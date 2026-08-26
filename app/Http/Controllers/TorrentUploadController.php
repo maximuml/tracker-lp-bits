@@ -10,10 +10,13 @@ use App\Repositories\SearchBoxRepository;
 use App\Repositories\TagRepository;
 use App\Repositories\TorrentRepository;
 use App\Repositories\UploadRepository;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Category;
+use App\Support\CurrentUser;
+use App\Support\Globals;
+use App\Support\Input;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
-use App\Support\SupportContext;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -24,7 +27,7 @@ class TorrentUploadController extends Controller
 {
     public function create(Request $request): View|RedirectResponse
     {
-        if (SupportContext::getCache() === null) {
+        if (app(LegacyRedisCache::class) === null) {
             return redirect('/upload.php?'.$request->getQueryString());
         }
 
@@ -33,21 +36,21 @@ class TorrentUploadController extends Controller
             return redirect('/login.php?returnto='.urlencode($request->fullUrl()));
         }
 
-        $currentUser = SupportContext::getUser() ?? $user->toLegacyArray();
-        SupportContext::setUser($currentUser);
+        $currentUser = app(CurrentUser::class)->get() ?? $user->toLegacyArray();
+        app(CurrentUser::class)->set($currentUser);
 
-        if (empty(SupportContext::getGlobal('lang_upload')) || empty(SupportContext::getGlobal('lang_edit'))) {
-            SupportContext::setServerValue('SCRIPT_NAME', '/upload.php');
+        if (empty(app(Globals::class)->get('lang_upload')) || empty(app(Globals::class)->get('lang_edit'))) {
+            Input::setServerValue('SCRIPT_NAME', '/upload.php');
             require base_path(Locale::scriptFilePath((string) '', (bool) false, (string) ''));
-            SupportContext::setGlobal('lang_upload', $lang_upload ?? []);
+            app(Globals::class)->set('lang_upload', $lang_upload ?? []);
             require base_path(Locale::scriptFilePath((string) 'edit.php', (bool) false, (string) ''));
-            SupportContext::setGlobal('lang_edit', $lang_edit ?? []);
+            app(Globals::class)->set('lang_edit', $lang_edit ?? []);
         }
 
         /** @var array<string, string> $lang_upload */
-        $lang_upload = SupportContext::getGlobal('lang_upload') ?? [];
+        $lang_upload = app(Globals::class)->get('lang_upload') ?? [];
         /** @var array<string, string> $lang_edit */
-        $lang_edit = SupportContext::getGlobal('lang_edit') ?? [];
+        $lang_edit = app(Globals::class)->get('lang_edit') ?? [];
 
         if ($currentUser['parked'] === 'yes') {
             LegacyResponse::abort($lang_upload['std_sorry'] ?? '', $lang_upload['std_unauthorized_to_upload'] ?? '', false);
@@ -57,7 +60,7 @@ class TorrentUploadController extends Controller
             LegacyResponse::abort($lang_upload['std_sorry'] ?? '', $lang_upload['std_unauthorized_to_upload'] ?? '', false);
         }
 
-        $enableoffer = SupportContext::getGlobal('enableoffer', 'no');
+        $enableoffer = app(Globals::class)->get('enableoffer', 'no');
         $has_allowed_offer = 0;
         $offerRows = [];
         if ($enableoffer === 'yes') {
@@ -76,7 +79,7 @@ class TorrentUploadController extends Controller
             LegacyResponse::abort($lang_upload['std_sorry'] ?? '', $lang_upload['std_please_offer'] ?? '', false);
         }
 
-        $browsecatmode = (int) (SupportContext::getGlobal('browsecatmode') ?? 1);
+        $browsecatmode = (int) (app(Globals::class)->get('browsecatmode') ?? 1);
 
         return view('torrents.upload', [
             'uploadFreely' => $uploadFreely,

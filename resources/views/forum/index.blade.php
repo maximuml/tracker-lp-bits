@@ -1,5 +1,5 @@
 @php
-$lang_forums = $lang ?? (array) (\App\Support\SupportContext::getGlobal('lang_forums') ?? []);
+$lang_forums = $lang ?? (array) (\app(\App\Support\Globals::class)->get('lang_forums') ?? []);
 $title = $title ?? ($lang_forums['head_forums'] ?? 'Forums');
 $action = $action ?? 'forums';
 @endphp

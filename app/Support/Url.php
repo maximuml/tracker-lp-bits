@@ -38,7 +38,7 @@ final class Url
         $url = self::schemeAndHost();
 
         if (! Environment::isConsole()) {
-            $requestUri = SupportContext::getServerValue('REQUEST_URI', '');
+            $requestUri = Input::serverValue('REQUEST_URI', '');
             $pos = strpos($requestUri, '?');
             $url .= $pos !== false ? substr($requestUri, 0, $pos) : $requestUri;
         }

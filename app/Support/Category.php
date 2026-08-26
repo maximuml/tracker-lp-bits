@@ -81,7 +81,7 @@ final class Category
      */
     public static function rowWithContext(int|string|null $catId = null): ?array
     {
-        return self::row(SupportContext::getCache(), $catId);
+        return self::row(app(LegacyRedisCache::class), $catId);
     }
 
     /**
@@ -91,7 +91,7 @@ final class Category
      */
     public static function iconRowWithContext(int|string $typeId): ?array
     {
-        return self::iconRow(SupportContext::getCache(), $typeId);
+        return self::iconRow(app(LegacyRedisCache::class), $typeId);
     }
 
     /**
@@ -101,7 +101,7 @@ final class Category
      */
     public static function listByModeWithContext(int|string $catmode = 1): array
     {
-        return self::listByMode(SupportContext::getCache(), $catmode);
+        return self::listByMode(app(LegacyRedisCache::class), $catmode);
     }
 
     /**
@@ -148,7 +148,7 @@ final class Category
      */
     public static function secondIconWithContext(array $row): string
     {
-        $cache = SupportContext::getCache();
+        $cache = app(LegacyRedisCache::class);
         $catFolder = Path::categoryFolderForIdWithContext($row['category'] ?? '');
 
         return self::secondIcon($cache, $row, $catFolder);

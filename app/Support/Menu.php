@@ -82,17 +82,17 @@ final class Menu
 
         $result = self::render(
             \function_exists('nexus') ? Nexus::instance()->getScript() : '',
-            SupportContext::getLangFunctions(),
-            (string) SupportContext::getGlobal('enableoffer', ''),
+            app(Language::class)->functions(),
+            (string) app(Globals::class)->get('enableoffer', ''),
             $customMenu !== '' ? $customMenu : null,
-            SupportContext::getUser(),
-            SupportContext::getCache(),
-            (string) SupportContext::getGlobal('CURLANGDIR', ''),
+            app(CurrentUser::class)->get(),
+            app(LegacyRedisCache::class),
+            (string) app(Globals::class)->get('CURLANGDIR', ''),
         );
 
-        $user = SupportContext::getUser();
-        if ($user && SupportContext::getGlobal('where_tweak', '') === 'yes') {
-            SupportContext::addUserUpdate('page', $result['selected']);
+        $user = app(CurrentUser::class)->get();
+        if ($user && app(Globals::class)->get('where_tweak', '') === 'yes') {
+            app(UserUpdateBatch::class)->add('page', $result['selected']);
         }
 
         echo $result['html'];

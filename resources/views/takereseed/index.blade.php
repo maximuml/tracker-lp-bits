@@ -1,5 +1,5 @@
 @php
-$lang_takereseed = (array) (\App\Support\SupportContext::getGlobal('lang_takereseed') ?? []);
+$lang_takereseed = (array) (\app(\App\Support\Globals::class)->get('lang_takereseed') ?? []);
 @endphp
 
 @extends('layouts.legacy')
@@ -8,7 +8,7 @@ $lang_takereseed = (array) (\App\Support\SupportContext::getGlobal('lang_takeres
 
 @section('content')
 @php
-$lang_takereseed = (array) (\App\Support\SupportContext::getGlobal('lang_takereseed') ?? []);
+$lang_takereseed = (array) (\app(\App\Support\Globals::class)->get('lang_takereseed') ?? []);
 $message = (string) ($message ?? $lang_takereseed['std_it_worked'] ?? 'Reseed request sent.');
 
 print('<center>' . $message . '</center>');

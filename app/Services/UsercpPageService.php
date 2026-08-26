@@ -13,16 +13,18 @@ use App\Repositories\UsercpRepository;
 use App\Repositories\UserPasskeyRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
+use App\Support\CurrentUser;
 use App\Support\Form;
 use App\Support\Forum;
+use App\Support\Globals;
 use App\Support\Hooks;
 use App\Support\Html;
 use App\Support\Http;
+use App\Support\Input;
 use App\Support\Locale;
 use App\Support\Network;
 use App\Support\SearchBox;
 use App\Support\Strings;
-use App\Support\SupportContext;
 use App\Support\Time;
 use App\Support\TwoFactorAuthHelper;
 use App\Support\Url;
@@ -49,9 +51,9 @@ final class UsercpPageService
      */
     public function build(string $action, string $type): array
     {
-        $curUser = (array) (SupportContext::getUser() ?? []);
-        $lang = (array) (SupportContext::getGlobal('lang_usercp') ?? []);
-        $cache = SupportContext::getCache();
+        $curUser = (array) (app(CurrentUser::class)->get() ?? []);
+        $lang = (array) (app(Globals::class)->get('lang_usercp') ?? []);
+        $cache = app(LegacyRedisCache::class);
         $userInfo = UsercpRepository::getUserById((int) ($curUser['id'] ?? 0));
         $siteName = Setting::getSiteName();
 
@@ -62,7 +64,7 @@ final class UsercpPageService
             'siteName' => $siteName,
             'action' => $action,
             'type' => $type,
-            'contentWidth' => (string) (SupportContext::getGlobal('CONTENT_WIDTH', '737')),
+            'contentWidth' => (string) (app(Globals::class)->get('CONTENT_WIDTH', '737')),
         ];
 
         switch ($action) {
@@ -151,7 +153,7 @@ final class UsercpPageService
         }
 
         // IP location
-        $enableLocationTweak = (string) SupportContext::getGlobal('enablelocation_tweak', '') === 'yes';
+        $enableLocationTweak = (string) app(Globals::class)->get('enablelocation_tweak', '') === 'yes';
         $seedBoxIcon = (new SeedBoxRepository)->renderIcon((string) ($curUser['ip'] ?? ''), $userId);
         $ipLocation = '';
         if ($enableLocationTweak) {
@@ -228,7 +230,7 @@ final class UsercpPageService
             return ['enabled' => false];
         }
 
-        $langFunctions = (array) (SupportContext::getGlobal('lang_functions') ?? []);
+        $langFunctions = (array) (app(Globals::class)->get('lang_functions') ?? []);
 
         $columns = [
             'operator' => Locale::trans('label.seed_box_record.operator', [], null),
@@ -259,7 +261,7 @@ final class UsercpPageService
      */
     private function buildTokens(array $lang, User $userInfo): array
     {
-        $langFunctions = (array) (SupportContext::getGlobal('lang_functions') ?? []);
+        $langFunctions = (array) (app(Globals::class)->get('lang_functions') ?? []);
 
         $permissions = TokenRepository::listUserTokenPermissionAllowed();
         $permissionOptions = [];
@@ -373,7 +375,7 @@ final class UsercpPageService
         // Bitbucket avatars
         $bitbucketRows = UsercpRepository::getBitbucketOptions();
         $bitbucketOptions = '';
-        $baseUrl = (string) SupportContext::getGlobal('BASEURL', '');
+        $baseUrl = (string) app(Globals::class)->get('BASEURL', '');
         foreach ($bitbucketRows as $sor) {
             $bitbucketOptions .= '<option value="'.Http::protocolPrefix(Url::isSecure()).$baseUrl.'/bitbucket/'.htmlspecialchars((string) $sor->name).'">'.htmlspecialchars((string) $sor->name).'</option>';
         }
@@ -386,7 +388,7 @@ final class UsercpPageService
             'trackerUrlOptions' => $trackerUrlOptions,
             'bitbucketOptions' => $bitbucketOptions,
             'notificationOptions' => $notificationOptions,
-            'enableBitbucket' => (string) SupportContext::getGlobal('enablebitbucket_main', '') === 'yes',
+            'enableBitbucket' => (string) app(Globals::class)->get('enablebitbucket_main', '') === 'yes',
             'baseUrl' => $baseUrl,
             'selectNoneLabel' => $lang['select_none_selected'] ?? 'None',
             'selectChooseAvatar' => $lang['select_choose_avatar'] ?? 'Choose avatar',
@@ -404,8 +406,8 @@ final class UsercpPageService
      */
     private function buildTracker(array $lang, array $curUser): array
     {
-        $showTooltipSetting = (string) SupportContext::getGlobal('enabletooltip_tweak', '') === 'yes';
-        $browsecatmode = (int) SupportContext::getGlobal('browsecatmode', 1);
+        $showTooltipSetting = (string) app(Globals::class)->get('enabletooltip_tweak', '') === 'yes';
+        $browsecatmode = (int) app(Globals::class)->get('browsecatmode', 1);
 
         // Special state from notifs
         $notifs = (string) ($curUser['notifs'] ?? '');
@@ -431,7 +433,7 @@ final class UsercpPageService
 
         // Site languages
         $siteLangs = Locale::languageList('site_lang', true);
-        $currentFolder = Locale::folderFromCookie((string) SupportContext::getCookieValue('c_lang_folder', ''), false);
+        $currentFolder = Locale::folderFromCookie((string) Input::cookieValue('c_lang_folder', ''), false);
         $langOptions = '';
         foreach ($siteLangs as $row) {
             $se = ($row['site_lang_folder'] === $currentFolder) ? ' selected' : '';
@@ -439,9 +441,9 @@ final class UsercpPageService
         }
 
         // Email notification row visibility
-        $showEmailNotify = (string) SupportContext::getGlobal('emailnotify_smtp', '') === 'yes'
-            && (string) SupportContext::getGlobal('smtptype', '') !== 'none';
-        $showShoutbox = (string) SupportContext::getGlobal('showshoutbox_main', '') === 'yes';
+        $showEmailNotify = (string) app(Globals::class)->get('emailnotify_smtp', '') === 'yes'
+            && (string) app(Globals::class)->get('smtptype', '') !== 'none';
+        $showShoutbox = (string) app(Globals::class)->get('showshoutbox_main', '') === 'yes';
 
         return [
             'showTooltipSetting' => $showTooltipSetting,
@@ -466,7 +468,7 @@ final class UsercpPageService
     private function buildForum(array $lang, array $curUser): array
     {
         return [
-            'showTooltipSetting' => (string) SupportContext::getGlobal('enabletooltip_tweak', '') === 'yes',
+            'showTooltipSetting' => (string) app(Globals::class)->get('enabletooltip_tweak', '') === 'yes',
         ];
     }
 
@@ -479,8 +481,8 @@ final class UsercpPageService
      */
     private function buildSecurity(array $lang, array $curUser, string $type): array
     {
-        $showEmailChange = (string) SupportContext::getGlobal('disableemailchange', '') !== 'no'
-            && (string) SupportContext::getGlobal('smtptype', '') !== 'none';
+        $showEmailChange = (string) app(Globals::class)->get('disableemailchange', '') !== 'no'
+            && (string) app(Globals::class)->get('smtptype', '') !== 'none';
 
         // Two-step auth
         $twoStep = [

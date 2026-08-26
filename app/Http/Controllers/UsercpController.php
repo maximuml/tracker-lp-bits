@@ -8,8 +8,9 @@ use App\DTOs\Usercp\SecuritySettingsDto;
 use App\DTOs\Usercp\TrackerSettingsDto;
 use App\Repositories\UsercpRepository;
 use App\Services\UsercpPageService;
+use App\Support\CurrentUser;
+use App\Support\Globals;
 use App\Support\LegacyResponse;
-use App\Support\SupportContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -68,7 +69,7 @@ class UsercpController extends LegacyController
      */
     public function legacy(Request $request): View|Response|RedirectResponse
     {
-        $user = SupportContext::getUser();
+        $user = app(CurrentUser::class)->get();
         if ($user === null) {
             $qs = $request->getQueryString();
 
@@ -109,7 +110,7 @@ class UsercpController extends LegacyController
 
         $allowedActions = ['personal', 'tracker', 'forum', 'security'];
         if ($action !== '' && ! in_array($action, $allowedActions, true)) {
-            $langUsercp = (array) (SupportContext::getGlobal('lang_usercp') ?? []);
+            $langUsercp = (array) (app(Globals::class)->get('lang_usercp') ?? []);
             LegacyResponse::abort(
                 (string) ($langUsercp['std_error'] ?? 'Error'),
                 (string) ($langUsercp['std_invalid_action'] ?? 'Invalid action.')

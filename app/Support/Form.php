@@ -22,7 +22,7 @@ final class Form
     public static function datetimepickerInput(string $name, ?string $value = '', string $label = '', array $options = []): string
     {
         $value = (string) $value;
-        $lang = Locale::folderFromCookie(SupportContext::getCookieValue('c_lang_folder'), true);
+        $lang = Locale::folderFromCookie(Input::cookieValue('c_lang_folder'), true);
         if ($lang === 'zh_CN') {
             $lang = 'zh';
         }
@@ -59,8 +59,8 @@ final class Form
      */
     public static function bbcodeEditor(string $form, string $text, string $content = '', bool $hasTitle = false, int $colNum = 130, bool $withPreview = false): string
     {
-        $lang_functions = SupportContext::getLangFunctions();
-        $enableattach_attachment = (string) SupportContext::getGlobal('enableattach_attachment', '');
+        $lang_functions = app(Language::class)->functions();
+        $enableattach_attachment = (string) app(Globals::class)->get('enableattach_attachment', '');
 
         ob_start();
 

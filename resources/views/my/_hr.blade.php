@@ -1,14 +1,14 @@
 <?php
 
-$__server_REQUEST_URI = (string) ($requestUri ?? \App\Support\SupportContext::getServerValue('REQUEST_URI'));
-$CURUSER = (array) ($CURUSER ?? \App\Support\SupportContext::getUser() ?? []);
+$__server_REQUEST_URI = (string) ($requestUri ?? \App\Support\Input::serverValue('REQUEST_URI'));
+$CURUSER = (array) ($CURUSER ?? \app(\App\Support\CurrentUser::class)->get() ?? []);
 $userInfo = $userInfo ?? null;
 $userid = (int) ($userid ?? $CURUSER['id'] ?? 0);
 $status = $status ?? \App\Models\HitAndRun::STATUS_INSPECTING;
 $headerFilters = (array) ($headerFilters ?? []);
 $q = (string) ($q ?? '');
-$lang_myhr = (array) ($lang_myhr ?? \App\Support\SupportContext::getGlobal('lang_myhr', []));
-$lang_functions = (array) \App\Support\SupportContext::getGlobal('lang_functions', []);
+$lang_myhr = (array) ($lang_myhr ?? \app(\App\Support\Globals::class)->get('lang_myhr', []));
+$lang_functions = (array) \app(\App\Support\Globals::class)->get('lang_functions', []);
 $rescount = (int) ($rescount ?? 0);
 $pagertop = (string) ($pagertop ?? '');
 $pagerbottom = (string) ($pagerbottom ?? '');

@@ -3,10 +3,10 @@
 namespace Nexus\Database;
 
 use App\Models\PersonalAccessToken;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config;
 use App\Support\Locale;
 use App\Support\Logger;
-use App\Support\SupportContext;
 use Illuminate\Container\Container;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Database\Connection;
@@ -271,7 +271,7 @@ class NexusDB
     public static function remember($key, $ttl, \Closure $callback)
     {
         if (IN_NEXUS) {
-            $Cache = SupportContext::getCache();
+            $Cache = app(LegacyRedisCache::class);
             if ($Cache === null) {
                 return Cache::remember($key, $ttl, $callback);
             }
@@ -293,7 +293,7 @@ class NexusDB
     public static function cache_put($key, $value, $ttl = 3600)
     {
         if (IN_NEXUS) {
-            $Cache = SupportContext::getCache();
+            $Cache = app(LegacyRedisCache::class);
             if ($Cache === null) {
                 return Cache::put($key, $value, $ttl);
             }
@@ -307,7 +307,7 @@ class NexusDB
     public static function cache_get($key)
     {
         if (IN_NEXUS) {
-            $Cache = SupportContext::getCache();
+            $Cache = app(LegacyRedisCache::class);
             if ($Cache === null) {
                 return Cache::get($key);
             }
@@ -320,7 +320,7 @@ class NexusDB
 
     public static function cache_del($key)
     {
-        $Cache = SupportContext::getCache();
+        $Cache = app(LegacyRedisCache::class);
         if (IN_NEXUS && $Cache !== null) {
             $Cache->delete_value($key, true);
 
@@ -358,7 +358,7 @@ class NexusDB
     public static function redis()
     {
         if (IN_NEXUS) {
-            $Cache = SupportContext::getCache();
+            $Cache = app(LegacyRedisCache::class);
             if ($Cache === null) {
                 return Redis::connection()->client();
             }

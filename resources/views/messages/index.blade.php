@@ -1,5 +1,5 @@
 @php
-$lang_messages = (array) (\App\Support\SupportContext::getGlobal('lang_messages') ?? []);
+$lang_messages = (array) (\app(\App\Support\Globals::class)->get('lang_messages') ?? []);
 $title = $title ?? ($lang_messages['head_private_messages'] ?? 'Private messages');
 $action = $action ?? 'viewmailbox';
 @endphp

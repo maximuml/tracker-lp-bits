@@ -1,5 +1,5 @@
 @php
-$lang_polloverview = (array) (\App\Support\SupportContext::getGlobal('lang_polloverview') ?? []);
+$lang_polloverview = (array) (\app(\App\Support\Globals::class)->get('lang_polloverview') ?? []);
 $mode = (string) ($mode ?? 'list');
 $poll = (array) ($poll ?? []);
 $polls = (array) ($polls ?? []);

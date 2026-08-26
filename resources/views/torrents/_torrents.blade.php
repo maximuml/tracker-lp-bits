@@ -29,9 +29,9 @@
 @if ($CURUSER)
     @php
         if ($sectiontype == $browsecatmode) {
-            \App\Support\SupportContext::addUserUpdate('last_browse', TIMENOW);
+            \app(\App\Support\UserUpdateBatch::class)->add('last_browse', TIMENOW);
         } else {
-            \App\Support\SupportContext::addUserUpdate('last_music', TIMENOW);
+            \app(\App\Support\UserUpdateBatch::class)->add('last_music', TIMENOW);
         }
     @endphp
 @endif

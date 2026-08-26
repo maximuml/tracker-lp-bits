@@ -12,10 +12,11 @@ use App\Repositories\IndexRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CoverThumb;
+use App\Support\CurrentUser;
 use App\Support\Format;
+use App\Support\Globals;
 use App\Support\Hooks;
 use App\Support\Shoutbox;
-use App\Support\SupportContext;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
 use Nexus\Nexus;
@@ -29,9 +30,9 @@ final class IndexPageService
     /** @return array<string, mixed> */
     public function build(): array
     {
-        $curUser = (array) (SupportContext::getUser() ?? []);
-        $lang = (array) (SupportContext::getGlobal('lang_index') ?? []);
-        $cache = SupportContext::getCache();
+        $curUser = (array) (app(CurrentUser::class)->get() ?? []);
+        $lang = (array) (app(Globals::class)->get('lang_index') ?? []);
+        $cache = app(LegacyRedisCache::class);
 
         $data = [
             'lang' => $lang,
@@ -90,7 +91,7 @@ final class IndexPageService
      */
     private function buildNews(array $lang, bool $canManage, ?LegacyRedisCache $cache): array
     {
-        $maxNews = (int) SupportContext::getGlobal('maxnewsnum_main', 0);
+        $maxNews = (int) app(Globals::class)->get('maxnewsnum_main', 0);
 
         return [
             'show' => true,
@@ -110,7 +111,7 @@ final class IndexPageService
      */
     private function buildShoutbox(array $lang, bool $canManage, int $userId): array
     {
-        $show = SupportContext::getGlobal('showshoutbox_main', '') === 'yes';
+        $show = app(Globals::class)->get('showshoutbox_main', '') === 'yes';
 
         if (! $show) {
             return ['show' => false];
@@ -160,7 +161,7 @@ JS;
      */
     private function buildForumPosts(array $lang, array $curUser): array
     {
-        $show = SupportContext::getGlobal('showlastxforumposts_main', '') === 'yes' && ! empty($curUser);
+        $show = app(Globals::class)->get('showlastxforumposts_main', '') === 'yes' && ! empty($curUser);
 
         if (! $show) {
             return ['show' => false];
@@ -186,7 +187,7 @@ JS;
      */
     private function buildLatestTorrents(array $lang, ?LegacyRedisCache $cache): array
     {
-        $show = SupportContext::getGlobal('showlastxtorrents_main', '') === 'yes';
+        $show = app(Globals::class)->get('showlastxtorrents_main', '') === 'yes';
 
         if (! $show) {
             return ['show' => false];
@@ -305,7 +306,7 @@ JS;
      */
     private function buildPolls(array $lang, array $curUser, bool $canManage, bool $canLog, ?LegacyRedisCache $cache): array
     {
-        $show = ! empty($curUser) && SupportContext::getGlobal('showpolls_main', '') === 'yes';
+        $show = ! empty($curUser) && app(Globals::class)->get('showpolls_main', '') === 'yes';
 
         if (! $show) {
             return ['show' => false];
@@ -385,7 +386,7 @@ JS;
      */
     private function buildStats(array $lang, ?LegacyRedisCache $cache): array
     {
-        $show = SupportContext::getGlobal('showstats_main', '') === 'yes';
+        $show = app(Globals::class)->get('showstats_main', '') === 'yes';
 
         if (! $show) {
             return ['show' => false];
@@ -394,7 +395,7 @@ JS;
         $userStats = IndexRepository::getUserStats();
         $torrentStats = IndexRepository::getTorrentStats();
         $classStats = IndexRepository::getClassStats();
-        $maxusers = (int) SupportContext::getGlobal('maxusers', 0);
+        $maxusers = (int) app(Globals::class)->get('maxusers', 0);
 
         return [
             'show' => true,
@@ -470,7 +471,7 @@ JS;
      */
     private function buildTrackerLoad(array $lang): array
     {
-        $show = SupportContext::getGlobal('showtrackerload', '') === 'yes';
+        $show = app(Globals::class)->get('showtrackerload', '') === 'yes';
 
         if (! $show) {
             return ['show' => false];
@@ -513,8 +514,8 @@ JS;
         return [
             'show' => true,
             'note' => $lang['text_browser_note'] ?? '',
-            'nexusUrl' => (string) SupportContext::getGlobal('NEXUSPHPURL', ''),
-            'projectName' => (string) SupportContext::getGlobal('PROJECTNAME', ''),
+            'nexusUrl' => (string) app(Globals::class)->get('NEXUSPHPURL', ''),
+            'projectName' => (string) app(Globals::class)->get('PROJECTNAME', ''),
         ];
     }
 }

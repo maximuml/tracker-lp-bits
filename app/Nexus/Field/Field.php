@@ -6,12 +6,13 @@ use App\Models\SearchBox;
 use App\Models\TorrentCustomField;
 use App\Models\TorrentCustomFieldValue;
 use App\Support\Format;
+use App\Support\Globals;
 use App\Support\Html;
 use App\Support\HtmlRenderer;
+use App\Support\Language;
 use App\Support\Locale;
 use App\Support\Logger;
 use App\Support\Pagination;
-use App\Support\SupportContext;
 use App\Support\Url;
 use Illuminate\Support\Facades\DB;
 
@@ -103,9 +104,9 @@ class Field
 
     public function buildFieldForm(array $row = [])
     {
-        $lang_functions = SupportContext::getLangFunctions();
-        $lang_fields = (array) SupportContext::getGlobal('lang_fields', []);
-        $lang_catmanage = (array) SupportContext::getGlobal('lang_catmanage', []);
+        $lang_functions = app(Language::class)->functions();
+        $lang_fields = (array) app(Globals::class)->get('lang_fields', []);
+        $lang_catmanage = (array) app(Globals::class)->get('lang_catmanage', []);
         $trName = Html::tr($lang_fields['col_name'].'<font color="red">*</font>', '<input type="text" name="name" value="'.($row['name'] ?? '').'" style="width: 300px" />&nbsp;&nbsp;'.$lang_fields['col_name_help'], 1, '', true);
         $trLabel = Html::tr($lang_fields['col_label'].'<font color="red">*</font>', '<input type="text" name="label" value="'.($row['label'] ?? '').'"  style="width: 300px" />', 1, '', true);
         $trType = Html::tr($lang_fields['col_type'].'<font color="red">*</font>', $this->radio('type', $this->getTypeRadioOptions(), $row['type'] ?? null), 1, '', true);
@@ -147,8 +148,8 @@ HTML;
 
     public function buildFieldTable()
     {
-        $lang_functions = SupportContext::getLangFunctions();
-        $lang_fields = (array) SupportContext::getGlobal('lang_fields', []);
+        $lang_functions = app(Language::class)->functions();
+        $lang_fields = (array) app(Globals::class)->get('lang_fields', []);
         $perPage = 10;
         $total = DB::table('torrents_custom_fields')->count();
         [$paginationTop, $paginationBottom, , $offset, $rpp] = Pagination::pager($perPage, $total, '?');
@@ -194,8 +195,8 @@ HEAD;
 
     public function save($data)
     {
-        $lang_functions = SupportContext::getLangFunctions();
-        $lang_fields = (array) SupportContext::getGlobal('lang_fields', []);
+        $lang_functions = app(Language::class)->functions();
+        $lang_fields = (array) app(Globals::class)->get('lang_fields', []);
         $attributes = [];
         if (empty($data['name'])) {
             throw new \InvalidArgumentException("{$lang_fields['col_name']} {$lang_functions['text_required']}");

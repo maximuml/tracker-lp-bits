@@ -5,9 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Exam;
 use App\Models\Medal;
 use App\Models\User;
+use App\Support\Cache\LegacyRedisCache;
+use App\Support\CurrentUser;
 use App\Support\Locale;
 use App\Support\Pagination;
-use App\Support\SupportContext;
 use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,7 +21,7 @@ class BonusShopController extends LegacyController
 {
     public function medal(Request $request): View|RedirectResponse|Response
     {
-        $curUser = SupportContext::getUser() ?? [];
+        $curUser = app(CurrentUser::class)->get() ?? [];
         $currentUserId = (int) ($curUser['id'] ?? 0);
         $seedbonus = (float) ($curUser['seedbonus'] ?? 0);
 
@@ -160,7 +161,7 @@ JS;
 
     public function task(Request $request): View|RedirectResponse|Response
     {
-        $curUser = SupportContext::getUser() ?? [];
+        $curUser = app(CurrentUser::class)->get() ?? [];
         $currentUserId = (int) ($curUser['id'] ?? 0);
 
         $query = Exam::query()
@@ -288,7 +289,7 @@ JS;
 
         if (isset($stateMap[$action])) {
             DB::table('torrents_state')->update(['global_sp_state' => $stateMap[$action]]);
-            SupportContext::getCache()?->delete_value('global_promotion_state');
+            app(LegacyRedisCache::class)?->delete_value('global_promotion_state');
 
             return $this->legacyAbortResponse('Success', $messages[$action]);
         }

@@ -8,17 +8,19 @@ use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
 use App\Repositories\OfferRepository;
 use App\Repositories\UsercpRepository;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Category;
 use App\Support\Comment;
 use App\Support\Config\SiteConfig;
+use App\Support\CurrentUser;
 use App\Support\Form;
 use App\Support\Format;
 use App\Support\Frame;
+use App\Support\Globals;
 use App\Support\Html;
 use App\Support\Input;
 use App\Support\LegacyResponse;
 use App\Support\Pagination;
-use App\Support\SupportContext;
 use App\Support\Time;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
@@ -44,8 +46,8 @@ final class OfferPageService
      */
     public function build(Request $request): array
     {
-        $curUser = (array) (SupportContext::getUser() ?? []);
-        $lang = (array) (SupportContext::getGlobal('lang_offers') ?? []);
+        $curUser = (array) (app(CurrentUser::class)->get() ?? []);
+        $lang = (array) (app(Globals::class)->get('lang_offers') ?? []);
         $userId = (int) ($curUser['id'] ?? 0);
 
         $action = $this->resolveAction($request);
@@ -55,17 +57,17 @@ final class OfferPageService
             'curUser' => $curUser,
             'userId' => $userId,
             'action' => $action,
-            'baseUrl' => (string) SupportContext::getGlobal('BASEURL', ''),
-            'contentWidth' => (string) SupportContext::getGlobal('CONTENT_WIDTH', '737'),
-            'browsecatmode' => SupportContext::getGlobal('browsecatmode', 1),
-            'enableoffer' => (string) SupportContext::getGlobal('enableoffer', 'yes'),
-            'minoffervotes' => (int) SupportContext::getGlobal('minoffervotes', 0),
-            'offervotetimeoutMain' => (int) SupportContext::getGlobal('offervotetimeout_main', 0),
-            'offeruptimeoutMain' => (int) SupportContext::getGlobal('offeruptimeout_main', 0),
-            'offervoteBonus' => (float) SupportContext::getGlobal('offervote_bonus', 0),
-            'uploadClass' => (int) SupportContext::getGlobal('upload_class', 0),
-            'addofferClass' => (int) SupportContext::getGlobal('addoffer_class', 0),
-            'againstofferClass' => (int) SupportContext::getGlobal('againstoffer_class', 0),
+            'baseUrl' => (string) app(Globals::class)->get('BASEURL', ''),
+            'contentWidth' => (string) app(Globals::class)->get('CONTENT_WIDTH', '737'),
+            'browsecatmode' => app(Globals::class)->get('browsecatmode', 1),
+            'enableoffer' => (string) app(Globals::class)->get('enableoffer', 'yes'),
+            'minoffervotes' => (int) app(Globals::class)->get('minoffervotes', 0),
+            'offervotetimeoutMain' => (int) app(Globals::class)->get('offervotetimeout_main', 0),
+            'offeruptimeoutMain' => (int) app(Globals::class)->get('offeruptimeout_main', 0),
+            'offervoteBonus' => (float) app(Globals::class)->get('offervote_bonus', 0),
+            'uploadClass' => (int) app(Globals::class)->get('upload_class', 0),
+            'addofferClass' => (int) app(Globals::class)->get('addoffer_class', 0),
+            'againstofferClass' => (int) app(Globals::class)->get('againstoffer_class', 0),
         ];
 
         if ($data['enableoffer'] === 'no') {
@@ -310,7 +312,7 @@ final class OfferPageService
         $offerName = (string) OfferRepository::getOfferName($offerId);
 
         $perpage = 25;
-        $self = (string) SupportContext::getServerValue('PHP_SELF');
+        $self = Input::serverValue('PHP_SELF');
         [$pagerTop, $pagerBottom, , $offset, $perpage] = Pagination::pager($perpage, $count, $self.'?id='.$offerId.'&offer_vote=1&');
         $voteRows = OfferRepository::getVoteRows($offerId, (int) $offset, (int) $perpage);
 
@@ -404,7 +406,7 @@ final class OfferPageService
 
         $search = (string) ($request->query('search', '') ?? '');
 
-        $self = (string) SupportContext::getServerValue('PHP_SELF');
+        $self = Input::serverValue('PHP_SELF');
         $offerResult = OfferRepository::getLegacyList($categ, $offerorid, $search, $sortColumn, $direction, 0, 0);
         $count = (int) $offerResult['count'];
 
@@ -478,7 +480,7 @@ final class OfferPageService
 
             $i = 0;
             $lastcom_tooltip = [];
-            $Cache = SupportContext::getCache();
+            $Cache = app(LegacyRedisCache::class);
             foreach ($offerRows as $row) {
                 $arr = (array) $row;
                 $addedby = UserDisplay::username((int) ($arr['userid'] ?? 0));

@@ -5,8 +5,8 @@ namespace App\Providers\Filament;
 use App\Filament\Pages\Dashboard;
 use App\Http\Middleware\Filament;
 use App\Models\User;
+use App\Support\Input;
 use App\Support\Locale;
-use App\Support\SupportContext;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -86,7 +86,7 @@ class AppPanelProvider extends PanelProvider
             ])
             ->navigationItems([
                 NavigationItem::make('Horizon')
-                    ->label(fn () => Locale::trans('admin.sidebar.queue_monitor', [], Auth::user() ? Locale::folderFromCookie(SupportContext::getCookieValue('c_lang_folder', ''), (bool) true) : 'en'))
+                    ->label(fn () => Locale::trans('admin.sidebar.queue_monitor', [], Auth::user() ? Locale::folderFromCookie(Input::cookieValue('c_lang_folder', ''), (bool) true) : 'en'))
                     ->icon('heroicon-o-presentation-chart-line')
                     ->group('System')
                     ->sort(99)

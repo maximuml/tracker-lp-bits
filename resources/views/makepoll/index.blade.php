@@ -1,5 +1,5 @@
 @php
-$lang_makepoll = (array) (\App\Support\SupportContext::getGlobal('lang_makepoll') ?? []);
+$lang_makepoll = (array) (\app(\App\Support\Globals::class)->get('lang_makepoll') ?? []);
 $poll = (array) ($poll ?? []);
 $pollid = (int) ($poll['id'] ?? 0);
 $ageWarning = (string) ($ageWarning ?? '');

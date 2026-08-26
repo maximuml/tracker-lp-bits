@@ -32,7 +32,7 @@ final class Forum
      */
     public static function picFolderWithContext(): string
     {
-        return self::picFolder((string) SupportContext::getGlobal('CURLANGDIR', ''));
+        return self::picFolder((string) app(Globals::class)->get('CURLANGDIR', ''));
     }
 
     /**
@@ -90,7 +90,7 @@ final class Forum
      */
     public static function isModerator(int|string $id, string $in = 'post'): bool
     {
-        $CURUSER = SupportContext::getUser() ?? [];
+        $CURUSER = app(CurrentUser::class)->get() ?? [];
 
         $forumRep = app(ForumRepository::class);
         $userId = (int) ($CURUSER['id'] ?? 0);
@@ -214,7 +214,7 @@ final class Forum
      */
     public static function postRowWithContext(int|string $postId): ?array
     {
-        return self::postRow(SupportContext::getCache(), $postId);
+        return self::postRow(app(LegacyRedisCache::class), $postId);
     }
 
     /**
@@ -222,6 +222,6 @@ final class Forum
      */
     public static function moderatorsWithContext(int|string $forumId, bool $plainText = true): string
     {
-        return self::moderators(SupportContext::getCache(), $forumId, $plainText);
+        return self::moderators(app(LegacyRedisCache::class), $forumId, $plainText);
     }
 }

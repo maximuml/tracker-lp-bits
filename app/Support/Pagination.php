@@ -175,9 +175,9 @@ final class Pagination
         }
         $page = self::resolvePage($rawPage, $count, $rpp, ! empty($opts['lastpagedefault']));
 
-        $userAgent = SupportContext::getServerValue('HTTP_USER_AGENT');
-        $isPresto = is_string($userAgent) && str_contains($userAgent, 'Presto');
-        $lang = SupportContext::getLangFunctions();
+        $userAgent = Input::serverValue('HTTP_USER_AGENT');
+        $isPresto = str_contains($userAgent, 'Presto');
+        $lang = app(Language::class)->functions();
         $labels = [
             'prev' => (string) ($lang['text_prev'] ?? ''),
             'next' => (string) ($lang['text_next'] ?? ''),
@@ -188,7 +188,7 @@ final class Pagination
         ];
 
         $result = self::render($rpp, $count, $href, $page, $pages, $labels, $pagename, $isPresto);
-        SupportContext::setGlobal('add_key_shortcut', Html::keyShortcutScript($page, $pages - 1));
+        app(Globals::class)->set('add_key_shortcut', Html::keyShortcutScript($page, $pages - 1));
 
         return $result;
     }

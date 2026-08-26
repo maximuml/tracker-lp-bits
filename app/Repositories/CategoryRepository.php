@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
-use App\Support\SupportContext;
+use App\Support\Cache\LegacyRedisCache;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -44,7 +44,7 @@ final class CategoryRepository
      */
     public static function clearCacheAfterDelete(string $type, array $row): void
     {
-        $cache = SupportContext::getCache();
+        $cache = app(LegacyRedisCache::class);
         $dbtablename = self::tableNameForType($type);
 
         if (in_array($type, self::VALID_SUBCAT_TYPES, true)) {

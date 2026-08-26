@@ -1,13 +1,13 @@
 <?php
-$lang_functions = $lang_functions ?? \App\Support\SupportContext::getLangFunctions();
-$lang_viewpeerlist = (array) ($lang_viewpeerlist ?? \App\Support\SupportContext::getGlobal('lang_viewpeerlist') ?? []);
+$lang_functions = $lang_functions ?? \app(\App\Support\Language::class)->functions();
+$lang_viewpeerlist = (array) ($lang_viewpeerlist ?? \app(\App\Support\Globals::class)->get('lang_viewpeerlist') ?? []);
 
 $torrent = (array) ($torrent ?? []);
 $seeders = (array) ($seeders ?? []);
 $leechers = (array) ($leechers ?? []);
 $privacyData = (array) ($privacyData ?? []);
 $showLocationColumn = (bool) ($showLocationColumn ?? false);
-$enablelocationTweak = $enablelocationTweak ?? \App\Support\SupportContext::getGlobal('enablelocation_tweak');
+$enablelocationTweak = $enablelocationTweak ?? \app(\App\Support\Globals::class)->get('enablelocation_tweak');
 $peerIpInfo = (array) ($peerIpInfo ?? []);
 $usernameSeedBoxIconMap = (array) ($usernameSeedBoxIconMap ?? []);
 $usernameHtmlMap = (array) ($usernameHtmlMap ?? []);

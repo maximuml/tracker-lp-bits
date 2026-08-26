@@ -43,7 +43,7 @@ final class Hooks
             }
         }
 
-        $hook = SupportContext::getGlobal('hook');
+        $hook = app(Globals::class)->get('hook');
 
         return $hook instanceof Hook ? $hook : new Hook;
     }

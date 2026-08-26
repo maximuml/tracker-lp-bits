@@ -8,8 +8,8 @@ use App\Models\User;
 use App\Support\Config\SiteConfig;
 use App\Support\Database;
 use App\Support\Format;
+use App\Support\Input;
 use App\Support\Locale;
-use App\Support\SupportContext;
 use Carbon\Carbon;
 use Composer\InstalledVersions;
 use Illuminate\Foundation\Application;
@@ -76,7 +76,7 @@ class DashboardRepository extends BaseRepository
         $result[$name] = [
             'name' => $name,
             'text' => Locale::trans("dashboard.system_info.{$name}", [], null),
-            'value' => SupportContext::getServerValue('SERVER_SOFTWARE', ''),
+            'value' => Input::serverValue('SERVER_SOFTWARE', ''),
         ];
 
         $name = 'load_average';

@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Support\SupportContext;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\UserDisplay;
 use Illuminate\Support\Facades\DB;
 
@@ -38,7 +38,7 @@ class PollRepository
     {
         if ($id) {
             DB::table('polls')->where('id', $id)->update($data);
-            $cache = SupportContext::getCache();
+            $cache = app(LegacyRedisCache::class);
             if ($cache !== null) {
                 $cache->delete_value('current_poll_content');
                 $cache->delete_value('current_poll_result', true);
@@ -50,7 +50,7 @@ class PollRepository
         $data['added'] = now()->toDateTimeString();
         $newId = (int) DB::table('polls')->insertGetId($data);
 
-        $cache = SupportContext::getCache();
+        $cache = app(LegacyRedisCache::class);
         if ($cache !== null) {
             $cache->delete_value('current_poll_content');
             $cache->delete_value('current_poll_result', true);

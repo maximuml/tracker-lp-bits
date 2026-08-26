@@ -9,7 +9,7 @@ $CONTENT_WIDTH = $contentWidth;
 $showtooltipsetting = $tracker['showTooltipSetting'];
 $showshoutbox_main = $tracker['showShoutbox'] ? 'yes' : 'no';
 $emailnotify_smtp = $tracker['showEmailNotify'] ? 'yes' : 'no';
-$smtptype = (string) (\App\Support\SupportContext::getGlobal('smtptype', ''));
+$smtptype = (string) (\app(\App\Support\Globals::class)->get('smtptype', ''));
 $notifs = (string) ($CURUSER['notifs'] ?? '');
 @endphp
 @include('usercp.sections._menu', ['selected' => 'tracker'])

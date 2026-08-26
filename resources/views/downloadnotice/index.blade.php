@@ -1,6 +1,6 @@
 @php
-$lang_downloadnotice = (array) (\App\Support\SupportContext::getGlobal('lang_downloadnotice') ?? []);
-$CURUSER = (array) (\App\Support\SupportContext::getUser() ?? []);
+$lang_downloadnotice = (array) (\app(\App\Support\Globals::class)->get('lang_downloadnotice') ?? []);
+$CURUSER = (array) (\app(\App\Support\CurrentUser::class)->get() ?? []);
 $torrentid = (int) ($torrentid ?? 0);
 $type = (string) ($type ?? 'firsttime');
 $title = $title ?? ($lang_downloadnotice['head_download_notice'] ?? 'Download Notice');

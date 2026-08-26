@@ -5,9 +5,9 @@ $CURUSER = $currentUser;
 $user = $user;
 $tagIds = (array) ($tagIds ?? []);
 $denyLog = $denyLog ?? null;
-$lang_details = \App\Support\SupportContext::getGlobal('lang_details') ?? [];
-$lang_functions = \App\Support\SupportContext::getGlobal('lang_functions') ?? [];
-$torrentnameprefix = \App\Support\SupportContext::getGlobal('torrentnameprefix') ?? '';
+$lang_details = \app(\App\Support\Globals::class)->get('lang_details') ?? [];
+$lang_functions = \app(\App\Support\Globals::class)->get('lang_functions') ?? [];
+$torrentnameprefix = \app(\App\Support\Globals::class)->get('torrentnameprefix') ?? '';
 
 $requestFlags = (array) ($requestFlags ?? []);
 $torrentTopHtml = (string) ($torrentTopHtml ?? '');

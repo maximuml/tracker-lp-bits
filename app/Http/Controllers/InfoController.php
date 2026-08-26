@@ -5,10 +5,11 @@ namespace App\Http\Controllers;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\User;
 use App\Repositories\InfoRepository;
+use App\Support\CurrentUser;
+use App\Support\Input;
 use App\Support\LegacyResponse;
 use App\Support\Pagination;
 use App\Support\Permissions;
-use App\Support\SupportContext;
 use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,7 +21,7 @@ class InfoController extends LegacyController
 {
     public function userhistory(Request $request): View|RedirectResponse|Response
     {
-        $curUser = SupportContext::getUser();
+        $curUser = app(CurrentUser::class)->get();
         if ($curUser === null) {
             $qs = $request->getQueryString();
 
@@ -37,7 +38,7 @@ class InfoController extends LegacyController
 
         $action = htmlspecialchars((string) request()->query('action'));
         $perpage = 15;
-        $phpSelf = SupportContext::getServerValue('PHP_SELF');
+        $phpSelf = Input::serverValue('PHP_SELF');
         $subject = UserDisplay::username($userid);
 
         $data = [
@@ -95,7 +96,7 @@ class InfoController extends LegacyController
 
     public function bitbucketlog(Request $request): Response|RedirectResponse|View
     {
-        $currentUser = (array) (SupportContext::getUser() ?? []);
+        $currentUser = (array) (app(CurrentUser::class)->get() ?? []);
         $currentClass = (int) UserDisplay::currentClass();
 
         if ($currentClass < (defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0)) {

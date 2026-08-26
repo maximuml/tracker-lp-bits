@@ -12,8 +12,8 @@ use App\Models\Forum;
 use App\Models\Topic;
 use App\Models\User;
 use App\Repositories\ForumRepository;
+use App\Support\CurrentUser;
 use App\Support\Forum as SupportForum;
-use App\Support\SupportContext;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -52,7 +52,7 @@ class TopicController extends Controller
             abort(401);
         }
 
-        SupportContext::setUser($user->toLegacyArray());
+        app(CurrentUser::class)->set($user->toLegacyArray());
 
         $dto = StoreTopicDto::fromRequest($request);
 
@@ -99,7 +99,7 @@ class TopicController extends Controller
             abort(401);
         }
 
-        SupportContext::setUser($user->toLegacyArray());
+        app(CurrentUser::class)->set($user->toLegacyArray());
 
         $dto = UpdateTopicDto::fromRequest($request);
 
@@ -144,7 +144,7 @@ class TopicController extends Controller
             abort(401);
         }
 
-        SupportContext::setUser($user->toLegacyArray());
+        app(CurrentUser::class)->set($user->toLegacyArray());
 
         if (! SupportForum::isModerator((int) $topic->id, 'topic') && ! Permission::can(PermissionEnum::POST_MANAGE, $user)) {
             throw ValidationException::withMessages(['topic' => ['Permission denied.']]);

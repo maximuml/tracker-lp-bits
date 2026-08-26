@@ -3,9 +3,14 @@
 namespace App\Repositories;
 
 use App\Models\Invite;
+use App\Support\Cache\LegacyRedisCache;
+use App\Support\CurrentUser;
+use App\Support\Globals;
 use App\Support\Hooks;
+use App\Support\Input;
+use App\Support\Language;
 use App\Support\Menu;
-use App\Support\SupportContext;
+use App\Support\UserUpdateBatch;
 use Illuminate\Support\Facades\DB;
 use Nexus\Nexus;
 
@@ -125,7 +130,7 @@ class PageLayoutRepository extends BaseRepository
      */
     public function prepareAccess(): void
     {
-        $user = SupportContext::getUser();
+        $user = app(CurrentUser::class)->get();
         if ($user === null || empty($user['id'])) {
             return;
         }
@@ -135,26 +140,26 @@ class PageLayoutRepository extends BaseRepository
             return;
         }
 
-        SupportContext::addUserUpdate('last_access', date('Y-m-d H:i:s'));
-        SupportContext::addUserUpdate('ip', $user['ip'] ?? SupportContext::getServerValue('REMOTE_ADDR', ''));
+        app(UserUpdateBatch::class)->add('last_access', date('Y-m-d H:i:s'));
+        app(UserUpdateBatch::class)->add('ip', $user['ip'] ?? Input::serverValue('REMOTE_ADDR', ''));
 
         IpLogRepository::saveToCache((int) $user['id']);
 
         $menuResult = Menu::render(
             $script,
-            SupportContext::getLangFunctions(),
-            (string) SupportContext::getGlobal('enableoffer', ''),
+            app(Language::class)->functions(),
+            (string) app(Globals::class)->get('enableoffer', ''),
             (string) Hooks::applyFilter('nexus_menu') ?: null,
             $user,
-            SupportContext::getCache(),
-            (string) SupportContext::getGlobal('CURLANGDIR', ''),
+            app(LegacyRedisCache::class),
+            (string) app(Globals::class)->get('CURLANGDIR', ''),
         );
 
-        SupportContext::setGlobal('nexus_menu_html', $menuResult['html']);
-        SupportContext::setGlobal('nexus_menu_selected', $menuResult['selected']);
+        app(Globals::class)->set('nexus_menu_html', $menuResult['html']);
+        app(Globals::class)->set('nexus_menu_selected', $menuResult['selected']);
 
-        if ((string) SupportContext::getGlobal('where_tweak', '') === 'yes') {
-            SupportContext::addUserUpdate('page', $menuResult['selected']);
+        if ((string) app(Globals::class)->get('where_tweak', '') === 'yes') {
+            app(UserUpdateBatch::class)->add('page', $menuResult['selected']);
         }
     }
 
@@ -163,12 +168,12 @@ class PageLayoutRepository extends BaseRepository
      */
     public function flushAccess(): void
     {
-        $user = SupportContext::getUser();
+        $user = app(CurrentUser::class)->get();
         if ($user === null || empty($user['id'])) {
             return;
         }
 
-        $userUpdateSet = SupportContext::getUserUpdateSet();
+        $userUpdateSet = app(UserUpdateBatch::class)->all();
         if (empty($userUpdateSet)) {
             return;
         }

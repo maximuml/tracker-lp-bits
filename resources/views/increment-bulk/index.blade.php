@@ -1,5 +1,5 @@
 @php
-$lang_incrementbulk = (array) (\App\Support\SupportContext::getGlobal('lang_incrementbulk') ?? []);
+$lang_incrementbulk = (array) (\app(\App\Support\Globals::class)->get('lang_incrementbulk') ?? []);
 $stdheadMsgalert = false;
 @endphp
 

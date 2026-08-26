@@ -1,5 +1,5 @@
 @php
-$lang_users = (array) (\App\Support\SupportContext::getGlobal('lang_users') ?? []);
+$lang_users = (array) (\app(\App\Support\Globals::class)->get('lang_users') ?? []);
 @endphp
 
 @extends('layouts.legacy')

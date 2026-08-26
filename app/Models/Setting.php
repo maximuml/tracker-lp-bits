@@ -12,8 +12,8 @@
 namespace App\Models;
 
 use App\Models\Traits\NexusActivityLogTrait;
+use App\Support\Input;
 use App\Support\Locale;
-use App\Support\SupportContext;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Redis;
@@ -232,9 +232,9 @@ class Setting extends NexusModel
 
     public static function getBaseUrl(): string
     {
-        $result = self::get('basic.BASEURL', SupportContext::getServerValue('HTTP_HOST', ''));
+        $result = self::get('basic.BASEURL', Input::serverValue('HTTP_HOST', ''));
         if (empty($result)) {
-            $result = SupportContext::getServerValue('HTTP_HOST', 'localhost');
+            $result = Input::serverValue('HTTP_HOST', 'localhost');
         }
 
         return rtrim($result, '/');

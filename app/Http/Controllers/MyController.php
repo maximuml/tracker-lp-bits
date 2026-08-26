@@ -8,10 +8,12 @@ use App\Models\User;
 use App\Services\BonusPageService;
 use App\Services\Legacy\BonusService;
 use App\Support\Config\SiteConfig;
+use App\Support\CurrentUser;
+use App\Support\Globals;
+use App\Support\Input;
 use App\Support\LegacyResponse;
 use App\Support\Pagination;
 use App\Support\Permissions;
-use App\Support\SupportContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -31,7 +33,7 @@ class MyController extends Controller
 
     public function bonus(Request $request): View|Response|RedirectResponse
     {
-        if (SupportContext::getUser() === null) {
+        if (app(CurrentUser::class)->get() === null) {
             $qs = $request->getQueryString();
 
             return redirect('/mybonus.php'.($qs ? '?'.$qs : ''));
@@ -55,7 +57,7 @@ class MyController extends Controller
 
     public function hr(Request $request): View|RedirectResponse
     {
-        $curUser = SupportContext::getUser();
+        $curUser = app(CurrentUser::class)->get();
         if ($curUser === null) {
             $qs = $request->getQueryString();
 
@@ -92,7 +94,7 @@ class MyController extends Controller
         }
 
         $q = htmlspecialchars((string) (request()->query('q') ?? ''));
-        $lang_myhr = (array) SupportContext::getGlobal('lang_myhr', []);
+        $lang_myhr = (array) app(Globals::class)->get('lang_myhr', []);
 
         $baseQuery = HitAndRun::query()->where('uid', $userid)->where('status', $status);
         $rescount = (int) (clone $baseQuery)->count();
@@ -132,7 +134,7 @@ class MyController extends Controller
             'headerFilters' => $headerFilters,
             'queryString' => $queryString,
             'q' => $q,
-            'requestUri' => SupportContext::getServerValue('REQUEST_URI'),
+            'requestUri' => Input::serverValue('REQUEST_URI'),
             'lang_myhr' => $lang_myhr,
             'rescount' => $rescount,
             'pagertop' => $pagertop,

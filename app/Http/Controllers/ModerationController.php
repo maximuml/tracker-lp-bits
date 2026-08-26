@@ -8,9 +8,11 @@ use App\Models\Offer;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\ModerationRepository;
+use App\Support\Cache\LegacyRedisCache;
+use App\Support\CurrentUser;
+use App\Support\Globals;
 use App\Support\Pagination;
 use App\Support\Permissions;
-use App\Support\SupportContext;
 use App\Support\Time;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
@@ -24,12 +26,12 @@ class ModerationController extends LegacyController
 {
     public function report(Request $request): View|RedirectResponse|Response
     {
-        $curUser = SupportContext::getUser() ?? [];
+        $curUser = app(CurrentUser::class)->get() ?? [];
         $currentUserId = (int) ($curUser['id'] ?? 0);
         $staffmemClass = defined('UC_STAFFMEM') ? \constant('UC_STAFFMEM') : (defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0);
 
-        $langReport = (array) SupportContext::getGlobal('lang_report', []);
-        $cache = SupportContext::getCache();
+        $langReport = (array) app(Globals::class)->get('lang_report', []);
+        $cache = app(LegacyRedisCache::class);
 
         $reportofferid = (int) (request()->query('reportofferid') ?? 0);
         $user = (int) (request()->query('user') ?? 0);
@@ -163,14 +165,14 @@ class ModerationController extends LegacyController
 
     public function reports(Request $request): View|RedirectResponse|Response
     {
-        $curUser = SupportContext::getUser() ?? [];
+        $curUser = app(CurrentUser::class)->get() ?? [];
         $currentUserId = (int) ($curUser['id'] ?? 0);
 
         if (! Permissions::userCan(PermissionEnum::STAFF_MEMBER->value, false, $currentUserId)) {
             return $this->legacyAbortResponse('Error', 'Permission denied.');
         }
 
-        $langReports = (array) SupportContext::getGlobal('lang_reports', []);
+        $langReports = (array) app(Globals::class)->get('lang_reports', []);
 
         $repo = app(ModerationRepository::class);
         $count = $repo->countReports();

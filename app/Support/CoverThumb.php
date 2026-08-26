@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Jobs\GenerateCoverThumbnail;
+use App\Support\Cache\LegacyRedisCache;
 use Nexus\Nexus;
 
 /**
@@ -62,8 +63,8 @@ final class CoverThumb
      */
     public static function urlWithContext(string $url, int $maxWidth = 240, int $maxHeight = 360, int $quality = 82): string
     {
-        $saveDirectory = (string) SupportContext::getGlobal('savedirectory_attachment', '');
-        $httpDirectory = (string) SupportContext::getGlobal('httpdirectory_attachment', '');
+        $saveDirectory = (string) app(Globals::class)->get('savedirectory_attachment', '');
+        $httpDirectory = (string) app(Globals::class)->get('httpdirectory_attachment', '');
 
         return self::url(
             $url,
@@ -73,7 +74,7 @@ final class CoverThumb
             $saveDirectory ?: 'attachments',
             $httpDirectory ?: 'attachments',
             defined('ROOT_PATH') ? (string) ROOT_PATH : '',
-            SupportContext::getCache() ?? null,
+            app(LegacyRedisCache::class) ?? null,
         );
     }
 

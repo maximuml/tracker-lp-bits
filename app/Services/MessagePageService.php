@@ -6,10 +6,12 @@ namespace App\Services;
 
 use App\Models\Message;
 use App\Repositories\MessageRepository;
+use App\Support\Cache\LegacyRedisCache;
+use App\Support\CurrentUser;
 use App\Support\Format;
+use App\Support\Globals;
 use App\Support\LegacyResponse;
 use App\Support\Pagination;
-use App\Support\SupportContext;
 use App\Support\Time;
 use App\Support\UserDisplay;
 use Illuminate\Http\Request;
@@ -38,8 +40,8 @@ final class MessagePageService
      */
     public function build(Request $request): array
     {
-        $curUser = (array) (SupportContext::getUser() ?? []);
-        $lang = (array) (SupportContext::getGlobal('lang_messages') ?? []);
+        $curUser = (array) (app(CurrentUser::class)->get() ?? []);
+        $lang = (array) (app(Globals::class)->get('lang_messages') ?? []);
         $userId = (int) ($curUser['id'] ?? 0);
 
         $action = (string) $request->input('action', '');
@@ -55,8 +57,8 @@ final class MessagePageService
             'curUser' => $curUser,
             'userId' => $userId,
             'action' => $action,
-            'baseUrl' => (string) SupportContext::getGlobal('BASEURL', ''),
-            'contentWidth' => (string) SupportContext::getGlobal('CONTENT_WIDTH', '737'),
+            'baseUrl' => (string) app(Globals::class)->get('BASEURL', ''),
+            'contentWidth' => (string) app(Globals::class)->get('CONTENT_WIDTH', '737'),
         ];
 
         switch ($action) {
@@ -254,7 +256,7 @@ final class MessagePageService
 
         // Mark message as read
         MessageRepository::markAsRead($pmId, $userId);
-        $cache = SupportContext::getCache();
+        $cache = app(LegacyRedisCache::class);
         if ($cache !== null) {
             $cache->delete_value('user_'.$userId.'_unread_message_count');
         }
@@ -363,7 +365,7 @@ final class MessagePageService
      */
     private function buildJumpToBoxes(Collection $pmBoxes, int $selected): string
     {
-        $lang = (array) (SupportContext::getGlobal('lang_messages') ?? []);
+        $lang = (array) (app(Globals::class)->get('lang_messages') ?? []);
         $html = '<option value="1" '.($selected === self::PM_INBOX ? ' selected' : '').'>'.htmlspecialchars((string) ($lang['select_inbox'] ?? 'Inbox'))."</option>\n";
         $html .= '<option value="-1" '.($selected === self::PM_SENT_BOX ? ' selected' : '').'>'.htmlspecialchars((string) ($lang['select_sentbox'] ?? 'Sentbox'))."</option>\n";
         foreach ($pmBoxes as $row) {

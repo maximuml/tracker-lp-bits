@@ -1,5 +1,5 @@
 @php
-$lang_offers = (array) (\App\Support\SupportContext::getGlobal('lang_offers') ?? []);
+$lang_offers = (array) (\app(\App\Support\Globals::class)->get('lang_offers') ?? []);
 $title = $title ?? ($lang_offers['head_offer'] ?? 'Offers');
 $action = $action ?? 'list';
 @endphp

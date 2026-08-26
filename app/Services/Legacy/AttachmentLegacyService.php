@@ -5,9 +5,9 @@ namespace App\Services\Legacy;
 use App\Models\Attachment;
 use App\Support\Attachment\AttachmentService;
 use App\Support\Config\SiteConfig;
+use App\Support\Globals;
 use App\Support\Logger;
 use App\Support\Path;
-use App\Support\SupportContext;
 use Illuminate\Support\Facades\DB;
 use Nexus\Attachment\Storage;
 
@@ -31,19 +31,19 @@ class AttachmentLegacyService
             return ['warning' => $lang['text_nothing_received'] ?? 'Nothing received.', 'script' => '', 'count_left' => $count_left];
         }
 
-        $savedirectorytype_attachment = (string) (SupportContext::getGlobal('savedirectorytype_attachment') ?? 'monthdir');
-        $savedirectory_attachment = (string) (SupportContext::getGlobal('savedirectory_attachment') ?? 'attachments');
-        $httpdirectory_attachment = (string) (SupportContext::getGlobal('httpdirectory_attachment') ?? 'attachments');
-        $thumbnailtype_attachment = (string) (SupportContext::getGlobal('thumbnailtype_attachment') ?? 'createthumb');
-        $thumbwidth_attachment = (int) (SupportContext::getGlobal('thumbwidth_attachment') ?? 200);
-        $thumbheight_attachment = (int) (SupportContext::getGlobal('thumbheight_attachment') ?? 200);
-        $thumbquality_attachment = (int) (SupportContext::getGlobal('thumbquality_attachment') ?? 80);
-        $watermarkpos_attachment = (string) (SupportContext::getGlobal('watermarkpos_attachment') ?? 'no');
-        $watermarkwidth_attachment = (int) (SupportContext::getGlobal('watermarkwidth_attachment') ?? 100);
-        $watermarkheight_attachment = (int) (SupportContext::getGlobal('watermarkheight_attachment') ?? 100);
-        $watermarkquality_attachment = (int) (SupportContext::getGlobal('watermarkquality_attachment') ?? 90);
-        $altthumbwidth_attachment = (int) (SupportContext::getGlobal('altthumbwidth_attachment') ?? 100);
-        $altthumbheight_attachment = (int) (SupportContext::getGlobal('altthumbheight_attachment') ?? 100);
+        $savedirectorytype_attachment = (string) (app(Globals::class)->get('savedirectorytype_attachment') ?? 'monthdir');
+        $savedirectory_attachment = (string) (app(Globals::class)->get('savedirectory_attachment') ?? 'attachments');
+        $httpdirectory_attachment = (string) (app(Globals::class)->get('httpdirectory_attachment') ?? 'attachments');
+        $thumbnailtype_attachment = (string) (app(Globals::class)->get('thumbnailtype_attachment') ?? 'createthumb');
+        $thumbwidth_attachment = (int) (app(Globals::class)->get('thumbwidth_attachment') ?? 200);
+        $thumbheight_attachment = (int) (app(Globals::class)->get('thumbheight_attachment') ?? 200);
+        $thumbquality_attachment = (int) (app(Globals::class)->get('thumbquality_attachment') ?? 80);
+        $watermarkpos_attachment = (string) (app(Globals::class)->get('watermarkpos_attachment') ?? 'no');
+        $watermarkwidth_attachment = (int) (app(Globals::class)->get('watermarkwidth_attachment') ?? 100);
+        $watermarkheight_attachment = (int) (app(Globals::class)->get('watermarkheight_attachment') ?? 100);
+        $watermarkquality_attachment = (int) (app(Globals::class)->get('watermarkquality_attachment') ?? 90);
+        $altthumbwidth_attachment = (int) (app(Globals::class)->get('altthumbwidth_attachment') ?? 100);
+        $altthumbheight_attachment = (int) (app(Globals::class)->get('altthumbheight_attachment') ?? 100);
 
         $isimage = false;
         $width = 0;

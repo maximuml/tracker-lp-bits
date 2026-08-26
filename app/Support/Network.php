@@ -200,13 +200,13 @@ final class Network
 
     private static function serverVar(string $key): string
     {
-        $value = SupportContext::getServerValue($key);
-        if ($value === null) {
+        $value = Input::serverValue($key);
+        if ($value === '') {
             $env = getenv($key);
             $value = is_string($env) ? $env : '';
         }
 
-        return is_string($value) ? $value : '';
+        return $value;
     }
 
     /**
@@ -311,7 +311,7 @@ final class Network
     public static function geoIpInfo(string $ip): array|false
     {
         $locationInfo = Cache::remember("locations_{$ip}", 864000, function () use ($ip) {
-            $lang = Locale::folderFromCookie(SupportContext::getCookieValue('c_lang_folder', ''), (bool) false);
+            $lang = Locale::folderFromCookie(Input::cookieValue('c_lang_folder', ''), (bool) false);
             $langMap = [
                 'chs' => 'zh-CN',
                 'cht' => 'zh-CN',
@@ -486,7 +486,7 @@ final class Network
      */
     public static function ipLocationWithContext(string $ip): array
     {
-        $lang_functions = SupportContext::getLangFunctions();
+        $lang_functions = app(Language::class)->functions();
 
         return self::ipLocation(
             $ip,

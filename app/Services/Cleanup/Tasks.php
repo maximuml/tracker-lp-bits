@@ -10,13 +10,13 @@ use App\Models\User;
 use App\Models\UserBanLog;
 use App\Models\UserModifyLog;
 use App\Repositories\UserRepository;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\Database;
 use App\Support\Events;
 use App\Support\Locale;
 use App\Support\Log;
 use App\Support\Logger;
-use App\Support\SupportContext;
 use App\Support\Time;
 use App\Support\TorrentOps;
 use App\Support\UserOps;
@@ -112,7 +112,7 @@ final class Tasks
                 ->update(['postcount' => $postcount, 'topiccount' => $topiccount]);
         }
 
-        $cache = SupportContext::getCache();
+        $cache = app(LegacyRedisCache::class);
         if ($cache !== null) {
             $cache->delete_value('forums_list');
         }

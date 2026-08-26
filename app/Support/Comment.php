@@ -68,7 +68,7 @@ final class Comment
 
         self::resetTempCode();
 
-        $lang_functions = SupportContext::getLangFunctions();
+        $lang_functions = app(Language::class)->functions();
         $s = $text;
 
         if ($stripHtml) {
@@ -281,9 +281,9 @@ final class Comment
      */
     public static function table(array $rows, string $type, int|string $parentId, bool $review = false): string
     {
-        $lang_functions = SupportContext::getLangFunctions();
-        $CURUSER = SupportContext::getUser();
-        $commanage_class = (int) SupportContext::getGlobal('commanage_class', 0);
+        $lang_functions = app(Language::class)->functions();
+        $CURUSER = app(CurrentUser::class)->get();
+        $commanage_class = (int) app(Globals::class)->get('commanage_class', 0);
 
         $contentWidth = \defined('CONTENT_WIDTH') ? (int) CONTENT_WIDTH : 100;
         $html = Frame::mainOpen('', false, 100, $contentWidth)

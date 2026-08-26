@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Torrent;
 use App\Support\Bonus;
+use App\Support\Cache\LegacyRedisCache;
+use App\Support\CurrentUser;
+use App\Support\Globals;
 use App\Support\LegacyResponse;
-use App\Support\SupportContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -23,7 +25,7 @@ class TorrentBookmarkController extends LegacyController
             'Content-Type' => 'text/xml; charset=utf-8',
         ];
 
-        $user = SupportContext::getUser();
+        $user = app(CurrentUser::class)->get();
         if ($user === null) {
             return response('failed', 200, $headers);
         }
@@ -48,7 +50,7 @@ class TorrentBookmarkController extends LegacyController
             $status = 'added';
         }
 
-        $cache = SupportContext::getCache();
+        $cache = app(LegacyRedisCache::class);
         if ($cache !== null) {
             $cache->delete_value('user_'.$userId.'_bookmark_array');
         }
@@ -58,11 +60,11 @@ class TorrentBookmarkController extends LegacyController
 
     public function thanks(Request $request): Response|RedirectResponse
     {
-        if (SupportContext::getUser() === null) {
+        if (app(CurrentUser::class)->get() === null) {
             return redirect('/thanks.php'.($request->getQueryString() ? '?'.$request->getQueryString() : ''));
         }
 
-        $curUser = SupportContext::getUser();
+        $curUser = app(CurrentUser::class)->get();
         $userid = (int) ($curUser['id'] ?? 0);
 
         if ($request->query('id') !== null) {
@@ -88,8 +90,8 @@ class TorrentBookmarkController extends LegacyController
             'userid' => $userid,
         ]);
 
-        $saythanksBonus = (float) SupportContext::getGlobal('saythanks_bonus', 0);
-        $receivethanksBonus = (float) SupportContext::getGlobal('receivethanks_bonus', 0);
+        $saythanksBonus = (float) app(Globals::class)->get('saythanks_bonus', 0);
+        $receivethanksBonus = (float) app(Globals::class)->get('receivethanks_bonus', 0);
         Bonus::updatePoints('+', $saythanksBonus, $userid);
         Bonus::updatePoints('+', $receivethanksBonus, (int) $torrentowner);
 

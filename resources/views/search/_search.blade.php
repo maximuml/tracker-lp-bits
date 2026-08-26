@@ -10,7 +10,7 @@ $torrentsperpage = (int) ($torrentsperpage ?? 50);
 $searchstr_ori = (string) ($searchstr_ori ?? htmlspecialchars($search));
 $hasResults = (bool) ($hasResults ?? false);
 
-$lang_torrents = \App\Support\SupportContext::getGlobal('lang_torrents', []);
+$lang_torrents = \app(\App\Support\Globals::class)->get('lang_torrents', []);
 
 print("<table width=\"97%\" class=\"main\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\"><tr><td class=\"embedded\">");
 

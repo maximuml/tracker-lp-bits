@@ -13,13 +13,14 @@ use App\Repositories\UserDetailRepository;
 use App\Repositories\UserRepository;
 use App\Support\Bonus;
 use App\Support\Country;
+use App\Support\CurrentUser;
 use App\Support\Env;
+use App\Support\Globals;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Network;
 use App\Support\Permissions;
 use App\Support\Strings;
-use App\Support\SupportContext;
 use App\Support\Url;
 use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
@@ -33,20 +34,20 @@ class UserDetailController extends Controller
         $id = (int) $request->input('id', 0);
 
         if ($id <= 0) {
-            $currentUser = SupportContext::getUser();
+            $currentUser = app(CurrentUser::class)->get();
             $id = (int) ($currentUser['id'] ?? 0);
             if ($id <= 0) {
                 abort(404);
             }
         }
 
-        if (SupportContext::getUser() === null) {
+        if (app(CurrentUser::class)->get() === null) {
             return redirect('/userdetails.php?'.$request->getQueryString());
         }
 
         $user = UserDetailRepository::getUser($id);
         /** @var array<string, string> $lang */
-        $lang = (array) SupportContext::getGlobal('lang_userdetails', []);
+        $lang = (array) app(Globals::class)->get('lang_userdetails', []);
 
         if ($user === null) {
             LegacyResponse::abort(
@@ -86,7 +87,7 @@ class UserDetailController extends Controller
      */
     private function buildDetailsViewData(int $id, array $user, ?User $userModel): array
     {
-        $currentUser = SupportContext::getUser() ?? [];
+        $currentUser = app(CurrentUser::class)->get() ?? [];
         $currentUserId = (int) ($currentUser['id'] ?? 0);
         $isOwner = $currentUserId === $id;
 
@@ -116,7 +117,7 @@ class UserDetailController extends Controller
         $countryHtml = '<img src="pic/flag/'.htmlspecialchars((string) ($countryRow['flagpic'] ?? '')).'" alt="'.htmlspecialchars((string) ($countryRow['name'] ?? '')).'" style="margin-left: 8pt" />';
 
         $locationInfo = [null, null];
-        if (SupportContext::getGlobal('enablelocation_tweak', '') === 'yes' && ! empty($user['ip'])) {
+        if (app(Globals::class)->get('enablelocation_tweak', '') === 'yes' && ! empty($user['ip'])) {
             $locationInfo = Network::ipLocationWithContext($user['ip']);
         }
 
@@ -157,7 +158,7 @@ class UserDetailController extends Controller
 
         $userManageSystemUrl = sprintf('%s/%s/user/users/%s', Url::schemeAndHost(false), Env::get('FILAMENT_PATH', 'nexusphp'), $user['id']);
 
-        $langDetails = (array) SupportContext::getGlobal('lang_userdetails', []);
+        $langDetails = (array) app(Globals::class)->get('lang_userdetails', []);
 
         $usernameHtml = UserDisplay::username($user['id'], true, false);
         $invitedByHtml = $user['invited_by'] > 0 ? UserDisplay::username($user['invited_by']) : '';

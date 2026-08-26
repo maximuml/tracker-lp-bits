@@ -48,7 +48,7 @@ final class Input
             return false;
         }
 
-        SupportContext::setGlobal($name, $value);
+        app(Globals::class)->set($name, $value);
 
         return $value;
     }
@@ -67,10 +67,10 @@ final class Input
         foreach ($vars as $v) {
             if (isset($get[$v])) {
                 $value = self::unescape($get[$v]);
-                SupportContext::setGlobal($v, $value);
+                app(Globals::class)->set($v, $value);
             } elseif (isset($post[$v])) {
                 $value = self::unescape($post[$v]);
-                SupportContext::setGlobal($v, $value);
+                app(Globals::class)->set($v, $value);
             } else {
                 return 0;
             }

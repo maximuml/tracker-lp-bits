@@ -1,5 +1,5 @@
 @php
-$lang_shoutbox = (array) (\App\Support\SupportContext::getGlobal('lang_shoutbox') ?? []);
+$lang_shoutbox = (array) (\app(\App\Support\Globals::class)->get('lang_shoutbox') ?? []);
 $CURUSER = (array) (\app(\App\Support\CurrentUser::class)->get() ?? []);
 $perPage = (int) ($perPage ?? 50);
 $page = (int) ($page ?? 1);

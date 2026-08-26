@@ -4,8 +4,8 @@ namespace App\Filament\Pages;
 
 use App\Models\User;
 use App\Repositories\UserRepository;
+use App\Support\Globals;
 use App\Support\Mail;
-use App\Support\SupportContext;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -191,8 +191,8 @@ class SystemActions extends Page implements HasForms
             return;
         }
 
-        $siteName = (string) SupportContext::getGlobal('SITENAME', '');
-        $siteEmail = (string) SupportContext::getGlobal('SITEEMAIL', '');
+        $siteName = (string) app(Globals::class)->get('SITENAME', '');
+        $siteEmail = (string) app(Globals::class)->get('SITEEMAIL', '');
         $sent = false;
         foreach ($users as $userRow) {
             $to = (string) $userRow->email;

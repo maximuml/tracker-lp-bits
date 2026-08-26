@@ -7,6 +7,7 @@ use App\Repositories\AttendanceRepository;
 use App\Support\Captcha;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
+use App\Support\Globals;
 use App\Support\LegacyResponse;
 use App\Support\SupportContext;
 use Carbon\Carbon;
@@ -28,7 +29,7 @@ class AttendanceController extends LegacyController
         $captchaEnabled = SiteConfig::current()->captcha->attendanceEnabled((bool) config('captcha.attendance.enabled', true));
 
         if ($request->isMethod('post')) {
-            if ($captchaEnabled && SupportContext::getGlobal('iv', '') === 'yes') {
+            if ($captchaEnabled && app(Globals::class)->get('iv', '') === 'yes') {
                 Captcha::checkCode(
                     (string) (SupportContext::getPost('imagehash') ?? ''),
                     (string) (SupportContext::getPost('imagestring') ?? ''),
@@ -38,7 +39,7 @@ class AttendanceController extends LegacyController
                 );
             }
             $attendance = $repository->attend($uid);
-            $langAttendance = (array) (SupportContext::getGlobal('lang_attendance') ?? []);
+            $langAttendance = (array) (app(Globals::class)->get('lang_attendance') ?? []);
             if (! $attendance->is_updated) {
                 LegacyResponse::abort($langAttendance['sorry'] ?? '', $langAttendance['already_attended'] ?? '');
             }

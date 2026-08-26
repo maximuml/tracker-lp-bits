@@ -1,5 +1,5 @@
 @php
-$lang_attachment = (array) (\App\Support\SupportContext::getGlobal('lang_attachment') ?? []);
+$lang_attachment = (array) (\app(\App\Support\Globals::class)->get('lang_attachment') ?? []);
 $CURUSER = (array) (\app(\App\Support\CurrentUser::class)->get() ?? []);
 $Attach = $Attach ?? new \App\Support\Attachment\AttachmentService($CURUSER['id'] ?? 0);
 $count_limit = (int) ($count_limit ?? $Attach->get_count_limit());

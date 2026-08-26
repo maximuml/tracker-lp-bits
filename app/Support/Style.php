@@ -116,7 +116,7 @@ final class Style
     public static function cssRowWithContext(): ?array
     {
         $user = app(CurrentUser::class)->get() ?? [];
-        $defaultId = (int) SupportContext::getGlobal('defcss', 0);
+        $defaultId = (int) app(Globals::class)->get('defcss', 0);
 
         return self::cssRow(app(LegacyRedisCache::class), $user ? $user['stylesheet'] : $defaultId, $defaultId);
     }
@@ -128,7 +128,7 @@ final class Style
     public static function cssUriWithContext(string $file = ''): string
     {
         $user = app(CurrentUser::class)->get() ?? [];
-        $defaultId = (int) SupportContext::getGlobal('defcss', 0);
+        $defaultId = (int) app(Globals::class)->get('defcss', 0);
 
         return self::cssUri(app(LegacyRedisCache::class), $user ? $user['stylesheet'] : $defaultId, $defaultId, $file);
     }
@@ -151,7 +151,7 @@ final class Style
     public static function addiCodeWithContext(): string
     {
         $user = app(CurrentUser::class)->get() ?? [];
-        $defaultId = (int) SupportContext::getGlobal('defcss', 0);
+        $defaultId = (int) app(Globals::class)->get('defcss', 0);
 
         return self::addiCode(app(LegacyRedisCache::class), $user ? $user['stylesheet'] : $defaultId, $defaultId);
     }

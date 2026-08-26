@@ -1,5 +1,5 @@
 @php
-$lang_friends = (array) (\App\Support\SupportContext::getGlobal('lang_friends') ?? []);
+$lang_friends = (array) (\app(\App\Support\Globals::class)->get('lang_friends') ?? []);
 $CURUSER = (array) (\app(\App\Support\CurrentUser::class)->get() ?? []);
 $userid = (int) ($userid ?? 0);
 $friendsList = (array) ($friendsList ?? []);

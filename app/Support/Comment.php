@@ -283,7 +283,7 @@ final class Comment
     {
         $lang_functions = app(Language::class)->functions();
         $CURUSER = app(CurrentUser::class)->get();
-        $commanage_class = (int) SupportContext::getGlobal('commanage_class', 0);
+        $commanage_class = (int) app(Globals::class)->get('commanage_class', 0);
 
         $contentWidth = \defined('CONTENT_WIDTH') ? (int) CONTENT_WIDTH : 100;
         $html = Frame::mainOpen('', false, 100, $contentWidth)

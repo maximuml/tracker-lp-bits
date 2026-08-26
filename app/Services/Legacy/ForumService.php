@@ -12,10 +12,10 @@ use App\Support\Bonus;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Forum;
+use App\Support\Globals;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Palette;
-use App\Support\SupportContext;
 use App\Support\UserDisplay;
 use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;
@@ -77,7 +77,7 @@ final class ForumService
      */
     private function lang(): array
     {
-        return (array) (SupportContext::getGlobal('lang_forums') ?? []);
+        return (array) (app(Globals::class)->get('lang_forums') ?? []);
     }
 
     private function cacheDelete(string $key): void
@@ -163,7 +163,7 @@ final class ForumService
             if ($subject === '') {
                 LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_must_enter_subject'] ?? 'Enter subject.');
             }
-            $maxsubjectlength = (int) (SupportContext::getGlobal('maxsubjectlength') ?? 100);
+            $maxsubjectlength = (int) (app(Globals::class)->get('maxsubjectlength') ?? 100);
             if (strlen($subject) > $maxsubjectlength) {
                 LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_subject_limited'] ?? 'Subject too long.');
             }
@@ -264,7 +264,7 @@ final class ForumService
         }
 
         if ($type === 'new') {
-            $starttopicBonus = (float) (SupportContext::getGlobal('starttopic_bonus') ?? 0);
+            $starttopicBonus = (float) (app(Globals::class)->get('starttopic_bonus') ?? 0);
             if ($starttopicBonus > 0) {
                 Bonus::updatePoints('+', $starttopicBonus, $userid);
             }
@@ -276,7 +276,7 @@ final class ForumService
             ForumRepository::incrementForumTopicCount($forumid);
             ForumRepository::incrementForumPostCount($forumid);
         } else {
-            $makepostBonus = (float) (SupportContext::getGlobal('makepost_bonus') ?? 0);
+            $makepostBonus = (float) (app(Globals::class)->get('makepost_bonus') ?? 0);
             if ($makepostBonus > 0) {
                 Bonus::updatePoints('+', $makepostBonus, $userid);
             }
@@ -424,7 +424,7 @@ final class ForumService
             $this->cacheDelete('forum_'.$forumid.'_last_replied_topic_content');
         }
 
-        $starttopicBonus = (float) (SupportContext::getGlobal('starttopic_bonus') ?? 0);
+        $starttopicBonus = (float) (app(Globals::class)->get('starttopic_bonus') ?? 0);
         if ($starttopicBonus > 0) {
             Bonus::updatePoints('-', $starttopicBonus, $targetUserid);
         }
@@ -480,7 +480,7 @@ final class ForumService
         }
         ForumRepository::updateTopicLastPost($topicid);
 
-        $makepostBonus = (float) (SupportContext::getGlobal('makepost_bonus') ?? 0);
+        $makepostBonus = (float) (app(Globals::class)->get('makepost_bonus') ?? 0);
         if ($makepostBonus > 0) {
             Bonus::updatePoints('-', $makepostBonus, $targetUserid);
         }

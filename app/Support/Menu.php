@@ -83,15 +83,15 @@ final class Menu
         $result = self::render(
             \function_exists('nexus') ? Nexus::instance()->getScript() : '',
             app(Language::class)->functions(),
-            (string) SupportContext::getGlobal('enableoffer', ''),
+            (string) app(Globals::class)->get('enableoffer', ''),
             $customMenu !== '' ? $customMenu : null,
             app(CurrentUser::class)->get(),
             app(LegacyRedisCache::class),
-            (string) SupportContext::getGlobal('CURLANGDIR', ''),
+            (string) app(Globals::class)->get('CURLANGDIR', ''),
         );
 
         $user = app(CurrentUser::class)->get();
-        if ($user && SupportContext::getGlobal('where_tweak', '') === 'yes') {
+        if ($user && app(Globals::class)->get('where_tweak', '') === 'yes') {
             SupportContext::addUserUpdate('page', $result['selected']);
         }
 

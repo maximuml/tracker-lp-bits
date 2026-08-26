@@ -1,10 +1,10 @@
 <?php
-$lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
+$lang_topten = (array) (\app(\App\Support\Globals::class)->get('lang_topten') ?? []);
 $CURUSER = \app(\App\Support\CurrentUser::class)->get() ?? [];
 
 if (!function_exists('usershare_table')) { function usershare_table($res, $frame_caption)
 {
-$lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
+$lang_topten = (array) (\app(\App\Support\Globals::class)->get('lang_topten') ?? []);
 	\App\Support\Html::beginFrame($frame_caption, true);
 	\App\Support\Html::beginTable();
 ?>
@@ -50,7 +50,7 @@ foreach ($res as $a) { $a = (array) $a;
 
 if (!function_exists('_torrenttable')) { function _torrenttable($res, $frame_caption)
 {
-$lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
+$lang_topten = (array) (\app(\App\Support\Globals::class)->get('lang_topten') ?? []);
 	\App\Support\Html::beginFrame($frame_caption, true);
 	\App\Support\Html::beginTable();
 ?>
@@ -91,7 +91,7 @@ foreach ($res as $a) { $a = (array) $a;
 
 if (!function_exists('countriestable')) { function countriestable($res, $frame_caption, $what)
 {
-$lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
+$lang_topten = (array) (\app(\App\Support\Globals::class)->get('lang_topten') ?? []);
 	\App\Support\Html::beginFrame($frame_caption, true);
 	\App\Support\Html::beginTable();
 ?>
@@ -122,7 +122,7 @@ foreach ($res as $a) { $a = (array) $a;
 
 if (!function_exists('peerstable')) { function peerstable($res, $frame_caption)
 {
-$lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
+$lang_topten = (array) (\app(\App\Support\Globals::class)->get('lang_topten') ?? []);
 	\App\Support\Html::beginFrame($frame_caption, true);
 	\App\Support\Html::beginTable();
 
@@ -142,7 +142,7 @@ $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ??
 
 if (!function_exists('bonustable')) { function bonustable($res, $frame_caption)
 {
-$lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
+$lang_topten = (array) (\app(\App\Support\Globals::class)->get('lang_topten') ?? []);
 	\App\Support\Html::beginFrame($frame_caption, true);
 	\App\Support\Html::beginTable();
 
@@ -161,7 +161,7 @@ $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ??
 
 if (!function_exists('charityTable')) { function charityTable($res, $frame_caption)
 {
-$lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
+$lang_topten = (array) (\app(\App\Support\Globals::class)->get('lang_topten') ?? []);
 	\App\Support\Html::beginFrame($frame_caption, true);
 	\App\Support\Html::beginTable();
 
@@ -180,7 +180,7 @@ $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ??
 
 if (!function_exists('cmttable')) { function cmttable($res, $frame_caption, $col2_name)
 {
-$lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
+$lang_topten = (array) (\app(\App\Support\Globals::class)->get('lang_topten') ?? []);
 	\App\Support\Html::beginFrame($frame_caption, true);
 	\App\Support\Html::beginTable();
 
@@ -199,7 +199,7 @@ $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ??
 
 if (!function_exists('locationtable')) { function locationtable($res, $frame_caption)
 {
-$lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
+$lang_topten = (array) (\app(\App\Support\Globals::class)->get('lang_topten') ?? []);
 	\App\Support\Html::beginFrame($frame_caption, true);
 	\App\Support\Html::beginTable();
 
@@ -218,7 +218,7 @@ $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ??
 
 if (!function_exists('postable')) { function postable($res, $frame_caption)
 {
-$lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
+$lang_topten = (array) (\app(\App\Support\Globals::class)->get('lang_topten') ?? []);
 	\App\Support\Html::beginFrame($frame_caption, true);
 	\App\Support\Html::beginTable();
 
@@ -238,7 +238,7 @@ $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ??
 
 if (!function_exists('bigtopic_table')) { function bigtopic_table($res, $frame_caption)
 {
-$lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
+$lang_topten = (array) (\app(\App\Support\Globals::class)->get('lang_topten') ?? []);
 	\App\Support\Html::beginFrame($frame_caption, true);
 	\App\Support\Html::beginTable();
 
@@ -258,7 +258,7 @@ $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ??
 
 if (!function_exists('donortable')) { function donortable($res, $frame_caption)
 {
-$lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
+$lang_topten = (array) (\app(\App\Support\Globals::class)->get('lang_topten') ?? []);
 	\App\Support\Html::beginFrame($frame_caption, true);
 	\App\Support\Html::beginTable();
 
@@ -278,7 +278,7 @@ $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ??
 
 if (!function_exists('clienttable')) { function clienttable($res, $frame_caption)
 {
-$lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
+$lang_topten = (array) (\app(\App\Support\Globals::class)->get('lang_topten') ?? []);
 	\App\Support\Html::beginFrame($frame_caption, true);
 	\App\Support\Html::beginTable();
 
@@ -297,7 +297,7 @@ $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ??
 
 if (!function_exists('lastsearch_table')) { function lastsearch_table($res, $frame_caption)
 {
-$lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
+$lang_topten = (array) (\app(\App\Support\Globals::class)->get('lang_topten') ?? []);
 	\App\Support\Html::beginFrame($frame_caption, true);
 	\App\Support\Html::beginTable();
 
@@ -315,7 +315,7 @@ $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ??
 
 if (!function_exists('search_ranktable')) { function search_ranktable($res, $frame_caption)
 {
-$lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
+$lang_topten = (array) (\app(\App\Support\Globals::class)->get('lang_topten') ?? []);
 	\App\Support\Html::beginFrame($frame_caption, true);
 	\App\Support\Html::beginTable();
 
@@ -334,7 +334,7 @@ $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ??
 
 if (!function_exists('supply_snatchtable')) { function supply_snatchtable($res, $frame_caption)
 {
-$lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
+$lang_topten = (array) (\app(\App\Support\Globals::class)->get('lang_topten') ?? []);
 $CURUSER = \app(\App\Support\CurrentUser::class)->get() ?? [];
 	\App\Support\Html::beginFrame($frame_caption, true);
 	\App\Support\Html::beginTable();
@@ -381,7 +381,7 @@ foreach ($res as $a) { $a = (array) $a;
 
 if (!function_exists('stylesheettable')) { function stylesheettable($res, $frame_caption)
 {
-$lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
+$lang_topten = (array) (\app(\App\Support\Globals::class)->get('lang_topten') ?? []);
 	\App\Support\Html::beginFrame($frame_caption, true);
 	\App\Support\Html::beginTable();
 
@@ -400,7 +400,7 @@ $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ??
 
 if (!function_exists('languagetable')) { function languagetable($res, $frame_caption)
 {
-$lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
+$lang_topten = (array) (\app(\App\Support\Globals::class)->get('lang_topten') ?? []);
 	\App\Support\Html::beginFrame($frame_caption, true);
 	\App\Support\Html::beginTable();
 

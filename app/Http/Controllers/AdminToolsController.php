@@ -6,6 +6,7 @@ use App\Models\UserBanLog;
 use App\Repositories\ModerationRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
+use App\Support\Globals;
 use App\Support\Html;
 use App\Support\Network;
 use App\Support\Pagination;
@@ -286,7 +287,7 @@ class AdminToolsController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Permission denied');
         }
 
-        $langTestip = (array) SupportContext::getGlobal('lang_testip', []);
+        $langTestip = (array) app(Globals::class)->get('lang_testip', []);
 
         if ($request->isMethod('post')) {
             $ip = (string) SupportContext::getPost('ip');

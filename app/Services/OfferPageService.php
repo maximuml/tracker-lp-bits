@@ -16,6 +16,7 @@ use App\Support\CurrentUser;
 use App\Support\Form;
 use App\Support\Format;
 use App\Support\Frame;
+use App\Support\Globals;
 use App\Support\Html;
 use App\Support\Input;
 use App\Support\LegacyResponse;
@@ -47,7 +48,7 @@ final class OfferPageService
     public function build(Request $request): array
     {
         $curUser = (array) (app(CurrentUser::class)->get() ?? []);
-        $lang = (array) (SupportContext::getGlobal('lang_offers') ?? []);
+        $lang = (array) (app(Globals::class)->get('lang_offers') ?? []);
         $userId = (int) ($curUser['id'] ?? 0);
 
         $action = $this->resolveAction($request);
@@ -57,17 +58,17 @@ final class OfferPageService
             'curUser' => $curUser,
             'userId' => $userId,
             'action' => $action,
-            'baseUrl' => (string) SupportContext::getGlobal('BASEURL', ''),
-            'contentWidth' => (string) SupportContext::getGlobal('CONTENT_WIDTH', '737'),
-            'browsecatmode' => SupportContext::getGlobal('browsecatmode', 1),
-            'enableoffer' => (string) SupportContext::getGlobal('enableoffer', 'yes'),
-            'minoffervotes' => (int) SupportContext::getGlobal('minoffervotes', 0),
-            'offervotetimeoutMain' => (int) SupportContext::getGlobal('offervotetimeout_main', 0),
-            'offeruptimeoutMain' => (int) SupportContext::getGlobal('offeruptimeout_main', 0),
-            'offervoteBonus' => (float) SupportContext::getGlobal('offervote_bonus', 0),
-            'uploadClass' => (int) SupportContext::getGlobal('upload_class', 0),
-            'addofferClass' => (int) SupportContext::getGlobal('addoffer_class', 0),
-            'againstofferClass' => (int) SupportContext::getGlobal('againstoffer_class', 0),
+            'baseUrl' => (string) app(Globals::class)->get('BASEURL', ''),
+            'contentWidth' => (string) app(Globals::class)->get('CONTENT_WIDTH', '737'),
+            'browsecatmode' => app(Globals::class)->get('browsecatmode', 1),
+            'enableoffer' => (string) app(Globals::class)->get('enableoffer', 'yes'),
+            'minoffervotes' => (int) app(Globals::class)->get('minoffervotes', 0),
+            'offervotetimeoutMain' => (int) app(Globals::class)->get('offervotetimeout_main', 0),
+            'offeruptimeoutMain' => (int) app(Globals::class)->get('offeruptimeout_main', 0),
+            'offervoteBonus' => (float) app(Globals::class)->get('offervote_bonus', 0),
+            'uploadClass' => (int) app(Globals::class)->get('upload_class', 0),
+            'addofferClass' => (int) app(Globals::class)->get('addoffer_class', 0),
+            'againstofferClass' => (int) app(Globals::class)->get('againstoffer_class', 0),
         ];
 
         if ($data['enableoffer'] === 'no') {

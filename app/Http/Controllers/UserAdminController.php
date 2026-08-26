@@ -11,6 +11,7 @@ use App\Repositories\BonusRepository;
 use App\Repositories\UserListingRepository;
 use App\Repositories\UserRepository;
 use App\Support\CurrentUser;
+use App\Support\Globals;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Log;
@@ -34,7 +35,7 @@ class UserAdminController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Permission denied.');
         }
 
-        $langUsers = (array) SupportContext::getGlobal('lang_users', []);
+        $langUsers = (array) app(Globals::class)->get('lang_users', []);
         $search = trim((string) (SupportContext::getQuery('search') ?? ''));
         $class = (string) (SupportContext::getQuery('class') ?? '-');
         $country = (int) (SupportContext::getQuery('country') ?? 0);

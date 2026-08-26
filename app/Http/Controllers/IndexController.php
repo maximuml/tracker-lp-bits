@@ -7,7 +7,7 @@ use App\Services\IndexPageService;
 use App\Support\Bonus;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
-use App\Support\SupportContext;
+use App\Support\Globals;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -30,7 +30,7 @@ class IndexController extends Controller
 
         IndexRepository::touchLastHome((int) $user['id']);
 
-        if ($request->isMethod('post') && SupportContext::getGlobal('showpolls_main', '') === 'yes') {
+        if ($request->isMethod('post') && app(Globals::class)->get('showpolls_main', '') === 'yes') {
             return $this->handlePollVote($request);
         }
 
@@ -67,7 +67,7 @@ class IndexController extends Controller
             $cache->delete_value('current_poll_result', true);
         }
 
-        $pollvoteBonus = (float) SupportContext::getGlobal('pollvote_bonus', 0);
+        $pollvoteBonus = (float) app(Globals::class)->get('pollvote_bonus', 0);
         if ($pollvoteBonus > 0) {
             Bonus::updatePoints((string) '+', (float) $pollvoteBonus, $user['id']);
         }

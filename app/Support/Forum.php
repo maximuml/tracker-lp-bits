@@ -32,7 +32,7 @@ final class Forum
      */
     public static function picFolderWithContext(): string
     {
-        return self::picFolder((string) SupportContext::getGlobal('CURLANGDIR', ''));
+        return self::picFolder((string) app(Globals::class)->get('CURLANGDIR', ''));
     }
 
     /**

@@ -7,6 +7,7 @@ use App\Models\StaffMessage;
 use App\Models\User;
 use App\Support\Cache;
 use App\Support\CurrentUser;
+use App\Support\Globals;
 use App\Support\Hooks;
 use App\Support\SupportContext;
 use App\Support\UserDisplay;
@@ -117,7 +118,7 @@ class StaffMessageController extends LegacyController
     public function contactstaff(Request $request): View|RedirectResponse|Response
     {
         return $this->legacyPage($request, 'contactstaff', true, [
-            'lang_contactstaff' => (array) SupportContext::getGlobal('lang_contactstaff', []),
+            'lang_contactstaff' => (array) app(Globals::class)->get('lang_contactstaff', []),
         ]);
 
     }
@@ -125,7 +126,7 @@ class StaffMessageController extends LegacyController
     public function takecontact(Request $request): View|RedirectResponse|Response
     {
         $curUser = app(CurrentUser::class)->get() ?? [];
-        $langTakecontact = (array) SupportContext::getGlobal('lang_takecontact', []);
+        $langTakecontact = (array) app(Globals::class)->get('lang_takecontact', []);
 
         if (! $request->isMethod('post')) {
             return $this->legacyAbortResponse($langTakecontact['std_error'] ?? 'Error', $langTakecontact['std_method'] ?? 'Method not allowed.');
@@ -143,7 +144,7 @@ class StaffMessageController extends LegacyController
 
         $currentUserId = (int) ($curUser['id'] ?? 0);
         $moderatorClass = defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0;
-        $timeNow = (int) SupportContext::getGlobal('TIMENOW', time());
+        $timeNow = (int) app(Globals::class)->get('TIMENOW', time());
 
         if (UserDisplay::currentClass() < $moderatorClass) {
             $last = $curUser['last_staffmsg'] ?? null;

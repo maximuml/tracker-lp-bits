@@ -5,11 +5,11 @@ namespace App\Http\Controllers;
 use App\Support\Category;
 use App\Support\CurrentUser;
 use App\Support\Format;
+use App\Support\Globals;
 use App\Support\Html;
 use App\Support\Http;
 use App\Support\Locale;
 use App\Support\SearchBox;
-use App\Support\SupportContext;
 use App\Support\Url;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -37,7 +37,7 @@ class RssController extends LegacyController
      */
     private function getrssData(): array
     {
-        $browsecatmode = (int) (SupportContext::getGlobal('browsecatmode') ?? 1);
+        $browsecatmode = (int) (app(Globals::class)->get('browsecatmode') ?? 1);
         $brsectiontype = $browsecatmode;
 
         $showsubcat = (bool) SearchBox::valueWithContext($brsectiontype, 'showsubcat');
@@ -106,9 +106,9 @@ class RssController extends LegacyController
             return redirect('/getrss.php');
         }
 
-        $lang_getrss = (array) (SupportContext::getGlobal('lang_getrss') ?? []);
-        $browsecatmode = (int) (SupportContext::getGlobal('browsecatmode') ?? 1);
-        $baseUrl = (string) SupportContext::getGlobal('BASEURL', '');
+        $lang_getrss = (array) (app(Globals::class)->get('lang_getrss') ?? []);
+        $browsecatmode = (int) (app(Globals::class)->get('browsecatmode') ?? 1);
+        $baseUrl = (string) app(Globals::class)->get('BASEURL', '');
 
         $allowedShowrows = ['10', '50'];
         $showrows = (string) $request->input('showrows', '10');

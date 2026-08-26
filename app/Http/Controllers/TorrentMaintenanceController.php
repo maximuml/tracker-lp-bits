@@ -9,6 +9,7 @@ use App\Models\Torrent;
 use App\Models\User;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
+use App\Support\Globals;
 use App\Support\Http;
 use App\Support\Locale;
 use App\Support\Path;
@@ -69,7 +70,7 @@ class TorrentMaintenanceController extends LegacyController
         $currentUserId = (int) ($currentUser['id'] ?? 0);
         $currentClass = (int) UserDisplay::currentClass();
 
-        $lang = (array) (SupportContext::getGlobal('lang_takeflush') ?? []);
+        $lang = (array) (app(Globals::class)->get('lang_takeflush') ?? []);
 
         if ($currentClass >= User::CLASS_MODERATOR || $currentUserId === $id) {
             $deadtime = Time::deadThreshold(SiteConfig::current()->main->anninterthree());
@@ -99,7 +100,7 @@ class TorrentMaintenanceController extends LegacyController
 
         $currentUserId = (int) ($curUser['id'] ?? 0);
         if (! Permissions::userCan(PermissionEnum::ASK_RESEED->value, false, $currentUserId)) {
-            $lang = (array) SupportContext::getGlobal('lang_takereseed', []);
+            $lang = (array) app(Globals::class)->get('lang_takereseed', []);
 
             return $this->legacyAbortResponse($lang['std_error'] ?? 'Error', $lang['std_permission_denied'] ?? 'Permission denied.');
         }
@@ -109,13 +110,13 @@ class TorrentMaintenanceController extends LegacyController
         $row = $torrent instanceof Torrent ? $torrent->toArray() : null;
 
         $seederCount = (int) Peer::query()->where('torrent', $reseedid)->count();
-        $lang = (array) SupportContext::getGlobal('lang_takereseed', []);
+        $lang = (array) app(Globals::class)->get('lang_takereseed', []);
 
         if ($seederCount > 0) {
             return $this->legacyAbortResponse($lang['std_error'] ?? 'Error', $lang['std_torrent_not_dead'] ?? 'Torrent is not dead.');
         }
 
-        $timeNow = (int) SupportContext::getGlobal('TIMENOW', time());
+        $timeNow = (int) app(Globals::class)->get('TIMENOW', time());
         if ($row !== null && strtotime((string) ($row['last_reseed'] ?? '')) > ($timeNow - 900)) {
             return $this->legacyAbortResponse($lang['std_error'] ?? 'Error', $lang['std_reseed_sent_recently'] ?? 'Reseed request sent recently.');
         }
@@ -130,7 +131,7 @@ class TorrentMaintenanceController extends LegacyController
             ->map(fn ($r) => (array) $r)
             ->all();
 
-        $baseUrl = (string) SupportContext::getGlobal('BASEURL', '');
+        $baseUrl = (string) app(Globals::class)->get('BASEURL', '');
         foreach ($snatchedRows as $snatchRow) {
             $locale = Locale::userLocale((int) $snatchRow['userid']);
             $rsSubject = Locale::trans('torrent.msg_reseed_request', [], $locale);

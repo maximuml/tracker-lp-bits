@@ -6,6 +6,7 @@ use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
 use App\Repositories\FriendsRepository;
 use App\Support\CurrentUser;
+use App\Support\Globals;
 use App\Support\Locale;
 use App\Support\SupportContext;
 use App\Support\UserClass;
@@ -21,7 +22,7 @@ class FriendsController extends LegacyController
     public function friends(Request $request): Response|RedirectResponse|View
     {
         $currentUser = (array) (app(CurrentUser::class)->get() ?? []);
-        $langFriends = (array) (SupportContext::getGlobal('lang_friends') ?? []);
+        $langFriends = (array) (app(Globals::class)->get('lang_friends') ?? []);
 
         $userid = (int) ($request->input('id') ?? $currentUser['id'] ?? 0);
         if ($userid <= 0 || ! Validators::isId($userid)) {

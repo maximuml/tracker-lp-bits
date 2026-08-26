@@ -188,7 +188,7 @@ final class Pagination
         ];
 
         $result = self::render($rpp, $count, $href, $page, $pages, $labels, $pagename, $isPresto);
-        SupportContext::setGlobal('add_key_shortcut', Html::keyShortcutScript($page, $pages - 1));
+        app(Globals::class)->set('add_key_shortcut', Html::keyShortcutScript($page, $pages - 1));
 
         return $result;
     }

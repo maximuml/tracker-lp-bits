@@ -63,8 +63,8 @@ final class CoverThumb
      */
     public static function urlWithContext(string $url, int $maxWidth = 240, int $maxHeight = 360, int $quality = 82): string
     {
-        $saveDirectory = (string) SupportContext::getGlobal('savedirectory_attachment', '');
-        $httpDirectory = (string) SupportContext::getGlobal('httpdirectory_attachment', '');
+        $saveDirectory = (string) app(Globals::class)->get('savedirectory_attachment', '');
+        $httpDirectory = (string) app(Globals::class)->get('httpdirectory_attachment', '');
 
         return self::url(
             $url,

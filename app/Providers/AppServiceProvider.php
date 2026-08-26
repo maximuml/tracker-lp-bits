@@ -6,10 +6,10 @@ use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Env;
 use App\Support\Environment;
+use App\Support\Globals;
 use App\Support\Hooks;
 use App\Support\Language;
 use App\Support\Locale;
-use App\Support\SupportContext;
 use Filament\Facades\Filament;
 use Filament\Support\Assets\Css;
 use Filament\Support\Facades\FilamentAsset;
@@ -34,8 +34,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->singleton(Hook::class, static fn () => SupportContext::getGlobal('hook') ?? new Hook);
-        $this->app->singleton(Plugin::class, static fn () => SupportContext::getGlobal('plugin') ?? new Plugin);
+        $this->app->singleton(Hook::class, static fn () => app(Globals::class)->get('hook') ?? new Hook);
+        $this->app->singleton(Plugin::class, static fn () => app(Globals::class)->get('plugin') ?? new Plugin);
         $this->app->singleton(LegacyRedisCache::class, static function (): LegacyRedisCache {
             $cache = new LegacyRedisCache;
             $cache->setLanguageFolderArray(Locale::available());
@@ -44,6 +44,7 @@ class AppServiceProvider extends ServiceProvider
         });
         $this->app->singleton(CurrentUser::class);
         $this->app->singleton(Language::class);
+        $this->app->singleton(Globals::class);
 
         Hooks::doAction('nexus_register');
     }
@@ -89,7 +90,7 @@ class AppServiceProvider extends ServiceProvider
         // Pass the legacy global context into every view as individual variables
         // so Blade/PHP partials no longer need extract($context, EXTR_SKIP).
         View::composer('*', static function (\Illuminate\View\View $view): void {
-            $context = SupportContext::getGlobalsForView();
+            $context = app(Globals::class)->forView();
             foreach ($context as $key => $value) {
                 if (! array_key_exists($key, $view->getData())) {
                     $view->with($key, $value);

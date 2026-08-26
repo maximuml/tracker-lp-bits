@@ -10,13 +10,13 @@ use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Format;
+use App\Support\Globals;
 use App\Support\Hooks;
 use App\Support\Http;
 use App\Support\Locale;
 use App\Support\Log;
 use App\Support\Permissions;
 use App\Support\Strings;
-use App\Support\SupportContext;
 use App\Support\TorrentBookmark;
 use App\Support\Url;
 use App\Support\UserDisplay;
@@ -204,12 +204,12 @@ class TorrentRssController extends LegacyController
         }
 
         $torrentRep = new TorrentRepository;
-        $baseUrl = Http::protocolPrefix(Url::isSecure()).(string) SupportContext::getGlobal('BASEURL', '');
-        $siteName = (string) SupportContext::getGlobal('SITENAME', '');
-        $slogan = (string) SupportContext::getGlobal('SLOGAN', '');
-        $siteEmail = (string) SupportContext::getGlobal('SITEEMAIL', '');
-        $projectName = (string) SupportContext::getGlobal('PROJECTNAME', '');
-        $dateFounded = (string) SupportContext::getGlobal('datefounded', '');
+        $baseUrl = Http::protocolPrefix(Url::isSecure()).(string) app(Globals::class)->get('BASEURL', '');
+        $siteName = (string) app(Globals::class)->get('SITENAME', '');
+        $slogan = (string) app(Globals::class)->get('SLOGAN', '');
+        $siteEmail = (string) app(Globals::class)->get('SITEEMAIL', '');
+        $projectName = (string) app(Globals::class)->get('PROJECTNAME', '');
+        $dateFounded = (string) app(Globals::class)->get('datefounded', '');
         $year = substr($dateFounded, 0, 4);
         $yearFounded = $year !== '' ? $year : '2007';
         $copyright = 'Copyright (c) '.$siteName.' '.(date('Y') !== $yearFounded ? $yearFounded.'-' : '').date('Y').', all rights reserved';

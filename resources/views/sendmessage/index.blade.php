@@ -1,5 +1,5 @@
 @php
-$lang_sendmessage = (array) (\App\Support\SupportContext::getGlobal('lang_sendmessage') ?? []);
+$lang_sendmessage = (array) (\app(\App\Support\Globals::class)->get('lang_sendmessage') ?? []);
 $CURUSER = (array) (\app(\App\Support\CurrentUser::class)->get() ?? []);
 $receiver = (int) ($receiver ?? 0);
 $replyto = (int) ($replyto ?? 0);

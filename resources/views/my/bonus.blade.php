@@ -1,5 +1,5 @@
 @php
-$lang_mybonus = (array) (\App\Support\SupportContext::getGlobal('lang_mybonus') ?? []);
+$lang_mybonus = (array) (\app(\App\Support\Globals::class)->get('lang_mybonus') ?? []);
 $CURUSER = (array) (\app(\App\Support\CurrentUser::class)->get() ?? []);
 $title = $title ?? (($CURUSER['username'] ?? '') . ($lang_mybonus['head_karma_page'] ?? ' - Karma'));
 $action = $action ?? '';

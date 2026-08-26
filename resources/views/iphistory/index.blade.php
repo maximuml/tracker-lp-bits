@@ -1,5 +1,5 @@
 @php
-$lang_iphistory = (array) (\App\Support\SupportContext::getGlobal('lang_iphistory') ?? []);
+$lang_iphistory = (array) (\app(\App\Support\Globals::class)->get('lang_iphistory') ?? []);
 @endphp
 @extends('layouts.legacy')
 

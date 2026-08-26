@@ -1,5 +1,5 @@
 <?php
-$lang_checkuser = (array) ($lang_checkuser ?? \App\Support\SupportContext::getGlobal('lang_checkuser', []));
+$lang_checkuser = (array) ($lang_checkuser ?? \app(\App\Support\Globals::class)->get('lang_checkuser', []));
 
 
 print('<p><table class=main border=0 cellspacing=0 cellpadding=0>'.

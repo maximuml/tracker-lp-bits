@@ -1,5 +1,5 @@
 @php
-$lang_downloadnotice = (array) (\App\Support\SupportContext::getGlobal('lang_downloadnotice') ?? []);
+$lang_downloadnotice = (array) (\app(\App\Support\Globals::class)->get('lang_downloadnotice') ?? []);
 $CURUSER = (array) (\app(\App\Support\CurrentUser::class)->get() ?? []);
 $torrentid = (int) ($torrentid ?? 0);
 $type = (string) ($type ?? 'firsttime');

@@ -9,6 +9,7 @@ use App\Services\BonusPageService;
 use App\Services\Legacy\BonusService;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
+use App\Support\Globals;
 use App\Support\LegacyResponse;
 use App\Support\Pagination;
 use App\Support\Permissions;
@@ -93,7 +94,7 @@ class MyController extends Controller
         }
 
         $q = htmlspecialchars((string) (SupportContext::getQuery('q') ?? ''));
-        $lang_myhr = (array) SupportContext::getGlobal('lang_myhr', []);
+        $lang_myhr = (array) app(Globals::class)->get('lang_myhr', []);
 
         $baseQuery = HitAndRun::query()->where('uid', $userid)->where('status', $status);
         $rescount = (int) (clone $baseQuery)->count();

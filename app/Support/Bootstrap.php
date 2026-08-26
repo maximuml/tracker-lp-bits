@@ -24,7 +24,7 @@ final class Bootstrap
         // request/cookie values, not stale FPM worker state from a previous request.
         SupportContext::reset();
 
-        $useCronTriggerCleanUp = (bool) SupportContext::getGlobal('useCronTriggerCleanUp', false);
+        $useCronTriggerCleanUp = (bool) app(Globals::class)->get('useCronTriggerCleanUp', false);
 
         if ($doLogin) {
             LegacyAuth::loginFromContext();

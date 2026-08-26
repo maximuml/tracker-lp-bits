@@ -14,10 +14,10 @@ use App\Support\Bonus;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Format;
+use App\Support\Globals;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Strings;
-use App\Support\SupportContext;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
 use Illuminate\Http\Request;
@@ -47,10 +47,10 @@ final class BonusPageService
     public function build(Request $request): array
     {
         $curUser = (array) (app(CurrentUser::class)->get() ?? []);
-        $lang = (array) (SupportContext::getGlobal('lang_mybonus') ?? []);
+        $lang = (array) (app(Globals::class)->get('lang_mybonus') ?? []);
         $userId = (int) ($curUser['id'] ?? 0);
 
-        $bonusTweak = (string) SupportContext::getGlobal('bonus_tweak', '');
+        $bonusTweak = (string) app(Globals::class)->get('bonus_tweak', '');
         if ($bonusTweak === 'disable' || $bonusTweak === 'disablesave') {
             LegacyResponse::abort(
                 (string) ($lang['std_sorry'] ?? ''),
@@ -90,7 +90,7 @@ final class BonusPageService
             'allBonus' => $allBonus,
             'shopHtml' => $shopHtml,
             'infoHtml' => $infoHtml,
-            'sitename' => (string) SupportContext::getGlobal('SITENAME', ''),
+            'sitename' => (string) app(Globals::class)->get('SITENAME', ''),
         ];
     }
 
@@ -100,14 +100,14 @@ final class BonusPageService
      */
     public function buildBonusArray(array $lang): array
     {
-        $onegbuploadBonus = (float) SupportContext::getGlobal('onegbupload_bonus', 0);
-        $fivegbuploadBonus = (float) SupportContext::getGlobal('fivegbupload_bonus', 0);
-        $tengbuploadBonus = (float) SupportContext::getGlobal('tengbupload_bonus', 0);
-        $oneinviteBonus = (float) SupportContext::getGlobal('oneinvite_bonus', 0);
-        $customtitleBonus = (float) SupportContext::getGlobal('customtitle_bonus', 0);
-        $vipstatusBonus = (float) SupportContext::getGlobal('vipstatus_bonus', 0);
-        $basictaxBonus = (float) SupportContext::getGlobal('basictax_bonus', 0);
-        $taxpercentageBonus = (float) SupportContext::getGlobal('taxpercentage_bonus', 0);
+        $onegbuploadBonus = (float) app(Globals::class)->get('onegbupload_bonus', 0);
+        $fivegbuploadBonus = (float) app(Globals::class)->get('fivegbupload_bonus', 0);
+        $tengbuploadBonus = (float) app(Globals::class)->get('tengbupload_bonus', 0);
+        $oneinviteBonus = (float) app(Globals::class)->get('oneinvite_bonus', 0);
+        $customtitleBonus = (float) app(Globals::class)->get('customtitle_bonus', 0);
+        $vipstatusBonus = (float) app(Globals::class)->get('vipstatus_bonus', 0);
+        $basictaxBonus = (float) app(Globals::class)->get('basictax_bonus', 0);
+        $taxpercentageBonus = (float) app(Globals::class)->get('taxpercentage_bonus', 0);
 
         $results = [];
 
@@ -218,10 +218,10 @@ final class BonusPageService
      */
     private function buildShopTable(array $allBonus, array $curUser, array $lang, string $bonus, string $msg, string $lockText): string
     {
-        $bonusgiftBonus = (string) SupportContext::getGlobal('bonusgift_bonus', 'yes');
-        $ratiolimitBonus = (float) SupportContext::getGlobal('ratiolimit_bonus', 0);
-        $dlamountlimitBonus = (int) SupportContext::getGlobal('dlamountlimit_bonus', 0);
-        $SITENAME = (string) SupportContext::getGlobal('SITENAME', '');
+        $bonusgiftBonus = (string) app(Globals::class)->get('bonusgift_bonus', 'yes');
+        $ratiolimitBonus = (float) app(Globals::class)->get('ratiolimit_bonus', 0);
+        $dlamountlimitBonus = (int) app(Globals::class)->get('dlamountlimit_bonus', 0);
+        $SITENAME = (string) app(Globals::class)->get('SITENAME', '');
 
         ob_start();
         echo "<table align=\"center\" width=\"97%\" border=\"1\" cellspacing=\"0\" cellpadding=\"3\">\n";
@@ -356,23 +356,23 @@ final class BonusPageService
      */
     private function buildInfoSection(array $curUser, array $lang): string
     {
-        $perseedingBonus = (float) SupportContext::getGlobal('perseeding_bonus', 0);
-        $maxseedingBonus = (int) SupportContext::getGlobal('maxseeding_bonus', 0);
-        $tzeroBonus = (float) SupportContext::getGlobal('tzero_bonus', 0);
-        $nzeroBonus = (float) SupportContext::getGlobal('nzero_bonus', 0);
-        $bzeroBonus = (float) SupportContext::getGlobal('bzero_bonus', 0);
-        $lBonus = (float) SupportContext::getGlobal('l_bonus', 0);
-        $donortimesBonus = (float) SupportContext::getGlobal('donortimes_bonus', 0);
-        $uploadtorrentBonus = (float) SupportContext::getGlobal('uploadtorrent_bonus', 0);
-        $starttopicBonus = (float) SupportContext::getGlobal('starttopic_bonus', 0);
-        $makepostBonus = (float) SupportContext::getGlobal('makepost_bonus', 0);
-        $addcommentBonus = (float) SupportContext::getGlobal('addcomment_bonus', 0);
-        $pollvoteBonus = (float) SupportContext::getGlobal('pollvote_bonus', 0);
-        $offervoteBonus = (float) SupportContext::getGlobal('offervote_bonus', 0);
-        $saythanksBonus = (float) SupportContext::getGlobal('saythanks_bonus', 0);
-        $receivethanksBonus = (float) SupportContext::getGlobal('receivethanks_bonus', 0);
-        $ratiolimitBonus = (float) SupportContext::getGlobal('ratiolimit_bonus', 0);
-        $dlamountlimitBonus = (int) SupportContext::getGlobal('dlamountlimit_bonus', 0);
+        $perseedingBonus = (float) app(Globals::class)->get('perseeding_bonus', 0);
+        $maxseedingBonus = (int) app(Globals::class)->get('maxseeding_bonus', 0);
+        $tzeroBonus = (float) app(Globals::class)->get('tzero_bonus', 0);
+        $nzeroBonus = (float) app(Globals::class)->get('nzero_bonus', 0);
+        $bzeroBonus = (float) app(Globals::class)->get('bzero_bonus', 0);
+        $lBonus = (float) app(Globals::class)->get('l_bonus', 0);
+        $donortimesBonus = (float) app(Globals::class)->get('donortimes_bonus', 0);
+        $uploadtorrentBonus = (float) app(Globals::class)->get('uploadtorrent_bonus', 0);
+        $starttopicBonus = (float) app(Globals::class)->get('starttopic_bonus', 0);
+        $makepostBonus = (float) app(Globals::class)->get('makepost_bonus', 0);
+        $addcommentBonus = (float) app(Globals::class)->get('addcomment_bonus', 0);
+        $pollvoteBonus = (float) app(Globals::class)->get('pollvote_bonus', 0);
+        $offervoteBonus = (float) app(Globals::class)->get('offervote_bonus', 0);
+        $saythanksBonus = (float) app(Globals::class)->get('saythanks_bonus', 0);
+        $receivethanksBonus = (float) app(Globals::class)->get('receivethanks_bonus', 0);
+        $ratiolimitBonus = (float) app(Globals::class)->get('ratiolimit_bonus', 0);
+        $dlamountlimitBonus = (int) app(Globals::class)->get('dlamountlimit_bonus', 0);
 
         ob_start();
         echo '<table width="97%" cellpadding="3">';

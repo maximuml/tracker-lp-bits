@@ -25,8 +25,8 @@ final class TorrentTable
         }
         $lang_functions = app(Language::class)->functions();
         $user = app(CurrentUser::class)->get() ?? [];
-        $waitsystem = (string) SupportContext::getGlobal('waitsystem', '');
-        $enabletooltip_tweak = (string) SupportContext::getGlobal('enabletooltip_tweak', '');
+        $waitsystem = (string) app(Globals::class)->get('waitsystem', '');
+        $enabletooltip_tweak = (string) app(Globals::class)->get('enabletooltip_tweak', '');
 
         $torrent = new Torrent;
         $torrentRep = new TorrentRepository;

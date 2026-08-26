@@ -1,5 +1,5 @@
 @php
-$lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
+$lang_topten = (array) (\app(\App\Support\Globals::class)->get('lang_topten') ?? []);
 @endphp
 
 @extends('layouts.legacy')

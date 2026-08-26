@@ -1,5 +1,5 @@
 <?php
-$lang_testip = (array) ($lang_testip ?? \App\Support\SupportContext::getGlobal('lang_testip', []));
+$lang_testip = (array) ($lang_testip ?? \app(\App\Support\Globals::class)->get('lang_testip', []));
 
 print('<h1>' . ($lang_testip['head_test_ip'] ?? 'Test IP address') . '</h1>');
 

@@ -12,10 +12,10 @@ use App\Repositories\CommentRepository;
 use App\Support\Bonus;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
+use App\Support\Globals;
 use App\Support\Http;
 use App\Support\Locale;
 use App\Support\Permissions;
-use App\Support\SupportContext;
 use App\Support\Url;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -352,7 +352,7 @@ class WebCommentController extends Controller
     /** @return array<string, string> */
     private function langComment(): array
     {
-        return (array) SupportContext::getGlobal('lang_comment', []);
+        return (array) app(Globals::class)->get('lang_comment', []);
     }
 
     private function lang(string $key): string

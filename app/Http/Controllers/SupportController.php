@@ -12,10 +12,10 @@ use App\Support\Cache\LegacyRedisCache;
 use App\Support\Captcha;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
+use App\Support\Globals;
 use App\Support\Logger;
 use App\Support\Network;
 use App\Support\Pagination;
-use App\Support\SupportContext;
 use App\Support\Url;
 use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
@@ -32,8 +32,8 @@ class SupportController extends LegacyController
         $currentUser = (array) (app(CurrentUser::class)->get() ?? []);
         $uid = (int) ($currentUser['id'] ?? 0);
         $isAdmin = Permission::can(PermissionEnum::STAFF_MEMBER);
-        $langComplains = (array) (SupportContext::getGlobal('lang_complains') ?? []);
-        $langFunctions = (array) (SupportContext::getGlobal('lang_functions') ?? []);
+        $langComplains = (array) (app(Globals::class)->get('lang_complains') ?? []);
+        $langFunctions = (array) (app(Globals::class)->get('lang_functions') ?? []);
 
         if ($uid > 0 && ! $isAdmin) {
             return $this->legacyAbortResponse($langComplains['std_error'] ?? 'Error', 'Permission denied.');

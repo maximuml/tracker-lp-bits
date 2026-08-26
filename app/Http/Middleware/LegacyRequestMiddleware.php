@@ -5,10 +5,10 @@ namespace App\Http\Middleware;
 use App\Repositories\PageLayoutRepository;
 use App\Support\Bootstrap;
 use App\Support\CurrentUser;
+use App\Support\Globals;
 use App\Support\LegacyAuth;
 use App\Support\LegacyBootstrap;
 use App\Support\Locale;
-use App\Support\SupportContext;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -289,17 +289,17 @@ final class LegacyRequestMiddleware
                 continue;
             }
 
-            $SITENAME = SupportContext::getGlobal('SITENAME');
-            $SITEEMAIL = SupportContext::getGlobal('SITEEMAIL');
-            $REPORTMAIL = SupportContext::getGlobal('REPORTMAIL');
-            $BASEURL = SupportContext::getGlobal('BASEURL');
+            $SITENAME = app(Globals::class)->get('SITENAME');
+            $SITEEMAIL = app(Globals::class)->get('SITEEMAIL');
+            $REPORTMAIL = app(Globals::class)->get('REPORTMAIL');
+            $BASEURL = app(Globals::class)->get('BASEURL');
             $before = get_defined_vars();
             require $langPath;
             foreach (array_diff_key(get_defined_vars(), $before) as $langKey => $langValue) {
                 if (in_array($langKey, ['before', 'path', 'langPath', 'scriptLangFiles', 'rootpath', 'scriptLangFile'], true)) {
                     continue;
                 }
-                SupportContext::setGlobal($langKey, $langValue);
+                app(Globals::class)->set($langKey, $langValue);
             }
         }
     }

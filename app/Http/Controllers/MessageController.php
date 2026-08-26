@@ -13,7 +13,7 @@ use App\Repositories\MessageRepository;
 use App\Services\Legacy\MessageService;
 use App\Services\MessagePageService;
 use App\Support\CurrentUser;
-use App\Support\SupportContext;
+use App\Support\Globals;
 use App\Support\UserDisplay;
 use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;
@@ -52,7 +52,7 @@ class MessageController extends LegacyController
 
     public function sendmessage(Request $request): Response|RedirectResponse|View
     {
-        $langSendmessage = (array) (SupportContext::getGlobal('lang_sendmessage') ?? []);
+        $langSendmessage = (array) (app(Globals::class)->get('lang_sendmessage') ?? []);
 
         $receiver = (int) $request->input('receiver', 0);
         if ($receiver <= 0) {

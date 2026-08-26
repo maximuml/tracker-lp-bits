@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Legacy;
 
-use App\Support\SupportContext;
+use App\Support\Globals;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
@@ -34,7 +34,7 @@ final class LegacyPartialRenderer
             $__renderer_data = $data;
             unset($__renderer_data['__renderer_path'], $__renderer_data['__renderer_data']);
             $render = static function () use ($__renderer_path, $__renderer_data): void {
-                extract(SupportContext::getGlobalsForView(), EXTR_SKIP);
+                extract(app(Globals::class)->forView(), EXTR_SKIP);
                 extract($__renderer_data);
                 include $__renderer_path;
             };

@@ -11,6 +11,7 @@ use App\Models\UsernameChangeLog;
 use App\Repositories\ModtaskRepository;
 use App\Support\Cache;
 use App\Support\CurrentUser;
+use App\Support\Globals;
 use App\Support\Http;
 use App\Support\Locale;
 use App\Support\Log;
@@ -34,7 +35,7 @@ class StaffModerationController extends LegacyController
     {
         $currentUser = app(CurrentUser::class)->get() ?? [];
         $currentUserId = (int) ($currentUser['id'] ?? 0);
-        $baseUrl = (string) SupportContext::getGlobal('BASEURL', '');
+        $baseUrl = (string) app(Globals::class)->get('BASEURL', '');
 
         if (! Permission::can(PermissionEnum::MANAGE_USER_BASIC_INFO, User::findOrFail($currentUserId))) {
             Log::writeWithContext(
@@ -410,7 +411,7 @@ class StaffModerationController extends LegacyController
 
         if ($act === 'newsect') {
             $langs = Locale::languageList('rule_lang', null);
-            $defLang = (string) SupportContext::getGlobal('deflang', '');
+            $defLang = (string) app(Globals::class)->get('deflang', '');
 
             return $this->legacyPage($request, 'modrules', true, [
                 'mode' => 'newsect',

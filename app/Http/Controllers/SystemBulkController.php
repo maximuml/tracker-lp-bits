@@ -13,6 +13,7 @@ use App\Support\CurrentUser;
 use App\Support\Email;
 use App\Support\Environment;
 use App\Support\Format;
+use App\Support\Globals;
 use App\Support\Hooks;
 use App\Support\Html;
 use App\Support\Input;
@@ -122,7 +123,7 @@ class SystemBulkController extends LegacyController
             try {
                 $sendText = $userRep->getInviteBtnText($currentUserId);
             } catch (\Exception $exception) {
-                $lang = (array) SupportContext::getGlobal('lang_takeinvite', []);
+                $lang = (array) app(Globals::class)->get('lang_takeinvite', []);
 
                 return $this->legacyAbortResponse($lang['std_error'] ?? 'Error', $exception->getMessage());
             }
@@ -131,7 +132,7 @@ class SystemBulkController extends LegacyController
             $email = Email::sanitizeForDisplay($email);
             $preRegisterUsername = (string) SupportContext::getPost('pre_register_username');
             $isPreRegisterEmailAndUsername = SiteConfig::current()->system->isInvitePreEmailAndUsername();
-            $lang = (array) SupportContext::getGlobal('lang_takeinvite', []);
+            $lang = (array) app(Globals::class)->get('lang_takeinvite', []);
 
             if (strlen($preRegisterUsername) > 12) {
                 return $this->legacyAbortResponse($lang['head_invitation_failed'] ?? 'Error', $lang['std_username_too_long'] ?? 'Username too long.');
@@ -182,7 +183,7 @@ class SystemBulkController extends LegacyController
             }
 
             $hashRecord = null;
-            $timeNow = (int) SupportContext::getGlobal('TIMENOW', time());
+            $timeNow = (int) app(Globals::class)->get('TIMENOW', time());
             if ($hashPost === 'permanent') {
                 $inviter = User::query()->findOrFail($currentUserId);
                 $hash = md5(mt_rand(1, 10000).$inviter->username.$timeNow.$inviter->passhash);
@@ -205,9 +206,9 @@ class SystemBulkController extends LegacyController
             $signupUrl = Url::schemeAndHost(Url::isSecure())."/signup.php?type=invite&invitenumber=$hash";
             $mailTwo = sprintf($lang['mail_two'], $siteName, $siteName);
             $mailFour = sprintf($lang['mail_four'], $siteName);
-            $reportMail = (string) SupportContext::getGlobal('REPORTMAIL', '');
+            $reportMail = (string) app(Globals::class)->get('REPORTMAIL', '');
             $mailSix = sprintf($lang['mail_six'], $reportMail, $siteName);
-            $inviteTimeout = (string) SupportContext::getGlobal('invite_timeout', '');
+            $inviteTimeout = (string) app(Globals::class)->get('invite_timeout', '');
 
             $message = $lang['mail_one'].$curUser['username'].$mailTwo.PHP_EOL
                 .'<b><a href="javascript:void(null)" onclick="window.open('.$signupUrl.')">'.$lang['mail_here'].'</a></b><br />'.PHP_EOL
@@ -219,7 +220,7 @@ class SystemBulkController extends LegacyController
             $sendResult = Mail::sentLegacy(
                 $email,
                 $siteName,
-                (string) SupportContext::getGlobal('SITEEMAIL', ''),
+                (string) app(Globals::class)->get('SITEEMAIL', ''),
                 $title,
                 $message,
                 'invitesignup',
@@ -277,7 +278,7 @@ class SystemBulkController extends LegacyController
 
         $delreport = (array) SupportContext::getPost('delreport');
         if (empty($delreport)) {
-            $langFunctions = (array) SupportContext::getGlobal('lang_functions', []);
+            $langFunctions = (array) app(Globals::class)->get('lang_functions', []);
 
             return $this->legacyAbortResponse('Error', $langFunctions['select_at_least_one_record'] ?? 'Select at least one record.');
         }
@@ -348,7 +349,7 @@ class SystemBulkController extends LegacyController
             return $this->legacyAbortResponse('Sorry', 'Permission denied.');
         }
 
-        $lang = (array) (SupportContext::getGlobal('lang_incrementbulk') ?? []);
+        $lang = (array) (app(Globals::class)->get('lang_incrementbulk') ?? []);
         $validTypeMap = (array) ($lang['types'] ?? []);
 
         $currentUser = app(CurrentUser::class)->get() ?? [];

@@ -13,6 +13,7 @@ use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Forum;
 use App\Support\Frame;
+use App\Support\Globals;
 use App\Support\Hooks;
 use App\Support\Html;
 use App\Support\Input;
@@ -51,14 +52,14 @@ final class ForumPageService
     public function build(Request $request): array
     {
         $curUser = (array) (app(CurrentUser::class)->get() ?? []);
-        $lang = (array) (SupportContext::getGlobal('lang_forums') ?? []);
+        $lang = (array) (app(Globals::class)->get('lang_forums') ?? []);
         $userId = (int) ($curUser['id'] ?? 0);
 
         // Global variables previously set by the procedural partial.
         $maxsubjectlength = 100;
         $postsperpage = (int) ($curUser['postsperpage'] ?? 0);
         if (! $postsperpage) {
-            $forumpostsperpage = SupportContext::getGlobal('forumpostsperpage');
+            $forumpostsperpage = app(Globals::class)->get('forumpostsperpage');
             if (is_numeric($forumpostsperpage)) {
                 $postsperpage = (int) $forumpostsperpage;
             } else {
@@ -67,7 +68,7 @@ final class ForumPageService
         }
         $topicsperpage = (int) ($curUser['topicsperpage'] ?? 0);
         if (! $topicsperpage) {
-            $forumtopicsperpageMain = SupportContext::getGlobal('forumtopicsperpage_main');
+            $forumtopicsperpageMain = app(Globals::class)->get('forumtopicsperpage_main');
             if (is_numeric($forumtopicsperpageMain)) {
                 $topicsperpage = (int) $forumtopicsperpageMain;
             } else {
@@ -75,10 +76,10 @@ final class ForumPageService
             }
         }
         $todayDate = date('Y-m-d');
-        SupportContext::setGlobal('maxsubjectlength', $maxsubjectlength);
-        SupportContext::setGlobal('postsperpage', $postsperpage);
-        SupportContext::setGlobal('topicsperpage', $topicsperpage);
-        SupportContext::setGlobal('today_date', $todayDate);
+        app(Globals::class)->set('maxsubjectlength', $maxsubjectlength);
+        app(Globals::class)->set('postsperpage', $postsperpage);
+        app(Globals::class)->set('topicsperpage', $topicsperpage);
+        app(Globals::class)->set('today_date', $todayDate);
 
         $action = htmlspecialchars(trim((string) SupportContext::getQuery('action')));
 
@@ -87,7 +88,7 @@ final class ForumPageService
             'curUser' => $curUser,
             'userId' => $userId,
             'action' => $action,
-            'sitename' => (string) SupportContext::getGlobal('SITENAME', ''),
+            'sitename' => (string) app(Globals::class)->get('SITENAME', ''),
             'postsperpage' => $postsperpage,
             'topicsperpage' => $topicsperpage,
             'todayDate' => $todayDate,
@@ -151,7 +152,7 @@ final class ForumPageService
      */
     private function buildComposeFrame(int $id, string $type, array $lang): array
     {
-        $maxsubjectlength = (int) SupportContext::getGlobal('maxsubjectlength');
+        $maxsubjectlength = (int) app(Globals::class)->get('maxsubjectlength');
         $CURUSER = (array) (app(CurrentUser::class)->get() ?? []);
         $hassubject = false;
         $subject = '';
@@ -424,7 +425,7 @@ final class ForumPageService
         $uidArr = array_keys($uidArr);
         unset($arr);
 
-        $SITENAME = (string) SupportContext::getGlobal('SITENAME', '');
+        $SITENAME = (string) app(Globals::class)->get('SITENAME', '');
 
         ob_start();
         echo '<h1 align="center"><a class="faqlink" href="forums.php">'.$SITENAME.'&nbsp;'.($lang['text_forums'] ?? '').'</a>--><a class="faqlink" href="'.htmlspecialchars('?action=viewforum&forumid='.$forumid).'">'.$forumname.'</a><b>--></b><span id="top">'.$subject.($locked ? '&nbsp;&nbsp;<b>[<font class="striking">'.($lang['text_locked'] ?? '').'</font>]</b>' : '')."</span></h1>\n";
@@ -673,8 +674,8 @@ final class ForumPageService
         $topicRows = $topicResult['rows'];
         $numtopics = $topicRows->count();
 
-        $SITENAME = (string) SupportContext::getGlobal('SITENAME', '');
-        $enabletooltipTweak = (string) SupportContext::getGlobal('enabletooltip_tweak', '');
+        $SITENAME = (string) app(Globals::class)->get('SITENAME', '');
+        $enabletooltipTweak = (string) app(Globals::class)->get('enabletooltip_tweak', '');
 
         ob_start();
         echo '<h1 align="center"><a class="faqlink" href="forums.php">'.$SITENAME.'&nbsp;'.($lang['text_forums'] ?? '').'</a>--><a class="faqlink" href="'.htmlspecialchars('forums.php?action=viewforum&forumid='.$forumid).'">'.$forumname."</a></h1>\n";
@@ -849,7 +850,7 @@ final class ForumPageService
         $lastCatchup = (int) ($curUser['last_catchup'] ?? 0);
         $unreadTopics = ForumRepository::getUnreadTopics($lastCatchup, $beforepostid ?: null, 100);
 
-        $SITENAME = (string) SupportContext::getGlobal('SITENAME', '');
+        $SITENAME = (string) app(Globals::class)->get('SITENAME', '');
 
         ob_start();
         echo '<h1 align="center"><a class="faqlink" href="forums.php">'.$SITENAME.'&nbsp;'.($lang['text_forums'] ?? '').'</a>-->'.($lang['text_topics_with_unread_posts'] ?? '').'</h1>';
@@ -1009,8 +1010,8 @@ final class ForumPageService
             ForumRepository::updateUserForumAccess((int) ($curUser['id'] ?? 0), date('Y-m-d H:i:s'));
         }
 
-        $SITENAME = (string) SupportContext::getGlobal('SITENAME', '');
-        $showforumstatsMain = (string) SupportContext::getGlobal('showforumstats_main', '');
+        $SITENAME = (string) app(Globals::class)->get('SITENAME', '');
+        $showforumstatsMain = (string) app(Globals::class)->get('showforumstats_main', '');
 
         ob_start();
         echo '<h1 align="center">'.$SITENAME.'&nbsp;'.($lang['text_forums'] ?? '').'</h1>';

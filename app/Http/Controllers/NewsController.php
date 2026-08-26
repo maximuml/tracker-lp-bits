@@ -8,7 +8,7 @@ use App\Repositories\IndexRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Events;
-use App\Support\SupportContext;
+use App\Support\Globals;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -18,8 +18,8 @@ class NewsController extends LegacyController
 {
     public function news(Request $request): Response|RedirectResponse|View
     {
-        $langNews = (array) (SupportContext::getGlobal('lang_news') ?? []);
-        $baseUrl = (string) SupportContext::getGlobal('BASEURL', '');
+        $langNews = (array) (app(Globals::class)->get('lang_news') ?? []);
+        $baseUrl = (string) app(Globals::class)->get('BASEURL', '');
 
         $action = htmlspecialchars((string) ($request->input('action') ?? ''));
 
@@ -239,7 +239,7 @@ class NewsController extends LegacyController
      */
     public function latest(): array
     {
-        $maxNews = (int) SupportContext::getGlobal('maxnewsnum_main', 5);
+        $maxNews = (int) app(Globals::class)->get('maxnewsnum_main', 5);
 
         $items = IndexRepository::getLatestNews($maxNews);
 

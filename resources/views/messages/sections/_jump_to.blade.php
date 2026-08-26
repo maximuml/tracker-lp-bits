@@ -1,6 +1,6 @@
 @php
 /** @var array<string, mixed> $viewmailbox */
-$lang_messages = (array) (\App\Support\SupportContext::getGlobal('lang_messages') ?? []);
+$lang_messages = (array) (\app(\App\Support\Globals::class)->get('lang_messages') ?? []);
 $vm = $viewmailbox;
 @endphp
 <form action="messages.php" method="get">

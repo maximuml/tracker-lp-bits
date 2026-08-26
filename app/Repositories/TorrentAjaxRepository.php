@@ -8,6 +8,7 @@ use App\Models\Torrent;
 use App\Models\User;
 use App\Support\Config\SiteConfig;
 use App\Support\Database;
+use App\Support\Globals;
 use App\Support\Hooks;
 use App\Support\Logger;
 use App\Support\Network;
@@ -242,7 +243,7 @@ final class TorrentAjaxRepository
             DB::table('peers')->whereIn('id', array_keys($caseWhens))->update(['is_seed_box' => DB::raw($caseSql)]);
         }
 
-        $enablelocationTweak = SupportContext::getGlobal('enablelocation_tweak');
+        $enablelocationTweak = app(Globals::class)->get('enablelocation_tweak');
         $showLocationColumn = $enablelocationTweak === 'yes' || ($currentUser !== null && Permissions::userCan(PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO->value, false, $currentUser->id));
 
         return [

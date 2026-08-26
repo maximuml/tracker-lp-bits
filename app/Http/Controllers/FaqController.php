@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Repositories\InfoRepository;
+use App\Support\Globals;
 use App\Support\Http;
 use App\Support\Locale;
 use App\Support\SupportContext;
@@ -18,7 +19,7 @@ class FaqController extends LegacyController
 {
     public function faq(Request $request): Response|RedirectResponse
     {
-        $langFolder = (string) SupportContext::getGlobal('CURLANGDIR', 'en');
+        $langFolder = (string) app(Globals::class)->get('CURLANGDIR', 'en');
         $cacheKey = "{$langFolder}_faq";
 
         $html = Cache::remember($cacheKey, 900, function () {
@@ -49,7 +50,7 @@ class FaqController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Only Administrators and above can modify the FAQ, sorry.');
         }
 
-        $baseUrl = (string) SupportContext::getGlobal('BASEURL', '');
+        $baseUrl = (string) app(Globals::class)->get('BASEURL', '');
         $redirectBase = Http::protocolPrefix(Url::isSecure()).$baseUrl;
         $action = (string) (SupportContext::getQuery('action') ?? '');
 
@@ -166,7 +167,7 @@ class FaqController extends LegacyController
 
         if ($action === 'addsection') {
             $languages = Locale::languageList('rule_lang', null);
-            $defLang = SupportContext::getGlobal('deflang', '');
+            $defLang = app(Globals::class)->get('deflang', '');
 
             return $this->legacyPage($request, 'faqactions', true, [
                 'mode' => 'addsection',

@@ -11,11 +11,11 @@ use App\Models\User;
 use App\Repositories\MessageRepository;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
+use App\Support\Globals;
 use App\Support\Language;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Mail;
-use App\Support\SupportContext;
 use App\Support\Url;
 use App\Support\UserDisplay;
 use App\Support\Validators;
@@ -249,7 +249,7 @@ final class MessageService
     {
         return array_merge(
             (array) app(Language::class)->functions(),
-            (array) (SupportContext::getGlobal('lang_'.$name) ?? [])
+            (array) (app(Globals::class)->get('lang_'.$name) ?? [])
         );
     }
 
@@ -357,7 +357,7 @@ final class MessageService
             }
             Cache::clearInboxCount($userId);
             if ($updated == 0) {
-                $lang = (array) (SupportContext::getGlobal('lang_messages') ?? []);
+                $lang = (array) (app(Globals::class)->get('lang_messages') ?? []);
                 LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_cannot_mark_messages'] ?? 'Cannot mark messages.'));
             }
 
@@ -371,7 +371,7 @@ final class MessageService
                 $updated = MessageRepository::moveMessages($pmMessages, $userId, $pmBox);
             }
             if ($updated == 0) {
-                $lang = (array) (SupportContext::getGlobal('lang_messages') ?? []);
+                $lang = (array) (app(Globals::class)->get('lang_messages') ?? []);
                 LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_cannot_move_messages'] ?? 'Cannot move messages.'));
             }
             Cache::clearInboxCount($userId);
@@ -385,7 +385,7 @@ final class MessageService
                 $deletedCount = MessageRepository::deleteSingleMessage($pmId, $userId) ? 1 : 0;
             } else {
                 if ($pmMessages === []) {
-                    $lang = (array) (SupportContext::getGlobal('lang_messages') ?? []);
+                    $lang = (array) (app(Globals::class)->get('lang_messages') ?? []);
                     LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_no_message_selected'] ?? 'No message selected.'));
                 }
                 $deletedCount = MessageRepository::deleteMultipleMessages($pmMessages, $userId);
@@ -393,14 +393,14 @@ final class MessageService
             Cache::clearInboxCount($userId);
             Cache::forgetWithLocales('user_'.$userId.'_outbox_count');
             if ($deletedCount == 0) {
-                $lang = (array) (SupportContext::getGlobal('lang_messages') ?? []);
+                $lang = (array) (app(Globals::class)->get('lang_messages') ?? []);
                 LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_cannot_delete_messages'] ?? 'Cannot delete messages.'));
             }
 
             return redirect('/messages.php?action=viewmailbox');
         }
 
-        $lang = (array) (SupportContext::getGlobal('lang_messages') ?? []);
+        $lang = (array) (app(Globals::class)->get('lang_messages') ?? []);
         LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_no_action'] ?? 'No action.'));
 
         return redirect('/messages.php');
@@ -416,7 +416,7 @@ final class MessageService
         $userId = (int) $user->id;
 
         $action2 = (string) $request->input('action2', '');
-        $lang = (array) (SupportContext::getGlobal('lang_messages') ?? []);
+        $lang = (array) (app(Globals::class)->get('lang_messages') ?? []);
 
         if ($action2 === 'add') {
             MessageRepository::addMailboxes($userId, [
@@ -462,7 +462,7 @@ final class MessageService
         $pmId = (int) $request->input('id', 0);
         $message = MessageRepository::deleteSingleMessage($pmId, $userId);
         if (! $message) {
-            $lang = (array) (SupportContext::getGlobal('lang_messages') ?? []);
+            $lang = (array) (app(Globals::class)->get('lang_messages') ?? []);
             LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_no_message_id'] ?? 'No message ID.'));
         }
         assert($message !== null);

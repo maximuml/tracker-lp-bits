@@ -1,5 +1,5 @@
 @php
-$lang_functions = (array) (\App\Support\SupportContext::getGlobal('lang_functions') ?? []);
+$lang_functions = (array) (\app(\App\Support\Globals::class)->get('lang_functions') ?? []);
 $CURUSER = (array) (\app(\App\Support\CurrentUser::class)->get() ?? []);
 $title = $title ?? ($lang_functions['text_latest_comments'] ?? 'Latest Comments');
 $perpage = (int) ($perpage ?? 20);

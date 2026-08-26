@@ -1,6 +1,6 @@
 @php
-$lang_invite = (array) (\App\Support\SupportContext::getGlobal('lang_invite') ?? []);
-$lang_functions = (array) (\App\Support\SupportContext::getGlobal('lang_functions') ?? []);
+$lang_invite = (array) (\app(\App\Support\Globals::class)->get('lang_invite') ?? []);
+$lang_functions = (array) (\app(\App\Support\Globals::class)->get('lang_functions') ?? []);
 $CURUSER = (array) (\app(\App\Support\CurrentUser::class)->get() ?? []);
 $id = (int) ($id ?? 0);
 $type = (string) ($type ?? '');

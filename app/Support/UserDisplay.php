@@ -289,7 +289,7 @@ final class UserDisplay
      */
     public static function avatarImageWithContext(string $url): string
     {
-        return self::avatarImage($url, (string) SupportContext::getGlobal('CURLANGDIR', ''));
+        return self::avatarImage($url, (string) app(Globals::class)->get('CURLANGDIR', ''));
     }
 
     /**

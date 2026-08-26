@@ -303,12 +303,12 @@ final class Promotion
     private static function expireTorrentGlobals(): array
     {
         return [
-            'expirefree_torrent' => (int) SupportContext::getGlobal('expirefree_torrent', 0),
-            'expiretwoup_torrent' => (int) SupportContext::getGlobal('expiretwoup_torrent', 0),
-            'expiretwoupfree_torrent' => (int) SupportContext::getGlobal('expiretwoupfree_torrent', 0),
-            'expirehalfleech_torrent' => (int) SupportContext::getGlobal('expirehalfleech_torrent', 0),
-            'expiretwouphalfleech_torrent' => (int) SupportContext::getGlobal('expiretwouphalfleech_torrent', 0),
-            'expirethirtypercentleech_torrent' => (int) SupportContext::getGlobal('expirethirtypercentleech_torrent', 0),
+            'expirefree_torrent' => (int) app(Globals::class)->get('expirefree_torrent', 0),
+            'expiretwoup_torrent' => (int) app(Globals::class)->get('expiretwoup_torrent', 0),
+            'expiretwoupfree_torrent' => (int) app(Globals::class)->get('expiretwoupfree_torrent', 0),
+            'expirehalfleech_torrent' => (int) app(Globals::class)->get('expirehalfleech_torrent', 0),
+            'expiretwouphalfleech_torrent' => (int) app(Globals::class)->get('expiretwouphalfleech_torrent', 0),
+            'expirethirtypercentleech_torrent' => (int) app(Globals::class)->get('expirethirtypercentleech_torrent', 0),
         ];
     }
 

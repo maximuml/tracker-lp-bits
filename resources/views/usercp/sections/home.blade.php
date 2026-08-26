@@ -3,7 +3,7 @@
 /** @var array<string, mixed> $lang */
 /** @var array<string, mixed> $curUser */
 $lang_usercp = $lang;
-$lang_functions = (array) (\App\Support\SupportContext::getGlobal('lang_functions') ?? []);
+$lang_functions = (array) (\app(\App\Support\Globals::class)->get('lang_functions') ?? []);
 $CONTENT_WIDTH = $contentWidth;
 @endphp
 @include('usercp.sections._menu', ['selected' => 'home'])

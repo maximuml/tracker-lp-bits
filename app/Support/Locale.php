@@ -91,7 +91,7 @@ final class Locale
      */
     public static function folderForIdWithContext(int|string $langId): string
     {
-        return self::folderForId($langId, (string) SupportContext::getGlobal('deflang', 'en'));
+        return self::folderForId($langId, (string) app(Globals::class)->get('deflang', 'en'));
     }
 
     /**
@@ -103,7 +103,7 @@ final class Locale
     public static function scriptFilePath(string $scriptName = '', bool $target = false, string $langFolder = ''): string
     {
         $CURLANGDIR = self::folderFromCookie(SupportContext::getCookieValue('c_lang_folder'));
-        SupportContext::setGlobal('CURLANGDIR', $CURLANGDIR);
+        app(Globals::class)->set('CURLANGDIR', $CURLANGDIR);
         if ($langFolder === '') {
             $langFolder = $CURLANGDIR;
         }
@@ -192,7 +192,7 @@ final class Locale
      */
     public static function guestIdWithContext(): int
     {
-        return self::guestId((string) SupportContext::getGlobal('CURLANGDIR', ''));
+        return self::guestId((string) app(Globals::class)->get('CURLANGDIR', ''));
     }
 
     /**

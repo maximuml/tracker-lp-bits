@@ -7,9 +7,9 @@ use App\Models\Poll;
 use App\Repositories\IndexRepository;
 use App\Repositories\PollRepository;
 use App\Support\CurrentUser;
+use App\Support\Globals;
 use App\Support\Pagination;
 use App\Support\Strings;
-use App\Support\SupportContext;
 use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -71,7 +71,7 @@ class PollController extends LegacyController
             if (! empty($lastPoll)) {
                 $hours = (int) floor((time() - strtotime((string) $lastPoll['added'])) / 3600);
                 $days = (int) floor($hours / 24);
-                $lang = (array) (SupportContext::getGlobal('lang_makepoll') ?? []);
+                $lang = (array) (app(Globals::class)->get('lang_makepoll') ?? []);
                 if ($days >= 1) {
                     $t = $days.($lang['text_day'] ?? ' day').Strings::addS($days);
                 } else {
@@ -96,7 +96,7 @@ class PollController extends LegacyController
         if ($pollid > 0) {
             $poll = PollRepository::findWithOptions($pollid);
             if (! $poll) {
-                $lang = (array) (SupportContext::getGlobal('lang_polloverview') ?? []);
+                $lang = (array) (app(Globals::class)->get('lang_polloverview') ?? []);
 
                 return $this->legacyAbortResponse($lang['std_error'] ?? 'Error', $lang['text_no_poll_id'] ?? 'Invalid poll ID.');
             }

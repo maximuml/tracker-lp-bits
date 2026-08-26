@@ -121,9 +121,9 @@ final class Cache
      */
     public static function pageCheck(string $file = 'cachefile', bool $endpage = true, int $cachetime = 600): bool
     {
-        $rootpath = SupportContext::getGlobal('rootpath', defined('ROOT_PATH') ? constant('ROOT_PATH') : '');
-        $cacheDir = SupportContext::getGlobal('cache', '');
-        $langDir = SupportContext::getGlobal('CURLANGDIR', '');
+        $rootpath = app(Globals::class)->get('rootpath', defined('ROOT_PATH') ? constant('ROOT_PATH') : '');
+        $cacheDir = app(Globals::class)->get('cache', '');
+        $langDir = app(Globals::class)->get('CURLANGDIR', '');
         $lang = app(Language::class)->functions();
 
         $cachefile = self::path($rootpath, $cacheDir, $langDir, $file);
@@ -152,9 +152,9 @@ final class Cache
      */
     public static function pageSave(string $file = 'cachefile'): void
     {
-        $rootpath = SupportContext::getGlobal('rootpath', defined('ROOT_PATH') ? constant('ROOT_PATH') : '');
-        $cacheDir = SupportContext::getGlobal('cache', '');
-        $langDir = SupportContext::getGlobal('CURLANGDIR', '');
+        $rootpath = app(Globals::class)->get('rootpath', defined('ROOT_PATH') ? constant('ROOT_PATH') : '');
+        $cacheDir = app(Globals::class)->get('cache', '');
+        $langDir = app(Globals::class)->get('CURLANGDIR', '');
 
         $cachefile = self::path($rootpath, $cacheDir, $langDir, $file);
         $contents = ob_get_contents();

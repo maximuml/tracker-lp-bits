@@ -6,6 +6,7 @@ use App\Models\Torrent;
 use App\Support\Bonus;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
+use App\Support\Globals;
 use App\Support\LegacyResponse;
 use App\Support\SupportContext;
 use Illuminate\Http\RedirectResponse;
@@ -90,8 +91,8 @@ class TorrentBookmarkController extends LegacyController
             'userid' => $userid,
         ]);
 
-        $saythanksBonus = (float) SupportContext::getGlobal('saythanks_bonus', 0);
-        $receivethanksBonus = (float) SupportContext::getGlobal('receivethanks_bonus', 0);
+        $saythanksBonus = (float) app(Globals::class)->get('saythanks_bonus', 0);
+        $receivethanksBonus = (float) app(Globals::class)->get('receivethanks_bonus', 0);
         Bonus::updatePoints('+', $saythanksBonus, $userid);
         Bonus::updatePoints('+', $receivethanksBonus, (int) $torrentowner);
 

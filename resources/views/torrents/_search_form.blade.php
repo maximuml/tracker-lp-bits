@@ -1,5 +1,5 @@
 @php
-$lang_torrents = (array) (\App\Support\SupportContext::getGlobal('lang_torrents') ?? []);
+$lang_torrents = (array) (\app(\App\Support\Globals::class)->get('lang_torrents') ?? []);
 $CURUSER = (array) (\app(\App\Support\CurrentUser::class)->get() ?? []);
 $Cache = \app(\App\Support\Cache\LegacyRedisCache::class);
 $__server_QUERY_STRING = \App\Support\SupportContext::getServerValue('QUERY_STRING');

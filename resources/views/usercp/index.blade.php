@@ -1,5 +1,5 @@
 @php
-$lang_usercp = (array) (\App\Support\SupportContext::getGlobal('lang_usercp') ?? []);
+$lang_usercp = (array) (\app(\App\Support\Globals::class)->get('lang_usercp') ?? []);
 $title = $title ?? ($lang_usercp['head_control_panel'] ?? 'Control Panel');
 $action = $action ?? '';
 $type = $type ?? '';

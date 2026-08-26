@@ -6,9 +6,9 @@ use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
 use App\Repositories\ShoutboxRepository;
 use App\Support\CurrentUser;
+use App\Support\Globals;
 use App\Support\Permissions;
 use App\Support\Shoutbox;
-use App\Support\SupportContext;
 use App\Support\UserDisplay;
 use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;
@@ -91,7 +91,7 @@ class ShoutboxController extends LegacyController
             }
         }
 
-        $langShoutbox = (array) (SupportContext::getGlobal('lang_shoutbox') ?? []);
+        $langShoutbox = (array) (app(Globals::class)->get('lang_shoutbox') ?? []);
         $isStaff = Permissions::userCan(PermissionEnum::SB_MANAGE->value, false, $currentUserId);
 
         $content = view('shoutbox.index', [

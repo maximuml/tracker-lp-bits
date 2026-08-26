@@ -13,6 +13,7 @@ use App\Repositories\BonusRepository;
 use App\Support\Api;
 use App\Support\Bonus;
 use App\Support\CurrentUser;
+use App\Support\Globals;
 use App\Support\Locale;
 use App\Support\Pagination;
 use App\Support\SupportContext;
@@ -140,7 +141,7 @@ JS;
             return $this->legacyAbortResponse('Error', 'Permission denied.');
         }
 
-        $langUploaders = (array) SupportContext::getGlobal('lang_uploaders', []);
+        $langUploaders = (array) app(Globals::class)->get('lang_uploaders', []);
 
         $year = (int) (SupportContext::getQuery('year') ?? 0);
         if (! $year || $year < 2000) {
@@ -162,7 +163,7 @@ JS;
         };
         $sortDirection = $order === 'username' ? 'ASC' : 'DESC';
 
-        $dateFounded = (string) SupportContext::getGlobal('datefounded', '2010-08-19');
+        $dateFounded = (string) app(Globals::class)->get('datefounded', '2010-08-19');
         $yearFounded = (int) substr($dateFounded, 0, 4);
         if (! $yearFounded) {
             $yearFounded = 2007;

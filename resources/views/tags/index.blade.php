@@ -1,5 +1,5 @@
 @php
-$lang_tags = (array) (\App\Support\SupportContext::getGlobal('lang_tags') ?? []);
+$lang_tags = (array) (\app(\App\Support\Globals::class)->get('lang_tags') ?? []);
 @endphp
 
 @extends('layouts.legacy')

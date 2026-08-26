@@ -111,7 +111,7 @@ final class Slots
         return self::display(
             (float) ($user['uploaded'] ?? 0),
             (float) ($user['downloaded'] ?? 0),
-            (string) SupportContext::getGlobal('maxdlsystem', ''),
+            (string) app(Globals::class)->get('maxdlsystem', ''),
             (int) ($user['class'] ?? 0),
             (int) User::CLASS_VIP,
             (string) ($lang['text_slots'] ?? ''),

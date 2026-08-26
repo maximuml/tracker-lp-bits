@@ -114,7 +114,7 @@ final class LegacyBootstrap
                 $langFunctions = $lang_functions;
             }
         }
-        SupportContext::setGlobal('lang_functions', $langFunctions);
+        app(Globals::class)->set('lang_functions', $langFunctions);
     }
 
     private static function bootUser(?Request $request): void
@@ -139,8 +139,8 @@ final class LegacyBootstrap
 
         $hook = app(Hook::class);
         $plugin = app(Plugin::class);
-        SupportContext::setGlobal('hook', $hook);
-        SupportContext::setGlobal('plugin', $plugin);
+        app(Globals::class)->set('hook', $hook);
+        app(Globals::class)->set('plugin', $plugin);
         $plugin->start();
     }
 }

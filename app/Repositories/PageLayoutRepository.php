@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Models\Invite;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
+use App\Support\Globals;
 use App\Support\Hooks;
 use App\Support\Language;
 use App\Support\Menu;
@@ -146,17 +147,17 @@ class PageLayoutRepository extends BaseRepository
         $menuResult = Menu::render(
             $script,
             app(Language::class)->functions(),
-            (string) SupportContext::getGlobal('enableoffer', ''),
+            (string) app(Globals::class)->get('enableoffer', ''),
             (string) Hooks::applyFilter('nexus_menu') ?: null,
             $user,
             app(LegacyRedisCache::class),
-            (string) SupportContext::getGlobal('CURLANGDIR', ''),
+            (string) app(Globals::class)->get('CURLANGDIR', ''),
         );
 
-        SupportContext::setGlobal('nexus_menu_html', $menuResult['html']);
-        SupportContext::setGlobal('nexus_menu_selected', $menuResult['selected']);
+        app(Globals::class)->set('nexus_menu_html', $menuResult['html']);
+        app(Globals::class)->set('nexus_menu_selected', $menuResult['selected']);
 
-        if ((string) SupportContext::getGlobal('where_tweak', '') === 'yes') {
+        if ((string) app(Globals::class)->get('where_tweak', '') === 'yes') {
             SupportContext::addUserUpdate('page', $menuResult['selected']);
         }
     }

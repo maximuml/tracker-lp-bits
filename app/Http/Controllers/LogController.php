@@ -8,8 +8,8 @@ use App\Models\Setting;
 use App\Repositories\LogRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
+use App\Support\Globals;
 use App\Support\Pagination;
-use App\Support\SupportContext;
 use App\Support\Time;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
@@ -22,10 +22,10 @@ class LogController extends LegacyController
 {
     public function legacy(Request $request): View|RedirectResponse|Response
     {
-        $langLog = (array) (SupportContext::getGlobal('lang_log') ?? []);
+        $langLog = (array) (app(Globals::class)->get('lang_log') ?? []);
 
         if (! Permission::can(PermissionEnum::LOG)) {
-            $logClass = (int) SupportContext::getGlobal('log_class', 0);
+            $logClass = (int) app(Globals::class)->get('log_class', 0);
 
             return $this->legacyAbortResponse(
                 $langLog['std_sorry'] ?? 'Sorry',

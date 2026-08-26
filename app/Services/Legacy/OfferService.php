@@ -10,6 +10,7 @@ use App\Models\Message;
 use App\Repositories\OfferRepository;
 use App\Support\Cache;
 use App\Support\CurrentUser;
+use App\Support\Globals;
 use App\Support\Input;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
@@ -61,7 +62,7 @@ final class OfferService
 
     private function lang(string $key): string
     {
-        $lang = (array) (SupportContext::getGlobal('lang_offers') ?? []);
+        $lang = (array) (app(Globals::class)->get('lang_offers') ?? []);
 
         return (string) ($lang[$key] ?? '');
     }
@@ -76,7 +77,7 @@ final class OfferService
 
     private function baseUrl(): string
     {
-        return (string) SupportContext::getGlobal('BASEURL', '');
+        return (string) app(Globals::class)->get('BASEURL', '');
     }
 
     private function isSecure(): bool
@@ -186,7 +187,7 @@ final class OfferService
         $arr = $offer->toArray();
         $arr['username'] = $offer->user->username ?? '';
         $locale = Locale::userLocale((int) $arr['userid']);
-        $offeruptimeout = (int) (SupportContext::getGlobal('offeruptimeout_main') ?? 0);
+        $offeruptimeout = (int) (app(Globals::class)->get('offeruptimeout_main') ?? 0);
 
         if ($offeruptimeout) {
             $timeouthour = (int) floor($offeruptimeout / 3600);
@@ -239,8 +240,8 @@ final class OfferService
         $arr = $offer->toArray();
         $arr['username'] = $offer->user->username ?? '';
         $locale = Locale::userLocale((int) $arr['userid']);
-        $offeruptimeout = (int) (SupportContext::getGlobal('offeruptimeout_main') ?? 0);
-        $minoffervotes = (int) (SupportContext::getGlobal('minoffervotes') ?? 0);
+        $offeruptimeout = (int) (app(Globals::class)->get('offeruptimeout_main') ?? 0);
+        $minoffervotes = (int) (app(Globals::class)->get('minoffervotes') ?? 0);
         $curuser = $this->curUser();
 
         $voteCounts = OfferRepository::getVoteCounts($offid);

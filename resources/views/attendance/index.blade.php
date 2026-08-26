@@ -1,5 +1,5 @@
 @php
-$lang_attendance = (array) (\App\Support\SupportContext::getGlobal('lang_attendance') ?? []);
+$lang_attendance = (array) (\app(\App\Support\Globals::class)->get('lang_attendance') ?? []);
 @endphp
 
 @extends('layouts.legacy')

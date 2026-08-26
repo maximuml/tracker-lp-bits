@@ -11,9 +11,9 @@ use App\Repositories\InviteRepository;
 use App\Repositories\UserRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
+use App\Support\Globals;
 use App\Support\Locale;
 use App\Support\Pagination;
-use App\Support\SupportContext;
 use App\Support\UserDisplay;
 use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;
@@ -29,7 +29,7 @@ class InviteController extends LegacyController
         $currentUser = app(CurrentUser::class)->get() ?? [];
         $currentUserId = (int) ($currentUser['id'] ?? 0);
         $id = $request->input('id') !== null ? (int) $request->input('id') : $currentUserId;
-        $langInvite = (array) (SupportContext::getGlobal('lang_invite') ?? []);
+        $langInvite = (array) (app(Globals::class)->get('lang_invite') ?? []);
 
         if (! Validators::isId($id) || ($currentUserId !== $id && ! Permission::can(PermissionEnum::VIEW_INVITE))) {
             return $this->legacyAbortResponse($langInvite['std_sorry'] ?? 'Sorry', $langInvite['std_permission_denied'] ?? 'Permission denied.');
@@ -56,7 +56,7 @@ class InviteController extends LegacyController
             'user' => $user->toArray(),
             'CURUSER' => $currentUser,
             'lang_invite' => $langInvite,
-            'lang_functions' => (array) (SupportContext::getGlobal('lang_functions') ?? []),
+            'lang_functions' => (array) (app(Globals::class)->get('lang_functions') ?? []),
             'SITENAME' => $SITENAME,
             'userRep' => $userRep,
             'invitesystem' => $invitesystem,
@@ -121,7 +121,7 @@ class InviteController extends LegacyController
             if ($menuSelected === 'invitee') {
                 $data = array_merge($data, $this->inviteeData($id, $enabled, $status, $currentUserId, $langInvite, $request->getRequestUri()));
             } elseif (in_array($menuSelected, ['sent', 'tmp'], true)) {
-                $data = array_merge($data, $this->sentTmpData($id, $menuSelected, $langInvite, $langFunctions = (array) (SupportContext::getGlobal('lang_functions') ?? [])));
+                $data = array_merge($data, $this->sentTmpData($id, $menuSelected, $langInvite, $langFunctions = (array) (app(Globals::class)->get('lang_functions') ?? [])));
             }
         }
 

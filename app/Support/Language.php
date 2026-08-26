@@ -18,7 +18,7 @@ final class Language
      */
     public function functions(): array
     {
-        $lang = SupportContext::getGlobal('lang_functions');
+        $lang = app(Globals::class)->get('lang_functions');
 
         return is_array($lang) ? $lang : [];
     }
@@ -30,7 +30,7 @@ final class Language
      */
     public function shoutbox(): array
     {
-        $lang = SupportContext::getGlobal('lang_shoutbox');
+        $lang = app(Globals::class)->get('lang_shoutbox');
 
         return is_array($lang) ? $lang : [];
     }

@@ -1,6 +1,6 @@
 @php
 /** @var string $selected */
-$lang_usercp = (array) (\App\Support\SupportContext::getGlobal('lang_usercp') ?? []);
+$lang_usercp = (array) (\app(\App\Support\Globals::class)->get('lang_usercp') ?? []);
 @endphp
 <div id="usercpnav"><ul id="usercpmenu" class="menu">
 <li{{ $selected === 'home' ? ' class=selected' : '' }}><a href="usercp.php">{{ $lang_usercp['text_user_cp_home'] ?? 'Home' }}</a></li>

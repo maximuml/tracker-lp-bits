@@ -9,12 +9,12 @@ use App\Repositories\IpLogRepository;
 use App\Repositories\TorrentRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
+use App\Support\Globals;
 use App\Support\Http;
 use App\Support\Json;
 use App\Support\Logger;
 use App\Support\Network;
 use App\Support\Path;
-use App\Support\SupportContext;
 use App\Support\Time;
 use App\Support\Tracker;
 use App\Support\Url;
@@ -168,7 +168,7 @@ class TorrentDownloadController extends LegacyController
 
         $torrentid = (int) $request->input('torrentid');
         $type = $request->input('type');
-        $lang = (array) (SupportContext::getGlobal('lang_downloadnotice') ?? []);
+        $lang = (array) (app(Globals::class)->get('lang_downloadnotice') ?? []);
         $timenow = time();
 
         switch ($type) {

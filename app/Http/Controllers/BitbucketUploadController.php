@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
+use App\Support\Globals;
 use App\Support\Http;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
@@ -40,7 +41,7 @@ class BitbucketUploadController extends Controller
             LegacyResponse::abort($lang['std_sorry'] ?? '', $lang['std_unauthorized_to_upload'] ?? '', false);
         }
 
-        if (SupportContext::getGlobal('enablebitbucket_main', 'no') !== 'yes') {
+        if (app(Globals::class)->get('enablebitbucket_main', 'no') !== 'yes') {
             LegacyResponse::permissionDenied();
         }
 
@@ -73,7 +74,7 @@ class BitbucketUploadController extends Controller
             LegacyResponse::abort($lang['std_sorry'] ?? '', $lang['std_unauthorized_to_upload'] ?? '', false);
         }
 
-        if (SupportContext::getGlobal('enablebitbucket_main', 'no') !== 'yes') {
+        if (app(Globals::class)->get('enablebitbucket_main', 'no') !== 'yes') {
             LegacyResponse::permissionDenied();
         }
 
@@ -95,7 +96,7 @@ class BitbucketUploadController extends Controller
             LegacyResponse::abort($lang['std_upload_failed'] ?? '', $lang['std_bad_file_name'] ?? '', false);
         }
 
-        $bitbucket = (string) SupportContext::getGlobal('bitbucket', 'bitbucket');
+        $bitbucket = (string) app(Globals::class)->get('bitbucket', 'bitbucket');
         $tgtfile = Path::resolve("{$bitbucket}/{$filename}", \ROOT_PATH);
         if (file_exists($tgtfile)) {
             LegacyResponse::abort(
@@ -161,7 +162,7 @@ class BitbucketUploadController extends Controller
             default => imagepng($thumb, $tgtfile),
         };
 
-        $baseUrl = (string) SupportContext::getGlobal('BASEURL', '');
+        $baseUrl = (string) app(Globals::class)->get('BASEURL', '');
         $url = str_replace(' ', '%20', htmlspecialchars(Http::protocolPrefix(Url::isSecure())."{$baseUrl}/bitbucket/{$filename}"));
         $public = $request->input('public') === 'yes' ? '1' : '0';
 
@@ -188,12 +189,12 @@ class BitbucketUploadController extends Controller
     /** @return array<string, string> */
     private function loadLang(): array
     {
-        if (empty(SupportContext::getGlobal('lang_bitbucketupload'))) {
+        if (empty(app(Globals::class)->get('lang_bitbucketupload'))) {
             SupportContext::setServerValue('SCRIPT_NAME', '/bitbucket-upload.php');
             require base_path(Locale::scriptFilePath((string) '', (bool) false, (string) ''));
-            SupportContext::setGlobal('lang_bitbucketupload', $lang_bitbucketupload ?? []);
+            app(Globals::class)->set('lang_bitbucketupload', $lang_bitbucketupload ?? []);
         }
 
-        return (array) SupportContext::getGlobal('lang_bitbucketupload', []);
+        return (array) app(Globals::class)->get('lang_bitbucketupload', []);
     }
 }

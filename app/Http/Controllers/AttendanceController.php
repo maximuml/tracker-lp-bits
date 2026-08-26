@@ -29,8 +29,8 @@ class AttendanceController extends LegacyController
         if ($request->isMethod('post')) {
             if ($captchaEnabled && SupportContext::getGlobal('iv', '') === 'yes') {
                 Captcha::checkCode(
-                    (string) (SupportContext::getPost('imagehash') ?? ''),
-                    (string) (SupportContext::getPost('imagestring') ?? ''),
+                    (string) (request()->post('imagehash') ?? ''),
+                    (string) (request()->post('imagestring') ?? ''),
                     'attendance.php',
                     false,
                     true

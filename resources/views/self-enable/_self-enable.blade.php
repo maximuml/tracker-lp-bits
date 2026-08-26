@@ -14,7 +14,7 @@ if ($unit <= 0) {
     $total = (float) $total;
     $isUserBonusEnough = (bool) $isUserBonusEnough;
 
-    if (! empty(\App\Support\SupportContext::getPost('submit'))) {
+    if (! empty(\request()->post('submit'))) {
         if (! $isUserBonusEnough) {
             \App\Support\Html::stdMessage('Error', $insufficientMessage);
         }

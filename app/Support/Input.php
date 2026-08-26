@@ -43,7 +43,7 @@ final class Input
             return $result;
         }
 
-        $value = SupportContext::getRequestInput($name);
+        $value = request()->input($name);
         if ($value === null) {
             return false;
         }

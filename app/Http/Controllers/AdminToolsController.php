@@ -117,12 +117,12 @@ class AdminToolsController extends LegacyController
         $mode = 'list';
         $message = '';
 
-        $rangeStartIp = (string) (SupportContext::getQuery('range_start_ip') ?? '');
-        $rangeEndIp = (string) (SupportContext::getQuery('range_end_ip') ?? '');
+        $rangeStartIp = (string) (request()->query('range_start_ip') ?? '');
+        $rangeEndIp = (string) (request()->query('range_end_ip') ?? '');
         $hasRangeFilter = false;
 
-        $sure = (string) (SupportContext::getQuery('sure') ?? '');
-        $delid = (int) (SupportContext::getQuery('delid') ?? 0);
+        $sure = (string) (request()->query('sure') ?? '');
+        $delid = (int) (request()->query('delid') ?? 0);
         if ($sure === 'yes' && $delid > 0) {
             if (Validators::isId($delid)) {
                 DB::table('locations')->where('id', $delid)->delete();
@@ -135,19 +135,19 @@ class AdminToolsController extends LegacyController
             return $this->legacyAbortResponse('Confirm', 'Are you sure you would like to delete this Location?(<strong><a href="'.$actionUrl.'?delid='.$delid.'&sure=yes">Yes!</a></strong> / <strong><a href="'.$actionUrl.'">No</a></strong>)', false);
         }
 
-        $edited = (string) (SupportContext::getQuery('edited') ?? '');
+        $edited = (string) (request()->query('edited') ?? '');
         if ($edited === '1') {
-            $id = (int) (SupportContext::getQuery('id') ?? 0);
-            $name = (string) SupportContext::getQuery('name');
-            $flagpic = (string) SupportContext::getQuery('flagpic');
-            $locationMain = (string) SupportContext::getQuery('location_main');
-            $locationSub = (string) SupportContext::getQuery('location_sub');
-            $startIp = (string) SupportContext::getQuery('start_ip');
-            $endIp = (string) SupportContext::getQuery('end_ip');
-            $theoryUpspeed = (string) SupportContext::getQuery('theory_upspeed');
-            $practicalUpspeed = (string) SupportContext::getQuery('practical_upspeed');
-            $theoryDownspeed = (string) SupportContext::getQuery('theory_downspeed');
-            $practicalDownspeed = (string) SupportContext::getQuery('practical_downspeed');
+            $id = (int) (request()->query('id') ?? 0);
+            $name = (string) request()->query('name');
+            $flagpic = (string) request()->query('flagpic');
+            $locationMain = (string) request()->query('location_main');
+            $locationSub = (string) request()->query('location_sub');
+            $startIp = (string) request()->query('start_ip');
+            $endIp = (string) request()->query('end_ip');
+            $theoryUpspeed = (string) request()->query('theory_upspeed');
+            $practicalUpspeed = (string) request()->query('practical_upspeed');
+            $theoryDownspeed = (string) request()->query('theory_downspeed');
+            $practicalDownspeed = (string) request()->query('practical_downspeed');
 
             if (! Network::isValidIpv4Format($startIp) || ! Network::isValidIpv4Format($endIp)) {
                 $error = 'Invalid IP Address Format !!!';
@@ -171,7 +171,7 @@ class AdminToolsController extends LegacyController
             }
         }
 
-        $editid = (int) (SupportContext::getQuery('editid') ?? 0);
+        $editid = (int) (request()->query('editid') ?? 0);
         if ($editid > 0) {
             $editRow = (array) DB::table('locations')->where('id', $editid)->first();
             if (empty($editRow)) {
@@ -186,18 +186,18 @@ class AdminToolsController extends LegacyController
             }
         }
 
-        $add = (string) (SupportContext::getQuery('add') ?? '');
+        $add = (string) (request()->query('add') ?? '');
         if ($add === 'true') {
-            $name = (string) SupportContext::getQuery('name');
-            $flagpic = (string) SupportContext::getQuery('flagpic');
-            $locationMain = (string) SupportContext::getQuery('location_main');
-            $locationSub = (string) SupportContext::getQuery('location_sub');
-            $startIp = (string) SupportContext::getQuery('start_ip');
-            $endIp = (string) SupportContext::getQuery('end_ip');
-            $theoryUpspeed = (string) SupportContext::getQuery('theory_upspeed');
-            $practicalUpspeed = (string) SupportContext::getQuery('practical_upspeed');
-            $theoryDownspeed = (string) SupportContext::getQuery('theory_downspeed');
-            $practicalDownspeed = (string) SupportContext::getQuery('practical_downspeed');
+            $name = (string) request()->query('name');
+            $flagpic = (string) request()->query('flagpic');
+            $locationMain = (string) request()->query('location_main');
+            $locationSub = (string) request()->query('location_sub');
+            $startIp = (string) request()->query('start_ip');
+            $endIp = (string) request()->query('end_ip');
+            $theoryUpspeed = (string) request()->query('theory_upspeed');
+            $practicalUpspeed = (string) request()->query('practical_upspeed');
+            $theoryDownspeed = (string) request()->query('theory_downspeed');
+            $practicalDownspeed = (string) request()->query('practical_downspeed');
 
             if (! Network::isValidIpv4Format($startIp) || ! Network::isValidIpv4Format($endIp)) {
                 $error = 'Invalid IP Address Format !!!';
@@ -220,7 +220,7 @@ class AdminToolsController extends LegacyController
             }
         }
 
-        $checkRange = (string) (SupportContext::getQuery('check_range') ?? '');
+        $checkRange = (string) (request()->query('check_range') ?? '');
         if ($checkRange === 'true') {
             if (! Network::isValidIpv4Format($rangeStartIp) || ! Network::isValidIpv4Format($rangeEndIp)) {
                 $error = 'Invalid IP Address Format !!!';
@@ -287,9 +287,9 @@ class AdminToolsController extends LegacyController
         $langTestip = (array) SupportContext::getGlobal('lang_testip', []);
 
         if ($request->isMethod('post')) {
-            $ip = (string) SupportContext::getPost('ip');
+            $ip = (string) request()->post('ip');
         } else {
-            $ip = (string) (SupportContext::getQuery('ip') ?? '');
+            $ip = (string) (request()->query('ip') ?? '');
         }
 
         $message = '';

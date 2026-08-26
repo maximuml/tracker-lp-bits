@@ -88,12 +88,12 @@ final class SiteAccess
         $loginType = $setting['login_type'];
 
         if ($loginType === 'secret') {
-            if (empty(SupportContext::getRequestInput('secret'))) {
+            if (empty(request()->input('secret'))) {
                 Logger::writeWithContext('no secret');
 
                 return false;
             }
-            $secret = SupportContext::getRequestInput('secret');
+            $secret = request()->input('secret');
             if ($secret !== $setting['login_secret']) {
                 Logger::writeWithContext('invlaid secret: '.$secret);
 

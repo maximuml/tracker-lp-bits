@@ -18,7 +18,7 @@ $lang_tags = (array) (\App\Support\SupportContext::getGlobal('lang_tags') ?? [])
 } }
 
 \App\Support\Html::beginFrame($lang_tags['text_tags']);
-$test = \App\Support\SupportContext::getPost("test") ?? '';
+$test = \request()->post("test") ?? '';
 $siteName = \App\Models\Setting::getSiteName();
 ?>
 <p><?php echo sprintf($lang_tags['text_bb_tags_note'], $siteName) ?></p>

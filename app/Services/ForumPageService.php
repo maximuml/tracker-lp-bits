@@ -78,7 +78,7 @@ final class ForumPageService
         SupportContext::setGlobal('topicsperpage', $topicsperpage);
         SupportContext::setGlobal('today_date', $todayDate);
 
-        $action = htmlspecialchars(trim((string) SupportContext::getQuery('action')));
+        $action = htmlspecialchars(trim((string) request()->query('action')));
 
         $data = [
             'lang' => $lang,
@@ -92,7 +92,7 @@ final class ForumPageService
         ];
 
         // catchup is a query-flag action, not a dispatched section.
-        if (((SupportContext::getQuery('catchup') !== null)) && SupportContext::getQuery('catchup') == 1) {
+        if (((request()->query('catchup') !== null)) && request()->query('catchup') == 1) {
             $this->catchUp();
         }
 
@@ -224,7 +224,7 @@ final class ForumPageService
      */
     private function buildNewTopic(array $lang, Request $request): array
     {
-        $forumid = (int) (SupportContext::getQuery('forumid') ?? 0);
+        $forumid = (int) (request()->query('forumid') ?? 0);
         $this->checkWhetherExist($forumid, 'forum', $lang);
 
         return $this->buildComposeFrame($forumid, 'new', $lang);
@@ -237,7 +237,7 @@ final class ForumPageService
      */
     private function buildQuotePost(array $lang, array $curUser, Request $request): array
     {
-        $postid = (int) (SupportContext::getQuery('postid') ?? 0);
+        $postid = (int) (request()->query('postid') ?? 0);
         $this->checkWhetherExist($postid, 'post', $lang);
         if (! Forum::canViewPost((int) ($curUser['id'] ?? 0), $postid)) {
             LegacyResponse::permissionDenied();
@@ -252,7 +252,7 @@ final class ForumPageService
      */
     private function buildReply(array $lang, Request $request): array
     {
-        $topicid = (int) (SupportContext::getQuery('topicid') ?? 0);
+        $topicid = (int) (request()->query('topicid') ?? 0);
         $this->checkWhetherExist($topicid, 'topic', $lang);
 
         return $this->buildComposeFrame($topicid, 'reply', $lang);
@@ -265,7 +265,7 @@ final class ForumPageService
      */
     private function buildEditPost(array $lang, array $curUser, Request $request): array
     {
-        $postid = (int) (SupportContext::getQuery('postid') ?? 0);
+        $postid = (int) (request()->query('postid') ?? 0);
         $this->checkWhetherExist($postid, 'post', $lang);
 
         $post = ForumRepository::getPostWithTopic((int) $postid);
@@ -294,11 +294,11 @@ final class ForumPageService
     private function buildViewTopic(array $lang, array $curUser, int $userId, Request $request, int $postsperpage): array
     {
         $Cache = SupportContext::getCache();
-        $highlight = htmlspecialchars(trim((string) (SupportContext::getQuery('highlight') ?? '')));
-        $topicid = (int) (SupportContext::getQuery('topicid') ?? 0);
+        $highlight = htmlspecialchars(trim((string) (request()->query('highlight') ?? '')));
+        $topicid = (int) (request()->query('topicid') ?? 0);
         LegacyResponse::assertId($topicid, true);
-        $page = SupportContext::getQuery('page') ?? 0;
-        $authorid = (int) (SupportContext::getQuery('authorid') ?? 0);
+        $page = is_string($val = request()->query('page')) ? $val : 0;
+        $authorid = (int) (request()->query('authorid') ?? 0);
         if ($authorid) {
             $addparam = 'action=viewtopic&topicid='.$topicid.'&authorid='.$authorid;
         } else {
@@ -618,7 +618,7 @@ final class ForumPageService
     private function buildViewForum(array $lang, array $curUser, Request $request, int $topicsperpage, int $postsperpage): array
     {
         $Cache = SupportContext::getCache();
-        $forumid = (int) (SupportContext::getQuery('forumid') ?? 0);
+        $forumid = (int) (request()->query('forumid') ?? 0);
         LegacyResponse::assertId($forumid, true);
         $userid = (int) ($curUser['id'] ?? 0);
 
@@ -633,14 +633,14 @@ final class ForumPageService
 
         $forumname = (string) ($row['name'] ?? '');
         $forummoderators = Forum::moderatorsWithContext($forumid, false);
-        $search = trim(is_scalar(SupportContext::getQuery('search') ?? '') ? (string) (SupportContext::getQuery('search') ?? '') : '');
+        $search = trim(is_scalar(request()->query('search') ?? '') ? (string) (request()->query('search') ?? '') : '');
         if ($search) {
             $addparam = '&search='.rawurlencode($search);
         } else {
             $addparam = '';
         }
 
-        $sort = (string) (SupportContext::getQuery('sort') ?? 'lastpostdesc');
+        $sort = (string) (request()->query('sort') ?? 'lastpostdesc');
         switch ($sort) {
             case 'firstpostasc':
                 $sortColumn = 'firstpost';
@@ -695,10 +695,10 @@ final class ForumPageService
         if ($numtopics > 0) {
             echo '<table border="1" cellspacing="0" cellpadding="5" width="97%">';
 
-            $sortToggleFirst = (((SupportContext::getQuery('sort') !== null)) && SupportContext::getQuery('sort') == 'firstpostdesc') ? 'firstpostasc' : 'firstpostdesc';
-            $sortToggleFirstTitle = (((SupportContext::getQuery('sort') !== null)) && SupportContext::getQuery('sort') == 'firstpostdesc') ? ($lang['title_order_topic_asc'] ?? '') : ($lang['title_order_topic_desc'] ?? '');
-            $sortToggleLast = (((SupportContext::getQuery('sort') !== null)) && SupportContext::getQuery('sort') == 'lastpostasc') ? 'lastpostdesc' : 'lastpostasc';
-            $sortToggleLastTitle = (((SupportContext::getQuery('sort') !== null)) && SupportContext::getQuery('sort') == 'lastpostasc') ? ($lang['title_order_post_desc'] ?? '') : ($lang['title_order_post_asc'] ?? '');
+            $sortToggleFirst = (((request()->query('sort') !== null)) && request()->query('sort') == 'firstpostdesc') ? 'firstpostasc' : 'firstpostdesc';
+            $sortToggleFirstTitle = (((request()->query('sort') !== null)) && request()->query('sort') == 'firstpostdesc') ? ($lang['title_order_topic_asc'] ?? '') : ($lang['title_order_topic_desc'] ?? '');
+            $sortToggleLast = (((request()->query('sort') !== null)) && request()->query('sort') == 'lastpostasc') ? 'lastpostdesc' : 'lastpostasc';
+            $sortToggleLastTitle = (((request()->query('sort') !== null)) && request()->query('sort') == 'lastpostasc') ? ($lang['title_order_post_desc'] ?? '') : ($lang['title_order_post_asc'] ?? '');
 
             echo '<tr><td class="colhead" align="center" width="99%">'.($lang['col_topic'] ?? '').'</td><td class="colhead" align="center"><a href="'.htmlspecialchars('?action=viewforum&forumid='.$forumid.$addparam.'&sort='.$sortToggleFirst).'" title="'.$sortToggleFirstTitle.'">'.($lang['col_author'] ?? '').'</a></td><td class="colhead" align="center">'.($lang['col_replies'] ?? '').'/'.($lang['col_views'] ?? '').'</td><td class="colhead" align="center"><a href="'.htmlspecialchars('?action=viewforum&forumid='.$forumid.$addparam.'&sort='.$sortToggleLast).'" title="'.$sortToggleLastTitle.'">'.($lang['col_last_post'] ?? '')."</a></td>\n";
 
@@ -842,7 +842,7 @@ final class ForumPageService
     private function buildViewUnread(array $lang, array $curUser): array
     {
         $userid = (int) ($curUser['id'] ?? 0);
-        $beforepostid = (int) (SupportContext::getQuery('beforepostid') ?? 0);
+        $beforepostid = (int) (request()->query('beforepostid') ?? 0);
         $maxresults = 25;
         $lastCatchup = (int) ($curUser['last_catchup'] ?? 0);
         $unreadTopics = ForumRepository::getUnreadTopics($lastCatchup, $beforepostid ?: null, 100);
@@ -911,7 +911,7 @@ final class ForumPageService
     {
         $error = true;
         $found = '';
-        $keywords = htmlspecialchars(trim((string) (SupportContext::getQuery('keywords') ?? '')));
+        $keywords = htmlspecialchars(trim((string) (request()->query('keywords') ?? '')));
         if ($keywords != '') {
             $searchResult = ForumRepository::searchForumPosts((string) $keywords, (int) UserDisplay::currentClass(), 0, 0);
             $hits = (int) $searchResult['hits'];

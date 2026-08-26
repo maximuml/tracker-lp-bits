@@ -508,22 +508,22 @@ final class UsercpPageService
         $isConfirm = $type === 'save';
         if ($isConfirm) {
             $confirmHidden = [
-                'resetpasskey' => (string) (SupportContext::getPost('resetpasskey') ?? ''),
-                'resetauthkey' => (string) (SupportContext::getPost('resetauthkey') ?? ''),
-                'email' => htmlspecialchars(trim((string) SupportContext::getPost('email'))),
-                'chpassword' => (string) (SupportContext::getPost('chpassword') ?? ''),
-                'privacy' => (string) (SupportContext::getPost('privacy') ?? ''),
-                'two_step_secret' => (string) (SupportContext::getPost('two_step_secret') ?? ''),
-                'two_step_code' => (string) (SupportContext::getPost('two_step_code') ?? ''),
+                'resetpasskey' => (string) (request()->post('resetpasskey') ?? ''),
+                'resetauthkey' => (string) (request()->post('resetauthkey') ?? ''),
+                'email' => htmlspecialchars(trim((string) request()->post('email'))),
+                'chpassword' => (string) (request()->post('chpassword') ?? ''),
+                'privacy' => (string) (request()->post('privacy') ?? ''),
+                'two_step_secret' => (string) (request()->post('two_step_secret') ?? ''),
+                'two_step_code' => (string) (request()->post('two_step_code') ?? ''),
             ];
         }
 
         // Saved message flags
         $savedFlags = [
-            'mail' => SupportContext::getQuery('mail') === '1',
-            'passkey' => SupportContext::getQuery('passkey') === '1',
-            'password' => SupportContext::getQuery('password') === '1',
-            'privacy' => SupportContext::getQuery('privacy') === '1',
+            'mail' => request()->query('mail') === '1',
+            'passkey' => request()->query('passkey') === '1',
+            'password' => request()->query('password') === '1',
+            'privacy' => request()->query('privacy') === '1',
         ];
 
         return [
@@ -566,7 +566,7 @@ final class UsercpPageService
     private function captureConfirmExtras(): string
     {
         ob_start();
-        Hooks::doAction('usercp_security_update_confirm', SupportContext::allPost());
+        Hooks::doAction('usercp_security_update_confirm', request()->post());
 
         return (string) ob_get_clean();
     }

@@ -35,23 +35,13 @@ final class Nexus
 
     private static array $appendFooters = [];
 
-    private static array $translationNamespaces = [];
-
-    private static array $translations = [];
-
     private static ?NexusTranslator $translator = null;
 
     private static ?Manager $queueManager = null;
 
     const QUEUE_CONNECTION_NAME = 'my_queue_connection';
 
-    const PLATFORM_USER = 'user';
-
     const PLATFORM_ADMIN = 'admin';
-
-    const PLATFORM_TRACKER = 'tracker';
-
-    const PLATFORMS = [self::PLATFORM_USER, self::PLATFORM_ADMIN, self::PLATFORM_TRACKER];
 
     private function __construct() {}
 
@@ -72,11 +62,6 @@ final class Nexus
         return $this->startTimestamp;
     }
 
-    public function getPlatform(): string
-    {
-        return $this->platform;
-    }
-
     public function getScript(): string
     {
         return $this->script;
@@ -87,24 +72,9 @@ final class Nexus
         return $this->logSequence;
     }
 
-    public function isPlatformValid(): bool
-    {
-        return in_array($this->platform, self::PLATFORMS);
-    }
-
     public function isPlatformAdmin(): bool
     {
         return $this->platform == self::PLATFORM_ADMIN;
-    }
-
-    public function isPlatformUser(): bool
-    {
-        return $this->platform == self::PLATFORM_USER;
-    }
-
-    public function isScriptAnnounce(): bool
-    {
-        return $this->script == 'announce';
     }
 
     public function incrementLogSequence(): void
@@ -139,13 +109,6 @@ final class Nexus
         $host = $this->retrieveFromServer(['HTTP_X_FORWARDED_HOST', 'HTTP_HOST', 'host'], true);
 
         return $this->getFirst(strval($host));
-    }
-
-    public function getRequestIp(): string
-    {
-        $ip = $this->retrieveFromServer(['HTTP_CF_CONNECTING_IP', 'HTTP_X_FORWARDED_FOR', 'x-forwarded-for', 'HTTP_REMOTE_ADDR', 'REMOTE_ADDR'], true);
-
-        return $this->getFirst($ip);
     }
 
     private function retrieveFromServer(array $fields, bool $includeHeader = false): mixed
@@ -355,18 +318,6 @@ final class Nexus
     public static function getAppendFooters(): array
     {
         return self::$appendFooters;
-    }
-
-    public static function addTranslationNamespace($path, $namespace): void
-    {
-        if (empty($namespace)) {
-            throw new \InvalidArgumentException('namespace can not be empty');
-        }
-        self::$translationNamespaces[$namespace] = rtrim($path, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;
-        if (IN_NEXUS) {
-            // 只有 Nexus 下需要，Laravel 下是通过 configurePackage 中 hasTranslations() 加载的
-            self::getTranslator()->addNamespace($namespace, $path);
-        }
     }
 
     public static function trans($key, $replace = [], $locale = null)

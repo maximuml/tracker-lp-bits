@@ -225,11 +225,9 @@ final class AuthCookie
         }
 
         $candidates[] = Input::serverValue('APP_KEY', '');
-        $candidates[] = getenv('APP_KEY') ?: '';
-
-        $env = getenv('APP_KEY');
-        if ($env !== false && $env !== '') {
-            $candidates[] = $env;
+        $envKey = getenv('APP_KEY');
+        if ($envKey !== false && $envKey !== '') {
+            $candidates[] = $envKey;
         }
 
         $key = '';

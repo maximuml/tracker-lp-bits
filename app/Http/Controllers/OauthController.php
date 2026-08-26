@@ -186,14 +186,6 @@ class OauthController extends Controller
         throw new NexusException('Unable to create user');
     }
 
-    /**
-     * @return mixed
-     */
-    public function debug(Request $request)
-    {
-        dd($request->all());
-    }
-
     /** @return  array<int|string, mixed> */
     public function userInfo(): array
     {

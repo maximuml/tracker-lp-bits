@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Repositories\OfferRepository;
-use App\Services\Legacy\OfferService;
 use App\Services\OfferPageService;
+use App\Services\OfferService;
 use App\Support\CurrentUser;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;

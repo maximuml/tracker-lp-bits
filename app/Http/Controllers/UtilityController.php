@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Setting;
 use App\Models\User;
 use App\Repositories\SearchPageRepository;
-use App\Services\Legacy\AjaxService;
-use App\Services\Legacy\AttachmentLegacyService;
+use App\Services\AjaxService;
+use App\Services\AttachmentMutationService;
 use App\Services\UsersearchPageService;
 use App\Support\Api;
 use App\Support\Attachment\AttachmentService;
@@ -122,7 +122,7 @@ class UtilityController extends LegacyController
             }
 
             $lang_attachment = (array) (app(Globals::class)->get('lang_attachment') ?? []);
-            $result = AttachmentLegacyService::processUpload($currentUser, $Attach, $lang_attachment, $altsize, $callback_func, $file);
+            $result = AttachmentMutationService::processUpload($currentUser, $Attach, $lang_attachment, $altsize, $callback_func, $file);
             $warning = (string) ($result['warning'] ?? '');
             $script = (string) ($result['script'] ?? '');
             $count_left = (int) ($result['count_left'] ?? $count_left);

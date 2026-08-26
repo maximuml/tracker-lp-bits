@@ -1,6 +1,6 @@
 <?php
 
-$__server_REQUEST_URI = (string) ($requestUri ?? \App\Support\SupportContext::getServerValue('REQUEST_URI'));
+$__server_REQUEST_URI = (string) ($requestUri ?? \App\Support\Input::serverValue('REQUEST_URI'));
 $CURUSER = (array) ($CURUSER ?? \app(\App\Support\CurrentUser::class)->get() ?? []);
 $userInfo = $userInfo ?? null;
 $userid = (int) ($userid ?? $CURUSER['id'] ?? 0);

@@ -159,7 +159,7 @@ class FriendsController extends LegacyController
     private function purgeNeighborsCache(): void
     {
         $currentUser = (array) (app(CurrentUser::class)->get() ?? []);
-        $cachefile = 'cache/'.Locale::folderFromCookie(SupportContext::getCookieValue('c_lang_folder', ''), false).'/neighbors/'.($currentUser['id'] ?? 0).'.html';
+        $cachefile = 'cache/'.Locale::folderFromCookie(Input::cookieValue('c_lang_folder', ''), false).'/neighbors/'.($currentUser['id'] ?? 0).'.html';
         if (file_exists($cachefile)) {
             unlink($cachefile);
         }

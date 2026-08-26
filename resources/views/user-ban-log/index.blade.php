@@ -4,7 +4,7 @@
 
 @section('content')
 @php
-$__server_REQUEST_URI = \App\Support\SupportContext::getServerValue('REQUEST_URI');
+$__server_REQUEST_URI = \App\Support\Input::serverValue('REQUEST_URI');
 $q = (string) ($q ?? '');
 $table = (string) ($table ?? '');
 $paginationBottom = (string) ($paginationBottom ?? '');

@@ -40,7 +40,7 @@ class TorrentUploadController extends Controller
         app(CurrentUser::class)->set($currentUser);
 
         if (empty(app(Globals::class)->get('lang_upload')) || empty(app(Globals::class)->get('lang_edit'))) {
-            SupportContext::setServerValue('SCRIPT_NAME', '/upload.php');
+            Input::setServerValue('SCRIPT_NAME', '/upload.php');
             require base_path(Locale::scriptFilePath((string) '', (bool) false, (string) ''));
             app(Globals::class)->set('lang_upload', $lang_upload ?? []);
             require base_path(Locale::scriptFilePath((string) 'edit.php', (bool) false, (string) ''));

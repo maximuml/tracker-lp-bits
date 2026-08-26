@@ -121,7 +121,7 @@ final class SearchBox
 
         parse_str($checkedValues, $checkedValuesArr);
         $searchBox = SearchBoxRepository::findForCategoryTable($mode);
-        $lang = Locale::folderFromCookie(SupportContext::getCookieValue('c_lang_folder'));
+        $lang = Locale::folderFromCookie(Input::cookieValue('c_lang_folder'));
         $withTaxonomies = [];
 
         if ($searchBox->showsubcat) {

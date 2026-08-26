@@ -88,7 +88,7 @@ final class PageLayoutContext
         if (\function_exists('nexus')) {
             $script = Nexus::instance()->getScript();
         } else {
-            $scriptFile = SupportContext::getServerValue('SCRIPT_FILENAME', '');
+            $scriptFile = Input::serverValue('SCRIPT_FILENAME', '');
             $script = basename($scriptFile);
             if (str_contains($script, '.')) {
                 $script = strstr($script, '.', true);
@@ -123,7 +123,7 @@ final class PageLayoutContext
             analyticsCodeTweak: (string) app(Globals::class)->get('analyticscode_tweak', ''),
             requestSearch: is_scalar(request()->query('search', '')) ? (string) request()->query('search', '') : '',
             requestSearchArea: is_scalar(request()->query('search_area', '')) ? (string) request()->query('search_area', '') : '',
-            scriptFileName: SupportContext::getServerValue('SCRIPT_FILENAME', ''),
+            scriptFileName: Input::serverValue('SCRIPT_FILENAME', ''),
             script: $script,
             enableOffer: (string) app(Globals::class)->get('enableoffer', ''),
             customMenu: (string) Hooks::applyFilter('nexus_menu') ?: null,

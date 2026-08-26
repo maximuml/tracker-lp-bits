@@ -61,7 +61,7 @@ final class LegacyAuthContext
         if (\function_exists('nexus')) {
             $script = Nexus::instance()->getScript();
         } else {
-            $scriptFile = SupportContext::getServerValue('SCRIPT_FILENAME', '');
+            $scriptFile = Input::serverValue('SCRIPT_FILENAME', '');
             $script = basename($scriptFile);
             if (str_contains($script, '.')) {
                 $script = strstr($script, '.', true);
@@ -73,11 +73,11 @@ final class LegacyAuthContext
             lang: app(Language::class)->functions(),
             cache: app(LegacyRedisCache::class),
             ip: \function_exists('getip') ? Network::clientIp((bool) true) : Network::clientIp(),
-            requestUri: SupportContext::getServerValue('REQUEST_URI'),
+            requestUri: Input::serverValue('REQUEST_URI'),
             requestBody: request()->post(),
             queryParams: request()->query(),
             request: array_merge(request()->post(), request()->query()),
-            cookies: SupportContext::allCookie(),
+            cookies: request()->cookies->all(),
             maxLoginAttempts: (int) app(Globals::class)->get('maxloginattempts', 0),
             captchaEnabled: app(Globals::class)->get('iv', '') === 'yes',
             registration: [
@@ -86,7 +86,7 @@ final class LegacyAuthContext
                 'maxusers' => (int) app(Globals::class)->get('maxusers', 0),
                 'maxip' => (int) app(Globals::class)->get('maxip', 0),
             ],
-            langFolder: SupportContext::getCookieValue('c_lang_folder'),
+            langFolder: Input::cookieValue('c_lang_folder'),
             moderatorClass: defined('UC_MODERATOR') ? (int) \constant('UC_MODERATOR') : 0,
             script: $script,
         );

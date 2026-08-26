@@ -134,7 +134,7 @@ class MyController extends Controller
             'headerFilters' => $headerFilters,
             'queryString' => $queryString,
             'q' => $q,
-            'requestUri' => SupportContext::getServerValue('REQUEST_URI'),
+            'requestUri' => Input::serverValue('REQUEST_URI'),
             'lang_myhr' => $lang_myhr,
             'rescount' => $rescount,
             'pagertop' => $pagertop,

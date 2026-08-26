@@ -36,7 +36,7 @@ final class SettingsSeed
         $TWEAK = app(Globals::class)->get('TWEAK', []);
 
         app(Globals::class)->set('SITENAME', $BASIC['SITENAME']);
-        app(Globals::class)->set('BASEURL', $BASIC['BASEURL'] ?: (SupportContext::getServerValue('HTTP_HOST', 'localhost')));
+        app(Globals::class)->set('BASEURL', $BASIC['BASEURL'] ?: (Input::serverValue('HTTP_HOST', 'localhost')));
         $BASEURL = app(Globals::class)->get('BASEURL', '');
         $announce_urls = [];
         $announce_urls[] = $BASIC['announce_url'] ?: ($BASEURL.DEFAULT_TRACKER_URI);

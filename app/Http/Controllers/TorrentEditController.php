@@ -52,7 +52,7 @@ class TorrentEditController extends Controller
         }
 
         if (empty(app(Globals::class)->get('lang_edit')) || empty(app(Globals::class)->get('lang_functions'))) {
-            SupportContext::setServerValue('SCRIPT_NAME', '/edit.php');
+            Input::setServerValue('SCRIPT_NAME', '/edit.php');
             require base_path(Locale::scriptFilePath((string) 'functions.php', (bool) false, (string) ''));
             app(Globals::class)->set('lang_functions', $lang_functions ?? []);
             require base_path(Locale::scriptFilePath((string) '', (bool) false, (string) ''));

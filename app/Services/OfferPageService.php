@@ -313,7 +313,7 @@ final class OfferPageService
         $offerName = (string) OfferRepository::getOfferName($offerId);
 
         $perpage = 25;
-        $self = (string) SupportContext::getServerValue('PHP_SELF');
+        $self = Input::serverValue('PHP_SELF');
         [$pagerTop, $pagerBottom, , $offset, $perpage] = Pagination::pager($perpage, $count, $self.'?id='.$offerId.'&offer_vote=1&');
         $voteRows = OfferRepository::getVoteRows($offerId, (int) $offset, (int) $perpage);
 
@@ -407,7 +407,7 @@ final class OfferPageService
 
         $search = (string) ($request->query('search', '') ?? '');
 
-        $self = (string) SupportContext::getServerValue('PHP_SELF');
+        $self = Input::serverValue('PHP_SELF');
         $offerResult = OfferRepository::getLegacyList($categ, $offerorid, $search, $sortColumn, $direction, 0, 0);
         $count = (int) $offerResult['count'];
 

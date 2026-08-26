@@ -46,6 +46,7 @@ final class AnnounceRequestDtoTest extends TestCase
             'REMOTE_ADDR' => '10.0.0.1',
             'HTTP_USER_AGENT' => 'PHPUnit/TestClient',
         ]);
+        app()->instance('request', $request);
 
         $dto = AnnounceRequestDto::fromRequest($request, $request->query->all());
 

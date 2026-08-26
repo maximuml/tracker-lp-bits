@@ -20,6 +20,7 @@ use App\Support\Globals;
 use App\Support\Hooks;
 use App\Support\Html;
 use App\Support\Http;
+use App\Support\Input;
 use App\Support\Locale;
 use App\Support\Network;
 use App\Support\SearchBox;
@@ -425,7 +426,7 @@ final class UsercpPageService
 
         // Site languages
         $siteLangs = Locale::languageList('site_lang', true);
-        $currentFolder = Locale::folderFromCookie((string) SupportContext::getCookieValue('c_lang_folder', ''), false);
+        $currentFolder = Locale::folderFromCookie((string) Input::cookieValue('c_lang_folder', ''), false);
         $langOptions = '';
         foreach ($siteLangs as $row) {
             $se = ($row['site_lang_folder'] === $currentFolder) ? ' selected' : '';

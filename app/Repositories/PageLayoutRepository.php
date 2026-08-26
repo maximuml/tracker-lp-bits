@@ -140,7 +140,7 @@ class PageLayoutRepository extends BaseRepository
         }
 
         SupportContext::addUserUpdate('last_access', date('Y-m-d H:i:s'));
-        SupportContext::addUserUpdate('ip', $user['ip'] ?? SupportContext::getServerValue('REMOTE_ADDR', ''));
+        SupportContext::addUserUpdate('ip', $user['ip'] ?? Input::serverValue('REMOTE_ADDR', ''));
 
         IpLogRepository::saveToCache((int) $user['id']);
 

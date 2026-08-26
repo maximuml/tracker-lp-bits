@@ -4,9 +4,9 @@ namespace App\Repositories;
 
 use App\Models\IpLog;
 use App\Support\Environment;
+use App\Support\Input;
 use App\Support\Logger;
 use App\Support\Network;
-use App\Support\SupportContext;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Redis;
 
@@ -33,7 +33,7 @@ class IpLogRepository extends BaseRepository
         }
         $redis = Redis::connection()->client();
         if (is_null($uri)) {
-            $parsed_uri = parse_url(SupportContext::getServerValue('REQUEST_URI', ''));
+            $parsed_uri = parse_url(Input::serverValue('REQUEST_URI', ''));
             $uri = $parsed_uri['path'] ?? '/';
         }
         if (is_null($ipArr)) {

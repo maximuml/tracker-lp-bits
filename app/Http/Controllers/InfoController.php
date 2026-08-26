@@ -38,7 +38,7 @@ class InfoController extends LegacyController
 
         $action = htmlspecialchars((string) request()->query('action'));
         $perpage = 15;
-        $phpSelf = SupportContext::getServerValue('PHP_SELF');
+        $phpSelf = Input::serverValue('PHP_SELF');
         $subject = UserDisplay::username($userid);
 
         $data = [

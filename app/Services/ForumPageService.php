@@ -447,7 +447,7 @@ final class ForumPageService
         $pn = 0;
         $lpr = $this->getLastReadPostId($topicid, $curUser);
 
-        $__server_REQUEST_URI = SupportContext::getServerValue('REQUEST_URI');
+        $__server_REQUEST_URI = Input::serverValue('REQUEST_URI');
 
         foreach ($allPosts as $arr) {
             $pn++;

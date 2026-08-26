@@ -3,7 +3,7 @@
 namespace Tests\Unit\Support;
 
 use App\Support\Network;
-use App\Support\SupportContext;
+use Illuminate\Http\Request;
 use PHPUnit\Framework\TestCase;
 
 class NetworkTest extends TestCase
@@ -91,23 +91,22 @@ class NetworkTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        SupportContext::reset();
         Network::setTrustedProxies(null);
     }
 
     protected function tearDown(): void
     {
-        SupportContext::reset();
         Network::setTrustedProxies(null);
         parent::tearDown();
     }
 
     private function setServerContext(array $server): void
     {
-        SupportContext::reset();
+        $request = Request::create('/', 'GET');
         foreach ($server as $key => $value) {
-            SupportContext::setServerValue($key, $value);
+            $request->server->set($key, $value);
         }
+        app()->instance('request', $request);
     }
 
     public function test_client_ip_returns_rightmost_non_trusted_forwarded_ip(): void

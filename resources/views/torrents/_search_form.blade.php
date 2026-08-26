@@ -2,7 +2,7 @@
 $lang_torrents = (array) (\app(\App\Support\Globals::class)->get('lang_torrents') ?? []);
 $CURUSER = (array) (\app(\App\Support\CurrentUser::class)->get() ?? []);
 $Cache = \app(\App\Support\Cache\LegacyRedisCache::class);
-$__server_QUERY_STRING = \App\Support\SupportContext::getServerValue('QUERY_STRING');
+$__server_QUERY_STRING = \App\Support\Input::serverValue('QUERY_STRING');
 $searchBoxRightTdStyle = 'padding: 1px;padding-left: 10px;white-space: nowrap';
 $sectiontype = $sectiontype ?? 0;
 $include_dead = (int) ($include_dead ?? 0);

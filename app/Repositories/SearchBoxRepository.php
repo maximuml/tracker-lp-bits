@@ -10,7 +10,7 @@ use App\Models\SearchBox;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Support\Cache;
-use App\Support\SupportContext;
+use App\Support\Input;
 use App\Support\UserDisplay;
 use Filament\Forms;
 use Filament\Schemas\Components\Fieldset;
@@ -397,7 +397,7 @@ class SearchBoxRepository extends BaseRepository
 
     public function buildSearchBoxFormSchema(SearchBox $searchBox, string $namePrefix): Section
     {
-        $lang = \App\Support\Locale::folderFromCookie(SupportContext::getCookieValue('c_lang_folder', ''), (bool) false);
+        $lang = \App\Support\Locale::folderFromCookie(Input::cookieValue('c_lang_folder', ''), (bool) false);
         $heading = $searchBox->section_name[$lang] ?? \App\Support\Locale::trans('searchbox.sections.browse', [], null);
 
         return Section::make($heading)

@@ -10,6 +10,7 @@ use App\Support\Config\SiteConfig;
 use App\Support\Database;
 use App\Support\Globals;
 use App\Support\Hooks;
+use App\Support\Input;
 use App\Support\Logger;
 use App\Support\Network;
 use App\Support\Pagination;
@@ -47,8 +48,8 @@ final class TorrentAjaxRepository
             ->count();
 
         $perPage = 25;
-        $scriptName = SupportContext::getServerValue('SCRIPT_NAME');
-        $href = is_string($scriptName) ? $scriptName.'?id='.$torrentId.'&' : '?id='.$torrentId.'&';
+        $scriptName = Input::serverValue('SCRIPT_NAME');
+        $href = $scriptName !== '' ? $scriptName.'?id='.$torrentId.'&' : '?id='.$torrentId.'&';
         $pager = Pagination::pager($perPage, $count, $href);
 
         $offset = (int) $pager[3];

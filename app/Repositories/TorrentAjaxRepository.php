@@ -15,7 +15,6 @@ use App\Support\Logger;
 use App\Support\Network;
 use App\Support\Pagination;
 use App\Support\Permissions;
-use App\Support\SupportContext;
 use App\Support\UserDisplay;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;

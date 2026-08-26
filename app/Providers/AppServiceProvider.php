@@ -10,6 +10,7 @@ use App\Support\Globals;
 use App\Support\Hooks;
 use App\Support\Language;
 use App\Support\Locale;
+use App\Support\UserUpdateBatch;
 use Filament\Facades\Filament;
 use Filament\Support\Assets\Css;
 use Filament\Support\Facades\FilamentAsset;
@@ -45,6 +46,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(CurrentUser::class);
         $this->app->singleton(Language::class);
         $this->app->singleton(Globals::class);
+        $this->app->singleton(UserUpdateBatch::class);
 
         Hooks::doAction('nexus_register');
     }

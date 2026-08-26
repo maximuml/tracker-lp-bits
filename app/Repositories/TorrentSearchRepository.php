@@ -17,7 +17,6 @@ use App\Support\Pagination;
 use App\Support\Promotion;
 use App\Support\SearchBox;
 use App\Support\SearchSuggest;
-use App\Support\SupportContext;
 use Carbon\Carbon;
 use Illuminate\Database\Connection;
 use Illuminate\Support\Facades\DB;

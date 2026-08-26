@@ -9,7 +9,6 @@ use App\Support\Cache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
 use App\Support\Hooks;
-use App\Support\SupportContext;
 use App\Support\UserDisplay;
 use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;

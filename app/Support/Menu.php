@@ -92,7 +92,7 @@ final class Menu
 
         $user = app(CurrentUser::class)->get();
         if ($user && app(Globals::class)->get('where_tweak', '') === 'yes') {
-            SupportContext::addUserUpdate('page', $result['selected']);
+            app(UserUpdateBatch::class)->add('page', $result['selected']);
         }
 
         echo $result['html'];

@@ -18,7 +18,6 @@ use App\Support\Log;
 use App\Support\Logger;
 use App\Support\Pagination;
 use App\Support\Permissions;
-use App\Support\SupportContext;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
 use Carbon\Carbon;

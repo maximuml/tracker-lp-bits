@@ -11,7 +11,6 @@ use App\Support\Input;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Path;
-use App\Support\SupportContext;
 use App\Support\Url;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;

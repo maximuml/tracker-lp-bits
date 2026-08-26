@@ -14,7 +14,6 @@ use App\Support\Http;
 use App\Support\Locale;
 use App\Support\Path;
 use App\Support\Permissions;
-use App\Support\SupportContext;
 use App\Support\Time;
 use App\Support\Url;
 use App\Support\UserDisplay;

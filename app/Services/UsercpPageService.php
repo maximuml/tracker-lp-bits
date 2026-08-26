@@ -25,7 +25,6 @@ use App\Support\Locale;
 use App\Support\Network;
 use App\Support\SearchBox;
 use App\Support\Strings;
-use App\Support\SupportContext;
 use App\Support\Time;
 use App\Support\TwoFactorAuthHelper;
 use App\Support\Url;

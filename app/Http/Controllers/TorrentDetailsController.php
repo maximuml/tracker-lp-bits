@@ -24,7 +24,6 @@ use App\Support\Locale;
 use App\Support\Logger;
 use App\Support\Promotion;
 use App\Support\Strings;
-use App\Support\SupportContext;
 use App\Support\TorrentAccess;
 use App\Support\TorrentBookmark;
 use App\Support\UserDisplay;

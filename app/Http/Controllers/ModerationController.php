@@ -13,7 +13,6 @@ use App\Support\CurrentUser;
 use App\Support\Globals;
 use App\Support\Pagination;
 use App\Support\Permissions;
-use App\Support\SupportContext;
 use App\Support\Time;
 use App\Support\UserClass;
 use App\Support\UserDisplay;

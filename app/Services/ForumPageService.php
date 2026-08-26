@@ -23,7 +23,6 @@ use App\Support\Pagination;
 use App\Support\Palette;
 use App\Support\Ratio;
 use App\Support\Strings;
-use App\Support\SupportContext;
 use App\Support\Time;
 use App\Support\UserClass;
 use App\Support\UserDisplay;

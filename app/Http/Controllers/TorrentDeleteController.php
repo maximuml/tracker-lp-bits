@@ -12,7 +12,6 @@ use App\Support\Globals;
 use App\Support\Locale;
 use App\Support\Log;
 use App\Support\Permissions;
-use App\Support\SupportContext;
 use App\Support\TorrentOps;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;

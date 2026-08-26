@@ -24,7 +24,6 @@ use App\Support\Logger;
 use App\Support\Mail;
 use App\Support\Permissions;
 use App\Support\SetlistLookup;
-use App\Support\SupportContext;
 use App\Support\Url;
 use App\Support\UserDisplay;
 use App\Support\Validators;

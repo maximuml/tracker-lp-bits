@@ -6,7 +6,6 @@ use App\Repositories\InfoRepository;
 use App\Support\Globals;
 use App\Support\Http;
 use App\Support\Locale;
-use App\Support\SupportContext;
 use App\Support\Url;
 use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;

@@ -82,7 +82,7 @@ final class PageLayoutContext
 
     public static function fromSupportContext(): self
     {
-        $userUpdateSet = &SupportContext::getUserUpdateSet();
+        $userUpdateSet = &app(UserUpdateBatch::class)->all();
 
         $script = '';
         if (\function_exists('nexus')) {

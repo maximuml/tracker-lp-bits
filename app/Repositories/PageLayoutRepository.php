@@ -7,9 +7,10 @@ use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
 use App\Support\Hooks;
+use App\Support\Input;
 use App\Support\Language;
 use App\Support\Menu;
-use App\Support\SupportContext;
+use App\Support\UserUpdateBatch;
 use Illuminate\Support\Facades\DB;
 use Nexus\Nexus;
 
@@ -139,8 +140,8 @@ class PageLayoutRepository extends BaseRepository
             return;
         }
 
-        SupportContext::addUserUpdate('last_access', date('Y-m-d H:i:s'));
-        SupportContext::addUserUpdate('ip', $user['ip'] ?? Input::serverValue('REMOTE_ADDR', ''));
+        app(UserUpdateBatch::class)->add('last_access', date('Y-m-d H:i:s'));
+        app(UserUpdateBatch::class)->add('ip', $user['ip'] ?? Input::serverValue('REMOTE_ADDR', ''));
 
         IpLogRepository::saveToCache((int) $user['id']);
 
@@ -158,7 +159,7 @@ class PageLayoutRepository extends BaseRepository
         app(Globals::class)->set('nexus_menu_selected', $menuResult['selected']);
 
         if ((string) app(Globals::class)->get('where_tweak', '') === 'yes') {
-            SupportContext::addUserUpdate('page', $menuResult['selected']);
+            app(UserUpdateBatch::class)->add('page', $menuResult['selected']);
         }
     }
 
@@ -172,7 +173,7 @@ class PageLayoutRepository extends BaseRepository
             return;
         }
 
-        $userUpdateSet = SupportContext::getUserUpdateSet();
+        $userUpdateSet = app(UserUpdateBatch::class)->all();
         if (empty($userUpdateSet)) {
             return;
         }

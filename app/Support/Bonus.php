@@ -365,7 +365,7 @@ class Bonus
     public static function updatePoints(string $type, float $point, int|string $id, ?string $bonusTweak = null): void
     {
         if ($bonusTweak === null) {
-            $bonusTweak = SupportContext::getBonusTweak();
+            $bonusTweak = (string) app(Globals::class)->get('bonus_tweak', '');
         }
 
         if ($point == 0) {

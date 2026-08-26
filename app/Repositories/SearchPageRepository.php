@@ -11,7 +11,6 @@ use App\Support\Globals;
 use App\Support\Logger;
 use App\Support\Pagination;
 use App\Support\Permissions;
-use App\Support\SupportContext;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;

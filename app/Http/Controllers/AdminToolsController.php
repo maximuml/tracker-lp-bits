@@ -10,7 +10,6 @@ use App\Support\Globals;
 use App\Support\Html;
 use App\Support\Network;
 use App\Support\Pagination;
-use App\Support\SupportContext;
 use App\Support\UserDisplay;
 use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;

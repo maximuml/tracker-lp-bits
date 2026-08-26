@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Http\Middleware\VerifyCsrfToken;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
@@ -18,6 +19,7 @@ final class Phase51CheckuserRedirectTest extends TestCase
     {
         parent::setUp();
         config(['scout.driver' => 'null', 'app.debug' => false]);
+        $this->withoutMiddleware(VerifyCsrfToken::class);
     }
 
     public function test_checkuser_with_id_redirects_to_filament_user_view(): void

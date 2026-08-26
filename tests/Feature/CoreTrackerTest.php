@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Http\Middleware\VerifyCsrfToken;
 use App\Models\Category;
 use App\Models\Comment;
 use App\Models\SearchBox;
@@ -9,7 +10,6 @@ use App\Models\Torrent;
 use App\Models\User;
 use App\ValueObjects\InfoHash;
 use App\ValueObjects\PeerId;
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Laravel\Sanctum\Sanctum;
 use Rhilip\Bencode\Bencode;

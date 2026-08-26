@@ -5,7 +5,6 @@ namespace App\Support;
 use App\Repositories\TorrentRepository;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
-use Nexus\Database\NexusDB;
 
 /**
  * Generic legacy DB helpers extracted from `include/functions.php` and
@@ -24,7 +23,9 @@ final class LegacyDb
      */
     public static function error(): string
     {
-        return (string) NexusDB::getInstance()->error();
+        $errorInfo = DB::connection()->getPdo()->errorInfo();
+
+        return (string) ($errorInfo[2] ?? '');
     }
 
     /**

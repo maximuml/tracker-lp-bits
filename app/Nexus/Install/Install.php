@@ -19,7 +19,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
-use Nexus\Database\NexusDB;
 
 class Install
 {
@@ -586,7 +585,7 @@ class Install
         $this->doLog('[CREATE ENV] final newData: '.json_encode($newData));
         unset($key, $value);
         // check
-        NexusDB::getInstance()->connect($newData['DB_HOST'], $newData['DB_USERNAME'], $newData['DB_PASSWORD'], $newData['DB_DATABASE'], (int) $newData['DB_PORT'], $newData['DB_CONNECTION']);
+        DB::connection()->getPdo();
         $redis = new \Redis;
         $redis->connect($newData['REDIS_HOST'], $newData['REDIS_PORT'] ?: 6379);
         if (! empty($data['REDIS_PASSWORD'])) {
@@ -632,7 +631,7 @@ class Install
     {
         foreach ($createTable as $table => $sql) {
             $this->doLog("[CREATE TABLE] $table \n $sql");
-            NexusDB::getInstance()->query($sql);
+            DB::statement($sql);
         }
 
         return true;
@@ -703,7 +702,7 @@ class Install
             }
             $this->doLog("[IMPORT DATA] $table, $sql");
             DB::table($table)->truncate();
-            NexusDB::getInstance()->query($sql);
+            DB::statement($sql);
         }
 
         return true;

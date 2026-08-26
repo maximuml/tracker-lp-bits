@@ -29,7 +29,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
-use Nexus\Database\NexusDB;
 
 class Update extends Install
 {
@@ -106,7 +105,7 @@ class Update extends Install
         foreach (['adminpanel', 'modpanel', 'sysoppanel'] as $table) {
             $columnInfo = $this->getMysqlColumnInfo($table, 'id');
             if ($columnInfo['DATA_TYPE'] == 'tinyint' || empty($columnInfo['EXTRA']) || $columnInfo['EXTRA'] != 'auto_increment') {
-                NexusDB::getInstance()->query("alter table $table modify id int(11) unsigned not null AUTO_INCREMENT");
+                DB::statement("alter table $table modify id int(11) unsigned not null AUTO_INCREMENT");
             }
         }
 
@@ -152,7 +151,7 @@ class Update extends Install
             if ($columnInfo['DATA_TYPE'] == 'enum') {
                 $sql = "alter table torrents modify `pos_state` varchar(32) NOT NULL DEFAULT 'normal'";
                 $this->doLog("[ALTER TORRENT POS_STATE TYPE TO VARCHAR], $sql");
-                NexusDB::getInstance()->query($sql);
+                DB::statement($sql);
             }
         }
 
@@ -386,7 +385,7 @@ class Update extends Install
                 $this->doLog('[MIGRATE_TORRENT_TAG] done!');
             }
             $sql = 'alter table torrents drop column tags';
-            NexusDB::getInstance()->query($sql);
+            DB::statement($sql);
             $this->doLog($sql);
         } else {
             $this->doLog('torrents table does not has column: tags');

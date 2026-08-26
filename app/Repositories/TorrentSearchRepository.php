@@ -18,7 +18,6 @@ use App\Support\SupportContext;
 use Carbon\Carbon;
 use Illuminate\Database\Connection;
 use Illuminate\Support\Facades\DB;
-use Nexus\Database\NexusDB;
 use Nexus\Nexus;
 
 class TorrentSearchRepository
@@ -95,7 +94,7 @@ class TorrentSearchRepository
 
         $searchstr_raw = is_scalar($searchParams['search'] ?? '') ? (string) ($searchParams['search'] ?? '') : '';
         $searchstr_ori = htmlspecialchars(trim($searchstr_raw));
-        $searchstr = NexusDB::getInstance()->escapeString(trim($searchstr_raw));
+        $searchstr = substr(DB::getPdo()->quote(trim($searchstr_raw)), 1, -1);
         $searchParams['search'] = $searchstr_raw;
         if (empty($searchstr)) {
             unset($searchstr);

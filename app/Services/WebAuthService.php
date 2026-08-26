@@ -231,7 +231,7 @@ class WebAuthService
         } else {
             DB::table('loginattempts')
                 ->where('ip', $ip)
-                ->update(['attempts' => DB::raw('attempts + 1')]);
+                ->increment('attempts');
         }
     }
 }

@@ -58,7 +58,7 @@ final class ToptenRepository
         if ($limit === 10 || $subtype === 'ul') {
             $sections[] = [
                 'renderer' => 'usershare_table',
-                'data' => self::toArray((clone $base)->orderByRaw('uploaded DESC')->limit($limit)->get()),
+                'data' => self::toArray((clone $base)->orderBy('uploaded', 'desc')->limit($limit)->get()),
                 'caption' => self::caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_uploaders'] ?? 'Uploaders'),
                 'limits' => [100, 250],
                 'subtype' => 'ul',
@@ -68,7 +68,7 @@ final class ToptenRepository
         if ($limit === 10 || $subtype === 'dl') {
             $sections[] = [
                 'renderer' => 'usershare_table',
-                'data' => self::toArray((clone $base)->orderByRaw('downloaded DESC')->limit($limit)->get()),
+                'data' => self::toArray((clone $base)->orderBy('downloaded', 'desc')->limit($limit)->get()),
                 'caption' => self::caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_downloaders'] ?? 'Downloaders'),
                 'limits' => [100, 250],
                 'subtype' => 'dl',
@@ -79,7 +79,7 @@ final class ToptenRepository
             $note = $lang['text_fastest_up_note'] ?? '';
             $sections[] = [
                 'renderer' => 'usershare_table',
-                'data' => self::toArray((clone $base)->where('uploaded', '>', 53687091200)->orderByRaw('upspeed DESC')->limit($limit)->get()),
+                'data' => self::toArray((clone $base)->where('uploaded', '>', 53687091200)->orderBy('upspeed', 'desc')->limit($limit)->get()),
                 'caption' => self::caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_fastest_uploaders'] ?? 'Fastest Uploaders', $note),
                 'limits' => [100, 250],
                 'subtype' => 'uls',
@@ -90,7 +90,7 @@ final class ToptenRepository
             $note = $lang['text_fastest_note'] ?? '';
             $sections[] = [
                 'renderer' => 'usershare_table',
-                'data' => self::toArray((clone $base)->orderByRaw('downspeed DESC')->limit($limit)->get()),
+                'data' => self::toArray((clone $base)->orderBy('downspeed', 'desc')->limit($limit)->get()),
                 'caption' => self::caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_fastest_downloaders'] ?? 'Fastest Downloaders', $note),
                 'limits' => [100, 250],
                 'subtype' => 'dls',
@@ -162,7 +162,7 @@ final class ToptenRepository
         if ($limit === 10 || $subtype === 'sna') {
             $sections[] = [
                 'renderer' => '_torrenttable',
-                'data' => self::toArray((clone $base)->orderByRaw('times_completed DESC')->limit($limit)->get()),
+                'data' => self::toArray((clone $base)->orderBy('times_completed', 'desc')->limit($limit)->get()),
                 'caption' => self::caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_most_snatched_torrents'] ?? 'Most Snatched Torrents'),
                 'limits' => [25, 50],
                 'subtype' => 'sna',
@@ -172,7 +172,7 @@ final class ToptenRepository
         if ($limit === 10 || $subtype === 'mdt') {
             $sections[] = [
                 'renderer' => '_torrenttable',
-                'data' => self::toArray((clone $base)->where('times_completed', '>', 0)->orderByRaw('data DESC, added ASC')->limit($limit)->get()),
+                'data' => self::toArray((clone $base)->where('times_completed', '>', 0)->orderBy('data', 'desc')->orderBy('added', 'asc')->limit($limit)->get()),
                 'caption' => self::caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_most_data_transferred_torrents'] ?? 'Most Data Transferred Torrents'),
                 'limits' => [25, 50],
                 'subtype' => 'mdt',
@@ -226,7 +226,7 @@ final class ToptenRepository
                         ->leftJoin('users', 'users.country', '=', 'countries.id')
                         ->select('countries.name', 'countries.flagpic', DB::raw('COUNT(users.country) as num'))
                         ->groupBy('countries.name', 'countries.flagpic')
-                        ->orderByRaw('num DESC')
+                        ->orderBy('num', 'desc')
                         ->limit($limit)
                         ->get()
                 ),
@@ -246,7 +246,7 @@ final class ToptenRepository
                         ->select('c.name', 'c.flagpic', DB::raw('sum(u.uploaded) AS ul'))
                         ->where('u.enabled', 'yes')
                         ->groupBy('c.name')
-                        ->orderByRaw('ul DESC')
+                        ->orderBy('ul', 'desc')
                         ->limit($limit)
                         ->get()
                 ),
@@ -267,7 +267,7 @@ final class ToptenRepository
                         ->where('u.enabled', 'yes')
                         ->groupBy('c.name')
                         ->havingRaw('sum(u.uploaded) > 1099511627776 AND count(u.id) >= 100')
-                        ->orderByRaw('ul_avg DESC')
+                        ->orderBy('ul_avg', 'desc')
                         ->limit($limit)
                         ->get()
                 ),
@@ -288,7 +288,7 @@ final class ToptenRepository
                         ->where('u.enabled', 'yes')
                         ->groupBy('c.name')
                         ->havingRaw('sum(u.uploaded) > 1099511627776 AND sum(u.downloaded) > 1099511627776 AND count(u.id) >= 100')
-                        ->orderByRaw('r DESC')
+                        ->orderBy('r', 'desc')
                         ->limit($limit)
                         ->get()
                 ),
@@ -319,7 +319,7 @@ final class ToptenRepository
         if ($limit === 10 || $subtype === 'mtop') {
             $sections[] = [
                 'renderer' => 'postable',
-                'data' => self::toArray((clone $postBase)->orderByRaw('usertopics DESC')->limit($limit)->get()),
+                'data' => self::toArray((clone $postBase)->orderBy('usertopics', 'desc')->limit($limit)->get()),
                 'caption' => self::caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_most_topic'] ?? ' Forum Topic Starters '),
                 'limits' => [100, 250],
                 'subtype' => 'mtop',
@@ -329,7 +329,7 @@ final class ToptenRepository
         if ($limit === 10 || $subtype === 'mpos') {
             $sections[] = [
                 'renderer' => 'postable',
-                'data' => self::toArray((clone $postBase)->orderByRaw('userposts DESC')->limit($limit)->get()),
+                'data' => self::toArray((clone $postBase)->orderBy('userposts', 'desc')->limit($limit)->get()),
                 'caption' => self::caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_most_post'] ?? ' Forum Posters '),
                 'limits' => [100, 250],
                 'subtype' => 'mpos',
@@ -344,7 +344,7 @@ final class ToptenRepository
                         ->leftJoin('comments', 'users.id', '=', 'comments.user')
                         ->select('users.id as userid', DB::raw('COUNT(comments.id) as num'))
                         ->groupBy('users.id')
-                        ->orderByRaw('num DESC')
+                        ->orderBy('num', 'desc')
                         ->limit($limit)
                         ->get()
                 ),
@@ -366,7 +366,7 @@ final class ToptenRepository
                         ->where('forums.minclassread', '<=', 1)
                         ->orWhereNull('forums.id')
                         ->groupBy('tp.id', 'tp.subject', 'tp.forumid', 'forums.id')
-                        ->orderByRaw('postnum DESC')
+                        ->orderBy('postnum', 'desc')
                         ->limit($limit)
                         ->get()
                 ),
@@ -415,7 +415,7 @@ final class ToptenRepository
                         DB::table('users')
                             ->select('id', 'donated', 'donated_cny')
                             ->where('donated', '>', 0)
-                            ->orderByRaw('donated DESC, donated_cny DESC')
+                            ->orderBy('donated', 'desc')->orderBy('donated_cny', 'desc')
                             ->limit($limit)
                             ->get()
                     ),
@@ -432,7 +432,7 @@ final class ToptenRepository
                         DB::table('users')
                             ->select('id', 'donated', 'donated_cny')
                             ->where('donated_cny', '>', 0)
-                            ->orderByRaw('donated DESC, donated_cny DESC')
+                            ->orderBy('donated', 'desc')->orderBy('donated_cny', 'desc')
                             ->limit($limit)
                             ->get()
                     ),
@@ -451,7 +451,7 @@ final class ToptenRepository
                         ->rightJoin('agent_allowed_family', 'users.clientselect', '=', 'agent_allowed_family.id')
                         ->select('agent_allowed_family.family as client_name', DB::raw('COUNT(users.id) as client_num'))
                         ->groupBy('users.clientselect', 'agent_allowed_family.family')
-                        ->orderByRaw('client_num DESC')
+                        ->orderBy('client_num', 'desc')
                         ->limit($limit)
                         ->get()
                 ),
@@ -469,7 +469,7 @@ final class ToptenRepository
                         ->join('stylesheets', 'users.stylesheet', '=', 'stylesheets.id')
                         ->select('stylesheets.name as stylesheet_name', DB::raw('COUNT(users.id) as stylesheet_num'))
                         ->groupBy('users.stylesheet', 'stylesheets.name')
-                        ->orderByRaw('stylesheet_num DESC')
+                        ->orderBy('stylesheet_num', 'desc')
                         ->limit($limit)
                         ->get()
                 ),
@@ -488,7 +488,7 @@ final class ToptenRepository
                         ->select('language.lang_name as lang_name', DB::raw('COUNT(users.id) as lang_num'))
                         ->where('language.site_lang', 1)
                         ->groupBy('users.lang', 'language.lang_name')
-                        ->orderByRaw('lang_num DESC')
+                        ->orderBy('lang_num', 'desc')
                         ->limit($limit)
                         ->get()
                 ),

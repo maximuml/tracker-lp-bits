@@ -100,7 +100,7 @@ final class Captcha
      */
     public static function showImageCode(): void
     {
-        $lang_functions = SupportContext::getLangFunctions();
+        $lang_functions = app(Language::class)->functions();
         $iv = (string) SupportContext::getGlobal('iv', '');
 
         self::render($iv, [

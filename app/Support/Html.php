@@ -261,7 +261,7 @@ final class Html
     public static function torrentSelection(string $name, string $selName, string $listName, int $selectedId = 0, int $mode = 0): string
     {
         $items = SearchBox::itemList(app(LegacyRedisCache::class), $listName, $mode);
-        $chooseOne = SupportContext::getLangFunctions()['select_choose_one'] ?? '';
+        $chooseOne = app(Language::class)->functions()['select_choose_one'] ?? '';
 
         return self::torrentSelect($name, $selName, $chooseOne, $selectedId, $items);
     }
@@ -272,7 +272,7 @@ final class Html
      */
     public static function promotionSelection(int $selected = 0, int $hide = 0): string
     {
-        $lang = SupportContext::getLangFunctions();
+        $lang = app(Language::class)->functions();
         $labels = [
             'normal' => (string) ($lang['text_normal'] ?? ''),
             'free' => (string) ($lang['text_free'] ?? ''),
@@ -498,7 +498,7 @@ final class Html
      */
     public static function formatSpoiler(string $content, string $title = '', bool $defaultCollapsed = true): string
     {
-        $defaultTitle = SupportContext::getLangFunctions()['spoiler_default_title'] ?? '';
+        $defaultTitle = app(Language::class)->functions()['spoiler_default_title'] ?? '';
 
         return Comment::addTempCode(BBCode::spoiler($content, $title, $defaultTitle, $defaultCollapsed));
     }
@@ -614,7 +614,7 @@ final class Html
      */
     public static function smiliesFrame(): void
     {
-        $lang = SupportContext::getLangFunctions();
+        $lang = app(Language::class)->functions();
 
         echo Smilies::framedTable(
             (string) ($lang['text_smilies'] ?? ''),

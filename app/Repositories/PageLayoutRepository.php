@@ -6,6 +6,7 @@ use App\Models\Invite;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Hooks;
+use App\Support\Language;
 use App\Support\Menu;
 use App\Support\SupportContext;
 use Illuminate\Support\Facades\DB;
@@ -144,7 +145,7 @@ class PageLayoutRepository extends BaseRepository
 
         $menuResult = Menu::render(
             $script,
-            SupportContext::getLangFunctions(),
+            app(Language::class)->functions(),
             (string) SupportContext::getGlobal('enableoffer', ''),
             (string) Hooks::applyFilter('nexus_menu') ?: null,
             $user,

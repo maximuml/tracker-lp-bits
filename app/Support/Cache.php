@@ -124,7 +124,7 @@ final class Cache
         $rootpath = SupportContext::getGlobal('rootpath', defined('ROOT_PATH') ? constant('ROOT_PATH') : '');
         $cacheDir = SupportContext::getGlobal('cache', '');
         $langDir = SupportContext::getGlobal('CURLANGDIR', '');
-        $lang = SupportContext::getLangFunctions();
+        $lang = app(Language::class)->functions();
 
         $cachefile = self::path($rootpath, $cacheDir, $langDir, $file);
         if (self::isFresh($cachefile, $cachetime)) {

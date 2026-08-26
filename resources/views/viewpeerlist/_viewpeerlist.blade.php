@@ -1,5 +1,5 @@
 <?php
-$lang_functions = $lang_functions ?? \App\Support\SupportContext::getLangFunctions();
+$lang_functions = $lang_functions ?? \App\Support\\app(\App\Support\Language::class)->functions();
 $lang_viewpeerlist = (array) ($lang_viewpeerlist ?? \App\Support\SupportContext::getGlobal('lang_viewpeerlist') ?? []);
 
 $torrent = (array) ($torrent ?? []);

@@ -101,7 +101,7 @@ final class LegacyResponse
      */
     public static function permissionDenied(?int $allowMinimumClass = null): void
     {
-        $lang_functions = SupportContext::getLangFunctions();
+        $lang_functions = app(Language::class)->functions();
 
         if ($allowMinimumClass === null) {
             self::abort(
@@ -147,7 +147,7 @@ final class LegacyResponse
         }
 
         $CURUSER = app(CurrentUser::class)->get() ?? [];
-        $lang_functions = SupportContext::getLangFunctions();
+        $lang_functions = app(Language::class)->functions();
 
         $msg = 'Invalid ID Attempt: Username: '.($CURUSER['username'] ?? '')
             .' - UserID: '.($CURUSER['id'] ?? '')
@@ -214,7 +214,7 @@ final class LegacyResponse
     public static function canUpload(string $where = 'torrents'): bool
     {
         $CURUSER = app(CurrentUser::class)->get() ?? [];
-        $lang_functions = SupportContext::getLangFunctions();
+        $lang_functions = app(Language::class)->functions();
 
         if (($CURUSER['uploadpos'] ?? '') != 'yes') {
             return false;

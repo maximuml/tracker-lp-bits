@@ -177,7 +177,7 @@ final class Pagination
 
         $userAgent = SupportContext::getServerValue('HTTP_USER_AGENT');
         $isPresto = is_string($userAgent) && str_contains($userAgent, 'Presto');
-        $lang = SupportContext::getLangFunctions();
+        $lang = app(Language::class)->functions();
         $labels = [
             'prev' => (string) ($lang['text_prev'] ?? ''),
             'next' => (string) ($lang['text_next'] ?? ''),

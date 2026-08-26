@@ -59,7 +59,7 @@ final class Form
      */
     public static function bbcodeEditor(string $form, string $text, string $content = '', bool $hasTitle = false, int $colNum = 130, bool $withPreview = false): string
     {
-        $lang_functions = SupportContext::getLangFunctions();
+        $lang_functions = app(Language::class)->functions();
         $enableattach_attachment = (string) SupportContext::getGlobal('enableattach_attachment', '');
 
         ob_start();

@@ -317,7 +317,7 @@ final class UserClass
         bool $includeNoClass = false,
         bool $disabled = false,
     ): string {
-        $lang = SupportContext::getLangFunctions();
+        $lang = app(Language::class)->functions();
 
         return self::classSelect(
             $selectName,

@@ -106,7 +106,7 @@ final class Slots
     public static function displayWithContext(): string
     {
         $user = app(CurrentUser::class)->get() ?? [];
-        $lang = SupportContext::getLangFunctions();
+        $lang = app(Language::class)->functions();
 
         return self::display(
             (float) ($user['uploaded'] ?? 0),

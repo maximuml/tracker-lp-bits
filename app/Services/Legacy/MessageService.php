@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Repositories\MessageRepository;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
+use App\Support\Language;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Mail;
@@ -247,7 +248,7 @@ final class MessageService
     private function lang(string $name): array
     {
         return array_merge(
-            (array) SupportContext::getLangFunctions(),
+            (array) app(Language::class)->functions(),
             (array) (SupportContext::getGlobal('lang_'.$name) ?? [])
         );
     }
@@ -349,7 +350,7 @@ final class MessageService
                 $updated = MessageRepository::markAsRead($pmId, $userId);
             } else {
                 if ($pmMessages === []) {
-                    $lang = (array) SupportContext::getLangFunctions();
+                    $lang = (array) app(Language::class)->functions();
                     LegacyResponse::abort('Error', (string) ($lang['select_at_least_one_record'] ?? 'Please select at least one record.'));
                 }
                 $updated = MessageRepository::markAsRead($pmMessages, $userId);

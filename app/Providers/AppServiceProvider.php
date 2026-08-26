@@ -7,6 +7,7 @@ use App\Support\CurrentUser;
 use App\Support\Env;
 use App\Support\Environment;
 use App\Support\Hooks;
+use App\Support\Language;
 use App\Support\Locale;
 use App\Support\SupportContext;
 use Filament\Facades\Filament;
@@ -42,6 +43,7 @@ class AppServiceProvider extends ServiceProvider
             return $cache;
         });
         $this->app->singleton(CurrentUser::class);
+        $this->app->singleton(Language::class);
 
         Hooks::doAction('nexus_register');
     }

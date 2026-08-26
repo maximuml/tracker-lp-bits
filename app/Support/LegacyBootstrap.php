@@ -114,7 +114,7 @@ final class LegacyBootstrap
                 $langFunctions = $lang_functions;
             }
         }
-        SupportContext::setLangFunctions($langFunctions);
+        SupportContext::setGlobal('lang_functions', $langFunctions);
     }
 
     private static function bootUser(?Request $request): void

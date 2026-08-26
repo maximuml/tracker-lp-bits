@@ -260,7 +260,7 @@ final class Promotion
             $promotionUntil,
             $ignoreGlobal,
             (string) ($user['appendpromotion'] ?? ''),
-            SupportContext::getLangFunctions(),
+            app(Language::class)->functions(),
             $expires,
         );
     }
@@ -290,7 +290,7 @@ final class Promotion
             $promotionUntil,
             $ignoreGlobal,
             (string) ($user['appendpromotion'] ?? ''),
-            SupportContext::getLangFunctions(),
+            app(Language::class)->functions(),
             $expires,
         );
     }

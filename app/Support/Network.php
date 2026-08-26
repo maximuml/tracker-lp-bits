@@ -486,7 +486,7 @@ final class Network
      */
     public static function ipLocationWithContext(string $ip): array
     {
-        $lang_functions = SupportContext::getLangFunctions();
+        $lang_functions = app(Language::class)->functions();
 
         return self::ipLocation(
             $ip,

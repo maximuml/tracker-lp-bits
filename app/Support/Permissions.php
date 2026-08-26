@@ -85,7 +85,7 @@ final class Permissions
         fail:
         Logger::writeWithContext("$log, [FAIL]");
         if (defined('IN_NEXUS') && IN_NEXUS && ! (defined('IN_TRACKER') && IN_TRACKER)) {
-            $lang_functions = SupportContext::getLangFunctions();
+            $lang_functions = app(Language::class)->functions();
             $requireClass = SiteConfig::current()->authority->permission($permission);
             if ($requireClass !== null && isset(User::$classes[$requireClass])) {
                 LegacyResponse::abort($lang_functions['std_sorry'], $lang_functions['std_permission_denied_only'].UserClass::name($requireClass, false, true, true).sprintf($lang_functions['std_or_above_can_view'], SiteConfig::current()->basic->siteName()), false);

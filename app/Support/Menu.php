@@ -82,7 +82,7 @@ final class Menu
 
         $result = self::render(
             \function_exists('nexus') ? Nexus::instance()->getScript() : '',
-            SupportContext::getLangFunctions(),
+            app(Language::class)->functions(),
             (string) SupportContext::getGlobal('enableoffer', ''),
             $customMenu !== '' ? $customMenu : null,
             app(CurrentUser::class)->get(),

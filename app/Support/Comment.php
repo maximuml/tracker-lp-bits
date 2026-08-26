@@ -68,7 +68,7 @@ final class Comment
 
         self::resetTempCode();
 
-        $lang_functions = SupportContext::getLangFunctions();
+        $lang_functions = app(Language::class)->functions();
         $s = $text;
 
         if ($stripHtml) {
@@ -281,7 +281,7 @@ final class Comment
      */
     public static function table(array $rows, string $type, int|string $parentId, bool $review = false): string
     {
-        $lang_functions = SupportContext::getLangFunctions();
+        $lang_functions = app(Language::class)->functions();
         $CURUSER = app(CurrentUser::class)->get();
         $commanage_class = (int) SupportContext::getGlobal('commanage_class', 0);
 

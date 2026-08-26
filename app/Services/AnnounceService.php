@@ -24,6 +24,7 @@ use App\Services\Announce\TrafficAccountant;
 use App\Services\Announce\TrafficResult;
 use App\Support\Cache as AppCache;
 use App\Support\Config\SiteConfig;
+use App\Support\Database;
 use App\Support\Hooks;
 use App\Support\Json;
 use App\Support\LegacyDb;
@@ -39,7 +40,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
-use Nexus\Database\NexusDB;
 use Nexus\Nexus;
 
 final class AnnounceService
@@ -316,7 +316,7 @@ final class AnnounceService
         $infoHashHex = bin2hex($this->infoHash);
 
         $torrent = Cache::remember("torrent_hash_{$this->infoHash}_content", 350, function () {
-            $tsField = NexusDB::unixTimestampField('added');
+            $tsField = Database::unixTimestampField('added');
             $torrent = DB::table('torrents')
                 ->leftJoin('categories', 'torrents.category', '=', 'categories.id')
                 ->select([

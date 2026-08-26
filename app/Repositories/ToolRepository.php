@@ -10,6 +10,7 @@ use App\Models\Poll;
 use App\Models\PollAnswer;
 use App\Models\User;
 use App\Support\Config\SiteConfig;
+use App\Support\Database;
 use App\Support\Environment;
 use App\Support\Hooks;
 use App\Support\Logger;
@@ -24,7 +25,6 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use League\Flysystem\Filesystem;
 use League\Flysystem\Local\LocalFilesystemAdapter;
-use Nexus\Database\NexusDB;
 use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Mailer\Transport\Dsn;
@@ -572,7 +572,7 @@ class ToolRepository extends BaseRepository
         $stickyPromotionExists = Schema::hasTable($stickyPromotionParticipatorsTable);
         $claimTableExists = Schema::hasTable($claimTable);
         $hitAndRunTableExists = Schema::hasTable($hitAndRunTable);
-        $idsField = NexusDB::groupConcatField('id');
+        $idsField = Database::groupConcatField('id');
         while (true) {
             $snatchRes = DB::table('snatched')
                 ->select('userid', 'torrentid', DB::raw("$idsField as ids"))
@@ -612,7 +612,7 @@ class ToolRepository extends BaseRepository
     public function removeDuplicatePeer()
     {
         $size = 2000;
-        $idsField = NexusDB::groupConcatField('id');
+        $idsField = Database::groupConcatField('id');
         while (true) {
             $results = DB::table('peers')
                 ->select('torrent', 'userid', DB::raw("$idsField as ids"))

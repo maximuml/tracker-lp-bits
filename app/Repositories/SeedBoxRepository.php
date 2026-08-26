@@ -12,6 +12,7 @@ use App\Models\SeedBoxRecord;
 use App\Models\User;
 use App\Support\Cache as AppCache;
 use App\Support\Config\SiteConfig;
+use App\Support\Database;
 use App\Support\Env;
 use App\Support\Events;
 use App\Support\Locale;
@@ -24,7 +25,6 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use MaxMind\Db\Reader\InvalidDatabaseException;
-use Nexus\Database\NexusDB;
 use PhpIP\IP;
 use PhpIP\IPBlock;
 
@@ -248,7 +248,7 @@ class SeedBoxRepository extends BaseRepository
         $size = 1000;
         $page = 1;
         $logPrefix = "isAllowed: $isAllowed->name, field: $field->name, page: $page, size: $size";
-        $selectRaw = sprintf('uid, %s as str', NexusDB::groupConcatField($field == IpAsnEnum::ASN ? 'asn' : 'ip'));
+        $selectRaw = sprintf('uid, %s as str', Database::groupConcatField($field == IpAsnEnum::ASN ? 'asn' : 'ip'));
         while (true) {
             $list = SeedBoxRecord::getValidQuery(TypeEnum::USER, $isAllowed, $field)
                 ->selectRaw($selectRaw)

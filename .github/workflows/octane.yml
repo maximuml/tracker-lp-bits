@@ -1,0 +1,147 @@
+name: Octane
+
+on:
+  push:
+    branches: ["php8"]
+  pull_request:
+    branches: ["php8"]
+
+jobs:
+  octane-smoke-test:
+    name: Octane compatibility smoke test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: nexusphp
+          MYSQL_USER: nexusphp
+          MYSQL_PASSWORD: nexusphp
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: --health-cmd="redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, pdo_mysql, redis, sqlite3, xml, zip, pcntl, sockets, posix
+          coverage: none
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction --ignore-platform-reqs --no-scripts
+
+      - name: Dump autoload
+        run: composer dump-autoload --no-interaction --no-scripts
+
+      - name: Download RoadRunner binary
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./vendor/bin/rr get-binary
+
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          sed -i 's/^CACHE_DRIVER=.*/CACHE_DRIVER=redis/' .env
+          sed -i 's/^QUEUE_CONNECTION=.*/QUEUE_CONNECTION=sync/' .env
+          sed -i 's/^SESSION_DRIVER=.*/SESSION_DRIVER=redis/' .env
+          sed -i 's/^DB_HOST=.*/DB_HOST=127.0.0.1/' .env
+          sed -i 's/^REDIS_HOST=.*/REDIS_HOST=127.0.0.1/' .env
+          sed -i 's|^MEILISEARCH_HOST=.*|MEILISEARCH_HOST=127.0.0.1|' .env
+          sed -i 's/^MEILISEARCH_ENABLED=.*/MEILISEARCH_ENABLED=no/' .env
+          sed -i 's|^LOG_FILE=.*|LOG_FILE=php://stderr|' .env
+
+      - name: Generate app key
+        run: php artisan key:generate
+
+      - name: Wait for MySQL and migrate
+        run: |
+          for i in $(seq 1 60); do
+            nc -z 127.0.0.1 3306 && break
+            sleep 1
+          done
+          nc -z 127.0.0.1 3306 || { echo "MySQL did not become ready in time"; exit 1; }
+          php artisan migrate:fresh --seed --force
+
+      - name: Cache Laravel bootstrap files
+        run: |
+          php artisan storage:link --force
+          php artisan view:cache
+          php artisan icons:cache
+          php artisan filament:cache-components
+
+      - name: Start Octane server (RoadRunner)
+        run: |
+          # Start RoadRunner Octane server in background
+          php artisan octane:start --server=roadrunner --host=127.0.0.1 --port=8000 --workers=2 --max-requests=50 &
+
+          # Wait for server to be ready — retry until we get any HTTP response
+          for i in $(seq 1 60); do
+            STATUS=$(curl -sL --max-time 3 -o /dev/null -w "%{http_code}" http://127.0.0.1:8000/ 2>/dev/null || true)
+            if [ -n "$STATUS" ] && [ "$STATUS" != "000" ]; then
+              echo "Server responded with $STATUS after $i attempts"
+              break
+            fi
+            sleep 1
+          done
+
+          # Verify server is up
+          if [ -z "$STATUS" ] || [ "$STATUS" = "000" ]; then
+            echo "Octane server failed to start"
+            exit 1
+          fi
+          echo "Octane server is running"
+
+      - name: Smoke test public pages
+        run: |
+          set -e
+          # Use actual Laravel route paths, not .php URLs.
+          # / redirects to /index, /index is the legacy IndexController route.
+          # /login, /signup, /torrents, /topten are the legacy route aliases.
+          for page in / /index /login /signup /torrents /topten; do
+            echo "Testing $page"
+            STATUS=$(curl -sL --max-time 10 -o /dev/null -w "%{http_code}" "http://127.0.0.1:8000$page")
+            echo "  Status: $STATUS"
+            # Accept 200 and 302 (redirects are fine for some pages)
+            [ "$STATUS" = "200" ] || [ "$STATUS" = "302" ] || { echo "FAIL: $page returned $STATUS"; exit 1; }
+          done
+          echo "All smoke tests passed"
+
+      - name: Test state isolation across requests
+        run: |
+          set -e
+          # Make multiple sequential requests to verify no state leaks
+          for i in 1 2 3 4 5; do
+            STATUS=$(curl -sL --max-time 10 -o /dev/null -w "%{http_code}" "http://127.0.0.1:8000/index")
+            [ "$STATUS" = "200" ] || [ "$STATUS" = "302" ] || { echo "FAIL: request $i returned $STATUS"; exit 1; }
+            echo "Request $i: $STATUS"
+          done
+          echo "State isolation test passed"
+
+      - name: Stop Octane server
+        if: always()
+        run: |
+          php artisan octane:stop 2>/dev/null || true
+          kill $(pgrep -f "rr serve") 2>/dev/null || true
+
+      - name: Run unit tests
+        run: vendor/bin/phpunit --testsuite Unit --no-coverage

@@ -259,7 +259,7 @@ class RegistrationController extends Controller
     private function backWithError(Request $request, string $message): RedirectResponse
     {
         return Redirect::back()
-            ->withInput($request->except('wantpassword', 'passagain', 'wantpassword_hashed'))
+            ->withInput($request->except('wantpassword', 'passagain'))
             ->with('error', $message);
     }
 }

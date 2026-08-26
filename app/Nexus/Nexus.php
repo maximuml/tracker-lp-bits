@@ -5,9 +5,9 @@ namespace Nexus;
 use App\Http\Middleware\Locale;
 use App\Support\Arrays;
 use App\Support\Config;
+use App\Support\Input;
 use App\Support\Json;
 use App\Support\Logger;
-use App\Support\SupportContext;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Http\Request;
@@ -286,7 +286,7 @@ final class Nexus
 
     private function setScript()
     {
-        $script = $this->retrieveFromServer(['SCRIPT_FILENAME', 'SCRIPT_NAME', 'Script', 'script'], true);
+        $script = (string) $this->retrieveFromServer(['SCRIPT_FILENAME', 'SCRIPT_NAME', 'Script', 'script'], true);
         if (str_contains($script, '.')) {
             $script = strstr(basename($script), '.', true);
         }
@@ -372,7 +372,7 @@ final class Nexus
     public static function trans($key, $replace = [], $locale = null)
     {
         if (is_null($locale)) {
-            $locale = \App\Support\Locale::folderFromCookie(SupportContext::getCookieValue('c_lang_folder', ''), (bool) true);
+            $locale = \App\Support\Locale::folderFromCookie(Input::cookieValue('c_lang_folder', ''), (bool) true);
         }
         if (IN_NEXUS) {
             return self::getTranslator()->trans($key, $replace, $locale);
@@ -421,7 +421,7 @@ final class Nexus
     private static function getTranslation($key, $replace = [], $locale = null)
     {
         if (! $locale) {
-            $lang = \App\Support\Locale::folderFromCookie(SupportContext::getCookieValue('c_lang_folder', ''), (bool) false);
+            $lang = \App\Support\Locale::folderFromCookie(Input::cookieValue('c_lang_folder', ''), (bool) false);
             $locale = Locale::$languageMaps[$lang] ?? 'en';
         }
         $getKey = self::getTranslationGetKey($key, $locale);

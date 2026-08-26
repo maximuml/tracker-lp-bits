@@ -9,8 +9,10 @@ use App\Repositories\TagRepository;
 use App\Repositories\TorrentDetailRepository;
 use App\Repositories\TorrentEditRepository;
 use App\Support\Category;
+use App\Support\CurrentUser;
+use App\Support\Globals;
+use App\Support\Input;
 use App\Support\Locale;
-use App\Support\SupportContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,7 +23,7 @@ class TorrentEditController extends Controller
 {
     public function legacy(Request $request): View|RedirectResponse
     {
-        if (SupportContext::getUser() === null) {
+        if (app(CurrentUser::class)->get() === null) {
             $qs = $request->getQueryString();
 
             return redirect('/edit.php'.($qs ? '?'.$qs : ''));
@@ -49,18 +51,18 @@ class TorrentEditController extends Controller
             return redirect('/login.php?returnto='.urlencode($request->fullUrl()));
         }
 
-        if (empty(SupportContext::getGlobal('lang_edit')) || empty(SupportContext::getGlobal('lang_functions'))) {
-            SupportContext::setServerValue('SCRIPT_NAME', '/edit.php');
+        if (empty(app(Globals::class)->get('lang_edit')) || empty(app(Globals::class)->get('lang_functions'))) {
+            Input::setServerValue('SCRIPT_NAME', '/edit.php');
             require base_path(Locale::scriptFilePath((string) 'functions.php', (bool) false, (string) ''));
-            SupportContext::setGlobal('lang_functions', $lang_functions ?? []);
+            app(Globals::class)->set('lang_functions', $lang_functions ?? []);
             require base_path(Locale::scriptFilePath((string) '', (bool) false, (string) ''));
-            SupportContext::setGlobal('lang_edit', $lang_edit ?? []);
+            app(Globals::class)->set('lang_edit', $lang_edit ?? []);
         }
 
-        $currentUser = SupportContext::getUser();
-        SupportContext::setUser($currentUser);
+        $currentUser = app(CurrentUser::class)->get();
+        app(CurrentUser::class)->set($currentUser);
 
-        $langEdit = SupportContext::getGlobal('lang_edit') ?? [];
+        $langEdit = app(Globals::class)->get('lang_edit') ?? [];
         $headTitle = ($langEdit['head_edit_torrent'] ?? '').'"'.$row['name'].'"';
 
         return view('torrent.edit', [

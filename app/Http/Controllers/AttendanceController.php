@@ -6,8 +6,9 @@ use App\Models\Attendance;
 use App\Repositories\AttendanceRepository;
 use App\Support\Captcha;
 use App\Support\Config\SiteConfig;
+use App\Support\CurrentUser;
+use App\Support\Globals;
 use App\Support\LegacyResponse;
-use App\Support\SupportContext;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,7 +19,7 @@ class AttendanceController extends LegacyController
 {
     public function attendance(Request $request, AttendanceRepository $repository): View|RedirectResponse|Response
     {
-        $curUser = SupportContext::getUser();
+        $curUser = app(CurrentUser::class)->get();
         if ($curUser === null) {
             return redirect('/attendance.php');
         }
@@ -27,7 +28,7 @@ class AttendanceController extends LegacyController
         $captchaEnabled = SiteConfig::current()->captcha->attendanceEnabled((bool) config('captcha.attendance.enabled', true));
 
         if ($request->isMethod('post')) {
-            if ($captchaEnabled && SupportContext::getGlobal('iv', '') === 'yes') {
+            if ($captchaEnabled && app(Globals::class)->get('iv', '') === 'yes') {
                 Captcha::checkCode(
                     (string) (request()->post('imagehash') ?? ''),
                     (string) (request()->post('imagestring') ?? ''),
@@ -37,7 +38,7 @@ class AttendanceController extends LegacyController
                 );
             }
             $attendance = $repository->attend($uid);
-            $langAttendance = (array) (SupportContext::getGlobal('lang_attendance') ?? []);
+            $langAttendance = (array) (app(Globals::class)->get('lang_attendance') ?? []);
             if (! $attendance->is_updated) {
                 LegacyResponse::abort($langAttendance['sorry'] ?? '', $langAttendance['already_attended'] ?? '');
             }
@@ -68,7 +69,7 @@ class AttendanceController extends LegacyController
      */
     public function attend(Request $request, AttendanceRepository $repository): array
     {
-        $curUser = SupportContext::getUser();
+        $curUser = app(CurrentUser::class)->get();
         if ($curUser === null) {
             return $this->fail([], 'Unauthenticated');
         }

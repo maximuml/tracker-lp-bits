@@ -6,8 +6,9 @@ use App\Enums\Permission\PermissionEnum;
 use App\Models\Setting;
 use App\Models\User;
 use App\Support\Country;
+use App\Support\CurrentUser;
+use App\Support\Globals;
 use App\Support\Permissions;
-use App\Support\SupportContext;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
@@ -20,14 +21,14 @@ class StaffPageController extends LegacyController
 {
     public function staff(Request $request): View|RedirectResponse|Response
     {
-        $curUser = SupportContext::getUser() ?? [];
+        $curUser = app(CurrentUser::class)->get() ?? [];
         $currentUserId = (int) ($curUser['id'] ?? 0);
 
         if (! Permissions::userCan(PermissionEnum::STAFF_MEMBER->value, false, $currentUserId)) {
             return $this->legacyAbortResponse('Error', 'Permission denied.');
         }
 
-        $langStaff = (array) SupportContext::getGlobal('lang_staff', []);
+        $langStaff = (array) app(Globals::class)->get('lang_staff', []);
         $secs = 900;
         $dt = time() - $secs;
 
@@ -137,7 +138,7 @@ class StaffPageController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Access denied!!!');
         }
 
-        $langStaffpanel = (array) SupportContext::getGlobal('lang_staffpanel', []);
+        $langStaffpanel = (array) app(Globals::class)->get('lang_staffpanel', []);
 
         $sysopPanels = [];
         $adminPanels = [];

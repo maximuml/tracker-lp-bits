@@ -1,5 +1,5 @@
 <?php
-$lang_ipsearch = (array) ($lang_ipsearch ?? \App\Support\SupportContext::getGlobal('lang_ipsearch', []));
+$lang_ipsearch = (array) ($lang_ipsearch ?? \app(\App\Support\Globals::class)->get('lang_ipsearch', []));
 
 
 print('<h1 align="center">' . ($lang_ipsearch['text_search_ip_history'] ?? 'Search IP History') . '</h1>' . "\n");

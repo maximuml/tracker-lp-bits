@@ -7,10 +7,10 @@ use App\Models\SearchBox;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Support\Config\SiteConfig;
+use App\Support\Globals;
 use App\Support\Logger;
 use App\Support\Pagination;
 use App\Support\Permissions;
-use App\Support\SupportContext;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -32,7 +32,7 @@ class SearchPageRepository
 
         $torrentsperpage = (int) ($currentUser->torrentsperpage ?: 0);
         if ($torrentsperpage <= 0) {
-            $torrentsperpage = (int) (SupportContext::getGlobal('torrentsperpage_main', 50) ?: 50);
+            $torrentsperpage = (int) (app(Globals::class)->get('torrentsperpage_main', 50) ?: 50);
         }
 
         $approvalStatus = null;

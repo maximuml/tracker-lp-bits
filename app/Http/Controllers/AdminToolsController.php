@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\UserBanLog;
 use App\Repositories\ModerationRepository;
+use App\Support\Cache\LegacyRedisCache;
+use App\Support\CurrentUser;
+use App\Support\Globals;
 use App\Support\Html;
 use App\Support\Network;
 use App\Support\Pagination;
-use App\Support\SupportContext;
 use App\Support\UserDisplay;
 use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;
@@ -27,7 +29,7 @@ class AdminToolsController extends LegacyController
 
     public function userBanLog(Request $request): View|RedirectResponse|Response
     {
-        if (SupportContext::getUser() === null) {
+        if (app(CurrentUser::class)->get() === null) {
             $qs = $request->getQueryString();
 
             return redirect('/user-ban-log.php'.($qs ? '?'.$qs : ''));
@@ -81,7 +83,7 @@ class AdminToolsController extends LegacyController
                 $error = 'You must fill in cache name.';
             } else {
                 $multilang = $request->input('multilang') === 'yes';
-                $cache = SupportContext::getCache();
+                $cache = app(LegacyRedisCache::class);
                 if ($cache !== null) {
                     $cache->delete_value($cachename, $multilang);
                 }
@@ -284,7 +286,7 @@ class AdminToolsController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Permission denied');
         }
 
-        $langTestip = (array) SupportContext::getGlobal('lang_testip', []);
+        $langTestip = (array) app(Globals::class)->get('lang_testip', []);
 
         if ($request->isMethod('post')) {
             $ip = (string) request()->post('ip');

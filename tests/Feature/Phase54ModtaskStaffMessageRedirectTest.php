@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Http\Middleware\VerifyCsrfToken;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
@@ -19,6 +20,7 @@ final class Phase54ModtaskStaffMessageRedirectTest extends TestCase
     {
         parent::setUp();
         config(['scout.driver' => 'null', 'app.debug' => false]);
+        $this->withoutMiddleware(VerifyCsrfToken::class);
     }
 
     public function test_staffbox_redirects_to_filament_staff_message_resource(): void

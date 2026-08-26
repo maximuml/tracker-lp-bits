@@ -203,7 +203,7 @@ final class Format
      */
     public static function getElapsedTime(int|string $ts, bool $shortunit = false): string
     {
-        $lang_functions = SupportContext::getLangFunctions();
+        $lang_functions = app(Language::class)->functions();
 
         return Time::elapsedSince((int) $ts, (int) TIMENOW, [
             'year' => $lang_functions['text_year'] ?? '',
@@ -280,7 +280,7 @@ final class Format
      */
     public static function prettyTimeWithLocale(int|float $s): string
     {
-        $lang_functions = SupportContext::getLangFunctions();
+        $lang_functions = app(Language::class)->functions();
 
         return self::prettyTime($s, (string) ($lang_functions['text_day'] ?? 'day(s)'));
     }

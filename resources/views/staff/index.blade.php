@@ -1,5 +1,5 @@
 @php
-$lang_staff = (array) (\App\Support\SupportContext::getGlobal('lang_staff') ?? []);
+$lang_staff = (array) (\app(\App\Support\Globals::class)->get('lang_staff') ?? []);
 @endphp
 
 @extends('layouts.legacy')

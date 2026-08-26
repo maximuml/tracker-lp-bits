@@ -21,6 +21,51 @@ final class Input
     }
 
     /**
+     * Get a server variable as string (or default).
+     *
+     * Wraps request()->server() with type narrowing so callers don't
+     * need to cast mixed return values.
+     */
+    public static function serverValue(string $key, string $default = ''): string
+    {
+        if (! app()->bound('request')) {
+            return $default;
+        }
+        $value = request()->server($key, $default);
+
+        return is_string($value) ? $value : $default;
+    }
+
+    /**
+     * Get a cookie value as string|null (or default).
+     *
+     * Wraps request()->cookie() with type narrowing so callers don't
+     * need to cast mixed return values.
+     */
+    public static function cookieValue(string $key, ?string $default = null): ?string
+    {
+        if (! app()->bound('request')) {
+            return $default;
+        }
+        $value = request()->cookie($key);
+
+        return is_string($value) ? $value : $default;
+    }
+
+    /**
+     * Override a server variable on the current request.
+     *
+     * Used by legacy controllers that need to fake SCRIPT_NAME for
+     * legacy partials that still reference it.
+     */
+    public static function setServerValue(string $key, string $value): void
+    {
+        if (app()->bound('request')) {
+            request()->server->set($key, $value);
+        }
+    }
+
+    /**
      * Import `$_REQUEST` keys into the request context.
      *
      * Mirrors `GetVar()`. For a single key, returns the value or `false` when
@@ -48,7 +93,7 @@ final class Input
             return false;
         }
 
-        SupportContext::setGlobal($name, $value);
+        app(Globals::class)->set($name, $value);
 
         return $value;
     }
@@ -67,10 +112,10 @@ final class Input
         foreach ($vars as $v) {
             if (isset($get[$v])) {
                 $value = self::unescape($get[$v]);
-                SupportContext::setGlobal($v, $value);
+                app(Globals::class)->set($v, $value);
             } elseif (isset($post[$v])) {
                 $value = self::unescape($post[$v]);
-                SupportContext::setGlobal($v, $value);
+                app(Globals::class)->set($v, $value);
             } else {
                 return 0;
             }

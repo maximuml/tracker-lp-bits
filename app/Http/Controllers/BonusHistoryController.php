@@ -12,9 +12,10 @@ use App\Models\User;
 use App\Repositories\BonusRepository;
 use App\Support\Api;
 use App\Support\Bonus;
+use App\Support\CurrentUser;
+use App\Support\Globals;
 use App\Support\Locale;
 use App\Support\Pagination;
-use App\Support\SupportContext;
 use App\Support\UserDisplay;
 use App\Support\Validators;
 use Illuminate\Http\JsonResponse;
@@ -29,7 +30,7 @@ class BonusHistoryController extends LegacyController
 {
     public function bonusLog(Request $request): View|RedirectResponse|Response
     {
-        $curUser = SupportContext::getUser() ?? [];
+        $curUser = app(CurrentUser::class)->get() ?? [];
         $uid = (int) (request()->input('uid') ?? $curUser['id'] ?? 0);
 
         if (! Validators::isId($uid)) {
@@ -139,7 +140,7 @@ JS;
             return $this->legacyAbortResponse('Error', 'Permission denied.');
         }
 
-        $langUploaders = (array) SupportContext::getGlobal('lang_uploaders', []);
+        $langUploaders = (array) app(Globals::class)->get('lang_uploaders', []);
 
         $year = (int) (request()->query('year') ?? 0);
         if (! $year || $year < 2000) {
@@ -161,7 +162,7 @@ JS;
         };
         $sortDirection = $order === 'username' ? 'ASC' : 'DESC';
 
-        $dateFounded = (string) SupportContext::getGlobal('datefounded', '2010-08-19');
+        $dateFounded = (string) app(Globals::class)->get('datefounded', '2010-08-19');
         $yearFounded = (int) substr($dateFounded, 0, 4);
         if (! $yearFounded) {
             $yearFounded = 2007;
@@ -261,7 +262,7 @@ JS;
 
     public function magic(Request $request): JsonResponse|Response
     {
-        $curUser = SupportContext::getUser() ?? [];
+        $curUser = app(CurrentUser::class)->get() ?? [];
         $userId = (int) ($curUser['id'] ?? 0);
         $torrentId = (int) ($request->input('id') ?? 0);
         $value = (int) abs((float) ($request->input('value') ?? 0));

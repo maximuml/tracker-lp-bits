@@ -1,5 +1,5 @@
 @php
-$lang_staffbox = (array) ($lang_staffbox ?? \App\Support\SupportContext::getGlobal('lang_staffbox', []));
+$lang_staffbox = (array) ($lang_staffbox ?? \app(\App\Support\Globals::class)->get('lang_staffbox', []));
 $title = match ($mode ?? '') {
     'list' => $lang_staffbox['head_staff_pm'] ?? 'Staff PM',
     'viewpm' => $lang_staffbox['head_view_staff_pm'] ?? 'View staff PM',

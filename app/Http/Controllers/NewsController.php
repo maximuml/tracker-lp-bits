@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Resources\NewsResource;
 use App\Models\News;
 use App\Repositories\IndexRepository;
+use App\Support\Cache\LegacyRedisCache;
+use App\Support\CurrentUser;
 use App\Support\Events;
-use App\Support\SupportContext;
+use App\Support\Globals;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -16,8 +18,8 @@ class NewsController extends LegacyController
 {
     public function news(Request $request): Response|RedirectResponse|View
     {
-        $langNews = (array) (SupportContext::getGlobal('lang_news') ?? []);
-        $baseUrl = (string) SupportContext::getGlobal('BASEURL', '');
+        $langNews = (array) (app(Globals::class)->get('lang_news') ?? []);
+        $baseUrl = (string) app(Globals::class)->get('BASEURL', '');
 
         $action = htmlspecialchars((string) ($request->input('action') ?? ''));
 
@@ -38,7 +40,7 @@ class NewsController extends LegacyController
             }
 
             News::query()->where('id', $newsid)->delete();
-            $cache = SupportContext::getCache();
+            $cache = app(LegacyRedisCache::class);
             if ($cache !== null) {
                 $cache->delete_value('recent_news', true);
             }
@@ -68,7 +70,7 @@ class NewsController extends LegacyController
             }
             $notify = $request->input('notify') === 'yes' ? 'yes' : 'no';
 
-            $currentUser = (array) (SupportContext::getUser() ?? []);
+            $currentUser = (array) (app(CurrentUser::class)->get() ?? []);
             $newsId = (int) News::query()->insertGetId([
                 'userid' => (int) ($currentUser['id'] ?? 0),
                 'added' => $added,
@@ -81,7 +83,7 @@ class NewsController extends LegacyController
                 return $this->legacyAbortResponse($langNews['std_error'] ?? 'Error', $langNews['std_something_weird_happened'] ?? 'Something weird happened.');
             }
 
-            $cache = SupportContext::getCache();
+            $cache = app(LegacyRedisCache::class);
             if ($cache !== null) {
                 $cache->delete_value('recent_news', true);
             }
@@ -123,7 +125,7 @@ class NewsController extends LegacyController
                     'notify' => $notify,
                 ]);
 
-                $cache = SupportContext::getCache();
+                $cache = app(LegacyRedisCache::class);
                 if ($cache !== null) {
                     $cache->delete_value('recent_news', true);
                 }
@@ -186,7 +188,7 @@ class NewsController extends LegacyController
             'notify' => 'in:yes,no',
         ]);
 
-        $currentUser = (array) (SupportContext::getUser() ?? []);
+        $currentUser = (array) (app(CurrentUser::class)->get() ?? []);
         $data['userid'] = (int) ($currentUser['id'] ?? 0);
         $data['added'] = now()->toDateTimeString();
         $data['notify'] = $data['notify'] ?? 'no';
@@ -194,7 +196,7 @@ class NewsController extends LegacyController
         $news = News::query()->create($data);
         Events::fire('news_created', $news, null);
 
-        $cache = SupportContext::getCache();
+        $cache = app(LegacyRedisCache::class);
         $cache?->delete_value('recent_news', true);
 
         return $this->success(new NewsResource($news), 'News created');
@@ -213,7 +215,7 @@ class NewsController extends LegacyController
 
         $news->update($data);
 
-        $cache = SupportContext::getCache();
+        $cache = app(LegacyRedisCache::class);
         $cache?->delete_value('recent_news', true);
 
         return $this->success(new NewsResource($news->fresh()), 'News updated');
@@ -226,7 +228,7 @@ class NewsController extends LegacyController
     {
         $news->delete();
 
-        $cache = SupportContext::getCache();
+        $cache = app(LegacyRedisCache::class);
         $cache?->delete_value('recent_news', true);
 
         return $this->success(['success' => true], 'News deleted');
@@ -237,7 +239,7 @@ class NewsController extends LegacyController
      */
     public function latest(): array
     {
-        $maxNews = (int) SupportContext::getGlobal('maxnewsnum_main', 5);
+        $maxNews = (int) app(Globals::class)->get('maxnewsnum_main', 5);
 
         $items = IndexRepository::getLatestNews($maxNews);
 

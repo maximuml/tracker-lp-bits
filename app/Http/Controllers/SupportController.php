@@ -8,12 +8,14 @@ use App\Models\Complain;
 use App\Models\Setting;
 use App\Models\User;
 use App\Repositories\ToolRepository;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Captcha;
 use App\Support\Config\SiteConfig;
+use App\Support\CurrentUser;
+use App\Support\Globals;
 use App\Support\Logger;
 use App\Support\Network;
 use App\Support\Pagination;
-use App\Support\SupportContext;
 use App\Support\Url;
 use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
@@ -27,11 +29,11 @@ class SupportController extends LegacyController
 {
     public function complains(Request $request): View|RedirectResponse|Response
     {
-        $currentUser = (array) (SupportContext::getUser() ?? []);
+        $currentUser = (array) (app(CurrentUser::class)->get() ?? []);
         $uid = (int) ($currentUser['id'] ?? 0);
         $isAdmin = Permission::can(PermissionEnum::STAFF_MEMBER);
-        $langComplains = (array) (SupportContext::getGlobal('lang_complains') ?? []);
-        $langFunctions = (array) (SupportContext::getGlobal('lang_functions') ?? []);
+        $langComplains = (array) (app(Globals::class)->get('lang_complains') ?? []);
+        $langFunctions = (array) (app(Globals::class)->get('lang_functions') ?? []);
 
         if ($uid > 0 && ! $isAdmin) {
             return $this->legacyAbortResponse($langComplains['std_error'] ?? 'Error', 'Permission denied.');
@@ -78,7 +80,7 @@ class SupportController extends LegacyController
      */
     private function complainNew(Request $request, array $langComplains, array $langFunctions): RedirectResponse|Response
     {
-        if ((int) (SupportContext::getUser()['id'] ?? 0) === 0) {
+        if ((int) (app(CurrentUser::class)->get()['id'] ?? 0) === 0) {
             return $this->legacyAbortResponse($langFunctions['std_error'] ?? 'Error', 'Permission denied.');
         }
 
@@ -123,7 +125,7 @@ class SupportController extends LegacyController
             'ip' => Network::clientIp(),
         ]);
 
-        $cache = SupportContext::getCache();
+        $cache = app(LegacyRedisCache::class);
         if ($cache !== null) {
             $cache->delete_value('COMPLAINTS_COUNT_CACHE');
         }
@@ -196,7 +198,7 @@ class SupportController extends LegacyController
             'answered' => $action === 'answered' ? 1 : 0,
         ]);
 
-        $cache = SupportContext::getCache();
+        $cache = app(LegacyRedisCache::class);
         if ($cache !== null) {
             $cache->delete_value('COMPLAINTS_COUNT_CACHE');
         }

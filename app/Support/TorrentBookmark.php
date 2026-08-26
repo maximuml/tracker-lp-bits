@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Repositories\TorrentRepository;
+use App\Support\Cache\LegacyRedisCache;
 
 /**
  * Legacy torrent-bookmark helpers extracted from `include/functions.php`.
@@ -72,8 +73,8 @@ final class TorrentBookmark
      */
     public static function stateMarkupWithContext(int|string $userId, int|string $torrentId, bool $text = false): string
     {
-        $cache = SupportContext::getCache();
-        $lang = SupportContext::getLangFunctions();
+        $cache = app(LegacyRedisCache::class);
+        $lang = app(Language::class)->functions();
 
         return self::stateMarkup($cache, $userId, $torrentId, $text, [
             'title_bookmark_torrent' => $lang['title_bookmark_torrent'] ?? '',

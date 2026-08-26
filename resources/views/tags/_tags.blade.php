@@ -4,7 +4,7 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 if (!function_exists('insert_tag')) { function insert_tag($name, $description, $syntax, $example, $remarks)
 {
-$lang_tags = (array) (\App\Support\SupportContext::getGlobal('lang_tags') ?? []);
+$lang_tags = (array) (\app(\App\Support\Globals::class)->get('lang_tags') ?? []);
 	$result = \App\Support\Format::formatComment($example);
 	print("<p class=sub><b>$name</b></p>\n");
 	print("<table class=main width=100% border=1 cellspacing=0 cellpadding=5>\n");

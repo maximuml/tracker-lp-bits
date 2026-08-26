@@ -1,6 +1,6 @@
 @php
 $title = 'BitBucket Log';
-$CURUSER = (array) (\App\Support\SupportContext::getUser() ?? []);
+$CURUSER = (array) (\app(\App\Support\CurrentUser::class)->get() ?? []);
 $rows = (array) ($rows ?? []);
 $count = (int) ($count ?? 0);
 $pagertop = (string) ($pagertop ?? '');

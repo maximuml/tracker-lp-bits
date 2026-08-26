@@ -1,6 +1,6 @@
 <?php
 
-$__server_PHP_SELF = \App\Support\SupportContext::getServerValue('PHP_SELF');
+$__server_PHP_SELF = \App\Support\Input::serverValue('PHP_SELF');
 $userid = (int) ($userid ?? 0);
 $action = (string) ($action ?? '');
 $subject = (string) ($subject ?? \App\Support\UserDisplay::username($userid));

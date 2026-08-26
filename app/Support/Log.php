@@ -20,7 +20,7 @@ final class Log
 
     public static function writeWithContext(string $text, string $security = 'normal'): void
     {
-        $user = SupportContext::getUser() ?? [];
+        $user = app(CurrentUser::class)->get() ?? [];
 
         self::write($text, $security, (int) ($user['id'] ?? 0));
     }

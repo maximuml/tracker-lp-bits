@@ -13,7 +13,7 @@ use App\Models\Post;
 use App\Models\Topic;
 use App\Models\User;
 use App\Repositories\ForumRepository;
-use App\Support\SupportContext;
+use App\Support\CurrentUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -147,7 +147,7 @@ class PostController extends Controller
     {
         $user = Auth::user();
         if ($user instanceof User) {
-            SupportContext::setUser($user->toLegacyArray());
+            app(CurrentUser::class)->set($user->toLegacyArray());
         }
     }
 

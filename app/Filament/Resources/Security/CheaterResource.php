@@ -5,8 +5,8 @@ namespace App\Filament\Resources\Security;
 use App\Filament\Resources\Security\CheaterResource\Pages\ListCheaters;
 use App\Models\Cheater;
 use App\Models\User;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Format;
-use App\Support\SupportContext;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\DeleteAction;
@@ -99,7 +99,7 @@ class CheaterResource extends Resource
                             'dealtwith' => 1,
                             'dealtby' => Auth::id() ?? 0,
                         ]);
-                        $cache = SupportContext::getCache();
+                        $cache = app(LegacyRedisCache::class);
                         $cache?->delete_value('staff_new_cheater_count', true);
                     }),
                 DeleteAction::make(),
@@ -119,7 +119,7 @@ class CheaterResource extends Resource
                                 'dealtby' => Auth::id() ?? 0,
                             ]);
                         });
-                        $cache = SupportContext::getCache();
+                        $cache = app(LegacyRedisCache::class);
                         $cache?->delete_value('staff_new_cheater_count', true);
                     }),
             ]);

@@ -7,8 +7,8 @@ namespace App\Services;
 use App\Repositories\CleanupRepository;
 use App\Services\Cleanup\Tasks;
 use App\Support\Config\SiteConfig;
+use App\Support\Globals;
 use App\Support\Logger;
-use App\Support\SupportContext;
 use App\Support\Time;
 use App\Support\UserDisplay;
 use Illuminate\Support\Facades\DB;
@@ -58,7 +58,7 @@ final class CleanupService
      */
     public function triggerCron(): string
     {
-        $useCronTriggerCleanUp = (bool) SupportContext::getGlobal('useCronTriggerCleanUp', true);
+        $useCronTriggerCleanUp = (bool) app(Globals::class)->get('useCronTriggerCleanUp', true);
 
         if (! $useCronTriggerCleanUp) {
             return "Forbidden. Clean-up is set to be browser-triggered.\n";

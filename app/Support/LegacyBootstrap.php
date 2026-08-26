@@ -76,9 +76,10 @@ final class LegacyBootstrap
 
     private static function bootCache(string $rootpath): void
     {
-        $Cache = new LegacyRedisCache;
-        $Cache->setLanguageFolderArray(Locale::available());
-        SupportContext::setCache($Cache);
+        // LegacyRedisCache is now registered as a singleton in
+        // AppServiceProvider::register(). Just resolve it to trigger
+        // the connection + language folder setup.
+        app(LegacyRedisCache::class);
     }
 
     private static function bootDatabase(): void
@@ -113,7 +114,7 @@ final class LegacyBootstrap
                 $langFunctions = $lang_functions;
             }
         }
-        SupportContext::setLangFunctions($langFunctions);
+        app(Globals::class)->set('lang_functions', $langFunctions);
     }
 
     private static function bootUser(?Request $request): void
@@ -138,8 +139,8 @@ final class LegacyBootstrap
 
         $hook = app(Hook::class);
         $plugin = app(Plugin::class);
-        SupportContext::setGlobal('hook', $hook);
-        SupportContext::setGlobal('plugin', $plugin);
+        app(Globals::class)->set('hook', $hook);
+        app(Globals::class)->set('plugin', $plugin);
         $plugin->start();
     }
 }

@@ -1,5 +1,5 @@
 @php
-$lang_getrss = (array) (\App\Support\SupportContext::getGlobal('lang_getrss') ?? []);
+$lang_getrss = (array) (\app(\App\Support\Globals::class)->get('lang_getrss') ?? []);
 @endphp
 
 @extends('layouts.legacy')

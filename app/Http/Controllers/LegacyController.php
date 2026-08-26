@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\CurrentUser;
 use App\Support\LegacyResponse;
-use App\Support\SupportContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -16,7 +16,7 @@ abstract class LegacyController extends Controller
      */
     protected function legacyPage(Request $request, string $page, bool $auth = true, array $data = []): View|RedirectResponse
     {
-        if ($auth && SupportContext::getUser() === null) {
+        if ($auth && app(CurrentUser::class)->get() === null) {
             $qs = $request->getQueryString();
 
             return redirect('/'.$page.'.php'.($qs ? '?'.$qs : ''));
@@ -33,7 +33,7 @@ abstract class LegacyController extends Controller
      */
     protected function legacyPageWithRedirect(Request $request, string $page, bool $auth = true, array $data = []): Response|RedirectResponse
     {
-        if ($auth && SupportContext::getUser() === null) {
+        if ($auth && app(CurrentUser::class)->get() === null) {
             $qs = $request->getQueryString();
 
             return redirect('/'.$page.'.php'.($qs ? '?'.$qs : ''));
@@ -61,7 +61,7 @@ abstract class LegacyController extends Controller
      */
     protected function legacyPageRaw(Request $request, string $page, bool $auth = true, array $data = []): Response|RedirectResponse
     {
-        if ($auth && SupportContext::getUser() === null) {
+        if ($auth && app(CurrentUser::class)->get() === null) {
             $qs = $request->getQueryString();
 
             return redirect('/'.$page.'.php'.($qs ? '?'.$qs : ''));

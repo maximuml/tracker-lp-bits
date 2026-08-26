@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
 use App\Repositories\FriendsRepository;
+use App\Support\CurrentUser;
+use App\Support\Globals;
+use App\Support\Input;
 use App\Support\Locale;
-use App\Support\SupportContext;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
 use App\Support\Validators;
@@ -19,8 +21,8 @@ class FriendsController extends LegacyController
 {
     public function friends(Request $request): Response|RedirectResponse|View
     {
-        $currentUser = (array) (SupportContext::getUser() ?? []);
-        $langFriends = (array) (SupportContext::getGlobal('lang_friends') ?? []);
+        $currentUser = (array) (app(CurrentUser::class)->get() ?? []);
+        $langFriends = (array) (app(Globals::class)->get('lang_friends') ?? []);
 
         $userid = (int) ($request->input('id') ?? $currentUser['id'] ?? 0);
         if ($userid <= 0 || ! Validators::isId($userid)) {
@@ -156,8 +158,8 @@ class FriendsController extends LegacyController
 
     private function purgeNeighborsCache(): void
     {
-        $currentUser = (array) (SupportContext::getUser() ?? []);
-        $cachefile = 'cache/'.Locale::folderFromCookie(SupportContext::getCookieValue('c_lang_folder', ''), false).'/neighbors/'.($currentUser['id'] ?? 0).'.html';
+        $currentUser = (array) (app(CurrentUser::class)->get() ?? []);
+        $cachefile = 'cache/'.Locale::folderFromCookie(Input::cookieValue('c_lang_folder', ''), false).'/neighbors/'.($currentUser['id'] ?? 0).'.html';
         if (file_exists($cachefile)) {
             unlink($cachefile);
         }

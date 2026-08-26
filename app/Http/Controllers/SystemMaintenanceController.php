@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Repositories\MysqlStatsRepository;
 use App\Services\CleanupService;
-use App\Support\SupportContext;
+use App\Support\CurrentUser;
 use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -33,7 +33,7 @@ class SystemMaintenanceController extends LegacyController
 
     public function mysqlStats(Request $request): View|RedirectResponse|Response
     {
-        if (SupportContext::getUser() === null) {
+        if (app(CurrentUser::class)->get() === null) {
             $qs = $request->getQueryString();
 
             return redirect('/mysql_stats.php'.($qs ? '?'.$qs : ''));

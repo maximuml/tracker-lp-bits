@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Repositories\TorrentSearchRepository;
-use App\Support\SupportContext;
+use App\Support\Cache\LegacyRedisCache;
+use App\Support\CurrentUser;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,7 +15,7 @@ class TorrentListingController extends Controller
 {
     public function index(Request $request): View|RedirectResponse
     {
-        if (SupportContext::getCache() === null) {
+        if (app(LegacyRedisCache::class) === null) {
             return redirect('/torrents.php?'.http_build_query($request->query->all()));
         }
 
@@ -23,8 +24,8 @@ class TorrentListingController extends Controller
             return redirect('/login.php?returnto='.urlencode($request->fullUrl()));
         }
 
-        $currentUser = SupportContext::getUser() ?? $user->toLegacyArray();
-        SupportContext::setUser($currentUser);
+        $currentUser = app(CurrentUser::class)->get() ?? $user->toLegacyArray();
+        app(CurrentUser::class)->set($currentUser);
 
         $data = TorrentSearchRepository::getListingData($request->query->all());
 

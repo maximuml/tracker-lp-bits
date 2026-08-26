@@ -9,13 +9,13 @@ use App\Enums\Permission\PermissionEnum;
 use App\Models\BonusLogs;
 use App\Models\Message;
 use App\Repositories\BonusRepository;
+use App\Support\Globals;
 use App\Support\Html;
 use App\Support\Http;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Log;
 use App\Support\Logger;
-use App\Support\SupportContext;
 use App\Support\Url;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
@@ -60,13 +60,13 @@ final class BonusService
      */
     private function handleExchange(Request $request, array $allBonus, array $curUser, array $lang, string $lockText): ?RedirectResponse
     {
-        $baseUrl = (string) SupportContext::getGlobal('BASEURL', '');
-        $bonusgiftBonus = (string) SupportContext::getGlobal('bonusgift_bonus', 'yes');
-        $ratiolimitBonus = (float) SupportContext::getGlobal('ratiolimit_bonus', 0);
-        $dlamountlimitBonus = (int) SupportContext::getGlobal('dlamountlimit_bonus', 0);
-        $buyinviteClass = (int) SupportContext::getGlobal('buyinvite_class', 0);
-        $taxpercentageBonus = (float) SupportContext::getGlobal('taxpercentage_bonus', 0);
-        $basictaxBonus = (float) SupportContext::getGlobal('basictax_bonus', 0);
+        $baseUrl = (string) app(Globals::class)->get('BASEURL', '');
+        $bonusgiftBonus = (string) app(Globals::class)->get('bonusgift_bonus', 'yes');
+        $ratiolimitBonus = (float) app(Globals::class)->get('ratiolimit_bonus', 0);
+        $dlamountlimitBonus = (int) app(Globals::class)->get('dlamountlimit_bonus', 0);
+        $buyinviteClass = (int) app(Globals::class)->get('buyinvite_class', 0);
+        $taxpercentageBonus = (float) app(Globals::class)->get('taxpercentage_bonus', 0);
+        $basictaxBonus = (float) app(Globals::class)->get('basictax_bonus', 0);
 
         // Cheat detection
         if (
@@ -158,7 +158,7 @@ final class BonusService
      */
     private function exchangeTraffic(array $curUser, array $bonusarray, float $points, float $ratiolimitBonus, int $dlamountlimitBonus, array $lang): RedirectResponse
     {
-        $baseUrl = (string) SupportContext::getGlobal('BASEURL', '');
+        $baseUrl = (string) app(Globals::class)->get('BASEURL', '');
         if (($curUser['uploaded'] ?? 0) > $dlamountlimitBonus * 1073741824) {
             $ratio = ($curUser['downloaded'] ?? 0) > 0
                 ? ($curUser['uploaded'] ?? 0) / ($curUser['downloaded'] ?? 1)

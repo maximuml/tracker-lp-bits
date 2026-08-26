@@ -1,5 +1,5 @@
 <?php
-$lang_iphistory = (array) (\App\Support\SupportContext::getGlobal('lang_iphistory') ?? []);
+$lang_iphistory = (array) (\app(\App\Support\Globals::class)->get('lang_iphistory') ?? []);
 
 print('<h1 align="center">'.$lang_iphistory['text_historical_ip_by'] . \App\Support\UserDisplay::username($userid).'</h1>');
 

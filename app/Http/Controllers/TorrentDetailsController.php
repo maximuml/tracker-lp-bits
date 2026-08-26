@@ -13,14 +13,17 @@ use App\Repositories\SearchBoxRepository;
 use App\Repositories\TagRepository;
 use App\Repositories\TorrentDetailRepository;
 use App\Repositories\TorrentRepository;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
+use App\Support\CurrentUser;
 use App\Support\Format;
+use App\Support\Globals;
 use App\Support\Hooks;
+use App\Support\Input;
 use App\Support\Locale;
 use App\Support\Logger;
 use App\Support\Promotion;
 use App\Support\Strings;
-use App\Support\SupportContext;
 use App\Support\TorrentAccess;
 use App\Support\TorrentBookmark;
 use App\Support\UserDisplay;
@@ -54,7 +57,7 @@ class TorrentDetailsController extends Controller
 
         Gate::forUser($user)->authorize('view', $torrent);
 
-        if (SupportContext::getCache() === null) {
+        if (app(LegacyRedisCache::class) === null) {
             $query = $request->query->all();
             unset($query['id']);
 
@@ -73,18 +76,18 @@ class TorrentDetailsController extends Controller
             abort(404);
         }
 
-        $currentUser = SupportContext::getUser() ?? $user->toLegacyArray();
-        SupportContext::setUser($currentUser);
+        $currentUser = app(CurrentUser::class)->get() ?? $user->toLegacyArray();
+        app(CurrentUser::class)->set($currentUser);
 
-        if (empty(SupportContext::getGlobal('lang_functions')) || empty(SupportContext::getGlobal('lang_details'))) {
-            SupportContext::setServerValue('SCRIPT_NAME', '/details.php');
+        if (empty(app(Globals::class)->get('lang_functions')) || empty(app(Globals::class)->get('lang_details'))) {
+            Input::setServerValue('SCRIPT_NAME', '/details.php');
             require base_path(Locale::scriptFilePath((string) 'functions.php', (bool) false, (string) ''));
-            SupportContext::setGlobal('lang_functions', $lang_functions ?? []);
+            app(Globals::class)->set('lang_functions', $lang_functions ?? []);
             require base_path(Locale::scriptFilePath((string) '', (bool) false, (string) ''));
-            SupportContext::setGlobal('lang_details', $lang_details ?? []);
+            app(Globals::class)->set('lang_details', $lang_details ?? []);
         }
 
-        $langDetails = SupportContext::getGlobal('lang_details') ?? [];
+        $langDetails = app(Globals::class)->get('lang_details') ?? [];
         $headTitle = empty($request->input('cmtpage'))
             ? ($langDetails['head_details_for_torrent'] ?? '').'"'.$row['name'].'"'
             : ($langDetails['head_comments_for_torrent'] ?? '').'"'.$row['name'].'"';
@@ -141,8 +144,8 @@ class TorrentDetailsController extends Controller
      */
     private function buildDetailsViewData(int $id, array $row, array $currentUser, User $user, ?TorrentOperationLog $denyLog, bool $hasBuy, array $tagIds, array $requestFlags): array
     {
-        $langFunctions = SupportContext::getGlobal('lang_functions') ?? [];
-        $langDetails = SupportContext::getGlobal('lang_details') ?? [];
+        $langFunctions = app(Globals::class)->get('lang_functions') ?? [];
+        $langDetails = app(Globals::class)->get('lang_details') ?? [];
 
         $torrentRep = new TorrentRepository;
         $searchBoxRep = new SearchBoxRepository;

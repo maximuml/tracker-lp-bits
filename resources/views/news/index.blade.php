@@ -1,5 +1,5 @@
 @php
-$lang_news = (array) (\App\Support\SupportContext::getGlobal('lang_news') ?? []);
+$lang_news = (array) (\app(\App\Support\Globals::class)->get('lang_news') ?? []);
 $mode = (string) ($mode ?? 'add');
 $newsid = (int) ($newsid ?? 0);
 $body = (string) ($body ?? '');

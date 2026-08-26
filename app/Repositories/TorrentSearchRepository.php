@@ -6,7 +6,10 @@ use App\Auth\Permission;
 use App\Models\Torrent;
 use App\Support\Category;
 use App\Support\Config\SiteConfig;
+use App\Support\CurrentUser;
+use App\Support\Globals;
 use App\Support\Hooks;
+use App\Support\Input;
 use App\Support\LegacyResponse;
 use App\Support\Log;
 use App\Support\Logger;
@@ -14,7 +17,6 @@ use App\Support\Pagination;
 use App\Support\Promotion;
 use App\Support\SearchBox;
 use App\Support\SearchSuggest;
-use App\Support\SupportContext;
 use Carbon\Carbon;
 use Illuminate\Database\Connection;
 use Illuminate\Support\Facades\DB;
@@ -28,10 +30,10 @@ class TorrentSearchRepository
      */
     public static function getListingData(array $query = []): array
     {
-        $CURUSER = SupportContext::getUser() ?? [];
-        $lang_torrents = SupportContext::getGlobal('lang_torrents', []);
-        $browsecatmode = (int) SupportContext::getGlobal('browsecatmode', 1);
-        $torrentsperpage_main = (int) SupportContext::getGlobal('torrentsperpage_main', 0);
+        $CURUSER = app(CurrentUser::class)->get() ?? [];
+        $lang_torrents = app(Globals::class)->get('lang_torrents', []);
+        $browsecatmode = (int) app(Globals::class)->get('browsecatmode', 1);
+        $torrentsperpage_main = (int) app(Globals::class)->get('torrentsperpage_main', 0);
         $catimgurl = '';
         $catpadding = 0;
         $catsperrow = 0;
@@ -195,7 +197,7 @@ class TorrentSearchRepository
 
         if (! in_array($inclbookmarked, [0, 1, 2])) {
             $inclbookmarked = 0;
-            Log::writeWithContext('User '.$CURUSER['username'].','.$CURUSER['ip'].' is hacking inclbookmarked field in'.SupportContext::getServerValue('SCRIPT_NAME', ''), 'mod');
+            Log::writeWithContext('User '.$CURUSER['username'].','.$CURUSER['ip'].' is hacking inclbookmarked field in'.Input::serverValue('SCRIPT_NAME', ''), 'mod');
         }
         if ($inclbookmarked == 0) {  // all(bookmarked,not)
             $addparam .= 'inclbookmarked=0&';
@@ -231,7 +233,7 @@ class TorrentSearchRepository
 
         if (! in_array($include_dead, [0, 1, 2])) {
             $include_dead = 0;
-            Log::writeWithContext('User '.$CURUSER['username'].','.$CURUSER['ip'].' is hacking incldead field in'.SupportContext::getServerValue('SCRIPT_NAME', ''), 'mod');
+            Log::writeWithContext('User '.$CURUSER['username'].','.$CURUSER['ip'].' is hacking incldead field in'.Input::serverValue('SCRIPT_NAME', ''), 'mod');
         }
         if ($include_dead == 0) {  // all(active,dead)
             $addparam .= 'incldead=0&';
@@ -277,7 +279,7 @@ class TorrentSearchRepository
 
         if (! in_array($special_state, [0, 1, 2, 3, 4, 5, 6, 7])) {
             $special_state = 0;
-            Log::writeWithContext('User '.$CURUSER['username'].','.$CURUSER['ip'].' is hacking spstate field in '.SupportContext::getServerValue('SCRIPT_NAME', ''), 'mod');
+            Log::writeWithContext('User '.$CURUSER['username'].','.$CURUSER['ip'].' is hacking spstate field in '.Input::serverValue('SCRIPT_NAME', ''), 'mod');
         }
         if ($special_state == 0) {	// all
             $addparam .= 'spstate=0&';
@@ -689,7 +691,7 @@ class TorrentSearchRepository
              */
             if (! in_array($search_mode, [0, 2])) {
                 $search_mode = 0;
-                Log::writeWithContext('User '.$CURUSER['username'].','.$CURUSER['ip'].' is hacking search_mode field in'.SupportContext::getServerValue('SCRIPT_NAME', ''), 'mod');
+                Log::writeWithContext('User '.$CURUSER['username'].','.$CURUSER['ip'].' is hacking search_mode field in'.Input::serverValue('SCRIPT_NAME', ''), 'mod');
             }
 
             $search_area = intval($searchParams['search_area'] ?? 0);
@@ -771,7 +773,7 @@ class TorrentSearchRepository
 
                     $search_area = 0;
                     $wherea[] = "torrents.name LIKE '%".$searchstr."%'";
-                    Log::writeWithContext('User '.$CURUSER['username'].','.$CURUSER['ip'].' is hacking search_area field in'.SupportContext::getServerValue('SCRIPT_NAME', ''), 'mod');
+                    Log::writeWithContext('User '.$CURUSER['username'].','.$CURUSER['ip'].' is hacking search_area field in'.Input::serverValue('SCRIPT_NAME', ''), 'mod');
                     break;
 
             }

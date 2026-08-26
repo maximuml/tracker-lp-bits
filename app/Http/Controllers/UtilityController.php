@@ -10,13 +10,15 @@ use App\Services\Legacy\AttachmentLegacyService;
 use App\Services\UsersearchPageService;
 use App\Support\Api;
 use App\Support\Attachment\AttachmentService;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Captcha;
+use App\Support\CurrentUser;
+use App\Support\Globals;
 use App\Support\Http;
 use App\Support\LegacyAuth;
 use App\Support\Logger;
 use App\Support\Strings;
 use App\Support\Style;
-use App\Support\SupportContext;
 use App\Support\Url;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -38,7 +40,7 @@ class UtilityController extends LegacyController
 
     public function search(Request $request): View|RedirectResponse
     {
-        $curUser = SupportContext::getUser() ?? [];
+        $curUser = app(CurrentUser::class)->get() ?? [];
         $currentUser = ! empty($curUser) ? User::query()->find((int) ($curUser['id'] ?? 0)) : null;
         if ($currentUser === null) {
             $qs = $request->getQueryString();
@@ -60,7 +62,7 @@ class UtilityController extends LegacyController
 
     public function ajax(Request $request): JsonResponse|RedirectResponse
     {
-        if (SupportContext::getCache() === null) {
+        if (app(LegacyRedisCache::class) === null) {
             $qs = $request->getQueryString();
 
             return redirect('/ajax.php'.($qs ? '?'.$qs : ''));
@@ -75,7 +77,7 @@ class UtilityController extends LegacyController
         }
 
         if (! in_array($action, AjaxService::ALLOWED_ACTIONS, true)) {
-            $currentUser = SupportContext::getUser() ?? [];
+            $currentUser = app(CurrentUser::class)->get() ?? [];
             Logger::writeWithContext((string) ('hacking attempt made by '.($currentUser['username'] ?? 'guest').',uid '.($currentUser['id'] ?? 0)), (string) 'error', (bool) false);
 
             return response()->json(Api::call(1, "Invalid action: {$action}", $request->all()));
@@ -94,7 +96,7 @@ class UtilityController extends LegacyController
 
     public function attachment(Request $request): Response
     {
-        $currentUser = SupportContext::getUser() ?? [];
+        $currentUser = app(CurrentUser::class)->get() ?? [];
         $Attach = new AttachmentService((int) ($currentUser['id'] ?? 0));
 
         $count_limit = (int) $Attach->get_count_limit();
@@ -119,7 +121,7 @@ class UtilityController extends LegacyController
                 ];
             }
 
-            $lang_attachment = (array) (SupportContext::getGlobal('lang_attachment') ?? []);
+            $lang_attachment = (array) (app(Globals::class)->get('lang_attachment') ?? []);
             $result = AttachmentLegacyService::processUpload($currentUser, $Attach, $lang_attachment, $altsize, $callback_func, $file);
             $warning = (string) ($result['warning'] ?? '');
             $script = (string) ($result['script'] ?? '');
@@ -128,7 +130,7 @@ class UtilityController extends LegacyController
 
         $content = view('attachment.index', [
             'CURUSER' => $currentUser,
-            'lang_attachment' => (array) (SupportContext::getGlobal('lang_attachment') ?? []),
+            'lang_attachment' => (array) (app(Globals::class)->get('lang_attachment') ?? []),
             'Attach' => $Attach,
             'count_limit' => $count_limit,
             'count_left' => $count_left,
@@ -158,7 +160,7 @@ class UtilityController extends LegacyController
             return response('No attachment found.', 404, ['Content-Type' => 'text/plain; charset=utf-8']);
         }
 
-        $httpdirectory = (string) SupportContext::getGlobal('httpdirectory_attachment', '');
+        $httpdirectory = (string) app(Globals::class)->get('httpdirectory_attachment', '');
         $basePath = realpath($httpdirectory);
         $filelocation = $httpdirectory.'/'.$row['location'];
         $realFile = realpath($filelocation);
@@ -175,7 +177,7 @@ class UtilityController extends LegacyController
 
         DB::table('attachments')->where('id', $id)->increment('downloads');
 
-        $cache = SupportContext::getCache();
+        $cache = app(LegacyRedisCache::class);
         if ($cache !== null) {
             $cache->delete_value('attachment_'.$dlkey.'_content');
         }
@@ -310,12 +312,12 @@ class UtilityController extends LegacyController
 
     private function buildOpensearchXml(): string
     {
-        $siteName = (string) (SupportContext::getGlobal('SITENAME', '') ?? '');
-        $siteEmail = (string) (SupportContext::getGlobal('SITEEMAIL', '') ?? '');
-        $slogan = (string) (SupportContext::getGlobal('SLOGAN', '') ?? '');
-        $baseUrl = (string) (SupportContext::getGlobal('BASEURL', '') ?? '');
-        $dateFounded = (string) (SupportContext::getGlobal('datefounded', '') ?? '');
-        $projectName = (string) (SupportContext::getGlobal('PROJECTNAME', '') ?? '');
+        $siteName = (string) (app(Globals::class)->get('SITENAME', '') ?? '');
+        $siteEmail = (string) (app(Globals::class)->get('SITEEMAIL', '') ?? '');
+        $slogan = (string) (app(Globals::class)->get('SLOGAN', '') ?? '');
+        $baseUrl = (string) (app(Globals::class)->get('BASEURL', '') ?? '');
+        $dateFounded = (string) (app(Globals::class)->get('datefounded', '') ?? '');
+        $projectName = (string) (app(Globals::class)->get('PROJECTNAME', '') ?? '');
 
         $url = Http::protocolPrefix(Url::isSecure()).$baseUrl;
         $year = substr($dateFounded, 0, 4);
@@ -417,7 +419,7 @@ XML;
         }
 
         /** @var array<string, string> $langOk */
-        $langOk = (array) SupportContext::getGlobal('lang_ok', []);
+        $langOk = (array) app(Globals::class)->get('lang_ok', []);
         $title = match ($type) {
             'adminactivate', 'inviter', 'signup' => $langOk['head_user_signup'] ?? '',
             'sysop' => $langOk['head_sysop_activation'] ?? '',
@@ -431,7 +433,7 @@ XML;
             'email' => $email,
             'title' => $title,
             'siteName' => Setting::getSiteName(),
-            'CURUSER' => SupportContext::getUser(),
+            'CURUSER' => app(CurrentUser::class)->get(),
         ]);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Repositories\StyleRepository;
+use App\Support\Cache\LegacyRedisCache;
 
 /**
  * Legacy stylesheet helpers extracted from `include/functions.php`.
@@ -114,10 +115,10 @@ final class Style
      */
     public static function cssRowWithContext(): ?array
     {
-        $user = SupportContext::getUser() ?? [];
-        $defaultId = (int) SupportContext::getGlobal('defcss', 0);
+        $user = app(CurrentUser::class)->get() ?? [];
+        $defaultId = (int) app(Globals::class)->get('defcss', 0);
 
-        return self::cssRow(SupportContext::getCache(), $user ? $user['stylesheet'] : $defaultId, $defaultId);
+        return self::cssRow(app(LegacyRedisCache::class), $user ? $user['stylesheet'] : $defaultId, $defaultId);
     }
 
     /**
@@ -126,10 +127,10 @@ final class Style
      */
     public static function cssUriWithContext(string $file = ''): string
     {
-        $user = SupportContext::getUser() ?? [];
-        $defaultId = (int) SupportContext::getGlobal('defcss', 0);
+        $user = app(CurrentUser::class)->get() ?? [];
+        $defaultId = (int) app(Globals::class)->get('defcss', 0);
 
-        return self::cssUri(SupportContext::getCache(), $user ? $user['stylesheet'] : $defaultId, $defaultId, $file);
+        return self::cssUri(app(LegacyRedisCache::class), $user ? $user['stylesheet'] : $defaultId, $defaultId, $file);
     }
 
     /**
@@ -138,7 +139,7 @@ final class Style
      */
     public static function fontCssUriWithContext(): string
     {
-        $user = SupportContext::getUser() ?? [];
+        $user = app(CurrentUser::class)->get() ?? [];
 
         return self::fontCssUri($user['fontsize'] ?? null);
     }
@@ -149,10 +150,10 @@ final class Style
      */
     public static function addiCodeWithContext(): string
     {
-        $user = SupportContext::getUser() ?? [];
-        $defaultId = (int) SupportContext::getGlobal('defcss', 0);
+        $user = app(CurrentUser::class)->get() ?? [];
+        $defaultId = (int) app(Globals::class)->get('defcss', 0);
 
-        return self::addiCode(SupportContext::getCache(), $user ? $user['stylesheet'] : $defaultId, $defaultId);
+        return self::addiCode(app(LegacyRedisCache::class), $user ? $user['stylesheet'] : $defaultId, $defaultId);
     }
 
     /**
@@ -161,7 +162,7 @@ final class Style
      */
     public static function highlightColorWithContext(): string
     {
-        $user = SupportContext::getUser() ?? [];
+        $user = app(CurrentUser::class)->get() ?? [];
 
         return self::highlightColor($user ? (int) $user['stylesheet'] : null);
     }

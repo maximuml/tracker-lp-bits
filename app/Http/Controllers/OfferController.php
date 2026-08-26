@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Repositories\OfferRepository;
 use App\Services\Legacy\OfferService;
 use App\Services\OfferPageService;
-use App\Support\SupportContext;
+use App\Support\CurrentUser;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -38,7 +38,7 @@ class OfferController extends LegacyController
      */
     public function legacy(Request $request): View|RedirectResponse
     {
-        if (SupportContext::getUser() === null) {
+        if (app(CurrentUser::class)->get() === null) {
             $qs = $request->getQueryString();
 
             return redirect('/offers.php'.($qs ? '?'.$qs : ''));

@@ -1,6 +1,6 @@
 <?php
 
-$lang_delete = (array) \App\Support\SupportContext::getGlobal('lang_delete', []);
+$lang_delete = (array) \app(\App\Support\Globals::class)->get('lang_delete', []);
 $message = (string) ($message ?? $lang_delete['text_torrent_deleted'] ?? 'Torrent deleted.');
 $ret = (string) ($ret ?? '<a href="index.php">' . ($lang_delete['text_back_to_index'] ?? 'Back to index') . '</a>');
 

@@ -1,7 +1,7 @@
 @php
-$lang_log = (array) (\App\Support\SupportContext::getGlobal('lang_log') ?? []);
-$CURUSER = (array) (\App\Support\SupportContext::getUser() ?? []);
-$BASEURL = \App\Support\SupportContext::getGlobal('BASEURL', '');
+$lang_log = (array) (\app(\App\Support\Globals::class)->get('lang_log') ?? []);
+$CURUSER = (array) (\app(\App\Support\CurrentUser::class)->get() ?? []);
+$BASEURL = \app(\App\Support\Globals::class)->get('BASEURL', '');
 $action = \request()->post('action') ?? \request()->query('action') ?? 'dailylog';
 $action = in_array($action, ['dailylog', 'chronicle', 'news', 'poll'], true) ? $action : 'dailylog';
 $mode = (string) ($mode ?? $action);

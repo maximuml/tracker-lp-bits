@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Support\Cache\LegacyRedisCache;
 use Nexus\Nexus;
 
 /**
@@ -60,7 +61,7 @@ final class LegacyAuthContext
         if (\function_exists('nexus')) {
             $script = Nexus::instance()->getScript();
         } else {
-            $scriptFile = SupportContext::getServerValue('SCRIPT_FILENAME', '');
+            $scriptFile = Input::serverValue('SCRIPT_FILENAME', '');
             $script = basename($scriptFile);
             if (str_contains($script, '.')) {
                 $script = strstr($script, '.', true);
@@ -68,24 +69,24 @@ final class LegacyAuthContext
         }
 
         return new self(
-            user: SupportContext::getUser(),
-            lang: SupportContext::getLangFunctions(),
-            cache: SupportContext::getCache(),
+            user: app(CurrentUser::class)->get(),
+            lang: app(Language::class)->functions(),
+            cache: app(LegacyRedisCache::class),
             ip: \function_exists('getip') ? Network::clientIp((bool) true) : Network::clientIp(),
-            requestUri: SupportContext::getServerValue('REQUEST_URI'),
+            requestUri: Input::serverValue('REQUEST_URI'),
             requestBody: request()->post(),
             queryParams: request()->query(),
             request: array_merge(request()->post(), request()->query()),
-            cookies: SupportContext::allCookie(),
-            maxLoginAttempts: (int) SupportContext::getGlobal('maxloginattempts', 0),
-            captchaEnabled: SupportContext::getGlobal('iv', '') === 'yes',
+            cookies: request()->cookies->all(),
+            maxLoginAttempts: (int) app(Globals::class)->get('maxloginattempts', 0),
+            captchaEnabled: app(Globals::class)->get('iv', '') === 'yes',
             registration: [
-                'invitesystem' => (string) SupportContext::getGlobal('invitesystem', ''),
-                'registration' => (string) SupportContext::getGlobal('registration', ''),
-                'maxusers' => (int) SupportContext::getGlobal('maxusers', 0),
-                'maxip' => (int) SupportContext::getGlobal('maxip', 0),
+                'invitesystem' => (string) app(Globals::class)->get('invitesystem', ''),
+                'registration' => (string) app(Globals::class)->get('registration', ''),
+                'maxusers' => (int) app(Globals::class)->get('maxusers', 0),
+                'maxip' => (int) app(Globals::class)->get('maxip', 0),
             ],
-            langFolder: SupportContext::getCookieValue('c_lang_folder'),
+            langFolder: Input::cookieValue('c_lang_folder'),
             moderatorClass: defined('UC_MODERATOR') ? (int) \constant('UC_MODERATOR') : 0,
             script: $script,
         );

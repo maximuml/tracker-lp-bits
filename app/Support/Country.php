@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Repositories\CountryRepository;
+use App\Support\Cache\LegacyRedisCache;
 
 /**
  * Legacy country helper extracted from `include/functions.php`.
@@ -41,6 +42,6 @@ final class Country
      */
     public static function rowWithContext(int|string $id): ?array
     {
-        return self::row(SupportContext::getCache(), $id);
+        return self::row(app(LegacyRedisCache::class), $id);
     }
 }

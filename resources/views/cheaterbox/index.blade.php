@@ -1,5 +1,5 @@
 @php
-$lang_cheaterbox = (array) (\App\Support\SupportContext::getGlobal('lang_cheaterbox') ?? []);
+$lang_cheaterbox = (array) (\app(\App\Support\Globals::class)->get('lang_cheaterbox') ?? []);
 @endphp
 @extends('layouts.legacy')
 

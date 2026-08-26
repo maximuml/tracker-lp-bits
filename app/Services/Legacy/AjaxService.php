@@ -17,8 +17,8 @@ use App\Repositories\SeedBoxRepository;
 use App\Repositories\TorrentRepository;
 use App\Repositories\UserPasskeyRepository;
 use App\Repositories\UserRepository;
+use App\Support\CurrentUser;
 use App\Support\Shoutbox;
-use App\Support\SupportContext;
 use App\Support\ToastNotifications;
 use Illuminate\Support\Facades\DB;
 use Nexus\Database\NexusLock;
@@ -68,7 +68,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public static function toggleUserMedalStatus(array $params): mixed
     {
-        $CURUSER = SupportContext::getUser() ?? [];
+        $CURUSER = app(CurrentUser::class)->get() ?? [];
         $rep = new MedalRepository;
 
         return $rep->toggleUserMedalStatus($params['id'], $CURUSER['id']);
@@ -77,7 +77,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public static function attendanceRetroactive(array $params): mixed
     {
-        $CURUSER = SupportContext::getUser() ?? [];
+        $CURUSER = app(CurrentUser::class)->get() ?? [];
         $rep = new AttendanceRepository;
 
         return $rep->retroactive($CURUSER['id'], $params['date']);
@@ -86,7 +86,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public static function removeUserLeechWarn(array $params): mixed
     {
-        $CURUSER = SupportContext::getUser() ?? [];
+        $CURUSER = app(CurrentUser::class)->get() ?? [];
         $rep = new UserRepository;
 
         return $rep->removeLeechWarn($CURUSER['id'], $params['uid']);
@@ -103,7 +103,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public static function approvalModal(array $params): mixed
     {
-        $CURUSER = SupportContext::getUser() ?? [];
+        $CURUSER = app(CurrentUser::class)->get() ?? [];
         $rep = new TorrentRepository;
 
         return $rep->buildApprovalModal($CURUSER['id'], (int) $params['torrent_id']);
@@ -112,7 +112,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public static function approval(array $params): mixed
     {
-        $CURUSER = SupportContext::getUser() ?? [];
+        $CURUSER = app(CurrentUser::class)->get() ?? [];
         foreach (['torrent_id', 'approval_status'] as $field) {
             if (! (isset($params[$field]))) {
                 throw new \InvalidArgumentException("Require $field");
@@ -126,7 +126,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public static function addSeedBoxRecord(array $params): mixed
     {
-        $CURUSER = SupportContext::getUser() ?? [];
+        $CURUSER = app(CurrentUser::class)->get() ?? [];
         $rep = new SeedBoxRepository;
         $params['uid'] = $CURUSER['id'];
         $params['type'] = SeedBoxRecord::TYPE_USER;
@@ -138,7 +138,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public static function removeSeedBoxRecord(array $params): mixed
     {
-        $CURUSER = SupportContext::getUser() ?? [];
+        $CURUSER = app(CurrentUser::class)->get() ?? [];
         $rep = new SeedBoxRepository;
 
         return $rep->delete($params['id'], $CURUSER['id']);
@@ -147,7 +147,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public static function removeHitAndRun(array $params): mixed
     {
-        $CURUSER = SupportContext::getUser() ?? [];
+        $CURUSER = app(CurrentUser::class)->get() ?? [];
         $rep = new BonusRepository;
 
         return $rep->consumeToCancelHitAndRun($CURUSER['id'], $params['id']);
@@ -156,7 +156,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public static function consumeBenefit(array $params): mixed
     {
-        $CURUSER = SupportContext::getUser() ?? [];
+        $CURUSER = app(CurrentUser::class)->get() ?? [];
         $rep = new UserRepository;
 
         return $rep->consumeBenefit($CURUSER['id'], $params);
@@ -165,7 +165,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public static function clearShoutBox(array $params): mixed
     {
-        $CURUSER = SupportContext::getUser() ?? [];
+        $CURUSER = app(CurrentUser::class)->get() ?? [];
         $user = User::query()->find($CURUSER['id'] ?? 0);
         if (! $user instanceof User || ! Permission::can(PermissionEnum::SB_MANAGE, $user)) {
             throw new \RuntimeException('No permission');
@@ -179,7 +179,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public static function shoutboxEdit(array $params): mixed
     {
-        $CURUSER = SupportContext::getUser() ?? [];
+        $CURUSER = app(CurrentUser::class)->get() ?? [];
         $id = (int) ($params['id'] ?? 0);
         $text = trim((string) ($params['text'] ?? ''));
         if ($id <= 0 || $text === '') {
@@ -220,7 +220,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public static function shoutboxDelete(array $params): mixed
     {
-        $CURUSER = SupportContext::getUser() ?? [];
+        $CURUSER = app(CurrentUser::class)->get() ?? [];
         $id = (int) ($params['id'] ?? 0);
         if ($id <= 0) {
             throw new \InvalidArgumentException('Invalid input');
@@ -254,7 +254,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public static function shoutboxReact(array $params): mixed
     {
-        $CURUSER = SupportContext::getUser() ?? [];
+        $CURUSER = app(CurrentUser::class)->get() ?? [];
         $id = (int) ($params['id'] ?? 0);
         $reaction = (string) ($params['reaction'] ?? '');
         if ($id <= 0 || ! in_array($reaction, Shoutbox::REACTIONS, true)) {
@@ -288,7 +288,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public static function buyMedal(array $params): mixed
     {
-        $CURUSER = SupportContext::getUser() ?? [];
+        $CURUSER = app(CurrentUser::class)->get() ?? [];
         $rep = new BonusRepository;
 
         return $rep->consumeToBuyMedal($CURUSER['id'], $params['medal_id']);
@@ -297,7 +297,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public static function giftMedal(array $params): mixed
     {
-        $CURUSER = SupportContext::getUser() ?? [];
+        $CURUSER = app(CurrentUser::class)->get() ?? [];
         $rep = new BonusRepository;
 
         return $rep->consumeToGiftMedal($CURUSER['id'], $params['medal_id'], $params['uid']);
@@ -306,7 +306,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public static function saveUserMedal(array $params): mixed
     {
-        $CURUSER = SupportContext::getUser() ?? [];
+        $CURUSER = app(CurrentUser::class)->get() ?? [];
         $data = [];
         foreach ($params as $param) {
             if (! is_array($param) || ! isset($param['name'], $param['value'])) {
@@ -329,7 +329,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public static function claimTask(array $params): mixed
     {
-        $CURUSER = SupportContext::getUser() ?? [];
+        $CURUSER = app(CurrentUser::class)->get() ?? [];
         $rep = new ExamRepository;
 
         return $rep->assignToUser($CURUSER['id'], $params['exam_id']);
@@ -338,7 +338,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public static function addToken(array $params): mixed
     {
-        $CURUSER = SupportContext::getUser() ?? [];
+        $CURUSER = app(CurrentUser::class)->get() ?? [];
         if (empty($params['name'])) {
             throw new \InvalidArgumentException('Name is required');
         }
@@ -352,7 +352,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public static function removeToken(array $params): mixed
     {
-        $CURUSER = SupportContext::getUser() ?? [];
+        $CURUSER = app(CurrentUser::class)->get() ?? [];
         if (empty($params['id'])) {
             throw new \InvalidArgumentException('id is required');
         }
@@ -366,7 +366,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public static function getPasskeyCreateArgs(array $params): mixed
     {
-        $CURUSER = SupportContext::getUser() ?? [];
+        $CURUSER = app(CurrentUser::class)->get() ?? [];
         $rep = new UserPasskeyRepository;
 
         return $rep->getCreateArgs($CURUSER['id'], $CURUSER['username']);
@@ -375,7 +375,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public static function processPasskeyCreate(array $params): mixed
     {
-        $CURUSER = SupportContext::getUser() ?? [];
+        $CURUSER = app(CurrentUser::class)->get() ?? [];
         $rep = new UserPasskeyRepository;
 
         return $rep->processCreate($CURUSER['id'], $params['challengeId'], $params['clientDataJSON'], $params['attestationObject']);
@@ -384,7 +384,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public static function deletePasskey(array $params): mixed
     {
-        $CURUSER = SupportContext::getUser() ?? [];
+        $CURUSER = app(CurrentUser::class)->get() ?? [];
         $rep = new UserPasskeyRepository;
 
         return $rep->delete($CURUSER['id'], $params['credentialId']);
@@ -393,7 +393,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public static function getPasskeyList(array $params): mixed
     {
-        $CURUSER = SupportContext::getUser() ?? [];
+        $CURUSER = app(CurrentUser::class)->get() ?? [];
         $rep = new UserPasskeyRepository;
 
         return $rep->getList($CURUSER['id']);
@@ -402,7 +402,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public static function getPasskeyGetArgs(array $params): mixed
     {
-        $CURUSER = SupportContext::getUser() ?? [];
+        $CURUSER = app(CurrentUser::class)->get() ?? [];
         $rep = new UserPasskeyRepository;
 
         return $rep->getGetArgs();
@@ -411,7 +411,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public static function processPasskeyGet(array $params): mixed
     {
-        $CURUSER = SupportContext::getUser() ?? [];
+        $CURUSER = app(CurrentUser::class)->get() ?? [];
         $rep = new UserPasskeyRepository;
 
         return $rep->processGet($params['challengeId'], $params['id'], $params['clientDataJSON'], $params['authenticatorData'], $params['signature'], $params['userHandle']);
@@ -420,7 +420,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public static function getToastNotifications(array $params): mixed
     {
-        $CURUSER = SupportContext::getUser() ?? [];
+        $CURUSER = app(CurrentUser::class)->get() ?? [];
         $lastPmId = (int) ($params['last_pm_id'] ?? 0);
         $lastShoutId = (int) ($params['last_shout_id'] ?? 0);
         $init = ! empty($params['init']);

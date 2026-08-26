@@ -328,7 +328,7 @@ final class LegacyAuth
      *
      * Mirrors `userlogin()`: checks the IP ban list, reads the user from
      * the cookie, generates a missing passkey, and returns the user row.
-     * The caller is responsible for populating SupportContext::setUser() so the
+     * The caller is responsible for populating app(CurrentUser::class)->set() so the
      * rest of the legacy page keeps working.
      *
      * @return array<string, mixed>|null
@@ -380,15 +380,15 @@ final class LegacyAuth
         $user = self::loginFromCookie($context);
 
         if ($user !== null) {
-            SupportContext::setGlobal('oldip', $user['old_ip'] ?? $user['ip'] ?? '');
-            SupportContext::setGlobal('CURUSER', $user);
-            SupportContext::setUser($user);
+            app(Globals::class)->set('oldip', $user['old_ip'] ?? $user['ip'] ?? '');
+            app(Globals::class)->set('CURUSER', $user);
+            app(CurrentUser::class)->set($user);
 
             return true;
         }
 
-        SupportContext::setGlobal('CURUSER', null);
-        SupportContext::setUser(null);
+        app(Globals::class)->set('CURUSER', null);
+        app(CurrentUser::class)->set(null);
 
         return false;
     }

@@ -102,7 +102,7 @@ final class Shoutbox
     public static function toolbar(string $formName = 'shbox', string $fieldName = 'shbox_text'): string
     {
         $panelId = 'shoutbox-emoji-panel';
-        $lang = SupportContext::getLangShoutbox();
+        $lang = app(Language::class)->shoutbox();
 
         $b = $lang['toolbar_bold'] ?? 'B';
         $i = $lang['toolbar_italic'] ?? 'I';
@@ -209,7 +209,7 @@ final class Shoutbox
             return '';
         }
 
-        $lang = SupportContext::getLangShoutbox();
+        $lang = app(Language::class)->shoutbox();
         $editLabel = $lang['text_edit'] ?? 'edit';
         $delLabel = $lang['text_del'] ?? 'del';
         $html = '<span class="shout-actions">';
@@ -266,7 +266,7 @@ final class Shoutbox
             $reactors = [];
         }
 
-        $lang = SupportContext::getLangShoutbox();
+        $lang = app(Language::class)->shoutbox();
         $titleReact = (string) ($lang['title_react'] ?? 'React');
         $titleAdd = (string) ($lang['title_add_reaction'] ?? 'Add reaction');
         $titleReacted = (string) ($lang['title_reacted_by'] ?? 'Reacted by');
@@ -311,10 +311,10 @@ final class Shoutbox
             $text .= ($text === '' ? '' : ', ').'+'.$remaining.' more';
         }
         if ($text === '') {
-            return (string) (SupportContext::getLangShoutbox()['title_react'] ?? 'React');
+            return (string) (app(Language::class)->shoutbox()['title_react'] ?? 'React');
         }
 
-        return ((string) (SupportContext::getLangShoutbox()['title_reacted_by'] ?? 'Reacted by')).': '.$text;
+        return ((string) (app(Language::class)->shoutbox()['title_reacted_by'] ?? 'Reacted by')).': '.$text;
     }
 
     /**
@@ -359,7 +359,7 @@ final class Shoutbox
                 $cls = $isMe ? 'shout-mention shout-mention-me' : 'shout-mention';
                 $name = $cache[$key]['name'];
                 $title = '';
-                $shoutboxLang = SupportContext::getLangShoutbox();
+                $shoutboxLang = app(Language::class)->shoutbox();
                 if (isset($shoutboxLang['tooltip_nick_reply'])) {
                     $title = ' title="'.htmlspecialchars((string) $shoutboxLang['tooltip_nick_reply'], ENT_QUOTES).'"';
                 }

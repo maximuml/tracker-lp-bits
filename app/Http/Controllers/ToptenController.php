@@ -5,7 +5,8 @@ namespace App\Http\Controllers;
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
 use App\Repositories\ToptenRepository;
-use App\Support\SupportContext;
+use App\Support\CurrentUser;
+use App\Support\Globals;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -15,7 +16,7 @@ class ToptenController extends Controller
 {
     public function legacy(Request $request): Response|RedirectResponse
     {
-        if (SupportContext::getUser() === null) {
+        if (app(CurrentUser::class)->get() === null) {
             $qs = $request->getQueryString();
 
             return redirect('/topten.php'.($qs ? '?'.$qs : ''));
@@ -30,7 +31,7 @@ class ToptenController extends Controller
         $subtype = $request->query('subtype');
         $subtype = is_string($subtype) ? $subtype : null;
 
-        $langFolder = (string) SupportContext::getGlobal('CURLANGDIR', 'en');
+        $langFolder = (string) app(Globals::class)->get('CURLANGDIR', 'en');
         $cacheKey = "topten_{$type}_{$limit}_{$subtype}_{$langFolder}";
 
         $html = Cache::remember($cacheKey, 3600, function () use ($type, $limit, $subtype) {

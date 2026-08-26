@@ -67,7 +67,7 @@ final class TorrentTags
      */
     public static function renderWithContext(int|string $tags = 0, string $type = 'checkbox'): string
     {
-        $lang = SupportContext::getLangFunctions();
+        $lang = app(Language::class)->functions();
 
         return self::render($tags, $type, [
             'text_tag_no_release_to_any_other' => $lang['text_tag_no_release_to_any_other'] ?? '',

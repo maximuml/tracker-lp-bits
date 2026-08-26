@@ -105,13 +105,13 @@ final class Slots
      */
     public static function displayWithContext(): string
     {
-        $user = SupportContext::getUser() ?? [];
-        $lang = SupportContext::getLangFunctions();
+        $user = app(CurrentUser::class)->get() ?? [];
+        $lang = app(Language::class)->functions();
 
         return self::display(
             (float) ($user['uploaded'] ?? 0),
             (float) ($user['downloaded'] ?? 0),
-            (string) SupportContext::getGlobal('maxdlsystem', ''),
+            (string) app(Globals::class)->get('maxdlsystem', ''),
             (int) ($user['class'] ?? 0),
             (int) User::CLASS_VIP,
             (string) ($lang['text_slots'] ?? ''),

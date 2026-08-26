@@ -15,12 +15,12 @@ use App\Models\User;
 use App\Services\WebAuthService;
 use App\Support\AuthCookie;
 use App\Support\Cache;
+use App\Support\Globals;
 use App\Support\Hooks;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Mail;
 use App\Support\PasswordHasher;
-use App\Support\SupportContext;
 use App\Support\Token;
 use App\Support\TwoFactorAuthHelper;
 use App\Support\Url;
@@ -391,7 +391,7 @@ final class UsercpRepository extends BaseRepository
             $data['lang'] = $dto->sitelanguage;
         }
 
-        $showTooltip = (string) SupportContext::getGlobal('enabletooltip_tweak', '') === 'yes';
+        $showTooltip = (string) app(Globals::class)->get('enabletooltip_tweak', '') === 'yes';
         if ($showTooltip) {
             $data['tooltip'] = $dto->tooltip ?? 'off';
             $data['showlastcom'] = $dto->showlastcom ?? 'no';
@@ -413,7 +413,7 @@ final class UsercpRepository extends BaseRepository
         if (! $user instanceof User) {
             throw new \RuntimeException('Unauthenticated');
         }
-        $lang = (array) (SupportContext::getGlobal('lang_usercp') ?? []);
+        $lang = (array) (app(Globals::class)->get('lang_usercp') ?? []);
 
         $response = (string) $request->input('response', '');
         $oldPassword = (string) $request->input('oldpassword', '');
@@ -478,8 +478,8 @@ final class UsercpRepository extends BaseRepository
             $passupdated = 1;
         }
 
-        $disableEmailChange = (string) SupportContext::getGlobal('disableemailchange', 'no');
-        $smtpType = (string) SupportContext::getGlobal('smtptype', 'none');
+        $disableEmailChange = (string) app(Globals::class)->get('disableemailchange', 'no');
+        $smtpType = (string) app(Globals::class)->get('smtptype', 'none');
 
         if ($disableEmailChange !== 'no' && $smtpType !== 'none' && $email !== '' && $email !== $user->email) {
             if (! Validators::isEmail($email)) {
@@ -497,9 +497,9 @@ final class UsercpRepository extends BaseRepository
             $data['passkey'] = md5($user->username.date('Y-m-d H:i:s').$user->passhash);
         }
 
-        $siteName = (string) SupportContext::getGlobal('SITENAME', '');
-        $siteEmail = (string) SupportContext::getGlobal('SITEEMAIL', '');
-        $baseUrl = (string) SupportContext::getGlobal('BASEURL', '');
+        $siteName = (string) app(Globals::class)->get('SITENAME', '');
+        $siteEmail = (string) app(Globals::class)->get('SITEEMAIL', '');
+        $baseUrl = (string) app(Globals::class)->get('BASEURL', '');
 
         if ($changedemail === 1) {
             $sec = Token::randomHex(20);
@@ -587,12 +587,12 @@ final class UsercpRepository extends BaseRepository
         }
 
         $email = (string) ($dto->email ?? '');
-        $disableEmailChange = (string) SupportContext::getGlobal('disableemailchange', 'no');
-        $smtpType = (string) SupportContext::getGlobal('smtptype', 'none');
-        $siteName = (string) SupportContext::getGlobal('SITENAME', '');
-        $siteEmail = (string) SupportContext::getGlobal('SITEEMAIL', '');
-        $baseUrl = (string) SupportContext::getGlobal('BASEURL', '');
-        $lang = (array) (SupportContext::getGlobal('lang_usercp') ?? []);
+        $disableEmailChange = (string) app(Globals::class)->get('disableemailchange', 'no');
+        $smtpType = (string) app(Globals::class)->get('smtptype', 'none');
+        $siteName = (string) app(Globals::class)->get('SITENAME', '');
+        $siteEmail = (string) app(Globals::class)->get('SITEEMAIL', '');
+        $baseUrl = (string) app(Globals::class)->get('BASEURL', '');
+        $lang = (array) (app(Globals::class)->get('lang_usercp') ?? []);
 
         if ($disableEmailChange !== 'no' && $smtpType !== 'none' && $email !== '' && $email !== $user->email) {
             if (! Validators::isEmail($email)) {

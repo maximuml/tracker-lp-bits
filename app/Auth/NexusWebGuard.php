@@ -5,7 +5,7 @@ namespace App\Auth;
 use App\Models\User;
 use App\Services\WebAuthService;
 use App\Support\AuthCookie;
-use App\Support\SupportContext;
+use App\Support\CurrentUser;
 use Illuminate\Auth\GuardHelpers;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\StatefulGuard;
@@ -153,7 +153,7 @@ class NexusWebGuard implements StatefulGuard
         $duration = $remember ? 5 * 365 * 86400 : 0;
         AuthCookie::setLoginCookie((int) $user->getAuthIdentifier(), null, $duration);
 
-        SupportContext::setUser($user->toArray());
+        app(CurrentUser::class)->set($user->toArray());
     }
 
     public function loginUsingId($id, $remember = false): Authenticatable|false
@@ -191,6 +191,6 @@ class NexusWebGuard implements StatefulGuard
     {
         AuthCookie::clear();
         $this->user = null;
-        SupportContext::setUser(null);
+        app(CurrentUser::class)->set(null);
     }
 }

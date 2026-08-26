@@ -3,8 +3,8 @@
 namespace Nexus\Torrent;
 
 use App\Support\Format;
+use App\Support\Language;
 use App\Support\Locale;
-use App\Support\SupportContext;
 
 class TechnicalInformation
 {
@@ -181,7 +181,7 @@ class TechnicalInformation
 
     public function renderOnDetailsPage()
     {
-        $lang_functions = SupportContext::getLangFunctions();
+        $lang_functions = app(Language::class)->functions();
         if (empty($this->mediaInfo)) {
             return '';
         }

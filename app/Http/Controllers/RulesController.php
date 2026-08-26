@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Repositories\InfoRepository;
+use App\Support\Globals;
 use App\Support\Locale;
-use App\Support\SupportContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -15,7 +15,7 @@ class RulesController extends LegacyController
 {
     public function rules(Request $request): Response|RedirectResponse
     {
-        $langFolder = (string) SupportContext::getGlobal('CURLANGDIR', 'en');
+        $langFolder = (string) app(Globals::class)->get('CURLANGDIR', 'en');
         $cacheKey = "{$langFolder}_rules";
 
         $html = Cache::remember($cacheKey, 900, function () {

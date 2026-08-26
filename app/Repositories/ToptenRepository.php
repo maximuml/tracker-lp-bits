@@ -2,8 +2,8 @@
 
 namespace App\Repositories;
 
+use App\Support\Globals;
 use App\Support\Settings;
-use App\Support\SupportContext;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -23,9 +23,9 @@ final class ToptenRepository
             $limit = 10;
         }
 
-        $lang = (array) SupportContext::getGlobal('lang_topten', []);
+        $lang = (array) app(Globals::class)->get('lang_topten', []);
         $enabledDonation = ((string) Settings::get('main.donation', 'no')) === 'yes';
-        $dateFounded = (string) SupportContext::getGlobal('datefounded', '');
+        $dateFounded = (string) app(Globals::class)->get('datefounded', '');
 
         $sections = match ($type) {
             1 => self::userSections($limit, $subtype, $lang),

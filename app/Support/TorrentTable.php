@@ -6,6 +6,7 @@ use App\Auth\Permission;
 use App\Repositories\SeedBoxRepository;
 use App\Repositories\TagRepository;
 use App\Repositories\TorrentRepository;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use Nexus\Torrent\Torrent;
 
@@ -18,14 +19,14 @@ final class TorrentTable
     {
         ob_start();
 
-        $cache = SupportContext::getCache();
+        $cache = app(LegacyRedisCache::class);
         if ($cache === null) {
             throw new \RuntimeException('Cache not initialized');
         }
-        $lang_functions = SupportContext::getLangFunctions();
-        $user = SupportContext::getUser() ?? [];
-        $waitsystem = (string) SupportContext::getGlobal('waitsystem', '');
-        $enabletooltip_tweak = (string) SupportContext::getGlobal('enabletooltip_tweak', '');
+        $lang_functions = app(Language::class)->functions();
+        $user = app(CurrentUser::class)->get() ?? [];
+        $waitsystem = (string) app(Globals::class)->get('waitsystem', '');
+        $enabletooltip_tweak = (string) app(Globals::class)->get('enabletooltip_tweak', '');
 
         $torrent = new Torrent;
         $torrentRep = new TorrentRepository;
@@ -326,7 +327,7 @@ if (Permission::canManageTorrent()) { ?>
                 if (Permission::canDeleteTorrent()) {
                     $actions[] = '<a href="'.htmlspecialchars('fastdelete.php?id='.$row['id']).'"><img class="staff_delete" src="pic/trans.gif" alt="D" title="'.$lang_functions['text_delete'].'" /></a>';
                 }
-                $actions[] = '<a href="edit.php?returnto='.rawurlencode(SupportContext::getServerValue('REQUEST_URI', '')).'&amp;id='.$row['id'].'"><img class="staff_edit" src="pic/trans.gif" alt="E" title="'.$lang_functions['text_edit'].'" /></a>';
+                $actions[] = '<a href="edit.php?returnto='.rawurlencode(Input::serverValue('REQUEST_URI', '')).'&amp;id='.$row['id'].'"><img class="staff_edit" src="pic/trans.gif" alt="E" title="'.$lang_functions['text_edit'].'" /></a>';
                 echo sprintf('<td class="rowfollow">%s</td>', implode('<br />', $actions));
             }
             echo "</tr>\n";

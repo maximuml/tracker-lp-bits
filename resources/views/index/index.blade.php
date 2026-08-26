@@ -1,6 +1,6 @@
 @php
-$lang_index = (array) (\App\Support\SupportContext::getGlobal('lang_index') ?? []);
-$CURUSER = (array) (\App\Support\SupportContext::getUser() ?? []);
+$lang_index = (array) (\app(\App\Support\Globals::class)->get('lang_index') ?? []);
+$CURUSER = (array) (\app(\App\Support\CurrentUser::class)->get() ?? []);
 $toastLang = json_encode([
     'newMessage' => $lang_index['toast_new_message'] ?? 'New message',
     'shoutboxMention' => $lang_index['toast_shoutbox_mention'] ?? 'Shoutbox mention',

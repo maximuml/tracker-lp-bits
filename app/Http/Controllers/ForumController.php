@@ -9,8 +9,8 @@ use App\Models\Forum;
 use App\Repositories\CommentRepository;
 use App\Services\ForumPageService;
 use App\Services\Legacy\ForumService;
+use App\Support\CurrentUser;
 use App\Support\Pagination;
-use App\Support\SupportContext;
 use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -34,7 +34,7 @@ class ForumController extends LegacyController
      */
     public function legacy(Request $request): View|Response|RedirectResponse
     {
-        if (SupportContext::getUser() === null) {
+        if (app(CurrentUser::class)->get() === null) {
             return redirect('/forums.php?'.$request->getQueryString());
         }
 

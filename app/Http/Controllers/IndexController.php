@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Repositories\IndexRepository;
 use App\Services\IndexPageService;
 use App\Support\Bonus;
-use App\Support\SupportContext;
+use App\Support\Cache\LegacyRedisCache;
+use App\Support\CurrentUser;
+use App\Support\Globals;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -19,7 +21,7 @@ class IndexController extends Controller
 
     public function legacy(Request $request): View|Response|RedirectResponse
     {
-        $user = SupportContext::getUser();
+        $user = app(CurrentUser::class)->get();
         if ($user === null) {
             $qs = $request->getQueryString();
 
@@ -28,7 +30,7 @@ class IndexController extends Controller
 
         IndexRepository::touchLastHome((int) $user['id']);
 
-        if ($request->isMethod('post') && SupportContext::getGlobal('showpolls_main', '') === 'yes') {
+        if ($request->isMethod('post') && app(Globals::class)->get('showpolls_main', '') === 'yes') {
             return $this->handlePollVote($request);
         }
 
@@ -40,7 +42,7 @@ class IndexController extends Controller
     private function handlePollVote(Request $request): RedirectResponse
     {
         $choice = $request->input('choice');
-        $user = SupportContext::getUser();
+        $user = app(CurrentUser::class)->get();
 
         if ($choice === null || $choice === '' || $choice >= 256 || $choice != floor($choice)) {
             return redirect('/index.php');
@@ -59,13 +61,13 @@ class IndexController extends Controller
 
         IndexRepository::recordPollVote($pollId, $user['id'], (int) $choice);
 
-        $cache = SupportContext::getCache();
+        $cache = app(LegacyRedisCache::class);
         if ($cache !== null) {
             $cache->delete_value('current_poll_content');
             $cache->delete_value('current_poll_result', true);
         }
 
-        $pollvoteBonus = (float) SupportContext::getGlobal('pollvote_bonus', 0);
+        $pollvoteBonus = (float) app(Globals::class)->get('pollvote_bonus', 0);
         if ($pollvoteBonus > 0) {
             Bonus::updatePoints((string) '+', (float) $pollvoteBonus, $user['id']);
         }

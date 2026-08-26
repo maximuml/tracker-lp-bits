@@ -1,5 +1,5 @@
 @php
-$lang_checkuser = (array) (\App\Support\SupportContext::getGlobal('lang_checkuser') ?? []);
+$lang_checkuser = (array) (\app(\App\Support\Globals::class)->get('lang_checkuser') ?? []);
 @endphp
 
 @extends('layouts.legacy')

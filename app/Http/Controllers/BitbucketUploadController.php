@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Support\Http;
+use App\Support\Input;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Path;
@@ -187,7 +188,7 @@ class BitbucketUploadController extends Controller
     private function loadLang(): array
     {
         if (empty(SupportContext::getGlobal('lang_bitbucketupload'))) {
-            SupportContext::setServerValue('SCRIPT_NAME', '/bitbucket-upload.php');
+            Input::setServerValue('SCRIPT_NAME', '/bitbucket-upload.php');
             require base_path(Locale::scriptFilePath((string) '', (bool) false, (string) ''));
             SupportContext::setGlobal('lang_bitbucketupload', $lang_bitbucketupload ?? []);
         }

@@ -9,6 +9,7 @@ use App\Repositories\UserListingRepository;
 use App\Repositories\UserSearchRepository;
 use App\Support\Format;
 use App\Support\Frame;
+use App\Support\Input;
 use App\Support\LegacyResponse;
 use App\Support\Pagination;
 use App\Support\Ratio;
@@ -36,7 +37,7 @@ final class UsersearchPageService
     public function build(Request $request): array
     {
         $curUser = (array) (SupportContext::getUser() ?? []);
-        $requestUri = (string) SupportContext::getServerValue('REQUEST_URI');
+        $requestUri = Input::serverValue('REQUEST_URI');
         $hasModcomment = Schema::hasColumn('users', 'modcomment');
 
         if (UserDisplay::currentClass() < UC_MODERATOR) {

@@ -2,7 +2,7 @@
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 
-$__server_HTTP_REFERER = \App\Support\SupportContext::getServerValue('HTTP_REFERER');
+$__server_HTTP_REFERER = \App\Support\Input::serverValue('HTTP_REFERER');
 if (\App\Support\UserDisplay::currentClass() < UC_SYSOP)
     \App\Support\LegacyResponse::abort("Sorry", "Access denied.");
 

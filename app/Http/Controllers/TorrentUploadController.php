@@ -11,6 +11,7 @@ use App\Repositories\TagRepository;
 use App\Repositories\TorrentRepository;
 use App\Repositories\UploadRepository;
 use App\Support\Category;
+use App\Support\Input;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\SupportContext;
@@ -37,7 +38,7 @@ class TorrentUploadController extends Controller
         SupportContext::setUser($currentUser);
 
         if (empty(SupportContext::getGlobal('lang_upload')) || empty(SupportContext::getGlobal('lang_edit'))) {
-            SupportContext::setServerValue('SCRIPT_NAME', '/upload.php');
+            Input::setServerValue('SCRIPT_NAME', '/upload.php');
             require base_path(Locale::scriptFilePath((string) '', (bool) false, (string) ''));
             SupportContext::setGlobal('lang_upload', $lang_upload ?? []);
             require base_path(Locale::scriptFilePath((string) 'edit.php', (bool) false, (string) ''));

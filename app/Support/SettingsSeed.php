@@ -36,7 +36,7 @@ final class SettingsSeed
         $TWEAK = SupportContext::getGlobal('TWEAK', []);
 
         SupportContext::setGlobal('SITENAME', $BASIC['SITENAME']);
-        SupportContext::setGlobal('BASEURL', $BASIC['BASEURL'] ?: (SupportContext::getServerValue('HTTP_HOST', 'localhost')));
+        SupportContext::setGlobal('BASEURL', $BASIC['BASEURL'] ?: (Input::serverValue('HTTP_HOST', 'localhost')));
         $BASEURL = SupportContext::getGlobal('BASEURL', '');
         $announce_urls = [];
         $announce_urls[] = $BASIC['announce_url'] ?: ($BASEURL.DEFAULT_TRACKER_URI);

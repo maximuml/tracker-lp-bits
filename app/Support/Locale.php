@@ -102,13 +102,13 @@ final class Locale
      */
     public static function scriptFilePath(string $scriptName = '', bool $target = false, string $langFolder = ''): string
     {
-        $CURLANGDIR = self::folderFromCookie(SupportContext::getCookieValue('c_lang_folder'));
+        $CURLANGDIR = self::folderFromCookie(Input::cookieValue('c_lang_folder'));
         SupportContext::setGlobal('CURLANGDIR', $CURLANGDIR);
         if ($langFolder === '') {
             $langFolder = $CURLANGDIR;
         }
 
-        return self::filePath($langFolder, $scriptName, SupportContext::getServerValue('SCRIPT_NAME', ''), $target);
+        return self::filePath($langFolder, $scriptName, Input::serverValue('SCRIPT_NAME', ''), $target);
     }
 
     /**
@@ -149,7 +149,7 @@ final class Locale
     public static function idFromCookie(string $lang = ''): int
     {
         if ($lang === '') {
-            $lang = self::folderFromCookie(SupportContext::getCookieValue('c_lang_folder'));
+            $lang = self::folderFromCookie(Input::cookieValue('c_lang_folder'));
         }
 
         return self::idFromFolder($lang);

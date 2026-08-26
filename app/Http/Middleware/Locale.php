@@ -3,8 +3,8 @@
 namespace App\Http\Middleware;
 
 use App\Support\Config\SiteConfig;
+use App\Support\Input;
 use App\Support\Logger;
-use App\Support\SupportContext;
 use Carbon\Carbon;
 use Closure;
 use Illuminate\Http\JsonResponse;
@@ -52,7 +52,7 @@ class Locale
     public static function getLocaleFromCookie()
     {
         if (IN_NEXUS) {
-            $lang = IN_TRACKER ? null : \App\Support\Locale::folderFromCookie(SupportContext::getCookieValue('c_lang_folder', ''), (bool) false);
+            $lang = IN_TRACKER ? null : \App\Support\Locale::folderFromCookie(Input::cookieValue('c_lang_folder', ''), (bool) false);
             $log = "IN_NEXUS, get_langfolder_cookie() or IN_TRACKER use null: $lang";
         } else {
             $lang = Cookie::get('c_lang_folder');

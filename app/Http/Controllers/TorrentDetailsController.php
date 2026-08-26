@@ -16,6 +16,7 @@ use App\Repositories\TorrentRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\Format;
 use App\Support\Hooks;
+use App\Support\Input;
 use App\Support\Locale;
 use App\Support\Logger;
 use App\Support\Promotion;
@@ -77,7 +78,7 @@ class TorrentDetailsController extends Controller
         SupportContext::setUser($currentUser);
 
         if (empty(SupportContext::getGlobal('lang_functions')) || empty(SupportContext::getGlobal('lang_details'))) {
-            SupportContext::setServerValue('SCRIPT_NAME', '/details.php');
+            Input::setServerValue('SCRIPT_NAME', '/details.php');
             require base_path(Locale::scriptFilePath((string) 'functions.php', (bool) false, (string) ''));
             SupportContext::setGlobal('lang_functions', $lang_functions ?? []);
             require base_path(Locale::scriptFilePath((string) '', (bool) false, (string) ''));

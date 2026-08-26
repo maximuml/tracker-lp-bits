@@ -326,7 +326,7 @@ if (Permission::canManageTorrent()) { ?>
                 if (Permission::canDeleteTorrent()) {
                     $actions[] = '<a href="'.htmlspecialchars('fastdelete.php?id='.$row['id']).'"><img class="staff_delete" src="pic/trans.gif" alt="D" title="'.$lang_functions['text_delete'].'" /></a>';
                 }
-                $actions[] = '<a href="edit.php?returnto='.rawurlencode(SupportContext::getServerValue('REQUEST_URI', '')).'&amp;id='.$row['id'].'"><img class="staff_edit" src="pic/trans.gif" alt="E" title="'.$lang_functions['text_edit'].'" /></a>';
+                $actions[] = '<a href="edit.php?returnto='.rawurlencode(Input::serverValue('REQUEST_URI', '')).'&amp;id='.$row['id'].'"><img class="staff_edit" src="pic/trans.gif" alt="E" title="'.$lang_functions['text_edit'].'" /></a>';
                 echo sprintf('<td class="rowfollow">%s</td>', implode('<br />', $actions));
             }
             echo "</tr>\n";

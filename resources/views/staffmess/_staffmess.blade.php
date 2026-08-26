@@ -4,7 +4,7 @@ $classes = $classes ?? [];
 $body = $body ?? '';
 $username = $username ?? '';
 $receiver = $receiver ?? 0;
-$httpReferer = (string) \App\Support\SupportContext::getServerValue('HTTP_REFERER');
+$httpReferer = (string) \App\Support\Input::serverValue('HTTP_REFERER');
 ?>
 <table class=main width=737 border=0 cellspacing=0 cellpadding=0><tr><td class=embedded>
 <div align=center>

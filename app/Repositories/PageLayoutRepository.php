@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Invite;
 use App\Support\Hooks;
+use App\Support\Input;
 use App\Support\Menu;
 use App\Support\SupportContext;
 use Illuminate\Support\Facades\DB;
@@ -136,7 +137,7 @@ class PageLayoutRepository extends BaseRepository
         }
 
         SupportContext::addUserUpdate('last_access', date('Y-m-d H:i:s'));
-        SupportContext::addUserUpdate('ip', $user['ip'] ?? SupportContext::getServerValue('REMOTE_ADDR', ''));
+        SupportContext::addUserUpdate('ip', $user['ip'] ?? Input::serverValue('REMOTE_ADDR', ''));
 
         IpLogRepository::saveToCache((int) $user['id']);
 

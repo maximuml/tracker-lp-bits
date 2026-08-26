@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
 use App\Repositories\FriendsRepository;
+use App\Support\Input;
 use App\Support\Locale;
 use App\Support\SupportContext;
 use App\Support\UserClass;
@@ -157,7 +158,7 @@ class FriendsController extends LegacyController
     private function purgeNeighborsCache(): void
     {
         $currentUser = (array) (SupportContext::getUser() ?? []);
-        $cachefile = 'cache/'.Locale::folderFromCookie(SupportContext::getCookieValue('c_lang_folder', ''), false).'/neighbors/'.($currentUser['id'] ?? 0).'.html';
+        $cachefile = 'cache/'.Locale::folderFromCookie(Input::cookieValue('c_lang_folder', ''), false).'/neighbors/'.($currentUser['id'] ?? 0).'.html';
         if (file_exists($cachefile)) {
             unlink($cachefile);
         }

@@ -80,7 +80,7 @@ final class OfferService
 
     private function isSecure(): bool
     {
-        return (bool) SupportContext::getServerValue('HTTPS');
+        return (bool) Input::serverValue('HTTPS');
     }
 
     private function protocolPrefix(): string

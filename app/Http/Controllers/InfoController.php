@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\User;
 use App\Repositories\InfoRepository;
+use App\Support\Input;
 use App\Support\LegacyResponse;
 use App\Support\Pagination;
 use App\Support\Permissions;
@@ -37,7 +38,7 @@ class InfoController extends LegacyController
 
         $action = htmlspecialchars((string) SupportContext::getQuery('action'));
         $perpage = 15;
-        $phpSelf = SupportContext::getServerValue('PHP_SELF');
+        $phpSelf = Input::serverValue('PHP_SELF');
         $subject = UserDisplay::username($userid);
 
         $data = [

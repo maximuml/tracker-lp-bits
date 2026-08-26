@@ -9,6 +9,7 @@ use App\Repositories\TagRepository;
 use App\Repositories\TorrentDetailRepository;
 use App\Repositories\TorrentEditRepository;
 use App\Support\Category;
+use App\Support\Input;
 use App\Support\Locale;
 use App\Support\SupportContext;
 use Illuminate\Http\RedirectResponse;
@@ -50,7 +51,7 @@ class TorrentEditController extends Controller
         }
 
         if (empty(SupportContext::getGlobal('lang_edit')) || empty(SupportContext::getGlobal('lang_functions'))) {
-            SupportContext::setServerValue('SCRIPT_NAME', '/edit.php');
+            Input::setServerValue('SCRIPT_NAME', '/edit.php');
             require base_path(Locale::scriptFilePath((string) 'functions.php', (bool) false, (string) ''));
             SupportContext::setGlobal('lang_functions', $lang_functions ?? []);
             require base_path(Locale::scriptFilePath((string) '', (bool) false, (string) ''));

@@ -175,8 +175,8 @@ final class Pagination
         }
         $page = self::resolvePage($rawPage, $count, $rpp, ! empty($opts['lastpagedefault']));
 
-        $userAgent = SupportContext::getServerValue('HTTP_USER_AGENT');
-        $isPresto = is_string($userAgent) && str_contains($userAgent, 'Presto');
+        $userAgent = Input::serverValue('HTTP_USER_AGENT');
+        $isPresto = str_contains($userAgent, 'Presto');
         $lang = SupportContext::getLangFunctions();
         $labels = [
             'prev' => (string) ($lang['text_prev'] ?? ''),

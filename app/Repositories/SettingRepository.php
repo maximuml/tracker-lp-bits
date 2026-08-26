@@ -4,7 +4,6 @@ namespace App\Repositories;
 
 use App\Models\Setting;
 use App\Support\Cache;
-use App\Support\Database;
 use App\Support\Hooks;
 use App\Support\Logger;
 use Illuminate\Support\Arr;
@@ -47,35 +46,31 @@ class SettingRepository extends BaseRepository
     public function store(array $params)
     {
         $settingModel = new Setting;
-        $values = [];
+        $records = [];
         foreach ($params as $prefix => $nameValues) {
             if (! is_array($nameValues)) {
                 throw new \InvalidArgumentException('Unsupported parameter format.');
             }
             foreach ($nameValues as $name => $value) {
                 $valueArr = Arr::wrap($value);
-                array_walk_recursive($valueArr, function ($item) {
-                    return addslashes($item);
-                });
                 if (is_array($value)) {
                     $valueStr = json_encode($valueArr);
                 } else {
                     $valueStr = Arr::first($valueArr);
                 }
-                $values[] = sprintf("('%s', '%s')", addslashes("$prefix.$name"), addslashes($valueStr));
+                $records[] = [
+                    'name' => "$prefix.$name",
+                    'value' => $valueStr,
+                ];
             }
         }
-        if (empty($values)) {
+        if (empty($records)) {
             Logger::writeWithContext((string) 'no values', (string) 'info', (bool) false);
 
             return true;
         }
-        $sql = sprintf(
-            'insert into %s (name, "value") values %s %s',
-            $settingModel->getTable(), implode(', ', $values), Database::upsertField(['name'], ['value'])
-        );
-        $result = DB::insert($sql);
-        Logger::writeWithContext((string) "sql: {$sql}, result: {$result}", (string) 'info', (bool) false);
+        $result = DB::table($settingModel->getTable())->upsert($records, ['name'], ['value']);
+        Logger::writeWithContext((string) sprintf('upsert %d settings, result: %s', count($records), $result ? 'true' : 'false'), (string) 'info', (bool) false);
         Cache::forgetWithLocales('nexus_settings_in_laravel');
         Cache::forgetWithLocales('nexus_settings_in_nexus');
         Cache::forgetWithLocales('setting_protected_forum');

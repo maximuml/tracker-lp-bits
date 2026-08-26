@@ -66,7 +66,7 @@ class BonusRepository extends BaseRepository
     {
         return (int) User::query()
             ->where('enabled', 'yes')
-            ->whereRaw('downloaded > 10737418240')
+            ->where('downloaded', '>', 10737418240)
             ->whereRaw('? > uploaded/downloaded', [$ratioCharity])
             ->count();
     }
@@ -78,7 +78,7 @@ class BonusRepository extends BaseRepository
     {
         return User::query()
             ->where('enabled', 'yes')
-            ->whereRaw('downloaded > 10737418240')
+            ->where('downloaded', '>', 10737418240)
             ->whereRaw('? > uploaded/downloaded', [$ratioCharity])
             ->increment('seedbonus', $amount);
     }

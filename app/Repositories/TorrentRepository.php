@@ -27,7 +27,6 @@ use App\Models\TorrentSecret;
 use App\Models\TorrentTag;
 use App\Models\User;
 use App\Support\Config\SiteConfig;
-use App\Support\Database;
 use App\Support\Description;
 use App\Support\Env;
 use App\Support\Events;
@@ -918,23 +917,26 @@ class TorrentRepository extends BaseRepository
         $idArr = Arr::wrap($id);
 
         return DB::transaction(function () use ($idArr, $tagIdArr, $remove) {
-            $sql = 'insert into torrent_tags (torrent_id, tag_id, created_at, updated_at) values ';
             $time = now()->toDateTimeString();
-            $values = [];
+            $records = [];
             foreach ($idArr as $torrentId) {
                 foreach ($tagIdArr as $tagId) {
-                    $values[] = sprintf("(%s, %s, '%s', '%s')", $torrentId, $tagId, $time, $time);
+                    $records[] = [
+                        'torrent_id' => $torrentId,
+                        'tag_id' => $tagId,
+                        'created_at' => $time,
+                        'updated_at' => $time,
+                    ];
                 }
             }
-            $sql .= implode(', ', $values).' '.Database::upsertField(['torrent_id', 'tag_id'], ['updated_at']);
             if ($remove) {
                 TorrentTag::query()->whereIn('torrent_id', $idArr)->delete();
             }
-            if (! empty($values)) {
-                DB::insert($sql);
+            if (! empty($records)) {
+                DB::table('torrent_tags')->upsert($records, ['torrent_id', 'tag_id'], ['updated_at']);
             }
 
-            return count($values);
+            return count($records);
         });
 
     }

@@ -1407,13 +1407,8 @@ class ExamRepository extends BaseRepository
                 } while ($deleted > 0);
                 Message::query()->insert($messageToSend);
                 if (! empty($uidToDisable)) {
-                    $uidStr = implode(', ', $uidToDisable);
-                    $sql = sprintf(
-                        "update %s set enabled = '%s' where id in (%s)",
-                        $userTable, User::ENABLED_NO, $uidStr
-                    );
-                    $updateResult = DB::update($sql);
-                    Logger::writeWithContext((string) sprintf("{$logPrefix}, disable %s users: %s, sql: %s, updateResult: %s", count($uidToDisable), $uidStr, $sql, $updateResult), (string) 'info', (bool) false);
+                    $updateResult = DB::table($userTable)->whereIn('id', $uidToDisable)->update(['enabled' => User::ENABLED_NO]);
+                    Logger::writeWithContext((string) sprintf("{$logPrefix}, disable %s users: %s, updateResult: %s", count($uidToDisable), implode(', ', $uidToDisable), $updateResult), (string) 'info', (bool) false);
                 }
                 if (! empty($userBanLog)) {
                     UserBanLog::query()->insert($userBanLog);

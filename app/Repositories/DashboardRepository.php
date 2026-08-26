@@ -384,7 +384,7 @@ class DashboardRepository extends BaseRepository
         $second = clone $base;
         $second->where('u.class', '>', 3)->groupBy('u.id');
 
-        $rows = $first->union($second)->orderByRaw('name')->get();
+        $rows = $first->union($second)->orderBy('name')->get();
         $result = [];
         foreach ($rows as $row) {
             $result[] = [
@@ -409,7 +409,7 @@ class DashboardRepository extends BaseRepository
             ->leftJoin('torrents as t', 't.category', '=', 'c.id')
             ->leftJoin('peers as p', 't.id', '=', 'p.torrent')
             ->groupBy('c.id')
-            ->orderByRaw('c.name')
+            ->orderBy('c.name')
             ->get();
 
         $result = [];

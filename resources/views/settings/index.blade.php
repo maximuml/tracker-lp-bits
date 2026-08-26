@@ -1,1 +1,0 @@
-@include('settings._settings')

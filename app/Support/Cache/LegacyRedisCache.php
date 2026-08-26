@@ -402,16 +402,22 @@ class LegacyRedisCache
     /**
      * Unserialize the value.
      *
+     * Redis is an internal trusted store (not user input), so unserialize
+     * is safe here. The RCE risk from unserialize() requires an attacker
+     * to already have write access to Redis, which means the system is
+     * already compromised.
+     *
+     * `allowed_classes: false` is set as defence-in-depth: all cached
+     * values are arrays, integers, strings, or HTML — never PHP objects —
+     * so blocking object deserialization eliminates the attack surface
+     * entirely without breaking any legitimate use case.
+     *
      * @param  mixed  $value
      * @return mixed
      */
     protected function unserialize($value)
     {
-        // Redis is an internal trusted store (not user input), so unserialize
-        // is safe here. The RCE risk from unserialize() requires an attacker
-        // to already have write access to Redis, which means the system is
-        // already compromised.
-        return is_numeric($value) ? $value : unserialize($value);
+        return is_numeric($value) ? $value : unserialize($value, ['allowed_classes' => false]);
     }
 
     /**

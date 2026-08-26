@@ -4,6 +4,8 @@ namespace App\Support;
 
 use App\Support\Cache\LegacyRedisCache;
 use Illuminate\Http\Request;
+use Laravel\Sanctum\PersonalAccessToken;
+use Laravel\Sanctum\Sanctum;
 use Nexus\Database\NexusDB;
 use Nexus\Nexus;
 use Nexus\Plugin\Hook;
@@ -87,7 +89,9 @@ final class LegacyBootstrap
             $config = $dbConfig['connections'][$dbConfig['default']];
             NexusDB::bootEloquent($config);
         }
-        NexusDB::customModel();
+        if (class_exists(Sanctum::class)) {
+            Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
+        }
     }
 
     private static function bootTimezone(): void

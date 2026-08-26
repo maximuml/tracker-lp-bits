@@ -3,6 +3,8 @@
 namespace App\Support;
 
 use App\Repositories\TorrentRepository;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
 use Nexus\Database\NexusDB;
 
 /**
@@ -33,7 +35,7 @@ final class LegacyDb
      */
     public static function lastQuery(bool|string $all = false, string $format = 'json'): mixed
     {
-        $connection = NexusDB::eloquentConnection();
+        $connection = DB::connection(Config::get('nexus.database.default', null));
 
         if ($all === 'COUNT') {
             return count($connection->getQueryLog());

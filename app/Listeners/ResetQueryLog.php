@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace App\Listeners;
 
 use Illuminate\Routing\Events\RouteMatched;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Reset the query log at the start of each request.
@@ -18,6 +19,6 @@ final class ResetQueryLog
 {
     public function handle(RouteMatched $event): void
     {
-        NexusDB::eloquentConnection()->flushQueryLog();
+        DB::connection(Config::get('nexus.database.default', null))->flushQueryLog();
     }
 }

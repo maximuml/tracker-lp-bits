@@ -151,9 +151,9 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\HasApiTokens;
-use Nexus\Database\NexusDB;
 
 /**
  * @property int $id
@@ -336,7 +336,7 @@ class User extends Authenticatable implements FilamentUser, HasName
     /** @return string */
     public function getConnectionName()
     {
-        return NexusDB::getConnectionName();
+        return Config::get('nexus.database.default', null);
     }
 
     public static function getUserEnableLatelyCacheKey(int $userId): string

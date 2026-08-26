@@ -16,7 +16,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
-use Nexus\Database\NexusDB;
+use Laravel\Sanctum\PersonalAccessToken;
+use Laravel\Sanctum\Sanctum;
 use Nexus\Plugin\Hook;
 use Nexus\Plugin\Plugin;
 
@@ -43,7 +44,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         app(Plugin::class)->start();
-        NexusDB::customModel();
+        if (class_exists(Sanctum::class)) {
+            Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
+        }
         DB::connection(config('database.default'))->enableQueryLog();
 
         Model::preventLazyLoading(! app()->isProduction());

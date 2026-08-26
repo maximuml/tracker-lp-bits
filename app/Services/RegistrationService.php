@@ -141,7 +141,6 @@ class RegistrationService
         $country = (int) ($data['country'] ?? 0);
         $gender = ucfirst(strtolower(trim((string) ($data['gender'] ?? ''))));
         $passwordAgain = trim((string) ($data['passagain'] ?? ''));
-        $isClientHashed = ($data['wantpassword_hashed'] ?? '0') === '1';
 
         $this->validateSignupFields(
             $username,
@@ -151,7 +150,6 @@ class RegistrationService
             $gender,
             $country,
             $isInvite && $isPreRegister && $invite !== null,
-            $isClientHashed,
             $langSignup,
             $langTakesignup,
         );
@@ -175,19 +173,12 @@ class RegistrationService
             );
         }
 
-        // Use argon2id for new passwords. If the client pre-hashed the password
-        // (isClientHashed, legacy), we fall back to legacy sha256 since we don't have
-        // the plaintext password to feed to password_hash(). New clients send
-        // plaintext so argon2id is always used.
-        if ($isClientHashed) {
-            $secret = Token::randomHex();
-            $passhash = hash('sha256', $secret.$passwordInput);
-            $passhashAlgo = PasswordHasher::ALGO_SHA256;
-        } else {
-            $passhash = PasswordHasher::hash($passwordInput);
-            $secret = Token::randomHex();
-            $passhashAlgo = PasswordHasher::ALGO_ARGON2ID;
-        }
+        // Always use argon2id for new passwords. The client sends plaintext
+        // over HTTPS (see Form::passwordHashJs), so we always have the raw
+        // password to feed to password_hash().
+        $passhash = PasswordHasher::hash($passwordInput);
+        $secret = Token::randomHex();
+        $passhashAlgo = PasswordHasher::ALGO_ARGON2ID;
         $authKey = Token::randomHex();
         $passkey = md5($username.now()->toDateTimeString().$passhash);
         $verification = (string) SiteConfig::current()->main->verification('email');
@@ -387,7 +378,6 @@ class RegistrationService
         string $gender,
         int $country,
         bool $preRegistered,
-        bool $isClientHashed,
         array $langSignup,
         array $langTakesignup,
     ): void {
@@ -407,9 +397,7 @@ class RegistrationService
             throw new AuthenticationException($this->msg($langTakesignup, 'std_wrong_email_address_format', 'That doesn\'t look like a valid email address.'));
         }
 
-        if (! $isClientHashed) {
-            $this->validatePassword($password, $passAgain, $username, $langTakesignup);
-        }
+        $this->validatePassword($password, $passAgain, $username, $langTakesignup);
 
         $allowedGenders = ['Male', 'Female'];
         if (! in_array($gender, $allowedGenders, true)) {

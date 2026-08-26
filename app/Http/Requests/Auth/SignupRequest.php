@@ -19,7 +19,6 @@ class SignupRequest extends FormRequest
         return [
             'wantusername' => ['nullable', 'string'],
             'wantpassword' => ['nullable', 'string'],
-            'wantpassword_hashed' => ['nullable', 'in:0,1'],
             'passagain' => ['nullable', 'string'],
             'email' => ['nullable', 'string'],
             'country' => ['nullable', 'integer'],

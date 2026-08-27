@@ -56,16 +56,15 @@ class BonusHistoryController extends LegacyController
             }
         }
 
-        $isRecordSeedingBonusLog = Setting::getIsRecordSeedingBonusLog();
         $defaultCategory = BonusLogs::CATEGORY_COMMON;
         $category = request()->input('category') ?? $defaultCategory;
-        $categoryOptions = BonusLogs::listCategoryOptions($isRecordSeedingBonusLog);
+        $categoryOptions = BonusLogs::listCategoryOptions();
         if (! isset($categoryOptions[$category])) {
             return $this->legacyAbortResponse('Error', "Invalid category: {$category}");
         }
 
         $businessType = (int) (request()->input('business_type') ?? 0);
-        $businessTypeOptions = BonusLogs::listBusinessTypeOptions($isRecordSeedingBonusLog ? '' : $defaultCategory);
+        $businessTypeOptions = BonusLogs::listBusinessTypeOptions($defaultCategory);
         if ($businessType && ! isset($businessTypeOptions[$businessType])) {
             return $this->legacyAbortResponse('Error', "Invalid business_type: {$businessType}");
         }

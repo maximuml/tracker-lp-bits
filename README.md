@@ -25,7 +25,6 @@ This is a streamlined fork focused on the core tracker/forum/community experienc
 - **Database** — MySQL 5.7+ or PostgreSQL 16+
 - **Redis** — 4.0+
 - **MeiliSearch** — 1.6+ (torrent search index)
-- **ClickHouse** (optional) — analytics backend for announce logs and bonus logs
 - **Other** — supervisor, cron, rsync
 
 ## Quick Start with Docker

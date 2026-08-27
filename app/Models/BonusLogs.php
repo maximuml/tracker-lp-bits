@@ -17,7 +17,6 @@ namespace App\Models;
 use App\Support\Config\SiteConfig;
 use App\Support\Locale;
 use Carbon\Carbon;
-use Illuminate\Support\Arr;
 
 class BonusLogs extends NexusModel
 {
@@ -31,8 +30,6 @@ class BonusLogs extends NexusModel
     public $timestamps = true;
 
     const CATEGORY_COMMON = 'common';
-
-    const CATEGORY_SEEDING = 'seeding';
 
     const DEFAULT_BONUS_CANCEL_ONE_HIT_AND_RUN = 10000;
 
@@ -104,17 +101,6 @@ class BonusLogs extends NexusModel
 
     const BUSINESS_TYPE_TORRENT_BE_REWARD = 1005;
 
-    // 获得类，做种获得，10000 起
-    const BUSINESS_TYPE_SEEDING_BASIC = 10000;
-
-    const BUSINESS_TYPE_SEEDING_DONOR_ADDITION = 10001;
-
-    const BUSINESS_TYPE_SEEDING_OFFICIAL_ADDITION = 10002;
-
-    const BUSINESS_TYPE_SEEDING_HAREM_ADDITION = 10003;
-
-    const BUSINESS_TYPE_SEEDING_MEDAL_ADDITION = 10004;
-
     /** @var array<int|string, mixed> */
     public static array $businessTypes = [
         self::BUSINESS_TYPE_CANCEL_HIT_AND_RUN => ['text' => 'Cancel H&R'],
@@ -146,21 +132,6 @@ class BonusLogs extends NexusModel
         self::BUSINESS_TYPE_RECEIVE_GIFT => ['text' => 'Receive gift'],
         self::BUSINESS_TYPE_UPLOAD_TORRENT => ['text' => 'Upload torrent'],
         self::BUSINESS_TYPE_TORRENT_BE_REWARD => ['text' => 'Torrent be reward'],
-
-        self::BUSINESS_TYPE_SEEDING_BASIC => ['text' => 'Seeding basic'],
-        self::BUSINESS_TYPE_SEEDING_DONOR_ADDITION => ['text' => 'Seeding donor addition'],
-        self::BUSINESS_TYPE_SEEDING_OFFICIAL_ADDITION => ['text' => 'Seeding official addition'],
-        self::BUSINESS_TYPE_SEEDING_HAREM_ADDITION => ['text' => 'Seeding harem addition'],
-        self::BUSINESS_TYPE_SEEDING_MEDAL_ADDITION => ['text' => 'Seeding medal addition'],
-    ];
-
-    /** @var array<int|string, mixed> */
-    public static array $businessTypeSeeding = [
-        self::BUSINESS_TYPE_SEEDING_BASIC,
-        self::BUSINESS_TYPE_SEEDING_DONOR_ADDITION,
-        self::BUSINESS_TYPE_SEEDING_OFFICIAL_ADDITION,
-        self::BUSINESS_TYPE_SEEDING_HAREM_ADDITION,
-        self::BUSINESS_TYPE_SEEDING_MEDAL_ADDITION,
     ];
 
     /**
@@ -171,9 +142,7 @@ class BonusLogs extends NexusModel
     {
         $source = BonusLogs::$businessTypes;
         if ($category == self::CATEGORY_COMMON) {
-            $source = Arr::except(BonusLogs::$businessTypes, BonusLogs::$businessTypeSeeding);
-        } elseif ($category == self::CATEGORY_SEEDING) {
-            $source = Arr::only(BonusLogs::$businessTypes, BonusLogs::$businessTypeSeeding);
+            $source = BonusLogs::$businessTypes;
         }
 
         return self::listStaticProps($source, 'bonus-log.business_types', true);
@@ -182,16 +151,11 @@ class BonusLogs extends NexusModel
     /**
      * @return array<int|string, mixed>
      */
-    public static function listCategoryOptions(bool $includeSeeding): array
+    public static function listCategoryOptions(): array
     {
-        $result = [
+        return [
             self::CATEGORY_COMMON => Locale::trans('bonus-log.category_common', [], null),
         ];
-        if ($includeSeeding) {
-            $result[self::CATEGORY_SEEDING] = Locale::trans('bonus-log.category_seeding', [], null);
-        }
-
-        return $result;
     }
 
     /** @return  mixed */

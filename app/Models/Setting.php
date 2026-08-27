@@ -335,16 +335,6 @@ class Setting extends NexusModel
         return (int) self::get('torrent.reward_times_limit', 0);
     }
 
-    public static function getIsRecordAnnounceLog(): bool
-    {
-        return self::get('system.is_record_announce_log') == 'yes';
-    }
-
-    public static function getIsRecordSeedingBonusLog(): bool
-    {
-        return self::get('system.is_record_seeding_bonus_log') == 'yes';
-    }
-
     public static function getSelfEnableBonus(): int
     {
         return (int) self::get('bonus.self_enable', BonusLogs::DEFAULT_BONUS_SELF_ENABLE);

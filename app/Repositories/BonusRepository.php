@@ -22,7 +22,6 @@ use App\Support\Logger;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
-use Nexus\Database\ClickHouse;
 
 class BonusRepository extends BaseRepository
 {
@@ -431,10 +430,6 @@ class BonusRepository extends BaseRepository
             $query = $this->buildQuery($userId, $businessType);
 
             return $query->count();
-        } elseif ($category == BonusLogs::CATEGORY_SEEDING) {
-            [$whereStr, $binds] = $this->buildWhereStrAndBinds($userId, $businessType);
-
-            return ClickHouse::count('bonus_logs', $whereStr, $binds);
         }
         throw new \InvalidArgumentException("Invalid category: $category");
     }
@@ -448,46 +443,8 @@ class BonusRepository extends BaseRepository
             $query = $this->buildQuery($userId, $businessType);
 
             return $query->orderBy('id', 'desc')->forPage($page, $perPage)->get();
-        } elseif ($category == BonusLogs::CATEGORY_SEEDING) {
-            [$whereStr, $binds] = $this->buildWhereStrAndBinds($userId, $businessType);
-            $offset = ($page - 1) * $perPage;
-            $rows = ClickHouse::list("select * from bonus_logs $whereStr order by created_at desc limit $offset, $perPage", $binds);
-            $result = [];
-            $id = 1; // fake id
-            foreach ($rows as $row) {
-                $record = new BonusLogs($row);
-                $record->id = $id;
-                $result[] = $record;
-                $id++;
-            }
-
-            return $result;
         }
         throw new \InvalidArgumentException("Invalid category: $category");
-    }
-
-    /**
-     * @return array<int|string, mixed>
-     */
-    private function buildWhereStrAndBinds(int $userId = 0, int $businessType = 0)
-    {
-        $whereArr = [];
-        $binds = [];
-        if ($userId > 0) {
-            $whereArr[] = 'uid = :uid';
-            $binds['uid'] = $userId;
-        }
-        if ($businessType > 0) {
-            $whereArr[] = 'business_type = :business_type';
-            $binds['business_type'] = $businessType;
-        }
-        if (empty($whereArr)) {
-            $whereStr = '';
-        } else {
-            $whereStr = sprintf('where %s', implode(' AND ', $whereArr));
-        }
-
-        return [$whereStr, $binds];
     }
 
     /**

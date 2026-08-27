@@ -57,9 +57,4 @@ final class SystemConfig extends Config
     {
         return $this->bool('meilisearch_search_description', $default);
     }
-
-    public function isRecordSeedingBonusLog(bool $default = false): bool
-    {
-        return $this->bool('is_record_seeding_bonus_log', $default);
-    }
 }

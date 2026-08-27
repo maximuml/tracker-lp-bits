@@ -77,11 +77,4 @@ class Hook
             }
         } while (next(self::$callbacks[$name]) !== false);
     }
-
-    public function dump()
-    {
-        echo '<pre>';
-        echo print_r(self::$callbacks, true);
-        echo '</pre>';
-    }
 }

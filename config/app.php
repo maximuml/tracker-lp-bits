@@ -295,7 +295,6 @@ return [
         'Password' => Password::class,
         'Queue' => Queue::class,
         'Redirect' => Redirect::class,
-        // 'Redis' => Illuminate\Support\Facades\Redis::class,
         'Request' => Request::class,
         'Response' => Response::class,
         'Route' => Route::class,

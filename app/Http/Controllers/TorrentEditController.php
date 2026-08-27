@@ -21,6 +21,19 @@ use Nexus\Field\Field;
 
 class TorrentEditController extends Controller
 {
+    private SearchBoxRepository $searchBoxRepository;
+
+    private TagRepository $tagRepository;
+
+    private HitAndRunRepository $hitAndRunRepository;
+
+    public function __construct(SearchBoxRepository $searchBoxRepository, TagRepository $tagRepository, HitAndRunRepository $hitAndRunRepository)
+    {
+        $this->searchBoxRepository = $searchBoxRepository;
+        $this->tagRepository = $tagRepository;
+        $this->hitAndRunRepository = $hitAndRunRepository;
+    }
+
     public function legacy(Request $request): View|RedirectResponse
     {
         if (app(CurrentUser::class)->get() === null) {
@@ -74,10 +87,10 @@ class TorrentEditController extends Controller
             'cats' => Category::listByModeWithContext($sectionmode),
             'returnto' => (string) $request->input('returnto', ''),
             'requestUri' => is_string($request->server('REQUEST_URI')) ? $request->server('REQUEST_URI') : '',
-            'taxonomySelect' => (new SearchBoxRepository)->renderTaxonomySelect($sectionmode, $row),
-            'tagCheckbox' => (new TagRepository)->renderCheckbox($sectionmode, (array) TorrentDetailRepository::getTagIds($id)),
+            'taxonomySelect' => $this->searchBoxRepository->renderTaxonomySelect($sectionmode, $row),
+            'tagCheckbox' => $this->tagRepository->renderCheckbox($sectionmode, (array) TorrentDetailRepository::getTagIds($id)),
             'customFieldsHtml' => (new Field)->renderOnUploadPage($id, $sectionmode),
-            'hitAndRunHtml' => (new HitAndRunRepository)->renderOnUploadPage($row['hr'] ?? 0, $sectionmode),
+            'hitAndRunHtml' => $this->hitAndRunRepository->renderOnUploadPage($row['hr'] ?? 0, $sectionmode),
         ]);
     }
 

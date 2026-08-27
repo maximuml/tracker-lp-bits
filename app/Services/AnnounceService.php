@@ -111,6 +111,12 @@ final class AnnounceService
 
     private int $autocleanIntervalOne = 900;
 
+    public function __construct(
+        private readonly AgentAllowRepository $agentAllowRepository,
+        private readonly TorrentRepository $torrentRepository,
+        private readonly UserRepository $userRepository,
+    ) {}
+
     /**
      * @param  array<string, mixed>  $params
      * @return array<string, mixed>
@@ -174,7 +180,7 @@ final class AnnounceService
         $this->uploadedIncrementForUser = $traffic->uploadedIncrementForUser;
         $this->downloadedIncrementForUser = $traffic->downloadedIncrementForUser;
 
-        $cheaterDetector = new CheaterDetector($this->responseBuilder);
+        $cheaterDetector = new CheaterDetector($this->responseBuilder, $this->userRepository);
         $cheaterDetector->checkSpeed($traffic->upthis, $this->self, $this->user, $this->userId, $this->isDonor, $this->isIPSeedBox);
         $cheaterDetector->checkCheating($traffic->upthis, $traffic->downthis, $this->self, $this->user, $torrent, $this->userId, $this->torrentId, $this->dt);
 
@@ -287,7 +293,7 @@ final class AnnounceService
 
     private function checkClient(): void
     {
-        $agentAllowRep = new AgentAllowRepository;
+        $agentAllowRep = $this->agentAllowRepository;
         $clicheckRes = '';
 
         try {
@@ -357,7 +363,7 @@ final class AnnounceService
         $this->responseBuilder = $this->responseBuilder->withTorrent($torrent);
 
         if ($this->left > (int) $torrent['size']) {
-            (new UserRepository)->updateDownloadPrivileges(null, $this->userId, 'no', 'fake_announce');
+            $this->userRepository->updateDownloadPrivileges(null, $this->userId, 'no', 'fake_announce');
             Logger::writeWithContext((string) sprintf('fake announce, user: %s, torrent: %s, announce left: %s > size: %s', $this->userId, $this->torrentId, $this->left, $torrent['size']), (string) 'warn', (bool) false);
             $this->responseBuilder->warn('fake announce', 300);
         }
@@ -406,7 +412,7 @@ final class AnnounceService
             return;
         }
 
-        $torrentRep = new TorrentRepository;
+        $torrentRep = $this->torrentRepository;
         $buyStatus = $torrentRep->getBuyStatus($this->userId, $this->torrentId);
         Logger::writeWithContext((string) "user: {$this->userId} buy torrent: {$this->torrentId}, status: {$buyStatus}", (string) 'info', (bool) false);
 
@@ -422,7 +428,7 @@ final class AnnounceService
                 );
             }
             if ($buyStatus > 10) {
-                (new UserRepository)->updateDownloadPrivileges(null, $this->userId, 'no', 'announce_paid_torrent_too_many_times');
+                $this->userRepository->updateDownloadPrivileges(null, $this->userId, 'no', 'announce_paid_torrent_too_many_times');
             }
             Nexus::dispatchQueueJob(new BuyTorrent($this->userId, $this->torrentId));
             $torrentRep->addBuyFailCache($this->userId, $this->torrentId);

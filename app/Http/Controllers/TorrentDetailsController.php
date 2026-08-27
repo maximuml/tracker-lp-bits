@@ -39,6 +39,19 @@ use Nexus\Torrent\TechnicalInformation;
 
 class TorrentDetailsController extends Controller
 {
+    private TorrentRepository $torrentRepository;
+
+    private SearchBoxRepository $searchBoxRepository;
+
+    private TagRepository $tagRepository;
+
+    public function __construct(TorrentRepository $torrentRepository, SearchBoxRepository $searchBoxRepository, TagRepository $tagRepository)
+    {
+        $this->torrentRepository = $torrentRepository;
+        $this->searchBoxRepository = $searchBoxRepository;
+        $this->tagRepository = $tagRepository;
+    }
+
     public function show(Request $request, int $id): View|RedirectResponse|Response
     {
         if ($id <= 0) {
@@ -147,9 +160,9 @@ class TorrentDetailsController extends Controller
         $langFunctions = app(Globals::class)->get('lang_functions') ?? [];
         $langDetails = app(Globals::class)->get('lang_details') ?? [];
 
-        $torrentRep = new TorrentRepository;
-        $searchBoxRep = new SearchBoxRepository;
-        $tagRep = new TagRepository;
+        $torrentRep = $this->torrentRepository;
+        $searchBoxRep = $this->searchBoxRepository;
+        $tagRep = $this->tagRepository;
         $customField = new Field;
 
         $bannedTorrent = ($row['banned'] ?? '') === 'yes'

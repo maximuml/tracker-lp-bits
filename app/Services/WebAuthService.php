@@ -18,6 +18,10 @@ use Illuminate\Support\Facades\DB;
 
 class WebAuthService
 {
+    public function __construct(
+        private readonly UserRepository $userRepository,
+    ) {}
+
     private static function getMaxLoginAttempts(): int
     {
         return SiteConfig::fromDb()->security->maxLoginAttempts();
@@ -184,7 +188,7 @@ class WebAuthService
         $duration = ! empty($data['logout']) && $data['logout'] === 'yes' ? 900 : 0;
         AuthCookie::setLoginCookie((int) $row['id'], null, $duration);
 
-        (new UserRepository)->saveLoginLog((int) $row['id'], $ip, 'Web', true);
+        $this->userRepository->saveLoginLog((int) $row['id'], $ip, 'Web', true);
 
         Cache::clearUser((int) $row['id'], '');
 

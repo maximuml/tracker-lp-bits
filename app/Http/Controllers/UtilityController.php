@@ -33,7 +33,7 @@ class UtilityController extends LegacyController
 {
     private UsersearchPageService $usersearchPageService;
 
-    public function __construct(UsersearchPageService $usersearchPageService)
+    public function __construct(UsersearchPageService $usersearchPageService, private AjaxService $ajaxService)
     {
         $this->usersearchPageService = $usersearchPageService;
     }
@@ -84,7 +84,7 @@ class UtilityController extends LegacyController
         }
 
         try {
-            $result = AjaxService::{$action}($params);
+            $result = $this->ajaxService->{$action}($params);
 
             return response()->json(Api::successWithContext($result));
         } catch (\Throwable $exception) {

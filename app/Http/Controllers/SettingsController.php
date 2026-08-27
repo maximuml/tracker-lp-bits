@@ -22,6 +22,13 @@ use Illuminate\View\View;
 
 class SettingsController extends LegacyController
 {
+    private TagRepository $tagRepository;
+
+    public function __construct(TagRepository $tagRepository)
+    {
+        $this->tagRepository = $tagRepository;
+    }
+
     /** @var array<string, array<int, string>> */
     private array $validConfigs = [
         'basic' => ['SITENAME', 'BASEURL', 'announce_url'],
@@ -145,7 +152,7 @@ class SettingsController extends LegacyController
 
             if ($section === 'bonus') {
                 $data['attendance_continuous'] = (array) ($data['config']['attendance_continuous'] ?? []);
-                $tagRep = new TagRepository;
+                $tagRep = $this->tagRepository;
                 $data['tagRep'] = $tagRep;
             }
 

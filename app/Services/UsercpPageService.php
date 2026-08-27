@@ -44,6 +44,10 @@ use Nexus\Nexus;
  */
 final class UsercpPageService
 {
+    public function __construct(
+        private readonly SeedBoxRepository $seedBoxRepository,
+    ) {}
+
     /**
      * Build the data for the requested section.
      *
@@ -154,7 +158,7 @@ final class UsercpPageService
 
         // IP location
         $enableLocationTweak = (string) app(Globals::class)->get('enablelocation_tweak', '') === 'yes';
-        $seedBoxIcon = (new SeedBoxRepository)->renderIcon((string) ($curUser['ip'] ?? ''), $userId);
+        $seedBoxIcon = $this->seedBoxRepository->renderIcon((string) ($curUser['ip'] ?? ''), $userId);
         $ipLocation = '';
         if ($enableLocationTweak) {
             [$locPub, $locMod] = Network::ipLocationWithContext((string) ($curUser['ip'] ?? ''));

@@ -26,7 +26,7 @@ final class TorrentEditControllerTest extends TestCase
         $repository = Mockery::mock(TorrentEditRepository::class);
         $repository->shouldReceive('update')->once()->with(Mockery::type(Request::class))->andReturn($torrent);
 
-        $controller = new TorrentEditController;
+        $controller = app(TorrentEditController::class);
         $request = Request::create('/takeedit', 'POST', [
             'id' => 42,
             'name' => 'Updated torrent',
@@ -49,7 +49,7 @@ final class TorrentEditControllerTest extends TestCase
         $repository = Mockery::mock(TorrentEditRepository::class);
         $repository->shouldReceive('update')->once()->andReturn($torrent);
 
-        $controller = new TorrentEditController;
+        $controller = app(TorrentEditController::class);
         $request = Request::create('/takeedit', 'POST', [
             'id' => 42,
             'name' => 'Updated torrent',
@@ -73,7 +73,7 @@ final class TorrentEditControllerTest extends TestCase
         $repository = Mockery::mock(TorrentEditRepository::class);
         $repository->shouldReceive('update')->once()->andReturn($torrent);
 
-        $controller = new TorrentEditController;
+        $controller = app(TorrentEditController::class);
         $request = Request::create('/takeedit', 'POST', [
             'id' => 42,
             'name' => 'Updated torrent',

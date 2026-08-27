@@ -20,12 +20,12 @@ class UserController extends Controller
     /** @var mixed */
     private $repository;
 
-    /**
-     * @return mixed
-     */
-    public function __construct(UserRepository $repository)
+    private ExamRepository $examRepository;
+
+    public function __construct(UserRepository $repository, ExamRepository $examRepository)
     {
         $this->repository = $repository;
+        $this->examRepository = $examRepository;
     }
 
     /**
@@ -148,7 +148,7 @@ class UserController extends Controller
         $request->validate([
             'uid' => 'required',
         ]);
-        $examRepository = new ExamRepository;
+        $examRepository = $this->examRepository;
         $result = $examRepository->listMatchExam((int) $request->uid);
         $resource = ExamResource::collection($result);
 

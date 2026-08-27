@@ -25,6 +25,22 @@ use Nexus\Field\Field;
 
 class TorrentUploadController extends Controller
 {
+    private TorrentRepository $torrentRepository;
+
+    private SearchBoxRepository $searchBoxRepository;
+
+    private TagRepository $tagRepository;
+
+    private HitAndRunRepository $hitAndRunRepository;
+
+    public function __construct(TorrentRepository $torrentRepository, SearchBoxRepository $searchBoxRepository, TagRepository $tagRepository, HitAndRunRepository $hitAndRunRepository)
+    {
+        $this->torrentRepository = $torrentRepository;
+        $this->searchBoxRepository = $searchBoxRepository;
+        $this->tagRepository = $tagRepository;
+        $this->hitAndRunRepository = $hitAndRunRepository;
+    }
+
     public function create(Request $request): View|RedirectResponse
     {
         if (app(LegacyRedisCache::class) === null) {
@@ -85,11 +101,11 @@ class TorrentUploadController extends Controller
             'uploadFreely' => $uploadFreely,
             'allowtorrents' => $allowtorrents,
             'offerRows' => $offerRows,
-            'torrentRep' => new TorrentRepository,
-            'searchBoxRep' => new SearchBoxRepository,
-            'tagRep' => new TagRepository,
+            'torrentRep' => $this->torrentRepository,
+            'searchBoxRep' => $this->searchBoxRepository,
+            'tagRep' => $this->tagRepository,
             'customField' => new Field,
-            'hitAndRunRep' => new HitAndRunRepository,
+            'hitAndRunRep' => $this->hitAndRunRepository,
             'pageTitle' => $lang_upload['head_upload'] ?? '',
             'cats' => Category::listByModeWithContext($browsecatmode),
         ]);

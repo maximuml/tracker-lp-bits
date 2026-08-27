@@ -39,6 +39,7 @@ class RegistrationService
 
     public function __construct(
         private WebAuthService $authService,
+        private UserRepository $userRepository,
     ) {}
 
     /**
@@ -461,7 +462,7 @@ class RegistrationService
             return;
         }
 
-        (new UserRepository)->addTemporaryInvite(null, $userId, 'increment', $tmpInviteCount, 7);
+        $this->userRepository->addTemporaryInvite(null, $userId, 'increment', $tmpInviteCount, 7);
     }
 
     private function consumeInvite(Invite $invite, int $userId, string $email, string $username): void

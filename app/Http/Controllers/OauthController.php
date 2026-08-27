@@ -21,6 +21,13 @@ use Illuminate\Support\Str;
 
 class OauthController extends Controller
 {
+    private UserRepository $userRepository;
+
+    public function __construct(UserRepository $userRepository)
+    {
+        $this->userRepository = $userRepository;
+    }
+
     /**
      * client redirect to authorization server, use oauth_providers config
      */
@@ -166,7 +173,7 @@ class OauthController extends Controller
             'password_confirmation' => $password,
             'provider_id' => $providerId,
         ];
-        $userRep = new UserRepository;
+        $userRep = $this->userRepository;
         for ($i = 0; $i < 3; $i++) {
             $userData['username'] = $username;
             try {

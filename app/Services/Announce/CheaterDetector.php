@@ -17,6 +17,7 @@ final class CheaterDetector
 {
     public function __construct(
         private readonly ResponseBuilder $responseBuilder,
+        private readonly UserRepository $userRepository,
     ) {}
 
     /**
@@ -49,7 +50,7 @@ final class CheaterDetector
         Logger::writeWithContext((string) "notSeedBoxMaxSpeedMbps: {$notSeedBoxMaxSpeedMbps}, upSpeedMbps: {$upSpeedMbps}", (string) 'info', (bool) false);
 
         if ($upSpeed > $notSeedBoxMaxSpeedMbps) {
-            (new UserRepository)->updateDownloadPrivileges(null, $userId, 'no', 'upload_over_speed');
+            $this->userRepository->updateDownloadPrivileges(null, $userId, 'no', 'upload_over_speed');
             Logger::writeWithContext((string) "user: {$userId} downloading privileges have been disabled! (over speed), upSpeedMbps: {$upSpeedMbps} > notSeedBoxMaxSpeedMbps: {$notSeedBoxMaxSpeedMbps}", (string) 'error', (bool) false);
             $this->responseBuilder->warn('Your downloading privileges have been disabled! (over speed)', 300);
         }

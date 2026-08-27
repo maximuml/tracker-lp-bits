@@ -27,6 +27,13 @@ use Illuminate\Support\Facades\DB;
 
 class TorrentRssController extends LegacyController
 {
+    private TorrentRepository $torrentRepository;
+
+    public function __construct(TorrentRepository $torrentRepository)
+    {
+        $this->torrentRepository = $torrentRepository;
+    }
+
     public function torrentrss(Request $request): Response
     {
         $cache = app(LegacyRedisCache::class);
@@ -203,7 +210,7 @@ class TorrentRssController extends LegacyController
             }
         }
 
-        $torrentRep = new TorrentRepository;
+        $torrentRep = $this->torrentRepository;
         $baseUrl = Http::protocolPrefix(Url::isSecure()).(string) app(Globals::class)->get('BASEURL', '');
         $siteName = (string) app(Globals::class)->get('SITENAME', '');
         $slogan = (string) app(Globals::class)->get('SLOGAN', '');

@@ -38,6 +38,13 @@ use Nexus\Database\NexusLock;
 
 class SystemBulkController extends LegacyController
 {
+    private UserRepository $userRepository;
+
+    public function __construct(UserRepository $userRepository)
+    {
+        $this->userRepository = $userRepository;
+    }
+
     public function takeamountupload(Request $request): Response|RedirectResponse|View
     {
         $sysopClass = defined('UC_SYSOP') ? \constant('UC_SYSOP') : 0;
@@ -118,7 +125,7 @@ class SystemBulkController extends LegacyController
         try {
             LegacyAuth::registrationCheckFromContext('invitesystem', true, false);
 
-            $userRep = new UserRepository;
+            $userRep = $this->userRepository;
             try {
                 $sendText = $userRep->getInviteBtnText($currentUserId);
             } catch (\Exception $exception) {

@@ -28,6 +28,13 @@ use Nexus\Nexus;
 
 class BonusHistoryController extends LegacyController
 {
+    private BonusRepository $bonusRepository;
+
+    public function __construct(BonusRepository $bonusRepository)
+    {
+        $this->bonusRepository = $bonusRepository;
+    }
+
     public function bonusLog(Request $request): View|RedirectResponse|Response
     {
         $curUser = app(CurrentUser::class)->get() ?? [];
@@ -83,7 +90,7 @@ class BonusHistoryController extends LegacyController
             $businessTypeOptionsHtml .= sprintf('<option value="%s"%s>%s</option>', htmlspecialchars((string) $name), $selected, htmlspecialchars($text));
         }
 
-        $rep = new BonusRepository;
+        $rep = $this->bonusRepository;
         $total = $rep->getCount($category, $uid, $businessType);
         [$pagertop, $pagerbottom, , , $pageSize, $page] = Pagination::pager(50, $total, "{$pagerParam}&");
         $list = $rep->getList($category, $uid, $businessType, $page + 1, $pageSize);

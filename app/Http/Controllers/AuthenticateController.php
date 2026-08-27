@@ -25,12 +25,12 @@ class AuthenticateController extends Controller
     /** @var mixed */
     private $repository;
 
-    /**
-     * @return mixed
-     */
-    public function __construct(AuthenticateRepository $repository)
+    private UserRepository $userRepository;
+
+    public function __construct(AuthenticateRepository $repository, UserRepository $userRepository)
     {
         $this->repository = $repository;
+        $this->userRepository = $userRepository;
     }
 
     /**
@@ -110,8 +110,7 @@ class AuthenticateController extends Controller
                 AuthCookie::setLoginCookie((int) $user->id, (string) $user->auth_key, (int) 0);
                 $user->last_login = now();
                 $user->save();
-                $userRep = new UserRepository;
-                $userRep->saveLoginLog($user->id, $ip, 'Passkey', false);
+                $this->userRepository->saveLoginLog($user->id, $ip, 'Passkey', false);
             }
         }
 

@@ -61,7 +61,10 @@ VENDOR_AUTOLOAD_FILE="${ROOT_PATH}/vendor/autoload.php"
 
 # Ensure writable directories exist and are writable by PHP-FPM (www-data)
 mkdir -p ${ROOT_PATH}/attachments ${ROOT_PATH}/torrents ${ROOT_PATH}/storage/framework/views ${ROOT_PATH}/storage/logs ${ROOT_PATH}/storage/app ${ROOT_PATH}/bootstrap/cache
-chown -R www-data:www-data ${ROOT_PATH}/attachments ${ROOT_PATH}/torrents ${ROOT_PATH}/storage ${ROOT_PATH}/bootstrap/cache
+# Only chown when running as root (queue/scheduler run as www-data)
+if [ "$(id -u)" = "0" ]; then
+  chown -R www-data:www-data ${ROOT_PATH}/attachments ${ROOT_PATH}/torrents ${ROOT_PATH}/storage ${ROOT_PATH}/bootstrap/cache
+fi
 chmod -R 775 ${ROOT_PATH}/storage ${ROOT_PATH}/bootstrap/cache ${ROOT_PATH}/attachments ${ROOT_PATH}/torrents
 
 if [ "$SERVICE_NAME" = "php" ]; then
@@ -82,7 +85,7 @@ if [ "$SERVICE_NAME" = "php" ]; then
     # composer install
     if [ ! -f "$VENDOR_AUTOLOAD_FILE" ]; then
       echo_info "vendor autoload file: $VENDOR_AUTOLOAD_FILE not exists, run composer install ..."
-      git config --global --add safe.directory ${ROOT_PATH}
+      git config --global --add safe.directory ${ROOT_PATH} 2>/dev/null || true
       composer install --working-dir=${ROOT_PATH}
     else
       echo_success "vendor autoload file: $VENDOR_AUTOLOAD_FILE already exists, skip run composer install ..."

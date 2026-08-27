@@ -97,12 +97,6 @@ class AdminToolsController extends LegacyController
         ]);
     }
 
-    public function settings(Request $request): RedirectResponse
-    {
-        // Legacy settings partial was removed; settings are managed via Filament.
-        return redirect()->route('filament.admin.resources.system.settings.index');
-    }
-
     public function location(Request $request): View|RedirectResponse|Response
     {
         $sysopClass = defined('UC_SYSOP') ? \constant('UC_SYSOP') : 0;

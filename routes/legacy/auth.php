@@ -19,6 +19,7 @@ use App\Http\Controllers\NewsController;
 use App\Http\Controllers\OfferController;
 use App\Http\Controllers\PollController;
 use App\Http\Controllers\RssController;
+use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\ShoutboxController;
 use App\Http\Controllers\StaffMessageController;
 use App\Http\Controllers\StaffModerationController;
@@ -155,7 +156,7 @@ Route::match(['get', 'post'], '/bonus-log', [BonusHistoryController::class, 'bon
 Route::match(['get', 'post'], '/medal', [BonusShopController::class, 'medal'])->name('medal.legacy');
 Route::match(['get', 'post'], '/task', [BonusShopController::class, 'task'])->name('task.legacy');
 Route::match(['get', 'post'], '/uploaders', [BonusHistoryController::class, 'uploaders'])->name('uploaders.legacy');
-Route::match(['get', 'post'], '/settings', [AdminToolsController::class, 'settings'])->name('settings.legacy');
+Route::match(['get', 'post'], '/settings', [SettingsController::class, 'settings'])->name('settings.legacy');
 Route::match(['get', 'post'], '/freeleech', [BonusShopController::class, 'freeleech'])->name('freeleech.legacy');
 Route::match(['get', 'post'], '/magic', [BonusHistoryController::class, 'magic'])->name('magic.legacy');
 // Phase 5.6: delacctadmin/deletedisabled/massmail migrated to Filament SystemActions page

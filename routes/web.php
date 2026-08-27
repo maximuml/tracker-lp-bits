@@ -5,7 +5,6 @@ use App\Http\Controllers\Auth\RegistrationController;
 use App\Http\Controllers\Auth\WebController as AuthWebController;
 use App\Http\Controllers\AuthenticateController;
 use App\Http\Controllers\ForumController;
-use App\Http\Controllers\OauthController;
 use App\Http\Controllers\TokenController;
 use App\Http\Controllers\ToolController;
 use App\Http\Controllers\TorrentController;
@@ -106,9 +105,3 @@ if (! Environment::isConsole()) {
         Route::post($passkeyLoginUri, [AuthenticateController::class, 'passkeyLogin']);
     }
 }
-
-Route::group(['prefix' => 'oauth'], function () {
-    Route::get('user-info', [OauthController::class, 'userInfo'])->name('oauth.user_info')->middleware('auth:sanctum');
-    Route::get('redirect/{uuid}', [OauthController::class, 'redirect']);
-    Route::get('callback/{uuid}', [OauthController::class, 'callback']);
-});

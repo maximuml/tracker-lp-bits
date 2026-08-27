@@ -11,7 +11,6 @@ use App\Http\Resources\UserResource;
 use App\Models\Invite;
 use App\Models\LoginLog;
 use App\Models\Message;
-use App\Models\OauthProvider;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Models\UserBanLog;
@@ -203,13 +202,6 @@ class UserRepository extends BaseRepository
             }
             Logger::writeWithContext((string) ('[CREATE_USER], specific id: '.$params['id']), (string) 'info', (bool) false);
             $user->id = $params['id'];
-        }
-        if (! empty($params['provider_id'])) {
-            if (! OauthProvider::query()->find($params['provider_id'])) {
-                throw new \InvalidArgumentException("provider_id: {$params['provider_id']} not exists.");
-            }
-            Logger::writeWithContext((string) ('[CREATE_USER], specific provider_id: '.$params['provider_id']), (string) 'info', (bool) false);
-            $user->provider_id = $params['provider_id'];
         }
         $user->save();
         Events::fire('user_created', $user, null);

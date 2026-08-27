@@ -71,7 +71,6 @@ class AppServiceProvider extends ServiceProvider
                 'Role & Permission',
                 'Other',
                 'Section',
-                'Oauth',
                 'System',
             ]);
         });

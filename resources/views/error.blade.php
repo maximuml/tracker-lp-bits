@@ -28,9 +28,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: url('/pic/oauth2-authorize-bg.jpg');
-            background-size: cover;
-            background-position: center;
+            background: #1a1a2e;
             opacity: 0.2;
             z-index: 1;
         }

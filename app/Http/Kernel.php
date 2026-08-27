@@ -14,6 +14,7 @@ use App\Http\Middleware\LogUserIp;
 use App\Http\Middleware\NexusAuth;
 use App\Http\Middleware\PreventRequestsDuringMaintenance;
 use App\Http\Middleware\RedirectIfAuthenticated;
+use App\Http\Middleware\ResponseTimeHeader;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\TrimStrings;
 use App\Http\Middleware\TrustProxies;
@@ -56,6 +57,7 @@ class Kernel extends HttpKernel
         Locale::class,
         LogUserIp::class,
         SecurityHeaders::class,
+        ResponseTimeHeader::class,
     ];
 
     /**

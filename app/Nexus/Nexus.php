@@ -84,8 +84,12 @@ final class Nexus
         $this->logSequence++;
     }
 
-    private function getFirst(string $result): string
+    private function getFirst(?string $result): string
     {
+        if ($result === null || $result === '') {
+            return '';
+        }
+
         if (str_contains($result, ',')) {
             return strstr($result, ',', true);
         }
@@ -103,7 +107,7 @@ final class Nexus
             }
         }
 
-        return $this->getFirst($schema);
+        return $this->getFirst(is_string($schema) ? $schema : null);
     }
 
     public function getRequestHost(): string

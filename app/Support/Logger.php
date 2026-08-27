@@ -45,9 +45,9 @@ final class Logger
         }
 
         $logFile = self::filePath();
-        if (($fd = fopen($logFile, 'a')) === false) {
+        if (($fd = @fopen($logFile, 'a')) === false) {
             $log .= "--------Can not open $logFile";
-            $fd = fopen(sys_get_temp_dir().'/nexus.log', 'a');
+            $fd = @fopen(sys_get_temp_dir().'/nexus.log', 'a');
         }
 
         $uid = $user['id'] ?? 0;

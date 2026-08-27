@@ -71,7 +71,7 @@ class Controller extends BaseController
      * @param  mixed  $msg
      * @return array<string, mixed>
      */
-    public function fail($data, $msg = null)
+    public function fail($data, $msg = null): array
     {
         if (is_null($msg)) {
             $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);

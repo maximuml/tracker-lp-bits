@@ -11,7 +11,6 @@ use Illuminate\Encryption\Encrypter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\UnauthorizedException;
 
 class AuthenticateRepository extends BaseRepository
 {
@@ -28,9 +27,6 @@ class AuthenticateRepository extends BaseRepository
         if (! $user instanceof User || ! app(WebAuthService::class)->validatePassword($user, $password)) {
             throw new \InvalidArgumentException('Username or password invalid.');
         }
-        //        if (nexus()->isPlatformAdmin() && !$user->canAccessAdmin()) {
-        //            throw new UnauthorizedException('Unauthorized!');
-        //        }
         $user->checkIsNormal();
         $tokenName = __METHOD__.__LINE__;
         $token = DB::transaction(function () use ($user, $tokenName) {

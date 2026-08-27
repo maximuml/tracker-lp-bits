@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\User;
 
-use App\Filament\Resources\User\ExamUserResource\Pages;
 use App\Filament\Resources\User\ExamUserResource\Pages\ListExamUsers;
 use App\Filament\Resources\User\ExamUserResource\Pages\ViewExamUser;
 use App\Models\Exam;
@@ -17,8 +16,6 @@ use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Infolists;
-use Filament\Infolists\Components;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\RepeatableEntry\TableColumn;
 use Filament\Infolists\Components\TextEntry;
@@ -164,7 +161,6 @@ class ExamUserResource extends Resource
                             ->formatStateUsing(fn ($record) => UserDisplay::adminUsername($record->uid))
                             ->label(__('label.username')),
                         TextEntry::make('exam.name')
-//                    ->formatStateUsing(fn ($record) => $record->torrent->name)
                             ->label(__('label.exam.label')),
                         TextEntry::make('begin')
                             ->label(__('label.begin')),
@@ -200,33 +196,6 @@ class ExamUserResource extends Resource
 
     }
 
-    //    private static function buildProgressTable(): array
-    //    {
-    //        $exam = $record->exam;
-    //        $passTransKey = $exam->getPassResultTransKey('pass');
-    //        $notPassTransKey = $exam->getPassResultTransKey('not_pass');
-    //        $result = [];
-    //        $result[] = Components\Grid::make(4) // 4 列的网格
-    //        ->schema([
-    //            Infolists\Components\TextEntry::make('index')->label(__('label.exam.index_required_label')),
-    //            Infolists\Components\TextEntry::make('require')->label(__('label.exam.index_required_value')),
-    //            Infolists\Components\TextEntry::make('current')->label(__('label.exam.index_current_value')),
-    //            Infolists\Components\TextEntry::make('result')->label(__('label.exam.index_result')),
-    //        ]);
-    //        foreach($record->progressFormatted as $key => $index) {
-    //            $result[] =  Components\Grid::make(4) // 4 列的网格
-    //            ->schema([
-    //                Infolists\Components\TextEntry::make('index'.$key)->label($index['index_formatted']),
-    //                Infolists\Components\TextEntry::make('require'.$key)->label($index['require_value_formatted']),
-    //                Infolists\Components\TextEntry::make('current'.$key)->label($index['current_value_formatted']),
-    //                Infolists\Components\TextEntry::make('result'.$key)->label($index['passed'] ? __($passTransKey) : __($notPassTransKey)),
-    //            ]);
-    //        }
-    //
-    //
-    //        return $result;
-    //    }
-
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()->with(['user', 'exam']);
@@ -243,8 +212,6 @@ class ExamUserResource extends Resource
     {
         return [
             'index' => ListExamUsers::route('/'),
-            //            'create' => Pages\CreateExamUser::route('/create'),
-            //            'edit' => Pages\EditExamUser::route('/{record}/edit'),
             'view' => ViewExamUser::route('/{record}'),
         ];
     }

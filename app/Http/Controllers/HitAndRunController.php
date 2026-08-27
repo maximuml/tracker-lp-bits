@@ -35,7 +35,7 @@ class HitAndRunController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function index(Request $request)
+    public function index(Request $request): array
     {
         $result = $this->repository->getList($request->all());
         $resource = HitAndRunResource::collection($result);
@@ -48,7 +48,7 @@ class HitAndRunController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function store(Request $request)
+    public function store(Request $request): array
     {
         $data = $request->validate($this->getRules());
         $result = $this->repository->store($data);
@@ -62,7 +62,7 @@ class HitAndRunController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function show(int $id)
+    public function show(int $id): array
     {
         $result = $this->repository->getDetail($id);
         $resource = new HitAndRunResource($result);
@@ -75,7 +75,7 @@ class HitAndRunController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function update(Request $request, int $id)
+    public function update(Request $request, int $id): array
     {
         $data = $request->validate($this->getRules());
         $result = $this->repository->update($data, $id);
@@ -89,7 +89,7 @@ class HitAndRunController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function destroy(int $id)
+    public function destroy(int $id): array
     {
         $result = $this->repository->delete($id);
 

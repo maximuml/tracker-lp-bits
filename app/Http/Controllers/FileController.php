@@ -14,24 +14,19 @@ class FileController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function index(Request $request)
+    public function index(Request $request): array
     {
         $torrentId = $request->torrent_id;
         $files = File::query()->where('torrent', $torrentId)->get();
         $resource = FileResource::collection($files);
-        //        $resource->additional([
-        //            'page_title' => nexus_trans('file.index.page_title'),
-        //        ]);
 
         return $this->success($resource);
     }
 
     /**
      * Store a newly created resource in storage.
-     *
-     * @return Response
      */
-    public function store(Request $request)
+    public function store(Request $request): Response
     {
         //
 
@@ -42,9 +37,8 @@ class FileController extends Controller
      * Display the specified resource.
      *
      * @param  mixed  $id
-     * @return Response
      */
-    public function show($id)
+    public function show($id): Response
     {
         //
 
@@ -55,9 +49,8 @@ class FileController extends Controller
      * Update the specified resource in storage.
      *
      * @param  mixed  $id
-     * @return Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id): Response
     {
         //
 
@@ -68,9 +61,8 @@ class FileController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  mixed  $id
-     * @return Response
      */
-    public function destroy($id)
+    public function destroy($id): Response
     {
         //
 

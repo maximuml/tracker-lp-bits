@@ -88,15 +88,7 @@ class IpSearch extends Page implements HasTable
                     ]),
             ])
             ->recordActions([
-                //                ViewAction::make(),
-                //                EditAction::make(),
-                //                DeleteAction::make(),
             ]);
-        //            ->toolbarActions([
-        //                BulkActionGroup::make([
-        // //                    DeleteBulkAction::make(),
-        //                ]),
-        //            ]);
     }
 
     /**

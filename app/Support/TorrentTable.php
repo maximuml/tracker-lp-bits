@@ -137,7 +137,6 @@ if (Permission::canManageTorrent()) { ?>
             $has_secondicon = false;
         }
         $counter = 0;
-        // while ($row = mysql_fetch_assoc($res))
         $lastcom_tooltip = [];
         $torrent_tooltip = [];
         foreach ($rows as $row) {

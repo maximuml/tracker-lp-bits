@@ -191,7 +191,6 @@ class CrowdinSync extends Command
             $this->uploadFile($filePath, $specificFile);
             $this->info("File {$specificFile} uploaded successfully.");
         } else {
-            //            throw new \RuntimeException("please specify a file to upload");
             // Upload all files in the source directory
             $files = File::allFiles($this->sourceDir.'/en');
 
@@ -387,10 +386,6 @@ class CrowdinSync extends Command
             // Move translations to the proper directories
             $this->moveTranslations($extractPath);
 
-            // Clean up
-            //            File::deleteDirectory($extractPath);
-            //            File::delete($zipPath);
-
             $this->info('Translations downloaded and processed successfully.');
         } else {
             $this->error('Failed to extract the ZIP file.');
@@ -449,7 +444,6 @@ class CrowdinSync extends Command
         if (! $response->successful()) {
             throw new \RuntimeException('[getFileId] Failed to fetch project files: '.$response->body());
         }
-        //        $this->info("[getFileId] FileName: {$fileName} response: {$response->body()}");
         $result = [];
         foreach ($response->json('data') as $file) {
             if ($fileName) {

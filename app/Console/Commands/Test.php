@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Torrent;
 use App\Repositories\RequireSeedTorrentRepository;
 use Illuminate\Console\Command;
 
@@ -40,7 +39,6 @@ class Test extends Command
     public function handle()
     {
         $rep = new RequireSeedTorrentRepository;
-        //        $rep->doRemove(Torrent::query()->whereIn('id', [58])->get());
         $rep->autoAddToListCronjob();
 
         return 0;

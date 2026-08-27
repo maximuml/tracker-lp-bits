@@ -27,7 +27,7 @@ class ExamController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function index(Request $request)
+    public function index(Request $request): array
     {
         $result = $this->repository->getList($request->all());
         $resource = ExamResource::collection($result);
@@ -43,7 +43,7 @@ class ExamController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function store(Request $request)
+    public function store(Request $request): array
     {
         $rules = [
             'name' => 'required|string',
@@ -65,7 +65,7 @@ class ExamController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function show(int $id)
+    public function show(int $id): array
     {
         $result = $this->repository->getDetail($id);
         $resource = new ExamResource($result);
@@ -78,7 +78,7 @@ class ExamController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function update(Request $request, int $id)
+    public function update(Request $request, int $id): array
     {
         $rules = [
             'name' => 'required|string',
@@ -100,7 +100,7 @@ class ExamController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function destroy(int $id)
+    public function destroy(int $id): array
     {
         $result = $this->repository->delete($id);
 
@@ -108,7 +108,7 @@ class ExamController extends Controller
     }
 
     /** @return  array<string, mixed> */
-    public function indexes()
+    public function indexes(): array
     {
         $result = $this->repository->listIndexes();
 
@@ -116,7 +116,7 @@ class ExamController extends Controller
     }
 
     /** @return  array<string, mixed> */
-    public function all()
+    public function all(): array
     {
         $result = Exam::query()->orderBy('id', 'desc')->get();
         $resource = ExamResource::collection($result);

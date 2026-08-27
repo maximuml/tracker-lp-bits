@@ -6,7 +6,6 @@ use App\Filament\PageListSingle;
 use App\Filament\Resources\Torrent\AnnounceLogResource;
 use App\Models\AnnounceLog;
 use App\Repositories\AnnounceLogRepository;
-use Filament\Actions;
 use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
@@ -40,7 +39,6 @@ class ListAnnounceLogs extends PageListSingle
         $sortableColumns = ['timestamp', 'uploaded_total', 'uploaded_increment', 'downloaded_total', 'downloaded_increment', 'left', 'announce_time'];
         $sortableDirections = ['asc', 'desc'];
         $request = request();
-        //        dd($request->all());
         $filters = [];
         foreach ($request->get('tableFilters', []) as $field => $values) {
             if (! isset($filterableColumns[$field])) {
@@ -78,7 +76,6 @@ class ListAnnounceLogs extends PageListSingle
             if (! is_array($snapshot)) {
                 continue;
             }
-            //            do_log("snapshot: " . $component['snapshot']);
             if (isset($snapshot['data']['tableRecordsPerPage'])) {
                 $perPage = $snapshot['data']['tableRecordsPerPage'];
             }
@@ -99,7 +96,6 @@ class ListAnnounceLogs extends PageListSingle
                 }
             }
             if (isset($snapshot['data']['tableFilters'])) {
-                //                dd($snapshot['data']['tableFilters']);
                 foreach ($snapshot['data']['tableFilters'] as $filterItems) {
                     foreach ($filterItems as $field => $items) {
                         if (! isset($filterableColumns[$field]) || ! is_array($items)) {
@@ -118,11 +114,9 @@ class ListAnnounceLogs extends PageListSingle
                     }
                 }
             }
-            //            do_log("updates: " . json_encode($component['updates'] ?? []));
             if (isset($component['updates']['tableRecordsPerPage'])) {
                 $perPage = $component['updates']['tableRecordsPerPage'];
             }
-            //            do_log("calls: " . json_encode($component['calls'] ?? []));
             if (isset($component['calls'])) {
                 foreach ($component['calls'] as $call) {
                     if ($call['method'] == 'gotoPage') {
@@ -181,7 +175,6 @@ class ListAnnounceLogs extends PageListSingle
     protected function getHeaderActions(): array
     {
         return [
-            //            Actions\CreateAction::make(),
         ];
     }
 

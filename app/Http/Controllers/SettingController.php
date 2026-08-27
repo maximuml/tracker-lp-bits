@@ -26,7 +26,7 @@ class SettingController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function index(Request $request)
+    public function index(Request $request): array
     {
         $result = $this->repository->getList($request->all());
 
@@ -38,7 +38,7 @@ class SettingController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function store(Request $request)
+    public function store(Request $request): array
     {
         $data = $request->all();
         $prefix = Arr::first(array_keys($data));
@@ -54,7 +54,7 @@ class SettingController extends Controller
      * @param  mixed  $id
      * @return array<int|string, mixed>
      */
-    public function show($id)
+    public function show($id): array
     {
 
         return [];
@@ -66,7 +66,7 @@ class SettingController extends Controller
      * @param  mixed  $id
      * @return array<int|string, mixed>
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id): array
     {
 
         return [];
@@ -78,7 +78,7 @@ class SettingController extends Controller
      * @param  mixed  $id
      * @return array<int|string, mixed>
      */
-    public function destroy($id)
+    public function destroy($id): array
     {
 
         return [];

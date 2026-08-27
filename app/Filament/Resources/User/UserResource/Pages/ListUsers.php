@@ -19,11 +19,6 @@ class ListUsers extends PageList implements HasActions
         ];
     }
 
-    //    public function isTableSearchable(): bool
-    //    {
-    //        return true;
-    //    }
-
     protected function getTableFiltersLayout(): FiltersLayout
     {
         return FiltersLayout::AboveContent;

@@ -15,7 +15,6 @@ use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Forms;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -60,8 +59,6 @@ class SeedBoxRecordResource extends Resource
                 TextInput::make('operator')->label(__('label.seed_box_record.operator')),
                 TextInput::make('bandwidth')->label(__('label.seed_box_record.bandwidth'))->integer(),
                 TextInput::make('asn')->label(__('label.seed_box_record.asn'))->integer(),
-                //                Forms\Components\TextInput::make('ip_begin')->label(__('label.seed_box_record.ip_begin')),
-                //                Forms\Components\TextInput::make('ip_end')->label(__('label.seed_box_record.ip_end')),
                 TextInput::make('ip')->label(__('label.seed_box_record.ip'))->helperText(__('label.seed_box_record.ip_help')),
                 Toggle::make('is_allowed')
                     ->label(__('label.seed_box_record.is_allowed'))

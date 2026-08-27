@@ -16,7 +16,6 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -80,7 +79,6 @@ class TagResource extends Resource
                 TextColumn::make('priority')->label(__('label.priority'))->sortable(),
                 TextColumn::make('torrents_count')->label(__('label.tag.torrents_count')),
                 TextColumn::make('torrents_sum_size')->label(__('label.tag.torrents_sum_size'))->formatStateUsing(fn ($state) => Format::size($state)),
-                //                Tables\Columns\TextColumn::make('updated_at')->dateTime()->label(__('label.updated_at')),
             ])
             ->defaultSort('priority', 'desc')
             ->filters([

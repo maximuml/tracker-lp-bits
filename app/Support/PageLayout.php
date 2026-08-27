@@ -529,17 +529,6 @@ class PageLayout
                     Html::messageAlertVoid('messages.php', $text, 'red');
                 }
                 MsgAlert::getInstance()->render();
-                /*
-                	$pending_invitee = $context->cache?->get_value('user_'.$context->user["id"].'_pending_invitee_count');
-                	if ($pending_invitee == ""){
-                		$pending_invitee = get_row_count("users","WHERE status = 'pending' AND invited_by = ".\App\Support\LegacyDb::escape($context->user['id']));
-                		$context->cache?->cache_value('user_'.$context->user["id"].'_pending_invitee_count', $pending_invitee, 900);
-                	}
-                	if ($pending_invitee > 0)
-                	{
-                		$text = $context->lang['text_your_friends'].Strings::addS($pending_invitee).Strings::isOrAre($pending_invitee).$context->lang['text_awaiting_confirmation'];
-                		msgalert("invite.php?id=".$context->user['id'],$text, "red");
-                	}*/
                 $settings_script_name = $context->scriptFileName;
                 if (! preg_match('/index/i', $settings_script_name)) {
                     $new_news = $context->cache?->get_value('user_'.$context->user['id'].'_unread_news_count');
@@ -684,7 +673,6 @@ class PageLayout
         if ($context->analyticsCodeTweak) {
             echo "\n".$context->analyticsCodeTweak."\n";
         }
-        //	$hook->dump();
         Hooks::doAction('nexus_footer');
         foreach (Nexus::getAppendFooters() as $value) {
             echo $value;
@@ -703,7 +691,5 @@ class PageLayout
         echo $js;
         echo '<img id="nexus-preview" style="display: none; position: absolute" src="" />';
         echo '</body></html>';
-        // echo replacePngTags(ob_get_clean());
-        //	unset($_SESSION['queries']);
     }
 }

@@ -23,7 +23,7 @@ class UploadController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function sections(Request $request)
+    public function sections(Request $request): array
     {
         $sections = $this->searchBoxRepository->listSections(SearchBox::listAuthorizedSectionId());
         $resource = SearchBoxResource::collection($sections);

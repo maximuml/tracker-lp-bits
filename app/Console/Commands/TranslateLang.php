@@ -168,7 +168,6 @@ class TranslateLang extends Command
      */
     protected function translateJsonFile($jsonFile, $sourceLang, $targetLang)
     {
-        //        $targetFile = resource_path("lang/{$targetLang}.json");
         $targetFile = $this->langPath."/{$targetLang}/{$jsonFile}";
         $raw = file_get_contents($jsonFile);
         if ($raw === false) {

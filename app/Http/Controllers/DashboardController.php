@@ -21,7 +21,7 @@ class DashboardController extends Controller
     }
 
     /** @return  array<string, mixed> */
-    public function systemInfo()
+    public function systemInfo(): array
     {
         $result = $this->repository->getSystemInfo();
 
@@ -29,7 +29,7 @@ class DashboardController extends Controller
     }
 
     /** @return  array<string, mixed> */
-    public function statData()
+    public function statData(): array
     {
         $result = $this->repository->getStatData();
 
@@ -37,7 +37,7 @@ class DashboardController extends Controller
     }
 
     /** @return  array<string, mixed> */
-    public function latestUser()
+    public function latestUser(): array
     {
         $result = $this->repository->latestUser();
         $resource = UserResource::collection($result);
@@ -49,7 +49,7 @@ class DashboardController extends Controller
     }
 
     /** @return  array<string, mixed> */
-    public function latestTorrent()
+    public function latestTorrent(): array
     {
         $result = $this->repository->latestTorrent();
         $resource = TorrentResource::collection($result);

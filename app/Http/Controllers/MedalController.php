@@ -25,7 +25,7 @@ class MedalController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function index(Request $request)
+    public function index(Request $request): array
     {
         $result = $this->repository->getList($request->all());
         $resource = MedalResource::collection($result);
@@ -41,7 +41,7 @@ class MedalController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function store(Request $request)
+    public function store(Request $request): array
     {
         $rules = [
             'name' => 'required|string',
@@ -63,7 +63,7 @@ class MedalController extends Controller
      * @param  mixed  $id
      * @return array<string, mixed>
      */
-    public function show($id)
+    public function show($id): array
     {
         $result = $this->repository->getDetail($id);
         $resource = new MedalResource($result);
@@ -77,7 +77,7 @@ class MedalController extends Controller
      * @param  mixed  $id
      * @return array<string, mixed>
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id): array
     {
         $rules = [
             'name' => 'required|string',
@@ -99,7 +99,7 @@ class MedalController extends Controller
      * @param  mixed  $id
      * @return array<string, mixed>
      */
-    public function destroy($id)
+    public function destroy($id): array
     {
         $result = $this->repository->delete($id);
 

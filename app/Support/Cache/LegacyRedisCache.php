@@ -237,7 +237,6 @@ class LegacyRedisCache
         if ($this->redis === null) {
             return;
         }
-        //        $this->delete('lock_'.$Key);
         $this->redis->del('lock_'.$Key);
     }
 
@@ -267,7 +266,6 @@ class LegacyRedisCache
             return;
         }
         $Value = $this->serialize($Value);
-        //        $this->set($Key,$Value, 0, $Duration);
         $this->redis->set($Key, $Value, $Duration);
         $this->cacheWriteTimes++;
         $this->keyHits['write'][$Key] = ! isset($this->keyHits['write'][$Key]) ? 1 : $this->keyHits['write'][$Key] + 1;
@@ -338,11 +336,7 @@ class LegacyRedisCache
 
             return false;
         }
-        // If we've locked it
         // Xia Zuojie: we disable the following lock feature 'cause we don't need it and it doubles the time to fetch a value from a key
-        /*while($Lock = $this->get('lock_'.$Key)){
-            sleep(2);
-        }*/
 
         if ($this->redis === null) {
             return false;

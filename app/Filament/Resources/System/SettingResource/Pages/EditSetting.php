@@ -16,7 +16,6 @@ use App\Support\Env;
 use App\Support\Hooks;
 use App\Support\Settings;
 use Filament\Actions\Action;
-use Filament\Forms;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
@@ -153,11 +152,6 @@ class EditSetting extends Page implements HasForms
             ->id('hr')
             ->schema($this->getHitAndRunSchema())
             ->columns(2);
-        //        $tabs[] = Forms\Components\Tabs\Tab::make(__('label.setting.require_seed_section.tab_header'))
-        //            ->id('require_seed_section')
-        //            ->schema($this->getRequireSeedSectionSchema())
-        //            ->columns(2)
-        //        ;
 
         $tabs[] = Tab::make(__('label.setting.backup.tab_header'))
             ->id('backup')

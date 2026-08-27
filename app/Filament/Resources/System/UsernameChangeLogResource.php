@@ -9,7 +9,6 @@ use App\Support\UserDisplay;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -77,11 +76,8 @@ class UsernameChangeLogResource extends Resource
                 SelectFilter::make('change_type')->options(UsernameChangeLog::listChangeType())->label(__('username-change-log.labels.change_type')),
             ])
             ->recordActions([
-                //                Tables\Actions\EditAction::make(),
-                //                Tables\Actions\DeleteAction::make(),
             ])
             ->toolbarActions([
-                //                Tables\Actions\DeleteBulkAction::make(),
             ]);
     }
 

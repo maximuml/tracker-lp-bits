@@ -9,7 +9,6 @@ use App\Filament\Resources\Torrent\TorrentResource\Pages\EditTorrent;
 use App\Filament\Resources\Torrent\TorrentResource\Pages\ListTorrents;
 use App\Models\Category;
 use App\Models\SearchBox;
-use App\Models\Setting;
 use App\Models\Torrent;
 use App\Repositories\TagRepository;
 use App\Repositories\TorrentRepository;
@@ -33,7 +32,6 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
-use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\IconColumn;
@@ -277,7 +275,6 @@ class TorrentResource extends Resource
                 })
                 ->deselectRecordsAfterCompletion();
         }
-        //        $actions[] = self::getBulkActionChangeCategory();
 
         if (Permission::canDeleteTorrent()) {
             $actions[] = DeleteBulkAction::make('bulk-delete')->using(function (Collection $records) {
@@ -326,7 +323,6 @@ class TorrentResource extends Resource
     private static function shouldShowApproval(): bool
     {
         return false;
-        //        return Setting::get('torrent.approval_status_none_visible') == 'no' || Setting::get('torrent.approval_status_icon_enabled') == 'yes';
     }
 
     /** @return array<Filter|SelectFilter> */

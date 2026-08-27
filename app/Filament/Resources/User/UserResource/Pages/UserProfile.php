@@ -22,7 +22,6 @@ use App\Support\Mail;
 use App\Support\Url;
 use Carbon\Carbon;
 use Exception;
-use Filament\Actions;
 use Filament\Actions\Action;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\DeleteAction;
@@ -48,8 +47,6 @@ class UserProfile extends ViewRecord implements HasActions
     private static ?UserRepository $rep = null;
 
     protected static string $resource = UserResource::class;
-
-    //    protected static string $view = 'filament.resources.user.user-resource.pages.user-profile';
 
     private function getRep(): UserRepository
     {
@@ -94,17 +91,11 @@ class UserProfile extends ViewRecord implements HasActions
             $actions[] = $this->buildGrantMedalAction();
             $actions[] = $this->buildAssignExamAction();
             $actions[] = $this->buildChangeBonusEtcAction();
-            //            if ($this->getUserRecord()->two_step_secret) {
-            //                $actions[] = $this->buildDisableTwoStepAuthenticationAction();
-            //            }
             $actions[] = $this->buildResetPasswordAction();
             $actions[] = $this->buildEnableDisableAction();
             $actions[] = $this->buildEnableDisableDownloadPrivilegesAction();
             $actions[] = $this->buildEnableDisableUploadPrivilegesAction();
             $actions[] = $this->buildEnableDisableForumPostAction();
-            //            if (user_can('user-change-class')) {
-            //                $actions[] = $this->buildChangeClassAction();
-            //            }
             if (Permission::can(PermissionEnum::USER_DELETE)) {
                 $actions[] = $this->buildDeleteAction();
             }
@@ -124,8 +115,6 @@ class UserProfile extends ViewRecord implements HasActions
                 Hidden::make('action')->default($this->getUserRecord()->enabled == 'yes' ? 'disable' : 'enable'),
                 Hidden::make('uid')->default($this->getUserRecord()->id),
             ])
-//            ->visible(false)
-//            ->hidden(true)
             ->action(function ($data) {
                 $userRep = $this->getRep();
                 try {
@@ -336,7 +325,6 @@ class UserProfile extends ViewRecord implements HasActions
     protected function buildEnableDisableDownloadPrivilegesAction(): Action
     {
         return Action::make($this->getUserRecord()->downloadpos == 'yes' ? __('admin.resources.user.actions.disable_download_privileges_btn') : __('admin.resources.user.actions.enable_download_privileges_btn'))
-//            ->modalHeading($this->getUserRecord()->enabled == 'yes' ? __('admin.resources.user.actions.disable_modal_title') : __('admin.resources.user.actions.enable_modal_title'))
             ->requiresConfirmation()
             ->action(function () {
                 $userRep = $this->getRep();

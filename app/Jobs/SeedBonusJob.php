@@ -2,16 +2,13 @@
 
 namespace App\Jobs;
 
-use App\Models\BonusLogs;
 use App\Models\User;
 use App\Support\Bonus;
 use App\Support\Cache as AppCache;
 use App\Support\Config\SiteConfig;
 use App\Support\Json;
 use App\Support\Logger;
-use App\Support\Time;
 use App\Support\UserDisplay;
-use ClickHouseDB\Client;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -117,7 +114,6 @@ class SeedBonusJob implements ShouldQueue
         $rows = [];
         $nowStr = now()->toDateTimeString();
         $logStr = '';
-        $bonusLogInsert = [];
         foreach ($results as $userInfo) {
             $uid = $userInfo['id'];
             $isDonor = UserDisplay::isDonor($userInfo);
@@ -126,20 +122,17 @@ class SeedBonusJob implements ShouldQueue
             $all_bonus = $basicBonus = $seedBonusResult['seed_bonus'];
             $oldValue = $userInfo['seedbonus'];
             $bonusLog .= ", all_bonus: $all_bonus";
-            $this->appendBonusLogInsert($bonusLogInsert, $uid, BonusLogs::BUSINESS_TYPE_SEEDING_BASIC, $oldValue, $basicBonus);
             $oldValue += $basicBonus;
             if ($isDonor && $donortimes_bonus != 0) {
                 $donorAddition = $basicBonus * $donortimes_bonus;
                 $all_bonus += $donorAddition;
                 $bonusLog .= ", isDonor, donortimes_bonus: $donortimes_bonus, all_bonus: $all_bonus";
-                $this->appendBonusLogInsert($bonusLogInsert, $uid, BonusLogs::BUSINESS_TYPE_SEEDING_DONOR_ADDITION, $oldValue, $donorAddition);
                 $oldValue += $donorAddition;
             }
             if ($officialAdditionFactor > 0) {
                 $officialAddition = $seedBonusResult['official_bonus'] * $officialAdditionFactor;
                 $all_bonus += $officialAddition;
                 $bonusLog .= ", officialAdditionFactor: $officialAdditionFactor, official_bonus: {$seedBonusResult['official_bonus']}, officialAddition: $officialAddition, all_bonus: $all_bonus";
-                $this->appendBonusLogInsert($bonusLogInsert, $uid, BonusLogs::BUSINESS_TYPE_SEEDING_OFFICIAL_ADDITION, $oldValue, $officialAddition);
                 $oldValue += $officialAddition;
             }
             if ($haremAdditionFactor > 0) {
@@ -147,14 +140,12 @@ class SeedBonusJob implements ShouldQueue
                 $haremAddition = (float) $haremBonus * (float) $haremAdditionFactor;
                 $all_bonus += $haremAddition;
                 $bonusLog .= ", haremAdditionFactor: $haremAdditionFactor, haremBonus: $haremBonus, haremAddition: $haremAddition, all_bonus: $all_bonus";
-                $this->appendBonusLogInsert($bonusLogInsert, $uid, BonusLogs::BUSINESS_TYPE_SEEDING_HAREM_ADDITION, $oldValue, $haremAddition);
                 $oldValue += $haremAddition;
             }
             if ($seedBonusResult['medal_additional_factor'] > 0) {
                 $medalAddition = $seedBonusResult['medal_bonus'] * $seedBonusResult['medal_additional_factor'];
                 $all_bonus += $medalAddition;
                 $bonusLog .= ", medalAdditionFactor: {$seedBonusResult['medal_additional_factor']}, medalBonus: {$seedBonusResult['medal_bonus']}, medalAddition: $medalAddition, all_bonus: $all_bonus";
-                $this->appendBonusLogInsert($bonusLogInsert, $uid, BonusLogs::BUSINESS_TYPE_SEEDING_MEDAL_ADDITION, $oldValue, $medalAddition);
                 $oldValue += $medalAddition;
             }
             Logger::writeWithContext((string) $bonusLog, (string) 'info', (bool) false);
@@ -190,10 +181,6 @@ class SeedBonusJob implements ShouldQueue
         if ($fd) {
             fwrite($fd, $logStr);
         }
-        if (! empty($bonusLogInsert)) {
-            //            BonusLogs::query()->insert($bonusLogInsert);
-            $this->insertIntoClickHouseBulk($bonusLogInsert);
-        }
         $costTime = time() - $beginTimestamp;
         Logger::writeWithContext((string) sprintf("{$logPrefix}, [DONE], update user count: %s, result: %s, cost time: %s seconds", count($rows), var_export($result, true), $costTime), (string) 'info', (bool) false);
         Logger::writeWithContext((string) "{$logPrefix}, upsert users seed bonus done", (string) 'debug', (bool) false);
@@ -207,51 +194,5 @@ class SeedBonusJob implements ShouldQueue
     public function failed(\Throwable $exception)
     {
         Logger::writeWithContext((string) ('failed: '.$exception->getMessage().$exception->getTraceAsString()), (string) 'error', (bool) false);
-    }
-
-    /**
-     * @param  array<int, array<string, mixed>>  $bonusLogInsert
-     * @param  int|float  $oldValue
-     * @param  int|float  $delta
-     */
-    private function appendBonusLogInsert(array &$bonusLogInsert, int $uid, int $businessType, $oldValue, $delta): void
-    {
-        if ($delta > 0) {
-            $bonusLogInsert[] = [
-                'business_type' => $businessType,
-                'uid' => $uid,
-                'old_total_value' => $oldValue,
-                'value' => $delta,
-                'new_total_value' => $oldValue + $delta,
-                'comment' => BonusLogs::$businessTypes[$businessType]['text'] ?? '',
-                'created_at' => Time::micro(),
-            ];
-        }
-    }
-
-    /**
-     * @param  array<int, array<string, mixed>>  $bonusLogInsert
-     */
-    private function insertIntoClickHouseBulk(array $bonusLogInsert): void
-    {
-        if (! SiteConfig::current()->system->isRecordSeedingBonusLog()) {
-            Logger::writeWithContext((string) 'not enabled', (string) 'info', (bool) false);
-
-            return;
-        }
-        $host = config('clickhouse.connection.host');
-        if (! $host) {
-            Logger::writeWithContext((string) 'clickhouse no host', (string) 'info', (bool) false);
-
-            return;
-        }
-        try {
-            $client = app(Client::class);
-            $fields = ['business_type', 'uid', 'old_total_value', 'value', 'new_total_value', 'comment', 'created_at'];
-            $client->insert('bonus_logs', $bonusLogInsert, $fields);
-            Logger::writeWithContext((string) ("insertIntoClickHouseBulk done, created_at: {$bonusLogInsert[0]['created_at']}, count: ".count($bonusLogInsert)), (string) 'info', (bool) false);
-        } catch (\Exception $e) {
-            Logger::writeWithContext((string) $e->getMessage(), (string) 'error', (bool) false);
-        }
     }
 }

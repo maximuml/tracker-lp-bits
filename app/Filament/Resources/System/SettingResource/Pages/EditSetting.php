@@ -211,16 +211,6 @@ class EditSetting extends Page implements HasForms
                     ->inline(true)
                     ->label(__('label.setting.system.is_invite_pre_email_and_username'))
                     ->helperText(__('label.setting.system.is_invite_pre_email_and_username_help')),
-                Radio::make('system.is_record_announce_log')
-                    ->options(self::$yesOrNo)
-                    ->inline(true)
-                    ->label(__('label.setting.system.is_record_announce_log'))
-                    ->helperText(__('label.setting.system.is_record_announce_log_help')),
-                Radio::make('system.is_record_seeding_bonus_log')
-                    ->options(self::$yesOrNo)
-                    ->inline(true)
-                    ->label(__('label.setting.system.is_record_seeding_bonus_log'))
-                    ->helperText(__('label.setting.system.is_record_seeding_bonus_log_help')),
                 Select::make('system.access_admin_class_min')
                     ->options(User::listClass(User::CLASS_VIP))
                     ->label(__('label.setting.system.access_admin_class_min'))

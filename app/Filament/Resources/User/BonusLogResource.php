@@ -67,7 +67,7 @@ class BonusLogResource extends Resource
             ])
             ->filters([
                 SelectFilter::make('category')
-                    ->options(BonusLogs::listCategoryOptions(true))
+                    ->options(BonusLogs::listCategoryOptions())
                     ->default(BonusLogs::CATEGORY_COMMON)
                     ->selectablePlaceholder(false)
                     ->label(__('bonus-log.category')),

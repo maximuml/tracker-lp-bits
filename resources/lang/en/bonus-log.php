@@ -33,12 +33,6 @@ return [
         BonusLogs::BUSINESS_TYPE_RECEIVE_GIFT => 'Receive gift',
         BonusLogs::BUSINESS_TYPE_UPLOAD_TORRENT => 'Upload torrent',
         BonusLogs::BUSINESS_TYPE_TORRENT_BE_REWARD => 'Torrent receive reward',
-
-        BonusLogs::BUSINESS_TYPE_SEEDING_BASIC => 'Seeding basic',
-        BonusLogs::BUSINESS_TYPE_SEEDING_DONOR_ADDITION => 'Seeding donor addition',
-        BonusLogs::BUSINESS_TYPE_SEEDING_OFFICIAL_ADDITION => 'Seeding official addition',
-        BonusLogs::BUSINESS_TYPE_SEEDING_HAREM_ADDITION => 'Seeding harem addition',
-        BonusLogs::BUSINESS_TYPE_SEEDING_MEDAL_ADDITION => 'Seeding medal addition',
     ],
     'fields' => [
         'business_type' => 'Business type',
@@ -50,6 +44,5 @@ return [
     'title_for_user' => 'User bonus details',
     'category' => 'Category',
     'category_common' => 'Common',
-    'category_seeding' => 'Seeding',
     'view_detail' => 'Details',
 ];

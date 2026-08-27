@@ -126,7 +126,6 @@ class UserDetailRepository
     {
         return BonusLogs::query()
             ->where('uid', $userId)
-            ->whereNotIn('business_type', BonusLogs::$businessTypeSeeding)
             ->orderBy('id', 'desc')
             ->limit(20)
             ->get()

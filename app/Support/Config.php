@@ -31,7 +31,7 @@ final class Config
     private static function loadLegacyConfigs(): void
     {
         $root = defined('ROOT_PATH') ? ROOT_PATH : dirname(__DIR__, 2).'/';
-        $files = ['nexus', 'emoji', 'captcha', 'clickhouse'];
+        $files = ['nexus', 'emoji', 'captcha'];
 
         foreach ($files as $prefix) {
             $file = $root.'config/'.$prefix.'.php';

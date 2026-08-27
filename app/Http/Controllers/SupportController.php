@@ -27,6 +27,13 @@ use Nexus\Database\NexusLock;
 
 class SupportController extends LegacyController
 {
+    private ToolRepository $toolRepository;
+
+    public function __construct(ToolRepository $toolRepository)
+    {
+        $this->toolRepository = $toolRepository;
+    }
+
     public function complains(Request $request): View|RedirectResponse|Response
     {
         $currentUser = (array) (app(CurrentUser::class)->get() ?? []);
@@ -162,7 +169,7 @@ class SupportController extends LegacyController
 
         if ($uid > 0) {
             try {
-                $toolRep = new ToolRepository;
+                $toolRep = $this->toolRepository;
                 $toolRep->sendMail(
                     $complain->email,
                     $langComplains['reply_notify_subject'] ?? 'Reply to your complain',

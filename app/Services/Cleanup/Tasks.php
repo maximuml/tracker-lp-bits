@@ -34,6 +34,10 @@ use Illuminate\Support\Facades\DB;
  */
 final class Tasks
 {
+    public function __construct(
+        private readonly UserRepository $userRepository,
+    ) {}
+
     /**
      * Priority Class 1: remove peers whose last_action is older than the dead
      * threshold.
@@ -534,7 +538,7 @@ final class Tasks
         $secs = $destroyDisabledDays * 86400;
         $dt = date('Y-m-d H:i:s', time() - $secs);
 
-        $userRep = new UserRepository;
+        $userRep = $this->userRepository;
 
         User::query()
             ->where('enabled', User::ENABLED_NO)

@@ -28,6 +28,16 @@ use Illuminate\View\View;
 
 class UserAdminController extends LegacyController
 {
+    private UserRepository $userRepository;
+
+    private BonusRepository $bonusRepository;
+
+    public function __construct(UserRepository $userRepository, BonusRepository $bonusRepository)
+    {
+        $this->userRepository = $userRepository;
+        $this->bonusRepository = $bonusRepository;
+    }
+
     public function users(Request $request): View|RedirectResponse|Response
     {
         if (! Permissions::userCan(PermissionEnum::VIEW_USER_LIST->value, false, (int) (app(CurrentUser::class)->get()['id'] ?? 0))) {
@@ -154,7 +164,7 @@ class UserAdminController extends LegacyController
                 return $this->legacyAbortResponse('Error', "Sorry, you don't have enough permission to reset this user's password.");
             }
 
-            $userRep = new UserRepository;
+            $userRep = $this->userRepository;
             try {
                 $userRep->resetPassword((int) $arr['id'], $newpassword, $newpasswordagain);
             } catch (\Exception $e) {
@@ -228,8 +238,8 @@ class UserAdminController extends LegacyController
                 return $this->legacyPage($request, 'self-enable', true, $viewData);
             }
 
-            $userRep = new UserRepository;
-            $bonusRep = new BonusRepository;
+            $userRep = $this->userRepository;
+            $bonusRep = $this->bonusRepository;
             $operator = User::query()->find($currentUserId);
             if ($operator) {
                 $bonusRep->consumeUserBonus($currentUserId, $total, BonusLogs::BUSINESS_TYPE_SELF_ENABLE, $title);
@@ -283,7 +293,7 @@ class UserAdminController extends LegacyController
         }
 
         if ($request->isMethod('post')) {
-            $userRep = new UserRepository;
+            $userRep = $this->userRepository;
             try {
                 $newUser = $userRep->store([
                     'username' => request()->post('username'),

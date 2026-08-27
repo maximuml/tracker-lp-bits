@@ -26,12 +26,12 @@ class TorrentController extends Controller
     /** @var mixed */
     private $repository;
 
-    /**
-     * @return mixed
-     */
-    public function __construct(TorrentRepository $repository)
+    private UploadRepository $uploadRepository;
+
+    public function __construct(TorrentRepository $repository, UploadRepository $uploadRepository)
     {
         $this->repository = $repository;
+        $this->uploadRepository = $uploadRepository;
     }
 
     /**
@@ -55,7 +55,7 @@ class TorrentController extends Controller
      */
     public function store(TorrentRequest $request): array
     {
-        $uploadRep = new UploadRepository;
+        $uploadRep = $this->uploadRepository;
         $newTorrent = $uploadRep->upload($request);
         $resource = new JsonResource(['id' => $newTorrent->id]);
 

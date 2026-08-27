@@ -29,6 +29,19 @@ use Illuminate\View\View;
 
 class UserDetailController extends Controller
 {
+    private SeedBoxRepository $seedBoxRepository;
+
+    private HitAndRunRepository $hitAndRunRepository;
+
+    private UserRepository $userRepository;
+
+    public function __construct(SeedBoxRepository $seedBoxRepository, HitAndRunRepository $hitAndRunRepository, UserRepository $userRepository)
+    {
+        $this->seedBoxRepository = $seedBoxRepository;
+        $this->hitAndRunRepository = $hitAndRunRepository;
+        $this->userRepository = $userRepository;
+    }
+
     public function show(Request $request): View|RedirectResponse
     {
         $id = (int) $request->input('id', 0);
@@ -121,7 +134,7 @@ class UserDetailController extends Controller
             $locationInfo = Network::ipLocationWithContext($user['ip']);
         }
 
-        $seedBoxRep = new SeedBoxRepository;
+        $seedBoxRep = $this->seedBoxRepository;
         $seedBoxIconCurrentUser = $seedBoxRep->renderIcon($currentUser['ip'] ?? '', $currentUserId);
 
         $peerRows = UserDetailRepository::getPeers($id);
@@ -180,7 +193,7 @@ class UserDetailController extends Controller
 
         $hrStatusHtml = '';
         if (($isOwner || $canViewHistory) && HitAndRun::getIsEnabled()) {
-            $hrStatusHtml = (new HitAndRunRepository)->getStatusStats($id);
+            $hrStatusHtml = $this->hitAndRunRepository->getStatusStats($id);
         }
 
         $ipHistoryCount = $canViewConfidential ? UserDetailRepository::getIplogCount($id) : 0;
@@ -203,7 +216,7 @@ jQuery("body").on("click", "#claim-all-seeding", function (e) {
 JS;
         }
 
-        $metas = (new UserRepository)->listMetas($id);
+        $metas = $this->userRepository->listMetas($id);
         $userPropsHtml = '';
         $consumeChangeUsernameJs = '';
         $consumeChangeUsernameForm = '';

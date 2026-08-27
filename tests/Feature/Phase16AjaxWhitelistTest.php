@@ -70,13 +70,15 @@ final class Phase16AjaxWhitelistTest extends TestCase
 
     public function test_allowed_actions_constant_lists_all_public_methods(): void
     {
-        // Verify that every public static method on AjaxService is in the
+        // Verify that every public method on AjaxService is in the
         // whitelist — no method should be silently exposed without explicit
         // registration.
         $reflection = new \ReflectionClass(AjaxService::class);
         $publicMethods = [];
-        foreach ($reflection->getMethods(\ReflectionMethod::IS_PUBLIC | \ReflectionMethod::IS_STATIC) as $method) {
-            if ($method->getDeclaringClass()->getName() === AjaxService::class) {
+        foreach ($reflection->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
+            if ($method->getDeclaringClass()->getName() === AjaxService::class
+                && $method->getName() !== '__construct'
+            ) {
                 $publicMethods[] = $method->getName();
             }
         }

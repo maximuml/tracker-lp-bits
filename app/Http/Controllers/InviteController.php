@@ -24,6 +24,13 @@ use Nexus\Nexus;
 
 class InviteController extends LegacyController
 {
+    private UserRepository $userRepository;
+
+    public function __construct(UserRepository $userRepository)
+    {
+        $this->userRepository = $userRepository;
+    }
+
     public function invite(Request $request): View|RedirectResponse|Response
     {
         $currentUser = app(CurrentUser::class)->get() ?? [];
@@ -45,7 +52,7 @@ class InviteController extends LegacyController
         $enabled = (string) $request->input('enabled', '');
         $status = (string) $request->input('status', '');
         $sent = (string) $request->input('sent', '');
-        $userRep = new UserRepository;
+        $userRep = $this->userRepository;
         $SITENAME = Setting::getSiteName();
         $invitesystem = SiteConfig::current()->main->inviteSystem() ? 'yes' : 'no';
 

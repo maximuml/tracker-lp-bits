@@ -65,35 +65,46 @@ final class AjaxService
         'getToastNotifications',
     ];
 
+    public function __construct(
+        private readonly MedalRepository $medalRepository,
+        private readonly AttendanceRepository $attendanceRepository,
+        private readonly UserRepository $userRepository,
+        private readonly TorrentRepository $torrentRepository,
+        private readonly SeedBoxRepository $seedBoxRepository,
+        private readonly BonusRepository $bonusRepository,
+        private readonly ExamRepository $examRepository,
+        private readonly UserPasskeyRepository $userPasskeyRepository,
+    ) {}
+
     /** @param array<string, mixed> $params */
-    public static function toggleUserMedalStatus(array $params): mixed
+    public function toggleUserMedalStatus(array $params): mixed
     {
         $CURUSER = app(CurrentUser::class)->get() ?? [];
-        $rep = new MedalRepository;
+        $rep = $this->medalRepository;
 
         return $rep->toggleUserMedalStatus($params['id'], $CURUSER['id']);
     }
 
     /** @param array<string, mixed> $params */
-    public static function attendanceRetroactive(array $params): mixed
+    public function attendanceRetroactive(array $params): mixed
     {
         $CURUSER = app(CurrentUser::class)->get() ?? [];
-        $rep = new AttendanceRepository;
+        $rep = $this->attendanceRepository;
 
         return $rep->retroactive($CURUSER['id'], $params['date']);
     }
 
     /** @param array<string, mixed> $params */
-    public static function removeUserLeechWarn(array $params): mixed
+    public function removeUserLeechWarn(array $params): mixed
     {
         $CURUSER = app(CurrentUser::class)->get() ?? [];
-        $rep = new UserRepository;
+        $rep = $this->userRepository;
 
         return $rep->removeLeechWarn($CURUSER['id'], $params['uid']);
     }
 
     /** @param array<string, mixed> $params */
-    public static function getOffer(array $params): mixed
+    public function getOffer(array $params): mixed
     {
         $offer = Offer::query()->findOrFail($params['id']);
 
@@ -101,16 +112,16 @@ final class AjaxService
     }
 
     /** @param array<string, mixed> $params */
-    public static function approvalModal(array $params): mixed
+    public function approvalModal(array $params): mixed
     {
         $CURUSER = app(CurrentUser::class)->get() ?? [];
-        $rep = new TorrentRepository;
+        $rep = $this->torrentRepository;
 
         return $rep->buildApprovalModal($CURUSER['id'], (int) $params['torrent_id']);
     }
 
     /** @param array<string, mixed> $params */
-    public static function approval(array $params): mixed
+    public function approval(array $params): mixed
     {
         $CURUSER = app(CurrentUser::class)->get() ?? [];
         foreach (['torrent_id', 'approval_status'] as $field) {
@@ -118,16 +129,16 @@ final class AjaxService
                 throw new \InvalidArgumentException("Require $field");
             }
         }
-        $rep = new TorrentRepository;
+        $rep = $this->torrentRepository;
 
         return $rep->approval($CURUSER['id'], $params);
     }
 
     /** @param array<string, mixed> $params */
-    public static function addSeedBoxRecord(array $params): mixed
+    public function addSeedBoxRecord(array $params): mixed
     {
         $CURUSER = app(CurrentUser::class)->get() ?? [];
-        $rep = new SeedBoxRepository;
+        $rep = $this->seedBoxRepository;
         $params['uid'] = $CURUSER['id'];
         $params['type'] = SeedBoxRecord::TYPE_USER;
         $params['status'] = SeedBoxRecord::STATUS_UNAUDITED;
@@ -136,34 +147,34 @@ final class AjaxService
     }
 
     /** @param array<string, mixed> $params */
-    public static function removeSeedBoxRecord(array $params): mixed
+    public function removeSeedBoxRecord(array $params): mixed
     {
         $CURUSER = app(CurrentUser::class)->get() ?? [];
-        $rep = new SeedBoxRepository;
+        $rep = $this->seedBoxRepository;
 
         return $rep->delete($params['id'], $CURUSER['id']);
     }
 
     /** @param array<string, mixed> $params */
-    public static function removeHitAndRun(array $params): mixed
+    public function removeHitAndRun(array $params): mixed
     {
         $CURUSER = app(CurrentUser::class)->get() ?? [];
-        $rep = new BonusRepository;
+        $rep = $this->bonusRepository;
 
         return $rep->consumeToCancelHitAndRun($CURUSER['id'], $params['id']);
     }
 
     /** @param array<string, mixed> $params */
-    public static function consumeBenefit(array $params): mixed
+    public function consumeBenefit(array $params): mixed
     {
         $CURUSER = app(CurrentUser::class)->get() ?? [];
-        $rep = new UserRepository;
+        $rep = $this->userRepository;
 
         return $rep->consumeBenefit($CURUSER['id'], $params);
     }
 
     /** @param array<string, mixed> $params */
-    public static function clearShoutBox(array $params): mixed
+    public function clearShoutBox(array $params): mixed
     {
         $CURUSER = app(CurrentUser::class)->get() ?? [];
         $user = User::query()->find($CURUSER['id'] ?? 0);
@@ -177,7 +188,7 @@ final class AjaxService
     }
 
     /** @param array<string, mixed> $params */
-    public static function shoutboxEdit(array $params): mixed
+    public function shoutboxEdit(array $params): mixed
     {
         $CURUSER = app(CurrentUser::class)->get() ?? [];
         $id = (int) ($params['id'] ?? 0);
@@ -218,7 +229,7 @@ final class AjaxService
     }
 
     /** @param array<string, mixed> $params */
-    public static function shoutboxDelete(array $params): mixed
+    public function shoutboxDelete(array $params): mixed
     {
         $CURUSER = app(CurrentUser::class)->get() ?? [];
         $id = (int) ($params['id'] ?? 0);
@@ -252,7 +263,7 @@ final class AjaxService
     }
 
     /** @param array<string, mixed> $params */
-    public static function shoutboxReact(array $params): mixed
+    public function shoutboxReact(array $params): mixed
     {
         $CURUSER = app(CurrentUser::class)->get() ?? [];
         $id = (int) ($params['id'] ?? 0);
@@ -286,25 +297,25 @@ final class AjaxService
     }
 
     /** @param array<string, mixed> $params */
-    public static function buyMedal(array $params): mixed
+    public function buyMedal(array $params): mixed
     {
         $CURUSER = app(CurrentUser::class)->get() ?? [];
-        $rep = new BonusRepository;
+        $rep = $this->bonusRepository;
 
         return $rep->consumeToBuyMedal($CURUSER['id'], $params['medal_id']);
     }
 
     /** @param array<string, mixed> $params */
-    public static function giftMedal(array $params): mixed
+    public function giftMedal(array $params): mixed
     {
         $CURUSER = app(CurrentUser::class)->get() ?? [];
-        $rep = new BonusRepository;
+        $rep = $this->bonusRepository;
 
         return $rep->consumeToGiftMedal($CURUSER['id'], $params['medal_id'], $params['uid']);
     }
 
     /** @param array<string, mixed> $params */
-    public static function saveUserMedal(array $params): mixed
+    public function saveUserMedal(array $params): mixed
     {
         $CURUSER = app(CurrentUser::class)->get() ?? [];
         $data = [];
@@ -321,22 +332,22 @@ final class AjaxService
             $value = $param['value'];
             $data[$id][$field] = $value;
         }
-        $rep = new MedalRepository;
+        $rep = $this->medalRepository;
 
         return $rep->saveUserMedal($CURUSER['id'], $data);
     }
 
     /** @param array<string, mixed> $params */
-    public static function claimTask(array $params): mixed
+    public function claimTask(array $params): mixed
     {
         $CURUSER = app(CurrentUser::class)->get() ?? [];
-        $rep = new ExamRepository;
+        $rep = $this->examRepository;
 
         return $rep->assignToUser($CURUSER['id'], $params['exam_id']);
     }
 
     /** @param array<string, mixed> $params */
-    public static function addToken(array $params): mixed
+    public function addToken(array $params): mixed
     {
         $CURUSER = app(CurrentUser::class)->get() ?? [];
         if (empty($params['name'])) {
@@ -350,7 +361,7 @@ final class AjaxService
     }
 
     /** @param array<string, mixed> $params */
-    public static function removeToken(array $params): mixed
+    public function removeToken(array $params): mixed
     {
         $CURUSER = app(CurrentUser::class)->get() ?? [];
         if (empty($params['id'])) {
@@ -364,61 +375,61 @@ final class AjaxService
     }
 
     /** @param array<string, mixed> $params */
-    public static function getPasskeyCreateArgs(array $params): mixed
+    public function getPasskeyCreateArgs(array $params): mixed
     {
         $CURUSER = app(CurrentUser::class)->get() ?? [];
-        $rep = new UserPasskeyRepository;
+        $rep = $this->userPasskeyRepository;
 
         return $rep->getCreateArgs($CURUSER['id'], $CURUSER['username']);
     }
 
     /** @param array<string, mixed> $params */
-    public static function processPasskeyCreate(array $params): mixed
+    public function processPasskeyCreate(array $params): mixed
     {
         $CURUSER = app(CurrentUser::class)->get() ?? [];
-        $rep = new UserPasskeyRepository;
+        $rep = $this->userPasskeyRepository;
 
         return $rep->processCreate($CURUSER['id'], $params['challengeId'], $params['clientDataJSON'], $params['attestationObject']);
     }
 
     /** @param array<string, mixed> $params */
-    public static function deletePasskey(array $params): mixed
+    public function deletePasskey(array $params): mixed
     {
         $CURUSER = app(CurrentUser::class)->get() ?? [];
-        $rep = new UserPasskeyRepository;
+        $rep = $this->userPasskeyRepository;
 
         return $rep->delete($CURUSER['id'], $params['credentialId']);
     }
 
     /** @param array<string, mixed> $params */
-    public static function getPasskeyList(array $params): mixed
+    public function getPasskeyList(array $params): mixed
     {
         $CURUSER = app(CurrentUser::class)->get() ?? [];
-        $rep = new UserPasskeyRepository;
+        $rep = $this->userPasskeyRepository;
 
         return $rep->getList($CURUSER['id']);
     }
 
     /** @param array<string, mixed> $params */
-    public static function getPasskeyGetArgs(array $params): mixed
+    public function getPasskeyGetArgs(array $params): mixed
     {
         $CURUSER = app(CurrentUser::class)->get() ?? [];
-        $rep = new UserPasskeyRepository;
+        $rep = $this->userPasskeyRepository;
 
         return $rep->getGetArgs();
     }
 
     /** @param array<string, mixed> $params */
-    public static function processPasskeyGet(array $params): mixed
+    public function processPasskeyGet(array $params): mixed
     {
         $CURUSER = app(CurrentUser::class)->get() ?? [];
-        $rep = new UserPasskeyRepository;
+        $rep = $this->userPasskeyRepository;
 
         return $rep->processGet($params['challengeId'], $params['id'], $params['clientDataJSON'], $params['authenticatorData'], $params['signature'], $params['userHandle']);
     }
 
     /** @param array<string, mixed> $params */
-    public static function getToastNotifications(array $params): mixed
+    public function getToastNotifications(array $params): mixed
     {
         $CURUSER = app(CurrentUser::class)->get() ?? [];
         $lastPmId = (int) ($params['last_pm_id'] ?? 0);

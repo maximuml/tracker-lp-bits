@@ -15,7 +15,6 @@ use App\Support\CoverThumb;
 use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Globals;
-use App\Support\Hooks;
 use App\Support\Shoutbox;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
@@ -49,9 +48,7 @@ final class IndexPageService
         // Shoutbox
         $data['shoutbox'] = $this->buildShoutbox($lang, $data['canSbManage'], (int) ($curUser['id'] ?? 0));
 
-        // Extra modules hook
-        $extraModules = Hooks::applyFilter('nexus_home_module', []);
-        $data['extraModules'] = is_array($extraModules) ? implode('', $extraModules) : '';
+        $data['extraModules'] = '';
 
         // Latest forum posts
         $data['forumPosts'] = $this->buildForumPosts($lang, $curUser);

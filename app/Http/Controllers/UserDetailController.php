@@ -8,7 +8,6 @@ use App\Models\HitAndRun;
 use App\Models\User;
 use App\Models\UserMeta;
 use App\Repositories\HitAndRunRepository;
-use App\Repositories\SeedBoxRepository;
 use App\Repositories\UserDetailRepository;
 use App\Repositories\UserRepository;
 use App\Support\Bonus;
@@ -29,15 +28,12 @@ use Illuminate\View\View;
 
 class UserDetailController extends Controller
 {
-    private SeedBoxRepository $seedBoxRepository;
-
     private HitAndRunRepository $hitAndRunRepository;
 
     private UserRepository $userRepository;
 
-    public function __construct(SeedBoxRepository $seedBoxRepository, HitAndRunRepository $hitAndRunRepository, UserRepository $userRepository)
+    public function __construct(HitAndRunRepository $hitAndRunRepository, UserRepository $userRepository)
     {
-        $this->seedBoxRepository = $seedBoxRepository;
         $this->hitAndRunRepository = $hitAndRunRepository;
         $this->userRepository = $userRepository;
     }
@@ -134,12 +130,8 @@ class UserDetailController extends Controller
             $locationInfo = Network::ipLocationWithContext($user['ip']);
         }
 
-        $seedBoxRep = $this->seedBoxRepository;
-        $seedBoxIconCurrentUser = $seedBoxRep->renderIcon($currentUser['ip'] ?? '', $currentUserId);
-
         $peerRows = UserDetailRepository::getPeers($id);
         $clientSelectHtml = '';
-        $seedBoxIcons = [];
         if (! empty($peerRows)) {
             $clientSelectHtml .= "<table border='1' cellspacing='0' cellpadding='5'><tr><td class='colhead'>Agent</td><td class='colhead'>IPV4</td><td class='colhead'>IPV6</td><td class='colhead'>Port</td></tr>";
             foreach ($peerRows as $arr) {
@@ -148,15 +140,10 @@ class UserDetailController extends Controller
                 if ($canViewConfidential || $isOwner) {
                     $v4 = $isOwner ? Strings::hidden($arr['ipv4']) : $arr['ipv4'];
                     $v6 = $isOwner ? Strings::hidden($arr['ipv6']) : $arr['ipv6'];
-                    foreach ([$arr['ipv4'], $arr['ipv6']] as $ip) {
-                        if (! isset($seedBoxIcons[$ip])) {
-                            $seedBoxIcons[$ip] = $seedBoxRep->renderIcon($ip, $id);
-                        }
-                    }
                     $clientSelectHtml .= sprintf(
                         '<td>%s</td><td>%s</td><td>%s</td>',
-                        $v4.($seedBoxIcons[$arr['ipv4']] ?? ''),
-                        $v6.($seedBoxIcons[$arr['ipv6']] ?? ''),
+                        $v4,
+                        $v6,
                         $arr['port']
                     );
                 } else {
@@ -302,7 +289,6 @@ JS;
             'showPmButton' => $showPmButton,
             'countryHtml' => $countryHtml,
             'locationInfo' => $locationInfo,
-            'seedBoxIconCurrentUser' => $seedBoxIconCurrentUser,
             'clientSelectHtml' => $clientSelectHtml,
             'trueTraffic' => $trueTraffic,
             'userManageSystemUrl' => $userManageSystemUrl,

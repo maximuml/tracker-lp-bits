@@ -10,13 +10,11 @@ use App\DTOs\Usercp\SecuritySettingsDto;
 use App\DTOs\Usercp\TrackerSettingsDto;
 use App\Models\Comment;
 use App\Models\Post;
-use App\Models\SeedBoxRecord;
 use App\Models\User;
 use App\Services\WebAuthService;
 use App\Support\AuthCookie;
 use App\Support\Cache;
 use App\Support\Globals;
-use App\Support\Hooks;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Mail;
@@ -26,7 +24,6 @@ use App\Support\TwoFactorAuthHelper;
 use App\Support\Url;
 use App\Support\Validators;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache as CacheFacade;
 use Illuminate\Support\Facades\DB;
@@ -104,13 +101,12 @@ final class UsercpRepository extends BaseRepository
      */
     public static function updateSecurity(int $userId, array $data, bool $resetAuthKey, array $allPost): bool
     {
-        return (bool) DB::transaction(function () use ($userId, $data, $resetAuthKey, $allPost) {
+        return (bool) DB::transaction(function () use ($userId, $data, $resetAuthKey) {
             self::updateUser($userId, $data);
             if ($resetAuthKey) {
                 $torrentRep = new TorrentRepository;
                 $torrentRep->resetTrackerReportAuthKeySecret($userId);
             }
-            Hooks::doAction('usercp_security_update', $allPost);
 
             return true;
         });
@@ -142,17 +138,6 @@ final class UsercpRepository extends BaseRepository
     public static function getTableIds(string $table): array
     {
         return DB::table($table)->pluck('id')->all();
-    }
-
-    /**
-     * @return Collection<int, SeedBoxRecord>
-     */
-    public static function getSeedBoxRecords(int $userId): Collection
-    {
-        return SeedBoxRecord::query()
-            ->where('uid', $userId)
-            ->where('type', SeedBoxRecord::TYPE_USER)
-            ->get();
     }
 
     /**

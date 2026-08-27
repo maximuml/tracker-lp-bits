@@ -601,9 +601,6 @@ $rootpath = '';
 /** @var string $savedirectory_attachment */
 $savedirectory_attachment = '';
 
-/** @var mixed $seedBoxRep */
-$seedBoxRep = null;
-
 /** @var mixed $signup_timeout */
 $signup_timeout = null;
 

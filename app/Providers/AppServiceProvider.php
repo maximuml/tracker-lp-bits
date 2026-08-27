@@ -7,7 +7,6 @@ use App\Support\CurrentUser;
 use App\Support\Env;
 use App\Support\Environment;
 use App\Support\Globals;
-use App\Support\Hooks;
 use App\Support\Language;
 use App\Support\Locale;
 use App\Support\UserUpdateBatch;
@@ -23,8 +22,6 @@ use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\PersonalAccessToken;
 use Laravel\Sanctum\Sanctum;
-use Nexus\Plugin\Hook;
-use Nexus\Plugin\Plugin;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -35,8 +32,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->singleton(Hook::class, static fn () => app(Globals::class)->get('hook') ?? new Hook);
-        $this->app->singleton(Plugin::class, static fn () => app(Globals::class)->get('plugin') ?? new Plugin);
         $this->app->singleton(LegacyRedisCache::class, static function (): LegacyRedisCache {
             $cache = new LegacyRedisCache;
             $cache->setLanguageFolderArray(Locale::available());
@@ -47,8 +42,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(Language::class);
         $this->app->singleton(Globals::class);
         $this->app->singleton(UserUpdateBatch::class);
-
-        Hooks::doAction('nexus_register');
     }
 
     /**
@@ -58,7 +51,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        app(Plugin::class)->start();
         if (class_exists(Sanctum::class)) {
             Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
         }
@@ -100,8 +92,6 @@ class AppServiceProvider extends ServiceProvider
             }
             $view->with('context', $context);
         });
-
-        Hooks::doAction('nexus_boot');
     }
 
     private function customScheduleTask(): void

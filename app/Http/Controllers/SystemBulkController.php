@@ -14,7 +14,6 @@ use App\Support\Email;
 use App\Support\Environment;
 use App\Support\Format;
 use App\Support\Globals;
-use App\Support\Hooks;
 use App\Support\Html;
 use App\Support\Input;
 use App\Support\LegacyAuth;
@@ -397,8 +396,6 @@ class SystemBulkController extends LegacyController
                 $conditions[] = 'class IN ('.implode(', ', $sanitized).')';
             }
         }
-
-        $conditions = Hooks::applyFilter('role_query_conditions', $conditions, $request->all());
 
         if (empty($conditions)) {
             return $this->legacyAbortResponse('Error', 'No valid filter');

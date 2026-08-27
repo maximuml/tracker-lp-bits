@@ -17,7 +17,6 @@ return [
         'torrent_state' => 'Free leach',
         'roles_list' => 'Roles',
         'ability_list' => 'Permissions',
-        'seed_box_records' => 'SeedBox',
         'menu' => 'Custom menu',
         'username_change_log' => 'Username change logs',
         'torrent_deny_reason' => 'Deny Reasons',
@@ -25,7 +24,6 @@ return [
         'permissions' => 'Permissions',
         'section' => 'Search boxes',
         'icon' => 'Category icons',
-        'plugin' => 'Plugins',
         'category' => 'Categories',
         'second_icon' => 'Second icons',
         'torrent_operation_log' => 'Torrent operation logs',
@@ -146,11 +144,6 @@ return [
             'bulk_action_recommend' => 'Recommend',
             'bulk_action_sp_state' => 'Promotion',
             'bulk_action_hr' => 'H&R',
-        ],
-        'seed_box_record' => [
-            'toggle_status' => 'Change status',
-            'check_modal_btn' => 'Check',
-            'check_modal_header' => 'Detect if IP is SeedBox',
         ],
         'tag' => [
             'detach_torrents' => 'Detach all torrents',

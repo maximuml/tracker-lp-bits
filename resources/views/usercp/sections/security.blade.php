@@ -79,7 +79,6 @@ if ($sec['showEmailChange']):
     \App\Support\Html::trSmall($lang_usercp['row_email_address'] ?? 'Email', '<input type="text" name="email" style="width: 200px" value="'.htmlspecialchars((string) ($CURUSER['email'] ?? '')).'" /> <br /><font class=small>'.htmlspecialchars($lang_usercp['text_email_address_note'] ?? '').'</font>', 1);
 endif;
 
-\App\Support\Hooks::doAction('usercp_security_setting_form');
 \App\Support\Html::trSmall($lang_usercp['row_change_password'] ?? 'Change password', '<input type="password" class="password" style="width: 200px" />', 1);
 @endphp
 <input type="hidden" name="chpassword" />

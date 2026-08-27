@@ -11,7 +11,6 @@ use App\Repositories\HitAndRunRepository;
 use App\Repositories\MessageRepository;
 use App\Repositories\PageLayoutRepository;
 use App\Repositories\SearchBoxRepository;
-use App\Repositories\SeedBoxRepository;
 use App\Utils\MsgAlert;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Response;
@@ -166,7 +165,6 @@ class PageLayout
         echo $cssupdatedate;
         ?>"></script>
 <?php
-        Hooks::doAction('nexus_header');
         foreach (Nexus::getAppendHeaders() as $value) {
             echo $value;
         }
@@ -564,18 +562,6 @@ class PageLayout
                         Html::messageAlertVoid('torrents.php?approval_status=0&incldead=0', sprintf($context->lang['text_torrent_to_approval'], Strings::isOrAre($toApprovalCounts), $toApprovalCounts, Strings::addS($toApprovalCounts)), 'darkred');
                     }
                 }
-                // seed box approval
-                if ($context->userClass() >= User::CLASS_ADMINISTRATOR && Settings::get('seed_box.enabled') == 'yes') {
-                    $cacheKey = SeedBoxRepository::APPROVAL_COUNT_CACHE_KEY;
-                    $toApprovalCounts = $context->cache?->get_value($cacheKey);
-                    if ($toApprovalCounts === false) {
-                        $toApprovalCounts = app(PageLayoutRepository::class)->getSeedBoxApprovalCount();
-                        $context->cache->cache_value($cacheKey, $toApprovalCounts, 60);
-                    }
-                    if ($toApprovalCounts) {
-                        Html::messageAlertVoid('/nexusphp/system/seed-box-records?tableFilters[status][value]=0', sprintf($context->lang['text_seed_box_record_to_approval'], Strings::isOrAre($toApprovalCounts), $toApprovalCounts, Strings::addS($toApprovalCounts)), 'darkred');
-                    }
-                }
                 if (Permissions::userCan('staffmem', false, (int) ($context->user['id'] ?? 0))) {
                     if (($complaints = $context->cache?->get_value('COMPLAINTS_COUNT_CACHE')) === false) {
                         $complaints = app(PageLayoutRepository::class)->getOpenComplaintsCount();
@@ -673,7 +659,6 @@ class PageLayout
         if ($context->analyticsCodeTweak) {
             echo "\n".$context->analyticsCodeTweak."\n";
         }
-        Hooks::doAction('nexus_footer');
         foreach (Nexus::getAppendFooters() as $value) {
             echo $value;
         }

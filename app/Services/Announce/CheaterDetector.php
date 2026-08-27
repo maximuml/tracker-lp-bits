@@ -7,18 +7,13 @@ namespace App\Services\Announce;
 use App\Exceptions\TrackerException;
 use App\Models\User;
 use App\Models\UserBanLog;
-use App\Repositories\UserRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\Format;
-use App\Support\Logger;
 use Illuminate\Support\Facades\DB;
 
 final class CheaterDetector
 {
-    public function __construct(
-        private readonly ResponseBuilder $responseBuilder,
-        private readonly UserRepository $userRepository,
-    ) {}
+    public function __construct() {}
 
     /**
      * @param  array<string, mixed>  $self
@@ -30,29 +25,13 @@ final class CheaterDetector
         array $user,
         int $userId,
         bool $isDonor,
-        bool $isIPSeedBox,
     ): void {
-        if ($self === null || $self['announcetime'] <= 0 || ! SiteConfig::current()->seedBox->enabled()) {
+        if ($self === null || $self['announcetime'] <= 0) {
             return;
         }
 
-        if ((int) $user['class'] >= (int) User::CLASS_VIP || $isDonor || $isIPSeedBox) {
+        if ((int) $user['class'] >= (int) User::CLASS_VIP || $isDonor) {
             return;
-        }
-
-        $notSeedBoxMaxSpeedMbps = (float) SiteConfig::current()->seedBox->notSeedBoxMaxSpeed(0);
-        if ($notSeedBoxMaxSpeedMbps <= 0) {
-            return;
-        }
-
-        $upSpeed = ($upthis / $self['announcetime'] / 1024 / 1024) * 8;
-        $upSpeedMbps = number_format($upSpeed, 2, '.', '');
-        Logger::writeWithContext((string) "notSeedBoxMaxSpeedMbps: {$notSeedBoxMaxSpeedMbps}, upSpeedMbps: {$upSpeedMbps}", (string) 'info', (bool) false);
-
-        if ($upSpeed > $notSeedBoxMaxSpeedMbps) {
-            $this->userRepository->updateDownloadPrivileges(null, $userId, 'no', 'upload_over_speed');
-            Logger::writeWithContext((string) "user: {$userId} downloading privileges have been disabled! (over speed), upSpeedMbps: {$upSpeedMbps} > notSeedBoxMaxSpeedMbps: {$notSeedBoxMaxSpeedMbps}", (string) 'error', (bool) false);
-            $this->responseBuilder->warn('Your downloading privileges have been disabled! (over speed)', 300);
         }
     }
 

@@ -9,7 +9,6 @@ $privacyData = (array) ($privacyData ?? []);
 $showLocationColumn = (bool) ($showLocationColumn ?? false);
 $enablelocationTweak = $enablelocationTweak ?? \app(\App\Support\Globals::class)->get('enablelocation_tweak');
 $peerIpInfo = (array) ($peerIpInfo ?? []);
-$usernameSeedBoxIconMap = (array) ($usernameSeedBoxIconMap ?? []);
 $usernameHtmlMap = (array) ($usernameHtmlMap ?? []);
 
 if (! function_exists('get_location_column')) {
@@ -19,29 +18,22 @@ if (! function_exists('get_location_column')) {
      * @param array<string, string> $lang_functions
      * @param array<string, string> $lang_viewpeerlist
      */
-    function get_location_column($e, $isStrongPrivacy, $canView, $enablelocationTweak, $peerIpInfo, $lang_functions, $lang_viewpeerlist): array
+    function get_location_column($e, $isStrongPrivacy, $canView, $enablelocationTweak, $peerIpInfo, $lang_functions, $lang_viewpeerlist): string
     {
         $address = $ips = [];
         $info = $peerIpInfo[$e['id']] ?? [];
-        $isSeedBox = false;
 
         if ($enablelocationTweak === 'yes') {
             foreach ($info as $ipInfo) {
-                $address[] = $ipInfo['public'] . $ipInfo['seedBoxIcon'];
+                $address[] = $ipInfo['public'];
                 $ips[] = $ipInfo['ip'];
-                if ($ipInfo['seedBoxIcon'] !== '') {
-                    $isSeedBox = true;
-                }
             }
             $title = $canView ? sprintf('%s%s%s', $lang_functions['text_user_ip'], ':&nbsp;', implode(', ', $ips)) : '';
             $addressStr = implode('<br/>', $address);
             $location = '<div style="margin-right: 6px" title="'.$title.'">'.$addressStr.'</div>';
         } else {
             foreach ($info as $ipInfo) {
-                $ips[] = $ipInfo['ip'] . $ipInfo['seedBoxIcon'];
-                if ($ipInfo['seedBoxIcon'] !== '') {
-                    $isSeedBox = true;
-                }
+                $ips[] = $ipInfo['ip'];
             }
             $location = '<div style="margin-right: 6px">'.implode('<br/>', $ips).'</div>';
         }
@@ -55,21 +47,7 @@ if (! function_exists('get_location_column')) {
             $result = $location;
         }
 
-        return [
-            'td' => "<td class=rowfollow align=left width=1%><div style='display: flex;white-space: nowrap;align-items: center'>" . $result . '</div></td>',
-            'is_seed_box' => $isSeedBox,
-        ];
-    }
-}
-
-if (! function_exists('get_username_seed_box_icon')) {
-    /**
-     * @param array<string, mixed> $e
-     * @param array<int, string> $usernameSeedBoxIconMap
-     */
-    function get_username_seed_box_icon($e, $usernameSeedBoxIconMap): string
-    {
-        return $usernameSeedBoxIconMap[$e['id']] ?? '';
+        return "<td class=rowfollow align=left width=1%><div style='display: flex;white-space: nowrap;align-items: center'>" . $result . '</div></td>';
     }
 }
 
@@ -78,12 +56,11 @@ if (! function_exists('dltable')) {
      * @param array<array<string, mixed>> $arr
      * @param array<int, string> $privacyData
      * @param array<int, list<array<string, string>>> $peerIpInfo
-     * @param array<int, string> $usernameSeedBoxIconMap
      * @param array<int, string> $usernameHtmlMap
      * @param array<string, string> $lang_viewpeerlist
      * @param array<string, string> $lang_functions
      */
-    function dltable($name, $arr, $torrent, $privacyData, $showLocationColumn, $enablelocationTweak, $peerIpInfo, $usernameSeedBoxIconMap, $usernameHtmlMap, $lang_viewpeerlist, $lang_functions, $CURUSER)
+    function dltable($name, $arr, $torrent, $privacyData, $showLocationColumn, $enablelocationTweak, $peerIpInfo, $usernameHtmlMap, $lang_viewpeerlist, $lang_functions, $CURUSER)
     {
         $s = '<b>' . count($arr) . ' ' . $name . "</b>\n";
         if (! count($arr)) {
@@ -115,26 +92,23 @@ if (! function_exists('dltable')) {
             $highlight = $CURUSER['id'] == $e['userid'] ? ' bgcolor=#BBAF9B' : '';
             $s .= "<tr$highlight>\n";
             $secs = max(1, ($e['la'] - $e['st']));
-            $columnLocation = $usernameSeedBoxIcon = '';
+            $columnLocation = '';
             $currentUserId = (int) ($CURUSER['id'] ?? 0);
             $isStrongPrivacy = $privacy == 'strong' || ($torrent['anonymous'] == 'yes' && $e['userid'] == $torrent['owner']);
             $canView = \App\Support\Permissions::userCan('viewanonymous', false, $currentUserId) || $e['userid'] == $currentUserId;
             if ($showLocationColumn) {
-                $columnLocationResult = get_location_column($e, $isStrongPrivacy, $canView, $enablelocationTweak, $peerIpInfo, $lang_functions, $lang_viewpeerlist);
-                $columnLocation = $columnLocationResult['td'];
-            } else {
-                $usernameSeedBoxIcon = get_username_seed_box_icon($e, $usernameSeedBoxIconMap);
+                $columnLocation = get_location_column($e, $isStrongPrivacy, $canView, $enablelocationTweak, $peerIpInfo, $lang_functions, $lang_viewpeerlist);
             }
 
             $usernameHtml = $usernameHtmlMap[$e['userid']] ?? '';
             if ($isStrongPrivacy) {
-                $columnUsername = "<td class=rowfollow align=left width=1%><i>".$lang_viewpeerlist['text_anonymous'].'</i>'.$usernameSeedBoxIcon;
+                $columnUsername = "<td class=rowfollow align=left width=1%><i>".$lang_viewpeerlist['text_anonymous'].'</i>';
                 if ($canView) {
                     $columnUsername .= '<br />(' . $usernameHtml . ')';
                 }
                 $columnUsername .= '</td>';
             } else {
-                $columnUsername = '<td class=rowfollow align=left width=1%>' . $usernameHtml.$usernameSeedBoxIcon.'</td>';
+                $columnUsername = '<td class=rowfollow align=left width=1%>' . $usernameHtml.'</td>';
             }
 
             $s .= $columnUsername . $columnLocation;
@@ -172,6 +146,6 @@ if (! function_exists('dltable')) {
     }
 }
 
-$seederTable = dltable($lang_viewpeerlist['text_seeders'], $seeders, $torrent, $privacyData, $showLocationColumn, $enablelocationTweak, $peerIpInfo, $usernameSeedBoxIconMap, $usernameHtmlMap, $lang_viewpeerlist, $lang_functions, $CURUSER);
-$leecherTable = dltable($lang_viewpeerlist['text_leechers'], $leechers, $torrent, $privacyData, $showLocationColumn, $enablelocationTweak, $peerIpInfo, $usernameSeedBoxIconMap, $usernameHtmlMap, $lang_viewpeerlist, $lang_functions, $CURUSER);
+$seederTable = dltable($lang_viewpeerlist['text_seeders'], $seeders, $torrent, $privacyData, $showLocationColumn, $enablelocationTweak, $peerIpInfo, $usernameHtmlMap, $lang_viewpeerlist, $lang_functions, $CURUSER);
+$leecherTable = dltable($lang_viewpeerlist['text_leechers'], $leechers, $torrent, $privacyData, $showLocationColumn, $enablelocationTweak, $peerIpInfo, $usernameHtmlMap, $lang_viewpeerlist, $lang_functions, $CURUSER);
 print $seederTable . $leecherTable;

@@ -135,7 +135,7 @@ final class UserDisplay
             $arr['__is_rainbow'] = $metas->isNotEmpty() ? 1 : 0;
             $arr['__is_donor'] = self::isDonor($arr);
 
-            return Hooks::applyFilter('user_row', $arr);
+            return $arr;
         });
 
         if (is_array($row)) {
@@ -235,7 +235,7 @@ final class UserDisplay
             $arr['__is_rainbow'] = isset($rainbowIds[$id]) ? 1 : 0;
             $arr['__is_donor'] = self::isDonor($arr);
 
-            self::$rowCache[$id] = Hooks::applyFilter('user_row', $arr);
+            self::$rowCache[$id] = $arr;
         }
 
         foreach ($missing as $id) {

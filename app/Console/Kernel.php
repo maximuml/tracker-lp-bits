@@ -6,12 +6,10 @@ use App\Jobs\AttendanceJob;
 use App\Jobs\CheckQueueFailedJobs;
 use App\Jobs\CleanupJob;
 use App\Jobs\HrCheckJob;
-use App\Jobs\MaintainPluginState;
 use App\Jobs\RemoveUserDonorStatus;
 use App\Jobs\RemoveUserVipStatus;
 use App\Jobs\RemoveUserWarning;
 use App\Jobs\SaveIpLogCacheToDB;
-use App\Jobs\UpdateIsSeedBoxFromUserRecordsCache;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -44,8 +42,6 @@ class Kernel extends ConsoleKernel
         $schedule->command('meilisearch:import')->weeklyOn(1, '03:00');
         $schedule->command('torrent:load_pieces_hash')->dailyAt('01:00');
         $schedule->job(new CheckQueueFailedJobs)->everySixHours();
-        $schedule->job(new MaintainPluginState)->everyMinute();
-        $schedule->job(new UpdateIsSeedBoxFromUserRecordsCache)->everySixHours();
         $schedule->job(new CleanupJob)->everyFifteenMinutes();
         $schedule->job(new AttendanceJob)->dailyAt('01:00');
         $schedule->job(new SaveIpLogCacheToDB)->hourly();

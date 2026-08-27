@@ -20,7 +20,6 @@ use App\Support\Cache;
 use App\Support\Config\SiteConfig;
 use App\Support\Events;
 use App\Support\Format;
-use App\Support\Hooks;
 use App\Support\Locale;
 use App\Support\Logger;
 use App\Support\Settings;
@@ -229,12 +228,12 @@ class HitAndRun extends NexusModel
         }
         $default = Settings::get($key);
 
-        return Hooks::applyFilter('nexus_setting_get', $default, $name, ['mode' => $searchBoxId]);
+        return $default;
     }
 
     public static function diffInSection(): bool
     {
-        return Hooks::applyFilter('hit_and_run_diff_in_section', false);
+        return false;
     }
 
     /** @return  BelongsTo<Torrent, $this> */

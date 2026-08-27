@@ -7,7 +7,6 @@ namespace App\Services;
 use App\Models\Setting;
 use App\Models\TrackerUrl;
 use App\Models\User;
-use App\Repositories\SeedBoxRepository;
 use App\Repositories\TokenRepository;
 use App\Repositories\UsercpRepository;
 use App\Repositories\UserPasskeyRepository;
@@ -17,7 +16,6 @@ use App\Support\CurrentUser;
 use App\Support\Form;
 use App\Support\Forum;
 use App\Support\Globals;
-use App\Support\Hooks;
 use App\Support\Html;
 use App\Support\Http;
 use App\Support\Input;
@@ -44,10 +42,6 @@ use Nexus\Nexus;
  */
 final class UsercpPageService
 {
-    public function __construct(
-        private readonly SeedBoxRepository $seedBoxRepository,
-    ) {}
-
     /**
      * Build the data for the requested section.
      *
@@ -158,13 +152,12 @@ final class UsercpPageService
 
         // IP location
         $enableLocationTweak = (string) app(Globals::class)->get('enablelocation_tweak', '') === 'yes';
-        $seedBoxIcon = $this->seedBoxRepository->renderIcon((string) ($curUser['ip'] ?? ''), $userId);
         $ipLocation = '';
         if ($enableLocationTweak) {
             [$locPub, $locMod] = Network::ipLocationWithContext((string) ($curUser['ip'] ?? ''));
-            $ipLocation = Strings::hidden((string) ($curUser['ip'] ?? '')." <span title='".$locMod."'>[".$locPub.']</span>'.$seedBoxIcon);
+            $ipLocation = Strings::hidden((string) ($curUser['ip'] ?? '')." <span title='".$locMod."'>[".$locPub.']</span>');
         } else {
-            $ipLocation = Strings::hidden((string) ($curUser['ip'] ?? '').$seedBoxIcon);
+            $ipLocation = Strings::hidden((string) ($curUser['ip'] ?? ''));
         }
 
         // Passkey login form (if passkey login enabled and deadline in future)
@@ -192,9 +185,6 @@ final class UsercpPageService
             );
         }
 
-        // Seed box
-        $seedBox = $this->buildSeedBox($lang, $userId);
-
         // Tokens
         $tokens = $this->buildTokens($lang, $userInfo);
 
@@ -209,7 +199,6 @@ final class UsercpPageService
             'percentages' => $percentages,
             'ipLocation' => $ipLocation,
             'passkeyLoginForm' => $passkeyLoginForm,
-            'seedBox' => $seedBox,
             'tokens' => $tokens,
             'readTopics' => $readTopics,
             'showAvatar' => ! empty($curUser['avatar']),
@@ -218,42 +207,6 @@ final class UsercpPageService
             'email' => (string) ($curUser['email'] ?? ''),
             'invites' => (int) ($curUser['invites'] ?? 0),
             'seedbonus' => (string) ($curUser['seedbonus'] ?? '0'),
-        ];
-    }
-
-    /**
-     * Build seed box section data.
-     *
-     * @param  array<string, mixed>  $lang
-     * @return array<string, mixed>
-     */
-    private function buildSeedBox(array $lang, int $userId): array
-    {
-        $siteConfig = SiteConfig::current();
-        if (! $siteConfig->seedBox->enabled()) {
-            return ['enabled' => false];
-        }
-
-        $langFunctions = (array) (app(Globals::class)->get('lang_functions') ?? []);
-
-        $columns = [
-            'operator' => Locale::trans('label.seed_box_record.operator', [], null),
-            'bandwidth' => Locale::trans('label.seed_box_record.bandwidth', [], null),
-            'ip' => Locale::trans('label.seed_box_record.ip', [], null),
-            'comment' => Locale::trans('label.comment', [], null),
-            'status' => Locale::trans('label.seed_box_record.status', [], null),
-        ];
-
-        $records = UsercpRepository::getSeedBoxRecords($userId);
-
-        return [
-            'enabled' => true,
-            'columns' => $columns,
-            'records' => $records,
-            'addLabel' => $lang['add_seed_box_btn'] ?? 'Add',
-            'deleteLabel' => $langFunctions['text_delete'] ?? 'Delete',
-            'confirmRemoveLabel' => $langFunctions['std_confirm_remove'] ?? 'Confirm remove?',
-            'rowLabel' => $lang['row_seed_box'] ?? 'Seed box',
         ];
     }
 
@@ -571,9 +524,6 @@ final class UsercpPageService
      */
     private function captureConfirmExtras(): string
     {
-        ob_start();
-        Hooks::doAction('usercp_security_update_confirm', request()->post());
-
-        return (string) ob_get_clean();
+        return '';
     }
 }

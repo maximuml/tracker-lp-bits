@@ -7,13 +7,11 @@ namespace App\Services;
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\Offer;
-use App\Models\SeedBoxRecord;
 use App\Models\User;
 use App\Repositories\AttendanceRepository;
 use App\Repositories\BonusRepository;
 use App\Repositories\ExamRepository;
 use App\Repositories\MedalRepository;
-use App\Repositories\SeedBoxRepository;
 use App\Repositories\TorrentRepository;
 use App\Repositories\UserPasskeyRepository;
 use App\Repositories\UserRepository;
@@ -42,8 +40,6 @@ final class AjaxService
         'getOffer',
         'approvalModal',
         'approval',
-        'addSeedBoxRecord',
-        'removeSeedBoxRecord',
         'removeHitAndRun',
         'consumeBenefit',
         'clearShoutBox',
@@ -70,7 +66,6 @@ final class AjaxService
         private readonly AttendanceRepository $attendanceRepository,
         private readonly UserRepository $userRepository,
         private readonly TorrentRepository $torrentRepository,
-        private readonly SeedBoxRepository $seedBoxRepository,
         private readonly BonusRepository $bonusRepository,
         private readonly ExamRepository $examRepository,
         private readonly UserPasskeyRepository $userPasskeyRepository,
@@ -132,27 +127,6 @@ final class AjaxService
         $rep = $this->torrentRepository;
 
         return $rep->approval($CURUSER['id'], $params);
-    }
-
-    /** @param array<string, mixed> $params */
-    public function addSeedBoxRecord(array $params): mixed
-    {
-        $CURUSER = app(CurrentUser::class)->get() ?? [];
-        $rep = $this->seedBoxRepository;
-        $params['uid'] = $CURUSER['id'];
-        $params['type'] = SeedBoxRecord::TYPE_USER;
-        $params['status'] = SeedBoxRecord::STATUS_UNAUDITED;
-
-        return $rep->store($params);
-    }
-
-    /** @param array<string, mixed> $params */
-    public function removeSeedBoxRecord(array $params): mixed
-    {
-        $CURUSER = app(CurrentUser::class)->get() ?? [];
-        $rep = $this->seedBoxRepository;
-
-        return $rep->delete($params['id'], $CURUSER['id']);
     }
 
     /** @param array<string, mixed> $params */

@@ -18,8 +18,6 @@ final class SiteConfig
 
     public readonly SystemConfig $system;
 
-    public readonly SeedBoxConfig $seedBox;
-
     public readonly MeiliSearchConfig $meiliSearch;
 
     public readonly BasicConfig $basic;
@@ -46,7 +44,6 @@ final class SiteConfig
         $this->account = new AccountConfig($data['account'] ?? []);
         $this->security = new SecurityConfig($data['security'] ?? []);
         $this->system = new SystemConfig($data['system'] ?? []);
-        $this->seedBox = new SeedBoxConfig($data['seed_box'] ?? []);
         $this->meiliSearch = new MeiliSearchConfig($data['meilisearch'] ?? []);
         $this->basic = new BasicConfig($data['basic'] ?? []);
         $this->bonus = new BonusConfig($data['bonus'] ?? []);

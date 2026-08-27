@@ -9,7 +9,6 @@ use App\Models\Category;
 use App\Models\Codec;
 use App\Models\Icon;
 use App\Models\Media;
-use App\Models\Plugin;
 use App\Models\Processing;
 use App\Models\SearchBox;
 use App\Models\SecondIcon;
@@ -45,7 +44,6 @@ class AuthServiceProvider extends ServiceProvider
         Media::class => CodecPolicy::class,
         Standard::class => CodecPolicy::class,        Processing::class => CodecPolicy::class,
 
-        Plugin::class => CodecPolicy::class,
         Torrent::class => TorrentPolicy::class,
     ];
 

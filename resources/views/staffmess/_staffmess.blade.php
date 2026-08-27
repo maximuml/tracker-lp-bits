@@ -38,7 +38,6 @@ if (\request()->query('returnto') || $httpReferer) {
         </table>
     </td>
 </tr>
-<?php \App\Support\Hooks::doAction('form_role_filter', ...['Send to Role:']) ?>
 <tr>
     <td class="rowhead">Subject</td>
     <td> <input type=text name=subject size=75></td>

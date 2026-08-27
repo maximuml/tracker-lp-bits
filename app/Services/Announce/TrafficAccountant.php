@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services\Announce;
 
-use App\Support\Hooks;
 use App\Support\TorrentOps;
 
 final class TrafficAccountant
@@ -63,7 +62,7 @@ final class TrafficAccountant
         if ($upthis > 0 || $downthis > 0) {
             $queries = $params;
             $queries['ip'] = $ip;
-            $promotionInfo = Hooks::applyFilter('torrent_promotion', $torrent);
+            $promotionInfo = $torrent;
             $dataTraffic = TorrentOps::dataTraffic($torrent, $queries, $user, $self, $snatchInfo ?: [], $promotionInfo);
             $uploadedIncrementForUser = (int) $dataTraffic['uploaded_increment_for_user'];
             $downloadedIncrementForUser = (int) $dataTraffic['downloaded_increment_for_user'];

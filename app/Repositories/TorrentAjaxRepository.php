@@ -6,10 +6,8 @@ use App\Enums\Permission\PermissionEnum;
 use App\Models\Snatch;
 use App\Models\Torrent;
 use App\Models\User;
-use App\Support\Config\SiteConfig;
 use App\Support\Database;
 use App\Support\Globals;
-use App\Support\Hooks;
 use App\Support\Input;
 use App\Support\Logger;
 use App\Support\Network;
@@ -143,29 +141,22 @@ final class TorrentAjaxRepository
         $torrent = Torrent::query()->findOrFail($torrentId, ['id', 'owner', 'size', 'anonymous', 'seeders', 'leechers']);
         $torrentArr = $torrent->toArray();
 
-        $seedersAndLeechers = Hooks::applyFilter('torrent_seeder_leecher_list', [], $torrentId);
-        if (is_array($seedersAndLeechers) && isset($seedersAndLeechers['seeders'], $seedersAndLeechers['leechers'])) {
-            $seeders = (array) $seedersAndLeechers['seeders'];
-            $leechers = (array) $seedersAndLeechers['leechers'];
-            Logger::writeWithContext('SEEDER_LEECHER_FROM_FILTER: torrent_seeder_leecher_list', 'info', false);
-        } else {
-            $startedField = Database::unixTimestampField('started');
-            $lastActionField = Database::unixTimestampField('last_action');
-            $peerRows = DB::table('peers')
-                ->where('torrent', $torrentId)
-                ->selectRaw("id, seeder, finishedat, downloadoffset, uploadoffset, ip, ipv4, ipv6, port, uploaded, downloaded, to_go, {$startedField} AS st, connectable, agent, peer_id, {$lastActionField} AS la, userid")
-                ->get()
-                ->map(fn ($r) => (array) $r)
-                ->all();
+        $startedField = Database::unixTimestampField('started');
+        $lastActionField = Database::unixTimestampField('last_action');
+        $peerRows = DB::table('peers')
+            ->where('torrent', $torrentId)
+            ->selectRaw("id, seeder, finishedat, downloadoffset, uploadoffset, ip, ipv4, ipv6, port, uploaded, downloaded, to_go, {$startedField} AS st, connectable, agent, peer_id, {$lastActionField} AS la, userid")
+            ->get()
+            ->map(fn ($r) => (array) $r)
+            ->all();
 
-            $seeders = [];
-            $leechers = [];
-            foreach ($peerRows as $subrow) {
-                if ($subrow['seeder'] === 'yes') {
-                    $seeders[] = $subrow;
-                } else {
-                    $leechers[] = $subrow;
-                }
+        $seeders = [];
+        $leechers = [];
+        foreach ($peerRows as $subrow) {
+            if ($subrow['seeder'] === 'yes') {
+                $seeders[] = $subrow;
+            } else {
+                $leechers[] = $subrow;
             }
         }
 
@@ -194,29 +185,11 @@ final class TorrentAjaxRepository
             $privacyData[$uid] = is_array($row) ? (string) ($row['privacy'] ?? '') : '';
         }
 
-        $seedBoxRep = new SeedBoxRepository;
-        $isSeedBoxMap = [];
-        $caseWhens = [];
-        foreach ($allPeers as $peer) {
-            $isSeedBox = false;
-            foreach (array_filter([$peer['ipv4'] ?? '', $peer['ipv6'] ?? '']) as $ip) {
-                if ($seedBoxRep->renderIcon($ip, (int) $peer['userid']) !== '') {
-                    $isSeedBox = true;
-                    break;
-                }
-            }
-            $isSeedBoxMap[$peer['id']] = $isSeedBox;
-            $caseWhens[$peer['id']] = sprintf('when %s then %s', $peer['id'], intval($isSeedBox));
-        }
-
         $peerIpInfo = [];
-        $usernameSeedBoxIconMap = [];
         $locationMap = [];
         foreach (array_merge($seeders, $leechers) as $peer) {
             $peerId = (int) $peer['id'];
-            $userId = (int) $peer['userid'];
             $ips = array_filter([$peer['ipv4'] ?? '', $peer['ipv6'] ?? '']);
-            $usernameSeedBoxIconMap[$peerId] = $seedBoxRep->renderIcon($ips, $userId);
             $peerIpInfo[$peerId] = [];
             foreach ($ips as $ip) {
                 if (! isset($locationMap[$ip])) {
@@ -227,7 +200,6 @@ final class TorrentAjaxRepository
                     'ip' => $ip,
                     'public' => $locPub,
                     'mod' => $locMod,
-                    'seedBoxIcon' => $seedBoxRep->renderIcon($ip, $userId),
                 ];
             }
         }
@@ -235,12 +207,6 @@ final class TorrentAjaxRepository
         $usernameHtmlMap = [];
         foreach ($userIds as $uid) {
             $usernameHtmlMap[(int) $uid] = UserDisplay::username((int) $uid, false, true, true, true);
-        }
-
-        if (! empty($caseWhens) && SiteConfig::current()->seedBox->enabled()) {
-            $caseSql = sprintf('case id %s end', implode(' ', array_values($caseWhens)));
-            Logger::writeWithContext("[IS_SEED_BOX], caseSql: {$caseSql}, ids: ".implode(',', array_keys($caseWhens)), 'info', false);
-            DB::table('peers')->whereIn('id', array_keys($caseWhens))->update(['is_seed_box' => DB::raw($caseSql)]);
         }
 
         $enablelocationTweak = app(Globals::class)->get('enablelocation_tweak');
@@ -251,10 +217,8 @@ final class TorrentAjaxRepository
             'seeders' => $seeders,
             'leechers' => $leechers,
             'privacyData' => $privacyData,
-            'isSeedBoxMap' => $isSeedBoxMap,
             'showLocationColumn' => $showLocationColumn,
             'peerIpInfo' => $peerIpInfo,
-            'usernameSeedBoxIconMap' => $usernameSeedBoxIconMap,
             'usernameHtmlMap' => $usernameHtmlMap,
             'enablelocationTweak' => $enablelocationTweak,
             'currentUser' => $currentUser,
@@ -314,7 +278,6 @@ final class TorrentAjaxRepository
             'pagertop' => (string) $pager[0],
             'pagerbottom' => (string) $pager[1],
             'torrentRep' => new TorrentRepository,
-            'seedBoxRep' => new SeedBoxRepository,
             'seedTimeAndUploaded' => $seedTimeAndUploaded,
         ];
     }

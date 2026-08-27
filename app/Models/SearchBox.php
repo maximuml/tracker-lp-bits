@@ -66,7 +66,6 @@ class SearchBox extends NexusModel
         'custom_fields', 'custom_fields_display_name', 'custom_fields_display',
         'extra->'.self::EXTRA_TAXONOMY_LABELS,
         'extra->'.self::EXTRA_DISPLAY_COVER_ON_TORRENT_LIST,
-        'extra->'.self::EXTRA_DISPLAY_SEED_BOX_ICON_ON_TORRENT_LIST,
     ];
 
     /** @var array<string, string> */
@@ -101,8 +100,6 @@ class SearchBox extends NexusModel
 
     const EXTRA_DISPLAY_COVER_ON_TORRENT_LIST = 'display_cover_on_torrent_list';
 
-    const EXTRA_DISPLAY_SEED_BOX_ICON_ON_TORRENT_LIST = 'display_seed_box_icon_on_torrent_list';
-
     /** @var array<string, array<string, string>> */
     public static array $taxonomies = [
         'source' => ['table' => 'sources', 'model' => Source::class],
@@ -116,7 +113,6 @@ class SearchBox extends NexusModel
     /** @var array<string, array<string, string>> */
     public static array $extras = [
         self::EXTRA_DISPLAY_COVER_ON_TORRENT_LIST => ['text' => 'Display cover on torrent list'],
-        self::EXTRA_DISPLAY_SEED_BOX_ICON_ON_TORRENT_LIST => ['text' => 'Display seed box icon on torrent list'],
     ];
 
     /**
@@ -156,7 +152,6 @@ class SearchBox extends NexusModel
         $data['extra->'.self::EXTRA_TAXONOMY_LABELS] = $data['extra'][self::EXTRA_TAXONOMY_LABELS];
         $other = $data['other'] ?? [];
         $data['extra->'.self::EXTRA_DISPLAY_COVER_ON_TORRENT_LIST] = in_array(self::EXTRA_DISPLAY_COVER_ON_TORRENT_LIST, $other) ? 1 : 0;
-        $data['extra->'.self::EXTRA_DISPLAY_SEED_BOX_ICON_ON_TORRENT_LIST] = in_array(self::EXTRA_DISPLAY_SEED_BOX_ICON_ON_TORRENT_LIST, $other) ? 1 : 0;
         $data['custom_fields'] = array_filter($data['custom_fields']);
 
         return $data;

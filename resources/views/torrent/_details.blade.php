@@ -123,16 +123,12 @@ jQuery('#approval').on("click", function () {
 JS;
             \Nexus\Nexus::js($js, 'footer', false);
         }
-        $actions = \App\Support\Hooks::applyFilter('torrent_detail_actions', $actions, $row);
         $actions[] = "<a title=\"".$lang_details['title_report_torrent']."\" href=\"report.php?torrent=$id\"><img class=\"dt_report\" src=\"pic/trans.gif\" alt=\"report\" />&nbsp;<b><font class=\"small\">".$lang_details['text_report_torrent']."</font></b></a>";
 		\App\Support\Html::tr($lang_details['row_action'], implode('&nbsp;|&nbsp;', $actions), 1);
 
         \App\Support\Html::tr($lang_details['torrent_dl_url'],sprintf('<a title="%s" href="%s">%s</a>',$lang_details['torrent_dl_url_notice'], $downloadUrl, $lang_details['torrent_dl_url_text']),1);
 
 
-
-        //hook before desc
-        \App\Support\Hooks::doAction('torrent_detail_before_desc', $row['id'], $CURUSER['id']);
 
         /**************start custom fields****************/
         echo $customFieldsHtml;
@@ -145,8 +141,7 @@ JS;
         }
 
 		if ($CURUSER['showdescription'] != 'no' && !empty($descr)){
-            $desc = \App\Support\Hooks::applyFilter('torrent_detail_description', $descr, $row['id'], $CURUSER['id']);
-            \App\Support\Html::tr("<a href=\"javascript: klappe_news('descr')\"><span class=\"nowrap\"><img class=\"minus\" src=\"pic/trans.gif\" alt=\"Show/Hide\" id=\"picdescr\" title=\"".($lang_details['title_show_or_hide'] ?? '')."\" /> ".$lang_details['row_description']."</span></a>", "<div id='kdescr'>".$desc."</div>", 1);
+            \App\Support\Html::tr("<a href=\"javascript: klappe_news('descr')\"><span class=\"nowrap\"><img class=\"minus\" src=\"pic/trans.gif\" alt=\"Show/Hide\" id=\"picdescr\" title=\"".($lang_details['title_show_or_hide'] ?? '')."\" /> ".$lang_details['row_description']."</span></a>", "<div id='kdescr'>".$descr."</div>", 1);
 		}
 
 

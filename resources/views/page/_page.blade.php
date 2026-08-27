@@ -5,13 +5,7 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 if (!empty(\request()->input('view'))) {
     $view = trim(\request()->input('view'), "/.");
     $view = str_replace(".", "/", $view);
-    if (!empty(\request()->input('plugin'))) {
-        $pluginId = \request()->input('plugin');
-        $plugin = \Nexus\Plugin\Plugin::getById($pluginId);
-        $viewFile = $plugin->getNexusView($view);
-    } else {
-        $viewFile = ROOT_PATH . "resources/views/$view";
-    }
+    $viewFile = ROOT_PATH . "resources/views/$view";
 
     if (!str_ends_with($viewFile, ".php")) {
         $viewFile .= ".php";

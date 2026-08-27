@@ -14,7 +14,6 @@ use App\Support\Format;
 use App\Support\Forum;
 use App\Support\Frame;
 use App\Support\Globals;
-use App\Support\Hooks;
 use App\Support\Html;
 use App\Support\Input;
 use App\Support\LegacyResponse;
@@ -518,7 +517,6 @@ final class ForumPageService
                 $lastedittime = Time::format($arr['editdate'], true, false);
                 $bodyContent .= '<br /><p><font class="small">'.($lang['text_last_edited_by'] ?? '').UserDisplay::username((int) $arr['editedby']).($lang['text_last_edit_at'] ?? '').$lastedittime."</font></p>\n";
             }
-            $bodyContent = Hooks::applyFilter('post_body', ...[$bodyContent, $arr, $allPosts]);
             $body .= $bodyContent.'</div>';
             if ($signature) {
                 $body .= "<p style='vertical-align:bottom'><br />____________________<br />".Format::formatComment($signature, false, false, false, true, 500, true, false, 1, 200).'</p>';
@@ -532,8 +530,6 @@ final class ForumPageService
             $online = ($arr2['last_access'] ?? '') > $dt;
             echo '<tr><td class="rowfollow" align="center" valign="middle">'.($online ? '<img class="f_online" src="pic/trans.gif" alt="Online" title="'.($lang['title_online'] ?? '').'" />' : '<img class="f_offline" src="pic/trans.gif" alt="Offline" title="'.($lang['title_offline'] ?? '').'" />').'<a href="sendmessage.php?receiver='.htmlspecialchars(trim((string) ($arr2['id'] ?? ''))).'"><img class="f_pm" src="pic/trans.gif" alt="PM" title="'.($lang['title_send_message_to'] ?? '').htmlspecialchars((string) ($arr2['username'] ?? ''))."\" /></a><a href=\"report.php?forumpost=$postid\"><img class=\"f_report\" src=\"pic/trans.gif\" alt=\"Report\" title=\"".($lang['title_report_this_post'] ?? '').'" /></a></td>';
             echo '<td class="toolbox" align="right">';
-
-            Hooks::doAction('post_toolbox', ...[$arr, $allPosts, (int) ($curUser['id'] ?? 0)]);
 
             if ($maypost && $canViewProtected) {
                 echo '<a href="'.htmlspecialchars('?action=quotepost&postid='.$postid).'"><img class="f_quote" src="pic/trans.gif" alt="Quote" title="'.($lang['title_reply_with_quote'] ?? '').'" /></a>';

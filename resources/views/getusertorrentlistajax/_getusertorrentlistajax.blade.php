@@ -7,11 +7,10 @@ $rows = (array) ($rows ?? []);
 $pagertop = (string) ($pagertop ?? '');
 $pagerbottom = (string) ($pagerbottom ?? '');
 $torrentRep = $torrentRep ?? null;
-$seedBoxRep = $seedBoxRep ?? null;
 $seedTimeAndUploaded = $seedTimeAndUploaded ?? collect();
 
 if (! function_exists('maketable')) {
-    function maketable($rows, $mode, $id, $currentUser, $seedTimeAndUploaded, $torrentRep, $seedBoxRep, $lang_getusertorrentlistajax, $lang_functions)
+    function maketable($rows, $mode, $id, $currentUser, $seedTimeAndUploaded, $torrentRep, $lang_getusertorrentlistajax, $lang_functions)
     {
         $showsize = $showsenum = $showlenum = $showuploaded = $showdownloaded = $showratio = $showsetime = $showletime = $showcotime = $showanonymous = $showtotalsize = false;
         $columncount = 7;
@@ -141,7 +140,7 @@ if (! function_exists('maketable')) {
             if ($shouldShowClient) {
                 $ipArr = array_filter([$arr['ipv4'], $arr['ipv6']]);
                 foreach ($ipArr as &$_ip) {
-                    $_ip = sprintf('<span class="nowrap">%s</span>', $_ip . $seedBoxRep->renderIcon($_ip, $arr['userid']));
+                    $_ip = sprintf('<span class="nowrap">%s</span>', $_ip);
                 }
                 $ret .= sprintf(
                     '<td class="rowfollow" align="center">%s<br/>%s</td><td class="rowfollow" align="center">%s</td>',
@@ -160,7 +159,7 @@ if (! function_exists('maketable')) {
 
 $torrentlist = '';
 if ($count > 0 && ! empty($rows)) {
-    list($torrentlist, $total_size_this_page) = maketable($rows, $type, $id, $CURUSER, $seedTimeAndUploaded, $torrentRep, $seedBoxRep, $lang_getusertorrentlistajax, $lang_functions);
+    list($torrentlist, $total_size_this_page) = maketable($rows, $type, $id, $CURUSER, $seedTimeAndUploaded, $torrentRep, $lang_getusertorrentlistajax, $lang_functions);
 }
 
 $table = $pagertop . $torrentlist . $pagerbottom;
@@ -173,8 +172,7 @@ if ($total_size) {
     $hasData = true;
 }
 if ($hasData) {
-    $btnArr = \App\Support\Hooks::applyFilter("user_seeding_top_btn", [], $CURUSER['id'] ?? 0);
-    $header = sprintf('<div style="display: flex;justify-content: space-between"><div>%s</div><div>%s</div></div>', $summary, implode("", $btnArr));
+    $header = sprintf('<div style="display: flex;justify-content: space-between"><div>%s</div><div></div></div>', $summary);
     echo '<br/>' . $header . $table;
 } else {
     echo $lang_getusertorrentlistajax['text_no_record'];

@@ -78,13 +78,11 @@ final class Menu
      */
     public static function outputWithContext(string $selected = 'home'): void
     {
-        $customMenu = (string) Hooks::applyFilter('nexus_menu');
-
         $result = self::render(
             \function_exists('nexus') ? Nexus::instance()->getScript() : '',
             app(Language::class)->functions(),
             (string) app(Globals::class)->get('enableoffer', ''),
-            $customMenu !== '' ? $customMenu : null,
+            null,
             app(CurrentUser::class)->get(),
             app(LegacyRedisCache::class),
             (string) app(Globals::class)->get('CURLANGDIR', ''),

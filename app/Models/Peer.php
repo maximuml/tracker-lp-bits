@@ -22,7 +22,6 @@
  * @property string $passkey
  * @property string $ipv4
  * @property string $ipv6
- * @property int $is_seed_box
  */
 
 namespace App\Models;
@@ -39,7 +38,7 @@ class Peer extends NexusModel
     protected $fillable = [
         'torrent', 'peer_id', 'ip', 'port', 'uploaded', 'downloaded', 'to_go', 'seeder', 'started', 'last_action',
         'prev_action', 'connectable', 'userid', 'agent', 'finishedat', 'downloadoffset', 'uploadedoffset', 'passkey',
-        'ipv4', 'ipv6', 'is_seed_box',
+        'ipv4', 'ipv6',
     ];
 
     const CONNECTABLE_YES = 'yes';

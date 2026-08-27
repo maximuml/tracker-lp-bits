@@ -17,7 +17,6 @@ use App\Repositories\UserRepository;
 use App\Support\Admin;
 use App\Support\Config\SiteConfig;
 use App\Support\Events;
-use App\Support\Hooks;
 use App\Support\Mail;
 use App\Support\Url;
 use Carbon\Carbon;
@@ -99,7 +98,6 @@ class UserProfile extends ViewRecord implements HasActions
             if (Permission::can(PermissionEnum::USER_DELETE)) {
                 $actions[] = $this->buildDeleteAction();
             }
-            $actions = Hooks::applyFilter('user_profile_actions', $actions);
         }
 
         return $actions;

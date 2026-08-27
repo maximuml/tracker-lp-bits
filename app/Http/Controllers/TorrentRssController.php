@@ -11,7 +11,6 @@ use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Globals;
-use App\Support\Hooks;
 use App\Support\Http;
 use App\Support\Locale;
 use App\Support\Log;
@@ -171,8 +170,6 @@ class TorrentRssController extends LegacyController
                 $prependIdArr = Torrent::query()->whereIn('pos_state', $posStates)->pluck('id')->toArray();
             }
         }
-
-        $prependIdArr = Hooks::applyFilter('sticky_promotion_torrent_ids', $prependIdArr);
 
         if ($hasStickyFirst || $hasStickySecond) {
             $noNormalResults = true;

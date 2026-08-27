@@ -13,7 +13,6 @@ use App\Repositories\ToolRepository;
 use App\Support\Admin;
 use App\Support\Cache;
 use App\Support\Env;
-use App\Support\Hooks;
 use App\Support\Settings;
 use Filament\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
@@ -131,7 +130,6 @@ class EditSetting extends Page implements HasForms
             'captcha.recaptcha',
         ])->delete();
         $this->doAfterUpdate();
-        Hooks::doAction('nexus_setting_update');
         Cache::clearSettings();
         Admin::successNotification('');
     }
@@ -164,16 +162,6 @@ class EditSetting extends Page implements HasForms
                 TextInput::make('backup.retention_count')->numeric()->label(__('label.setting.backup.retention_count'))->helperText(new HtmlString(__('label.setting.backup.retention_count_help', ['default_count' => ToolRepository::BACKUP_RETENTION_COUNT_DEFAULT]))),
                 Radio::make('backup.via_ftp')->options(self::$yesOrNo)->inline(true)->label(__('label.setting.backup.via_ftp'))->helperText(new HtmlString(__('label.setting.backup.via_ftp_help'))),
                 Radio::make('backup.via_sftp')->options(self::$yesOrNo)->inline(true)->label(__('label.setting.backup.via_sftp'))->helperText(new HtmlString(__('label.setting.backup.via_sftp_help'))),
-            ])->columns(2);
-
-        $tabs[] = Tab::make(__('label.setting.seed_box.tab_header'))
-            ->id('seed_box')
-            ->schema([
-                Radio::make('seed_box.enabled')->options(self::$yesOrNo)->inline(true)->label(__('label.enabled'))->helperText(__('label.setting.seed_box.enabled_help')),
-                TextInput::make('seed_box.not_seed_box_max_speed')->label(__('label.setting.seed_box.not_seed_box_max_speed'))->helperText(__('label.setting.seed_box.not_seed_box_max_speed_help'))->integer(),
-                Radio::make('seed_box.no_promotion')->options(self::$yesOrNo)->inline(true)->label(__('label.setting.seed_box.no_promotion'))->helperText(__('label.setting.seed_box.no_promotion_help')),
-                TextInput::make('seed_box.max_uploaded')->label(__('label.setting.seed_box.max_uploaded'))->helperText(__('label.setting.seed_box.max_uploaded_help'))->integer(),
-                TextInput::make('seed_box.max_uploaded_duration')->label(__('label.setting.seed_box.max_uploaded_duration'))->helperText(__('label.setting.seed_box.max_uploaded_duration_help'))->integer(),
             ])->columns(2);
 
         $id = 'meilisearch';
@@ -241,8 +229,6 @@ class EditSetting extends Page implements HasForms
                     ->label(__('label.setting.system.alarm_email_receiver'))
                     ->helperText(__('label.setting.system.alarm_email_receiver_help')),
             ])->columns(2);
-
-        $tabs = Hooks::applyFilter('nexus_setting_tabs', $tabs);
 
         return $tabs;
     }
@@ -396,7 +382,7 @@ class EditSetting extends Page implements HasForms
             TextInput::make('hr.include_rate')->helperText(__('label.setting.hr.include_rate_help'))->label(__('label.setting.hr.include_rate'))->numeric(),
         ];
 
-        return Hooks::applyFilter('hit_and_run_setting_schema', $default);
+        return $default;
     }
 
     /** @return array<Component> */

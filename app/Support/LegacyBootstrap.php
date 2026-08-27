@@ -7,8 +7,6 @@ use Illuminate\Http\Request;
 use Laravel\Sanctum\PersonalAccessToken;
 use Laravel\Sanctum\Sanctum;
 use Nexus\Nexus;
-use Nexus\Plugin\Hook;
-use Nexus\Plugin\Plugin;
 
 /**
  * One-stop legacy bootstrap for web wrappers and console commands.
@@ -35,7 +33,6 @@ final class LegacyBootstrap
         self::bootSettings();
         self::bootLanguage($rootpath);
         self::bootUser($request);
-        self::bootPlugins($rootpath);
     }
 
     public static function bootConsole(string $rootpath = ''): void
@@ -53,7 +50,6 @@ final class LegacyBootstrap
         self::bootTimezone();
         self::bootSettings();
         self::bootLanguage($rootpath);
-        self::bootPlugins($rootpath);
     }
 
     private static function resetAndCapture(?Request $request): void
@@ -135,16 +131,5 @@ final class LegacyBootstrap
         defined('TIMENOW') || define('TIMENOW', time());
 
         SiteAccess::checkGuestVisit();
-    }
-
-    private static function bootPlugins(string $rootpath): void
-    {
-        defined('TIMENOW') || define('TIMENOW', time());
-
-        $hook = app(Hook::class);
-        $plugin = app(Plugin::class);
-        app(Globals::class)->set('hook', $hook);
-        app(Globals::class)->set('plugin', $plugin);
-        $plugin->start();
     }
 }

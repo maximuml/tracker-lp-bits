@@ -126,14 +126,13 @@ if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_CO
 }
 if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO) ||  $user["id"] == $CURUSER["id"])
 {
-    $seedBoxIcon = (string) ($seedBoxIconCurrentUser ?? '');
 	if ($enablelocation_tweak == 'yes'){
 		list($loc_pub, $loc_mod) = (array) ($locationInfo ?? [null, null]);
 		$locationinfo = "<span title=\"" . (string) $loc_mod . "\">[" . (string) $loc_pub . "]</span>";
 	}
 	else $locationinfo = "";
     $ip = $user["ip"];
-	\App\Support\Html::trSmall($lang_userdetails['row_ip_address'], \App\Support\Strings::hidden($ip.$locationinfo.$seedBoxIcon), 1);
+	\App\Support\Html::trSmall($lang_userdetails['row_ip_address'], \App\Support\Strings::hidden($ip.$locationinfo), 1);
 }
 $clientselect = (string) ($clientSelectHtml ?? '');
 if ($clientselect)
@@ -190,8 +189,6 @@ if (!empty($userPropsHtml)) {
 if (!empty($consumeChangeUsernameJs)) {
     \Nexus\Nexus::js((string) $consumeChangeUsernameJs, 'footer', false);
 }
-
-\App\Support\Hooks::doAction('user_detail_rows', $user['id'], 'web');
 
 \App\Support\Html::trSmall($lang_userdetails['row_torrent_comment'], ($torrentcomments && ($user["id"] == $CURUSER["id"] || \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_HISTORY)) ? "<a href=\"userhistory.php?action=viewcomments&amp;id=".$id."\" title=\"".$lang_userdetails['link_view_comments']."\">".$torrentcomments."</a>" : $torrentcomments), 1);
 

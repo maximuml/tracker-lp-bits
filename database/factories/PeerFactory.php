@@ -47,7 +47,6 @@ class PeerFactory extends Factory
             'passkey' => Token::randomHex(16),
             'ipv4' => '',
             'ipv6' => '',
-            'is_seed_box' => 0,
         ];
     }
 

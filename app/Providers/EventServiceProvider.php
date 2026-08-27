@@ -2,14 +2,12 @@
 
 namespace App\Providers;
 
-use App\Events\SeedBoxRecordUpdated;
 use App\Events\TorrentCreated;
 use App\Events\TorrentDeleted;
 use App\Events\TorrentUpdated;
 use App\Listeners\AppendQueryCountHeader;
 use App\Listeners\ClearTorrentCache;
 use App\Listeners\DeductUserBonusWhenTorrentDeleted;
-use App\Listeners\RemoveSeedBoxRecordCache;
 use App\Listeners\ResetNexus;
 use App\Listeners\ResetQueryLog;
 use App\Listeners\SendEmailNotificationWhenTorrentCreated;
@@ -33,9 +31,6 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         Registered::class => [
             SendEmailVerificationNotification::class,
-        ],
-        SeedBoxRecordUpdated::class => [
-            RemoveSeedBoxRecordCache::class,
         ],
         TorrentUpdated::class => [
             SyncTorrentToMeilisearch::class,

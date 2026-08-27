@@ -3,11 +3,9 @@
 namespace App\Support;
 
 use App\Auth\Permission;
-use App\Repositories\SeedBoxRepository;
 use App\Repositories\TagRepository;
 use App\Repositories\TorrentRepository;
 use App\Support\Cache\LegacyRedisCache;
-use App\Support\Config\SiteConfig;
 use Nexus\Torrent\Torrent;
 
 final class TorrentTable
@@ -43,21 +41,11 @@ final class TorrentTable
         $tagRep = new TagRepository;
         $torrentTagResult = $torrentRep->getTorrentTagsGrouped($torrentIdArr);
         $showCover = false;
-        $showSeedBoxIcon = false;
         if ($searchBoxId) {
             $searchBoxExtra = SearchBox::value($cache, $searchBoxId, 'extra');
             if (! empty($searchBoxExtra[\App\Models\SearchBox::EXTRA_DISPLAY_COVER_ON_TORRENT_LIST])) {
                 $showCover = true;
             }
-            $showSeedBoxIcon = SiteConfig::current()->seedBox->enabled();
-            if (empty($searchBoxExtra[\App\Models\SearchBox::EXTRA_DISPLAY_SEED_BOX_ICON_ON_TORRENT_LIST])) {
-                $showSeedBoxIcon = false;
-            }
-        }
-        // seedBoxIcon
-        if ($showSeedBoxIcon) {
-            $seedBoxRep = new SeedBoxRepository;
-            $seedBoxPeerInfo = $torrentRep->getSeedBoxPeerInfo($torrentIdArr);
         }
 
         $last_browse = $user['last_browse'];
@@ -171,7 +159,6 @@ if (Permission::canManageTorrent()) { ?>
             } else {
                 $stickyicon = '';
             }
-            $stickyicon = Hooks::applyFilter('sticky_icon', $stickyicon, $row);
             $sp_torrent = Promotion::appendWithContext($row['sp_state'], '', true, $row['added'], $row['promotion_time_type'], $row['promotion_until'], $row['__ignore_global_sp_state'] ?? false);
             $hrImg = TorrentAccess::hrImage($row, $row['search_box_id']);
 
@@ -193,14 +180,8 @@ if (Permission::canManageTorrent()) { ?>
             $banned_torrent = ($row['banned'] == 'yes' ? ' <b>(<font class="striking">'.$lang_functions['text_banned'].'</font>)</b>' : '');
             $sp_torrent_sub = Promotion::appendSubWithContext($row['sp_state'], '', true, $row['added'], $row['promotion_time_type'], $row['promotion_until'], $row['__ignore_global_sp_state'] ?? false);
             $approvalStatusIcon = $torrentRep->renderApprovalStatus($row['approval_status']);
-            if ($showSeedBoxIcon && $seedBoxPeerInfo->has($row['id'])) {
-                $seedBoxIcon = $seedBoxRep->getSeedBoxIcon();
-            } else {
-                $seedBoxIcon = '';
-            }
             $paidIcon = $torrentRep->getPaidIcon($row);
-            $titleSuffix = $banned_torrent.$paidIcon.$sp_torrent.$sp_torrent_sub.$hrImg.$seedBoxIcon.$approvalStatusIcon;
-            $titleSuffix = Hooks::applyFilter('torrent_title_suffix', $titleSuffix, $row);
+            $titleSuffix = $banned_torrent.$paidIcon.$sp_torrent.$sp_torrent_sub.$hrImg.$approvalStatusIcon;
             echo $titleSuffix;
             /**
              * render tags

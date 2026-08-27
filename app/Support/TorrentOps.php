@@ -81,7 +81,7 @@ final class TorrentOps
      * Compute the upload/download increments for a peer announce.
      *
      * Mirrors `getDataTraffic()`. Applies global/torrent promotion multipliers,
-     * VIP download exemption, and seed-box rules.
+     * VIP download exemption.
      *
      * @param  array<string, mixed>  $torrent
      * @param  array<string, mixed>  $queries
@@ -157,39 +157,6 @@ final class TorrentOps
         $uploadedIncrementForUser = $realUploaded * $upRatio;
         $downloadedIncrementForUser = $realDownloaded * $downRatio;
         $log .= ", uploadedIncrementForUser: $uploadedIncrementForUser, downloadedIncrementForUser: $downloadedIncrementForUser";
-
-        $isSeedBoxRuleEnabled = SiteConfig::current()->seedBox->enabled();
-        $log .= ", isSeedBoxRuleEnabled: $isSeedBoxRuleEnabled, user class: {$user['class']}, __is_donor: {$user['__is_donor']}";
-        if ($isSeedBoxRuleEnabled && $torrent['owner'] != $user['id'] && ! ($user['class'] >= User::CLASS_VIP || $user['__is_donor'])) {
-            $isIPSeedBox = Network::isSeedBox((string) $queries['ip'], (int) $user['id']);
-            $log .= ', isIPSeedBox: '.($isIPSeedBox ? 'true' : 'false');
-            if ($isIPSeedBox) {
-                $isSeedBoxNoPromotion = SiteConfig::current()->seedBox->noPromotion();
-                $log .= ', isSeedBoxNoPromotion: '.($isSeedBoxNoPromotion ? 'true' : 'false');
-                if ($isSeedBoxNoPromotion) {
-                    $uploadedIncrementForUser = $realUploaded;
-                    $downloadedIncrementForUser = $realDownloaded;
-                    $log .= ', isIPSeedBox && isSeedBoxNoPromotion, increment for user = real';
-                }
-
-                $maxUploadedTimes = SiteConfig::current()->seedBox->maxUploaded();
-                $maxUploadedDurationSeconds = SiteConfig::current()->seedBox->maxUploadedDuration(0) * 3600;
-                $torrentTTL = time() - strtotime($torrent['added']);
-                $timeRangeValid = ($maxUploadedDurationSeconds == 0) || ($torrentTTL < $maxUploadedDurationSeconds);
-                $log .= ", maxUploadedTimes: $maxUploadedTimes, maxUploadedDurationSeconds: $maxUploadedDurationSeconds, timeRangeValid: ".($timeRangeValid ? 'true' : 'false');
-                if ($maxUploadedTimes > 0 && $timeRangeValid) {
-                    $log .= ', [LIMIT_UPLOADED]';
-                    if (! empty($snatch) && isset($torrent['size']) && $snatch['uploaded'] >= $torrent['size'] * $maxUploadedTimes) {
-                        $log .= ", snatchUploaded({$snatch['uploaded']}) >= torrentSize({$torrent['size']}) * times($maxUploadedTimes), uploadedIncrementForUser = 0";
-                        $uploadedIncrementForUser = 0;
-                    } else {
-                        $log .= ", snatchUploaded({$snatch['uploaded']}) < torrentSize({$torrent['size']}) * times($maxUploadedTimes), uploadedIncrementForUser do not change to 0";
-                    }
-                } else {
-                    $log .= ', [NOT_LIMIT_UPLOADED]';
-                }
-            }
-        }
 
         $result = [
             'uploaded_increment' => $realUploaded,

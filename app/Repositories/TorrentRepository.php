@@ -31,7 +31,6 @@ use App\Support\Description;
 use App\Support\Env;
 use App\Support\Events;
 use App\Support\Format;
-use App\Support\Hooks;
 use App\Support\Json;
 use App\Support\Locale;
 use App\Support\Logger;
@@ -1432,22 +1431,6 @@ HTML;
     }
 
     /**
-     * Get seed-box peer info keyed by torrent id for the torrent list table.
-     *
-     * @param  array<int, int>  $torrentIds
-     * @return Collection<int|string, mixed>
-     */
-    public function getSeedBoxPeerInfo(array $torrentIds)
-    {
-        return Peer::query()
-            ->whereIn('torrent', $torrentIds)
-            ->where('seeder', 'yes')
-            ->where('is_seed_box', '1')
-            ->get()
-            ->keyBy('torrent');
-    }
-
-    /**
      * Fetch a torrent as an array for the legacy "torrent to user" value calculation.
      *
      * @return array<string, mixed>|null
@@ -1526,7 +1509,6 @@ HTML;
                 'comment' => '',
             ], $notify);
 
-            Hooks::doAction('torrent_delete', $_id);
             if ($torrent instanceof Torrent) {
                 Events::fire('torrent_deleted', $torrent);
             }

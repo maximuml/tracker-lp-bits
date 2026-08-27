@@ -377,13 +377,6 @@ return [
         'ban_user_when_counts_reach' => '',
         'include_rate' => 1,
     ],
-    'seed_box' => [
-        'enabled' => 'no',
-        'no_promotion' => 'yes',
-        'max_uploaded' => 3,
-        'not_seed_box_max_speed' => 10240,
-        'max_uploaded_duration' => 0,
-    ],
     'meilisearch' => [
         'enabled' => 'yes',
         'search_description' => 'no',

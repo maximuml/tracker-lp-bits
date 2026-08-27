@@ -8,7 +8,6 @@ use App\Support\Category;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Globals;
-use App\Support\Hooks;
 use App\Support\Input;
 use App\Support\LegacyResponse;
 use App\Support\Log;
@@ -924,7 +923,6 @@ class TorrentSearchRepository
                     'offset' => $offset,
                     'limit' => $size,
                 ]));
-            $rows = Hooks::applyFilter('torrent_list', $rows, $page, $sectiontype, $searchstr_raw);
         }
 
         if (isset($searchstr)) {

@@ -12,7 +12,6 @@ use App\Models\User;
 use App\Support\Config\SiteConfig;
 use App\Support\Database;
 use App\Support\Environment;
-use App\Support\Hooks;
 use App\Support\Logger;
 use App\Support\UserDisplay;
 use Carbon\Carbon;
@@ -523,10 +522,10 @@ class ToolRepository extends BaseRepository
         $classPermissions = self::listUserClassPermissions($class);
 
         // Role permission
-        $rolePermissions = Hooks::applyFilter('user_role_permissions', [], $uid);
+        $rolePermissions = [];
 
         // Direct permission
-        $directPermissions = Hooks::applyFilter('user_direct_permissions', [], $uid);
+        $directPermissions = [];
 
         $allPermissions = array_merge($classPermissions, $rolePermissions, $directPermissions);
         Logger::writeWithContext((string) ("{$log}, allPermissions: ".json_encode($allPermissions)), (string) 'info', (bool) false);

@@ -31,8 +31,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Livewire\Livewire;
-use NexusPlugin\TelegramBot\Filament\TelegramBotBindsResource;
-use NexusPlugin\TelegramBot\Filament\TelegramBotResource;
 
 class AppPanelProvider extends PanelProvider
 {
@@ -53,8 +51,6 @@ class AppPanelProvider extends PanelProvider
                 'primary' => Color::Amber,
             ])
             ->resources([
-                //                TelegramBotResource::class,
-                //                TelegramBotBindsResource::class
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')

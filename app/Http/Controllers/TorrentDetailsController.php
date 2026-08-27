@@ -18,7 +18,6 @@ use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Globals;
-use App\Support\Hooks;
 use App\Support\Input;
 use App\Support\Locale;
 use App\Support\Logger;
@@ -81,11 +80,6 @@ class TorrentDetailsController extends Controller
         if (empty($row)) {
             Logger::writeWithContext((string) "TorrentDetailsRepository getTorrent empty: {$id}", (string) 'info', (bool) false);
             error_log("TorrentDetailsRepository getTorrent empty: $id");
-            abort(404);
-        }
-
-        $row = Hooks::applyFilter('torrent_detail', $row);
-        if (! is_array($row)) {
             abort(404);
         }
 

@@ -26,11 +26,9 @@ use App\Support\Cache as AppCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Database;
-use App\Support\Hooks;
 use App\Support\Json;
 use App\Support\LegacyDb;
 use App\Support\Logger;
-use App\Support\Network;
 use App\Support\Permissions;
 use App\Support\Tracker;
 use App\Support\Url;
@@ -75,13 +73,7 @@ final class AnnounceService
 
     private string $ip = '';
 
-    private string $ipv4 = '';
-
-    private string $ipv6 = '';
-
     private string $agent = '';
-
-    private bool $isIPSeedBox = false;
 
     private bool $isDonor = false;
 
@@ -128,8 +120,6 @@ final class AnnounceService
         $this->params = $this->dto->toParams();
         $this->agent = $this->dto->userAgent;
         $this->ip = $this->dto->ip;
-        $this->ipv4 = $this->dto->ipv4 ?? '';
-        $this->ipv6 = $this->dto->ipv6 ?? '';
         $this->peerId = $this->dto->peerId->toBinary();
         $this->infoHash = $this->dto->infoHash->toBinary();
         $this->left = $this->dto->left;
@@ -166,9 +156,7 @@ final class AnnounceService
         $this->userId = (int) $this->user['id'];
         $this->torrentId = (int) $torrent['id'];
 
-        $this->detectSeedBox();
-
-        $peerLifecycle = new PeerLifecycle($this->dto, $torrent, $this->user, $this->isIPSeedBox, $this->dt);
+        $peerLifecycle = new PeerLifecycle($this->dto, $torrent, $this->user, $this->dt);
         $this->self = $peerLifecycle->findSelf();
         $this->loadSnatchInfo();
         $peerLifecycle->setSnatchInfo($this->snatchInfo ?: false);
@@ -180,8 +168,8 @@ final class AnnounceService
         $this->uploadedIncrementForUser = $traffic->uploadedIncrementForUser;
         $this->downloadedIncrementForUser = $traffic->downloadedIncrementForUser;
 
-        $cheaterDetector = new CheaterDetector($this->responseBuilder, $this->userRepository);
-        $cheaterDetector->checkSpeed($traffic->upthis, $this->self, $this->user, $this->userId, $this->isDonor, $this->isIPSeedBox);
+        $cheaterDetector = new CheaterDetector;
+        $cheaterDetector->checkSpeed($traffic->upthis, $this->self, $this->user, $this->userId, $this->isDonor);
         $cheaterDetector->checkCheating($traffic->upthis, $traffic->downthis, $this->self, $this->user, $torrent, $this->userId, $this->torrentId, $this->dt);
 
         $response = DB::transaction(function () use ($peerLifecycle, $traffic) {
@@ -383,20 +371,6 @@ final class AnnounceService
         }
     }
 
-    private function detectSeedBox(): void
-    {
-        if (! SiteConfig::current()->seedBox->enabled()) {
-            return;
-        }
-
-        if ($this->ipv4 && Network::isSeedBox($this->ipv4, $this->userId)) {
-            $this->isIPSeedBox = true;
-        }
-        if (! $this->isIPSeedBox && $this->ipv6 && Network::isSeedBox($this->ipv6, $this->userId)) {
-            $this->isIPSeedBox = true;
-        }
-    }
-
     /**
      * @param  array<string, mixed>  $torrent
      */
@@ -517,7 +491,5 @@ final class AnnounceService
                 RequireSeedTorrentRepository::recordUser($redis, $this->userId, $this->torrentId, $this->snatchInfo);
             }
         }
-
-        Hooks::doAction('announced', $torrent, $this->user, $this->request->all());
     }
 }

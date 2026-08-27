@@ -161,11 +161,10 @@ final class Permissions
         return sprintf('ability:%s', $permission->value);
     }
 
-    public static function hasRoleWorkSeeding(int $uid): mixed
+    public static function hasRoleWorkSeeding(int $uid): bool
     {
-        $result = Hooks::applyFilter('user_has_role_work_seeding', false, $uid);
-        Logger::writeWithContext("uid: $uid, result: ".($result ? 'true' : 'false'));
+        Logger::writeWithContext("uid: $uid, result: false");
 
-        return $result;
+        return false;
     }
 }

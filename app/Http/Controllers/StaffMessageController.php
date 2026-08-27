@@ -8,7 +8,6 @@ use App\Models\User;
 use App\Support\Cache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
-use App\Support\Hooks;
 use App\Support\UserDisplay;
 use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;
@@ -75,10 +74,6 @@ class StaffMessageController extends LegacyController
         $conditions = [];
         $classIds = array_map('intval', $selectedClasses);
         $conditions[] = 'class IN ('.implode(', ', $classIds).')';
-        $conditions = Hooks::applyFilter('role_query_conditions', $conditions, request()->post());
-        if (empty($conditions)) {
-            return $this->legacyAbortResponse('Error', 'No valid filter');
-        }
         $whereStr = implode(' OR ', $conditions);
 
         set_time_limit(300);

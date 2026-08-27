@@ -10,7 +10,6 @@ use App\Exceptions\TrackerWarningException;
 use App\Models\User;
 use App\Support\Config\SiteConfig;
 use App\Support\Format;
-use App\Support\Hooks;
 use App\Support\LegacyDb;
 use App\Support\Logger;
 use App\Support\Url;
@@ -25,8 +24,6 @@ final class PeerLifecycle
 
     /** @var array<string, mixed> */
     private array $user;
-
-    private bool $isIPSeedBox;
 
     private string $dt;
 
@@ -66,12 +63,11 @@ final class PeerLifecycle
      * @param  array<string, mixed>  $torrent
      * @param  array<string, mixed>  $user
      */
-    public function __construct(AnnounceRequestDto $dto, array $torrent, array $user, bool $isIPSeedBox, string $dt)
+    public function __construct(AnnounceRequestDto $dto, array $torrent, array $user, string $dt)
     {
         $this->dto = $dto;
         $this->torrent = $torrent;
         $this->user = $user;
-        $this->isIPSeedBox = $isIPSeedBox;
         $this->dt = $dt;
 
         $this->params = $dto->toParams();
@@ -194,7 +190,6 @@ final class PeerLifecycle
             'downloadoffset' => (int) $this->params['downloaded'],
             'uploadoffset' => (int) $this->params['uploaded'],
             'passkey' => $this->params['passkey'],
-            'is_seed_box' => (int) $this->isIPSeedBox,
         ];
 
         if ($this->ipv4) {
@@ -263,7 +258,6 @@ final class PeerLifecycle
             'last_action' => $this->dt,
             'seeder' => $this->seeder,
             'agent' => $this->agent,
-            'is_seed_box' => (int) $this->isIPSeedBox,
         ];
 
         $snatchUpdate = $this->buildSnatchUpdate($upthis, $downthis, $snatchTimeColumn, $snatchTimeIncrement, $leechTimeNoSeederIncrement);
@@ -292,7 +286,6 @@ final class PeerLifecycle
 
             if (! empty($this->snatchInfo)) {
                 DB::table('snatched')->where('id', (int) $this->snatchInfo['id'])->update($snatchUpdate);
-                Hooks::doAction('snatched_saved', $this->torrent, $this->snatchInfo);
             }
         }
     }

@@ -2,23 +2,14 @@
 
 use App\Exceptions\Handler;
 use App\Http\Kernel;
-use App\Support\SupportContext;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Foundation\Application;
 use Nexus\Nexus;
-use Nexus\Plugin\Hook;
-use Nexus\Plugin\Plugin;
 
 defined('LARAVEL_START') || define('LARAVEL_START', microtime(true));
 defined('IN_NEXUS') || define('IN_NEXUS', false);
 if (! RUNNING_IN_OCTANE) {
     Nexus::boot();
-}
-$hook = new Hook;
-$plugin = new Plugin;
-if (class_exists(SupportContext::class)) {
-    SupportContext::setGlobal('hook', $hook);
-    SupportContext::setGlobal('plugin', $plugin);
 }
 
 // Legacy pages define this in include/core.php, but Laravel-routed endpoints

@@ -24,7 +24,6 @@ use App\Support\Email;
 use App\Support\Environment;
 use App\Support\Events;
 use App\Support\Format;
-use App\Support\Hooks;
 use App\Support\Json;
 use App\Support\Locale;
 use App\Support\Logger;
@@ -1034,7 +1033,6 @@ class UserRepository extends BaseRepository
             'attendance' => 'uid',
             'attendance_logs' => 'uid',
             'login_logs' => 'uid',
-            'seed_box_records' => 'uid',
             'user_modify_logs' => 'user_id',
             'messages' => 'receiver',
         ];
@@ -1059,7 +1057,6 @@ class UserRepository extends BaseRepository
             })
             ->delete();
         if (is_int($id)) {
-            Hooks::doAction('user_delete', $id);
             Events::fire(ModelEventEnum::USER_DELETED, $users->first(), null);
         }
 

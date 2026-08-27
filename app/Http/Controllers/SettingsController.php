@@ -9,7 +9,6 @@ use App\Models\User;
 use App\Repositories\TagRepository;
 use App\Support\CurrentUser;
 use App\Support\Globals;
-use App\Support\Hooks;
 use App\Support\Log;
 use App\Support\Settings;
 use App\Support\UserDisplay;
@@ -207,11 +206,6 @@ class SettingsController extends LegacyController
             } elseif ($smtpType === 'external') {
                 $validConfig = array_merge($validConfig, ['smtpaddress', 'smtpport', 'encryption', 'accountname', 'accountpassword']);
             }
-        }
-
-        // Torrent: allow hooks to extend valid config
-        if ($section === 'torrent') {
-            $validConfig = Hooks::applyFilter('setting_valid_config', $validConfig);
         }
 
         $data = [];

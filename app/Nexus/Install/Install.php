@@ -161,8 +161,6 @@ class Install
             $count = preg_match('/create_(.*)_table.php/', $filename, $matches);
             if ($count) {
                 $tableName = $matches[1];
-                // Special treatment
-                $tableName = str_replace('seedbox_records', 'seed_box_records', $tableName);
                 $tables[$tableName] = "database/migrations/$filename";
             }
         }

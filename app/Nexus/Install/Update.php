@@ -253,7 +253,6 @@ class Update extends Install
          */
         $this->removeMenu(['freeleech.php']);
         Cache::forgetWithLocales('nexus_rss');
-        Cache::forgetWithLocales('nexus_is_ip_seed_box');
 
         /**
          * @since 1.7.24
@@ -262,7 +261,6 @@ class Update extends Install
             $this->runMigrate('database/migrations/2022_09_02_031539_add_extra_to_searchbox_table.php');
             SearchBox::query()->update(['extra' => [
                 SearchBox::EXTRA_DISPLAY_COVER_ON_TORRENT_LIST => 1,
-                SearchBox::EXTRA_DISPLAY_SEED_BOX_ICON_ON_TORRENT_LIST => 1,
             ]]);
         }
 

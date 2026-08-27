@@ -567,7 +567,6 @@ $classSelect = function (string $name, int $maxClass, mixed $selected, int $min 
     $expireHtml .= '</ul>'.($lang['text_promotion_timeout_note_two'] ?? '');
     @endphp
     {!! \App\Support\Html::tr($lang['row_promotion_timeout'] ?? 'Promotion timeout', $expireHtml, 1) !!}
-    {!! \App\Support\Hooks::doAction('setting_fields', $TORRENT) !!}
     {!! $textRow($lang['row_auto_pick_hot'] ?? 'Auto pick hot', 'hotdays', $TORRENT['hotdays'] ?? 7, $lang['text_days_with_more_than'] ?? '', '50px') !!}
     {!! $textRow($lang['row_auto_pick_hot'] ?? '', 'hotseeder', $TORRENT['hotseeder'] ?? 10, $lang['text_be_picked_as_hot'] ?? '', '50px') !!}
     {!! $textRow($lang['row_uploader_get_double'] ?? 'Uploader double', 'uploaderdouble', $TORRENT['uploaderdouble'] ?? 1, $lang['text_times_uploading_credit'] ?? '', '50px') !!}

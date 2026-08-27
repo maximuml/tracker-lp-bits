@@ -74,7 +74,7 @@ final class Promotion
             }
         }
 
-        return (string) Hooks::applyFilter('torrent_background_color', (string) $sphighlight, $torrent);
+        return (string) $sphighlight;
     }
 
     /**

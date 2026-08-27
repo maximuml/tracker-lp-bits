@@ -4,7 +4,6 @@ namespace App\Repositories;
 
 use App\Models\Setting;
 use App\Support\Cache;
-use App\Support\Hooks;
 use App\Support\Logger;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -105,6 +104,5 @@ class SettingRepository extends BaseRepository
         }
 
         Cache::clearSettings();
-        Hooks::doAction('nexus_setting_update');
     }
 }

@@ -6,7 +6,6 @@ use App\Models\Invite;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
-use App\Support\Hooks;
 use App\Support\Input;
 use App\Support\Language;
 use App\Support\Menu;
@@ -89,11 +88,6 @@ class PageLayoutRepository extends BaseRepository
         return (int) DB::table('torrents')->where('approval_status', 0)->count();
     }
 
-    public function getSeedBoxApprovalCount(): int
-    {
-        return (int) DB::table('seed_box_records')->where('status', 0)->count();
-    }
-
     public function getOpenComplaintsCount(): int
     {
         return (int) DB::table('complains')->where('answered', 0)->count();
@@ -149,7 +143,7 @@ class PageLayoutRepository extends BaseRepository
             $script,
             app(Language::class)->functions(),
             (string) app(Globals::class)->get('enableoffer', ''),
-            (string) Hooks::applyFilter('nexus_menu') ?: null,
+            null,
             $user,
             app(LegacyRedisCache::class),
             (string) app(Globals::class)->get('CURLANGDIR', ''),

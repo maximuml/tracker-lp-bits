@@ -60,7 +60,6 @@ $classes = array_chunk(\App\Models\User::listClass(), 4, true);
                                     </table>
                                 </td>
                             </tr>
-                            <?php \App\Support\Hooks::doAction('form_role_filter', ...[$lang_incrementbulk['labels']['roles']]) ?>
                             <tr><td class="rowhead" valign="top"><?php echo $lang_incrementbulk['labels']['msg_subject'] ?> </td><td class="rowfollow"><input type=text name=subject size=82></td></tr>
                             <tr><td class="rowhead" valign="top"><?php echo $lang_incrementbulk['labels']['msg_body'] ?> </td><td class="rowfollow"><textarea name=msg cols=80 rows=5><?php echo $body ?? ''?></textarea></td></tr>
                             <tr>

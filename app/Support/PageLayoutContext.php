@@ -126,7 +126,7 @@ final class PageLayoutContext
             scriptFileName: Input::serverValue('SCRIPT_FILENAME', ''),
             script: $script,
             enableOffer: (string) app(Globals::class)->get('enableoffer', ''),
-            customMenu: (string) Hooks::applyFilter('nexus_menu') ?: null,
+            customMenu: null,
             maxdlSystem: (string) app(Globals::class)->get('maxdlsystem', ''),
             whereTweak: (string) app(Globals::class)->get('where_tweak', ''),
             menuHtml: (string) app(Globals::class)->get('nexus_menu_html', ''),

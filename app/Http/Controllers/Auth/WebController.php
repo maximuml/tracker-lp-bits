@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Auth;
 use App\Exceptions\AuthenticationException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
-use App\Models\OauthProvider;
 use App\Models\Setting;
 use App\Repositories\UserPasskeyRepository;
 use App\Services\Captcha\Drivers\ImageCaptchaDriver;
@@ -87,10 +86,6 @@ class WebController extends Controller
             'maxAttempts' => $this->authService->maxLoginAttempts(),
             'nowarn' => $nowarn,
             'error' => $request->session()->get('error'),
-            'oauthProviders' => OauthProvider::query()
-                ->orderBy('priority', 'desc')
-                ->where('enabled', '=', 1)
-                ->get(['uuid', 'name']),
             'isComplainEnabled' => Setting::getIsComplainEnabled(),
             'passkeyLoginHtml' => $this->renderPasskeyLogin(),
         ]);

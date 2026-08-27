@@ -115,7 +115,6 @@
  * @property int $offer_allowed_count
  * @property string|null $seed_points_updated_at
  * @property string|null $seed_time_updated_at
- * @property int $provider_id
  * @property int $seeding_torrent_count
  * @property int $seeding_torrent_size
  * @property string|null $last_announce_at
@@ -434,7 +433,7 @@ class User extends Authenticatable implements FilamentUser, HasName
         'username', 'email', 'passhash', 'passhash_algo', 'secret', 'stylesheet', 'editsecret', 'added', 'enabled', 'status',
         'leechwarn', 'leechwarnuntil', 'page', 'class', 'uploaded', 'downloaded', 'clientselect', 'showclienterror', 'last_home',
         'seedbonus', 'downloadpos', 'vip_added', 'vip_until', 'title', 'invites', 'attendance_card',
-        'seed_points_per_hour', 'passkey', 'auth_key', 'last_login', 'lang', 'provider_id',
+        'seed_points_per_hour', 'passkey', 'auth_key', 'last_login', 'lang',
     ];
 
     /**

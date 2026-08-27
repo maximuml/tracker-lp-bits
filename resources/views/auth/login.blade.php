@@ -90,16 +90,6 @@ $showWarn = $returnto !== '' && ! $nowarn;
         {!! $passkeyLoginHtml !!}
     </form>
 
-    @if ($oauthProviders->isNotEmpty())
-        <p>
-            {{ $lang['other_methods'] ?? 'Other methods' }}:
-            @foreach ($oauthProviders as $oauthProvider)
-                [<b><a href="oauth/redirect/{{ $oauthProvider->uuid }}">{{ $oauthProvider->name }}</a></b>]
-                @if (! $loop->last)&nbsp;&nbsp;@endif
-            @endforeach
-        </p>
-    @endif
-
     @if ($isComplainEnabled)
         <p>[<b><a href="complains.php">{{ $lang['text_complain'] ?? 'Complain' }}</a></b>]</p>
     @endif

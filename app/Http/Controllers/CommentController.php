@@ -28,7 +28,7 @@ class CommentController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function index(Request $request)
+    public function index(Request $request): array
     {
         $comments = $this->repository->getList($request, Auth::user());
         $resource = CommentResource::collection($comments);
@@ -75,7 +75,7 @@ class CommentController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function store(Request $request)
+    public function store(Request $request): array
     {
         $user = Auth::user();
         $comment = $this->repository->store($this->prepareData($request), $user);
@@ -88,9 +88,8 @@ class CommentController extends Controller
      * Display the specified resource.
      *
      * @param  mixed  $id
-     * @return Response
      */
-    public function show($id)
+    public function show($id): Response
     {
         //
 
@@ -101,9 +100,8 @@ class CommentController extends Controller
      * Update the specified resource in storage.
      *
      * @param  mixed  $id
-     * @return Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id): Response
     {
         //
 
@@ -114,9 +112,8 @@ class CommentController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  mixed  $id
-     * @return Response
      */
-    public function destroy($id)
+    public function destroy($id): Response
     {
         //
 

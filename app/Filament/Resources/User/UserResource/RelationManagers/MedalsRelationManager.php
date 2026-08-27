@@ -8,7 +8,6 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
-use Filament\Tables;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -41,10 +40,8 @@ class MedalsRelationManager extends RelationManager implements HasActions
                 //
             ])
             ->headerActions([
-                //                Tables\Actions\CreateAction::make(),
             ])
             ->recordActions([
-                //                Tables\Actions\EditAction::make(),
                 DeleteAction::make(),
             ])
             ->toolbarActions([

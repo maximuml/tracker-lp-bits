@@ -126,10 +126,6 @@ class HitAndRun extends NexusModel
             return '---';
         }
         // change to use create time
-        //        if (!$this->snatch->completedat) {
-        //            //not download completed
-        //            return '---';
-        //        }
         $searchBoxId = $this->torrent->basic_category->mode ?? 0;
         if ($searchBoxId == 0) {
             Logger::writeWithContext((string) sprintf('[INVALID_CATEGORY], Torrent: %s', $this->torrent_id), (string) 'error', (bool) false);

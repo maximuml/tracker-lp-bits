@@ -21,7 +21,7 @@ class ThankController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function index(Request $request)
+    public function index(Request $request): array
     {
         $torrentId = $request->torrent_id;
         $thanks = Thank::query()
@@ -30,9 +30,6 @@ class ThankController extends Controller
             ->with(['user'])
             ->paginate();
         $resource = ThankResource::collection($thanks);
-        //        $resource->additional([
-        //            'page_title' => nexus_trans('thank.index.page_title'),
-        //        ]);
 
         return $this->success($resource);
     }
@@ -42,7 +39,7 @@ class ThankController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function store(Request $request)
+    public function store(Request $request): array
     {
         $user = Auth::user();
         if (! $user instanceof User) {
@@ -97,9 +94,8 @@ class ThankController extends Controller
      * Display the specified resource.
      *
      * @param  mixed  $id
-     * @return Response
      */
-    public function show($id)
+    public function show($id): Response
     {
         //
 
@@ -110,9 +106,8 @@ class ThankController extends Controller
      * Update the specified resource in storage.
      *
      * @param  mixed  $id
-     * @return Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id): Response
     {
         //
 
@@ -123,9 +118,8 @@ class ThankController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  mixed  $id
-     * @return Response
      */
-    public function destroy($id)
+    public function destroy($id): Response
     {
         //
 

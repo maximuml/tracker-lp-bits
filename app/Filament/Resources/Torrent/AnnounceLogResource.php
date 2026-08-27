@@ -17,7 +17,6 @@ use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
-use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
@@ -162,7 +161,6 @@ class AnnounceLogResource extends Resource
                     ->sortable(),
                 TextColumn::make('event')->label(__('announce-log.event')),
                 TextColumn::make('ip')->label('IP'),
-                //                Tables\Columns\TextColumn::make('agent')->label(__('announce-log.agent')),
             ])
             ->filters([
                 Filter::make('user_id')
@@ -200,9 +198,6 @@ class AnnounceLogResource extends Resource
                 ViewAction::make()->modalWidth('5xl'),
             ])
             ->toolbarActions([
-                //                Tables\Actions\BulkActionGroup::make([
-                //                    Tables\Actions\DeleteBulkAction::make(),
-                //                ]),
             ]);
     }
 

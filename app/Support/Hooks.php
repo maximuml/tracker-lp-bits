@@ -39,7 +39,7 @@ final class Hooks
             try {
                 return app(Hook::class);
             } catch (\Throwable $e) {
-                // fall back to the legacy context value
+                Logger::writeWithContext("Hook container resolution failed: {$e->getMessage()}", 'debug');
             }
         }
 

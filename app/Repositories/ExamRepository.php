@@ -49,15 +49,6 @@ class ExamRepository extends BaseRepository
         $diffInHours = $this->checkBeginEnd($params);
         $this->checkIndexes($params, $diffInHours);
         $this->checkFilters($params);
-        /**
-         * does not limit this
-         *
-         * @since 1.7.4
-         */
-        //        $valid = $this->listValid(null, Exam::DISCOVERED_YES);
-        //        if ($valid->isNotEmpty() && $params['status'] == Exam::STATUS_ENABLED) {
-        //            throw new NexusException("Enabled and discovered exam already exists.");
-        //        }
         $formatted = $this->formatParams($params);
         /** @var array<string, mixed> $data */
         $data = $formatted;
@@ -74,15 +65,6 @@ class ExamRepository extends BaseRepository
         $diffInHours = $this->checkBeginEnd($params);
         $this->checkIndexes($params, $diffInHours);
         $this->checkFilters($params);
-        /**
-         * does not limit this
-         *
-         * @since 1.7.4
-         */
-        //        $valid = $this->listValid($id, Exam::DISCOVERED_YES);
-        //        if ($valid->isNotEmpty() && $params['status'] == Exam::STATUS_ENABLED) {
-        //            throw new NexusException("Enabled and discovered exam already exists.");
-        //        }
         $exam = Exam::query()->findOrFail($id);
         $formatted = $this->formatParams($params);
         /** @var array<string, mixed> $data */
@@ -705,8 +687,6 @@ class ExamRepository extends BaseRepository
              *
              * @since v1.7.0
              */
-            //            do_log("examUser: {$examUser->id} is done, won't update progress.");
-            //            return false;
         }
         $exam = $examUser->exam;
         if (! $user instanceof User) {
@@ -1114,11 +1094,6 @@ class ExamRepository extends BaseRepository
          *
          * @since 1.7.4
          */
-        //        if ($exams->count() > 1) {
-        //            do_log("Valid and discovered exam more than 1.", "error");
-        //            return false;
-        //        }
-
         $result = 0;
         foreach ($exams as $exam) {
             $start = microtime(true);
@@ -1361,8 +1336,6 @@ class ExamRepository extends BaseRepository
                         }
                         $uidToDisable[] = $uid;
                         $userModcomment = Locale::trans('exam.ban_user_modcomment', ['exam_name' => $exam->name, 'begin' => $examUser->begin, 'end' => $examUser->end], $locale);
-                        //                        $userModcomment = sprintf('%s - %s', date('Y-m-d'), $userModcomment);
-                        //                        $userModcommentUpdate[] = sprintf("when `id` = %s then concat_ws('\n', '%s', modcomment)", $uid, $userModcomment);
                         $userModifyLogs[] = [
                             'user_id' => $uid,
                             'content' => $userModcomment,

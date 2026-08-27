@@ -13,7 +13,6 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Tables;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
@@ -87,10 +86,8 @@ class InviteResource extends Resource
             ->defaultSort('id', 'desc')
             ->filters(self::getFilters())
             ->recordActions([
-                //                Tables\Actions\EditAction::make(),
             ])
             ->toolbarActions([
-                //                Tables\Actions\DeleteBulkAction::make(),
             ]);
     }
 

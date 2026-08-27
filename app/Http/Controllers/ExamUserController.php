@@ -27,7 +27,7 @@ class ExamUserController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function index(Request $request)
+    public function index(Request $request): array
     {
         $result = $this->repository->listUser($request->all());
         $resource = ExamUserResource::collection($result);
@@ -43,7 +43,7 @@ class ExamUserController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function store(Request $request)
+    public function store(Request $request): array
     {
         $rules = [
             'uid' => 'required',
@@ -65,7 +65,7 @@ class ExamUserController extends Controller
      * @param  mixed  $id
      * @return array<int|string, mixed>
      */
-    public function show($id)
+    public function show($id): array
     {
 
         return [];
@@ -77,7 +77,7 @@ class ExamUserController extends Controller
      * @param  mixed  $id
      * @return array<int|string, mixed>
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id): array
     {
 
         return [];
@@ -89,7 +89,7 @@ class ExamUserController extends Controller
      * @param  mixed  $id
      * @return array<string, mixed>
      */
-    public function destroy($id)
+    public function destroy($id): array
     {
         $result = $this->repository->removeExamUser($id);
 
@@ -99,7 +99,7 @@ class ExamUserController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function avoid(Request $request)
+    public function avoid(Request $request): array
     {
         $request->validate(['id' => 'required']);
         $result = $this->repository->avoidExamUser($request->id);
@@ -110,7 +110,7 @@ class ExamUserController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function recover(Request $request)
+    public function recover(Request $request): array
     {
         $request->validate(['id' => 'required']);
         $result = $this->repository->recoverExamUser($request->id);

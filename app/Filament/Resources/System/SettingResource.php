@@ -11,7 +11,6 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Tables;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -71,7 +70,6 @@ class SettingResource extends Resource
                 EditAction::make(),
             ])
             ->toolbarActions([
-                //                Tables\Actions\DeleteBulkAction::make(),
             ]);
     }
 

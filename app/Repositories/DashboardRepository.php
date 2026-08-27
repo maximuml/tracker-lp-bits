@@ -59,12 +59,6 @@ class DashboardRepository extends BaseRepository
             'text' => Locale::trans("dashboard.system_info.{$name}", [], null),
             'value' => sprintf('%s: %s', $databaseInfo['dbType'], $databaseInfo['version']),
         ];
-        //        $name = 'os';
-        //        $result[$name] = [
-        //            'name' => $name,
-        //            'text' => nexus_trans("dashboard.system_info.$name"),
-        //            'value' => PHP_OS,
-        //        ];
         $name = 'redis_version';
         $result[$name] = [
             'name' => $name,

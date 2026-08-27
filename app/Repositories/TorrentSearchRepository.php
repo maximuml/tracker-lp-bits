@@ -239,17 +239,14 @@ class TorrentSearchRepository
             $addparam .= 'incldead=0&';
         } elseif ($include_dead == 1) {		// active
             $addparam .= 'incldead=1&';
-            //	$wherea[] = "visible = 'yes'";
             $whereothera[] = "visible = 'yes'";
         } elseif ($include_dead == 2) {		// dead
             $addparam .= 'incldead=2&';
-            //	$wherea[] = "visible = 'no'";
             $whereothera[] = "visible = 'no'";
         }
         // ----------------- end include dead ---------------------//
 
         if (empty($CURUSER['id']) || ! Permission::canViewBannedTorrent()) {
-            //    $wherea[] = "banned = 'no'";
             $whereothera[] = "banned = 'no'";
             $searchParams['banned'] = 'no';
         }
@@ -600,7 +597,6 @@ class TorrentSearchRepository
         }
 
         if ($all) {
-            // stderr("in if all","");
             $wherecatina = [];
             if ($showsubcat) {
                 $wheresourceina = [];
@@ -612,7 +608,6 @@ class TorrentSearchRepository
             }
             $addparam .= '';
         }
-        // stderr("", count($wherecatina)."-". count($wheresourceina));
         $wherecatin = $wheresourcein = $wheremediumin = $wherecodecin = $wherestandardin = $whereprocessingin = $whereaudiocodecin = '';
         if (empty($wherecatina) && ! (in_array($inclbookmarked, [1, 2]) && $allsec == 1)) {
             // require limit in some category
@@ -718,12 +713,6 @@ class TorrentSearchRepository
 
                     $like_expression_array[] = " LIKE '%".$searchstr."%'";
                     break;
-
-                    /*case 3 :	// parsed
-                    {
-                    $like_expression_array[] = $searchstr;
-                    break;
-                    }*/
             }
             $ANDOR = ($search_mode == 0 ? ' AND ' : ' OR ');	// only affects mode 0 and mode 1
 
@@ -739,19 +728,11 @@ class TorrentSearchRepository
                 case 1:	// torrent description
 
                     foreach ($like_expression_array as &$like_expression_array_element) {
-                        //			$like_expression_array_element = "torrents.descr". $like_expression_array_element;
                         $like_expression_array_element = 'torrent_extras.descr'.$like_expression_array_element;
                     }
                     $wherea[] = implode($ANDOR, $like_expression_array);
                     break;
 
-                    /*case 2	:	// torrent small description
-                    {
-                        foreach ($like_expression_array as &$like_expression_array_element)
-                        $like_expression_array_element =  "torrents.small_descr". $like_expression_array_element;
-                        $wherea[] =  implode($ANDOR, $like_expression_array);
-                        break;
-                    }*/
                 case 3:	// torrent uploader
 
                     foreach ($like_expression_array as &$like_expression_array_element) {
@@ -930,8 +911,6 @@ class TorrentSearchRepository
                     $addparam .= '&'.$pagerlink;
                 }
             }
-            // stderr("addparam",$addparam);
-            // echo $addparam;
 
             [$pagertop, $pagerbottom, $limit, $offset, $size, $page] = Pagination::pager($torrentsperpage, $count, '?'.$addparam);
 

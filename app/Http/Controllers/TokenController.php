@@ -14,7 +14,7 @@ class TokenController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function addToken(Request $request)
+    public function addToken(Request $request): array
     {
         try {
             $request->validate([
@@ -48,7 +48,7 @@ class TokenController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function delToken(Request $request)
+    public function delToken(Request $request): array
     {
         try {
             $request->validate([

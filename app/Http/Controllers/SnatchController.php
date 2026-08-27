@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\SnatchResource;
-use App\Models\Snatch;
 use App\Repositories\TorrentRepository;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -24,27 +23,21 @@ class SnatchController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function index(Request $request)
+    public function index(Request $request): array
     {
         $request->validate([
             'torrent_id' => 'required',
         ]);
         $snatches = $this->repository->listSnatches($request->torrent_id);
         $resource = SnatchResource::collection($snatches);
-        //        $resource->additional([
-        //            'card_titles' => Snatch::$cardTitles,
-        //            'page_title' => nexus_trans('snatch.index.page_title'),
-        //        ]);
 
         return $this->success($resource);
     }
 
     /**
      * Store a newly created resource in storage.
-     *
-     * @return Response
      */
-    public function store(Request $request)
+    public function store(Request $request): Response
     {
         //
 
@@ -55,9 +48,8 @@ class SnatchController extends Controller
      * Display the specified resource.
      *
      * @param  mixed  $id
-     * @return Response
      */
-    public function show($id)
+    public function show($id): Response
     {
         //
 
@@ -68,9 +60,8 @@ class SnatchController extends Controller
      * Update the specified resource in storage.
      *
      * @param  mixed  $id
-     * @return Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id): Response
     {
         //
 
@@ -81,9 +72,8 @@ class SnatchController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  mixed  $id
-     * @return Response
      */
-    public function destroy($id)
+    public function destroy($id): Response
     {
         //
 

@@ -9,7 +9,6 @@ use App\Support\UserDisplay;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
@@ -82,13 +81,8 @@ class UserModifyLogResource extends Resource
             ])
             ->defaultSort('id', 'desc')
             ->recordActions([
-                //                Tables\Actions\EditAction::make(),
-                //                Tables\Actions\DeleteAction::make(),
             ])
             ->toolbarActions([
-                //                Tables\Actions\BulkActionGroup::make([
-                //                    Tables\Actions\DeleteBulkAction::make(),
-                //                ]),
             ]);
     }
 

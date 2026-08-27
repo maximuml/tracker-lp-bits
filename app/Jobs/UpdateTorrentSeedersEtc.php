@@ -90,7 +90,6 @@ class UpdateTorrentSeedersEtc implements ShouldQueue
         }
         // 批量取，简单化
         $torrents = [];
-        //        $res = sql_query("SELECT torrent, seeder, COUNT(*) AS c FROM peers GROUP BY torrent, seeder where torrent in ($idStr)");
         $res = DB::table('peers')
             ->selectRaw('torrent, seeder, COUNT(*) AS c')
             ->whereIn('torrent', $torrentIdArr)
@@ -110,7 +109,6 @@ class UpdateTorrentSeedersEtc implements ShouldQueue
             $torrents[$row->torrent][$key] = $row->c;
         }
 
-        //        $res = sql_query("SELECT torrent, COUNT(*) AS c FROM comments GROUP BY torrent where torrent in ($idStr)");
         $res = DB::table('comments')
             ->selectRaw('torrent, COUNT(*) AS c')
             ->whereIn('torrent', $torrentIdArr)

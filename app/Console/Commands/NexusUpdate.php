@@ -108,7 +108,6 @@ class NexusUpdate extends Command
         $log = sprintf('Step %s, %s...', $step, $this->update->getStepName($step));
         $this->doLog($log);
         $settingTableRows = $this->update->listSettingTableRows();
-        //        $settings = $settingTableRows['settings'];
         $symbolicLinks = $settingTableRows['symbolic_links'];
         $fails = $settingTableRows['fails'];
         $mysqlInfo = $this->update->getDatabaseVersionInfo();
@@ -140,10 +139,6 @@ class NexusUpdate extends Command
         $this->doLog('going to createSymbolicLinks...');
         $this->update->createSymbolicLinks($symbolicLinks);
         $this->doLog('createSymbolicLinks done!');
-
-        //        $this->doLog("going to saveSettings...");
-        //        $this->update->saveSettings($settings);
-        //        $this->doLog("saveSettings done!");
 
         $this->doLog('going to runExtraQueries...');
         $this->update->runExtraQueries();

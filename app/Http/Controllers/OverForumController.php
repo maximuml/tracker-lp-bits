@@ -14,7 +14,7 @@ class OverForumController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function index()
+    public function index(): array
     {
         $list = OverForum::query()->orderBy('sort', 'asc')->get();
         $resource = OverForumResource::collection($list);
@@ -24,10 +24,8 @@ class OverForumController extends Controller
 
     /**
      * Show the form for creating a new resource.
-     *
-     * @return Response
      */
-    public function create()
+    public function create(): Response
     {
         //
 
@@ -36,10 +34,8 @@ class OverForumController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     *
-     * @return Response
      */
-    public function store(Request $request)
+    public function store(Request $request): Response
     {
         //
 
@@ -48,10 +44,8 @@ class OverForumController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @return Response
      */
-    public function show(OverForum $overForum)
+    public function show(OverForum $overForum): Response
     {
         //
 
@@ -60,10 +54,8 @@ class OverForumController extends Controller
 
     /**
      * Show the form for editing the specified resource.
-     *
-     * @return Response
      */
-    public function edit(OverForum $overForum)
+    public function edit(OverForum $overForum): Response
     {
         //
 
@@ -72,10 +64,8 @@ class OverForumController extends Controller
 
     /**
      * Update the specified resource in storage.
-     *
-     * @return Response
      */
-    public function update(Request $request, OverForum $overForum)
+    public function update(Request $request, OverForum $overForum): Response
     {
         //
 
@@ -84,10 +74,8 @@ class OverForumController extends Controller
 
     /**
      * Remove the specified resource from storage.
-     *
-     * @return Response
      */
-    public function destroy(OverForum $overForum)
+    public function destroy(OverForum $overForum): Response
     {
         //
 

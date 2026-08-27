@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\PeerResource;
-use App\Models\Peer;
 use App\Repositories\TorrentRepository;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -26,7 +25,7 @@ class PeerController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function index(Request $request)
+    public function index(Request $request): array
     {
         $request->validate([
             'torrent_id' => 'required',
@@ -35,8 +34,6 @@ class PeerController extends Controller
         $response = [
             'seeder_list' => [],
             'leecher_list' => [],
-            //            'card_titles' => Peer::$cardTitles,
-            //            'page_title' => nexus_trans('peer.index.page_title'),
         ];
         $result = $this->repository->listPeers($request->torrent_id);
         if ($result['seeder_list']->isNotEmpty()) {
@@ -52,10 +49,8 @@ class PeerController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     *
-     * @return Response
      */
-    public function store(Request $request)
+    public function store(Request $request): Response
     {
         //
 
@@ -66,9 +61,8 @@ class PeerController extends Controller
      * Display the specified resource.
      *
      * @param  mixed  $id
-     * @return Response
      */
-    public function show($id)
+    public function show($id): Response
     {
         //
 
@@ -79,9 +73,8 @@ class PeerController extends Controller
      * Update the specified resource in storage.
      *
      * @param  mixed  $id
-     * @return Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id): Response
     {
         //
 
@@ -92,9 +85,8 @@ class PeerController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  mixed  $id
-     * @return Response
      */
-    public function destroy($id)
+    public function destroy($id): Response
     {
         //
 

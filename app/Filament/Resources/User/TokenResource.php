@@ -10,7 +10,6 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -63,7 +62,6 @@ class TokenResource extends Resource
                 //
             ])
             ->recordActions([
-                //                Tables\Actions\EditAction::make(),
                 DeleteAction::make(),
             ])
             ->toolbarActions([

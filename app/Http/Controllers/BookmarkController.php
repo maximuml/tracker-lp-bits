@@ -14,25 +14,19 @@ class BookmarkController extends Controller
     /** @var mixed */
     private $repository;
 
-    /**
-     * @return mixed
-     */
     public function __construct(BookmarkRepository $repository)
     {
         $this->repository = $repository;
     }
 
-    /**
-     * @return mixed
-     */
-    public function index(Request $request) {}
+    public function index(Request $request): void {}
 
     /**
      * Store a newly created resource in storage.
      *
      * @return array<string, mixed>
      */
-    public function store(Request $request)
+    public function store(Request $request): array
     {
         $request->validate([
             'torrent_id' => 'required|integer',
@@ -47,9 +41,8 @@ class BookmarkController extends Controller
      * Display the specified resource.
      *
      * @param  mixed  $id
-     * @return Response
      */
-    public function show($id)
+    public function show($id): Response
     {
 
         return new Response('');
@@ -59,9 +52,8 @@ class BookmarkController extends Controller
      * Update the specified resource in storage.
      *
      * @param  mixed  $id
-     * @return Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id): Response
     {
         //
 
@@ -73,7 +65,7 @@ class BookmarkController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function destroy(Request $request)
+    public function destroy(Request $request): array
     {
         $request->validate([
             'torrent_id' => 'required|integer',

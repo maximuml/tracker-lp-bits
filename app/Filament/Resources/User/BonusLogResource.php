@@ -9,15 +9,12 @@ use App\Support\UserDisplay;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
-
-use function Filament\Support\get_model_label;
 
 class BonusLogResource extends Resource
 {
@@ -33,11 +30,6 @@ class BonusLogResource extends Resource
     {
         return __('admin.sidebar.bonus_log');
     }
-
-    //    public static function getModelLabel(): string
-    //    {
-    //        return sprintf('%s(%s)', get_model_label(static::getModel()), __('bonus-log.exclude_seeding_bonus'));
-    //    }
 
     public static function form(Schema $schema): Schema
     {
@@ -93,11 +85,8 @@ class BonusLogResource extends Resource
                     }),
             ])
             ->recordActions([
-                //                Tables\Actions\EditAction::make(),
-                //                Tables\Actions\DeleteAction::make(),
             ])
             ->toolbarActions([
-                //                Tables\Actions\DeleteBulkAction::make(),
             ]);
     }
 

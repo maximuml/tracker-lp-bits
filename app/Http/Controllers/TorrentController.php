@@ -15,6 +15,7 @@ use App\Models\User;
 use App\Repositories\TorrentRepository;
 use App\Repositories\UploadRepository;
 use App\Support\Logger;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Response;
@@ -36,7 +37,7 @@ class TorrentController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function index(Request $request, ?string $section = null)
+    public function index(Request $request, ?string $section = null): array
     {
         Logger::writeWithContext((string) 'controller torrent index entry', (string) 'info', (bool) false);
         $result = $this->repository->getList($request, Auth::user(), $section);
@@ -52,7 +53,7 @@ class TorrentController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function store(TorrentRequest $request)
+    public function store(TorrentRequest $request): array
     {
         $uploadRep = new UploadRepository;
         $newTorrent = $uploadRep->upload($request);
@@ -66,7 +67,7 @@ class TorrentController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function show(int $id)
+    public function show(int $id): array
     {
         Logger::writeWithContext((string) 'controller torrent show entry', (string) 'info', (bool) false);
         /**
@@ -91,9 +92,8 @@ class TorrentController extends Controller
      * Update the specified resource in storage.
      *
      * @param  mixed  $id
-     * @return Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id): Response
     {
         return new Response('', 204);
     }
@@ -102,25 +102,21 @@ class TorrentController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  mixed  $id
-     * @return Response
      */
-    public function destroy($id)
+    public function destroy($id): Response
     {
         return new Response('', 204);
     }
 
     /** @return  array<string, mixed> */
-    public function searchBox()
+    public function searchBox(): array
     {
         $result = $this->repository->getSearchBox();
 
         return $this->success($result);
     }
 
-    /**
-     * @return mixed
-     */
-    public function approvalPage(Request $request)
+    public function approvalPage(Request $request): View
     {
         Permission::assertCan(PermissionEnum::TORRENT_APPROVAL);
         $request->validate(['torrent_id' => 'required']);
@@ -134,7 +130,7 @@ class TorrentController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function approvalLogs(Request $request)
+    public function approvalLogs(Request $request): array
     {
         Permission::assertCan(PermissionEnum::TORRENT_APPROVAL);
         $request->validate(['torrent_id' => 'required']);
@@ -159,7 +155,7 @@ class TorrentController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function approval(Request $request)
+    public function approval(Request $request): array
     {
         Permission::assertCan(PermissionEnum::TORRENT_APPROVAL);
         $request->validate([
@@ -175,7 +171,7 @@ class TorrentController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function queryByPiecesHash(Request $request)
+    public function queryByPiecesHash(Request $request): array
     {
         $request->validate([
             'pieces_hash' => 'required|array',

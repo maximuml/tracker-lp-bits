@@ -68,7 +68,6 @@ class MeiliSearchRepository extends BaseRepository
     /** @var array<int|string, mixed> */
     private static array $sortFieldMaps = [
         '1' => 'name',
-        //        '2' => 'numfiles',
         '3' => 'comments',
         '4' => 'added',
         '5' => 'size',
@@ -613,11 +612,6 @@ class MeiliSearchRepository extends BaseRepository
             $sortType = 'desc';
         }
         // when searching, ignore promotion
-        //        if ($sortField == "id") {
-        //            return ["pos_state:desc", "$sortField:$sortType"];
-        //        } else {
-        //            return ["pos_state:desc", "$sortField:$sortType", "id:desc"];
-        //        }
 
         return ["$sortField:$sortType"];
     }

@@ -12,11 +12,9 @@ use App\Support\AuthCookie;
 use App\Support\Locale;
 use App\Support\Logger;
 use App\Support\Url;
-use Illuminate\Foundation\Application;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
@@ -25,10 +23,8 @@ class OauthController extends Controller
 {
     /**
      * client redirect to authorization server, use oauth_providers config
-     *
-     * @return Application|RedirectResponse|Redirector
      */
-    public function redirect(Request $request, string $uuid)
+    public function redirect(Request $request, string $uuid): RedirectResponse
     {
         $provider = OauthProvider::query()->where('uuid', $uuid)->firstOrFail();
         $request->session()->put('state', $state = Str::random(40));
@@ -39,7 +35,6 @@ class OauthController extends Controller
             'response_type' => 'code',
             'scope' => '',
             'state' => $state,
-            //            'prompt' => 'none', // "none", "consent", or "login"
         ]);
         $authorizationUrl = sprintf(
             '%s%s%s',
@@ -61,12 +56,10 @@ class OauthController extends Controller
      * authorization server redirect to this url with auth code after user authorized
      * and then use auth code to request to authorization server token endpoint url to get access token
      *
-     * @return array<int|string, mixed>|mixed
-     *
      * @throws ConnectionException
      * @throws \Throwable
      */
-    public function callback(Request $request, string $uuid)
+    public function callback(Request $request, string $uuid): RedirectResponse
     {
         $state = $request->session()->pull('state');
 

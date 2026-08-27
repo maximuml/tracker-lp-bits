@@ -25,7 +25,7 @@ class TopicController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function index(Request $request)
+    public function index(Request $request): array
     {
         $dto = ListTopicsDto::fromRequest($request);
         $query = Topic::query()
@@ -45,7 +45,7 @@ class TopicController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function store(Request $request)
+    public function store(Request $request): array
     {
         $user = Auth::user();
         if (! $user instanceof User) {
@@ -80,7 +80,7 @@ class TopicController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function show(Topic $topic)
+    public function show(Topic $topic): array
     {
         $topic->load('user', 'firstPost', 'lastPost');
 
@@ -92,7 +92,7 @@ class TopicController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function update(Request $request, Topic $topic)
+    public function update(Request $request, Topic $topic): array
     {
         $user = Auth::user();
         if (! $user instanceof User) {
@@ -137,7 +137,7 @@ class TopicController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function destroy(Topic $topic)
+    public function destroy(Topic $topic): array
     {
         $user = Auth::user();
         if (! $user instanceof User) {

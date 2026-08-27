@@ -48,7 +48,7 @@ class AgentAllowController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function index(Request $request)
+    public function index(Request $request): array
     {
         $result = $this->repository->getList($request->all());
         $resource = AgentAllowResource::collection($result);
@@ -61,7 +61,7 @@ class AgentAllowController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function store(Request $request)
+    public function store(Request $request): array
     {
         $request->validate($this->getRules());
         $result = $this->repository->store($request->all());
@@ -76,7 +76,7 @@ class AgentAllowController extends Controller
      * @param  mixed  $id
      * @return array<string, mixed>
      */
-    public function show($id)
+    public function show($id): array
     {
         $result = AgentAllow::query()->findOrFail($id);
         $resource = new AgentAllowResource($result);
@@ -90,7 +90,7 @@ class AgentAllowController extends Controller
      * @param  mixed  $id
      * @return array<string, mixed>
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id): array
     {
         $request->validate($this->getRules());
         $result = $this->repository->update($request->all(), $id);
@@ -105,7 +105,7 @@ class AgentAllowController extends Controller
      * @param  mixed  $id
      * @return array<string, mixed>
      */
-    public function destroy($id)
+    public function destroy($id): array
     {
         $result = $this->repository->delete($id);
 
@@ -113,7 +113,7 @@ class AgentAllowController extends Controller
     }
 
     /** @return  array<string, mixed> */
-    public function all()
+    public function all(): array
     {
         $result = AgentAllow::query()->orderBy('id', 'desc')->get();
         $resource = AgentAllowResource::collection($result);
@@ -124,7 +124,7 @@ class AgentAllowController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function check(Request $request)
+    public function check(Request $request): array
     {
         $request->validate([
             'peer_id' => 'required|string',

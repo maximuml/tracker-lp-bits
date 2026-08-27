@@ -25,7 +25,7 @@ class RewardController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function index(Request $request)
+    public function index(Request $request): array
     {
         $request->validate([
             'torrent_id' => 'required',
@@ -44,7 +44,7 @@ class RewardController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function store(Request $request)
+    public function store(Request $request): array
     {
         $request->validate([
             'torrent_id' => 'required',
@@ -60,9 +60,8 @@ class RewardController extends Controller
      * Display the specified resource.
      *
      * @param  mixed  $id
-     * @return Response
      */
-    public function show($id)
+    public function show($id): Response
     {
         //
 
@@ -73,9 +72,8 @@ class RewardController extends Controller
      * Update the specified resource in storage.
      *
      * @param  mixed  $id
-     * @return Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id): Response
     {
         //
 
@@ -86,9 +84,8 @@ class RewardController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  mixed  $id
-     * @return Response
      */
-    public function destroy($id)
+    public function destroy($id): Response
     {
         //
 

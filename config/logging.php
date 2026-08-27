@@ -1,5 +1,6 @@
 <?php
 
+use App\Logging\JsonLogFormatter;
 use App\Logging\NexusFormatter;
 use App\Support\Logger;
 use Monolog\Handler\NullHandler;
@@ -39,7 +40,7 @@ return [
     'channels' => [
         'stack' => [
             'driver' => 'stack',
-            'channels' => ['single'],
+            'channels' => array_filter(array_map('trim', explode(',', env('LOG_STACK', 'single')))),
             'ignore_exceptions' => false,
         ],
 
@@ -57,7 +58,16 @@ return [
             'path' => Logger::filePath(''),
             'level' => env('LOG_LEVEL', 'debug'),
             'tap' => [NexusFormatter::class],
-            'days' => 14,
+            'days' => (int) env('LOG_DAILY_DAYS', 14),
+            'ignore_exceptions' => false,
+        ],
+
+        'json' => [
+            'driver' => 'daily',
+            'path' => Logger::filePath('json'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'tap' => [JsonLogFormatter::class],
+            'days' => (int) env('LOG_DAILY_DAYS', 14),
             'ignore_exceptions' => false,
         ],
 
@@ -66,7 +76,8 @@ return [
             'url' => env('LOG_SLACK_WEBHOOK_URL'),
             'username' => 'Laravel Log',
             'emoji' => ':boom:',
-            'level' => env('LOG_LEVEL', 'critical'),
+            'level' => env('LOG_SLACK_LEVEL', 'critical'),
+            'replace_nulls' => true,
         ],
 
         'papertrail' => [
@@ -77,6 +88,10 @@ return [
                 'host' => env('PAPERTRAIL_URL'),
                 'port' => env('PAPERTRAIL_PORT'),
             ],
+        ],
+
+        'deprecations' => [
+            'channel' => env('LOG_DEPRECATIONS_CHANNEL', 'null'),
         ],
 
         'stderr' => [

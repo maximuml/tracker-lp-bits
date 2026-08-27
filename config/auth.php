@@ -81,11 +81,6 @@ return [
             'driver' => 'eloquent',
             'model' => User::class,
         ],
-
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
     ],
 
     /*

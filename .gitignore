@@ -2,6 +2,7 @@
 /vendor
 /public/hot
 /public/storage
+/public/build
 /storage/*.key
 /.idea
 /.vagrant

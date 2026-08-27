@@ -2,6 +2,9 @@
 /.idea
 /.vagrant
 /.settings
+/node_modules
+/vendor
+/public/build
 npm-debug.log
 .buildpath
 .project

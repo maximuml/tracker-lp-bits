@@ -54,7 +54,6 @@ return [
 
         'daily' => [
             'driver' => 'daily',
-            //            'path' => env('LOG_FILE', '/tmp/nexus.log'),
             'path' => Logger::filePath(''),
             'level' => env('LOG_LEVEL', 'debug'),
             'tap' => [NexusFormatter::class],
@@ -122,7 +121,6 @@ return [
         ],
 
         'emergency' => [
-            //            'path' => env('LOG_FILE', '/tmp/nexus.log'),
             'path' => Logger::filePath(''),
         ],
     ],

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 /**
  * @property int $id
- * @property int $sender
+ * @property int|null $sender
  * @property int $receiver
  * @property string|null $added
  * @property string $subject

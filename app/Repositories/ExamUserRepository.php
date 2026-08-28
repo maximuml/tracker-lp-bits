@@ -180,7 +180,7 @@ class ExamUserRepository extends BaseRepository
         $locale = $examUser->user->locale;
         $examName = $examUser->exam->name;
         Message::add([
-            'sender' => 0,
+            'sender' => null,
             'receiver' => $examUser->uid,
             'added' => now(),
             'subject' => Locale::trans('message.exam_user_end_time_updated.subject', ['exam_name' => $examName], $locale),

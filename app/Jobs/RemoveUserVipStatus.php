@@ -51,7 +51,7 @@ class RemoveUserVipStatus
                 $subject = Locale::trans('cleanup.msg_vip_status_removed', [], $locale);
                 $msg = Locale::trans('cleanup.msg_vip_status_removed_body', [], $locale);
                 $message = [
-                    'sender' => 0,
+                    'sender' => null,
                     'receiver' => $user->id,
                     'added' => now(),
                     'subject' => $subject,

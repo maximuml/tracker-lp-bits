@@ -45,21 +45,23 @@ final class TasksTest extends TestCase
         $userTwo = $this->createUser(['clientselect' => $familyIdOne]);
         $userThree = $this->createUser(['clientselect' => $familyIdTwo]);
 
-        $oldMessageId = $this->createMessage(['added' => Carbon::now()->subDays(181)]);
-        $newMessageId = $this->createMessage(['added' => Carbon::now()->subDay()]);
+        $oldMessageId = $this->createMessage(['receiver' => $userOne, 'added' => Carbon::now()->subDays(181)]);
+        $newMessageId = $this->createMessage(['receiver' => $userOne, 'added' => Carbon::now()->subDay()]);
 
         $forumId = $this->createForum();
         $oldTopicId = $this->createTopic([
             'sticky' => 'no',
             'forumid' => $forumId,
+            'userid' => $userOne,
         ]);
         $newTopicId = $this->createTopic([
             'sticky' => 'no',
             'forumid' => $forumId,
+            'userid' => $userOne,
         ]);
 
-        $oldPostId = $this->createPost(['added' => Carbon::now()->subDays(370), 'topicid' => $oldTopicId]);
-        $newPostId = $this->createPost(['added' => Carbon::now()->subDay(), 'topicid' => $newTopicId]);
+        $oldPostId = $this->createPost(['added' => Carbon::now()->subDays(370), 'topicid' => $oldTopicId, 'userid' => $userOne]);
+        $newPostId = $this->createPost(['added' => Carbon::now()->subDay(), 'topicid' => $newTopicId, 'userid' => $userOne]);
 
         $catchupUserId = $this->createUser(['last_catchup' => 0]);
         DB::table('readposts')->insert([
@@ -187,7 +189,7 @@ final class TasksTest extends TestCase
         $unique = Str::random();
 
         return (int) DB::table('messages')->insertGetId(array_merge([
-            'sender' => 0,
+            'sender' => null,
             'receiver' => 0,
             'added' => Carbon::now()->toDateTimeString(),
             'subject' => 'test-'.$unique,

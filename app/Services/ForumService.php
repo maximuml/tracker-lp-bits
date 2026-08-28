@@ -241,7 +241,7 @@ final class ForumService
                 if ($receiver !== null) {
                     $locale = $receiver->locale;
                     Message::add([
-                        'sender' => 0,
+                        'sender' => null,
                         'receiver' => $receiver->id,
                         'subject' => Locale::trans('forum.post.edited_notify_subject', [], $locale),
                         'msg' => Locale::trans('forum.post.edited_notify_body', ['topic_subject' => $postUrl, 'editor' => $user['username'] ?? ''], $locale),
@@ -298,7 +298,7 @@ final class ForumService
                 if ($receiver !== null && $receiver->acceptNotification('topic_reply')) {
                     $locale = $receiver->locale;
                     Message::add([
-                        'sender' => 0,
+                        'sender' => null,
                         'receiver' => $receiver->id,
                         'subject' => Locale::trans('forum.topic.replied_notify_subject', [], $locale),
                         'msg' => Locale::trans('forum.topic.replied_notify_body', ['topic_subject' => $postUrl], $locale),
@@ -314,7 +314,7 @@ final class ForumService
                     if ($receiver !== null && $receiver->acceptNotification('topic_reply')) {
                         $locale = $receiver->locale;
                         Message::add([
-                            'sender' => 0,
+                            'sender' => null,
                             'receiver' => $receiver->id,
                             'subject' => Locale::trans('forum.reply.replied_notify_subject', [], $locale),
                             'msg' => Locale::trans('forum.reply.replied_notify_body', ['topic_subject' => $postUrl, 'replyer' => $user['username'] ?? ''], $locale),

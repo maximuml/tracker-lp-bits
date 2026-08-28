@@ -673,7 +673,7 @@ class UploadRepository extends BaseRepository
                 .$torrent->name
                 .Locale::trans('torrent.msg_was_just_uploaded', [], $locale);
             Message::add([
-                'sender' => 0,
+                'sender' => null,
                 'subject' => $subject,
                 'receiver' => $voterId,
                 'added' => now()->toDateTimeString(),

@@ -146,7 +146,7 @@ class StaffModerationController extends LegacyController
                 $subject = Locale::trans('user.msg_email_change', [], $locale);
                 $msg = Locale::trans('user.msg_your_email_changed_from', [], $locale).$arr['email'].Locale::trans('user.msg_to_new', [], $locale).$email.Locale::trans('user.msg_by', [], $locale).$currentUser['username'];
                 Message::add([
-                    'sender' => 0,
+                    'sender' => null,
                     'receiver' => $userId,
                     'subject' => $subject,
                     'msg' => $msg,
@@ -160,7 +160,7 @@ class StaffModerationController extends LegacyController
                 $subject = Locale::trans('user.msg_username_change', [], $locale);
                 $msg = Locale::trans('user.msg_your_username_changed_from', [], $locale).$arr['username'].Locale::trans('user.msg_to_new', [], $locale).$username.Locale::trans('user.msg_by', [], $locale).$currentUser['username'];
                 Message::add([
-                    'sender' => 0,
+                    'sender' => null,
                     'receiver' => $userId,
                     'subject' => $subject,
                     'msg' => $msg,
@@ -201,7 +201,7 @@ class StaffModerationController extends LegacyController
                 $subject = Locale::trans('user.msg_your_donor_status_changed', [], $locale);
                 $msg = Locale::trans('user.msg_donor_status_changed_by', [], $locale).$currentUser['username'];
                 Message::add([
-                    'sender' => 0,
+                    'sender' => null,
                     'receiver' => $userId,
                     'subject' => $subject,
                     'msg' => $msg,
@@ -235,7 +235,7 @@ class StaffModerationController extends LegacyController
             }
 
             Message::add([
-                'sender' => 0,
+                'sender' => null,
                 'receiver' => $userId,
                 'subject' => $subject,
                 'msg' => $msg,
@@ -257,7 +257,7 @@ class StaffModerationController extends LegacyController
 
             $subject = Locale::trans('user.msg_you_are_warned', [], $locale);
             Message::add([
-                'sender' => 0,
+                'sender' => null,
                 'receiver' => $userId,
                 'subject' => $subject,
                 'msg' => $msg,
@@ -290,7 +290,7 @@ class StaffModerationController extends LegacyController
                 $msg = Locale::trans('user.msg_your_posting_rights_removed', [], $locale).$currentUser['username'].Locale::trans('user.msg_probably_reason_two', [], $locale);
             }
             Message::add([
-                'sender' => 0,
+                'sender' => null,
                 'receiver' => $userId,
                 'subject' => $subject,
                 'msg' => $msg,
@@ -310,7 +310,7 @@ class StaffModerationController extends LegacyController
                 $msg = Locale::trans('user.msg_your_upload_rights_removed', [], $locale).$currentUser['username'].Locale::trans('user.msg_probably_reason_two', [], $locale);
             }
             Message::add([
-                'sender' => 0,
+                'sender' => null,
                 'receiver' => $userId,
                 'subject' => $subject,
                 'msg' => $msg,
@@ -330,7 +330,7 @@ class StaffModerationController extends LegacyController
                 $msg = Locale::trans('user.msg_your_download_rights_removed', [], $locale).$currentUser['username'].Locale::trans('user.msg_probably_reason_three', [], $locale);
             }
             Message::add([
-                'sender' => 0,
+                'sender' => null,
                 'receiver' => $userId,
                 'subject' => $subject,
                 'msg' => $msg,

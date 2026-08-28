@@ -168,7 +168,7 @@ class BonusRepository extends BaseRepository
                 $expireAt = Carbon::now()->addDays((int) $medal->duration)->toDateTimeString();
             }
             $msg = [
-                'sender' => 0,
+                'sender' => null,
                 'receiver' => $toUser->id,
                 'subject' => Locale::trans('message.receive_medal.subject', [], $toUser->locale),
                 'msg' => Locale::trans('message.receive_medal.body', ['username' => $user->username, 'cost_bonus' => $requireBonus, 'medal_name' => $medal->name, 'price' => $medal->price, 'gift_fee_total' => $giftFee, 'gift_fee_factor' => $medal->gift_fee_factor ?? 0, 'expire_at' => $expireAt ?? Locale::trans('label.permanent', [], null), 'bonus_addition_factor' => $medal->bonus_addition_factor ?? 0], $toUser->locale),
@@ -351,7 +351,7 @@ class BonusRepository extends BaseRepository
                 BonusLogs::query()->insert($bonusLog);
             }
             $buyTorrentSuccessMessage = [
-                'sender' => 0,
+                'sender' => null,
                 'receiver' => $user->id,
                 'added' => now(),
                 'subject' => Locale::trans('message.buy_torrent_success.subject', [], $buyerLocale),

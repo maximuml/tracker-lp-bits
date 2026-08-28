@@ -205,7 +205,7 @@ final class OfferService
         $allowedtime = date('Y-m-d H:i:s');
 
         Message::add([
-            'sender' => 0,
+            'sender' => null,
             'receiver' => (int) $arr['userid'],
             'msg' => $msg,
             'subject' => $subject,
@@ -279,7 +279,7 @@ final class OfferService
         }
 
         Message::add([
-            'sender' => 0,
+            'sender' => null,
             'subject' => $subject,
             'receiver' => (int) $arr['userid'],
             'added' => $finishvotetime,
@@ -339,7 +339,7 @@ final class OfferService
             $msg = Locale::trans('offer.msg_your_offer', [], $locale).$num['name'].Locale::trans('offer.msg_was_deleted_by', [], $locale)."[url=userdetails.php?id={$userId}]".($curuser['username'] ?? '').'[/url]'.Locale::trans('offer.msg_blank', [], $locale).($reason !== '' ? Locale::trans('offer.msg_reason_is', [], $locale).$reason : '');
 
             Message::add([
-                'sender' => 0,
+                'sender' => null,
                 'receiver' => (int) $num['userid'],
                 'msg' => $msg,
                 'subject' => $subject,

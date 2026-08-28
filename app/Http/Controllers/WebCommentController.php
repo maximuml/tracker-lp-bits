@@ -313,7 +313,7 @@ class WebCommentController extends Controller
             .' [url='.Http::protocolPrefix(Url::isSecure()).rtrim((string) SiteConfig::current()->basic->baseUrl(), '/').'/'.$this->buildScript($type, $parentId).'] '.$name.'[/url].';
 
         Message::add([
-            'sender' => 0,
+            'sender' => null,
             'receiver' => $ownerId,
             'subject' => $subject,
             'added' => now(),

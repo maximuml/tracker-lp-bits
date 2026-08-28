@@ -20,6 +20,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use LogicException;
 
 class BitbucketUploadController extends Controller
 {
@@ -85,7 +86,9 @@ class BitbucketUploadController extends Controller
         if (! $file instanceof UploadedFile || ! $file->isValid()) {
             LegacyResponse::abort($lang['std_upload_failed'] ?? '', $lang['std_nothing_received'] ?? '', false);
         }
-        assert($file instanceof UploadedFile);
+        if (! $file instanceof UploadedFile) {
+            throw new LogicException('Expected uploaded file.');
+        }
 
         if ($file->getSize() > 256 * 1024) {
             LegacyResponse::abort($lang['std_upload_failed'] ?? '', $lang['std_file_too_large'] ?? '', false);
@@ -112,7 +115,9 @@ class BitbucketUploadController extends Controller
         if ($size === false) {
             LegacyResponse::abort($lang['std_error'] ?? '', $lang['std_invalid_image_format'] ?? '', false);
         }
-        assert($size !== false);
+        if ($size === false) {
+            throw new LogicException('Expected valid image size.');
+        }
 
         $height = (int) $size[1];
         $width = (int) $size[0];
@@ -145,7 +150,9 @@ class BitbucketUploadController extends Controller
                 false,
             );
         }
-        assert($orig !== false);
+        if ($orig === false) {
+            throw new LogicException('Expected valid image resource.');
+        }
 
         $thumb = imagecreatetruecolor($newwidth, $newheight);
         if ($thumb === false) {
@@ -155,7 +162,9 @@ class BitbucketUploadController extends Controller
                 false,
             );
         }
-        assert($thumb !== false);
+        if ($thumb === false) {
+            throw new LogicException('Expected valid thumbnail resource.');
+        }
         imagecopyresampled($thumb, $orig, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
 
         match ($it) {

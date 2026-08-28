@@ -46,95 +46,37 @@ class BonusLogs extends NexusModel
 
     const DEFAULT_BONUS_SELF_ENABLE = 100000;
 
-    // 扣除类，1开始
-    const BUSINESS_TYPE_CANCEL_HIT_AND_RUN = 1;
-
-    const BUSINESS_TYPE_BUY_MEDAL = 2;
-
-    const BUSINESS_TYPE_BUY_ATTENDANCE_CARD = 3;
-
-    const BUSINESS_TYPE_STICKY_PROMOTION = 4;
-
-    const BUSINESS_TYPE_POST_REWARD = 5;
-
-    const BUSINESS_TYPE_EXCHANGE_UPLOAD = 6;
-
-    const BUSINESS_TYPE_EXCHANGE_INVITE = 7;
-
-    const BUSINESS_TYPE_CUSTOM_TITLE = 8;
-
-    const BUSINESS_TYPE_BUY_VIP = 9;
-
-    const BUSINESS_TYPE_GIFT_TO_SOMEONE = 10;
-
-    const BUSINESS_TYPE_GIFT_TO_LOW_SHARE_RATIO = 12;
-
-    const BUSINESS_TYPE_LUCKY_DRAW = 13;
-
-    const BUSINESS_TYPE_EXCHANGE_DOWNLOAD = 14;
-
-    const BUSINESS_TYPE_BUY_TEMPORARY_INVITE = 15;
-
-    const BUSINESS_TYPE_BUY_RAINBOW_ID = 16;
-
-    const BUSINESS_TYPE_BUY_CHANGE_USERNAME_CARD = 17;
-
-    const BUSINESS_TYPE_GIFT_MEDAL = 18;
-
-    const BUSINESS_TYPE_BUY_TORRENT = 19;
-
-    const BUSINESS_TYPE_TASK_NOT_PASS_DEDUCT = 20;
-
-    const BUSINESS_TYPE_TASK_PASS_REWARD = 21;
-
-    const BUSINESS_TYPE_REWARD_TORRENT = 22;
-
-    const BUSINESS_TYPE_SELF_ENABLE = 24;
-
-    // 获得类，普通获得，1000 起步
-    const BUSINESS_TYPE_ROLE_WORK_SALARY = 1000;
-
-    const BUSINESS_TYPE_TORRENT_BE_DOWNLOADED = 1001;
-
-    const BUSINESS_TYPE_RECEIVE_REWARD = 1002;
-
-    const BUSINESS_TYPE_RECEIVE_GIFT = 1003;
-
-    const BUSINESS_TYPE_UPLOAD_TORRENT = 1004;
-
-    const BUSINESS_TYPE_TORRENT_BE_REWARD = 1005;
-
     /** @var array<int|string, mixed> */
     public static array $businessTypes = [
-        self::BUSINESS_TYPE_CANCEL_HIT_AND_RUN => ['text' => 'Cancel H&R'],
-        self::BUSINESS_TYPE_BUY_MEDAL => ['text' => 'Buy medal'],
-        self::BUSINESS_TYPE_BUY_ATTENDANCE_CARD => ['text' => 'Buy attendance card'],
-        self::BUSINESS_TYPE_STICKY_PROMOTION => ['text' => 'Buy torrent sticky promotion'],
-        self::BUSINESS_TYPE_POST_REWARD => ['text' => 'Reward post'],
-        self::BUSINESS_TYPE_EXCHANGE_UPLOAD => ['text' => 'Exchange upload'],
-        self::BUSINESS_TYPE_EXCHANGE_INVITE => ['text' => 'Exchange invite'],
-        self::BUSINESS_TYPE_CUSTOM_TITLE => ['text' => 'Custom title'],
-        self::BUSINESS_TYPE_BUY_VIP => ['text' => 'Buy VIP'],
-        self::BUSINESS_TYPE_GIFT_TO_SOMEONE => ['text' => 'Gift to someone'],
-        self::BUSINESS_TYPE_GIFT_TO_LOW_SHARE_RATIO => ['text' => 'Gift to low share ratio'],
-        self::BUSINESS_TYPE_LUCKY_DRAW => ['text' => 'Lucky draw'],
-        self::BUSINESS_TYPE_EXCHANGE_DOWNLOAD => ['text' => 'Exchange download'],
-        self::BUSINESS_TYPE_BUY_TEMPORARY_INVITE => ['text' => 'Buy temporary invite'],
-        self::BUSINESS_TYPE_BUY_RAINBOW_ID => ['text' => 'Buy rainbow ID'],
-        self::BUSINESS_TYPE_BUY_CHANGE_USERNAME_CARD => ['text' => 'Buy change username card'],
-        self::BUSINESS_TYPE_GIFT_MEDAL => ['text' => 'Gift medal to someone'],
-        self::BUSINESS_TYPE_BUY_TORRENT => ['text' => 'Buy torrent'],
-        self::BUSINESS_TYPE_TASK_NOT_PASS_DEDUCT => ['text' => 'Task failure penalty'],
-        self::BUSINESS_TYPE_TASK_PASS_REWARD => ['text' => 'Task success reward'],
-        self::BUSINESS_TYPE_REWARD_TORRENT => ['text' => 'Reward torrent'],
-        self::BUSINESS_TYPE_SELF_ENABLE => ['text' => 'Self enable'],
+        BusinessType::CANCEL_HIT_AND_RUN->value => ['text' => 'Cancel H&R'],
+        BusinessType::BUY_MEDAL->value => ['text' => 'Buy medal'],
+        BusinessType::BUY_ATTENDANCE_CARD->value => ['text' => 'Buy attendance card'],
+        BusinessType::STICKY_PROMOTION->value => ['text' => 'Buy torrent sticky promotion'],
+        BusinessType::POST_REWARD->value => ['text' => 'Reward post'],
+        BusinessType::EXCHANGE_UPLOAD->value => ['text' => 'Exchange upload'],
+        BusinessType::EXCHANGE_INVITE->value => ['text' => 'Exchange invite'],
+        BusinessType::CUSTOM_TITLE->value => ['text' => 'Custom title'],
+        BusinessType::BUY_VIP->value => ['text' => 'Buy VIP'],
+        BusinessType::GIFT_TO_SOMEONE->value => ['text' => 'Gift to someone'],
+        BusinessType::GIFT_TO_LOW_SHARE_RATIO->value => ['text' => 'Gift to low share ratio'],
+        BusinessType::LUCKY_DRAW->value => ['text' => 'Lucky draw'],
+        BusinessType::EXCHANGE_DOWNLOAD->value => ['text' => 'Exchange download'],
+        BusinessType::BUY_TEMPORARY_INVITE->value => ['text' => 'Buy temporary invite'],
+        BusinessType::BUY_RAINBOW_ID->value => ['text' => 'Buy rainbow ID'],
+        BusinessType::BUY_CHANGE_USERNAME_CARD->value => ['text' => 'Buy change username card'],
+        BusinessType::GIFT_MEDAL->value => ['text' => 'Gift medal to someone'],
+        BusinessType::BUY_TORRENT->value => ['text' => 'Buy torrent'],
+        BusinessType::TASK_NOT_PASS_DEDUCT->value => ['text' => 'Task failure penalty'],
+        BusinessType::TASK_PASS_REWARD->value => ['text' => 'Task success reward'],
+        BusinessType::REWARD_TORRENT->value => ['text' => 'Reward torrent'],
+        BusinessType::SELF_ENABLE->value => ['text' => 'Self enable'],
 
-        self::BUSINESS_TYPE_ROLE_WORK_SALARY => ['text' => 'Role work salary'],
-        self::BUSINESS_TYPE_TORRENT_BE_DOWNLOADED => ['text' => 'Torrent be downloaded'],
-        self::BUSINESS_TYPE_RECEIVE_REWARD => ['text' => 'Receive reward'],
-        self::BUSINESS_TYPE_RECEIVE_GIFT => ['text' => 'Receive gift'],
-        self::BUSINESS_TYPE_UPLOAD_TORRENT => ['text' => 'Upload torrent'],
-        self::BUSINESS_TYPE_TORRENT_BE_REWARD => ['text' => 'Torrent be reward'],
+        BusinessType::ROLE_WORK_SALARY->value => ['text' => 'Role work salary'],
+        BusinessType::TORRENT_BE_DOWNLOADED->value => ['text' => 'Torrent be downloaded'],
+        BusinessType::RECEIVE_REWARD->value => ['text' => 'Receive reward'],
+        BusinessType::RECEIVE_GIFT->value => ['text' => 'Receive gift'],
+        BusinessType::UPLOAD_TORRENT->value => ['text' => 'Upload torrent'],
+        BusinessType::TORRENT_BE_REWARD->value => ['text' => 'Torrent be reward'],
     ];
 
     /**

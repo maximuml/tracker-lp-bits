@@ -18,6 +18,7 @@ use App\Support\Log;
 use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use LogicException;
 
 /**
  * Handles offer action mutations (create, allow, finish, delete, edit).
@@ -181,7 +182,9 @@ final class OfferService
         if (! $offer) {
             $this->abort($this->lang('std_error'), $this->lang('text_nothing_found'));
         }
-        assert($offer !== null);
+        if ($offer === null) {
+            throw new LogicException('Expected non-null offer.');
+        }
 
         $arr = $offer->toArray();
         $arr['username'] = $offer->user->username ?? '';
@@ -234,7 +237,9 @@ final class OfferService
         if (! $offer) {
             $this->abort($this->lang('std_error'), $this->lang('text_nothing_found'));
         }
-        assert($offer !== null);
+        if ($offer === null) {
+            throw new LogicException('Expected non-null offer.');
+        }
 
         $arr = $offer->toArray();
         $arr['username'] = $offer->user->username ?? '';
@@ -302,7 +307,9 @@ final class OfferService
         if (! $offerRecord) {
             $this->abort($this->lang('std_error'), $this->lang('text_nothing_found'));
         }
-        assert($offerRecord !== null);
+        if ($offerRecord === null) {
+            throw new LogicException('Expected non-null offer record.');
+        }
 
         $num = $offerRecord->toArray();
         $curuser = $this->curUser();

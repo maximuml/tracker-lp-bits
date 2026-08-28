@@ -74,7 +74,7 @@ class UserResource extends Resource
     private static function getRep(): UserRepository
     {
         if (self::$rep === null) {
-            self::$rep = new UserRepository;
+            self::$rep = app(UserRepository::class);
         }
 
         return self::$rep;

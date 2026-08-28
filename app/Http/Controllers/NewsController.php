@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\NewsStoreRequest;
 use App\Http\Resources\NewsResource;
 use App\Models\News;
 use App\Repositories\IndexRepository;
@@ -182,13 +183,9 @@ class NewsController extends LegacyController
     /**
      * @return array<string, mixed>
      */
-    public function store(Request $request): array
+    public function store(NewsStoreRequest $request): array
     {
-        $data = $request->validate([
-            'title' => 'required|string|max:255',
-            'body' => 'required|string',
-            'notify' => 'in:yes,no',
-        ]);
+        $data = $request->validated();
 
         $currentUser = (array) (app(CurrentUser::class)->get() ?? []);
         $data['userid'] = (int) ($currentUser['id'] ?? 0);

@@ -179,7 +179,7 @@ class UploadRepository extends BaseRepository
             return $newTorrent;
         });
         $id = $newTorrent->id;
-        $torrentRep = new TorrentRepository;
+        $torrentRep = app(TorrentRepository::class);
         $torrentRep->addPiecesHashCache($id, $newTorrent->pieces_hash);
         $this->handleOffer($request, $newTorrent, $user);
         Log::writeWithContext("Torrent $id ($newTorrent->name) was uploaded by $uploaderUsername");
@@ -487,7 +487,7 @@ class UploadRepository extends BaseRepository
      */
     public function getSubCategoriesAndTags(Request $request, Category $category, bool $checkUploadPermission = true): array
     {
-        $searchBoxRep = new SearchBoxRepository;
+        $searchBoxRep = app(SearchBoxRepository::class);
         $sections = $searchBoxRep->listSections(SearchBox::listAllSectionId())->keyBy('id');
         if (! $sections->has($category->mode)) {
             throw new NexusException(Locale::trans('upload.invalid_section', [], null));
@@ -604,7 +604,7 @@ class UploadRepository extends BaseRepository
 
             return 0;
         }
-        $toolRep = new ToolRepository;
+        $toolRep = app(ToolRepository::class);
         $categoryName = $torrent->basic_category->name;
         $torrentUploader = $torrent->user;
         $successCount = 0;

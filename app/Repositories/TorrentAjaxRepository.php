@@ -127,7 +127,7 @@ final class TorrentAjaxRepository
         }
 
         try {
-            $torrents = (new MeiliSearchRepository)->autocomplete($query, 10, $user);
+            $torrents = app(MeiliSearchRepository::class)->autocomplete($query, 10, $user);
         } catch (ApiException) {
             $torrents = [];
         }
@@ -279,7 +279,7 @@ final class TorrentAjaxRepository
             'total_size' => $totalSize,
             'pagertop' => (string) $pager[0],
             'pagerbottom' => (string) $pager[1],
-            'torrentRep' => new TorrentRepository,
+            'torrentRep' => app(TorrentRepository::class),
             'seedTimeAndUploaded' => $seedTimeAndUploaded,
         ];
     }

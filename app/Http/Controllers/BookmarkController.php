@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\BookmarkRequest;
 use App\Http\Resources\BookmarkResource;
 use App\Models\User;
 use App\Repositories\BookmarkRepository;
@@ -28,11 +29,8 @@ class BookmarkController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function store(Request $request): array
+    public function store(BookmarkRequest $request): array
     {
-        $request->validate([
-            'torrent_id' => 'required|integer',
-        ]);
         $user = Auth::user();
         if (! $user instanceof User) {
             throw new \RuntimeException('unauthenticated');
@@ -71,11 +69,8 @@ class BookmarkController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function destroy(Request $request): array
+    public function destroy(BookmarkRequest $request): array
     {
-        $request->validate([
-            'torrent_id' => 'required|integer',
-        ]);
         $user = Auth::user();
         if (! $user instanceof User) {
             throw new \RuntimeException('unauthenticated');

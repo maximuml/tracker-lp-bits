@@ -18,6 +18,12 @@ class BuyTorrent implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public int $tries = 3;
+
+    public int $backoff = 10;
+
+    public int $timeout = 300;
+
     public int $userId;
 
     public int $torrentId;
@@ -43,7 +49,7 @@ class BuyTorrent implements ShouldQueue
     public function handle()
     {
         $logPrefix = sprintf('user: %s, torrent: %s', $this->userId, $this->torrentId);
-        $torrentRep = new TorrentRepository;
+        $torrentRep = app(TorrentRepository::class);
         $userId = $this->userId;
         $torrentId = $this->torrentId;
 
@@ -60,7 +66,7 @@ class BuyTorrent implements ShouldQueue
             return;
         }
         try {
-            $bonusRep = new BonusRepository;
+            $bonusRep = app(BonusRepository::class);
             $buyLog = $bonusRep->consumeToBuyTorrent($this->userId, $this->torrentId);
             // 标记购买成功
             Logger::writeWithContext((string) "{$logPrefix}, buy torrent success", (string) 'info', (bool) false);

@@ -40,7 +40,7 @@ class Test extends Command
      */
     public function handle()
     {
-        $rep = new RequireSeedTorrentRepository;
+        $rep = app(RequireSeedTorrentRepository::class);
         $rep->autoAddToListCronjob();
 
         return 0;

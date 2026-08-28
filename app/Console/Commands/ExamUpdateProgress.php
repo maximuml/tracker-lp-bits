@@ -43,7 +43,7 @@ class ExamUpdateProgress extends Command
     {
         $uid = $this->option('uid');
         $bulk = $this->option('bulk');
-        $examRep = new ExamRepository;
+        $examRep = app(ExamRepository::class);
         $log = "uid: $uid, bulk: $bulk";
         $this->info($log);
         if (is_numeric($uid) && $uid) {

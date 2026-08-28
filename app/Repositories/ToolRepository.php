@@ -465,7 +465,7 @@ class ToolRepository extends BaseRepository
     {
         $result = [];
         // attend or not
-        $attendRep = new AttendanceRepository;
+        $attendRep = app(AttendanceRepository::class);
         $attendance = $attendRep->getAttendance($user->id, date('Ymd'));
         $result['attendance'] = $attendance ? 0 : 1;
 

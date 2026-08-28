@@ -41,7 +41,7 @@ class AttendanceMigrate extends Command
      */
     public function handle(): int
     {
-        $rep = new AttendanceRepository;
+        $rep = app(AttendanceRepository::class);
         $result = $rep->migrateAttendance();
         $log = sprintf('[%s], %s, result: %s, query: %s', Nexus::instance() ? Nexus::instance()->getRequestId() : 'NO_REQUEST_ID', __METHOD__, var_export($result, true), LegacyDb::lastQuery(false, 'json'));
         $this->info($log);

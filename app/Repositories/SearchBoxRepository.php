@@ -461,7 +461,7 @@ class SearchBoxRepository extends BaseRepository
         $fieldset->schema($fieldsetSchema)->columns(1);
         $schema[] = $fieldset;
 
-        $tagRep = new TagRepository;
+        $tagRep = app(TagRepository::class);
         $tags = $tagRep->listAll($searchBox->id);
         $schema[] = Forms\Components\CheckboxList::make("$namePrefix.tag")
             ->options($tags->pluck('name', 'id'))

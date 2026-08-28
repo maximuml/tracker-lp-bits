@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
+use App\Http\Requests\TorrentIdRequest;
 use App\Http\Requests\TorrentRequest;
 use App\Http\Resources\TorrentOperationLogResource;
 use App\Http\Resources\TorrentResource;
@@ -121,10 +122,9 @@ class TorrentController extends Controller
         return $this->success($result);
     }
 
-    public function approvalPage(Request $request): View
+    public function approvalPage(TorrentIdRequest $request): View
     {
         Permission::assertCan(PermissionEnum::TORRENT_APPROVAL);
-        $request->validate(['torrent_id' => 'required']);
         $torrentId = $request->torrent_id;
         $torrent = Torrent::query()->findOrFail($torrentId, Torrent::$commentFields);
         $denyReasons = TorrentDenyReason::query()->orderBy('priority', 'desc')->get();
@@ -135,10 +135,9 @@ class TorrentController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function approvalLogs(Request $request): array
+    public function approvalLogs(TorrentIdRequest $request): array
     {
         Permission::assertCan(PermissionEnum::TORRENT_APPROVAL);
-        $request->validate(['torrent_id' => 'required']);
         $torrentId = $request->torrent_id;
         $actionTypes = [
             TorrentOperationLog::ACTION_TYPE_APPROVAL_NONE,

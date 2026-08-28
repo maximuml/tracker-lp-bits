@@ -13,6 +13,12 @@ class UpdateUserDownloadPrivilege implements ShouldQueue
 {
     use Queueable;
 
+    public int $tries = 3;
+
+    public int $backoff = 10;
+
+    public int $timeout = 120;
+
     /**
      * Create a new job instance.
      */
@@ -26,7 +32,7 @@ class UpdateUserDownloadPrivilege implements ShouldQueue
      */
     public function handle(): void
     {
-        $rep = new UserRepository;
+        $rep = app(UserRepository::class);
         $rep->updateDownloadPrivileges(null, $this->userId, $this->status, $this->reasonKey);
         Logger::writeWithContext((string) "Updating user download privilege for user {$this->userId} to {$this->status} by reason {$this->reasonKey}", (string) 'info', (bool) false);
     }

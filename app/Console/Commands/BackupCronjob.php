@@ -42,7 +42,7 @@ class BackupCronjob extends Command
     {
         $force = $this->option('force');
         $this->info("force: $force");
-        $rep = new ToolRepository;
+        $rep = app(ToolRepository::class);
         $result = $rep->cronjobBackup($force);
         $log = sprintf(
             '[%s], %s, result: %s',

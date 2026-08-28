@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SnatchRequest;
 use App\Http\Resources\SnatchResource;
 use App\Repositories\TorrentRepository;
 use Illuminate\Http\Request;
@@ -24,11 +25,8 @@ class SnatchController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function index(Request $request): array
+    public function index(SnatchRequest $request): array
     {
-        $request->validate([
-            'torrent_id' => 'required',
-        ]);
         $snatches = $this->repository->listSnatches($request->torrent_id);
         $resource = SnatchResource::collection($snatches);
 

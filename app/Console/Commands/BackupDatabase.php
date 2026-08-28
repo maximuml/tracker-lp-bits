@@ -42,7 +42,7 @@ class BackupDatabase extends Command
      */
     public function handle()
     {
-        $rep = new ToolRepository;
+        $rep = app(ToolRepository::class);
         $transfer = $this->option('transfer');
         $this->info("transfer: $transfer");
         $result = $rep->backupDatabase($transfer);

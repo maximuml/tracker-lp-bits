@@ -10,6 +10,12 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 
 class SyncTorrentToMeilisearch implements ShouldQueue
 {
+    public int $tries = 3;
+
+    public int $backoff = 10;
+
+    public int $timeout = 120;
+
     /**
      * Create the event listener.
      */

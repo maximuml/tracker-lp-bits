@@ -166,7 +166,7 @@ final class Mail
         }
 
         if ($smtpType === 'external') {
-            $toolRep = new ToolRepository;
+            $toolRep = app(ToolRepository::class);
 
             return (bool) $toolRep->sendMail($to, $subject, $body);
         }

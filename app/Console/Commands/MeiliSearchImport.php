@@ -30,7 +30,7 @@ class MeiliSearchImport extends Command
      */
     public function handle()
     {
-        $rep = new MeiliSearchRepository;
+        $rep = app(MeiliSearchRepository::class);
         $this->info('going to import torrents...');
         $total = $rep->import();
         $this->info("import $total torrents.");

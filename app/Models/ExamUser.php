@@ -82,7 +82,7 @@ class ExamUser extends NexusModel
     /** @return  array<int|string, mixed> */
     public function getProgressFormattedAttribute(): array
     {
-        $examRep = new ExamRepository;
+        $examRep = app(ExamRepository::class);
 
         return $examRep->getProgressFormatted($this->exam, (array) $this->progress);
     }

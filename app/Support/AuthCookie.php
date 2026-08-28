@@ -276,7 +276,7 @@ final class AuthCookie
                 throw new \InvalidArgumentException("Invalid authkey: $authkey, format error");
             }
             $uid = $arr[1];
-            $decrypted = (new TorrentRepository)->checkTrackerReportAuthKey($authkey);
+            $decrypted = app(TorrentRepository::class)->checkTrackerReportAuthKey($authkey);
             if (empty($decrypted)) {
                 throw new \InvalidArgumentException("Invalid authkey: $authkey");
             }

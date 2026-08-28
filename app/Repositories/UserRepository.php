@@ -1074,7 +1074,7 @@ class UserRepository extends BaseRepository
         if ($operator) {
             $this->checkPermission($operator, $targetUser);
         }
-        $toolRep = new ToolRepository;
+        $toolRep = app(ToolRepository::class);
         $locale = $targetUser->locale;
 
         $changeType = Locale::trans("nexus.{$action}", [], $locale);

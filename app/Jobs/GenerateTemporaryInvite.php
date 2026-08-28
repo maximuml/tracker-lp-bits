@@ -42,6 +42,8 @@ class GenerateTemporaryInvite implements ShouldQueue
 
     public int $timeout = 1800;
 
+    public int $backoff = 60;
+
     /**
      * Execute the job.
      *
@@ -50,7 +52,7 @@ class GenerateTemporaryInvite implements ShouldQueue
     public function handle()
     {
         $beginTimestamp = microtime(true);
-        $toolRep = new ToolRepository;
+        $toolRep = app(ToolRepository::class);
         $idStr = Cache::get($this->idRedisKey);
         $logPrefix = 'idRedisKey: '.$this->idRedisKey;
         if (empty($idStr)) {

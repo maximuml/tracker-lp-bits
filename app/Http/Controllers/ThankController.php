@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ThankRequest;
 use App\Http\Resources\ThankResource;
 use App\Models\Thank;
 use App\Models\Torrent;
@@ -41,13 +42,12 @@ class ThankController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function store(Request $request): array
+    public function store(ThankRequest $request): array
     {
         $user = Auth::user();
         if (! $user instanceof User) {
             throw new \RuntimeException('unauthenticated');
         }
-        $request->validate(['torrent_id' => 'required']);
         $torrentId = (int) $request->torrent_id;
         $torrent = Torrent::query()->findOrFail($torrentId, Torrent::$commentFields);
         $torrent->checkIsNormal();

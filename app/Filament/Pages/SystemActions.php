@@ -115,7 +115,7 @@ class SystemActions extends Page implements HasForms
         }
 
         $name = $user->username;
-        $userRep = new UserRepository;
+        $userRep = app(UserRepository::class);
         $userRep->destroy((int) $user->id);
 
         Notification::make()

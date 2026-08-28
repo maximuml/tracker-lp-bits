@@ -42,7 +42,7 @@ class ExamCheckoutCronjob extends Command
      */
     public function handle()
     {
-        $examRep = new ExamRepository;
+        $examRep = app(ExamRepository::class);
         $ignoreTimeRange = $this->option('ignore-time-range');
         $this->info('ignore-time-range: '.var_export($ignoreTimeRange, true));
         $result = $examRep->cronjobCheckout($ignoreTimeRange);

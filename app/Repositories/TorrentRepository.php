@@ -1354,7 +1354,7 @@ HTML;
         }
         $torrentIdStr = implode(',', $torrentIdArr);
         Logger::writeWithContext((string) "torrentIdStr: {$torrentIdStr}, sectionId: {$sectionId}", (string) 'info', (bool) false);
-        $searchBoxRep = new SearchBoxRepository;
+        $searchBoxRep = app(SearchBoxRepository::class);
         $sections = $searchBoxRep->listSections(SearchBox::listAllSectionId(), true)->keyBy('id');
         if (! $sections->has($sectionId)) {
             throw new NexusException(Locale::trans('upload.invalid_section', [], null));
@@ -1526,7 +1526,7 @@ HTML;
         }
 
         try {
-            $meiliSearchRep = new MeiliSearchRepository;
+            $meiliSearchRep = app(MeiliSearchRepository::class);
             $meiliSearchRep->deleteDocuments($idArr);
         } catch (\Throwable $e) {
             Logger::writeWithContext('MeiliSearch delete on torrent delete failed: '.$e->getMessage(), 'error');

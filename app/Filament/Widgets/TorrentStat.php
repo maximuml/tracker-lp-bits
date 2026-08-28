@@ -20,7 +20,7 @@ class TorrentStat extends StatTable
     /** @return array<int|string, array<string, mixed>> */
     protected function getTableRows(): array
     {
-        $dashboardRep = new DashboardRepository;
+        $dashboardRep = app(DashboardRepository::class);
 
         return $dashboardRep->statTorrents();
     }

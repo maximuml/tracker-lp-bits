@@ -29,7 +29,7 @@ final class TorrentTable
         $enabletooltip_tweak = (string) app(Globals::class)->get('enabletooltip_tweak', '');
 
         $torrent = new Torrent;
-        $torrentRep = new TorrentRepository;
+        $torrentRep = app(TorrentRepository::class);
         $torrentIdArr = $ownerIdArr = [];
         foreach ($rows as $row) {
             $torrentIdArr[] = $row['id'];
@@ -40,7 +40,7 @@ final class TorrentTable
         UserDisplay::preload($ownerIdArr);
 
         $torrentSeedingLeechingStatus = $torrent->listLeechingSeedingStatus($user['id'], $torrentIdArr);
-        $tagRep = new TagRepository;
+        $tagRep = app(TagRepository::class);
         $torrentTagResult = $torrentRep->getTorrentTagsGrouped($torrentIdArr);
         $showCover = false;
         if ($searchBoxId) {

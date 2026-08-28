@@ -42,7 +42,7 @@ class ExamAssignCronjob extends Command
      */
     public function handle()
     {
-        $examRep = new ExamRepository;
+        $examRep = app(ExamRepository::class);
         $result = $examRep->cronjonAssign();
         $log = sprintf('[%s], %s, result: %s', Nexus::instance()->getRequestId(), __METHOD__, var_export($result, true));
         $this->info($log);

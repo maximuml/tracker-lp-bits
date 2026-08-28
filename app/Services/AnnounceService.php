@@ -16,6 +16,7 @@ use App\Repositories\AgentAllowRepository;
 use App\Repositories\CleanupRepository;
 use App\Repositories\IpLogRepository;
 use App\Repositories\RequireSeedTorrentRepository;
+use App\Repositories\TorrentPurchaseRepository;
 use App\Repositories\TorrentRepository;
 use App\Repositories\UserRepository;
 use App\Services\Announce\CheaterDetector;
@@ -412,7 +413,7 @@ final class AnnounceService
             $this->responseBuilder->warn('purchase in progress, please try again later, and make sure you have enough bonus', 300);
         }
 
-        if ($buyStatus == TorrentRepository::BUY_STATUS_UNKNOWN) {
+        if ($buyStatus == TorrentPurchaseRepository::BUY_STATUS_UNKNOWN) {
             Nexus::dispatchQueueJob(new BuyTorrent($this->userId, $this->torrentId));
             $this->responseBuilder->warn('purchase started, please wait', 300);
         }

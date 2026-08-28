@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Auth\Permission;
-use App\Enums\Permission\PermissionEnum;
 use App\Models\Offer;
 use App\Models\User;
 use App\Repositories\AttendanceRepository;
@@ -18,8 +16,6 @@ use App\Repositories\UserRepository;
 use App\Support\CurrentUser;
 use App\Support\Shoutbox;
 use App\Support\ToastNotifications;
-use Illuminate\Support\Facades\DB;
-use Nexus\Database\NexusLock;
 
 final class AjaxService
 {
@@ -69,6 +65,7 @@ final class AjaxService
         private readonly BonusRepository $bonusRepository,
         private readonly ExamRepository $examRepository,
         private readonly UserPasskeyRepository $userPasskeyRepository,
+        private readonly ShoutboxService $shoutboxService,
     ) {}
 
     /** @param array<string, mixed> $params */
@@ -151,12 +148,9 @@ final class AjaxService
     public function clearShoutBox(array $params): mixed
     {
         $CURUSER = app(CurrentUser::class)->get() ?? [];
-        $user = User::query()->find($CURUSER['id'] ?? 0);
-        if (! $user instanceof User || ! Permission::can(PermissionEnum::SB_MANAGE, $user)) {
+        if (! $this->shoutboxService->clearAll($CURUSER)) {
             throw new \RuntimeException('No permission');
         }
-        DB::table('shoutbox')->delete();
-        DB::table('shoutbox_reactions')->delete();
 
         return true;
     }
@@ -173,33 +167,11 @@ final class AjaxService
         if (mb_strlen($text) > Shoutbox::MAX_MESSAGE_LENGTH) {
             throw new \InvalidArgumentException('Message too long');
         }
-        $msg = DB::table('shoutbox')->where('id', $id)->first();
-        if (! $msg) {
-            throw new \RuntimeException('Message not found');
+        if (! $this->shoutboxService->editMessage($CURUSER, $id, $text)) {
+            throw new \RuntimeException('Message not found, no permission, edit window expired, or editing too often');
         }
-        $msgUserId = (int) ($msg->userid ?? 0);
-        $msgDate = (int) ($msg->date ?? 0);
-        if ($msgUserId !== (int) $CURUSER['id'] && ! Permission::can(PermissionEnum::SB_MANAGE)) {
-            throw new \RuntimeException('No permission');
-        }
-        if ((time() - $msgDate) > Shoutbox::EDIT_WINDOW && ! Permission::can(PermissionEnum::SB_MANAGE)) {
-            throw new \RuntimeException('Edit window expired');
-        }
-        $editLock = new NexusLock('shoutbox_edit:'.$CURUSER['id'], 10);
-        if (! $editLock->acquire()) {
-            throw new \RuntimeException('Editing too often');
-        }
-        try {
-            DB::table('shoutbox')->where('id', $id)->update([
-                'text' => $text,
-                'edited_by' => $CURUSER['id'],
-                'edited_at' => time(),
-            ]);
 
-            return true;
-        } finally {
-            $editLock->release();
-        }
+        return true;
     }
 
     /** @param array<string, mixed> $params */
@@ -210,30 +182,11 @@ final class AjaxService
         if ($id <= 0) {
             throw new \InvalidArgumentException('Invalid input');
         }
-        $msg = DB::table('shoutbox')->where('id', $id)->first();
-        if (! $msg) {
-            return true;
+        if (! $this->shoutboxService->deleteMessage($CURUSER, $id)) {
+            throw new \RuntimeException('No permission, delete window expired, or deleting too often');
         }
-        $msgUserId = (int) ($msg->userid ?? 0);
-        $msgDate = (int) ($msg->date ?? 0);
-        if ($msgUserId !== (int) $CURUSER['id'] && ! Permission::can(PermissionEnum::SB_MANAGE)) {
-            throw new \RuntimeException('No permission');
-        }
-        if ((time() - $msgDate) > Shoutbox::EDIT_WINDOW && ! Permission::can(PermissionEnum::SB_MANAGE)) {
-            throw new \RuntimeException('Delete window expired');
-        }
-        $deleteLock = new NexusLock('shoutbox_delete:'.$CURUSER['id'], 10);
-        if (! $deleteLock->acquire()) {
-            throw new \RuntimeException('Deleting too often');
-        }
-        try {
-            DB::table('shoutbox')->where('id', $id)->delete();
-            DB::table('shoutbox_reactions')->where('shoutbox_id', $id)->delete();
 
-            return true;
-        } finally {
-            $deleteLock->release();
-        }
+        return true;
     }
 
     /** @param array<string, mixed> $params */
@@ -242,32 +195,12 @@ final class AjaxService
         $CURUSER = app(CurrentUser::class)->get() ?? [];
         $id = (int) ($params['id'] ?? 0);
         $reaction = (string) ($params['reaction'] ?? '');
-        if ($id <= 0 || ! in_array($reaction, Shoutbox::REACTIONS, true)) {
-            throw new \InvalidArgumentException('Invalid reaction');
+        $result = $this->shoutboxService->toggleReaction($CURUSER, $id, $reaction);
+        if ($result === null) {
+            throw new \InvalidArgumentException('Invalid reaction or reacting too often');
         }
-        $reactLock = new NexusLock('shoutbox_react:'.$CURUSER['id'], 5);
-        if (! $reactLock->acquire()) {
-            throw new \RuntimeException('Reacting too often');
-        }
-        try {
-            $table = DB::table('shoutbox_reactions');
-            $existing = $table->where('shoutbox_id', $id)->where('user_id', $CURUSER['id'])->where('reaction', $reaction)->first();
-            if ($existing) {
-                $table->where('id', $existing->id)->delete();
 
-                return 'removed';
-            }
-            $table->insert([
-                'shoutbox_id' => $id,
-                'user_id' => $CURUSER['id'],
-                'reaction' => $reaction,
-                'created_at' => date('Y-m-d H:i:s'),
-            ]);
-
-            return 'added';
-        } finally {
-            $reactLock->release();
-        }
+        return $result;
     }
 
     /** @param array<string, mixed> $params */

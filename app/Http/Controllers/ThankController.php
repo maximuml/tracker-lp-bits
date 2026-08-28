@@ -9,16 +9,17 @@ use App\Http\Resources\ThankResource;
 use App\Models\Thank;
 use App\Models\Torrent;
 use App\Models\User;
-use App\Support\Config\SiteConfig;
-use App\Support\LegacyDb;
-use App\Support\Logger;
+use App\Services\ThankService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class ThankController extends Controller
 {
+    public function __construct(
+        private readonly ThankService $thankService,
+    ) {}
+
     /**
      * Display a listing of the resource.
      *
@@ -51,42 +52,8 @@ class ThankController extends Controller
         $torrentId = (int) $request->torrent_id;
         $torrent = Torrent::query()->findOrFail($torrentId, Torrent::$commentFields);
         $torrent->checkIsNormal();
-        $torrentOwner = User::query()->findOrFail((int) $torrent->owner);
-        if ($user->id == $torrentOwner->id) {
-            throw new \LogicException("you can't thank to yourself");
-        }
-        $torrentOwner->checkIsNormal();
-        if ($user->thank_torrent_logs()->where('torrentid', $torrentId)->exists()) {
-            throw new \LogicException('you already thank this torrent');
-        }
 
-        $result = DB::transaction(function () use ($user, $torrentOwner, $torrent) {
-            $thank = $user->thank_torrent_logs()->create(['torrentid' => $torrent->id]);
-            $sayThanksBonus = SiteConfig::current()->bonus->sayThanks();
-            $receiveThanksBonus = SiteConfig::current()->bonus->receiveThanks();
-            if ($sayThanksBonus > 0) {
-                $affectedRows = User::query()
-                    ->where('id', $user->id)
-                    ->where('seedbonus', $user->seedbonus)
-                    ->increment('seedbonus', $sayThanksBonus);
-                if ($affectedRows != 1) {
-                    Logger::writeWithContext((string) ("affectedRows: {$affectedRows}, query: ".LegacyDb::lastQuery(false, 'json')), (string) 'error', (bool) false);
-                    throw new \RuntimeException('increment user bonus fail.');
-                }
-            }
-            if ($receiveThanksBonus > 0) {
-                $affectedRows = User::query()
-                    ->where('id', $torrentOwner->id)
-                    ->where('seedbonus', $torrentOwner->seedbonus)
-                    ->increment('seedbonus', $receiveThanksBonus);
-                if ($affectedRows != 1) {
-                    Logger::writeWithContext((string) ("affectedRows: {$affectedRows}, query: ".LegacyDb::lastQuery(false, 'json')), (string) 'error', (bool) false);
-                    throw new \RuntimeException('increment owner bonus fail.');
-                }
-            }
-
-            return $thank;
-        });
+        $result = $this->thankService->thankTorrent($user, $torrent);
         $resource = new ThankResource($result);
 
         return $this->success($resource, '说谢谢成功！');

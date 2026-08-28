@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Models\Torrent;
-use App\Support\Bonus;
-use App\Support\Cache\LegacyRedisCache;
+use App\Services\TorrentBookmarkService;
 use App\Support\CurrentUser;
-use App\Support\Globals;
 use App\Support\LegacyResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\DB;
 
 class TorrentBookmarkController extends LegacyController
 {
+    public function __construct(
+        private readonly TorrentBookmarkService $bookmarkService,
+    ) {}
+
     public function bookmark(Request $request): Response
     {
         $headers = [
@@ -37,25 +37,7 @@ class TorrentBookmarkController extends LegacyController
             return response('failed', 200, $headers);
         }
 
-        $userId = (int) $user['id'];
-        $bookmark = DB::table('bookmarks')->where('torrentid', $torrentId)->where('userid', $userId)->first();
-
-        if ($bookmark) {
-            $bookmarkId = (int) $bookmark->id;
-            DB::table('bookmarks')->where('id', $bookmarkId)->delete();
-            $status = 'deleted';
-        } else {
-            DB::table('bookmarks')->insertGetId([
-                'torrentid' => $torrentId,
-                'userid' => $userId,
-            ]);
-            $status = 'added';
-        }
-
-        $cache = app(LegacyRedisCache::class);
-        if ($cache !== null) {
-            $cache->delete_value('user_'.$userId.'_bookmark_array');
-        }
+        $status = $this->bookmarkService->toggleBookmark((int) $user['id'], $torrentId);
 
         return response($status, 200, $headers);
     }
@@ -67,35 +49,18 @@ class TorrentBookmarkController extends LegacyController
         }
 
         $curUser = app(CurrentUser::class)->get();
-        $userid = (int) ($curUser['id'] ?? 0);
 
         if ($request->query('id') !== null) {
             LegacyResponse::abort('Party is over!', "This trick doesn't work anymore. You need to click the button!");
         }
 
         $torrentid = (int) request()->post('id');
-        $torrentowner = Torrent::query()->where('id', $torrentid)->value('owner');
-        if (! $torrentowner) {
-            LegacyResponse::abort('Error', 'Invalid torrent id!');
+
+        try {
+            $this->bookmarkService->thankTorrent($curUser, $torrentid);
+        } catch (\RuntimeException $e) {
+            LegacyResponse::abort('Error', $e->getMessage());
         }
-
-        $existing = DB::table('thanks')
-            ->where('torrentid', $torrentid)
-            ->where('userid', $userid)
-            ->count();
-        if ($existing != 0) {
-            LegacyResponse::abort('Error', 'You already said thanks!');
-        }
-
-        DB::table('thanks')->insert([
-            'torrentid' => $torrentid,
-            'userid' => $userid,
-        ]);
-
-        $saythanksBonus = (float) app(Globals::class)->get('saythanks_bonus', 0);
-        $receivethanksBonus = (float) app(Globals::class)->get('receivethanks_bonus', 0);
-        Bonus::updatePoints('+', $saythanksBonus, $userid);
-        Bonus::updatePoints('+', $receivethanksBonus, (int) $torrentowner);
 
         return $this->legacyPageRaw($request, 'thanks', true, [
             'torrentid' => $torrentid,

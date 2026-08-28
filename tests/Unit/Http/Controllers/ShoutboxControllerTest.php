@@ -4,6 +4,7 @@ namespace Tests\Unit\Http\Controllers;
 
 use App\Http\Controllers\ShoutboxController;
 use App\Repositories\ShoutboxRepository;
+use App\Services\ShoutboxService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -26,7 +27,7 @@ final class ShoutboxControllerTest extends TestCase
             ['userid' => 20, 'date' => 1700000001, 'text' => 'world', 'type' => 'sb'],
         ]);
 
-        $controller = new ShoutboxController(new ShoutboxRepository);
+        $controller = new ShoutboxController(new ShoutboxRepository, app(ShoutboxService::class));
         $request = Request::create('/api/v1/shoutbox', 'GET', ['page' => 1]);
         app()->instance('request', $request);
 

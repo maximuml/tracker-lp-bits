@@ -2,16 +2,16 @@
 
 ## Project overview
 
-Private BitTorrent tracker built on NexusPHP, modernised with Laravel 12 + Filament 5.
+Private BitTorrent tracker built on NexusPHP, modernised with Laravel 13 + Filament 5.
 PHP 8.4+, MySQL, Redis, MeiliSearch. Docker Compose stack for local development.
 
 ## Tech stack
 
-- **Backend:** Laravel 12, PHP 8.4, Filament 5
+- **Backend:** Laravel 13, PHP 8.4, Filament 5
 - **Database:** MySQL 9 (Docker), Redis 7
 - **Search:** MeiliSearch
 - **Queue:** Redis (default), Octane-compatible
-- **Frontend:** Blade templates, legacy NexusPHP themes, Vite for asset bundling
+- **Frontend:** Blade templates, legacy NexusPHP themes, Vite 8 + Tailwind CSS 4 for asset bundling
 
 ## Key directories
 
@@ -90,6 +90,11 @@ docker compose exec -T php composer audit
 
 ## Modernisation status
 
-See `STEP_BY_STEP_PLAN.md` for the full sprint-by-sprint progress.
-Sprints 0–29 complete. Sprint 22 (observability) in progress.
-Key remaining work: Sprint 30 (audit cleanup), test coverage, frontend upgrade.
+Sprints 0–47 complete. Recent work:
+- Sprint 46: service decomposition (extract ShoutboxService, ThankService,
+  TorrentBookmarkService, ComplainService, LocationService, BitbucketService;
+  AnnounceService DI cleanup)
+- Sprint 47: major dependency upgrades — Laravel 12→13, Tailwind 3→4,
+  laravel-vite-plugin 1→3 + Vite 6→8
+
+Key remaining work: Sprint 30 (audit cleanup), test coverage expansion.

@@ -22,6 +22,8 @@ class LoadTorrentBoughtUsers implements ShouldQueue
 
     public int $timeout = 1800;
 
+    public int $backoff = 60;
+
     /**
      * Create a new job instance.
      *
@@ -39,7 +41,7 @@ class LoadTorrentBoughtUsers implements ShouldQueue
      */
     public function handle()
     {
-        $rep = new TorrentRepository;
+        $rep = app(TorrentRepository::class);
         $result = $rep->loadBoughtUser($this->torrentId);
         Logger::writeWithContext((string) "result: {$result}", (string) 'info', (bool) false);
     }

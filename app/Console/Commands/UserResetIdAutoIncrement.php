@@ -77,7 +77,7 @@ class UserResetIdAutoIncrement extends Command
         $this->info($statement);
         $result = DB::statement($statement);
 
-        $userRep = new UserRepository;
+        $userRep = app(UserRepository::class);
         $insert = [
             'username' => $options['admin'],
             'email' => $options['email'],

@@ -44,7 +44,7 @@ class BackupAll extends Command
     {
         $method = $this->option('method');
         $this->info("method: $method");
-        $rep = new ToolRepository;
+        $rep = app(ToolRepository::class);
         $result = $rep->backupAll($method);
         $log = sprintf(
             '[%s], %s, result: %s',

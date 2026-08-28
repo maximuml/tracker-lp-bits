@@ -6,6 +6,11 @@ namespace App\Http\Controllers;
 
 use App\Enums\PeerSeeder;
 use App\Enums\SnatchFinished;
+use App\Http\Requests\UidRequest;
+use App\Http\Requests\UserDisableRequest;
+use App\Http\Requests\UserIncrementDecrementRequest;
+use App\Http\Requests\UserResetPasswordRequest;
+use App\Http\Requests\UserStoreRequest;
 use App\Http\Resources\ExamResource;
 use App\Http\Resources\InviteResource;
 use App\Http\Resources\TorrentResource;
@@ -47,16 +52,9 @@ class UserController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function store(Request $request): array
+    public function store(UserStoreRequest $request): array
     {
-        $rules = [
-            'username' => 'required|string',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|string|min:6|max:40',
-            'password_confirmation' => 'required|string|same:password',
-        ];
-        $request->validate($rules);
-        $result = $this->repository->store($request->all());
+        $result = $this->repository->store($request->validated());
         $resource = new UserResource($result);
 
         return $this->success($resource);
@@ -110,14 +108,8 @@ class UserController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function resetPassword(Request $request): array
+    public function resetPassword(UserResetPasswordRequest $request): array
     {
-        $rules = [
-            'uid' => 'required',
-            'password' => 'required|string|min:6|max:40',
-            'password_confirmation' => 'required|same:password',
-        ];
-        $request->validate($rules);
         $result = $this->repository->resetPassword((int) $request->uid, $request->password, $request->password_confirmation);
 
         return $this->success($result, 'Reset password success!');
@@ -144,11 +136,8 @@ class UserController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function matchExams(Request $request): array
+    public function matchExams(UidRequest $request): array
     {
-        $request->validate([
-            'uid' => 'required',
-        ]);
         $examRepository = $this->examRepository;
         $result = $examRepository->listMatchExam((int) $request->uid);
         $resource = ExamResource::collection($result);
@@ -159,12 +148,8 @@ class UserController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function disable(Request $request): array
+    public function disable(UserDisableRequest $request): array
     {
-        $request->validate([
-            'uid' => 'required',
-            'reason' => 'required',
-        ]);
         $user = Auth::user();
         if (! $user instanceof User) {
             throw new \RuntimeException('unauthenticated');
@@ -177,11 +162,8 @@ class UserController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function enable(Request $request): array
+    public function enable(UidRequest $request): array
     {
-        $request->validate([
-            'uid' => 'required',
-        ]);
         $user = Auth::user();
         if (! $user instanceof User) {
             throw new \RuntimeException('unauthenticated');
@@ -194,11 +176,8 @@ class UserController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function inviteInfo(Request $request): array
+    public function inviteInfo(UidRequest $request): array
     {
-        $request->validate([
-            'uid' => 'required',
-        ]);
         $result = $this->repository->getInviteInfo((int) $request->uid);
         $resource = $result ? (new InviteResource($result)) : null;
 
@@ -208,11 +187,8 @@ class UserController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function modComment(Request $request): array
+    public function modComment(UidRequest $request): array
     {
-        $request->validate([
-            'uid' => 'required',
-        ]);
         $result = $this->repository->getModComment((int) $request->uid);
 
         return $this->success($result);
@@ -351,18 +327,12 @@ class UserController extends Controller
     /**
      * @return array<int|string, mixed>
      */
-    public function incrementDecrement(Request $request): array
+    public function incrementDecrement(UserIncrementDecrementRequest $request): array
     {
         $user = Auth::user();
         if (! $user instanceof User) {
             throw new \RuntimeException('unauthenticated');
         }
-        $request->validate([
-            'uid' => 'required',
-            'action' => 'required',
-            'field' => 'required',
-            'value' => 'required|numeric',
-        ]);
         $result = $this->repository->incrementDecrement($user, $request->uid, $request->action, $request->field, $request->value, $request->reason);
 
         return $this->success(['success' => $result]);
@@ -371,12 +341,9 @@ class UserController extends Controller
     /**
      * @return array<int|string, mixed>
      */
-    public function removeTwoStepAuthentication(Request $request): array
+    public function removeTwoStepAuthentication(UidRequest $request): array
     {
         $user = Auth::user();
-        $request->validate([
-            'uid' => 'required',
-        ]);
         $result = $this->repository->removeTwoStepAuthentication($user, $request->uid);
 
         return $this->success(['success' => $result]);

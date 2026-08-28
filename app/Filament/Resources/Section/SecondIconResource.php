@@ -47,7 +47,7 @@ class SecondIconResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        $searchBoxRep = new SearchBoxRepository;
+        $searchBoxRep = app(SearchBoxRepository::class);
         $torrentMode = SiteConfig::current()->main->browseCat();
         $torrentTaxonomySchema = $searchBoxRep->listTaxonomyFormSchema($torrentMode);
         $modeOptions = SearchBox::listModeOptions();

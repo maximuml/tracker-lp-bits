@@ -3,10 +3,10 @@
 namespace Tests\Unit\Http\Controllers;
 
 use App\Http\Controllers\BookmarkController;
+use App\Http\Requests\BookmarkRequest;
 use App\Models\Bookmark;
 use App\Models\User;
 use App\Repositories\BookmarkRepository;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Mockery;
@@ -40,8 +40,10 @@ final class BookmarkControllerTest extends TestCase
         Auth::shouldReceive('user')->once()->andReturn($user);
 
         $controller = new BookmarkController($repository);
-        $request = Request::create('/api/v1/bookmarks', 'POST', ['torrent_id' => 42]);
-        app()->instance('request', $request);
+        $request = BookmarkRequest::create('/api/v1/bookmarks', 'POST', ['torrent_id' => 42]);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $result = $controller->store($request);
 
@@ -61,8 +63,10 @@ final class BookmarkControllerTest extends TestCase
         $repository->shouldNotReceive('add');
 
         $controller = new BookmarkController($repository);
-        $request = Request::create('/api/v1/bookmarks', 'POST', []);
-        app()->instance('request', $request);
+        $request = BookmarkRequest::create('/api/v1/bookmarks', 'POST', []);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $controller->store($request);
     }
@@ -82,8 +86,10 @@ final class BookmarkControllerTest extends TestCase
         Auth::shouldReceive('user')->once()->andReturn($user);
 
         $controller = new BookmarkController($repository);
-        $request = Request::create('/api/v1/bookmarks/42', 'DELETE', ['torrent_id' => 42]);
-        app()->instance('request', $request);
+        $request = BookmarkRequest::create('/api/v1/bookmarks/42', 'DELETE', ['torrent_id' => 42]);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $result = $controller->destroy($request);
 

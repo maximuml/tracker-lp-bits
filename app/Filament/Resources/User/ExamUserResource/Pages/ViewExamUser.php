@@ -95,7 +95,7 @@ class ViewExamUser extends ViewRecord
             Action::make('Avoid')
                 ->requiresConfirmation()
                 ->action(function () {
-                    $examRep = new ExamRepository;
+                    $examRep = app(ExamRepository::class);
                     try {
                         $examRep->avoidExamUser($this->getExamUserRecord()->id);
                         Admin::successNotification('');
@@ -118,7 +118,7 @@ class ViewExamUser extends ViewRecord
                         ->label(__('label.reason')),
                 ])
                 ->action(function (array $data) {
-                    $examRep = new ExamRepository;
+                    $examRep = app(ExamRepository::class);
                     try {
                         $examRep->updateExamUserEnd($this->getExamUserRecord(), Carbon::parse($data['end']), $data['reason'] ?? '');
                         Admin::successNotification('');

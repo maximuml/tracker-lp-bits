@@ -105,7 +105,7 @@ class CategoryResource extends Resource
                 EditAction::make(),
                 DeleteAction::make()->using(function (Category $record) {
                     try {
-                        $rep = new SearchBoxRepository;
+                        $rep = app(SearchBoxRepository::class);
                         $rep->deleteCategory($record->id);
                     } catch (Exception $exception) {
                         Notification::make()->danger()->body($exception->getMessage() ?: class_basename($exception))->send();
@@ -115,7 +115,7 @@ class CategoryResource extends Resource
             ->toolbarActions([
                 DeleteBulkAction::make()->using(function (Collection $records) {
                     try {
-                        $rep = new SearchBoxRepository;
+                        $rep = app(SearchBoxRepository::class);
                         $rep->deleteCategory($records->pluck('id')->toArray());
                     } catch (Exception $exception) {
                         Notification::make()->danger()->body($exception->getMessage() ?: class_basename($exception))->send();

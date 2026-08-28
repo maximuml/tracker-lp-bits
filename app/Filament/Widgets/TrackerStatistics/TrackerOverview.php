@@ -21,7 +21,7 @@ class TrackerOverview extends StatTable
      */
     protected function getTableRows(): array
     {
-        $dashboardRep = new DashboardRepository;
+        $dashboardRep = app(DashboardRepository::class);
 
         return $dashboardRep->statTracker();
     }

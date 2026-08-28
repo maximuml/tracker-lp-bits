@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PeerRequest;
 use App\Http\Resources\PeerResource;
 use App\Repositories\TorrentRepository;
 use Illuminate\Http\Request;
@@ -26,12 +27,8 @@ class PeerController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function index(Request $request): array
+    public function index(PeerRequest $request): array
     {
-        $request->validate([
-            'torrent_id' => 'required',
-        ]);
-
         $response = [
             'seeder_list' => [],
             'leecher_list' => [],

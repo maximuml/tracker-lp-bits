@@ -19,6 +19,6 @@ class PeerAgents extends StatTable
     /** @return array<int|string, array<string, mixed>> */
     protected function getTableRows(): array
     {
-        return (new DashboardRepository)->peerAgents();
+        return app(DashboardRepository::class)->peerAgents();
     }
 }

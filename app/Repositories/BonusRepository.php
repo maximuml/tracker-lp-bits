@@ -122,7 +122,7 @@ class BonusRepository extends BaseRepository
             $comment = Locale::trans('bonus.comment_buy_medal', ['bonus' => $requireBonus, 'medal_name' => $medal->name], $user->locale);
             Logger::writeWithContext((string) "comment: {$comment}", (string) 'info', (bool) false);
             $this->consumeUserBonus($user, $requireBonus, BusinessType::BUY_MEDAL->value, "$comment(medal ID: {$medal->id})");
-            $medalRep = new MedalRepository;
+            $medalRep = app(MedalRepository::class);
             $medalRep->userAttachMedal($user, $medal);
             if ($medal->inventory !== null) {
                 $affectedRows = DB::table('medals')
@@ -219,7 +219,7 @@ class BonusRepository extends BaseRepository
             throw new \RuntimeException('Temporary invite require bonus <= 0 !');
         }
         $user = User::query()->findOrFail((int) $uid);
-        $toolRep = new ToolRepository;
+        $toolRep = app(ToolRepository::class);
         $hashArr = $toolRep->generateUniqueInviteHash([], $count, $count);
         DB::transaction(function () use ($user, $requireBonus, $hashArr) {
             $comment = Locale::trans('bonus.comment_buy_temporary_invite', ['bonus' => $requireBonus, 'count' => count($hashArr)], $user->locale);
@@ -259,7 +259,7 @@ class BonusRepository extends BaseRepository
                 'meta_key' => UserMeta::META_KEY_PERSONALIZED_USERNAME,
                 'duration' => $duration,
             ];
-            $userRep = new UserRepository;
+            $userRep = app(UserRepository::class);
             $userRep->addMeta($user, $metaData, $metaData, false);
         });
 
@@ -292,7 +292,7 @@ class BonusRepository extends BaseRepository
             $metaData = [
                 'meta_key' => UserMeta::META_KEY_CHANGE_USERNAME,
             ];
-            $userRep = new UserRepository;
+            $userRep = app(UserRepository::class);
             $userRep->addMeta($user, $metaData, $metaData, false);
         });
 

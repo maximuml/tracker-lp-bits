@@ -298,7 +298,7 @@ LUA;
     {
         $now = Carbon::now();
         $timestamp = $now->getTimestamp();
-        $toolRep = new ToolRepository;
+        $toolRep = app(ToolRepository::class);
         $arvToLevel = [
             'lastcleantime' => 'one',
             'lastcleantime2' => 'two',
@@ -377,7 +377,7 @@ LUA;
         }
         $receiverUid = SiteConfig::current()->system->alarmEmailReceiver();
         Logger::writeWithContext((string) "receiverUid: {$receiverUid}", (string) 'info', (bool) false);
-        $toolRep = new ToolRepository;
+        $toolRep = app(ToolRepository::class);
         if (empty($receiverUid)) {
             $locale = Locale::getDefault();
             $subject = self::getAlarmEmailSubjectForQueueFailedJobs($locale);

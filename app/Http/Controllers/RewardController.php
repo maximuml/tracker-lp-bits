@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\RewardRequest;
 use App\Http\Resources\RewardResource;
 use App\Models\User;
 use App\Repositories\RewardRepository;
@@ -46,12 +47,8 @@ class RewardController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function store(Request $request): array
+    public function store(RewardRequest $request): array
     {
-        $request->validate([
-            'torrent_id' => 'required',
-            'value' => 'required',
-        ]);
         $user = Auth::user();
         if (! $user instanceof User) {
             throw new \RuntimeException('unauthenticated');

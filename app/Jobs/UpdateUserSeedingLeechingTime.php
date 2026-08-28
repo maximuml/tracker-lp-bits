@@ -49,6 +49,8 @@ class UpdateUserSeedingLeechingTime implements ShouldQueue
     /** @var int */
     public $timeout = 3600;
 
+    public int $backoff = 60;
+
     /**
      * 获取任务时，应该通过的中间件。
      *

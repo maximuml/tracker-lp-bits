@@ -100,7 +100,7 @@ class Update extends Install
         $this->runMigrate('database/migrations/2025_10_05_030401_add_event_column_to_activity_log_table.php');
         $this->runMigrate('database/migrations/2025_10_05_030402_add_batch_uuid_column_to_activity_log_table.php');
 
-        $toolRep = new ToolRepository;
+        $toolRep = app(ToolRepository::class);
         $redis = Redis::connection()->client();
         /**
          * @since 1.7.13
@@ -170,7 +170,7 @@ class Update extends Install
             }
             if (! Schema::hasColumn('attendance', 'total_days')) {
                 $this->runMigrate('database/migrations/2021_06_13_215440_add_total_days_to_attendance_table.php');
-                $attendanceRep = new AttendanceRepository;
+                $attendanceRep = app(AttendanceRepository::class);
                 $count = $attendanceRep->migrateAttendance();
                 $this->doLog("[MIGRATE_ATTENDANCE] $count");
             }
@@ -235,7 +235,7 @@ class Update extends Install
         if (WITH_LARAVEL && ! Schema::hasColumn('users', 'attendance_card')) {
             $this->runMigrate('database/migrations/2022_04_02_163930_create_attendance_logs_table.php');
             $this->runMigrate('database/migrations/2022_04_03_041642_add_attendance_card_to_users_table.php');
-            $rep = new AttendanceRepository;
+            $rep = app(AttendanceRepository::class);
             $count = $rep->migrateAttendanceLogs();
             $this->doLog("[ADD_ATTENDANCE_CARD_TO_USERS], migrateAttendanceLogs: $count");
         }
@@ -381,7 +381,7 @@ class Update extends Install
         if (Schema::hasColumn('torrents', 'tags')) {
             if (Torrent::query()->where('tags', '>', 0)->count() > 0 && TorrentTag::query()->count() == 0) {
                 $this->doLog('[MIGRATE_TORRENT_TAG]...');
-                $tagRep = new TagRepository;
+                $tagRep = app(TagRepository::class);
                 $tagRep->migrateTorrentTag();
                 $this->doLog('[MIGRATE_TORRENT_TAG] done!');
             }

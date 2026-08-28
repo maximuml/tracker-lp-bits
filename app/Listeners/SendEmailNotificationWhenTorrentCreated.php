@@ -12,6 +12,12 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 
 class SendEmailNotificationWhenTorrentCreated implements ShouldQueue
 {
+    public int $tries = 3;
+
+    public int $backoff = 10;
+
+    public int $timeout = 120;
+
     /**
      * Create the event listener.
      */
@@ -31,7 +37,7 @@ class SendEmailNotificationWhenTorrentCreated implements ShouldQueue
 
             return;
         }
-        $uploadRepo = new UploadRepository;
+        $uploadRepo = app(UploadRepository::class);
         $result = $uploadRepo->sendEmailNotification($torrent);
         Logger::writeWithContext((string) ("torrent: {$torrent->id}, sendEmailNotification result: ".var_export($result, true)), (string) 'info', (bool) false);
     }

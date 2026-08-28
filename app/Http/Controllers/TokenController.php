@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Exceptions\NexusException;
+use App\Http\Requests\TokenRequest;
 use App\Models\User;
 use App\Repositories\TokenRepository;
 use App\Support\Locale;
@@ -16,13 +17,9 @@ class TokenController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function addToken(Request $request): array
+    public function addToken(TokenRequest $request): array
     {
         try {
-            $request->validate([
-                'name' => 'required|string',
-                'permissions' => 'required|array|min:1',
-            ]);
             $user = Auth::user();
             if (! $user instanceof User) {
                 return $this->fail(false, 'Unauthenticated');

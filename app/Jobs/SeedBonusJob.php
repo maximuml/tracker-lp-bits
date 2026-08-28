@@ -54,6 +54,8 @@ class SeedBonusJob implements ShouldQueue
     /** @var int */
     public $timeout = 120;
 
+    public int $backoff = 60;
+
     /**
      * 获取任务时，应该通过的中间件。
      *

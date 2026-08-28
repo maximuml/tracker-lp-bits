@@ -36,7 +36,7 @@ class EditExam extends EditRecord
     public function save(bool $shouldRedirect = true, bool $shouldSendSavedNotification = true): void
     {
         $data = $this->form->getState();
-        $examRep = new ExamRepository;
+        $examRep = app(ExamRepository::class);
         try {
             $this->record = $examRep->update($data, $this->getExamRecord()->id);
             Admin::successNotification('');

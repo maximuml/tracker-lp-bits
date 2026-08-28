@@ -81,7 +81,7 @@ class TorrentResource extends Resource
     public static function getRep(): TorrentRepository
     {
         if (self::$rep === null) {
-            self::$rep = new TorrentRepository;
+            self::$rep = app(TorrentRepository::class);
         }
 
         return self::$rep;
@@ -168,7 +168,7 @@ class TorrentResource extends Resource
                 ->action(function (Collection $records, array $data) {
                     $idArr = $records->pluck('id')->toArray();
                     try {
-                        $torrentRep = new TorrentRepository;
+                        $torrentRep = app(TorrentRepository::class);
                         $torrentRep->setPosState($idArr, $data['pos_state'], $data['pos_state_until']);
                     } catch (Exception $exception) {
                         Logger::writeWithContext((string) ($exception->getMessage().$exception->getTraceAsString()), (string) 'error', (bool) false);
@@ -197,7 +197,7 @@ class TorrentResource extends Resource
                 ->action(function (Collection $records, array $data) {
                     $idArr = $records->pluck('id')->toArray();
                     try {
-                        $torrentRep = new TorrentRepository;
+                        $torrentRep = app(TorrentRepository::class);
                         $torrentRep->setSpState($idArr, $data['sp_state'], $data['promotion_time_type'], $data['promotion_until']);
                     } catch (Exception $exception) {
                         Logger::writeWithContext((string) ($exception->getMessage().$exception->getTraceAsString()), (string) 'error', (bool) false);
@@ -215,7 +215,7 @@ class TorrentResource extends Resource
                 ->action(function (Collection $records) {
                     $idArr = $records->pluck('id')->toArray();
                     try {
-                        $torrentRep = new TorrentRepository;
+                        $torrentRep = app(TorrentRepository::class);
                         $torrentRep->syncTags($idArr);
                     } catch (Exception $exception) {
                         Logger::writeWithContext((string) ($exception->getMessage().$exception->getTraceAsString()), (string) 'error', (bool) false);
@@ -242,7 +242,7 @@ class TorrentResource extends Resource
                     }
                     $idArr = $records->pluck('id')->toArray();
                     try {
-                        $torrentRep = new TorrentRepository;
+                        $torrentRep = app(TorrentRepository::class);
                         $torrentRep->syncTags($idArr, $data['tags'], $data['remove'] ?? false);
                     } catch (Exception $exception) {
                         Logger::writeWithContext((string) ($exception->getMessage().$exception->getTraceAsString()), (string) 'error', (bool) false);
@@ -268,7 +268,7 @@ class TorrentResource extends Resource
                     }
                     $idArr = $records->pluck('id')->toArray();
                     try {
-                        $torrentRep = new TorrentRepository;
+                        $torrentRep = app(TorrentRepository::class);
                         $torrentRep->setHr($idArr, $data['hr']);
                     } catch (Exception $exception) {
                         Logger::writeWithContext((string) ($exception->getMessage().$exception->getTraceAsString()), (string) 'error', (bool) false);
@@ -303,7 +303,7 @@ class TorrentResource extends Resource
                     Textarea::make('comment')->label(__('label.comment')),
                 ])
                 ->action(function (Torrent $record, array $data) {
-                    $torrentRep = new TorrentRepository;
+                    $torrentRep = app(TorrentRepository::class);
                     try {
                         $data['torrent_id'] = $record->id;
                         $torrentRep->approval(Auth::user(), $data);

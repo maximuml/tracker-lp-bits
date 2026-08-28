@@ -18,6 +18,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\CommentType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -32,21 +33,14 @@ class Comment extends NexusModel
     /** @var list<string> */
     protected $fillable = ['user', 'torrent', 'added', 'text', 'ori_text', 'editedby', 'editdate', 'offer', 'anonymous'];
 
-    /** @deprecated Use App\Enums\CommentType enum instead. */
-    const TYPE_TORRENT = 'torrent';
-
-    /** @deprecated Use App\Enums\CommentType enum instead. */
-    const TYPE_OFFER = 'offer';
-
-    /** @deprecated Use App\Enums\CommentType enum instead. */
     const TYPE_MAPS = [
-        self::TYPE_TORRENT => [
+        CommentType::TORRENT->value => [
             'model' => Torrent::class,
             'foreign_key' => 'torrent',
             'target_name_field' => 'name',
             'target_script' => 'details.php?id=%s',
         ],
-        self::TYPE_OFFER => [
+        CommentType::OFFER->value => [
             'model' => Offer::class,
             'foreign_key' => 'offer',
             'target_name_field' => 'name',

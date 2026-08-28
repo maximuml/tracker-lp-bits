@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\TorrentPromotion;
+use App\Enums\TorrentStateNotice;
 use App\Models\Traits\NexusActivityLogTrait;
 use App\Support\Cache as AppCache;
 use App\Support\Events;
@@ -27,10 +28,6 @@ use Illuminate\Validation\ValidationException;
 class TorrentState extends NexusModel
 {
     use NexusActivityLogTrait;
-
-    public const NOTICE_NONE = 0;
-
-    public const NOTICE_UNLIMITED = -1;
 
     /** @var list<string> */
     protected $fillable = ['global_sp_state', 'deadline', 'begin', 'remark', 'notice_days'];
@@ -156,7 +153,7 @@ class TorrentState extends NexusModel
         foreach ($states as $state) {
             $begin = self::parseDateTimeValue($state['begin'] ?? null);
             $deadline = self::parseDateTimeValue($state['deadline'] ?? null);
-            $noticeDays = (int) ($state['notice_days'] ?? self::NOTICE_NONE);
+            $noticeDays = (int) ($state['notice_days'] ?? TorrentStateNotice::NONE->value);
 
             $hasBegun = ! $begin || $begin->lessThanOrEqualTo($moment);
             $notExpired = ! $deadline || $deadline->greaterThanOrEqualTo($moment);
@@ -345,13 +342,13 @@ class TorrentState extends NexusModel
     public static function noticeOptions(): array
     {
         return [
-            self::NOTICE_NONE => __('label.torrent_state.notice_none'),
+            TorrentStateNotice::NONE->value => __('label.torrent_state.notice_none'),
             1 => __('label.torrent_state.notice_day', ['days' => 1]),
             3 => __('label.torrent_state.notice_day', ['days' => 3]),
             7 => __('label.torrent_state.notice_day', ['days' => 7]),
             15 => __('label.torrent_state.notice_day', ['days' => 15]),
             30 => __('label.torrent_state.notice_day', ['days' => 30]),
-            self::NOTICE_UNLIMITED => __('label.torrent_state.notice_unlimited'),
+            TorrentStateNotice::UNLIMITED->value => __('label.torrent_state.notice_unlimited'),
         ];
     }
 
@@ -360,10 +357,10 @@ class TorrentState extends NexusModel
         if (! $begin) {
             return true;
         }
-        if ($noticeDays === self::NOTICE_NONE) {
+        if ($noticeDays === TorrentStateNotice::NONE->value) {
             return false;
         }
-        if ($noticeDays === self::NOTICE_UNLIMITED) {
+        if ($noticeDays === TorrentStateNotice::UNLIMITED->value) {
             return true;
         }
 

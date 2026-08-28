@@ -15,6 +15,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\UsernameChangeType;
 use App\Support\Locale;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -26,16 +27,10 @@ class UsernameChangeLog extends NexusModel
     /** @var bool */
     public $timestamps = true;
 
-    /** @deprecated Use App\Enums\UsernameChangeType enum instead. */
-    const CHANGE_TYPE_USER = 1;
-
-    /** @deprecated Use App\Enums\UsernameChangeType enum instead. */
-    const CHANGE_TYPE_ADMIN = 2;
-
     /** @var array<int|string, mixed> */
     public static array $changeTypes = [
-        self::CHANGE_TYPE_USER => ['text' => 'User'],
-        self::CHANGE_TYPE_ADMIN => ['text' => 'Administrator'],
+        UsernameChangeType::USER->value => ['text' => 'User'],
+        UsernameChangeType::ADMIN->value => ['text' => 'Administrator'],
     ];
 
     /** @return  mixed */

@@ -7,6 +7,7 @@ namespace App\Models\Traits;
 use App\Enums\ExamUserStatus;
 use App\Enums\PeerSeeder;
 use App\Enums\SnatchFinished;
+use App\Enums\UserMedalStatus;
 use App\Models\Bookmark;
 use App\Models\Comment;
 use App\Models\Country;
@@ -25,7 +26,6 @@ use App\Models\Snatch;
 use App\Models\Thank;
 use App\Models\Torrent;
 use App\Models\User;
-use App\Models\UserMedal;
 use App\Models\UserMeta;
 use App\Models\UserModifyLog;
 use App\Models\UsernameChangeLog;
@@ -203,7 +203,7 @@ trait HasUserRelationships
      */
     public function wearing_medals(): BelongsToMany
     {
-        return $this->valid_medals()->where('user_medals.status', UserMedal::STATUS_WEARING);
+        return $this->valid_medals()->where('user_medals.status', UserMedalStatus::WEARING->value);
     }
 
     /** @return HasMany<Reward, $this> */

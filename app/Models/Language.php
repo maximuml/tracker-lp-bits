@@ -15,6 +15,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\LanguageTranslationState;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
 
@@ -27,26 +28,11 @@ class Language extends NexusModel
 {
     const DEFAULT_ENABLED = ['en'];
 
-    /** @deprecated Use App\Enums\LanguageTranslationState enum instead. */
-    const TRANS_STATE_UP_TO_DATE = 'up-to-date';
-
-    /** @deprecated Use App\Enums\LanguageTranslationState enum instead. */
-    const TRANS_STATE_OUT_DATE = 'outdate';
-
-    /** @deprecated Use App\Enums\LanguageTranslationState enum instead. */
-    const TRANS_STATE_INCOMPLETE = 'incomplete';
-
-    /** @deprecated Use App\Enums\LanguageTranslationState enum instead. */
-    const TRANS_STATE_NEED_NEW = 'need-new';
-
-    /** @deprecated Use App\Enums\LanguageTranslationState enum instead. */
-    const TRANS_STATE_UNAVAILABLE = 'unavailable';
-
     const CONFIG = [
         'en' => [
             'lang_name' => 'English',
             'lang_name_cn' => 'English',
-            'trans_state' => self::TRANS_STATE_UP_TO_DATE,
+            'trans_state' => LanguageTranslationState::UP_TO_DATE->value,
         ],
     ];
 

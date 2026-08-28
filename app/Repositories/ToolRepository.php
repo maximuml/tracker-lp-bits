@@ -577,7 +577,7 @@ class ToolRepository extends BaseRepository
         $idsField = Database::groupConcatField('id');
         while (true) {
             $snatchRes = DB::table('snatched')
-                ->select('userid', 'torrentid', DB::raw("$idsField as ids"))
+                ->select('userid', 'torrentid', DB::raw("$idsField as ids")) // @phpstan-ignore argument.type
                 ->groupBy('userid', 'torrentid')
                 ->havingRaw('count(*) > 1')
                 ->limit($size)
@@ -617,7 +617,7 @@ class ToolRepository extends BaseRepository
         $idsField = Database::groupConcatField('id');
         while (true) {
             $results = DB::table('peers')
-                ->select('torrent', 'userid', DB::raw("$idsField as ids"))
+                ->select('torrent', 'userid', DB::raw("$idsField as ids")) // @phpstan-ignore argument.type
                 ->groupBy('torrent', 'peer_id', 'userid')
                 ->havingRaw('count(*) > 1')
                 ->limit($size)

@@ -113,6 +113,7 @@ class TorrentStateResource extends Resource
                     ->badge()
                     ->sortable(query: function (Builder $query, string $direction): Builder {
                         $now = Carbon::now()->toDateTimeString();
+                        $dir = $direction === 'asc' ? 'asc' : 'desc';
 
                         // expired=0, ongoing=1, upcoming=2
                         return $query->orderByRaw(
@@ -120,7 +121,7 @@ class TorrentStateResource extends Resource
                                 WHEN deadline IS NOT NULL AND deadline < ? THEN 0
                                 WHEN begin IS NOT NULL AND begin > ? THEN 2
                                 ELSE 1
-                            END {$direction}",
+                            END {$dir}",
                             [$now, $now]
                         );
                     })

@@ -233,7 +233,7 @@ class AdminToolsController extends LegacyController
                 $start = (int) ip2long($rangeStartIp);
                 $end = (int) ip2long($rangeEndIp);
 
-                return $query->whereRaw("INET_ATON(start_ip) <= {$start} AND INET_ATON(end_ip) >= {$end}");
+                return $query->whereRaw('INET_ATON(start_ip) <= ? AND INET_ATON(end_ip) >= ?', [$start, $end]);
             });
 
         $count = $baseQuery->count();

@@ -92,7 +92,7 @@ class SearchPageRepository
                 default => 'id',
             };
 
-            $ascdesc = ((string) $searchParams['type'] === 'asc') ? 'ASC' : 'DESC';
+            $ascdesc = ((string) $searchParams['type'] === 'asc') ? 'asc' : 'desc';
             $linkascdesc = ((string) $searchParams['type'] === 'asc') ? 'asc' : 'desc';
             $pagerSortParam = 'sort='.intval($searchParams['sort']).'&type='.$linkascdesc.'&';
         }

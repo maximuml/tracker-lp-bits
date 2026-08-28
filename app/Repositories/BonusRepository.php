@@ -427,7 +427,7 @@ class BonusRepository extends BaseRepository
     public function consumeUserBonusAndIncrementCharity($user, float $requireBonus, int $logBusinessType, string $logComment, float $charityIncrement): void
     {
         $this->consumeUserBonus($user, $requireBonus, $logBusinessType, $logComment, [
-            'charity' => DB::raw('charity + '.(float) $charityIncrement),
+            'charity' => DB::raw('charity + '.(float) $charityIncrement), // @phpstan-ignore argument.type
         ]);
     }
 
@@ -569,7 +569,7 @@ class BonusRepository extends BaseRepository
         DB::table('users')
             ->where('id', $id)
             ->update([
-                'seedbonus' => DB::raw('seedbonus '.$op.' '.(float) $point),
+                'seedbonus' => DB::raw('seedbonus '.$op.' '.(float) $point), // @phpstan-ignore argument.type
             ]);
     }
 }

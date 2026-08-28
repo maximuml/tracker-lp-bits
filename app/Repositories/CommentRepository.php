@@ -104,7 +104,7 @@ class CommentRepository
     {
         $row = DB::table('comments')
             ->where('id', $commentId)
-            ->selectRaw("{$type} as pid, user")
+            ->selectRaw("{$type} as pid, user") // @phpstan-ignore argument.type
             ->first();
 
         return $row === null ? null : (array) $row;

@@ -496,7 +496,7 @@ class HitAndRunRepository extends BaseRepository
             ->selectRaw('count(*) as counts, uid')
             ->where('status', HitAndRunStatus::UNREACHED->value)
             ->groupBy('uid')
-            ->havingRaw("count(*) >= $disableCounts");
+            ->havingRaw('count(*) >= ?', [$disableCounts]);
         if ($setting['diff_in_section']) {
             $query->whereHas('torrent.basic_category', function (Builder $query) use ($setting) {
                 return $query->where('mode', $setting['search_box_id']);

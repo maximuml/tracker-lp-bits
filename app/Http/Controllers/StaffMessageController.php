@@ -73,17 +73,14 @@ class StaffMessageController extends LegacyController
         $size = 10000;
         $page = 1;
         $dt = now()->toDateTimeString();
-        $conditions = [];
         $classIds = array_map('intval', $selectedClasses);
-        $conditions[] = 'class IN ('.implode(', ', $classIds).')';
-        $whereStr = implode(' OR ', $conditions);
 
         set_time_limit(300);
 
         while (true) {
             $offset = ($page - 1) * $size;
             $rows = DB::table('users')
-                ->whereRaw("($whereStr)")
+                ->whereIn('class', $classIds)
                 ->where('enabled', 'yes')
                 ->where('status', 'confirmed')
                 ->offset($offset)

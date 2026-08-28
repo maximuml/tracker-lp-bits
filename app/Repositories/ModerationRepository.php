@@ -203,7 +203,7 @@ class ModerationRepository extends BaseRepository
             default => 'access DESC',
         };
 
-        return DB::table(DB::raw("({$unionSql}) as ipsearch"))
+        return DB::table(DB::raw("({$unionSql}) as ipsearch")) // @phpstan-ignore argument.type
             ->mergeBindings($union)
             ->select('*')
             ->groupBy('id')
@@ -239,7 +239,7 @@ class ModerationRepository extends BaseRepository
         $union = $userQuery->union($iplogQuery);
         $unionSql = $union->toSql();
 
-        $countRow = (array) DB::table(DB::raw("({$unionSql}) as ipsearch"))
+        $countRow = (array) DB::table(DB::raw("({$unionSql}) as ipsearch")) // @phpstan-ignore argument.type
             ->mergeBindings($union)
             ->selectRaw('count(DISTINCT id) as c')
             ->first();

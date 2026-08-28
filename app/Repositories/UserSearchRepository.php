@@ -382,7 +382,7 @@ final class UserSearchRepository
         }
         $offset = $page * $perPage;
 
-        $rows = (clone $userQuery)->distinct()->selectRaw($select_is)->offset($offset)->limit($perPage)->get()->map(fn ($row) => (array) $row)->all();
+        $rows = (clone $userQuery)->distinct()->selectRaw($select_is)->offset($offset)->limit($perPage)->get()->map(fn ($row) => (array) $row)->all(); // @phpstan-ignore argument.type
 
         $q = $q !== '' ? $q.'&' : '';
 

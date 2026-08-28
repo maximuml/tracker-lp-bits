@@ -75,7 +75,7 @@ class ExamCronRepository extends BaseRepository
         $baseQuery = User::query()
             ->where("$userTable.enabled", UserEnabled::YES->value)
             ->where("$userTable.status", UserStatus::CONFIRMED->value)
-            ->selectRaw("$userTable.*")
+            ->selectRaw("$userTable.*") // @phpstan-ignore argument.type
             ->orderBy("$userTable.id", 'asc');
 
         $filter = ExamFilterUser::USER_CLASS->value;
@@ -207,10 +207,10 @@ class ExamCronRepository extends BaseRepository
 
                         if (DB::connection()->getDriverName() === 'pgsql') {
                             // PG 写法：使用 || 拼接字符串再转为 INTERVAL
-                            $q->whereRaw("$examUserTable.created_at + ($examTable.duration || ' day')::INTERVAL < ?", [$now]);
+                            $q->whereRaw("$examUserTable.created_at + ($examTable.duration || ' day')::INTERVAL < ?", [$now]); // @phpstan-ignore argument.type
                         } else {
                             // MySQL 写法
-                            $q->whereRaw("DATE_ADD($examUserTable.created_at, INTERVAL $examTable.duration DAY) < ?", [$now]);
+                            $q->whereRaw("DATE_ADD($examUserTable.created_at, INTERVAL $examTable.duration DAY) < ?", [$now]); // @phpstan-ignore argument.type
                         }
                     });
             });

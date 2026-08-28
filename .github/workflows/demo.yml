@@ -1,7 +1,7 @@
 name: deploy to demo site
-#on:
-#  push:
-#    branches: [ "php8" ]
+on:
+  push:
+    branches: [ "php8" ]
 
 # Environment variables available to all jobs and steps in this workflow
 env:

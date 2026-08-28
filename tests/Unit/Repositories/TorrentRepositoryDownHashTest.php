@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Repositories;
 
+use App\Repositories\TorrentDownloadRepository;
 use App\Repositories\TorrentRepository;
 use Firebase\JWT\JWT;
 use PHPUnit\Framework\TestCase;
@@ -10,10 +11,13 @@ class TorrentRepositoryDownHashTest extends TestCase
 {
     private TorrentRepository $repository;
 
+    private TorrentDownloadRepository $downloadRepository;
+
     protected function setUp(): void
     {
         parent::setUp();
         $this->repository = new TorrentRepository;
+        $this->downloadRepository = new TorrentDownloadRepository;
     }
 
     public function test_hkdf_downhash_roundtrip(): void
@@ -70,10 +74,10 @@ class TorrentRepositoryDownHashTest extends TestCase
      */
     private function invokeHkdfKey(array $user): string
     {
-        $reflection = new \ReflectionClass($this->repository);
+        $reflection = new \ReflectionClass($this->downloadRepository);
         $method = $reflection->getMethod('getHkdfDownHashKey');
         $method->setAccessible(true);
 
-        return $method->invoke($this->repository, (int) $user['id'], (string) $user['passkey']);
+        return $method->invoke($this->downloadRepository, (int) $user['id'], (string) $user['passkey']);
     }
 }

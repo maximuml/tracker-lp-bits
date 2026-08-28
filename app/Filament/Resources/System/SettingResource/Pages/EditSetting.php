@@ -238,7 +238,7 @@ class EditSetting extends Page implements HasForms
         ];
 
         $defaultDriver = Settings::get('captcha.default');
-        if (is_null($defaultDriver)) {
+        if ($defaultDriver === null) {
             $defaultDriver = Settings::get('captcha.driver', Env::get('CAPTCHA_DRIVER', 'image'));
         }
 

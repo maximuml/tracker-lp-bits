@@ -344,7 +344,7 @@ class LegacyRedisCache
             return false;
         }
         $Return = $this->redis->get($Key);
-        $Return = ! is_null($Return) ? $this->unserialize($Return) : null;
+        $Return = $Return !== null ? $this->unserialize($Return) : null;
         $this->cacheReadTimes++;
         $this->keyHits['read'][$Key] = ! isset($this->keyHits['read'][$Key]) ? 1 : $this->keyHits['read'][$Key] + 1;
 

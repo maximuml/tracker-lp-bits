@@ -540,10 +540,10 @@ JS;
 
     public function getPreparedTorrent($torrentId = null, $fieldName = null)
     {
-        if (is_null($torrentId)) {
+        if ($torrentId === null) {
             return $this->preparedTorrentCustomFieldValues;
         }
-        if (is_null($fieldName)) {
+        if ($fieldName === null) {
             return $this->preparedTorrentCustomFieldValues[$torrentId] ?? [];
         }
 

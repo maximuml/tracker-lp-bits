@@ -335,7 +335,7 @@ final class Nexus
 
     public static function trans($key, $replace = [], $locale = null)
     {
-        if (is_null($locale)) {
+        if ($locale === null) {
             $locale = \App\Support\Locale::folderFromCookie(Input::cookieValue('c_lang_folder', ''), (bool) true);
         }
         if (IN_NEXUS) {
@@ -396,9 +396,7 @@ final class Nexus
             $result = Arrays::get(self::$translations, $getKey, null);
         }
         if (! empty($replace)) {
-            $search = array_map(function ($value) {
-                return ":$value";
-            }, array_keys($replace));
+            $search = array_map(fn ($value) => ":$value", array_keys($replace));
             $result = str_replace($search, array_values($replace), $result);
         }
         Logger::writeWithContext((string) ("key: {$key}, replace: ".Json::encode($replace).", locale: {$locale}, getKey: {$getKey}, result: {$result}"), (string) 'debug', (bool) false);
@@ -421,7 +419,7 @@ final class Nexus
 
     private static function getTranslator(): NexusTranslator
     {
-        if (is_null(self::$translator)) {
+        if (self::$translator === null) {
             self::$translator = new NexusTranslator(Locale::getDefault());
         }
 
@@ -430,7 +428,7 @@ final class Nexus
 
     private static function getQueueManager(): Manager
     {
-        if (is_null(self::$queueManager)) {
+        if (self::$queueManager === null) {
             $container = Container::getInstance();
             $redisConfig = Config::get('nexus.redis', null);
             $redisConnectionName = 'my_redis_connection';

@@ -33,7 +33,7 @@ class Controller extends BaseController
      */
     public function success($data, $msg = null): array
     {
-        if (is_null($msg)) {
+        if ($msg === null) {
             $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
             $caller = $backtrace[1];
             $msg = $this->getReturnMsg($caller);
@@ -53,7 +53,7 @@ class Controller extends BaseController
      */
     public function successJsonResource($data, $msg = null): array
     {
-        if (is_null($msg)) {
+        if ($msg === null) {
             $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
             $caller = $backtrace[1];
             $msg = $this->getReturnMsg($caller);
@@ -75,7 +75,7 @@ class Controller extends BaseController
      */
     public function fail($data, $msg = null): array
     {
-        if (is_null($msg)) {
+        if ($msg === null) {
             $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
             $caller = $backtrace[1];
             $msg = $this->getReturnMsg($caller);

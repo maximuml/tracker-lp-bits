@@ -130,7 +130,7 @@ class Handler extends ExceptionHandler
         }
         //        dd($e);
         if ($e instanceof \Error || $e instanceof \ErrorException) {
-            Logger::writeWithContext((string) sprintf(get_class($e).': %s, trace: %s', $msg, $e->getTraceAsString()), (string) 'error', (bool) false);
+            Logger::writeWithContext((string) sprintf($e::class.': %s, trace: %s', $msg, $e->getTraceAsString()), (string) 'error', (bool) false);
         }
 
         return new JsonResponse(

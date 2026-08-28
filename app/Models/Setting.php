@@ -49,12 +49,12 @@ class Setting extends NexusModel
     public static function get(?string $name = null, mixed $default = null): mixed
     {
         static $settings = null;
-        if (is_null($settings)) {
+        if ($settings === null) {
             $settings = Cache::remember('nexus_settings_in_laravel', 600, function () {
                 return self::getFromDb();
             });
         }
-        if (is_null($name)) {
+        if ($name === null) {
             return $settings;
         }
 
@@ -72,7 +72,7 @@ class Setting extends NexusModel
             $value = self::normalizeValue($row);
             Arr::set($result, $row->name, $value);
         }
-        if (is_null($name)) {
+        if ($name === null) {
             return $result;
         }
 
@@ -112,7 +112,7 @@ class Setting extends NexusModel
     public static function normalizeValue(Setting $setting)
     {
         $value = $setting->value;
-        if (! is_null($value)) {
+        if ($value !== null) {
             $arr = json_decode($value, true);
             if (is_array($arr)) {
                 $value = $arr;

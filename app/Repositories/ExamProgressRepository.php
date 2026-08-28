@@ -314,7 +314,7 @@ class ExamProgressRepository extends BaseRepository
     {
         $logPrefix = "uid: $uid";
         $query = ExamUser::query()->where('uid', $uid)->orderBy('exam_id', 'desc');
-        if (! is_null($status)) {
+        if ($status !== null) {
             $query->where('status', $status);
         }
         $examUsers = $query->get();

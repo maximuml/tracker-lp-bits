@@ -716,7 +716,7 @@ class Install
             throw new \RuntimeException('Laravel is not available.');
         }
         $command = 'php '.ROOT_PATH.'artisan migrate';
-        if (! is_null($path)) {
+        if ($path !== null) {
             foreach ((array) $path as $key => $value) {
                 $command .= " --path=$value";
             }

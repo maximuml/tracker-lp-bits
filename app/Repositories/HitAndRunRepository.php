@@ -201,10 +201,10 @@ class HitAndRunRepository extends BaseRepository
                 },
                 'user.language',
             ]);
-        if (! is_null($uid)) {
+        if ($uid !== null) {
             $query->where('uid', $uid);
         }
-        if (! is_null($torrentId)) {
+        if ($torrentId !== null) {
             $query->where('torrent_id', $torrentId);
         }
         if (! $ignoreTime) {

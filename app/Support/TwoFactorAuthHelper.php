@@ -14,7 +14,7 @@ class TwoFactorAuthHelper
 
     private static function getTfa(): TwoFactorAuth
     {
-        if (is_null(self::$tfa)) {
+        if (self::$tfa === null) {
             self::$tfa = new TwoFactorAuth(new GoogleChartsQrCodeProvider, SiteConfig::current()->basic->siteName());
         }
 

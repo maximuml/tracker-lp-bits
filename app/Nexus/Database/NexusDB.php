@@ -375,7 +375,7 @@ class NexusDB
     {
         static $driver;
         $config = Config::get('nexus.mysql', null);
-        if (is_null($driver)) {
+        if ($driver === null) {
             $driver = new DBMysqli;
             $driver->connect($config['host'], $config['username'], $config['password'], 'information_schema', $config['port']);
         }

@@ -34,11 +34,11 @@ class IpLogRepository extends BaseRepository
             return;
         }
         $redis = Redis::connection()->client();
-        if (is_null($uri)) {
+        if ($uri === null) {
             $parsed_uri = parse_url(Input::serverValue('REQUEST_URI', ''));
             $uri = $parsed_uri['path'] ?? '/';
         }
-        if (is_null($ipArr)) {
+        if ($ipArr === null) {
             $ipArr = [Network::clientIp()];
         }
         $key = sprintf('%s:%s', self::CACHE_KEY_PREFIX, date('Y-m-d-H'));

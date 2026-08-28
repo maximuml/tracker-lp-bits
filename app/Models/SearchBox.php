@@ -294,14 +294,14 @@ class SearchBox extends NexusModel
     public static function listCategoryId($searchBoxId, $glue = null): array|string|null
     {
         static $results = null;
-        if (is_null($results)) {
+        if ($results === null) {
             $results = [];
             $res = Category::listByModeWithContext($searchBoxId);
             foreach ($res as $item) {
                 $results[] = $item['id'];
             }
         }
-        if (! is_null($glue)) {
+        if ($glue !== null) {
             $results = implode($glue, $results);
         }
 

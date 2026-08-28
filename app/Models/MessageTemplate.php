@@ -68,9 +68,7 @@ class MessageTemplate extends NexusModel
     private static function format(?self $template, array $placeholders): ?string
     {
         if ($template && $template->content) {
-            $search = array_map(function ($value) {
-                return ":$value";
-            }, array_keys($placeholders));
+            $search = array_map(fn ($value) => ":$value", array_keys($placeholders));
 
             return str_replace($search, array_values($placeholders), $template->content);
         }

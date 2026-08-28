@@ -69,7 +69,7 @@ class DBMysqli implements DBInterface
 
     public function fetchArray($mysqliResult, $type)
     {
-        if (is_null($type)) {
+        if ($type === null) {
             $type = MYSQLI_BOTH;
         }
 

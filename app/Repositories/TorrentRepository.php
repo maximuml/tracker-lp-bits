@@ -231,7 +231,7 @@ class TorrentRepository extends BaseRepository
      */
     public function getSearchBox(?int $id = null)
     {
-        if (is_null($id)) {
+        if ($id === null) {
             $id = SiteConfig::current()->main->browseCat();
         }
         $searchBox = SearchBox::query()->findOrFail((int) $id);

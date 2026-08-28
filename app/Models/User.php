@@ -380,7 +380,7 @@ class User extends Authenticatable implements FilamentUser, HasName
     /** @param string $name */
     public function acceptNotification($name): bool
     {
-        return is_null($this->original['notifs']) || str_contains((string) $this->notifs, "[{$name}]");
+        return $this->original['notifs'] === null || str_contains((string) $this->notifs, "[{$name}]");
     }
 
     public function tokenCan(string $ability): bool

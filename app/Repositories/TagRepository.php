@@ -195,7 +195,7 @@ class TagRepository extends BaseRepository
 
     public static function getOrderByFieldIdString(): string
     {
-        if (is_null(self::$orderByFieldIdString)) {
+        if (self::$orderByFieldIdString === null) {
             $results = self::createBasicQuery()->get(['id']);
             self::$orderByFieldIdString = $results->isEmpty() ? '0' : $results->implode('id', ',');
         }

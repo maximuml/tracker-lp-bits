@@ -127,7 +127,7 @@ class MeiliSearchRepository extends BaseRepository
 
     public function getClient(): Client
     {
-        if (is_null(self::$client)) {
+        if (self::$client === null) {
             $config = Config::get('nexus.meilisearch', null);
             $url = sprintf('%s://%s:%s', $config['scheme'], $config['host'], $config['port']);
             Logger::writeWithContext((string) ("get client with url: {$url}, master key: ".$config['master_key']), (string) 'info', (bool) false);

@@ -316,14 +316,14 @@ class ExamRepository extends BaseRepository
                 });
             });
 
-        if (! is_null($excludeId)) {
+        if ($excludeId !== null) {
             $excludeIds = is_array($excludeId) ? $excludeId : [$excludeId];
             $query->whereNotIn('id', $excludeIds);
         }
-        if (! is_null($isDiscovered)) {
+        if ($isDiscovered !== null) {
             $query->where('is_discovered', $isDiscovered);
         }
-        if (! is_null($type)) {
+        if ($type !== null) {
             $query->where('type', $type);
         }
 

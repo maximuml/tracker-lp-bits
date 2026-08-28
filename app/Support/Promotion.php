@@ -66,7 +66,7 @@ final class Promotion
             $sphighlight = self::backgroundClass((int) $code);
         }
 
-        if (is_null($sphighlight)) {
+        if ($sphighlight === null) {
             $torrentSettings = SiteConfig::current()->torrent->toArray();
             if ($posState === TorrentPosState::STICKY_FIRST->value && ! empty($torrentSettings['sticky_first_level_background_color'])) {
                 $sphighlight = sprintf(' style="background-color: %s"', $torrentSettings['sticky_first_level_background_color']);

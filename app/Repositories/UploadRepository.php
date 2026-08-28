@@ -335,7 +335,7 @@ class UploadRepository extends BaseRepository
             throw new NexusException(Locale::trans('upload.dictionary_is_missing_key', [], null));
         }
         $value = $dict[$key];
-        if (! is_null($type)) {
+        if ($type !== null) {
             $isFunction = 'is_'.$type;
             if (function_exists($isFunction) && ! $isFunction($value)) {
                 throw new NexusException(Locale::trans('upload.invalid_entry_in_dictionary', [], null));

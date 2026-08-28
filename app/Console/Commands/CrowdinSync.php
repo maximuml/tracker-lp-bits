@@ -140,10 +140,10 @@ class CrowdinSync extends Command
         if ($mtType) {
             $this->mtType = $mtType;
         }
-        if (! is_null($noPreTrans)) {
+        if ($noPreTrans !== null) {
             $this->noPreTrans = (bool) $noPreTrans;
         }
-        if (! is_null($debug)) {
+        if ($debug !== null) {
             $this->debug = (bool) $debug;
         }
         $this->info(
@@ -584,7 +584,7 @@ class CrowdinSync extends Command
     /** @return  mixed */
     protected function getMachineTranslationEngine()
     {
-        if (! is_null($this->mtInfo)) {
+        if ($this->mtInfo !== null) {
             return $this->mtInfo;
         }
         $url = sprintf('%s/mts', trim($this->apiBaseUrl, '/'));

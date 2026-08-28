@@ -63,9 +63,7 @@ class UserPasskeyRepository extends BaseRepository
 
         $passkey = Passkey::query()->where('user_id', '=', $userId)->get();
 
-        $credentialIds = array_map(function ($item) {
-            return hex2bin($item['credential_id']);
-        }, $passkey->toArray());
+        $credentialIds = array_map(fn ($item) => hex2bin($item['credential_id']), $passkey->toArray());
 
         $createArgs = $WebAuthn->getCreateArgs(bin2hex($userId), $userName, $userName, 120, true, 'preferred', null, $credentialIds);
         $challengeId = self::putChallenge($WebAuthn->getChallenge());

@@ -1,0 +1,12 @@
+# Default owner for all code
+*       @maximuml
+
+# CI/CD and DevOps
+/.github/        @maximuml
+
+# Database migrations and schema
+/database/       @maximuml
+
+# Security-critical areas
+/app/Auth/       @maximuml
+/app/Http/Middleware/  @maximuml

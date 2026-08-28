@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * @property int $id
  * @property string $name
@@ -24,17 +26,18 @@
 
 namespace App\Models;
 
+use App\Models\Traits\HasExamAccessors;
+use App\Models\Traits\HasExamRelationships;
 use App\Models\Traits\NexusActivityLogTrait;
 use App\Support\Locale;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * @property int $duration
  */
 class Exam extends NexusModel
 {
-    use NexusActivityLogTrait;
+    use HasExamAccessors, HasExamRelationships, NexusActivityLogTrait;
 
     /** @var list<string> */
     protected $fillable = [
@@ -166,104 +169,6 @@ class Exam extends NexusModel
         ];
     }
 
-    /** @return  mixed */
-    public function getTypeTextAttribute()
-    {
-        return self::listTypeOptions()[$this->type] ?? '';
-    }
-
-    protected function getRecurringTextAttribute(): string
-    {
-        $options = self::listRecurringOptions();
-
-        return $options[(string) $this->recurring] ?? '';
-    }
-
-    public function getStatusTextAttribute(): string
-    {
-        return $this->status == self::STATUS_ENABLED ? Locale::trans('label.enabled', [], null) : Locale::trans('label.disabled', [], null);
-    }
-
-    public function getIsDiscoveredTextAttribute(): string
-    {
-        return self::$discovers[$this->is_discovered]['text'] ?? '';
-    }
-
-    public function getDurationTextAttribute(): string
-    {
-        if ($this->duration > 0) {
-            return $this->duration.' Days';
-        }
-
-        return '';
-    }
-
-    public function getIndexFormattedAttribute(): string
-    {
-        $indexes = $this->indexes;
-        $arr = [];
-        foreach ($indexes as $index) {
-            if (isset($index['checked']) && $index['checked']) {
-                $arr[] = sprintf(
-                    '%s: %s %s',
-                    Locale::trans("exam.index_text_{$index['index']}", [], null),
-                    $index['require_value'],
-                    self::$indexes[$index['index']]['unit'] ?? ''
-                );
-            }
-        }
-
-        return implode('<br/>', $arr);
-    }
-
-    public function getFilterFormattedAttribute(): string
-    {
-        $currentFilters = $this->filters;
-        $arr = [];
-        $filter = self::FILTER_USER_CLASS;
-        if (! empty($currentFilters[$filter])) {
-            $classes = collect(User::$classes)->only($currentFilters[$filter]);
-            $arr[] = sprintf(
-                '%s: %s',
-                Locale::trans("exam.filters.{$filter}", [], null), $classes->map(fn ($value, $key) => User::getClassText($key))->implode(', ')
-            );
-        }
-
-        $filter = self::FILTER_USER_REGISTER_TIME_RANGE;
-        if (! empty($currentFilters[$filter])) {
-            $range = $currentFilters[$filter];
-            if (! empty($range[0]) || ! empty($range[1])) {
-                $arr[] = sprintf(
-                    '%s: <br/>%s ~ %s',
-                    Locale::trans("exam.filters.{$filter}", [], null),
-                    $range[0] ? Carbon::parse($range[0])->toDateTimeString() : '--',
-                    $range[1] ? Carbon::parse($range[1])->toDateTimeString() : '--'
-                );
-            }
-        }
-
-        $filter = self::FILTER_USER_REGISTER_DAYS_RANGE;
-        if (! empty($currentFilters[$filter])) {
-            $range = $currentFilters[$filter];
-            if (! empty($range[0]) || ! empty($range[1])) {
-                $arr[] = sprintf(
-                    '%s: %s ~ %s',
-                    Locale::trans("exam.filters.{$filter}", [], null),
-                    $range[0] ?? '--',
-                    $range[1] ?? '--'
-                );
-            }
-        }
-
-        $filter = self::FILTER_USER_DONATE;
-        if (! empty($currentFilters[$filter])) {
-            $donateStatus = collect(User::$donateStatus)->only($currentFilters[$filter]);
-            $arr[] = sprintf('%s: %s', Locale::trans("exam.filters.{$filter}", [], null), $donateStatus->pluck('text')->implode(', '));
-        }
-
-        return implode('<br/>', $arr);
-    }
-
     public function getBeginForUser(): Carbon
     {
         if (! empty($this->begin)) {
@@ -353,17 +258,5 @@ class Exam extends NexusModel
     public function isTypeTask(): bool
     {
         return $this->type == self::TYPE_TASK;
-    }
-
-    /** @return  BelongsToMany<User, $this> */
-    public function users()
-    {
-        return $this->belongsToMany(User::class, 'exam_users', 'exam_id', 'uid');
-    }
-
-    /** @return  mixed */
-    public function onGoingUsers()
-    {
-        return $this->users()->wherePivot('status', ExamUser::STATUS_NORMAL);
     }
 }

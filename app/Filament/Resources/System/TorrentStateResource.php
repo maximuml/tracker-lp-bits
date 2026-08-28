@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\System;
 
+use App\Enums\TorrentPromotion;
 use App\Filament\Resources\System\TorrentStateResource\Pages\ManageTorrentStates;
 use App\Models\Torrent;
 use App\Models\TorrentState;
@@ -45,7 +48,7 @@ class TorrentStateResource extends Resource
                 Select::make('global_sp_state')
                     ->options(function () {
                         $options = Torrent::listPromotionTypes(true);
-                        unset($options[Torrent::PROMOTION_NORMAL]);
+                        unset($options[TorrentPromotion::NORMAL->value]);
 
                         return $options;
                     })

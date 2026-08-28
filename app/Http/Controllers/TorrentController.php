@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Auth\Permission;
@@ -23,8 +25,7 @@ use Illuminate\Support\Facades\Auth;
 
 class TorrentController extends Controller
 {
-    /** @var mixed */
-    private $repository;
+    private TorrentRepository $repository;
 
     private UploadRepository $uploadRepository;
 
@@ -40,7 +41,11 @@ class TorrentController extends Controller
     public function index(Request $request, ?string $section = null): array
     {
         Logger::writeWithContext((string) 'controller torrent index entry', (string) 'info', (bool) false);
-        $result = $this->repository->getList($request, Auth::user(), $section);
+        $user = Auth::user();
+        if (! $user instanceof User) {
+            throw new \RuntimeException('unauthenticated');
+        }
+        $result = $this->repository->getList($request, $user, $section);
         Logger::writeWithContext((string) 'controller torrent index getList', (string) 'info', (bool) false);
         $resource = TorrentResource::collection($result);
         Logger::writeWithContext((string) 'controller torrent index prepare resource', (string) 'info', (bool) false);

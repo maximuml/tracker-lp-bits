@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\User\UserResource\Pages;
 
 use App\Auth\Permission;
 use App\Enums\ModelEventEnum;
 use App\Enums\Permission\PermissionEnum;
+use App\Enums\UserClass as UserClassEnum;
 use App\Filament\OptionsTrait;
 use App\Filament\Resources\User\UserResource;
 use App\Models\Invite;
@@ -482,7 +485,7 @@ class UserProfile extends ViewRecord implements HasActions
             ->label(__('admin.resources.user.actions.change_class_btn'))
             ->schema([
                 Select::make('class')
-                    ->options(User::listClass(User::CLASS_PEASANT, $this->currentUser()->class - 1))
+                    ->options(User::listClass(UserClassEnum::PEASANT->value, $this->currentUser()->class - 1))
                     ->default($this->getUserRecord()->class)
                     ->label(__('user.labels.class'))
                     ->required()
@@ -492,12 +495,12 @@ class UserProfile extends ViewRecord implements HasActions
                     ->default($this->getUserRecord()->vip_added)
                     ->label(__('user.labels.vip_added'))
                     ->helperText(__('user.labels.vip_added_help'))
-                    ->hidden(fn (Get $get) => $get('class') != User::CLASS_VIP),
+                    ->hidden(fn (Get $get) => $get('class') != UserClassEnum::VIP->value),
                 DateTimePicker::make('vip_until')
                     ->default($this->getUserRecord()->vip_until)
                     ->label(__('user.labels.vip_until'))
                     ->helperText(__('user.labels.vip_until_help'))
-                    ->hidden(fn (Get $get) => $get('class') != User::CLASS_VIP),
+                    ->hidden(fn (Get $get) => $get('class') != UserClassEnum::VIP->value),
                 TextInput::make('reason')
                     ->label(__('admin.resources.user.actions.enable_disable_reason'))
                     ->placeholder(__('admin.resources.user.actions.enable_disable_reason_placeholder')),

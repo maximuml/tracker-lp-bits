@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Captcha\Drivers;
 
 use App\Models\RegImage;

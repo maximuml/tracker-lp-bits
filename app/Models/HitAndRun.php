@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * @property int $id
  * @property int $uid
@@ -16,6 +18,7 @@ namespace App\Models;
 
 use App\Enums\HitAndRunMode;
 use App\Enums\ModelEventEnum;
+use App\Enums\UserClass as UserClassEnum;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
 use App\Support\Events;
@@ -78,7 +81,7 @@ class HitAndRun extends NexusModel
         self::MODE_GLOBAL => ['text' => 'Global'],
     ];
 
-    const MINIMUM_IGNORE_USER_CLASS = User::CLASS_VIP;
+    const MINIMUM_IGNORE_USER_CLASS = UserClassEnum::VIP->value;
 
     /** @return  mixed */
     protected static function booted()

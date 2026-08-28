@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Services\Announce;
 
 use App\DTOs\AnnounceRequestDto;
+use App\Enums\UserClass as UserClassEnum;
 use App\Exceptions\TrackerException;
 use App\Exceptions\TrackerWarningException;
-use App\Models\User;
 use App\Support\Config\SiteConfig;
 use App\Support\Format;
 use App\Support\LegacyDb;
@@ -308,7 +308,7 @@ final class PeerLifecycle
 
     private function enforceWaitAndSlotLimitsForNewPeer(): void
     {
-        if ((int) $this->user['class'] >= (int) User::CLASS_VIP) {
+        if ((int) $this->user['class'] >= (int) UserClassEnum::VIP->value) {
             return;
         }
 

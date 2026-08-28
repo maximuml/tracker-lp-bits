@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Http\Resources\BookmarkResource;
+use App\Models\User;
 use App\Repositories\BookmarkRepository;
 use App\Support\Locale;
 use Illuminate\Http\Request;
@@ -11,8 +14,7 @@ use Illuminate\Support\Facades\Auth;
 
 class BookmarkController extends Controller
 {
-    /** @var mixed */
-    private $repository;
+    private BookmarkRepository $repository;
 
     public function __construct(BookmarkRepository $repository)
     {
@@ -31,7 +33,11 @@ class BookmarkController extends Controller
         $request->validate([
             'torrent_id' => 'required|integer',
         ]);
-        $result = $this->repository->add(Auth::user(), $request->torrent_id);
+        $user = Auth::user();
+        if (! $user instanceof User) {
+            throw new \RuntimeException('unauthenticated');
+        }
+        $result = $this->repository->add($user, $request->torrent_id);
         $resource = new BookmarkResource($result);
 
         return $this->success($resource, Locale::trans('bookmark.actions.store_success', [], null));
@@ -70,7 +76,11 @@ class BookmarkController extends Controller
         $request->validate([
             'torrent_id' => 'required|integer',
         ]);
-        $result = $this->repository->remove(Auth::user(), $request->torrent_id);
+        $user = Auth::user();
+        if (! $user instanceof User) {
+            throw new \RuntimeException('unauthenticated');
+        }
+        $result = $this->repository->remove($user, $request->torrent_id);
 
         return $this->success(true, Locale::trans('bookmark.actions.delete_success', [], null));
     }

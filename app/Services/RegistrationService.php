@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Enums\ModelEventEnum;
+use App\Enums\UserClass as UserClassEnum;
 use App\Exceptions\AuthenticationException;
 use App\Models\Invite;
 use App\Models\Message;
@@ -197,7 +200,7 @@ class RegistrationService
             'country' => $country,
             'gender' => $gender,
             'status' => 'pending',
-            'class' => SiteConfig::current()->authority->defaultClass((int) User::CLASS_USER),
+            'class' => SiteConfig::current()->authority->defaultClass((int) UserClassEnum::USER->value),
             'invites' => (int) SiteConfig::current()->main->inviteCount(0),
             'added' => now()->toDateTimeString(),
             'last_access' => now()->toDateTimeString(),

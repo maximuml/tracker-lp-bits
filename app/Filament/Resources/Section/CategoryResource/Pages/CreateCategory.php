@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Section\CategoryResource\Pages;
 
 use App\Filament\CreateRedirectIndexTrait;

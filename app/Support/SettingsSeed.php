@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Support;
 
+use App\Enums\UserClass as UserClassEnum;
 use App\Models\Attendance;
 use App\Models\User;
 use App\Repositories\SearchBoxRepository;
@@ -125,7 +128,7 @@ final class SettingsSeed
         app(Globals::class)->set('cheaterdet_security', $SECURITY['cheaterdet']);
         app(Globals::class)->set('nodetect_security', $SECURITY['nodetect']);
 
-        app(Globals::class)->set('defaultclass_class', isset(User::$classes[$AUTHORITY['defaultclass']]) ? $AUTHORITY['defaultclass'] : User::CLASS_USER);
+        app(Globals::class)->set('defaultclass_class', isset(User::$classes[$AUTHORITY['defaultclass']]) ? $AUTHORITY['defaultclass'] : UserClassEnum::USER->value);
         app(Globals::class)->set('staffmem_class', $AUTHORITY['staffmem']);
         app(Globals::class)->set('newsmanage_class', $AUTHORITY['newsmanage']);
         app(Globals::class)->set('sbmanage_class', $AUTHORITY['sbmanage']);

@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Auth;
 
 use App\Enums\Permission\PermissionEnum;
+use App\Enums\UserClass as UserClassEnum;
 use App\Exceptions\InsufficientPermissionException;
 use App\Models\User;
 use App\Support\Permissions;
@@ -68,7 +71,7 @@ class Permission
     {
         $user = self::user($user);
 
-        return $user instanceof User && ($user->picker == 'yes' && self::canManageTorrent($user) || $user->class >= User::CLASS_SYSOP);
+        return $user instanceof User && ($user->picker == 'yes' && self::canManageTorrent($user) || $user->class >= UserClassEnum::SYSOP->value);
     }
 
     public static function canSetTorrentSpecialTag(?User $user = null): bool

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Http\Resources\ExamResource;
@@ -11,8 +13,7 @@ use Illuminate\Validation\Rule;
 
 class ExamController extends Controller
 {
-    /** @var mixed */
-    private $repository;
+    private ExamRepository $repository;
 
     /**
      * @return mixed

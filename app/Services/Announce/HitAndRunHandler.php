@@ -6,9 +6,9 @@ namespace App\Services\Announce;
 
 use App\Enums\HitAndRunMode;
 use App\Enums\ModelEventEnum;
+use App\Enums\UserClass as UserClassEnum;
 use App\Models\HitAndRun;
 use App\Models\Torrent;
-use App\Models\User;
 use App\Support\Events;
 use App\Support\LegacyDb;
 use App\Support\Logger;
@@ -35,7 +35,7 @@ final class HitAndRunHandler
         array|false $snatchInfo,
     ): ?array {
         if (($left <= 0 && $event !== 'completed')
-            || (int) $user['class'] >= (int) User::CLASS_VIP
+            || (int) $user['class'] >= (int) UserClassEnum::VIP->value
             || $isDonor
             || empty($torrent['mode'])
         ) {

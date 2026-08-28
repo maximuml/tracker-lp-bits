@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
+use App\Enums\BusinessType;
 use App\Exceptions\NexusException;
 use App\Models\BonusLogs;
 use App\Models\Exam;
@@ -1318,7 +1321,7 @@ class ExamRepository extends BaseRepository
                                 'old_total_value' => $examUser->user->seedbonus,
                                 'value' => $exam->success_reward_bonus,
                                 'new_total_value' => $examUser->user->seedbonus + $exam->success_reward_bonus,
-                                'business_type' => BonusLogs::BUSINESS_TYPE_TASK_PASS_REWARD,
+                                'business_type' => BusinessType::TASK_PASS_REWARD->value,
                             ];
                             $userBonusUpdate[] = sprintf('when `id` = %s then seedbonus + %d', $uid, $exam->success_reward_bonus);
                         }
@@ -1357,7 +1360,7 @@ class ExamRepository extends BaseRepository
                                 'old_total_value' => $examUser->user->seedbonus,
                                 'value' => -1 * $exam->fail_deduct_bonus,
                                 'new_total_value' => $examUser->user->seedbonus - $exam->fail_deduct_bonus,
-                                'business_type' => BonusLogs::BUSINESS_TYPE_TASK_NOT_PASS_DEDUCT,
+                                'business_type' => BusinessType::TASK_NOT_PASS_DEDUCT->value,
                             ];
                             $userBonusUpdate[] = sprintf('when `id` = %s then seedbonus - %d', $uid, $exam->fail_deduct_bonus);
                         }

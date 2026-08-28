@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Http\Resources\ExamUserResource;
+use App\Models\User;
 use App\Repositories\ExamRepository;
 use App\Support\Locale;
 use Carbon\Carbon;
@@ -11,8 +14,7 @@ use Illuminate\Support\Facades\Auth;
 
 class ExamUserController extends Controller
 {
-    /** @var mixed */
-    private $repository;
+    private ExamRepository $repository;
 
     /**
      * @return mixed
@@ -123,7 +125,11 @@ class ExamUserController extends Controller
      */
     public function bulkAvoid(Request $request): array
     {
-        $result = $this->repository->avoidExamUserBulk($request->all(), Auth::user());
+        $user = Auth::user();
+        if (! $user instanceof User) {
+            throw new \RuntimeException('unauthenticated');
+        }
+        $result = $this->repository->avoidExamUserBulk($request->all(), $user);
 
         return $this->success(['result' => $result], 'Affected: '.intval($result));
     }
@@ -133,7 +139,11 @@ class ExamUserController extends Controller
      */
     public function bulkDelete(Request $request): array
     {
-        $result = $this->repository->removeExamUserBulk($request->all(), Auth::user());
+        $user = Auth::user();
+        if (! $user instanceof User) {
+            throw new \RuntimeException('unauthenticated');
+        }
+        $result = $this->repository->removeExamUserBulk($request->all(), $user);
 
         return $this->success(['result' => $result], 'Affected: '.intval($result));
     }

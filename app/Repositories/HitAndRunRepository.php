@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Auth\Permission;
 use App\Enums\HitAndRunMode;
 use App\Enums\ModelEventEnum;
+use App\Enums\UserClass as UserClassEnum;
 use App\Models\HitAndRun;
 use App\Models\Message;
 use App\Models\SearchBox;
@@ -505,7 +508,7 @@ class HitAndRunRepository extends BaseRepository
         }
         $users = User::query()
             ->with('language')
-            ->where('class', '<', User::CLASS_VIP)
+            ->where('class', '<', UserClassEnum::VIP->value)
             ->where('enabled', User::ENABLED_YES)
             ->where('donor', 'no')
             ->find($result->pluck('uid')->toArray(), ['id', 'username', 'lang']);

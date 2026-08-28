@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Section;
 
+use App\Enums\UserClass as UserClassEnum;
 use App\Filament\Resources\Section\OverForumResource\Pages\CreateOverForum;
 use App\Filament\Resources\Section\OverForumResource\Pages\EditOverForum;
 use App\Filament\Resources\Section\OverForumResource\Pages\ListOverForums;
@@ -44,7 +47,7 @@ class OverForumResource extends Resource
     {
         $user = Auth::user();
 
-        return $user instanceof User && $user->class >= User::CLASS_ADMINISTRATOR;
+        return $user instanceof User && $user->class >= UserClassEnum::ADMINISTRATOR->value;
     }
 
     public static function form(Schema $schema): Schema
@@ -55,8 +58,8 @@ class OverForumResource extends Resource
                 Textarea::make('description')->label(__('label.forum.description'))->rows(3),
                 TextInput::make('sort')->integer()->default(0)->label(__('label.forum.sort')),
                 Select::make('minclassview')
-                    ->options(User::listClass(0, User::CLASS_SYSOP))
-                    ->default(User::CLASS_USER)
+                    ->options(User::listClass(0, UserClassEnum::SYSOP->value))
+                    ->default(UserClassEnum::USER->value)
                     ->label(__('label.forum.min_class_view')),
             ]);
     }

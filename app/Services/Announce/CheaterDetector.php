@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\Announce;
 
+use App\Enums\UserClass as UserClassEnum;
 use App\Exceptions\TrackerException;
-use App\Models\User;
 use App\Models\UserBanLog;
 use App\Support\Config\SiteConfig;
 use App\Support\Format;
@@ -30,7 +30,7 @@ final class CheaterDetector
             return;
         }
 
-        if ((int) $user['class'] >= (int) User::CLASS_VIP || $isDonor) {
+        if ((int) $user['class'] >= (int) UserClassEnum::VIP->value || $isDonor) {
             return;
         }
     }

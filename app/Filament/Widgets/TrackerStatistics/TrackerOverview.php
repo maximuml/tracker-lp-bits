@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Widgets\TrackerStatistics;
 
 use App\Filament\Custom\Widgets\StatTable;

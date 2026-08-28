@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Security;
 
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
+use App\Enums\UserClass as UserClassEnum;
 use App\Filament\Resources\Security\StaffMessageResource\Pages\ListStaffMessages;
 use App\Filament\Resources\Security\StaffMessageResource\Pages\ViewStaffMessage;
 use App\Models\StaffMessage;
@@ -49,7 +52,7 @@ class StaffMessageResource extends Resource
     {
         $user = Auth::user();
 
-        return $user instanceof User && $user->class >= User::CLASS_MODERATOR;
+        return $user instanceof User && $user->class >= UserClassEnum::MODERATOR->value;
     }
 
     public static function getEloquentQuery(): Builder

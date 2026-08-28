@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Http\Resources\TorrentResource;
@@ -9,8 +11,7 @@ use App\Support\Locale;
 
 class DashboardController extends Controller
 {
-    /** @var mixed */
-    private $repository;
+    private DashboardRepository $repository;
 
     /**
      * @return mixed

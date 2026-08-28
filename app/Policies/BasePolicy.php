@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies;
 
+use App\Enums\UserClass as UserClassEnum;
 use App\Models\User;
 
 class BasePolicy
@@ -12,7 +15,7 @@ class BasePolicy
      */
     public function before(User $user, $ability)
     {
-        if ($user->class >= User::CLASS_STAFF_LEADER) {
+        if ($user->class >= UserClassEnum::STAFFLEADER->value) {
             return true;
         }
     }

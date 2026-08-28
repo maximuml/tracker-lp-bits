@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
-use App\Models\User;
+use App\Enums\UserClass as UserClassEnum;
 use App\Repositories\UserRepository;
 use App\Support\Logger;
 use Illuminate\Console\Command;
@@ -81,7 +83,7 @@ class UserResetIdAutoIncrement extends Command
             'email' => $options['email'],
             'password' => $options['password'],
             'password_confirmation' => $options['password'],
-            'class' => User::CLASS_STAFF_LEADER,
+            'class' => UserClassEnum::STAFFLEADER->value,
             'id' => 1,
         ];
         $userRep->store($insert);

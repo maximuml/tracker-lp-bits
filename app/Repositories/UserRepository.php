@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Auth\Permission;
 use App\Enums\ModelEventEnum;
 use App\Enums\Permission\PermissionEnum;
+use App\Enums\UserClass as UserClassEnum;
 use App\Exceptions\InsufficientPermissionException;
 use App\Exceptions\NexusException;
 use App\Http\Resources\UserResource;
@@ -172,7 +175,7 @@ class UserRepository extends BaseRepository
                 }
             }
         } else {
-            $class = User::CLASS_USER;
+            $class = UserClassEnum::USER->value;
         }
 
         if (! isset(User::$classes[$class])) {
@@ -296,7 +299,7 @@ class UserRepository extends BaseRepository
         $update = [
             'enabled' => User::ENABLED_YES,
         ];
-        if ($targetUser->class == User::CLASS_PEASANT) {
+        if ($targetUser->class == UserClassEnum::PEASANT->value) {
             // warn users until 30 days
             $until = now()->addDays(30)->toDateTimeString();
             $update['leechwarn'] = 'yes';
@@ -804,7 +807,7 @@ class UserRepository extends BaseRepository
         if ($operator->class <= $targetUser->class || $operator->class <= $newClass) {
             throw new InsufficientPermissionException;
         }
-        if ($targetUser->class == $newClass && $newClass != User::CLASS_VIP) {
+        if ($targetUser->class == $newClass && $newClass != UserClassEnum::VIP->value) {
             return true;
         }
         $locale = $targetUser->locale;
@@ -820,7 +823,7 @@ class UserRepository extends BaseRepository
         $userUpdates = [
             'class' => $newClass,
         ];
-        if ($newClass == User::CLASS_VIP) {
+        if ($newClass == UserClassEnum::VIP->value) {
             if (! empty($extra['vip_added']) && in_array($extra['vip_added'], ['yes', 'no'])) {
                 $userUpdates['vip_added'] = $extra['vip_added'];
             } else {

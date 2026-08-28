@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Http\Resources\ExamResource;
@@ -17,8 +19,7 @@ use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
-    /** @var mixed */
-    private $repository;
+    private UserRepository $repository;
 
     private ExamRepository $examRepository;
 
@@ -353,6 +354,9 @@ class UserController extends Controller
     public function incrementDecrement(Request $request): array
     {
         $user = Auth::user();
+        if (! $user instanceof User) {
+            throw new \RuntimeException('unauthenticated');
+        }
         $request->validate([
             'uid' => 'required',
             'action' => 'required',

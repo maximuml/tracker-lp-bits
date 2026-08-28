@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Resources;
 
 use App\Models\SearchBox;
@@ -23,7 +25,7 @@ class TorrentResource extends BaseResource
      * @param  mixed  $request
      * @return array<int|string, mixed>
      */
-    public function toArray($request)
+    public function toArray($request): array
     {
         $out = [
             'id' => $this->id,

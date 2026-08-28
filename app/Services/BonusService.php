@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Auth\Permission;
+use App\Enums\BusinessType;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\BonusLogs;
 use App\Models\Message;
@@ -171,7 +172,7 @@ final class BonusService
         }
         $up = (int) ($curUser['uploaded'] ?? 0) + (int) $bonusarray['menge'];
         Logger::writeWithContext(sprintf('user: %s going to use %s bonus to exchange uploaded from %s to %s', $curUser['id'] ?? 0, $points, $curUser['uploaded'] ?? 0, $up), 'info', false);
-        $this->bonusRep->consumeUserBonus((int) $curUser['id'], $points, BonusLogs::BUSINESS_TYPE_EXCHANGE_UPLOAD, $points.' Points for uploaded.', ['uploaded' => $up]);
+        $this->bonusRep->consumeUserBonus((int) $curUser['id'], $points, BusinessType::EXCHANGE_UPLOAD->value, $points.' Points for uploaded.', ['uploaded' => $up]);
 
         return $this->redirect($baseUrl, 'upload');
     }
@@ -184,7 +185,7 @@ final class BonusService
     {
         $down = (int) ($curUser['downloaded'] ?? 0) + (int) $bonusarray['menge'];
         Logger::writeWithContext(sprintf('user: %s going to use %s bonus to exchange downloaded from %s to %s', $curUser['id'] ?? 0, $points, $curUser['downloaded'] ?? 0, $down), 'info', false);
-        $this->bonusRep->consumeUserBonus((int) $curUser['id'], $points, BonusLogs::BUSINESS_TYPE_EXCHANGE_DOWNLOAD, $points.' Points for downloaded.', ['downloaded' => $down]);
+        $this->bonusRep->consumeUserBonus((int) $curUser['id'], $points, BusinessType::EXCHANGE_DOWNLOAD->value, $points.' Points for downloaded.', ['downloaded' => $down]);
 
         return $this->redirect($baseUrl, 'download');
     }
@@ -201,7 +202,7 @@ final class BonusService
             return null;
         }
         $vipUntil = date('Y-m-d H:i:s', (strtotime(date('Y-m-d H:i:s')) + 28 * 86400));
-        $this->bonusRep->consumeUserBonus((int) $curUser['id'], $points, BonusLogs::BUSINESS_TYPE_BUY_VIP, $points.' Points for 1 month VIP Status.', ['class' => UC_VIP, 'vip_added' => 'yes', 'vip_until' => $vipUntil]);
+        $this->bonusRep->consumeUserBonus((int) $curUser['id'], $points, BusinessType::BUY_VIP->value, $points.' Points for 1 month VIP Status.', ['class' => UC_VIP, 'vip_added' => 'yes', 'vip_until' => $vipUntil]);
 
         return $this->redirect($baseUrl, 'vip');
     }
@@ -217,7 +218,7 @@ final class BonusService
             LegacyResponse::abort((string) ($lang['std_sorry'] ?? ''), UserClass::name($buyinviteClass, false, false, true).($lang['text_plus_only'] ?? ''), false, false);
         }
         $inv = (int) ($curUser['invites'] ?? 0) + (int) $bonusarray['menge'];
-        $this->bonusRep->consumeUserBonus((int) $curUser['id'], $points, BonusLogs::BUSINESS_TYPE_EXCHANGE_INVITE, $points.' Points for invites.', ['invites' => $inv]);
+        $this->bonusRep->consumeUserBonus((int) $curUser['id'], $points, BusinessType::EXCHANGE_INVITE->value, $points.' Points for invites.', ['invites' => $inv]);
 
         return $this->redirect($baseUrl, 'invite');
     }
@@ -245,7 +246,7 @@ final class BonusService
         $title = (string) $request->post('title', '');
         $words = ['fuck', 'shit', 'pussy', 'cunt', 'nigger', 'Staff Leader', 'SysOp', 'Administrator', 'Moderator', 'Uploader', 'Retiree', 'VIP', 'Nexus Master', 'Ultimate User', 'Extreme User', 'Veteran User', 'Insane User', 'Crazy User', 'Elite User', 'Power User', 'User', 'Peasant', 'Champion'];
         $title = str_replace($words, (string) ($lang['text_wasted_karma'] ?? ''), $title);
-        $this->bonusRep->consumeUserBonus((int) $curUser['id'], $points, BonusLogs::BUSINESS_TYPE_CUSTOM_TITLE, $points.' Points for custom title. Old title is '.htmlspecialchars(trim((string) ($curUser['title'] ?? '')))." and new title is {$title}.", ['title' => $title]);
+        $this->bonusRep->consumeUserBonus((int) $curUser['id'], $points, BusinessType::CUSTOM_TITLE->value, $points.' Points for custom title. Old title is '.htmlspecialchars(trim((string) ($curUser['title'] ?? '')))." and new title is {$title}.", ['title' => $title]);
 
         return $this->redirect($baseUrl, 'title');
     }
@@ -277,7 +278,7 @@ final class BonusService
 
             return null;
         }
-        $this->bonusRep->consumeUserBonusAndIncrementCharity((int) $curUser['id'], (float) $points, BonusLogs::BUSINESS_TYPE_GIFT_TO_LOW_SHARE_RATIO, $points.' Points as charity to users with ratio below '.htmlspecialchars(trim((string) $ratiocharity)).'.', (float) $points);
+        $this->bonusRep->consumeUserBonusAndIncrementCharity((int) $curUser['id'], (float) $points, BusinessType::GIFT_TO_LOW_SHARE_RATIO->value, $points.' Points as charity to users with ratio below '.htmlspecialchars(trim((string) $ratiocharity)).'.', (float) $points);
         $charityPerUser = $points / $charityReceiverCount;
         $this->bonusRep->incrementSeedbonusForLowRatioReceivers($ratiocharity, (float) $charityPerUser);
 
@@ -324,9 +325,9 @@ final class BonusService
         }
         $points2 = number_format($points, 1);
         $points2receiver = number_format($aftertaxpoint, 1);
-        $this->bonusRep->consumeUserBonus((int) $curUser['id'], $points, BonusLogs::BUSINESS_TYPE_GIFT_TO_SOMEONE, $points2.' Points as gift to '.htmlspecialchars(trim($usernamegift)));
+        $this->bonusRep->consumeUserBonus((int) $curUser['id'], $points, BusinessType::GIFT_TO_SOMEONE->value, $points2.' Points as gift to '.htmlspecialchars(trim($usernamegift)));
         $this->bonusRep->incrementUserSeedbonus($useridgift, (float) $aftertaxpoint);
-        BonusLogs::add($useridgift, $userseedbonus, $aftertaxpoint, $userseedbonus + $aftertaxpoint, ' + '.$points2receiver.' Points (after tax) as a gift from '.($curUser['username'] ?? ''), BonusLogs::BUSINESS_TYPE_RECEIVE_GIFT);
+        BonusLogs::add($useridgift, $userseedbonus, $aftertaxpoint, $userseedbonus + $aftertaxpoint, ' + '.$points2receiver.' Points (after tax) as a gift from '.($curUser['username'] ?? ''), BusinessType::RECEIVE_GIFT->value);
 
         $locale = Locale::userLocale($useridgift);
         $subject = Locale::trans('bonus.msg_someone_loves_you', [], $locale);

@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies;
 
+use App\Enums\UserClass as UserClassEnum;
 use App\Models\IpLog;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -68,7 +71,7 @@ class IpLogPolicy extends BasePolicy
 
     private function can(User $user): bool
     {
-        if ($user->class >= User::CLASS_SYSOP) {
+        if ($user->class >= UserClassEnum::SYSOP->value) {
             return true;
         }
 

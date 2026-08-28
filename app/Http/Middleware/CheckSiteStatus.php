@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Middleware;
 
+use App\Enums\UserClass as UserClassEnum;
 use App\Exceptions\NexusException;
 use App\Models\Setting;
-use App\Models\User;
 use App\Support\Locale;
 use Closure;
 use Illuminate\Http\Request;
@@ -18,7 +20,7 @@ class CheckSiteStatus
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
-        if ($user && $user->class < User::CLASS_ADMINISTRATOR && ! Setting::getIsSiteOnline()) {
+        if ($user && $user->class < UserClassEnum::ADMINISTRATOR->value && ! Setting::getIsSiteOnline()) {
             throw new NexusException(Locale::trans('misc.site_down_for_maintenance', [], null));
         }
 

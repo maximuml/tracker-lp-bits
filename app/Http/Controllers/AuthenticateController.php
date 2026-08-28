@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Http\Resources\UserResource;
@@ -22,8 +24,7 @@ use Illuminate\Validation\Rule;
 
 class AuthenticateController extends Controller
 {
-    /** @var mixed */
-    private $repository;
+    private AuthenticateRepository $repository;
 
     private UserRepository $userRepository;
 
@@ -58,7 +59,7 @@ class AuthenticateController extends Controller
      */
     public function logout(Request $request): array
     {
-        $result = $this->repository->logout(Auth::id());
+        $result = $this->repository->logout((int) Auth::id());
 
         return $this->success($result);
     }

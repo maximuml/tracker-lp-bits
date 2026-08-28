@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support\Config;
 
-use App\Models\User;
+use App\Enums\UserClass as UserClassEnum;
 
 final class AccountConfig extends Config
 {
@@ -40,14 +40,14 @@ final class AccountConfig extends Config
 
     public function neverdelete(?int $default = null): int
     {
-        $value = $this->data['neverdelete'] ?? $default ?? User::CLASS_VIP;
+        $value = $this->data['neverdelete'] ?? $default ?? UserClassEnum::VIP->value;
 
         return (int) $value;
     }
 
     public function neverdeletepacked(?int $default = null): int
     {
-        $value = $this->data['neverdeletepacked'] ?? $default ?? User::CLASS_VIP;
+        $value = $this->data['neverdeletepacked'] ?? $default ?? UserClassEnum::VIP->value;
 
         return (int) $value;
     }

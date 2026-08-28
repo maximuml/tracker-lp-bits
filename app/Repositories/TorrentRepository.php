@@ -1,10 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Auth\Permission;
 use App\Enums\ModelEventEnum;
 use App\Enums\Permission\PermissionEnum;
+use App\Enums\PromotionTimeType;
+use App\Enums\TorrentPromotion;
 use App\Exceptions\InsufficientPermissionException;
 use App\Exceptions\NexusException;
 use App\Http\Resources\TorrentResource;
@@ -128,7 +132,7 @@ class TorrentRepository extends BaseRepository
             ->allowSorts(self::$allowSorts)
             ->registerCustomFilter('title', function (Builder $query, Request $request) {
                 $title = $request->input(ApiQueryBuilder::PARAM_NAME_FILTER.'.title');
-                $title = trim(str_replace('.', '', $title));
+                $title = trim(str_replace('.', '', (string) $title));
                 if ($title) {
                     $titleParts = explode(' ', $title);
                     $keywordCount = 1;
@@ -809,7 +813,7 @@ class TorrentRepository extends BaseRepository
                 // increase promotion time
                 if (
                     ! SiteConfig::current()->torrent->approvalStatusNoneVisible()
-                    && $torrent->sp_state != Torrent::PROMOTION_NORMAL
+                    && $torrent->sp_state != TorrentPromotion::NORMAL->value
                     && $torrent->promotion_until
                 ) {
                     $hasBeenDownloaded = Snatch::query()->where('torrentid', $torrent->id)->exists();
@@ -992,13 +996,13 @@ class TorrentRepository extends BaseRepository
     public function setSpState($id, $spState, $promotionTimeType, $promotionUntil = null): int
     {
         Permission::assertCan(PermissionEnum::TORRENT_ON_PROMOTION);
-        if (! isset(Torrent::$promotionTypes[$spState])) {
+        if (TorrentPromotion::tryFrom((int) $spState) === null) {
             throw new \InvalidArgumentException("Invalid spState: $spState");
         }
-        if (! isset(Torrent::$promotionTimeTypes[$promotionTimeType])) {
+        if (PromotionTimeType::tryFrom((int) $promotionTimeType) === null) {
             throw new \InvalidArgumentException("Invalid promotionTimeType: $promotionTimeType");
         }
-        if (in_array($promotionTimeType, [Torrent::PROMOTION_TIME_TYPE_GLOBAL, Torrent::PROMOTION_TIME_TYPE_PERMANENT])) {
+        if (in_array((int) $promotionTimeType, [PromotionTimeType::GLOBAL->value, PromotionTimeType::PERMANENT->value])) {
             $promotionUntil = null;
         } elseif (! $promotionUntil || Carbon::parse($promotionUntil)->lte(now())) {
             throw new \InvalidArgumentException("Invalid promotionUntil: $promotionUntil");

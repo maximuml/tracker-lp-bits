@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\TorrentPromotion;
 use App\Jobs\SeedBonusJob;
 use App\Models\Torrent;
 use App\Models\User;
@@ -256,7 +257,7 @@ class CriticalPathTest extends TestCase
         $this->assertSame(20, strlen($infoHash), 'Torrent info_hash is not 20 bytes');
 
         // Force normal promotion so the ratio calculation is predictable.
-        $torrent->update(['sp_state' => Torrent::PROMOTION_NORMAL]);
+        $torrent->update(['sp_state' => TorrentPromotion::NORMAL->value]);
 
         $user = User::query()->where('username', $username)->first();
         $this->assertNotNull($user, 'Newly registered user not found');

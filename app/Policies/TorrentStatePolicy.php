@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies;
 
+use App\Enums\UserClass as UserClassEnum;
 use App\Models\TorrentState;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -83,7 +86,7 @@ class TorrentStatePolicy extends BasePolicy
 
     private function can(User $user): bool
     {
-        if ($user->class >= User::CLASS_ADMINISTRATOR) {
+        if ($user->class >= UserClassEnum::ADMINISTRATOR->value) {
             return true;
         }
 

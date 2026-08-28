@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Http\Resources\PeerResource;
@@ -9,8 +11,7 @@ use Illuminate\Http\Response;
 
 class PeerController extends Controller
 {
-    /** @var mixed */
-    private $repository;
+    private TorrentRepository $repository;
 
     /**
      * @return mixed

@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Security;
 
+use App\Enums\UserClass as UserClassEnum;
 use App\Filament\Resources\Security\LoginAttemptResource\Pages\EditLoginAttempt;
 use App\Filament\Resources\Security\LoginAttemptResource\Pages\ListLoginAttempts;
 use App\Models\LoginAttempt;
@@ -45,7 +48,7 @@ class LoginAttemptResource extends Resource
     {
         $user = Auth::user();
 
-        return $user instanceof User && $user->class >= User::CLASS_SYSOP;
+        return $user instanceof User && $user->class >= UserClassEnum::SYSOP->value;
     }
 
     public static function form(Schema $schema): Schema

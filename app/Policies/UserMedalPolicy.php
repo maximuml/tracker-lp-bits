@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies;
 
+use App\Enums\UserClass as UserClassEnum;
 use App\Models\User;
 use App\Models\UserMedal;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -87,7 +90,7 @@ class UserMedalPolicy extends BasePolicy
 
     private function can(User $user): bool
     {
-        if ($user->class >= User::CLASS_SYSOP) {
+        if ($user->class >= UserClassEnum::SYSOP->value) {
             return true;
         }
 

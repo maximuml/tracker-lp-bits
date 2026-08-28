@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Resources;
 
 use App\Models\ExamUser;
@@ -20,7 +22,7 @@ class ExamUserResource extends JsonResource
      * @param  mixed  $request
      * @return array<int|string, mixed>
      */
-    public function toArray($request)
+    public function toArray($request): array
     {
         return [
             'id' => $this->id,

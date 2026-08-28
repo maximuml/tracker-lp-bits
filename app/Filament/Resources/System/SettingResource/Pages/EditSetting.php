@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\System\SettingResource\Pages;
 
+use App\Enums\UserClass as UserClassEnum;
 use App\Filament\OptionsTrait;
 use App\Filament\Resources\System\SettingResource;
 use App\Models\HitAndRun;
@@ -212,7 +215,7 @@ class EditSetting extends Page implements HasForms
                     ->label(__('label.setting.system.is_invite_pre_email_and_username'))
                     ->helperText(__('label.setting.system.is_invite_pre_email_and_username_help')),
                 Select::make('system.access_admin_class_min')
-                    ->options(User::listClass(User::CLASS_VIP))
+                    ->options(User::listClass(UserClassEnum::VIP->value))
                     ->label(__('label.setting.system.access_admin_class_min'))
                     ->helperText(__('label.setting.system.access_admin_class_min_help')),
                 TextInput::make('system.alarm_email_receiver')

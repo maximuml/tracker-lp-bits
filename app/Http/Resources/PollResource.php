@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Resources;
 
 use App\Models\Poll;
@@ -20,7 +22,7 @@ class PollResource extends JsonResource
      * @param  mixed  $request
      * @return array<int|string, mixed>
      */
-    public function toArray($request)
+    public function toArray($request): array
     {
         $out = [
             'id' => $this->id,

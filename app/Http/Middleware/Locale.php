@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Middleware;
 
 use App\Support\Config\SiteConfig;
@@ -23,17 +25,15 @@ class Locale
 
     /**
      * Handle an incoming request.
-     *
-     * @return mixed
      */
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next): mixed
     {
         $user = $request->user();
         if ($user) {
             $locale = $user->locale;
             Logger::writeWithContext((string) "locale from user: {$user->id}, set locale: {$locale}", (string) 'info', (bool) false);
         } else {
-            $locale = self::getLocaleFromCookie() ?? self::getDefault();
+            $locale = self::getLocaleFromCookie();
             Logger::writeWithContext((string) "locale from cookie, set locale: {$locale}", (string) 'info', (bool) false);
         }
         App::setLocale($locale);
@@ -48,8 +48,7 @@ class Locale
         return $response;
     }
 
-    /** @return  mixed */
-    public static function getLocaleFromCookie()
+    public static function getLocaleFromCookie(): string
     {
         if (IN_NEXUS) {
             $lang = IN_TRACKER ? null : \App\Support\Locale::folderFromCookie(Input::cookieValue('c_lang_folder', ''), (bool) false);
@@ -64,8 +63,7 @@ class Locale
         return self::$languageMaps[$lang] ?? 'en';
     }
 
-    /** @return  mixed */
-    public static function getDefault()
+    public static function getDefault(): string
     {
         $defaultLang = SiteConfig::current()->main->defaultLang();
 

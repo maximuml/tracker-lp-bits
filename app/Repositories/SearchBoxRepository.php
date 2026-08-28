@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
+use App\Enums\UserClass as UserClassEnum;
 use App\Exceptions\InsufficientPermissionException;
 use App\Http\Middleware\Locale;
 use App\Models\Category;
 use App\Models\Icon;
 use App\Models\SearchBox;
 use App\Models\Torrent;
-use App\Models\User;
 use App\Support\Cache;
 use App\Support\Input;
 use App\Support\UserDisplay;
@@ -361,7 +363,7 @@ class SearchBoxRepository extends BaseRepository
      */
     public function deleteCategory($id)
     {
-        if (UserDisplay::currentClass() < User::CLASS_SYSOP) {
+        if (UserDisplay::currentClass() < UserClassEnum::SYSOP->value) {
             throw new InsufficientPermissionException;
         }
         $idArr = Arr::wrap($id);

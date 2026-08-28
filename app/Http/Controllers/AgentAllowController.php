@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Http\Resources\AgentAllowResource;
@@ -10,8 +12,7 @@ use Illuminate\Validation\Rule;
 
 class AgentAllowController extends Controller
 {
-    /** @var mixed */
-    private $repository;
+    private AgentAllowRepository $repository;
 
     /**
      * @return mixed

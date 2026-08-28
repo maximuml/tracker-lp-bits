@@ -698,7 +698,7 @@ final class Tasks
             ]);
 
             DB::table('messages')->insert([
-                'sender' => 0,
+                'sender' => null,
                 'receiver' => $uid,
                 'added' => $dt,
                 'subject' => Locale::trans('cleanup.msg_low_ratio_warning_removed', [], $locale),
@@ -790,7 +790,7 @@ final class Tasks
             }
 
             DB::table('messages')->insert([
-                'sender' => 0,
+                'sender' => null,
                 'receiver' => $uid,
                 'added' => $dt,
                 'subject' => $subject,
@@ -857,7 +857,7 @@ final class Tasks
             User::query()->where('id', $uid)->update(['class' => (string) $newclass]);
 
             DB::table('messages')->insert([
-                'sender' => 0,
+                'sender' => null,
                 'receiver' => $uid,
                 'added' => $dt,
                 'subject' => $subject,
@@ -925,7 +925,7 @@ final class Tasks
             ]);
 
             DB::table('messages')->insert([
-                'sender' => 0,
+                'sender' => null,
                 'receiver' => $uid,
                 'added' => $dt,
                 'subject' => $subject,
@@ -1017,7 +1017,7 @@ final class Tasks
                 $locale = Locale::userLocale((int) $arr['owner']);
 
                 DB::table('messages')->insert([
-                    'sender' => 0,
+                    'sender' => null,
                     'receiver' => $arr['owner'],
                     'added' => $dt,
                     'subject' => Locale::trans('cleanup.msg_your_torrent_deleted', [], $locale),
@@ -1083,7 +1083,7 @@ final class Tasks
         $length = 180 * 86400;
         $until = date('Y-m-d H:i:s', time() - $length);
 
-        DB::table('messages')->where('sender', 0)->where('added', '<', $until)->delete();
+        DB::table('messages')->whereNull('sender')->where('added', '<', $until)->delete();
     }
 
     private function deleteOldReadPosts(): void

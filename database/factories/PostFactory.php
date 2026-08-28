@@ -31,7 +31,7 @@ class PostFactory extends Factory
             'added' => now()->toDateTimeString(),
             'body' => $body,
             'ori_body' => $body,
-            'editedby' => 0,
+            'editedby' => null,
             'editdate' => null,
         ];
     }

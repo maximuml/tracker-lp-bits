@@ -52,7 +52,7 @@ class RemoveUserWarning
             $subject = Locale::trans('cleanup.msg_warning_removed', [], $locale);
             $msg = Locale::trans('cleanup.msg_your_warning_removed', [], $locale);
             Message::add([
-                'sender' => 0,
+                'sender' => null,
                 'receiver' => $user->id,
                 'added' => now(),
                 'subject' => $subject,

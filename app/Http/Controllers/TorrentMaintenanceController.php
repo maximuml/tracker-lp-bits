@@ -142,7 +142,7 @@ class TorrentMaintenanceController extends LegacyController
                 .'[url='.Http::protocolPrefix(Url::isSecure()).$baseUrl.'/details.php?id='.$reseedid.']'.$snatchRow['torrent_name'].'[/url]'
                 .Locale::trans('torrent.msg_thank_you', [], $locale);
             Message::add([
-                'sender' => 0,
+                'sender' => null,
                 'receiver' => $snatchRow['userid'],
                 'subject' => $rsSubject,
                 'msg' => $pnMsg,

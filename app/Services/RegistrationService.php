@@ -451,7 +451,7 @@ class RegistrationService
         }
 
         Message::add([
-            'sender' => 0,
+            'sender' => null,
             'receiver' => $user->id,
             'subject' => $subject,
             'added' => now()->toDateTimeString(),
@@ -486,7 +486,7 @@ class RegistrationService
             .Locale::trans('user.msg_has_registered', [], $locale);
 
         Message::add([
-            'sender' => 0,
+            'sender' => null,
             'receiver' => $inviter,
             'subject' => $subject,
             'added' => now()->toDateTimeString(),

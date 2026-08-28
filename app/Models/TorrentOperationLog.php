@@ -88,7 +88,7 @@ class TorrentOperationLog extends NexusModel
         $subject = Locale::trans("torrent.operation_log.{$actionType}.notify_subject", [], $locale);
         $msg = Locale::trans("torrent.operation_log.{$actionType}.notify_msg", ['torrent_name' => $torrentOperationLog->torrent->name, 'detail_url' => sprintf('details.php?id=%s', $torrentOperationLog->torrent_id), 'operator' => $torrentOperationLog->user->username, 'reason' => $torrentOperationLog->comment], $locale);
         $message = [
-            'sender' => 0,
+            'sender' => null,
             'receiver' => $receiver->id,
             'subject' => $subject,
             'msg' => $msg,

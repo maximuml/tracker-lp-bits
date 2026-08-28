@@ -67,7 +67,7 @@ class SystemBulkController extends LegacyController
         }
 
         $curUser = app(CurrentUser::class)->get() ?? [];
-        $senderId = request()->post('sender') === 'system' ? 0 : (int) ($curUser['id'] ?? 0);
+        $senderId = request()->post('sender') === 'system' ? null : (int) ($curUser['id'] ?? 0);
         $added = date('Y-m-d H:i:s');
         $msg = trim((string) request()->post('msg'));
         $amount = request()->post('amount');
@@ -361,7 +361,7 @@ class SystemBulkController extends LegacyController
         $validTypeMap = (array) ($lang['types'] ?? []);
 
         $currentUser = app(CurrentUser::class)->get() ?? [];
-        $senderId = $request->input('sender') === 'system' ? 0 : ((int) ($currentUser['id'] ?? 0));
+        $senderId = $request->input('sender') === 'system' ? null : ((int) ($currentUser['id'] ?? 0));
         $added = date('Y-m-d H:i:s');
         $msg = trim((string) $request->input('msg', ''));
         $amount = $request->input('amount');

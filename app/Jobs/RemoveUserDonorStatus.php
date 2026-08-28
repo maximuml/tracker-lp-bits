@@ -51,7 +51,7 @@ class RemoveUserDonorStatus
             $subject = Locale::trans('cleanup.msg_donor_status_removed', [], $locale);
             $msg = Locale::trans('cleanup.msg_donor_status_removed_body', [], $locale);
             Message::add([
-                'sender' => 0,
+                'sender' => null,
                 'receiver' => $user->id,
                 'added' => now(),
                 'subject' => $subject,

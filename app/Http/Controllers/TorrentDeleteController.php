@@ -83,7 +83,7 @@ class TorrentDeleteController extends LegacyController
                 .$row['name']
                 .Locale::trans('torrent.msg_was_deleted_by', ['admin' => $curUser['username']], $locale);
             Message::add([
-                'sender' => 0,
+                'sender' => null,
                 'receiver' => $row['owner'],
                 'subject' => $subject,
                 'msg' => $msg,
@@ -182,7 +182,7 @@ class TorrentDeleteController extends LegacyController
                 .Locale::trans('torrent.msg_reason_is', [], $locale)
                 .$reasonstr;
             Message::add([
-                'sender' => 0,
+                'sender' => null,
                 'receiver' => $row['owner'],
                 'subject' => $subject,
                 'msg' => $msg,

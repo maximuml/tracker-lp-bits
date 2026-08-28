@@ -336,7 +336,7 @@ final class BonusService
             $msg .= "\n".Locale::trans('bonus.msg_personal_message_from', [], $locale).($curUser['username'] ?? '').Locale::trans('bonus.msg_colon', [], $locale).$message;
         }
         Message::add([
-            'sender' => 0,
+            'sender' => null,
             'subject' => $subject,
             'added' => now(),
             'msg' => $msg,

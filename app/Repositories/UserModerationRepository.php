@@ -171,7 +171,7 @@ class UserModerationRepository extends BaseRepository
         $fieldLabel = Locale::trans("user.labels.{$sourceField}", [], $locale);
         $msg = Locale::trans('message.field_value_change_message_body', ['field' => $fieldLabel, 'operator' => $operator->username, 'old' => $formatSize ? Format::size((float) $old) : $old, 'new' => $formatSize ? Format::size((float) $new) : $new, 'reason' => $reason], $locale);
         $message = [
-            'sender' => 0,
+            'sender' => null,
             'receiver' => $targetUser->id,
             'subject' => Locale::trans('message.field_value_change_message_subject', ['field' => $fieldLabel], $locale),
             'msg' => $msg,
@@ -393,7 +393,7 @@ class UserModerationRepository extends BaseRepository
         }
         $locale = $targetUser->locale;
         $update = [];
-        $message = ['added' => now(), 'receiver' => $targetUser->id, 'sender' => 0];
+        $message = ['added' => now(), 'receiver' => $targetUser->id, 'sender' => null];
 
         if ($weeks === 0) {
             $update['warned'] = 'no';
@@ -486,7 +486,7 @@ class UserModerationRepository extends BaseRepository
         $subject = Locale::trans('user.edit_notifications.change_class.subject', [], $locale);
         $body = Locale::trans('user.edit_notifications.change_class.body', ['action' => Locale::trans('user.edit_notifications.change_class.'.($newClass > $targetUser->class ? 'promote' : 'demote'), [], null), 'new_class' => User::getClassText($newClass), 'operator' => $operator->username, 'reason' => $reason], $locale);
         $message = [
-            'sender' => 0,
+            'sender' => null,
             'receiver' => $targetUser->id,
             'subject' => $subject,
             'msg' => $body,
@@ -671,7 +671,7 @@ class UserModerationRepository extends BaseRepository
         $subject = Locale::trans('message.temporary_invite_change.subject', ['change_type' => $changeType], $locale);
         $body = Locale::trans('message.temporary_invite_change.body', ['change_type' => $changeType, 'count' => $count, 'operator' => $operator->username ?? '', 'reason' => $reason], $locale);
         $message = [
-            'sender' => 0,
+            'sender' => null,
             'receiver' => $targetUser->id,
             'subject' => $subject,
             'msg' => $body,

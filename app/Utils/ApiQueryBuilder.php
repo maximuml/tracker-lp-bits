@@ -64,7 +64,7 @@ class ApiQueryBuilder
 
     protected Builder $query;
 
-    public function __construct(protected Request $request, Builder $query, protected string $resourceName)
+    public function __construct(protected readonly Request $request, Builder $query, protected readonly string $resourceName)
     {
         $this->query = $query;
     }

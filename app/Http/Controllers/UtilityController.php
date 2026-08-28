@@ -35,7 +35,7 @@ class UtilityController extends LegacyController
 {
     private UsersearchPageService $usersearchPageService;
 
-    public function __construct(UsersearchPageService $usersearchPageService, private AjaxService $ajaxService)
+    public function __construct(UsersearchPageService $usersearchPageService, private readonly AjaxService $ajaxService)
     {
         $this->usersearchPageService = $usersearchPageService;
     }

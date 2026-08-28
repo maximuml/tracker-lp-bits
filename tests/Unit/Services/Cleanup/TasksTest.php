@@ -48,13 +48,23 @@ final class TasksTest extends TestCase
         $oldMessageId = $this->createMessage(['added' => Carbon::now()->subDays(181)]);
         $newMessageId = $this->createMessage(['added' => Carbon::now()->subDay()]);
 
-        $oldPostId = $this->createPost(['added' => Carbon::now()->subDays(370)]);
-        $newPostId = $this->createPost(['added' => Carbon::now()->subDay()]);
+        $forumId = $this->createForum();
+        $oldTopicId = $this->createTopic([
+            'sticky' => 'no',
+            'forumid' => $forumId,
+        ]);
+        $newTopicId = $this->createTopic([
+            'sticky' => 'no',
+            'forumid' => $forumId,
+        ]);
+
+        $oldPostId = $this->createPost(['added' => Carbon::now()->subDays(370), 'topicid' => $oldTopicId]);
+        $newPostId = $this->createPost(['added' => Carbon::now()->subDay(), 'topicid' => $newTopicId]);
 
         $catchupUserId = $this->createUser(['last_catchup' => 0]);
         DB::table('readposts')->insert([
             'userid' => $catchupUserId,
-            'topicid' => 1,
+            'topicid' => $oldTopicId,
             'lastpostread' => 0,
         ]);
 
@@ -67,14 +77,8 @@ final class TasksTest extends TestCase
         $oldLogId = $this->createSiteLog(['added' => Carbon::now()->subDays(181)]);
         $newLogId = $this->createSiteLog(['added' => Carbon::now()->subDay()]);
 
-        $oldTopicId = $this->createTopic([
-            'sticky' => 'no',
-            'lastpost' => $oldPostId,
-        ]);
-        $newTopicId = $this->createTopic([
-            'sticky' => 'no',
-            'lastpost' => $newPostId,
-        ]);
+        DB::table('topics')->where('id', $oldTopicId)->update(['lastpost' => $oldPostId]);
+        DB::table('topics')->where('id', $newTopicId)->update(['lastpost' => $newPostId]);
 
         $oldReportId = $this->createReport([
             'added' => Carbon::now()->subDays(30),
@@ -197,7 +201,7 @@ final class TasksTest extends TestCase
     private function createPost(array $overrides = []): int
     {
         return (int) DB::table('posts')->insertGetId(array_merge([
-            'topicid' => 1,
+            'topicid' => 0,
             'userid' => 1,
             'added' => Carbon::now()->toDateTimeString(),
             'body' => 'test',
@@ -249,11 +253,26 @@ final class TasksTest extends TestCase
         return (int) DB::table('topics')->insertGetId(array_merge([
             'userid' => 1,
             'subject' => 'test-topic-'.Str::random(),
-            'forumid' => 1,
+            'forumid' => 0,
             'firstpost' => 0,
             'lastpost' => 0,
             'sticky' => 'no',
             'locked' => 'no',
+        ], $overrides));
+    }
+
+    /**
+     * @param  array<string, mixed>  $overrides
+     */
+    private function createForum(array $overrides = []): int
+    {
+        return (int) DB::table('forums')->insertGetId(array_merge([
+            'name' => 'test-forum-'.Str::random(),
+            'description' => 'test',
+            'minclassread' => 0,
+            'minclasswrite' => 0,
+            'minclasscreate' => 0,
+            'forid' => 0,
         ], $overrides));
     }
 

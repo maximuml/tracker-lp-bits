@@ -223,9 +223,9 @@ class TorrentDetailsController extends Controller
             if (! empty($technicalData)) {
                 $firstLine = (string) strtok($technicalData, "\n");
                 if (
-                    strpos($firstLine, 'DISC INFO') !== false
-                    || strpos($firstLine, 'Disc Title') !== false
-                    || strpos($firstLine, 'Disc Label') !== false
+                    str_contains($firstLine, 'DISC INFO')
+                    || str_contains($firstLine, 'Disc Title')
+                    || str_contains($firstLine, 'Disc Label')
                 ) {
                     $isBdInfo = true;
                 }

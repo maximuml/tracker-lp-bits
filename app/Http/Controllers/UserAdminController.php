@@ -63,7 +63,7 @@ class UserAdminController extends LegacyController
         $q = '';
         if ($search !== '' && $letter === '') {
             $q = 'search='.rawurlencode($search);
-        } elseif ($letter !== '' && strpos('0abcdefghijklmnopqrstuvwxyz', $letter) !== false) {
+        } elseif ($letter !== '' && str_contains('0abcdefghijklmnopqrstuvwxyz', $letter)) {
             $q = "letter={$letter}";
         }
 

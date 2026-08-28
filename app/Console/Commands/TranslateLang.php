@@ -139,9 +139,10 @@ class TranslateLang extends Command
             $data = require $sourceFile;
         } else {
             require $sourceFile;
+            $definedVars = get_defined_vars();
             $var = str_replace(['.php', 'lang_', '-'], '', $relativePath);
             $var = "lang_$var";
-            $data = $$var;
+            $data = $definedVars[$var] ?? [];
         }
         $translated = $this->translateArray($data);
 

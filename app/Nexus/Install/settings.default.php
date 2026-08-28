@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Enums\TorrentNfoViewStyle;
 use App\Enums\UserClass as UserClassEnum;
 use App\Models\BonusLogs;

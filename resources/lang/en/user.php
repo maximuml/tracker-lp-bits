@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\UserGender;
 use App\Models\User;
 
 return [
@@ -37,9 +38,9 @@ return [
     'destroy_by_admin' => 'Physical delete by administrator',
     'disable_by_admin' => 'Disable by administrator',
     'genders' => [
-        User::GENDER_MALE => 'Male',
-        User::GENDER_FEMALE => 'Female',
-        User::GENDER_UNKNOWN => 'Unknown',
+        UserGender::MALE->value => 'Male',
+        UserGender::FEMALE->value => 'Female',
+        UserGender::UNKNOWN->value => 'Unknown',
     ],
     'grant_props_notification' => [
         'subject' => 'Get Props：:name',

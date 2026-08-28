@@ -64,8 +64,10 @@ class Snatch extends NexusModel
         'completed_at_human' => '完成',
     ];
 
+    /** @deprecated Use App\Enums\SnatchFinished enum instead. */
     const FINISHED_YES = 'yes';
 
+    /** @deprecated Use App\Enums\SnatchFinished enum instead. */
     const FINISHED_NO = 'no';
 
     /**

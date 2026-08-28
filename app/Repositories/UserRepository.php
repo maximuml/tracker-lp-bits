@@ -8,6 +8,9 @@ use App\Auth\Permission;
 use App\Enums\ModelEventEnum;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserClass as UserClassEnum;
+use App\Enums\UserEnabled;
+use App\Enums\UsernameChangeType;
+use App\Enums\UserStatus;
 use App\Exceptions\InsufficientPermissionException;
 use App\Exceptions\NexusException;
 use App\Http\Resources\UserResource;
@@ -19,7 +22,6 @@ use App\Models\User;
 use App\Models\UserBanLog;
 use App\Models\UserMeta;
 use App\Models\UserModifyLog;
-use App\Models\UsernameChangeLog;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
 use App\Support\Email;
@@ -194,7 +196,7 @@ class UserRepository extends BaseRepository
             'passhash' => $passhash,
             'stylesheet' => $setting['defstylesheet'],
             'added' => now()->toDateTimeString(),
-            'status' => User::STATUS_CONFIRMED,
+            'status' => UserStatus::CONFIRMED->value,
             'class' => $class,
             'passkey' => md5($username.date('Y-m-d H:i:s').$passhash),
         ];
@@ -259,7 +261,7 @@ class UserRepository extends BaseRepository
     public function disableUser(User $operator, $uid, $reason = '')
     {
         $targetUser = User::query()->findOrFail((int) $uid, ['id', 'enabled', 'username', 'class']);
-        if ($targetUser->enabled == User::ENABLED_NO) {
+        if ($targetUser->enabled == UserEnabled::NO->value) {
             throw new NexusException('Already disabled !');
         }
         if (empty($reason)) {
@@ -274,7 +276,7 @@ class UserRepository extends BaseRepository
         ];
         $modCommentText = sprintf('%s - Disable by %s, reason: %s.', now()->format('Y-m-d'), $operator->username, $reason);
         DB::transaction(function () use ($targetUser, $banLog, $modCommentText) {
-            $targetUser->updateWithModComment(['enabled' => User::ENABLED_NO], $modCommentText);
+            $targetUser->updateWithModComment(['enabled' => UserEnabled::NO->value], $modCommentText);
             UserBanLog::query()->create($banLog);
         });
         Logger::writeWithContext((string) "user: {$uid}, {$modCommentText}", (string) 'info', (bool) false);
@@ -292,12 +294,12 @@ class UserRepository extends BaseRepository
     public function enableUser(User $operator, $uid, $reason = '')
     {
         $targetUser = User::query()->findOrFail((int) $uid, ['id', 'enabled', 'username', 'class']);
-        if ($targetUser->enabled == User::ENABLED_YES) {
+        if ($targetUser->enabled == UserEnabled::YES->value) {
             throw new NexusException('Already enabled !');
         }
         $this->checkPermission($operator, $targetUser);
         $update = [
-            'enabled' => User::ENABLED_YES,
+            'enabled' => UserEnabled::YES->value,
         ];
         if ($targetUser->class == UserClassEnum::PEASANT->value) {
             // warn users until 30 days
@@ -730,7 +732,7 @@ class UserRepository extends BaseRepository
             }
             DB::transaction(function () use ($user, $meta, $params) {
                 $this->changeUsername(
-                    $user, UsernameChangeLog::CHANGE_TYPE_USER, $user, $params['username'],
+                    $user, UsernameChangeType::USER->value, $user, $params['username'],
                     SiteConfig::current()->system->changeUsernameCardAllowCharactersOutsideTheAlphabets()
                 );
                 $meta->delete();
@@ -939,7 +941,7 @@ class UserRepository extends BaseRepository
         $ids = Arr::wrap($id);
         $users = User::query()
             ->whereIn('id', $ids)
-            ->where('status', User::STATUS_PENDING)
+            ->where('status', UserStatus::PENDING->value)
             ->get();
 
         if ($users->isEmpty()) {
@@ -947,7 +949,7 @@ class UserRepository extends BaseRepository
         }
 
         $update = [
-            'status' => User::STATUS_CONFIRMED,
+            'status' => UserStatus::CONFIRMED->value,
             'editsecret' => '',
         ];
         User::query()
@@ -955,7 +957,7 @@ class UserRepository extends BaseRepository
             ->update($update);
 
         foreach ($users as $user) {
-            $user->status = User::STATUS_CONFIRMED;
+            $user->status = UserStatus::CONFIRMED->value;
             $user->editsecret = '';
             Events::fire(ModelEventEnum::USER_UPDATED, $user, null);
         }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\System;
 
 use App\Enums\TorrentPromotion;
+use App\Enums\TorrentStateNotice;
 use App\Filament\Resources\System\TorrentStateResource\Pages\ManageTorrentStates;
 use App\Models\Torrent;
 use App\Models\TorrentState;
@@ -68,7 +69,7 @@ class TorrentStateResource extends Resource
                     ->label(__('label.torrent_state.notice_days'))
                     ->options(TorrentState::noticeOptions())
                     ->required()
-                    ->default(TorrentState::NOTICE_NONE)
+                    ->default(TorrentStateNotice::NONE->value)
                     ->dehydrated(true)
                     ->native(false),
                 Textarea::make('remark')

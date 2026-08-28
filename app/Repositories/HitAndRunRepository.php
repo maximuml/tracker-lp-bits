@@ -6,8 +6,10 @@ namespace App\Repositories;
 
 use App\Auth\Permission;
 use App\Enums\HitAndRunMode;
+use App\Enums\HitAndRunStatus;
 use App\Enums\ModelEventEnum;
 use App\Enums\UserClass as UserClassEnum;
+use App\Enums\UserEnabled;
 use App\Models\HitAndRun;
 use App\Models\Message;
 use App\Models\SearchBox;
@@ -188,7 +190,7 @@ class HitAndRunRepository extends BaseRepository
             return false;
         }
         $query = HitAndRun::query()
-            ->where('status', HitAndRun::STATUS_INSPECTING)
+            ->where('status', HitAndRunStatus::INSPECTING->value)
             ->with([
                 'torrent' => function ($query) {
                     $query->select(['id', 'size', 'name', 'category']);
@@ -417,10 +419,10 @@ class HitAndRunRepository extends BaseRepository
      */
     private function inspectingToReached(HitAndRun $hitAndRun, array $update, string $logPrefix = ''): bool
     {
-        $update['status'] = HitAndRun::STATUS_REACHED;
+        $update['status'] = HitAndRunStatus::REACHED->value;
         $affectedRows = DB::table($hitAndRun->getTable())
             ->where('id', $hitAndRun->id)
-            ->where('status', HitAndRun::STATUS_INSPECTING)
+            ->where('status', HitAndRunStatus::INSPECTING->value)
             ->update($update);
         Logger::writeWithContext((string) ("[{$logPrefix}], ".LegacyDb::lastQuery(false, 'json').", affectedRows: {$affectedRows}"), (string) 'info', (bool) false);
         if ($affectedRows != 1) {
@@ -455,12 +457,12 @@ class HitAndRunRepository extends BaseRepository
         }
         $comment = Locale::trans('hr.unreached_comment', ['now' => Carbon::now()->toDateTimeString(), 'seed_time' => bcdiv((string) $snatch->seedtime, '3600', 1), 'seed_time_minimum' => $setting['seed_time_minimum'], 'share_ratio' => Ratio::hr($snatch->uploaded, $snatch->downloaded), 'torrent_size' => Format::size($hitAndRun->torrent->size), 'ignore_when_ratio_reach' => $setting['ignore_when_ratio_reach']], $user->locale);
         $update = [
-            'status' => HitAndRun::STATUS_UNREACHED,
+            'status' => HitAndRunStatus::UNREACHED->value,
             'comment' => $comment,
         ];
         $affectedRows = DB::table($hitAndRun->getTable())
             ->where('id', $hitAndRun->id)
-            ->where('status', HitAndRun::STATUS_INSPECTING)
+            ->where('status', HitAndRunStatus::INSPECTING->value)
             ->update($update);
         Logger::writeWithContext((string) ('[H&R_UNREACHED], '.LegacyDb::lastQuery(false, 'json').", affectedRows: {$affectedRows}"), (string) 'info', (bool) false);
         if ($affectedRows != 1) {
@@ -492,7 +494,7 @@ class HitAndRunRepository extends BaseRepository
         }
         $query = HitAndRun::query()
             ->selectRaw('count(*) as counts, uid')
-            ->where('status', HitAndRun::STATUS_UNREACHED)
+            ->where('status', HitAndRunStatus::UNREACHED->value)
             ->groupBy('uid')
             ->havingRaw("count(*) >= $disableCounts");
         if ($setting['diff_in_section']) {
@@ -509,14 +511,14 @@ class HitAndRunRepository extends BaseRepository
         $users = User::query()
             ->with('language')
             ->where('class', '<', UserClassEnum::VIP->value)
-            ->where('enabled', User::ENABLED_YES)
+            ->where('enabled', UserEnabled::YES->value)
             ->where('donor', 'no')
             ->find($result->pluck('uid')->toArray(), ['id', 'username', 'lang']);
         Logger::writeWithContext((string) ("{$logPrefix}, Going to disable user: ".json_encode($users->toArray())), (string) 'info', (bool) false);
         foreach ($users as $user) {
             $locale = $user->locale;
             $comment = Locale::trans('hr.unreached_disable_comment', [], $locale);
-            $user->updateWithModComment(['enabled' => User::ENABLED_NO], sprintf('%s - %s', date('Y-m-d'), $comment));
+            $user->updateWithModComment(['enabled' => UserEnabled::NO->value], sprintf('%s - %s', date('Y-m-d'), $comment));
             $message = [
                 'receiver' => $user->id,
                 'added' => Carbon::now()->toDateTimeString(),
@@ -571,8 +573,8 @@ class HitAndRunRepository extends BaseRepository
                 $out[] = sprintf(
                     '%s: %s/<font color="red">%s</font>/%s',
                     $info['text'],
-                    $grouped[$info['mode']][HitAndRun::STATUS_INSPECTING] ?? 0,
-                    $grouped[$info['mode']][HitAndRun::STATUS_UNREACHED] ?? 0,
+                    $grouped[$info['mode']][HitAndRunStatus::INSPECTING->value] ?? 0,
+                    $grouped[$info['mode']][HitAndRunStatus::UNREACHED->value] ?? 0,
                     HitAndRun::getConfig('ban_user_when_counts_reach', $info['mode'])
                 );
             }
@@ -587,8 +589,8 @@ class HitAndRunRepository extends BaseRepository
                 if ($key == SearchBox::SECTION_BROWSE) {
                     return sprintf(
                         '%s/<font color="red">%s</font>/%s',
-                        $grouped[HitAndRun::STATUS_INSPECTING] ?? 0,
-                        $grouped[HitAndRun::STATUS_UNREACHED] ?? 0,
+                        $grouped[HitAndRunStatus::INSPECTING->value] ?? 0,
+                        $grouped[HitAndRunStatus::UNREACHED->value] ?? 0,
                         HitAndRun::getConfig('ban_user_when_counts_reach', $info['mode'])
                     );
                 }
@@ -613,7 +615,7 @@ class HitAndRunRepository extends BaseRepository
         if (! in_array($model->status, $this->getCanPardonStatus())) {
             throw new \LogicException("Can't be pardoned due to status is: ".$model->status_text.' !');
         }
-        $model->status = HitAndRun::STATUS_PARDONED;
+        $model->status = HitAndRunStatus::PARDONED->value;
         $prefix = date('Y-m-d').' - Pardon by '.$user->username;
         $existing = (string) $model->comment;
         $model->comment = $existing === '' ? $prefix : "\n".$prefix.$existing;
@@ -637,7 +639,7 @@ class HitAndRunRepository extends BaseRepository
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
         $affected = DB::update(
             "UPDATE hit_and_runs SET status = ?, updated_at = ?, comment = CASE WHEN comment = '' THEN ? ELSE CONCAT('\\n', ?, comment) END WHERE id IN ({$placeholders})",
-            array_merge([HitAndRun::STATUS_PARDONED, Carbon::now()->toDateTimeString(), $prefix, $prefix], $ids)
+            array_merge([HitAndRunStatus::PARDONED->value, Carbon::now()->toDateTimeString(), $prefix, $prefix], $ids)
         );
         Logger::writeWithContext((string) sprintf('user: %s bulk pardon by filter: %s, affected: %s', $user->id, json_encode($params), $affected), (string) 'alert', (bool) false);
         if ($affected) {

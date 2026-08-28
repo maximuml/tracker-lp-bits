@@ -36,10 +36,13 @@ class ExamUser extends NexusModel
     /** @var bool */
     public $timestamps = true;
 
+    /** @deprecated Use App\Enums\ExamUserStatus enum instead. */
     const STATUS_NORMAL = 0;
 
+    /** @deprecated Use App\Enums\ExamUserStatus enum instead. */
     const STATUS_FINISHED = 1;
 
+    /** @deprecated Use App\Enums\ExamUserStatus enum instead. */
     const STATUS_AVOIDED = -1;
 
     /** @var array<int|string, mixed> */
@@ -49,8 +52,10 @@ class ExamUser extends NexusModel
         self::STATUS_AVOIDED => ['text' => 'Avoided'],
     ];
 
+    /** @deprecated Use App\Enums\ExamUserIsDone enum instead. */
     const IS_DONE_YES = 1;
 
+    /** @deprecated Use App\Enums\ExamUserIsDone enum instead. */
     const IS_DONE_NO = 0;
 
     /** @var array<int|string, mixed> */

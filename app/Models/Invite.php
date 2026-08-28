@@ -27,8 +27,10 @@ class Invite extends NexusModel
     /** @var string */
     protected $table = 'invites';
 
+    /** @deprecated Use App\Enums\InviteValid enum instead. */
     const VALID_YES = 1;
 
+    /** @deprecated Use App\Enums\InviteValid enum instead. */
     const VALID_NO = 0;
 
     const TEMPORARY_INVITE_VALID_DAYS = 7;

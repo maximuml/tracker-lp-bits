@@ -54,8 +54,10 @@ class Exam extends NexusModel
         'indexes' => 'array',
     ];
 
+    /** @deprecated Use App\Enums\ExamStatus enum instead. */
     const STATUS_ENABLED = 0;
 
+    /** @deprecated Use App\Enums\ExamStatus enum instead. */
     const STATUS_DISABLED = 1;
 
     /** @var array<int|string, mixed> */
@@ -64,8 +66,10 @@ class Exam extends NexusModel
         self::STATUS_DISABLED => ['text' => 'Disabled'],
     ];
 
+    /** @deprecated Use App\Enums\ExamDiscovered enum instead. */
     const DISCOVERED_YES = 1;
 
+    /** @deprecated Use App\Enums\ExamDiscovered enum instead. */
     const DISCOVERED_NO = 0;
 
     /** @var array<int|string, mixed> */
@@ -74,16 +78,22 @@ class Exam extends NexusModel
         self::DISCOVERED_YES => ['text' => 'Yes'],
     ];
 
+    /** @deprecated Use App\Enums\ExamIndex enum instead. */
     const INDEX_UPLOADED = 1;
 
+    /** @deprecated Use App\Enums\ExamIndex enum instead. */
     const INDEX_SEED_TIME_AVERAGE = 2;
 
+    /** @deprecated Use App\Enums\ExamIndex enum instead. */
     const INDEX_DOWNLOADED = 3;
 
+    /** @deprecated Use App\Enums\ExamIndex enum instead. */
     const INDEX_SEED_BONUS = 4;
 
+    /** @deprecated Use App\Enums\ExamIndex enum instead. */
     const INDEX_SEED_POINTS = 5;
 
+    /** @deprecated Use App\Enums\ExamIndex enum instead. */
     const INDEX_UPLOAD_TORRENT_COUNT = 6;
 
     /** @var array<int|string, mixed> */
@@ -96,12 +106,16 @@ class Exam extends NexusModel
         self::INDEX_UPLOAD_TORRENT_COUNT => ['name' => 'Upload torrent', 'unit' => '', 'source_user_field' => ''],
     ];
 
+    /** @deprecated Use App\Enums\ExamFilterUser enum instead. */
     const FILTER_USER_CLASS = 'classes';
 
+    /** @deprecated Use App\Enums\ExamFilterUser enum instead. */
     const FILTER_USER_REGISTER_TIME_RANGE = 'register_time_range';
 
+    /** @deprecated Use App\Enums\ExamFilterUser enum instead. */
     const FILTER_USER_DONATE = 'donate_status';
 
+    /** @deprecated Use App\Enums\ExamFilterUser enum instead. */
     const FILTER_USER_REGISTER_DAYS_RANGE = 'register_days_range';
 
     /** @var array<int|string, mixed> */
@@ -112,14 +126,19 @@ class Exam extends NexusModel
         self::FILTER_USER_REGISTER_DAYS_RANGE => ['name' => 'User register days range'],
     ];
 
+    /** @deprecated Use App\Enums\ExamRecurring enum instead. */
     const RECURRING_DAILY = 'Daily';
 
+    /** @deprecated Use App\Enums\ExamRecurring enum instead. */
     const RECURRING_WEEKLY = 'Weekly';
 
+    /** @deprecated Use App\Enums\ExamRecurring enum instead. */
     const RECURRING_MONTHLY = 'Monthly';
 
+    /** @deprecated Use App\Enums\ExamType enum instead. */
     const TYPE_EXAM = 1;
 
+    /** @deprecated Use App\Enums\ExamType enum instead. */
     const TYPE_TASK = 2;
 
     /** @return  mixed */

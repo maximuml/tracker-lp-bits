@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\TorrentApprovalStatus;
 use App\Models\Torrent;
 use App\Models\TorrentOperationLog;
 
@@ -69,9 +70,9 @@ return [
         'status_label' => 'Approval status',
         'comment_label' => 'Comment(optional)',
         'status_text' => [
-            Torrent::APPROVAL_STATUS_NONE => 'Not reviewed',
-            Torrent::APPROVAL_STATUS_ALLOW => 'Allowed',
-            Torrent::APPROVAL_STATUS_DENY => 'Denied',
+            TorrentApprovalStatus::NONE->value => 'Not reviewed',
+            TorrentApprovalStatus::ALLOW->value => 'Allowed',
+            TorrentApprovalStatus::DENY->value => 'Denied',
         ],
         'deny_comment_show' => 'Denied, reason: :reason',
         'logs_label' => 'Approval logs',

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Enums\TorrentOperationAction;
 use App\Models\Comment;
 use App\Models\Torrent;
 use App\Models\TorrentOperationLog;
@@ -158,7 +159,7 @@ class TorrentDetailRepository
     {
         return TorrentOperationLog::query()
             ->where('torrent_id', $torrentId)
-            ->where('action_type', TorrentOperationLog::ACTION_TYPE_APPROVAL_DENY)
+            ->where('action_type', TorrentOperationAction::APPROVAL_DENY->value)
             ->orderBy('id', 'desc')
             ->first();
     }

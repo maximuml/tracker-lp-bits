@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\Exam;
+use App\Enums\ExamType;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -15,7 +15,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('exams', function (Blueprint $table) {
-            $table->integer('type')->default(Exam::TYPE_EXAM);
+            $table->integer('type')->default(ExamType::EXAM->value);
             $table->integer('success_reward_bonus')->default(0);
             $table->integer('fail_deduct_bonus')->default(0);
         });

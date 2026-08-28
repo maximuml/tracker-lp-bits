@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
+use App\Enums\TorrentApprovalStatus;
 use App\Models\Setting;
 use App\Models\Torrent;
 use App\Models\TorrentBuyLog;
@@ -101,7 +102,7 @@ class TorrentDetailsController extends Controller
             ? ($langDetails['head_details_for_torrent'] ?? '').'"'.$row['name'].'"'
             : ($langDetails['head_comments_for_torrent'] ?? '').'"'.$row['name'].'"';
 
-        $denyLog = $row['approval_status'] == Torrent::APPROVAL_STATUS_DENY
+        $denyLog = $row['approval_status'] == TorrentApprovalStatus::DENY->value
             ? TorrentDetailRepository::getLatestApprovalDenyLog($id)
             : null;
 

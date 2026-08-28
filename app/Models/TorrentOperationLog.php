@@ -34,14 +34,19 @@ class TorrentOperationLog extends NexusModel
     /** @var list<string> */
     protected $fillable = ['uid', 'torrent_id', 'action_type', 'comment'];
 
+    /** @deprecated Use App\Enums\TorrentOperationAction enum instead. */
     const ACTION_TYPE_APPROVAL_NONE = 'approval_none';
 
+    /** @deprecated Use App\Enums\TorrentOperationAction enum instead. */
     const ACTION_TYPE_APPROVAL_ALLOW = 'approval_allow';
 
+    /** @deprecated Use App\Enums\TorrentOperationAction enum instead. */
     const ACTION_TYPE_APPROVAL_DENY = 'approval_deny';
 
+    /** @deprecated Use App\Enums\TorrentOperationAction enum instead. */
     const ACTION_TYPE_EDIT = 'edit';
 
+    /** @deprecated Use App\Enums\TorrentOperationAction enum instead. */
     const ACTION_TYPE_DELETE = 'delete';
 
     /** @var array<int|string, mixed> */

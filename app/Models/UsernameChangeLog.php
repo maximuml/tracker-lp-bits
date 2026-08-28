@@ -26,8 +26,10 @@ class UsernameChangeLog extends NexusModel
     /** @var bool */
     public $timestamps = true;
 
+    /** @deprecated Use App\Enums\UsernameChangeType enum instead. */
     const CHANGE_TYPE_USER = 1;
 
+    /** @deprecated Use App\Enums\UsernameChangeType enum instead. */
     const CHANGE_TYPE_ADMIN = 2;
 
     /** @var array<int|string, mixed> */

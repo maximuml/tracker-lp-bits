@@ -82,8 +82,10 @@ class Torrent extends NexusModel
         'hr',
     ];
 
+    /** @deprecated Use App\Enums\TorrentVisible enum instead. */
     const VISIBLE_YES = 'yes';
 
+    /** @deprecated Use App\Enums\TorrentVisible enum instead. */
     const VISIBLE_NO = 'no';
 
     const FILTER_VISIBLE_ALL = '0';
@@ -122,14 +124,17 @@ class Torrent extends NexusModel
         'basic_category', 'basic_audio_codec', 'basic_codec', 'basic_media',
         'basic_source', 'basic_standard', ];
 
+    /** @deprecated Use App\Enums\TorrentPosState enum instead. */
     const POS_STATE_STICKY_NONE = 'normal';
 
+    /** @deprecated Use App\Enums\TorrentPosState enum instead. */
     const POS_STATE_STICKY_FIRST = 'sticky';
 
     /**
      * alphabet 'r' is  after 'n' and before 's', so it will fit: order by pos_state desc,
      * first sticky, then r_sticky, then normal
      */
+    /** @deprecated Use App\Enums\TorrentPosState enum instead. */
     const POS_STATE_STICKY_SECOND = 'r_sticky';
 
     /** @var array<int|string, mixed> */
@@ -139,8 +144,10 @@ class Torrent extends NexusModel
         self::POS_STATE_STICKY_FIRST => ['text' => 'Sticky first', 'icon_counts' => 2],
     ];
 
+    /** @deprecated Use App\Enums\TorrentHr enum instead. */
     const HR_YES = 1;
 
+    /** @deprecated Use App\Enums\TorrentHr enum instead. */
     const HR_NO = 0;
 
     /** @var array<int|string, mixed> */
@@ -242,10 +249,13 @@ class Torrent extends NexusModel
 
     const BONUS_REWARD_VALUES = [50, 100, 200, 500, 1000];
 
+    /** @deprecated Use App\Enums\TorrentApprovalStatus enum instead. */
     const APPROVAL_STATUS_NONE = 0;
 
+    /** @deprecated Use App\Enums\TorrentApprovalStatus enum instead. */
     const APPROVAL_STATUS_ALLOW = 1;
 
+    /** @deprecated Use App\Enums\TorrentApprovalStatus enum instead. */
     const APPROVAL_STATUS_DENY = 2;
 
     /** @var array<int|string, mixed> */
@@ -267,8 +277,10 @@ class Torrent extends NexusModel
         ],
     ];
 
+    /** @deprecated Use App\Enums\TorrentNfoViewStyle enum instead. */
     const NFO_VIEW_STYLE_DOS = 'magic';
 
+    /** @deprecated Use App\Enums\TorrentNfoViewStyle enum instead. */
     const NFO_VIEW_STYLE_WINDOWS = 'latin-1';
 
     const REQUIRE_SEED_SECTION_DEFAULT_PROMOTION_STATE = self::PROMOTION_FREE;

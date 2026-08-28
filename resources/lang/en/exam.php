@@ -1,23 +1,24 @@
 <?php
 
-use App\Models\Exam;
+use App\Enums\ExamFilterUser;
+use App\Enums\ExamIndex;
 
 return [
     'label' => 'Exam',
     'name' => 'Exam name',
     'index' => 'Exam index',
     'time_range' => 'Exam time',
-    'index_text_'.Exam::INDEX_UPLOADED => 'Upload increment',
-    'index_text_'.Exam::INDEX_SEED_TIME_AVERAGE => 'Seed time average',
-    'index_text_'.Exam::INDEX_DOWNLOADED => 'Download increment',
-    'index_text_'.Exam::INDEX_SEED_BONUS => 'Bonus increment',
-    'index_text_'.Exam::INDEX_SEED_POINTS => 'Seed points increment',
-    'index_text_'.Exam::INDEX_UPLOAD_TORRENT_COUNT => 'Upload torrent increment',
+    'index_text_'.ExamIndex::UPLOADED->value => 'Upload increment',
+    'index_text_'.ExamIndex::SEED_TIME_AVERAGE->value => 'Seed time average',
+    'index_text_'.ExamIndex::DOWNLOADED->value => 'Download increment',
+    'index_text_'.ExamIndex::SEED_BONUS->value => 'Bonus increment',
+    'index_text_'.ExamIndex::SEED_POINTS->value => 'Seed points increment',
+    'index_text_'.ExamIndex::UPLOAD_TORRENT_COUNT->value => 'Upload torrent increment',
     'filters' => [
-        Exam::FILTER_USER_CLASS => 'User class',
-        Exam::FILTER_USER_REGISTER_TIME_RANGE => 'Register time range',
-        Exam::FILTER_USER_DONATE => 'Donated',
-        Exam::FILTER_USER_REGISTER_DAYS_RANGE => 'Range of days of registration',
+        ExamFilterUser::USER_CLASS->value => 'User class',
+        ExamFilterUser::REGISTER_TIME_RANGE->value => 'Register time range',
+        ExamFilterUser::DONATE->value => 'Donated',
+        ExamFilterUser::REGISTER_DAYS_RANGE->value => 'Range of days of registration',
     ],
     'require_value' => 'Require',
     'current_value' => 'Current',

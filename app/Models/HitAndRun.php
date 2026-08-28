@@ -47,12 +47,16 @@ class HitAndRun extends NexusModel
     /** @var bool */
     public $timestamps = true;
 
+    /** @deprecated Use App\Enums\HitAndRunStatus enum instead. */
     const STATUS_INSPECTING = 1;
 
+    /** @deprecated Use App\Enums\HitAndRunStatus enum instead. */
     const STATUS_REACHED = 2;
 
+    /** @deprecated Use App\Enums\HitAndRunStatus enum instead. */
     const STATUS_UNREACHED = 3;
 
+    /** @deprecated Use App\Enums\HitAndRunStatus enum instead. */
     const STATUS_PARDONED = 4;
 
     /** @var array<int|string, mixed> */

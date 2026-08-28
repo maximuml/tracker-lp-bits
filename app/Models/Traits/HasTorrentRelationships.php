@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Traits;
 
+use App\Enums\PeerSeeder;
 use App\Models\AudioCodec;
 use App\Models\Bookmark;
 use App\Models\Category;
@@ -82,13 +83,13 @@ trait HasTorrentRelationships
     /** @return mixed */
     public function upload_peers()
     {
-        return $this->peers()->where('seeder', Peer::SEEDER_YES);
+        return $this->peers()->where('seeder', PeerSeeder::YES->value);
     }
 
     /** @return mixed */
     public function download_peers()
     {
-        return $this->peers()->where('seeder', Peer::SEEDER_NO);
+        return $this->peers()->where('seeder', PeerSeeder::NO->value);
     }
 
     /** @return mixed */

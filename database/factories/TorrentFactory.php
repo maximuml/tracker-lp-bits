@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Enums\TorrentPosState;
+use App\Enums\TorrentVisible;
 use App\Models\Category;
 use App\Models\Torrent;
 use App\Models\User;
@@ -51,7 +53,7 @@ class TorrentFactory extends Factory
             'leechers' => 0,
             'seeders' => 0,
             'last_action' => now()->toDateTimeString(),
-            'visible' => Torrent::VISIBLE_YES,
+            'visible' => TorrentVisible::YES->value,
             'banned' => Torrent::BANNED_NO,
             'owner' => User::factory(),
             'sp_state' => 1,
@@ -59,7 +61,7 @@ class TorrentFactory extends Factory
             'promotion_until' => null,
             'anonymous' => 'no',
             'url' => null,
-            'pos_state' => Torrent::POS_STATE_STICKY_NONE,
+            'pos_state' => TorrentPosState::NONE->value,
             'cache_stamp' => 0,
             'last_reseed' => null,
             'hr' => 0,
@@ -114,7 +116,7 @@ class TorrentFactory extends Factory
     public function invisible(): self
     {
         return $this->state(fn (array $attributes) => [
-            'visible' => Torrent::VISIBLE_NO,
+            'visible' => TorrentVisible::NO->value,
         ]);
     }
 }

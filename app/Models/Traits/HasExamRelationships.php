@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Traits;
 
-use App\Models\ExamUser;
+use App\Enums\ExamUserStatus;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
@@ -22,6 +22,6 @@ trait HasExamRelationships
     /** @return mixed */
     public function onGoingUsers()
     {
-        return $this->users()->wherePivot('status', ExamUser::STATUS_NORMAL);
+        return $this->users()->wherePivot('status', ExamUserStatus::NORMAL->value);
     }
 }

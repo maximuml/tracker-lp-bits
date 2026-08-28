@@ -158,16 +158,22 @@ class User extends Authenticatable implements FilamentUser, HasName
 
     protected $perPage = 50;
 
+    /** @deprecated Use App\Enums\UserStatus enum instead. */
     const STATUS_CONFIRMED = 'confirmed';
 
+    /** @deprecated Use App\Enums\UserStatus enum instead. */
     const STATUS_PENDING = 'pending';
 
+    /** @deprecated Use App\Enums\UserEnabled enum instead. */
     const ENABLED_YES = 'yes';
 
+    /** @deprecated Use App\Enums\UserEnabled enum instead. */
     const ENABLED_NO = 'no';
 
+    /** @deprecated Use App\Enums\UserDonate enum instead. */
     const DONATE_YES = 'yes';
 
+    /** @deprecated Use App\Enums\UserDonate enum instead. */
     const DONATE_NO = 'no';
 
     /** @var array<string, array<string, string>> */
@@ -176,10 +182,13 @@ class User extends Authenticatable implements FilamentUser, HasName
         self::DONATE_NO => ['text' => 'No'],
     ];
 
+    /** @deprecated Use App\Enums\UserGender enum instead. */
     const GENDER_FEMALE = 'Female';
 
+    /** @deprecated Use App\Enums\UserGender enum instead. */
     const GENDER_MALE = 'Male';
 
+    /** @deprecated Use App\Enums\UserGender enum instead. */
     const GENDER_UNKNOWN = 'N/A';
 
     /** @var array<string, string> */

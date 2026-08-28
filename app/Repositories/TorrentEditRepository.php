@@ -6,6 +6,8 @@ namespace App\Repositories;
 
 use App\Auth\Permission;
 use App\Enums\ModelEventEnum;
+use App\Enums\TorrentOperationAction;
+use App\Enums\TorrentPosState;
 use App\Enums\TorrentPromotion;
 use App\Exceptions\NexusException;
 use App\Models\Category;
@@ -141,11 +143,11 @@ class TorrentEditRepository extends BaseRepository
             $posState = $request->input('pos_state');
             if (isset(Torrent::$posStates[$posState])) {
                 $posStateUntil = $request->input('pos_state_until') ?: null;
-                if ($posState == Torrent::POS_STATE_STICKY_NONE) {
+                if ($posState == TorrentPosState::NONE->value) {
                     $posStateUntil = null;
                 }
                 if ($posStateUntil && Carbon::parse($posStateUntil)->lte(now())) {
-                    $posState = Torrent::POS_STATE_STICKY_NONE;
+                    $posState = TorrentPosState::NONE->value;
                     $posStateUntil = null;
                 }
                 $updateset['pos_state'] = $posState;
@@ -193,7 +195,7 @@ class TorrentEditRepository extends BaseRepository
             TorrentOperationLog::add([
                 'torrent_id' => $torrentOld->id,
                 'uid' => $user->id,
-                'action_type' => TorrentOperationLog::ACTION_TYPE_EDIT,
+                'action_type' => TorrentOperationAction::EDIT->value,
                 'comment' => '',
             ], true);
         }

@@ -6,9 +6,9 @@ namespace App\Services\Announce;
 
 use App\Enums\HitAndRunMode;
 use App\Enums\ModelEventEnum;
+use App\Enums\TorrentHr;
 use App\Enums\UserClass as UserClassEnum;
 use App\Models\HitAndRun;
-use App\Models\Torrent;
 use App\Support\Events;
 use App\Support\LegacyDb;
 use App\Support\Logger;
@@ -52,7 +52,7 @@ final class HitAndRunHandler
         );
         Logger::writeWithContext((string) "[HR_LOG] user: {$userId}, torrent: {$torrentId}, hrMode: {$hrMode->value}", (string) 'info', (bool) false);
 
-        if (! $hrMode->isGlobal() && ($hrMode !== HitAndRunMode::MANUAL || $torrent['hr'] != Torrent::HR_YES)) {
+        if (! $hrMode->isGlobal() && ($hrMode !== HitAndRunMode::MANUAL || $torrent['hr'] != TorrentHr::YES->value)) {
             Logger::writeWithContext((string) "[HR_LOG] user: {$userId}, torrent: {$torrentId}, hrMode: {$hrMode->value}, not match", (string) 'debug', (bool) false);
 
             return $snatchInfo;

@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Enums\UserEnabled;
+use App\Enums\UserStatus;
 use App\Models\User;
 use App\Support\Config\SiteConfig;
 use App\Support\PasswordHasher;
@@ -61,9 +63,9 @@ class UserFactory extends Factory
             'passkey' => Token::randomHex(16),
             'stylesheet' => self::$defaultStyleSheet,
             'added' => now()->toDateTimeString(),
-            'status' => User::STATUS_CONFIRMED,
+            'status' => UserStatus::CONFIRMED->value,
             'class' => $class,
-            'enabled' => User::ENABLED_YES,
+            'enabled' => UserEnabled::YES->value,
             'timetype' => 'timealive',
             'downloadpos' => 'yes',
             'avatars' => 'yes',
@@ -116,7 +118,7 @@ class UserFactory extends Factory
     public function disabled(): self
     {
         return $this->state(fn (array $attributes) => [
-            'enabled' => User::ENABLED_NO,
+            'enabled' => UserEnabled::NO->value,
         ]);
     }
 }

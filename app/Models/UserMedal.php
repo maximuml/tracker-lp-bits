@@ -27,8 +27,10 @@ class UserMedal extends NexusModel
     /** @var list<string> */
     protected $fillable = ['uid', 'medal_id', 'expire_at', 'status', 'bonus_addition_expire_at'];
 
+    /** @deprecated Use App\Enums\UserMedalStatus enum instead. */
     const STATUS_NOT_WEARING = 0;
 
+    /** @deprecated Use App\Enums\UserMedalStatus enum instead. */
     const STATUS_WEARING = 1;
 
     public function getWearingStatusTextAttribute(): string

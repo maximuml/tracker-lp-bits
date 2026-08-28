@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Enums\TorrentPosState;
 use App\Enums\TorrentPromotion;
 use App\Models\Torrent;
 use App\Models\TorrentState;
@@ -67,9 +68,9 @@ final class Promotion
 
         if (is_null($sphighlight)) {
             $torrentSettings = SiteConfig::current()->torrent->toArray();
-            if ($posState === Torrent::POS_STATE_STICKY_FIRST && ! empty($torrentSettings['sticky_first_level_background_color'])) {
+            if ($posState === TorrentPosState::STICKY_FIRST->value && ! empty($torrentSettings['sticky_first_level_background_color'])) {
                 $sphighlight = sprintf(' style="background-color: %s"', $torrentSettings['sticky_first_level_background_color']);
-            } elseif ($posState === Torrent::POS_STATE_STICKY_SECOND && ! empty($torrentSettings['sticky_second_level_background_color'])) {
+            } elseif ($posState === TorrentPosState::STICKY_SECOND->value && ! empty($torrentSettings['sticky_second_level_background_color'])) {
                 $sphighlight = sprintf(' style="background-color: %s"', $torrentSettings['sticky_second_level_background_color']);
             }
         }

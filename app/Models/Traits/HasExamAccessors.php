@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models\Traits;
 
+use App\Enums\ExamFilterUser;
+use App\Enums\ExamStatus;
 use App\Models\Exam;
 use App\Models\User;
 use App\Support\Locale;
@@ -29,7 +31,7 @@ trait HasExamAccessors
 
     public function getStatusTextAttribute(): string
     {
-        return $this->status == Exam::STATUS_ENABLED ? Locale::trans('label.enabled', [], null) : Locale::trans('label.disabled', [], null);
+        return $this->status == ExamStatus::ENABLED->value ? Locale::trans('label.enabled', [], null) : Locale::trans('label.disabled', [], null);
     }
 
     public function getIsDiscoveredTextAttribute(): string
@@ -68,7 +70,7 @@ trait HasExamAccessors
     {
         $currentFilters = $this->filters;
         $arr = [];
-        $filter = Exam::FILTER_USER_CLASS;
+        $filter = ExamFilterUser::USER_CLASS->value;
         if (! empty($currentFilters[$filter])) {
             $classes = collect(User::$classes)->only($currentFilters[$filter]);
             $arr[] = sprintf(
@@ -77,7 +79,7 @@ trait HasExamAccessors
             );
         }
 
-        $filter = Exam::FILTER_USER_REGISTER_TIME_RANGE;
+        $filter = ExamFilterUser::REGISTER_TIME_RANGE->value;
         if (! empty($currentFilters[$filter])) {
             $range = $currentFilters[$filter];
             if (! empty($range[0]) || ! empty($range[1])) {
@@ -90,7 +92,7 @@ trait HasExamAccessors
             }
         }
 
-        $filter = Exam::FILTER_USER_REGISTER_DAYS_RANGE;
+        $filter = ExamFilterUser::REGISTER_DAYS_RANGE->value;
         if (! empty($currentFilters[$filter])) {
             $range = $currentFilters[$filter];
             if (! empty($range[0]) || ! empty($range[1])) {
@@ -103,7 +105,7 @@ trait HasExamAccessors
             }
         }
 
-        $filter = Exam::FILTER_USER_DONATE;
+        $filter = ExamFilterUser::DONATE->value;
         if (! empty($currentFilters[$filter])) {
             $donateStatus = collect(User::$donateStatus)->only($currentFilters[$filter]);
             $arr[] = sprintf('%s: %s', Locale::trans("exam.filters.{$filter}", [], null), $donateStatus->pluck('text')->implode(', '));

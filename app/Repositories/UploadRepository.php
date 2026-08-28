@@ -7,6 +7,8 @@ namespace App\Repositories;
 use App\Auth\Permission;
 use App\Enums\BusinessType;
 use App\Enums\ModelEventEnum;
+use App\Enums\TorrentApprovalStatus;
+use App\Enums\TorrentPosState;
 use App\Enums\TorrentPromotion;
 use App\Exceptions\NexusException;
 use App\Exceptions\TorrentAlreadyExistsException;
@@ -247,10 +249,10 @@ class UploadRepository extends BaseRepository
     private function getApprovalStatus(Request $request): int
     {
         if (Permission::canTorrentApprovalAllowAutomatic()) {
-            return Torrent::APPROVAL_STATUS_ALLOW;
+            return TorrentApprovalStatus::ALLOW->value;
         }
 
-        return Torrent::APPROVAL_STATUS_NONE;
+        return TorrentApprovalStatus::NONE->value;
     }
 
     public function getPrice(Request $request): int
@@ -298,9 +300,9 @@ class UploadRepository extends BaseRepository
      */
     public function getPosStateInfo(Request $request): array
     {
-        $posState = $request->pos_state ?: Torrent::POS_STATE_STICKY_NONE;
+        $posState = $request->pos_state ?: TorrentPosState::NONE->value;
         $posStateUntil = $request->pos_state_until ?: null;
-        if ($posState !== Torrent::POS_STATE_STICKY_NONE) {
+        if ($posState !== TorrentPosState::NONE->value) {
             if (! Permission::canSetTorrentPosState()) {
                 throw new NexusException('upload.no_permission_to_set_torrent_pos_state');
             }
@@ -308,7 +310,7 @@ class UploadRepository extends BaseRepository
                 throw new NexusException(Locale::trans('upload.invalid_pos_state', ['pos_state' => $posState], null));
             }
         }
-        if ($posState == Torrent::POS_STATE_STICKY_NONE) {
+        if ($posState == TorrentPosState::NONE->value) {
             $posStateUntil = null;
         }
         if ($posStateUntil && Carbon::parse($posStateUntil)->lt(Carbon::now())) {
@@ -405,7 +407,7 @@ class UploadRepository extends BaseRepository
 
         $uploadDenyApprovalDenyCount = SiteConfig::current()->main->uploadDenyApprovalDenyCount();
         $approvalDenyCount = Torrent::query()->where('owner', $user->id)
-            ->where('approval_status', Torrent::APPROVAL_STATUS_DENY)
+            ->where('approval_status', TorrentApprovalStatus::DENY->value)
             ->count();
         if ($uploadDenyApprovalDenyCount > 0 && $approvalDenyCount >= $uploadDenyApprovalDenyCount) {
             throw new NexusException(Locale::trans('upload.approval_deny_reach_upper_limit', [], null));

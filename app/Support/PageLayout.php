@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Enums\ExamType;
 use App\Enums\TorrentPromotion;
 use App\Models\HitAndRun;
 use App\Models\Torrent;
@@ -596,7 +597,7 @@ class PageLayout
                 $exam = new Exam;
                 $currentExam = $exam->getCurrent($context->user['id']);
                 if (! empty($currentExam['html'])) {
-                    Html::messageAlertVoid($currentExam['exam']->type == \App\Models\Exam::TYPE_TASK ? 'task.php' : 'messages.php', $currentExam['html'], $currentExam['exam']->background_color ?? 'blue');
+                    Html::messageAlertVoid($currentExam['exam']->type == ExamType::TASK->value ? 'task.php' : 'messages.php', $currentExam['html'], $currentExam['exam']->background_color ?? 'blue');
                 }
             }
             if ($context->offlineMsg) {

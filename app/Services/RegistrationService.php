@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Enums\InviteValid;
 use App\Enums\ModelEventEnum;
 use App\Enums\UserClass as UserClassEnum;
 use App\Exceptions\AuthenticationException;
@@ -116,7 +117,7 @@ class RegistrationService
 
             $invite = Invite::query()
                 ->where('hash', $code)
-                ->where('valid', Invite::VALID_YES)
+                ->where('valid', InviteValid::YES->value)
                 ->first();
 
             if (! $invite) {
@@ -124,7 +125,7 @@ class RegistrationService
             }
 
             if ((int) $invite->inviter !== $inviter) {
-                Invite::query()->where('id', $invite->id)->update(['valid' => Invite::VALID_NO]);
+                Invite::query()->where('id', $invite->id)->update(['valid' => InviteValid::NO->value]);
                 throw new AuthenticationException(Locale::trans('invite.invalid_inviter', [], $langFolder));
             }
         }
@@ -471,7 +472,7 @@ class RegistrationService
     private function consumeInvite(Invite $invite, int $userId, string $email, string $username): void
     {
         Invite::query()->where('id', $invite->id)->update([
-            'valid' => Invite::VALID_NO,
+            'valid' => InviteValid::NO->value,
             'invitee_register_uid' => $userId,
             'invitee_register_email' => $email,
             'invitee_register_username' => $username,

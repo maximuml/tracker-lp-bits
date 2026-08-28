@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Enums\PeerSeeder;
+use App\Enums\TorrentVisible;
 use App\Models\News;
 use App\Models\Peer;
 use App\Models\Poll;
@@ -29,7 +31,7 @@ class IndexRepository
             300,
             function () use ($limit) {
                 return Torrent::with('basic_category')
-                    ->where('visible', Torrent::VISIBLE_YES)
+                    ->where('visible', TorrentVisible::YES->value)
                     ->orderByDesc('id')
                     ->limit($limit)
                     ->get();
@@ -104,13 +106,13 @@ class IndexRepository
     public static function getTorrentStats(): array
     {
         return Cache::remember(self::cacheKey('torrent_stats', []), 60, function () {
-            $seeders = Peer::where('seeder', Peer::SEEDER_YES)->count();
-            $leechers = Peer::where('seeder', Peer::SEEDER_NO)->count();
+            $seeders = Peer::where('seeder', PeerSeeder::YES->value)->count();
+            $leechers = Peer::where('seeder', PeerSeeder::NO->value)->count();
             $cutoffQuarterHour = Carbon::now()->subSeconds(900)->format('Y-m-d H:i:s');
 
             return [
                 'torrents' => Torrent::count(),
-                'dead' => Torrent::where('visible', Torrent::VISIBLE_NO)->count(),
+                'dead' => Torrent::where('visible', TorrentVisible::NO->value)->count(),
                 'seeders' => $seeders,
                 'leechers' => $leechers,
                 'peers' => $seeders + $leechers,

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Auth;
 
+use App\Enums\InviteValid;
 use App\Exceptions\AuthenticationException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\ConfirmResendRequest;
@@ -58,7 +59,7 @@ class RegistrationController extends Controller
         if ($isInvite && $code !== '') {
             $invite = Invite::query()
                 ->where('hash', $code)
-                ->where('valid', Invite::VALID_YES)
+                ->where('valid', InviteValid::YES->value)
                 ->first();
         }
 

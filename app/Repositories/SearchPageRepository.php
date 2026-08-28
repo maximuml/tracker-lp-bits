@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Enums\Permission\PermissionEnum;
+use App\Enums\TorrentApprovalStatus;
 use App\Models\SearchBox;
 use App\Models\Torrent;
 use App\Models\User;
@@ -39,7 +40,7 @@ class SearchPageRepository
 
         $approvalStatus = null;
         if (! SiteConfig::current()->torrent->approvalStatusNoneVisible() && ! Permissions::userCan(PermissionEnum::TORRENT_APPROVAL->value, false, $currentUser->id)) {
-            $approvalStatus = Torrent::APPROVAL_STATUS_ALLOW;
+            $approvalStatus = TorrentApprovalStatus::ALLOW->value;
         }
 
         $banned = null;

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Enums\UserMedalStatus;
 use App\Exceptions\NexusException;
 use App\Models\Medal;
 use App\Models\User;
@@ -119,7 +120,7 @@ class MedalRepository extends BaseRepository
             $medal->id => [
                 'expire_at' => $expireAt,
                 'bonus_addition_expire_at' => $bonusAdditionExpireAt,
-                'status' => UserMedal::STATUS_NOT_WEARING,
+                'status' => UserMedalStatus::NOT_WEARING->value,
             ],
         ]);
         Cache::clearUser($user->id);
@@ -135,16 +136,16 @@ class MedalRepository extends BaseRepository
             throw new \LogicException('no privilege');
         }
         $current = $userMedal->status;
-        if ($current == UserMedal::STATUS_NOT_WEARING) {
+        if ($current == UserMedalStatus::NOT_WEARING->value) {
             $maxWearAllow = SiteConfig::current()->system->maximumNumberOfMedalsCanBeWorn();
             $user = User::query()->findOrFail($userId, User::$commonFields);
             $wearCount = $user->wearing_medals()->count();
             if ($maxWearAllow && $wearCount >= $maxWearAllow) {
                 throw new NexusException(Locale::trans('medal.max_allow_wearing', ['count' => $maxWearAllow], null));
             }
-            $userMedal->status = UserMedal::STATUS_WEARING;
-        } elseif ($current == UserMedal::STATUS_WEARING) {
-            $userMedal->status = UserMedal::STATUS_NOT_WEARING;
+            $userMedal->status = UserMedalStatus::WEARING->value;
+        } elseif ($current == UserMedalStatus::WEARING->value) {
+            $userMedal->status = UserMedalStatus::NOT_WEARING->value;
         }
         $userMedal->save();
         Cache::clearUser($userId);
@@ -169,10 +170,10 @@ class MedalRepository extends BaseRepository
         foreach ($validMedals as $medal) {
             $id = (int) $medal->pivot->id;
             if (isset($userMedalData[$id]['status'])) {
-                $status = UserMedal::STATUS_WEARING;
+                $status = UserMedalStatus::WEARING->value;
                 $wearCount++;
             } else {
-                $status = UserMedal::STATUS_NOT_WEARING;
+                $status = UserMedalStatus::NOT_WEARING->value;
             }
             $rows[] = [
                 'id' => $id,

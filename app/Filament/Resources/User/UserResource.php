@@ -6,6 +6,7 @@ namespace App\Filament\Resources\User;
 
 use App\Enums\ModelEventEnum;
 use App\Enums\UserClass as UserClassEnum;
+use App\Enums\UserStatus;
 use App\Filament\OptionsTrait;
 use App\Filament\Resources\User\UserResource\Pages;
 use App\Filament\Resources\User\UserResource\Pages\CreateUser;
@@ -223,7 +224,7 @@ class UserResource extends Resource
                         TextEntry::make('status')
                             ->label(__('label.user.status'))
                             ->badge()
-                            ->colors(['success' => User::STATUS_CONFIRMED, 'warning' => User::STATUS_PENDING])
+                            ->colors(['success' => UserStatus::CONFIRMED->value, 'warning' => UserStatus::PENDING->value])
                             ->hintAction(self::buildActionConfirm()),
 
                         TextEntry::make('classText')
@@ -297,7 +298,7 @@ class UserResource extends Resource
             ->visible(fn (User $record): bool => (self::currentUser()->class > $record->class))
             ->button()
             ->color('success')
-            ->visible(fn ($record) => $record->status == User::STATUS_PENDING)
+            ->visible(fn ($record) => $record->status == UserStatus::PENDING->value)
             ->schema([
                 Forms\Components\Checkbox::make('send_email')
                     ->label(__('admin.resources.user.actions.confirm_send_email'))
@@ -310,7 +311,7 @@ class UserResource extends Resource
 
                     return;
                 }
-                $record->status = User::STATUS_CONFIRMED;
+                $record->status = UserStatus::CONFIRMED->value;
                 $record->info = null;
                 $record->save();
 

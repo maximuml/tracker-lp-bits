@@ -5,10 +5,17 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Auth\Permission;
+use App\Enums\BookmarkFilter;
 use App\Enums\ModelEventEnum;
+use App\Enums\PeerSeeder;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\PromotionTimeType;
+use App\Enums\SnatchFinished;
+use App\Enums\TorrentApprovalStatus;
+use App\Enums\TorrentOperationAction;
+use App\Enums\TorrentPosState;
 use App\Enums\TorrentPromotion;
+use App\Enums\TorrentVisible;
 use App\Exceptions\InsufficientPermissionException;
 use App\Exceptions\NexusException;
 use App\Http\Resources\TorrentResource;
@@ -150,11 +157,11 @@ class TorrentRepository extends BaseRepository
             })
             ->registerCustomFilter('bookmark', function (Builder $query, Request $request) use ($user) {
                 $filterBookmark = $request->input(ApiQueryBuilder::PARAM_NAME_FILTER.'.bookmark');
-                if ($filterBookmark === Bookmark::FILTER_INCLUDE) {
+                if ($filterBookmark === BookmarkFilter::INCLUDE->value) {
                     $query->whereHas('bookmarks', function (Builder $query) use ($user) {
                         $query->where('userid', $user->id);
                     });
-                } elseif ($filterBookmark === Bookmark::FILTER_EXCLUDE) {
+                } elseif ($filterBookmark === BookmarkFilter::EXCLUDE->value) {
                     $query->whereDoesntHave('bookmarks', function (Builder $query) use ($user) {
                         $query->where('userid', $user->id);
                     });
@@ -163,9 +170,9 @@ class TorrentRepository extends BaseRepository
             ->registerCustomFilter('visible', function (Builder $query, Request $request) {
                 $filterVisible = $request->input(ApiQueryBuilder::PARAM_NAME_FILTER.'.visible', Torrent::FILTER_VISIBLE_YES);
                 if ($filterVisible === Torrent::FILTER_VISIBLE_YES) {
-                    $query->where('visible', Torrent::VISIBLE_YES);
+                    $query->where('visible', TorrentVisible::YES->value);
                 } elseif ($filterVisible === Torrent::FILTER_VISIBLE_NO) {
-                    $query->where('visible', Torrent::VISIBLE_NO);
+                    $query->where('visible', TorrentVisible::NO->value);
                 }
             });
         $query = $apiQueryBuilder->build();
@@ -353,7 +360,7 @@ class TorrentRepository extends BaseRepository
             ->with(['user', 'relative_torrent'])
             ->get()
             ->groupBy('seeder');
-        $seederGroup = $peers->get(Peer::SEEDER_YES);
+        $seederGroup = $peers->get(PeerSeeder::YES->value);
         if ($seederGroup instanceof Collection) {
             $seederList = $seederGroup->sort(function ($a, $b) {
                 $x = $a->uploaded;
@@ -369,7 +376,7 @@ class TorrentRepository extends BaseRepository
             });
             $seederList = $this->formatPeers($seederList);
         }
-        $leecherGroup = $peers->get(Peer::SEEDER_NO);
+        $leecherGroup = $peers->get(PeerSeeder::NO->value);
         if ($leecherGroup instanceof Collection) {
             $leecherList = $leecherGroup->sort(function ($a, $b) {
                 $x = $a->to_go;
@@ -466,7 +473,7 @@ class TorrentRepository extends BaseRepository
     {
         $snatches = Snatch::query()
             ->where('torrentid', $torrentId)
-            ->where('finished', Snatch::FINISHED_YES)
+            ->where('finished', SnatchFinished::YES->value)
             ->with(['user'])
             ->orderBy('completedat', 'desc')
             ->paginate();
@@ -805,11 +812,11 @@ class TorrentRepository extends BaseRepository
         $torrentUpdate = $torrentOperationLog = [];
         $torrentUpdate['approval_status'] = $approvalStatus;
         $notifyUser = false;
-        if ($approvalStatus == Torrent::APPROVAL_STATUS_ALLOW) {
+        if ($approvalStatus == TorrentApprovalStatus::ALLOW->value) {
             $torrentUpdate['banned'] = 'no';
             $torrentUpdate['visible'] = 'yes';
             if ($torrent->approval_status != $approvalStatus) {
-                $torrentOperationLog['action_type'] = TorrentOperationLog::ACTION_TYPE_APPROVAL_ALLOW;
+                $torrentOperationLog['action_type'] = TorrentOperationAction::APPROVAL_ALLOW->value;
                 // increase promotion time
                 if (
                     ! SiteConfig::current()->torrent->approvalStatusNoneVisible()
@@ -826,22 +833,22 @@ class TorrentRepository extends BaseRepository
                     Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
                 }
             }
-            if ($torrent->approval_status == Torrent::APPROVAL_STATUS_DENY) {
+            if ($torrent->approval_status == TorrentApprovalStatus::DENY->value) {
                 $notifyUser = true;
             }
-        } elseif ($approvalStatus == Torrent::APPROVAL_STATUS_DENY) {
+        } elseif ($approvalStatus == TorrentApprovalStatus::DENY->value) {
             $torrentUpdate['banned'] = 'yes';
             $torrentUpdate['visible'] = 'no';
             // Deny, record and notify all the time
-            $torrentOperationLog['action_type'] = TorrentOperationLog::ACTION_TYPE_APPROVAL_DENY;
+            $torrentOperationLog['action_type'] = TorrentOperationAction::APPROVAL_DENY->value;
             $notifyUser = true;
-        } elseif ($approvalStatus == Torrent::APPROVAL_STATUS_NONE) {
+        } elseif ($approvalStatus == TorrentApprovalStatus::NONE->value) {
             $torrentUpdate['banned'] = 'no';
             $torrentUpdate['visible'] = 'yes';
             if ($torrent->approval_status != $approvalStatus) {
-                $torrentOperationLog['action_type'] = TorrentOperationLog::ACTION_TYPE_APPROVAL_NONE;
+                $torrentOperationLog['action_type'] = TorrentOperationAction::APPROVAL_NONE->value;
             }
-            if ($torrent->approval_status == Torrent::APPROVAL_STATUS_DENY) {
+            if ($torrent->approval_status == TorrentApprovalStatus::DENY->value) {
                 $notifyUser = true;
             }
         } else {
@@ -898,7 +905,7 @@ class TorrentRepository extends BaseRepository
             return true;
         }
         if (
-            $approvalStatus != Torrent::APPROVAL_STATUS_ALLOW
+            $approvalStatus != TorrentApprovalStatus::ALLOW->value
             && ! SiteConfig::current()->torrent->approvalStatusNoneVisible()
         ) {
             // 不启用审核状态图标，尽量不显示。在种子不是审核通过状态，而审核不通过又不能被用户看到时，显示
@@ -952,11 +959,11 @@ class TorrentRepository extends BaseRepository
     public function setPosState($id, $posState, $posStateUntil = null): int
     {
         Permission::assertCan(PermissionEnum::TORRENT_SET_STICKY);
-        if ($posState == Torrent::POS_STATE_STICKY_NONE) {
+        if ($posState == TorrentPosState::NONE->value) {
             $posStateUntil = null;
         }
         if ($posStateUntil && Carbon::parse($posStateUntil)->lte(now())) {
-            $posState = Torrent::POS_STATE_STICKY_NONE;
+            $posState = TorrentPosState::NONE->value;
             $posStateUntil = null;
         }
         $update = [
@@ -1509,7 +1516,7 @@ HTML;
             TorrentOperationLog::add([
                 'torrent_id' => $_id,
                 'uid' => UserDisplay::currentId(),
-                'action_type' => TorrentOperationLog::ACTION_TYPE_DELETE,
+                'action_type' => TorrentOperationAction::DELETE->value,
                 'comment' => '',
             ], $notify);
 
@@ -1544,7 +1551,7 @@ HTML;
     {
         return (int) Torrent::query()
             ->where('owner', $ownerId)
-            ->where('approval_status', Torrent::APPROVAL_STATUS_DENY)
+            ->where('approval_status', TorrentApprovalStatus::DENY->value)
             ->count();
     }
 

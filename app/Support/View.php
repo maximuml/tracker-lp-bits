@@ -26,11 +26,7 @@ final class View
      */
     public static function render(string $view, array $data, bool $return, string $rootPath): mixed
     {
-        foreach ($data as $key => $value) {
-            if (preg_match('/^[a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff]*$/', (string) $key) && ! isset($$key)) {
-                $$key = $value;
-            }
-        }
+        extract($data, EXTR_SKIP);
 
         if (! file_exists($view)) {
             $view = $rootPath.$view;

@@ -52,11 +52,11 @@ class BdInfoExtra
     {
         foreach ($lines as $line) {
             $line = $this->trim($line);
-            if (strpos($line, 'DISC INFO') !== false ||
-                strpos($line, 'PLAYLIST REPORT') !== false ||
-                strpos($line, 'VIDEO') !== false ||
-                strpos($line, 'AUDIO') !== false ||
-                strpos($line, 'SUBTITLES') !== false) {
+            if (str_contains($line, 'DISC INFO') ||
+                str_contains($line, 'PLAYLIST REPORT') ||
+                str_contains($line, 'VIDEO') ||
+                str_contains($line, 'AUDIO') ||
+                str_contains($line, 'SUBTITLES')) {
                 return false;
             }
         }
@@ -82,7 +82,7 @@ class BdInfoExtra
             }
 
             // 检测新的DISC
-            if (strpos($line, 'DISC INFO') !== false) {
+            if (str_contains($line, 'DISC INFO')) {
                 // 保存之前的DISC（如果存在）
                 if ($currentDisc !== null) {
                     $discs[] = $currentDisc;
@@ -101,23 +101,23 @@ class BdInfoExtra
                 $subtitleIndex = 0;
 
                 continue;
-            } elseif (strpos($line, 'PLAYLIST REPORT') !== false) {
+            } elseif (str_contains($line, 'PLAYLIST REPORT')) {
                 $currentSection = 'playlist_report';
 
                 continue;
-            } elseif (strpos($line, 'VIDEO') !== false) {
+            } elseif (str_contains($line, 'VIDEO')) {
                 $currentSection = 'video';
 
                 continue;
-            } elseif (strpos($line, 'AUDIO') !== false) {
+            } elseif (str_contains($line, 'AUDIO')) {
                 $currentSection = 'audio';
 
                 continue;
-            } elseif (strpos($line, 'SUBTITLES') !== false) {
+            } elseif (str_contains($line, 'SUBTITLES')) {
                 $currentSection = 'subtitles';
 
                 continue;
-            } elseif (strpos($line, 'CHAPTERS') !== false || strpos($line, 'STREAM DIAGNOSTICS') !== false) {
+            } elseif (str_contains($line, 'CHAPTERS') || str_contains($line, 'STREAM DIAGNOSTICS')) {
                 $currentSection = '';
 
                 continue;
@@ -180,25 +180,25 @@ class BdInfoExtra
             }
 
             // 解析光盘信息
-            if (strpos($line, 'Disc Label:') !== false) {
+            if (str_contains($line, 'Disc Label:')) {
                 $result['disc_info']['label'] = trim(substr($line, 11));
-            } elseif (strpos($line, 'Disc Size:') !== false) {
+            } elseif (str_contains($line, 'Disc Size:')) {
                 $result['disc_info']['size'] = trim(substr($line, 10));
-            } elseif (strpos($line, 'Protection:') !== false) {
+            } elseif (str_contains($line, 'Protection:')) {
                 $result['disc_info']['protection'] = trim(substr($line, 11));
-            } elseif (strpos($line, 'Playlist:') !== false) {
+            } elseif (str_contains($line, 'Playlist:')) {
                 $result['playlist_report']['name'] = trim(substr($line, 9));
-            } elseif (strpos($line, 'Size:') !== false) {
+            } elseif (str_contains($line, 'Size:')) {
                 $result['playlist_report']['size'] = trim(substr($line, 5));
-            } elseif (strpos($line, 'Length:') !== false) {
+            } elseif (str_contains($line, 'Length:')) {
                 $result['playlist_report']['length'] = trim(substr($line, 7));
-            } elseif (strpos($line, 'Total Bitrate:') !== false) {
+            } elseif (str_contains($line, 'Total Bitrate:')) {
                 $result['playlist_report']['total_bitrate'] = trim(substr($line, 14));
-            } elseif (strpos($line, 'Video:') !== false) {
+            } elseif (str_contains($line, 'Video:')) {
                 $this->summaryFormatVideo($line, $result['video']);
-            } elseif (strpos($line, 'Audio:') !== false) {
+            } elseif (str_contains($line, 'Audio:')) {
                 $this->summaryFormatAudio($line, $result['audio'], $audioIndex);
-            } elseif (strpos($line, 'Subtitle:') !== false) {
+            } elseif (str_contains($line, 'Subtitle:')) {
                 $this->summaryFormatSubtitle($line, $result['subtitles'], $subtitleIndex);
             }
         }
@@ -267,15 +267,15 @@ class BdInfoExtra
      */
     private function parseDiscInfo(string $line, array &$discInfo): void
     {
-        if (strpos($line, 'Disc Title:') !== false) {
+        if (str_contains($line, 'Disc Title:')) {
             $discInfo['title'] = trim(substr($line, 11));
-        } elseif (strpos($line, 'Disc Label:') !== false) {
+        } elseif (str_contains($line, 'Disc Label:')) {
             $discInfo['label'] = trim(substr($line, 11));
-        } elseif (strpos($line, 'Disc Size:') !== false) {
+        } elseif (str_contains($line, 'Disc Size:')) {
             $discInfo['size'] = trim(substr($line, 10));
-        } elseif (strpos($line, 'Protection:') !== false) {
+        } elseif (str_contains($line, 'Protection:')) {
             $discInfo['protection'] = trim(substr($line, 11));
-        } elseif (strpos($line, 'Extras:') !== false) {
+        } elseif (str_contains($line, 'Extras:')) {
             $discInfo['extras'] = trim(substr($line, 7));
         }
     }
@@ -285,13 +285,13 @@ class BdInfoExtra
      */
     private function parsePlaylistReport(string $line, array &$playlistReport): void
     {
-        if (strpos($line, 'Name:') !== false) {
+        if (str_contains($line, 'Name:')) {
             $playlistReport['name'] = trim(substr($line, 5));
-        } elseif (strpos($line, 'Length:') !== false) {
+        } elseif (str_contains($line, 'Length:')) {
             $playlistReport['length'] = trim(substr($line, 7));
-        } elseif (strpos($line, 'Size:') !== false) {
+        } elseif (str_contains($line, 'Size:')) {
             $playlistReport['size'] = trim(substr($line, 5));
-        } elseif (strpos($line, 'Total Bitrate:') !== false) {
+        } elseif (str_contains($line, 'Total Bitrate:')) {
             $playlistReport['total_bitrate'] = trim(substr($line, 14));
         }
     }
@@ -302,13 +302,13 @@ class BdInfoExtra
     private function parseVideo(string $line, array &$video): void
     {
         // 跳过表头和分隔线
-        if (strpos($line, 'Codec') !== false || strpos($line, '-----') !== false || strpos($line, 'Description') !== false) {
+        if (str_contains($line, 'Codec') || str_contains($line, '-----') || str_contains($line, 'Description')) {
             return;
         }
 
         // 解析视频行 - 包括隐藏视频流（带*号的）
         if (preg_match('/^(\*?\s*)(.+?)\s+([\d,]+)\s+kbps\s+(.+)$/', $line, $matches)) {
-            $isHidden = strpos($matches[1], '*') !== false;
+            $isHidden = str_contains($matches[1], '*');
 
             if (! $isHidden) {
                 // 主视频流 - 支持多个视频流
@@ -374,7 +374,7 @@ class BdInfoExtra
     private function parseAudio(string $line, array &$audio, int &$audioIndex): void
     {
         // 跳过表头和分隔线
-        if (strpos($line, 'Codec') !== false || strpos($line, '-----') !== false || strpos($line, 'Language') !== false) {
+        if (str_contains($line, 'Codec') || str_contains($line, '-----') || str_contains($line, 'Language')) {
             return;
         }
 
@@ -405,12 +405,12 @@ class BdInfoExtra
     private function parseSubtitles(string $line, array &$subtitles, int &$subtitleIndex): void
     {
         // 跳过表头和分隔线
-        if (strpos($line, 'Codec') !== false || strpos($line, '-----') !== false || strpos($line, 'Language') !== false) {
+        if (str_contains($line, 'Codec') || str_contains($line, '-----') || str_contains($line, 'Language')) {
             return;
         }
 
         // 跳过FILES章节的内容
-        if (strpos($line, 'Name') !== false || strpos($line, 'Time In') !== false || strpos($line, 'Length') !== false || strpos($line, 'Size') !== false || strpos($line, 'Total Bitrate') !== false) {
+        if (str_contains($line, 'Name') || str_contains($line, 'Time In') || str_contains($line, 'Length') || str_contains($line, 'Size') || str_contains($line, 'Total Bitrate')) {
             return;
         }
 
@@ -774,7 +774,7 @@ class BdInfoExtra
             }
 
             // 检测新的DISC
-            if (strpos($line, 'DISC INFO') !== false) {
+            if (str_contains($line, 'DISC INFO')) {
                 // 保存之前的DISC（如果存在）
                 if ($currentDisc !== null) {
                     $discs[] = $currentDisc;
@@ -793,23 +793,23 @@ class BdInfoExtra
                 $subtitleIndex = 0;
 
                 continue;
-            } elseif (strpos($line, 'PLAYLIST REPORT') !== false) {
+            } elseif (str_contains($line, 'PLAYLIST REPORT')) {
                 $currentSection = 'playlist_report';
 
                 continue;
-            } elseif (strpos($line, 'VIDEO') !== false) {
+            } elseif (str_contains($line, 'VIDEO')) {
                 $currentSection = 'video';
 
                 continue;
-            } elseif (strpos($line, 'AUDIO') !== false) {
+            } elseif (str_contains($line, 'AUDIO')) {
                 $currentSection = 'audio';
 
                 continue;
-            } elseif (strpos($line, 'SUBTITLES') !== false) {
+            } elseif (str_contains($line, 'SUBTITLES')) {
                 $currentSection = 'subtitles';
 
                 continue;
-            } elseif (strpos($line, 'CHAPTERS') !== false || strpos($line, 'STREAM DIAGNOSTICS') !== false) {
+            } elseif (str_contains($line, 'CHAPTERS') || str_contains($line, 'STREAM DIAGNOSTICS')) {
                 $currentSection = '';
 
                 continue;
@@ -981,7 +981,7 @@ class BdInfoExtra
         $audioPrefix = Locale::trans('torrent.technicalinfo_audio', [], null);
         $subtitlePrefix = Locale::trans('torrent.technicalinfo_subtitles', [], null);
         foreach ($parts as $key => $value) {
-            if (strpos($key, $audioPrefix) === 0 || strpos($key, $subtitlePrefix) === 0) {
+            if (str_starts_with($key, $audioPrefix) || str_starts_with($key, $subtitlePrefix)) {
                 $isAudioOrSubtitle = true;
                 $audioOrSubtitleCount++;
             }
@@ -1020,7 +1020,7 @@ class BdInfoExtra
             }
             $hiddenContent = rtrim($hiddenContent, '<br>');
 
-            $spoilerTitle = $isAudioOrSubtitle && strpos(array_keys($parts)[0], $audioPrefix) === 0
+            $spoilerTitle = $isAudioOrSubtitle && str_starts_with(array_keys($parts)[0], $audioPrefix)
                 ? Locale::trans('torrent.collapse_show_more_audio', [], null)
                 : Locale::trans('torrent.collapse_show_more_subtitles', [], null);
 

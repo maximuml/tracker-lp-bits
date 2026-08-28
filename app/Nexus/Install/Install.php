@@ -321,6 +321,7 @@ class Install
         ];
         $symbolicLinks = [];
         require $originalConfigFile;
+        $definedVars = get_defined_vars();
         $settings = require $defaultSettingsFile;
         $settingsFromDb = [];
         if (Schema::hasTable('settings') && Setting::query()->count() > 0) {
@@ -332,7 +333,7 @@ class Install
         $this->doLog('settings form db: '.json_encode($settingsFromDb));
         foreach ($settings as $prefix => &$group) {
             $prefixUpperCase = strtoupper($prefix);
-            $oldGroupValues = $$prefixUpperCase ?? null;
+            $oldGroupValues = $definedVars[$prefixUpperCase] ?? null;
             foreach ($group as $key => &$value) {
                 // merge original config or db config to default setting, exclude code part
                 if ($prefix != 'code') {

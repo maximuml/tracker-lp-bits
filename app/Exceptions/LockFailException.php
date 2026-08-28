@@ -6,7 +6,7 @@ namespace App\Exceptions;
 
 class LockFailException extends NexusException
 {
-    public function __construct(protected string $lockName, protected string $lockOwner)
+    public function __construct(protected readonly string $lockName, protected readonly string $lockOwner)
     {
         parent::__construct();
     }

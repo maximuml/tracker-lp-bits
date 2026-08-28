@@ -95,7 +95,7 @@ class TorrentRepository extends BaseRepository
         // query this info default
         $query = Torrent::query()->with(self::$defaultLoadRelationships)
             ->whereIn('category', $categoryIdList)
-            ->orderBy('pos_state', 'DESC');
+            ->orderBy('pos_state', 'desc');
         $apiQueryBuilder = ApiQueryBuilder::for(TorrentResource::NAME, $query, $request)
             ->allowIncludes(self::$allowIncludes)
             ->allowIncludeCounts(self::$allowIncludeCounts)
@@ -142,7 +142,7 @@ class TorrentRepository extends BaseRepository
             });
         $query = $apiQueryBuilder->build();
         if (! $apiQueryBuilder->hasSort() || ! $apiQueryBuilder->hasSort('id')) {
-            $query->orderBy('id', 'DESC');
+            $query->orderBy('id', 'desc');
         }
         Logger::writeWithContext((string) 'before query torrent list', (string) 'info', (bool) false);
         $torrents = $query->paginate($this->getPerPageFromRequest($request));

@@ -18,7 +18,7 @@ class CreateExam extends CreateRecord
     public function create(bool $another = false): void
     {
         $data = $this->form->getState();
-        $examRep = new ExamRepository;
+        $examRep = app(ExamRepository::class);
         try {
             $this->record = $examRep->store($data);
             Admin::successNotification('');

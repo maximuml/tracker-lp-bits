@@ -107,7 +107,7 @@ class HitAndRunResource extends Resource
                     if (! $user instanceof User) {
                         throw new \RuntimeException('Expected an authenticated user.');
                     }
-                    $rep = new HitAndRunRepository;
+                    $rep = app(HitAndRunRepository::class);
                     $rep->bulkPardon(['id' => $idArr], $user);
                 })
                     ->deselectRecordsAfterCompletion()

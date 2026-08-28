@@ -43,7 +43,7 @@ class MigrateTorrentTag extends Command
      */
     public function handle()
     {
-        $rep = new TagRepository;
+        $rep = app(TagRepository::class);
         $result = $rep->migrateTorrentTag();
         $log = sprintf('[%s], %s, result: %s, query: %s', Nexus::instance()->getRequestId(), __METHOD__, var_export($result, true), LegacyDb::lastQuery(false, 'json'));
         $this->info($log);

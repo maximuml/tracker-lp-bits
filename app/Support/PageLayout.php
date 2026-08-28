@@ -135,7 +135,7 @@ class PageLayout
         if ($context->user) {
             $requireSearchBoxIdAr = SearchBox::requiredIds();
             if (! empty($requireSearchBoxIdAr)) {
-                $icons = (new SearchBoxRepository)->listIcon($requireSearchBoxIdAr);
+                $icons = app(SearchBoxRepository::class)->listIcon($requireSearchBoxIdAr);
                 foreach ($icons as $icon) {
                     ?>
 <link rel="stylesheet" href="<?php
@@ -293,7 +293,7 @@ class PageLayout
                 $context->cache?->cache_value('user_'.$context->user['id'].'_unread_message_count', $unread, 60);
             }
             $inboxpic = '<img class="'.($unread ? 'inboxnew' : 'inbox').'" src="pic/trans.gif" alt="inbox" title="'.($unread ? $context->lang['title_inbox_new_messages'] : $context->lang['title_inbox_no_new_messages']).'" />';
-            $attendanceRep = new AttendanceRepository;
+            $attendanceRep = app(AttendanceRepository::class);
             $attendance = $attendanceRep->getAttendance($context->user['id'], date('Ymd'));
             ?>
 
@@ -356,7 +356,7 @@ class PageLayout
             ?>"><?php
             echo $context->lang['text_send'];
             ?></a>]: <?php
-            echo sprintf('%s(%s)', $context->user['invites'], (new PageLayoutRepository)->getPendingInviteCount((int) $context->user['id']));
+            echo sprintf('%s(%s)', $context->user['invites'], app(PageLayoutRepository::class)->getPendingInviteCount((int) $context->user['id']));
             ?>
                 <?php
             if ($context->userClass() >= User::getAccessAdminClassMin()) {
@@ -400,7 +400,7 @@ class PageLayout
                 <?php
             if (HitAndRun::getIsEnabled()) {
                 ?><font class='color_bonus'>H&R: </font> <?php
-                echo sprintf('[<a href="myhr.php">%s</a>]', (new HitAndRunRepository)->getStatusStats($context->user['id']));
+                echo sprintf('[<a href="myhr.php">%s</a>]', app(HitAndRunRepository::class)->getStatusStats($context->user['id']));
             }
             ?>
             </span>

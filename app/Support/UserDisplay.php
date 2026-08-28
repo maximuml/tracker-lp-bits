@@ -134,7 +134,7 @@ final class UserDisplay
             }
 
             $arr = $user->toArray();
-            $metas = (new UserRepository)->listMetas($id, UserMeta::META_KEY_PERSONALIZED_USERNAME);
+            $metas = app(UserRepository::class)->listMetas($id, UserMeta::META_KEY_PERSONALIZED_USERNAME);
             $arr['__is_rainbow'] = $metas->isNotEmpty() ? 1 : 0;
             $arr['__is_donor'] = self::isDonor($arr);
 

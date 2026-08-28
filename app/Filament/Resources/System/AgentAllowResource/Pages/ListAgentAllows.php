@@ -29,7 +29,7 @@ class ListAgentAllows extends PageList
                 ])
                 ->modalHeading(__('admin.resources.agent_allow.check_modal_header'))
                 ->action(function ($data) {
-                    $agentAllowRep = new AgentAllowRepository;
+                    $agentAllowRep = app(AgentAllowRepository::class);
                     try {
                         $result = $agentAllowRep->checkClient($data['peer_id'], $data['agent']);
                         Admin::successNotification(__('admin.resources.agent_allow.check_pass_msg', ['id' => $result->id]));

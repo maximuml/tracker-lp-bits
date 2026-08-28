@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\MedalGetType;
 use App\Models\Traits\NexusActivityLogTrait;
 use App\Support\Locale;
 use Carbon\Carbon;
@@ -39,16 +40,10 @@ class Medal extends NexusModel
 {
     use NexusActivityLogTrait;
 
-    /** @deprecated Use App\Enums\MedalGetType enum instead. */
-    const GET_TYPE_EXCHANGE = 1;
-
-    /** @deprecated Use App\Enums\MedalGetType enum instead. */
-    const GET_TYPE_GRANT = 2;
-
     /** @var array<int|string, mixed> */
     public static array $getTypeText = [
-        self::GET_TYPE_EXCHANGE => ['text' => 'Exchange'],
-        self::GET_TYPE_GRANT => ['text' => 'Grant'],
+        MedalGetType::EXCHANGE->value => ['text' => 'Exchange'],
+        MedalGetType::GRANT->value => ['text' => 'Grant'],
     ];
 
     /** @var list<string> */
@@ -111,7 +106,7 @@ class Medal extends NexusModel
     /** @return  mixed */
     public function checkCanBeBuy()
     {
-        if ($this->get_type == self::GET_TYPE_GRANT) {
+        if ($this->get_type == MedalGetType::GRANT->value) {
             throw new \RuntimeException(Locale::trans('medal.grant_only', [], null));
         }
         $now = now();

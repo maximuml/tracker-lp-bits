@@ -203,7 +203,7 @@ class TorrentEditRepository extends BaseRepository
         Events::fire(ModelEventEnum::TORRENT_UPDATED, $torrentNew, $torrentOld);
 
         try {
-            $meiliSearch = new MeiliSearchRepository;
+            $meiliSearch = app(MeiliSearchRepository::class);
             $meiliSearch->doImportFromDatabase($torrentOld->id);
         } catch (\Throwable $e) {
             Logger::writeWithContext((string) ('MeiliSearch update on edit failed: '.$e->getMessage()), (string) 'error', (bool) false);

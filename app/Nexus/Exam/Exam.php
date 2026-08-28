@@ -12,7 +12,7 @@ class Exam
 {
     public function getCurrent($uid): array
     {
-        $examRep = new ExamRepository;
+        $examRep = app(ExamRepository::class);
         $userExam = $examRep->getUserExamProgress($uid, ExamUserStatus::NORMAL->value);
         if (empty($userExam)) {
             return ['exam' => null, 'html' => ''];

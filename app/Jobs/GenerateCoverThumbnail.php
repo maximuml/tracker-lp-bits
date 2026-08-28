@@ -22,6 +22,12 @@ class GenerateCoverThumbnail implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public int $tries = 3;
+
+    public int $backoff = 10;
+
+    public int $timeout = 300;
+
     /**
      * @param  string  $sourceUrl  Remote cover URL (http/https).
      * @param  string  $absolutePath  Destination filesystem path for the JPEG thumbnail.

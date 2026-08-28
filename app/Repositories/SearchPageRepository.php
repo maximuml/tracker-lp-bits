@@ -67,7 +67,7 @@ class SearchPageRepository
             }
 
             try {
-                $searchRep = new MeiliSearchRepository;
+                $searchRep = app(MeiliSearchRepository::class);
                 $meiliResult = $searchRep->search($meiliParams, $currentUser->id);
             } catch (\Throwable $e) {
                 Logger::writeWithContext('MeiliSearch search failed, falling back to SQL: '.$e->getMessage(), 'error', false);

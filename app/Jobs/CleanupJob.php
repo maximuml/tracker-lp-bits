@@ -29,6 +29,8 @@ final class CleanupJob implements ShouldBeUnique, ShouldQueue
     /** @var int */
     public $timeout = 3600;
 
+    public int $backoff = 60;
+
     /** @var int */
     public $uniqueFor = 3600;
 

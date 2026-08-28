@@ -7,6 +7,7 @@ namespace App\Repositories;
 use App\Enums\BusinessType;
 use App\Enums\HitAndRunStatus;
 use App\Enums\UserEnabled;
+use App\Enums\UserMedalStatus;
 use App\Enums\UserStatus;
 use App\Exceptions\NexusException;
 use App\Models\BonusLogs;
@@ -17,7 +18,6 @@ use App\Models\Message;
 use App\Models\Torrent;
 use App\Models\TorrentBuyLog;
 use App\Models\User;
-use App\Models\UserMedal;
 use App\Models\UserMeta;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
@@ -122,7 +122,7 @@ class BonusRepository extends BaseRepository
             $comment = Locale::trans('bonus.comment_buy_medal', ['bonus' => $requireBonus, 'medal_name' => $medal->name], $user->locale);
             Logger::writeWithContext((string) "comment: {$comment}", (string) 'info', (bool) false);
             $this->consumeUserBonus($user, $requireBonus, BusinessType::BUY_MEDAL->value, "$comment(medal ID: {$medal->id})");
-            $medalRep = new MedalRepository;
+            $medalRep = app(MedalRepository::class);
             $medalRep->userAttachMedal($user, $medal);
             if ($medal->inventory !== null) {
                 $affectedRows = DB::table('medals')
@@ -175,7 +175,7 @@ class BonusRepository extends BaseRepository
                 'added' => now(),
             ];
             Message::add($msg);
-            $toUser->medals()->attach([$medal->id => ['expire_at' => $expireAt, 'status' => UserMedal::STATUS_NOT_WEARING]]);
+            $toUser->medals()->attach([$medal->id => ['expire_at' => $expireAt, 'status' => UserMedalStatus::NOT_WEARING->value]]);
             if ($medal->inventory !== null) {
                 $affectedRows = DB::table('medals')
                     ->where('id', $medal->id)
@@ -219,7 +219,7 @@ class BonusRepository extends BaseRepository
             throw new \RuntimeException('Temporary invite require bonus <= 0 !');
         }
         $user = User::query()->findOrFail((int) $uid);
-        $toolRep = new ToolRepository;
+        $toolRep = app(ToolRepository::class);
         $hashArr = $toolRep->generateUniqueInviteHash([], $count, $count);
         DB::transaction(function () use ($user, $requireBonus, $hashArr) {
             $comment = Locale::trans('bonus.comment_buy_temporary_invite', ['bonus' => $requireBonus, 'count' => count($hashArr)], $user->locale);
@@ -259,7 +259,7 @@ class BonusRepository extends BaseRepository
                 'meta_key' => UserMeta::META_KEY_PERSONALIZED_USERNAME,
                 'duration' => $duration,
             ];
-            $userRep = new UserRepository;
+            $userRep = app(UserRepository::class);
             $userRep->addMeta($user, $metaData, $metaData, false);
         });
 
@@ -292,7 +292,7 @@ class BonusRepository extends BaseRepository
             $metaData = [
                 'meta_key' => UserMeta::META_KEY_CHANGE_USERNAME,
             ];
-            $userRep = new UserRepository;
+            $userRep = app(UserRepository::class);
             $userRep->addMeta($user, $metaData, $metaData, false);
         });
 

@@ -49,7 +49,7 @@ class UserResetPassword extends Command
         $this->info($log);
         Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
 
-        $rep = new UserRepository;
+        $rep = app(UserRepository::class);
         $result = $rep->resetPassword($uid, $password, $passwordConfirmation);
         $log = sprintf('[%s], %s, result: %s', Nexus::instance()->getRequestId(), __METHOD__, var_export($result, true));
         $this->info($log);

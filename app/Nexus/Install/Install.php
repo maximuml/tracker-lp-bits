@@ -539,7 +539,7 @@ class Install
             'class' => $class,
             'id' => 1,
         ];
-        $user = (new UserRepository)->store($data);
+        $user = app(UserRepository::class)->store($data);
         $this->doLog('[CREATE ADMINISTRATOR] '.$user->toJson());
 
         return $user;
@@ -795,7 +795,7 @@ class Install
     public function migrateSearchBoxModeRelated()
     {
         $this->doLog('[migrateSearchBoxModeRelated]');
-        $searchBoxRep = new SearchBoxRepository;
+        $searchBoxRep = app(SearchBoxRepository::class);
         $searchBoxRep->migrateToModeRelated();
     }
 

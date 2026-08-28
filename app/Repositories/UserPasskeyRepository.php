@@ -183,7 +183,7 @@ class UserPasskeyRepository extends BaseRepository
         $user->checkIsNormal();
 
         $ip = Network::clientIp();
-        $userRep = new UserRepository;
+        $userRep = app(UserRepository::class);
         $userRep->saveLoginLog($user->id, $ip, 'Web', true);
 
         AuthCookie::setLoginCookie((int) $user->id, (string) $user->auth_key, (int) 0);

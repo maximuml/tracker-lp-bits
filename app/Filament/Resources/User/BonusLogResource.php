@@ -105,7 +105,7 @@ class BonusLogResource extends Resource
      */
     private static function listRecords(int $page, int $perPage, array $filters = []): LengthAwarePaginator
     {
-        $rep = new BonusRepository;
+        $rep = app(BonusRepository::class);
         $category = $filters['category']['value'] ?: BonusLogs::CATEGORY_COMMON;
         $userId = intval($filters['userId']['value'] ?? 0);
         $businessType = intval($filters['businessType']['value'] ?? 0);

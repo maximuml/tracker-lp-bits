@@ -57,7 +57,7 @@ class TorrentSearchRepository
         /**
          * tags
          */
-        $tagRep = new TagRepository;
+        $tagRep = app(TagRepository::class);
         $allTags = $tagRep->listAll($sectiontype);
         $filterInputWidth = 62;
         $searchParams = $query ?: request()->query();
@@ -879,7 +879,7 @@ class TorrentSearchRepository
 
         if ($shouldUseMeili) {
             try {
-                $searchRep = new MeiliSearchRepository;
+                $searchRep = app(MeiliSearchRepository::class);
                 $resultFromSearchRep = $searchRep->search($searchParams, $CURUSER['id']);
                 $count = $resultFromSearchRep['total'];
             } catch (\Throwable $e) {

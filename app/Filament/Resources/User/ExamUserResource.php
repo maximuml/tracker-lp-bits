@@ -117,7 +117,7 @@ class ExamUserResource extends Resource
                     if (! $user instanceof User) {
                         throw new \RuntimeException('Expected an authenticated user.');
                     }
-                    $rep = new ExamRepository;
+                    $rep = app(ExamRepository::class);
                     $rep->avoidExamUserBulk(['id' => $idArr], $user);
                 })
                     ->deselectRecordsAfterCompletion()
@@ -135,7 +135,7 @@ class ExamUserResource extends Resource
                     ])
                     ->action(function (Collection $records, array $data) {
                         $end = Carbon::parse($data['end']);
-                        $rep = new ExamRepository;
+                        $rep = app(ExamRepository::class);
                         foreach ($records as $record) {
                             if ($end->isAfter($record->begin)) {
                                 $rep->updateExamUserEnd($record, $end, $data['reason'] ?? '');

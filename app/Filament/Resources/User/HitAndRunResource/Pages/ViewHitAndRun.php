@@ -105,7 +105,7 @@ class ViewHitAndRun extends ViewRecord
             $actions[] = Action::make('Pardon')
                 ->requiresConfirmation()
                 ->action(function () {
-                    $hitAndRunRep = new HitAndRunRepository;
+                    $hitAndRunRep = app(HitAndRunRepository::class);
                     $user = Auth::user();
                     if (! $user instanceof User) {
                         throw new \RuntimeException('Expected an authenticated user.');

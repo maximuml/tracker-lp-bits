@@ -58,7 +58,7 @@ class ExamResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        $userRep = new UserRepository;
+        $userRep = app(UserRepository::class);
 
         return $schema
             ->components([
@@ -186,7 +186,7 @@ class ExamResource extends Resource
             ->recordActions([
                 EditAction::make(),
                 DeleteAction::make()->using(function ($record) {
-                    $rep = new ExamRepository;
+                    $rep = app(ExamRepository::class);
                     $rep->delete($record->id);
                 }),
             ])

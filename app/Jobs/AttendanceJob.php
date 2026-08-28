@@ -29,6 +29,8 @@ final class AttendanceJob implements ShouldBeUnique, ShouldQueue
     /** @var int */
     public $timeout = 1800;
 
+    public int $backoff = 60;
+
     /** @var int */
     public $uniqueFor = 86400;
 

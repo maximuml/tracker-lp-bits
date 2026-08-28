@@ -45,7 +45,7 @@ class BackupWeb extends Command
         $method = $this->option('method');
         $transfer = $this->option('transfer');
         $this->info("method: $method, transfer: $transfer");
-        $rep = new ToolRepository;
+        $rep = app(ToolRepository::class);
         $result = $rep->backupWeb($method, $transfer);
         $log = sprintf('[%s], %s, result: %s', Nexus::instance()->getRequestId(), __METHOD__, var_export($result, true));
         $this->info($log);

@@ -15,6 +15,10 @@ class SaveIpLogCacheToDB implements ShouldQueue
 
     public int $tries = 1;
 
+    public int $backoff = 10;
+
+    public int $timeout = 120;
+
     /**
      * Create a new job instance.
      */

@@ -20,18 +20,13 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\InviteValid;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Invite extends NexusModel
 {
     /** @var string */
     protected $table = 'invites';
-
-    /** @deprecated Use App\Enums\InviteValid enum instead. */
-    const VALID_YES = 1;
-
-    /** @deprecated Use App\Enums\InviteValid enum instead. */
-    const VALID_NO = 0;
 
     const TEMPORARY_INVITE_VALID_DAYS = 7;
 
@@ -42,8 +37,8 @@ class Invite extends NexusModel
 
     /** @var array<int|string, mixed> */
     public static $validInfo = [
-        self::VALID_NO => ['text' => 'No'],
-        self::VALID_YES => ['text' => 'Yes'],
+        InviteValid::NO->value => ['text' => 'No'],
+        InviteValid::YES->value => ['text' => 'Yes'],
     ];
 
     /** @var list<string> */

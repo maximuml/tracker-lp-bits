@@ -164,7 +164,7 @@ class UserMedalResource extends Resource
             ])
             ->action(function (Collection $collection, array $data) use ($filed) {
                 try {
-                    $rep = new MedalRepository;
+                    $rep = app(MedalRepository::class);
                     $rep->increaseExpireAt($collection, $filed, $data['increase_duration']);
                     Admin::successNotification('');
                 } catch (Exception $e) {
@@ -188,7 +188,7 @@ class UserMedalResource extends Resource
             ->action(function (Collection $collection, array $data) use ($filed) {
                 try {
                     $expireAt = Carbon::parse($data['update_expire_at']);
-                    $rep = new MedalRepository;
+                    $rep = app(MedalRepository::class);
                     $rep->updateExpireAt($collection, $filed, $expireAt);
                     Admin::successNotification('');
                 } catch (Exception $e) {
@@ -206,7 +206,7 @@ class UserMedalResource extends Resource
             ->requiresConfirmation()
             ->action(function (Collection $collection) use ($filed) {
                 try {
-                    $rep = new MedalRepository;
+                    $rep = app(MedalRepository::class);
                     $rep->cancelExpireAt($collection, $filed);
                     Admin::successNotification('');
                 } catch (Exception $e) {

@@ -54,7 +54,7 @@ class UserProfile extends ViewRecord implements HasActions
     private function getRep(): UserRepository
     {
         if (! self::$rep) {
-            self::$rep = new UserRepository;
+            self::$rep = app(UserRepository::class);
         }
 
         return self::$rep;
@@ -227,7 +227,7 @@ class UserProfile extends ViewRecord implements HasActions
             ->modalHeading(__('admin.resources.user.actions.assign_exam_btn'))
             ->schema([
                 Select::make('exam_id')
-                    ->options((new ExamRepository)->listMatchExam($this->getUserRecord()->id)->pluck('name', 'id'))
+                    ->options(app(ExamRepository::class)->listMatchExam($this->getUserRecord()->id)->pluck('name', 'id'))
                     ->label(__('admin.resources.user.actions.assign_exam_exam_label'))->required(),
                 DateTimePicker::make('begin')->label(__('admin.resources.user.actions.assign_exam_begin_label')),
                 DateTimePicker::make('end')->label(__('admin.resources.user.actions.assign_exam_end_label'))
@@ -235,7 +235,7 @@ class UserProfile extends ViewRecord implements HasActions
 
             ])
             ->action(function ($data) {
-                $examRep = new ExamRepository;
+                $examRep = app(ExamRepository::class);
                 try {
                     $examRep->assignToUser($this->getUserRecord()->id, $data['exam_id'], $data['begin'], $data['end']);
                     $this->sendSuccessNotification();
@@ -262,7 +262,7 @@ class UserProfile extends ViewRecord implements HasActions
 
             ])
             ->action(function ($data) {
-                $medalRep = new MedalRepository;
+                $medalRep = app(MedalRepository::class);
                 try {
                     $medalRep->grantToUser($this->getUserRecord()->id, $data['medal_id'], $data['duration']);
                     $this->sendSuccessNotification();

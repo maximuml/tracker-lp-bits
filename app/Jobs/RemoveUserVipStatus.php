@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Jobs;
 
 use App\Enums\ModelEventEnum;
+use App\Enums\UserClass as UserClassEnum;
 use App\Models\Message;
 use App\Models\User;
 use App\Models\UserModifyLog;
@@ -43,8 +46,8 @@ class RemoveUserVipStatus
             $message = [];
             $user->vip_added = 'no';
             $user->vip_until = null;
-            if ($user->class <= (int) User::CLASS_VIP) {
-                $user->class = (int) User::CLASS_USER;
+            if ($user->class <= (int) UserClassEnum::VIP->value) {
+                $user->class = (int) UserClassEnum::USER->value;
                 $subject = Locale::trans('cleanup.msg_vip_status_removed', [], $locale);
                 $msg = Locale::trans('cleanup.msg_vip_status_removed_body', [], $locale);
                 $message = [

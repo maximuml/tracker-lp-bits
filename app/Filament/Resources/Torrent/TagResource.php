@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Torrent;
 
 use App\Filament\Resources\Torrent\TagResource\Pages\CreateTag;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Logging;
 
 use Illuminate\Log\Logger as IlluminateLogger;

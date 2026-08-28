@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers;
 
+use App\Enums\UserClass as UserClassEnum;
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Horizon\HorizonApplicationServiceProvider;
@@ -28,7 +31,7 @@ class NexusHorizonServiceProvider extends HorizonApplicationServiceProvider
     protected function gate(): void
     {
         Gate::define('viewHorizon', function (?User $user = null) {
-            return $user && $user->class >= User::CLASS_SYSOP;
+            return $user && $user->class >= UserClassEnum::SYSOP->value;
         });
     }
 }

@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Support;
 
+use App\Enums\TorrentPromotion;
 use App\Models\HitAndRun;
 use App\Models\Torrent;
 use App\Models\TorrentState;
@@ -476,7 +479,7 @@ class PageLayout
                 $upcomingPromotion = $timeline['upcoming'] ?? null;
                 $remarkTpl = $context->lang['full_site_promotion_remark'] ?? 'Remark: %s';
                 if ($currentPromotion) {
-                    $promotionText = Torrent::$promotionTypes[$currentPromotion['global_sp_state']]['text'] ?? '';
+                    $promotionText = TorrentPromotion::fromIntSafe((int) ($currentPromotion['global_sp_state'] ?? TorrentPromotion::NORMAL->value))->label();
                     $msg = sprintf($context->lang['full_site_promotion_in_effect'], $promotionText);
                     if (! empty($currentPromotion['begin']) || ! empty($currentPromotion['deadline'])) {
                         $timeRange = sprintf($context->lang['full_site_promotion_time_range'], $currentPromotion['begin'] ?? '-∞', $currentPromotion['deadline'] ?? '∞');
@@ -488,7 +491,7 @@ class PageLayout
                     Html::messageAlertVoid('torrents.php', $msg, 'green');
                 }
                 if ($upcomingPromotion) {
-                    $promotionText = Torrent::$promotionTypes[$upcomingPromotion['global_sp_state']]['text'] ?? '';
+                    $promotionText = TorrentPromotion::fromIntSafe((int) ($upcomingPromotion['global_sp_state'] ?? TorrentPromotion::NORMAL->value))->label();
                     $msg = sprintf($context->lang['full_site_promotion_upcoming'] ?? 'Upcoming full site [%s]', $promotionText);
                     if (! empty($upcomingPromotion['begin']) || ! empty($upcomingPromotion['deadline'])) {
                         $timeRange = sprintf($context->lang['full_site_promotion_time_range'], $upcomingPromotion['begin'] ?? '-∞', $upcomingPromotion['deadline'] ?? '∞');
@@ -523,7 +526,7 @@ class PageLayout
                     Html::messageAlertVoid('faq.php#id29', $text, 'black');
                 }
                 if ($unread) {
-                    $text = $context->lang['text_you_have'].$unread.$context->lang['text_new_message'].Strings::addS($unread).$context->lang['text_click_here_to_read'];
+                    $text = $context->lang['text_you_have'].$unread.$context->lang['text_new_message'].Strings::addS((int) $unread).$context->lang['text_click_here_to_read'];
                     Html::messageAlertVoid('messages.php', $text, 'red');
                 }
                 MsgAlert::getInstance()->render();

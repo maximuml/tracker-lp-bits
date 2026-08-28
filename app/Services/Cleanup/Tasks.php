@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Services\Cleanup;
 
 use App\Enums\ModelEventEnum;
+use App\Enums\PromotionTimeType;
+use App\Enums\TorrentPromotion;
+use App\Enums\UserClass as UserClassEnum;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Models\UserBanLog;
@@ -164,44 +167,44 @@ final class Tasks
     {
         $this->expirePromotionType(
             (int) SiteConfig::current()->torrent->expireHalfleech(0),
-            Torrent::PROMOTION_HALF_DOWN,
-            (int) SiteConfig::current()->torrent->halfleechbecome(Torrent::PROMOTION_NORMAL),
+            TorrentPromotion::HALF_DOWN->value,
+            (int) SiteConfig::current()->torrent->halfleechbecome(TorrentPromotion::NORMAL->value),
         );
 
         $this->expirePromotionType(
             (int) SiteConfig::current()->torrent->expireFree(0),
-            Torrent::PROMOTION_FREE,
-            (int) SiteConfig::current()->torrent->freebecome(Torrent::PROMOTION_NORMAL),
+            TorrentPromotion::FREE->value,
+            (int) SiteConfig::current()->torrent->freebecome(TorrentPromotion::NORMAL->value),
         );
 
         $this->expirePromotionType(
             (int) SiteConfig::current()->torrent->expireTwoup(0),
-            Torrent::PROMOTION_TWO_TIMES_UP,
-            (int) SiteConfig::current()->torrent->twoupbecome(Torrent::PROMOTION_NORMAL),
+            TorrentPromotion::TWO_TIMES_UP->value,
+            (int) SiteConfig::current()->torrent->twoupbecome(TorrentPromotion::NORMAL->value),
         );
 
         $this->expirePromotionType(
             (int) SiteConfig::current()->torrent->expireTwoupfree(0),
-            Torrent::PROMOTION_FREE_TWO_TIMES_UP,
-            (int) SiteConfig::current()->torrent->twoupfreebecome(Torrent::PROMOTION_NORMAL),
+            TorrentPromotion::FREE_TWO_TIMES_UP->value,
+            (int) SiteConfig::current()->torrent->twoupfreebecome(TorrentPromotion::NORMAL->value),
         );
 
         $this->expirePromotionType(
             (int) SiteConfig::current()->torrent->expireTwouphalfleech(0),
-            Torrent::PROMOTION_HALF_DOWN_TWO_TIMES_UP,
-            (int) SiteConfig::current()->torrent->twouphalfleechbecome(Torrent::PROMOTION_NORMAL),
+            TorrentPromotion::HALF_DOWN_TWO_TIMES_UP->value,
+            (int) SiteConfig::current()->torrent->twouphalfleechbecome(TorrentPromotion::NORMAL->value),
         );
 
         $this->expirePromotionType(
             (int) SiteConfig::current()->torrent->expireThirtypercentleech(0),
-            Torrent::PROMOTION_ONE_THIRD_DOWN,
-            (int) SiteConfig::current()->torrent->thirtypercentleechbecome(Torrent::PROMOTION_NORMAL),
+            TorrentPromotion::ONE_THIRD_DOWN->value,
+            (int) SiteConfig::current()->torrent->thirtypercentleechbecome(TorrentPromotion::NORMAL->value),
         );
 
         $this->expirePromotionType(
             (int) SiteConfig::current()->torrent->expireNormal(0),
-            Torrent::PROMOTION_NORMAL,
-            (int) SiteConfig::current()->torrent->normalbecome(Torrent::PROMOTION_NORMAL),
+            TorrentPromotion::NORMAL->value,
+            (int) SiteConfig::current()->torrent->normalbecome(TorrentPromotion::NORMAL->value),
         );
 
         $this->expireIndividualPromotions();
@@ -320,29 +323,29 @@ final class Tasks
         $dt = date('Y-m-d H:i:s', time() - $secs);
 
         $validStates = [
-            Torrent::PROMOTION_NORMAL,
-            Torrent::PROMOTION_FREE,
-            Torrent::PROMOTION_TWO_TIMES_UP,
-            Torrent::PROMOTION_FREE_TWO_TIMES_UP,
-            Torrent::PROMOTION_HALF_DOWN,
-            Torrent::PROMOTION_HALF_DOWN_TWO_TIMES_UP,
+            TorrentPromotion::NORMAL->value,
+            TorrentPromotion::FREE->value,
+            TorrentPromotion::TWO_TIMES_UP->value,
+            TorrentPromotion::FREE_TWO_TIMES_UP->value,
+            TorrentPromotion::HALF_DOWN->value,
+            TorrentPromotion::HALF_DOWN_TWO_TIMES_UP->value,
         ];
-        $targetState = in_array($toState, $validStates, true) ? $toState : Torrent::PROMOTION_NORMAL;
+        $targetState = in_array($toState, $validStates, true) ? $toState : TorrentPromotion::NORMAL->value;
 
         $becomeMap = [
-            Torrent::PROMOTION_NORMAL => 'normal',
-            Torrent::PROMOTION_FREE => 'Free',
-            Torrent::PROMOTION_TWO_TIMES_UP => '2X',
-            Torrent::PROMOTION_FREE_TWO_TIMES_UP => '2X Free',
-            Torrent::PROMOTION_HALF_DOWN => '50%',
-            Torrent::PROMOTION_HALF_DOWN_TWO_TIMES_UP => '2X 50%',
+            TorrentPromotion::NORMAL->value => 'normal',
+            TorrentPromotion::FREE->value => 'Free',
+            TorrentPromotion::TWO_TIMES_UP->value => '2X',
+            TorrentPromotion::FREE_TWO_TIMES_UP->value => '2X Free',
+            TorrentPromotion::HALF_DOWN->value => '50%',
+            TorrentPromotion::HALF_DOWN_TWO_TIMES_UP->value => '2X 50%',
         ];
         $become = $becomeMap[$targetState];
 
         $torrents = DB::table('torrents')
             ->where('added', '<', $dt)
             ->where('sp_state', $fromState)
-            ->where('promotion_time_type', Torrent::PROMOTION_TIME_TYPE_GLOBAL)
+            ->where('promotion_time_type', PromotionTimeType::GLOBAL->value)
             ->get(['id', 'name']);
 
         foreach ($torrents as $torrent) {
@@ -354,7 +357,7 @@ final class Tasks
 
             Events::publishModel(ModelEventEnum::TORRENT_UPDATED, (int) $arr['id']);
 
-            if ($targetState === Torrent::PROMOTION_NORMAL) {
+            if ($targetState === TorrentPromotion::NORMAL->value) {
                 Log::write("Torrent {$arr['id']} ({$arr['name']}) is no longer on promotion (time expired)", 'normal');
             } else {
                 Log::write("Promotion type for torrent {$arr['id']} ({$arr['name']}) is changed to {$become} (time expired)", 'normal');
@@ -365,14 +368,14 @@ final class Tasks
     private function expireIndividualPromotions(): void
     {
         $torrents = Torrent::query()
-            ->where('promotion_time_type', Torrent::PROMOTION_TIME_TYPE_DEADLINE)
+            ->where('promotion_time_type', PromotionTimeType::DEADLINE->value)
             ->where('promotion_until', '<', now())
             ->get(['id']);
 
         foreach ($torrents as $torrent) {
             Torrent::query()->where('id', $torrent->id)->update([
-                'sp_state' => Torrent::PROMOTION_NORMAL,
-                'promotion_time_type' => Torrent::PROMOTION_TIME_TYPE_GLOBAL,
+                'sp_state' => TorrentPromotion::NORMAL->value,
+                'promotion_time_type' => PromotionTimeType::GLOBAL->value,
                 'promotion_until' => null,
             ]);
 
@@ -552,7 +555,7 @@ final class Tasks
 
     private function neverDeleteClass(): int
     {
-        return min(SiteConfig::current()->account->neverdelete(), (int) User::CLASS_VIP);
+        return min(SiteConfig::current()->account->neverdelete(), (int) UserClassEnum::VIP->value);
     }
 
     private function neverDeleteParkedClass(): int
@@ -664,7 +667,7 @@ final class Tasks
         $downlimitRoof = $downRoofGb * 1024 * 1024 * 1024;
 
         $query = User::query()
-            ->where('class', User::CLASS_PEASANT)
+            ->where('class', UserClassEnum::PEASANT->value)
             ->where('downloaded', '>=', $downlimitFloor);
 
         if ($downlimitRoof > $downFloorGb) {
@@ -686,7 +689,7 @@ final class Tasks
             UserOps::logModify($uid, 'Leech Warning removed by System.');
 
             User::query()->where('id', $uid)->update([
-                'class' => User::CLASS_USER,
+                'class' => UserClassEnum::USER->value,
                 'leechwarn' => 'no',
                 'leechwarnuntil' => null,
             ]);
@@ -708,14 +711,14 @@ final class Tasks
         $getInvitesByPromotion = SiteConfig::current()->account->getInvitesByPromotion([]);
 
         $promotions = [
-            User::CLASS_POWER_USER,
-            User::CLASS_ELITE_USER,
-            User::CLASS_CRAZY_USER,
-            User::CLASS_INSANE_USER,
-            User::CLASS_VETERAN_USER,
-            User::CLASS_EXTREME_USER,
-            User::CLASS_ULTIMATE_USER,
-            User::CLASS_NEXUS_MASTER,
+            UserClassEnum::POWER_USER->value,
+            UserClassEnum::ELITE_USER->value,
+            UserClassEnum::CRAZY_USER->value,
+            UserClassEnum::INSANE_USER->value,
+            UserClassEnum::VETERAN_USER->value,
+            UserClassEnum::EXTREME_USER->value,
+            UserClassEnum::ULTIMATE_USER->value,
+            UserClassEnum::NEXUS_MASTER->value,
         ];
 
         foreach ($promotions as $class) {
@@ -729,7 +732,7 @@ final class Tasks
         }
     }
 
-    private function promoteUsers(string $class, int $downFloorGb, float $minRatio, int $timeWeek, int $addInvite): void
+    private function promoteUsers(int|string $class, int $downFloorGb, float $minRatio, int $timeWeek, int $addInvite): void
     {
         if ($downFloorGb <= 0) {
             return;
@@ -798,14 +801,14 @@ final class Tasks
     private function demoteUsersByClass(): void
     {
         $demotions = [
-            User::CLASS_NEXUS_MASTER,
-            User::CLASS_ULTIMATE_USER,
-            User::CLASS_EXTREME_USER,
-            User::CLASS_VETERAN_USER,
-            User::CLASS_INSANE_USER,
-            User::CLASS_CRAZY_USER,
-            User::CLASS_ELITE_USER,
-            User::CLASS_POWER_USER,
+            UserClassEnum::NEXUS_MASTER->value,
+            UserClassEnum::ULTIMATE_USER->value,
+            UserClassEnum::EXTREME_USER->value,
+            UserClassEnum::VETERAN_USER->value,
+            UserClassEnum::INSANE_USER->value,
+            UserClassEnum::CRAZY_USER->value,
+            UserClassEnum::ELITE_USER->value,
+            UserClassEnum::POWER_USER->value,
         ];
 
         foreach ($demotions as $class) {
@@ -813,7 +816,7 @@ final class Tasks
         }
     }
 
-    private function demoteUsers(string $class, float $deRatio): void
+    private function demoteUsers(int|string $class, float $deRatio): void
     {
         if ($deRatio <= 0) {
             return;
@@ -889,7 +892,7 @@ final class Tasks
         $downlimitFloor = $downFloorGb * 1024 * 1024 * 1024;
 
         $res = User::query()
-            ->where('class', User::CLASS_USER)
+            ->where('class', UserClassEnum::USER->value)
             ->where('downloaded', '>', $downlimitFloor)
             ->whereRaw('uploaded / downloaded < ?', [$minRatio])
             ->get(['id']);
@@ -903,7 +906,7 @@ final class Tasks
         foreach ($res as $arr) {
             $uid = $arr->id;
             $locale = Locale::userLocale($uid);
-            $peasantName = \App\Support\User::getUserClassName(User::CLASS_PEASANT, false, false, false);
+            $peasantName = \App\Support\User::getUserClassName(UserClassEnum::PEASANT->value, false, false, false);
 
             $subject = Locale::trans('cleanup.msg_demoted_to', [], $locale).$peasantName;
             $msg = Locale::trans('cleanup.msg_must_fix_ratio_within', [], $locale)
@@ -913,7 +916,7 @@ final class Tasks
             UserOps::logModify($uid, 'Leech Warned by System - Low Ratio.');
 
             User::query()->where('id', $uid)->update([
-                'class' => User::CLASS_PEASANT,
+                'class' => UserClassEnum::PEASANT->value,
                 'leechwarn' => 'yes',
                 'leechwarnuntil' => $until,
             ]);
@@ -935,7 +938,7 @@ final class Tasks
         $dt = date('Y-m-d H:i:s');
 
         $results = User::query()
-            ->where('class', '<', User::CLASS_VIP)
+            ->where('class', '<', UserClassEnum::VIP->value)
             ->where('donor', 'no')
             ->where('enabled', User::ENABLED_YES)
             ->where('leechwarn', 'yes')

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support\Config;
 
-use App\Models\Torrent;
+use App\Enums\TorrentPromotion;
 
 final class TorrentConfig extends Config
 {
@@ -28,7 +28,7 @@ final class TorrentConfig extends Config
         return $this->int('expirehalfleech', $default);
     }
 
-    public function halfleechbecome(int $default = Torrent::PROMOTION_NORMAL): int
+    public function halfleechbecome(int $default = TorrentPromotion::NORMAL->value): int
     {
         return $this->int('halfleechbecome', $default);
     }
@@ -38,7 +38,7 @@ final class TorrentConfig extends Config
         return $this->int('expirefree', $default);
     }
 
-    public function freebecome(int $default = Torrent::PROMOTION_NORMAL): int
+    public function freebecome(int $default = TorrentPromotion::NORMAL->value): int
     {
         return $this->int('freebecome', $default);
     }
@@ -48,7 +48,7 @@ final class TorrentConfig extends Config
         return $this->int('expiretwoup', $default);
     }
 
-    public function twoupbecome(int $default = Torrent::PROMOTION_NORMAL): int
+    public function twoupbecome(int $default = TorrentPromotion::NORMAL->value): int
     {
         return $this->int('twoupbecome', $default);
     }
@@ -58,7 +58,7 @@ final class TorrentConfig extends Config
         return $this->int('expiretwoupfree', $default);
     }
 
-    public function twoupfreebecome(int $default = Torrent::PROMOTION_NORMAL): int
+    public function twoupfreebecome(int $default = TorrentPromotion::NORMAL->value): int
     {
         return $this->int('twoupfreebecome', $default);
     }
@@ -68,7 +68,7 @@ final class TorrentConfig extends Config
         return $this->int('expiretwouphalfleech', $default);
     }
 
-    public function twouphalfleechbecome(int $default = Torrent::PROMOTION_NORMAL): int
+    public function twouphalfleechbecome(int $default = TorrentPromotion::NORMAL->value): int
     {
         return $this->int('twouphalfleechbecome', $default);
     }
@@ -78,7 +78,7 @@ final class TorrentConfig extends Config
         return $this->int('expirethirtypercentleech', $default);
     }
 
-    public function thirtypercentleechbecome(int $default = Torrent::PROMOTION_NORMAL): int
+    public function thirtypercentleechbecome(int $default = TorrentPromotion::NORMAL->value): int
     {
         return $this->int('thirtypercentleechbecome', $default);
     }
@@ -88,7 +88,7 @@ final class TorrentConfig extends Config
         return $this->int('expirenormal', $default);
     }
 
-    public function normalbecome(int $default = Torrent::PROMOTION_NORMAL): int
+    public function normalbecome(int $default = TorrentPromotion::NORMAL->value): int
     {
         return $this->int('normalbecome', $default);
     }

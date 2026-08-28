@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Security\LoginAttemptResource\Pages;
 
 use App\Filament\PageList;

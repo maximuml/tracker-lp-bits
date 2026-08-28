@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
+use App\Enums\UserClass as UserClassEnum;
 use App\Http\Middleware\Locale;
 use App\Models\Invite;
 use App\Models\Message;
@@ -491,7 +494,7 @@ class ToolRepository extends BaseRepository
         $settings = SiteConfig::current()->authority->toArray();
         $result = [];
         foreach ($settings as $permission => $minClass) {
-            if ($minClass >= User::CLASS_PEASANT && $minClass <= $class) {
+            if ($minClass >= UserClassEnum::PEASANT->value && $minClass <= $class) {
                 $result[] = $permission;
             }
         }

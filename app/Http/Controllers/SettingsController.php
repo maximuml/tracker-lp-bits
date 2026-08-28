@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
+use App\Enums\UserClass as UserClassEnum;
 use App\Models\Language;
 use App\Models\Setting;
 use App\Models\Torrent;
@@ -68,16 +71,16 @@ class SettingsController extends LegacyController
         ],
         'account' => [
             'neverdelete', 'neverdeletepacked', 'deletepacked', 'deleteunpacked', 'deletenotransfer', 'deletenotransfertwo', 'deletepeasant',
-            'psdlone', 'psratioone', 'psdltwo', 'psratiotwo', 'psdlthree', 'psratiothree', 'psdlfour', 'psratiofour', 'psdlfive', 'psratiofive', User::CLASS_PEASANT.'_alias',
-            User::CLASS_USER.'_alias',
-            'putime', 'pudl', User::CLASS_POWER_USER.'_min_seed_points', 'puprratio', 'puderatio', User::CLASS_POWER_USER.'_alias',
-            'eutime', 'eudl', User::CLASS_ELITE_USER.'_min_seed_points', 'euprratio', 'euderatio', User::CLASS_ELITE_USER.'_alias',
-            'cutime', 'cudl', User::CLASS_CRAZY_USER.'_min_seed_points', 'cuprratio', 'cuderatio', User::CLASS_CRAZY_USER.'_alias',
-            'iutime', 'iudl', User::CLASS_INSANE_USER.'_min_seed_points', 'iuprratio', 'iuderatio', User::CLASS_INSANE_USER.'_alias',
-            'vutime', 'vudl', User::CLASS_VETERAN_USER.'_min_seed_points', 'vuprratio', 'vuderatio', User::CLASS_VETERAN_USER.'_alias',
-            'exutime', 'exudl', User::CLASS_EXTREME_USER.'_min_seed_points', 'exuprratio', 'exuderatio', User::CLASS_EXTREME_USER.'_alias',
-            'uutime', 'uudl', User::CLASS_ULTIMATE_USER.'_min_seed_points', 'uuprratio', 'uuderatio', User::CLASS_ULTIMATE_USER.'_alias',
-            'nmtime', 'nmdl', User::CLASS_NEXUS_MASTER.'_min_seed_points', 'nmprratio', 'nmderatio', User::CLASS_NEXUS_MASTER.'_alias',
+            'psdlone', 'psratioone', 'psdltwo', 'psratiotwo', 'psdlthree', 'psratiothree', 'psdlfour', 'psratiofour', 'psdlfive', 'psratiofive', UserClassEnum::PEASANT->value.'_alias',
+            UserClassEnum::USER->value.'_alias',
+            'putime', 'pudl', UserClassEnum::POWER_USER->value.'_min_seed_points', 'puprratio', 'puderatio', UserClassEnum::POWER_USER->value.'_alias',
+            'eutime', 'eudl', UserClassEnum::ELITE_USER->value.'_min_seed_points', 'euprratio', 'euderatio', UserClassEnum::ELITE_USER->value.'_alias',
+            'cutime', 'cudl', UserClassEnum::CRAZY_USER->value.'_min_seed_points', 'cuprratio', 'cuderatio', UserClassEnum::CRAZY_USER->value.'_alias',
+            'iutime', 'iudl', UserClassEnum::INSANE_USER->value.'_min_seed_points', 'iuprratio', 'iuderatio', UserClassEnum::INSANE_USER->value.'_alias',
+            'vutime', 'vudl', UserClassEnum::VETERAN_USER->value.'_min_seed_points', 'vuprratio', 'vuderatio', UserClassEnum::VETERAN_USER->value.'_alias',
+            'exutime', 'exudl', UserClassEnum::EXTREME_USER->value.'_min_seed_points', 'exuprratio', 'exuderatio', UserClassEnum::EXTREME_USER->value.'_alias',
+            'uutime', 'uudl', UserClassEnum::ULTIMATE_USER->value.'_min_seed_points', 'uuprratio', 'uuderatio', UserClassEnum::ULTIMATE_USER->value.'_alias',
+            'nmtime', 'nmdl', UserClassEnum::NEXUS_MASTER->value.'_min_seed_points', 'nmprratio', 'nmderatio', UserClassEnum::NEXUS_MASTER->value.'_alias',
             'getInvitesByPromotion', 'destroy_disabled',
         ],
         'torrent' => [
@@ -99,7 +102,7 @@ class SettingsController extends LegacyController
             return redirect('/settings.php');
         }
 
-        if (UserDisplay::currentClass() < User::CLASS_SYSOP) {
+        if (UserDisplay::currentClass() < UserClassEnum::SYSOP->value) {
             return $this->legacyAbortResponse('Error', 'Permission denied.');
         }
 

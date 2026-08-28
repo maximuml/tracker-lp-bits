@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Http\Resources\TagResource;
@@ -10,8 +12,7 @@ use Illuminate\Validation\Rule;
 
 class TagController extends Controller
 {
-    /** @var mixed */
-    private $repository;
+    private TagRepository $repository;
 
     /**
      * @return mixed

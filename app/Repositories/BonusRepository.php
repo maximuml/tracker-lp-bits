@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
+use App\Enums\BusinessType;
 use App\Exceptions\NexusException;
 use App\Models\BonusLogs;
 use App\Models\HitAndRun;
@@ -47,7 +50,7 @@ class BonusRepository extends BaseRepository
             $comment = Locale::trans('hr.bonus_cancel_comment', ['bonus' => $requireBonus], $user->locale);
             Logger::writeWithContext((string) "comment: {$comment}", (string) 'info', (bool) false);
 
-            $this->consumeUserBonus($user, $requireBonus, BonusLogs::BUSINESS_TYPE_CANCEL_HIT_AND_RUN, "$comment(H&R ID: {$hitAndRun->id})");
+            $this->consumeUserBonus($user, $requireBonus, BusinessType::CANCEL_HIT_AND_RUN->value, "$comment(H&R ID: {$hitAndRun->id})");
 
             $existingComment = (string) $hitAndRun->comment;
             $newComment = $existingComment === '' ? $comment : $comment."\n".$existingComment;
@@ -115,7 +118,7 @@ class BonusRepository extends BaseRepository
         DB::transaction(function () use ($user, $medal, $requireBonus) {
             $comment = Locale::trans('bonus.comment_buy_medal', ['bonus' => $requireBonus, 'medal_name' => $medal->name], $user->locale);
             Logger::writeWithContext((string) "comment: {$comment}", (string) 'info', (bool) false);
-            $this->consumeUserBonus($user, $requireBonus, BonusLogs::BUSINESS_TYPE_BUY_MEDAL, "$comment(medal ID: {$medal->id})");
+            $this->consumeUserBonus($user, $requireBonus, BusinessType::BUY_MEDAL->value, "$comment(medal ID: {$medal->id})");
             $medalRep = new MedalRepository;
             $medalRep->userAttachMedal($user, $medal);
             if ($medal->inventory !== null) {
@@ -155,7 +158,7 @@ class BonusRepository extends BaseRepository
         DB::transaction(function () use ($user, $toUser, $medal, $requireBonus, $giftFee) {
             $comment = Locale::trans('bonus.comment_gift_medal', ['bonus' => $requireBonus, 'medal_name' => $medal->name, 'to_username' => $toUser->username], $user->locale);
             Logger::writeWithContext((string) "comment: {$comment}", (string) 'info', (bool) false);
-            $this->consumeUserBonus($user, $requireBonus, BonusLogs::BUSINESS_TYPE_GIFT_MEDAL, "$comment(medal ID: {$medal->id})");
+            $this->consumeUserBonus($user, $requireBonus, BusinessType::GIFT_MEDAL->value, "$comment(medal ID: {$medal->id})");
 
             $expireAt = null;
             if ($medal->duration > 0) {
@@ -194,7 +197,7 @@ class BonusRepository extends BaseRepository
         DB::transaction(function () use ($user, $requireBonus) {
             $comment = Locale::trans('bonus.comment_buy_attendance_card', ['bonus' => $requireBonus], $user->locale);
             Logger::writeWithContext((string) "comment: {$comment}", (string) 'info', (bool) false);
-            $this->consumeUserBonus($user, $requireBonus, BonusLogs::BUSINESS_TYPE_BUY_ATTENDANCE_CARD, $comment);
+            $this->consumeUserBonus($user, $requireBonus, BusinessType::BUY_ATTENDANCE_CARD->value, $comment);
             User::query()->where('id', $user->id)->increment('attendance_card');
         });
 
@@ -218,7 +221,7 @@ class BonusRepository extends BaseRepository
         DB::transaction(function () use ($user, $requireBonus, $hashArr) {
             $comment = Locale::trans('bonus.comment_buy_temporary_invite', ['bonus' => $requireBonus, 'count' => count($hashArr)], $user->locale);
             Logger::writeWithContext((string) "comment: {$comment}", (string) 'info', (bool) false);
-            $this->consumeUserBonus($user, $requireBonus, BonusLogs::BUSINESS_TYPE_BUY_TEMPORARY_INVITE, $comment);
+            $this->consumeUserBonus($user, $requireBonus, BusinessType::BUY_TEMPORARY_INVITE->value, $comment);
             $invites = [];
             foreach ($hashArr as $hash) {
                 $invites[] = [
@@ -248,7 +251,7 @@ class BonusRepository extends BaseRepository
         DB::transaction(function () use ($user, $requireBonus, $duration) {
             $comment = Locale::trans('bonus.comment_buy_rainbow_id', ['bonus' => $requireBonus, 'duration' => $duration], $user->locale);
             Logger::writeWithContext((string) "comment: {$comment}", (string) 'info', (bool) false);
-            $this->consumeUserBonus($user, $requireBonus, BonusLogs::BUSINESS_TYPE_BUY_RAINBOW_ID, $comment);
+            $this->consumeUserBonus($user, $requireBonus, BusinessType::BUY_RAINBOW_ID->value, $comment);
             $metaData = [
                 'meta_key' => UserMeta::META_KEY_PERSONALIZED_USERNAME,
                 'duration' => $duration,
@@ -282,7 +285,7 @@ class BonusRepository extends BaseRepository
         DB::transaction(function () use ($user, $requireBonus) {
             $comment = Locale::trans('bonus.comment_buy_change_username_card', ['bonus' => $requireBonus], $user->locale);
             Logger::writeWithContext((string) "comment: {$comment}", (string) 'info', (bool) false);
-            $this->consumeUserBonus($user, $requireBonus, BonusLogs::BUSINESS_TYPE_BUY_CHANGE_USERNAME_CARD, $comment);
+            $this->consumeUserBonus($user, $requireBonus, BusinessType::BUY_CHANGE_USERNAME_CARD->value, $comment);
             $metaData = [
                 'meta_key' => UserMeta::META_KEY_CHANGE_USERNAME,
             ];
@@ -313,7 +316,7 @@ class BonusRepository extends BaseRepository
             $buyerLocale = $user->locale;
             $comment = Locale::trans('bonus.comment_buy_torrent', ['bonus' => $requireBonus, 'torrent_id' => $torrent->id], $buyerLocale);
             Logger::writeWithContext((string) "comment: {$comment}", (string) 'info', (bool) false);
-            $this->consumeUserBonus($user, $requireBonus, BonusLogs::BUSINESS_TYPE_BUY_TORRENT, $comment);
+            $this->consumeUserBonus($user, $requireBonus, BusinessType::BUY_TORRENT->value, $comment);
             $buyLog = TorrentBuyLog::query()->create([
                 'uid' => $user->id,
                 'torrent_id' => $torrent->id,
@@ -329,16 +332,16 @@ class BonusRepository extends BaseRepository
             $owner = $torrent->user;
             if ($owner->id) {
                 $nowStr = now()->toDateTimeString();
-                $businessType = BonusLogs::BUSINESS_TYPE_TORRENT_BE_DOWNLOADED;
+                $businessType = BusinessType::TORRENT_BE_DOWNLOADED->value;
                 $owner->increment('seedbonus', $increaseBonus);
                 $comment = Locale::trans('bonus.comment_torrent_be_downloaded', ['username' => $user->username, 'uid' => $user->id], $owner->locale);
                 $bonusLog = [
                     'business_type' => $businessType,
                     'uid' => $owner->id,
-                    'old_total_value' => $owner->seedbonus,
+                    'old_total_value' => (float) $owner->seedbonus,
                     'value' => $increaseBonus,
-                    'new_total_value' => bcadd((string) $owner->seedbonus, (string) $increaseBonus),
-                    'comment' => sprintf('[%s] %s', BonusLogs::$businessTypes[$businessType]['text'], $comment),
+                    'new_total_value' => bcadd((string) ($owner->seedbonus ?? 0), (string) $increaseBonus),
+                    'comment' => sprintf('[%s] %s', BusinessType::TORRENT_BE_DOWNLOADED->label(), $comment),
                     'created_at' => $nowStr,
                     'updated_at' => $nowStr,
                 ];
@@ -364,7 +367,8 @@ class BonusRepository extends BaseRepository
      */
     public function consumeUserBonus($user, float $requireBonus, int $logBusinessType, string $logComment = '', array $userUpdates = [])
     {
-        if (! isset(BonusLogs::$businessTypes[$logBusinessType])) {
+        $logBusinessTypeEnum = BusinessType::fromIntSafe($logBusinessType);
+        if ($logBusinessTypeEnum === null) {
             throw new \InvalidArgumentException("Invalid logBusinessType: $logBusinessType");
         }
         if (isset($userUpdates['seedbonus']) || isset($userUpdates['bonuscomment']) || isset($userUpdates['modcomment'])) {
@@ -381,8 +385,8 @@ class BonusRepository extends BaseRepository
             Logger::writeWithContext((string) "user: {$user->id}, bonus: {$user->seedbonus} < requireBonus: {$requireBonus}", (string) 'error', (bool) false);
             throw new \LogicException('User bonus not enough.');
         }
-        DB::transaction(function () use ($user, $requireBonus, $logBusinessType, $logComment, $userUpdates) {
-            $oldUserBonus = $user->seedbonus;
+        DB::transaction(function () use ($user, $requireBonus, $logBusinessType, $logBusinessTypeEnum, $logComment, $userUpdates) {
+            $oldUserBonus = (float) ($user->seedbonus ?? 0);
             $newUserBonus = bcsub((string) $oldUserBonus, (string) $requireBonus);
             $log = "user: {$user->id}, requireBonus: $requireBonus, oldUserBonus: $oldUserBonus, newUserBonus: $newUserBonus, logBusinessType: $logBusinessType, logComment: $logComment";
             Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
@@ -402,7 +406,7 @@ class BonusRepository extends BaseRepository
                 'old_total_value' => $oldUserBonus,
                 'value' => $requireBonus,
                 'new_total_value' => $newUserBonus,
-                'comment' => sprintf('[%s] %s', BonusLogs::$businessTypes[$logBusinessType]['text'], $logComment),
+                'comment' => sprintf('[%s] %s', $logBusinessTypeEnum->label(), $logComment),
                 'created_at' => $nowStr,
                 'updated_at' => $nowStr,
             ];

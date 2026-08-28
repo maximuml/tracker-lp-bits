@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\TorrentCustomFields;
 
 use App\Filament\Resources\TorrentCustomFields\Pages\ListTorrentCustomFields;

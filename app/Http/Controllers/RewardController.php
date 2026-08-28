@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Http\Resources\RewardResource;
+use App\Models\User;
 use App\Repositories\RewardRepository;
 use App\Support\Locale;
 use Illuminate\Http\Request;
@@ -11,8 +14,7 @@ use Illuminate\Support\Facades\Auth;
 
 class RewardController extends Controller
 {
-    /** @var mixed */
-    private $repository;
+    private RewardRepository $repository;
 
     /**
      * @return mixed
@@ -50,7 +52,11 @@ class RewardController extends Controller
             'torrent_id' => 'required',
             'value' => 'required',
         ]);
-        $result = $this->repository->store($request->torrent_id, $request->value, Auth::user());
+        $user = Auth::user();
+        if (! $user instanceof User) {
+            throw new \RuntimeException('unauthenticated');
+        }
+        $result = $this->repository->store($request->torrent_id, $request->value, $user);
         $resource = new RewardResource($result);
 
         return $this->success($resource, '赠魔成功！');

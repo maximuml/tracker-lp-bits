@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Http\Resources\AgentDenyResource;
@@ -9,8 +11,7 @@ use Illuminate\Http\Request;
 
 class AgentDenyController extends Controller
 {
-    /** @var mixed */
-    private $repository;
+    private AgentDenyRepository $repository;
 
     /**
      * @return mixed

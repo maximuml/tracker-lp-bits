@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Support;
 
 use App\Enums\TorrentPromotion;
+use App\Enums\UserClass as UserClassEnum;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\TorrentRepository;
@@ -109,12 +112,20 @@ final class TorrentOps
         );
 
         if (! empty($peer)) {
-            $realUploaded = max((int) \bcsub($queries['uploaded'], $peer['uploaded']), 0);
-            $realDownloaded = max((int) \bcsub($queries['downloaded'], $peer['downloaded']), 0);
+            /** @var numeric-string $queriesUploaded */
+            $queriesUploaded = (string) $queries['uploaded'];
+            /** @var numeric-string $peerUploaded */
+            $peerUploaded = (string) $peer['uploaded'];
+            /** @var numeric-string $queriesDownloaded */
+            $queriesDownloaded = (string) $queries['downloaded'];
+            /** @var numeric-string $peerDownloaded */
+            $peerDownloaded = (string) $peer['downloaded'];
+            $realUploaded = max((int) \bcsub($queriesUploaded, $peerUploaded), 0);
+            $realDownloaded = max((int) \bcsub($queriesDownloaded, $peerDownloaded), 0);
             $log .= ", [PEER_EXISTS], realUploaded: $realUploaded, realDownloaded: $realDownloaded, [SP_STATE]";
 
             $spStateGlobal = Promotion::globalSpecialState();
-            $spStateNormal = Torrent::PROMOTION_NORMAL;
+            $spStateNormal = TorrentPromotion::NORMAL->value;
             if (! empty($promotionInfo) && isset($promotionInfo['__ignore_global_sp_state'])) {
                 $log .= ', use promotionInfo';
                 $spStateReal = $promotionInfo['sp_state'];
@@ -139,7 +150,7 @@ final class TorrentOps
                 $log .= ", [IS_NOT_UPLOADER] || uploaderRatio == 1, upRatio: $upRatio";
             }
 
-            if ($user['class'] == User::CLASS_VIP) {
+            if ($user['class'] == UserClassEnum::VIP->value) {
                 $downRatio = 0;
                 $log .= ", [IS_VIP], downRatio: $downRatio";
             } else {

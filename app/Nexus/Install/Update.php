@@ -2,6 +2,7 @@
 
 namespace Nexus\Install;
 
+use App\Enums\UserClass as UserClassEnum;
 use App\Models\Attendance;
 use App\Models\Category;
 use App\Models\Icon;
@@ -335,7 +336,7 @@ class Update extends Install
         if ($hasTableSetting) {
             Setting::query()->firstOrCreate(
                 ['name' => 'system.alarm_email_receiver'],
-                ['value' => User::query()->where('class', User::CLASS_STAFF_LEADER)->first(['id'])->id]
+                ['value' => User::query()->where('class', UserClassEnum::STAFFLEADER->value)->first(['id'])->id]
             );
         }
 

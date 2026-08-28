@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Section\SectionResource\Pages;
 
 use App\Filament\PageList;

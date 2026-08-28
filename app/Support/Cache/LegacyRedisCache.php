@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Support\Cache;
 
 use App\Support\Config;
@@ -411,6 +413,10 @@ class LegacyRedisCache
      */
     protected function unserialize($value)
     {
+        if ($value === false || $value === null) {
+            return false;
+        }
+
         return is_numeric($value) ? $value : unserialize($value, ['allowed_classes' => false]);
     }
 

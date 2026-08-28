@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Models\HitAndRun;
@@ -10,8 +12,7 @@ use Illuminate\Validation\Rule;
 
 class SettingController extends Controller
 {
-    /** @var mixed */
-    private $repository;
+    private SettingRepository $repository;
 
     /**
      * @return mixed

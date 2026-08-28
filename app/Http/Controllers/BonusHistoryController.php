@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Auth\Permission;
+use App\Enums\BusinessType;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\BonusLogs;
 use App\Models\Reward;
@@ -312,10 +315,10 @@ JS;
         ]);
 
         Bonus::updatePoints('-', (float) $value, $userId);
-        BonusLogs::add($userId, (float) ($curUser['seedbonus'] ?? 0), $value, (float) ($curUser['seedbonus'] ?? 0) - $value, '', BonusLogs::BUSINESS_TYPE_REWARD_TORRENT);
+        BonusLogs::add($userId, (float) ($curUser['seedbonus'] ?? 0), $value, (float) ($curUser['seedbonus'] ?? 0) - $value, '', BusinessType::REWARD_TORRENT->value);
 
         Bonus::updatePoints('+', (float) $value, (int) $torrentOwner);
-        BonusLogs::add((int) $torrentOwnerInfo['id'], (float) $torrentOwnerInfo['seedbonus'], $value, (float) $torrentOwnerInfo['seedbonus'] + $value, '', BonusLogs::BUSINESS_TYPE_TORRENT_BE_REWARD);
+        BonusLogs::add((int) $torrentOwnerInfo['id'], (float) $torrentOwnerInfo['seedbonus'], $value, (float) $torrentOwnerInfo['seedbonus'] + $value, '', BusinessType::TORRENT_BE_REWARD->value);
 
         return response()->json(Api::successWithContext('OK', $request->all()));
 

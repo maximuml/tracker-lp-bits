@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
+use App\Enums\UserClass as UserClassEnum;
 use App\Models\Invite;
 use App\Models\Setting;
 use App\Models\User;
@@ -71,7 +74,7 @@ class InviteController extends LegacyController
             'enabled' => $enabled,
             'status' => $status,
             'sent' => $sent,
-            'UC_SYSOP' => (int) User::CLASS_SYSOP,
+            'UC_SYSOP' => (int) UserClassEnum::SYSOP->value,
         ];
 
         if ($type === 'new') {
@@ -192,7 +195,7 @@ class InviteController extends LegacyController
             $inviteRows = InviteRepository::getInvitees($id, $filters, (int) $offset, $pageSize);
         }
 
-        if ($currentUserId === $id || UserDisplay::currentClass() >= (int) User::CLASS_SYSOP) {
+        if ($currentUserId === $id || UserDisplay::currentClass() >= (int) UserClassEnum::SYSOP->value) {
             $pendingCount = InviteRepository::countPendingInvitees($currentUserId);
         }
 

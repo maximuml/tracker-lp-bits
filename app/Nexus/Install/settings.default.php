@@ -1,11 +1,11 @@
 <?php
 
+use App\Enums\UserClass as UserClassEnum;
 use App\Models\BonusLogs;
 use App\Models\HitAndRun;
 use App\Models\Language;
 use App\Models\SearchBox;
 use App\Models\Torrent;
-use App\Models\User;
 use App\Repositories\TokenRepository;
 
 return [
@@ -159,14 +159,14 @@ return [
         'seebanned' => '12',
         'againstoffer' => '1',
         'userbar' => '2',
-        'torrent_hr' => User::CLASS_ADMINISTRATOR,
-        'torrent-approval' => User::CLASS_ADMINISTRATOR,
-        'torrent-delete' => User::CLASS_ADMINISTRATOR,
-        'user-delete' => User::CLASS_ADMINISTRATOR,
-        'user-change-class' => User::CLASS_ADMINISTRATOR,
-        'torrent-set-special-tag' => User::CLASS_ADMINISTRATOR,
-        'torrent-approval-allow-automatic' => User::CLASS_UPLOADER,
-        'torrent-set-price' => User::CLASS_UPLOADER,
+        'torrent_hr' => UserClassEnum::ADMINISTRATOR->value,
+        'torrent-approval' => UserClassEnum::ADMINISTRATOR->value,
+        'torrent-delete' => UserClassEnum::ADMINISTRATOR->value,
+        'user-delete' => UserClassEnum::ADMINISTRATOR->value,
+        'user-change-class' => UserClassEnum::ADMINISTRATOR->value,
+        'torrent-set-special-tag' => UserClassEnum::ADMINISTRATOR->value,
+        'torrent-approval-allow-automatic' => UserClassEnum::UPLOADER->value,
+        'torrent-set-price' => UserClassEnum::UPLOADER->value,
     ],
     'tweak' => [
         'where' => 'no',
@@ -389,7 +389,7 @@ return [
         'cookie_valid_days' => 365,
         'maximum_upload_speed' => 8000,
         'is_invite_pre_email_and_username' => 'No',
-        'access_admin_class_min' => User::CLASS_ADMINISTRATOR,
+        'access_admin_class_min' => UserClassEnum::ADMINISTRATOR->value,
     ],
     'permission' => [
         'user_token_allowed' => TokenRepository::listUserTokenPermissions(false),

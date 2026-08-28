@@ -1,9 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Auth\Permission;
+use App\Enums\BusinessType;
 use App\Enums\ModelEventEnum;
+use App\Enums\TorrentPromotion;
 use App\Exceptions\NexusException;
 use App\Exceptions\TorrentAlreadyExistsException;
 use App\Http\Resources\SearchBoxResource;
@@ -436,29 +440,29 @@ class UploadRepository extends BaseRepository
         $largeTorrentSize = $siteConfig->torrent->largeSize();
         if ($largeTorrentSize > 0 && $torrentSize > $largeTorrentSize * 1073741824) {
             $largeTorrentSpState = $siteConfig->torrent->largeSpState();
-            if (isset(Torrent::$promotionTypes[$largeTorrentSpState])) {
+            if (TorrentPromotion::tryFrom((int) $largeTorrentSpState) !== null) {
                 Logger::writeWithContext((string) "large torrent, sp state from config: {$largeTorrentSpState}", (string) 'info', (bool) false);
 
                 return $largeTorrentSpState;
             }
             Logger::writeWithContext((string) "invalid large torrent sp state: {$largeTorrentSpState}", (string) 'error', (bool) false);
 
-            return Torrent::PROMOTION_NORMAL;
+            return TorrentPromotion::NORMAL->value;
         } else {
             $torrentConfig = SiteConfig::current()->torrent;
             $probabilities = [
-                Torrent::PROMOTION_FREE => $torrentConfig->randomFreeProbability(),
-                Torrent::PROMOTION_TWO_TIMES_UP => $torrentConfig->randomTwoTimesUpProbability(),
-                Torrent::PROMOTION_FREE_TWO_TIMES_UP => $torrentConfig->randomFreeTwoTimesUpProbability(),
-                Torrent::PROMOTION_HALF_DOWN => $torrentConfig->randomHalfDownProbability(),
-                Torrent::PROMOTION_HALF_DOWN_TWO_TIMES_UP => $torrentConfig->randomHalfDownTwoTimesUpProbability(),
-                Torrent::PROMOTION_ONE_THIRD_DOWN => $torrentConfig->randomOneThirdDownProbability(),
+                TorrentPromotion::FREE->value => $torrentConfig->randomFreeProbability(),
+                TorrentPromotion::TWO_TIMES_UP->value => $torrentConfig->randomTwoTimesUpProbability(),
+                TorrentPromotion::FREE_TWO_TIMES_UP->value => $torrentConfig->randomFreeTwoTimesUpProbability(),
+                TorrentPromotion::HALF_DOWN->value => $torrentConfig->randomHalfDownProbability(),
+                TorrentPromotion::HALF_DOWN_TWO_TIMES_UP->value => $torrentConfig->randomHalfDownTwoTimesUpProbability(),
+                TorrentPromotion::ONE_THIRD_DOWN->value => $torrentConfig->randomOneThirdDownProbability(),
             ];
             $sum = array_sum($probabilities);
             if ($sum == 0) {
                 Logger::writeWithContext((string) 'no random sp state', (string) 'warning', (bool) false);
 
-                return Torrent::PROMOTION_NORMAL;
+                return TorrentPromotion::NORMAL->value;
             }
             $random = mt_rand(1, $sum);
             $currentProbability = 0;
@@ -558,12 +562,13 @@ class UploadRepository extends BaseRepository
         if (! $user instanceof User) {
             throw new NexusException('Unauthenticated');
         }
-        $old = $user->seedbonus;
+        $seedbonus = $user->seedbonus;
+        $old = is_numeric($seedbonus) ? (float) $seedbonus : 0.0;
         $delta = SiteConfig::current()->bonus->uploadTorrent();
         if ($delta > 0) {
             $new = $old + $delta;
             $user->increment('seedbonus', $delta);
-            BonusLogs::add($user->id, $old, $delta, $new, "Upload torrent: $torrentId", BonusLogs::BUSINESS_TYPE_UPLOAD_TORRENT);
+            BonusLogs::add($user->id, $old, $delta, $new, "Upload torrent: $torrentId", BusinessType::UPLOAD_TORRENT->value);
             Logger::writeWithContext((string) "upload torrent: {$torrentId}, success send reward: {$delta}", (string) 'info', (bool) false);
         } else {
             Logger::writeWithContext((string) "upload torrent: {$torrentId}, no reward", (string) 'info', (bool) false);

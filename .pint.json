@@ -6,6 +6,6 @@
         "config/nexus_constants.php"
     ],
     "rules": {
-        "declare_strict_types": false
+        "declare_strict_types": true
     }
 }

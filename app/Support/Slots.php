@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Support;
 
+use App\Enums\UserClass as UserClassEnum;
 use App\Models\User;
 
 /**
@@ -113,7 +116,7 @@ final class Slots
             (float) ($user['downloaded'] ?? 0),
             (string) app(Globals::class)->get('maxdlsystem', ''),
             (int) ($user['class'] ?? 0),
-            (int) User::CLASS_VIP,
+            (int) UserClassEnum::VIP->value,
             (string) ($lang['text_slots'] ?? ''),
             (string) ($lang['text_unlimited'] ?? '')
         );

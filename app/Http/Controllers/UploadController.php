@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Http\Resources\SearchBoxResource;
@@ -9,8 +11,7 @@ use Illuminate\Http\Request;
 
 class UploadController extends Controller
 {
-    /** @var mixed */
-    private $searchBoxRepository;
+    private SearchBoxRepository $searchBoxRepository;
 
     /**
      * @return mixed

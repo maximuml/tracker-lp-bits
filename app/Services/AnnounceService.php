@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\DTOs\AnnounceRequestDto;
 use App\Enums\Permission\PermissionEnum;
+use App\Enums\UserClass as UserClassEnum;
 use App\Exceptions\ClientNotAllowedException;
 use App\Exceptions\TrackerException;
 use App\Jobs\BuyTorrent;
@@ -462,7 +465,7 @@ final class AnnounceService
             $this->userUpdate['downloaded'] = DB::raw('downloaded + '.$this->downloadedIncrementForUser);
         }
 
-        if ((int) $this->user['class'] === (int) User::CLASS_VIP) {
+        if ((int) $this->user['class'] === (int) UserClassEnum::VIP->value) {
             unset($this->userUpdate['downloaded']);
         }
 

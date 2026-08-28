@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Support;
 
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\Permission\RoutePermissionEnum;
+use App\Enums\UserClass as UserClassEnum;
 use App\Exceptions\InsufficientPermissionException;
 use App\Models\User;
 use App\Repositories\ToolRepository;
@@ -64,7 +67,7 @@ final class Permissions
         $class = $userInfo['class'] ?? '';
         $log .= ", userClass: $class";
 
-        if ($class == User::CLASS_STAFF_LEADER) {
+        if ($class == UserClassEnum::STAFFLEADER->value) {
             Logger::writeWithContext("$log, CLASS_STAFF_LEADER, true");
             self::$userCanCache[$permission][$uid] = true;
 

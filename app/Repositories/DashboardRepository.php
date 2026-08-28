@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
+use App\Enums\UserClass as UserClassEnum;
 use App\Models\Peer;
 use App\Models\Torrent;
 use App\Models\User;
@@ -116,7 +119,7 @@ class DashboardRepository extends BaseRepository
             ->pluck('counts', 'class');
         $result = [];
         foreach (User::$classes as $class => $value) {
-            if ($class >= User::CLASS_VIP) {
+            if ($class >= UserClassEnum::VIP->value) {
                 break;
             }
             $result[$class] = [
@@ -169,7 +172,7 @@ class DashboardRepository extends BaseRepository
         $result[$name] = [
             'name' => $name,
             'text' => Locale::trans("dashboard.user.{$name}", [], null),
-            'value' => number_format(User::query()->where('class', User::CLASS_VIP)->count()),
+            'value' => number_format(User::query()->where('class', UserClassEnum::VIP->value)->count()),
         ];
         $name = 'donated';
         $result[$name] = [

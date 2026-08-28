@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Auth\Permission;
@@ -326,8 +328,8 @@ class MessageRepository extends BaseRepository
         $redis = Redis::connection()->client();
 
         return match ($type) {
-            'total' => $redis->hGet(self::STAFF_MESSAGE_TOTAL_CACHE_KEY, $uid),
-            'new' => $redis->hGet(self::STAFF_MESSAGE_NEW_CACHE_KEY, $uid),
+            'total' => $redis->hGet(self::STAFF_MESSAGE_TOTAL_CACHE_KEY, (string) $uid),
+            'new' => $redis->hGet(self::STAFF_MESSAGE_NEW_CACHE_KEY, (string) $uid),
             default => throw new \InvalidArgumentException("Invalid type: $type")
         };
     }

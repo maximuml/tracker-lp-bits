@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Support;
 
+use App\Enums\UserClass as UserClassEnum;
 use App\Models\Topic;
 use App\Models\User;
 use App\Repositories\ForumRepository;
@@ -169,7 +172,7 @@ final class Forum
 
         if (
             in_array($forumId, $protectedForumIds)
-            && UserDisplay::currentClass() < User::CLASS_ADMINISTRATOR
+            && UserDisplay::currentClass() < UserClassEnum::ADMINISTRATOR->value
             && $uid != $post['userid']
             && $uid != $topicInfo->userid
             && ! $isForumMod

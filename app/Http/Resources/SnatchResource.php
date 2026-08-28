@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Resources;
 
 use App\Models\Snatch;
@@ -19,7 +21,7 @@ class SnatchResource extends JsonResource
      *
      * @see viewsnatches.php
      */
-    public function toArray($request)
+    public function toArray($request): array
     {
         return [
             'id' => $this->id,

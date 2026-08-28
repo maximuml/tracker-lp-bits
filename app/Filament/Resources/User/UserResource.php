@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\User;
 
 use App\Enums\ModelEventEnum;
+use App\Enums\UserClass as UserClassEnum;
 use App\Filament\OptionsTrait;
 use App\Filament\Resources\User\UserResource\Pages;
 use App\Filament\Resources\User\UserResource\Pages\CreateUser;
@@ -95,7 +98,7 @@ class UserResource extends Resource
                 TextInput::make('password')->password()->required()->visibleOn(CreateUser::class),
                 TextInput::make('password_confirmation')->password()->required()->same('password')->visibleOn(CreateUser::class),
                 TextInput::make('id')->integer(),
-                Select::make('class')->options(User::listClass(User::CLASS_PEASANT, self::currentUser()->class - 1)),
+                Select::make('class')->options(User::listClass(UserClassEnum::PEASANT->value, self::currentUser()->class - 1)),
             ]);
     }
 
@@ -203,7 +206,7 @@ class UserResource extends Resource
                         TextEntry::make('inviter.username')->label(__('label.user.invite_by')),
                         TextEntry::make('ip')
                             ->label(__('label.user.ip'))
-                            ->visible(fn (User $record): bool => self::currentUser()->class >= User::CLASS_MODERATOR)
+                            ->visible(fn (User $record): bool => self::currentUser()->class >= UserClassEnum::MODERATOR->value)
                             ->placeholder('N/A'),
                         TextEntry::make('parked')->label(__('label.user.parked')),
                         TextEntry::make('offer_allowed_count')->label(__('label.user.offer_allowed_count')),
@@ -256,7 +259,7 @@ class UserResource extends Resource
             ->visible(fn (User $record): bool => (self::currentUser()->class > $record->class))
             ->schema([
                 Select::make('class')
-                    ->options(User::listClass(User::CLASS_PEASANT, self::currentUser()->class - 1))
+                    ->options(User::listClass(UserClassEnum::PEASANT->value, self::currentUser()->class - 1))
                     ->default(fn (User $record) => $record->class)
                     ->label(__('user.labels.class'))
                     ->required()
@@ -266,12 +269,12 @@ class UserResource extends Resource
                     ->default(fn (User $record) => $record->vip_added)
                     ->label(__('user.labels.vip_added'))
                     ->helperText(__('user.labels.vip_added_help'))
-                    ->hidden(fn (Get $get) => $get('class') != User::CLASS_VIP),
+                    ->hidden(fn (Get $get) => $get('class') != UserClassEnum::VIP->value),
                 DateTimePicker::make('vip_until')
                     ->default(fn (User $record) => $record->vip_until)
                     ->label(__('user.labels.vip_until'))
                     ->helperText(__('user.labels.vip_until_help'))
-                    ->hidden(fn (Get $get) => $get('class') != User::CLASS_VIP),
+                    ->hidden(fn (Get $get) => $get('class') != UserClassEnum::VIP->value),
                 TextInput::make('reason')
                     ->label(__('admin.resources.user.actions.enable_disable_reason'))
                     ->placeholder(__('admin.resources.user.actions.enable_disable_reason_placeholder')),
@@ -446,7 +449,7 @@ class UserResource extends Resource
         $actions = [];
         $currentUser = self::currentUser();
 
-        if ($currentUser->class >= User::CLASS_SYSOP) {
+        if ($currentUser->class >= UserClassEnum::SYSOP->value) {
             $actions[] = BulkAction::make('confirm')
                 ->label(__('admin.resources.user.actions.confirm_bulk'))
                 ->requiresConfirmation()
@@ -457,7 +460,7 @@ class UserResource extends Resource
                 });
         }
 
-        if ($currentUser->class >= User::CLASS_MODERATOR) {
+        if ($currentUser->class >= UserClassEnum::MODERATOR->value) {
             $actions[] = BulkAction::make('remove_warning')
                 ->label(__('admin.resources.user.actions.remove_warning_bulk'))
                 ->requiresConfirmation()

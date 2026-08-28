@@ -2,6 +2,7 @@
 
 namespace Nexus\Install;
 
+use App\Enums\UserClass as UserClassEnum;
 use App\Models\Setting;
 use App\Models\TrackerUrl;
 use App\Models\User;
@@ -522,7 +523,7 @@ class Install
 
     public function createAdministrator($username, $email, $password, $confirmPassword)
     {
-        $class = User::CLASS_STAFF_LEADER;
+        $class = UserClassEnum::STAFFLEADER->value;
         $count = User::query()->where('class', $class)->count();
         if ($count > 0) {
             throw new \InvalidArgumentException('Administrator already exists');

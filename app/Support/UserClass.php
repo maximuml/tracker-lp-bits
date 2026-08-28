@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Support;
 
+use App\Enums\UserClass as UserClassEnum;
 use App\Models\Setting;
 use App\Models\User;
 use App\Support\Config\SiteConfig;
@@ -38,69 +41,39 @@ use App\Support\Config\SiteConfig;
  */
 final class UserClass
 {
-    public const PEASANT = 0;
+    public const PEASANT = UserClassEnum::PEASANT->value;
 
-    public const USER = 1;
+    public const USER = UserClassEnum::USER->value;
 
-    public const POWER_USER = 2;
+    public const POWER_USER = UserClassEnum::POWER_USER->value;
 
-    public const ELITE_USER = 3;
+    public const ELITE_USER = UserClassEnum::ELITE_USER->value;
 
-    public const CRAZY_USER = 4;
+    public const CRAZY_USER = UserClassEnum::CRAZY_USER->value;
 
-    public const INSANE_USER = 5;
+    public const INSANE_USER = UserClassEnum::INSANE_USER->value;
 
-    public const VETERAN_USER = 6;
+    public const VETERAN_USER = UserClassEnum::VETERAN_USER->value;
 
-    public const EXTREME_USER = 7;
+    public const EXTREME_USER = UserClassEnum::EXTREME_USER->value;
 
-    public const ULTIMATE_USER = 8;
+    public const ULTIMATE_USER = UserClassEnum::ULTIMATE_USER->value;
 
-    public const NEXUS_MASTER = 9;
+    public const NEXUS_MASTER = UserClassEnum::NEXUS_MASTER->value;
 
-    public const VIP = 10;
+    public const VIP = UserClassEnum::VIP->value;
 
-    public const RETIREE = 11;
+    public const RETIREE = UserClassEnum::RETIREE->value;
 
-    public const UPLOADER = 12;
+    public const UPLOADER = UserClassEnum::UPLOADER->value;
 
-    public const MODERATOR = 13;
+    public const MODERATOR = UserClassEnum::MODERATOR->value;
 
-    public const ADMINISTRATOR = 14;
+    public const ADMINISTRATOR = UserClassEnum::ADMINISTRATOR->value;
 
-    public const SYSOP = 15;
+    public const SYSOP = UserClassEnum::SYSOP->value;
 
-    public const STAFFLEADER = 16;
-
-    /**
-     * Lang-array key for each user-class tier.
-     *
-     * Note the deliberately pluralised keys for the staff tiers
-     * (`text_moderators`, `text_administrators`, `text_sysops`) —
-     * those match the legacy lang files exactly and must not be
-     * "corrected" to singular forms.
-     *
-     * @var array<int, string>
-     */
-    private const LANG_KEYS = [
-        self::PEASANT => 'text_peasant',
-        self::USER => 'text_user',
-        self::POWER_USER => 'text_power_user',
-        self::ELITE_USER => 'text_elite_user',
-        self::CRAZY_USER => 'text_crazy_user',
-        self::INSANE_USER => 'text_insane_user',
-        self::VETERAN_USER => 'text_veteran_user',
-        self::EXTREME_USER => 'text_extreme_user',
-        self::ULTIMATE_USER => 'text_ultimate_user',
-        self::NEXUS_MASTER => 'text_nexus_master',
-        self::VIP => 'text_vip',
-        self::RETIREE => 'text_retiree',
-        self::UPLOADER => 'text_uploader',
-        self::MODERATOR => 'text_moderators',
-        self::ADMINISTRATOR => 'text_administrators',
-        self::SYSOP => 'text_sysops',
-        self::STAFFLEADER => 'text_staff_leader',
-    ];
+    public const STAFFLEADER = UserClassEnum::STAFFLEADER->value;
 
     /**
      * Resolve the lang-array key for a user-class tier, or `null` for
@@ -110,7 +83,9 @@ final class UserClass
      */
     public static function langKey(int $class): ?string
     {
-        return self::LANG_KEYS[$class] ?? null;
+        $enum = UserClassEnum::tryFrom($class);
+
+        return $enum?->langKey();
     }
 
     /**

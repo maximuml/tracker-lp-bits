@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\System;
 
 use App\Filament\Resources\System\UsernameChangeLogResource\Pages\ManageUsernameChangeLogs;

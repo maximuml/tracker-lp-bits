@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Enums\Permission\PermissionEnum;
+use App\Enums\UserClass as UserClassEnum;
 use App\Models\Message;
 use App\Models\Peer;
 use App\Models\Torrent;
-use App\Models\User;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Globals;
@@ -71,7 +73,7 @@ class TorrentMaintenanceController extends LegacyController
 
         $lang = (array) (app(Globals::class)->get('lang_takeflush') ?? []);
 
-        if ($currentClass >= User::CLASS_MODERATOR || $currentUserId === $id) {
+        if ($currentClass >= UserClassEnum::MODERATOR->value || $currentUserId === $id) {
             $deadtime = Time::deadThreshold(SiteConfig::current()->main->anninterthree());
             $lastAction = date('Y-m-d H:i:s', $deadtime);
             $effected = Peer::query()->where('last_action', '<', $lastAction)->where('userid', $id)->delete();

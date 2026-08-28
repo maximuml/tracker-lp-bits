@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Enums\Permission\PermissionEnum;
+use App\Enums\UserClass as UserClassEnum;
 use App\Models\Invite;
 use App\Models\Setting;
 use App\Models\User;
@@ -350,7 +353,7 @@ class SystemBulkController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Permission denied!');
         }
 
-        if ((int) UserDisplay::currentClass() < User::CLASS_SYSOP) {
+        if ((int) UserDisplay::currentClass() < UserClassEnum::SYSOP->value) {
             return $this->legacyAbortResponse('Sorry', 'Permission denied.');
         }
 

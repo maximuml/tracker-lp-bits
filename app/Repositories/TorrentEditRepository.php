@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Auth\Permission;
 use App\Enums\ModelEventEnum;
+use App\Enums\TorrentPromotion;
 use App\Exceptions\NexusException;
 use App\Models\Category;
 use App\Models\SearchBox;
@@ -106,7 +109,7 @@ class TorrentEditRepository extends BaseRepository
         }
 
         if (Permission::canSetTorrentOnPromotion($user)) {
-            $spState = Torrent::PROMOTION_NORMAL;
+            $spState = TorrentPromotion::NORMAL->value;
             if ($request->has('sel_spstate')) {
                 $selSpState = (int) $request->input('sel_spstate');
                 if (in_array($selSpState, [2, 3, 4, 5, 6, 7])) {

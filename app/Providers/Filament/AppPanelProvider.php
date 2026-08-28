@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers\Filament;
 
+use App\Enums\UserClass as UserClassEnum;
 use App\Filament\Pages\Dashboard;
 use App\Http\Middleware\Filament;
-use App\Models\User;
 use App\Support\Input;
 use App\Support\Locale;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -88,7 +90,7 @@ class AppPanelProvider extends PanelProvider
                     ->sort(99)
                     ->url('/horizon')
                     ->openUrlInNewTab()
-                    ->hidden(fn () => ! (Auth::user() && Auth::user()->class >= User::CLASS_SYSOP)),
+                    ->hidden(fn () => ! (Auth::user() && Auth::user()->class >= UserClassEnum::SYSOP->value)),
             ]);
     }
 

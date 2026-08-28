@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
+use App\Enums\BusinessType;
 use App\Enums\Permission\PermissionEnum;
-use App\Models\BonusLogs;
 use App\Models\Setting;
 use App\Models\User;
 use App\Models\UserBanLog;
@@ -242,7 +244,7 @@ class UserAdminController extends LegacyController
             $bonusRep = $this->bonusRepository;
             $operator = User::query()->find($currentUserId);
             if ($operator) {
-                $bonusRep->consumeUserBonus($currentUserId, $total, BonusLogs::BUSINESS_TYPE_SELF_ENABLE, $title);
+                $bonusRep->consumeUserBonus($currentUserId, $total, BusinessType::SELF_ENABLE->value, $title);
                 $userRep->enableUser($operator, $currentUserId, $title);
             }
 

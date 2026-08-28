@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Security;
 
+use App\Enums\UserClass as UserClassEnum;
 use App\Filament\Resources\Security\BanResource\Pages\CreateBan;
 use App\Filament\Resources\Security\BanResource\Pages\EditBan;
 use App\Filament\Resources\Security\BanResource\Pages\ListBans;
@@ -43,7 +46,7 @@ class BanResource extends Resource
     {
         $user = Auth::user();
 
-        return $user instanceof User && $user->class >= User::CLASS_ADMINISTRATOR;
+        return $user instanceof User && $user->class >= UserClassEnum::ADMINISTRATOR->value;
     }
 
     public static function form(Schema $schema): Schema

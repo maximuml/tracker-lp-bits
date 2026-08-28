@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Section;
 
+use App\Enums\UserClass as UserClassEnum;
 use App\Filament\Resources\Section\ForumResource\Pages\CreateForum;
 use App\Filament\Resources\Section\ForumResource\Pages\EditForum;
 use App\Filament\Resources\Section\ForumResource\Pages\ListForums;
@@ -45,7 +48,7 @@ class ForumResource extends Resource
     {
         $user = Auth::user();
 
-        return $user instanceof User && $user->class >= User::CLASS_ADMINISTRATOR;
+        return $user instanceof User && $user->class >= UserClassEnum::ADMINISTRATOR->value;
     }
 
     public static function form(Schema $schema): Schema
@@ -59,16 +62,16 @@ class ForumResource extends Resource
                     ->options(OverForum::query()->pluck('name', 'id')->toArray())
                     ->label(__('label.forum.over_forum')),
                 Select::make('minclassread')
-                    ->options(User::listClass(0, User::CLASS_SYSOP))
-                    ->default(User::CLASS_USER)
+                    ->options(User::listClass(0, UserClassEnum::SYSOP->value))
+                    ->default(UserClassEnum::USER->value)
                     ->label(__('label.forum.min_class_read')),
                 Select::make('minclasswrite')
-                    ->options(User::listClass(0, User::CLASS_SYSOP))
-                    ->default(User::CLASS_USER)
+                    ->options(User::listClass(0, UserClassEnum::SYSOP->value))
+                    ->default(UserClassEnum::USER->value)
                     ->label(__('label.forum.min_class_write')),
                 Select::make('minclasscreate')
-                    ->options(User::listClass(0, User::CLASS_SYSOP))
-                    ->default(User::CLASS_USER)
+                    ->options(User::listClass(0, UserClassEnum::SYSOP->value))
+                    ->default(UserClassEnum::USER->value)
                     ->label(__('label.forum.min_class_create')),
             ]);
     }

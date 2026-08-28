@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * @property int $global_sp_state
  * @property int $id
@@ -11,6 +13,7 @@
 
 namespace App\Models;
 
+use App\Enums\TorrentPromotion;
 use App\Models\Traits\NexusActivityLogTrait;
 use App\Support\Cache as AppCache;
 use App\Support\Events;
@@ -64,7 +67,7 @@ class TorrentState extends NexusModel
     /** @return  mixed */
     public function getGlobalSpStateTextAttribute()
     {
-        return Torrent::$promotionTypes[$this->global_sp_state]['text'] ?? '';
+        return TorrentPromotion::fromIntSafe((int) $this->global_sp_state)->label();
     }
 
     public function getNoticeDaysTextAttribute(): string
@@ -81,7 +84,7 @@ class TorrentState extends NexusModel
         $moment = $moment ?? Carbon::now();
 
         return $query
-            ->where('global_sp_state', '!=', Torrent::PROMOTION_NORMAL)
+            ->where('global_sp_state', '!=', TorrentPromotion::NORMAL->value)
             ->where(function (Builder $query) use ($moment) {
                 $query->whereNull('begin')->orWhere('begin', '<=', $moment);
             })
@@ -101,7 +104,7 @@ class TorrentState extends NexusModel
         $moment = $moment ?? Carbon::now();
 
         return $query
-            ->where('global_sp_state', '!=', Torrent::PROMOTION_NORMAL)
+            ->where('global_sp_state', '!=', TorrentPromotion::NORMAL->value)
             ->whereNotNull('begin')
             ->where('begin', '>', $moment)
             ->orderBy('begin')
@@ -123,7 +126,7 @@ class TorrentState extends NexusModel
     {
         return Cache::remember(Setting::TORRENT_GLOBAL_STATE_CACHE_KEY, 600, function () {
             return self::query()
-                ->where('global_sp_state', '!=', Torrent::PROMOTION_NORMAL)
+                ->where('global_sp_state', '!=', TorrentPromotion::NORMAL->value)
                 ->orderByRaw('begin is null')
                 ->orderBy('begin')
                 ->orderBy('id')
@@ -241,15 +244,15 @@ class TorrentState extends NexusModel
      */
     public static function validateNoOverlap(array $attributes, ?int $ignoreId = null): void
     {
-        $globalState = (int) Arr::get($attributes, 'global_sp_state', Torrent::PROMOTION_NORMAL);
-        if ($globalState === Torrent::PROMOTION_NORMAL) {
+        $globalState = (int) Arr::get($attributes, 'global_sp_state', TorrentPromotion::NORMAL->value);
+        if ($globalState === TorrentPromotion::NORMAL->value) {
             return;
         }
 
         $range = self::getRangeForArray($attributes);
 
         $conflicts = self::query()
-            ->where('global_sp_state', '!=', Torrent::PROMOTION_NORMAL)
+            ->where('global_sp_state', '!=', TorrentPromotion::NORMAL->value)
             ->when($ignoreId, fn (Builder $query) => $query->whereKeyNot($ignoreId))
             ->get(['id', 'begin', 'deadline']);
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * @property int $id
  * @property string|null $name
@@ -21,15 +23,13 @@
 
 namespace App\Models;
 
-use App\Auth\Permission;
-use App\Http\Middleware\Locale;
+use App\Models\Traits\HasSearchBoxAccessors;
+use App\Models\Traits\HasSearchBoxRelationships;
 use App\Models\Traits\NexusActivityLogTrait;
-use App\Repositories\TagRepository;
+use App\Support\Category;
 use App\Support\Config\SiteConfig;
-use App\Support\Input;
+use App\Support\Locale;
 use App\Support\Logger;
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -48,7 +48,7 @@ use Illuminate\Support\Facades\DB;
  */
 class SearchBox extends NexusModel
 {
-    use NexusActivityLogTrait;
+    use HasSearchBoxAccessors, HasSearchBoxRelationships, NexusActivityLogTrait;
 
     /** @var array<int|string, mixed> */
     private static array $instances = [];
@@ -128,7 +128,7 @@ class SearchBox extends NexusModel
             } else {
                 $name = $field;
             }
-            $result[$name] = \App\Support\Locale::trans("searchbox.extras.{$field}", [], null);
+            $result[$name] = Locale::trans("searchbox.extras.{$field}", [], null);
         }
 
         return $result;
@@ -157,33 +157,6 @@ class SearchBox extends NexusModel
         return $data;
     }
 
-    /**
-     * @param  mixed  $torrentField
-     * @return mixed
-     */
-    public function getTaxonomyLabel($torrentField)
-    {
-        $lang = \App\Support\Locale::folderFromCookie(Input::cookieValue('c_lang_folder', ''), (bool) false);
-        foreach ($this->extra[self::EXTRA_TAXONOMY_LABELS] ?? [] as $item) {
-            if ($item['torrent_field'] == $torrentField) {
-                if (! empty($item['display_text'][$lang])) {
-                    return $item['display_text'][$lang];
-                }
-            }
-        }
-
-        return \App\Support\Locale::trans("searchbox.sub_category_{$torrentField}_label", [], null) ?: ucfirst($torrentField);
-    }
-
-    /** @return  Attribute<mixed, mixed> */
-    protected function customFields(): Attribute
-    {
-        return new Attribute(
-            get: fn ($value) => is_string($value) ? explode(',', $value) : $value,
-            set: fn ($value) => is_array($value) ? implode(',', $value) : $value,
-        );
-    }
-
     /** @return  array<int|string, mixed> */
     public static function getSubCatOptions(): array
     {
@@ -198,7 +171,7 @@ class SearchBox extends NexusModel
     {
         $result = [];
         foreach (self::$sections as $key => $value) {
-            $value['text'] = \App\Support\Locale::trans("searchbox.sections.{$key}", [], null);
+            $value['text'] = Locale::trans("searchbox.sections.{$key}", [], null);
             $value['mode'] = SiteConfig::current()->main->category((string) $key);
             if ($field !== null && isset($value[$field])) {
                 $result[$key] = $value[$field];
@@ -255,54 +228,12 @@ class SearchBox extends NexusModel
         return self::$modeOptions;
     }
 
-    /**
-     * @param  mixed  $value
-     * @return array<int|string, mixed>
-     */
-    public function getCustomFieldsAttribute($value): array
-    {
-        if (! is_array($value)) {
-            return explode(',', $value);
-        }
-
-        return $value;
-    }
-
-    /**
-     * @param  mixed  $value
-     * @return mixed
-     */
-    public function setCustomFieldsAttribute($value)
-    {
-        if (is_array($value)) {
-            $this->attributes['custom_fields'] = implode(',', $value);
-        }
-    }
-
-    /** @return  mixed */
-    public function getDisplaySectionNameAttribute()
-    {
-        $locale = Locale::getDefault();
-        if (! empty($this->section_name[$locale])) {
-            return $this->section_name[$locale];
-        }
-        $defaultLang = SiteConfig::current()->main->defaultLang();
-        if (! empty($this->section_name[$defaultLang])) {
-            return $this->section_name[$defaultLang];
-        }
-        if ($this->isSectionBrowse()) {
-            return \App\Support\Locale::trans('searchbox.sections.browse', [], null);
-        }
-
-        return $this->name;
-    }
-
     /** @return  array<int|string, mixed> */
     public static function listSearchModes(): array
     {
         $result = [];
         foreach (self::$searchModes as $key => $value) {
-            $result[$key] = \App\Support\Locale::trans("search.search_modes.{$value['text']}", [], null);
+            $result[$key] = Locale::trans("search.search_modes.{$value['text']}", [], null);
         }
 
         return $result;
@@ -323,82 +254,6 @@ class SearchBox extends NexusModel
     public function isSectionBrowse(): bool
     {
         return $this->id == self::getBrowseMode();
-    }
-
-    /** @return  HasMany<Category, $this> */
-    public function categories(): HasMany
-    {
-        return $this->hasMany(Category::class, 'mode');
-    }
-
-    /** @return  HasMany<Source, $this> */
-    public function taxonomy_source(): HasMany
-    {
-        return $this->hasMany(Source::class, 'mode');
-    }
-
-    /** @return  HasMany<Media, $this> */
-    public function taxonomy_medium(): HasMany
-    {
-        return $this->hasMany(Media::class, 'mode');
-    }
-
-    /** @return  HasMany<Standard, $this> */
-    public function taxonomy_standard(): HasMany
-    {
-        return $this->hasMany(Standard::class, 'mode');
-    }
-
-    /** @return  HasMany<Codec, $this> */
-    public function taxonomy_codec(): HasMany
-    {
-        return $this->hasMany(Codec::class, 'mode');
-    }
-
-    /** @return  HasMany<AudioCodec, $this> */
-    public function taxonomy_audiocodec(): HasMany
-    {
-        return $this->hasMany(AudioCodec::class, 'mode');
-    }
-
-    /** @return  HasMany<Processing, $this> */
-    public function taxonomy_processing(): HasMany
-    {
-        return $this->hasMany(Processing::class, 'mode');
-    }
-
-    public function loadSubCategories(): void
-    {
-        foreach (self::$taxonomies as $name => $info) {
-            $relationName = 'taxonomy_'.$name;
-            $show = 'show'.$name;
-            if ($this->{$show} && isset(self::$taxonomies[$name])) {
-                $modelName = self::$taxonomies[$name]['model'];
-                $this->setRelation(
-                    $relationName,
-                    $modelName::query()->whereIn('mode', [$this->getKey(), 0])
-                        ->orderBy('sort_index', 'desc')
-                        ->orderBy('id', 'desc')
-                        ->get()
-                );
-            }
-        }
-    }
-
-    /** @return  HasMany<Tag, $this> */
-    public function tags(): HasMany
-    {
-        return $this->hasMany(Tag::class, 'mode');
-    }
-
-    public function loadTags(): void
-    {
-        $allTags = TagRepository::listAll($this->getKey());
-        if (! Permission::canSetTorrentSpecialTag()) {
-            $specialTagIdList = Tag::listSpecial();
-            $allTags = $allTags->filter(fn ($item) => ! in_array($item->id, $specialTagIdList));
-        }
-        $this->setRelation('tags', $allTags);
     }
 
     /** @return  mixed */
@@ -441,7 +296,7 @@ class SearchBox extends NexusModel
         static $results = null;
         if (is_null($results)) {
             $results = [];
-            $res = \App\Support\Category::listByModeWithContext($searchBoxId);
+            $res = Category::listByModeWithContext($searchBoxId);
             foreach ($res as $item) {
                 $results[] = $item['id'];
             }

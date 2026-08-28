@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Pages;
 
+use App\Enums\UserClass as UserClassEnum;
 use App\Models\User;
 use App\Repositories\UserRepository;
 use App\Support\Globals;
@@ -44,7 +47,7 @@ class SystemActions extends Page implements HasForms
     {
         $user = Auth::user();
 
-        return $user instanceof User && $user->class >= User::CLASS_SYSOP;
+        return $user instanceof User && $user->class >= UserClassEnum::SYSOP->value;
     }
 
     /**

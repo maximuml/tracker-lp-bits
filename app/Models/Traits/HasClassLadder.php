@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Models\Traits;
 
 use App\Enums\UserClass as UserClassEnum;
-use App\Models\User;
 use App\Support\Config\SiteConfig;
 use App\Support\Locale;
 
@@ -17,40 +16,6 @@ use App\Support\Locale;
  */
 trait HasClassLadder
 {
-    const CLASS_PEASANT = '0';
-
-    const CLASS_USER = '1';
-
-    const CLASS_POWER_USER = '2';
-
-    const CLASS_ELITE_USER = '3';
-
-    const CLASS_CRAZY_USER = '4';
-
-    const CLASS_INSANE_USER = '5';
-
-    const CLASS_VETERAN_USER = '6';
-
-    const CLASS_EXTREME_USER = '7';
-
-    const CLASS_ULTIMATE_USER = '8';
-
-    const CLASS_NEXUS_MASTER = '9';
-
-    const CLASS_VIP = '10';
-
-    const CLASS_RETIREE = '11';
-
-    const CLASS_UPLOADER = '12';
-
-    const CLASS_MODERATOR = '13';
-
-    const CLASS_ADMINISTRATOR = '14';
-
-    const CLASS_SYSOP = '15';
-
-    const CLASS_STAFF_LEADER = '16';
-
     /**
      * Convenience accessors to the UserClass enum for type-safe comparisons.
      */
@@ -61,23 +26,23 @@ trait HasClassLadder
 
     /** @var array<int|string, array<string, mixed>> */
     public static array $classes = [
-        self::CLASS_PEASANT => ['text' => 'Peasant'],
-        self::CLASS_USER => ['text' => 'User', 'min_seed_points' => 0],
-        self::CLASS_POWER_USER => ['text' => 'Power User', 'min_seed_points' => 40000],
-        self::CLASS_ELITE_USER => ['text' => 'Elite User', 'min_seed_points' => 80000],
-        self::CLASS_CRAZY_USER => ['text' => 'Crazy User', 'min_seed_points' => 150000],
-        self::CLASS_INSANE_USER => ['text' => 'Insane User', 'min_seed_points' => 250000],
-        self::CLASS_VETERAN_USER => ['text' => 'Veteran User', 'min_seed_points' => 400000],
-        self::CLASS_EXTREME_USER => ['text' => 'Extreme User', 'min_seed_points' => 600000],
-        self::CLASS_ULTIMATE_USER => ['text' => 'Ultimate User', 'min_seed_points' => 800000],
-        self::CLASS_NEXUS_MASTER => ['text' => 'Nexus Master', 'min_seed_points' => 1000000],
-        self::CLASS_VIP => ['text' => 'VIP'],
-        self::CLASS_RETIREE => ['text' => 'Retiree'],
-        self::CLASS_UPLOADER => ['text' => 'Uploader'],
-        self::CLASS_MODERATOR => ['text' => 'Moderator'],
-        self::CLASS_ADMINISTRATOR => ['text' => 'Administrator'],
-        self::CLASS_SYSOP => ['text' => 'Sysop'],
-        self::CLASS_STAFF_LEADER => ['text' => 'Staff Leader'],
+        UserClassEnum::PEASANT->value => ['text' => 'Peasant'],
+        UserClassEnum::USER->value => ['text' => 'User', 'min_seed_points' => 0],
+        UserClassEnum::POWER_USER->value => ['text' => 'Power User', 'min_seed_points' => 40000],
+        UserClassEnum::ELITE_USER->value => ['text' => 'Elite User', 'min_seed_points' => 80000],
+        UserClassEnum::CRAZY_USER->value => ['text' => 'Crazy User', 'min_seed_points' => 150000],
+        UserClassEnum::INSANE_USER->value => ['text' => 'Insane User', 'min_seed_points' => 250000],
+        UserClassEnum::VETERAN_USER->value => ['text' => 'Veteran User', 'min_seed_points' => 400000],
+        UserClassEnum::EXTREME_USER->value => ['text' => 'Extreme User', 'min_seed_points' => 600000],
+        UserClassEnum::ULTIMATE_USER->value => ['text' => 'Ultimate User', 'min_seed_points' => 800000],
+        UserClassEnum::NEXUS_MASTER->value => ['text' => 'Nexus Master', 'min_seed_points' => 1000000],
+        UserClassEnum::VIP->value => ['text' => 'VIP'],
+        UserClassEnum::RETIREE->value => ['text' => 'Retiree'],
+        UserClassEnum::UPLOADER->value => ['text' => 'Uploader'],
+        UserClassEnum::MODERATOR->value => ['text' => 'Moderator'],
+        UserClassEnum::ADMINISTRATOR->value => ['text' => 'Administrator'],
+        UserClassEnum::SYSOP->value => ['text' => 'Sysop'],
+        UserClassEnum::STAFFLEADER->value => ['text' => 'Staff Leader'],
     ];
 
     public function getClassTextAttribute(): string
@@ -95,7 +60,7 @@ trait HasClassLadder
             return '';
         }
         $classText = self::$classes[$class]['text'];
-        if ($class >= self::CLASS_VIP) {
+        if ($class >= UserClassEnum::VIP->value) {
             $alias = Locale::trans('user.class_names.'.$class, [], null);
         } else {
             $alias = SiteConfig::current()->account->classAlias($class);
@@ -112,7 +77,7 @@ trait HasClassLadder
      * @param  int|string  $max
      * @return array<int|string, string>
      */
-    public static function listClass($min = self::CLASS_PEASANT, $max = self::CLASS_STAFF_LEADER): array
+    public static function listClass($min = UserClassEnum::PEASANT->value, $max = UserClassEnum::STAFFLEADER->value): array
     {
         $result = [];
         foreach (self::$classes as $class => $info) {
@@ -134,7 +99,7 @@ trait HasClassLadder
     public static function getClassName($class, $compact = false, $b_colored = false, $I18N = false)
     {
         $class_name = self::$classes[$class]['text'] ?? '';
-        if ($class >= self::CLASS_VIP && $I18N) {
+        if ($class >= UserClassEnum::VIP->value && $I18N) {
             $class_name = Locale::trans("user.class_names.{$class}", [], null);
         }
         $class_name_color = self::$classes[$class]['text'] ?? '';
@@ -165,6 +130,6 @@ trait HasClassLadder
     /** @return int|string */
     public static function getAccessAdminClassMin()
     {
-        return SiteConfig::current()->system->accessAdminClassMin() ?: User::CLASS_ADMINISTRATOR;
+        return SiteConfig::current()->system->accessAdminClassMin() ?: UserClassEnum::ADMINISTRATOR->value;
     }
 }

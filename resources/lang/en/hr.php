@@ -1,7 +1,7 @@
 <?php
 
+use App\Enums\HitAndRunMode;
 use App\Enums\HitAndRunStatus;
-use App\Models\HitAndRun;
 
 return [
     'status_'.HitAndRunStatus::INSPECTING->value => 'Inspecting',
@@ -9,9 +9,9 @@ return [
     'status_'.HitAndRunStatus::UNREACHED->value => 'Unreached',
     'status_'.HitAndRunStatus::PARDONED->value => 'Pardoned',
 
-    'mode_'.HitAndRun::MODE_DISABLED => 'Disabled',
-    'mode_'.HitAndRun::MODE_MANUAL => 'Manual',
-    'mode_'.HitAndRun::MODE_GLOBAL => 'Global',
+    'mode_'.HitAndRunMode::DISABLED->value => 'Disabled',
+    'mode_'.HitAndRunMode::MANUAL->value => 'Manual',
+    'mode_'.HitAndRunMode::GLOBAL->value => 'Global',
 
     'reached_by_seed_time_comment' => 'Up to：:now，seed time: :seed_time Hour(s) reached :seed_time_minimum Hour(s)',
     'reached_by_leech_time_comment' => 'Up to：:now，leech time: :leech_time Hour(s) reached :leech_time_minimum Hour(s)',

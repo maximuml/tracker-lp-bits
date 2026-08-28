@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Enums\UserClass;
 use App\Models\Forum;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ForumFactory extends Factory
@@ -26,11 +26,11 @@ class ForumFactory extends Factory
             'sort' => $this->faker->numberBetween(0, 100),
             'name' => $this->faker->unique()->words(3, true),
             'description' => $this->faker->sentence(),
-            'minclassread' => intval(User::CLASS_USER),
-            'minclasswrite' => intval(User::CLASS_USER),
+            'minclassread' => UserClass::USER->value,
+            'minclasswrite' => UserClass::USER->value,
             'postcount' => 0,
             'topiccount' => 0,
-            'minclasscreate' => intval(User::CLASS_USER),
+            'minclasscreate' => UserClass::USER->value,
             'forid' => 0,
         ];
     }

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Models\Traits;
 
 use App\Enums\HitAndRunMode;
+use App\Enums\TorrentHr;
+use App\Enums\TorrentPosState;
 use App\Enums\TorrentPromotion;
 use App\Models\HitAndRun;
 use App\Models\Torrent;
@@ -76,14 +78,14 @@ trait HasTorrentAccessors
         if ($globalResolved !== TorrentPromotion::NORMAL) {
             $spState = $globalResolved->value;
             $resolved = $globalResolved;
-            $log .= sprintf(', global != %s, set sp_state to global: %s', self::PROMOTION_NORMAL, $global);
+            $log .= sprintf(', global != %s, set sp_state to global: %s', TorrentPromotion::NORMAL->value, $global);
         }
 
         // fromIntSafe guarantees a valid enum, but keep the $promotionTypes guard
         // for backwards compatibility with any code that still inspects that array.
         if (! isset(self::$promotionTypes[$spState])) {
-            $log .= ", but now sp_state: $spState, is invalid, reset to: ".self::PROMOTION_NORMAL;
-            $spState = self::PROMOTION_NORMAL;
+            $log .= ", but now sp_state: $spState, is invalid, reset to: ".TorrentPromotion::NORMAL->value;
+            $spState = TorrentPromotion::NORMAL->value;
         }
 
         Logger::writeWithContext((string) $log, (string) 'debug', (bool) false);
@@ -95,7 +97,7 @@ trait HasTorrentAccessors
     protected function getPosStateTextAttribute()
     {
         $text = Locale::trans('torrent.pos_state_'.$this->pos_state, [], null);
-        if ($this->pos_state != Torrent::POS_STATE_STICKY_NONE) {
+        if ($this->pos_state != TorrentPosState::NONE->value) {
             if ($this->pos_state_until) {
                 $append = Time::formatDateTime($this->pos_state_until);
             } else {
@@ -129,16 +131,16 @@ trait HasTorrentAccessors
         if ($searchBoxId == 0) {
             Logger::writeWithContext((string) sprintf('[INVALID_CATEGORY], Torrent: %s, category: %s invalid', $this->id, $this->category), (string) 'error', (bool) false);
 
-            return self::HR_NO;
+            return TorrentHr::NO->value;
         }
         $hrMode = HitAndRunMode::fromStringSafe(
             is_string($mode = HitAndRun::getConfig('mode', $searchBoxId)) ? $mode : null
         );
         if ($hrMode === HitAndRunMode::GLOBAL) {
-            return self::HR_YES;
+            return TorrentHr::YES->value;
         }
         if ($hrMode === HitAndRunMode::DISABLED) {
-            return self::HR_NO;
+            return TorrentHr::NO->value;
         }
 
         return (int) $this->getRawOriginal('hr');

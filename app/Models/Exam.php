@@ -26,6 +26,12 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\ExamDiscovered;
+use App\Enums\ExamFilterUser;
+use App\Enums\ExamIndex;
+use App\Enums\ExamRecurring;
+use App\Enums\ExamStatus;
+use App\Enums\ExamType;
 use App\Models\Traits\HasExamAccessors;
 use App\Models\Traits\HasExamRelationships;
 use App\Models\Traits\NexusActivityLogTrait;
@@ -54,92 +60,35 @@ class Exam extends NexusModel
         'indexes' => 'array',
     ];
 
-    /** @deprecated Use App\Enums\ExamStatus enum instead. */
-    const STATUS_ENABLED = 0;
-
-    /** @deprecated Use App\Enums\ExamStatus enum instead. */
-    const STATUS_DISABLED = 1;
-
     /** @var array<int|string, mixed> */
     public static $status = [
-        self::STATUS_ENABLED => ['text' => 'Enabled'],
-        self::STATUS_DISABLED => ['text' => 'Disabled'],
+        ExamStatus::ENABLED->value => ['text' => 'Enabled'],
+        ExamStatus::DISABLED->value => ['text' => 'Disabled'],
     ];
-
-    /** @deprecated Use App\Enums\ExamDiscovered enum instead. */
-    const DISCOVERED_YES = 1;
-
-    /** @deprecated Use App\Enums\ExamDiscovered enum instead. */
-    const DISCOVERED_NO = 0;
 
     /** @var array<int|string, mixed> */
     public static $discovers = [
-        self::DISCOVERED_NO => ['text' => 'No'],
-        self::DISCOVERED_YES => ['text' => 'Yes'],
+        ExamDiscovered::NO->value => ['text' => 'No'],
+        ExamDiscovered::YES->value => ['text' => 'Yes'],
     ];
-
-    /** @deprecated Use App\Enums\ExamIndex enum instead. */
-    const INDEX_UPLOADED = 1;
-
-    /** @deprecated Use App\Enums\ExamIndex enum instead. */
-    const INDEX_SEED_TIME_AVERAGE = 2;
-
-    /** @deprecated Use App\Enums\ExamIndex enum instead. */
-    const INDEX_DOWNLOADED = 3;
-
-    /** @deprecated Use App\Enums\ExamIndex enum instead. */
-    const INDEX_SEED_BONUS = 4;
-
-    /** @deprecated Use App\Enums\ExamIndex enum instead. */
-    const INDEX_SEED_POINTS = 5;
-
-    /** @deprecated Use App\Enums\ExamIndex enum instead. */
-    const INDEX_UPLOAD_TORRENT_COUNT = 6;
 
     /** @var array<int|string, mixed> */
     public static array $indexes = [
-        self::INDEX_UPLOADED => ['name' => 'Uploaded', 'unit' => 'GB', 'source_user_field' => 'uploaded'],
-        self::INDEX_DOWNLOADED => ['name' => 'Downloaded', 'unit' => 'GB', 'source_user_field' => 'downloaded'],
-        self::INDEX_SEED_TIME_AVERAGE => ['name' => 'Seed time average', 'unit' => 'Hour', 'source_user_field' => 'seedtime'],
-        self::INDEX_SEED_BONUS => ['name' => 'Bonus', 'unit' => '', 'source_user_field' => 'seedbonus'],
-        self::INDEX_SEED_POINTS => ['name' => 'Seed points', 'unit' => '', 'source_user_field' => ''],
-        self::INDEX_UPLOAD_TORRENT_COUNT => ['name' => 'Upload torrent', 'unit' => '', 'source_user_field' => ''],
+        ExamIndex::UPLOADED->value => ['name' => 'Uploaded', 'unit' => 'GB', 'source_user_field' => 'uploaded'],
+        ExamIndex::DOWNLOADED->value => ['name' => 'Downloaded', 'unit' => 'GB', 'source_user_field' => 'downloaded'],
+        ExamIndex::SEED_TIME_AVERAGE->value => ['name' => 'Seed time average', 'unit' => 'Hour', 'source_user_field' => 'seedtime'],
+        ExamIndex::SEED_BONUS->value => ['name' => 'Bonus', 'unit' => '', 'source_user_field' => 'seedbonus'],
+        ExamIndex::SEED_POINTS->value => ['name' => 'Seed points', 'unit' => '', 'source_user_field' => ''],
+        ExamIndex::UPLOAD_TORRENT_COUNT->value => ['name' => 'Upload torrent', 'unit' => '', 'source_user_field' => ''],
     ];
-
-    /** @deprecated Use App\Enums\ExamFilterUser enum instead. */
-    const FILTER_USER_CLASS = 'classes';
-
-    /** @deprecated Use App\Enums\ExamFilterUser enum instead. */
-    const FILTER_USER_REGISTER_TIME_RANGE = 'register_time_range';
-
-    /** @deprecated Use App\Enums\ExamFilterUser enum instead. */
-    const FILTER_USER_DONATE = 'donate_status';
-
-    /** @deprecated Use App\Enums\ExamFilterUser enum instead. */
-    const FILTER_USER_REGISTER_DAYS_RANGE = 'register_days_range';
 
     /** @var array<int|string, mixed> */
     public static $filters = [
-        self::FILTER_USER_CLASS => ['name' => 'User class'],
-        self::FILTER_USER_REGISTER_TIME_RANGE => ['name' => 'User register time range'],
-        self::FILTER_USER_DONATE => ['name' => 'User donated'],
-        self::FILTER_USER_REGISTER_DAYS_RANGE => ['name' => 'User register days range'],
+        ExamFilterUser::USER_CLASS->value => ['name' => 'User class'],
+        ExamFilterUser::REGISTER_TIME_RANGE->value => ['name' => 'User register time range'],
+        ExamFilterUser::DONATE->value => ['name' => 'User donated'],
+        ExamFilterUser::REGISTER_DAYS_RANGE->value => ['name' => 'User register days range'],
     ];
-
-    /** @deprecated Use App\Enums\ExamRecurring enum instead. */
-    const RECURRING_DAILY = 'Daily';
-
-    /** @deprecated Use App\Enums\ExamRecurring enum instead. */
-    const RECURRING_WEEKLY = 'Weekly';
-
-    /** @deprecated Use App\Enums\ExamRecurring enum instead. */
-    const RECURRING_MONTHLY = 'Monthly';
-
-    /** @deprecated Use App\Enums\ExamType enum instead. */
-    const TYPE_EXAM = 1;
-
-    /** @deprecated Use App\Enums\ExamType enum instead. */
-    const TYPE_TASK = 2;
 
     /** @return  mixed */
     protected static function booted()
@@ -173,9 +122,9 @@ class Exam extends NexusModel
     public static function listRecurringOptions(): array
     {
         return [
-            self::RECURRING_DAILY => Locale::trans('exam.recurring_daily', [], null),
-            self::RECURRING_WEEKLY => Locale::trans('exam.recurring_weekly', [], null),
-            self::RECURRING_MONTHLY => Locale::trans('exam.recurring_monthly', [], null),
+            ExamRecurring::DAILY->value => Locale::trans('exam.recurring_daily', [], null),
+            ExamRecurring::WEEKLY->value => Locale::trans('exam.recurring_weekly', [], null),
+            ExamRecurring::MONTHLY->value => Locale::trans('exam.recurring_monthly', [], null),
         ];
     }
 
@@ -183,8 +132,8 @@ class Exam extends NexusModel
     public static function listTypeOptions(): array
     {
         return [
-            self::TYPE_EXAM => Locale::trans('exam.type_exam', [], null),
-            self::TYPE_TASK => Locale::trans('exam.type_task', [], null),
+            ExamType::EXAM->value => Locale::trans('exam.type_exam', [], null),
+            ExamType::TASK->value => Locale::trans('exam.type_task', [], null),
         ];
     }
 
@@ -218,11 +167,11 @@ class Exam extends NexusModel
     {
         $time = $time->copy();
         $recurring = $this->recurring;
-        if ($recurring == self::RECURRING_WEEKLY) {
+        if ($recurring == ExamRecurring::WEEKLY->value) {
             return $time->startOfWeek();
-        } elseif ($recurring == self::RECURRING_MONTHLY) {
+        } elseif ($recurring == ExamRecurring::MONTHLY->value) {
             return $time->startOfMonth();
-        } elseif ($recurring == self::RECURRING_DAILY) {
+        } elseif ($recurring == ExamRecurring::DAILY->value) {
             return $time->startOfDay();
         }
         throw new \RuntimeException("Invalid recurring: $recurring");
@@ -232,11 +181,11 @@ class Exam extends NexusModel
     {
         $time = $time->copy();
         $recurring = $this->recurring;
-        if ($recurring == self::RECURRING_WEEKLY) {
+        if ($recurring == ExamRecurring::WEEKLY->value) {
             return $time->endOfWeek();
-        } elseif ($recurring == self::RECURRING_MONTHLY) {
+        } elseif ($recurring == ExamRecurring::MONTHLY->value) {
             return $time->endOfMonth();
-        } elseif ($recurring == self::RECURRING_DAILY) {
+        } elseif ($recurring == ExamRecurring::DAILY->value) {
             return $time->endOfDay();
         }
         throw new \RuntimeException("Invalid recurring: $recurring");
@@ -245,8 +194,8 @@ class Exam extends NexusModel
     public function getMessageSubjectTransKey(string $result): string
     {
         return match ($this->type) {
-            self::TYPE_EXAM => "exam.checkout_{$result}_message_subject_for_exam",
-            self::TYPE_TASK => "exam.checkout_{$result}_message_subject_for_task",
+            ExamType::EXAM->value => "exam.checkout_{$result}_message_subject_for_exam",
+            ExamType::TASK->value => "exam.checkout_{$result}_message_subject_for_task",
             default => throw new \RuntimeException('Invalid type: '.$this->type)
         };
     }
@@ -254,8 +203,8 @@ class Exam extends NexusModel
     public function getMessageContentTransKey(string $result): string
     {
         return match ($this->type) {
-            self::TYPE_EXAM => "exam.checkout_{$result}_message_content_for_exam",
-            self::TYPE_TASK => "exam.checkout_{$result}_message_content_for_task",
+            ExamType::EXAM->value => "exam.checkout_{$result}_message_content_for_exam",
+            ExamType::TASK->value => "exam.checkout_{$result}_message_content_for_task",
             default => throw new \RuntimeException('Invalid type: '.$this->type)
         };
     }
@@ -263,19 +212,19 @@ class Exam extends NexusModel
     public function getPassResultTransKey(string $result): string
     {
         return match ($this->type) {
-            self::TYPE_EXAM => "exam.result_{$result}_for_exam",
-            self::TYPE_TASK => "exam.result_{$result}_for_task",
+            ExamType::EXAM->value => "exam.result_{$result}_for_exam",
+            ExamType::TASK->value => "exam.result_{$result}_for_task",
             default => throw new \RuntimeException('Invalid type: '.$this->type)
         };
     }
 
     public function isTypeExam(): bool
     {
-        return $this->type == self::TYPE_EXAM;
+        return $this->type == ExamType::EXAM->value;
     }
 
     public function isTypeTask(): bool
     {
-        return $this->type == self::TYPE_TASK;
+        return $this->type == ExamType::TASK->value;
     }
 }

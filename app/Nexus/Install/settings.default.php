@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Enums\HitAndRunMode;
 use App\Enums\TorrentNfoViewStyle;
 use App\Enums\UserClass as UserClassEnum;
 use App\Models\BonusLogs;
-use App\Models\HitAndRun;
 use App\Models\Language;
 use App\Models\SearchBox;
 use App\Repositories\TokenRepository;
@@ -372,7 +372,7 @@ return [
         'via_sftp' => 'no',
     ],
     'hr' => [
-        'mode' => HitAndRun::MODE_DISABLED,
+        'mode' => HitAndRunMode::DISABLED->value,
         'inspect_time' => '',
         'seed_time_minimum' => '',
         'ignore_when_ratio_reach' => '',

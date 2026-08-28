@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\UserClass;
 use App\Enums\UserEnabled;
 use App\Enums\UserStatus;
 use App\Models\User;
@@ -48,9 +49,9 @@ class UserFactory extends Factory
         self::$sequence++;
         $randNum = random_int(1, 10);
         if ($randNum >= 8) {
-            $class = random_int(intval(User::CLASS_POWER_USER), intval(User::CLASS_SYSOP));
+            $class = random_int(UserClass::POWER_USER->value, UserClass::SYSOP->value);
         } else {
-            $class = User::CLASS_USER;
+            $class = UserClass::USER->value;
         }
 
         return [
@@ -107,7 +108,7 @@ class UserFactory extends Factory
      */
     public function admin(): self
     {
-        return $this->class(intval(User::CLASS_SYSOP));
+        return $this->class(UserClass::SYSOP->value);
     }
 
     /**

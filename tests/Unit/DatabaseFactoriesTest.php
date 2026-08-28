@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Enums\TorrentVisible;
+use App\Enums\UserClass;
 use App\Models\Bookmark;
 use App\Models\Category;
 use App\Models\Comment;
@@ -40,7 +41,7 @@ final class DatabaseFactoriesTest extends TestCase
         $this->assertNotEmpty($user->passkey);
 
         $admin = User::factory()->admin()->create();
-        $this->assertSame((int) User::CLASS_SYSOP, (int) $admin->class);
+        $this->assertSame(UserClass::SYSOP->value, (int) $admin->class);
 
         $searchBox = SearchBox::factory()->create();
         $this->assertGreaterThan(0, $searchBox->id);

@@ -1,8 +1,8 @@
 <?php
 
+use App\Enums\PromotionTimeType;
 use App\Enums\TorrentApprovalStatus;
-use App\Models\Torrent;
-use App\Models\TorrentOperationLog;
+use App\Enums\TorrentOperationAction;
 
 return [
     'pos_state_normal' => 'Normal',
@@ -37,27 +37,27 @@ return [
     ],
     'no_snatch' => 'Never download this torrent yet',
     'operation_log' => [
-        TorrentOperationLog::ACTION_TYPE_APPROVAL_DENY => [
+        TorrentOperationAction::APPROVAL_DENY->value => [
             'type_text' => 'Allowed',
             'notify_subject' => 'Torrent was allowed',
             'notify_msg' => 'Your torrent：[url=:detail_url]:torrent_name[/url] was allowed by :operator, Reason: :reason',
         ],
-        TorrentOperationLog::ACTION_TYPE_APPROVAL_ALLOW => [
+        TorrentOperationAction::APPROVAL_ALLOW->value => [
             'type_text' => 'Denied',
             'notify_subject' => 'Torrent was denied',
             'notify_msg' => 'Your torrent: [url=:detail_url]:torrent_name[/url] denied by :operator',
         ],
-        TorrentOperationLog::ACTION_TYPE_APPROVAL_NONE => [
+        TorrentOperationAction::APPROVAL_NONE->value => [
             'type_text' => 'Not reviewed',
             'notify_subject' => 'Torrent was mark as not reviewed',
             'notify_msg' => 'Your torrent: [url=:detail_url]:torrent_name[/url] was mark as not reviewed by :operator',
         ],
-        TorrentOperationLog::ACTION_TYPE_EDIT => [
+        TorrentOperationAction::EDIT->value => [
             'type_text' => 'Edit',
             'notify_subject' => 'Torrent was edited',
             'notify_msg' => 'Your torrent: [url=:detail_url]:torrent_name[/url] was edited by :operator',
         ],
-        TorrentOperationLog::ACTION_TYPE_DELETE => [
+        TorrentOperationAction::DELETE->value => [
             'type_text' => 'Delete',
             'notify_subject' => 'Torrent was deleted',
             'notify_msg' => 'Your torrent: :torrent_name was deleted by :operator',
@@ -112,9 +112,9 @@ return [
     'technicalinfo_forced' => 'Forced',
     'technicalinfo_more_general' => 'More General',
     'promotion_time_types' => [
-        Torrent::PROMOTION_TIME_TYPE_GLOBAL => 'Global',
-        Torrent::PROMOTION_TIME_TYPE_PERMANENT => 'Permanent',
-        Torrent::PROMOTION_TIME_TYPE_DEADLINE => 'Until',
+        PromotionTimeType::GLOBAL->value => 'Global',
+        PromotionTimeType::PERMANENT->value => 'Permanent',
+        PromotionTimeType::DEADLINE->value => 'Until',
     ],
     'paid_torrent' => 'Paid torrent',
     'msg_torrent_deleted' => 'Your torrent was deleted',

@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
+use App\Enums\TorrentOperationAction;
 use App\Http\Requests\TorrentIdRequest;
 use App\Http\Requests\TorrentRequest;
 use App\Http\Resources\TorrentOperationLogResource;
@@ -140,9 +141,9 @@ class TorrentController extends Controller
         Permission::assertCan(PermissionEnum::TORRENT_APPROVAL);
         $torrentId = $request->torrent_id;
         $actionTypes = [
-            TorrentOperationLog::ACTION_TYPE_APPROVAL_NONE,
-            TorrentOperationLog::ACTION_TYPE_APPROVAL_ALLOW,
-            TorrentOperationLog::ACTION_TYPE_APPROVAL_DENY,
+            TorrentOperationAction::APPROVAL_NONE->value,
+            TorrentOperationAction::APPROVAL_ALLOW->value,
+            TorrentOperationAction::APPROVAL_DENY->value,
         ];
         $records = TorrentOperationLog::query()
             ->with(['user'])

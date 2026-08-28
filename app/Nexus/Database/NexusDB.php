@@ -57,7 +57,6 @@ class NexusDB
             return self::$instance;
         }
         $instance = new self;
-        //        $driver = new DBMysqli();
         $driver = new DBPdo;
         $instance->setDriver($driver);
 
@@ -369,34 +368,6 @@ class NexusDB
         } else {
             return Redis::connection()->client();
         }
-    }
-
-    public static function getMysqlColumnInfo($table, $column = null)
-    {
-        static $driver;
-        $config = Config::get('nexus.mysql', null);
-        if (is_null($driver)) {
-            $driver = new DBMysqli;
-            $driver->connect($config['host'], $config['username'], $config['password'], 'information_schema', $config['port']);
-        }
-        $sql = sprintf(
-            "select * from COLUMNS where TABLE_SCHEMA = '%s' and TABLE_NAME = '%s'",
-            $config['database'], $table
-        );
-        if ($column !== null) {
-            $sql .= " and COLUMN_NAME = '$column'";
-        }
-        $res = $driver->query($sql);
-        if ($column !== null) {
-            return $driver->fetchAssoc($res);
-        }
-        $results = [];
-        while ($row = $driver->fetchAssoc($res)) {
-            $results[$row['COLUMN_NAME']] = $row;
-        }
-
-        return $results;
-
     }
 
     public static function hasIndex($table, $indexName): bool

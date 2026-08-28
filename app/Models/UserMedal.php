@@ -16,6 +16,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\UserMedalStatus;
 use App\Support\Locale;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -27,12 +28,6 @@ class UserMedal extends NexusModel
     /** @var list<string> */
     protected $fillable = ['uid', 'medal_id', 'expire_at', 'status', 'bonus_addition_expire_at'];
 
-    /** @deprecated Use App\Enums\UserMedalStatus enum instead. */
-    const STATUS_NOT_WEARING = 0;
-
-    /** @deprecated Use App\Enums\UserMedalStatus enum instead. */
-    const STATUS_WEARING = 1;
-
     public function getWearingStatusTextAttribute(): string
     {
         return Locale::trans('medal.wearing_status_text.'.$this->status, [], null);
@@ -42,8 +37,8 @@ class UserMedal extends NexusModel
     public static function listWearingStatusLabels(): array
     {
         return [
-            self::STATUS_WEARING => Locale::trans('medal.wearing_status_text.'.self::STATUS_WEARING, [], null),
-            self::STATUS_NOT_WEARING => Locale::trans('medal.wearing_status_text.'.self::STATUS_NOT_WEARING, [], null),
+            UserMedalStatus::WEARING->value => Locale::trans('medal.wearing_status_text.'.UserMedalStatus::WEARING->value, [], null),
+            UserMedalStatus::NOT_WEARING->value => Locale::trans('medal.wearing_status_text.'.UserMedalStatus::NOT_WEARING->value, [], null),
         ];
     }
 

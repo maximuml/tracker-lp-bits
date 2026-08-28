@@ -28,6 +28,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\PeerConnectable;
+use App\Enums\PeerSeeder;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -43,12 +45,6 @@ class Peer extends NexusModel
         'ipv4', 'ipv6',
     ];
 
-    /** @deprecated Use App\Enums\PeerConnectable enum instead. */
-    const CONNECTABLE_YES = 'yes';
-
-    /** @deprecated Use App\Enums\PeerConnectable enum instead. */
-    const CONNECTABLE_NO = 'no';
-
     /** @var array<string, string> */
     protected $casts = [
         'started' => 'datetime',
@@ -59,15 +55,9 @@ class Peer extends NexusModel
 
     /** @var array<int|string, mixed> */
     public static $connectableText = [
-        self::CONNECTABLE_YES => '是',
-        self::CONNECTABLE_NO => '否',
+        PeerConnectable::YES->value => '是',
+        PeerConnectable::NO->value => '否',
     ];
-
-    /** @deprecated Use App\Enums\PeerSeeder enum instead. */
-    const SEEDER_YES = 'yes';
-
-    /** @deprecated Use App\Enums\PeerSeeder enum instead. */
-    const SEEDER_NO = 'no';
 
     /** @var array<int|string, mixed> */
     public static $cardTitles = [
@@ -92,7 +82,7 @@ class Peer extends NexusModel
      */
     public function scopeIsSeeder(Builder $builder)
     {
-        return $builder->where('seeder', self::SEEDER_YES);
+        return $builder->where('seeder', PeerSeeder::YES->value);
     }
 
     /**
@@ -101,19 +91,19 @@ class Peer extends NexusModel
      */
     public function scopeIsNotSeeder(Builder $builder)
     {
-        return $builder->where('seeder', self::SEEDER_NO);
+        return $builder->where('seeder', PeerSeeder::NO->value);
     }
 
     /** @return  mixed */
     public function isSeeder()
     {
-        return $this->seeder == self::SEEDER_YES;
+        return $this->seeder == PeerSeeder::YES->value;
     }
 
     /** @return  mixed */
     public function isNotSeeder()
     {
-        return $this->seeder == self::SEEDER_NO;
+        return $this->seeder == PeerSeeder::NO->value;
     }
 
     /** @return  BelongsTo<User, $this> */

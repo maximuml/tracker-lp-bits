@@ -17,6 +17,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\ExamUserIsDone;
+use App\Enums\ExamUserStatus;
 use App\Repositories\ExamRepository;
 use App\Support\Locale;
 use App\Support\Logger;
@@ -36,32 +38,17 @@ class ExamUser extends NexusModel
     /** @var bool */
     public $timestamps = true;
 
-    /** @deprecated Use App\Enums\ExamUserStatus enum instead. */
-    const STATUS_NORMAL = 0;
-
-    /** @deprecated Use App\Enums\ExamUserStatus enum instead. */
-    const STATUS_FINISHED = 1;
-
-    /** @deprecated Use App\Enums\ExamUserStatus enum instead. */
-    const STATUS_AVOIDED = -1;
-
     /** @var array<int|string, mixed> */
     public static array $status = [
-        self::STATUS_NORMAL => ['text' => 'Normal'],
-        self::STATUS_FINISHED => ['text' => 'Finished'],
-        self::STATUS_AVOIDED => ['text' => 'Avoided'],
+        ExamUserStatus::NORMAL->value => ['text' => 'Normal'],
+        ExamUserStatus::FINISHED->value => ['text' => 'Finished'],
+        ExamUserStatus::AVOIDED->value => ['text' => 'Avoided'],
     ];
-
-    /** @deprecated Use App\Enums\ExamUserIsDone enum instead. */
-    const IS_DONE_YES = 1;
-
-    /** @deprecated Use App\Enums\ExamUserIsDone enum instead. */
-    const IS_DONE_NO = 0;
 
     /** @var array<int|string, mixed> */
     public static array $isDoneInfo = [
-        self::IS_DONE_YES => ['text' => 'Yes'],
-        self::IS_DONE_NO => ['text' => 'No'],
+        ExamUserIsDone::YES->value => ['text' => 'Yes'],
+        ExamUserIsDone::NO->value => ['text' => 'No'],
     ];
 
     /** @var array<string, string> */

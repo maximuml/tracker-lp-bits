@@ -22,6 +22,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\AgentAllowMatchType;
 use App\Enums\ModelEventEnum;
 use App\Models\Traits\NexusActivityLogTrait;
 use App\Support\Events;
@@ -41,16 +42,10 @@ class AgentAllow extends NexusModel
         'agent_pattern', 'agent_match_num', 'agent_matchtype', 'agent_start',
     ];
 
-    /** @deprecated Use App\Enums\AgentAllowMatchType enum instead. */
-    const MATCH_TYPE_DEC = 'dec';
-
-    /** @deprecated Use App\Enums\AgentAllowMatchType enum instead. */
-    const MATCH_TYPE_HEX = 'hex';
-
     /** @var array<int|string, mixed> */
     public static $matchTypes = [
-        self::MATCH_TYPE_DEC => 'dec',
-        self::MATCH_TYPE_HEX => 'hex',
+        AgentAllowMatchType::DEC->value => 'dec',
+        AgentAllowMatchType::HEX->value => 'hex',
     ];
 
     /** @return  mixed */

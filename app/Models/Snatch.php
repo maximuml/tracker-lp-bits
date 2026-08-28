@@ -24,6 +24,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\SnatchFinished;
 use App\Support\Format;
 use App\Support\Locale;
 use Illuminate\Database\Eloquent\Builder;
@@ -63,12 +64,6 @@ class Snatch extends NexusModel
         'leech_time' => '下载时间',
         'completed_at_human' => '完成',
     ];
-
-    /** @deprecated Use App\Enums\SnatchFinished enum instead. */
-    const FINISHED_YES = 'yes';
-
-    /** @deprecated Use App\Enums\SnatchFinished enum instead. */
-    const FINISHED_NO = 'no';
 
     /**
      * @return Attribute<mixed, mixed>
@@ -160,7 +155,7 @@ class Snatch extends NexusModel
      */
     public function scopeIsFinished(Builder $builder)
     {
-        return $builder->where('finished', self::FINISHED_YES);
+        return $builder->where('finished', SnatchFinished::YES->value);
     }
 
     /**
@@ -169,7 +164,7 @@ class Snatch extends NexusModel
      */
     public function scopeIsNotFinished(Builder $builder)
     {
-        return $builder->where('finished', self::FINISHED_NO);
+        return $builder->where('finished', SnatchFinished::NO->value);
     }
 
     /** @return  BelongsTo<Torrent, $this> */

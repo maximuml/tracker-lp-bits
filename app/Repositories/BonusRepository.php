@@ -7,6 +7,7 @@ namespace App\Repositories;
 use App\Enums\BusinessType;
 use App\Enums\HitAndRunStatus;
 use App\Enums\UserEnabled;
+use App\Enums\UserMedalStatus;
 use App\Enums\UserStatus;
 use App\Exceptions\NexusException;
 use App\Models\BonusLogs;
@@ -17,7 +18,6 @@ use App\Models\Message;
 use App\Models\Torrent;
 use App\Models\TorrentBuyLog;
 use App\Models\User;
-use App\Models\UserMedal;
 use App\Models\UserMeta;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
@@ -175,7 +175,7 @@ class BonusRepository extends BaseRepository
                 'added' => now(),
             ];
             Message::add($msg);
-            $toUser->medals()->attach([$medal->id => ['expire_at' => $expireAt, 'status' => UserMedal::STATUS_NOT_WEARING]]);
+            $toUser->medals()->attach([$medal->id => ['expire_at' => $expireAt, 'status' => UserMedalStatus::NOT_WEARING->value]]);
             if ($medal->inventory !== null) {
                 $affectedRows = DB::table('medals')
                     ->where('id', $medal->id)

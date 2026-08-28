@@ -17,6 +17,6 @@
     },
     "dependencies": {
         "@awcodes/alpine-floating-ui": "^3.6.4",
-        "alpinejs": "^3.15.12"
+        "alpinejs": "^3.16.3"
     }
 }

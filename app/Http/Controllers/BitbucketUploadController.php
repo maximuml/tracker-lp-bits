@@ -5,25 +5,26 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Services\BitbucketService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
-use App\Support\Http;
 use App\Support\Input;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
-use App\Support\Path;
-use App\Support\Url;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use LogicException;
 
 class BitbucketUploadController extends Controller
 {
+    public function __construct(
+        private readonly BitbucketService $bitbucketService,
+    ) {}
+
     public function create(Request $request): View|RedirectResponse
     {
         if (app(LegacyRedisCache::class) === null) {
@@ -94,105 +95,44 @@ class BitbucketUploadController extends Controller
             LegacyResponse::abort($lang['std_upload_failed'] ?? '', $lang['std_file_too_large'] ?? '', false);
         }
 
-        $filename = $file->getClientOriginalName();
-        $filename = (string) preg_replace('/[\x00-\x1F\x7F]/', '', $filename);
-        $pp = pathinfo($filename);
-        if ($pp['basename'] !== $filename) {
-            LegacyResponse::abort($lang['std_upload_failed'] ?? '', $lang['std_bad_file_name'] ?? '', false);
+        $isPublic = $request->input('public') === 'yes';
+
+        try {
+            $result = $this->bitbucketService->uploadAvatar($file, $currentUser, $isPublic);
+        } catch (LogicException $e) {
+            $message = $e->getMessage();
+            // Map known errors back to lang strings where possible
+            if (str_starts_with($message, 'Bad file name')) {
+                LegacyResponse::abort($lang['std_upload_failed'] ?? '', $lang['std_bad_file_name'] ?? '', false);
+            }
+            if (str_starts_with($message, 'File already exists')) {
+                $filename = $file->getClientOriginalName();
+                LegacyResponse::abort(
+                    $lang['std_upload_failed'] ?? '',
+                    ($lang['std_file_already_exists'] ?? '').htmlspecialchars($filename).($lang['std_already_exists'] ?? ''),
+                    false,
+                );
+            }
+            if (str_starts_with($message, 'Invalid image format')) {
+                LegacyResponse::abort($lang['std_error'] ?? '', $lang['std_invalid_image_format'] ?? '', false);
+            }
+            if (str_starts_with($message, 'Image processing failed') || str_starts_with($message, 'Thumbnail creation failed')) {
+                LegacyResponse::abort(
+                    $lang['std_image_processing_failed'] ?? '',
+                    ($lang['std_sorry_the_uploaded'] ?? '').($lang['std_failed_processing'] ?? ''),
+                    false,
+                );
+            }
+            throw $e;
         }
-
-        $bitbucket = (string) app(Globals::class)->get('bitbucket', 'bitbucket');
-        $tgtfile = Path::resolve("{$bitbucket}/{$filename}", \ROOT_PATH);
-        if (file_exists($tgtfile)) {
-            LegacyResponse::abort(
-                $lang['std_upload_failed'] ?? '',
-                ($lang['std_file_already_exists'] ?? '').htmlspecialchars($filename).($lang['std_already_exists'] ?? ''),
-                false,
-            );
-        }
-
-        $size = getimagesize($file->getPathname());
-        if ($size === false) {
-            LegacyResponse::abort($lang['std_error'] ?? '', $lang['std_invalid_image_format'] ?? '', false);
-        }
-        if ($size === false) {
-            throw new LogicException('Expected valid image size.');
-        }
-
-        $height = (int) $size[1];
-        $width = (int) $size[0];
-        $it = (int) $size[2];
-        $imgtypes = [null, 'gif', 'jpg', 'png'];
-        $typeName = $imgtypes[$it] ?? null;
-
-        if ($typeName === null || $typeName !== strtolower($pp['extension'] ?? '')) {
-            LegacyResponse::abort($lang['std_error'] ?? '', $lang['std_invalid_image_format'] ?? '', false);
-        }
-
-        $scaleh = 200;
-        $scalew = 150;
-        $hscale = $height / $scaleh;
-        $wscale = $width / $scalew;
-        $scale = ($hscale < 1 && $wscale < 1) ? 1 : (($hscale > $wscale) ? $hscale : $wscale);
-        $newwidth = max(1, (int) floor($width / $scale));
-        $newheight = max(1, (int) floor($height / $scale));
-
-        $orig = match ($it) {
-            1 => @imagecreatefromgif($file->getPathname()),
-            2 => @imagecreatefromjpeg($file->getPathname()),
-            default => @imagecreatefrompng($file->getPathname()),
-        };
-
-        if (! $orig) {
-            LegacyResponse::abort(
-                $lang['std_image_processing_failed'] ?? '',
-                ($lang['std_sorry_the_uploaded'] ?? '').($typeName ?? '').($lang['std_failed_processing'] ?? ''),
-                false,
-            );
-        }
-        if ($orig === false) {
-            throw new LogicException('Expected valid image resource.');
-        }
-
-        $thumb = imagecreatetruecolor($newwidth, $newheight);
-        if ($thumb === false) {
-            LegacyResponse::abort(
-                $lang['std_image_processing_failed'] ?? '',
-                ($lang['std_sorry_the_uploaded'] ?? '').($typeName ?? '').($lang['std_failed_processing'] ?? ''),
-                false,
-            );
-        }
-        if ($thumb === false) {
-            throw new LogicException('Expected valid thumbnail resource.');
-        }
-        imagecopyresampled($thumb, $orig, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
-
-        match ($it) {
-            1 => imagegif($thumb, $tgtfile),
-            2 => imagejpeg($thumb, $tgtfile),
-            default => imagepng($thumb, $tgtfile),
-        };
-
-        $baseUrl = (string) app(Globals::class)->get('BASEURL', '');
-        $url = str_replace(' ', '%20', htmlspecialchars(Http::protocolPrefix(Url::isSecure())."{$baseUrl}/bitbucket/{$filename}"));
-        $public = $request->input('public') === 'yes' ? '1' : '0';
-
-        DB::table('bitbucket')->insert([
-            'owner' => $currentUser['id'],
-            'name' => $filename,
-            'added' => date('Y-m-d H:i:s'),
-            'public' => $public,
-        ]);
-
-        User::query()->where('id', $currentUser['id'])->update(['avatar' => $url]);
 
         return view('bitbucket.result', [
-            'url' => $url,
-            'filename' => $filename,
-            'width' => $width,
-            'height' => $height,
-            'newwidth' => $newwidth,
-            'newheight' => $newheight,
+            'url' => $result['url'],
+            'filename' => $result['filename'],
+            'width' => $result['width'],
+            'height' => $result['height'],
+            'newwidth' => $result['newwidth'],
+            'newheight' => $result['newheight'],
             'lang' => $lang,
         ]);
     }

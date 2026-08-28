@@ -19,12 +19,8 @@ use App\Repositories\RequireSeedTorrentRepository;
 use App\Repositories\TorrentPurchaseRepository;
 use App\Repositories\TorrentRepository;
 use App\Repositories\UserRepository;
-use App\Services\Announce\CheaterDetector;
-use App\Services\Announce\HitAndRunHandler;
 use App\Services\Announce\PeerLifecycle;
-use App\Services\Announce\RateLimiter;
 use App\Services\Announce\ResponseBuilder;
-use App\Services\Announce\TrafficAccountant;
 use App\Services\Announce\TrafficResult;
 use App\Support\Cache as AppCache;
 use App\Support\Config\SiteConfig;
@@ -111,6 +107,10 @@ final class AnnounceService
         private readonly AgentAllowRepository $agentAllowRepository,
         private readonly TorrentRepository $torrentRepository,
         private readonly UserRepository $userRepository,
+        private readonly Announce\RateLimiter $rateLimiter,
+        private readonly Announce\TrafficAccountant $trafficAccountant,
+        private readonly Announce\CheaterDetector $cheaterDetector,
+        private readonly Announce\HitAndRunHandler $hitAndRunHandler,
     ) {}
 
     /**
@@ -135,7 +135,7 @@ final class AnnounceService
 
         $this->blockBrowser();
         $this->checkPort();
-        $rateLimitResult = (new RateLimiter)->check($this->dto);
+        $rateLimitResult = $this->rateLimiter->check($this->dto);
         $this->isReAnnounce = $rateLimitResult->isReAnnounce;
         $this->authenticateUser();
         $this->checkClient();
@@ -168,11 +168,11 @@ final class AnnounceService
         $this->validateAnnounceTime();
         $this->handlePaidTorrent($torrent);
 
-        $traffic = (new TrafficAccountant)->calculate($this->self, $this->params, $torrent, $this->user, $this->snatchInfo ?: false, $this->ip, $this->seeder);
+        $traffic = $this->trafficAccountant->calculate($this->self, $this->params, $torrent, $this->user, $this->snatchInfo ?: false, $this->ip, $this->seeder);
         $this->uploadedIncrementForUser = $traffic->uploadedIncrementForUser;
         $this->downloadedIncrementForUser = $traffic->downloadedIncrementForUser;
 
-        $cheaterDetector = new CheaterDetector;
+        $cheaterDetector = $this->cheaterDetector;
         $cheaterDetector->checkSpeed($traffic->upthis, $this->self, $this->user, $this->userId, $this->isDonor);
         $cheaterDetector->checkCheating($traffic->upthis, $traffic->downthis, $this->self, $this->user, $torrent, $this->userId, $this->torrentId, $this->dt);
 
@@ -434,7 +434,7 @@ final class AnnounceService
         $this->snatchInfo = $result->snatchInfo;
         $this->torrentUpdate = $result->torrentUpdate;
 
-        $hitAndRunResult = (new HitAndRunHandler)->handle($this->left, $this->event, $this->user, $torrent, $this->userId, $this->torrentId, $this->isDonor, $this->dt, $this->snatchInfo ?: false);
+        $hitAndRunResult = $this->hitAndRunHandler->handle($this->left, $this->event, $this->user, $torrent, $this->userId, $this->torrentId, $this->isDonor, $this->dt, $this->snatchInfo ?: false);
         if ($hitAndRunResult !== null) {
             $this->snatchInfo = $hitAndRunResult;
         }

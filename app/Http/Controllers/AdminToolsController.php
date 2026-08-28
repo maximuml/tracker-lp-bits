@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Models\UserBanLog;
 use App\Repositories\ModerationRepository;
+use App\Services\LocationService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
@@ -22,12 +23,10 @@ use Illuminate\View\View;
 
 class AdminToolsController extends LegacyController
 {
-    private ModerationRepository $moderationRepository;
-
-    public function __construct(ModerationRepository $moderationRepository)
-    {
-        $this->moderationRepository = $moderationRepository;
-    }
+    public function __construct(
+        private readonly ModerationRepository $moderationRepository,
+        private readonly LocationService $locationService,
+    ) {}
 
     public function userBanLog(Request $request): View|RedirectResponse|Response
     {
@@ -122,7 +121,7 @@ class AdminToolsController extends LegacyController
         $delid = (int) (request()->query('delid') ?? 0);
         if ($sure === 'yes' && $delid > 0) {
             if (Validators::isId($delid)) {
-                DB::table('locations')->where('id', $delid)->delete();
+                $this->locationService->deleteLocation($delid);
             }
 
             return $this->legacyAbortResponse('Success', 'Location successfully removed, click <a class=altlink href="'.$actionUrl.'">here</a> to go back.', false);
@@ -151,7 +150,7 @@ class AdminToolsController extends LegacyController
             } elseif (ip2long($endIp) <= ip2long($startIp)) {
                 $error = 'The end IP address should be larger than the start one, or equal for single IP check!';
             } elseif (Validators::isId($id)) {
-                DB::table('locations')->where('id', $id)->update([
+                $this->locationService->updateLocation($id, [
                     'name' => $name,
                     'flagpic' => $flagpic,
                     'location_main' => $locationMain,
@@ -170,7 +169,7 @@ class AdminToolsController extends LegacyController
 
         $editid = (int) (request()->query('editid') ?? 0);
         if ($editid > 0) {
-            $editRow = (array) DB::table('locations')->where('id', $editid)->first();
+            $editRow = $this->locationService->findLocation($editid);
             if (empty($editRow)) {
                 $error = 'Location not found.';
             } else {
@@ -201,7 +200,7 @@ class AdminToolsController extends LegacyController
             } elseif (ip2long($endIp) <= ip2long($startIp)) {
                 $error = 'The end IP address should be larger than the start one, or equal for single IP check!';
             } else {
-                DB::table('locations')->insert([
+                $this->locationService->createLocation([
                     'name' => $name,
                     'flagpic' => $flagpic,
                     'location_main' => $locationMain,

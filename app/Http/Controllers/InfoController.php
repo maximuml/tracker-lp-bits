@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\User;
 use App\Repositories\InfoRepository;
+use App\Services\BitbucketService;
 use App\Support\CurrentUser;
 use App\Support\Input;
 use App\Support\LegacyResponse;
@@ -21,6 +22,10 @@ use Illuminate\View\View;
 
 class InfoController extends LegacyController
 {
+    public function __construct(
+        private readonly BitbucketService $bitbucketService,
+    ) {}
+
     public function userhistory(Request $request): View|RedirectResponse|Response
     {
         $curUser = app(CurrentUser::class)->get();
@@ -109,13 +114,10 @@ class InfoController extends LegacyController
 
         $delete = (int) $request->input('delete', 0);
         if ($currentClass >= (defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0) && $delete > 0) {
-            $bitbucket = DB::table('bitbucket')->where('id', $delete)->first(['name', 'owner']);
-            if ($bitbucket) {
-                $file = $bucketPath.'/'.$bitbucket->name;
-                DB::table('bitbucket')->where('id', $delete)->delete();
-                if (file_exists($file) && ! unlink($file)) {
-                    return $this->legacyAbortResponse('Warning', 'Unable to unlink file: <b>'.htmlspecialchars((string) $bitbucket->name).'</b>. You should contact an administrator about this error.', false);
-                }
+            $name = $this->bitbucketService->getBitbucketName($delete);
+            $ok = $this->bitbucketService->deleteBitbucket($delete, $bucketPath);
+            if (! $ok && $name !== null) {
+                return $this->legacyAbortResponse('Warning', 'Unable to unlink file: <b>'.htmlspecialchars($name).'</b>. You should contact an administrator about this error.', false);
             }
 
             return redirect($request->url());

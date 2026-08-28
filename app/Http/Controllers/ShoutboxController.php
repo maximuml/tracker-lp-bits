@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
 use App\Repositories\ShoutboxRepository;
+use App\Services\ShoutboxService;
 use App\Support\CurrentUser;
 use App\Support\Globals;
 use App\Support\Permissions;
@@ -25,12 +26,10 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ShoutboxController extends LegacyController
 {
-    private ShoutboxRepository $repository;
-
-    public function __construct(ShoutboxRepository $repository)
-    {
-        $this->repository = $repository;
-    }
+    public function __construct(
+        private readonly ShoutboxRepository $repository,
+        private readonly ShoutboxService $shoutboxService,
+    ) {}
 
     /**
      * @return array<string, mixed>
@@ -47,8 +46,7 @@ class ShoutboxController extends LegacyController
 
         $del = (int) $request->input('del', 0);
         if ($del > 0 && Validators::isId($del) && Permissions::userCan(PermissionEnum::SB_MANAGE->value, false, $currentUserId)) {
-            DB::table('shoutbox')->where('id', $del)->delete();
-            DB::table('shoutbox_reactions')->where('shoutbox_id', $del)->delete();
+            $this->shoutboxService->deleteMessage($currentUser, $del);
         }
 
         if ($request->input('sent') === 'yes' && $request->filled('shbox_text') && $currentUserId > 0) {
@@ -57,17 +55,9 @@ class ShoutboxController extends LegacyController
                 return response('Message too long', 400, ['Content-Type' => 'text/plain; charset=utf-8']);
             }
 
-            $lock = new NexusLock("shoutbox:{$currentUserId}", 60);
-            if (! $lock->acquire()) {
+            if (! $this->shoutboxService->postMessage($currentUser, $text)) {
                 return response('speaking too often', 429, ['Content-Type' => 'text/plain; charset=utf-8']);
             }
-
-            DB::table('shoutbox')->insert([
-                'userid' => $currentUserId,
-                'date' => time(),
-                'text' => $text,
-                'type' => 'sb',
-            ]);
         }
 
         $isAjax = ! empty($request->input('ajax'));

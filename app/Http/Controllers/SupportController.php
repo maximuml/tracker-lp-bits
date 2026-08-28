@@ -6,35 +6,26 @@ namespace App\Http\Controllers;
 
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
-use App\Models\Complain;
 use App\Models\Setting;
 use App\Models\User;
-use App\Repositories\ToolRepository;
-use App\Support\Cache\LegacyRedisCache;
+use App\Services\ComplainService;
 use App\Support\Captcha;
-use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Globals;
-use App\Support\Logger;
 use App\Support\Network;
 use App\Support\Pagination;
-use App\Support\Url;
 use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
-use Nexus\Database\NexusLock;
 
 class SupportController extends LegacyController
 {
-    private ToolRepository $toolRepository;
-
-    public function __construct(ToolRepository $toolRepository)
-    {
-        $this->toolRepository = $toolRepository;
-    }
+    public function __construct(
+        private readonly ComplainService $complainService,
+    ) {}
 
     public function complains(Request $request): View|RedirectResponse|Response
     {
@@ -103,43 +94,16 @@ class SupportController extends LegacyController
             return $this->legacyAbortResponse($langFunctions['std_error'] ?? 'Error', $langComplains['text_new_failure'] ?? 'Invalid captcha.');
         }
 
-        try {
-            NexusLock::lockOrFail('complains:lock:'.Network::clientIp(), 10);
-        } catch (\Throwable $e) {
-            return $this->legacyAbortResponse($langFunctions['std_error'] ?? 'Error', $langComplains['text_new_failure'] ?? 'Unable to process request.');
-        }
-
         $email = filter_var((string) ($request->input('email') ?? ''), FILTER_VALIDATE_EMAIL);
         $body = filter_var((string) ($request->input('body') ?? ''), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         if (empty($email) || empty($body)) {
             return $this->legacyAbortResponse($langFunctions['std_error'] ?? 'Error', $langComplains['text_new_failure'] ?? 'Missing data.');
         }
 
-        try {
-            NexusLock::lockOrFail('complains:lock:'.$email, 600);
-        } catch (\Throwable $e) {
+        $uuid = $this->complainService->createComplain($email, $body, Network::clientIp());
+        if ($uuid === null) {
             return $this->legacyAbortResponse($langFunctions['std_error'] ?? 'Error', $langComplains['text_new_failure'] ?? 'Unable to process request.');
         }
-
-        $user = User::query()->where('email', $email)->where('enabled', 'no')->first();
-        if (! $user) {
-            return $this->legacyAbortResponse($langFunctions['std_error'] ?? 'Error', $langComplains['text_new_failure'] ?? 'Unable to find disabled account.');
-        }
-
-        $complainId = (int) DB::table('complains')->insertGetId([
-            'uuid' => DB::raw('UUID()'),
-            'email' => $email,
-            'body' => $body,
-            'added' => now()->toDateTimeString(),
-            'ip' => Network::clientIp(),
-        ]);
-
-        $cache = app(LegacyRedisCache::class);
-        if ($cache !== null) {
-            $cache->delete_value('COMPLAINTS_COUNT_CACHE');
-        }
-
-        $uuid = (string) Complain::query()->where('id', $complainId)->value('uuid');
 
         return redirect('/complains.php?action=view&id='.urlencode($uuid));
     }
@@ -156,34 +120,9 @@ class SupportController extends LegacyController
             return $this->legacyAbortResponse($langFunctions['std_error'] ?? 'Error', $langComplains['text_new_failure'] ?? 'Missing data.');
         }
 
-        $complain = Complain::query()->find($id);
-        if (! $complain) {
+        $ok = $this->complainService->replyToComplain($id, $uid, $body, Network::clientIp(), $langComplains);
+        if (! $ok) {
             return $this->legacyAbortResponse($langFunctions['std_error'] ?? 'Error', 'Complain not found.');
-        }
-
-        DB::table('complain_replies')->insert([
-            'complain' => $id,
-            'userid' => $uid,
-            'added' => now()->toDateTimeString(),
-            'body' => $body,
-            'ip' => Network::clientIp(),
-        ]);
-
-        if ($uid > 0) {
-            try {
-                $toolRep = $this->toolRepository;
-                $toolRep->sendMail(
-                    $complain->email,
-                    $langComplains['reply_notify_subject'] ?? 'Reply to your complain',
-                    sprintf(
-                        $langComplains['reply_notify_body'] ?? '',
-                        SiteConfig::current()->basic->siteName(),
-                        Url::schemeAndHost(false).'/complains.php?action=view&id='.$complain->uuid
-                    )
-                );
-            } catch (\Throwable $exception) {
-                Logger::writeWithContext((string) $exception->getMessage(), 'error', false);
-            }
         }
 
         return redirect()->to($request->headers->get('referer') ?: '/complains.php');
@@ -203,14 +142,7 @@ class SupportController extends LegacyController
             return $this->legacyAbortResponse($langComplains['std_error'] ?? 'Error', 'Permission denied.');
         }
 
-        DB::table('complains')->where('id', $id)->update([
-            'answered' => $action === 'answered' ? 1 : 0,
-        ]);
-
-        $cache = app(LegacyRedisCache::class);
-        if ($cache !== null) {
-            $cache->delete_value('COMPLAINTS_COUNT_CACHE');
-        }
+        $this->complainService->toggleAnswered($id, $action === 'answered');
 
         return redirect()->to($request->headers->get('referer') ?: '/complains.php');
     }

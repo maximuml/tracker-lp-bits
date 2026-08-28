@@ -22,6 +22,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use LogicException;
 use Meilisearch\Client;
 use Meilisearch\Endpoints\Indexes;
 
@@ -331,7 +332,9 @@ class MeiliSearchRepository extends BaseRepository
             $torrents->load('basic_category');
             $list = [];
             foreach ($torrents as $torrent) {
-                assert($torrent instanceof Torrent);
+                if (! $torrent instanceof Torrent) {
+                    throw new LogicException('Expected torrent to be a Torrent instance.');
+                }
                 $searchBoxId = $torrent->basic_category->mode;
                 $arr = $torrent->toArray();
                 $arr['search_box_id'] = $searchBoxId;

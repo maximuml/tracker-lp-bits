@@ -20,6 +20,7 @@ use App\Support\UserDisplay;
 use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use LogicException;
 
 /**
  * Handles forum mutation actions (post, move, delete, lock, sticky, highlight).
@@ -451,7 +452,9 @@ final class ForumService
         if ($post === null) {
             LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_post_not_found'] ?? 'Post not found.');
         }
-        assert($post !== null);
+        if ($post === null) {
+            throw new LogicException('Expected non-null post.');
+        }
 
         $topicid = $post['topicid'];
         $targetUserid = $post['userid'];

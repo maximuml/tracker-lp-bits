@@ -23,6 +23,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use LogicException;
 
 /**
  * Handles message action mutations (takeMessage, deletemessage, moveordel,
@@ -42,7 +43,9 @@ final class MessageService
             $lang = $this->lang('takemessage');
             LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_permission_denied'] ?? 'Permission denied.');
         }
-        assert($sender instanceof User);
+        if (! $sender instanceof User) {
+            throw new LogicException('Expected authenticated user.');
+        }
 
         $lang = $this->lang('takemessage');
 
@@ -69,7 +72,9 @@ final class MessageService
             if (! $origmsgRecord) {
                 LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_no_permission_forwarding'] ?? 'No permission to forward.');
             }
-            assert($origmsgRecord !== null);
+            if ($origmsgRecord === null) {
+                throw new LogicException('Expected non-null original message record.');
+            }
 
             $to = trim((string) $request->input('to', ''));
             if ($to === '') {
@@ -113,7 +118,9 @@ final class MessageService
         if (! $recipient) {
             LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_user_not_exist'] ?? 'No user with that ID.');
         }
-        assert($recipient instanceof User);
+        if (! $recipient instanceof User) {
+            throw new LogicException('Expected recipient to be a User instance.');
+        }
 
         if (! Permission::can(PermissionEnum::STAFF_MEMBER, $sender)) {
             if ($recipient->parked === 'yes') {
@@ -186,7 +193,9 @@ final class MessageService
             $lang = $this->lang('deletemessage');
             LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_bad_message_id'] ?? 'Bad message ID.');
         }
-        assert($sender instanceof User);
+        if (! $sender instanceof User) {
+            throw new LogicException('Expected authenticated user.');
+        }
 
         $lang = $this->lang('deletemessage');
 
@@ -202,7 +211,9 @@ final class MessageService
             if (! $msg || $msg->receiver != $sender->id) {
                 LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_not_suggested'] ?? 'Not suggested.');
             }
-            assert($msg !== null);
+            if ($msg === null) {
+                throw new LogicException('Expected non-null message.');
+            }
 
             if ((int) $msg->location === 0) {
                 LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_not_in_inbox'] ?? 'Not in inbox.');
@@ -220,7 +231,9 @@ final class MessageService
             if (! $msg || $msg->sender != $sender->id) {
                 LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_not_suggested'] ?? 'Not suggested.');
             }
-            assert($msg !== null);
+            if ($msg === null) {
+                throw new LogicException('Expected non-null message.');
+            }
 
             if ((int) $msg->location === 0 && $msg->saved === 'no') {
                 LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_not_in_sentbox'] ?? 'Not in sentbox.');
@@ -337,7 +350,9 @@ final class MessageService
         if (! $user instanceof User) {
             LegacyResponse::abort('Error', 'Permission denied.');
         }
-        assert($user instanceof User);
+        if (! $user instanceof User) {
+            throw new LogicException('Expected authenticated user.');
+        }
         $userId = (int) $user->id;
 
         $pmId = (int) $request->input('id', 0);
@@ -412,7 +427,9 @@ final class MessageService
         if (! $user instanceof User) {
             LegacyResponse::abort('Error', 'Permission denied.');
         }
-        assert($user instanceof User);
+        if (! $user instanceof User) {
+            throw new LogicException('Expected authenticated user.');
+        }
         $userId = (int) $user->id;
 
         $action2 = (string) $request->input('action2', '');
@@ -456,7 +473,9 @@ final class MessageService
         if (! $user instanceof User) {
             LegacyResponse::abort('Error', 'Permission denied.');
         }
-        assert($user instanceof User);
+        if (! $user instanceof User) {
+            throw new LogicException('Expected authenticated user.');
+        }
         $userId = (int) $user->id;
 
         $pmId = (int) $request->input('id', 0);
@@ -465,7 +484,9 @@ final class MessageService
             $lang = (array) (app(Globals::class)->get('lang_messages') ?? []);
             LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_no_message_id'] ?? 'No message ID.'));
         }
-        assert($message !== null);
+        if ($message === null) {
+            throw new LogicException('Expected non-null message.');
+        }
 
         Cache::clearInboxCount($userId);
         Cache::forgetWithLocales('user_'.$userId.'_outbox_count');

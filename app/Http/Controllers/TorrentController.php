@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
+use App\Enums\TorrentOperationAction;
 use App\Http\Requests\TorrentRequest;
 use App\Http\Resources\TorrentOperationLogResource;
 use App\Http\Resources\TorrentResource;
@@ -141,9 +142,9 @@ class TorrentController extends Controller
         $request->validate(['torrent_id' => 'required']);
         $torrentId = $request->torrent_id;
         $actionTypes = [
-            TorrentOperationLog::ACTION_TYPE_APPROVAL_NONE,
-            TorrentOperationLog::ACTION_TYPE_APPROVAL_ALLOW,
-            TorrentOperationLog::ACTION_TYPE_APPROVAL_DENY,
+            TorrentOperationAction::APPROVAL_NONE->value,
+            TorrentOperationAction::APPROVAL_ALLOW->value,
+            TorrentOperationAction::APPROVAL_DENY->value,
         ];
         $records = TorrentOperationLog::query()
             ->with(['user'])

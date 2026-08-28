@@ -1,5 +1,5 @@
 @php
-use App\Models\User;
+use App\Enums\UserClass;
 
 $lang = $lang ?? [];
 $currentUser = $currentUser ?? [];
@@ -310,58 +310,58 @@ $classSelect = function (string $name, int $maxClass, mixed $selected, int $min 
     </form>
 
 @elseif ($action === 'authoritysettings')
-    @php $AUTHORITY = $config ?? []; $maxclass = User::CLASS_SYSOP; @endphp
+    @php $AUTHORITY = $config ?? []; $maxclass = UserClass::SYSOP->value; @endphp
     <form method="post" action="{{ $scriptName }}"><input type="hidden" name="action" value="savesettings_authority">@csrf
     @php
     $permRows = [
-        ['defaultclass', 'row_default_class', 'text_default_user_class', 'text_default', User::CLASS_USER, 'text_default_class_note'],
-        ['staffmem', 'row_staff_member', 'text_minimum_class', 'text_default', User::CLASS_MODERATOR, 'text_staff_member_note'],
-        ['newsmanage', 'row_news_management', 'text_minimum_class', 'text_default', User::CLASS_ADMINISTRATOR, 'text_news_management_note'],
-        ['sbmanage', 'row_shoutbox_management', 'text_minimum_class', 'text_default', User::CLASS_MODERATOR, 'text_shoutbox_management_note'],
-        ['pollmanage', 'row_poll_management', 'text_minimum_class', 'text_default', User::CLASS_ADMINISTRATOR, 'text_poll_management_note'],
-        ['postmanage', 'row_forum_post_management', 'text_minimum_class', 'text_default', User::CLASS_MODERATOR, 'text_forum_post_management_note'],
-        ['commanage', 'row_comment_management', 'text_minimum_class', 'text_default', User::CLASS_MODERATOR, 'text_comment_management_note'],
-        ['forummanage', 'row_forum_management', 'text_minimum_class', 'text_default', User::CLASS_ADMINISTRATOR, 'text_forum_management_note'],
-        ['viewuserlist', 'row_view_userlist', 'text_minimum_class', 'text_default', User::CLASS_POWER_USER, 'text_view_userlist_note'],
-        ['torrentmanage', 'row_torrent_management', 'text_minimum_class', 'text_default', User::CLASS_MODERATOR, 'text_torrent_management_note'],
-        ['torrent-delete', 'row_torrent_delete', 'text_minimum_class', 'text_default', User::CLASS_ADMINISTRATOR, 'text_torrent_delete_note'],
-        ['torrentsticky', 'row_torrent_sticky', 'text_minimum_class', 'text_default', User::CLASS_ADMINISTRATOR, 'text_torrent_sticky_note'],
-        ['torrenton_promotion', 'row_torrent_on_promotion', 'text_minimum_class', 'text_default', User::CLASS_ADMINISTRATOR, 'text_torrent_promotion_note'],
-        ['torrent_hr', 'row_torrent_hr', 'text_minimum_class', 'text_default', User::CLASS_ADMINISTRATOR, 'text_torrent_hr_note'],
-        ['torrent-set-special-tag', null, 'text_minimum_class', 'text_default', User::CLASS_ADMINISTRATOR, null],
-        ['torrent-approval', null, 'text_minimum_class', 'text_default', User::CLASS_ADMINISTRATOR, null],
-        ['torrent-approval-allow-automatic', null, 'text_minimum_class', 'text_default', User::CLASS_UPLOADER, null],
-        ['torrent-set-price', null, 'text_minimum_class', 'text_default', User::CLASS_UPLOADER, null],
-        ['askreseed', 'row_ask_for_reseed', 'text_minimum_class', 'text_default', User::CLASS_POWER_USER, 'text_ask_for_reseed_note'],
-        ['viewnfo', 'row_view_nfo', 'text_minimum_class', 'text_default', User::CLASS_POWER_USER, 'text_view_nfo_note'],
-        ['torrentstructure', 'row_view_torrent_structure', 'text_minimum_class', 'text_default', User::CLASS_ULTIMATE_USER, 'text_view_torrent_structure_note'],
-        ['sendinvite', 'row_send_invite', 'text_minimum_class', 'text_default', User::CLASS_POWER_USER, 'text_send_invite_note'],
-        ['viewhistory', 'row_view_history', 'text_minimum_class', 'text_default', User::CLASS_VETERAN_USER, 'text_view_history_note'],
-        ['topten', 'row_view_topten', 'text_minimum_class', 'text_default', User::CLASS_POWER_USER, 'text_view_topten_note'],
-        ['log', 'row_view_general_log', 'text_minimum_class', 'text_default', User::CLASS_INSANE_USER, 'text_view_general_log_note'],
-        ['confilog', 'row_view_confidential_log', 'text_minimum_class', 'text_default', User::CLASS_MODERATOR, 'text_view_confidential_log_note'],
-        ['userprofile', 'row_view_user_confidential', 'text_minimum_class', 'text_default', User::CLASS_ADMINISTRATOR, 'text_view_user_confidential_note'],
-        ['torrenthistory', 'row_view_user_torrent', 'text_minimum_class', 'text_default', User::CLASS_POWER_USER, 'text_view_user_torrent_note'],
-        ['prfmanage', 'row_general_profile_management', 'text_minimum_class', 'text_default', User::CLASS_MODERATOR, 'text_general_profile_management_note'],
-        ['cruprfmanage', 'row_crucial_profile_management', 'text_minimum_class', 'text_default', User::CLASS_ADMINISTRATOR, 'text_crucial_profile_management_note'],
-        ['uploadsub', 'row_upload_subtitle', 'text_minimum_class', 'text_default', User::CLASS_USER, 'text_upload_subtitle_note'],
-        ['delownsub', 'row_delete_own_subtitle', 'text_minimum_class', 'text_default', User::CLASS_POWER_USER, 'text_delete_own_subtitle_note'],
-        ['submanage', 'row_subtitle_management', 'text_minimum_class', 'text_default', User::CLASS_MODERATOR, 'text_subtitle_management'],
-        ['updateextinfo', 'row_update_external_info', 'text_minimum_class', 'text_default', User::CLASS_EXTREME_USER, 'text_update_external_info_note'],
-        ['viewanonymous', 'row_view_anonymous', 'text_minimum_class', 'text_default', User::CLASS_UPLOADER, 'text_view_anonymous_note'],
-        ['beanonymous', 'row_be_anonymous', 'text_minimum_class', 'text_default', User::CLASS_CRAZY_USER, 'text_be_anonymous_note'],
-        ['addoffer', 'row_add_offer', 'text_minimum_class', 'text_default', User::CLASS_PEASANT, 'text_add_offer_note'],
-        ['offermanage', 'row_offer_management', 'text_minimum_class', 'text_default', User::CLASS_MODERATOR, 'text_offer_management_note'],
-        ['upload', 'row_upload_torrent', 'text_minimum_class', 'text_default', User::CLASS_POWER_USER, 'text_upload_torrent_note'],
-        ['movetorrent', 'row_move_torrent', 'text_minimum_class', 'text_default', User::CLASS_MODERATOR, 'text_move_torrent_note'],
-        ['chrmanage', 'row_chronicle_management', 'text_minimum_class', 'text_default', User::CLASS_MODERATOR, 'text_chronicle_management_note'],
-        ['viewinvite', 'row_view_invite', 'text_minimum_class', 'text_default', User::CLASS_MODERATOR, 'text_view_invite_note'],
-        ['buyinvite', 'row_buy_invites', 'text_minimum_class', 'text_default', User::CLASS_INSANE_USER, 'text_buy_invites_note'],
-        ['seebanned', 'row_see_banned_torrents', 'text_minimum_class', 'text_default', User::CLASS_UPLOADER, 'text_see_banned_torrents_note'],
-        ['againstoffer', 'row_vote_against_offers', 'text_minimum_class', 'text_default', User::CLASS_USER, 'text_vote_against_offers_note'],
-        ['userbar', 'row_allow_userbar', 'text_minimum_class', 'text_default', User::CLASS_POWER_USER, 'text_allow_userbar_note'],
-        ['user-delete', null, 'text_minimum_class', 'text_default', User::CLASS_ADMINISTRATOR, null],
-        ['user-change-class', null, 'text_minimum_class', 'text_default', User::CLASS_ADMINISTRATOR, null],
+        ['defaultclass', 'row_default_class', 'text_default_user_class', 'text_default', UserClass::USER->value, 'text_default_class_note'],
+        ['staffmem', 'row_staff_member', 'text_minimum_class', 'text_default', UserClass::MODERATOR->value, 'text_staff_member_note'],
+        ['newsmanage', 'row_news_management', 'text_minimum_class', 'text_default', UserClass::ADMINISTRATOR->value, 'text_news_management_note'],
+        ['sbmanage', 'row_shoutbox_management', 'text_minimum_class', 'text_default', UserClass::MODERATOR->value, 'text_shoutbox_management_note'],
+        ['pollmanage', 'row_poll_management', 'text_minimum_class', 'text_default', UserClass::ADMINISTRATOR->value, 'text_poll_management_note'],
+        ['postmanage', 'row_forum_post_management', 'text_minimum_class', 'text_default', UserClass::MODERATOR->value, 'text_forum_post_management_note'],
+        ['commanage', 'row_comment_management', 'text_minimum_class', 'text_default', UserClass::MODERATOR->value, 'text_comment_management_note'],
+        ['forummanage', 'row_forum_management', 'text_minimum_class', 'text_default', UserClass::ADMINISTRATOR->value, 'text_forum_management_note'],
+        ['viewuserlist', 'row_view_userlist', 'text_minimum_class', 'text_default', UserClass::POWER_USER->value, 'text_view_userlist_note'],
+        ['torrentmanage', 'row_torrent_management', 'text_minimum_class', 'text_default', UserClass::MODERATOR->value, 'text_torrent_management_note'],
+        ['torrent-delete', 'row_torrent_delete', 'text_minimum_class', 'text_default', UserClass::ADMINISTRATOR->value, 'text_torrent_delete_note'],
+        ['torrentsticky', 'row_torrent_sticky', 'text_minimum_class', 'text_default', UserClass::ADMINISTRATOR->value, 'text_torrent_sticky_note'],
+        ['torrenton_promotion', 'row_torrent_on_promotion', 'text_minimum_class', 'text_default', UserClass::ADMINISTRATOR->value, 'text_torrent_promotion_note'],
+        ['torrent_hr', 'row_torrent_hr', 'text_minimum_class', 'text_default', UserClass::ADMINISTRATOR->value, 'text_torrent_hr_note'],
+        ['torrent-set-special-tag', null, 'text_minimum_class', 'text_default', UserClass::ADMINISTRATOR->value, null],
+        ['torrent-approval', null, 'text_minimum_class', 'text_default', UserClass::ADMINISTRATOR->value, null],
+        ['torrent-approval-allow-automatic', null, 'text_minimum_class', 'text_default', UserClass::UPLOADER->value, null],
+        ['torrent-set-price', null, 'text_minimum_class', 'text_default', UserClass::UPLOADER->value, null],
+        ['askreseed', 'row_ask_for_reseed', 'text_minimum_class', 'text_default', UserClass::POWER_USER->value, 'text_ask_for_reseed_note'],
+        ['viewnfo', 'row_view_nfo', 'text_minimum_class', 'text_default', UserClass::POWER_USER->value, 'text_view_nfo_note'],
+        ['torrentstructure', 'row_view_torrent_structure', 'text_minimum_class', 'text_default', UserClass::ULTIMATE_USER->value, 'text_view_torrent_structure_note'],
+        ['sendinvite', 'row_send_invite', 'text_minimum_class', 'text_default', UserClass::POWER_USER->value, 'text_send_invite_note'],
+        ['viewhistory', 'row_view_history', 'text_minimum_class', 'text_default', UserClass::VETERAN_USER->value, 'text_view_history_note'],
+        ['topten', 'row_view_topten', 'text_minimum_class', 'text_default', UserClass::POWER_USER->value, 'text_view_topten_note'],
+        ['log', 'row_view_general_log', 'text_minimum_class', 'text_default', UserClass::INSANE_USER->value, 'text_view_general_log_note'],
+        ['confilog', 'row_view_confidential_log', 'text_minimum_class', 'text_default', UserClass::MODERATOR->value, 'text_view_confidential_log_note'],
+        ['userprofile', 'row_view_user_confidential', 'text_minimum_class', 'text_default', UserClass::ADMINISTRATOR->value, 'text_view_user_confidential_note'],
+        ['torrenthistory', 'row_view_user_torrent', 'text_minimum_class', 'text_default', UserClass::POWER_USER->value, 'text_view_user_torrent_note'],
+        ['prfmanage', 'row_general_profile_management', 'text_minimum_class', 'text_default', UserClass::MODERATOR->value, 'text_general_profile_management_note'],
+        ['cruprfmanage', 'row_crucial_profile_management', 'text_minimum_class', 'text_default', UserClass::ADMINISTRATOR->value, 'text_crucial_profile_management_note'],
+        ['uploadsub', 'row_upload_subtitle', 'text_minimum_class', 'text_default', UserClass::USER->value, 'text_upload_subtitle_note'],
+        ['delownsub', 'row_delete_own_subtitle', 'text_minimum_class', 'text_default', UserClass::POWER_USER->value, 'text_delete_own_subtitle_note'],
+        ['submanage', 'row_subtitle_management', 'text_minimum_class', 'text_default', UserClass::MODERATOR->value, 'text_subtitle_management'],
+        ['updateextinfo', 'row_update_external_info', 'text_minimum_class', 'text_default', UserClass::EXTREME_USER->value, 'text_update_external_info_note'],
+        ['viewanonymous', 'row_view_anonymous', 'text_minimum_class', 'text_default', UserClass::UPLOADER->value, 'text_view_anonymous_note'],
+        ['beanonymous', 'row_be_anonymous', 'text_minimum_class', 'text_default', UserClass::CRAZY_USER->value, 'text_be_anonymous_note'],
+        ['addoffer', 'row_add_offer', 'text_minimum_class', 'text_default', UserClass::PEASANT->value, 'text_add_offer_note'],
+        ['offermanage', 'row_offer_management', 'text_minimum_class', 'text_default', UserClass::MODERATOR->value, 'text_offer_management_note'],
+        ['upload', 'row_upload_torrent', 'text_minimum_class', 'text_default', UserClass::POWER_USER->value, 'text_upload_torrent_note'],
+        ['movetorrent', 'row_move_torrent', 'text_minimum_class', 'text_default', UserClass::MODERATOR->value, 'text_move_torrent_note'],
+        ['chrmanage', 'row_chronicle_management', 'text_minimum_class', 'text_default', UserClass::MODERATOR->value, 'text_chronicle_management_note'],
+        ['viewinvite', 'row_view_invite', 'text_minimum_class', 'text_default', UserClass::MODERATOR->value, 'text_view_invite_note'],
+        ['buyinvite', 'row_buy_invites', 'text_minimum_class', 'text_default', UserClass::INSANE_USER->value, 'text_buy_invites_note'],
+        ['seebanned', 'row_see_banned_torrents', 'text_minimum_class', 'text_default', UserClass::UPLOADER->value, 'text_see_banned_torrents_note'],
+        ['againstoffer', 'row_vote_against_offers', 'text_minimum_class', 'text_default', UserClass::USER->value, 'text_vote_against_offers_note'],
+        ['userbar', 'row_allow_userbar', 'text_minimum_class', 'text_default', UserClass::POWER_USER->value, 'text_allow_userbar_note'],
+        ['user-delete', null, 'text_minimum_class', 'text_default', UserClass::ADMINISTRATOR->value, null],
+        ['user-change-class', null, 'text_minimum_class', 'text_default', UserClass::ADMINISTRATOR->value, null],
     ];
     @endphp
     @foreach ($permRows as [$perm, $rowKey, $minKey, $defKey, $defaultClass, $noteKey])
@@ -393,7 +393,7 @@ $classSelect = function (string $name, int $maxClass, mixed $selected, int $min 
     {!! $textRow($lang['row_meta_keywords'] ?? 'Meta keywords', 'metakeywords', $TWEAK['metakeywords'] ?? '', $lang['text_meta_keywords_note'] ?? '', '300px') !!}
     <tr><td class="rowhead nowrap" valign="top">{{ $lang['row_meta_description'] ?? 'Meta description' }}</td><td><textarea cols="100" style="width: 450px;" rows="5" name='metadescription'>{{ htmlspecialchars((string)($TWEAK['metadescription'] ?? '')) }}</textarea><br />{{ $lang['text_meta_description_note'] ?? '' }}</td></tr>
     <tr><td class="rowhead nowrap" valign="top">{{ $lang['row_web_analytics_code'] ?? 'Analytics code' }}</td><td><textarea cols="100" style="width: 450px;" rows="5" name='analyticscode'>{{ htmlspecialchars((string)($TWEAK['analyticscode'] ?? '')) }}</textarea><br />{{ $lang['text_web_analytics_code_note'] ?? '' }}</td></tr>
-    <tr><td class="rowhead nowrap">{{ $lang['row_see_sql_debug'] ?? 'SQL debug' }}</td><td><input type='checkbox' name='enablesqldebug' value='yes'{{ ($TWEAK['enablesqldebug'] ?? 'no') === 'yes' ? " checked='checked'" : '' }}>{{ $lang['text_allow'] ?? 'Allow' }}{!! $classSelect('sqldebug', User::CLASS_STAFF_LEADER, $TWEAK['sqldebug'] ?? User::CLASS_MODERATOR) !!}{{ $lang['text_see_sql_list'] ?? '' }}{!! \App\Support\UserClass::name(User::CLASS_SYSOP, false, true, true) !!}</td></tr>
+    <tr><td class="rowhead nowrap">{{ $lang['row_see_sql_debug'] ?? 'SQL debug' }}</td><td><input type='checkbox' name='enablesqldebug' value='yes'{{ ($TWEAK['enablesqldebug'] ?? 'no') === 'yes' ? " checked='checked'" : '' }}>{{ $lang['text_allow'] ?? 'Allow' }}{!! $classSelect('sqldebug', UserClass::STAFFLEADER->value, $TWEAK['sqldebug'] ?? UserClass::MODERATOR->value) !!}{{ $lang['text_see_sql_list'] ?? '' }}{!! \App\Support\UserClass::name(UserClass::SYSOP->value, false, true, true) !!}</td></tr>
     {!! $textRow($lang['row_tracker_founded_date'] ?? 'Founded date', 'datefounded', $TWEAK['datefounded'] ?? '2007-12-24', $lang['text_tracker_founded_date_note'] ?? '', '300px') !!}
     {!! $textRow($lang['row_css_date'] ?? 'CSS date', 'cssdate', $TWEAK['cssdate'] ?? '', $lang['text_css_date'] ?? '', '300px') !!}
     {!! \App\Support\Html::tr($lang['row_save_settings'] ?? 'Save', "<input type='submit' name='save' value='".($lang['submit_save_settings'] ?? 'Save')."'>", 1) !!}
@@ -465,11 +465,11 @@ $classSelect = function (string $name, int $maxClass, mixed $selected, int $min 
     </form>
 
 @elseif ($action === 'accountsettings')
-    @php $ACCOUNT = $config ?? []; $maxclass = User::CLASS_VIP; @endphp
+    @php $ACCOUNT = $config ?? []; $maxclass = UserClass::VIP->value; @endphp
     <form method="post" action="{{ $scriptName }}"><input type="hidden" name="action" value="savesettings_account">@csrf
     <tr><td colspan=2 align=center><b>{{ $lang['text_delete_inactive_accounts'] ?? 'Delete inactive' }}</b></td></tr>
-    {!! \App\Support\Html::tr($lang['row_never_delete'] ?? 'Never delete', $classSelect('neverdelete', $maxclass, $ACCOUNT['neverdelete'] ?? 0).($lang['text_never_delete'] ?? '').\App\Support\UserClass::name(User::CLASS_VETERAN_USER, false, true, true), 1) !!}
-    {!! \App\Support\Html::tr($lang['row_never_delete_if_packed'] ?? 'Never delete packed', $classSelect('neverdeletepacked', $maxclass, $ACCOUNT['neverdeletepacked'] ?? 0).($lang['text_never_delete_if_packed'] ?? '').\App\Support\UserClass::name(User::CLASS_ELITE_USER, false, true, true), 1) !!}
+    {!! \App\Support\Html::tr($lang['row_never_delete'] ?? 'Never delete', $classSelect('neverdelete', $maxclass, $ACCOUNT['neverdelete'] ?? 0).($lang['text_never_delete'] ?? '').\App\Support\UserClass::name(UserClass::VETERAN_USER->value, false, true, true), 1) !!}
+    {!! \App\Support\Html::tr($lang['row_never_delete_if_packed'] ?? 'Never delete packed', $classSelect('neverdeletepacked', $maxclass, $ACCOUNT['neverdeletepacked'] ?? 0).($lang['text_never_delete_if_packed'] ?? '').\App\Support\UserClass::name(UserClass::ELITE_USER->value, false, true, true), 1) !!}
     {!! $textRow($lang['row_delete_packed'] ?? 'Delete packed', 'deletepacked', $ACCOUNT['deletepacked'] ?? 400, $lang['text_delete_packed_note_two'] ?? '', '50px') !!}
     {!! $textRow($lang['row_delete_unpacked'] ?? 'Delete unpacked', 'deleteunpacked', $ACCOUNT['deleteunpacked'] ?? 150, $lang['text_delete_unpacked_note_two'] ?? '', '50px') !!}
     {!! $textRow($lang['row_delete_no_transfer'] ?? 'Delete no transfer', 'deletenotransfer', $ACCOUNT['deletenotransfer'] ?? 60, $lang['text_delete_transfer_note_two'] ?? '', '50px') !!}
@@ -477,14 +477,14 @@ $classSelect = function (string $name, int $maxClass, mixed $selected, int $min 
     <tr><td colspan=2 align=center><b>{{ $lang['text_user_promotion_demotion'] ?? 'Promotion/Demotion' }}</b></td></tr>
     @php
     $promotions = [
-        [User::CLASS_POWER_USER, 'pu', 4, 50, 1.05, 0.95, 1],
-        [User::CLASS_ELITE_USER, 'eu', 8, 120, 1.55, 1.45, 0],
-        [User::CLASS_CRAZY_USER, 'cu', 15, 300, 2.05, 1.95, 2],
-        [User::CLASS_INSANE_USER, 'iu', 25, 500, 2.55, 2.45, 0],
-        [User::CLASS_VETERAN_USER, 'vu', 40, 750, 3.05, 2.95, 3],
-        [User::CLASS_EXTREME_USER, 'exu', 60, 1024, 3.55, 3.45, 0],
-        [User::CLASS_ULTIMATE_USER, 'uu', 80, 1536, 4.05, 3.95, 5],
-        [User::CLASS_NEXUS_MASTER, 'nm', 100, 3072, 4.55, 4.45, 10],
+        [UserClass::POWER_USER->value, 'pu', 4, 50, 1.05, 0.95, 1],
+        [UserClass::ELITE_USER->value, 'eu', 8, 120, 1.55, 1.45, 0],
+        [UserClass::CRAZY_USER->value, 'cu', 15, 300, 2.05, 1.95, 2],
+        [UserClass::INSANE_USER->value, 'iu', 25, 500, 2.55, 2.45, 0],
+        [UserClass::VETERAN_USER->value, 'vu', 40, 750, 3.05, 2.95, 3],
+        [UserClass::EXTREME_USER->value, 'exu', 60, 1024, 3.55, 3.45, 0],
+        [UserClass::ULTIMATE_USER->value, 'uu', 80, 1536, 4.05, 3.95, 5],
+        [UserClass::NEXUS_MASTER->value, 'nm', 100, 3072, 4.55, 4.45, 10],
     ];
     @endphp
     @foreach ($promotions as [$class, $prefix, $time, $dl, $prratio, $deratio, $invites])
@@ -580,14 +580,14 @@ $classSelect = function (string $name, int $maxClass, mixed $selected, int $min 
     {!! $yesorno($lang['row_enable_attachment'] ?? 'Enable attachment', 'enableattach', $ATTACHMENT['enableattach'] ?? 'no', $lang['text_enable_attachment_note'] ?? '') !!}
     @php
     $levels = [
-        ['one', User::CLASS_USER, 'text_authority_default_one_one', 'text_authority_default_one_two'],
-        ['two', User::CLASS_POWER_USER, 'text_authority_default_two_one', 'text_authority_default_two_two'],
-        ['three', User::CLASS_ELITE_USER, '', ''],
-        ['four', User::CLASS_EXTREME_USER, '', ''],
+        ['one', UserClass::USER->value, 'text_authority_default_one_one', 'text_authority_default_one_two'],
+        ['two', UserClass::POWER_USER->value, 'text_authority_default_two_one', 'text_authority_default_two_two'],
+        ['three', UserClass::ELITE_USER->value, '', ''],
+        ['four', UserClass::EXTREME_USER->value, '', ''],
     ];
     $attachHtml = '<ul>';
     foreach ($levels as [$num, $defaultClass, $defOne, $defTwo]) {
-        $cls = $classSelect("class{$num}", User::CLASS_STAFF_LEADER, $ATTACHMENT["class{$num}"] ?? 0);
+        $cls = $classSelect("class{$num}", UserClass::STAFFLEADER->value, $ATTACHMENT["class{$num}"] ?? 0);
         $attachHtml .= '<li>'.$cls.($lang['text_can_upload_at_most'] ?? '')."<input type='text' style=\"width: 50px\" name=\"count{$num}\" value='".htmlspecialchars((string)($ATTACHMENT["count{$num}"] ?? ''))."'> ".($lang['text_file_size_below'] ?? '')."<input type='text' style=\"width: 50px\" name=\"size{$num}\" value='".htmlspecialchars((string)($ATTACHMENT["size{$num}"] ?? ''))."'>".($lang['text_with_extension_name'] ?? '')."<input type='text' style=\"width: 200px\" name=\"ext{$num}\" value='".htmlspecialchars((string)($ATTACHMENT["ext{$num}"] ?? ''))."'>".($lang[$defOne] ?? '').\App\Support\UserClass::name($defaultClass, false, true, true).($lang[$defTwo] ?? '').'</li>';
     }
     $attachHtml .= '</ul>';

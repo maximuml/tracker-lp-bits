@@ -17,6 +17,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\HitAndRunMode;
+use App\Enums\HitAndRunStatus;
 use App\Enums\ModelEventEnum;
 use App\Enums\UserClass as UserClassEnum;
 use App\Support\Cache;
@@ -47,42 +48,24 @@ class HitAndRun extends NexusModel
     /** @var bool */
     public $timestamps = true;
 
-    /** @deprecated Use App\Enums\HitAndRunStatus enum instead. */
-    const STATUS_INSPECTING = 1;
-
-    /** @deprecated Use App\Enums\HitAndRunStatus enum instead. */
-    const STATUS_REACHED = 2;
-
-    /** @deprecated Use App\Enums\HitAndRunStatus enum instead. */
-    const STATUS_UNREACHED = 3;
-
-    /** @deprecated Use App\Enums\HitAndRunStatus enum instead. */
-    const STATUS_PARDONED = 4;
-
     /** @var array<int|string, mixed> */
     public static array $status = [
-        self::STATUS_INSPECTING => ['text' => 'Inspecting'],
-        self::STATUS_REACHED => ['text' => 'Reached'],
-        self::STATUS_UNREACHED => ['text' => 'Unreached'],
-        self::STATUS_PARDONED => ['text' => 'Pardoned'],
+        HitAndRunStatus::INSPECTING->value => ['text' => 'Inspecting'],
+        HitAndRunStatus::REACHED->value => ['text' => 'Reached'],
+        HitAndRunStatus::UNREACHED->value => ['text' => 'Unreached'],
+        HitAndRunStatus::PARDONED->value => ['text' => 'Pardoned'],
     ];
 
     const CAN_PARDON_STATUS = [
-        self::STATUS_INSPECTING,
-        self::STATUS_UNREACHED,
+        HitAndRunStatus::INSPECTING->value,
+        HitAndRunStatus::UNREACHED->value,
     ];
-
-    const MODE_DISABLED = 'disabled';
-
-    const MODE_MANUAL = 'manual';
-
-    const MODE_GLOBAL = 'global';
 
     /** @var array<int|string, mixed> */
     public static $modes = [
-        self::MODE_DISABLED => ['text' => 'Disabled'],
-        self::MODE_MANUAL => ['text' => 'Manual'],
-        self::MODE_GLOBAL => ['text' => 'Global'],
+        HitAndRunMode::DISABLED->value => ['text' => 'Disabled'],
+        HitAndRunMode::MANUAL->value => ['text' => 'Manual'],
+        HitAndRunMode::GLOBAL->value => ['text' => 'Global'],
     ];
 
     const MINIMUM_IGNORE_USER_CLASS = UserClassEnum::VIP->value;
@@ -128,7 +111,7 @@ class HitAndRun extends NexusModel
 
     private function doGetInspectTimeLeft(): string
     {
-        if ($this->status != self::STATUS_INSPECTING) {
+        if ($this->status != HitAndRunStatus::INSPECTING->value) {
             return '---';
         }
         // change to use create time
@@ -146,7 +129,7 @@ class HitAndRun extends NexusModel
 
     private function doGetSeedTimeRequired(): string
     {
-        if ($this->status != self::STATUS_INSPECTING) {
+        if ($this->status != HitAndRunStatus::INSPECTING->value) {
             return '---';
         }
         $searchBoxId = $this->torrent->basic_category->mode ?? 0;

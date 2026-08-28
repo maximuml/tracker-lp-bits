@@ -48,6 +48,13 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\PromotionTimeType;
+use App\Enums\TorrentApprovalStatus;
+use App\Enums\TorrentHr;
+use App\Enums\TorrentNfoViewStyle;
+use App\Enums\TorrentPosState;
+use App\Enums\TorrentPromotion;
+use App\Enums\TorrentVisible;
 use App\Models\Traits\HasTorrentAccessors;
 use App\Models\Traits\HasTorrentRelationships;
 use App\Models\Traits\HasTorrentScopes;
@@ -81,12 +88,6 @@ class Torrent extends NexusModel
         'times_completed', 'approval_status', 'banned', 'visible', 'pos_state_until', 'price',
         'hr',
     ];
-
-    /** @deprecated Use App\Enums\TorrentVisible enum instead. */
-    const VISIBLE_YES = 'yes';
-
-    /** @deprecated Use App\Enums\TorrentVisible enum instead. */
-    const VISIBLE_NO = 'no';
 
     const FILTER_VISIBLE_ALL = '0';
 
@@ -124,58 +125,18 @@ class Torrent extends NexusModel
         'basic_category', 'basic_audio_codec', 'basic_codec', 'basic_media',
         'basic_source', 'basic_standard', ];
 
-    /** @deprecated Use App\Enums\TorrentPosState enum instead. */
-    const POS_STATE_STICKY_NONE = 'normal';
-
-    /** @deprecated Use App\Enums\TorrentPosState enum instead. */
-    const POS_STATE_STICKY_FIRST = 'sticky';
-
-    /**
-     * alphabet 'r' is  after 'n' and before 's', so it will fit: order by pos_state desc,
-     * first sticky, then r_sticky, then normal
-     */
-    /** @deprecated Use App\Enums\TorrentPosState enum instead. */
-    const POS_STATE_STICKY_SECOND = 'r_sticky';
-
     /** @var array<int|string, mixed> */
     public static $posStates = [
-        self::POS_STATE_STICKY_NONE => ['text' => 'Normal', 'icon_counts' => 0],
-        self::POS_STATE_STICKY_SECOND => ['text' => 'Sticky second', 'icon_counts' => 1],
-        self::POS_STATE_STICKY_FIRST => ['text' => 'Sticky first', 'icon_counts' => 2],
+        TorrentPosState::NONE->value => ['text' => 'Normal', 'icon_counts' => 0],
+        TorrentPosState::STICKY_SECOND->value => ['text' => 'Sticky second', 'icon_counts' => 1],
+        TorrentPosState::STICKY_FIRST->value => ['text' => 'Sticky first', 'icon_counts' => 2],
     ];
-
-    /** @deprecated Use App\Enums\TorrentHr enum instead. */
-    const HR_YES = 1;
-
-    /** @deprecated Use App\Enums\TorrentHr enum instead. */
-    const HR_NO = 0;
 
     /** @var array<int|string, mixed> */
     public static $hrStatus = [
-        self::HR_NO => ['text' => 'NO'],
-        self::HR_YES => ['text' => 'YES'],
+        TorrentHr::NO->value => ['text' => 'NO'],
+        TorrentHr::YES->value => ['text' => 'YES'],
     ];
-
-    /** @deprecated Use App\Enums\TorrentPromotion enum instead. */
-    const PROMOTION_NORMAL = 1;
-
-    /** @deprecated Use App\Enums\TorrentPromotion enum instead. */
-    const PROMOTION_FREE = 2;
-
-    /** @deprecated Use App\Enums\TorrentPromotion enum instead. */
-    const PROMOTION_TWO_TIMES_UP = 3;
-
-    /** @deprecated Use App\Enums\TorrentPromotion enum instead. */
-    const PROMOTION_FREE_TWO_TIMES_UP = 4;
-
-    /** @deprecated Use App\Enums\TorrentPromotion enum instead. */
-    const PROMOTION_HALF_DOWN = 5;
-
-    /** @deprecated Use App\Enums\TorrentPromotion enum instead. */
-    const PROMOTION_HALF_DOWN_TWO_TIMES_UP = 6;
-
-    /** @deprecated Use App\Enums\TorrentPromotion enum instead. */
-    const PROMOTION_ONE_THIRD_DOWN = 7;
 
     /**
      * @deprecated Use App\Enums\TorrentPromotion enum methods (label(), color(), upMultiplier(), downMultiplier()) instead.
@@ -183,43 +144,43 @@ class Torrent extends NexusModel
      * @var array<int|string, mixed>
      */
     public static array $promotionTypes = [
-        self::PROMOTION_NORMAL => [
+        TorrentPromotion::NORMAL->value => [
             'text' => 'Normal',
             'up_multiplier' => 1,
             'down_multiplier' => 1,
             'color' => '',
         ],
-        self::PROMOTION_FREE => [
+        TorrentPromotion::FREE->value => [
             'text' => 'Free',
             'up_multiplier' => 1,
             'down_multiplier' => 0,
             'color' => 'linear-gradient(to right, rgba(0,52,206,0.5), rgba(0,52,206,1), rgba(0,52,206,0.5))',
         ],
-        self::PROMOTION_TWO_TIMES_UP => [
+        TorrentPromotion::TWO_TIMES_UP->value => [
             'text' => '2X',
             'up_multiplier' => 2,
             'down_multiplier' => 1,
             'color' => 'linear-gradient(to right, rgba(0,153,0,0.5), rgba(0,153,0,1), rgba(0,153,0,0.5))',
         ],
-        self::PROMOTION_FREE_TWO_TIMES_UP => [
+        TorrentPromotion::FREE_TWO_TIMES_UP->value => [
             'text' => '2X Free',
             'up_multiplier' => 2,
             'down_multiplier' => 0,
             'color' => 'linear-gradient(to right, rgba(0,153,0,1), rgba(0,52,206,1)',
         ],
-        self::PROMOTION_HALF_DOWN => [
+        TorrentPromotion::HALF_DOWN->value => [
             'text' => '50%',
             'up_multiplier' => 1,
             'down_multiplier' => 0.5,
             'color' => 'linear-gradient(to right, rgba(220,0,3,0.5), rgba(220,0,3,1), rgba(220,0,3,0.5))',
         ],
-        self::PROMOTION_HALF_DOWN_TWO_TIMES_UP => [
+        TorrentPromotion::HALF_DOWN_TWO_TIMES_UP->value => [
             'text' => '2X 50%',
             'up_multiplier' => 2,
             'down_multiplier' => 0.5,
             'color' => 'linear-gradient(to right, rgba(0,153,0,1), rgba(220,0,3,1)',
         ],
-        self::PROMOTION_ONE_THIRD_DOWN => [
+        TorrentPromotion::ONE_THIRD_DOWN->value => [
             'text' => '30%',
             'up_multiplier' => 1,
             'down_multiplier' => 0.3,
@@ -227,63 +188,39 @@ class Torrent extends NexusModel
         ],
     ];
 
-    /** @deprecated Use App\Enums\PromotionTimeType enum instead. */
-    const PROMOTION_TIME_TYPE_GLOBAL = 0;
-
-    /** @deprecated Use App\Enums\PromotionTimeType enum instead. */
-    const PROMOTION_TIME_TYPE_PERMANENT = 1;
-
-    /** @deprecated Use App\Enums\PromotionTimeType enum instead. */
-    const PROMOTION_TIME_TYPE_DEADLINE = 2;
-
     /**
      * @deprecated Use App\Enums\PromotionTimeType enum methods (label()) instead.
      *
      * @var array<int|string, mixed>
      */
     public static array $promotionTimeTypes = [
-        self::PROMOTION_TIME_TYPE_GLOBAL => ['text' => 'Global'],
-        self::PROMOTION_TIME_TYPE_PERMANENT => ['text' => 'Permanent'],
-        self::PROMOTION_TIME_TYPE_DEADLINE => ['text' => 'Until'],
+        PromotionTimeType::GLOBAL->value => ['text' => 'Global'],
+        PromotionTimeType::PERMANENT->value => ['text' => 'Permanent'],
+        PromotionTimeType::DEADLINE->value => ['text' => 'Until'],
     ];
 
     const BONUS_REWARD_VALUES = [50, 100, 200, 500, 1000];
 
-    /** @deprecated Use App\Enums\TorrentApprovalStatus enum instead. */
-    const APPROVAL_STATUS_NONE = 0;
-
-    /** @deprecated Use App\Enums\TorrentApprovalStatus enum instead. */
-    const APPROVAL_STATUS_ALLOW = 1;
-
-    /** @deprecated Use App\Enums\TorrentApprovalStatus enum instead. */
-    const APPROVAL_STATUS_DENY = 2;
-
     /** @var array<int|string, mixed> */
     public static array $approvalStatus = [
-        self::APPROVAL_STATUS_NONE => [
+        TorrentApprovalStatus::NONE->value => [
             'text' => 'None',
             'badge_color' => 'primary',
             'icon' => '<svg t="1655184824967" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="34118" width="16" height="16"><path d="M450.267 772.245l0 92.511 92.511 0 0-92.511L450.267 772.245zM689.448 452.28c13.538-24.367 20.311-50.991 20.311-79.875 0-49.938-19.261-92.516-57.765-127.713-38.517-35.197-90.114-52.8-154.797-52.8-61.077 0-110.191 16.4-147.342 49.188-37.16 32.798-59.497 80.032-67.014 141.703l83.486 9.927c7.218-46.025 22.41-79.875 45.576-101.533 23.166-21.665 52.047-32.494 86.647-32.494 35.802 0 66.038 11.957 90.711 35.874 24.667 23.92 37.01 51.675 37.01 83.266 0 17.451-4.222 33.55-12.642 48.284-8.425 14.747-26.698 34.526-54.83 59.346s-47.607 43.701-58.442 56.637c-14.741 17.754-25.424 35.354-32.037 52.797-9.028 23.172-13.537 50.701-13.537 82.584 0 5.418 0.146 13.539 0.45 24.374l78.069 0c0.599-32.495 2.855-55.966 6.772-70.4 3.903-14.44 9.926-27.229 18.047-38.363 8.127-11.123 25.425-28.43 51.901-51.895C649.43 506.288 675.908 476.656 689.448 452.28L689.448 452.28z" p-id="34119" fill="#e78d0f"></path></svg>',
         ],
-        self::APPROVAL_STATUS_ALLOW => [
+        TorrentApprovalStatus::ALLOW->value => [
             'text' => 'Allow',
             'badge_color' => 'success',
             'icon' => '<svg t="1655145688503" class="icon" viewBox="0 0 1413 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="16225" width="16" height="16"><path d="M1381.807797 107.47394L1274.675044 0.438669 465.281736 809.880718l-322.665524-322.714266L35.434718 594.152982l430.041982 430.041982 107.084012-107.035271-0.243705-0.292446z" fill="#1afa29" p-id="16226"></path></svg>',
         ],
-        self::APPROVAL_STATUS_DENY => [
+        TorrentApprovalStatus::DENY->value => [
             'text' => 'Deny',
             'badge_color' => 'danger',
             'icon' => '<svg t="1655184952662" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="35029" width="16" height="16"><path d="M220.8 812.8l22.4 22.4 272-272 272 272 48-44.8-275.2-272 275.2-272-48-48-272 275.2-272-275.2-22.4 25.6-22.4 22.4 272 272-272 272z" fill="#d81e06" p-id="35030"></path></svg>',
         ],
     ];
 
-    /** @deprecated Use App\Enums\TorrentNfoViewStyle enum instead. */
-    const NFO_VIEW_STYLE_DOS = 'magic';
-
-    /** @deprecated Use App\Enums\TorrentNfoViewStyle enum instead. */
-    const NFO_VIEW_STYLE_WINDOWS = 'latin-1';
-
-    const REQUIRE_SEED_SECTION_DEFAULT_PROMOTION_STATE = self::PROMOTION_FREE;
+    const REQUIRE_SEED_SECTION_DEFAULT_PROMOTION_STATE = TorrentPromotion::FREE->value;
 
     const REQUIRE_SEED_SECTION_DEFAULT_BONUS_ADDITION_FACTOR = 0;
 
@@ -297,8 +234,8 @@ class Torrent extends NexusModel
 
     /** @var array<int|string, mixed> */
     public static array $nfoViewStyles = [
-        self::NFO_VIEW_STYLE_DOS => ['text' => 'DOS-vy'],
-        self::NFO_VIEW_STYLE_WINDOWS => ['text' => 'Windows-vy'],
+        TorrentNfoViewStyle::DOS->value => ['text' => 'DOS-vy'],
+        TorrentNfoViewStyle::WINDOWS->value => ['text' => 'Windows-vy'],
     ];
 
     /**
@@ -449,7 +386,7 @@ class Torrent extends NexusModel
      */
     public function checkIsNormal(array $fields = ['visible', 'banned'])
     {
-        if (in_array('visible', $fields) && $this->getAttribute('visible') != self::VISIBLE_YES) {
+        if (in_array('visible', $fields) && $this->getAttribute('visible') != TorrentVisible::YES->value) {
             throw new \InvalidArgumentException(sprintf('Torrent: %s is not visible.', $this->id));
         }
         if (in_array('banned', $fields) && $this->getAttribute('banned') == self::BANNED_YES) {

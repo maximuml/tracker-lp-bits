@@ -7,6 +7,11 @@ namespace App\Models;
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\Permission\RoutePermissionEnum;
+use App\Enums\UserClass;
+use App\Enums\UserDonate;
+use App\Enums\UserEnabled;
+use App\Enums\UserGender;
+use App\Enums\UserStatus;
 use App\Exceptions\NexusException;
 use App\Models\Traits\HasClassLadder;
 use App\Models\Traits\HasFilamentAccess;
@@ -158,44 +163,17 @@ class User extends Authenticatable implements FilamentUser, HasName
 
     protected $perPage = 50;
 
-    /** @deprecated Use App\Enums\UserStatus enum instead. */
-    const STATUS_CONFIRMED = 'confirmed';
-
-    /** @deprecated Use App\Enums\UserStatus enum instead. */
-    const STATUS_PENDING = 'pending';
-
-    /** @deprecated Use App\Enums\UserEnabled enum instead. */
-    const ENABLED_YES = 'yes';
-
-    /** @deprecated Use App\Enums\UserEnabled enum instead. */
-    const ENABLED_NO = 'no';
-
-    /** @deprecated Use App\Enums\UserDonate enum instead. */
-    const DONATE_YES = 'yes';
-
-    /** @deprecated Use App\Enums\UserDonate enum instead. */
-    const DONATE_NO = 'no';
-
     /** @var array<string, array<string, string>> */
     public static array $donateStatus = [
-        self::DONATE_YES => ['text' => 'Yes'],
-        self::DONATE_NO => ['text' => 'No'],
+        UserDonate::YES->value => ['text' => 'Yes'],
+        UserDonate::NO->value => ['text' => 'No'],
     ];
-
-    /** @deprecated Use App\Enums\UserGender enum instead. */
-    const GENDER_FEMALE = 'Female';
-
-    /** @deprecated Use App\Enums\UserGender enum instead. */
-    const GENDER_MALE = 'Male';
-
-    /** @deprecated Use App\Enums\UserGender enum instead. */
-    const GENDER_UNKNOWN = 'N/A';
 
     /** @var array<string, string> */
     public static array $genders = [
-        self::GENDER_MALE => 'Male',
-        self::GENDER_FEMALE => 'Female',
-        self::GENDER_UNKNOWN => 'N/A',
+        UserGender::MALE->value => 'Male',
+        UserGender::FEMALE->value => 'Female',
+        UserGender::UNKNOWN->value => 'N/A',
     ];
 
     /** @var array<string, string> */
@@ -303,9 +281,9 @@ class User extends Authenticatable implements FilamentUser, HasName
         return [
             'id' => 0,
             'username' => Locale::trans('user.deleted_username', [], null),
-            'class' => self::CLASS_PEASANT,
+            'class' => UserClass::PEASANT->value,
             'email' => '',
-            'status' => self::STATUS_CONFIRMED,
+            'status' => UserStatus::CONFIRMED->value,
             'added' => '1970-01-01 08:00:00',
             'avatar' => '',
             'uploaded' => 0,
@@ -313,7 +291,7 @@ class User extends Authenticatable implements FilamentUser, HasName
             'seedbonus' => 0,
             'seedtime' => 0,
             'leechtime' => 0,
-            'enabled' => self::ENABLED_NO,
+            'enabled' => UserEnabled::NO->value,
             'seed_points' => 0,
         ];
     }
@@ -344,10 +322,10 @@ class User extends Authenticatable implements FilamentUser, HasName
             'user_id' => $this->id,
             'username' => $this->username,
         ];
-        if (in_array('status', $fields) && $this->getAttribute('status') != self::STATUS_CONFIRMED) {
+        if (in_array('status', $fields) && $this->getAttribute('status') != UserStatus::CONFIRMED->value) {
             throw new NexusException(Locale::trans('user.user_is_not_confirmed', $params, null));
         }
-        if (in_array('enabled', $fields) && $this->getAttribute('enabled') != self::ENABLED_YES) {
+        if (in_array('enabled', $fields) && $this->getAttribute('enabled') != UserEnabled::YES->value) {
             throw new NexusException(Locale::trans('user.user_is_disabled', $params, null));
         }
 

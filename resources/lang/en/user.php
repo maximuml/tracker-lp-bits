@@ -1,7 +1,7 @@
 <?php
 
+use App\Enums\UserClass;
 use App\Enums\UserGender;
-use App\Models\User;
 
 return [
     'edit_ban_reason' => 'Disable by administrator',
@@ -26,13 +26,13 @@ return [
         'vip_until_help' => "The time format is 'Year-Year-Month-Day Hour:Minute:Second The time when the VIP status ends.' VIP status auto expires' must be set to 'Yes' for this rule to take effect.",
     ],
     'class_names' => [
-        User::CLASS_VIP => 'Vip',
-        User::CLASS_RETIREE => 'Retiree',
-        User::CLASS_UPLOADER => 'Uploader',
-        User::CLASS_MODERATOR => 'Moderator',
-        User::CLASS_ADMINISTRATOR => 'Administrator',
-        User::CLASS_SYSOP => 'Sysop',
-        User::CLASS_STAFF_LEADER => 'Staff Leader',
+        UserClass::VIP->value => 'Vip',
+        UserClass::RETIREE->value => 'Retiree',
+        UserClass::UPLOADER->value => 'Uploader',
+        UserClass::MODERATOR->value => 'Moderator',
+        UserClass::ADMINISTRATOR->value => 'Administrator',
+        UserClass::SYSOP->value => 'Sysop',
+        UserClass::STAFFLEADER->value => 'Staff Leader',
     ],
     'change_username_lte_min_interval' => 'Last change time: :last_change_time, unmet minimum interval: :interval days',
     'destroy_by_admin' => 'Physical delete by administrator',

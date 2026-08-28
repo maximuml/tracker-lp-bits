@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\TorrentOperationAction;
 use App\Support\Cache;
 use App\Support\Locale;
 use App\Support\Logger;
@@ -34,28 +35,13 @@ class TorrentOperationLog extends NexusModel
     /** @var list<string> */
     protected $fillable = ['uid', 'torrent_id', 'action_type', 'comment'];
 
-    /** @deprecated Use App\Enums\TorrentOperationAction enum instead. */
-    const ACTION_TYPE_APPROVAL_NONE = 'approval_none';
-
-    /** @deprecated Use App\Enums\TorrentOperationAction enum instead. */
-    const ACTION_TYPE_APPROVAL_ALLOW = 'approval_allow';
-
-    /** @deprecated Use App\Enums\TorrentOperationAction enum instead. */
-    const ACTION_TYPE_APPROVAL_DENY = 'approval_deny';
-
-    /** @deprecated Use App\Enums\TorrentOperationAction enum instead. */
-    const ACTION_TYPE_EDIT = 'edit';
-
-    /** @deprecated Use App\Enums\TorrentOperationAction enum instead. */
-    const ACTION_TYPE_DELETE = 'delete';
-
     /** @var array<int|string, mixed> */
     public static array $actionTypes = [
-        self::ACTION_TYPE_APPROVAL_NONE => ['text' => 'Approval none'],
-        self::ACTION_TYPE_APPROVAL_ALLOW => ['text' => 'Approval allow'],
-        self::ACTION_TYPE_APPROVAL_DENY => ['text' => 'Approval deny'],
-        self::ACTION_TYPE_EDIT => ['text' => 'Edit'],
-        self::ACTION_TYPE_DELETE => ['text' => 'Delete'],
+        TorrentOperationAction::APPROVAL_NONE->value => ['text' => 'Approval none'],
+        TorrentOperationAction::APPROVAL_ALLOW->value => ['text' => 'Approval allow'],
+        TorrentOperationAction::APPROVAL_DENY->value => ['text' => 'Approval deny'],
+        TorrentOperationAction::EDIT->value => ['text' => 'Edit'],
+        TorrentOperationAction::DELETE->value => ['text' => 'Delete'],
     ];
 
     /** @return  mixed */

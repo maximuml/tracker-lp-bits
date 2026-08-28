@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\UserClass;
 use App\Models\User;
 use App\Support\PasswordHasher;
 use App\Support\Token;
@@ -92,7 +93,7 @@ final class Phase13PasswordArgon2idTest extends TestCase
             'auth_key' => Token::randomHex(),
             'passkey' => md5('test'.date('Y-m-d H:i:s')),
             'status' => 'confirmed',
-            'class' => User::CLASS_USER,
+            'class' => UserClass::USER->value,
             'added' => now()->toDateTimeString(),
             'last_access' => now()->toDateTimeString(),
         ]);
@@ -118,7 +119,7 @@ final class Phase13PasswordArgon2idTest extends TestCase
             'auth_key' => Token::randomHex(),
             'passkey' => md5('test'.date('Y-m-d H:i:s')),
             'status' => 'confirmed',
-            'class' => User::CLASS_USER,
+            'class' => UserClass::USER->value,
             'added' => now()->toDateTimeString(),
             'last_access' => now()->toDateTimeString(),
         ]);
@@ -144,7 +145,7 @@ final class Phase13PasswordArgon2idTest extends TestCase
             'auth_key' => Token::randomHex(),
             'passkey' => md5('test'.date('Y-m-d H:i:s')),
             'status' => 'confirmed',
-            'class' => User::CLASS_USER,
+            'class' => UserClass::USER->value,
             'added' => now()->toDateTimeString(),
             'last_access' => now()->toDateTimeString(),
         ]);

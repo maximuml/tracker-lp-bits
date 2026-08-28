@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Services\Cleanup;
 
+use App\Enums\UserClass;
 use App\Enums\UserStatus;
-use App\Models\User;
 use App\Services\Cleanup\Tasks;
 use App\Support\Cache;
 use App\Support\Settings;
@@ -173,7 +173,7 @@ final class TasksTest extends TestCase
             'editsecret' => '',
             'added' => Carbon::now()->toDateTimeString(),
             'status' => UserStatus::CONFIRMED->value,
-            'class' => User::CLASS_USER,
+            'class' => UserClass::USER->value,
             'clientselect' => 0,
             'last_catchup' => 0,
         ], $overrides));

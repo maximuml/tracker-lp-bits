@@ -9,7 +9,7 @@ $user = (array) ($user ?? []);
 $sent = (string) ($sent ?? '');
 $__server_REQUEST_URI = (string) ($__server_REQUEST_URI ?? '');
 $title = $title ?? ($lang_invite['head_invites'] ?? 'Invites');
-$UC_SYSOP = (int) ($UC_SYSOP ?? \App\Models\User::CLASS_SYSOP);
+$UC_SYSOP = (int) ($UC_SYSOP ?? \App\Enums\UserClass::SYSOP->value);
 $sendBtnText = (string) ($sendBtnText ?? '');
 $sendBtnDisabled = (string) ($sendBtnDisabled ?? '');
 @endphp

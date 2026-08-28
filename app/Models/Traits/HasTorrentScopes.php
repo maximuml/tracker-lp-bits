@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Traits;
 
+use App\Enums\TorrentVisible;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -33,7 +34,7 @@ trait HasTorrentScopes
      * @param  mixed  $visible
      * @return mixed
      */
-    public function scopeVisible($query, $visible = self::VISIBLE_YES)
+    public function scopeVisible($query, $visible = TorrentVisible::YES->value)
     {
         $query->where('visible', $visible);
     }
@@ -44,6 +45,6 @@ trait HasTorrentScopes
      */
     public function scopeNormal($query)
     {
-        $query->where('visible', self::VISIBLE_YES)->where('banned', self::BANNED_NO);
+        $query->where('visible', TorrentVisible::YES->value)->where('banned', self::BANNED_NO);
     }
 }

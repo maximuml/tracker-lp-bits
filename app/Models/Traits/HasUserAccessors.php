@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Traits;
 
+use App\Enums\UserDonate;
 use App\Http\Middleware\Locale;
 use App\Support\Format;
 use App\Support\Logger;
@@ -19,10 +20,10 @@ trait HasUserAccessors
     public function getDonateStatusAttribute(): string
     {
         if ($this->isDonating()) {
-            return self::DONATE_YES;
+            return UserDonate::YES->value;
         }
 
-        return self::DONATE_NO;
+        return UserDonate::NO->value;
     }
 
     public function getLocaleAttribute(): string

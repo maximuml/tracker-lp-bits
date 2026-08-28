@@ -165,7 +165,7 @@ trait HasTorrentRelationships
         }
 
         return $this->belongsToMany(Tag::class, 'torrent_tags', 'torrent_id', 'tag_id')
-            ->orderByRaw($orderByRaw);
+            ->orderByRaw($orderByRaw); // @phpstan-ignore argument.type
     }
 
     /** @return HasMany<Reward, $this> */

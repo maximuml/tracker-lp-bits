@@ -189,6 +189,7 @@ final class OfferRepository extends BaseRepository
      */
     public static function getLegacyList(int $category, int $offerorId, string $search, string $sort, string $direction, int $offset, int $perPage): array
     {
+        $direction = $direction === 'asc' ? 'asc' : 'desc';
         $query = DB::table('offers')
             ->join('categories', 'offers.category', '=', 'categories.id')
             ->join('users', 'offers.userid', '=', 'users.id');

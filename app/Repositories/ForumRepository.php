@@ -705,7 +705,7 @@ class ForumRepository extends BaseRepository
     {
         $allowed = ['firstpost' => 'firstpost', 'lastpost' => 'lastpost'];
         $column = $allowed[$sortColumn] ?? 'lastpost';
-        $direction = in_array(strtolower($direction), ['asc', 'desc'], true) ? strtolower($direction) : 'desc';
+        $direction = strtolower($direction) === 'asc' ? 'asc' : 'desc';
 
         $query = Topic::query()->where('forumid', $forumid);
         if ($search !== '') {

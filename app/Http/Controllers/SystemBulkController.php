@@ -391,16 +391,13 @@ class SystemBulkController extends LegacyController
         $size = 2000;
         $page = 1;
 
-        $conditions = [];
+        $classIds = [];
         $classes = $request->input('classes', []);
         if (is_array($classes) && ! empty($classes)) {
-            $sanitized = array_filter(array_map('intval', $classes), fn ($v) => $v > 0);
-            if (! empty($sanitized)) {
-                $conditions[] = 'class IN ('.implode(', ', $sanitized).')';
-            }
+            $classIds = array_filter(array_map('intval', $classes), fn ($v) => $v > 0);
         }
 
-        if (empty($conditions)) {
+        if (empty($classIds)) {
             return $this->legacyAbortResponse('Error', 'No valid filter');
         }
 
@@ -412,7 +409,6 @@ class SystemBulkController extends LegacyController
         }
 
         set_time_limit(300);
-        $whereStr = implode(' OR ', $conditions);
 
         while (true) {
             $msgRows = [];
@@ -420,7 +416,7 @@ class SystemBulkController extends LegacyController
             $offset = ($page - 1) * $size;
 
             $users = DB::table('users')
-                ->whereRaw("({$whereStr})")
+                ->whereIn('class', $classIds)
                 ->where('enabled', 'yes')
                 ->where('status', 'confirmed')
                 ->offset($offset)

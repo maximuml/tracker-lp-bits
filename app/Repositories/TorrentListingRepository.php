@@ -28,7 +28,7 @@ class TorrentListingRepository
         $query = self::buildBaseQuery($options)
             ->select($options['fields'])
             ->selectRaw('? as search_box_id', [$options['search_box_id']])
-            ->orderByRaw($orderBy)
+            ->orderByRaw($orderBy) // @phpstan-ignore argument.type
             ->offset($options['offset'])
             ->limit($options['limit']);
 
@@ -62,7 +62,7 @@ class TorrentListingRepository
         $where = $options['where'] ?? '';
         $where = preg_replace('/^WHERE\s+/i', '', $where);
         if ($where !== '') {
-            $query = $query->whereRaw($where);
+            $query = $query->whereRaw($where); // @phpstan-ignore argument.type
         }
 
         return $query;

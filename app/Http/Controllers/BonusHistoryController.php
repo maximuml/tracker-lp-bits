@@ -169,7 +169,7 @@ JS;
             'torrent_count' => DB::raw('COUNT(torrents.id)'),
             default => 'users.username',
         };
-        $sortDirection = $order === 'username' ? 'ASC' : 'DESC';
+        $sortDirection = $order === 'username' ? 'asc' : 'desc';
 
         $dateFounded = (string) app(Globals::class)->get('datefounded', '2010-08-19');
         $yearFounded = (int) substr($dateFounded, 0, 4);

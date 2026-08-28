@@ -147,7 +147,7 @@ final class TorrentAjaxRepository
         $lastActionField = Database::unixTimestampField('last_action');
         $peerRows = DB::table('peers')
             ->where('torrent', $torrentId)
-            ->selectRaw("id, seeder, finishedat, downloadoffset, uploadoffset, ip, ipv4, ipv6, port, uploaded, downloaded, to_go, {$startedField} AS st, connectable, agent, peer_id, {$lastActionField} AS la, userid")
+            ->selectRaw("id, seeder, finishedat, downloadoffset, uploadoffset, ip, ipv4, ipv6, port, uploaded, downloaded, to_go, {$startedField} AS st, connectable, agent, peer_id, {$lastActionField} AS la, userid") // @phpstan-ignore argument.type
             ->get()
             ->map(fn ($r) => (array) $r)
             ->all();

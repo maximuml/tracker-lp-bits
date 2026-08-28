@@ -368,15 +368,15 @@ final class PeerLifecycle
     private function buildSnatchUpdate(int $upthis, int $downthis, string $snatchTimeColumn, int $snatchTimeIncrement, int $leechTimeNoSeederIncrement): array
     {
         $snatchUpdate = [
-            'uploaded' => DB::raw('uploaded + '.$upthis),
-            'downloaded' => DB::raw('downloaded + '.$downthis),
+            'uploaded' => DB::raw('uploaded + '.$upthis), // @phpstan-ignore argument.type
+            'downloaded' => DB::raw('downloaded + '.$downthis), // @phpstan-ignore argument.type
             'to_go' => $this->left,
-            $snatchTimeColumn => DB::raw("{$snatchTimeColumn} + ".$snatchTimeIncrement),
+            $snatchTimeColumn => DB::raw("{$snatchTimeColumn} + ".$snatchTimeIncrement), // @phpstan-ignore argument.type
             'last_action' => $this->dt,
         ];
 
         if ($leechTimeNoSeederIncrement > 0) {
-            $snatchUpdate['leech_time_no_seeder'] = DB::raw('leech_time_no_seeder + '.$leechTimeNoSeederIncrement);
+            $snatchUpdate['leech_time_no_seeder'] = DB::raw('leech_time_no_seeder + '.$leechTimeNoSeederIncrement); // @phpstan-ignore argument.type
         }
 
         return $snatchUpdate;

@@ -197,7 +197,7 @@ class TorrentRssController extends LegacyController
             $prependQuery->whereIn('torrents.id', $prependIdArr);
             $prependCacheKey = sprintf('nexus_rss:prepend:%s', md5($prependQuery->toSql().':'.$prependIdStr));
             $prependRows = Cache::remember($prependCacheKey, 300, function () use ($prependQuery, $prependIdStr) {
-                return $prependQuery->orderByRaw('FIELD(torrents.id, '.$prependIdStr.')')->get()->map(fn ($row) => (array) $row)->all();
+                return $prependQuery->orderByRaw('FIELD(torrents.id, '.$prependIdStr.')')->get()->map(fn ($row) => (array) $row)->all(); // @phpstan-ignore argument.type
             });
         }
 

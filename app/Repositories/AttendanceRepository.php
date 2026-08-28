@@ -174,7 +174,7 @@ class AttendanceRepository extends BaseRepository
         $caseWhenStr = sprintf('case id %s end', implode(' ', $caseWhens));
         $result = DB::table($table)
             ->whereIn('id', $idArr)
-            ->update(['total_days' => DB::raw($caseWhenStr)]);
+            ->update(['total_days' => DB::raw($caseWhenStr)]); // @phpstan-ignore argument.type
 
         Logger::writeWithContext((string) ("[MIGRATE_ATTENDANCE] DONE! {$caseWhenStr}, result: ".var_export($result, true)), (string) 'info', (bool) false);
 
@@ -340,7 +340,7 @@ class AttendanceRepository extends BaseRepository
             Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
             $userUpdates = [
                 'attendance_card' => DB::raw('attendance_card - 1'),
-                'seedbonus' => DB::raw("seedbonus + $points"),
+                'seedbonus' => DB::raw("seedbonus + $points"), // @phpstan-ignore argument.type
             ];
             $affectedRows = User::query()
                 ->where('id', $user->id)

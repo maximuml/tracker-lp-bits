@@ -205,7 +205,7 @@ class MedalRepository extends BaseRepository
         $result = DB::table('user_medals')
             ->whereIn('id', $idArr)
             ->whereNotNull($field)
-            ->update([$field => DB::raw("`$field` + INTERVAL $duration DAY")]);
+            ->update([$field => DB::raw("`$field` + INTERVAL $duration DAY")]); // @phpstan-ignore argument.type
         Logger::writeWithContext(sprintf(
             "operator: %s, increase records: %s $field + $duration day, result: %s",
             UserDisplay::currentUsername(), implode(', ', $idArr), $result

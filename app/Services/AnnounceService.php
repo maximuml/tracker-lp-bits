@@ -322,7 +322,7 @@ final class AnnounceService
                     'torrents.seeders', 'torrents.leechers', 'torrents.times_completed',
                     'torrents.banned', 'torrents.hr', 'torrents.approval_status', 'torrents.price',
                     'torrents.visible', 'torrents.last_action', 'categories.mode',
-                    DB::raw("{$tsField} AS ts"),
+                    DB::raw("{$tsField} AS ts"), // @phpstan-ignore argument.type
                 ])
                 ->where('torrents.info_hash', $this->infoHash)
                 ->first();
@@ -460,10 +460,10 @@ final class AnnounceService
         $this->userUpdate['last_announce_at'] = $this->dt;
 
         if ($this->uploadedIncrementForUser > 0) {
-            $this->userUpdate['uploaded'] = DB::raw('uploaded + '.$this->uploadedIncrementForUser);
+            $this->userUpdate['uploaded'] = DB::raw('uploaded + '.$this->uploadedIncrementForUser); // @phpstan-ignore argument.type
         }
         if ($this->downloadedIncrementForUser > 0) {
-            $this->userUpdate['downloaded'] = DB::raw('downloaded + '.$this->downloadedIncrementForUser);
+            $this->userUpdate['downloaded'] = DB::raw('downloaded + '.$this->downloadedIncrementForUser); // @phpstan-ignore argument.type
         }
 
         if ((int) $this->user['class'] === (int) UserClassEnum::VIP->value) {

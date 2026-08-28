@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config;
 use Nexus\Database\NexusDB;

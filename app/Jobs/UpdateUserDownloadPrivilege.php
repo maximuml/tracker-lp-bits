@@ -22,7 +22,7 @@ class UpdateUserDownloadPrivilege implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(public int $userId, public string $status, public string $reasonKey)
+    public function __construct(public readonly int $userId, public readonly string $status, public readonly string $reasonKey)
     {
         //
     }

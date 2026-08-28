@@ -4,19 +4,10 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
-use App\Auth\Permission;
 use App\Enums\BookmarkFilter;
-use App\Enums\ModelEventEnum;
 use App\Enums\PeerSeeder;
-use App\Enums\Permission\PermissionEnum;
-use App\Enums\PromotionTimeType;
 use App\Enums\SnatchFinished;
-use App\Enums\TorrentApprovalStatus;
-use App\Enums\TorrentOperationAction;
-use App\Enums\TorrentPosState;
-use App\Enums\TorrentPromotion;
 use App\Enums\TorrentVisible;
-use App\Exceptions\InsufficientPermissionException;
 use App\Exceptions\NexusException;
 use App\Http\Resources\TorrentResource;
 use App\Models\AudioCodec;
@@ -27,61 +18,35 @@ use App\Models\Media;
 use App\Models\Peer;
 use App\Models\Processing;
 use App\Models\SearchBox;
-use App\Models\SiteLog;
 use App\Models\Snatch;
 use App\Models\Source;
 use App\Models\Standard;
 use App\Models\Torrent;
-use App\Models\TorrentBuyLog;
-use App\Models\TorrentOperationLog;
-use App\Models\TorrentSecret;
 use App\Models\TorrentTag;
 use App\Models\User;
 use App\Support\Config\SiteConfig;
 use App\Support\Description;
-use App\Support\Env;
-use App\Support\Events;
 use App\Support\Format;
-use App\Support\Json;
 use App\Support\Locale;
 use App\Support\Logger;
-use App\Support\Path;
-use App\Support\Permissions;
 use App\Support\Strings;
-use App\Support\TorrentBookmark;
-use App\Support\TorrentOps;
-use App\Support\Url;
-use App\Support\UserDisplay;
 use App\Utils\ApiQueryBuilder;
-use Carbon\Carbon;
-use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
-use Hashids\Hashids;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Redis;
-use Illuminate\Support\Str;
-use Rhilip\Bencode\Bencode;
 
+/**
+ * Torrent repository: listing, detail, peer/snatch, and presentation helpers.
+ *
+ * Purchase, download, and moderation logic has been extracted to:
+ *
+ * @see TorrentPurchaseRepository
+ * @see TorrentDownloadRepository
+ * @see TorrentModerationRepository
+ */
 class TorrentRepository extends BaseRepository
 {
-    const BOUGHT_USER_CACHE_KEY_PREFIX = 'torrent_purchasers';
-
-    const BUY_FAIL_CACHE_KEY_PREFIX = 'torrent_purchase_fails';
-
-    const PIECES_HASH_CACHE_KEY = 'torrent_pieces_hash';
-
-    const BUY_STATUS_SUCCESS = 0;
-
-    const BUY_STATUS_NOT_YET = -1;
-
-    const BUY_STATUS_UNKNOWN = -2;
-
     /** @var array<int, string> */
     private static array $defaultLoadRelationships = [
         'basic_category', 'basic_category.search_box',
@@ -231,6 +196,7 @@ class TorrentRepository extends BaseRepository
         }
         Logger::writeWithContext((string) 'after prepare has data', (string) 'info', (bool) false);
 
+        $downloadRepo = new TorrentDownloadRepository;
         foreach ($torrentList as $torrent) {
             $id = $torrent->id;
             if ($hasFieldHasBookmarked) {
@@ -252,24 +218,12 @@ class TorrentRepository extends BaseRepository
                 $torrent->images = Description::imageFromDescription($descriptionArr);
             }
             if ($apiQueryBuilder->hasIncludeField('download_url')) {
-                $torrent->download_url = $this->getDownloadUrl($id, $user);
+                $torrent->download_url = $downloadRepo->getDownloadUrl($id, $user);
             }
         }
         Logger::writeWithContext((string) 'after fill has data', (string) 'info', (bool) false);
 
         return $torrentList;
-    }
-
-    /**
-     * @param  mixed  $id
-     * @param  array<int|string, mixed>|User  $user
-     */
-    public function getDownloadUrl($id, array|User $user): string
-    {
-        return sprintf(
-            '%s/download.php?downhash=%s.%s',
-            Url::schemeAndHost(false), is_array($user) ? $user['id'] : $user->id, $this->encryptDownHash($id, $user)
-        );
     }
 
     /**
@@ -511,517 +465,19 @@ class TorrentRepository extends BaseRepository
         return "$speed/s";
     }
 
-    /** @var array<string, string> */
-    private static array $downHashKeys = [];
-
     /**
-     * @param  mixed  $id
-     * @param  mixed  $user
-     */
-    public function encryptDownHash($id, $user): string
-    {
-        $userInfo = $this->getUserForDownHash($user);
-        $key = $this->getHkdfDownHashKey($userInfo['id'], $userInfo['passkey']);
-        $payload = [
-            'id' => $id,
-            'exp' => time() + 3600,
-        ];
-
-        return JWT::encode($payload, $key, 'HS256');
-    }
-
-    /**
-     * @param  mixed  $downHash
-     * @param  mixed  $user
-     * @return array<int|string, mixed>
-     */
-    public function decryptDownHash($downHash, $user)
-    {
-        $userInfo = $this->getUserForDownHash($user);
-        $keys = $this->buildDownHashVerificationKeys($userInfo['id'], $userInfo['passkey']);
-
-        foreach ($keys as $key) {
-            try {
-                $decoded = JWT::decode($downHash, new Key($key, 'HS256'));
-
-                return [$decoded->id];
-            } catch (\Exception $e) {
-                continue;
-            }
-        }
-
-        Logger::write("Invalid down hash: $downHash", 'error');
-
-        return [];
-    }
-
-    /**
-     * @param  mixed  $user
-     * @return array{id: int, passkey: string}
-     */
-    private function getUserForDownHash($user): array
-    {
-        $passkey = '';
-        if ($user instanceof User && $user->passkey) {
-            $passkey = $user->passkey;
-            $id = (int) $user->id;
-        } elseif (is_array($user) && ! empty($user['passkey'])) {
-            $passkey = $user['passkey'];
-            $id = (int) $user['id'];
-        } elseif (is_scalar($user)) {
-            $user = User::query()->findOrFail(intval($user), ['id', 'passkey']);
-            $passkey = $user->passkey;
-            $id = (int) $user->id;
-        } else {
-            throw new \InvalidArgumentException('Invalid user: '.json_encode($user));
-        }
-
-        if (empty($passkey)) {
-            throw new \InvalidArgumentException('Invalid user: '.json_encode($user));
-        }
-
-        return ['id' => $id, 'passkey' => (string) $passkey];
-    }
-
-    /**
-     * @return array<int, string>
-     */
-    private function buildDownHashVerificationKeys(int $userId, string $passkey): array
-    {
-        $keys = [$this->getHkdfDownHashKey($userId, $passkey)];
-
-        // Legacy md5-based keys are still accepted until the user changes their
-        // passkey; the old key material includes the passkey, so a passkey
-        // rotation automatically invalidates any previously issued md5 downhash.
-        $now = time();
-        foreach ([$now, $now - 86400, $now - 2 * 86400] as $ts) {
-            $keys[] = $this->getLegacyMd5DownHashKey($userId, $passkey, date('Ymd', $ts));
-        }
-
-        return $keys;
-    }
-
-    private function getHkdfDownHashKey(int $userId, string $passkey): string
-    {
-        $cacheKey = $userId.':'.$passkey;
-        if (isset(self::$downHashKeys[$cacheKey])) {
-            return self::$downHashKeys[$cacheKey];
-        }
-
-        $appKey = (string) Env::get('APP_KEY', '');
-        if ($appKey === '') {
-            throw new \RuntimeException('APP_KEY is not configured for downhash');
-        }
-
-        if (str_starts_with($appKey, 'base64:')) {
-            $appKey = base64_decode(substr($appKey, 7));
-        }
-
-        return self::$downHashKeys[$cacheKey] = hash_hkdf('sha256', $appKey, 32, 'nexus-downhash-'.$userId.'-'.$passkey);
-    }
-
-    private function getLegacyMd5DownHashKey(int $userId, string $passkey, string $dateYmd): string
-    {
-        return md5($passkey.$dateYmd.$userId);
-    }
-
-    /**
-     * @param  mixed  $id
-     * @param  mixed  $uid
-     * @param  mixed  $initializeIfNotExists
-     *
-     * @deprecated
-     *
-     * @throws NexusException
-     */
-    public function getTrackerReportAuthKey($id, $uid, $initializeIfNotExists = false): string
-    {
-        $key = $this->getTrackerReportAuthKeySecret($id, $uid, $initializeIfNotExists);
-        $hash = (new Hashids($key))->encode(date('Ymd'));
-
-        return sprintf('%s|%s|%s', $id, $uid, $hash);
-    }
-
-    /**
-     * check tracker report authkey
-     * if valid, the result will be the date the key generate, else if will be empty string
-     *
-     * @param  mixed  $authKey
-     * @return array<int|string, mixed>
-     *
-     * @deprecated
-     *
-     * @date 2021/6/3
-     *
-     * @time 20:29
-     *
-     * @throws NexusException
-     */
-    public function checkTrackerReportAuthKey($authKey)
-    {
-        $arr = explode('|', $authKey);
-        if (count($arr) != 3) {
-            throw new NexusException('Invalid authkey');
-        }
-        $id = $arr[0];
-        $uid = $arr[1];
-        $hash = $arr[2];
-        $key = $this->getTrackerReportAuthKeySecret($id, $uid);
-
-        return (new Hashids($key))->decode($hash);
-    }
-
-    /**
-     * @param  mixed  $id
-     * @param  mixed  $uid
-     * @param  mixed  $initializeIfNotExists
+     * @param  array<int|string, mixed>  $torrentInfo
+     * @param  mixed  $size
+     * @param  mixed  $verticalAlign
      * @return mixed
      */
-    private function getTrackerReportAuthKeySecret($id, $uid, $initializeIfNotExists = false)
+    public function getPaidIcon(array $torrentInfo, $size = 16, $verticalAlign = 'sub')
     {
-        $secret = Cache::remember("torrent_secret_{$uid}_{$id}", 3600, function () use ($id, $uid) {
-            return TorrentSecret::query()
-                ->where('uid', $uid)
-                ->whereIn('torrent_id', [0, $id])
-                ->orderBy('torrent_id', 'desc')
-                ->orderBy('id', 'desc')
-                ->first() ?? false;
-        });
-
-        if ($secret) {
-            return $secret->secret;
-        }
-        if ($initializeIfNotExists) {
-            $insert = [
-                'uid' => $uid,
-                'torrent_id' => 0,
-                'secret' => Str::random(),
-            ];
-            Logger::writeWithContext((string) ('[INSERT_TORRENT_SECRET] '.json_encode($insert)), (string) 'info', (bool) false);
-            TorrentSecret::query()->insert($insert);
-
-            return $insert['secret'];
-        }
-        throw new NexusException('No valid report secret, please re-download this torrent.');
-    }
-
-    /**
-     * reset user tracker report authkey secret
-     *
-     * @param  mixed  $uid
-     * @param  mixed  $torrentId
-     *
-     * @todo wrap with transaction
-     *
-     * @date 2021/6/3
-     *
-     * @time 20:15
-     */
-    public function resetTrackerReportAuthKeySecret($uid, $torrentId = 0): string
-    {
-        $insert = [
-            'uid' => $uid,
-            'secret' => Str::random(),
-            'torrent_id' => $torrentId,
-        ];
-        if ($torrentId > 0) {
-            TorrentSecret::query()->insert($insert);
-
-            return $insert['secret'];
+        if (! isset($torrentInfo['price']) || $torrentInfo['price'] <= 0) {
+            return '';
         }
 
-        TorrentSecret::query()->where('uid', $uid)->delete();
-        TorrentSecret::query()->insert($insert);
-
-        return $insert['secret'];
-
-    }
-
-    /**
-     * @param  mixed  $user
-     * @return array<int|string, mixed>
-     */
-    public function buildApprovalModal($user, int $torrentId)
-    {
-        $user = $this->getUser($user);
-        Permission::assertCan(PermissionEnum::TORRENT_APPROVAL, $user);
-        $torrent = Torrent::query()->findOrFail($torrentId, ['id', 'approval_status', 'banned']);
-        $radios = [];
-        foreach (Torrent::$approvalStatus as $key => $value) {
-            if ($torrent->approval_status == $key) {
-                $checked = ' checked';
-            } else {
-                $checked = '';
-            }
-            $radios[] = sprintf(
-                '<label><input type="radio" name="params[approval_status]" value="%s"%s>%s</label>',
-                $key, $checked, Locale::trans("torrent.approval.status_text.{$key}", [], null)
-            );
-        }
-        $id = 'torrent-approval';
-        $rows = [];
-        $rowStyle = 'display: flex; padding: 10px; align-items: center';
-        $labelStyle = 'width: 80px';
-        $formId = "$id-form";
-        $rows[] = sprintf(
-            '<div class="%s-row" style="%s"><div style="%s">%s: </div><div>%s</div></div>',
-            $id, $rowStyle, $labelStyle, Locale::trans('torrent.approval.status_label', [], null), implode('', $radios)
-        );
-        $rows[] = sprintf(
-            '<div class="%s-row" style="%s"><div style="%s">%s: </div><div><textarea name="params[comment]" rows="4" cols="40"></textarea></div></div>',
-            $id, $rowStyle, $labelStyle, Locale::trans('torrent.approval.comment_label', [], null)
-        );
-        $rows[] = sprintf('<input type="hidden" name="params[torrent_id]" value="%s" />', $torrent->id);
-
-        $html = sprintf('<div id="%s-box" style="padding: 15px 30px"><form id="%s">%s</form></div>', $id, $formId, implode('', $rows));
-
-        return [
-            'id' => $id,
-            'form_id' => $formId,
-            'title' => Locale::trans('torrent.approval.modal_title', [], null),
-            'content' => $html,
-        ];
-
-    }
-
-    /**
-     * @param  mixed  $user
-     * @param  array<int|string, mixed>  $params
-     * @return array<int|string, mixed>
-     */
-    public function approval($user, array $params): array
-    {
-        $user = $this->getUser($user) ?? Auth::user();
-        Permission::assertCan(PermissionEnum::TORRENT_APPROVAL, $user);
-        if (! $user instanceof User) {
-            throw new InsufficientPermissionException;
-        }
-        $torrentId = (int) $params['torrent_id'];
-        $approvalStatus = (int) $params['approval_status'];
-        $comment = (string) ($params['comment'] ?? '');
-        $torrent = Torrent::query()->findOrFail($torrentId, Torrent::$commentFields);
-        $lastLog = TorrentOperationLog::query()
-            ->where('torrent_id', $torrentId)
-            ->where('uid', $user->id)
-            ->orderBy('id', 'desc')
-            ->first();
-        if ($torrent->approval_status == $approvalStatus && $lastLog && $lastLog->comment == $comment) {
-            // No change
-            return $params;
-        }
-        $torrentUpdate = $torrentOperationLog = [];
-        $torrentUpdate['approval_status'] = $approvalStatus;
-        $notifyUser = false;
-        if ($approvalStatus == TorrentApprovalStatus::ALLOW->value) {
-            $torrentUpdate['banned'] = 'no';
-            $torrentUpdate['visible'] = 'yes';
-            if ($torrent->approval_status != $approvalStatus) {
-                $torrentOperationLog['action_type'] = TorrentOperationAction::APPROVAL_ALLOW->value;
-                // increase promotion time
-                if (
-                    ! SiteConfig::current()->torrent->approvalStatusNoneVisible()
-                    && $torrent->sp_state != TorrentPromotion::NORMAL->value
-                    && $torrent->promotion_until
-                ) {
-                    $hasBeenDownloaded = Snatch::query()->where('torrentid', $torrent->id)->exists();
-                    $log = "Torrent: {$torrent->id} is in promotion, hasBeenDownloaded: $hasBeenDownloaded";
-                    if (! $hasBeenDownloaded) {
-                        $diffInSeconds = $torrent->promotion_until->diffInSeconds($torrent->added, true);
-                        $log .= ", addSeconds: $diffInSeconds";
-                        $torrentUpdate['promotion_until'] = $torrent->promotion_until->addSeconds($diffInSeconds);
-                    }
-                    Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
-                }
-            }
-            if ($torrent->approval_status == TorrentApprovalStatus::DENY->value) {
-                $notifyUser = true;
-            }
-        } elseif ($approvalStatus == TorrentApprovalStatus::DENY->value) {
-            $torrentUpdate['banned'] = 'yes';
-            $torrentUpdate['visible'] = 'no';
-            // Deny, record and notify all the time
-            $torrentOperationLog['action_type'] = TorrentOperationAction::APPROVAL_DENY->value;
-            $notifyUser = true;
-        } elseif ($approvalStatus == TorrentApprovalStatus::NONE->value) {
-            $torrentUpdate['banned'] = 'no';
-            $torrentUpdate['visible'] = 'yes';
-            if ($torrent->approval_status != $approvalStatus) {
-                $torrentOperationLog['action_type'] = TorrentOperationAction::APPROVAL_NONE->value;
-            }
-            if ($torrent->approval_status == TorrentApprovalStatus::DENY->value) {
-                $notifyUser = true;
-            }
-        } else {
-            throw new \InvalidArgumentException('Invalid approval_status: '.$approvalStatus);
-        }
-
-        if (isset($torrentOperationLog['action_type'])) {
-            $torrentOperationLog['uid'] = $user->id;
-            $torrentOperationLog['torrent_id'] = $torrent->id;
-            $torrentOperationLog['comment'] = $comment;
-        }
-
-        DB::transaction(function () use ($torrent, $torrentOperationLog, $torrentUpdate, $notifyUser) {
-            $log = 'torrent: '.$torrent->id;
-            /** @var array<string, mixed> $torrentUpdate */
-            $log .= ', [UPDATE_TORRENT]: '.Json::encode($torrentUpdate);
-            $torrent->update($torrentUpdate);
-            if (! empty($torrentOperationLog)) {
-                $log .= ', [ADD_TORRENT_OPERATION_LOG]: '.Json::encode($torrentOperationLog);
-                TorrentOperationLog::add($torrentOperationLog, $notifyUser);
-            }
-            Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
-        });
-
-        return $params;
-
-    }
-
-    /**
-     * @param  mixed  $approvalStatus
-     * @param  mixed  $show
-     */
-    public function renderApprovalStatus($approvalStatus, $show = null): string
-    {
-        if ($show === null) {
-            $show = $this->shouldShowApprovalStatusIcon($approvalStatus);
-        }
-        if ($show) {
-            return sprintf(
-                '<span style="margin-left: 6px" title="%s">%s</span>',
-                Locale::trans("torrent.approval.status_text.{$approvalStatus}", [], null),
-                Torrent::$approvalStatus[$approvalStatus]['icon']
-            );
-        }
-
-        return '';
-    }
-
-    /** @param  mixed  $approvalStatus */
-    public function shouldShowApprovalStatusIcon($approvalStatus): bool
-    {
-        if (SiteConfig::current()->torrent->approvalStatusIconEnabled()) {
-            // 启用审核状态图标，肯定显示
-            return true;
-        }
-        if (
-            $approvalStatus != TorrentApprovalStatus::ALLOW->value
-            && ! SiteConfig::current()->torrent->approvalStatusNoneVisible()
-        ) {
-            // 不启用审核状态图标，尽量不显示。在种子不是审核通过状态，而审核不通过又不能被用户看到时，显示
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * @param  mixed  $id
-     * @param  array<int|string, mixed>  $tagIdArr
-     * @param  mixed  $remove
-     * @return mixed
-     */
-    public function syncTags($id, array $tagIdArr = [], $remove = true)
-    {
-        Permission::assertCan(PermissionEnum::TORRENT_MANAGE);
-        $idArr = Arr::wrap($id);
-
-        return DB::transaction(function () use ($idArr, $tagIdArr, $remove) {
-            $time = now()->toDateTimeString();
-            $records = [];
-            foreach ($idArr as $torrentId) {
-                foreach ($tagIdArr as $tagId) {
-                    $records[] = [
-                        'torrent_id' => $torrentId,
-                        'tag_id' => $tagId,
-                        'created_at' => $time,
-                        'updated_at' => $time,
-                    ];
-                }
-            }
-            if ($remove) {
-                TorrentTag::query()->whereIn('torrent_id', $idArr)->delete();
-            }
-            if (! empty($records)) {
-                DB::table('torrent_tags')->upsert($records, ['torrent_id', 'tag_id'], ['updated_at']);
-            }
-
-            return count($records);
-        });
-
-    }
-
-    /**
-     * @param  mixed  $id
-     * @param  mixed  $posState
-     * @param  mixed  $posStateUntil
-     */
-    public function setPosState($id, $posState, $posStateUntil = null): int
-    {
-        Permission::assertCan(PermissionEnum::TORRENT_SET_STICKY);
-        if ($posState == TorrentPosState::NONE->value) {
-            $posStateUntil = null;
-        }
-        if ($posStateUntil && Carbon::parse($posStateUntil)->lte(now())) {
-            $posState = TorrentPosState::NONE->value;
-            $posStateUntil = null;
-        }
-        $update = [
-            'pos_state' => $posState,
-            'pos_state_until' => $posStateUntil,
-        ];
-        $idArr = Arr::wrap($id);
-
-        return Torrent::query()->whereIn('id', $idArr)->update($update);
-    }
-
-    /**
-     * @param  mixed  $id
-     * @param  mixed  $hrStatus
-     */
-    public function setHr($id, $hrStatus): int
-    {
-        Permission::assertCan(PermissionEnum::TORRENT_MANAGE);
-        if (! isset(Torrent::$hrStatus[$hrStatus])) {
-            throw new \InvalidArgumentException("Invalid hrStatus: $hrStatus");
-        }
-        $update = [
-            'hr' => $hrStatus,
-        ];
-        $idArr = Arr::wrap($id);
-        Logger::writeWithContext((string) sprintf('set torrent: %s hr: %s', implode(',', $idArr), $hrStatus), (string) 'info', (bool) false);
-
-        return Torrent::query()->whereIn('id', $idArr)->update($update);
-    }
-
-    /**
-     * @param  mixed  $id
-     * @param  mixed  $spState
-     * @param  mixed  $promotionTimeType
-     * @param  mixed  $promotionUntil
-     */
-    public function setSpState($id, $spState, $promotionTimeType, $promotionUntil = null): int
-    {
-        Permission::assertCan(PermissionEnum::TORRENT_ON_PROMOTION);
-        if (TorrentPromotion::tryFrom((int) $spState) === null) {
-            throw new \InvalidArgumentException("Invalid spState: $spState");
-        }
-        if (PromotionTimeType::tryFrom((int) $promotionTimeType) === null) {
-            throw new \InvalidArgumentException("Invalid promotionTimeType: $promotionTimeType");
-        }
-        if (in_array((int) $promotionTimeType, [PromotionTimeType::GLOBAL->value, PromotionTimeType::PERMANENT->value])) {
-            $promotionUntil = null;
-        } elseif (! $promotionUntil || Carbon::parse($promotionUntil)->lte(now())) {
-            throw new \InvalidArgumentException("Invalid promotionUntil: $promotionUntil");
-        }
-        $update = [
-            'sp_state' => $spState,
-            'promotion_time_type' => $promotionTimeType,
-            'promotion_until' => $promotionUntil,
-        ];
-        $idArr = Arr::wrap($id);
-
-        return Torrent::query()->whereIn('id', $idArr)->update($update);
+        return sprintf('<span title="%s" style="vertical-align: %s"><svg t="1676058062789" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3406" width="%s" height="%s"><path d="M554.666667 810.666667v42.666666h-85.333334v-42.666666c-93.866667 0-170.666667-76.8-170.666666-170.666667h85.333333c0 46.933333 38.4 85.333333 85.333333 85.333333v-170.666666c-93.866667 0-170.666667-76.8-170.666666-170.666667s76.8-170.666667 170.666666-170.666667V170.666667h85.333334v42.666666c93.866667 0 170.666667 76.8 170.666666 170.666667h-85.333333c0-46.933333-38.4-85.333333-85.333333-85.333333v170.666666h17.066666c29.866667 0 68.266667 17.066667 98.133334 42.666667 34.133333 29.866667 59.733333 76.8 59.733333 128-4.266667 93.866667-81.066667 170.666667-174.933333 170.666667z m0-85.333334c46.933333 0 85.333333-38.4 85.333333-85.333333s-38.4-85.333333-85.333333-85.333333v170.666666zM469.333333 298.666667c-46.933333 0-85.333333 38.4-85.333333 85.333333s38.4 85.333333 85.333333 85.333333V298.666667z" fill="#CD7F32" p-id="3407"></path></svg></span>', Locale::trans('torrent.paid_torrent', [], null), $verticalAlign, $size, $size);
     }
 
     /**
@@ -1469,90 +925,206 @@ HTML;
         return array_map(fn ($id) => (int) $id, $rows);
     }
 
+    // ──────────────────────────────────────────────────────────────────────────
+    //  Delegating methods — backward compatibility for callers not yet updated
+    //  to use TorrentPurchaseRepository, TorrentDownloadRepository, or
+    //  TorrentModerationRepository directly.
+    // ──────────────────────────────────────────────────────────────────────────
+
     /**
-     * Delete one or more torrents and related records.
-     *
-     * Mirrors the legacy {@see TorrentOps::deleteTorrents()}.
-     *
-     * @param  int|int[]  $id
+     * @param  mixed  $torrentId
      */
-    public function deleteTorrents(int|array $id, bool $notify = false): void
+    public function loadBoughtUser($torrentId): int
     {
-        $idArr = array_map('intval', is_array($id) ? $id : [$id]);
+        return (new TorrentPurchaseRepository)->loadBoughtUser($torrentId);
+    }
 
-        $torrentInfo = Torrent::query()
-            ->whereIn('id', $idArr)
-            ->get()
-            ->keyBy('id');
+    /**
+     * @param  mixed  $uid
+     * @param  mixed  $torrentId
+     * @param  mixed  $buyLogId
+     */
+    public function addBuySuccessCache($uid, $torrentId, $buyLogId): void
+    {
+        (new TorrentPurchaseRepository)->addBuySuccessCache($uid, $torrentId, $buyLogId);
+    }
 
-        $torrentDir = SiteConfig::current()->main->torrentDir();
+    /**
+     * @param  mixed  $uid
+     * @param  mixed  $torrentId
+     */
+    public function hasBuySuccessCache($uid, $torrentId): bool
+    {
+        return (new TorrentPurchaseRepository)->hasBuySuccessCache($uid, $torrentId);
+    }
 
-        DB::table('torrents')->whereIn('id', $idArr)->delete();
-        DB::table('torrent_extras')->whereIn('torrent_id', $idArr)->delete();
-        DB::table('snatched')
-            ->whereIn('torrentid', $idArr)
-            ->whereNotExists(function ($query) {
-                $query->selectRaw('1')->from('users')->whereColumn('users.id', '=', 'snatched.userid');
-            })
-            ->delete();
+    /**
+     * @param  mixed  $uid
+     * @param  mixed  $torrentId
+     */
+    public function hasBuySuccess($uid, $torrentId): bool
+    {
+        return (new TorrentPurchaseRepository)->hasBuySuccess($uid, $torrentId);
+    }
 
-        foreach (['peers', 'files', 'comments'] as $x) {
-            DB::table($x)->whereIn('torrent', $idArr)->delete();
-        }
+    /**
+     * @param  mixed  $uid
+     * @param  mixed  $torrentId
+     */
+    public function getBuyStatus($uid, $torrentId): int
+    {
+        return (new TorrentPurchaseRepository)->getBuyStatus($uid, $torrentId);
+    }
 
-        DB::table('hit_and_runs')->whereIn('torrent_id', $idArr)->delete();
+    /**
+     * @param  mixed  $uid
+     * @param  mixed  $torrentId
+     */
+    public function addBuyFailCache($uid, $torrentId): void
+    {
+        (new TorrentPurchaseRepository)->addBuyFailCache($uid, $torrentId);
+    }
 
-        foreach ($idArr as $_id) {
-            /** @var Torrent|null $torrent */
-            $torrent = $torrentInfo->get($_id);
+    /**
+     * @param  mixed  $uid
+     * @param  mixed  $torrentId
+     */
+    public function getBuyFailCache($uid, $torrentId): int
+    {
+        return (new TorrentPurchaseRepository)->getBuyFailCache($uid, $torrentId);
+    }
 
-            if ($torrent instanceof Torrent) {
-                $this->delPiecesHashCache((string) $torrent->getAttribute('pieces_hash'));
-            }
+    /**
+     * @param  mixed  $id
+     * @param  array<int|string, mixed>|User  $user
+     */
+    public function getDownloadUrl($id, array|User $user): string
+    {
+        return (new TorrentDownloadRepository)->getDownloadUrl($id, $user);
+    }
 
-            Logger::writeWithContext("delete torrent: $_id", 'error');
-            @unlink(Path::resolve("$torrentDir/$_id.torrent", defined('ROOT_PATH') ? (string) ROOT_PATH : ''));
+    /**
+     * @param  mixed  $id
+     * @param  mixed  $user
+     */
+    public function encryptDownHash($id, $user): string
+    {
+        return (new TorrentDownloadRepository)->encryptDownHash($id, $user);
+    }
 
-            TorrentOperationLog::add([
-                'torrent_id' => $_id,
-                'uid' => UserDisplay::currentId(),
-                'action_type' => TorrentOperationAction::DELETE->value,
-                'comment' => '',
-            ], $notify);
+    /**
+     * @param  mixed  $downHash
+     * @param  mixed  $user
+     * @return array<int|string, mixed>
+     */
+    public function decryptDownHash($downHash, $user)
+    {
+        return (new TorrentDownloadRepository)->decryptDownHash($downHash, $user);
+    }
 
-            if ($torrent instanceof Torrent) {
-                Events::fire('torrent_deleted', $torrent);
-            }
-        }
+    /**
+     * @param  mixed  $id
+     * @param  mixed  $uid
+     * @param  mixed  $initializeIfNotExists
+     */
+    public function getTrackerReportAuthKey($id, $uid, $initializeIfNotExists = false): string
+    {
+        return (new TorrentDownloadRepository)->getTrackerReportAuthKey($id, $uid, $initializeIfNotExists);
+    }
 
-        try {
-            $meiliSearchRep = app(MeiliSearchRepository::class);
-            $meiliSearchRep->deleteDocuments($idArr);
-        } catch (\Throwable $e) {
-            Logger::writeWithContext('MeiliSearch delete on torrent delete failed: '.$e->getMessage(), 'error');
-        }
+    /**
+     * @param  mixed  $authKey
+     * @return array<int|string, mixed>
+     */
+    public function checkTrackerReportAuthKey($authKey)
+    {
+        return (new TorrentDownloadRepository)->checkTrackerReportAuthKey($authKey);
+    }
+
+    /**
+     * @param  mixed  $uid
+     * @param  mixed  $torrentId
+     */
+    public function resetTrackerReportAuthKeySecret($uid, $torrentId = 0): string
+    {
+        return (new TorrentDownloadRepository)->resetTrackerReportAuthKeySecret($uid, $torrentId);
+    }
+
+    public function addPiecesHashCache(int $torrentId, string $piecesHash): bool|int|\Redis
+    {
+        return (new TorrentDownloadRepository)->addPiecesHashCache($torrentId, $piecesHash);
+    }
+
+    public function delPiecesHashCache(string $piecesHash): bool|int|\Redis
+    {
+        return (new TorrentDownloadRepository)->delPiecesHashCache($piecesHash);
+    }
+
+    /**
+     * @param  mixed  $piecesHash
+     * @return array<int|string, mixed>
+     */
+    public function getPiecesHashCache($piecesHash): array
+    {
+        return (new TorrentDownloadRepository)->getPiecesHashCache($piecesHash);
+    }
+
+    /**
+     * @param  mixed  $id
+     * @return array<int|string, mixed>
+     */
+    public function loadPiecesHashCache($id = 0): array
+    {
+        return (new TorrentDownloadRepository)->loadPiecesHashCache($id);
     }
 
     public function touchCacheStamp(int|string $torrentId, string $field = 'cache_stamp'): void
     {
-        DB::table('torrents')
-            ->where('id', $torrentId)
-            ->update([$field => time()]);
+        (new TorrentDownloadRepository)->touchCacheStamp($torrentId, $field);
     }
 
     public function resetCacheStamp(int|string $torrentId, string $field = 'cache_stamp'): void
     {
-        DB::table('torrents')
-            ->where('id', $torrentId)
-            ->update([$field => 0]);
+        (new TorrentDownloadRepository)->resetCacheStamp($torrentId, $field);
+    }
+
+    /**
+     * @param  mixed  $user
+     * @return array<int|string, mixed>
+     */
+    public function buildApprovalModal($user, int $torrentId)
+    {
+        return (new TorrentModerationRepository)->buildApprovalModal($user, $torrentId);
+    }
+
+    /**
+     * @param  mixed  $user
+     * @param  array<int|string, mixed>  $params
+     * @return array<int|string, mixed>
+     */
+    public function approval($user, array $params): array
+    {
+        return (new TorrentModerationRepository)->approval($user, $params);
+    }
+
+    /**
+     * @param  mixed  $approvalStatus
+     * @param  mixed  $show
+     */
+    public function renderApprovalStatus($approvalStatus, $show = null): string
+    {
+        return (new TorrentModerationRepository)->renderApprovalStatus($approvalStatus, $show);
+    }
+
+    /** @param  mixed  $approvalStatus */
+    public function shouldShowApprovalStatusIcon($approvalStatus): bool
+    {
+        return (new TorrentModerationRepository)->shouldShowApprovalStatusIcon($approvalStatus);
     }
 
     public static function getApprovalDenyCount(int $ownerId): int
     {
-        return (int) Torrent::query()
-            ->where('owner', $ownerId)
-            ->where('approval_status', TorrentApprovalStatus::DENY->value)
-            ->count();
+        return TorrentModerationRepository::getApprovalDenyCount($ownerId);
     }
 
     /**
@@ -1567,5 +1139,63 @@ HTML;
             ->first();
 
         return $record ? (array) $record : false;
+    }
+
+    /**
+     * @param  mixed  $id
+     * @param  array<int|string, mixed>  $tagIdArr
+     * @param  mixed  $remove
+     * @return mixed
+     */
+    public function syncTags($id, array $tagIdArr = [], $remove = true)
+    {
+        return (new TorrentModerationRepository)->syncTags($id, $tagIdArr, $remove);
+    }
+
+    /**
+     * @param  mixed  $id
+     * @param  mixed  $posState
+     * @param  mixed  $posStateUntil
+     */
+    public function setPosState($id, $posState, $posStateUntil = null): int
+    {
+        return (new TorrentModerationRepository)->setPosState($id, $posState, $posStateUntil);
+    }
+
+    /**
+     * @param  mixed  $id
+     * @param  mixed  $hrStatus
+     */
+    public function setHr($id, $hrStatus): int
+    {
+        return (new TorrentModerationRepository)->setHr($id, $hrStatus);
+    }
+
+    /**
+     * @param  mixed  $id
+     * @param  mixed  $spState
+     * @param  mixed  $promotionTimeType
+     * @param  mixed  $promotionUntil
+     */
+    public function setSpState($id, $spState, $promotionTimeType, $promotionUntil = null): int
+    {
+        return (new TorrentModerationRepository)->setSpState($id, $spState, $promotionTimeType, $promotionUntil);
+    }
+
+    /**
+     * @param  Collection<int, mixed>|\Illuminate\Database\Eloquent\Collection<int, mixed>  $torrents
+     * @param  array<int|string, mixed>  $specificSubCategoryAndTags
+     */
+    public function changeCategory(Collection|\Illuminate\Database\Eloquent\Collection $torrents, int $sectionId, array $specificSubCategoryAndTags): void
+    {
+        (new TorrentModerationRepository)->changeCategory($torrents, $sectionId, $specificSubCategoryAndTags);
+    }
+
+    /**
+     * @param  int|int[]  $id
+     */
+    public function deleteTorrents(int|array $id, bool $notify = false): void
+    {
+        (new TorrentModerationRepository)->deleteTorrents($id, $notify);
     }
 }

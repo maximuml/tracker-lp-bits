@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class AnnounceController extends Controller
 {
-    public function __construct(private AnnounceService $service) {}
+    public function __construct(private readonly AnnounceService $service) {}
 
     public function announce(Request $request): Response
     {

@@ -26,7 +26,7 @@ class FireEvent implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(public string $name, public string $idKey, public string $idKeyOld = '')
+    public function __construct(public readonly string $name, public readonly string $idKey, public readonly string $idKeyOld = '')
     {
         //
     }

@@ -188,11 +188,11 @@ class TorrentSearchRepository
         if ($hasSearchParams) {
             $inclbookmarked = intval($searchParams['inclbookmarked'] ?? 0);
         } elseif ($CURUSER['notifs']) {
-            if (strpos($CURUSER['notifs'], '[inclbookmarked=0]') !== false) {
+            if (str_contains($CURUSER['notifs'], '[inclbookmarked=0]')) {
                 $inclbookmarked = 0;
-            } elseif (strpos($CURUSER['notifs'], '[inclbookmarked=1]') !== false) {
+            } elseif (str_contains($CURUSER['notifs'], '[inclbookmarked=1]')) {
                 $inclbookmarked = 1;
-            } elseif (strpos($CURUSER['notifs'], '[inclbookmarked=2]') !== false) {
+            } elseif (str_contains($CURUSER['notifs'], '[inclbookmarked=2]')) {
                 $inclbookmarked = 2;
             }
         }
@@ -220,11 +220,11 @@ class TorrentSearchRepository
         if (isset($searchParams['incldead'])) {
             $include_dead = intval($searchParams['incldead'] ?? 0);
         } elseif ($CURUSER['notifs']) {
-            if (strpos($CURUSER['notifs'], '[incldead=0]') !== false) {
+            if (str_contains($CURUSER['notifs'], '[incldead=0]')) {
                 $include_dead = 0;
-            } elseif (strpos($CURUSER['notifs'], '[incldead=1]') !== false) {
+            } elseif (str_contains($CURUSER['notifs'], '[incldead=1]')) {
                 $include_dead = 1;
-            } elseif (strpos($CURUSER['notifs'], '[incldead=2]') !== false) {
+            } elseif (str_contains($CURUSER['notifs'], '[incldead=2]')) {
                 $include_dead = 2;
             } else {
                 $include_dead = 1;
@@ -257,21 +257,21 @@ class TorrentSearchRepository
         if ($hasSearchParams) {
             $special_state = intval($searchParams['spstate'] ?? 0);
         } elseif ($CURUSER['notifs']) {
-            if (strpos($CURUSER['notifs'], '[spstate=0]') !== false) {
+            if (str_contains($CURUSER['notifs'], '[spstate=0]')) {
                 $special_state = 0;
-            } elseif (strpos($CURUSER['notifs'], '[spstate=1]') !== false) {
+            } elseif (str_contains($CURUSER['notifs'], '[spstate=1]')) {
                 $special_state = 1;
-            } elseif (strpos($CURUSER['notifs'], '[spstate=2]') !== false) {
+            } elseif (str_contains($CURUSER['notifs'], '[spstate=2]')) {
                 $special_state = 2;
-            } elseif (strpos($CURUSER['notifs'], '[spstate=3]') !== false) {
+            } elseif (str_contains($CURUSER['notifs'], '[spstate=3]')) {
                 $special_state = 3;
-            } elseif (strpos($CURUSER['notifs'], '[spstate=4]') !== false) {
+            } elseif (str_contains($CURUSER['notifs'], '[spstate=4]')) {
                 $special_state = 4;
-            } elseif (strpos($CURUSER['notifs'], '[spstate=5]') !== false) {
+            } elseif (str_contains($CURUSER['notifs'], '[spstate=5]')) {
                 $special_state = 5;
-            } elseif (strpos($CURUSER['notifs'], '[spstate=6]') !== false) {
+            } elseif (str_contains($CURUSER['notifs'], '[spstate=6]')) {
                 $special_state = 6;
-            } elseif (strpos($CURUSER['notifs'], '[spstate=7]') !== false) {
+            } elseif (str_contains($CURUSER['notifs'], '[spstate=7]')) {
                 $special_state = 7;
             }
         }

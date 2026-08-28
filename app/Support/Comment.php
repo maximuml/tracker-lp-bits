@@ -77,7 +77,7 @@ final class Comment
             $s = htmlspecialchars($s);
         }
 
-        if (strpos($s, '[code]') !== false && strpos($s, '[/code]') !== false) {
+        if (str_contains($s, '[code]') && str_contains($s, '[/code]')) {
             $s = (string) preg_replace_callback(
                 '/\[code\](.+?)\[\/code\]/is',
                 static fn (array $m): string => self::addTempCode(BBCode::code((string) $m[1], (string) Locale::trans('label.text_code'))),
@@ -85,7 +85,7 @@ final class Comment
             );
         }
 
-        if (strpos($s, '[raw]') !== false && strpos($s, '[/raw]') !== false) {
+        if (str_contains($s, '[raw]') && str_contains($s, '[/raw]')) {
             $s = (string) preg_replace_callback(
                 '/\[raw\](.+?)\[\/raw\]/is',
                 static fn (array $m): string => self::addTempCode($m[1]),
@@ -211,7 +211,7 @@ final class Comment
 
         $s = Format::formatUrls($s, $newtab);
 
-        if (strpos($s, '[quote') !== false && strpos($s, '[/quote]') !== false) {
+        if (str_contains($s, '[quote') && str_contains($s, '[/quote]')) {
             $s = BBCode::quotes($s, Locale::trans('label.text_quote'));
         }
 

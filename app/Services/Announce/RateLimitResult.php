@@ -9,5 +9,5 @@ namespace App\Services\Announce;
  */
 final readonly class RateLimitResult
 {
-    public function __construct(public bool $isReAnnounce) {}
+    public function __construct(public readonly bool $isReAnnounce) {}
 }

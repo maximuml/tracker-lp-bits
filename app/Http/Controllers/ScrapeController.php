@@ -16,7 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ScrapeController extends Controller
 {
-    public function __construct(private ScrapeService $service) {}
+    public function __construct(private readonly ScrapeService $service) {}
 
     public function scrape(Request $request): Response
     {

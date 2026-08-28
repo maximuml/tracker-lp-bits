@@ -400,17 +400,17 @@ final class UserSearchRepository
 
     private static function hasWildcard(string $text): bool
     {
-        return strpos($text, '*') !== false
-            || strpos($text, '?') !== false
-            || strpos($text, '%') !== false
-            || strpos($text, '_') !== false;
+        return str_contains($text, '*')
+            || str_contains($text, '?')
+            || str_contains($text, '%')
+            || str_contains($text, '_');
     }
 
     private static function parseDate(string $date): ?string
     {
-        if (strpos($date, '-') !== false) {
+        if (str_contains($date, '-')) {
             $a = explode('-', $date);
-        } elseif (strpos($date, '/') !== false) {
+        } elseif (str_contains($date, '/')) {
             $a = explode('/', $date);
         } else {
             return null;

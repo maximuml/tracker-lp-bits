@@ -518,7 +518,7 @@ class TechnicalInformation
         $audioPrefix = Locale::trans('torrent.technicalinfo_audio', [], null);
         $subtitlePrefix = Locale::trans('torrent.technicalinfo_subtitles', [], null);
         foreach ($parts as $key => $value) {
-            if (strpos($key, $audioPrefix) === 0 || strpos($key, $subtitlePrefix) === 0) {
+            if (str_starts_with($key, $audioPrefix) || str_starts_with($key, $subtitlePrefix)) {
                 $isAudioOrSubtitle = true;
                 $audioOrSubtitleCount++;
             }
@@ -557,7 +557,7 @@ class TechnicalInformation
             }
             $hiddenContent = rtrim($hiddenContent, '<br>');
 
-            $spoilerTitle = $isAudioOrSubtitle && strpos(array_keys($parts)[0], $audioPrefix) === 0
+            $spoilerTitle = $isAudioOrSubtitle && str_starts_with(array_keys($parts)[0], $audioPrefix)
                 ? Locale::trans('torrent.collapse_show_more_audio', [], null)
                 : Locale::trans('torrent.collapse_show_more_subtitles', [], null);
 

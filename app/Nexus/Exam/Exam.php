@@ -2,7 +2,7 @@
 
 namespace Nexus\Exam;
 
-use App\Models\ExamUser;
+use App\Enums\ExamUserStatus;
 use App\Repositories\ExamRepository;
 use App\Support\Locale;
 
@@ -11,7 +11,7 @@ class Exam
     public function getCurrent($uid): array
     {
         $examRep = new ExamRepository;
-        $userExam = $examRep->getUserExamProgress($uid, ExamUser::STATUS_NORMAL);
+        $userExam = $examRep->getUserExamProgress($uid, ExamUserStatus::NORMAL->value);
         if (empty($userExam)) {
             return ['exam' => null, 'html' => ''];
         }

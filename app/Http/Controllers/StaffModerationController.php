@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
+use App\Enums\UsernameChangeType;
 use App\Models\Message;
 use App\Models\User;
 use App\Models\UserModifyLog;
@@ -168,7 +169,7 @@ class StaffModerationController extends LegacyController
                 UsernameChangeLog::query()->create([
                     'uid' => $arr['id'],
                     'operator' => $currentUser['username'],
-                    'change_type' => UsernameChangeLog::CHANGE_TYPE_ADMIN,
+                    'change_type' => UsernameChangeType::ADMIN->value,
                     'username_old' => $arr['username'],
                     'username_new' => $username,
                 ]);

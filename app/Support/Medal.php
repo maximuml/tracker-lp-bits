@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
-use App\Models\UserMedal;
+use App\Enums\UserMedalStatus;
 use Illuminate\Support\Collection;
 
 /**
@@ -53,7 +53,7 @@ final class Medal
                 );
 
                 $checked = '';
-                if ($medal->pivot->status == UserMedal::STATUS_WEARING) {
+                if ($medal->pivot->status == UserMedalStatus::WEARING->value) {
                     $checked = ' checked';
                 }
                 $html .= sprintf('<label>%s<input type="checkbox" name="status_%s" value="1"%s></label>', Locale::trans('medal.action_wearing'), $medal->pivot->id, $checked);

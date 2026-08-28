@@ -43,8 +43,10 @@ class Peer extends NexusModel
         'ipv4', 'ipv6',
     ];
 
+    /** @deprecated Use App\Enums\PeerConnectable enum instead. */
     const CONNECTABLE_YES = 'yes';
 
+    /** @deprecated Use App\Enums\PeerConnectable enum instead. */
     const CONNECTABLE_NO = 'no';
 
     /** @var array<string, string> */
@@ -61,8 +63,10 @@ class Peer extends NexusModel
         self::CONNECTABLE_NO => '否',
     ];
 
+    /** @deprecated Use App\Enums\PeerSeeder enum instead. */
     const SEEDER_YES = 'yes';
 
+    /** @deprecated Use App\Enums\PeerSeeder enum instead. */
     const SEEDER_NO = 'no';
 
     /** @var array<int|string, mixed> */

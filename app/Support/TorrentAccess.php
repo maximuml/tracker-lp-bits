@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Enums\HitAndRunMode;
+use App\Enums\TorrentHr;
 use App\Models\HitAndRun;
 use App\Models\Torrent;
 use Illuminate\Support\HtmlString;
@@ -71,7 +72,7 @@ final class TorrentAccess
 
         if (
             $mode === HitAndRunMode::GLOBAL
-            || ($mode === HitAndRunMode::MANUAL && isset($torrent['hr']) && $torrent['hr'] == Torrent::HR_YES)
+            || ($mode === HitAndRunMode::MANUAL && isset($torrent['hr']) && $torrent['hr'] == TorrentHr::YES->value)
         ) {
             return '<img class="hitandrun" src="pic/trans.gif" alt="H&R" title="H&R" />';
         }

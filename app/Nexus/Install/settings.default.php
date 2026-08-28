@@ -1,11 +1,11 @@
 <?php
 
+use App\Enums\TorrentNfoViewStyle;
 use App\Enums\UserClass as UserClassEnum;
 use App\Models\BonusLogs;
 use App\Models\HitAndRun;
 use App\Models\Language;
 use App\Models\SearchBox;
-use App\Models\Torrent;
 use App\Repositories\TokenRepository;
 
 return [
@@ -318,7 +318,7 @@ return [
         'download_support_passkey' => 'yes',
         'approval_status_icon_enabled' => 'no',
         'approval_status_none_visible' => 'yes',
-        'nfo_view_style_default' => Torrent::NFO_VIEW_STYLE_DOS,
+        'nfo_view_style_default' => TorrentNfoViewStyle::DOS->value,
         'tax_factor' => '0.3',
         'paid_torrent_enabled' => 'yes',
         'max_price' => 1000000,

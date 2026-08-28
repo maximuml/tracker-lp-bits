@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Enums\Permission\PermissionEnum;
+use App\Enums\TorrentApprovalStatus;
+use App\Enums\TorrentPosState;
 use App\Models\SearchBox;
 use App\Models\Torrent;
 use App\Repositories\TorrentRepository;
@@ -110,7 +112,7 @@ class TorrentRssController extends LegacyController
         }
 
         if (! SiteConfig::current()->torrent->approvalStatusNoneVisible() && ! Permissions::userCan(PermissionEnum::STAFF_MEMBER->value, false, (int) ($rssUser['id'] ?? 0))) {
-            $baseQuery->where('torrents.approval_status', Torrent::APPROVAL_STATUS_ALLOW);
+            $baseQuery->where('torrents.approval_status', TorrentApprovalStatus::ALLOW->value);
         }
 
         $browseMode = SiteConfig::current()->main->browseCat();
@@ -162,11 +164,11 @@ class TorrentRssController extends LegacyController
             }
             if (in_array('1', $stickyArr, true)) {
                 $hasStickyFirst = true;
-                $posStates[] = Torrent::POS_STATE_STICKY_FIRST;
+                $posStates[] = TorrentPosState::STICKY_FIRST->value;
             }
             if (in_array('2', $stickyArr, true)) {
                 $hasStickySecond = true;
-                $posStates[] = Torrent::POS_STATE_STICKY_SECOND;
+                $posStates[] = TorrentPosState::STICKY_SECOND->value;
             }
             if (! empty($posStates)) {
                 $prependIdArr = Torrent::query()->whereIn('pos_state', $posStates)->pluck('id')->toArray();
@@ -180,7 +182,7 @@ class TorrentRssController extends LegacyController
         if (! $noNormalResults) {
             $normalQuery = clone $baseQuery;
             if ($hasStickyNormal) {
-                $normalQuery->where('torrents.pos_state', Torrent::POS_STATE_STICKY_NONE);
+                $normalQuery->where('torrents.pos_state', TorrentPosState::NONE->value);
             }
             $normalSql = $normalQuery->toSql();
             $normalCacheKey = sprintf('nexus_rss:normal:%s', md5($normalSql.':'.$showrows));

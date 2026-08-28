@@ -39,8 +39,10 @@ class Medal extends NexusModel
 {
     use NexusActivityLogTrait;
 
+    /** @deprecated Use App\Enums\MedalGetType enum instead. */
     const GET_TYPE_EXCHANGE = 1;
 
+    /** @deprecated Use App\Enums\MedalGetType enum instead. */
     const GET_TYPE_GRANT = 2;
 
     /** @var array<int|string, mixed> */

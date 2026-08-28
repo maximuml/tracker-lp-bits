@@ -1,11 +1,11 @@
 <?php
 
-use App\Models\UsernameChangeLog;
+use App\Enums\UsernameChangeType;
 
 return [
     'change_type' => [
-        UsernameChangeLog::CHANGE_TYPE_USER => 'User',
-        UsernameChangeLog::CHANGE_TYPE_ADMIN => 'Administrator',
+        UsernameChangeType::USER->value => 'User',
+        UsernameChangeType::ADMIN->value => 'Administrator',
     ],
     'labels' => [
         'username_old' => 'Old username',

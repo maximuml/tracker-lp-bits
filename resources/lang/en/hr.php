@@ -1,12 +1,13 @@
 <?php
 
+use App\Enums\HitAndRunStatus;
 use App\Models\HitAndRun;
 
 return [
-    'status_'.HitAndRun::STATUS_INSPECTING => 'Inspecting',
-    'status_'.HitAndRun::STATUS_REACHED => 'Reached',
-    'status_'.HitAndRun::STATUS_UNREACHED => 'Unreached',
-    'status_'.HitAndRun::STATUS_PARDONED => 'Pardoned',
+    'status_'.HitAndRunStatus::INSPECTING->value => 'Inspecting',
+    'status_'.HitAndRunStatus::REACHED->value => 'Reached',
+    'status_'.HitAndRunStatus::UNREACHED->value => 'Unreached',
+    'status_'.HitAndRunStatus::PARDONED->value => 'Pardoned',
 
     'mode_'.HitAndRun::MODE_DISABLED => 'Disabled',
     'mode_'.HitAndRun::MODE_MANUAL => 'Manual',

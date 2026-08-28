@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Enums\CommentType;
 use App\Models\Comment;
 use App\Models\Offer;
 use App\Models\Torrent;
@@ -147,7 +148,7 @@ class CommentRepository
      */
     public static function getList(Request $request, User $user)
     {
-        $type = $request->input('type', Comment::TYPE_TORRENT);
+        $type = $request->input('type', CommentType::TORRENT->value);
         $parentId = (int) $request->input('parent_id', 0);
 
         $query = Comment::query()->with(['create_user', 'update_user']);

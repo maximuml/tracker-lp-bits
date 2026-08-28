@@ -6,11 +6,11 @@ namespace App\Services;
 
 use App\DTOs\AnnounceRequestDto;
 use App\Enums\Permission\PermissionEnum;
+use App\Enums\TorrentApprovalStatus;
 use App\Enums\UserClass as UserClassEnum;
 use App\Exceptions\ClientNotAllowedException;
 use App\Exceptions\TrackerException;
 use App\Jobs\BuyTorrent;
-use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\AgentAllowRepository;
 use App\Repositories\CleanupRepository;
@@ -344,7 +344,7 @@ final class AnnounceService
             throw TrackerException::failure('torrent banned');
         }
 
-        if ($torrent['approval_status'] != Torrent::APPROVAL_STATUS_ALLOW
+        if ($torrent['approval_status'] != TorrentApprovalStatus::ALLOW->value
             && ! SiteConfig::current()->torrent->approvalStatusNoneVisible()
             && ! Permissions::userCan(PermissionEnum::TORRENT_VIEW_BANNED->value, false, $this->userId)
         ) {

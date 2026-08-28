@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Enums\BusinessType;
+use App\Enums\HitAndRunStatus;
+use App\Enums\UserEnabled;
+use App\Enums\UserStatus;
 use App\Exceptions\NexusException;
 use App\Models\BonusLogs;
 use App\Models\HitAndRun;
@@ -42,7 +45,7 @@ class BonusRepository extends BaseRepository
         if ($hitAndRun->uid != $uid) {
             throw new \LogicException("H&R: $hitAndRunId not belongs to user: $uid.");
         }
-        if ($hitAndRun->status == HitAndRun::STATUS_PARDONED) {
+        if ($hitAndRun->status == HitAndRunStatus::PARDONED->value) {
             throw new \LogicException("H&R: $hitAndRunId already pardoned.");
         }
         $requireBonus = BonusLogs::getBonusForCancelHitAndRun();
@@ -55,7 +58,7 @@ class BonusRepository extends BaseRepository
             $existingComment = (string) $hitAndRun->comment;
             $newComment = $existingComment === '' ? $comment : $comment."\n".$existingComment;
             $hitAndRun->update([
-                'status' => HitAndRun::STATUS_PARDONED,
+                'status' => HitAndRunStatus::PARDONED->value,
                 'comment' => $newComment,
             ]);
         });
@@ -549,8 +552,8 @@ class BonusRepository extends BaseRepository
     {
         $addition = DB::table('users')
             ->where('invited_by', $uid)
-            ->where('status', User::STATUS_CONFIRMED)
-            ->where('enabled', User::ENABLED_YES)
+            ->where('status', UserStatus::CONFIRMED->value)
+            ->where('enabled', UserEnabled::YES->value)
             ->sum('seed_points_per_hour');
 
         Logger::writeWithContext("[HAREM_ADDITION], user: $uid, addition: $addition");

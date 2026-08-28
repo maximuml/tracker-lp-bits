@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Auth\Permission;
+use App\Enums\TorrentApprovalStatus;
 use App\Models\Torrent;
 use App\Support\Category;
 use App\Support\Config\SiteConfig;
@@ -781,8 +782,8 @@ class TorrentSearchRepository
             $searchParams['approval_status'] = $approvalStatus;
             $addparam .= "approval_status=$approvalStatus&";
         } elseif (! $approvalStatusNoneVisible && ! Permission::canApproveTorrent()) {
-            $wherea[] = 'torrents.approval_status = '.Torrent::APPROVAL_STATUS_ALLOW;
-            $searchParams['approval_status'] = Torrent::APPROVAL_STATUS_ALLOW;
+            $wherea[] = 'torrents.approval_status = '.TorrentApprovalStatus::ALLOW->value;
+            $searchParams['approval_status'] = TorrentApprovalStatus::ALLOW->value;
         }
 
         if (isset($searchParams['size_begin']) && ctype_digit($searchParams['size_begin'])) {

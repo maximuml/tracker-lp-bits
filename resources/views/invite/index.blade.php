@@ -198,7 +198,7 @@ $sendBtnDisabled = (string) ($sendBtnDisabled ?? '');
             </tr>
             @foreach ($sentTmpRows as $arr1)
                 @php
-                    $isHashValid = $arr1['valid'] == \App\Models\Invite::VALID_YES;
+                    $isHashValid = $arr1['valid'] == \App\Enums\InviteValid::YES->value;
                     $registerLink = '';
                     if ($isHashValid) {
                         $registerLink = sprintf('&nbsp;<a href="signup.php?type=invite&invitenumber=%s" title="%s" target="_blank"><small>[%s]</small></a>', $arr1['hash'], $lang_invite['signup_link_help'] ?? '', $lang_invite['signup_link'] ?? '');

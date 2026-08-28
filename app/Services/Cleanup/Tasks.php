@@ -6,8 +6,11 @@ namespace App\Services\Cleanup;
 
 use App\Enums\ModelEventEnum;
 use App\Enums\PromotionTimeType;
+use App\Enums\TorrentPosState;
 use App\Enums\TorrentPromotion;
 use App\Enums\UserClass as UserClassEnum;
+use App\Enums\UserEnabled;
+use App\Enums\UserStatus;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Models\UserBanLog;
@@ -217,14 +220,14 @@ final class Tasks
      */
     public function expireTorrentSticky(): string
     {
-        $toBeExpirePosStates = [Torrent::POS_STATE_STICKY_FIRST, Torrent::POS_STATE_STICKY_SECOND];
+        $toBeExpirePosStates = [TorrentPosState::STICKY_FIRST->value, TorrentPosState::STICKY_SECOND->value];
 
         Torrent::query()
             ->whereIn('pos_state', $toBeExpirePosStates)
             ->whereNotNull('pos_state_until')
             ->where('pos_state_until', '<', now())
             ->update([
-                'pos_state' => Torrent::POS_STATE_STICKY_NONE,
+                'pos_state' => TorrentPosState::NONE->value,
                 'pos_state_until' => null,
             ]);
 
@@ -393,7 +396,7 @@ final class Tasks
         $deadtime = time() - $signupTimeout;
 
         User::query()
-            ->where('status', User::STATUS_PENDING)
+            ->where('status', UserStatus::PENDING->value)
             ->whereRaw('added < FROM_UNIXTIME(?)', [$deadtime])
             ->whereRaw('last_login < FROM_UNIXTIME(?)', [$deadtime])
             ->whereRaw('last_access < FROM_UNIXTIME(?)', [$deadtime])
@@ -455,7 +458,7 @@ final class Tasks
 
         $query = User::query()
             ->where('parked', 'no')
-            ->where('status', User::STATUS_CONFIRMED)
+            ->where('status', UserStatus::CONFIRMED->value)
             ->where('class', '<', $maxclass)
             ->where('last_access', '<', $dt)
             ->where('downloaded', 0)
@@ -480,7 +483,7 @@ final class Tasks
 
         $query = User::query()
             ->where('parked', 'no')
-            ->where('status', User::STATUS_CONFIRMED)
+            ->where('status', UserStatus::CONFIRMED->value)
             ->where('class', '<', $maxclass)
             ->where('added', '<', $dt)
             ->where('downloaded', 0)
@@ -504,7 +507,7 @@ final class Tasks
 
         $query = User::query()
             ->where('parked', 'no')
-            ->where('status', User::STATUS_CONFIRMED)
+            ->where('status', UserStatus::CONFIRMED->value)
             ->where('class', '<', $maxclass)
             ->where('last_access', '<', $dt);
 
@@ -524,7 +527,7 @@ final class Tasks
 
         $query = User::query()
             ->where('parked', 'yes')
-            ->where('status', User::STATUS_CONFIRMED)
+            ->where('status', UserStatus::CONFIRMED->value)
             ->where('class', '<', $maxclass)
             ->where('last_access', '<', $dt);
 
@@ -544,7 +547,7 @@ final class Tasks
         $userRep = $this->userRepository;
 
         User::query()
-            ->where('enabled', User::ENABLED_NO)
+            ->where('enabled', UserEnabled::NO->value)
             ->where('last_access', '<', $dt)
             ->select(['id', 'username', 'lang'])
             ->orderBy('id', 'asc')
@@ -568,7 +571,7 @@ final class Tasks
      */
     private function disableUsers(Builder $query, string $reasonKey): void
     {
-        $results = $query->where('enabled', User::ENABLED_YES)->get(['id', 'username', 'lang']);
+        $results = $query->where('enabled', UserEnabled::YES->value)->get(['id', 'username', 'lang']);
         if ($results->isEmpty()) {
             return;
         }
@@ -609,7 +612,7 @@ final class Tasks
             return;
         }
 
-        User::query()->whereIn('id', $uidArr)->update(['enabled' => User::ENABLED_NO]);
+        User::query()->whereIn('id', $uidArr)->update(['enabled' => UserEnabled::NO->value]);
         UserBanLog::query()->insert($userBanLogData);
         UserModifyLog::query()->insert($userModifyLogs);
 
@@ -940,7 +943,7 @@ final class Tasks
         $results = User::query()
             ->where('class', '<', UserClassEnum::VIP->value)
             ->where('donor', 'no')
-            ->where('enabled', User::ENABLED_YES)
+            ->where('enabled', UserEnabled::YES->value)
             ->where('leechwarn', 'yes')
             ->where('leechwarnuntil', '<', $dt)
             ->get(['id', 'username', 'lang']);
@@ -971,7 +974,7 @@ final class Tasks
             UserOps::logModify($uid, $comment);
         }
 
-        User::query()->whereIn('id', $uidArr)->update(['enabled' => User::ENABLED_NO]);
+        User::query()->whereIn('id', $uidArr)->update(['enabled' => UserEnabled::NO->value]);
         UserBanLog::query()->insert($userBanLogData);
 
         Logger::writeWithContext((string) ('ban user: '.implode(', ', $uidArr)), (string) 'info', (bool) false);

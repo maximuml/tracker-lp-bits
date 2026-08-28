@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Auth\Permission;
+use App\Enums\TorrentApprovalStatus;
 use App\Exceptions\NexusException;
 use App\Models\Bookmark;
 use App\Models\Category;
@@ -359,7 +360,7 @@ class MeiliSearchRepository extends BaseRepository
             $params['banned'] = 'no';
         }
         if (! SiteConfig::current()->torrent->approvalStatusNoneVisible() && ! Permission::canApproveTorrent()) {
-            $params['approval_status'] = Torrent::APPROVAL_STATUS_ALLOW;
+            $params['approval_status'] = TorrentApprovalStatus::ALLOW->value;
         }
         $filters = $this->getFilters($params, $user);
 

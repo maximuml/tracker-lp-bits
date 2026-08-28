@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\Enums\TorrentVisible;
 use App\Models\Bookmark;
 use App\Models\Category;
 use App\Models\Comment;
@@ -95,7 +96,7 @@ final class DatabaseFactoriesTest extends TestCase
         $this->assertSame(Torrent::BANNED_YES, $torrent->banned);
 
         $invisible = Torrent::factory()->invisible()->create();
-        $this->assertSame(Torrent::VISIBLE_NO, $invisible->visible);
+        $this->assertSame(TorrentVisible::NO->value, $invisible->visible);
 
         $user = User::factory()->create();
         $torrent2 = Torrent::factory()->owner($user)->create();

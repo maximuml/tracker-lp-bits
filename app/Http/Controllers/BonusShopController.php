@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Enums\ExamStatus;
+use App\Enums\ExamType;
 use App\Models\Exam;
 use App\Models\Medal;
 use App\Models\User;
@@ -167,8 +169,8 @@ JS;
         $currentUserId = (int) ($curUser['id'] ?? 0);
 
         $query = Exam::query()
-            ->where('type', Exam::TYPE_TASK)
-            ->where('status', Exam::STATUS_ENABLED);
+            ->where('type', ExamType::TASK->value)
+            ->where('status', ExamStatus::ENABLED->value);
 
         $total = (clone $query)->count();
         $perPage = 20;
@@ -183,7 +185,7 @@ JS;
 
         $userInfo = User::query()->findOrFail($currentUserId, User::$commonFields);
         $userTasks = $userInfo->onGoingExamAndTasks()
-            ->where('type', Exam::TYPE_TASK)
+            ->where('type', ExamType::TASK->value)
             ->orderBy('id', 'desc')
             ->get()
             ->keyBy('id');

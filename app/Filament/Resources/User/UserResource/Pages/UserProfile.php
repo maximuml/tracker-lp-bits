@@ -8,6 +8,7 @@ use App\Auth\Permission;
 use App\Enums\ModelEventEnum;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserClass as UserClassEnum;
+use App\Enums\UserStatus;
 use App\Filament\OptionsTrait;
 use App\Filament\Resources\User\UserResource;
 use App\Models\Invite;
@@ -85,7 +86,7 @@ class UserProfile extends ViewRecord implements HasActions
         $user = $this->currentUser();
         $record = $this->getUserRecord();
         if ($user->class > $record->class) {
-            if ($record->status == User::STATUS_PENDING) {
+            if ($record->status == UserStatus::PENDING->value) {
                 $actions[] = $this->buildConfirmAction();
             }
             $actions[] = $this->buildWarnAction();
@@ -289,7 +290,7 @@ class UserProfile extends ViewRecord implements HasActions
                     return;
                 }
                 $record = $this->getUserRecord();
-                $record->status = User::STATUS_CONFIRMED;
+                $record->status = UserStatus::CONFIRMED->value;
                 $record->info = null;
                 $record->save();
 

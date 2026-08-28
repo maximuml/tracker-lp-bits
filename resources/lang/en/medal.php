@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\Medal;
+use App\Enums\MedalGetType;
 
 return [
     'label' => 'Medal',
@@ -11,8 +11,8 @@ return [
         ],
     ],
     'get_types' => [
-        Medal::GET_TYPE_EXCHANGE => 'Exchange',
-        Medal::GET_TYPE_GRANT => 'Grant',
+        MedalGetType::EXCHANGE->value => 'Exchange',
+        MedalGetType::GRANT->value => 'Grant',
     ],
     'fields' => [
         'get_type' => 'Get type',

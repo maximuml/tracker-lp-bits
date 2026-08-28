@@ -32,10 +32,13 @@ class Comment extends NexusModel
     /** @var list<string> */
     protected $fillable = ['user', 'torrent', 'added', 'text', 'ori_text', 'editedby', 'editdate', 'offer', 'anonymous'];
 
+    /** @deprecated Use App\Enums\CommentType enum instead. */
     const TYPE_TORRENT = 'torrent';
 
+    /** @deprecated Use App\Enums\CommentType enum instead. */
     const TYPE_OFFER = 'offer';
 
+    /** @deprecated Use App\Enums\CommentType enum instead. */
     const TYPE_MAPS = [
         self::TYPE_TORRENT => [
             'model' => Torrent::class,

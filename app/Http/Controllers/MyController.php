@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Enums\HitAndRunStatus;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\HitAndRun;
 use App\Models\User;
@@ -84,7 +85,7 @@ class MyController extends Controller
             LegacyResponse::abort('Error', 'User not exists.');
         }
 
-        $status = request()->query('status') ?? HitAndRun::STATUS_INSPECTING;
+        $status = request()->query('status') ?? HitAndRunStatus::INSPECTING->value;
         $allStatus = HitAndRun::listStatus();
         $pagerParams['status'] = $status;
         $filterParams = $pagerParams;

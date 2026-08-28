@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Models\Traits;
 
+use App\Enums\ExamUserStatus;
+use App\Enums\PeerSeeder;
+use App\Enums\SnatchFinished;
 use App\Models\Bookmark;
 use App\Models\Comment;
 use App\Models\Country;
@@ -147,25 +150,25 @@ trait HasUserRelationships
     /** @return HasManyThrough<Torrent, Peer, $this> */
     public function seeding_torrents(): HasManyThrough
     {
-        return $this->peers_torrents()->where('peers.seeder', Peer::SEEDER_YES);
+        return $this->peers_torrents()->where('peers.seeder', PeerSeeder::YES->value);
     }
 
     /** @return HasManyThrough<Torrent, Peer, $this> */
     public function leeching_torrents(): HasManyThrough
     {
-        return $this->peers_torrents()->where('peers.seeder', Peer::SEEDER_NO);
+        return $this->peers_torrents()->where('peers.seeder', PeerSeeder::NO->value);
     }
 
     /** @return HasManyThrough<Torrent, Snatch, $this> */
     public function completed_torrents(): HasManyThrough
     {
-        return $this->snatched_torrents()->where('snatched.finished', Snatch::FINISHED_YES);
+        return $this->snatched_torrents()->where('snatched.finished', SnatchFinished::YES->value);
     }
 
     /** @return HasManyThrough<Torrent, Snatch, $this> */
     public function incomplete_torrents(): HasManyThrough
     {
-        return $this->snatched_torrents()->where('snatched.finished', Snatch::FINISHED_NO);
+        return $this->snatched_torrents()->where('snatched.finished', SnatchFinished::NO->value);
     }
 
     /** @return HasMany<HitAndRun, $this> */
@@ -242,7 +245,7 @@ trait HasUserRelationships
     /** @return BelongsToMany<Exam, $this> */
     public function onGoingExamAndTasks(): BelongsToMany
     {
-        return $this->examAndTasks()->wherePivot('status', ExamUser::STATUS_NORMAL);
+        return $this->examAndTasks()->wherePivot('status', ExamUserStatus::NORMAL->value);
     }
 
     /** @return HasMany<UserModifyLog, $this> */

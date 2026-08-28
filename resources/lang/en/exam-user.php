@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\ExamUser;
+use App\Enums\ExamUserStatus;
 
 return [
     'admin' => [
@@ -9,9 +9,9 @@ return [
         ],
     ],
     'status' => [
-        ExamUser::STATUS_FINISHED => 'Finished',
-        ExamUser::STATUS_AVOIDED => 'Avoided',
-        ExamUser::STATUS_NORMAL => 'Normal',
+        ExamUserStatus::FINISHED->value => 'Finished',
+        ExamUserStatus::AVOIDED->value => 'Avoided',
+        ExamUserStatus::NORMAL->value => 'Normal',
     ],
     'end_can_not_before_begin' => "End time: :end can't be before begin time: :begin",
     'status_not_allow_update_end' => 'Current status is not::status_text, unable to change end time',

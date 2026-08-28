@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Enums\TorrentVisible;
 use App\Enums\UserClass as UserClassEnum;
+use App\Enums\UserGender;
+use App\Enums\UserStatus;
 use App\Models\Peer;
 use App\Models\Torrent;
 use App\Models\User;
@@ -148,7 +151,7 @@ class DashboardRepository extends BaseRepository
         $result[$name] = [
             'name' => $name,
             'text' => Locale::trans("dashboard.user.{$name}", [], null),
-            'value' => number_format(User::query()->where('status', User::STATUS_PENDING)->count()),
+            'value' => number_format(User::query()->where('status', UserStatus::PENDING->value)->count()),
         ];
         $name = 'visit_last_one_day';
         $result[$name] = [
@@ -196,7 +199,7 @@ class DashboardRepository extends BaseRepository
         $statGender = User::query()->groupBy('gender')->selectRaw('gender, count(*) as counts')->get()->pluck('counts', 'gender');
         foreach ($statGender as $gender => $value) {
             if (! isset(User::$genders[$gender])) {
-                $gender = User::GENDER_UNKNOWN;
+                $gender = UserGender::UNKNOWN->value;
             }
             $name = "gender_$gender";
             $result[$name] = [
@@ -223,7 +226,7 @@ class DashboardRepository extends BaseRepository
         $result[$name] = [
             'name' => $name,
             'text' => Locale::trans("dashboard.torrent.{$name}", [], null),
-            'value' => number_format(Torrent::query()->where('visible', '=', Torrent::VISIBLE_NO)->count()),
+            'value' => number_format(Torrent::query()->where('visible', '=', TorrentVisible::NO->value)->count()),
         ];
 
         $seeders = Peer::query()->where('seeder', 'yes')->count();

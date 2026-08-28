@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Enums\PeerSeeder;
+use App\Enums\SnatchFinished;
 use App\Http\Resources\ExamResource;
 use App\Http\Resources\InviteResource;
 use App\Http\Resources\TorrentResource;
 use App\Http\Resources\UserResource;
-use App\Models\Peer;
-use App\Models\Snatch;
 use App\Models\User;
 use App\Repositories\ExamRepository;
 use App\Repositories\UserRepository;
@@ -278,7 +278,7 @@ class UserController extends Controller
             throw new \RuntimeException('unauthenticated');
         }
 
-        $result = $user->peers_torrents()->where('seeder', Peer::SEEDER_YES)->orderBy('torrent', 'desc')->paginate();
+        $result = $user->peers_torrents()->where('seeder', PeerSeeder::YES->value)->orderBy('torrent', 'desc')->paginate();
 
         $resource = TorrentResource::collection($result);
 
@@ -296,7 +296,7 @@ class UserController extends Controller
             throw new \RuntimeException('unauthenticated');
         }
 
-        $result = $user->peers_torrents()->where('seeder', Peer::SEEDER_NO)->orderBy('torrent', 'desc')->paginate();
+        $result = $user->peers_torrents()->where('seeder', PeerSeeder::NO->value)->orderBy('torrent', 'desc')->paginate();
 
         $resource = TorrentResource::collection($result);
 
@@ -316,7 +316,7 @@ class UserController extends Controller
 
         $result = $user->snatched_torrents()
             ->where('owner', '<>', $user->id)
-            ->where('finished', Snatch::FINISHED_YES)
+            ->where('finished', SnatchFinished::YES->value)
             ->orderBy('torrentid', 'desc')
             ->paginate();
 
@@ -338,7 +338,7 @@ class UserController extends Controller
 
         $result = $user->snatched_torrents()
             ->where('owner', '<>', $user->id)
-            ->where('finished', Snatch::FINISHED_NO)
+            ->where('finished', SnatchFinished::NO->value)
             ->orderBy('torrentid', 'desc')
             ->paginate();
 

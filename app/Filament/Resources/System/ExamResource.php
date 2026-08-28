@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\System;
 
+use App\Enums\ExamType;
 use App\Filament\OptionsTrait;
 use App\Filament\Resources\System\ExamResource\Pages\CreateExam;
 use App\Filament\Resources\System\ExamResource\Pages\EditExam;
@@ -74,18 +75,18 @@ class ExamResource extends Resource
                         ->columnSpanFull()
                         ->required()
                         ->label(__('exam.success_reward_bonus'))
-                        ->hidden(fn (Get $get) => $get('type') != Exam::TYPE_TASK),
+                        ->hidden(fn (Get $get) => $get('type') != ExamType::TASK->value),
                     TextInput::make('fail_deduct_bonus')
                         ->columnSpanFull()
                         ->required()
                         ->label(__('exam.fail_deduct_bonus'))
-                        ->hidden(fn (Get $get) => $get('type') != Exam::TYPE_TASK),
+                        ->hidden(fn (Get $get) => $get('type') != ExamType::TASK->value),
                     TextInput::make('max_user_count')
                         ->columnSpanFull()
                         ->required()
                         ->numeric()
                         ->label(__('exam.max_user_count'))
-                        ->hidden(fn (Get $get) => $get('type') != Exam::TYPE_TASK),
+                        ->hidden(fn (Get $get) => $get('type') != ExamType::TASK->value),
 
                     Repeater::make('indexes')->schema([
                         Select::make('index')

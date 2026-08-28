@@ -27,14 +27,19 @@ class Language extends NexusModel
 {
     const DEFAULT_ENABLED = ['en'];
 
+    /** @deprecated Use App\Enums\LanguageTranslationState enum instead. */
     const TRANS_STATE_UP_TO_DATE = 'up-to-date';
 
+    /** @deprecated Use App\Enums\LanguageTranslationState enum instead. */
     const TRANS_STATE_OUT_DATE = 'outdate';
 
+    /** @deprecated Use App\Enums\LanguageTranslationState enum instead. */
     const TRANS_STATE_INCOMPLETE = 'incomplete';
 
+    /** @deprecated Use App\Enums\LanguageTranslationState enum instead. */
     const TRANS_STATE_NEED_NEW = 'need-new';
 
+    /** @deprecated Use App\Enums\LanguageTranslationState enum instead. */
     const TRANS_STATE_UNAVAILABLE = 'unavailable';
 
     const CONFIG = [

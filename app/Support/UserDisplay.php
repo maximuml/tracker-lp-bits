@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Enums\UserMedalStatus;
 use App\Models\UserMedal;
 use App\Models\UserMeta;
 use App\Repositories\UserRepository;
@@ -204,7 +205,7 @@ final class UserDisplay
 
         $medalRows = UserMedal::query()
             ->whereIn('uid', $missing)
-            ->where('status', UserMedal::STATUS_WEARING)
+            ->where('status', UserMedalStatus::WEARING->value)
             ->where(function ($query) {
                 $query->whereNull('expire_at')->orWhere('expire_at', '>=', now());
             })

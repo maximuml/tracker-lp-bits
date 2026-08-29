@@ -218,6 +218,8 @@ final class LegacyRequestMiddleware
             }
         } elseif ($script === 'takelogin') {
             $routePath = '/login';
+        } elseif ($script === 'login') {
+            $routePath = '/login';
         }
 
         $queryString = http_build_query($query, '', '&', PHP_QUERY_RFC3986);

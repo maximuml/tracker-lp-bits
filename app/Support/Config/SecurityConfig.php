@@ -74,4 +74,13 @@ final class SecurityConfig extends Config
     {
         return $this->string('https_announce_url', $default);
     }
+
+    /**
+     * Comma-separated list of blacklisted port ranges/singles, e.g. "411-413,6881-6889,1214".
+     * Empty string means no blacklist.
+     */
+    public function portBlacklist(string $default = '411-413,6881-6889,1214,6346-6347,4662,6699'): string
+    {
+        return $this->string('port_blacklist', $default);
+    }
 }

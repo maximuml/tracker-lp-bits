@@ -107,6 +107,7 @@ return [
         'iv' => 'yes',
         'maxip' => '2',
         'maxloginattempts' => '10',
+        'port_blacklist' => '411-413,6881-6889,1214,6346-6347,4662,6699',
         'changeemail' => 'no',
         'cheaterdet' => '1',
         'nodetect' => '11',

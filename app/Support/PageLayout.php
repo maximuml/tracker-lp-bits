@@ -101,6 +101,9 @@ class PageLayout
 <meta name="generator" content="<?php
         echo PROJECTNAME;
         ?>" />
+<meta name="csrf-token" content="<?php
+        echo csrf_token();
+        ?>" />
 <?php
         echo Style::addiCode($context->cache, $context->userStylesheet(), $context->defaultStylesheet);
         $css_uri = Style::cssUri($context->cache, $context->userStylesheet(), $context->defaultStylesheet);
@@ -668,6 +671,7 @@ class PageLayout
         }
         $js = <<<'JS'
         <script type="application/javascript" src="js/nexus.js"></script>
+        <script type="application/javascript" src="js/csrf.js"></script>
         <script type="application/javascript" src="js/medium-zoom.min.js"></script>
         <script type="application/javascript" src="vendor/jquery-goup-1.1.3/jquery.goup.min.js"></script>
         <script>

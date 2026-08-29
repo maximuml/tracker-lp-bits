@@ -2,21 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Nexus\Torrent;
+namespace App\Support\Torrent;
 
 use Illuminate\Support\Facades\DB;
-use Nexus\Database\DatabaseException;
 
-class Torrent
+class TorrentStatus
 {
     /**
      * get torrent seeding or leeching status, download progress of someone
      *
-     * @return array
-     *
-     * @throws DatabaseException
+     * @param  array<int, int>  $torrentIdArr
+     * @return array<int, array{finished: string, progress: float, active_status: string}>
      */
-    public function listLeechingSeedingStatus(int $uid, array $torrentIdArr)
+    public function listLeechingSeedingStatus(int $uid, array $torrentIdArr): array
     {
         if (empty($torrentIdArr)) {
             return [];
@@ -63,7 +61,7 @@ class Torrent
         return $snatchedList;
     }
 
-    public function renderProgressBar($activeStatus, $progress): string
+    public function renderProgressBar(string $activeStatus, float $progress): string
     {
         $color = '#aaa';
         if ($activeStatus == 'seeding') {

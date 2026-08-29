@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Nexus\Torrent;
+namespace App\Support\Torrent;
 
 use App\Support\Format;
 use App\Support\Language;
@@ -10,9 +10,10 @@ use App\Support\Locale;
 
 class BdInfoExtra
 {
-    private $bdInfo;
+    private string $bdInfo;
 
-    private $bdInfoArr;
+    /** @var array<string, mixed> */
+    private array $bdInfoArr;
 
     public function __construct(string $bdInfo)
     {
@@ -22,10 +23,12 @@ class BdInfoExtra
 
     /**
      * 解析BDINFO文本为结构化数组
+     *
+     * @return array<string, mixed>
      */
     private function parseBdInfo(string $bdInfo): array
     {
-        $lines = preg_split('/[\r\n]+/', $bdInfo);
+        $lines = preg_split('/[\r\n]+/', $bdInfo) ?: [];
 
         // 检测是否为Summary格式（无章节标题的格式）
         $isSummaryFormat = $this->isSummaryFormat($lines);
@@ -47,6 +50,8 @@ class BdInfoExtra
 
     /**
      * 检测是否为Summary格式
+     *
+     * @param  array<int, string>  $lines
      */
     private function isSummaryFormat(array $lines): bool
     {
@@ -66,6 +71,9 @@ class BdInfoExtra
 
     /**
      * 解析格式1（有章节标题的格式）
+     *
+     * @param  array<int, string>  $lines
+     * @return array<string, mixed>
      */
     private function normalFormat(array $lines): array
     {
@@ -167,6 +175,10 @@ class BdInfoExtra
 
     /**
      * 解析Summary格式（无章节标题的格式）
+     *
+     * @param  array<int, string>  $lines
+     * @param  array<string, mixed>  $result
+     * @return array<string, mixed>
      */
     private function summaryFormat(array $lines, array $result): array
     {
@@ -208,6 +220,8 @@ class BdInfoExtra
 
     /**
      * 解析Summary格式的视频信息
+     *
+     * @param  array<string, mixed>  $video
      */
     private function summaryFormatVideo(string $line, array &$video): void
     {
@@ -221,6 +235,8 @@ class BdInfoExtra
 
     /**
      * 解析Summary格式的音频信息
+     *
+     * @param  array<int, array<string, mixed>>  $audio
      */
     private function summaryFormatAudio(string $line, array &$audio, int &$audioIndex): void
     {
@@ -247,6 +263,8 @@ class BdInfoExtra
 
     /**
      * 解析Summary格式的字幕信息
+     *
+     * @param  array<int, array<string, mixed>>  $subtitles
      */
     private function summaryFormatSubtitle(string $line, array &$subtitles, int &$subtitleIndex): void
     {
@@ -264,6 +282,8 @@ class BdInfoExtra
 
     /**
      * 解析光盘信息
+     *
+     * @param  array<string, mixed>  $discInfo
      */
     private function parseDiscInfo(string $line, array &$discInfo): void
     {
@@ -282,6 +302,8 @@ class BdInfoExtra
 
     /**
      * 解析播放列表报告
+     *
+     * @param  array<string, mixed>  $playlistReport
      */
     private function parsePlaylistReport(string $line, array &$playlistReport): void
     {
@@ -298,6 +320,8 @@ class BdInfoExtra
 
     /**
      * 解析视频信息
+     *
+     * @param  array<int|string, mixed>  $video
      */
     private function parseVideo(string $line, array &$video): void
     {
@@ -343,6 +367,8 @@ class BdInfoExtra
 
     /**
      * 提取字幕和音轨描述中的非英文内容
+     *
+     * @return array<string, mixed>
      */
     private function extractNonEnglishContent(string $text): array
     {
@@ -352,7 +378,7 @@ class BdInfoExtra
         if (preg_match_all('/[^\x{0000}-\x{007F}]+/u', $text, $matches)) {
             foreach ($matches[0] as $match) {
                 // 去除制表符和括号
-                $match = preg_replace('/[\s\t\n\r（）()【】\[\]]+/u', '', $match);
+                $match = preg_replace('/[\s\t\n\r（）()【】\[\]]+/u', '', $match) ?? '';
                 $match = trim($match);
                 if (! empty($match)) {
                     $result['non_english_content'][] = $match;
@@ -360,7 +386,7 @@ class BdInfoExtra
             }
 
             // 从原文本中移除非英文字符内容
-            $result['text'] = preg_replace('/[^\x{0000}-\x{007F}]+/u', '', $text);
+            $result['text'] = preg_replace('/[^\x{0000}-\x{007F}]+/u', '', $text) ?? '';
         }
 
         $result['text'] = trim($result['text']);
@@ -370,6 +396,8 @@ class BdInfoExtra
 
     /**
      * 解析音频信息
+     *
+     * @param  array<int, array<string, mixed>>  $audio
      */
     private function parseAudio(string $line, array &$audio, int &$audioIndex): void
     {
@@ -401,6 +429,8 @@ class BdInfoExtra
 
     /**
      * 解析字幕信息
+     *
+     * @param  array<int, array<string, mixed>>  $subtitles
      */
     private function parseSubtitles(string $line, array &$subtitles, int &$subtitleIndex): void
     {
@@ -680,6 +710,8 @@ class BdInfoExtra
 
     /**
      * 获取音频信息
+     *
+     * @return array<string, string>
      */
     public function getAudios(): array
     {
@@ -731,6 +763,8 @@ class BdInfoExtra
 
     /**
      * 获取字幕信息
+     *
+     * @return array<string, string>
      */
     public function getSubtitles(): array
     {
@@ -757,10 +791,12 @@ class BdInfoExtra
 
     /**
      * 获取所有DISC的数据
+     *
+     * @return array<int, array<string, mixed>>
      */
     private function getAllDiscs(): array
     {
-        $lines = preg_split('/[\r\n]+/', $this->bdInfo);
+        $lines = preg_split('/[\r\n]+/', $this->bdInfo) ?: [];
         $discs = [];
         $currentDisc = null;
         $currentSection = '';
@@ -857,6 +893,8 @@ class BdInfoExtra
 
     /**
      * 获取汇总信息
+     *
+     * @return array<string, mixed>
      */
     public function getSummaryInfo(): array
     {
@@ -970,8 +1008,10 @@ class BdInfoExtra
 
     /**
      * 构建表格单元格
+     *
+     * @param  array<string, string>  $parts
      */
-    private function buildTdTable(array $parts)
+    private function buildTdTable(array $parts): string
     {
         $table = '<table style="border: none;"><tbody>';
 

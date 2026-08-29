@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Auth\Permission;
+use App\Models\Torrent;
 use App\Repositories\TagRepository;
 use App\Repositories\TorrentRepository;
 use App\Support\Cache\LegacyRedisCache;
-use Nexus\Torrent\Torrent;
+use App\Support\Torrent\TorrentStatus;
 
 final class TorrentTable
 {
@@ -28,7 +29,7 @@ final class TorrentTable
         $waitsystem = (string) app(Globals::class)->get('waitsystem', '');
         $enabletooltip_tweak = (string) app(Globals::class)->get('enabletooltip_tweak', '');
 
-        $torrent = new Torrent;
+        $torrent = new TorrentStatus;
         $torrentRep = app(TorrentRepository::class);
         $torrentIdArr = $ownerIdArr = [];
         foreach ($rows as $row) {
@@ -156,7 +157,7 @@ if (Permission::canManageTorrent()) { ?>
                 $dispname = mb_substr($dispname, 0, $max_length_of_torrent_name - 2, 'UTF-8').'..';
             }
             if ($user['appendsticky'] == 'yes') {
-                $posStates = \App\Models\Torrent::listPosStates();
+                $posStates = Torrent::listPosStates();
                 $stickyicon = str_repeat('<img class="sticky" src="pic/trans.gif" alt="Sticky" title="'.$posStates[$row['pos_state']]['text'].'" />&nbsp;', $posStates[$row['pos_state']]['icon_counts'] ?? 0);
             } else {
                 $stickyicon = '';

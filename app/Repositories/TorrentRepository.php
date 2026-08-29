@@ -30,6 +30,7 @@ use App\Support\Format;
 use App\Support\Locale;
 use App\Support\Logger;
 use App\Support\Strings;
+use App\Support\Torrent\TorrentStatus;
 use App\Utils\ApiQueryBuilder;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -191,7 +192,7 @@ class TorrentRepository extends BaseRepository
             $rewardData = $user->reward_torrent_logs()->whereIn('torrentid', $torrentIdArr)->get()->keyBy('torrentid');
         }
         if ($hasFieldActiveStatus = $apiQueryBuilder->hasIncludeField('active_status')) {
-            $torrentModule = new \Nexus\Torrent\Torrent;
+            $torrentModule = new TorrentStatus;
             $activeData = $torrentModule->listLeechingSeedingStatus($user->id, $torrentIdArr);
         }
         Logger::writeWithContext((string) 'after prepare has data', (string) 'info', (bool) false);

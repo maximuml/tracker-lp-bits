@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Nexus\Torrent;
+namespace App\Support\Torrent;
 
 use App\Support\Format;
 use App\Support\Language;
@@ -10,9 +10,10 @@ use App\Support\Locale;
 
 class TechnicalInformation
 {
-    private $mediaInfo;
+    private string $mediaInfo;
 
-    private $mediaInfoArr;
+    /** @var array<string, array<string, string>> */
+    private array $mediaInfoArr;
 
     public function __construct(string $mediaInfo)
     {
@@ -20,9 +21,12 @@ class TechnicalInformation
         $this->mediaInfoArr = $this->getMediaInfoArr($mediaInfo);
     }
 
-    public function getMediaInfoArr(string $mediaInfo)
+    /**
+     * @return array<string, array<string, string>>
+     */
+    public function getMediaInfoArr(string $mediaInfo): array
     {
-        $arr = preg_split('/[\r\n]+/', $mediaInfo);
+        $arr = preg_split('/[\r\n]+/', $mediaInfo) ?: [];
         $result = [];
         $parentKey = '';
         foreach ($arr as $key => $value) {
@@ -51,12 +55,12 @@ class TechnicalInformation
         return trim($value, " \n\r\t\v\0\u{A0}");
     }
 
-    public function getRuntime()
+    public function getRuntime(): string
     {
         return $this->mediaInfoArr['General']['Duration'] ?? '';
     }
 
-    public function getResolution()
+    public function getResolution(): string
     {
         $width = $this->mediaInfoArr['Video']['Width'] ?? '';
         $height = $this->mediaInfoArr['Video']['Height'] ?? '';
@@ -72,28 +76,28 @@ class TechnicalInformation
         return $result;
     }
 
-    public function getBitrate()
+    public function getBitrate(): string
     {
         $result = $this->mediaInfoArr['Video']['Bit rate'] ?? '';
 
         return $result;
     }
 
-    public function getFramerate()
+    public function getFramerate(): string
     {
         $result = $this->mediaInfoArr['Video']['Frame rate'] ?? '';
 
         return $result;
     }
 
-    public function getProfile()
+    public function getProfile(): string
     {
         $result = $this->mediaInfoArr['Video']['Format profile'] ?? '';
 
         return $result;
     }
 
-    public function getRefFrame()
+    public function getRefFrame(): string
     {
         foreach ($this->mediaInfoArr['Video'] ?? [] as $key => $value) {
             if (str_contains($key, 'Reference frames')) {
@@ -104,7 +108,10 @@ class TechnicalInformation
         return '';
     }
 
-    public function getAudios()
+    /**
+     * @return array<string, string>
+     */
+    public function getAudios(): array
     {
         $result = [];
         $audioIndex = 1;
@@ -138,7 +145,10 @@ class TechnicalInformation
         return $result;
     }
 
-    public function getSubtitles()
+    /**
+     * @return array<string, string>
+     */
+    public function getSubtitles(): array
     {
         $result = [];
         $subtitleIndex = 1;
@@ -166,22 +176,22 @@ class TechnicalInformation
         return $result;
     }
 
-    public function getHDRFormat()
+    public function getHDRFormat(): string
     {
         return $this->mediaInfoArr['Video']['HDR format'] ?? '';
     }
 
-    public function getVideoFormat()
+    public function getVideoFormat(): string
     {
         return $this->mediaInfoArr['Video']['Format'] ?? '';
     }
 
-    public function getBitDepth()
+    public function getBitDepth(): string
     {
         return $this->mediaInfoArr['Video']['Bit depth'] ?? '';
     }
 
-    public function renderOnDetailsPage()
+    public function renderOnDetailsPage(): string
     {
         $lang_functions = app(Language::class)->functions();
         if (empty($this->mediaInfo)) {
@@ -235,8 +245,8 @@ class TechnicalInformation
         if (! empty($videos)) {
             $html .= '<div class="nti-col">';
             $html .= '<h4>'.htmlspecialchars(Locale::trans('torrent.technicalinfo_section_video', [], null)).'</h4>';
-            $html .= $this->renderKvList($videos['main'] ?? []);
-            if (! empty($videos['encoding_settings'])) {
+            $html .= $this->renderKvList(is_array($videos['main'] ?? null) ? $videos['main'] : []);
+            if (! empty($videos['encoding_settings']) && is_string($videos['encoding_settings'])) {
                 $html .= $this->renderColumnSpoiler(Locale::trans('torrent.technicalinfo_encoding_settings', [], null), [
                     Locale::trans('torrent.technicalinfo_encoding_settings', [], null) => $videos['encoding_settings'],
                 ]);
@@ -286,6 +296,8 @@ class TechnicalInformation
     /**
      * Returns ['main' => [label => value], 'extra' => [label => value]]
      * The "main" set is the small column display; "extra" goes into a per-column spoiler.
+     *
+     * @return array<string, array<string, string>>
      */
     public function getGeneralInfo(): array
     {
@@ -302,7 +314,7 @@ class TechnicalInformation
             Locale::trans('torrent.technicalinfo_writing_app', [], null) => $g['Writing application'] ?? ($g['Encoded application'] ?? ''),
             Locale::trans('torrent.technicalinfo_writing_lib', [], null) => $g['Writing library'] ?? '',
         ];
-        $main = array_filter($main, fn ($v) => $v !== '' && $v !== null);
+        $main = array_filter($main, fn ($v) => $v !== '');
 
         // Anything else from [General] goes to the "extra" spoiler so we don't drop info.
         $shownKeys = ['Format', 'File size', 'Overall bit rate', 'Overall bit rate mode',
@@ -313,7 +325,7 @@ class TechnicalInformation
             if (in_array($k, $shownKeys, true)) {
                 continue;
             }
-            if ($v === '' || $v === null) {
+            if ($v === '') {
                 continue;
             }
             $extra[$k] = $v;
@@ -324,6 +336,8 @@ class TechnicalInformation
 
     /**
      * Returns ['main' => [...], 'encoding_settings' => string|null]
+     *
+     * @return array<string, array<string, string>|string|null>
      */
     public function getVideoInfoDetailed(): array
     {
@@ -353,7 +367,7 @@ class TechnicalInformation
             Locale::trans('torrent.technicalinfo_ref_frames', [], null) => $this->getRefFrame(),
             Locale::trans('torrent.technicalinfo_encoder', [], null) => $v['Encoded library'] ?? ($v['Writing library'] ?? ''),
         ];
-        $main = array_filter($main, fn ($v) => $v !== '' && $v !== null);
+        $main = array_filter($main, fn ($v) => $v !== '');
 
         return [
             'main' => $main,
@@ -371,6 +385,8 @@ class TechnicalInformation
      *   'rows' => [label => value],
      *   'badges' => ['Default' => bool, 'Forced' => bool],
      * ]
+     *
+     * @return array<int, array<string, mixed>>
      */
     public function getAudioTracks(): array
     {
@@ -425,6 +441,7 @@ class TechnicalInformation
         return $tracks;
     }
 
+    /** @param  array<int, string>  $parts */
     private function joinNonEmpty(array $parts, string $glue = ' / '): string
     {
         $parts = array_filter(array_map([$this, 'trim'], $parts), fn ($v) => $v !== '');
@@ -432,6 +449,7 @@ class TechnicalInformation
         return implode($glue, $parts);
     }
 
+    /** @param  array<string, string>  $items */
     private function renderKvList(array $items): string
     {
         if (empty($items)) {
@@ -446,6 +464,7 @@ class TechnicalInformation
         return $html;
     }
 
+    /** @param  array<string, mixed>  $track */
     private function renderAudioTrack(array $track): string
     {
         $head = '#'.(int) $track['index'];
@@ -474,6 +493,7 @@ class TechnicalInformation
         return $html;
     }
 
+    /** @param  array<string, string>  $items */
     private function renderColumnSpoiler(string $title, array $items): string
     {
         if (empty($items)) {
@@ -488,6 +508,7 @@ class TechnicalInformation
         return sprintf('<div class="nti-more">%s</div>', Format::formatComment($bbcode, false));
     }
 
+    /** @return array<string, array<string, string>|null> */
     public function getSummaryInfo(): array
     {
         $videos = [
@@ -508,7 +529,12 @@ class TechnicalInformation
         return compact('videos', 'audios', 'subtitles');
     }
 
-    private function buildTdTable(array $parts)
+    /**
+     * @param  array<string, string>  $parts
+     *
+     * @phpstan-ignore method.unused
+     */
+    private function buildTdTable(array $parts): string
     {
         $table = '<table style="border: none;"><tbody>';
 

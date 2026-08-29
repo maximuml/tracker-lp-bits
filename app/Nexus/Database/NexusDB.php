@@ -380,8 +380,8 @@ class NexusDB
             $driver->connect($config['host'], $config['username'], $config['password'], 'information_schema', $config['port']);
         }
         $quotedDb = DB::connection()->getPdo()->quote($config['database']);
-        $wrappedTable = DB::getQueryGrammar()->wrap($table);
-        $sql = "select * from COLUMNS where TABLE_SCHEMA = {$quotedDb} and TABLE_NAME = {$wrappedTable}";
+        $quotedTable = DB::connection()->getPdo()->quote($table);
+        $sql = "select * from COLUMNS where TABLE_SCHEMA = {$quotedDb} and TABLE_NAME = {$quotedTable}";
         if ($column !== null) {
             $sql .= ' and COLUMN_NAME = '.DB::connection()->getPdo()->quote($column);
         }

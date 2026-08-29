@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Models\Attachment;
-use Nexus\Nexus;
 
 /**
  * Legacy security helpers extracted from `include/globalfunctions.php`.
@@ -49,7 +48,7 @@ final class Security
 
         $dangerScriptsPattern = '/(logout|login|ajax|announce|scrape|adduser|modtask|docleanup|freeleech|take.*)\.php/i';
         if (preg_match($dangerScriptsPattern, $path)) {
-            $msg = sprintf('[DANGER_URL]: %s [%s]', $src, Nexus::instance()->getRequestId());
+            $msg = sprintf('[DANGER_URL]: %s [%s]', $src, RequestContext::instance()->getRequestId());
             Logger::writeWithContext($msg, 'alert');
             Log::writeWithContext($msg, 'mod');
         }

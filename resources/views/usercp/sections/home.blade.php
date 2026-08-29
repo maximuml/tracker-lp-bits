@@ -106,7 +106,7 @@ jQuery('#token-table').on('click', '.token-del', function () {
     })
 });
 JS;
-\Nexus\Nexus::js($tokenJs, 'footer', false);
+\App\Support\AssetAppender::js($tokenJs, 'footer', false);
 
 // Forum posts row
 if ($home['forumPosts']):

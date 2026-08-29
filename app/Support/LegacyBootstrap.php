@@ -8,7 +8,6 @@ use App\Support\Cache\LegacyRedisCache;
 use Illuminate\Http\Request;
 use Laravel\Sanctum\PersonalAccessToken;
 use Laravel\Sanctum\Sanctum;
-use Nexus\Nexus;
 
 /**
  * One-stop legacy bootstrap for web wrappers and console commands.
@@ -67,13 +66,14 @@ final class LegacyBootstrap
         if (defined('RUNNING_IN_OCTANE') && RUNNING_IN_OCTANE) {
             // ResetNexus listener already flushed state; just re-boot
             // the instance with fresh request-scoped data.
-            Nexus::boot();
+            RequestContext::boot();
 
             return;
         }
 
-        Nexus::flush();
-        Nexus::boot();
+        RequestContext::flush();
+        AssetAppender::flush();
+        RequestContext::boot();
     }
 
     private static function bootCache(string $rootpath): void
@@ -103,7 +103,7 @@ final class LegacyBootstrap
 
     private static function bootLanguage(string $rootpath): void
     {
-        $script = Nexus::instance()->getScript();
+        $script = RequestContext::instance()->getScript();
         if (in_array($script, ['announce', 'scrape'], true)) {
             return;
         }
@@ -125,7 +125,7 @@ final class LegacyBootstrap
             return;
         }
 
-        $script = Nexus::instance()->getScript();
+        $script = RequestContext::instance()->getScript();
         if (in_array($script, ['announce', 'scrape', 'torrentrss', 'download'], true)) {
             return;
         }

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Repositories\ExamRepository;
+use App\Support\RequestContext;
 use Illuminate\Console\Command;
-use Nexus\Nexus;
 
 class ExamUpdateProgress extends Command
 {
@@ -57,7 +57,7 @@ class ExamUpdateProgress extends Command
 
             return 0;
         }
-        $this->info(Nexus::instance()->getRequestId().", $log, result: ".var_export($result, true));
+        $this->info(RequestContext::instance()->getRequestId().", $log, result: ".var_export($result, true));
 
         return 0;
     }

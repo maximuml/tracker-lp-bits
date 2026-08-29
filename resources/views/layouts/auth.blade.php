@@ -24,7 +24,7 @@
     <script type="text/javascript" src="js/jquery-1.12.4.min.js"></script>
     <script type="text/javascript" src="js/csrf.js"></script>
     <script type="text/javascript" src="vendor/layer-v3.5.1/layer/layer.js"></script>
-    @foreach (\Nexus\Nexus::getAppendHeaders() as $html)
+    @foreach (\App\Support\AssetAppender::getAppendHeaders() as $html)
         {!! $html !!}
     @endforeach
 </head>
@@ -33,7 +33,7 @@
     <div class="container" id="main-content" tabindex="-1">
         @yield('content')
     </div>
-    @foreach (\Nexus\Nexus::getAppendFooters() as $html)
+    @foreach (\App\Support\AssetAppender::getAppendFooters() as $html)
         {!! $html !!}
     @endforeach
 </body>

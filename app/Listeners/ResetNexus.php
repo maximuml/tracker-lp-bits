@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Listeners;
 
+use App\Support\AssetAppender;
 use App\Support\CurrentUser;
 use App\Support\PageLayout;
 use App\Support\Permissions;
+use App\Support\RequestContext;
 use App\Support\SupportContext;
 use App\Utils\MsgAlert;
-use Nexus\Nexus;
 
 class ResetNexus
 {
@@ -23,7 +24,8 @@ class ResetNexus
     {
         SupportContext::reset();
         app(CurrentUser::class)->reset();
-        Nexus::flush();
+        RequestContext::flush();
+        AssetAppender::flush();
         PageLayout::resetState();
         Permissions::resetState();
         MsgAlert::resetState();

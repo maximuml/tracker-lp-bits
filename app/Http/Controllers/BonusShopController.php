@@ -9,6 +9,7 @@ use App\Enums\ExamType;
 use App\Models\Exam;
 use App\Models\Medal;
 use App\Models\User;
+use App\Support\AssetAppender;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Locale;
@@ -19,7 +20,6 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
-use Nexus\Nexus;
 
 class BonusShopController extends LegacyController
 {
@@ -141,7 +141,7 @@ jQuery('.gift').on('click', function (e) {
     })
 })
 JS;
-        Nexus::js($js, 'footer', false);
+        AssetAppender::js($js, 'footer', false);
 
         return $this->legacyPage($request, 'medal', true, [
             'title' => $title,
@@ -238,8 +238,8 @@ jQuery('.claim').on('click', function (e) {
     })
 })
 JS;
-        Nexus::js('vendor/jquery-loading/jquery.loading.min.js', 'footer', true);
-        Nexus::js($js, 'footer', false);
+        AssetAppender::js('vendor/jquery-loading/jquery.loading.min.js', 'footer', true);
+        AssetAppender::js($js, 'footer', false);
 
         return $this->legacyPage($request, 'task', true, [
             'title' => $title,

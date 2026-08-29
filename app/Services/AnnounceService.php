@@ -38,7 +38,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
-use Nexus\Nexus;
 
 final class AnnounceService
 {
@@ -420,13 +419,13 @@ final class AnnounceService
             if ($buyStatus > 10) {
                 $this->userRepository->updateDownloadPrivileges(null, $this->userId, 'no', 'announce_paid_torrent_too_many_times');
             }
-            Nexus::dispatchQueueJob(new BuyTorrent($this->userId, $this->torrentId));
+            dispatch(new BuyTorrent($this->userId, $this->torrentId));
             $torrentRep->addBuyFailCache($this->userId, $this->torrentId);
             $this->responseBuilder->warn('purchase in progress, please try again later, and make sure you have enough bonus', 300);
         }
 
         if ($buyStatus == TorrentPurchaseRepository::BUY_STATUS_UNKNOWN) {
-            Nexus::dispatchQueueJob(new BuyTorrent($this->userId, $this->torrentId));
+            dispatch(new BuyTorrent($this->userId, $this->torrentId));
             $this->responseBuilder->warn('purchase started, please wait', 300);
         }
     }

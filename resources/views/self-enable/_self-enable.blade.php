@@ -1,5 +1,5 @@
 <?php
-\Nexus\Nexus::css('#ban-info td {border: none}', 'header', false);
+\App\Support\AssetAppender::css('#ban-info td {border: none}', 'header', false);
 
 \App\Support\Html::beginFrame($title, true, 10, '100%', 'center');
 

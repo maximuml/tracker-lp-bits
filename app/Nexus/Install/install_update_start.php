@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config;
+use App\Support\RequestContext;
 use Nexus\Database\NexusDB;
-use Nexus\Nexus;
 
 ini_set('error_reporting', E_ALL);
 ini_set('display_errors', 0);
@@ -22,4 +22,4 @@ if (file_exists(ROOT_PATH.'.env')) {
     $withLaravel = true;
 }
 define('WITH_LARAVEL', $withLaravel);
-Nexus::boot();
+RequestContext::boot();

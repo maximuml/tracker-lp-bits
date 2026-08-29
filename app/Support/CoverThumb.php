@@ -6,7 +6,6 @@ namespace App\Support;
 
 use App\Jobs\GenerateCoverThumbnail;
 use App\Support\Cache\LegacyRedisCache;
-use Nexus\Nexus;
 
 /**
  * Cover-thumbnail URL resolver extracted from `include/functions.php`.
@@ -95,7 +94,7 @@ final class CoverThumb
         }
 
         if ($lockSet) {
-            Nexus::dispatchQueueJob(new GenerateCoverThumbnail($url, $absolutePath, $maxWidth, $maxHeight, $quality));
+            dispatch(new GenerateCoverThumbnail($url, $absolutePath, $maxWidth, $maxHeight, $quality));
         }
     }
 

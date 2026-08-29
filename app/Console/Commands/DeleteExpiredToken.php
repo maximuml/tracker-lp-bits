@@ -7,10 +7,10 @@ namespace App\Console\Commands;
 use App\Models\User;
 use App\Support\LegacyDb;
 use App\Support\Logger;
+use App\Support\RequestContext;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Laravel\Sanctum\PersonalAccessToken;
-use Nexus\Nexus;
 
 class DeleteExpiredToken extends Command
 {
@@ -60,7 +60,7 @@ class DeleteExpiredToken extends Command
 
         $query->where('last_used_at', '<', Carbon::now()->subDays((int) $days));
         $result = $query->delete();
-        $log = sprintf('[%s], %s, result: %s, query: %s', Nexus::instance()->getRequestId(), __METHOD__, var_export($result, true), LegacyDb::lastQuery(false, 'json'));
+        $log = sprintf('[%s], %s, result: %s, query: %s', RequestContext::instance()->getRequestId(), __METHOD__, var_export($result, true), LegacyDb::lastQuery(false, 'json'));
         $this->info($log);
         Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
 

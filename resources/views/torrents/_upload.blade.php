@@ -127,7 +127,7 @@ jQuery('select[name="offer"]').on("change", function () {
     }, 'json')
 })
 JS;
-					\Nexus\Nexus::js($getOfferJs, 'footer', false);
+					\App\Support\AssetAppender::js($getOfferJs, 'footer', false);
 
 				}
 				//===end
@@ -156,8 +156,8 @@ JS;
 		</table>
 	</form>
 <?php
-\Nexus\Nexus::js('vendor/jquery-loading/jquery.loading.min.js', 'footer', true);
-\Nexus\Nexus::js('js/ptgen.js', 'footer', true);
+\App\Support\AssetAppender::js('vendor/jquery-loading/jquery.loading.min.js', 'footer', true);
+\App\Support\AssetAppender::js('js/ptgen.js', 'footer', true);
 $customFieldJs = <<<JS
 jQuery("#compose").on("change", "select[name=type]", function () {
     let _this = jQuery(this);
@@ -171,5 +171,5 @@ jQuery("#compose").on("change", "select[name=type]", function () {
 })
 jQuery("tr[relation]").hide();
 JS;
-\Nexus\Nexus::js($customFieldJs, 'footer', false);
+\App\Support\AssetAppender::js($customFieldJs, 'footer', false);
 ?>

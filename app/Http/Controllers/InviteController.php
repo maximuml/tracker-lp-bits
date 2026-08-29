@@ -12,6 +12,7 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Repositories\InviteRepository;
 use App\Repositories\UserRepository;
+use App\Support\AssetAppender;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Globals;
@@ -23,7 +24,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
-use Nexus\Nexus;
 
 class InviteController extends LegacyController
 {
@@ -206,7 +206,7 @@ jQuery("#reset").on('click', function () {
     jQuery("select[name=enabled]").val('')
 })
 JS;
-        Nexus::js($resetJs, 'footer', false);
+        AssetAppender::js($resetJs, 'footer', false);
 
         return [
             'inviteeCount' => $number,

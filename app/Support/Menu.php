@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Support\Cache\LegacyRedisCache;
-use Nexus\Nexus;
 
 /**
  * Legacy main-menu helper extracted from `include/functions.php`.
@@ -81,7 +80,7 @@ final class Menu
     public static function outputWithContext(string $selected = 'home'): void
     {
         $result = self::render(
-            \function_exists('nexus') ? Nexus::instance()->getScript() : '',
+            \function_exists('nexus') ? RequestContext::instance()->getScript() : '',
             app(Language::class)->functions(),
             (string) app(Globals::class)->get('enableoffer', ''),
             null,

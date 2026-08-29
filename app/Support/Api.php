@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Support;
 
 use Illuminate\Http\Resources\Json\JsonResource;
-use Nexus\Nexus;
 
 /**
  * Legacy API response helpers extracted from `include/globalfunctions.php`.
@@ -40,8 +39,8 @@ final class Api
 
         Logger::write('api after prepare data', 'info');
 
-        $nexus = Nexus::instance();
-        $time = (float) number_format(microtime(true) - ($nexus ? $nexus->getStartTimestamp() : 0), 3);
+        $nexus = RequestContext::instance();
+        $time = (float) number_format(microtime(true) - $nexus->getStartTimestamp(), 3);
         $count = null;
         $resultKey = 'ret';
         $msgKey = 'msg';
@@ -60,7 +59,7 @@ final class Api
             $msgKey => (string) $msg,
             'data' => $data,
             'time' => $time,
-            'rid' => $nexus ? $nexus->getRequestId() : 'NO_REQUEST_ID',
+            'rid' => $nexus->getRequestId(),
         ];
 
         if ($format === 'layui-table') {

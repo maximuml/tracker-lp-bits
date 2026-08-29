@@ -17,11 +17,11 @@ use App\Support\Log;
 use App\Support\Logger;
 use App\Support\Pagination;
 use App\Support\Promotion;
+use App\Support\RequestContext;
 use App\Support\SearchBox;
 use App\Support\SearchSuggest;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
-use Nexus\Nexus;
 
 class TorrentSearchRepository
 {
@@ -46,7 +46,7 @@ class TorrentSearchRepository
         $sources = $media = $codecs = $standards = $processings = $audiocodecs = [];
 
         // check searchbox
-        switch (Nexus::instance()->getScript()) {
+        switch (RequestContext::instance()->getScript()) {
             case 'torrents':
                 $sectiontype = $browsecatmode;
                 break;

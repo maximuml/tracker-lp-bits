@@ -9,7 +9,6 @@ use App\Enums\Permission\PermissionEnum;
 use App\Models\User;
 use App\Repositories\UserRepository;
 use App\Support\Config\SiteConfig;
-use Nexus\Nexus;
 
 /**
  * Legacy BBCode formatter extracted from `include/functions.php`.
@@ -232,7 +231,7 @@ final class Comment
                     return HtmlRenderer::formatSpoiler(
                         $m[3],
                         $m[2],
-                        Nexus::instance()->getScript() != 'preview',
+                        RequestContext::instance()->getScript() != 'preview',
                     );
                 },
                 $s,

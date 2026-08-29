@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Str;
-use Nexus\Nexus;
 
 /**
  * Legacy model-event helpers extracted from `include/globalfunctions.php`.
@@ -42,7 +41,7 @@ final class Events
                 $idKeyOld = $prefix.Str::random();
                 Cache::put($idKeyOld, json_encode($oldModel->toArray(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), 3600 * 24 * 30);
             }
-            Nexus::dispatchQueueJob(new FireEvent($name, $idKey, $idKeyOld));
+            dispatch(new FireEvent($name, $idKey, $idKeyOld));
             Logger::writeWithContext("success fire_event in nexus, name: $name, idKey: $idKey, idKeyOld: $idKeyOld");
         } else {
             $eventClass = ModelEventEnum::$eventMaps[$name]['event'];

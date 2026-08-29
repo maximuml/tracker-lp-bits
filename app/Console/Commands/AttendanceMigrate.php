@@ -7,8 +7,8 @@ namespace App\Console\Commands;
 use App\Repositories\AttendanceRepository;
 use App\Support\LegacyDb;
 use App\Support\Logger;
+use App\Support\RequestContext;
 use Illuminate\Console\Command;
-use Nexus\Nexus;
 
 class AttendanceMigrate extends Command
 {
@@ -43,7 +43,7 @@ class AttendanceMigrate extends Command
     {
         $rep = app(AttendanceRepository::class);
         $result = $rep->migrateAttendance();
-        $log = sprintf('[%s], %s, result: %s, query: %s', Nexus::instance() ? Nexus::instance()->getRequestId() : 'NO_REQUEST_ID', __METHOD__, var_export($result, true), LegacyDb::lastQuery(false, 'json'));
+        $log = sprintf('[%s], %s, result: %s, query: %s', RequestContext::instance()->getRequestId(), __METHOD__, var_export($result, true), LegacyDb::lastQuery(false, 'json'));
         $this->info($log);
         Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
 

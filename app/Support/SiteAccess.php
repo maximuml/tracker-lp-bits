@@ -8,7 +8,6 @@ use App\Support\Config\SiteConfig;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
-use Nexus\Nexus;
 
 /**
  * Legacy guest-access / login-mode helpers extracted from
@@ -40,7 +39,7 @@ final class SiteAccess
             return;
         }
 
-        if (in_array(Nexus::instance()->getScript(), ['login', 'takelogin', 'image']) && self::canDoLogin()) {
+        if (in_array(RequestContext::instance()->getScript(), ['login', 'takelogin', 'image']) && self::canDoLogin()) {
             return;
         }
 

@@ -62,7 +62,7 @@ jQuery('#save-user-medal-btn').on("click", function (e) {
     }, 'json')
 })
 JS;
-    \Nexus\Nexus::js($warnMedalJs, 'footer', false);
+    \App\Support\AssetAppender::js($warnMedalJs, 'footer', false);
 }
 
 if (!$enabled)
@@ -187,7 +187,7 @@ if (!empty($userPropsHtml)) {
     \App\Support\Html::trSmall($lang_userdetails['row_user_props'], (string) $userPropsHtml, 1);
 }
 if (!empty($consumeChangeUsernameJs)) {
-    \Nexus\Nexus::js((string) $consumeChangeUsernameJs, 'footer', false);
+    \App\Support\AssetAppender::js((string) $consumeChangeUsernameJs, 'footer', false);
 }
 
 \App\Support\Html::trSmall($lang_userdetails['row_torrent_comment'], ($torrentcomments && ($user["id"] == $CURUSER["id"] || \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_HISTORY)) ? "<a href=\"userhistory.php?action=viewcomments&amp;id=".$id."\" title=\"".$lang_userdetails['link_view_comments']."\">".$torrentcomments."</a>" : $torrentcomments), 1);
@@ -364,7 +364,7 @@ jQuery('#remove-leech-warn').on('click', function () {
     }, 'json')
 })
 JS;
-            \Nexus\Nexus::js($removeLeechWarnJs, 'footer', false);
+            \App\Support\AssetAppender::js($removeLeechWarnJs, 'footer', false);
 		}else{
 			print("<i>".$lang_userdetails['text_for_unlimited_time']."</i>");
 		}
@@ -423,4 +423,4 @@ jQuery("body").on("click", ".nexus-pagination a", function (e) {
 $claimJs
 JS;
 
-\Nexus\Nexus::js($paginationJs, 'footer', false);
+\App\Support\AssetAppender::js($paginationJs, 'footer', false);

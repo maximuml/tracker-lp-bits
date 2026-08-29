@@ -8,11 +8,11 @@ $toastLang = json_encode([
     'close' => $lang_index['toast_close'] ?? 'Close',
     'userId' => (int) ($CURUSER['id'] ?? 0),
 ], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT);
-\Nexus\Nexus::css('styles/shoutbox.css', 'header', true);
-\Nexus\Nexus::js('js/shoutbox.js', 'footer', true);
-\Nexus\Nexus::js("window.TOAST_LANG = $toastLang;", 'footer', false, 'toast-lang');
-\Nexus\Nexus::css('styles/toast.css', 'header', true);
-\Nexus\Nexus::js('js/toast.js', 'footer', true);
+\App\Support\AssetAppender::css('styles/shoutbox.css', 'header', true);
+\App\Support\AssetAppender::js('js/shoutbox.js', 'footer', true);
+\App\Support\AssetAppender::js("window.TOAST_LANG = $toastLang;", 'footer', false, 'toast-lang');
+\App\Support\AssetAppender::css('styles/toast.css', 'header', true);
+\App\Support\AssetAppender::js('js/toast.js', 'footer', true);
 @endphp
 @extends('layouts.legacy')
 

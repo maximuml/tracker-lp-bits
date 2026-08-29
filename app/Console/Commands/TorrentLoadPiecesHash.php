@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Repositories\TorrentRepository;
+use App\Support\RequestContext;
 use Illuminate\Console\Command;
-use Nexus\Nexus;
 
 class TorrentLoadPiecesHash extends Command
 {
@@ -36,7 +36,7 @@ class TorrentLoadPiecesHash extends Command
         $rep = app(TorrentRepository::class);
         $this->info("id: $id, going to load pieces hash...");
         $result = $rep->loadPiecesHashCache($id);
-        $this->info(sprintf('%s, result: %s, cost time: %s seconds.', Nexus::instance()->getRequestId(), json_encode($result), time() - $begin));
+        $this->info(sprintf('%s, result: %s, cost time: %s seconds.', RequestContext::instance()->getRequestId(), json_encode($result), time() - $begin));
 
         return Command::SUCCESS;
     }

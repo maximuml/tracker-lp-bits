@@ -121,7 +121,7 @@ jQuery('#approval').on("click", function () {
     })
 })
 JS;
-            \Nexus\Nexus::js($js, 'footer', false);
+            \App\Support\AssetAppender::js($js, 'footer', false);
         }
         $actions[] = "<a title=\"".$lang_details['title_report_torrent']."\" href=\"report.php?torrent=$id\"><img class=\"dt_report\" src=\"pic/trans.gif\" alt=\"report\" />&nbsp;<b><font class=\"small\">".$lang_details['text_report_torrent']."</font></b></a>";
 		\App\Support\Html::tr($lang_details['row_action'], implode('&nbsp;|&nbsp;', $actions), 1);

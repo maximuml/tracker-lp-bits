@@ -5,16 +5,17 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Models\Passkey;
+use App\Support\AssetAppender;
 use App\Support\AuthCookie;
 use App\Support\Cache as AppCache;
 use App\Support\Config\SiteConfig;
 use App\Support\Locale;
 use App\Support\Network;
+use App\Support\RequestContext;
 use App\Support\Time;
 use Exception;
 use Illuminate\Support\Facades\Cache;
 use lbuchs\WebAuthn\WebAuthn;
-use Nexus\Nexus;
 use RuntimeException;
 
 class UserPasskeyRepository extends BaseRepository
@@ -23,7 +24,7 @@ class UserPasskeyRepository extends BaseRepository
     public static function createWebAuthn()
     {
         $formats = ['android-key', 'android-safetynet', 'apple', 'fido-u2f', 'packed', 'tpm', 'none'];
-        $rpId = explode(':', Nexus::instance()->getRequestHost())[0];
+        $rpId = explode(':', RequestContext::instance()->getRequestHost())[0];
 
         return new WebAuthn(SiteConfig::current()->basic->siteName(), $rpId, $formats);
     }
@@ -335,6 +336,6 @@ class UserPasskeyRepository extends BaseRepository
             });
         </script>
         <?php
-        Nexus::js('js/passkey.js', 'footer', true);
+        AssetAppender::js('js/passkey.js', 'footer', true);
     }
 }

@@ -6,8 +6,8 @@ namespace App\Console\Commands;
 
 use App\Repositories\ExamRepository;
 use App\Support\Logger;
+use App\Support\RequestContext;
 use Illuminate\Console\Command;
-use Nexus\Nexus;
 
 class ExamAssign extends Command
 {
@@ -49,7 +49,7 @@ class ExamAssign extends Command
         $end = $this->option('end');
         $this->info(sprintf('uid: %s, examId: %s, begin: %s, end: %s', $uid, $examId, $begin, $end));
         $result = $examRep->assignToUser($uid, $examId, $begin, $end);
-        $log = sprintf('[%s], %s, result: %s', Nexus::instance()->getRequestId(), __METHOD__, var_export($result, true));
+        $log = sprintf('[%s], %s, result: %s', RequestContext::instance()->getRequestId(), __METHOD__, var_export($result, true));
         $this->info($log);
         Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
 

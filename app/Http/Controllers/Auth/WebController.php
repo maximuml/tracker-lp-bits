@@ -11,6 +11,7 @@ use App\Models\Setting;
 use App\Repositories\UserPasskeyRepository;
 use App\Services\Captcha\Drivers\ImageCaptchaDriver;
 use App\Services\WebAuthService;
+use App\Support\AssetAppender;
 use App\Support\Captcha;
 use App\Support\Locale;
 use App\Support\Network;
@@ -20,7 +21,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
-use Nexus\Nexus;
 
 class WebController extends Controller
 {
@@ -184,7 +184,7 @@ class WebController extends Controller
     {
         ob_start();
         UserPasskeyRepository::renderLogin();
-        Nexus::js('js/passkey.js', 'footer', true);
+        AssetAppender::js('js/passkey.js', 'footer', true);
 
         return (string) ob_get_clean();
     }

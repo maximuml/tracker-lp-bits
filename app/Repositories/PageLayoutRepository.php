@@ -11,9 +11,9 @@ use App\Support\Globals;
 use App\Support\Input;
 use App\Support\Language;
 use App\Support\Menu;
+use App\Support\RequestContext;
 use App\Support\UserUpdateBatch;
 use Illuminate\Support\Facades\DB;
-use Nexus\Nexus;
 
 class PageLayoutRepository extends BaseRepository
 {
@@ -131,7 +131,7 @@ class PageLayoutRepository extends BaseRepository
             return;
         }
 
-        $script = Nexus::instance()->getScript();
+        $script = RequestContext::instance()->getScript();
         if (in_array($script, ['announce', 'scrape', 'torrentrss', 'download'], true)) {
             return;
         }

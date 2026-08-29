@@ -41,34 +41,38 @@ final class Environment
      * Execute a shell command and return its output.
      *
      * Mirrors `executeCommand()`. When `$artisan` is true, the command is
-     * prefixed with the configured PHP binary and `artisan`.
+     * prefixed with the configured PHP binary and `artisan`. The command may
+     * be passed either as a single string (split by whitespace) or as a list
+     * of arguments that have not yet been escaped.
      *
+     * @param  string|array<int, string>  $command
      * @return string|array<int, string>
      */
-    public static function run(string $command, string $format = 'string', bool $artisan = false, bool $exception = true): string|array
+    public static function run(string|array $command, string $format = 'string', bool $artisan = false, bool $exception = true): string|array
     {
         $append = ' 2>&1';
-        $needsAppend = ! str_ends_with($command, $append);
+        $commandString = is_array($command) ? implode(' ', $command) : $command;
+        $needsAppend = ! str_ends_with($commandString, $append);
 
         if ($artisan) {
             $phpPath = Env::get('PHP_PATH', null) ?: 'php';
             $webRoot = rtrim(ROOT_PATH, '/');
-            $tokens = preg_split('/\s+/', trim($command), -1, PREG_SPLIT_NO_EMPTY);
+            $tokens = is_array($command) ? $command : preg_split('/\s+/', trim($command), -1, PREG_SPLIT_NO_EMPTY);
             if ($tokens === false) {
                 throw new \InvalidArgumentException('Failed to parse artisan command');
             }
             $escapedCommand = implode(' ', array_map('escapeshellarg', $tokens));
-            $command = escapeshellarg($phpPath).' '.escapeshellarg($webRoot.'/artisan').' '.$escapedCommand;
+            $commandString = escapeshellarg($phpPath).' '.escapeshellarg($webRoot.'/artisan').' '.$escapedCommand;
         } else {
-            $command = escapeshellcmd($command);
+            $commandString = escapeshellcmd($commandString);
         }
 
         if ($needsAppend) {
-            $command .= $append;
+            $commandString .= $append;
         }
 
-        Logger::writeWithContext("command: $command");
-        $result = exec($command, $output, $resultCode);
+        Logger::writeWithContext("command: $commandString");
+        $result = exec($commandString, $output, $resultCode);
         $outputString = implode("\n", $output);
         $log = sprintf('result_code: %s, result: %s, output: %s', $resultCode, $result, $outputString);
 

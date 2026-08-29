@@ -203,9 +203,10 @@ class Install
         foreach ($this->requiredFunctions as $fn) {
             if (str_starts_with($fn, 'pcntl_') && function_exists('exec')) {
                 $output = [];
-                $command = "php -r 'var_export(function_exists(\"$fn\"));'";
+                $safeFn = addcslashes($fn, '\"');
+                $command = "php -r 'var_export(function_exists(\"$safeFn\"));'";
                 $result = exec($command, $output, $result_code);
-                $lastFourChars = substr(trim($output[0]), -4);
+                $lastFourChars = substr(trim($output[0] ?? ''), -4);
                 $exists = $lastFourChars == 'true';
                 if (! $exists) {
                     $disabledFunctions[] = $fn;
@@ -715,14 +716,14 @@ class Install
         if (! WITH_LARAVEL) {
             throw new \RuntimeException('Laravel is not available.');
         }
-        $command = 'php '.ROOT_PATH.'artisan migrate';
+        $args = ['migrate'];
         if ($path !== null) {
-            foreach ((array) $path as $key => $value) {
-                $command .= " --path=$value";
+            foreach ((array) $path as $value) {
+                $args[] = '--path='.$value;
             }
         }
-        $command .= ' --force';
-        $this->executeCommand($command);
+        $args[] = '--force';
+        Environment::run($args, 'string', true, true);
         $this->doLog('[MIGRATE] success.');
     }
 
@@ -736,15 +737,9 @@ class Install
         if (! WITH_LARAVEL) {
             throw new \RuntimeException('Laravel is not available.');
         }
-        $command = 'php '.ROOT_PATH.'artisan db:seed --force';
-        $result = exec($command, $output, $result_code);
-        $this->doLog(sprintf('command: %s, result_code: %s, result: %s', $command, $result_code, $result));
-        $this->doLog('output: '.json_encode($output));
-        if ($result_code != 0) {
-            throw new \RuntimeException(json_encode($output));
-        } else {
-            $this->doLog('[DATABASE_SEED] success.');
-        }
+        $output = Environment::run(['db:seed', '--force'], 'string', true, true);
+        $this->doLog('output: '.$output);
+        $this->doLog('[DATABASE_SEED] success.');
     }
 
     public function listTimeZone()

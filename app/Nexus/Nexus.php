@@ -438,6 +438,11 @@ final class Nexus
                 $connectionConfig = [
                     'client' => $redisDriver,
                     $redisConnectionName => $redisConfig,
+                    // Preserve the 'default' and 'cache' connections so
+                    // Redis::connection() / Redis::connection('cache') keep
+                    // working after the queue manager rebinds the singleton.
+                    'default' => $redisConfig,
+                    'cache' => $redisConfig,
                 ];
 
                 return new RedisManager($app, $redisDriver, $connectionConfig);

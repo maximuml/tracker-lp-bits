@@ -23,6 +23,7 @@ use App\Models\Torrent;
 use App\Models\TorrentExtra;
 use App\Models\User;
 use App\Support\Config\SiteConfig;
+use App\Support\CustomField;
 use App\Support\Description;
 use App\Support\Events;
 use App\Support\Format;
@@ -40,7 +41,6 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Nexus\Field\Field;
 use Rhilip\Bencode\Bencode;
 use Rhilip\Bencode\ParseException;
 
@@ -644,7 +644,7 @@ class UploadRepository extends BaseRepository
         if (empty($data)) {
             return;
         }
-        $field = new Field;
+        $field = new CustomField;
         $field->saveFieldValues($category->mode, $torrentId, $data);
     }
 

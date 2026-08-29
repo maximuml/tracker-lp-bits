@@ -2,23 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Nexus\Field;
+namespace App\Support;
 
 use App\Models\SearchBox;
 use App\Models\TorrentCustomField;
 use App\Models\TorrentCustomFieldValue;
-use App\Support\Format;
-use App\Support\Globals;
-use App\Support\Html;
-use App\Support\HtmlRenderer;
-use App\Support\Language;
-use App\Support\Locale;
-use App\Support\Logger;
-use App\Support\Pagination;
-use App\Support\Url;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
-class Field
+class CustomField
 {
     const TYPE_TEXT = 'text';
 
@@ -32,7 +24,8 @@ class Field
 
     const TYPE_IMAGE = 'image';
 
-    public static $types = [
+    /** @var array<string, array{text: string, has_option: bool, is_value_multiple: bool}> */
+    public static array $types = [
         self::TYPE_TEXT => [
             'text' => 'text',
             'has_option' => false,
@@ -65,9 +58,10 @@ class Field
         ],
     ];
 
-    private $preparedTorrentCustomFieldValues = [];
+    /** @var array<int|string, array<int|string, mixed>> */
+    private array $preparedTorrentCustomFieldValues = [];
 
-    public function getTypeHuman($type)
+    public function getTypeHuman(string $type): string
     {
         $map = [
             self::TYPE_TEXT => Locale::trans('field.type.text', [], null),
@@ -81,7 +75,8 @@ class Field
         return $map[$type] ?? '';
     }
 
-    public function getTypeRadioOptions()
+    /** @return array<string, string> */
+    public function getTypeRadioOptions(): array
     {
         $out = [];
         foreach (self::$types as $key => $value) {
@@ -91,7 +86,8 @@ class Field
         return $out;
     }
 
-    public function radio($name, $options, $current = null)
+    /** @param  array<int|string, string>  $options */
+    public function radio(string $name, array $options, mixed $current = null): string
     {
         $arr = [];
         foreach ($options as $value => $label) {
@@ -104,7 +100,8 @@ class Field
         return implode('', $arr);
     }
 
-    public function buildFieldForm(array $row = [])
+    /** @param  array<int|string, mixed>  $row */
+    public function buildFieldForm(array $row = []): string
     {
         $lang_functions = app(Language::class)->functions();
         $lang_fields = (array) app(Globals::class)->get('lang_fields', []);
@@ -148,7 +145,7 @@ HTML;
         return $form;
     }
 
-    public function buildFieldTable()
+    public function buildFieldTable(): string
     {
         $lang_functions = app(Language::class)->functions();
         $lang_fields = (array) app(Globals::class)->get('lang_fields', []);
@@ -195,7 +192,8 @@ HEAD;
         return $head.$table.$paginationBottom;
     }
 
-    public function save($data)
+    /** @param  array<string, mixed>  $data */
+    public function save(array $data): int|string
     {
         $lang_functions = app(Language::class)->functions();
         $lang_fields = (array) app(Globals::class)->get('lang_fields', []);
@@ -254,7 +252,11 @@ HEAD;
         return $result;
     }
 
-    protected function buildTable(array $header, array $rows)
+    /**
+     * @param  array<string, string>  $header
+     * @param  array<int, array<int|string, mixed>>  $rows
+     */
+    protected function buildTable(array $header, array $rows): string
     {
         $table = '<table border="1" cellspacing="0" cellpadding="5" width="100%"><thead><tr>';
         foreach ($header as $key => $value) {
@@ -273,7 +275,8 @@ HEAD;
         return $table;
     }
 
-    public function buildFieldCheckbox($name, $current = [])
+    /** @param  array<int|string, mixed>|string  $current */
+    public function buildFieldCheckbox(string $name, array|string $current = []): string
     {
         $res = DB::table('torrents_custom_fields')->orderBy('priority', 'desc')->get();
         if (! is_array($current)) {
@@ -293,14 +296,15 @@ HEAD;
 
     }
 
-    public function renderOnUploadPage($torrentId, $searchBoxId)
+    public function renderOnUploadPage(int $torrentId, int $searchBoxId): string
     {
         $searchBox = SearchBox::query()->find($searchBoxId);
         if (empty($searchBox)) {
             throw new \RuntimeException("Invalid search box: $searchBoxId");
         }
         $customValues = $this->listTorrentCustomField($torrentId, $searchBoxId);
-        $customFieldIds = array_filter(array_map('intval', is_array($searchBox->custom_fields) ? $searchBox->custom_fields : explode(',', $searchBox->custom_fields ?? '')));
+        $customFieldsRaw = $searchBox->custom_fields;
+        $customFieldIds = array_filter(array_map('intval', is_array($customFieldsRaw) ? $customFieldsRaw : explode(',', (string) ($customFieldsRaw ?? ''))));
         $res = DB::table('torrents_custom_fields')
             ->whereIn('id', $customFieldIds)
             ->orderBy('priority', 'desc')
@@ -325,7 +329,8 @@ HEAD;
                     $name .= '[]';
                 }
                 $part = '';
-                foreach (preg_split('/[\r\n]+/', trim($row['options'])) as $option) {
+                $options = preg_split('/[\r\n]+/', trim((string) $row['options'])) ?: [];
+                foreach ($options as $option) {
                     if (empty($option) || ($pos = strpos($option, '|')) === false) {
                         continue;
                     }
@@ -346,7 +351,8 @@ HEAD;
                 $html .= Html::tr($trLabel, $part, 1, $trRelation);
             } elseif ($row['type'] == self::TYPE_SELECT) {
                 $part = '<select name="'.$name.'">';
-                foreach (preg_split('/[\r\n]+/', trim($row['options'])) as $option) {
+                $options = preg_split('/[\r\n]+/', trim((string) $row['options'])) ?: [];
+                foreach ($options as $option) {
                     if (empty($option) || ($pos = strpos($option, '|')) === false) {
                         continue;
                     }
@@ -373,10 +379,10 @@ HEAD;
                 $y .= sprintf('<input id="%s" type="text" name="%s" value="%s" style="width: %s;margin: 10px 0">', $inputId, $name, $currentValue, '99%');
                 $y .= '<div id="'.$previewBoxId.'">';
                 if (! empty($currentValue)) {
-                    if (substr($currentValue, 0, 4) == 'http') {
-                        $y .= HtmlRenderer::formatImg($currentValue, true, 700, 0, $imgId);
+                    if (substr((string) $currentValue, 0, 4) == 'http') {
+                        $y .= HtmlRenderer::formatImg((string) $currentValue, true, 700, 0, $imgId);
                     } else {
-                        $y .= Format::formatComment($currentValue);
+                        $y .= Format::formatComment((string) $currentValue);
                     }
                 }
                 $y .= '</div>';
@@ -408,20 +414,21 @@ JS;
         return $html;
     }
 
-    public function listTorrentCustomField($torrentId, $searchBoxId)
+    /**
+     * @param  int|array<int, int>  $torrentId
+     * @return array<int|string, array<int|string, mixed>>
+     */
+    public function listTorrentCustomField(int|array $torrentId, int $searchBoxId): array
     {
         // suppose torrentId is array
-        $isArray = true;
-        $torrentIdArr = $torrentId;
-        if (! is_array($torrentId)) {
-            $isArray = false;
-            $torrentIdArr = [$torrentId];
-        }
+        $isArray = is_array($torrentId);
+        $torrentIdArr = is_array($torrentId) ? $torrentId : [$torrentId];
         $searchBox = SearchBox::query()->find($searchBoxId);
         if (empty($searchBox)) {
             throw new \RuntimeException("Invalid search box: $searchBoxId");
         }
-        $customFieldIds = array_filter(array_map('intval', is_array($searchBox->custom_fields) ? $searchBox->custom_fields : explode(',', $searchBox->custom_fields ?? '')));
+        $customFieldsRaw = $searchBox->custom_fields;
+        $customFieldIds = array_filter(array_map('intval', is_array($customFieldsRaw) ? $customFieldsRaw : explode(',', (string) ($customFieldsRaw ?? ''))));
         if (empty($customFieldIds)) {
             return [];
         }
@@ -440,10 +447,13 @@ JS;
             $row = (array) $row;
             $typeInfo = self::$types[$row['type']];
             if ($typeInfo['has_option']) {
-                $options = preg_split('/[\r\n]+/', trim($row['options']));
+                $options = preg_split('/[\r\n]+/', trim((string) $row['options'])) ?: [];
                 $optionsArr = [];
                 foreach ($options as $option) {
                     $pos = strpos($option, '|');
+                    if ($pos === false) {
+                        continue;
+                    }
                     $value = substr($option, 0, $pos);
                     $label = substr($option, $pos + 1);
                     $optionsArr[$value] = $label;
@@ -452,7 +462,7 @@ JS;
             }
             $result[$row['torrent_id']][$row['id']] = $row;
             if ($typeInfo['is_value_multiple']) {
-                $values[$row['torrent_id']][$row['id']] = json_decode($row['custom_field_value'], true);
+                $values[$row['torrent_id']][$row['id']] = json_decode((string) $row['custom_field_value'], true);
             } else {
                 $values[$row['torrent_id']][$row['id']] = $row['custom_field_value'];
             }
@@ -466,7 +476,7 @@ JS;
         return $isArray ? $result : ($result[$torrentId] ?? []);
     }
 
-    public function renderOnTorrentDetailsPage($torrentId, $searchBoxId)
+    public function renderOnTorrentDetailsPage(int $torrentId, int $searchBoxId): string
     {
         $displayName = \App\Support\SearchBox::valueWithContext($searchBoxId, 'custom_fields_display_name');
         $customFields = $this->listTorrentCustomField($torrentId, $searchBoxId);
@@ -487,7 +497,7 @@ JS;
             $mixedRowContent = str_replace("<%{$field['name']}.value%>", $contentNotFormatted, $mixedRowContent);
             if ($field['is_single_row']) {
                 if (! empty($field['display'])) {
-                    $customFieldDisplay = $field['display'];
+                    $customFieldDisplay = (string) $field['display'];
                     $customFieldDisplay = str_replace("<%{$field['name']}.label%>", $field['label'], $customFieldDisplay);
                     $customFieldDisplay = str_replace("<%{$field['name']}.value%>", $contentNotFormatted, $customFieldDisplay);
                     $rowByRowHtml .= Html::tr($field['label'], Format::formatComment($customFieldDisplay), 1);
@@ -500,26 +510,27 @@ JS;
 
         $result = $rowByRowHtml;
         if ($shouldRenderMixRow && $mixedRowContent) {
-            $result .= Html::tr($displayName, Format::formatComment($mixedRowContent), 1);
+            $result .= Html::tr($displayName, Format::formatComment((string) $mixedRowContent), 1);
         }
 
         return $result;
     }
 
-    protected function formatCustomFieldValue(array $customFieldWithValue, $doFormatComment = false): string
+    /** @param  array<int|string, mixed>  $customFieldWithValue */
+    protected function formatCustomFieldValue(array $customFieldWithValue, bool $doFormatComment = false): string
     {
         $result = '';
         $fieldValue = $customFieldWithValue['custom_field_value'];
         switch ($customFieldWithValue['type']) {
             case self::TYPE_TEXT:
             case self::TYPE_TEXTAREA:
-                $result .= $doFormatComment ? Format::formatComment($fieldValue) : $fieldValue;
+                $result .= $doFormatComment ? Format::formatComment((string) $fieldValue) : (string) $fieldValue;
                 break;
             case self::TYPE_IMAGE:
-                if (substr($fieldValue, 0, 4) == 'http') {
-                    $result .= $doFormatComment ? HtmlRenderer::formatImg($fieldValue, true, 700, 0, "attach{$customFieldWithValue['id']}") : $fieldValue;
+                if (substr((string) $fieldValue, 0, 4) == 'http') {
+                    $result .= $doFormatComment ? HtmlRenderer::formatImg((string) $fieldValue, true, 700, 0, "attach{$customFieldWithValue['id']}") : (string) $fieldValue;
                 } else {
-                    $result .= $doFormatComment ? Format::formatComment($fieldValue) : $fieldValue;
+                    $result .= $doFormatComment ? Format::formatComment((string) $fieldValue) : (string) $fieldValue;
                 }
                 break;
             case self::TYPE_RADIO:
@@ -538,7 +549,8 @@ JS;
         return $result;
     }
 
-    public function getPreparedTorrent($torrentId = null, $fieldName = null)
+    /** @return array<int|string, mixed>|array<int|string, array<int|string, mixed>>|string */
+    public function getPreparedTorrent(int|string|null $torrentId = null, ?string $fieldName = null): array|string
     {
         if ($torrentId === null) {
             return $this->preparedTorrentCustomFieldValues;
@@ -550,28 +562,31 @@ JS;
         return $this->preparedTorrentCustomFieldValues[$torrentId][$fieldName] ?? '';
     }
 
-    public function saveFieldValues($searchBoxId, $torrentId, array $data)
+    /** @param  array<int|string, mixed>  $data */
+    public function saveFieldValues(int $searchBoxId, int $torrentId, array $data): void
     {
         $searchBox = SearchBox::query()->findOrFail($searchBoxId);
         $enabledFields = TorrentCustomField::query()->find($searchBox->custom_fields);
         $insert = [];
         $now = now();
-        foreach ($enabledFields as $field) {
-            if (empty($data[$field->id])) {
-                if ($field->required) {
-                    //                    throw new \InvalidArgumentException(nexus_trans("nexus.require_argument", ['argument' => $field->label]));
-                    Logger::writeWithContext((string) "Field: {$field->label} required, but empty", (string) 'info', (bool) false);
-                }
+        if ($enabledFields instanceof Collection) {
+            foreach ($enabledFields as $field) {
+                if (empty($data[$field->id])) {
+                    if ($field->required) {
+                        //                    throw new \InvalidArgumentException(nexus_trans("nexus.require_argument", ['argument' => $field->label]));
+                        Logger::writeWithContext((string) "Field: {$field->label} required, but empty", (string) 'info', (bool) false);
+                    }
 
-                continue;
+                    continue;
+                }
+                $insert[] = [
+                    'torrent_id' => $torrentId,
+                    'custom_field_id' => $field->id,
+                    'custom_field_value' => is_array($data[$field->id]) ? json_encode($data[$field->id]) : $data[$field->id],
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
             }
-            $insert[] = [
-                'torrent_id' => $torrentId,
-                'custom_field_id' => $field->id,
-                'custom_field_value' => is_array($data[$field->id]) ? json_encode($data[$field->id]) : $data[$field->id],
-                'created_at' => $now,
-                'updated_at' => $now,
-            ];
         }
         TorrentCustomFieldValue::query()->where('torrent_id', $torrentId)->delete();
         TorrentCustomFieldValue::query()->insert($insert);

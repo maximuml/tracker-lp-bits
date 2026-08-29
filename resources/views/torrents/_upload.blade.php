@@ -88,7 +88,7 @@ $offerRows = (array) ($offerRows ?? []);
 				}
 
 */
-                $customField = new \Nexus\Field\Field();
+                $customField = new \App\Support\CustomField();
                 $hitAndRunRep = new \App\Repositories\HitAndRunRepository();
                 echo "<tbody id=\"browsecat_section\" data-mode=\"$browsecatmode\">\n";
 				$selectNormal = $searchBoxRep->renderTaxonomySelect($browsecatmode);

@@ -12,6 +12,7 @@ use App\Repositories\TorrentDetailRepository;
 use App\Repositories\TorrentEditRepository;
 use App\Support\Category;
 use App\Support\CurrentUser;
+use App\Support\CustomField;
 use App\Support\Globals;
 use App\Support\Input;
 use App\Support\Locale;
@@ -19,7 +20,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
-use Nexus\Field\Field;
 
 class TorrentEditController extends Controller
 {
@@ -91,7 +91,7 @@ class TorrentEditController extends Controller
             'requestUri' => is_string($request->server('REQUEST_URI')) ? $request->server('REQUEST_URI') : '',
             'taxonomySelect' => $this->searchBoxRepository->renderTaxonomySelect($sectionmode, $row),
             'tagCheckbox' => $this->tagRepository->renderCheckbox($sectionmode, (array) TorrentDetailRepository::getTagIds($id)),
-            'customFieldsHtml' => (new Field)->renderOnUploadPage($id, $sectionmode),
+            'customFieldsHtml' => (new CustomField)->renderOnUploadPage($id, $sectionmode),
             'hitAndRunHtml' => $this->hitAndRunRepository->renderOnUploadPage($row['hr'] ?? 0, $sectionmode),
         ]);
     }

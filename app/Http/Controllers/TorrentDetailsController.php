@@ -19,6 +19,7 @@ use App\Repositories\TorrentRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
+use App\Support\CustomField;
 use App\Support\Format;
 use App\Support\Globals;
 use App\Support\Input;
@@ -35,7 +36,6 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
-use Nexus\Field\Field;
 use Nexus\Torrent\BdInfoExtra;
 use Nexus\Torrent\TechnicalInformation;
 
@@ -136,7 +136,7 @@ class TorrentDetailsController extends Controller
             'torrentRow' => $row,
             'user' => $user,
             'currentUser' => $currentUser,
-            'customField' => new Field,
+            'customField' => new CustomField,
             'headTitle' => $headTitle,
             'tagIds' => $tagIds,
             'denyLog' => $denyLog,
@@ -160,7 +160,7 @@ class TorrentDetailsController extends Controller
         $torrentRep = $this->torrentRepository;
         $searchBoxRep = $this->searchBoxRepository;
         $tagRep = $this->tagRepository;
-        $customField = new Field;
+        $customField = new CustomField;
 
         $bannedTorrent = ($row['banned'] ?? '') === 'yes'
             ? ' <b>(<font class="striking">'.($langFunctions['text_banned'] ?? '').'</font>)</b>'

@@ -45,6 +45,7 @@ use Illuminate\Support\Facades\DB;
  * @property bool $showstandard
  * @property bool $showprocessing
  * @property bool $showaudiocodec
+ * @property array<int, int|string>|string|null $custom_fields
  */
 class SearchBox extends NexusModel
 {

@@ -1,9 +1,9 @@
 <?php
 
 use App\Repositories\UpgradeRepository;
+use App\Support\Database;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
-use Nexus\Database\NexusDB;
 
 return new class extends Migration
 {
@@ -12,13 +12,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (NexusDB::isPgsql()) {
+        if (Database::isPgsql()) {
             return;
         }
         $tableFields = UpgradeRepository::DATETIME_INVALID_VALUE_FIELDS;
 
         foreach ($tableFields as $table => $fields) {
-            $columnInfo = NexusDB::getMysqlColumnInfo($table);
+            $columnInfo = Database::getMysqlColumnInfo($table);
             foreach ($fields as $field) {
                 if (isset($columnInfo[$field]) && $columnInfo[$field]['DATA_TYPE'] == 'datetime') {
                     // Use a valid lower-bound date for the comparison. The literal
@@ -28,7 +28,7 @@ return new class extends Migration
                 }
             }
         }
-        $columnInfo = NexusDB::getMysqlColumnInfo('snatched');
+        $columnInfo = Database::getMysqlColumnInfo('snatched');
         if (isset($columnInfo['finish_ip'])) {
             DB::statement('alter table snatched drop column finish_ip');
         }

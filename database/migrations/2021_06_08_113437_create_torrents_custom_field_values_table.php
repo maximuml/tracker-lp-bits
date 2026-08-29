@@ -1,10 +1,10 @@
 <?php
 
+use App\Support\Database;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use Nexus\Database\NexusDB;
 
 class CreateTorrentsCustomFieldValuesTable extends Migration
 {
@@ -26,7 +26,7 @@ class CreateTorrentsCustomFieldValuesTable extends Migration
             $table->dateTime('created_at');
             $table->dateTime('updated_at');
         });
-        if (NexusDB::isMysql()) {
+        if (Database::isMysql()) {
             DB::statement('alter table torrents_custom_field_values add index(custom_field_value(191))');
         }
 

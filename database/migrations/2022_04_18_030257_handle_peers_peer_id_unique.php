@@ -1,9 +1,9 @@
 <?php
 
+use App\Support\Database;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Nexus\Database\NexusDB;
 
 return new class extends Migration
 {
@@ -14,13 +14,13 @@ return new class extends Migration
      */
     public function up()
     {
-        if (NexusDB::isPgsql()) {
+        if (Database::isPgsql()) {
             return;
         }
         $tableName = 'peers';
         $columnNames = ['torrent', 'peer_id'];
         // 1. 获取该表所有的索引信息
-        $indexesToDelete = NexusDB::listColumnIndexNames($tableName, $columnNames);
+        $indexesToDelete = Database::listColumnIndexNames($tableName, $columnNames);
 
         // 3. 执行删除操作
         Schema::table($tableName, function (Blueprint $table) use ($indexesToDelete) {

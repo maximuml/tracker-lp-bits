@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        //        $columnInfo = \Nexus\Database\NexusDB::getMysqlColumnInfo("torrents", "cache_stamp");
+        //        $columnInfo = \App\Support\Database::getMysqlColumnInfo("torrents", "cache_stamp");
         //        if ($columnInfo["DATA_TYPE"] == "int") {
         //            return;
         //        }

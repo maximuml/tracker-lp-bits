@@ -6,12 +6,12 @@ namespace App\Services;
 
 use App\Models\Attachment;
 use App\Support\Attachment\AttachmentService;
+use App\Support\AttachmentStorage;
 use App\Support\Config\SiteConfig;
 use App\Support\Globals;
 use App\Support\Logger;
 use App\Support\Path;
 use Illuminate\Support\Facades\DB;
-use Nexus\Attachment\Storage;
 
 class AttachmentMutationService
 {
@@ -314,7 +314,7 @@ class AttachmentMutationService
                 $location = $db_file_location.'.'.$ext;
             } else {
                 try {
-                    $driver = Storage::getDriver();
+                    $driver = AttachmentStorage::driver();
                     $location = $driver->uploadGetLocation($file['tmp_name'], $file['name']);
                     Logger::writeWithContext((string) "location: {$location}", 'info');
                     $url = $driver->getImageUrl($location);

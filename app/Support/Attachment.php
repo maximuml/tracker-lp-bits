@@ -8,7 +8,6 @@ use App\Repositories\AttachmentRepository;
 use App\Support\Config\SiteConfig;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
-use Nexus\Attachment\Storage;
 
 /**
  * Attachment HTML emitter extracted from `include/functions.php`.
@@ -108,7 +107,7 @@ final class Attachment
                 $url = $httpdirectory.'/'.$row['location'];
             }
         } else {
-            $url = Storage::getDriver($driver)->getImageUrl($row['location']);
+            $url = AttachmentStorage::driver($driver)->getImageUrl($row['location']);
         }
 
         Logger::writeWithContext(sprintf('driver: %s, location: %s, url: %s', $driver, $row['location'], $url));
@@ -216,7 +215,7 @@ final class Attachment
                 }
                 $url = sprintf('%s/%s', Url::schemeAndHost(true), trim($url, '/'));
             } else {
-                $url = Storage::getDriver($driver)->getImageUrl($row['location']);
+                $url = AttachmentStorage::driver($driver)->getImageUrl($row['location']);
             }
 
             return '[img]'.$url.'[/img]';

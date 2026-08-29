@@ -339,8 +339,8 @@ class AttendanceRepository extends BaseRepository
             $log .= ", points: $points";
             Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
             $userUpdates = [
-                'attendance_card' => DB::raw('attendance_card - 1'),
-                'seedbonus' => DB::raw("seedbonus + $points"), // @phpstan-ignore argument.type
+                'attendance_card' => DB::raw(DB::getQueryGrammar()->wrap('attendance_card').' - 1'), // @phpstan-ignore argument.type
+                'seedbonus' => DB::raw(DB::getQueryGrammar()->wrap('seedbonus').' + '.(float) $points), // @phpstan-ignore argument.type
             ];
             $affectedRows = User::query()
                 ->where('id', $user->id)
@@ -361,7 +361,7 @@ class AttendanceRepository extends BaseRepository
             $attendanceLog = AttendanceLog::query()->create($insert);
             // Increment total days and update days.
             $attendance->update([
-                'total_days' => DB::raw('total_days + 1'),
+                'total_days' => DB::raw(DB::getQueryGrammar()->wrap('total_days').' + 1'), // @phpstan-ignore argument.type
                 'days' => $this->getContinuousDays($attendance, Carbon::today()),
             ]);
 

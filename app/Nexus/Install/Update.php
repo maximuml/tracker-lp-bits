@@ -486,28 +486,27 @@ class Update extends Install
         }
         $this->doLog('SUCCESS_DOWNLOAD');
         $extractDir = str_replace($suffix, '', $filename);
-        $command = "mkdir -p $extractDir";
+        $command = 'mkdir -p '.escapeshellarg($extractDir);
         $this->executeCommand($command);
 
         if ($isZip) {
-            $command = "unzip -q $filename -d $extractDir";
+            $command = 'unzip -q '.escapeshellarg($filename).' -d '.escapeshellarg($extractDir);
         } else {
-            $command = "tar -xf $filename -C $extractDir";
+            $command = 'tar -xf '.escapeshellarg($filename).' -C '.escapeshellarg($extractDir);
         }
         $this->executeCommand($command);
 
-        foreach (glob("$extractDir/*") as $path) {
+        foreach (glob($extractDir.'/*') as $path) {
             if (is_dir($path)) {
                 $excludes = array_merge(ToolRepository::BACKUP_EXCLUDES, ['public/favicon.ico', '.env', 'public/pic/category/chd/*']);
                 if (! in_array('composer', $includes)) {
                     $excludes[] = 'composer.lock';
                     $excludes[] = 'composer.json';
                 }
-                //                $command = sprintf('cp -raf %s/. %s', $path, ROOT_PATH);
-                $command = "rsync -rvq $path/ ".ROOT_PATH;
+                $command = 'rsync -rvq '.escapeshellarg($path.DIRECTORY_SEPARATOR).' '.escapeshellarg(ROOT_PATH);
                 $command .= ' --include=public/vendor';
                 foreach ($excludes as $exclude) {
-                    $command .= " --exclude=$exclude";
+                    $command .= ' --exclude='.escapeshellarg($exclude);
                 }
                 $this->executeCommand($command);
                 // remove original file
@@ -541,7 +540,7 @@ class Update extends Install
 
     public function updateDependencies()
     {
-        $command = 'composer install -d '.ROOT_PATH;
+        $command = 'composer install -d '.escapeshellarg(ROOT_PATH);
         $this->executeCommand($command);
         $this->doLog('[COMPOSER INSTALL] SUCCESS');
     }

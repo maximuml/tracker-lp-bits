@@ -5,6 +5,7 @@ namespace Tests\Unit\Http\Controllers;
 use App\Http\Controllers\ForumController;
 use App\Models\Forum;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 final class ForumControllerTest extends TestCase
@@ -15,6 +16,10 @@ final class ForumControllerTest extends TestCase
     {
         parent::setUp();
         config(['scout.driver' => 'null']);
+        DB::statement('SET FOREIGN_KEY_CHECKS = 0');
+        DB::table('forums')->truncate();
+        DB::table('overforums')->truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS = 1');
     }
 
     private function controller(): ForumController

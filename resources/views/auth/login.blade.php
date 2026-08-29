@@ -46,7 +46,7 @@ $showWarn = $returnto !== '' && ! $nowarn;
         <p><b>{{ $lang['p_error'] ?? 'Error:' }}</b> {{ $lang['p_after_logged_in'] ?? 'The page you tried to view can only be used when you are logged in.' }}</p>
     @endif
 
-    <form id="login-form" method="post" action="takelogin.php">
+    <form id="login-form" method="post" action="/login">
         @csrf
         <input type="hidden" name="secret" value="{{ $secret }}" />
         @if ($returnto !== '')

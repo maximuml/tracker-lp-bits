@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
         $this->call(CodecsTableSeeder::class);
         $this->call(CountriesTableSeeder::class);
         $this->call(FaqTableSeeder::class);
+        $this->call(ForumsTableSeeder::class);
         $this->call(LanguageTableSeeder::class);
         $this->call(MediaTableSeeder::class);
         $this->call(ModpanelTableSeeder::class);

@@ -39,6 +39,7 @@ final class AjaxService
         'removeHitAndRun',
         'consumeBenefit',
         'clearShoutBox',
+        'shoutboxPost',
         'shoutboxEdit',
         'shoutboxDelete',
         'shoutboxReact',
@@ -150,6 +151,24 @@ final class AjaxService
         $CURUSER = app(CurrentUser::class)->get() ?? [];
         if (! $this->shoutboxService->clearAll($CURUSER)) {
             throw new \RuntimeException('No permission');
+        }
+
+        return true;
+    }
+
+    /** @param array<string, mixed> $params */
+    public function shoutboxPost(array $params): mixed
+    {
+        $CURUSER = app(CurrentUser::class)->get() ?? [];
+        $text = trim((string) ($params['text'] ?? $params['content'] ?? ''));
+        if ($text === '') {
+            throw new \InvalidArgumentException('Message cannot be empty');
+        }
+        if (mb_strlen($text) > Shoutbox::MAX_MESSAGE_LENGTH) {
+            throw new \InvalidArgumentException('Message too long');
+        }
+        if (! $this->shoutboxService->postMessage($CURUSER, $text)) {
+            throw new \RuntimeException('Speaking too often or no permission');
         }
 
         return true;

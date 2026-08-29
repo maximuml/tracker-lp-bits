@@ -114,12 +114,12 @@ final class OfferService
             $this->abort($this->lang('std_error'), $this->lang('std_must_enter_name'));
         }
 
-        $cat = (int) $request->input('type');
+        $cat = (int) ($request->input('type') ?? $request->input('category'));
         if (! Validators::isId($cat)) {
             $this->abort($this->lang('std_error'), $this->lang('std_must_select_category'));
         }
 
-        $descrmain = (string) Input::unescape($request->input('body'));
+        $descrmain = (string) Input::unescape($request->input('body') ?? $request->input('descr'));
         if (! $descrmain) {
             $this->abort($this->lang('std_error'), $this->lang('std_must_enter_description'));
         }

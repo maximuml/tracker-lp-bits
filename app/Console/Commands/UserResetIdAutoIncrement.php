@@ -58,7 +58,7 @@ class UserResetIdAutoIncrement extends Command
 
         $tablesToTruncate = [
             'adclicks', 'attachments', 'attendance', 'attendance_logs', 'bitbucket', 'blocks', 'bonus_logs', 'bookmarks', 'cheaters', 'chronicle',
-            'claims', 'comments', 'complain_replies', 'complains', 'exam_progress', 'exam_users', 'forummods', 'friends', 'fun', 'funds', 'funvotes',
+            'comments', 'complain_replies', 'complains', 'exam_progress', 'exam_users', 'forummods', 'friends', 'fun', 'funds', 'funvotes',
             'hit_and_runs', 'invites', 'iplog', 'loginattempts', 'lucky_draw_winning_records', 'magic', 'messages', 'offers', 'offervotes', 'peers',
             'pmboxes', 'pollanswers', 'posts', 'readposts', 'reports', 'requests', 'shoutbox', 'snatched',
             'staffmessages', 'sticky_promotion_appends', 'sticky_promotion_participators', 'sticky_promotions', 'subs', 'suggest', 'thanks', 'topics',
@@ -66,12 +66,17 @@ class UserResetIdAutoIncrement extends Command
             'username_change_logs', 'users',
         ];
         $allTables = DB::select('show tables');
-        foreach ($allTables as $tableObj) {
-            $tableName = current($tableObj);
-            if (in_array($tableName, $tablesToTruncate)) {
-                $this->info("truncate table: $tableName ...");
-                DB::table($tableName)->truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS = 0');
+        try {
+            foreach ($allTables as $tableObj) {
+                $tableName = current($tableObj);
+                if (in_array($tableName, $tablesToTruncate)) {
+                    $this->info("truncate table: $tableName ...");
+                    DB::table($tableName)->truncate();
+                }
             }
+        } finally {
+            DB::statement('SET FOREIGN_KEY_CHECKS = 1');
         }
         $statement = 'alter table users auto_increment = '.$options['auto_increment'];
         $this->info($statement);

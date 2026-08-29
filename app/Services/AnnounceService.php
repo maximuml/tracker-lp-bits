@@ -219,15 +219,27 @@ final class AnnounceService
 
     private function portBlacklisted(int $port): bool
     {
-        return match (true) {
-            $port >= 411 && $port <= 413 => true,
-            $port >= 6881 && $port <= 6889 => true,
-            $port == 1214 => true,
-            $port >= 6346 && $port <= 6347 => true,
-            $port == 4662 => true,
-            $port == 6699 => true,
-            default => false,
-        };
+        $list = SiteConfig::current()->security->portBlacklist();
+        if ($list === '') {
+            return false;
+        }
+
+        foreach (explode(',', $list) as $entry) {
+            $entry = trim($entry);
+            if ($entry === '') {
+                continue;
+            }
+            if (str_contains($entry, '-')) {
+                [$min, $max] = array_map('intval', explode('-', $entry, 2));
+                if ($port >= $min && $port <= $max) {
+                    return true;
+                }
+            } elseif ((int) $entry === $port) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function authenticateUser(): void

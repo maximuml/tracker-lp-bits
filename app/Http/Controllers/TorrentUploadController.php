@@ -15,6 +15,7 @@ use App\Repositories\UploadRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Category;
 use App\Support\CurrentUser;
+use App\Support\CustomField;
 use App\Support\Globals;
 use App\Support\Input;
 use App\Support\LegacyResponse;
@@ -23,7 +24,6 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Nexus\Field\Field;
 
 class TorrentUploadController extends Controller
 {
@@ -106,7 +106,7 @@ class TorrentUploadController extends Controller
             'torrentRep' => $this->torrentRepository,
             'searchBoxRep' => $this->searchBoxRepository,
             'tagRep' => $this->tagRepository,
-            'customField' => new Field,
+            'customField' => new CustomField,
             'hitAndRunRep' => $this->hitAndRunRepository,
             'pageTitle' => $lang_upload['head_upload'] ?? '',
             'cats' => Category::listByModeWithContext($browsecatmode),

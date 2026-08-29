@@ -1,6 +1,6 @@
 <?php
 $mode = $mode ?? 'view';
-$field = new \Nexus\Field\Field();
+$field = new \App\Support\CustomField();
 if ($mode === 'add') {
     echo $field->buildFieldForm();
 } elseif ($mode === 'edit') {

@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\TorrentCustomFields\Schemas;
 
+use App\Support\CustomField;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
-use Nexus\Field\Field;
 
 class TorrentCustomFieldForm
 {
@@ -26,7 +26,7 @@ class TorrentCustomFieldForm
                     ->label(__('label.field.field_label'))
                     ->required(),
                 Select::make('type')
-                    ->options((new Field)->getTypeRadioOptions())
+                    ->options((new CustomField)->getTypeRadioOptions())
                     ->label(__('label.field.type'))
                     ->required(),
                 Checkbox::make('required')

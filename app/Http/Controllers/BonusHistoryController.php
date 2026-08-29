@@ -14,6 +14,7 @@ use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\BonusRepository;
 use App\Support\Api;
+use App\Support\AssetAppender;
 use App\Support\Bonus;
 use App\Support\CurrentUser;
 use App\Support\Globals;
@@ -27,7 +28,6 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
-use Nexus\Nexus;
 
 class BonusHistoryController extends LegacyController
 {
@@ -119,7 +119,7 @@ jQuery("#reset").on('click', function () {
     jQuery("select[name=business_type]").val('')
 })
 JS;
-        Nexus::js($resetJs, 'footer', false);
+        AssetAppender::js($resetJs, 'footer', false);
 
         return $this->legacyPage($request, 'bonus-log', true, [
             'title' => $title,

@@ -6,7 +6,6 @@ namespace App\Support;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
-use Nexus\Nexus;
 
 /**
  * Legacy file-log helpers extracted from `include/globalfunctions.php`.
@@ -56,13 +55,13 @@ final class Logger
         $passkey = $passkey ?? '';
 
         $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
-        $nexus = Nexus::instance();
+        $nexus = RequestContext::instance();
         $content = sprintf(
             '[%s] [%s] [%s] [%s] [%s] [%s] %s.%s %s:%s %s%s%s %s%s',
             Time::millis(true),
-            $nexus ? $nexus->getRequestId() : 'NO_REQUEST_ID',
-            $nexus ? $nexus->getLogSequence() : 0,
-            sprintf('%.3f', microtime(true) - ($nexus ? $nexus->getStartTimestamp() : 0)),
+            $nexus->getRequestId(),
+            $nexus->getLogSequence(),
+            sprintf('%.3f', microtime(true) - $nexus->getStartTimestamp()),
             $uid,
             $passkey,
             self::$appEnv,
@@ -82,9 +81,7 @@ final class Logger
         if ($echo) {
             echo $content.PHP_EOL;
         }
-        if ($nexus) {
-            $nexus->incrementLogSequence();
-        }
+        $nexus->incrementLogSequence();
     }
 
     /**

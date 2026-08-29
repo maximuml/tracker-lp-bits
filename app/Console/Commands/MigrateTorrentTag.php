@@ -7,8 +7,8 @@ namespace App\Console\Commands;
 use App\Repositories\TagRepository;
 use App\Support\LegacyDb;
 use App\Support\Logger;
+use App\Support\RequestContext;
 use Illuminate\Console\Command;
-use Nexus\Nexus;
 
 class MigrateTorrentTag extends Command
 {
@@ -45,7 +45,7 @@ class MigrateTorrentTag extends Command
     {
         $rep = app(TagRepository::class);
         $result = $rep->migrateTorrentTag();
-        $log = sprintf('[%s], %s, result: %s, query: %s', Nexus::instance()->getRequestId(), __METHOD__, var_export($result, true), LegacyDb::lastQuery(false, 'json'));
+        $log = sprintf('[%s], %s, result: %s, query: %s', RequestContext::instance()->getRequestId(), __METHOD__, var_export($result, true), LegacyDb::lastQuery(false, 'json'));
         $this->info($log);
         Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
 

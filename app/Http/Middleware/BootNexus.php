@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Support\RequestContext;
 use Closure;
 use Illuminate\Http\Request;
-use Nexus\Nexus;
 
 class BootNexus
 {
@@ -15,7 +15,7 @@ class BootNexus
      */
     public function handle(Request $request, Closure $next): mixed
     {
-        Nexus::boot();
+        RequestContext::boot();
 
         //        do_log(sprintf(
         //            "Nexus booted. request.server: %s, request.header: %s, request.query: %s, request.input: %s",

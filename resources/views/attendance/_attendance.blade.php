@@ -1,13 +1,13 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
-\Nexus\Nexus::css('vendor/fullcalendar-5.10.2/main.min.css', 'header', true);
-\Nexus\Nexus::js('vendor/fullcalendar-5.10.2/main.min.js', 'footer', true);
+\App\Support\AssetAppender::css('vendor/fullcalendar-5.10.2/main.min.css', 'header', true);
+\App\Support\AssetAppender::js('vendor/fullcalendar-5.10.2/main.min.js', 'footer', true);
 
 $iv = $iv ?? '';
 
 if ($localeJs !== null) {
-    \Nexus\Nexus::js("vendor/fullcalendar-5.10.2/locales/{$localeJs}.js", 'footer', true);
+    \App\Support\AssetAppender::js("vendor/fullcalendar-5.10.2/locales/{$localeJs}.js", 'footer', true);
 }
 
 
@@ -60,7 +60,7 @@ function retroactive(dateStr) {
 }
 EOP;
 
-    \Nexus\Nexus::js($calendarScript, 'footer', false);
+    \App\Support\AssetAppender::js($calendarScript, 'footer', false);
 
     echo '<div style="display: flex;justify-content: center;padding: 20px 0"><div id="calendar" style="width: 60%"></div></div>';
     echo '<ul>';

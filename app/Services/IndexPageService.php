@@ -9,6 +9,7 @@ use App\Enums\Permission\PermissionEnum;
 use App\Models\Poll;
 use App\Models\Setting;
 use App\Repositories\IndexRepository;
+use App\Support\AssetAppender;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CoverThumb;
@@ -18,7 +19,6 @@ use App\Support\Globals;
 use App\Support\Shoutbox;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
-use Nexus\Nexus;
 
 /**
  * Prepares section data for the index page, replacing the legacy
@@ -115,7 +115,7 @@ final class IndexPageService
         }
 
         $csrf = Shoutbox::csrfToken($userId);
-        Nexus::js("var SHOUT_CSRF = '".addslashes($csrf)."';", 'footer', false);
+        AssetAppender::js("var SHOUT_CSRF = '".addslashes($csrf)."';", 'footer', false);
 
         $clearJs = '';
         if ($canManage) {
@@ -133,7 +133,7 @@ jQuery('#clear-shout-box').on("click", function () {
     })
 })
 JS;
-            Nexus::js($clearJs, 'footer', false);
+            AssetAppender::js($clearJs, 'footer', false);
         }
 
         return [
@@ -251,7 +251,7 @@ JS;
             return ['show' => false];
         }
 
-        Nexus::css('.tr-top-uploader-tab>td {cursor: pointer}', 'footer', false);
+        AssetAppender::css('.tr-top-uploader-tab>td {cursor: pointer}', 'footer', false);
         $toggleJs = <<<'JS'
 jQuery(".tr-top-uploader-tab").on("click", "td", function () {
     let _this = jQuery(this)
@@ -265,7 +265,7 @@ jQuery(".tr-top-uploader-tab").on("click", "td", function () {
 
 })
 JS;
-        Nexus::js($toggleJs, 'footer', false);
+        AssetAppender::js($toggleJs, 'footer', false);
 
         $recentUploaders = IndexRepository::getTopUploaders(10, 30);
 

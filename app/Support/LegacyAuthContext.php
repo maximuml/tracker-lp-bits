@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Support\Cache\LegacyRedisCache;
-use Nexus\Nexus;
 
 /**
  * Context bundle for legacy authentication helpers.
@@ -61,12 +60,12 @@ final class LegacyAuthContext
     {
         $script = '';
         if (\function_exists('nexus')) {
-            $script = Nexus::instance()->getScript();
+            $script = RequestContext::instance()->getScript();
         } else {
             $scriptFile = Input::serverValue('SCRIPT_FILENAME', '');
             $script = basename($scriptFile);
             if (str_contains($script, '.')) {
-                $script = strstr($script, '.', true);
+                $script = strstr($script, '.', true) ?: '';
             }
         }
 

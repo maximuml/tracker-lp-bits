@@ -86,7 +86,7 @@ jQuery('#hr-table').on('click', '.remove-hr', function () {
     })
 })
 JS;
-        \Nexus\Nexus::js($js, 'footer', false);
+        \App\Support\AssetAppender::js($js, 'footer', false);
     }
 }
 

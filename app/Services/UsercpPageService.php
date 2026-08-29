@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Repositories\TokenRepository;
 use App\Repositories\UsercpRepository;
 use App\Repositories\UserPasskeyRepository;
+use App\Support\AssetAppender;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
@@ -27,7 +28,6 @@ use App\Support\Time;
 use App\Support\TwoFactorAuthHelper;
 use App\Support\Url;
 use App\Support\UserDisplay;
-use Nexus\Nexus;
 
 /**
  * Prepares section data for the user control panel, replacing the legacy
@@ -83,7 +83,7 @@ final class UsercpPageService
                 break;
         }
 
-        Nexus::js('vendor/jquery-loading/jquery.loading.min.js', 'footer', true);
+        AssetAppender::js('vendor/jquery-loading/jquery.loading.min.js', 'footer', true);
 
         return $data;
     }

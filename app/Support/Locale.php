@@ -8,7 +8,6 @@ use App\Http\Middleware\Locale as LocaleMiddleware;
 use App\Models\Language;
 use App\Models\Setting;
 use App\Repositories\LanguageRepository;
-use Nexus\Nexus;
 
 /**
  * Legacy locale helpers extracted from `include/functions.php`.
@@ -198,13 +197,17 @@ final class Locale
     }
 
     /**
-     * Legacy `nexus_trans()` helper. Delegates to the Nexus translator.
+     * Legacy `nexus_trans()` helper. Delegates to the Laravel translator.
      *
      * @param  array<string, mixed>  $replace
      */
     public static function trans(string $key, array $replace = [], ?string $locale = null): string
     {
-        return Nexus::trans($key, $replace, $locale);
+        if ($locale === null) {
+            $locale = self::folderFromCookie(Input::cookieValue('c_lang_folder', ''), (bool) true);
+        }
+
+        return trans($key, $replace, $locale);
     }
 
     /**

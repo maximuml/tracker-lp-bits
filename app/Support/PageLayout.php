@@ -18,7 +18,6 @@ use App\Repositories\SearchBoxRepository;
 use App\Utils\MsgAlert;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Response;
-use Nexus\Nexus;
 
 class PageLayout
 {
@@ -171,7 +170,7 @@ class PageLayout
         echo $cssupdatedate;
         ?>"></script>
 <?php
-        foreach (Nexus::getAppendHeaders() as $value) {
+        foreach (AssetAppender::getAppendHeaders() as $value) {
             echo $value;
         }
         ?>
@@ -412,7 +411,7 @@ class PageLayout
                 ?>
         <td class="bottom" align="left" style="border: none">
             <form action="search.php" method="get" target="<?php
-                echo Nexus::instance()->getScript() == 'search' ? '_self' : '_blank';
+                echo RequestContext::instance()->getScript() == 'search' ? '_self' : '_blank';
                 ?>">
                 <div style="display: flex;align-items: center">
                     <div style="display: flex;flex-direction: column">
@@ -622,7 +621,7 @@ class PageLayout
         echo '<div style="margin-top: 10px; margin-bottom: 30px;" align="center">';
         // Variables for End Time
         $tend = microtime(true);
-        $totaltime = $tend - Nexus::instance()->getStartTimestamp();
+        $totaltime = $tend - RequestContext::instance()->getStartTimestamp();
         $year = substr($context->dateFounded, 0, 4);
         $yearfounded = $year ? $year : 2007;
         echo ' (c) '.' <a href="'.Http::protocolPrefix(Url::isSecure()).$context->baseUrl.'" target="_self">'.$context->siteName.'</a> '.($context->icpLicenseMain ? ' '.$context->icpLicenseMain.' ' : '').(date('Y') != $yearfounded ? $yearfounded.'-' : '').date('Y').' '.VERSION.'<br /><br />';
@@ -665,7 +664,7 @@ class PageLayout
         if ($context->analyticsCodeTweak) {
             echo "\n".$context->analyticsCodeTweak."\n";
         }
-        foreach (Nexus::getAppendFooters() as $value) {
+        foreach (AssetAppender::getAppendFooters() as $value) {
             echo $value;
         }
         $js = <<<'JS'

@@ -228,6 +228,6 @@ jQuery(function($){
 </script>
 EOT;
 }
-\Nexus\Nexus::js('vendor/jquery-loading/jquery.loading.min.js', 'footer', true);
-\Nexus\Nexus::js('js/ptgen.js', 'footer', true);
+\App\Support\AssetAppender::js('vendor/jquery-loading/jquery.loading.min.js', 'footer', true);
+\App\Support\AssetAppender::js('js/ptgen.js', 'footer', true);
 @endphp

@@ -10,10 +10,10 @@ use App\Support\Config\SiteConfig;
 use App\Support\Globals;
 use App\Support\Lock;
 use App\Support\Logger;
+use App\Support\RequestContext;
 use App\Support\Time;
 use App\Support\UserDisplay;
 use Illuminate\Support\Facades\DB;
-use Nexus\Nexus;
 
 /**
  * Cleanup orchestrator. Replaces the monolithic `docleanup()` with discrete,
@@ -113,7 +113,7 @@ final class CleanupService
     public function runAll(bool $forceAll = false, bool $printProgress = false): string|bool
     {
         $now = time();
-        $requestId = Nexus::instance()->getRequestId();
+        $requestId = RequestContext::instance()->getRequestId();
         $output = '';
 
         foreach (self::CLASSES as $level => $taskList) {
@@ -231,6 +231,6 @@ final class CleanupService
 
     private function formatProgress(string $message): string
     {
-        return sprintf("[%s] [%s] %s ... done!\n", date('Y-m-d H:i:s'), Nexus::instance()->getRequestId(), $message);
+        return sprintf("[%s] [%s] %s ... done!\n", date('Y-m-d H:i:s'), RequestContext::instance()->getRequestId(), $message);
     }
 }

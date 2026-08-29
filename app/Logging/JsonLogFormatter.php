@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Logging;
 
+use App\Support\RequestContext;
 use Illuminate\Log\Logger as IlluminateLogger;
 use Monolog\Formatter\JsonFormatter;
 use Monolog\Handler\FormattableHandlerInterface;
 use Monolog\Logger;
 use Monolog\LogRecord;
-use Nexus\Nexus;
 
 /**
  * Switches all handlers on a Monolog instance to JSON format.
@@ -31,11 +31,7 @@ final class JsonLogFormatter
         $formatter = new JsonFormatter(JsonFormatter::BATCH_MODE_JSON, true);
         $formatter->includeStacktraces();
 
-        $requestId = 'NO_REQUEST_ID';
-        $nexus = Nexus::instance();
-        if ($nexus) {
-            $requestId = $nexus->getRequestId();
-        }
+        $requestId = RequestContext::instance()->getRequestId();
 
         foreach ($monolog->getHandlers() as $handler) {
             if ($handler instanceof FormattableHandlerInterface) {

@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Resources;
 
 use App\Models\HitAndRun;
+use App\Support\RequestContext;
 use App\Support\Time;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Nexus\Nexus;
 
 /**
  * @mixin HitAndRun
@@ -38,7 +38,7 @@ class HitAndRunResource extends JsonResource
             'seed_time_required' => $this->seedTimeRequired,
             'inspect_time_left' => $this->inspectTimeLeft,
         ];
-        if (Nexus::instance()->isPlatformAdmin()) {
+        if (RequestContext::instance()->isPlatformAdmin()) {
             $out['comment'] = nl2br(trim($out['comment']));
         }
 

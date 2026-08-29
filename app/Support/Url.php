@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Support\Config\SiteConfig;
-use Nexus\Nexus;
 
 /**
  * Request/URL helpers extracted from `include/globalfunctions.php`.
@@ -21,7 +20,7 @@ final class Url
             return SiteConfig::current()->security->secureLogin();
         }
 
-        return Nexus::instance()->getRequestSchema() === 'https';
+        return RequestContext::instance()->getRequestSchema() === 'https';
     }
 
     public static function schemeAndHost(bool $fromConfig = false): string
@@ -29,7 +28,7 @@ final class Url
         if (Environment::isConsole() || $fromConfig) {
             $host = (string) SiteConfig::current()->basic->baseUrl();
         } else {
-            $host = Nexus::instance()->getRequestHost();
+            $host = RequestContext::instance()->getRequestHost();
         }
 
         return (self::isSecure() ? 'https' : 'http').'://'.$host;

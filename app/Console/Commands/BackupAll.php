@@ -6,8 +6,8 @@ namespace App\Console\Commands;
 
 use App\Repositories\ToolRepository;
 use App\Support\Logger;
+use App\Support\RequestContext;
 use Illuminate\Console\Command;
-use Nexus\Nexus;
 
 class BackupAll extends Command
 {
@@ -48,7 +48,7 @@ class BackupAll extends Command
         $result = $rep->backupAll($method);
         $log = sprintf(
             '[%s], %s, result: %s',
-            Nexus::instance()->getRequestId(), __METHOD__, var_export($result, true)
+            RequestContext::instance()->getRequestId(), __METHOD__, var_export($result, true)
         );
         $this->info($log);
         Logger::writeWithContext((string) $log, (string) 'info', (bool) false);

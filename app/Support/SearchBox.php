@@ -8,7 +8,6 @@ use App\Repositories\SearchBoxRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use Illuminate\Support\Arr;
-use Nexus\Nexus;
 
 /**
  * Legacy searchbox helper extracted from `include/functions.php`.
@@ -311,7 +310,7 @@ TD;
             'details' => [$setting['browsecat']],
             'search' => [$setting['browsecat']],
         ];
-        $script = Nexus::instance()->getScript();
+        $script = RequestContext::instance()->getScript();
 
         return array_values(array_map('intval', Arr::wrap($maps[$script] ?? [])));
     }

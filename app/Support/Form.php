@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Support;
 
-use Nexus\Nexus;
-
 /**
  * Legacy form-emitter helpers extracted from `include/functions.php`.
  *
@@ -32,8 +30,8 @@ final class Form
 
         $js = '';
         if (! empty($options['require_files'])) {
-            Nexus::css('vendor/jquery-datetimepicker/jquery.datetimepicker.min.css', 'footer', true);
-            Nexus::js('vendor/jquery-datetimepicker/jquery.datetimepicker.full.min.js', 'footer', true);
+            AssetAppender::css('vendor/jquery-datetimepicker/jquery.datetimepicker.min.css', 'footer', true);
+            AssetAppender::js('vendor/jquery-datetimepicker/jquery.datetimepicker.full.min.js', 'footer', true);
             $js = "jQuery.datetimepicker.setLocale('{$lang}');";
         }
 
@@ -49,7 +47,7 @@ final class Form
 
         $format = $options['format'] ?? 'Y-m-d H:i';
         $js .= "jQuery(\"#{$id}\").datetimepicker({ format: '{$format}' })";
-        Nexus::js($js, 'footer', false);
+        AssetAppender::js($js, 'footer', false);
 
         return $input;
     }
@@ -500,8 +498,8 @@ $formVar.on("click", "input[type=button]", function() {
     }
 })
 JS;
-        Nexus::js('js/crypto-js.js', 'footer', true);
-        Nexus::js($js, 'footer', false);
+        AssetAppender::js('js/crypto-js.js', 'footer', true);
+        AssetAppender::js($js, 'footer', false);
     }
 
     /**
@@ -566,8 +564,8 @@ async function login(username, password, jqForm) {
     }
 }
 JS;
-        Nexus::js('vendor/jquery-loading/jquery.loading.min.js', 'footer', true);
-        Nexus::js('js/crypto-js.js', 'footer', true);
-        Nexus::js($js, 'footer', false);
+        AssetAppender::js('vendor/jquery-loading/jquery.loading.min.js', 'footer', true);
+        AssetAppender::js('js/crypto-js.js', 'footer', true);
+        AssetAppender::js($js, 'footer', false);
     }
 }

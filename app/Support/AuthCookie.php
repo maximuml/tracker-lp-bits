@@ -11,7 +11,6 @@ use App\Support\Config\SiteConfig;
 use Dotenv\Dotenv;
 use Illuminate\Encryption\Encrypter;
 use Illuminate\Support\Facades\Cache;
-use Nexus\Nexus;
 
 /**
  * Auth-cookie helpers extracted from `include/functions.php` (Phase 5
@@ -418,7 +417,7 @@ final class AuthCookie
      */
     private static function fetchUser(int $id, bool $isArray, string $log)
     {
-        $isAjax = Nexus::instance()->isAjax();
+        $isAjax = RequestContext::instance()->isAjax();
         $selfEnableBonus = SiteConfig::current()->bonus->selfEnable();
         $shouldIgnoreEnabled = defined('IN_NEXUS') && IN_NEXUS && ! $isAjax && $selfEnableBonus > 0;
 

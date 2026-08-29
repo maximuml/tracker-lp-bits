@@ -2,14 +2,14 @@
 
 use App\Exceptions\Handler;
 use App\Http\Kernel;
+use App\Support\RequestContext;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Foundation\Application;
-use Nexus\Nexus;
 
 defined('LARAVEL_START') || define('LARAVEL_START', microtime(true));
 defined('IN_NEXUS') || define('IN_NEXUS', false);
 if (! RUNNING_IN_OCTANE) {
-    Nexus::boot();
+    RequestContext::boot();
 }
 
 // Legacy pages define this in include/core.php, but Laravel-routed endpoints

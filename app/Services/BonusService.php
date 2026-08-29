@@ -15,6 +15,7 @@ use App\Support\Html;
 use App\Support\Http;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
+use App\Support\Lock;
 use App\Support\Log;
 use App\Support\Logger;
 use App\Support\Url;
@@ -22,7 +23,6 @@ use App\Support\UserClass;
 use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Nexus\Database\NexusLock;
 
 /**
  * Handles bonus exchange action mutations.
@@ -93,7 +93,7 @@ final class BonusService
         }
 
         $lockName = "user:{$userid}:exchange:bonus";
-        $lock = new NexusLock($lockName, self::LOCK_SECONDS);
+        $lock = new Lock($lockName, self::LOCK_SECONDS);
         if (! $lock->get()) {
             Logger::writeWithContext("[LOCKED], {$lockName}, {$lockText}", 'info', false);
 

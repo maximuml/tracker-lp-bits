@@ -10,6 +10,7 @@ use App\Repositories\ShoutboxRepository;
 use App\Services\ShoutboxService;
 use App\Support\CurrentUser;
 use App\Support\Globals;
+use App\Support\Lock;
 use App\Support\Permissions;
 use App\Support\Shoutbox;
 use App\Support\UserDisplay;
@@ -20,7 +21,6 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\View\View;
-use Nexus\Database\NexusLock;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -166,7 +166,7 @@ class ShoutboxController extends LegacyController
                 return;
             }
 
-            $userLock = new NexusLock('shoutbox_sse:'.$userId, $ttl);
+            $userLock = new Lock('shoutbox_sse:'.$userId, $ttl);
             if (! $userLock->acquire()) {
                 try {
                     $redis->decr($globalKey);

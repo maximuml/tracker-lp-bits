@@ -21,6 +21,7 @@ use App\Support\Html;
 use App\Support\Input;
 use App\Support\LegacyAuth;
 use App\Support\Locale;
+use App\Support\Lock;
 use App\Support\Log;
 use App\Support\Logger;
 use App\Support\Mail;
@@ -36,7 +37,6 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
-use Nexus\Database\NexusLock;
 
 class SystemBulkController extends LegacyController
 {
@@ -117,7 +117,7 @@ class SystemBulkController extends LegacyController
 
         $currentUserId = (int) ($curUser['id'] ?? 0);
         $lockName = sprintf('takeinvite:%s', $currentUserId);
-        $lock = new NexusLock($lockName, 10);
+        $lock = new Lock($lockName, 10);
         if (! $lock->get()) {
             $errMsg = Locale::trans('nexus.do_not_repeat', [], null);
 

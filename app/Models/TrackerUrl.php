@@ -87,7 +87,7 @@ class TrackerUrl extends NexusModel
         if ($trackerUrlId == 0) {
             return self::getFromRedisWithRetry($redis, 'get', [self::TRACKER_URL_DEFAULT_CACHE_KEY], $notFoundFlagKey);
         }
-        $result = self::getFromRedisWithRetry($redis, 'hGet', [self::TRACKER_URL_CACHE_KEY, $trackerUrlId], $notFoundFlagKey);
+        $result = self::getFromRedisWithRetry($redis, 'hGet', [self::TRACKER_URL_CACHE_KEY, (string) $trackerUrlId], $notFoundFlagKey);
         if ($result !== false) {
             return $result;
         }

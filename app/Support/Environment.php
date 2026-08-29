@@ -53,9 +53,14 @@ final class Environment
         if ($artisan) {
             $phpPath = Env::get('PHP_PATH', null) ?: 'php';
             $webRoot = rtrim(ROOT_PATH, '/');
+            $tokens = preg_split('/\s+/', trim($command), -1, PREG_SPLIT_NO_EMPTY);
+            if ($tokens === false) {
+                throw new \InvalidArgumentException('Failed to parse artisan command');
+            }
+            $escapedCommand = implode(' ', array_map('escapeshellarg', $tokens));
+            $command = escapeshellarg($phpPath).' '.escapeshellarg($webRoot.'/artisan').' '.$escapedCommand;
+        } else {
             $command = escapeshellcmd($command);
-            $command = str_replace('`', '\\`', $command);
-            $command = escapeshellarg($phpPath).' '.escapeshellarg($webRoot.'/artisan').' '.$command;
         }
 
         if ($needsAppend) {

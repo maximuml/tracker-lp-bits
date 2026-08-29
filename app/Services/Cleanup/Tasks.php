@@ -785,7 +785,7 @@ final class Tasks
                 User::query()->where('id', $uid)->update([
                     'class' => $class,
                     'max_class_once' => $class,
-                    'invites' => DB::raw('invites + '.$addInvite), // @phpstan-ignore argument.type
+                    'invites' => DB::raw(DB::getQueryGrammar()->wrap('invites').' + '.(int) $addInvite), // @phpstan-ignore argument.type
                 ]);
             }
 

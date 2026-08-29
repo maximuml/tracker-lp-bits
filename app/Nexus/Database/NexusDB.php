@@ -379,12 +379,11 @@ class NexusDB
             $driver = new DBMysqli;
             $driver->connect($config['host'], $config['username'], $config['password'], 'information_schema', $config['port']);
         }
-        $sql = sprintf(
-            "select * from COLUMNS where TABLE_SCHEMA = '%s' and TABLE_NAME = '%s'",
-            $config['database'], $table
-        );
+        $quotedDb = DB::connection()->getPdo()->quote($config['database']);
+        $wrappedTable = DB::getQueryGrammar()->wrap($table);
+        $sql = "select * from COLUMNS where TABLE_SCHEMA = {$quotedDb} and TABLE_NAME = {$wrappedTable}";
         if ($column !== null) {
-            $sql .= " and COLUMN_NAME = '$column'";
+            $sql .= ' and COLUMN_NAME = '.DB::connection()->getPdo()->quote($column);
         }
         $res = $driver->query($sql);
         if ($column !== null) {
@@ -401,7 +400,7 @@ class NexusDB
 
     public static function hasIndex($table, $indexName): bool
     {
-        $results = self::select("show index from $table");
+        $results = self::select('show index from '.DB::getQueryGrammar()->wrap($table));
         foreach ($results as $item) {
             if ($item['Key_name'] == $indexName) {
                 return true;
@@ -467,10 +466,12 @@ class NexusDB
 
     public static function unixTimestampField(string $field): string
     {
+        $wrapped = DB::getQueryGrammar()->wrap($field);
+
         if (self::isMysql()) {
-            return sprintf('UNIX_TIMESTAMP(%s)', $field);
+            return "UNIX_TIMESTAMP({$wrapped})";
         } elseif (self::isPgsql()) {
-            return sprintf('EXTRACT(EPOCH FROM %s)', $field);
+            return "EXTRACT(EPOCH FROM {$wrapped})";
         } else {
             throw new \RuntimeException('Not supported database.');
         }
@@ -515,10 +516,12 @@ class NexusDB
 
     public static function groupConcatField(string $field): string
     {
+        $wrapped = DB::getQueryGrammar()->wrap($field);
+
         if (self::isMysql()) {
-            return sprintf('group_concat(%s)', $field);
+            return "group_concat({$wrapped})";
         } elseif (self::isPgsql()) {
-            return sprintf("string_agg(%s::text, ',')", $field);
+            return "string_agg({$wrapped}::text, ',')";
         } else {
             throw new \RuntimeException('Not supported database.');
         }

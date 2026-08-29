@@ -231,7 +231,8 @@ class ExamCronRepository extends BaseRepository
             $result += $examUsers->count();
             $now = Carbon::now()->toDateTimeString();
             $examUserIdArr = $uidToDisable = $messageToSend = $userBanLog = [];
-            $bonusLog = $userBonusUpdate = $uidToUpdateBonus = [];
+            $bonusLog = $uidToUpdateBonusPass = $uidToUpdateBonusFail = [];
+            $successRewardBonus = $failDeductBonus = 0;
             $examUserToInsert = [];
             $userModifyLogs = [];
             foreach ($examUsers as $examUser) {
@@ -241,6 +242,8 @@ class ExamCronRepository extends BaseRepository
                 Cache::clearInboxCount($uid);
                 /** @var Exam $exam */
                 $exam = $examUser->exam;
+                $successRewardBonus = (int) $exam->success_reward_bonus;
+                $failDeductBonus = (int) $exam->fail_deduct_bonus;
                 $currentLogPrefix = sprintf("$logPrefix, user: %s, exam: %s, examUser: %s", $uid, $examUser->exam_id, $examUser->id);
                 if (! $examUser->user) {
                     Logger::writeWithContext((string) "{$currentLogPrefix}, user not exists, remove it!", (string) 'error', (bool) false);
@@ -273,7 +276,6 @@ class ExamCronRepository extends BaseRepository
                     } elseif ($exam->isTypeTask()) {
                         // reward bonus
                         if ($exam->success_reward_bonus > 0) {
-                            $uidToUpdateBonus[] = $uid;
                             $bonusLog[] = [
                                 'uid' => $uid,
                                 'old_total_value' => $examUser->user->seedbonus,
@@ -281,7 +283,7 @@ class ExamCronRepository extends BaseRepository
                                 'new_total_value' => $examUser->user->seedbonus + $exam->success_reward_bonus,
                                 'business_type' => BusinessType::TASK_PASS_REWARD->value,
                             ];
-                            $userBonusUpdate[] = sprintf('when `id` = %s then seedbonus + %d', $uid, $exam->success_reward_bonus);
+                            $uidToUpdateBonusPass[] = $uid;
                         }
                     }
                 } else {
@@ -312,7 +314,6 @@ class ExamCronRepository extends BaseRepository
                     } elseif ($exam->isTypeTask()) {
                         // deduct bonus
                         if ($exam->fail_deduct_bonus > 0) {
-                            $uidToUpdateBonus[] = $uid;
                             $bonusLog[] = [
                                 'uid' => $uid,
                                 'old_total_value' => $examUser->user->seedbonus,
@@ -320,7 +321,7 @@ class ExamCronRepository extends BaseRepository
                                 'new_total_value' => $examUser->user->seedbonus - $exam->fail_deduct_bonus,
                                 'business_type' => BusinessType::TASK_NOT_PASS_DEDUCT->value,
                             ];
-                            $userBonusUpdate[] = sprintf('when `id` = %s then seedbonus - %d', $uid, $exam->fail_deduct_bonus);
+                            $uidToUpdateBonusFail[] = $uid;
                         }
                     }
                 }
@@ -333,7 +334,7 @@ class ExamCronRepository extends BaseRepository
                     'msg' => $msg,
                 ];
             }
-            DB::transaction(function () use ($uidToDisable, $messageToSend, $examUserIdArr, $examUserToInsert, $userBanLog, $userModifyLogs, $userBonusUpdate, $bonusLog, $uidToUpdateBonus, $userTable, $logPrefix) {
+            DB::transaction(function () use ($uidToDisable, $messageToSend, $examUserIdArr, $examUserToInsert, $userBanLog, $userModifyLogs, $bonusLog, $uidToUpdateBonusPass, $uidToUpdateBonusFail, $userTable, $successRewardBonus, $failDeductBonus, $logPrefix) {
                 ExamUser::query()->whereIn('id', $examUserIdArr)->update(['status' => ExamUserStatus::FINISHED->value]);
                 do {
                     $deleted = ExamProgress::query()->whereIn('exam_user_id', $examUserIdArr)->limit(10000)->delete();
@@ -350,14 +351,13 @@ class ExamCronRepository extends BaseRepository
                 if (! empty($examUserToInsert)) {
                     ExamUser::query()->insert($examUserToInsert);
                 }
-                if (! empty($userBonusUpdate)) {
-                    $uidStr = implode(', ', $uidToUpdateBonus);
-                    $sql = sprintf(
-                        'update %s set seedbonus = case %s end where id in (%s)',
-                        $userTable, implode(' ', $userBonusUpdate), $uidStr
-                    );
-                    $updateResult = DB::update($sql);
-                    Logger::writeWithContext((string) sprintf("{$logPrefix}, update %s users: %s seedbonus, sql: %s, updateResult: %s", count($uidToUpdateBonus), $uidStr, $sql, $updateResult), (string) 'info', (bool) false);
+                if (! empty($uidToUpdateBonusPass)) {
+                    $updateResult = DB::table($userTable)->whereIn('id', $uidToUpdateBonusPass)->increment('seedbonus', $successRewardBonus);
+                    Logger::writeWithContext((string) sprintf("{$logPrefix}, reward %s users: %s seedbonus, updateResult: %s", count($uidToUpdateBonusPass), implode(', ', $uidToUpdateBonusPass), $updateResult), (string) 'info', (bool) false);
+                }
+                if (! empty($uidToUpdateBonusFail)) {
+                    $updateResult = DB::table($userTable)->whereIn('id', $uidToUpdateBonusFail)->decrement('seedbonus', $failDeductBonus);
+                    Logger::writeWithContext((string) sprintf("{$logPrefix}, deduct %s users: %s seedbonus, updateResult: %s", count($uidToUpdateBonusFail), implode(', ', $uidToUpdateBonusFail), $updateResult), (string) 'info', (bool) false);
                 }
                 if (! empty($bonusLog)) {
                     BonusLogs::query()->insert($bonusLog);

@@ -97,8 +97,6 @@ class Update extends Install
          * @since 1.10, must run first
          */
         $this->runMigrate('database/migrations/2025_10_05_030400_create_activity_log_table.php');
-        $this->runMigrate('database/migrations/2025_10_05_030401_add_event_column_to_activity_log_table.php');
-        $this->runMigrate('database/migrations/2025_10_05_030402_add_batch_uuid_column_to_activity_log_table.php');
 
         $toolRep = app(ToolRepository::class);
         $redis = Redis::connection()->client();

@@ -25,7 +25,7 @@ PHP 8.4+, MySQL, Redis, MeiliSearch. Docker Compose stack for local development.
 - `routes/legacy/` — legacy route mappings (PHP file routes)
 - `config/` — Laravel configuration
 - `database/migrations/` — 75 migrations
-- `tests/` — 92 test files (792 tests)
+- `tests/` — 97 test files (830 tests)
 
 ## Build & run commands
 
@@ -90,7 +90,7 @@ docker compose exec -T php composer audit
 
 ## Modernisation status
 
-Sprints 0–48 complete. Recent work:
+Sprints 0–49 complete. Recent work:
 - Sprint 46: service decomposition (extract ShoutboxService, ThankService,
   TorrentBookmarkService, ComplainService, LocationService, BitbucketService;
   AnnounceService DI cleanup)
@@ -100,6 +100,10 @@ Sprints 0–48 complete. Recent work:
   (RewardController, HitAndRunController, PeerController, SnatchController,
   AttendanceController) using Mockery + FormRequest validation pattern;
   test count 767 → 792
+- Sprint 49: test coverage batch 2 — added 38 unit tests for 5 admin
+  CRUD controllers (TagController, MedalController, AgentDenyController,
+  ExamController, ExamUserController) with paginator mocks and enum
+  validation; test count 792 → 830
 
 ## PHP version
 

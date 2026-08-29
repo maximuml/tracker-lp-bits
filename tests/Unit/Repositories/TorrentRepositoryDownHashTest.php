@@ -76,7 +76,6 @@ class TorrentRepositoryDownHashTest extends TestCase
     {
         $reflection = new \ReflectionClass($this->downloadRepository);
         $method = $reflection->getMethod('getHkdfDownHashKey');
-        $method->setAccessible(true);
 
         return $method->invoke($this->downloadRepository, (int) $user['id'], (string) $user['passkey']);
     }

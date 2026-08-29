@@ -1,5 +1,5 @@
 # 👷‍♀️ 第一阶段：构建阶段，包含所有开发依赖
-FROM php:8.4-fpm AS builder
+FROM php:8.5-fpm AS builder
 
 # 安装依赖
 RUN apt-get update && apt-get install -y \
@@ -29,8 +29,7 @@ RUN apt-get update && apt-get install -y \
         sockets \
         gmp \
         zip \
-        intl \
-        opcache
+        intl
 
 # 检查 pecl.php.net 可用性
 RUN curl -Is https://pecl.php.net | head -n 1 | grep "200" \
@@ -42,7 +41,7 @@ RUN pecl channel-update pecl.php.net \
     && docker-php-ext-enable redis
 
 # 👨‍🍳 第二阶段：运行阶段，仅包含必要运行环境
-FROM php:8.4-fpm
+FROM php:8.5-fpm
 
 # 安装运行所需依赖（无需 dev 工具）
 RUN apt-get update && apt-get install -y \

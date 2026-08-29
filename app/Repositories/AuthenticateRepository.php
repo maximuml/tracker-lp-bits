@@ -25,7 +25,7 @@ class AuthenticateRepository extends BaseRepository
     {
         $user = User::query()
             ->where('username', (string) $username)
-            ->first(array_merge(User::$commonFields, ['class', 'secret', 'passhash', 'auth_key']));
+            ->first(array_merge(User::$commonFields, ['class', 'secret', 'passhash', 'auth_key', 'passhash_algo']));
         if (! $user instanceof User || ! app(WebAuthService::class)->validatePassword($user, $password)) {
             throw new \InvalidArgumentException('Username or password invalid.');
         }

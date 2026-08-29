@@ -249,10 +249,10 @@ final class Time
         $TIMENOW = defined('TIMENOW') ? (int) TIMENOW : time();
 
         if (isset($CURUSER) && ($CURUSER['timetype'] ?? '') != 'timealive' && ! $forceago) {
-            return self::formatAbsoluteTime((string) $time, (bool) $twoline);
+            return self::formatAbsoluteTime($time instanceof Carbon ? $time->toDateTimeString() : (string) $time, (bool) $twoline);
         }
 
-        $timestamp = strtotime($time);
+        $timestamp = strtotime($time instanceof Carbon ? $time->toDateTimeString() : (string) $time);
         if ($timestamp === false) {
             return null;
         }

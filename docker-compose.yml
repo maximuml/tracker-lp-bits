@@ -195,7 +195,7 @@ services:
       - appnet
 
   meilisearch:
-    image: getmeili/meilisearch:v1.16
+    image: getmeili/meilisearch:v1.53
     container_name: nexusphp-meilisearch
     environment:
       MEILI_NO_ANALYTICS: "true"

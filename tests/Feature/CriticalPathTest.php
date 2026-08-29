@@ -7,7 +7,7 @@ use App\Jobs\SeedBonusJob;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Support\Settings;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\Redis;
 use Rhilip\Bencode\Bencode;
 use Tests\TestCase;
 
@@ -60,7 +60,7 @@ class CriticalPathTest extends TestCase
         // The FPM workers cache settings in Redis. Clear those keys so the
         // updated values are loaded on the next legacy request.
         try {
-            NexusDB::redis()->del('nexus_settings_in_nexus', 'nexus_settings_in_laravel', 'setting_protected_forum');
+            Redis::connection()->client()->del('nexus_settings_in_nexus', 'nexus_settings_in_laravel', 'setting_protected_forum');
         } catch (\Throwable $e) {
             // Redis may not be reachable in this environment; the request may
             // still work if the cache already holds compatible values.

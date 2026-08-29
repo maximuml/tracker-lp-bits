@@ -6,6 +6,7 @@ namespace App\Support;
 
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Database introspection and SQL-dialect helpers extracted from `NexusDB`.
@@ -119,5 +120,62 @@ final class Database
     private static function driverName(): string
     {
         return (string) DB::connection()->getDriverName();
+    }
+
+    public static function isMysql(): bool
+    {
+        return self::driverName() === 'mysql';
+    }
+
+    public static function isPgsql(): bool
+    {
+        return self::driverName() === 'pgsql';
+    }
+
+    public static function hasColumn(string $table, string $column): bool
+    {
+        return Schema::hasColumn($table, $column);
+    }
+
+    /**
+     * @param  list<string>  $columns
+     * @return list<string>
+     */
+    public static function listColumnIndexNames(string $table, array $columns): array
+    {
+        $indexes = Schema::getIndexes($table);
+        $names = [];
+        foreach ($indexes as $index) {
+            foreach ($columns as $column) {
+                if (in_array($column, $index['columns'])) {
+                    $names[] = $index['name'];
+                    break;
+                }
+            }
+        }
+
+        return array_values(array_unique($names));
+    }
+
+    /**
+     * @return ($column is null ? array<string, array<string, mixed>> : array<string, mixed>)
+     */
+    public static function getMysqlColumnInfo(string $table, ?string $column = null): array
+    {
+        $query = DB::table('information_schema.COLUMNS')
+            ->where('TABLE_SCHEMA', Config::get('database.connections.'.(string) Config::get('database.default').'.database'))
+            ->where('TABLE_NAME', $table);
+
+        if ($column !== null) {
+            return (array) $query->where('COLUMN_NAME', $column)->first() ?: [];
+        }
+
+        $results = [];
+        foreach ($query->get() as $row) {
+            $row = (array) $row;
+            $results[$row['COLUMN_NAME']] = $row;
+        }
+
+        return $results;
     }
 }

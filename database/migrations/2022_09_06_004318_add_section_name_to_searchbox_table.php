@@ -1,9 +1,9 @@
 <?php
 
+use App\Support\Database;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Nexus\Database\NexusDB;
 
 return new class extends Migration
 {
@@ -14,7 +14,7 @@ return new class extends Migration
      */
     public function up()
     {
-        if (! NexusDB::hasColumn('searchbox', 'section_name')) {
+        if (! Database::hasColumn('searchbox', 'section_name')) {
             Schema::table('searchbox', function (Blueprint $table) {
                 $table->json('section_name')->after('name')->nullable(true);
             });

@@ -8,11 +8,11 @@ use App\Repositories\CleanupRepository;
 use App\Services\Cleanup\Tasks;
 use App\Support\Config\SiteConfig;
 use App\Support\Globals;
+use App\Support\Lock;
 use App\Support\Logger;
 use App\Support\Time;
 use App\Support\UserDisplay;
 use Illuminate\Support\Facades\DB;
-use Nexus\Database\NexusLock;
 use Nexus\Nexus;
 
 /**
@@ -169,7 +169,7 @@ final class CleanupService
             $method = $item['method'];
             $lockKey = "cleanup:task:{$task}";
             $lockTtl = max(60, (int) SiteConfig::current()->main->autocleanInterval($this->intervalName($level), 3600));
-            $lock = new NexusLock($lockKey, $lockTtl);
+            $lock = new Lock($lockKey, $lockTtl);
 
             if (! $lock->acquire()) {
                 $msg = "Task {$task} is already running.";

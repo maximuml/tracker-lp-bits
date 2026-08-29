@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Services\Cleanup\Tasks;
+use App\Support\Lock;
 use App\Support\Logger;
 use Illuminate\Console\Command;
-use Nexus\Database\NexusLock;
 
 final class CleanupTasks extends Command
 {
@@ -44,7 +44,7 @@ final class CleanupTasks extends Command
         }
 
         $lockKey = "cleanup:task:{$task}";
-        $lock = new NexusLock($lockKey, 3600);
+        $lock = new Lock($lockKey, 3600);
 
         if (! $lock->acquire()) {
             $this->warn("Task {$task} is already running.");

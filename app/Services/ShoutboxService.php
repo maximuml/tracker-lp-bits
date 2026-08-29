@@ -7,9 +7,9 @@ namespace App\Services;
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\User;
+use App\Support\Lock;
 use App\Support\Shoutbox;
 use Illuminate\Support\Facades\DB;
-use Nexus\Database\NexusLock;
 
 /**
  * Handles shoutbox message and reaction mutations.
@@ -44,7 +44,7 @@ final class ShoutboxService
             return false;
         }
 
-        $lock = new NexusLock("shoutbox:{$userId}", self::POST_LOCK_SECONDS);
+        $lock = new Lock("shoutbox:{$userId}", self::POST_LOCK_SECONDS);
         if (! $lock->acquire()) {
             return false;
         }
@@ -86,7 +86,7 @@ final class ShoutboxService
             return false;
         }
 
-        $lock = new NexusLock('shoutbox_delete:'.$userId, self::DELETE_LOCK_SECONDS);
+        $lock = new Lock('shoutbox_delete:'.$userId, self::DELETE_LOCK_SECONDS);
         if (! $lock->acquire()) {
             return false;
         }
@@ -130,7 +130,7 @@ final class ShoutboxService
             return false;
         }
 
-        $lock = new NexusLock('shoutbox_edit:'.$userId, self::EDIT_LOCK_SECONDS);
+        $lock = new Lock('shoutbox_edit:'.$userId, self::EDIT_LOCK_SECONDS);
         if (! $lock->acquire()) {
             return false;
         }
@@ -178,7 +178,7 @@ final class ShoutboxService
             return null;
         }
 
-        $lock = new NexusLock('shoutbox_react:'.$userId, self::REACT_LOCK_SECONDS);
+        $lock = new Lock('shoutbox_react:'.$userId, self::REACT_LOCK_SECONDS);
         if (! $lock->acquire()) {
             return null;
         }

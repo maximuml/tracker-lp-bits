@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Utils;
 
 use App\Jobs\BuyTorrent;
+use App\Support\Lock;
 use App\Support\Logger;
 use App\Support\Strings;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Redis;
-use Nexus\Database\NexusLock;
 
 final class ThirdPartyJob
 {
@@ -22,7 +22,7 @@ final class ThirdPartyJob
     public function __invoke(): void
     {
         $lockName = Strings::namespaceToSnake(__METHOD__);
-        $lock = new NexusLock($lockName, 600);
+        $lock = new Lock($lockName, 600);
         if (! $lock->get()) {
             Logger::writeWithContext((string) "can not get lock: {$lockName}, return ...", (string) 'info', (bool) false);
 

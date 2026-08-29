@@ -9,10 +9,10 @@ use App\Models\User;
 use App\Repositories\ToolRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
+use App\Support\Lock;
 use App\Support\Logger;
 use App\Support\Url;
 use Illuminate\Support\Facades\DB;
-use Nexus\Database\NexusLock;
 
 /**
  * Handles complain (support ticket) mutations: creating new complains,
@@ -34,13 +34,13 @@ final class ComplainService
     public function createComplain(string $email, string $body, string $clientIp): ?string
     {
         try {
-            NexusLock::lockOrFail('complains:lock:'.$clientIp, 10);
+            Lock::lockOrFail('complains:lock:'.$clientIp, 10);
         } catch (\Throwable) {
             return null;
         }
 
         try {
-            NexusLock::lockOrFail('complains:lock:'.$email, 600);
+            Lock::lockOrFail('complains:lock:'.$email, 600);
         } catch (\Throwable) {
             return null;
         }

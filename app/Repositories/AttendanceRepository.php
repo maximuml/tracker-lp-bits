@@ -160,8 +160,8 @@ class AttendanceRepository extends BaseRepository
                 break;
             }
             foreach ($result as $row) {
-                $caseWhens[] = sprintf('when %s then %s', $row->id, $row->counts);
-                $idArr[] = $row->id;
+                $caseWhens[] = sprintf('when %d then %d', (int) $row->id, (int) $row->counts);
+                $idArr[] = (int) $row->id;
                 Logger::writeWithContext((string) sprintf("{$logPrefix}, update user: %s(ID: %s) => %s", $row->uid, $row->id, $row->counts), (string) 'info', (bool) false);
             }
             $page++;

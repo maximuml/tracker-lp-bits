@@ -460,10 +460,10 @@ final class AnnounceService
         $this->userUpdate['last_announce_at'] = $this->dt;
 
         if ($this->uploadedIncrementForUser > 0) {
-            $this->userUpdate['uploaded'] = DB::raw('uploaded + '.$this->uploadedIncrementForUser); // @phpstan-ignore argument.type
+            $this->userUpdate['uploaded'] = DB::raw(DB::getQueryGrammar()->wrap('uploaded').' + '.(int) $this->uploadedIncrementForUser); // @phpstan-ignore argument.type
         }
         if ($this->downloadedIncrementForUser > 0) {
-            $this->userUpdate['downloaded'] = DB::raw('downloaded + '.$this->downloadedIncrementForUser); // @phpstan-ignore argument.type
+            $this->userUpdate['downloaded'] = DB::raw(DB::getQueryGrammar()->wrap('downloaded').' + '.(int) $this->downloadedIncrementForUser); // @phpstan-ignore argument.type
         }
 
         if ((int) $this->user['class'] === (int) UserClassEnum::VIP->value) {

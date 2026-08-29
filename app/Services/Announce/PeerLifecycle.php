@@ -367,16 +367,19 @@ final class PeerLifecycle
      */
     private function buildSnatchUpdate(int $upthis, int $downthis, string $snatchTimeColumn, int $snatchTimeIncrement, int $leechTimeNoSeederIncrement): array
     {
+        if (! in_array($snatchTimeColumn, ['seedtime', 'leechtime'], true)) {
+            throw new \InvalidArgumentException('Invalid snatch time column: '.$snatchTimeColumn);
+        }
         $snatchUpdate = [
-            'uploaded' => DB::raw('uploaded + '.$upthis), // @phpstan-ignore argument.type
-            'downloaded' => DB::raw('downloaded + '.$downthis), // @phpstan-ignore argument.type
+            'uploaded' => DB::raw(DB::getQueryGrammar()->wrap('uploaded').' + '.(int) $upthis), // @phpstan-ignore argument.type
+            'downloaded' => DB::raw(DB::getQueryGrammar()->wrap('downloaded').' + '.(int) $downthis), // @phpstan-ignore argument.type
             'to_go' => $this->left,
-            $snatchTimeColumn => DB::raw("{$snatchTimeColumn} + ".$snatchTimeIncrement), // @phpstan-ignore argument.type
+            $snatchTimeColumn => DB::raw(DB::getQueryGrammar()->wrap($snatchTimeColumn).' + '.(int) $snatchTimeIncrement), // @phpstan-ignore argument.type
             'last_action' => $this->dt,
         ];
 
         if ($leechTimeNoSeederIncrement > 0) {
-            $snatchUpdate['leech_time_no_seeder'] = DB::raw('leech_time_no_seeder + '.$leechTimeNoSeederIncrement); // @phpstan-ignore argument.type
+            $snatchUpdate['leech_time_no_seeder'] = DB::raw(DB::getQueryGrammar()->wrap('leech_time_no_seeder').' + '.(int) $leechTimeNoSeederIncrement); // @phpstan-ignore argument.type
         }
 
         return $snatchUpdate;

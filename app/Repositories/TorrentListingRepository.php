@@ -24,13 +24,21 @@ class TorrentListingRepository
      */
     public static function getList(array $options): array
     {
-        $orderBy = preg_replace('/^ORDER BY /i', '', $options['order_by']);
         $query = self::buildBaseQuery($options)
             ->select($options['fields'])
             ->selectRaw('? as search_box_id', [$options['search_box_id']])
-            ->orderByRaw($orderBy) // @phpstan-ignore argument.type
             ->offset($options['offset'])
             ->limit($options['limit']);
+
+        $orderBy = $options['order_by'] ?? [];
+        foreach ($orderBy as $order) {
+            [$column, $direction] = is_array($order) ? array_pad($order, 2, 'asc') : [$order, 'asc'];
+            $direction = match (is_string($direction) ? strtolower($direction) : '') {
+                'desc' => 'desc',
+                default => 'asc',
+            };
+            $query->orderBy((string) $column, $direction);
+        }
 
         return $query->get()
             ->map(fn ($row) => (array) $row)
@@ -62,7 +70,8 @@ class TorrentListingRepository
         $where = $options['where'] ?? '';
         $where = preg_replace('/^WHERE\s+/i', '', $where);
         if ($where !== '') {
-            $query = $query->whereRaw($where); // @phpstan-ignore argument.type
+            $whereBindings = $options['where_bindings'] ?? [];
+            $query = $query->whereRaw($where, $whereBindings); // @phpstan-ignore argument.type
         }
 
         return $query;

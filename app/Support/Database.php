@@ -44,9 +44,11 @@ final class Database
      */
     public static function unixTimestampField(string $field): string
     {
+        $wrapped = DB::getQueryGrammar()->wrap($field);
+
         return match (self::driverName()) {
-            'mysql' => sprintf('UNIX_TIMESTAMP(%s)', $field),
-            'pgsql' => sprintf('EXTRACT(EPOCH FROM %s)', $field),
+            'mysql' => "UNIX_TIMESTAMP({$wrapped})",
+            'pgsql' => "EXTRACT(EPOCH FROM {$wrapped})",
             default => throw new \RuntimeException('Not supported database.'),
         };
     }

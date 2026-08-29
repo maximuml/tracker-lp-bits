@@ -20,7 +20,6 @@ use App\Support\Promotion;
 use App\Support\SearchBox;
 use App\Support\SearchSuggest;
 use Carbon\Carbon;
-use Illuminate\Database\Connection;
 use Illuminate\Support\Facades\DB;
 use Nexus\Nexus;
 
@@ -148,16 +147,26 @@ class TorrentSearchRepository
             }
 
             if ($column == 'owner') {
-                $orderby = 'ORDER BY pos_state DESC, torrents.anonymous, users.username '.$ascdesc;
+                $orderBy = [
+                    ['pos_state', 'desc'],
+                    ['torrents.anonymous', 'asc'],
+                    ['users.username', $ascdesc],
+                ];
             } else {
-                $orderby = 'ORDER BY pos_state DESC, torrents.'.$column.' '.$ascdesc;
+                $orderBy = [
+                    ['pos_state', 'desc'],
+                    ['torrents.'.$column, $ascdesc],
+                ];
             }
 
             $pagerlink = 'sort='.intval($searchParams['sort']).'&type='.$linkascdesc.'&';
 
         } else {
 
-            $orderby = 'ORDER BY pos_state DESC, torrents.id DESC';
+            $orderBy = [
+                ['pos_state', 'desc'],
+                ['torrents.id', 'desc'],
+            ];
             $pagerlink = '';
 
         }
@@ -165,6 +174,7 @@ class TorrentSearchRepository
         $allCategoryId = \App\Models\SearchBox::listCategoryId($sectiontype);
         $addparam = '';
         $wherea = [];
+        $whereBindings = [];
         $wherecatina = [];
         $wheresourceina = [];
         $wheremediumina = [];
@@ -206,12 +216,12 @@ class TorrentSearchRepository
         } elseif ($inclbookmarked == 1) {		// bookmarked
             $addparam .= 'inclbookmarked=1&';
             if (! empty($CURUSER['id'])) {
-                $wherea[] = 'torrents.id IN (SELECT torrentid FROM bookmarks WHERE userid='.$CURUSER['id'].')';
+                self::pushWhere($wherea, $whereBindings, 'torrents.id IN (SELECT torrentid FROM bookmarks WHERE userid = ?)', [(int) $CURUSER['id']]);
             }
         } elseif ($inclbookmarked == 2) {		// not bookmarked
             $addparam .= 'inclbookmarked=2&';
             if (! empty($CURUSER['id'])) {
-                $wherea[] = 'torrents.id NOT IN (SELECT torrentid FROM bookmarks WHERE userid='.$CURUSER['id'].')';
+                self::pushWhere($wherea, $whereBindings, 'torrents.id NOT IN (SELECT torrentid FROM bookmarks WHERE userid = ?)', [(int) $CURUSER['id']]);
             }
         }
         // ----------------- end bookmarked ---------------------//
@@ -692,74 +702,72 @@ class TorrentSearchRepository
             }
 
             $search_area = intval($searchParams['search_area'] ?? 0);
-            $like_expression_array = [];
 
+            $likePatterns = [];
+            $searchTerm = trim($searchstr_raw);
             switch ($search_mode) {
                 case 0:	// AND, OR
                 case 1:
 
-                    $searchstr = str_replace('.', ' ', $searchstr);
-                    $searchstr_exploded = explode(' ', $searchstr);
+                    $searchTerm = str_replace('.', ' ', $searchTerm);
+                    $searchstr_exploded = explode(' ', $searchTerm);
                     $searchstr_exploded_count = 0;
                     foreach ($searchstr_exploded as $searchstr_element) {
-                        $searchstr_element = trim($searchstr_element);	// furthur trim to ensure that multi space seperated words still work
+                        $searchstr_element = trim($searchstr_element);
+                        if ($searchstr_element === '') {
+                            continue;
+                        }
                         $searchstr_exploded_count++;
-                        if ($searchstr_exploded_count > 3) {	// maximum 3 keywords
+                        if ($searchstr_exploded_count > 3) {    // maximum 3 keywords
                             break;
                         }
-                        $like_expression_array[] = " LIKE '%".$searchstr_element."%'";
+                        $likePatterns[] = '%'.$searchstr_element.'%';
                     }
                     break;
 
                 case 2:	// exact
 
-                    $like_expression_array[] = " LIKE '%".$searchstr."%'";
+                    $likePatterns[] = '%'.$searchTerm.'%';
                     break;
             }
             $ANDOR = ($search_mode == 0 ? ' AND ' : ' OR ');	// only affects mode 0 and mode 1
 
-            switch ($search_area) {
-                case 0:	// torrent name
+            $searchColumn = match ($search_area) {
+                1 => 'torrent_extras.descr',
+                3 => 'users.username',
+                0 => 'torrents.name',
+                default => 'torrents.name',
+            };
 
-                    foreach ($like_expression_array as &$like_expression_array_element) {
-                        $like_expression_array_element = '(torrents.name'.$like_expression_array_element.')';
-                    }
-                    $wherea[] = implode($ANDOR, $like_expression_array);
-                    break;
+            if ($search_area === 3) {
+                $likeClauses = array_fill(0, count($likePatterns), $searchColumn.' LIKE ?');
+                $likeSql = implode($ANDOR, $likeClauses);
 
-                case 1:	// torrent description
+                if (empty($CURUSER['id'])) {
+                    // not registered user, only show not anonymous torrents
+                    self::pushWhere($wherea, $whereBindings, $likeSql." AND torrents.anonymous = 'no'", $likePatterns);
+                } elseif (Permission::canManageTorrent()) {
+                    // moderator or above, show all
+                    self::pushWhere($wherea, $whereBindings, $likeSql, $likePatterns);
+                } else {
+                    // only show normal torrents and anonymous torrents from himself
+                    $sql = "({$likeSql} AND torrents.anonymous = 'no') OR ({$likeSql} AND torrents.anonymous = 'yes' AND users.id = ?)";
+                    self::pushWhere($wherea, $whereBindings, $sql, array_merge($likePatterns, $likePatterns, [(int) $CURUSER['id']]));
+                }
+            } else {
+                if (empty($likePatterns)) {
+                    $likePatterns[] = '%'.$searchTerm.'%';
+                }
+                $likeClauses = array_fill(0, count($likePatterns), $searchColumn.' LIKE ?');
 
-                    foreach ($like_expression_array as &$like_expression_array_element) {
-                        $like_expression_array_element = 'torrent_extras.descr'.$like_expression_array_element;
-                    }
-                    $wherea[] = implode($ANDOR, $like_expression_array);
-                    break;
-
-                case 3:	// torrent uploader
-
-                    foreach ($like_expression_array as &$like_expression_array_element) {
-                        $like_expression_array_element = 'users.username'.$like_expression_array_element;
-                    }
-
-                    if (empty($CURUSER['id'])) {	// not registered user, only show not anonymous torrents
-                        $wherea[] = implode($ANDOR, $like_expression_array)." AND torrents.anonymous = 'no'";
-                    } else {
-                        if (Permission::canManageTorrent()) {	// moderator or above, show all
-                            $wherea[] = implode($ANDOR, $like_expression_array);
-                        } else { // only show normal torrents and anonymous torrents from hiself
-                            $wherea[] = '('.implode($ANDOR, $like_expression_array)." AND torrents.anonymous = 'no') OR (".implode($ANDOR, $like_expression_array)." AND torrents.anonymous = 'yes' AND users.id=".$CURUSER['id'].') ';
-                        }
-                    }
-                    break;
-
-                default:	// unkonwn
-
+                if ($search_area !== 0 && $search_area !== 1) {
                     $search_area = 0;
-                    $wherea[] = "torrents.name LIKE '%".$searchstr."%'";
                     Log::writeWithContext('User '.$CURUSER['username'].','.$CURUSER['ip'].' is hacking search_area field in'.Input::serverValue('SCRIPT_NAME', ''), 'mod');
-                    break;
+                }
 
+                self::pushWhere($wherea, $whereBindings, implode($ANDOR, $likeClauses), $likePatterns);
             }
+
             $addparam .= 'search_area='.$search_area.'&';
             $addparam .= 'search='.rawurlencode($searchstr).'&'.$notnewword;
             $addparam .= 'search_mode='.$search_mode.'&';
@@ -778,60 +786,56 @@ class TorrentSearchRepository
         // OR if [not approval can not be view] and not staff member, force to view  approval allowed
         if ($showApprovalStatusFilter && isset($searchParams['approval_status']) && is_numeric($searchParams['approval_status'])) {
             $approvalStatus = intval($searchParams['approval_status']);
-            $wherea[] = "torrents.approval_status = $approvalStatus";
+            self::pushWhere($wherea, $whereBindings, 'torrents.approval_status = ?', [(int) $approvalStatus]);
             $searchParams['approval_status'] = $approvalStatus;
             $addparam .= "approval_status=$approvalStatus&";
         } elseif (! $approvalStatusNoneVisible && ! Permission::canApproveTorrent()) {
-            $wherea[] = 'torrents.approval_status = '.TorrentApprovalStatus::ALLOW->value;
+            self::pushWhere($wherea, $whereBindings, 'torrents.approval_status = ?', [(int) TorrentApprovalStatus::ALLOW->value]);
             $searchParams['approval_status'] = TorrentApprovalStatus::ALLOW->value;
         }
 
         if (isset($searchParams['size_begin']) && ctype_digit($searchParams['size_begin'])) {
-            $wherea[] = 'torrents.size >= '.intval($searchParams['size_begin']) * 1024 * 1024 * 1024;
+            self::pushWhere($wherea, $whereBindings, 'torrents.size >= ?', [intval($searchParams['size_begin']) * 1024 * 1024 * 1024]);
             $addparam .= 'size_begin='.intval($searchParams['size_begin']).'&';
         }
         if (isset($searchParams['size_end']) && ctype_digit($searchParams['size_end'])) {
-            $wherea[] = 'torrents.size <= '.intval($searchParams['size_end']) * 1024 * 1024 * 1024;
+            self::pushWhere($wherea, $whereBindings, 'torrents.size <= ?', [intval($searchParams['size_end']) * 1024 * 1024 * 1024]);
             $addparam .= 'size_end='.intval($searchParams['size_end']).'&';
         }
 
         if (isset($searchParams['seeders_begin']) && ctype_digit($searchParams['seeders_begin'])) {
-            $wherea[] = 'torrents.seeders >= '.(int) $searchParams['seeders_begin'];
+            self::pushWhere($wherea, $whereBindings, 'torrents.seeders >= ?', [(int) $searchParams['seeders_begin']]);
             $addparam .= 'seeders_begin='.intval($searchParams['seeders_begin']).'&';
         }
         if (isset($searchParams['seeders_end']) && ctype_digit($searchParams['seeders_end'])) {
-            $wherea[] = 'torrents.seeders <= '.(int) $searchParams['seeders_end'];
+            self::pushWhere($wherea, $whereBindings, 'torrents.seeders <= ?', [(int) $searchParams['seeders_end']]);
             $addparam .= 'seeders_end='.intval($searchParams['seeders_end']).'&';
         }
 
         if (isset($searchParams['leechers_begin']) && ctype_digit($searchParams['leechers_begin'])) {
-            $wherea[] = 'torrents.leechers >= '.(int) $searchParams['leechers_begin'];
+            self::pushWhere($wherea, $whereBindings, 'torrents.leechers >= ?', [(int) $searchParams['leechers_begin']]);
             $addparam .= 'leechers_begin='.intval($searchParams['leechers_begin']).'&';
         }
         if (isset($searchParams['leechers_end']) && ctype_digit($searchParams['leechers_end'])) {
-            $wherea[] = 'torrents.leechers <= '.(int) $searchParams['leechers_end'];
+            self::pushWhere($wherea, $whereBindings, 'torrents.leechers <= ?', [(int) $searchParams['leechers_end']]);
             $addparam .= 'leechers_end='.intval($searchParams['leechers_end']).'&';
         }
 
         if (isset($searchParams['times_completed_begin']) && ctype_digit($searchParams['times_completed_begin'])) {
-            $wherea[] = 'torrents.times_completed >= '.(int) $searchParams['times_completed_begin'];
+            self::pushWhere($wherea, $whereBindings, 'torrents.times_completed >= ?', [(int) $searchParams['times_completed_begin']]);
             $addparam .= 'times_completed_begin='.intval($searchParams['times_completed_begin']).'&';
         }
         if (isset($searchParams['times_completed_end']) && ctype_digit($searchParams['times_completed_end'])) {
-            $wherea[] = 'torrents.times_completed <= '.(int) $searchParams['times_completed_end'];
+            self::pushWhere($wherea, $whereBindings, 'torrents.times_completed <= ?', [(int) $searchParams['times_completed_end']]);
             $addparam .= 'times_completed_end='.intval($searchParams['times_completed_end']).'&';
         }
 
-        /** @var Connection $db */
-        $db = DB::table('torrents')->getConnection();
-        $quote = fn ($value) => (string) $db->getPdo()->quote((string) $value);
-
         if (isset($searchParams['added_begin']) && ! empty($searchParams['added_begin'])) {
-            $wherea[] = 'torrents.added >= '.$quote($searchParams['added_begin']);
+            self::pushWhere($wherea, $whereBindings, 'torrents.added >= ?', [(string) $searchParams['added_begin']]);
             $addparam .= 'added_begin='.$searchParams['added_begin'].'&';
         }
         if (isset($searchParams['added_end']) && ! empty($searchParams['added_end'])) {
-            $wherea[] = 'torrents.added <= '.$quote(Carbon::parse($searchParams['added_end'])->endOfDay()->toDateTimeString());
+            self::pushWhere($wherea, $whereBindings, 'torrents.added <= ?', [Carbon::parse($searchParams['added_end'])->endOfDay()->toDateTimeString()]);
             $addparam .= 'added_end='.$searchParams['added_end'].'&';
         }
 
@@ -871,6 +875,7 @@ class TorrentSearchRepository
         }
         $listingOptions = [
             'where' => $where,
+            'where_bindings' => $whereBindings,
             'join_users' => ($search_area == 3 || $column == 'owner'),
             'join_torrent_tags' => $tagId > 0,
             'tag_id' => $tagId,
@@ -922,7 +927,7 @@ class TorrentSearchRepository
                 : TorrentListingRepository::getList(array_merge($listingOptions, [
                     'fields' => $fieldsArr,
                     'search_box_id' => $sectiontype,
-                    'order_by' => $orderby,
+                    'order_by' => $orderBy,
                     'offset' => $offset,
                     'limit' => $size,
                 ]));
@@ -937,5 +942,20 @@ class TorrentSearchRepository
         }
 
         return get_defined_vars();
+    }
+
+    /**
+     * Append a parameterized where fragment and its bindings.
+     *
+     * @param  list<string>  $wherea
+     * @param  list<mixed>  $whereBindings
+     * @param  list<mixed>  $bindings
+     */
+    private static function pushWhere(array &$wherea, array &$whereBindings, string $sql, array $bindings = []): void
+    {
+        $wherea[] = $sql;
+        foreach ($bindings as $binding) {
+            $whereBindings[] = $binding;
+        }
     }
 }

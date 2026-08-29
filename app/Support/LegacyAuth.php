@@ -356,8 +356,8 @@ final class LegacyAuth
             $row = $row->toArray();
         }
 
-        if (! $row['passkey']) {
-            $passkey = md5($row['username'].date('Y-m-d H:i:s').$row['passhash']);
+        if (empty($row['passkey'])) {
+            $passkey = md5($row['username'].date('Y-m-d H:i:s').($row['passhash'] ?? ''));
             app(AuthRepository::class)->updateUserPasskey((int) $row['id'], $passkey);
         }
 

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Nexus\Database;
+namespace App\Support\Install\Database;
 
 use PDOStatement;
 
-interface DBInterface
+interface Driver
 {
     public function connect($host, $username, $password, $database, $port, $driver = 'mysql');
 

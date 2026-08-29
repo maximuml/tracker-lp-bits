@@ -28,6 +28,7 @@ parameters:
         analyse:
             - app/Services/Legacy/partials (?)
             - app/Services/Legacy/*_content.php
+            - app/Support/Install
 
     bootstrapFiles:
         - tests/phpstan/bootstrap.php

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Nexus\Database;
+namespace App\Support\Install\Database;
 
 use PDO;
 
-class DBPdo implements DBInterface
+class PdoDriver implements Driver
 {
     private PDO $pdo;
 

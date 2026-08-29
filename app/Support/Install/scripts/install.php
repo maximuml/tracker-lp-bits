@@ -3,12 +3,12 @@
 declare(strict_types=1);
 
 use App\Support\Env;
+use App\Support\Install\Install;
 use App\Support\Url;
-use Nexus\Install\Install;
 
 $rootpath = dirname(dirname(__DIR__)).'/';
 define('ROOT_PATH', $rootpath);
-require ROOT_PATH.'app/Nexus/Install/install_update_start.php';
+require ROOT_PATH.'app/Support/Install/install_update_start.php';
 
 $isPost = $_SERVER['REQUEST_METHOD'] == 'POST';
 $install = new Install;

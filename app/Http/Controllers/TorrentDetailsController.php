@@ -27,6 +27,8 @@ use App\Support\Locale;
 use App\Support\Logger;
 use App\Support\Promotion;
 use App\Support\Strings;
+use App\Support\Torrent\BdInfoExtra;
+use App\Support\Torrent\TechnicalInformation;
 use App\Support\TorrentAccess;
 use App\Support\TorrentBookmark;
 use App\Support\UserDisplay;
@@ -36,8 +38,6 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
-use Nexus\Torrent\BdInfoExtra;
-use Nexus\Torrent\TechnicalInformation;
 
 class TorrentDetailsController extends Controller
 {

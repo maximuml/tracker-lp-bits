@@ -15,8 +15,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Support\Torrent\TechnicalInformation;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Nexus\Torrent\TechnicalInformation;
 
 /**
  * @property string|null $descr

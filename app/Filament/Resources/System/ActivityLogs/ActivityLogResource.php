@@ -131,9 +131,12 @@ class ActivityLogResource extends Resource
                     ->schema(function ($record) {
                         $fields = [];
                         // 动态地从 JSON 数据创建 TextEntry
-                        // 注意：这里需要确保 $record->properties 是一个数组
-                        $properties = $record->properties->toArray();
-                        foreach ($properties as $key => $value) {
+                        // v5: attribute_changes stores tracked model changes,
+                        // properties stores only custom user data.
+                        $properties = $record->properties?->toArray() ?? [];
+                        $attributeChanges = $record->attribute_changes?->toArray() ?? [];
+                        $allData = array_merge($attributeChanges, $properties);
+                        foreach ($allData as $key => $value) {
                             // 如果值是数组或对象，美化输出
                             if (is_array($value) || is_object($value)) {
                                 $value = json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);

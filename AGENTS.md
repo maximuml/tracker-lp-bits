@@ -25,7 +25,7 @@ PHP 8.4+, MySQL, Redis, MeiliSearch. Docker Compose stack for local development.
 - `routes/legacy/` — legacy route mappings (PHP file routes)
 - `config/` — Laravel configuration
 - `database/migrations/` — 75 migrations
-- `tests/` — 87 test files (751 tests)
+- `tests/` — 92 test files (792 tests)
 
 ## Build & run commands
 
@@ -90,11 +90,26 @@ docker compose exec -T php composer audit
 
 ## Modernisation status
 
-Sprints 0–47 complete. Recent work:
+Sprints 0–48 complete. Recent work:
 - Sprint 46: service decomposition (extract ShoutboxService, ThankService,
   TorrentBookmarkService, ComplainService, LocationService, BitbucketService;
   AnnounceService DI cleanup)
 - Sprint 47: major dependency upgrades — Laravel 12→13, Tailwind 3→4,
   laravel-vite-plugin 1→3 + Vite 6→8
+- Sprint 48: test coverage — added 25 unit tests for 5 API controllers
+  (RewardController, HitAndRunController, PeerController, SnatchController,
+  AttendanceController) using Mockery + FormRequest validation pattern;
+  test count 767 → 792
 
-Key remaining work: Sprint 30 (audit cleanup), test coverage expansion.
+## PHP version
+
+- **CI:** PHP 8.5 (shivammathur/setup-php)
+- **Docker:** PHP 8.4-fpm-alpine (`.docker/php/Dockerfile`)
+- **composer.json:** `>=8.4 <8.6` — allows both 8.4 and 8.5
+- **PHP 8.5 compatibility:** verified — no deprecated features used
+  (no backtick operator, no non-canonical casts, no semicolon-terminated
+  case statements). All 792 tests pass on PHP 8.5 in CI.
+- Docker image upgrade to PHP 8.5 is a future task (not blocking).
+
+Key remaining work: Sprint 30 (audit cleanup), test coverage expansion
+(60+ controllers still untested), Docker PHP 8.5 upgrade.

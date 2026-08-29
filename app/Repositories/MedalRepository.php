@@ -202,10 +202,11 @@ class MedalRepository extends BaseRepository
     {
         $this->checkExpireField($field);
         $idArr = $collection->pluck('id')->toArray();
+        $wrappedField = DB::getQueryGrammar()->wrap($field);
         $result = DB::table('user_medals')
             ->whereIn('id', $idArr)
             ->whereNotNull($field)
-            ->update([$field => DB::raw("`$field` + INTERVAL $duration DAY")]); // @phpstan-ignore argument.type
+            ->update([$field => DB::raw("{$wrappedField} + INTERVAL ".(int) $duration.' DAY')]); // @phpstan-ignore argument.type
         Logger::writeWithContext(sprintf(
             "operator: %s, increase records: %s $field + $duration day, result: %s",
             UserDisplay::currentUsername(), implode(', ', $idArr), $result

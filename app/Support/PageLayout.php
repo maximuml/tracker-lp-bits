@@ -18,7 +18,6 @@ use App\Repositories\SearchBoxRepository;
 use App\Utils\MsgAlert;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Response;
-use Nexus\Exam\Exam;
 use Nexus\Nexus;
 
 class PageLayout
@@ -599,7 +598,7 @@ class PageLayout
                 // show the exam info
                 $exam = new Exam;
                 $currentExam = $exam->getCurrent($context->user['id']);
-                if (! empty($currentExam['html'])) {
+                if (! empty($currentExam['html']) && $currentExam['exam'] !== null) {
                     Html::messageAlertVoid($currentExam['exam']->type == ExamType::TASK->value ? 'task.php' : 'messages.php', $currentExam['html'], $currentExam['exam']->background_color ?? 'blue');
                 }
             }

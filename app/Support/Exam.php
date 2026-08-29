@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Nexus\Exam;
+namespace App\Support;
 
 use App\Enums\ExamUserStatus;
 use App\Repositories\ExamRepository;
-use App\Support\Locale;
 
 class Exam
 {
-    public function getCurrent($uid): array
+    /** @return array{exam: \App\Models\Exam|null, html: string} */
+    public function getCurrent(int $uid): array
     {
         $examRep = app(ExamRepository::class);
         $userExam = $examRep->getUserExamProgress($uid, ExamUserStatus::NORMAL->value);

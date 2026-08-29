@@ -2,15 +2,21 @@
 
 declare(strict_types=1);
 
-namespace Nexus\Attachment\Drivers;
+namespace App\Support\Drivers;
 
+use App\Support\AttachmentDriver;
+use App\Support\AttachmentStorage;
 use App\Support\Config\SiteConfig;
 use App\Support\Logger;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7;
-use Nexus\Attachment\Storage;
 
-class Lsky extends Storage
+/**
+ * Lsky Pro image-hosting driver.
+ *
+ * Uploads files via the Lsky REST API and returns the hosted URL.
+ */
+final class LskyAttachmentDriver implements AttachmentDriver
 {
     public function upload(string $filepath): string
     {
@@ -65,6 +71,45 @@ class Lsky extends Storage
 
     public function getDriverName(): string
     {
-        return static::DRIVER_LSKY;
+        return AttachmentStorage::DRIVER_LSKY;
+    }
+
+    public function uploadGetLocation(string $filepath, string $originalName): string
+    {
+        $extension = pathinfo($filepath, PATHINFO_EXTENSION);
+        if (empty($extension)) {
+            $newFilepath = sprintf('%s/%s', dirname($filepath), trim($originalName));
+            $moveResult = move_uploaded_file($filepath, $newFilepath);
+            Logger::writeWithContext((string) sprintf('filepath: %s, newFilepath: %s, moveResult: %s', $filepath, $newFilepath, $moveResult), (string) 'info', (bool) false);
+            if (! $moveResult) {
+                throw new \Exception('Failed to move uploaded file.');
+            }
+            $url = $this->upload($newFilepath);
+            @unlink($newFilepath);
+        } else {
+            $url = $this->upload($filepath);
+            @unlink($filepath);
+        }
+
+        return $this->trimBaseUrl($url);
+    }
+
+    public function getImageUrl(string $location): string
+    {
+        if (str_starts_with($location, 'http://') || str_starts_with($location, 'https://')) {
+            return $location;
+        }
+
+        return sprintf('%s/%s', trim($this->getBaseUrl(), '/'), trim($location, '/'));
+    }
+
+    private function trimBaseUrl(string $url): string
+    {
+        $baseUrl = trim($this->getBaseUrl(), '/').'/';
+        if (str_starts_with($url, $baseUrl)) {
+            return substr($url, strlen($baseUrl));
+        }
+
+        return $url;
     }
 }

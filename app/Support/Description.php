@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Repositories\AttachmentRepository;
-use Nexus\Attachment\Storage;
 
 /**
  * Description-AST helpers extracted from `include/functions.php`.
@@ -61,7 +60,7 @@ final class Description
                     if ($item === null) {
                         return $matches[1];
                     }
-                    $url = Storage::getDriver($item['driver'])->getImageUrl($item['location']);
+                    $url = AttachmentStorage::driver($item['driver'])->getImageUrl($item['location']);
                     Logger::writeWithContext(sprintf('location: %s, driver: %s, url: %s', $item['location'], $item['driver'], $url));
 
                     return str_replace($matches[2], $url, $matches[1]);

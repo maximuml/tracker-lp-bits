@@ -2,32 +2,36 @@
 
 declare(strict_types=1);
 
-namespace Nexus\Attachment;
+namespace App\Support\Drivers;
 
+use App\Support\AttachmentDriver;
+use App\Support\AttachmentStorage;
 use App\Support\Config\SiteConfig;
 use App\Support\Logger;
-use Nexus\Attachment\Drivers\Chevereto;
-use Nexus\Attachment\Drivers\Local;
-use Nexus\Attachment\Drivers\Lsky;
+use App\Support\Url;
 
-abstract class Storage
+/**
+ * Local filesystem attachment driver.
+ *
+ * Files are served from the configured HTTP attachment directory; no
+ * remote upload is performed.
+ */
+final class LocalAttachmentDriver implements AttachmentDriver
 {
-    private static array $drivers = [];
+    public function upload(string $filepath): string
+    {
+        throw new \RuntimeException('Not implemented');
+    }
 
-    const DRIVER_LOCAL = 'local';
+    public function getBaseUrl(): string
+    {
+        return sprintf('%s/%s', Url::schemeAndHost(false), trim(SiteConfig::current()->attachment->httpDirectory(), '/'));
+    }
 
-    const DRIVER_CHEVERETO = 'chevereto';
-
-    const DRIVER_LSKY = 'lsky';
-
-    /**
-     * upload to remote and return full url
-     */
-    abstract public function upload(string $filepath): string;
-
-    abstract public function getBaseUrl(): string;
-
-    abstract public function getDriverName(): string;
+    public function getDriverName(): string
+    {
+        return AttachmentStorage::DRIVER_LOCAL;
+    }
 
     public function uploadGetLocation(string $filepath, string $originalName): string
     {
@@ -58,7 +62,7 @@ abstract class Storage
         return sprintf('%s/%s', trim($this->getBaseUrl(), '/'), trim($location, '/'));
     }
 
-    protected function trimBaseUrl(string $url): string
+    private function trimBaseUrl(string $url): string
     {
         $baseUrl = trim($this->getBaseUrl(), '/').'/';
         if (str_starts_with($url, $baseUrl)) {
@@ -66,25 +70,5 @@ abstract class Storage
         }
 
         return $url;
-    }
-
-    public static function getDriver(?string $name = null): Storage
-    {
-        $driver = $name ?: SiteConfig::current()->imageHosting->driver();
-        if (isset(self::$drivers[$driver])) {
-            return self::$drivers[$driver];
-        }
-        $result = null;
-        if ($driver == self::DRIVER_CHEVERETO) {
-            $result = new Chevereto;
-        } elseif ($driver == self::DRIVER_LSKY) {
-            $result = new Lsky;
-        } elseif ($driver == self::DRIVER_LOCAL) {
-            $result = new Local;
-        }
-        if ($result) {
-            return self::$drivers[$driver] = $result;
-        }
-        throw new \Exception("Unsupported driver: $driver");
     }
 }

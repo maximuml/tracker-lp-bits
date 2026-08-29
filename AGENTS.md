@@ -90,7 +90,7 @@ docker compose exec -T php composer audit
 
 ## Modernisation status
 
-Sprints 0–54 complete. Recent work:
+Sprints 0–55 complete. Recent work:
 - Sprint 46: service decomposition (extract ShoutboxService, ThankService,
   TorrentBookmarkService, ComplainService, LocationService, BitbucketService;
   AnnounceService DI cleanup)
@@ -123,16 +123,20 @@ Sprints 0–54 complete. Recent work:
 - Sprint 54: test coverage batch 7 — added 3 unit tests for
   TokenController (addToken/delToken unauthenticated guards, delToken
   validation failure); test count 882 → 885
+- Sprint 55: Docker PHP 8.5 upgrade — updated Dockerfile (Alpine) and
+  DockerfileDebian from php:8.4-fpm to php:8.5-fpm, removed explicit
+  opcache install (built-in since 8.5), fixed ReflectionMethod::
+  setAccessible() deprecation in test; all 885 tests pass on PHP 8.5.9
 
 ## PHP version
 
 - **CI:** PHP 8.5 (shivammathur/setup-php)
-- **Docker:** PHP 8.4-fpm-alpine (`.docker/php/Dockerfile`)
+- **Docker:** PHP 8.5-fpm-alpine (`.docker/php/Dockerfile`)
 - **composer.json:** `>=8.4 <8.6` — allows both 8.4 and 8.5
 - **PHP 8.5 compatibility:** verified — no deprecated features used
   (no backtick operator, no non-canonical casts, no semicolon-terminated
-  case statements). All 792 tests pass on PHP 8.5 in CI.
-- Docker image upgrade to PHP 8.5 is a future task (not blocking).
+  case statements, no ReflectionMethod::setAccessible()). All 885 tests
+  pass on PHP 8.5.9 in Docker and CI.
 
-Key remaining work: Sprint 30 (audit cleanup), test coverage expansion
-(60+ controllers still untested), Docker PHP 8.5 upgrade.
+Key remaining work: test coverage expansion (50+ controllers still
+untested — many blocked by final repository classes or static methods).

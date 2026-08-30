@@ -365,7 +365,7 @@ final class UserDisplay
                 $pics .= '<img class="'.$disabledpic.'" src="/pic/trans.gif" alt="Disabled" '.$style." />\n";
             }
 
-            $username = $arr['username'];
+            $username = htmlspecialchars((string) $arr['username']);
             $rainbow = '';
             $hasSetRainbow = false;
             if (isset($arr['__is_rainbow']) && $arr['__is_rainbow']) {

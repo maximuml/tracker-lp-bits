@@ -19,4 +19,7 @@ use App\Models\Traits\NexusActivityLogTrait;
 class Avp extends NexusModel
 {
     use NexusActivityLogTrait;
+
+    /** @var list<string> */
+    protected $fillable = ['arg', 'value_s', 'value_i', 'value_u'];
 }

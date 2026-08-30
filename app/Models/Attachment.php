@@ -23,4 +23,7 @@ namespace App\Models;
 class Attachment extends NexusModel
 {
     const IMG_EXTENSIONS = ['jpeg', 'jpg', 'png', 'gif', 'webp', 'bmp', 'tif', 'tiff', 'heic'];
+
+    /** @var list<string> */
+    protected $fillable = ['id', 'userid', 'width', 'added', 'filename', 'dlkey', 'filetype', 'filesize', 'location', 'downloads', 'isimage', 'thumb', 'driver'];
 }

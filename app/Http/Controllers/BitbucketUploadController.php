@@ -95,6 +95,11 @@ class BitbucketUploadController extends Controller
             LegacyResponse::abort($lang['std_upload_failed'] ?? '', $lang['std_file_too_large'] ?? '', false);
         }
 
+        $allowedMimes = ['image/gif', 'image/jpeg', 'image/png'];
+        if (! in_array($file->getMimeType(), $allowedMimes, true)) {
+            LegacyResponse::abort($lang['std_error'] ?? '', $lang['std_invalid_image_format'] ?? '', false);
+        }
+
         $isPublic = $request->input('public') === 'yes';
 
         try {

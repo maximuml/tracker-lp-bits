@@ -219,6 +219,12 @@ class UploadRepository extends BaseRepository
             throw new NexusException('upload.filename_not_torrent');
         }
 
+        $mime = $file->getMimeType();
+        $allowedMimes = ['application/x-bittorrent', 'application/octet-stream', 'application/x-torrent'];
+        if (! in_array($mime, $allowedMimes, true)) {
+            throw new NexusException('upload.not_bencoded_file');
+        }
+
         return $file;
     }
 

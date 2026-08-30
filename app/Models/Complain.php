@@ -14,4 +14,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-class Complain extends NexusModel {}
+class Complain extends NexusModel
+{
+    /** @var list<string> */
+    protected $fillable = ['id', 'uuid', 'email', 'body', 'added', 'answered', 'ip'];
+}

@@ -15,9 +15,10 @@ class VerifyCsrfToken extends Middleware
     /**
      * The URIs that should be excluded from CSRF verification.
      *
-     * Only webhooks and AJAX endpoints that cannot use CSRF tokens
-     * (called via fetch() without CSRF headers, or by external services).
-     * All form-based routes now have CSRF protection via csrf.js auto-injection.
+     * Only webhooks and endpoints that cannot use CSRF tokens
+     * (called by external services, or legacy AJAX endpoints using
+     * raw XMLHttpRequest without csrf.js). Form-based routes and
+     * jQuery AJAX calls are protected via csrf.js auto-injection.
      *
      * @var array<int, string>
      */
@@ -26,10 +27,7 @@ class VerifyCsrfToken extends Middleware
         'web/token/*',
         'ajax',
         'getusertorrentlistajax',
-        'shoutbox',
-        'preview',
         'setlist_lookup',
-        'thanks',
     ];
 
     /**

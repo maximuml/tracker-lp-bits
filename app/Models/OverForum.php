@@ -19,6 +19,9 @@ class OverForum extends NexusModel
     /** @var string */
     protected $table = 'overforums';
 
+    /** @var list<string> */
+    protected $fillable = ['id', 'name', 'description', 'minclassview', 'sort'];
+
     /** @return HasMany<Forum, $this> */
     public function forums()
     {

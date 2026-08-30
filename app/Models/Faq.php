@@ -20,4 +20,7 @@ class Faq extends NexusModel
 {
     /** @var string */
     protected $table = 'faq';
+
+    /** @var list<string> */
+    protected $fillable = ['id', 'link_id', 'lang_id', 'type', 'question', 'answer', 'flag', 'categ', 'order'];
 }

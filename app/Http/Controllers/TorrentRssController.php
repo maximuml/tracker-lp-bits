@@ -63,7 +63,7 @@ class TorrentRssController extends LegacyController
         $cacheKey = 'nexus_rss:'.$passkey.':'.md5(http_build_query($filteredQuery));
         $cacheData = Cache::get($cacheKey);
         if ($cacheData && config('app.env') !== 'local') {
-            Log::writeWithContext('rss get from cache', 'info');
+            Log::writeWithContext('rss get from cache');
 
             return response((string) $cacheData, 200, ['Content-Type' => 'text/xml; charset=utf-8']);
         }
@@ -301,7 +301,7 @@ class TorrentRssController extends LegacyController
         $xml .= '</channel>
 </rss>';
 
-        Log::writeWithContext('rss cache generated', 'info');
+        Log::writeWithContext('rss cache generated');
         Cache::put($cacheKey, $xml, 300);
 
         return response($xml, 200, ['Content-Type' => 'text/xml; charset=utf-8']);

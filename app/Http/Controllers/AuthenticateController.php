@@ -43,7 +43,11 @@ class AuthenticateController extends Controller
             'username' => 'required',
             'password' => 'required',
         ]);
-        $result = $this->repository->login($request->username, $request->password);
+        try {
+            $result = $this->repository->login($request->username, $request->password);
+        } catch (\InvalidArgumentException $e) {
+            abort(401, $e->getMessage());
+        }
         $includes = explode(',', $request->get('include', ''));
         if (in_array('site_info', $includes)) {
             $result['site_info'] = [

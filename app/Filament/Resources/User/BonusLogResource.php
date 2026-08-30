@@ -55,13 +55,13 @@ class BonusLogResource extends Resource
                     ->label(__('bonus-log.fields.business_type')),
                 TextColumn::make('old_total_value')
                     ->label(__('bonus-log.fields.old_total_value'))
-                    ->formatStateUsing(fn ($state) => $state >= 0 ? number_format($state) : '-'),
+                    ->formatStateUsing(fn ($state) => (float) $state >= 0 ? number_format((float) $state) : '-'),
                 TextColumn::make('value')
-                    ->formatStateUsing(fn ($record) => $record->old_total_value > $record->new_total_value ? '-'.number_format($record->value) : '+'.number_format($record->value))
+                    ->formatStateUsing(fn ($record) => (float) $record->old_total_value > (float) $record->new_total_value ? '-'.number_format((float) $record->value) : '+'.number_format((float) $record->value))
                     ->label(__('bonus-log.fields.value')),
                 TextColumn::make('new_total_value')
                     ->label(__('bonus-log.fields.new_total_value'))
-                    ->formatStateUsing(fn ($state) => $state >= 0 ? number_format($state) : '-'),
+                    ->formatStateUsing(fn ($state) => (float) $state >= 0 ? number_format((float) $state) : '-'),
                 TextColumn::make('comment')
                     ->label(__('label.comment')),
                 TextColumn::make('created_at')

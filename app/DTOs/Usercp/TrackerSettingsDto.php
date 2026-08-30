@@ -64,10 +64,10 @@ final readonly class TrackerSettingsDto
             self::intId($request->input('sitelanguage', 0)),
             self::stringOrEmpty($request->cookie('c_lang_folder', '')),
             max(0, min(100, self::intInput($request->input('torrentsperpage', 0)))),
-            self::stringOrEmpty($request->input('timetype', '')),
+            self::enumValue($request->input('timetype', ''), ['timeadded', 'timealive'], 'timealive'),
             self::yesNo($request->input('appendsticky')),
             self::yesNo($request->input('appendnew')),
-            self::stringOrEmpty($request->input('appendpromotion', '')),
+            self::enumValue($request->input('appendpromotion', ''), ['highlight', 'word', 'icon', 'off'], 'icon'),
             self::yesNo($request->input('appendpicked')),
             self::yesNo($request->input('dlicon')),
             self::yesNo($request->input('bmicon')),
@@ -169,5 +169,16 @@ final readonly class TrackerSettingsDto
         $size = self::stringOrEmpty($request->input('fontsize', ''));
 
         return in_array($size, ['small', 'medium', 'large'], true) ? $size : 'medium';
+    }
+
+    /**
+     * Return the input value if it is one of the allowed enum values,
+     * otherwise fall back to the MySQL column default.
+     *
+     * @param  list<string>  $allowed
+     */
+    private static function enumValue(mixed $value, array $allowed, string $default): string
+    {
+        return in_array($value, $allowed, true) ? (string) $value : $default;
     }
 }

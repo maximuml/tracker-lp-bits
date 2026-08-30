@@ -26,7 +26,7 @@ final class Phase53SecurityRedirectTest extends TestCase
         $response = $this->withNexusCookie($admin)->get('/bans');
 
         $response->assertStatus(302);
-        $response->assertRedirect('/nexusphp/bans');
+        $response->assertRedirect('/nexusphp/security/bans');
     }
 
     public function test_cheaterbox_redirects_to_filament_cheater_resource(): void
@@ -35,7 +35,7 @@ final class Phase53SecurityRedirectTest extends TestCase
         $response = $this->withNexusCookie($admin)->get('/cheaterbox');
 
         $response->assertStatus(302);
-        $response->assertRedirect('/nexusphp/cheaters');
+        $response->assertRedirect('/nexusphp/security/cheaters');
     }
 
     public function test_cheaters_redirects_to_filament_cheater_resource(): void
@@ -44,7 +44,7 @@ final class Phase53SecurityRedirectTest extends TestCase
         $response = $this->withNexusCookie($admin)->get('/cheaters');
 
         $response->assertStatus(302);
-        $response->assertRedirect('/nexusphp/cheaters');
+        $response->assertRedirect('/nexusphp/security/cheaters');
     }
 
     public function test_ipcheck_redirects_to_filament_user_list(): void

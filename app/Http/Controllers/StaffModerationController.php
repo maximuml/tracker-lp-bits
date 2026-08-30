@@ -141,7 +141,7 @@ class StaffModerationController extends LegacyController
             if ($arr['email'] !== $email) {
                 $updateset['email'] = $email;
                 $modifyLog = "Email changed from {$arr['email']} to {$email} by {$currentUser['username']}.";
-                Log::writeWithContext($modifyLog, 'alert');
+                Log::writeWithContext($modifyLog, 'mod');
                 $userModifyLogs[] = $modifyLog;
                 $subject = Locale::trans('user.msg_email_change', [], $locale);
                 $msg = Locale::trans('user.msg_your_email_changed_from', [], $locale).$arr['email'].Locale::trans('user.msg_to_new', [], $locale).$email.Locale::trans('user.msg_by', [], $locale).$currentUser['username'];
@@ -179,7 +179,10 @@ class StaffModerationController extends LegacyController
         $staffleaderClass = defined('UC_STAFFLEADER') ? \constant('UC_STAFFLEADER') : 0;
         if (UserDisplay::currentClass() == $staffleaderClass) {
             $locale = Locale::userLocale($userId);
-            $donor = (string) request()->post('donor');
+            $donor = (string) (request()->post('donor') ?? 'no');
+            if ($donor !== 'yes') {
+                $donor = 'no';
+            }
             $donoruntil = request()->post('donoruntil') ?: null;
             $donated = (float) (request()->post('donated') ?? 0);
             $donatedCny = (float) (request()->post('donated_cny') ?? 0);

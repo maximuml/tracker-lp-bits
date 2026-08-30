@@ -51,7 +51,7 @@ class StaffMessageController extends LegacyController
         }
 
         $currentUser = app(CurrentUser::class)->get() ?? [];
-        $senderId = request()->post('sender') === 'system' ? 0 : (int) ($currentUser['id'] ?? 0);
+        $senderId = request()->post('sender') === 'system' ? null : (int) ($currentUser['id'] ?? 0);
         $subject = trim((string) request()->post('subject'));
         $msg = trim((string) request()->post('msg'));
 

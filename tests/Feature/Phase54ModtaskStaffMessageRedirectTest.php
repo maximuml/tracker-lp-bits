@@ -29,7 +29,7 @@ final class Phase54ModtaskStaffMessageRedirectTest extends TestCase
         $response = $this->withNexusCookie($admin)->get('/staffbox');
 
         $response->assertStatus(302);
-        $response->assertRedirect('/nexusphp/staff-messages');
+        $response->assertRedirect('/nexusphp/security/staff-messages');
     }
 
     public function test_staffbox_post_redirects_to_filament_staff_message_resource(): void
@@ -38,7 +38,7 @@ final class Phase54ModtaskStaffMessageRedirectTest extends TestCase
         $response = $this->withNexusCookie($admin)->post('/staffbox');
 
         $response->assertStatus(302);
-        $response->assertRedirect('/nexusphp/staff-messages');
+        $response->assertRedirect('/nexusphp/security/staff-messages');
     }
 
     public function test_staffmess_remains_legacy_route(): void

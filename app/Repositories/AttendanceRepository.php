@@ -427,7 +427,7 @@ class AttendanceRepository extends BaseRepository
                     if ($logValue->is_retroactive) {
                         $events[] = array_merge($eventBase, ['title' => Locale::trans('attendance.retroactive_event_text', [], null), 'display' => 'list-item']);
                     }
-                } elseif ($value <= $today && $value->diffInDays($today, true) <= Attendance::MAX_RETROACTIVE_DAYS) {
+                } elseif ($value <= $today && Carbon::instance($value)->diffInDays($today, true) <= Attendance::MAX_RETROACTIVE_DAYS) {
                     $events[] = array_merge($eventBase, ['groupId' => 'to_do', 'display' => 'list-item']);
                 }
             }

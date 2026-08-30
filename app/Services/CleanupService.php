@@ -124,7 +124,7 @@ final class CleanupService
                 $ts = (int) DB::table('avps')->where('arg', $arg)->value('value_u');
 
                 if ($ts === 0) {
-                    DB::table('avps')->insertOrIgnore(['arg' => $arg, 'value_u' => $now]);
+                    DB::table('avps')->insertOrIgnore(['arg' => $arg, 'value_s' => '', 'value_u' => $now]);
                     Logger::writeWithContext((string) "no value for arg: '{$arg}', return", (string) 'info', (bool) false);
 
                     return false;
@@ -148,7 +148,7 @@ final class CleanupService
                     return false;
                 }
             } else {
-                DB::table('avps')->updateOrInsert(['arg' => $arg], ['value_u' => $now]);
+                DB::table('avps')->updateOrInsert(['arg' => $arg], ['value_s' => '', 'value_u' => $now]);
             }
 
             $output = $this->runClass($level, $taskList, $requestId, $output, $printProgress);

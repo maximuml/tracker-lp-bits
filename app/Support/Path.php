@@ -89,7 +89,7 @@ final class Path
      * so leading/trailing slashes on any input collapse and never
      * produce empty `//` segments. The language segment is appended
      * only when the icon set is flagged multilingual — matching the
-     * legacy `$caticonrow['multilang'] == 'yes'` gate.
+     * legacy `$caticonrow['multilang']` boolean gate.
      */
     public static function categoryFolder(
         string $catMode,
@@ -124,7 +124,7 @@ final class Path
         return $catPath[$cat] = self::categoryFolder(
             (string) ($catrow['catmodename'] ?? ''),
             (string) ($caticonrow['folder'] ?? ''),
-            ($caticonrow['multilang'] ?? '') == 'yes',
+            (bool) ($caticonrow['multilang'] ?? false),
             $langDir,
         );
     }

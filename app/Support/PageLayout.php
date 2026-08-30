@@ -266,13 +266,14 @@ class PageLayout
                 $outmessages = app(PageLayoutRepository::class)->getOutboxCount((int) $context->user['id']);
                 $context->cache?->cache_value('user_'.$context->user['id'].'_outbox_count', $outmessages, 900);
             }
-            if (! $connect = $context->cache?->get_value('user_'.$context->user['id'].'_connect')) {
+            $connect = $context->cache?->get_value('user_'.$context->user['id'].'_connect');
+            if ($connect === false || $connect === null) {
                 $connect = app(PageLayoutRepository::class)->getConnectable((int) $context->user['id']);
                 $context->cache?->cache_value('user_'.$context->user['id'].'_connect', $connect, 900);
             }
-            if ($connect == 'yes') {
+            if ($connect === 1) {
                 $connectable = '<b><font color="green">'.$context->lang['text_yes'].'</font></b>';
-            } elseif ($connect == 'no') {
+            } elseif ($connect === 0) {
                 $connectable = '<a href="faq.php#id21"><b><font color="red">'.$context->lang['text_no'].'</font></b></a>';
             } else {
                 $connectable = $context->lang['text_unknown'];
@@ -504,7 +505,7 @@ class PageLayout
                     }
                     Html::messageAlertVoid('torrents.php', $msg, 'blue');
                 }
-                if ($context->user['leechwarn'] == 'yes') {
+                if ($context->user['leechwarn']) {
                     $kicktimeout = Time::format($context->user['leechwarnuntil'], false, false, true);
                     $text = $context->lang['text_please_improve_ratio_within'].$kicktimeout.$context->lang['text_or_you_will_be_banned'];
                     Html::messageAlertVoid('faq.php#id17', $text, 'orange');
@@ -523,7 +524,7 @@ class PageLayout
                         }
                     }
                 }
-                if ($context->user['showclienterror'] == 'yes') {
+                if ($context->user['showclienterror']) {
                     $text = $context->lang['text_banned_client_warning'];
                     Html::messageAlertVoid('faq.php#id29', $text, 'black');
                 }

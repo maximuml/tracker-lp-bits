@@ -474,7 +474,7 @@ class ToolRepository extends BaseRepository
         $result['news'] = $count;
 
         // unread messages
-        $count = Message::query()->where('receiver', $user->id)->where('unread', 'yes')->count();
+        $count = Message::query()->where('receiver', $user->id)->where('unread', true)->count();
         $result['message'] = $count;
 
         // un-vote poll
@@ -586,6 +586,8 @@ class ToolRepository extends BaseRepository
                 break;
             }
             Logger::writeWithContext((string) ('[DELETE_DUPLICATED_SNATCH], count: '.count($snatchRes)), (string) 'info', (bool) false);
+            $allDeleteIds = [];
+            $pairUpdates = [];
             foreach ($snatchRes as $snatchRow) {
                 $snatchRow = (array) $snatchRow;
                 $torrentId = $snatchRow['torrentid'];
@@ -595,16 +597,34 @@ class ToolRepository extends BaseRepository
                 $remainId = array_pop($idArr);
                 Logger::writeWithContext((string) ("[DELETE_DUPLICATED_SNATCH], torrent: {$torrentId}, user: {$userId}, snatchIdStr: ".implode(',', $idArr)), (string) 'info', (bool) false);
                 if (! empty($idArr)) {
-                    DB::table('snatched')->whereIn('id', $idArr)->delete();
+                    $allDeleteIds = array_merge($allDeleteIds, $idArr);
                 }
+                $pairUpdates[] = ['torrent_id' => (int) $torrentId, 'uid' => (int) $userId, 'snatched_id' => (int) $remainId];
+            }
+            if (! empty($allDeleteIds)) {
+                DB::table('snatched')->whereIn('id', $allDeleteIds)->delete();
+            }
+            if (! empty($pairUpdates)) {
+                $caseParts = [];
+                $whereParts = [];
+                foreach ($pairUpdates as $pair) {
+                    $tid = $pair['torrent_id'];
+                    $uid = $pair['uid'];
+                    $rid = $pair['snatched_id'];
+                    $caseParts[] = "WHEN torrent_id = {$tid} AND uid = {$uid} THEN {$rid}";
+                    $whereParts[] = "(torrent_id = {$tid} AND uid = {$uid})";
+                }
+                $caseSql = 'CASE '.implode(' ', $caseParts).' END';
+                $whereSql = implode(' OR ', $whereParts);
+                $caseExpr = DB::raw($caseSql); // @phpstan-ignore argument.type
                 if ($claimTableExists) {
-                    DB::table($claimTable)->where('torrent_id', $torrentId)->where('uid', $userId)->update(['snatched_id' => $remainId]);
+                    DB::table($claimTable)->whereRaw($whereSql)->update(['snatched_id' => $caseExpr]); // @phpstan-ignore argument.type
                 }
                 if ($hitAndRunTableExists) {
-                    DB::table($hitAndRunTable)->where('torrent_id', $torrentId)->where('uid', $userId)->update(['snatched_id' => $remainId]);
+                    DB::table($hitAndRunTable)->whereRaw($whereSql)->update(['snatched_id' => $caseExpr]); // @phpstan-ignore argument.type
                 }
                 if ($stickyPromotionExists) {
-                    DB::table($stickyPromotionParticipatorsTable)->where('torrent_id', $torrentId)->where('uid', $userId)->update(['snatched_id' => $remainId]);
+                    DB::table($stickyPromotionParticipatorsTable)->whereRaw($whereSql)->update(['snatched_id' => $caseExpr]); // @phpstan-ignore argument.type
                 }
             }
         }
@@ -627,6 +647,7 @@ class ToolRepository extends BaseRepository
                 break;
             }
             Logger::writeWithContext((string) ('[DELETE_DUPLICATED_PEERS], count: '.count($results)), (string) 'info', (bool) false);
+            $allDeleteIds = [];
             foreach ($results as $row) {
                 $row = (array) $row;
                 $torrentId = $row['torrent'];
@@ -636,8 +657,11 @@ class ToolRepository extends BaseRepository
                 $remainId = array_pop($idArr);
                 Logger::writeWithContext((string) ("[DELETE_DUPLICATED_PEERS], torrent: {$torrentId}, user: {$userId}, snatchIdStr: ".implode(',', $idArr)), (string) 'info', (bool) false);
                 if (! empty($idArr)) {
-                    DB::table('peers')->whereIn('id', $idArr)->delete();
+                    $allDeleteIds = array_merge($allDeleteIds, $idArr);
                 }
+            }
+            if (! empty($allDeleteIds)) {
+                DB::table('peers')->whereIn('id', $allDeleteIds)->delete();
             }
         }
     }

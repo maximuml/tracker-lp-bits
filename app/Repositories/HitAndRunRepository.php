@@ -9,7 +9,6 @@ use App\Enums\HitAndRunMode;
 use App\Enums\HitAndRunStatus;
 use App\Enums\ModelEventEnum;
 use App\Enums\UserClass as UserClassEnum;
-use App\Enums\UserEnabled;
 use App\Models\HitAndRun;
 use App\Models\Message;
 use App\Models\SearchBox;
@@ -218,6 +217,8 @@ class HitAndRunRepository extends BaseRepository
 
         $successCounts = 0;
         $disabledUsers = [];
+        $messages = [];
+        DB::beginTransaction();
         while (true) {
             $logPrefix = "page: $page, size: $size";
             $rows = $query->forPage($page, $size)->get();
@@ -249,7 +250,7 @@ class HitAndRunRepository extends BaseRepository
 
                 // If is VIP or above OR donated, pass
                 if ($row->user->class >= HitAndRun::MINIMUM_IGNORE_USER_CLASS || $row->user->isDonating()) {
-                    $result = $this->reachedBySpecialUserClass($row);
+                    $result = $this->reachedBySpecialUserClass($row, $messages);
                     if ($result) {
                         $successCounts++;
                     }
@@ -262,7 +263,7 @@ class HitAndRunRepository extends BaseRepository
                 $requireSeedTime = bcmul((string) (float) $setting['seed_time_minimum'], '3600');
                 Logger::writeWithContext((string) "{$currentLog}, targetSeedTime: {$targetSeedTime}, requireSeedTime: {$requireSeedTime}", (string) 'info', (bool) false);
                 if ($targetSeedTime >= $requireSeedTime) {
-                    $result = $this->reachedBySeedTime($row, $setting);
+                    $result = $this->reachedBySeedTime($row, $setting, $messages);
                     if ($result) {
                         $successCounts++;
                     }
@@ -277,7 +278,7 @@ class HitAndRunRepository extends BaseRepository
                     $requireLeechTime = bcmul((string) (float) $setting['leech_time_minimum'], '3600');
                     Logger::writeWithContext((string) "{$currentLog}, targetLeechTime: {$targetLeechTime}, requireLeechTime: {$requireLeechTime}", (string) 'info', (bool) false);
                     if ($targetLeechTime >= $requireLeechTime) {
-                        $result = $this->reachedByLeechTime($row, $setting);
+                        $result = $this->reachedByLeechTime($row, $setting, $messages);
                         if ($result) {
                             $successCounts++;
                         }
@@ -291,7 +292,7 @@ class HitAndRunRepository extends BaseRepository
                 $requireShareRatio = $setting['ignore_when_ratio_reach'];
                 Logger::writeWithContext((string) "{$currentLog}, targetShareRatio: {$targetShareRatio}, requireShareRatio: {$requireShareRatio}", (string) 'info', (bool) false);
                 if ($targetShareRatio >= $requireShareRatio) {
-                    $result = $this->reachedByShareRatio($row, $setting);
+                    $result = $this->reachedByShareRatio($row, $setting, $messages);
                     if ($result) {
                         $successCounts++;
                     }
@@ -301,7 +302,7 @@ class HitAndRunRepository extends BaseRepository
 
                 // unreached
                 if ($row->created_at->addHours((int) $setting['inspect_time'])->lte(Carbon::now())) {
-                    $result = $this->unreached($row, $setting, ! isset($disabledUsers[$row->uid]));
+                    $result = $this->unreached($row, $setting, ! isset($disabledUsers[$row->uid]), $messages);
                     if ($result) {
                         $successCounts++;
                         $disabledUsers[$row->uid] = true;
@@ -309,6 +310,10 @@ class HitAndRunRepository extends BaseRepository
                 }
             }
             $page++;
+        }
+        DB::commit();
+        if (! empty($messages)) {
+            Message::query()->insert($messages);
         }
         Logger::writeWithContext((string) '[CRONJOB_UPDATE_HR_DONE]', (string) 'info', (bool) false);
 
@@ -339,8 +344,9 @@ class HitAndRunRepository extends BaseRepository
 
     /**
      * @param  array<int|string, mixed>  $setting
+     * @param  array<int, array<int|string, mixed>>  $messages
      */
-    private function reachedByShareRatio(HitAndRun $hitAndRun, array $setting): bool
+    private function reachedByShareRatio(HitAndRun $hitAndRun, array $setting, array &$messages = []): bool
     {
         Logger::writeWithContext((string) __METHOD__, (string) 'info', (bool) false);
         $snatch = $hitAndRun->snatch;
@@ -356,13 +362,14 @@ class HitAndRunRepository extends BaseRepository
             'comment' => $comment,
         ];
 
-        return $this->inspectingToReached($hitAndRun, $update, __FUNCTION__);
+        return $this->inspectingToReached($hitAndRun, $update, __FUNCTION__, $messages);
     }
 
     /**
      * @param  array<int|string, mixed>  $setting
+     * @param  array<int, array<int|string, mixed>>  $messages
      */
-    private function reachedBySeedTime(HitAndRun $hitAndRun, array $setting): bool
+    private function reachedBySeedTime(HitAndRun $hitAndRun, array $setting, array &$messages = []): bool
     {
         Logger::writeWithContext((string) __METHOD__, (string) 'info', (bool) false);
         $snatch = $hitAndRun->snatch;
@@ -378,13 +385,14 @@ class HitAndRunRepository extends BaseRepository
             'comment' => $comment,
         ];
 
-        return $this->inspectingToReached($hitAndRun, $update, __FUNCTION__);
+        return $this->inspectingToReached($hitAndRun, $update, __FUNCTION__, $messages);
     }
 
     /**
      * @param  array<int|string, mixed>  $setting
+     * @param  array<int, array<int|string, mixed>>  $messages
      */
-    private function reachedByLeechTime(HitAndRun $hitAndRun, array $setting): bool
+    private function reachedByLeechTime(HitAndRun $hitAndRun, array $setting, array &$messages = []): bool
     {
         Logger::writeWithContext((string) __METHOD__, (string) 'info', (bool) false);
         $snatch = $hitAndRun->snatch;
@@ -400,10 +408,13 @@ class HitAndRunRepository extends BaseRepository
             'comment' => $comment,
         ];
 
-        return $this->inspectingToReached($hitAndRun, $update, __FUNCTION__);
+        return $this->inspectingToReached($hitAndRun, $update, __FUNCTION__, $messages);
     }
 
-    private function reachedBySpecialUserClass(HitAndRun $hitAndRun): bool
+    /**
+     * @param  array<int, array<int|string, mixed>>  $messages
+     */
+    private function reachedBySpecialUserClass(HitAndRun $hitAndRun, array &$messages = []): bool
     {
         Logger::writeWithContext((string) __METHOD__, (string) 'info', (bool) false);
         $comment = Locale::trans('hr.reached_by_special_user_class_comment', ['user_class_text' => $hitAndRun->user->class_text], $hitAndRun->user->locale);
@@ -411,13 +422,14 @@ class HitAndRunRepository extends BaseRepository
             'comment' => $comment,
         ];
 
-        return $this->inspectingToReached($hitAndRun, $update, __FUNCTION__);
+        return $this->inspectingToReached($hitAndRun, $update, __FUNCTION__, $messages);
     }
 
     /**
      * @param  array<string, mixed>  $update
+     * @param  array<int, array<int|string, mixed>>  $messages
      */
-    private function inspectingToReached(HitAndRun $hitAndRun, array $update, string $logPrefix = ''): bool
+    private function inspectingToReached(HitAndRun $hitAndRun, array $update, string $logPrefix = '', array &$messages = []): bool
     {
         $update['status'] = HitAndRunStatus::REACHED->value;
         $affectedRows = DB::table($hitAndRun->getTable())
@@ -432,7 +444,7 @@ class HitAndRunRepository extends BaseRepository
         }
         if ($hitAndRun->user->acceptNotification('hr_reached')) {
             $message = $this->geReachedMessage($hitAndRun);
-            Message::query()->insert($message);
+            $messages[] = $message;
         } else {
             Logger::writeWithContext((string) ($hitAndRun->toJson().", [{$logPrefix}], user do not accept hr_reached notification"), (string) 'notice', (bool) false);
         }
@@ -443,8 +455,9 @@ class HitAndRunRepository extends BaseRepository
 
     /**
      * @param  array<int|string, mixed>  $setting
+     * @param  array<int, array<int|string, mixed>>  $messages
      */
-    private function unreached(HitAndRun $hitAndRun, array $setting, bool $disableUser = true): bool
+    private function unreached(HitAndRun $hitAndRun, array $setting, bool $disableUser = true, array &$messages = []): bool
     {
         Logger::writeWithContext((string) sprintf('hitAndRun: %s, disableUser: %s', $hitAndRun->toJson(), var_export($disableUser, true)), (string) 'info', (bool) false);
         $snatch = $hitAndRun->snatch;
@@ -476,7 +489,7 @@ class HitAndRunRepository extends BaseRepository
             'subject' => Locale::trans('hr.unreached_message_subject', ['hit_and_run_id' => $hitAndRun->id], $hitAndRun->user->locale),
             'msg' => Locale::trans('hr.unreached_message_content', ['completed_at' => Time::formatDateTime($snatch->completedat), 'torrent_id' => $hitAndRun->torrent_id, 'torrent_name' => $hitAndRun->torrent->name], $user->locale),
         ];
-        Message::query()->insert($message);
+        $messages[] = $message;
         HitAndRun::clearCache($hitAndRun);
 
         return true;
@@ -511,14 +524,14 @@ class HitAndRunRepository extends BaseRepository
         $users = User::query()
             ->with('language')
             ->where('class', '<', UserClassEnum::VIP->value)
-            ->where('enabled', UserEnabled::YES->value)
-            ->where('donor', 'no')
+            ->where('enabled', true)
+            ->where('donor', false)
             ->find($result->pluck('uid')->toArray(), ['id', 'username', 'lang']);
         Logger::writeWithContext((string) ("{$logPrefix}, Going to disable user: ".json_encode($users->toArray())), (string) 'info', (bool) false);
         foreach ($users as $user) {
             $locale = $user->locale;
             $comment = Locale::trans('hr.unreached_disable_comment', [], $locale);
-            $user->updateWithModComment(['enabled' => UserEnabled::NO->value], sprintf('%s - %s', date('Y-m-d'), $comment));
+            $user->updateWithModComment(['enabled' => false], sprintf('%s - %s', date('Y-m-d'), $comment));
             $message = [
                 'receiver' => $user->id,
                 'added' => Carbon::now()->toDateTimeString(),

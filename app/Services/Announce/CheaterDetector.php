@@ -101,7 +101,7 @@ final class CheaterDetector
                     'leechers' => $leechers,
                     'comment' => $comment,
                 ]);
-                DB::table('users')->where('id', $userId)->update(['enabled' => 'no']);
+                DB::table('users')->where('id', $userId)->update(['enabled' => false]);
                 UserBanLog::query()->insert([
                     'uid' => $userId,
                     'username' => $user['username'],

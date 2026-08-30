@@ -22,13 +22,13 @@ final class TrafficAccountant
         array $user,
         array|false $snatchInfo,
         string $ip,
-        string $seeder,
+        int $seeder,
     ): TrafficResult {
         if ($self === null) {
             return new TrafficResult(0, 0, null, 0, 0, 0, 0);
         }
 
-        $snatchTimeColumn = ($self['seeder'] ?? '') === 'yes' ? 'seedtime' : 'leechtime';
+        $snatchTimeColumn = ((int) ($self['seeder'] ?? 0)) === 1 ? 'seedtime' : 'leechtime';
         $snatchTimeIncrement = max(0, (int) ($self['announcetime'] ?? 0));
 
         $rawUploaded = $params['uploaded'] ?? 0;
@@ -53,7 +53,7 @@ final class TrafficAccountant
         $downthis = max(0, (int) \bcsub($downloaded, $selfDownloaded));
 
         $leechTimeNoSeederIncrement = 0;
-        if ((int) $torrent['seeders'] <= 0 && $seeder === 'no' && $snatchTimeIncrement > 0) {
+        if ((int) $torrent['seeders'] <= 0 && $seeder === 0 && $snatchTimeIncrement > 0) {
             $leechTimeNoSeederIncrement = $snatchTimeIncrement;
         }
 

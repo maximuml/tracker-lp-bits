@@ -13,7 +13,7 @@ declare(strict_types=1);
  * @property string|null $editdate
  * @property int $offer
  * @property int $request
- * @property string $anonymous
+ * @property bool $anonymous
  */
 
 namespace App\Models;
@@ -28,6 +28,7 @@ class Comment extends NexusModel
     protected $casts = [
         'added' => 'datetime',
         'editdate' => 'datetime',
+        'anonymous' => 'boolean',
     ];
 
     /** @var list<string> */

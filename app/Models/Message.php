@@ -9,9 +9,9 @@ declare(strict_types=1);
  * @property string|null $added
  * @property string $subject
  * @property string $msg
- * @property string $unread
+ * @property bool $unread
  * @property int $location
- * @property string $saved
+ * @property bool $saved
  */
 
 namespace App\Models;
@@ -34,6 +34,8 @@ class Message extends NexusModel
     /** @var array<string, string> */
     protected $casts = [
         'added' => 'datetime',
+        'unread' => 'boolean',
+        'saved' => 'boolean',
     ];
 
     /** @return  BelongsTo<User, $this> */

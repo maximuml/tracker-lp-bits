@@ -52,7 +52,7 @@ class MessageService
         $origmsg = (int) $request->input('origmsg', 0);
         $body = trim((string) $request->input('body', ''));
         $isForward = $request->input('forward') === '1';
-        $save = $request->input('save') === 'yes' ? 'yes' : 'no';
+        $save = $request->input('save') === 'yes';
         $returnto = (string) $request->input('returnto', '');
         $subject = trim((string) $request->input('subject', ''));
         $delete = $request->input('delete') === 'yes';
@@ -123,7 +123,7 @@ class MessageService
         }
 
         if (! Permission::can(PermissionEnum::STAFF_MEMBER, $sender)) {
-            if ($recipient->parked === 'yes') {
+            if ($recipient->parked) {
                 LegacyResponse::abort($lang['std_refused'] ?? 'Refused', $lang['std_account_parked'] ?? 'Account is parked.');
             }
 
@@ -220,7 +220,7 @@ class MessageService
             }
 
             if ($msg->saved === 'yes') {
-                $msg->update(['location' => '0', 'unread' => 'no']);
+                $msg->update(['location' => '0', 'unread' => false]);
             } else {
                 $msg->delete();
             }
@@ -242,7 +242,7 @@ class MessageService
             if ((int) $msg->location === 0) {
                 $msg->delete();
             } else {
-                $msg->update(['saved' => 'no']);
+                $msg->update(['saved' => false]);
             }
 
             Cache::forgetWithLocales('user_'.$sender->id.'_outbox_count');

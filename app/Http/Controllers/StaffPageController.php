@@ -53,7 +53,7 @@ class StaffPageController extends LegacyController
         };
 
         $supportRows = User::query()
-            ->where('support', 'yes')
+            ->where('support', true)
             ->where('status', 'confirmed')
             ->orderBy('username')
             ->get(['id', 'country', 'last_access', 'supportlang', 'supportfor'])
@@ -61,7 +61,7 @@ class StaffPageController extends LegacyController
             ->all();
 
         $pickerRows = User::query()
-            ->where('picker', 'yes')
+            ->where('picker', true)
             ->where('status', 'confirmed')
             ->orderBy('username')
             ->get(['id', 'country', 'last_access', 'pickfor'])

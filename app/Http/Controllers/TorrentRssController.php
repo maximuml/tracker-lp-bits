@@ -95,7 +95,7 @@ class TorrentRssController extends LegacyController
             return response('invalid passkey', 400, ['Content-Type' => 'text/plain; charset=utf-8']);
         }
 
-        if ($rssUser['enabled'] === 'no' || $rssUser['parked'] === 'yes') {
+        if (! $rssUser['enabled'] || $rssUser['parked']) {
             return response('account disabed or parked', 403, ['Content-Type' => 'text/plain; charset=utf-8']);
         }
 
@@ -119,7 +119,7 @@ class TorrentRssController extends LegacyController
         $allBrowseCategoryId = SearchBox::listCategoryId($browseMode);
         $baseQuery->whereIn('torrents.category', $allBrowseCategoryId);
 
-        $baseQuery->where('torrents.visible', 'yes');
+        $baseQuery->where('torrents.visible', 1);
 
         if ($paidFilter === '0') {
             $baseQuery->where('torrents.price', 0);
@@ -255,7 +255,7 @@ class TorrentRssController extends LegacyController
         foreach ($list as $row) {
             $ownerInfo = UserDisplay::row((int) ($row['owner'] ?? 0));
             $author = 'anonymous';
-            if ($row['anonymous'] !== 'yes') {
+            if ($row['anonymous'] != 1) {
                 if (! empty($ownerInfo)) {
                     $author = (string) ($ownerInfo['username'] ?? '');
                 } else {

@@ -25,7 +25,7 @@ class PeerFactory extends Factory
      */
     public function definition(): array
     {
-        $seeder = $this->faker->randomElement(['yes', 'no']);
+        $seeder = $this->faker->randomElement([1, 0]);
 
         return [
             'torrent' => Torrent::factory(),
@@ -34,12 +34,12 @@ class PeerFactory extends Factory
             'port' => $this->faker->numberBetween(1025, 65535),
             'uploaded' => 0,
             'downloaded' => 0,
-            'to_go' => $seeder === 'yes' ? 0 : $this->faker->numberBetween(0, 1073741824),
+            'to_go' => $seeder === 1 ? 0 : $this->faker->numberBetween(0, 1073741824),
             'seeder' => $seeder,
             'started' => now()->toDateTimeString(),
             'last_action' => now()->toDateTimeString(),
             'prev_action' => now()->toDateTimeString(),
-            'connectable' => 'yes',
+            'connectable' => 1,
             'userid' => User::factory(),
             'agent' => substr($this->faker->userAgent(), 0, 60),
             'finishedat' => 0,
@@ -84,7 +84,7 @@ class PeerFactory extends Factory
     public function seeder(): self
     {
         return $this->state(fn (array $attributes) => [
-            'seeder' => 'yes',
+            'seeder' => 1,
             'to_go' => 0,
         ]);
     }

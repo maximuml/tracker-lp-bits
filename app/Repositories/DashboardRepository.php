@@ -181,19 +181,19 @@ class DashboardRepository extends BaseRepository
         $result[$name] = [
             'name' => $name,
             'text' => Locale::trans("dashboard.user.{$name}", [], null),
-            'value' => number_format(User::query()->where('donor', 'yes')->count()),
+            'value' => number_format(User::query()->where('donor', true)->count()),
         ];
         $name = 'warned';
         $result[$name] = [
             'name' => $name,
             'text' => Locale::trans("dashboard.user.{$name}", [], null),
-            'value' => number_format(User::query()->where('warned', 'yes')->count()),
+            'value' => number_format(User::query()->where('warned', true)->count()),
         ];
         $name = 'disabled';
         $result[$name] = [
             'name' => $name,
             'text' => Locale::trans("dashboard.user.{$name}", [], null),
-            'value' => number_format(User::query()->where('enabled', 'no')->count()),
+            'value' => number_format(User::query()->where('enabled', false)->count()),
         ];
 
         $statGender = User::query()->groupBy('gender')->selectRaw('gender, count(*) as counts')->get()->pluck('counts', 'gender');
@@ -229,7 +229,7 @@ class DashboardRepository extends BaseRepository
             'value' => number_format(Torrent::query()->where('visible', '=', TorrentVisible::NO->value)->count()),
         ];
 
-        $seeders = Peer::query()->where('seeder', 'yes')->count();
+        $seeders = Peer::query()->where('seeder', 1)->count();
         $name = 'seeders';
         $result[$name] = [
             'name' => $name,
@@ -237,7 +237,7 @@ class DashboardRepository extends BaseRepository
             'value' => number_format($seeders),
         ];
 
-        $leechers = Peer::query()->where('seeder', 'no')->count();
+        $leechers = Peer::query()->where('seeder', 0)->count();
         $name = 'leechers';
         $result[$name] = [
             'name' => $name,
@@ -335,12 +335,12 @@ class DashboardRepository extends BaseRepository
         $result[] = [
             'name' => 'seeders',
             'text' => __('dashboard.tracker.seeders'),
-            'value' => number_format(Peer::query()->where('seeder', 'yes')->count()),
+            'value' => number_format(Peer::query()->where('seeder', 1)->count()),
         ];
         $result[] = [
             'name' => 'leechers',
             'text' => __('dashboard.tracker.leechers'),
-            'value' => number_format(Peer::query()->where('seeder', 'no')->count()),
+            'value' => number_format(Peer::query()->where('seeder', 0)->count()),
         ];
         $result[] = [
             'name' => 'total_users',
@@ -457,7 +457,7 @@ class DashboardRepository extends BaseRepository
     public function donorSummary(): array
     {
         $rows = User::query()
-            ->where('donor', 'yes')
+            ->where('donor', true)
             ->orderByDesc('donated')
             ->limit(20)
             ->get(['id', 'username', 'donated', 'donated_cny', 'donoruntil']);

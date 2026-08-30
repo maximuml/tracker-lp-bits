@@ -29,7 +29,7 @@ $vm = $viewmailbox;
 </tr>
 @foreach ($vm['rows'] as $row)
 @php
-$unreadImg = $row['unread'] === 'yes'
+$unreadImg = $row['unread']
     ? '<img class="unreadpm" src="pic/trans.gif" alt="Unread" title="'.htmlspecialchars($lang_messages['title_unread'] ?? '').'" />'
     : '<img class="readpm" src="pic/trans.gif" alt="Read" title="'.htmlspecialchars($lang_messages['title_read'] ?? '').'" />';
 @endphp

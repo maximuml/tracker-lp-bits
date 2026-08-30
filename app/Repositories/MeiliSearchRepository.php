@@ -360,7 +360,7 @@ class MeiliSearchRepository extends BaseRepository
 
         $params = ['mode' => SearchBox::listAuthorizedSectionId()];
         if (! Permission::canViewBannedTorrent()) {
-            $params['banned'] = 'no';
+            $params['banned'] = 0;
         }
         if (! SiteConfig::current()->torrent->approvalStatusNoneVisible() && ! Permission::canApproveTorrent()) {
             $params['approval_status'] = TorrentApprovalStatus::ALLOW->value;
@@ -549,8 +549,8 @@ class MeiliSearchRepository extends BaseRepository
         }
 
         // permission see banned
-        if (isset($params['banned']) && in_array($params['banned'], ['yes', 'no'])) {
-            if ($params['banned'] == 'yes') {
+        if (isset($params['banned']) && in_array($params['banned'], [1, 0, 'yes', 'no'])) {
+            if ($params['banned'] == 1 || $params['banned'] == 'yes') {
                 $filters[] = 'banned = 1';
             } else {
                 $filters[] = 'banned = 0';
@@ -648,7 +648,11 @@ class MeiliSearchRepository extends BaseRepository
         // Yes/no enums must be resolved before any numeric cast so that a value
         // like 'yes' is not accidentally run through intval() and stored as 0.
         if (in_array($field, self::$yesOrNoFields)) {
-            return $value == 'yes' ? 1 : 0;
+            if (is_bool($value)) {
+                return $value ? 1 : 0;
+            }
+
+            return $value == 'yes' || $value == 1 ? 1 : 0;
         }
         if (in_array($field, self::$intFields)) {
             return intval($value);

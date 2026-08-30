@@ -61,12 +61,12 @@ class IconResource extends Resource
                     ->helperText(__('label.icon.folder_help')),
                 Radio::make('multilang')
                     ->label(__('label.icon.multilang'))
-                    ->options(self::$yesOrNo)
+                    ->options(self::getYesNoOptions())
                     ->required()
                     ->helperText(__('label.icon.multilang_help')),
                 Radio::make('secondicon')
                     ->label(__('label.icon.secondicon'))
-                    ->options(self::$yesOrNo)
+                    ->options(self::getYesNoOptions())
                     ->required()
                     ->helperText(__('label.icon.secondicon_help')),
                 TextInput::make('cssfile')->label(__('label.icon.cssfile'))->helperText(__('label.icon.cssfile_help')),

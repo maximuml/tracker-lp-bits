@@ -84,13 +84,13 @@ class IndexRepository
 
             return [
                 'registered' => User::count(),
-                'unverified' => User::where('status', 'pending')->where('enabled', 'yes')->count(),
+                'unverified' => User::where('status', 'pending')->where('enabled', true)->count(),
                 'totalonlinetoday' => User::where('last_access', '>=', $cutoffDay)->count(),
                 'totalonlineweek' => User::where('last_access', '>=', $cutoffWeek)->count(),
                 'vip' => User::where('class', UC_VIP)->count(),
-                'donated' => User::where('donor', 'yes')->count(),
-                'warned' => User::where('warned', 'yes')->count(),
-                'disabled' => User::where('enabled', 'no')->count(),
+                'donated' => User::where('donor', true)->count(),
+                'warned' => User::where('warned', true)->count(),
+                'disabled' => User::where('enabled', false)->count(),
                 'registered_male' => User::where('gender', 'Male')->count(),
                 'registered_female' => User::where('gender', 'Female')->count(),
             ];

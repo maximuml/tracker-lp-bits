@@ -10,10 +10,10 @@ namespace App\Enums;
  * Mirrors the string constants from App\Models\User:
  *   ENABLED_YES ('yes'), ENABLED_NO ('no').
  */
-enum UserEnabled: string
+enum UserEnabled: int
 {
-    case YES = 'yes';
-    case NO = 'no';
+    case YES = 1;
+    case NO = 0;
 
     public function label(): string
     {

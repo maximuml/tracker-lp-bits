@@ -177,7 +177,7 @@ class MessageController extends LegacyController
             abort(404);
         }
 
-        if ($message->receiver == $userId && $message->unread === 'yes') {
+        if ($message->receiver == $userId && $message->unread) {
             MessageRepository::markAsRead([(int) $message->id], $userId);
             $message->refresh();
         }
@@ -237,7 +237,7 @@ class MessageController extends LegacyController
 
         $messages = Message::query()
             ->where('receiver', Auth::id())
-            ->where('unread', 'yes')
+            ->where('unread', true)
             ->with('send_user')
             ->orderByDesc('id')
             ->paginate($dto->perPage);

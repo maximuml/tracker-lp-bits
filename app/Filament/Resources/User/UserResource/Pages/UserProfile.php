@@ -110,11 +110,11 @@ class UserProfile extends ViewRecord implements HasActions
     protected function buildEnableDisableAction(): Action
     {
         return Action::make('enable_disable')
-            ->label($this->getUserRecord()->enabled == 'yes' ? __('admin.resources.user.actions.disable_modal_btn') : __('admin.resources.user.actions.enable_modal_btn'))
-            ->modalHeading($this->getUserRecord()->enabled == 'yes' ? __('admin.resources.user.actions.disable_modal_title') : __('admin.resources.user.actions.enable_modal_title'))
+            ->label($this->getUserRecord()->enabled ? __('admin.resources.user.actions.disable_modal_btn') : __('admin.resources.user.actions.enable_modal_btn'))
+            ->modalHeading($this->getUserRecord()->enabled ? __('admin.resources.user.actions.disable_modal_title') : __('admin.resources.user.actions.enable_modal_title'))
             ->schema([
                 TextInput::make('reason')->label(__('admin.resources.user.actions.enable_disable_reason'))->placeholder(__('admin.resources.user.actions.enable_disable_reason_placeholder')),
-                Hidden::make('action')->default($this->getUserRecord()->enabled == 'yes' ? 'disable' : 'enable'),
+                Hidden::make('action')->default($this->getUserRecord()->enabled ? 'disable' : 'enable'),
                 Hidden::make('uid')->default($this->getUserRecord()->id),
             ])
             ->action(function ($data) {
@@ -326,12 +326,12 @@ class UserProfile extends ViewRecord implements HasActions
 
     protected function buildEnableDisableDownloadPrivilegesAction(): Action
     {
-        return Action::make($this->getUserRecord()->downloadpos == 'yes' ? __('admin.resources.user.actions.disable_download_privileges_btn') : __('admin.resources.user.actions.enable_download_privileges_btn'))
+        return Action::make($this->getUserRecord()->downloadpos ? __('admin.resources.user.actions.disable_download_privileges_btn') : __('admin.resources.user.actions.enable_download_privileges_btn'))
             ->requiresConfirmation()
             ->action(function () {
                 $userRep = $this->getRep();
                 try {
-                    $userRep->updateDownloadPrivileges($this->currentUser(), $this->getUserRecord()->id, $this->getUserRecord()->downloadpos == 'yes' ? 'no' : 'yes');
+                    $userRep->updateDownloadPrivileges($this->currentUser(), $this->getUserRecord()->id, ! $this->getUserRecord()->downloadpos);
                     $this->sendSuccessNotification();
                 } catch (Exception $exception) {
                     $this->sendFailNotification($exception->getMessage());
@@ -341,12 +341,12 @@ class UserProfile extends ViewRecord implements HasActions
 
     protected function buildEnableDisableUploadPrivilegesAction(): Action
     {
-        return Action::make($this->getUserRecord()->uploadpos == 'yes' ? __('admin.resources.user.actions.disable_upload_privileges_btn') : __('admin.resources.user.actions.enable_upload_privileges_btn'))
+        return Action::make($this->getUserRecord()->uploadpos ? __('admin.resources.user.actions.disable_upload_privileges_btn') : __('admin.resources.user.actions.enable_upload_privileges_btn'))
             ->requiresConfirmation()
             ->action(function () {
                 $userRep = $this->getRep();
                 try {
-                    $userRep->updateUploadPrivileges($this->currentUser(), $this->getUserRecord()->id, $this->getUserRecord()->uploadpos == 'yes' ? 'no' : 'yes');
+                    $userRep->updateUploadPrivileges($this->currentUser(), $this->getUserRecord()->id, ! $this->getUserRecord()->uploadpos);
                     $this->sendSuccessNotification();
                 } catch (Exception $exception) {
                     $this->sendFailNotification($exception->getMessage());
@@ -356,12 +356,12 @@ class UserProfile extends ViewRecord implements HasActions
 
     protected function buildEnableDisableForumPostAction(): Action
     {
-        return Action::make($this->getUserRecord()->forumpost == 'yes' ? __('admin.resources.user.actions.disable_forumpost_btn') : __('admin.resources.user.actions.enable_forumpost_btn'))
+        return Action::make($this->getUserRecord()->forumpost ? __('admin.resources.user.actions.disable_forumpost_btn') : __('admin.resources.user.actions.enable_forumpost_btn'))
             ->requiresConfirmation()
             ->action(function () {
                 $userRep = $this->getRep();
                 try {
-                    $userRep->updateForumPost($this->currentUser(), $this->getUserRecord()->id, $this->getUserRecord()->forumpost == 'yes' ? 'no' : 'yes');
+                    $userRep->updateForumPost($this->currentUser(), $this->getUserRecord()->id, ! $this->getUserRecord()->forumpost);
                     $this->sendSuccessNotification();
                 } catch (Exception $exception) {
                     $this->sendFailNotification($exception->getMessage());
@@ -372,7 +372,7 @@ class UserProfile extends ViewRecord implements HasActions
     protected function buildWarnAction(): Action
     {
         $record = $this->getUserRecord();
-        $isWarned = $record->warned === 'yes';
+        $isWarned = $record->warned;
 
         return Action::make($isWarned ? __('admin.resources.user.actions.edit_warning_btn') : __('admin.resources.user.actions.warn_btn'))
             ->icon('heroicon-o-exclamation-triangle')
@@ -492,8 +492,8 @@ class UserProfile extends ViewRecord implements HasActions
                     ->required()
                     ->reactive(),
                 Radio::make('vip_added')
-                    ->options(self::getYesNoOptions('yes', 'no'))
-                    ->default($this->getUserRecord()->vip_added)
+                    ->options(self::getYesNoOptions(1, 0))
+                    ->default((int) $this->getUserRecord()->vip_added)
                     ->label(__('user.labels.vip_added'))
                     ->helperText(__('user.labels.vip_added_help'))
                     ->hidden(fn (Get $get) => $get('class') != UserClassEnum::VIP->value),

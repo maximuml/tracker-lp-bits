@@ -71,7 +71,7 @@ class NewsController extends LegacyController
             if ($added <= 0) {
                 $added = now()->toDateTimeString();
             }
-            $notify = $request->input('notify') === 'yes' ? 'yes' : 'no';
+            $notify = $request->input('notify') === 'yes';
 
             $currentUser = (array) (app(CurrentUser::class)->get() ?? []);
             $newsId = (int) News::query()->insertGetId([
@@ -120,7 +120,7 @@ class NewsController extends LegacyController
                 if ($title === '') {
                     return $this->legacyAbortResponse($langNews['std_error'] ?? 'Error', $langNews['std_news_title_empty'] ?? 'News title empty.');
                 }
-                $notify = $request->input('notify') === 'yes' ? 'yes' : 'no';
+                $notify = $request->input('notify') === 'yes';
 
                 News::query()->where('id', $newsid)->update([
                     'body' => $body,
@@ -145,7 +145,7 @@ class NewsController extends LegacyController
                 'newsid' => $newsid,
                 'body' => $arr['body'] ?? '',
                 'subject' => htmlspecialchars((string) ($arr['title'] ?? '')),
-                'notify' => (string) ($arr['notify'] ?? 'no'),
+                'notify' => ($arr['notify'] ?? false) ? 'yes' : 'no',
                 'returnto' => $returnto,
                 'title' => $newsTitle,
             ]);
@@ -190,7 +190,7 @@ class NewsController extends LegacyController
         $currentUser = (array) (app(CurrentUser::class)->get() ?? []);
         $data['userid'] = (int) ($currentUser['id'] ?? 0);
         $data['added'] = now()->toDateTimeString();
-        $data['notify'] = $data['notify'] ?? 'no';
+        $data['notify'] = ($data['notify'] ?? 'no') === 'yes';
 
         $news = News::query()->create($data);
         Events::fire('news_created', $news, null);
@@ -211,6 +211,10 @@ class NewsController extends LegacyController
             'body' => 'sometimes|string',
             'notify' => 'sometimes|in:yes,no',
         ]);
+
+        if (isset($data['notify'])) {
+            $data['notify'] = $data['notify'] === 'yes';
+        }
 
         $news->update($data);
 

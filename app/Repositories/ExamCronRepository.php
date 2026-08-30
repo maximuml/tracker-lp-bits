@@ -10,7 +10,6 @@ use App\Enums\ExamFilterUser;
 use App\Enums\ExamType;
 use App\Enums\ExamUserStatus;
 use App\Enums\UserDonate;
-use App\Enums\UserEnabled;
 use App\Enums\UserStatus;
 use App\Models\BonusLogs;
 use App\Models\Exam;
@@ -73,7 +72,7 @@ class ExamCronRepository extends BaseRepository
         $examUserTable = (new ExamUser)->getTable();
         // Fetch user doesn't has this exam and doesn't has any other unfinished exam
         $baseQuery = User::query()
-            ->where("$userTable.enabled", UserEnabled::YES->value)
+            ->where("$userTable.enabled", true)
             ->where("$userTable.status", UserStatus::CONFIRMED->value)
             ->selectRaw("$userTable.*") // @phpstan-ignore argument.type
             ->orderBy("$userTable.id", 'asc');
@@ -88,13 +87,13 @@ class ExamCronRepository extends BaseRepository
             $donateStatus = $filters[$filter][0];
             if ($donateStatus == UserDonate::YES->value) {
                 $baseQuery->where(function (Builder $query) {
-                    $query->where('donor', 'yes')->where(function (Builder $query) {
+                    $query->where('donor', true)->where(function (Builder $query) {
                         $query->whereNull('donoruntil')->orWhere('donoruntil', '>=', Carbon::now());
                     });
                 });
             } elseif ($donateStatus == UserDonate::NO->value) {
                 $baseQuery->where(function (Builder $query) {
-                    $query->where('donor', 'no')->orWhere(function (Builder $query) {
+                    $query->where('donor', false)->orWhere(function (Builder $query) {
                         $query->whereNotNull('donoruntil')->where('donoruntil', '<', Carbon::now());
                     });
                 });
@@ -342,7 +341,7 @@ class ExamCronRepository extends BaseRepository
                 } while ($deleted > 0);
                 Message::query()->insert($messageToSend);
                 if (! empty($uidToDisable)) {
-                    $updateResult = DB::table($userTable)->whereIn('id', $uidToDisable)->update(['enabled' => UserEnabled::NO->value]);
+                    $updateResult = DB::table($userTable)->whereIn('id', $uidToDisable)->update(['enabled' => false]);
                     Logger::writeWithContext((string) sprintf("{$logPrefix}, disable %s users: %s, updateResult: %s", count($uidToDisable), implode(', ', $uidToDisable), $updateResult), (string) 'info', (bool) false);
                 }
                 if (! empty($userBanLog)) {

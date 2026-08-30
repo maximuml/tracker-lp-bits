@@ -29,7 +29,7 @@ class Permission
     {
         $user = self::user($user);
 
-        return $user instanceof User && $user->uploadpos == 'yes' && self::userCan($user, PermissionEnum::UPLOAD);
+        return $user instanceof User && $user->uploadpos && self::userCan($user, PermissionEnum::UPLOAD);
     }
 
     public static function canBeAnonymous(?User $user = null): bool
@@ -71,7 +71,7 @@ class Permission
     {
         $user = self::user($user);
 
-        return $user instanceof User && ($user->picker == 'yes' && self::canManageTorrent($user) || $user->class >= UserClassEnum::SYSOP->value);
+        return $user instanceof User && ($user->picker && self::canManageTorrent($user) || $user->class >= UserClassEnum::SYSOP->value);
     }
 
     public static function canSetTorrentSpecialTag(?User $user = null): bool

@@ -8,7 +8,7 @@ declare(strict_types=1);
  * @property string|null $value
  * @property string $created_at
  * @property string $updated_at
- * @property string $autoload
+ * @property bool $autoload
  */
 
 namespace App\Models;
@@ -27,6 +27,11 @@ class Setting extends NexusModel
     /** @var list<string> */
     protected $fillable = ['name', 'value', 'autoload'];
 
+    /** @var array<string, string> */
+    protected $casts = [
+        'autoload' => 'boolean',
+    ];
+
     /** @var bool */
     public $timestamps = true;
 
@@ -44,7 +49,7 @@ class Setting extends NexusModel
     const USER_TOKEN_PERMISSION_ALLOWED_CACHE_KRY = 'user_token_permission_allowed';
 
     /**
-     * get setting autoload = yes with cache
+     * get setting autoload = true with cache
      */
     public static function get(?string $name = null, mixed $default = null): mixed
     {
@@ -62,11 +67,11 @@ class Setting extends NexusModel
     }
 
     /**
-     * get setting autoload = yes without cache
+     * get setting autoload = true without cache
      */
     public static function getFromDb(?string $name = null, mixed $default = null): mixed
     {
-        $rows = self::query()->where('autoload', 'yes')->get(['name', 'value']);
+        $rows = self::query()->where('autoload', true)->get(['name', 'value']);
         $result = [];
         foreach ($rows as $row) {
             $value = self::normalizeValue($row);
@@ -80,7 +85,7 @@ class Setting extends NexusModel
     }
 
     /**
-     * get from db by name, generally used for `autoload` = 'no'
+     * get from db by name, generally used for `autoload` = false
      */
     public static function getByName(string $name, mixed $default = null): mixed
     {

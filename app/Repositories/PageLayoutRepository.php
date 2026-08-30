@@ -29,23 +29,25 @@ class PageLayoutRepository extends BaseRepository
     {
         return (int) DB::table('messages')
             ->where('sender', $userId)
-            ->where('saved', 'yes')
+            ->where('saved', true)
             ->count();
     }
 
-    public function getConnectable(int $userId): string
+    public function getConnectable(int $userId): ?int
     {
-        return DB::table('peers')
+        $value = DB::table('peers')
             ->where('userid', $userId)
             ->orderBy('id', 'desc')
-            ->value('connectable') ?? 'unknown';
+            ->value('connectable');
+
+        return $value === null ? null : (int) $value;
     }
 
     public function getActiveSeedCount(int $userId): int
     {
         return (int) DB::table('peers')
             ->where('userid', $userId)
-            ->where('seeder', 'yes')
+            ->where('seeder', 1)
             ->count();
     }
 
@@ -53,7 +55,7 @@ class PageLayoutRepository extends BaseRepository
     {
         return (int) DB::table('peers')
             ->where('userid', $userId)
-            ->where('seeder', 'no')
+            ->where('seeder', 0)
             ->count();
     }
 
@@ -61,13 +63,13 @@ class PageLayoutRepository extends BaseRepository
     {
         return (int) DB::table('messages')
             ->where('receiver', $userId)
-            ->where('unread', 'yes')
+            ->where('unread', true)
             ->count();
     }
 
     public function getUnreadNewsCount(?string $lastHome): int
     {
-        $query = DB::table('news')->where('notify', 'yes');
+        $query = DB::table('news')->where('notify', true);
         if (! empty($lastHome) && $lastHome !== '0000-00-00 00:00:00') {
             $query->where('added', '>', $lastHome);
         }

@@ -202,7 +202,7 @@ final class BonusService
             return null;
         }
         $vipUntil = date('Y-m-d H:i:s', (strtotime(date('Y-m-d H:i:s')) + 28 * 86400));
-        $this->bonusRep->consumeUserBonus((int) $curUser['id'], $points, BusinessType::BUY_VIP->value, $points.' Points for 1 month VIP Status.', ['class' => UC_VIP, 'vip_added' => 'yes', 'vip_until' => $vipUntil]);
+        $this->bonusRep->consumeUserBonus((int) $curUser['id'], $points, BusinessType::BUY_VIP->value, $points.' Points for 1 month VIP Status.', ['class' => UC_VIP, 'vip_added' => true, 'vip_until' => $vipUntil]);
 
         return $this->redirect($baseUrl, 'vip');
     }

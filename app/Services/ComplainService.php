@@ -45,7 +45,7 @@ final class ComplainService
             return null;
         }
 
-        $user = User::query()->where('email', $email)->where('enabled', 'no')->first();
+        $user = User::query()->where('email', $email)->where('enabled', false)->first();
         if (! $user) {
             return null;
         }

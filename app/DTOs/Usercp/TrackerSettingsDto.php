@@ -30,21 +30,21 @@ final readonly class TrackerSettingsDto
         public ?string $currentLangFolder,
         public int $torrentsperpage,
         public string $timetype,
-        public string $appendsticky,
-        public string $appendnew,
+        public bool $appendsticky,
+        public bool $appendnew,
         public string $appendpromotion,
-        public string $appendpicked,
-        public string $dlicon,
-        public string $bmicon,
-        public string $showcomnum,
-        public string $showdescription,
-        public string $showsmalldescr,
-        public string $showcomment,
+        public bool $appendpicked,
+        public bool $dlicon,
+        public bool $bmicon,
+        public bool $showcomnum,
+        public bool $showdescription,
+        public bool $showsmalldescr,
+        public bool $showcomment,
         public int $pmnum,
         public int $sbnum,
         public int $sbrefresh,
         public ?string $tooltip,
-        public ?string $showlastcom,
+        public ?bool $showlastcom,
         public string $fontsize,
     ) {}
 
@@ -101,9 +101,9 @@ final readonly class TrackerSettingsDto
         return is_string($value) && $value === 'yes';
     }
 
-    private static function yesNo(mixed $value): string
+    private static function yesNo(mixed $value): bool
     {
-        return self::isYes($value) ? 'yes' : 'no';
+        return self::isYes($value);
     }
 
     private static function stringOrNull(mixed $value): ?string

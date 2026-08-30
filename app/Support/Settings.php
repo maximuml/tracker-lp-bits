@@ -62,7 +62,7 @@ final class Settings
      *
      * @param  array<string, mixed>  $nameAndValue
      */
-    public static function saveBatch(string $prefix, array $nameAndValue, string $autoload = 'yes'): void
+    public static function saveBatch(string $prefix, array $nameAndValue, bool $autoload = true): void
     {
         SettingRepository::saveBatch($prefix, $nameAndValue, $autoload);
     }

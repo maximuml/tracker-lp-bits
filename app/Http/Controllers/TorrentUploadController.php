@@ -70,11 +70,11 @@ class TorrentUploadController extends Controller
         /** @var array<string, string> $lang_edit */
         $lang_edit = app(Globals::class)->get('lang_edit') ?? [];
 
-        if ($currentUser['parked'] === 'yes') {
+        if ($currentUser['parked']) {
             LegacyResponse::abort($lang_upload['std_sorry'] ?? '', $lang_upload['std_unauthorized_to_upload'] ?? '', false);
         }
 
-        if ($currentUser['uploadpos'] == 'no') {
+        if (! $currentUser['uploadpos']) {
             LegacyResponse::abort($lang_upload['std_sorry'] ?? '', $lang_upload['std_unauthorized_to_upload'] ?? '', false);
         }
 

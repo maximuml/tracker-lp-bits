@@ -276,7 +276,7 @@ final class ForumPageService
             return ['title' => '', 'body' => ''];
         }
 
-        $locked = $post['locked'] == 'yes';
+        $locked = (bool) $post['locked'];
         $ismod = Forum::isModerator($postid, 'post');
         if (($curUser['id'] != $post['userid'] || $locked) && ! Permission::can(PermissionEnum::POST_MANAGE) && ! $ismod) {
             LegacyResponse::permissionDenied();
@@ -315,13 +315,13 @@ final class ForumPageService
         $arr = $topic->toArray();
 
         $forumid = (int) $arr['forumid'];
-        $locked = $arr['locked'] == 'yes';
+        $locked = (bool) $arr['locked'];
         $orgsubject = (string) $arr['subject'];
         $subject = htmlspecialchars((string) $arr['subject']);
         if ($highlight) {
             $subject = Format::highlight($highlight, $orgsubject);
         }
-        $sticky = $arr['sticky'] == 'yes';
+        $sticky = $arr['sticky'] == 1;
         $hlcolor = (int) $arr['hlcolor'];
         $views = (int) $arr['views'];
         $basePosterid = (int) $arr['userid'];
@@ -556,7 +556,7 @@ final class ForumPageService
             echo "<td class=\"embedded\"><form method=\"post\" action=\"?action=setlocked\">\n";
             echo '<input type="hidden" name="topicid" value="'.$topicid."\" />\n";
             echo '<input type="hidden" name="returnto" value="'.htmlspecialchars((string) $__server_REQUEST_URI)."\" />\n";
-            echo '<input type="hidden" name="locked" value="'.($locked ? 'no' : 'yes').'" /><input type="submit" class="medium" value="'.($locked ? ($lang['submit_unlock'] ?? '') : ($lang['submit_lock'] ?? ''))."\" /></form></td>\n";
+            echo '<input type="hidden" name="locked" value="'.($locked ? 0 : 1).'" /><input type="submit" class="medium" value="'.($locked ? ($lang['submit_unlock'] ?? '') : ($lang['submit_lock'] ?? ''))."\" /></form></td>\n";
             echo "<td class=\"embedded\"><form method=\"get\" action=\"?\">\n";
             echo "<input type=\"hidden\" name=\"action\" value=\"deletetopic\" />\n";
             echo '<input type="hidden" name="topicid" value="'.$topicid."\" />\n";
@@ -710,8 +710,8 @@ final class ForumPageService
                 $topic_userid = (int) $topicarr['userid'];
                 $topic_views = (int) $topicarr['views'];
                 $views = number_format($topic_views);
-                $locked = $topicarr['locked'] == 'yes';
-                $sticky = $topicarr['sticky'] == 'yes';
+                $locked = (bool) $topicarr['locked'];
+                $sticky = $topicarr['sticky'] == 1;
                 $hlcolor = (int) $topicarr['hlcolor'];
 
                 if (! $posts = $Cache?->get_value('topic_'.$topicid.'_post_count')) {

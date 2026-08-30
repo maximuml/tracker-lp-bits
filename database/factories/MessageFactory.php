@@ -28,9 +28,9 @@ class MessageFactory extends Factory
             'added' => now()->toDateTimeString(),
             'subject' => $this->faker->sentence(4),
             'msg' => $this->faker->paragraphs(2, true),
-            'unread' => 'yes',
+            'unread' => true,
             'location' => 1,
-            'saved' => 'no',
+            'saved' => false,
         ];
     }
 
@@ -55,7 +55,7 @@ class MessageFactory extends Factory
     public function read(): self
     {
         return $this->state(fn (array $attributes) => [
-            'unread' => 'no',
+            'unread' => false,
         ]);
     }
 }

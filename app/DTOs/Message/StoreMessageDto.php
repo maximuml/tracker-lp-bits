@@ -21,9 +21,9 @@ final readonly class StoreMessageDto
         public string $msg,
         public int $sender,
         public string $added,
-        public string $unread = 'yes',
+        public bool $unread = true,
         public int $location = 1,
-        public string $saved = 'no',
+        public bool $saved = false,
     ) {}
 
     public static function fromRequest(Request $request): self

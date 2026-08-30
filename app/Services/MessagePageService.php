@@ -117,23 +117,27 @@ class MessagePageService
         // Search params
         $keyword = trim((string) $request->input('keyword', ''));
         $place = (string) $request->input('place', '');
-        $unread = $request->input('unread');
-        $unreadStr = is_string($unread) ? $unread : null;
+        $unreadRaw = $request->input('unread');
+        $unreadBool = match (true) {
+            $unreadRaw === 'yes' || $unreadRaw === '1' => true,
+            $unreadRaw === 'no' || $unreadRaw === '0' => false,
+            default => null,
+        };
         $perpage = (int) ($curUser['pmnum'] ?? 0) ?: 20;
 
-        $countResult = MessageRepository::getMailboxMessages($userId, $mailbox, $keyword, $place, $unreadStr, 0, 0);
+        $countResult = MessageRepository::getMailboxMessages($userId, $mailbox, $keyword, $place, $unreadBool, 0, 0);
         $count = $countResult['count'];
 
         $pagerHref = '?action=viewmailbox'
             .'&box='.$mailbox
             .($place ? '&place='.$place : '')
             .($keyword ? '&keyword='.rawurlencode($keyword) : '')
-            .($unread ? '&unread='.$unread : '')
+            .($unreadRaw ? '&unread='.$unreadRaw : '')
             .'&';
 
         [$pagertop, $pagerbottom, , $offset, $perpage] = Pagination::pager($perpage, $count, $pagerHref);
 
-        $messageResult = MessageRepository::getMailboxMessages($userId, $mailbox, $keyword, $place, $unreadStr, (int) $offset, (int) $perpage);
+        $messageResult = MessageRepository::getMailboxMessages($userId, $mailbox, $keyword, $place, $unreadBool, (int) $offset, (int) $perpage);
         $messages = $messageResult['messages'];
 
         // Build message rows
@@ -160,7 +164,7 @@ class MessagePageService
                 'subject' => $subject,
                 'username' => $username,
                 'added' => Time::format((string) $row['added'], true, false),
-                'unread' => (string) $row['unread'],
+                'unread' => (bool) $row['unread'],
             ];
         }
 
@@ -182,7 +186,7 @@ class MessagePageService
             'isSentBox' => $mailbox === self::PM_SENT_BOX,
             'keyword' => htmlspecialchars($keyword),
             'place' => $place,
-            'unread' => is_string($unread) ? $unread : '',
+            'unread' => is_string($unreadRaw) ? $unreadRaw : '',
             'pagertop' => $pagertop,
             'pagerbottom' => $pagerbottom,
             'rows' => $rows,
@@ -244,7 +248,7 @@ class MessagePageService
 
         $unread = '';
         if ($isSender) {
-            $unread = ($message['unread'] ?? '') === 'yes'
+            $unread = (bool) ($message['unread'] ?? false)
                 ? '<span style="color: #FF0000;"><b>'.htmlspecialchars((string) ($lang['text_new'] ?? 'New')).'</b></a>'
                 : '';
         }

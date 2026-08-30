@@ -379,7 +379,7 @@ final class UsercpRepository extends BaseRepository
         $showTooltip = (string) app(Globals::class)->get('enabletooltip_tweak', '') === 'yes';
         if ($showTooltip) {
             $data['tooltip'] = $dto->tooltip ?? 'off';
-            $data['showlastcom'] = $dto->showlastcom ?? 'no';
+            $data['showlastcom'] = $dto->showlastcom ?? false;
         }
 
         User::query()->where('id', $user->id)->update($data);

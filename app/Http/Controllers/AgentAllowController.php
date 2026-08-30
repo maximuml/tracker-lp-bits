@@ -45,6 +45,21 @@ class AgentAllowController extends Controller
     }
 
     /**
+     * Convert the legacy 'yes'/'no' string values for boolean columns
+     * into actual booleans before persisting via the repository.
+     *
+     * @param  array<int|string, mixed>  $data
+     * @return array<int|string, mixed>
+     */
+    private function normalizeBooleanFields(array $data): array
+    {
+        $data['exception'] = ($data['exception'] ?? 'no') === 'yes';
+        $data['allowhttps'] = ($data['allowhttps'] ?? 'no') === 'yes';
+
+        return $data;
+    }
+
+    /**
      * Display a listing of the resource.
      *
      * @return array<string, mixed>
@@ -65,7 +80,8 @@ class AgentAllowController extends Controller
     public function store(Request $request): array
     {
         $request->validate($this->getRules());
-        $result = $this->repository->store($request->all());
+        $data = $this->normalizeBooleanFields($request->all());
+        $result = $this->repository->store($data);
         $resource = new AgentAllowResource($result);
 
         return $this->success($resource);
@@ -94,7 +110,8 @@ class AgentAllowController extends Controller
     public function update(Request $request, $id): array
     {
         $request->validate($this->getRules());
-        $result = $this->repository->update($request->all(), $id);
+        $data = $this->normalizeBooleanFields($request->all());
+        $result = $this->repository->update($data, $id);
         $resource = new AgentAllowResource($result);
 
         return $this->success($resource);

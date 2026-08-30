@@ -251,16 +251,16 @@ class TorrentSearchRepository
             $addparam .= 'incldead=0&';
         } elseif ($include_dead == 1) {		// active
             $addparam .= 'incldead=1&';
-            $whereothera[] = "visible = 'yes'";
+            $whereothera[] = 'visible = 1';
         } elseif ($include_dead == 2) {		// dead
             $addparam .= 'incldead=2&';
-            $whereothera[] = "visible = 'no'";
+            $whereothera[] = 'visible = 0';
         }
         // ----------------- end include dead ---------------------//
 
         if (empty($CURUSER['id']) || ! Permission::canViewBannedTorrent()) {
-            $whereothera[] = "banned = 'no'";
-            $searchParams['banned'] = 'no';
+            $whereothera[] = 'banned = 0';
+            $searchParams['banned'] = 0;
         }
 
         $special_state = 0;
@@ -290,61 +290,58 @@ class TorrentSearchRepository
             $special_state = 0;
             Log::writeWithContext('User '.$CURUSER['username'].','.$CURUSER['ip'].' is hacking spstate field in '.Input::serverValue('SCRIPT_NAME', ''), 'mod');
         }
+        $globalSpecialState = Promotion::globalSpecialState();
         if ($special_state == 0) {	// all
             $addparam .= 'spstate=0&';
         } elseif ($special_state == 1) {	// normal
             $addparam .= 'spstate=1&';
 
             $wherea[] = 'sp_state = 1';
-
-            if (Promotion::globalSpecialState() == 1) {
-                $wherea[] = 'sp_state = 1';
-            }
         } elseif ($special_state == 2) {	// free
             $addparam .= 'spstate=2&';
 
-            if (Promotion::globalSpecialState() == 1) {
+            if ($globalSpecialState == 1) {
                 $wherea[] = 'sp_state = 2';
-            } elseif (Promotion::globalSpecialState() == 2) {
+            } elseif ($globalSpecialState == 2) {
 
             }
         } elseif ($special_state == 3) {	// 2x up
             $addparam .= 'spstate=3&';
-            if (Promotion::globalSpecialState() == 1) {	// only sp state
+            if ($globalSpecialState == 1) {	// only sp state
                 $wherea[] = 'sp_state = 3';
-            } elseif (Promotion::globalSpecialState() == 3) {	// all
+            } elseif ($globalSpecialState == 3) {	// all
 
             }
         } elseif ($special_state == 4) {	// 2x up and free
             $addparam .= 'spstate=4&';
 
-            if (Promotion::globalSpecialState() == 1) {	// only sp state
+            if ($globalSpecialState == 1) {	// only sp state
                 $wherea[] = 'sp_state = 4';
-            } elseif (Promotion::globalSpecialState() == 4) {	// all
+            } elseif ($globalSpecialState == 4) {	// all
 
             }
         } elseif ($special_state == 5) {	// half down
             $addparam .= 'spstate=5&';
 
-            if (Promotion::globalSpecialState() == 1) {	// only sp state
+            if ($globalSpecialState == 1) {	// only sp state
                 $wherea[] = 'sp_state = 5';
-            } elseif (Promotion::globalSpecialState() == 5) {	// all
+            } elseif ($globalSpecialState == 5) {	// all
 
             }
         } elseif ($special_state == 6) {	// half down
             $addparam .= 'spstate=6&';
 
-            if (Promotion::globalSpecialState() == 1) {	// only sp state
+            if ($globalSpecialState == 1) {	// only sp state
                 $wherea[] = 'sp_state = 6';
-            } elseif (Promotion::globalSpecialState() == 6) {	// all
+            } elseif ($globalSpecialState == 6) {	// all
 
             }
         } elseif ($special_state == 7) {	// 30% down
             $addparam .= 'spstate=7&';
 
-            if (Promotion::globalSpecialState() == 1) {	// only sp state
+            if ($globalSpecialState == 1) {	// only sp state
                 $wherea[] = 'sp_state = 7';
-            } elseif (Promotion::globalSpecialState() == 7) {	// all
+            } elseif ($globalSpecialState == 7) {	// all
 
             }
         }
@@ -378,7 +375,6 @@ class TorrentSearchRepository
             if (! $hasSearchParams && $CURUSER['notifs']) {
                 $all = true;
                 foreach ($cats as $cat) {
-                    $all &= $cat['id'];
                     $mystring = $CURUSER['notifs'];
                     $findme = '[cat'.$cat['id'].']';
                     $search = strpos($mystring, $findme);
@@ -388,6 +384,7 @@ class TorrentSearchRepository
                         $catcheck = true;
                     }
 
+                    $all = $all && $catcheck;
                     if ($catcheck) {
                         $wherecatina[] = $cat['id'];
                         $addparam .= "cat$cat[id]=1&";
@@ -396,7 +393,6 @@ class TorrentSearchRepository
                 if ($showsubcat) {
                     if ($showsource) {
                         foreach ($sources as $source) {
-                            $all &= $source['id'];
                             $mystring = $CURUSER['notifs'];
                             $findme = '[sou'.$source['id'].']';
                             $search = strpos($mystring, $findme);
@@ -406,6 +402,7 @@ class TorrentSearchRepository
                                 $sourcecheck = true;
                             }
 
+                            $all = $all && $sourcecheck;
                             if ($sourcecheck) {
                                 $wheresourceina[] = $source['id'];
                                 $addparam .= "source{$source['id']}=1&";
@@ -414,7 +411,6 @@ class TorrentSearchRepository
                     }
                     if ($showmedium) {
                         foreach ($media as $medium) {
-                            $all &= $medium['id'];
                             $mystring = $CURUSER['notifs'];
                             $findme = '[med'.$medium['id'].']';
                             $search = strpos($mystring, $findme);
@@ -424,6 +420,7 @@ class TorrentSearchRepository
                                 $mediumcheck = true;
                             }
 
+                            $all = $all && $mediumcheck;
                             if ($mediumcheck) {
                                 $wheremediumina[] = $medium['id'];
                                 $addparam .= "medium{$medium['id']}=1&";
@@ -432,7 +429,6 @@ class TorrentSearchRepository
                     }
                     if ($showcodec) {
                         foreach ($codecs as $codec) {
-                            $all &= $codec['id'];
                             $mystring = $CURUSER['notifs'];
                             $findme = '[cod'.$codec['id'].']';
                             $search = strpos($mystring, $findme);
@@ -442,6 +438,7 @@ class TorrentSearchRepository
                                 $codeccheck = true;
                             }
 
+                            $all = $all && $codeccheck;
                             if ($codeccheck) {
                                 $wherecodecina[] = $codec['id'];
                                 $addparam .= "codec{$codec['id']}=1&";
@@ -450,7 +447,6 @@ class TorrentSearchRepository
                     }
                     if ($showstandard) {
                         foreach ($standards as $standard) {
-                            $all &= $standard['id'];
                             $mystring = $CURUSER['notifs'];
                             $findme = '[sta'.$standard['id'].']';
                             $search = strpos($mystring, $findme);
@@ -460,6 +456,7 @@ class TorrentSearchRepository
                                 $standardcheck = true;
                             }
 
+                            $all = $all && $standardcheck;
                             if ($standardcheck) {
                                 $wherestandardina[] = $standard['id'];
                                 $addparam .= "standard{$standard['id']}=1&";
@@ -468,7 +465,6 @@ class TorrentSearchRepository
                     }
                     if ($showprocessing) {
                         foreach ($processings as $processing) {
-                            $all &= $processing['id'];
                             $mystring = $CURUSER['notifs'];
                             $findme = '[pro'.$processing['id'].']';
                             $search = strpos($mystring, $findme);
@@ -478,6 +474,7 @@ class TorrentSearchRepository
                                 $processingcheck = true;
                             }
 
+                            $all = $all && $processingcheck;
                             if ($processingcheck) {
                                 $whereprocessingina[] = $processing['id'];
                                 $addparam .= "processing{$processing['id']}=1&";
@@ -486,7 +483,6 @@ class TorrentSearchRepository
                     }
                     if ($showaudiocodec) {
                         foreach ($audiocodecs as $audiocodec) {
-                            $all &= $audiocodec['id'];
                             $mystring = $CURUSER['notifs'];
                             $findme = '[aud'.$audiocodec['id'].']';
                             $search = strpos($mystring, $findme);
@@ -496,6 +492,7 @@ class TorrentSearchRepository
                                 $audiocodeccheck = true;
                             }
 
+                            $all = $all && $audiocodeccheck;
                             if ($audiocodeccheck) {
                                 $whereaudiocodecina[] = $audiocodec['id'];
                                 $addparam .= "audiocodec{$audiocodec['id']}=1&";
@@ -745,13 +742,13 @@ class TorrentSearchRepository
 
                 if (empty($CURUSER['id'])) {
                     // not registered user, only show not anonymous torrents
-                    self::pushWhere($wherea, $whereBindings, $likeSql." AND torrents.anonymous = 'no'", $likePatterns);
+                    self::pushWhere($wherea, $whereBindings, $likeSql.' AND torrents.anonymous = 0', $likePatterns);
                 } elseif (Permission::canManageTorrent()) {
                     // moderator or above, show all
                     self::pushWhere($wherea, $whereBindings, $likeSql, $likePatterns);
                 } else {
                     // only show normal torrents and anonymous torrents from himself
-                    $sql = "({$likeSql} AND torrents.anonymous = 'no') OR ({$likeSql} AND torrents.anonymous = 'yes' AND users.id = ?)";
+                    $sql = "({$likeSql} AND torrents.anonymous = 0) OR ({$likeSql} AND torrents.anonymous = 1 AND users.id = ?)";
                     self::pushWhere($wherea, $whereBindings, $sql, array_merge($likePatterns, $likePatterns, [(int) $CURUSER['id']]));
                 }
             } else {
@@ -765,7 +762,7 @@ class TorrentSearchRepository
                     Log::writeWithContext('User '.$CURUSER['username'].','.$CURUSER['ip'].' is hacking search_area field in'.Input::serverValue('SCRIPT_NAME', ''), 'mod');
                 }
 
-                self::pushWhere($wherea, $whereBindings, implode($ANDOR, $likeClauses), $likePatterns);
+                self::pushWhere($wherea, $whereBindings, '('.implode($ANDOR, $likeClauses).')', $likePatterns);
             }
 
             $addparam .= 'search_area='.$search_area.'&';

@@ -46,7 +46,7 @@ class Phase20ApiParityTest extends TestCase
         Sanctum::actingAs($user, ['usercp:settings']);
 
         $this->postJson('/api/v1/usercp/settings', [
-            'parked' => 'no',
+            'parked' => false,
             'acceptpms' => 'friends',
             'commentpm' => 'no',
             'gender' => 'Male',
@@ -85,7 +85,7 @@ class Phase20ApiParityTest extends TestCase
             ->assertJsonPath('ret', 0)
             ->assertJsonPath('data.topicsperpage', 25)
             ->assertJsonPath('data.postsperpage', 15)
-            ->assertJsonPath('data.showlastpost', 'yes');
+            ->assertJsonPath('data.showlastpost', true);
     }
 
     public function test_usercp_tracker_settings_updates_user(): void
@@ -195,7 +195,7 @@ class Phase20ApiParityTest extends TestCase
             ->assertJsonPath('data.data.msg', 'World');
 
         $this->patchJson('/api/v1/messages/'.$messageId, [
-            'unread' => 'no',
+            'unread' => false,
             'location' => 2,
         ])
             ->assertStatus(200)
@@ -203,7 +203,7 @@ class Phase20ApiParityTest extends TestCase
 
         $this->assertDatabaseHas('messages', [
             'id' => $messageId,
-            'unread' => 'no',
+            'unread' => 0,
             'location' => 2,
         ]);
 

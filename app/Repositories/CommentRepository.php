@@ -136,9 +136,9 @@ class CommentRepository
         return $row === null ? null : (array) $row;
     }
 
-    public static function getCommentPmSetting(int $userId): ?string
+    public static function getCommentPmSetting(int $userId): bool
     {
-        return User::query()->where('id', $userId)->value('commentpm');
+        return (bool) User::query()->where('id', $userId)->value('commentpm');
     }
 
     /**

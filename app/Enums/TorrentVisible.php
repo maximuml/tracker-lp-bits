@@ -7,13 +7,13 @@ namespace App\Enums;
 /**
  * Backed enum for torrent visibility.
  *
- * Mirrors the string constants from App\Models\Torrent:
- *   VISIBLE_YES ('yes'), VISIBLE_NO ('no').
+ * Mirrors the boolean columns from App\Models\Torrent:
+ *   VISIBLE_YES (1), VISIBLE_NO (0).
  */
-enum TorrentVisible: string
+enum TorrentVisible: int
 {
-    case YES = 'yes';
-    case NO = 'no';
+    case YES = 1;
+    case NO = 0;
 
     public function label(): string
     {

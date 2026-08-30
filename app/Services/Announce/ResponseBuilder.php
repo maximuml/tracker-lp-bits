@@ -70,7 +70,7 @@ final class ResponseBuilder
     /**
      * @return array<string, mixed>
      */
-    public function peerList(int $torrentId, int $userId, string $seeder): array
+    public function peerList(int $torrentId, int $userId, bool $seeder): array
     {
         $counts = $this->countPeers($torrentId) ?: (object) ['seeders' => 0, 'leechers' => 0];
         $complete = (int) ($counts->seeders ?? 0);
@@ -91,8 +91,8 @@ final class ResponseBuilder
                 })
                 ->limit($this->dto->numWant);
 
-            if ($seeder === 'yes') {
-                $query->where('seeder', 'no');
+            if ($seeder) {
+                $query->where('seeder', 0);
             }
 
             foreach ($query->inRandomOrder()->get() as $row) {
@@ -134,7 +134,7 @@ final class ResponseBuilder
     {
         return DB::table('peers')
             ->where('torrent', $torrentId)
-            ->selectRaw("SUM(CASE WHEN seeder = 'yes' THEN 1 ELSE 0 END) as seeders, SUM(CASE WHEN seeder = 'no' THEN 1 ELSE 0 END) as leechers")
+            ->selectRaw('SUM(CASE WHEN seeder = 1 THEN 1 ELSE 0 END) as seeders, SUM(CASE WHEN seeder = 0 THEN 1 ELSE 0 END) as leechers')
             ->first();
     }
 

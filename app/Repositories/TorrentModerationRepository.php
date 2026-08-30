@@ -120,8 +120,8 @@ class TorrentModerationRepository extends BaseRepository
         $torrentUpdate['approval_status'] = $approvalStatus;
         $notifyUser = false;
         if ($approvalStatus == TorrentApprovalStatus::ALLOW->value) {
-            $torrentUpdate['banned'] = 'no';
-            $torrentUpdate['visible'] = 'yes';
+            $torrentUpdate['banned'] = 0;
+            $torrentUpdate['visible'] = 1;
             if ($torrent->approval_status != $approvalStatus) {
                 $torrentOperationLog['action_type'] = TorrentOperationAction::APPROVAL_ALLOW->value;
                 // increase promotion time
@@ -144,14 +144,14 @@ class TorrentModerationRepository extends BaseRepository
                 $notifyUser = true;
             }
         } elseif ($approvalStatus == TorrentApprovalStatus::DENY->value) {
-            $torrentUpdate['banned'] = 'yes';
-            $torrentUpdate['visible'] = 'no';
+            $torrentUpdate['banned'] = 1;
+            $torrentUpdate['visible'] = 0;
             // Deny, record and notify all the time
             $torrentOperationLog['action_type'] = TorrentOperationAction::APPROVAL_DENY->value;
             $notifyUser = true;
         } elseif ($approvalStatus == TorrentApprovalStatus::NONE->value) {
-            $torrentUpdate['banned'] = 'no';
-            $torrentUpdate['visible'] = 'yes';
+            $torrentUpdate['banned'] = 0;
+            $torrentUpdate['visible'] = 1;
             if ($torrent->approval_status != $approvalStatus) {
                 $torrentOperationLog['action_type'] = TorrentOperationAction::APPROVAL_NONE->value;
             }

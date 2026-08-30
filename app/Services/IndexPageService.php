@@ -203,7 +203,7 @@ JS;
                     $rawCover = trim((string) ($torrent->cover ?? ''));
                     $thumbUrl = $rawCover !== '' ? CoverThumb::urlWithContext((string) $rawCover, (int) 240, (int) 360, (int) 82) : '';
                     $typeLabel = trim((string) ($torrent->basic_category->name ?? ''));
-                    if (($torrent->anonymous ?? 'no') === 'yes') {
+                    if ($torrent->anonymous) {
                         $ownerHtml = '<i>Anonymous</i>';
                     } else {
                         $ownerHtml = UserDisplay::username((int) $torrent->owner);

@@ -91,7 +91,7 @@ class TorrentEditRepository extends BaseRepository
         /** @var array<string, mixed> $extraUpdate */
         $extraUpdate = [];
 
-        $updateset['anonymous'] = $request->input('anonymous') ? 'yes' : 'no';
+        $updateset['anonymous'] = $request->input('anonymous') ? 1 : 0;
         $updateset['name'] = $name;
         $extraUpdate['descr'] = $descr;
         $extraUpdate['media_info'] = (string) $request->input('technical_info', '');
@@ -107,7 +107,7 @@ class TorrentEditRepository extends BaseRepository
         }
 
         if (Permission::canManageTorrent($user)) {
-            $updateset['visible'] = $request->input('visible') ? 'yes' : 'no';
+            $updateset['visible'] = $request->input('visible') ? 1 : 0;
         }
 
         if (Permission::canSetTorrentOnPromotion($user)) {
@@ -180,7 +180,7 @@ class TorrentEditRepository extends BaseRepository
         $this->writeEditLog($torrentOld, $torrentNew, $user);
 
         $torrentUrl = sprintf('details.php?id=%s', $torrentOld->id);
-        if ($torrentOld->banned == 'yes' && $torrentOld->owner == $user->id) {
+        if ($torrentOld->banned == 1 && $torrentOld->owner == $user->id) {
             StaffMessage::query()->insert([
                 'sender' => $user->id,
                 'subject' => Locale::trans('torrent.owner_update_torrent_subject', ['detail_url' => $torrentUrl, 'torrent_name' => $name], null),
@@ -221,7 +221,7 @@ class TorrentEditRepository extends BaseRepository
         $id = $torrentOld->id;
 
         if ($user->id == $torrentOld->owner) {
-            if ($torrentOld->anonymous == 'yes') {
+            if ($torrentOld->anonymous == 1) {
                 Log::writeWithContext("Torrent $id ($name) was edited by Anonymous");
             } else {
                 Log::writeWithContext("Torrent $id ($name) was edited by {$user->username}");

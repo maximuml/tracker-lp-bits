@@ -40,7 +40,7 @@ final class PeerLifecycle
 
     private string $agent = '';
 
-    private string $seeder = 'no';
+    private int $seeder = 0;
 
     private ?string $event = null;
 
@@ -76,7 +76,7 @@ final class PeerLifecycle
         $this->ipv4 = $dto->ipv4;
         $this->ipv6 = $dto->ipv6;
         $this->agent = $dto->userAgent;
-        $this->seeder = $dto->isSeeder() ? 'yes' : 'no';
+        $this->seeder = $dto->isSeeder() ? 1 : 0;
         $this->left = $dto->left;
         $this->event = $dto->event;
         $this->userId = (int) ($user['id'] ?? 0);
@@ -156,7 +156,7 @@ final class PeerLifecycle
             ->where('userid', $this->userId)
             ->where('ip', $this->ip)
             ->value('id');
-        if (! empty($sameIPRecord) && $this->seeder === 'yes') {
+        if (! empty($sameIPRecord) && $this->seeder === 1) {
             $this->warn('You cannot seed the same torrent in the same location from more than 1 client.', 300);
         }
 
@@ -164,10 +164,10 @@ final class PeerLifecycle
             ->where('torrent', $this->torrentId)
             ->where('userid', $this->userId)
             ->count();
-        if ($valid >= 1 && $this->seeder === 'no') {
+        if ($valid >= 1 && $this->seeder === 0) {
             throw TrackerException::failure('You already are downloading the same torrent. You may only leech from one location at a time.');
         }
-        if ($valid >= 3 && $this->seeder === 'yes') {
+        if ($valid >= 3 && $this->seeder === 1) {
             throw TrackerException::failure('You cannot seed the same torrent from more than 3 locations.');
         }
 
@@ -179,7 +179,7 @@ final class PeerLifecycle
             'peer_id' => $this->peerId,
             'ip' => $this->ip,
             'port' => (int) $this->params['port'],
-            'connectable' => 'yes',
+            'connectable' => 1,
             'uploaded' => (int) $this->params['uploaded'],
             'downloaded' => (int) $this->params['downloaded'],
             'to_go' => $this->left,
@@ -203,8 +203,8 @@ final class PeerLifecycle
 
         try {
             DB::table('peers')->insert($peerInsert);
-            $this->torrentUpdate[$this->seeder === 'yes' ? 'seeders' : 'leechers'] = DB::raw(
-                $this->seeder === 'yes' ? 'seeders + 1' : 'leechers + 1'
+            $this->torrentUpdate[$this->seeder === 1 ? 'seeders' : 'leechers'] = DB::raw(
+                $this->seeder === 1 ? 'seeders + 1' : 'leechers + 1'
             );
 
             $existingSnatchId = DB::table('snatched')
@@ -265,7 +265,7 @@ final class PeerLifecycle
         if ($this->event === 'completed') {
             $peerUpdate['finishedat'] = TIMENOW;
             $snatchUpdate['completedat'] = $this->dt;
-            $snatchUpdate['finished'] = 'yes';
+            $snatchUpdate['finished'] = 1;
             $this->torrentUpdate['times_completed'] = DB::raw('times_completed + 1');
         }
 
@@ -274,8 +274,8 @@ final class PeerLifecycle
         $peerAffected = DB::table('peers')->where('id', (int) ($this->self['id'] ?? 0))->update($peerUpdate);
 
         if ($peerAffected > 0) {
-            if ($this->seeder !== (string) ($this->self['seeder'] ?? 'no')) {
-                if ($this->seeder === 'yes') {
+            if ($this->seeder !== (int) ($this->self['seeder'] ?? 0)) {
+                if ($this->seeder === 1) {
                     $this->torrentUpdate['seeders'] = DB::raw('seeders + 1');
                     $this->torrentUpdate['leechers'] = DB::raw('leechers - 1');
                 } else {
@@ -296,8 +296,8 @@ final class PeerLifecycle
 
         $deleted = DB::table('peers')->where('id', (int) ($this->self['id'] ?? 0))->delete();
         if ($deleted) {
-            $this->torrentUpdate[((string) ($this->self['seeder'] ?? 'no')) === 'yes' ? 'seeders' : 'leechers'] = DB::raw(
-                ((string) ($this->self['seeder'] ?? 'no')) === 'yes' ? 'seeders - 1' : 'leechers - 1'
+            $this->torrentUpdate[((int) ($this->self['seeder'] ?? 0)) === 1 ? 'seeders' : 'leechers'] = DB::raw(
+                ((int) ($this->self['seeder'] ?? 0)) === 1 ? 'seeders - 1' : 'leechers - 1'
             );
 
             if (! empty($this->snatchInfo)) {
@@ -350,7 +350,7 @@ final class PeerLifecycle
             if ($max > 0) {
                 $leechingCount = DB::table('peers')
                     ->where('userid', $this->userId)
-                    ->where('seeder', 'no')
+                    ->where('seeder', 0)
                     ->count();
 
                 if ($leechingCount >= $max) {

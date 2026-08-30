@@ -111,9 +111,9 @@ class EditSetting extends Page implements HasForms
         foreach ($formData as $prefix => $parts) {
             foreach ($parts as $name => $value) {
                 if (in_array($name, $notAutoloadNames)) {
-                    $autoload = 'no';
+                    $autoload = false;
                 } else {
-                    $autoload = 'yes';
+                    $autoload = true;
                 }
                 if (is_array($value)) {
                     $value = json_encode($value);

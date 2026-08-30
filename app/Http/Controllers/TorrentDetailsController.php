@@ -162,7 +162,7 @@ class TorrentDetailsController extends Controller
         $tagRep = $this->tagRepository;
         $customField = new CustomField;
 
-        $bannedTorrent = ($row['banned'] ?? '') === 'yes'
+        $bannedTorrent = ($row['banned'] ?? 0) == 1
             ? ' <b>(<font class="striking">'.($langFunctions['text_banned'] ?? '').'</font>)</b>'
             : '';
 
@@ -191,7 +191,7 @@ class TorrentDetailsController extends Controller
 
         $canViewAnonymous = Permission::can(PermissionEnum::VIEW_ANONYMOUS);
         $isOwner = (int) $currentUser['id'] === (int) ($row['owner'] ?? 0);
-        if (($row['anonymous'] ?? '') === 'yes') {
+        if (($row['anonymous'] ?? 0) == 1) {
             if (! $canViewAnonymous && ! $isOwner) {
                 $uprow = '<i>'.($langDetails['text_anonymous'] ?? '').'</i>';
             } else {

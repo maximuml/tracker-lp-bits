@@ -7,13 +7,13 @@ namespace App\Enums;
 /**
  * Backed enum for snatch finished state.
  *
- * Mirrors the string constants from App\Models\Snatch:
- *   FINISHED_YES ('yes'), FINISHED_NO ('no').
+ * Mirrors the boolean columns from App\Models\Snatch:
+ *   FINISHED_YES (1), FINISHED_NO (0).
  */
-enum SnatchFinished: string
+enum SnatchFinished: int
 {
-    case YES = 'yes';
-    case NO = 'no';
+    case YES = 1;
+    case NO = 0;
 
     public function label(): string
     {

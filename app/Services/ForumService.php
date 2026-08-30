@@ -113,7 +113,7 @@ final class ForumService
         $user = $this->user();
         $lang = $this->lang();
 
-        if (($user['forumpost'] ?? '') === 'no') {
+        if (! ($user['forumpost'] ?? true)) {
             LegacyResponse::abort($lang['std_sorry'] ?? 'Sorry', $lang['std_unauthorized_to_post'] ?? 'Unauthorized.', false);
         }
 
@@ -197,7 +197,7 @@ final class ForumService
                 return $this->redirectTo('/forums.php');
             }
             if (
-                $locked === 'yes'
+                $locked
                 && ! Permission::can(PermissionEnum::POST_MANAGE)
                 && ! Forum::isModerator($topicid, 'topic')
             ) {
@@ -503,7 +503,7 @@ final class ForumService
             LegacyResponse::permissionDenied();
         }
 
-        $locked = (string) $request->input('locked');
+        $locked = (bool) $request->input('locked');
         ForumRepository::updateTopicLocked($topicid, $locked);
 
         return $this->redirectTo((string) $request->input('returnto', '?action=viewforum'));

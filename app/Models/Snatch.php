@@ -16,7 +16,7 @@ declare(strict_types=1);
  * @property string|null $last_action
  * @property string|null $startdat
  * @property string|null $completedat
- * @property string $finished
+ * @property bool $finished
  * @property int $hit_and_run_id
  * @property int $buy_log_id
  * @property int $leech_time_no_seeder
@@ -53,6 +53,7 @@ class Snatch extends NexusModel
         'last_action' => 'datetime',
         'startdat' => 'datetime',
         'completedat' => 'datetime',
+        'finished' => 'boolean',
     ];
 
     /** @var array<int|string, mixed> */

@@ -105,7 +105,7 @@ final class TorrentTable
         if ($wait) {
             echo '<td class="colhead">'.$lang_functions['col_wait']."</td>\n";
         }
-        if ($user['showcomnum'] != 'no') { ?>
+        if ($user['showcomnum']) { ?>
 <td class="colhead"><a href="?<?php echo $oldlink?>sort=3&amp;type=<?php echo $link[3]?>"><img class="comments" src="pic/trans.gif" alt="comments" title="<?php echo $lang_functions['title_number_of_comments'] ?>" /></a></td>
 <?php } ?>
 
@@ -122,7 +122,7 @@ if (Permission::canManageTorrent()) { ?>
 </tr>
 <?php
         $caticonrow = Category::iconRowWithContext($user['caticon']);
-        if (is_array($caticonrow) && ($caticonrow['secondicon'] ?? '') == 'yes') {
+        if (is_array($caticonrow) && (bool) ($caticonrow['secondicon'] ?? false)) {
             $has_secondicon = true;
         } else {
             $has_secondicon = false;
@@ -156,7 +156,7 @@ if (Permission::canManageTorrent()) { ?>
             if ($count_dispname > $max_length_of_torrent_name) {
                 $dispname = mb_substr($dispname, 0, $max_length_of_torrent_name - 2, 'UTF-8').'..';
             }
-            if ($user['appendsticky'] == 'yes') {
+            if ($user['appendsticky']) {
                 $posStates = Torrent::listPosStates();
                 $stickyicon = str_repeat('<img class="sticky" src="pic/trans.gif" alt="Sticky" title="'.$posStates[$row['pos_state']]['text'].'" />&nbsp;', $posStates[$row['pos_state']]['icon_counts'] ?? 0);
             } else {
@@ -176,11 +176,11 @@ if (Permission::canManageTorrent()) { ?>
             }
 
             echo "<td class=\"rowfollow\" width=\"100%\" align=\"left\" style='padding: 0px'><table class=\"torrentname\" width=\"100%\"><tr".$sphighlight.">$tdCover<td class=\"embedded\" style='padding-left: 5px'>".$stickyicon."<a $short_torrent_name_alt $mouseovertorrent href=\"details.php?id=".$id.'&amp;hit=1"><b>'.htmlspecialchars($dispname).'</b></a>';
-            if ($user['appendnew'] != 'no' && strtotime($row['added']) >= $last_browse) {
+            if ($user['appendnew'] && strtotime($row['added']) >= $last_browse) {
                 echo "<b> (<font class='new'>".$lang_functions['text_new_uppercase'].'</font>)</b>';
             }
 
-            $banned_torrent = ($row['banned'] == 'yes' ? ' <b>(<font class="striking">'.$lang_functions['text_banned'].'</font>)</b>' : '');
+            $banned_torrent = ($row['banned'] == 1 ? ' <b>(<font class="striking">'.$lang_functions['text_banned'].'</font>)</b>' : '');
             $sp_torrent_sub = Promotion::appendSubWithContext($row['sp_state'], '', true, $row['added'], $row['promotion_time_type'], $row['promotion_until'], $row['__ignore_global_sp_state'] ?? false);
             $approvalStatusIcon = $torrentRep->renderApprovalStatus($row['approval_status']);
             $paidIcon = $torrentRep->getPaidIcon($row);
@@ -204,10 +204,10 @@ if (Permission::canManageTorrent()) { ?>
             echo '</td>';
 
             $act = '';
-            if ($user['dlicon'] != 'no' && $user['downloadpos'] != 'no') {
+            if ($user['dlicon'] && $user['downloadpos']) {
                 $act .= '<a href="download.php?id='.$id."\"><img class=\"download\" src=\"pic/trans.gif\" style='padding-bottom: 2px;' alt=\"download\" title=\"".$lang_functions['title_download_torrent'].'" /></a>';
             }
-            if ($user['bmicon'] == 'yes') {
+            if ($user['bmicon']) {
                 $bookmark = ' href="javascript: bookmark('.$id.','.$counter.');"';
                 $act .= ($act ? '<br />' : '').'<a id="bookmark'.$counter.'" '.$bookmark.' >'.TorrentBookmark::stateMarkupWithContext($user['id'], $id).'</a>';
             }
@@ -225,7 +225,7 @@ if (Permission::canManageTorrent()) { ?>
                 }
             }
 
-            if ($user['showcomnum'] != 'no') {
+            if ($user['showcomnum']) {
                 echo '<td class="rowfollow">';
                 $nl = '';
 
@@ -236,7 +236,7 @@ if (Permission::canManageTorrent()) { ?>
                     $commentCount = is_scalar($row['comments']) ? (string) $row['comments'] : '0';
                     echo '<a href="comment.php?action=add&amp;pid='.$id.'&amp;type=torrent" title="'.$lang_functions['title_add_comments'].'">'.$commentCount.'</a>';
                 } else {
-                    if ($enabletooltip_tweak == 'yes' && $user['showlastcom'] != 'no') {
+                    if ($enabletooltip_tweak == 'yes' && $user['showlastcom']) {
                         if (! $lastcom = $cache->get_value('torrent_'.$id.'_last_comment_content')) {
                             $lastcom = $torrentRep->getLastComment((int) $id);
                             $cache->cache_value('torrent_'.$id.'_last_comment_content', $lastcom, 1855);
@@ -295,11 +295,11 @@ if (Permission::canManageTorrent()) { ?>
             }
 
             if (
-                $row['anonymous'] == 'yes'
+                $row['anonymous'] == 1
                 && (Permission::canViewAnonymous() || (isset($row['owner']) && $row['owner'] == $user['id']))
             ) {
                 echo '<td class="rowfollow" align="center"><i>'.$lang_functions['text_anonymous'].'</i><br />'.(isset($row['owner']) ? '('.UserDisplay::username($row['owner']).')' : '<i>'.$lang_functions['text_orphaned'].'</i>')."</td>\n";
-            } elseif ($row['anonymous'] == 'yes') {
+            } elseif ($row['anonymous'] == 1) {
                 echo '<td class="rowfollow"><i>'.$lang_functions['text_anonymous']."</i></td>\n";
             } else {
                 echo '<td class="rowfollow">'.(isset($row['owner']) ? UserDisplay::username($row['owner']) : '<i>'.$lang_functions['text_orphaned'].'</i>')."</td>\n";
@@ -321,7 +321,7 @@ if (Permission::canManageTorrent()) { ?>
             echo '<p align="center"> '.$lang_functions['text_promoted_torrents_note']."</p>\n";
         }
 
-        if ($enabletooltip_tweak == 'yes' && (empty($user) || ($user['showlastcom'] ?? '') == 'yes')) {
+        if ($enabletooltip_tweak == 'yes' && (empty($user) || ($user['showlastcom'] ?? false))) {
             echo Html::tooltipContainer($lastcom_tooltip, 400);
         }
         echo Html::tooltipContainer($torrent_tooltip, 500);

@@ -7,8 +7,8 @@ declare(strict_types=1);
  * @property string $name
  * @property string $folder
  * @property string|null $cssfile
- * @property string $multilang
- * @property string $secondicon
+ * @property bool $multilang
+ * @property bool $secondicon
  * @property string|null $designer
  * @property string|null $comment
  */
@@ -20,7 +20,7 @@ use App\Models\Traits\NexusActivityLogTrait;
 /**
  * @property int $id
  * @property string $folder
- * @property string $multilang
+ * @property bool $multilang
  */
 class Icon extends NexusModel
 {
@@ -31,4 +31,10 @@ class Icon extends NexusModel
 
     /** @var list<string> */
     protected $fillable = ['name', 'folder', 'cssfile', 'multilang', 'secondicon', 'designer', 'comment'];
+
+    /** @var array<string, string> */
+    protected $casts = [
+        'multilang' => 'boolean',
+        'secondicon' => 'boolean',
+    ];
 }

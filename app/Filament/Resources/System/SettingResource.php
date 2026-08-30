@@ -62,11 +62,11 @@ class SettingResource extends Resource
                 TextColumn::make('id'),
                 TextColumn::make('name')->searchable(),
                 TextColumn::make('value')->limit(),
-                BadgeColumn::make('autoload')->colors(['success' => 'yes', 'warning' => 'no']),
+                BadgeColumn::make('autoload')->colors(['success' => true, 'warning' => false]),
                 TextColumn::make('updated_at'),
             ])
             ->filters([
-                SelectFilter::make('autoload')->options(self::$yesOrNo),
+                SelectFilter::make('autoload')->options(self::getYesNoOptions()),
             ])
             ->recordActions([
                 EditAction::make(),

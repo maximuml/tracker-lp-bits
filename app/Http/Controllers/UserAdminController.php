@@ -197,7 +197,7 @@ class UserAdminController extends LegacyController
         $viewData = [
             'title' => $title,
             'unit' => $unit,
-            'enabled' => ($curUser['enabled'] ?? '') === 'yes',
+            'enabled' => (bool) ($curUser['enabled'] ?? false),
             'bonus' => (float) ($curUser['seedbonus'] ?? 0),
             'latestBanLog' => null,
             'elapsedDay' => 0,
@@ -210,7 +210,7 @@ class UserAdminController extends LegacyController
             return $this->legacyPage($request, 'self-enable', true, $viewData);
         }
 
-        if (($curUser['enabled'] ?? '') === 'yes') {
+        if (($curUser['enabled'] ?? false)) {
             return $this->legacyPage($request, 'self-enable', true, $viewData);
         }
 

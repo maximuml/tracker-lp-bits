@@ -14,7 +14,7 @@ final readonly class MessageListDto
     public function __construct(
         public int $userId,
         public int $mailbox,
-        public ?string $unread,
+        public ?bool $unread,
         public string $keyword,
         public string $place,
         public int $perPage,
@@ -25,9 +25,11 @@ final readonly class MessageListDto
     {
         $mailbox = max(0, (int) $request->input('mailbox', 0));
         $rawUnread = $request->input('unread');
-        $unread = $rawUnread !== null && in_array((string) $rawUnread, ['yes', 'no'], true)
-            ? (string) $rawUnread
-            : null;
+        $unread = match (true) {
+            $rawUnread === true || $rawUnread === 'yes' || $rawUnread === '1' => true,
+            $rawUnread === false || $rawUnread === 'no' || $rawUnread === '0' => false,
+            default => null,
+        };
 
         $keyword = (string) $request->input('keyword', '');
         $place = (string) $request->input('place', '');

@@ -142,7 +142,7 @@ class ModerationRepository extends BaseRepository
     {
         return DB::table('users')
             ->selectRaw('ip, count(*) AS dupl')
-            ->where('enabled', 'yes')
+            ->where('enabled', true)
             ->where('ip', '!=', '')
             ->where('ip', '!=', '127.0.0.0')
             ->groupBy('ip')

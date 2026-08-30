@@ -101,7 +101,7 @@ final class SnatchControllerTest extends TestCase
         $snatch->last_action = now()->toDateTimeString();
         $snatch->startdat = now()->toDateTimeString();
         $snatch->completedat = null;
-        $snatch->finished = 'no';
+        $snatch->finished = 0;
 
         return $snatch;
     }

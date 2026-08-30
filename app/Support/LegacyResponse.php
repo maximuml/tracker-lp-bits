@@ -218,7 +218,7 @@ final class LegacyResponse
         $CURUSER = app(CurrentUser::class)->get() ?? [];
         $lang_functions = app(Language::class)->functions();
 
-        if (($CURUSER['uploadpos'] ?? '') != 'yes') {
+        if (! ($CURUSER['uploadpos'] ?? true)) {
             return false;
         }
 

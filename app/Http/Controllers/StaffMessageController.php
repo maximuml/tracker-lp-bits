@@ -81,7 +81,7 @@ class StaffMessageController extends LegacyController
             $offset = ($page - 1) * $size;
             $rows = DB::table('users')
                 ->whereIn('class', $classIds)
-                ->where('enabled', 'yes')
+                ->where('enabled', true)
                 ->where('status', 'confirmed')
                 ->offset($offset)
                 ->limit($size)

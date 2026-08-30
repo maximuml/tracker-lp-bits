@@ -102,13 +102,13 @@ class UploadRepository extends BaseRepository
         $subCategoriesAngTags = $this->getSubCategoriesAndTags($request, $category);
         $fileListInfo = $this->getFileListInfo($info, $dname);
         $posStateInfo = $this->getPosStateInfo($request);
-        $anonymous = 'no';
+        $anonymous = 0;
         $uploaderUsername = $user->username;
         if ($request->uplver == 'yes') {
             if (! Permission::canBeAnonymous()) {
                 throw new NexusException(Locale::trans('upload.no_permission_to_be_anonymous', [], null));
             }
-            $anonymous = 'yes';
+            $anonymous = 1;
             $uploaderUsername = 'Anonymous';
         }
         $torrentSavePath = $this->getTorrentSavePath();
@@ -116,7 +116,7 @@ class UploadRepository extends BaseRepository
         $torrentInsert = [
             'filename' => $torrentFile->getClientOriginalName(),
             'owner' => $user->id,
-            'visible' => 'yes',
+            'visible' => 1,
             'anonymous' => $anonymous,
             'name' => $request->name,
             'size' => $fileListInfo['totalLength'],
@@ -407,7 +407,7 @@ class UploadRepository extends BaseRepository
         if (! $user instanceof User) {
             throw new NexusException('Unauthenticated');
         }
-        if ($user->uploadpos !== 'yes') {
+        if (! $user->uploadpos) {
             throw new NexusException(Locale::trans('upload.unauthorized_to_upload', [], null));
         }
 

@@ -57,7 +57,7 @@ class PostController extends Controller
             throw ValidationException::withMessages(['topic' => ['Permission denied.']]);
         }
 
-        if ($topic->locked === 'yes' && ! $this->canModerate($topic)) {
+        if ($topic->locked && ! $this->canModerate($topic)) {
             throw ValidationException::withMessages(['topic' => ['Topic is locked.']]);
         }
 

@@ -163,6 +163,7 @@ class ExamCronRepository extends BaseRepository
                 ];
                 Logger::writeWithContext((string) "{$currentLogPrefix}, exam will be assigned to this user.", (string) 'info', (bool) false);
                 $examUser = ExamUser::query()->create($insert);
+                $examUser->load('progresses');
                 $progressRepo->updateProgress($examUser, $user);
                 $result++;
             }
@@ -185,7 +186,7 @@ class ExamCronRepository extends BaseRepository
             ->join($examTable, "$examUserTable.exam_id", '=', "$examTable.id")
             ->where("$examUserTable.status", ExamUserStatus::NORMAL->value)
             ->select("$examUserTable.*") // 替换 selectRaw
-            ->with(['exam', 'user', 'user.language'])
+            ->with(['exam', 'user', 'user.language', 'progresses'])
             ->orderBy("$examUserTable.id", 'asc');
 
         if (! $ignoreTimeRange) {

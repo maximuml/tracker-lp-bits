@@ -417,7 +417,17 @@ class LegacyRedisCache
             return false;
         }
 
-        return is_numeric($value) ? $value : unserialize($value, ['allowed_classes' => false]);
+        if (is_numeric($value)) {
+            // Preserve the original PHP type: integers stay int, floats stay
+            // float.  Redis stores everything as strings, so a cached int(0)
+            // comes back as "0" (string) — which breaks int|float type
+            // declarations in callers (e.g. Strings::isOrAre).
+            return (float) $value == (int) $value && strpos((string) $value, '.') === false
+                ? (int) $value
+                : (float) $value;
+        }
+
+        return unserialize($value, ['allowed_classes' => false]);
     }
 
     /**

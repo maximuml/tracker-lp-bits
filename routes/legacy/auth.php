@@ -69,10 +69,10 @@ Route::match(['get', 'post'], '/report', [ModerationController::class, 'report']
 Route::match(['get', 'post'], '/reports', [ModerationController::class, 'reports'])->name('reports.legacy');
 
 // Phase 5.3: bans/cheaters/ipcheck migrated to Filament SecurityResource group
-Route::get('/bans', fn () => redirect('/nexusphp/bans'))->name('bans.legacy');
-Route::post('/bans', fn () => redirect('/nexusphp/bans'))->name('bans.legacy.post');
-Route::get('/cheaterbox', fn () => redirect('/nexusphp/cheaters'))->name('cheaterbox.legacy');
-Route::get('/cheaters', fn () => redirect('/nexusphp/cheaters'))->name('cheaters.legacy');
+Route::get('/bans', fn () => redirect('/nexusphp/security/bans'))->name('bans.legacy');
+Route::post('/bans', fn () => redirect('/nexusphp/security/bans'))->name('bans.legacy.post');
+Route::get('/cheaterbox', fn () => redirect('/nexusphp/security/cheaters'))->name('cheaterbox.legacy');
+Route::get('/cheaters', fn () => redirect('/nexusphp/security/cheaters'))->name('cheaters.legacy');
 Route::get('/ipcheck', fn () => redirect('/nexusphp/users'))->name('ipcheck.legacy');
 
 // Phase 5.3: iphistory/ipsearch redirect to Filament user view (IP shown on profile for moderators)
@@ -86,8 +86,8 @@ Route::match(['get', 'post'], '/modtask', [StaffModerationController::class, 'mo
 Route::match(['get', 'post'], '/staff', [StaffPageController::class, 'staff'])->name('staff.legacy');
 
 // Phase 5.4: staffbox migrated to Filament StaffMessageResource
-Route::get('/staffbox', fn () => redirect('/nexusphp/staff-messages'))->name('staffbox.legacy');
-Route::post('/staffbox', fn () => redirect('/nexusphp/staff-messages'))->name('staffbox.legacy.post');
+Route::get('/staffbox', fn () => redirect('/nexusphp/security/staff-messages'))->name('staffbox.legacy');
+Route::post('/staffbox', fn () => redirect('/nexusphp/security/staff-messages'))->name('staffbox.legacy.post');
 
 // Phase 5.4: staffmess/takestaffmess (mass PM) kept as legacy for now — admin-only mass-mail form
 Route::match(['get', 'post'], '/staffmess', [StaffMessageController::class, 'staffmess'])->name('staffmess.legacy');

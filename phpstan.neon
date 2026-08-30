@@ -14,5 +14,6 @@ parameters:
             - bootstrap/cache
             - node_modules (?)
             - public/vendor (?)
+            - public/install (?)
     scanDirectories:
         - vendor

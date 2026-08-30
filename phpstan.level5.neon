@@ -8,6 +8,10 @@ parameters:
         - app/Support
         - app/Models
 
+    excludePaths:
+        analyse:
+            - app/Support/Install
+
     bootstrapFiles:
         - tests/phpstan/bootstrap.php
         - tests/phpstan/constants.stub.php

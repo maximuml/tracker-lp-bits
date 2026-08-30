@@ -21,7 +21,7 @@ PHP 8.4+, MySQL, Redis, MeiliSearch. Docker Compose stack for local development.
 - `app/Support/` — helper classes (Cache, Logger, Auth, HTML, etc.)
 - `app/Models/` — 83 Eloquent models
 - `app/Filament/` — Filament admin resources
-- `app/Nexus/` — legacy NexusPHP code (install scripts, plugin system)
+- `app/Support/Install/` — legacy NexusPHP install/update scripts (standalone, `IN_NEXUS=true`)
 - `routes/legacy/` — legacy route mappings (PHP file routes)
 - `config/` — Laravel configuration
 - `database/migrations/` — 75 migrations
@@ -73,7 +73,7 @@ docker compose exec -T php composer audit
 
 ## Architecture notes
 
-- **Legacy bridge:** `app/Nexus/` contains install scripts and plugin system (standalone, `IN_NEXUS=true`)
+- **Legacy bridge:** `app/Support/Install/` contains install/update scripts (standalone, `IN_NEXUS=true`)
 - **PageServices:** `IndexPageService`, `UsercpPageService`, `MessagePageService`, etc. — render legacy pages via Blade
 - **Events:** `Events::fire()` → `ModelEventEnum` → event classes (legacy event system, not Laravel's Event::dispatch)
 - **Settings:** `settings` table → `App\Support\Settings` / `Globals` singleton (cached in Redis)

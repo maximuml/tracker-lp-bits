@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Nexus\Database;
+namespace App\Support\Install\Database;
 
 class DatabaseException extends \Exception
 {

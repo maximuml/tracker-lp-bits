@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Nexus\Install;
+namespace App\Support\Install;
 
 use App\Enums\UserClass as UserClassEnum;
 use App\Models\Setting;

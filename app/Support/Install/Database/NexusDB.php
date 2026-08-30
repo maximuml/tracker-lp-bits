@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Nexus\Database;
+namespace App\Support\Install\Database;
 
 use App\Models\PersonalAccessToken;
 use App\Support\Cache\LegacyRedisCache;
@@ -39,7 +39,7 @@ class NexusDB
 
     const ELOQUENT_CONNECTION_NAME = 'mysql';
 
-    public function setDriver(DBInterface $driver)
+    public function setDriver(Driver $driver)
     {
         $this->driver = $driver;
 
@@ -57,8 +57,8 @@ class NexusDB
             return self::$instance;
         }
         $instance = new self;
-        //        $driver = new DBMysqli();
-        $driver = new DBPdo;
+        //        $driver = new MysqliDriver();
+        $driver = new PdoDriver;
         $instance->setDriver($driver);
 
         return self::$instance = $instance;
@@ -376,7 +376,7 @@ class NexusDB
         static $driver;
         $config = Config::get('nexus.mysql', null);
         if ($driver === null) {
-            $driver = new DBMysqli;
+            $driver = new MysqliDriver;
             $driver->connect($config['host'], $config['username'], $config['password'], 'information_schema', $config['port']);
         }
         $quotedDb = DB::connection()->getPdo()->quote($config['database']);

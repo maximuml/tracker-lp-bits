@@ -54,7 +54,7 @@ echo_info "Starting container for SERVICE_NAME=$SERVICE_NAME..."
 
 ROOT_PATH="/var/www/html"
 
-SOURCE_DIR="${ROOT_PATH}/app/Nexus/Install/install"
+SOURCE_DIR="${ROOT_PATH}/app/Support/Install/scripts"
 TARGET_DIR="${ROOT_PATH}/public"
 ENV_FILE="${ROOT_PATH}/.env"
 VENDOR_AUTOLOAD_FILE="${ROOT_PATH}/vendor/autoload.php"

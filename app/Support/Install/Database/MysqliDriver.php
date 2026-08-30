@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Nexus\Database;
+namespace App\Support\Install\Database;
 
 /**
  * @deprecated
  *
- * use DBPdo instead
+ * use PdoDriver instead
  */
-class DBMysqli implements DBInterface
+class MysqliDriver implements Driver
 {
     private $mysqli;
 

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config;
+use App\Support\Install\Database\NexusDB;
 use App\Support\RequestContext;
-use Nexus\Database\NexusDB;
 
 ini_set('error_reporting', E_ALL);
 ini_set('display_errors', 0);

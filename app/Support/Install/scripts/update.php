@@ -3,14 +3,14 @@
 declare(strict_types=1);
 
 use App\Support\Env;
+use App\Support\Install\Update;
 use App\Support\Url;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
-use Nexus\Install\Update;
 
 $rootpath = dirname(dirname(__DIR__)).'/';
 define('ROOT_PATH', $rootpath);
-require ROOT_PATH.'app/Nexus/Install/install_update_start.php';
+require ROOT_PATH.'app/Support/Install/install_update_start.php';
 
 $isPost = $_SERVER['REQUEST_METHOD'] == 'POST';
 $update = new Update;

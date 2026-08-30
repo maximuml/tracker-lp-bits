@@ -210,7 +210,7 @@ function shoutAttachToggleHandler() {
             }
             $rowClass = implode(' ', $rowClasses);
         @endphp
-        <tr><td class="{{ $rowClass }}"><span class='date'>[{{ $time }}]</span> {!! $actions !!} {!! $avatarHtml !!} {!! $classBadge !!}{!! $username !!} {!! $reactions !!} {!! $messageHtml !!}
+        <tr><td class="{{ $rowClass }}"><span class='date'>[{!! $time !!}]</span> {!! $actions !!} {!! $avatarHtml !!} {!! $classBadge !!}{!! $username !!} {!! $reactions !!} {!! $messageHtml !!}
 </td></tr>
         @php
             $prevUserId = $currUserId;

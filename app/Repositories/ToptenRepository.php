@@ -134,7 +134,7 @@ final class ToptenRepository
 
         return DB::table('users')
             ->selectRaw("id as userid, username, added, uploaded, downloaded, {$speedStr}")
-            ->where('enabled', 'yes');
+            ->where('enabled', true);
     }
 
     /**
@@ -146,7 +146,7 @@ final class ToptenRepository
         $base = DB::table('torrents as t')
             ->leftJoin('peers as p', 't.id', '=', 'p.torrent')
             ->selectRaw('t.*, (t.size * t.times_completed + SUM(p.downloaded)) AS data')
-            ->where('p.seeder', 'no')
+            ->where('p.seeder', 0)
             ->groupBy('t.id');
 
         $sections = [];
@@ -246,7 +246,7 @@ final class ToptenRepository
                     DB::table('users as u')
                         ->leftJoin('countries as c', 'u.country', '=', 'c.id')
                         ->select('c.name', 'c.flagpic', DB::raw('sum(u.uploaded) AS ul'))
-                        ->where('u.enabled', 'yes')
+                        ->where('u.enabled', true)
                         ->groupBy('c.name')
                         ->orderBy('ul', 'desc')
                         ->limit($limit)
@@ -266,7 +266,7 @@ final class ToptenRepository
                     DB::table('users as u')
                         ->leftJoin('countries as c', 'u.country', '=', 'c.id')
                         ->select('c.name', 'c.flagpic', DB::raw('sum(u.uploaded)/count(u.id) AS ul_avg'))
-                        ->where('u.enabled', 'yes')
+                        ->where('u.enabled', true)
                         ->groupBy('c.name')
                         ->havingRaw('sum(u.uploaded) > 1099511627776 AND count(u.id) >= 100')
                         ->orderBy('ul_avg', 'desc')
@@ -287,7 +287,7 @@ final class ToptenRepository
                     DB::table('users as u')
                         ->leftJoin('countries as c', 'u.country', '=', 'c.id')
                         ->select('c.name', 'c.flagpic', DB::raw('sum(u.uploaded)/sum(u.downloaded) AS r'))
-                        ->where('u.enabled', 'yes')
+                        ->where('u.enabled', true)
                         ->groupBy('c.name')
                         ->havingRaw('sum(u.uploaded) > 1099511627776 AND sum(u.downloaded) > 1099511627776 AND count(u.id) >= 100')
                         ->orderBy('r', 'desc')

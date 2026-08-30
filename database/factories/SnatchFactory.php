@@ -36,7 +36,7 @@ class SnatchFactory extends Factory
             'last_action' => now()->toDateTimeString(),
             'startdat' => now()->toDateTimeString(),
             'completedat' => null,
-            'finished' => 'no',
+            'finished' => 0,
             'hit_and_run_id' => 0,
             'buy_log_id' => 0,
         ];
@@ -64,7 +64,7 @@ class SnatchFactory extends Factory
     public function finished(): self
     {
         return $this->state(fn (array $attributes) => [
-            'finished' => 'yes',
+            'finished' => 1,
             'to_go' => 0,
             'completedat' => now()->toDateTimeString(),
         ]);

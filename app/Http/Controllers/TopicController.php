@@ -120,10 +120,10 @@ class TopicController extends Controller
         }
 
         if ($dto->locked !== null) {
-            $topic->locked = $dto->locked ? 'yes' : 'no';
+            $topic->locked = (bool) $dto->locked;
         }
         if ($dto->sticky !== null) {
-            $topic->sticky = $dto->sticky ? 'yes' : 'no';
+            $topic->sticky = (bool) $dto->sticky;
         }
         if ($dto->hlcolor !== null) {
             $topic->hlcolor = (int) max(0, $dto->hlcolor);

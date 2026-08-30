@@ -18,7 +18,7 @@ class TorrentRequest extends FormRequest
     {
         $user = $this->user();
 
-        return $user instanceof User && $user->uploadpos == 'yes';
+        return $user instanceof User && $user->uploadpos;
     }
 
     /**

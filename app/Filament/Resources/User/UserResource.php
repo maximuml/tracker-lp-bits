@@ -123,10 +123,14 @@ class UserResource extends Resource
                     ->formatStateUsing(fn (Column $column) => ($record = $column->getRecord()) instanceof User ? $record->downloadedText : '')
                     ->sortable()->label(__('label.downloaded')),
                 TextColumn::make('status')->badge()->colors(['success' => 'confirmed', 'warning' => 'pending'])->label(__('label.user.status')),
-                TextColumn::make('enabled')->badge()->colors($yesNoOptions)->label(__('label.user.enabled')),
-                TextColumn::make('downloadpos')->badge()->colors($yesNoOptions)->label(__('label.user.downloadpos')),
-                TextColumn::make('parked')->badge()->colors($yesNoOptions)->label(__('label.user.parked')),
-                TextColumn::make('warned')->badge()->colors($yesNoOptions)->label(__('label.user.warned')),
+                TextColumn::make('enabled')->badge()->colors($yesNoOptions)->label(__('label.user.enabled'))
+                    ->formatStateUsing(fn ($state) => $state ? 'yes' : 'no'),
+                TextColumn::make('downloadpos')->badge()->colors($yesNoOptions)->label(__('label.user.downloadpos'))
+                    ->formatStateUsing(fn ($state) => $state ? 'yes' : 'no'),
+                TextColumn::make('parked')->badge()->colors($yesNoOptions)->label(__('label.user.parked'))
+                    ->formatStateUsing(fn ($state) => $state ? 'yes' : 'no'),
+                TextColumn::make('warned')->badge()->colors($yesNoOptions)->label(__('label.user.warned'))
+                    ->formatStateUsing(fn ($state) => $state ? 'yes' : 'no'),
                 TextColumn::make('isDonating')
                     ->state(fn ($record): string => $record->isDonating() ? 'yes' : 'no')
                     ->badge()
@@ -146,15 +150,42 @@ class UserResource extends Resource
                     }),
                 SelectFilter::make('class')->options(User::listClass())->label(__('label.user.class')),
                 SelectFilter::make('status')->options(['confirmed' => 'confirmed', 'pending' => 'pending'])->label(__('label.user.status')),
-                SelectFilter::make('enabled')->options(self::$yesOrNo)->label(__('label.user.enabled')),
-                SelectFilter::make('downloadpos')->options(self::$yesOrNo)->label(__('label.user.downloadpos')),
-                SelectFilter::make('parked')->options(self::$yesOrNo)->label(__('label.user.parked')),
+                SelectFilter::make('enabled')->options(self::$yesOrNo)->label(__('label.user.enabled'))
+                    ->query(function (Builder $query, array $data) {
+                        if ($data['value'] === 'yes') {
+                            return $query->where('enabled', true);
+                        } elseif ($data['value'] === 'no') {
+                            return $query->where('enabled', false);
+                        }
+
+                        return $query;
+                    }),
+                SelectFilter::make('downloadpos')->options(self::$yesOrNo)->label(__('label.user.downloadpos'))
+                    ->query(function (Builder $query, array $data) {
+                        if ($data['value'] === 'yes') {
+                            return $query->where('downloadpos', true);
+                        } elseif ($data['value'] === 'no') {
+                            return $query->where('downloadpos', false);
+                        }
+
+                        return $query;
+                    }),
+                SelectFilter::make('parked')->options(self::$yesOrNo)->label(__('label.user.parked'))
+                    ->query(function (Builder $query, array $data) {
+                        if ($data['value'] === 'yes') {
+                            return $query->where('parked', true);
+                        } elseif ($data['value'] === 'no') {
+                            return $query->where('parked', false);
+                        }
+
+                        return $query;
+                    }),
                 SelectFilter::make('warned')->options(self::$yesOrNo)->label(__('label.user.warned'))
                     ->query(function (Builder $query, array $data) {
                         if ($data['value'] === 'yes') {
-                            return $query->where('warned', 'yes');
+                            return $query->where('warned', true);
                         } elseif ($data['value'] === 'no') {
-                            return $query->where('warned', 'no');
+                            return $query->where('warned', false);
                         }
 
                         return $query;
@@ -164,11 +195,11 @@ class UserResource extends Resource
                     ->label(__('label.user.is_donating'))
                     ->query(function (Builder $query, array $data) {
                         if ($data['value'] === 'yes') {
-                            return $query->where('donor', 'yes')->where(function ($query) {
+                            return $query->where('donor', true)->where(function ($query) {
                                 return $query->whereNull('donoruntil')->orWhere('donoruntil', '>=', now());
                             });
                         } elseif ($data['value'] === 'no') {
-                            return $query->where('donor', 'no');
+                            return $query->where('donor', false);
                         }
 
                         return $query;
@@ -234,12 +265,14 @@ class UserResource extends Resource
                         TextEntry::make('enabled')
                             ->label(__('label.user.enabled'))
                             ->badge()
-                            ->colors(['success' => 'yes', 'warning' => 'no'])
+                            ->colors(['success' => true, 'warning' => false])
+                            ->formatStateUsing(fn ($state) => $state ? 'yes' : 'no')
                             ->hintAction(self::buildActionEnableDisable()),
                         TextEntry::make('downloadpos')
                             ->label(__('label.user.downloadpos'))
                             ->badge()
-                            ->colors(['success' => 'yes', 'warning' => 'no'])
+                            ->colors(['success' => true, 'warning' => false])
+                            ->formatStateUsing(fn ($state) => $state ? 'yes' : 'no')
                             ->hintAction(self::buildActionChangeDownloadPos()),
                         TextEntry::make('twoFactorAuthenticationStatus')
                             ->label(__('label.user.two_step_authentication'))
@@ -266,8 +299,8 @@ class UserResource extends Resource
                     ->required()
                     ->reactive(),
                 Radio::make('vip_added')
-                    ->options(self::getYesNoOptions('yes', 'no'))
-                    ->default(fn (User $record) => $record->vip_added)
+                    ->options(self::getYesNoOptions(1, 0))
+                    ->default(fn (User $record) => (int) $record->vip_added)
                     ->label(__('user.labels.vip_added'))
                     ->helperText(__('user.labels.vip_added_help'))
                     ->hidden(fn (Get $get) => $get('class') != UserClassEnum::VIP->value),
@@ -363,13 +396,13 @@ class UserResource extends Resource
     private static function buildActionEnableDisable(): Action
     {
         return Action::make('changeClass')
-            ->label(fn (User $record) => $record->enabled == 'yes' ? __('admin.resources.user.actions.disable_modal_btn') : __('admin.resources.user.actions.enable_modal_btn'))
-            ->modalHeading(fn (User $record) => $record->enabled == 'yes' ? __('admin.resources.user.actions.disable_modal_title') : __('admin.resources.user.actions.enable_modal_title'))
+            ->label(fn (User $record) => $record->enabled ? __('admin.resources.user.actions.disable_modal_btn') : __('admin.resources.user.actions.enable_modal_btn'))
+            ->modalHeading(fn (User $record) => $record->enabled ? __('admin.resources.user.actions.disable_modal_title') : __('admin.resources.user.actions.enable_modal_title'))
             ->button()
             ->visible(fn (User $record): bool => (self::currentUser()->class > $record->class))
             ->schema([
                 TextInput::make('reason')->label(__('admin.resources.user.actions.enable_disable_reason'))->placeholder(__('admin.resources.user.actions.enable_disable_reason_placeholder')),
-                Hidden::make('action')->default(fn (User $record) => $record->enabled == 'yes' ? 'disable' : 'enable'),
+                Hidden::make('action')->default(fn (User $record) => $record->enabled ? 'disable' : 'enable'),
                 Hidden::make('uid')->default(fn (User $record) => $record->id),
             ])
             ->action(function (User $record, array $data) {
@@ -390,14 +423,14 @@ class UserResource extends Resource
     private static function buildActionChangeDownloadPos(): Action
     {
         return Action::make('changeDownloadPos')
-            ->label(fn (User $record) => $record->downloadpos == 'yes' ? __('admin.resources.user.actions.disable_download_privileges_btn') : __('admin.resources.user.actions.enable_download_privileges_btn'))
+            ->label(fn (User $record) => $record->downloadpos ? __('admin.resources.user.actions.disable_download_privileges_btn') : __('admin.resources.user.actions.enable_download_privileges_btn'))
             ->button()
             ->requiresConfirmation()
             ->visible(fn (User $record): bool => (self::currentUser()->class > $record->class))
             ->action(function (User $record) {
                 $userRep = self::getRep();
                 try {
-                    $userRep->updateDownloadPrivileges(self::currentUser(), $record->id, $record->downloadpos == 'yes' ? 'no' : 'yes');
+                    $userRep->updateDownloadPrivileges(self::currentUser(), $record->id, ! $record->downloadpos);
                     Admin::successNotification('');
                 } catch (Exception $exception) {
                     Admin::failNotification($exception->getMessage());
@@ -479,7 +512,7 @@ class UserResource extends Resource
                 ->action(function (Collection $records) {
                     $rep = self::getRep();
                     foreach ($records as $record) {
-                        if ($record instanceof User && $record->enabled === 'yes') {
+                        if ($record instanceof User && $record->enabled) {
                             try {
                                 $rep->disableUser(self::currentUser(), $record->id, __('admin.resources.user.actions.disable_bulk_reason'));
                             } catch (Exception $e) {

@@ -2,7 +2,6 @@
 
 namespace Tests\Unit;
 
-use App\Enums\TorrentVisible;
 use App\Enums\UserClass;
 use App\Models\Bookmark;
 use App\Models\Category;
@@ -61,7 +60,7 @@ final class DatabaseFactoriesTest extends TestCase
         $this->assertSame(32, strlen((string) $peer->passkey));
 
         $seeder = Peer::factory()->seeder()->create();
-        $this->assertSame('yes', $seeder->seeder);
+        $this->assertTrue($seeder->seeder);
 
         $comment = Comment::factory()->create();
         $this->assertGreaterThan(0, $comment->id);
@@ -94,10 +93,10 @@ final class DatabaseFactoriesTest extends TestCase
     public function test_factory_state_methods_work(): void
     {
         $torrent = Torrent::factory()->banned()->create();
-        $this->assertSame(Torrent::BANNED_YES, $torrent->banned);
+        $this->assertTrue($torrent->banned);
 
         $invisible = Torrent::factory()->invisible()->create();
-        $this->assertSame(TorrentVisible::NO->value, $invisible->visible);
+        $this->assertFalse($invisible->visible);
 
         $user = User::factory()->create();
         $torrent2 = Torrent::factory()->owner($user)->create();
@@ -115,6 +114,6 @@ final class DatabaseFactoriesTest extends TestCase
         $message = Message::factory()->between($user, $receiver)->read()->create();
         $this->assertSame($user->id, $message->sender);
         $this->assertSame($receiver->id, $message->receiver);
-        $this->assertSame('no', $message->unread);
+        $this->assertFalse($message->unread);
     }
 }

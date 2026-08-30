@@ -41,7 +41,7 @@ class BitbucketUploadController extends Controller
 
         $lang = $this->loadLang();
 
-        if ($currentUser['parked'] === 'yes') {
+        if ($currentUser['parked']) {
             LegacyResponse::abort($lang['std_sorry'] ?? '', $lang['std_unauthorized_to_upload'] ?? '', false);
         }
 
@@ -74,7 +74,7 @@ class BitbucketUploadController extends Controller
 
         $lang = $this->loadLang();
 
-        if ($currentUser['parked'] === 'yes') {
+        if ($currentUser['parked']) {
             LegacyResponse::abort($lang['std_sorry'] ?? '', $lang['std_unauthorized_to_upload'] ?? '', false);
         }
 

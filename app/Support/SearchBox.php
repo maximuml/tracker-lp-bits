@@ -178,7 +178,7 @@ final class SearchBox
                     $icon = $item->icon;
                     if ($icon) {
                         $iconFolder = trim($icon->folder, '/');
-                        $langAndFile = sprintf('%s%s', $icon->multilang == 'yes' ? "$lang/" : '', $item->image);
+                        $langAndFile = sprintf('%s%s', $icon->multilang ? "$lang/" : '', $item->image);
                         $fullDir = Path::resolve("pic/category/$iconFolder/$langAndFile", ROOT_PATH);
                         if (file_exists($fullDir)) {
                             $backgroundImagePath = "pic/category/$iconFolder/$langAndFile";

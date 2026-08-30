@@ -18,9 +18,7 @@ class ForumRepository extends BaseRepository
     public function deleteForum(int $id): void
     {
         $topics = DB::table('topics')->where('forumid', $id)->get(['id']);
-        foreach ($topics as $topic) {
-            DB::table('posts')->where('topicid', $topic->id)->delete();
-        }
+        DB::table('posts')->whereIn('topicid', $topics->pluck('id')->toArray())->delete();
 
         DB::table('topics')->where('forumid', $id)->delete();
         DB::table('forums')->where('id', $id)->delete();
@@ -399,9 +397,11 @@ class ForumRepository extends BaseRepository
         ];
     }
 
-    public static function isTopicLocked(int $topicid): ?string
+    public static function isTopicLocked(int $topicid): ?bool
     {
-        return Topic::query()->where('id', $topicid)->value('locked');
+        $topic = Topic::query()->where('id', $topicid)->first(['locked']);
+
+        return $topic?->locked;
     }
 
     public static function getTopic(int $id): ?Topic
@@ -449,8 +449,8 @@ class ForumRepository extends BaseRepository
             'userid' => $userId,
             'forumid' => $forumId,
             'subject' => $subject,
-            'locked' => 'no',
-            'sticky' => 'no',
+            'locked' => false,
+            'sticky' => false,
             'hlcolor' => 0,
             'views' => 0,
             'firstpost' => 0,
@@ -678,7 +678,7 @@ class ForumRepository extends BaseRepository
         return true;
     }
 
-    public static function updateTopicLocked(int $topicid, string $locked): bool
+    public static function updateTopicLocked(int $topicid, bool $locked): bool
     {
         return (bool) Topic::query()->where('id', $topicid)->update(['locked' => $locked]);
     }

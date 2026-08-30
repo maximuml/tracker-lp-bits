@@ -75,15 +75,15 @@ class StaffModerationController extends LegacyController
         $title = (string) (request()->post('title') ?? '');
         $avatar = (string) (request()->post('avatar') ?? '');
         $signature = (string) (request()->post('signature') ?? '');
-        $enabled = (string) (request()->post('enabled') ?? 'yes');
-        $uploadpos = (string) (request()->post('uploadpos') ?? 'yes');
-        $downloadpos = (string) (request()->post('downloadpos') ?? 'yes');
+        $enabled = request()->post('enabled') === 'yes';
+        $uploadpos = request()->post('uploadpos') === 'yes';
+        $downloadpos = request()->post('downloadpos') === 'yes';
         $privacy = (string) (request()->post('privacy') ?? 'normal');
-        $forumpost = (string) (request()->post('forumpost') ?? 'yes');
+        $forumpost = request()->post('forumpost') === 'yes';
         $supportlang = (string) (request()->post('supportlang') ?? '');
-        $support = (string) (request()->post('support') ?? 'no');
+        $support = request()->post('support') === 'yes';
         $supportfor = (string) (request()->post('supportfor') ?? '');
-        $moviepicker = (string) (request()->post('moviepicker') ?? 'no');
+        $moviepicker = request()->post('moviepicker') === 'yes';
         $pickfor = (string) (request()->post('pickfor') ?? '');
         $stafffor = (string) (request()->post('staffduties') ?? '');
 
@@ -179,10 +179,7 @@ class StaffModerationController extends LegacyController
         $staffleaderClass = defined('UC_STAFFLEADER') ? \constant('UC_STAFFLEADER') : 0;
         if (UserDisplay::currentClass() == $staffleaderClass) {
             $locale = Locale::userLocale($userId);
-            $donor = (string) (request()->post('donor') ?? 'no');
-            if ($donor !== 'yes') {
-                $donor = 'no';
-            }
+            $donor = request()->post('donor') === 'yes';
             $donoruntil = request()->post('donoruntil') ?: null;
             $donated = (float) (request()->post('donated') ?? 0);
             $donatedCny = (float) (request()->post('donated_cny') ?? 0);
@@ -200,7 +197,7 @@ class StaffModerationController extends LegacyController
             $updateset['donoruntil'] = $donoruntil;
 
             $nowStr = date('Y-m-d H:i:s');
-            if (($donor !== $arr['donor']) && (($donor === 'yes' && $donoruntil && $donoruntil >= $nowStr) || ($donor === 'no'))) {
+            if (($donor !== (bool) $arr['donor']) && (($donor && $donoruntil && $donoruntil >= $nowStr) || (! $donor))) {
                 $subject = Locale::trans('user.msg_your_donor_status_changed', [], $locale);
                 $msg = Locale::trans('user.msg_donor_status_changed_by', [], $locale).$currentUser['username'];
                 Message::add([
@@ -210,7 +207,7 @@ class StaffModerationController extends LegacyController
                     'msg' => $msg,
                     'added' => now(),
                 ]);
-                $userModifyLogs[] = "donor status changed by {$currentUser['username']}. Current donor status: {$donor}";
+                $userModifyLogs[] = "donor status changed by {$currentUser['username']}. Current donor status: ".($donor ? 'yes' : 'no');
             }
         }
 
@@ -223,8 +220,8 @@ class StaffModerationController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Permission denied. For security reason, we logged this action');
         }
 
-        if ($warned !== '' && $curWarned !== $warned) {
-            $updateset['warned'] = $warned;
+        if ($warned !== '' && (bool) $curWarned !== ($warned === 'yes')) {
+            $updateset['warned'] = $warned === 'yes';
             $updateset['warneduntil'] = null;
 
             $locale = Locale::userLocale($userId);
@@ -267,7 +264,7 @@ class StaffModerationController extends LegacyController
                 'added' => now(),
             ]);
 
-            $updateset['warned'] = 'yes';
+            $updateset['warned'] = true;
             $updateset['lastwarned'] = now()->toDateTimeString();
             $updateset['warnedby'] = $currentUserId;
             $updateset['timeswarned'] = new Expression('timeswarned + 1');
@@ -283,7 +280,7 @@ class StaffModerationController extends LegacyController
 
         if ($forumpost !== $curForumpost) {
             $locale = Locale::userLocale($userId);
-            if ($forumpost === 'yes') {
+            if ($forumpost) {
                 $userModifyLogs[] = "Posting enabled by {$currentUser['username']}";
                 $subject = Locale::trans('user.msg_posting_rights_restored', [], $locale);
                 $msg = Locale::trans('user.msg_your_posting_rights_restored', [], $locale).$currentUser['username'].Locale::trans('user.msg_you_can_post', [], $locale);
@@ -303,7 +300,7 @@ class StaffModerationController extends LegacyController
 
         if ($uploadpos !== $curUploadpos) {
             $locale = Locale::userLocale($userId);
-            if ($uploadpos === 'yes') {
+            if ($uploadpos) {
                 $userModifyLogs[] = "Upload enabled by {$currentUser['username']}";
                 $subject = Locale::trans('user.msg_upload_rights_restored', [], $locale);
                 $msg = Locale::trans('user.msg_your_upload_rights_restored', [], $locale).$currentUser['username'].Locale::trans('user.msg_you_upload_can_upload', [], $locale);
@@ -323,7 +320,7 @@ class StaffModerationController extends LegacyController
 
         if ($downloadpos !== $curDownloadpos) {
             $locale = Locale::userLocale($userId);
-            if ($downloadpos === 'yes') {
+            if ($downloadpos) {
                 $userModifyLogs[] = "Download enabled by {$currentUser['username']}";
                 $subject = Locale::trans('user.msg_download_rights_restored', [], $locale);
                 $msg = Locale::trans('user.msg_your_download_rights_restored', [], $locale).$currentUser['username'].Locale::trans('user.msg_you_can_download', [], $locale);

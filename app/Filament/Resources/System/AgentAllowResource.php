@@ -58,8 +58,8 @@ class AgentAllowResource extends Resource
                 TextInput::make('agent_pattern')->required()->label(__('label.agent_allow.agent_pattern')),
                 Radio::make('agent_matchtype')->options(self::$matchTypes)->required()->label(__('label.agent_allow.agent_matchtype')),
                 TextInput::make('agent_match_num')->required()->label(__('label.agent_allow.agent_match_num')),
-                Radio::make('exception')->options(self::$yesOrNo)->required()->label(__('label.agent_allow.exception')),
-                Radio::make('allowhttps')->options(self::$yesOrNo)->required()->label(__('label.agent_allow.allowhttps')),
+                Radio::make('exception')->options(self::getYesNoOptions())->required()->label(__('label.agent_allow.exception')),
+                Radio::make('allowhttps')->options(self::getYesNoOptions())->required()->label(__('label.agent_allow.allowhttps')),
 
                 Textarea::make('comment')->label(__('label.comment')),
             ]);

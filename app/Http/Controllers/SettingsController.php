@@ -279,7 +279,7 @@ class SettingsController extends LegacyController
             }
         }
 
-        $autoload = $section === 'misc' ? 'no' : 'yes';
+        $autoload = $section !== 'misc';
         Settings::saveBatch($section, $data, $autoload);
 
         // Cache clearing

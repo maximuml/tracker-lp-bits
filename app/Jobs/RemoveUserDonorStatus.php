@@ -30,7 +30,7 @@ class RemoveUserDonorStatus
     {
         $users = User::query()
             ->with('language')
-            ->where('donor', 'yes')
+            ->where('donor', true)
             ->whereNotNull('donoruntil')
             ->where('donoruntil', '<', now())
             ->get();
@@ -43,7 +43,7 @@ class RemoveUserDonorStatus
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
-            $user->donor = 'no';
+            $user->donor = false;
             Logger::writeWithContext((string) sprintf('update user %s => %s', $user->id, json_encode($user->getDirty())), (string) 'info', (bool) false);
             $user->save();
             Cache::clearUser($user->id, '');

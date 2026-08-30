@@ -58,15 +58,15 @@ class ScrapeService
             throw TrackerException::failure('Invalid passkey! Re-download the .torrent from '.SiteConfig::current()->basic->baseUrl());
         }
 
-        if ($user['enabled'] === 'no') {
+        if (! $user['enabled']) {
             throw TrackerException::failure('Your account is disabled!');
         }
 
-        if ($user['parked'] === 'yes') {
+        if ($user['parked']) {
             throw TrackerException::failure('Your account is parked! (Read the FAQ)');
         }
 
-        if ($user['downloadpos'] === 'no') {
+        if (! $user['downloadpos']) {
             throw TrackerException::failure('Your downloading privileges have been disabled! (Read the rules)');
         }
     }

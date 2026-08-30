@@ -62,8 +62,8 @@ class LoginAttemptResource extends Resource
                     ->default('login')
                     ->label(__('label.login_attempt.type')),
                 Select::make('banned')
-                    ->options(['yes' => 'Banned', 'no' => 'Not banned'])
-                    ->default('no')
+                    ->options([1 => 'Banned', 0 => 'Not banned'])
+                    ->default(0)
                     ->label(__('label.login_attempt.status')),
             ]);
     }
@@ -78,15 +78,15 @@ class LoginAttemptResource extends Resource
                 TextColumn::make('type')->label(__('label.login_attempt.type'))->badge(),
                 TextColumn::make('banned')
                     ->badge()
-                    ->colors(['danger' => 'yes', 'success' => 'no'])
-                    ->formatStateUsing(fn ($record) => $record->banned === 'yes' ? __('label.login_attempt.banned') : __('label.login_attempt.not_banned'))
+                    ->colors(['danger' => true, 'success' => false])
+                    ->formatStateUsing(fn ($record) => $record->banned ? __('label.login_attempt.banned') : __('label.login_attempt.not_banned'))
                     ->label(__('label.login_attempt.status')),
                 TextColumn::make('added')->dateTime('Y-m-d H:i')->sortable()->label(__('label.added')),
             ])
             ->defaultSort('id', 'desc')
             ->filters([
                 Tables\Filters\SelectFilter::make('banned')
-                    ->options(['yes' => 'Banned', 'no' => 'Not banned'])
+                    ->options([1 => 'Banned', 0 => 'Not banned'])
                     ->label(__('label.login_attempt.status')),
                 Tables\Filters\SelectFilter::make('type')
                     ->options(['login' => 'Login', 'recover' => 'Recover'])
@@ -97,16 +97,16 @@ class LoginAttemptResource extends Resource
                     ->label(__('label.login_attempt.ban'))
                     ->icon('heroicon-o-lock-closed')
                     ->color('danger')
-                    ->visible(fn ($record) => $record->banned === 'no')
+                    ->visible(fn ($record) => ! $record->banned)
                     ->requiresConfirmation()
-                    ->action(fn ($record) => $record->update(['banned' => 'yes'])),
+                    ->action(fn ($record) => $record->update(['banned' => true])),
                 Action::make('unban')
                     ->label(__('label.login_attempt.unban'))
                     ->icon('heroicon-o-lock-open')
                     ->color('success')
-                    ->visible(fn ($record) => $record->banned === 'yes')
+                    ->visible(fn ($record) => $record->banned)
                     ->requiresConfirmation()
-                    ->action(fn ($record) => $record->update(['banned' => 'no'])),
+                    ->action(fn ($record) => $record->update(['banned' => false])),
                 EditAction::make(),
                 DeleteAction::make(),
             ])
@@ -118,14 +118,14 @@ class LoginAttemptResource extends Resource
                     ->color('danger')
                     ->requiresConfirmation()
                     ->deselectRecordsAfterCompletion()
-                    ->action(fn (Collection $records) => $records->each(fn ($r) => $r->update(['banned' => 'yes']))),
+                    ->action(fn (Collection $records) => $records->each(fn ($r) => $r->update(['banned' => true]))),
                 BulkAction::make('unban_bulk')
                     ->label(__('label.login_attempt.unban_bulk'))
                     ->icon('heroicon-o-lock-open')
                     ->color('success')
                     ->requiresConfirmation()
                     ->deselectRecordsAfterCompletion()
-                    ->action(fn (Collection $records) => $records->each(fn ($r) => $r->update(['banned' => 'no']))),
+                    ->action(fn (Collection $records) => $records->each(fn ($r) => $r->update(['banned' => false]))),
             ]);
     }
 

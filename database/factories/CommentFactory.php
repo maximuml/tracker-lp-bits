@@ -34,7 +34,7 @@ class CommentFactory extends Factory
             'editedby' => 0,
             'editdate' => null,
             'offer' => 0,
-            'anonymous' => 'no',
+            'anonymous' => false,
         ];
     }
 

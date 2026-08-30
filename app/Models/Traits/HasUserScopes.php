@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models\Traits;
 
-use App\Enums\UserEnabled;
 use App\Enums\UserStatus;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
@@ -20,7 +19,7 @@ trait HasUserScopes
      */
     public function scopeNormal(Builder $query): Builder
     {
-        return $query->where('status', UserStatus::CONFIRMED->value)->where('enabled', UserEnabled::YES->value);
+        return $query->where('status', UserStatus::CONFIRMED->value)->where('enabled', true);
     }
 
     /**
@@ -29,7 +28,7 @@ trait HasUserScopes
      */
     public function scopeDonating(Builder $query): Builder
     {
-        return $query->where('donor', 'yes')->where(function (Builder $query) {
+        return $query->where('donor', true)->where(function (Builder $query) {
             return $query->whereNull('donoruntil')
                 ->orWhere('donoruntil', '>=', now());
         });

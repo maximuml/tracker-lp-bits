@@ -202,11 +202,19 @@ final class InfoRepository
         $torrentIds = array_filter(array_unique(array_column($comments, 't_id')));
         $countsBefore = [];
         if (! empty($comments)) {
-            foreach ($comments as $comment) {
-                $countsBefore[$comment['id']] = (int) DB::table('comments')
-                    ->where('torrent', $comment['t_id'])
-                    ->where('id', '<', $comment['id'])
-                    ->count();
+            $commentIds = array_column($comments, 'id');
+            $counts = DB::table('comments as c1')
+                ->leftJoin('comments as c2', function ($join) {
+                    $join->on('c1.torrent', '=', 'c2.torrent')
+                        ->on('c2.id', '<', 'c1.id');
+                })
+                ->whereIn('c1.id', $commentIds)
+                ->groupBy('c1.id')
+                ->selectRaw('c1.id as comment_id, COUNT(c2.id) as count_before')
+                ->pluck('count_before', 'comment_id')
+                ->toArray();
+            foreach ($counts as $commentId => $count) {
+                $countsBefore[(int) $commentId] = (int) $count;
             }
         }
 

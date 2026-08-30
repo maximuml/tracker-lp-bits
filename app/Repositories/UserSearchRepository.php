@@ -335,28 +335,28 @@ final class UserSearchRepository
             // account status
             $accountstatus = (string) ($params['as'] ?? '');
             if ($accountstatus) {
-                $userQuery->where('u.enabled', $accountstatus == '1' ? 'yes' : 'no');
+                $userQuery->where('u.enabled', $accountstatus == '1');
                 $q = self::appendQueryParam($q, 'as='.$accountstatus);
             }
 
             // donor
             $donor = (string) ($params['do'] ?? '');
             if ($donor) {
-                $userQuery->where('u.donor', $donor == '1' ? 'yes' : 'no');
+                $userQuery->where('u.donor', $donor == '1');
                 $q = self::appendQueryParam($q, 'do='.$donor);
             }
 
             // warned
             $warned = (string) ($params['w'] ?? '');
             if ($warned) {
-                $userQuery->where('u.warned', $warned == '1' ? 'yes' : 'no');
+                $userQuery->where('u.warned', $warned == '1');
                 $q = self::appendQueryParam($q, 'w='.$warned);
             }
 
             // disabled IP
             $disabled = (string) ($params['dip'] ?? '');
             if ($disabled) {
-                $userQuery->leftJoin('users as u2', 'u.ip', '=', 'u2.ip')->where('u2.enabled', 'no');
+                $userQuery->leftJoin('users as u2', 'u.ip', '=', 'u2.ip')->where('u2.enabled', false);
                 $q = self::appendQueryParam($q, 'dip='.$disabled);
             }
 

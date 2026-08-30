@@ -42,7 +42,7 @@ final class TorrentAjaxRepository
     {
         $torrentName = Torrent::query()->where('id', $torrentId)->value('name') ?? '';
         $count = DB::table('snatched')
-            ->where('finished', 'yes')
+            ->where('finished', 1)
             ->where('torrentid', $torrentId)
             ->count();
 
@@ -55,7 +55,7 @@ final class TorrentAjaxRepository
         $rpp = (int) $pager[4];
 
         $snatchedRows = DB::table('snatched')
-            ->where('finished', 'yes')
+            ->where('finished', 1)
             ->where('torrentid', $torrentId)
             ->orderByDesc('completedat')
             ->offset($offset)
@@ -155,7 +155,7 @@ final class TorrentAjaxRepository
         $seeders = [];
         $leechers = [];
         foreach ($peerRows as $subrow) {
-            if ($subrow['seeder'] === 'yes') {
+            if ($subrow['seeder'] === 1) {
                 $seeders[] = $subrow;
             } else {
                 $leechers[] = $subrow;
@@ -300,7 +300,7 @@ final class TorrentAjaxRepository
                     ->orderByDesc('torrents.id');
 
                 if ($currentUser === null || ($currentUser->id !== $targetUserId && ! Permissions::userCan(PermissionEnum::VIEW_ANONYMOUS->value, false, $currentUser->id))) {
-                    $query->where('torrents.anonymous', 'no');
+                    $query->where('torrents.anonymous', 0);
                 }
 
                 return $query;
@@ -312,7 +312,7 @@ final class TorrentAjaxRepository
                     ->leftJoin('snatched', 'torrents.id', '=', 'snatched.torrentid')
                     ->where('peers.userid', $targetUserId)
                     ->where('snatched.userid', $targetUserId)
-                    ->where('peers.seeder', 'yes')
+                    ->where('peers.seeder', 1)
                     ->select([
                         'peers.torrent', 'torrents.added', 'snatched.uploaded', 'snatched.downloaded', 'snatched.seedtime',
                         'torrents.name as torrentname', 'torrents.sp_state', 'torrents.banned', 'torrents.approval_status',
@@ -329,7 +329,7 @@ final class TorrentAjaxRepository
                     ->leftJoin('snatched', 'torrents.id', '=', 'snatched.torrentid')
                     ->where('peers.userid', $targetUserId)
                     ->where('snatched.userid', $targetUserId)
-                    ->where('peers.seeder', 'no')
+                    ->where('peers.seeder', 0)
                     ->select([
                         'peers.torrent', 'torrents.added', 'snatched.uploaded', 'snatched.downloaded', 'snatched.seedtime',
                         'torrents.name as torrentname', 'torrents.sp_state', 'torrents.banned', 'torrents.approval_status',
@@ -343,7 +343,7 @@ final class TorrentAjaxRepository
                 return DB::table('torrents')
                     ->leftJoin('snatched', 'torrents.id', '=', 'snatched.torrentid')
                     ->leftJoin('categories', 'torrents.category', '=', 'categories.id')
-                    ->where('snatched.finished', 'yes')
+                    ->where('snatched.finished', 1)
                     ->where('snatched.userid', $targetUserId)
                     ->where('torrents.owner', '!=', $targetUserId)
                     ->select([
@@ -359,7 +359,7 @@ final class TorrentAjaxRepository
                 return DB::table('torrents')
                     ->leftJoin('snatched', 'torrents.id', '=', 'snatched.torrentid')
                     ->leftJoin('categories', 'torrents.category', '=', 'categories.id')
-                    ->where('snatched.finished', 'no')
+                    ->where('snatched.finished', 0)
                     ->where('snatched.userid', $targetUserId)
                     ->where('torrents.owner', '!=', $targetUserId)
                     ->select([

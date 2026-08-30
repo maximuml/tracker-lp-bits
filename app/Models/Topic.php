@@ -6,11 +6,11 @@ declare(strict_types=1);
  * @property int $id
  * @property int $userid
  * @property string $subject
- * @property string $locked
+ * @property bool $locked
  * @property int $forumid
  * @property int $firstpost
  * @property int $lastpost
- * @property string $sticky
+ * @property bool $sticky
  * @property int $hlcolor
  * @property int $views
  */
@@ -26,6 +26,12 @@ class Topic extends NexusModel
 
     /** @var list<string> */
     protected $fillable = ['userid', 'subject', 'locked', 'forumid', 'firstpost', 'lastpost', 'sticky', 'hlcolor', 'views'];
+
+    /** @var array<string, string> */
+    protected $casts = [
+        'locked' => 'boolean',
+        'sticky' => 'boolean',
+    ];
 
     /** @return  BelongsTo<User, $this> */
     public function user(): BelongsTo

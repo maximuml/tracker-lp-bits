@@ -14,11 +14,11 @@ use Illuminate\Http\Request;
 final readonly class PersonalSettingsDto
 {
     public function __construct(
-        public string $parked,
+        public bool $parked,
         public string $acceptpms,
-        public string $deletepms,
-        public string $savepms,
-        public string $commentpm,
+        public bool $deletepms,
+        public bool $savepms,
+        public bool $commentpm,
         public string $gender,
         public ?int $country,
         public ?int $trackerUrlId,
@@ -29,12 +29,12 @@ final readonly class PersonalSettingsDto
 
     public static function fromRequest(Request $request): self
     {
-        $parked = $request->input('parked') === 'yes' ? 'yes' : 'no';
+        $parked = $request->input('parked') === 'yes';
         $acceptpmsRaw = (string) $request->input('acceptpms', 'yes');
         $acceptpms = in_array($acceptpmsRaw, ['yes', 'friends', 'no'], true) ? $acceptpmsRaw : 'yes';
-        $deletepms = $request->has('deletepms') ? 'yes' : 'no';
-        $savepms = $request->has('savepms') ? 'yes' : 'no';
-        $commentpm = $request->input('commentpm') === 'yes' ? 'yes' : 'no';
+        $deletepms = $request->has('deletepms');
+        $savepms = $request->has('savepms');
+        $commentpm = $request->input('commentpm') === 'yes';
         $genderRaw = (string) $request->input('gender', 'N/A');
         $gender = in_array($genderRaw, ['N/A', 'Male', 'Female'], true) ? $genderRaw : 'N/A';
 

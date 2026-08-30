@@ -12,7 +12,7 @@ class TorrentStatus
      * get torrent seeding or leeching status, download progress of someone
      *
      * @param  array<int, int>  $torrentIdArr
-     * @return array<int, array{finished: string, progress: float, active_status: string}>
+     * @return array<int, array{finished: int, progress: float, active_status: string}>
      */
     public function listLeechingSeedingStatus(int $uid, array $torrentIdArr): array
     {
@@ -52,7 +52,7 @@ class TorrentStatus
                 $progress = sprintf('%.4f', $realDownloaded / $torrentSize);
             }
             $snatchedList[$id] = [
-                'finished' => $row['to_go'] == 0 ? 'yes' : 'no',
+                'finished' => $row['to_go'] == 0 ? 1 : 0,
                 'progress' => floatval($progress),
                 'active_status' => $activeStatus,
             ];

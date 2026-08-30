@@ -34,7 +34,7 @@ class RequireSeedTorrentRepository extends BaseRepository
         $seederMax = Setting::getRequireSeedSectionSeederLte();
         $seederMin = Setting::getRequireSeedSectionSeederGte();
         $logPrefix .= ", countMaxAllowed: $countMaxAllowed, countNow: $countNow, count: $count, seederMax: $seederMax, seederMin: $seederMin";
-        $query = Torrent::query()->where('banned', 'no')
+        $query = Torrent::query()->where('banned', 0)
             ->where('seeders', '<=', $seederMax)
             ->where('seeders', '>=', $seederMin);
         $tags = Setting::getRequireSeedSectionTags();

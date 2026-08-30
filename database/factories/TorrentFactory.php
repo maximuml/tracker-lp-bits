@@ -59,7 +59,7 @@ class TorrentFactory extends Factory
             'sp_state' => 1,
             'promotion_time_type' => 0,
             'promotion_until' => null,
-            'anonymous' => 'no',
+            'anonymous' => 0,
             'url' => null,
             'pos_state' => TorrentPosState::NONE->value,
             'cache_stamp' => 0,

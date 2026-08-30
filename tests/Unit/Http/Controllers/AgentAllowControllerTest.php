@@ -48,12 +48,15 @@ final class AgentAllowControllerTest extends TestCase
         $agentAllow = $this->makeAgentAllow(1);
 
         $data = $this->validData();
+        $normalized = $data;
+        $normalized['exception'] = false;
+        $normalized['allowhttps'] = true;
 
         /** @var AgentAllowRepository&Mockery\MockInterface $repository */
         $repository = Mockery::mock(AgentAllowRepository::class);
         $repository->shouldReceive('store')
             ->once()
-            ->with($data)
+            ->with($normalized)
             ->andReturn($agentAllow);
 
         $controller = new AgentAllowController($repository);
@@ -102,12 +105,15 @@ final class AgentAllowControllerTest extends TestCase
         $agentAllow = $this->makeAgentAllow(1);
 
         $data = $this->validData();
+        $normalized = $data;
+        $normalized['exception'] = false;
+        $normalized['allowhttps'] = true;
 
         /** @var AgentAllowRepository&Mockery\MockInterface $repository */
         $repository = Mockery::mock(AgentAllowRepository::class);
         $repository->shouldReceive('update')
             ->once()
-            ->with($data, 1)
+            ->with($normalized, 1)
             ->andReturn($agentAllow);
 
         $controller = new AgentAllowController($repository);
@@ -166,9 +172,9 @@ final class AgentAllowControllerTest extends TestCase
         $agentAllow->agent_match_num = 4;
         $agentAllow->agent_matchtype = 'dec';
         $agentAllow->agent_start = 'uTorrent/3.0';
-        $agentAllow->exception = 'no';
+        $agentAllow->exception = false;
         $agentAllow->comment = 'Test';
-        $agentAllow->allowhttps = 'yes';
+        $agentAllow->allowhttps = true;
         $agentAllow->hits = 0;
 
         return $agentAllow;

@@ -30,8 +30,8 @@ class RemoveUserWarning
     {
         $users = User::query()
             ->with('language')
-            ->where('enabled', 'yes')
-            ->where('warned', 'yes')
+            ->where('enabled', true)
+            ->where('warned', true)
             ->where('warneduntil', '<', now())
             ->get();
         $userModifyLogs = [];
@@ -43,7 +43,7 @@ class RemoveUserWarning
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
-            $user->warned = 'no';
+            $user->warned = false;
             $user->warneduntil = null;
             Logger::writeWithContext((string) sprintf('update user %s => %s', $user->id, json_encode($user->getDirty())), (string) 'info', (bool) false);
             $user->save();

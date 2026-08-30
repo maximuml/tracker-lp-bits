@@ -7,13 +7,13 @@ namespace App\Enums;
 /**
  * Backed enum for peer seeder state.
  *
- * Mirrors the string constants from App\Models\Peer:
- *   SEEDER_YES ('yes'), SEEDER_NO ('no').
+ * Mirrors the boolean columns from App\Models\Peer:
+ *   SEEDER_YES (1), SEEDER_NO (0).
  */
-enum PeerSeeder: string
+enum PeerSeeder: int
 {
-    case YES = 'yes';
-    case NO = 'no';
+    case YES = 1;
+    case NO = 0;
 
     public function label(): string
     {

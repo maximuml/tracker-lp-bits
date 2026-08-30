@@ -9,7 +9,6 @@ use App\Enums\PromotionTimeType;
 use App\Enums\TorrentPosState;
 use App\Enums\TorrentPromotion;
 use App\Enums\UserClass as UserClassEnum;
-use App\Enums\UserEnabled;
 use App\Enums\UserStatus;
 use App\Models\Torrent;
 use App\Models\User;
@@ -92,10 +91,10 @@ final class Tasks
         $lastActionDeadTime = date('Y-m-d H:i:s', $deadtime);
 
         DB::table('torrents')
-            ->where('visible', 'yes')
+            ->where('visible', 1)
             ->where('last_action', '<', $lastActionDeadTime)
             ->where('seeders', 0)
-            ->update(['visible' => 'no']);
+            ->update(['visible' => 0]);
 
         return "update torrents' visibility";
     }
@@ -107,20 +106,41 @@ final class Tasks
     {
         $forumIds = DB::table('forums')->pluck('id');
 
+        // Get all topics with their forumid in a single query
+        $topics = DB::table('topics')->whereIn('forumid', $forumIds)->pluck('forumid', 'id');
+
+        // Batch count posts per topic in a single grouped query
+        $postCounts = DB::table('posts')
+            ->select('topicid', DB::raw('COUNT(*) as cnt'))
+            ->whereIn('topicid', $topics->keys()->all())
+            ->groupBy('topicid')
+            ->get()
+            ->keyBy('topicid');
+
+        // Compute per-forum totals
+        $forumPostCounts = [];
+        $forumTopicCounts = [];
         foreach ($forumIds as $forumId) {
-            $postcount = 0;
-            $topiccount = 0;
-            $topicIds = DB::table('topics')->where('forumid', $forumId)->pluck('id');
-
-            foreach ($topicIds as $topicId) {
-                $postcount += (int) DB::table('posts')->where('topicid', $topicId)->count();
-                $topiccount++;
-            }
-
-            DB::table('forums')
-                ->where('id', $forumId)
-                ->update(['postcount' => $postcount, 'topiccount' => $topiccount]);
+            $forumPostCounts[$forumId] = 0;
+            $forumTopicCounts[$forumId] = 0;
         }
+
+        foreach ($topics as $topicId => $forumId) {
+            $postCount = $postCounts->get($topicId);
+            if ($postCount !== null) {
+                $forumPostCounts[$forumId] += (int) $postCount->cnt;
+            }
+            $forumTopicCounts[$forumId]++;
+        }
+
+        // Batch forum updates in a single transaction
+        DB::transaction(function () use ($forumPostCounts, $forumTopicCounts): void {
+            foreach ($forumPostCounts as $forumId => $postcount) {
+                DB::table('forums')
+                    ->where('id', $forumId)
+                    ->update(['postcount' => $postcount, 'topiccount' => $forumTopicCounts[$forumId]]);
+            }
+        });
 
         $cache = app(LegacyRedisCache::class);
         if ($cache !== null) {
@@ -351,12 +371,14 @@ final class Tasks
             ->where('promotion_time_type', PromotionTimeType::GLOBAL->value)
             ->get(['id', 'name']);
 
+        if ($torrents->isNotEmpty()) {
+            DB::table('torrents')
+                ->whereIn('id', $torrents->pluck('id')->all())
+                ->update(['sp_state' => $targetState]);
+        }
+
         foreach ($torrents as $torrent) {
             $arr = (array) $torrent;
-
-            DB::table('torrents')
-                ->where('id', $arr['id'])
-                ->update(['sp_state' => $targetState]);
 
             Events::publishModel(ModelEventEnum::TORRENT_UPDATED, (int) $arr['id']);
 
@@ -375,13 +397,15 @@ final class Tasks
             ->where('promotion_until', '<', now())
             ->get(['id']);
 
-        foreach ($torrents as $torrent) {
-            Torrent::query()->where('id', $torrent->id)->update([
+        if ($torrents->isNotEmpty()) {
+            Torrent::query()->whereIn('id', $torrents->pluck('id')->all())->update([
                 'sp_state' => TorrentPromotion::NORMAL->value,
                 'promotion_time_type' => PromotionTimeType::GLOBAL->value,
                 'promotion_until' => null,
             ]);
+        }
 
+        foreach ($torrents as $torrent) {
             Events::publishModel(ModelEventEnum::TORRENT_UPDATED, $torrent->id);
         }
     }
@@ -409,7 +433,7 @@ final class Tasks
         $dt = date('Y-m-d H:i:s', time() - $secs);
 
         DB::table('loginattempts')
-            ->where('banned', 'no')
+            ->where('banned', false)
             ->where('added', '<', $dt)
             ->delete();
     }
@@ -547,7 +571,7 @@ final class Tasks
         $userRep = $this->userRepository;
 
         User::query()
-            ->where('enabled', UserEnabled::NO->value)
+            ->where('enabled', false)
             ->where('last_access', '<', $dt)
             ->select(['id', 'username', 'lang'])
             ->orderBy('id', 'asc')
@@ -571,7 +595,7 @@ final class Tasks
      */
     private function disableUsers(Builder $query, string $reasonKey): void
     {
-        $results = $query->where('enabled', UserEnabled::YES->value)->get(['id', 'username', 'lang']);
+        $results = $query->where('enabled', true)->get(['id', 'username', 'lang']);
         if ($results->isEmpty()) {
             return;
         }
@@ -612,7 +636,7 @@ final class Tasks
             return;
         }
 
-        User::query()->whereIn('id', $uidArr)->update(['enabled' => UserEnabled::NO->value]);
+        User::query()->whereIn('id', $uidArr)->update(['enabled' => false]);
         UserBanLog::query()->insert($userBanLogData);
         UserModifyLog::query()->insert($userModifyLogs);
 
@@ -685,28 +709,35 @@ final class Tasks
 
         $dt = date('Y-m-d H:i:s');
 
+        $messages = [];
+        $uidArr = [];
+
         foreach ($res as $arr) {
             $uid = $arr->id;
             $locale = Locale::userLocale($uid);
 
             UserOps::logModify($uid, 'Leech Warning removed by System.');
 
-            User::query()->where('id', $uid)->update([
-                'class' => UserClassEnum::USER->value,
-                'leechwarn' => 'no',
-                'leechwarnuntil' => null,
-            ]);
+            $uidArr[] = $uid;
 
-            DB::table('messages')->insert([
+            $messages[] = [
                 'sender' => null,
                 'receiver' => $uid,
                 'added' => $dt,
                 'subject' => Locale::trans('cleanup.msg_low_ratio_warning_removed', [], $locale),
                 'msg' => Locale::trans('cleanup.msg_your_ratio_warning_removed', [], $locale),
-            ]);
+            ];
 
             Events::publishModel(ModelEventEnum::USER_UPDATED, $uid);
         }
+
+        User::query()->whereIn('id', $uidArr)->update([
+            'class' => UserClassEnum::USER->value,
+            'leechwarn' => 'no',
+            'leechwarnuntil' => null,
+        ]);
+
+        DB::table('messages')->insert($messages);
     }
 
     private function promoteUsersByClass(): void
@@ -767,38 +798,44 @@ final class Tasks
 
         $dt = date('Y-m-d H:i:s');
 
-        foreach ($res as $arr) {
-            $uid = $arr->id;
-            $locale = Locale::userLocale($uid);
-            $className = \App\Support\User::getUserClassName($class, false, false, false);
+        $messages = [];
 
-            $subject = Locale::trans('cleanup.msg_promoted_to', [], $locale).$className;
-            $msg = Locale::trans('cleanup.msg_now_you_are', [], $locale)
-                .$className
-                .Locale::trans('cleanup.msg_see_faq', [], $locale);
+        DB::transaction(function () use ($res, $class, $addInvite, $dt, &$messages): void {
+            foreach ($res as $arr) {
+                $uid = $arr->id;
+                $locale = Locale::userLocale($uid);
+                $className = \App\Support\User::getUserClassName($class, false, false, false);
 
-            if ((int) $class <= (int) $arr->max_class_once) {
-                Logger::writeWithContext((string) sprintf('user: %s upgrade to class: %s', $uid, $class), (string) 'info', (bool) false);
-                User::query()->where('id', $uid)->update(['class' => $class]);
-            } else {
-                Logger::writeWithContext((string) sprintf('user: %s upgrade to class: %s, and add invites: %s', $uid, $class, $addInvite), (string) 'info', (bool) false);
-                User::query()->where('id', $uid)->update([
-                    'class' => $class,
-                    'max_class_once' => $class,
-                    'invites' => DB::raw(DB::getQueryGrammar()->wrap('invites').' + '.(int) $addInvite), // @phpstan-ignore argument.type
-                ]);
+                $subject = Locale::trans('cleanup.msg_promoted_to', [], $locale).$className;
+                $msg = Locale::trans('cleanup.msg_now_you_are', [], $locale)
+                    .$className
+                    .Locale::trans('cleanup.msg_see_faq', [], $locale);
+
+                if ((int) $class <= (int) $arr->max_class_once) {
+                    Logger::writeWithContext((string) sprintf('user: %s upgrade to class: %s', $uid, $class), (string) 'info', (bool) false);
+                    User::query()->where('id', $uid)->update(['class' => $class]);
+                } else {
+                    Logger::writeWithContext((string) sprintf('user: %s upgrade to class: %s, and add invites: %s', $uid, $class, $addInvite), (string) 'info', (bool) false);
+                    User::query()->where('id', $uid)->update([
+                        'class' => $class,
+                        'max_class_once' => $class,
+                        'invites' => DB::raw(DB::getQueryGrammar()->wrap('invites').' + '.(int) $addInvite), // @phpstan-ignore argument.type
+                    ]);
+                }
+
+                $messages[] = [
+                    'sender' => null,
+                    'receiver' => $uid,
+                    'added' => $dt,
+                    'subject' => $subject,
+                    'msg' => $msg,
+                ];
+
+                Events::publishModel(ModelEventEnum::USER_UPDATED, $uid);
             }
+        });
 
-            DB::table('messages')->insert([
-                'sender' => null,
-                'receiver' => $uid,
-                'added' => $dt,
-                'subject' => $subject,
-                'msg' => $msg,
-            ]);
-
-            Events::publishModel(ModelEventEnum::USER_UPDATED, $uid);
-        }
+        DB::table('messages')->insert($messages);
     }
 
     private function demoteUsersByClass(): void
@@ -840,6 +877,9 @@ final class Tasks
 
         $dt = date('Y-m-d H:i:s');
 
+        $messages = [];
+        $uidArr = [];
+
         foreach ($res as $arr) {
             $uid = $arr->id;
             $locale = Locale::userLocale($uid);
@@ -854,18 +894,22 @@ final class Tasks
                 .Locale::trans('cleanup.msg_because_ratio_drop_below', [], $locale)
                 .$deRatio.".\n";
 
-            User::query()->where('id', $uid)->update(['class' => (string) $newclass]);
+            $uidArr[] = $uid;
 
-            DB::table('messages')->insert([
+            $messages[] = [
                 'sender' => null,
                 'receiver' => $uid,
                 'added' => $dt,
                 'subject' => $subject,
                 'msg' => $msg,
-            ]);
+            ];
 
             Events::publishModel(ModelEventEnum::USER_UPDATED, $uid);
         }
+
+        User::query()->whereIn('id', $uidArr)->update(['class' => (string) $newclass]);
+
+        DB::table('messages')->insert($messages);
     }
 
     private function demoteUsersToPeasant(): void
@@ -906,6 +950,9 @@ final class Tasks
 
         $dt = date('Y-m-d H:i:s');
 
+        $messages = [];
+        $uidArr = [];
+
         foreach ($res as $arr) {
             $uid = $arr->id;
             $locale = Locale::userLocale($uid);
@@ -918,22 +965,26 @@ final class Tasks
 
             UserOps::logModify($uid, 'Leech Warned by System - Low Ratio.');
 
-            User::query()->where('id', $uid)->update([
-                'class' => UserClassEnum::PEASANT->value,
-                'leechwarn' => 'yes',
-                'leechwarnuntil' => $until,
-            ]);
+            $uidArr[] = $uid;
 
-            DB::table('messages')->insert([
+            $messages[] = [
                 'sender' => null,
                 'receiver' => $uid,
                 'added' => $dt,
                 'subject' => $subject,
                 'msg' => $msg,
-            ]);
+            ];
 
             Events::publishModel(ModelEventEnum::USER_UPDATED, $uid);
         }
+
+        User::query()->whereIn('id', $uidArr)->update([
+            'class' => UserClassEnum::PEASANT->value,
+            'leechwarn' => 'yes',
+            'leechwarnuntil' => $until,
+        ]);
+
+        DB::table('messages')->insert($messages);
     }
 
     private function banLeechWarningExpired(): void
@@ -942,9 +993,9 @@ final class Tasks
 
         $results = User::query()
             ->where('class', '<', UserClassEnum::VIP->value)
-            ->where('donor', 'no')
-            ->where('enabled', UserEnabled::YES->value)
-            ->where('leechwarn', 'yes')
+            ->where('donor', false)
+            ->where('enabled', true)
+            ->where('leechwarn', true)
             ->where('leechwarnuntil', '<', $dt)
             ->get(['id', 'username', 'lang']);
 
@@ -974,7 +1025,7 @@ final class Tasks
             UserOps::logModify($uid, $comment);
         }
 
-        User::query()->whereIn('id', $uidArr)->update(['enabled' => UserEnabled::NO->value]);
+        User::query()->whereIn('id', $uidArr)->update(['enabled' => false]);
         UserBanLog::query()->insert($userBanLogData);
 
         Logger::writeWithContext((string) ('ban user: '.implode(', ', $uidArr)), (string) 'info', (bool) false);
@@ -1001,7 +1052,7 @@ final class Tasks
 
         $res = DB::table('torrents as t')
             ->leftJoin('users as u', 't.owner', '=', 'u.id')
-            ->where('t.visible', 'no')
+            ->where('t.visible', 0)
             ->where('t.last_action', '<', $until)
             ->where('t.seeders', 0)
             ->where('t.leechers', 0)
@@ -1133,11 +1184,11 @@ final class Tasks
         $postAddedField = Database::unixTimestampField('posts.added');
 
         DB::table('topics')
-            ->where('sticky', 'no')
+            ->where('sticky', false)
             ->whereIn('lastpost', function ($query) use ($postAddedField, $diff): void {
                 $query->select('id')->from('posts')->whereRaw("{$postAddedField} < ?", [$diff]);
             })
-            ->update(['locked' => 'yes']);
+            ->update(['locked' => true]);
     }
 
     private function deleteOldReports(): void

@@ -48,7 +48,7 @@ class TorrentDownloadController extends LegacyController
             if (! $user) {
                 throw new NexusException('download.invalid_uid');
             }
-            if ($user->enabled == 'no' || $user->parked == 'yes') {
+            if (! $user->enabled || $user->parked) {
                 throw new NexusException('download.account_disabled_or_parked');
             }
             $decrypted = $torrentRepository->decryptDownHash($hash, $user);
@@ -62,7 +62,7 @@ class TorrentDownloadController extends LegacyController
             if (! $user) {
                 throw new NexusException('download.invalid_passkey');
             }
-            if ($user->enabled == 'no' || $user->parked == 'yes') {
+            if (! $user->enabled || $user->parked) {
                 throw new NexusException('download.account_disabled_or_parked');
             }
         } else {
@@ -73,14 +73,14 @@ class TorrentDownloadController extends LegacyController
             if (! $user instanceof User) {
                 return redirect('/login.php?returnto='.urlencode($request->fullUrl()));
             }
-            if ($user->parked == 'yes') {
+            if ($user->parked) {
                 throw new NexusException('download.account_parked');
             }
             if (! $request->letdown) {
-                if ($user->showclienterror == 'yes') {
+                if ($user->showclienterror) {
                     return redirect('/downloadnotice.php?torrentid='.$id.'&type=client');
                 }
-                if ($user->leechwarn == 'yes') {
+                if ($user->leechwarn) {
                     return redirect('/downloadnotice.php?torrentid='.$id.'&type=ratio');
                 }
             }
@@ -158,7 +158,7 @@ class TorrentDownloadController extends LegacyController
                 if ($type === 'firsttime') {
                     $update['showdlnotice'] = 0;
                 } elseif ($type === 'client') {
-                    $update['showclienterror'] = 'no';
+                    $update['showclienterror'] = false;
                 }
                 if (! empty($update)) {
                     User::query()->where('id', $userId)->update($update);

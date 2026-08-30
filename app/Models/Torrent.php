@@ -28,13 +28,13 @@ declare(strict_types=1);
  * @property int $leechers
  * @property int $seeders
  * @property string|null $last_action
- * @property string $visible
- * @property string $banned
+ * @property bool $visible
+ * @property bool $banned
  * @property int $owner
  * @property int $sp_state
  * @property int $promotion_time_type
  * @property string|null $promotion_until
- * @property string $anonymous
+ * @property bool $anonymous
  * @property int|null $url
  * @property string $pos_state
  * @property string|null $pos_state_until
@@ -95,9 +95,9 @@ class Torrent extends NexusModel
 
     const FILTER_VISIBLE_NO = '2';
 
-    const BANNED_YES = 'yes';
+    const BANNED_YES = 1;
 
-    const BANNED_NO = 'no';
+    const BANNED_NO = 0;
 
     /** @var array<string, string> */
     protected $casts = [
@@ -105,6 +105,9 @@ class Torrent extends NexusModel
         'promotion_until' => 'datetime',
         'pos_state_until' => 'datetime',
         'last_action' => 'datetime',
+        'anonymous' => 'boolean',
+        'banned' => 'boolean',
+        'visible' => 'boolean',
     ];
 
     /** @var list<string> */

@@ -30,7 +30,7 @@ class TorrentPolicy extends BasePolicy
 
     public function view(User $user, Torrent $torrent): bool
     {
-        if ($torrent->banned === 'yes' && ! Permission::canViewBannedTorrent($user) && $torrent->owner != $user->id) {
+        if ($torrent->banned && ! Permission::canViewBannedTorrent($user) && $torrent->owner != $user->id) {
             return false;
         }
 
@@ -68,12 +68,12 @@ class TorrentPolicy extends BasePolicy
 
     public function comment(User $user, Torrent $torrent): bool
     {
-        return $user->parked !== 'yes';
+        return ! $user->parked;
     }
 
     public function download(User $user, Torrent $torrent): bool
     {
-        if ($user->downloadpos === 'no') {
+        if (! $user->downloadpos) {
             return false;
         }
 
@@ -83,7 +83,7 @@ class TorrentPolicy extends BasePolicy
         $canSeedBanned = Permission::canViewBannedTorrent($user);
         $canAccessTorrent = TorrentAccess::canAccess($torrent->id, $user->id);
 
-        if ((($torrent->banned == 'yes' || ($approvalNotAllowed && ! $allowOwnerDownload)) && ! $canSeedBanned)
+        if ((($torrent->banned || ($approvalNotAllowed && ! $allowOwnerDownload)) && ! $canSeedBanned)
             || ! $canAccessTorrent
         ) {
             Logger::writeWithContext((string) sprintf('[DENY_DOWNLOAD], user: %s, approvalNotAllowed: %s, allowOwnerDownload: %s, canSeedBanned: %s, canAccessTorrent: %s', $user->id, $approvalNotAllowed ? 'true' : 'false', $allowOwnerDownload ? 'true' : 'false', $canSeedBanned ? 'true' : 'false', $canAccessTorrent ? 'true' : 'false'), (string) 'error', (bool) false);

@@ -69,7 +69,7 @@ class TorrentDeleteController extends LegacyController
         $uploadtorrentBonus = (float) app(Globals::class)->get('uploadtorrent_bonus', 0);
         Bonus::updatePoints('-', $uploadtorrentBonus, (int) $row['owner']);
 
-        if ($row['anonymous'] === 'yes' && $currentUserId == $row['owner']) {
+        if ($row['anonymous'] == 1 && $currentUserId == $row['owner']) {
             Log::writeWithContext("Torrent $id ({$row['name']}) was deleted by its anonymous uploader", 'normal');
         } else {
             Log::writeWithContext("Torrent $id ({$row['name']}) was deleted by {$curUser['username']}", 'normal');
@@ -162,7 +162,7 @@ class TorrentDeleteController extends LegacyController
 
         TorrentOps::deleteTorrents($id, false);
 
-        if ($row['anonymous'] === 'yes' && $currentUserId == $row['owner']) {
+        if ($row['anonymous'] == 1 && $currentUserId == $row['owner']) {
             Log::writeWithContext("Torrent $id ({$row['name']}) was deleted by its anonymous uploader ($reasonstr)", 'normal');
         } else {
             Log::writeWithContext("Torrent $id ({$row['name']}) was deleted by {$curUser['username']} ($reasonstr)", 'normal');

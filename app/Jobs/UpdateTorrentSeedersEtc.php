@@ -105,7 +105,7 @@ class UpdateTorrentSeedersEtc implements ShouldQueue
             return;
         }
         foreach ($res as $row) {
-            if ($row->seeder == 'yes') {
+            if ($row->seeder == 1) {
                 $key = 'seeders';
             } else {
                 $key = 'leechers';

@@ -16,7 +16,7 @@ class AuthRepository extends BaseRepository
 
     public function banLoginAttempts(string $ip): void
     {
-        DB::table('loginattempts')->where('ip', $ip)->update(['banned' => 'yes']);
+        DB::table('loginattempts')->where('ip', $ip)->update(['banned' => true]);
     }
 
     public function recordFailedLogin(string $ip, bool $recover): void
@@ -101,7 +101,7 @@ class AuthRepository extends BaseRepository
             ->where('id', $userId)
             ->where('status', 'confirmed');
         if (! $shouldIgnoreEnabled) {
-            $query->where('enabled', 'yes');
+            $query->where('enabled', true);
         }
         $result = $query->first();
 

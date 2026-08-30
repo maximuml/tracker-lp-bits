@@ -7,13 +7,13 @@ namespace App\Enums;
 /**
  * Backed enum for peer connectable state.
  *
- * Mirrors the string constants from App\Models\Peer:
- *   CONNECTABLE_YES ('yes'), CONNECTABLE_NO ('no').
+ * Mirrors the boolean columns from App\Models\Peer:
+ *   CONNECTABLE_YES (1), CONNECTABLE_NO (0).
  */
-enum PeerConnectable: string
+enum PeerConnectable: int
 {
-    case YES = 'yes';
-    case NO = 'no';
+    case YES = 1;
+    case NO = 0;
 
     public function label(): string
     {

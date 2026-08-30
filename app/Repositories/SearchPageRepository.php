@@ -45,7 +45,7 @@ class SearchPageRepository
 
         $banned = null;
         if (! Permissions::userCan(PermissionEnum::TORRENT_VIEW_BANNED->value, false, $currentUser->id)) {
-            $banned = 'no';
+            $banned = 0;
         }
 
         $modeArr = [SearchBox::getBrowseMode()];
@@ -135,7 +135,7 @@ class SearchPageRepository
     /**
      * @param  array<int, mixed>  $modeArr
      */
-    private static function buildFallbackQuery(string $search, int $searchArea, array $modeArr, ?int $approvalStatus, ?string $banned, int $currentUserId): Builder
+    private static function buildFallbackQuery(string $search, int $searchArea, array $modeArr, ?int $approvalStatus, ?int $banned, int $currentUserId): Builder
     {
         $tableTorrent = 'torrents';
         $tableCategory = 'categories';

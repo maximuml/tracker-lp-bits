@@ -8,7 +8,7 @@ declare(strict_types=1);
  * @property string|null $added
  * @property string|null $body
  * @property string $title
- * @property string $notify
+ * @property bool $notify
  */
 
 namespace App\Models;
@@ -31,6 +31,7 @@ class News extends NexusModel
     /** @var array<string, string> */
     protected $casts = [
         'added' => 'datetime',
+        'notify' => 'boolean',
     ];
 
     /** @return  BelongsTo<User, $this> */

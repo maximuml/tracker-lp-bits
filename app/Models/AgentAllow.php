@@ -14,8 +14,8 @@ declare(strict_types=1);
  * @property int $agent_match_num
  * @property string $agent_matchtype
  * @property string $agent_start
- * @property string $exception
- * @property string $allowhttps
+ * @property bool $exception
+ * @property bool $allowhttps
  * @property string|null $comment
  * @property int $hits
  */
@@ -40,6 +40,12 @@ class AgentAllow extends NexusModel
         'family', 'start_name', 'exception', 'allowhttps', 'comment',
         'peer_id_pattern', 'peer_id_match_num', 'peer_id_matchtype', 'peer_id_start',
         'agent_pattern', 'agent_match_num', 'agent_matchtype', 'agent_start',
+    ];
+
+    /** @var array<string, string> */
+    protected $casts = [
+        'exception' => 'boolean',
+        'allowhttps' => 'boolean',
     ];
 
     /** @var array<int|string, mixed> */

@@ -50,12 +50,12 @@ final class TasksTest extends TestCase
 
         $forumId = $this->createForum();
         $oldTopicId = $this->createTopic([
-            'sticky' => 'no',
+            'sticky' => false,
             'forumid' => $forumId,
             'userid' => $userOne,
         ]);
         $newTopicId = $this->createTopic([
-            'sticky' => 'no',
+            'sticky' => false,
             'forumid' => $forumId,
             'userid' => $userOne,
         ]);
@@ -113,8 +113,8 @@ final class TasksTest extends TestCase
         $this->assertNull(DB::table('sitelog')->find($oldLogId));
         $this->assertNotNull(DB::table('sitelog')->find($newLogId));
 
-        $this->assertSame('yes', DB::table('topics')->where('id', $oldTopicId)->value('locked'));
-        $this->assertSame('no', DB::table('topics')->where('id', $newTopicId)->value('locked'));
+        $this->assertSame(1, (int) DB::table('topics')->where('id', $oldTopicId)->value('locked'));
+        $this->assertSame(0, (int) DB::table('topics')->where('id', $newTopicId)->value('locked'));
 
         $this->assertNull(DB::table('reports')->find($oldReportId));
         $this->assertNotNull(DB::table('reports')->find($newReportId));
@@ -154,8 +154,8 @@ final class TasksTest extends TestCase
             'agent_match_num' => 0,
             'agent_matchtype' => 'dec',
             'agent_start' => '',
-            'exception' => 'no',
-            'allowhttps' => 'no',
+            'exception' => 0,
+            'allowhttps' => 0,
         ]);
     }
 
@@ -258,8 +258,8 @@ final class TasksTest extends TestCase
             'forumid' => 0,
             'firstpost' => 0,
             'lastpost' => 0,
-            'sticky' => 'no',
-            'locked' => 'no',
+            'sticky' => false,
+            'locked' => false,
         ], $overrides));
     }
 

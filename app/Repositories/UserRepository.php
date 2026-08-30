@@ -492,7 +492,7 @@ class UserRepository extends BaseRepository
                     'leeching_size' => 0,
                 ];
             }
-            if ($row['seeder'] == 'yes') {
+            if ($row['seeder'] == 1) {
                 $result[$row['userid']]['seeding_count'] += 1;
                 $result[$row['userid']]['seeding_size'] += $row['size'];
             } else {
@@ -648,11 +648,10 @@ class UserRepository extends BaseRepository
     /**
      * @param  mixed  $operator
      * @param  mixed  $user
-     * @param  mixed  $status
      * @param  mixed  $disableReasonKey
      * @return mixed
      */
-    public function updateDownloadPrivileges($operator, $user, $status, $disableReasonKey = null)
+    public function updateDownloadPrivileges($operator, $user, bool $status, $disableReasonKey = null)
     {
         return (new UserModerationRepository)->updateDownloadPrivileges($operator, $user, $status, $disableReasonKey);
     }
@@ -660,10 +659,9 @@ class UserRepository extends BaseRepository
     /**
      * @param  mixed  $operator
      * @param  mixed  $user
-     * @param  string  $status  'yes' or 'no'
      * @return mixed
      */
-    public function updateUploadPrivileges($operator, $user, string $status)
+    public function updateUploadPrivileges($operator, $user, bool $status)
     {
         return (new UserModerationRepository)->updateUploadPrivileges($operator, $user, $status);
     }
@@ -671,10 +669,9 @@ class UserRepository extends BaseRepository
     /**
      * @param  mixed  $operator
      * @param  mixed  $user
-     * @param  string  $status  'yes' or 'no'
      * @return mixed
      */
-    public function updateForumPost($operator, $user, string $status)
+    public function updateForumPost($operator, $user, bool $status)
     {
         return (new UserModerationRepository)->updateForumPost($operator, $user, $status);
     }

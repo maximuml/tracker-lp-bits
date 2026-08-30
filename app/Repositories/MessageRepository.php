@@ -44,7 +44,7 @@ class MessageRepository extends BaseRepository
     /**
      * @return array{count: int, messages: \Illuminate\Database\Eloquent\Collection<int, Message>}
      */
-    public static function getMailboxMessages(int $userId, int $mailbox, string $keyword, string $place, ?string $unread, int $offset, int $perPage): array
+    public static function getMailboxMessages(int $userId, int $mailbox, string $keyword, string $place, ?bool $unread, int $offset, int $perPage): array
     {
         $query = Message::query()->with('send_user');
         if ($keyword !== '') {
@@ -62,7 +62,7 @@ class MessageRepository extends BaseRepository
                     });
             }
         }
-        if ($unread === 'yes' || $unread === 'no') {
+        if ($unread !== null) {
             $query->where('unread', $unread);
         }
 
@@ -78,10 +78,10 @@ class MessageRepository extends BaseRepository
                 ->get();
         } else {
             $countQuery = clone $query;
-            $countQuery->where('sender', $userId)->where('saved', 'yes');
+            $countQuery->where('sender', $userId)->where('saved', true);
             $messages = (clone $query)
                 ->where('sender', $userId)
-                ->where('saved', 'yes')
+                ->where('saved', true)
                 ->orderByDesc('id')
                 ->offset($offset)
                 ->limit($perPage)
@@ -98,7 +98,7 @@ class MessageRepository extends BaseRepository
             ->where(function ($q) use ($userId) {
                 $q->where('receiver', $userId)
                     ->orWhere(function ($sub) use ($userId) {
-                        $sub->where('sender', $userId)->where('saved', 'yes');
+                        $sub->where('sender', $userId)->where('saved', true);
                     });
             })
             ->first();
@@ -119,7 +119,7 @@ class MessageRepository extends BaseRepository
      */
     public static function markAsRead(int|array $ids, int $userId): int
     {
-        return Message::query()->whereIn('id', (array) $ids)->where('receiver', $userId)->update(['unread' => 'no']);
+        return Message::query()->whereIn('id', (array) $ids)->where('receiver', $userId)->update(['unread' => false]);
     }
 
     /**
@@ -141,14 +141,14 @@ class MessageRepository extends BaseRepository
         }
 
         $messageArr = $message->toArray();
-        if ($messageArr['receiver'] == $userId && $messageArr['saved'] == 'no') {
+        if ($messageArr['receiver'] == $userId && $messageArr['saved'] == 0) {
             $message->delete();
         } elseif ($messageArr['sender'] == $userId && $messageArr['location'] == 0) { // PM_DELETED
             $message->delete();
-        } elseif ($messageArr['receiver'] == $userId && $messageArr['saved'] == 'yes') {
+        } elseif ($messageArr['receiver'] == $userId && $messageArr['saved'] == 1) {
             $message->update(['location' => 0]);
         } elseif ($messageArr['sender'] == $userId && $messageArr['location'] != 0) { // not PM_DELETED
-            $message->update(['saved' => 'no']);
+            $message->update(['saved' => false]);
         } else {
             return null;
         }
@@ -202,10 +202,10 @@ class MessageRepository extends BaseRepository
     public static function deleteMailbox(int $userId, int $boxId, int $boxNumber): void
     {
         DB::table('pmboxes')->where('id', $boxId)->where('userid', $userId)->delete();
-        Message::query()->where('saved', 'yes')->where('location', $boxNumber)->where('receiver', $userId)->update(['location' => 0]);
-        Message::query()->where('saved', 'yes')->where('sender', $userId)->update(['saved' => 'no']);
-        Message::query()->where('saved', 'no')->where('location', $boxNumber)->where('receiver', $userId)->delete();
-        Message::query()->where('location', 0)->where('saved', 'yes')->where('sender', $userId)->delete();
+        Message::query()->where('saved', true)->where('location', $boxNumber)->where('receiver', $userId)->update(['location' => 0]);
+        Message::query()->where('saved', true)->where('sender', $userId)->update(['saved' => false]);
+        Message::query()->where('saved', false)->where('location', $boxNumber)->where('receiver', $userId)->delete();
+        Message::query()->where('location', 0)->where('saved', true)->where('sender', $userId)->delete();
     }
 
     public static function getUsername(int $userId): ?string
@@ -346,7 +346,7 @@ class MessageRepository extends BaseRepository
     {
         $rows = Message::query()
             ->where('receiver', $userId)
-            ->where('unread', 'yes')
+            ->where('unread', true)
             ->where('id', '>', $lastPmId)
             ->with('send_user')
             ->orderByDesc('id')

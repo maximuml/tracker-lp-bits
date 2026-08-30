@@ -68,12 +68,12 @@ class UserFactory extends Factory
             'class' => $class,
             'enabled' => UserEnabled::YES->value,
             'timetype' => 'timealive',
-            'downloadpos' => 'yes',
-            'avatars' => 'yes',
+            'downloadpos' => true,
+            'avatars' => true,
             'uploaded' => 0,
             'downloaded' => 0,
             'seedbonus' => 0.0,
-            'parked' => 'no',
+            'parked' => false,
         ];
     }
 

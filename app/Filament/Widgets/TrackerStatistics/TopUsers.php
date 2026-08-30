@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Filament\Widgets\TrackerStatistics;
 
-use App\Enums\UserEnabled;
 use App\Models\User;
 use App\Support\Format;
 use App\Support\Ratio;
@@ -35,7 +34,7 @@ class TopUsers extends BaseWidget implements HasActions
     protected function getTableQuery(): Builder
     {
         return User::query()
-            ->where('enabled', UserEnabled::YES->value)
+            ->where('enabled', true)
             ->orderByDesc('uploaded')
             ->limit(10);
     }

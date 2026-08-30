@@ -259,7 +259,7 @@ final class UserDisplay
     {
         $donorUntil = $userInfo['donoruntil'] ?? null;
 
-        return $userInfo['donor'] == 'yes'
+        return $userInfo['donor']
             && ($donorUntil === null
                 || $donorUntil == '0000-00-00 00:00:00'
                 || $donorUntil >= date('Y-m-d H:i:s'));
@@ -355,12 +355,12 @@ final class UserDisplay
 
             $now = date('Y-m-d H:i:s');
             $donorUntil = $arr['donoruntil'] ?? null;
-            $isDonor = $arr['donor'] === 'yes' && ($donorUntil === null || $donorUntil < '1970' || $donorUntil >= $now);
+            $isDonor = $arr['donor'] && ($donorUntil === null || $donorUntil < '1970' || $donorUntil >= $now);
             $pics = $isDonor ? '<img class="'.$donorpic.'" src="/pic/trans.gif" alt="Donor" '.$style.' />' : '';
 
-            if ($arr['enabled'] === 'yes') {
-                $pics .= ($arr['leechwarn'] === 'yes' ? '<img class="'.$leechwarnpic.'" src="/pic/trans.gif" alt="Leechwarned" '.$style.' />' : '')
-                    .($arr['warned'] === 'yes' ? '<img class="'.$warnedpic.'" src="/pic/trans.gif" alt="Warned" '.$style.' />' : '');
+            if ($arr['enabled']) {
+                $pics .= ($arr['leechwarn'] ? '<img class="'.$leechwarnpic.'" src="/pic/trans.gif" alt="Leechwarned" '.$style.' />' : '')
+                    .($arr['warned'] ? '<img class="'.$warnedpic.'" src="/pic/trans.gif" alt="Warned" '.$style.' />' : '');
             } else {
                 $pics .= '<img class="'.$disabledpic.'" src="/pic/trans.gif" alt="Disabled" '.$style." />\n";
             }

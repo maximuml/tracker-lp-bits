@@ -11,11 +11,11 @@ declare(strict_types=1);
  * @property int $uploaded
  * @property int $downloaded
  * @property int $to_go
- * @property string $seeder
+ * @property bool $seeder
  * @property string|null $started
  * @property string|null $last_action
  * @property string|null $prev_action
- * @property string $connectable
+ * @property bool $connectable
  * @property int $userid
  * @property string $agent
  * @property int $finishedat
@@ -51,6 +51,8 @@ class Peer extends NexusModel
         'last_action' => 'datetime',
         'prev_action' => 'datetime',
         'finishedat' => 'datetime:U',
+        'connectable' => 'boolean',
+        'seeder' => 'boolean',
     ];
 
     /** @var array<int|string, mixed> */
@@ -94,13 +96,13 @@ class Peer extends NexusModel
         return $builder->where('seeder', PeerSeeder::NO->value);
     }
 
-    /** @return  mixed */
+    /** @return  bool */
     public function isSeeder()
     {
         return $this->seeder == PeerSeeder::YES->value;
     }
 
-    /** @return  mixed */
+    /** @return  bool */
     public function isNotSeeder()
     {
         return $this->seeder == PeerSeeder::NO->value;

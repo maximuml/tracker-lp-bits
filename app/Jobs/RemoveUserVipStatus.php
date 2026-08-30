@@ -31,7 +31,7 @@ class RemoveUserVipStatus
     {
         $users = User::query()
             ->with('language')
-            ->where('vip_added', 'yes')
+            ->where('vip_added', true)
             ->where('vip_until', '<', now())
             ->get();
         $userModifyLogs = [];
@@ -44,7 +44,7 @@ class RemoveUserVipStatus
                 'updated_at' => now(),
             ];
             $message = [];
-            $user->vip_added = 'no';
+            $user->vip_added = false;
             $user->vip_until = null;
             if ($user->class <= (int) UserClassEnum::VIP->value) {
                 $user->class = (int) UserClassEnum::USER->value;

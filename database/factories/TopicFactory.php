@@ -26,11 +26,11 @@ class TopicFactory extends Factory
         return [
             'userid' => User::factory(),
             'subject' => $this->faker->sentence(4),
-            'locked' => 'no',
+            'locked' => false,
             'forumid' => Forum::factory(),
             'firstpost' => 0,
             'lastpost' => 0,
-            'sticky' => 'no',
+            'sticky' => false,
             'hlcolor' => 0,
             'views' => 0,
         ];
@@ -68,7 +68,7 @@ class TopicFactory extends Factory
     public function sticky(): self
     {
         return $this->state(fn (array $attributes) => [
-            'sticky' => 'yes',
+            'sticky' => true,
         ]);
     }
 }

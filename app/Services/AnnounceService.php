@@ -92,7 +92,7 @@ class AnnounceService
 
     private string $infoHash = '';
 
-    private string $seeder = 'no';
+    private int $seeder = 0;
 
     private int $left = 0;
 
@@ -127,7 +127,7 @@ class AnnounceService
         $this->infoHash = $this->dto->infoHash->toBinary();
         $this->left = $this->dto->left;
         $this->event = $this->dto->event;
-        $this->seeder = $this->dto->isSeeder() ? 'yes' : 'no';
+        $this->seeder = $this->dto->isSeeder() ? 1 : 0;
         $this->dt = date('Y-m-d H:i:s', TIMENOW);
 
         $this->responseBuilder = new ResponseBuilder($this->dto);
@@ -266,13 +266,13 @@ class AnnounceService
         $this->userId = (int) $this->user['id'];
         app(CurrentUser::class)->set($this->user);
 
-        if ($this->user['enabled'] === 'no') {
+        if (! $this->user['enabled']) {
             throw TrackerException::failure('Your account is disabled!');
         }
-        if ($this->user['parked'] === 'yes') {
+        if ($this->user['parked']) {
             throw TrackerException::failure('Your account is parked! (Read the FAQ)');
         }
-        if ($this->user['downloadpos'] === 'no') {
+        if (! $this->user['downloadpos']) {
             throw TrackerException::failure('Your downloading privileges have been disabled! (Read the rules)');
         }
 
@@ -307,15 +307,15 @@ class AnnounceService
         }
 
         if ($clicheckRes) {
-            if ($this->user['showclienterror'] === 'no') {
-                User::query()->where('id', $this->userId)->update(['showclienterror' => 'yes']);
+            if (! $this->user['showclienterror']) {
+                User::query()->where('id', $this->userId)->update(['showclienterror' => true]);
                 AppCache::forgetWithLocales("user_passkey_{$this->params['passkey']}_content");
             }
             throw TrackerException::failure($clicheckRes);
         }
 
-        if ($this->user['showclienterror'] === 'yes') {
-            $this->userUpdate['showclienterror'] = 'no';
+        if ($this->user['showclienterror']) {
+            $this->userUpdate['showclienterror'] = false;
             AppCache::forgetWithLocales("user_passkey_{$this->params['passkey']}_content");
         }
     }
@@ -352,7 +352,7 @@ class AnnounceService
 
         $this->torrentId = (int) $torrent['id'];
 
-        if ($torrent['banned'] === 'yes' && ! Permissions::userCan(PermissionEnum::TORRENT_VIEW_BANNED->value, false, $this->userId)) {
+        if ($torrent['banned'] && ! Permissions::userCan(PermissionEnum::TORRENT_VIEW_BANNED->value, false, $this->userId)) {
             throw TrackerException::failure('torrent banned');
         }
 
@@ -366,7 +366,7 @@ class AnnounceService
         $this->responseBuilder = $this->responseBuilder->withTorrent($torrent);
 
         if ($this->left > (int) $torrent['size']) {
-            $this->userRepository->updateDownloadPrivileges(null, $this->userId, 'no', 'fake_announce');
+            $this->userRepository->updateDownloadPrivileges(null, $this->userId, false, 'fake_announce');
             Logger::writeWithContext((string) sprintf('fake announce, user: %s, torrent: %s, announce left: %s > size: %s', $this->userId, $this->torrentId, $this->left, $torrent['size']), (string) 'warn', (bool) false);
             $this->responseBuilder->warn('fake announce', 300);
         }
@@ -391,7 +391,7 @@ class AnnounceService
      */
     private function handlePaidTorrent(array $torrent): void
     {
-        if ($this->seeder === 'yes'
+        if ($this->seeder === 1
             || ! isset($this->user['seedbonus'])
             || ! isset($torrent['price'])
             || (int) $torrent['price'] <= 0
@@ -417,7 +417,7 @@ class AnnounceService
                 );
             }
             if ($buyStatus > 10) {
-                $this->userRepository->updateDownloadPrivileges(null, $this->userId, 'no', 'announce_paid_torrent_too_many_times');
+                $this->userRepository->updateDownloadPrivileges(null, $this->userId, false, 'announce_paid_torrent_too_many_times');
             }
             dispatch(new BuyTorrent($this->userId, $this->torrentId));
             $torrentRep->addBuyFailCache($this->userId, $this->torrentId);
@@ -453,13 +453,13 @@ class AnnounceService
         $this->applyUserUpdate();
 
         if (! empty($this->torrentUpdate)) {
-            $this->torrentUpdate['visible'] = 'yes';
+            $this->torrentUpdate['visible'] = 1;
             $this->torrentUpdate['last_action'] = $this->dt;
             DB::table('torrents')->where('id', $this->torrentId)->update($this->torrentUpdate);
             Logger::writeWithContext((string) ('[ANNOUNCE_UPDATE_TORRENT], '.Json::encode($this->torrentUpdate)), (string) 'info', (bool) false);
         }
 
-        return $this->responseBuilder->peerList($this->torrentId, $this->userId, $this->seeder);
+        return $this->responseBuilder->peerList($this->torrentId, $this->userId, $this->seeder === 1);
     }
 
     private function applyUserUpdate(): void

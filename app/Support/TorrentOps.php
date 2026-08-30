@@ -51,7 +51,7 @@ final class TorrentOps
                     : ($userSnatched['uploaded'] / $torrentArr['size']) - 1;
                 $torrent2UserValue += min(0.1, (($userSnatched['seedtime'] / 37 * 60 * 60) * 0.1));
             } else {
-                if ($userSnatched['finished'] == 'yes') {
+                if ($userSnatched['finished'] == 1) {
                     $torrent2UserValue *= 0.5;
                     $torrent2UserValue += ($userSnatched['uploaded'] / $torrentArr['size']) - 1 > 0
                         ? 0.4 - exp(-(($userSnatched['uploaded'] / $torrentArr['size']) - 1))
@@ -63,7 +63,7 @@ final class TorrentOps
                 }
             }
         } else {
-            if ($userSnatched['finished'] == 'no' && $userSnatched['uploaded'] > 0 && $userSnatched['downloaded'] == 0) {
+            if ($userSnatched['finished'] == 0 && $userSnatched['uploaded'] > 0 && $userSnatched['downloaded'] == 0) {
                 $torrent2UserValue *= 0.55;
                 $torrent2UserValue += min(0.05, (($userSnatched['leechtime'] / 31 * 60 * 60) * 0.1));
                 $torrent2UserValue += min(0.1, (($userSnatched['seedtime'] / 31 * 60 * 60) * 0.1));

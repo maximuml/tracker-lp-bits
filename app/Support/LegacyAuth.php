@@ -180,7 +180,7 @@ final class LegacyAuth
     {
         $lang = $context->lang;
 
-        if (($context->user['parked'] ?? '') === 'yes') {
+        if (($context->user['parked'] ?? false)) {
             LegacyResponse::abort(
                 (string) ($lang['std_access_denied'] ?? ''),
                 (string) ($lang['std_your_account_parked'] ?? ''),
@@ -301,7 +301,7 @@ final class LegacyAuth
             }
         }
 
-        if (($context->user['enabled'] ?? '') !== 'yes' && $context->script !== 'self-enable') {
+        if (! ($context->user['enabled'] ?? false) && $context->script !== 'self-enable') {
             LegacyResponse::redirect('self-enable.php');
         }
     }

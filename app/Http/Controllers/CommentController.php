@@ -59,7 +59,7 @@ class CommentController extends Controller
             'ori_text' => $request->text,
             'offer' => $request->offer_id,
             'request' => $request->request_id,
-            'anonymous' => $request->anonymous,
+            'anonymous' => $request->boolean('anonymous'),
         ];
         $data = array_filter($data);
         $dataType = $data['type'] ?? '';

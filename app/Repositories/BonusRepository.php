@@ -6,7 +6,6 @@ namespace App\Repositories;
 
 use App\Enums\BusinessType;
 use App\Enums\HitAndRunStatus;
-use App\Enums\UserEnabled;
 use App\Enums\UserMedalStatus;
 use App\Enums\UserStatus;
 use App\Exceptions\NexusException;
@@ -70,7 +69,7 @@ class BonusRepository extends BaseRepository
     public function getCharityReceiverCount(float $ratioCharity): int
     {
         return (int) User::query()
-            ->where('enabled', 'yes')
+            ->where('enabled', true)
             ->where('downloaded', '>', 10737418240)
             ->whereRaw('? > uploaded/downloaded', [$ratioCharity])
             ->count();
@@ -82,7 +81,7 @@ class BonusRepository extends BaseRepository
     public function incrementSeedbonusForLowRatioReceivers(float $ratioCharity, float $amount): int
     {
         return User::query()
-            ->where('enabled', 'yes')
+            ->where('enabled', true)
             ->where('downloaded', '>', 10737418240)
             ->whereRaw('? > uploaded/downloaded', [$ratioCharity])
             ->increment('seedbonus', $amount);
@@ -488,7 +487,7 @@ class BonusRepository extends BaseRepository
             $torrentQuery = DB::table('torrents')
                 ->leftJoin('peers', 'peers.torrent', '=', 'torrents.id')
                 ->where('peers.userid', $uid)
-                ->where('peers.seeder', 'yes')
+                ->where('peers.seeder', 1)
                 ->where('torrents.size', '>', $minSize)
                 ->groupBy('torrents.id', 'peers.id')
                 ->select('torrents.id', 'torrents.added', 'torrents.size', 'torrents.seeders', 'peers.id as peerID', 'peers.last_action', 'peers.ip');
@@ -553,7 +552,7 @@ class BonusRepository extends BaseRepository
         $addition = DB::table('users')
             ->where('invited_by', $uid)
             ->where('status', UserStatus::CONFIRMED->value)
-            ->where('enabled', UserEnabled::YES->value)
+            ->where('enabled', true)
             ->sum('seed_points_per_hour');
 
         Logger::writeWithContext("[HAREM_ADDITION], user: $uid, addition: $addition");

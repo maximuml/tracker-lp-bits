@@ -82,7 +82,7 @@ class SettingRepository extends BaseRepository
     /**
      * @param  array<string, mixed>  $nameAndValue
      */
-    public static function saveBatch(string $prefix, array $nameAndValue, string $autoload = 'yes'): void
+    public static function saveBatch(string $prefix, array $nameAndValue, bool $autoload = true): void
     {
         $prefix = strtolower($prefix);
         $datetimeNow = date('Y-m-d H:i:s');

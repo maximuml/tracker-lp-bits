@@ -62,7 +62,7 @@ class WebAuthService
         if ($total >= self::getMaxLoginAttempts()) {
             DB::table('loginattempts')
                 ->where('ip', $ip)
-                ->update(['banned' => 'yes']);
+                ->update(['banned' => true]);
 
             throw new AuthenticationException('Your IP is banned due to too many failed login attempts.');
         }
@@ -157,7 +157,7 @@ class WebAuthService
             throw new AuthenticationException('Account unconfirmed.');
         }
 
-        if ($row['enabled'] === 'no' && (int) SiteConfig::current()->bonus->selfEnable() <= 0) {
+        if (! $row['enabled'] && (int) SiteConfig::current()->bonus->selfEnable() <= 0) {
             $this->recordFailedAttempt($ip);
             throw new AuthenticationException('Account disabled.');
         }

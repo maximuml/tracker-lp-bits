@@ -18,7 +18,7 @@ class SettingsTableSeeder extends Seeder
                     ['name' => "{$prefix}.{$key}"],
                     [
                         'value' => is_array($value) ? json_encode($value) : $value,
-                        'autoload' => 'yes',
+                        'autoload' => 1,
                     ]
                 );
             }

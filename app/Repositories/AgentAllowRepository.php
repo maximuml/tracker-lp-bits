@@ -200,7 +200,7 @@ class AgentAllowRepository extends BaseRepository
         }
 
         // check if exclude
-        if ($agentAllowPassed->exception == 'yes') {
+        if ($agentAllowPassed->exception) {
             $agentDeny = $this->checkIsDenied($peerId, $agent, $agentAllowPassed->id);
             if ($agentDeny) {
                 if ($debug) {
@@ -212,7 +212,7 @@ class AgentAllowRepository extends BaseRepository
                 ));
             }
         }
-        if (Url::isSecure() && $agentAllowPassed->allowhttps != 'yes') {
+        if (Url::isSecure() && ! $agentAllowPassed->allowhttps) {
             throw new ClientNotAllowedException(sprintf(
                 '[%s]This client does not support https well, Please goto %s/faq.php#id29 for a list of proper clients',
                 $agentAllowPassed->id, Url::schemeAndHost(false)
@@ -356,7 +356,7 @@ class AgentAllowRepository extends BaseRepository
         }
 
         // check if exclude
-        if ($agentAllowPassed->exception == 'yes') {
+        if ($agentAllowPassed->exception) {
             $agentDeny = $this->checkIsDenied($peerId, $agent, $agentAllowPassed->id);
             if ($agentDeny) {
                 if ($debug) {
@@ -368,7 +368,7 @@ class AgentAllowRepository extends BaseRepository
                 ));
             }
         }
-        if (Url::isSecure() && $agentAllowPassed->allowhttps != 'yes') {
+        if (Url::isSecure() && ! $agentAllowPassed->allowhttps) {
             throw new ClientNotAllowedException(sprintf(
                 '[%s]This client does not support https well, Please goto %s/faq.php#id29 for a list of proper clients',
                 $agentAllowPassed->id, Url::schemeAndHost(false)

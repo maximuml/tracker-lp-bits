@@ -125,7 +125,7 @@ class TorrentMaintenanceController extends LegacyController
         $snatchedRows = DB::table('snatched')
             ->join('users', 'snatched.userid', '=', 'users.id')
             ->join('torrents', 'snatched.torrentid', '=', 'torrents.id')
-            ->where('snatched.finished', 'Yes')
+            ->where('snatched.finished', 1)
             ->where('snatched.torrentid', $reseedid)
             ->select('snatched.userid', 'snatched.torrentid', 'torrents.name as torrent_name', 'users.id')
             ->get()

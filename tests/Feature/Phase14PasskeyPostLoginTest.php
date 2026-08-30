@@ -155,7 +155,7 @@ final class Phase14PasskeyPostLoginTest extends TestCase
         $user = User::factory()->create([
             'passkey' => str_repeat('e', 32),
             'status' => 'confirmed',
-            'enabled' => 'yes',
+            'enabled' => true,
         ]);
 
         $timestamp = time();

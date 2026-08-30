@@ -496,7 +496,7 @@ final class OfferPageService
                     $lastcom = (array) $lastcom;
                     $timestamp = strtotime((string) ($lastcom['added'] ?? 'now'));
                     $hasnewcom = (($lastcom['user'] ?? 0) !== $userId && $timestamp >= $last_offer);
-                    if (($curUser['showlastcom'] ?? 'yes') !== 'no') {
+                    if (($curUser['showlastcom'] ?? true)) {
                         $title = '';
                         if (! empty($lastcom)) {
                             if (($curUser['timetype'] ?? '') !== 'timealive') {
@@ -563,7 +563,7 @@ final class OfferPageService
             }
             echo "</table>\n";
             echo $pagerBottom;
-            if (($curUser['showlastcom'] ?? 'yes') === 'yes') {
+            if (($curUser['showlastcom'] ?? true)) {
                 echo Html::tooltipContainer($lastcom_tooltip, 400);
             }
             $tableHtml = (string) ob_get_clean();

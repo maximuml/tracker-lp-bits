@@ -9,7 +9,6 @@ use App\Enums\Permission\PermissionEnum;
 use App\Enums\Permission\RoutePermissionEnum;
 use App\Enums\UserClass;
 use App\Enums\UserDonate;
-use App\Enums\UserEnabled;
 use App\Enums\UserGender;
 use App\Enums\UserStatus;
 use App\Exceptions\NexusException;
@@ -59,7 +58,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string|null $fontsize
  * @property string|null $info
  * @property string|null $acceptpms
- * @property string|null $commentpm
+ * @property bool $commentpm
  * @property string|null $ip
  * @property int|null $class
  * @property int|null $max_class_once
@@ -72,34 +71,34 @@ use Laravel\Sanctum\HasApiTokens;
  * @property int|null $country
  * @property string|null $notifs
  * @property string|null $modcomment
- * @property string|null $enabled
- * @property string|null $avatars
- * @property string|null $donor
+ * @property bool $enabled
+ * @property bool $avatars
+ * @property bool $donor
  * @property string|null $donated
  * @property string|null $donated_cny
  * @property Carbon|null $donoruntil
- * @property string|null $warned
+ * @property bool $warned
  * @property string|null $warneduntil
- * @property string|null $noad
+ * @property bool $noad
  * @property string|null $noaduntil
  * @property int|null $torrentsperpage
  * @property int|null $topicsperpage
  * @property int|null $postsperpage
  * @property string|null $clicktopic
- * @property string|null $deletepms
- * @property string|null $savepms
- * @property string|null $support
- * @property string|null $picker
+ * @property bool $deletepms
+ * @property bool $savepms
+ * @property bool $support
+ * @property bool $picker
  * @property string|null $stafffor
  * @property string|null $supportfor
  * @property string|null $pickfor
  * @property string|null $supportlang
  * @property string|null $passkey
- * @property string|null $uploadpos
- * @property string|null $forumpost
- * @property string|null $downloadpos
+ * @property bool $uploadpos
+ * @property bool $forumpost
+ * @property bool $downloadpos
  * @property int|null $clientselect
- * @property string|null $signatures
+ * @property bool $signatures
  * @property string|null $signature
  * @property int|null $lang
  * @property string|null $locale
@@ -107,36 +106,36 @@ use Laravel\Sanctum\HasApiTokens;
  * @property int|null $invites
  * @property int|null $invited_by
  * @property string|null $gender
- * @property string|null $vip_added
+ * @property bool $vip_added
  * @property string|null $vip_until
  * @property float|null $seedbonus
  * @property float|null $charity
- * @property string|null $parked
- * @property string|null $leechwarn
+ * @property bool $parked
+ * @property bool $leechwarn
  * @property string|null $leechwarnuntil
  * @property string|null $lastwarned
  * @property int|null $timeswarned
  * @property int|null $warnedby
  * @property int|null $sbnum
  * @property int|null $sbrefresh
- * @property string|null $showimdb
- * @property string|null $showdescription
- * @property string|null $showcomment
- * @property string|null $showclienterror
+ * @property bool $showimdb
+ * @property bool $showdescription
+ * @property bool $showcomment
+ * @property bool $showclienterror
  * @property int|null $showdlnotice
  * @property string|null $tooltip
- * @property string|null $shownfo
+ * @property bool $shownfo
  * @property string|null $timetype
- * @property string|null $appendsticky
- * @property string|null $appendnew
+ * @property bool $appendsticky
+ * @property bool $appendnew
  * @property string|null $appendpromotion
- * @property string|null $appendpicked
- * @property string|null $dlicon
- * @property string|null $bmicon
- * @property string|null $showsmalldescr
- * @property string|null $showcomnum
- * @property string|null $showlastcom
- * @property string|null $showlastpost
+ * @property bool $appendpicked
+ * @property bool $dlicon
+ * @property bool $bmicon
+ * @property bool $showsmalldescr
+ * @property bool $showcomnum
+ * @property bool $showlastcom
+ * @property bool $showlastpost
  * @property int|null $pmnum
  * @property string|null $page
  * @property string|null $two_step_secret
@@ -263,6 +262,37 @@ class User extends Authenticatable implements FilamentUser, HasName
         'noaduntil' => 'datetime',
         'vip_until' => 'datetime',
         'leechwarnuntil' => 'datetime',
+        'appendnew' => 'boolean',
+        'appendpicked' => 'boolean',
+        'appendsticky' => 'boolean',
+        'avatars' => 'boolean',
+        'bmicon' => 'boolean',
+        'commentpm' => 'boolean',
+        'deletepms' => 'boolean',
+        'dlicon' => 'boolean',
+        'donor' => 'boolean',
+        'downloadpos' => 'boolean',
+        'enabled' => 'boolean',
+        'forumpost' => 'boolean',
+        'leechwarn' => 'boolean',
+        'noad' => 'boolean',
+        'parked' => 'boolean',
+        'picker' => 'boolean',
+        'savepms' => 'boolean',
+        'showclienterror' => 'boolean',
+        'showcomment' => 'boolean',
+        'showcomnum' => 'boolean',
+        'showdescription' => 'boolean',
+        'showimdb' => 'boolean',
+        'showlastcom' => 'boolean',
+        'showlastpost' => 'boolean',
+        'shownfo' => 'boolean',
+        'showsmalldescr' => 'boolean',
+        'signatures' => 'boolean',
+        'support' => 'boolean',
+        'uploadpos' => 'boolean',
+        'vip_added' => 'boolean',
+        'warned' => 'boolean',
     ];
 
     /** @var list<string> */
@@ -291,7 +321,7 @@ class User extends Authenticatable implements FilamentUser, HasName
             'seedbonus' => 0,
             'seedtime' => 0,
             'leechtime' => 0,
-            'enabled' => UserEnabled::NO->value,
+            'enabled' => false,
             'seed_points' => 0,
         ];
     }
@@ -325,7 +355,7 @@ class User extends Authenticatable implements FilamentUser, HasName
         if (in_array('status', $fields) && $this->getAttribute('status') != UserStatus::CONFIRMED->value) {
             throw new NexusException(Locale::trans('user.user_is_not_confirmed', $params, null));
         }
-        if (in_array('enabled', $fields) && $this->getAttribute('enabled') != UserEnabled::YES->value) {
+        if (in_array('enabled', $fields) && ! $this->getAttribute('enabled')) {
             throw new NexusException(Locale::trans('user.user_is_disabled', $params, null));
         }
 
@@ -368,7 +398,7 @@ class User extends Authenticatable implements FilamentUser, HasName
         $rawDonorUntil = $this->getRawOriginal('donoruntil');
         $donorUntil = $this->donoruntil;
         if (
-            $this->donor == 'yes'
+            $this->donor === true
             && ($rawDonorUntil === null || $rawDonorUntil == '0000-00-00 00:00:00' || ($donorUntil instanceof Carbon && $donorUntil->gte(Carbon::now())))
         ) {
             return true;

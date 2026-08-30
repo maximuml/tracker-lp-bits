@@ -8,7 +8,6 @@ use App\Auth\Permission;
 use App\Enums\ModelEventEnum;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserClass as UserClassEnum;
-use App\Enums\UserEnabled;
 use App\Enums\UserStatus;
 use App\Exceptions\InsufficientPermissionException;
 use App\Exceptions\NexusException;
@@ -46,7 +45,7 @@ class UserModerationRepository extends BaseRepository
     public function disableUser(User $operator, $uid, $reason = '')
     {
         $targetUser = User::query()->findOrFail((int) $uid, ['id', 'enabled', 'username', 'class']);
-        if ($targetUser->enabled == UserEnabled::NO->value) {
+        if (! $targetUser->enabled) {
             throw new NexusException('Already disabled !');
         }
         if (empty($reason)) {
@@ -61,7 +60,7 @@ class UserModerationRepository extends BaseRepository
         ];
         $modCommentText = sprintf('%s - Disable by %s, reason: %s.', now()->format('Y-m-d'), $operator->username, $reason);
         DB::transaction(function () use ($targetUser, $banLog, $modCommentText) {
-            $targetUser->updateWithModComment(['enabled' => UserEnabled::NO->value], $modCommentText);
+            $targetUser->updateWithModComment(['enabled' => false], $modCommentText);
             UserBanLog::query()->create($banLog);
         });
         Logger::writeWithContext((string) "user: {$uid}, {$modCommentText}", (string) 'info', (bool) false);
@@ -79,20 +78,20 @@ class UserModerationRepository extends BaseRepository
     public function enableUser(User $operator, $uid, $reason = '')
     {
         $targetUser = User::query()->findOrFail((int) $uid, ['id', 'enabled', 'username', 'class']);
-        if ($targetUser->enabled == UserEnabled::YES->value) {
+        if ($targetUser->enabled) {
             throw new NexusException('Already enabled !');
         }
         $this->checkPermission($operator, $targetUser);
         $update = [
-            'enabled' => UserEnabled::YES->value,
+            'enabled' => true,
         ];
         if ($targetUser->class == UserClassEnum::PEASANT->value) {
             // warn users until 30 days
             $until = now()->addDays(30)->toDateTimeString();
-            $update['leechwarn'] = 'yes';
+            $update['leechwarn'] = true;
             $update['leechwarnuntil'] = $until;
         } else {
-            $update['leechwarn'] = 'no';
+            $update['leechwarn'] = false;
             $update['leechwarnuntil'] = null;
         }
         $modCommentText = sprintf('%s - Enable by %s, reason: %s', now()->format('Y-m-d'), $operator->username, $reason);
@@ -208,7 +207,7 @@ class UserModerationRepository extends BaseRepository
         $user = User::query()->findOrFail((int) $uid, User::$commonFields);
         $this->checkPermission($operator, $user);
         $this->clearCache($user);
-        $user->leechwarn = 'no';
+        $user->leechwarn = false;
         $user->leechwarnuntil = null;
 
         return $user->save();
@@ -234,15 +233,11 @@ class UserModerationRepository extends BaseRepository
     /**
      * @param  mixed  $operator
      * @param  mixed  $user
-     * @param  mixed  $status
      * @param  mixed  $disableReasonKey
      * @return mixed
      */
-    public function updateDownloadPrivileges($operator, $user, $status, $disableReasonKey = null)
+    public function updateDownloadPrivileges($operator, $user, bool $status, $disableReasonKey = null)
     {
-        if (! in_array($status, ['yes', 'no'])) {
-            throw new \InvalidArgumentException("Invalid status: $status");
-        }
         $targetUser = $this->getUser($user);
         if ($targetUser === null) {
             throw new \InvalidArgumentException('Target user not found');
@@ -257,8 +252,8 @@ class UserModerationRepository extends BaseRepository
             'added' => now(),
             'receiver' => $targetUser->id,
         ];
-        if ($status == 'no') {
-            $update = ['downloadpos' => 'no'];
+        if (! $status) {
+            $update = ['downloadpos' => false];
             $modComment = date('Y-m-d').' - Download disable by '.$operatorUsername;
             $msgTransPrefix = 'message.download_disable';
             if ($disableReasonKey !== null) {
@@ -267,7 +262,7 @@ class UserModerationRepository extends BaseRepository
             $message['subject'] = Locale::trans("{$msgTransPrefix}.subject", [], $targetUser->locale);
             $message['msg'] = Locale::trans("{$msgTransPrefix}.body", ['operator' => $operatorUsername], $targetUser->locale);
         } else {
-            $update = ['downloadpos' => 'yes'];
+            $update = ['downloadpos' => true];
             $modComment = date('Y-m-d').' - Download enable by '.$operatorUsername;
             $message['subject'] = Locale::trans('message.download_enable.subject', [], $targetUser->locale);
             $message['msg'] = Locale::trans('message.download_enable.body', ['operator' => $operatorUsername], $targetUser->locale);
@@ -287,14 +282,10 @@ class UserModerationRepository extends BaseRepository
      *
      * @param  mixed  $operator
      * @param  mixed  $user
-     * @param  string  $status  'yes' or 'no'
      * @return mixed
      */
-    public function updateUploadPrivileges($operator, $user, string $status)
+    public function updateUploadPrivileges($operator, $user, bool $status)
     {
-        if (! in_array($status, ['yes', 'no'])) {
-            throw new \InvalidArgumentException("Invalid status: $status");
-        }
         $targetUser = $this->getUser($user);
         if ($targetUser === null) {
             throw new \InvalidArgumentException('Target user not found');
@@ -305,13 +296,13 @@ class UserModerationRepository extends BaseRepository
             $this->checkPermission($operator, $targetUser);
         }
         $message = ['added' => now(), 'receiver' => $targetUser->id];
-        if ($status == 'no') {
-            $update = ['uploadpos' => 'no'];
+        if (! $status) {
+            $update = ['uploadpos' => false];
             $modComment = date('Y-m-d').' - Upload disable by '.$operatorUsername;
             $message['subject'] = Locale::trans('message.upload_disable.subject', [], $targetUser->locale);
             $message['msg'] = Locale::trans('message.upload_disable.body', ['operator' => $operatorUsername], $targetUser->locale);
         } else {
-            $update = ['uploadpos' => 'yes'];
+            $update = ['uploadpos' => true];
             $modComment = date('Y-m-d').' - Upload enable by '.$operatorUsername;
             $message['subject'] = Locale::trans('message.upload_enable.subject', [], $targetUser->locale);
             $message['msg'] = Locale::trans('message.upload_enable.body', ['operator' => $operatorUsername], $targetUser->locale);
@@ -331,14 +322,10 @@ class UserModerationRepository extends BaseRepository
      *
      * @param  mixed  $operator
      * @param  mixed  $user
-     * @param  string  $status  'yes' or 'no'
      * @return mixed
      */
-    public function updateForumPost($operator, $user, string $status)
+    public function updateForumPost($operator, $user, bool $status)
     {
-        if (! in_array($status, ['yes', 'no'])) {
-            throw new \InvalidArgumentException("Invalid status: $status");
-        }
         $targetUser = $this->getUser($user);
         if ($targetUser === null) {
             throw new \InvalidArgumentException('Target user not found');
@@ -349,13 +336,13 @@ class UserModerationRepository extends BaseRepository
             $this->checkPermission($operator, $targetUser);
         }
         $message = ['added' => now(), 'receiver' => $targetUser->id];
-        if ($status == 'no') {
-            $update = ['forumpost' => 'no'];
+        if (! $status) {
+            $update = ['forumpost' => false];
             $modComment = date('Y-m-d').' - Forum posting disabled by '.$operatorUsername;
             $message['subject'] = Locale::trans('message.forumpost_disable.subject', [], $targetUser->locale);
             $message['msg'] = Locale::trans('message.forumpost_disable.body', ['operator' => $operatorUsername], $targetUser->locale);
         } else {
-            $update = ['forumpost' => 'yes'];
+            $update = ['forumpost' => true];
             $modComment = date('Y-m-d').' - Forum posting enabled by '.$operatorUsername;
             $message['subject'] = Locale::trans('message.forumpost_enable.subject', [], $targetUser->locale);
             $message['msg'] = Locale::trans('message.forumpost_enable.body', ['operator' => $operatorUsername], $targetUser->locale);
@@ -396,12 +383,12 @@ class UserModerationRepository extends BaseRepository
         $message = ['added' => now(), 'receiver' => $targetUser->id, 'sender' => null];
 
         if ($weeks === 0) {
-            $update['warned'] = 'no';
+            $update['warned'] = false;
             $update['warneduntil'] = null;
             $message['subject'] = Locale::trans('user.msg_warn_removed', [], $locale);
             $message['msg'] = Locale::trans('user.msg_your_warning_removed_by', [], $locale).$operatorUsername.'.';
         } else {
-            $update['warned'] = 'yes';
+            $update['warned'] = true;
             $update['lastwarned'] = now()->toDateTimeString();
             $update['warnedby'] = $operatorId;
             $update['timeswarned'] = new Expression('timeswarned + 1');
@@ -496,10 +483,10 @@ class UserModerationRepository extends BaseRepository
             'class' => $newClass,
         ];
         if ($newClass == UserClassEnum::VIP->value) {
-            if (! empty($extra['vip_added']) && in_array($extra['vip_added'], ['yes', 'no'])) {
-                $userUpdates['vip_added'] = $extra['vip_added'];
+            if (array_key_exists('vip_added', $extra)) {
+                $userUpdates['vip_added'] = (bool) $extra['vip_added'];
             } else {
-                $userUpdates['vip_added'] = 'no';
+                $userUpdates['vip_added'] = false;
             }
             if (! empty($extra['vip_until'])) {
                 $until = Carbon::parse($extra['vip_until']);
@@ -508,7 +495,7 @@ class UserModerationRepository extends BaseRepository
                 $userUpdates['vip_until'] = null;
             }
         } else {
-            $userUpdates['vip_added'] = 'no';
+            $userUpdates['vip_added'] = false;
             $userUpdates['vip_until'] = null;
         }
         Logger::writeWithContext((string) ('userUpdates: '.json_encode($userUpdates)), (string) 'info', (bool) false);
@@ -575,14 +562,14 @@ class UserModerationRepository extends BaseRepository
 
         foreach ($userIds as $uid) {
             $user = User::query()->find($uid, ['id', 'warned', 'modcomment']);
-            if ($user === null || $user->warned !== 'yes') {
+            if ($user === null || ! $user->warned) {
                 continue;
             }
             $newModcomment = $user->modcomment === '' || $user->modcomment === null
                 ? $modcomment
                 : $modcomment."\n".$user->modcomment;
 
-            $user->warned = 'no';
+            $user->warned = false;
             $user->warneduntil = null;
             $user->modcomment = $newModcomment;
             $user->save();

@@ -38,7 +38,7 @@ class InviteRepository
             $query->where('u.status', $filters['status']);
         }
         if (! empty($filters['enabled'])) {
-            $query->where('u.enabled', $filters['enabled']);
+            $query->where('u.enabled', $filters['enabled'] === 'yes');
         }
 
         return (int) $query->count();
@@ -58,7 +58,7 @@ class InviteRepository
             $query->where('u.status', $filters['status']);
         }
         if (! empty($filters['enabled'])) {
-            $query->where('u.enabled', $filters['enabled']);
+            $query->where('u.enabled', $filters['enabled'] === 'yes');
         }
 
         return $query

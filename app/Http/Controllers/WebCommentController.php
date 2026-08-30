@@ -244,7 +244,7 @@ class WebCommentController extends Controller
     private function authorizeComment(string $type, int $parentId): void
     {
         $user = $this->currentUser();
-        if ($user->parked === 'yes') {
+        if ($user->parked) {
             abort(403, $this->lang('std_permission_denied'));
         }
 
@@ -302,7 +302,7 @@ class WebCommentController extends Controller
             return;
         }
 
-        if (CommentRepository::getCommentPmSetting($ownerId) !== 'yes') {
+        if (! CommentRepository::getCommentPmSetting($ownerId)) {
             return;
         }
 

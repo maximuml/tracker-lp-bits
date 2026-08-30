@@ -34,7 +34,7 @@ class TopTorrents extends BaseWidget implements HasActions
     protected function getTableQuery(): Builder
     {
         return Torrent::query()
-            ->where('banned', 'no')
+            ->where('banned', 0)
             ->orderByDesc('seeders')
             ->orderByDesc('leechers')
             ->limit(10);

@@ -12,19 +12,19 @@ use Illuminate\Http\Request;
 final readonly class UpdateMessageDto
 {
     public function __construct(
-        public ?string $unread,
+        public ?bool $unread,
         public ?int $location,
     ) {}
 
     public static function fromRequest(Request $request): self
     {
         $validated = $request->validate([
-            'unread' => 'sometimes|in:yes,no',
+            'unread' => 'sometimes|boolean',
             'location' => 'sometimes|integer',
         ]);
 
         return new self(
-            isset($validated['unread']) ? (string) $validated['unread'] : null,
+            isset($validated['unread']) ? (bool) $validated['unread'] : null,
             isset($validated['location']) ? (int) $validated['location'] : null,
         );
     }

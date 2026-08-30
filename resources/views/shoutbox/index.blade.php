@@ -54,7 +54,7 @@ function shoutReply(nick) {
 	return false;
 }
 var SHOUT_REFRESH = {{ (int) $refresh }};
-var SHOUT_TYPE = {{ json_encode($where, JSON_UNESCAPED_UNICODE) }};
+var SHOUT_TYPE = @json($where, JSON_UNESCAPED_UNICODE);
 var pollTimer = null;
 function schedulePoll() {
 	if (pollTimer) { clearTimeout(pollTimer); }
@@ -101,7 +101,7 @@ function shoutAttachToggleHandler() {
 //]]>
 </script>
 </head>
-<body class='inframe' onload="{{ $startcountdown }}">
+<body class='inframe' onload="{!! $startcountdown !!}">
 @endif
 @php
     $reactionCounts = $reactionData['counts'] ?? [];

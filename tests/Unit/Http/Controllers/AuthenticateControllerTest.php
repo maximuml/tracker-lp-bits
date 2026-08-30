@@ -229,4 +229,75 @@ final class AuthenticateControllerTest extends TestCase
 
         $this->assertNotSame(0, $result['ret']);
     }
+
+    public function test_ammds_approve_returns_success(): void
+    {
+        $user = new User;
+        $user->id = 5;
+        $user->username = 'testuser';
+        $user->email = 'test@example.com';
+        $user->class = 1;
+
+        /** @var AuthenticateRepository&Mockery\MockInterface $repository */
+        $repository = Mockery::mock(AuthenticateRepository::class);
+        $repository->shouldReceive('ammdsApprove')
+            ->once()
+            ->andReturn($user);
+
+        /** @var UserRepository&Mockery\MockInterface $userRepository */
+        $userRepository = Mockery::mock(UserRepository::class);
+
+        $controller = new AuthenticateController($repository, $userRepository);
+        $request = Request::create('/api/v1/ammds/approve', 'POST', [
+            'uid' => 5,
+            'timestamp' => time(),
+            'nonce' => 'nonce123',
+            'signature' => 'sig123',
+        ]);
+
+        $result = $controller->ammdsApprove($request);
+
+        $this->assertSame(0, $result['ret']);
+    }
+
+    public function test_ammds_approve_validates_required_fields(): void
+    {
+        /** @var AuthenticateRepository&Mockery\MockInterface $repository */
+        $repository = Mockery::mock(AuthenticateRepository::class);
+        $repository->shouldNotReceive('ammdsApprove');
+
+        /** @var UserRepository&Mockery\MockInterface $userRepository */
+        $userRepository = Mockery::mock(UserRepository::class);
+
+        $controller = new AuthenticateController($repository, $userRepository);
+        $request = Request::create('/api/v1/ammds/approve', 'POST', []);
+
+        $result = $controller->ammdsApprove($request);
+
+        $this->assertNotSame(0, $result['ret']);
+    }
+
+    public function test_ammds_approve_returns_fail_on_exception(): void
+    {
+        /** @var AuthenticateRepository&Mockery\MockInterface $repository */
+        $repository = Mockery::mock(AuthenticateRepository::class);
+        $repository->shouldReceive('ammdsApprove')
+            ->once()
+            ->andThrow(new \InvalidArgumentException('Invalid signature.'));
+
+        /** @var UserRepository&Mockery\MockInterface $userRepository */
+        $userRepository = Mockery::mock(UserRepository::class);
+
+        $controller = new AuthenticateController($repository, $userRepository);
+        $request = Request::create('/api/v1/ammds/approve', 'POST', [
+            'uid' => 5,
+            'timestamp' => time(),
+            'nonce' => 'nonce123',
+            'signature' => 'bad-sig',
+        ]);
+
+        $result = $controller->ammdsApprove($request);
+
+        $this->assertNotSame(0, $result['ret']);
+    }
 }

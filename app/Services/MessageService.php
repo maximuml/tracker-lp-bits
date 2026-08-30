@@ -29,7 +29,7 @@ use LogicException;
  * Handles message action mutations (takeMessage, deletemessage, moveordel,
  * editmailboxes2). Page rendering is handled by MessagePageService.
  */
-final class MessageService
+class MessageService
 {
     public function takeMessage(Request $request): RedirectResponse
     {

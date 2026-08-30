@@ -27,7 +27,7 @@ use Illuminate\Support\Collection;
  *  - forward: forward-a-PM form
  *  - editmailboxes: add/edit custom mailboxes form
  */
-final class MessagePageService
+class MessagePageService
 {
     private const PM_INBOX = 1;
 

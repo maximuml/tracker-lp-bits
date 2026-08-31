@@ -1,0 +1,120 @@
+/**
+ * k6 performance budget baseline for tracker-lp-bits
+ *
+ * Step 23 of the modernization plan.
+ *
+ * Scans key unauthenticated pages and enforces response time budgets.
+ * Run against the Docker stack (OpenResty on port 80).
+ *
+ * Usage:
+ *   k6 run tests/Performance/baseline.js
+ *   k6 run --env BASE_URL=http://127.0.0.1:80 tests/Performance/baseline.js
+ *
+ * CI: .github/workflows/perf-budget.yml runs this against Docker stack.
+ */
+
+import http from 'k6/http';
+import { check, group } from 'k6';
+import { Trend } from 'k6/metrics';
+
+const BASE_URL = __ENV.BASE_URL || 'http://127.0.0.1:80';
+
+// Custom metrics per page
+const indexTrend = new Trend('page_index_duration', true);
+const loginTrend = new Trend('page_login_duration', true);
+const signupTrend = new Trend('page_signup_duration', true);
+const healthLiveTrend = new Trend('page_health_live_duration', true);
+const healthReadyTrend = new Trend('page_health_ready_duration', true);
+
+// Performance budgets (in milliseconds, p95)
+const BUDGETS = {
+  page_index_duration: 2000,
+  page_login_duration: 1500,
+  page_signup_duration: 1500,
+  page_health_live_duration: 100,
+  page_health_ready_duration: 500,
+};
+
+export const options = {
+  stages: [
+    { duration: '10s', target: 5 },   // ramp up to 5 VUs
+    { duration: '20s', target: 5 },   // hold at 5 VUs
+    { duration: '5s', target: 0 },    // ramp down
+  ],
+  thresholds: {
+    // p95 must be under budget; failed requests must be 0
+    'page_index_duration': ['p(95)<' + BUDGETS.page_index_duration],
+    'page_login_duration': ['p(95)<' + BUDGETS.page_login_duration],
+    'page_signup_duration': ['p(95)<' + BUDGETS.page_signup_duration],
+    'page_health_live_duration': ['p(95)<' + BUDGETS.page_health_live_duration],
+    'page_health_ready_duration': ['p(95)<' + BUDGETS.page_health_ready_duration],
+    'http_req_failed': ['rate<0.01'],
+  },
+};
+
+export default function () {
+  // Health/live — should be very fast
+  group('health/live', () => {
+    const res = http.get(`${BASE_URL}/health/live`);
+    healthLiveTrend.add(res.timings.duration);
+    check(res, {
+      'health/live status 200': (r) => r.status === 200,
+    });
+  });
+
+  // Health/ready — checks DB + Redis
+  group('health/ready', () => {
+    const res = http.get(`${BASE_URL}/health/ready`);
+    healthReadyTrend.add(res.timings.duration);
+    check(res, {
+      'health/ready status 200': (r) => r.status === 200,
+    });
+  });
+
+  // Index page — heaviest unauthenticated page
+  group('index', () => {
+    const res = http.get(`${BASE_URL}/index.php`);
+    indexTrend.add(res.timings.duration);
+    check(res, {
+      'index status 200': (r) => r.status === 200,
+    });
+  });
+
+  // Login page
+  group('login', () => {
+    const res = http.get(`${BASE_URL}/login.php`);
+    loginTrend.add(res.timings.duration);
+    check(res, {
+      'login status 200': (r) => r.status === 200,
+    });
+  });
+
+  // Signup page
+  group('signup', () => {
+    const res = http.get(`${BASE_URL}/signup.php`);
+    signupTrend.add(res.timings.duration);
+    check(res, {
+      'signup status 200': (r) => r.status === 200,
+    });
+  });
+}
+
+export function handleSummary(data) {
+  const budgetReport = {
+    thresholds: {},
+  };
+
+  for (const [metric, budget] of Object.entries(BUDGETS)) {
+    const actual = data.metrics[metric]?.values?.['p(95)'] ?? 0;
+    const passed = actual <= budget;
+    budgetReport.thresholds[metric] = {
+      budget_ms: budget,
+      actual_p95_ms: Math.round(actual),
+      passed: passed,
+    };
+  }
+
+  return {
+    stdout: JSON.stringify(budgetReport, null, 2) + '\n',
+  };
+}

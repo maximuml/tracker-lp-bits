@@ -17,7 +17,7 @@ jobs:
   axe-scan:
     name: axe-core accessibility scan
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
 
     steps:
       - name: Checkout code
@@ -48,9 +48,35 @@ jobs:
           # Set CI MeiliSearch key (docker-compose requires it)
           sed -i 's/^MEILISEARCH_MASTER_KEY=.*/MEILISEARCH_MASTER_KEY=ci-meilisearch-test-key/' .env
           docker compose build
-          docker compose up -d --wait mysql redis php openresty
+          # Start mysql + redis first, wait for them
+          docker compose up -d --wait mysql redis
+          # Start php (runs composer install + config:cache in entrypoint)
+          docker compose up -d php
+          # Wait for PHP-FPM to be ready (entrypoint runs composer install etc.)
+          echo "Waiting for PHP-FPM to finish setup..."
+          for i in $(seq 1 60); do
+            if docker compose exec -T php php -r "echo 'ready';" 2>/dev/null | grep -q ready; then
+              echo "PHP-FPM ready after ${i}0s"
+              break
+            fi
+            sleep 10
+          done
+          # Run migrations + seed
           docker compose exec -T php php artisan migrate:fresh --seed --force
           docker compose exec -T php php artisan storage:link --force
+          # Start openresty (don't use --wait, healthcheck may fail during Laravel boot)
+          docker compose up -d openresty
+          # Wait for openresty to serve /health/live
+          echo "Waiting for OpenResty to serve requests..."
+          for i in $(seq 1 30); do
+            if curl -sfL http://127.0.0.1:80/health/live -o /dev/null 2>/dev/null; then
+              echo "OpenResty ready after ${i}s"
+              break
+            fi
+            sleep 2
+          done
+          # Final check
+          curl -sfL http://127.0.0.1:80/health/live || (echo "::error::OpenResty not responding" && exit 1)
           docker compose exec -T redis sh -c "redis-cli -a \"${REDIS_PASSWORD:-}\" FLUSHALL" 2>/dev/null || true
 
       - name: Run axe-core scans

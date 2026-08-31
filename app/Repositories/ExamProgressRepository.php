@@ -217,7 +217,7 @@ class ExamProgressRepository extends BaseRepository
             Logger::writeWithContext((string) ('[GET_TOTAL_VALUE]: '.$attributes['value']), (string) 'info', (bool) false);
             $newVersionProgress = ExamProgress::query()
                 ->where('exam_user_id', $examUser->id)
-                ->where('torrent_id', -1)
+                ->whereNull('torrent_id')
                 ->where('index', $index['index'])
                 ->orderBy('id', 'desc')
                 ->first();
@@ -234,7 +234,7 @@ class ExamProgressRepository extends BaseRepository
             } else {
                 // do insert.
                 $attributes['init_value'] = $attributes['value'];
-                $attributes['torrent_id'] = -1;
+                $attributes['torrent_id'] = null;
                 ExamProgress::query()->insert($attributes);
                 Logger::writeWithContext((string) ('newVersionProgress [NOT EXISTS], doInsert with: '.json_encode($attributes)), (string) 'info', (bool) false);
             }
@@ -256,10 +256,12 @@ class ExamProgressRepository extends BaseRepository
                     $torrentCounts = 1;
                     Logger::writeWithContext((string) 'torrent count is 0, use 1', (string) 'info', (bool) false);
                 }
-                $examUserProgressFieldData[$index['index']] = bcdiv((string) bcsub($attributes['value'], $attributes['init_value']), (string) $torrentCounts);
+                $valueStr = sprintf('%d', $attributes['value']);
+                $initValueStr = sprintf('%d', $attributes['init_value']);
+                $examUserProgressFieldData[$index['index']] = bcdiv(bcsub($valueStr, $initValueStr), (string) $torrentCounts);
                 Logger::writeWithContext((string) sprintf('torrentCounts > 0, examUserProgress: (total(%s) - init_value(%s)) / %s = %s', $attributes['value'], $attributes['init_value'], $torrentCounts, $examUserProgressFieldData[$index['index']]), (string) 'info', (bool) false);
             } else {
-                $examUserProgressFieldData[$index['index']] = bcsub($attributes['value'], $attributes['init_value']);
+                $examUserProgressFieldData[$index['index']] = bcsub(sprintf('%d', $attributes['value']), sprintf('%d', $attributes['init_value']));
                 Logger::writeWithContext((string) sprintf("normal index: {$index['index']}, examUserProgress: total(%s) - init_value(%s) = %s", $attributes['value'], $attributes['init_value'], $examUserProgressFieldData[$index['index']]), (string) 'info', (bool) false);
             }
         }
@@ -417,7 +419,7 @@ class ExamProgressRepository extends BaseRepository
             if (! isset($progress[$index['index']])) {
                 continue;
             }
-            $currentValue = $progress[$index['index']] ?? 0;
+            $currentValue = (float) ($progress[$index['index']] ?? 0);
             $requireValue = $index['require_value'];
             $unit = Exam::$indexes[$index['index']]['unit'] ?? '';
             switch ($index['index']) {

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Http\Controllers;
 
 use App\Http\Controllers\SettingController;
+use App\Http\Requests\SettingStoreRequest;
 use App\Repositories\SettingRepository;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -79,7 +80,10 @@ final class SettingControllerTest extends TestCase
             ->andReturn(true);
 
         $controller = new SettingController($repository);
-        $request = Request::create('/api/v1/settings', 'POST', $data);
+        $request = SettingStoreRequest::create('/api/v1/settings', 'POST', $data);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $result = $controller->store($request);
 
@@ -95,9 +99,12 @@ final class SettingControllerTest extends TestCase
         $repository->shouldNotReceive('store');
 
         $controller = new SettingController($repository);
-        $request = Request::create('/api/v1/settings', 'POST', [
+        $request = SettingStoreRequest::create('/api/v1/settings', 'POST', [
             'hr' => ['inspect_time' => 72],
         ]);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $controller->store($request);
     }
@@ -111,7 +118,7 @@ final class SettingControllerTest extends TestCase
         $repository->shouldNotReceive('store');
 
         $controller = new SettingController($repository);
-        $request = Request::create('/api/v1/settings', 'POST', [
+        $request = SettingStoreRequest::create('/api/v1/settings', 'POST', [
             'hr' => [
                 'ban_user_when_counts_reach' => 3,
                 'ignore_when_ratio_reach' => 1.0,
@@ -120,6 +127,9 @@ final class SettingControllerTest extends TestCase
                 'mode' => 'invalid-mode',
             ],
         ]);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $controller->store($request);
     }

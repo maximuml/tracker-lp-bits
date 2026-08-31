@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tests\Unit\Http\Controllers;
 
 use App\Http\Controllers\UserMedalController;
+use App\Http\Requests\UserMedalStoreRequest;
+use App\Http\Requests\UserMedalUpdateRequest;
 use App\Models\Medal;
 use App\Repositories\MedalRepository;
 use Illuminate\Http\Request;
@@ -55,7 +57,10 @@ final class UserMedalControllerTest extends TestCase
             ->andReturn(true);
 
         $controller = new UserMedalController($repository);
-        $request = Request::create('/api/v1/user-medals', 'POST', $data);
+        $request = UserMedalStoreRequest::create('/api/v1/user-medals', 'POST', $data);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $result = $controller->store($request);
 
@@ -71,7 +76,10 @@ final class UserMedalControllerTest extends TestCase
         $repository->shouldNotReceive('grantToUser');
 
         $controller = new UserMedalController($repository);
-        $request = Request::create('/api/v1/user-medals', 'POST', []);
+        $request = UserMedalStoreRequest::create('/api/v1/user-medals', 'POST', []);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $controller->store($request);
     }
@@ -114,7 +122,10 @@ final class UserMedalControllerTest extends TestCase
             ->andReturn($medal);
 
         $controller = new UserMedalController($repository);
-        $request = Request::create('/api/v1/user-medals/1', 'PUT', $data);
+        $request = UserMedalUpdateRequest::create('/api/v1/user-medals/1', 'PUT', $data);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $result = $controller->update($request, 1);
 
@@ -131,7 +142,10 @@ final class UserMedalControllerTest extends TestCase
         $repository->shouldNotReceive('update');
 
         $controller = new UserMedalController($repository);
-        $request = Request::create('/api/v1/user-medals/1', 'PUT', []);
+        $request = UserMedalUpdateRequest::create('/api/v1/user-medals/1', 'PUT', []);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $controller->update($request, 1);
     }

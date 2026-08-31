@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tests\Unit\Http\Controllers;
 
 use App\Http\Controllers\ExamUserController;
+use App\Http\Requests\ExamUserAvoidRequest;
+use App\Http\Requests\UidRequest;
 use App\Models\Exam;
 use App\Models\ExamUser;
 use App\Models\User;
@@ -57,7 +59,10 @@ final class ExamUserControllerTest extends TestCase
             ->andReturn($examUser);
 
         $controller = new ExamUserController($repository);
-        $request = Request::create('/api/v1/exam-users', 'POST', ['uid' => 5, 'exam_id' => 10]);
+        $request = UidRequest::create('/api/v1/exam-users', 'POST', ['uid' => 5, 'exam_id' => 10]);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $result = $controller->store($request);
 
@@ -74,7 +79,10 @@ final class ExamUserControllerTest extends TestCase
         $repository->shouldNotReceive('assignToUser');
 
         $controller = new ExamUserController($repository);
-        $request = Request::create('/api/v1/exam-users', 'POST', []);
+        $request = UidRequest::create('/api/v1/exam-users', 'POST', []);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $controller->store($request);
     }
@@ -105,7 +113,10 @@ final class ExamUserControllerTest extends TestCase
             ->andReturn(true);
 
         $controller = new ExamUserController($repository);
-        $request = Request::create('/api/v1/exam-users/1/avoid', 'POST', ['id' => 1]);
+        $request = ExamUserAvoidRequest::create('/api/v1/exam-users/1/avoid', 'POST', ['id' => 1]);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $result = $controller->avoid($request);
 
@@ -121,7 +132,10 @@ final class ExamUserControllerTest extends TestCase
         $repository->shouldNotReceive('avoidExamUser');
 
         $controller = new ExamUserController($repository);
-        $request = Request::create('/api/v1/exam-users/avoid', 'POST', []);
+        $request = ExamUserAvoidRequest::create('/api/v1/exam-users/avoid', 'POST', []);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $controller->avoid($request);
     }
@@ -136,7 +150,10 @@ final class ExamUserControllerTest extends TestCase
             ->andReturn(true);
 
         $controller = new ExamUserController($repository);
-        $request = Request::create('/api/v1/exam-users/1/recover', 'POST', ['id' => 1]);
+        $request = ExamUserAvoidRequest::create('/api/v1/exam-users/1/recover', 'POST', ['id' => 1]);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $result = $controller->recover($request);
 
@@ -152,7 +169,10 @@ final class ExamUserControllerTest extends TestCase
         $repository->shouldNotReceive('recoverExamUser');
 
         $controller = new ExamUserController($repository);
-        $request = Request::create('/api/v1/exam-users/recover', 'POST', []);
+        $request = ExamUserAvoidRequest::create('/api/v1/exam-users/recover', 'POST', []);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $controller->recover($request);
     }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\RewardIndexRequest;
 use App\Http\Requests\RewardRequest;
 use App\Http\Resources\RewardResource;
 use App\Models\User;
@@ -28,11 +29,8 @@ class RewardController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function index(Request $request): array
+    public function index(RewardIndexRequest $request): array
     {
-        $request->validate([
-            'torrent_id' => 'required',
-        ]);
         $result = $this->repository->getList($request->all());
         $resource = RewardResource::collection($result);
         $resource->additional([

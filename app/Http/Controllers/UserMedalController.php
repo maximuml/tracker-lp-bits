@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UserMedalStoreRequest;
+use App\Http\Requests\UserMedalUpdateRequest;
 use App\Http\Resources\MedalResource;
 use App\Models\UserMedal;
 use App\Repositories\MedalRepository;
@@ -43,14 +45,8 @@ class UserMedalController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function store(Request $request): array
+    public function store(UserMedalStoreRequest $request): array
     {
-        $rules = [
-            'medal_id' => 'required|integer',
-            'uid' => 'required|integer',
-            'duration' => 'nullable|integer|min:-1',
-        ];
-        $request->validate($rules);
         $result = $this->repository->grantToUser($request->uid, $request->medal_id, $request->duration);
 
         return $this->success($result);
@@ -76,16 +72,8 @@ class UserMedalController extends Controller
      * @param  mixed  $id
      * @return array<string, mixed>
      */
-    public function update(Request $request, $id): array
+    public function update(UserMedalUpdateRequest $request, $id): array
     {
-        $rules = [
-            'name' => 'required|string',
-            'price' => 'required|integer|min:1',
-            'image_large' => 'required|url',
-            'image_small' => 'required|url',
-            'duration' => 'nullable|integer|min:-1',
-        ];
-        $request->validate($rules);
         $result = $this->repository->update($request->all(), $id);
         $resource = new MedalResource($result);
 

@@ -4,6 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Auth\AmmdsApproveRequest;
+use App\Http\Requests\Auth\ChallengeRequest;
+use App\Http\Requests\Auth\IyuuApproveRequest;
+use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\Auth\NasToolsApproveRequest;
+use App\Http\Requests\Auth\PasskeyLoginRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Repositories\AuthenticateRepository;
@@ -20,7 +26,6 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Validation\Rule;
 
 class AuthenticateController extends Controller
 {
@@ -37,12 +42,8 @@ class AuthenticateController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function login(Request $request): array
+    public function login(LoginRequest $request): array
     {
-        $request->validate([
-            'username' => 'required',
-            'password' => 'required',
-        ]);
         $result = $this->repository->login($request->username, $request->password);
         $includes = explode(',', $request->get('include', ''));
         if (in_array('site_info', $includes)) {
@@ -74,13 +75,8 @@ class AuthenticateController extends Controller
      *
      * The timestamp must be within ±5 minutes of server time.
      */
-    public function passkeyLogin(Request $request): RedirectResponse
+    public function passkeyLogin(PasskeyLoginRequest $request): RedirectResponse
     {
-        $request->validate([
-            'passkey' => 'required|string|size:32',
-            'timestamp' => 'required|integer',
-            'signature' => 'required|string',
-        ]);
         $passkey = $request->input('passkey');
         $timestamp = (int) $request->input('timestamp');
         $signature = (string) $request->input('signature');
@@ -121,11 +117,8 @@ class AuthenticateController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function nasToolsApprove(Request $request): array
+    public function nasToolsApprove(NasToolsApproveRequest $request): array
     {
-        $request->validate([
-            'data' => 'required|string',
-        ]);
         try {
             $user = $this->repository->nasToolsApprove($request->data);
             $resource = new UserResource($user);
@@ -153,15 +146,9 @@ class AuthenticateController extends Controller
         return $result;
     }
 
-    public function iyuuApprove(Request $request): JsonResponse
+    public function iyuuApprove(IyuuApproveRequest $request): JsonResponse
     {
         try {
-            $request->validate([
-                'token' => 'required|string',
-                'id' => 'required|integer',
-                'verity' => 'required|string',
-                'provider' => ['required', 'string', Rule::in('iyuu')],
-            ]);
             $this->repository->iyuuApprove($request->token, $request->id, $request->verity);
 
             return response()->json(['success' => true]);
@@ -173,15 +160,9 @@ class AuthenticateController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function ammdsApprove(Request $request): array
+    public function ammdsApprove(AmmdsApproveRequest $request): array
     {
         try {
-            $request->validate([
-                'uid' => 'required|integer',
-                'timestamp' => 'required|integer',
-                'nonce' => 'required|string',
-                'signature' => 'required|string',
-            ]);
             $user = $this->repository->ammdsApprove($request);
             $resource = new UserResource($user);
 
@@ -199,12 +180,9 @@ class AuthenticateController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function challenge(Request $request): array
+    public function challenge(ChallengeRequest $request): array
     {
         try {
-            $request->validate([
-                'username' => 'required|string',
-            ]);
             $username = $request->username;
             $challenge = Token::randomHex((int) 20);
             Cache::put(Token::challengeKey($username), $challenge, 300);

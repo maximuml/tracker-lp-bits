@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ExamRequest;
 use App\Http\Resources\ExamResource;
 use App\Models\Exam;
 use App\Repositories\ExamRepository;
 use App\Support\Locale;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 class ExamController extends Controller
 {
@@ -44,17 +44,8 @@ class ExamController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function store(Request $request): array
+    public function store(ExamRequest $request): array
     {
-        $rules = [
-            'name' => 'required|string',
-            'indexes' => 'required|array|min:1',
-            'indexes.*.index' => ['required', Rule::in(array_keys(Exam::$indexes))],
-            'indexes.*.require_value' => 'nullable|numeric',
-            'status' => 'required|in:0,1',
-            'duration' => 'nullable|numeric',
-        ];
-        $request->validate($rules);
         $result = $this->repository->store($request->all());
         $resource = new ExamResource($result);
 
@@ -79,17 +70,8 @@ class ExamController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function update(Request $request, int $id): array
+    public function update(ExamRequest $request, int $id): array
     {
-        $rules = [
-            'name' => 'required|string',
-            'indexes' => 'required|array|min:1',
-            'indexes.*.index' => ['required', Rule::in(array_keys(Exam::$indexes))],
-            'indexes.*.require_value' => 'nullable|numeric',
-            'status' => 'required|in:0,1',
-            'duration' => 'nullable|numeric',
-        ];
-        $request->validate($rules);
         $result = $this->repository->update($request->all(), $id);
         $resource = new ExamResource($result);
 

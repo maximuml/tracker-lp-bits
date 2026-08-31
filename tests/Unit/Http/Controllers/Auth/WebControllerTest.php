@@ -6,11 +6,13 @@ namespace Tests\Unit\Http\Controllers\Auth;
 
 use App\Exceptions\AuthenticationException;
 use App\Http\Controllers\Auth\WebController;
+use App\Http\Requests\Auth\LoginRequest;
 use App\Services\WebAuthService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Validation\ValidationException;
 use Mockery;
 use Tests\TestCase;
 
@@ -35,10 +37,13 @@ final class WebControllerTest extends TestCase
         );
 
         $controller = new WebController($authService);
-        $request = Request::create('/login', 'POST', [
+        $request = LoginRequest::create('/login', 'POST', [
             'username' => 'testuser',
             'password' => 'password',
         ]);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $response = $controller->login($request);
 
@@ -58,10 +63,13 @@ final class WebControllerTest extends TestCase
         Auth::shouldReceive('guard')->with('nexus-web')->once()->andReturn($guard);
 
         $controller = new WebController($authService);
-        $request = Request::create('/login', 'POST', [
+        $request = LoginRequest::create('/login', 'POST', [
             'username' => 'testuser',
             'password' => 'password',
         ]);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $response = $controller->login($request);
 
@@ -69,23 +77,20 @@ final class WebControllerTest extends TestCase
         $this->assertSame('You are banned.', $response->getSession()->get('error'));
     }
 
-    public function test_login_redirects_back_on_validation_failure(): void
+    public function test_login_throws_validation_exception_on_empty_data(): void
     {
+        $this->expectException(ValidationException::class);
+
         /** @var WebAuthService&Mockery\MockInterface $authService */
         $authService = Mockery::mock(WebAuthService::class);
-        $authService->shouldReceive('assertNotBanned')->once();
-        $authService->shouldReceive('recordFailedAttempt')->once();
-
-        $guard = Mockery::mock();
-        $guard->shouldReceive('check')->once()->andReturn(false);
-        Auth::shouldReceive('guard')->with('nexus-web')->once()->andReturn($guard);
 
         $controller = new WebController($authService);
-        $request = Request::create('/login', 'POST', []);
+        $request = LoginRequest::create('/login', 'POST', []);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
-        $response = $controller->login($request);
-
-        $this->assertTrue($response->isRedirect());
+        $controller->login($request);
     }
 
     public function test_login_redirects_to_index_on_success(): void
@@ -100,10 +105,13 @@ final class WebControllerTest extends TestCase
         Auth::shouldReceive('guard')->with('nexus-web')->once()->andReturn($guard);
 
         $controller = new WebController($authService);
-        $request = Request::create('/login', 'POST', [
+        $request = LoginRequest::create('/login', 'POST', [
             'username' => 'testuser',
             'password' => 'password',
         ]);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $response = $controller->login($request);
 
@@ -123,11 +131,14 @@ final class WebControllerTest extends TestCase
         Auth::shouldReceive('guard')->with('nexus-web')->once()->andReturn($guard);
 
         $controller = new WebController($authService);
-        $request = Request::create('/login', 'POST', [
+        $request = LoginRequest::create('/login', 'POST', [
             'username' => 'testuser',
             'password' => 'password',
             'returnto' => '/torrents.php',
         ]);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $response = $controller->login($request);
 
@@ -147,11 +158,14 @@ final class WebControllerTest extends TestCase
         Auth::shouldReceive('guard')->with('nexus-web')->once()->andReturn($guard);
 
         $controller = new WebController($authService);
-        $request = Request::create('/login', 'POST', [
+        $request = LoginRequest::create('/login', 'POST', [
             'username' => 'testuser',
             'password' => 'password',
             'returnto' => 'https://evil.com/path',
         ]);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $response = $controller->login($request);
 
@@ -173,10 +187,13 @@ final class WebControllerTest extends TestCase
         Auth::shouldReceive('guard')->with('nexus-web')->once()->andReturn($guard);
 
         $controller = new WebController($authService);
-        $request = Request::create('/login', 'POST', [
+        $request = LoginRequest::create('/login', 'POST', [
             'username' => 'testuser',
             'password' => 'wrongpass',
         ]);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $response = $controller->login($request);
 

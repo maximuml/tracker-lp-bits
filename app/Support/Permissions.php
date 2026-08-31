@@ -52,7 +52,7 @@ final class Permissions
 
         if ($uid <= 0) {
             if ($fail) {
-                goto fail;
+                return self::permissionFail($log, $permission);
             }
             Logger::writeWithContext("$log, unauthenticated, false");
 
@@ -91,7 +91,14 @@ final class Permissions
             return $result;
         }
 
-        fail:
+        return self::permissionFail($log, $permission);
+    }
+
+    /**
+     * Handle permission failure: log and abort with legacy response.
+     */
+    private static function permissionFail(string $log, string $permission = ''): bool
+    {
         Logger::writeWithContext("$log, [FAIL]");
         if (defined('IN_NEXUS') && IN_NEXUS && ! (defined('IN_TRACKER') && IN_TRACKER)) {
             $lang_functions = app(Language::class)->functions();

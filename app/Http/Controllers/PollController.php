@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PollStoreRequest;
+use App\Http\Requests\PollUpdateRequest;
+use App\Http\Requests\PollVoteRequest;
 use App\Http\Resources\PollResource;
 use App\Models\Poll;
 use App\Repositories\IndexRepository;
@@ -158,12 +161,9 @@ class PollController extends LegacyController
     /**
      * @return array<string, mixed>
      */
-    public function store(Request $request): array
+    public function store(PollStoreRequest $request): array
     {
-        $data = $request->validate(array_merge(
-            ['question' => 'required|string|max:255'],
-            array_fill_keys(array_map(fn ($i) => "option{$i}", range(0, Poll::MAX_OPTION_INDEX)), 'sometimes|string|max:255')
-        ));
+        $data = $request->validated();
 
         $data['added'] = now()->toDateTimeString();
 
@@ -175,12 +175,9 @@ class PollController extends LegacyController
     /**
      * @return array<string, mixed>
      */
-    public function update(Request $request, Poll $poll): array
+    public function update(PollUpdateRequest $request, Poll $poll): array
     {
-        $data = $request->validate(array_merge(
-            ['question' => 'sometimes|string|max:255'],
-            array_fill_keys(array_map(fn ($i) => "option{$i}", range(0, Poll::MAX_OPTION_INDEX)), 'sometimes|string|max:255')
-        ));
+        $data = $request->validated();
 
         $poll->update($data);
 
@@ -216,15 +213,12 @@ class PollController extends LegacyController
     /**
      * @return array<string, mixed>
      */
-    public function vote(Request $request): array
+    public function vote(PollVoteRequest $request): array
     {
         $currentUser = (array) (app(CurrentUser::class)->get() ?? []);
         $userId = (int) ($currentUser['id'] ?? 0);
 
-        $data = $request->validate([
-            'poll_id' => 'required|integer',
-            'choice' => 'required|integer|min:0',
-        ]);
+        $data = $request->validated();
 
         $pollId = (int) $data['poll_id'];
         $choice = (int) $data['choice'];

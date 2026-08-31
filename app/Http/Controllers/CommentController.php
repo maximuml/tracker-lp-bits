@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PrepareCommentRequest;
 use App\Http\Resources\CommentResource;
 use App\Models\Comment;
 use App\Repositories\CommentRepository;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
 
 class CommentController extends Controller
 {
@@ -44,14 +44,6 @@ class CommentController extends Controller
     private function prepareData(Request $request)
     {
         $allTypes = array_keys(Comment::TYPE_MAPS);
-        $request->validate([
-            'type' => ['required', Rule::in($allTypes)],
-            'torrent_id' => 'nullable|integer',
-            'text' => 'required',
-            'offer_id' => 'nullable|integer',
-            'request_id' => 'nullable|integer',
-            'anonymous' => 'nullable',
-        ]);
         $data = [
             'type' => $request->type,
             'torrent' => $request->torrent_id,
@@ -77,7 +69,7 @@ class CommentController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function store(Request $request): array
+    public function store(PrepareCommentRequest $request): array
     {
         $user = Auth::user();
         $comment = $this->repository->store($this->prepareData($request), $user);

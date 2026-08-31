@@ -128,7 +128,6 @@ class Handler extends ExceptionHandler
         if (config('app.debug')) {
             $data['trace'] = $trace;
         }
-        //        dd($e);
         if ($e instanceof \Error || $e instanceof \ErrorException) {
             Logger::writeWithContext((string) sprintf($e::class.': %s, trace: %s', $msg, $e->getTraceAsString()), (string) 'error', (bool) false);
         }

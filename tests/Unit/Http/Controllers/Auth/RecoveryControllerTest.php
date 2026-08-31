@@ -6,10 +6,10 @@ namespace Tests\Unit\Http\Controllers\Auth;
 
 use App\Exceptions\AuthenticationException;
 use App\Http\Controllers\Auth\RecoveryController;
+use App\Http\Requests\Auth\RecoverRequest;
 use App\Services\PasswordRecoveryService;
 use App\Services\WebAuthService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Mockery;
@@ -38,7 +38,7 @@ final class RecoveryControllerTest extends TestCase
         );
 
         $controller = new RecoveryController($recoveryService, $authService);
-        $request = Request::create('/recover', 'GET');
+        $request = RecoverRequest::create('/recover', 'GET');
 
         $response = $controller->recover($request);
 
@@ -63,7 +63,10 @@ final class RecoveryControllerTest extends TestCase
         );
 
         $controller = new RecoveryController($recoveryService, $authService);
-        $request = Request::create('/recover', 'POST', ['email' => 'test@test.com']);
+        $request = RecoverRequest::create('/recover', 'POST', ['email' => 'test@test.com']);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $response = $controller->recover($request);
 
@@ -87,7 +90,10 @@ final class RecoveryControllerTest extends TestCase
         Auth::shouldReceive('guard')->with('nexus-web')->once()->andReturn($guard);
 
         $controller = new RecoveryController($recoveryService, $authService);
-        $request = Request::create('/recover', 'POST', ['email' => 'test@test.com']);
+        $request = RecoverRequest::create('/recover', 'POST', ['email' => 'test@test.com']);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $response = $controller->recover($request);
 
@@ -113,7 +119,7 @@ final class RecoveryControllerTest extends TestCase
         );
 
         $controller = new RecoveryController($recoveryService, $authService);
-        $request = Request::create('/recover', 'GET', ['id' => 1, 'secret' => 'abc123']);
+        $request = RecoverRequest::create('/recover', 'GET', ['id' => 1, 'secret' => 'abc123']);
 
         $response = $controller->recover($request);
 
@@ -137,7 +143,7 @@ final class RecoveryControllerTest extends TestCase
         Auth::shouldReceive('guard')->with('nexus-web')->once()->andReturn($guard);
 
         $controller = new RecoveryController($recoveryService, $authService);
-        $request = Request::create('/recover', 'GET', ['id' => 1, 'secret' => 'bad']);
+        $request = RecoverRequest::create('/recover', 'GET', ['id' => 1, 'secret' => 'bad']);
 
         $response = $controller->recover($request);
 

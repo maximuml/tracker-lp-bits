@@ -7,7 +7,9 @@ namespace App\Http\Controllers;
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\TorrentOperationAction;
+use App\Http\Requests\TorrentApprovalRequest;
 use App\Http\Requests\TorrentIdRequest;
+use App\Http\Requests\TorrentPiecesHashRequest;
 use App\Http\Requests\TorrentRequest;
 use App\Http\Resources\TorrentOperationLogResource;
 use App\Http\Resources\TorrentResource;
@@ -160,13 +162,9 @@ class TorrentController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function approval(Request $request): array
+    public function approval(TorrentApprovalRequest $request): array
     {
         Permission::assertCan(PermissionEnum::TORRENT_APPROVAL);
-        $request->validate([
-            'torrent_id' => 'required',
-            'approval_status' => 'required',
-        ]);
         $params = $request->all();
         $this->repository->approval(Auth::user(), $params);
 
@@ -176,11 +174,8 @@ class TorrentController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function queryByPiecesHash(Request $request): array
+    public function queryByPiecesHash(TorrentPiecesHashRequest $request): array
     {
-        $request->validate([
-            'pieces_hash' => 'required|array',
-        ]);
         $result = $this->repository->getPiecesHashCache($request->pieces_hash);
 
         return $this->success($result ?: (object) []);

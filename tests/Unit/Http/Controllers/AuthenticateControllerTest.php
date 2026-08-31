@@ -5,12 +5,16 @@ declare(strict_types=1);
 namespace Tests\Unit\Http\Controllers;
 
 use App\Http\Controllers\AuthenticateController;
+use App\Http\Requests\Auth\AmmdsApproveRequest;
+use App\Http\Requests\Auth\ChallengeRequest;
+use App\Http\Requests\Auth\IyuuApproveRequest;
+use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\Auth\NasToolsApproveRequest;
 use App\Models\User;
 use App\Repositories\AuthenticateRepository;
 use App\Repositories\UserRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\ValidationException;
 use Mockery;
 use Tests\TestCase;
@@ -38,10 +42,13 @@ final class AuthenticateControllerTest extends TestCase
         $userRepository = Mockery::mock(UserRepository::class);
 
         $controller = new AuthenticateController($repository, $userRepository);
-        $request = Request::create('/api/v1/login', 'POST', [
+        $request = LoginRequest::create('/api/v1/login', 'POST', [
             'username' => 'testuser',
             'password' => 'password',
         ]);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $result = $controller->login($request);
 
@@ -61,7 +68,10 @@ final class AuthenticateControllerTest extends TestCase
         $userRepository = Mockery::mock(UserRepository::class);
 
         $controller = new AuthenticateController($repository, $userRepository);
-        $request = Request::create('/api/v1/login', 'POST', []);
+        $request = LoginRequest::create('/api/v1/login', 'POST', []);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $controller->login($request);
     }
@@ -107,7 +117,10 @@ final class AuthenticateControllerTest extends TestCase
         $userRepository = Mockery::mock(UserRepository::class);
 
         $controller = new AuthenticateController($repository, $userRepository);
-        $request = Request::create('/api/v1/nas-tools/approve', 'POST', ['data' => 'encrypted-data']);
+        $request = NasToolsApproveRequest::create('/api/v1/nas-tools/approve', 'POST', ['data' => 'encrypted-data']);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $result = $controller->nasToolsApprove($request);
 
@@ -126,7 +139,10 @@ final class AuthenticateControllerTest extends TestCase
         $userRepository = Mockery::mock(UserRepository::class);
 
         $controller = new AuthenticateController($repository, $userRepository);
-        $request = Request::create('/api/v1/nas-tools/approve', 'POST', []);
+        $request = NasToolsApproveRequest::create('/api/v1/nas-tools/approve', 'POST', []);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $controller->nasToolsApprove($request);
     }
@@ -143,7 +159,10 @@ final class AuthenticateControllerTest extends TestCase
         $userRepository = Mockery::mock(UserRepository::class);
 
         $controller = new AuthenticateController($repository, $userRepository);
-        $request = Request::create('/api/v1/nas-tools/approve', 'POST', ['data' => 'bad-data']);
+        $request = NasToolsApproveRequest::create('/api/v1/nas-tools/approve', 'POST', ['data' => 'bad-data']);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $result = $controller->nasToolsApprove($request);
 
@@ -162,12 +181,15 @@ final class AuthenticateControllerTest extends TestCase
         $userRepository = Mockery::mock(UserRepository::class);
 
         $controller = new AuthenticateController($repository, $userRepository);
-        $request = Request::create('/api/v1/iyuu/approve', 'POST', [
+        $request = IyuuApproveRequest::create('/api/v1/iyuu/approve', 'POST', [
             'token' => 'token123',
             'id' => 5,
             'verity' => 'verity123',
             'provider' => 'iyuu',
         ]);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $response = $controller->iyuuApprove($request);
 
@@ -176,6 +198,8 @@ final class AuthenticateControllerTest extends TestCase
 
     public function test_iyuu_approve_validates_required_fields(): void
     {
+        $this->expectException(ValidationException::class);
+
         /** @var AuthenticateRepository&Mockery\MockInterface $repository */
         $repository = Mockery::mock(AuthenticateRepository::class);
         $repository->shouldNotReceive('iyuuApprove');
@@ -184,19 +208,16 @@ final class AuthenticateControllerTest extends TestCase
         $userRepository = Mockery::mock(UserRepository::class);
 
         $controller = new AuthenticateController($repository, $userRepository);
-        $request = Request::create('/api/v1/iyuu/approve', 'POST', []);
+        $request = IyuuApproveRequest::create('/api/v1/iyuu/approve', 'POST', []);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
-        $response = $controller->iyuuApprove($request);
-
-        $this->assertSame(200, $response->getStatusCode());
-        $data = json_decode($response->getContent(), true);
-        $this->assertFalse($data['success']);
+        $controller->iyuuApprove($request);
     }
 
     public function test_challenge_returns_challenge_data(): void
     {
-        Cache::shouldReceive('put')->once();
-
         /** @var AuthenticateRepository&Mockery\MockInterface $repository */
         $repository = Mockery::mock(AuthenticateRepository::class);
 
@@ -204,7 +225,10 @@ final class AuthenticateControllerTest extends TestCase
         $userRepository = Mockery::mock(UserRepository::class);
 
         $controller = new AuthenticateController($repository, $userRepository);
-        $request = Request::create('/api/v1/challenge', 'POST', ['username' => 'testuser']);
+        $request = ChallengeRequest::create('/api/v1/challenge', 'POST', ['username' => 'testuser']);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $result = $controller->challenge($request);
 
@@ -216,6 +240,8 @@ final class AuthenticateControllerTest extends TestCase
 
     public function test_challenge_validates_username_required(): void
     {
+        $this->expectException(ValidationException::class);
+
         /** @var AuthenticateRepository&Mockery\MockInterface $repository */
         $repository = Mockery::mock(AuthenticateRepository::class);
 
@@ -223,11 +249,12 @@ final class AuthenticateControllerTest extends TestCase
         $userRepository = Mockery::mock(UserRepository::class);
 
         $controller = new AuthenticateController($repository, $userRepository);
-        $request = Request::create('/api/v1/challenge', 'POST', []);
+        $request = ChallengeRequest::create('/api/v1/challenge', 'POST', []);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
-        $result = $controller->challenge($request);
-
-        $this->assertNotSame(0, $result['ret']);
+        $controller->challenge($request);
     }
 
     public function test_ammds_approve_returns_success(): void
@@ -248,12 +275,15 @@ final class AuthenticateControllerTest extends TestCase
         $userRepository = Mockery::mock(UserRepository::class);
 
         $controller = new AuthenticateController($repository, $userRepository);
-        $request = Request::create('/api/v1/ammds/approve', 'POST', [
+        $request = AmmdsApproveRequest::create('/api/v1/ammds/approve', 'POST', [
             'uid' => 5,
             'timestamp' => time(),
             'nonce' => 'nonce123',
             'signature' => 'sig123',
         ]);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $result = $controller->ammdsApprove($request);
 
@@ -262,6 +292,8 @@ final class AuthenticateControllerTest extends TestCase
 
     public function test_ammds_approve_validates_required_fields(): void
     {
+        $this->expectException(ValidationException::class);
+
         /** @var AuthenticateRepository&Mockery\MockInterface $repository */
         $repository = Mockery::mock(AuthenticateRepository::class);
         $repository->shouldNotReceive('ammdsApprove');
@@ -270,11 +302,12 @@ final class AuthenticateControllerTest extends TestCase
         $userRepository = Mockery::mock(UserRepository::class);
 
         $controller = new AuthenticateController($repository, $userRepository);
-        $request = Request::create('/api/v1/ammds/approve', 'POST', []);
+        $request = AmmdsApproveRequest::create('/api/v1/ammds/approve', 'POST', []);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
-        $result = $controller->ammdsApprove($request);
-
-        $this->assertNotSame(0, $result['ret']);
+        $controller->ammdsApprove($request);
     }
 
     public function test_ammds_approve_returns_fail_on_exception(): void
@@ -289,12 +322,15 @@ final class AuthenticateControllerTest extends TestCase
         $userRepository = Mockery::mock(UserRepository::class);
 
         $controller = new AuthenticateController($repository, $userRepository);
-        $request = Request::create('/api/v1/ammds/approve', 'POST', [
+        $request = AmmdsApproveRequest::create('/api/v1/ammds/approve', 'POST', [
             'uid' => 5,
             'timestamp' => time(),
             'nonce' => 'nonce123',
             'signature' => 'bad-sig',
         ]);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $result = $controller->ammdsApprove($request);
 

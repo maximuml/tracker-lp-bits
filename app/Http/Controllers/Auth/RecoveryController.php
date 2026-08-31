@@ -16,7 +16,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
 
 class RecoveryController extends Controller
@@ -26,7 +25,7 @@ class RecoveryController extends Controller
         private WebAuthService $authService,
     ) {}
 
-    public function recover(Request $request): View|RedirectResponse
+    public function recover(RecoverRequest $request): View|RedirectResponse
     {
         if (Auth::guard('nexus-web')->check()) {
             return Redirect::to('index.php');
@@ -50,14 +49,8 @@ class RecoveryController extends Controller
         $langFunctions = $this->langFunctions($langFolder);
 
         if ($request->isMethod('post')) {
-            $validator = Validator::make($request->all(), (new RecoverRequest)->rules());
-
-            if ($validator->fails()) {
-                return $this->backWithError($request, $validator->errors()->first());
-            }
-
             try {
-                $this->recoveryService->requestReset($validator->validated(), Network::clientIp(), $langRecover, $langFunctions);
+                $this->recoveryService->requestReset($request->validated(), Network::clientIp(), $langRecover, $langFunctions);
             } catch (AuthenticationException $exception) {
                 return $this->backWithError($request, $exception->getMessage());
             }

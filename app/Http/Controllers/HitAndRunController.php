@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\HitAndRunRequest;
 use App\Http\Resources\HitAndRunResource;
 use App\Models\User;
 use App\Repositories\HitAndRunRepository;
@@ -17,19 +18,6 @@ class HitAndRunController extends Controller
     public function __construct(HitAndRunRepository $repository)
     {
         $this->repository = $repository;
-    }
-
-    /** @return  array<int|string, mixed> */
-    private function getRules(): array
-    {
-        return [
-            'family_id' => 'required|numeric',
-            'name' => 'required|string',
-            'peer_id' => 'required|string',
-            'agent' => 'required|string',
-            'comment' => 'required|string',
-
-        ];
     }
 
     /**
@@ -50,9 +38,9 @@ class HitAndRunController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function store(Request $request): array
+    public function store(HitAndRunRequest $request): array
     {
-        $data = $request->validate($this->getRules());
+        $data = $request->validated();
         $result = $this->repository->store($data);
         $resource = new HitAndRunResource($result);
 
@@ -77,9 +65,9 @@ class HitAndRunController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function update(Request $request, int $id): array
+    public function update(HitAndRunRequest $request, int $id): array
     {
-        $data = $request->validate($this->getRules());
+        $data = $request->validated();
         $result = $this->repository->update($data, $id);
         $resource = new HitAndRunResource($result);
 

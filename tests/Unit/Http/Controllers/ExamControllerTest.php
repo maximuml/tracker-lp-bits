@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Http\Controllers;
 
 use App\Http\Controllers\ExamController;
+use App\Http\Requests\ExamRequest;
 use App\Models\Exam;
 use App\Repositories\ExamRepository;
 use Illuminate\Http\Request;
@@ -60,7 +61,10 @@ final class ExamControllerTest extends TestCase
             ->andReturn($exam);
 
         $controller = new ExamController($repository);
-        $request = Request::create('/api/v1/exams', 'POST', $data);
+        $request = ExamRequest::create('/api/v1/exams', 'POST', $data);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $result = $controller->store($request);
 
@@ -77,7 +81,10 @@ final class ExamControllerTest extends TestCase
         $repository->shouldNotReceive('store');
 
         $controller = new ExamController($repository);
-        $request = Request::create('/api/v1/exams', 'POST', []);
+        $request = ExamRequest::create('/api/v1/exams', 'POST', []);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $controller->store($request);
     }
@@ -91,11 +98,14 @@ final class ExamControllerTest extends TestCase
         $repository->shouldNotReceive('store');
 
         $controller = new ExamController($repository);
-        $request = Request::create('/api/v1/exams', 'POST', [
+        $request = ExamRequest::create('/api/v1/exams', 'POST', [
             'name' => 'Test',
             'indexes' => [],
             'status' => '1',
         ]);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $controller->store($request);
     }
@@ -136,7 +146,10 @@ final class ExamControllerTest extends TestCase
             ->andReturn($exam);
 
         $controller = new ExamController($repository);
-        $request = Request::create('/api/v1/exams/1', 'PUT', $data);
+        $request = ExamRequest::create('/api/v1/exams/1', 'PUT', $data);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $result = $controller->update($request, 1);
 

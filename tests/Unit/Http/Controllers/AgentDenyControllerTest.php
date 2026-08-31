@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Http\Controllers;
 
 use App\Http\Controllers\AgentDenyController;
+use App\Http\Requests\AgentDenyRequest;
 use App\Models\AgentDeny;
 use App\Repositories\AgentDenyRepository;
 use Illuminate\Database\Eloquent\Collection;
@@ -75,7 +76,10 @@ final class AgentDenyControllerTest extends TestCase
             ->andReturn($agentDeny);
 
         $controller = new AgentDenyController($repository);
-        $request = Request::create('/api/v1/agent-denies', 'POST', $data);
+        $request = AgentDenyRequest::create('/api/v1/agent-denies', 'POST', $data);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $result = $controller->store($request);
 
@@ -92,7 +96,10 @@ final class AgentDenyControllerTest extends TestCase
         $repository->shouldNotReceive('store');
 
         $controller = new AgentDenyController($repository);
-        $request = Request::create('/api/v1/agent-denies', 'POST', []);
+        $request = AgentDenyRequest::create('/api/v1/agent-denies', 'POST', []);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $controller->store($request);
     }
@@ -123,7 +130,10 @@ final class AgentDenyControllerTest extends TestCase
             ->andReturn($agentDeny);
 
         $controller = new AgentDenyController($repository);
-        $request = Request::create('/api/v1/agent-denies/1', 'PUT', $data);
+        $request = AgentDenyRequest::create('/api/v1/agent-denies/1', 'PUT', $data);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $result = $controller->update($request, 1);
 
@@ -140,7 +150,10 @@ final class AgentDenyControllerTest extends TestCase
         $repository->shouldNotReceive('update');
 
         $controller = new AgentDenyController($repository);
-        $request = Request::create('/api/v1/agent-denies/1', 'PUT', []);
+        $request = AgentDenyRequest::create('/api/v1/agent-denies/1', 'PUT', []);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $controller->update($request, 1);
     }

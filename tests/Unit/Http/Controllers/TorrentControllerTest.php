@@ -6,9 +6,10 @@ namespace Tests\Unit\Http\Controllers;
 
 use App\Exceptions\InsufficientPermissionException;
 use App\Http\Controllers\TorrentController;
+use App\Http\Requests\TorrentApprovalRequest;
+use App\Http\Requests\TorrentPiecesHashRequest;
 use App\Repositories\TorrentRepository;
 use App\Repositories\UploadRepository;
-use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Mockery;
 use Tests\TestCase;
@@ -57,9 +58,12 @@ final class TorrentControllerTest extends TestCase
         $uploadRepository = Mockery::mock(UploadRepository::class);
 
         $controller = new TorrentController($torrentRepository, $uploadRepository);
-        $request = Request::create('/api/v1/torrents/query-by-pieces-hash', 'POST', [
+        $request = TorrentPiecesHashRequest::create('/api/v1/torrents/query-by-pieces-hash', 'POST', [
             'pieces_hash' => ['abc123', 'def456'],
         ]);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $result = $controller->queryByPiecesHash($request);
 
@@ -79,7 +83,10 @@ final class TorrentControllerTest extends TestCase
         $uploadRepository = Mockery::mock(UploadRepository::class);
 
         $controller = new TorrentController($torrentRepository, $uploadRepository);
-        $request = Request::create('/api/v1/torrents/query-by-pieces-hash', 'POST', []);
+        $request = TorrentPiecesHashRequest::create('/api/v1/torrents/query-by-pieces-hash', 'POST', []);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $controller->queryByPiecesHash($request);
     }
@@ -97,9 +104,12 @@ final class TorrentControllerTest extends TestCase
         $uploadRepository = Mockery::mock(UploadRepository::class);
 
         $controller = new TorrentController($torrentRepository, $uploadRepository);
-        $request = Request::create('/api/v1/torrents/query-by-pieces-hash', 'POST', [
+        $request = TorrentPiecesHashRequest::create('/api/v1/torrents/query-by-pieces-hash', 'POST', [
             'pieces_hash' => ['notfound'],
         ]);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $result = $controller->queryByPiecesHash($request);
 
@@ -118,10 +128,13 @@ final class TorrentControllerTest extends TestCase
         $uploadRepository = Mockery::mock(UploadRepository::class);
 
         $controller = new TorrentController($torrentRepository, $uploadRepository);
-        $request = Request::create('/api/v1/torrents/approval', 'POST', [
+        $request = TorrentApprovalRequest::create('/api/v1/torrents/approval', 'POST', [
             'torrent_id' => 1,
             'approval_status' => 1,
         ]);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $controller->approval($request);
     }

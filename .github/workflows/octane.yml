@@ -156,4 +156,4 @@ jobs:
           kill $(pgrep -f "rr serve") 2>/dev/null || true
 
       - name: Run unit tests
-        run: vendor/bin/phpunit --testsuite Unit --no-coverage
+        run: DB_DATABASE=nexusphp_testing vendor/bin/phpunit --testsuite Unit --no-coverage

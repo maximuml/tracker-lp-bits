@@ -15,10 +15,10 @@
     <server name="CACHE_DRIVER" value="array"/>
     <server name="CHANNEL_NAME_SETTING" value=""/>
     <server name="CHANNEL_NAME_MODEL_EVENT" value=""/>
-    <!-- Tests use a dedicated test database to avoid wiping dev data.
-         Set DB_TEST_DATABASE in .env (defaults to nexusphp_testing).
-         Tests that truncate() tables would otherwise destroy dev data. -->
-    <server name="DB_DATABASE" value="nexusphp_testing"/>
+    <!-- DB_DATABASE is set per-suite: Unit tests use nexusphp_testing
+         (set in CI and locally via .env.testing) to avoid wiping dev
+         data via truncate(). Feature tests use nexusphp (the main DB)
+         because they make HTTP requests through OpenResty. -->
     <server name="MAIL_MAILER" value="array"/>
     <server name="CRITICAL_PATH_BASE_URL" value="http://openresty"/>
     <env name="QUEUE_CONNECTION" value="sync"/>

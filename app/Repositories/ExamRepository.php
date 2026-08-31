@@ -510,17 +510,6 @@ class ExamRepository extends BaseRepository
     }
 
     /**
-     * @param  array<int|string, mixed>  $indexAndValue
-     * @return bool
-     *
-     * @deprecated old version used
-     */
-    public function addProgress(int $uid, int $torrentId, array $indexAndValue)
-    {
-        return $this->examProgressRepository->addProgress($uid, $torrentId, $indexAndValue);
-    }
-
-    /**
      * @param  mixed  $examUser
      */
     public function updateProgress($examUser, ?User $user = null): ExamUser|bool
@@ -536,16 +525,6 @@ class ExamRepository extends BaseRepository
     public function getUserExamProgress($uid, $status = null)
     {
         return $this->examProgressRepository->getUserExamProgress($uid, $status);
-    }
-
-    /**
-     * @return array<int|string, mixed>|null
-     *
-     * @deprecated
-     */
-    public function calculateProgress(ExamUser $examUser, bool $allSum = false)
-    {
-        return $this->examProgressRepository->calculateProgress($examUser, $allSum);
     }
 
     /**

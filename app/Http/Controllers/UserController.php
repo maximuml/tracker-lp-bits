@@ -118,7 +118,7 @@ class UserController extends Controller
     /** @return  array<string, mixed> */
     public function classes(): array
     {
-        $result = $this->repository->listClass();
+        $result = User::listClass();
 
         return $this->success($result);
     }

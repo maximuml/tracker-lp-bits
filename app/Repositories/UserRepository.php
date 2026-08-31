@@ -244,16 +244,6 @@ class UserRepository extends BaseRepository
     }
 
     /**
-     * @return array<int|string, mixed>
-     *
-     * @deprecated  use User::listClass() instead !
-     */
-    public function listClass()
-    {
-        return User::listClass();
-    }
-
-    /**
      * @param  mixed  $id
      * @return mixed
      */

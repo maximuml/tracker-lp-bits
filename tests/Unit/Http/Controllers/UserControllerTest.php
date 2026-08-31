@@ -51,16 +51,8 @@ final class UserControllerTest extends TestCase
 
     public function test_classes_returns_user_class_list(): void
     {
-        $classes = [
-            ['value' => 1, 'text' => 'User'],
-            ['value' => 2, 'text' => 'Power User'],
-        ];
-
         /** @var UserRepository&Mockery\MockInterface $repository */
         $repository = Mockery::mock(UserRepository::class);
-        $repository->shouldReceive('listClass')
-            ->once()
-            ->andReturn($classes);
 
         /** @var ExamRepository&Mockery\MockInterface $examRepository */
         $examRepository = Mockery::mock(ExamRepository::class);

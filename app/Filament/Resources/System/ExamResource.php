@@ -10,8 +10,8 @@ use App\Filament\Resources\System\ExamResource\Pages\CreateExam;
 use App\Filament\Resources\System\ExamResource\Pages\EditExam;
 use App\Filament\Resources\System\ExamResource\Pages\ListExams;
 use App\Models\Exam;
+use App\Models\User;
 use App\Repositories\ExamRepository;
-use App\Repositories\UserRepository;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\CheckboxList;
@@ -58,8 +58,6 @@ class ExamResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        $userRep = app(UserRepository::class);
-
         return $schema
             ->components([
                 Section::make(__('label.exam.section_base_info'))->schema([
@@ -144,7 +142,7 @@ class ExamResource extends Resource
 
                 Section::make(__('label.exam.section_target_user'))->schema([
                     CheckboxList::make('filters.classes')
-                        ->options($userRep->listClass())->columnSpan(['sm' => 2])
+                        ->options(User::listClass())->columnSpan(['sm' => 2])
                         ->columns(4)
                         ->label(__('label.user.class')),
                     DateTimePicker::make('filters.register_time_range.0')->label(__('label.exam.register_time_range.begin')),

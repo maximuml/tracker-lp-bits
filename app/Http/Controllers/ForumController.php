@@ -59,6 +59,7 @@ class ForumController extends LegacyController
         $rows = app(CommentRepository::class)->getLatest($perpage, $offset);
 
         $userIds = array_filter(array_unique(array_column($rows, 'user')));
+        UserDisplay::preload(array_map('intval', $userIds));
         $userDisplayMap = [];
         foreach ($userIds as $uid) {
             $userDisplayMap[(int) $uid] = UserDisplay::username((int) $uid, false, true, true, false, false, true);

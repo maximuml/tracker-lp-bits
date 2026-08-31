@@ -58,11 +58,11 @@ class FriendsController extends LegacyController
             [$userid],
         );
 
+        $validUserIds = array_filter(array_unique(array_map('intval', $userIds)), fn ($uid) => $uid > 0);
+        UserDisplay::preload(array_values($validUserIds));
         $userDisplayMap = [];
-        foreach (array_filter(array_unique(array_map('intval', $userIds))) as $uid) {
-            if ($uid > 0) {
-                $userDisplayMap[$uid] = UserDisplay::username($uid);
-            }
+        foreach ($validUserIds as $uid) {
+            $userDisplayMap[$uid] = UserDisplay::username($uid);
         }
 
         $friendsList = [];

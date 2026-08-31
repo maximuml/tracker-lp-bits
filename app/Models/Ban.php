@@ -23,6 +23,14 @@ class Ban extends Model
 
     protected $fillable = ['added', 'addedby', 'comment', 'first', 'last'];
 
+    /** @var array<string, string> */
+    protected $casts = [
+        'added' => 'datetime',
+        'addedby' => 'integer',
+        'first' => 'integer',
+        'last' => 'integer',
+    ];
+
     /**
      * Convert a dotted-quad IP to its long-integer representation.
      */

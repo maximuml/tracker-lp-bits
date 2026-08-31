@@ -20,6 +20,12 @@ class SiteLog extends NexusModel
     /** @var list<string> */
     protected $fillable = ['added', 'txt', 'security_level', 'uid'];
 
+    /** @var array<string, string> */
+    protected $casts = [
+        'added' => 'datetime',
+        'uid' => 'integer',
+    ];
+
     /**
      * @param  mixed  $uid
      * @param  mixed  $content

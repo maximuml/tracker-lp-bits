@@ -25,6 +25,17 @@ class Forum extends NexusModel
     /** @var list<string> */
     protected $fillable = ['sort', 'name', 'description', 'minclassread', 'minclasswrite', 'postcount', 'topiccount', 'minclasscreate', 'forid'];
 
+    /** @var array<string, string> */
+    protected $casts = [
+        'sort' => 'integer',
+        'minclassread' => 'integer',
+        'minclasswrite' => 'integer',
+        'minclasscreate' => 'integer',
+        'postcount' => 'integer',
+        'topiccount' => 'integer',
+        'forid' => 'integer',
+    ];
+
     /** @return BelongsToMany<User, $this> */
     public function moderators(): BelongsToMany
     {

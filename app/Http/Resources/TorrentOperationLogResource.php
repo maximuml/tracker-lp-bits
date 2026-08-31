@@ -26,7 +26,7 @@ class TorrentOperationLogResource extends JsonResource
             'action_type' => $this->action_type,
             'action_type_text' => $this->actionTypeText,
             'uid' => $this->uid,
-            'username' => $this->user->username,
+            'username' => $this->whenLoaded('user', fn () => $this->user->username),
             'comment' => $this->comment,
             'created_at' => Time::formatDateTime($this->created_at),
         ];

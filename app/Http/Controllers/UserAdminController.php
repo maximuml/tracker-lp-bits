@@ -94,6 +94,7 @@ class UserAdminController extends LegacyController
         [$pagertop, $pagerbottom, , $offset] = Pagination::pager($perPage, $count, 'users.php?'.$q.($q ? '&' : ''));
         $userRows = app(UserListingRepository::class)->listUsers($filters, (int) $offset, $perPage);
 
+        UserDisplay::preload(array_map(fn ($arr) => (int) $arr['id'], $userRows));
         $rows = [];
         foreach ($userRows as $arr) {
             $rows[] = [

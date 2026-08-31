@@ -57,4 +57,63 @@ final class XssProtectionTest extends TestCase
         $this->assertStringNotContainsString('<script>', $escaped);
         $this->assertStringContainsString('Remove from friends', $escaped);
     }
+
+    /**
+     * Form::bbcodeEditor textarea content must be htmlspecialchars'd
+     * to prevent </textarea><script> injection.
+     */
+    public function test_bbcode_editor_escapes_textarea_content(): void
+    {
+        $evil = '</textarea><script>alert(1)</script>';
+        $escaped = htmlspecialchars($evil, ENT_QUOTES, 'UTF-8');
+
+        $this->assertStringNotContainsString('</textarea>', $escaped);
+        $this->assertStringNotContainsString('<script>', $escaped);
+    }
+
+    /**
+     * Frame::composeOpen title must be htmlspecialchars'd.
+     */
+    public function test_compose_open_escapes_title(): void
+    {
+        $evilTitle = '<script>alert(1)</script>';
+        $escaped = htmlspecialchars($evilTitle, ENT_QUOTES, 'UTF-8');
+
+        $this->assertStringNotContainsString('<script>', $escaped);
+    }
+
+    /**
+     * Html::buildTable cell values must be htmlspecialchars'd.
+     */
+    public function test_build_table_escapes_cell_values(): void
+    {
+        $evilCell = '<script>alert(1)</script>';
+        $escaped = htmlspecialchars($evilCell, ENT_QUOTES, 'UTF-8');
+
+        $this->assertStringNotContainsString('<script>', $escaped);
+    }
+
+    /**
+     * Html::messageAlert URL must be htmlspecialchars'd to prevent
+     * href attribute injection.
+     */
+    public function test_message_alert_escapes_url(): void
+    {
+        $evilUrl = '" onclick="alert(1)';
+        $escaped = htmlspecialchars($evilUrl, ENT_QUOTES, 'UTF-8');
+
+        $this->assertStringNotContainsString('" onclick', $escaped);
+    }
+
+    /**
+     * Html::quickReply textarea name and submit label must be escaped.
+     */
+    public function test_quick_reply_escapes_attributes(): void
+    {
+        $evilName = "x'><script>alert(1)</script>";
+        $escaped = htmlspecialchars($evilName, ENT_QUOTES, 'UTF-8');
+
+        $this->assertStringNotContainsString("'>", $escaped);
+        $this->assertStringNotContainsString('<script>', $escaped);
+    }
 }

@@ -521,17 +521,17 @@ final class HtmlTest extends TestCase
         $this->assertStringContainsString('background: red;', $output);
     }
 
-    public function test_message_alert_does_not_escape_text_or_url(): void
+    public function test_message_alert_escapes_url_but_preserves_text_html(): void
     {
-        // Legacy contract: alerts are authored in the sysop panel and
-        // may contain pre-built HTML (e.g. <br />, <b>, <a>) plus
-        // ampersand-bearing URLs. Pinning that escaping is OFF.
+        // Security hardening: the URL is htmlspecialchars'd to prevent
+        // href attribute injection, while the text remains raw HTML
+        // (authored in the sysop panel, may contain <br/>, <b>, etc.).
         $output = Html::messageAlert(
             'https://example.com/?a=1&b=2',
             'Read <b>this</b> & that',
         );
 
-        $this->assertStringContainsString('href="https://example.com/?a=1&b=2"', $output);
+        $this->assertStringContainsString('href="https://example.com/?a=1&amp;b=2"', $output);
         $this->assertStringContainsString('<font color="white">Read <b>this</b> & that</font>', $output);
     }
 
@@ -605,15 +605,17 @@ final class HtmlTest extends TestCase
         $this->assertStringContainsString('<td class="colhead">X</td>', $output);
     }
 
-    public function test_build_table_does_not_escape_markup(): void
+    public function test_build_table_escapes_markup_for_xss_safety(): void
     {
+        // Security hardening: cell values are htmlspecialchars'd to
+        // prevent XSS via user-controlled data (e.g. ban-log reasons).
         $output = Html::buildTable(
             ['c' => '<b>H</b>'],
             [['c' => '<i>v</i>']],
         );
 
-        $this->assertStringContainsString('<td class="colhead"><b>H</b></td>', $output);
-        $this->assertStringContainsString('<td class=""><i>v</i></td>', $output);
+        $this->assertStringContainsString('<td class="colhead">&lt;b&gt;H&lt;/b&gt;</td>', $output);
+        $this->assertStringContainsString('<td class="">&lt;i&gt;v&lt;/i&gt;</td>', $output);
     }
 
     public function test_build_table_with_no_rows_renders_empty_body(): void

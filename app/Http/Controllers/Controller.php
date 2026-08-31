@@ -10,7 +10,6 @@ use App\Support\Settings;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
-use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Str;
 
@@ -40,30 +39,6 @@ class Controller extends BaseController
         }
 
         return Api::successWithContext($msg, $data);
-    }
-
-    /**
-     * 返回成功信息，对于不是 JsonResource 的数据，进行包装。返回的数据在 data.data 中
-     *
-     * @param  mixed  $data
-     * @param  mixed  $msg
-     * @return array<string, mixed>
-     *
-     * @deprecated 没有必要，已经在 api() 中添加 data 包裹，使用 success() 即可
-     */
-    public function successJsonResource($data, $msg = null): array
-    {
-        if ($msg === null) {
-            $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
-            $caller = $backtrace[1];
-            $msg = $this->getReturnMsg($caller);
-        }
-        if ($data instanceof JsonResource) {
-            return $this->success($data, $msg);
-        }
-        $resource = new JsonResource($data);
-
-        return $this->success($resource, $msg);
     }
 
     /**

@@ -36,7 +36,7 @@ Total Images Stored: {{ $count }}
             $height = (int) ($dim['height'] ?? 0);
         @endphp
         <tr>
-        <td><center><a href={{ $url }}><img src="{{ $url }}" border=0 onLoad='SetSize(this, 400)'></a></center>
+        <td><center><a href="{{ $url }}"><img src="{{ $url }}" border=0 onLoad='SetSize(this, 400)'></a></center>
         Uploaded by: {!! $userDisplayMap[$owner] ?? \App\Support\UserDisplay::username($owner) !!}<br />
         (#{{ $id }}) Filename: {{ $name }} ({{ $width }}&nbsp;x&nbsp;{{ $height }})
         @if ($isModerator)

@@ -671,13 +671,13 @@ function domLib_getComputedStyle(in_obj, in_property)
 	if (domLib_isIE)
 	{
 		var humpBackProp = in_property.replace(/-(.)/, function (a, b) { return b.toUpperCase(); });
-		return eval('in_obj.currentStyle.' + humpBackProp);
+		return in_obj.currentStyle[humpBackProp];
 	}
 	// getComputedStyle() is broken in konqueror, so let's go for the style object
 	else if (domLib_isKonq)
 	{
 		//var humpBackProp = in_property.replace(/-(.)/, function (a, b) { return b.toUpperCase(); });
-		return eval('in_obj.style.' + in_property);
+		return in_obj.style[in_property];
 	}
 	else
 	{

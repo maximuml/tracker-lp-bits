@@ -28,10 +28,10 @@ final class Html
      */
     public static function quickReply(string $formName, string $textareaName, string $submitLabel): string
     {
-        $html = "<textarea name='".$textareaName."' cols=\"100\" rows=\"8\" style=\"width: 450px\" onkeydown=\"ctrlenter(event,'compose','qr')\"></textarea>";
+        $html = "<textarea name='".htmlspecialchars($textareaName, ENT_QUOTES)."' cols=\"100\" rows=\"8\" style=\"width: 450px\" onkeydown=\"ctrlenter(event,'compose','qr')\"></textarea>";
         $html .= Smilies::quickRow($formName, $textareaName);
         $html .= '<br />';
-        $html .= '<input type="submit" id="qr" class="btn" value="'.$submitLabel.'" />';
+        $html .= '<input type="submit" id="qr" class="btn" value="'.htmlspecialchars($submitLabel, ENT_QUOTES).'" />';
 
         return $html;
     }
@@ -344,11 +344,12 @@ final class Html
      */
     public static function messageAlert(string $url, string $text, string $bgcolor = 'red'): string
     {
+        $safeUrl = htmlspecialchars($url, ENT_QUOTES);
         $inner = $url !== ''
-            ? '<b><a href="'.$url.'" target=\'_blank\'><font color="white">'.$text.'</font></a></b>'
+            ? '<b><a href="'.$safeUrl.'" target=\'_blank\'><font color="white">'.$text.'</font></a></b>'
             : '<b><font color="white">'.$text.'</font></b>';
 
-        return '<table border="0" cellspacing="0" cellpadding="10" style="margin: 0 auto;"><tr><td style=\'border: none; padding: 10px; background: '.$bgcolor.'; text-align: center;\'>'."\n".$inner.'</td></tr></table><br />';
+        return '<table border="0" cellspacing="0" cellpadding="10" style="margin: 0 auto;"><tr><td style=\'border: none; padding: 10px; background: '.htmlspecialchars($bgcolor, ENT_QUOTES).'; text-align: center;\'>'."\n".$inner.'</td></tr></table><br />';
     }
 
     /**
@@ -376,7 +377,7 @@ final class Html
     {
         $table = '<table border="1" cellspacing="0" cellpadding="5" width="100%"><thead><tr>';
         foreach ($header as $value) {
-            $table .= sprintf('<td class="colhead">%s</td>', $value);
+            $table .= sprintf('<td class="colhead">%s</td>', htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8'));
         }
         $table .= '</tr></thead><tbody>';
 
@@ -385,7 +386,8 @@ final class Html
         foreach ($rows as $row) {
             $table .= '<tr>';
             foreach ($header as $headerKey => $headerValue) {
-                $table .= sprintf('<td class="%s">%s</td>', $tdClass, $row[$headerKey] ?? '');
+                $cell = $row[$headerKey] ?? '';
+                $table .= sprintf('<td class="%s">%s</td>', $tdClass, htmlspecialchars((string) $cell, ENT_QUOTES, 'UTF-8'));
             }
             $table .= '</tr>';
         }

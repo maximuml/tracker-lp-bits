@@ -6,9 +6,91 @@ on:
   pull_request:
     branches: ["php8"]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  lint-and-validate:
-    name: Lint PHP and validate composer
+  static-analysis:
+    name: Lint + Pint + PHPStan L8
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          php-version: '8.5'
+          extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, pdo_mysql, redis, sqlite3, xml, zip
+          coverage: none
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: ~/.composer/cache
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Validate composer.json and composer.lock
+        run: composer validate
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction --ignore-platform-reqs --no-scripts
+
+      - name: Dump autoload
+        run: composer dump-autoload --no-interaction --no-scripts
+
+      - name: Audit composer dependencies
+        run: composer audit
+
+      - name: Run PHP syntax lint
+        run: |
+          find . -type f -name '*.php' \
+            -not -path './vendor/*' \
+            -not -path './node_modules/*' \
+            -not -path './.docker/*' \
+            -not -path './public/vendor/*' \
+            -not -path './storage/*' \
+            -print0 | xargs -0 -n1 -P4 php -l
+
+      - name: Run Laravel Pint
+        run: vendor/bin/pint --test
+
+      - name: Run PHPStan level 8
+        run: vendor/bin/phpstan analyse -c phpstan.level8.neon --no-progress --memory-limit=2G
+
+  frontend:
+    name: Build + audit npm
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend assets
+        run: npm run build
+
+      - name: Audit npm dependencies
+        run: npm audit
+
+  unit-tests:
+    name: PHPUnit Unit
     runs-on: ubuntu-latest
 
     services:
@@ -30,41 +112,27 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
         with:
           php-version: '8.5'
           extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, pdo_mysql, redis, sqlite3, xml, zip
           coverage: none
 
       - name: Cache Composer dependencies
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: ~/.composer/cache
           key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Validate composer.json and composer.lock
-        run: composer validate
 
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --no-interaction --ignore-platform-reqs --no-scripts
 
       - name: Dump autoload
         run: composer dump-autoload --no-interaction --no-scripts
-
-      - name: Audit composer dependencies
-        run: composer audit
 
       - name: Prepare environment
         run: |
@@ -73,45 +141,6 @@ jobs:
           sed -i 's/^QUEUE_CONNECTION=.*/QUEUE_CONNECTION=sync/' .env
           sed -i 's/^CHANNEL_NAME_SETTING=.*/CHANNEL_NAME_SETTING=/' .env
           sed -i 's/^CHANNEL_NAME_MODEL_EVENT=.*/CHANNEL_NAME_MODEL_EVENT=/' .env
-
-      - name: Run PHP syntax lint
-        run: |
-          find . -type f -name '*.php' \
-            -not -path './vendor/*' \
-            -not -path './node_modules/*' \
-            -not -path './.docker/*' \
-            -not -path './public/vendor/*' \
-            -not -path './storage/*' \
-            -print0 | xargs -0 -n1 -P4 php -l
-
-      - name: Run Laravel Pint
-        run: vendor/bin/pint --test
-
-      - name: Run PHPStan on all PHP files
-        run: vendor/bin/phpstan analyse --no-progress --memory-limit=2G
-
-      - name: Run PHPStan level 5 on app/Support and app/Models
-        run: vendor/bin/phpstan analyse -c phpstan.level5.neon --no-progress --memory-limit=2G
-
-      - name: Run PHPStan level 5 on app/Console, app/Http, and app/Repositories
-        run: vendor/bin/phpstan analyse -c phpstan.level5.app.neon --no-progress --memory-limit=2G
-
-      - name: Run PHPStan level 6 on app/Support, app/Models, app/Console, app/Http, and app/Repositories
-        run: vendor/bin/phpstan analyse -c phpstan.level6.neon --no-progress --memory-limit=2G
-
-      - name: Run PHPStan level 7 on app/ and empty baseline
-        run: vendor/bin/phpstan analyse -c phpstan.level7.neon --no-progress --memory-limit=2G
-
-      - name: Run PHPStan level 8 on app/ and empty baseline
-        run: vendor/bin/phpstan analyse -c phpstan.level8.neon --no-progress --memory-limit=2G
-
-      - name: Build frontend assets
-        run: |
-          npm ci
-          npm run build
-
-      - name: Audit npm dependencies
-        run: npm audit
 
       - name: Cache Laravel bootstrap files
         run: |
@@ -160,17 +189,17 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
         with:
           php-version: '8.5'
           extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, pdo_mysql, redis, sqlite3, xml, zip
           coverage: xdebug
 
       - name: Cache Composer dependencies
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: ~/.composer/cache
           key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
@@ -203,7 +232,7 @@ jobs:
         run: vendor/bin/phpunit --testsuite Unit --coverage-clover=coverage.xml
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v7
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
         with:
           files: ./coverage.xml
           fail_ci_if_error: false
@@ -214,10 +243,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
         with:
           php-version: '8.5'
           extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, pdo_mysql, redis, sqlite3, xml, zip
@@ -234,7 +263,7 @@ jobs:
           sed -i 's|^MEILISEARCH_MASTER_KEY=.*|MEILISEARCH_MASTER_KEY=nexusphp_default_key|' .env
 
       - name: Cache Composer dependencies
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: ~/.composer/cache
           key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
@@ -283,3 +312,45 @@ jobs:
       - name: Run Feature tests
         run: |
           docker compose exec -T -e CRITICAL_PATH_BASE_URL=http://openresty php vendor/bin/phpunit --testsuite Feature --no-coverage
+
+  codeql:
+    name: CodeQL security scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ['javascript']
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@6f5948dfacef28e207b48d0905cf90c03365536d # v3
+        with:
+          languages: ${{ matrix.language }}
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@6f5948dfacef28e207b48d0905cf90c03365536d # v3
+
+  gitleaks:
+    name: Secret scanning (gitleaks)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+
+      - name: Run gitleaks
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

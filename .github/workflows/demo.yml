@@ -9,8 +9,12 @@ env:
   SSH_USER: ${{secrets.DEMO_SSH_USER}}
   SSH_HOST: ${{secrets.DEMO_SSH_HOST}}
   DEMO_WEB_ROOT: ${{secrets.DEMO_WEB_ROOT}}
+  SSH_HOST_KEY: ${{secrets.DEMO_SSH_HOST_KEY}}
 permissions:
   contents: read
+concurrency:
+  group: demo-deploy
+  cancel-in-progress: false
 jobs:
   login-to-demo-and-up:
     name: Login to demo and Deploy

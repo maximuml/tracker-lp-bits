@@ -1,0 +1,22 @@
+# Raw SQL query baseline (Step 25 ratchet)
+#
+# This file lists all DB::select/statement/unprepared and DB::table(DB::raw())
+# calls outside app/Support/Install/ (legacy install scripts).
+#
+# The CI check in ci.yml "Raw SQL ratchet" fails if the count increases.
+# To add a new raw query: get it reviewed, add it here, and update BASELINE_COUNT.
+#
+# Last updated: 2026-08-31
+# Baseline count: 11
+
+app/Console/Commands/Upgrade/MigrateSnatchedHitAndRunId.php:33
+app/Console/Commands/Upgrade/MigrateTorrentsTableTextColumn.php:36
+app/Console/Commands/Upgrade/MigrateTorrentsTableTextColumn.php:48
+app/Console/Commands/Upgrade/UpdateSnatchedBuyLogId.php:33
+app/Console/Commands/UserResetIdAutoIncrement.php:68
+app/Console/Commands/UserResetIdAutoIncrement.php:69
+app/Console/Commands/UserResetIdAutoIncrement.php:79
+app/Console/Commands/UserResetIdAutoIncrement.php:83
+app/Repositories/MysqlStatsRepository.php:29
+app/Repositories/ModerationRepository.php:206
+app/Repositories/ModerationRepository.php:242

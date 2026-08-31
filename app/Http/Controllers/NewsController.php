@@ -13,6 +13,7 @@ use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Events;
 use App\Support\Globals;
+use App\Support\Http\SafeReturnUrl;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -28,6 +29,9 @@ class NewsController extends LegacyController
         $action = htmlspecialchars((string) ($request->input('action') ?? ''));
 
         if ($action === 'delete') {
+            if (! $request->isMethod('post')) {
+                return $this->legacyAbortResponse($langNews['std_error'] ?? 'Error', $langNews['std_permission_denied'] ?? 'Permission denied.');
+            }
             $newsid = (int) $request->input('newsid', 0);
             if ($newsid <= 0) {
                 return $this->legacyAbortResponse($langNews['std_error'] ?? 'Error', $langNews['std_invalid_news_id'] ?? 'Invalid news ID.');
@@ -50,7 +54,7 @@ class NewsController extends LegacyController
             }
 
             if ($returnto !== '') {
-                return redirect($returnto);
+                return redirect(SafeReturnUrl::filter($returnto));
             }
 
             return redirect('/');

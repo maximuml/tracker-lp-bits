@@ -37,7 +37,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('exam:assign_cronjob')->everyMinute();
         $schedule->command('exam:checkout_cronjob')->everyFiveMinutes();
         $schedule->command('exam:update_progress --bulk=1')->hourly();
-        $schedule->command('backup:cronjob')->everyMinute();
+        $schedule->command('backup:cronjob')->everyFiveMinutes()->withoutOverlapping()->onOneServer();
         $schedule->job(new HrCheckJob)->everyTenMinutes();
         $schedule->job(new HrCheckJob(null, null, true))->hourly();
         $schedule->command('user:delete_expired_token')->dailyAt('04:00');

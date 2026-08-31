@@ -24,6 +24,7 @@ use App\Support\Locale;
 use App\Support\Mail;
 use App\Support\Network;
 use App\Support\PasswordHasher;
+use App\Support\Security\PasskeyGenerator;
 use App\Support\Strings;
 use App\Support\Token;
 use App\Support\Url;
@@ -185,7 +186,7 @@ class RegistrationService
         $secret = Token::randomHex();
         $passhashAlgo = PasswordHasher::ALGO_ARGON2ID;
         $authKey = Token::randomHex();
-        $passkey = md5($username.now()->toDateTimeString().$passhash);
+        $passkey = app(PasskeyGenerator::class)->generate();
         $verification = (string) SiteConfig::current()->main->verification('email');
         $editsecret = $verification === 'admin' ? '' : $secret;
 

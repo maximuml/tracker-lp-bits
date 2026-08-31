@@ -181,7 +181,7 @@ class PageLayout
             echo $value;
         }
         ?>
-<script type="text/javascript" src="js/jquery-1.12.4.min.js<?php
+<script type="text/javascript" src="js/jquery-3.7.1.min.js<?php
         echo $cssupdatedate;
         ?>"></script>
 <script type="text/javascript" nonce="<?php echo $cspNonce; ?>">
@@ -425,7 +425,7 @@ class PageLayout
                     <div style="display: flex;flex-direction: column">
                         <div>
                             <span><input type="text" name="search" style="width: 80px;height: 12px" value="<?php
-                echo $context->requestSearch ?? '';
+                echo Html::escapeAttr((string) ($context->requestSearch ?? ''));
                 ?>" placeholder="<?php
                 echo Locale::trans('search.search_keyword');
                 ?>"/></span>

@@ -555,16 +555,16 @@ class Install
         if (file_exists($envFile) && is_readable($envFile)) {
             // already exists, read it ,and merge post data
             $newData = Env::load($envFile);
-            $this->doLog('[CREATE ENV] .env exists, data: '.json_encode($newData));
+            $this->doLog('[CREATE ENV] .env exists, loaded '.count($newData).' keys');
         }
-        $this->doLog('[CREATE ENV] newData: '.json_encode($newData));
+        $this->doLog('[CREATE ENV] starting with '.count($newData).' keys');
         foreach ($envExampleData as $key => $value) {
             if (isset($data[$key])) {
                 $value = trim($data[$key]);
-                $this->doLog("[CREATE ENV] key: $key, new value: $value from post.");
+                $this->doLog("[CREATE ENV] key: $key, value from post.");
                 $newData[$key] = $value;
             } elseif (! isset($newData[$key])) {
-                $this->doLog("[CREATE ENV] key: $key, new value: $value from example.");
+                $this->doLog("[CREATE ENV] key: $key, value from example.");
                 $newData[$key] = $value;
             }
             if ($key == 'CACHE_DRIVER') {
@@ -583,9 +583,16 @@ class Install
                 if ($key == 'LOG_LEVEL') {
                     $newData[$key] = 'info';
                 }
+                if ($key == 'APP_KEY') {
+                    $current = (string) ($newData['APP_KEY'] ?? '');
+                    if ($current === '' || $current === 'ChangeMeToYourGeneratedAppKeyNow') {
+                        $newData[$key] = 'base64:'.base64_encode(random_bytes(32));
+                        $this->doLog('[CREATE ENV] generated fresh APP_KEY');
+                    }
+                }
             }
         }
-        $this->doLog('[CREATE ENV] final newData: '.json_encode($newData));
+        $this->doLog('[CREATE ENV] final newData has '.count($newData).' keys');
         unset($key, $value);
         // check
         DB::connection()->getPdo();
@@ -610,7 +617,7 @@ class Install
         }
         fwrite($fp, $content);
         fclose($fp);
-        $this->doLog("[CREATE ENV] $envFile with content: $content");
+        $this->doLog("[CREATE ENV] wrote {$envFile} with ".count($newData).' keys');
 
         return true;
     }

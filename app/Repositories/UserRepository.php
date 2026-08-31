@@ -23,6 +23,7 @@ use App\Support\Locale;
 use App\Support\Logger;
 use App\Support\Network;
 use App\Support\PasswordHasher;
+use App\Support\Security\PasskeyGenerator;
 use App\Support\Token;
 use App\Support\UserDisplay;
 use App\Support\Validators;
@@ -198,7 +199,7 @@ class UserRepository extends BaseRepository
             'added' => now()->toDateTimeString(),
             'status' => UserStatus::CONFIRMED->value,
             'class' => $class,
-            'passkey' => md5($username.date('Y-m-d H:i:s').$passhash),
+            'passkey' => app(PasskeyGenerator::class)->generate(),
         ];
         $user = new User($data);
         if (! empty($params['id'])) {

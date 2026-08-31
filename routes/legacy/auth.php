@@ -63,8 +63,8 @@ Route::match(['get', 'post'], '/news', [NewsController::class, 'news'])->name('n
 Route::match(['get', 'post'], '/makepoll', [PollController::class, 'makepoll'])->name('makepoll.legacy');
 Route::match(['get', 'post'], '/polloverview', [PollController::class, 'polloverview'])->name('polloverview.legacy');
 Route::match(['get', 'post'], '/attendance', [AttendanceController::class, 'attendance'])->name('attendance.legacy');
-Route::match(['get', 'post'], '/takemessage', [MessageController::class, 'takeMessage'])->name('takemessage.legacy');
-Route::match(['get', 'post'], '/deletemessage', [MessageController::class, 'deletemessage'])->name('deletemessage.legacy');
+Route::post('/takemessage', [MessageController::class, 'takeMessage'])->middleware('reject.get.mutations')->name('takemessage.legacy');
+Route::post('/deletemessage', [MessageController::class, 'deletemessage'])->middleware('reject.get.mutations')->name('deletemessage.legacy');
 Route::match(['get', 'post'], '/report', [ModerationController::class, 'report'])->name('report.legacy');
 Route::match(['get', 'post'], '/reports', [ModerationController::class, 'reports'])->name('reports.legacy');
 
@@ -83,7 +83,7 @@ Route::get('/iphistory', function (Request $request) {
 })->name('iphistory.legacy');
 Route::get('/ipsearch', fn () => redirect('/nexusphp/users'))->name('ipsearch.legacy');
 Route::match(['get', 'post'], '/modtask', [StaffModerationController::class, 'modtask'])->name('modtask.legacy');
-Route::match(['get', 'post'], '/staff', [StaffPageController::class, 'staff'])->name('staff.legacy');
+Route::get('/staff', [StaffPageController::class, 'staff'])->name('staff.legacy');
 
 // Phase 5.4: staffbox migrated to Filament StaffMessageResource
 Route::get('/staffbox', fn () => redirect('/nexusphp/security/staff-messages'))->name('staffbox.legacy');
@@ -91,11 +91,11 @@ Route::post('/staffbox', fn () => redirect('/nexusphp/security/staff-messages'))
 
 // Phase 5.4: staffmess/takestaffmess (mass PM) kept as legacy for now — admin-only mass-mail form
 Route::match(['get', 'post'], '/staffmess', [StaffMessageController::class, 'staffmess'])->name('staffmess.legacy');
-Route::match(['get', 'post'], '/takestaffmess', [StaffMessageController::class, 'takeStaffmess'])->name('takestaffmess.legacy');
+Route::post('/takestaffmess', [StaffMessageController::class, 'takeStaffmess'])->middleware('reject.get.mutations')->name('takestaffmess.legacy');
 
 // Phase 5.4: contactstaff stays legacy (user-facing form to contact staff)
 Route::match(['get', 'post'], '/contactstaff', [StaffMessageController::class, 'contactstaff'])->name('contactstaff.legacy');
-Route::match(['get', 'post'], '/takecontact', [StaffMessageController::class, 'takecontact'])->name('takecontact.legacy');
+Route::post('/takecontact', [StaffMessageController::class, 'takecontact'])->middleware('reject.get.mutations')->name('takecontact.legacy');
 Route::match(['get', 'post'], '/modrules', [StaffModerationController::class, 'modrules'])->name('modrules.legacy');
 
 // Phase 5.5: stats/allagents migrated to Filament dashboard widgets
@@ -125,10 +125,10 @@ Route::post('/takeconfirm', function (Request $request) {
 Route::match(['get', 'post'], '/user-ban-log', [AdminToolsController::class, 'userBanLog'])->name('user-ban-log.legacy');
 Route::match(['get', 'post'], '/torrent_info', [TorrentMaintenanceController::class, 'torrentInfo'])->name('torrent_info.legacy');
 Route::match(['get', 'post'], '/viewsnatches', [TorrentAjaxController::class, 'viewSnatches'])->name('viewsnatches.legacy');
-Route::match(['get', 'post'], '/takeflush', [TorrentMaintenanceController::class, 'takeFlush'])->name('takeflush.legacy');
-Route::match(['get', 'post'], '/takereseed', [TorrentMaintenanceController::class, 'takeReseed'])->name('takereseed.legacy');
+Route::post('/takeflush', [TorrentMaintenanceController::class, 'takeFlush'])->middleware('reject.get.mutations')->name('takeflush.legacy');
+Route::post('/takereseed', [TorrentMaintenanceController::class, 'takeReseed'])->middleware('reject.get.mutations')->name('takereseed.legacy');
 Route::match(['get', 'post'], '/clearcache', [AdminToolsController::class, 'clearCache'])->name('clearcache.legacy');
-Route::match(['get', 'post'], '/fastdelete', [TorrentDeleteController::class, 'fastDelete'])->name('fastdelete.legacy');
+Route::post('/fastdelete', [TorrentDeleteController::class, 'fastDelete'])->middleware('reject.get.mutations')->name('fastdelete.legacy');
 Route::match(['get', 'post'], '/donated', [InfoController::class, 'donated'])->name('donated.legacy');
 Route::match(['get', 'post'], '/faqmanage', [FaqController::class, 'faqManage'])->name('faqmanage.legacy');
 Route::match(['get', 'post'], '/faqactions', [FaqController::class, 'faqActions'])->name('faqactions.legacy');
@@ -158,19 +158,19 @@ Route::match(['get', 'post'], '/task', [BonusShopController::class, 'task'])->na
 Route::match(['get', 'post'], '/uploaders', [BonusHistoryController::class, 'uploaders'])->name('uploaders.legacy');
 Route::match(['get', 'post'], '/settings', [SettingsController::class, 'settings'])->name('settings.legacy');
 Route::match(['get', 'post'], '/freeleech', [BonusShopController::class, 'freeleech'])->name('freeleech.legacy');
-Route::match(['get', 'post'], '/magic', [BonusHistoryController::class, 'magic'])->name('magic.legacy');
+Route::post('/magic', [BonusHistoryController::class, 'magic'])->middleware('reject.get.mutations')->name('magic.legacy');
 // Phase 5.6: delacctadmin/deletedisabled/massmail migrated to Filament SystemActions page
 Route::get('/delacctadmin', fn () => redirect('/nexusphp/system-actions'))->name('delacctadmin.legacy');
 Route::post('/delacctadmin', fn () => redirect('/nexusphp/system-actions'))->name('delacctadmin.legacy.post');
 Route::get('/deletedisabled', fn () => redirect('/nexusphp/system-actions'))->name('deletedisabled.legacy');
 Route::get('/massmail', fn () => redirect('/nexusphp/system-actions'))->name('massmail.legacy');
 Route::post('/massmail', fn () => redirect('/nexusphp/system-actions'))->name('massmail.legacy.post');
-Route::match(['get', 'post'], '/takeamountupload', [SystemBulkController::class, 'takeamountupload'])->name('takeamountupload.legacy');
-Route::match(['get', 'post'], '/takeinvite', [SystemBulkController::class, 'takeinvite'])->name('takeinvite.legacy');
-Route::match(['get', 'post'], '/takeupdate', [SystemBulkController::class, 'takeupdate'])->name('takeupdate.legacy');
+Route::post('/takeamountupload', [SystemBulkController::class, 'takeamountupload'])->middleware('reject.get.mutations')->name('takeamountupload.legacy');
+Route::post('/takeinvite', [SystemBulkController::class, 'takeinvite'])->middleware('reject.get.mutations')->name('takeinvite.legacy');
+Route::post('/takeupdate', [SystemBulkController::class, 'takeupdate'])->middleware('reject.get.mutations')->name('takeupdate.legacy');
 Route::match(['get', 'post'], '/users', [UserAdminController::class, 'users'])->name('users.legacy');
 Route::match(['get', 'post'], '/staffpanel', [StaffPageController::class, 'staffpanel'])->name('staffpanel.legacy');
-Route::match(['get', 'post'], '/docleanup', [SystemMaintenanceController::class, 'docleanup'])->name('docleanup.legacy');
+Route::post('/docleanup', [SystemMaintenanceController::class, 'docleanup'])->middleware('reject.get.mutations')->name('docleanup.legacy');
 Route::match(['get', 'post'], '/location', [AdminToolsController::class, 'location'])->name('location.legacy');
 Route::match(['get', 'post'], '/preview', [UtilityController::class, 'preview'])->name('preview.legacy');
 Route::match(['get', 'post'], '/moresmilies', [UtilityController::class, 'moresmilies'])->name('moresmilies.legacy');
@@ -182,13 +182,13 @@ Route::match(['get', 'post'], '/self-enable', [UserAdminController::class, 'self
 Route::match(['get', 'post'], '/unco', [UserAdminController::class, 'unco'])->name('unco.legacy');
 Route::match(['get', 'post'], '/adduser', [UserAdminController::class, 'adduser'])->name('adduser.legacy');
 Route::match(['get', 'post'], '/bitbucketlog', [InfoController::class, 'bitbucketlog'])->name('bitbucketlog.legacy');
-Route::match(['get', 'post'], '/delete', [TorrentDeleteController::class, 'delete'])->name('delete.legacy');
+Route::post('/delete', [TorrentDeleteController::class, 'delete'])->middleware('reject.get.mutations')->name('delete.legacy');
 Route::match(['get', 'post'], '/downloadnotice', [TorrentDownloadController::class, 'downloadnotice'])->name('downloadnotice.legacy');
-Route::match(['get', 'post'], '/thanks', [TorrentBookmarkController::class, 'thanks'])->name('thanks.legacy');
+Route::post('/thanks', [TorrentBookmarkController::class, 'thanks'])->middleware('reject.get.mutations')->name('thanks.legacy');
 Route::match(['get', 'post'], '/increment-bulk', [SystemBulkController::class, 'incrementBulk'])->name('increment-bulk.legacy');
 // Phase 5.6: maxlogin migrated to Filament LoginAttemptResource
 Route::get('/maxlogin', fn () => redirect('/nexusphp/login-attempts'))->name('maxlogin.legacy');
 Route::post('/maxlogin', fn () => redirect('/nexusphp/login-attempts'))->name('maxlogin.legacy.post');
 Route::match(['get', 'post'], '/setlist_lookup', [SystemBulkController::class, 'setlistLookup'])->name('setlist_lookup.legacy');
-Route::match(['get', 'post'], '/take-increment-bulk', [SystemBulkController::class, 'takeIncrementBulk'])->name('take-increment-bulk.legacy');
+Route::post('/take-increment-bulk', [SystemBulkController::class, 'takeIncrementBulk'])->middleware('reject.get.mutations')->name('take-increment-bulk.legacy');
 Route::match(['get', 'post'], '/testip', [AdminToolsController::class, 'testip'])->name('testip.legacy');

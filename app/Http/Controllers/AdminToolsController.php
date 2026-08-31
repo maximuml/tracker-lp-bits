@@ -120,6 +120,9 @@ class AdminToolsController extends LegacyController
         $sure = (string) (request()->query('sure') ?? '');
         $delid = (int) (request()->query('delid') ?? 0);
         if ($sure === 'yes' && $delid > 0) {
+            if (! $request->isMethod('post')) {
+                return $this->legacyAbortResponse('Error', 'Permission denied.');
+            }
             if (Validators::isId($delid)) {
                 $this->locationService->deleteLocation($delid);
             }
@@ -133,6 +136,9 @@ class AdminToolsController extends LegacyController
 
         $edited = (string) (request()->query('edited') ?? '');
         if ($edited === '1') {
+            if (! $request->isMethod('post')) {
+                return $this->legacyAbortResponse('Error', 'Permission denied.');
+            }
             $id = (int) (request()->query('id') ?? 0);
             $name = (string) request()->query('name');
             $flagpic = (string) request()->query('flagpic');
@@ -184,6 +190,9 @@ class AdminToolsController extends LegacyController
 
         $add = (string) (request()->query('add') ?? '');
         if ($add === 'true') {
+            if (! $request->isMethod('post')) {
+                return $this->legacyAbortResponse('Error', 'Permission denied.');
+            }
             $name = (string) request()->query('name');
             $flagpic = (string) request()->query('flagpic');
             $locationMain = (string) request()->query('location_main');

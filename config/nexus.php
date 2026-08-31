@@ -87,6 +87,6 @@ return [
     'iyuu_secret' => Env::get('IYUU_SECRET', ''),
     'ammds_secret' => Env::get('AMMDS_SECRET', ''),
 
-    'trusted_proxies' => Env::get('TRUSTED_PROXIES', '10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,127.0.0.1,::1'),
+    'trusted_proxies' => Env::get('TRUSTED_PROXIES', ''),
 
 ];

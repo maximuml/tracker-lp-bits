@@ -23,12 +23,18 @@ jobs:
         mkdir -p ~/.ssh/
         echo "$SSH_KEY" > ~/.ssh/demo.key
         chmod 600 ~/.ssh/demo.key
+        # Trust the demo host key explicitly (pinned in repo secrets).
+        # Avoids MITM risk of StrictHostKeyChecking=no.
+        mkdir -p ~/.ssh/
+        echo "$SSH_HOST_KEY" >> ~/.ssh/known_hosts
+        chmod 644 ~/.ssh/known_hosts
         cat >> ~/.ssh/config <<END
         Host demo
           HostName $SSH_HOST
           User $SSH_USER
           IdentityFile ~/.ssh/demo.key
-          StrictHostKeyChecking no
+          StrictHostKeyChecking yes
+          UserKnownHostsFile ~/.ssh/known_hosts
         END
     # Deploy
     - name: Fetch code

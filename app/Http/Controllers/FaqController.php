@@ -84,6 +84,9 @@ class FaqController extends LegacyController
         }
 
         if ($action === 'delete') {
+            if (! $request->isMethod('post')) {
+                return $this->legacyAbortResponse('Error', 'Permission denied.');
+            }
             $id = (int) (request()->query('id') ?? 0);
             if (request()->query('confirm') === 'yes') {
                 app(InfoRepository::class)->deleteFaq($id);

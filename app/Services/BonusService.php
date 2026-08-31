@@ -51,6 +51,10 @@ final class BonusService
             return null;
         }
 
+        if (! $request->isMethod('post')) {
+            return redirect('/mybonus.php');
+        }
+
         return $this->handleExchange($request, $allBonus, $curUser, $lang, $lockText);
     }
 

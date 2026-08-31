@@ -19,6 +19,7 @@ use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Mail;
 use App\Support\PasswordHasher;
+use App\Support\Security\PasskeyGenerator;
 use App\Support\Token;
 use App\Support\TwoFactorAuthHelper;
 use App\Support\Url;
@@ -479,7 +480,7 @@ final class UsercpRepository extends BaseRepository
         }
 
         if ($resetpasskey === 1) {
-            $data['passkey'] = md5($user->username.date('Y-m-d H:i:s').$user->passhash);
+            $data['passkey'] = app(PasskeyGenerator::class)->generate();
         }
 
         $siteName = (string) app(Globals::class)->get('SITENAME', '');
@@ -612,7 +613,7 @@ final class UsercpRepository extends BaseRepository
         }
 
         if ($resetpasskey) {
-            $data['passkey'] = md5($user->username.date('Y-m-d H:i:s').$user->passhash);
+            $data['passkey'] = app(PasskeyGenerator::class)->generate();
         }
 
         if ($dto->twoStepCode !== null && $dto->twoStepCode !== '') {

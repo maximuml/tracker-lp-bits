@@ -292,6 +292,9 @@ JS;
         ];
 
         if (isset($stateMap[$action])) {
+            if (! $request->isMethod('post')) {
+                return $this->legacyAbortResponse('Error', 'Permission denied.');
+            }
             DB::table('torrents_state')->update(['global_sp_state' => $stateMap[$action]]);
             app(LegacyRedisCache::class)?->delete_value('global_promotion_state');
 

@@ -412,7 +412,7 @@ class ToolRepository extends BaseRepository
         $log = '[SEND_MAIL]';
         $factory = new EsmtpTransportFactory;
         $smtpConfig = SiteConfig::fromDb()->smtp;
-        Logger::writeWithContext((string) ("{$log}, to: {$to}, subject: {$subject}, body: {$body}, smtp: ".json_encode($smtpConfig->toArray())), (string) 'info', (bool) false);
+        Logger::writeWithContext((string) ("{$log}, to: {$to}, subject: {$subject}, smtp_host: {$smtpConfig->address()}:{$smtpConfig->port()}, encryption: ".($smtpConfig->encryption() ?? 'none')), (string) 'info', (bool) false);
         $encryption = $smtpConfig->encryption();
         if ($encryption !== null && ! in_array($encryption, ['ssl', 'tls'])) {
             $encryption = null;
@@ -429,7 +429,7 @@ class ToolRepository extends BaseRepository
             $accountName,
             $accountPassword,
             $port,
-            ['verify_peer' => false]
+            ['verify_peer' => (bool) config('mail.verify_peer', true), 'verify_peer_name' => (bool) config('mail.verify_peer', true), 'allow_self_signed' => false]
         ));
 
         // Create the Mailer using your created Transport

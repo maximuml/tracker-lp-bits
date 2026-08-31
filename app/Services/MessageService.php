@@ -12,6 +12,7 @@ use App\Repositories\MessageRepository;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
 use App\Support\Globals;
+use App\Support\Http\SafeReturnUrl;
 use App\Support\Language;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
@@ -181,7 +182,7 @@ class MessageService
             }
         }
 
-        $redirect = $returnto !== '' ? $returnto : 'messages.php';
+        $redirect = SafeReturnUrl::filter($returnto, '/messages.php');
 
         return redirect($redirect);
     }
@@ -330,14 +331,26 @@ class MessageService
         }
 
         if ($action === 'moveordel') {
+            if (! $request->isMethod('post')) {
+                return redirect('/messages.php');
+            }
+
             return $this->handleMoveOrDel($request);
         }
 
         if ($action === 'editmailboxes2') {
+            if (! $request->isMethod('post')) {
+                return redirect('/messages.php');
+            }
+
             return $this->handleEditMailboxes($request);
         }
 
         if ($action === 'deletemessage') {
+            if (! $request->isMethod('post')) {
+                return redirect('/messages.php');
+            }
+
             return $this->handleDeleteMessage($request);
         }
 

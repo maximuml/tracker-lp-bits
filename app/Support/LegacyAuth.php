@@ -8,6 +8,7 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Repositories\AuthRepository;
 use App\Services\Captcha\Exceptions\CaptchaValidationException;
+use App\Support\Security\PasskeyGenerator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
@@ -357,7 +358,7 @@ final class LegacyAuth
         }
 
         if (empty($row['passkey'])) {
-            $passkey = md5($row['username'].date('Y-m-d H:i:s').($row['passhash'] ?? ''));
+            $passkey = app(PasskeyGenerator::class)->generate();
             app(AuthRepository::class)->updateUserPasskey((int) $row['id'], $passkey);
         }
 

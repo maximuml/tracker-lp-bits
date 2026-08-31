@@ -17,6 +17,12 @@ final class TorrentBookmarkControllerTest extends TestCase
 {
     use DatabaseTransactions;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        config(['scout.driver' => 'null']);
+    }
+
     public function test_bookmark_returns_failed_for_guest(): void
     {
         $controller = app(TorrentBookmarkController::class);

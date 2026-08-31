@@ -296,11 +296,12 @@ jobs:
       - name: Install database
         run: |
           docker compose exec -T php php artisan migrate:fresh --seed --force
-          # Create isolated test database for Feature tests
+          # Create isolated test database for Feature tests (phpunit.xml
+          # uses nexusphp_testing). Copy full schema + all seed data so
+          # Feature tests have the same fixtures as the main database.
           source .env 2>/dev/null
           docker compose exec -T mysql sh -c "mysql -u root -p${DB_PASSWORD:-root} -e \"CREATE DATABASE IF NOT EXISTS nexusphp_testing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; GRANT ALL PRIVILEGES ON nexusphp_testing.* TO '${DB_USERNAME:-nexusphp}'@'%'; FLUSH PRIVILEGES;\""
-          docker compose exec -T mysql sh -c "mysqldump -u root -p${DB_PASSWORD:-root} --no-data --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp | mysql -u root -p${DB_PASSWORD:-root} nexusphp_testing"
-          docker compose exec -T mysql sh -c "mysqldump -u root -p${DB_PASSWORD:-root} --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users | mysql -u root -p${DB_PASSWORD:-root} nexusphp_testing"
+          docker compose exec -T mysql sh -c "mysqldump -u root -p${DB_PASSWORD:-root} --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp | mysql -u root -p${DB_PASSWORD:-root} nexusphp_testing"
 
       - name: Start remaining services and wait
         run: docker compose up -d --wait

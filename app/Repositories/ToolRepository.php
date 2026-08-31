@@ -190,6 +190,26 @@ class ToolRepository extends BaseRepository
         }
         File::delete($backupWeb['filename']);
         File::delete($backupDatabase['filename']);
+
+        // Optional GPG encryption of the backup archive
+        $gpgRecipient = SiteConfig::current()->backup->gpgRecipient();
+        if ($gpgRecipient !== '' && Environment::commandExists('gpg')) {
+            $encryptedFile = $filename.'.gpg';
+            $gpgCommand = sprintf(
+                'gpg --batch --yes --trust-model always --recipient %s --encrypt %s 2>&1',
+                escapeshellarg($gpgRecipient),
+                escapeshellarg($filename)
+            );
+            $gpgResult = exec($gpgCommand, $gpgOutput, $gpgCode);
+            Logger::writeWithContext((string) sprintf('GPG encrypt: command=%s, code=%s, output=%s', $gpgCommand, $gpgCode, json_encode($gpgOutput)), (string) 'info', (bool) false);
+            if ($gpgCode === 0 && file_exists($encryptedFile)) {
+                File::delete($filename);
+                $filename = $encryptedFile;
+            } else {
+                throw new \RuntimeException('GPG encryption failed: '.json_encode($gpgOutput));
+            }
+        }
+
         if (! $transfer) {
             return compact('result_code', 'filename');
         }

@@ -36,4 +36,20 @@ final class SecurityHeadersTest extends TestCase
         $this->assertStringContainsString('https://fonts.googleapis.com', $csp);
         $this->assertStringContainsString('https://www.paypal.com', $csp);
     }
+
+    /**
+     * Filament/Livewire admin routes require unsafe-eval (Alpine.js) and
+     * unsafe-inline for scripts/styles. This is acceptable because Filament
+     * routes are behind admin auth. Legacy/public routes keep strict CSP.
+     */
+    public function test_filament_csp_allows_unsafe_eval_for_alpine(): void
+    {
+        $response = $this->get('/nexusphp');
+
+        $csp = $response->headers->get('Content-Security-Policy');
+        $this->assertNotNull($csp);
+        $this->assertStringContainsString("'unsafe-eval'", $csp);
+        $this->assertStringContainsString("'unsafe-inline'", $csp);
+        $this->assertStringContainsString("object-src 'none'", $csp);
+    }
 }

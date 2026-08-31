@@ -87,7 +87,7 @@ final class Comment
         if (str_contains($s, '[raw]') && str_contains($s, '[/raw]')) {
             $s = (string) preg_replace_callback(
                 '/\[raw\](.+?)\[\/raw\]/is',
-                static fn (array $m): string => self::addTempCode($m[1]),
+                static fn (array $m): string => self::addTempCode(SafeHtml::sanitize((string) $m[1], 'media')),
                 $s,
             );
         }

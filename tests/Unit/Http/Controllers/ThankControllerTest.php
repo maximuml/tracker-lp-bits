@@ -37,7 +37,6 @@ final class ThankControllerTest extends TestCase
         Thank::query()->create([
             'userid' => $user->id,
             'torrentid' => $torrent->id,
-            'thankdate' => now()->toDateTimeString(),
         ]);
 
         $controller = app(ThankController::class);

@@ -1,0 +1,32 @@
+# Codecov configuration — ratchet coverage so it never decreases.
+#
+# After baseline stabilises, enable fail_ci_if_error: true in ci.yml
+# and tighten project.target.
+
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 1%
+        informational: true
+    patch:
+      default:
+        target: 60%
+        threshold: 5%
+        informational: true
+
+comment:
+  layout: "reach,diff,flags,files,footer"
+  behavior: default
+  require_changes: false
+
+ignore:
+  - "tests/**"
+  - "database/**"
+  - "config/**"
+  - "routes/**"
+  - "resources/**"
+  - "public/**"
+  - ".docker/**"
+  - "_db/**"

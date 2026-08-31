@@ -145,7 +145,7 @@ class PollController extends LegacyController
     {
         $perPage = (int) $request->input('limit', 20);
 
-        $polls = Poll::query()->latest('id')->paginate($perPage);
+        $polls = Poll::query()->withCount('answers')->latest('id')->paginate($perPage);
 
         return $this->success(PollResource::collection($polls));
     }
@@ -155,6 +155,8 @@ class PollController extends LegacyController
      */
     public function show(Poll $poll): array
     {
+        $poll->loadCount('answers');
+
         return $this->success(new PollResource($poll));
     }
 
@@ -181,7 +183,10 @@ class PollController extends LegacyController
 
         $poll->update($data);
 
-        return $this->success(new PollResource($poll->fresh()), 'Poll updated');
+        $fresh = $poll->fresh();
+        $fresh?->loadCount('answers');
+
+        return $this->success($fresh ? new PollResource($fresh) : null, 'Poll updated');
     }
 
     /**
@@ -205,7 +210,7 @@ class PollController extends LegacyController
             return $this->success([], 'No poll');
         }
 
-        $poll = Poll::query()->find($pollArr['id']);
+        $poll = Poll::query()->withCount('answers')->find($pollArr['id']);
 
         return $this->success($poll ? new PollResource($poll) : null);
     }

@@ -85,7 +85,12 @@ return [
     */
 
     'waits' => [
+        'redis:tracker-critical' => 30,
         'redis:default' => 60,
+        'redis:nexus_queue' => 60,
+        'redis:mail' => 120,
+        'redis:search' => 90,
+        'redis:maintenance' => 300,
     ],
 
     /*
@@ -181,9 +186,23 @@ return [
     */
 
     'defaults' => [
-        'supervisor-1' => [
+        'tracker-critical' => [
             'connection' => 'redis',
-            'queue' => ['nexus_queue'],
+            'queue' => ['tracker-critical'],
+            'balance' => 'auto',
+            'autoScalingStrategy' => 'time',
+            'maxProcesses' => 1,
+            'maxTime' => 0,
+            'maxJobs' => 0,
+            'memory' => 128,
+            'tries' => 3,
+            'timeout' => 60,
+            'backoff' => 5,
+            'nice' => 0,
+        ],
+        'default' => [
+            'connection' => 'redis',
+            'queue' => ['default', 'nexus_queue'],
             'balance' => 'auto',
             'autoScalingStrategy' => 'time',
             'maxProcesses' => 1,
@@ -194,20 +213,92 @@ return [
             'timeout' => 120,
             'nice' => 0,
         ],
+        'mail' => [
+            'connection' => 'redis',
+            'queue' => ['mail'],
+            'balance' => 'auto',
+            'autoScalingStrategy' => 'time',
+            'maxProcesses' => 1,
+            'maxTime' => 0,
+            'maxJobs' => 0,
+            'memory' => 96,
+            'tries' => 3,
+            'timeout' => 30,
+            'backoff' => 10,
+            'nice' => 0,
+        ],
+        'search' => [
+            'connection' => 'redis',
+            'queue' => ['search'],
+            'balance' => 'auto',
+            'autoScalingStrategy' => 'time',
+            'maxProcesses' => 1,
+            'maxTime' => 0,
+            'maxJobs' => 0,
+            'memory' => 128,
+            'tries' => 1,
+            'timeout' => 90,
+            'nice' => 0,
+        ],
+        'maintenance' => [
+            'connection' => 'redis',
+            'queue' => ['maintenance'],
+            'balance' => 'auto',
+            'autoScalingStrategy' => 'time',
+            'maxProcesses' => 1,
+            'maxTime' => 0,
+            'maxJobs' => 0,
+            'memory' => 256,
+            'tries' => 1,
+            'timeout' => 600,
+            'nice' => 5,
+        ],
     ],
 
     'environments' => [
         'production' => [
-            'supervisor-1' => [
+            'tracker-critical' => [
+                'maxProcesses' => 5,
+                'balanceMaxShift' => 1,
+                'balanceCooldown' => 3,
+            ],
+            'default' => [
                 'maxProcesses' => 10,
+                'balanceMaxShift' => 1,
+                'balanceCooldown' => 3,
+            ],
+            'mail' => [
+                'maxProcesses' => 3,
+                'balanceMaxShift' => 1,
+                'balanceCooldown' => 3,
+            ],
+            'search' => [
+                'maxProcesses' => 3,
+                'balanceMaxShift' => 1,
+                'balanceCooldown' => 3,
+            ],
+            'maintenance' => [
+                'maxProcesses' => 2,
                 'balanceMaxShift' => 1,
                 'balanceCooldown' => 3,
             ],
         ],
 
         'local' => [
-            'supervisor-1' => [
+            'tracker-critical' => [
+                'maxProcesses' => 1,
+            ],
+            'default' => [
                 'maxProcesses' => 3,
+            ],
+            'mail' => [
+                'maxProcesses' => 1,
+            ],
+            'search' => [
+                'maxProcesses' => 1,
+            ],
+            'maintenance' => [
+                'maxProcesses' => 1,
             ],
         ],
     ],

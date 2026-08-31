@@ -66,6 +66,36 @@ jobs:
       - name: Run PHPStan level 8
         run: vendor/bin/phpstan analyse -c phpstan.level8.neon --no-progress --memory-limit=2G
 
+  raw-sql-ratchet:
+    name: Raw SQL ratchet
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Check raw SQL query count
+        run: |
+          BASELINE_COUNT=11
+          CURRENT=$(grep -rn 'DB::\(select\|statement\|unprepared\)\s*(' app/ --include="*.php" \
+            | grep -v 'Support/Install' \
+            | wc -l)
+          CURRENT_SUBQUERY=$(grep -rn 'DB::table\s*(\s*DB::raw' app/ --include="*.php" \
+            | grep -v 'Support/Install' \
+            | wc -l)
+          TOTAL=$((CURRENT + CURRENT_SUBQUERY))
+          echo "Baseline: $BASELINE_COUNT"
+          echo "Current raw queries: $CURRENT"
+          echo "Current raw subqueries: $CURRENT_SUBQUERY"
+          echo "Total: $TOTAL"
+          if [ "$TOTAL" -gt "$BASELINE_COUNT" ]; then
+            echo "::error::Raw SQL query count increased from $BASELINE_COUNT to $TOTAL. \
+          See .raw-queries-baseline.txt for the allowed list. \
+          Use query builder instead of DB::select/statement/unprepared."
+            exit 1
+          fi
+          echo "OK: raw SQL query count ($TOTAL) <= baseline ($BASELINE_COUNT)"
+
   frontend:
     name: Build + audit npm
     runs-on: ubuntu-latest

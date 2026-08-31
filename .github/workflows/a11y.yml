@@ -40,10 +40,13 @@ jobs:
         env:
           NP_PORT: '80'
           REDIS_PASSWORD: 'ci-redis-test-password'
+          MEILISEARCH_MASTER_KEY: 'ci-meilisearch-test-key'
         run: |
           cp .env.example .env
           # Set CI Redis password (docker-compose requires it)
           sed -i 's/^REDIS_PASSWORD=.*/REDIS_PASSWORD=ci-redis-test-password/' .env
+          # Set CI MeiliSearch key (docker-compose requires it)
+          sed -i 's/^MEILISEARCH_MASTER_KEY=.*/MEILISEARCH_MASTER_KEY=ci-meilisearch-test-key/' .env
           docker compose build
           docker compose up -d --wait mysql redis php openresty
           docker compose exec -T php php artisan migrate:fresh --seed --force

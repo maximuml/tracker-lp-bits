@@ -108,7 +108,7 @@ final class Frame
     ): string {
         $html = '';
         if ($title !== '') {
-            $html .= '<h1 align="center">'.$title.'</h1>';
+            $html .= '<h1 align="center">'.htmlspecialchars($title).'</h1>';
         }
 
         $typeKey = match ($type) {

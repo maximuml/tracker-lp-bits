@@ -157,7 +157,6 @@ JS;
 	</form>
 <?php
 \App\Support\AssetAppender::js('vendor/jquery-loading/jquery.loading.min.js', 'footer', true);
-\App\Support\AssetAppender::js('js/ptgen.js', 'footer', true);
 $customFieldJs = <<<JS
 jQuery("#compose").on("change", "select[name=type]", function () {
     let _this = jQuery(this);

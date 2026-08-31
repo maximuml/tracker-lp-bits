@@ -2,7 +2,7 @@
 $lang_cheaterbox = (array) (\app(\App\Support\Globals::class)->get('lang_cheaterbox') ?? []);
 $lang_functions = (array) (\app(\App\Support\Globals::class)->get('lang_functions') ?? []);
 ?>
-<style type="text/css">
+<style type="text/css" nonce="{{ $cspNonce ?? '' }}">
 table.cheaterbox td
 {
 	text-align: center;

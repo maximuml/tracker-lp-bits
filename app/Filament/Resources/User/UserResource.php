@@ -12,7 +12,6 @@ use App\Filament\Resources\User\UserResource\Pages;
 use App\Filament\Resources\User\UserResource\Pages\CreateUser;
 use App\Filament\Resources\User\UserResource\Pages\ListUsers;
 use App\Filament\Resources\User\UserResource\Pages\UserProfile;
-use App\Filament\Resources\User\UserResource\RelationManagers;
 use App\Models\User;
 use App\Repositories\UserRepository;
 use App\Support\Admin;
@@ -462,7 +461,6 @@ class UserResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //            RelationManagers\MedalsRelationManager::class,
         ];
     }
 
@@ -471,8 +469,7 @@ class UserResource extends Resource
         return [
             'index' => ListUsers::route('/'),
             'create' => CreateUser::route('/create'),
-            //            'edit' => Pages\EditUser::route('/{record}/edit'),
-            //            'view' => Pages\ViewUser::route('/{record}'),
+            'edit' => Pages\EditUser::route('/{record}/edit'),
             'view' => UserProfile::route('/{record}'),
         ];
     }

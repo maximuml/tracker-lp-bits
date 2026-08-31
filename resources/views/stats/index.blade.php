@@ -3,7 +3,7 @@
 @section('title', 'Stats')
 
 @section('content')
-<style type="text/css" media="screen">
+<style type="text/css" media="screen" nonce="{{ $cspNonce ?? '' }}">
   a.colheadlink:link, a.colheadlink:visited{
     font-weight: bold;
     color: #FFFFFF;

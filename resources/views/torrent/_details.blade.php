@@ -170,14 +170,14 @@ JS;
 		{
 			$scronload = "viewpeerlist(".$row['id'].")";
 
-echo "<script type=\"text/javascript\">\n";
+echo "<script type=\"text/javascript\" nonce=\"".e($cspNonce ?? '')."\">\n";
 echo $scronload;
 echo "</script>";
 		}
 
         //Add 魔力值奖励功能
         $bonus_array = $bonusOptions;
-        echo '<style type="text/css">
+        echo '<style type="text/css" nonce="'.e($cspNonce ?? '').'">
 					ul.magic
 					{
 						cursor:pointer;

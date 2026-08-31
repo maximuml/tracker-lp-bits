@@ -9,7 +9,7 @@
     <script type="text/javascript" src="/vendor/layui/layui.js"></script>
     <script type="text/javascript" src="/vendor/datatables-1.12.1/datatables.min.js"></script>
     @stack('scripts')
-    <script>
+    <script nonce="{{ $cspNonce ?? '' }}">
         var nexusDataTableConfig = {{ \Illuminate\Support\Js::from([
             'processing' => true,
             'serverSide' => true,

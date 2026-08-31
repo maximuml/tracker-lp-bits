@@ -57,7 +57,6 @@ class NexusDB
             return self::$instance;
         }
         $instance = new self;
-        //        $driver = new MysqliDriver();
         $driver = new PdoDriver;
         $instance->setDriver($driver);
 

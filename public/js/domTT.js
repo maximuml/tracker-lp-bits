@@ -1074,7 +1074,7 @@ function domTT_replaceTitles(in_decorator)
 			}
 
 			content = content.replace(new RegExp('\'', 'g'), '\\\'');
-			elements[i].onmouseover = new Function('in_event', "domTT_activate(this, in_event, 'content', '" + content + "')");
+			elements[i].onmouseover = function(in_event) { domTT_activate(this, in_event, 'content', content); };
 			elements[i].title = '';
 		}
 	}

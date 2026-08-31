@@ -5,13 +5,13 @@ $text = \request()->query('text');
 <html><head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>{{ $lang_moresmilies['head_more_smilies'] }}</title>
-<style type="text/css">
+<style type="text/css" nonce="{{ $cspNonce ?? '' }}">
 img {border: none;}
 body {color: #000000; background-color: #ffffff}
 </style>
 </head>
 <body>
-<script type="text/javascript">
+<script type="text/javascript" nonce="{{ $cspNonce ?? '' }}">
 function SmileIT(smile,form,text){
    window.opener.document.forms[form].elements[text].value = window.opener.document.forms[form].elements[text].value+" "+smile+" ";
    window.opener.document.forms[form].elements[text].focus();

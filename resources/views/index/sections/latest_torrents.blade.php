@@ -1,5 +1,5 @@
 <h2>{{ $title }}</h2>
-<style>
+<style nonce="{{ $cspNonce ?? '' }}">
     .lt-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);

@@ -44,7 +44,7 @@
                 @foreach ($faqCategories[$id]['items'] as $id2 => $tempItem)
                     @if ($faqCategories[$id]['items'][$id2]['flag'] != "0")
                         <br /><span id="id{{ $faqCategories[$id]['items'][$id2]['link_id'] }}"><b>{{ $faqCategories[$id]['items'][$id2]['question'] }}</b></span><br />
-                        <br />{!! $faqCategories[$id]['items'][$id2]['answer'] !!}<br /><br />
+                        <br />{!! strip_tags($faqCategories[$id]['items'][$id2]['answer'], '<a><b><i><u><s><br><p><div><span><ul><ol><li><img><font><pre><code><hr><table><tr><td><th><strong><em><h1><h2><h3><h4><h5><h6><blockquote>') !!}<br /><br />
                     @endif
                 @endforeach
             @endif

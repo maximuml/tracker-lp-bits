@@ -340,7 +340,7 @@ class AttachmentMutationService
                 ]);
                 $count_left--;
                 if (! empty($callbackFunc) && preg_match('/^preview_custom_field_image_\d+$/', $callbackFunc)) {
-                    $script = sprintf('<script type="text/javascript">parent.%s("%s", "%s")</script>', $callbackFunc, $dlkey, $url);
+                    $script = sprintf('<script type="text/javascript">parent.%s("%s", "%s")</script>', $callbackFunc, $dlkey, addslashes($url));
                 } else {
                     $script = "<script type=\"text/javascript\">parent.tag_extimage('[attach]".$dlkey."[/attach]');</script>";
                 }

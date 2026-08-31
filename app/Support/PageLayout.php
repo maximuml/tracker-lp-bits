@@ -52,6 +52,8 @@ class PageLayout
             throw new \RuntimeException('PageLayout context not set');
         }
 
+        $cspNonce = (string) (request()->attributes->get('csp_nonce', ''));
+
         $context->cache?->setLanguage($context->langDir);
         $cssupdatedate = $context->cssDateTweak;
         // Insert old ip into iplog
@@ -103,7 +105,12 @@ class PageLayout
         echo csrf_token();
         ?>" />
 <?php
-        echo Style::addiCode($context->cache, $context->userStylesheet(), $context->defaultStylesheet);
+        $addiCode = Style::addiCode($context->cache, $context->userStylesheet(), $context->defaultStylesheet);
+        if ($cspNonce !== '' && $addiCode !== '') {
+            // Inject CSP nonce into <style> tags within addicode.
+            $addiCode = (string) preg_replace('/<style(?![^>]*\snonce=)/i', '<style nonce="'.$cspNonce.'"', $addiCode);
+        }
+        echo $addiCode;
         $css_uri = Style::cssUri($context->cache, $context->userStylesheet(), $context->defaultStylesheet);
         $cssupdatedate = $cssupdatedate ? '?'.htmlspecialchars($cssupdatedate) : '';
         ?>
@@ -177,7 +184,7 @@ class PageLayout
 <script type="text/javascript" src="js/jquery-1.12.4.min.js<?php
         echo $cssupdatedate;
         ?>"></script>
-<script type="text/javascript">
+<script type="text/javascript" nonce="<?php echo $cspNonce; ?>">
     jQuery.noConflict();
     window.nexusLayerOptions = {
         confirm: {btnAlign: 'c', title: 'Confirm', btn: ['OK', 'Cancel']},
@@ -617,6 +624,8 @@ class PageLayout
             throw new \RuntimeException('PageLayout context not set');
         }
 
+        $cspNonce = (string) (request()->attributes->get('csp_nonce', ''));
+
         echo '</td></tr></table>';
         echo '<div id="footer">';
         echo '<div style="margin-top: 10px; margin-bottom: 30px;" align="center">';
@@ -659,11 +668,20 @@ class PageLayout
             echo '</div>';
         }
         if ($context->addKeyShortcut != '') {
-            echo $context->addKeyShortcut;
+            $keyShortcut = $context->addKeyShortcut;
+            if ($cspNonce !== '') {
+                $keyShortcut = (string) preg_replace('/<script(?![^>]*\snonce=)/i', '<script nonce="'.$cspNonce.'"', $keyShortcut);
+            }
+            echo $keyShortcut;
         }
         echo '</div>';
         if ($context->analyticsCodeTweak) {
-            echo "\n".$context->analyticsCodeTweak."\n";
+            $analyticsCode = $context->analyticsCodeTweak;
+            if ($cspNonce !== '') {
+                // Inject CSP nonce into <script> tags within analytics code.
+                $analyticsCode = (string) preg_replace('/<script(?![^>]*\snonce=)/i', '<script nonce="'.$cspNonce.'"', $analyticsCode);
+            }
+            echo "\n".$analyticsCode."\n";
         }
         foreach (AssetAppender::getAppendFooters() as $value) {
             echo $value;
@@ -673,7 +691,13 @@ class PageLayout
         <script type="application/javascript" src="js/csrf.js"></script>
         <script type="application/javascript" src="js/medium-zoom.min.js"></script>
         <script type="application/javascript" src="vendor/jquery-goup-1.1.3/jquery.goup.min.js"></script>
-        <script>
+        JS;
+        if ($cspNonce !== '') {
+            $js .= "<script nonce=\"{$cspNonce}\">\n";
+        } else {
+            $js .= "<script>\n";
+        }
+        $js .= <<<'JS'
         jQuery(document).ready(function(){
             jQuery.goup()
             mediumZoom('[data-zoomable]')

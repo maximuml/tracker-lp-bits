@@ -173,7 +173,7 @@ else {
     }
     $json_sticky_series = json_encode(array(4, 6, 12, 24, 36, 48, 72, 168, 360));
     echo <<<EOT
-<script>
+<script nonce="{{ $cspNonce ?? '' }}">
 jQuery(function($){
 	var date_format = function (date) {
 		var seperator1 = "-";
@@ -229,5 +229,4 @@ jQuery(function($){
 EOT;
 }
 \App\Support\AssetAppender::js('vendor/jquery-loading/jquery.loading.min.js', 'footer', true);
-\App\Support\AssetAppender::js('js/ptgen.js', 'footer', true);
 @endphp

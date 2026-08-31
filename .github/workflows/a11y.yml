@@ -39,10 +39,11 @@ jobs:
       - name: Build and start Docker stack
         env:
           NP_PORT: '80'
+          REDIS_PASSWORD: 'ci-redis-test-password'
         run: |
           cp .env.example .env
-          # CI Redis has no password — clear it
-          sed -i 's/^REDIS_PASSWORD=.*/REDIS_PASSWORD=/' .env
+          # Set CI Redis password (docker-compose requires it)
+          sed -i 's/^REDIS_PASSWORD=.*/REDIS_PASSWORD=ci-redis-test-password/' .env
           docker compose build
           docker compose up -d --wait mysql redis php openresty
           docker compose exec -T php php artisan migrate:fresh --seed --force

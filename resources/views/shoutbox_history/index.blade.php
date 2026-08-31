@@ -22,7 +22,7 @@ $title = $title ?? ($lang_shoutbox['text_history_title'] ?? 'Shoutbox history');
 @section('title', $title)
 
 @section('content')
-<script>var SHOUT_CSRF = '{{ htmlspecialchars($csrfToken) }}';</script>
+<script nonce="{{ $cspNonce ?? '' }}">var SHOUT_CSRF = '{{ htmlspecialchars($csrfToken) }}';</script>
 
 <h2>{{ $lang_shoutbox['text_history_title'] ?? 'Shoutbox history' }}</h2>
 <form action="{{ htmlspecialchars($formAction) }}" method="get">

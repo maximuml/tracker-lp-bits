@@ -38,7 +38,7 @@ if (!function_exists('torrent_structure_builder')) { function torrent_structure_
 
 ?>
 
-<style type="text/css">
+<style type="text/css" nonce="{{ $cspNonce ?? '' }}">
 
 /* list styles */
 ul ul { margin-left: 15px; }

@@ -17,12 +17,12 @@ $reactionData = (array) ($reactionData ?? ['counts' => [], 'mine' => [], 'users'
 <link rel="stylesheet" href="{{ \App\Support\Style::cssUriWithContext().'theme.css' }}" type="text/css">
 <link rel="stylesheet" href="styles/curtain_imageresizer.css" type="text/css">
 <link rel="stylesheet" href="styles/nexus.css" type="text/css">
-<script src="js/curtain_imageresizer.js" type="text/javascript"></script><script>var SHOUT_CSRF = '{{ htmlspecialchars(\App\Support\Shoutbox::csrfToken((int) ($CURUSER['id'] ?? 0))) }}';</script><script src="js/shoutbox.js" type="text/javascript"></script><link rel="stylesheet" href="styles/shoutbox.css" type="text/css">
+<script src="js/curtain_imageresizer.js" type="text/javascript"></script><script nonce="{{ $cspNonce ?? '' }}">var SHOUT_CSRF = '{{ htmlspecialchars(\App\Support\Shoutbox::csrfToken((int) ($CURUSER['id'] ?? 0))) }}';</script><script src="js/shoutbox.js" type="text/javascript"></script><link rel="stylesheet" href="styles/shoutbox.css" type="text/css">
 {!! \App\Support\Style::addiCodeWithContext() !!}
 @php
     $startcountdown = 'startcountdown('.$refresh.');shoutboxInitSSE('.htmlspecialchars(json_encode($where, JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8').','.$lastId.');shoutAttachToggleHandler();';
 @endphp
-<script type="text/javascript">
+<script type="text/javascript" nonce="{{ $cspNonce ?? '' }}">
 //<![CDATA[
 var t;
 function startcountdown(time)

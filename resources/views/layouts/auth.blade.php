@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
     <title>@yield('title', $siteName ?? config('app.name'))</title>
-    <style>
+    <style nonce="{{ $cspNonce ?? '' }}">
         body { font-family: Arial, Helvetica, sans-serif; background: #f5f5f5; margin: 0; padding: 0; }
         .container { max-width: 600px; margin: 2em auto; background: #fff; border: 1px solid #ccc; padding: 1em; }
         h1 { text-align: center; font-size: 1.4em; }

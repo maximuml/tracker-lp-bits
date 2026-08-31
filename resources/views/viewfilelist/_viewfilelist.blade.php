@@ -49,7 +49,7 @@ if (! function_exists('viewfilelist_render_badge')) {
 }
 
 if (isset($CURUSER)) {
-    $css = '<style>
+    $css = '<style nonce="'.e($cspNonce ?? '').'">
 .fileicon { display:inline-block; box-sizing:border-box; min-width:38px; padding:1px 5px; margin-right:6px; border-radius:3px; font:10px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-weight:bold; letter-spacing:.3px; color:#fff; text-align:center; vertical-align:1px; text-transform:uppercase; }
 .fileicon.fi-video    { background:#3498db; }
 .fileicon.fi-audio    { background:#27ae60; }

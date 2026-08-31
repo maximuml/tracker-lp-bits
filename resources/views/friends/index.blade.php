@@ -29,7 +29,7 @@ $title = $title ?? (($lang_friends['head_personal_lists_for'] ?? 'Personal lists
     @foreach ($friendsList as $friend)
         @php
             $friendId = (int) ($friend['id'] ?? 0);
-            $friendTitle = (string) ($friend['title'] ?? '');
+            $friendTitle = htmlspecialchars((string) ($friend['title'] ?? ''), ENT_QUOTES, 'UTF-8');
             $lastAccess = (string) ($friend['last_access'] ?? '');
             $avatar = ($CURUSER['avatars'] ?? '') === 'yes' ? htmlspecialchars((string) ($friend['avatar'] ?? '')) : '';
             if (! $avatar) {
@@ -37,8 +37,8 @@ $title = $title ?? (($lang_friends['head_personal_lists_for'] ?? 'Personal lists
             }
             $usernameHtml = $userDisplayMap[$friendId] ?? \App\Support\UserDisplay::username($friendId);
             $body1 = $usernameHtml." ($friendTitle)<br /><br />".($lang_friends['text_last_seen_on'] ?? 'Last seen on ').\App\Support\Time::format($lastAccess, true, false);
-            $body2 = "<a href=friends.php?id=$userid&action=delete&type=friend&targetid=$friendId>".($lang_friends['text_remove_from_friends'] ?? 'Remove from friends').'</a>'.
-                "<br /><br /><a href=sendmessage.php?receiver=$friendId>".($lang_friends['text_send_pm'] ?? 'Send PM').'</a>';
+            $body2 = "<a href=friends.php?id=$userid&action=delete&type=friend&targetid=$friendId>".htmlspecialchars($lang_friends['text_remove_from_friends'] ?? 'Remove from friends', ENT_QUOTES, 'UTF-8').'</a>'.
+                "<br /><br /><a href=sendmessage.php?receiver=$friendId>".htmlspecialchars($lang_friends['text_send_pm'] ?? 'Send PM', ENT_QUOTES, 'UTF-8').'</a>';
         @endphp
         @if ($i % 2 == 0)
             <table width=100% style='padding: 0px'><tr><td class=bottom style='padding: 5px' width=50% align=center>

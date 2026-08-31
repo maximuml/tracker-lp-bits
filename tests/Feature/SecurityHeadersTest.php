@@ -21,4 +21,18 @@ final class SecurityHeadersTest extends TestCase
 
         $response->assertHeader('X-Content-Type-Options', 'nosniff');
     }
+
+    public function test_csp_header_contains_nonce_and_no_unsafe_inline(): void
+    {
+        $response = $this->get('/login');
+
+        $csp = $response->headers->get('Content-Security-Policy');
+        $this->assertNotNull($csp);
+        $this->assertStringContainsString("'nonce-", $csp);
+        $this->assertStringNotContainsString("'unsafe-inline'", $csp);
+        $this->assertStringContainsString("object-src 'none'", $csp);
+        $this->assertStringContainsString('https://challenges.cloudflare.com', $csp);
+        $this->assertStringContainsString('https://fonts.googleapis.com', $csp);
+        $this->assertStringContainsString('https://www.paypal.com', $csp);
+    }
 }

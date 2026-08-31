@@ -24,7 +24,7 @@ $title = $title ?? ($pollid > 0
 
 <form method="post" action="makepoll.php">
 @csrf
-<style type="text/css">
+<style type="text/css" nonce="{{ $cspNonce ?? '' }}">
 input.mp { width: 450px; }
 </style>
 <table border=1 cellspacing=0 cellpadding=5>

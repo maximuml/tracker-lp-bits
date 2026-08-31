@@ -57,11 +57,13 @@ class AppServiceProvider extends ServiceProvider
             DB::connection(config('database.default'))->enableQueryLog();
         }
 
-        // Strict models: catch lazy loading, mass assignment gaps, and
-        // silently discarded attributes in all non-production environments.
+        // Strict models: catch lazy loading and silently discarded attributes
+        // in non-production. shouldBeStrict() (which also enables
+        // preventAccessingMissingAttributes) is intentionally not enabled
+        // because legacy code accesses virtual properties not declared as
+        // accessors (e.g. Poll::options before migration, dynamic columns).
         Model::preventLazyLoading(! app()->isProduction());
         Model::preventSilentlyDiscardingAttributes(! app()->isProduction());
-        Model::shouldBeStrict(! app()->isProduction());
         $forceScheme = strtolower((string) Env::get('FORCE_SCHEME', ''));
         if (app()->environment('production') && in_array($forceScheme, ['https', 'http'], true)) {
             URL::forceScheme($forceScheme);

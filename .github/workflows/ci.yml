@@ -129,6 +129,10 @@ jobs:
           done
           nc -z 127.0.0.1 3306 || { echo "MySQL did not become ready in time"; exit 1; }
           php artisan migrate:fresh --seed --force
+          # Create isolated test database (phpunit.xml uses nexusphp_testing)
+          # to prevent tests from truncating tables in the seed database.
+          mysql -h 127.0.0.1 -u root -proot -e "CREATE DATABASE IF NOT EXISTS nexusphp_testing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; GRANT ALL PRIVILEGES ON nexusphp_testing.* TO 'nexusphp'@'%'; FLUSH PRIVILEGES;"
+          mysqldump -h 127.0.0.1 -u root -proot --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users | mysql -h 127.0.0.1 -u root -proot nexusphp_testing
 
       - name: Run PHPUnit unit tests
         run: vendor/bin/phpunit --testsuite Unit --no-coverage

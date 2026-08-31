@@ -52,8 +52,8 @@ docker compose exec -T php vendor/bin/phpstan analyse --no-progress --memory-lim
 docker compose exec -T php vendor/bin/phpstan analyse -c phpstan.level7.neon --no-progress --memory-limit=2G
 docker compose exec -T php vendor/bin/phpstan analyse -c phpstan.level8.neon --no-progress --memory-limit=2G
 
-# Tests
-docker compose exec -T redis redis-cli FLUSHDB
+# Tests (uses isolated nexusphp_testing DB — never truncates dev tables)
+docker compose exec -T redis redis-cli -a "${REDIS_PASSWORD}" FLUSHDB
 docker compose exec -T php vendor/bin/phpunit --no-coverage
 
 # Security audit

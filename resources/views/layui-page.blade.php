@@ -5,7 +5,7 @@
     <link rel="stylesheet" href="/styles/sprites.css">
     <link rel="stylesheet" href="/vendor/layui/css/layui.css">
     @stack('css')
-    <script type="text/javascript" src="/js/jquery-1.12.4.min.js"></script>
+    <script type="text/javascript" src="/js/jquery-3.7.1.min.js"></script>
     <script type="text/javascript" src="/js/csrf.js"></script>
     <script type="text/javascript" src="/vendor/layui/layui.js"></script>
     @stack('scripts')

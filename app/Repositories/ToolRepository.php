@@ -190,6 +190,26 @@ class ToolRepository extends BaseRepository
         }
         File::delete($backupWeb['filename']);
         File::delete($backupDatabase['filename']);
+
+        // Optional GPG encryption of the backup archive
+        $gpgRecipient = SiteConfig::current()->backup->gpgRecipient();
+        if ($gpgRecipient !== '' && Environment::commandExists('gpg')) {
+            $encryptedFile = $filename.'.gpg';
+            $gpgCommand = sprintf(
+                'gpg --batch --yes --trust-model always --recipient %s --encrypt %s 2>&1',
+                escapeshellarg($gpgRecipient),
+                escapeshellarg($filename)
+            );
+            $gpgResult = exec($gpgCommand, $gpgOutput, $gpgCode);
+            Logger::writeWithContext((string) sprintf('GPG encrypt: command=%s, code=%s, output=%s', $gpgCommand, $gpgCode, json_encode($gpgOutput)), (string) 'info', (bool) false);
+            if ($gpgCode === 0 && file_exists($encryptedFile)) {
+                File::delete($filename);
+                $filename = $encryptedFile;
+            } else {
+                throw new \RuntimeException('GPG encryption failed: '.json_encode($gpgOutput));
+            }
+        }
+
         if (! $transfer) {
             return compact('result_code', 'filename');
         }
@@ -412,7 +432,7 @@ class ToolRepository extends BaseRepository
         $log = '[SEND_MAIL]';
         $factory = new EsmtpTransportFactory;
         $smtpConfig = SiteConfig::fromDb()->smtp;
-        Logger::writeWithContext((string) ("{$log}, to: {$to}, subject: {$subject}, body: {$body}, smtp: ".json_encode($smtpConfig->toArray())), (string) 'info', (bool) false);
+        Logger::writeWithContext((string) ("{$log}, to: {$to}, subject: {$subject}, smtp_host: {$smtpConfig->address()}:{$smtpConfig->port()}, encryption: ".($smtpConfig->encryption() ?? 'none')), (string) 'info', (bool) false);
         $encryption = $smtpConfig->encryption();
         if ($encryption !== null && ! in_array($encryption, ['ssl', 'tls'])) {
             $encryption = null;
@@ -429,7 +449,7 @@ class ToolRepository extends BaseRepository
             $accountName,
             $accountPassword,
             $port,
-            ['verify_peer' => false]
+            ['verify_peer' => (bool) config('mail.verify_peer', true), 'verify_peer_name' => (bool) config('mail.verify_peer', true), 'allow_self_signed' => false]
         ));
 
         // Create the Mailer using your created Transport

@@ -88,7 +88,11 @@ server {
     }
 
     # Static attachments outside the public root (matches attachment.savedirectory = ./attachments)
+    # Marked `internal` so files are only served via X-Accel-Redirect from the
+    # authenticated PHP controller (getattachment.php), preventing direct
+    # unauthorised access by guessing the URL.
     location /attachments/ {
+        internal;
         alias /var/www/html/attachments/;
     }
 }

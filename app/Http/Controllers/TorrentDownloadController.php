@@ -17,6 +17,7 @@ use App\Support\Json;
 use App\Support\Logger;
 use App\Support\Network;
 use App\Support\Path;
+use App\Support\Security\PasskeyGenerator;
 use App\Support\Time;
 use App\Support\Tracker;
 use App\Support\Url;
@@ -102,7 +103,7 @@ class TorrentDownloadController extends LegacyController
         Gate::forUser($user)->authorize('download', $torrent);
 
         if (strlen((string) $user->passkey) != 32) {
-            $passkey = md5($user->username.date('Y-m-d H:i:s').$user->passhash);
+            $passkey = app(PasskeyGenerator::class)->generate();
             User::query()->where('id', $user->id)->update(['passkey' => $passkey]);
             $user->passkey = $passkey;
         }

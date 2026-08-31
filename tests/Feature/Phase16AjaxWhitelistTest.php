@@ -25,7 +25,7 @@ final class Phase16AjaxWhitelistTest extends TestCase
     {
         // getToastNotifications is in the whitelist and requires login
         $user = User::factory()->create();
-        $response = $this->withNexusCookie($user)->get('/ajax?action=getToastNotifications');
+        $response = $this->withNexusCookie($user)->post('/ajax', ['action' => 'getToastNotifications']);
 
         // Should not be a "hacking attempt" rejection (which returns 200
         // with ret=1). The key assertion is that the action is dispatched,
@@ -40,7 +40,7 @@ final class Phase16AjaxWhitelistTest extends TestCase
     public function test_non_whitelisted_action_is_rejected(): void
     {
         $user = User::factory()->create();
-        $response = $this->withNexusCookie($user)->get('/ajax?action=__construct');
+        $response = $this->withNexusCookie($user)->post('/ajax', ['action' => '__construct']);
 
         $response->assertOk();
         $response->assertJsonPath('ret', 1);
@@ -51,7 +51,7 @@ final class Phase16AjaxWhitelistTest extends TestCase
     public function test_unknown_action_is_rejected(): void
     {
         $user = User::factory()->create();
-        $response = $this->withNexusCookie($user)->get('/ajax?action=doesNotExist');
+        $response = $this->withNexusCookie($user)->post('/ajax', ['action' => 'doesNotExist']);
 
         $response->assertOk();
         $response->assertJsonPath('ret', 1);
@@ -62,7 +62,7 @@ final class Phase16AjaxWhitelistTest extends TestCase
     public function test_empty_action_is_rejected(): void
     {
         $user = User::factory()->create();
-        $response = $this->withNexusCookie($user)->get('/ajax?action=');
+        $response = $this->withNexusCookie($user)->post('/ajax', ['action' => '']);
 
         $response->assertOk();
         $response->assertJsonPath('ret', 1);

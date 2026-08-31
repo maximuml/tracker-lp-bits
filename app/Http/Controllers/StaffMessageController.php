@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Support\Cache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
+use App\Support\Http\SafeReturnUrl;
 use App\Support\UserDisplay;
 use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;
@@ -158,7 +159,7 @@ class StaffMessageController extends LegacyController
 
         $returnto = (string) request()->post('returnto');
         if ($returnto !== '') {
-            return redirect($returnto);
+            return redirect(SafeReturnUrl::filter($returnto));
         }
 
         return $this->legacyPage($request, 'takecontact', true, [

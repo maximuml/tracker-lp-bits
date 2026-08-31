@@ -6,6 +6,13 @@ on:
   pull_request:
     branches: ["php8"]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: octane-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   octane-smoke-test:
     name: Octane compatibility smoke test
@@ -31,17 +38,17 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
         with:
           php-version: '8.5'
           extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, pdo_mysql, redis, sqlite3, xml, zip, pcntl, sockets, posix
           coverage: none
 
       - name: Cache Composer dependencies
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: ~/.composer/cache
           key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
@@ -66,6 +73,7 @@ jobs:
           sed -i 's/^SESSION_DRIVER=.*/SESSION_DRIVER=redis/' .env
           sed -i 's/^DB_HOST=.*/DB_HOST=127.0.0.1/' .env
           sed -i 's/^REDIS_HOST=.*/REDIS_HOST=127.0.0.1/' .env
+          sed -i 's/^REDIS_PASSWORD=.*/REDIS_PASSWORD=/' .env
           sed -i 's|^MEILISEARCH_HOST=.*|MEILISEARCH_HOST=127.0.0.1|' .env
           sed -i 's/^MEILISEARCH_ENABLED=.*/MEILISEARCH_ENABLED=no/' .env
           sed -i 's|^LOG_FILE=.*|LOG_FILE=php://stderr|' .env
@@ -81,6 +89,10 @@ jobs:
           done
           nc -z 127.0.0.1 3306 || { echo "MySQL did not become ready in time"; exit 1; }
           php artisan migrate:fresh --seed --force
+          # Create isolated test database (phpunit.xml uses nexusphp_testing)
+          mysql -h 127.0.0.1 -u root -proot -e "CREATE DATABASE IF NOT EXISTS nexusphp_testing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; GRANT ALL PRIVILEGES ON nexusphp_testing.* TO 'nexusphp'@'%'; FLUSH PRIVILEGES;"
+          mysqldump -h 127.0.0.1 -u root -proot --no-data --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp | mysql -h 127.0.0.1 -u root -proot nexusphp_testing
+          mysqldump -h 127.0.0.1 -u root -proot --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users | mysql -h 127.0.0.1 -u root -proot nexusphp_testing
 
       - name: Cache Laravel bootstrap files
         run: |
@@ -144,4 +156,4 @@ jobs:
           kill $(pgrep -f "rr serve") 2>/dev/null || true
 
       - name: Run unit tests
-        run: vendor/bin/phpunit --testsuite Unit --no-coverage
+        run: DB_DATABASE=nexusphp_testing vendor/bin/phpunit --testsuite Unit --no-coverage

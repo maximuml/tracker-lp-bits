@@ -52,9 +52,18 @@ class AppServiceProvider extends ServiceProvider
         if (class_exists(Sanctum::class)) {
             Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
         }
-        DB::connection(config('database.default'))->enableQueryLog();
+        // Query log only in non-production (avoids memory leak in prod)
+        if (! app()->isProduction()) {
+            DB::connection(config('database.default'))->enableQueryLog();
+        }
 
+        // Strict models: catch lazy loading and silently discarded attributes
+        // in non-production. shouldBeStrict() (which also enables
+        // preventAccessingMissingAttributes) is intentionally not enabled
+        // because legacy code accesses virtual properties not declared as
+        // accessors (e.g. Poll::options before migration, dynamic columns).
         Model::preventLazyLoading(! app()->isProduction());
+        Model::preventSilentlyDiscardingAttributes(! app()->isProduction());
         $forceScheme = strtolower((string) Env::get('FORCE_SCHEME', ''));
         if (app()->environment('production') && in_array($forceScheme, ['https', 'http'], true)) {
             URL::forceScheme($forceScheme);

@@ -30,6 +30,14 @@ final class OfferService
     {
         $action = $this->action($request);
 
+        if ($action === '') {
+            return null;
+        }
+
+        if (! $request->isMethod('post')) {
+            return redirect('/offers.php');
+        }
+
         if ($action === 'new_offer') {
             return $this->handleCreate($request);
         }

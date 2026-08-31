@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\RegistrationController;
 use App\Http\Controllers\Auth\WebController as AuthWebController;
 use App\Http\Controllers\AuthenticateController;
 use App\Http\Controllers\ForumController;
+use App\Http\Controllers\HealthController;
 use App\Http\Controllers\TokenController;
 use App\Http\Controllers\ToolController;
 use App\Http\Controllers\TorrentController;
@@ -36,9 +37,9 @@ Route::get('/nexus', function () {
     return redirect('index.php');
 });
 
-Route::get('/health', function () {
-    return response()->json(['status' => 'ok']);
-})->name('health');
+Route::get('/health/live', [HealthController::class, 'live'])->name('health.live');
+Route::get('/health/ready', [HealthController::class, 'ready'])->name('health.ready');
+Route::get('/health', [HealthController::class, 'live'])->name('health');
 
 Route::get('/login', [AuthWebController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthWebController::class, 'login'])->middleware('throttle:login');

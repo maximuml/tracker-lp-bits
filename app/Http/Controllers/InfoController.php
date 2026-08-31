@@ -114,6 +114,9 @@ class InfoController extends LegacyController
 
         $delete = (int) $request->input('delete', 0);
         if ($currentClass >= (defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0) && $delete > 0) {
+            if (! $request->isMethod('post')) {
+                return $this->legacyAbortResponse('Error', 'Permission denied.');
+            }
             $name = $this->bitbucketService->getBitbucketName($delete);
             $ok = $this->bitbucketService->deleteBitbucket($delete, $bucketPath);
             if (! $ok && $name !== null) {

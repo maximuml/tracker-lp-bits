@@ -17,6 +17,17 @@ use App\Support\Cache\LegacyRedisCache;
 final class Html
 {
     /**
+     * Escape a string for safe output inside an HTML attribute value
+     * (e.g. `value="..."`). Uses ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE
+     * so both single and double quotes are encoded and invalid UTF-8
+     * is replaced rather than passed through.
+     */
+    public static function escapeAttr(string $value): string
+    {
+        return htmlspecialchars($value, ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE, 'UTF-8');
+    }
+
+    /**
      * Build a `<tr><td>…</td>…</tr>\n` row. Legacy `EchoRow($class, ...$cells)`
      * returns the bare `<tr></tr>` (with no trailing newline) when no
      * cells are supplied; that bare-row contract is preserved.

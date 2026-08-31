@@ -15,4 +15,13 @@ final class BackupConfig extends Config
     {
         return $this->int('retention_count', $default);
     }
+
+    /**
+     * GPG recipient (email or key ID) for encrypting backup archives.
+     * When empty, backups are stored unencrypted (not recommended for production).
+     */
+    public function gpgRecipient(): string
+    {
+        return (string) config('backup.gpg_recipient', '');
+    }
 }

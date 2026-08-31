@@ -13,6 +13,7 @@ use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Forum;
 use App\Support\Globals;
+use App\Support\Http\SafeReturnUrl;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Palette;
@@ -105,7 +106,7 @@ final class ForumService
             return redirect('/forums.php'.$path);
         }
 
-        return redirect($path);
+        return redirect(SafeReturnUrl::filter($path, '/forums.php'));
     }
 
     private function handlePost(Request $request): RedirectResponse

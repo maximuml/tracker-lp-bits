@@ -9,7 +9,6 @@ use App\Http\Resources\CommentResource;
 use App\Models\Comment;
 use App\Repositories\CommentRepository;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
 class CommentController extends Controller
@@ -76,41 +75,5 @@ class CommentController extends Controller
         $resource = new CommentResource($comment);
 
         return $this->success($resource);
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  mixed  $id
-     */
-    public function show($id): Response
-    {
-        //
-
-        return new Response('');
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  mixed  $id
-     */
-    public function update(Request $request, $id): Response
-    {
-        //
-
-        return new Response('');
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  mixed  $id
-     */
-    public function destroy($id): Response
-    {
-        //
-
-        return new Response('');
     }
 }

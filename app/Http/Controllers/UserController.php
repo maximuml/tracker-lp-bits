@@ -90,7 +90,7 @@ class UserController extends Controller
     {
         //
 
-        return new Response('');
+        abort(501, 'Not implemented');
     }
 
     /**
@@ -102,7 +102,7 @@ class UserController extends Controller
     {
         //
 
-        return new Response('');
+        abort(501, 'Not implemented');
     }
 
     /**

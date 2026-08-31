@@ -31,6 +31,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Models\Traits\NexusActivityLogTrait;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
@@ -55,5 +56,25 @@ class Poll extends NexusModel
     public function answers(): HasMany
     {
         return $this->hasMany(PollAnswer::class, 'pollid');
+    }
+
+    /**
+     * Collect all non-empty option columns into a single array.
+     *
+     * @return Attribute<list<non-empty-string>, never>
+     */
+    protected function options(): Attribute
+    {
+        return Attribute::get(function (): array {
+            $options = [];
+            for ($i = 0; $i <= self::MAX_OPTION_INDEX; $i++) {
+                $value = $this->{"option{$i}"};
+                if ($value !== null && $value !== '') {
+                    $options[] = $value;
+                }
+            }
+
+            return $options;
+        });
     }
 }

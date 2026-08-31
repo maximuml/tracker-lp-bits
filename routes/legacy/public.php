@@ -20,7 +20,7 @@ Route::match(['get', 'post'], '/faq', [FaqController::class, 'faq'])->name('faq.
 Route::match(['get', 'post'], '/donate', [InfoController::class, 'donate'])->name('donate.legacy');
 Route::match(['get', 'post'], '/getusertorrentlistajax', [TorrentAjaxController::class, 'getUserTorrentListAjax'])->name('getusertorrentlistajax.legacy');
 Route::match(['get', 'post'], '/searchsuggest', [TorrentAjaxController::class, 'searchSuggest'])->name('searchsuggest.legacy');
-Route::match(['get', 'post'], '/ajax', [UtilityController::class, 'ajax'])->middleware('throttle:ajax')->name('ajax.legacy');
+Route::post('/ajax', [UtilityController::class, 'ajax'])->middleware(['throttle:ajax', 'reject.get.mutations'])->name('ajax.legacy');
 
 Route::match(['get', 'post'], '/image', [UtilityController::class, 'image'])->name('image.legacy');
 Route::match(['get', 'post'], '/shoutbox_sse', [ShoutboxController::class, 'shoutboxSse'])->name('shoutbox_sse.legacy');
@@ -38,8 +38,8 @@ Route::match(['get', 'post'], '/email-gateway', [TorrentDownloadController::clas
 Route::match(['get', 'post'], '/ok', [UtilityController::class, 'ok'])->name('ok.legacy');
 
 Route::match(['get', 'post'], '/complains', [SupportController::class, 'complains'])->name('complains.legacy');
-Route::match(['get', 'post'], '/shoutbox', [ShoutboxController::class, 'shoutbox'])->middleware('throttle:shoutbox')->name('shoutbox.legacy');
+Route::post('/shoutbox', [ShoutboxController::class, 'shoutbox'])->middleware(['throttle:shoutbox', 'reject.get.mutations'])->name('shoutbox.legacy');
 
-Route::match(['get', 'post'], '/bookmark', [TorrentBookmarkController::class, 'bookmark'])->name('bookmark.legacy');
+Route::post('/bookmark', [TorrentBookmarkController::class, 'bookmark'])->middleware('reject.get.mutations')->name('bookmark.legacy');
 Route::match(['get', 'post'], '/viewfilelist', [TorrentAjaxController::class, 'viewFileList'])->name('viewfilelist.legacy');
 Route::match(['get', 'post'], '/viewpeerlist', [TorrentAjaxController::class, 'viewPeerList'])->name('viewpeerlist.legacy');

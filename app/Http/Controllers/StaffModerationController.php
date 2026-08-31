@@ -19,6 +19,7 @@ use App\Support\Http;
 use App\Support\Locale;
 use App\Support\Log;
 use App\Support\Network;
+use App\Support\Security\PasskeyGenerator;
 use App\Support\Url;
 use App\Support\User as SupportUser;
 use App\Support\UserClass;
@@ -275,7 +276,7 @@ class StaffModerationController extends LegacyController
         }
 
         if (request()->post('resetkey') !== null && request()->post('resetkey') === 'yes') {
-            $updateset['passkey'] = md5($arr['username'].date('Y-m-d H:i:s').$arr['passhash']);
+            $updateset['passkey'] = app(PasskeyGenerator::class)->generate();
         }
 
         if ($forumpost !== $curForumpost) {
@@ -400,6 +401,9 @@ class StaffModerationController extends LegacyController
         }
 
         if ($act === 'del') {
+            if (! $request->isMethod('post')) {
+                return $this->legacyAbortResponse('Error', 'Permission denied.');
+            }
             $id = (int) (request()->query('id') ?? 0);
             $sure = (int) (request()->query('sure') ?? 0);
             if (! $sure) {

@@ -34,10 +34,18 @@ class FriendsController extends LegacyController
         $action = (string) ($request->input('action') ?? '');
 
         if ($action === 'add') {
+            if (! $request->isMethod('post')) {
+                return $this->legacyAbortResponse($langFriends['std_error'] ?? 'Error', $langFriends['std_permission_denied'] ?? 'Permission denied.');
+            }
+
             return $this->handleAdd($request, $userid, $langFriends);
         }
 
         if ($action === 'delete') {
+            if (! $request->isMethod('post')) {
+                return $this->legacyAbortResponse($langFriends['std_error'] ?? 'Error', $langFriends['std_permission_denied'] ?? 'Permission denied.');
+            }
+
             return $this->handleDelete($request, $userid, $langFriends);
         }
 

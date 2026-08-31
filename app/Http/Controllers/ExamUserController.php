@@ -68,7 +68,7 @@ class ExamUserController extends Controller
     public function show($id): array
     {
 
-        return [];
+        abort(501, 'Not implemented');
     }
 
     /**
@@ -80,7 +80,7 @@ class ExamUserController extends Controller
     public function update(Request $request, $id): array
     {
 
-        return [];
+        abort(501, 'Not implemented');
     }
 
     /**

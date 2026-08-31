@@ -40,7 +40,7 @@ class SnatchController extends Controller
     {
         //
 
-        return new Response('');
+        abort(501, 'Not implemented');
     }
 
     /**
@@ -52,7 +52,7 @@ class SnatchController extends Controller
     {
         //
 
-        return new Response('');
+        abort(501, 'Not implemented');
     }
 
     /**
@@ -64,7 +64,7 @@ class SnatchController extends Controller
     {
         //
 
-        return new Response('');
+        abort(501, 'Not implemented');
     }
 
     /**
@@ -76,6 +76,6 @@ class SnatchController extends Controller
     {
         //
 
-        return new Response('');
+        abort(501, 'Not implemented');
     }
 }

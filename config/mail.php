@@ -2,6 +2,10 @@
 
 return [
 
+    // SMTP TLS peer verification — set to false only for self-signed certs
+    // in trusted internal networks. Defaults to true (secure).
+    'verify_peer' => env('MAIL_VERIFY_PEER', true),
+
     /*
     |--------------------------------------------------------------------------
     | Default Mailer

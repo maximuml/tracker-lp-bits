@@ -9,8 +9,6 @@ use App\Http\Resources\BookmarkResource;
 use App\Models\User;
 use App\Repositories\BookmarkRepository;
 use App\Support\Locale;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
 class BookmarkController extends Controller
@@ -21,8 +19,6 @@ class BookmarkController extends Controller
     {
         $this->repository = $repository;
     }
-
-    public function index(Request $request): void {}
 
     /**
      * Store a newly created resource in storage.
@@ -39,29 +35,6 @@ class BookmarkController extends Controller
         $resource = new BookmarkResource($result);
 
         return $this->success($resource, Locale::trans('bookmark.actions.store_success', [], null));
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  mixed  $id
-     */
-    public function show($id): Response
-    {
-
-        return new Response('');
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  mixed  $id
-     */
-    public function update(Request $request, $id): Response
-    {
-        //
-
-        return new Response('');
     }
 
     /**

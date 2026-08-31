@@ -13,7 +13,7 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8 */;
+/*!40101 SET NAMES utf8mb4 */;
 
 --
 -- Database: `nexus20100517`
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS `adminpanel` (
   `url` varchar(255) NOT NULL DEFAULT '',
   `info` varchar(255) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=12 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=12 ;
 
 --
 -- Dumping data for table `adminpanel`
@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS `advertisements` (
   `starttime` datetime NOT NULL,
   `endtime` datetime NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `advertisements`
@@ -87,7 +87,7 @@ CREATE TABLE IF NOT EXISTS `agent_allowed_exception` (
   `agent` varchar(100) NOT NULL,
   `comment` varchar(200) NOT NULL DEFAULT '',
   KEY `family_id` (`family_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `agent_allowed_exception`
@@ -119,7 +119,7 @@ CREATE TABLE IF NOT EXISTS `agent_allowed_family` (
   `comment` varchar(200) NOT NULL DEFAULT '',
   `hits` mediumint(8) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `agent_allowed_family`
@@ -149,7 +149,7 @@ CREATE TABLE IF NOT EXISTS `attachments` (
   PRIMARY KEY (`id`),
   KEY `pid` (`userid`,`id`),
   KEY `dateline` (`added`,`isimage`,`downloads`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `attachments`
@@ -168,7 +168,7 @@ CREATE TABLE IF NOT EXISTS `audiocodecs` (
   `image` varchar(255) NOT NULL,
   `sort_index` tinyint(3) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC AUTO_INCREMENT=10 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC AUTO_INCREMENT=10 ;
 
 --
 -- Dumping data for table `audiocodecs`
@@ -195,7 +195,7 @@ CREATE TABLE IF NOT EXISTS `avps` (
   `value_i` int(11) NOT NULL DEFAULT '0',
   `value_u` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`arg`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `avps`
@@ -224,7 +224,7 @@ CREATE TABLE IF NOT EXISTS `bans` (
   `last` bigint(20) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `first_last` (`first`,`last`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `bans`
@@ -244,7 +244,7 @@ CREATE TABLE IF NOT EXISTS `bitbucket` (
   `added` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   `public` enum('0','1') NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `bitbucket`
@@ -263,7 +263,7 @@ CREATE TABLE IF NOT EXISTS `blocks` (
   `blockid` mediumint(8) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `userfriend` (`userid`,`blockid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `blocks`
@@ -282,7 +282,7 @@ CREATE TABLE IF NOT EXISTS `bookmarks` (
   `userid` mediumint(8) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `userid_torrentid` (`userid`,`torrentid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `bookmarks`
@@ -304,7 +304,7 @@ CREATE TABLE IF NOT EXISTS `categories` (
   `sort_index` smallint(5) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `mode_sort` (`mode`,`sort_index`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=410 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=410 ;
 
 --
 -- Dumping data for table `categories`
@@ -337,7 +337,7 @@ CREATE TABLE IF NOT EXISTS `caticons` (
   `designer` varchar(50) NOT NULL DEFAULT '',
   `comment` varchar(255) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=5 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=5 ;
 
 --
 -- Dumping data for table `caticons`
@@ -367,7 +367,7 @@ CREATE TABLE IF NOT EXISTS `cheaters` (
   `dealtwith` tinyint(1) NOT NULL DEFAULT '0',
   `comment` varchar(255) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `cheaters`
@@ -387,7 +387,7 @@ CREATE TABLE IF NOT EXISTS `chronicle` (
   `txt` text,
   PRIMARY KEY (`id`),
   KEY `added` (`added`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `chronicle`
@@ -405,7 +405,7 @@ CREATE TABLE IF NOT EXISTS `codecs` (
   `name` varchar(30) NOT NULL,
   `sort_index` tinyint(3) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=10 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=10 ;
 
 --
 -- Dumping data for table `codecs`
@@ -438,7 +438,7 @@ CREATE TABLE IF NOT EXISTS `comments` (
   KEY `user` (`user`),
   KEY `torrent_id` (`torrent`,`id`),
   KEY `offer_id` (`offer`,`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `comments`
@@ -456,7 +456,7 @@ CREATE TABLE IF NOT EXISTS `countries` (
   `name` varchar(50) NOT NULL,
   `flagpic` varchar(255) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=108 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=108 ;
 
 --
 -- Dumping data for table `countries`
@@ -574,7 +574,7 @@ CREATE TABLE IF NOT EXISTS `downloadspeed` (
   `id` tinyint(3) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=19 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=19 ;
 
 --
 -- Dumping data for table `downloadspeed`
@@ -617,7 +617,7 @@ CREATE TABLE IF NOT EXISTS `faq` (
   `categ` smallint(5) unsigned NOT NULL DEFAULT '0',
   `order` smallint(5) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=476 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=476 ;
 
 --
 -- Dumping data for table `faq`
@@ -830,7 +830,7 @@ CREATE TABLE IF NOT EXISTS `files` (
   `size` bigint(20) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `torrent` (`torrent`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `files`
@@ -849,7 +849,7 @@ CREATE TABLE IF NOT EXISTS `forummods` (
   `userid` mediumint(8) unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `forumid` (`forumid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `forummods`
@@ -874,7 +874,7 @@ CREATE TABLE IF NOT EXISTS `forums` (
   `minclasscreate` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `forid` smallint(5) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `forums`
@@ -893,7 +893,7 @@ CREATE TABLE IF NOT EXISTS `friends` (
   `friendid` mediumint(8) unsigned NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `userfriend` (`userid`,`friendid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `friends`
@@ -914,7 +914,7 @@ CREATE TABLE IF NOT EXISTS `fun` (
   `title` varchar(255) NOT NULL DEFAULT '',
   `status` enum('normal','dull','notfunny','funny','veryfunny','banned') NOT NULL DEFAULT 'normal',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `fun`
@@ -935,7 +935,7 @@ CREATE TABLE IF NOT EXISTS `funds` (
   `added` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   `memo` varchar(255) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `funds`
@@ -954,7 +954,7 @@ CREATE TABLE IF NOT EXISTS `funvotes` (
   `added` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   `vote` enum('fun','dull') NOT NULL DEFAULT 'fun',
   PRIMARY KEY (`funid`,`userid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `funvotes`
@@ -975,7 +975,7 @@ CREATE TABLE IF NOT EXISTS `invites` (
   `time_invited` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`id`),
   KEY `hash` (`hash`(3))
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `invites`
@@ -995,7 +995,7 @@ CREATE TABLE IF NOT EXISTS `iplog` (
   `access` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`id`),
   KEY `userid` (`userid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `iplog`
@@ -1012,7 +1012,7 @@ CREATE TABLE IF NOT EXISTS `isp` (
   `id` tinyint(3) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=21 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=21 ;
 
 --
 -- Dumping data for table `isp`
@@ -1043,7 +1043,7 @@ CREATE TABLE IF NOT EXISTS `language` (
   `site_lang_folder` varchar(255) NOT NULL DEFAULT '',
   `trans_state` enum('up-to-date','outdate','incomplete','need-new','unavailable') NOT NULL DEFAULT 'unavailable',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=32 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=32 ;
 
 --
 -- Dumping data for table `language`
@@ -1094,7 +1094,7 @@ CREATE TABLE IF NOT EXISTS `links` (
   `url` varchar(255) NOT NULL,
   `title` varchar(50) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `links`
@@ -1121,7 +1121,7 @@ CREATE TABLE IF NOT EXISTS `locations` (
   `practical_downspeed` int(10) unsigned NOT NULL DEFAULT '10',
   `hit` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `locations`
@@ -1142,7 +1142,7 @@ CREATE TABLE IF NOT EXISTS `loginattempts` (
   `attempts` smallint(5) unsigned NOT NULL DEFAULT '0',
   `type` enum('login','recover') NOT NULL DEFAULT 'login',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `loginattempts`
@@ -1160,7 +1160,7 @@ CREATE TABLE IF NOT EXISTS `media` (
   `name` varchar(30) NOT NULL,
   `sort_index` tinyint(3) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=10 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=10 ;
 
 --
 -- Dumping data for table `media`
@@ -1196,7 +1196,7 @@ CREATE TABLE IF NOT EXISTS `messages` (
   PRIMARY KEY (`id`),
   KEY `receiver` (`receiver`),
   KEY `sender` (`sender`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `messages`
@@ -1215,7 +1215,7 @@ CREATE TABLE IF NOT EXISTS `modpanel` (
   `url` varchar(255) NOT NULL DEFAULT '',
   `info` varchar(255) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1020 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1020 ;
 
 --
 -- Dumping data for table `modpanel`
@@ -1247,7 +1247,7 @@ CREATE TABLE IF NOT EXISTS `news` (
   `notify` enum('yes','no') NOT NULL DEFAULT 'no',
   PRIMARY KEY (`id`),
   KEY `added` (`added`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `news`
@@ -1274,7 +1274,7 @@ CREATE TABLE IF NOT EXISTS `offers` (
   `allowed` enum('allowed','pending','denied') NOT NULL DEFAULT 'pending',
   PRIMARY KEY (`id`),
   KEY `userid` (`userid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `offers`
@@ -1294,7 +1294,7 @@ CREATE TABLE IF NOT EXISTS `offervotes` (
   `vote` enum('yeah','against') NOT NULL DEFAULT 'yeah',
   PRIMARY KEY (`id`),
   KEY `userid` (`userid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `offervotes`
@@ -1314,7 +1314,7 @@ CREATE TABLE IF NOT EXISTS `overforums` (
   `minclassview` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `sort` tinyint(3) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `overforums`
@@ -1350,7 +1350,7 @@ CREATE TABLE IF NOT EXISTS `peers` (
   PRIMARY KEY (`id`),
   KEY `userid` (`userid`),
   KEY `torrent` (`torrent`)
-) ENGINE=MEMORY DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED AUTO_INCREMENT=1 ;
+) ENGINE=MEMORY DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=FIXED AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `peers`
@@ -1369,7 +1369,7 @@ CREATE TABLE IF NOT EXISTS `pmboxes` (
   `boxnumber` tinyint(3) unsigned NOT NULL DEFAULT '2',
   `name` varchar(15) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `pmboxes`
@@ -1391,7 +1391,7 @@ CREATE TABLE IF NOT EXISTS `pollanswers` (
   KEY `pollid` (`pollid`),
   KEY `selection` (`selection`),
   KEY `userid` (`userid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `pollanswers`
@@ -1429,7 +1429,7 @@ CREATE TABLE IF NOT EXISTS `polls` (
   `option18` varchar(40) NOT NULL DEFAULT '',
   `option19` varchar(40) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `polls`
@@ -1456,7 +1456,7 @@ CREATE TABLE IF NOT EXISTS `posts` (
   KEY `topicid_id` (`topicid`,`id`),
   KEY `added` (`added`),
   FULLTEXT KEY `body` (`body`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `posts`
@@ -1474,7 +1474,7 @@ CREATE TABLE IF NOT EXISTS `processings` (
   `name` varchar(30) NOT NULL,
   `sort_index` tinyint(3) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=3 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=3 ;
 
 --
 -- Dumping data for table `processings`
@@ -1496,7 +1496,7 @@ CREATE TABLE IF NOT EXISTS `prolinkclicks` (
   `ip` varchar(64) NOT NULL DEFAULT '',
   `added` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `prolinkclicks`
@@ -1517,7 +1517,7 @@ CREATE TABLE IF NOT EXISTS `readposts` (
   PRIMARY KEY (`id`),
   KEY `topicid` (`topicid`),
   KEY `userid` (`userid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `readposts`
@@ -1536,7 +1536,7 @@ CREATE TABLE IF NOT EXISTS `regimages` (
   `imagestring` varchar(8) NOT NULL DEFAULT '',
   `dateline` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `regimages`
@@ -1559,7 +1559,7 @@ CREATE TABLE IF NOT EXISTS `reports` (
   `dealtby` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `dealtwith` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `reports`
@@ -1578,7 +1578,7 @@ CREATE TABLE IF NOT EXISTS `rules` (
   `title` varchar(255) NOT NULL,
   `text` text,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=56 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=56 ;
 
 --
 -- Dumping data for table `rules`
@@ -1627,7 +1627,7 @@ CREATE TABLE IF NOT EXISTS `schools` (
   `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=101 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=101 ;
 
 --
 -- Dumping data for table `schools`
@@ -1755,7 +1755,7 @@ CREATE TABLE IF NOT EXISTS `searchbox` (
   `catsperrow` smallint(5) unsigned NOT NULL DEFAULT '7',
   `catpadding` smallint(5) unsigned NOT NULL DEFAULT '25',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=6 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=6 ;
 
 --
 -- Dumping data for table `searchbox`
@@ -1783,7 +1783,7 @@ CREATE TABLE IF NOT EXISTS `secondicons` (
   `class_name` varchar(255) DEFAULT NULL,
   `image` varchar(255) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=23 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=23 ;
 
 --
 -- Dumping data for table `secondicons`
@@ -1826,7 +1826,7 @@ CREATE TABLE IF NOT EXISTS `shoutbox` (
   `text` text NOT NULL,
   `type` enum('sb') NOT NULL DEFAULT 'sb',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `shoutbox`
@@ -1846,7 +1846,7 @@ CREATE TABLE IF NOT EXISTS `sitelog` (
   `security_level` enum('normal','mod') NOT NULL DEFAULT 'normal',
   PRIMARY KEY (`id`),
   KEY `added` (`added`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `sitelog`
@@ -1877,7 +1877,7 @@ CREATE TABLE IF NOT EXISTS `snatched` (
   PRIMARY KEY (`id`),
   KEY `torrentid_userid` (`torrentid`,`userid`),
   KEY `userid` (`userid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `snatched`
@@ -1895,7 +1895,7 @@ CREATE TABLE IF NOT EXISTS `sources` (
   `name` varchar(30) NOT NULL,
   `sort_index` tinyint(3) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=7 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=7 ;
 
 --
 -- Dumping data for table `sources`
@@ -1925,7 +1925,7 @@ CREATE TABLE IF NOT EXISTS `staffmessages` (
   `answered` tinyint(1) NOT NULL DEFAULT '0',
   `answer` text,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `staffmessages`
@@ -1943,7 +1943,7 @@ CREATE TABLE IF NOT EXISTS `standards` (
   `name` varchar(30) NOT NULL,
   `sort_index` tinyint(3) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=5 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=5 ;
 
 --
 -- Dumping data for table `standards`
@@ -1969,7 +1969,7 @@ CREATE TABLE IF NOT EXISTS `stylesheets` (
   `designer` varchar(50) NOT NULL DEFAULT '',
   `comment` varchar(255) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=14 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=14 ;
 
 --
 -- Dumping data for table `stylesheets`
@@ -2002,7 +2002,7 @@ CREATE TABLE IF NOT EXISTS `subs` (
   `ext` varchar(10) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
   KEY `torrentid_langid` (`torrent_id`,`lang_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `subs`
@@ -2023,7 +2023,7 @@ CREATE TABLE IF NOT EXISTS `suggest` (
   PRIMARY KEY (`id`),
   KEY `keywords` (`keywords`(4)),
   KEY `adddate` (`adddate`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `suggest`
@@ -2042,7 +2042,7 @@ CREATE TABLE IF NOT EXISTS `sysoppanel` (
   `url` varchar(255) NOT NULL DEFAULT '',
   `info` varchar(255) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=3028 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=3028 ;
 
 --
 -- Dumping data for table `sysoppanel`
@@ -2071,7 +2071,7 @@ CREATE TABLE IF NOT EXISTS `teams` (
   `name` varchar(30) NOT NULL,
   `sort_index` tinyint(3) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC AUTO_INCREMENT=6 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC AUTO_INCREMENT=6 ;
 
 --
 -- Dumping data for table `teams`
@@ -2097,7 +2097,7 @@ CREATE TABLE IF NOT EXISTS `thanks` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `torrentid_id` (`torrentid`,`id`),
   KEY `torrentid_userid` (`torrentid`,`userid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `thanks`
@@ -2126,7 +2126,7 @@ CREATE TABLE IF NOT EXISTS `topics` (
   KEY `subject` (`subject`),
   KEY `forumid_lastpost` (`forumid`,`lastpost`),
   KEY `forumid_sticky_lastpost` (`forumid`,`sticky`,`lastpost`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `topics`
@@ -2188,7 +2188,7 @@ CREATE TABLE IF NOT EXISTS `torrents` (
   KEY `category_visible_banned` (`category`,`visible`,`banned`),
   KEY `visible_banned_pos_id` (`visible`,`banned`,`pos_state`,`id`),
   FULLTEXT KEY `name` (`name`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `torrents`
@@ -2203,7 +2203,7 @@ CREATE TABLE IF NOT EXISTS `torrents` (
 
 CREATE TABLE IF NOT EXISTS `torrents_state` (
   `global_sp_state` tinyint(3) unsigned NOT NULL DEFAULT '1'
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `torrents_state`
@@ -2222,7 +2222,7 @@ CREATE TABLE IF NOT EXISTS `uploadspeed` (
   `id` tinyint(3) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=19 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=19 ;
 
 --
 -- Dumping data for table `uploadspeed`
@@ -2381,7 +2381,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   KEY `cheat` (`cheat`),
   KEY `class` (`class`),
   KEY `passkey` (`passkey`(8))
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `users`
@@ -2396,7 +2396,7 @@ CREATE TABLE IF NOT EXISTS `adclicks` (
   `userid` int(11) unsigned DEFAULT NULL,
   `added` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 -- 2010-06-15
 ALTER TABLE `torrents` ADD `promotion_time_type` TINYINT UNSIGNED NOT NULL DEFAULT '0' AFTER `sp_state` ;
 ALTER TABLE `torrents` ADD `promotion_until` DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00' AFTER `promotion_time_type` ;

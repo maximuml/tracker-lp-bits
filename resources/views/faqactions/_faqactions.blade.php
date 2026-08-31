@@ -10,8 +10,8 @@ if ($mode === 'edit'):
             @csrf
             <table border="1" cellspacing="0" cellpadding="10" align="center">
             <tr><td>ID:</td><td><?php echo (int) $arr['id']; ?> <input type="hidden" name="id" value="<?php echo (int) $arr['id']; ?>" /></td></tr>
-            <tr><td>Question:</td><td><input style="width: 600px;" type="text" name="question" value="<?php echo $arr['question']; ?>" /></td></tr>
-            <tr><td style="vertical-align: top;">Answer:</td><td><textarea rows=20 style="width: 600px; height=600px;" name="answer"><?php echo $arr['answer']; ?></textarea></td></tr>
+            <tr><td>Question:</td><td><input style="width: 600px;" type="text" name="question" value="<?php echo htmlspecialchars((string) $arr['question'], ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE, 'UTF-8'); ?>" /></td></tr>
+            <tr><td style="vertical-align: top;">Answer:</td><td><textarea rows=20 style="width: 600px; height=600px;" name="answer"><?php echo htmlspecialchars((string) $arr['answer'], ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE, 'UTF-8'); ?></textarea></td></tr>
             <tr><td>Status:</td><td>
                 <select name="flag" style="width: 110px;">
                     <option value="0" style="color: #FF0000;"<?php echo $arr['flag'] == 0 ? ' selected="selected"' : ''; ?>>Hidden</option>
@@ -36,7 +36,7 @@ if ($mode === 'edit'):
             <table border="1" cellspacing="0" cellpadding="10" align="center">
             <tr><td>ID:</td><td><?php echo (int) $arr['id']; ?> <input type="hidden" name="id" value="<?php echo (int) $arr['id']; ?>" /></td></tr>
             <tr><td>Language:</td><td><?php echo htmlspecialchars((string) $arr['lang_name']); ?></td></tr>
-            <tr><td>Title:</td><td><input style="width: 300px;" type="text" name="title" value="<?php echo $arr['question']; ?>" /></td></tr>
+            <tr><td>Title:</td><td><input style="width: 300px;" type="text" name="title" value="<?php echo htmlspecialchars((string) $arr['question'], ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE, 'UTF-8'); ?>" /></td></tr>
             <tr><td>Status:</td><td>
                 <select name="flag" style="width: 110px;">
                     <option value="0" style="color: #FF0000;"<?php echo $arr['flag'] == 0 ? ' selected="selected"' : ''; ?>>Hidden</option>

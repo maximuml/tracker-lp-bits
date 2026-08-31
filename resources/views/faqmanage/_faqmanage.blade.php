@@ -16,7 +16,7 @@ foreach ($faqCateg as $lang => $temp2) {
             echo '<option value="' . $n . '"' . $sel . '>' . $n . '</option>';
         }
         $status = ($temp['flag'] == "0") ? '<font color="red">Hidden</font>' : 'Normal';
-        echo '</select></td><td align="center" width="40px">&nbsp;</td><td><b>' . $temp['title'] . '</b></td><td align="center" width="60px">' . $temp['lang_name'] . '</td><td align="center" width="60px">' . $status . '</td><td align="center" width="60px"><a href="faqactions.php?action=edit&id=' . (int) $temp['id'] . '">Edit</a> <a href="faqactions.php?action=delete&id=' . (int) $temp['id'] . '">Delete</a></td></tr>' . "\n";
+        echo '</select></td><td align="center" width="40px">&nbsp;</td><td><b>' . htmlspecialchars((string) $temp['title'], ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE, 'UTF-8') . '</b></td><td align="center" width="60px">' . htmlspecialchars((string) $temp['lang_name'], ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE, 'UTF-8') . '</td><td align="center" width="60px">' . $status . '</td><td align="center" width="60px"><a href="faqactions.php?action=edit&id=' . (int) $temp['id'] . '">Edit</a> <a href="faqactions.php?action=delete&id=' . (int) $temp['id'] . '">Delete</a></td></tr>' . "\n";
 
         if (array_key_exists('items', $temp) && is_array($temp['items'])) {
             foreach ($temp['items'] as $id2 => $tempItem) {
@@ -30,7 +30,7 @@ foreach ($faqCateg as $lang => $temp2) {
                 elseif ($tempItem['flag'] == "2") $status = '<font color="#0000FF"><img src="pic/updated.png" alt="Updated" width="46" height="11" align="absbottom"></font>';
                 elseif ($tempItem['flag'] == "3") $status = '<font color="#008000"><img src="pic/new.png" alt="New" width="27" height="11" align="absbottom"></font>';
                 else $status = 'Normal';
-                echo '</select></td><td>' . $tempItem['question'] . '</td><td align="center"></td><td align="center" width="60px">' . $status . '</td><td align="center" width="60px"><a href="faqactions.php?action=edit&id=' . (int) $id2 . '">Edit</a> <a href="faqactions.php?action=delete&id=' . (int) $id2 . '">Delete</a></td></tr>' . "\n";
+                echo '</select></td><td>' . htmlspecialchars((string) $tempItem['question'], ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE, 'UTF-8') . '</td><td align="center"></td><td align="center" width="60px">' . $status . '</td><td align="center" width="60px"><a href="faqactions.php?action=edit&id=' . (int) $id2 . '">Edit</a> <a href="faqactions.php?action=delete&id=' . (int) $id2 . '">Delete</a></td></tr>' . "\n";
             }
         }
 
@@ -50,7 +50,7 @@ if (! empty($faqOrphaned)) {
             elseif ($temp['flag'] == "2") $status = '<font color="#0000FF">Updated</font>';
             elseif ($temp['flag'] == "3") $status = '<font color="#008000">New</font>';
             else $status = 'Normal';
-            echo '<tr><td>' . $temp['question'] . '</td><td align="center" width="60px">' . $status . '</td><td align="center" width="60px"><a href="faqactions.php?action=edit&id=' . (int) $id . '">edit</a> <a href="faqactions.php?action=delete&id=' . (int) $id . '">delete</a></td></tr>' . "\n";
+            echo '<tr><td>' . htmlspecialchars((string) $temp['question'], ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE, 'UTF-8') . '</td><td align="center" width="60px">' . $status . '</td><td align="center" width="60px"><a href="faqactions.php?action=edit&id=' . (int) $id . '">edit</a> <a href="faqactions.php?action=delete&id=' . (int) $id . '">delete</a></td></tr>' . "\n";
         }
     }
     echo '</table>' . "\n";

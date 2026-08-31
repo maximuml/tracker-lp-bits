@@ -11,7 +11,6 @@ use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Globals;
 use App\Support\LegacyResponse;
-use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -46,9 +45,6 @@ class AttendanceController extends LegacyController
             }
         } else {
             $attendance = $repository->getAttendance($uid);
-            if (! $captchaEnabled && ! ($attendance && $attendance->added && $attendance->added->isSameDay(Carbon::today()))) {
-                $attendance = $repository->attend($uid);
-            }
         }
 
         if (! $attendance) {

@@ -32,7 +32,7 @@ class FileController extends Controller
     {
         //
 
-        return new Response('');
+        abort(501, 'Not implemented');
     }
 
     /**
@@ -44,7 +44,7 @@ class FileController extends Controller
     {
         //
 
-        return new Response('');
+        abort(501, 'Not implemented');
     }
 
     /**
@@ -56,7 +56,7 @@ class FileController extends Controller
     {
         //
 
-        return new Response('');
+        abort(501, 'Not implemented');
     }
 
     /**
@@ -68,6 +68,6 @@ class FileController extends Controller
     {
         //
 
-        return new Response('');
+        abort(501, 'Not implemented');
     }
 }

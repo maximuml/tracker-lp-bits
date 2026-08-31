@@ -10,6 +10,7 @@ use App\Repositories\SettingRepository;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Mockery;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\TestCase;
 
 final class SettingControllerTest extends TestCase
@@ -134,40 +135,38 @@ final class SettingControllerTest extends TestCase
         $controller->store($request);
     }
 
-    public function test_show_returns_empty_array(): void
+    public function test_show_returns_not_implemented(): void
     {
+        $this->expectException(HttpException::class);
+
         /** @var SettingRepository&Mockery\MockInterface $repository */
         $repository = Mockery::mock(SettingRepository::class);
 
         $controller = new SettingController($repository);
-
-        $result = $controller->show(1);
-
-        $this->assertSame([], $result);
+        $controller->show(1);
     }
 
-    public function test_update_returns_empty_array(): void
+    public function test_update_returns_not_implemented(): void
     {
+        $this->expectException(HttpException::class);
+
         /** @var SettingRepository&Mockery\MockInterface $repository */
         $repository = Mockery::mock(SettingRepository::class);
 
         $controller = new SettingController($repository);
         $request = Request::create('/api/v1/settings/1', 'PUT', []);
 
-        $result = $controller->update($request, 1);
-
-        $this->assertSame([], $result);
+        $controller->update($request, 1);
     }
 
-    public function test_destroy_returns_empty_array(): void
+    public function test_destroy_returns_not_implemented(): void
     {
+        $this->expectException(HttpException::class);
+
         /** @var SettingRepository&Mockery\MockInterface $repository */
         $repository = Mockery::mock(SettingRepository::class);
 
         $controller = new SettingController($repository);
-
-        $result = $controller->destroy(1);
-
-        $this->assertSame([], $result);
+        $controller->destroy(1);
     }
 }

@@ -25,23 +25,13 @@ class OverForumController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create(): Response
-    {
-        //
-
-        return new Response('');
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request): Response
     {
         //
 
-        return new Response('');
+        abort(501, 'Not implemented');
     }
 
     /**
@@ -51,17 +41,7 @@ class OverForumController extends Controller
     {
         //
 
-        return new Response('');
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(OverForum $overForum): Response
-    {
-        //
-
-        return new Response('');
+        abort(501, 'Not implemented');
     }
 
     /**
@@ -71,7 +51,7 @@ class OverForumController extends Controller
     {
         //
 
-        return new Response('');
+        abort(501, 'Not implemented');
     }
 
     /**
@@ -81,6 +61,6 @@ class OverForumController extends Controller
     {
         //
 
-        return new Response('');
+        abort(501, 'Not implemented');
     }
 }

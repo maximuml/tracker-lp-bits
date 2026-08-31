@@ -11,9 +11,9 @@ use App\Models\Torrent;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\TestCase;
 
 final class ThankControllerTest extends TestCase
@@ -84,31 +84,27 @@ final class ThankControllerTest extends TestCase
         $this->assertArrayHasKey('data', $result['data']);
     }
 
-    public function test_show_returns_empty_response(): void
+    public function test_show_returns_not_implemented(): void
     {
+        $this->expectException(HttpException::class);
+
         $controller = app(ThankController::class);
-
-        $response = $controller->show(1);
-
-        $this->assertInstanceOf(Response::class, $response);
-        $this->assertSame('', $response->getContent());
+        $controller->show(1);
     }
 
-    public function test_update_returns_empty_response(): void
+    public function test_update_returns_not_implemented(): void
     {
+        $this->expectException(HttpException::class);
+
         $controller = app(ThankController::class);
-
-        $response = $controller->update(new Request, 1);
-
-        $this->assertInstanceOf(Response::class, $response);
+        $controller->update(new Request, 1);
     }
 
-    public function test_destroy_returns_empty_response(): void
+    public function test_destroy_returns_not_implemented(): void
     {
+        $this->expectException(HttpException::class);
+
         $controller = app(ThankController::class);
-
-        $response = $controller->destroy(1);
-
-        $this->assertInstanceOf(Response::class, $response);
+        $controller->destroy(1);
     }
 }

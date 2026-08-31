@@ -121,7 +121,7 @@ final class SearchBox
         $checkedValues = (string) $checkedValues;
 
         parse_str($checkedValues, $checkedValuesArr);
-        $searchBox = SearchBoxRepository::findForCategoryTable($mode);
+        $searchBox = app(SearchBoxRepository::class)->findForCategoryTable($mode);
         $lang = Locale::folderFromCookie(Input::cookieValue('c_lang_folder'));
         $withTaxonomies = [];
 
@@ -151,7 +151,7 @@ final class SearchBox
 
         $html .= sprintf('<tr><td class="embedded" align="left">%s</td></tr>', Locale::trans('label.search_box.category', [], null));
 
-        $categoryCollection = SearchBoxRepository::getCategoriesForTable($searchBox, ! empty($options['select_unselect']));
+        $categoryCollection = app(SearchBoxRepository::class)->getCategoriesForTable($searchBox, ! empty($options['select_unselect']));
         $categoryChunks = $categoryCollection->chunk($searchBox->catsperrow);
         $checkPrefix = 'cat';
 

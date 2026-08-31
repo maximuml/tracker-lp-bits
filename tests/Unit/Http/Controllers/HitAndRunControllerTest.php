@@ -6,6 +6,7 @@ namespace Tests\Unit\Http\Controllers;
 
 use App\Enums\HitAndRunStatus;
 use App\Http\Controllers\HitAndRunController;
+use App\Http\Requests\HitAndRunRequest;
 use App\Models\HitAndRun;
 use App\Models\User;
 use App\Repositories\HitAndRunRepository;
@@ -74,7 +75,10 @@ final class HitAndRunControllerTest extends TestCase
             ->andReturn($hitAndRun);
 
         $controller = new HitAndRunController($repository);
-        $request = Request::create('/api/v1/hit-and-runs', 'POST', $data);
+        $request = HitAndRunRequest::create('/api/v1/hit-and-runs', 'POST', $data);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $result = $controller->store($request);
 
@@ -91,7 +95,10 @@ final class HitAndRunControllerTest extends TestCase
         $repository->shouldNotReceive('store');
 
         $controller = new HitAndRunController($repository);
-        $request = Request::create('/api/v1/hit-and-runs', 'POST', []);
+        $request = HitAndRunRequest::create('/api/v1/hit-and-runs', 'POST', []);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $controller->store($request);
     }
@@ -142,7 +149,10 @@ final class HitAndRunControllerTest extends TestCase
             ->andReturn($hitAndRun);
 
         $controller = new HitAndRunController($repository);
-        $request = Request::create('/api/v1/hit-and-runs/1', 'PUT', $data);
+        $request = HitAndRunRequest::create('/api/v1/hit-and-runs/1', 'PUT', $data);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $result = $controller->update($request, 1);
 

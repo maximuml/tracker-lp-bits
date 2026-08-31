@@ -53,7 +53,7 @@ final class Description
         $pattern = '/(\[attach\](.*)\[\/attach\])/isU';
         $matchCount = preg_match_all($pattern, $description, $matches);
         if ($matchCount) {
-            $attachments = AttachmentRepository::findByDlkeys($matches[2]);
+            $attachments = app(AttachmentRepository::class)->findByDlkeys($matches[2]);
             if (! empty($attachments)) {
                 $description = (string) preg_replace_callback($pattern, function ($matches) use ($attachments) {
                     $item = $attachments[$matches[2]] ?? null;

@@ -3,7 +3,7 @@
 $lang_messages = (array) (\app(\App\Support\Globals::class)->get('lang_messages') ?? []);
 $BASEURL = (string) (\app(\App\Support\Globals::class)->get('BASEURL', ''));
 $CURUSER = (array) (\app(\App\Support\CurrentUser::class)->get() ?? []);
-$pmBoxes = \App\Repositories\MessageRepository::getUserMailboxes((int) ($CURUSER['id'] ?? 0));
+$pmBoxes = app(\App\Repositories\MessageRepository::class)->getUserMailboxes((int) ($CURUSER['id'] ?? 0));
 @endphp
 <div id="pmboxnav"><ul id="pmboxmenu" class="menu">
 <li{{ $selected === 1 ? ' class=selected' : '' }}><a href="{{ \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) }}{{ $BASEURL }}/messages.php" >{{ $lang_messages['text_inbox'] ?? 'Inbox' }}</a></li>

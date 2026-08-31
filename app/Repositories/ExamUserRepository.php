@@ -26,6 +26,10 @@ use Illuminate\Support\Facades\DB;
  */
 class ExamUserRepository extends BaseRepository
 {
+    public function __construct(
+        private readonly ExamProgressRepository $examProgressRepository,
+    ) {}
+
     /**
      * assign exam to user
      *
@@ -73,7 +77,7 @@ class ExamUserRepository extends BaseRepository
             }
         }
 
-        $examRepo = new ExamRepository;
+        $examRepo = app(ExamRepository::class);
         if (! $examRepo->isExamMatchUser($exam, $user)) {
             throw new NexusException(Locale::trans('exam.not_match_target_user', [], $locale));
         }
@@ -105,7 +109,7 @@ class ExamUserRepository extends BaseRepository
         $data['end'] = $end;
         Logger::writeWithContext((string) ("{$logPrefix}, data: ".Json::encode($data)), (string) 'info', (bool) false);
         $examUser = $user->exams()->create($data);
-        (new ExamProgressRepository)->updateProgress($examUser, $user);
+        $this->examProgressRepository->updateProgress($examUser, $user);
 
         return $examUser;
     }

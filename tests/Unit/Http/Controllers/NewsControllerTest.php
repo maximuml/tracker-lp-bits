@@ -3,6 +3,7 @@
 namespace Tests\Unit\Http\Controllers;
 
 use App\Http\Controllers\NewsController;
+use App\Http\Requests\NewsUpdateRequest;
 use App\Models\News;
 use App\Support\Cache\LegacyRedisCache;
 use Illuminate\Http\Request;
@@ -66,10 +67,13 @@ final class NewsControllerTest extends TestCase
         $news->shouldReceive('fresh')->once()->andReturn($freshNews);
 
         $controller = app(NewsController::class);
-        $request = Request::create('/api/news/1', 'PUT', [
+        $request = NewsUpdateRequest::create('/api/news/1', 'PUT', [
             'title' => 'Updated Title',
             'body' => 'Updated body content',
         ]);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
         app()->instance('request', $request);
 
         $result = $controller->update($request, $news);
@@ -102,9 +106,12 @@ final class NewsControllerTest extends TestCase
         $news->shouldReceive('fresh')->once()->andReturn($freshNews);
 
         $controller = app(NewsController::class);
-        $request = Request::create('/api/news/2', 'PUT', [
+        $request = NewsUpdateRequest::create('/api/news/2', 'PUT', [
             'notify' => 'yes',
         ]);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
         app()->instance('request', $request);
 
         $result = $controller->update($request, $news);

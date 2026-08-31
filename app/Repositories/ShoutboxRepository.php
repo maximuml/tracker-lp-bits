@@ -86,7 +86,7 @@ final class ShoutboxRepository extends BaseRepository
      * @param  list<int>  $shoutIds
      * @return array{counts: array<int, array<string, int>>, mine: array<int, list<string>>, users: array<int, array<string, list<string>>>}
      */
-    public static function prefetchReactions(array $shoutIds, int $currentUserId): array
+    public function prefetchReactions(array $shoutIds, int $currentUserId): array
     {
         if ($shoutIds === []) {
             return ['counts' => [], 'mine' => [], 'users' => []];
@@ -147,7 +147,7 @@ final class ShoutboxRepository extends BaseRepository
     /**
      * @return array<string, int>
      */
-    public static function getReactionCounts(int $shoutId): array
+    public function getReactionCounts(int $shoutId): array
     {
         return DB::table('shoutbox_reactions')
             ->select('reaction', DB::raw('COUNT(*) as cnt'))
@@ -160,7 +160,7 @@ final class ShoutboxRepository extends BaseRepository
     /**
      * @return list<string>
      */
-    public static function getMyReactions(int $shoutId, int $currentUserId): array
+    public function getMyReactions(int $shoutId, int $currentUserId): array
     {
         $values = DB::table('shoutbox_reactions')
             ->where('shoutbox_id', $shoutId)
@@ -174,7 +174,7 @@ final class ShoutboxRepository extends BaseRepository
     /**
      * @return array<int, array<string, mixed>>
      */
-    public static function getMentions(int $userId, int $lastShoutId): array
+    public function getMentions(int $userId, int $lastShoutId): array
     {
         $user = User::query()->find($userId, ['username']);
         $username = $user?->username;
@@ -194,7 +194,7 @@ final class ShoutboxRepository extends BaseRepository
             ->orderBy('shoutbox.id')
             ->limit(50);
 
-        self::applyTypeFilter($query, 'shoutbox', null);
+        $this->applyTypeFilter($query, 'shoutbox', null);
         $rows = $query->get();
 
         $result = [];
@@ -214,7 +214,7 @@ final class ShoutboxRepository extends BaseRepository
         return $result;
     }
 
-    public static function getLastShoutId(): int
+    public function getLastShoutId(): int
     {
         return (int) (DB::table('shoutbox')->max('id') ?? 0);
     }
@@ -222,14 +222,14 @@ final class ShoutboxRepository extends BaseRepository
     /**
      * @return array<string, mixed>|null
      */
-    public static function findUserByUsername(string $username): ?array
+    public function findUserByUsername(string $username): ?array
     {
         $row = User::query()->whereRaw('LOWER(username) = LOWER(?)', [$username])->first(['id', 'username']);
 
         return $row ? ['id' => (int) $row->id, 'name' => (string) $row->username] : null;
     }
 
-    public static function torrentExists(int $id): bool
+    public function torrentExists(int $id): bool
     {
         return Torrent::query()->where('id', $id)->exists();
     }
@@ -238,7 +238,7 @@ final class ShoutboxRepository extends BaseRepository
      * @param  Builder  $query
      * @param  array<string, mixed>|object|null  $user
      */
-    public static function applyTypeFilter($query, string $type, $user = null): void
+    public function applyTypeFilter($query, string $type, $user = null): void
     {
         $query->where('type', 'sb');
     }

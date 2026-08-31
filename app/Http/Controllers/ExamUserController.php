@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ExamUserAvoidRequest;
+use App\Http\Requests\UidRequest;
 use App\Http\Resources\ExamUserResource;
 use App\Models\User;
 use App\Repositories\ExamRepository;
@@ -45,12 +47,8 @@ class ExamUserController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function store(Request $request): array
+    public function store(UidRequest $request): array
     {
-        $rules = [
-            'uid' => 'required',
-        ];
-        $request->validate($rules);
         $timeRange = $request->get('time_range', []);
         $begin = isset($timeRange[0]) ? Carbon::parse($timeRange[0])->toDateTimeString() : null;
         $end = isset($timeRange[1]) ? Carbon::parse($timeRange[1])->toDateTimeString() : null;
@@ -101,9 +99,8 @@ class ExamUserController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function avoid(Request $request): array
+    public function avoid(ExamUserAvoidRequest $request): array
     {
-        $request->validate(['id' => 'required']);
         $result = $this->repository->avoidExamUser($request->id);
 
         return $this->success($result, 'Avoid user exam success!');
@@ -112,9 +109,8 @@ class ExamUserController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function recover(Request $request): array
+    public function recover(ExamUserAvoidRequest $request): array
     {
-        $request->validate(['id' => 'required']);
         $result = $this->repository->recoverExamUser($request->id);
 
         return $this->success($result, 'Recover user exam success!');

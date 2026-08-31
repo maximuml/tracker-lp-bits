@@ -349,10 +349,10 @@ class Update extends Install
             Language::updateTransStatus();
             $this->addSetting('main.complain_enabled', 'yes');
             $this->addSetting('image_hosting.driver', 'local');
-            $this->addSetting('permission.user_token_allowed', json_encode(TokenRepository::listUserTokenPermissions(false)));
+            $this->addSetting('permission.user_token_allowed', json_encode(app(TokenRepository::class)->listUserTokenPermissions(false)));
         }
         if (! $redis->exists(Setting::USER_TOKEN_PERMISSION_ALLOWED_CACHE_KRY)) {
-            Setting::updateUserTokenPermissionAllowedCache(TokenRepository::listUserTokenPermissions(false));
+            Setting::updateUserTokenPermissionAllowedCache(app(TokenRepository::class)->listUserTokenPermissions(false));
         }
 
         /**

@@ -171,8 +171,6 @@ class ApiQueryBuilder
             return;
         }
 
-        //        dd($filters);
-
         foreach ($filters as $field => $value) {
             $field = (string) $field;
             if (! in_array($field, $this->allowedFilters)) {

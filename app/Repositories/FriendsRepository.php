@@ -11,7 +11,7 @@ class FriendsRepository
     /**
      * @return array<int|string, mixed>
      */
-    public static function getFriends(int $userId): array
+    public function getFriends(int $userId): array
     {
         return DB::table('friends as f')
             ->leftJoin('users as u', 'f.friendid', '=', 'u.id')
@@ -26,7 +26,7 @@ class FriendsRepository
     /**
      * @return array<int|string, mixed>
      */
-    public static function getBlocks(int $userId): array
+    public function getBlocks(int $userId): array
     {
         return DB::table('blocks')
             ->where('userid', $userId)
@@ -37,9 +37,9 @@ class FriendsRepository
             ->all();
     }
 
-    public static function exists(int $userId, string $type, int $targetId): bool
+    public function exists(int $userId, string $type, int $targetId): bool
     {
-        [$table, $field] = self::resolveTable($type);
+        [$table, $field] = $this->resolveTable($type);
 
         return DB::table($table)
             ->where('userid', $userId)
@@ -47,9 +47,9 @@ class FriendsRepository
             ->exists();
     }
 
-    public static function add(int $userId, string $type, int $targetId): void
+    public function add(int $userId, string $type, int $targetId): void
     {
-        [$table, $field] = self::resolveTable($type);
+        [$table, $field] = $this->resolveTable($type);
 
         DB::table($table)->insert([
             'userid' => $userId,
@@ -57,9 +57,9 @@ class FriendsRepository
         ]);
     }
 
-    public static function delete(int $userId, string $type, int $targetId): int
+    public function delete(int $userId, string $type, int $targetId): int
     {
-        [$table, $field] = self::resolveTable($type);
+        [$table, $field] = $this->resolveTable($type);
 
         return (int) DB::table($table)
             ->where('userid', $userId)
@@ -70,7 +70,7 @@ class FriendsRepository
     /**
      * @return array<int|string, mixed>
      */
-    private static function resolveTable(string $type): array
+    private function resolveTable(string $type): array
     {
         return match ($type) {
             'block' => ['blocks', 'blockid'],

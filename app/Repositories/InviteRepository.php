@@ -12,14 +12,14 @@ class InviteRepository
     /**
      * @return ?array<int|string, mixed>
      */
-    public static function getUserArray(int $id): ?array
+    public function getUserArray(int $id): ?array
     {
         $user = User::query()->find($id);
 
         return $user === null ? null : $user->toArray();
     }
 
-    public static function countPendingInvitees(int $inviterId): int
+    public function countPendingInvitees(int $inviterId): int
     {
         return User::query()
             ->where('status', 'pending')
@@ -30,7 +30,7 @@ class InviteRepository
     /**
      * @param  array<int|string, mixed>  $filters
      */
-    public static function countInvitees(int $inviterId, array $filters): int
+    public function countInvitees(int $inviterId, array $filters): int
     {
         $query = DB::table('users as u')->where('u.invited_by', $inviterId);
 
@@ -48,7 +48,7 @@ class InviteRepository
      * @param  array<int|string, mixed>  $filters
      * @return array<int|string, mixed>
      */
-    public static function getInvitees(int $inviterId, array $filters, int $offset, int $perPage): array
+    public function getInvitees(int $inviterId, array $filters, int $offset, int $perPage): array
     {
         $query = DB::table('users as u')
             ->where('u.invited_by', $inviterId)
@@ -76,7 +76,7 @@ class InviteRepository
             ->all();
     }
 
-    public static function countInvites(int $inviterId, string $type): int
+    public function countInvites(int $inviterId, string $type): int
     {
         $query = DB::table('invites')->where('inviter', $inviterId);
 
@@ -92,7 +92,7 @@ class InviteRepository
     /**
      * @return array<int|string, mixed>
      */
-    public static function getInvites(int $inviterId, string $type, int $offset, int $perPage): array
+    public function getInvites(int $inviterId, string $type, int $offset, int $perPage): array
     {
         $query = DB::table('invites')->where('inviter', $inviterId);
 

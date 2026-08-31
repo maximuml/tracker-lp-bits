@@ -18,7 +18,7 @@ final class InfoRepository
     /**
      * @return array<string, mixed>
      */
-    public static function aboutNexus(): array
+    public function aboutNexus(): array
     {
         return [
             'languages' => Language::query()
@@ -34,7 +34,7 @@ final class InfoRepository
         ];
     }
 
-    public static function resolveRuleLangId(int $langId): int
+    public function resolveRuleLangId(int $langId): int
     {
         $hasRules = Language::query()->where('id', $langId)->value('rule_lang');
 
@@ -48,7 +48,7 @@ final class InfoRepository
     /**
      * @return array<int|string, array<string, mixed>>
      */
-    public static function faqCategories(int $langId): array
+    public function faqCategories(int $langId): array
     {
         $faqCategories = [];
 
@@ -89,7 +89,7 @@ final class InfoRepository
     /**
      * @return array<int, array<string, mixed>>
      */
-    public static function rules(int $langId): array
+    public function rules(int $langId): array
     {
         return DB::table('rules')
             ->where('lang_id', $langId)
@@ -102,7 +102,7 @@ final class InfoRepository
     /**
      * @return array<string, mixed>
      */
-    public static function donationPageData(): array
+    public function donationPageData(): array
     {
         $enabled = Settings::get('main.donation', 'no') === 'yes';
         $custom = (string) Settings::fromDb('misc.donation_custom', '');
@@ -135,7 +135,7 @@ final class InfoRepository
     /**
      * @return array<string, mixed>
      */
-    public static function getUserHistoryPosts(int $userId, int $userClass, int $perpage, string $phpSelf): array
+    public function getUserHistoryPosts(int $userId, int $userClass, int $perpage, string $phpSelf): array
     {
         $postcount = (int) DB::table('posts as p')
             ->leftJoin('topics as t', 'p.topicid', '=', 't.id')
@@ -180,7 +180,7 @@ final class InfoRepository
     /**
      * @return array<string, mixed>
      */
-    public static function getUserHistoryComments(int $userId, int $perpage, string $phpSelf): array
+    public function getUserHistoryComments(int $userId, int $perpage, string $phpSelf): array
     {
         $commentcount = (int) DB::table('comments as c')
             ->leftJoin('torrents as t', 'c.torrent', '=', 't.id')
@@ -231,7 +231,7 @@ final class InfoRepository
     /**
      * @return array{faqCateg: array<string, mixed>, faqOrphaned: array<string, mixed>}
      */
-    public static function faqManageData(): array
+    public function faqManageData(): array
     {
         $categRows = DB::table('faq')
             ->leftJoin('language', 'faq.lang_id', '=', 'language.id')
@@ -288,7 +288,7 @@ final class InfoRepository
     /**
      * @param  array<int|string, int>  $order
      */
-    public static function reorderFaq(array $order): void
+    public function reorderFaq(array $order): void
     {
         foreach ($order as $id => $position) {
             DB::table('faq')->where('id', (int) $id)->update(['order' => (int) $position]);
@@ -297,13 +297,13 @@ final class InfoRepository
     }
 
     /** @param  array<string, mixed>  $data */
-    public static function updateFaq(int $id, array $data): void
+    public function updateFaq(int $id, array $data): void
     {
         DB::table('faq')->where('id', $id)->update($data);
         Cache::forgetWithLocales('faq');
     }
 
-    public static function deleteFaq(int $id): void
+    public function deleteFaq(int $id): void
     {
         DB::table('faq')->where('id', $id)->delete();
         Cache::forgetWithLocales('faq');
@@ -312,7 +312,7 @@ final class InfoRepository
     /**
      * @return array<string, mixed>|null
      */
-    public static function getFaqById(int $id): ?array
+    public function getFaqById(int $id): ?array
     {
         $arr = (array) DB::table('faq')->where('id', $id)->first();
 
@@ -322,7 +322,7 @@ final class InfoRepository
     /**
      * @return array<int, array<string, mixed>>
      */
-    public static function getFaqCategoriesByLang(int $langId): array
+    public function getFaqCategoriesByLang(int $langId): array
     {
         return DB::table('faq')
             ->where('type', 'categ')
@@ -333,7 +333,7 @@ final class InfoRepository
             ->all();
     }
 
-    public static function getLanguageName(int $langId): string
+    public function getLanguageName(int $langId): string
     {
         return (string) (DB::table('language')->where('id', $langId)->value('lang_name') ?? '');
     }
@@ -341,7 +341,7 @@ final class InfoRepository
     /**
      * @return array{maxorder: int, maxlinkid: int}
      */
-    public static function getFaqMaxOrderAndLinkId(string $type, int $langId): array
+    public function getFaqMaxOrderAndLinkId(string $type, int $langId): array
     {
         $maxRow = (array) DB::table('faq')
             ->where('type', $type)
@@ -356,7 +356,7 @@ final class InfoRepository
     }
 
     /** @param  array<string, mixed>  $data */
-    public static function insertFaq(array $data): void
+    public function insertFaq(array $data): void
     {
         DB::table('faq')->insert($data);
         Cache::forgetWithLocales('faq');

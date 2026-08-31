@@ -56,7 +56,7 @@ class PageLayout
         $cssupdatedate = $context->cssDateTweak;
         // Insert old ip into iplog
         if ($context->user) {
-            // Per-request access tracking is handled by PageLayoutRepository::prepareAccess().
+            // Per-request access tracking is handled by app(PageLayoutRepository::class)->prepareAccess().
         }
         if ($title == '') {
             $title = $context->siteName;
@@ -456,10 +456,10 @@ class PageLayout
             echo ' <a href="friends.php"><img class="buddylist" alt="Buddylist" title="'.$context->lang['title_buddylist'].'" src="pic/trans.gif" /></a>';
             echo ' <a href="getrss.php"><img class="rss" alt="RSS" title="'.$context->lang['title_get_rss'].'" src="pic/trans.gif" /></a>';
             echo '<br/>';
-            $totalsm = MessageRepository::getStaffMessageCountCache($context->user['id'], 'total');
+            $totalsm = app(MessageRepository::class)->getStaffMessageCountCache($context->user['id'], 'total');
             if ($totalsm === false) {
-                $totalsm = MessageRepository::countStaffMessage($context->user['id']);
-                MessageRepository::updateStaffMessageCountCache($context->user['id'], 'total', $totalsm);
+                $totalsm = app(MessageRepository::class)->countStaffMessage($context->user['id']);
+                app(MessageRepository::class)->updateStaffMessageCountCache($context->user['id'], 'total', $totalsm);
             }
             if ($totalsm > 0) {
                 echo '  <a href="staffbox.php"><img class="staffbox" alt="staffbox" title="'.$context->lang['title_staffbox'].'" src="pic/trans.gif" />  </a>'.$totalsm.'  ';
@@ -547,10 +547,10 @@ class PageLayout
                     }
                 }
                 // Staff message, not only staff member
-                $nummessages = MessageRepository::getStaffMessageCountCache($context->user['id'], 'new');
+                $nummessages = app(MessageRepository::class)->getStaffMessageCountCache($context->user['id'], 'new');
                 if ($nummessages === false) {
-                    $nummessages = MessageRepository::countStaffMessage($context->user['id'], 0);
-                    MessageRepository::updateStaffMessageCountCache($context->user['id'], 'new', $nummessages);
+                    $nummessages = app(MessageRepository::class)->countStaffMessage($context->user['id'], 0);
+                    app(MessageRepository::class)->updateStaffMessageCountCache($context->user['id'], 'new', $nummessages);
                 }
                 if ($nummessages > 0) {
                     $text = $context->lang['text_there_is'].Strings::isOrAre($nummessages).$nummessages.$context->lang['text_new_staff_message'].Strings::addS($nummessages);

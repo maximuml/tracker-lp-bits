@@ -322,7 +322,7 @@ class MessageService
         if ($action === 'viewmessage') {
             $id = (int) $request->input('id', 0);
             $user = Auth::user();
-            if ($id <= 0 || ! $user instanceof User || ! MessageRepository::getMessageForUser($id, (int) $user->id)) {
+            if ($id <= 0 || ! $user instanceof User || ! app(MessageRepository::class)->getMessageForUser($id, (int) $user->id)) {
                 return redirect('/messages.php');
             }
 
@@ -362,13 +362,13 @@ class MessageService
 
         if ($request->has('markread')) {
             if ($pmId > 0) {
-                $updated = MessageRepository::markAsRead($pmId, $userId);
+                $updated = app(MessageRepository::class)->markAsRead($pmId, $userId);
             } else {
                 if ($pmMessages === []) {
                     $lang = (array) app(Language::class)->functions();
                     LegacyResponse::abort('Error', (string) ($lang['select_at_least_one_record'] ?? 'Please select at least one record.'));
                 }
-                $updated = MessageRepository::markAsRead($pmMessages, $userId);
+                $updated = app(MessageRepository::class)->markAsRead($pmMessages, $userId);
             }
             Cache::clearInboxCount($userId);
             if ($updated == 0) {
@@ -381,9 +381,9 @@ class MessageService
 
         if ($request->has('move')) {
             if ($pmId > 0) {
-                $updated = MessageRepository::moveMessages($pmId, $userId, $pmBox);
+                $updated = app(MessageRepository::class)->moveMessages($pmId, $userId, $pmBox);
             } else {
-                $updated = MessageRepository::moveMessages($pmMessages, $userId, $pmBox);
+                $updated = app(MessageRepository::class)->moveMessages($pmMessages, $userId, $pmBox);
             }
             if ($updated == 0) {
                 $lang = (array) (app(Globals::class)->get('lang_messages') ?? []);
@@ -397,13 +397,13 @@ class MessageService
 
         if ($request->has('delete')) {
             if ($pmId > 0) {
-                $deletedCount = MessageRepository::deleteSingleMessage($pmId, $userId) ? 1 : 0;
+                $deletedCount = app(MessageRepository::class)->deleteSingleMessage($pmId, $userId) ? 1 : 0;
             } else {
                 if ($pmMessages === []) {
                     $lang = (array) (app(Globals::class)->get('lang_messages') ?? []);
                     LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_no_message_selected'] ?? 'No message selected.'));
                 }
-                $deletedCount = MessageRepository::deleteMultipleMessages($pmMessages, $userId);
+                $deletedCount = app(MessageRepository::class)->deleteMultipleMessages($pmMessages, $userId);
             }
             Cache::clearInboxCount($userId);
             Cache::forgetWithLocales('user_'.$userId.'_outbox_count');
@@ -436,7 +436,7 @@ class MessageService
         $lang = (array) (app(Globals::class)->get('lang_messages') ?? []);
 
         if ($action2 === 'add') {
-            MessageRepository::addMailboxes($userId, [
+            app(MessageRepository::class)->addMailboxes($userId, [
                 $request->input('new1'),
                 $request->input('new2'),
                 $request->input('new3'),
@@ -446,16 +446,16 @@ class MessageService
         }
 
         if ($action2 === 'edit') {
-            $pmBoxes = MessageRepository::getUserMailboxes($userId);
+            $pmBoxes = app(MessageRepository::class)->getUserMailboxes($userId);
             if ($pmBoxes->isEmpty()) {
                 LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['text_no_mailboxes_to_edit'] ?? 'No mailboxes to edit.'));
             }
             foreach ($pmBoxes as $pmBox) {
                 $newValue = (string) ($request->input('edit'.$pmBox->id) ?? '');
                 if ($newValue !== '' && $newValue !== $pmBox->name) {
-                    MessageRepository::updateMailbox($userId, (int) $pmBox->id, $newValue);
+                    app(MessageRepository::class)->updateMailbox($userId, (int) $pmBox->id, $newValue);
                 } elseif ($newValue === '') {
-                    MessageRepository::deleteMailbox($userId, (int) $pmBox->id, (int) $pmBox->boxnumber);
+                    app(MessageRepository::class)->deleteMailbox($userId, (int) $pmBox->id, (int) $pmBox->boxnumber);
                 }
             }
 
@@ -479,7 +479,7 @@ class MessageService
         $userId = (int) $user->id;
 
         $pmId = (int) $request->input('id', 0);
-        $message = MessageRepository::deleteSingleMessage($pmId, $userId);
+        $message = app(MessageRepository::class)->deleteSingleMessage($pmId, $userId);
         if (! $message) {
             $lang = (array) (app(Globals::class)->get('lang_messages') ?? []);
             LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_no_message_id'] ?? 'No message ID.'));

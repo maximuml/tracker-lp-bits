@@ -17,14 +17,14 @@ class UserDetailRepository
     /**
      * @return ?array<string, mixed>
      */
-    public static function getUser(int $id): ?array
+    public function getUser(int $id): ?array
     {
         $user = User::query()->find($id);
 
         return $user === null ? null : $user->toArray();
     }
 
-    public static function isFriend(int $userId, int $friendId): bool
+    public function isFriend(int $userId, int $friendId): bool
     {
         return DB::table('friends')
             ->where('userid', $userId)
@@ -32,7 +32,7 @@ class UserDetailRepository
             ->exists();
     }
 
-    public static function isBlocked(int $userId, int $blockId): bool
+    public function isBlocked(int $userId, int $blockId): bool
     {
         return DB::table('blocks')
             ->where('userid', $userId)
@@ -40,7 +40,7 @@ class UserDetailRepository
             ->exists();
     }
 
-    public static function getIplogCount(int $userId): int
+    public function getIplogCount(int $userId): int
     {
         return DB::table('iplog')
             ->where('userid', $userId)
@@ -51,7 +51,7 @@ class UserDetailRepository
     /**
      * @return array<int|string, mixed>
      */
-    public static function getPeers(int $userId): array
+    public function getPeers(int $userId): array
     {
         return DB::table('peers')
             ->where('userid', $userId)
@@ -65,7 +65,7 @@ class UserDetailRepository
     /**
      * @return array<int|string, mixed>
      */
-    public static function getTrueTraffic(int $userId): array
+    public function getTrueTraffic(int $userId): array
     {
         $row = DB::table('snatched')
             ->where('userid', $userId)
@@ -86,34 +86,34 @@ class UserDetailRepository
     /**
      * @return ?array<int|string, mixed>
      */
-    public static function getWarnedBy(int $warnedBy): ?array
+    public function getWarnedBy(int $warnedBy): ?array
     {
         $user = User::query()->where('id', $warnedBy)->select(['id', 'username'])->first();
 
         return $user === null ? null : ['id' => (int) $user->id, 'username' => (string) $user->username];
     }
 
-    public static function getUserWithMedals(int $id): ?User
+    public function getUserWithMedals(int $id): ?User
     {
         return User::query()->with('valid_medals')->find($id);
     }
 
-    public static function getCommentCount(int $userId): int
+    public function getCommentCount(int $userId): int
     {
         return Comment::query()->where('user', $userId)->count();
     }
 
-    public static function getPostCount(int $userId): int
+    public function getPostCount(int $userId): int
     {
         return Post::query()->where('userid', $userId)->count();
     }
 
-    public static function getTemporaryInviteCount(User $user): int
+    public function getTemporaryInviteCount(User $user): int
     {
         return $user->temporary_invites()->count();
     }
 
-    public static function getModComment(int $userId): string
+    public function getModComment(int $userId): string
     {
         return UserModifyLog::query()
             ->where('user_id', $userId)
@@ -124,7 +124,7 @@ class UserDetailRepository
             ->implode("\n");
     }
 
-    public static function getBonusComment(int $userId): string
+    public function getBonusComment(int $userId): string
     {
         return BonusLogs::query()
             ->where('uid', $userId)

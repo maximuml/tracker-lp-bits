@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Http\Requests\NewsStoreRequest;
+use App\Http\Requests\NewsUpdateRequest;
 use App\Http\Resources\NewsResource;
 use App\Models\News;
 use App\Repositories\IndexRepository;
@@ -204,13 +205,9 @@ class NewsController extends LegacyController
     /**
      * @return array<string, mixed>
      */
-    public function update(Request $request, News $news): array
+    public function update(NewsUpdateRequest $request, News $news): array
     {
-        $data = $request->validate([
-            'title' => 'sometimes|string|max:255',
-            'body' => 'sometimes|string',
-            'notify' => 'sometimes|in:yes,no',
-        ]);
+        $data = $request->validated();
 
         if (isset($data['notify'])) {
             $data['notify'] = $data['notify'] === 'yes';
@@ -244,7 +241,7 @@ class NewsController extends LegacyController
     {
         $maxNews = (int) app(Globals::class)->get('maxnewsnum_main', 5);
 
-        $items = IndexRepository::getLatestNews($maxNews);
+        $items = app(IndexRepository::class)->getLatestNews($maxNews);
 
         return $this->success(NewsResource::collection($items));
     }

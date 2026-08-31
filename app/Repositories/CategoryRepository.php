@@ -14,7 +14,7 @@ final class CategoryRepository
 {
     private const VALID_SUBCAT_TYPES = ['source', 'medium', 'codec', 'standard', 'processing', 'audiocodec'];
 
-    public static function tableNameForType(string $type): string
+    public function tableNameForType(string $type): string
     {
         return match ($type) {
             'category' => 'categories',
@@ -34,7 +34,7 @@ final class CategoryRepository
     /**
      * @return list<string>
      */
-    public static function validSubcatTypes(): array
+    public function validSubcatTypes(): array
     {
         return self::VALID_SUBCAT_TYPES;
     }
@@ -42,10 +42,10 @@ final class CategoryRepository
     /**
      * @param  array<string, mixed>  $row
      */
-    public static function clearCacheAfterDelete(string $type, array $row): void
+    public function clearCacheAfterDelete(string $type, array $row): void
     {
         $cache = app(LegacyRedisCache::class);
-        $dbtablename = self::tableNameForType($type);
+        $dbtablename = $this->tableNameForType($type);
 
         if (in_array($type, self::VALID_SUBCAT_TYPES, true)) {
             $cache?->delete_value($dbtablename.'_list');
@@ -64,7 +64,7 @@ final class CategoryRepository
     /**
      * @return array<int, array<string, mixed>>
      */
-    public static function getSearchboxOptions(): array
+    public function getSearchboxOptions(): array
     {
         return DB::table('searchbox')
             ->orderBy('id')
@@ -76,7 +76,7 @@ final class CategoryRepository
     /**
      * @return array<int, array<string, mixed>>
      */
-    public static function getCaticonOptions(): array
+    public function getCaticonOptions(): array
     {
         return DB::table('caticons')
             ->orderBy('id')
@@ -85,7 +85,7 @@ final class CategoryRepository
             ->all();
     }
 
-    public static function countByTable(string $table): int
+    public function countByTable(string $table): int
     {
         return (int) DB::table($table)->count();
     }
@@ -93,14 +93,14 @@ final class CategoryRepository
     /**
      * @return array<string, mixed>|null
      */
-    public static function getRecord(string $table, int $id): ?array
+    public function getRecord(string $table, int $id): ?array
     {
         $row = DB::table($table)->where('id', $id)->first();
 
         return $row ? (array) $row : null;
     }
 
-    public static function deleteRecord(string $table, int $id): bool
+    public function deleteRecord(string $table, int $id): bool
     {
         return (bool) DB::table($table)->where('id', $id)->delete();
     }
@@ -109,7 +109,7 @@ final class CategoryRepository
      * @param  'asc'|'desc'  $direction
      * @return array<int, array<string, mixed>>
      */
-    public static function listByTable(string $table, int $offset, int $perPage, string $sort = 'id', string $direction = 'desc'): array
+    public function listByTable(string $table, int $offset, int $perPage, string $sort = 'id', string $direction = 'desc'): array
     {
         return DB::table($table)
             ->orderBy($sort, $direction)
@@ -123,7 +123,7 @@ final class CategoryRepository
     /**
      * @return array<int, array<string, mixed>>
      */
-    public static function getCategoryList(int $offset, int $perPage): array
+    public function getCategoryList(int $offset, int $perPage): array
     {
         return DB::table('categories')
             ->select(['categories.*', 'searchbox.name as catmodename', 'caticons.name as icon_name'])
@@ -141,7 +141,7 @@ final class CategoryRepository
     /**
      * @return array<string, array<int|string, string>>
      */
-    public static function getSecondiconLookups(): array
+    public function getSecondiconLookups(): array
     {
         return [
             'source' => DB::table('sources')->pluck('name', 'id')->all(),
@@ -156,7 +156,7 @@ final class CategoryRepository
     /**
      * @return array<int, array<string, mixed>>
      */
-    public static function getIconRows(): array
+    public function getIconRows(): array
     {
         $rows = [];
         foreach (DB::table('caticons')->orderBy('id')->get() as $row) {
@@ -170,7 +170,7 @@ final class CategoryRepository
     /**
      * @return array<int, array<string, mixed>>
      */
-    public static function getCategoryRows(): array
+    public function getCategoryRows(): array
     {
         $rows = [];
         foreach (DB::table('categories')->leftJoin('searchbox', 'categories.mode', '=', 'searchbox.id')->select('categories.*', 'searchbox.name as catmodename')->get() as $row) {
@@ -185,7 +185,7 @@ final class CategoryRepository
      * @param  array<string, mixed>  $row
      * @return array<string, mixed>|null
      */
-    public static function findSecondIcon(array $row): ?array
+    public function findSecondIcon(array $row): ?array
     {
         $source = $row['source'] ?? '';
         $medium = $row['medium'] ?? '';
@@ -225,7 +225,7 @@ final class CategoryRepository
     /**
      * @return array<int, array<string, mixed>>
      */
-    public static function getCategoriesByMode(int $catmode): array
+    public function getCategoriesByMode(int $catmode): array
     {
         return DB::table('categories')
             ->where('mode', $catmode)

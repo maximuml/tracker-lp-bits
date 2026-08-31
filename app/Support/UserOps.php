@@ -18,6 +18,6 @@ final class UserOps
      */
     public static function logModify(int|string $userId, string $comment): void
     {
-        UserRepository::logModify($userId, $comment);
+        app(UserRepository::class)->logModify($userId, $comment);
     }
 }

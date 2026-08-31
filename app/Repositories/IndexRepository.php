@@ -24,10 +24,10 @@ class IndexRepository
      *
      * @return Collection<int, Torrent>
      */
-    public static function getLatestTorrents(int $limit = 9): Collection
+    public function getLatestTorrents(int $limit = 9): Collection
     {
         return Cache::remember(
-            self::cacheKey('latest_torrents', [(string) $limit]),
+            $this->cacheKey('latest_torrents', [(string) $limit]),
             300,
             function () use ($limit) {
                 return Torrent::with('basic_category')
@@ -42,7 +42,7 @@ class IndexRepository
     /**
      * @param  array<int, string>  $parts
      */
-    private static function cacheKey(string $name, array $parts): string
+    private function cacheKey(string $name, array $parts): string
     {
         return 'index_repo:'.$name.':'.implode(':', $parts);
     }
@@ -52,9 +52,9 @@ class IndexRepository
      *
      * @return Collection<int, User>
      */
-    public static function getTopUploaders(int $limit = 10, ?int $days = null): Collection
+    public function getTopUploaders(int $limit = 10, ?int $days = null): Collection
     {
-        $cacheKey = self::cacheKey('top_uploaders', [(string) $limit, $days === null ? 'all' : (string) $days]);
+        $cacheKey = $this->cacheKey('top_uploaders', [(string) $limit, $days === null ? 'all' : (string) $days]);
 
         return Cache::remember($cacheKey, 300, function () use ($limit, $days) {
             $query = User::query()
@@ -76,9 +76,9 @@ class IndexRepository
     }
 
     /** @return  array<int|string, mixed> */
-    public static function getUserStats(): array
+    public function getUserStats(): array
     {
-        return Cache::remember(self::cacheKey('user_stats', []), 60, function () {
+        return Cache::remember($this->cacheKey('user_stats', []), 60, function () {
             $cutoffDay = Carbon::now()->subDay()->format('Y-m-d H:i:s');
             $cutoffWeek = Carbon::now()->subWeek()->format('Y-m-d H:i:s');
 
@@ -97,15 +97,15 @@ class IndexRepository
         });
     }
 
-    public static function touchLastHome(int $userId): bool
+    public function touchLastHome(int $userId): bool
     {
         return (bool) User::query()->where('id', $userId)->update(['last_home' => now()]);
     }
 
     /** @return  array<int|string, mixed> */
-    public static function getTorrentStats(): array
+    public function getTorrentStats(): array
     {
-        return Cache::remember(self::cacheKey('torrent_stats', []), 60, function () {
+        return Cache::remember($this->cacheKey('torrent_stats', []), 60, function () {
             $seeders = Peer::where('seeder', PeerSeeder::YES->value)->count();
             $leechers = Peer::where('seeder', PeerSeeder::NO->value)->count();
             $cutoffQuarterHour = Carbon::now()->subSeconds(900)->format('Y-m-d H:i:s');
@@ -128,9 +128,9 @@ class IndexRepository
     }
 
     /** @return  array<int|string, mixed> */
-    public static function getClassStats(): array
+    public function getClassStats(): array
     {
-        return Cache::remember(self::cacheKey('class_stats', []), 60, function () {
+        return Cache::remember($this->cacheKey('class_stats', []), 60, function () {
             return [
                 UC_PEASANT => User::where('class', UC_PEASANT)->count(),
                 UC_USER => User::where('class', UC_USER)->count(),
@@ -147,28 +147,28 @@ class IndexRepository
     }
 
     /** @return  ?array<int|string, mixed> */
-    public static function getCurrentPoll(): ?array
+    public function getCurrentPoll(): ?array
     {
-        return Cache::remember(self::cacheKey('current_poll', []), 60, function () {
+        return Cache::remember($this->cacheKey('current_poll', []), 60, function () {
             $poll = Poll::query()->orderByDesc('id')->first();
 
             return $poll ? $poll->toArray() : null;
         });
     }
 
-    public static function hasVoted(int $pollId, int $userId): bool
+    public function hasVoted(int $pollId, int $userId): bool
     {
         return (bool) Cache::remember(
-            self::cacheKey('poll_voted', [(string) $pollId, (string) $userId]),
+            $this->cacheKey('poll_voted', [(string) $pollId, (string) $userId]),
             60,
             fn () => PollAnswer::where('pollid', $pollId)->where('userid', $userId)->exists()
         );
     }
 
-    public static function getUserVote(int $pollId, int $userId): ?int
+    public function getUserVote(int $pollId, int $userId): ?int
     {
         return Cache::remember(
-            self::cacheKey('poll_user_vote', [(string) $pollId, (string) $userId]),
+            $this->cacheKey('poll_user_vote', [(string) $pollId, (string) $userId]),
             60,
             function () use ($pollId, $userId) {
                 $selection = PollAnswer::where('pollid', $pollId)->where('userid', $userId)->value('selection');
@@ -178,7 +178,7 @@ class IndexRepository
         );
     }
 
-    public static function recordPollVote(int $pollId, int $userId, int $choice): bool
+    public function recordPollVote(int $pollId, int $userId, int $choice): bool
     {
         PollAnswer::create([
             'pollid' => $pollId,
@@ -186,9 +186,9 @@ class IndexRepository
             'selection' => $choice,
         ]);
 
-        Cache::forget(self::cacheKey('poll_voted', [(string) $pollId, (string) $userId]));
-        Cache::forget(self::cacheKey('poll_user_vote', [(string) $pollId, (string) $userId]));
-        Cache::forget(self::cacheKey('poll_results', [(string) $pollId]));
+        Cache::forget($this->cacheKey('poll_voted', [(string) $pollId, (string) $userId]));
+        Cache::forget($this->cacheKey('poll_user_vote', [(string) $pollId, (string) $userId]));
+        Cache::forget($this->cacheKey('poll_results', [(string) $pollId]));
 
         return true;
     }
@@ -196,10 +196,10 @@ class IndexRepository
     /**
      * @return array<int|string, mixed>
      */
-    public static function getPollResults(int $pollId): array
+    public function getPollResults(int $pollId): array
     {
         return Cache::remember(
-            self::cacheKey('poll_results', [(string) $pollId]),
+            $this->cacheKey('poll_results', [(string) $pollId]),
             300,
             function () use ($pollId) {
                 $selections = PollAnswer::where('pollid', $pollId)
@@ -244,10 +244,10 @@ class IndexRepository
     /**
      * @return array<int, array<string, mixed>>
      */
-    public static function getLatestNews(int $limit): array
+    public function getLatestNews(int $limit): array
     {
         return Cache::remember(
-            self::cacheKey('latest_news', [(string) $limit]),
+            $this->cacheKey('latest_news', [(string) $limit]),
             300,
             function () use ($limit) {
                 return News::query()
@@ -263,10 +263,10 @@ class IndexRepository
     /**
      * @return array<int, array<string, mixed>>
      */
-    public static function getLatestForumPosts(int $limit, int $minClassRead): array
+    public function getLatestForumPosts(int $limit, int $minClassRead): array
     {
         return Cache::remember(
-            self::cacheKey('latest_forum_posts', [(string) $limit, (string) $minClassRead]),
+            $this->cacheKey('latest_forum_posts', [(string) $limit, (string) $minClassRead]),
             60,
             function () use ($limit, $minClassRead) {
                 return Post::query()

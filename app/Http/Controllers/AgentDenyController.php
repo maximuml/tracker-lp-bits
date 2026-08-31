@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AgentDenyRequest;
 use App\Http\Resources\AgentDenyResource;
 use App\Models\AgentDeny;
 use App\Repositories\AgentDenyRepository;
@@ -19,19 +20,6 @@ class AgentDenyController extends Controller
     public function __construct(AgentDenyRepository $repository)
     {
         $this->repository = $repository;
-    }
-
-    /** @return  array<int|string, mixed> */
-    private function getRules(): array
-    {
-        return [
-            'family_id' => 'required|numeric',
-            'name' => 'required|string',
-            'peer_id' => 'required|string',
-            'agent' => 'required|string',
-            'comment' => 'required|string',
-
-        ];
     }
 
     /**
@@ -52,10 +40,9 @@ class AgentDenyController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function store(Request $request): array
+    public function store(AgentDenyRequest $request): array
     {
-        $request->validate($this->getRules());
-        $result = $this->repository->store($request->all());
+        $result = $this->repository->store($request->validated());
         $resource = new AgentDenyResource($result);
 
         return $this->success($resource);
@@ -81,10 +68,9 @@ class AgentDenyController extends Controller
      * @param  mixed  $id
      * @return array<string, mixed>
      */
-    public function update(Request $request, $id): array
+    public function update(AgentDenyRequest $request, $id): array
     {
-        $request->validate($this->getRules());
-        $result = $this->repository->update($request->all(), $id);
+        $result = $this->repository->update($request->validated(), $id);
         $resource = new AgentDenyResource($result);
 
         return $this->success($resource);

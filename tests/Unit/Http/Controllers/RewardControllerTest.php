@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Tests\Unit\Http\Controllers;
 
 use App\Http\Controllers\RewardController;
+use App\Http\Requests\RewardIndexRequest;
 use App\Http\Requests\RewardRequest;
 use App\Models\Reward;
 use App\Models\User;
 use App\Repositories\RewardRepository;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Mockery;
@@ -42,7 +42,10 @@ final class RewardControllerTest extends TestCase
             ->andReturn($collection);
 
         $controller = new RewardController($repository);
-        $request = Request::create('/api/v1/rewards', 'GET', ['torrent_id' => 10]);
+        $request = RewardIndexRequest::create('/api/v1/rewards', 'GET', ['torrent_id' => 10]);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $result = $controller->index($request);
 
@@ -59,7 +62,10 @@ final class RewardControllerTest extends TestCase
         $repository->shouldNotReceive('getList');
 
         $controller = new RewardController($repository);
-        $request = Request::create('/api/v1/rewards', 'GET', []);
+        $request = RewardIndexRequest::create('/api/v1/rewards', 'GET', []);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $controller->index($request);
     }

@@ -90,7 +90,7 @@ final class Shoutbox
      */
     public static function applyTypeFilter($query, string $type, $user = null): void
     {
-        ShoutboxRepository::applyTypeFilter($query, $type, $user);
+        app(ShoutboxRepository::class)->applyTypeFilter($query, $type, $user);
     }
 
     /**
@@ -239,7 +239,7 @@ final class Shoutbox
             return ['counts' => [], 'mine' => [], 'users' => []];
         }
 
-        return ShoutboxRepository::prefetchReactions($shoutIds, $currentUserId);
+        return app(ShoutboxRepository::class)->prefetchReactions($shoutIds, $currentUserId);
     }
 
     /**
@@ -262,8 +262,8 @@ final class Shoutbox
             $myReactions = $myReactionsMap ?? [];
             $reactors = $reactorMap ?? [];
         } else {
-            $counts = ShoutboxRepository::getReactionCounts($shoutId);
-            $myReactions = ShoutboxRepository::getMyReactions($shoutId, $currentUserId);
+            $counts = app(ShoutboxRepository::class)->getReactionCounts($shoutId);
+            $myReactions = app(ShoutboxRepository::class)->getMyReactions($shoutId, $currentUserId);
 
             $reactors = [];
         }
@@ -349,7 +349,7 @@ final class Shoutbox
                 $nick = $m[1];
                 $key = strtolower($nick);
                 if (! array_key_exists($key, $cache)) {
-                    $cache[$key] = ShoutboxRepository::findUserByUsername($nick) ?? false;
+                    $cache[$key] = app(ShoutboxRepository::class)->findUserByUsername($nick) ?? false;
                 }
                 if (! $cache[$key]) {
                     return $m[0];
@@ -397,7 +397,7 @@ final class Shoutbox
                     return $m[0];
                 }
                 if (! array_key_exists($id, $cache)) {
-                    $cache[$id] = ShoutboxRepository::torrentExists($id);
+                    $cache[$id] = app(ShoutboxRepository::class)->torrentExists($id);
                 }
                 if (! $cache[$id]) {
                     return $m[0];

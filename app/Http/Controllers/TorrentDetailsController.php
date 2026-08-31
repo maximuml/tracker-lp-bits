@@ -79,7 +79,7 @@ class TorrentDetailsController extends Controller
             return redirect('/details.php?id='.$id.($query ? '&'.http_build_query($query) : ''));
         }
 
-        $row = TorrentDetailRepository::getTorrent($id);
+        $row = app(TorrentDetailRepository::class)->getTorrent($id);
         if (empty($row)) {
             Logger::writeWithContext((string) "TorrentDetailsRepository getTorrent empty: {$id}", (string) 'info', (bool) false);
             error_log("TorrentDetailsRepository getTorrent empty: $id");
@@ -103,7 +103,7 @@ class TorrentDetailsController extends Controller
             : ($langDetails['head_comments_for_torrent'] ?? '').'"'.$row['name'].'"';
 
         $denyLog = $row['approval_status'] == TorrentApprovalStatus::DENY->value
-            ? TorrentDetailRepository::getLatestApprovalDenyLog($id)
+            ? app(TorrentDetailRepository::class)->getLatestApprovalDenyLog($id)
             : null;
 
         $hasBuy = TorrentBuyLog::query()->where('uid', $currentUser['id'] ?? 0)->where('torrent_id', $id)->exists();
@@ -119,7 +119,7 @@ class TorrentDetailsController extends Controller
         ];
 
         if ($requestFlags['hit']) {
-            TorrentDetailRepository::incrementViews($id);
+            app(TorrentDetailRepository::class)->incrementViews($id);
         }
 
         $headers = [];
@@ -127,7 +127,7 @@ class TorrentDetailsController extends Controller
             $headers['Refresh'] = "1; url=download.php?id={$id}";
         }
 
-        $tagIds = TorrentDetailRepository::getTagIds($id);
+        $tagIds = app(TorrentDetailRepository::class)->getTagIds($id);
 
         $viewData = $this->buildDetailsViewData($id, $row, $currentUser, $user, $denyLog, $hasBuy, $tagIds, $requestFlags);
 
@@ -243,8 +243,8 @@ class TorrentDetailsController extends Controller
         $descr = ! empty($row['descr']) ? Format::formatComment((string) $row['descr']) : '';
         $bonusOptions = Setting::getBonusRewardOptions();
 
-        $magicInfo = TorrentDetailRepository::getMagicInfo($id, (int) $currentUser['id']);
-        $thanksInfo = TorrentDetailRepository::getThanksInfo($id, (int) $currentUser['id']);
+        $magicInfo = app(TorrentDetailRepository::class)->getMagicInfo($id, (int) $currentUser['id']);
+        $thanksInfo = app(TorrentDetailRepository::class)->getThanksInfo($id, (int) $currentUser['id']);
 
         $userIds = array_filter(array_unique([
             (int) ($row['owner'] ?? 0),

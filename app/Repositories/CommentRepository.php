@@ -20,7 +20,7 @@ class CommentRepository
     /**
      * @return ?array<int|string, mixed>
      */
-    public static function getParent(int $parentId, string $type): ?array
+    public function getParent(int $parentId, string $type): ?array
     {
         $row = match ($type) {
             'torrent' => Torrent::query()->where('id', $parentId)->select(['name', 'owner'])->first(),
@@ -38,7 +38,7 @@ class CommentRepository
     /**
      * @return array<int, array<string, mixed>>
      */
-    public static function getLatest(int $limit, int $offset): array
+    public function getLatest(int $limit, int $offset): array
     {
         return DB::table('comments as c')
             ->leftJoin('users as u', 'c.user', '=', 'u.id')
@@ -52,7 +52,7 @@ class CommentRepository
             ->toArray();
     }
 
-    public static function countLatest(): int
+    public function countLatest(): int
     {
         return (int) DB::table('comments')->count();
     }
@@ -60,7 +60,7 @@ class CommentRepository
     /**
      * @return ?array<int|string, mixed>
      */
-    public static function getQuote(int $commentId): ?array
+    public function getQuote(int $commentId): ?array
     {
         $row = DB::table('comments')
             ->leftJoin('users', 'comments.user', '=', 'users.id')
@@ -74,7 +74,7 @@ class CommentRepository
     /**
      * @return ?array<int|string, mixed>
      */
-    public static function getForEdit(int $commentId, string $type): ?array
+    public function getForEdit(int $commentId, string $type): ?array
     {
         $query = DB::table('comments as c');
 
@@ -100,7 +100,7 @@ class CommentRepository
     /**
      * @return ?array<int|string, mixed>
      */
-    public static function getForDelete(int $commentId, string $type): ?array
+    public function getForDelete(int $commentId, string $type): ?array
     {
         $row = DB::table('comments')
             ->where('id', $commentId)
@@ -113,7 +113,7 @@ class CommentRepository
     /**
      * @return ?array<int|string, mixed>
      */
-    public static function getForViewOriginal(int $commentId, string $type): ?array
+    public function getForViewOriginal(int $commentId, string $type): ?array
     {
         $query = DB::table('comments as c');
 
@@ -136,7 +136,7 @@ class CommentRepository
         return $row === null ? null : (array) $row;
     }
 
-    public static function getCommentPmSetting(int $userId): bool
+    public function getCommentPmSetting(int $userId): bool
     {
         return (bool) User::query()->where('id', $userId)->value('commentpm');
     }
@@ -146,7 +146,7 @@ class CommentRepository
      *
      * @return LengthAwarePaginator<int, Comment>
      */
-    public static function getList(Request $request, User $user)
+    public function getList(Request $request, User $user)
     {
         $type = $request->input('type', CommentType::TORRENT->value);
         $parentId = (int) $request->input('parent_id', 0);
@@ -169,7 +169,7 @@ class CommentRepository
         return $query->orderBy('id', 'desc')->paginate((int) $request->input('per_page', 20));
     }
 
-    public static function create(int $parentId, string $type, string $text, int $userId): int
+    public function create(int $parentId, string $type, string $text, int $userId): int
     {
         $now = Carbon::now();
 
@@ -208,7 +208,7 @@ class CommentRepository
         return (int) $comment->id;
     }
 
-    public static function update(int $commentId, string $text, int $editedBy): void
+    public function update(int $commentId, string $text, int $editedBy): void
     {
         Comment::query()->where('id', $commentId)->update([
             'text' => $text,
@@ -217,7 +217,7 @@ class CommentRepository
         ]);
     }
 
-    public static function delete(int $commentId, string $type, int $parentId): bool
+    public function delete(int $commentId, string $type, int $parentId): bool
     {
         $deleted = Comment::query()->where('id', $commentId)->delete();
 

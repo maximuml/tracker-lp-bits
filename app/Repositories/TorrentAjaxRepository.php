@@ -27,7 +27,7 @@ final class TorrentAjaxRepository
     /**
      * @return Collection<int, \stdClass>
      */
-    public static function fileList(int $torrentId): Collection
+    public function fileList(int $torrentId): Collection
     {
         return DB::table('files')
             ->where('torrent', $torrentId)
@@ -38,7 +38,7 @@ final class TorrentAjaxRepository
     /**
      * @return array<string, mixed>
      */
-    public static function snatchList(int $torrentId): array
+    public function snatchList(int $torrentId): array
     {
         $torrentName = Torrent::query()->where('id', $torrentId)->value('name') ?? '';
         $count = DB::table('snatched')
@@ -80,7 +80,7 @@ final class TorrentAjaxRepository
     /**
      * @return list{string, list<string>, list<int>}
      */
-    public static function searchSuggest(string $searchstr): array
+    public function searchSuggest(string $searchstr): array
     {
         $result = [$searchstr, [], []];
 
@@ -120,7 +120,7 @@ final class TorrentAjaxRepository
     /**
      * @return array<string, mixed>
      */
-    public static function autocompleteTorrents(string $query, ?User $user): array
+    public function autocompleteTorrents(string $query, ?User $user): array
     {
         if ($query === '' || $user === null) {
             return ['torrents' => []];
@@ -138,7 +138,7 @@ final class TorrentAjaxRepository
     /**
      * @return array<string, mixed>
      */
-    public static function peerList(int $torrentId, ?User $currentUser = null): array
+    public function peerList(int $torrentId, ?User $currentUser = null): array
     {
         $torrent = Torrent::query()->findOrFail($torrentId, ['id', 'owner', 'size', 'anonymous', 'seeders', 'leechers']);
         $torrentArr = $torrent->toArray();
@@ -231,7 +231,7 @@ final class TorrentAjaxRepository
     /**
      * @return array<string, mixed>
      */
-    public static function userTorrentList(int $targetUserId, string $type, int $page, ?User $currentUser = null): array
+    public function userTorrentList(int $targetUserId, string $type, int $page, ?User $currentUser = null): array
     {
         if (! in_array($type, ['uploaded', 'seeding', 'leeching', 'completed', 'incomplete'], true)) {
             return [
@@ -250,7 +250,7 @@ final class TorrentAjaxRepository
         $pageSize = 100;
         $href = "getusertorrentlistajax.php?userid={$targetUserId}&type={$type}&";
 
-        $query = self::buildUserTorrentQuery($targetUserId, $type, $currentUser);
+        $query = $this->buildUserTorrentQuery($targetUserId, $type, $currentUser);
         $count = (int) (clone $query)->count();
         $totalSize = (int) (clone $query)->sum('torrents.size');
 
@@ -284,7 +284,7 @@ final class TorrentAjaxRepository
         ];
     }
 
-    private static function buildUserTorrentQuery(int $targetUserId, string $type, ?User $currentUser = null): Builder
+    private function buildUserTorrentQuery(int $targetUserId, string $type, ?User $currentUser = null): Builder
     {
         switch ($type) {
             case 'uploaded':

@@ -170,7 +170,7 @@ final class AuthCookie
             $update['lang'] = $langId;
         }
 
-        AuthRepository::updateLogin($userId, $update);
+        app(AuthRepository::class)->updateLogin($userId, $update);
     }
 
     /**
@@ -280,7 +280,7 @@ final class AuthCookie
                 throw new \InvalidArgumentException("Invalid authkey: $authkey");
             }
 
-            return AuthRepository::getPasskeyByUserId((int) $uid) ?? '';
+            return app(AuthRepository::class)->getPasskeyByUserId((int) $uid) ?? '';
         });
     }
 
@@ -422,7 +422,7 @@ final class AuthCookie
         $shouldIgnoreEnabled = defined('IN_NEXUS') && IN_NEXUS && ! $isAjax && $selfEnableBonus > 0;
 
         if ($isArray) {
-            $row = AuthRepository::findUserArrayForCookie($id, $shouldIgnoreEnabled);
+            $row = app(AuthRepository::class)->findUserArrayForCookie($id, $shouldIgnoreEnabled);
             if ($row === null) {
                 Logger::writeWithContext("$log, user not exists");
 
@@ -432,7 +432,7 @@ final class AuthCookie
             return $row;
         }
 
-        $row = AuthRepository::findUserModelForCookie($id, $shouldIgnoreEnabled);
+        $row = app(AuthRepository::class)->findUserModelForCookie($id, $shouldIgnoreEnabled);
         if ($row === null) {
             Logger::writeWithContext("$log, user not exists");
 

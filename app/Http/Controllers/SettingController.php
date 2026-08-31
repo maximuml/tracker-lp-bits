@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Models\HitAndRun;
+use App\Http\Requests\SettingStoreRequest;
 use App\Repositories\SettingRepository;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
-use Illuminate\Validation\Rule;
 
 class SettingController extends Controller
 {
@@ -39,11 +37,9 @@ class SettingController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function store(Request $request): array
+    public function store(SettingStoreRequest $request): array
     {
         $data = $request->all();
-        $prefix = Arr::first(array_keys($data));
-        $request->validate($this->getRules($prefix));
         $result = $this->repository->store($data);
 
         return $this->success($result, 'Save setting success!');
@@ -83,34 +79,5 @@ class SettingController extends Controller
     {
 
         return [];
-    }
-
-    /**
-     * @param  mixed  $prefix
-     * @return array<int|string, mixed>
-     */
-    private function getRules($prefix): array
-    {
-        $allRules = [
-            'hr' => [
-                'ban_user_when_counts_reach' => 'required|integer|min:1',
-                'ignore_when_ratio_reach' => 'required|numeric',
-                'inspect_time' => 'required|integer|min:1',
-                'seed_time_minimum' => 'required|integer|lt:hr.inspect_time',
-                'mode' => ['required', Rule::in(array_keys(HitAndRun::$modes))],
-            ],
-        ];
-
-        $result = [];
-        foreach ($allRules as $rulePrefix => $rules) {
-            if ($rulePrefix != $prefix) {
-                continue;
-            }
-            foreach ($rules as $key => $value) {
-                $result["$prefix.$key"] = $value;
-            }
-        }
-
-        return $result;
     }
 }

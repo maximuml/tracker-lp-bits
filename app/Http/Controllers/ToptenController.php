@@ -37,7 +37,7 @@ class ToptenController extends Controller
         $cacheKey = "topten_{$type}_{$limit}_{$subtype}_{$langFolder}";
 
         $html = Cache::remember($cacheKey, 3600, function () use ($type, $limit, $subtype) {
-            $page = ToptenRepository::page($type, $limit, $subtype);
+            $page = app(ToptenRepository::class)->page($type, $limit, $subtype);
 
             return view('topten.index', $page)->render();
         });

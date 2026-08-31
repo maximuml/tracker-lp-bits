@@ -84,15 +84,15 @@ class UserAdminController extends LegacyController
         }
 
         $countryOptions = [['value' => 0, 'label' => $langUsers['select_any_country'] ?? 'Any country', 'selected' => $country === 0]];
-        foreach (UserListingRepository::getCountries() as $ct) {
+        foreach (app(UserListingRepository::class)->getCountries() as $ct) {
             $countryOptions[] = ['value' => (int) $ct['id'], 'label' => (string) $ct['name'], 'selected' => $country === (int) $ct['id']];
         }
 
         $perPage = 50;
         $filters = ['search' => $search, 'class' => $class, 'country' => $country, 'letter' => $letter];
-        $count = UserListingRepository::countUsers($filters);
+        $count = app(UserListingRepository::class)->countUsers($filters);
         [$pagertop, $pagerbottom, , $offset] = Pagination::pager($perPage, $count, 'users.php?'.$q.($q ? '&' : ''));
-        $userRows = UserListingRepository::listUsers($filters, (int) $offset, $perPage);
+        $userRows = app(UserListingRepository::class)->listUsers($filters, (int) $offset, $perPage);
 
         $rows = [];
         foreach ($userRows as $arr) {

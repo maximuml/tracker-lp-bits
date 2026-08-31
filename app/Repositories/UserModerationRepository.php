@@ -37,6 +37,10 @@ use Illuminate\Support\Facades\DB;
  */
 class UserModerationRepository extends BaseRepository
 {
+    public function __construct(
+        private readonly ToolRepository $toolRepository,
+    ) {}
+
     /**
      * @param  mixed  $uid
      * @param  mixed  $reason
@@ -651,7 +655,7 @@ class UserModerationRepository extends BaseRepository
         if ($operator) {
             $this->checkPermission($operator, $targetUser);
         }
-        $toolRep = new ToolRepository;
+        $toolRep = $this->toolRepository;
         $locale = $targetUser->locale;
 
         $changeType = Locale::trans("nexus.{$action}", [], $locale);

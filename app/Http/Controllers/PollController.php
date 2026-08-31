@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PollStoreRequest;
+use App\Http\Requests\PollUpdateRequest;
+use App\Http\Requests\PollVoteRequest;
 use App\Http\Resources\PollResource;
 use App\Models\Poll;
 use App\Repositories\IndexRepository;
@@ -35,7 +38,7 @@ class PollController extends LegacyController
             if ($pollid <= 0) {
                 return $this->legacyAbortResponse('Error', 'Invalid poll id.');
             }
-            $poll = PollRepository::findForEdit($pollid);
+            $poll = app(PollRepository::class)->findForEdit($pollid);
             if (! $poll) {
                 return $this->legacyAbortResponse('Error', 'No poll with that ID.');
             }
@@ -56,7 +59,7 @@ class PollController extends LegacyController
             }
 
             $data = array_merge(['question' => $question], $options);
-            $newId = PollRepository::createOrUpdate($data, $pollid > 0 ? $pollid : null);
+            $newId = app(PollRepository::class)->createOrUpdate($data, $pollid > 0 ? $pollid : null);
 
             if ($returnto === 'main') {
                 return redirect(url('/'));
@@ -69,7 +72,7 @@ class PollController extends LegacyController
 
         $ageWarning = '';
         if ($pollid <= 0) {
-            $lastPoll = PollRepository::lastPoll();
+            $lastPoll = app(PollRepository::class)->lastPoll();
             if (! empty($lastPoll)) {
                 $hours = (int) floor((time() - strtotime((string) $lastPoll['added'])) / 3600);
                 $days = (int) floor($hours / 24);
@@ -96,14 +99,14 @@ class PollController extends LegacyController
         $pollid = (int) $request->input('id', 0);
 
         if ($pollid > 0) {
-            $poll = PollRepository::findWithOptions($pollid);
+            $poll = app(PollRepository::class)->findWithOptions($pollid);
             if (! $poll) {
                 $lang = (array) (app(Globals::class)->get('lang_polloverview') ?? []);
 
                 return $this->legacyAbortResponse($lang['std_error'] ?? 'Error', $lang['text_no_poll_id'] ?? 'Invalid poll ID.');
             }
 
-            $count = PollRepository::countAnswers($pollid);
+            $count = app(PollRepository::class)->countAnswers($pollid);
             $answers = [];
             $pagertop = '';
             $pagerbottom = '';
@@ -112,8 +115,8 @@ class PollController extends LegacyController
             if ($count > 0) {
                 $perpage = 100;
                 [$pagertop, $pagerbottom, , $offset, $perpage] = Pagination::pager($perpage, $count, "?id={$pollid}&");
-                $answers = PollRepository::answers($pollid, $offset, $perpage);
-                $userDisplayMap = PollRepository::userDisplayMap($answers);
+                $answers = app(PollRepository::class)->answers($pollid, $offset, $perpage);
+                $userDisplayMap = app(PollRepository::class)->userDisplayMap($answers);
             }
 
             return $this->legacyPage($request, 'polloverview', true, [
@@ -127,7 +130,7 @@ class PollController extends LegacyController
             ]);
         }
 
-        $polls = PollRepository::listAll();
+        $polls = app(PollRepository::class)->listAll();
 
         return $this->legacyPage($request, 'polloverview', true, [
             'mode' => 'list',
@@ -158,12 +161,9 @@ class PollController extends LegacyController
     /**
      * @return array<string, mixed>
      */
-    public function store(Request $request): array
+    public function store(PollStoreRequest $request): array
     {
-        $data = $request->validate(array_merge(
-            ['question' => 'required|string|max:255'],
-            array_fill_keys(array_map(fn ($i) => "option{$i}", range(0, Poll::MAX_OPTION_INDEX)), 'sometimes|string|max:255')
-        ));
+        $data = $request->validated();
 
         $data['added'] = now()->toDateTimeString();
 
@@ -175,12 +175,9 @@ class PollController extends LegacyController
     /**
      * @return array<string, mixed>
      */
-    public function update(Request $request, Poll $poll): array
+    public function update(PollUpdateRequest $request, Poll $poll): array
     {
-        $data = $request->validate(array_merge(
-            ['question' => 'sometimes|string|max:255'],
-            array_fill_keys(array_map(fn ($i) => "option{$i}", range(0, Poll::MAX_OPTION_INDEX)), 'sometimes|string|max:255')
-        ));
+        $data = $request->validated();
 
         $poll->update($data);
 
@@ -202,7 +199,7 @@ class PollController extends LegacyController
      */
     public function latest(): array
     {
-        $pollArr = IndexRepository::getCurrentPoll();
+        $pollArr = app(IndexRepository::class)->getCurrentPoll();
 
         if ($pollArr === null) {
             return $this->success([], 'No poll');
@@ -216,15 +213,12 @@ class PollController extends LegacyController
     /**
      * @return array<string, mixed>
      */
-    public function vote(Request $request): array
+    public function vote(PollVoteRequest $request): array
     {
         $currentUser = (array) (app(CurrentUser::class)->get() ?? []);
         $userId = (int) ($currentUser['id'] ?? 0);
 
-        $data = $request->validate([
-            'poll_id' => 'required|integer',
-            'choice' => 'required|integer|min:0',
-        ]);
+        $data = $request->validated();
 
         $pollId = (int) $data['poll_id'];
         $choice = (int) $data['choice'];
@@ -234,11 +228,11 @@ class PollController extends LegacyController
             return $this->fail([], 'Poll not found');
         }
 
-        if (IndexRepository::hasVoted($pollId, $userId)) {
+        if (app(IndexRepository::class)->hasVoted($pollId, $userId)) {
             return $this->fail([], 'Already voted');
         }
 
-        IndexRepository::recordPollVote($pollId, $userId, $choice);
+        app(IndexRepository::class)->recordPollVote($pollId, $userId, $choice);
 
         return $this->success(['success' => true], 'Vote recorded');
     }

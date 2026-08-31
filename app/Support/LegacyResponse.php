@@ -223,7 +223,7 @@ final class LegacyResponse
         }
 
         $uploadDenyApprovalDenyCount = (int) SiteConfig::current()->main->uploadDenyApprovalDenyCount();
-        $approvalDenyCount = TorrentRepository::getApprovalDenyCount((int) ($CURUSER['id'] ?? 0));
+        $approvalDenyCount = app(TorrentRepository::class)->getApprovalDenyCount((int) ($CURUSER['id'] ?? 0));
 
         if ($uploadDenyApprovalDenyCount > 0 && $approvalDenyCount >= $uploadDenyApprovalDenyCount) {
             self::abort(

@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Exceptions\NexusException;
+use App\Http\Requests\TokenDeleteRequest;
 use App\Http\Requests\TokenRequest;
 use App\Models\User;
 use App\Repositories\TokenRepository;
 use App\Support\Locale;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class TokenController extends Controller
@@ -28,7 +28,7 @@ class TokenController extends Controller
             if ($count >= 5) {
                 throw new NexusException(Locale::trans('token.maximum_allow_number_reached', [], null));
             }
-            $allowed = TokenRepository::listUserTokenPermissionAllowed();
+            $allowed = app(TokenRepository::class)->listUserTokenPermissionAllowed();
             foreach ($request->permissions as $permission) {
                 if (! isset($allowed[$permission])) {
                     throw new NexusException(Locale::trans('token.permission_not_allowed', ['permission_text' => Locale::trans("route-permission.{$permission}.text", [], null)], null));
@@ -47,12 +47,9 @@ class TokenController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function delToken(Request $request): array
+    public function delToken(TokenDeleteRequest $request): array
     {
         try {
-            $request->validate([
-                'id' => 'required|integer',
-            ]);
             $user = Auth::user();
             if (! $user instanceof User) {
                 return $this->fail(false, 'Unauthenticated');

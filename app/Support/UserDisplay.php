@@ -127,7 +127,7 @@ final class UserDisplay
         }
 
         $row = Cache::remember("user_{$id}_content", 3600, function () use ($id) {
-            $user = UserRepository::findForDisplay($id);
+            $user = app(UserRepository::class)->findForDisplay($id);
 
             if (! $user) {
                 return false;
@@ -180,7 +180,7 @@ final class UserDisplay
             'downloadpos', 'parked', 'clientselect', 'showclienterror',
         ];
 
-        $users = UserRepository::getByIds($missing, $columns);
+        $users = app(UserRepository::class)->getByIds($missing, $columns);
         if ($users->isEmpty()) {
             foreach ($missing as $id) {
                 self::$rowCache[$id] = false;

@@ -16,7 +16,7 @@ class TorrentDetailRepository
     /**
      * @return ?array<string, mixed>
      */
-    public static function getTorrent(int $id): ?array
+    public function getTorrent(int $id): ?array
     {
         $torrent = DB::table('torrents')
             ->leftJoin('categories', 'torrents.category', '=', 'categories.id')
@@ -54,7 +54,7 @@ class TorrentDetailRepository
     /**
      * @return array<int|string, mixed>
      */
-    public static function getMagicInfo(int $torrentId, int $currentUserId): array
+    public function getMagicInfo(int $torrentId, int $currentUserId): array
     {
         $givers = DB::table('magic')
             ->where('torrentid', $torrentId)
@@ -87,7 +87,7 @@ class TorrentDetailRepository
     /**
      * @return array<int|string, mixed>
      */
-    public static function getThanksInfo(int $torrentId, int $currentUserId): array
+    public function getThanksInfo(int $torrentId, int $currentUserId): array
     {
         $thanks = DB::table('thanks')
             ->where('torrentid', $torrentId)
@@ -117,7 +117,7 @@ class TorrentDetailRepository
         ];
     }
 
-    public static function getCommentCount(int $torrentId): int
+    public function getCommentCount(int $torrentId): int
     {
         return Comment::query()->where('torrent', $torrentId)->count();
     }
@@ -125,7 +125,7 @@ class TorrentDetailRepository
     /**
      * @return array<int|string, mixed>
      */
-    public static function getComments(int $torrentId, int $offset, int $limit): array
+    public function getComments(int $torrentId, int $offset, int $limit): array
     {
         return Comment::query()
             ->where('torrent', $torrentId)
@@ -136,7 +136,7 @@ class TorrentDetailRepository
             ->toArray();
     }
 
-    public static function incrementViews(int $id): void
+    public function incrementViews(int $id): void
     {
         Torrent::query()->where('id', $id)->increment('views');
     }
@@ -144,7 +144,7 @@ class TorrentDetailRepository
     /**
      * @return array<int, int>
      */
-    public static function getTagIds(int $torrentId): array
+    public function getTagIds(int $torrentId): array
     {
         return array_map(
             fn ($id) => (int) $id,
@@ -155,7 +155,7 @@ class TorrentDetailRepository
         );
     }
 
-    public static function getLatestApprovalDenyLog(int $torrentId): ?TorrentOperationLog
+    public function getLatestApprovalDenyLog(int $torrentId): ?TorrentOperationLog
     {
         return TorrentOperationLog::query()
             ->where('torrent_id', $torrentId)

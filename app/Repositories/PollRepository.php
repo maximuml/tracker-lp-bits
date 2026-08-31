@@ -13,7 +13,7 @@ class PollRepository
     /**
      * @return array<string, mixed>|null
      */
-    public static function findForEdit(int $id): ?array
+    public function findForEdit(int $id): ?array
     {
         if ($id <= 0) {
             return null;
@@ -26,7 +26,7 @@ class PollRepository
     /**
      * @return array<string, mixed>|null
      */
-    public static function lastPoll(): ?array
+    public function lastPoll(): ?array
     {
         $row = DB::table('polls')->orderByDesc('added')->first(['question', 'added']);
 
@@ -36,7 +36,7 @@ class PollRepository
     /**
      * @param  array<string, mixed>  $data
      */
-    public static function createOrUpdate(array $data, ?int $id = null): int
+    public function createOrUpdate(array $data, ?int $id = null): int
     {
         if ($id) {
             DB::table('polls')->where('id', $id)->update($data);
@@ -64,7 +64,7 @@ class PollRepository
     /**
      * @return array<int, array<string, mixed>>
      */
-    public static function listAll(): array
+    public function listAll(): array
     {
         return DB::table('polls')
             ->orderByDesc('id')
@@ -76,14 +76,14 @@ class PollRepository
     /**
      * @return array<string, mixed>|null
      */
-    public static function findWithOptions(int $id): ?array
+    public function findWithOptions(int $id): ?array
     {
         $row = DB::table('polls')->where('id', $id)->first();
 
         return $row ? (array) $row : null;
     }
 
-    public static function countAnswers(int $pollId): int
+    public function countAnswers(int $pollId): int
     {
         return (int) DB::table('pollanswers')
             ->where('pollid', $pollId)
@@ -94,7 +94,7 @@ class PollRepository
     /**
      * @return array<int, array<string, mixed>>
      */
-    public static function answers(int $pollId, int $offset, int $perPage): array
+    public function answers(int $pollId, int $offset, int $perPage): array
     {
         return DB::table('pollanswers')
             ->leftJoin('users', 'pollanswers.userid', '=', 'users.id')
@@ -112,7 +112,7 @@ class PollRepository
      * @param  array<int, array<string, mixed>>  $answers
      * @return array<int, string>
      */
-    public static function userDisplayMap(array $answers): array
+    public function userDisplayMap(array $answers): array
     {
         $ids = array_filter(array_unique(array_column($answers, 'userid')));
         $map = [];

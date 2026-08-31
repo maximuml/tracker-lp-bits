@@ -64,13 +64,13 @@ class TopicController extends Controller
         }
 
         $date = now()->toDateTimeString();
-        $topicId = ForumRepository::createTopic((int) $user->id, (int) $forum->id, $dto->subject);
-        $postId = ForumRepository::createPost($topicId, (int) $user->id, $dto->body, $date);
+        $topicId = app(ForumRepository::class)->createTopic((int) $user->id, (int) $forum->id, $dto->subject);
+        $postId = app(ForumRepository::class)->createPost($topicId, (int) $user->id, $dto->body, $date);
 
-        ForumRepository::updateTopicFirstLastPost($topicId, $postId);
-        ForumRepository::incrementForumTopicCount((int) $forum->id);
-        ForumRepository::incrementForumPostCount((int) $forum->id);
-        ForumRepository::updateUserLastPost((int) $user->id, $date);
+        app(ForumRepository::class)->updateTopicFirstLastPost($topicId, $postId);
+        app(ForumRepository::class)->incrementForumTopicCount((int) $forum->id);
+        app(ForumRepository::class)->incrementForumPostCount((int) $forum->id);
+        app(ForumRepository::class)->updateUserLastPost((int) $user->id, $date);
 
         $topic = Topic::query()->findOrFail($topicId);
 
@@ -152,8 +152,8 @@ class TopicController extends Controller
             throw ValidationException::withMessages(['topic' => ['Permission denied.']]);
         }
 
-        $postCount = ForumRepository::countTopicPosts((int) $topic->id);
-        ForumRepository::deleteTopic((int) $topic->id, (int) $topic->forumid, $postCount);
+        $postCount = app(ForumRepository::class)->countTopicPosts((int) $topic->id);
+        app(ForumRepository::class)->deleteTopic((int) $topic->id, (int) $topic->forumid, $postCount);
 
         return $this->success(['success' => true], 'Topic deleted');
     }

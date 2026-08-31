@@ -4,7 +4,7 @@ $showComments = ($CURUSER['showcomment'] ?? '') !== 'no';
 
 @if ($showComments)
     @php
-    $count = \App\Repositories\TorrentDetailRepository::getCommentCount($id);
+    $count = \app(\App\Repositories\TorrentDetailRepository::class)->getCommentCount($id);
     @endphp
 
     @if ($count)
@@ -13,7 +13,7 @@ $showComments = ($CURUSER['showcomment'] ?? '') !== 'no';
 
         @php
         list($pagertop, $pagerbottom, $limit, $offset, $rpp) = \App\Support\Pagination::pager(10, $count, "details.php?id=$id&cmtpage=1&", ['lastpagedefault' => 1], 'page');
-        $allrows = \App\Repositories\TorrentDetailRepository::getComments($id, (int) $offset, (int) $rpp);
+        $allrows = \app(\App\Repositories\TorrentDetailRepository::class)->getComments($id, (int) $offset, (int) $rpp);
         @endphp
 
         {!! $pagertop !!}

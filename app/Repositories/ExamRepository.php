@@ -29,6 +29,12 @@ use Illuminate\Support\Facades\DB;
  */
 class ExamRepository extends BaseRepository
 {
+    public function __construct(
+        private readonly ExamUserRepository $examUserRepository,
+        private readonly ExamProgressRepository $examProgressRepository,
+        private readonly ExamCronRepository $examCronRepository,
+    ) {}
+
     /**
      * @param  array<int|string, mixed>  $params
      * @return mixed
@@ -445,7 +451,7 @@ class ExamRepository extends BaseRepository
      */
     public function assignToUser(int $uid, int $examId, $begin = null, $end = null)
     {
-        return (new ExamUserRepository)->assignToUser($uid, $examId, $begin, $end);
+        return $this->examUserRepository->assignToUser($uid, $examId, $begin, $end);
     }
 
     /**
@@ -454,7 +460,7 @@ class ExamRepository extends BaseRepository
      */
     public function listUser(array $params)
     {
-        return (new ExamUserRepository)->listUser($params);
+        return $this->examUserRepository->listUser($params);
     }
 
     /**
@@ -462,7 +468,7 @@ class ExamRepository extends BaseRepository
      */
     public function removeExamUser(int $examUserId)
     {
-        return (new ExamUserRepository)->removeExamUser($examUserId);
+        return $this->examUserRepository->removeExamUser($examUserId);
     }
 
     /**
@@ -470,12 +476,12 @@ class ExamRepository extends BaseRepository
      */
     public function avoidExamUser(int $examUserId)
     {
-        return (new ExamUserRepository)->avoidExamUser($examUserId);
+        return $this->examUserRepository->avoidExamUser($examUserId);
     }
 
     public function updateExamUserEnd(ExamUser $examUser, Carbon $end, string $reason = ''): void
     {
-        (new ExamUserRepository)->updateExamUserEnd($examUser, $end, $reason);
+        $this->examUserRepository->updateExamUserEnd($examUser, $end, $reason);
     }
 
     /**
@@ -484,7 +490,7 @@ class ExamRepository extends BaseRepository
      */
     public function removeExamUserBulk(array $params, User $user)
     {
-        return (new ExamUserRepository)->removeExamUserBulk($params, $user);
+        return $this->examUserRepository->removeExamUserBulk($params, $user);
     }
 
     /**
@@ -492,7 +498,7 @@ class ExamRepository extends BaseRepository
      */
     public function avoidExamUserBulk(array $params, User $user): int
     {
-        return (new ExamUserRepository)->avoidExamUserBulk($params, $user);
+        return $this->examUserRepository->avoidExamUserBulk($params, $user);
     }
 
     /**
@@ -500,7 +506,7 @@ class ExamRepository extends BaseRepository
      */
     public function recoverExamUser(int $examUserId)
     {
-        return (new ExamUserRepository)->recoverExamUser($examUserId);
+        return $this->examUserRepository->recoverExamUser($examUserId);
     }
 
     /**
@@ -511,7 +517,7 @@ class ExamRepository extends BaseRepository
      */
     public function addProgress(int $uid, int $torrentId, array $indexAndValue)
     {
-        return (new ExamProgressRepository)->addProgress($uid, $torrentId, $indexAndValue);
+        return $this->examProgressRepository->addProgress($uid, $torrentId, $indexAndValue);
     }
 
     /**
@@ -519,7 +525,7 @@ class ExamRepository extends BaseRepository
      */
     public function updateProgress($examUser, ?User $user = null): ExamUser|bool
     {
-        return (new ExamProgressRepository)->updateProgress($examUser, $user);
+        return $this->examProgressRepository->updateProgress($examUser, $user);
     }
 
     /**
@@ -529,7 +535,7 @@ class ExamRepository extends BaseRepository
      */
     public function getUserExamProgress($uid, $status = null)
     {
-        return (new ExamProgressRepository)->getUserExamProgress($uid, $status);
+        return $this->examProgressRepository->getUserExamProgress($uid, $status);
     }
 
     /**
@@ -539,7 +545,7 @@ class ExamRepository extends BaseRepository
      */
     public function calculateProgress(ExamUser $examUser, bool $allSum = false)
     {
-        return (new ExamProgressRepository)->calculateProgress($examUser, $allSum);
+        return $this->examProgressRepository->calculateProgress($examUser, $allSum);
     }
 
     /**
@@ -549,29 +555,29 @@ class ExamRepository extends BaseRepository
      */
     public function getProgressFormatted(Exam $exam, array $progress, $locale = null)
     {
-        return (new ExamProgressRepository)->getProgressFormatted($exam, $progress, $locale);
+        return $this->examProgressRepository->getProgressFormatted($exam, $progress, $locale);
     }
 
     /** @return  array<int|string, mixed> */
     public function updateProgressBulk(): array
     {
-        return (new ExamProgressRepository)->updateProgressBulk();
+        return $this->examProgressRepository->updateProgressBulk();
     }
 
     /** @return  mixed */
     public function cronjonAssign()
     {
-        return (new ExamCronRepository)->cronjonAssign();
+        return $this->examCronRepository->cronjonAssign();
     }
 
     public function fetchUserAndDoAssign(Exam $exam): bool|int
     {
-        return (new ExamCronRepository)->fetchUserAndDoAssign($exam);
+        return $this->examCronRepository->fetchUserAndDoAssign($exam);
     }
 
     /** @param  mixed  $ignoreTimeRange */
     public function cronjobCheckout($ignoreTimeRange = false): int
     {
-        return (new ExamCronRepository)->cronjobCheckout($ignoreTimeRange);
+        return $this->examCronRepository->cronjobCheckout($ignoreTimeRange);
     }
 }

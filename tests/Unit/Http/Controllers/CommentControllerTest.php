@@ -3,6 +3,7 @@
 namespace Tests\Unit\Http\Controllers;
 
 use App\Http\Controllers\CommentController;
+use App\Http\Requests\PrepareCommentRequest;
 use App\Models\Comment;
 use App\Models\User;
 use App\Repositories\CommentRepository;
@@ -65,11 +66,14 @@ final class CommentControllerTest extends TestCase
         Auth::shouldReceive('user')->andReturn($user);
 
         $controller = new CommentController($repository);
-        $request = Request::create('/api/comments', 'POST', [
+        $request = PrepareCommentRequest::create('/api/comments', 'POST', [
             'type' => 'torrent',
             'torrent_id' => 10,
             'text' => 'hello world',
         ]);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
         app()->instance('request', $request);
 
         $result = $controller->store($request);
@@ -99,11 +103,14 @@ final class CommentControllerTest extends TestCase
         Auth::shouldReceive('user')->andReturn($user);
 
         $controller = new CommentController($repository);
-        $request = Request::create('/api/comments', 'POST', [
+        $request = PrepareCommentRequest::create('/api/comments', 'POST', [
             'type' => 'offer',
             'offer_id' => 5,
             'text' => 'nice offer',
         ]);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
         app()->instance('request', $request);
 
         $result = $controller->store($request);
@@ -124,10 +131,13 @@ final class CommentControllerTest extends TestCase
         Auth::shouldReceive('user')->andReturn($user);
 
         $controller = new CommentController($repository);
-        $request = Request::create('/api/comments', 'POST', [
+        $request = PrepareCommentRequest::create('/api/comments', 'POST', [
             'type' => 'torrent',
             'text' => 'missing parent',
         ]);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
         app()->instance('request', $request);
 
         $this->expectException(InvalidArgumentException::class);
@@ -148,14 +158,17 @@ final class CommentControllerTest extends TestCase
         Auth::shouldReceive('user')->andReturn($user);
 
         $controller = new CommentController($repository);
-        $request = Request::create('/api/comments', 'POST', [
+        $request = PrepareCommentRequest::create('/api/comments', 'POST', [
             'type' => 'invalid',
             'torrent_id' => 1,
             'text' => 'hello',
         ]);
-        app()->instance('request', $request);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
 
         $this->expectException(ValidationException::class);
+
+        $request->validateResolved();
 
         $controller->store($request);
     }

@@ -24,7 +24,7 @@ class TorrentAjaxController extends LegacyController
             return response('', 400, ['Content-Type' => 'text/html; charset=utf-8']);
         }
 
-        $files = TorrentAjaxRepository::fileList($torrentId);
+        $files = app(TorrentAjaxRepository::class)->fileList($torrentId);
 
         return response()->view('viewfilelist.index', ['files' => $files], 200, [
             'Expires' => 'Mon, 26 Jul 1997 05:00:00 GMT',
@@ -53,7 +53,7 @@ class TorrentAjaxController extends LegacyController
             'Content-Type' => 'text/html; charset=utf-8',
         ];
 
-        return response()->view('viewpeerlist.index', TorrentAjaxRepository::peerList($torrentId, $currentUser), 200, $headers);
+        return response()->view('viewpeerlist.index', app(TorrentAjaxRepository::class)->peerList($torrentId, $currentUser), 200, $headers);
     }
 
     public function viewSnatches(Request $request): View|RedirectResponse|Response
@@ -63,7 +63,7 @@ class TorrentAjaxController extends LegacyController
             return redirect('/torrents.php');
         }
 
-        return $this->legacyPage($request, 'viewsnatches', true, TorrentAjaxRepository::snatchList($torrentId));
+        return $this->legacyPage($request, 'viewsnatches', true, app(TorrentAjaxRepository::class)->snatchList($torrentId));
     }
 
     public function getUserTorrentListAjax(Request $request): Response|RedirectResponse
@@ -92,7 +92,7 @@ class TorrentAjaxController extends LegacyController
             'Content-Type' => 'text/html; charset=utf-8',
         ];
 
-        return response()->view('getusertorrentlistajax.index', TorrentAjaxRepository::userTorrentList($targetUserId, $type, $page, $currentUser), 200, $headers);
+        return response()->view('getusertorrentlistajax.index', app(TorrentAjaxRepository::class)->userTorrentList($targetUserId, $type, $page, $currentUser), 200, $headers);
     }
 
     public function searchSuggest(Request $request): Response|RedirectResponse
@@ -103,7 +103,7 @@ class TorrentAjaxController extends LegacyController
         }
 
         return response(
-            (string) json_encode(TorrentAjaxRepository::searchSuggest($searchstr), JSON_UNESCAPED_UNICODE),
+            (string) json_encode(app(TorrentAjaxRepository::class)->searchSuggest($searchstr), JSON_UNESCAPED_UNICODE),
             200,
             ['Content-Type' => 'application/x-suggestions+json; charset=utf-8']
         );
@@ -123,6 +123,6 @@ class TorrentAjaxController extends LegacyController
             return response()->json(['torrents' => []]);
         }
 
-        return response()->json(TorrentAjaxRepository::autocompleteTorrents($query, $user));
+        return response()->json(app(TorrentAjaxRepository::class)->autocompleteTorrents($query, $user));
     }
 }

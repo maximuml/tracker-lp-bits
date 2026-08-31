@@ -53,7 +53,7 @@ class StaffModerationController extends LegacyController
         if ($action === 'confirmuser') {
             $userId = (int) request()->post('userid');
             $confirm = (string) request()->post('confirm');
-            ModtaskRepository::confirmUser($userId, $confirm);
+            app(ModtaskRepository::class)->confirmUser($userId, $confirm);
 
             return redirect(Http::protocolPrefix(Url::isSecure()).$baseUrl.'/unco.php?status=1');
         }
@@ -94,7 +94,7 @@ class StaffModerationController extends LegacyController
             return $this->legacyAbortResponse('Error', "You have no permission to change user's class to ".UserClass::name((int) $class, false, false, true).'. BTW, how do you get here?');
         }
 
-        $arr = ModtaskRepository::getUserArray($userId);
+        $arr = app(ModtaskRepository::class)->getUserArray($userId);
         if ($arr === null) {
             Log::writeWithContext(
                 'User '.($currentUser['username'] ?? '')." (id: {$currentUserId}) is hacking user's profile. IP : ".Network::clientIp(),
@@ -188,7 +188,7 @@ class StaffModerationController extends LegacyController
             $memo = htmlspecialchars((string) request()->post('donation_memo'));
 
             if ($donated != (float) $arr['donated'] || $donatedCny != (float) $arr['donated_cny']) {
-                ModtaskRepository::addFund($userId, $thisDonatedUsd, $thisDonatedCny, $memo);
+                app(ModtaskRepository::class)->addFund($userId, $thisDonatedUsd, $thisDonatedCny, $memo);
                 $updateset['donated'] = $donated;
                 $updateset['donated_cny'] = $donatedCny;
             }
@@ -338,7 +338,7 @@ class StaffModerationController extends LegacyController
             ]);
         }
 
-        ModtaskRepository::updateUser($userId, $updateset);
+        app(ModtaskRepository::class)->updateUser($userId, $updateset);
 
         if (! empty($userModifyLogs)) {
             $insert = [];

@@ -21,9 +21,9 @@ class RulesController extends LegacyController
         $cacheKey = "{$langFolder}_rules";
 
         $html = Cache::remember($cacheKey, 900, function () {
-            $langId = InfoRepository::resolveRuleLangId(Locale::guestIdWithContext());
+            $langId = app(InfoRepository::class)->resolveRuleLangId(Locale::guestIdWithContext());
 
-            return view('rules.index', ['rules' => InfoRepository::rules($langId)])->render();
+            return view('rules.index', ['rules' => app(InfoRepository::class)->rules($langId)])->render();
         });
 
         return response($html);
@@ -36,6 +36,6 @@ class RulesController extends LegacyController
 
     public function aboutNexus(Request $request): View|RedirectResponse|Response
     {
-        return $this->legacyPage($request, 'aboutnexus', false, InfoRepository::aboutNexus());
+        return $this->legacyPage($request, 'aboutnexus', false, app(InfoRepository::class)->aboutNexus());
     }
 }

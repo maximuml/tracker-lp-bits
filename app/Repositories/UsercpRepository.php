@@ -31,7 +31,7 @@ use Illuminate\Validation\ValidationException;
 
 final class UsercpRepository extends BaseRepository
 {
-    public static function getUserById(int $userId): User
+    public function getUserById(int $userId): User
     {
         return User::query()->findOrFail($userId);
     }
@@ -39,7 +39,7 @@ final class UsercpRepository extends BaseRepository
     /**
      * @return array<int, array<string, mixed>>
      */
-    public static function getUserTokens(User $user): array
+    public function getUserTokens(User $user): array
     {
         $tokens = [];
         foreach ($user->tokens()->orderBy('id', 'desc')->get() as $token) {
@@ -68,27 +68,27 @@ final class UsercpRepository extends BaseRepository
     /**
      * @param  array<string, mixed>  $data
      */
-    public static function updateUser(int $userId, array $data): bool
+    public function updateUser(int $userId, array $data): bool
     {
         return (bool) User::query()->where('id', $userId)->update($data);
     }
 
-    public static function updateLastOffer(int $userId): bool
+    public function updateLastOffer(int $userId): bool
     {
         return (bool) User::query()->where('id', $userId)->update(['last_offer' => date('Y-m-d H:i:s')]);
     }
 
-    public static function emailExistsForOther(string $email, int $userId): bool
+    public function emailExistsForOther(string $email, int $userId): bool
     {
         return User::query()->where('email', $email)->where('id', '!=', $userId)->exists();
     }
 
-    public static function getChallenge(string $username): ?string
+    public function getChallenge(string $username): ?string
     {
         return CacheFacade::get(Token::challengeKey($username));
     }
 
-    public static function deleteChallenge(string $username): bool
+    public function deleteChallenge(string $username): bool
     {
         Cache::forgetWithLocales(Token::challengeKey($username));
 
@@ -99,10 +99,10 @@ final class UsercpRepository extends BaseRepository
      * @param  array<string, mixed>  $data
      * @param  array<string, mixed>  $allPost
      */
-    public static function updateSecurity(int $userId, array $data, bool $resetAuthKey, array $allPost): bool
+    public function updateSecurity(int $userId, array $data, bool $resetAuthKey, array $allPost): bool
     {
         return (bool) DB::transaction(function () use ($userId, $data, $resetAuthKey) {
-            self::updateUser($userId, $data);
+            $this->updateUser($userId, $data);
             if ($resetAuthKey) {
                 $torrentRep = app(TorrentRepository::class);
                 $torrentRep->resetTrackerReportAuthKeySecret($userId);
@@ -112,22 +112,22 @@ final class UsercpRepository extends BaseRepository
         });
     }
 
-    public static function getCommentCount(int $userId): int
+    public function getCommentCount(int $userId): int
     {
         return (int) Comment::query()->where('user', $userId)->count();
     }
 
-    public static function getForumPostCount(int $userId): int
+    public function getForumPostCount(int $userId): int
     {
         return (int) Post::query()->where('userid', $userId)->count();
     }
 
-    public static function getTotalPostCount(): int
+    public function getTotalPostCount(): int
     {
         return (int) Post::query()->count();
     }
 
-    public static function getTopicPostCount(int $topicId): int
+    public function getTopicPostCount(int $topicId): int
     {
         return (int) Post::query()->where('topicid', $topicId)->count();
     }
@@ -135,7 +135,7 @@ final class UsercpRepository extends BaseRepository
     /**
      * @return array<int, int>
      */
-    public static function getTableIds(string $table): array
+    public function getTableIds(string $table): array
     {
         return DB::table($table)->pluck('id')->all();
     }
@@ -143,7 +143,7 @@ final class UsercpRepository extends BaseRepository
     /**
      * @return array<int, array<string, mixed>>
      */
-    public static function getReadTopics(int $userId, int $limit = 5): array
+    public function getReadTopics(int $userId, int $limit = 5): array
     {
         return DB::table('readposts')
             ->join('topics', 'topics.id', '=', 'readposts.topicid')
@@ -158,7 +158,7 @@ final class UsercpRepository extends BaseRepository
     /**
      * @return array<int, \stdClass>
      */
-    public static function getCountryOptions(): array
+    public function getCountryOptions(): array
     {
         return DB::table('countries')
             ->orderBy('name')
@@ -169,7 +169,7 @@ final class UsercpRepository extends BaseRepository
     /**
      * @return array<int, \stdClass>
      */
-    public static function getBitbucketOptions(): array
+    public function getBitbucketOptions(): array
     {
         return DB::table('bitbucket')
             ->where('public', '1')
@@ -180,7 +180,7 @@ final class UsercpRepository extends BaseRepository
     /**
      * @return array<string, int>
      */
-    public static function getStylesheetOptions(): array
+    public function getStylesheetOptions(): array
     {
         return DB::table('stylesheets')
             ->orderBy('name')
@@ -324,7 +324,7 @@ final class UsercpRepository extends BaseRepository
             'processings' => 'pro',
             'audiocodecs' => 'aud',
         ] as $table => $cbname) {
-            foreach (self::getTableIds($table) as $id) {
+            foreach ($this->getTableIds($table) as $id) {
                 if ($dto->notifPreferences[$cbname.$id] ?? false) {
                     $notifsArr[$cbname.$id] = 1;
                 }
@@ -413,7 +413,7 @@ final class UsercpRepository extends BaseRepository
                 LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_wrong_password_note'] ?? 'Wrong password.'));
             }
         } else {
-            $challenge = self::getChallenge((string) $user->username);
+            $challenge = $this->getChallenge((string) $user->username);
             if (empty($challenge)) {
                 LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), 'expired!');
             }
@@ -471,7 +471,7 @@ final class UsercpRepository extends BaseRepository
                 LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_wrong_email_address_format'] ?? 'Wrong email format.'));
             }
 
-            if (self::emailExistsForOther($email, (int) $user->id)) {
+            if ($this->emailExistsForOther($email, (int) $user->id)) {
                 LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_email_in_use'] ?? 'Email in use.'));
             }
 
@@ -521,7 +521,7 @@ final class UsercpRepository extends BaseRepository
             $privacyupdated = 1;
         }
 
-        self::updateSecurity((int) $user->id, $data, $resetAuthKey, (array) $request->all());
+        $this->updateSecurity((int) $user->id, $data, $resetAuthKey, (array) $request->all());
 
         $to = 'usercp.php?action=security&type=saved';
         if ($changedemail === 1) {
@@ -538,7 +538,7 @@ final class UsercpRepository extends BaseRepository
         }
 
         Cache::clearUser($user->id, '');
-        self::deleteChallenge((string) $user->username);
+        $this->deleteChallenge((string) $user->username);
 
         return $to;
     }
@@ -584,7 +584,7 @@ final class UsercpRepository extends BaseRepository
                 throw ValidationException::withMessages(['email' => [$lang['std_wrong_email_address_format'] ?? 'Wrong email format.']]);
             }
 
-            if (self::emailExistsForOther($email, (int) $user->id)) {
+            if ($this->emailExistsForOther($email, (int) $user->id)) {
                 throw ValidationException::withMessages(['email' => [$lang['std_email_in_use'] ?? 'Email in use.']]);
             }
 
@@ -632,7 +632,7 @@ final class UsercpRepository extends BaseRepository
         }
 
         if ($data !== []) {
-            self::updateSecurity((int) $user->id, $data, $resetAuthKey, $dto->allInputs);
+            $this->updateSecurity((int) $user->id, $data, $resetAuthKey, $dto->allInputs);
             Cache::clearUser($user->id, '');
         }
 

@@ -2,7 +2,11 @@
 
 namespace Tests\Unit\Repositories;
 
+use App\Repositories\MeiliSearchRepository;
+use App\Repositories\SearchBoxRepository;
 use App\Repositories\TorrentDownloadRepository;
+use App\Repositories\TorrentModerationRepository;
+use App\Repositories\TorrentPurchaseRepository;
 use App\Repositories\TorrentRepository;
 use Firebase\JWT\JWT;
 use PHPUnit\Framework\TestCase;
@@ -16,8 +20,16 @@ class TorrentRepositoryDownHashTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->repository = new TorrentRepository;
         $this->downloadRepository = new TorrentDownloadRepository;
+        $this->repository = new TorrentRepository(
+            $this->downloadRepository,
+            new TorrentPurchaseRepository,
+            new TorrentModerationRepository(
+                new SearchBoxRepository,
+                $this->downloadRepository,
+                new MeiliSearchRepository,
+            ),
+        );
     }
 
     public function test_hkdf_downhash_roundtrip(): void

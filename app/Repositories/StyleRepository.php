@@ -14,7 +14,7 @@ final class StyleRepository
     /**
      * @return array<int, array<string, mixed>>
      */
-    public static function all(): array
+    public function all(): array
     {
         if (self::$rows === null) {
             $rows = [];
@@ -31,28 +31,28 @@ final class StyleRepository
     /**
      * @return array<string, mixed>|null
      */
-    public static function row(int|string $id): ?array
+    public function row(int|string $id): ?array
     {
-        return self::all()[(int) $id] ?? null;
+        return $this->all()[(int) $id] ?? null;
     }
 
-    public static function uri(int|string $id): ?string
+    public function uri(int|string $id): ?string
     {
-        $row = self::row($id);
+        $row = $this->row($id);
 
         return $row !== null ? (string) ($row['uri'] ?? '') : null;
     }
 
-    public static function highlightColor(int|string $id): ?string
+    public function highlightColor(int|string $id): ?string
     {
-        $row = self::row($id);
+        $row = $this->row($id);
 
         return $row !== null ? ($row['hltr'] ?? null) : null;
     }
 
-    public static function firstId(): ?int
+    public function firstId(): ?int
     {
-        $rows = self::all();
+        $rows = $this->all();
 
         return $rows === [] ? null : (int) array_key_first($rows);
     }

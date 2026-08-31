@@ -53,10 +53,10 @@ class ForumController extends LegacyController
     public function latestcomments(Request $request): View|RedirectResponse|Response
     {
         $perpage = 20;
-        $count = CommentRepository::countLatest();
+        $count = app(CommentRepository::class)->countLatest();
 
         [$pagertop, $pagerbottom, , $offset, $perpage] = Pagination::pager($perpage, $count, 'latestcomments.php?');
-        $rows = CommentRepository::getLatest($perpage, $offset);
+        $rows = app(CommentRepository::class)->getLatest($perpage, $offset);
 
         $userIds = array_filter(array_unique(array_column($rows, 'user')));
         $userDisplayMap = [];

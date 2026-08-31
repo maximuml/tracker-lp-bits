@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tests\Unit\Http\Controllers;
 
 use App\Http\Controllers\AgentAllowController;
+use App\Http\Requests\AgentAllowCheckRequest;
+use App\Http\Requests\AgentAllowRequest;
 use App\Models\AgentAllow;
 use App\Repositories\AgentAllowRepository;
 use Illuminate\Http\Request;
@@ -60,7 +62,10 @@ final class AgentAllowControllerTest extends TestCase
             ->andReturn($agentAllow);
 
         $controller = new AgentAllowController($repository);
-        $request = Request::create('/api/v1/agent-allows', 'POST', $data);
+        $request = AgentAllowRequest::create('/api/v1/agent-allows', 'POST', $data);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $result = $controller->store($request);
 
@@ -77,7 +82,10 @@ final class AgentAllowControllerTest extends TestCase
         $repository->shouldNotReceive('store');
 
         $controller = new AgentAllowController($repository);
-        $request = Request::create('/api/v1/agent-allows', 'POST', []);
+        $request = AgentAllowRequest::create('/api/v1/agent-allows', 'POST', []);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $controller->store($request);
     }
@@ -95,7 +103,10 @@ final class AgentAllowControllerTest extends TestCase
         $data['agent_matchtype'] = 'invalid';
 
         $controller = new AgentAllowController($repository);
-        $request = Request::create('/api/v1/agent-allows', 'POST', $data);
+        $request = AgentAllowRequest::create('/api/v1/agent-allows', 'POST', $data);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $controller->store($request);
     }
@@ -117,7 +128,10 @@ final class AgentAllowControllerTest extends TestCase
             ->andReturn($agentAllow);
 
         $controller = new AgentAllowController($repository);
-        $request = Request::create('/api/v1/agent-allows/1', 'PUT', $data);
+        $request = AgentAllowRequest::create('/api/v1/agent-allows/1', 'PUT', $data);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $result = $controller->update($request, 1);
 
@@ -150,7 +164,10 @@ final class AgentAllowControllerTest extends TestCase
         $repository->shouldNotReceive('checkClient');
 
         $controller = new AgentAllowController($repository);
-        $request = Request::create('/api/v1/agent-allows/check', 'POST', []);
+        $request = AgentAllowCheckRequest::create('/api/v1/agent-allows/check', 'POST', []);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $controller->check($request);
     }

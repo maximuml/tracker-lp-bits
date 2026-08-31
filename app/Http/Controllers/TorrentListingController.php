@@ -29,7 +29,7 @@ class TorrentListingController extends Controller
         $currentUser = app(CurrentUser::class)->get() ?? $user->toLegacyArray();
         app(CurrentUser::class)->set($currentUser);
 
-        $data = TorrentSearchRepository::getListingData($request->query->all());
+        $data = app(TorrentSearchRepository::class)->getListingData($request->query->all());
 
         return view('torrents.index', $data);
     }

@@ -35,7 +35,7 @@ class PostController extends Controller
         }
 
         $dto = ListPostsDto::fromRequest($request);
-        $posts = ForumRepository::getTopicPosts((int) $topic->id, null, $dto->offset(), $dto->perPage);
+        $posts = app(ForumRepository::class)->getTopicPosts((int) $topic->id, null, $dto->offset(), $dto->perPage);
 
         return $this->success(PostResource::collection($posts));
     }
@@ -64,11 +64,11 @@ class PostController extends Controller
         $dto = StorePostDto::fromRequest($request);
 
         $date = now()->toDateTimeString();
-        $postId = ForumRepository::createPost((int) $topic->id, (int) $user->id, $dto->body, $date);
+        $postId = app(ForumRepository::class)->createPost((int) $topic->id, (int) $user->id, $dto->body, $date);
 
-        ForumRepository::setTopicLastPost((int) $topic->id, $postId);
-        ForumRepository::incrementForumPostCount((int) $forum->id);
-        ForumRepository::updateUserLastPost((int) $user->id, $date);
+        app(ForumRepository::class)->setTopicLastPost((int) $topic->id, $postId);
+        app(ForumRepository::class)->incrementForumPostCount((int) $forum->id);
+        app(ForumRepository::class)->updateUserLastPost((int) $user->id, $date);
 
         $post = Post::query()->findOrFail($postId);
         $post->load('user');
@@ -112,9 +112,9 @@ class PostController extends Controller
         $dto = UpdatePostDto::fromRequest($request);
 
         $date = now()->toDateTimeString();
-        ForumRepository::updatePostBody((int) $post->id, $dto->body, $date, (int) $user->id);
+        app(ForumRepository::class)->updatePostBody((int) $post->id, $dto->body, $date, (int) $user->id);
 
-        $postInfo = ForumRepository::getPostEditInfo((int) $post->id);
+        $postInfo = app(ForumRepository::class)->getPostEditInfo((int) $post->id);
         if ($dto->subject !== null && $dto->subject !== '' && ! empty($postInfo['is_first_post'])) {
             $topic->update(['subject' => $dto->subject]);
         }
@@ -140,7 +140,7 @@ class PostController extends Controller
             throw ValidationException::withMessages(['post' => ['Permission denied.']]);
         }
 
-        ForumRepository::deletePost((int) $post->id, (int) $topic->id, (int) $topic->forumid);
+        app(ForumRepository::class)->deletePost((int) $post->id, (int) $topic->id, (int) $topic->forumid);
 
         return $this->success(['success' => true], 'Post deleted');
     }

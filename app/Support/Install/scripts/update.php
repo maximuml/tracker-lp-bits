@@ -96,7 +96,6 @@ if ($currentStep == 2) {
         }
     }
 
-    //    dd($tableRows);
     while ($isPost) {
         try {
             if (empty($_REQUEST['version_url'])) {

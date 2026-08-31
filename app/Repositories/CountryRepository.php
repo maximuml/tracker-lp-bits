@@ -11,7 +11,7 @@ final class CountryRepository
     /**
      * @return array<string, mixed>|null
      */
-    public static function findById(int|string $id): ?array
+    public function findById(int|string $id): ?array
     {
         $result = DB::table('countries')->where('id', $id)->first();
 

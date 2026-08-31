@@ -19,7 +19,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
 
 class WebController extends Controller
@@ -93,7 +92,7 @@ class WebController extends Controller
         ]);
     }
 
-    public function login(Request $request): RedirectResponse
+    public function login(LoginRequest $request): RedirectResponse
     {
         if (Auth::guard('nexus-web')->check()) {
             return Redirect::intended('index.php');
@@ -107,18 +106,8 @@ class WebController extends Controller
             return $this->backWithError($request, $exception->getMessage());
         }
 
-        $validator = Validator::make($request->all(), (new LoginRequest)->rules());
-
-        if ($validator->fails()) {
-            $this->authService->recordFailedAttempt($ip);
-
-            return Redirect::back()
-                ->withErrors($validator)
-                ->withInput($request->except('password'));
-        }
-
         try {
-            $this->authService->authenticate($validator->validated(), $ip);
+            $this->authService->authenticate($request->validated(), $ip);
         } catch (AuthenticationException $exception) {
             return $this->backWithError($request, $exception->getMessage());
         }
@@ -183,7 +172,7 @@ class WebController extends Controller
     private function renderPasskeyLogin(): string
     {
         ob_start();
-        UserPasskeyRepository::renderLogin();
+        app(UserPasskeyRepository::class)->renderLogin();
         AssetAppender::js('js/passkey.js', 'footer', true);
 
         return (string) ob_get_clean();

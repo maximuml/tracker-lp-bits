@@ -90,10 +90,10 @@ final class SettingsSeed
         app(Globals::class)->set('enablebitbucket_main', $MAIN['enablebitbucket']);
         app(Globals::class)->set('altname_main', $MAIN['altname'] ?? '');
         app(Globals::class)->set('deflang', $MAIN['defaultlang']);
-        $firstStylesheetId = StyleRepository::firstId() ?? 3;
+        $firstStylesheetId = app(StyleRepository::class)->firstId() ?? 3;
         app(Globals::class)->set('defcss', (int) ($MAIN['defstylesheet'] ?: $firstStylesheetId));
         app(Globals::class)->set('enabledonation', $MAIN['donation']);
-        $searchBoxIds = SearchBoxRepository::getOrderedIds();
+        $searchBoxIds = app(SearchBoxRepository::class)->getOrderedIds();
         $defaultBrowsecat = (int) ($searchBoxIds[0] ?? 1);
         app(Globals::class)->set('browsecatmode', (int) ($MAIN['browsecat'] ?? $defaultBrowsecat));
         app(Globals::class)->set('waitsystem', $MAIN['waitsystem']);

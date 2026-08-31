@@ -11,9 +11,9 @@ use Illuminate\Support\Facades\DB;
 class TorrentListingRepository
 {
     /** @param  array<int|string, mixed>  $options */
-    public static function getCount(array $options): int
+    public function getCount(array $options): int
     {
-        $query = self::buildBaseQuery($options);
+        $query = $this->buildBaseQuery($options);
 
         return $query->count();
     }
@@ -22,9 +22,9 @@ class TorrentListingRepository
      * @param  array<int|string, mixed>  $options
      * @return array<int|string, mixed>
      */
-    public static function getList(array $options): array
+    public function getList(array $options): array
     {
-        $query = self::buildBaseQuery($options)
+        $query = $this->buildBaseQuery($options)
             ->select($options['fields'])
             ->selectRaw('? as search_box_id', [$options['search_box_id']])
             ->offset($options['offset'])
@@ -48,7 +48,7 @@ class TorrentListingRepository
     /**
      * @param  array<int|string, mixed>  $options
      */
-    private static function buildBaseQuery(array $options): Builder
+    private function buildBaseQuery(array $options): Builder
     {
         $query = DB::table('torrents');
 
@@ -80,7 +80,7 @@ class TorrentListingRepository
     /**
      * @return array<int|string, mixed>
      */
-    public static function getHotSearch(int $secondsBack = 259200): array
+    public function getHotSearch(int $secondsBack = 259200): array
     {
         return DB::table('suggest')
             ->select('keywords')
@@ -94,7 +94,7 @@ class TorrentListingRepository
             ->all();
     }
 
-    public static function cleanupSuggest(int $secondsBack = 518400): void
+    public function cleanupSuggest(int $secondsBack = 518400): void
     {
         DB::table('suggest')
             ->where('adddate', '<', Carbon::createFromTimestamp(TIMENOW - $secondsBack)->format('Y-m-d H:i:s'))

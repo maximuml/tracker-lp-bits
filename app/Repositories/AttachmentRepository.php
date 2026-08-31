@@ -12,7 +12,7 @@ final class AttachmentRepository
     /**
      * @return array<string, mixed>|null
      */
-    public static function findByDlkey(string $dlkey): ?array
+    public function findByDlkey(string $dlkey): ?array
     {
         $record = Attachment::query()->where('dlkey', $dlkey)->first();
 
@@ -23,7 +23,7 @@ final class AttachmentRepository
      * @param  array<int, string>  $dlkeys
      * @return array<string, array<string, mixed>>
      */
-    public static function findByDlkeys(array $dlkeys): array
+    public function findByDlkeys(array $dlkeys): array
     {
         if (empty($dlkeys)) {
             return [];
@@ -37,7 +37,7 @@ final class AttachmentRepository
             ->all();
     }
 
-    public static function countRecentForUser(int $userId): int
+    public function countRecentForUser(int $userId): int
     {
         $now = date('Y-m-d H:i:s', time() - 86400);
 

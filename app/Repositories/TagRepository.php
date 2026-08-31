@@ -84,7 +84,7 @@ class TagRepository extends BaseRepository
     }
 
     /** @return  mixed */
-    public static function createBasicQuery()
+    public function createBasicQuery()
     {
         return Tag::query()->orderBy('priority', 'desc')->orderBy('id', 'desc');
     }
@@ -193,10 +193,10 @@ class TagRepository extends BaseRepository
         return count($rows);
     }
 
-    public static function getOrderByFieldIdString(): string
+    public function getOrderByFieldIdString(): string
     {
         if (self::$orderByFieldIdString === null) {
-            $results = self::createBasicQuery()->get(['id']);
+            $results = $this->createBasicQuery()->get(['id']);
             self::$orderByFieldIdString = $results->isEmpty() ? '0' : $results->implode('id', ',');
         }
 
@@ -256,10 +256,10 @@ class TagRepository extends BaseRepository
     /**
      * @return EloquentCollection<int, Tag>
      */
-    public static function listAll(int $searchBoxId = 0): EloquentCollection
+    public function listAll(int $searchBoxId = 0): EloquentCollection
     {
         if (empty(self::$allTags)) {
-            self::$allTags = self::createBasicQuery()->get();
+            self::$allTags = $this->createBasicQuery()->get();
         }
         if ($searchBoxId > 0) {
             return self::$allTags->filter(fn (Tag $d) => in_array($d->mode, [0, $searchBoxId]));

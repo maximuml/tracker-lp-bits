@@ -50,7 +50,7 @@ class UtilityController extends LegacyController
             return redirect('/search.php'.($qs ? '?'.$qs : ''));
         }
 
-        $data = SearchPageRepository::dataForSearch($request, $currentUser);
+        $data = app(SearchPageRepository::class)->dataForSearch($request, $currentUser);
 
         return $this->legacyPage($request, 'search', true, $data);
     }

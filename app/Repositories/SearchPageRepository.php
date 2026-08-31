@@ -23,7 +23,7 @@ class SearchPageRepository
     /**
      * @return array<string, mixed>
      */
-    public static function dataForSearch(Request $request, User $currentUser): array
+    public function dataForSearch(Request $request, User $currentUser): array
     {
         $searchParams = $request->all();
         $searchRaw = is_scalar($searchParams['search'] ?? '') ? trim((string) ($searchParams['search'] ?? '')) : '';
@@ -104,13 +104,13 @@ class SearchPageRepository
             $rows = (array) ($meiliResult['list'] ?? []);
             $pager = Pagination::pager($torrentsperpage, $count, $addparam);
 
-            return self::formatResult($searchRaw, $searchArea, $count, $rows, $pager[0] ?? '', $pager[1] ?? '', $torrentsperpage);
+            return $this->formatResult($searchRaw, $searchArea, $count, $rows, $pager[0] ?? '', $pager[1] ?? '', $torrentsperpage);
         }
 
         $count = 0;
         $rows = [];
         if ($search !== '') {
-            $torrentQuery = self::buildFallbackQuery($search, $searchArea, $modeArr, $approvalStatus, $banned, $currentUser->id);
+            $torrentQuery = $this->buildFallbackQuery($search, $searchArea, $modeArr, $approvalStatus, $banned, $currentUser->id);
             $count = (int) (clone $torrentQuery)->count();
             $pager = Pagination::pager($torrentsperpage, $count, $addparam);
             $offset = (int) ($pager[3] ?? 0);
@@ -129,13 +129,13 @@ class SearchPageRepository
             $pager = Pagination::pager($torrentsperpage, 0, $addparam);
         }
 
-        return self::formatResult($searchRaw, $searchArea, $count, $rows, $pager[0] ?? '', $pager[1] ?? '', $torrentsperpage);
+        return $this->formatResult($searchRaw, $searchArea, $count, $rows, $pager[0] ?? '', $pager[1] ?? '', $torrentsperpage);
     }
 
     /**
      * @param  array<int, mixed>  $modeArr
      */
-    private static function buildFallbackQuery(string $search, int $searchArea, array $modeArr, ?int $approvalStatus, ?int $banned, int $currentUserId): Builder
+    private function buildFallbackQuery(string $search, int $searchArea, array $modeArr, ?int $approvalStatus, ?int $banned, int $currentUserId): Builder
     {
         $tableTorrent = 'torrents';
         $tableCategory = 'categories';
@@ -184,7 +184,7 @@ class SearchPageRepository
      * @param  array<int, array<string, mixed>>  $rows
      * @return array<string, mixed>
      */
-    private static function formatResult(string $searchRaw, int $searchArea, int $count, array $rows, string $pagertop, string $pagerbottom, int $torrentsperpage): array
+    private function formatResult(string $searchRaw, int $searchArea, int $count, array $rows, string $pagertop, string $pagerbottom, int $torrentsperpage): array
     {
         return [
             'search' => $searchRaw,

@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 
 class ModtaskRepository
 {
-    public static function confirmUser(int $userId, string $status): void
+    public function confirmUser(int $userId, string $status): void
     {
         User::query()->where('id', $userId)->update([
             'status' => $status,
@@ -21,7 +21,7 @@ class ModtaskRepository
     /**
      * @return ?array<int|string, mixed>
      */
-    public static function getUserArray(int $userId): ?array
+    public function getUserArray(int $userId): ?array
     {
         $user = User::query()->find($userId);
 
@@ -34,7 +34,7 @@ class ModtaskRepository
         return $user->makeVisible(['passhash'])->toArray();
     }
 
-    public static function addFund(int $userId, float $usd, float $cny, string $memo): void
+    public function addFund(int $userId, float $usd, float $cny, string $memo): void
     {
         DB::table('funds')->insert([
             'usd' => $usd,
@@ -48,7 +48,7 @@ class ModtaskRepository
     /**
      * @param  array<string, mixed>  $data
      */
-    public static function updateUser(int $userId, array $data): int
+    public function updateUser(int $userId, array $data): int
     {
         return User::query()->where('id', $userId)->update($data);
     }
@@ -56,7 +56,7 @@ class ModtaskRepository
     /**
      * @param  array<string, mixed>  $extra
      */
-    public static function addWarning(int $userId, array $extra): void
+    public function addWarning(int $userId, array $extra): void
     {
         DB::table('users')
             ->where('id', $userId)

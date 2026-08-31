@@ -395,7 +395,7 @@ return [
         'access_admin_class_min' => UserClassEnum::ADMINISTRATOR->value,
     ],
     'permission' => [
-        'user_token_allowed' => TokenRepository::listUserTokenPermissions(false),
+        'user_token_allowed' => app(TokenRepository::class)->listUserTokenPermissions(false),
     ],
     'image_hosting' => [
         'driver' => 'local',

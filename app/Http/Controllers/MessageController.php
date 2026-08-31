@@ -134,7 +134,7 @@ class MessageController extends LegacyController
     {
         $dto = MessageListDto::fromRequest($request, (int) Auth::id());
 
-        $result = MessageRepository::getMailboxMessages(
+        $result = $this->repository->getMailboxMessages(
             $dto->userId,
             $dto->mailbox,
             $dto->keyword,
@@ -173,12 +173,12 @@ class MessageController extends LegacyController
     {
         $userId = (int) Auth::id();
 
-        if (! MessageRepository::getMessageForUser((int) $message->id, $userId)) {
+        if (! $this->repository->getMessageForUser((int) $message->id, $userId)) {
             abort(404);
         }
 
         if ($message->receiver == $userId && $message->unread) {
-            MessageRepository::markAsRead([(int) $message->id], $userId);
+            $this->repository->markAsRead([(int) $message->id], $userId);
             $message->refresh();
         }
 
@@ -194,7 +194,7 @@ class MessageController extends LegacyController
     {
         $userId = (int) Auth::id();
 
-        if (! MessageRepository::getMessageForUser((int) $message->id, $userId)) {
+        if (! $this->repository->getMessageForUser((int) $message->id, $userId)) {
             abort(404);
         }
 
@@ -207,7 +207,7 @@ class MessageController extends LegacyController
         }
 
         if ($dto->location !== null) {
-            MessageRepository::moveMessages([(int) $message->id], $userId, $dto->location);
+            $this->repository->moveMessages([(int) $message->id], $userId, $dto->location);
         }
 
         $message->refresh()->load('send_user');
@@ -221,7 +221,7 @@ class MessageController extends LegacyController
     public function destroy(Message $message): array
     {
         $userId = (int) Auth::id();
-        if (MessageRepository::deleteSingleMessage((int) $message->id, $userId) === null) {
+        if ($this->repository->deleteSingleMessage((int) $message->id, $userId) === null) {
             abort(404);
         }
 

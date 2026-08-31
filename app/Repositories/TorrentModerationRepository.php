@@ -44,6 +44,12 @@ use Illuminate\Support\Facades\DB;
  */
 class TorrentModerationRepository extends BaseRepository
 {
+    public function __construct(
+        private readonly SearchBoxRepository $searchBoxRepository,
+        private readonly TorrentDownloadRepository $downloadRepository,
+        private readonly MeiliSearchRepository $meiliSearchRepository,
+    ) {}
+
     /**
      * @param  mixed  $user
      * @return array<int|string, mixed>
@@ -222,7 +228,7 @@ class TorrentModerationRepository extends BaseRepository
         return false;
     }
 
-    public static function getApprovalDenyCount(int $ownerId): int
+    public function getApprovalDenyCount(int $ownerId): int
     {
         return (int) Torrent::query()
             ->where('owner', $ownerId)
@@ -354,7 +360,7 @@ class TorrentModerationRepository extends BaseRepository
         }
         $torrentIdStr = implode(',', $torrentIdArr);
         Logger::writeWithContext((string) "torrentIdStr: {$torrentIdStr}, sectionId: {$sectionId}", (string) 'info', (bool) false);
-        $searchBoxRep = new SearchBoxRepository;
+        $searchBoxRep = $this->searchBoxRepository;
         $sections = $searchBoxRep->listSections(SearchBox::listAllSectionId(), true)->keyBy('id');
         if (! $sections->has($sectionId)) {
             throw new NexusException(Locale::trans('upload.invalid_section', [], null));
@@ -451,7 +457,7 @@ class TorrentModerationRepository extends BaseRepository
 
         DB::table('hit_and_runs')->whereIn('torrent_id', $idArr)->delete();
 
-        $downloadRepo = new TorrentDownloadRepository;
+        $downloadRepo = $this->downloadRepository;
         foreach ($idArr as $_id) {
             /** @var Torrent|null $torrent */
             $torrent = $torrentInfo->get($_id);
@@ -476,7 +482,7 @@ class TorrentModerationRepository extends BaseRepository
         }
 
         try {
-            $meiliSearchRep = new MeiliSearchRepository;
+            $meiliSearchRep = $this->meiliSearchRepository;
             $meiliSearchRep->deleteDocuments($idArr);
         } catch (\Throwable $e) {
             Logger::writeWithContext('MeiliSearch delete on torrent delete failed: '.$e->getMessage(), 'error');

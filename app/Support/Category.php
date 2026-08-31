@@ -38,7 +38,7 @@ final class Category
             if ($cached !== false && is_array($cached)) {
                 self::$iconRows = $cached;
             } else {
-                self::$iconRows = CategoryRepository::getIconRows();
+                self::$iconRows = app(CategoryRepository::class)->getIconRows();
                 if ($cache !== null) {
                     $cache->cache_value('category_icon_content', self::$iconRows, 156400);
                 }
@@ -62,7 +62,7 @@ final class Category
             if ($cached !== false && is_array($cached)) {
                 self::$categoryRows = $cached;
             } else {
-                self::$categoryRows = CategoryRepository::getCategoryRows();
+                self::$categoryRows = app(CategoryRepository::class)->getCategoryRows();
                 if ($cache !== null) {
                     $cache->cache_value('category_content', self::$categoryRows, 126400);
                 }
@@ -128,7 +128,7 @@ final class Category
         $sirow = $cache !== null ? $cache->get_value($cacheKey) : false;
 
         if ($sirow === false) {
-            $sirowData = CategoryRepository::findSecondIcon($row);
+            $sirowData = app(CategoryRepository::class)->findSecondIcon($row);
             $sirow = $sirowData ?? 'not allowed';
             if ($cache !== null) {
                 $cache->cache_value($cacheKey, $sirow, 600);
@@ -178,7 +178,7 @@ final class Category
             }
         }
 
-        $ret = CategoryRepository::getCategoriesByMode($catmode);
+        $ret = app(CategoryRepository::class)->getCategoriesByMode($catmode);
 
         if ($cache !== null) {
             $cache->cache_value($cacheKey, $ret, 3600);

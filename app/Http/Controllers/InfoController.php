@@ -55,9 +55,9 @@ class InfoController extends LegacyController
         ];
 
         if ($action === 'viewposts') {
-            $data = array_merge($data, InfoRepository::getUserHistoryPosts($userid, (int) ($curUser['class'] ?? 0), $perpage, $phpSelf));
+            $data = array_merge($data, app(InfoRepository::class)->getUserHistoryPosts($userid, (int) ($curUser['class'] ?? 0), $perpage, $phpSelf));
         } elseif ($action === 'viewcomments') {
-            $data = array_merge($data, InfoRepository::getUserHistoryComments($userid, $perpage, $phpSelf));
+            $data = array_merge($data, app(InfoRepository::class)->getUserHistoryComments($userid, $perpage, $phpSelf));
         }
 
         return $this->legacyPage($request, 'userhistory', true, $data);
@@ -65,7 +65,7 @@ class InfoController extends LegacyController
 
     public function donate(Request $request): View|RedirectResponse|Response
     {
-        $data = InfoRepository::donationPageData();
+        $data = app(InfoRepository::class)->donationPageData();
         $data['thanks'] = $request->query('do') === 'thanks';
 
         return $this->legacyPage($request, 'donate', false, $data);

@@ -8,7 +8,7 @@ use App\Models\SiteLog;
 
 final class SiteLogRepository
 {
-    public static function create(string $text, string $security = 'normal', ?int $userId = null): void
+    public function create(string $text, string $security = 'normal', ?int $userId = null): void
     {
         SiteLog::query()->insert([
             'added' => now(),

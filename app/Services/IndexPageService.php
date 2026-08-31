@@ -95,7 +95,7 @@ final class IndexPageService
             'title' => $lang['text_recent_news'] ?? 'Recent news',
             'canManage' => $canManage,
             'manageLink' => $lang['text_news_page'] ?? 'News page',
-            'items' => IndexRepository::getLatestNews($maxNews),
+            'items' => app(IndexRepository::class)->getLatestNews($maxNews),
             'showHideTitle' => $lang['title_show_or_hide'] ?? 'Show/Hide',
             'editLabel' => $lang['text_e'] ?? 'E',
             'deleteLabel' => $lang['text_d'] ?? 'D',
@@ -164,7 +164,7 @@ JS;
             return ['show' => false];
         }
 
-        $posts = IndexRepository::getLatestForumPosts(5, (int) UserDisplay::currentClass());
+        $posts = app(IndexRepository::class)->getLatestForumPosts(5, (int) UserDisplay::currentClass());
 
         return [
             'show' => count($posts) > 0,
@@ -195,7 +195,7 @@ JS;
         $html = $cache !== null ? $cache->get_value($cacheKey) : false;
 
         if ($html === false || $html === null || $html === '') {
-            $torrents = IndexRepository::getLatestTorrents(9);
+            $torrents = app(IndexRepository::class)->getLatestTorrents(9);
             if ($torrents->isNotEmpty()) {
                 $items = [];
                 foreach ($torrents as $torrent) {
@@ -246,7 +246,7 @@ JS;
             return ['show' => false];
         }
 
-        $allUploaders = IndexRepository::getTopUploaders(10);
+        $allUploaders = app(IndexRepository::class)->getTopUploaders(10);
         if ($allUploaders->isEmpty()) {
             return ['show' => false];
         }
@@ -267,7 +267,7 @@ jQuery(".tr-top-uploader-tab").on("click", "td", function () {
 JS;
         AssetAppender::js($toggleJs, 'footer', false);
 
-        $recentUploaders = IndexRepository::getTopUploaders(10, 30);
+        $recentUploaders = app(IndexRepository::class)->getTopUploaders(10, 30);
 
         $buildRows = function ($uploaders): array {
             $rows = [];
@@ -311,7 +311,7 @@ JS;
 
         $pollArr = $cache !== null ? $cache->get_value('current_poll_content') : false;
         if ($pollArr === false || $pollArr === null) {
-            $pollArr = IndexRepository::getCurrentPoll();
+            $pollArr = app(IndexRepository::class)->getCurrentPoll();
             if ($pollArr && $cache !== null) {
                 $cache->cache_value('current_poll_content', $pollArr, 7226);
             }
@@ -341,7 +341,7 @@ JS;
                 }
             }
 
-            $uservote = IndexRepository::getUserVote($pollid, (int) ($curUser['id'] ?? 0));
+            $uservote = app(IndexRepository::class)->getUserVote($pollid, (int) ($curUser['id'] ?? 0));
             $result['pollId'] = $pollid;
             $result['question'] = $question;
             $result['options'] = $options;
@@ -355,7 +355,7 @@ JS;
             if ($uservote !== null) {
                 $results = $cache !== null ? $cache->get_value('current_poll_result') : false;
                 if ($results === false || $results === null) {
-                    $results = IndexRepository::getPollResults($pollid);
+                    $results = app(IndexRepository::class)->getPollResults($pollid);
                     $cache?->cache_value('current_poll_result', $results, 3652);
                 }
                 $tvotes = array_sum(array_column($results, 'count'));
@@ -389,9 +389,9 @@ JS;
             return ['show' => false];
         }
 
-        $userStats = IndexRepository::getUserStats();
-        $torrentStats = IndexRepository::getTorrentStats();
-        $classStats = IndexRepository::getClassStats();
+        $userStats = app(IndexRepository::class)->getUserStats();
+        $torrentStats = app(IndexRepository::class)->getTorrentStats();
+        $classStats = app(IndexRepository::class)->getClassStats();
         $maxusers = (int) app(Globals::class)->get('maxusers', 0);
 
         return [

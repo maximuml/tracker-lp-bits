@@ -54,7 +54,7 @@ class TorrentEditController extends Controller
             abort(404);
         }
 
-        $row = TorrentDetailRepository::getTorrent($id);
+        $row = app(TorrentDetailRepository::class)->getTorrent($id);
         if (empty($row)) {
             abort(404);
         }
@@ -85,12 +85,12 @@ class TorrentEditController extends Controller
             'torrentRow' => $row,
             'currentUser' => $currentUser,
             'headTitle' => $headTitle,
-            'tagIds' => TorrentDetailRepository::getTagIds($id),
+            'tagIds' => app(TorrentDetailRepository::class)->getTagIds($id),
             'cats' => Category::listByModeWithContext($sectionmode),
             'returnto' => (string) $request->input('returnto', ''),
             'requestUri' => is_string($request->server('REQUEST_URI')) ? $request->server('REQUEST_URI') : '',
             'taxonomySelect' => $this->searchBoxRepository->renderTaxonomySelect($sectionmode, $row),
-            'tagCheckbox' => $this->tagRepository->renderCheckbox($sectionmode, (array) TorrentDetailRepository::getTagIds($id)),
+            'tagCheckbox' => $this->tagRepository->renderCheckbox($sectionmode, (array) app(TorrentDetailRepository::class)->getTagIds($id)),
             'customFieldsHtml' => (new CustomField)->renderOnUploadPage($id, $sectionmode),
             'hitAndRunHtml' => $this->hitAndRunRepository->renderOnUploadPage($row['hr'] ?? 0, $sectionmode),
         ]);

@@ -233,7 +233,7 @@ final class Cache
     {
         Logger::writeWithContext('clear_category_cache');
         self::forgetWithLocales('category_content');
-        foreach (SearchBoxRepository::getOrderedIds() as $id) {
+        foreach (app(SearchBoxRepository::class)->getOrderedIds() as $id) {
             self::forgetWithLocales("category_list_mode_{$id}");
         }
     }
@@ -241,7 +241,7 @@ final class Cache
     public static function clearTaxonomy(string $table): void
     {
         Logger::writeWithContext("clear_taxonomy_cache: $table");
-        foreach (SearchBoxRepository::getOrderedIds() as $id) {
+        foreach (app(SearchBoxRepository::class)->getOrderedIds() as $id) {
             self::forgetWithLocales("{$table}_list_mode_{$id}");
         }
         self::forgetWithLocales("{$table}_list_mode_0");
@@ -250,7 +250,7 @@ final class Cache
     public static function clearStaffMessage(): void
     {
         Logger::writeWithContext('clear_staff_message_cache');
-        MessageRepository::updateStaffMessageCountCache(false);
+        app(MessageRepository::class)->updateStaffMessageCountCache(false);
     }
 
     public static function clearSearchBox(): void

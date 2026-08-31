@@ -178,7 +178,7 @@ final class UsersearchPageService
      */
     private function buildResults(array $curUser, bool $hasModcomment, string $requestUri): string
     {
-        $searchResult = UserSearchRepository::administrativeSearch((array) request()->query(), $hasModcomment, 30);
+        $searchResult = app(UserSearchRepository::class)->administrativeSearch((array) request()->query(), $hasModcomment, 30);
         $count = (int) $searchResult['count'];
         $q = (string) $searchResult['q'];
         $perpage = 30;
@@ -187,7 +187,7 @@ final class UsersearchPageService
 
         $userIds = array_map(fn ($row) => (int) ($row['id'] ?? 0), $res);
         $ips = array_map(fn ($row) => (string) ($row['ip'] ?? ''), $res);
-        $extraStats = UserListingRepository::getSearchExtraStats($userIds, $ips, (int) ($curUser['class'] ?? 0));
+        $extraStats = app(UserListingRepository::class)->getSearchExtraStats($userIds, $ips, (int) ($curUser['class'] ?? 0));
         $peerTotals = $extraStats['peers'];
         $postCounts = $extraStats['posts'];
         $commentCounts = $extraStats['comments'];

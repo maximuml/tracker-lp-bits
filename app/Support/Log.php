@@ -17,7 +17,7 @@ final class Log
 {
     public static function write(string $text, string $security = 'normal', ?int $userId = null): void
     {
-        SiteLogRepository::create($text, $security, $userId);
+        app(SiteLogRepository::class)->create($text, $security, $userId);
     }
 
     public static function writeWithContext(string $text, string $security = 'normal'): void

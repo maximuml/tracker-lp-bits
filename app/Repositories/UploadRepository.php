@@ -421,7 +421,7 @@ class UploadRepository extends BaseRepository
 
         if ($section->isSectionBrowse()) {
             $offerId = (int) $request->offer;
-            if ($offerId > 0 && SiteConfig::current()->main->showOffer() && TorrentUploadRepository::isAllowedOffer($offerId, $user->id)) {
+            if ($offerId > 0 && SiteConfig::current()->main->showOffer() && app(TorrentUploadRepository::class)->isAllowedOffer($offerId, $user->id)) {
                 return true;
             }
 
@@ -660,11 +660,11 @@ class UploadRepository extends BaseRepository
         if ($offerId <= 0) {
             return;
         }
-        if (! TorrentUploadRepository::isAllowedOffer($offerId, $user->id)) {
+        if (! app(TorrentUploadRepository::class)->isAllowedOffer($offerId, $user->id)) {
             return;
         }
 
-        $voterIds = TorrentUploadRepository::getOfferVoterIds($offerId, $user->id);
+        $voterIds = app(TorrentUploadRepository::class)->getOfferVoterIds($offerId, $user->id);
         foreach ($voterIds as $voterId) {
             $locale = Locale::userLocale($voterId);
             $msg = Locale::trans('torrent.msg_offer_you_voted', [], $locale)
@@ -686,7 +686,7 @@ class UploadRepository extends BaseRepository
                 'msg' => $msg,
             ]);
         }
-        TorrentUploadRepository::finalizeOffer($offerId, $user->id);
+        app(TorrentUploadRepository::class)->finalizeOffer($offerId, $user->id);
     }
 
     private function getSubCategoryValue(Request $request, string $name, int $mode): int

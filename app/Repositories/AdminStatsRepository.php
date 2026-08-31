@@ -12,7 +12,7 @@ final class AdminStatsRepository
     /**
      * @return array<string, mixed>
      */
-    public static function stats(string $uporder, string $catorder): array
+    public function stats(string $uporder, string $catorder): array
     {
         $nTor = DB::table('torrents')->count();
         $nPeers = DB::table('peers')->count();
@@ -20,8 +20,8 @@ final class AdminStatsRepository
         return [
             'n_tor' => $nTor,
             'n_peers' => $nPeers,
-            'upers' => self::uploaderActivity($uporder, $nTor, $nPeers),
-            'cats' => $nTor > 0 ? self::categoryActivity($catorder) : collect(),
+            'upers' => $this->uploaderActivity($uporder, $nTor, $nPeers),
+            'cats' => $nTor > 0 ? $this->categoryActivity($catorder) : collect(),
             'uporder' => $uporder,
             'catorder' => $catorder,
         ];
@@ -30,7 +30,7 @@ final class AdminStatsRepository
     /**
      * @return Collection<int, \stdClass>
      */
-    private static function uploaderActivity(string $uporder, int $nTor, int $nPeers): Collection
+    private function uploaderActivity(string $uporder, int $nTor, int $nPeers): Collection
     {
         $orderBy = match ($uporder) {
             'lastul' => 'last DESC, name',
@@ -56,7 +56,7 @@ final class AdminStatsRepository
     /**
      * @return Collection<int, \stdClass>
      */
-    private static function categoryActivity(string $catorder): Collection
+    private function categoryActivity(string $catorder): Collection
     {
         $orderBy = match ($catorder) {
             'lastul' => 'last DESC, c.name',
@@ -77,7 +77,7 @@ final class AdminStatsRepository
     /**
      * @return Collection<int, \stdClass>
      */
-    public static function allagents(): Collection
+    public function allagents(): Collection
     {
         return DB::table('peers')
             ->selectRaw('agent, count(*) as counts')

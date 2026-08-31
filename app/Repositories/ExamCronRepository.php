@@ -35,10 +35,14 @@ use Illuminate\Support\Facades\DB;
  */
 class ExamCronRepository extends BaseRepository
 {
+    public function __construct(
+        private readonly ExamProgressRepository $examProgressRepository,
+    ) {}
+
     /** @return  mixed */
     public function cronjonAssign()
     {
-        $examRepo = new ExamRepository;
+        $examRepo = app(ExamRepository::class);
         $exams = $examRepo->listValid(null, ExamDiscovered::YES->value, ExamType::EXAM->value);
         if ($exams->isEmpty()) {
             Logger::writeWithContext((string) 'No valid and discovered exam.', (string) 'info', (bool) false);
@@ -64,8 +68,8 @@ class ExamCronRepository extends BaseRepository
 
     public function fetchUserAndDoAssign(Exam $exam): bool|int
     {
-        $examRepo = new ExamRepository;
-        $progressRepo = new ExamProgressRepository;
+        $examRepo = app(ExamRepository::class);
+        $progressRepo = $this->examProgressRepository;
         $filters = $exam->filters;
         Logger::writeWithContext((string) ("exam: {$exam->id}, filters: ".Json::encode($filters)), (string) 'info', (bool) false);
         $userTable = (new User)->getTable();
@@ -173,8 +177,8 @@ class ExamCronRepository extends BaseRepository
     /** @param  mixed  $ignoreTimeRange */
     public function cronjobCheckout($ignoreTimeRange = false): int
     {
-        $examRepo = new ExamRepository;
-        $progressRepo = new ExamProgressRepository;
+        $examRepo = app(ExamRepository::class);
+        $progressRepo = $this->examProgressRepository;
         $now = Carbon::now(); // 保持 Carbon 对象即可，Laravel 会自动序列化
         $examUserTable = (new ExamUser)->getTable();
         $examTable = (new Exam)->getTable();

@@ -20,22 +20,22 @@ final class OfferRepository extends BaseRepository
     /** @var list<string> */
     private const ALLOWED_SORT_COLUMNS = ['category', 'name', 'added', 'comments', 'yeah', 'against', 'v_res'];
 
-    public static function findOffer(int $id): ?Offer
+    public function findOffer(int $id): ?Offer
     {
         return Offer::query()->where('id', $id)->first();
     }
 
-    public static function findOfferWithUser(int $id): ?Offer
+    public function findOfferWithUser(int $id): ?Offer
     {
         return Offer::query()->with('user')->where('offers.id', $id)->first(['offers.userid', 'offers.name']);
     }
 
-    public static function findOfferWithVotes(int $id): ?Offer
+    public function findOfferWithVotes(int $id): ?Offer
     {
         return Offer::query()->where('id', $id)->first(['yeah', 'against', 'allowed', 'userid', 'name']);
     }
 
-    public static function offerNameExists(string $name): bool
+    public function offerNameExists(string $name): bool
     {
         return Offer::query()->where('name', $name)->exists();
     }
@@ -43,7 +43,7 @@ final class OfferRepository extends BaseRepository
     /**
      * @param  array<string, mixed>  $data
      */
-    public static function createOffer(array $data): int
+    public function createOffer(array $data): int
     {
         return (int) Offer::query()->insertGetId($data);
     }
@@ -51,7 +51,7 @@ final class OfferRepository extends BaseRepository
     /**
      * @return array{yeah: int, against: int}
      */
-    public static function getVoteCounts(int $offerId): array
+    public function getVoteCounts(int $offerId): array
     {
         return [
             'yeah' => (int) DB::table('offervotes')->where('vote', 'yeah')->where('offerid', $offerId)->count(),
@@ -59,19 +59,19 @@ final class OfferRepository extends BaseRepository
         ];
     }
 
-    public static function getOfferOwner(int $id): ?int
+    public function getOfferOwner(int $id): ?int
     {
         $value = Offer::query()->where('id', $id)->value('userid');
 
         return $value === null ? null : (int) $value;
     }
 
-    public static function getOfferName(int $id): ?string
+    public function getOfferName(int $id): ?string
     {
         return Offer::query()->where('id', $id)->value('name');
     }
 
-    public static function getVoteCount(int $offerId): int
+    public function getVoteCount(int $offerId): int
     {
         return (int) DB::table('offervotes')->where('offerid', $offerId)->count();
     }
@@ -79,7 +79,7 @@ final class OfferRepository extends BaseRepository
     /**
      * @return Collection<int, \stdClass>
      */
-    public static function getVoteRows(int $offerId, int $offset, int $perPage): Collection
+    public function getVoteRows(int $offerId, int $offset, int $perPage): Collection
     {
         return DB::table('offervotes')
             ->where('offerid', $offerId)
@@ -89,12 +89,12 @@ final class OfferRepository extends BaseRepository
             ->get();
     }
 
-    public static function userVoted(int $offerId, int $userId): bool
+    public function userVoted(int $offerId, int $userId): bool
     {
         return (bool) DB::table('offervotes')->where('offerid', $offerId)->where('userid', $userId)->exists();
     }
 
-    public static function recordVote(int $offerId, int $userId, string $vote): void
+    public function recordVote(int $offerId, int $userId, string $vote): void
     {
         DB::table('offervotes')->insert([
             'offerid' => $offerId,
@@ -103,17 +103,17 @@ final class OfferRepository extends BaseRepository
         ]);
     }
 
-    public static function incrementVote(int $offerId, string $column): bool
+    public function incrementVote(int $offerId, string $column): bool
     {
         return (bool) Offer::query()->where('id', $offerId)->increment($column);
     }
 
-    public static function allowOffer(int $offerId, string $allowedTime): bool
+    public function allowOffer(int $offerId, string $allowedTime): bool
     {
         return (bool) Offer::query()->where('id', $offerId)->update(['allowed' => 'allowed', 'allowedtime' => $allowedTime]);
     }
 
-    public static function denyOffer(int $offerId): bool
+    public function denyOffer(int $offerId): bool
     {
         return (bool) Offer::query()->where('id', $offerId)->update(['allowed' => 'denied']);
     }
@@ -121,22 +121,22 @@ final class OfferRepository extends BaseRepository
     /**
      * @param  array<string, mixed>  $data
      */
-    public static function updateOffer(int $offerId, array $data): bool
+    public function updateOffer(int $offerId, array $data): bool
     {
         return (bool) Offer::query()->where('id', $offerId)->update($data);
     }
 
-    public static function deleteOffer(int $offerId): bool
+    public function deleteOffer(int $offerId): bool
     {
         return (bool) Offer::query()->where('id', $offerId)->delete();
     }
 
-    public static function deleteOfferVotes(int $offerId): int
+    public function deleteOfferVotes(int $offerId): int
     {
         return DB::table('offervotes')->where('offerid', $offerId)->delete();
     }
 
-    public static function deleteOfferComments(int $offerId): int
+    public function deleteOfferComments(int $offerId): int
     {
         return Comment::query()->where('offer', $offerId)->delete();
     }
@@ -144,14 +144,14 @@ final class OfferRepository extends BaseRepository
     /**
      * @return array<string, mixed>|null
      */
-    public static function getLastComment(int $offerId): ?array
+    public function getLastComment(int $offerId): ?array
     {
         $row = Comment::query()->where('offer', $offerId)->orderByDesc('added')->first(['user', 'added', 'text']);
 
         return $row ? $row->toArray() : null;
     }
 
-    public static function countComments(int $offerId): int
+    public function countComments(int $offerId): int
     {
         return (int) Comment::query()->where('offer', $offerId)->count();
     }
@@ -159,7 +159,7 @@ final class OfferRepository extends BaseRepository
     /**
      * @return \Illuminate\Database\Eloquent\Collection<int, Comment>
      */
-    public static function getComments(int $offerId, int $offset, int $perPage): \Illuminate\Database\Eloquent\Collection
+    public function getComments(int $offerId, int $offset, int $perPage): \Illuminate\Database\Eloquent\Collection
     {
         return Comment::query()
             ->where('offer', $offerId)
@@ -169,7 +169,7 @@ final class OfferRepository extends BaseRepository
             ->get(['id', 'text', 'user', 'added', 'editedby', 'editdate']);
     }
 
-    public static function addStaffMessage(int $senderId, string $senderName, string $offerName, int $offerId): void
+    public function addStaffMessage(int $senderId, string $senderName, string $offerName, int $offerId): void
     {
         StaffMessage::query()->insert([
             'sender' => $senderId,
@@ -179,7 +179,7 @@ final class OfferRepository extends BaseRepository
         ]);
     }
 
-    public static function getUsername(int $userId): ?string
+    public function getUsername(int $userId): ?string
     {
         return User::query()->where('id', $userId)->value('username');
     }
@@ -187,7 +187,7 @@ final class OfferRepository extends BaseRepository
     /**
      * @return array{count: int, rows: Collection<int, \stdClass>}
      */
-    public static function getLegacyList(int $category, int $offerorId, string $search, string $sort, string $direction, int $offset, int $perPage): array
+    public function getLegacyList(int $category, int $offerorId, string $search, string $sort, string $direction, int $offset, int $perPage): array
     {
         $direction = $direction === 'asc' ? 'asc' : 'desc';
         $query = DB::table('offers')

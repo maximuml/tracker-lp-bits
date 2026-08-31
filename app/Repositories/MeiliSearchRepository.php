@@ -137,7 +137,7 @@ class MeiliSearchRepository extends BaseRepository
         return self::$client;
     }
 
-    public static function isEnabled(): bool
+    public function isEnabled(): bool
     {
         return SiteConfig::current()->meiliSearch->enabled();
     }
@@ -204,8 +204,8 @@ class MeiliSearchRepository extends BaseRepository
         $index = $client->index($indexName);
         $settings = [
             'distinctAttribute' => 'id',
-            'displayedAttributes' => self::getRequiredFields(),
-            'searchableAttributes' => self::getSearchableAttributes(),
+            'displayedAttributes' => $this->getRequiredFields(),
+            'searchableAttributes' => $this->getSearchableAttributes(),
             'filterableAttributes' => self::$filterableAttributes,
             'sortableAttributes' => self::$sortableAttributes,
             'rankingRules' => [
@@ -224,10 +224,10 @@ class MeiliSearchRepository extends BaseRepository
     }
 
     /** @return  array<int|string, mixed> */
-    public static function getRequiredFields(): array
+    public function getRequiredFields(): array
     {
         return array_values(array_unique(array_merge(
-            self::$filterableAttributes, self::$sortableAttributes, self::getSearchableAttributes()
+            self::$filterableAttributes, self::$sortableAttributes, $this->getSearchableAttributes()
         )));
     }
 
@@ -643,7 +643,7 @@ class MeiliSearchRepository extends BaseRepository
      * @param  mixed  $value
      * @return mixed
      */
-    public static function formatValueForMeili($field, $value)
+    public function formatValueForMeili($field, $value)
     {
         // Yes/no enums must be resolved before any numeric cast so that a value
         // like 'yes' is not accidentally run through intval() and stored as 0.
@@ -676,7 +676,7 @@ class MeiliSearchRepository extends BaseRepository
     }
 
     /** @return  array<int|string, mixed> */
-    private static function getAttributesToRetrieve(): array
+    private function getAttributesToRetrieve(): array
     {
         if (Env::get('APP_ENV', null) == 'production') {
             return ['id'];
@@ -686,7 +686,7 @@ class MeiliSearchRepository extends BaseRepository
     }
 
     /** @return  array<int|string, mixed> */
-    private static function getSearchableAttributes(): array
+    private function getSearchableAttributes(): array
     {
         $attributes = ['name', 'url'];
         if (SiteConfig::current()->meiliSearch->searchDescription()) {

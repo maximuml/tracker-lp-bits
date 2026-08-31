@@ -23,7 +23,7 @@ class IpLogRepository extends BaseRepository
      * @param  mixed  $uri
      * @param  mixed  $ipArr
      */
-    public static function saveToCache($userId, $uri = null, $ipArr = null): void
+    public function saveToCache($userId, $uri = null, $ipArr = null): void
     {
         if (! is_numeric($userId) || $userId <= 0) {
             Logger::writeWithContext((string) "invalid userId: {$userId}", (string) 'error', (bool) false);
@@ -52,7 +52,7 @@ class IpLogRepository extends BaseRepository
         }
     }
 
-    public static function saveToDB(): void
+    public function saveToDB(): void
     {
         $beginTimestamp = microtime(true);
         $redis = Redis::connection()->client();

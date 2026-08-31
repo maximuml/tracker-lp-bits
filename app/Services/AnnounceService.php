@@ -496,14 +496,14 @@ class AnnounceService
 
         $lockKey = sprintf('record_batch_lock:%s:%s', $this->userId, $this->torrentId);
         if ($redis->set($lockKey, TIMENOW, ['nx', 'ex' => $this->autocleanIntervalOne])) {
-            CleanupRepository::recordBatch($redis, $this->userId, $this->torrentId);
-            IpLogRepository::saveToCache($this->userId, null, [$this->ip]);
+            app(CleanupRepository::class)->recordBatch($redis, $this->userId, $this->torrentId);
+            app(IpLogRepository::class)->saveToCache($this->userId, null, [$this->ip]);
         }
 
-        if (RequireSeedTorrentRepository::shouldRecordUser($redis, $this->userId, $this->torrentId)) {
+        if (app(RequireSeedTorrentRepository::class)->shouldRecordUser($redis, $this->userId, $this->torrentId)) {
             $this->snatchInfo = LegacyDb::snatchInfo($this->torrentId, $this->userId);
             if ($this->snatchInfo) {
-                RequireSeedTorrentRepository::recordUser($redis, $this->userId, $this->torrentId, $this->snatchInfo);
+                app(RequireSeedTorrentRepository::class)->recordUser($redis, $this->userId, $this->torrentId, $this->snatchInfo);
             }
         }
     }

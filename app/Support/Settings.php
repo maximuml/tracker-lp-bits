@@ -27,7 +27,7 @@ final class Settings
     public static function get(?string $name = null, mixed $default = null): mixed
     {
         if (self::$settings === null) {
-            self::$settings = SettingRepository::getAll();
+            self::$settings = app(SettingRepository::class)->getAll();
         }
 
         if ($name === null) {
@@ -45,7 +45,7 @@ final class Settings
     public static function fromDb(?string $name = null, mixed $default = null): mixed
     {
         if (self::$fromDb === null) {
-            self::$fromDb = SettingRepository::getAll();
+            self::$fromDb = app(SettingRepository::class)->getAll();
         }
 
         if ($name === null) {
@@ -64,6 +64,6 @@ final class Settings
      */
     public static function saveBatch(string $prefix, array $nameAndValue, bool $autoload = true): void
     {
-        SettingRepository::saveBatch($prefix, $nameAndValue, $autoload);
+        app(SettingRepository::class)->saveBatch($prefix, $nameAndValue, $autoload);
     }
 }

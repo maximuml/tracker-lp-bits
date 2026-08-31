@@ -201,13 +201,13 @@ class ToolRepository extends BaseRepository
     {
         $path = SiteConfig::current()->backup->exportPath();
         if (empty($path)) {
-            $path = self::getBackupExportPathDefault();
+            $path = $this->getBackupExportPathDefault();
         }
 
         return $path;
     }
 
-    public static function getBackupExportPathDefault(): string
+    public function getBackupExportPathDefault(): string
     {
         return sys_get_temp_dir().'/nexusphp_backup';
     }
@@ -384,7 +384,7 @@ class ToolRepository extends BaseRepository
         if ($retentionCount <= 0) {
             $retentionCount = self::BACKUP_RETENTION_COUNT_DEFAULT;
         }
-        $path = self::getBackupExportPath();
+        $path = $this->getBackupExportPath();
         $allFiles = collect(File::allFiles($path))->filter(function (SplFileInfo $file) use ($firstPart, $lastPart) {
             $name = basename($file->getRealPath());
 
@@ -489,7 +489,7 @@ class ToolRepository extends BaseRepository
      * @param  mixed  $class
      * @return array<int|string, mixed>
      */
-    public static function listUserClassPermissions($class): array
+    public function listUserClassPermissions($class): array
     {
         $settings = SiteConfig::current()->authority->toArray();
         $result = [];
@@ -506,7 +506,7 @@ class ToolRepository extends BaseRepository
      * @param  mixed  $uid
      * @return array<int|string, mixed>
      */
-    public static function listUserAllPermissions($uid): array
+    public function listUserAllPermissions($uid): array
     {
         static $uidPermissionsCached = [];
         if (isset($uidPermissionsCached[$uid])) {
@@ -522,7 +522,7 @@ class ToolRepository extends BaseRepository
         $class = $userInfo['class'];
 
         // Class permission
-        $classPermissions = self::listUserClassPermissions($class);
+        $classPermissions = $this->listUserClassPermissions($class);
 
         // Role permission
         $rolePermissions = [];

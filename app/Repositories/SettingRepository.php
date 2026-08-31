@@ -15,12 +15,12 @@ class SettingRepository extends BaseRepository
     /**
      * @return array<string, mixed>
      */
-    public static function getAll(): array
+    public function getAll(): array
     {
         return Setting::getFromDb();
     }
 
-    public static function getByName(string $name, mixed $default = null): mixed
+    public function getByName(string $name, mixed $default = null): mixed
     {
         return Setting::getByName($name, $default);
     }
@@ -82,7 +82,7 @@ class SettingRepository extends BaseRepository
     /**
      * @param  array<string, mixed>  $nameAndValue
      */
-    public static function saveBatch(string $prefix, array $nameAndValue, bool $autoload = true): void
+    public function saveBatch(string $prefix, array $nameAndValue, bool $autoload = true): void
     {
         $prefix = strtolower($prefix);
         $datetimeNow = date('Y-m-d H:i:s');

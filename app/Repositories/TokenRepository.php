@@ -13,7 +13,7 @@ class TokenRepository extends BaseRepository
     /**
      * @return list<string>
      */
-    private static function allUserTokenPermissions(): array
+    private function allUserTokenPermissions(): array
     {
         return array_map(
             static fn (RoutePermissionEnum $permission) => $permission->value,
@@ -24,27 +24,27 @@ class TokenRepository extends BaseRepository
     /**
      * @return array<int|string, mixed>
      */
-    public static function listUserTokenPermissions(bool $format = true): array
+    public function listUserTokenPermissions(bool $format = true): array
     {
-        $permissions = self::allUserTokenPermissions();
+        $permissions = $this->allUserTokenPermissions();
         if (! $format) {
             return $permissions;
         }
 
-        return self::formatPermissions($permissions);
+        return $this->formatPermissions($permissions);
     }
 
     /** @return  array<int|string, mixed> */
-    public static function listUserTokenPermissionAllowed(): array
+    public function listUserTokenPermissionAllowed(): array
     {
-        return self::formatPermissions(Setting::getPermissionUserTokenAllowed());
+        return $this->formatPermissions(Setting::getPermissionUserTokenAllowed());
     }
 
     /**
      * @param  array<int|string, mixed>  $permissions
      * @return array<int|string, mixed>
      */
-    private static function formatPermissions(array $permissions): array
+    private function formatPermissions(array $permissions): array
     {
         $result = [];
         foreach ($permissions as $permission) {

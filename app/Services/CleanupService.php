@@ -202,11 +202,11 @@ final class CleanupService
 
         // Class-specific batch jobs are kept in their existing repository form.
         if ($level === 1) {
-            CleanupRepository::runBatchJobCalculateUserSeedBonus($requestId);
+            app(CleanupRepository::class)->runBatchJobCalculateUserSeedBonus($requestId);
         } elseif ($level === 3) {
-            CleanupRepository::runBatchJobUpdateTorrentSeedersEtc($requestId);
+            app(CleanupRepository::class)->runBatchJobUpdateTorrentSeedersEtc($requestId);
         } elseif ($level === 4) {
-            CleanupRepository::runBatchJobUpdateUserSeedingLeechingTime($requestId);
+            app(CleanupRepository::class)->runBatchJobUpdateUserSeedingLeechingTime($requestId);
         }
 
         return $output;

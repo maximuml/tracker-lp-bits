@@ -41,8 +41,8 @@ class FriendsController extends LegacyController
             return $this->handleDelete($request, $userid, $langFriends);
         }
 
-        $friendRows = FriendsRepository::getFriends($userid);
-        $blockRows = FriendsRepository::getBlocks($userid);
+        $friendRows = app(FriendsRepository::class)->getFriends($userid);
+        $blockRows = app(FriendsRepository::class)->getBlocks($userid);
 
         $userIds = array_merge(
             array_column($friendRows, 'id'),
@@ -96,11 +96,11 @@ class FriendsController extends LegacyController
             return $this->legacyAbortResponse($langFriends['std_error'] ?? 'Error', ($langFriends['std_unknown_type'] ?? 'Unknown type ').$type);
         }
 
-        if (FriendsRepository::exists($userid, $type, $targetid)) {
+        if (app(FriendsRepository::class)->exists($userid, $type, $targetid)) {
             return $this->legacyAbortResponse($langFriends['std_error'] ?? 'Error', ($langFriends['std_user_id'] ?? 'User ').$targetid.($langFriends['std_already_in'] ?? ' is already in ').$tableIs.($langFriends['std_list'] ?? ' list.'));
         }
 
-        FriendsRepository::add($userid, $type, $targetid);
+        app(FriendsRepository::class)->add($userid, $type, $targetid);
         $this->purgeNeighborsCache();
 
         return redirect('/friends.php?id='.$userid.'#'.$frag);
@@ -134,7 +134,7 @@ class FriendsController extends LegacyController
             return $this->legacyAbortResponse(($langFriends['std_delete'] ?? 'Delete ').$type, $confirm, false);
         }
 
-        $deleted = FriendsRepository::delete($userid, $type, $targetid);
+        $deleted = app(FriendsRepository::class)->delete($userid, $type, $targetid);
         if ($deleted === 0) {
             $notFoundKey = $type === 'friend' ? 'std_no_friend_found' : 'std_no_block_found';
 

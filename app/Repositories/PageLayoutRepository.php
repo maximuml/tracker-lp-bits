@@ -141,7 +141,7 @@ class PageLayoutRepository extends BaseRepository
         app(UserUpdateBatch::class)->add('last_access', date('Y-m-d H:i:s'));
         app(UserUpdateBatch::class)->add('ip', $user['ip'] ?? Input::serverValue('REMOTE_ADDR', ''));
 
-        IpLogRepository::saveToCache((int) $user['id']);
+        app(IpLogRepository::class)->saveToCache((int) $user['id']);
 
         $menuResult = Menu::render(
             $script,

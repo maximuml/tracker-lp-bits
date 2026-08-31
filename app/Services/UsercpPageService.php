@@ -52,7 +52,7 @@ final class UsercpPageService
         $curUser = (array) (app(CurrentUser::class)->get() ?? []);
         $lang = (array) (app(Globals::class)->get('lang_usercp') ?? []);
         $cache = app(LegacyRedisCache::class);
-        $userInfo = UsercpRepository::getUserById((int) ($curUser['id'] ?? 0));
+        $userInfo = app(UsercpRepository::class)->getUserById((int) ($curUser['id'] ?? 0));
         $siteName = Setting::getSiteName();
 
         $data = [
@@ -100,7 +100,7 @@ final class UsercpPageService
         $userId = (int) ($curUser['id'] ?? 0);
 
         // Comment count
-        $commentCount = UsercpRepository::getCommentCount($userId);
+        $commentCount = app(UsercpRepository::class)->getCommentCount($userId);
 
         // Join date
         $added = (string) ($curUser['added'] ?? '');
@@ -121,7 +121,7 @@ final class UsercpPageService
             }
         }
         if ($forumPosts === 0) {
-            $forumPosts = UsercpRepository::getForumPostCount($userId);
+            $forumPosts = app(UsercpRepository::class)->getForumPostCount($userId);
             if ($cache !== null) {
                 $cache->cache_value('user_'.$userId.'_post_count', $forumPosts, 3600);
             }
@@ -140,7 +140,7 @@ final class UsercpPageService
                 }
             }
             if ($postCount === 0) {
-                $postCount = UsercpRepository::getTotalPostCount();
+                $postCount = app(UsercpRepository::class)->getTotalPostCount();
                 if ($cache !== null) {
                     $cache->cache_value('total_posts_count', $postCount, 96400);
                 }
@@ -220,13 +220,13 @@ final class UsercpPageService
     {
         $langFunctions = (array) (app(Globals::class)->get('lang_functions') ?? []);
 
-        $permissions = TokenRepository::listUserTokenPermissionAllowed();
+        $permissions = app(TokenRepository::class)->listUserTokenPermissionAllowed();
         $permissionOptions = [];
         foreach ($permissions as $name => $label) {
             $permissionOptions[] = sprintf('<label><input type="checkbox" name="permissions[]" value="%s">%s</label>', $name, $label);
         }
 
-        $tokens = UsercpRepository::getUserTokens($userInfo);
+        $tokens = app(UsercpRepository::class)->getUserTokens($userInfo);
 
         return [
             'label' => Locale::trans('token.label', [], null),
@@ -250,7 +250,7 @@ final class UsercpPageService
      */
     private function buildReadTopics(array $lang, int $userId, ?LegacyRedisCache $cache): array
     {
-        $topicRows = UsercpRepository::getReadTopics($userId);
+        $topicRows = app(UsercpRepository::class)->getReadTopics($userId);
         $items = [];
         foreach ($topicRows as $topicArr) {
             $topicId = (int) $topicArr['id'];
@@ -265,7 +265,7 @@ final class UsercpPageService
                 }
             }
             if ($posts === 0) {
-                $posts = UsercpRepository::getTopicPostCount($topicId);
+                $posts = app(UsercpRepository::class)->getTopicPostCount($topicId);
                 if ($cache !== null) {
                     $cache->cache_value('topic_'.$topicId.'_post_count', $posts, 3600);
                 }
@@ -313,7 +313,7 @@ final class UsercpPageService
     {
         // Countries
         $countryOptions = '';
-        $countryRows = UsercpRepository::getCountryOptions();
+        $countryRows = app(UsercpRepository::class)->getCountryOptions();
         foreach ($countryRows as $ct) {
             $countryOptions .= '<option value='.htmlspecialchars((string) $ct->id).''
                 .(htmlspecialchars((string) ($curUser['country'] ?? '')) === htmlspecialchars((string) $ct->id) ? ' selected' : '')
@@ -330,7 +330,7 @@ final class UsercpPageService
         }
 
         // Bitbucket avatars
-        $bitbucketRows = UsercpRepository::getBitbucketOptions();
+        $bitbucketRows = app(UsercpRepository::class)->getBitbucketOptions();
         $bitbucketOptions = '';
         $baseUrl = (string) app(Globals::class)->get('BASEURL', '');
         foreach ($bitbucketRows as $sor) {
@@ -380,7 +380,7 @@ final class UsercpPageService
         $categories = SearchBox::buildCategoryTableWithContext($browsecatmode, 'yes', 'torrents.php?allsec=1', '', 3, $notifs, ['section_name' => true]);
 
         // Stylesheets
-        $ssSa = UsercpRepository::getStylesheetOptions();
+        $ssSa = app(UsercpRepository::class)->getStylesheetOptions();
         ksort($ssSa);
         $stylesheetOptions = '';
         foreach ($ssSa as $ssName => $ssId) {
@@ -514,7 +514,7 @@ final class UsercpPageService
     private function capturePasskeyList(int $userId): string
     {
         ob_start();
-        UserPasskeyRepository::renderList($userId);
+        app(UserPasskeyRepository::class)->renderList($userId);
 
         return (string) ob_get_clean();
     }

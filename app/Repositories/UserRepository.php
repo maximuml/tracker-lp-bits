@@ -44,6 +44,12 @@ use Illuminate\Support\Facades\Gate;
  */
 class UserRepository extends BaseRepository
 {
+    public function __construct(
+        private readonly UserModerationRepository $userModerationRepository,
+    ) {
+        //
+    }
+
     /** @var array<int, string> */
     private static array $allowIncludes = ['inviter', 'valid_medals'];
 
@@ -545,7 +551,7 @@ class UserRepository extends BaseRepository
         return User::query()->find($id, User::$commonFields);
     }
 
-    public static function findForDisplay(int|string $id): ?User
+    public function findForDisplay(int|string $id): ?User
     {
         $neededColumns = [
             'id', 'class', 'enabled', 'privacy', 'avatar', 'signature', 'uploaded', 'downloaded',
@@ -564,7 +570,7 @@ class UserRepository extends BaseRepository
             ->find($id, $neededColumns);
     }
 
-    public static function logModify(int|string $userId, string $comment): void
+    public function logModify(int|string $userId, string $comment): void
     {
         UserModifyLog::query()->create([
             'user_id' => $userId,
@@ -577,7 +583,7 @@ class UserRepository extends BaseRepository
      * @param  list<string>  $columns
      * @return \Illuminate\Database\Eloquent\Collection<int, User>
      */
-    public static function getByIds(array $ids, array $columns = ['*']): \Illuminate\Database\Eloquent\Collection
+    public function getByIds(array $ids, array $columns = ['*']): \Illuminate\Database\Eloquent\Collection
     {
         return User::query()->find($ids, $columns)->keyBy('id');
     }
@@ -594,7 +600,7 @@ class UserRepository extends BaseRepository
      */
     public function disableUser(User $operator, $uid, $reason = '')
     {
-        return (new UserModerationRepository)->disableUser($operator, $uid, $reason);
+        return $this->userModerationRepository->disableUser($operator, $uid, $reason);
     }
 
     /**
@@ -604,7 +610,7 @@ class UserRepository extends BaseRepository
      */
     public function enableUser(User $operator, $uid, $reason = '')
     {
-        return (new UserModerationRepository)->enableUser($operator, $uid, $reason);
+        return $this->userModerationRepository->enableUser($operator, $uid, $reason);
     }
 
     /**
@@ -612,7 +618,7 @@ class UserRepository extends BaseRepository
      */
     public function getModComment(int $id)
     {
-        return (new UserModerationRepository)->getModComment($id);
+        return $this->userModerationRepository->getModComment($id);
     }
 
     /**
@@ -624,7 +630,7 @@ class UserRepository extends BaseRepository
      */
     public function incrementDecrement(User $operator, $uid, $action, $field, $value, $reason = ''): bool
     {
-        return (new UserModerationRepository)->incrementDecrement($operator, $uid, $action, $field, $value, $reason);
+        return $this->userModerationRepository->incrementDecrement($operator, $uid, $action, $field, $value, $reason);
     }
 
     /**
@@ -633,7 +639,7 @@ class UserRepository extends BaseRepository
      */
     public function removeLeechWarn($operator, $uid): bool
     {
-        return (new UserModerationRepository)->removeLeechWarn($operator, $uid);
+        return $this->userModerationRepository->removeLeechWarn($operator, $uid);
     }
 
     /**
@@ -642,7 +648,7 @@ class UserRepository extends BaseRepository
      */
     public function removeTwoStepAuthentication($operator, $uid): bool
     {
-        return (new UserModerationRepository)->removeTwoStepAuthentication($operator, $uid);
+        return $this->userModerationRepository->removeTwoStepAuthentication($operator, $uid);
     }
 
     /**
@@ -653,7 +659,7 @@ class UserRepository extends BaseRepository
      */
     public function updateDownloadPrivileges($operator, $user, bool $status, $disableReasonKey = null)
     {
-        return (new UserModerationRepository)->updateDownloadPrivileges($operator, $user, $status, $disableReasonKey);
+        return $this->userModerationRepository->updateDownloadPrivileges($operator, $user, $status, $disableReasonKey);
     }
 
     /**
@@ -663,7 +669,7 @@ class UserRepository extends BaseRepository
      */
     public function updateUploadPrivileges($operator, $user, bool $status)
     {
-        return (new UserModerationRepository)->updateUploadPrivileges($operator, $user, $status);
+        return $this->userModerationRepository->updateUploadPrivileges($operator, $user, $status);
     }
 
     /**
@@ -673,7 +679,7 @@ class UserRepository extends BaseRepository
      */
     public function updateForumPost($operator, $user, bool $status)
     {
-        return (new UserModerationRepository)->updateForumPost($operator, $user, $status);
+        return $this->userModerationRepository->updateForumPost($operator, $user, $status);
     }
 
     /**
@@ -685,7 +691,7 @@ class UserRepository extends BaseRepository
      */
     public function warnUser($operator, $user, int $weeks, string $reason = '')
     {
-        return (new UserModerationRepository)->warnUser($operator, $user, $weeks, $reason);
+        return $this->userModerationRepository->warnUser($operator, $user, $weeks, $reason);
     }
 
     /**
@@ -697,13 +703,13 @@ class UserRepository extends BaseRepository
      */
     public function changeClass($operator, $targetUser, $newClass, $reason = '', array $extra = []): bool
     {
-        return (new UserModerationRepository)->changeClass($operator, $targetUser, $newClass, $reason, $extra);
+        return $this->userModerationRepository->changeClass($operator, $targetUser, $newClass, $reason, $extra);
     }
 
     /** @param  mixed  $id */
     public function confirmUser($id): bool
     {
-        return (new UserModerationRepository)->confirmUser($id);
+        return $this->userModerationRepository->confirmUser($id);
     }
 
     /**
@@ -711,7 +717,7 @@ class UserRepository extends BaseRepository
      */
     public function removeWarnings(User $operator, array $userIds): void
     {
-        (new UserModerationRepository)->removeWarnings($operator, $userIds);
+        $this->userModerationRepository->removeWarnings($operator, $userIds);
     }
 
     /**
@@ -721,7 +727,7 @@ class UserRepository extends BaseRepository
      */
     public function destroy(Collection|int $id, $reasonKey = 'user.destroy_by_admin')
     {
-        return (new UserModerationRepository)->destroy($id, $reasonKey);
+        return $this->userModerationRepository->destroy($id, $reasonKey);
     }
 
     /**
@@ -729,7 +735,7 @@ class UserRepository extends BaseRepository
      */
     public function addTemporaryInvite(?User $operator, int $uid, string $action, int $count, ?int $days, ?string $reason = '')
     {
-        return (new UserModerationRepository)->addTemporaryInvite($operator, $uid, $action, $count, $days, $reason);
+        return $this->userModerationRepository->addTemporaryInvite($operator, $uid, $action, $count, $days, $reason);
     }
 
     /**
@@ -737,6 +743,6 @@ class UserRepository extends BaseRepository
      */
     public function getInviteBtnText(int $uid)
     {
-        return (new UserModerationRepository)->getInviteBtnText($uid);
+        return $this->userModerationRepository->getInviteBtnText($uid);
     }
 }

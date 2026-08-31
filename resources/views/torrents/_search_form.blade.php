@@ -190,8 +190,8 @@ $browsecatmode = $browsecatmode ?? 0;
 @php
     $Cache->new_page('hot_search', 3670, true);
     if (! $Cache->get_page()) {
-        \App\Repositories\TorrentListingRepository::cleanupSuggest();
-        $searchres = \App\Repositories\TorrentListingRepository::getHotSearch();
+        \app(\App\Repositories\TorrentListingRepository::class)->cleanupSuggest();
+        $searchres = \app(\App\Repositories\TorrentListingRepository::class)->getHotSearch();
         $hotcount = 0;
         $hotsearch = '';
         foreach ($searchres as $searchrow) {

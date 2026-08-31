@@ -34,7 +34,7 @@ class WebCommentController extends Controller
 
         $this->authorizeComment($type, $parentId);
 
-        $parent = CommentRepository::getParent($parentId, $type);
+        $parent = app(CommentRepository::class)->getParent($parentId, $type);
         if (! $parent) {
             abort(404, $this->lang('std_no_torrent_id'));
         }
@@ -46,7 +46,7 @@ class WebCommentController extends Controller
             if ($commentId <= 0) {
                 abort(404, $this->lang('std_no_comment_id'));
             }
-            $quote = CommentRepository::getQuote($commentId);
+            $quote = app(CommentRepository::class)->getQuote($commentId);
             if (! $quote) {
                 abort(404, $this->lang('std_no_comment_id'));
             }
@@ -77,12 +77,12 @@ class WebCommentController extends Controller
         $this->authorizeComment($type, $parentId);
         $this->assertNotFlood($user);
 
-        $parent = CommentRepository::getParent($parentId, $type);
+        $parent = app(CommentRepository::class)->getParent($parentId, $type);
         if (! $parent) {
             abort(404, $this->lang('std_no_torrent_id'));
         }
 
-        $newId = CommentRepository::create($parentId, $type, $body, (int) $user->id);
+        $newId = app(CommentRepository::class)->create($parentId, $type, $body, (int) $user->id);
         $this->deleteCache($type, $parentId);
         $this->sendCommentPm($type, $parentId, (int) $parent['owner'], (string) $parent['name'], (int) $user->id);
         $this->applyBonus('+', (int) $user->id);
@@ -94,7 +94,7 @@ class WebCommentController extends Controller
     {
         $type = $this->type($request);
 
-        $arr = CommentRepository::getForEdit($commentId, $type);
+        $arr = app(CommentRepository::class)->getForEdit($commentId, $type);
         if (! $arr) {
             abort(404, $this->lang('std_invalid_id'));
         }
@@ -127,7 +127,7 @@ class WebCommentController extends Controller
 
         $user = $this->currentUser();
 
-        $arr = CommentRepository::getForEdit($commentId, $type);
+        $arr = app(CommentRepository::class)->getForEdit($commentId, $type);
         if (! $arr) {
             abort(404, $this->lang('std_invalid_id'));
         }
@@ -135,7 +135,7 @@ class WebCommentController extends Controller
             abort(403, $this->lang('std_permission_denied'));
         }
 
-        CommentRepository::update($commentId, $body, (int) $user->id);
+        app(CommentRepository::class)->update($commentId, $body, (int) $user->id);
         $this->deleteCache($type, (int) $arr['parent_id']);
 
         $defaultUrl = $this->buildScript($type, (int) $arr['parent_id']);
@@ -167,7 +167,7 @@ class WebCommentController extends Controller
             return view('comments.delete', compact('heading', 'message'));
         }
 
-        $arr = CommentRepository::getForDelete($commentId, $type);
+        $arr = app(CommentRepository::class)->getForDelete($commentId, $type);
         if (! $arr) {
             abort(404, $this->lang('std_invalid_id'));
         }
@@ -175,7 +175,7 @@ class WebCommentController extends Controller
         $parentId = (int) $arr['pid'];
         $userPostId = (int) $arr['user'];
 
-        if (CommentRepository::delete($commentId, $type, $parentId)) {
+        if (app(CommentRepository::class)->delete($commentId, $type, $parentId)) {
             $this->deleteCache($type, $parentId);
         }
         $this->applyBonus('-', $userPostId);
@@ -198,7 +198,7 @@ class WebCommentController extends Controller
             abort(403, $this->lang('std_permission_denied'));
         }
 
-        $arr = CommentRepository::getForViewOriginal($commentId, $type);
+        $arr = app(CommentRepository::class)->getForViewOriginal($commentId, $type);
         if (! $arr) {
             abort(404, $this->lang('std_invalid_id'));
         }
@@ -302,7 +302,7 @@ class WebCommentController extends Controller
             return;
         }
 
-        if (! CommentRepository::getCommentPmSetting($ownerId)) {
+        if (! app(CommentRepository::class)->getCommentPmSetting($ownerId)) {
             return;
         }
 

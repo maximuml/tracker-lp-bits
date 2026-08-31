@@ -80,12 +80,12 @@ class AuthRepository extends BaseRepository
     /**
      * @param  array<string, mixed>  $update
      */
-    public static function updateLogin(int $userId, array $update): void
+    public function updateLogin(int $userId, array $update): void
     {
         User::query()->where('id', $userId)->update($update);
     }
 
-    public static function getPasskeyByUserId(int $userId): ?string
+    public function getPasskeyByUserId(int $userId): ?string
     {
         $user = User::query()->where('id', $userId)->first(['id', 'passkey']);
 
@@ -95,7 +95,7 @@ class AuthRepository extends BaseRepository
     /**
      * @return array<string, mixed>|null
      */
-    public static function findUserArrayForCookie(int $userId, bool $shouldIgnoreEnabled): ?array
+    public function findUserArrayForCookie(int $userId, bool $shouldIgnoreEnabled): ?array
     {
         $query = DB::table('users')
             ->where('id', $userId)
@@ -108,7 +108,7 @@ class AuthRepository extends BaseRepository
         return $result ? array_merge((array) $result, array_values((array) $result)) : null;
     }
 
-    public static function findUserModelForCookie(int $userId, bool $shouldIgnoreEnabled): ?User
+    public function findUserModelForCookie(int $userId, bool $shouldIgnoreEnabled): ?User
     {
         $row = User::query()->find($userId);
         if (! $row) {

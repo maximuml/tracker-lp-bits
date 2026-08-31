@@ -231,7 +231,7 @@ class TorrentResource extends Resource
                     CheckboxList::make('tags')
                         ->label(__('label.tag.label'))
                         ->columns(4)
-                        ->options(TagRepository::createBasicQuery()->pluck('name', 'id')->toArray())
+                        ->options(app(TagRepository::class)->createBasicQuery()->pluck('name', 'id')->toArray())
                         ->required(),
 
                 ])

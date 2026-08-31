@@ -136,13 +136,13 @@ class ForumRepository extends BaseRepository
      */
     public function getAllOverforums(): array
     {
-        return self::getOverforumsList();
+        return $this->getOverforumsList();
     }
 
     /**
      * @return array<int, array<string, mixed>>
      */
-    public static function getOverforumsList(): array
+    public function getOverforumsList(): array
     {
         return DB::table('overforums')
             ->orderBy('sort')
@@ -204,7 +204,7 @@ class ForumRepository extends BaseRepository
             ->exists();
     }
 
-    public static function getActiveForumUserCount(): int
+    public function getActiveForumUserCount(): int
     {
         $secs = 900;
         $dt = date('Y-m-d H:i:s', (time() - $secs));
@@ -212,58 +212,58 @@ class ForumRepository extends BaseRepository
         return (int) User::query()->where('forum_access', '>=', $dt)->count();
     }
 
-    public static function getTotalPostsCount(): int
+    public function getTotalPostsCount(): int
     {
         return (int) Post::query()->count();
     }
 
-    public static function getTotalTopicsCount(): int
+    public function getTotalTopicsCount(): int
     {
         return (int) Topic::query()->count();
     }
 
-    public static function getTodayPostsCount(string $todayDate): int
+    public function getTodayPostsCount(string $todayDate): int
     {
         return (int) Post::query()->where('added', '>', date('Y-m-d'))->count();
     }
 
-    public static function clearReadPosts(int $userId): void
+    public function clearReadPosts(int $userId): void
     {
         DB::table('readposts')->where('userid', $userId)->delete();
     }
 
-    public static function getLastPostId(): ?int
+    public function getLastPostId(): ?int
     {
         $value = Post::query()->orderByDesc('id')->value('id');
 
         return $value === null ? null : (int) $value;
     }
 
-    public static function updateLastCatchup(int $userId, int $lastPostId): bool
+    public function updateLastCatchup(int $userId, int $lastPostId): bool
     {
         return (bool) User::query()->where('id', $userId)->update(['last_catchup' => $lastPostId]);
     }
 
-    public static function forumExists(int $id): bool
+    public function forumExists(int $id): bool
     {
         return (bool) Forum::query()->where('id', $id)->exists();
     }
 
-    public static function topicExists(int $id): ?int
+    public function topicExists(int $id): ?int
     {
         $topic = Topic::query()->where('id', $id)->first(['forumid']);
 
         return $topic ? (int) $topic->forumid : null;
     }
 
-    public static function postExists(int $id): ?int
+    public function postExists(int $id): ?int
     {
         $post = Post::query()->where('id', $id)->first(['topicid']);
 
         return $post ? (int) $post->topicid : null;
     }
 
-    public static function updateTopicLastPost(int $topicId): bool
+    public function updateTopicLastPost(int $topicId): bool
     {
         $postId = Post::query()->where('topicid', $topicId)->orderByDesc('id')->value('id');
 
@@ -277,7 +277,7 @@ class ForumRepository extends BaseRepository
     /**
      * @return array<int, array<string, mixed>>
      */
-    public static function getForumsList(): array
+    public function getForumsList(): array
     {
         return Forum::query()->orderBy('forid')->orderBy('sort')->get()->keyBy('id')->map(fn ($f) => $f->toArray())->all();
     }
@@ -285,7 +285,7 @@ class ForumRepository extends BaseRepository
     /**
      * @return array<int, int>|null
      */
-    public static function getLastReadPosts(int $userId): ?array
+    public function getLastReadPosts(int $userId): ?array
     {
         $rows = DB::table('readposts')->where('userid', $userId)->get(['topicid', 'lastpostread']);
 
@@ -301,12 +301,12 @@ class ForumRepository extends BaseRepository
         return $ret;
     }
 
-    public static function getForumName(int $id): ?string
+    public function getForumName(int $id): ?string
     {
         return Forum::query()->where('id', $id)->value('name');
     }
 
-    public static function getTopicSubject(int $id): ?string
+    public function getTopicSubject(int $id): ?string
     {
         return Topic::query()->where('id', $id)->value('subject');
     }
@@ -314,7 +314,7 @@ class ForumRepository extends BaseRepository
     /**
      * @return array<string, mixed>|null
      */
-    public static function getPostForQuote(int $id): ?array
+    public function getPostForQuote(int $id): ?array
     {
         $post = Post::query()->where('id', $id)->first(['topicid', 'body', 'userid']);
         if (! $post) {
@@ -335,7 +335,7 @@ class ForumRepository extends BaseRepository
     /**
      * @return array<string, mixed>|null
      */
-    public static function getPostForEdit(int $id): ?array
+    public function getPostForEdit(int $id): ?array
     {
         $post = Post::query()->where('id', $id)->first(['topicid', 'body']);
         if (! $post) {
@@ -357,7 +357,7 @@ class ForumRepository extends BaseRepository
     /**
      * @return array<string, mixed>|null
      */
-    public static function getPostWithTopic(int $postid): ?array
+    public function getPostWithTopic(int $postid): ?array
     {
         $post = Post::query()->where('id', $postid)->first(['userid', 'topicid']);
         if (! $post) {
@@ -372,7 +372,7 @@ class ForumRepository extends BaseRepository
         ];
     }
 
-    public static function getTopicForumId(int $topicid): ?int
+    public function getTopicForumId(int $topicid): ?int
     {
         return Topic::query()->where('id', $topicid)->value('forumid');
     }
@@ -380,7 +380,7 @@ class ForumRepository extends BaseRepository
     /**
      * @return array<string, mixed>|null
      */
-    public static function getPostEditInfo(int $postid): ?array
+    public function getPostEditInfo(int $postid): ?array
     {
         $post = Post::query()->where('id', $postid)->first(['topicid']);
         if (! $post) {
@@ -397,39 +397,39 @@ class ForumRepository extends BaseRepository
         ];
     }
 
-    public static function isTopicLocked(int $topicid): ?bool
+    public function isTopicLocked(int $topicid): ?bool
     {
         $topic = Topic::query()->where('id', $topicid)->first(['locked']);
 
         return $topic?->locked;
     }
 
-    public static function getTopic(int $id): ?Topic
+    public function getTopic(int $id): ?Topic
     {
         return Topic::query()->where('id', $id)->first();
     }
 
-    public static function getPost(int $id): ?Post
+    public function getPost(int $id): ?Post
     {
         return Post::query()->where('id', $id)->first();
     }
 
-    public static function getTopicWithUser(int $id): ?Topic
+    public function getTopicWithUser(int $id): ?Topic
     {
         return Topic::query()->with('user')->where('id', $id)->first();
     }
 
-    public static function getPostWithUser(int $id): ?Post
+    public function getPostWithUser(int $id): ?Post
     {
         return Post::query()->with('user')->where('id', $id)->first();
     }
 
-    public static function updateTopicSubject(int $topicid, string $subject): bool
+    public function updateTopicSubject(int $topicid, string $subject): bool
     {
         return (bool) Topic::query()->where('id', $topicid)->update(['subject' => $subject]);
     }
 
-    public static function updatePostBody(int $postid, string $body, string $date, int $editedBy): bool
+    public function updatePostBody(int $postid, string $body, string $date, int $editedBy): bool
     {
         return (bool) Post::query()->where('id', $postid)->update([
             'body' => $body,
@@ -438,12 +438,12 @@ class ForumRepository extends BaseRepository
         ]);
     }
 
-    public static function getFirstPostId(int $topicid): int
+    public function getFirstPostId(int $topicid): int
     {
         return (int) Post::query()->where('topicid', $topicid)->min('id');
     }
 
-    public static function createTopic(int $userId, int $forumId, string $subject): int
+    public function createTopic(int $userId, int $forumId, string $subject): int
     {
         $topic = Topic::create([
             'userid' => $userId,
@@ -460,17 +460,17 @@ class ForumRepository extends BaseRepository
         return (int) $topic->id;
     }
 
-    public static function incrementForumTopicCount(int $forumid): bool
+    public function incrementForumTopicCount(int $forumid): bool
     {
         return (bool) Forum::query()->where('id', $forumid)->increment('topiccount');
     }
 
-    public static function incrementForumPostCount(int $forumid, int $amount = 1): bool
+    public function incrementForumPostCount(int $forumid, int $amount = 1): bool
     {
         return (bool) Forum::query()->where('id', $forumid)->increment('postcount', $amount);
     }
 
-    public static function createPost(int $topicId, int $userId, string $body, string $date): int
+    public function createPost(int $topicId, int $userId, string $body, string $date): int
     {
         return (int) DB::table('posts')->insertGetId([
             'topicid' => $topicId,
@@ -481,22 +481,22 @@ class ForumRepository extends BaseRepository
         ]);
     }
 
-    public static function updateTopicFirstLastPost(int $topicid, int $postid): bool
+    public function updateTopicFirstLastPost(int $topicid, int $postid): bool
     {
         return (bool) Topic::query()->where('id', $topicid)->update(['firstpost' => $postid, 'lastpost' => $postid]);
     }
 
-    public static function setTopicLastPost(int $topicid, int $postid): bool
+    public function setTopicLastPost(int $topicid, int $postid): bool
     {
         return (bool) Topic::query()->where('id', $topicid)->update(['lastpost' => $postid]);
     }
 
-    public static function incrementTopicViews(int $topicid): bool
+    public function incrementTopicViews(int $topicid): bool
     {
         return (bool) Topic::query()->where('id', $topicid)->increment('views');
     }
 
-    public static function countTopicPosts(int $topicid, ?int $authorId = null): int
+    public function countTopicPosts(int $topicid, ?int $authorId = null): int
     {
         $query = Post::query()->where('topicid', $topicid);
         if ($authorId) {
@@ -509,7 +509,7 @@ class ForumRepository extends BaseRepository
     /**
      * @return array<int>
      */
-    public static function getTopicPostIds(int $topicid, ?int $authorId = null): array
+    public function getTopicPostIds(int $topicid, ?int $authorId = null): array
     {
         $query = Post::query()->where('topicid', $topicid)->orderBy('added');
         if ($authorId) {
@@ -522,7 +522,7 @@ class ForumRepository extends BaseRepository
     /**
      * @return \Illuminate\Database\Eloquent\Collection<int, Post>
      */
-    public static function getTopicPosts(int $topicid, ?int $authorId, int $offset, int $perPage): \Illuminate\Database\Eloquent\Collection
+    public function getTopicPosts(int $topicid, ?int $authorId, int $offset, int $perPage): \Illuminate\Database\Eloquent\Collection
     {
         $query = Post::query()->with('user')->where('topicid', $topicid)->orderBy('id');
         if ($authorId) {
@@ -537,12 +537,12 @@ class ForumRepository extends BaseRepository
      * @param  list<string>  $columns
      * @return Collection<int, User>
      */
-    public static function getUsersByIds(array $ids, array $columns): Collection
+    public function getUsersByIds(array $ids, array $columns): Collection
     {
         return User::query()->find($ids, $columns)->keyBy('id');
     }
 
-    public static function getReadPost(int $userId, int $topicId): ?\stdClass
+    public function getReadPost(int $userId, int $topicId): ?\stdClass
     {
         return DB::table('readposts')
             ->where('userid', $userId)
@@ -550,7 +550,7 @@ class ForumRepository extends BaseRepository
             ->first();
     }
 
-    public static function insertReadPost(int $userId, int $topicId, int $postId): bool
+    public function insertReadPost(int $userId, int $topicId, int $postId): bool
     {
         return (bool) DB::table('readposts')->insert([
             'userid' => $userId,
@@ -559,7 +559,7 @@ class ForumRepository extends BaseRepository
         ]);
     }
 
-    public static function updateReadPost(int $userId, int $topicId, int $postId): bool
+    public function updateReadPost(int $userId, int $topicId, int $postId): bool
     {
         return (bool) DB::table('readposts')
             ->where('userid', $userId)
@@ -567,12 +567,12 @@ class ForumRepository extends BaseRepository
             ->update(['lastpostread' => $postId]);
     }
 
-    public static function countUserPosts(int $userId): int
+    public function countUserPosts(int $userId): int
     {
         return (int) Post::query()->where('userid', $userId)->count();
     }
 
-    public static function markPostRead(int $userId, int $topicId, int $postId, int $lastCatchup): bool
+    public function markPostRead(int $userId, int $topicId, int $postId, int $lastCatchup): bool
     {
         $readPost = DB::table('readposts')
             ->where('userid', $userId)
@@ -597,19 +597,19 @@ class ForumRepository extends BaseRepository
         return true;
     }
 
-    public static function updateUserLastPost(int $userId, string $date): bool
+    public function updateUserLastPost(int $userId, string $date): bool
     {
         return (bool) User::query()->where('id', $userId)->update(['last_post' => $date]);
     }
 
-    public static function getForumMinclasswrite(int $forumid): ?int
+    public function getForumMinclasswrite(int $forumid): ?int
     {
         $forum = Forum::query()->where('id', $forumid)->first(['minclasswrite']);
 
         return $forum ? (int) $forum->minclasswrite : null;
     }
 
-    public static function moveTopic(int $topicid, int $newForumid, int $postCount, int $oldForumid): bool
+    public function moveTopic(int $topicid, int $newForumid, int $postCount, int $oldForumid): bool
     {
         if ($oldForumid == $newForumid) {
             return true;
@@ -627,7 +627,7 @@ class ForumRepository extends BaseRepository
     /**
      * @return array<string, int>|null
      */
-    public static function getTopicForumAndUser(int $topicid): ?array
+    public function getTopicForumAndUser(int $topicid): ?array
     {
         $topic = Topic::query()->where('id', $topicid)->first(['forumid', 'userid']);
 
@@ -637,7 +637,7 @@ class ForumRepository extends BaseRepository
         ] : null;
     }
 
-    public static function deleteTopic(int $topicid, int $forumid, int $postCount): bool
+    public function deleteTopic(int $topicid, int $forumid, int $postCount): bool
     {
         Topic::query()->where('id', $topicid)->delete();
         Post::query()->where('topicid', $topicid)->delete();
@@ -651,7 +651,7 @@ class ForumRepository extends BaseRepository
     /**
      * @return array{topicid: int, userid: int}|null
      */
-    public static function getPostTopicAndUser(int $postid): ?array
+    public function getPostTopicAndUser(int $postid): ?array
     {
         $post = Post::query()->where('id', $postid)->first(['topicid', 'userid']);
 
@@ -661,7 +661,7 @@ class ForumRepository extends BaseRepository
         ] : null;
     }
 
-    public static function getPreviousPostId(int $topicid, int $postid): ?int
+    public function getPreviousPostId(int $topicid, int $postid): ?int
     {
         return Post::query()
             ->where('topicid', $topicid)
@@ -670,7 +670,7 @@ class ForumRepository extends BaseRepository
             ->value('id');
     }
 
-    public static function deletePost(int $postid, int $topicid, int $forumid): bool
+    public function deletePost(int $postid, int $topicid, int $forumid): bool
     {
         Post::query()->where('id', $postid)->delete();
         Forum::query()->where('id', $forumid)->decrement('postcount');
@@ -678,22 +678,22 @@ class ForumRepository extends BaseRepository
         return true;
     }
 
-    public static function updateTopicLocked(int $topicid, bool $locked): bool
+    public function updateTopicLocked(int $topicid, bool $locked): bool
     {
         return (bool) Topic::query()->where('id', $topicid)->update(['locked' => $locked]);
     }
 
-    public static function updateTopicSticky(int $topicid, string $sticky): bool
+    public function updateTopicSticky(int $topicid, string $sticky): bool
     {
         return (bool) Topic::query()->where('id', $topicid)->update(['sticky' => $sticky]);
     }
 
-    public static function updateTopicHighlight(int $topicid, int $color): bool
+    public function updateTopicHighlight(int $topicid, int $color): bool
     {
         return (bool) Topic::query()->where('id', $topicid)->update(['hlcolor' => $color]);
     }
 
-    public static function updateUserForumAccess(int $userId, string $date): bool
+    public function updateUserForumAccess(int $userId, string $date): bool
     {
         return (bool) User::query()->where('id', $userId)->update(['forum_access' => $date]);
     }
@@ -701,7 +701,7 @@ class ForumRepository extends BaseRepository
     /**
      * @return array{count: int, rows: Collection<int, Topic>}
      */
-    public static function getTopicsByForum(int $forumid, string $search, string $sortColumn, string $direction, int $offset, int $perPage): array
+    public function getTopicsByForum(int $forumid, string $search, string $sortColumn, string $direction, int $offset, int $perPage): array
     {
         $allowed = ['firstpost' => 'firstpost', 'lastpost' => 'lastpost'];
         $column = $allowed[$sortColumn] ?? 'lastpost';
@@ -723,7 +723,7 @@ class ForumRepository extends BaseRepository
     /**
      * @return Collection<int, Topic>
      */
-    public static function getUnreadTopics(int $lastCatchup, ?int $beforePostId, int $limit): Collection
+    public function getUnreadTopics(int $lastCatchup, ?int $beforePostId, int $limit): Collection
     {
         $query = Topic::query()->where('lastpost', '>', $lastCatchup);
         if ($beforePostId) {
@@ -736,7 +736,7 @@ class ForumRepository extends BaseRepository
     /**
      * @return array{hits: int, rows: Collection<int, \stdClass>}
      */
-    public static function searchForumPosts(string $keywords, int $minClass, int $offset, int $perPage): array
+    public function searchForumPosts(string $keywords, int $minClass, int $offset, int $perPage): array
     {
         $term = '%'.$keywords.'%';
         $query = DB::table('posts')
@@ -760,12 +760,12 @@ class ForumRepository extends BaseRepository
         return ['hits' => $hits, 'rows' => $rows];
     }
 
-    public static function getLastTopicByForum(int $forumid): ?Topic
+    public function getLastTopicByForum(int $forumid): ?Topic
     {
         return Topic::query()->where('forumid', $forumid)->orderByDesc('lastpost')->first();
     }
 
-    public static function getForumTodayPostCount(int $forumid, string $todayDate): int
+    public function getForumTodayPostCount(int $forumid, string $todayDate): int
     {
         return (int) DB::table('posts')
             ->leftJoin('topics', 'posts.topicid', '=', 'topics.id')
@@ -777,12 +777,12 @@ class ForumRepository extends BaseRepository
     /**
      * @return array<string, mixed>
      */
-    public static function getPostArrayById(int $id): array
+    public function getPostArrayById(int $id): array
     {
         return Post::query()->findOrFail($id)->toArray();
     }
 
-    public static function getTopicById(int $id): Topic
+    public function getTopicById(int $id): Topic
     {
         return Topic::query()->findOrFail($id);
     }
@@ -790,7 +790,7 @@ class ForumRepository extends BaseRepository
     /**
      * @return array<int, int>
      */
-    public static function getForumMods(): array
+    public function getForumMods(): array
     {
         $mods = [];
         foreach (ForumMod::query()->get() as $item) {
@@ -803,7 +803,7 @@ class ForumRepository extends BaseRepository
     /**
      * @return array<string, mixed>|null
      */
-    public static function findPostArrayById(int $id): ?array
+    public function findPostArrayById(int $id): ?array
     {
         $post = Post::query()->where('id', $id)->first();
 

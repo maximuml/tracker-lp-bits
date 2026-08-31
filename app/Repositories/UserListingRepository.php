@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 class UserListingRepository
 {
     /** @return  array<int|string, mixed> */
-    public static function getCountries(): array
+    public function getCountries(): array
     {
         return DB::table('countries')
             ->select('id', 'name')
@@ -21,18 +21,18 @@ class UserListingRepository
     }
 
     /** @param  array<int|string, mixed>  $filters */
-    public static function countUsers(array $filters): int
+    public function countUsers(array $filters): int
     {
-        return self::buildUserQuery($filters)->count();
+        return $this->buildUserQuery($filters)->count();
     }
 
     /**
      * @param  array<int|string, mixed>  $filters
      * @return array<int|string, mixed>
      */
-    public static function listUsers(array $filters, int $offset, int $perPage): array
+    public function listUsers(array $filters, int $offset, int $perPage): array
     {
-        $query = self::buildUserQuery($filters)
+        $query = $this->buildUserQuery($filters)
             ->leftJoin('countries as c', 'u.country', '=', 'c.id')
             ->select('u.id', 'u.class', 'u.added', 'u.last_access')
             ->selectRaw("CASE WHEN u.country > 0 THEN CONCAT('<img src=\"pic/flag/', c.flagpic, '\" alt=\"', c.name, '\">') ELSE '---' END as country")
@@ -46,7 +46,7 @@ class UserListingRepository
     /**
      * @param  array<int|string, mixed>  $filters
      */
-    private static function buildUserQuery(array $filters): Builder
+    private function buildUserQuery(array $filters): Builder
     {
         $search = trim($filters['search'] ?? '');
         $class = $filters['class'] ?? '-';
@@ -77,7 +77,7 @@ class UserListingRepository
      * @param  array<int|string, string>  $ips
      * @return array<string, mixed>
      */
-    public static function getSearchExtraStats(array $userIds, array $ips, int $minClassRead): array
+    public function getSearchExtraStats(array $userIds, array $ips, int $minClassRead): array
     {
         $userIds = array_values(array_filter(array_map('intval', $userIds)));
 

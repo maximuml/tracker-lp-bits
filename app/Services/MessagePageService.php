@@ -96,7 +96,7 @@ class MessagePageService
 
         // Mailbox name
         if ($mailbox !== self::PM_INBOX && $mailbox !== self::PM_SENT_BOX) {
-            $pmBoxName = MessageRepository::getMailboxName($userId, $mailbox);
+            $pmBoxName = app(MessageRepository::class)->getMailboxName($userId, $mailbox);
             if (! $pmBoxName) {
                 LegacyResponse::abort(
                     (string) ($lang['std_error'] ?? 'Error'),
@@ -125,7 +125,7 @@ class MessagePageService
         };
         $perpage = (int) ($curUser['pmnum'] ?? 0) ?: 20;
 
-        $countResult = MessageRepository::getMailboxMessages($userId, $mailbox, $keyword, $place, $unreadBool, 0, 0);
+        $countResult = app(MessageRepository::class)->getMailboxMessages($userId, $mailbox, $keyword, $place, $unreadBool, 0, 0);
         $count = $countResult['count'];
 
         $pagerHref = '?action=viewmailbox'
@@ -137,7 +137,7 @@ class MessagePageService
 
         [$pagertop, $pagerbottom, , $offset, $perpage] = Pagination::pager($perpage, $count, $pagerHref);
 
-        $messageResult = MessageRepository::getMailboxMessages($userId, $mailbox, $keyword, $place, $unreadBool, (int) $offset, (int) $perpage);
+        $messageResult = app(MessageRepository::class)->getMailboxMessages($userId, $mailbox, $keyword, $place, $unreadBool, (int) $offset, (int) $perpage);
         $messages = $messageResult['messages'];
 
         // Build message rows
@@ -169,7 +169,7 @@ class MessagePageService
         }
 
         // User mailboxes for the "move to" select
-        $pmBoxes = MessageRepository::getUserMailboxes($userId);
+        $pmBoxes = app(MessageRepository::class)->getUserMailboxes($userId);
         $moveBoxOptions = '';
         foreach ($pmBoxes as $box) {
             $boxArr = (array) $box;
@@ -214,7 +214,7 @@ class MessagePageService
             );
         }
 
-        $messageModel = MessageRepository::getMessageForUser($pmId, $userId);
+        $messageModel = app(MessageRepository::class)->getMessageForUser($pmId, $userId);
         if (! $messageModel) {
             LegacyResponse::abort(
                 (string) ($lang['std_error'] ?? 'Error'),
@@ -259,7 +259,7 @@ class MessagePageService
         }
 
         // Mark message as read
-        MessageRepository::markAsRead($pmId, $userId);
+        app(MessageRepository::class)->markAsRead($pmId, $userId);
         $cache = app(LegacyRedisCache::class);
         if ($cache !== null) {
             $cache->delete_value('user_'.$userId.'_unread_message_count');
@@ -269,7 +269,7 @@ class MessagePageService
         $mailbox = $isSender ? self::PM_SENT_BOX : (int) $message['location'];
 
         // Move-to boxes
-        $pmBoxes = MessageRepository::getUserMailboxes($userId);
+        $pmBoxes = app(MessageRepository::class)->getUserMailboxes($userId);
         $moveBoxOptions = '';
         foreach ($pmBoxes as $box) {
             $boxArr = (array) $box;
@@ -301,7 +301,7 @@ class MessagePageService
     {
         $pmId = (int) $request->input('id', 0);
 
-        $messageModel = MessageRepository::getMessageForForward($pmId, $userId);
+        $messageModel = app(MessageRepository::class)->getMessageForForward($pmId, $userId);
         if (! $messageModel) {
             LegacyResponse::abort(
                 (string) ($lang['std_error'] ?? 'Error'),
@@ -323,7 +323,7 @@ class MessagePageService
             $origName2 = (string) ($lang['text_system'] ?? 'System');
         } else {
             $origName = UserDisplay::username($orig);
-            $origName2 = MessageRepository::getUsername($orig) ?? '';
+            $origName2 = app(MessageRepository::class)->getUsername($orig) ?? '';
         }
 
         $body = '-------- Original Message from '.htmlspecialchars($origName2).' --------<br />'.Format::formatComment((string) $message['msg']);
@@ -345,7 +345,7 @@ class MessagePageService
      */
     private function buildEditMailboxes(array $lang, int $userId): array
     {
-        $pmBoxes = MessageRepository::getUserMailboxes($userId);
+        $pmBoxes = app(MessageRepository::class)->getUserMailboxes($userId);
 
         $boxes = [];
         foreach ($pmBoxes as $box) {

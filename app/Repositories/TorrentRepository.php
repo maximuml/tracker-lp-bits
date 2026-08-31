@@ -48,6 +48,12 @@ use Illuminate\Support\Facades\DB;
  */
 class TorrentRepository extends BaseRepository
 {
+    public function __construct(
+        private readonly TorrentDownloadRepository $downloadRepository,
+        private readonly TorrentPurchaseRepository $purchaseRepository,
+        private readonly TorrentModerationRepository $moderationRepository,
+    ) {}
+
     /** @var array<int, string> */
     private static array $defaultLoadRelationships = [
         'basic_category', 'basic_category.search_box',
@@ -197,7 +203,7 @@ class TorrentRepository extends BaseRepository
         }
         Logger::writeWithContext((string) 'after prepare has data', (string) 'info', (bool) false);
 
-        $downloadRepo = new TorrentDownloadRepository;
+        $downloadRepo = $this->downloadRepository;
         foreach ($torrentList as $torrent) {
             $id = $torrent->id;
             if ($hasFieldHasBookmarked) {
@@ -575,7 +581,7 @@ HTML;
      */
     public function loadBoughtUser($torrentId): int
     {
-        return (new TorrentPurchaseRepository)->loadBoughtUser($torrentId);
+        return $this->purchaseRepository->loadBoughtUser($torrentId);
     }
 
     /**
@@ -585,7 +591,7 @@ HTML;
      */
     public function addBuySuccessCache($uid, $torrentId, $buyLogId): void
     {
-        (new TorrentPurchaseRepository)->addBuySuccessCache($uid, $torrentId, $buyLogId);
+        ($this->purchaseRepository)->addBuySuccessCache($uid, $torrentId, $buyLogId);
     }
 
     /**
@@ -594,7 +600,7 @@ HTML;
      */
     public function hasBuySuccessCache($uid, $torrentId): bool
     {
-        return (new TorrentPurchaseRepository)->hasBuySuccessCache($uid, $torrentId);
+        return $this->purchaseRepository->hasBuySuccessCache($uid, $torrentId);
     }
 
     /**
@@ -603,7 +609,7 @@ HTML;
      */
     public function hasBuySuccess($uid, $torrentId): bool
     {
-        return (new TorrentPurchaseRepository)->hasBuySuccess($uid, $torrentId);
+        return $this->purchaseRepository->hasBuySuccess($uid, $torrentId);
     }
 
     /**
@@ -612,7 +618,7 @@ HTML;
      */
     public function getBuyStatus($uid, $torrentId): int
     {
-        return (new TorrentPurchaseRepository)->getBuyStatus($uid, $torrentId);
+        return $this->purchaseRepository->getBuyStatus($uid, $torrentId);
     }
 
     /**
@@ -621,7 +627,7 @@ HTML;
      */
     public function addBuyFailCache($uid, $torrentId): void
     {
-        (new TorrentPurchaseRepository)->addBuyFailCache($uid, $torrentId);
+        ($this->purchaseRepository)->addBuyFailCache($uid, $torrentId);
     }
 
     /**
@@ -630,7 +636,7 @@ HTML;
      */
     public function getBuyFailCache($uid, $torrentId): int
     {
-        return (new TorrentPurchaseRepository)->getBuyFailCache($uid, $torrentId);
+        return $this->purchaseRepository->getBuyFailCache($uid, $torrentId);
     }
 
     /**
@@ -639,7 +645,7 @@ HTML;
      */
     public function getDownloadUrl($id, array|User $user): string
     {
-        return (new TorrentDownloadRepository)->getDownloadUrl($id, $user);
+        return $this->downloadRepository->getDownloadUrl($id, $user);
     }
 
     /**
@@ -648,7 +654,7 @@ HTML;
      */
     public function encryptDownHash($id, $user): string
     {
-        return (new TorrentDownloadRepository)->encryptDownHash($id, $user);
+        return $this->downloadRepository->encryptDownHash($id, $user);
     }
 
     /**
@@ -658,7 +664,7 @@ HTML;
      */
     public function decryptDownHash($downHash, $user)
     {
-        return (new TorrentDownloadRepository)->decryptDownHash($downHash, $user);
+        return $this->downloadRepository->decryptDownHash($downHash, $user);
     }
 
     /**
@@ -668,7 +674,7 @@ HTML;
      */
     public function getTrackerReportAuthKey($id, $uid, $initializeIfNotExists = false): string
     {
-        return (new TorrentDownloadRepository)->getTrackerReportAuthKey($id, $uid, $initializeIfNotExists);
+        return $this->downloadRepository->getTrackerReportAuthKey($id, $uid, $initializeIfNotExists);
     }
 
     /**
@@ -677,7 +683,7 @@ HTML;
      */
     public function checkTrackerReportAuthKey($authKey)
     {
-        return (new TorrentDownloadRepository)->checkTrackerReportAuthKey($authKey);
+        return $this->downloadRepository->checkTrackerReportAuthKey($authKey);
     }
 
     /**
@@ -686,17 +692,17 @@ HTML;
      */
     public function resetTrackerReportAuthKeySecret($uid, $torrentId = 0): string
     {
-        return (new TorrentDownloadRepository)->resetTrackerReportAuthKeySecret($uid, $torrentId);
+        return $this->downloadRepository->resetTrackerReportAuthKeySecret($uid, $torrentId);
     }
 
     public function addPiecesHashCache(int $torrentId, string $piecesHash): bool|int|\Redis
     {
-        return (new TorrentDownloadRepository)->addPiecesHashCache($torrentId, $piecesHash);
+        return $this->downloadRepository->addPiecesHashCache($torrentId, $piecesHash);
     }
 
     public function delPiecesHashCache(string $piecesHash): bool|int|\Redis
     {
-        return (new TorrentDownloadRepository)->delPiecesHashCache($piecesHash);
+        return $this->downloadRepository->delPiecesHashCache($piecesHash);
     }
 
     /**
@@ -705,7 +711,7 @@ HTML;
      */
     public function getPiecesHashCache($piecesHash): array
     {
-        return (new TorrentDownloadRepository)->getPiecesHashCache($piecesHash);
+        return $this->downloadRepository->getPiecesHashCache($piecesHash);
     }
 
     /**
@@ -714,17 +720,17 @@ HTML;
      */
     public function loadPiecesHashCache($id = 0): array
     {
-        return (new TorrentDownloadRepository)->loadPiecesHashCache($id);
+        return $this->downloadRepository->loadPiecesHashCache($id);
     }
 
     public function touchCacheStamp(int|string $torrentId, string $field = 'cache_stamp'): void
     {
-        (new TorrentDownloadRepository)->touchCacheStamp($torrentId, $field);
+        ($this->downloadRepository)->touchCacheStamp($torrentId, $field);
     }
 
     public function resetCacheStamp(int|string $torrentId, string $field = 'cache_stamp'): void
     {
-        (new TorrentDownloadRepository)->resetCacheStamp($torrentId, $field);
+        ($this->downloadRepository)->resetCacheStamp($torrentId, $field);
     }
 
     /**
@@ -733,7 +739,7 @@ HTML;
      */
     public function buildApprovalModal($user, int $torrentId)
     {
-        return (new TorrentModerationRepository)->buildApprovalModal($user, $torrentId);
+        return $this->moderationRepository->buildApprovalModal($user, $torrentId);
     }
 
     /**
@@ -743,7 +749,7 @@ HTML;
      */
     public function approval($user, array $params): array
     {
-        return (new TorrentModerationRepository)->approval($user, $params);
+        return $this->moderationRepository->approval($user, $params);
     }
 
     /**
@@ -752,24 +758,24 @@ HTML;
      */
     public function renderApprovalStatus($approvalStatus, $show = null): string
     {
-        return (new TorrentModerationRepository)->renderApprovalStatus($approvalStatus, $show);
+        return $this->moderationRepository->renderApprovalStatus($approvalStatus, $show);
     }
 
     /** @param  mixed  $approvalStatus */
     public function shouldShowApprovalStatusIcon($approvalStatus): bool
     {
-        return (new TorrentModerationRepository)->shouldShowApprovalStatusIcon($approvalStatus);
+        return $this->moderationRepository->shouldShowApprovalStatusIcon($approvalStatus);
     }
 
-    public static function getApprovalDenyCount(int $ownerId): int
+    public function getApprovalDenyCount(int $ownerId): int
     {
-        return TorrentModerationRepository::getApprovalDenyCount($ownerId);
+        return app(TorrentModerationRepository::class)->getApprovalDenyCount($ownerId);
     }
 
     /**
      * @return array<string, mixed>|false
      */
-    public static function getSnatchInfo(int|string $torrentId, int|string $userId): array|false
+    public function getSnatchInfo(int|string $torrentId, int|string $userId): array|false
     {
         $record = DB::table('snatched')
             ->where('torrentid', (int) $torrentId)
@@ -788,7 +794,7 @@ HTML;
      */
     public function syncTags($id, array $tagIdArr = [], $remove = true)
     {
-        return (new TorrentModerationRepository)->syncTags($id, $tagIdArr, $remove);
+        return $this->moderationRepository->syncTags($id, $tagIdArr, $remove);
     }
 
     /**
@@ -798,7 +804,7 @@ HTML;
      */
     public function setPosState($id, $posState, $posStateUntil = null): int
     {
-        return (new TorrentModerationRepository)->setPosState($id, $posState, $posStateUntil);
+        return $this->moderationRepository->setPosState($id, $posState, $posStateUntil);
     }
 
     /**
@@ -807,7 +813,7 @@ HTML;
      */
     public function setHr($id, $hrStatus): int
     {
-        return (new TorrentModerationRepository)->setHr($id, $hrStatus);
+        return $this->moderationRepository->setHr($id, $hrStatus);
     }
 
     /**
@@ -818,7 +824,7 @@ HTML;
      */
     public function setSpState($id, $spState, $promotionTimeType, $promotionUntil = null): int
     {
-        return (new TorrentModerationRepository)->setSpState($id, $spState, $promotionTimeType, $promotionUntil);
+        return $this->moderationRepository->setSpState($id, $spState, $promotionTimeType, $promotionUntil);
     }
 
     /**
@@ -827,7 +833,7 @@ HTML;
      */
     public function changeCategory(Collection|\Illuminate\Database\Eloquent\Collection $torrents, int $sectionId, array $specificSubCategoryAndTags): void
     {
-        (new TorrentModerationRepository)->changeCategory($torrents, $sectionId, $specificSubCategoryAndTags);
+        ($this->moderationRepository)->changeCategory($torrents, $sectionId, $specificSubCategoryAndTags);
     }
 
     /**
@@ -835,6 +841,6 @@ HTML;
      */
     public function deleteTorrents(int|array $id, bool $notify = false): void
     {
-        (new TorrentModerationRepository)->deleteTorrents($id, $notify);
+        ($this->moderationRepository)->deleteTorrents($id, $notify);
     }
 }

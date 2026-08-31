@@ -31,8 +31,8 @@ final class ToastNotifications
             return ['cursors' => $cursors, 'notifications' => []];
         }
 
-        $notifications = MessageRepository::getUnreadPmNotifications($userId, $lastPmId, self::LIMIT_PM);
-        foreach (ShoutboxRepository::getMentions($userId, $lastShoutId) as $mention) {
+        $notifications = app(MessageRepository::class)->getUnreadPmNotifications($userId, $lastPmId, self::LIMIT_PM);
+        foreach (app(ShoutboxRepository::class)->getMentions($userId, $lastShoutId) as $mention) {
             $notifications[] = [
                 'id' => 'shout_'.$mention['id'],
                 'type' => 'shoutbox-mention',
@@ -55,8 +55,8 @@ final class ToastNotifications
     private static function cursors(int $userId): array
     {
         return [
-            'last_pm_id' => MessageRepository::getLastPmId($userId),
-            'last_shout_id' => ShoutboxRepository::getLastShoutId(),
+            'last_pm_id' => app(MessageRepository::class)->getLastPmId($userId),
+            'last_shout_id' => app(ShoutboxRepository::class)->getLastShoutId(),
         ];
     }
 

@@ -162,18 +162,18 @@ final class ForumPageService
         echo "<form id=\"compose\" method=\"post\" name=\"compose\" action=\"?action=post\">\n";
         switch ($type) {
             case 'new':
-                $forumname = ForumRepository::getForumName((int) $id) ?? '';
+                $forumname = app(ForumRepository::class)->getForumName((int) $id) ?? '';
                 $title = ($lang['text_new_topic_in'] ?? '').' <a href="'.htmlspecialchars('?action=viewforum&forumid='.$id).'">'.htmlspecialchars($forumname).'</a> '.($lang['text_forum'] ?? '');
                 $hassubject = true;
                 break;
 
             case 'reply':
-                $topicname = ForumRepository::getTopicSubject((int) $id) ?? '';
+                $topicname = app(ForumRepository::class)->getTopicSubject((int) $id) ?? '';
                 $title = ($lang['text_reply_to_topic'] ?? '').' <a href="'.htmlspecialchars('?action=viewtopic&topicid='.$id).'">'.htmlspecialchars($topicname).'</a> ';
                 break;
 
             case 'quote':
-                $post = ForumRepository::getPostForQuote((int) $id);
+                $post = app(ForumRepository::class)->getPostForQuote((int) $id);
                 if (! $post) {
                     ob_get_clean();
                     LegacyResponse::abort($lang['std_error'] ?? '', $lang['std_no_post_id'] ?? '');
@@ -190,7 +190,7 @@ final class ForumPageService
                 break;
 
             case 'edit':
-                $post = ForumRepository::getPostForEdit((int) $id);
+                $post = app(ForumRepository::class)->getPostForEdit((int) $id);
                 if (! $post) {
                     ob_get_clean();
 
@@ -269,7 +269,7 @@ final class ForumPageService
         $postid = (int) (request()->query('postid') ?? 0);
         $this->checkWhetherExist($postid, 'post', $lang);
 
-        $post = ForumRepository::getPostWithTopic((int) $postid);
+        $post = app(ForumRepository::class)->getPostWithTopic((int) $postid);
         if (! $post) {
             LegacyResponse::abort($lang['std_error'] ?? '', $lang['std_no_post_id'] ?? '');
 
@@ -306,7 +306,7 @@ final class ForumPageService
             $addparam = 'action=viewtopic&topicid='.$topicid;
         }
 
-        $topic = ForumRepository::getTopic((int) $topicid);
+        $topic = app(ForumRepository::class)->getTopic((int) $topicid);
         if (! $topic) {
             LegacyResponse::abort($lang['std_forum_error'] ?? '', $lang['std_topic_not_found'] ?? '');
 
@@ -339,9 +339,9 @@ final class ForumPageService
             $maypost = false;
         }
 
-        ForumRepository::incrementTopicViews((int) $topicid);
+        app(ForumRepository::class)->incrementTopicViews((int) $topicid);
 
-        $postcount = ForumRepository::countTopicPosts((int) $topicid, $authorid ?: null);
+        $postcount = app(ForumRepository::class)->countTopicPosts((int) $topicid, $authorid ?: null);
         if (! $authorid) {
             $Cache?->cache_value('topic_'.$topicid.'_post_count', $postcount, 3600);
         }
@@ -352,7 +352,7 @@ final class ForumPageService
 
         if ((isset($page[0])) && $page[0] == 'p') {
             $findpost = substr($page, 1);
-            $postIds = ForumRepository::getTopicPostIds((int) $topicid, $authorid ?: null);
+            $postIds = app(ForumRepository::class)->getTopicPostIds((int) $topicid, $authorid ?: null);
             $i = array_search($findpost, $postIds);
             if ($i === false) {
                 $i = 0;
@@ -411,7 +411,7 @@ final class ForumPageService
         $pagertop = '<p align="center">'.$pager.'<br />'.$pagerstr."</p>\n";
         $pagerbottom = '<p align="center">'.$pagerstr.'<br />'.$pager."</p>\n";
 
-        $postRows = ForumRepository::getTopicPosts((int) $topicid, $authorid ?: null, (int) $offset, (int) $perpage);
+        $postRows = app(ForumRepository::class)->getTopicPosts((int) $topicid, $authorid ?: null, (int) $offset, (int) $perpage);
         $pc = $postRows->count();
         $allPosts = [];
         $uidArr = [];
@@ -441,7 +441,7 @@ final class ForumPageService
         Html::beginFrame();
 
         $neededColumns = ['id', 'class', 'enabled', 'privacy', 'avatar', 'signature', 'uploaded', 'downloaded', 'last_access', 'username', 'donor', 'leechwarn', 'warned', 'title'];
-        $userInfoArr = ForumRepository::getUsersByIds($uidArr, $neededColumns);
+        $userInfoArr = app(ForumRepository::class)->getUsersByIds($uidArr, $neededColumns);
         $pn = 0;
         $lpr = $this->getLastReadPostId($topicid, $curUser);
 
@@ -463,7 +463,7 @@ final class ForumPageService
             $ratio = Ratio::forUserId((int) $arr2['id']);
 
             if (! $forumposts = $Cache?->get_value('user_'.$posterid.'_post_count')) {
-                $forumposts = ForumRepository::countUserPosts((int) $posterid);
+                $forumposts = app(ForumRepository::class)->countUserPosts((int) $posterid);
                 $Cache?->cache_value('user_'.$posterid.'_post_count', $forumposts, 3600);
             }
 
@@ -480,7 +480,7 @@ final class ForumPageService
             if ($pn == $pc) {
                 echo "<span id=\"last\"></span>\n";
                 if ($postid > $lpr) {
-                    ForumRepository::markPostRead((int) $userId, (int) $topicid, (int) $postid, (int) ($curUser['last_catchup'] ?? 0));
+                    app(ForumRepository::class)->markPostRead((int) $userId, (int) $topicid, (int) $postid, (int) ($curUser['last_catchup'] ?? 0));
                     $Cache?->delete_value('user_'.($curUser['id'] ?? 0).'_last_read_post_list');
                 }
             }
@@ -661,11 +661,11 @@ final class ForumPageService
                 $sortDirection = 'desc';
         }
 
-        $topicResult = ForumRepository::getTopicsByForum((int) $forumid, (string) $search, (string) $sortColumn, (string) $sortDirection, 0, 0);
+        $topicResult = app(ForumRepository::class)->getTopicsByForum((int) $forumid, (string) $search, (string) $sortColumn, (string) $sortDirection, 0, 0);
         $num = (int) $topicResult['count'];
 
         [$pagertop, $pagerbottom, , $offset, $perpage] = Pagination::pager($topicsperpage, $num, '?'.'action=viewforum&forumid='.$forumid.$addparam.'&');
-        $topicResult = ForumRepository::getTopicsByForum((int) $forumid, (string) $search, (string) $sortColumn, (string) $sortDirection, (int) $offset, (int) $perpage);
+        $topicResult = app(ForumRepository::class)->getTopicsByForum((int) $forumid, (string) $search, (string) $sortColumn, (string) $sortDirection, (int) $offset, (int) $perpage);
         $topicRows = $topicResult['rows'];
         $numtopics = $topicRows->count();
 
@@ -715,7 +715,7 @@ final class ForumPageService
                 $hlcolor = (int) $topicarr['hlcolor'];
 
                 if (! $posts = $Cache?->get_value('topic_'.$topicid.'_post_count')) {
-                    $posts = ForumRepository::countTopicPosts((int) $topicid);
+                    $posts = app(ForumRepository::class)->countTopicPosts((int) $topicid);
                     $Cache?->cache_value('topic_'.$topicid.'_post_count', $posts, 3600);
                 }
 
@@ -843,7 +843,7 @@ final class ForumPageService
         $beforepostid = (int) (request()->query('beforepostid') ?? 0);
         $maxresults = 25;
         $lastCatchup = (int) ($curUser['last_catchup'] ?? 0);
-        $unreadTopics = ForumRepository::getUnreadTopics($lastCatchup, $beforepostid ?: null, 100);
+        $unreadTopics = app(ForumRepository::class)->getUnreadTopics($lastCatchup, $beforepostid ?: null, 100);
 
         $SITENAME = (string) app(Globals::class)->get('SITENAME', '');
 
@@ -911,7 +911,7 @@ final class ForumPageService
         $found = '';
         $keywords = htmlspecialchars(trim((string) (request()->query('keywords') ?? '')));
         if ($keywords != '') {
-            $searchResult = ForumRepository::searchForumPosts((string) $keywords, (int) UserDisplay::currentClass(), 0, 0);
+            $searchResult = app(ForumRepository::class)->searchForumPosts((string) $keywords, (int) UserDisplay::currentClass(), 0, 0);
             $hits = (int) $searchResult['hits'];
             if ($hits) {
                 $error = false;
@@ -970,7 +970,7 @@ final class ForumPageService
         if (! $error) {
             $perpage = $topicsperpage;
             [$pagertop, $pagerbottom, , $offset, $perpage] = Pagination::pager($perpage, $hits, 'forums.php?action=search&keywords='.rawurlencode($keywords).'&');
-            $searchResult = ForumRepository::searchForumPosts((string) $keywords, (int) UserDisplay::currentClass(), (int) $offset, (int) $perpage);
+            $searchResult = app(ForumRepository::class)->searchForumPosts((string) $keywords, (int) UserDisplay::currentClass(), (int) $offset, (int) $perpage);
             $posts = $searchResult['rows'];
 
             echo $pagertop;
@@ -1002,7 +1002,7 @@ final class ForumPageService
         $todayDate = date('Y-m-d');
 
         if ($curUser) {
-            ForumRepository::updateUserForumAccess((int) ($curUser['id'] ?? 0), date('Y-m-d H:i:s'));
+            app(ForumRepository::class)->updateUserForumAccess((int) ($curUser['id'] ?? 0), date('Y-m-d H:i:s'));
         }
 
         $SITENAME = (string) app(Globals::class)->get('SITENAME', '');
@@ -1014,7 +1014,7 @@ final class ForumPageService
         echo "<table border=\"1\" cellspacing=\"0\" cellpadding=\"5\" width=\"100%\">\n";
 
         if (! $overforums = $Cache?->get_value('overforums_list')) {
-            $overforums = ForumRepository::getOverforumsList();
+            $overforums = app(ForumRepository::class)->getOverforumsList();
             $Cache?->cache_value('overforums_list', $overforums, 86400);
         }
         foreach ($overforums as $a) {
@@ -1050,7 +1050,7 @@ final class ForumPageService
                 $postcount = number_format((int) $forums_arr['postcount']);
 
                 if (! $arr = $Cache?->get_value('forum_'.$forumid.'_last_replied_topic_content')) {
-                    $lastTopic = ForumRepository::getLastTopicByForum((int) $forumid);
+                    $lastTopic = app(ForumRepository::class)->getLastTopicByForum((int) $forumid);
                     $arr = $lastTopic ? $lastTopic->toArray() : false;
                     $Cache?->cache_value('forum_'.$forumid.'_last_replied_topic_content', $arr, 900);
                 }
@@ -1085,7 +1085,7 @@ final class ForumPageService
                 }
                 $posttodaycount = $Cache?->get_value('forum_'.$forumid.'_post_'.$todayDate.'_count');
                 if ($posttodaycount == '') {
-                    $posttodaycount = ForumRepository::getForumTodayPostCount((int) $forumid, date('Y-m-d'));
+                    $posttodaycount = app(ForumRepository::class)->getForumTodayPostCount((int) $forumid, date('Y-m-d'));
                     $Cache?->cache_value('forum_'.$forumid.'_post_'.$todayDate.'_count', $posttodaycount, 1800);
                 }
                 if ($posttodaycount > 0) {
@@ -1116,7 +1116,7 @@ final class ForumPageService
         $Cache = app(LegacyRedisCache::class);
 
         if (! $activeforumuser_num = $Cache?->get_value('active_forum_user_count')) {
-            $activeforumuser_num = ForumRepository::getActiveForumUserCount();
+            $activeforumuser_num = app(ForumRepository::class)->getActiveForumUserCount();
             $Cache?->cache_value('active_forum_user_count', $activeforumuser_num, 300);
         }
         if ($activeforumuser_num) {
@@ -1131,15 +1131,15 @@ final class ForumPageService
 <table width="100%"><tr><td class="text">
 <?php
         if (! $postcount = $Cache?->get_value('total_posts_count')) {
-            $postcount = ForumRepository::getTotalPostsCount();
+            $postcount = app(ForumRepository::class)->getTotalPostsCount();
             $Cache?->cache_value('total_posts_count', $postcount, 96400);
         }
         if (! $topiccount = $Cache?->get_value('total_topics_count')) {
-            $topiccount = ForumRepository::getTotalTopicsCount();
+            $topiccount = app(ForumRepository::class)->getTotalTopicsCount();
             $Cache?->cache_value('total_topics_count', $topiccount, 96500);
         }
         if (! $todaypostcount = $Cache?->get_value('today_'.$todayDate.'_posts_count')) {
-            $todaypostcount = ForumRepository::getTodayPostsCount($todayDate);
+            $todaypostcount = app(ForumRepository::class)->getTodayPostsCount($todayDate);
             $Cache?->cache_value('today_'.$todayDate.'_posts_count', $todaypostcount, 700);
         }
         echo ($lang['text_our_members_have'] ?? '').'<b>'.$postcount.'</b>'.($lang['text_posts_in_topics'] ?? '').'<b>'.$topiccount.'</b>'.($lang['text_in_topics'] ?? '').'<b><font class="new">'.$todaypostcount.'</font></b>'.($lang['text_new_post'] ?? '').Strings::addS((int) $todaypostcount).($lang['text_posts_today'] ?? '').'<br /><br />';
@@ -1161,12 +1161,12 @@ final class ForumPageService
         if (! $CURUSER) {
             return;
         }
-        ForumRepository::clearReadPosts((int) $CURUSER['id']);
+        app(ForumRepository::class)->clearReadPosts((int) $CURUSER['id']);
         $Cache?->delete_value('user_'.$CURUSER['id'].'_last_read_post_list');
-        $lastpostid = ForumRepository::getLastPostId();
+        $lastpostid = app(ForumRepository::class)->getLastPostId();
         if ($lastpostid) {
             $CURUSER['last_catchup'] = $lastpostid;
-            ForumRepository::updateLastCatchup((int) $CURUSER['id'], (int) $lastpostid);
+            app(ForumRepository::class)->updateLastCatchup((int) $CURUSER['id'], (int) $lastpostid);
         }
     }
 
@@ -1178,13 +1178,13 @@ final class ForumPageService
         LegacyResponse::assertId($id, true);
         switch ($place) {
             case 'forum':
-                if (! ForumRepository::forumExists((int) $id)) {
+                if (! app(ForumRepository::class)->forumExists((int) $id)) {
                     LegacyResponse::abort($lang['std_error'] ?? '', $lang['std_no_forum_id'] ?? '');
                 }
                 break;
 
             case 'topic':
-                $forumid = ForumRepository::topicExists((int) $id);
+                $forumid = app(ForumRepository::class)->topicExists((int) $id);
                 if (! $forumid) {
                     LegacyResponse::abort($lang['std_error'] ?? '', $lang['std_bad_topic_id'] ?? '');
                 }
@@ -1192,7 +1192,7 @@ final class ForumPageService
                 break;
 
             case 'post':
-                $topicid = ForumRepository::postExists((int) $id);
+                $topicid = app(ForumRepository::class)->postExists((int) $id);
                 if (! $topicid) {
                     LegacyResponse::abort($lang['std_error'] ?? '', $lang['std_no_post_id'] ?? '');
                 }
@@ -1208,7 +1208,7 @@ final class ForumPageService
     {
         $Cache = app(LegacyRedisCache::class);
         if (! $forums = $Cache?->get_value('forums_list')) {
-            $forums = ForumRepository::getForumsList();
+            $forums = app(ForumRepository::class)->getForumsList();
             $Cache?->cache_value('forums_list', $forums, 86400);
         }
         if (! $forumid) {
@@ -1226,7 +1226,7 @@ final class ForumPageService
         $Cache = app(LegacyRedisCache::class);
         static $ret = null;
         if (! $ret && ! $ret = $Cache?->get_value('user_'.($curUser['id'] ?? 0).'_last_read_post_list')) {
-            $ret = ForumRepository::getLastReadPosts((int) ($curUser['id'] ?? 0));
+            $ret = app(ForumRepository::class)->getLastReadPosts((int) ($curUser['id'] ?? 0));
             if ($ret !== null) {
                 $Cache?->cache_value('user_'.($curUser['id'] ?? 0).'_last_read_post_list', $ret, 900);
             } else {

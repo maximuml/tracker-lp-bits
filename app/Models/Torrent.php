@@ -264,16 +264,16 @@ class Torrent extends NexusModel
      */
     public function shouldBeSearchable(): bool
     {
-        return MeiliSearchRepository::isEnabled();
+        return app(MeiliSearchRepository::class)->isEnabled();
     }
 
     /** @return  array<int|string, mixed> */
     public function toSearchableArray(): array
     {
-        $fields = MeiliSearchRepository::getRequiredFields();
+        $fields = app(MeiliSearchRepository::class)->getRequiredFields();
         $row = [];
         foreach ($fields as $field) {
-            $row[$field] = MeiliSearchRepository::formatValueForMeili($field, $this->getAttribute($field));
+            $row[$field] = app(MeiliSearchRepository::class)->formatValueForMeili($field, $this->getAttribute($field));
         }
 
         return $row;

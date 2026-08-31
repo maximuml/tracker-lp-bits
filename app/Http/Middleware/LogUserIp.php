@@ -23,7 +23,7 @@ class LogUserIp
         }
         $user = $request->user();
         if ($user) {
-            IpLogRepository::saveToCache($user->id);
+            app(IpLogRepository::class)->saveToCache($user->id);
         }
 
         return $response;

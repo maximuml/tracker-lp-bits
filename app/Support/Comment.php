@@ -292,7 +292,7 @@ final class Comment
 
         $uidArr = array_values(array_filter(array_map('intval', array_column($rows, 'user'))));
         $neededColumns = ['id', 'class', 'enabled', 'privacy', 'avatar', 'signature', 'uploaded', 'downloaded', 'last_access', 'username', 'donor', 'leechwarn', 'warned', 'title'];
-        $userInfoArr = UserRepository::getByIds($uidArr, $neededColumns);
+        $userInfoArr = app(UserRepository::class)->getByIds($uidArr, $neededColumns);
 
         foreach ($rows as $row) {
             $userInfo = $userInfoArr->get($row['user'], User::defaultUser());

@@ -172,7 +172,7 @@ class InviteController extends LegacyController
     private function inviteeData(int $id, string $enabled, string $status, int $currentUserId, array $langInvite, string $requestUri): array
     {
         $filters = ['status' => $status, 'enabled' => $enabled];
-        $number = InviteRepository::countInvitees($id, $filters);
+        $number = app(InviteRepository::class)->countInvitees($id, $filters);
         $pageSize = 50;
 
         $enabledOptions = '';
@@ -192,11 +192,11 @@ class InviteController extends LegacyController
 
         if ($number > 0) {
             [$pagertop, $pagerbottom, , $offset] = Pagination::pager($pageSize, $number, "?id=$id&menu=invitee&");
-            $inviteRows = InviteRepository::getInvitees($id, $filters, (int) $offset, $pageSize);
+            $inviteRows = app(InviteRepository::class)->getInvitees($id, $filters, (int) $offset, $pageSize);
         }
 
         if ($currentUserId === $id || UserDisplay::currentClass() >= (int) UserClassEnum::SYSOP->value) {
-            $pendingCount = InviteRepository::countPendingInvitees($currentUserId);
+            $pendingCount = app(InviteRepository::class)->countPendingInvitees($currentUserId);
         }
 
         // Register reset JS
@@ -232,7 +232,7 @@ JS;
      */
     private function sentTmpData(int $id, string $menuSelected, array $langInvite, array $langFunctions): array
     {
-        $number = InviteRepository::countInvites($id, $menuSelected);
+        $number = app(InviteRepository::class)->countInvites($id, $menuSelected);
         $pageSize = 50;
         $inviteRows = [];
         $pagertop = '';
@@ -240,7 +240,7 @@ JS;
 
         if ($number > 0) {
             [$pagertop, $pagerbottom, , $offset] = Pagination::pager($pageSize, $number, "?id=$id&menu=$menuSelected&");
-            $inviteRows = InviteRepository::getInvites($id, $menuSelected, (int) $offset, $pageSize);
+            $inviteRows = app(InviteRepository::class)->getInvites($id, $menuSelected, (int) $offset, $pageSize);
         }
 
         return [

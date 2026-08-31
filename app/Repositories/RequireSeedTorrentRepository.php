@@ -54,7 +54,7 @@ class RequireSeedTorrentRepository extends BaseRepository
         $data = [];
         $nowStr = now()->toDateTimeString();
         $redis = Redis::connection()->client();
-        $cacheKey = self::getTorrentCacheKey();
+        $cacheKey = $this->getTorrentCacheKey();
         foreach ($list as $item) {
             $data[] = [
                 'torrent_id' => $item->id,
@@ -105,22 +105,22 @@ class RequireSeedTorrentRepository extends BaseRepository
             $promotionStateCacheKey = sprintf('%s:%s', Torrent::REQUIRE_SEED_SECTION_PROMOTION_STATE_CACHE_KEY, $torrent->id);
             $redis->setex($promotionStateCacheKey, $ttlInSeconds, $promotionState);
             // remove torrent from list
-            $redis->hDel(self::getTorrentCacheKey(), $torrent->id);
+            $redis->hDel($this->getTorrentCacheKey(), $torrent->id);
             // remove all users under torrent
-            $redis->unlink(self::getTorrentUserCacheKey($torrent->id));
+            $redis->unlink($this->getTorrentUserCacheKey($torrent->id));
         }
         RequireSeedTorrent::query()->whereIn('torrent_id', $idArr)->delete();
         UserRequireSeedTorrent::query()->whereIn('torrent_id', $idArr)->delete();
         Logger::writeWithContext((string) ('success removed '.count($idArr)), (string) 'info', (bool) false);
     }
 
-    private static function getTorrentCacheKey(): string
+    private function getTorrentCacheKey(): string
     {
         return Torrent::REQUIRE_SEED_SECTION_TORRENT_ON_LIST_CACHE_KEY;
     }
 
     /** @param  mixed  $torrentId */
-    private static function getTorrentUserCacheKey($torrentId): string
+    private function getTorrentUserCacheKey($torrentId): string
     {
         return sprintf('%s:%s', Torrent::REQUIRE_SEED_SECTION_TORRENT_USER_CACHE_KEY, $torrentId);
     }
@@ -129,7 +129,7 @@ class RequireSeedTorrentRepository extends BaseRepository
      * @param  mixed  $userId
      * @param  mixed  $torrentId
      */
-    public static function shouldRecordUser(\Redis $redis, $userId, $torrentId): bool
+    public function shouldRecordUser(\Redis $redis, $userId, $torrentId): bool
     {
         $logPrefix = "userId: $userId, torrentId: $torrentId";
         // check enabled or not
@@ -139,14 +139,14 @@ class RequireSeedTorrentRepository extends BaseRepository
             return false;
         }
         // first, torrent on list
-        $onListCacheKey = self::getTorrentCacheKey();
+        $onListCacheKey = $this->getTorrentCacheKey();
         if (! $redis->hExists($onListCacheKey, $torrentId)) {
             Logger::writeWithContext((string) "{$logPrefix}, torrent not on list: {$onListCacheKey}", (string) 'debug', (bool) false);
 
             return false;
         }
         // second, torrent user not exists
-        $torrentUserCacheKey = self::getTorrentUserCacheKey($torrentId);
+        $torrentUserCacheKey = $this->getTorrentUserCacheKey($torrentId);
         if ($redis->hExists($torrentUserCacheKey, $userId)) {
             Logger::writeWithContext((string) "{$logPrefix}, user already exists: {$torrentUserCacheKey}", (string) 'debug', (bool) false);
 
@@ -161,9 +161,9 @@ class RequireSeedTorrentRepository extends BaseRepository
      * @param  mixed  $torrentId
      * @param  array<int|string, mixed>  $snatchedInfo
      */
-    public static function recordUser(\Redis $redis, $userId, $torrentId, array $snatchedInfo): void
+    public function recordUser(\Redis $redis, $userId, $torrentId, array $snatchedInfo): void
     {
-        $torrentUserCacheKey = self::getTorrentUserCacheKey($torrentId);
+        $torrentUserCacheKey = $this->getTorrentUserCacheKey($torrentId);
         $nowStr = now()->toDateTimeString();
         $values = [
             'user_id' => $userId,

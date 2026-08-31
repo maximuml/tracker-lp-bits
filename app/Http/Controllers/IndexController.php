@@ -30,7 +30,7 @@ class IndexController extends Controller
             return redirect('/index.php'.($qs ? '?'.$qs : ''));
         }
 
-        IndexRepository::touchLastHome((int) $user['id']);
+        app(IndexRepository::class)->touchLastHome((int) $user['id']);
 
         if ($request->isMethod('post') && app(Globals::class)->get('showpolls_main', '') === 'yes') {
             return $this->handlePollVote($request);
@@ -50,18 +50,18 @@ class IndexController extends Controller
             return redirect('/index.php');
         }
 
-        $poll = IndexRepository::getCurrentPoll();
+        $poll = app(IndexRepository::class)->getCurrentPoll();
         if (! is_array($poll) || ! isset($poll['id']) || ! is_array($user)) {
             return redirect('/index.php');
         }
 
         $pollId = $poll['id'];
 
-        if (IndexRepository::hasVoted($pollId, $user['id'])) {
+        if (app(IndexRepository::class)->hasVoted($pollId, $user['id'])) {
             return redirect('/index.php');
         }
 
-        IndexRepository::recordPollVote($pollId, $user['id'], (int) $choice);
+        app(IndexRepository::class)->recordPollVote($pollId, $user['id'], (int) $choice);
 
         $cache = app(LegacyRedisCache::class);
         if ($cache !== null) {

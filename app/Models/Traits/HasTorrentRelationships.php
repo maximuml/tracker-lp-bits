@@ -155,7 +155,7 @@ trait HasTorrentRelationships
     /** @return BelongsToMany<Tag, $this> */
     public function tags(): BelongsToMany
     {
-        $idsString = TagRepository::getOrderByFieldIdString();
+        $idsString = app(TagRepository::class)->getOrderByFieldIdString();
         if (DB::connection()->getDriverName() === 'pgsql') {
             $orderByRaw = "array_position(ARRAY[$idsString]::int[], tags.id)";
         } elseif (DB::connection()->getDriverName() === 'mysql') {

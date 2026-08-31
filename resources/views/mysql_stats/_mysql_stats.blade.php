@@ -6,7 +6,7 @@ echo '<h1 align=center>' . "\n"
 
 <table id="torrenttable" border="1"><tr><td>
 <?php
-echo 'This MySQL server has been running for '. \App\Repositories\MysqlStatsRepository::timespanFormat($uptimeSeconds) .'. It started up on '. \App\Repositories\MysqlStatsRepository::localisedDate($startTime) . "\n";
+echo 'This MySQL server has been running for '. \app(\App\Repositories\MysqlStatsRepository::class)->timespanFormat($uptimeSeconds) .'. It started up on '. \app(\App\Repositories\MysqlStatsRepository::class)->localisedDate($startTime) . "\n";
 ?>
 </td></tr></table>
 
@@ -24,18 +24,18 @@ echo 'This MySQL server has been running for '. \App\Repositories\MysqlStatsRepo
                         </tr>
                         <tr>
                             <td bgcolor="#EFF3FF">&nbsp;Received&nbsp;</td>
-                            <td bgcolor="#EFF3FF" align="right">&nbsp;<?php echo implode(' ', \App\Repositories\MysqlStatsRepository::formatByteDown($bytesReceived)); ?>&nbsp;</td>
-                            <td bgcolor="#EFF3FF" align="right">&nbsp;<?php echo implode(' ', \App\Repositories\MysqlStatsRepository::formatByteDown($bytesReceived * 3600 / max(1, $uptimeSeconds))); ?>&nbsp;</td>
+                            <td bgcolor="#EFF3FF" align="right">&nbsp;<?php echo implode(' ', \app(\App\Repositories\MysqlStatsRepository::class)->formatByteDown($bytesReceived)); ?>&nbsp;</td>
+                            <td bgcolor="#EFF3FF" align="right">&nbsp;<?php echo implode(' ', \app(\App\Repositories\MysqlStatsRepository::class)->formatByteDown($bytesReceived * 3600 / max(1, $uptimeSeconds))); ?>&nbsp;</td>
                         </tr>
                         <tr>
                             <td bgcolor="#EFF3FF">&nbsp;Sent&nbsp;</td>
-                            <td bgcolor="#EFF3FF" align="right">&nbsp;<?php echo implode(' ', \App\Repositories\MysqlStatsRepository::formatByteDown($bytesSent)); ?>&nbsp;</td>
-                            <td bgcolor="#EFF3FF" align="right">&nbsp;<?php echo implode(' ', \App\Repositories\MysqlStatsRepository::formatByteDown($bytesSent * 3600 / max(1, $uptimeSeconds))); ?>&nbsp;</td>
+                            <td bgcolor="#EFF3FF" align="right">&nbsp;<?php echo implode(' ', \app(\App\Repositories\MysqlStatsRepository::class)->formatByteDown($bytesSent)); ?>&nbsp;</td>
+                            <td bgcolor="#EFF3FF" align="right">&nbsp;<?php echo implode(' ', \app(\App\Repositories\MysqlStatsRepository::class)->formatByteDown($bytesSent * 3600 / max(1, $uptimeSeconds))); ?>&nbsp;</td>
                         </tr>
                         <tr>
                             <td bgcolor="lightgrey">&nbsp;Total&nbsp;</td>
-                            <td bgcolor="lightgrey" align="right">&nbsp;<?php echo implode(' ', \App\Repositories\MysqlStatsRepository::formatByteDown($totalBytes)); ?>&nbsp;</td>
-                            <td bgcolor="lightgrey" align="right">&nbsp;<?php echo implode(' ', \App\Repositories\MysqlStatsRepository::formatByteDown($totalBytes * 3600 / max(1, $uptimeSeconds))); ?>&nbsp;</td>
+                            <td bgcolor="lightgrey" align="right">&nbsp;<?php echo implode(' ', \app(\App\Repositories\MysqlStatsRepository::class)->formatByteDown($totalBytes)); ?>&nbsp;</td>
+                            <td bgcolor="lightgrey" align="right">&nbsp;<?php echo implode(' ', \app(\App\Repositories\MysqlStatsRepository::class)->formatByteDown($totalBytes * 3600 / max(1, $uptimeSeconds))); ?>&nbsp;</td>
                         </tr>
                     </table>
                 </td>

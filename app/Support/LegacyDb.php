@@ -87,6 +87,6 @@ final class LegacyDb
      */
     public static function snatchInfo(int|string $torrentId, int|string $userId): array|false
     {
-        return TorrentRepository::getSnatchInfo($torrentId, $userId);
+        return app(TorrentRepository::class)->getSnatchInfo($torrentId, $userId);
     }
 }

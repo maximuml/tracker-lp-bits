@@ -63,7 +63,7 @@ class StaffMessageResource extends Resource
             return $query;
         }
         // Non-staff-member users can only see messages whose permission they hold
-        $userPerms = ToolRepository::listUserAllPermissions((int) $user?->id);
+        $userPerms = app(ToolRepository::class)->listUserAllPermissions((int) $user?->id);
 
         return $query->where(function (Builder $q) use ($userPerms) {
             $q->whereNull('permission')->orWhereIn('permission', $userPerms);

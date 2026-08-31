@@ -24,9 +24,9 @@ class FaqController extends LegacyController
         $cacheKey = "{$langFolder}_faq";
 
         $html = Cache::remember($cacheKey, 900, function () {
-            $langId = InfoRepository::resolveRuleLangId(Locale::guestIdWithContext());
+            $langId = app(InfoRepository::class)->resolveRuleLangId(Locale::guestIdWithContext());
 
-            return view('faq.index', ['faqCategories' => InfoRepository::faqCategories($langId)])->render();
+            return view('faq.index', ['faqCategories' => app(InfoRepository::class)->faqCategories($langId)])->render();
         });
 
         return response($html);
@@ -39,7 +39,7 @@ class FaqController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Permission denied.');
         }
 
-        $faqData = InfoRepository::faqManageData();
+        $faqData = app(InfoRepository::class)->faqManageData();
 
         return $this->legacyPage($request, 'faqmanage', true, $faqData);
     }
@@ -56,13 +56,13 @@ class FaqController extends LegacyController
         $action = (string) (request()->query('action') ?? '');
 
         if ($action === 'reorder' && $request->isMethod('post')) {
-            InfoRepository::reorderFaq((array) request()->post('order'));
+            app(InfoRepository::class)->reorderFaq((array) request()->post('order'));
 
             return redirect($redirectBase.'/faqmanage.php');
         }
 
         if ($action === 'edititem' && $request->isMethod('post')) {
-            InfoRepository::updateFaq((int) request()->post('id'), [
+            app(InfoRepository::class)->updateFaq((int) request()->post('id'), [
                 'question' => (string) request()->post('question'),
                 'answer' => (string) request()->post('answer'),
                 'flag' => (int) request()->post('flag'),
@@ -73,7 +73,7 @@ class FaqController extends LegacyController
         }
 
         if ($action === 'editsect' && $request->isMethod('post')) {
-            InfoRepository::updateFaq((int) request()->post('id'), [
+            app(InfoRepository::class)->updateFaq((int) request()->post('id'), [
                 'question' => (string) request()->post('title'),
                 'answer' => '',
                 'flag' => (int) request()->post('flag'),
@@ -86,7 +86,7 @@ class FaqController extends LegacyController
         if ($action === 'delete') {
             $id = (int) (request()->query('id') ?? 0);
             if (request()->query('confirm') === 'yes') {
-                InfoRepository::deleteFaq($id);
+                app(InfoRepository::class)->deleteFaq($id);
 
                 return redirect($redirectBase.'/faqmanage.php');
             }
@@ -100,8 +100,8 @@ class FaqController extends LegacyController
         if ($action === 'addnewitem' && $request->isMethod('post')) {
             $categ = (int) (request()->post('categ') ?? 0);
             $langId = (int) (request()->post('langid') ?? 0);
-            $max = InfoRepository::getFaqMaxOrderAndLinkId('item', $langId);
-            InfoRepository::insertFaq([
+            $max = app(InfoRepository::class)->getFaqMaxOrderAndLinkId('item', $langId);
+            app(InfoRepository::class)->insertFaq([
                 'link_id' => $max['maxlinkid'] + 1,
                 'type' => 'item',
                 'lang_id' => $langId,
@@ -117,8 +117,8 @@ class FaqController extends LegacyController
 
         if ($action === 'addnewsect' && $request->isMethod('post')) {
             $language = (int) (request()->post('language') ?? 0);
-            $max = InfoRepository::getFaqMaxOrderAndLinkId('categ', $language);
-            InfoRepository::insertFaq([
+            $max = app(InfoRepository::class)->getFaqMaxOrderAndLinkId('categ', $language);
+            app(InfoRepository::class)->insertFaq([
                 'link_id' => $max['maxlinkid'] + 1,
                 'type' => 'categ',
                 'lang_id' => $language,
@@ -134,7 +134,7 @@ class FaqController extends LegacyController
 
         if ($action === 'edit') {
             $id = (int) (request()->query('id') ?? 0);
-            $arr = InfoRepository::getFaqById($id);
+            $arr = app(InfoRepository::class)->getFaqById($id);
             if ($arr === null) {
                 return $this->legacyAbortResponse('Error', 'Invalid id');
             }
@@ -143,9 +143,9 @@ class FaqController extends LegacyController
 
             $categories = [];
             if ($arr['type'] === 'item') {
-                $categories = InfoRepository::getFaqCategoriesByLang((int) $arr['lang_id']);
+                $categories = app(InfoRepository::class)->getFaqCategoriesByLang((int) $arr['lang_id']);
             } elseif ($arr['type'] === 'categ') {
-                $arr['lang_name'] = InfoRepository::getLanguageName((int) $arr['lang_id']);
+                $arr['lang_name'] = app(InfoRepository::class)->getLanguageName((int) $arr['lang_id']);
             }
 
             return $this->legacyPage($request, 'faqactions', true, [

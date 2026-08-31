@@ -23,7 +23,7 @@ final class MysqlStatsRepository
     /**
      * @return array<string, mixed>
      */
-    public static function status(): array
+    public function status(): array
     {
         $serverStatus = [];
         foreach (DB::select('SHOW STATUS') as $row) {
@@ -75,7 +75,7 @@ final class MysqlStatsRepository
     /**
      * @return list{string, string}
      */
-    public static function formatByteDown(float $value, int $limes = 6, int $comma = 0): array
+    public function formatByteDown(float $value, int $limes = 6, int $comma = 0): array
     {
         $dh = 10 ** $comma;
         $li = 10 ** $limes;
@@ -99,7 +99,7 @@ final class MysqlStatsRepository
         return [$returnValue, $unit];
     }
 
-    public static function timespanFormat(int $seconds): string
+    public function timespanFormat(int $seconds): string
     {
         $days = floor($seconds / 86400);
         if ($days > 0) {
@@ -119,7 +119,7 @@ final class MysqlStatsRepository
         return (string) $days.' Days '.(string) $hours.' Hours '.(string) $minutes.' Minutes '.(string) $seconds.' Seconds ';
     }
 
-    public static function localisedDate(int $timestamp = -1, string $format = ''): string
+    public function localisedDate(int $timestamp = -1, string $format = ''): string
     {
         if ($format === '') {
             $format = self::$datefmt;

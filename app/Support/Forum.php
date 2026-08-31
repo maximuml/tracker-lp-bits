@@ -136,12 +136,12 @@ final class Forum
         static $forumMods = null;
 
         if (! is_array($post)) {
-            $post = ForumRepository::getPostArrayById((int) $post);
+            $post = app(ForumRepository::class)->getPostArrayById((int) $post);
         }
 
         $topicId = $post['topicid'];
         if (! isset($topics[$topicId])) {
-            $topics[$topicId] = ForumRepository::getTopicById($topicId);
+            $topics[$topicId] = app(ForumRepository::class)->getTopicById($topicId);
         }
         /** @var Topic $topicInfo */
         $topicInfo = $topics[$topicId];
@@ -149,13 +149,13 @@ final class Forum
 
         if ($protectedForumIds === null) {
             $protected = Cache::remember('setting_protected_forum', 600, function () {
-                return SettingRepository::getByName('misc.protected_forum') ?? false;
+                return app(SettingRepository::class)->getByName('misc.protected_forum') ?? false;
             });
             $protectedForumIds = $protected ? (preg_split('/[,\s]+/', $protected) ?: []) : [];
         }
 
         if ($forumMods === null) {
-            $forumMods = ForumRepository::getForumMods();
+            $forumMods = app(ForumRepository::class)->getForumMods();
         }
 
         $isForumMod = isset($forumMods[$forumId]) && $forumMods[$forumId] == $uid;
@@ -201,7 +201,7 @@ final class Forum
         $row = $cache !== null ? $cache->get_value($cacheKey) : false;
 
         if ($row === false) {
-            $row = ForumRepository::findPostArrayById((int) $postId);
+            $row = app(ForumRepository::class)->findPostArrayById((int) $postId);
             if ($cache !== null) {
                 $cache->cache_value($cacheKey, $row, 7200);
             }

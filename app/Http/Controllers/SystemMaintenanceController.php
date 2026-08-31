@@ -45,7 +45,7 @@ class SystemMaintenanceController extends LegacyController
             abort(403);
         }
 
-        return $this->legacyPage($request, 'mysql_stats', true, MysqlStatsRepository::status());
+        return $this->legacyPage($request, 'mysql_stats', true, app(MysqlStatsRepository::class)->status());
     }
 
     public function cron(Request $request): Response

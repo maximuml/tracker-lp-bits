@@ -15,9 +15,9 @@ use Illuminate\Support\Facades\DB;
 class LogRepository
 {
     /** @param  array<int|string, mixed>  $filters */
-    public static function countSiteLog(array $filters): int
+    public function countSiteLog(array $filters): int
     {
-        $query = self::buildSiteLogQuery($filters);
+        $query = $this->buildSiteLogQuery($filters);
 
         return (int) $query->count();
     }
@@ -26,9 +26,9 @@ class LogRepository
      * @param  array<int|string, mixed>  $filters
      * @return array<int|string, mixed>
      */
-    public static function getSiteLog(array $filters, int $offset, int $perPage): array
+    public function getSiteLog(array $filters, int $offset, int $perPage): array
     {
-        return self::buildSiteLogQuery($filters)
+        return $this->buildSiteLogQuery($filters)
             ->orderBy('added', 'desc')
             ->offset($offset)
             ->limit($perPage)
@@ -40,7 +40,7 @@ class LogRepository
     /**
      * @param  array<int|string, mixed>  $filters
      */
-    private static function buildSiteLogQuery(array $filters): Builder
+    private function buildSiteLogQuery(array $filters): Builder
     {
         $query = DB::table('sitelog');
 
@@ -59,7 +59,7 @@ class LogRepository
         return $query;
     }
 
-    public static function countChronicle(string $queryString): int
+    public function countChronicle(string $queryString): int
     {
         $query = DB::table('chronicle');
         if ($queryString !== '') {
@@ -72,7 +72,7 @@ class LogRepository
     /**
      * @return array<int|string, mixed>
      */
-    public static function getChronicle(string $queryString, int $offset, int $perPage): array
+    public function getChronicle(string $queryString, int $offset, int $perPage): array
     {
         $query = DB::table('chronicle');
         if ($queryString !== '') {
@@ -92,14 +92,14 @@ class LogRepository
     /**
      * @return ?array<int|string, mixed>
      */
-    public static function getChronicleById(int $id): ?array
+    public function getChronicleById(int $id): ?array
     {
         $row = DB::table('chronicle')->where('id', $id)->first();
 
         return $row === null ? null : (array) $row;
     }
 
-    public static function addChronicle(int $userId, string $txt): void
+    public function addChronicle(int $userId, string $txt): void
     {
         DB::table('chronicle')->insert([
             'userid' => $userId,
@@ -108,12 +108,12 @@ class LogRepository
         ]);
     }
 
-    public static function updateChronicle(int $id, string $txt): int
+    public function updateChronicle(int $id, string $txt): int
     {
         return DB::table('chronicle')->where('id', $id)->update(['txt' => $txt]);
     }
 
-    public static function deleteChronicle(int $id): int
+    public function deleteChronicle(int $id): int
     {
         return DB::table('chronicle')->where('id', $id)->delete();
     }
@@ -121,7 +121,7 @@ class LogRepository
     /**
      * @return ?array<int|string, mixed>
      */
-    public static function getGenericById(string $table, int $id): ?array
+    public function getGenericById(string $table, int $id): ?array
     {
         $row = DB::table($table)->where('id', $id)->first();
 
@@ -129,7 +129,7 @@ class LogRepository
     }
 
     /** @param  array<int|string, mixed>  $filters */
-    public static function countNews(array $filters): int
+    public function countNews(array $filters): int
     {
         $query = News::query();
 
@@ -157,7 +157,7 @@ class LogRepository
      * @param  array<int|string, mixed>  $filters
      * @return array<int|string, mixed>
      */
-    public static function getNews(array $filters, int $offset, int $perPage): array
+    public function getNews(array $filters, int $offset, int $perPage): array
     {
         $query = News::query();
 
@@ -188,15 +188,15 @@ class LogRepository
             ->all();
     }
 
-    public static function getPollCount(): int
+    public function getPollCount(): int
     {
         return (int) Poll::query()->count();
     }
 
     /** @return  array<int|string, mixed> */
-    public static function getPollsExceptFirst(): array
+    public function getPollsExceptFirst(): array
     {
-        $count = self::getPollCount();
+        $count = $this->getPollCount();
         if ($count <= 1) {
             return [];
         }
@@ -210,7 +210,7 @@ class LogRepository
             ->all();
     }
 
-    public static function deletePoll(int $pollId): void
+    public function deletePoll(int $pollId): void
     {
         PollAnswer::query()->where('pollid', $pollId)->delete();
         Poll::query()->where('id', $pollId)->delete();
@@ -219,7 +219,7 @@ class LogRepository
     /**
      * @return array<int|string, mixed>
      */
-    public static function getPollVoteCounts(int $pollId): array
+    public function getPollVoteCounts(int $pollId): array
     {
         $selections = PollAnswer::query()
             ->where('pollid', $pollId)

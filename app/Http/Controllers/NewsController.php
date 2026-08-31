@@ -244,7 +244,7 @@ class NewsController extends LegacyController
     {
         $maxNews = (int) app(Globals::class)->get('maxnewsnum_main', 5);
 
-        $items = IndexRepository::getLatestNews($maxNews);
+        $items = app(IndexRepository::class)->getLatestNews($maxNews);
 
         return $this->success(NewsResource::collection($items));
     }

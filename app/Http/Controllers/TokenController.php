@@ -28,7 +28,7 @@ class TokenController extends Controller
             if ($count >= 5) {
                 throw new NexusException(Locale::trans('token.maximum_allow_number_reached', [], null));
             }
-            $allowed = TokenRepository::listUserTokenPermissionAllowed();
+            $allowed = app(TokenRepository::class)->listUserTokenPermissionAllowed();
             foreach ($request->permissions as $permission) {
                 if (! isset($allowed[$permission])) {
                     throw new NexusException(Locale::trans('token.permission_not_allowed', ['permission_text' => Locale::trans("route-permission.{$permission}.text", [], null)], null));

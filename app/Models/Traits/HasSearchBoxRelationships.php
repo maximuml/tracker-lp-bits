@@ -90,7 +90,7 @@ trait HasSearchBoxRelationships
 
     public function loadTags(): void
     {
-        $allTags = TagRepository::listAll($this->getKey());
+        $allTags = app(TagRepository::class)->listAll($this->getKey());
         if (! Permission::canSetTorrentSpecialTag()) {
             $specialTagIdList = Tag::listSpecial();
             $allTags = $allTags->filter(fn ($item) => ! in_array($item->id, $specialTagIdList));

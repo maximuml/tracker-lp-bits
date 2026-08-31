@@ -51,7 +51,7 @@ class AttachmentService
 
     public function set_count_so_far(): void
     {
-        $this->countsofar = AttachmentRepository::countRecentForUser($this->userid);
+        $this->countsofar = app(AttachmentRepository::class)->countRecentForUser($this->userid);
     }
 
     public function get_count_so_far(): int

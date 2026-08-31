@@ -183,7 +183,7 @@ class WebController extends Controller
     private function renderPasskeyLogin(): string
     {
         ob_start();
-        UserPasskeyRepository::renderLogin();
+        app(UserPasskeyRepository::class)->renderLogin();
         AssetAppender::js('js/passkey.js', 'footer', true);
 
         return (string) ob_get_clean();

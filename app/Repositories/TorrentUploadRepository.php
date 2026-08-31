@@ -11,12 +11,12 @@ use Illuminate\Support\Facades\DB;
 
 class TorrentUploadRepository
 {
-    public static function getCategoryMode(int $catId): ?string
+    public function getCategoryMode(int $catId): ?string
     {
         return Category::query()->where('id', $catId)->value('mode');
     }
 
-    public static function allowedOfferCount(int $userId): int
+    public function allowedOfferCount(int $userId): int
     {
         return DB::table('offers')
             ->where('allowed', 'allowed')
@@ -24,7 +24,7 @@ class TorrentUploadRepository
             ->count();
     }
 
-    public static function isAllowedOffer(int $offerId, int $userId): bool
+    public function isAllowedOffer(int $offerId, int $userId): bool
     {
         return DB::table('offers')
             ->where('id', $offerId)
@@ -33,7 +33,7 @@ class TorrentUploadRepository
             ->exists();
     }
 
-    public static function rollbackTorrent(int $torrentId): void
+    public function rollbackTorrent(int $torrentId): void
     {
         Torrent::query()->where('id', $torrentId)->delete();
     }
@@ -41,7 +41,7 @@ class TorrentUploadRepository
     /**
      * @param  array<int|string, mixed>  $fileList
      */
-    public static function syncFiles(int $torrentId, array $fileList): void
+    public function syncFiles(int $torrentId, array $fileList): void
     {
         DB::table('files')->where('torrent', $torrentId)->delete();
 
@@ -62,7 +62,7 @@ class TorrentUploadRepository
     /**
      * @return array<int|string, mixed>
      */
-    public static function getOfferVoterIds(int $offerId, int $uploaderId): array
+    public function getOfferVoterIds(int $offerId, int $uploaderId): array
     {
         return DB::table('offervotes')
             ->where('offerid', $offerId)
@@ -72,7 +72,7 @@ class TorrentUploadRepository
             ->all();
     }
 
-    public static function finalizeOffer(int $offerId, int $uploaderId): void
+    public function finalizeOffer(int $offerId, int $uploaderId): void
     {
         DB::table('offers')->where('id', $offerId)->delete();
         DB::table('offervotes')->where('offerid', $offerId)->delete();

@@ -74,7 +74,7 @@ final class Permissions
             return true;
         }
 
-        $userAllPermissions = ToolRepository::listUserAllPermissions($uid);
+        $userAllPermissions = app(ToolRepository::class)->listUserAllPermissions($uid);
         $result = isset($userAllPermissions[$permission]);
 
         if (self::$sequence === 0) {

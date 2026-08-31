@@ -129,7 +129,7 @@ final class ForumService
 
         switch ($type) {
             case 'new':
-                if (! ForumRepository::forumExists($id)) {
+                if (! app(ForumRepository::class)->forumExists($id)) {
                     LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_no_forum_id'] ?? 'Forum not found.');
                 }
                 $forumid = $id;
@@ -137,7 +137,7 @@ final class ForumService
                 break;
 
             case 'reply':
-                $forumid = ForumRepository::topicExists($id);
+                $forumid = app(ForumRepository::class)->topicExists($id);
                 if ($forumid === null) {
                     LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_bad_topic_id'] ?? 'Topic not found.');
                 }
@@ -145,7 +145,7 @@ final class ForumService
                 break;
 
             case 'edit':
-                $post = ForumRepository::getPostEditInfo($id);
+                $post = app(ForumRepository::class)->getPostEditInfo($id);
                 if ($post === null) {
                     return $this->redirectTo('/forums.php');
                 }
@@ -192,7 +192,7 @@ final class ForumService
         $date = date('Y-m-d H:i:s');
 
         if ($type !== 'new') {
-            $locked = ForumRepository::isTopicLocked($topicid);
+            $locked = app(ForumRepository::class)->isTopicLocked($topicid);
             if ($locked === null) {
                 return $this->redirectTo('/forums.php');
             }
@@ -206,8 +206,8 @@ final class ForumService
         }
 
         if ($type === 'edit') {
-            $postInfo = ForumRepository::getPostWithUser($postid);
-            $topicInfo = ForumRepository::getTopicWithUser($topicid);
+            $postInfo = app(ForumRepository::class)->getPostWithUser($postid);
+            $topicInfo = app(ForumRepository::class)->getTopicWithUser($topicid);
             if (
                 $postInfo === null
                 || $topicInfo === null
@@ -225,14 +225,14 @@ final class ForumService
             }
 
             if ($hassubject) {
-                ForumRepository::updateTopicSubject($topicid, $subject);
+                app(ForumRepository::class)->updateTopicSubject($topicid, $subject);
                 $cached = $this->cacheGet('forum_'.$forumid.'_last_replied_topic_content');
                 if (is_array($cached) && ($cached['id'] ?? null) == $topicid) {
                     $this->cacheDelete('forum_'.$forumid.'_last_replied_topic_content');
                 }
             }
 
-            ForumRepository::updatePostBody($postid, $body, $date, $userid);
+            app(ForumRepository::class)->updatePostBody($postid, $body, $date, $userid);
             $this->cacheDelete('post_'.$postid.'_content');
 
             $postUrl = sprintf('[url=/forums.php?action=viewtopic&topicid=%s&page=p%s#pid%s]%s[/url]', $topicid, $postid, $postid, $topicInfo->subject ?? '');
@@ -270,26 +270,26 @@ final class ForumService
                 Bonus::updatePoints('+', $starttopicBonus, $userid);
             }
 
-            $topicid = ForumRepository::createTopic($userid, $forumid, $subject);
+            $topicid = app(ForumRepository::class)->createTopic($userid, $forumid, $subject);
             if ($topicid <= 0) {
                 LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_no_topic_id_returned'] ?? 'Topic creation failed.');
             }
-            ForumRepository::incrementForumTopicCount($forumid);
-            ForumRepository::incrementForumPostCount($forumid);
+            app(ForumRepository::class)->incrementForumTopicCount($forumid);
+            app(ForumRepository::class)->incrementForumPostCount($forumid);
         } else {
             $makepostBonus = (float) (app(Globals::class)->get('makepost_bonus') ?? 0);
             if ($makepostBonus > 0) {
                 Bonus::updatePoints('+', $makepostBonus, $userid);
             }
-            ForumRepository::incrementForumPostCount($forumid);
+            app(ForumRepository::class)->incrementForumPostCount($forumid);
         }
 
-        $newPostId = ForumRepository::createPost($topicid, $userid, $body, $date);
+        $newPostId = app(ForumRepository::class)->createPost($topicid, $userid, $body, $date);
         if ($newPostId <= 0) {
             return $this->redirectTo('/forums.php');
         }
 
-        $topicInfo = ForumRepository::getTopicWithUser($topicid);
+        $topicInfo = app(ForumRepository::class)->getTopicWithUser($topicid);
         $postUrl = sprintf('[url=/forums.php?action=viewtopic&topicid=%s&page=p%s#pid%s]%s[/url]', $topicid, $newPostId, $newPostId, $topicInfo ? $topicInfo->subject : '');
 
         if ($type === 'reply') {
@@ -308,7 +308,7 @@ final class ForumService
             }
 
             if ($quotepostid > 0) {
-                $quotePostInfo = ForumRepository::getPostWithUser($quotepostid);
+                $quotePostInfo = app(ForumRepository::class)->getPostWithUser($quotepostid);
                 if ($quotePostInfo !== null && $quotePostInfo->userid !== $userid) {
                     $receiver = $quotePostInfo->user;
                     if ($receiver !== null && $receiver->acceptNotification('topic_reply')) {
@@ -333,12 +333,12 @@ final class ForumService
         $this->cacheDelete('user_'.$userid.'_post_count');
 
         if ($type === 'new') {
-            ForumRepository::updateTopicFirstLastPost($topicid, $newPostId);
+            app(ForumRepository::class)->updateTopicFirstLastPost($topicid, $newPostId);
         } else {
-            ForumRepository::setTopicLastPost($topicid, $newPostId);
+            app(ForumRepository::class)->setTopicLastPost($topicid, $newPostId);
         }
 
-        ForumRepository::updateUserLastPost($userid, $date);
+        app(ForumRepository::class)->updateUserLastPost($userid, $date);
 
         $headerstr = '/forums.php?action=viewtopic&topicid='.$topicid;
 
@@ -360,7 +360,7 @@ final class ForumService
             LegacyResponse::permissionDenied();
         }
 
-        $minclasswrite = ForumRepository::getForumMinclasswrite($forumid);
+        $minclasswrite = app(ForumRepository::class)->getForumMinclasswrite($forumid);
         if ($minclasswrite === null) {
             LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_forum_not_found'] ?? 'Forum not found.');
         }
@@ -369,13 +369,13 @@ final class ForumService
             LegacyResponse::permissionDenied();
         }
 
-        $oldForumid = ForumRepository::getTopicForumId($topicid);
+        $oldForumid = app(ForumRepository::class)->getTopicForumId($topicid);
         if ($oldForumid === null) {
             LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_topic_not_found'] ?? 'Topic not found.');
         }
 
-        $postCount = ForumRepository::countTopicPosts($topicid);
-        ForumRepository::moveTopic($topicid, $forumid, $postCount, (int) $oldForumid);
+        $postCount = app(ForumRepository::class)->countTopicPosts($topicid);
+        app(ForumRepository::class)->moveTopic($topicid, $forumid, $postCount, (int) $oldForumid);
 
         if ($oldForumid !== $forumid) {
             $todayDate = date('Y-m-d');
@@ -393,7 +393,7 @@ final class ForumService
         $user = $this->user();
         $lang = $this->lang();
         $topicid = (int) $request->query('topicid');
-        $topic = ForumRepository::getTopicForumAndUser($topicid);
+        $topic = app(ForumRepository::class)->getTopicForumAndUser($topicid);
 
         if ($topic === null) {
             return $this->redirectTo('/forums.php');
@@ -415,8 +415,8 @@ final class ForumService
             LegacyResponse::abort($lang['std_delete_topic'] ?? 'Delete topic', ($lang['std_delete_topic_note'] ?? '')."<a class=altlink href=?action=deletetopic&topicid={$topicid}&sure=1>".($lang['std_here_if_sure'] ?? ''), false);
         }
 
-        $postCount = ForumRepository::countTopicPosts($topicid);
-        ForumRepository::deleteTopic($topicid, $forumid, $postCount);
+        $postCount = app(ForumRepository::class)->countTopicPosts($topicid);
+        app(ForumRepository::class)->deleteTopic($topicid, $forumid, $postCount);
 
         $todayDate = date('Y-m-d');
         $this->cacheDelete('forum_'.$forumid.'_post_'.$todayDate.'_count');
@@ -448,7 +448,7 @@ final class ForumService
             LegacyResponse::permissionDenied();
         }
 
-        $post = ForumRepository::getPostTopicAndUser($postid);
+        $post = app(ForumRepository::class)->getPostTopicAndUser($postid);
         if ($post === null) {
             LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_post_not_found'] ?? 'Post not found.');
         }
@@ -458,7 +458,7 @@ final class ForumService
 
         $topicid = $post['topicid'];
         $targetUserid = $post['userid'];
-        $prevPostId = ForumRepository::getPreviousPostId($topicid, $postid);
+        $prevPostId = app(ForumRepository::class)->getPreviousPostId($topicid, $postid);
 
         if ($prevPostId === null || $prevPostId === 0) {
             LegacyResponse::abort($lang['std_error'] ?? 'Error', ($lang['std_cannot_delete_post'] ?? '')."<a class=altlink href=?action=deletetopic&topicid={$topicid}&sure=1>".($lang['std_delete_topic_instead'] ?? ''), false);
@@ -469,19 +469,19 @@ final class ForumService
         }
 
         $redirtopost = '&page=p'.$prevPostId.'#pid'.$prevPostId;
-        $forumid = ForumRepository::getTopicForumId($topicid) ?? 0;
+        $forumid = app(ForumRepository::class)->getTopicForumId($topicid) ?? 0;
         if ($forumid === 0) {
             return $this->redirectTo('/forums.php');
         }
 
-        ForumRepository::deletePost($postid, $topicid, $forumid);
+        app(ForumRepository::class)->deletePost($postid, $topicid, $forumid);
         $this->cacheDelete('user_'.$targetUserid.'_post_count');
         $this->cacheDelete('topic_'.$topicid.'_post_count');
         $cached = $this->cacheGet('forum_'.$forumid.'_last_replied_topic_content');
         if (is_array($cached) && ($cached['lastpost'] ?? null) == $postid) {
             $this->cacheDelete('forum_'.$forumid.'_last_replied_topic_content');
         }
-        ForumRepository::updateTopicLastPost($topicid);
+        app(ForumRepository::class)->updateTopicLastPost($topicid);
 
         $makepostBonus = (float) (app(Globals::class)->get('makepost_bonus') ?? 0);
         if ($makepostBonus > 0) {
@@ -504,7 +504,7 @@ final class ForumService
         }
 
         $locked = (bool) $request->input('locked');
-        ForumRepository::updateTopicLocked($topicid, $locked);
+        app(ForumRepository::class)->updateTopicLocked($topicid, $locked);
 
         return $this->redirectTo((string) $request->input('returnto', '?action=viewforum'));
     }
@@ -523,10 +523,10 @@ final class ForumService
 
         $color = (int) $request->input('color');
         if ($color === 0 || Palette::forumHighlight($color)) {
-            ForumRepository::updateTopicHighlight($topicid, $color);
+            app(ForumRepository::class)->updateTopicHighlight($topicid, $color);
         }
 
-        $forumid = ForumRepository::getTopicForumId($topicid) ?? 0;
+        $forumid = app(ForumRepository::class)->getTopicForumId($topicid) ?? 0;
         if ($forumid > 0) {
             $cached = $this->cacheGet('forum_'.$forumid.'_last_replied_topic_content');
             if (is_array($cached) && ($cached['id'] ?? null) == $topicid) {
@@ -550,7 +550,7 @@ final class ForumService
         }
 
         $sticky = (string) $request->input('sticky');
-        ForumRepository::updateTopicSticky($topicid, $sticky);
+        app(ForumRepository::class)->updateTopicSticky($topicid, $sticky);
 
         return $this->redirectTo((string) $request->input('returnto', '?action=viewforum'));
     }

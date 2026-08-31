@@ -25,7 +25,7 @@ class MessageRepository extends BaseRepository
     /**
      * @return Collection<int, \stdClass>
      */
-    public static function getUserMailboxes(int $userId): Collection
+    public function getUserMailboxes(int $userId): Collection
     {
         return DB::table('pmboxes')
             ->where('userid', $userId)
@@ -33,7 +33,7 @@ class MessageRepository extends BaseRepository
             ->get(['id', 'boxnumber', 'name']);
     }
 
-    public static function getMailboxName(int $userId, int $mailbox): ?string
+    public function getMailboxName(int $userId, int $mailbox): ?string
     {
         return DB::table('pmboxes')
             ->where('userid', $userId)
@@ -44,7 +44,7 @@ class MessageRepository extends BaseRepository
     /**
      * @return array{count: int, messages: \Illuminate\Database\Eloquent\Collection<int, Message>}
      */
-    public static function getMailboxMessages(int $userId, int $mailbox, string $keyword, string $place, ?bool $unread, int $offset, int $perPage): array
+    public function getMailboxMessages(int $userId, int $mailbox, string $keyword, string $place, ?bool $unread, int $offset, int $perPage): array
     {
         $query = Message::query()->with('send_user');
         if ($keyword !== '') {
@@ -91,7 +91,7 @@ class MessageRepository extends BaseRepository
         return ['count' => (int) $countQuery->count(), 'messages' => $messages];
     }
 
-    public static function getMessageForUser(int $messageId, int $userId): ?Message
+    public function getMessageForUser(int $messageId, int $userId): ?Message
     {
         return Message::query()
             ->where('id', $messageId)
@@ -104,7 +104,7 @@ class MessageRepository extends BaseRepository
             ->first();
     }
 
-    public static function getMessageForForward(int $messageId, int $userId): ?Message
+    public function getMessageForForward(int $messageId, int $userId): ?Message
     {
         return Message::query()
             ->where('id', $messageId)
@@ -117,7 +117,7 @@ class MessageRepository extends BaseRepository
     /**
      * @param  int|array<int>  $ids
      */
-    public static function markAsRead(int|array $ids, int $userId): int
+    public function markAsRead(int|array $ids, int $userId): int
     {
         return Message::query()->whereIn('id', (array) $ids)->where('receiver', $userId)->update(['unread' => false]);
     }
@@ -125,7 +125,7 @@ class MessageRepository extends BaseRepository
     /**
      * @param  int|array<int>  $ids
      */
-    public static function moveMessages(int|array $ids, int $userId, int $box): int
+    public function moveMessages(int|array $ids, int $userId, int $box): int
     {
         return Message::query()->whereIn('id', (array) $ids)->where('receiver', $userId)->update(['location' => $box]);
     }
@@ -133,7 +133,7 @@ class MessageRepository extends BaseRepository
     /**
      * @return array<string, mixed>|null
      */
-    public static function deleteSingleMessage(int $messageId, int $userId): ?array
+    public function deleteSingleMessage(int $messageId, int $userId): ?array
     {
         $message = Message::query()->where('id', $messageId)->first();
         if (! $message) {
@@ -159,11 +159,11 @@ class MessageRepository extends BaseRepository
     /**
      * @param  array<int>  $ids
      */
-    public static function deleteMultipleMessages(array $ids, int $userId): int
+    public function deleteMultipleMessages(array $ids, int $userId): int
     {
         $deleted = 0;
         foreach ($ids as $id) {
-            if (self::deleteSingleMessage((int) $id, $userId) !== null) {
+            if ($this->deleteSingleMessage((int) $id, $userId) !== null) {
                 $deleted++;
             }
         }
@@ -171,7 +171,7 @@ class MessageRepository extends BaseRepository
         return $deleted;
     }
 
-    public static function getNextMailboxNumber(int $userId): int
+    public function getNextMailboxNumber(int $userId): int
     {
         $max = (int) DB::table('pmboxes')->where('userid', $userId)->max('boxnumber');
 
@@ -181,9 +181,9 @@ class MessageRepository extends BaseRepository
     /**
      * @param  array<int|string, mixed>  $names
      */
-    public static function addMailboxes(int $userId, array $names): void
+    public function addMailboxes(int $userId, array $names): void
     {
-        $box = self::getNextMailboxNumber($userId);
+        $box = $this->getNextMailboxNumber($userId);
         foreach ($names as $name) {
             $name = trim((string) $name);
             if ($name === '') {
@@ -194,12 +194,12 @@ class MessageRepository extends BaseRepository
         }
     }
 
-    public static function updateMailbox(int $userId, int $boxId, string $newName): void
+    public function updateMailbox(int $userId, int $boxId, string $newName): void
     {
         DB::table('pmboxes')->where('id', $boxId)->where('userid', $userId)->update(['name' => $newName]);
     }
 
-    public static function deleteMailbox(int $userId, int $boxId, int $boxNumber): void
+    public function deleteMailbox(int $userId, int $boxId, int $boxNumber): void
     {
         DB::table('pmboxes')->where('id', $boxId)->where('userid', $userId)->delete();
         Message::query()->where('saved', true)->where('location', $boxNumber)->where('receiver', $userId)->update(['location' => 0]);
@@ -208,7 +208,7 @@ class MessageRepository extends BaseRepository
         Message::query()->where('location', 0)->where('saved', true)->where('sender', $userId)->delete();
     }
 
-    public static function getUsername(int $userId): ?string
+    public function getUsername(int $userId): ?string
     {
         return User::query()->where('id', $userId)->value('username');
     }
@@ -272,9 +272,9 @@ class MessageRepository extends BaseRepository
      * @param  mixed  $uid
      * @param  mixed  $answered
      */
-    public static function countStaffMessage($uid, $answered = null): int
+    public function countStaffMessage($uid, $answered = null): int
     {
-        return self::buildStaffMessageQuery($uid, $answered)->count();
+        return $this->buildStaffMessageQuery($uid, $answered)->count();
     }
 
     /**
@@ -282,7 +282,7 @@ class MessageRepository extends BaseRepository
      * @param  mixed  $answered
      * @return Builder<StaffMessage>
      */
-    public static function buildStaffMessageQuery($uid, $answered = null): Builder
+    public function buildStaffMessageQuery($uid, $answered = null): Builder
     {
         $query = StaffMessage::query();
         if ($answered !== null) {
@@ -290,7 +290,7 @@ class MessageRepository extends BaseRepository
         }
         if (! Permission::can(PermissionEnum::STAFF_MEMBER, User::findOrFail((int) $uid))) {
             // Not staff member only can see authorized
-            $permissions = ToolRepository::listUserAllPermissions($uid);
+            $permissions = app(ToolRepository::class)->listUserAllPermissions($uid);
             $query->whereIn('permission', $permissions);
         }
 
@@ -303,7 +303,7 @@ class MessageRepository extends BaseRepository
      * @param  mixed  $value
      * @return mixed
      */
-    public static function updateStaffMessageCountCache($uid = 0, $type = '', $value = '')
+    public function updateStaffMessageCountCache($uid = 0, $type = '', $value = '')
     {
         if ($uid === false) {
             Cache::forgetWithLocales(self::STAFF_MESSAGE_NEW_CACHE_KEY);
@@ -323,7 +323,7 @@ class MessageRepository extends BaseRepository
      * @param  mixed  $type
      * @return mixed
      */
-    public static function getStaffMessageCountCache($uid = 0, $type = '')
+    public function getStaffMessageCountCache($uid = 0, $type = '')
     {
         $redis = Redis::connection()->client();
 
@@ -334,7 +334,7 @@ class MessageRepository extends BaseRepository
         };
     }
 
-    public static function getLastPmId(int $userId): int
+    public function getLastPmId(int $userId): int
     {
         return (int) (Message::query()->where('receiver', $userId)->max('id') ?? 0);
     }
@@ -342,7 +342,7 @@ class MessageRepository extends BaseRepository
     /**
      * @return list<array<string, mixed>>
      */
-    public static function getUnreadPmNotifications(int $userId, int $lastPmId, int $limit): array
+    public function getUnreadPmNotifications(int $userId, int $lastPmId, int $limit): array
     {
         $rows = Message::query()
             ->where('receiver', $userId)

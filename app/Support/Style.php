@@ -38,7 +38,7 @@ final class Style
             if ($cached !== false) {
                 self::$stylesheetRows = is_array($cached) ? $cached : [];
             } else {
-                self::$stylesheetRows = StyleRepository::all();
+                self::$stylesheetRows = app(StyleRepository::class)->all();
                 if (is_object($cache) && method_exists($cache, 'cache_value')) {
                     $cache->cache_value('stylesheet_content', self::$stylesheetRows, 95400);
                 }
@@ -57,7 +57,7 @@ final class Style
     public static function cssUri(mixed $cache, int|string $cssId, int|string $defaultId, string $file = ''): string
     {
         $row = self::cssRow($cache, $cssId, $defaultId);
-        $uri = $row['uri'] ?? StyleRepository::uri($defaultId);
+        $uri = $row['uri'] ?? app(StyleRepository::class)->uri($defaultId);
 
         return $file === '' ? (string) $uri : (string) $uri.$file;
     }
@@ -98,9 +98,9 @@ final class Style
      */
     public static function highlightColor(?int $userStyleId): string
     {
-        $fallback = StyleRepository::highlightColor(5) ?? '';
+        $fallback = app(StyleRepository::class)->highlightColor(5) ?? '';
         if ($userStyleId !== null && $userStyleId > 0) {
-            $hltr = StyleRepository::highlightColor($userStyleId) ?? '';
+            $hltr = app(StyleRepository::class)->highlightColor($userStyleId) ?? '';
             if (! empty($hltr)) {
                 return (string) $hltr;
             }

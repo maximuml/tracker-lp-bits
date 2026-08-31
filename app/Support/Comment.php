@@ -128,7 +128,7 @@ final class Comment
             $s = (string) preg_replace_callback(
                 '/\[img\]([^\<\r\n"\']+?)\[\/img\]/i',
                 function (array $m) use ($imageresizer, $imageMaxWidth, $imageMaxHeight): string {
-                    return HtmlRenderer::formatImg($m[1], $imageresizer, $imageMaxWidth, $imageMaxHeight);
+                    return Html::formatImg($m[1], $imageresizer, $imageMaxWidth, $imageMaxHeight);
                 },
                 $s,
                 $imagenum,
@@ -137,7 +137,7 @@ final class Comment
             $s = (string) preg_replace_callback(
                 '/\[img=([^\<\r\n"\']+?)\]/i',
                 function (array $m) use ($imageresizer, $imageMaxWidth, $imageMaxHeight): string {
-                    return HtmlRenderer::formatImg($m[1], $imageresizer, $imageMaxWidth, $imageMaxHeight);
+                    return Html::formatImg($m[1], $imageresizer, $imageMaxWidth, $imageMaxHeight);
                 },
                 $s,
                 ($imagenum != -1 ? max($imagenum - $imgReplaceCount, 0) : -1),
@@ -150,7 +150,7 @@ final class Comment
         if (str_contains($s, '[youtube') && str_contains($s, 'v=')) {
             $s = (string) preg_replace_callback(
                 '/\[youtube(\,([1-9][0-9]*)\,([1-9][0-9]*))?\]((http|https):\/\/[^\s\'"<>]+)\[\/youtube\]/i',
-                static fn (array $m): string => HtmlRenderer::formatYoutube($m[4], $m[2] ?: 0, $m[3] ?: 0),
+                static fn (array $m): string => Html::formatYoutube($m[4], $m[2] ?: 0, $m[3] ?: 0),
                 $s,
             );
         }
@@ -158,7 +158,7 @@ final class Comment
         if (str_contains($s, '[video')) {
             $s = (string) preg_replace_callback(
                 '/\[video(\,([1-9][0-9]*)\,([1-9][0-9]*))?\]((http|https):\/\/[^\s\'"<>]+)\[\/video\]/i',
-                static fn (array $m): string => HtmlRenderer::formatVideo($m[4], $m[2] ?: 0, $m[3] ?: 0),
+                static fn (array $m): string => Html::formatVideo($m[4], $m[2] ?: 0, $m[3] ?: 0),
                 $s,
             );
         }
@@ -166,7 +166,7 @@ final class Comment
         if (str_contains($s, '[audio')) {
             $s = (string) preg_replace_callback(
                 '/\[audio\]((http|https):\/\/[^\s\'"<>]+)\[\/audio\]/i',
-                static fn (array $m): string => HtmlRenderer::formatAudio($m[1]),
+                static fn (array $m): string => Html::formatAudio($m[1]),
                 $s,
             );
         }
@@ -174,7 +174,7 @@ final class Comment
         $s = (string) preg_replace_callback(
             '/\[url=([^\[\s]+?)\](.+?)\[\/url\]/i',
             function (array $m) use ($newtab): string {
-                return HtmlRenderer::formatUrl($m[1], $newtab, $m[2], 'faqlink');
+                return Html::formatUrl($m[1], $newtab, $m[2], 'faqlink');
             },
             $s,
         );
@@ -182,29 +182,29 @@ final class Comment
         $s = (string) preg_replace_callback(
             '/\[url\]([^\[\s]+?)\[\/url\]/i',
             function (array $m) use ($newtab): string {
-                return HtmlRenderer::formatUrl($m[1], $newtab, '', 'faqlink');
+                return Html::formatUrl($m[1], $newtab, '', 'faqlink');
             },
             $s,
         );
 
         $s = (string) preg_replace_callback(
             '/\[left\](.*)\[\/left\]/isU',
-            static fn (array $m): string => HtmlRenderer::formatTextAlign($m[1], 'left'),
+            static fn (array $m): string => Comment::addTempCode(BBCode::textAlign($m[1], "left")),
             $s,
         );
         $s = (string) preg_replace_callback(
             '/\[center\](.*)\[\/center\]/isU',
-            static fn (array $m): string => HtmlRenderer::formatTextAlign($m[1], 'center'),
+            static fn (array $m): string => Comment::addTempCode(BBCode::textAlign($m[1], "center")),
             $s,
         );
         $s = (string) preg_replace_callback(
             '/\[right\](.*)\[\/right\]/isU',
-            static fn (array $m): string => HtmlRenderer::formatTextAlign($m[1], 'right'),
+            static fn (array $m): string => Comment::addTempCode(BBCode::textAlign($m[1], "right")),
             $s,
         );
         $s = (string) preg_replace_callback(
             '/\[hide\](.*)\[\/hide\]/isU',
-            static fn (array $m): string => HtmlRenderer::formatHidden($m[1]),
+            static fn (array $m): string => Comment::addTempCode(BBCode::hidden($m[1])),
             $s,
         );
 
@@ -228,7 +228,7 @@ final class Comment
             $s = (string) preg_replace_callback(
                 '/\[spoiler(=(.*))?\](.*)\[\/spoiler\]/isU',
                 function (array $m): string {
-                    return HtmlRenderer::formatSpoiler(
+                    return Html::formatSpoiler(
                         $m[3],
                         $m[2],
                         RequestContext::instance()->getScript() != 'preview',

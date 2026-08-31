@@ -145,6 +145,7 @@ jobs:
           sed -i 's/^QUEUE_CONNECTION=.*/QUEUE_CONNECTION=sync/' .env
           sed -i 's/^CHANNEL_NAME_SETTING=.*/CHANNEL_NAME_SETTING=/' .env
           sed -i 's/^CHANNEL_NAME_MODEL_EVENT=.*/CHANNEL_NAME_MODEL_EVENT=/' .env
+          sed -i 's/^REDIS_PASSWORD=.*/REDIS_PASSWORD=/' .env
 
       - name: Cache Laravel bootstrap files
         run: |
@@ -165,6 +166,8 @@ jobs:
           # Create isolated test database (phpunit.xml uses nexusphp_testing)
           # to prevent tests from truncating tables in the seed database.
           mysql -h 127.0.0.1 -u root -proot -e "CREATE DATABASE IF NOT EXISTS nexusphp_testing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; GRANT ALL PRIVILEGES ON nexusphp_testing.* TO 'nexusphp'@'%'; FLUSH PRIVILEGES;"
+          # Copy schema + seed data for tables tests depend on (settings, users)
+          mysqldump -h 127.0.0.1 -u root -proot --no-data --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp | mysql -h 127.0.0.1 -u root -proot nexusphp_testing
           mysqldump -h 127.0.0.1 -u root -proot --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users | mysql -h 127.0.0.1 -u root -proot nexusphp_testing
 
       - name: Run PHPUnit unit tests
@@ -222,6 +225,7 @@ jobs:
           sed -i 's/^QUEUE_CONNECTION=.*/QUEUE_CONNECTION=sync/' .env
           sed -i 's/^CHANNEL_NAME_SETTING=.*/CHANNEL_NAME_SETTING=/' .env
           sed -i 's/^CHANNEL_NAME_MODEL_EVENT=.*/CHANNEL_NAME_MODEL_EVENT=/' .env
+          sed -i 's/^REDIS_PASSWORD=.*/REDIS_PASSWORD=/' .env
 
       - name: Wait for MySQL and migrate
         run: |
@@ -231,6 +235,10 @@ jobs:
           done
           nc -z 127.0.0.1 3306 || { echo "MySQL did not become ready in time"; exit 1; }
           php artisan migrate:fresh --seed --force
+          # Create isolated test database (phpunit.xml uses nexusphp_testing)
+          mysql -h 127.0.0.1 -u root -proot -e "CREATE DATABASE IF NOT EXISTS nexusphp_testing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; GRANT ALL PRIVILEGES ON nexusphp_testing.* TO 'nexusphp'@'%'; FLUSH PRIVILEGES;"
+          mysqldump -h 127.0.0.1 -u root -proot --no-data --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp | mysql -h 127.0.0.1 -u root -proot nexusphp_testing
+          mysqldump -h 127.0.0.1 -u root -proot --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users | mysql -h 127.0.0.1 -u root -proot nexusphp_testing
 
       - name: Run PHPUnit with coverage
         run: vendor/bin/phpunit --testsuite Unit --coverage-clover=coverage.xml
@@ -286,7 +294,13 @@ jobs:
         run: docker compose up -d --wait mysql redis php
 
       - name: Install database
-        run: docker compose exec -T php php artisan migrate:fresh --seed --force
+        run: |
+          docker compose exec -T php php artisan migrate:fresh --seed --force
+          # Create isolated test database for Feature tests
+          source .env 2>/dev/null
+          docker compose exec -T mysql sh -c "mysql -u root -p${DB_PASSWORD:-root} -e \"CREATE DATABASE IF NOT EXISTS nexusphp_testing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; GRANT ALL PRIVILEGES ON nexusphp_testing.* TO '${DB_USERNAME:-nexusphp}'@'%'; FLUSH PRIVILEGES;\""
+          docker compose exec -T mysql sh -c "mysqldump -u root -p${DB_PASSWORD:-root} --no-data --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp | mysql -u root -p${DB_PASSWORD:-root} nexusphp_testing"
+          docker compose exec -T mysql sh -c "mysqldump -u root -p${DB_PASSWORD:-root} --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users | mysql -u root -p${DB_PASSWORD:-root} nexusphp_testing"
 
       - name: Start remaining services and wait
         run: docker compose up -d --wait

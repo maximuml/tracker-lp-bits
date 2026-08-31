@@ -73,6 +73,7 @@ jobs:
           sed -i 's/^SESSION_DRIVER=.*/SESSION_DRIVER=redis/' .env
           sed -i 's/^DB_HOST=.*/DB_HOST=127.0.0.1/' .env
           sed -i 's/^REDIS_HOST=.*/REDIS_HOST=127.0.0.1/' .env
+          sed -i 's/^REDIS_PASSWORD=.*/REDIS_PASSWORD=/' .env
           sed -i 's|^MEILISEARCH_HOST=.*|MEILISEARCH_HOST=127.0.0.1|' .env
           sed -i 's/^MEILISEARCH_ENABLED=.*/MEILISEARCH_ENABLED=no/' .env
           sed -i 's|^LOG_FILE=.*|LOG_FILE=php://stderr|' .env

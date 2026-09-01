@@ -105,7 +105,7 @@ jobs:
 
           for page in $PAGES; do
             echo "::group::Scanning $page"
-            if axe "$BASE$page" --exit --tags wcag2a,wcag2aa --load-delay=3000 --chrome-flags="--headless --no-sandbox" 2>&1; then
+            if axe "$BASE$page" --exit --tags wcag2a,wcag2aa --load-delay=3000 --chrome-options="no-sandbox,disable-dev-shm-usage" 2>&1; then
               echo "PASS: $page"
               PASS=$((PASS + 1))
             else

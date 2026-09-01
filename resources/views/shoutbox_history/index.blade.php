@@ -58,7 +58,7 @@ $title = $title ?? ($lang_shoutbox['text_history_title'] ?? 'Shoutbox history');
         $messageHtml = '<span id="shout-msg-'.$shoutId.'" class="shout-msg" data-raw="'.htmlspecialchars((string) $arr['text'], ENT_QUOTES).'">'.$message.'</span>'.$editedNote;
     @endphp
     <tr><td class="shoutrow{{ $mentionsMe ? ' shoutrow-mentions-me' : '' }}">
-    <span class="date">[{{ $time }}]</span> {!! $actions !!} {!! $username !!} {!! $reactions !!}
+    <span class="date">[{!! $time !!}]</span> {!! $actions !!} {!! $username !!} {!! $reactions !!}
     <div>{!! $messageHtml !!}</div>
     </td></tr>
 @endforeach

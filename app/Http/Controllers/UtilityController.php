@@ -198,6 +198,7 @@ class UtilityController extends LegacyController
         }, 200, [
             'Content-Type' => 'application/octet-stream',
             'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+            'X-Content-Type-Options' => 'nosniff',
             'X-Accel-Redirect' => '/attachments/'.$row['location'],
         ]);
     }

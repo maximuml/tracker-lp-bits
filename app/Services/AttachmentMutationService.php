@@ -324,7 +324,7 @@ class AttachmentMutationService
                 }
             }
             if (! $warning) { // insert into database and add code to editor
-                $dlkey = md5($location.microtime(true));
+                $dlkey = bin2hex(random_bytes(16));
                 DB::table('attachments')->insert([
                     'userid' => $CURUSER['id'],
                     'width' => $width,

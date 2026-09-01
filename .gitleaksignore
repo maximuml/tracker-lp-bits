@@ -1,3 +1,5 @@
 # Test fixtures — false positives from gitleaks
 # Passkey in AnnounceProtocolContractTest is a dummy value for negative tests
 0572cdfaa4a5ded146c60bb1b5e66fafbcce0ad0:tests/Feature/AnnounceProtocolContractTest.php:generic-api-key:92
+# Fake dlkey in PrivateAttachmentsTest is a dummy value for negative tests
+41e8e75624b7eebbf493089e559a8aeeb50aed91:tests/Feature/PrivateAttachmentsTest.php:generic-api-key:120

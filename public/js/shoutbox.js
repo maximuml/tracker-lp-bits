@@ -48,6 +48,10 @@ function shoutboxPost(action, params, onSuccess) {
     xhr.open('POST', 'ajax.php', true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
     xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+    var csrfMeta = document.querySelector('meta[name="csrf-token"]');
+    if (csrfMeta) {
+        xhr.setRequestHeader('X-CSRF-TOKEN', csrfMeta.getAttribute('content'));
+    }
     xhr.onreadystatechange = function () {
         if (xhr.readyState !== 4) { return; }
         if (xhr.status >= 200 && xhr.status < 300) {

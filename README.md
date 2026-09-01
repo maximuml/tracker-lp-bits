@@ -20,10 +20,10 @@ This is a streamlined fork focused on the core tracker/forum/community experienc
 
 ## System Requirements
 
-- **PHP** 8.4 / 8.5
+- **PHP** 8.4 / 8.5 (both tested in CI)
   - Required extensions: `bcmath`, `ctype`, `curl`, `fileinfo`, `json`, `mbstring`, `openssl`, `pdo_mysql`, `tokenizer`, `xml`, `mysqli`, `gd`, `redis`, `pcntl`, `sockets`, `posix`, `gmp`, `opcache`, `zip`, `intl`, `pdo_sqlite`, `sqlite3`, `pdo_pgsql`
-- **Database** — MySQL 5.7+ or PostgreSQL 16+
-- **Redis** — 4.0+
+- **Database** — MySQL 8.0+ (tested in CI on MySQL 8.0 and 9.0; Docker uses MySQL 9)
+- **Redis** — 7.0+ (tested in CI on Redis 7)
 - **MeiliSearch** — 1.6+ (torrent search index)
 - **Other** — supervisor, cron, rsync
 
@@ -58,11 +58,12 @@ php artisan serve
 
 ```bash
 vendor/bin/phpunit
-vendor/bin/phpstan analyse
+vendor/bin/phpstan analyse -c phpstan.level8.neon
 composer audit
 ```
 
-CI also runs a Docker smoke test against the application.
+CI runs Pint, PHPStan level 8, Unit tests (PHP 8.4/8.5 × MySQL 8.0/9.0 matrix),
+Feature tests, Docker smoke test, CodeQL, gitleaks, Trivy container scan, and SBOM generation.
 
 ## License
 

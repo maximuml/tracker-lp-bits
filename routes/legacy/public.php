@@ -38,8 +38,8 @@ Route::match(['get', 'post'], '/email-gateway', [TorrentDownloadController::clas
 Route::match(['get', 'post'], '/ok', [UtilityController::class, 'ok'])->name('ok.legacy');
 
 Route::match(['get', 'post'], '/complains', [SupportController::class, 'complains'])->name('complains.legacy');
-Route::post('/shoutbox', [ShoutboxController::class, 'shoutbox'])->middleware(['throttle:shoutbox', 'reject.get.mutations'])->name('shoutbox.legacy');
+Route::match(['get', 'post'], '/shoutbox', [ShoutboxController::class, 'shoutbox'])->middleware('throttle:shoutbox')->name('shoutbox.legacy');
 
-Route::post('/bookmark', [TorrentBookmarkController::class, 'bookmark'])->middleware('reject.get.mutations')->name('bookmark.legacy');
+Route::match(['get', 'post'], '/bookmark', [TorrentBookmarkController::class, 'bookmark'])->name('bookmark.legacy');
 Route::match(['get', 'post'], '/viewfilelist', [TorrentAjaxController::class, 'viewFileList'])->name('viewfilelist.legacy');
 Route::match(['get', 'post'], '/viewpeerlist', [TorrentAjaxController::class, 'viewPeerList'])->name('viewpeerlist.legacy');

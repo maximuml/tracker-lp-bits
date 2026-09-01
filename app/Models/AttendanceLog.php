@@ -22,6 +22,11 @@ class AttendanceLog extends NexusModel
     /** @var list<string> */
     protected $fillable = ['uid', 'points', 'date', 'is_retroactive'];
 
+    /** @var array<string, string> */
+    protected $casts = [
+        'date' => 'date',
+    ];
+
     /** @var bool */
     public $timestamps = true;
 }

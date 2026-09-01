@@ -24,6 +24,11 @@ class IpLog extends NexusModel
     /** @var list<string> */
     protected $fillable = ['ip', 'userid', 'access', 'uri', 'count'];
 
+    /** @var array<string, string> */
+    protected $casts = [
+        'access' => 'datetime',
+    ];
+
     /** @return  Attribute<mixed, mixed> */
     protected function ipLocation(): Attribute
     {

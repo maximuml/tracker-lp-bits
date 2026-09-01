@@ -32,6 +32,11 @@ class TorrentCustomField extends NexusModel
         'name', 'label', 'type', 'required', 'is_single_row', 'options', 'help', 'display', 'priority',
     ];
 
+    /** @var array<string, string> */
+    protected $casts = [
+        'type' => 'string',
+    ];
+
     /** @return  array<int|string, mixed> */
     public static function getCheckboxOptions(): array
     {

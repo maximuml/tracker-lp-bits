@@ -284,14 +284,44 @@ jobs:
           # categories — torrent listing, agent_allowed_family/agent_allowed_exception — announce client check
           mysqldump -h 127.0.0.1 -u root -proot --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users searchbox searchbox_fields categories agent_allowed_family agent_allowed_exception | mysql -h 127.0.0.1 -u root -proot nexusphp_testing
 
-      - name: Run PHPUnit with coverage
-        run: DB_DATABASE=nexusphp_testing vendor/bin/phpunit --testsuite Unit --coverage-clover=coverage.xml
+      - name: Run PHPUnit Unit with coverage
+        run: DB_DATABASE=nexusphp_testing vendor/bin/phpunit --testsuite Unit --coverage-clover=coverage-unit.xml
+
+      - name: Run PHPUnit Feature with coverage
+        run: DB_DATABASE=nexusphp_testing vendor/bin/phpunit --testsuite Feature --coverage-clover=coverage-feature.xml --coverage-html=coverage-html
+
+      - name: Merge Clover coverage reports
+        run: |
+          # Merge Unit and Feature Clover reports into a single file
+          # Codecov accepts multiple files, but a single merged file is simpler
+          php -r "
+          \$unit = simplexml_load_file('coverage-unit.xml');
+          \$feature = simplexml_load_file('coverage-feature.xml');
+          if (\$unit === false || \$feature === false) {
+            fwrite(STDERR, 'Failed to load Clover XML files' . PHP_EOL);
+            exit(1);
+          }
+          // Merge project nodes from feature into unit
+          foreach (\$feature->project as \$project) {
+            \$unit->addChild('project', (string) \$project);
+          }
+          \$unit->asXML('coverage.xml');
+          echo 'Merged coverage.xml created' . PHP_EOL;
+          "
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
         with:
           files: ./coverage.xml
-          fail_ci_if_error: false
+          fail_ci_if_error: true
+
+      - name: Upload HTML coverage artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4846f43603d02a # v4
+        if: always()
+        with:
+          name: coverage-html
+          path: coverage-html
+          retention-days: 14
 
   smoke-test:
     name: Docker smoke test

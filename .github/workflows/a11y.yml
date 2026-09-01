@@ -54,6 +54,8 @@ jobs:
           PUSHER_APP_CLUSTER: ''
         run: |
           cp .env.example .env
+          # Set CI DB password (.env.example uses a placeholder)
+          sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=nexusphp/' .env
           # Set CI Redis password (docker-compose requires it)
           sed -i 's/^REDIS_PASSWORD=.*/REDIS_PASSWORD=ci-redis-test-password/' .env
           # Set CI MeiliSearch key (docker-compose requires it)

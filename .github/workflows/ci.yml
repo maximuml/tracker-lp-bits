@@ -175,6 +175,7 @@ jobs:
       - name: Prepare environment
         run: |
           cp .env.example .env
+          sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=nexusphp/' .env
           sed -i 's/^CACHE_DRIVER=.*/CACHE_DRIVER=array/' .env
           sed -i 's/^QUEUE_CONNECTION=.*/QUEUE_CONNECTION=sync/' .env
           sed -i 's/^CHANNEL_NAME_SETTING=.*/CHANNEL_NAME_SETTING=/' .env
@@ -259,6 +260,7 @@ jobs:
       - name: Prepare environment
         run: |
           cp .env.example .env
+          sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=nexusphp/' .env
           sed -i 's/^CACHE_DRIVER=.*/CACHE_DRIVER=array/' .env
           sed -i 's/^QUEUE_CONNECTION=.*/QUEUE_CONNECTION=sync/' .env
           sed -i 's/^CHANNEL_NAME_SETTING=.*/CHANNEL_NAME_SETTING=/' .env
@@ -347,6 +349,9 @@ jobs:
           sed -i 's|DB_HOST=127.0.0.1|DB_HOST=mysql|g' .env
           sed -i 's|REDIS_HOST=127.0.0.1|REDIS_HOST=redis|g' .env
           sed -i 's|LOG_FILE=.*|LOG_FILE=php://stdout|g' .env
+          # .env.example uses a placeholder DB_PASSWORD — set the real value
+          # to match the MySQL service container.
+          sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=nexusphp/' .env
           # .env.example leaves MEILISEARCH_MASTER_KEY empty so users must set
           # their own. For the smoke-test stack, restore the compose default.
           sed -i 's|^MEILISEARCH_MASTER_KEY=.*|MEILISEARCH_MASTER_KEY=nexusphp_default_key|' .env
@@ -465,6 +470,7 @@ jobs:
           cp .env.example .env
           sed -i 's|DB_HOST=127.0.0.1|DB_HOST=mysql|g' .env
           sed -i 's|REDIS_HOST=127.0.0.1|REDIS_HOST=redis|g' .env
+          sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=nexusphp/' .env
           sed -i 's|^MEILISEARCH_MASTER_KEY=.*|MEILISEARCH_MASTER_KEY=nexusphp_default_key|' .env
 
       - name: Build Docker images

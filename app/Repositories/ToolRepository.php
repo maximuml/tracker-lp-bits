@@ -229,7 +229,7 @@ class ToolRepository extends BaseRepository
 
     public function getBackupExportPathDefault(): string
     {
-        return sys_get_temp_dir().'/nexusphp_backup';
+        return storage_path('app/backups');
     }
 
     /**

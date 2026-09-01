@@ -66,6 +66,11 @@ jobs:
       - name: Run Laravel Pint
         run: vendor/bin/pint --test
 
+      - name: Prepare environment for PHPStan
+        run: |
+          cp .env.example .env
+          php artisan key:generate --force
+
       - name: Run PHPStan level 8
         run: vendor/bin/phpstan analyse --no-progress --memory-limit=2G
 

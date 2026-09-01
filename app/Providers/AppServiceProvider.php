@@ -52,6 +52,15 @@ class AppServiceProvider extends ServiceProvider
         if (class_exists(Sanctum::class)) {
             Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
         }
+        // Production startup validation: warn about missing/weak secrets.
+        // Does not throw — the app may still function (e.g. cron is loopback
+        // only without a token) — but logs a warning so operators notice.
+        if (app()->isProduction()) {
+            $cronToken = (string) Env::get('CRON_TOKEN', '');
+            if ($cronToken !== '' && strlen($cronToken) < 32) {
+                logger()->warning('CRON_TOKEN is set but shorter than 32 characters — consider using a stronger token.');
+            }
+        }
         // Query log only in non-production (avoids memory leak in prod)
         if (! app()->isProduction()) {
             DB::connection(config('database.default'))->enableQueryLog();

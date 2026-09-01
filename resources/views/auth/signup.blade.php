@@ -30,7 +30,7 @@ $preEmail = $isInvite && $isPreRegisterEmailAndUsername && ! empty($invite->pre_
         <input type="hidden" name="secret" value="{{ $secret }}" />
         <div align="right">
             {{ $lang['text_select_lang'] ?? 'Select Site Language:' }}
-            <select name="sitelanguage" onchange="this.form.submit()">
+            <select name="sitelanguage" aria-label="{{ $lang['text_select_lang'] ?? 'Select Site Language' }}" onchange="this.form.submit()">
                 @foreach ($languages as $row)
                     <option value="{{ $row['id'] }}" @if (($row['site_lang_folder'] ?? '') === $langFolder) selected @endif>
                         {{ $row['lang_name'] }}
@@ -55,11 +55,11 @@ $preEmail = $isInvite && $isPreRegisterEmailAndUsername && ! empty($invite->pre_
             @php
                 $inputStyle = 'style="width: min(100%, 320px); min-width: 180px; border: 1px solid gray; box-sizing: border-box"';
                 $usernameInput = $preUsername !== ''
-                    ? '<input type="text" ' . $inputStyle . ' name="wantusername" value="' . e($preUsername) . '" readonly autocomplete="username" />'
-                    : '<input type="text" ' . $inputStyle . ' name="wantusername" value="' . e(old('wantusername')) . '" autocomplete="username" />';
+                    ? '<input type="text" ' . $inputStyle . ' name="wantusername" aria-label="' . e($lang['row_desired_username'] ?? 'Desired username') . '" value="' . e($preUsername) . '" readonly autocomplete="username" />'
+                    : '<input type="text" ' . $inputStyle . ' name="wantusername" aria-label="' . e($lang['row_desired_username'] ?? 'Desired username') . '" value="' . e(old('wantusername')) . '" autocomplete="username" />';
                 $emailInput = $preEmail !== ''
-                    ? '<input type="email" ' . $inputStyle . ' name="email" value="' . e($preEmail) . '" readonly autocomplete="email" />'
-                    : '<input type="email" ' . $inputStyle . ' name="email" value="' . e(old('email')) . '" autocomplete="email" />';
+                    ? '<input type="email" ' . $inputStyle . ' name="email" aria-label="' . e($lang['row_email_address'] ?? 'Email address') . '" value="' . e($preEmail) . '" readonly autocomplete="email" />'
+                    : '<input type="email" ' . $inputStyle . ' name="email" aria-label="' . e($lang['row_email_address'] ?? 'Email address') . '" value="' . e(old('email')) . '" autocomplete="email" />';
             @endphp
 
             <tr>
@@ -72,14 +72,14 @@ $preEmail = $isInvite && $isPreRegisterEmailAndUsername && ! empty($invite->pre_
             <tr>
                 <td class="rowhead">{{ $lang['row_pick_a_password'] }}</td>
                 <td class="rowfollow" align="left">
-                    <input type="password" {!! $inputStyle !!} class="wantpassword" autocomplete="new-password" /><br />
+                    <input type="password" {!! $inputStyle !!} class="wantpassword" aria-label="{{ $lang['row_pick_a_password'] ?? 'Pick a password' }}" autocomplete="new-password" /><br />
                     <font class="small">{{ $lang['text_minimum_six_characters'] ?? 'Minimum is 6 characters' }}</font>
                 </td>
             </tr>
             <tr>
                 <td class="rowhead">{{ $lang['row_enter_password_again'] ?? 'Enter password again' }}</td>
                 <td class="rowfollow" align="left">
-                    <input type="password" {!! $inputStyle !!} class="passagain" autocomplete="new-password" />
+                    <input type="password" {!! $inputStyle !!} class="passagain" aria-label="{{ $lang['row_enter_password_again'] ?? 'Enter password again' }}" autocomplete="new-password" />
                 </td>
             </tr>
 
@@ -95,7 +95,7 @@ $preEmail = $isInvite && $isPreRegisterEmailAndUsername && ! empty($invite->pre_
             <tr>
                 <td class="rowhead">{{ $lang['row_country'] ?? 'Country' }}</td>
                 <td class="rowfollow" align="left">
-                    <select name="country" style="width: min(100%, 320px);">
+                    <select name="country" aria-label="{{ $lang['row_country'] ?? 'Country' }}" style="width: min(100%, 320px);">
                         <option value="8">---- {{ $lang['select_none_selected'] ?? 'None selected' }} ----</option>
                         @foreach ($countries as $country)
                             <option value="{{ $country->id }}" @if ((int) old('country', 8) === (int) $country->id) selected @endif>{{ $country->name }}</option>
@@ -107,17 +107,17 @@ $preEmail = $isInvite && $isPreRegisterEmailAndUsername && ! empty($invite->pre_
             <tr>
                 <td class="rowhead">{{ $lang['row_gender'] ?? 'Gender' }}</td>
                 <td class="rowfollow" align="left">
-                    <input type="radio" name="gender" value="Male" @if (old('gender') === 'Male') checked @endif />{{ $lang['radio_male'] ?? 'Male ' }}
-                    <input type="radio" name="gender" value="Female" @if (old('gender') === 'Female') checked @endif />{{ $lang['radio_female'] ?? 'Female ' }}
+                    <input type="radio" name="gender" value="Male" aria-label="{{ $lang['radio_male'] ?? 'Male' }}" @if (old('gender') === 'Male') checked @endif />{{ $lang['radio_male'] ?? 'Male ' }}
+                    <input type="radio" name="gender" value="Female" aria-label="{{ $lang['radio_female'] ?? 'Female' }}" @if (old('gender') === 'Female') checked @endif />{{ $lang['radio_female'] ?? 'Female ' }}
                 </td>
             </tr>
 
             <tr>
                 <td class="rowhead">{{ $lang['row_verification'] ?? 'Verification' }}</td>
                 <td class="rowfollow" align="left">
-                    <input type="checkbox" name="rulesverify" value="yes" @if (old('rulesverify') === 'yes') checked @endif />{!! $lang['checkbox_read_rules'] ?? 'I have read the site <a href="rules.php"><u>rules</u></a> page.' !!}<br />
-                    <input type="checkbox" name="faqverify" value="yes" @if (old('faqverify') === 'yes') checked @endif />{!! $lang['checkbox_read_faq'] ?? 'I agree to read the <a href="faq.php"><u>FAQ</u></a> before asking questions.' !!}<br />
-                    <input type="checkbox" name="ageverify" value="yes" @if (old('ageverify') === 'yes') checked @endif />{!! $lang['checkbox_age'] ?? 'I am at least 13 years old.' !!}
+                    <input type="checkbox" name="rulesverify" value="yes" aria-label="{{ $lang['checkbox_read_rules_plain'] ?? 'I have read the site rules page' }}" @if (old('rulesverify') === 'yes') checked @endif />{!! $lang['checkbox_read_rules'] ?? 'I have read the site <a href="rules.php"><u>rules</u></a> page.' !!}<br />
+                    <input type="checkbox" name="faqverify" value="yes" aria-label="{{ $lang['checkbox_read_faq_plain'] ?? 'I agree to read the FAQ before asking questions' }}" @if (old('faqverify') === 'yes') checked @endif />{!! $lang['checkbox_read_faq'] ?? 'I agree to read the <a href="faq.php"><u>FAQ</u></a> before asking questions.' !!}<br />
+                    <input type="checkbox" name="ageverify" value="yes" aria-label="{{ $lang['checkbox_age'] ?? 'I am at least 13 years old' }}" @if (old('ageverify') === 'yes') checked @endif />{!! $lang['checkbox_age'] ?? 'I am at least 13 years old.' !!}
                 </td>
             </tr>
 
@@ -125,7 +125,7 @@ $preEmail = $isInvite && $isPreRegisterEmailAndUsername && ! empty($invite->pre_
 
             <tr>
                 <td class="toolbox" colspan="2" align="center">
-                    <font color="red"><b>{{ $lang['text_all_fields_required'] ?? 'All Fields are required!' }}</b></font><p></p>
+                    <font color="#a00"><b>{{ $lang['text_all_fields_required'] ?? 'All Fields are required!' }}</b></font><p></p>
                     <input id="submit-btn" type="button" value="{!! $lang['submit_sign_up'] ?? 'Sign up!' !!}" style="height: 25px" />
                 </td>
             </tr>

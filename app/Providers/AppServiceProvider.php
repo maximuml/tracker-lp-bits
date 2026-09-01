@@ -9,6 +9,7 @@ use App\Support\CurrentUser;
 use App\Support\Env;
 use App\Support\Environment;
 use App\Support\Globals;
+use App\Support\Html\SafeHtml;
 use App\Support\Language;
 use App\Support\Locale;
 use App\Support\UserUpdateBatch;
@@ -18,6 +19,7 @@ use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Console\Events\ScheduledTaskStarting;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
@@ -120,6 +122,18 @@ class AppServiceProvider extends ServiceProvider
             }
             $view->with('context', $context);
         });
+
+        // SafeHtml Blade directive: @safeHtml($var) renders a SafeHtml
+        // value object's sanitized HTML. This replaces {!! !!} for
+        // user-controlled content, creating a type boundary between
+        // untrusted strings and sanitized HTML.
+        Blade::directive('safeHtml', static function (string $expression): string {
+            return "<?php \$__safeHtmlVal = $expression; echo \$__safeHtmlVal instanceof \\App\\Support\\Html\\SafeHtml ? \$__safeHtmlVal->toHtml() : htmlspecialchars((string) \$__safeHtmlVal, ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE, 'UTF-8'); ?>";
+        });
+
+        // Register SafeHtml as a stringable type so {{ $safeHtml }}
+        // automatically calls __toString() → toHtml()
+        Blade::stringable(SafeHtml::class, static fn (SafeHtml $html): string => $html->toHtml());
     }
 
     private function customScheduleTask(): void

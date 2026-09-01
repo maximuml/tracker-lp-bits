@@ -139,7 +139,7 @@ jobs:
 
       - name: Upload axe results
         if: always()
-        uses: actions/upload-artifact@b4b6b8956e3a64b9675f3d6f1f3f6a0c4420111a # v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: axe-results
           path: axe-results/

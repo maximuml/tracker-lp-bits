@@ -43,8 +43,10 @@ class CoreTrackerTest extends TestCase
     public function test_api_torrents_listing_returns_results(): void
     {
         $user = User::factory()->create();
-        $category = Category::where('mode', SearchBox::getBrowseMode())->first()
-            ?? Category::factory()->create();
+        $browseMode = (int) SearchBox::getBrowseMode();
+        $searchBox = SearchBox::find($browseMode) ?? SearchBox::factory()->create(['id' => $browseMode]);
+        $category = Category::where('mode', $browseMode)->first()
+            ?? Category::factory()->mode($browseMode)->create();
 
         Torrent::factory()->owner($user)->category($category->id)->create();
 
@@ -73,7 +75,12 @@ class CoreTrackerTest extends TestCase
     public function test_web_torrents_listing_renders_for_authenticated_user(): void
     {
         $user = User::factory()->create();
-        Torrent::factory()->owner($user)->create();
+        $browseMode = (int) SearchBox::getBrowseMode();
+        $searchBox = SearchBox::find($browseMode) ?? SearchBox::factory()->create(['id' => $browseMode]);
+        $category = Category::where('mode', $browseMode)->first()
+            ?? Category::factory()->mode($browseMode)->create();
+
+        Torrent::factory()->owner($user)->category($category->id)->create();
 
         $this->withNexusCookie($user)
             ->get('/torrents')

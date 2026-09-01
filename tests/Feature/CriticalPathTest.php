@@ -7,6 +7,7 @@ use App\Jobs\SeedBonusJob;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Support\Settings;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Rhilip\Bencode\Bencode;
 use Tests\TestCase;
@@ -35,6 +36,13 @@ class CriticalPathTest extends TestCase
         if (! is_string($base) || $base === '') {
             $this->markTestSkipped('CRITICAL_PATH_BASE_URL is not configured');
         }
+
+        // This test sends HTTP requests to the real OpenResty server, which
+        // always uses the main nexusphp database. Force Eloquent to use the
+        // same database so assertions can read what the HTTP requests wrote,
+        // even when the test suite was launched with DB_DATABASE=nexusphp_testing.
+        config(['database.connections.mysql.database' => 'nexusphp']);
+        DB::purge('mysql');
 
         $this->baseUrl = rtrim($base, '/');
         $this->cookieFile = sys_get_temp_dir().'/critical_path_'.uniqid().'.txt';

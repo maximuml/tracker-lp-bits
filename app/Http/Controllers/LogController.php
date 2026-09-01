@@ -229,10 +229,22 @@ class LogController extends LegacyController
             if ($pollid <= 0) {
                 return $this->legacyAbortResponse($langLog['std_error'] ?? 'Error', $langLog['std_invalid_poll_id'] ?? 'Invalid poll ID.');
             }
-            if ((int) $request->input('sure', 0) !== 1) {
-                $confirm = ($langLog['std_delete_poll_confirmation'] ?? 'Are you sure? ')."<a href=\"?action=poll&do=delete&pollid=$pollid&returnto=$returnto&sure=1\">".($langLog['std_here_if_sure'] ?? 'here').'</a>';
+            // The actual deletion requires POST to prevent CSRF via GET
+            // (e.g. <img src="/log.php?action=poll&do=delete&pollid=1&sure=1">).
+            // GET with sure=0 shows a confirmation form with a POST button.
+            if (! $request->isMethod('post')) {
+                $token = csrf_token();
+                $confirm = ($langLog['std_delete_poll_confirmation'] ?? 'Are you sure? ')
+                    ."<form method=\"post\" action=\"/log.php?action=poll&do=delete&pollid=$pollid&returnto=$returnto\">"
+                    ."<input type=\"hidden\" name=\"_token\" value=\"$token\" />"
+                    .'<input type="hidden" name="sure" value="1" />'
+                    .'<button type="submit">'.($langLog['std_here_if_sure'] ?? 'here').'</button>'
+                    .'</form>';
 
                 return $this->legacyAbortResponse($langLog['std_delete_poll'] ?? 'Delete poll', $confirm, false);
+            }
+            if ((int) $request->input('sure', 0) !== 1) {
+                return $this->legacyAbortResponse($langLog['std_error'] ?? 'Error', $langLog['std_permission_denied'] ?? 'Permission denied.');
             }
             app(LogRepository::class)->deletePoll($pollid);
 

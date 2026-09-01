@@ -268,7 +268,10 @@ jobs:
           # Create isolated test database (phpunit.xml uses nexusphp_testing)
           mysql -h 127.0.0.1 -u root -proot -e "CREATE DATABASE IF NOT EXISTS nexusphp_testing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; GRANT ALL PRIVILEGES ON nexusphp_testing.* TO 'nexusphp'@'%'; FLUSH PRIVILEGES;"
           mysqldump -h 127.0.0.1 -u root -proot --no-data --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp | mysql -h 127.0.0.1 -u root -proot nexusphp_testing
-          mysqldump -h 127.0.0.1 -u root -proot --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users | mysql -h 127.0.0.1 -u root -proot nexusphp_testing
+          # Copy seed data for tables Feature tests depend on:
+          # settings/users — config + auth, searchbox/searchbox_fields — browse mode,
+          # categories — torrent listing, agent_allowed_family/agent_allowed_exception — announce client check
+          mysqldump -h 127.0.0.1 -u root -proot --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users searchbox searchbox_fields categories agent_allowed_family agent_allowed_exception | mysql -h 127.0.0.1 -u root -proot nexusphp_testing
 
       - name: Run PHPUnit with coverage
         run: DB_DATABASE=nexusphp_testing vendor/bin/phpunit --testsuite Unit --coverage-clover=coverage.xml

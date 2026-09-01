@@ -37,6 +37,5 @@ class DatabaseSeeder extends Seeder
         $this->call(TorrentsStateTableSeeder::class);
         $this->call(TagsTableSeeder::class);
         $this->call(SettingsTableSeeder::class);
-        $this->call(LegacyLookupTableSeeder::class);
     }
 }

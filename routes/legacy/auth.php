@@ -51,7 +51,7 @@ Route::match(['get', 'post'], '/mybonus', [MyController::class, 'bonus'])->name(
 Route::match(['get', 'post'], '/my_bonus', [MyController::class, 'bonus'])->name('my.bonus.underscore');
 Route::get('/myhr', [MyController::class, 'hr'])->name('my.hr');
 Route::get('/topten', [ToptenController::class, 'legacy'])->name('topten.legacy');
-Route::get('/log', [LogController::class, 'legacy'])->name('log.legacy');
+Route::match(['get', 'post'], '/log', [LogController::class, 'legacy'])->name('log.legacy');
 Route::match(['get', 'post'], '/index', [IndexController::class, 'legacy'])->name('index.legacy');
 Route::match(['get', 'post'], '/friends', [FriendsController::class, 'friends'])->name('friends.legacy');
 Route::match(['get', 'post'], '/messages', [MessageController::class, 'messages'])->name('messages.legacy');

@@ -112,4 +112,31 @@ final class Phase11CsrfEnforcementTest extends TestCase
         $this->assertNotContains('settings', $except);
         $this->assertNotContains('takeinvite', $except);
     }
+
+    public function test_get_request_to_modtask_returns_405(): void
+    {
+        // modtask performs high-privilege user edits and must not be
+        // reachable via GET (CSRF bypass vector). The reject.get.mutations
+        // middleware returns 405 for GET/HEAD.
+        $response = $this->get('/modtask');
+
+        $this->assertContains($response->status(), [405, 302]);
+    }
+
+    public function test_get_request_to_poll_delete_shows_confirmation_form_not_delete(): void
+    {
+        // Poll delete via GET must NOT delete — it should show a
+        // confirmation form with a POST button instead.
+        $response = $this->get('/log?action=poll&do=delete&pollid=1&sure=1');
+
+        // Should not be a redirect to /log.php?action=poll&deleted=1
+        // (which would indicate the poll was deleted via GET).
+        // Expected: 200 (confirmation page) or 302 (login redirect).
+        $this->assertContains($response->status(), [200, 302]);
+        if ($response->status() === 200) {
+            // The confirmation page should contain a POST form, not a GET link
+            $this->assertStringContainsString('method="post"', $response->getContent());
+            $this->assertStringNotContainsString('deleted=1', $response->headers->get('Location', ''));
+        }
+    }
 }

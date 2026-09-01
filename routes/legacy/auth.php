@@ -82,7 +82,7 @@ Route::get('/iphistory', function (Request $request) {
     return $id > 0 ? redirect("/nexusphp/users/{$id}") : redirect('/nexusphp/users');
 })->name('iphistory.legacy');
 Route::get('/ipsearch', fn () => redirect('/nexusphp/users'))->name('ipsearch.legacy');
-Route::match(['get', 'post'], '/modtask', [StaffModerationController::class, 'modtask'])->name('modtask.legacy');
+Route::match(['get', 'post'], '/modtask', [StaffModerationController::class, 'modtask'])->middleware('reject.get.mutations')->name('modtask.legacy');
 Route::get('/staff', [StaffPageController::class, 'staff'])->name('staff.legacy');
 
 // Phase 5.4: staffbox migrated to Filament StaffMessageResource

@@ -32,6 +32,7 @@ class LoadTorrentBoughtUsers implements ShouldQueue
     public function __construct(int $torrentId)
     {
         $this->torrentId = $torrentId;
+        $this->onQueue('default');
     }
 
     /**

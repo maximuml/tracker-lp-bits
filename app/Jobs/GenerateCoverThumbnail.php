@@ -38,7 +38,9 @@ class GenerateCoverThumbnail implements ShouldQueue
         public readonly int $maxWidth = 240,
         public readonly int $maxHeight = 360,
         public readonly int $quality = 82,
-    ) {}
+    ) {
+        $this->onQueue('tracker-critical');
+    }
 
     public function handle(): void
     {

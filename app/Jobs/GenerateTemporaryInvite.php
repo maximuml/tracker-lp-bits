@@ -36,6 +36,7 @@ class GenerateTemporaryInvite implements ShouldQueue
         $this->idRedisKey = $idRedisKey;
         $this->days = $days;
         $this->count = $count;
+        $this->onQueue('default');
     }
 
     public int $tries = 1;

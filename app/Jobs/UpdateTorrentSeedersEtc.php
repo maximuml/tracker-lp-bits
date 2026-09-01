@@ -41,6 +41,7 @@ class UpdateTorrentSeedersEtc implements ShouldQueue
         $this->idStr = $idStr;
         $this->idRedisKey = $idRedisKey;
         $this->requestId = $requestId;
+        $this->onQueue('tracker-critical');
     }
 
     /** @var int */

@@ -104,18 +104,29 @@ jobs:
           BASE=http://127.0.0.1:80
           PASS=0
           FAIL=0
+          RESULTS_DIR="axe-results"
+          mkdir -p "$RESULTS_DIR"
 
           # Pages that don't require authentication
-          PAGES="/index.php /login.php /signup.php"
+          PAGES="/index.php /login.php /signup.php /faq.php /rules.php /aboutnexus.php /recover.php"
 
           for page in $PAGES; do
             echo "::group::Scanning $page"
-            if axe "$BASE$page" --exit --tags wcag2a,wcag2aa --load-delay=3000 --chrome-options="no-sandbox,disable-dev-shm-usage" 2>&1; then
+            PAGE_NAME=$(echo "$page" | tr '/' '_')
+            RESULT_FILE="$RESULTS_DIR/${PAGE_NAME}.json"
+            if axe "$BASE$page" --exit --tags wcag2a,wcag2aa,wcag21a,wcag21aa --load-delay=3000 --chrome-options="no-sandbox,disable-dev-shm-usage" --save "$RESULT_FILE" 2>&1; then
               echo "PASS: $page"
               PASS=$((PASS + 1))
             else
               echo "FAIL: $page"
               FAIL=$((FAIL + 1))
+              # Print violation summary
+              if [ -f "$RESULT_FILE" ]; then
+                echo "::error::Violations on $page (see $RESULT_FILE for details)"
+                # Show violation count from JSON
+                VIOLATIONS=$(jq '.violations | length' "$RESULT_FILE" 2>/dev/null || echo "?")
+                echo "  Violations: $VIOLATIONS"
+              fi
             fi
             echo "::endgroup::"
           done
@@ -125,3 +136,11 @@ jobs:
             echo "::error::$FAIL pages have accessibility violations"
             exit 1
           fi
+
+      - name: Upload axe results
+        if: always()
+        uses: actions/upload-artifact@b4b6b8956e3a64b9675f3d6f1f3f6a0c4420111a # v4
+        with:
+          name: axe-results
+          path: axe-results/
+          retention-days: 14

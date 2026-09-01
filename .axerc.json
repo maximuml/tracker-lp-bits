@@ -1,0 +1,24 @@
+{
+  "rules": [
+    "color-contrast",
+    "aria-roles",
+    "aria-valid-attr",
+    "aria-valid-attr-value",
+    "button-name",
+    "html-has-lang",
+    "html-lang-valid",
+    "image-alt",
+    "input-image-alt",
+    "label",
+    "link-name",
+    "list",
+    "listitem",
+    "region",
+    "tabindex",
+    "table-fake-caption",
+    "td-has-header",
+    "th-has-data-cells"
+  ],
+  "tags": ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"],
+  "resultTypes": ["violations", "incomplete"]
+}

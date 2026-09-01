@@ -6,10 +6,25 @@ server {
     ssl_certificate     /certs/fullchain.pem;
     ssl_certificate_key /certs/private.key;
 
+    # Basic auth protection — requires htpasswd file at /etc/nginx/.htpasswd
+    # Generate with: htpasswd -c /etc/nginx/.htpasswd <user>
+    auth_basic           "phpMyAdmin Restricted";
+    auth_basic_user_file /etc/nginx/.htpasswd;
+
+    # Allow only loopback and private networks by default
+    # Override with PMA_ALLOW_CIDR env if external access is needed
+    allow 127.0.0.1;
+    allow 10.0.0.0/8;
+    allow 172.16.0.0/12;
+    allow 192.168.0.0/16;
+    deny  all;
+
     location / {
-        set $phpmyadmin_url "http://phpmyadmin:80";
-        proxy_pass $phpmyadmin_url;
+        set $phpmyadmin-url "http://phpmyadmin:80";
+        proxy_pass $phpmyadmin-url;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 }

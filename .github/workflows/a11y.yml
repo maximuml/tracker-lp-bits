@@ -36,6 +36,9 @@ jobs:
       - name: Install axe-core CLI
         run: npm install -g @axe-core/cli
 
+      - name: Install matching ChromeDriver
+        run: npx --yes browser-driver-manager install chrome@stable
+
       - name: Build and start Docker stack
         env:
           NP_PORT: '80'

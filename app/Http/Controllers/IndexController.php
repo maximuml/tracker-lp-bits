@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Models\Poll;
 use App\Repositories\IndexRepository;
 use App\Services\IndexPageService;
 use App\Support\Bonus;
@@ -46,7 +47,12 @@ class IndexController extends Controller
         $choice = $request->input('choice');
         $user = app(CurrentUser::class)->get();
 
-        if ($choice === null || $choice === '' || $choice >= 256 || $choice != floor($choice)) {
+        if ($choice === null || $choice === '' || (int) $choice != floor((float) $choice)) {
+            return redirect('/index.php');
+        }
+
+        $choiceInt = (int) $choice;
+        if ($choiceInt < 0 || $choiceInt > Poll::MAX_OPTION_INDEX) {
             return redirect('/index.php');
         }
 
@@ -57,11 +63,16 @@ class IndexController extends Controller
 
         $pollId = $poll['id'];
 
+        $optionKey = "option{$choiceInt}";
+        if (empty($poll[$optionKey])) {
+            return redirect('/index.php');
+        }
+
         if (app(IndexRepository::class)->hasVoted($pollId, $user['id'])) {
             return redirect('/index.php');
         }
 
-        app(IndexRepository::class)->recordPollVote($pollId, $user['id'], (int) $choice);
+        app(IndexRepository::class)->recordPollVote($pollId, $user['id'], $choiceInt);
 
         $cache = app(LegacyRedisCache::class);
         if ($cache !== null) {

@@ -111,7 +111,7 @@ class TorrentRepository extends BaseRepository
             ->allowSorts(self::$allowSorts)
             ->registerCustomFilter('title', function (Builder $query, Request $request) {
                 $title = $request->input(ApiQueryBuilder::PARAM_NAME_FILTER.'.title');
-                $title = trim(str_replace('.', '', (string) $title));
+                $title = trim(str_replace('.', ' ', (string) $title));
                 if ($title) {
                     $titleParts = explode(' ', $title);
                     $keywordCount = 1;

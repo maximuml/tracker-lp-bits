@@ -19,6 +19,7 @@ $title = $title ?? ($mode === 'edit' && $newsid > 0
 
 @section('content')
 <form id="compose" name="compose" method="post" action="{{ $actionUrl }}">
+@csrf
 {!! \App\Support\Frame::composeBegin($composeTitle, $mode === 'edit' ? 'edit' : 'new', $body, true, $subject, 100) !!}
 <tr><td class="toolbox" align="center" colspan="2"><input type="checkbox" name="notify" value="yes"{{ $checked }} />{{ $lang_news['text_notify_users_of_this'] ?? 'Notify users of this' }}</td></tr>
 {!! \App\Support\Frame::composeEnd() !!}

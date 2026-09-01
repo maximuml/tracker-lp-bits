@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Auth\Permission;
+use App\Enums\Permission\PermissionEnum;
 use App\Http\Requests\NewsStoreRequest;
 use App\Http\Requests\NewsUpdateRequest;
 use App\Http\Resources\NewsResource;
@@ -26,9 +28,12 @@ class NewsController extends LegacyController
         $langNews = (array) (app(Globals::class)->get('lang_news') ?? []);
         $baseUrl = (string) app(Globals::class)->get('BASEURL', '');
 
-        $action = htmlspecialchars((string) ($request->input('action') ?? ''));
+        $action = (string) ($request->input('action') ?? '');
 
         if ($action === 'delete') {
+            if (! Permission::can(PermissionEnum::NEWS_MANAGE)) {
+                return $this->legacyAbortResponse($langNews['std_error'] ?? 'Error', $langNews['std_permission_denied'] ?? 'Permission denied.');
+            }
             if (! $request->isMethod('post')) {
                 return $this->legacyAbortResponse($langNews['std_error'] ?? 'Error', $langNews['std_permission_denied'] ?? 'Permission denied.');
             }
@@ -38,11 +43,20 @@ class NewsController extends LegacyController
             }
 
             $returnto = $request->input('returnto') !== null && $request->input('returnto') !== ''
-                ? htmlspecialchars((string) $request->input('returnto'))
-                : htmlspecialchars((string) $request->headers->get('referer', ''));
+                ? (string) $request->input('returnto')
+                : (string) $request->headers->get('referer', '');
 
             if ((int) $request->input('sure', 0) !== 1) {
-                $confirm = ($langNews['std_are_you_sure'] ?? 'Are you sure? ')."<a class=altlink href=\"?action=delete&newsid={$newsid}&returnto=".urlencode($returnto).'&sure=1">'.($langNews['std_here'] ?? 'here').'</a>'.($langNews['std_if_sure'] ?? '.');
+                $confirm = ($langNews['std_are_you_sure'] ?? 'Are you sure? ')
+                    .'<form method="post" action="'.htmlspecialchars((string) url('/news')).'" style="display:inline">'
+                    .csrf_field()
+                    .'<input type="hidden" name="action" value="delete" />'
+                    .'<input type="hidden" name="newsid" value="'.$newsid.'" />'
+                    .'<input type="hidden" name="returnto" value="'.htmlspecialchars($returnto).'" />'
+                    .'<input type="hidden" name="sure" value="1" />'
+                    .'<button type="submit" class="altlink">'.($langNews['std_here'] ?? 'here').'</button>'
+                    .'</form>'
+                    .($langNews['std_if_sure'] ?? '.');
 
                 return $this->legacyAbortResponse($langNews['std_delete_news_item'] ?? 'Delete news item', $confirm, false);
             }
@@ -61,14 +75,17 @@ class NewsController extends LegacyController
         }
 
         if ($action === 'add') {
+            if (! Permission::can(PermissionEnum::NEWS_MANAGE)) {
+                return $this->legacyAbortResponse($langNews['std_error'] ?? 'Error', $langNews['std_permission_denied'] ?? 'Permission denied.');
+            }
             if (! $request->isMethod('post')) {
                 return $this->legacyAbortResponse($langNews['std_error'] ?? 'Error', $langNews['std_news_body_empty'] ?? 'News body empty.');
             }
-            $body = htmlspecialchars((string) $request->input('body'), ENT_QUOTES);
+            $body = (string) $request->input('body', '');
             if ($body === '') {
                 return $this->legacyAbortResponse($langNews['std_error'] ?? 'Error', $langNews['std_news_body_empty'] ?? 'News body empty.');
             }
-            $title = htmlspecialchars((string) $request->input('subject'));
+            $title = (string) $request->input('subject', '');
             if ($title === '') {
                 return $this->legacyAbortResponse($langNews['std_error'] ?? 'Error', $langNews['std_news_title_empty'] ?? 'News title empty.');
             }
@@ -106,6 +123,9 @@ class NewsController extends LegacyController
         }
 
         if ($action === 'edit') {
+            if (! Permission::can(PermissionEnum::NEWS_MANAGE)) {
+                return $this->legacyAbortResponse($langNews['std_error'] ?? 'Error', $langNews['std_permission_denied'] ?? 'Permission denied.');
+            }
             $newsid = (int) $request->input('newsid', 0);
             if ($newsid <= 0) {
                 return $this->legacyAbortResponse($langNews['std_error'] ?? 'Error', $langNews['std_invalid_news_id'] ?? 'Invalid news ID.');
@@ -117,11 +137,11 @@ class NewsController extends LegacyController
             }
 
             if ($request->isMethod('post')) {
-                $body = htmlspecialchars((string) $request->input('body'), ENT_QUOTES);
+                $body = (string) $request->input('body', '');
                 if ($body === '') {
                     return $this->legacyAbortResponse($langNews['std_error'] ?? 'Error', $langNews['std_news_body_empty'] ?? 'News body empty.');
                 }
-                $title = htmlspecialchars((string) $request->input('subject'));
+                $title = (string) $request->input('subject', '');
                 if ($title === '') {
                     return $this->legacyAbortResponse($langNews['std_error'] ?? 'Error', $langNews['std_news_title_empty'] ?? 'News title empty.');
                 }
@@ -143,13 +163,13 @@ class NewsController extends LegacyController
 
             $arr = $news->toArray();
             $newsTitle = $langNews['text_edit_site_news'] ?? 'Edit site news';
-            $returnto = htmlspecialchars((string) ($request->input('returnto') ?? $request->headers->get('referer', '')));
+            $returnto = (string) ($request->input('returnto') ?? $request->headers->get('referer', ''));
 
             return $this->legacyPageRaw($request, 'news', true, [
                 'mode' => 'edit',
                 'newsid' => $newsid,
                 'body' => $arr['body'] ?? '',
-                'subject' => htmlspecialchars((string) ($arr['title'] ?? '')),
+                'subject' => $arr['title'] ?? '',
                 'notify' => ($arr['notify'] ?? false) ? 'yes' : 'no',
                 'returnto' => $returnto,
                 'title' => $newsTitle,
@@ -157,6 +177,9 @@ class NewsController extends LegacyController
         }
 
         // Default: show compose form
+        if (! Permission::can(PermissionEnum::NEWS_MANAGE)) {
+            return $this->legacyAbortResponse($langNews['std_error'] ?? 'Error', $langNews['std_permission_denied'] ?? 'Permission denied.');
+        }
         $composeTitle = $langNews['text_submit_news_item'] ?? 'Submit news item';
 
         return $this->legacyPageRaw($request, 'news', true, [

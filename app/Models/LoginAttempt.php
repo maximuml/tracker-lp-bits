@@ -22,7 +22,9 @@ class LoginAttempt extends Model
 
     /** @var array<string, string> */
     protected $casts = [
+        'added' => 'datetime',
         'banned' => 'boolean',
+        'attempts' => 'integer',
     ];
 
     protected $fillable = ['ip', 'added', 'banned', 'attempts', 'type'];

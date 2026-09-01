@@ -22,6 +22,12 @@ class OverForum extends NexusModel
     /** @var list<string> */
     protected $fillable = ['id', 'name', 'description', 'minclassview', 'sort'];
 
+    /** @var array<string, string> */
+    protected $casts = [
+        'minclassview' => 'integer',
+        'sort' => 'integer',
+    ];
+
     /** @return HasMany<Forum, $this> */
     public function forums()
     {

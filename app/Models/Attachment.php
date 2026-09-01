@@ -26,4 +26,14 @@ class Attachment extends NexusModel
 
     /** @var list<string> */
     protected $fillable = ['id', 'userid', 'width', 'added', 'filename', 'dlkey', 'filetype', 'filesize', 'location', 'downloads', 'isimage', 'thumb', 'driver'];
+
+    /** @var array<string, string> */
+    protected $casts = [
+        'added' => 'datetime',
+        'width' => 'integer',
+        'filesize' => 'integer',
+        'downloads' => 'integer',
+        'isimage' => 'boolean',
+        'thumb' => 'boolean',
+    ];
 }

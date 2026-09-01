@@ -18,4 +18,10 @@ class Complain extends NexusModel
 {
     /** @var list<string> */
     protected $fillable = ['id', 'uuid', 'email', 'body', 'added', 'answered', 'ip'];
+
+    /** @var array<string, string> */
+    protected $casts = [
+        'added' => 'datetime',
+        'answered' => 'boolean',
+    ];
 }

@@ -56,19 +56,14 @@ class StaffPageController extends LegacyController
             ->where('support', true)
             ->where('status', 'confirmed')
             ->orderBy('username')
-            ->get(['id', 'country', 'last_access', 'supportlang', 'supportfor'])
-            ->map(fn ($r) => $buildUserRow((array) $r->getAttributes(), 'supportfor'))
-            ->all();
+            ->get(['id', 'country', 'last_access', 'supportlang', 'supportfor']);
 
         $pickerRows = User::query()
             ->where('picker', true)
             ->where('status', 'confirmed')
             ->orderBy('username')
-            ->get(['id', 'country', 'last_access', 'pickfor'])
-            ->map(fn ($r) => $buildUserRow((array) $r->getAttributes(), 'pickfor'))
-            ->all();
+            ->get(['id', 'country', 'last_access', 'pickfor']);
 
-        $forumModRows = [];
         $forumMods = DB::table('forummods')
             ->leftJoin('users', 'forummods.userid', '=', 'users.id')
             ->orderBy('forummods.forumid')
@@ -77,6 +72,21 @@ class StaffPageController extends LegacyController
             ->unique('userid')
             ->values();
 
+        // Preload user display rows to avoid N+1 in buildUserRow
+        $allUserIds = $supportRows->pluck('id')
+            ->merge($pickerRows->pluck('id'))
+            ->merge($forumMods->pluck('userid'))
+            ->map(fn ($id) => (int) $id)
+            ->filter(fn ($id) => $id > 0)
+            ->unique()
+            ->values()
+            ->all();
+        UserDisplay::preload($allUserIds);
+
+        $supportRows = $supportRows->map(fn ($r) => $buildUserRow((array) $r->getAttributes(), 'supportfor'))->all();
+        $pickerRows = $pickerRows->map(fn ($r) => $buildUserRow((array) $r->getAttributes(), 'pickfor'))->all();
+
+        $forumModRows = [];
         foreach ($forumMods as $modRow) {
             $arr = (array) $modRow;
             $userId = (int) $arr['userid'];

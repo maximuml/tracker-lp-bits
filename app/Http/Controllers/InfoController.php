@@ -141,6 +141,7 @@ class InfoController extends LegacyController
             }
         }
 
+        UserDisplay::preload(array_values(array_unique($userIds)));
         $userDisplayMap = [];
         foreach (array_unique($userIds) as $uid) {
             $userDisplayMap[$uid] = UserDisplay::username($uid);

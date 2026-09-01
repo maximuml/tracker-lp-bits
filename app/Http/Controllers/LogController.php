@@ -72,6 +72,7 @@ class LogController extends LegacyController
         $logRows = app(LogRepository::class)->getSiteLog($filters, (int) $offset, $perpage);
 
         $userIds = array_filter(array_unique(array_column($logRows, 'uid')));
+        UserDisplay::preload(array_map('intval', $userIds));
         $userDisplayMap = [];
         foreach ($userIds as $uid) {
             $userDisplayMap[(int) $uid] = (int) $uid > 0 ? UserDisplay::username((int) $uid) : 'System';

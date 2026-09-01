@@ -23,4 +23,14 @@ class Faq extends NexusModel
 
     /** @var list<string> */
     protected $fillable = ['id', 'link_id', 'lang_id', 'type', 'question', 'answer', 'flag', 'categ', 'order'];
+
+    /** @var array<string, string> */
+    protected $casts = [
+        'link_id' => 'integer',
+        'lang_id' => 'integer',
+        'type' => 'integer',
+        'flag' => 'integer',
+        'categ' => 'integer',
+        'order' => 'integer',
+    ];
 }

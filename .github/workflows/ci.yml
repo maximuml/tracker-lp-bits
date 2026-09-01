@@ -435,6 +435,7 @@ jobs:
     permissions:
       contents: read
       security-events: write
+      pull-requests: write
 
     steps:
       - name: Checkout code
@@ -469,7 +470,7 @@ jobs:
         run: docker compose build php openresty
 
       - name: Run Trivy on PHP image
-        uses: aquasecurity/trivy-action@915b19bbe73b92a6cf82a1bc12b087c9a19a5fe2 # v0.28.0
+        uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
         with:
           image-ref: tracker-lp-bits-php:latest
           format: sarif
@@ -478,7 +479,7 @@ jobs:
           exit-code: '0'
 
       - name: Run Trivy on OpenResty image
-        uses: aquasecurity/trivy-action@915b19bbe73b92a6cf82a1bc12b087c9a19a5fe2 # v0.28.0
+        uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
         with:
           image-ref: tracker-lp-bits-openresty:latest
           format: sarif
@@ -513,6 +514,8 @@ jobs:
         run: composer install --prefer-dist --no-progress --no-interaction --no-scripts
 
       - name: Generate Composer SBOM (CycloneDX)
+        env:
+          COMPOSER_ALLOW_PLUGINS: cyclonedx/cyclonedx-php-composer
         run: |
           composer require --dev cyclonedx/cyclonedx-php-composer:^5 --no-interaction --no-scripts
           vendor/bin/cyclonedx-php-composer analyze --output-format=Json --output-file=composer-sbom.json --no-dev

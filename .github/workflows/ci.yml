@@ -179,6 +179,10 @@ jobs:
           sed -i 's/^CHANNEL_NAME_SETTING=.*/CHANNEL_NAME_SETTING=/' .env
           sed -i 's/^CHANNEL_NAME_MODEL_EVENT=.*/CHANNEL_NAME_MODEL_EVENT=/' .env
           sed -i 's/^REDIS_PASSWORD=.*/REDIS_PASSWORD=/' .env
+          # Redis isolation: use DB index 15 for tests to avoid clobbering
+          sed -i 's/^REDIS_DB=.*/REDIS_DB=15/' .env
+          # MeiliSearch isolation: disable Scout for unit/coverage tests
+          echo "SCOUT_DRIVER=null" >> .env
 
       - name: Cache Laravel bootstrap files
         run: |
@@ -259,6 +263,10 @@ jobs:
           sed -i 's/^CHANNEL_NAME_SETTING=.*/CHANNEL_NAME_SETTING=/' .env
           sed -i 's/^CHANNEL_NAME_MODEL_EVENT=.*/CHANNEL_NAME_MODEL_EVENT=/' .env
           sed -i 's/^REDIS_PASSWORD=.*/REDIS_PASSWORD=/' .env
+          # Redis isolation: use DB index 15 for tests to avoid clobbering
+          sed -i 's/^REDIS_DB=.*/REDIS_DB=15/' .env
+          # MeiliSearch isolation: disable Scout for unit/coverage tests
+          echo "SCOUT_DRIVER=null" >> .env
 
       - name: Wait for MySQL and migrate
         run: |

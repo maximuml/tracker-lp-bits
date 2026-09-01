@@ -16,9 +16,16 @@
     <server name="CHANNEL_NAME_SETTING" value=""/>
     <server name="CHANNEL_NAME_MODEL_EVENT" value=""/>
     <!-- DB_DATABASE is set per-suite: Unit tests use nexusphp_testing
-         (set in CI and locally via .env.testing) to avoid wiping dev
+         (set in CI and locally via DB_DATABASE env var) to avoid wiping dev
          data via truncate(). Feature tests use nexusphp (the main DB)
          because they make HTTP requests through OpenResty. -->
+    <!-- Redis isolation: use DB index 15 and a test prefix to avoid
+         clobbering dev data (dev uses DB 0 with no prefix).
+         REDIS_HOST/REDIS_PASSWORD are inherited from .env. -->
+    <server name="REDIS_DB" value="15"/>
+    <server name="REDIS_PREFIX" value="nexusphp_test_"/>
+    <!-- MeiliSearch isolation: disable Scout to avoid touching real indices. -->
+    <server name="SCOUT_DRIVER" value="null"/>
     <server name="MAIL_MAILER" value="array"/>
     <server name="CRITICAL_PATH_BASE_URL" value="http://openresty"/>
     <env name="QUEUE_CONNECTION" value="sync"/>

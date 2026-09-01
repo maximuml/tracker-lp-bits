@@ -116,7 +116,7 @@ final class Network
             return self::$trustedProxies;
         }
 
-        $config = Env::get('TRUSTED_PROXIES', '10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,127.0.0.1,::1');
+        $config = Env::get('TRUSTED_PROXIES', '');
         if ($config === '*') {
             return ['*'];
         }

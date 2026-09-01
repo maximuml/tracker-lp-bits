@@ -42,7 +42,11 @@ final class CronToken
 
     private function isLoopback(Request $request): bool
     {
-        $ip = $request->ip();
+        // Use REMOTE_ADDR directly — not the request's resolved IP,
+        // which may be influenced by X-Forwarded-For from a trusted
+        // proxy. The cron endpoint must only be accessible from the
+        // actual loopback interface (local scheduler) without a token.
+        $ip = (string) ($request->server->get('REMOTE_ADDR') ?? '');
 
         return $ip === '127.0.0.1' || $ip === '::1';
     }

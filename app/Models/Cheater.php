@@ -30,6 +30,11 @@ class Cheater extends NexusModel
         'dealtby', 'dealtwith', 'comment',
     ];
 
+    /** @var array<string, string> */
+    protected $casts = [
+        'added' => 'datetime',
+    ];
+
     /** @return BelongsTo<Torrent, $this> */
     public function torrent()
     {

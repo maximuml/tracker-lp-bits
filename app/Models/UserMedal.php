@@ -28,6 +28,12 @@ class UserMedal extends NexusModel
     /** @var list<string> */
     protected $fillable = ['uid', 'medal_id', 'expire_at', 'status', 'bonus_addition_expire_at'];
 
+    /** @var array<string, string> */
+    protected $casts = [
+        'expire_at' => 'datetime',
+        'bonus_addition_expire_at' => 'datetime',
+    ];
+
     public function getWearingStatusTextAttribute(): string
     {
         return Locale::trans('medal.wearing_status_text.'.$this->status, [], null);

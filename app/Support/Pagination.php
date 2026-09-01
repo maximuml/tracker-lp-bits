@@ -201,12 +201,18 @@ final class Pagination
         int $rpp,
         bool $lastPageDefault = false,
     ): int {
+        if ($rpp <= 0) {
+            return 0;
+        }
+
+        $maxPage = (int) ceil($count / $rpp) - 1;
+        if ($maxPage < 0) {
+            $maxPage = 0;
+        }
+
         $pageDefault = 0;
         if ($lastPageDefault) {
-            $pageDefault = (int) floor(($count - 1) / $rpp);
-            if ($pageDefault < 0) {
-                $pageDefault = 0;
-            }
+            $pageDefault = $maxPage;
         }
 
         if ($raw === null) {
@@ -215,6 +221,14 @@ final class Pagination
 
         $page = (int) $raw;
 
-        return $page < 0 ? $pageDefault : $page;
+        if ($page < 0) {
+            return $pageDefault;
+        }
+
+        if ($page > $maxPage) {
+            return $maxPage;
+        }
+
+        return $page;
     }
 }

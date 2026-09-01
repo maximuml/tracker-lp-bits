@@ -82,7 +82,6 @@ class TorrentDetailsController extends Controller
         $row = app(TorrentDetailRepository::class)->getTorrent($id);
         if (empty($row)) {
             Logger::writeWithContext((string) "TorrentDetailsRepository getTorrent empty: {$id}", (string) 'info', (bool) false);
-            error_log("TorrentDetailsRepository getTorrent empty: $id");
             abort(404);
         }
 

@@ -233,6 +233,10 @@ class PollController extends LegacyController
             return $this->fail([], 'Poll not found');
         }
 
+        if (empty($poll->getAttribute("option{$choice}"))) {
+            return $this->fail([], 'Invalid poll choice');
+        }
+
         if (app(IndexRepository::class)->hasVoted($pollId, $userId)) {
             return $this->fail([], 'Already voted');
         }

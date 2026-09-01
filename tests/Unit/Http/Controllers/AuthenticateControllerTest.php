@@ -35,7 +35,7 @@ final class AuthenticateControllerTest extends TestCase
         $repository = Mockery::mock(AuthenticateRepository::class);
         $repository->shouldReceive('login')
             ->once()
-            ->with('testuser', 'password')
+            ->with('testuser', 'password', '')
             ->andReturn($loginResult);
 
         /** @var UserRepository&Mockery\MockInterface $userRepository */

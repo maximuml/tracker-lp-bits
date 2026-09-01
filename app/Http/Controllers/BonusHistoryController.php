@@ -99,17 +99,16 @@ class BonusHistoryController extends LegacyController
 
         $rows = [];
         foreach ($list as $row) {
-            $r = (array) $row;
-            $old = (float) ($r['old_total_value'] ?? 0);
-            $new = (float) ($r['new_total_value'] ?? 0);
-            $value = (float) ($r['value'] ?? 0);
+            $old = (float) $row->old_total_value;
+            $new = (float) $row->new_total_value;
+            $value = (float) $row->value;
             $rows[] = [
-                'businessTypeText' => $r['businessTypeText'] ?? '',
+                'businessTypeText' => $row->businessTypeText,
                 'old_formatted' => $old > 0 ? number_format($old, 1) : '-',
                 'value_formatted' => ($old < $new ? '+' : '-').number_format($value, 1),
                 'new_formatted' => $new > 0 ? number_format($new, 1) : '-',
-                'comment' => $r['comment'] ?? '',
-                'created_at' => $r['created_at'] ?? '',
+                'comment' => $row->comment ?? '',
+                'created_at' => (string) ($row->created_at ?? ''),
             ];
         }
 

@@ -34,6 +34,11 @@ final class CleanupJob implements ShouldBeUnique, ShouldQueue
     /** @var int */
     public $uniqueFor = 3600;
 
+    public function __construct()
+    {
+        $this->onQueue('maintenance');
+    }
+
     public function uniqueId(): string
     {
         return self::class;

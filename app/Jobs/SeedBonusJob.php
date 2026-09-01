@@ -46,6 +46,7 @@ class SeedBonusJob implements ShouldQueue
         $this->idStr = $idStr;
         $this->idRedisKey = $idRedisKey;
         $this->requestId = $requestId;
+        $this->onQueue('default');
     }
 
     /** @var int */

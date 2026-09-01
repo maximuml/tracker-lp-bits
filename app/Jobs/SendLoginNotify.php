@@ -36,6 +36,7 @@ class SendLoginNotify implements ShouldQueue
     public function __construct(int $thisLoginLogId)
     {
         $this->thisLoginLogId = $thisLoginLogId;
+        $this->onQueue('mail');
     }
 
     /**

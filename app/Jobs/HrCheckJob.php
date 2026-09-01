@@ -38,7 +38,9 @@ final class HrCheckJob implements ShouldBeUnique, ShouldQueue
         private readonly ?int $uid = null,
         private readonly ?int $torrentId = null,
         private readonly bool $ignoreTime = false,
-    ) {}
+    ) {
+        $this->onQueue('default');
+    }
 
     public function uniqueId(): string
     {

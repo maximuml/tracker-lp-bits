@@ -37,6 +37,7 @@ class BuyTorrent implements ShouldQueue
     {
         $this->userId = $userId;
         $this->torrentId = $torrentId;
+        $this->onQueue('tracker-critical');
     }
 
     /**

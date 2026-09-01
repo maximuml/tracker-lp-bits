@@ -24,7 +24,7 @@ class UpdateUserDownloadPrivilege implements ShouldQueue
      */
     public function __construct(public readonly int $userId, public readonly bool $status, public readonly string $reasonKey)
     {
-        //
+        $this->onQueue('default');
     }
 
     /**

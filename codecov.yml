@@ -1,7 +1,9 @@
 # Codecov configuration — ratchet coverage so it never decreases.
 #
-# After baseline stabilises, enable fail_ci_if_error: true in ci.yml
-# and tighten project.target.
+# project: overall coverage must not drop below auto (current) - 1%
+# patch: changed lines must have at least 60% coverage
+# Both are now blocking (informational: false) — PRs that drop
+# coverage will fail the CI gate.
 
 coverage:
   status:
@@ -9,12 +11,12 @@ coverage:
       default:
         target: auto
         threshold: 1%
-        informational: true
+        informational: false
     patch:
       default:
         target: 60%
         threshold: 5%
-        informational: true
+        informational: false
 
 comment:
   layout: "reach,diff,flags,files,footer"

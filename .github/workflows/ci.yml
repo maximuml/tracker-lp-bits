@@ -25,7 +25,7 @@ jobs:
           fetch-depth: 0
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        uses: shivammathur/setup-php@b604ade2a87db23f8871b7182e69ec5e75effb45 # v2
         with:
           php-version: '8.5'
           extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, pdo_mysql, redis, sqlite3, xml, zip
@@ -42,13 +42,16 @@ jobs:
         run: composer validate
 
       - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction --ignore-platform-reqs --no-scripts
+        run: composer install --prefer-dist --no-progress --no-interaction --no-scripts
 
       - name: Dump autoload
         run: composer dump-autoload --no-interaction --no-scripts
 
       - name: Audit composer dependencies
         run: composer audit
+
+      - name: Check platform requirements
+        run: composer check-platform-reqs
 
       - name: Run PHP syntax lint
         run: |
@@ -64,7 +67,7 @@ jobs:
         run: vendor/bin/pint --test
 
       - name: Run PHPStan level 8
-        run: vendor/bin/phpstan analyse -c phpstan.level8.neon --no-progress --memory-limit=2G
+        run: vendor/bin/phpstan analyse --no-progress --memory-limit=2G
 
   raw-sql-ratchet:
     name: Raw SQL ratchet
@@ -120,16 +123,17 @@ jobs:
         run: npm audit
 
   unit-tests:
-    name: PHPUnit Unit (PHP ${{ matrix.php }})
+    name: PHPUnit Unit (PHP ${{ matrix.php }}, MySQL ${{ matrix.mysql }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         php: ['8.4', '8.5']
+        mysql: ['8.0', '9.0']
 
     services:
       mysql:
-        image: mysql:8.0
+        image: mysql:${{ matrix.mysql }}
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: nexusphp
@@ -149,7 +153,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        uses: shivammathur/setup-php@b604ade2a87db23f8871b7182e69ec5e75effb45 # v2
         with:
           php-version: ${{ matrix.php }}
           extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, pdo_mysql, redis, sqlite3, xml, zip
@@ -163,7 +167,7 @@ jobs:
           restore-keys: ${{ runner.os }}-composer-
 
       - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction --ignore-platform-reqs --no-scripts
+        run: composer install --prefer-dist --no-progress --no-interaction --no-scripts
 
       - name: Dump autoload
         run: composer dump-autoload --no-interaction --no-scripts
@@ -176,6 +180,10 @@ jobs:
           sed -i 's/^CHANNEL_NAME_SETTING=.*/CHANNEL_NAME_SETTING=/' .env
           sed -i 's/^CHANNEL_NAME_MODEL_EVENT=.*/CHANNEL_NAME_MODEL_EVENT=/' .env
           sed -i 's/^REDIS_PASSWORD=.*/REDIS_PASSWORD=/' .env
+          # Redis isolation: use DB index 15 for tests to avoid clobbering
+          sed -i 's/^REDIS_DB=.*/REDIS_DB=15/' .env
+          # MeiliSearch isolation: disable Scout for unit/coverage tests
+          echo "SCOUT_DRIVER=null" >> .env
 
       - name: Cache Laravel bootstrap files
         run: |
@@ -229,7 +237,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        uses: shivammathur/setup-php@b604ade2a87db23f8871b7182e69ec5e75effb45 # v2
         with:
           php-version: '8.5'
           extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, pdo_mysql, redis, sqlite3, xml, zip
@@ -243,7 +251,7 @@ jobs:
           restore-keys: ${{ runner.os }}-composer-
 
       - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction --ignore-platform-reqs --no-scripts
+        run: composer install --prefer-dist --no-progress --no-interaction --no-scripts
 
       - name: Dump autoload
         run: composer dump-autoload --no-interaction --no-scripts
@@ -256,6 +264,10 @@ jobs:
           sed -i 's/^CHANNEL_NAME_SETTING=.*/CHANNEL_NAME_SETTING=/' .env
           sed -i 's/^CHANNEL_NAME_MODEL_EVENT=.*/CHANNEL_NAME_MODEL_EVENT=/' .env
           sed -i 's/^REDIS_PASSWORD=.*/REDIS_PASSWORD=/' .env
+          # Redis isolation: use DB index 15 for tests to avoid clobbering
+          sed -i 's/^REDIS_DB=.*/REDIS_DB=15/' .env
+          # MeiliSearch isolation: disable Scout for unit/coverage tests
+          echo "SCOUT_DRIVER=null" >> .env
 
       - name: Wait for MySQL and migrate
         run: |
@@ -273,25 +285,57 @@ jobs:
           # categories — torrent listing, agent_allowed_family/agent_allowed_exception — announce client check
           mysqldump -h 127.0.0.1 -u root -proot --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users searchbox searchbox_fields categories agent_allowed_family agent_allowed_exception | mysql -h 127.0.0.1 -u root -proot nexusphp_testing
 
-      - name: Run PHPUnit with coverage
-        run: DB_DATABASE=nexusphp_testing vendor/bin/phpunit --testsuite Unit --coverage-clover=coverage.xml
+      - name: Run PHPUnit Unit with coverage
+        run: DB_DATABASE=nexusphp_testing vendor/bin/phpunit --testsuite Unit --coverage-clover=coverage-unit.xml
+
+      - name: Run PHPUnit Feature with coverage
+        run: DB_DATABASE=nexusphp_testing vendor/bin/phpunit --testsuite Feature --coverage-clover=coverage-feature.xml --coverage-html=coverage-html
+
+      - name: Merge Clover coverage reports
+        run: |
+          # Merge Unit and Feature Clover reports into a single file
+          # Codecov accepts multiple files, but a single merged file is simpler
+          php -r "
+          \$unit = simplexml_load_file('coverage-unit.xml');
+          \$feature = simplexml_load_file('coverage-feature.xml');
+          if (\$unit === false || \$feature === false) {
+            fwrite(STDERR, 'Failed to load Clover XML files' . PHP_EOL);
+            exit(1);
+          }
+          // Merge project nodes from feature into unit
+          foreach (\$feature->project as \$project) {
+            \$unit->addChild('project', (string) \$project);
+          }
+          \$unit->asXML('coverage.xml');
+          echo 'Merged coverage.xml created' . PHP_EOL;
+          "
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
+        uses: codecov/codecov-action@a99c28d3f0da835de33ff2feb2e15691c7b9641f # v7
         with:
           files: ./coverage.xml
           fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Upload HTML coverage artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: coverage-html
+          path: coverage-html
+          retention-days: 14
 
   smoke-test:
     name: Docker smoke test
     runs-on: ubuntu-latest
+    needs: [static-analysis, unit-tests, frontend]
 
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        uses: shivammathur/setup-php@b604ade2a87db23f8871b7182e69ec5e75effb45 # v2
         with:
           php-version: '8.5'
           extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, pdo_mysql, redis, sqlite3, xml, zip
@@ -315,7 +359,7 @@ jobs:
           restore-keys: ${{ runner.os }}-composer-
 
       - name: Install PHP dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction --ignore-platform-reqs --no-scripts
+        run: composer install --prefer-dist --no-progress --no-interaction --no-scripts
 
       - name: Dump autoload
         run: composer dump-autoload --no-interaction --no-scripts
@@ -392,6 +436,7 @@ jobs:
     permissions:
       contents: read
       security-events: write
+      pull-requests: write
 
     steps:
       - name: Checkout code
@@ -400,6 +445,102 @@ jobs:
           fetch-depth: 0
 
       - name: Run gitleaks
-        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
+        uses: gitleaks/gitleaks-action@dcedce43c6f43de0b836d1fe38946645c9c638dc # v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  container-scan:
+    name: Container image scan (Trivy)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          sed -i 's|DB_HOST=127.0.0.1|DB_HOST=mysql|g' .env
+          sed -i 's|REDIS_HOST=127.0.0.1|REDIS_HOST=redis|g' .env
+          sed -i 's|^MEILISEARCH_MASTER_KEY=.*|MEILISEARCH_MASTER_KEY=nexusphp_default_key|' .env
+
+      - name: Build Docker images
+        run: docker compose build php openresty
+
+      - name: Run Trivy on PHP image
+        uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
+        with:
+          image-ref: nexusphp_php:latest
+          format: sarif
+          output: trivy-php-results.sarif
+          severity: CRITICAL,HIGH
+          exit-code: '0'
+
+      - name: Run Trivy on OpenResty image
+        uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
+        with:
+          image-ref: nexusphp_openresty:latest
+          format: sarif
+          output: trivy-openresty-results.sarif
+          severity: CRITICAL,HIGH
+          exit-code: '0'
+
+      - name: Upload Trivy scan results to GitHub Security
+        uses: github/codeql-action/upload-sarif@6f5948dfacef28e207b48d0905cf90c03365536d # v3
+        if: always()
+        with:
+          sarif_file: trivy-php-results.sarif
+
+  sbom:
+    name: SBOM generation
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@b604ade2a87db23f8871b7182e69ec5e75effb45 # v2
+        with:
+          php-version: '8.5'
+          extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, pdo_mysql, redis, sqlite3, xml, zip
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction --no-scripts
+
+      - name: Generate Composer SBOM (CycloneDX)
+        run: |
+          composer config --no-interaction allow-plugins.cyclonedx/cyclonedx-php-composer true
+          composer require --dev cyclonedx/cyclonedx-php-composer:^5 --no-interaction --no-scripts
+          composer CycloneDX:make-sbom --output-format=Json --output-file=composer-sbom.json --omit=dev
+          echo "Composer SBOM generated: composer-sbom.json"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Generate npm SBOM (CycloneDX)
+        run: |
+          npx @cyclonedx/cyclonedx-npm --output-file=npm-sbom.json --omit dev
+          echo "npm SBOM generated: npm-sbom.json"
+
+      - name: Upload SBOM artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: sbom
+          path: |
+            composer-sbom.json
+            npm-sbom.json
+          retention-days: 30

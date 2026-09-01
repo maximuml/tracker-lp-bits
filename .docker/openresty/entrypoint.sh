@@ -67,26 +67,38 @@ echo_info "PHPMYADMIN_SERVER_NAME: ${PHPMYADMIN_SERVER_NAME}"
 
 # 生成配置
 APP_CONF="/etc/nginx/conf.d/app.conf"
-PMA_CONF="/etc/nginx/conf.d/phpmyadmin.conf"
 envsubst '$NP_DOMAIN' < /etc/nginx/conf.d/sites/app.conf.template > "$APP_CONF"
-envsubst '$PHPMYADMIN_SERVER_NAME' < /etc/nginx/conf.d/sites/phpmyadmin.conf.template > "$PMA_CONF"
 
-# if no certs, remove ssl configuration
+# phpMyAdmin vhost — disabled by default, opt-in via ENABLE_PHPMYADMIN=true
+PMA_CONF="/etc/nginx/conf.d/phpmyadmin.conf"
+if [ "${ENABLE_PHPMYADMIN:-false}" = "true" ]; then
+    echo_info "phpMyAdmin vhost enabled (ENABLE_PHPMYADMIN=true)"
+    envsubst '$PHPMYADMIN_SERVER_NAME' < /etc/nginx/conf.d/sites/phpmyadmin.conf.template > "$PMA_CONF"
+
+    # if no certs, remove ssl configuration
+    if [ "$USE_HTTPS" = "0" ]; then
+        sed -i '/ssl_certificate/d' "$PMA_CONF"
+        sed -i '/http2/d' "$PMA_CONF"
+        sed -i "s/listen.*/listen $NP_PORT;/g" "$PMA_CONF"
+    else
+        sed -i "s/listen.*/listen $NP_PORT ssl;/g" "$PMA_CONF"
+    fi
+    cat $PMA_CONF
+else
+    echo_info "phpMyAdmin vhost disabled (set ENABLE_PHPMYADMIN=true to enable)"
+    rm -f "$PMA_CONF"
+fi
+
+# if no certs, remove ssl configuration from app conf
 if [ "$USE_HTTPS" = "0" ]; then
     echo_info "remove https related configuration ..."
     sed -i '/ssl_certificate/d' "$APP_CONF"
     sed -i '/http2/d' "$APP_CONF"
     sed -i "s/listen.*/listen $NP_PORT;/g" "$APP_CONF"
-
-    sed -i '/ssl_certificate/d' "$PMA_CONF"
-    sed -i '/http2/d' "$PMA_CONF"
-    sed -i "s/listen.*/listen $NP_PORT;/g" "$PMA_CONF"
 else
     sed -i "s/listen.*/listen $NP_PORT ssl;/g" "$APP_CONF"
-    sed -i "s/listen.*/listen $NP_PORT ssl;/g" "$PMA_CONF"
 fi
 cat $APP_CONF
-cat $PMA_CONF
 
 openresty -T
 

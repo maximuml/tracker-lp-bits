@@ -47,10 +47,8 @@ docker compose exec php php artisan user:reset_id_auto_increment \
 # Lint
 docker compose exec -T php vendor/bin/pint --test
 
-# Static analysis (CI runs 6 levels)
+# Static analysis (level 8, single canonical phpstan.neon)
 docker compose exec -T php vendor/bin/phpstan analyse --no-progress --memory-limit=2G
-docker compose exec -T php vendor/bin/phpstan analyse -c phpstan.level7.neon --no-progress --memory-limit=2G
-docker compose exec -T php vendor/bin/phpstan analyse -c phpstan.level8.neon --no-progress --memory-limit=2G
 
 # Tests (uses isolated nexusphp_testing DB — never truncates dev tables)
 docker compose exec -T redis redis-cli -a "${REDIS_PASSWORD}" FLUSHDB

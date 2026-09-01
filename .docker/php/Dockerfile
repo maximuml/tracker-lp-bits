@@ -32,9 +32,9 @@ RUN curl -Is https://pecl.php.net | head -n 1 | grep "200" \
     || (echo "❌ pecl.php.net unreachable, aborting build." && exit 1)
 
 
-# 安装 redis 扩展
+# 安装 redis 扩展 (pinned version for reproducibility)
 RUN pecl channel-update pecl.php.net \
-    && pecl install redis \
+    && pecl install redis-6.3.0 \
     && docker-php-ext-enable redis
 
 # 👨‍🍳 第二阶段：运行阶段，仅包含必要运行环境
@@ -78,8 +78,17 @@ RUN echo "post_max_size = 10M" >> /usr/local/etc/php/conf.d/upload.ini
 ARG NEXUSPHP_ENV=prod
 COPY .docker/php/opcache.${NEXUSPHP_ENV}.ini /usr/local/etc/php/conf.d/opcache.ini
 
-# 安装 Composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+# 安装 Composer (with signature verification)
+RUN EXPECTED_SIGNATURE="$(curl -sS https://composer.github.io/installer.sig)" \
+    && curl -sS https://getcomposer.org/installer -o /tmp/composer-setup.php \
+    && ACTUAL_SIGNATURE="$(php -r "echo hash_file('sha384', '/tmp/composer-setup.php');")" \
+    && if [ "$EXPECTED_SIGNATURE" != "$ACTUAL_SIGNATURE" ]; then \
+         echo 'ERROR: Composer installer signature mismatch!' >&2; \
+         rm /tmp/composer-setup.php; \
+         exit 1; \
+       fi \
+    && php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer \
+    && rm /tmp/composer-setup.php
 
 ENV LOG_CHANNEL=stderr
 ENV RUNNING_IN_DOCKER=1

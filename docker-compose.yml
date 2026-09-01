@@ -101,6 +101,7 @@ services:
   openresty:
     build:
       dockerfile: .docker/openresty/Dockerfile
+    image: nexusphp_openresty
     container_name: nexusphp-openresty
     environment:
       NP_DOMAIN: ${NP_DOMAIN:-localhost}

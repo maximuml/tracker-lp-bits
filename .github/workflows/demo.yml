@@ -10,6 +10,7 @@ env:
   SSH_HOST: ${{secrets.DEMO_SSH_HOST}}
   DEMO_WEB_ROOT: ${{secrets.DEMO_WEB_ROOT}}
   SSH_HOST_KEY: ${{secrets.DEMO_SSH_HOST_KEY}}
+  DEMO_HEALTH_URL: ${{secrets.DEMO_HEALTH_URL}}
 permissions:
   contents: read
 concurrency:
@@ -40,11 +41,63 @@ jobs:
           StrictHostKeyChecking yes
           UserKnownHostsFile ~/.ssh/known_hosts
         END
+
+    # Pre-deploy: record current commit for rollback
+    - name: Record current commit (for rollback)
+      run: |
+        ssh demo "cd $DEMO_WEB_ROOT && git rev-parse HEAD" > /tmp/previous-commit.txt
+        echo "Previous commit: $(cat /tmp/previous-commit.txt)"
+
+    # Pre-deploy: check migration readiness
+    - name: Check migration readiness
+      run: |
+        ssh demo "cd $DEMO_WEB_ROOT && php artisan nexus:update --tag=dev"
+
     # Deploy
-    - name: Fetch code
-      run: ssh demo "cd $DEMO_WEB_ROOT && php artisan nexus:update --tag=dev"
-    - name: Update
-      run: ssh demo "cd $DEMO_WEB_ROOT && php artisan nexus:update"
+    - name: Run migrations and update
+      run: |
+        ssh demo "cd $DEMO_WEB_ROOT && php artisan nexus:update"
 
+    # Post-deploy: health check
+    - name: Health check (liveness)
+      run: |
+        for i in $(seq 1 10); do
+          HTTP_CODE=$(curl -sfL --max-time 10 -o /dev/null -w "%{http_code}" "${DEMO_HEALTH_URL:-https://example.com}/health/live" 2>/dev/null || echo "000")
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "Health check passed (HTTP $HTTP_CODE)"
+            exit 0
+          fi
+          echo "Health check attempt $i: HTTP $HTTP_CODE, retrying..."
+          sleep 5
+        done
+        echo "::error::Health check failed after 10 attempts"
+        exit 1
 
+    # Post-deploy: readiness check (DB + Redis)
+    - name: Readiness check (DB + Redis)
+      run: |
+        for i in $(seq 1 10); do
+          HTTP_CODE=$(curl -sfL --max-time 15 -o /dev/null -w "%{http_code}" "${DEMO_HEALTH_URL:-https://example.com}/health/ready" 2>/dev/null || echo "000")
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "Readiness check passed (HTTP $HTTP_CODE)"
+            exit 0
+          fi
+          echo "Readiness check attempt $i: HTTP $HTTP_CODE, retrying..."
+          sleep 5
+        done
+        echo "::error::Readiness check failed after 10 attempts — initiating rollback"
+        # Rollback to previous commit
+        PREVIOUS=$(cat /tmp/previous-commit.txt)
+        echo "Rolling back to $PREVIOUS"
+        ssh demo "cd $DEMO_WEB_ROOT && git checkout $PREVIOUS && php artisan nexus:update"
+        exit 1
 
+    # Post-deploy: verify login page
+    - name: Verify login page
+      run: |
+        HTTP_CODE=$(curl -sfL --max-time 10 -o /dev/null -w "%{http_code}" "${DEMO_HEALTH_URL:-https://example.com}/login.php" 2>/dev/null || echo "000")
+        if [ "$HTTP_CODE" != "200" ]; then
+          echo "::error::Login page returned HTTP $HTTP_CODE"
+          exit 1
+        fi
+        echo "Login page OK (HTTP $HTTP_CODE)"

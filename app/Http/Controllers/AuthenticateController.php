@@ -78,6 +78,8 @@ class AuthenticateController extends Controller
      * - signature: hmac_sha256(passkey + timestamp, login_secret)
      *
      * The timestamp must be within ±5 minutes of server time.
+     * Each signature can only be used once — a Redis SET NX EX 300
+     * key prevents replay within the timestamp window.
      */
     public function passkeyLogin(PasskeyLoginRequest $request): RedirectResponse
     {
@@ -100,6 +102,16 @@ class AuthenticateController extends Controller
         $now = time();
         if (abs($now - $timestamp) > 300) {
             Logger::writeWithContext((string) sprintf('passkeyLogin: timestamp out of window (server=%d, client=%d)', $now, $timestamp), (string) 'warning', (bool) false);
+
+            return redirect('index.php');
+        }
+
+        // Replay protection: use Cache::add() which is atomic "set if not exists".
+        // If the key already exists, the signature has been used before — reject.
+        $replayKey = 'passkey_login_used:'.hash('sha256', $signature);
+        $stored = Cache::add($replayKey, '1', now()->addSeconds(300));
+        if ($stored === false) {
+            Logger::writeWithContext((string) 'passkeyLogin: replay detected — signature already used', (string) 'warning', (bool) false);
 
             return redirect('index.php');
         }

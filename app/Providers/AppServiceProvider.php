@@ -52,6 +52,19 @@ class AppServiceProvider extends ServiceProvider
         if (class_exists(Sanctum::class)) {
             Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
         }
+        // Production guard: refuse to serve traffic with a placeholder or
+        // missing APP_KEY. The installer generates a CSPRNG key, but if the
+        // .env was copied manually or the key was cleared, encrypted cookies
+        // and sessions would be silently broken or use a known key.
+        if (app()->isProduction()) {
+            $key = (string) Env::get('APP_KEY', '');
+            if ($key === '' || $key === 'ChangeMeToYourGeneratedAppKeyNow') {
+                throw new \RuntimeException(
+                    'APP_KEY is missing or set to a placeholder. '
+                    .'Run "php artisan key:generate" to generate a secure key.'
+                );
+            }
+        }
         // Production startup validation: warn about missing/weak secrets.
         // Does not throw — the app may still function (e.g. cron is loopback
         // only without a token) — but logs a warning so operators notice.

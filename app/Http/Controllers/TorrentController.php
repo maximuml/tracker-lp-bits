@@ -24,7 +24,6 @@ use App\Support\Logger;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
 class TorrentController extends Controller
@@ -95,26 +94,6 @@ class TorrentController extends Controller
         Logger::writeWithContext((string) 'controller torrent show prepare resource', (string) 'info', (bool) false);
 
         return $this->success($resource);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  mixed  $id
-     */
-    public function update(Request $request, $id): Response
-    {
-        return new Response('', 204);
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  mixed  $id
-     */
-    public function destroy($id): Response
-    {
-        return new Response('', 204);
     }
 
     /** @return  array<string, mixed> */

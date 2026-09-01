@@ -100,17 +100,14 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::post('comments', [CommentController::class, 'store'])
             ->middleware(Permissions::abilityLabel(RoutePermissionEnum::COMMENT_STORE));
 
-        Route::apiResource('peers', PeerController::class)->only(['index', 'show'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::PEER_LIST));
-        Route::apiResource('peers', PeerController::class)->only(['store', 'update', 'destroy'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::PEER_MANAGE));
+        Route::apiResource('peers', PeerController::class)->only(['index'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::PEER_LIST));
 
-        Route::apiResource('files', FileController::class)->only(['index', 'show'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::FILE_LIST));
-        Route::apiResource('files', FileController::class)->only(['store', 'update', 'destroy'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::FILE_MANAGE));
+        Route::apiResource('files', FileController::class)->only(['index'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::FILE_LIST));
 
-        Route::apiResource('thanks', ThankController::class)->only(['index', 'show'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::THANK_LIST));
-        Route::apiResource('thanks', ThankController::class)->only(['store', 'update', 'destroy'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::THANK_MANAGE));
+        Route::apiResource('thanks', ThankController::class)->only(['index'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::THANK_LIST));
+        Route::apiResource('thanks', ThankController::class)->only(['store'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::THANK_MANAGE));
 
-        Route::apiResource('snatches', SnatchController::class)->only(['index', 'show'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::SNATCH_LIST));
-        Route::apiResource('snatches', SnatchController::class)->only(['store', 'update', 'destroy'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::SNATCH_MANAGE));
+        Route::apiResource('snatches', SnatchController::class)->only(['index'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::SNATCH_LIST));
 
         Route::apiResource('news', NewsController::class)->only(['index', 'show'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::NEWS_LIST));
         Route::apiResource('news', NewsController::class)->only(['store', 'update', 'destroy'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::NEWS_MANAGE));
@@ -127,14 +124,13 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::post('polls-vote', [PollController::class, 'vote'])
             ->middleware(Permissions::abilityLabel(RoutePermissionEnum::POLL_VOTE));
 
-        Route::apiResource('rewards', RewardController::class)->only(['index', 'show'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::REWARD_LIST));
-        Route::apiResource('rewards', RewardController::class)->only(['store', 'update', 'destroy'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::REWARD_MANAGE));
+        Route::apiResource('rewards', RewardController::class)->only(['index'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::REWARD_LIST));
+        Route::apiResource('rewards', RewardController::class)->only(['store'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::REWARD_MANAGE));
 
         Route::get('notifications', [ToolController::class, 'notifications'])
             ->middleware(Permissions::abilityLabel(RoutePermissionEnum::NOTIFICATION_LIST));
 
-        Route::apiResource('over-forums', OverForumController::class)->only(['index', 'show'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::OVER_FORUM_LIST));
-        Route::apiResource('over-forums', OverForumController::class)->only(['store', 'update', 'destroy'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::OVER_FORUM_MANAGE));
+        Route::apiResource('over-forums', OverForumController::class)->only(['index'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::OVER_FORUM_LIST));
 
         Route::apiResource('forums', ForumController::class)->only(['index', 'show'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::FORUM_LIST));
         Route::apiResource('forums', ForumController::class)->only(['store', 'update', 'destroy'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::FORUM_MANAGE));
@@ -186,8 +182,6 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
         Route::apiResource('users', UserController::class)->only(['index', 'show'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::USER_VIEW));
         Route::apiResource('users', UserController::class)->only(['store'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::USER_STORE));
-        Route::apiResource('users', UserController::class)->only(['update'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::USER_UPDATE));
-        Route::apiResource('users', UserController::class)->only(['destroy'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::USER_DESTROY));
         Route::get('user-base', [UserController::class, 'base'])
             ->middleware(Permissions::abilityLabel(RoutePermissionEnum::USER_BASE));
         Route::get('user-classes', [UserController::class, 'classes'])
@@ -216,8 +210,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::get('exam-indexes', [ExamController::class, 'indexes'])
             ->middleware(Permissions::abilityLabel(RoutePermissionEnum::EXAM_INDEXES));
 
-        Route::apiResource('exam-users', ExamUserController::class)->only(['index', 'show'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::EXAM_USER_LIST));
-        Route::apiResource('exam-users', ExamUserController::class)->only(['store', 'update', 'destroy'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::EXAM_USER_MANAGE));
+        Route::apiResource('exam-users', ExamUserController::class)->only(['index'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::EXAM_USER_LIST));
+        Route::apiResource('exam-users', ExamUserController::class)->only(['store', 'destroy'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::EXAM_USER_MANAGE));
         Route::put('exam-users-avoid', [ExamUserController::class, 'avoid'])
             ->middleware(Permissions::abilityLabel(RoutePermissionEnum::EXAM_USER_AVOID));
         Route::put('exam-users-recover', [ExamUserController::class, 'recover'])
@@ -236,8 +230,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::get('dashboard/latest-torrent', [DashboardController::class, 'latestTorrent'])
             ->middleware(Permissions::abilityLabel(RoutePermissionEnum::DASHBOARD_VIEW));
 
-        Route::apiResource('settings', SettingController::class)->only(['index', 'show'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::SETTING_LIST));
-        Route::apiResource('settings', SettingController::class)->only(['store', 'update', 'destroy'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::SETTING_MANAGE));
+        Route::apiResource('settings', SettingController::class)->only(['index'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::SETTING_LIST));
+        Route::apiResource('settings', SettingController::class)->only(['store'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::SETTING_MANAGE));
         Route::apiResource('medals', MedalController::class)->only(['index', 'show'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::MEDAL_LIST));
         Route::apiResource('medals', MedalController::class)->only(['store', 'update', 'destroy'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::MEDAL_MANAGE));
         Route::apiResource('user-medals', UserMedalController::class)->only(['index', 'show'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::USER_MEDAL_LIST));

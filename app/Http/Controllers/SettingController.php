@@ -44,40 +44,4 @@ class SettingController extends Controller
 
         return $this->success($result, 'Save setting success!');
     }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  mixed  $id
-     * @return array<int|string, mixed>
-     */
-    public function show($id): array
-    {
-
-        abort(501, 'Not implemented');
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  mixed  $id
-     * @return array<int|string, mixed>
-     */
-    public function update(Request $request, $id): array
-    {
-
-        abort(501, 'Not implemented');
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  mixed  $id
-     * @return array<int|string, mixed>
-     */
-    public function destroy($id): array
-    {
-
-        abort(501, 'Not implemented');
-    }
 }

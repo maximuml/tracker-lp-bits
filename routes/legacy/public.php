@@ -8,7 +8,6 @@ use App\Http\Controllers\SupportController;
 use App\Http\Controllers\SystemMaintenanceController;
 use App\Http\Controllers\TorrentAjaxController;
 use App\Http\Controllers\TorrentBookmarkController;
-use App\Http\Controllers\TorrentDownloadController;
 use App\Http\Controllers\TorrentRssController;
 use App\Http\Controllers\UtilityController;
 use Illuminate\Support\Facades\Route;
@@ -34,7 +33,6 @@ Route::match(['get', 'post'], '/opensearch', [UtilityController::class, 'opensea
 
 Route::match(['get', 'post'], '/confirmemail/{path?}', [UtilityController::class, 'confirmemail'])->where('path', '.*')->name('confirmemail.legacy');
 Route::match(['get', 'post'], '/cron', [SystemMaintenanceController::class, 'cron'])->middleware('cron.token')->name('cron.legacy');
-Route::match(['get', 'post'], '/email-gateway', [TorrentDownloadController::class, 'emailGateway'])->name('email-gateway.legacy');
 Route::match(['get', 'post'], '/ok', [UtilityController::class, 'ok'])->name('ok.legacy');
 
 Route::match(['get', 'post'], '/complains', [SupportController::class, 'complains'])->name('complains.legacy');

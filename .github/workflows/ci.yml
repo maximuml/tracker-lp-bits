@@ -289,8 +289,6 @@ jobs:
         run: DB_DATABASE=nexusphp_testing vendor/bin/phpunit --testsuite Unit --coverage-clover=coverage-unit.xml
 
       - name: Run PHPUnit Feature with coverage
-        env:
-          CRITICAL_PATH_BASE_URL: ''
         run: DB_DATABASE=nexusphp_testing vendor/bin/phpunit --testsuite Feature --coverage-clover=coverage-feature.xml --coverage-html=coverage-html
 
       - name: Merge Clover coverage reports

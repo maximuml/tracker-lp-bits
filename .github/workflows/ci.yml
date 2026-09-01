@@ -517,7 +517,7 @@ jobs:
         run: |
           composer config --no-interaction allow-plugins.cyclonedx/cyclonedx-php-composer true
           composer require --dev cyclonedx/cyclonedx-php-composer:^5 --no-interaction --no-scripts
-          vendor/bin/cyclonedx-php-composer analyze --output-format=Json --output-file=composer-sbom.json --no-dev
+          composer CycloneDX:make-sbom --output-format=Json --output-file=composer-sbom.json --no-dev
           echo "Composer SBOM generated: composer-sbom.json"
 
       - name: Setup Node.js

@@ -65,10 +65,11 @@ jobs:
           docker compose up -d --wait mysql redis
           # Start php (runs composer install + config:cache in entrypoint)
           docker compose up -d php
-          # Wait for PHP-FPM to be ready (entrypoint runs composer install etc.)
+          # Wait for PHP-FPM to be ready (entrypoint runs composer install + config:cache)
+          # Check artisan (not php -r) because vendor/autoload.php must exist
           echo "Waiting for PHP-FPM to finish setup..."
           for i in $(seq 1 60); do
-            if docker compose --env-file /dev/null exec -T php php -r "echo 'ready';" 2>/dev/null | grep -q ready; then
+            if docker compose --env-file /dev/null exec -T php php artisan --version 2>/dev/null | grep -q "Laravel"; then
               echo "PHP-FPM ready after ${i}0s"
               break
             fi

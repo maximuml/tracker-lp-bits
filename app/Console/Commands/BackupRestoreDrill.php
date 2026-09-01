@@ -8,7 +8,6 @@ use App\Repositories\ToolRepository;
 use App\Support\Environment;
 use App\Support\Logger;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 
 class BackupRestoreDrill extends Command
@@ -55,17 +54,17 @@ class BackupRestoreDrill extends Command
         $connectionName = config('database.default');
         $config = config("database.connections.{$connectionName}");
 
+        $credsFile = $this->createTempCredsFile($config);
+
         try {
             $this->info("Creating temporary database: {$testDb}");
-            DB::statement("CREATE DATABASE IF NOT EXISTS `{$testDb}`");
+            $this->execMysql($credsFile, "CREATE DATABASE IF NOT EXISTS `{$testDb}`");
 
             $this->info("Restoring backup into {$testDb}...");
-            $tmpFile = $this->createTempCredsFile($config);
-            $restoreCommand = $this->buildRestoreCommand($config, $tmpFile, $sqlFile, $testDb);
+            $restoreCommand = $this->buildRestoreCommand($credsFile, $sqlFile, $testDb);
             $output = [];
             $resultCode = 0;
             exec($restoreCommand, $output, $resultCode);
-            @unlink($tmpFile);
 
             if ($resultCode !== 0) {
                 $this->error('Restore failed: '.implode("\n", $output));
@@ -73,9 +72,7 @@ class BackupRestoreDrill extends Command
                 return 1;
             }
 
-            $tableCount = DB::connection($connectionName)
-                ->select('SELECT COUNT(*) as count FROM information_schema.tables WHERE table_schema = ?', [$testDb]);
-            $count = (int) $tableCount[0]->count;
+            $count = $this->getTableCount($credsFile, $testDb);
 
             $this->info("Restored tables: {$count}");
 
@@ -95,8 +92,46 @@ class BackupRestoreDrill extends Command
             return 0;
         } finally {
             $this->info("Cleaning up temporary database: {$testDb}");
-            DB::statement("DROP DATABASE IF EXISTS `{$testDb}`");
+            $this->execMysql($credsFile, "DROP DATABASE IF EXISTS `{$testDb}`");
+            @unlink($credsFile);
         }
+    }
+
+    private function execMysql(string $credsFile, string $sql): void
+    {
+        $client = Environment::commandExists('mariadb') ? 'mariadb' : 'mysql';
+        $sslFlag = Environment::commandExists('mariadb') ? '--ssl=0' : '--ssl-mode=DISABLED';
+        $command = sprintf(
+            '%s --defaults-extra-file=%s %s -e %s 2>&1',
+            $client,
+            escapeshellarg($credsFile),
+            $sslFlag,
+            escapeshellarg($sql)
+        );
+        exec($command, $output, $resultCode);
+        if ($resultCode !== 0) {
+            throw new \RuntimeException('MySQL command failed: '.implode("\n", $output));
+        }
+    }
+
+    private function getTableCount(string $credsFile, string $testDb): int
+    {
+        $client = Environment::commandExists('mariadb') ? 'mariadb' : 'mysql';
+        $sslFlag = Environment::commandExists('mariadb') ? '--ssl=0' : '--ssl-mode=DISABLED';
+        $command = sprintf(
+            '%s --defaults-extra-file=%s %s -N -e %s 2>&1',
+            $client,
+            escapeshellarg($credsFile),
+            $sslFlag,
+            escapeshellarg("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = '{$testDb}'")
+        );
+        $output = [];
+        exec($command, $output, $resultCode);
+        if ($resultCode !== 0) {
+            return 0;
+        }
+
+        return (int) ($output[0] ?? 0);
     }
 
     private function findBackupFile(): ?string
@@ -141,10 +176,7 @@ class BackupRestoreDrill extends Command
         return $tmpFile;
     }
 
-    /**
-     * @param  array<string, mixed>  $config
-     */
-    private function buildRestoreCommand(array $config, string $credsFile, string $sqlFile, string $testDb): string
+    private function buildRestoreCommand(string $credsFile, string $sqlFile, string $testDb): string
     {
         $client = Environment::commandExists('mariadb') ? 'mariadb' : 'mysql';
         $sslFlag = Environment::commandExists('mariadb') ? '--ssl=0' : '--ssl-mode=DISABLED';

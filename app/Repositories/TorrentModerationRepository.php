@@ -442,21 +442,6 @@ class TorrentModerationRepository extends BaseRepository
 
         $torrentDir = SiteConfig::current()->main->torrentDir();
 
-        DB::table('torrents')->whereIn('id', $idArr)->delete();
-        DB::table('torrent_extras')->whereIn('torrent_id', $idArr)->delete();
-        DB::table('snatched')
-            ->whereIn('torrentid', $idArr)
-            ->whereNotExists(function ($query) {
-                $query->selectRaw('1')->from('users')->whereColumn('users.id', '=', 'snatched.userid');
-            })
-            ->delete();
-
-        foreach (['peers', 'files', 'comments'] as $x) {
-            DB::table($x)->whereIn('torrent', $idArr)->delete();
-        }
-
-        DB::table('hit_and_runs')->whereIn('torrent_id', $idArr)->delete();
-
         $downloadRepo = $this->downloadRepository;
         foreach ($idArr as $_id) {
             /** @var Torrent|null $torrent */
@@ -480,6 +465,21 @@ class TorrentModerationRepository extends BaseRepository
                 Events::fire('torrent_deleted', $torrent);
             }
         }
+
+        DB::table('torrents')->whereIn('id', $idArr)->delete();
+        DB::table('torrent_extras')->whereIn('torrent_id', $idArr)->delete();
+        DB::table('snatched')
+            ->whereIn('torrentid', $idArr)
+            ->whereNotExists(function ($query) {
+                $query->selectRaw('1')->from('users')->whereColumn('users.id', '=', 'snatched.userid');
+            })
+            ->delete();
+
+        foreach (['peers', 'files', 'comments'] as $x) {
+            DB::table($x)->whereIn('torrent', $idArr)->delete();
+        }
+
+        DB::table('hit_and_runs')->whereIn('torrent_id', $idArr)->delete();
 
         try {
             $meiliSearchRep = $this->meiliSearchRepository;

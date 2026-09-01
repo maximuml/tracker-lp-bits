@@ -10,8 +10,6 @@ use App\Http\Resources\RewardResource;
 use App\Models\User;
 use App\Repositories\RewardRepository;
 use App\Support\Locale;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
 class RewardController extends Controller
@@ -55,41 +53,5 @@ class RewardController extends Controller
         $resource = new RewardResource($result);
 
         return $this->success($resource, '赠魔成功！');
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  mixed  $id
-     */
-    public function show($id): Response
-    {
-        //
-
-        abort(501, 'Not implemented');
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  mixed  $id
-     */
-    public function update(Request $request, $id): Response
-    {
-        //
-
-        abort(501, 'Not implemented');
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  mixed  $id
-     */
-    public function destroy($id): Response
-    {
-        //
-
-        abort(501, 'Not implemented');
     }
 }

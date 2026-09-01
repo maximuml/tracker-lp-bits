@@ -19,7 +19,6 @@ use App\Models\User;
 use App\Repositories\ExamRepository;
 use App\Repositories\UserRepository;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
@@ -79,30 +78,6 @@ class UserController extends Controller
         $resource = new UserResource($result);
 
         return $this->success($resource);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  mixed  $id
-     */
-    public function update(Request $request, $id): Response
-    {
-        //
-
-        abort(501, 'Not implemented');
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  mixed  $id
-     */
-    public function destroy($id): Response
-    {
-        //
-
-        abort(501, 'Not implemented');
     }
 
     /**

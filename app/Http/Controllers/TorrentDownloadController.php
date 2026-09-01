@@ -222,9 +222,4 @@ class TorrentDownloadController extends LegacyController
             'lang_downloadnotice' => $lang,
         ]);
     }
-
-    public function emailGateway(Request $request): Response
-    {
-        return response('');
-    }
 }

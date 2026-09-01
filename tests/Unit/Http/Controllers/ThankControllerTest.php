@@ -13,7 +13,6 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\TestCase;
 
 final class ThankControllerTest extends TestCase
@@ -82,29 +81,5 @@ final class ThankControllerTest extends TestCase
 
         $this->assertSame(0, $result['ret']);
         $this->assertArrayHasKey('data', $result['data']);
-    }
-
-    public function test_show_returns_not_implemented(): void
-    {
-        $this->expectException(HttpException::class);
-
-        $controller = app(ThankController::class);
-        $controller->show(1);
-    }
-
-    public function test_update_returns_not_implemented(): void
-    {
-        $this->expectException(HttpException::class);
-
-        $controller = app(ThankController::class);
-        $controller->update(new Request, 1);
-    }
-
-    public function test_destroy_returns_not_implemented(): void
-    {
-        $this->expectException(HttpException::class);
-
-        $controller = app(ThankController::class);
-        $controller->destroy(1);
     }
 }

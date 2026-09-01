@@ -11,7 +11,6 @@ use App\Models\Torrent;
 use App\Models\User;
 use App\Services\ThankService;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
 class ThankController extends Controller
@@ -57,41 +56,5 @@ class ThankController extends Controller
         $resource = new ThankResource($result);
 
         return $this->success($resource, '说谢谢成功！');
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  mixed  $id
-     */
-    public function show($id): Response
-    {
-        //
-
-        abort(501, 'Not implemented');
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  mixed  $id
-     */
-    public function update(Request $request, $id): Response
-    {
-        //
-
-        abort(501, 'Not implemented');
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  mixed  $id
-     */
-    public function destroy($id): Response
-    {
-        //
-
-        abort(501, 'Not implemented');
     }
 }

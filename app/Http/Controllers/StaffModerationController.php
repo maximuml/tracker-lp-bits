@@ -54,6 +54,9 @@ class StaffModerationController extends LegacyController
         if ($action === 'confirmuser') {
             $userId = (int) request()->post('userid');
             $confirm = (string) request()->post('confirm');
+            if (! in_array($confirm, ['pending', 'confirmed'], true)) {
+                return $this->legacyAbortResponse('Error', 'Invalid confirmation status.');
+            }
             app(ModtaskRepository::class)->confirmUser($userId, $confirm);
 
             return redirect(Http::protocolPrefix(Url::isSecure()).$baseUrl.'/unco.php?status=1');
@@ -404,10 +407,10 @@ class StaffModerationController extends LegacyController
             if (! $request->isMethod('post')) {
                 return $this->legacyAbortResponse('Error', 'Permission denied.');
             }
-            $id = (int) (request()->query('id') ?? 0);
-            $sure = (int) (request()->query('sure') ?? 0);
+            $id = (int) (request()->post('id') ?? 0);
+            $sure = (int) (request()->post('sure') ?? 0);
             if (! $sure) {
-                return $this->legacyAbortResponse('Delete Rule', 'You are about to delete a rule. Click <a class=altlink href=?act=del&id='.$id.'&sure=1>here</a> if you are sure.', false);
+                return $this->legacyAbortResponse('Delete Rule', 'You are about to delete a rule. Click <a class=altlink href="?act=edit&id='.$id.'">here</a> to go back. To confirm deletion, use the delete button on the rules page.', false);
             }
             DB::table('rules')->where('id', $id)->delete();
             Cache::forgetWithLocales('rules');

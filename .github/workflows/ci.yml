@@ -50,6 +50,9 @@ jobs:
       - name: Audit composer dependencies
         run: composer audit
 
+      - name: Check platform requirements
+        run: composer check-platform-reqs
+
       - name: Run PHP syntax lint
         run: |
           find . -type f -name '*.php' \
@@ -403,3 +406,98 @@ jobs:
         uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  container-scan:
+    name: Container image scan (Trivy)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          sed -i 's|DB_HOST=127.0.0.1|DB_HOST=mysql|g' .env
+          sed -i 's|REDIS_HOST=127.0.0.1|REDIS_HOST=redis|g' .env
+          sed -i 's|^MEILISEARCH_MASTER_KEY=.*|MEILISEARCH_MASTER_KEY=nexusphp_default_key|' .env
+
+      - name: Build Docker images
+        run: docker compose build php openresty
+
+      - name: Run Trivy on PHP image
+        uses: aquasecurity/trivy-action@b664f637b0c97c938a2e2c4e2ca253e58483f41b # v0.28.0
+        with:
+          image-ref: tracker-lp-bits-php:latest
+          format: sarif
+          output: trivy-php-results.sarif
+          severity: CRITICAL,HIGH
+          exit-code: '0'
+
+      - name: Run Trivy on OpenResty image
+        uses: aquasecurity/trivy-action@b664f637b0c97c938a2e2c4e2ca253e58483f41b # v0.28.0
+        with:
+          image-ref: tracker-lp-bits-openresty:latest
+          format: sarif
+          output: trivy-openresty-results.sarif
+          severity: CRITICAL,HIGH
+          exit-code: '0'
+
+      - name: Upload Trivy scan results to GitHub Security
+        uses: github/codeql-action/upload-sarif@6f5948dfacef28e207b48d0905cf90c03365536d # v3
+        if: always()
+        with:
+          sarif_file: trivy-php-results.sarif
+
+  sbom:
+    name: SBOM generation
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          php-version: '8.5'
+          extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, pdo_mysql, redis, sqlite3, xml, zip
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction --ignore-platform-reqs --no-scripts
+
+      - name: Generate Composer SBOM (CycloneDX)
+        run: |
+          composer require --dev cyclonedx/cyclonedx-php-composer:^5 --no-interaction --no-scripts
+          vendor/bin/cyclonedx-php-composer analyze --output-format=Json --output-file=composer-sbom.json --no-dev
+          echo "Composer SBOM generated: composer-sbom.json"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Generate npm SBOM (CycloneDX)
+        run: |
+          npx @cyclonedx/cyclonedx-npm --output-file=npm-sbom.json --omit dev
+          echo "npm SBOM generated: npm-sbom.json"
+
+      - name: Upload SBOM artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4846f43603d02a # v4
+        if: always()
+        with:
+          name: sbom
+          path: |
+            composer-sbom.json
+            npm-sbom.json
+          retention-days: 30

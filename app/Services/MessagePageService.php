@@ -262,7 +262,7 @@ class MessagePageService
         app(MessageRepository::class)->markAsRead($pmId, $userId);
         $cache = app(LegacyRedisCache::class);
         if ($cache !== null) {
-            $cache->delete_value('user_'.$userId.'_unread_message_count');
+            $cache->delete_value('user_'.$userId.'_unread_message_count', true);
         }
 
         // Mailbox for menu highlight

@@ -58,7 +58,7 @@ php artisan serve
 
 ```bash
 vendor/bin/phpunit
-vendor/bin/phpstan analyse -c phpstan.level8.neon
+vendor/bin/phpstan analyse
 composer audit
 ```
 

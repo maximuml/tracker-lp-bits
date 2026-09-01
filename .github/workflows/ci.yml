@@ -514,10 +514,8 @@ jobs:
         run: composer install --prefer-dist --no-progress --no-interaction --no-scripts
 
       - name: Generate Composer SBOM (CycloneDX)
-        env:
-          COMPOSER_ALLOW_PLUGINS: cyclonedx/cyclonedx-php-composer
         run: |
-          composer require --dev cyclonedx/cyclonedx-php-composer:^5 --no-interaction --no-scripts
+          composer require --dev cyclonedx/cyclonedx-php-composer:^5 --no-interaction --no-scripts --allow-plugin=cyclonedx/cyclonedx-php-composer
           vendor/bin/cyclonedx-php-composer analyze --output-format=Json --output-file=composer-sbom.json --no-dev
           echo "Composer SBOM generated: composer-sbom.json"
 

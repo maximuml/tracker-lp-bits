@@ -31,7 +31,7 @@ $showWarn = $returnto !== '' && ! $nowarn;
         @endif
         <div align="right">
             {{ $lang['text_select_lang'] ?? 'Select Site Language:' }}
-            <select name="sitelanguage" onchange="this.form.submit()">
+            <select name="sitelanguage" aria-label="{{ $lang['text_select_lang'] ?? 'Select Site Language' }}" onchange="this.form.submit()">
                 @foreach ($languages as $row)
                     <option value="{{ $row['id'] }}" @if (($row['site_lang_folder'] ?? '') === $langFolder) selected @endif>
                         {{ $row['lang_name'] }}
@@ -60,15 +60,15 @@ $showWarn = $returnto !== '' && ! $nowarn;
         <table border="0" cellpadding="5">
             <tr>
                 <td class="rowhead">{{ $lang['rowhead_username'] ?? 'Username:' }}</td>
-                <td class="rowfollow"><input type="text" name="username" autocomplete="username" value="{{ old('username') }}" /></td>
+                <td class="rowfollow"><input type="text" name="username" aria-label="{{ $lang['rowhead_username'] ?? 'Username' }}" autocomplete="username" value="{{ old('username') }}" /></td>
             </tr>
             <tr>
                 <td class="rowhead">{{ $lang['rowhead_password'] ?? 'Password:' }}</td>
-                <td class="rowfollow"><input type="password" name="password" autocomplete="current-password" /></td>
+                <td class="rowfollow"><input type="password" name="password" aria-label="{{ $lang['rowhead_password'] ?? 'Password' }}" autocomplete="current-password" /></td>
             </tr>
             <tr>
                 <td class="rowhead">{{ $lang['rowhead_two_step_code'] ?? 'Two-Factor Authentication:' }}</td>
-                <td class="rowfollow"><input type="text" name="two_step_code" inputmode="numeric" pattern="[0-9]*" placeholder="{{ $lang['two_step_code_tooltip'] ?? '' }}" /></td>
+                <td class="rowfollow"><input type="text" name="two_step_code" aria-label="{{ $lang['rowhead_two_step_code'] ?? 'Two-Factor Authentication' }}" inputmode="numeric" pattern="[0-9]*" placeholder="{{ $lang['two_step_code_tooltip'] ?? '' }}" /></td>
             </tr>
             @if ($captchaEnabled && $captchaMarkup !== '')
                 {!! $captchaMarkup !!}
@@ -76,7 +76,7 @@ $showWarn = $returnto !== '' && ! $nowarn;
             <tr>
                 <td class="toolbox" colspan="2">
                     {{ $lang['text_auto_logout'] ?? 'Auto Logout:' }}
-                    <input type="checkbox" name="logout" value="yes" /> {{ $lang['checkbox_auto_logout'] ?? 'Log me out after 15 minutes' }}
+                    <input type="checkbox" name="logout" value="yes" aria-label="{{ $lang['checkbox_auto_logout'] ?? 'Log me out after 15 minutes' }}" /> {{ $lang['checkbox_auto_logout'] ?? 'Log me out after 15 minutes' }}
                 </td>
             </tr>
             <tr>

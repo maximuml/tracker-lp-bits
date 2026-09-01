@@ -51,6 +51,12 @@ class UserRepository extends BaseRepository
         //
     }
 
+    /** @return list<string> */
+    protected function allowedSortColumns(): array
+    {
+        return ['id', 'username', 'email', 'class', 'added', 'last_access'];
+    }
+
     /** @var array<int, string> */
     private static array $allowIncludes = ['inviter', 'valid_medals'];
 

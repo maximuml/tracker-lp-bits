@@ -13,6 +13,12 @@ use Illuminate\Support\Facades\DB;
 
 class RewardRepository extends BaseRepository
 {
+    /** @return list<string> */
+    protected function allowedSortColumns(): array
+    {
+        return ['id', 'torrentid', 'userid', 'value', 'added'];
+    }
+
     /**
      * @param  array<int|string, mixed>  $params
      * @return mixed

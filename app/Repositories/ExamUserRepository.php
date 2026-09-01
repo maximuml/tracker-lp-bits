@@ -30,6 +30,12 @@ class ExamUserRepository extends BaseRepository
         private readonly ExamProgressRepository $examProgressRepository,
     ) {}
 
+    /** @return list<string> */
+    protected function allowedSortColumns(): array
+    {
+        return ['id', 'exam_id', 'uid', 'status', 'begin', 'end', 'is_done'];
+    }
+
     /**
      * assign exam to user
      *

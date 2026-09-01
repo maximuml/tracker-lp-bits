@@ -111,8 +111,11 @@ final class CategoryRepository
      */
     public function listByTable(string $table, int $offset, int $perPage, string $sort = 'id', string $direction = 'desc'): array
     {
+        $allowedSort = in_array($sort, ['id', 'name', 'sort'], true) ? $sort : 'id';
+        $allowedDir = in_array(strtolower($direction), ['asc', 'desc'], true) ? strtolower($direction) : 'desc';
+
         return DB::table($table)
-            ->orderBy($sort, $direction)
+            ->orderBy($allowedSort, $allowedDir)
             ->offset($offset)
             ->limit($perPage)
             ->get()

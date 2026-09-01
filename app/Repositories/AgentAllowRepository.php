@@ -17,6 +17,12 @@ use Illuminate\Support\Facades\Cache;
 
 class AgentAllowRepository extends BaseRepository
 {
+    /** @return list<string> */
+    protected function allowedSortColumns(): array
+    {
+        return ['id', 'family', 'allowed'];
+    }
+
     /**
      * @param  array<int|string, mixed>  $params
      * @return mixed

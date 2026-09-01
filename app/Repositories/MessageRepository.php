@@ -22,6 +22,12 @@ class MessageRepository extends BaseRepository
 
     const STAFF_MESSAGE_NEW_CACHE_KEY = 'staff_new_message_count';
 
+    /** @return list<string> */
+    protected function allowedSortColumns(): array
+    {
+        return ['id', 'sender', 'receiver', 'added', 'subject'];
+    }
+
     /**
      * @return Collection<int, \stdClass>
      */

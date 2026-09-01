@@ -472,7 +472,7 @@ jobs:
       - name: Run Trivy on PHP image
         uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
         with:
-          image-ref: tracker-lp-bits-php:latest
+          image-ref: nexusphp_php:latest
           format: sarif
           output: trivy-php-results.sarif
           severity: CRITICAL,HIGH
@@ -481,7 +481,7 @@ jobs:
       - name: Run Trivy on OpenResty image
         uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
         with:
-          image-ref: tracker-lp-bits-openresty:latest
+          image-ref: nexusphp_openresty:latest
           format: sarif
           output: trivy-openresty-results.sarif
           severity: CRITICAL,HIGH
@@ -517,7 +517,7 @@ jobs:
         run: |
           composer config --no-interaction allow-plugins.cyclonedx/cyclonedx-php-composer true
           composer require --dev cyclonedx/cyclonedx-php-composer:^5 --no-interaction --no-scripts
-          composer CycloneDX:make-sbom --output-format=Json --output-file=composer-sbom.json --no-dev
+          composer CycloneDX:make-sbom --output-format=Json --output-file=composer-sbom.json --omit=dev
           echo "Composer SBOM generated: composer-sbom.json"
 
       - name: Setup Node.js

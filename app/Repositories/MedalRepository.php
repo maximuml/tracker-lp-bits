@@ -23,6 +23,12 @@ use Illuminate\Support\Facades\DB;
 
 class MedalRepository extends BaseRepository
 {
+    /** @return list<string> */
+    protected function allowedSortColumns(): array
+    {
+        return ['id', 'name', 'sort', 'class'];
+    }
+
     /**
      * @param  array<int|string, mixed>  $params
      * @return LengthAwarePaginator<int, Medal>

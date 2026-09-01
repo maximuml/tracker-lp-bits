@@ -25,6 +25,12 @@ use Illuminate\Support\Facades\DB;
 
 class SearchBoxRepository extends BaseRepository
 {
+    /** @return list<string> */
+    protected function allowedSortColumns(): array
+    {
+        return ['id', 'name', 'sort'];
+    }
+
     /**
      * Fetch all search-box rows, decoding JSON columns.
      *

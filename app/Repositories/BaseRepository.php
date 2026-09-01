@@ -11,22 +11,37 @@ use App\Models\User;
 use App\Support\Environment;
 use App\Support\Locale;
 use App\Support\Logger;
+use App\Support\Query\SortDirection;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class BaseRepository
 {
     /**
+     * Whitelist of columns allowed for sorting.
+     *
+     * Override in subclasses to define repository-specific sort columns.
+     * If the requested sort field is not in this list, the default ('id')
+     * is used instead — user input is never passed directly to orderBy().
+     *
+     * @return list<string>
+     */
+    protected function allowedSortColumns(): array
+    {
+        return ['id'];
+    }
+
+    /**
      * @param  array<int|string, mixed>  $params
-     * @return array<int|string, mixed>
+     * @return array{0: string, 1: 'asc'|'desc'}
      */
     protected function getSortFieldAndType(array $params): array
     {
-        $field = ! empty($params['sort_field']) ? $params['sort_field'] : 'id';
-        $type = 'desc';
-        if (! empty($params['sort_type']) && Str::startsWith($params['sort_type'], 'asc')) {
-            $type = 'asc';
-        }
+        $requested = (string) ($params['sort_field'] ?? '');
+        $allowed = $this->allowedSortColumns();
+        $field = in_array($requested, $allowed, true) ? $requested : 'id';
+        $type = SortDirection::fromInput(
+            isset($params['sort_type']) ? (string) $params['sort_type'] : null
+        )->value;
 
         return [$field, $type];
     }

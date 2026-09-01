@@ -8,6 +8,12 @@ use App\Models\News;
 
 class NewsRepository extends BaseRepository
 {
+    /** @return list<string> */
+    protected function allowedSortColumns(): array
+    {
+        return ['id', 'userid', 'added'];
+    }
+
     /**
      * @param  array<int|string, mixed>  $params
      * @return mixed

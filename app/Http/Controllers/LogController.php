@@ -100,9 +100,25 @@ class LogController extends LegacyController
         $q = htmlspecialchars(trim((string) ($request->input('query') ?? '')));
         $canManage = Permission::can(PermissionEnum::CHR_MANAGE);
 
-        if ($request->isMethod('post') || $request->filled('do')) {
-            $do = (string) ($request->input('do') ?? '');
-            if ($do !== '' && ! $canManage) {
+        $do = (string) ($request->input('do') ?? '');
+
+        // 'edit' is read-only (shows the edit form) and safe via GET.
+        // 'add', 'update', 'del' are state-changing and require POST.
+        if ($do === 'edit') {
+            if (! $canManage) {
+                return $this->legacyAbortResponse($langLog['std_error'] ?? 'Error', $langLog['std_permission_denied'] ?? 'Permission denied.');
+            }
+            $id = (int) $request->input('id', 0);
+            $editItem = $id > 0 ? app(LogRepository::class)->getChronicleById($id) : null;
+            if ($editItem === null) {
+                return redirect('/log.php?action=chronicle');
+            }
+
+            return $this->chronicleList($request, $q, $canManage, $langLog, $editItem);
+        }
+
+        if ($request->isMethod('post') && $do !== '') {
+            if (! $canManage) {
                 return $this->legacyAbortResponse($langLog['std_error'] ?? 'Error', $langLog['std_permission_denied'] ?? 'Permission denied.');
             }
 
@@ -136,16 +152,6 @@ class LogController extends LegacyController
                 app(LogRepository::class)->deleteChronicle($id);
 
                 return redirect('/log.php?action=chronicle');
-            }
-
-            if ($do === 'edit') {
-                $id = (int) $request->input('id', 0);
-                $editItem = $id > 0 ? app(LogRepository::class)->getChronicleById($id) : null;
-                if ($editItem === null) {
-                    return redirect('/log.php?action=chronicle');
-                }
-
-                return $this->chronicleList($request, $q, $canManage, $langLog, $editItem);
             }
         }
 

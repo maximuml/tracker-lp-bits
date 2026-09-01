@@ -617,9 +617,32 @@ class Install
         }
         fwrite($fp, $content);
         fclose($fp);
+        @chmod($envFile, 0640);
         $this->doLog("[CREATE ENV] wrote {$envFile} with ".count($newData).' keys');
 
+        $this->warnOnInsecureDefaults($newData);
+
         return true;
+    }
+
+    /**
+     * Log warnings when well-known insecure default secrets are detected.
+     * Does not block installation — the values may be intentional for
+     * local development — but alerts the operator to change them.
+     */
+    private function warnOnInsecureDefaults(array $envData): void
+    {
+        $insecureDefaults = [
+            'DB_PASSWORD' => ['nexusphp', 'ChangeMeToYourDBPassword', 'root', 'password', ''],
+            'REDIS_PASSWORD' => ['changeme_redis_password', '', 'redis'],
+            'MEILISEARCH_MASTER_KEY' => ['nexusphp_default_key', ''],
+        ];
+        foreach ($insecureDefaults as $key => $badValues) {
+            $current = (string) ($envData[$key] ?? '');
+            if (in_array($current, $badValues, true)) {
+                $this->doLog("[SECURITY WARNING] {$key} is set to an insecure default ('{$current}'). Change it before exposing to the internet.");
+            }
+        }
     }
 
     public function listShouldCreateTable()

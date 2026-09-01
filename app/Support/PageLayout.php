@@ -315,9 +315,11 @@ class PageLayout
             ?>, <?php
             echo UserDisplay::username($context->user['id']);
             ?>
-                [<a href="logout.php"><?php
+                [<form method="post" action="logout.php" style="display:inline"><?php
+            echo csrf_field();
+            ?><button type="submit" style="background:none;border:none;padding:0;margin:0;color:inherit;cursor:pointer;text-decoration:underline;display:inline"><?php
             echo $context->lang['text_logout'];
-            ?></a>]
+            ?></button></form>]
                 [<a href="usercp.php"><?php
             echo $context->lang['text_user_cp'];
             ?></a>]

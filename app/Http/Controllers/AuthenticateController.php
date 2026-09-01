@@ -45,7 +45,7 @@ class AuthenticateController extends Controller
     public function login(LoginRequest $request): array
     {
         try {
-            $result = $this->repository->login($request->username, $request->password);
+            $result = $this->repository->login($request->username, $request->password, (string) $request->input('two_step_code', ''));
         } catch (\InvalidArgumentException $e) {
             abort(401, $e->getMessage());
         }

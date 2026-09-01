@@ -43,7 +43,7 @@ Route::get('/health', [HealthController::class, 'live'])->name('health');
 
 Route::get('/login', [AuthWebController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthWebController::class, 'login'])->middleware('throttle:login');
-Route::get('/logout', [AuthWebController::class, 'logout'])->name('logout');
+Route::post('/logout', [AuthWebController::class, 'logout'])->name('logout');
 
 Route::get('/signup', [RegistrationController::class, 'showSignup'])->name('signup');
 Route::post('/signup', [RegistrationController::class, 'signup'])->middleware('throttle:login');

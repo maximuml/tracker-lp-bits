@@ -8,6 +8,7 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\WebAuthService;
 use App\Support\Logger;
+use App\Support\TwoFactorAuthHelper;
 use Carbon\Carbon;
 use Illuminate\Encryption\Encrypter;
 use Illuminate\Http\Request;
@@ -21,15 +22,20 @@ class AuthenticateRepository extends BaseRepository
      * @param  mixed  $password
      * @return mixed
      */
-    public function login($username, $password)
+    public function login($username, $password, string $twoStepCode = '')
     {
         $user = User::query()
             ->where('username', (string) $username)
-            ->first(array_merge(User::$commonFields, ['class', 'secret', 'passhash', 'auth_key', 'passhash_algo']));
+            ->first(array_merge(User::$commonFields, ['class', 'secret', 'passhash', 'auth_key', 'passhash_algo', 'two_step_secret']));
         if (! $user instanceof User || ! app(WebAuthService::class)->validatePassword($user, $password)) {
             throw new \InvalidArgumentException('Username or password invalid.');
         }
         $user->checkIsNormal();
+        if (! empty($user->two_step_secret)) {
+            if ($twoStepCode === '' || ! TwoFactorAuthHelper::verifyCode((string) $user->two_step_secret, $twoStepCode)) {
+                throw new \InvalidArgumentException($twoStepCode === '' ? 'Require two-step code.' : 'Invalid two-step code.');
+            }
+        }
         $tokenName = __METHOD__.__LINE__;
         $token = DB::transaction(function () use ($user, $tokenName) {
             $user->update(['last_login' => Carbon::now()]);

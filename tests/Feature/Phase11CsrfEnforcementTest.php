@@ -7,9 +7,10 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
 /**
- * Phase 1.1: verify that CSRF protection is enforced on form-based routes
- * and that the blanket $except list has been reduced to only webhooks and
- * AJAX endpoints.
+ * Phase 1.1 / Wave 2 Step 5: verify that CSRF protection is enforced
+ * on form-based routes AND on the /ajax endpoint. The blanket $except
+ * list has been reduced to only webhooks and legacy AJAX endpoints
+ * that cannot use CSRF tokens (external services, raw XHR without csrf.js).
  */
 final class Phase11CsrfEnforcementTest extends TestCase
 {
@@ -36,6 +37,46 @@ final class Phase11CsrfEnforcementTest extends TestCase
     public function test_csrf_js_file_exists(): void
     {
         $this->assertFileExists(public_path('js/csrf.js'));
+    }
+
+    public function test_csrf_js_injects_token_into_forms_and_ajax(): void
+    {
+        $content = file_get_contents(public_path('js/csrf.js'));
+        // Injects _token into POST forms
+        $this->assertStringContainsString('_token', $content);
+        // Sets X-CSRF-TOKEN header for jQuery
+        $this->assertStringContainsString('ajaxSetup', $content);
+        // Patches fetch for same-origin mutating requests
+        $this->assertStringContainsString('X-CSRF-TOKEN', $content);
+    }
+
+    public function test_ajaxbasic_js_sends_csrf_header_on_post(): void
+    {
+        $content = file_get_contents(public_path('js/ajaxbasic.js'));
+        $this->assertStringContainsString('X-CSRF-TOKEN', $content, 'ajaxbasic.js must send X-CSRF-TOKEN header on POST requests');
+    }
+
+    public function test_shoutbox_js_sends_csrf_header_on_xhr_fallback(): void
+    {
+        $content = file_get_contents(public_path('js/shoutbox.js'));
+        // The XHR fallback path must set X-CSRF-TOKEN header
+        $this->assertStringContainsString('X-CSRF-TOKEN', $content, 'shoutbox.js XHR fallback must send X-CSRF-TOKEN header');
+    }
+
+    public function test_csrf_meta_tag_in_page_layout_header(): void
+    {
+        // PageLayout::header() renders the meta tag for all legacy pages.
+        // Verify the source includes the csrf-token meta tag.
+        $source = file_get_contents(app_path('Support/PageLayout.php'));
+        $this->assertStringContainsString('csrf-token', $source, 'PageLayout must include csrf-token meta tag in header');
+    }
+
+    public function test_csrf_js_included_in_page_layout_footer(): void
+    {
+        // PageLayout::footer() includes csrf.js for all legacy pages.
+        // Verify by checking the source file for the include.
+        $source = file_get_contents(app_path('Support/PageLayout.php'));
+        $this->assertStringContainsString('csrf.js', $source, 'PageLayout must include csrf.js in footer');
     }
 
     public function test_post_without_csrf_token_to_protected_route_returns_419(): void
@@ -84,16 +125,41 @@ final class Phase11CsrfEnforcementTest extends TestCase
         $this->assertContains($response->status(), [419, 302]);
     }
 
-    public function test_ajax_route_still_exempt_from_csrf(): void
+    public function test_ajax_route_not_in_csrf_except_list(): void
     {
-        // 'ajax' should still be exempt — it's used by fetch() without CSRF headers
-        $response = $this->post('/ajax', ['action' => 'nonexistent']);
+        // 'ajax' was removed from $except in Phase 1.1 — it now requires CSRF.
+        // Note: Laravel's VerifyCsrfToken skips checks in unit tests via
+        // runningUnitTests(), so we verify the configuration instead of
+        // expecting a 419 response at runtime.
+        $reflection = new \ReflectionClass(VerifyCsrfToken::class);
+        $property = $reflection->getProperty('except');
+        $property->setAccessible(true);
+        $middleware = app(VerifyCsrfToken::class);
+        $except = $property->getValue($middleware);
 
-        // Should NOT get 419 — ajax is exempt
-        $this->assertNotEquals(419, $response->status());
+        $this->assertNotContains('ajax', $except, '/ajax must NOT be in CSRF $except — it requires CSRF protection');
     }
 
-    public function test_except_list_only_contains_webhooks_and_ajax(): void
+    public function test_ajax_route_has_web_middleware_with_csrf(): void
+    {
+        // Verify that /ajax route has 'web' middleware group which includes
+        // VerifyCsrfToken (PreventRequestForgery in Laravel 13).
+        $route = app('router')->getRoutes()->getByAction('POST/ajax');
+        if (! $route) {
+            // Fallback: search all routes
+            foreach (app('router')->getRoutes() as $r) {
+                if ($r->uri() === 'ajax' && in_array('POST', $r->methods())) {
+                    $route = $r;
+                    break;
+                }
+            }
+        }
+        $this->assertNotNull($route, '/ajax POST route must exist');
+        $middleware = $route->gatherMiddleware();
+        $this->assertContains('web', $middleware, '/ajax must have web middleware (includes CSRF verification)');
+    }
+
+    public function test_except_list_only_contains_webhooks_and_legacy_ajax(): void
     {
         $reflection = new \ReflectionClass(VerifyCsrfToken::class);
         $property = $reflection->getProperty('except');
@@ -101,8 +167,8 @@ final class Phase11CsrfEnforcementTest extends TestCase
         $middleware = app(VerifyCsrfToken::class);
         $except = $property->getValue($middleware);
 
-        // Should be a small list — webhooks + AJAX endpoints only
-        $this->assertLessThanOrEqual(10, count($except), 'CSRF $except list should be small (webhooks + AJAX only), got: '.implode(', ', $except));
+        // Should be a small list — webhooks + legacy AJAX endpoints only
+        $this->assertLessThanOrEqual(10, count($except), 'CSRF $except list should be small (webhooks + legacy AJAX only), got: '.implode(', ', $except));
 
         // Should NOT contain form-based admin routes
         $this->assertNotContains('modtask', $except);
@@ -111,6 +177,8 @@ final class Phase11CsrfEnforcementTest extends TestCase
         $this->assertNotContains('takeupload', $except);
         $this->assertNotContains('settings', $except);
         $this->assertNotContains('takeinvite', $except);
+        // 'ajax' was removed — CSRF is now enforced via X-CSRF-TOKEN header
+        $this->assertNotContains('ajax', $except);
     }
 
     public function test_get_request_to_modtask_returns_405(): void

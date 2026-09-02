@@ -3,7 +3,7 @@
 $lang_messages = (array) (\app(\App\Support\Globals::class)->get('lang_messages') ?? []);
 $vm = $viewmailbox;
 @endphp
-<form action="messages.php" method="get">
+<form action="/messages" method="get">
 <input type="hidden" name="action" value="viewmailbox">{{ $lang_messages['text_search'] ?? 'Search' }}&nbsp;&nbsp;<input id="searchinput" name="keyword" type="text" value="{{ $vm['keyword'] }}" style="width: 200px"/>
 {{ $lang_messages['text_in'] ?? 'in' }}&nbsp;<select name="place">
 <option value="both" {{ $vm['place'] === 'both' ? ' selected' : '' }}>{{ $lang_messages['select_both'] ?? 'Both' }}</option>

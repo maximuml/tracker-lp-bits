@@ -31,7 +31,7 @@ if (!(isset($CURUSER)) || ($CURUSER["id"] != $row["owner"] && !\App\Auth\Permiss
 	echo sprintf("<p>".$lang_edit['text_cannot_edit_torrent_note']."</p>", $__server_REQUEST_URI ?? '');
 }
 else {
-	print("<form method=\"post\" id=\"compose\" name=\"edittorrent\" action=\"takeedit.php\" enctype=\"multipart/form-data\">");
+	print("<form method=\"post\" id=\"compose\" name=\"edittorrent\" action=\"/takeedit\" enctype=\"multipart/form-data\">");
 	print("<input type=\"hidden\" name=\"id\" value=\"$id\" />");
 	if (($returnto ?? '') !== '')
 	print("<input type=\"hidden\" name=\"returnto\" value=\"" . htmlspecialchars($returnto) . "\" />");
@@ -156,7 +156,7 @@ else {
 	print("</form>\n");
 	if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_DELETE) && \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_MANAGE)) {
         print("<br /><br />");
-        print("<form method=\"post\" action=\"delete.php\">\n");
+        print("<form method=\"post\" action=\"/delete\">\n");
         print("<input type=\"hidden\" name=\"id\" value=\"$id\" />\n");
         if (($returnto ?? '') !== '')
             print("<input type=\"hidden\" name=\"returnto\" value=\"" . htmlspecialchars($returnto) . "\" />\n");

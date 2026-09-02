@@ -9,7 +9,7 @@ $fw = $forward;
 @endphp
 <h1 align="center">{{ $lang_messages['text_forward_pm'] ?? 'Forward PM' }}</h1>
 <table border="0" cellpadding="4" cellspacing="0"  width={{ $CONTENT_WIDTH }}>
-<form action="takemessage.php" method="post">
+<form action="/takemessage" method="post">
 @csrf
 <input type="hidden" name="forward" value="1">
 <input type="hidden" name="origmsg" value="{{ $fw['pmId'] }}">

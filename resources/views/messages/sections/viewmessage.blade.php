@@ -23,11 +23,11 @@ $vm = $viewmessage;
 <tr>
 <td align=left>
 @if (! $vm['isSender'])
-<form action="messages.php" method="post">@csrf<input type="hidden" name="action" value="moveordel"><input type="hidden" name="id" value={{ $vm['pmId'] }}>
+<form action="/messages" method="post">@csrf<input type="hidden" name="action" value="moveordel"><input type="hidden" name="id" value={{ $vm['pmId'] }}>
 <input type="submit" name="move" value={{ $lang_messages['submit_move_to'] ?? 'Move to' }}><select name="box"><option value="1">{{ $lang_messages['text_inbox'] ?? 'Inbox' }}</option>
 {!! $vm['moveBoxOptions'] !!}
 </select></form>
 @endif
-</td><td align="right" ><font color=white>[ <form action="messages.php" method="post" style="display:inline;">@csrf<input type="hidden" name="action" value="deletemessage"><input type="hidden" name="id" value="{{ $vm['pmId'] }}"><input type="submit" value="{{ $lang_messages['text_delete'] ?? 'Delete' }}" style="display:inline;"></form> ]{!! $vm['reply'] !!} [ <a href="messages.php?action=forward&id={{ $vm['pmId'] }}">{{ $lang_messages['text_forward_pm'] ?? 'Forward' }}</a> ]</font></td>
+</td><td align="right" ><font color=white>[ <form action="/messages" method="post" style="display:inline;">@csrf<input type="hidden" name="action" value="deletemessage"><input type="hidden" name="id" value="{{ $vm['pmId'] }}"><input type="submit" value="{{ $lang_messages['text_delete'] ?? 'Delete' }}" style="display:inline;"></form> ]{!! $vm['reply'] !!} [ <a href="messages.php?action=forward&id={{ $vm['pmId'] }}">{{ $lang_messages['text_forward_pm'] ?? 'Forward' }}</a> ]</font></td>
 </tr>
 </table>

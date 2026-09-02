@@ -122,6 +122,7 @@ $preEmail = $isInvite && $isPreRegisterEmailAndUsername && ! empty($invite->pre_
             </tr>
 
             <input type="hidden" name="wantpassword" />
+            <input type="hidden" name="passagain" />
 
             <tr>
                 <td class="toolbox" colspan="2" align="center">

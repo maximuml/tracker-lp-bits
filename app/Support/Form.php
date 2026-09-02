@@ -486,6 +486,10 @@ $formVar.addEventListener("click", function(e) {
         // Send plaintext password over HTTPS so the server can use argon2id.
         // Client-side SHA256 hashing prevented argon2id upgrades.
         $formVar.querySelector("input[name={$passwordHashedName}]").value = password
+        var passAgainHidden = $formVar.querySelector("input[name={$passwordConfirmClass}]")
+        if (passAgainHidden) {
+            passAgainHidden.value = passwordConfirmEl ? passwordConfirmEl.value : password
+        }
         $formVar.submit()
     } else {
         $formVar.submit()

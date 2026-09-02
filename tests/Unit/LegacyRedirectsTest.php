@@ -20,17 +20,26 @@ final class LegacyRedirectsTest extends TestCase
 {
     /**
      * nginx config has 301-redirects for key .php URLs.
+     * /index.php is NOT redirected — it's the Laravel front controller.
      */
     public function test_nginx_has_legacy_redirects(): void
     {
         $conf = file_get_contents(base_path('.docker/openresty/sites/app.conf.template'));
-        $this->assertStringContainsString('return 301 /index', $conf, 'nginx must redirect /index.php');
         $this->assertStringContainsString('return 301 /login', $conf, 'nginx must redirect /login.php');
         $this->assertStringContainsString('return 301 /signup', $conf, 'nginx must redirect /signup.php');
         $this->assertStringContainsString('return 301 /torrents', $conf, 'nginx must redirect /torrents.php');
         $this->assertStringContainsString('return 301 /forums', $conf, 'nginx must redirect /forums.php');
         $this->assertStringContainsString('return 301 /faq', $conf, 'nginx must redirect /faq.php');
         $this->assertStringContainsString('return 301 /rules', $conf, 'nginx must redirect /rules.php');
+    }
+
+    /**
+     * /index.php is NOT redirected (it's the Laravel front controller).
+     */
+    public function test_index_php_not_redirected(): void
+    {
+        $conf = file_get_contents(base_path('.docker/openresty/sites/app.conf.template'));
+        $this->assertStringNotContainsString('location = /index.php { return 301', $conf, '/index.php must not be redirected');
     }
 
     /**

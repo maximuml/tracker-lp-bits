@@ -75,9 +75,10 @@ server {
     }
 
     # 301-redirect legacy .php URLs to canonical routes (Step 28).
+    # NOTE: /index.php is NOT redirected — it's the Laravel front controller
+    # used by try_files as an internal rewrite target.
     # announce.php and scrape.php are kept as-is (external BT clients).
     # confirmemail.php is handled above with PATH_INFO.
-    location = /index.php { return 301 /index; }
     location = /login.php { return 301 /login; }
     location = /signup.php { return 301 /signup; }
     location = /takesignup.php { return 301 /signup; }

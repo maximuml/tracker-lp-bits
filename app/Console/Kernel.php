@@ -14,6 +14,7 @@ use App\Jobs\RemoveUserWarning;
 use App\Jobs\SaveIpLogCacheToDB;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use Illuminate\Support\Facades\Redis;
 
 class Kernel extends ConsoleKernel
 {
@@ -33,6 +34,15 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+        // Scheduler heartbeat — written to Redis every minute for health checks.
+        $schedule->call(function (): void {
+            try {
+                Redis::connection()->set('scheduler:heartbeat', (string) time(), ['ex' => 120]);
+            } catch (\Throwable) {
+                // Non-critical: health check will report stale heartbeat.
+            }
+        })->everyMinute()->name('scheduler-heartbeat')->withoutOverlapping()->onOneServer();
+
         $schedule->command('cache:prune-stale-tags')->hourly();
         $schedule->command('exam:assign_cronjob')->everyMinute();
         $schedule->command('exam:checkout_cronjob')->everyFiveMinutes();

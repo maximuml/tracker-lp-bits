@@ -12,6 +12,7 @@ use App\Support\Settings;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Testing\PendingCommand;
 use Tests\TestCase;
 
 final class TasksTest extends TestCase
@@ -136,9 +137,11 @@ final class TasksTest extends TestCase
 
     public function test_cleanup_tasks_command_runs_class_five(): void
     {
-        $this->artisan('cleanup:tasks', ['task' => 'cleanup-class-5'])
-            ->assertSuccessful()
-            ->expectsOutput('cleanup class 5');
+        $command = $this->artisan('cleanup:tasks', ['task' => 'cleanup-class-5']);
+        if ($command instanceof PendingCommand) {
+            $command->assertSuccessful();
+            $command->expectsOutput('cleanup class 5');
+        }
     }
 
     private function createAgentFamily(): int

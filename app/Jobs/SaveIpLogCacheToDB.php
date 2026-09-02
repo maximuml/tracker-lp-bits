@@ -24,7 +24,7 @@ class SaveIpLogCacheToDB implements ShouldQueue
      */
     public function __construct()
     {
-        //
+        $this->onQueue('default');
     }
 
     /**

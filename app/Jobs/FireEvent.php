@@ -28,7 +28,7 @@ class FireEvent implements ShouldQueue
      */
     public function __construct(public readonly string $name, public readonly string $idKey, public readonly string $idKeyOld = '')
     {
-        //
+        $this->onQueue('tracker-critical');
     }
 
     /**

@@ -34,6 +34,11 @@ final class AttendanceJob implements ShouldBeUnique, ShouldQueue
     /** @var int */
     public $uniqueFor = 86400;
 
+    public function __construct()
+    {
+        $this->onQueue('default');
+    }
+
     public function uniqueId(): string
     {
         return self::class;

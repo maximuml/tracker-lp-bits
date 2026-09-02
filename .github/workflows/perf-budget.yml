@@ -55,7 +55,7 @@ jobs:
           sed -i 's/\${PUSHER_APP_KEY}//g' .env
           sed -i 's/\${PUSHER_APP_CLUSTER}//g' .env
           # Use dev overrides (bind-mounts, openresty config mounts)
-          echo "COMPOSE_FILE=docker-compose.yml:docker-compose.dev.yml" >> "$GITHUB_ENV"
+          export COMPOSE_FILE=docker-compose.yml:docker-compose.dev.yml
           docker compose build
           # Start mysql + redis first, wait for them
           docker compose up -d --wait mysql redis

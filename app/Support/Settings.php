@@ -66,4 +66,17 @@ final class Settings
     {
         app(SettingRepository::class)->saveBatch($prefix, $nameAndValue, $autoload);
     }
+
+    /**
+     * Reset the in-memory static caches.
+     *
+     * Useful in test environments where settings may change between tests
+     * (e.g. via DatabaseTransactions rollback) but the static cache persists
+     * across tests in the same process.
+     */
+    public static function resetCache(): void
+    {
+        self::$settings = null;
+        self::$fromDb = null;
+    }
 }

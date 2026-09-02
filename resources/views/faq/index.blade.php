@@ -46,8 +46,7 @@
                         <br /><span id="id{{ $faqCategories[$id]['items'][$id2]['link_id'] }}"><b>{{ $faqCategories[$id]['items'][$id2]['question'] }}</b></span><br />
                         @php
                             $answer = strip_tags($faqCategories[$id]['items'][$id2]['answer'], '<a><b><i><u><s><br><p><div><span><ul><ol><li><img><font><pre><code><hr><table><tr><td><th><strong><em><h1><h2><h3><h4><h5><h6><blockquote>');
-                            // Remove <br> tags that are direct children of <ul>/<ol> (WCAG list rule)
-                            $answer = preg_replace('/(<ul[^>]*>|<\/li>)(\s*<br\s*\/?>\s*)+(?=<li|<\/ul|<\/ol)/i', '$1', $answer);
+                            $answer = \App\Support\Html::cleanListChildren($answer);
                         @endphp
                         <br />{!! $answer !!}<br /><br />
                     @endif

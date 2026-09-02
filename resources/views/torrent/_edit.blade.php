@@ -174,7 +174,7 @@ else {
     $json_sticky_series = json_encode(array(4, 6, 12, 24, 36, 48, 72, 168, 360));
     echo <<<EOT
 <script nonce="{{ $cspNonce ?? '' }}">
-jQuery(function($){
+document.addEventListener('DOMContentLoaded', function(){
 	var date_format = function (date) {
 		var seperator1 = "-";
 		var seperator2 = ":";
@@ -196,37 +196,45 @@ jQuery(function($){
 				+ " " + strHour + seperator2 + strMinute
 				+ seperator2 + strSecond;
 	}
-	var pos_until_select = $("#pos_until_select");
-	var pos_until = $("#pos_until");
-	$("#pos_group").change(function(){
-		if($(this).val() == 0){
-			pos_until.hide();
-			pos_until_select.hide();
-		}else{
-			pos_until.show();
-			pos_until_select.show();
+	var pos_until_select = document.getElementById("pos_until_select");
+	var pos_until = document.getElementById("pos_until");
+	var pos_group = document.getElementById("pos_group");
+	function togglePosGroup() {
+		if (pos_group.value == 0) {
+			pos_until.style.display = 'none';
+			pos_until_select.style.display = 'none';
+		} else {
+			pos_until.style.display = '';
+			pos_until_select.style.display = '';
 		}
-	}).change();
+	}
+	pos_group.addEventListener('change', togglePosGroup);
+	togglePosGroup();
 	var series = $json_sticky_series;
 	series.forEach(function(elem){
 		var label = elem >= 72 ? parseInt(parseInt(elem) / 24) + "{$lang_functions['text_day']}" : elem + "{$lang_functions['text_hour']}";
-		pos_until_select.append('<option value="' + elem + '">' + label + '</option>');
+		var opt = document.createElement('option');
+		opt.value = elem;
+		opt.textContent = label;
+		pos_until_select.appendChild(opt);
 	});
-	pos_until_select.change(function(){
-		var value = $(this).val();
-		if(value == -1){
-			pos_until.val("0000-00-00 00:00:00").attr("readonly", true);
-		}else if(value == 0){
-			pos_until.attr("readonly", false);
-		}else if(value > 0){
-			var curr = pos_until.val();
+	function onPosUntilChange() {
+		var value = pos_until_select.value;
+		if (value == -1) {
+			pos_until.value = "0000-00-00 00:00:00";
+			pos_until.readOnly = true;
+		} else if (value == 0) {
+			pos_until.readOnly = false;
+		} else if (value > 0) {
 			var d = new Date(Date.now() + 3600000 * value);
-			pos_until.attr("readonly", true).val(date_format(d));
+			pos_until.readOnly = true;
+			pos_until.value = date_format(d);
 		}
-	}).change();
+	}
+	pos_until_select.addEventListener('change', onPosUntilChange);
+	onPosUntilChange();
 });
 </script>
 EOT;
 }
-\App\Support\AssetAppender::js('vendor/jquery-loading/jquery.loading.min.js', 'footer', true);
 @endphp

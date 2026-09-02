@@ -32,18 +32,6 @@ function shoutboxPost(action, params, onSuccess) {
         }
     };
 
-    if (typeof jQuery !== 'undefined') {
-        jQuery.ajax({
-            url: 'ajax.php',
-            type: 'POST',
-            dataType: 'json',
-            data: { action: action, params: params || {} },
-            success: cb,
-            error: function () { alert('Request failed'); }
-        });
-        return;
-    }
-
     var xhr = new XMLHttpRequest();
     xhr.open('POST', 'ajax.php', true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');

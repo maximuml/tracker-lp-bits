@@ -201,9 +201,11 @@ class InviteController extends LegacyController
 
         // Register reset JS
         $resetJs = <<<'JS'
-jQuery("#reset").on('click', function () {
-    jQuery("select[name=status]").val('')
-    jQuery("select[name=enabled]").val('')
+document.getElementById("reset").addEventListener('click', function () {
+    var status = document.querySelector("select[name=status]")
+    var enabled = document.querySelector("select[name=enabled]")
+    if (status) status.value = ''
+    if (enabled) enabled.value = ''
 })
 JS;
         AssetAppender::js($resetJs, 'footer', false);

@@ -87,21 +87,34 @@
             //监听提交
             form.on('submit(formDemo)', function(data){
                 console.log(data)
-                jQuery.post('/web/torrent-approval', data.field, function (response) {
+                var formData = new FormData();
+                for (var key in data.field) {
+                    if (data.field.hasOwnProperty(key)) {
+                        formData.append(key, data.field[key]);
+                    }
+                }
+                fetch('/web/torrent-approval', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'same-origin',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                }).then(function(res) { return res.json(); }).then(function (response) {
                     if (response.ret != 0) {
                         layer.alert(response.msg)
                         return
                     }
                     parent.window.location.reload()
-                }, 'json')
+                }).catch(function() { layer.alert('Request failed'); });
                 return false;
             });
         });
-        let approvalComment = jQuery('#approval-comment')
-        jQuery('.comments').on("click", '.comment', function () {
-            let text = jQuery(this).text()
-            let oldText = approvalComment.val()
-            approvalComment.val(oldText + text)
-        })
+        var approvalComment = document.getElementById('approval-comment');
+        document.querySelector('.comments').addEventListener('click', function (e) {
+            if (e.target && e.target.classList && e.target.classList.contains('comment')) {
+                var text = e.target.textContent;
+                var oldText = approvalComment.value;
+                approvalComment.value = oldText + text;
+            }
+        });
     </script>
 @endsection

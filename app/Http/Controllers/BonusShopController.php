@@ -99,45 +99,49 @@ class BonusShopController extends LegacyController
         $confirmGiftMsg = Locale::trans('medal.confirm_to_gift', [], null);
 
         $js = <<<JS
-jQuery('.buy').on('click', function (e) {
-    let medalId = jQuery(this).attr('data-id')
-    layer.confirm("{$confirmBuyMsg}", function (index) {
-        let params = {
-            action: "buyMedal",
-            params: {medal_id: medalId}
-        }
-        console.log(params)
-        jQuery.post('ajax.php', params, function(response) {
-            console.log(response)
-            if (response.ret != 0) {
-                layer.alert(response.msg)
-                return
+document.querySelectorAll('.buy').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        var medalId = this.getAttribute('data-id')
+        layer.confirm("{$confirmBuyMsg}", function (index) {
+            var params = {
+                action: "buyMedal",
+                params: {medal_id: medalId}
             }
-            window.location.reload()
-        }, 'json')
+            console.log(params)
+            nativePost('ajax.php', params, function(response) {
+                console.log(response)
+                if (response.ret != 0) {
+                    layer.alert(response.msg)
+                    return
+                }
+                window.location.reload()
+            })
+        })
     })
 })
-jQuery('.gift').on('click', function (e) {
-    let medalId = jQuery(this).attr('data-id')
-    let uid = jQuery(this).prev().val()
-    if (!uid) {
-        layer.alert('Require UID')
-        return
-    }
-    layer.confirm("{$confirmGiftMsg}" + uid + " ?", function (index) {
-        let params = {
-            action: "giftMedal",
-            params: {medal_id: medalId, uid: uid}
+document.querySelectorAll('.gift').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        var medalId = this.getAttribute('data-id')
+        var uid = this.previousElementSibling.value
+        if (!uid) {
+            layer.alert('Require UID')
+            return
         }
-        console.log(params)
-        jQuery.post('ajax.php', params, function(response) {
-            console.log(response)
-            if (response.ret != 0) {
-                layer.alert(response.msg)
-                return
+        layer.confirm("{$confirmGiftMsg}" + uid + " ?", function (index) {
+            var params = {
+                action: "giftMedal",
+                params: {medal_id: medalId, uid: uid}
             }
-            window.location.reload()
-        }, 'json')
+            console.log(params)
+            nativePost('ajax.php', params, function(response) {
+                console.log(response)
+                if (response.ret != 0) {
+                    layer.alert(response.msg)
+                    return
+                }
+                window.location.reload()
+            })
+        })
     })
 })
 JS;
@@ -214,31 +218,28 @@ JS;
         $confirmGiftMsg = Locale::trans('medal.confirm_to_gift', [], null);
 
         $js = <<<JS
-jQuery('.claim').on('click', function (e) {
-    let id = jQuery(this).attr('data-id')
-    layer.confirm("{$confirmBuyMsg}", function (index) {
-        layer.close(index)
-        let params = {
-            action: "claimTask",
-            params: {exam_id: id}
-        }
-        console.log(params)
-        jQuery('body').loading({
-            stoppable: false
-        });
-        jQuery.post('ajax.php', params, function(response) {
-            jQuery('body').loading('stop');
-            console.log(response)
-            if (response.ret != 0) {
-                layer.alert(response.msg)
-                return
+document.querySelectorAll('.claim').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        var id = this.getAttribute('data-id')
+        layer.confirm("{$confirmBuyMsg}", function (index) {
+            layer.close(index)
+            var params = {
+                action: "claimTask",
+                params: {exam_id: id}
             }
-            window.location.reload()
-        }, 'json')
+            console.log(params)
+            nativePost('ajax.php', params, function(response) {
+                console.log(response)
+                if (response.ret != 0) {
+                    layer.alert(response.msg)
+                    return
+                }
+                window.location.reload()
+            })
+        })
     })
 })
 JS;
-        AssetAppender::js('vendor/jquery-loading/jquery.loading.min.js', 'footer', true);
         AssetAppender::js($js, 'footer', false);
 
         return $this->legacyPage($request, 'task', true, [

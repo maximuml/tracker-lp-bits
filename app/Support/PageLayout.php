@@ -181,11 +181,7 @@ class PageLayout
             echo $value;
         }
         ?>
-<script type="text/javascript" src="js/jquery-3.7.1.min.js<?php
-        echo $cssupdatedate;
-        ?>"></script>
 <script type="text/javascript" nonce="<?php echo $cspNonce; ?>">
-    jQuery.noConflict();
     window.nexusLayerOptions = {
         confirm: {btnAlign: 'c', title: 'Confirm', btn: ['OK', 'Cancel']},
         alert: {btnAlign: 'c', title: 'Info', btn: ['OK', 'Cancel']}
@@ -689,10 +685,11 @@ class PageLayout
             echo $value;
         }
         $js = <<<'JS'
+        <script type="application/javascript" src="js/ajax.js"></script>
         <script type="application/javascript" src="js/nexus.js"></script>
         <script type="application/javascript" src="js/csrf.js"></script>
         <script type="application/javascript" src="js/medium-zoom.min.js"></script>
-        <script type="application/javascript" src="vendor/jquery-goup-1.1.3/jquery.goup.min.js"></script>
+        <script type="application/javascript" src="js/goup.js"></script>
         JS;
         if ($cspNonce !== '') {
             $js .= "<script nonce=\"{$cspNonce}\">\n";
@@ -700,8 +697,7 @@ class PageLayout
             $js .= "<script>\n";
         }
         $js .= <<<'JS'
-        jQuery(document).ready(function(){
-            jQuery.goup()
+        document.addEventListener('DOMContentLoaded', function(){
             mediumZoom('[data-zoomable]')
         });
         </script>

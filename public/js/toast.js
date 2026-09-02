@@ -39,29 +39,35 @@
             params.init = 1;
         }
 
-        jQuery.ajax({
-            url: 'ajax.php',
-            type: 'POST',
-            data: { action: 'getToastNotifications', params: params },
-            dataType: 'json',
-            success: function (response) {
-                if (!response || response.ret !== 0 || !response.data) {
-                    return;
-                }
-                var data = response.data;
-                if (data.cursors) {
-                    localStorage.setItem(LS_PM, data.cursors.last_pm_id);
-                    localStorage.setItem(LS_SHOUT, data.cursors.last_shout_id);
-                }
-                if (init) {
-                    return;
-                }
-                var notifications = data.notifications || [];
-                notifications.forEach(function (n) {
-                    showToast(n);
-                });
+        var formData = new FormData();
+        formData.append('action', 'getToastNotifications');
+        for (var key in params) {
+            if (params.hasOwnProperty(key)) {
+                formData.append('params[' + key + ']', params[key]);
             }
-        });
+        }
+        fetch('ajax.php', {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            credentials: 'same-origin'
+        }).then(function (res) { return res.json(); }).then(function (response) {
+            if (!response || response.ret !== 0 || !response.data) {
+                return;
+            }
+            var data = response.data;
+            if (data.cursors) {
+                localStorage.setItem(LS_PM, data.cursors.last_pm_id);
+                localStorage.setItem(LS_SHOUT, data.cursors.last_shout_id);
+            }
+            if (init) {
+                return;
+            }
+            var notifications = data.notifications || [];
+            notifications.forEach(function (n) {
+                showToast(n);
+            });
+        }).catch(function () {});
     }
 
     function showToast(n) {

@@ -44,8 +44,8 @@ final class Phase11CsrfEnforcementTest extends TestCase
         $content = file_get_contents(public_path('js/csrf.js'));
         // Injects _token into POST forms
         $this->assertStringContainsString('_token', $content);
-        // Sets X-CSRF-TOKEN header for jQuery
-        $this->assertStringContainsString('ajaxSetup', $content);
+        // Patches XMLHttpRequest for CSRF on mutating requests
+        $this->assertStringContainsString('XMLHttpRequest', $content);
         // Patches fetch for same-origin mutating requests
         $this->assertStringContainsString('X-CSRF-TOKEN', $content);
     }

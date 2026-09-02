@@ -583,37 +583,37 @@ A.SysOp_Name:visited{color: #a0522d}
 A.Administrator_Name:link{color: #4b0082}
 A.Administrator_Name:visited{color: #4b0082}
 
-.Moderator_Name{color: #6495ED}
-A.Moderator_Name:link{color: #6495ED}
-A.Moderator_Name:visited{color: #6495ED}
+.Moderator_Name{color: #4E75BB}
+A.Moderator_Name:link{color: #4E75BB}
+A.Moderator_Name:visited{color: #4E75BB}
 
-.ForumModerator_Name{COLOR: #1cc6d5}
-A.ForumModerator_Name:link{COLOR: #1cc6d5}
-A.ForumModerator_Name:visited{COLOR: #1cc6d5}
+.ForumModerator_Name{COLOR: #12828C}
+A.ForumModerator_Name:link{COLOR: #12828C}
+A.ForumModerator_Name:visited{COLOR: #12828C}
 
-.Retiree_Name{COLOR: #1cc6d5}
-A.Retiree_Name:link{COLOR: #1cc6d5}
-A.Retiree_Name:visited{COLOR: #1cc6d5}
+.Retiree_Name{COLOR: #12828C}
+A.Retiree_Name:link{COLOR: #12828C}
+A.Retiree_Name:visited{COLOR: #12828C}
 
 .Uploader_Name{color: #DC143C}
 A.Uploader_Name:link{color: #DC143C}
 A.Uploader_Name:visited{color: #DC143C}
 
-.VIP_Name{color: #009F00}
-A.VIP_Name:link{color: #009F00}
-A.VIP_Name:visited{color: #009F00}
+.VIP_Name{color: #008A00}
+A.VIP_Name:link{color: #008A00}
+A.VIP_Name:visited{color: #008A00}
 
-.NexusMaster_Name{color: #38ACEC}
-A.NexusMaster_Name:link{color: #38ACEC}
-A.NexusMaster_Name:visited{color: #38ACEC}
+.NexusMaster_Name{color: #287DAC}
+A.NexusMaster_Name:link{color: #287DAC}
+A.NexusMaster_Name:visited{color: #287DAC}
 
 .UltimateUser_Name{color: #006400}
 A.UltimateUser_Name:link{color: #006400}
 A.UltimateUser_Name:visited{color: #006400}
 
-.ExtremeUser_Name{color: #FF8C00}
-A.ExtremeUser_Name:link{color: #FF8C00}
-A.ExtremeUser_Name:visited{color: #FF8C00}
+.ExtremeUser_Name{color: #B26100}
+A.ExtremeUser_Name:link{color: #B26100}
+A.ExtremeUser_Name:visited{color: #B26100}
 
 .VeteranUser_Name{color: #483D8B}
 A.VeteranUser_Name:link{color: #483D8B}
@@ -623,25 +623,25 @@ A.VeteranUser_Name:visited{color: #483D8B}
 A.InsaneUser_Name:link{color: #8B008B}
 A.InsaneUser_Name:visited{color: #8B008B}
 
-.CrazyUser_Name{color: #00BFFF}
-A.CrazyUser_Name:link{color: #00BFFF}
-A.CrazyUser_Name:visited{color: #00BFFF}
+.CrazyUser_Name{color: #007FAA}
+A.CrazyUser_Name:link{color: #007FAA}
+A.CrazyUser_Name:visited{color: #007FAA}
 
-.EliteUser_Name{color: #008B8B}
-A.EliteUser_Name:link{color: #008B8B}
-A.EliteUser_Name:visited{color: #008B8B}
+.EliteUser_Name{color: #007575}
+A.EliteUser_Name:link{color: #007575}
+A.EliteUser_Name:visited{color: #007575}
 
-.PowerUser_Name{color: #DAA520}
-A.PowerUser_Name:link{color: #DAA520}
-A.PowerUser_Name:visited{color: #DAA520}
+.PowerUser_Name{color: #947015}
+A.PowerUser_Name:link{color: #947015}
+A.PowerUser_Name:visited{color: #947015}
 
 .User_Name{color: #000000}
 A.User_Name:link{color: #000000}
 A.User_Name:visited{color: #000000}
 
-.Peasant_Name{color: #708090}
-A.Peasant_Name:link{color: #708090}
-A.Peasant_Name:visited{color: #708090}
+.Peasant_Name{color: #5A6A7A}
+A.Peasant_Name:link{color: #5A6A7A}
+A.Peasant_Name:visited{color: #5A6A7A}
 
 .color_bonus{color: #1900d1}
 .color_invite{color: #1900d1}

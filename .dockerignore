@@ -20,3 +20,17 @@ yarn-error.log
 /.history
 crowdin.yml
 .env.bak
+
+# Dev-only files — not needed in production image
+# Note: .docker/php/entrypoint.sh and opcache.dev.ini are still needed by the
+# dev Dockerfile, so they are NOT excluded here. The prod Dockerfile uses
+# entrypoint.prod.sh and opcache.prod.ini instead.
+/tests
+/.github
+/.agents
+/.devin
+/.raw-queries-baseline.txt
+/AGENTS.md
+/modernization-*.md
+/audit-*.md
+/.gitleaksignore

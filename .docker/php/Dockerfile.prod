@@ -120,13 +120,13 @@ RUN echo "post_max_size = 10M" >> /usr/local/etc/php/conf.d/upload.ini
 ARG NEXUSPHP_ENV=prod
 COPY .docker/php/opcache.${NEXUSPHP_ENV}.ini /usr/local/etc/php/conf.d/opcache.ini
 
-# Install Composer (needed for entrypoint if vendor is not pre-baked)
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+# Install Composer (only needed for build-time; not in runtime)
+# Runtime has no composer, no git, no mysql-client
 
 ENV LOG_CHANNEL=stderr
 ENV RUNNING_IN_DOCKER=1
 
-# Copy application code
+# Copy application code (excluding dev-only files via .dockerignore)
 COPY --chown=www-data:www-data . /var/www/html
 
 # Copy pre-built vendor from vendor-builder
@@ -136,17 +136,33 @@ COPY --from=vendor-builder --chown=www-data:www-data /app/composer.lock /var/www
 # Copy pre-built frontend assets from assets-builder
 COPY --from=assets-builder --chown=www-data:www-data /app/public/build /var/www/html/public/build
 
-# Ensure writable directories exist
+# Ensure writable directories exist (mounted as volumes in prod compose)
 RUN mkdir -p /var/www/html/attachments /var/www/html/torrents \
-    /var/www/html/storage/framework/views /var/www/html/storage/logs \
-    /var/www/html/storage/app /var/www/html/bootstrap/cache \
+    /var/www/html/storage/framework/views /var/www/html/storage/framework/sessions \
+    /var/www/html/storage/framework/cache/data \
+    /var/www/html/storage/logs /var/www/html/storage/app/public \
+    /var/www/html/bootstrap/cache \
     && chown -R www-data:www-data /var/www/html/attachments /var/www/html/torrents \
     /var/www/html/storage /var/www/html/bootstrap/cache \
     && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache \
     /var/www/html/attachments /var/www/html/torrents
 
-COPY .docker/php/entrypoint.sh /usr/local/bin/entrypoint.sh
+# Build Laravel caches at image build time (config/route/view/icons/filament)
+# These are baked into the image; entrypoint re-runs them for runtime .env overrides.
+RUN cd /var/www/html \
+    && php artisan storage:link --force 2>/dev/null || true \
+    && php artisan config:cache 2>/dev/null || true \
+    && php artisan route:cache 2>/dev/null || true \
+    && php artisan view:cache 2>/dev/null || true \
+    && php artisan icons:cache 2>/dev/null || true \
+    && php artisan filament:cache-components 2>/dev/null || true
+
+# Production entrypoint — no composer install, no install-script copy
+COPY .docker/php/entrypoint.prod.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# Run as non-root user
+USER www-data
 
 WORKDIR /var/www/html
 

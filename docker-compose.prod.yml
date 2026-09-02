@@ -1,0 +1,78 @@
+# Production overrides — use pre-built prod image, no bind mounts, read-only rootfs.
+#
+# Usage:
+#   docker build -f .docker/php/Dockerfile.prod -t nexusphp_php:prod .
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# The prod image bakes vendor/, public/build/, and Laravel caches at build time.
+# The entrypoint does NOT run composer install — it only waits for deps and starts FPM.
+
+services:
+  php:
+    build:
+      dockerfile: .docker/php/Dockerfile.prod
+      args:
+        NEXUSPHP_ENV: prod
+    image: nexusphp_php:prod
+    user: www-data
+    # Read-only rootfs: only named volumes are writable
+    read_only: true
+    tmpfs:
+      - /tmp:size=64M
+      - /var/run:size=1M
+    volumes:
+      - storage-data:/var/www/html/storage
+      - bootstrap-cache:/var/www/html/bootstrap/cache
+      - attachments-data:/var/www/html/attachments
+      - torrents-data:/var/www/html/torrents
+      - ${NP_BACKUP_EXPORT_PATH:-/tmp/nexusphp_backup}:${NP_BACKUP_EXPORT_PATH:-/tmp/nexusphp_backup}
+
+  queue:
+    image: nexusphp_php:prod
+    user: www-data
+    read_only: true
+    tmpfs:
+      - /tmp:size=64M
+      - /var/run:size=1M
+    volumes:
+      - storage-data:/var/www/html/storage
+      - bootstrap-cache:/var/www/html/bootstrap/cache
+      - attachments-data:/var/www/html/attachments
+      - torrents-data:/var/www/html/torrents
+
+  scheduler:
+    image: nexusphp_php:prod
+    user: www-data
+    read_only: true
+    tmpfs:
+      - /tmp:size=64M
+      - /var/run:size=1M
+    volumes:
+      - storage-data:/var/www/html/storage
+      - bootstrap-cache:/var/www/html/bootstrap/cache
+      - attachments-data:/var/www/html/attachments
+      - torrents-data:/var/www/html/torrents
+      - ${NP_BACKUP_EXPORT_PATH:-/tmp/nexusphp_backup}:${NP_BACKUP_EXPORT_PATH:-/tmp/nexusphp_backup}
+
+  openresty:
+    volumes:
+      - openresty-sites:/etc/nginx/conf.d/sites:ro
+      - openresty-certs:/certs:ro
+      - openresty-lua:/usr/local/openresty/lua:ro
+      - storage-data:/var/www/html/storage:ro
+      - attachments-data:/var/www/html/attachments:ro
+      - torrents-data:/var/www/html/torrents:ro
+      - public-build:/var/www/html/public/build:ro
+    # No bind-mount of source — openresty reads static files from the php image's
+    # public/ via a shared volume. For simplicity in this compose, we mount the
+    # static assets volume (populated by the php build).
+
+volumes:
+  storage-data:
+  bootstrap-cache:
+  attachments-data:
+  torrents-data:
+  public-build:
+  openresty-sites:
+  openresty-certs:
+  openresty-lua:

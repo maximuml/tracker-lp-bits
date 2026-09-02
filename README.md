@@ -29,19 +29,41 @@ This is a streamlined fork focused on the core tracker/forum/community experienc
 
 ## Quick Start with Docker
 
+### Development
+
 ```bash
 cp .env.example .env
 # Edit .env so DB_HOST=mysql, REDIS_HOST=redis and MEILISEARCH_HOST=meilisearch match docker-compose.yml
-docker compose up -d
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
 ```
 
 After the containers start, complete the web installer at `http://<your-domain>/install` (or run `php artisan migrate --seed` and create an admin user if you prefer the CLI). Then populate the MeiliSearch index:
 
 ```bash
-docker compose exec php php artisan meilisearch:import
+docker compose -f docker-compose.yml -f docker-compose.dev.yml exec php php artisan meilisearch:import
 ```
 
 Run the queue worker, scheduler and cleanup workers via the containers started by `docker compose` (see `docker-compose.yml`).
+
+### Production
+
+The production image is a multi-stage build that pre-bakes `vendor/`, `public/build/`, and Laravel caches. It runs as `www-data` with a read-only rootfs.
+
+```bash
+# Build the production image
+docker build -f .docker/php/Dockerfile.prod -t nexusphp_php:prod .
+
+# Start the production stack
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+```
+
+Key differences from dev:
+- No bind-mounts — code is baked into the image
+- `USER www-data` — runs as non-root
+- `read_only: true` — rootfs is read-only; only `storage/`, `bootstrap/cache/`, `attachments/`, `torrents/` are writable volumes
+- No `composer install` at runtime — vendor is pre-built
+- Laravel caches (`config:cache`, `route:cache`, `view:cache`) are built at image build time
+- OPcache configured for production (`validate_timestamps=0`)
 
 ## Local Development
 

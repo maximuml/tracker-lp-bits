@@ -122,7 +122,7 @@ jobs:
           mkdir -p "$RESULTS_DIR"
 
           # Pages that don't require authentication
-          PAGES="/index.php /login.php /signup.php /faq.php /rules.php /aboutnexus.php /recover.php"
+          PAGES="/index /login /signup /faq /rules /aboutnexus /recover"
 
           for page in $PAGES; do
             echo "::group::Scanning $page"

@@ -74,11 +74,11 @@ final class A11yCiGateTest extends TestCase
     public function test_a11y_workflow_scans_multiple_pages(): void
     {
         $content = file_get_contents($this->workflowPath);
-        $this->assertStringContainsString('/index.php', $content);
-        $this->assertStringContainsString('/login.php', $content);
-        $this->assertStringContainsString('/signup.php', $content);
-        $this->assertStringContainsString('/faq.php', $content);
-        $this->assertStringContainsString('/rules.php', $content);
+        $this->assertStringContainsString('/index', $content);
+        $this->assertStringContainsString('/login', $content);
+        $this->assertStringContainsString('/signup', $content);
+        $this->assertStringContainsString('/faq', $content);
+        $this->assertStringContainsString('/rules', $content);
     }
 
     /**

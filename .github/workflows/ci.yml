@@ -399,7 +399,7 @@ jobs:
       - name: Smoke test public pages
         run: |
           set -e
-          for page in /index.php /login.php /signup.php /torrents.php /topten.php; do
+          for page in /index /login /signup /torrents /topten; do
             echo "Testing $page"
             curl -sfL --max-time 10 "http://localhost$page" -o /dev/null
           done

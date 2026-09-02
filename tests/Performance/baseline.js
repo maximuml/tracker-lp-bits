@@ -91,7 +91,7 @@ export default function () {
 
   // Index page — heaviest unauthenticated page
   group('index', () => {
-    const res = http.get(`${BASE_URL}/index.php`);
+    const res = http.get(`${BASE_URL}/index`);
     indexTrend.add(res.timings.duration);
     check(res, {
       'index status 200': (r) => r.status === 200,
@@ -100,7 +100,7 @@ export default function () {
 
   // Login page
   group('login', () => {
-    const res = http.get(`${BASE_URL}/login.php`);
+    const res = http.get(`${BASE_URL}/login`);
     loginTrend.add(res.timings.duration);
     check(res, {
       'login status 200': (r) => r.status === 200,
@@ -109,7 +109,7 @@ export default function () {
 
   // Signup page
   group('signup', () => {
-    const res = http.get(`${BASE_URL}/signup.php`);
+    const res = http.get(`${BASE_URL}/signup`);
     signupTrend.add(res.timings.duration);
     check(res, {
       'signup status 200': (r) => r.status === 200,
@@ -127,7 +127,7 @@ export default function () {
 
   // Torrents page — listing with search
   group('torrents', () => {
-    const res = http.get(`${BASE_URL}/torrents.php`);
+    const res = http.get(`${BASE_URL}/torrents`);
     torrentsTrend.add(res.timings.duration);
     check(res, {
       'torrents responds': (r) => r.status !== 0,
@@ -136,7 +136,7 @@ export default function () {
 
   // Forums page
   group('forums', () => {
-    const res = http.get(`${BASE_URL}/forums.php`);
+    const res = http.get(`${BASE_URL}/forums`);
     forumsTrend.add(res.timings.duration);
     check(res, {
       'forums responds': (r) => r.status !== 0,
@@ -145,7 +145,7 @@ export default function () {
 
   // FAQ page
   group('faq', () => {
-    const res = http.get(`${BASE_URL}/faq.php`);
+    const res = http.get(`${BASE_URL}/faq`);
     faqTrend.add(res.timings.duration);
     check(res, {
       'faq responds': (r) => r.status !== 0,
@@ -154,7 +154,7 @@ export default function () {
 
   // Rules page
   group('rules', () => {
-    const res = http.get(`${BASE_URL}/rules.php`);
+    const res = http.get(`${BASE_URL}/rules`);
     rulesTrend.add(res.timings.duration);
     check(res, {
       'rules responds': (r) => r.status !== 0,

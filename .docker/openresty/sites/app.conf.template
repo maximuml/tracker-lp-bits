@@ -74,6 +74,22 @@ server {
         fastcgi_param HTTP_X_FORWARDED_FOR $proxy_add_x_forwarded_for;
     }
 
+    # 301-redirect legacy .php URLs to canonical routes (Step 28).
+    # NOTE: /index.php is NOT redirected — it's the Laravel front controller
+    # used by try_files as an internal rewrite target.
+    # announce.php and scrape.php are kept as-is (external BT clients).
+    # confirmemail.php is handled above with PATH_INFO.
+    location = /login.php { return 301 /login; }
+    location = /signup.php { return 301 /signup; }
+    location = /torrents.php { return 301 /torrents; }
+    location = /forums.php { return 301 /forums; }
+    location = /faq.php { return 301 /faq; }
+    location = /rules.php { return 301 /rules; }
+    location = /aboutnexus.php { return 301 /aboutnexus; }
+    location = /useragreement.php { return 301 /useragreement; }
+    location = /recover.php { return 301 /recover; }
+    location = /topten.php { return 301 /topten; }
+
     # Remaining .php URLs (including the root index.php wrapper) are served if the
     # file still exists; otherwise they fall through to index.php so legacy URLs
     # like /torrents.php keep working after the per-page wrappers are removed.

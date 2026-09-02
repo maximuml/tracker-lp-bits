@@ -31,11 +31,11 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return redirect('index.php');
+    return redirect('/index');
 });
 
 Route::get('/nexus', function () {
-    return redirect('index.php');
+    return redirect('/index');
 });
 
 Route::get('/health/live', [HealthController::class, 'live'])->name('health.live');

@@ -26,6 +26,14 @@ services:
       - attachments-data:/var/www/html/attachments
       - torrents-data:/var/www/html/torrents
       - ${NP_BACKUP_EXPORT_PATH:-/tmp/nexusphp_backup}:${NP_BACKUP_EXPORT_PATH:-/tmp/nexusphp_backup}
+    # Resource limits — tune based on measured memory usage
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 512M
+        reservations:
+          memory: 256M
 
   queue:
     image: nexusphp_php:prod
@@ -39,6 +47,13 @@ services:
       - bootstrap-cache:/var/www/html/bootstrap/cache
       - attachments-data:/var/www/html/attachments
       - torrents-data:/var/www/html/torrents
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 256M
+        reservations:
+          memory: 128M
 
   scheduler:
     image: nexusphp_php:prod
@@ -53,6 +68,13 @@ services:
       - attachments-data:/var/www/html/attachments
       - torrents-data:/var/www/html/torrents
       - ${NP_BACKUP_EXPORT_PATH:-/tmp/nexusphp_backup}:${NP_BACKUP_EXPORT_PATH:-/tmp/nexusphp_backup}
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M
+        reservations:
+          memory: 64M
 
   openresty:
     volumes:

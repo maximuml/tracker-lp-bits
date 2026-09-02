@@ -380,7 +380,7 @@ HEAD;
                 $y .= '<div id="'.$previewBoxId.'">';
                 if (! empty($currentValue)) {
                     if (substr((string) $currentValue, 0, 4) == 'http') {
-                        $y .= HtmlRenderer::formatImg((string) $currentValue, true, 700, 0, $imgId);
+                        $y .= Html::formatImg((string) $currentValue, true, 700, 0, $imgId);
                     } else {
                         $y .= Format::formatComment((string) $currentValue);
                     }
@@ -528,7 +528,7 @@ JS;
                 break;
             case self::TYPE_IMAGE:
                 if (substr((string) $fieldValue, 0, 4) == 'http') {
-                    $result .= $doFormatComment ? HtmlRenderer::formatImg((string) $fieldValue, true, 700, 0, "attach{$customFieldWithValue['id']}") : (string) $fieldValue;
+                    $result .= $doFormatComment ? Html::formatImg((string) $fieldValue, true, 700, 0, "attach{$customFieldWithValue['id']}") : (string) $fieldValue;
                 } else {
                     $result .= $doFormatComment ? Format::formatComment((string) $fieldValue) : (string) $fieldValue;
                 }

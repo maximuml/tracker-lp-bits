@@ -672,4 +672,24 @@ final class Html
 
         return $result;
     }
+
+    /**
+     * Wrap content in a BBCode [hidden] block with temp-code protection.
+     *
+     * Consolidated from HtmlRenderer::formatHidden().
+     */
+    public static function formatHidden(string $content): string
+    {
+        return Comment::addTempCode(BBCode::hidden($content));
+    }
+
+    /**
+     * Wrap content in a BBCode text-align block with temp-code protection.
+     *
+     * Consolidated from HtmlRenderer::formatTextAlign().
+     */
+    public static function formatTextAlign(string $text, string $align): string
+    {
+        return Comment::addTempCode(BBCode::textAlign($text, $align));
+    }
 }

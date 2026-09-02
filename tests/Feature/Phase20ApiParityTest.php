@@ -11,6 +11,7 @@ use App\Services\WebAuthService;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redis;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -24,6 +25,7 @@ class Phase20ApiParityTest extends TestCase
 
         config(['scout.driver' => 'null', 'app.debug' => false]);
         $this->withoutMiddleware(VerifyCsrfToken::class);
+        Redis::connection()->flushdb();
     }
 
     public function test_usercp_settings_returns_authenticated_user(): void

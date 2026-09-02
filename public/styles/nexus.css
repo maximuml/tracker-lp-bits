@@ -128,3 +128,8 @@ details[open] summary {
         -webkit-overflow-scrolling: touch;
     }
 }
+
+/* WCAG AA color-contrast: override deprecated <font color="red"> from BBCode */
+font[color="red"] {
+    color: #B00000;
+}

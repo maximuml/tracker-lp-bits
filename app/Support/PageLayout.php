@@ -703,7 +703,7 @@ class PageLayout
         </script>
         JS;
         echo $js;
-        echo '<img id="nexus-preview" style="display: none; position: absolute" src="" />';
+        echo '<img id="nexus-preview" alt="" role="presentation" style="display: none; position: absolute" src="" />';
         echo '</body></html>';
     }
 }

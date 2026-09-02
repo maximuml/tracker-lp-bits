@@ -23,6 +23,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
+      - name: Setup PHP
+        uses: shivammathur/setup-php@b604ade2a87db23f8871b7182e69ec5e75effb45 # v2
+        with:
+          php-version: '8.5'
+          extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, pdo_mysql, redis, sqlite3, xml, zip
+          coverage: none
+
       - name: Setup Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
@@ -38,6 +45,19 @@ jobs:
 
       - name: Install matching ChromeDriver
         run: npx --yes browser-driver-manager install chrome@stable
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: ~/.composer/cache
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install PHP dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction --no-scripts
+
+      - name: Dump autoload
+        run: composer dump-autoload --no-interaction --no-scripts
 
       - name: Build and start Docker stack
         env:
@@ -60,26 +80,18 @@ jobs:
           sed -i 's/^REDIS_PASSWORD=.*/REDIS_PASSWORD=ci-redis-test-password/' .env
           # Set CI MeiliSearch key (docker-compose requires it)
           sed -i 's/^MEILISEARCH_MASTER_KEY=.*/MEILISEARCH_MASTER_KEY=ci-meilisearch-test-key/' .env
+          # Point DB/Redis at Docker service hostnames (not 127.0.0.1)
+          sed -i 's/^DB_HOST=.*/DB_HOST=mysql/' .env
+          sed -i 's/^REDIS_HOST=.*/REDIS_HOST=redis/' .env
           # Replace ${VAR} references that docker compose can't interpolate
-          sed -i 's/\${DB_HOST}/mysql/g' .env
           sed -i 's/\${APP_NAME}/NexusPHP/g' .env
           sed -i 's/\${PUSHER_APP_KEY}//g' .env
           sed -i 's/\${PUSHER_APP_CLUSTER}//g' .env
           docker compose build
           # Start mysql + redis first, wait for them
           docker compose up -d --wait mysql redis
-          # Start php (runs composer install + config:cache in entrypoint)
-          docker compose up -d php
-          # Wait for PHP-FPM to be ready (entrypoint runs composer install + config:cache)
-          # Check artisan (not php -r) because vendor/autoload.php must exist
-          echo "Waiting for PHP-FPM to finish setup..."
-          for i in $(seq 1 60); do
-            if docker compose --env-file /dev/null exec -T php php artisan --version 2>/dev/null | grep -q "Laravel"; then
-              echo "PHP-FPM ready after ${i}0s"
-              break
-            fi
-            sleep 10
-          done
+          # Start php (vendor/ already populated on host via volume mount)
+          docker compose up -d --wait php
           # Run migrations + seed
           docker compose --env-file /dev/null exec -T php php artisan migrate:fresh --seed --force
           docker compose --env-file /dev/null exec -T php php artisan storage:link --force
@@ -104,18 +116,29 @@ jobs:
           BASE=http://127.0.0.1:80
           PASS=0
           FAIL=0
+          RESULTS_DIR="axe-results"
+          mkdir -p "$RESULTS_DIR"
 
           # Pages that don't require authentication
-          PAGES="/index.php /login.php /signup.php"
+          PAGES="/index.php /login.php /signup.php /faq.php /rules.php /aboutnexus.php /recover.php"
 
           for page in $PAGES; do
             echo "::group::Scanning $page"
-            if axe "$BASE$page" --exit --tags wcag2a,wcag2aa --load-delay=3000 --chrome-options="no-sandbox,disable-dev-shm-usage" 2>&1; then
+            PAGE_NAME=$(echo "$page" | tr '/' '_')
+            RESULT_FILE="$RESULTS_DIR/${PAGE_NAME}.json"
+            if axe "$BASE$page" --exit --tags wcag2a,wcag2aa,wcag21a,wcag21aa --load-delay=3000 --chrome-options="no-sandbox,disable-dev-shm-usage" --save "$RESULT_FILE" 2>&1; then
               echo "PASS: $page"
               PASS=$((PASS + 1))
             else
               echo "FAIL: $page"
               FAIL=$((FAIL + 1))
+              # Print violation summary
+              if [ -f "$RESULT_FILE" ]; then
+                echo "::error::Violations on $page (see $RESULT_FILE for details)"
+                # Show violation count from JSON
+                VIOLATIONS=$(jq '.violations | length' "$RESULT_FILE" 2>/dev/null || echo "?")
+                echo "  Violations: $VIOLATIONS"
+              fi
             fi
             echo "::endgroup::"
           done
@@ -125,3 +148,11 @@ jobs:
             echo "::error::$FAIL pages have accessibility violations"
             exit 1
           fi
+
+      - name: Upload axe results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: axe-results
+          path: axe-results/
+          retention-days: 14

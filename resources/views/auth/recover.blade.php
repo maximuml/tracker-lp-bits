@@ -26,8 +26,8 @@ $siteName = \App\Models\Setting::getSiteName();
     <form method="get" action="/recover">
         <input type="hidden" name="secret" value="{{ $secret }}" />
         <div align="right">
-            {{ $lang['text_select_lang'] ?? 'Select Site Language:' }}
-            <select name="sitelanguage" onchange="this.form.submit()">
+            <label for="sitelanguage">{{ $lang['text_select_lang'] ?? 'Select Site Language:' }}</label>
+            <select id="sitelanguage" name="sitelanguage" onchange="this.form.submit()">
                 @foreach ($languages as $row)
                     <option value="{{ $row['id'] }}" @if (($row['site_lang_folder'] ?? '') === $langFolder) selected @endif>
                         {{ $row['lang_name'] }}
@@ -48,8 +48,8 @@ $siteName = \App\Models\Setting::getSiteName();
         <input type="hidden" name="secret" value="{{ $secret }}" />
         <table border="1" cellspacing="0" cellpadding="10" style="width: 100%;">
             <tr>
-                <td class="rowhead">{{ $lang['row_registered_email'] ?? 'Registered email:' }}</td>
-                <td class="rowfollow"><input type="email" name="email" autocomplete="email" value="{{ old('email') }}" style="width: min(100%, 320px); min-width: 180px; border: 1px solid gray; box-sizing: border-box" /></td>
+                <td class="rowhead"><label for="email">{{ $lang['row_registered_email'] ?? 'Registered email:' }}</label></td>
+                <td class="rowfollow"><input type="email" id="email" name="email" autocomplete="email" value="{{ old('email') }}" style="width: min(100%, 320px); min-width: 180px; border: 1px solid gray; box-sizing: border-box" /></td>
             </tr>
 
             @if ($captchaEnabled && $captchaMarkup !== '')

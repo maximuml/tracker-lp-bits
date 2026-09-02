@@ -644,7 +644,7 @@ final class Html
      */
     public static function cleanListChildren(string $html): string
     {
-        $dom = new \DOMDocument();
+        $dom = new \DOMDocument;
         $previous = libxml_use_internal_errors(true);
         $dom->loadHTML('<?xml encoding="UTF-8"><div>'.$html.'</div>', LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
         libxml_clear_errors();

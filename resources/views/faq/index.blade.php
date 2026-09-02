@@ -27,10 +27,10 @@
                 @endforeach
             @endif
             </ul></li>
-            <br />
         @endif
     @endforeach
     </ul>
+    <br />
     @php \App\Support\Html::endFrame(); @endphp
 
     @foreach ($faqCategories as $id => $temp)

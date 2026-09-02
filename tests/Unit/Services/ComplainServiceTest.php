@@ -9,6 +9,7 @@ use App\Repositories\ToolRepository;
 use App\Services\ComplainService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redis;
 use Mockery;
 use Mockery\MockInterface;
 use Tests\TestCase;
@@ -33,6 +34,7 @@ final class ComplainServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        Redis::connection()->flushdb();
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
         DB::table('complains')->truncate();
         DB::table('complain_replies')->truncate();

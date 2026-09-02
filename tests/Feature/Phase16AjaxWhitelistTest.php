@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\User;
 use App\Services\AjaxService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 /**
@@ -21,11 +22,20 @@ final class Phase16AjaxWhitelistTest extends TestCase
         config(['app.debug' => false]);
     }
 
+    private function csrfToken(): string
+    {
+        return Str::random(40);
+    }
+
     public function test_whitelisted_action_passes_the_gate(): void
     {
         // getToastNotifications is in the whitelist and requires login
         $user = User::factory()->create();
-        $response = $this->withNexusCookie($user)->post('/ajax', ['action' => 'getToastNotifications']);
+        $token = $this->csrfToken();
+        $response = $this->withNexusCookie($user)
+            ->withSession(['_token' => $token])
+            ->withHeader('X-CSRF-TOKEN', $token)
+            ->post('/ajax', ['action' => 'getToastNotifications', '_token' => $token]);
 
         // Should not be a "hacking attempt" rejection (which returns 200
         // with ret=1). The key assertion is that the action is dispatched,
@@ -40,7 +50,11 @@ final class Phase16AjaxWhitelistTest extends TestCase
     public function test_non_whitelisted_action_is_rejected(): void
     {
         $user = User::factory()->create();
-        $response = $this->withNexusCookie($user)->post('/ajax', ['action' => '__construct']);
+        $token = $this->csrfToken();
+        $response = $this->withNexusCookie($user)
+            ->withSession(['_token' => $token])
+            ->withHeader('X-CSRF-TOKEN', $token)
+            ->post('/ajax', ['action' => '__construct', '_token' => $token]);
 
         $response->assertOk();
         $response->assertJsonPath('ret', 1);
@@ -51,7 +65,11 @@ final class Phase16AjaxWhitelistTest extends TestCase
     public function test_unknown_action_is_rejected(): void
     {
         $user = User::factory()->create();
-        $response = $this->withNexusCookie($user)->post('/ajax', ['action' => 'doesNotExist']);
+        $token = $this->csrfToken();
+        $response = $this->withNexusCookie($user)
+            ->withSession(['_token' => $token])
+            ->withHeader('X-CSRF-TOKEN', $token)
+            ->post('/ajax', ['action' => 'doesNotExist', '_token' => $token]);
 
         $response->assertOk();
         $response->assertJsonPath('ret', 1);
@@ -62,7 +80,11 @@ final class Phase16AjaxWhitelistTest extends TestCase
     public function test_empty_action_is_rejected(): void
     {
         $user = User::factory()->create();
-        $response = $this->withNexusCookie($user)->post('/ajax', ['action' => '']);
+        $token = $this->csrfToken();
+        $response = $this->withNexusCookie($user)
+            ->withSession(['_token' => $token])
+            ->withHeader('X-CSRF-TOKEN', $token)
+            ->post('/ajax', ['action' => '', '_token' => $token]);
 
         $response->assertOk();
         $response->assertJsonPath('ret', 1);

@@ -113,9 +113,11 @@ class BonusHistoryController extends LegacyController
         }
 
         $resetJs = <<<'JS'
-jQuery("#reset").on('click', function () {
-    jQuery("select[name=category]").val('')
-    jQuery("select[name=business_type]").val('')
+document.getElementById("reset").addEventListener('click', function () {
+    var cat = document.querySelector("select[name=category]")
+    var biz = document.querySelector("select[name=business_type]")
+    if (cat) cat.value = ''
+    if (biz) biz.value = ''
 })
 JS;
         AssetAppender::js($resetJs, 'footer', false);

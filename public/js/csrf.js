@@ -3,8 +3,8 @@
  *
  * Reads the token from <meta name="csrf-token"> and:
  * 1. Injects a hidden _token field into every <form method="POST"> on the page.
- * 2. Sets up $.ajaxSetup so all jQuery AJAX requests send X-CSRF-TOKEN header.
- * 3. Patches window.fetch to include the header in same-origin POST/PUT/DELETE/PATCH requests.
+ * 2. Patches window.fetch to include the header in same-origin POST/PUT/DELETE/PATCH requests.
+ * 3. Patches XMLHttpRequest to include the header in same-origin mutating requests.
  */
 (function () {
     'use strict';
@@ -45,14 +45,7 @@
         injectTokens();
     }
 
-    // 2. jQuery ajaxSetup — add X-CSRF-TOKEN header to all jQuery AJAX requests
-    if (typeof jQuery !== 'undefined') {
-        jQuery.ajaxSetup({
-            headers: { 'X-CSRF-TOKEN': token }
-        });
-    }
-
-    // 3. Patch fetch — add X-CSRF-TOKEN header to same-origin mutating requests
+    // 2. Patch fetch — add X-CSRF-TOKEN header to same-origin mutating requests
     var originalFetch = window.fetch;
     if (originalFetch && typeof originalFetch === 'function') {
         window.fetch = function (input, init) {
@@ -72,6 +65,26 @@
                 }
             }
             return originalFetch.call(this, input, init);
+        };
+    }
+
+    // 3. Patch XMLHttpRequest — add X-CSRF-TOKEN header to mutating requests
+    var OriginalXHR = window.XMLHttpRequest;
+    if (OriginalXHR && OriginalXHR.prototype) {
+        var originalOpen = OriginalXHR.prototype.open;
+        OriginalXHR.prototype.open = function (method, url) {
+            this._csrfMethod = (method || 'GET').toUpperCase();
+            return originalOpen.apply(this, arguments);
+        };
+        var originalSend = OriginalXHR.prototype.send;
+        OriginalXHR.prototype.send = function () {
+            if (this._csrfMethod === 'POST' || this._csrfMethod === 'PUT' ||
+                this._csrfMethod === 'PATCH' || this._csrfMethod === 'DELETE') {
+                try {
+                    this.setRequestHeader('X-CSRF-TOKEN', token);
+                } catch (e) { /* headers already sent */ }
+            }
+            return originalSend.apply(this, arguments);
         };
     }
 })();

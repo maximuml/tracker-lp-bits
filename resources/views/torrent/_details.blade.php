@@ -111,8 +111,8 @@ if (empty($requestFlags['cmtpage'])) {
             );
             $title = \App\Support\Locale::trans('torrent.approval.modal_title', [], null);
             $js = <<<JS
-jQuery('#approval').on("click", function () {
-    let torrentId = jQuery(this).attr('data-torrent_id')
+document.getElementById('approval').addEventListener("click", function () {
+    var torrentId = this.getAttribute('data-torrent_id')
     layer.open({
         type: 2,
         title: '$title',

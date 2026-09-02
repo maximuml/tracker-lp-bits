@@ -72,17 +72,18 @@ if ($rescount) {
     if ($hasActionRemove) {
         $msg = \App\Support\Locale::trans('hr.remove_confirm_msg', ['bonus' => $cancelHrBonus], null);
         $js = <<<JS
-jQuery('#hr-table').on('click', '.remove-hr', function () {
-    var id = jQuery(this).attr('data-id')
+document.getElementById('hr-table').addEventListener('click', function (e) {
+    if (!e.target || !e.target.classList || !e.target.classList.contains('remove-hr')) return;
+    var id = e.target.getAttribute('data-id');
     layer.confirm('{$msg}', function (index) {
-        jQuery.post('ajax.php', {"action": "removeHitAndRun", "params": {"id": id}}, function (response) {
+        nativePost('ajax.php', {"action": "removeHitAndRun", "params": {"id": id}}, function (response) {
             console.log(response)
             if (response.ret != 0) {
                 layer.alert(response.msg)
                 return
             }
             window.location.reload()
-        }, 'json')
+        })
     })
 })
 JS;

@@ -50,13 +50,13 @@ function retroactive(dateStr) {
     if (!window.confirm(confirmText + dateStr + ' ?')) {
         return
     }
-    jQuery.post('ajax.php', {params: {date: dateStr}, action: 'attendanceRetroactive'}, function (response) {
+    nativePost('ajax.php', {params: {date: dateStr}, action: 'attendanceRetroactive'}, function (response) {
         if (response.ret != 0) {
             alert(response.msg)
         } else {
             location.reload();
         }
-    }, 'json')
+    })
 }
 EOP;
 

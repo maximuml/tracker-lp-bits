@@ -29,25 +29,16 @@ final class Form
         $lang = str_replace('_', '-', $lang);
 
         $js = '';
-        if (! empty($options['require_files'])) {
-            AssetAppender::css('vendor/jquery-datetimepicker/jquery.datetimepicker.min.css', 'footer', true);
-            AssetAppender::js('vendor/jquery-datetimepicker/jquery.datetimepicker.full.min.js', 'footer', true);
-            $js = "jQuery.datetimepicker.setLocale('{$lang}');";
-        }
 
         $id = "datetime-picker-$name";
         $input = sprintf(
-            '%s<input type="text" id="%s" name="%s" value="%s" autocomplete="off" style="%s">',
+            '%s<input type="datetime-local" id="%s" name="%s" value="%s" autocomplete="off" style="%s">',
             $label,
             $id,
             $name,
             $value,
             $options['style'] ?? ''
         );
-
-        $format = $options['format'] ?? 'Y-m-d H:i';
-        $js .= "jQuery(\"#{$id}\").datetimepicker({ format: '{$format}' })";
-        AssetAppender::js($js, 'footer', false);
 
         return $input;
     }
@@ -283,16 +274,18 @@ function simpletag(thetag)
 function textBBCodePreview() {
     let poststr = encodeURIComponent( document.getElementById(textareaId).value );
     let result=ajax.posts('preview.php','body='+poststr);
-    jQuery('#' + editTbodyId).hide()
-    jQuery('#' + previewTbodyId).html(result).show()
-    jQuery('#' + btnPreviewId).hide()
-    jQuery('#' + btnEditId).show()
+    document.getElementById(editTbodyId).style.display = 'none'
+    var previewEl = document.getElementById(previewTbodyId)
+    previewEl.innerHTML = result
+    previewEl.style.display = ''
+    document.getElementById(btnPreviewId).style.display = 'none'
+    document.getElementById(btnEditId).style.display = ''
 }
 function textBBCodeEdit() {
-    jQuery('#' + editTbodyId).show()
-    jQuery('#' + previewTbodyId).hide()
-    jQuery('#' + btnPreviewId).show()
-    jQuery('#' + btnEditId).hide()
+    document.getElementById(editTbodyId).style.display = ''
+    document.getElementById(previewTbodyId).style.display = 'none'
+    document.getElementById(btnPreviewId).style.display = ''
+    document.getElementById(btnEditId).style.display = 'none'
 }
 //]]>
 </script>
@@ -473,25 +466,26 @@ JS;
 
         $formVar = 'jqForm'.md5($formId);
         $js = <<<JS
-var $formVar = jQuery("#{$formId}");
-$formVar.on("click", "input[type=button]", function() {
-    let jqUsername = $formVar.find("[name={$usernameName}]")
-    let jqPassword = $formVar.find(".{$passwordOriginalClass}")
-    let jqPasswordConfirm = $formVar.find(".{$passwordConfirmClass}")
-    let password = jqPassword.val()
+var $formVar = document.getElementById("{$formId}");
+$formVar.addEventListener("click", function(e) {
+    if (!e.target || e.target.type !== 'button') return;
+    var usernameEl = $formVar.querySelector("[name={$usernameName}]")
+    var passwordEl = $formVar.querySelector(".{$passwordOriginalClass}")
+    var passwordConfirmEl = $formVar.querySelector(".{$passwordConfirmClass}")
+    var password = passwordEl.value
     $passwordValidateJS
-    if (jqUsername.length > 0 && jqUsername.val() === password) {
+    if (usernameEl && usernameEl.value === password) {
         layer.alert("$tipEqualUsername")
         return
     }
-    if (jqPasswordConfirm.length > 0 && password !== jqPasswordConfirm.val()) {
+    if (passwordConfirmEl && password !== passwordConfirmEl.value) {
         layer.alert("$tipNotMatch")
         return
     }
     if (password !== "") {
         // Send plaintext password over HTTPS so the server can use argon2id.
         // Client-side SHA256 hashing prevented argon2id upgrades.
-        $formVar.find("input[name={$passwordHashedName}]").val(password)
+        $formVar.querySelector("input[name={$passwordHashedName}]").value = password
         $formVar.submit()
     } else {
         $formVar.submit()
@@ -511,21 +505,22 @@ JS;
     {
         $formVar = 'jqForm'.md5($formId);
         $js = <<<JS
-var $formVar = jQuery("#{$formId}");
-$formVar.on("click", "input[type=button]", function() {
-    let useChallengeResponseAuthentication = $formVar.find("input[name=response]").length > 0
+var $formVar = document.getElementById("{$formId}");
+$formVar.addEventListener("click", function(e) {
+    if (!e.target || e.target.type !== 'button') return;
+    var useChallengeResponseAuthentication = $formVar.querySelector("input[name=response]") !== null
     if (!useChallengeResponseAuthentication) {
-        return $formVar.submit()
+        $formVar.submit()
+        return
     }
-    let jqUsername = $formVar.find("[name={$usernameName}]")
-    let jqPassword = $formVar.find(".{$passwordOriginalClass}")
-    let username = jqUsername.val()
-    let password = jqPassword.val()
+    var usernameEl = $formVar.querySelector("[name={$usernameName}]")
+    var passwordEl = $formVar.querySelector(".{$passwordOriginalClass}")
+    var username = usernameEl.value
+    var password = passwordEl.value
     login(username, password, $formVar)
 })
-async function login(username, password, jqForm) {
+async function login(username, password, theForm) {
     try {
-        jQuery('body').loading({stoppable: false});
         const challengeResponse = await fetch('/api/challenge', {
             method: 'POST',
             headers: {
@@ -533,7 +528,6 @@ async function login(username, password, jqForm) {
             },
             body: JSON.stringify({ username: username })
         });
-        jQuery('body').loading('stop');
 
         const challengeData = await challengeResponse.json();
         if (challengeData.ret !== 0) {
@@ -544,10 +538,17 @@ async function login(username, password, jqForm) {
         // For argon2id users, send plaintext password (over HTTPS) since
         // the server-side hash cannot be computed client-side.
         if (challengeData.data.passhash_algo === 'argon2id') {
-            jqForm.find("input[name=response]").val('')
-            jqForm.find("input[name=oldpassword]").remove()
-            jqForm.append('<input type="hidden" name="oldpassword" value="' + $('<div>').text(password).html() + '">')
-            jqForm.submit()
+            theForm.querySelector("input[name=response]").value = ''
+            var oldPwd = theForm.querySelector("input[name=oldpassword]")
+            if (oldPwd) oldPwd.remove()
+            var escDiv = document.createElement('div')
+            escDiv.textContent = password
+            var hiddenInput = document.createElement('input')
+            hiddenInput.type = 'hidden'
+            hiddenInput.name = 'oldpassword'
+            hiddenInput.value = escDiv.innerHTML
+            theForm.appendChild(hiddenInput)
+            theForm.submit()
             return
         }
 
@@ -556,15 +557,14 @@ async function login(username, password, jqForm) {
         const serverSideHash = CryptoJS.SHA256(challengeData.data.secret + clientHashedPassword).toString();
 
         const clientResponse = CryptoJS.HmacSHA256(serverSideHash, challengeData.data.challenge).toString();
-        jqForm.find("input[name=response]").val(clientResponse)
-        jqForm.submit()
+        theForm.querySelector("input[name=response]").value = clientResponse
+        theForm.submit()
     } catch (error) {
         console.error(error);
         layer.alert(error.toString())
     }
 }
 JS;
-        AssetAppender::js('vendor/jquery-loading/jquery.loading.min.js', 'footer', true);
         AssetAppender::js('js/crypto-js.js', 'footer', true);
         AssetAppender::js($js, 'footer', false);
     }

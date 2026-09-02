@@ -191,15 +191,16 @@ class UserDetailController extends Controller
         $claimJs = '';
         if ($userModel instanceof User && $userModel->id === $currentUserId && Permissions::hasRoleWorkSeeding($userModel->id)) {
             $claimJs = <<<JS
-jQuery("body").on("click", "#claim-all-seeding", function (e) {
+document.body.addEventListener("click", function (e) {
+    if (!e.target || e.target.id !== "claim-all-seeding") return;
     layer.confirm("$claimAllSeedingConfirmation", {}, function () {
-        jQuery.post('/plugin/claim_all_seeding', {"action": "claimAllSeeding"}, function (response) {
+        nativePost('/plugin/claim_all_seeding', {"action": "claimAllSeeding"}, function (response) {
             if (response.ret == 0) {
                 window.location.reload()
             } else {
                 layer.alert(response.msg)
             }
-        }, 'json')
+        })
     })
 })
 JS;
@@ -238,7 +239,7 @@ JS;
 </div>
 HTML;
                 $consumeChangeUsernameJs = <<<JS
-jQuery('#{$triggerId}').on("click", function () {
+document.getElementById('{$triggerId}').addEventListener("click", function () {
     layer.open({
         type: 1,
         title: "{$langDetails['consume']} {$cardName}",
@@ -246,15 +247,17 @@ jQuery('#{$triggerId}').on("click", function () {
         btn: ['OK'],
         btnAlign: 'c',
         yes: function () {
-            let params = jQuery('#layer-form-{$metaKey}').serialize()
-            jQuery.post('ajax.php', params + "&action=consumeBenefit", function (response) {
+            var form = document.getElementById('layer-form-{$metaKey}')
+            var params = serializeForm(form)
+            params.action = 'consumeBenefit'
+            nativePost('ajax.php', params, function (response) {
                 console.log(response)
                 if (response.ret != 0) {
                     layer.alert(response.msg)
                     return
                 }
                 window.location.reload()
-            }, 'json')
+            })
         }
     })
 })

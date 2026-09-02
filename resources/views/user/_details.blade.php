@@ -48,18 +48,17 @@ print("<h1 style='margin:0px'>" . (string) ($usernameHtml ?? '') . $country."</h
 if ($userInfo->valid_medals->isNotEmpty()) {
     print \App\Support\Medal::buildImages($userInfo->{$medalType}, 120, $CURUSER['id'] == $user['id']);
     $warnMedalJs = <<<JS
-jQuery('#save-user-medal-btn').on("click", function (e) {
-    let form = jQuery(this).closest('form');
-    let data = form.serializeArray();
-    console.log(data)
-    jQuery.post('ajax.php', {params: data, action: 'saveUserMedal'}, function (response) {
+document.getElementById('save-user-medal-btn').addEventListener("click", function (e) {
+    var form = this.closest('form');
+    var data = serializeForm(form);
+    nativePost('ajax.php', {params: data, action: 'saveUserMedal'}, function (response) {
         console.log(response)
         if (response.ret != 0) {
             layer.alert(response.msg)
         } else {
             window.location.reload()
         }
-    }, 'json')
+    })
 })
 JS;
     \App\Support\AssetAppender::js($warnMedalJs, 'footer', false);
@@ -349,19 +348,19 @@ if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_
 			print("<br />(" . \App\Support\Format::prettyTimeWithLocale(strtotime($leechwarnuntil) - strtotime(date("Y-m-d H:i:s"))) .$lang_userdetails['text_to_go'].")");
 			printf('&nbsp;<input id="remove-leech-warn" type="button" class="btn" value="Remove" data-uid="%s" />', $user['id']);
 			$removeLeechWarnJs = <<<JS
-jQuery('#remove-leech-warn').on('click', function () {
+document.getElementById('remove-leech-warn').addEventListener('click', function () {
     if (!window.confirm('{$lang_userdetails['sure_to_remove_leech_warn']}')) {
         return
     }
-    let params = {action: 'removeUserLeechWarn', params: {uid: jQuery(this).attr('data-uid')}}
-    jQuery.post('ajax.php', params, function (response) {
+    var params = {action: 'removeUserLeechWarn', params: {uid: this.getAttribute('data-uid')}}
+    nativePost('ajax.php', params, function (response) {
         console.log(response)
         if (response.ret == 0) {
             location.reload()
         } else {
             alert(response.msg)
         }
-    }, 'json')
+    })
 })
 JS;
             \App\Support\AssetAppender::js($removeLeechWarnJs, 'footer', false);
@@ -411,14 +410,15 @@ JS;
 }
 
 $paginationJs = <<<JS
-jQuery("body").on("click", ".nexus-pagination a", function (e) {
+document.body.addEventListener("click", function (e) {
+    if (!e.target || !e.target.matches || !e.target.matches(".nexus-pagination a")) return;
     e.preventDefault()
-    let _this = jQuery(this)
-    let box = _this.closest("[data-type]")
-    let type = box.attr("data-type");
-    let url = _this.attr("href") + "&userid={$user['id']}&type=" + type;
-    let result = ajax.gets(url);
-    box.html(result)
+    var link = e.target
+    var box = link.closest("[data-type]")
+    var type = box.getAttribute("data-type");
+    var url = link.getAttribute("href") + "&userid={$user['id']}&type=" + type;
+    var result = ajax.gets(url);
+    box.innerHTML = result
 })
 $claimJs
 JS;

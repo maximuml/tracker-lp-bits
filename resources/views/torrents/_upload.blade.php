@@ -108,23 +108,29 @@ $offerRows = (array) ($offerRows ?? []);
 					$offer .= "</select>";
 					\App\Support\Html::tr($lang_upload['row_your_offer']. (!$uploadFreely ? "<font color=red>*</font>" : ""), $offer.$lang_upload['text_please_select_offer'], 1);
 					$getOfferJs = <<<JS
-jQuery('select[name="offer"]').on("change", function () {
-    let id = this.value
+document.querySelector('select[name="offer"]').addEventListener("change", function () {
+    var id = this.value
     if (id == 0) {
         return
     }
-    let params = {action: "getOffer", params: {id: id}}
-    jQuery.post("ajax.php", params, function (response) {
+    var params = {action: "getOffer", params: {id: id}}
+    nativePost("ajax.php", params, function (response) {
         console.log(response)
         if (response.ret != 0) {
             alert(response.msg)
             return
         }
-        jQuery("#name").val(response.data.name)
+        var nameEl = document.getElementById("name")
+        if (nameEl) nameEl.value = response.data.name
         clearContent()
         doInsert(response.data.descr, '', false)
-        jQuery("#browsecat").prop('disabled', false).val(response.data.category).trigger('change')
-    }, 'json')
+        var catEl = document.getElementById("browsecat")
+        if (catEl) {
+            catEl.disabled = false
+            catEl.value = response.data.category
+            catEl.dispatchEvent(new Event('change'))
+        }
+    })
 })
 JS;
 					\App\Support\AssetAppender::js($getOfferJs, 'footer', false);
@@ -156,19 +162,18 @@ JS;
 		</table>
 	</form>
 <?php
-\App\Support\AssetAppender::js('vendor/jquery-loading/jquery.loading.min.js', 'footer', true);
 $customFieldJs = <<<JS
-jQuery("#compose").on("change", "select[name=type]", function () {
-    let _this = jQuery(this);
-    let mode = _this.attr("data-mode");
-    let value = _this.val();
+document.getElementById("compose").addEventListener("change", function (e) {
+    if (!e.target || !e.target.matches("select[name=type]")) return;
+    var mode = e.target.getAttribute("data-mode");
+    var value = e.target.value;
     console.log(mode)
-    jQuery("tr[relation]").hide();
+    document.querySelectorAll("tr[relation]").forEach(function (tr) { tr.style.display = 'none'; });
     if (value > 0) {
-        jQuery("tr[relation=mode_" + mode +"]").show();
+        document.querySelectorAll('tr[relation="mode_' + mode + '"]').forEach(function (tr) { tr.style.display = ''; });
     }
 })
-jQuery("tr[relation]").hide();
+document.querySelectorAll("tr[relation]").forEach(function (tr) { tr.style.display = 'none'; });
 JS;
 \App\Support\AssetAppender::js($customFieldJs, 'footer', false);
 ?>

@@ -120,16 +120,16 @@ final class IndexPageService
         $clearJs = '';
         if ($canManage) {
             $clearJs = <<<JS
-jQuery('#clear-shout-box').on("click", function () {
+document.getElementById('clear-shout-box').addEventListener("click", function () {
     layer.confirm("{$lang['sure_to_clear_shout_box']}", {title: "Info", btn: ['Yes', "Cancel"], btnAlign: 'c'}, function (layerIndex) {
-        jQuery.post("ajax.php", {"action": "clearShoutBox", "params": {"csrf": (typeof SHOUT_CSRF !== 'undefined' ? SHOUT_CSRF : '')}}, function (response) {
+        nativePost("ajax.php", {"action": "clearShoutBox", "params": {"csrf": (typeof SHOUT_CSRF !== 'undefined' ? SHOUT_CSRF : '')}}, function (response) {
             layer.close(layerIndex)
             if (response.ret != 0) {
                 layer.alert(response.msg, {title: "Info", btn: ['OK', 'Cancel'], btnAlign: 'c'})
             } else {
                 document.getElementById('iframe-shout-box').src='shoutbox.php?type=shoutbox';
             }
-        }, "json")
+        })
     })
 })
 JS;
@@ -253,16 +253,23 @@ JS;
 
         AssetAppender::css('.tr-top-uploader-tab>td {cursor: pointer}', 'footer', false);
         $toggleJs = <<<'JS'
-jQuery(".tr-top-uploader-tab").on("click", "td", function () {
-    let _this = jQuery(this)
-    if (_this.hasClass("colhead")) {
-        return
+document.querySelector(".tr-top-uploader-tab").addEventListener("click", function (e) {
+    var td = e.target.closest("td");
+    if (!td || td.classList.contains("colhead")) return;
+    var siblings = td.parentNode.children;
+    for (var i = 0; i < siblings.length; i++) {
+        siblings[i].classList.remove("colhead");
     }
-    _this.parent().children().removeClass("colhead")
-    _this.addClass("colhead")
-    jQuery(".top-uploader").hide()
-    jQuery("." + _this.attr("data-table")).fadeIn()
-
+    td.classList.add("colhead");
+    var tables = document.querySelectorAll(".top-uploader");
+    tables.forEach(function (t) { t.style.display = 'none'; });
+    var target = document.querySelectorAll("." + td.getAttribute("data-table"));
+    target.forEach(function (t) {
+        t.style.display = '';
+        t.style.opacity = '0';
+        t.style.transition = 'opacity 0.2s';
+        requestAnimationFrame(function () { t.style.opacity = '1'; });
+    });
 })
 JS;
         AssetAppender::js($toggleJs, 'footer', false);

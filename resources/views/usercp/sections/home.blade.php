@@ -63,7 +63,7 @@ $tokLabel = addslashes($tok['label']);
 $tokCreate = addslashes($tok['actionCreate']);
 $tokConfirmRemove = addslashes($tok['confirmRemoveLabel']);
 $tokenJs = <<<JS
-jQuery('#add-token-box-btn').on('click', function () {
+document.getElementById('add-token-box-btn').addEventListener('click', function () {
     layer.open({
         type: 1,
         title: "{$tokLabel} {$tokCreate}",
@@ -72,10 +72,9 @@ jQuery('#add-token-box-btn').on('click', function () {
         btnAlign: 'c',
         yes: function (index) {
             layer.close(index);
-            jQuery('body').loading({stoppable: false});
-            let params = jQuery('#token-box-form').serialize()
-            jQuery.post('/web/token/add', params, function (response) {
-                 jQuery('body').loading('stop');
+            var form = document.getElementById('token-box-form');
+            var params = serializeForm(form);
+            nativePost('/web/token/add', params, function (response) {
                 console.log(response)
                 if (response.ret != 0) {
                     layer.alert(response.msg, window.nexusLayerOptions.alert)
@@ -85,24 +84,23 @@ jQuery('#add-token-box-btn').on('click', function () {
                         window.location.reload()
                     })
                 }
-            }, 'json')
+            })
         }
     })
 });
-jQuery('#token-table').on('click', '.token-del', function () {
-    let params = {id: jQuery(this).attr("data-id")}
+document.getElementById('token-table').addEventListener('click', function (e) {
+    if (!e.target || !e.target.classList || !e.target.classList.contains('token-del')) return;
+    var params = {id: e.target.getAttribute("data-id")}
     layer.confirm("{$tokConfirmRemove}", window.nexusLayerOptions.confirm, function (index) {
         layer.close(index)
-        jQuery('body').loading({stoppable: false});
-        jQuery.post('/web/token/del', params, function (response) {
+        nativePost('/web/token/del', params, function (response) {
             console.log(response)
             if (response.ret != 0) {
-                jQuery('body').loading('stop');
                 layer.alert(response.msg, window.nexusLayerOptions.alert)
                 return
             }
             window.location.reload()
-        }, 'json')
+        })
     })
 });
 JS;

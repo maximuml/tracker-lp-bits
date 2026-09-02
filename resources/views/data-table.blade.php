@@ -5,7 +5,6 @@
     <link rel="stylesheet" href="/vendor/layui/css/layui.css">
     <link rel="stylesheet" href="/vendor/datatables-1.12.1/datatables.min.css">
     @stack('css')
-    <script type="text/javascript" src="/js/jquery-3.7.1.min.js"></script>
     <script type="text/javascript" src="/vendor/layui/layui.js"></script>
     <script type="text/javascript" src="/vendor/datatables-1.12.1/datatables.min.js"></script>
     @stack('scripts')

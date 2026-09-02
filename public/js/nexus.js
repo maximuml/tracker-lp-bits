@@ -1,8 +1,10 @@
-jQuery(document).ready(function () {
+/**
+ * Image preview + lazy-load (native JS, no jQuery).
+ */
+document.addEventListener('DOMContentLoaded', function () {
     function getImgPosition(e, imgEle) {
-        // console.log(e, imgEle)
-        let imgWidth = imgEle.prop('naturalWidth')
-        let imgHeight = imgEle.prop("naturalHeight")
+        let imgWidth = imgEle.naturalWidth;
+        let imgHeight = imgEle.naturalHeight;
         let ratio = imgWidth / imgHeight;
         let offsetX = 10;
         let offsetY = 10;
@@ -11,20 +13,18 @@ jQuery(document).ready(function () {
         let changeOffsetY = 0;
         let changeOffsetX = false;
         if (e.clientX > window.innerWidth / 2 && e.clientX + imgWidth > window.innerWidth) {
-            changeOffsetX = true
-            width = e.clientX
+            changeOffsetX = true;
+            width = e.clientX;
         }
         if (e.clientY > window.innerHeight / 2) {
-            if (e.clientY + imgHeight/2 > window.innerHeight) {
-                changeOffsetY = 1
-                height = e.clientY
+            if (e.clientY + imgHeight / 2 > window.innerHeight) {
+                changeOffsetY = 1;
+                height = e.clientY;
             } else if (e.clientY + imgHeight > window.innerHeight) {
-                changeOffsetY = 2
-                height = e.clientY
+                changeOffsetY = 2;
+                height = e.clientY;
             }
         }
-        let log = `innerWidth: ${window.innerWidth}, innerHeight: ${window.innerHeight}, pageX: ${e.pageX}, pageY: ${e.pageY}, imgWidth: ${imgWidth}, imgHeight: ${imgHeight}, width: ${width}, height: ${height}, offsetX: ${offsetX}, offsetY: ${offsetY}, changeOffsetX: ${changeOffsetX}, changeOffsetY: ${changeOffsetY}`
-        console.log(log)
         if (imgWidth > width) {
             imgWidth = width;
             imgHeight = imgWidth / ratio;
@@ -34,17 +34,16 @@ jQuery(document).ready(function () {
             imgWidth = imgHeight * ratio;
         }
         if (changeOffsetX) {
-            offsetX = -(e.clientX - width + 10)
+            offsetX = -(e.clientX - width + 10);
         }
-        if (changeOffsetY == 1) {
-            offsetY = - (imgHeight - (window.innerHeight - e.clientY))
-        } else if (changeOffsetY == 2) {
-            offsetY = - imgHeight/2
+        if (changeOffsetY === 1) {
+            offsetY = -(imgHeight - (window.innerHeight - e.clientY));
+        } else if (changeOffsetY === 2) {
+            offsetY = -imgHeight / 2;
         }
-        return {imgWidth, imgHeight,offsetX, offsetY}
+        return { imgWidth, imgHeight, offsetX, offsetY };
     }
 
-    // preview
     function getPosition(e, position) {
         if (!position) {
             return {};
@@ -54,27 +53,53 @@ jQuery(document).ready(function () {
             top: e.pageY + position.offsetY,
             width: position.imgWidth,
             height: position.imgHeight
-        }
+        };
     }
-    var previewEle = jQuery('#nexus-preview')
-    var imgEle, selector = 'img.preview', imgPosition
-    jQuery("body").on("mouseover", selector, function (e) {
-        imgEle = jQuery(this);
-        // previewEle = jQuery('<img style="display: none;position:absolute;">').appendTo(imgEle.parent())
-        imgPosition = getImgPosition(e, imgEle)
-        let position = getPosition(e, imgPosition)
-        let src = imgEle.attr("src")
-        if (src) {
-            previewEle.stop(true, true).attr("src", src).css(position).fadeIn("fast");
+
+    let previewEle = document.getElementById('nexus-preview');
+    let imgEle = null;
+    let imgPosition = null;
+    let selector = 'img.preview';
+
+    document.body.addEventListener('mouseover', function (e) {
+        let target = e.target;
+        if (!target || !target.matches || !target.matches(selector)) return;
+        imgEle = target;
+        imgPosition = getImgPosition(e, imgEle);
+        let position = getPosition(e, imgPosition);
+        let src = imgEle.getAttribute('src');
+        if (src && previewEle) {
+            previewEle.setAttribute('src', src);
+            Object.assign(previewEle.style, {
+                display: 'block',
+                left: position.left + 'px',
+                top: position.top + 'px',
+                width: position.width + 'px',
+                height: position.height + 'px'
+            });
+            previewEle.style.opacity = '1';
         }
-    }).on("mouseout", selector, function (e) {
-        // previewEle.remove()
-        // previewEle = null
-        previewEle.hide()
-    }).on("mousemove", selector, function (e) {
-        let position = getPosition(e, imgPosition)
-        previewEle.css(position)
-    })
+    });
+
+    document.body.addEventListener('mouseout', function (e) {
+        let target = e.target;
+        if (!target || !target.matches || !target.matches(selector)) return;
+        if (previewEle) {
+            previewEle.style.display = 'none';
+        }
+    });
+
+    document.body.addEventListener('mousemove', function (e) {
+        let target = e.target;
+        if (!target || !target.matches || !target.matches(selector)) return;
+        if (previewEle && imgPosition) {
+            let position = getPosition(e, imgPosition);
+            Object.assign(previewEle.style, {
+                left: position.left + 'px',
+                top: position.top + 'px'
+            });
+        }
+    });
 
     // lazy load
     if ("IntersectionObserver" in window) {
@@ -117,6 +142,4 @@ jQuery(document).ready(function () {
             img.onerror = () => tryNextDomain(img, currentSrc, index + 1);
         }
     }
-
-
-})
+});

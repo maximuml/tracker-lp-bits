@@ -1,0 +1,28 @@
+# Development overrides — bind-mount source code, backup volume, openresty config mounts.
+#
+# Usage: docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+#        docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile debug up  (with phpMyAdmin)
+
+services:
+  php:
+    volumes:
+      - .:/var/www/html
+      - ${NP_BACKUP_EXPORT_PATH:-/tmp/nexusphp_backup}:${NP_BACKUP_EXPORT_PATH:-/tmp/nexusphp_backup}
+
+  queue:
+    volumes:
+      - .:/var/www/html
+
+  scheduler:
+    volumes:
+      - .:/var/www/html
+      - ${NP_BACKUP_EXPORT_PATH:-/tmp/nexusphp_backup}:${NP_BACKUP_EXPORT_PATH:-/tmp/nexusphp_backup}
+
+  openresty:
+    volumes:
+      - ./.docker/openresty/sites:/etc/nginx/conf.d/sites
+      - ./.docker/openresty/certs:/certs
+      - ./.docker/openresty/entrypoint.sh:/usr/local/bin/entrypoint.sh
+      - ./.docker/openresty/nginx.conf:/usr/local/openresty/nginx/conf/nginx.conf
+      - ./.docker/openresty/lua:/usr/local/openresty/lua
+      - .:/var/www/html

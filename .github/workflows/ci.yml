@@ -360,6 +360,8 @@ jobs:
           # .env.example leaves MEILISEARCH_MASTER_KEY empty so users must set
           # their own. For the smoke-test stack, restore the compose default.
           sed -i 's|^MEILISEARCH_MASTER_KEY=.*|MEILISEARCH_MASTER_KEY=nexusphp_default_key|' .env
+          # Use dev overrides (bind-mounts, openresty config mounts)
+          echo "COMPOSE_FILE=docker-compose.yml:docker-compose.dev.yml" >> "$GITHUB_ENV"
 
       - name: Cache Composer dependencies
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
@@ -477,6 +479,7 @@ jobs:
           sed -i 's|REDIS_HOST=127.0.0.1|REDIS_HOST=redis|g' .env
           sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=nexusphp/' .env
           sed -i 's|^MEILISEARCH_MASTER_KEY=.*|MEILISEARCH_MASTER_KEY=nexusphp_default_key|' .env
+          echo "COMPOSE_FILE=docker-compose.yml:docker-compose.dev.yml" >> "$GITHUB_ENV"
 
       - name: Build Docker images
         run: docker compose build php openresty

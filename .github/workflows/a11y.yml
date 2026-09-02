@@ -23,6 +23,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
+      - name: Setup PHP
+        uses: shivammathur/setup-php@b604ade2a87db23f8871b7182e69ec5e75effb45 # v2
+        with:
+          php-version: '8.5'
+          extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, pdo_mysql, redis, sqlite3, xml, zip
+          coverage: none
+
       - name: Setup Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
@@ -38,6 +45,19 @@ jobs:
 
       - name: Install matching ChromeDriver
         run: npx --yes browser-driver-manager install chrome@stable
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: ~/.composer/cache
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install PHP dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction --no-scripts
+
+      - name: Dump autoload
+        run: composer dump-autoload --no-interaction --no-scripts
 
       - name: Build and start Docker stack
         env:
@@ -68,18 +88,8 @@ jobs:
           docker compose build
           # Start mysql + redis first, wait for them
           docker compose up -d --wait mysql redis
-          # Start php (runs composer install + config:cache in entrypoint)
-          docker compose up -d php
-          # Wait for PHP-FPM to be ready (entrypoint runs composer install + config:cache)
-          # Check artisan (not php -r) because vendor/autoload.php must exist
-          echo "Waiting for PHP-FPM to finish setup..."
-          for i in $(seq 1 60); do
-            if docker compose --env-file /dev/null exec -T php php artisan --version 2>/dev/null | grep -q "Laravel"; then
-              echo "PHP-FPM ready after ${i}0s"
-              break
-            fi
-            sleep 10
-          done
+          # Start php (vendor/ already populated on host via volume mount)
+          docker compose up -d --wait php
           # Run migrations + seed
           docker compose --env-file /dev/null exec -T php php artisan migrate:fresh --seed --force
           docker compose --env-file /dev/null exec -T php php artisan storage:link --force

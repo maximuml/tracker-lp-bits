@@ -146,6 +146,9 @@ final class ProdImageTest extends TestCase
         $this->assertStringContainsString('/tests', $ignore, '.dockerignore must exclude tests/');
         $this->assertStringContainsString('/.github', $ignore, '.dockerignore must exclude .github/');
         $this->assertStringContainsString('/.agents', $ignore, '.dockerignore must exclude .agents/');
+        // Dev entrypoint and opcache.dev.ini must NOT be excluded (dev Dockerfile needs them)
+        $this->assertStringNotContainsString('/.docker/php/entrypoint.sh', $ignore, '.dockerignore must not exclude dev entrypoint.sh');
+        $this->assertStringNotContainsString('/.docker/php/opcache.dev.ini', $ignore, '.dockerignore must not exclude opcache.dev.ini');
     }
 
     /**

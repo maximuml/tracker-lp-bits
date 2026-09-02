@@ -22,11 +22,10 @@ crowdin.yml
 .env.bak
 
 # Dev-only files — not needed in production image
+# Note: .docker/php/entrypoint.sh and opcache.dev.ini are still needed by the
+# dev Dockerfile, so they are NOT excluded here. The prod Dockerfile uses
+# entrypoint.prod.sh and opcache.prod.ini instead.
 /tests
-/.docker/php/Dockerfile
-/.docker/php/DockerfileDebian
-/.docker/php/opcache.dev.ini
-/.docker/php/entrypoint.sh
 /.github
 /.agents
 /.devin

@@ -80,8 +80,10 @@ jobs:
           sed -i 's/^REDIS_PASSWORD=.*/REDIS_PASSWORD=ci-redis-test-password/' .env
           # Set CI MeiliSearch key (docker-compose requires it)
           sed -i 's/^MEILISEARCH_MASTER_KEY=.*/MEILISEARCH_MASTER_KEY=ci-meilisearch-test-key/' .env
+          # Point DB/Redis at Docker service hostnames (not 127.0.0.1)
+          sed -i 's/^DB_HOST=.*/DB_HOST=mysql/' .env
+          sed -i 's/^REDIS_HOST=.*/REDIS_HOST=redis/' .env
           # Replace ${VAR} references that docker compose can't interpolate
-          sed -i 's/\${DB_HOST}/mysql/g' .env
           sed -i 's/\${APP_NAME}/NexusPHP/g' .env
           sed -i 's/\${PUSHER_APP_KEY}//g' .env
           sed -i 's/\${PUSHER_APP_CLUSTER}//g' .env

@@ -62,6 +62,7 @@ use Illuminate\Support\Str;
 use Illuminate\Translation\TranslationServiceProvider;
 use Illuminate\Validation\ValidationServiceProvider;
 use Illuminate\View\ViewServiceProvider;
+use Sentry\Laravel\ServiceProvider;
 
 return [
 
@@ -242,6 +243,8 @@ return [
         /*
          * Package Service Providers...
          */
+        ServiceProvider::class,
+        Sentry\Laravel\Tracing\ServiceProvider::class,
 
         /*
          * Application Service Providers...

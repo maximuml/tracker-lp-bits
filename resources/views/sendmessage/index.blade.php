@@ -16,7 +16,7 @@ $stdheadMsgalert = false;
 @section('title', $title)
 
 @section('content')
-<form id="compose" name="compose" method="post" action="takemessage.php">
+<form id="compose" name="compose" method="post" action="/takemessage">
 @csrf
 <input type="hidden" name="receiver" value="{{ $receiver }}">
 @if ($returnto !== '')

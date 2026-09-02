@@ -12,7 +12,7 @@ $em = $editmailboxes;
 </tr>
 <tr>
 <td align=left>{{ $lang_messages['text_extra_mailboxes_note'] ?? '' }}<br />
-<form action="messages.php" method="get">
+<form action="/messages" method="get">
 <input type="hidden" name="action" value="editmailboxes2">
 <input type="hidden" name="action2" value="add">
 <input type="text" name="new1" size="40" maxlength="14"><br />
@@ -26,7 +26,7 @@ $em = $editmailboxes;
 </tr>
 <tr>
 <td align=left>{{ $lang_messages['text_edit_mailboxes_note'] ?? '' }}
-<form action="messages.php" method="get">
+<form action="/messages" method="get">
 <input type="hidden" name="action" value="editmailboxes2">
 <input type="hidden" name="action2" value="edit">
 @if (! $em['hasBoxes'])

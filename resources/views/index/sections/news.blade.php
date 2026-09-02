@@ -17,7 +17,7 @@
         <div id="ka{{ $newsItem['id'] }}" style="display: none;"> {{ \App\Support\Format::formatComment($newsItem['body'], 0) }} </div>
     @endif
     &nbsp; [<a class="faqlink" href="news.php?action=edit&amp;newsid={{ $newsItem['id'] }}"><b>{{ $news['editLabel'] }}</b></a>]
-    <form method="post" action="news.php" style="display:inline">@csrf<input type="hidden" name="action" value="delete" /><input type="hidden" name="newsid" value="{{ $newsItem['id'] }}" /><input type="hidden" name="sure" value="1" /><button type="submit" class="faqlink"><b>{{ $news['deleteLabel'] }}</b></button></form>
+    <form method="post" action="/news" style="display:inline">@csrf<input type="hidden" name="action" value="delete" /><input type="hidden" name="newsid" value="{{ $newsItem['id'] }}" /><input type="hidden" name="sure" value="1" /><button type="submit" class="faqlink"><b>{{ $news['deleteLabel'] }}</b></button></form>
 @endforeach
 </div></td></tr></table>
 @endif

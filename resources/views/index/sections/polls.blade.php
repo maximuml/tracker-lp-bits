@@ -25,7 +25,7 @@
         <p align="center"><a href="log.php?action=poll">{{ $polls['previousPollsLabel'] }}</a></p>
     @endif
 @else
-    <form method="post" action="index.php">
+    <form method="post" action="/index">
     <input type="hidden" name="_token" value="{{ csrf_token() }}" />
     @foreach($polls['options'] as $i => $option)
         <input type="radio" name="choice" value="{{ $i }}">{{ $option }}<br />

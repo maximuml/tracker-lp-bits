@@ -16,7 +16,7 @@ $vm = $viewmailbox;
 <p align="center">{{ $lang_messages['text_no_messages'] ?? 'No messages' }}</p>
 @else
 {!! $vm['pagertop'] !!}
-<form action="messages.php" method="post">
+<form action="/messages" method="post">
 @csrf
 <input type="hidden" name="action" value="moveordel">
 <table border="0" cellpadding="4" cellspacing="0" width={{ $CONTENT_WIDTH }}>

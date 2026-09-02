@@ -1,7 +1,7 @@
 <?php
 $offerRows = (array) ($offerRows ?? []);
 ?>
-	<form id="compose" enctype="multipart/form-data" action="takeupload.php" method="post" name="upload">
+	<form id="compose" enctype="multipart/form-data" action="/takeupload" method="post" name="upload">
 			<?php
 			print("<p align=\"center\">".$lang_upload['text_red_star_required']."</p>");
 			?>

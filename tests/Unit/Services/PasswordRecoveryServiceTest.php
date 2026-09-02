@@ -153,14 +153,19 @@ final class PasswordRecoveryServiceTest extends TestCase
 
     public function test_request_reset_stores_hash_in_cache(): void
     {
-        $this->createUser(['email' => 'cache@test.com']);
+        $userId = $this->createUser(['email' => 'cache@test.com']);
 
         $this->service->requestReset(['email' => 'cache@test.com'], '127.0.0.1', [], []);
 
-        // The cache should have at least one recover:* key in Redis
-        $redis = Redis::connection()->client();
-        $keys = $redis->keys('*recover:*');
-        $this->assertNotEmpty($keys, 'Expected a recover:* key in the cache');
+        // The service stores a random secret in editsecret
+        $editSecret = DB::table('users')->where('id', $userId)->value('editsecret');
+        $this->assertNotNull($editSecret, 'Expected editsecret to be set on the user');
+
+        // The cache key is recover:<md5(sec+email+passhash+sec)>, not recover:<sec>
+        $passhash = DB::table('users')->where('id', $userId)->value('passhash');
+        $expectedHash = md5($editSecret.'cache@test.com'.$passhash.$editSecret);
+        $cacheHas = CacheFacade::has('recover:'.$expectedHash);
+        $this->assertTrue($cacheHas, 'Expected a recover:* key in the cache');
     }
 
     // --- requestReset: captcha enabled and fails ---

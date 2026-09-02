@@ -81,7 +81,6 @@ server {
     # confirmemail.php is handled above with PATH_INFO.
     location = /login.php { return 301 /login; }
     location = /signup.php { return 301 /signup; }
-    location = /takesignup.php { return 301 /signup; }
     location = /torrents.php { return 301 /torrents; }
     location = /forums.php { return 301 /forums; }
     location = /faq.php { return 301 /faq; }

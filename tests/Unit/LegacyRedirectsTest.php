@@ -43,6 +43,17 @@ final class LegacyRedirectsTest extends TestCase
     }
 
     /**
+     * Form action endpoints (takesignup.php, takelogin.php, etc.) are NOT redirected.
+     * They are POST targets, not page URLs.
+     */
+    public function test_form_actions_not_redirected(): void
+    {
+        $conf = file_get_contents(base_path('.docker/openresty/sites/app.conf.template'));
+        $this->assertStringNotContainsString('location = /takesignup.php { return 301', $conf, '/takesignup.php is a POST form action, not a page');
+        $this->assertStringNotContainsString('location = /takelogin.php { return 301', $conf, '/takelogin.php is a POST form action, not a page');
+    }
+
+    /**
      * announce.php is NOT redirected (external BT clients need it).
      */
     public function test_announce_not_redirected(): void

@@ -136,7 +136,10 @@ return [
     ],
 
     'flush' => [
-        //
+        // T-10: Flush auth guard so NexusWebGuard is re-instantiated with the
+        // new request binding each request. Without this, the guard holds a
+        // stale Request object and cached user from a previous request.
+        'auth',
     ],
 
     /*

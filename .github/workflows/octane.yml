@@ -159,3 +159,11 @@ jobs:
 
       - name: Run unit tests
         run: DB_DATABASE=nexusphp_unit_testing vendor/bin/phpunit --testsuite Unit --no-coverage
+
+      - name: Run Octane cross-request isolation tests
+        run: |
+          # T-10: Run the dedicated isolation test suite that verifies
+          # no per-request state leaks between simulated worker requests.
+          DB_DATABASE=nexusphp_unit_testing vendor/bin/phpunit \
+            tests/Feature/OctaneCrossRequestIsolationTest.php \
+            --no-coverage

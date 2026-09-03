@@ -144,7 +144,7 @@ class WebCommentController extends Controller
         return redirect($this->safeReturnUrl($returnto, $defaultUrl));
     }
 
-    public function destroy(Request $request, int $commentId): RedirectResponse|View
+    public function deleteConfirm(Request $request, int $commentId): View
     {
         $type = $this->type($request);
 
@@ -153,18 +153,29 @@ class WebCommentController extends Controller
             abort(403, $this->lang('std_permission_denied'));
         }
 
-        $sure = $request->input('sure');
-        if ((string) $sure !== '1') {
-            $referer = (string) ($request->headers->get('referer') ?? '');
-            $query = ['type' => $type, 'cid' => $commentId, 'sure' => 1];
-            if ($referer !== '') {
-                $query['returnto'] = $referer;
-            }
-            $confirmUrl = $this->legacyAction('delete', $query);
-            $heading = $this->lang('std_delete_comment');
-            $message = $this->lang('std_delete_comment_note').'<a href="'.$confirmUrl.'">'.ltrim($this->lang('std_here_if_sure'), '>').'</a>';
+        $referer = (string) ($request->headers->get('referer') ?? '');
+        $query = ['type' => $type];
+        if ($referer !== '') {
+            $query['returnto'] = $referer;
+        }
+        $formAction = $this->legacyAction('delete', ['type' => $type]);
+        $heading = $this->lang('std_delete_comment');
+        $message = $this->lang('std_delete_comment_note');
+        $confirmLabel = ltrim($this->lang('std_here_if_sure'), '>');
+        $cancelLabel = $this->lang('text_cancel');
+        $cancelUrl = $referer !== '' ? $referer : $this->buildScript($type, 0);
+        $returnto = $referer;
 
-            return view('comments.delete', compact('heading', 'message'));
+        return view('comments.delete', compact('heading', 'message', 'formAction', 'commentId', 'confirmLabel', 'cancelLabel', 'cancelUrl', 'type', 'returnto'));
+    }
+
+    public function destroy(Request $request, int $commentId): RedirectResponse
+    {
+        $type = $this->type($request);
+
+        $user = $this->currentUser();
+        if (! Permissions::userCan('commanage', false, (int) $user->id)) {
+            abort(403, $this->lang('std_permission_denied'));
         }
 
         $arr = app(CommentRepository::class)->getForDelete($commentId, $type);

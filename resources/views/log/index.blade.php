@@ -2,9 +2,7 @@
 $lang_log = (array) (\app(\App\Support\Globals::class)->get('lang_log') ?? []);
 $CURUSER = (array) (\app(\App\Support\CurrentUser::class)->get() ?? []);
 $BASEURL = \app(\App\Support\Globals::class)->get('BASEURL', '');
-$action = \request()->post('action') ?? \request()->query('action') ?? 'dailylog';
-$action = in_array($action, ['dailylog', 'chronicle', 'news', 'poll'], true) ? $action : 'dailylog';
-$mode = (string) ($mode ?? $action);
+$mode = (string) ($mode ?? 'dailylog');
 $title = $title ?? match ($mode) {
     'chronicle' => $lang_log['head_chronicle'] ?? 'Chronicle',
     'news' => $lang_log['head_news'] ?? 'News log',

@@ -4,9 +4,6 @@
 
 @section('content')
 @php
-if (\App\Support\UserDisplay::currentClass() < UC_MODERATOR) {
-    \App\Support\LegacyResponse::abort('Sorry', 'Access denied.');
-}
 $status = $status ?? '';
 $rows = (array) ($rows ?? []);
 @endphp
@@ -49,11 +46,5 @@ $rows = (array) ($rows ?? []);
         @endforeach
     </table>
     @php \App\Support\Html::endFrame(); @endphp
-@else
-    @if ($status)
-        @php \App\Support\LegacyResponse::abort('Updated!', 'The user account has been updated.'); @endphp
-    @else
-        @php \App\Support\LegacyResponse::abort('Ups!', 'Nothing Found...'); @endphp
-    @endif
 @endif
 @endsection

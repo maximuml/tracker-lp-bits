@@ -13,8 +13,9 @@ if ($unit <= 0) {
     $elapsedDay = (int) $elapsedDay;
     $total = (float) $total;
     $isUserBonusEnough = (bool) $isUserBonusEnough;
+    $showError = (bool) ($showError ?? false);
 
-    if (! empty(\request()->post('submit'))) {
+    if ($showError) {
         if (! $isUserBonusEnough) {
             \App\Support\Html::stdMessage('Error', $insufficientMessage);
         }

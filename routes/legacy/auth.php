@@ -139,7 +139,8 @@ Route::get('/comment/add', [WebCommentController::class, 'create'])->middleware(
 Route::post('/comment', [WebCommentController::class, 'store'])->middleware('throttle:comment');
 Route::get('/comment/{commentId}/edit', [WebCommentController::class, 'edit'])->middleware('throttle:comment');
 Route::post('/comment/{commentId}/edit', [WebCommentController::class, 'update'])->middleware('throttle:comment');
-Route::get('/comment/{commentId}/delete', [WebCommentController::class, 'destroy'])->middleware('throttle:comment');
+Route::get('/comment/{commentId}/delete', [WebCommentController::class, 'deleteConfirm'])->middleware('throttle:comment');
+Route::post('/comment/{commentId}/delete', [WebCommentController::class, 'destroy'])->middleware('throttle:comment');
 Route::get('/comment/{commentId}/original', [WebCommentController::class, 'original'])->middleware('throttle:comment');
 // Phase 5.7: catmanage/forummanage/moforums/fields/formats migrated to Filament Section resources
 Route::get('/catmanage', fn () => redirect('/nexusphp/section/categories'))->name('catmanage.legacy');

@@ -1,14 +1,14 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
-
-$__server_HTTP_REFERER = \App\Support\Input::serverValue('HTTP_REFERER');
-if (\App\Support\UserDisplay::currentClass() < UC_SYSOP)
-    \App\Support\LegacyResponse::abort("Sorry", "Access denied.");
-
-$validTypeMap = $lang_incrementbulk['types'];
-$type = \request()->input('type') ?? '';
-$classes = array_chunk(\App\Models\User::listClass(), 4, true);
+$validTypeMap = $validTypeMap ?? [];
+$type = $type ?? '';
+$classes = $classes ?? [];
+$receiver = $receiver ?? '';
+$body = $body ?? '';
+$sent = $sent ?? null;
+$returnto = $returnto ?? '';
+$CURUSER = $CURUSER ?? [];
 ?>
     <table class=main width=737 border=0 cellspacing=0 cellpadding=0><tr><td class=embedded>
                 <div align=center>
@@ -16,16 +16,16 @@ $classes = array_chunk(\App\Models\User::listClass(), 4, true);
                     <form method=post action=take-increment-bulk.php>
                         <?php
 
-                        if (((\request()->query("returnto") !== null)) || $__server_HTTP_REFERER)
+                        if ($returnto || $__server_HTTP_REFERER ?? '')
                         {
                             ?>
-                            <input type=hidden name=returnto value="<?php echo htmlspecialchars(\request()->query("returnto")) ? htmlspecialchars(\request()->query("returnto")) : htmlspecialchars($__server_HTTP_REFERER)?>">
+                            <input type=hidden name=returnto value="<?php echo htmlspecialchars((string) $returnto) ?>">
                             <?php
                         }
                         ?>
                         <table cellspacing=0 cellpadding=5>
                             <?php
-                            if (((\request()->query("sent") !== null)) && \request()->query("sent") == 1) {
+                            if ($sent !== null && $sent == 1) {
                                 echo '<tr><td colspan=2 class="text" align="center"><font color=red><b> '. ($validTypeMap[$type] ?? '') . $lang_incrementbulk['sent_success'] .'</font></b></tr></td>';
                             }
                             ?>
@@ -64,7 +64,7 @@ $classes = array_chunk(\App\Models\User::listClass(), 4, true);
                             <tr><td class="rowhead" valign="top"><?php echo $lang_incrementbulk['labels']['msg_body'] ?> </td><td class="rowfollow"><textarea name=msg cols=80 rows=5><?php echo $body ?? ''?></textarea></td></tr>
                             <tr>
                                 <td class="rowfollow" colspan=2><div align="center"><b><?php echo $lang_incrementbulk['labels']['operator'] ?>:&nbsp;&nbsp;</b>
-                                        <label><input name="sender" type="radio" value="self" checked><?php echo $CURUSER['username']?></label>
+                                        <label><input name="sender" type="radio" value="self" checked><?php echo $CURUSER['username'] ?? ''?></label>
                                         &nbsp; <label><input name="sender" type="radio" value="system">System</label>
                                     </div></td></tr>
                             <tr><td class="rowfollow" colspan=2 align=center><input type=submit value="<?php echo \App\Support\Locale::trans('label.submit', [], null) ?>" class=btn></td></tr>

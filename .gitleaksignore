@@ -5,3 +5,6 @@
 41e8e75624b7eebbf493089e559a8aeeb50aed91:tests/Feature/PrivateAttachmentsTest.php:generic-api-key:120
 # Passkey in TorrentRssControllerTest is a dummy value for negative tests (fixed in later commit)
 6aedf2ae16d7e551b72f0c04abe6064924bffb04:tests/Unit/Http/Controllers/TorrentRssControllerTest.php:generic-api-key:87
+# Passkey in TorrentDownloadRepositoryTest is a dummy value (fixed in later commit)
+3598feba59fafbd155547e11175c47fd62c99375:tests/Unit/Repositories/TorrentDownloadRepositoryTest.php:generic-api-key:66
+3598feba59fafbd155547e11175c47fd62c99375:tests/Unit/Repositories/TorrentDownloadRepositoryTest.php:generic-api-key:88

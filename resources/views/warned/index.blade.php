@@ -4,9 +4,6 @@
 
 @section('content')
 @php
-if (\App\Support\UserDisplay::currentClass() < UC_MODERATOR) {
-    \App\Support\LegacyResponse::abort('Sorry', 'Access denied.');
-}
 $count = (int) ($count ?? 0);
 $warned = $warnedCount ?? number_format($count);
 $rows = (array) ($rows ?? []);

@@ -246,7 +246,9 @@ class UtilityController extends LegacyController
 
     public function tags(Request $request): View|RedirectResponse
     {
-        return $this->legacyPage($request, 'tags', false);
+        return $this->legacyPage($request, 'tags', false, [
+            'test' => (string) $request->post('test', ''),
+        ]);
     }
 
     public function suggest(Request $request): Response
@@ -292,7 +294,9 @@ class UtilityController extends LegacyController
 
     public function preview(Request $request): View|RedirectResponse
     {
-        return $this->legacyPage($request, 'preview', true);
+        return $this->legacyPage($request, 'preview', true, [
+            'body' => (string) $request->post('body', ''),
+        ]);
     }
 
     public function moresmilies(Request $request): View|RedirectResponse

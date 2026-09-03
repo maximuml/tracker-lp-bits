@@ -230,13 +230,14 @@ class UserAdminController extends LegacyController
         $isUserBonusEnough = (float) ($curUser['seedbonus'] ?? 0) >= $total;
         $insufficientMessage = Locale::trans('self-enable.bonus_not_enough', ['bonus' => $curUser['seedbonus'] ?? 0], null);
 
-        if (! empty(request()->post('submit'))) {
+        if ($request->isMethod('post') && $request->post('submit')) {
             if (! $isUserBonusEnough) {
                 $viewData['latestBanLog'] = $latestBanLog;
                 $viewData['elapsedDay'] = $elapsedDay;
                 $viewData['total'] = $total;
                 $viewData['isUserBonusEnough'] = false;
                 $viewData['insufficientMessage'] = $insufficientMessage;
+                $viewData['showError'] = true;
 
                 return $this->legacyPage($request, 'self-enable', true, $viewData);
             }
@@ -270,7 +271,11 @@ class UserAdminController extends LegacyController
             return redirect('/unco.php'.($qs ? '?'.$qs : ''));
         }
 
-        $status = request()->query('status');
+        if (UserDisplay::currentClass() < UC_MODERATOR) {
+            return $this->legacyAbortResponse('Sorry', 'Access denied.');
+        }
+
+        $status = $request->query('status');
         if ($status) {
             LegacyResponse::assertId($status, true);
         }
@@ -281,6 +286,14 @@ class UserAdminController extends LegacyController
             ->get()
             ->map(fn ($user) => $user->getAttributes())
             ->toArray();
+
+        if (empty($rows)) {
+            if ($status) {
+                return $this->legacyAbortResponse('Updated!', 'The user account has been updated.');
+            }
+
+            return $this->legacyAbortResponse('Ups!', 'Nothing Found...');
+        }
 
         return $this->legacyPage($request, 'unco', true, [
             'status' => $status,

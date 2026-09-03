@@ -174,7 +174,7 @@ final class WebCommentControllerTest extends TestCase
         $request = Request::create('/comment.php', 'GET', ['type' => 'torrent']);
         app()->instance('request', $request);
 
-        $response = $controller->destroy($request, 10);
+        $response = $controller->deleteConfirm($request, 10);
 
         $this->assertInstanceOf(View::class, $response);
         $this->assertSame('comments.delete', $response->name());
@@ -196,7 +196,7 @@ final class WebCommentControllerTest extends TestCase
         app()->instance(CommentRepository::class, $repository);
 
         $controller = app(WebCommentController::class);
-        $request = Request::create('/comment.php', 'GET', ['type' => 'torrent', 'sure' => '1']);
+        $request = Request::create('/comment.php', 'POST', ['type' => 'torrent']);
         app()->instance('request', $request);
 
         $response = $controller->destroy($request, 10);

@@ -24,7 +24,6 @@ class VerifyCsrfToken extends Middleware
      */
     protected $except = [
         self::TG_WEBHOOK_PREFIX.'/*',
-        'web/token/*',
         'getusertorrentlistajax',
         'setlist_lookup',
     ];

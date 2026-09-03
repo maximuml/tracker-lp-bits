@@ -314,9 +314,37 @@ class SystemBulkController extends LegacyController
 
     public function incrementBulk(Request $request): View|RedirectResponse|Response
     {
+        $curUser = app(CurrentUser::class)->get();
+        if ($curUser === null) {
+            $qs = $request->getQueryString();
 
-        return $this->legacyPage($request, 'increment-bulk', true);
+            return redirect('/increment-bulk.php'.($qs ? '?'.$qs : ''));
+        }
 
+        if (UserDisplay::currentClass() < UC_SYSOP) {
+            return $this->legacyAbortResponse('Sorry', 'Access denied.');
+        }
+
+        $langIncrementbulk = (array) (app(Globals::class)->get('lang_incrementbulk') ?? []);
+        $validTypeMap = (array) ($langIncrementbulk['types'] ?? []);
+        $type = (string) $request->input('type', '');
+        $classes = array_chunk(User::listClass(), 4, true);
+        $receiver = $request->input('receiver', '');
+        $body = $request->input('body', '');
+        $sent = $request->query('sent');
+        $returnto = $request->query('returnto', '');
+
+        return $this->legacyPage($request, 'increment-bulk', true, [
+            'lang_incrementbulk' => $langIncrementbulk,
+            'validTypeMap' => $validTypeMap,
+            'type' => $type,
+            'classes' => $classes,
+            'receiver' => $receiver,
+            'body' => $body,
+            'sent' => $sent,
+            'returnto' => $returnto,
+            'CURUSER' => $curUser,
+        ]);
     }
 
     public function setlistLookup(Request $request): JsonResponse

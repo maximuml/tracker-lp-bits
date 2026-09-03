@@ -13,7 +13,9 @@ class TorrentUploadRepository
 {
     public function getCategoryMode(int $catId): ?string
     {
-        return Category::query()->where('id', $catId)->value('mode');
+        $mode = Category::query()->where('id', $catId)->value('mode');
+
+        return $mode === null ? null : (string) $mode;
     }
 
     public function allowedOfferCount(int $userId): int

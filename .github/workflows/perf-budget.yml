@@ -38,7 +38,7 @@ jobs:
           MEILISEARCH_MASTER_KEY: 'ci-meilisearch-test-key'
           DB_HOST: 'mysql'
           DB_PORT: '3306'
-          DB_DATABASE: 'nexusphp'
+          DB_DATABASE: 'nexusphp_e2e_testing'
           DB_USERNAME: 'nexusphp'
           DB_PASSWORD: 'nexusphp'
           APP_NAME: 'NexusPHP'
@@ -49,6 +49,8 @@ jobs:
           sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=nexusphp/' .env
           sed -i 's/^REDIS_PASSWORD=.*/REDIS_PASSWORD=ci-redis-test-password/' .env
           sed -i 's/^MEILISEARCH_MASTER_KEY=.*/MEILISEARCH_MASTER_KEY=ci-meilisearch-test-key/' .env
+          # Use isolated E2E testing database (never the dev/production DB).
+          sed -i 's/^DB_DATABASE=.*/DB_DATABASE=nexusphp_e2e_testing/' .env
           # Replace ${VAR} references that docker compose can't interpolate
           sed -i 's/\${DB_HOST}/mysql/g' .env
           sed -i 's/\${APP_NAME}/NexusPHP/g' .env

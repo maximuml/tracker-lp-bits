@@ -38,10 +38,18 @@ class CriticalPathTest extends TestCase
         }
 
         // This test sends HTTP requests to the real OpenResty server, which
-        // always uses the main nexusphp database. Force Eloquent to use the
-        // same database so assertions can read what the HTTP requests wrote,
-        // even when the test suite was launched with DB_DATABASE=nexusphp_testing.
-        config(['database.connections.mysql.database' => 'nexusphp']);
+        // must be configured to use the isolated E2E database (set via the
+        // E2E_DB_DATABASE env var, defaulting to nexusphp_e2e_testing). Force
+        // Eloquent to use the same database so assertions can read what the
+        // HTTP requests wrote, even when the test suite was launched with a
+        // different DB_DATABASE. The DestructiveEnvironmentGuard in
+        // TestCase::setUp() already verified that the name carries a test
+        // marker, so we only override the connection here, not the guard.
+        $e2eDatabase = $_SERVER['E2E_DB_DATABASE'] ?? getenv('E2E_DB_DATABASE');
+        if (! is_string($e2eDatabase) || $e2eDatabase === '') {
+            $e2eDatabase = 'nexusphp_e2e_testing';
+        }
+        config(['database.connections.mysql.database' => $e2eDatabase]);
         DB::purge('mysql');
 
         $this->baseUrl = rtrim($base, '/');

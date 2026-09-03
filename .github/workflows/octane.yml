@@ -90,10 +90,11 @@ jobs:
           done
           nc -z 127.0.0.1 3306 || { echo "MySQL did not become ready in time"; exit 1; }
           php artisan migrate:fresh --seed --force
-          # Create isolated test database (phpunit.xml uses nexusphp_testing)
-          mysql -h 127.0.0.1 -u root -proot -e "CREATE DATABASE IF NOT EXISTS nexusphp_testing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; GRANT ALL PRIVILEGES ON nexusphp_testing.* TO 'nexusphp'@'%'; FLUSH PRIVILEGES;"
-          mysqldump -h 127.0.0.1 -u root -proot --no-data --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp | mysql -h 127.0.0.1 -u root -proot nexusphp_testing
-          mysqldump -h 127.0.0.1 -u root -proot --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users | mysql -h 127.0.0.1 -u root -proot nexusphp_testing
+          # Create isolated unit test database. The name carries the
+          # "testing" marker required by DestructiveEnvironmentGuard.
+          mysql -h 127.0.0.1 -u root -proot -e "CREATE DATABASE IF NOT EXISTS nexusphp_unit_testing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; GRANT ALL PRIVILEGES ON nexusphp_unit_testing.* TO 'nexusphp'@'%'; FLUSH PRIVILEGES;"
+          mysqldump -h 127.0.0.1 -u root -proot --no-data --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp | mysql -h 127.0.0.1 -u root -proot nexusphp_unit_testing
+          mysqldump -h 127.0.0.1 -u root -proot --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users | mysql -h 127.0.0.1 -u root -proot nexusphp_unit_testing
 
       - name: Cache Laravel bootstrap files
         run: |
@@ -157,4 +158,4 @@ jobs:
           kill $(pgrep -f "rr serve") 2>/dev/null || true
 
       - name: Run unit tests
-        run: DB_DATABASE=nexusphp_testing vendor/bin/phpunit --testsuite Unit --no-coverage
+        run: DB_DATABASE=nexusphp_unit_testing vendor/bin/phpunit --testsuite Unit --no-coverage

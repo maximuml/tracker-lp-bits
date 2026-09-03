@@ -207,15 +207,16 @@ jobs:
           done
           nc -z 127.0.0.1 3306 || { echo "MySQL did not become ready in time"; exit 1; }
           php artisan migrate:fresh --seed --force
-          # Create isolated test database (phpunit.xml uses nexusphp_testing)
-          # to prevent tests from truncating tables in the seed database.
-          mysql -h 127.0.0.1 -u root -proot -e "CREATE DATABASE IF NOT EXISTS nexusphp_testing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; GRANT ALL PRIVILEGES ON nexusphp_testing.* TO 'nexusphp'@'%'; FLUSH PRIVILEGES;"
+          # Create isolated unit test database to prevent tests from
+          # truncating tables in the seed database. The name carries the
+          # "testing" marker required by DestructiveEnvironmentGuard.
+          mysql -h 127.0.0.1 -u root -proot -e "CREATE DATABASE IF NOT EXISTS nexusphp_unit_testing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; GRANT ALL PRIVILEGES ON nexusphp_unit_testing.* TO 'nexusphp'@'%'; FLUSH PRIVILEGES;"
           # Copy schema + seed data for tables tests depend on (settings, users)
-          mysqldump -h 127.0.0.1 -u root -proot --no-data --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp | mysql -h 127.0.0.1 -u root -proot nexusphp_testing
-          mysqldump -h 127.0.0.1 -u root -proot --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users | mysql -h 127.0.0.1 -u root -proot nexusphp_testing
+          mysqldump -h 127.0.0.1 -u root -proot --no-data --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp | mysql -h 127.0.0.1 -u root -proot nexusphp_unit_testing
+          mysqldump -h 127.0.0.1 -u root -proot --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users | mysql -h 127.0.0.1 -u root -proot nexusphp_unit_testing
 
       - name: Run PHPUnit unit tests
-        run: DB_DATABASE=nexusphp_testing vendor/bin/phpunit --testsuite Unit --no-coverage
+        run: DB_DATABASE=nexusphp_unit_testing vendor/bin/phpunit --testsuite Unit --no-coverage
 
   coverage:
     name: Code coverage
@@ -284,19 +285,33 @@ jobs:
           done
           nc -z 127.0.0.1 3306 || { echo "MySQL did not become ready in time"; exit 1; }
           php artisan migrate:fresh --seed --force
-          # Create isolated test database (phpunit.xml uses nexusphp_testing)
-          mysql -h 127.0.0.1 -u root -proot -e "CREATE DATABASE IF NOT EXISTS nexusphp_testing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; GRANT ALL PRIVILEGES ON nexusphp_testing.* TO 'nexusphp'@'%'; FLUSH PRIVILEGES;"
-          mysqldump -h 127.0.0.1 -u root -proot --no-data --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp | mysql -h 127.0.0.1 -u root -proot nexusphp_testing
-          # Copy seed data for tables Feature tests depend on:
-          # settings/users — config + auth, searchbox/searchbox_fields — browse mode,
+          # Create isolated test databases for Unit and Feature suites.
+          # Separate databases allow the two suites to run with independent
+          # fixtures and prevent any risk of cross-suite data interference.
+          # Both names carry the "testing" marker required by
+          # DestructiveEnvironmentGuard.
+          mysql -h 127.0.0.1 -u root -proot -e "
+            CREATE DATABASE IF NOT EXISTS nexusphp_unit_testing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+            CREATE DATABASE IF NOT EXISTS nexusphp_feature_testing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+            GRANT ALL PRIVILEGES ON nexusphp_unit_testing.* TO 'nexusphp'@'%';
+            GRANT ALL PRIVILEGES ON nexusphp_feature_testing.* TO 'nexusphp'@'%';
+            FLUSH PRIVILEGES;
+          "
+          # Copy schema to both test databases
+          for db in nexusphp_unit_testing nexusphp_feature_testing; do
+            mysqldump -h 127.0.0.1 -u root -proot --no-data --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp | mysql -h 127.0.0.1 -u root -proot "$db"
+          done
+          # Unit tests need: settings, users
+          mysqldump -h 127.0.0.1 -u root -proot --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users | mysql -h 127.0.0.1 -u root -proot nexusphp_unit_testing
+          # Feature tests need: settings/users — config + auth, searchbox/searchbox_fields — browse mode,
           # categories — torrent listing, agent_allowed_family/agent_allowed_exception — announce client check
-          mysqldump -h 127.0.0.1 -u root -proot --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users searchbox searchbox_fields categories agent_allowed_family agent_allowed_exception | mysql -h 127.0.0.1 -u root -proot nexusphp_testing
+          mysqldump -h 127.0.0.1 -u root -proot --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users searchbox searchbox_fields categories agent_allowed_family agent_allowed_exception | mysql -h 127.0.0.1 -u root -proot nexusphp_feature_testing
 
       - name: Run PHPUnit Unit with coverage
-        run: DB_DATABASE=nexusphp_testing vendor/bin/phpunit --testsuite Unit --coverage-clover=coverage-unit.xml
+        run: DB_DATABASE=nexusphp_unit_testing vendor/bin/phpunit --testsuite Unit --coverage-clover=coverage-unit.xml
 
       - name: Run PHPUnit Feature with coverage
-        run: DB_DATABASE=nexusphp_testing vendor/bin/phpunit --testsuite Feature --coverage-clover=coverage-feature.xml --coverage-html=coverage-html
+        run: DB_DATABASE=nexusphp_feature_testing vendor/bin/phpunit --testsuite Feature --coverage-clover=coverage-feature.xml --coverage-html=coverage-html
 
       - name: Merge Clover coverage reports
         run: |
@@ -360,6 +375,12 @@ jobs:
           # .env.example leaves MEILISEARCH_MASTER_KEY empty so users must set
           # their own. For the smoke-test stack, restore the compose default.
           sed -i 's|^MEILISEARCH_MASTER_KEY=.*|MEILISEARCH_MASTER_KEY=nexusphp_default_key|' .env
+          # Use an isolated E2E testing database so Feature tests (including
+          # CriticalPathTest) never mutate the dev/production database.
+          # The MySQL container creates this DB automatically via
+          # MYSQL_DATABASE in docker-compose.yml. The name carries the
+          # "testing" marker required by DestructiveEnvironmentGuard.
+          sed -i 's/^DB_DATABASE=.*/DB_DATABASE=nexusphp_e2e_testing/' .env
           # Use dev overrides (bind-mounts, openresty config mounts)
           echo "COMPOSE_FILE=docker-compose.yml:docker-compose.dev.yml" >> "$GITHUB_ENV"
 
@@ -415,8 +436,14 @@ jobs:
           # Flush Redis to clear any cached settings from migrate:fresh
           source .env 2>/dev/null
           docker compose exec -T redis sh -c "redis-cli -a \"\${REDIS_PASSWORD:-}\" FLUSHALL" 2>/dev/null || true
-          # Feature tests use nexusphp (main DB) — same as OpenResty.
-          docker compose exec -T -e CRITICAL_PATH_BASE_URL=http://openresty php vendor/bin/phpunit --testsuite Feature --no-coverage
+          # Feature tests use the isolated E2E database (nexusphp_e2e_testing),
+          # same as the OpenResty/PHP-FPM stack. CriticalPathTest reads
+          # E2E_DB_DATABASE to match the connection used by HTTP requests.
+          docker compose exec -T \
+            -e CRITICAL_PATH_BASE_URL=http://openresty \
+            -e DB_DATABASE=nexusphp_e2e_testing \
+            -e E2E_DB_DATABASE=nexusphp_e2e_testing \
+            php vendor/bin/phpunit --testsuite Feature --no-coverage
 
   codeql:
     name: CodeQL security scan

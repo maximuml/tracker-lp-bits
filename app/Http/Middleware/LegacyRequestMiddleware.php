@@ -88,7 +88,7 @@ final class LegacyRequestMiddleware
     }
 
     /** Paths that are routed directly by Laravel/Filament/Livewire and must not be rewritten to legacy /script.php. */
-    private const LARAVEL_ONLY_PREFIXES = ['api', 'livewire', 'filament', 'nexusphp', 'horizon'];
+    private const LARAVEL_ONLY_PREFIXES = ['api', 'livewire', 'filament', 'nexusphp', 'horizon', 'web'];
 
     private function prepareRequest(Request $request): Request
     {

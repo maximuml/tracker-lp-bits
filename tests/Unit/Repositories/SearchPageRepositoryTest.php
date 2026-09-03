@@ -6,6 +6,7 @@ namespace Tests\Unit\Repositories;
 
 use App\Models\User;
 use App\Repositories\SearchPageRepository;
+use App\Support\Permissions;
 use App\Support\Settings;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
@@ -28,18 +29,28 @@ final class SearchPageRepositoryTest extends TestCase
 
     private SearchPageRepository $repository;
 
+    private int $categoryId;
+
+    private int $categoryMode;
+
     protected function setUp(): void
     {
         parent::setUp();
+        Permissions::resetState();
 
-        // Disable MeiliSearch, set browse_cat to match seeded category (mode=1),
+        // Find an existing category from the seeded data
+        $category = DB::table('categories')->first();
+        $this->categoryId = $category ? (int) $category->id : 1;
+        $this->categoryMode = $category ? (int) $category->mode : 1;
+
+        // Disable MeiliSearch, set browse_cat to match the seeded category mode,
         // and make all approval statuses visible so the query is not filtered.
         $settingsRef = new \ReflectionClass(Settings::class);
         $prop = $settingsRef->getProperty('settings');
         $prop->setAccessible(true);
         $prop->setValue(null, [
             'meilisearch' => ['enabled' => 'no'],
-            'main' => ['browsecat' => '4'],
+            'main' => ['browsecat' => (string) $this->categoryMode],
             'torrent' => ['approval_status_none_visible' => 'yes'],
         ]);
 
@@ -164,7 +175,7 @@ final class SearchPageRepositoryTest extends TestCase
             'name' => $name,
             'filename' => 'test.torrent',
             'save_as' => 'test',
-            'category' => 401,
+            'category' => $this->categoryId,
             'size' => 1024,
             'type' => 'single',
             'numfiles' => 1,

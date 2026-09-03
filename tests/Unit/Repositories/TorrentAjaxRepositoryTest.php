@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Repositories;
 
+use App\Enums\UserClass;
 use App\Models\User;
 use App\Repositories\TorrentAjaxRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -226,11 +227,11 @@ final class TorrentAjaxRepositoryTest extends TestCase
     public function test_user_torrent_list_uploaded_filters_anonymous_for_other_viewers(): void
     {
         $ownerId = $this->createUser();
-        $viewerId = $this->createUser();
+        // Create viewer with a low class (USER) so they lack VIEW_ANONYMOUS permission
+        /** @var User $viewer */
+        $viewer = User::factory()->class(UserClass::USER->value)->create();
         $categoryId = $this->ensureCategory();
         $this->createTorrent($ownerId, ['category' => $categoryId, 'anonymous' => 1, 'name' => 'Anon Torrent']);
-        /** @var User $viewer */
-        $viewer = User::query()->findOrFail($viewerId);
 
         $result = $this->repository->userTorrentList($ownerId, 'uploaded', 1, $viewer);
 

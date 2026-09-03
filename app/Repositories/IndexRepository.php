@@ -158,7 +158,7 @@ class IndexRepository
 
     public function hasVoted(int $pollId, int $userId): bool
     {
-        return (bool) Cache::remember(
+        return (bool) (int) Cache::remember(
             $this->cacheKey('poll_voted', [(string) $pollId, (string) $userId]),
             60,
             fn () => PollAnswer::where('pollid', $pollId)->where('userid', $userId)->exists()
@@ -167,7 +167,7 @@ class IndexRepository
 
     public function getUserVote(int $pollId, int $userId): ?int
     {
-        return Cache::remember(
+        $result = Cache::remember(
             $this->cacheKey('poll_user_vote', [(string) $pollId, (string) $userId]),
             60,
             function () use ($pollId, $userId) {
@@ -176,6 +176,8 @@ class IndexRepository
                 return $selection === null ? null : (int) $selection;
             }
         );
+
+        return $result === null ? null : (int) $result;
     }
 
     public function recordPollVote(int $pollId, int $userId, int $choice): bool

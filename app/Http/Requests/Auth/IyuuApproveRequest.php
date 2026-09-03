@@ -22,6 +22,13 @@ class IyuuApproveRequest extends FormRequest
             'id' => 'required|integer',
             'verity' => 'required|string',
             'provider' => ['required', 'string', Rule::in('iyuu')],
+            // v2 fields (optional — used when version=v2)
+            'version' => ['nullable', 'string', Rule::in(['v2'])],
+            'uid' => 'nullable|integer',
+            'passkey' => 'nullable|string|size:32',
+            'timestamp' => 'nullable|integer',
+            'nonce' => 'nullable|string',
+            'signature' => 'nullable|string',
         ];
     }
 }

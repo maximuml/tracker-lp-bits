@@ -13,6 +13,7 @@ use App\Http\Requests\Auth\NasToolsApproveRequest;
 use App\Models\User;
 use App\Repositories\AuthenticateRepository;
 use App\Repositories\UserRepository;
+use App\Services\ThirdPartyAuthService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -25,6 +26,17 @@ final class AuthenticateControllerTest extends TestCase
     {
         Mockery::close();
         parent::tearDown();
+    }
+
+    /**
+     * Create a mock ThirdPartyAuthService for controller construction.
+     */
+    private function mockThirdPartyAuth(): ThirdPartyAuthService
+    {
+        /** @var ThirdPartyAuthService&Mockery\MockInterface $service */
+        $service = Mockery::mock(ThirdPartyAuthService::class);
+
+        return $service;
     }
 
     public function test_login_returns_success_with_valid_credentials(): void
@@ -41,7 +53,7 @@ final class AuthenticateControllerTest extends TestCase
         /** @var UserRepository&Mockery\MockInterface $userRepository */
         $userRepository = Mockery::mock(UserRepository::class);
 
-        $controller = new AuthenticateController($repository, $userRepository);
+        $controller = new AuthenticateController($repository, $userRepository, $this->mockThirdPartyAuth());
         $request = LoginRequest::create('/api/v1/login', 'POST', [
             'username' => 'testuser',
             'password' => 'password',
@@ -67,7 +79,7 @@ final class AuthenticateControllerTest extends TestCase
         /** @var UserRepository&Mockery\MockInterface $userRepository */
         $userRepository = Mockery::mock(UserRepository::class);
 
-        $controller = new AuthenticateController($repository, $userRepository);
+        $controller = new AuthenticateController($repository, $userRepository, $this->mockThirdPartyAuth());
         $request = LoginRequest::create('/api/v1/login', 'POST', []);
         $request->setContainer(app());
         $request->setRedirector(app('redirect'));
@@ -90,7 +102,7 @@ final class AuthenticateControllerTest extends TestCase
 
         Auth::shouldReceive('id')->once()->andReturn(5);
 
-        $controller = new AuthenticateController($repository, $userRepository);
+        $controller = new AuthenticateController($repository, $userRepository, $this->mockThirdPartyAuth());
         $request = Request::create('/api/v1/logout', 'POST', []);
 
         $result = $controller->logout($request);
@@ -108,15 +120,18 @@ final class AuthenticateControllerTest extends TestCase
 
         /** @var AuthenticateRepository&Mockery\MockInterface $repository */
         $repository = Mockery::mock(AuthenticateRepository::class);
-        $repository->shouldReceive('nasToolsApprove')
-            ->once()
-            ->with('encrypted-data')
-            ->andReturn($user);
 
         /** @var UserRepository&Mockery\MockInterface $userRepository */
         $userRepository = Mockery::mock(UserRepository::class);
 
-        $controller = new AuthenticateController($repository, $userRepository);
+        /** @var ThirdPartyAuthService&Mockery\MockInterface $thirdPartyAuth */
+        $thirdPartyAuth = Mockery::mock(ThirdPartyAuthService::class);
+        $thirdPartyAuth->shouldReceive('verifyLegacyNasTools')
+            ->once()
+            ->with('encrypted-data', Mockery::any())
+            ->andReturn($user);
+
+        $controller = new AuthenticateController($repository, $userRepository, $thirdPartyAuth);
         $request = NasToolsApproveRequest::create('/api/v1/nas-tools/approve', 'POST', ['data' => 'encrypted-data']);
         $request->setContainer(app());
         $request->setRedirector(app('redirect'));
@@ -129,36 +144,46 @@ final class AuthenticateControllerTest extends TestCase
 
     public function test_nas_tools_approve_validates_required_fields(): void
     {
-        $this->expectException(ValidationException::class);
-
+        // With nullable rules, empty data passes validation but legacy path
+        // returns null → InvalidArgumentException. Test that instead.
         /** @var AuthenticateRepository&Mockery\MockInterface $repository */
         $repository = Mockery::mock(AuthenticateRepository::class);
-        $repository->shouldNotReceive('nasToolsApprove');
 
         /** @var UserRepository&Mockery\MockInterface $userRepository */
         $userRepository = Mockery::mock(UserRepository::class);
 
-        $controller = new AuthenticateController($repository, $userRepository);
+        /** @var ThirdPartyAuthService&Mockery\MockInterface $thirdPartyAuth */
+        $thirdPartyAuth = Mockery::mock(ThirdPartyAuthService::class);
+        $thirdPartyAuth->shouldReceive('verifyLegacyNasTools')
+            ->once()
+            ->andReturnNull();
+
+        $controller = new AuthenticateController($repository, $userRepository, $thirdPartyAuth);
         $request = NasToolsApproveRequest::create('/api/v1/nas-tools/approve', 'POST', []);
         $request->setContainer(app());
         $request->setRedirector(app('redirect'));
         $request->validateResolved();
 
-        $controller->nasToolsApprove($request);
+        $result = $controller->nasToolsApprove($request);
+
+        $this->assertNotSame(0, $result['ret']);
     }
 
     public function test_nas_tools_approve_returns_fail_on_exception(): void
     {
         /** @var AuthenticateRepository&Mockery\MockInterface $repository */
         $repository = Mockery::mock(AuthenticateRepository::class);
-        $repository->shouldReceive('nasToolsApprove')
-            ->once()
-            ->andThrow(new \InvalidArgumentException('Invalid data format.'));
 
         /** @var UserRepository&Mockery\MockInterface $userRepository */
         $userRepository = Mockery::mock(UserRepository::class);
 
-        $controller = new AuthenticateController($repository, $userRepository);
+        /** @var ThirdPartyAuthService&Mockery\MockInterface $thirdPartyAuth */
+        $thirdPartyAuth = Mockery::mock(ThirdPartyAuthService::class);
+        $thirdPartyAuth->shouldReceive('verifyLegacyNasTools')
+            ->once()
+            ->andThrow(new \InvalidArgumentException('Invalid data format.'));
+
+        $controller = new AuthenticateController($repository, $userRepository, $thirdPartyAuth);
         $request = NasToolsApproveRequest::create('/api/v1/nas-tools/approve', 'POST', ['data' => 'bad-data']);
         $request->setContainer(app());
         $request->setRedirector(app('redirect'));
@@ -171,16 +196,23 @@ final class AuthenticateControllerTest extends TestCase
 
     public function test_iyuu_approve_returns_success(): void
     {
+        $user = new User;
+        $user->id = 5;
+
         /** @var AuthenticateRepository&Mockery\MockInterface $repository */
         $repository = Mockery::mock(AuthenticateRepository::class);
-        $repository->shouldReceive('iyuuApprove')
-            ->once()
-            ->with('token123', 5, 'verity123');
 
         /** @var UserRepository&Mockery\MockInterface $userRepository */
         $userRepository = Mockery::mock(UserRepository::class);
 
-        $controller = new AuthenticateController($repository, $userRepository);
+        /** @var ThirdPartyAuthService&Mockery\MockInterface $thirdPartyAuth */
+        $thirdPartyAuth = Mockery::mock(ThirdPartyAuthService::class);
+        $thirdPartyAuth->shouldReceive('verifyLegacyIyuu')
+            ->once()
+            ->with('token123', 5, 'verity123', Mockery::any())
+            ->andReturn($user);
+
+        $controller = new AuthenticateController($repository, $userRepository, $thirdPartyAuth);
         $request = IyuuApproveRequest::create('/api/v1/iyuu/approve', 'POST', [
             'token' => 'token123',
             'id' => 5,
@@ -202,12 +234,15 @@ final class AuthenticateControllerTest extends TestCase
 
         /** @var AuthenticateRepository&Mockery\MockInterface $repository */
         $repository = Mockery::mock(AuthenticateRepository::class);
-        $repository->shouldNotReceive('iyuuApprove');
 
         /** @var UserRepository&Mockery\MockInterface $userRepository */
         $userRepository = Mockery::mock(UserRepository::class);
 
-        $controller = new AuthenticateController($repository, $userRepository);
+        /** @var ThirdPartyAuthService&Mockery\MockInterface $thirdPartyAuth */
+        $thirdPartyAuth = Mockery::mock(ThirdPartyAuthService::class);
+        $thirdPartyAuth->shouldNotReceive('verifyLegacyIyuu');
+
+        $controller = new AuthenticateController($repository, $userRepository, $thirdPartyAuth);
         $request = IyuuApproveRequest::create('/api/v1/iyuu/approve', 'POST', []);
         $request->setContainer(app());
         $request->setRedirector(app('redirect'));
@@ -224,7 +259,7 @@ final class AuthenticateControllerTest extends TestCase
         /** @var UserRepository&Mockery\MockInterface $userRepository */
         $userRepository = Mockery::mock(UserRepository::class);
 
-        $controller = new AuthenticateController($repository, $userRepository);
+        $controller = new AuthenticateController($repository, $userRepository, $this->mockThirdPartyAuth());
         $request = ChallengeRequest::create('/api/v1/challenge', 'POST', ['username' => 'testuser']);
         $request->setContainer(app());
         $request->setRedirector(app('redirect'));
@@ -248,7 +283,7 @@ final class AuthenticateControllerTest extends TestCase
         /** @var UserRepository&Mockery\MockInterface $userRepository */
         $userRepository = Mockery::mock(UserRepository::class);
 
-        $controller = new AuthenticateController($repository, $userRepository);
+        $controller = new AuthenticateController($repository, $userRepository, $this->mockThirdPartyAuth());
         $request = ChallengeRequest::create('/api/v1/challenge', 'POST', []);
         $request->setContainer(app());
         $request->setRedirector(app('redirect'));
@@ -267,14 +302,17 @@ final class AuthenticateControllerTest extends TestCase
 
         /** @var AuthenticateRepository&Mockery\MockInterface $repository */
         $repository = Mockery::mock(AuthenticateRepository::class);
-        $repository->shouldReceive('ammdsApprove')
-            ->once()
-            ->andReturn($user);
 
         /** @var UserRepository&Mockery\MockInterface $userRepository */
         $userRepository = Mockery::mock(UserRepository::class);
 
-        $controller = new AuthenticateController($repository, $userRepository);
+        /** @var ThirdPartyAuthService&Mockery\MockInterface $thirdPartyAuth */
+        $thirdPartyAuth = Mockery::mock(ThirdPartyAuthService::class);
+        $thirdPartyAuth->shouldReceive('verifyLegacyAmmds')
+            ->once()
+            ->andReturn($user);
+
+        $controller = new AuthenticateController($repository, $userRepository, $thirdPartyAuth);
         $request = AmmdsApproveRequest::create('/api/v1/ammds/approve', 'POST', [
             'uid' => 5,
             'timestamp' => time(),
@@ -296,12 +334,15 @@ final class AuthenticateControllerTest extends TestCase
 
         /** @var AuthenticateRepository&Mockery\MockInterface $repository */
         $repository = Mockery::mock(AuthenticateRepository::class);
-        $repository->shouldNotReceive('ammdsApprove');
 
         /** @var UserRepository&Mockery\MockInterface $userRepository */
         $userRepository = Mockery::mock(UserRepository::class);
 
-        $controller = new AuthenticateController($repository, $userRepository);
+        /** @var ThirdPartyAuthService&Mockery\MockInterface $thirdPartyAuth */
+        $thirdPartyAuth = Mockery::mock(ThirdPartyAuthService::class);
+        $thirdPartyAuth->shouldNotReceive('verifyLegacyAmmds');
+
+        $controller = new AuthenticateController($repository, $userRepository, $thirdPartyAuth);
         $request = AmmdsApproveRequest::create('/api/v1/ammds/approve', 'POST', []);
         $request->setContainer(app());
         $request->setRedirector(app('redirect'));
@@ -314,14 +355,17 @@ final class AuthenticateControllerTest extends TestCase
     {
         /** @var AuthenticateRepository&Mockery\MockInterface $repository */
         $repository = Mockery::mock(AuthenticateRepository::class);
-        $repository->shouldReceive('ammdsApprove')
-            ->once()
-            ->andThrow(new \InvalidArgumentException('Invalid signature.'));
 
         /** @var UserRepository&Mockery\MockInterface $userRepository */
         $userRepository = Mockery::mock(UserRepository::class);
 
-        $controller = new AuthenticateController($repository, $userRepository);
+        /** @var ThirdPartyAuthService&Mockery\MockInterface $thirdPartyAuth */
+        $thirdPartyAuth = Mockery::mock(ThirdPartyAuthService::class);
+        $thirdPartyAuth->shouldReceive('verifyLegacyAmmds')
+            ->once()
+            ->andThrow(new \InvalidArgumentException('Invalid signature.'));
+
+        $controller = new AuthenticateController($repository, $userRepository, $thirdPartyAuth);
         $request = AmmdsApproveRequest::create('/api/v1/ammds/approve', 'POST', [
             'uid' => 5,
             'timestamp' => time(),

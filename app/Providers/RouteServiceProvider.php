@@ -73,6 +73,12 @@ class RouteServiceProvider extends ServiceProvider
             return Limit::perMinute(10)->by(Network::clientIp());
         });
 
+        // Stricter rate limit for third-party auth endpoints (approve/challenge).
+        // These are high-risk targets for credential brute-forcing.
+        RateLimiter::for('third-party-auth', function (Request $request) {
+            return Limit::perMinute(5)->by(Network::clientIp());
+        });
+
         RateLimiter::for('tracker', function (Request $request) {
             return Limit::perMinute(120)->by($request->ip() ?? 'default');
         });

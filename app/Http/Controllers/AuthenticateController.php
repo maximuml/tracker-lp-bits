@@ -10,10 +10,12 @@ use App\Http\Requests\Auth\IyuuApproveRequest;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\NasToolsApproveRequest;
 use App\Http\Requests\Auth\PasskeyLoginRequest;
+use App\Http\Requests\Auth\PasskeyLoginV2Request;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Repositories\AuthenticateRepository;
 use App\Repositories\UserRepository;
+use App\Services\PasskeyLoginService;
 use App\Services\ThirdPartyAuthService;
 use App\Support\AuthCookie;
 use App\Support\Config\SiteConfig;
@@ -122,6 +124,49 @@ class AuthenticateController extends Controller
             return redirect('index.php');
         }
 
+        if ($deadline && $deadline > now()->toDateTimeString()) {
+            $user = User::query()->where('passkey', $passkey)->first(['id', 'passhash', 'secret', 'auth_key']);
+            if ($user) {
+                $ip = Network::clientIp();
+                AuthCookie::setLoginCookie((int) $user->id, (string) $user->auth_key, (int) 0);
+                $user->last_login = now();
+                $user->save();
+                $this->userRepository->saveLoginLog($user->id, $ip, 'Passkey', false);
+            }
+        }
+
+        return redirect('index.php');
+    }
+
+    /**
+     * Passkey login v2 — HMAC-SHA256 with canonical payload, nonce
+     * replay protection, and key rotation by key ID.
+     *
+     * Required parameters:
+     * - passkey: 32-char hex string (user's BitTorrent passkey)
+     * - timestamp: unix timestamp (seconds)
+     * - nonce: 32-char hex string (unique per request)
+     * - signature: 64-char hex HMAC-SHA256
+     * - key_id: signing key identifier
+     * - action: action scope (default: "login")
+     *
+     * The timestamp must be within ±5 minutes of server time.
+     * Each nonce can only be used once — Redis SET NX EX prevents replay.
+     */
+    public function passkeyLoginV2(PasskeyLoginV2Request $request, PasskeyLoginService $service): RedirectResponse
+    {
+        $passkey = (string) $request->input('passkey');
+        $timestamp = (int) $request->input('timestamp');
+        $nonce = (string) $request->input('nonce');
+        $signature = (string) $request->input('signature');
+        $keyId = (string) $request->input('key_id');
+        $action = (string) $request->input('action', PasskeyLoginService::ACTION_LOGIN);
+
+        if (! $service->verify($passkey, $timestamp, $nonce, $signature, $keyId, $action)) {
+            return redirect('index.php');
+        }
+
+        $deadline = SiteConfig::current()->security->loginSecretDeadline();
         if ($deadline && $deadline > now()->toDateTimeString()) {
             $user = User::query()->where('passkey', $passkey)->first(['id', 'passhash', 'secret', 'auth_key']);
             if ($user) {

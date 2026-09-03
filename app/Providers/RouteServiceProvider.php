@@ -118,5 +118,9 @@ class RouteServiceProvider extends ServiceProvider
         RateLimiter::for('legacy', function (Request $request) {
             return Limit::perMinute(120)->by($request->user()?->id ?: $request->ip() ?? 'default');
         });
+
+        RateLimiter::for('passkey-login', function (Request $request) {
+            return Limit::perMinute(10)->by($request->ip() ?? 'default');
+        });
     }
 }

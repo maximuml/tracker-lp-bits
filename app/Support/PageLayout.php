@@ -546,6 +546,7 @@ class PageLayout
                         $new_news = app(PageLayoutRepository::class)->getUnreadNewsCount($lastHome);
                         $context->cache?->cache_value('user_'.$context->user['id'].'_unread_news_count', $new_news, 300);
                     }
+                    $new_news = (int) $new_news;
                     if ($new_news > 0) {
                         $text = $context->lang['text_there_is'].Strings::isOrAre($new_news).$new_news.$context->lang['text_new_news'];
                         Html::messageAlertVoid('index.php', $text, 'green');
@@ -557,6 +558,7 @@ class PageLayout
                     $nummessages = app(MessageRepository::class)->countStaffMessage($context->user['id'], 0);
                     app(MessageRepository::class)->updateStaffMessageCountCache($context->user['id'], 'new', $nummessages);
                 }
+                $nummessages = (int) $nummessages;
                 if ($nummessages > 0) {
                     $text = $context->lang['text_there_is'].Strings::isOrAre($nummessages).$nummessages.$context->lang['text_new_staff_message'].Strings::addS($nummessages);
                     Html::messageAlertVoid('staffbox.php', $text, 'blue');
@@ -569,6 +571,7 @@ class PageLayout
                         $toApprovalCounts = app(PageLayoutRepository::class)->getTorrentApprovalNoneCount();
                         $context->cache->cache_value($cacheKey, $toApprovalCounts, 60);
                     }
+                    $toApprovalCounts = (int) $toApprovalCounts;
                     if ($toApprovalCounts) {
                         Html::messageAlertVoid('torrents.php?approval_status=0&incldead=0', sprintf($context->lang['text_torrent_to_approval'], Strings::isOrAre($toApprovalCounts), $toApprovalCounts, Strings::addS($toApprovalCounts)), 'darkred');
                     }
@@ -578,6 +581,7 @@ class PageLayout
                         $complaints = app(PageLayoutRepository::class)->getOpenComplaintsCount();
                         $context->cache->cache_value('COMPLAINTS_COUNT_CACHE', $complaints, 600);
                     }
+                    $complaints = (int) $complaints;
                     if ($complaints) {
                         Html::messageAlertVoid('complains.php?action=list', sprintf($context->lang['text_complains'], Strings::isOrAre($complaints), $complaints, Strings::addS($complaints)), 'darkred');
                     }
@@ -586,6 +590,7 @@ class PageLayout
                         $numreports = app(PageLayoutRepository::class)->getOpenReportsCount();
                         $context->cache?->cache_value('staff_new_report_count', $numreports, 900);
                     }
+                    $numreports = (int) $numreports;
                     if ($numreports) {
                         $text = $context->lang['text_there_is'].Strings::isOrAre($numreports).$numreports.$context->lang['text_new_report'].Strings::addS($numreports);
                         Html::messageAlertVoid('reports.php', $text, 'blue');
@@ -595,6 +600,7 @@ class PageLayout
                         $numcheaters = app(PageLayoutRepository::class)->getOpenCheatersCount();
                         $context->cache?->cache_value('staff_new_cheater_count', $numcheaters, 900);
                     }
+                    $numcheaters = (int) $numcheaters;
                     if ($numcheaters) {
                         $text = $context->lang['text_there_is'].Strings::isOrAre($numcheaters).$numcheaters.$context->lang['text_new_suspected_cheater'].Strings::addS($numcheaters);
                         Html::messageAlertVoid('cheaterbox.php', $text, 'blue');

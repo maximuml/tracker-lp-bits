@@ -281,7 +281,7 @@ class AttendanceRepository extends BaseRepository
     {
         $start = Carbon::parse($start);
         $logQuery = $attendance->logs()->where('date', '<=', $start->format('Y-m-d'))->orderBy('date', 'desc');
-        $attendanceLogs = $logQuery->get(['date'])->keyBy('date');
+        $attendanceLogs = $logQuery->get(['date'])->keyBy(fn ($log) => $log->date->format('Y-m-d'));
         $counts = $attendanceLogs->count();
         Logger::writeWithContext((string) sprintf('user: %s, log counts: %s from query: %s', $attendance->uid, $counts, LegacyDb::lastQuery(false, 'json')), (string) 'info', (bool) false);
         if ($counts == 0) {

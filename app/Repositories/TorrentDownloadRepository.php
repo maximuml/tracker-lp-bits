@@ -292,6 +292,9 @@ class TorrentDownloadRepository extends BaseRepository
         $logPrefix = sprintf('piecesHashCount: %s, resultCount: %s', count($piecesHash), count($results));
         $out = [];
         foreach ($results as $item) {
+            if (! is_string($item)) {
+                continue;
+            }
             $arr = json_decode($item, true);
             if (is_array($arr) && isset($arr['torrent_id'], $arr['pieces_hash'])) {
                 $out[$arr['pieces_hash']] = $arr['torrent_id'];

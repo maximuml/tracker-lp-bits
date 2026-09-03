@@ -332,7 +332,7 @@ final class Comment
                 ? '<img class="f_online" src="pic/trans.gif" alt="Online" title="'.($lang_functions['title_online'] ?? '').'" />'
                 : '<img class="f_offline" src="pic/trans.gif" alt="Offline" title="'.($lang_functions['title_offline'] ?? '').'" />';
 
-            $html .= '<tr><td class="toolbox"> '.$onlineIcon.'<a href="sendmessage.php?receiver='.\htmlspecialchars(trim($row['user'])).'"><img class="f_pm" src="pic/trans.gif" alt="PM" title="'.($lang_functions['title_send_message_to'] ?? '').\htmlspecialchars($userRow['username']).'" /></a><a href="report.php?commentid='.\htmlspecialchars(trim($row['id'])).'"><img class="f_report" src="pic/trans.gif" alt="Report" title="'.($lang_functions['title_report_this_comment'] ?? '').'" /></a></td><td class="toolbox" align="right">'.$actionbar.'</td>';
+            $html .= '<tr><td class="toolbox"> '.$onlineIcon.'<a href="sendmessage.php?receiver='.\htmlspecialchars(trim((string) $row['user'])).'"><img class="f_pm" src="pic/trans.gif" alt="PM" title="'.($lang_functions['title_send_message_to'] ?? '').\htmlspecialchars($userRow['username']).'" /></a><a href="report.php?commentid='.\htmlspecialchars(trim((string) $row['id'])).'"><img class="f_report" src="pic/trans.gif" alt="Report" title="'.($lang_functions['title_report_this_comment'] ?? '').'" /></a></td><td class="toolbox" align="right">'.$actionbar.'</td>';
 
             $html .= '</tr></table>'."\n";
         }

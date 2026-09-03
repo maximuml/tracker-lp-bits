@@ -328,7 +328,7 @@ class User extends Authenticatable implements FilamentUser, HasName
 
     public static function defaultUser(): self
     {
-        return new self(self::getDefaultUserAttributes());
+        return (new self)->forceFill(self::getDefaultUserAttributes());
     }
 
     /**

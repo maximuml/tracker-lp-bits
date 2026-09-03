@@ -3,3 +3,5 @@
 0572cdfaa4a5ded146c60bb1b5e66fafbcce0ad0:tests/Feature/AnnounceProtocolContractTest.php:generic-api-key:92
 # Fake dlkey in PrivateAttachmentsTest is a dummy value for negative tests
 41e8e75624b7eebbf493089e559a8aeeb50aed91:tests/Feature/PrivateAttachmentsTest.php:generic-api-key:120
+# Passkey in TorrentRssControllerTest is a dummy value for negative tests (fixed in later commit)
+6aedf2ae16d7e551b72f0c04abe6064924bffb04:tests/Unit/Http/Controllers/TorrentRssControllerTest.php:generic-api-key:87

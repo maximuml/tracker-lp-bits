@@ -15,10 +15,11 @@
     <server name="CACHE_DRIVER" value="array"/>
     <server name="CHANNEL_NAME_SETTING" value=""/>
     <server name="CHANNEL_NAME_MODEL_EVENT" value=""/>
-    <!-- DB_DATABASE is set per-suite: Unit tests use nexusphp_testing
-         (set in CI and locally via DB_DATABASE env var) to avoid wiping dev
-         data via truncate(). Feature tests use nexusphp (the main DB)
-         because they make HTTP requests through OpenResty. -->
+    <!-- DB_DATABASE: not set here — CI sets it per-suite via env var
+         (nexusphp_unit_testing / nexusphp_feature_testing / nexusphp_e2e_testing).
+         DestructiveEnvironmentGuard in TestCase::setUp() refuses to run
+         if the name does not contain a test marker (test/testing/e2e).
+         Locally, run: DB_DATABASE=nexusphp_testing vendor/bin/phpunit -->
     <!-- Redis isolation: use DB index 15 and a test prefix to avoid
          clobbering dev data (dev uses DB 0 with no prefix).
          REDIS_HOST/REDIS_PASSWORD are inherited from .env. -->

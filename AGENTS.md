@@ -86,6 +86,31 @@ docker compose exec -T php composer audit
 - **Login for E2E:** CSRF token from `/login.php` → POST to `/takelogin.php` with `_token`, `username`, `password`
 - **Captcha:** disable with `UPDATE settings SET value='no' WHERE name='security.iv'` + flush Redis settings cache
 
+### Database isolation (T-05)
+
+Tests must never run against the dev/production database. Three isolated
+databases are used:
+
+| Database | Suite | CI job |
+|---|---|---|
+| `nexusphp_unit_testing` | Unit | `unit-tests`, `coverage`, `octane` |
+| `nexusphp_feature_testing` | Feature (no OpenResty) | `coverage` |
+| `nexusphp_e2e_testing` | Feature + OpenResty (CriticalPathTest) | `smoke-test`, `a11y`, `perf-budget` |
+
+`DestructiveEnvironmentGuard` (`app/Support/DestructiveEnvironmentGuard.php`)
+is invoked from `Tests\TestCase::setUp()` and from a `CommandStarting` listener
+in `AppServiceProvider` (for `migrate:fresh`/`migrate:refresh`/`migrate:reset`/
+`db:wipe`). When `APP_ENV=testing`, it refuses to run if the database name does
+not contain `test`, `testing` or `e2e`, or if the Redis prefix does not contain
+`test`. This prevents accidental data loss from misconfigured `DB_DATABASE`.
+
+`phpunit.xml` sets `DB_DATABASE=nexusphp_testing` as the default; CI overrides
+it per-suite. The E2E stack (smoke-test, a11y, perf-budget) sets
+`DB_DATABASE=nexusphp_e2e_testing` in `.env` so the Docker containers
+(PHP-FPM, OpenResty) use the same isolated database as the test suite.
+`CriticalPathTest` reads `E2E_DB_DATABASE` (default `nexusphp_e2e_testing`) to
+match the connection used by HTTP requests through OpenResty.
+
 ## Modernisation status
 
 Sprints 0–55 complete. Recent work:

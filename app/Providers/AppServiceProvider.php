@@ -6,6 +6,7 @@ namespace App\Providers;
 
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
+use App\Support\DestructiveEnvironmentGuard;
 use App\Support\Env;
 use App\Support\Environment;
 use App\Support\Globals;
@@ -16,6 +17,7 @@ use App\Support\UserUpdateBatch;
 use Filament\Facades\Filament;
 use Filament\Support\Assets\Css;
 use Filament\Support\Facades\FilamentAsset;
+use Illuminate\Console\Events\CommandStarting;
 use Illuminate\Console\Events\ScheduledTaskStarting;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\Eloquent\Model;
@@ -93,6 +95,7 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme($forceScheme);
         }
         $this->customScheduleTask();
+        $this->guardDestructiveCommands();
 
         Filament::serving(function () {
             Filament::registerNavigationGroups([
@@ -154,6 +157,41 @@ class AppServiceProvider extends ServiceProvider
                 if (getenv('RUNNING_IN_DOCKER') == '1' && $event->task->output === $event->task->getDefaultOutput()) {
                     $event->task->appendOutputTo('/proc/1/fd/1');
                 }
+            }
+        );
+    }
+
+    /**
+     * Block destructive Artisan commands (migrate:fresh, migrate:refresh,
+     * migrate:reset, db:wipe) from running against a non-test database when
+     * APP_ENV=testing. This prevents accidental data loss if a developer
+     * runs "php artisan migrate:fresh" with the testing env loaded but the
+     * DB_DATABASE pointing at the dev/production database.
+     */
+    private function guardDestructiveCommands(): void
+    {
+        if (! Environment::isConsole()) {
+            return;
+        }
+
+        $destructiveCommands = [
+            'migrate:fresh',
+            'migrate:refresh',
+            'migrate:reset',
+            'db:wipe',
+        ];
+
+        /** @var Dispatcher $eventDispatcher */
+        $eventDispatcher = $this->app->make(Dispatcher::class);
+
+        $eventDispatcher->listen(
+            events: [CommandStarting::class],
+            listener: static function (CommandStarting $event) use ($destructiveCommands): void {
+                if (! in_array($event->command, $destructiveCommands, true)) {
+                    return;
+                }
+
+                DestructiveEnvironmentGuard::assertTestingEnvironment();
             }
         );
     }

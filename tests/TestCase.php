@@ -4,6 +4,7 @@ namespace Tests;
 
 use App\Models\User;
 use App\Support\AuthCookie;
+use App\Support\DestructiveEnvironmentGuard;
 use App\Support\Settings;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
@@ -14,6 +15,14 @@ abstract class TestCase extends BaseTestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        // Fail fast before any test code runs: refuse to operate on a
+        // database or Redis namespace that is not explicitly marked as a
+        // test environment. This prevents Feature/E2E tests from
+        // accidentally truncating tables in the dev/production database.
+        // Called after parent::setUp() so that the Laravel container is
+        // bootstrapped and config() is available.
+        DestructiveEnvironmentGuard::assertTestingEnvironment();
 
         // Reset the static settings cache between tests so that changes
         // made by one test (and rolled back via DatabaseTransactions) don't

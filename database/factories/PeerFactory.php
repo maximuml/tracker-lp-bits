@@ -88,4 +88,17 @@ class PeerFactory extends Factory
             'to_go' => 0,
         ]);
     }
+
+    /**
+     * Mark the peer as a leecher.
+     *
+     * @return $this
+     */
+    public function leecher(): self
+    {
+        return $this->state(fn (array $attributes) => [
+            'seeder' => 0,
+            'to_go' => $this->faker->numberBetween(1, 1073741824),
+        ]);
+    }
 }

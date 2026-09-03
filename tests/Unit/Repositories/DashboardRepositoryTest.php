@@ -155,7 +155,7 @@ final class DashboardRepositoryTest extends TestCase
         /** @var Torrent $torrent */
         $torrent = Torrent::factory()->create();
         Peer::factory()->torrent($torrent)->seeder()->create();
-        Peer::factory()->torrent($torrent)->create();
+        Peer::factory()->torrent($torrent)->leecher()->create();
 
         $result = $this->repository->statTorrents();
 

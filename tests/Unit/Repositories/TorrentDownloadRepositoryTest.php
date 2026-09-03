@@ -63,7 +63,7 @@ final class TorrentDownloadRepositoryTest extends TestCase
 
     public function test_get_download_url_accepts_array_user(): void
     {
-        $userArray = ['id' => 99, 'passkey' => 'abcdef1234567890'];
+        $userArray = ['id' => 99, 'passkey' => bin2hex(random_bytes(8))];
 
         $url = $this->repository->getDownloadUrl(7, $userArray);
 
@@ -85,7 +85,7 @@ final class TorrentDownloadRepositoryTest extends TestCase
 
     public function test_encrypt_and_decrypt_down_hash_roundtrip_with_array(): void
     {
-        $userArray = ['id' => 55, 'passkey' => 'testpasskey123456'];
+        $userArray = ['id' => 55, 'passkey' => bin2hex(random_bytes(8))];
 
         $downHash = $this->repository->encryptDownHash(77, $userArray);
         $decoded = $this->repository->decryptDownHash($downHash, $userArray);

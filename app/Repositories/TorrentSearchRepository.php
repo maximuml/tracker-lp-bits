@@ -894,7 +894,7 @@ class TorrentSearchRepository
         }
         $maxPageSize = 100;
         if (! empty($searchParams['pageSize'])) {
-            $torrentsperpage = $searchParams['pageSize'];
+            $torrentsperpage = (int) $searchParams['pageSize'];
         } elseif ($CURUSER['torrentsperpage']) {
             $torrentsperpage = (int) $CURUSER['torrentsperpage'];
         } elseif ($torrentsperpage_main) {

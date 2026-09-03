@@ -79,16 +79,16 @@ server {
     # used by try_files as an internal rewrite target.
     # announce.php and scrape.php are kept as-is (external BT clients).
     # confirmemail.php is handled above with PATH_INFO.
-    location = /login.php { return 301 /login; }
-    location = /signup.php { return 301 /signup; }
-    location = /torrents.php { return 301 /torrents; }
-    location = /forums.php { return 301 /forums; }
-    location = /faq.php { return 301 /faq; }
-    location = /rules.php { return 301 /rules; }
-    location = /aboutnexus.php { return 301 /aboutnexus; }
-    location = /useragreement.php { return 301 /useragreement; }
-    location = /recover.php { return 301 /recover; }
-    location = /topten.php { return 301 /topten; }
+    location = /login.php { return 301 /login?$args; }
+    location = /signup.php { return 301 /signup?$args; }
+    location = /torrents.php { return 301 /torrents?$args; }
+    location = /forums.php { return 301 /forums?$args; }
+    location = /faq.php { return 301 /faq?$args; }
+    location = /rules.php { return 301 /rules?$args; }
+    location = /aboutnexus.php { return 301 /aboutnexus?$args; }
+    location = /useragreement.php { return 301 /useragreement?$args; }
+    location = /recover.php { return 301 /recover?$args; }
+    location = /topten.php { return 301 /topten?$args; }
 
     # Remaining .php URLs (including the root index.php wrapper) are served if the
     # file still exists; otherwise they fall through to index.php so legacy URLs

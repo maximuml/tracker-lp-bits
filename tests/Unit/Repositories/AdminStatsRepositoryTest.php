@@ -25,10 +25,10 @@ final class AdminStatsRepositoryTest extends TestCase
     {
         parent::setUp();
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
-        DB::table('peers')->truncate();
-        DB::table('torrents')->truncate();
-        DB::table('users')->truncate();
-        DB::table('categories')->truncate();
+        DB::table('peers')->delete();
+        DB::table('torrents')->delete();
+        DB::table('users')->delete();
+        DB::table('categories')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
         $this->repository = new AdminStatsRepository;

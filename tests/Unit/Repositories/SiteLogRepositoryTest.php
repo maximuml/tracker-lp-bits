@@ -18,7 +18,7 @@ final class SiteLogRepositoryTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        DB::table('sitelog')->truncate();
+        DB::table('sitelog')->delete();
         $this->repository = new SiteLogRepository;
     }
 

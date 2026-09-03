@@ -25,9 +25,9 @@ final class TorrentListingRepositoryTest extends TestCase
     {
         parent::setUp();
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
-        DB::table('suggest')->truncate();
-        DB::table('torrents')->truncate();
-        DB::table('users')->truncate();
+        DB::table('suggest')->delete();
+        DB::table('torrents')->delete();
+        DB::table('users')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
         $this->repository = new TorrentListingRepository;

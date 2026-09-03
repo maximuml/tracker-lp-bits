@@ -27,7 +27,7 @@ final class IpLogRepositoryTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        DB::table('iplog')->truncate();
+        DB::table('iplog')->delete();
         $this->repository = new IpLogRepository;
     }
 

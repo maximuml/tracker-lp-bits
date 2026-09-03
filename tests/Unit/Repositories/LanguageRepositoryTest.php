@@ -27,8 +27,8 @@ final class LanguageRepositoryTest extends TestCase
     {
         parent::setUp();
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
-        DB::table('language')->truncate();
-        DB::table('users')->truncate();
+        DB::table('language')->delete();
+        DB::table('users')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
         Cache::flush();
 

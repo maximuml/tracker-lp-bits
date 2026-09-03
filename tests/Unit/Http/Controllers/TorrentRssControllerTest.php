@@ -84,7 +84,8 @@ final class TorrentRssControllerTest extends TestCase
         Cache::flush();
 
         $controller = app(TorrentRssController::class);
-        $request = Request::create('/torrentrss', 'GET', ['passkey' => 'nonexistent-passkey-12345']);
+        $fakePasskey = 'fake-'.bin2hex(random_bytes(8));
+        $request = Request::create('/torrentrss', 'GET', ['passkey' => $fakePasskey]);
         app()->instance('request', $request);
 
         $response = $controller->torrentrss($request);

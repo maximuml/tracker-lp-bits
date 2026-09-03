@@ -2,6 +2,7 @@
 
 use App\Logging\JsonLogFormatter;
 use App\Logging\NexusFormatter;
+use App\Logging\SensitiveDataRedactor;
 use App\Support\Logger;
 use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
@@ -46,7 +47,7 @@ return [
 
         'single' => [
             'driver' => 'single',
-            'tap' => [NexusFormatter::class],
+            'tap' => [SensitiveDataRedactor::class, NexusFormatter::class],
             'path' => Logger::filePath(''),
             'level' => env('LOG_LEVEL', 'debug'),
             'ignore_exceptions' => false,
@@ -56,7 +57,7 @@ return [
             'driver' => 'daily',
             'path' => Logger::filePath(''),
             'level' => env('LOG_LEVEL', 'debug'),
-            'tap' => [NexusFormatter::class],
+            'tap' => [SensitiveDataRedactor::class, NexusFormatter::class],
             'days' => (int) env('LOG_DAILY_DAYS', 14),
             'ignore_exceptions' => false,
         ],
@@ -65,7 +66,7 @@ return [
             'driver' => 'daily',
             'path' => Logger::filePath('json'),
             'level' => env('LOG_LEVEL', 'debug'),
-            'tap' => [JsonLogFormatter::class],
+            'tap' => [SensitiveDataRedactor::class, JsonLogFormatter::class],
             'days' => (int) env('LOG_DAILY_DAYS', 14),
             'ignore_exceptions' => false,
         ],
@@ -99,7 +100,7 @@ return [
             'handler' => StreamHandler::class,
             'formatter' => env('LOG_STDERR_FORMATTER'),
             'ignore_exceptions' => false,
-            'tap' => [NexusFormatter::class],
+            'tap' => [SensitiveDataRedactor::class, NexusFormatter::class],
             'with' => [
                 'stream' => 'php://stderr',
             ],

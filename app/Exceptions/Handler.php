@@ -56,7 +56,7 @@ class Handler extends ExceptionHandler
         $request = request();
         $permissionDenied = function (InsufficientPermissionException $e) use ($request) {
             if ($request->expectsJson()) {
-                return response()->json(Api::failWithContext($e->getMessage(), $request->all()), 403);
+                return response()->json(Api::failWithContext($e->getMessage(), []), 403);
             }
             try {
                 LegacyResponse::permissionDenied();
@@ -93,7 +93,7 @@ class Handler extends ExceptionHandler
         });
 
         $this->renderable(function (UnauthorizedException $e) {
-            return response()->json(Api::failWithContext($e->getMessage(), request()->all()), 403);
+            return response()->json(Api::failWithContext($e->getMessage(), []), 403);
         });
 
         $this->renderable(function (ValidationException $exception) {
@@ -108,7 +108,7 @@ class Handler extends ExceptionHandler
                 $exception = $e->getPrevious();
                 Logger::writeWithContext((string) sprintf('NotFoundHttpException: %s, trace: %s', $exception->getMessage(), $exception->getTraceAsString()), (string) 'error', (bool) false);
 
-                return response()->json(Api::failWithContext($exception->getMessage(), request()->all()));
+                return response()->json(Api::failWithContext($exception->getMessage(), []));
             }
         });
     }
@@ -121,10 +121,10 @@ class Handler extends ExceptionHandler
      */
     protected function prepareJsonResponse($request, Throwable $e)
     {
-        $data = $request->all();
         $httpStatusCode = $this->getHttpStatusCode($e);
         $msg = $e->getMessage() ?: class_basename($e);
         $trace = $e->getTraceAsString();
+        $data = [];
         if (config('app.debug')) {
             $data['trace'] = $trace;
         }

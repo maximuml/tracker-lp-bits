@@ -71,6 +71,9 @@ jobs:
           sed -i 's/^MEILISEARCH_MASTER_KEY=.*/MEILISEARCH_MASTER_KEY=ci-meilisearch-test-key/' .env
           # Use isolated E2E testing database (never the dev/production DB).
           sed -i 's/^DB_DATABASE=.*/DB_DATABASE=nexusphp_e2e_testing/' .env
+          # Point DB/Redis at Docker service hostnames (not 127.0.0.1)
+          sed -i 's/^DB_HOST=.*/DB_HOST=mysql/' .env
+          sed -i 's/^REDIS_HOST=.*/REDIS_HOST=redis/' .env
           # Replace ${VAR} references that docker compose can't interpolate
           sed -i 's/\${DB_HOST}/mysql/g' .env
           sed -i 's/\${APP_NAME}/NexusPHP/g' .env

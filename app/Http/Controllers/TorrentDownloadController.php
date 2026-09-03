@@ -13,7 +13,6 @@ use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Globals;
 use App\Support\Http;
-use App\Support\Json;
 use App\Support\Logger;
 use App\Support\Network;
 use App\Support\Path;
@@ -54,7 +53,7 @@ class TorrentDownloadController extends LegacyController
             }
             $decrypted = $torrentRepository->decryptDownHash($hash, $user);
             if (empty($decrypted)) {
-                Logger::writeWithContext((string) ('downhash invalid: '.Json::encode($request->all())), (string) 'error', (bool) false);
+                Logger::writeWithContext((string) sprintf('downhash invalid: uid=%d, torrent_id=%d', $uid, $id), (string) 'error', (bool) false);
                 throw new NexusException('download.invalid_downhash_decrypt');
             }
             $id = (int) $decrypted[0];

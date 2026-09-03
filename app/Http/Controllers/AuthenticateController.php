@@ -16,7 +16,6 @@ use App\Repositories\AuthenticateRepository;
 use App\Repositories\UserRepository;
 use App\Support\AuthCookie;
 use App\Support\Config\SiteConfig;
-use App\Support\Json;
 use App\Support\Logger;
 use App\Support\Network;
 use App\Support\Token;
@@ -143,10 +142,9 @@ class AuthenticateController extends Controller
             return $this->success($this->polyfillArray($resource, $request), 'Please use data.data');
         } catch (\Exception $exception) {
             $msg = $exception->getMessage();
-            $params = $request->all();
-            Logger::writeWithContext((string) sprintf('nasToolsApprove fail: %s, params: %s', $msg, Json::encode($params)), (string) 'info', (bool) false);
+            Logger::writeWithContext((string) sprintf('nasToolsApprove fail: %s', $msg), (string) 'info', (bool) false);
 
-            return $this->fail($params, $msg);
+            return $this->fail([], $msg);
         }
     }
 
@@ -186,10 +184,9 @@ class AuthenticateController extends Controller
             return $this->success($this->polyfillArray($resource, $request), 'Please use data.data');
         } catch (\Exception $exception) {
             $msg = $exception->getMessage();
-            $params = $request->all();
-            Logger::writeWithContext((string) sprintf('ammdsApprove fail: %s, params: %s', $msg, Json::encode($params)), (string) 'info', (bool) false);
+            Logger::writeWithContext((string) sprintf('ammdsApprove fail: %s', $msg), (string) 'info', (bool) false);
 
-            return $this->fail($params, $msg);
+            return $this->fail([], $msg);
         }
     }
 
@@ -211,10 +208,9 @@ class AuthenticateController extends Controller
             ]);
         } catch (\Exception $exception) {
             $msg = $exception->getMessage();
-            $params = $request->all();
-            Logger::writeWithContext((string) sprintf('challenge fail: %s, params: %s', $msg, Json::encode($params)), (string) 'info', (bool) false);
+            Logger::writeWithContext((string) sprintf('challenge fail: %s', $msg), (string) 'info', (bool) false);
 
-            return $this->fail($params, $msg);
+            return $this->fail([], $msg);
         }
     }
 }

@@ -1,107 +1,333 @@
 name: deploy to demo site
+
 on:
+  # T-15: Deploy only on explicit trigger or release tag — not on every push.
+  # This prevents accidental deployments and makes deployments auditable.
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Git ref (branch/tag/SHA) to deploy'
+        required: false
+        default: 'php8'
+        type: string
   push:
-    branches: [ "php8" ]
+    tags:
+      - 'v*'
+    branches: []
+  # Remove push to php8 — deployments must be intentional.
 
 # Environment variables available to all jobs and steps in this workflow
 env:
-  SSH_KEY: ${{secrets.DEMO_SSH_KEY}}
-  SSH_USER: ${{secrets.DEMO_SSH_USER}}
-  SSH_HOST: ${{secrets.DEMO_SSH_HOST}}
-  DEMO_WEB_ROOT: ${{secrets.DEMO_WEB_ROOT}}
-  SSH_HOST_KEY: ${{secrets.DEMO_SSH_HOST_KEY}}
-  DEMO_HEALTH_URL: ${{secrets.DEMO_HEALTH_URL}}
+  SSH_KEY: ${{ secrets.DEMO_SSH_KEY }}
+  SSH_USER: ${{ secrets.DEMO_SSH_USER }}
+  SSH_HOST: ${{ secrets.DEMO_SSH_HOST }}
+  DEMO_WEB_ROOT: ${{ secrets.DEMO_WEB_ROOT }}
+  SSH_HOST_KEY: ${{ secrets.DEMO_SSH_HOST_KEY }}
+  DEMO_HEALTH_URL: ${{ secrets.DEMO_HEALTH_URL }}
+
 permissions:
   contents: read
+
 concurrency:
   group: demo-deploy
-  cancel-in-progress: false
+  cancel-progress: false
+
 jobs:
-  login-to-demo-and-up:
-    name: Login to demo and Deploy
+  # ── Job 1: Pre-deploy checks ──────────────────────────────────────────────
+  pre-deploy:
+    name: Pre-deploy checks
     runs-on: ubuntu-latest
     environment: production
     # Skip when demo secrets are not configured — avoids red check on
-    # forks and repos without a demo server. T-15 will switch this to
-    # workflow_dispatch only.
+    # forks and repos without a demo server.
     if: ${{ secrets.DEMO_SSH_KEY != '' && secrets.DEMO_SSH_HOST != '' }}
+    outputs:
+      deploy-ref: ${{ steps.resolve-ref.outputs.deploy-ref }}
+      previous-ref: ${{ steps.record-previous.outputs.previous-ref }}
+
     steps:
-    # Prepare
-    - name: Prepare user key
-      run: |
-        mkdir -p ~/.ssh/
-        echo "$SSH_KEY" > ~/.ssh/demo.key
-        chmod 600 ~/.ssh/demo.key
-        # Trust the demo host key explicitly (pinned in repo secrets).
-        # Avoids MITM risk of StrictHostKeyChecking=no.
-        mkdir -p ~/.ssh/
-        echo "$SSH_HOST_KEY" >> ~/.ssh/known_hosts
-        chmod 644 ~/.ssh/known_hosts
-        cat >> ~/.ssh/config <<END
-        Host demo
-          HostName $SSH_HOST
-          User $SSH_USER
-          IdentityFile ~/.ssh/demo.key
-          StrictHostKeyChecking yes
-          UserKnownHostsFile ~/.ssh/known_hosts
-        END
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ inputs.ref || github.ref }}
 
-    # Pre-deploy: record current commit for rollback
-    - name: Record current commit (for rollback)
-      run: |
-        ssh demo "cd $DEMO_WEB_ROOT && git rev-parse HEAD" > /tmp/previous-commit.txt
-        echo "Previous commit: $(cat /tmp/previous-commit.txt)"
-
-    # Pre-deploy: check migration readiness
-    - name: Check migration readiness
-      run: |
-        ssh demo "cd $DEMO_WEB_ROOT && php artisan nexus:update --tag=dev"
-
-    # Deploy
-    - name: Run migrations and update
-      run: |
-        ssh demo "cd $DEMO_WEB_ROOT && php artisan nexus:update"
-
-    # Post-deploy: health check
-    - name: Health check (liveness)
-      run: |
-        for i in $(seq 1 10); do
-          HTTP_CODE=$(curl -sfL --max-time 10 -o /dev/null -w "%{http_code}" "${DEMO_HEALTH_URL:-https://example.com}/health/live" 2>/dev/null || echo "000")
-          if [ "$HTTP_CODE" = "200" ]; then
-            echo "Health check passed (HTTP $HTTP_CODE)"
-            exit 0
+      - name: Resolve deploy ref
+        id: resolve-ref
+        run: |
+          if [ -n "${{ inputs.ref }}" ]; then
+            REF="${{ inputs.ref }}"
+          elif [ -n "${{ github.ref_name }}" ] && [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            REF="${{ github.ref_name }}"
+          else
+            REF="php8"
           fi
-          echo "Health check attempt $i: HTTP $HTTP_CODE, retrying..."
-          sleep 5
-        done
-        echo "::error::Health check failed after 10 attempts"
-        exit 1
+          echo "Deploying ref: $REF"
+          echo "deploy-ref=$REF" >> "$GITHUB_OUTPUT"
 
-    # Post-deploy: readiness check (DB + Redis)
-    - name: Readiness check (DB + Redis)
-      run: |
-        for i in $(seq 1 10); do
-          HTTP_CODE=$(curl -sfL --max-time 15 -o /dev/null -w "%{http_code}" "${DEMO_HEALTH_URL:-https://example.com}/health/ready" 2>/dev/null || echo "000")
-          if [ "$HTTP_CODE" = "200" ]; then
-            echo "Readiness check passed (HTTP $HTTP_CODE)"
-            exit 0
+      - name: Prepare SSH
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_KEY" > ~/.ssh/demo.key
+          chmod 600 ~/.ssh/demo.key
+          echo "$SSH_HOST_KEY" >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+          cat >> ~/.ssh/config <<END
+          Host demo
+            HostName $SSH_HOST
+            User $SSH_USER
+            IdentityFile ~/.ssh/demo.key
+            StrictHostKeyChecking yes
+            UserKnownHostsFile ~/.ssh/known_hosts
+          END
+
+      - name: Record current commit (for rollback)
+        id: record-previous
+        run: |
+          PREVIOUS=$(ssh demo "cd $DEMO_WEB_ROOT && git rev-parse HEAD" 2>/dev/null || echo "")
+          echo "Previous commit: $PREVIOUS"
+          echo "previous-ref=$PREVIOUS" >> "$GITHUB_OUTPUT"
+
+      - name: Check migration readiness (dry-run)
+        run: |
+          ssh demo "cd $DEMO_WEB_ROOT && php artisan nexus:update --tag=dev"
+
+  # ── Job 2: Migrations (controlled, separate from deploy) ──────────────────
+  migrations:
+    name: Run database migrations
+    runs-on: ubuntu-latest
+    environment: production
+    needs: pre-deploy
+    # Migrations are the riskiest part of deployment — run them in a
+    # separate job so they can be approved/rejected independently.
+
+    steps:
+      - name: Prepare SSH
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_KEY" > ~/.ssh/demo.key
+          chmod 600 ~/.ssh/demo.key
+          echo "$SSH_HOST_KEY" >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+          cat >> ~/.ssh/config <<END
+          Host demo
+            HostName $SSH_HOST
+            User $SSH_USER
+            IdentityFile ~/.ssh/demo.key
+            StrictHostKeyChecking yes
+            UserKnownHostsFile ~/.ssh/known_hosts
+          END
+
+      - name: Pull code and run migrations
+        run: |
+          DEPLOY_REF="${{ needs.pre-deploy.outputs.deploy-ref }}"
+          echo "Pulling ref $DEPLOY_REF on demo server..."
+          ssh demo "cd $DEMO_WEB_ROOT && git fetch origin && git checkout $DEPLOY_REF && git pull origin $DEPLOY_REF"
+
+          echo "Running migrations..."
+          ssh demo "cd $DEMO_WEB_ROOT && php artisan nexus:update"
+
+      - name: Verify migrations completed
+        run: |
+          ssh demo "cd $DEMO_WEB_ROOT && php artisan migrate:status --pending" > /tmp/pending-migrations.txt
+          PENDING=$(grep -c "Pending" /tmp/pending-migrations.txt || echo "0")
+          if [ "$PENDING" -gt 0 ]; then
+            echo "::error::$PENDING pending migrations detected after migrate"
+            cat /tmp/pending-migrations.txt
+            exit 1
           fi
-          echo "Readiness check attempt $i: HTTP $HTTP_CODE, retrying..."
-          sleep 5
-        done
-        echo "::error::Readiness check failed after 10 attempts — initiating rollback"
-        # Rollback to previous commit
-        PREVIOUS=$(cat /tmp/previous-commit.txt)
-        echo "Rolling back to $PREVIOUS"
-        ssh demo "cd $DEMO_WEB_ROOT && git checkout $PREVIOUS && php artisan nexus:update"
-        exit 1
+          echo "All migrations completed."
 
-    # Post-deploy: verify login page
-    - name: Verify login page
-      run: |
-        HTTP_CODE=$(curl -sfL --max-time 10 -o /dev/null -w "%{http_code}" "${DEMO_HEALTH_URL:-https://example.com}/login.php" 2>/dev/null || echo "000")
-        if [ "$HTTP_CODE" != "200" ]; then
-          echo "::error::Login page returned HTTP $HTTP_CODE"
+  # ── Job 3: Deploy (update code + warm caches) ─────────────────────────────
+  deploy:
+    name: Deploy to demo
+    runs-on: ubuntu-latest
+    environment: production
+    needs: [pre-deploy, migrations]
+    # Deploy only after migrations succeed.
+
+    steps:
+      - name: Prepare SSH
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_KEY" > ~/.ssh/demo.key
+          chmod 600 ~/.ssh/demo.key
+          echo "$SSH_HOST_KEY" >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+          cat >> ~/.ssh/config <<END
+          Host demo
+            HostName $SSH_HOST
+            User $SSH_USER
+            IdentityFile ~/.ssh/demo.key
+            StrictHostKeyChecking yes
+            UserKnownHostsFile ~/.ssh/known_hosts
+          END
+
+      - name: Update code on demo server
+        run: |
+          DEPLOY_REF="${{ needs.pre-deploy.outputs.deploy-ref }}"
+          echo "Ensuring ref $DEPLOY_REF is checked out..."
+          ssh demo "cd $DEMO_WEB_ROOT && git fetch origin && git checkout $DEPLOY_REF && git pull origin $DEPLOY_REF"
+
+      - name: Warm caches
+        run: |
+          ssh demo "cd $DEMO_WEB_ROOT && \
+            php artisan config:cache && \
+            php artisan route:cache && \
+            php artisan view:cache && \
+            php artisan icons:cache && \
+            php artisan filament:cache-components"
+
+      - name: Restart PHP-FPM (graceful)
+        run: |
+          ssh demo "cd $DEMO_WEB_ROOT && php artisan octane:reload 2>/dev/null || \
+            (sudo systemctl reload php8.5-fpm 2>/dev/null || \
+             sudo service php8.5-fpm reload 2>/dev/null || \
+             echo 'Could not reload PHP-FPM — caches will refresh on next request')"
+
+  # ── Job 4: Health gate (comprehensive post-deploy checks) ─────────────────
+  health-gate:
+    name: Health gate
+    runs-on: ubuntu-latest
+    environment: production
+    needs: [pre-deploy, migrations, deploy]
+    # Health gate runs after deploy. If any check fails, rollback.
+
+    steps:
+      - name: Prepare SSH (for rollback if needed)
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_KEY" > ~/.ssh/demo.key
+          chmod 600 ~/.ssh/demo.key
+          echo "$SSH_HOST_KEY" >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+          cat >> ~/.ssh/config <<END
+          Host demo
+            HostName $SSH_HOST
+            User $SSH_USER
+            IdentityFile ~/.ssh/demo.key
+            StrictHostKeyChecking yes
+            UserKnownHostsFile ~/.ssh/known_hosts
+          END
+
+      - name: Health check — liveness
+        run: |
+          for i in $(seq 1 10); do
+            HTTP_CODE=$(curl -sfL --max-time 10 -o /dev/null -w "%{http_code}" "${DEMO_HEALTH_URL:-https://example.com}/health/live" 2>/dev/null || echo "000")
+            if [ "$HTTP_CODE" = "200" ]; then
+              echo "Liveness check passed (HTTP $HTTP_CODE)"
+              exit 0
+            fi
+            echo "Liveness attempt $i: HTTP $HTTP_CODE, retrying..."
+            sleep 5
+          done
+          echo "::error::Liveness check failed after 10 attempts"
           exit 1
-        fi
-        echo "Login page OK (HTTP $HTTP_CODE)"
+
+      - name: Health check — readiness (DB + Redis + MeiliSearch)
+        run: |
+          for i in $(seq 1 10); do
+            HTTP_CODE=$(curl -sfL --max-time 15 -o /dev/null -w "%{http_code}" "${DEMO_HEALTH_URL:-https://example.com}/health/ready" 2>/dev/null || echo "000")
+            if [ "$HTTP_CODE" = "200" ]; then
+              echo "Readiness check passed (HTTP $HTTP_CODE)"
+              exit 0
+            fi
+            echo "Readiness attempt $i: HTTP $HTTP_CODE, retrying..."
+            sleep 5
+          done
+          echo "::error::Readiness check failed after 10 attempts"
+          exit 1
+
+      - name: Health check — login page
+        run: |
+          HTTP_CODE=$(curl -sfL --max-time 10 -o /dev/null -w "%{http_code}" "${DEMO_HEALTH_URL:-https://example.com}/login.php" 2>/dev/null || echo "000")
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "::error::Login page returned HTTP $HTTP_CODE"
+            exit 1
+          fi
+          echo "Login page OK (HTTP $HTTP_CODE)"
+
+      - name: Health check — static asset
+        run: |
+          HTTP_CODE=$(curl -sfL --max-time 10 -o /dev/null -w "%{http_code}" "${DEMO_HEALTH_URL:-https://example.com}/build/manifest.json" 2>/dev/null || echo "000")
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "::warning::Static asset manifest returned HTTP $HTTP_CODE (may not exist in all builds)"
+          else
+            echo "Static asset OK (HTTP $HTTP_CODE)"
+          fi
+
+      - name: Health check — queue (Horizon)
+        run: |
+          HTTP_CODE=$(curl -sfL --max-time 10 -o /dev/null -w "%{http_code}" "${DEMO_HEALTH_URL:-https://example.com}/horizon/api/stats" 2>/dev/null || echo "000")
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "::warning::Horizon dashboard returned HTTP $HTTP_CODE (may require auth)"
+          else
+            echo "Horizon OK (HTTP $HTTP_CODE)"
+          fi
+
+      - name: Health check — scheduler heartbeat
+        run: |
+          ssh demo "cd $DEMO_WEB_ROOT && php artisan tinker --execute='echo Redis::connection()->get(\"scheduler:heartbeat\") ?? \"missing\";'" > /tmp/heartbeat.txt 2>/dev/null
+          HEARTBEAT=$(cat /tmp/heartbeat.txt | tr -d '[:space:]')
+          if [ "$HEARTBEAT" = "missing" ] || [ -z "$HEARTBEAT" ]; then
+            echo "::warning::Scheduler heartbeat not found in Redis — scheduler may not be running"
+          else
+            AGE=$(( $(date +%s) - HEARTBEAT ))
+            if [ "$AGE" -gt 300 ]; then
+              echo "::warning::Scheduler heartbeat is ${AGE}s old (expected <300s)"
+            else
+              echo "Scheduler heartbeat OK (${AGE}s old)"
+            fi
+          fi
+
+  # ── Job 5: Rollback (only runs if health-gate fails) ──────────────────────
+  rollback:
+    name: Rollback on failure
+    runs-on: ubuntu-latest
+    environment: production
+    needs: [pre-deploy, health-gate]
+    if: failure()
+
+    steps:
+      - name: Prepare SSH
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_KEY" > ~/.ssh/demo.key
+          chmod 600 ~/.ssh/demo.key
+          echo "$SSH_HOST_KEY" >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+          cat >> ~/.ssh/config <<END
+          Host demo
+            HostName $SSH_HOST
+            User $SSH_USER
+            IdentityFile ~/.ssh/demo.key
+            StrictHostKeyChecking yes
+            UserKnownHostsFile ~/.ssh/known_hosts
+          END
+
+      - name: Rollback to previous commit
+        run: |
+          PREVIOUS="${{ needs.pre-deploy.outputs.previous-ref }}"
+          if [ -z "$PREVIOUS" ]; then
+            echo "::error::No previous commit recorded — cannot rollback automatically"
+            exit 1
+          fi
+          echo "Rolling back to $PREVIOUS..."
+          ssh demo "cd $DEMO_WEB_ROOT && git checkout $PREVIOUS && php artisan nexus:update"
+          ssh demo "cd $DEMO_WEB_ROOT && \
+            php artisan config:cache && \
+            php artisan route:cache && \
+            php artisan view:cache"
+
+      - name: Verify rollback — liveness
+        run: |
+          for i in $(seq 1 10); do
+            HTTP_CODE=$(curl -sfL --max-time 10 -o /dev/null -w "%{http_code}" "${DEMO_HEALTH_URL:-https://example.com}/health/live" 2>/dev/null || echo "000")
+            if [ "$HTTP_CODE" = "200" ]; then
+              echo "Rollback liveness check passed (HTTP $HTTP_CODE)"
+              exit 0
+            fi
+            echo "Rollback liveness attempt $i: HTTP $HTTP_CODE, retrying..."
+            sleep 5
+          done
+          echo "::error::Rollback liveness check failed — manual intervention required"
+          exit 1

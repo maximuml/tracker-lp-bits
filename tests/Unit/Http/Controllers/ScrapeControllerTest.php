@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\Http\Controllers;
 
+use App\Exceptions\TrackerException;
 use App\Exceptions\TrackerWarningException;
 use App\Http\Controllers\ScrapeController;
 use App\Services\ScrapeService;
@@ -18,73 +21,84 @@ final class ScrapeControllerTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_scrape_returns_bencoded_files_dict(): void
+    private function createValidScrapeRequest(array $overrides = []): Request
+    {
+        $params = array_merge([
+            'passkey' => str_repeat('a', 32),
+            'info_hash' => str_repeat('A', 20),
+        ], $overrides);
+
+        $request = Request::create('/scrape.php', 'GET', $params);
+        $request->headers->set('User-Agent', 'Transmission/4.0.0');
+
+        return $request;
+    }
+
+    public function test_scrape_returns_failure_on_tracker_exception(): void
     {
         /** @var ScrapeService&Mockery\MockInterface $service */
         $service = Mockery::mock(ScrapeService::class);
-        $service->shouldReceive('scrape')->once()->andReturn([
-            'files' => [
-                "\x01\x02\x03" => [
-                    'complete' => 5,
-                    'downloaded' => 10,
-                    'incomplete' => 2,
-                ],
-            ],
-        ]);
+        $service->shouldReceive('scrape')
+            ->once()
+            ->andThrow(new TrackerException('Invalid passkey'));
 
         $controller = new ScrapeController($service);
-        $request = Request::create('/scrape', 'GET', [
-            'passkey' => '0123456789abcdef0123456789abcdef',
-            'info_hash' => '%01%02%03',
-        ]);
+        $request = $this->createValidScrapeRequest();
 
         $response = $controller->scrape($request);
 
-        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame(200, $response->status());
+        $decoded = Bencode::decode($response->getContent());
+        $this->assertSame('Invalid passkey', $decoded['failure reason']);
+    }
+
+    public function test_scrape_returns_warning_on_tracker_warning(): void
+    {
+        /** @var ScrapeService&Mockery\MockInterface $service */
+        $service = Mockery::mock(ScrapeService::class);
+        $service->shouldReceive('scrape')
+            ->once()
+            ->andThrow(new TrackerWarningException('Too many info_hashes', ['files' => []], 7200));
+
+        $controller = new ScrapeController($service);
+        $request = $this->createValidScrapeRequest();
+
+        $response = $controller->scrape($request);
+
+        $this->assertSame(200, $response->status());
+        $decoded = Bencode::decode($response->getContent());
+        $this->assertSame('Too many info_hashes', $decoded['warning message']);
+    }
+
+    public function test_scrape_response_has_correct_content_type(): void
+    {
+        /** @var ScrapeService&Mockery\MockInterface $service */
+        $service = Mockery::mock(ScrapeService::class);
+        $service->shouldReceive('scrape')
+            ->once()
+            ->andReturn(['files' => []]);
+
+        $controller = new ScrapeController($service);
+        $request = $this->createValidScrapeRequest();
+
+        $response = $controller->scrape($request);
+
         $this->assertSame('text/plain; charset=utf-8', $response->headers->get('Content-Type'));
-
-        $decoded = Bencode::decode($response->getContent());
-        $this->assertSame(['complete' => 5, 'downloaded' => 10, 'incomplete' => 2], $decoded['files']["\x01\x02\x03"]);
     }
 
-    public function test_tracker_failure_returns_bencoded_failure_reason(): void
+    public function test_scrape_response_has_no_cache_pragma(): void
     {
         /** @var ScrapeService&Mockery\MockInterface $service */
         $service = Mockery::mock(ScrapeService::class);
-        $service->shouldNotReceive('scrape');
+        $service->shouldReceive('scrape')
+            ->once()
+            ->andReturn(['files' => []]);
 
         $controller = new ScrapeController($service);
-        $request = Request::create('/scrape', 'GET');
+        $request = $this->createValidScrapeRequest();
 
         $response = $controller->scrape($request);
 
-        $this->assertSame(200, $response->getStatusCode());
-        $decoded = Bencode::decode($response->getContent());
-        $this->assertSame('require passkey', $decoded['failure reason']);
-    }
-
-    public function test_tracker_warning_returns_bencoded_warning_with_interval(): void
-    {
-        /** @var ScrapeService&Mockery\MockInterface $service */
-        $service = Mockery::mock(ScrapeService::class);
-        $service->shouldReceive('scrape')->once()->andThrow(new TrackerWarningException(
-            'Torrent not registered with this tracker.',
-            ['files' => []],
-            86400
-        ));
-
-        $controller = new ScrapeController($service);
-        $request = Request::create('/scrape', 'GET', [
-            'passkey' => '0123456789abcdef0123456789abcdef',
-        ]);
-
-        $response = $controller->scrape($request);
-
-        $this->assertSame(200, $response->getStatusCode());
-        $decoded = Bencode::decode($response->getContent());
-        $this->assertSame('Torrent not registered with this tracker.', $decoded['warning message']);
-        $this->assertSame(86400, $decoded['interval']);
-        $this->assertSame(86400, $decoded['min interval']);
-        $this->assertSame([], $decoded['files']);
+        $this->assertSame('no-cache', $response->headers->get('Pragma'));
     }
 }

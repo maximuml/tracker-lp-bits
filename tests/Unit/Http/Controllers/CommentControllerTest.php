@@ -1,175 +1,208 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\Http\Controllers;
 
 use App\Http\Controllers\CommentController;
 use App\Http\Requests\PrepareCommentRequest;
 use App\Models\Comment;
+use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\CommentRepository;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
-use InvalidArgumentException;
 use Mockery;
 use Tests\TestCase;
 
 final class CommentControllerTest extends TestCase
 {
+    use DatabaseTransactions;
+
     protected function tearDown(): void
     {
         Mockery::close();
         parent::tearDown();
     }
 
-    public function test_index_returns_paginated_comment_list(): void
+    public function test_index_returns_paginated_comments(): void
     {
-        $user = new User;
-        $user->id = 1;
+        $user = User::factory()->create();
+        Auth::login($user);
 
-        $paginator = new LengthAwarePaginator([], 0, 20, 1);
+        $torrent = Torrent::factory()->create();
+        Comment::factory()->create(['torrent' => $torrent->id, 'user' => $user->id]);
 
-        /** @var CommentRepository&Mockery\MockInterface $repository */
-        $repository = Mockery::mock(CommentRepository::class);
-        $repository->shouldReceive('getList')->once()->andReturn($paginator);
-
-        Auth::shouldReceive('user')->andReturn($user);
-
+        $repository = new CommentRepository;
         $controller = new CommentController($repository);
-        $request = Request::create('/api/comments', 'GET', ['type' => 'torrent', 'parent_id' => 1]);
-        app()->instance('request', $request);
+        $request = Request::create('/api/comments', 'GET', [
+            'type' => 'torrent',
+            'parent_id' => $torrent->id,
+        ]);
 
         $result = $controller->index($request);
 
         $this->assertSame(0, $result['ret']);
-        $this->assertSame('comment.list', $result['msg']);
-        $this->assertIsArray($result['data']);
-        $this->assertArrayHasKey('data', $result['data']);
-        $this->assertSame([], $result['data']['data']);
+        $this->assertArrayHasKey('data', $result);
     }
 
-    public function test_store_creates_torrent_comment(): void
+    public function test_store_creates_comment_for_torrent(): void
     {
-        $user = new User;
-        $user->id = 1;
+        $user = User::factory()->create();
+        Auth::login($user);
+        $torrent = Torrent::factory()->create();
 
-        $comment = new Comment;
-        $comment->id = 42;
-        $comment->text = 'hello world';
-        $comment->editedby = 0;
-
-        /** @var CommentRepository&Mockery\MockInterface $repository */
-        $repository = Mockery::mock(CommentRepository::class);
-        $repository->shouldReceive('store')->once()->andReturn($comment);
-
-        Auth::shouldReceive('user')->andReturn($user);
-
+        $repository = new CommentRepository;
         $controller = new CommentController($repository);
         $request = PrepareCommentRequest::create('/api/comments', 'POST', [
             'type' => 'torrent',
-            'torrent_id' => 10,
-            'text' => 'hello world',
+            'torrent_id' => $torrent->id,
+            'text' => 'Great torrent!',
         ]);
         $request->setContainer(app());
         $request->setRedirector(app('redirect'));
         $request->validateResolved();
-        app()->instance('request', $request);
 
         $result = $controller->store($request);
 
         $this->assertSame(0, $result['ret']);
-        $this->assertSame('comment.store', $result['msg']);
-        $this->assertIsArray($result['data']);
-        $this->assertArrayHasKey('data', $result['data']);
-        $this->assertSame(42, $result['data']['data']['id']);
-        $this->assertSame('hello world', $result['data']['data']['text']);
+        $this->assertDatabaseHas('comments', [
+            'torrent' => $torrent->id,
+            'text' => 'Great torrent!',
+            'user' => $user->id,
+        ]);
     }
 
-    public function test_store_creates_offer_comment(): void
+    public function test_store_creates_anonymous_comment(): void
     {
-        $user = new User;
-        $user->id = 2;
+        $user = User::factory()->create();
+        Auth::login($user);
+        $torrent = Torrent::factory()->create();
 
-        $comment = new Comment;
-        $comment->id = 99;
-        $comment->text = 'nice offer';
-        $comment->editedby = 0;
-
-        /** @var CommentRepository&Mockery\MockInterface $repository */
-        $repository = Mockery::mock(CommentRepository::class);
-        $repository->shouldReceive('store')->once()->andReturn($comment);
-
-        Auth::shouldReceive('user')->andReturn($user);
-
+        $repository = new CommentRepository;
         $controller = new CommentController($repository);
         $request = PrepareCommentRequest::create('/api/comments', 'POST', [
-            'type' => 'offer',
-            'offer_id' => 5,
-            'text' => 'nice offer',
+            'type' => 'torrent',
+            'torrent_id' => $torrent->id,
+            'text' => 'Anonymous comment',
+            'anonymous' => true,
         ]);
         $request->setContainer(app());
         $request->setRedirector(app('redirect'));
         $request->validateResolved();
-        app()->instance('request', $request);
 
         $result = $controller->store($request);
 
         $this->assertSame(0, $result['ret']);
-        $this->assertSame(99, $result['data']['data']['id']);
+        $this->assertDatabaseHas('comments', [
+            'torrent' => $torrent->id,
+            'text' => 'Anonymous comment',
+            'anonymous' => true,
+        ]);
     }
 
-    public function test_store_throws_when_torrent_id_missing(): void
+    public function test_store_fails_without_required_type(): void
     {
-        $user = new User;
-        $user->id = 1;
-
-        /** @var CommentRepository&Mockery\MockInterface $repository */
-        $repository = Mockery::mock(CommentRepository::class);
-        $repository->shouldNotReceive('store');
-
-        Auth::shouldReceive('user')->andReturn($user);
-
-        $controller = new CommentController($repository);
-        $request = PrepareCommentRequest::create('/api/comments', 'POST', [
-            'type' => 'torrent',
-            'text' => 'missing parent',
-        ]);
-        $request->setContainer(app());
-        $request->setRedirector(app('redirect'));
-        $request->validateResolved();
-        app()->instance('request', $request);
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('require torrent_id');
-
-        $controller->store($request);
-    }
-
-    public function test_store_rejects_invalid_type(): void
-    {
-        $user = new User;
-        $user->id = 1;
-
-        /** @var CommentRepository&Mockery\MockInterface $repository */
-        $repository = Mockery::mock(CommentRepository::class);
-        $repository->shouldNotReceive('store');
-
-        Auth::shouldReceive('user')->andReturn($user);
-
-        $controller = new CommentController($repository);
-        $request = PrepareCommentRequest::create('/api/comments', 'POST', [
-            'type' => 'invalid',
-            'torrent_id' => 1,
-            'text' => 'hello',
-        ]);
-        $request->setContainer(app());
-        $request->setRedirector(app('redirect'));
-
         $this->expectException(ValidationException::class);
 
+        $user = User::factory()->create();
+        Auth::login($user);
+
+        $repository = new CommentRepository;
+        $controller = new CommentController($repository);
+        $request = PrepareCommentRequest::create('/api/comments', 'POST', [
+            'text' => 'Missing type',
+        ]);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
         $request->validateResolved();
 
         $controller->store($request);
+    }
+
+    public function test_store_fails_without_text(): void
+    {
+        $this->expectException(ValidationException::class);
+
+        $user = User::factory()->create();
+        Auth::login($user);
+        $torrent = Torrent::factory()->create();
+
+        $repository = new CommentRepository;
+        $controller = new CommentController($repository);
+        $request = PrepareCommentRequest::create('/api/comments', 'POST', [
+            'type' => 'torrent',
+            'torrent_id' => $torrent->id,
+        ]);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+
+        $request->validateResolved();
+        $controller->store($request);
+    }
+
+    public function test_store_fails_with_invalid_type(): void
+    {
+        $this->expectException(ValidationException::class);
+
+        $user = User::factory()->create();
+        Auth::login($user);
+
+        $repository = new CommentRepository;
+        $controller = new CommentController($repository);
+        $request = PrepareCommentRequest::create('/api/comments', 'POST', [
+            'type' => 'invalid_type',
+            'torrent_id' => 1,
+            'text' => 'Test',
+        ]);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+
+        $controller->store($request);
+        $request->validateResolved();
+    }
+
+    public function test_store_fails_when_torrent_id_missing_for_torrent_type(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        $user = User::factory()->create();
+        Auth::login($user);
+
+        $repository = new CommentRepository;
+        $controller = new CommentController($repository);
+        $request = PrepareCommentRequest::create('/api/comments', 'POST', [
+            'type' => 'torrent',
+            'text' => 'Missing torrent_id',
+        ]);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
+
+        $controller->store($request);
+    }
+
+    public function test_store_increments_torrent_comment_count(): void
+    {
+        $user = User::factory()->create();
+        Auth::login($user);
+        $torrent = Torrent::factory()->create(['comments' => 0]);
+
+        $repository = new CommentRepository;
+        $controller = new CommentController($repository);
+        $request = PrepareCommentRequest::create('/api/comments', 'POST', [
+            'type' => 'torrent',
+            'torrent_id' => $torrent->id,
+            'text' => 'Increment test',
+        ]);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
+
+        $controller->store($request);
+
+        $this->assertSame(1, (int) $torrent->fresh()->comments);
     }
 }

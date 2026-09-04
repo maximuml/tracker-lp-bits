@@ -10,6 +10,7 @@ use App\Repositories\ShoutboxRepository;
 use App\Services\ShoutboxService;
 use App\Support\CurrentUser;
 use App\Support\Globals;
+use App\Support\LegacyHeaderBag;
 use App\Support\Lock;
 use App\Support\Permissions;
 use App\Support\Shoutbox;
@@ -161,7 +162,9 @@ class ShoutboxController extends LegacyController
                     $redis->decr($globalKey);
                 } catch (\Throwable $e) {
                 }
-                http_response_code(503);
+                // T-11: Use LegacyHeaderBag instead of SAPI http_response_code()
+                // to avoid cross-request status leakage under Octane.
+                app(LegacyHeaderBag::class)->setStatusCode(503);
 
                 return;
             }
@@ -172,7 +175,7 @@ class ShoutboxController extends LegacyController
                     $redis->decr($globalKey);
                 } catch (\Throwable $e) {
                 }
-                http_response_code(429);
+                app(LegacyHeaderBag::class)->setStatusCode(429);
 
                 return;
             }

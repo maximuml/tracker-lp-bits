@@ -6,6 +6,7 @@ namespace Database\Seeders;
 
 use App\Models\Torrent;
 use App\Models\User;
+use App\Support\Settings;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -41,6 +42,11 @@ class PerformanceTestDatasetSeeder extends Seeder
      */
     public function run(): void
     {
+        // Disable MeiliSearch indexing during seeding — the perf-budget
+        // CI workflow does not start MeiliSearch, and Torrent model's
+        // Scout observer would try to index each created torrent.
+        $this->disableMeiliSearch();
+
         // Create 10 test users with known credentials
         $this->createTestUsers();
 
@@ -342,9 +348,19 @@ class PerformanceTestDatasetSeeder extends Seeder
             ->where('name', 'security.iv')
             ->update(['value' => 'no']);
 
-        // Flush settings cache so the change takes effect
-        if (function_exists('cache')) {
-            cache()->forget('settings_all');
-        }
+        Settings::resetCache();
+    }
+
+    /**
+     * Disable MeiliSearch indexing — the perf-budget CI workflow
+     * does not start MeiliSearch, so Scout observer would fail.
+     */
+    private function disableMeiliSearch(): void
+    {
+        DB::table('settings')
+            ->where('name', 'meilisearch.enabled')
+            ->update(['value' => 'no']);
+
+        Settings::resetCache();
     }
 }

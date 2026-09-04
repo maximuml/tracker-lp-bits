@@ -30,20 +30,55 @@ final class PerformanceBudgetTest extends TestCase
     }
 
     /**
-     * k6 baseline.js includes extended page coverage (torrents, forums, faq, rules, metrics).
+     * T-17: k6 baseline.js uses authenticated login (CSRF + session cookie).
+     */
+    public function test_k6_baseline_has_authenticated_login(): void
+    {
+        $baseline = file_get_contents(base_path('tests/Performance/baseline.js'));
+        $this->assertStringContainsString('csrf', $baseline, 'baseline.js must extract CSRF token (T-17)');
+        $this->assertStringContainsString('sessionCookies', $baseline, 'baseline.js must use session cookies (T-17)');
+        $this->assertStringContainsString('USERNAME', $baseline, 'baseline.js must accept USERNAME env (T-17)');
+        $this->assertStringContainsString('PASSWORD', $baseline, 'baseline.js must accept PASSWORD env (T-17)');
+    }
+
+    /**
+     * T-17: k6 baseline.js has strict failure threshold (< 0.01, not 0.50).
+     */
+    public function test_k6_baseline_has_strict_failure_threshold(): void
+    {
+        $baseline = file_get_contents(base_path('tests/Performance/baseline.js'));
+        $this->assertStringContainsString("rate<0.01", $baseline, 'baseline.js must have http_req_failed < 0.01 (T-17)');
+        $this->assertStringNotContainsString("rate<0.50", $baseline, 'baseline.js must not have loose 0.50 threshold (T-17)');
+    }
+
+    /**
+     * T-17: PerformanceTestDatasetSeeder exists for deterministic test data.
+     */
+    public function test_performance_dataset_seeder_exists(): void
+    {
+        $this->assertFileExists(base_path('database/seeders/PerformanceTestDatasetSeeder.php'));
+        $seeder = file_get_contents(base_path('database/seeders/PerformanceTestDatasetSeeder.php'));
+        $this->assertStringContainsString('perf_user_', $seeder, 'Seeder must create perf_user_* accounts');
+        $this->assertStringContainsString('perf-torrent-', $seeder, 'Seeder must create perf-torrent-* torrents');
+        $this->assertStringContainsString('PerfTest2026!', $seeder, 'Seeder must use known password');
+    }
+
+    /**
+     * k6 baseline.js includes extended page coverage (T-17: authenticated scenarios).
      */
     public function test_k6_baseline_has_extended_pages(): void
     {
         $baseline = file_get_contents(base_path('tests/Performance/baseline.js'));
-        $this->assertStringContainsString('page_torrents_duration', $baseline, 'baseline.js must have torrents budget');
-        $this->assertStringContainsString('page_forums_duration', $baseline, 'baseline.js must have forums budget');
-        $this->assertStringContainsString('page_faq_duration', $baseline, 'baseline.js must have faq budget');
-        $this->assertStringContainsString('page_rules_duration', $baseline, 'baseline.js must have rules budget');
-        $this->assertStringContainsString('page_metrics_duration', $baseline, 'baseline.js must have metrics budget');
+        $this->assertStringContainsString('page_browse_duration', $baseline, 'baseline.js must have browse budget');
+        $this->assertStringContainsString('page_search_duration', $baseline, 'baseline.js must have search budget');
+        $this->assertStringContainsString('page_details_duration', $baseline, 'baseline.js must have details budget');
+        $this->assertStringContainsString('page_messages_duration', $baseline, 'baseline.js must have messages budget');
+        $this->assertStringContainsString('page_usercp_duration', $baseline, 'baseline.js must have usercp budget');
+        $this->assertStringContainsString('page_upload_duration', $baseline, 'baseline.js must have upload budget');
     }
 
     /**
-     * k6 announce.js exists for separate announce load testing.
+     * k6 announce.js exists for separate announce load testing (T-17: passkey + scrape).
      */
     public function test_k6_announce_load_test_exists(): void
     {
@@ -51,6 +86,9 @@ final class PerformanceBudgetTest extends TestCase
         $announce = file_get_contents(base_path('tests/Performance/announce.js'));
         $this->assertStringContainsString('announce.php', $announce, 'announce.js must test announce.php');
         $this->assertStringContainsString('announce_duration', $announce, 'announce.js must track announce duration');
+        $this->assertStringContainsString('scrape.php', $announce, 'announce.js must test scrape.php (T-17)');
+        $this->assertStringContainsString('passkey', $announce, 'announce.js must use passkey auth (T-17)');
+        $this->assertStringContainsString('scrape_duration', $announce, 'announce.js must track scrape duration (T-17)');
     }
 
     /**

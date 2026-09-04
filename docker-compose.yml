@@ -174,7 +174,7 @@ services:
 
   phpmyadmin:
     # T-13: Digest-pinned for reproducible builds. Update via Renovate.
-    image: phpmyadmin/phpmyadmin@sha256:e66b1f5a8c5852cc6f7143589f34de435a0f5057fa3b012d6fb4705b9127b46b
+    image: phpmyadmin/phpmyadmin@sha256:42a200db07b4e70fbf32c594ad4521cf16399b8e54bbb5adceae98e7566dfbeb
     container_name: nexusphp-phpmyadmin
     profiles:
       - debug
@@ -193,7 +193,7 @@ services:
 
   meilisearch:
     # T-13: Digest-pinned for reproducible builds. Update via Renovate.
-    image: getmeili/meilisearch:v1.53@sha256:b4a0a1f9545ae1dd8e12a750fa4416ef3f4b421ed0758c430d0c46182ad233ee
+    image: getmeili/meilisearch:v1.53@sha256:81ffa96ce6e9a6769775d772742ed3da653ad34960cd6c3b43b98918c07db101
     container_name: nexusphp-meilisearch
     environment:
       MEILI_NO_ANALYTICS: "true"

@@ -6,7 +6,8 @@
 #   NEXUSPHP_ENV=prod by default; set --build-arg NEXUSPHP_ENV=dev for dev opcache settings
 
 # ── Stage 1: Build PHP extensions ──────────────────────────────────────────
-FROM php:8.5-fpm-alpine AS ext-builder
+# T-13: Digest-pinned for reproducible builds. Update via Renovate.
+FROM php:8.5-fpm-alpine@sha256:059977c6511192520341f9ae5f106714b7834803d916f6eb592a9e19514a11de AS ext-builder
 
 RUN apk add --no-cache \
     $PHPIZE_DEPS \
@@ -35,11 +36,12 @@ RUN docker-php-ext-install -j$(nproc) \
     intl
 
 RUN pecl channel-update pecl.php.net \
-    && pecl install redis \
+    && pecl install redis-6.3.0 \
     && docker-php-ext-enable redis
 
 # ── Stage 2: Composer dependencies (production, no dev) ────────────────────
-FROM composer:2 AS vendor-builder
+# T-13: Digest-pinned for reproducible builds. Update via Renovate.
+FROM composer:2@sha256:0baf37e7f495f1c42cee6bdd9cf3e00e9435f193b512529e7c484d66c623773f AS vendor-builder
 
 COPY composer.json composer.lock /app/
 COPY artisan /app/artisan
@@ -76,17 +78,20 @@ RUN composer dump-autoload \
     --no-scripts
 
 # ── Stage 3: Build frontend assets ─────────────────────────────────────────
-FROM node:22-alpine AS assets-builder
+# T-13: Digest-pinned for reproducible builds. Update via Renovate.
+FROM node:22-alpine@sha256:76789712cd1ae89a1225eac9077010d68987a423588042dac30446f502f1858c AS assets-builder
 
 WORKDIR /app
-COPY package.json package-lock.json* ./
-RUN npm ci --prefer-offline || npm install
+COPY package.json package-lock.json ./
+# T-13: Remove `|| npm install` fallback — lockfile is committed,
+# so npm ci must succeed. If it fails, fix the lockfile instead.
+RUN npm ci --prefer-offline
 
 COPY . .
 RUN npm run build
 
 # ── Stage 4: Production runtime ────────────────────────────────────────────
-FROM php:8.5-fpm-alpine AS production
+FROM php:8.5-fpm-alpine@sha256:059977c6511192520341f9ae5f106714b7834803d916f6eb592a9e19514a11de AS production
 
 # Copy compiled extensions from ext-builder
 COPY --from=ext-builder /usr/local/lib/php/extensions /usr/local/lib/php/extensions

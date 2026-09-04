@@ -85,6 +85,15 @@ final class TorrentTable
             if (is_array($get_value) || in_array($get_name, ['sort', 'type'], true)) {
                 continue;
             }
+            // Clamp page to non-negative so sort header links don't preserve
+            // out-of-range page values. The actual page clamping to maxPage
+            // is handled by Pagination::resolvePage() in the pager; here we
+            // just ensure negative values become 0. Out-of-range positive
+            // values will still appear in links but the pager will clamp
+            // them when the user clicks through.
+            if ($get_name === 'page') {
+                $get_value = (string) max(0, (int) $get_value);
+            }
             $queryParams[(string) $get_name] = (string) $get_value;
         }
         $oldlink = $queryParams ? str_replace('&', '&amp;', http_build_query($queryParams, '', '&')).'&amp;' : '';

@@ -299,13 +299,16 @@ class MeiliSearchRepository extends BaseRepository
         $searchArea = $this->getSearchArea($params);
         $searchQuery = is_scalar($params['search'] ?? '') ? (string) ($params['search'] ?? '') : '';
         if ($searchArea == self::SEARCH_AREA_OWNER) {
-            $searchOwner = User::query()->where('username', trim($searchQuery))->first(['id']);
-            if (! $searchOwner) {
-                // No user match, no results
+            // Use LIKE to match partial usernames, consistent with the SQL
+            // path in TorrentSearchRepository which does username LIKE %term%.
+            $searchOwnerIds = User::query()
+                ->where('username', 'LIKE', '%'.trim($searchQuery).'%')
+                ->pluck('id')
+                ->all();
+            if (empty($searchOwnerIds)) {
                 return $results;
-            } else {
-                $filters[] = 'owner = '.$searchOwner->id;
             }
+            $filters[] = 'owner IN ['.implode(',', $searchOwnerIds).']';
         }
         if (! ($user instanceof User)) {
             $user = User::query()->findOrFail(intval($user));
@@ -313,6 +316,9 @@ class MeiliSearchRepository extends BaseRepository
         $filters = array_merge($filters, $this->getFilters($params, $user));
         $query = $this->getQuery($params);
         $page = isset($params['page']) && is_numeric($params['page']) ? (int) $params['page'] : 0;
+        if ($page < 0) {
+            $page = 0;
+        }
         $perPage = $this->getPerPage($user);
 
         $options = [
@@ -322,6 +328,22 @@ class MeiliSearchRepository extends BaseRepository
         $sort = $this->getSort($params);
         if (! empty($sort)) {
             $options['sort'] = $sort;
+        }
+
+        // Clamp page to valid range: MeiliSearch returns empty for pages
+        // beyond the last, but we want the caller to get the last page's
+        // data so the pager and results are consistent.
+        // First do a count-only query to determine max page.
+        $countOptions = $options;
+        $countOptions['attributesToRetrieve'] = ['id'];
+        $countPaginator = Torrent::search($query)->options($countOptions)->paginate(1, 'page', 1);
+        $total = $countPaginator->total();
+        $maxPage = $perPage > 0 ? (int) ceil($total / $perPage) - 1 : 0;
+        if ($maxPage < 0) {
+            $maxPage = 0;
+        }
+        if ($page > $maxPage) {
+            $page = $maxPage;
         }
 
         $paginator = Torrent::search($query)->options($options)->paginate($perPage, 'page', $page + 1);
@@ -478,7 +500,12 @@ class MeiliSearchRepository extends BaseRepository
             $spState = $matches[1];
             Logger::writeWithContext((string) 'spstate from user setting', (string) 'info', (bool) false);
         }
-        if ($spState > 0) {
+        // Mirror the SQL path's sp_state logic: only apply the filter when
+        // globalSpecialState == 1 (only sp state) or when globalSpecialState
+        // matches the requested state (all = that state). Otherwise the SQL
+        // path doesn't filter sp_state, so MeiliSearch shouldn't either.
+        $globalSpecialState = (int) ($params['global_special_state'] ?? 0);
+        if ($spState > 0 && ($globalSpecialState == 1 || $globalSpecialState == $spState)) {
             $filters[] = "sp_state = $spState";
             Logger::writeWithContext((string) "sp_state = {$spState} through spstate: {$spState}", (string) 'info', (bool) false);
         }

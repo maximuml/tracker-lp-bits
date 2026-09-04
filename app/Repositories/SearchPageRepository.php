@@ -124,7 +124,8 @@ class SearchPageRepository
                 ->offset($offset)
                 ->limit($rpp)
                 ->get()
-                ->toArray();
+                ->map(fn ($row) => (array) $row)
+                ->all();
         } else {
             $pager = Pagination::pager($torrentsperpage, 0, $addparam);
         }

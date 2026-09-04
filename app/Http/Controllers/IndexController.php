@@ -52,7 +52,8 @@ class IndexController extends Controller
         }
 
         $choiceInt = (int) $choice;
-        if ($choiceInt < 0 || $choiceInt > Poll::MAX_OPTION_INDEX) {
+        // Allow 0-19 for normal options, 255 for blank vote.
+        if ($choiceInt < 0 || ($choiceInt > Poll::MAX_OPTION_INDEX && $choiceInt !== 255)) {
             return redirect('/index.php');
         }
 
@@ -64,7 +65,7 @@ class IndexController extends Controller
         $pollId = $poll['id'];
 
         $optionKey = "option{$choiceInt}";
-        if (empty($poll[$optionKey])) {
+        if ($choiceInt !== 255 && empty($poll[$optionKey])) {
             return redirect('/index.php');
         }
 

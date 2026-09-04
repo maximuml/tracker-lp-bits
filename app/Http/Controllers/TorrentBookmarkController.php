@@ -54,7 +54,7 @@ class TorrentBookmarkController extends LegacyController
             LegacyResponse::abort('Party is over!', "This trick doesn't work anymore. You need to click the button!");
         }
 
-        $torrentid = (int) request()->post('id');
+        $torrentid = (int) $request->post('id');
 
         try {
             $this->bookmarkService->thankTorrent($curUser, $torrentid);

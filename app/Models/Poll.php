@@ -43,7 +43,13 @@ class Poll extends NexusModel
     use NexusActivityLogTrait;
 
     /** @var list<string> */
-    protected $fillable = ['added', 'question', 'option0', 'option1', 'option2', 'option3', 'option4', 'option5'];
+    protected $fillable = [
+        'added', 'question',
+        'option0', 'option1', 'option2', 'option3', 'option4', 'option5',
+        'option6', 'option7', 'option8', 'option9', 'option10',
+        'option11', 'option12', 'option13', 'option14', 'option15',
+        'option16', 'option17', 'option18', 'option19',
+    ];
 
     /** @var array<string, string> */
     protected $casts = [

@@ -21,10 +21,17 @@ final class TorrentBookmarkService
     /**
      * Toggle a bookmark for a user on a torrent.
      *
-     * @return string 'added' or 'deleted'.
+     * @return string 'added', 'deleted', or 'failed' if torrent doesn't exist.
      */
     public function toggleBookmark(int $userId, int $torrentId): string
     {
+        // Verify the torrent exists before adding a bookmark — prevents
+        // orphaned bookmark records for non-existent torrents.
+        $torrentExists = DB::table('torrents')->where('id', $torrentId)->exists();
+        if (! $torrentExists) {
+            return 'failed';
+        }
+
         $bookmark = DB::table('bookmarks')
             ->where('torrentid', $torrentId)
             ->where('userid', $userId)

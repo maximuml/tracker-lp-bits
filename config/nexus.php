@@ -83,10 +83,6 @@ return [
         'master_key' => Env::get('MEILISEARCH_MASTER_KEY', ''),
     ],
 
-    'nas_tools_key' => Env::get('NAS_TOOLS_KEY', ''),
-    'iyuu_secret' => Env::get('IYUU_SECRET', ''),
-    'ammds_secret' => Env::get('AMMDS_SECRET', ''),
-
     'trusted_proxies' => Env::get('TRUSTED_PROXIES', ''),
 
 ];

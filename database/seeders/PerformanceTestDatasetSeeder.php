@@ -149,27 +149,31 @@ class PerformanceTestDatasetSeeder extends Seeder
                 continue;
             }
 
-            Torrent::create([
-                'name' => $name,
-                'filename' => $name.'.torrent',
-                'save_as' => $name,
-                'owner' => $firstUser->id,
-                'size' => 1024 * 1024 * 1024 * ($i % 10 + 1), // 1-10 GB
-                'category' => $categories[($i - 1) % count($categories)],
-                'codec' => $codecs[($i - 1) % count($codecs)],
-                'source' => $sources[($i - 1) % count($sources)],
-                'medium' => $media[($i - 1) % count($media)],
-                'info_hash' => substr(md5($name), 0, 20),
-                'added' => now()->subDays($i),
-                'visible' => 1,
-                'banned' => 0,
-                'seeders' => ($i % 5) + 1,
-                'leechers' => ($i % 3),
-                'times_completed' => $i * 2,
-                'type' => 'single',
-                'numfiles' => 1,
-                'anonymous' => false,
-            ]);
+            // Use withoutEvents to bypass Scout/MeiliSearch observer —
+            // the perf-budget CI workflow doesn't start MeiliSearch.
+            Torrent::withoutEvents(function () use ($name, $firstUser, $i, $categories, $codecs, $sources, $media) {
+                Torrent::create([
+                    'name' => $name,
+                    'filename' => $name.'.torrent',
+                    'save_as' => $name,
+                    'owner' => $firstUser->id,
+                    'size' => 1024 * 1024 * 1024 * ($i % 10 + 1), // 1-10 GB
+                    'category' => $categories[($i - 1) % count($categories)],
+                    'codec' => $codecs[($i - 1) % count($codecs)],
+                    'source' => $sources[($i - 1) % count($sources)],
+                    'medium' => $media[($i - 1) % count($media)],
+                    'info_hash' => substr(md5($name), 0, 20),
+                    'added' => now()->subDays($i),
+                    'visible' => 1,
+                    'banned' => 0,
+                    'seeders' => ($i % 5) + 1,
+                    'leechers' => ($i % 3),
+                    'times_completed' => $i * 2,
+                    'type' => 'single',
+                    'numfiles' => 1,
+                    'anonymous' => false,
+                ]);
+            });
         }
     }
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Support\CurrentUser;
+use App\Support\LegacyHeaderBag;
 use App\Support\LegacyResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -43,16 +44,19 @@ abstract class LegacyController extends Controller
 
         $content = view()->make($page.'.index', $data)->render();
 
-        $headers = headers_list();
-        $status = http_response_code();
-        foreach ($headers as $header) {
-            if (stripos($header, 'Location:') === 0) {
-                $url = trim(substr($header, 9));
-                header_remove('Location');
-                $statusCode = is_int($status) && $status >= 300 && $status < 400 ? $status : 302;
+        // T-11: Read from the per-request LegacyHeaderBag instead of SAPI
+        // globals (headers_list/http_response_code/header_remove) that
+        // leak state across Octane worker requests.
+        $headerBag = app(LegacyHeaderBag::class);
+        $status = $headerBag->getStatusCode();
 
-                return redirect($url, $statusCode);
-            }
+        // Check for a Location header (redirect)
+        $location = $headerBag->first('Location');
+        if ($location !== null) {
+            $headerBag->remove('Location');
+            $statusCode = $status !== null && $status >= 300 && $status < 400 ? $status : 302;
+
+            return redirect($location, $statusCode);
         }
 
         return response($content);
@@ -71,29 +75,26 @@ abstract class LegacyController extends Controller
 
         $content = view()->make($page.'.index', $data)->render();
 
-        $headers = headers_list();
-        $responseHeaders = [];
-        $status = http_response_code();
-        foreach ($headers as $header) {
-            if (stripos($header, 'Location:') === 0) {
-                $url = trim(substr($header, 9));
-                header_remove('Location');
+        // T-11: Read from the per-request LegacyHeaderBag instead of SAPI
+        // globals (headers_list/http_response_code/header_remove) that
+        // leak state across Octane worker requests.
+        $headerBag = app(LegacyHeaderBag::class);
+        $status = $headerBag->getStatusCode();
 
-                $statusCode = is_int($status) && $status >= 300 && $status < 400 ? $status : 302;
+        // Check for a Location header (redirect)
+        $location = $headerBag->first('Location');
+        if ($location !== null) {
+            $headerBag->remove('Location');
+            $statusCode = $status !== null && $status >= 300 && $status < 400 ? $status : 302;
 
-                return redirect($url, $statusCode);
-            }
-
-            $parts = explode(':', $header, 2);
-            if (count($parts) === 2) {
-                $name = trim($parts[0]);
-                $value = trim($parts[1]);
-                $responseHeaders[$name] = ($responseHeaders[$name] ?? '') !== '' ? $responseHeaders[$name].', '.$value : $value;
-                header_remove($name);
-            }
+            return redirect($location, $statusCode);
         }
 
-        $responseStatus = is_int($status) && $status >= 100 ? $status : 200;
+        // Collect remaining headers for the response
+        $responseHeaders = $headerBag->toResponseHeaders();
+        $headerBag->flush();
+
+        $responseStatus = $status !== null && $status >= 100 ? $status : 200;
 
         return response($content, $responseStatus, $responseHeaders);
     }

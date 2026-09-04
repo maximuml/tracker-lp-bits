@@ -6,6 +6,7 @@ namespace App\Listeners;
 
 use App\Support\AssetAppender;
 use App\Support\CurrentUser;
+use App\Support\LegacyHeaderBag;
 use App\Support\PageLayout;
 use App\Support\Permissions;
 use App\Support\RequestContext;
@@ -31,6 +32,9 @@ class ResetNexus
         PageLayout::resetState();
         Permissions::resetState();
         MsgAlert::resetState();
+        // T-11: Flush the per-request legacy header bag so headers/status
+        // set by one request do not leak into the next under Octane.
+        app(LegacyHeaderBag::class)->flush();
 
         // T-10: Reset auth guard cached user to prevent cross-request user
         // leakage under Octane. NexusWebGuard caches $this->user on the guard

@@ -125,7 +125,20 @@ jobs:
         run: npm run build
 
       - name: Audit npm dependencies
-        run: npm audit
+        # Retry up to 3 times — npm audit endpoint can return 503
+        # transiently (Service Unavailable).
+        run: |
+          for i in 1 2 3; do
+            if npm audit; then
+              break
+            fi
+            if [ "$i" -eq 3 ]; then
+              echo "::error::npm audit failed after 3 attempts"
+              exit 1
+            fi
+            echo "npm audit attempt $i failed, retrying in 10s..."
+            sleep 10
+          done
 
   unit-tests:
     name: PHPUnit Unit (PHP ${{ matrix.php }}, MySQL ${{ matrix.mysql }})

@@ -18,6 +18,7 @@ use App\Support\CurrentUser;
 use App\Support\Globals;
 use App\Support\Http;
 use App\Support\LegacyAuth;
+use App\Support\LegacyHeaderBag;
 use App\Support\Logger;
 use App\Support\Strings;
 use App\Support\Style;
@@ -222,19 +223,14 @@ class UtilityController extends LegacyController
         $driver->outputImage($imagehash);
         $content = ob_get_clean() ?: '';
 
-        $headers = [];
-        $status = http_response_code();
-        foreach (headers_list() as $header) {
-            $parts = explode(':', $header, 2);
-            if (count($parts) === 2) {
-                $name = trim($parts[0]);
-                $value = trim($parts[1]);
-                $headers[$name] = ($headers[$name] ?? '') !== '' ? $headers[$name].', '.$value : $value;
-                header_remove($name);
-            }
-        }
+        // T-11: Read from the per-request LegacyHeaderBag instead of SAPI
+        // globals that leak state across Octane worker requests.
+        $headerBag = app(LegacyHeaderBag::class);
+        $status = $headerBag->getStatusCode();
+        $headers = $headerBag->toResponseHeaders();
+        $headerBag->flush();
 
-        $responseStatus = is_int($status) && $status >= 100 ? $status : 200;
+        $responseStatus = $status !== null && $status >= 100 ? $status : 200;
 
         return response($content, $responseStatus, $headers);
     }

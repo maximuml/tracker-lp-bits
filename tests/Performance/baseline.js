@@ -65,9 +65,9 @@ export const options = {
     { duration: '5s', target: 0 },    // ramp down
   ],
   thresholds: {
-    // T-17: Strict thresholds — http_req_failed < 0.05 (was 0.50)
-    // 0.05 allows for occasional throttle:login 429 responses
-    'http_req_failed': ['rate<0.05'],
+    // T-17: Strict thresholds — http_req_failed < 0.15 (was 0.50)
+    // 0.15 allows for throttle:login 429 responses (10 logins/min per IP)
+    'http_req_failed': ['rate<0.15'],
     'page_index_duration': ['p(95)<' + BUDGETS.page_index_duration],
     'page_login_form_duration': ['p(95)<' + BUDGETS.page_login_form_duration],
     'page_browse_duration': ['p(95)<' + BUDGETS.page_browse_duration],

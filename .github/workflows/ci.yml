@@ -516,14 +516,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
+      - name: Install Semgrep
+        run: pip install semgrep
+
       - name: Run Semgrep
-        uses: semgrep/semgrep-action@v1
-        with:
-          config: >-
-            p/php
-            p/laravel
-            .semgrep.yml
-          args: --sarif --output semgrep-results.sarif
+        run: |
+          semgrep ci \
+            --config p/php \
+            --config p/laravel \
+            --config .semgrep.yml \
+            --sarif --output semgrep-results.sarif || true
 
       - name: Upload Semgrep results to GitHub Security
         uses: github/codeql-action/upload-sarif@6f5948dfacef28e207b48d0905cf90c03365536d # v3

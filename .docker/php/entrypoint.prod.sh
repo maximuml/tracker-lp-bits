@@ -59,31 +59,46 @@ if [ "$(id -u)" = "0" ]; then
 fi
 
 if [ "$SERVICE_NAME" = "php" ]; then
+    # T-14: Validate production config before starting — fail fast if
+    # APP_KEY is missing, APP_DEBUG is on, or writable paths are broken.
+    echo_info "Validating production configuration..."
+    php artisan app:validate-production
+    echo_success "Production config validated."
+
     # Laravel caches are pre-baked at build time, but storage:link needs the
     # storage volume to exist. Re-run safe-to-repeat commands.
+    # T-14: No `|| true` — if cache warming fails, the container should
+    # not start with stale/missing caches.
     echo_info "Linking storage + warming caches..."
-    php artisan storage:link --force 2>/dev/null || true
-
-    # Re-cache config/routes/views in case .env changed at runtime
-    # (these write to bootstrap/cache which is a writable volume)
-    php artisan config:cache 2>/dev/null || true
-    php artisan route:cache 2>/dev/null || true
-    php artisan view:cache 2>/dev/null || true
-    php artisan icons:cache 2>/dev/null || true
-    php artisan filament:cache-components 2>/dev/null || true
+    php artisan storage:link --force
+    php artisan config:cache
+    php artisan route:cache
+    php artisan view:cache
+    php artisan icons:cache
+    php artisan filament:cache-components
     echo_success "Caches warmed."
 
     exec php-fpm
 
 elif [ "$SERVICE_NAME" = "queue" ]; then
+    # T-14: Validate production config before starting queue worker.
+    echo_info "Validating production configuration..."
+    php artisan app:validate-production
+    echo_success "Production config validated."
+
     echo_info "Start Queue Worker..."
     exec php artisan horizon
 
 elif [ "$SERVICE_NAME" = "scheduler" ]; then
+    # T-14: Validate production config before starting scheduler.
+    echo_info "Validating production configuration..."
+    php artisan app:validate-production
+    echo_success "Production config validated."
+
     echo_info "Start Scheduler..."
     while true; do
         echo_success "[Scheduler] Running schedule:run at $(date '+%Y-%m-%d %H:%M:%S')"
-        php artisan schedule:run --verbose --no-interaction 2>&1 || true
+        php artisan schedule:run --verbose --no-interaction 2>&1
         sleep 60
     done
 

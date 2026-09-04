@@ -159,14 +159,16 @@ RUN mkdir -p /var/www/html/attachments /var/www/html/torrents \
     /var/www/html/attachments /var/www/html/torrents
 
 # Build Laravel caches at image build time (config/route/view/icons/filament)
-# These are baked into the image; entrypoint re-runs them for runtime .env overrides.
+# T-14: Fail-fast — no `|| true` or `2>/dev/null`. If any cache command
+# fails, the image build fails. This catches missing extensions, broken
+# config, and invalid routes before the image reaches production.
 RUN cd /var/www/html \
-    && php artisan storage:link --force 2>/dev/null || true \
-    && php artisan config:cache 2>/dev/null || true \
-    && php artisan route:cache 2>/dev/null || true \
-    && php artisan view:cache 2>/dev/null || true \
-    && php artisan icons:cache 2>/dev/null || true \
-    && php artisan filament:cache-components 2>/dev/null || true
+    && php artisan storage:link --force \
+    && php artisan config:cache \
+    && php artisan route:cache \
+    && php artisan view:cache \
+    && php artisan icons:cache \
+    && php artisan filament:cache-components
 
 # Production entrypoint — no composer install, no install-script copy
 COPY .docker/php/entrypoint.prod.sh /usr/local/bin/entrypoint.sh

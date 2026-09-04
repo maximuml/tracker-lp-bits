@@ -37,12 +37,12 @@ class ResetNexus
         // instance, which persists across worker requests unless explicitly
         // cleared. We use a reflection-based approach because setUser(null)
         // is not supported by all guard implementations (e.g. SessionGuard
-        // requires a non-null Authenticatable).
+        // requires a non-null Authenticatable). Note: setAccessible() is
+        // omitted — it's a no-op since PHP 8.1 and deprecated in 8.5.
         $guard = Auth::guard();
         if (property_exists($guard, 'user')) {
             try {
                 $ref = new \ReflectionProperty($guard, 'user');
-                $ref->setAccessible(true);
                 $ref->setValue($guard, null);
             } catch (\Throwable) {
                 // Guard may not have a $user property — skip silently

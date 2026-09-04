@@ -136,10 +136,12 @@ return [
     ],
 
     'flush' => [
-        // T-10: Flush auth guard so NexusWebGuard is re-instantiated with the
-        // new request binding each request. Without this, the guard holds a
-        // stale Request object and cached user from a previous request.
-        'auth',
+        // T-10: Note — 'auth' cannot be flushed here because custom guard
+        // drivers (nexus-web) are registered in AuthServiceProvider::boot()
+        // which only runs once. Flushing 'auth' creates a new AuthManager
+        // that doesn't know about the nexus-web driver, causing 500 errors.
+        // Instead, the guard's cached $user is cleared via reflection in
+        // ResetNexus::handle().
     ],
 
     /*

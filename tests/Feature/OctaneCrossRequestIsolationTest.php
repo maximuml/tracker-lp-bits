@@ -95,7 +95,6 @@ final class OctaneCrossRequestIsolationTest extends TestCase
         // NexusWebGuard::user() does when it caches the authenticated user)
         $guard = Auth::guard();
         $ref = new \ReflectionProperty($guard, 'user');
-        $ref->setAccessible(true);
         $ref->setValue($guard, $userA);
         $this->assertSame($userA->id, Auth::guard()->user()->id);
 
@@ -210,7 +209,6 @@ final class OctaneCrossRequestIsolationTest extends TestCase
         app(Globals::class)->set('TEST_KEY', 'test_value');
         $guard = Auth::guard();
         $ref = new \ReflectionProperty($guard, 'user');
-        $ref->setAccessible(true);
         $ref->setValue($guard, new User);
 
         // Run ResetNexus
@@ -253,7 +251,6 @@ final class OctaneCrossRequestIsolationTest extends TestCase
         if (property_exists($guard, 'user')) {
             try {
                 $ref = new \ReflectionProperty($guard, 'user');
-                $ref->setAccessible(true);
                 $ref->setValue($guard, null);
             } catch (\Throwable) {
                 // Ignore

@@ -83,4 +83,49 @@ final class SecurityConfig extends Config
     {
         return $this->string('port_blacklist', $default);
     }
+
+    /**
+     * Passkey login v2 feature flag.
+     * When true, the v2 protocol is used at /auth/passkey.
+     * When false, the legacy protocol is used (if configured).
+     */
+    public function passkeyLoginV2Enabled(bool $default = false): bool
+    {
+        return $this->bool('passkey_login_v2_enabled', $default);
+    }
+
+    /**
+     * Current signing key for passkey login v2.
+     * Generated from bin2hex(random_bytes(32)) — 64-char hex string.
+     */
+    public function passkeyLoginSigningKeyCurrent(string $default = ''): string
+    {
+        return $this->string('passkey_login_signing_key_current', $default);
+    }
+
+    /**
+     * Current signing key ID for passkey login v2.
+     * Used by clients to select the correct key during rotation.
+     */
+    public function passkeyLoginSigningKeyIdCurrent(string $default = ''): string
+    {
+        return $this->string('passkey_login_signing_key_id_current', $default);
+    }
+
+    /**
+     * Previous signing key for passkey login v2 (for rotation overlap).
+     * Accepted alongside the current key during the overlap window.
+     */
+    public function passkeyLoginSigningKeyPrevious(string $default = ''): string
+    {
+        return $this->string('passkey_login_signing_key_previous', $default);
+    }
+
+    /**
+     * Previous signing key ID for passkey login v2.
+     */
+    public function passkeyLoginSigningKeyIdPrevious(string $default = ''): string
+    {
+        return $this->string('passkey_login_signing_key_id_previous', $default);
+    }
 }

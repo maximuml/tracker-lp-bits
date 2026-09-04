@@ -8,3 +8,6 @@
 # Passkey in TorrentDownloadRepositoryTest is a dummy value (fixed in later commit)
 3598feba59fafbd155547e11175c47fd62c99375:tests/Unit/Repositories/TorrentDownloadRepositoryTest.php:generic-api-key:66
 3598feba59fafbd155547e11175c47fd62c99375:tests/Unit/Repositories/TorrentDownloadRepositoryTest.php:generic-api-key:88
+# Fake signing keys in PasskeyLoginV2Test are dummy values for testing
+4e1dac8641b892c8ac8338b1a1f51ffd6fc5c80e:tests/Feature/PasskeyLoginV2Test.php:generic-api-key:25
+4e1dac8641b892c8ac8338b1a1f51ffd6fc5c80e:tests/Feature/PasskeyLoginV2Test.php:generic-api-key:29

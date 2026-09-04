@@ -109,4 +109,11 @@ if (! Environment::isConsole()) {
     if (! empty($passkeyLoginUri) && SiteConfig::current()->security->loginType() === 'passkey') {
         Route::post($passkeyLoginUri, [AuthenticateController::class, 'passkeyLogin']);
     }
+
+    // Passkey login v2 — fixed route with HMAC-SHA256, nonce replay protection,
+    // and key rotation. Active when passkey_login_v2_enabled feature flag is set.
+    if (SiteConfig::current()->security->passkeyLoginV2Enabled()) {
+        Route::post('/auth/passkey', [AuthenticateController::class, 'passkeyLoginV2'])
+            ->middleware('throttle:passkey-login');
+    }
 }

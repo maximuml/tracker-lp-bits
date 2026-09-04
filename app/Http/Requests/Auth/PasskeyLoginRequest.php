@@ -17,9 +17,9 @@ class PasskeyLoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'passkey' => 'required|string|size:32',
+            'passkey' => 'required|string|regex:/^[a-f0-9]{32}$/i',
             'timestamp' => 'required|integer',
-            'signature' => 'required|string',
+            'signature' => 'required|string|regex:/^[a-f0-9]{64}$/i',
         ];
     }
 }

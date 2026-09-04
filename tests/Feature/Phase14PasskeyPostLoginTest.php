@@ -121,7 +121,7 @@ final class Phase14PasskeyPostLoginTest extends TestCase
         $response = $this->post('secretlogin', [
             'passkey' => $fakePasskey,
             'timestamp' => $timestamp,
-            'signature' => 'invalid-signature',
+            'signature' => str_repeat('0', 64),
         ]);
 
         // Should redirect to index.php (HMAC validation fails, no auth)

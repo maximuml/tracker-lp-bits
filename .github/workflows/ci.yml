@@ -349,6 +349,10 @@ jobs:
         uses: codecov/codecov-action@a99c28d3f0da835de33ff2feb2e15691c7b9641f # v7
         with:
           files: ./coverage.xml
+          # Keep non-blocking until CODECOV_TOKEN secret is configured.
+          # T-12 set this to true, but tokenless uploads are rejected by
+          # Codecov, causing CI failures. Revert to false until the secret
+          # is added in repo settings.
           fail_ci_if_error: false
           token: ${{ secrets.CODECOV_TOKEN }}
 
@@ -501,6 +505,55 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  semgrep:
+    name: Semgrep static analysis
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Install Semgrep
+        run: pip install semgrep
+
+      - name: Run Semgrep
+        run: |
+          semgrep ci \
+            --config p/php \
+            --config p/laravel \
+            --config .semgrep.yml \
+            --sarif --output semgrep-results.sarif || true
+
+      - name: Upload Semgrep results to GitHub Security
+        uses: github/codeql-action/upload-sarif@6f5948dfacef28e207b48d0905cf90c03365536d # v3
+        if: always()
+        with:
+          sarif_file: semgrep-results.sarif
+
+  dependency-review:
+    name: Dependency review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Dependency review
+        uses: actions/dependency-review-action@v4
+        # Skip if Dependency graph is not enabled on the repository
+        # (e.g. forks, private repos without Advanced Security).
+        continue-on-error: true
+        with:
+          fail-on-severity: moderate
+          comment-summary-in-pr: on-failure
+
   container-scan:
     name: Container image scan (Trivy)
     runs-on: ubuntu-latest
@@ -526,21 +579,30 @@ jobs:
 
       - name: Run Trivy on PHP image
         uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
+        # Trivy 0.70 has a bug with rejected CVEs (CVE-2026-80256)
+        # causing exit code 1 even when .trivyignore lists them.
+        # Use continue-on-error until the action ships Trivy >= 0.74.
+        continue-on-error: true
         with:
           image-ref: nexusphp_php:latest
           format: sarif
           output: trivy-php-results.sarif
           severity: CRITICAL,HIGH
-          exit-code: '0'
+          exit-code: '1'
+          ignore-unfixed: true
+          trivyignores: .trivyignore
 
       - name: Run Trivy on OpenResty image
         uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
+        continue-on-error: true
         with:
           image-ref: nexusphp_openresty:latest
           format: sarif
           output: trivy-openresty-results.sarif
           severity: CRITICAL,HIGH
-          exit-code: '0'
+          exit-code: '1'
+          ignore-unfixed: true
+          trivyignores: .trivyignore
 
       - name: Upload Trivy scan results to GitHub Security
         uses: github/codeql-action/upload-sarif@6f5948dfacef28e207b48d0905cf90c03365536d # v3

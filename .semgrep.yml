@@ -9,19 +9,10 @@
 # CI runs this via the semgrep/semgrep-action in .github/workflows/ci.yml.
 
 rules:
-  # ---- PHP security rulesets ----
-  - id: php-security
-    paths:
-      include:
-        - "app/**/*.php"
-        - "routes/**/*.php"
-        - "database/migrations/**/*.php"
-    # Inherit the community PHP security rules
-    # (SQL injection, XSS, file inclusion, command injection, etc.)
-    # This is a meta-rule that pulls from the registry.
-    message: "PHP security rule"
-
   # ---- Custom Laravel-specific rules ----
+  # Community PHP rulesets are pulled via the semgrep-action `config`
+  # parameter in CI (e.g. `p/php` and `p/laravel`). This file only
+  # contains project-specific custom rules.
 
   # Rule 1: Detect raw SQL with string interpolation (SQL injection risk)
   - id: laravel-raw-sql-interpolation

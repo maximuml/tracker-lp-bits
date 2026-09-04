@@ -12,3 +12,8 @@
 # Example:
 # CVE-2024-12345
 # # expires: 2026-12-31 — reason: no fix available for php-8.5-alpine yet
+
+# Rejected CVE — Trivy fails to fetch details from the DB, causing
+# exit code 1 even though the vulnerability is not actionable.
+CVE-2026-80256
+# expires: 2026-12-31 — reason: rejected CVE, no fix available, Trivy DB issue

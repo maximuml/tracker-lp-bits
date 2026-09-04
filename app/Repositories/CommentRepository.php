@@ -142,6 +142,47 @@ class CommentRepository
     }
 
     /**
+     * Store a comment from the API CommentController.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    public function store(array $data, ?User $user): Comment
+    {
+        $userId = max(0, (int) ($user->id ?? 0));
+        $type = (string) ($data['type'] ?? '');
+        $text = (string) ($data['text'] ?? '');
+
+        $typeMap = Comment::TYPE_MAPS[$type] ?? null;
+        $parentId = 0;
+        if ($typeMap !== null) {
+            $parentId = max(0, (int) ($data[$typeMap['foreign_key']] ?? 0));
+        }
+
+        $comment = new Comment;
+        $comment->user = $userId;
+        $comment->added = Carbon::now();
+        $comment->text = $text;
+        $comment->ori_text = (string) ($data['ori_text'] ?? $text);
+        $comment->anonymous = (bool) ($data['anonymous'] ?? false);
+
+        if ($typeMap !== null) {
+            $comment->{$typeMap['foreign_key']} = $parentId;
+        }
+
+        $comment->save();
+
+        if ($type === 'torrent' && $parentId > 0) {
+            Torrent::query()->where('id', $parentId)->increment('comments');
+        } elseif ($type === 'offer' && $parentId > 0) {
+            Offer::query()->where('id', $parentId)->increment('comments');
+        }
+
+        User::query()->where('id', $userId)->update(['last_comment' => Carbon::now()]);
+
+        return $comment;
+    }
+
+    /**
      * Fetch a paginated list of comments for the given parent and type.
      *
      * @return LengthAwarePaginator<int, Comment>

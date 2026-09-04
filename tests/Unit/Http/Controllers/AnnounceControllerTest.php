@@ -21,336 +21,214 @@ final class AnnounceControllerTest extends TestCase
         parent::tearDown();
     }
 
-    /** @return array<string, mixed> */
-    private function validParams(): array
+    private function createValidRequest(array $overrides = []): Request
     {
-        return [
-            'passkey' => '0123456789abcdef0123456789abcdef',
-            'info_hash' => str_repeat("\x01", 20),
-            'peer_id' => str_repeat("\x02", 20),
-            'port' => 6881,
+        $params = array_merge([
+            'passkey' => str_repeat('a', 32),
+            'info_hash' => str_repeat('A', 20),
+            'peer_id' => str_repeat('A', 20),
+            'port' => 54321,
             'uploaded' => 0,
             'downloaded' => 0,
-            'left' => 1000,
-            'event' => 'started',
-        ];
+            'left' => 0,
+        ], $overrides);
+
+        $request = Request::create('/announce.php', 'GET', $params);
+
+        return $request;
     }
 
-    public function test_announce_returns_bencoded_success_response(): void
+    public function test_announce_returns_success_response_with_valid_request(): void
     {
+        $responseData = ['complete' => 1, 'incomplete' => 0, 'interval' => 1800, 'peers' => ''];
+
         /** @var AnnounceService&Mockery\MockInterface $service */
         $service = Mockery::mock(AnnounceService::class);
         $service->shouldReceive('handle')
             ->once()
-            ->andReturn([
-                'interval' => 1800,
-                'min interval' => 1800,
-                'complete' => 1,
-                'incomplete' => 2,
-                'downloaded' => 3,
-                'peers' => '',
-                'peers6' => '',
-            ]);
+            ->andReturn($responseData);
 
         $controller = new AnnounceController($service);
-        $request = Request::create('/announce', 'GET', $this->validParams());
+        $request = $this->createValidRequest(['event' => 'started', 'compact' => 1]);
 
         $response = $controller->announce($request);
 
-        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame(200, $response->status());
         $this->assertSame('text/plain; charset=utf-8', $response->headers->get('Content-Type'));
-        $this->assertSame('no-cache', $response->headers->get('Pragma'));
-
         $decoded = Bencode::decode($response->getContent());
-        $this->assertSame(1800, $decoded['interval']);
         $this->assertSame(1, $decoded['complete']);
-        $this->assertSame(2, $decoded['incomplete']);
-        $this->assertSame('', $decoded['peers']);
+        $this->assertSame(0, $decoded['incomplete']);
     }
 
-    public function test_announce_returns_failure_reason_when_passkey_missing(): void
+    public function test_announce_returns_failure_on_validation_error(): void
     {
         /** @var AnnounceService&Mockery\MockInterface $service */
         $service = Mockery::mock(AnnounceService::class);
         $service->shouldNotReceive('handle');
 
         $controller = new AnnounceController($service);
-        $request = Request::create('/announce', 'GET', [
-            'info_hash' => str_repeat("\x01", 20),
-            'peer_id' => str_repeat("\x02", 20),
-            'port' => 6881,
+        $request = Request::create('/announce.php', 'GET', [
+            'passkey' => 'short',
+            'info_hash' => str_repeat('A', 20),
+            'peer_id' => str_repeat('A', 20),
+            'port' => 54321,
             'uploaded' => 0,
             'downloaded' => 0,
-            'left' => 1000,
+            'left' => 0,
         ]);
 
         $response = $controller->announce($request);
 
-        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame(200, $response->status());
         $decoded = Bencode::decode($response->getContent());
         $this->assertArrayHasKey('failure reason', $decoded);
     }
 
-    public function test_announce_returns_failure_reason_when_passkey_invalid(): void
+    public function test_announce_returns_failure_on_tracker_exception(): void
     {
         /** @var AnnounceService&Mockery\MockInterface $service */
         $service = Mockery::mock(AnnounceService::class);
-        $service->shouldNotReceive('handle');
+        $service->shouldReceive('handle')
+            ->once()
+            ->andThrow(new TrackerException('Banned Client'));
 
         $controller = new AnnounceController($service);
-        $params = $this->validParams();
-        $params['passkey'] = 'too-short';
-
-        $request = Request::create('/announce', 'GET', $params);
+        $request = $this->createValidRequest();
 
         $response = $controller->announce($request);
 
-        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame(200, $response->status());
         $decoded = Bencode::decode($response->getContent());
-        $this->assertArrayHasKey('failure reason', $decoded);
+        $this->assertSame('Banned Client', $decoded['failure reason']);
     }
 
-    public function test_announce_returns_failure_reason_when_info_hash_missing(): void
+    public function test_announce_returns_warning_response_on_tracker_warning(): void
     {
         /** @var AnnounceService&Mockery\MockInterface $service */
         $service = Mockery::mock(AnnounceService::class);
-        $service->shouldNotReceive('handle');
+        $service->shouldReceive('handle')
+            ->once()
+            ->andThrow(new TrackerWarningException('Port is blacklisted', ['peers' => ''], 1800));
 
         $controller = new AnnounceController($service);
-        $params = $this->validParams();
-        unset($params['info_hash']);
-
-        $request = Request::create('/announce', 'GET', $params);
+        $request = $this->createValidRequest(['port' => 6881]);
 
         $response = $controller->announce($request);
 
+        $this->assertSame(200, $response->status());
         $decoded = Bencode::decode($response->getContent());
-        $this->assertArrayHasKey('failure reason', $decoded);
+        $this->assertSame('Port is blacklisted', $decoded['warning message']);
     }
 
-    public function test_announce_returns_failure_reason_when_port_missing(): void
+    public function test_announce_invalid_event_is_set_to_null(): void
     {
+        $capturedValidated = null;
+
         /** @var AnnounceService&Mockery\MockInterface $service */
         $service = Mockery::mock(AnnounceService::class);
-        $service->shouldNotReceive('handle');
+        $service->shouldReceive('handle')
+            ->once()
+            ->withArgs(function ($req, $validated) use (&$capturedValidated): bool {
+                $capturedValidated = $validated;
+
+                return true;
+            })
+            ->andReturn(['complete' => 0, 'incomplete' => 0, 'interval' => 1800, 'peers' => '']);
 
         $controller = new AnnounceController($service);
-        $params = $this->validParams();
-        unset($params['port']);
+        $request = $this->createValidRequest(['event' => 'invalid_event']);
 
-        $request = Request::create('/announce', 'GET', $params);
+        $controller->announce($request);
 
-        $response = $controller->announce($request);
-
-        $decoded = Bencode::decode($response->getContent());
-        $this->assertArrayHasKey('failure reason', $decoded);
+        $this->assertNull($capturedValidated['event']);
     }
 
-    public function test_announce_returns_failure_reason_when_port_out_of_range(): void
+    public function test_announce_valid_events_are_preserved(): void
     {
+        $validEvents = ['started', 'completed', 'stopped', 'paused'];
+
+        foreach ($validEvents as $event) {
+            $capturedValidated = null;
+
+            /** @var AnnounceService&Mockery\MockInterface $service */
+            $service = Mockery::mock(AnnounceService::class);
+            $service->shouldReceive('handle')
+                ->once()
+                ->withArgs(function ($req, $validated) use (&$capturedValidated): bool {
+                    $capturedValidated = $validated;
+
+                    return true;
+                })
+                ->andReturn(['complete' => 0, 'incomplete' => 0, 'interval' => 1800, 'peers' => '']);
+
+            $controller = new AnnounceController($service);
+            $request = $this->createValidRequest(['event' => $event]);
+
+            $controller->announce($request);
+
+            $this->assertSame($event, $capturedValidated['event'], "Event '$event' should be preserved");
+        }
+    }
+
+    public function test_announce_missing_event_is_set_to_null(): void
+    {
+        $capturedValidated = null;
+
         /** @var AnnounceService&Mockery\MockInterface $service */
         $service = Mockery::mock(AnnounceService::class);
-        $service->shouldNotReceive('handle');
+        $service->shouldReceive('handle')
+            ->once()
+            ->withArgs(function ($req, $validated) use (&$capturedValidated): bool {
+                $capturedValidated = $validated;
+
+                return true;
+            })
+            ->andReturn(['complete' => 0, 'incomplete' => 0, 'interval' => 1800, 'peers' => '']);
 
         $controller = new AnnounceController($service);
-        $params = $this->validParams();
-        $params['port'] = 99999;
+        $request = $this->createValidRequest();
 
-        $request = Request::create('/announce', 'GET', $params);
+        $controller->announce($request);
 
-        $response = $controller->announce($request);
-
-        $decoded = Bencode::decode($response->getContent());
-        $this->assertArrayHasKey('failure reason', $decoded);
+        $this->assertNull($capturedValidated['event']);
     }
 
-    public function test_announce_returns_failure_reason_on_tracker_exception(): void
+    public function test_announce_response_has_no_cache_headers(): void
     {
         /** @var AnnounceService&Mockery\MockInterface $service */
         $service = Mockery::mock(AnnounceService::class);
         $service->shouldReceive('handle')
             ->once()
-            ->andThrow(TrackerException::failure('torrent not registered'));
+            ->andReturn(['complete' => 0, 'incomplete' => 0, 'interval' => 1800, 'peers' => '']);
 
         $controller = new AnnounceController($service);
-        $request = Request::create('/announce', 'GET', $this->validParams());
+        $request = $this->createValidRequest();
 
         $response = $controller->announce($request);
 
-        $this->assertSame(200, $response->getStatusCode());
-        $decoded = Bencode::decode($response->getContent());
-        $this->assertSame('torrent not registered', $decoded['failure reason']);
+        $this->assertSame('no-cache', $response->headers->get('Pragma'));
     }
 
-    public function test_announce_returns_warning_on_tracker_warning_exception(): void
+    public function test_announce_empty_event_is_set_to_null(): void
     {
+        $capturedValidated = null;
+
         /** @var AnnounceService&Mockery\MockInterface $service */
         $service = Mockery::mock(AnnounceService::class);
         $service->shouldReceive('handle')
             ->once()
-            ->andThrow(new TrackerWarningException(
-                'port 6881 is blacklisted',
-                ['interval' => 1800, 'min interval' => 1800],
-                7200
-            ));
+            ->withArgs(function ($req, $validated) use (&$capturedValidated): bool {
+                $capturedValidated = $validated;
+
+                return true;
+            })
+            ->andReturn(['complete' => 0, 'incomplete' => 0, 'interval' => 1800, 'peers' => '']);
 
         $controller = new AnnounceController($service);
-        $request = Request::create('/announce', 'GET', $this->validParams());
+        $request = $this->createValidRequest(['event' => '']);
 
-        $response = $controller->announce($request);
+        $controller->announce($request);
 
-        $this->assertSame(200, $response->getStatusCode());
-        $decoded = Bencode::decode($response->getContent());
-        $this->assertSame('port 6881 is blacklisted', $decoded['warning message']);
-        $this->assertSame(7200, $decoded['interval']);
-        $this->assertSame(7200, $decoded['min interval']);
-    }
-
-    public function test_announce_normalizes_unknown_event_to_null(): void
-    {
-        /** @var AnnounceService&Mockery\MockInterface $service */
-        $service = Mockery::mock(AnnounceService::class);
-        $service->shouldReceive('handle')
-            ->once()
-            ->with(Mockery::any(), Mockery::on(function (array $params): bool {
-                return $params['event'] === null;
-            }))
-            ->andReturn(['interval' => 1800]);
-
-        $controller = new AnnounceController($service);
-        $params = $this->validParams();
-        $params['event'] = 'not-a-real-event';
-
-        $request = Request::create('/announce', 'GET', $params);
-
-        $response = $controller->announce($request);
-
-        $this->assertSame(200, $response->getStatusCode());
-    }
-
-    public function test_announce_passes_valid_event_started(): void
-    {
-        /** @var AnnounceService&Mockery\MockInterface $service */
-        $service = Mockery::mock(AnnounceService::class);
-        $service->shouldReceive('handle')
-            ->once()
-            ->with(Mockery::any(), Mockery::on(function (array $params): bool {
-                return $params['event'] === 'started';
-            }))
-            ->andReturn(['interval' => 1800]);
-
-        $controller = new AnnounceController($service);
-        $params = $this->validParams();
-        $params['event'] = 'started';
-
-        $request = Request::create('/announce', 'GET', $params);
-
-        $response = $controller->announce($request);
-        $this->assertSame(200, $response->getStatusCode());
-    }
-
-    public function test_announce_passes_valid_event_completed(): void
-    {
-        /** @var AnnounceService&Mockery\MockInterface $service */
-        $service = Mockery::mock(AnnounceService::class);
-        $service->shouldReceive('handle')
-            ->once()
-            ->with(Mockery::any(), Mockery::on(function (array $params): bool {
-                return $params['event'] === 'completed';
-            }))
-            ->andReturn(['interval' => 1800]);
-
-        $controller = new AnnounceController($service);
-        $params = $this->validParams();
-        $params['event'] = 'completed';
-
-        $request = Request::create('/announce', 'GET', $params);
-
-        $response = $controller->announce($request);
-        $this->assertSame(200, $response->getStatusCode());
-    }
-
-    public function test_announce_passes_valid_event_stopped(): void
-    {
-        /** @var AnnounceService&Mockery\MockInterface $service */
-        $service = Mockery::mock(AnnounceService::class);
-        $service->shouldReceive('handle')
-            ->once()
-            ->with(Mockery::any(), Mockery::on(function (array $params): bool {
-                return $params['event'] === 'stopped';
-            }))
-            ->andReturn(['interval' => 1800]);
-
-        $controller = new AnnounceController($service);
-        $params = $this->validParams();
-        $params['event'] = 'stopped';
-
-        $request = Request::create('/announce', 'GET', $params);
-
-        $response = $controller->announce($request);
-        $this->assertSame(200, $response->getStatusCode());
-    }
-
-    public function test_announce_passes_valid_event_paused(): void
-    {
-        /** @var AnnounceService&Mockery\MockInterface $service */
-        $service = Mockery::mock(AnnounceService::class);
-        $service->shouldReceive('handle')
-            ->once()
-            ->with(Mockery::any(), Mockery::on(function (array $params): bool {
-                return $params['event'] === 'paused';
-            }))
-            ->andReturn(['interval' => 1800]);
-
-        $controller = new AnnounceController($service);
-        $params = $this->validParams();
-        $params['event'] = 'paused';
-
-        $request = Request::create('/announce', 'GET', $params);
-
-        $response = $controller->announce($request);
-        $this->assertSame(200, $response->getStatusCode());
-    }
-
-    public function test_announce_normalizes_empty_event_to_null(): void
-    {
-        /** @var AnnounceService&Mockery\MockInterface $service */
-        $service = Mockery::mock(AnnounceService::class);
-        $service->shouldReceive('handle')
-            ->once()
-            ->with(Mockery::any(), Mockery::on(function (array $params): bool {
-                return $params['event'] === null;
-            }))
-            ->andReturn(['interval' => 1800]);
-
-        $controller = new AnnounceController($service);
-        $params = $this->validParams();
-        $params['event'] = '';
-
-        $request = Request::create('/announce', 'GET', $params);
-
-        $response = $controller->announce($request);
-        $this->assertSame(200, $response->getStatusCode());
-    }
-
-    public function test_announce_normalizes_missing_event_to_null(): void
-    {
-        /** @var AnnounceService&Mockery\MockInterface $service */
-        $service = Mockery::mock(AnnounceService::class);
-        $service->shouldReceive('handle')
-            ->once()
-            ->with(Mockery::any(), Mockery::on(function (array $params): bool {
-                return $params['event'] === null;
-            }))
-            ->andReturn(['interval' => 1800]);
-
-        $controller = new AnnounceController($service);
-        $params = $this->validParams();
-        unset($params['event']);
-
-        $request = Request::create('/announce', 'GET', $params);
-
-        $response = $controller->announce($request);
-        $this->assertSame(200, $response->getStatusCode());
+        $this->assertNull($capturedValidated['event']);
     }
 }

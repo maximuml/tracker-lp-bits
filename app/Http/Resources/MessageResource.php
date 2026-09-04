@@ -26,7 +26,7 @@ class MessageResource extends JsonResource
         return [
             'id' => $this->id,
             'subject' => $this->subject,
-            'msg' => htmlspecialchars_decode(Strings::stripAllTags((string) $this->msg)),
+            'msg' => Strings::stripAllTags((string) $this->msg),
             'added_human' => $this->added instanceof Carbon ? $this->added->diffForHumans() : '',
             'added' => $this->added instanceof Carbon ? Time::formatDateTime($this->added) : '',
             'send_user' => new UserResource($this->whenLoaded('send_user')),

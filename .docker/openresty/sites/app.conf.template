@@ -80,6 +80,8 @@ server {
     # announce.php and scrape.php are kept as-is (external BT clients).
     # confirmemail.php is handled above with PATH_INFO.
     location = /login.php { return 301 /login?$args; }
+    # 308 preserves the POST method and body (logout is a POST form).
+    location = /logout.php { return 308 /logout; }
     location = /signup.php { return 301 /signup?$args; }
     location = /torrents.php { return 301 /torrents?$args; }
     location = /forums.php { return 301 /forums?$args; }

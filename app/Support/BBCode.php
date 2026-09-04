@@ -46,21 +46,83 @@ final class BBCode
      *     anything else (false, "0", null) does NOT
      *   - `$linkClass`, if non-empty, becomes `class="…"`
      *
-     * The `$url` is interpolated as-is — sanitisation is the
-     * caller's job (the legacy proxy does it via `filter_src()`
-     * before reaching here for image/video embeds, but URLs from
-     * `[url]…[/url]` BBCode tags are written verbatim, matching
-     * the pre-existing contract).
+     * The `$url` is sanitised: only `http`, `https`, `mailto`, and
+     * relative URLs are allowed. Dangerous schemes (`javascript:`,
+     * `data:`, `vbscript:`, etc.) are neutralised. The URL and link
+     * text are HTML-escaped for attribute context.
      */
     public static function url(string $url, bool $newWindow = false, string $text = '', string $linkClass = ''): string
     {
+        // Decode HTML entities first — Comment::format() runs
+        // htmlspecialchars() on the whole text before parsing BBCode,
+        // so the URL arrives entity-encoded (e.g. &#x6a;avascript:).
+        $decoded = html_entity_decode($url, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        // Validate the URL scheme — only allow safe schemes or
+        // relative URLs (no scheme). Reject javascript:, data:, etc.
+        $safeUrl = self::sanitizeUrl($decoded);
+        if ($safeUrl === null) {
+            // Dangerous scheme — render as plain text, no link.
+            $displayText = $text !== '' ? $text : $url;
+
+            return htmlspecialchars($displayText, ENT_QUOTES, 'UTF-8');
+        }
+
         if (! $text) {
             $text = $url;
         }
-        $classAttr = $linkClass !== '' ? " class=\"$linkClass\"" : '';
-        $targetAttr = $newWindow ? ' target="_blank"' : '';
 
-        return "<a$classAttr href=\"$url\"$targetAttr>$text</a>";
+        // Escape for HTML attribute and text context.
+        $escapedUrl = htmlspecialchars($safeUrl, ENT_QUOTES, 'UTF-8');
+        $escapedText = htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
+        $classAttr = $linkClass !== '' ? ' class="'.htmlspecialchars($linkClass, ENT_QUOTES, 'UTF-8').'"' : '';
+        // rel="noopener noreferrer" prevents tabnabbing when target="_blank".
+        $targetAttr = $newWindow ? ' target="_blank" rel="noopener noreferrer"' : '';
+
+        return "<a$classAttr href=\"$escapedUrl\"$targetAttr>$escapedText</a>";
+    }
+
+    /**
+     * Validate a URL and return a safe version, or null if dangerous.
+     *
+     * Allows:
+     * - Relative URLs (no scheme): `/path`, `page.php`, `?foo=bar`
+     * - http://, https://, mailto:, ftp://
+     *
+     * Rejects:
+     * - javascript:, data:, vbscript:, file:, blob:, etc.
+     * - Any scheme not in the allowlist
+     *
+     * @param  string  $url  The raw (entity-decoded) URL to validate.
+     * @return string|null The safe URL, or null if the scheme is dangerous.
+     */
+    public static function sanitizeUrl(string $url): ?string
+    {
+        $trimmed = trim($url);
+
+        // Empty URL — safe, render as empty link.
+        if ($trimmed === '') {
+            return '';
+        }
+
+        // Check for a scheme (scheme:...). Relative URLs have no scheme.
+        // Use a case-insensitive match for scheme:// or scheme: prefix.
+        if (preg_match('/^([a-zA-Z][a-zA-Z0-9+.\-]*):/i', $trimmed, $matches)) {
+            $scheme = strtolower($matches[1]);
+            $allowed = ['http', 'https', 'mailto', 'ftp'];
+
+            if (! in_array($scheme, $allowed, true)) {
+                // Dangerous scheme (javascript:, data:, vbscript:, etc.)
+                return null;
+            }
+        }
+
+        // Also check for scheme-less but dangerous patterns like
+        // "//evil.com" (protocol-relative) — allow but they're fine.
+        // And "&#x6a;avascript:" that decoded to "javascript:" is
+        // already caught above.
+
+        return $trimmed;
     }
 
     /**
@@ -82,17 +144,16 @@ final class BBCode
 
     /**
      * Render an ad-tracking redirect link. Wraps the destination URL
-     * in `adredir.php?id=…&amp;url=…` (rawurlencoded) and delegates
+     * in `adredir.php?id=…&url=…` (rawurlencoded) and delegates
      * to {@see url} for the actual anchor.
      *
-     * Pinned legacy quirk: the `&amp;` separator is HTML-encoded
-     * inline (not `&`). The legacy `formatAdUrl()` does the same —
-     * removing the encoding would double-encode when the surrounding
-     * HTML pipeline runs `htmlspecialchars()`. Don't "fix" it.
+     * BBCode::url() now HTML-escapes the href attribute, so the `&`
+     * separator is encoded to `&amp;` by url(). Callers must pass
+     * raw `&` (not `&amp;`) to avoid double-encoding.
      */
     public static function adUrl(int|string $adid, string $url, string $content, bool $newWindow = true): string
     {
-        return self::url('adredir.php?id='.$adid.'&amp;url='.rawurlencode($url), $newWindow, $content);
+        return self::url('adredir.php?id='.$adid.'&url='.rawurlencode($url), $newWindow, $content);
     }
 
     /**
@@ -129,11 +190,16 @@ final class BBCode
         if (empty($src)) {
             return '';
         }
+        // Escape src for HTML attribute and JS string contexts.
+        $escapedSrc = htmlspecialchars($src, ENT_QUOTES, 'UTF-8');
+        // For the JS string argument, escape single quotes and backslashes.
+        $jsSrc = addcslashes($src, "'\\");
+
         $resizerAttrs = $enableResizer
             ? " onload=\"Scale(this, $maxWidth, $maxHeight);\" data-zoomable "
             : '';
 
-        return "<img style=\"max-width: 100%\" id=\"$imgId\" alt=\"image\" src=\"$src\"".$resizerAttrs." onerror=\"handleImageError(this, '$src');\" />";
+        return "<img style=\"max-width: 100%\" id=\"$imgId\" alt=\"image\" src=\"$escapedSrc\"".$resizerAttrs." onerror=\"handleImageError(this, '$jsSrc');\" />";
     }
 
     /**

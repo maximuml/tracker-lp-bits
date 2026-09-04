@@ -15,6 +15,7 @@ use App\Services\WebAuthService;
 use App\Support\AuthCookie;
 use App\Support\Cache;
 use App\Support\Globals;
+use App\Support\Http;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Mail;
@@ -486,6 +487,7 @@ final class UsercpRepository extends BaseRepository
         $siteName = (string) app(Globals::class)->get('SITENAME', '');
         $siteEmail = (string) app(Globals::class)->get('SITEEMAIL', '');
         $baseUrl = (string) app(Globals::class)->get('BASEURL', '');
+        $scheme = Http::protocolPrefix(Url::isSecure());
 
         if ($changedemail === 1) {
             $sec = Token::randomHex(20);
@@ -503,9 +505,9 @@ final class UsercpRepository extends BaseRepository
                 .($lang['mail_change_email_four'] ?? '').$request->ip()
                 .($lang['mail_change_email_five'] ?? '')."\n\n"
                 .($lang['mail_change_email_six'] ?? '')
-                .'<b><a href="javascript:void(null)" onclick="window.open(\'http://'.$baseUrl.'/confirmemail.php/'.$user->id.'/'.$hash.'/'.$obemail.'\')">'.($lang['mail_here'] ?? '').'</a></b>'
+                .'<b><a href="javascript:void(null)" onclick="window.open(\''.$scheme.$baseUrl.'/confirmemail.php/'.$user->id.'/'.$hash.'/'.$obemail.'\')">'.($lang['mail_here'] ?? '').'</a></b>'
                 .($lang['mail_change_email_six_1'] ?? '').'<br />'."\n"
-                .'http://'.$baseUrl.'/confirmemail.php/'.$user->id.'/'.$hash.'/'.$obemail."\n\n"
+                .$scheme.$baseUrl.'/confirmemail.php/'.$user->id.'/'.$hash.'/'.$obemail."\n\n"
                 .($lang['mail_change_email_seven'] ?? '')."\n\n"
                 .'------'.($lang['mail_change_email_eight'] ?? '')."\n"
                 .$changeEmailNine;
@@ -578,6 +580,7 @@ final class UsercpRepository extends BaseRepository
         $siteName = (string) app(Globals::class)->get('SITENAME', '');
         $siteEmail = (string) app(Globals::class)->get('SITEEMAIL', '');
         $baseUrl = (string) app(Globals::class)->get('BASEURL', '');
+        $scheme = Http::protocolPrefix(Url::isSecure());
         $lang = (array) (app(Globals::class)->get('lang_usercp') ?? []);
 
         if ($disableEmailChange !== 'no' && $smtpType !== 'none' && $email !== '' && $email !== $user->email) {
@@ -602,9 +605,9 @@ final class UsercpRepository extends BaseRepository
                 .($lang['mail_change_email_four'] ?? '').$dto->ip
                 .($lang['mail_change_email_five'] ?? '')."\n\n"
                 .($lang['mail_change_email_six'] ?? '')
-                .'<b><a href="javascript:void(null)" onclick="window.open(\'http://'.$baseUrl.'/confirmemail.php/'.$user->id.'/'.$hash.'/'.$obemail.'\')">'.($lang['mail_here'] ?? '').'</a></b>'
+                .'<b><a href="javascript:void(null)" onclick="window.open(\''.$scheme.$baseUrl.'/confirmemail.php/'.$user->id.'/'.$hash.'/'.$obemail.'\')">'.($lang['mail_here'] ?? '').'</a></b>'
                 .($lang['mail_change_email_six_1'] ?? '').'<br />'."\n"
-                .'http://'.$baseUrl.'/confirmemail.php/'.$user->id.'/'.$hash.'/'.$obemail."\n\n"
+                .$scheme.$baseUrl.'/confirmemail.php/'.$user->id.'/'.$hash.'/'.$obemail."\n\n"
                 .($lang['mail_change_email_seven'] ?? '')."\n\n"
                 .'------'.($lang['mail_change_email_eight'] ?? '')."\n"
                 .($lang['mail_change_email_nine'] ?? '');

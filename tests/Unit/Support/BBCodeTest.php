@@ -14,6 +14,7 @@ class BBCodeTest extends TestCase
         // Pinned legacy contract: when no text is supplied, the
         // anchor text equals the URL. Single source of truth for
         // the `[url]https://…[/url]` BBCode shape.
+        // URLs are now HTML-escaped for attribute context.
         $this->assertSame(
             '<a href="https://example.com">https://example.com</a>',
             BBCode::url('https://example.com'),
@@ -26,8 +27,10 @@ class BBCodeTest extends TestCase
         // gate the `target="_blank"`. We pin the explicit-bool
         // contract; the legacy proxy is responsible for the loose
         // coercion at the call site.
+        // target="_blank" now includes rel="noopener noreferrer" for tabnabbing protection.
         $this->assertStringNotContainsString('target="_blank"', BBCode::url('u', false));
         $this->assertStringContainsString('target="_blank"', BBCode::url('u', true));
+        $this->assertStringContainsString('rel="noopener noreferrer"', BBCode::url('u', true));
     }
 
     public function test_url_class_attribute_is_emitted_when_non_empty(): void
@@ -54,8 +57,9 @@ class BBCodeTest extends TestCase
         // Pin the exact attribute order to keep diffs visible if
         // anyone ever rewrites this helper. The legacy contract is:
         //   <a CLASS href=URL TARGET>TEXT</a>
+        // target="_blank" now includes rel="noopener noreferrer".
         $this->assertSame(
-            '<a class="cls" href="u" target="_blank">t</a>',
+            '<a class="cls" href="u" target="_blank" rel="noopener noreferrer">t</a>',
             BBCode::url('u', true, 't', 'cls'),
         );
     }
@@ -64,9 +68,7 @@ class BBCodeTest extends TestCase
 
     public function test_ad_url_wraps_destination_in_adredir(): void
     {
-        // Pinned legacy quirk: the `&amp;` separator is HTML-encoded
-        // inline (NOT raw `&`). Removing it would double-encode
-        // when the surrounding pipeline runs htmlspecialchars().
+        // BBCode::url() now HTML-escapes the href, so `&` becomes `&amp;`.
         $html = BBCode::adUrl(42, 'https://example.com/foo?x=1', 'Click');
         $this->assertStringContainsString('adredir.php?id=42&amp;url=https%3A%2F%2Fexample.com%2Ffoo%3Fx%3D1', $html);
         $this->assertStringContainsString('>Click</a>', $html);
@@ -78,7 +80,8 @@ class BBCodeTest extends TestCase
     {
         // adUrl is documented as delegating to url() — pin that
         // the output really does match url() with the same args.
-        $manual = BBCode::url('adredir.php?id=7&amp;url='.rawurlencode('https://x.test'), true, 'go');
+        // adUrl now uses raw `&` (not `&amp;`) since url() escapes it.
+        $manual = BBCode::url('adredir.php?id=7&url='.rawurlencode('https://x.test'), true, 'go');
         $this->assertSame($manual, BBCode::adUrl(7, 'https://x.test', 'go'));
     }
 
@@ -446,5 +449,128 @@ class BBCodeTest extends TestCase
     public function test_strip_all_returns_empty_for_pure_bbcode_input(): void
     {
         $this->assertSame('', BBCode::stripAll('[b][/b]', []));
+    }
+
+    // ---------- security: XSS prevention ----------
+
+    public function test_url_rejects_javascript_scheme(): void
+    {
+        // javascript: URLs must not produce a clickable link.
+        $html = BBCode::url('javascript:alert(document.cookie)');
+        $this->assertStringNotContainsString('href="javascript:', $html);
+        $this->assertStringNotContainsString('<a ', $html);
+    }
+
+    public function test_url_rejects_data_scheme(): void
+    {
+        $html = BBCode::url('data:text/html,<script>alert(1)</script>');
+        $this->assertStringNotContainsString('href="data:', $html);
+        $this->assertStringNotContainsString('<a ', $html);
+    }
+
+    public function test_url_rejects_vbscript_scheme(): void
+    {
+        $html = BBCode::url('vbscript:msgbox(1)');
+        $this->assertStringNotContainsString('href="vbscript:', $html);
+        $this->assertStringNotContainsString('<a ', $html);
+    }
+
+    public function test_url_rejects_entity_encoded_javascript(): void
+    {
+        // Comment::format() runs htmlspecialchars() before parsing
+        // BBCode, so the URL arrives entity-encoded. The decoder
+        // must catch &#x6a;avascript: → javascript:.
+        $html = BBCode::url('&#x6a;avascript:alert(1)');
+        $this->assertStringNotContainsString('javascript:', $html);
+        $this->assertStringNotContainsString('<a ', $html);
+    }
+
+    public function test_url_allows_http_scheme(): void
+    {
+        $html = BBCode::url('http://example.com');
+        $this->assertStringContainsString('href="http://example.com"', $html);
+        $this->assertStringContainsString('<a ', $html);
+    }
+
+    public function test_url_allows_https_scheme(): void
+    {
+        $html = BBCode::url('https://example.com');
+        $this->assertStringContainsString('href="https://example.com"', $html);
+    }
+
+    public function test_url_allows_mailto_scheme(): void
+    {
+        $html = BBCode::url('mailto:user@example.com');
+        $this->assertStringContainsString('href="mailto:user@example.com"', $html);
+    }
+
+    public function test_url_allows_relative_url(): void
+    {
+        $html = BBCode::url('/torrents.php');
+        $this->assertStringContainsString('href="/torrents.php"', $html);
+    }
+
+    public function test_url_escapes_quotes_in_url(): void
+    {
+        // Attribute breakout attempt: quote in URL must be escaped.
+        $html = BBCode::url('https://example.com/" onmouseover="alert(1)');
+        $this->assertStringNotContainsString('" onmouseover="alert(1)"', $html);
+        $this->assertStringContainsString('&quot;', $html);
+    }
+
+    public function test_url_escapes_link_text(): void
+    {
+        $html = BBCode::url('https://example.com', false, '<script>alert(1)</script>');
+        $this->assertStringNotContainsString('<script>', $html);
+        $this->assertStringContainsString('&lt;script&gt;', $html);
+    }
+
+    public function test_url_includes_rel_noopener_for_target_blank(): void
+    {
+        $html = BBCode::url('https://example.com', true);
+        $this->assertStringContainsString('rel="noopener noreferrer"', $html);
+    }
+
+    public function test_url_no_rel_when_not_target_blank(): void
+    {
+        $html = BBCode::url('https://example.com', false);
+        $this->assertStringNotContainsString('rel="noopener noreferrer"', $html);
+    }
+
+    public function test_sanitize_url_allows_safe_schemes(): void
+    {
+        $this->assertSame('http://example.com', BBCode::sanitizeUrl('http://example.com'));
+        $this->assertSame('https://example.com', BBCode::sanitizeUrl('https://example.com'));
+        $this->assertSame('mailto:a@b.com', BBCode::sanitizeUrl('mailto:a@b.com'));
+        $this->assertSame('ftp://example.com', BBCode::sanitizeUrl('ftp://example.com'));
+    }
+
+    public function test_sanitize_url_allows_relative_urls(): void
+    {
+        $this->assertSame('/path', BBCode::sanitizeUrl('/path'));
+        $this->assertSame('page.php', BBCode::sanitizeUrl('page.php'));
+        $this->assertSame('?foo=bar', BBCode::sanitizeUrl('?foo=bar'));
+    }
+
+    public function test_sanitize_url_rejects_dangerous_schemes(): void
+    {
+        $this->assertNull(BBCode::sanitizeUrl('javascript:alert(1)'));
+        $this->assertNull(BBCode::sanitizeUrl('data:text/html,<script>'));
+        $this->assertNull(BBCode::sanitizeUrl('vbscript:msgbox(1)'));
+        $this->assertNull(BBCode::sanitizeUrl('file:///etc/passwd'));
+        $this->assertNull(BBCode::sanitizeUrl('blob:https://example.com/uuid'));
+    }
+
+    public function test_sanitize_url_allows_empty_string(): void
+    {
+        $this->assertSame('', BBCode::sanitizeUrl(''));
+    }
+
+    public function test_img_escapes_src_in_attribute(): void
+    {
+        // src with quotes should be escaped in the HTML attribute.
+        $html = BBCode::img('pic"onerror="alert(1)', false, 800, 600);
+        $this->assertStringNotContainsString('"onerror="alert(1)"', $html);
+        $this->assertStringContainsString('&quot;', $html);
     }
 }

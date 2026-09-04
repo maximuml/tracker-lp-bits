@@ -398,8 +398,7 @@ class TorrentRepository extends BaseRepository
         if ($peer->downloaded) {
             $ratio = floor(($peer->uploaded / $peer->downloaded) * 1000) / 1000;
         } elseif ($peer->uploaded) {
-            // @todo 读语言文件
-            $ratio = '无限';
+            $ratio = 'Infinity';
         } else {
             $ratio = '---';
         }

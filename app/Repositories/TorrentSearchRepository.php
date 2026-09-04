@@ -291,6 +291,9 @@ class TorrentSearchRepository
             Log::writeWithContext('User '.$CURUSER['username'].','.$CURUSER['ip'].' is hacking spstate field in '.Input::serverValue('SCRIPT_NAME', ''), 'mod');
         }
         $globalSpecialState = Promotion::globalSpecialState();
+        // Pass globalSpecialState to MeiliSearch so it can apply the same
+        // sp_state filtering logic as the SQL path (see getFilters).
+        $searchParams['global_special_state'] = $globalSpecialState;
         if ($special_state == 0) {	// all
             $addparam .= 'spstate=0&';
         } elseif ($special_state == 1) {	// normal

@@ -11,6 +11,7 @@ use App\Http\Resources\PollResource;
 use App\Models\Poll;
 use App\Repositories\IndexRepository;
 use App\Repositories\PollRepository;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
 use App\Support\Pagination;
@@ -233,7 +234,7 @@ class PollController extends LegacyController
             return $this->fail([], 'Poll not found');
         }
 
-        if (empty($poll->getAttribute("option{$choice}"))) {
+        if ($choice !== 255 && empty($poll->getAttribute("option{$choice}"))) {
             return $this->fail([], 'Invalid poll choice');
         }
 
@@ -242,6 +243,14 @@ class PollController extends LegacyController
         }
 
         app(IndexRepository::class)->recordPollVote($pollId, $userId, $choice);
+
+        // Invalidate legacy poll cache so the index page shows fresh results
+        // after an API vote — mirrors IndexController::handlePollVote().
+        $cache = app(LegacyRedisCache::class);
+        if ($cache !== null) {
+            $cache->delete_value('current_poll_content');
+            $cache->delete_value('current_poll_result', true);
+        }
 
         return $this->success(['success' => true], 'Vote recorded');
     }

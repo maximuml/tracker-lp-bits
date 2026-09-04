@@ -1,0 +1,103 @@
+# Semgrep configuration for tracker-lp-bits
+#
+# Uses the PHP and Laravel security rulesets from the Semgrep
+# Registry plus a few custom rules tailored to this codebase.
+#
+# Run locally:
+#   semgrep ci --config .semgrep.yml
+#
+# CI runs this via the semgrep/semgrep-action in .github/workflows/ci.yml.
+
+rules:
+  # ---- PHP security rulesets ----
+  - id: php-security
+    paths:
+      include:
+        - "app/**/*.php"
+        - "routes/**/*.php"
+        - "database/migrations/**/*.php"
+    # Inherit the community PHP security rules
+    # (SQL injection, XSS, file inclusion, command injection, etc.)
+    # This is a meta-rule that pulls from the registry.
+    message: "PHP security rule"
+
+  # ---- Custom Laravel-specific rules ----
+
+  # Rule 1: Detect raw SQL with string interpolation (SQL injection risk)
+  - id: laravel-raw-sql-interpolation
+    languages: [php]
+    severity: ERROR
+    message: "Raw SQL query with variable interpolation — potential SQL injection. Use parameter binding."
+    patterns:
+      - pattern: DB::select(...)
+      - pattern-not: DB::select("...")
+      - pattern-either:
+          - pattern-regex: 'DB::select\s*\(\s*"[^"]*\$'
+          - pattern-regex: "DB::select\\s*\\(\\s*'[^']*\\$"
+    paths:
+      include:
+        - "app/**/*.php"
+      exclude:
+        - "app/Support/Install/**"
+
+  # Rule 2: Detect $request->all() in controllers (should use $request->validated())
+  - id: laravel-request-all-in-controller
+    languages: [php]
+    severity: WARNING
+    message: "$request->all() in controller — use $request->validated() to restrict input fields."
+    pattern: $REQUEST->all()
+    paths:
+      include:
+        - "app/Http/Controllers/**/*.php"
+
+  # Rule 3: Detect unescaped output in Blade (potential XSS)
+  - id: laravel-unescaped-blade-output
+    languages: [php]
+    severity: WARNING
+    message: "Unescaped Blade output {!! !!} — ensure the content is sanitized."
+    pattern-regex: '\{!!.*\$.*!!\}'
+    paths:
+      include:
+        - "resources/views/**/*.blade.php"
+
+  # Rule 4: Detect hardcoded secrets/credentials
+  - id: hardcoded-secret
+    languages: [php]
+    severity: ERROR
+    message: "Hardcoded secret detected — use environment variables or config."
+    pattern-either:
+      - pattern-regex: '(password|secret|api_key|token)\s*=\s*["\x27][^"\x27]{8,}["\x27]'
+    paths:
+      include:
+        - "app/**/*.php"
+        - "config/**/*.php"
+      exclude:
+        - "config/**/*.php"
+        - "**/Test*.php"
+        - "tests/**/*.php"
+
+  # Rule 5: Detect md5() usage for security-sensitive operations
+  - id: md5-for-security
+    languages: [php]
+    severity: WARNING
+    message: "md5() used in security context — use hash_hmac('sha256', ...) or password_hash()."
+    pattern: md5(...)
+    paths:
+      include:
+        - "app/Services/**/*.php"
+        - "app/Http/Controllers/**/*.php"
+        - "app/Repositories/**/*.php"
+      exclude:
+        - "tests/**/*.php"
+
+  # Rule 6: Detect mt_rand() for security-sensitive randomness
+  - id: mt-rand-for-security
+    languages: [php]
+    severity: WARNING
+    message: "mt_rand() is not CSPRNG — use random_int() or random_bytes() for security tokens."
+    pattern: mt_rand(...)
+    paths:
+      include:
+        - "app/**/*.php"
+      exclude:
+        - "tests/**/*.php"

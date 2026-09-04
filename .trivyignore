@@ -1,0 +1,14 @@
+# Trivy ignore file — CVE IDs listed here are skipped during scans.
+#
+# Format: one CVE ID per line. Comments start with #.
+# Each entry MUST have an expiry date comment on the next line:
+#   CVE-XXXX-XXXXX
+#   # expires: 2026-12-31 — reason: <short explanation>
+#
+# Review this file monthly. Expired entries should be removed
+# once the upstream package is updated or the vulnerability is
+# no longer applicable.
+#
+# Example:
+# CVE-2024-12345
+# # expires: 2026-12-31 — reason: no fix available for php-8.5-alpine yet

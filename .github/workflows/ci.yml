@@ -336,7 +336,7 @@ jobs:
         uses: codecov/codecov-action@a99c28d3f0da835de33ff2feb2e15691c7b9641f # v7
         with:
           files: ./coverage.xml
-          fail_ci_if_error: false
+          fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Upload HTML coverage artifact
@@ -488,6 +488,48 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  semgrep:
+    name: Semgrep static analysis
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Run Semgrep
+        uses: semgrep/semgrep-action@v1
+        with:
+          config: .semgrep.yml
+          generate-sarif: true
+          sarif-output: semgrep-results.sarif
+
+      - name: Upload Semgrep results to GitHub Security
+        uses: github/codeql-action/upload-sarif@6f5948dfacef28e207b48d0905cf90c03365536d # v3
+        if: always()
+        with:
+          sarif_file: semgrep-results.sarif
+
+  dependency-review:
+    name: Dependency review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Dependency review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: moderate
+          comment-summary-in-pr: on-failure
+
   container-scan:
     name: Container image scan (Trivy)
     runs-on: ubuntu-latest
@@ -518,7 +560,9 @@ jobs:
           format: sarif
           output: trivy-php-results.sarif
           severity: CRITICAL,HIGH
-          exit-code: '0'
+          exit-code: '1'
+          ignore-unfixed: true
+          trivyignores: .trivyignore
 
       - name: Run Trivy on OpenResty image
         uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
@@ -527,7 +571,9 @@ jobs:
           format: sarif
           output: trivy-openresty-results.sarif
           severity: CRITICAL,HIGH
-          exit-code: '0'
+          exit-code: '1'
+          ignore-unfixed: true
+          trivyignores: .trivyignore
 
       - name: Upload Trivy scan results to GitHub Security
         uses: github/codeql-action/upload-sarif@6f5948dfacef28e207b48d0905cf90c03365536d # v3

@@ -1,0 +1,28 @@
+{
+    "$schema": "vendor/infection/infection/resources/schema.json",
+    "source": {
+        "directories": [
+            "app/Http/Controllers/AuthenticateController.php",
+            "app/Http/Controllers/TokenController.php",
+            "app/Services/Bonus/",
+            "app/Services/Tracker/"
+        ]
+    },
+    "logs": {
+        "text": "infection.log",
+        "summary": "infection-summary.log"
+    },
+    "mutators": {
+        "global-ignore": [],
+        "@default": true
+    },
+    "testFramework": "phpunit",
+    "bootstrap": "vendor/autoload.php",
+    "phpUnit": {
+        "configPath": "phpunit.xml"
+    },
+    "minMsi": 40,
+    "minCoveredMsi": 50,
+    "threads": 4,
+    "timeout": 10
+}

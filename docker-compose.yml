@@ -127,7 +127,8 @@ services:
       - appnet
 
   redis:
-    image: redis:alpine
+    # T-13: Digest-pinned for reproducible builds. Update via Renovate.
+    image: redis:alpine@sha256:9c3ecc609a8087c0f11c494fefaf37a8f7bf9a967631d4a0da8967a9810be354
     container_name: nexusphp-redis
     command: redis-server --requirepass ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
     volumes:
@@ -147,7 +148,8 @@ services:
       - appnet
 
   mysql:
-    image: mysql:9
+    # T-13: Digest-pinned for reproducible builds. Update via Renovate.
+    image: mysql:9@sha256:313c76f59c62376fd26b78fc85169902ef10134996bbfc31200eb9c2ed7e802e
     container_name: nexusphp-mysql
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
@@ -171,7 +173,8 @@ services:
       - appnet
 
   phpmyadmin:
-    image: phpmyadmin/phpmyadmin
+    # T-13: Digest-pinned for reproducible builds. Update via Renovate.
+    image: phpmyadmin/phpmyadmin@sha256:e66b1f5a8c5852cc6f7143589f34de435a0f5057fa3b012d6fb4705b9127b46b
     container_name: nexusphp-phpmyadmin
     profiles:
       - debug
@@ -189,7 +192,8 @@ services:
       - appnet
 
   meilisearch:
-    image: getmeili/meilisearch:v1.53
+    # T-13: Digest-pinned for reproducible builds. Update via Renovate.
+    image: getmeili/meilisearch:v1.53@sha256:b4a0a1f9545ae1dd8e12a750fa4416ef3f4b421ed0758c430d0c46182ad233ee
     container_name: nexusphp-meilisearch
     environment:
       MEILI_NO_ANALYTICS: "true"

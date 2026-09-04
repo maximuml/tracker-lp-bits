@@ -1,5 +1,6 @@
 # 👷‍♀️ 第一阶段：构建阶段，包含所有开发依赖
-FROM php:8.5-fpm AS builder
+# T-13: Digest-pinned for reproducible builds. Update via Renovate.
+FROM php:8.5-fpm@sha256:fd8a1a99dd0239c884d7e95c84427b7e2ff9969fada948a9013f5ad826cbeba2 AS builder
 
 # 安装依赖
 RUN apt-get update && apt-get install -y \
@@ -35,13 +36,13 @@ RUN apt-get update && apt-get install -y \
 RUN curl -Is https://pecl.php.net | head -n 1 | grep "200" \
     || (echo "❌ pecl.php.net unreachable, aborting build." && exit 1)
 
-# 安装 redis 扩展
+# 安装 redis 扩展 (pinned version for reproducibility)
 RUN pecl channel-update pecl.php.net \
-    && pecl install redis \
+    && pecl install redis-6.3.0 \
     && docker-php-ext-enable redis
 
 # 👨‍🍳 第二阶段：运行阶段，仅包含必要运行环境
-FROM php:8.5-fpm
+FROM php:8.5-fpm@sha256:fd8a1a99dd0239c884d7e95c84427b7e2ff9969fada948a9013f5ad826cbeba2
 
 # 安装运行所需依赖（无需 dev 工具）
 RUN apt-get update && apt-get install -y \

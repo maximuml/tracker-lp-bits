@@ -1,0 +1,53 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", "docker:pinDigests", ":semanticCommits"],
+  "labels": ["dependencies", "renovate"],
+  "schedule": ["before 6am on Monday"],
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 2,
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "labels": ["security"]
+  },
+  "packageRules": [
+    {
+      "description": "Group PHP base image updates",
+      "matchPackagePatterns": ["^php:"],
+      "groupName": "PHP base image",
+      "pinDigests": true
+    },
+    {
+      "description": "Group Docker infrastructure images",
+      "matchPackagePatterns": ["^redis:", "^mysql:", "^openresty/", "^getmeili/", "^phpmyadmin/"],
+      "groupName": "Docker infrastructure",
+      "pinDigests": true
+    },
+    {
+      "description": "Group build tool images",
+      "matchPackagePatterns": ["^composer:", "^node:"],
+      "groupName": "Build tools",
+      "pinDigests": true
+    },
+    {
+      "description": "Pin PECL redis extension in Dockerfiles",
+      "matchManagers": ["regex"],
+      "matchPackagePatterns": ["redis-"],
+      "groupName": "PECL extensions"
+    }
+  ],
+  "regexManagers": [
+    {
+      "description": "PECL redis version in Dockerfiles",
+      "fileMatch": ["^\\.docker/.*Dockerfile.*$"],
+      "matchStrings": ["pecl install redis-(?<currentValue>[0-9.]+)"],
+      "depNameTemplate": "pecl/redis",
+      "datasourceTemplate": "custom.pecl"
+    }
+  ],
+  "customDatasources": {
+    "pecl": {
+      "defaultRegistryUrlTemplate": "https://pecl.php.net/rest/r/redis/allreleases.xml",
+      "format": "xml"
+    }
+  }
+}

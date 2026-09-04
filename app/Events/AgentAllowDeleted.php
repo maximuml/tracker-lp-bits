@@ -7,7 +7,6 @@ namespace App\Events;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
@@ -15,16 +14,19 @@ class AgentAllowDeleted
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public ?Model $model = null;
+    /**
+     * @var array<string, mixed>
+     */
+    public ?array $data = null;
 
     /**
      * Create a new event instance.
      *
-     * @return void
+     * @param  array<string, mixed>  $data
      */
-    public function __construct(Model $model)
+    public function __construct(array $data)
     {
-        $this->model = $model;
+        $this->data = $data;
     }
 
     /**

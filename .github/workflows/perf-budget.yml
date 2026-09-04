@@ -104,13 +104,16 @@ jobs:
           # Final check
           curl -sfL http://127.0.0.1:80/health/live || (echo "::error::OpenResty not responding" && exit 1)
 
-      - name: Extract passkey for tracker tests
-        id: passkey
+      - name: Extract passkey and info_hash for tracker tests
+        id: tracker-creds
         run: |
-          # T-17: Extract passkey from perf_user_1 for announce/scrape tests
+          # T-17: Extract passkey from perf_user_1 and info_hash from perf-torrent-1
           PASSKEY=$(docker compose exec -T php php artisan tinker --execute='echo App\Models\User::where("username","perf_user_1")->value("passkey") ?? "";' 2>/dev/null | tr -d '[:space:]')
+          INFO_HASH=$(docker compose exec -T php php artisan tinker --execute='echo App\Models\Torrent::where("name","perf-torrent-1")->value("info_hash") ?? "";' 2>/dev/null | tr -d '[:space:]')
           echo "Extracted passkey: ${PASSKEY:0:8}..."
+          echo "Extracted info_hash: ${INFO_HASH:0:8}..."
           echo "passkey=$PASSKEY" >> "$GITHUB_OUTPUT"
+          echo "info_hash=$INFO_HASH" >> "$GITHUB_OUTPUT"
 
       - name: Run k6 performance baseline (web UI)
         run: |
@@ -122,5 +125,6 @@ jobs:
       - name: Run k6 tracker load test (announce + scrape)
         run: |
           k6 run --env BASE_URL=http://127.0.0.1:80 \
-            --env PASSKEY=${{ steps.passkey.outputs.passkey }} \
+            --env PASSKEY=${{ steps.tracker-creds.outputs.passkey }} \
+            --env INFO_HASH=${{ steps.tracker-creds.outputs.info_hash }} \
             tests/Performance/announce.js

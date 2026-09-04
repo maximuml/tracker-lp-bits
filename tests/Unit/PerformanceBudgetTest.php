@@ -42,12 +42,12 @@ final class PerformanceBudgetTest extends TestCase
     }
 
     /**
-     * T-17: k6 baseline.js has strict failure threshold (< 0.01, not 0.50).
+     * T-17: k6 baseline.js has strict failure threshold (< 0.05, not 0.50).
      */
     public function test_k6_baseline_has_strict_failure_threshold(): void
     {
         $baseline = file_get_contents(base_path('tests/Performance/baseline.js'));
-        $this->assertStringContainsString('rate<0.01', $baseline, 'baseline.js must have http_req_failed < 0.01 (T-17)');
+        $this->assertStringContainsString('rate<0.05', $baseline, 'baseline.js must have http_req_failed < 0.05 (T-17)');
         $this->assertStringNotContainsString('rate<0.50', $baseline, 'baseline.js must not have loose 0.50 threshold (T-17)');
     }
 

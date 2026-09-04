@@ -326,35 +326,42 @@ jobs:
       - name: Run PHPUnit Feature with coverage
         run: DB_DATABASE=nexusphp_feature_testing vendor/bin/phpunit --testsuite Feature --coverage-clover=coverage-feature.xml --coverage-html=coverage-html
 
-      - name: Merge Clover coverage reports
-        run: |
-          # Merge Unit and Feature Clover reports into a single file
-          # Codecov accepts multiple files, but a single merged file is simpler
-          php -r "
-          \$unit = simplexml_load_file('coverage-unit.xml');
-          \$feature = simplexml_load_file('coverage-feature.xml');
-          if (\$unit === false || \$feature === false) {
-            fwrite(STDERR, 'Failed to load Clover XML files' . PHP_EOL);
-            exit(1);
-          }
-          // Merge project nodes from feature into unit
-          foreach (\$feature->project as \$project) {
-            \$unit->addChild('project', (string) \$project);
-          }
-          \$unit->asXML('coverage.xml');
-          echo 'Merged coverage.xml created' . PHP_EOL;
-          "
-
-      - name: Upload coverage to Codecov
+      - name: Upload coverage to Codecov (Unit + Feature flags)
         uses: codecov/codecov-action@a99c28d3f0da835de33ff2feb2e15691c7b9641f # v7
         with:
-          files: ./coverage.xml
-          # Keep non-blocking until CODECOV_TOKEN secret is configured.
-          # T-12 set this to true, but tokenless uploads are rejected by
-          # Codecov, causing CI failures. Revert to false until the secret
-          # is added in repo settings.
+          files: ./coverage-unit.xml,./coverage-feature.xml
+          flags: unit,feature
+          # T-16: Patch coverage target — 60% of new/changed lines must
+          # be covered. Codecov enforces this server-side when configured
+          # in codecov.yml. The token is needed for patch coverage to work.
           fail_ci_if_error: false
           token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Minimum coverage gate (Unit ≥ 35%)
+        # T-16: Local minimum coverage gate — fails CI if Unit test
+        # coverage drops below 35%. This is a floor, not a ceiling:
+        # the goal is to prevent regressions, not to enforce a high
+        # bar immediately. Raise gradually as coverage improves.
+        # Uses PHPUnit's --coverage-text output to extract the percentage.
+        run: |
+          DB_DATABASE=nexusphp_unit_testing vendor/bin/phpunit \
+            --testsuite Unit \
+            --coverage-text=php://stdout \
+            --no-coverage-html \
+            > /tmp/coverage-output.txt 2>&1 || true
+          # Extract the Lines percentage from the Code Coverage report
+          COVERAGE=$(grep -oP 'Lines:\s+\K[0-9.]+' /tmp/coverage-output.txt | head -1)
+          if [ -z "$COVERAGE" ]; then
+            echo "::warning::Could not parse coverage percentage from output"
+            exit 0
+          fi
+          THRESHOLD=35
+          echo "Unit coverage: ${COVERAGE}% (threshold: ${THRESHOLD}%)"
+          if (( $(echo "$COVERAGE < $THRESHOLD" | bc -l) )); then
+            echo "::error::Unit coverage ${COVERAGE}% is below threshold ${THRESHOLD}%"
+            exit 1
+          fi
+          echo "Coverage gate passed."
 
       - name: Upload HTML coverage artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -718,3 +725,51 @@ jobs:
           if [ -f composer-sbom.json ]; then
             cosign attest --yes --predicate composer-sbom.json --type cyclonedx nexusphp_php:latest
           fi
+
+  infection:
+    name: Mutation testing (Infection)
+    runs-on: ubuntu-latest
+    needs: [coverage]
+    # T-16: Mutation testing for critical paths: Auth, Token, Bonus, Tracker.
+    # Runs only on push to php8 (not PRs) to keep PR CI fast.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/php8'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@b604ade2a87db23f8871b7182e69ec5e75effb45 # v2
+        with:
+          php-version: '8.5'
+          extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, pdo_mysql, redis, sqlite3, xml, zip
+          coverage: xdebug
+          ini-values: memory_limit=2G
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Run Infection (Auth, Token, Bonus, Tracker)
+        run: |
+          vendor/bin/infection \
+            --configuration=infection.json5 \
+            --threads=4 \
+            --min-msi=40 \
+            --min-covered-msi=50 \
+            --no-progress \
+            --logger-github
+
+      - name: Upload Infection logs
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: infection-logs
+          path: |
+            infection.log
+            infection-summary.log
+          retention-days: 14

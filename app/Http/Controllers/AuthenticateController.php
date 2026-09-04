@@ -14,6 +14,7 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Repositories\AuthenticateRepository;
 use App\Repositories\UserRepository;
+use App\Services\ThirdPartyAuthService;
 use App\Support\AuthCookie;
 use App\Support\Config\SiteConfig;
 use App\Support\Logger;
@@ -32,10 +33,16 @@ class AuthenticateController extends Controller
 
     private UserRepository $userRepository;
 
-    public function __construct(AuthenticateRepository $repository, UserRepository $userRepository)
-    {
+    private ThirdPartyAuthService $thirdPartyAuth;
+
+    public function __construct(
+        AuthenticateRepository $repository,
+        UserRepository $userRepository,
+        ThirdPartyAuthService $thirdPartyAuth,
+    ) {
         $this->repository = $repository;
         $this->userRepository = $userRepository;
+        $this->thirdPartyAuth = $thirdPartyAuth;
     }
 
     /**
@@ -135,7 +142,7 @@ class AuthenticateController extends Controller
     public function nasToolsApprove(NasToolsApproveRequest $request): array
     {
         try {
-            $user = $this->repository->nasToolsApprove($request->data);
+            $user = $this->resolveNasToolsUser($request);
             $resource = new UserResource($user);
 
             // temporarily compatible
@@ -146,6 +153,39 @@ class AuthenticateController extends Controller
 
             return $this->fail([], $msg);
         }
+    }
+
+    /**
+     * Resolve NAS Tools user — tries v2 first, then legacy encrypted JSON.
+     */
+    private function resolveNasToolsUser(NasToolsApproveRequest $request): User
+    {
+        // v2 protocol: version=v2 with HMAC-SHA256
+        if ($request->version === ThirdPartyAuthService::VERSION) {
+            $user = $this->thirdPartyAuth->verifyV2(
+                ThirdPartyAuthService::PROVIDER_NAS_TOOLS,
+                (int) $request->uid,
+                (string) $request->passkey,
+                (int) $request->timestamp,
+                (string) $request->nonce,
+                (string) $request->signature,
+                (string) config('nexus.nas_tools_key'),
+            );
+            if ($user instanceof User) {
+                return $user;
+            }
+            throw new \InvalidArgumentException('Invalid signature or credentials.');
+        }
+
+        // Legacy: encrypted JSON
+        $user = $this->thirdPartyAuth->verifyLegacyNasTools(
+            (string) $request->data,
+            (string) config('nexus.nas_tools_key'),
+        );
+        if ($user instanceof User) {
+            return $user;
+        }
+        throw new \InvalidArgumentException('Invalid uid or passkey.');
     }
 
     /**
@@ -163,7 +203,7 @@ class AuthenticateController extends Controller
     public function iyuuApprove(IyuuApproveRequest $request): JsonResponse
     {
         try {
-            $this->repository->iyuuApprove($request->token, $request->id, $request->verity);
+            $this->resolveIyuuUser($request);
 
             return response()->json(['success' => true]);
         } catch (\Exception $exception) {
@@ -172,12 +212,47 @@ class AuthenticateController extends Controller
     }
 
     /**
+     * Resolve IYUU user — tries v2 first, then legacy MD5.
+     */
+    private function resolveIyuuUser(IyuuApproveRequest $request): User
+    {
+        // v2 protocol: version=v2 with HMAC-SHA256
+        if ($request->version === ThirdPartyAuthService::VERSION) {
+            $user = $this->thirdPartyAuth->verifyV2(
+                ThirdPartyAuthService::PROVIDER_IYUU,
+                (int) $request->uid,
+                (string) $request->passkey,
+                (int) $request->timestamp,
+                (string) $request->nonce,
+                (string) $request->signature,
+                (string) config('nexus.iyuu_secret'),
+            );
+            if ($user instanceof User) {
+                return $user;
+            }
+            throw new \InvalidArgumentException('Invalid signature or credentials.');
+        }
+
+        // Legacy: MD5-based
+        $user = $this->thirdPartyAuth->verifyLegacyIyuu(
+            (string) $request->token,
+            (int) $request->id,
+            (string) $request->verity,
+            (string) config('nexus.iyuu_secret'),
+        );
+        if ($user instanceof User) {
+            return $user;
+        }
+        throw new \InvalidArgumentException('Invalid uid or passkey');
+    }
+
+    /**
      * @return array<string, mixed>
      */
     public function ammdsApprove(AmmdsApproveRequest $request): array
     {
         try {
-            $user = $this->repository->ammdsApprove($request);
+            $user = $this->resolveAmmdsUser($request);
             $resource = new UserResource($user);
 
             // temporarily compatible
@@ -188,6 +263,39 @@ class AuthenticateController extends Controller
 
             return $this->fail([], $msg);
         }
+    }
+
+    /**
+     * Resolve AMMDS user — tries v2 first, then legacy HMAC-SHA256 (ms timestamp).
+     */
+    private function resolveAmmdsUser(AmmdsApproveRequest $request): User
+    {
+        // v2 protocol: version=v2 with HMAC-SHA256 (seconds timestamp)
+        if ($request->version === ThirdPartyAuthService::VERSION) {
+            $user = $this->thirdPartyAuth->verifyV2(
+                ThirdPartyAuthService::PROVIDER_AMMDS,
+                (int) $request->uid,
+                (string) $request->passkey,
+                (int) $request->timestamp,
+                (string) $request->nonce,
+                (string) $request->signature,
+                (string) config('nexus.ammds_secret'),
+            );
+            if ($user instanceof User) {
+                return $user;
+            }
+            throw new \InvalidArgumentException('Invalid signature or credentials.');
+        }
+
+        // Legacy: HMAC-SHA256 with millisecond timestamp
+        $user = $this->thirdPartyAuth->verifyLegacyAmmds(
+            $request,
+            (string) config('nexus.ammds_secret'),
+        );
+        if ($user instanceof User) {
+            return $user;
+        }
+        throw new \InvalidArgumentException('Invalid signature.');
     }
 
     /**

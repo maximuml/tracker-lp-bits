@@ -21,6 +21,10 @@ jobs:
     name: Login to demo and Deploy
     runs-on: ubuntu-latest
     environment: production
+    # Skip when demo secrets are not configured — avoids red check on
+    # forks and repos without a demo server. T-15 will switch this to
+    # workflow_dispatch only.
+    if: ${{ secrets.DEMO_SSH_KEY != '' && secrets.DEMO_SSH_HOST != '' }}
     steps:
     # Prepare
     - name: Prepare user key

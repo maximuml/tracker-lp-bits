@@ -86,8 +86,9 @@ jobs:
           docker compose up -d --wait mysql redis
           # Start php (vendor/ already populated on host via bind-mount)
           docker compose up -d --wait php
-          # Run migrations + seed
+          # Run migrations + seed (base seeders + T-17 perf dataset)
           docker compose exec -T php php artisan migrate:fresh --seed --force
+          docker compose exec -T php php artisan db:seed --class=PerformanceTestDatasetSeeder --force
           docker compose exec -T php php artisan storage:link --force
           # Start openresty
           docker compose up -d openresty
@@ -103,6 +104,23 @@ jobs:
           # Final check
           curl -sfL http://127.0.0.1:80/health/live || (echo "::error::OpenResty not responding" && exit 1)
 
-      - name: Run k6 performance baseline
+      - name: Extract passkey for tracker tests
+        id: passkey
         run: |
-          k6 run --env BASE_URL=http://127.0.0.1:80 tests/Performance/baseline.js
+          # T-17: Extract passkey from perf_user_1 for announce/scrape tests
+          PASSKEY=$(docker compose exec -T php php artisan tinker --execute='echo App\Models\User::where("username","perf_user_1")->value("passkey") ?? "";' 2>/dev/null | tr -d '[:space:]')
+          echo "Extracted passkey: ${PASSKEY:0:8}..."
+          echo "passkey=$PASSKEY" >> "$GITHUB_OUTPUT"
+
+      - name: Run k6 performance baseline (web UI)
+        run: |
+          k6 run --env BASE_URL=http://127.0.0.1:80 \
+            --env USERNAME=perf_user_1 \
+            --env PASSWORD=PerfTest2026! \
+            tests/Performance/baseline.js
+
+      - name: Run k6 tracker load test (announce + scrape)
+        run: |
+          k6 run --env BASE_URL=http://127.0.0.1:80 \
+            --env PASSKEY=${{ steps.passkey.outputs.passkey }} \
+            tests/Performance/announce.js

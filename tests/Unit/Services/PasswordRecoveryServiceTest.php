@@ -7,6 +7,7 @@ namespace Tests\Unit\Services;
 use App\Exceptions\AuthenticationException;
 use App\Models\User;
 use App\Services\PasswordRecoveryService;
+use App\Services\SecureTokenService;
 use App\Services\WebAuthService;
 use App\Support\Token;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -49,7 +50,7 @@ final class PasswordRecoveryServiceTest extends TestCase
         $authService->shouldReceive('recordFailedAttempt')->byDefault();
         $this->authService = $authService;
 
-        $this->service = new PasswordRecoveryService($this->authService);
+        $this->service = new PasswordRecoveryService($this->authService, app(SecureTokenService::class));
     }
 
     protected function tearDown(): void

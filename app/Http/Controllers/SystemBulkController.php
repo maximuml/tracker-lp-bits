@@ -193,8 +193,9 @@ class SystemBulkController extends LegacyController
             $hashRecord = null;
             $timeNow = (int) app(Globals::class)->get('TIMENOW', time());
             if ($hashPost === 'permanent') {
-                $inviter = User::query()->findOrFail($currentUserId);
-                $hash = md5(mt_rand(1, 10000).$inviter->username.$timeNow.$inviter->passhash);
+                // Use CSPRNG for invite token generation (T-08)
+                // Legacy: md5(mt_rand(1, 10000).username.time.passhash) — not CSPRNG, leaked passhash
+                $hash = bin2hex(random_bytes(32));
             } else {
                 $hashRecord = Invite::query()->where('inviter', $currentUserId)->where('hash', $hashPost)->first();
                 if (! $hashRecord instanceof Invite) {

@@ -28,8 +28,11 @@ class PasswordRecoveryService
 
     private const RECOVER_CACHE_TTL = 3600;
 
+    private const RECOVERY_TOKEN_TABLE = 'password_recovery_tokens';
+
     public function __construct(
         private WebAuthService $authService,
+        private SecureTokenService $tokenService,
     ) {}
 
     /**
@@ -80,11 +83,21 @@ class PasswordRecoveryService
 
         Cache::clearUser((int) $user['id'], '');
 
-        $hash = md5($sec.$email.$user['passhash'].$sec);
+        // T-08: Generate a CSPRNG recovery token and store its SHA-256 digest.
+        // Legacy: md5(editsecret + email + passhash + editsecret) — leaked passhash, md5
+        $recoveryToken = $this->tokenService->generate();
+        $this->tokenService->store(self::RECOVERY_TOKEN_TABLE, $recoveryToken, [
+            'user_id' => (int) $user['id'],
+            'ip' => $ip,
+        ]);
 
+        // Also keep the legacy cache-based token for backward compatibility
+        // during the transition period. Old links will expire from cache naturally.
+        $hash = md5($sec.$email.$user['passhash'].$sec);
         CacheFacade::put("recover:$hash", now()->toDateTimeString(), self::RECOVER_CACHE_TTL);
 
-        $this->sendResetRequestEmail($email, (int) $user['id'], $hash, $ip, $langRecover);
+        // Send the new secure token in the reset URL
+        $this->sendResetRequestEmail($email, (int) $user['id'], $recoveryToken, $ip, $langRecover);
     }
 
     /**
@@ -94,6 +107,26 @@ class PasswordRecoveryService
      */
     public function resetPassword(int $id, string $md5, array $langRecover): string
     {
+        // T-08: Try the new secure token first, then fall back to legacy.
+        $tokenRow = $this->tokenService->consume(self::RECOVERY_TOKEN_TABLE, $md5, [
+            'consumed_at' => now()->toDateTimeString(),
+        ]);
+
+        if ($tokenRow !== null) {
+            // New secure token path — verify user ID matches
+            if ((int) $tokenRow['user_id'] !== $id) {
+                throw new AuthenticationException($this->msg($langRecover, 'std_unable_updating_user_data', 'The reset link is invalid.'));
+            }
+
+            $user = User::query()->find($id, ['id', 'username', 'email', 'passhash', 'editsecret']);
+            if (! $user) {
+                throw new AuthenticationException($this->msg($langRecover, 'std_unable_updating_user_data', 'Unable to update user data.'));
+            }
+
+            return $this->completePasswordReset($user, $langRecover);
+        }
+
+        // Legacy path: cache-based md5 token (backward compatibility)
         if (! CacheFacade::get("recover:$md5")) {
             throw new AuthenticationException($this->msg($langRecover, 'std_unable_updating_user_data', 'The reset link is expired or invalid.'));
         }
@@ -113,6 +146,17 @@ class PasswordRecoveryService
 
         Cache::forgetWithLocales("recover:$md5");
 
+        return $this->completePasswordReset($user, $langRecover);
+    }
+
+    /**
+     * Complete the password reset: generate new password, update user, send email.
+     *
+     * @param  array<string, string>  $langRecover
+     */
+    private function completePasswordReset(User $user, array $langRecover): string
+    {
+        $id = (int) $user->id;
         $newPassword = $this->generateRandomPassword();
         $newSecret = Token::randomHex();
         $newPasshash = PasswordHasher::hash($newPassword);

@@ -12,6 +12,7 @@ use App\Support\Environment;
 use App\Support\Globals;
 use App\Support\Html\SafeHtml;
 use App\Support\Language;
+use App\Support\LegacyHeaderBag;
 use App\Support\Locale;
 use App\Support\UserUpdateBatch;
 use Filament\Facades\Filament;
@@ -46,6 +47,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(Language::class);
         $this->app->singleton(Globals::class);
         $this->app->singleton(UserUpdateBatch::class);
+        // T-11: Per-request header bag for the legacy bridge — replaces
+        // SAPI globals headers_list()/http_response_code()/header_remove()
+        // that leak state across Octane worker requests.
+        $this->app->singleton(LegacyHeaderBag::class);
     }
 
     /**

@@ -201,16 +201,28 @@ final class UsercpRepositoryTest extends TestCase
 
     public function test_get_stylesheet_options_returns_array(): void
     {
+        DB::table('stylesheets')->insert([
+            'name' => 'TestTheme',
+            'uri' => 'TestTheme',
+        ]);
+
         $options = $this->repository->getStylesheetOptions();
 
         $this->assertIsArray($options);
         $this->assertNotEmpty($options);
+        $this->assertArrayHasKey('TestTheme', $options);
     }
 
     public function test_get_country_options_returns_array(): void
     {
+        DB::table('countries')->insert([
+            'name' => 'TestCountry',
+            'flagpic' => 'test.gif',
+        ]);
+
         $options = $this->repository->getCountryOptions();
 
         $this->assertIsArray($options);
+        $this->assertNotEmpty($options);
     }
 }

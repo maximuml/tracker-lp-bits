@@ -11,3 +11,8 @@
 # Fake signing keys in PasskeyLoginV2Test are dummy values for testing
 4e1dac8641b892c8ac8338b1a1f51ffd6fc5c80e:tests/Feature/PasskeyLoginV2Test.php:generic-api-key:25
 4e1dac8641b892c8ac8338b1a1f51ffd6fc5c80e:tests/Feature/PasskeyLoginV2Test.php:generic-api-key:29
+# Dummy passkey in AnnounceContextTest is a fixed test value, not a real secret
+8f965d5298c4f44b31489ca61c4c4283a67db6a1:tests/Unit/DTOs/Announce/AnnounceContextTest.php:generic-api-key:97
+8f965d5298c4f44b31489ca61c4c4283a67db6a1:tests/Unit/DTOs/Announce/AnnounceContextTest.php:generic-api-key:129
+8f965d5298c4f44b31489ca61c4c4283a67db6a1:tests/Unit/DTOs/Announce/AnnounceContextTest.php:generic-api-key:146
+8f965d5298c4f44b31489ca61c4c4283a67db6a1:tests/Unit/DTOs/Announce/AnnounceContextTest.php:generic-api-key:156

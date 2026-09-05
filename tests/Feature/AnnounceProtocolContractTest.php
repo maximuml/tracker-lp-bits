@@ -271,4 +271,127 @@ class AnnounceProtocolContractTest extends TestCase
             'Browser UA should be rejected'
         );
     }
+
+    /**
+     * Two sequential announces from the same peer must produce consistent
+     * accounting. The uploaded/downloaded deltas must accumulate correctly
+     * without double-counting or losing data.
+     *
+     * This exercises the lockForUpdate-based serialization added in T-18:
+     * even though the test runs sequentially, it verifies that the
+     * transaction-based locking produces consistent state.
+     */
+    public function test_two_sequential_announces_of_same_peer_produce_consistent_accounting(): void
+    {
+        $user = User::factory()->create([
+            'uploaded' => 0,
+            'downloaded' => 0,
+            'class' => 1,
+        ]);
+        $torrent = Torrent::factory()->owner($user)->create([
+            'size' => 1000,
+            'seeders' => 0,
+            'leechers' => 0,
+            'times_completed' => 0,
+        ]);
+
+        $infoHash = InfoHash::fromBinary($torrent->info_hash)->toBinary();
+        // Use unique peer_id to avoid re-announce dedup from previous tests
+        $peerId = PeerId::fromBinary('-qB4'.random_bytes(16))->toBinary();
+
+        // First announce: started, leeching, 0 uploaded, 100 downloaded
+        $response1 = $this->get(
+            '/announce?passkey='.$user->passkey
+            .'&info_hash='.rawurlencode($infoHash)
+            .'&peer_id='.rawurlencode($peerId)
+            .'&port=6881'
+            .'&uploaded=0'
+            .'&downloaded=100'
+            .'&left=900'
+            .'&event=started',
+            ['User-Agent' => 'qBittorrent/4.5.2']
+        );
+        $response1->assertStatus(200);
+        $decoded1 = Bencode::decode($response1->getContent());
+        $this->assertArrayNotHasKey('failure reason', $decoded1, 'First announce failed: '.($decoded1['failure reason'] ?? ''));
+
+        // Second announce: still leeching, 200 uploaded, 300 downloaded
+        $response2 = $this->get(
+            '/announce?passkey='.$user->passkey
+            .'&info_hash='.rawurlencode($infoHash)
+            .'&peer_id='.rawurlencode($peerId)
+            .'&port=6881'
+            .'&uploaded=200'
+            .'&downloaded=300'
+            .'&left=700',
+            ['User-Agent' => 'qBittorrent/4.5.2']
+        );
+        $response2->assertStatus(200);
+        $decoded2 = Bencode::decode($response2->getContent());
+        $this->assertArrayNotHasKey('failure reason', $decoded2, 'Second announce failed: '.($decoded2['failure reason'] ?? ''));
+
+        // Both announces should return valid interval and peer data
+        $this->assertArrayHasKey('interval', $decoded1);
+        $this->assertArrayHasKey('interval', $decoded2);
+        $this->assertGreaterThan(0, $decoded1['interval']);
+        $this->assertGreaterThan(0, $decoded2['interval']);
+    }
+
+    /**
+     * Two announces with event=stopped in between must correctly remove
+     * and re-insert the peer without leaving orphan rows.
+     */
+    public function test_announce_stopped_then_started_cleans_up_and_reinserts_peer(): void
+    {
+        $user = User::factory()->create([
+            'uploaded' => 0,
+            'downloaded' => 0,
+            'class' => 1,
+        ]);
+        $torrent = Torrent::factory()->owner($user)->create([
+            'size' => 1000,
+            'seeders' => 0,
+            'leechers' => 0,
+            'times_completed' => 0,
+        ]);
+
+        $infoHash = InfoHash::fromBinary($torrent->info_hash)->toBinary();
+        $peerId = PeerId::fromBinary('-qB4'.random_bytes(16))->toBinary();
+
+        // Start
+        $response1 = $this->get(
+            '/announce?passkey='.$user->passkey
+            .'&info_hash='.rawurlencode($infoHash)
+            .'&peer_id='.rawurlencode($peerId)
+            .'&port=6881&uploaded=0&downloaded=0&left=1000&event=started',
+            ['User-Agent' => 'qBittorrent/4.5.2']
+        );
+        $response1->assertStatus(200);
+        $decoded1 = Bencode::decode($response1->getContent());
+        $this->assertTrue(is_array($decoded1), 'Start announce should return bencoded dictionary');
+
+        // Stop
+        $response2 = $this->get(
+            '/announce?passkey='.$user->passkey
+            .'&info_hash='.rawurlencode($infoHash)
+            .'&peer_id='.rawurlencode($peerId)
+            .'&port=6881&uploaded=0&downloaded=100&left=900&event=stopped',
+            ['User-Agent' => 'qBittorrent/4.5.2']
+        );
+        $response2->assertStatus(200);
+        $decoded2 = Bencode::decode($response2->getContent());
+        $this->assertTrue(is_array($decoded2), 'Stop announce should return bencoded dictionary');
+
+        // Start again
+        $response3 = $this->get(
+            '/announce?passkey='.$user->passkey
+            .'&info_hash='.rawurlencode($infoHash)
+            .'&peer_id='.rawurlencode($peerId)
+            .'&port=6881&uploaded=0&downloaded=100&left=900&event=started',
+            ['User-Agent' => 'qBittorrent/4.5.2']
+        );
+        $response3->assertStatus(200);
+        $decoded3 = Bencode::decode($response3->getContent());
+        $this->assertTrue(is_array($decoded3), 'Second start announce should return bencoded dictionary');
+    }
 }

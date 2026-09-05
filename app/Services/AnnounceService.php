@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\DTOs\Announce\AnnounceContext;
 use App\DTOs\AnnounceRequestDto;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\TorrentApprovalStatus;
@@ -20,6 +21,7 @@ use App\Repositories\TorrentPurchaseRepository;
 use App\Repositories\TorrentRepository;
 use App\Repositories\UserRepository;
 use App\Services\Announce\PeerLifecycle;
+use App\Services\Announce\PeerLifecycleResult;
 use App\Services\Announce\ResponseBuilder;
 use App\Services\Announce\TrafficResult;
 use App\Support\Cache as AppCache;
@@ -41,67 +43,6 @@ use Illuminate\Support\Facades\Redis;
 
 class AnnounceService
 {
-    private Request $request;
-
-    private AnnounceRequestDto $dto;
-
-    /** @var array<string, mixed> */
-    private array $params;
-
-    /** @var array<string, mixed> */
-    private array $user = [];
-
-    /** @var array<string, mixed>|null */
-    private ?array $torrent = null;
-
-    /** @var array<string, mixed>|null */
-    private ?array $self = null;
-
-    /** @var array<string, mixed>|false */
-    private array|false $snatchInfo = false;
-
-    /** @var array<string, mixed> */
-    private array $userUpdate = [];
-
-    /** @var array<string, mixed> */
-    private array $torrentUpdate = [];
-
-    private int $uploadedIncrementForUser = 0;
-
-    private int $downloadedIncrementForUser = 0;
-
-    private string $ip = '';
-
-    private string $agent = '';
-
-    private bool $isDonor = false;
-
-    private int $clientFamilyId = 0;
-
-    private bool $isReAnnounce = false;
-
-    private ResponseBuilder $responseBuilder;
-
-    private string $dt = '';
-
-    private int $userId = 0;
-
-    private int $torrentId = 0;
-
-    private string $peerId = '';
-
-    private string $infoHash = '';
-
-    private int $seeder = 0;
-
-    private int $left = 0;
-
-    private ?string $event = null;
-
-    private int $announceWait = MIN_ANNOUNCE_WAIT_SECOND;
-
-    private int $autocleanIntervalOne = 900;
-
     public function __construct(
         private readonly AgentAllowRepository $agentAllowRepository,
         private readonly TorrentRepository $torrentRepository,
@@ -118,101 +59,105 @@ class AnnounceService
      */
     public function handle(Request $request, array $params): array
     {
-        $this->request = $request;
-        $this->dto = AnnounceRequestDto::fromRequest($request, $params);
-        $this->params = $this->dto->toParams();
-        $this->agent = $this->dto->userAgent;
-        $this->ip = $this->dto->ip;
-        $this->peerId = $this->dto->peerId->toBinary();
-        $this->infoHash = $this->dto->infoHash->toBinary();
-        $this->left = $this->dto->left;
-        $this->event = $this->dto->event;
-        $this->seeder = $this->dto->isSeeder() ? 1 : 0;
-        $this->dt = date('Y-m-d H:i:s', TIMENOW);
+        $dto = AnnounceRequestDto::fromRequest($request, $params);
 
-        $this->responseBuilder = new ResponseBuilder($this->dto);
+        $ctx = new AnnounceContext(
+            dto: $dto,
+            params: $dto->toParams(),
+            ip: $dto->ip,
+            agent: $dto->userAgent,
+            dt: date('Y-m-d H:i:s', TIMENOW),
+            seeder: $dto->isSeeder() ? 1 : 0,
+            isDonor: false,
+            isReAnnounce: false,
+            clientFamilyId: 0,
+            announceWait: MIN_ANNOUNCE_WAIT_SECOND,
+            autocleanIntervalOne: 900,
+            responseBuilder: new ResponseBuilder($dto),
+        );
 
-        $this->blockBrowser();
-        $this->checkPort();
-        $rateLimitResult = $this->rateLimiter->check($this->dto);
-        $this->isReAnnounce = $rateLimitResult->isReAnnounce;
-        $this->authenticateUser();
-        $this->checkClient();
-        $this->loadTorrent();
+        $this->blockBrowser($ctx);
+        $this->checkPort($ctx);
 
-        $torrent = $this->torrent;
+        $rateLimitResult = $this->rateLimiter->check($dto);
+        $ctx = $ctx->withIsReAnnounce($rateLimitResult->isReAnnounce);
+
+        $ctx = $this->authenticateUser($ctx);
+        $ctx = $this->checkClient($ctx);
+        $ctx = $this->loadTorrent($ctx);
+
+        $torrent = $ctx->torrent;
         if ($torrent === null) {
             throw TrackerException::failure('torrent not registered with this tracker');
         }
 
-        $this->responseBuilder = $this->responseBuilder->withTorrent($torrent);
-        $initialResult = $this->responseBuilder->initial($this->torrentId);
-        $this->autocleanIntervalOne = $initialResult->autocleanIntervalOne;
+        $ctx = $ctx->withResponseBuilder($ctx->responseBuilder->withTorrent($torrent));
+
+        $initialResult = $ctx->responseBuilder->initial($ctx->torrentId());
+        $ctx = $ctx->withAutocleanIntervalOne($initialResult->autocleanIntervalOne);
         $repDict = $initialResult->response;
 
-        if ($this->isReAnnounce) {
+        if ($ctx->isReAnnounce) {
             Logger::writeWithContext((string) '[ANNOUNCE] re-announce, return early.', (string) 'info', (bool) false);
 
             return $repDict;
         }
 
-        $this->userId = (int) $this->user['id'];
-        $this->torrentId = (int) $torrent['id'];
+        $peerLifecycle = new PeerLifecycle($dto, $torrent, $ctx->user, $ctx->dt);
+        $self = $peerLifecycle->findSelf();
+        $ctx = $ctx->withSelf($self);
 
-        $peerLifecycle = new PeerLifecycle($this->dto, $torrent, $this->user, $this->dt);
-        $this->self = $peerLifecycle->findSelf();
-        $this->loadSnatchInfo();
-        $peerLifecycle->setSnatchInfo($this->snatchInfo ?: false);
+        $snatchInfo = $this->loadSnatchInfo($ctx);
+        $ctx = $ctx->withSnatchInfo($snatchInfo);
+        $peerLifecycle->setSnatchInfo($ctx->snatchInfo);
 
-        $this->validateAnnounceTime();
-        $this->handlePaidTorrent($torrent);
+        $this->validateAnnounceTime($ctx);
+        $this->handlePaidTorrent($ctx);
 
-        $traffic = $this->trafficAccountant->calculate($this->self, $this->params, $torrent, $this->user, $this->snatchInfo ?: false, $this->ip, $this->seeder);
-        $this->uploadedIncrementForUser = $traffic->uploadedIncrementForUser;
-        $this->downloadedIncrementForUser = $traffic->downloadedIncrementForUser;
+        $traffic = $this->trafficAccountant->calculate(
+            $ctx->self,
+            $ctx->params,
+            $torrent,
+            $ctx->user,
+            $ctx->snatchInfo,
+            $ctx->ip,
+            $ctx->seeder,
+        );
+        $ctx = $ctx->withTraffic($traffic);
 
-        $cheaterDetector = $this->cheaterDetector;
-        $cheaterDetector->checkSpeed($traffic->upthis, $this->self, $this->user, $this->userId, $this->isDonor);
-        $cheaterDetector->checkCheating($traffic->upthis, $traffic->downthis, $this->self, $this->user, $torrent, $this->userId, $this->torrentId, $this->dt);
+        $this->cheaterDetector->checkSpeed($traffic->upthis, $ctx->self, $ctx->user, $ctx->userId(), $ctx->isDonor);
+        $this->cheaterDetector->checkCheating($traffic->upthis, $traffic->downthis, $ctx->self, $ctx->user, $torrent, $ctx->userId(), $ctx->torrentId(), $ctx->dt);
 
-        $response = DB::transaction(function () use ($peerLifecycle, $traffic) {
-            return $this->process($peerLifecycle, $traffic);
+        $response = DB::transaction(function () use ($ctx, $peerLifecycle, $traffic): array {
+            return $this->process($ctx, $peerLifecycle, $traffic);
         });
 
-        $this->postProcess($torrent);
+        $this->postProcess($ctx);
 
         return $response;
     }
 
-    private function blockBrowser(): void
+    private function blockBrowser(AnnounceContext $ctx): void
     {
-        if (preg_match('/^Mozilla/', $this->agent)
-            || preg_match('/^Opera/', $this->agent)
-            || preg_match('/^Links/', $this->agent)
-            || preg_match('/^Lynx/', $this->agent)
+        if (preg_match('/^Mozilla/', $ctx->agent)
+            || preg_match('/^Opera/', $ctx->agent)
+            || preg_match('/^Links/', $ctx->agent)
+            || preg_match('/^Lynx/', $ctx->agent)
         ) {
             throw TrackerException::failure('Browser access blocked!');
         }
-
-        $https = $this->request->server('HTTPS');
-        if ($https !== null && $https !== 'on') {
-            $headers = $this->request->headers->all();
-            if (isset($headers['cookie']) || isset($headers['accept-language']) || isset($headers['accept-charset'])) {
-                throw TrackerException::failure('Anti-Cheater: You cannot use this agent');
-            }
-        }
     }
 
-    private function checkPort(): void
+    private function checkPort(AnnounceContext $ctx): void
     {
-        $port = (int) $this->params['port'];
+        $port = (int) $ctx->params['port'];
 
         if ($port <= 0 || $port > 0xFFFF) {
-            $this->responseBuilder->warn('invalid port');
+            $ctx->responseBuilder->warn('invalid port');
         }
 
         if ($this->portBlacklisted($port)) {
-            $this->responseBuilder->warn("Port $port is blacklisted.");
+            $ctx->responseBuilder->warn("Port $port is blacklisted.");
         }
     }
 
@@ -241,11 +186,11 @@ class AnnounceService
         return false;
     }
 
-    private function authenticateUser(): void
+    private function authenticateUser(AnnounceContext $ctx): AnnounceContext
     {
-        $passkey = $this->params['passkey'];
+        $passkey = $ctx->params['passkey'];
 
-        $this->user = Cache::remember("user_passkey_{$passkey}_content", 3600, function () use ($passkey) {
+        $user = Cache::remember("user_passkey_{$passkey}_content", 3600, function () use ($passkey) {
             $user = User::query()
                 ->select([
                     'id', 'username', 'downloadpos', 'enabled', 'uploaded', 'downloaded',
@@ -258,73 +203,79 @@ class AnnounceService
             return $user ? $user->toArray() : [];
         });
 
-        if (! $this->user) {
+        if (! $user) {
             Redis::connection()->client()->set("passkey_invalid:{$passkey}", TIMENOW, ['ex' => 24 * 3600]);
             throw TrackerException::failure('Invalid passkey! Re-download the .torrent from '.Url::schemeAndHost(true));
         }
 
-        $this->userId = (int) $this->user['id'];
-        app(CurrentUser::class)->set($this->user);
+        app(CurrentUser::class)->set($user);
 
-        if (! $this->user['enabled']) {
+        if (! $user['enabled']) {
             throw TrackerException::failure('Your account is disabled!');
         }
-        if ($this->user['parked']) {
+        if ($user['parked']) {
             throw TrackerException::failure('Your account is parked! (Read the FAQ)');
         }
-        if (! $this->user['downloadpos']) {
+        if (! $user['downloadpos']) {
             throw TrackerException::failure('Your downloading privileges have been disabled! (Read the rules)');
         }
 
-        $this->isDonor = UserDisplay::isDonor($this->user);
-        $this->user['__is_donor'] = $this->isDonor;
+        $isDonor = UserDisplay::isDonor($user);
+        $user['__is_donor'] = $isDonor;
 
-        $this->checkTrackerUrl();
+        $ctx = $ctx->withUser($user)->withIsDonor($isDonor);
+
+        $this->checkTrackerUrl($ctx);
+
+        return $ctx;
     }
 
-    private function checkTrackerUrl(): void
+    private function checkTrackerUrl(AnnounceContext $ctx): void
     {
-        $trackerUrlRaw = Tracker::schemaAndHost((int) $this->user['tracker_url_id'], true);
+        $trackerUrlRaw = Tracker::schemaAndHost((int) $ctx->user['tracker_url_id'], true);
         $trackerUrl = is_array($trackerUrlRaw) ? implode('', $trackerUrlRaw) : $trackerUrlRaw;
         $currentUrl = Url::schemeAndHost();
 
         if (! str_contains($trackerUrl, $currentUrl)) {
             Logger::writeWithContext((string) "announce check tracker url, trackerUrl: {$trackerUrl} does not contains: {$currentUrl}", (string) 'info', (bool) false);
-            $this->responseBuilder->warn("you should announce to: {$trackerUrl}");
+            $ctx->responseBuilder->warn("you should announce to: {$trackerUrl}");
         }
     }
 
-    private function checkClient(): void
+    private function checkClient(AnnounceContext $ctx): AnnounceContext
     {
         $agentAllowRep = $this->agentAllowRepository;
         $clicheckRes = '';
 
         try {
-            $checkClientResult = $agentAllowRep->checkClient($this->peerId, $this->agent);
-            $this->clientFamilyId = (int) $checkClientResult->id;
+            $checkClientResult = $agentAllowRep->checkClient($ctx->peerIdBinary(), $ctx->agent);
+            $ctx = $ctx->withClientFamilyId((int) $checkClientResult->id);
         } catch (ClientNotAllowedException $exception) {
             $clicheckRes = $exception->getMessage();
         }
 
         if ($clicheckRes) {
-            if (! $this->user['showclienterror']) {
-                User::query()->where('id', $this->userId)->update(['showclienterror' => true]);
-                AppCache::forgetWithLocales("user_passkey_{$this->params['passkey']}_content");
+            if (! $ctx->user['showclienterror']) {
+                User::query()->where('id', $ctx->userId())->update(['showclienterror' => true]);
+                AppCache::forgetWithLocales("user_passkey_{$ctx->params['passkey']}_content");
             }
             throw TrackerException::failure($clicheckRes);
         }
 
-        if ($this->user['showclienterror']) {
-            $this->userUpdate['showclienterror'] = false;
-            AppCache::forgetWithLocales("user_passkey_{$this->params['passkey']}_content");
+        $userUpdate = $ctx->userUpdate;
+        if ($ctx->user['showclienterror']) {
+            $userUpdate['showclienterror'] = false;
+            AppCache::forgetWithLocales("user_passkey_{$ctx->params['passkey']}_content");
         }
+
+        return $ctx->withUserUpdate($userUpdate);
     }
 
-    private function loadTorrent(): void
+    private function loadTorrent(AnnounceContext $ctx): AnnounceContext
     {
-        $infoHashHex = bin2hex($this->infoHash);
+        $infoHashHex = bin2hex($ctx->infoHashBinary());
 
-        $torrent = Cache::remember("torrent_hash_{$this->infoHash}_content", 350, function () {
+        $torrent = Cache::remember("torrent_hash_{$ctx->infoHashBinary()}_content", 350, function () use ($ctx) {
             $tsField = Database::unixTimestampField('added');
             $torrent = DB::table('torrents')
                 ->leftJoin('categories', 'torrents.category', '=', 'categories.id')
@@ -335,78 +286,77 @@ class AnnounceService
                     'torrents.visible', 'torrents.last_action', 'categories.mode',
                     DB::raw("{$tsField} AS ts"), // @phpstan-ignore argument.type
                 ])
-                ->where('torrents.info_hash', $this->infoHash)
+                ->where('torrents.info_hash', $ctx->infoHashBinary())
                 ->first();
 
             return $torrent ? (array) $torrent : false;
         });
-        $this->torrent = $torrent === false ? null : $torrent;
 
-        if ($this->torrent === null) {
+        if ($torrent === false) {
             Logger::writeWithContext((string) ('[TORRENT NOT EXISTS] info_hash: '.$infoHashHex), (string) 'info', (bool) false);
-            Redis::connection()->client()->set('torrent_not_exists:'.$this->infoHash, TIMENOW, ['ex' => 24 * 3600]);
+            Redis::connection()->client()->set('torrent_not_exists:'.$ctx->infoHashBinary(), TIMENOW, ['ex' => 24 * 3600]);
             throw TrackerException::failure('torrent not registered with this tracker');
         }
 
-        $torrent = $this->torrent;
+        $ctx = $ctx->withTorrent($torrent);
 
-        $this->torrentId = (int) $torrent['id'];
-
-        if ($torrent['banned'] && ! Permissions::userCan(PermissionEnum::TORRENT_VIEW_BANNED->value, false, $this->userId)) {
+        if ($torrent['banned'] && ! Permissions::userCan(PermissionEnum::TORRENT_VIEW_BANNED->value, false, $ctx->userId())) {
             throw TrackerException::failure('torrent banned');
         }
 
         if ($torrent['approval_status'] != TorrentApprovalStatus::ALLOW->value
             && ! SiteConfig::current()->torrent->approvalStatusNoneVisible()
-            && ! Permissions::userCan(PermissionEnum::TORRENT_VIEW_BANNED->value, false, $this->userId)
+            && ! Permissions::userCan(PermissionEnum::TORRENT_VIEW_BANNED->value, false, $ctx->userId())
         ) {
             throw TrackerException::failure('torrent review not approved');
         }
 
-        $this->responseBuilder = $this->responseBuilder->withTorrent($torrent);
+        $ctx = $ctx->withResponseBuilder($ctx->responseBuilder->withTorrent($torrent));
 
-        if ($this->left > (int) $torrent['size']) {
-            $this->userRepository->updateDownloadPrivileges(null, $this->userId, false, 'fake_announce');
-            Logger::writeWithContext((string) sprintf('fake announce, user: %s, torrent: %s, announce left: %s > size: %s', $this->userId, $this->torrentId, $this->left, $torrent['size']), (string) 'warn', (bool) false);
-            $this->responseBuilder->warn('fake announce', 300);
+        if ($ctx->dto->left > (int) $torrent['size']) {
+            $this->userRepository->updateDownloadPrivileges(null, $ctx->userId(), false, 'fake_announce');
+            Logger::writeWithContext((string) sprintf('fake announce, user: %s, torrent: %s, announce left: %s > size: %s', $ctx->userId(), $ctx->torrentId(), $ctx->dto->left, $torrent['size']), (string) 'warn', (bool) false);
+            $ctx->responseBuilder->warn('fake announce', 300);
+        }
+
+        return $ctx;
+    }
+
+    /** @return array<string, mixed>|false */
+    private function loadSnatchInfo(AnnounceContext $ctx): array|false
+    {
+        if ($ctx->self !== null) {
+            return LegacyDb::snatchInfo($ctx->torrentId(), $ctx->userId());
+        }
+
+        return false;
+    }
+
+    private function validateAnnounceTime(AnnounceContext $ctx): void
+    {
+        if ($ctx->self !== null && empty($ctx->dto->event) && (int) $ctx->self['prevts'] > (TIMENOW - $ctx->announceWait)) {
+            $ctx->responseBuilder->warn('There is a minimum announce time of '.$ctx->announceWait.' seconds', $ctx->announceWait);
         }
     }
 
-    private function loadSnatchInfo(): void
+    private function handlePaidTorrent(AnnounceContext $ctx): void
     {
-        if ($this->self !== null) {
-            $this->snatchInfo = LegacyDb::snatchInfo($this->torrentId, $this->userId);
-        }
-    }
-
-    private function validateAnnounceTime(): void
-    {
-        if ($this->self !== null && empty($this->event) && (int) $this->self['prevts'] > (TIMENOW - $this->announceWait)) {
-            $this->responseBuilder->warn('There is a minimum announce time of '.$this->announceWait.' seconds', $this->announceWait);
-        }
-    }
-
-    /**
-     * @param  array<string, mixed>  $torrent
-     */
-    private function handlePaidTorrent(array $torrent): void
-    {
-        if ($this->seeder === 1
-            || ! isset($this->user['seedbonus'])
-            || ! isset($torrent['price'])
-            || (int) $torrent['price'] <= 0
-            || (int) $torrent['owner'] == $this->userId
+        if ($ctx->seeder === 1
+            || ! isset($ctx->user['seedbonus'])
+            || ! isset($ctx->torrent['price'])
+            || (int) $ctx->torrent['price'] <= 0
+            || (int) $ctx->torrent['owner'] == $ctx->userId()
             || ! SiteConfig::current()->torrent->paidTorrentEnabled()
         ) {
             return;
         }
 
         $torrentRep = $this->torrentRepository;
-        $buyStatus = $torrentRep->getBuyStatus($this->userId, $this->torrentId);
-        Logger::writeWithContext((string) "user: {$this->userId} buy torrent: {$this->torrentId}, status: {$buyStatus}", (string) 'info', (bool) false);
+        $buyStatus = $torrentRep->getBuyStatus($ctx->userId(), $ctx->torrentId());
+        Logger::writeWithContext((string) "user: {$ctx->userId()} buy torrent: {$ctx->torrentId()}, status: {$buyStatus}", (string) 'info', (bool) false);
 
         if ($buyStatus > 0) {
-            Logger::writeWithContext((string) sprintf('user: %s buy torrent： %s fail count: %s', $this->userId, $this->torrentId, $buyStatus), (string) 'error', (bool) false);
+            Logger::writeWithContext((string) sprintf('user: %s buy torrent： %s fail count: %s', $ctx->userId(), $ctx->torrentId(), $buyStatus), (string) 'error', (bool) false);
             if ($buyStatus > 3) {
                 MsgAlert::getInstance()->add(
                     'announce_paid_torrent_too_many_times',
@@ -417,93 +367,125 @@ class AnnounceService
                 );
             }
             if ($buyStatus > 10) {
-                $this->userRepository->updateDownloadPrivileges(null, $this->userId, false, 'announce_paid_torrent_too_many_times');
+                $this->userRepository->updateDownloadPrivileges(null, $ctx->userId(), false, 'announce_paid_torrent_too_many_times');
             }
-            dispatch(new BuyTorrent($this->userId, $this->torrentId));
-            $torrentRep->addBuyFailCache($this->userId, $this->torrentId);
-            $this->responseBuilder->warn('purchase in progress, please try again later, and make sure you have enough bonus', 300);
+            dispatch(new BuyTorrent($ctx->userId(), $ctx->torrentId()));
+            $torrentRep->addBuyFailCache($ctx->userId(), $ctx->torrentId());
+            $ctx->responseBuilder->warn('purchase in progress, please try again later, and make sure you have enough bonus', 300);
         }
 
         if ($buyStatus == TorrentPurchaseRepository::BUY_STATUS_UNKNOWN) {
-            dispatch(new BuyTorrent($this->userId, $this->torrentId));
-            $this->responseBuilder->warn('purchase started, please wait', 300);
+            dispatch(new BuyTorrent($ctx->userId(), $ctx->torrentId()));
+            $ctx->responseBuilder->warn('purchase started, please wait', 300);
         }
     }
 
     /**
      * @return array<string, mixed>
      */
-    private function process(PeerLifecycle $peerLifecycle, TrafficResult $traffic): array
+    private function process(AnnounceContext $ctx, PeerLifecycle $peerLifecycle, TrafficResult $traffic): array
     {
-        $torrent = $this->torrent;
+        $torrent = $ctx->torrent;
         if ($torrent === null) {
             throw TrackerException::failure('torrent not registered with this tracker');
         }
 
+        // Lock the peer row, snatch row, and user row to prevent concurrent
+        // announce updates from racing on the same peer. This ensures
+        // consistent accounting under high concurrency.
+        $this->lockRowsForUpdate($ctx);
+
         $result = $peerLifecycle->process($traffic->upthis, $traffic->downthis, $traffic->snatchTimeColumn, $traffic->snatchTimeIncrement, $traffic->leechTimeNoSeederIncrement);
-        $this->self = $result->self;
-        $this->snatchInfo = $result->snatchInfo;
-        $this->torrentUpdate = $result->torrentUpdate;
 
-        $hitAndRunResult = $this->hitAndRunHandler->handle($this->left, $this->event, $this->user, $torrent, $this->userId, $this->torrentId, $this->isDonor, $this->dt, $this->snatchInfo ?: false);
+        $snatchInfo = $result->snatchInfo;
+        $hitAndRunResult = $this->hitAndRunHandler->handle($ctx->dto->left, $ctx->dto->event, $ctx->user, $torrent, $ctx->userId(), $ctx->torrentId(), $ctx->isDonor, $ctx->dt, $snatchInfo);
         if ($hitAndRunResult !== null) {
-            $this->snatchInfo = $hitAndRunResult;
+            $snatchInfo = $hitAndRunResult;
         }
 
-        $this->applyUserUpdate();
+        $this->applyUserUpdate($ctx, $result);
 
-        if (! empty($this->torrentUpdate)) {
-            $this->torrentUpdate['visible'] = 1;
-            $this->torrentUpdate['last_action'] = $this->dt;
-            DB::table('torrents')->where('id', $this->torrentId)->update($this->torrentUpdate);
-            Logger::writeWithContext((string) ('[ANNOUNCE_UPDATE_TORRENT], '.Json::encode($this->torrentUpdate)), (string) 'info', (bool) false);
+        $torrentUpdate = $result->torrentUpdate;
+        if (! empty($torrentUpdate)) {
+            $torrentUpdate['visible'] = 1;
+            $torrentUpdate['last_action'] = $ctx->dt;
+            DB::table('torrents')->where('id', $ctx->torrentId())->update($torrentUpdate);
+            Logger::writeWithContext((string) ('[ANNOUNCE_UPDATE_TORRENT], '.Json::encode($torrentUpdate)), (string) 'info', (bool) false);
         }
 
-        return $this->responseBuilder->peerList($this->torrentId, $this->userId, $this->seeder === 1);
-    }
-
-    private function applyUserUpdate(): void
-    {
-        if ($this->clientFamilyId != 0 && $this->clientFamilyId != (int) $this->user['clientselect']) {
-            $this->userUpdate['clientselect'] = $this->clientFamilyId;
-        }
-
-        $this->userUpdate['last_announce_at'] = $this->dt;
-
-        if ($this->uploadedIncrementForUser > 0) {
-            $this->userUpdate['uploaded'] = DB::raw(DB::getQueryGrammar()->wrap('uploaded').' + '.(int) $this->uploadedIncrementForUser); // @phpstan-ignore argument.type
-        }
-        if ($this->downloadedIncrementForUser > 0) {
-            $this->userUpdate['downloaded'] = DB::raw(DB::getQueryGrammar()->wrap('downloaded').' + '.(int) $this->downloadedIncrementForUser); // @phpstan-ignore argument.type
-        }
-
-        if ((int) $this->user['class'] === (int) UserClassEnum::VIP->value) {
-            unset($this->userUpdate['downloaded']);
-        }
-
-        if (! empty($this->userUpdate) && $this->userId) {
-            User::query()->where('id', $this->userId)->update($this->userUpdate);
-            Logger::writeWithContext((string) ('[ANNOUNCE_UPDATE_USER], '.Json::encode($this->userUpdate)), (string) 'info', (bool) false);
-        }
+        return $ctx->responseBuilder->peerList($ctx->torrentId(), $ctx->userId(), $ctx->seeder === 1);
     }
 
     /**
-     * @param  array<string, mixed>  $torrent
+     * Lock peer, snatch, and user rows for update within the transaction
+     * to prevent concurrent announce races on the same peer.
      */
-    private function postProcess(array $torrent): void
+    private function lockRowsForUpdate(AnnounceContext $ctx): void
+    {
+        // Lock the existing peer row if present
+        if ($ctx->self !== null && ! empty($ctx->self['id'])) {
+            DB::table('peers')
+                ->where('id', (int) $ctx->self['id'])
+                ->lockForUpdate()
+                ->first();
+        }
+
+        // Lock the snatch row if present
+        if (! empty($ctx->snatchInfo) && ! empty($ctx->snatchInfo['id'])) {
+            DB::table('snatched')
+                ->where('id', (int) $ctx->snatchInfo['id'])
+                ->lockForUpdate()
+                ->first();
+        }
+
+        // Lock the user row to serialize uploaded/downloaded increments
+        DB::table('users')
+            ->where('id', $ctx->userId())
+            ->lockForUpdate()
+            ->first();
+    }
+
+    private function applyUserUpdate(AnnounceContext $ctx, PeerLifecycleResult $result): void
+    {
+        $userUpdate = $ctx->userUpdate;
+
+        if ($ctx->clientFamilyId != 0 && $ctx->clientFamilyId != (int) $ctx->user['clientselect']) {
+            $userUpdate['clientselect'] = $ctx->clientFamilyId;
+        }
+
+        $userUpdate['last_announce_at'] = $ctx->dt;
+
+        if ($ctx->uploadedIncrementForUser > 0) {
+            $userUpdate['uploaded'] = DB::raw(DB::getQueryGrammar()->wrap('uploaded').' + '.(int) $ctx->uploadedIncrementForUser); // @phpstan-ignore argument.type
+        }
+        if ($ctx->downloadedIncrementForUser > 0) {
+            $userUpdate['downloaded'] = DB::raw(DB::getQueryGrammar()->wrap('downloaded').' + '.(int) $ctx->downloadedIncrementForUser); // @phpstan-ignore argument.type
+        }
+
+        if ((int) $ctx->user['class'] === (int) UserClassEnum::VIP->value) {
+            unset($userUpdate['downloaded']);
+        }
+
+        if ($ctx->userId() !== 0) {
+            User::query()->where('id', $ctx->userId())->update($userUpdate);
+            Logger::writeWithContext((string) ('[ANNOUNCE_UPDATE_USER], '.Json::encode($userUpdate)), (string) 'info', (bool) false);
+        }
+    }
+
+    private function postProcess(AnnounceContext $ctx): void
     {
         $redis = Redis::connection()->client();
 
-        $lockKey = sprintf('record_batch_lock:%s:%s', $this->userId, $this->torrentId);
-        if ($redis->set($lockKey, TIMENOW, ['nx', 'ex' => $this->autocleanIntervalOne])) {
-            app(CleanupRepository::class)->recordBatch($redis, $this->userId, $this->torrentId);
-            app(IpLogRepository::class)->saveToCache($this->userId, null, [$this->ip]);
+        $lockKey = sprintf('record_batch_lock:%s:%s', $ctx->userId(), $ctx->torrentId());
+        if ($redis->set($lockKey, TIMENOW, ['nx', 'ex' => $ctx->autocleanIntervalOne])) {
+            app(CleanupRepository::class)->recordBatch($redis, $ctx->userId(), $ctx->torrentId());
+            app(IpLogRepository::class)->saveToCache($ctx->userId(), null, [$ctx->ip]);
         }
 
-        if (app(RequireSeedTorrentRepository::class)->shouldRecordUser($redis, $this->userId, $this->torrentId)) {
-            $this->snatchInfo = LegacyDb::snatchInfo($this->torrentId, $this->userId);
-            if ($this->snatchInfo) {
-                app(RequireSeedTorrentRepository::class)->recordUser($redis, $this->userId, $this->torrentId, $this->snatchInfo);
+        if (app(RequireSeedTorrentRepository::class)->shouldRecordUser($redis, $ctx->userId(), $ctx->torrentId())) {
+            $snatchInfo = LegacyDb::snatchInfo($ctx->torrentId(), $ctx->userId());
+            if ($snatchInfo) {
+                app(RequireSeedTorrentRepository::class)->recordUser($redis, $ctx->userId(), $ctx->torrentId(), $snatchInfo);
             }
         }
     }

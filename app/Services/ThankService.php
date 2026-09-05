@@ -31,6 +31,9 @@ final class ThankService
             throw new \LogicException("you can't thank to yourself");
         }
         $torrentOwner->checkIsNormal();
+        // Pre-check for existing thank to provide a clean error message.
+        // The unique constraint on (torrentid, userid) provides the
+        // definitive race-condition protection at the database level.
         if ($user->thank_torrent_logs()->where('torrentid', $torrent->id)->exists()) {
             throw new \LogicException('you already thank this torrent');
         }

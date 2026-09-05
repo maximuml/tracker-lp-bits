@@ -310,11 +310,9 @@ class BonusRepository extends BaseRepository
         $requireBonus = $torrent->price;
 
         return DB::transaction(function () use ($requireBonus, $torrent, $channel, $uid) {
-            $userQuery = User::query();
-            if ($requireBonus > 0) {
-                $userQuery = $userQuery->lockForUpdate();
-            }
-            $user = $userQuery->findOrFail((int) $uid);
+            // consumeUserBonus now locks the user row internally via lockForUpdate,
+            // so we don't need a separate lockForUpdate here.
+            $user = User::query()->findOrFail((int) $uid);
             $buyerLocale = $user->locale;
             $comment = Locale::trans('bonus.comment_buy_torrent', ['bonus' => $requireBonus, 'torrent_id' => $torrent->id], $buyerLocale);
             Logger::writeWithContext((string) "comment: {$comment}", (string) 'info', (bool) false);
@@ -383,18 +381,31 @@ class BonusRepository extends BaseRepository
         if ($user === null) {
             throw new \InvalidArgumentException('User not found');
         }
-        if ($user->seedbonus < $requireBonus) {
-            Logger::writeWithContext((string) "user: {$user->id}, bonus: {$user->seedbonus} < requireBonus: {$requireBonus}", (string) 'error', (bool) false);
-            throw new \LogicException('User bonus not enough.');
-        }
-        DB::transaction(function () use ($user, $requireBonus, $logBusinessType, $logBusinessTypeEnum, $logComment, $userUpdates) {
-            $oldUserBonus = (float) ($user->seedbonus ?? 0);
+        $userId = (int) $user->id;
+        $passkey = (string) $user->passkey;
+        DB::transaction(function () use ($userId, $passkey, $requireBonus, $logBusinessType, $logBusinessTypeEnum, $logComment, $userUpdates) {
+            // Lock the user row for update to prevent concurrent bonus consumption
+            $lockedUser = DB::table('users')
+                ->where('id', $userId)
+                ->lockForUpdate()
+                ->first();
+
+            if ($lockedUser === null) {
+                throw new \InvalidArgumentException('User not found');
+            }
+
+            $oldUserBonus = (float) ($lockedUser->seedbonus ?? 0);
+            if ($oldUserBonus < $requireBonus) {
+                Logger::writeWithContext((string) "user: {$userId}, bonus: {$oldUserBonus} < requireBonus: {$requireBonus}", (string) 'error', (bool) false);
+                throw new \LogicException('User bonus not enough.');
+            }
+
             $newUserBonus = bcsub((string) $oldUserBonus, (string) $requireBonus);
-            $log = "user: {$user->id}, requireBonus: $requireBonus, oldUserBonus: $oldUserBonus, newUserBonus: $newUserBonus, logBusinessType: $logBusinessType, logComment: $logComment";
+            $log = "user: {$userId}, requireBonus: $requireBonus, oldUserBonus: $oldUserBonus, newUserBonus: $newUserBonus, logBusinessType: $logBusinessType, logComment: $logComment";
             Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
             $userUpdates['seedbonus'] = $newUserBonus;
-            $affectedRows = DB::table($user->getTable())
-                ->where('id', $user->id)
+            $affectedRows = DB::table('users')
+                ->where('id', $userId)
                 ->where('seedbonus', $oldUserBonus)
                 ->update($userUpdates);
             if ($affectedRows != 1) {
@@ -404,7 +415,7 @@ class BonusRepository extends BaseRepository
             $nowStr = now()->toDateTimeString();
             $bonusLog = [
                 'business_type' => $logBusinessType,
-                'uid' => $user->id,
+                'uid' => $userId,
                 'old_total_value' => $oldUserBonus,
                 'value' => $requireBonus,
                 'new_total_value' => $newUserBonus,
@@ -414,7 +425,7 @@ class BonusRepository extends BaseRepository
             ];
             BonusLogs::query()->insert($bonusLog);
             Logger::writeWithContext((string) ('bonusLog: '.Json::encode($bonusLog)), (string) 'info', (bool) false);
-            Cache::clearUser($user->id, (string) $user->passkey);
+            Cache::clearUser($userId, $passkey);
         });
     }
 

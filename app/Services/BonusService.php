@@ -23,6 +23,7 @@ use App\Support\UserClass;
 use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Handles bonus exchange action mutations.
@@ -282,9 +283,12 @@ final class BonusService
 
             return null;
         }
-        $this->bonusRep->consumeUserBonusAndIncrementCharity((int) $curUser['id'], (float) $points, BusinessType::GIFT_TO_LOW_SHARE_RATIO->value, $points.' Points as charity to users with ratio below '.htmlspecialchars(trim((string) $ratiocharity)).'.', (float) $points);
+        $senderId = (int) $curUser['id'];
         $charityPerUser = $points / $charityReceiverCount;
-        $this->bonusRep->incrementSeedbonusForLowRatioReceivers($ratiocharity, (float) $charityPerUser);
+        DB::transaction(function () use ($senderId, $points, $ratiocharity, $charityPerUser) {
+            $this->bonusRep->consumeUserBonusAndIncrementCharity($senderId, (float) $points, BusinessType::GIFT_TO_LOW_SHARE_RATIO->value, $points.' Points as charity to users with ratio below '.htmlspecialchars(trim((string) $ratiocharity)).'.', (float) $points);
+            $this->bonusRep->incrementSeedbonusForLowRatioReceivers($ratiocharity, (float) $charityPerUser);
+        });
 
         return $this->redirect($baseUrl, 'charity');
     }
@@ -329,9 +333,13 @@ final class BonusService
         }
         $points2 = number_format($points, 1);
         $points2receiver = number_format($aftertaxpoint, 1);
-        $this->bonusRep->consumeUserBonus((int) $curUser['id'], $points, BusinessType::GIFT_TO_SOMEONE->value, $points2.' Points as gift to '.htmlspecialchars(trim($usernamegift)));
-        $this->bonusRep->incrementUserSeedbonus($useridgift, (float) $aftertaxpoint);
-        BonusLogs::add($useridgift, $userseedbonus, $aftertaxpoint, $userseedbonus + $aftertaxpoint, ' + '.$points2receiver.' Points (after tax) as a gift from '.($curUser['username'] ?? ''), BusinessType::RECEIVE_GIFT->value);
+        $senderId = (int) $curUser['id'];
+        $senderUsername = (string) ($curUser['username'] ?? '');
+        DB::transaction(function () use ($senderId, $useridgift, $points, $aftertaxpoint, $points2, $points2receiver, $usernamegift, $userseedbonus, $senderUsername) {
+            $this->bonusRep->consumeUserBonus($senderId, $points, BusinessType::GIFT_TO_SOMEONE->value, $points2.' Points as gift to '.htmlspecialchars(trim($usernamegift)));
+            $this->bonusRep->incrementUserSeedbonus($useridgift, (float) $aftertaxpoint);
+            BonusLogs::add($useridgift, $userseedbonus, $aftertaxpoint, $userseedbonus + $aftertaxpoint, ' + '.$points2receiver.' Points (after tax) as a gift from '.$senderUsername, BusinessType::RECEIVE_GIFT->value);
+        });
 
         $locale = Locale::userLocale($useridgift);
         $subject = Locale::trans('bonus.msg_someone_loves_you', [], $locale);

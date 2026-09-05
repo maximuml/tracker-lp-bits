@@ -114,13 +114,19 @@ class UserModerationRepository extends BaseRepository
     }
 
     /**
-     * @return mixed
+     * Get the latest moderation comment for a user.
+     *
+     * Since the `modcomment` column was dropped in migration
+     * 2025_01_18_235747, moderation comments are stored in
+     * `user_modify_logs` via the `modifyLogs()` relationship.
+     *
+     * @return string|null
      */
     public function getModComment(int $id)
     {
-        $user = User::query()->findOrFail((int) $id, ['modcomment']);
+        $user = User::query()->findOrFail((int) $id);
 
-        return $user->modcomment;
+        return (string) $user->modifyLogs()->orderByDesc('id')->value('content');
     }
 
     /**
@@ -565,18 +571,18 @@ class UserModerationRepository extends BaseRepository
         $modcomment = date('Y-m-d').' - Warning Removed By '.$operator->username;
 
         foreach ($userIds as $uid) {
-            $user = User::query()->find($uid, ['id', 'warned', 'modcomment']);
+            $user = User::query()->find($uid, ['id', 'warned']);
             if ($user === null || ! $user->warned) {
                 continue;
             }
-            $newModcomment = $user->modcomment === '' || $user->modcomment === null
-                ? $modcomment
-                : $modcomment."\n".$user->modcomment;
 
+            DB::table('users')->where('id', $uid)->update([
+                'warned' => 0,
+                'warneduntil' => null,
+            ]);
+            $user->modifyLogs()->create(['content' => $modcomment]);
             $user->warned = false;
             $user->warneduntil = null;
-            $user->modcomment = $newModcomment;
-            $user->save();
 
             Events::fire(ModelEventEnum::USER_UPDATED, $user, null);
         }

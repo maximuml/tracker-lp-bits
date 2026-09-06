@@ -95,7 +95,7 @@ final class Strings
         $count = count(self::RANDOM_CODE_ALPHABET);
         $str = '';
         for ($i = 1; $i <= $length; $i++) {
-            $str .= self::RANDOM_CODE_ALPHABET[rand(0, $count - 1)];
+            $str .= self::RANDOM_CODE_ALPHABET[random_int(0, $count - 1)];
         }
 
         return $str;

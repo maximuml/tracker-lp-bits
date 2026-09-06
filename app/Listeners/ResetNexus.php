@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Listeners;
 
+use App\DTOs\Auth\ActorContext;
 use App\Support\AssetAppender;
 use App\Support\CurrentUser;
 use App\Support\LegacyHeaderBag;
@@ -27,6 +28,9 @@ class ResetNexus
     {
         SupportContext::reset();
         app(CurrentUser::class)->reset();
+        // T-20: Flush the ActorContext singleton so the next request
+        // re-resolves it from the freshly-reset auth guard.
+        app()->forgetInstance(ActorContext::class);
         RequestContext::flush();
         AssetAppender::flush();
         PageLayout::resetState();

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\DTOs\Auth\ActorContext;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\DestructiveEnvironmentGuard;
@@ -47,6 +48,12 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(Language::class);
         $this->app->singleton(Globals::class);
         $this->app->singleton(UserUpdateBatch::class);
+        // T-20: ActorContext is a per-request singleton — the instance is
+        // resolved lazily from the authenticated user and must be flushed
+        // between requests under Octane. See ResetNexus listener.
+        $this->app->singleton(ActorContext::class, static function (): ActorContext {
+            return ActorContext::fromAuth();
+        });
         // T-11: Per-request header bag for the legacy bridge — replaces
         // SAPI globals headers_list()/http_response_code()/header_remove()
         // that leak state across Octane worker requests.

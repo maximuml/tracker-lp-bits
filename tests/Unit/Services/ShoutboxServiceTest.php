@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Services;
 
+use App\DTOs\Auth\ActorContext;
+use App\Enums\UserClass;
 use App\Services\ShoutboxService;
 use App\Support\Shoutbox;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -56,10 +58,23 @@ final class ShoutboxServiceTest extends TestCase
         ]);
     }
 
-    /** @return array<string, mixed> */
-    private function userArray(int $id): array
+    /**
+     * Build an ActorContext for a test user.
+     * Uses PEASANT class (no SB_MANAGE permission) by default.
+     */
+    private function actor(int $id): ActorContext
     {
-        return ['id' => $id, 'username' => 'user'.$id, 'class' => 1];
+        return new ActorContext(
+            id: $id,
+            username: 'user'.$id,
+            class: UserClass::PEASANT,
+            locale: 'en',
+            stylesheet: 0,
+            page: 0,
+            passkey: 'passkey'.$id,
+            permissions: [],
+            user: null,
+        );
     }
 
     private function insertMessage(int $userId, string $text = 'Hello', ?int $date = null): int
@@ -76,7 +91,7 @@ final class ShoutboxServiceTest extends TestCase
 
     public function test_post_message_rejects_zero_user_id(): void
     {
-        $result = $this->service->postMessage(['id' => 0], 'Hello');
+        $result = $this->service->postMessage($this->actor(0), 'Hello');
 
         $this->assertFalse($result);
         $this->assertSame(0, DB::table('shoutbox')->count());
@@ -86,7 +101,7 @@ final class ShoutboxServiceTest extends TestCase
     {
         $this->insertUser(1);
 
-        $result = $this->service->postMessage($this->userArray(1), '');
+        $result = $this->service->postMessage($this->actor(1), '');
 
         $this->assertFalse($result);
         $this->assertSame(0, DB::table('shoutbox')->count());
@@ -96,7 +111,7 @@ final class ShoutboxServiceTest extends TestCase
     {
         $this->insertUser(1);
 
-        $result = $this->service->postMessage($this->userArray(1), str_repeat('x', Shoutbox::MAX_MESSAGE_LENGTH + 1));
+        $result = $this->service->postMessage($this->actor(1), str_repeat('x', Shoutbox::MAX_MESSAGE_LENGTH + 1));
 
         $this->assertFalse($result);
         $this->assertSame(0, DB::table('shoutbox')->count());
@@ -106,7 +121,7 @@ final class ShoutboxServiceTest extends TestCase
     {
         $this->insertUser(1);
 
-        $result = $this->service->postMessage($this->userArray(1), 'Hello world');
+        $result = $this->service->postMessage($this->actor(1), 'Hello world');
 
         $this->assertTrue($result);
         $this->assertSame(1, DB::table('shoutbox')->count());
@@ -121,7 +136,7 @@ final class ShoutboxServiceTest extends TestCase
     {
         $this->insertUser(1);
 
-        $result = $this->service->postMessage($this->userArray(1), str_repeat('x', Shoutbox::MAX_MESSAGE_LENGTH));
+        $result = $this->service->postMessage($this->actor(1), str_repeat('x', Shoutbox::MAX_MESSAGE_LENGTH));
 
         $this->assertTrue($result);
     }
@@ -130,14 +145,14 @@ final class ShoutboxServiceTest extends TestCase
 
     public function test_delete_message_rejects_invalid_id(): void
     {
-        $result = $this->service->deleteMessage($this->userArray(1), 0);
+        $result = $this->service->deleteMessage($this->actor(1), 0);
 
         $this->assertFalse($result);
     }
 
     public function test_delete_message_returns_true_for_nonexistent(): void
     {
-        $result = $this->service->deleteMessage($this->userArray(1), 99999);
+        $result = $this->service->deleteMessage($this->actor(1), 99999);
 
         $this->assertTrue($result);
     }
@@ -147,7 +162,7 @@ final class ShoutboxServiceTest extends TestCase
         $this->insertUser(1);
         $id = $this->insertMessage(1, 'My message');
 
-        $result = $this->service->deleteMessage($this->userArray(1), $id);
+        $result = $this->service->deleteMessage($this->actor(1), $id);
 
         $this->assertTrue($result);
         $this->assertSame(0, DB::table('shoutbox')->count());
@@ -160,7 +175,7 @@ final class ShoutboxServiceTest extends TestCase
         $id = $this->insertMessage(1, 'User 1 message');
 
         // User 2 is not the owner and doesn't have SB_MANAGE
-        $result = $this->service->deleteMessage($this->userArray(2), $id);
+        $result = $this->service->deleteMessage($this->actor(2), $id);
 
         $this->assertFalse($result);
         $this->assertSame(1, DB::table('shoutbox')->count());
@@ -172,7 +187,7 @@ final class ShoutboxServiceTest extends TestCase
         // Message from 10 minutes ago (well beyond 120s edit window)
         $id = $this->insertMessage(1, 'Old message', time() - 600);
 
-        $result = $this->service->deleteMessage($this->userArray(1), $id);
+        $result = $this->service->deleteMessage($this->actor(1), $id);
 
         $this->assertFalse($result);
         $this->assertSame(1, DB::table('shoutbox')->count());
@@ -190,7 +205,7 @@ final class ShoutboxServiceTest extends TestCase
             'created_at' => date('Y-m-d H:i:s'),
         ]);
 
-        $this->service->deleteMessage($this->userArray(1), $id);
+        $this->service->deleteMessage($this->actor(1), $id);
 
         $this->assertSame(0, DB::table('shoutbox')->count());
         $this->assertSame(0, DB::table('shoutbox_reactions')->count());
@@ -203,7 +218,7 @@ final class ShoutboxServiceTest extends TestCase
         $this->insertUser(1);
         $id = $this->insertMessage(1, 'Original');
 
-        $result = $this->service->editMessage($this->userArray(1), $id, '');
+        $result = $this->service->editMessage($this->actor(1), $id, '');
 
         $this->assertFalse($result);
     }
@@ -213,7 +228,7 @@ final class ShoutboxServiceTest extends TestCase
         $this->insertUser(1);
         $id = $this->insertMessage(1, 'Original');
 
-        $result = $this->service->editMessage($this->userArray(1), $id, str_repeat('x', Shoutbox::MAX_MESSAGE_LENGTH + 1));
+        $result = $this->service->editMessage($this->actor(1), $id, str_repeat('x', Shoutbox::MAX_MESSAGE_LENGTH + 1));
 
         $this->assertFalse($result);
     }
@@ -222,7 +237,7 @@ final class ShoutboxServiceTest extends TestCase
     {
         $this->insertUser(1);
 
-        $result = $this->service->editMessage($this->userArray(1), 99999, 'New text');
+        $result = $this->service->editMessage($this->actor(1), 99999, 'New text');
 
         $this->assertFalse($result);
     }
@@ -232,7 +247,7 @@ final class ShoutboxServiceTest extends TestCase
         $this->insertUser(1);
         $id = $this->insertMessage(1, 'Original');
 
-        $result = $this->service->editMessage($this->userArray(1), $id, 'Edited text');
+        $result = $this->service->editMessage($this->actor(1), $id, 'Edited text');
 
         $this->assertTrue($result);
         $msg = DB::table('shoutbox')->where('id', $id)->first();
@@ -247,7 +262,7 @@ final class ShoutboxServiceTest extends TestCase
         $this->insertUser(2);
         $id = $this->insertMessage(1, 'User 1 message');
 
-        $result = $this->service->editMessage($this->userArray(2), $id, 'Hacked');
+        $result = $this->service->editMessage($this->actor(2), $id, 'Hacked');
 
         $this->assertFalse($result);
         $msg = DB::table('shoutbox')->where('id', $id)->first();
@@ -260,7 +275,7 @@ final class ShoutboxServiceTest extends TestCase
         $this->insertUser(1);
         $id = $this->insertMessage(1, 'Old', time() - 600);
 
-        $result = $this->service->editMessage($this->userArray(1), $id, 'New text');
+        $result = $this->service->editMessage($this->actor(1), $id, 'New text');
 
         $this->assertFalse($result);
     }
@@ -269,7 +284,7 @@ final class ShoutboxServiceTest extends TestCase
 
     public function test_toggle_reaction_rejects_invalid_id(): void
     {
-        $result = $this->service->toggleReaction($this->userArray(1), 0, '👍');
+        $result = $this->service->toggleReaction($this->actor(1), 0, '👍');
 
         $this->assertNull($result);
     }
@@ -279,7 +294,7 @@ final class ShoutboxServiceTest extends TestCase
         $this->insertUser(1);
         $id = $this->insertMessage(1, 'Hello');
 
-        $result = $this->service->toggleReaction($this->userArray(1), $id, 'invalid');
+        $result = $this->service->toggleReaction($this->actor(1), $id, 'invalid');
 
         $this->assertNull($result);
         $this->assertSame(0, DB::table('shoutbox_reactions')->count());
@@ -290,7 +305,7 @@ final class ShoutboxServiceTest extends TestCase
         $this->insertUser(1);
         $id = $this->insertMessage(1, 'Hello');
 
-        $result = $this->service->toggleReaction($this->userArray(1), $id, '👍');
+        $result = $this->service->toggleReaction($this->actor(1), $id, '👍');
 
         $this->assertSame('added', $result);
         $this->assertSame(1, DB::table('shoutbox_reactions')->count());
@@ -306,9 +321,9 @@ final class ShoutboxServiceTest extends TestCase
         $this->insertUser(1);
         $id = $this->insertMessage(1, 'Hello');
 
-        $this->service->toggleReaction($this->userArray(1), $id, '👍');
+        $this->service->toggleReaction($this->actor(1), $id, '👍');
 
-        $result = $this->service->toggleReaction($this->userArray(1), $id, '👍');
+        $result = $this->service->toggleReaction($this->actor(1), $id, '👍');
 
         $this->assertSame('removed', $result);
         $this->assertSame(0, DB::table('shoutbox_reactions')->count());
@@ -319,8 +334,8 @@ final class ShoutboxServiceTest extends TestCase
         $this->insertUser(1);
         $id = $this->insertMessage(1, 'Hello');
 
-        $this->service->toggleReaction($this->userArray(1), $id, '👍');
-        $result = $this->service->toggleReaction($this->userArray(1), $id, '🔥');
+        $this->service->toggleReaction($this->actor(1), $id, '👍');
+        $result = $this->service->toggleReaction($this->actor(1), $id, '🔥');
 
         $this->assertSame('added', $result);
         $this->assertSame(2, DB::table('shoutbox_reactions')->count());
@@ -333,7 +348,7 @@ final class ShoutboxServiceTest extends TestCase
         $this->insertUser(1);
         $this->insertMessage(1, 'Hello');
 
-        $result = $this->service->clearAll($this->userArray(1));
+        $result = $this->service->clearAll($this->actor(1));
 
         $this->assertFalse($result);
         $this->assertSame(1, DB::table('shoutbox')->count());
@@ -341,7 +356,7 @@ final class ShoutboxServiceTest extends TestCase
 
     public function test_clear_all_rejects_nonexistent_user(): void
     {
-        $result = $this->service->clearAll(['id' => 99999]);
+        $result = $this->service->clearAll($this->actor(99999));
 
         $this->assertFalse($result);
     }

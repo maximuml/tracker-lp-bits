@@ -7,7 +7,6 @@ namespace App\Support;
 use App\Enums\ExamType;
 use App\Enums\TorrentPromotion;
 use App\Models\HitAndRun;
-use App\Models\Torrent;
 use App\Models\TorrentState;
 use App\Models\User;
 use App\Repositories\AttendanceRepository;
@@ -55,11 +54,6 @@ class PageLayout
         $cspNonce = (string) (request()->attributes->get('csp_nonce', ''));
 
         $context->cache?->setLanguage($context->langDir);
-        $cssupdatedate = $context->cssDateTweak;
-        // Insert old ip into iplog
-        if ($context->user) {
-            // Per-request access tracking is handled by app(PageLayoutRepository::class)->prepareAccess().
-        }
         if ($title == '') {
             $title = $context->siteName;
         } else {
@@ -76,189 +70,69 @@ class PageLayout
                 $context->offlineMsg = true;
             }
         }
-        ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" lang="<?php echo htmlspecialchars(str_replace('_', '-', app()->getLocale())); ?>">
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<?php
-        if ($context->metaKeywordsTweak) {
-            ?>
-<meta name="keywords" content="<?php
-            echo htmlspecialchars($context->metaKeywordsTweak);
-            ?>" />
-<?php
-        }
-        if ($context->metaDescriptionTweak) {
-            ?>
-<meta name="description" content="<?php
-            echo htmlspecialchars($context->metaDescriptionTweak);
-            ?>" />
-<?php
-        }
-        ?>
-<meta name="generator" content="<?php
-        echo PROJECTNAME;
-        ?>" />
-<meta name="csrf-token" content="<?php
-        echo csrf_token();
-        ?>" />
-<?php
+
         $addiCode = Style::addiCode($context->cache, $context->userStylesheet(), $context->defaultStylesheet);
         if ($cspNonce !== '' && $addiCode !== '') {
-            // Inject CSP nonce into <style> tags within addicode.
             $addiCode = (string) preg_replace('/<style(?![^>]*\snonce=)/i', '<style nonce="'.$cspNonce.'"', $addiCode);
         }
-        echo $addiCode;
-        $css_uri = Style::cssUri($context->cache, $context->userStylesheet(), $context->defaultStylesheet);
-        $cssupdatedate = $cssupdatedate ? '?'.htmlspecialchars($cssupdatedate) : '';
-        ?>
-<title><?php
-        echo $title;
-        ?></title>
-<link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
-<link rel="search" type="application/opensearchdescription+xml" title="<?php
-        echo $context->siteName;
-        ?> Torrents" href="opensearch.php" />
-<link rel="stylesheet" href="<?php
-        echo Style::fontCssUri($context->userFontSize()).$cssupdatedate;
-        ?>" type="text/css" />
-<link rel="stylesheet" href="styles/sprites.css<?php
-        echo $cssupdatedate;
-        ?>" type="text/css" />
-<link rel="stylesheet" href="<?php
-        echo Forum::picFolder($context->langDir).'/forumsprites.css'.$cssupdatedate;
-        ?>" type="text/css" />
-<link rel="stylesheet" href="<?php
-        echo $css_uri.'theme.css'.$cssupdatedate;
-        ?>" type="text/css" />
-<link rel="stylesheet" href="<?php
-        echo $css_uri.'DomTT.css'.$cssupdatedate;
-        ?>" type="text/css" />
-<link rel="stylesheet" href="styles/nexus.css<?php
-        echo $cssupdatedate;
-        ?>" type="text/css" />
-<?php
+        $cssUri = Style::cssUri($context->cache, $context->userStylesheet(), $context->defaultStylesheet);
+        $cssUpdateDate = $context->cssDateTweak ? '?'.htmlspecialchars($context->cssDateTweak) : '';
+        $locale = str_replace('_', '-', app()->getLocale());
+        $fontCssUri = Style::fontCssUri($context->userFontSize());
+        $forumPicFolder = Forum::picFolder($context->langDir);
+        $appendHeaders = AssetAppender::getAppendHeaders();
+        $contentWidth = defined('CONTENT_WIDTH') ? (int) \constant('CONTENT_WIDTH') : 0;
+        $headTableWidth = $context->user !== null ? $contentWidth + 28.66 : $contentWidth;
+
+        $searchBoxIcons = [];
         if ($context->user) {
             $requireSearchBoxIdAr = SearchBox::requiredIds();
             if (! empty($requireSearchBoxIdAr)) {
                 $icons = app(SearchBoxRepository::class)->listIcon($requireSearchBoxIdAr);
                 foreach ($icons as $icon) {
-                    ?>
-<link rel="stylesheet" href="<?php
-                    echo htmlspecialchars(trim($icon['cssfile'] ?? '', '/')).$cssupdatedate;
-                    ?>" type="text/css" />
-<?php
+                    $searchBoxIcons[] = trim($icon['cssfile'] ?? '', '/');
                 }
             }
         }
-        ?>
-<link rel="alternate" type="application/rss+xml" title="Latest Torrents" href="torrentrss.php" />
-<script type="text/javascript" src="js/curtain_imageresizer.js<?php
-        echo $cssupdatedate;
-        ?>"></script>
-<script type="text/javascript" src="js/ajaxbasic.js<?php
-        echo $cssupdatedate;
-        ?>"></script>
-<script type="text/javascript" src="js/common.js<?php
-        echo $cssupdatedate;
-        ?>"></script>
-<script type="text/javascript" src="js/domLib.js<?php
-        echo $cssupdatedate;
-        ?>"></script>
-<script type="text/javascript" src="js/domTT.js<?php
-        echo $cssupdatedate;
-        ?>"></script>
-<script type="text/javascript" src="js/domTT_drag.js<?php
-        echo $cssupdatedate;
-        ?>"></script>
-<script type="text/javascript" src="js/fadomatic.js<?php
-        echo $cssupdatedate;
-        ?>"></script>
-<?php
-        foreach (AssetAppender::getAppendHeaders() as $value) {
-            echo $value;
-        }
-        ?>
-<script type="text/javascript" nonce="<?php echo $cspNonce; ?>">
-    window.nexusLayerOptions = {
-        confirm: {btnAlign: 'c', title: 'Confirm', btn: ['OK', 'Cancel']},
-        alert: {btnAlign: 'c', title: 'Info', btn: ['OK', 'Cancel']}
-    }
-</script>
-<script type="text/javascript" src="vendor/layer-v3.5.1/layer/layer.js<?php
-        echo $cssupdatedate;
-        ?>"></script>
-</head>
-<body>
-<a href="#main-content" class="skip-link" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;" onfocus="this.style.left='0';this.style.width='auto';this.style.height='auto';" onblur="this.style.left='-9999px';this.style.width='1px';this.style.height='1px';">Skip to main content</a>
-<table class="head" cellspacing="0" cellpadding="0" align="center" style="width: <?php
-        echo $context->user !== null ? CONTENT_WIDTH + 28.66 : CONTENT_WIDTH;
-        ?>px">
-	<tr>
-		<td class="clear">
-<?php
-        if ($context->logoMain == '') {
-            ?>
-			<div class="logo"><?php
-            echo htmlspecialchars($context->siteName);
-            ?></div>
-			<div class="slogan"><?php
-            echo htmlspecialchars($context->slogan);
-            ?></div>
-<?php
-        } else {
-            ?>
-			<div class="logo_img"><img src="<?php
-            echo $context->logoMain;
-            ?>" alt="<?php
-            echo htmlspecialchars($context->siteName);
-            ?>" title="<?php
-            echo htmlspecialchars($context->siteName);
-            ?> - <?php
-            echo htmlspecialchars($context->slogan);
-            ?>" /></div>
-<?php
-        }
-        ?>
-		</td>
-		<td class="clear nowrap" align="right" valign="middle">
-<?php
-        if ($context->enableDonation == 'yes') {
-            ?>
-			<a href="donate.php"><img src="<?php
-            echo Forum::picFolder($context->langDir);
-            ?>/donate.gif" alt="Make a donation" style="margin-left: 5px; margin-top: 50px;" /></a>
-<?php
-        }
-        ?>
-		</td>
-	</tr>
-</table>
 
-<table class="mainouter" width="<?php
-        echo CONTENT_WIDTH;
-        ?>" cellspacing="0" cellpadding="5" align="center">
-	<tr><td id="nav_block" class="text" align="center">
-<?php
-        if (! $context->user) {
-            ?>
-			<a href="login.php"><font class="big"><b><?php
-            echo $context->lang['text_login'];
-            ?></b></font></a> / <a href="signup.php"><font class="big"><b><?php
-            echo $context->lang['text_signup'];
-            ?></b></font></a>
-<?php
-        } else {
-            Frame::mainFrameOpen();
-            echo $context->menuHtml;
-            Frame::mainFrameClose();
-            $datum = getdate();
-            $datum['hours'] = sprintf('%02.0f', $datum['hours']);
-            $datum['minutes'] = sprintf('%02.0f', $datum['minutes']);
-            $ratio = Ratio::forUserId($context->user['id']);
-            // // check every 15 minutes //////////////////
+        $user = $context->user;
+        $lang = $context->lang;
+        $menuHtml = '';
+        $username = '';
+        $isModerator = false;
+        $isSysop = false;
+        $seedbonus = '';
+        $attendanceLink = '';
+        $medalLabel = '';
+        $taskLabel = '';
+        $userId = 0;
+        $invites = '';
+        $pendingInviteCount = 0;
+        $managementSystemLink = '';
+        $ratio = '';
+        $uploaded = '';
+        $downloaded = '';
+        $activeseed = '';
+        $activeleech = '';
+        $connectable = '';
+        $slotsDisplay = '';
+        $hitAndRunEnabled = false;
+        $hitAndRunStatus = '';
+        $globalSearchEnabled = false;
+        $searchFormTarget = '_blank';
+        $requestSearchEscaped = '';
+        $searchKeywordPlaceholder = '';
+        $searchBoxAreaSelect = '';
+        $globalSearchLabel = '';
+        $staffIcons = '';
+        $messageAlerts = '';
+        $offlineMsg = $context->offlineMsg;
+        $offlineMsgHtml = '';
+
+        if ($context->user) {
+            $menuHtml = Frame::mainOpen('', false, 100, $contentWidth).$context->menuHtml.Frame::CLOSE;
+
+            $ratio = (string) Ratio::forUserId($context->user['id']);
             $messages = $context->cache?->get_value('user_'.$context->user['id'].'_inbox_count');
             if ($messages == '') {
                 $messages = app(PageLayoutRepository::class)->getInboxCount((int) $context->user['id']);
@@ -281,7 +155,6 @@ class PageLayout
             } else {
                 $connectable = $context->lang['text_unknown'];
             }
-            // // check every 60 seconds //////////////////
             $activeseed = $context->cache?->get_value('user_'.$context->user['id'].'_active_seed_count');
             if ($activeseed == '') {
                 $activeseed = app(PageLayoutRepository::class)->getActiveSeedCount((int) $context->user['id']);
@@ -298,153 +171,47 @@ class PageLayout
                 $context->cache?->cache_value('user_'.$context->user['id'].'_unread_message_count', $unread, 60);
             }
             $inboxpic = '<img class="'.($unread ? 'inboxnew' : 'inbox').'" src="pic/trans.gif" alt="inbox" title="'.($unread ? $context->lang['title_inbox_new_messages'] : $context->lang['title_inbox_no_new_messages']).'" />';
+
+            $username = UserDisplay::username($context->user['id']);
+            $isModerator = $context->userClass() >= $context->moderatorClass;
+            $isSysop = $context->userClass() >= $context->sysopClass;
+            $seedbonus = number_format($context->user['seedbonus'], 1);
+
             $attendanceRep = app(AttendanceRepository::class);
             $attendance = $attendanceRep->getAttendance($context->user['id'], date('Ymd'));
-            ?>
-
-<table id="info_block" cellpadding="4" cellspacing="0" border="0" width="100%"><tr>
-	<td><table width="100%" cellspacing="0" cellpadding="0" border="0"><tr>
-		<td class="bottom" align="left">
-            <span class="medium">
-                <?php
-            echo $context->lang['text_welcome_back'];
-            ?>, <?php
-            echo UserDisplay::username($context->user['id']);
-            ?>
-                [<form method="post" action="logout.php" style="display:inline"><?php
-            echo csrf_field();
-            ?><button type="submit" style="background:none;border:none;padding:0;margin:0;color:inherit;cursor:pointer;text-decoration:underline;display:inline"><?php
-            echo $context->lang['text_logout'];
-            ?></button></form>]
-                [<a href="usercp.php"><?php
-            echo $context->lang['text_user_cp'];
-            ?></a>]
-                <?php
-            if ($context->userClass() >= $context->moderatorClass) {
-                ?> [<a href="staffpanel.php"><?php
-                echo $context->lang['text_staff_panel'];
-                ?></a>] <?php
-            }
-            ?>
-                <?php
-            if ($context->userClass() >= $context->sysopClass) {
-                ?> [<a href="settings.php"><?php
-                echo $context->lang['text_site_settings'];
-                ?></a>]<?php
-            }
-            ?>
-                [<a href="torrents.php?inclbookmarked=1&amp;allsec=1&amp;incldead=0"><?php
-            echo $context->lang['text_bookmarks'];
-            ?></a>]
-                <font class = 'color_bonus'><?php
-            echo $context->lang['text_bonus'];
-            ?></font>[<a href="mybonus.php"><?php
-            echo $context->lang['text_use'];
-            ?></a>]: <?php
-            echo number_format($context->user['seedbonus'], 1);
-            ?>
-                <?php
             if ($attendance) {
-                printf(' <a href="attendance.php" class="">'.$context->lang['text_attended'].'</a>', $attendance->points, $context->user['attendance_card']);
+                $attendanceLink = sprintf(' <a href="attendance.php" class="">'.$context->lang['text_attended'].'</a>', $attendance->points, $context->user['attendance_card']);
             } else {
-                printf(' <a href="attendance.php" class="faqlink">%s</a>', $context->lang['text_attendance']);
+                $attendanceLink = sprintf(' <a href="attendance.php" class="faqlink">%s</a>', $context->lang['text_attendance']);
             }
-            ?>
-                <a href="medal.php">[<?php
-            echo Locale::trans('medal.label');
-            ?>]</a>
-                <a href="task.php">[<?php
-            echo Locale::trans('exam.type_task');
-            ?>]</a>
-                <font class = 'color_invite'><?php
-            echo $context->lang['text_invite'];
-            ?></font>[<a href="invite.php?id=<?php
-            echo $context->user['id'];
-            ?>"><?php
-            echo $context->lang['text_send'];
-            ?></a>]: <?php
-            echo sprintf('%s(%s)', $context->user['invites'], app(PageLayoutRepository::class)->getPendingInviteCount((int) $context->user['id']));
-            ?>
-                <?php
+
+            $medalLabel = Locale::trans('medal.label');
+            $taskLabel = Locale::trans('exam.type_task');
+            $userId = $context->user['id'];
+            $invites = $context->user['invites'];
+            $pendingInviteCount = app(PageLayoutRepository::class)->getPendingInviteCount((int) $context->user['id']);
+
             if ($context->userClass() >= User::getAccessAdminClassMin()) {
-                printf('[<a href="%s" target="_blank">%s</a>]', Env::get('FILAMENT_PATH', 'nexusphp'), $context->lang['text_management_system']);
+                $managementSystemLink = sprintf('[<a href="%s" target="_blank">%s</a>]', Env::get('FILAMENT_PATH', 'nexusphp'), $context->lang['text_management_system']);
             }
-            ?>
-                <br />
-	            <font class="color_ratio"><?php
-            echo $context->lang['text_ratio'];
-            ?></font> <?php
-            echo $ratio;
-            ?>
-                <font class='color_uploaded'><?php
-            echo $context->lang['text_uploaded'];
-            ?></font> <?php
-            echo Format::size($context->user['uploaded']);
-            ?>
-                <font class='color_downloaded'> <?php
-            echo $context->lang['text_downloaded'];
-            ?></font> <?php
-            echo Format::size($context->user['downloaded']);
-            ?>
-                <font class='color_active'><?php
-            echo $context->lang['text_active_torrents'];
-            ?></font> <img class="arrowup" alt="Torrents seeding" title="<?php
-            echo $context->lang['title_torrents_seeding'];
-            ?>" src="pic/trans.gif" /><?php
-            echo $activeseed;
-            ?>  <img class="arrowdown" alt="Torrents leeching" title="<?php
-            echo $context->lang['title_torrents_leeching'];
-            ?>" src="pic/trans.gif" /><?php
-            echo $activeleech;
-            ?>&nbsp;&nbsp;
-                <font class='color_connectable'><?php
-            echo $context->lang['text_connectable'];
-            ?></font><?php
-            echo $connectable;
-            ?> <?php
-            echo Slots::display((int) $context->user['uploaded'], (int) $context->user['downloaded'], $context->maxdlSystem, $context->userClass(), $context->vipClass, $context->lang['text_slots'] ?? '', $context->lang['text_unlimited'] ?? '');
-            ?>
-                <?php
-            if (HitAndRun::getIsEnabled()) {
-                ?><font class='color_bonus'>H&R: </font> <?php
-                echo sprintf('[<a href="myhr.php">%s</a>]', app(HitAndRunRepository::class)->getStatusStats($context->user['id']));
+
+            $uploaded = Format::size($context->user['uploaded']);
+            $downloaded = Format::size($context->user['downloaded']);
+            $slotsDisplay = Slots::display((int) $context->user['uploaded'], (int) $context->user['downloaded'], $context->maxdlSystem, $context->userClass(), $context->vipClass, $context->lang['text_slots'] ?? '', $context->lang['text_unlimited'] ?? '');
+
+            $hitAndRunEnabled = HitAndRun::getIsEnabled();
+            if ($hitAndRunEnabled) {
+                $hitAndRunStatus = sprintf('[<a href="myhr.php">%s</a>]', app(HitAndRunRepository::class)->getStatusStats($context->user['id']));
             }
-            ?>
-            </span>
-        </td>
-                <?php
-            if (Settings::get('main.enable_global_search') == 'yes') {
-                ?>
-        <td class="bottom" align="left" style="border: none">
-            <form action="search.php" method="get" target="<?php
-                echo RequestContext::instance()->getScript() == 'search' ? '_self' : '_blank';
-                ?>">
-                <div style="display: flex;align-items: center">
-                    <div style="display: flex;flex-direction: column">
-                        <div>
-                            <span><input type="text" name="search" style="width: 80px;height: 12px" value="<?php
-                echo Html::escapeAttr((string) ($context->requestSearch ?? ''));
-                ?>" placeholder="<?php
-                echo Locale::trans('search.search_keyword');
-                ?>"/></span>
-                        </div>
-                        <div>
-                            <span><?php
-                echo SearchBox::areaSelect($context->requestSearchArea ?? '', ['style' => 'width: 88px']);
-                ?></span>
-                        </div>
-                    </div>
-                    <div><input type="submit" value="<?php
-                echo Locale::trans('search.global_search');
-                ?>" style="width: 39px;white-space: break-spaces;padding: 0" /></div>
-                </div>
-            </form>
-        </td>
-                <?php
-            }
-            ?>
-	<td class="bottom" align="right"><span class="medium">
-<?php
+
+            $globalSearchEnabled = Settings::get('main.enable_global_search') == 'yes';
+            $searchFormTarget = RequestContext::instance()->getScript() == 'search' ? '_self' : '_blank';
+            $requestSearchEscaped = Html::escapeAttr((string) ($context->requestSearch ?? ''));
+            $searchKeywordPlaceholder = Locale::trans('search.search_keyword');
+            $searchBoxAreaSelect = SearchBox::areaSelect($context->requestSearchArea ?? '', ['style' => 'width: 88px']);
+            $globalSearchLabel = Locale::trans('search.global_search');
+
+            $staffIcons = '';
             if (Permissions::userCan('staffmem', false, (int) ($context->user['id'] ?? 0))) {
                 $totalreports = $context->cache?->get_value('staff_report_count');
                 if ($totalreports == '') {
@@ -456,31 +223,23 @@ class PageLayout
                     $totalcheaters = app(PageLayoutRepository::class)->getTotalCheaters();
                     $context->cache?->cache_value('staff_cheater_count', $totalcheaters, 900);
                 }
-                echo '<a href="cheaterbox.php"><img class="cheaterbox" alt="cheaterbox" title="'.$context->lang['title_cheaterbox'].'" src="pic/trans.gif" />  </a>'.$totalcheaters.'  <a href="reports.php"><img class="reportbox" alt="reportbox" title="'.$context->lang['title_reportbox'].'" src="pic/trans.gif" />  </a>'.$totalreports;
+                $staffIcons .= '<a href="cheaterbox.php"><img class="cheaterbox" alt="cheaterbox" title="'.$context->lang['title_cheaterbox'].'" src="pic/trans.gif" />  </a>'.$totalcheaters.'  <a href="reports.php"><img class="reportbox" alt="reportbox" title="'.$context->lang['title_reportbox'].'" src="pic/trans.gif" />  </a>'.$totalreports;
             }
-            echo ' <a href="friends.php"><img class="buddylist" alt="Buddylist" title="'.$context->lang['title_buddylist'].'" src="pic/trans.gif" /></a>';
-            echo ' <a href="getrss.php"><img class="rss" alt="RSS" title="'.$context->lang['title_get_rss'].'" src="pic/trans.gif" /></a>';
-            echo '<br/>';
+            $staffIcons .= ' <a href="friends.php"><img class="buddylist" alt="Buddylist" title="'.$context->lang['title_buddylist'].'" src="pic/trans.gif" /></a>';
+            $staffIcons .= ' <a href="getrss.php"><img class="rss" alt="RSS" title="'.$context->lang['title_get_rss'].'" src="pic/trans.gif" /></a>';
+            $staffIcons .= '<br/>';
             $totalsm = app(MessageRepository::class)->getStaffMessageCountCache($context->user['id'], 'total');
             if ($totalsm === false) {
                 $totalsm = app(MessageRepository::class)->countStaffMessage($context->user['id']);
                 app(MessageRepository::class)->updateStaffMessageCountCache($context->user['id'], 'total', $totalsm);
             }
             if ($totalsm > 0) {
-                echo '  <a href="staffbox.php"><img class="staffbox" alt="staffbox" title="'.$context->lang['title_staffbox'].'" src="pic/trans.gif" />  </a>'.$totalsm.'  ';
+                $staffIcons .= '  <a href="staffbox.php"><img class="staffbox" alt="staffbox" title="'.$context->lang['title_staffbox'].'" src="pic/trans.gif" />  </a>'.$totalsm.'  ';
             }
-            echo '<a href="messages.php">'.$inboxpic.'</a> '.($messages ? $messages.' ('.$unread.$context->lang['text_message_new'].')' : '0');
-            echo '  <a href="messages.php?action=viewmailbox&amp;box=-1"><img class="sentbox" alt="sentbox" title="'.$context->lang['title_sentbox'].'" src="pic/trans.gif" /></a> '.($outmessages ? $outmessages : '0');
-            ?>
+            $staffIcons .= '<a href="messages.php">'.$inboxpic.'</a> '.($messages ? $messages.' ('.$unread.$context->lang['text_message_new'].')' : '0');
+            $staffIcons .= '  <a href="messages.php?action=viewmailbox&amp;box=-1"><img class="sentbox" alt="sentbox" title="'.$context->lang['title_sentbox'].'" src="pic/trans.gif" /></a> '.($outmessages ? $outmessages : '0');
 
-	</span></td>
-	</tr></table></td>
-</tr></table>
-
-</td></tr>
-
-<tr><td id="outer" align="center" class="outer" style="padding-top: 20px; padding-bottom: 20px">
-<?php
+            ob_start();
             if ($msgalert) {
                 $timeline = TorrentState::resolveTimeline();
                 $currentPromotion = $timeline['current'] ?? null;
@@ -552,7 +311,6 @@ class PageLayout
                         Html::messageAlertVoid('index.php', $text, 'green');
                     }
                 }
-                // Staff message, not only staff member
                 $nummessages = app(MessageRepository::class)->getStaffMessageCountCache($context->user['id'], 'new');
                 if ($nummessages === false) {
                     $nummessages = app(MessageRepository::class)->countStaffMessage($context->user['id'], 0);
@@ -563,7 +321,6 @@ class PageLayout
                     $text = $context->lang['text_there_is'].Strings::isOrAre($nummessages).$nummessages.$context->lang['text_new_staff_message'].Strings::addS($nummessages);
                     Html::messageAlertVoid('staffbox.php', $text, 'blue');
                 }
-                // torrent approval
                 if (Permissions::userCan('torrent-approval', false, (int) ($context->user['id'] ?? 0)) && Settings::get('torrent.approval_status_none_visible') == 'no') {
                     $cacheKey = 'TORRENT_APPROVAL_NONE';
                     $toApprovalCounts = $context->cache?->get_value($cacheKey);
@@ -606,7 +363,6 @@ class PageLayout
                         Html::messageAlertVoid('cheaterbox.php', $text, 'blue');
                     }
                 }
-                // show the exam info
                 $exam = new Exam;
                 $currentExam = $exam->getCurrent($context->user['id']);
                 if (! empty($currentExam['html']) && $currentExam['exam'] !== null) {
@@ -618,7 +374,64 @@ class PageLayout
                 echo '<font color="white">'.$context->lang['text_website_offline_warning'].'</font>';
                 echo "</td></tr></table></p><br />\n";
             }
+            $messageAlerts = (string) ob_get_clean();
         }
+
+        echo view('layouts.legacy.header', [
+            'cspNonce' => $cspNonce,
+            'title' => $title,
+            'locale' => $locale,
+            'projectName' => PROJECTNAME,
+            'csrfToken' => csrf_token(),
+            'metaKeywords' => $context->metaKeywordsTweak,
+            'metaDescription' => $context->metaDescriptionTweak,
+            'addiCode' => $addiCode,
+            'cssUri' => $cssUri,
+            'cssUpdateDate' => $cssUpdateDate,
+            'fontCssUri' => $fontCssUri,
+            'forumPicFolder' => $forumPicFolder,
+            'siteName' => $context->siteName,
+            'slogan' => $context->slogan,
+            'logoMain' => $context->logoMain,
+            'enableDonation' => $context->enableDonation,
+            'appendHeaders' => $appendHeaders,
+            'contentWidth' => $contentWidth,
+            'headTableWidth' => $headTableWidth,
+            'searchBoxIcons' => $searchBoxIcons,
+            'user' => $user,
+            'lang' => $lang,
+            'menuHtml' => $menuHtml,
+            'username' => $username,
+            'isModerator' => $isModerator,
+            'isSysop' => $isSysop,
+            'seedbonus' => $seedbonus,
+            'attendanceLink' => $attendanceLink,
+            'medalLabel' => $medalLabel,
+            'taskLabel' => $taskLabel,
+            'userId' => $userId,
+            'invites' => $invites,
+            'pendingInviteCount' => $pendingInviteCount,
+            'managementSystemLink' => $managementSystemLink,
+            'ratio' => $ratio,
+            'uploaded' => $uploaded,
+            'downloaded' => $downloaded,
+            'activeseed' => $activeseed,
+            'activeleech' => $activeleech,
+            'connectable' => $connectable,
+            'slotsDisplay' => $slotsDisplay,
+            'hitAndRunEnabled' => $hitAndRunEnabled,
+            'hitAndRunStatus' => $hitAndRunStatus,
+            'globalSearchEnabled' => $globalSearchEnabled,
+            'searchFormTarget' => $searchFormTarget,
+            'requestSearchEscaped' => $requestSearchEscaped,
+            'searchKeywordPlaceholder' => $searchKeywordPlaceholder,
+            'searchBoxAreaSelect' => $searchBoxAreaSelect,
+            'globalSearchLabel' => $globalSearchLabel,
+            'staffIcons' => $staffIcons,
+            'messageAlerts' => $messageAlerts,
+            'offlineMsg' => $offlineMsg,
+            'offlineMsgHtml' => $offlineMsgHtml,
+        ])->render();
     }
 
     public static function footer(): void
@@ -630,16 +443,12 @@ class PageLayout
 
         $cspNonce = (string) (request()->attributes->get('csp_nonce', ''));
 
-        echo '</td></tr></table>';
-        echo '<div id="footer">';
-        echo '<div style="margin-top: 10px; margin-bottom: 30px;" align="center">';
-        // Variables for End Time
         $tend = microtime(true);
         $totaltime = $tend - RequestContext::instance()->getStartTimestamp();
         $year = substr($context->dateFounded, 0, 4);
         $yearfounded = $year ? $year : 2007;
-        echo ' (c) '.' <a href="'.Http::protocolPrefix(Url::isSecure()).$context->baseUrl.'" target="_self">'.$context->siteName.'</a> '.($context->icpLicenseMain ? ' '.$context->icpLicenseMain.' ' : '').(date('Y') != $yearfounded ? $yearfounded.'-' : '').date('Y').' '.VERSION.'<br /><br />';
-        printf('[page created in <b> %s </b> sec', sprintf('%.3f', $totaltime));
+        $copyrightHtml = ' (c) '.' <a href="'.Http::protocolPrefix(Url::isSecure()).$context->baseUrl.'" target="_self">'.$context->siteName.'</a> '.($context->icpLicenseMain ? ' '.$context->icpLicenseMain.' ' : '').(date('Y') != $yearfounded ? $yearfounded.'-' : '').date('Y').' '.VERSION.'<br /><br />';
+
         $debugQuery = $context->enableSqlDebugTweak == 'yes' && $context->userClass() >= $context->sqlDebugTweak;
         if ($debugQuery) {
             $query_name_laravel = LegacyDb::lastQuery(true, 'json');
@@ -648,48 +457,52 @@ class PageLayout
             $query_name_laravel = [];
             $dbQueryCount = count($context->queryName) + LegacyDb::lastQuery('COUNT', 'json');
         }
-        echo ' with <b>'.$dbQueryCount.'</b> db queries, <b>'.$context->cache?->getCacheReadTimes().'</b> reads and <b>'.$context->cache?->getCacheWriteTimes().'</b> writes of Redis and <b>'.Format::size(memory_get_usage()).'</b> ram]';
-        echo "</div>\n";
+        $cacheReadTimes = $context->cache?->getCacheReadTimes();
+        $cacheWriteTimes = $context->cache?->getCacheWriteTimes();
+        $pageStatsLine = sprintf('[page created in <b> %s </b> sec', sprintf('%.3f', $totaltime)).' with <b>'.$dbQueryCount.'</b> db queries, <b>'.$cacheReadTimes.'</b> reads and <b>'.$cacheWriteTimes.'</b> writes of Redis and <b>'.Format::size(memory_get_usage()).'</b> ram]';
+
+        $debugQueryHtml = '';
         if ($debugQuery) {
-            echo "<div id=\"sql_debug\" style='text-align: left;'>SQL query list: <ul>";
+            $debugQueryHtml = "<div id=\"sql_debug\" style='text-align: left;'>SQL query list: <ul>";
             foreach ($context->queryName as $query) {
-                echo sprintf('<li>%s [%s]</li>', htmlspecialchars($query['query']), $query['time']);
+                $debugQueryHtml .= sprintf('<li>%s [%s]</li>', htmlspecialchars($query['query']), $query['time']);
             }
             foreach ($query_name_laravel as $query) {
-                echo sprintf('<li>%s [%s ms]</li>', htmlspecialchars($query['raw_query']), $query['time']);
+                $debugQueryHtml .= sprintf('<li>%s [%s ms]</li>', htmlspecialchars($query['raw_query']), $query['time']);
             }
-            echo '</ul>';
-            echo 'Redis key read: <ul>';
+            $debugQueryHtml .= '</ul>';
+            $debugQueryHtml .= 'Redis key read: <ul>';
             foreach (($context->cache?->getKeyHits('read') ?? []) as $keyName => $hits) {
-                echo '<li>'.htmlspecialchars($keyName).' : '.$hits.'</li>';
+                $debugQueryHtml .= '<li>'.htmlspecialchars((string) $keyName).' : '.$hits.'</li>';
             }
-            echo '</ul>';
-            echo 'Redis key write: <ul>';
+            $debugQueryHtml .= '</ul>';
+            $debugQueryHtml .= 'Redis key write: <ul>';
             foreach (($context->cache?->getKeyHits('write') ?? []) as $keyName => $hits) {
-                echo '<li>'.htmlspecialchars($keyName).' : '.$hits.'</li>';
+                $debugQueryHtml .= '<li>'.htmlspecialchars((string) $keyName).' : '.$hits.'</li>';
             }
-            echo '</ul>';
-            echo '</div>';
+            $debugQueryHtml .= '</ul>';
+            $debugQueryHtml .= '</div>';
         }
+
+        $keyShortcut = '';
         if ($context->addKeyShortcut != '') {
             $keyShortcut = $context->addKeyShortcut;
             if ($cspNonce !== '') {
                 $keyShortcut = (string) preg_replace('/<script(?![^>]*\snonce=)/i', '<script nonce="'.$cspNonce.'"', $keyShortcut);
             }
-            echo $keyShortcut;
         }
-        echo '</div>';
+
+        $analyticsCode = '';
         if ($context->analyticsCodeTweak) {
             $analyticsCode = $context->analyticsCodeTweak;
             if ($cspNonce !== '') {
-                // Inject CSP nonce into <script> tags within analytics code.
                 $analyticsCode = (string) preg_replace('/<script(?![^>]*\snonce=)/i', '<script nonce="'.$cspNonce.'"', $analyticsCode);
             }
-            echo "\n".$analyticsCode."\n";
+            $analyticsCode = "\n".$analyticsCode."\n";
         }
-        foreach (AssetAppender::getAppendFooters() as $value) {
-            echo $value;
-        }
+
+        $appendFooters = AssetAppender::getAppendFooters();
+
         $js = <<<'JS'
         <script type="application/javascript" src="js/ajax.js"></script>
         <script type="application/javascript" src="js/nexus.js"></script>
@@ -708,8 +521,16 @@ class PageLayout
         });
         </script>
         JS;
-        echo $js;
-        echo '<img id="nexus-preview" alt="" role="presentation" style="display: none; position: absolute" src="" />';
-        echo '</body></html>';
+
+        echo view('layouts.legacy.footer', [
+            'copyrightHtml' => $copyrightHtml,
+            'pageStatsLine' => $pageStatsLine,
+            'debugQuery' => $debugQuery,
+            'debugQueryHtml' => $debugQueryHtml,
+            'keyShortcut' => $keyShortcut,
+            'analyticsCode' => $analyticsCode,
+            'appendFooters' => $appendFooters,
+            'jsBlock' => $js,
+        ])->render();
     }
 }

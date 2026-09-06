@@ -11,7 +11,6 @@ use App\Services\SecureTokenService;
 use App\Services\WebAuthService;
 use App\Support\Token;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Support\Facades\Cache as CacheFacade;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Mockery;
@@ -22,8 +21,10 @@ use Tests\TestCase;
  * Unit tests for PasswordRecoveryService.
  *
  * Covers requestReset (empty email, invalid email, unknown email,
- * pending account, success) and resetPassword (expired/invalid cache
- * entry, nonexistent user, invalid hash, success).
+ * pending account, success) and resetPassword (invalid token,
+ * nonexistent user, user ID mismatch, success).
+ *
+ * W1-04: Legacy md5 token path removed. All tests now use SecureTokenService.
  */
 final class PasswordRecoveryServiceTest extends TestCase
 {
@@ -41,6 +42,7 @@ final class PasswordRecoveryServiceTest extends TestCase
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
         DB::table('users')->truncate();
         DB::table('loginattempts')->truncate();
+        DB::table('password_recovery_tokens')->truncate();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
         /** @var WebAuthService&MockInterface $authService */
@@ -152,21 +154,20 @@ final class PasswordRecoveryServiceTest extends TestCase
         $this->assertNotSame('', (string) $editsecret);
     }
 
-    public function test_request_reset_stores_hash_in_cache(): void
+    public function test_request_reset_stores_secure_token(): void
     {
-        $userId = $this->createUser(['email' => 'cache@test.com']);
+        $userId = $this->createUser(['email' => 'token@test.com']);
 
-        $this->service->requestReset(['email' => 'cache@test.com'], '127.0.0.1', [], []);
+        $this->service->requestReset(['email' => 'token@test.com'], '127.0.0.1', [], []);
 
-        // The service stores a random secret in editsecret
-        $editSecret = DB::table('users')->where('id', $userId)->value('editsecret');
-        $this->assertNotNull($editSecret, 'Expected editsecret to be set on the user');
+        // W1-04: token digest is stored in password_recovery_tokens
+        $tokenRow = DB::table('password_recovery_tokens')
+            ->where('user_id', $userId)
+            ->first();
 
-        // The cache key is recover:<md5(sec+email+passhash+sec)>, not recover:<sec>
-        $passhash = DB::table('users')->where('id', $userId)->value('passhash');
-        $expectedHash = md5($editSecret.'cache@test.com'.$passhash.$editSecret);
-        $cacheHas = CacheFacade::has('recover:'.$expectedHash);
-        $this->assertTrue($cacheHas, 'Expected a recover:* key in the cache');
+        $this->assertNotNull($tokenRow, 'Expected a recovery token row');
+        $this->assertSame((int) $userId, (int) $tokenRow->user_id);
+        $this->assertNotEmpty($tokenRow->token_digest);
     }
 
     // --- requestReset: captcha enabled and fails ---
@@ -194,43 +195,57 @@ final class PasswordRecoveryServiceTest extends TestCase
         $this->service->requestReset(['email' => 'valid@test.com'], '127.0.0.1', [], []);
     }
 
-    // --- resetPassword: expired/invalid cache ---
+    // --- resetPassword: invalid token ---
 
-    public function test_reset_password_throws_for_expired_cache_entry(): void
+    public function test_reset_password_throws_for_invalid_token(): void
     {
         $userId = $this->createUser();
 
         $this->expectException(AuthenticationException::class);
 
-        $this->service->resetPassword($userId, 'invalid_hash', []);
+        $this->service->resetPassword($userId, 'invalid_token', []);
+    }
+
+    // --- resetPassword: user ID mismatch ---
+
+    public function test_reset_password_throws_for_user_id_mismatch(): void
+    {
+        $userId = $this->createUser();
+        $tokenService = app(SecureTokenService::class);
+
+        // Generate a token for userId
+        $token = $tokenService->generate();
+        $tokenService->store('password_recovery_tokens', $token, [
+            'user_id' => $userId,
+            'ip' => '127.0.0.1',
+        ]);
+
+        // Try to reset with a different user ID
+        $this->expectException(AuthenticationException::class);
+
+        $this->service->resetPassword(99999, $token, []);
     }
 
     // --- resetPassword: nonexistent user ---
 
     public function test_reset_password_throws_for_nonexistent_user(): void
     {
-        $hash = md5(uniqid());
-        CacheFacade::put("recover:$hash", now()->toDateTimeString(), 3600);
-
-        $this->expectException(AuthenticationException::class);
-
-        $this->service->resetPassword(99999, $hash, []);
-    }
-
-    // --- resetPassword: invalid hash ---
-
-    public function test_reset_password_throws_for_invalid_hash(): void
-    {
         $userId = $this->createUser();
-        $editsecret = Token::randomHex();
-        DB::table('users')->where('id', $userId)->update(['editsecret' => $editsecret]);
+        $tokenService = app(SecureTokenService::class);
 
-        $validHash = md5($editsecret.'user@test.com'.DB::table('users')->where('id', $userId)->value('passhash').$editsecret);
-        CacheFacade::put("recover:$validHash", now()->toDateTimeString(), 3600);
+        // Generate a token for userId
+        $token = $tokenService->generate();
+        $tokenService->store('password_recovery_tokens', $token, [
+            'user_id' => $userId,
+            'ip' => '127.0.0.1',
+        ]);
+
+        // Delete the user to simulate nonexistent
+        DB::table('users')->where('id', $userId)->delete();
 
         $this->expectException(AuthenticationException::class);
 
-        $this->service->resetPassword($userId, 'wrong_hash', []);
+        $this->service->resetPassword($userId, $token, []);
     }
 
     // --- resetPassword: success ---
@@ -240,16 +255,17 @@ final class PasswordRecoveryServiceTest extends TestCase
         $userId = $this->createUser();
         $user = User::query()->find($userId, ['id', 'username', 'email', 'passhash', 'editsecret']);
         $this->assertNotNull($user);
-
-        $editsecret = Token::randomHex();
         $oldPasshash = $user->passhash;
-        DB::table('users')->where('id', $userId)->update(['editsecret' => $editsecret]);
 
-        $sec = str_pad($editsecret, 20);
-        $hash = md5($sec.$user->email.$oldPasshash.$sec);
-        CacheFacade::put("recover:$hash", now()->toDateTimeString(), 3600);
+        // Generate a valid token directly
+        $tokenService = app(SecureTokenService::class);
+        $token = $tokenService->generate();
+        $tokenService->store('password_recovery_tokens', $token, [
+            'user_id' => $userId,
+            'ip' => '127.0.0.1',
+        ]);
 
-        $newPassword = $this->service->resetPassword($userId, $hash, []);
+        $newPassword = $this->service->resetPassword($userId, $token, []);
 
         $this->assertSame(10, strlen($newPassword));
 
@@ -260,46 +276,48 @@ final class PasswordRecoveryServiceTest extends TestCase
         $this->assertSame('argon2id', $updatedUser->passhash_algo);
     }
 
-    public function test_reset_password_clears_cache_after_success(): void
+    public function test_reset_password_consumes_token_after_success(): void
     {
         $userId = $this->createUser();
-        $user = User::query()->find($userId, ['id', 'username', 'email', 'passhash', 'editsecret']);
-        $this->assertNotNull($user);
+        $tokenService = app(SecureTokenService::class);
 
-        $editsecret = Token::randomHex();
-        $oldPasshash = $user->passhash;
-        DB::table('users')->where('id', $userId)->update(['editsecret' => $editsecret]);
+        // Generate a token
+        $token = $tokenService->generate();
+        $tokenService->store('password_recovery_tokens', $token, [
+            'user_id' => $userId,
+            'ip' => '127.0.0.1',
+        ]);
 
-        $sec = str_pad($editsecret, 20);
-        $hash = md5($sec.$user->email.$oldPasshash.$sec);
-        CacheFacade::put("recover:$hash", now()->toDateTimeString(), 3600);
+        // Reset password
+        $this->service->resetPassword($userId, $token, []);
 
-        $this->service->resetPassword($userId, $hash, []);
-
-        $this->assertNull(CacheFacade::get("recover:$hash"));
+        // Token should be consumed (marked with consumed_at)
+        $digest = $tokenService->digest($token);
+        $consumedRow = DB::table('password_recovery_tokens')->where('token_digest', $digest)->first();
+        $this->assertNotNull($consumedRow);
+        $this->assertNotNull($consumedRow->consumed_at, 'Token should be marked as consumed');
     }
 
-    // --- resetPassword: stale editsecret (concurrent reset) ---
+    // --- resetPassword: token already consumed (replay attack) ---
 
-    public function test_reset_password_throws_when_editsecret_changed(): void
+    public function test_reset_password_throws_for_already_consumed_token(): void
     {
         $userId = $this->createUser();
-        $user = User::query()->find($userId, ['id', 'username', 'email', 'passhash', 'editsecret']);
-        $this->assertNotNull($user);
+        $tokenService = app(SecureTokenService::class);
 
-        $editsecret = Token::randomHex();
-        $oldPasshash = $user->passhash;
-        DB::table('users')->where('id', $userId)->update(['editsecret' => $editsecret]);
+        // Generate a token
+        $token = $tokenService->generate();
+        $tokenService->store('password_recovery_tokens', $token, [
+            'user_id' => $userId,
+            'ip' => '127.0.0.1',
+        ]);
 
-        $sec = str_pad($editsecret, 20);
-        $hash = md5($sec.$user->email.$oldPasshash.$sec);
-        CacheFacade::put("recover:$hash", now()->toDateTimeString(), 3600);
+        // First reset succeeds
+        $this->service->resetPassword($userId, $token, []);
 
-        // Simulate a concurrent reset that changes editsecret
-        DB::table('users')->where('id', $userId)->update(['editsecret' => Token::randomHex()]);
-
+        // Second reset with same token should fail
         $this->expectException(AuthenticationException::class);
 
-        $this->service->resetPassword($userId, $hash, []);
+        $this->service->resetPassword($userId, $token, []);
     }
 }

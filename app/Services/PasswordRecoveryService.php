@@ -13,20 +13,16 @@ use App\Support\Email;
 use App\Support\Http;
 use App\Support\Mail;
 use App\Support\PasswordHasher;
-use App\Support\Strings;
 use App\Support\Token;
 use App\Support\Url;
-use Illuminate\Support\Facades\Cache as CacheFacade;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Handles the legacy recover.php password reset flow.
+ * Handles the password reset flow via SecureTokenService (CSPRNG + SHA-256 digest).
  */
 class PasswordRecoveryService
 {
     private const NEW_PASSWORD_LENGTH = 10;
-
-    private const RECOVER_CACHE_TTL = 3600;
 
     private const RECOVERY_TOKEN_TABLE = 'password_recovery_tokens';
 
@@ -84,20 +80,15 @@ class PasswordRecoveryService
 
         Cache::clearUser((int) $user['id'], '');
 
-        // T-08: Generate a CSPRNG recovery token and store its SHA-256 digest.
-        // Legacy: md5(editsecret + email + passhash + editsecret) — leaked passhash, md5
+        // T-08/W1-04: Generate a CSPRNG recovery token and store its SHA-256 digest.
+        // Legacy md5(editsecret + email + passhash + editsecret) path removed in W1-04.
         $recoveryToken = $this->tokenService->generate();
         $this->tokenService->store(self::RECOVERY_TOKEN_TABLE, $recoveryToken, [
             'user_id' => (int) $user['id'],
             'ip' => $ip,
         ]);
 
-        // Also keep the legacy cache-based token for backward compatibility
-        // during the transition period. Old links will expire from cache naturally.
-        $hash = md5($sec.$email.$user['passhash'].$sec);
-        CacheFacade::put("recover:$hash", now()->toDateTimeString(), self::RECOVER_CACHE_TTL);
-
-        // Send the new secure token in the reset URL
+        // Send the secure token in the reset URL
         $this->sendResetRequestEmail($email, (int) $user['id'], $recoveryToken, $ip, $langRecover);
     }
 
@@ -108,44 +99,24 @@ class PasswordRecoveryService
      */
     public function resetPassword(int $id, string $md5, array $langRecover): string
     {
-        // T-08: Try the new secure token first, then fall back to legacy.
+        // W1-04: Legacy md5 token path removed. Only SecureTokenService is accepted.
         $tokenRow = $this->tokenService->consume(self::RECOVERY_TOKEN_TABLE, $md5, [
             'consumed_at' => now()->toDateTimeString(),
         ]);
 
-        if ($tokenRow !== null) {
-            // New secure token path — verify user ID matches
-            if ((int) $tokenRow['user_id'] !== $id) {
-                throw new AuthenticationException($this->msg($langRecover, 'std_unable_updating_user_data', 'The reset link is invalid.'));
-            }
-
-            $user = User::query()->find($id, ['id', 'username', 'email', 'passhash', 'editsecret']);
-            if (! $user) {
-                throw new AuthenticationException($this->msg($langRecover, 'std_unable_updating_user_data', 'Unable to update user data.'));
-            }
-
-            return $this->completePasswordReset($user, $langRecover);
+        if ($tokenRow === null) {
+            throw new AuthenticationException($this->msg($langRecover, 'std_unable_updating_user_data', 'The reset link is invalid or expired.'));
         }
 
-        // Legacy path: cache-based md5 token (backward compatibility)
-        if (! CacheFacade::get("recover:$md5")) {
-            throw new AuthenticationException($this->msg($langRecover, 'std_unable_updating_user_data', 'The reset link is expired or invalid.'));
-        }
-
-        $user = User::query()->find($id, ['id', 'username', 'email', 'passhash', 'editsecret']);
-
-        if (! $user) {
-            throw new AuthenticationException($this->msg($langRecover, 'std_unable_updating_user_data', 'Unable to update user data.'));
-        }
-
-        $email = $user->email;
-        $sec = Strings::padHash($user->editsecret);
-
-        if ($md5 !== md5($sec.$email.$user->passhash.$sec)) {
+        // Verify user ID matches
+        if ((int) $tokenRow['user_id'] !== $id) {
             throw new AuthenticationException($this->msg($langRecover, 'std_unable_updating_user_data', 'The reset link is invalid.'));
         }
 
-        Cache::forgetWithLocales("recover:$md5");
+        $user = User::query()->find($id, ['id', 'username', 'email', 'passhash', 'editsecret']);
+        if (! $user) {
+            throw new AuthenticationException($this->msg($langRecover, 'std_unable_updating_user_data', 'Unable to update user data.'));
+        }
 
         return $this->completePasswordReset($user, $langRecover);
     }

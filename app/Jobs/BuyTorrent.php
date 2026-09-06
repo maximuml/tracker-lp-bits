@@ -9,12 +9,13 @@ use App\Repositories\BonusRepository;
 use App\Repositories\TorrentRepository;
 use App\Support\Logger;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class BuyTorrent implements ShouldQueue
+class BuyTorrent implements ShouldBeUnique, ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -23,6 +24,9 @@ class BuyTorrent implements ShouldQueue
     public int $backoff = 10;
 
     public int $timeout = 300;
+
+    /** @var int How long to hold the unique lock */
+    public int $uniqueFor = 300;
 
     public int $userId;
 
@@ -38,6 +42,14 @@ class BuyTorrent implements ShouldQueue
         $this->userId = $userId;
         $this->torrentId = $torrentId;
         $this->onQueue('tracker-critical');
+    }
+
+    /**
+     * The unique ID for the job to prevent duplicate purchases.
+     */
+    public function uniqueId(): string
+    {
+        return "buy_torrent:{$this->userId}:{$this->torrentId}";
     }
 
     /**

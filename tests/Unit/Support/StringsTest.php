@@ -72,17 +72,16 @@ class StringsTest extends TestCase
         }
     }
 
-    public function test_random_code_is_deterministic_under_srand(): void
+    public function test_random_code_uses_csprng_not_deterministic(): void
     {
-        // Pins the legacy `rand()` (not `random_int()`) source. If a
-        // future refactor swaps to `random_int()` this test will fail
-        // — re-seeding `random_int()` is not possible, so the new
-        // helper must keep using `rand()` for backward compatibility.
+        // W1-10: randomCode() now uses random_int() (CSPRNG) instead of rand().
+        // Two calls with the same seed should produce different results
+        // because random_int() is not affected by srand().
         srand(12345);
         $a = Strings::randomCode(16);
         srand(12345);
         $b = Strings::randomCode(16);
-        $this->assertSame($a, $b);
+        $this->assertNotSame($a, $b, 'randomCode() should use CSPRNG (random_int), not deterministic rand()');
     }
 
     // ---------- hidden() ----------

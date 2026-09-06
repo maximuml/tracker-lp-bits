@@ -25,10 +25,10 @@ use App\Support\Mail;
 use App\Support\Network;
 use App\Support\PasswordHasher;
 use App\Support\Security\PasskeyGenerator;
-use App\Support\Strings;
 use App\Support\Token;
 use App\Support\Url;
 use App\Support\Validators;
+use Illuminate\Support\Facades\Cache as CacheFacade;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -42,9 +42,16 @@ class RegistrationService
 
     private const MAX_PASSWORD_LENGTH = 40;
 
+    private const CONFIRMATION_TOKEN_TABLE = 'email_confirmation_tokens';
+
+    private const RESEND_RATE_LIMIT = 5;
+
+    private const RESEND_RATE_LIMIT_TTL = 3600;
+
     public function __construct(
         private WebAuthService $authService,
         private UserRepository $userRepository,
+        private readonly SecureTokenService $tokenService = new SecureTokenService,
         private readonly OutboxService $outboxService = new OutboxService,
     ) {}
 
@@ -242,7 +249,10 @@ class RegistrationService
             $this->consumeInvite($invite, $id, $email, $username);
         }
 
-        $redirect = $this->resolveSignupRedirect($id, $secret, $user, $verification, $email, $langFolder, $langTakesignup);
+        // W1-05: Generate a secure confirmation token (CSPRNG + SHA-256 digest)
+        $confirmToken = $this->generateConfirmationToken($id, $ip);
+
+        $redirect = $this->resolveSignupRedirect($id, $confirmToken, $user, $verification, $email, $langFolder, $langTakesignup);
 
         return ['user' => $user, 'redirect' => $redirect];
     }
@@ -250,7 +260,7 @@ class RegistrationService
     /**
      * Confirm a pending account from a confirmation link.
      */
-    public function confirm(int $id, string $confirmMd5, string $ip): User
+    public function confirm(int $id, string $confirmToken, string $ip): User
     {
         $user = User::query()->find($id, ['id', 'passhash', 'secret', 'auth_key', 'editsecret', 'status', 'username']);
 
@@ -266,9 +276,12 @@ class RegistrationService
             abort(404);
         }
 
-        $user->makeVisible(['secret']);
+        // W1-05: Verify token via SecureTokenService (atomic consumption)
+        $tokenRow = $this->tokenService->consume(self::CONFIRMATION_TOKEN_TABLE, $confirmToken, [
+            'consumed_at' => now()->toDateTimeString(),
+        ]);
 
-        if (md5(Strings::padHash($user->secret)) !== $confirmMd5) {
+        if ($tokenRow === null || (int) $tokenRow['user_id'] !== $id) {
             abort(404);
         }
 
@@ -333,6 +346,9 @@ class RegistrationService
 
         $this->validatePassword($password, $passAgain, (string) $user->username, $langConfirmResend);
 
+        // W1-05: Rate-limit resend requests (max 5 per hour per IP)
+        $this->assertResendRateLimit($ip, $langConfirmResend);
+
         $secret = Token::randomHex();
         $passhash = PasswordHasher::hash($password);
         $verification = (string) SiteConfig::current()->main->verification('email');
@@ -351,7 +367,11 @@ class RegistrationService
 
         Cache::clearUser($user->id, '');
 
-        $this->sendConfirmationEmail((string) $user->username, $email, $user->id, $editsecret, $ip, $langFolder, $langConfirmResend);
+        // W1-05: Revoke old confirmation tokens and generate a new secure one
+        $this->revokeConfirmationTokens($user->id);
+        $confirmToken = $this->generateConfirmationToken((int) $user->id, $ip);
+
+        $this->sendConfirmationEmail((string) $user->username, $email, (int) $user->id, $confirmToken, $ip, $langFolder, $langConfirmResend);
 
         return 'ok.php?type=signup&email='.rawurlencode($email);
     }
@@ -523,7 +543,7 @@ class RegistrationService
     /**
      * @param  array<string, string>  $langTakesignup
      */
-    private function resolveSignupRedirect(int $userId, string $secret, User $user, string $verification, string $email, string $langFolder, array $langTakesignup): string
+    private function resolveSignupRedirect(int $userId, string $confirmToken, User $user, string $verification, string $email, string $langFolder, array $langTakesignup): string
     {
         $baseUrl = SiteConfig::current()->basic->baseUrl();
         if (! str_contains($baseUrl, '://')) {
@@ -539,12 +559,10 @@ class RegistrationService
         }
 
         if ($verification === 'automatic' || SiteConfig::current()->smtp->type('none') === 'none') {
-            $psecret = md5(Strings::padHash($secret));
-
-            return $baseUrl.'/confirm.php?id='.$userId.'&secret='.$psecret;
+            return $baseUrl.'/confirm.php?id='.$userId.'&secret='.$confirmToken;
         }
 
-        $this->sendConfirmationEmail((string) $user->username, $email, $userId, $secret, Network::clientIp(), $langFolder, $langTakesignup);
+        $this->sendConfirmationEmail((string) $user->username, $email, $userId, $confirmToken, Network::clientIp(), $langFolder, $langTakesignup);
 
         return 'ok.php?type=signup&email='.rawurlencode($email);
     }
@@ -556,7 +574,7 @@ class RegistrationService
         string $username,
         string $email,
         int $userId,
-        string $secret,
+        string $confirmToken,
         string $ip,
         string $langFolder,
         array $langMail,
@@ -566,8 +584,7 @@ class RegistrationService
             $baseUrl = Http::protocolPrefix(Url::isSecure()).$baseUrl;
         }
         $baseUrl = rtrim($baseUrl, '/');
-        $psecret = md5(Strings::padHash($secret));
-        $confirmUrl = $baseUrl.'/confirm.php?id='.$userId.'&secret='.$psecret;
+        $confirmUrl = $baseUrl.'/confirm.php?id='.$userId.'&secret='.$confirmToken;
         $resendUrl = $baseUrl.'/confirm_resend.php';
         $siteName = SiteConfig::current()->basic->siteName();
         $reportEmail = SiteConfig::current()->main->reportEmail('');
@@ -619,5 +636,51 @@ class RegistrationService
     private function msg(array $lang, string $key, string $fallback): string
     {
         return (string) ($lang[$key] ?? $fallback);
+    }
+
+    /**
+     * W1-05: Generate a secure confirmation token and store its digest.
+     */
+    private function generateConfirmationToken(int $userId, string $ip): string
+    {
+        $token = $this->tokenService->generate();
+        $this->tokenService->store(self::CONFIRMATION_TOKEN_TABLE, $token, [
+            'user_id' => $userId,
+            'ip' => $ip,
+        ]);
+
+        return $token;
+    }
+
+    /**
+     * W1-05: Revoke all existing confirmation tokens for a user.
+     */
+    private function revokeConfirmationTokens(int $userId): void
+    {
+        DB::table(self::CONFIRMATION_TOKEN_TABLE)
+            ->where('user_id', $userId)
+            ->whereNull('consumed_at')
+            ->update(['revoked' => 1]);
+    }
+
+    /**
+     * W1-05: Rate-limit resend requests per IP (max 5 per hour).
+     *
+     * @param  array<string, string>  $langConfirmResend
+     */
+    private function assertResendRateLimit(string $ip, array $langConfirmResend): void
+    {
+        $cacheKey = "confirm_resend_rate:{$ip}";
+        $count = (int) (CacheFacade::get($cacheKey, 0));
+
+        if ($count >= self::RESEND_RATE_LIMIT) {
+            throw new AuthenticationException($this->msg(
+                $langConfirmResend,
+                'std_rate_limited',
+                'Too many confirmation email requests. Please try again later.',
+            ));
+        }
+
+        CacheFacade::put($cacheKey, $count + 1, self::RESEND_RATE_LIMIT_TTL);
     }
 }

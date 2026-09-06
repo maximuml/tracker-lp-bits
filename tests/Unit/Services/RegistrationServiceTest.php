@@ -8,9 +8,9 @@ use App\Enums\UserClass as UserClassEnum;
 use App\Exceptions\AuthenticationException;
 use App\Repositories\UserRepository;
 use App\Services\RegistrationService;
+use App\Services\SecureTokenService;
 use App\Services\WebAuthService;
 use App\Support\Settings;
-use App\Support\Strings;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Mockery;
@@ -40,6 +40,7 @@ final class RegistrationServiceTest extends TestCase
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
         DB::table('users')->truncate();
         DB::table('loginattempts')->truncate();
+        DB::table('email_confirmation_tokens')->truncate();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
         // Reset Settings static cache so SiteConfig reads fresh DB values
@@ -203,7 +204,7 @@ final class RegistrationServiceTest extends TestCase
     {
         $this->expectException(HttpException::class);
 
-        $this->service()->confirm(999999, 'wrongmd5', '1.2.3.4');
+        $this->service()->confirm(999999, 'wrongtoken', '1.2.3.4');
     }
 
     public function test_confirm_returns_user_if_already_confirmed(): void
@@ -218,46 +219,78 @@ final class RegistrationServiceTest extends TestCase
             'editsecret' => '',
         ]);
 
-        $user = $this->service()->confirm($id, 'wrongmd5', '1.2.3.4');
+        $user = $this->service()->confirm($id, 'wrongtoken', '1.2.3.4');
 
         $this->assertSame('confirmed', $user->status);
     }
 
-    public function test_confirm_throws_404_for_pending_user_with_wrong_md5(): void
+    public function test_confirm_throws_404_for_pending_user_with_wrong_token(): void
     {
-        $secret = 'testsecret456';
         $id = $this->insertUser([
             'username' => 'pendinguser',
             'email' => 'pending@test.com',
-            'secret' => $secret,
+            'secret' => 'testsecret456',
             'passkey' => 'passkey456',
             'status' => 'pending',
-            'editsecret' => $secret,
+            'editsecret' => 'testsecret456',
         ]);
 
         $this->expectException(HttpException::class);
 
-        $this->service()->confirm($id, 'wrongmd5hash', '1.2.3.4');
+        $this->service()->confirm($id, 'wrongtoken', '1.2.3.4');
     }
 
-    public function test_confirm_confirms_pending_user_with_correct_md5(): void
+    public function test_confirm_confirms_pending_user_with_correct_token(): void
     {
-        $secret = 'testsecret789';
         $id = $this->insertUser([
             'username' => 'pendinguser2',
             'email' => 'pending2@test.com',
-            'secret' => $secret,
+            'secret' => 'testsecret789',
             'passkey' => 'passkey789',
             'status' => 'pending',
-            'editsecret' => $secret,
+            'editsecret' => 'testsecret789',
         ]);
 
-        $confirmMd5 = md5(Strings::padHash($secret));
+        // W1-05: Generate a real secure token for this user
+        $tokenService = app(SecureTokenService::class);
+        $token = $tokenService->generate();
+        $tokenService->store('email_confirmation_tokens', $token, [
+            'user_id' => $id,
+            'ip' => '1.2.3.4',
+        ]);
 
-        $user = $this->service()->confirm($id, $confirmMd5, '1.2.3.4');
+        $user = $this->service()->confirm($id, $token, '1.2.3.4');
 
         $this->assertSame('confirmed', $user->status);
         $this->assertSame('', $user->editsecret);
+    }
+
+    public function test_confirm_throws_404_for_token_with_wrong_user_id(): void
+    {
+        $id1 = $this->insertUser([
+            'username' => 'pendinguser3',
+            'email' => 'pending3@test.com',
+            'status' => 'pending',
+            'editsecret' => 'secret3',
+        ]);
+        $id2 = $this->insertUser([
+            'username' => 'pendinguser4',
+            'email' => 'pending4@test.com',
+            'status' => 'pending',
+            'editsecret' => 'secret4',
+        ]);
+
+        // Generate token for id1 but try to confirm id2
+        $tokenService = app(SecureTokenService::class);
+        $token = $tokenService->generate();
+        $tokenService->store('email_confirmation_tokens', $token, [
+            'user_id' => $id1,
+            'ip' => '1.2.3.4',
+        ]);
+
+        $this->expectException(HttpException::class);
+
+        $this->service()->confirm($id2, $token, '1.2.3.4');
     }
 
     // --- resendConfirmation ---

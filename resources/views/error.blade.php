@@ -163,7 +163,6 @@
             }
         }
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 <div class="background"></div>
@@ -172,7 +171,7 @@
 
 <div class="container">
     <div class="error-icon">
-        <i class="fas fa-exclamation-circle"></i>
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 512 512" fill="currentColor"><path d="M256 0C114.6 0 0 114.6 0 256S114.6 512 256 512 512 397.4 512 256 397.4 0 256 0zM232 128h48v160h-48zm0 200h48v48h-48z"/></svg>
     </div>
     <h1 class="error-title">Error</h1>
     <p class="error-message">

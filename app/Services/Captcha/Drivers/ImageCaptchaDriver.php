@@ -113,7 +113,7 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
         $textwidth = $fontwidth * strlen($characters);
         $textheight = $fontheight;
 
-        $randimg = rand(1, 5);
+        $randimg = random_int(1, 5);
         $imagePath = ROOT_PATH."public/pic/regimages/reg{$randimg}.png";
 
         if (! is_file($imagePath)) {
@@ -135,11 +135,11 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
 
         $dots = (int) floor($imgheight * $imgwidth / 35);
         for ($i = 1; $i <= $dots; $i++) {
-            $color = imagecolorallocate($im, rand(0, 255), rand(0, 255), rand(0, 255));
+            $color = imagecolorallocate($im, random_int(0, 255), random_int(0, 255), random_int(0, 255));
             if ($color === false) {
                 continue;
             }
-            imagesetpixel($im, rand(0, $imgwidth - 1), rand(0, $imgheight - 1), $color);
+            imagesetpixel($im, random_int(0, $imgwidth - 1), random_int(0, $imgheight - 1), $color);
         }
 
         $textcolor = imagecolorallocate($im, 0, 0, 0);

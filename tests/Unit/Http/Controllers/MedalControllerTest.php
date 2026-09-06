@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Tests\Unit\Http\Controllers;
 
 use App\Http\Controllers\MedalController;
+use App\Http\Requests\GenericIndexRequest;
+use App\Http\Requests\MedalStoreRequest;
+use App\Http\Requests\MedalUpdateRequest;
 use App\Models\Medal;
 use App\Repositories\MedalRepository;
-use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Validation\ValidationException;
 use Mockery;
@@ -43,7 +45,9 @@ final class MedalControllerTest extends TestCase
             ->andReturn($paginator);
 
         $controller = new MedalController($repository);
-        $request = Request::create('/api/v1/medals', 'GET', []);
+        $request = GenericIndexRequest::create('/api/v1/medals', 'GET', []);
+        $request->setContainer(app());
+        $request->validateResolved();
 
         $result = $controller->index($request);
 
@@ -77,7 +81,10 @@ final class MedalControllerTest extends TestCase
             ->andReturn($medal);
 
         $controller = new MedalController($repository);
-        $request = Request::create('/api/v1/medals', 'POST', $data);
+        $request = MedalStoreRequest::create('/api/v1/medals', 'POST', $data);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $result = $controller->store($request);
 
@@ -94,7 +101,10 @@ final class MedalControllerTest extends TestCase
         $repository->shouldNotReceive('store');
 
         $controller = new MedalController($repository);
-        $request = Request::create('/api/v1/medals', 'POST', []);
+        $request = MedalStoreRequest::create('/api/v1/medals', 'POST', []);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $controller->store($request);
     }
@@ -108,12 +118,15 @@ final class MedalControllerTest extends TestCase
         $repository->shouldNotReceive('store');
 
         $controller = new MedalController($repository);
-        $request = Request::create('/api/v1/medals', 'POST', [
+        $request = MedalStoreRequest::create('/api/v1/medals', 'POST', [
             'name' => 'Test',
             'price' => 100,
             'image_large' => 'not-a-url',
             'image_small' => 'not-a-url',
         ]);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $controller->store($request);
     }
@@ -172,7 +185,10 @@ final class MedalControllerTest extends TestCase
             ->andReturn($medal);
 
         $controller = new MedalController($repository);
-        $request = Request::create('/api/v1/medals/1', 'PUT', $data);
+        $request = MedalUpdateRequest::create('/api/v1/medals/1', 'PUT', $data);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $result = $controller->update($request, 1);
 

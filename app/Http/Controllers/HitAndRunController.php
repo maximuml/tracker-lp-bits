@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\HitAndRunBulkRequest;
+use App\Http\Requests\HitAndRunIndexRequest;
 use App\Http\Requests\HitAndRunRequest;
 use App\Http\Resources\HitAndRunResource;
 use App\Models\User;
 use App\Repositories\HitAndRunRepository;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class HitAndRunController extends Controller
@@ -25,9 +26,9 @@ class HitAndRunController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function index(Request $request): array
+    public function index(HitAndRunIndexRequest $request): array
     {
-        $result = $this->repository->getList($request->all());
+        $result = $this->repository->getList($request->validated());
         $resource = HitAndRunResource::collection($result);
 
         return $this->success($resource);
@@ -111,13 +112,13 @@ class HitAndRunController extends Controller
     /**
      * @return array<int|string, mixed>
      */
-    public function bulkPardon(Request $request): array
+    public function bulkPardon(HitAndRunBulkRequest $request): array
     {
         $user = Auth::user();
         if (! $user instanceof User) {
             return $this->success(['result' => false], 'Unauthenticated');
         }
-        $result = $this->repository->bulkPardon($request->all(), $user);
+        $result = $this->repository->bulkPardon($request->validated(), $user);
 
         return $this->success(['result' => $result], 'Affected: '.intval($result));
     }
@@ -125,13 +126,13 @@ class HitAndRunController extends Controller
     /**
      * @return array<int|string, mixed>
      */
-    public function bulkDelete(Request $request): array
+    public function bulkDelete(HitAndRunBulkRequest $request): array
     {
         $user = Auth::user();
         if (! $user instanceof User) {
             return $this->success(['result' => false], 'Unauthenticated');
         }
-        $result = $this->repository->bulkDelete($request->all(), $user);
+        $result = $this->repository->bulkDelete($request->validated(), $user);
 
         return $this->success(['result' => $result], 'Affected: '.intval($result));
     }

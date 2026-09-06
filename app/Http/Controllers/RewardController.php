@@ -29,7 +29,7 @@ class RewardController extends Controller
      */
     public function index(RewardIndexRequest $request): array
     {
-        $result = $this->repository->getList($request->all());
+        $result = $this->repository->getList($request->validated());
         $resource = RewardResource::collection($result);
         $resource->additional([
             'page_title' => Locale::trans('reward.index.page_title', [], null),

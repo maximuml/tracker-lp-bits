@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SettingIndexRequest;
 use App\Http\Requests\SettingStoreRequest;
 use App\Repositories\SettingRepository;
-use Illuminate\Http\Request;
 
 class SettingController extends Controller
 {
@@ -25,9 +25,9 @@ class SettingController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function index(Request $request): array
+    public function index(SettingIndexRequest $request): array
     {
-        $result = $this->repository->getList($request->all());
+        $result = $this->repository->getList($request->validated());
 
         return $this->success($result);
     }
@@ -39,7 +39,7 @@ class SettingController extends Controller
      */
     public function store(SettingStoreRequest $request): array
     {
-        $data = $request->all();
+        $data = $request->validated();
         $result = $this->repository->store($data);
 
         return $this->success($result, 'Save setting success!');

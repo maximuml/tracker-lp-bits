@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Tests\Unit\Http\Controllers;
 
 use App\Http\Controllers\SettingController;
+use App\Http\Requests\SettingIndexRequest;
 use App\Http\Requests\SettingStoreRequest;
 use App\Repositories\SettingRepository;
-use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Mockery;
 use Tests\TestCase;
@@ -32,7 +32,9 @@ final class SettingControllerTest extends TestCase
             ->andReturn($settings);
 
         $controller = new SettingController($repository);
-        $request = Request::create('/api/v1/settings', 'GET', []);
+        $request = SettingIndexRequest::create('/api/v1/settings', 'GET', []);
+        $request->setContainer(app());
+        $request->validateResolved();
 
         $result = $controller->index($request);
 
@@ -52,7 +54,9 @@ final class SettingControllerTest extends TestCase
             ->andReturn($settings);
 
         $controller = new SettingController($repository);
-        $request = Request::create('/api/v1/settings', 'GET', ['prefix' => 'hr']);
+        $request = SettingIndexRequest::create('/api/v1/settings', 'GET', ['prefix' => 'hr']);
+        $request->setContainer(app());
+        $request->validateResolved();
 
         $result = $controller->index($request);
 

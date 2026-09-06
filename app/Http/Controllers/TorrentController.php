@@ -144,7 +144,7 @@ class TorrentController extends Controller
     public function approval(TorrentApprovalRequest $request): array
     {
         Permission::assertCan(PermissionEnum::TORRENT_APPROVAL);
-        $params = $request->all();
+        $params = $request->validated();
         $this->repository->approval(Auth::user(), $params);
 
         return $this->success($params);

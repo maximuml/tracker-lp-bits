@@ -8,6 +8,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Requests\UidRequest;
 use App\Http\Requests\UserDisableRequest;
 use App\Http\Requests\UserIncrementDecrementRequest;
+use App\Http\Requests\UserIndexRequest;
 use App\Models\User;
 use App\Repositories\ExamRepository;
 use App\Repositories\UserRepository;
@@ -41,7 +42,9 @@ final class UserControllerTest extends TestCase
         $examRepository = Mockery::mock(ExamRepository::class);
 
         $controller = new UserController($repository, $examRepository);
-        $request = Request::create('/api/v1/users', 'GET', []);
+        $request = UserIndexRequest::create('/api/v1/users', 'GET', []);
+        $request->setContainer(app());
+        $request->validateResolved();
 
         $result = $controller->index($request);
 

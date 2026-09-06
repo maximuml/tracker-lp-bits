@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\GenericIndexRequest;
 use App\Http\Requests\UserMedalStoreRequest;
 use App\Http\Requests\UserMedalUpdateRequest;
 use App\Http\Resources\MedalResource;
 use App\Models\UserMedal;
 use App\Repositories\MedalRepository;
 use App\Support\Locale;
-use Illuminate\Http\Request;
 
 class UserMedalController extends Controller
 {
@@ -29,9 +29,9 @@ class UserMedalController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function index(Request $request): array
+    public function index(GenericIndexRequest $request): array
     {
-        $result = $this->repository->getList($request->all());
+        $result = $this->repository->getList($request->validated());
         $resource = MedalResource::collection($result);
         $resource->additional([
             'page_title' => Locale::trans('medal.admin.list.page_title', [], null),
@@ -74,7 +74,7 @@ class UserMedalController extends Controller
      */
     public function update(UserMedalUpdateRequest $request, $id): array
     {
-        $result = $this->repository->update($request->all(), $id);
+        $result = $this->repository->update($request->validated(), $id);
         $resource = new MedalResource($result);
 
         return $this->success($resource);

@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Tests\Unit\Http\Controllers;
 
 use App\Http\Controllers\AgentDenyController;
+use App\Http\Requests\AgentDenyIndexRequest;
 use App\Http\Requests\AgentDenyRequest;
 use App\Models\AgentDeny;
 use App\Repositories\AgentDenyRepository;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Mockery;
 use Tests\TestCase;
@@ -42,7 +42,9 @@ final class AgentDenyControllerTest extends TestCase
             ->andReturn($collection);
 
         $controller = new AgentDenyController($repository);
-        $request = Request::create('/api/v1/agent-denies', 'GET', []);
+        $request = AgentDenyIndexRequest::create('/api/v1/agent-denies', 'GET', []);
+        $request->setContainer(app());
+        $request->validateResolved();
 
         $result = $controller->index($request);
 

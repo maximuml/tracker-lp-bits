@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace Tests\Unit\Http\Controllers;
 
 use App\Http\Controllers\TagController;
+use App\Http\Requests\GenericIndexRequest;
+use App\Http\Requests\TagStoreRequest;
+use App\Http\Requests\TagUpdateRequest;
 use App\Models\Tag;
 use App\Repositories\TagRepository;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Mockery;
 use Tests\TestCase;
@@ -38,7 +40,9 @@ final class TagControllerTest extends TestCase
             ->andReturn($collection);
 
         $controller = new TagController($repository);
-        $request = Request::create('/api/v1/tags', 'GET', []);
+        $request = GenericIndexRequest::create('/api/v1/tags', 'GET', []);
+        $request->setContainer(app());
+        $request->validateResolved();
 
         $result = $controller->index($request);
 
@@ -63,7 +67,10 @@ final class TagControllerTest extends TestCase
             ->andReturn($tag);
 
         $controller = new TagController($repository);
-        $request = Request::create('/api/v1/tags', 'POST', $data);
+        $request = TagStoreRequest::create('/api/v1/tags', 'POST', $data);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $result = $controller->store($request);
 
@@ -80,7 +87,10 @@ final class TagControllerTest extends TestCase
         $repository->shouldNotReceive('store');
 
         $controller = new TagController($repository);
-        $request = Request::create('/api/v1/tags', 'POST', []);
+        $request = TagStoreRequest::create('/api/v1/tags', 'POST', []);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $controller->store($request);
     }
@@ -106,7 +116,10 @@ final class TagControllerTest extends TestCase
             ->andReturn($tag);
 
         $controller = new TagController($repository);
-        $request = Request::create('/api/v1/tags/1', 'PUT', $data);
+        $request = TagUpdateRequest::create('/api/v1/tags/1', 'PUT', $data);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $result = $controller->update($request, 1);
 
@@ -123,7 +136,10 @@ final class TagControllerTest extends TestCase
         $repository->shouldNotReceive('update');
 
         $controller = new TagController($repository);
-        $request = Request::create('/api/v1/tags/1', 'PUT', []);
+        $request = TagUpdateRequest::create('/api/v1/tags/1', 'PUT', []);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
         $controller->update($request, 1);
     }

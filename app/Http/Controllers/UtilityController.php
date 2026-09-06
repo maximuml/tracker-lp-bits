@@ -83,7 +83,7 @@ class UtilityController extends LegacyController
             $currentUser = app(CurrentUser::class)->get() ?? [];
             Logger::writeWithContext((string) ('hacking attempt made by '.($currentUser['username'] ?? 'guest').',uid '.($currentUser['id'] ?? 0)), (string) 'error', (bool) false);
 
-            return response()->json(Api::call(1, "Invalid action: {$action}", $request->all()));
+            return response()->json(Api::call(1, "Invalid action: {$action}", $request->only(['action', 'params'])));
         }
 
         try {
@@ -93,7 +93,7 @@ class UtilityController extends LegacyController
         } catch (\Throwable $exception) {
             Logger::writeWithContext((string) ($exception->getMessage().$exception->getTraceAsString()), (string) 'error', (bool) false);
 
-            return response()->json(Api::failWithContext($exception->getMessage(), $request->all()));
+            return response()->json(Api::failWithContext($exception->getMessage(), $request->only(['action', 'params'])));
         }
     }
 

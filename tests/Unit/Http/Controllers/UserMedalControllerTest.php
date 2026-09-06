@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Tests\Unit\Http\Controllers;
 
 use App\Http\Controllers\UserMedalController;
+use App\Http\Requests\GenericIndexRequest;
 use App\Http\Requests\UserMedalStoreRequest;
 use App\Http\Requests\UserMedalUpdateRequest;
 use App\Models\Medal;
 use App\Repositories\MedalRepository;
-use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Validation\ValidationException;
 use Mockery;
@@ -37,7 +37,9 @@ final class UserMedalControllerTest extends TestCase
             ->andReturn($paginator);
 
         $controller = new UserMedalController($repository);
-        $request = Request::create('/api/v1/user-medals', 'GET', []);
+        $request = GenericIndexRequest::create('/api/v1/user-medals', 'GET', []);
+        $request->setContainer(app());
+        $request->validateResolved();
 
         $result = $controller->index($request);
 

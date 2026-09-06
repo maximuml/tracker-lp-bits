@@ -9,6 +9,7 @@ use App\Enums\SnatchFinished;
 use App\Http\Requests\UidRequest;
 use App\Http\Requests\UserDisableRequest;
 use App\Http\Requests\UserIncrementDecrementRequest;
+use App\Http\Requests\UserIndexRequest;
 use App\Http\Requests\UserResetPasswordRequest;
 use App\Http\Requests\UserStoreRequest;
 use App\Http\Resources\ExamResource;
@@ -38,9 +39,9 @@ class UserController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function index(Request $request): array
+    public function index(UserIndexRequest $request): array
     {
-        $result = $this->repository->getList($request->all());
+        $result = $this->repository->getList($request->validated());
         $resource = UserResource::collection($result);
 
         return $this->success($resource);

@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AgentAllowCheckRequest;
+use App\Http\Requests\AgentAllowIndexRequest;
 use App\Http\Requests\AgentAllowRequest;
 use App\Http\Resources\AgentAllowResource;
 use App\Models\AgentAllow;
 use App\Repositories\AgentAllowRepository;
-use Illuminate\Http\Request;
 
 class AgentAllowController extends Controller
 {
@@ -43,9 +43,9 @@ class AgentAllowController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function index(Request $request): array
+    public function index(AgentAllowIndexRequest $request): array
     {
-        $result = $this->repository->getList($request->all());
+        $result = $this->repository->getList($request->validated());
         $resource = AgentAllowResource::collection($result);
 
         return $this->success($resource);

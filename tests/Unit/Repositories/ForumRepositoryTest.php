@@ -29,7 +29,7 @@ final class ForumRepositoryTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->repository = new ForumRepository;
+        $this->repository = app(ForumRepository::class);
     }
 
     public function test_create_forum_returns_id(): void

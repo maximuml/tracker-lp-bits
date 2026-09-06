@@ -20,6 +20,7 @@ use App\Support\Locale;
 use App\Support\Strings;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
+use App\ViewModels\BonusPageViewModel;
 use Illuminate\Http\Request;
 
 /**
@@ -41,10 +42,8 @@ final class BonusPageService
 
     /**
      * Build the data for the requested action.
-     *
-     * @return array<string, mixed>
      */
-    public function build(Request $request): array
+    public function build(Request $request): BonusPageViewModel
     {
         $curUser = (array) (app(CurrentUser::class)->get() ?? []);
         $lang = (array) (app(Globals::class)->get('lang_mybonus') ?? []);
@@ -78,20 +77,20 @@ final class BonusPageService
             $infoHtml = $this->buildInfoSection($curUser, $lang);
         }
 
-        return [
-            'lang' => $lang,
-            'curUser' => $curUser,
-            'userId' => $userId,
-            'action' => $action,
-            'do' => $do,
-            'msg' => $msg,
-            'bonus' => $bonus,
-            'lockText' => $lockText,
-            'allBonus' => $allBonus,
-            'shopHtml' => $shopHtml,
-            'infoHtml' => $infoHtml,
-            'sitename' => (string) app(Globals::class)->get('SITENAME', ''),
-        ];
+        return new BonusPageViewModel(
+            lang: $lang,
+            curUser: $curUser,
+            userId: $userId,
+            action: $action,
+            do: $do,
+            msg: $msg,
+            bonus: $bonus,
+            lockText: $lockText,
+            allBonus: $allBonus,
+            shopHtml: $shopHtml,
+            infoHtml: $infoHtml,
+            sitename: (string) app(Globals::class)->get('SITENAME', ''),
+        );
     }
 
     /**

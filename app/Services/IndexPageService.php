@@ -19,6 +19,7 @@ use App\Support\Globals;
 use App\Support\Shoutbox;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
+use App\ViewModels\IndexPageViewModel;
 
 /**
  * Prepares section data for the index page, replacing the legacy
@@ -26,8 +27,7 @@ use App\Support\UserDisplay;
  */
 final class IndexPageService
 {
-    /** @return array<string, mixed> */
-    public function build(): array
+    public function build(): IndexPageViewModel
     {
         $curUser = (array) (app(CurrentUser::class)->get() ?? []);
         $lang = (array) (app(Globals::class)->get('lang_index') ?? []);
@@ -79,7 +79,25 @@ final class IndexPageService
             $cache->delete_value('user_'.(int) $curUser['id'].'_unread_news_count');
         }
 
-        return $data;
+        return new IndexPageViewModel(
+            lang: $data['lang'],
+            curUser: $data['curUser'],
+            canNewsManage: $data['canNewsManage'],
+            canPollManage: $data['canPollManage'],
+            canSbManage: $data['canSbManage'],
+            canLog: $data['canLog'],
+            news: $data['news'],
+            shoutbox: $data['shoutbox'],
+            extraModules: $data['extraModules'],
+            forumPosts: $data['forumPosts'],
+            latestTorrents: $data['latestTorrents'],
+            topUploaders: $data['topUploaders'],
+            polls: $data['polls'],
+            stats: $data['stats'],
+            trackerLoad: $data['trackerLoad'],
+            disclaimer: $data['disclaimer'],
+            browserNote: $data['browserNote'],
+        );
     }
 
     /**

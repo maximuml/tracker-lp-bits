@@ -141,8 +141,7 @@ final class UsersearchPageServiceTest extends TestCase
         }, E_NOTICE | E_WARNING | E_USER_NOTICE | E_USER_WARNING);
 
         try {
-            /** @var array<string, mixed> */
-            return $this->service()->build($request);
+            return $this->service()->build($request)->toArray();
         } finally {
             restore_error_handler();
         }

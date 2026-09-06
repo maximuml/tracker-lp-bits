@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Support\CurrentUser;
 use App\Support\Globals;
 use App\Support\LegacyResponse;
+use App\ViewModels\ForumPageViewModel;
 use Illuminate\Http\Request;
 
 /**
@@ -32,10 +33,8 @@ final class ForumPageService
 
     /**
      * Build the data for the requested action.
-     *
-     * @return array<string, mixed>
      */
-    public function build(Request $request): array
+    public function build(Request $request): ForumPageViewModel
     {
         $curUser = (array) (app(CurrentUser::class)->get() ?? []);
         $lang = (array) (app(Globals::class)->get('lang_forums') ?? []);
@@ -69,64 +68,77 @@ final class ForumPageService
 
         $action = htmlspecialchars(trim((string) request()->query('action')));
 
-        $data = [
-            'lang' => $lang,
-            'curUser' => $curUser,
-            'userId' => $userId,
-            'action' => $action,
-            'sitename' => (string) app(Globals::class)->get('SITENAME', ''),
-            'postsperpage' => $postsperpage,
-            'topicsperpage' => $topicsperpage,
-            'todayDate' => $todayDate,
-        ];
+        $sitename = (string) app(Globals::class)->get('SITENAME', '');
 
         // catchup is a query-flag action, not a dispatched section.
         if (((request()->query('catchup') !== null)) && request()->query('catchup') == 1) {
             $this->indexService->catchUp();
         }
 
+        $compose = null;
+        $viewtopic = null;
+        $viewforum = null;
+        $viewunread = null;
+        $search = null;
+        $forums = null;
+
         switch ($action) {
             case 'newtopic':
-                $data['compose'] = $this->composeService->buildNewTopic($lang, $request);
-                $data['action'] = 'newtopic';
+                $compose = $this->composeService->buildNewTopic($lang, $request);
+                $action = 'newtopic';
                 break;
             case 'quotepost':
-                $data['compose'] = $this->composeService->buildQuotePost($lang, $curUser, $request);
-                $data['action'] = 'quotepost';
+                $compose = $this->composeService->buildQuotePost($lang, $curUser, $request);
+                $action = 'quotepost';
                 break;
             case 'reply':
-                $data['compose'] = $this->composeService->buildReply($lang, $request);
-                $data['action'] = 'reply';
+                $compose = $this->composeService->buildReply($lang, $request);
+                $action = 'reply';
                 break;
             case 'editpost':
-                $data['compose'] = $this->composeService->buildEditPost($lang, $curUser, $request);
-                $data['action'] = 'editpost';
+                $compose = $this->composeService->buildEditPost($lang, $curUser, $request);
+                $action = 'editpost';
                 break;
             case 'viewtopic':
-                $data['viewtopic'] = $this->topicViewService->buildViewTopic($lang, $curUser, $userId, $request, $postsperpage);
-                $data['action'] = 'viewtopic';
+                $viewtopic = $this->topicViewService->buildViewTopic($lang, $curUser, $userId, $request, $postsperpage);
+                $action = 'viewtopic';
                 break;
             case 'viewforum':
-                $data['viewforum'] = $this->listingService->buildViewForum($lang, $curUser, $request, $topicsperpage, $postsperpage);
-                $data['action'] = 'viewforum';
+                $viewforum = $this->listingService->buildViewForum($lang, $curUser, $request, $topicsperpage, $postsperpage);
+                $action = 'viewforum';
                 break;
             case 'viewunread':
-                $data['viewunread'] = $this->listingService->buildViewUnread($lang, $curUser);
-                $data['action'] = 'viewunread';
+                $viewunread = $this->listingService->buildViewUnread($lang, $curUser);
+                $action = 'viewunread';
                 break;
             case 'search':
-                $data['search'] = $this->listingService->buildSearch($lang, $topicsperpage);
-                $data['action'] = 'search';
+                $search = $this->listingService->buildSearch($lang, $topicsperpage);
+                $action = 'search';
                 break;
             default:
                 if ($action !== '') {
                     LegacyResponse::abort($lang['std_forum_error'] ?? '', $lang['std_unknown_action'] ?? '');
                 }
-                $data['forums'] = $this->indexService->buildForumsIndex($lang, $curUser, $userId);
-                $data['action'] = 'forums';
+                $forums = $this->indexService->buildForumsIndex($lang, $curUser, $userId);
+                $action = 'forums';
                 break;
         }
 
-        return $data;
+        return new ForumPageViewModel(
+            lang: $lang,
+            curUser: $curUser,
+            userId: $userId,
+            action: $action,
+            sitename: $sitename,
+            postsperpage: $postsperpage,
+            topicsperpage: $topicsperpage,
+            todayDate: $todayDate,
+            compose: $compose,
+            viewtopic: $viewtopic,
+            viewforum: $viewforum,
+            viewunread: $viewunread,
+            search: $search,
+            forums: $forums,
+        );
     }
 }

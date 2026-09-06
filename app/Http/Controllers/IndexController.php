@@ -37,7 +37,7 @@ class IndexController extends Controller
             return $this->handlePollVote($request);
         }
 
-        $data = $this->indexPageService->build();
+        $data = $this->indexPageService->build()->toArray();
 
         return view('index.index', $data);
     }

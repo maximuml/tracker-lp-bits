@@ -6,6 +6,7 @@ namespace App\Repositories;
 
 use App\Auth\Permission;
 use App\Enums\ModelEventEnum;
+use App\Enums\ModerationAction;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserClass as UserClassEnum;
 use App\Enums\UserStatus;
@@ -16,6 +17,7 @@ use App\Models\Message;
 use App\Models\User;
 use App\Models\UserBanLog;
 use App\Models\UserModifyLog;
+use App\Services\ModerationService;
 use App\Services\OutboxService;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
@@ -25,7 +27,6 @@ use App\Support\Format;
 use App\Support\Locale;
 use App\Support\Logger;
 use Carbon\Carbon;
-use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache as CacheFacade;
@@ -41,6 +42,7 @@ class UserModerationRepository extends BaseRepository
     public function __construct(
         private readonly ToolRepository $toolRepository,
         private readonly OutboxService $outboxService = new OutboxService,
+        private readonly ModerationService $moderationService = new ModerationService,
     ) {}
 
     /**
@@ -169,12 +171,14 @@ class UserModerationRepository extends BaseRepository
             $valueAtomic = $valueAtomic * 1024 * 1024 * 1024;
             $formatSize = true;
         }
-        if ($action == 'Increment') {
-            $new = $old + abs($valueAtomic);
-        } elseif ($action == 'Decrement') {
-            $new = $old - abs($valueAtomic);
-        } else {
+        $actionEnum = ModerationAction::tryFrom((string) $action);
+        if ($actionEnum === null) {
             throw new \InvalidArgumentException("Invalid action: $action.");
+        }
+        if ($actionEnum === ModerationAction::INCREMENT) {
+            $new = $old + abs($valueAtomic);
+        } else {
+            $new = $old - abs($valueAtomic);
         }
         if ($new < 0) {
             throw new NexusException("New value($new) lte 0");
@@ -223,14 +227,7 @@ class UserModerationRepository extends BaseRepository
      */
     public function removeLeechWarn($operator, $uid): bool
     {
-        $operator = $this->getUser($operator);
-        $user = User::query()->findOrFail((int) $uid, User::$commonFields);
-        $this->checkPermission($operator, $user);
-        $this->clearCache($user);
-        $user->leechwarn = false;
-        $user->leechwarnuntil = null;
-
-        return $user->save();
+        return $this->moderationService->removeLeechWarn($operator, $uid);
     }
 
     /**
@@ -239,15 +236,7 @@ class UserModerationRepository extends BaseRepository
      */
     public function removeTwoStepAuthentication($operator, $uid): bool
     {
-        if (! $operator->canAccessAdmin()) {
-            throw new \RuntimeException('No permission.');
-        }
-        $user = User::query()->findOrFail((int) $uid, User::$commonFields);
-        $this->checkPermission($operator, $user);
-        $this->clearCache($user);
-        $user->two_step_secret = '';
-
-        return $user->save();
+        return $this->moderationService->removeTwoStepAuthentication($operator, $uid);
     }
 
     /**
@@ -258,43 +247,7 @@ class UserModerationRepository extends BaseRepository
      */
     public function updateDownloadPrivileges($operator, $user, bool $status, $disableReasonKey = null)
     {
-        $targetUser = $this->getUser($user);
-        if ($targetUser === null) {
-            throw new \InvalidArgumentException('Target user not found');
-        }
-        $operator = $this->getUser($operator);
-        $operatorUsername = 'System';
-        if ($operator) {
-            $operatorUsername = $operator->username;
-            $this->checkPermission($operator, $targetUser);
-        }
-        $message = [
-            'added' => now(),
-            'receiver' => $targetUser->id,
-        ];
-        if (! $status) {
-            $update = ['downloadpos' => false];
-            $modComment = date('Y-m-d').' - Download disable by '.$operatorUsername;
-            $msgTransPrefix = 'message.download_disable';
-            if ($disableReasonKey !== null) {
-                $msgTransPrefix .= "_$disableReasonKey";
-            }
-            $message['subject'] = Locale::trans("{$msgTransPrefix}.subject", [], $targetUser->locale);
-            $message['msg'] = Locale::trans("{$msgTransPrefix}.body", ['operator' => $operatorUsername], $targetUser->locale);
-        } else {
-            $update = ['downloadpos' => true];
-            $modComment = date('Y-m-d').' - Download enable by '.$operatorUsername;
-            $message['subject'] = Locale::trans('message.download_enable.subject', [], $targetUser->locale);
-            $message['msg'] = Locale::trans('message.download_enable.body', ['operator' => $operatorUsername], $targetUser->locale);
-        }
-        $result = DB::transaction(function () use ($targetUser, $update, $modComment, $message) {
-            Message::add($message);
-
-            return $targetUser->updateWithModComment($update, $modComment);
-        });
-        $this->clearCache($targetUser);
-
-        return $result;
+        return $this->moderationService->updateDownloadPrivileges($operator, $user, $status, $disableReasonKey);
     }
 
     /**
@@ -306,35 +259,7 @@ class UserModerationRepository extends BaseRepository
      */
     public function updateUploadPrivileges($operator, $user, bool $status)
     {
-        $targetUser = $this->getUser($user);
-        if ($targetUser === null) {
-            throw new \InvalidArgumentException('Target user not found');
-        }
-        $operator = $this->getUser($operator);
-        $operatorUsername = $operator ? $operator->username : 'System';
-        if ($operator) {
-            $this->checkPermission($operator, $targetUser);
-        }
-        $message = ['added' => now(), 'receiver' => $targetUser->id];
-        if (! $status) {
-            $update = ['uploadpos' => false];
-            $modComment = date('Y-m-d').' - Upload disable by '.$operatorUsername;
-            $message['subject'] = Locale::trans('message.upload_disable.subject', [], $targetUser->locale);
-            $message['msg'] = Locale::trans('message.upload_disable.body', ['operator' => $operatorUsername], $targetUser->locale);
-        } else {
-            $update = ['uploadpos' => true];
-            $modComment = date('Y-m-d').' - Upload enable by '.$operatorUsername;
-            $message['subject'] = Locale::trans('message.upload_enable.subject', [], $targetUser->locale);
-            $message['msg'] = Locale::trans('message.upload_enable.body', ['operator' => $operatorUsername], $targetUser->locale);
-        }
-        $result = DB::transaction(function () use ($targetUser, $update, $modComment, $message) {
-            Message::add($message);
-
-            return $targetUser->updateWithModComment($update, $modComment);
-        });
-        $this->clearCache($targetUser);
-
-        return $result;
+        return $this->moderationService->updateUploadPrivileges($operator, $user, $status);
     }
 
     /**
@@ -346,35 +271,7 @@ class UserModerationRepository extends BaseRepository
      */
     public function updateForumPost($operator, $user, bool $status)
     {
-        $targetUser = $this->getUser($user);
-        if ($targetUser === null) {
-            throw new \InvalidArgumentException('Target user not found');
-        }
-        $operator = $this->getUser($operator);
-        $operatorUsername = $operator ? $operator->username : 'System';
-        if ($operator) {
-            $this->checkPermission($operator, $targetUser);
-        }
-        $message = ['added' => now(), 'receiver' => $targetUser->id];
-        if (! $status) {
-            $update = ['forumpost' => false];
-            $modComment = date('Y-m-d').' - Forum posting disabled by '.$operatorUsername;
-            $message['subject'] = Locale::trans('message.forumpost_disable.subject', [], $targetUser->locale);
-            $message['msg'] = Locale::trans('message.forumpost_disable.body', ['operator' => $operatorUsername], $targetUser->locale);
-        } else {
-            $update = ['forumpost' => true];
-            $modComment = date('Y-m-d').' - Forum posting enabled by '.$operatorUsername;
-            $message['subject'] = Locale::trans('message.forumpost_enable.subject', [], $targetUser->locale);
-            $message['msg'] = Locale::trans('message.forumpost_enable.body', ['operator' => $operatorUsername], $targetUser->locale);
-        }
-        $result = DB::transaction(function () use ($targetUser, $update, $modComment, $message) {
-            Message::add($message);
-
-            return $targetUser->updateWithModComment($update, $modComment);
-        });
-        $this->clearCache($targetUser);
-
-        return $result;
+        return $this->moderationService->updateForumPost($operator, $user, $status);
     }
 
     /**
@@ -388,52 +285,7 @@ class UserModerationRepository extends BaseRepository
      */
     public function warnUser($operator, $user, int $weeks, string $reason = '')
     {
-        $targetUser = $this->getUser($user);
-        if ($targetUser === null) {
-            throw new \InvalidArgumentException('Target user not found');
-        }
-        $operator = $this->getUser($operator);
-        $operatorId = $operator ? $operator->id : 0;
-        $operatorUsername = $operator ? $operator->username : 'System';
-        if ($operator) {
-            $this->checkPermission($operator, $targetUser);
-        }
-        $locale = $targetUser->locale;
-        $update = [];
-        $message = ['added' => now(), 'receiver' => $targetUser->id, 'sender' => null];
-
-        if ($weeks === 0) {
-            $update['warned'] = false;
-            $update['warneduntil'] = null;
-            $message['subject'] = Locale::trans('user.msg_warn_removed', [], $locale);
-            $message['msg'] = Locale::trans('user.msg_your_warning_removed_by', [], $locale).$operatorUsername.'.';
-        } else {
-            $update['warned'] = true;
-            $update['lastwarned'] = now()->toDateTimeString();
-            $update['warnedby'] = $operatorId;
-            $update['timeswarned'] = new Expression('timeswarned + 1');
-            if ($weeks == 255) {
-                $update['warneduntil'] = null;
-                $msg = Locale::trans('user.msg_you_are_warned_by', [], $locale).$operatorUsername.'.'.($reason ? Locale::trans('user.msg_reason', [], $locale).$reason : '');
-            } else {
-                $warneduntil = date('Y-m-d H:i:s', strtotime(date('Y-m-d H:i:s')) + $weeks * 604800);
-                $update['warneduntil'] = $warneduntil;
-                $dur = $weeks.Locale::trans('user.msg_week', [], $locale).($weeks > 1 ? Locale::trans('user.msg_s', [], $locale) : '');
-                $msg = Locale::trans('user.msg_you_are_warned_for', [], $locale).$dur.Locale::trans('user.msg_by', [], $locale).$operatorUsername.'.'.($reason ? Locale::trans('user.msg_reason', [], $locale).$reason : '');
-            }
-            $message['subject'] = Locale::trans('user.msg_you_are_warned', [], $locale);
-            $message['msg'] = $msg;
-        }
-
-        $result = DB::transaction(function () use ($targetUser, $update, $message) {
-            Message::add($message);
-            $modComment = date('Y-m-d').' - Warning updated';
-
-            return $targetUser->updateWithModComment($update, $modComment);
-        });
-        $this->clearCache($targetUser);
-
-        return $result;
+        return $this->moderationService->warnUser($operator, $user, $weeks, $reason);
     }
 
     /**

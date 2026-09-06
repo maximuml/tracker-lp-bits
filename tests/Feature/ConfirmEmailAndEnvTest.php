@@ -11,7 +11,7 @@ use Tests\TestCase;
  * address before writing it to the database, and that .env.example is
  * sanitized (no real secrets).
  */
-final class Phase15ConfirmEmailAndEnvTest extends TestCase
+final class ConfirmEmailAndEnvTest extends TestCase
 {
     use DatabaseTransactions;
 

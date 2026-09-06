@@ -12,7 +12,7 @@ use Tests\TestCase;
  * list has been reduced to only webhooks and legacy AJAX endpoints
  * that cannot use CSRF tokens (external services, raw XHR without csrf.js).
  */
-final class Phase11CsrfEnforcementTest extends TestCase
+final class CsrfEnforcementTest extends TestCase
 {
     use DatabaseTransactions;
 

@@ -12,7 +12,7 @@ use Tests\TestCase;
  * Filament StaffMessageResource, and that modtask actions (warn, uploadpos,
  * downloadpos, forumpost) are available as UserProfile header actions.
  */
-final class Phase54ModtaskStaffMessageRedirectTest extends TestCase
+final class ModtaskStaffMessageRedirectTest extends TestCase
 {
     use DatabaseTransactions;
 

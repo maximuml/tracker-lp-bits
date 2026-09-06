@@ -10,7 +10,7 @@ use Tests\TestCase;
  * Phase 5.7: verify that the legacy catmanage/forummanage/moforums/fields/formats/videoformats
  * endpoints redirect to the corresponding Filament Section resources.
  */
-final class Phase57SectionResourcesRedirectTest extends TestCase
+final class SectionResourcesRedirectTest extends TestCase
 {
     use DatabaseTransactions;
 

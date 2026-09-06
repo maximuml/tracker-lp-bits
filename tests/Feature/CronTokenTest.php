@@ -13,7 +13,7 @@ use Tests\TestCase;
  * when a valid CRON_TOKEN query parameter is supplied; all other
  * requests receive 403 Forbidden.
  */
-final class Phase12CronTokenTest extends TestCase
+final class CronTokenTest extends TestCase
 {
     use DatabaseTransactions;
 

@@ -15,7 +15,7 @@ use Tests\TestCase;
  * legacy sha256/md5 hashes are verified correctly, and rehash-on-login
  * upgrades legacy hashes to argon2id.
  */
-final class Phase13PasswordArgon2idTest extends TestCase
+final class PasswordArgon2idTest extends TestCase
 {
     use DatabaseTransactions;
 

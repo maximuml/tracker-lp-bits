@@ -11,7 +11,7 @@ use Tests\TestCase;
  * Phase 5.2: verify that the legacy donorlist/warned/nowarn endpoints redirect
  * to the Filament UserResource with appropriate filters.
  */
-final class Phase52DonorWarnedRedirectTest extends TestCase
+final class DonorWarnedRedirectTest extends TestCase
 {
     use DatabaseTransactions;
 

@@ -10,7 +10,7 @@ use Tests\TestCase;
  * Phase 5.3: verify that the legacy bans/cheaters/iphistory/ipcheck/ipsearch
  * endpoints redirect to the Filament SecurityResource group.
  */
-final class Phase53SecurityRedirectTest extends TestCase
+final class SecurityRedirectTest extends TestCase
 {
     use DatabaseTransactions;
 

@@ -12,7 +12,7 @@ use Tests\TestCase;
  * Phase 1.6: verify that the /ajax endpoint only dispatches actions
  * that are explicitly listed in AjaxService::ALLOWED_ACTIONS.
  */
-final class Phase16AjaxWhitelistTest extends TestCase
+final class AjaxWhitelistTest extends TestCase
 {
     use DatabaseTransactions;
 

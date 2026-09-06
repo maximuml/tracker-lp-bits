@@ -231,6 +231,10 @@ jobs:
       - name: Run PHPUnit unit tests
         run: DB_DATABASE=nexusphp_unit_testing vendor/bin/phpunit --testsuite Unit --no-coverage
 
+      - name: Run architecture ratchet tests
+        if: matrix.php == '8.5' && matrix.mysql == '9.0'
+        run: DB_DATABASE=nexusphp_unit_testing vendor/bin/phpunit --testsuite Architecture --no-coverage
+
   coverage:
     name: Code coverage
     runs-on: ubuntu-latest

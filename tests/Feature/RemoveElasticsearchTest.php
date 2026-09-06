@@ -17,7 +17,7 @@ use Tests\TestCase;
  * codebase — no SearchRepository class, no ES listener, no ES commands,
  * and no ES env vars in .env.example.
  */
-final class Phase41RemoveElasticsearchTest extends TestCase
+final class RemoveElasticsearchTest extends TestCase
 {
     use DatabaseTransactions;
 

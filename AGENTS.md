@@ -24,8 +24,9 @@ PHP 8.4+, MySQL, Redis, MeiliSearch. Docker Compose stack for local development.
 - `app/Support/Install/` — legacy NexusPHP install/update scripts (standalone, `IN_NEXUS=true`)
 - `routes/legacy/` — legacy route mappings (PHP file routes)
 - `config/` — Laravel configuration
-- `database/migrations/` — 75 migrations
-- `tests/` — 108 test files (885 tests)
+- `database/migrations/` — 215 migrations
+- `tests/` — 3465 tests (Unit + Feature + Architecture)
+- `docs/` — project documentation (runtime binaries, ADRs)
 
 ## Build & run commands
 
@@ -52,7 +53,10 @@ docker compose exec -T php vendor/bin/phpstan analyse --no-progress --memory-lim
 
 # Tests (uses isolated nexusphp_testing DB — never truncates dev tables)
 docker compose exec -T redis redis-cli -a "${REDIS_PASSWORD}" FLUSHDB
-docker compose exec -T php vendor/bin/phpunit --no-coverage
+DB_DATABASE=nexusphp_testing docker compose exec -T -e DB_DATABASE=nexusphp_testing php vendor/bin/phpunit --no-coverage
+
+# Architecture ratchet tests only
+DB_DATABASE=nexusphp_testing docker compose exec -T -e DB_DATABASE=nexusphp_testing php vendor/bin/phpunit --testsuite Architecture --no-coverage
 
 # Security audit
 docker compose exec -T php composer audit

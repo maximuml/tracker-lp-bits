@@ -10,7 +10,7 @@ use Tests\TestCase;
  * Phase 5.5: verify that the legacy stats/allagents endpoints redirect
  * to the Filament dashboard, which now hosts the equivalent widgets.
  */
-final class Phase55DashboardWidgetsRedirectTest extends TestCase
+final class DashboardWidgetsRedirectTest extends TestCase
 {
     use DatabaseTransactions;
 

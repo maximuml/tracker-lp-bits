@@ -17,7 +17,7 @@ use Tests\TestCase;
  * - signature = hmac_sha256(passkey + timestamp, login_secret)
  * - timestamp must be within ±5 minutes of server time
  */
-final class Phase14PasskeyPostLoginTest extends TestCase
+final class PasskeyPostLoginTest extends TestCase
 {
     use DatabaseTransactions;
 

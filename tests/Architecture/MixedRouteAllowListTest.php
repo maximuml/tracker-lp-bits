@@ -24,6 +24,36 @@ use Tests\TestCase;
  */
 final class MixedRouteAllowListTest extends TestCase
 {
+    /**
+     * W0-06: Maximum allowed mixed-method route entries.
+     *
+     * Current baseline: 68 entries. This number must only decrease as
+     * routes are split into separate GET/POST actions (W1-01).
+     *
+     * To lower: split a Route::match into Route::get + Route::post,
+     * remove the entry from MixedRouteAllowList::entries(), and
+     * lower this constant.
+     */
+    private const MAX_ALLOWED_ENTRIES = 68;
+
+    public function test_allow_list_count_does_not_exceed_target(): void
+    {
+        $count = count(MixedRouteAllowList::entries());
+
+        $this->assertLessThanOrEqual(
+            self::MAX_ALLOWED_ENTRIES,
+            $count,
+            sprintf(
+                'MixedRouteAllowList has %d entries, exceeding the target of %d. '
+               .'Split mixed routes into separate Route::get()/Route::post() and '
+               .'remove entries from the allow-list. '
+               .'If this increase is intentional, lower MAX_ALLOWED_ENTRIES after removing entries elsewhere.',
+                $count,
+                self::MAX_ALLOWED_ENTRIES,
+            ),
+        );
+    }
+
     public function test_all_mixed_method_routes_are_in_allow_list(): void
     {
         $allowList = MixedRouteAllowList::entries();

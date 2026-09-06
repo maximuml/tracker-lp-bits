@@ -11,7 +11,7 @@ use Tests\TestCase;
  * Phase 5.1: verify that the legacy checkuser/takeconfirm endpoints redirect
  * to the Filament UserResource instead of rendering the old admin pages.
  */
-final class Phase51CheckuserRedirectTest extends TestCase
+final class CheckuserRedirectTest extends TestCase
 {
     use DatabaseTransactions;
 

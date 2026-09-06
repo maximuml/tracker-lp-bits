@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Redis;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
-class Phase20ApiParityTest extends TestCase
+class ApiParityTest extends TestCase
 {
     use DatabaseTransactions;
 

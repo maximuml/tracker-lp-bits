@@ -33,6 +33,20 @@
       "matchManagers": ["regex"],
       "matchPackagePatterns": ["redis-"],
       "groupName": "PECL extensions"
+    },
+    {
+      "description": "Auto-merge semver-safe dev dependency updates after 7 days stability",
+      "matchDepTypes": ["devDependencies", "require-dev"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "minimumReleaseAge": "7 days",
+      "automerge": true,
+      "automergeType": "pr",
+      "labels": ["dependencies", "renovate", "automerge"]
+    },
+    {
+      "description": "Never auto-merge production dependencies — require manual review",
+      "matchDepTypes": ["dependencies", "require"],
+      "automerge": false
     }
   ],
   "regexManagers": [

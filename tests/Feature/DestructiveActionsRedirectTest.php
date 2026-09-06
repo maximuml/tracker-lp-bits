@@ -10,7 +10,7 @@ use Tests\TestCase;
  * Phase 5.6: verify that the legacy delacctadmin/deletedisabled/massmail/maxlogin
  * endpoints redirect to the Filament SystemActions page and LoginAttemptResource.
  */
-final class Phase56DestructiveActionsRedirectTest extends TestCase
+final class DestructiveActionsRedirectTest extends TestCase
 {
     use DatabaseTransactions;
 

@@ -190,6 +190,87 @@ class User extends Authenticatable implements FilamentUser, HasName
 
     private const USER_ENABLE_LATELY = 'user_enable_lately:%s';
 
+    /**
+     * W3-01: Maps partitioned column names to their partition table.
+     * Used by UserPartitionObserver to decide which partition table(s)
+     * to update during dual-write. The columns remain on the users
+     * table during phase 1 — this mapping only drives the observer.
+     *
+     * @var array<string, string>
+     */
+    public static array $partitionedColumns = [
+        // user_preferences
+        'stylesheet' => 'user_preferences',
+        'caticon' => 'user_preferences',
+        'fontsize' => 'user_preferences',
+        'torrentsperpage' => 'user_preferences',
+        'topicsperpage' => 'user_preferences',
+        'postsperpage' => 'user_preferences',
+        'clicktopic' => 'user_preferences',
+        'tooltip' => 'user_preferences',
+        'timetype' => 'user_preferences',
+        'appendpromotion' => 'user_preferences',
+        'appendnew' => 'user_preferences',
+        'appendpicked' => 'user_preferences',
+        'appendsticky' => 'user_preferences',
+        'avatars' => 'user_preferences',
+        'bmicon' => 'user_preferences',
+        'commentpm' => 'user_preferences',
+        'deletepms' => 'user_preferences',
+        'dlicon' => 'user_preferences',
+        'forumpost' => 'user_preferences',
+        'savepms' => 'user_preferences',
+        'showclienterror' => 'user_preferences',
+        'showcomment' => 'user_preferences',
+        'showcomnum' => 'user_preferences',
+        'showdescription' => 'user_preferences',
+        'showimdb' => 'user_preferences',
+        'showlastcom' => 'user_preferences',
+        'showlastpost' => 'user_preferences',
+        'shownfo' => 'user_preferences',
+        'showsmalldescr' => 'user_preferences',
+        'signatures' => 'user_preferences',
+        'acceptpms' => 'user_preferences',
+        'notifs' => 'user_preferences',
+        'lang' => 'user_preferences',
+        'sbnum' => 'user_preferences',
+        'sbrefresh' => 'user_preferences',
+        'showdlnotice' => 'user_preferences',
+        'clientselect' => 'user_preferences',
+        'info' => 'user_preferences',
+        'support' => 'user_preferences',
+        'stafffor' => 'user_preferences',
+        'supportfor' => 'user_preferences',
+        'pickfor' => 'user_preferences',
+        'supportlang' => 'user_preferences',
+        'page' => 'user_preferences',
+        'signature' => 'user_preferences',
+        // user_activity
+        'last_login' => 'user_activity',
+        'last_access' => 'user_activity',
+        'last_home' => 'user_activity',
+        'last_offer' => 'user_activity',
+        'forum_access' => 'user_activity',
+        'last_staffmsg' => 'user_activity',
+        'last_pm' => 'user_activity',
+        'last_comment' => 'user_activity',
+        'last_post' => 'user_activity',
+        'last_browse' => 'user_activity',
+        'last_music' => 'user_activity',
+        'last_catchup' => 'user_activity',
+        'last_announce_at' => 'user_activity',
+        // user_seed_stats
+        'seed_points' => 'user_seed_stats',
+        'seed_points_per_hour' => 'user_seed_stats',
+        'seed_bonus_per_hour' => 'user_seed_stats',
+        'seed_points_updated_at' => 'user_seed_stats',
+        'seed_time_updated_at' => 'user_seed_stats',
+        'seeding_torrent_count' => 'user_seed_stats',
+        'seeding_torrent_size' => 'user_seed_stats',
+        'attendance_card' => 'user_seed_stats',
+        'offer_allowed_count' => 'user_seed_stats',
+    ];
+
     public function getConnectionName(): string
     {
         return Config::get('nexus.database.default', null);

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\DTOs\Auth\ActorContext;
+use App\Models\User;
+use App\Observers\UserPartitionObserver;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\DestructiveEnvironmentGuard;
@@ -149,6 +151,9 @@ class AppServiceProvider extends ServiceProvider
         // Register SafeHtml as a stringable type so {{ $safeHtml }}
         // automatically calls __toString() → toHtml()
         Blade::stringable(SafeHtml::class, static fn (SafeHtml $html): string => $html->toHtml());
+
+        // W3-01: Register the dual-write observer for user partitioning.
+        User::observe(UserPartitionObserver::class);
     }
 
     private function customScheduleTask(): void

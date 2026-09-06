@@ -33,7 +33,8 @@ final class SecurityHeadersTest extends TestCase
         $this->assertStringNotContainsString("'unsafe-eval'", $csp);
         $this->assertStringContainsString("object-src 'none'", $csp);
         $this->assertStringContainsString('https://challenges.cloudflare.com', $csp);
-        $this->assertStringContainsString('https://fonts.googleapis.com', $csp);
+        $this->assertStringNotContainsString('https://fonts.googleapis.com', $csp);
+        $this->assertStringNotContainsString('https://cdnjs.cloudflare.com', $csp);
         $this->assertStringContainsString('https://www.paypal.com', $csp);
     }
 

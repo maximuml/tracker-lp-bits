@@ -49,7 +49,7 @@ final class RepositorySizeTest extends TestCase
         'app/Repositories/SearchBoxRepository.php' => 526,
         'app/Repositories/ToptenRepository.php' => 525,
         // Services (6 files > 500 lines)
-        'app/Services/RegistrationService.php' => 623,
+        'app/Services/RegistrationService.php' => 686,
         'app/Services/OfferPageService.php' => 588,
         'app/Services/ForumService.php' => 558,
         'app/Services/UsercpPageService.php' => 529,

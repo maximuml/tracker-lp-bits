@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Http\LegacyScriptContext;
+use App\Http\LegacyUrlRewriter;
 use App\Support\Network;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
@@ -34,6 +36,8 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->configureLegacyRouting();
+
         $this->configureRateLimiting();
 
         $this->routes(function () {
@@ -56,6 +60,23 @@ class RouteServiceProvider extends ServiceProvider
                 ->group(base_path('routes/tracker.php'));
 
         });
+    }
+
+    /**
+     * Register the legacy URL rewriter and route parameter patterns.
+     *
+     * The LegacyUrlRewriter handles per-request rewriting of legacy .php URLs
+     * to canonical Laravel routes (e.g. /details.php?id=1 → /details/1).
+     * Route::pattern declarations enforce numeric constraints on legacy route
+     * parameters so that malformed IDs are rejected before reaching controllers.
+     */
+    protected function configureLegacyRouting(): void
+    {
+        $this->app->singleton(LegacyUrlRewriter::class);
+        $this->app->singleton(LegacyScriptContext::class);
+
+        Route::pattern('id', '[0-9]+');
+        Route::pattern('commentId', '[0-9]+');
     }
 
     /**

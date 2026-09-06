@@ -36,6 +36,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Token Hashing
+    |--------------------------------------------------------------------------
+    |
+    | When enabled, personal access tokens are stored as SHA-256 hashes in
+    | the database. This means a database leak does not expose valid API
+    | tokens. Existing plaintext tokens must be re-issued after enabling.
+    |
+    */
+
+    'hash' => true,
+
+    /*
+    |--------------------------------------------------------------------------
     | Sanctum Middleware
     |--------------------------------------------------------------------------
     |

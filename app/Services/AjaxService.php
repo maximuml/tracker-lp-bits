@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\DTOs\Auth\ActorContext;
 use App\Models\Offer;
 use App\Models\User;
 use App\Repositories\AttendanceRepository;
@@ -148,8 +149,8 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public function clearShoutBox(array $params): mixed
     {
-        $CURUSER = app(CurrentUser::class)->get() ?? [];
-        if (! $this->shoutboxService->clearAll($CURUSER)) {
+        $actor = app(ActorContext::class);
+        if (! $this->shoutboxService->clearAll($actor)) {
             throw new \RuntimeException('No permission');
         }
 
@@ -159,7 +160,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public function shoutboxPost(array $params): mixed
     {
-        $CURUSER = app(CurrentUser::class)->get() ?? [];
+        $actor = app(ActorContext::class);
         $text = trim((string) ($params['text'] ?? $params['content'] ?? ''));
         if ($text === '') {
             throw new \InvalidArgumentException('Message cannot be empty');
@@ -167,7 +168,7 @@ final class AjaxService
         if (mb_strlen($text) > Shoutbox::MAX_MESSAGE_LENGTH) {
             throw new \InvalidArgumentException('Message too long');
         }
-        if (! $this->shoutboxService->postMessage($CURUSER, $text)) {
+        if (! $this->shoutboxService->postMessage($actor, $text)) {
             throw new \RuntimeException('Speaking too often or no permission');
         }
 
@@ -177,7 +178,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public function shoutboxEdit(array $params): mixed
     {
-        $CURUSER = app(CurrentUser::class)->get() ?? [];
+        $actor = app(ActorContext::class);
         $id = (int) ($params['id'] ?? 0);
         $text = trim((string) ($params['text'] ?? ''));
         if ($id <= 0 || $text === '') {
@@ -186,7 +187,7 @@ final class AjaxService
         if (mb_strlen($text) > Shoutbox::MAX_MESSAGE_LENGTH) {
             throw new \InvalidArgumentException('Message too long');
         }
-        if (! $this->shoutboxService->editMessage($CURUSER, $id, $text)) {
+        if (! $this->shoutboxService->editMessage($actor, $id, $text)) {
             throw new \RuntimeException('Message not found, no permission, edit window expired, or editing too often');
         }
 
@@ -196,12 +197,12 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public function shoutboxDelete(array $params): mixed
     {
-        $CURUSER = app(CurrentUser::class)->get() ?? [];
+        $actor = app(ActorContext::class);
         $id = (int) ($params['id'] ?? 0);
         if ($id <= 0) {
             throw new \InvalidArgumentException('Invalid input');
         }
-        if (! $this->shoutboxService->deleteMessage($CURUSER, $id)) {
+        if (! $this->shoutboxService->deleteMessage($actor, $id)) {
             throw new \RuntimeException('No permission, delete window expired, or deleting too often');
         }
 
@@ -211,10 +212,10 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public function shoutboxReact(array $params): mixed
     {
-        $CURUSER = app(CurrentUser::class)->get() ?? [];
+        $actor = app(ActorContext::class);
         $id = (int) ($params['id'] ?? 0);
         $reaction = (string) ($params['reaction'] ?? '');
-        $result = $this->shoutboxService->toggleReaction($CURUSER, $id, $reaction);
+        $result = $this->shoutboxService->toggleReaction($actor, $id, $reaction);
         if ($result === null) {
             throw new \InvalidArgumentException('Invalid reaction or reacting too often');
         }

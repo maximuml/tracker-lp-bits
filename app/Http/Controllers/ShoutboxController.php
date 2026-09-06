@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Auth\Permission;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Repositories\ShoutboxRepository;
 use App\Services\ShoutboxService;
@@ -12,7 +13,6 @@ use App\Support\CurrentUser;
 use App\Support\Globals;
 use App\Support\LegacyHeaderBag;
 use App\Support\Lock;
-use App\Support\Permissions;
 use App\Support\Shoutbox;
 use App\Support\UserDisplay;
 use App\Support\Validators;
@@ -42,12 +42,13 @@ class ShoutboxController extends LegacyController
 
     public function shoutbox(Request $request): Response
     {
-        $currentUser = app(CurrentUser::class)->get() ?? [];
-        $currentUserId = (int) ($currentUser['id'] ?? 0);
+        $actor = app(ActorContext::class);
+        $currentUser = $actor->toLegacyArray();
+        $currentUserId = $actor->id;
 
         $del = (int) $request->input('del', 0);
-        if ($del > 0 && Validators::isId($del) && Permissions::userCan(PermissionEnum::SB_MANAGE->value, false, $currentUserId)) {
-            $this->shoutboxService->deleteMessage($currentUser, $del);
+        if ($del > 0 && Validators::isId($del) && $actor->can(PermissionEnum::SB_MANAGE)) {
+            $this->shoutboxService->deleteMessage($actor, $del);
         }
 
         if ($request->input('sent') === 'yes' && $request->filled('shbox_text') && $currentUserId > 0) {
@@ -56,7 +57,7 @@ class ShoutboxController extends LegacyController
                 return response('Message too long', 400, ['Content-Type' => 'text/plain; charset=utf-8']);
             }
 
-            if (! $this->shoutboxService->postMessage($currentUser, $text)) {
+            if (! $this->shoutboxService->postMessage($actor, $text)) {
                 return response('speaking too often', 429, ['Content-Type' => 'text/plain; charset=utf-8']);
             }
         }
@@ -85,7 +86,7 @@ class ShoutboxController extends LegacyController
         }
 
         $langShoutbox = (array) (app(Globals::class)->get('lang_shoutbox') ?? []);
-        $isStaff = Permissions::userCan(PermissionEnum::SB_MANAGE->value, false, $currentUserId);
+        $isStaff = $actor->can(PermissionEnum::SB_MANAGE);
 
         $content = view('shoutbox.index', [
             'CURUSER' => $currentUser,

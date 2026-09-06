@@ -14,6 +14,7 @@ use App\Models\Message;
 use App\Models\User;
 use App\Models\UserMeta;
 use App\Models\UserModifyLog;
+use App\Services\UserStatsService;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
 use App\Support\Email;
@@ -47,6 +48,7 @@ class UserRepository extends BaseRepository
 {
     public function __construct(
         private readonly UserModerationRepository $userModerationRepository,
+        private readonly UserStatsService $statsService = new UserStatsService,
     ) {
         //
     }
@@ -133,7 +135,7 @@ class UserRepository extends BaseRepository
             $idArr[] = $user->id;
         }
         if ($hasFieldSeedingData = $apiQueryBuilder->hasIncludeField('seeding_leeching_data')) {
-            $seedingData = $this->listUserSeedingLeechingData($idArr);
+            $seedingData = $this->statsService->listUserSeedingLeechingData($idArr);
         }
         foreach ($userList as $user) {
             $id = $user->id;
@@ -464,47 +466,6 @@ class UserRepository extends BaseRepository
         }
 
         return $loginLog;
-    }
-
-    /**
-     * get user seeding/leeching count and size
-     *
-     * @param  array<int|string, mixed>  $userIdArr
-     * @return array<int|string, mixed>
-     *
-     * @see calculate_seed_bonus()
-     */
-    private function listUserSeedingLeechingData(array $userIdArr)
-    {
-        $minSize = SiteConfig::current()->bonus->minSize(0);
-        $data = DB::table('torrents')
-            ->leftJoin('peers', 'peers.torrent', '=', 'torrents.id')
-            ->select('peers.userid', 'peers.seeder', 'torrents.size')
-            ->whereIn('peers.userid', $userIdArr)
-            ->where('torrents.size', '>', $minSize)
-            ->groupBy('peers.torrent', 'peers.peer_id', 'peers.userid', 'peers.seeder')
-            ->get();
-        $result = [];
-        foreach ($data as $row) {
-            $row = (array) $row;
-            if (! isset($result[$row['userid']])) {
-                $result[$row['userid']] = [
-                    'seeding_count' => 0,
-                    'seeding_size' => 0,
-                    'leeching_count' => 0,
-                    'leeching_size' => 0,
-                ];
-            }
-            if ($row['seeder'] == 1) {
-                $result[$row['userid']]['seeding_count'] += 1;
-                $result[$row['userid']]['seeding_size'] += $row['size'];
-            } else {
-                $result[$row['userid']]['leeching_count'] += 1;
-                $result[$row['userid']]['leeching_size'] += $row['size'];
-            }
-        }
-
-        return $result;
     }
 
     /**

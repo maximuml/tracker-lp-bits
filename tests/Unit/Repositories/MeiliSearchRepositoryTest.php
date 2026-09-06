@@ -24,7 +24,7 @@ final class MeiliSearchRepositoryTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->repository = new MeiliSearchRepository;
+        $this->repository = app(MeiliSearchRepository::class);
     }
 
     public function test_format_value_for_meili_converts_yes_to_int_for_yesno_field(): void

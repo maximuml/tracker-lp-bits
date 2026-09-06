@@ -28,7 +28,7 @@ final class ToolRepositoryTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->repository = new ToolRepository;
+        $this->repository = app(ToolRepository::class);
     }
 
     public function test_get_notification_count_returns_array_with_expected_keys(): void

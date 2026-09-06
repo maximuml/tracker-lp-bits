@@ -11,6 +11,8 @@ use App\Repositories\TorrentDownloadRepository;
 use App\Repositories\TorrentModerationRepository;
 use App\Repositories\TorrentPurchaseRepository;
 use App\Repositories\TorrentRepository;
+use App\Services\TorrentPromotionService;
+use App\Services\TorrentStatsService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -34,6 +36,8 @@ final class TorrentRepositoryTest extends TestCase
             app(TorrentDownloadRepository::class),
             app(TorrentPurchaseRepository::class),
             app(TorrentModerationRepository::class),
+            app(TorrentStatsService::class),
+            app(TorrentPromotionService::class),
         );
     }
 

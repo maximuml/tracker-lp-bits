@@ -5,37 +5,31 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Enums\BookmarkFilter;
-use App\Enums\PeerSeeder;
-use App\Enums\SnatchFinished;
 use App\Enums\TorrentVisible;
 use App\Exceptions\NexusException;
 use App\Http\Resources\TorrentResource;
 use App\Models\AudioCodec;
-use App\Models\Bookmark;
 use App\Models\Category;
 use App\Models\Codec;
 use App\Models\Media;
-use App\Models\Peer;
 use App\Models\Processing;
 use App\Models\SearchBox;
-use App\Models\Snatch;
 use App\Models\Source;
 use App\Models\Standard;
 use App\Models\Torrent;
 use App\Models\TorrentTag;
 use App\Models\User;
+use App\Services\TorrentPromotionService;
+use App\Services\TorrentStatsService;
 use App\Support\Config\SiteConfig;
 use App\Support\Description;
-use App\Support\Format;
 use App\Support\Locale;
 use App\Support\Logger;
-use App\Support\Strings;
 use App\Support\Torrent\TorrentStatus;
 use App\Utils\ApiQueryBuilder;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Torrent repository: listing, detail, peer/snatch, and presentation helpers.
@@ -52,6 +46,8 @@ class TorrentRepository extends BaseRepository
         private readonly TorrentDownloadRepository $downloadRepository,
         private readonly TorrentPurchaseRepository $purchaseRepository,
         private readonly TorrentModerationRepository $moderationRepository,
+        private readonly TorrentStatsService $statsService,
+        private readonly TorrentPromotionService $promotionService,
     ) {}
 
     /** @var array<int, string> */
@@ -314,79 +310,25 @@ class TorrentRepository extends BaseRepository
      */
     public function listPeers($torrentId)
     {
-        $seederList = $leecherList = collect();
-        $peers = Peer::query()
-            ->where('torrent', $torrentId)
-            ->groupBy('peer_id')
-            ->with(['user', 'relative_torrent'])
-            ->get()
-            ->groupBy('seeder');
-        $seederGroup = $peers->get(PeerSeeder::YES->value);
-        if ($seederGroup instanceof Collection) {
-            $seederList = $seederGroup->sort(function ($a, $b) {
-                $x = $a->uploaded;
-                $y = $b->uploaded;
-                if ($x == $y) {
-                    return 0;
-                }
-                if ($x < $y) {
-                    return 1;
-                }
-
-                return -1;
-            });
-            $seederList = $this->formatPeers($seederList);
-        }
-        $leecherGroup = $peers->get(PeerSeeder::NO->value);
-        if ($leecherGroup instanceof Collection) {
-            $leecherList = $leecherGroup->sort(function ($a, $b) {
-                $x = $a->to_go;
-                $y = $b->to_go;
-                if ($x == $y) {
-                    return 0;
-                }
-                if ($x < $y) {
-                    return -1;
-                }
-
-                return 1;
-            });
-            $leecherList = $this->formatPeers($leecherList);
-        }
-
-        return [
-            'seeder_list' => $seederList,
-            'leecher_list' => $leecherList,
-        ];
-
+        return $this->statsService->listPeers($torrentId);
     }
 
     /** @param  mixed  $peer */
     public function getPeerUploadSpeed($peer): string
     {
-        $diff = $peer->uploaded - $peer->uploadoffset;
-        $seconds = max(1, $peer->started->diffInSeconds($peer->last_action, true));
-
-        return Format::size($diff / $seconds).'/s';
+        return $this->statsService->getPeerUploadSpeed($peer);
     }
 
     /** @param  mixed  $peer */
     public function getPeerDownloadSpeed($peer): string
     {
-        $diff = $peer->downloaded - $peer->downloadoffset;
-        if ($peer->isSeeder()) {
-            $seconds = max(1, $peer->started->diffInSeconds($peer->finishedat, true));
-        } else {
-            $seconds = max(1, $peer->started->diffInSeconds($peer->last_action, true));
-        }
-
-        return Format::size($diff / $seconds).'/s';
+        return $this->statsService->getPeerDownloadSpeed($peer);
     }
 
     /** @param  mixed  $peer */
     public function getDownloadProgress($peer): string
     {
-        return sprintf('%.2f%%', 100 * (1 - ($peer->to_go / $peer->relative_torrent->size)));
+        return $this->statsService->getDownloadProgress($peer);
     }
 
     /**
@@ -395,34 +337,7 @@ class TorrentRepository extends BaseRepository
      */
     public function getShareRatio($peer)
     {
-        if ($peer->downloaded) {
-            $ratio = floor(($peer->uploaded / $peer->downloaded) * 1000) / 1000;
-        } elseif ($peer->uploaded) {
-            $ratio = 'Infinity';
-        } else {
-            $ratio = '---';
-        }
-
-        return $ratio;
-    }
-
-    /**
-     * @param  mixed  $peers
-     * @return mixed
-     */
-    private function formatPeers($peers)
-    {
-        foreach ($peers as &$item) {
-            $item->upload_text = sprintf('%s@%s', Format::size($item->uploaded), $this->getPeerUploadSpeed($item));
-            $item->download_text = sprintf('%s@%s', Format::size($item->downloaded), $this->getPeerDownloadSpeed($item));
-            $item->download_progress = $this->getDownloadProgress($item);
-            $item->share_ratio = $this->getShareRatio($item);
-            $item->connect_time_total = $item->started->diffForHumans();
-            $item->last_action_human = $item->last_action->diffForHumans();
-            $item->agent_human = htmlspecialchars(Strings::userAgentClient($item->agent));
-        }
-
-        return $peers;
+        return $this->statsService->getShareRatio($peer);
     }
 
     /**
@@ -431,14 +346,7 @@ class TorrentRepository extends BaseRepository
      */
     public function listSnatches($torrentId)
     {
-        $snatches = Snatch::query()
-            ->where('torrentid', $torrentId)
-            ->where('finished', SnatchFinished::YES->value)
-            ->with(['user'])
-            ->orderBy('completedat', 'desc')
-            ->paginate();
-
-        return $snatches;
+        return $this->statsService->listSnatches($torrentId);
     }
 
     /**
@@ -447,13 +355,7 @@ class TorrentRepository extends BaseRepository
      */
     public function getSnatchUploadSpeed($snatch)
     {
-        if ($snatch->seedtime <= 0) {
-            $speed = Format::size(0);
-        } else {
-            $speed = Format::size($snatch->uploaded / ($snatch->seedtime + $snatch->leechtime));
-        }
-
-        return "$speed/s";
+        return $this->statsService->getSnatchUploadSpeed($snatch);
     }
 
     /**
@@ -462,13 +364,7 @@ class TorrentRepository extends BaseRepository
      */
     public function getSnatchDownloadSpeed($snatch)
     {
-        if ($snatch->leechtime <= 0) {
-            $speed = Format::size(0);
-        } else {
-            $speed = Format::size($snatch->downloaded / $snatch->leechtime);
-        }
-
-        return "$speed/s";
+        return $this->statsService->getSnatchDownloadSpeed($snatch);
     }
 
     /**
@@ -525,9 +421,7 @@ HTML;
      */
     public function getLastComment(int $torrentId): ?array
     {
-        $lastcom = DB::table('comments')->where('torrent', $torrentId)->orderBy('id', 'desc')->first();
-
-        return $lastcom ? array_merge((array) $lastcom, array_values((array) $lastcom)) : null;
+        return $this->statsService->getLastComment($torrentId);
     }
 
     /**
@@ -538,7 +432,7 @@ HTML;
      */
     public function getTorrentTagsGrouped(array $torrentIds)
     {
-        return TorrentTag::query()->whereIn('torrent_id', $torrentIds)->get()->groupBy('torrent_id');
+        return $this->statsService->getTorrentTagsGrouped($torrentIds);
     }
 
     /**
@@ -548,7 +442,7 @@ HTML;
      */
     public function findForUserValue(int $torrentId): ?array
     {
-        return Torrent::query()->find($torrentId)?->toArray();
+        return $this->statsService->findForUserValue($torrentId);
     }
 
     /**
@@ -560,13 +454,7 @@ HTML;
      */
     public function getBookmarkTorrentIds(int $userId): array
     {
-        $rows = Bookmark::query()->where('userid', $userId)->pluck('torrentid')->all();
-
-        if (empty($rows)) {
-            return [0];
-        }
-
-        return array_map(fn ($id) => (int) $id, $rows);
+        return $this->statsService->getBookmarkTorrentIds($userId);
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -776,13 +664,7 @@ HTML;
      */
     public function getSnatchInfo(int|string $torrentId, int|string $userId): array|false
     {
-        $record = DB::table('snatched')
-            ->where('torrentid', (int) $torrentId)
-            ->where('userid', (int) $userId)
-            ->orderBy('id', 'desc')
-            ->first();
-
-        return $record ? (array) $record : false;
+        return $this->statsService->getSnatchInfo($torrentId, $userId);
     }
 
     /**
@@ -803,7 +685,7 @@ HTML;
      */
     public function setPosState($id, $posState, $posStateUntil = null): int
     {
-        return $this->moderationRepository->setPosState($id, $posState, $posStateUntil);
+        return $this->promotionService->setPosState($id, $posState, $posStateUntil);
     }
 
     /**
@@ -812,7 +694,7 @@ HTML;
      */
     public function setHr($id, $hrStatus): int
     {
-        return $this->moderationRepository->setHr($id, $hrStatus);
+        return $this->promotionService->setHr($id, $hrStatus);
     }
 
     /**
@@ -823,7 +705,7 @@ HTML;
      */
     public function setSpState($id, $spState, $promotionTimeType, $promotionUntil = null): int
     {
-        return $this->moderationRepository->setSpState($id, $spState, $promotionTimeType, $promotionUntil);
+        return $this->promotionService->setSpState($id, $spState, $promotionTimeType, $promotionUntil);
     }
 
     /**

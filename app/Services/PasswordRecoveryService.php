@@ -33,6 +33,7 @@ class PasswordRecoveryService
     public function __construct(
         private WebAuthService $authService,
         private SecureTokenService $tokenService,
+        private readonly OutboxService $outboxService = new OutboxService,
     ) {}
 
     /**
@@ -175,6 +176,12 @@ class PasswordRecoveryService
         }
 
         Cache::clearUser($id, '');
+
+        // T-24: Record password reset event in outbox
+        $this->outboxService->recordPasswordReset(
+            userId: $id,
+            resetData: ['username' => $user->username],
+        );
 
         $this->sendNewPasswordEmail($user, $newPassword, $langRecover);
 

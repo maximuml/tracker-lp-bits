@@ -16,6 +16,7 @@ use App\Models\Message;
 use App\Models\User;
 use App\Models\UserBanLog;
 use App\Models\UserModifyLog;
+use App\Services\OutboxService;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
 use App\Support\Environment;
@@ -39,6 +40,7 @@ class UserModerationRepository extends BaseRepository
 {
     public function __construct(
         private readonly ToolRepository $toolRepository,
+        private readonly OutboxService $outboxService = new OutboxService,
     ) {}
 
     /**
@@ -63,9 +65,17 @@ class UserModerationRepository extends BaseRepository
             'operator' => $operator->id,
         ];
         $modCommentText = sprintf('%s - Disable by %s, reason: %s.', now()->format('Y-m-d'), $operator->username, $reason);
-        DB::transaction(function () use ($targetUser, $banLog, $modCommentText) {
+        DB::transaction(function () use ($targetUser, $banLog, $modCommentText, $operator, $reason) {
             $targetUser->updateWithModComment(['enabled' => false], $modCommentText);
             UserBanLog::query()->create($banLog);
+
+            // T-24: Record moderation action event in outbox (same transaction)
+            $this->outboxService->recordModerationAction(
+                moderatorId: (int) $operator->id,
+                action: 'disable',
+                targetUserId: (int) $targetUser->id,
+                actionData: ['reason' => $reason],
+            );
         });
         Logger::writeWithContext((string) "user: {$uid}, {$modCommentText}", (string) 'info', (bool) false);
         $this->clearCache($targetUser);

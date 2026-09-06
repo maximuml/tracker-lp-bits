@@ -6,9 +6,9 @@ namespace Tests\Unit\Http\Controllers;
 
 use App\Http\Controllers\ExamController;
 use App\Http\Requests\ExamRequest;
+use App\Http\Requests\GenericIndexRequest;
 use App\Models\Exam;
 use App\Repositories\ExamRepository;
-use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Validation\ValidationException;
 use Mockery;
@@ -36,7 +36,9 @@ final class ExamControllerTest extends TestCase
             ->andReturn($paginator);
 
         $controller = new ExamController($repository);
-        $request = Request::create('/api/v1/exams', 'GET', []);
+        $request = GenericIndexRequest::create('/api/v1/exams', 'GET', []);
+        $request->setContainer(app());
+        $request->validateResolved();
 
         $result = $controller->index($request);
 

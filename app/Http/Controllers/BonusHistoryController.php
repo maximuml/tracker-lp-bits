@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Auth\Permission;
 use App\Enums\BusinessType;
 use App\Enums\Permission\PermissionEnum;
+use App\Http\Requests\MagicRewardRequest;
 use App\Models\BonusLogs;
 use App\Models\Reward;
 use App\Models\Setting;
@@ -270,43 +271,44 @@ JS;
 
     }
 
-    public function magic(Request $request): JsonResponse|Response
+    public function magic(MagicRewardRequest $request): JsonResponse|Response
     {
         $curUser = app(CurrentUser::class)->get() ?? [];
         $userId = (int) ($curUser['id'] ?? 0);
-        $torrentId = (int) ($request->input('id') ?? 0);
-        $value = (int) abs((float) ($request->input('value') ?? 0));
+        $validated = $request->validated();
+        $torrentId = (int) $validated['id'];
+        $value = (int) abs((float) $validated['value']);
 
         if (! in_array($value, Setting::getBonusRewardOptions())) {
-            return response()->json(Api::failWithContext('Invalid value.', $request->all()));
+            return response()->json(Api::failWithContext('Invalid value.', $validated));
         }
         if ($value > (float) ($curUser['seedbonus'] ?? 0)) {
-            return response()->json(Api::failWithContext('You do not have such bonus!', $request->all()));
+            return response()->json(Api::failWithContext('You do not have such bonus!', $validated));
         }
 
         $torrentOwner = Torrent::query()->where('id', $torrentId)->value('owner');
         if (! $torrentOwner) {
-            return response()->json(Api::failWithContext('Invalid torrent id!', $request->all()));
+            return response()->json(Api::failWithContext('Invalid torrent id!', $validated));
         }
         if ((int) $torrentOwner === $userId) {
-            return response()->json(Api::failWithContext('You are giving magic to yourself.', $request->all()));
+            return response()->json(Api::failWithContext('You are giving magic to yourself.', $validated));
         }
 
         $alreadyMagic = DB::table('magic')->where('torrentid', $torrentId)->where('userid', $userId)->count();
         if ($alreadyMagic != 0) {
-            return response()->json(Api::failWithContext('You already gave the magic value!', $request->all()));
+            return response()->json(Api::failWithContext('You already gave the magic value!', $validated));
         }
 
         $todayStr = now()->startOfDay();
         $todayCount = Reward::query()->where('userid', $userId)->where('created_at', '>=', $todayStr)->count();
         $timesLimit = Setting::getBonusRewardTimesLimit();
         if ($timesLimit > 0 && $todayCount >= $timesLimit) {
-            return response()->json(Api::failWithContext('You already reach times limit!', $request->all()));
+            return response()->json(Api::failWithContext('You already reach times limit!', $validated));
         }
 
         $torrentOwnerInfo = User::query()->find($torrentOwner, User::$commonFields);
         if (! $torrentOwnerInfo) {
-            return response()->json(Api::failWithContext('Invalid torrent owner!', $request->all()));
+            return response()->json(Api::failWithContext('Invalid torrent owner!', $validated));
         }
 
         DB::table('magic')->insert([
@@ -321,7 +323,7 @@ JS;
         Bonus::updatePoints('+', (float) $value, (int) $torrentOwner);
         BonusLogs::add((int) $torrentOwnerInfo['id'], (float) $torrentOwnerInfo['seedbonus'], $value, (float) $torrentOwnerInfo['seedbonus'] + $value, '', BusinessType::TORRENT_BE_REWARD->value);
 
-        return response()->json(Api::successWithContext('OK', $request->all()));
+        return response()->json(Api::successWithContext('OK', $validated));
 
     }
 }

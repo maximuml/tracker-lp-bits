@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AgentDenyIndexRequest;
 use App\Http\Requests\AgentDenyRequest;
 use App\Http\Resources\AgentDenyResource;
 use App\Models\AgentDeny;
 use App\Repositories\AgentDenyRepository;
-use Illuminate\Http\Request;
 
 class AgentDenyController extends Controller
 {
@@ -27,9 +27,9 @@ class AgentDenyController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function index(Request $request): array
+    public function index(AgentDenyIndexRequest $request): array
     {
-        $result = $this->repository->getList($request->all());
+        $result = $this->repository->getList($request->validated());
         $resource = AgentDenyResource::collection($result);
 
         return $this->success($resource);

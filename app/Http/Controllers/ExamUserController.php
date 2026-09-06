@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ExamUserAvoidRequest;
+use App\Http\Requests\ExamUserBulkRequest;
+use App\Http\Requests\ExamUserIndexRequest;
 use App\Http\Requests\UidRequest;
 use App\Http\Resources\ExamUserResource;
 use App\Models\User;
 use App\Repositories\ExamRepository;
 use App\Support\Locale;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ExamUserController extends Controller
@@ -31,9 +32,9 @@ class ExamUserController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function index(Request $request): array
+    public function index(ExamUserIndexRequest $request): array
     {
-        $result = $this->repository->listUser($request->all());
+        $result = $this->repository->listUser($request->validated());
         $resource = ExamUserResource::collection($result);
         $resource->additional([
             'page_title' => Locale::trans('exam-user.admin.list.page_title', [], null),
@@ -95,13 +96,13 @@ class ExamUserController extends Controller
     /**
      * @return array<int|string, mixed>
      */
-    public function bulkAvoid(Request $request): array
+    public function bulkAvoid(ExamUserBulkRequest $request): array
     {
         $user = Auth::user();
         if (! $user instanceof User) {
             throw new \RuntimeException('unauthenticated');
         }
-        $result = $this->repository->avoidExamUserBulk($request->all(), $user);
+        $result = $this->repository->avoidExamUserBulk($request->validated(), $user);
 
         return $this->success(['result' => $result], 'Affected: '.intval($result));
     }
@@ -109,13 +110,13 @@ class ExamUserController extends Controller
     /**
      * @return array<int|string, mixed>
      */
-    public function bulkDelete(Request $request): array
+    public function bulkDelete(ExamUserBulkRequest $request): array
     {
         $user = Auth::user();
         if (! $user instanceof User) {
             throw new \RuntimeException('unauthenticated');
         }
-        $result = $this->repository->removeExamUserBulk($request->all(), $user);
+        $result = $this->repository->removeExamUserBulk($request->validated(), $user);
 
         return $this->success(['result' => $result], 'Affected: '.intval($result));
     }

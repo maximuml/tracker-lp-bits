@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\GenericIndexRequest;
+use App\Http\Requests\TagStoreRequest;
+use App\Http\Requests\TagUpdateRequest;
 use App\Http\Resources\TagResource;
 use App\Models\Tag;
 use App\Repositories\TagRepository;
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 class TagController extends Controller
 {
@@ -23,25 +24,13 @@ class TagController extends Controller
     }
 
     /**
-     * @param  mixed  $id
-     * @return array<int|string, mixed>
-     */
-    private function getRules($id = null): array
-    {
-        return [
-            'name' => ['required', 'string', Rule::unique('tags', 'name')->ignore($id)],
-            'color' => 'required|string',
-        ];
-    }
-
-    /**
      * Display a listing of the resource.
      *
      * @return array<string, mixed>
      */
-    public function index(Request $request): array
+    public function index(GenericIndexRequest $request): array
     {
-        $result = $this->repository->getList($request->all());
+        $result = $this->repository->getList($request->validated());
         $resource = TagResource::collection($result);
 
         return $this->success($resource);
@@ -52,10 +41,9 @@ class TagController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function store(Request $request): array
+    public function store(TagStoreRequest $request): array
     {
-        $request->validate($this->getRules());
-        $data = array_filter($request->all());
+        $data = array_filter($request->validated());
         $result = $this->repository->store($data);
         $resource = new TagResource($result);
 
@@ -82,10 +70,9 @@ class TagController extends Controller
      * @param  mixed  $id
      * @return array<string, mixed>
      */
-    public function update(Request $request, $id): array
+    public function update(TagUpdateRequest $request, $id): array
     {
-        $request->validate($this->getRules($id));
-        $data = $request->all();
+        $data = $request->validated();
         if (isset($data['priority'])) {
             $data['priority'] = intval($data['priority']);
         }

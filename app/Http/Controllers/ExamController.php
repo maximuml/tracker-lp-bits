@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ExamRequest;
+use App\Http\Requests\GenericIndexRequest;
 use App\Http\Resources\ExamResource;
 use App\Models\Exam;
 use App\Repositories\ExamRepository;
 use App\Support\Locale;
-use Illuminate\Http\Request;
 
 class ExamController extends Controller
 {
@@ -28,9 +28,9 @@ class ExamController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function index(Request $request): array
+    public function index(GenericIndexRequest $request): array
     {
-        $result = $this->repository->getList($request->all());
+        $result = $this->repository->getList($request->validated());
         $resource = ExamResource::collection($result);
         $resource->additional([
             'page_title' => Locale::trans('exam.admin.list.page_title', [], null),
@@ -46,7 +46,7 @@ class ExamController extends Controller
      */
     public function store(ExamRequest $request): array
     {
-        $result = $this->repository->store($request->all());
+        $result = $this->repository->store($request->validated());
         $resource = new ExamResource($result);
 
         return $this->success($resource);
@@ -72,7 +72,7 @@ class ExamController extends Controller
      */
     public function update(ExamRequest $request, int $id): array
     {
-        $result = $this->repository->update($request->all(), $id);
+        $result = $this->repository->update($request->validated(), $id);
         $resource = new ExamResource($result);
 
         return $this->success($resource);

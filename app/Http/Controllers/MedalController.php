@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\GenericIndexRequest;
+use App\Http\Requests\MedalStoreRequest;
+use App\Http\Requests\MedalUpdateRequest;
 use App\Http\Resources\MedalResource;
 use App\Repositories\MedalRepository;
 use App\Support\Locale;
-use Illuminate\Http\Request;
 
 class MedalController extends Controller
 {
@@ -26,9 +28,9 @@ class MedalController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function index(Request $request): array
+    public function index(GenericIndexRequest $request): array
     {
-        $result = $this->repository->getList($request->all());
+        $result = $this->repository->getList($request->validated());
         $resource = MedalResource::collection($result);
         $resource->additional([
             'page_title' => Locale::trans('medal.admin.list.page_title', [], null),
@@ -42,17 +44,9 @@ class MedalController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function store(Request $request): array
+    public function store(MedalStoreRequest $request): array
     {
-        $rules = [
-            'name' => 'required|string',
-            'price' => 'required|integer|min:1',
-            'image_large' => 'required|url',
-            'image_small' => 'required|url',
-            'duration' => 'nullable|integer|min:-1',
-        ];
-        $request->validate($rules);
-        $result = $this->repository->store($request->all());
+        $result = $this->repository->store($request->validated());
         $resource = new MedalResource($result);
 
         return $this->success($resource);
@@ -78,17 +72,9 @@ class MedalController extends Controller
      * @param  mixed  $id
      * @return array<string, mixed>
      */
-    public function update(Request $request, $id): array
+    public function update(MedalUpdateRequest $request, $id): array
     {
-        $rules = [
-            'name' => 'required|string',
-            'price' => 'required|integer|min:1',
-            'image_large' => 'required|url',
-            'image_small' => 'required|url',
-            'duration' => 'nullable|integer|min:-1',
-        ];
-        $request->validate($rules);
-        $result = $this->repository->update($request->all(), $id);
+        $result = $this->repository->update($request->validated(), $id);
         $resource = new MedalResource($result);
 
         return $this->success($resource);

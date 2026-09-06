@@ -6,10 +6,10 @@ namespace Tests\Unit\Http\Controllers;
 
 use App\Http\Controllers\AgentAllowController;
 use App\Http\Requests\AgentAllowCheckRequest;
+use App\Http\Requests\AgentAllowIndexRequest;
 use App\Http\Requests\AgentAllowRequest;
 use App\Models\AgentAllow;
 use App\Repositories\AgentAllowRepository;
-use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Validation\ValidationException;
 use Mockery;
@@ -37,7 +37,9 @@ final class AgentAllowControllerTest extends TestCase
             ->andReturn($paginator);
 
         $controller = new AgentAllowController($repository);
-        $request = Request::create('/api/v1/agent-allows', 'GET', []);
+        $request = AgentAllowIndexRequest::create('/api/v1/agent-allows', 'GET', []);
+        $request->setContainer(app());
+        $request->validateResolved();
 
         $result = $controller->index($request);
 

@@ -6,12 +6,13 @@ namespace Tests\Unit\Http\Controllers;
 
 use App\Enums\HitAndRunStatus;
 use App\Http\Controllers\HitAndRunController;
+use App\Http\Requests\HitAndRunBulkRequest;
+use App\Http\Requests\HitAndRunIndexRequest;
 use App\Http\Requests\HitAndRunRequest;
 use App\Models\HitAndRun;
 use App\Models\User;
 use App\Repositories\HitAndRunRepository;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Mockery;
@@ -43,7 +44,9 @@ final class HitAndRunControllerTest extends TestCase
             ->andReturn($collection);
 
         $controller = new HitAndRunController($repository);
-        $request = Request::create('/api/v1/hit-and-runs', 'GET', []);
+        $request = HitAndRunIndexRequest::create('/api/v1/hit-and-runs', 'GET', []);
+        $request->setContainer(app());
+        $request->validateResolved();
 
         $result = $controller->index($request);
 
@@ -244,13 +247,15 @@ final class HitAndRunControllerTest extends TestCase
         $repository = Mockery::mock(HitAndRunRepository::class);
         $repository->shouldReceive('bulkPardon')
             ->once()
-            ->with(['ids' => [1, 2, 3]], Mockery::type(User::class))
+            ->with(['id' => [1, 2, 3]], Mockery::type(User::class))
             ->andReturn(3);
 
         Auth::shouldReceive('user')->once()->andReturn($user);
 
         $controller = new HitAndRunController($repository);
-        $request = Request::create('/api/v1/hit-and-runs/bulk-pardon', 'POST', ['ids' => [1, 2, 3]]);
+        $request = HitAndRunBulkRequest::create('/api/v1/hit-and-runs/bulk-pardon', 'POST', ['id' => [1, 2, 3]]);
+        $request->setContainer(app());
+        $request->validateResolved();
 
         $result = $controller->bulkPardon($request);
 
@@ -267,13 +272,15 @@ final class HitAndRunControllerTest extends TestCase
         $repository = Mockery::mock(HitAndRunRepository::class);
         $repository->shouldReceive('bulkDelete')
             ->once()
-            ->with(['ids' => [1, 2]], Mockery::type(User::class))
+            ->with(['id' => [1, 2]], Mockery::type(User::class))
             ->andReturn(2);
 
         Auth::shouldReceive('user')->once()->andReturn($user);
 
         $controller = new HitAndRunController($repository);
-        $request = Request::create('/api/v1/hit-and-runs/bulk-delete', 'POST', ['ids' => [1, 2]]);
+        $request = HitAndRunBulkRequest::create('/api/v1/hit-and-runs/bulk-delete', 'POST', ['id' => [1, 2]]);
+        $request->setContainer(app());
+        $request->validateResolved();
 
         $result = $controller->bulkDelete($request);
 

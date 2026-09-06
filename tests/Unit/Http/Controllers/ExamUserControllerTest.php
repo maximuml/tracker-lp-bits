@@ -6,12 +6,12 @@ namespace Tests\Unit\Http\Controllers;
 
 use App\Http\Controllers\ExamUserController;
 use App\Http\Requests\ExamUserAvoidRequest;
+use App\Http\Requests\ExamUserBulkRequest;
 use App\Http\Requests\UidRequest;
 use App\Models\Exam;
 use App\Models\ExamUser;
 use App\Models\User;
 use App\Repositories\ExamRepository;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Mockery;
@@ -186,13 +186,15 @@ final class ExamUserControllerTest extends TestCase
         $repository = Mockery::mock(ExamRepository::class);
         $repository->shouldReceive('avoidExamUserBulk')
             ->once()
-            ->with(['ids' => [1, 2]], Mockery::type(User::class))
+            ->with(['id' => [1, 2]], Mockery::type(User::class))
             ->andReturn(2);
 
         Auth::shouldReceive('user')->once()->andReturn($user);
 
         $controller = new ExamUserController($repository);
-        $request = Request::create('/api/v1/exam-users/bulk-avoid', 'POST', ['ids' => [1, 2]]);
+        $request = ExamUserBulkRequest::create('/api/v1/exam-users/bulk-avoid', 'POST', ['id' => [1, 2]]);
+        $request->setContainer(app());
+        $request->validateResolved();
 
         $result = $controller->bulkAvoid($request);
 
@@ -212,7 +214,8 @@ final class ExamUserControllerTest extends TestCase
         Auth::shouldReceive('user')->once()->andReturn(null);
 
         $controller = new ExamUserController($repository);
-        $request = Request::create('/api/v1/exam-users/bulk-avoid', 'POST', ['ids' => [1, 2]]);
+        $request = ExamUserBulkRequest::create('/api/v1/exam-users/bulk-avoid', 'POST', ['ids' => [1, 2]]);
+        $request->setContainer(app());
 
         $controller->bulkAvoid($request);
     }
@@ -226,13 +229,15 @@ final class ExamUserControllerTest extends TestCase
         $repository = Mockery::mock(ExamRepository::class);
         $repository->shouldReceive('removeExamUserBulk')
             ->once()
-            ->with(['ids' => [1, 2]], Mockery::type(User::class))
+            ->with(['id' => [1, 2]], Mockery::type(User::class))
             ->andReturn(2);
 
         Auth::shouldReceive('user')->once()->andReturn($user);
 
         $controller = new ExamUserController($repository);
-        $request = Request::create('/api/v1/exam-users/bulk-delete', 'POST', ['ids' => [1, 2]]);
+        $request = ExamUserBulkRequest::create('/api/v1/exam-users/bulk-delete', 'POST', ['id' => [1, 2]]);
+        $request->setContainer(app());
+        $request->validateResolved();
 
         $result = $controller->bulkDelete($request);
 
@@ -252,7 +257,8 @@ final class ExamUserControllerTest extends TestCase
         Auth::shouldReceive('user')->once()->andReturn(null);
 
         $controller = new ExamUserController($repository);
-        $request = Request::create('/api/v1/exam-users/bulk-delete', 'POST', ['ids' => [1, 2]]);
+        $request = ExamUserBulkRequest::create('/api/v1/exam-users/bulk-delete', 'POST', ['ids' => [1, 2]]);
+        $request->setContainer(app());
 
         $controller->bulkDelete($request);
     }

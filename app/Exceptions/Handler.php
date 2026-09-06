@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Exceptions;
 
+use App\Http\Responses\ProblemDetails;
 use App\Support\Api;
 use App\Support\LegacyResponse;
 use App\Support\Logger;
@@ -56,6 +57,10 @@ class Handler extends ExceptionHandler
         $request = request();
         $permissionDenied = function (InsufficientPermissionException $e) use ($request) {
             if ($request->expectsJson()) {
+                if ($this->isApiRoute($request)) {
+                    return ProblemDetails::forbidden($e->getMessage(), $request->path())->toResponse();
+                }
+
                 return response()->json(Api::failWithContext($e->getMessage(), []), 403);
             }
             try {
@@ -88,29 +93,53 @@ class Handler extends ExceptionHandler
             return;
         }
 
-        $this->renderable(function (AuthenticationException $e) {
+        $this->renderable(function (AuthenticationException $e) use ($request) {
+            if ($this->isApiRoute($request)) {
+                return ProblemDetails::unauthorized($e->getMessage(), $request->path())->toResponse();
+            }
+
             return response()->json(Api::failWithContext($e->getMessage(), ['guards' => $e->guards()]), 401);
         });
 
-        $this->renderable(function (UnauthorizedException $e) {
+        $this->renderable(function (UnauthorizedException $e) use ($request) {
+            if ($this->isApiRoute($request)) {
+                return ProblemDetails::forbidden($e->getMessage(), $request->path())->toResponse();
+            }
+
             return response()->json(Api::failWithContext($e->getMessage(), []), 403);
         });
 
-        $this->renderable(function (ValidationException $exception) {
+        $this->renderable(function (ValidationException $exception) use ($request) {
             $errors = $exception->errors();
             $msg = (string) Arr::first(array_merge(...array_values($errors)));
+
+            if ($this->isApiRoute($request)) {
+                return ProblemDetails::validation($errors, $request->path())->toResponse();
+            }
 
             return response()->json(Api::failWithContext($msg, $errors));
         });
 
-        $this->renderable(function (NotFoundHttpException $e) {
+        $this->renderable(function (NotFoundHttpException $e) use ($request) {
             if ($e->getPrevious() && $e->getPrevious() instanceof ModelNotFoundException) {
                 $exception = $e->getPrevious();
                 Logger::writeWithContext((string) sprintf('NotFoundHttpException: %s, trace: %s', $exception->getMessage(), $exception->getTraceAsString()), (string) 'error', (bool) false);
 
+                if ($this->isApiRoute($request)) {
+                    return ProblemDetails::notFound($exception->getMessage(), $request->path())->toResponse();
+                }
+
                 return response()->json(Api::failWithContext($exception->getMessage(), []));
             }
         });
+    }
+
+    /**
+     * Determine if the request is targeting an API route (api/v1 or api).
+     */
+    private function isApiRoute(Request $request): bool
+    {
+        return $request->is('api/*') || $request->is('api/v1/*');
     }
 
     /**
@@ -130,6 +159,23 @@ class Handler extends ExceptionHandler
         }
         if ($e instanceof \Error || $e instanceof \ErrorException) {
             Logger::writeWithContext((string) sprintf($e::class.': %s, trace: %s', $msg, $e->getTraceAsString()), (string) 'error', (bool) false);
+        }
+
+        if ($this->isApiRoute($request)) {
+            $extensions = [];
+            if (config('app.debug')) {
+                $extensions['trace'] = $trace;
+            }
+
+            $problem = new ProblemDetails(
+                status: $httpStatusCode,
+                title: $httpStatusCode >= 500 ? 'Internal Server Error' : class_basename($e),
+                detail: $msg,
+                instance: $request->path(),
+                extensions: $extensions,
+            );
+
+            return $problem->toResponse();
         }
 
         return new JsonResponse(

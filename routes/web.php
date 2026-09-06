@@ -42,8 +42,8 @@ Route::get('/health/live', [HealthController::class, 'live'])->name('health.live
 Route::get('/health/ready', [HealthController::class, 'ready'])->name('health.ready');
 Route::get('/health', [HealthController::class, 'live'])->name('health');
 
-// Prometheus-compatible metrics endpoint (no auth, no throttling)
-Route::get('/metrics', [MetricsController::class, 'index'])->name('metrics');
+// Prometheus-compatible metrics endpoint (T-23: access-controlled)
+Route::get('/metrics', [MetricsController::class, 'index'])->middleware('metrics.access')->name('metrics');
 
 Route::get('/login', [AuthWebController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthWebController::class, 'login'])->middleware('throttle:login');

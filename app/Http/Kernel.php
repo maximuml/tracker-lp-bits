@@ -13,6 +13,7 @@ use App\Http\Middleware\Filament;
 use App\Http\Middleware\LegacyRequestMiddleware;
 use App\Http\Middleware\Locale;
 use App\Http\Middleware\LogUserIp;
+use App\Http\Middleware\MetricsAccess;
 use App\Http\Middleware\NexusAuth;
 use App\Http\Middleware\PreventRequestsDuringMaintenance;
 use App\Http\Middleware\RecordHttpMetrics;
@@ -114,6 +115,7 @@ class Kernel extends HttpKernel
         'checkUserStatus' => CheckUserStatus::class,
         'cron.token' => CronToken::class,
         'reject.get.mutations' => RejectGetMutations::class,
+        'metrics.access' => MetricsAccess::class,
     ];
 
     /** @var array<string, string> */

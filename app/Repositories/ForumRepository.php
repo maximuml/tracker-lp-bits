@@ -9,12 +9,20 @@ use App\Models\ForumMod;
 use App\Models\Post;
 use App\Models\Topic;
 use App\Models\User;
+use App\Services\PostService;
+use App\Services\TopicService;
 use App\Support\Cache;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class ForumRepository extends BaseRepository
 {
+    public function __construct(
+        private readonly TopicService $topicService,
+        private readonly PostService $postService,
+    ) {}
+
     public function deleteForum(int $id): void
     {
         $topics = DB::table('topics')->where('forumid', $id)->get(['id']);
@@ -179,23 +187,6 @@ class ForumRepository extends BaseRepository
         Cache::forgetWithLocales('forum_moderator_array');
     }
 
-    public function getTopicIdByPost(int $postId): ?int
-    {
-        $topicId = Post::query()->where('id', $postId)->value('topicid');
-
-        return $topicId === null ? null : (int) $topicId;
-    }
-
-    public function isModeratorOfTopic(int $topicId, int $userId): bool
-    {
-        return (int) DB::table('forummods')
-            ->selectRaw('COUNT(forummods.userid) AS count')
-            ->leftJoin('topics', 'forummods.forumid', '=', 'topics.forumid')
-            ->where('topics.id', $topicId)
-            ->where('forummods.userid', $userId)
-            ->value('count') > 0;
-    }
-
     public function isModeratorOfForum(int $forumId, int $userId): bool
     {
         return ForumMod::query()
@@ -212,66 +203,9 @@ class ForumRepository extends BaseRepository
         return (int) User::query()->where('forum_access', '>=', $dt)->count();
     }
 
-    public function getTotalPostsCount(): int
-    {
-        return (int) Post::query()->count();
-    }
-
-    public function getTotalTopicsCount(): int
-    {
-        return (int) Topic::query()->count();
-    }
-
-    public function getTodayPostsCount(string $todayDate): int
-    {
-        return (int) Post::query()->where('added', '>', date('Y-m-d'))->count();
-    }
-
-    public function clearReadPosts(int $userId): void
-    {
-        DB::table('readposts')->where('userid', $userId)->delete();
-    }
-
-    public function getLastPostId(): ?int
-    {
-        $value = Post::query()->orderByDesc('id')->value('id');
-
-        return $value === null ? null : (int) $value;
-    }
-
-    public function updateLastCatchup(int $userId, int $lastPostId): bool
-    {
-        return (bool) User::query()->where('id', $userId)->update(['last_catchup' => $lastPostId]);
-    }
-
     public function forumExists(int $id): bool
     {
         return (bool) Forum::query()->where('id', $id)->exists();
-    }
-
-    public function topicExists(int $id): ?int
-    {
-        $topic = Topic::query()->where('id', $id)->first(['forumid']);
-
-        return $topic ? (int) $topic->forumid : null;
-    }
-
-    public function postExists(int $id): ?int
-    {
-        $post = Post::query()->where('id', $id)->first(['topicid']);
-
-        return $post ? (int) $post->topicid : null;
-    }
-
-    public function updateTopicLastPost(int $topicId): bool
-    {
-        $postId = Post::query()->where('topicid', $topicId)->orderByDesc('id')->value('id');
-
-        if (! $postId) {
-            return false;
-        }
-
-        return (bool) Topic::query()->where('id', $topicId)->update(['lastpost' => $postId]);
     }
 
     /**
@@ -282,182 +216,9 @@ class ForumRepository extends BaseRepository
         return Forum::query()->orderBy('forid')->orderBy('sort')->get()->keyBy('id')->map(fn ($f) => $f->toArray())->all();
     }
 
-    /**
-     * @return array<int, int>|null
-     */
-    public function getLastReadPosts(int $userId): ?array
-    {
-        $rows = DB::table('readposts')->where('userid', $userId)->get(['topicid', 'lastpostread']);
-
-        if ($rows->isEmpty()) {
-            return null;
-        }
-
-        $ret = [];
-        foreach ($rows as $row) {
-            $ret[(int) $row->topicid] = (int) $row->lastpostread;
-        }
-
-        return $ret;
-    }
-
     public function getForumName(int $id): ?string
     {
         return Forum::query()->where('id', $id)->value('name');
-    }
-
-    public function getTopicSubject(int $id): ?string
-    {
-        return Topic::query()->where('id', $id)->value('subject');
-    }
-
-    /**
-     * @return array<string, mixed>|null
-     */
-    public function getPostForQuote(int $id): ?array
-    {
-        $post = Post::query()->where('id', $id)->first(['topicid', 'body', 'userid']);
-        if (! $post) {
-            return null;
-        }
-        $topic = Topic::query()->where('id', $post->topicid)->first(['subject']);
-        $username = User::query()->where('id', $post->userid)->value('username');
-
-        return [
-            'topicid' => (int) $post->topicid,
-            'body' => (string) $post->body,
-            'userid' => (int) $post->userid,
-            'username' => $username,
-            'topic_subject' => $topic ? $topic->subject : null,
-        ];
-    }
-
-    /**
-     * @return array<string, mixed>|null
-     */
-    public function getPostForEdit(int $id): ?array
-    {
-        $post = Post::query()->where('id', $id)->first(['topicid', 'body']);
-        if (! $post) {
-            return null;
-        }
-        $topicid = (int) $post->topicid;
-        $firstpost = (int) Post::query()->where('topicid', $topicid)->min('id');
-        $topic = Topic::query()->where('id', $topicid)->first(['subject']);
-
-        return [
-            'topicid' => $topicid,
-            'body' => (string) $post->body,
-            'firstpost' => $firstpost,
-            'topic_subject' => $topic ? $topic->subject : null,
-            'is_first_post' => $firstpost == $id,
-        ];
-    }
-
-    /**
-     * @return array<string, mixed>|null
-     */
-    public function getPostWithTopic(int $postid): ?array
-    {
-        $post = Post::query()->where('id', $postid)->first(['userid', 'topicid']);
-        if (! $post) {
-            return null;
-        }
-        $topic = Topic::query()->where('id', $post->topicid)->first(['locked']);
-
-        return [
-            'userid' => (int) $post->userid,
-            'topicid' => (int) $post->topicid,
-            'locked' => $topic ? $topic->locked : null,
-        ];
-    }
-
-    public function getTopicForumId(int $topicid): ?int
-    {
-        return Topic::query()->where('id', $topicid)->value('forumid');
-    }
-
-    /**
-     * @return array<string, mixed>|null
-     */
-    public function getPostEditInfo(int $postid): ?array
-    {
-        $post = Post::query()->where('id', $postid)->first(['topicid']);
-        if (! $post) {
-            return null;
-        }
-        $topicid = (int) $post->topicid;
-        $topic = Topic::query()->where('id', $topicid)->first(['forumid']);
-        $firstpost = (int) Post::query()->where('topicid', $topicid)->min('id');
-
-        return [
-            'topicid' => $topicid,
-            'forumid' => $topic ? (int) $topic->forumid : 0,
-            'is_first_post' => $firstpost == $postid,
-        ];
-    }
-
-    public function isTopicLocked(int $topicid): ?bool
-    {
-        $topic = Topic::query()->where('id', $topicid)->first(['locked']);
-
-        return $topic?->locked;
-    }
-
-    public function getTopic(int $id): ?Topic
-    {
-        return Topic::query()->where('id', $id)->first();
-    }
-
-    public function getPost(int $id): ?Post
-    {
-        return Post::query()->where('id', $id)->first();
-    }
-
-    public function getTopicWithUser(int $id): ?Topic
-    {
-        return Topic::query()->with('user')->where('id', $id)->first();
-    }
-
-    public function getPostWithUser(int $id): ?Post
-    {
-        return Post::query()->with('user')->where('id', $id)->first();
-    }
-
-    public function updateTopicSubject(int $topicid, string $subject): bool
-    {
-        return (bool) Topic::query()->where('id', $topicid)->update(['subject' => $subject]);
-    }
-
-    public function updatePostBody(int $postid, string $body, string $date, int $editedBy): bool
-    {
-        return (bool) Post::query()->where('id', $postid)->update([
-            'body' => $body,
-            'editdate' => $date,
-            'editedby' => $editedBy,
-        ]);
-    }
-
-    public function getFirstPostId(int $topicid): int
-    {
-        return (int) Post::query()->where('topicid', $topicid)->min('id');
-    }
-
-    public function createTopic(int $userId, int $forumId, string $subject): int
-    {
-        $topic = Topic::create([
-            'userid' => $userId,
-            'forumid' => $forumId,
-            'subject' => $subject,
-            'locked' => false,
-            'sticky' => false,
-            'hlcolor' => 0,
-            'views' => 0,
-            'firstpost' => 0,
-            'lastpost' => 0,
-        ]);
-
-        return (int) $topic->id;
     }
 
     public function incrementForumTopicCount(int $forumid): bool
@@ -470,321 +231,11 @@ class ForumRepository extends BaseRepository
         return (bool) Forum::query()->where('id', $forumid)->increment('postcount', $amount);
     }
 
-    public function createPost(int $topicId, int $userId, string $body, string $date): int
-    {
-        return (int) DB::table('posts')->insertGetId([
-            'topicid' => $topicId,
-            'userid' => $userId,
-            'added' => $date,
-            'body' => $body,
-            'ori_body' => $body,
-        ]);
-    }
-
-    public function updateTopicFirstLastPost(int $topicid, int $postid): bool
-    {
-        return (bool) Topic::query()->where('id', $topicid)->update(['firstpost' => $postid, 'lastpost' => $postid]);
-    }
-
-    public function setTopicLastPost(int $topicid, int $postid): bool
-    {
-        return (bool) Topic::query()->where('id', $topicid)->update(['lastpost' => $postid]);
-    }
-
-    public function incrementTopicViews(int $topicid): bool
-    {
-        return (bool) Topic::query()->where('id', $topicid)->increment('views');
-    }
-
-    public function countTopicPosts(int $topicid, ?int $authorId = null): int
-    {
-        $query = Post::query()->where('topicid', $topicid);
-        if ($authorId) {
-            $query->where('userid', $authorId);
-        }
-
-        return (int) $query->count();
-    }
-
-    /**
-     * @return array<int>
-     */
-    public function getTopicPostIds(int $topicid, ?int $authorId = null): array
-    {
-        $query = Post::query()->where('topicid', $topicid)->orderBy('added');
-        if ($authorId) {
-            $query->where('userid', $authorId);
-        }
-
-        return $query->pluck('id')->all();
-    }
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Collection<int, Post>
-     */
-    public function getTopicPosts(int $topicid, ?int $authorId, int $offset, int $perPage): \Illuminate\Database\Eloquent\Collection
-    {
-        $query = Post::query()->with('user')->where('topicid', $topicid)->orderBy('id');
-        if ($authorId) {
-            $query->where('userid', $authorId);
-        }
-
-        return $query->offset($offset)->limit($perPage)->get();
-    }
-
-    /**
-     * @param  array<int>  $ids
-     * @param  list<string>  $columns
-     * @return Collection<int, User>
-     */
-    public function getUsersByIds(array $ids, array $columns): Collection
-    {
-        return User::query()->find($ids, $columns)->keyBy('id');
-    }
-
-    public function getReadPost(int $userId, int $topicId): ?\stdClass
-    {
-        return DB::table('readposts')
-            ->where('userid', $userId)
-            ->where('topicid', $topicId)
-            ->first();
-    }
-
-    public function insertReadPost(int $userId, int $topicId, int $postId): bool
-    {
-        return (bool) DB::table('readposts')->insert([
-            'userid' => $userId,
-            'topicid' => $topicId,
-            'lastpostread' => $postId,
-        ]);
-    }
-
-    public function updateReadPost(int $userId, int $topicId, int $postId): bool
-    {
-        return (bool) DB::table('readposts')
-            ->where('userid', $userId)
-            ->where('topicid', $topicId)
-            ->update(['lastpostread' => $postId]);
-    }
-
-    public function countUserPosts(int $userId): int
-    {
-        return (int) Post::query()->where('userid', $userId)->count();
-    }
-
-    public function markPostRead(int $userId, int $topicId, int $postId, int $lastCatchup): bool
-    {
-        $readPost = DB::table('readposts')
-            ->where('userid', $userId)
-            ->where('topicid', $topicId)
-            ->first();
-
-        if (! $readPost) {
-            return (bool) DB::table('readposts')->insert([
-                'userid' => $userId,
-                'topicid' => $topicId,
-                'lastpostread' => $postId,
-            ]);
-        }
-
-        if ($lastCatchup < $postId) {
-            return (bool) DB::table('readposts')
-                ->where('userid', $userId)
-                ->where('topicid', $topicId)
-                ->update(['lastpostread' => $postId]);
-        }
-
-        return true;
-    }
-
-    public function updateUserLastPost(int $userId, string $date): bool
-    {
-        return (bool) User::query()->where('id', $userId)->update(['last_post' => $date]);
-    }
-
     public function getForumMinclasswrite(int $forumid): ?int
     {
         $forum = Forum::query()->where('id', $forumid)->first(['minclasswrite']);
 
         return $forum ? (int) $forum->minclasswrite : null;
-    }
-
-    public function moveTopic(int $topicid, int $newForumid, int $postCount, int $oldForumid): bool
-    {
-        if ($oldForumid == $newForumid) {
-            return true;
-        }
-
-        Topic::query()->where('id', $topicid)->update(['forumid' => $newForumid]);
-        Forum::query()->where('id', $oldForumid)->decrement('topiccount');
-        Forum::query()->where('id', $oldForumid)->decrement('postcount', $postCount);
-        Forum::query()->where('id', $newForumid)->increment('topiccount');
-        Forum::query()->where('id', $newForumid)->increment('postcount', $postCount);
-
-        return true;
-    }
-
-    /**
-     * @return array<string, int>|null
-     */
-    public function getTopicForumAndUser(int $topicid): ?array
-    {
-        $topic = Topic::query()->where('id', $topicid)->first(['forumid', 'userid']);
-
-        return $topic ? [
-            'forumid' => (int) $topic->forumid,
-            'userid' => (int) $topic->userid,
-        ] : null;
-    }
-
-    public function deleteTopic(int $topicid, int $forumid, int $postCount): bool
-    {
-        Topic::query()->where('id', $topicid)->delete();
-        Post::query()->where('topicid', $topicid)->delete();
-        DB::table('readposts')->where('topicid', $topicid)->delete();
-        Forum::query()->where('id', $forumid)->decrement('topiccount');
-        Forum::query()->where('id', $forumid)->decrement('postcount', $postCount);
-
-        return true;
-    }
-
-    /**
-     * @return array{topicid: int, userid: int}|null
-     */
-    public function getPostTopicAndUser(int $postid): ?array
-    {
-        $post = Post::query()->where('id', $postid)->first(['topicid', 'userid']);
-
-        return $post ? [
-            'topicid' => (int) $post->topicid,
-            'userid' => (int) $post->userid,
-        ] : null;
-    }
-
-    public function getPreviousPostId(int $topicid, int $postid): ?int
-    {
-        return Post::query()
-            ->where('topicid', $topicid)
-            ->where('id', '<', $postid)
-            ->orderByDesc('id')
-            ->value('id');
-    }
-
-    public function deletePost(int $postid, int $topicid, int $forumid): bool
-    {
-        Post::query()->where('id', $postid)->delete();
-        Forum::query()->where('id', $forumid)->decrement('postcount');
-
-        return true;
-    }
-
-    public function updateTopicLocked(int $topicid, bool $locked): bool
-    {
-        return (bool) Topic::query()->where('id', $topicid)->update(['locked' => $locked]);
-    }
-
-    public function updateTopicSticky(int $topicid, string $sticky): bool
-    {
-        return (bool) Topic::query()->where('id', $topicid)->update(['sticky' => $sticky]);
-    }
-
-    public function updateTopicHighlight(int $topicid, int $color): bool
-    {
-        return (bool) Topic::query()->where('id', $topicid)->update(['hlcolor' => $color]);
-    }
-
-    public function updateUserForumAccess(int $userId, string $date): bool
-    {
-        return (bool) User::query()->where('id', $userId)->update(['forum_access' => $date]);
-    }
-
-    /**
-     * @return array{count: int, rows: Collection<int, Topic>}
-     */
-    public function getTopicsByForum(int $forumid, string $search, string $sortColumn, string $direction, int $offset, int $perPage): array
-    {
-        $allowed = ['firstpost' => 'firstpost', 'lastpost' => 'lastpost'];
-        $column = $allowed[$sortColumn] ?? 'lastpost';
-        $direction = strtolower($direction) === 'asc' ? 'asc' : 'desc';
-
-        $query = Topic::query()->where('forumid', $forumid);
-        if ($search !== '') {
-            $query->where('subject', 'like', '%'.$search.'%');
-        }
-
-        $count = (int) $query->count();
-        $rows = $query->orderBy('sticky', 'desc')->orderBy($column, $direction)->offset($offset)->limit($perPage)
-            ->with(['user', 'forum', 'firstPost.user', 'lastPost.user'])
-            ->get();
-
-        return ['count' => $count, 'rows' => $rows];
-    }
-
-    /**
-     * @return Collection<int, Topic>
-     */
-    public function getUnreadTopics(int $lastCatchup, ?int $beforePostId, int $limit): Collection
-    {
-        $query = Topic::query()->where('lastpost', '>', $lastCatchup);
-        if ($beforePostId) {
-            $query->where('lastpost', '<', $beforePostId);
-        }
-
-        return $query->orderByDesc('lastpost')->with(['user', 'forum', 'lastPost.user'])->limit($limit)->get();
-    }
-
-    /**
-     * @return array{hits: int, rows: Collection<int, \stdClass>}
-     */
-    public function searchForumPosts(string $keywords, int $minClass, int $offset, int $perPage): array
-    {
-        $term = '%'.$keywords.'%';
-        $query = DB::table('posts')
-            ->leftJoin('topics', 'posts.topicid', '=', 'topics.id')
-            ->leftJoin('forums', 'topics.forumid', '=', 'forums.id')
-            ->where('forums.minclassread', '<=', $minClass)
-            ->where(function ($q) use ($term) {
-                $q->where(function ($sub) use ($term) {
-                    $sub->where('topics.subject', 'like', $term)->whereColumn('posts.id', 'topics.firstpost');
-                })->orWhere('posts.body', 'like', $term);
-            });
-
-        $hits = (int) $query->count('posts.id');
-        $rows = $query
-            ->select('posts.id', 'posts.topicid', 'posts.userid', 'posts.added', 'topics.subject', 'topics.hlcolor', 'forums.id AS forumid', 'forums.name AS forumname')
-            ->orderByDesc('posts.id')
-            ->offset($offset)
-            ->limit($perPage)
-            ->get();
-
-        return ['hits' => $hits, 'rows' => $rows];
-    }
-
-    public function getLastTopicByForum(int $forumid): ?Topic
-    {
-        return Topic::query()->where('forumid', $forumid)->orderByDesc('lastpost')->first();
-    }
-
-    public function getForumTodayPostCount(int $forumid, string $todayDate): int
-    {
-        return (int) DB::table('posts')
-            ->leftJoin('topics', 'posts.topicid', '=', 'topics.id')
-            ->where('posts.added', '>', $todayDate)
-            ->where('topics.forumid', $forumid)
-            ->count('posts.id');
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    public function getPostArrayById(int $id): array
-    {
-        return Post::query()->findOrFail($id)->toArray();
-    }
-
-    public function getTopicById(int $id): Topic
-    {
-        return Topic::query()->findOrFail($id);
     }
 
     /**
@@ -800,13 +251,349 @@ class ForumRepository extends BaseRepository
         return $mods;
     }
 
+    public function updateUserForumAccess(int $userId, string $date): bool
+    {
+        return (bool) User::query()->where('id', $userId)->update(['forum_access' => $date]);
+    }
+
+    /**
+     * @param  array<int>  $ids
+     * @param  list<string>  $columns
+     * @return Collection<int, User>
+     */
+    public function getUsersByIds(array $ids, array $columns): Collection
+    {
+        return User::query()->find($ids, $columns)->keyBy('id');
+    }
+
+    // ---- Topic operations (delegated to TopicService) ----
+
+    public function getTopicIdByPost(int $postId): ?int
+    {
+        return $this->topicService->getTopicIdByPost($postId);
+    }
+
+    public function isModeratorOfTopic(int $topicId, int $userId): bool
+    {
+        return $this->topicService->isModeratorOfTopic($topicId, $userId);
+    }
+
+    public function getTotalTopicsCount(): int
+    {
+        return $this->topicService->getTotalTopicsCount();
+    }
+
+    public function topicExists(int $id): ?int
+    {
+        return $this->topicService->topicExists($id);
+    }
+
+    public function updateTopicLastPost(int $topicId): bool
+    {
+        return $this->topicService->updateTopicLastPost($topicId);
+    }
+
+    public function getTopicSubject(int $id): ?string
+    {
+        return $this->topicService->getTopicSubject($id);
+    }
+
+    public function getTopicForumId(int $topicid): ?int
+    {
+        return $this->topicService->getTopicForumId($topicid);
+    }
+
+    public function isTopicLocked(int $topicid): ?bool
+    {
+        return $this->topicService->isTopicLocked($topicid);
+    }
+
+    public function getTopic(int $id): ?Topic
+    {
+        return $this->topicService->getTopic($id);
+    }
+
+    public function getTopicWithUser(int $id): ?Topic
+    {
+        return $this->topicService->getTopicWithUser($id);
+    }
+
+    public function updateTopicSubject(int $topicid, string $subject): bool
+    {
+        return $this->topicService->updateTopicSubject($topicid, $subject);
+    }
+
+    public function createTopic(int $userId, int $forumId, string $subject): int
+    {
+        return $this->topicService->createTopic($userId, $forumId, $subject);
+    }
+
+    public function updateTopicFirstLastPost(int $topicid, int $postid): bool
+    {
+        return $this->topicService->updateTopicFirstLastPost($topicid, $postid);
+    }
+
+    public function setTopicLastPost(int $topicid, int $postid): bool
+    {
+        return $this->topicService->setTopicLastPost($topicid, $postid);
+    }
+
+    public function incrementTopicViews(int $topicid): bool
+    {
+        return $this->topicService->incrementTopicViews($topicid);
+    }
+
+    public function moveTopic(int $topicid, int $newForumid, int $postCount, int $oldForumid): bool
+    {
+        return $this->topicService->moveTopic($topicid, $newForumid, $postCount, $oldForumid);
+    }
+
+    /**
+     * @return array<string, int>|null
+     */
+    public function getTopicForumAndUser(int $topicid): ?array
+    {
+        return $this->topicService->getTopicForumAndUser($topicid);
+    }
+
+    public function deleteTopic(int $topicid, int $forumid, int $postCount): bool
+    {
+        return $this->topicService->deleteTopic($topicid, $forumid, $postCount);
+    }
+
+    public function updateTopicLocked(int $topicid, bool $locked): bool
+    {
+        return $this->topicService->updateTopicLocked($topicid, $locked);
+    }
+
+    public function updateTopicSticky(int $topicid, string $sticky): bool
+    {
+        return $this->topicService->updateTopicSticky($topicid, $sticky);
+    }
+
+    public function updateTopicHighlight(int $topicid, int $color): bool
+    {
+        return $this->topicService->updateTopicHighlight($topicid, $color);
+    }
+
+    /**
+     * @return array{count: int, rows: Collection<int, Topic>}
+     */
+    public function getTopicsByForum(int $forumid, string $search, string $sortColumn, string $direction, int $offset, int $perPage): array
+    {
+        return $this->topicService->getTopicsByForum($forumid, $search, $sortColumn, $direction, $offset, $perPage);
+    }
+
+    /**
+     * @return Collection<int, Topic>
+     */
+    public function getUnreadTopics(int $lastCatchup, ?int $beforePostId, int $limit): Collection
+    {
+        return $this->topicService->getUnreadTopics($lastCatchup, $beforePostId, $limit);
+    }
+
+    public function getTopicById(int $id): Topic
+    {
+        return $this->topicService->getTopicById($id);
+    }
+
+    /**
+     * @return array<int, int>|null
+     */
+    public function getLastReadPosts(int $userId): ?array
+    {
+        return $this->topicService->getLastReadPosts($userId);
+    }
+
+    public function getReadPost(int $userId, int $topicId): ?\stdClass
+    {
+        return $this->topicService->getReadPost($userId, $topicId);
+    }
+
+    public function insertReadPost(int $userId, int $topicId, int $postId): bool
+    {
+        return $this->topicService->insertReadPost($userId, $topicId, $postId);
+    }
+
+    public function updateReadPost(int $userId, int $topicId, int $postId): bool
+    {
+        return $this->topicService->updateReadPost($userId, $topicId, $postId);
+    }
+
+    public function markPostRead(int $userId, int $topicId, int $postId, int $lastCatchup): bool
+    {
+        return $this->topicService->markPostRead($userId, $topicId, $postId, $lastCatchup);
+    }
+
+    public function clearReadPosts(int $userId): void
+    {
+        $this->topicService->clearReadPosts($userId);
+    }
+
+    public function getLastTopicByForum(int $forumid): ?Topic
+    {
+        return $this->topicService->getLastTopicByForum($forumid);
+    }
+
+    // ---- Post operations (delegated to PostService) ----
+
+    public function getTotalPostsCount(): int
+    {
+        return $this->postService->getTotalPostsCount();
+    }
+
+    public function getTodayPostsCount(string $todayDate): int
+    {
+        return $this->postService->getTodayPostsCount($todayDate);
+    }
+
+    public function getLastPostId(): ?int
+    {
+        return $this->postService->getLastPostId();
+    }
+
+    public function updateLastCatchup(int $userId, int $lastPostId): bool
+    {
+        return $this->postService->updateLastCatchup($userId, $lastPostId);
+    }
+
+    public function postExists(int $id): ?int
+    {
+        return $this->postService->postExists($id);
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    public function getPostForQuote(int $id): ?array
+    {
+        return $this->postService->getPostForQuote($id);
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    public function getPostForEdit(int $id): ?array
+    {
+        return $this->postService->getPostForEdit($id);
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    public function getPostWithTopic(int $postid): ?array
+    {
+        return $this->postService->getPostWithTopic($postid);
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    public function getPostEditInfo(int $postid): ?array
+    {
+        return $this->postService->getPostEditInfo($postid);
+    }
+
+    public function getPost(int $id): ?Post
+    {
+        return $this->postService->getPost($id);
+    }
+
+    public function getPostWithUser(int $id): ?Post
+    {
+        return $this->postService->getPostWithUser($id);
+    }
+
+    public function updatePostBody(int $postid, string $body, string $date, int $editedBy): bool
+    {
+        return $this->postService->updatePostBody($postid, $body, $date, $editedBy);
+    }
+
+    public function getFirstPostId(int $topicid): int
+    {
+        return $this->postService->getFirstPostId($topicid);
+    }
+
+    public function createPost(int $topicId, int $userId, string $body, string $date): int
+    {
+        return $this->postService->createPost($topicId, $userId, $body, $date);
+    }
+
+    public function countTopicPosts(int $topicid, ?int $authorId = null): int
+    {
+        return $this->postService->countTopicPosts($topicid, $authorId);
+    }
+
+    /**
+     * @return array<int>
+     */
+    public function getTopicPostIds(int $topicid, ?int $authorId = null): array
+    {
+        return $this->postService->getTopicPostIds($topicid, $authorId);
+    }
+
+    /**
+     * @return EloquentCollection<int, Post>
+     */
+    public function getTopicPosts(int $topicid, ?int $authorId, int $offset, int $perPage): EloquentCollection
+    {
+        return $this->postService->getTopicPosts($topicid, $authorId, $offset, $perPage);
+    }
+
+    public function countUserPosts(int $userId): int
+    {
+        return $this->postService->countUserPosts($userId);
+    }
+
+    public function updateUserLastPost(int $userId, string $date): bool
+    {
+        return $this->postService->updateUserLastPost($userId, $date);
+    }
+
+    /**
+     * @return array{topicid: int, userid: int}|null
+     */
+    public function getPostTopicAndUser(int $postid): ?array
+    {
+        return $this->postService->getPostTopicAndUser($postid);
+    }
+
+    public function getPreviousPostId(int $topicid, int $postid): ?int
+    {
+        return $this->postService->getPreviousPostId($topicid, $postid);
+    }
+
+    public function deletePost(int $postid, int $topicid, int $forumid): bool
+    {
+        return $this->postService->deletePost($postid, $topicid, $forumid);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function getPostArrayById(int $id): array
+    {
+        return $this->postService->getPostArrayById($id);
+    }
+
     /**
      * @return array<string, mixed>|null
      */
     public function findPostArrayById(int $id): ?array
     {
-        $post = Post::query()->where('id', $id)->first();
+        return $this->postService->findPostArrayById($id);
+    }
 
-        return $post ? $post->toArray() : null;
+    /**
+     * @return array{hits: int, rows: Collection<int, \stdClass>}
+     */
+    public function searchForumPosts(string $keywords, int $minClass, int $offset, int $perPage): array
+    {
+        return $this->postService->searchForumPosts($keywords, $minClass, $offset, $perPage);
+    }
+
+    public function getForumTodayPostCount(int $forumid, string $todayDate): int
+    {
+        return $this->postService->getForumTodayPostCount($forumid, $todayDate);
     }
 }

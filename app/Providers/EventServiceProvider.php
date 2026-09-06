@@ -4,13 +4,32 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Events\AgentAllowCreated;
+use App\Events\AgentAllowDeleted;
+use App\Events\AgentAllowUpdated;
+use App\Events\AgentDenyCreated;
+use App\Events\AgentDenyDeleted;
+use App\Events\AgentDenyUpdated;
+use App\Events\HitAndRunCreated;
+use App\Events\HitAndRunDeleted;
+use App\Events\HitAndRunUpdated;
+use App\Events\MessageCreated;
+use App\Events\NewsCreated;
+use App\Events\SnatchedUpdated;
+use App\Events\StaffMessageCreated;
 use App\Events\TorrentCreated;
 use App\Events\TorrentDeleted;
 use App\Events\TorrentUpdated;
+use App\Events\UserCreated;
+use App\Events\UserDeleted;
+use App\Events\UserDisabled;
+use App\Events\UserEnabled;
+use App\Events\UserUpdated;
 use App\Listeners\AppendQueryCountHeader;
 use App\Listeners\ClearTorrentCache;
 use App\Listeners\DeductUserBonusWhenTorrentDeleted;
 use App\Listeners\RecordCacheMetrics;
+use App\Listeners\RecordModelEventToOutbox;
 use App\Listeners\ResetNexus;
 use App\Listeners\ResetQueryLog;
 use App\Listeners\SendEmailNotificationWhenTorrentCreated;
@@ -39,15 +58,37 @@ class EventServiceProvider extends ServiceProvider
         ],
         TorrentUpdated::class => [
             SyncTorrentToMeilisearch::class,
+            RecordModelEventToOutbox::class,
         ],
         TorrentCreated::class => [
             SyncTorrentToMeilisearch::class,
             SendEmailNotificationWhenTorrentCreated::class,
             ClearTorrentCache::class,
+            RecordModelEventToOutbox::class,
         ],
         TorrentDeleted::class => [
             DeductUserBonusWhenTorrentDeleted::class,
+            RecordModelEventToOutbox::class,
         ],
+        // W2-10: Record all model events to the outbox
+        UserCreated::class => [RecordModelEventToOutbox::class],
+        UserUpdated::class => [RecordModelEventToOutbox::class],
+        UserDeleted::class => [RecordModelEventToOutbox::class],
+        UserEnabled::class => [RecordModelEventToOutbox::class],
+        UserDisabled::class => [RecordModelEventToOutbox::class],
+        NewsCreated::class => [RecordModelEventToOutbox::class],
+        HitAndRunCreated::class => [RecordModelEventToOutbox::class],
+        HitAndRunUpdated::class => [RecordModelEventToOutbox::class],
+        HitAndRunDeleted::class => [RecordModelEventToOutbox::class],
+        MessageCreated::class => [RecordModelEventToOutbox::class],
+        StaffMessageCreated::class => [RecordModelEventToOutbox::class],
+        SnatchedUpdated::class => [RecordModelEventToOutbox::class],
+        AgentAllowCreated::class => [RecordModelEventToOutbox::class],
+        AgentAllowUpdated::class => [RecordModelEventToOutbox::class],
+        AgentAllowDeleted::class => [RecordModelEventToOutbox::class],
+        AgentDenyCreated::class => [RecordModelEventToOutbox::class],
+        AgentDenyUpdated::class => [RecordModelEventToOutbox::class],
+        AgentDenyDeleted::class => [RecordModelEventToOutbox::class],
         Looping::class => [
             ResetNexus::class,
         ],

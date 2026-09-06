@@ -8,6 +8,8 @@ use App\Repositories\TorrentDownloadRepository;
 use App\Repositories\TorrentModerationRepository;
 use App\Repositories\TorrentPurchaseRepository;
 use App\Repositories\TorrentRepository;
+use App\Services\TorrentPromotionService;
+use App\Services\TorrentStatsService;
 use Firebase\JWT\JWT;
 use PHPUnit\Framework\TestCase;
 
@@ -28,6 +30,14 @@ class TorrentRepositoryDownHashTest extends TestCase
                 new SearchBoxRepository,
                 $this->downloadRepository,
                 new MeiliSearchRepository,
+            ),
+            new TorrentStatsService,
+            new TorrentPromotionService(
+                new TorrentModerationRepository(
+                    new SearchBoxRepository,
+                    $this->downloadRepository,
+                    new MeiliSearchRepository,
+                ),
             ),
         );
     }

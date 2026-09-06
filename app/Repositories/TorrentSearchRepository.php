@@ -4,23 +4,20 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
-use App\Auth\Permission;
-use App\Enums\TorrentApprovalStatus;
 use App\Models\Torrent;
+use App\Repositories\TorrentSearch\FilterParser;
+use App\Repositories\TorrentSearch\MeiliAdapter;
+use App\Repositories\TorrentSearch\QueryBuilder;
+use App\Repositories\TorrentSearch\SqlFallback;
 use App\Support\Category;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Globals;
-use App\Support\Input;
-use App\Support\LegacyResponse;
-use App\Support\Log;
 use App\Support\Logger;
 use App\Support\Pagination;
-use App\Support\Promotion;
 use App\Support\RequestContext;
 use App\Support\SearchBox;
 use App\Support\SearchSuggest;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class TorrentSearchRepository
@@ -100,800 +97,108 @@ class TorrentSearchRepository
         $searchstr = substr(DB::getPdo()->quote(trim($searchstr_raw)), 1, -1);
         $searchParams['search'] = $searchstr_raw;
         if (empty($searchstr)) {
-            unset($searchstr);
+            $searchstr = null;
         }
 
         $meilisearchEnabled = SiteConfig::current()->meiliSearch->enabled();
         $shouldUseMeili = $meilisearchEnabled && ! empty($searchstr);
         Logger::writeWithContext((string) "[SHOULD_USE_MEILI]: {$shouldUseMeili}", (string) 'info', (bool) false);
         // sorting by MarkoStamcar
-        $column = '';
-        $ascdesc = '';
-        if (isset($searchParams['sort']) && $searchParams['sort'] && isset($searchParams['type']) && $searchParams['type']) {
-
-            switch ($searchParams['sort']) {
-                case '1': $column = 'name';
-                    break;
-                case '2': $column = 'numfiles';
-                    break;
-                case '3': $column = 'comments';
-                    break;
-                case '4': $column = 'added';
-                    break;
-                case '5': $column = 'size';
-                    break;
-                case '6': $column = 'times_completed';
-                    break;
-                case '7': $column = 'seeders';
-                    break;
-                case '8': $column = 'leechers';
-                    break;
-                case '9': $column = 'owner';
-                    break;
-                default: $column = 'id';
-                    break;
-            }
-
-            switch ($searchParams['type']) {
-                case 'asc': $ascdesc = 'ASC';
-                    $linkascdesc = 'asc';
-                    break;
-                case 'desc': $ascdesc = 'DESC';
-                    $linkascdesc = 'desc';
-                    break;
-                default: $ascdesc = 'DESC';
-                    $linkascdesc = 'desc';
-                    break;
-            }
-
-            if ($column == 'owner') {
-                $orderBy = [
-                    ['pos_state', 'desc'],
-                    ['torrents.anonymous', 'asc'],
-                    ['users.username', $ascdesc],
-                ];
-            } else {
-                $orderBy = [
-                    ['pos_state', 'desc'],
-                    ['torrents.'.$column, $ascdesc],
-                ];
-            }
-
-            $pagerlink = 'sort='.intval($searchParams['sort']).'&type='.$linkascdesc.'&';
-
-        } else {
-
-            $orderBy = [
-                ['pos_state', 'desc'],
-                ['torrents.id', 'desc'],
-            ];
-            $pagerlink = '';
-
-        }
-
         $allCategoryId = \App\Models\SearchBox::listCategoryId($sectiontype);
-        $addparam = '';
-        $wherea = [];
-        $whereBindings = [];
-        $wherecatina = [];
-        $wheresourceina = [];
-        $wheremediumina = [];
-        $wherecodecina = [];
-        $wherestandardina = [];
-        $whereprocessingina = [];
-        $whereaudiocodecina = [];
-        $whereothera = [];
-        // ----------------- start whether show torrents from all sections---------------------//
-        if ($hasSearchParams) {
-            $allsec = intval($searchParams['allsec'] ?? 0);
-        } else {
-            $allsec = 0;
-        }
-        if ($allsec == 1) {		// show torrents from all sections
-            $addparam .= 'allsec=1&';
-        }
-        // ----------------- end whether ignoring section ---------------------//
-        // ----------------- start bookmarked ---------------------//
-        $inclbookmarked = 0;
-        if ($hasSearchParams) {
-            $inclbookmarked = intval($searchParams['inclbookmarked'] ?? 0);
-        } elseif ($CURUSER['notifs']) {
-            if (str_contains($CURUSER['notifs'], '[inclbookmarked=0]')) {
-                $inclbookmarked = 0;
-            } elseif (str_contains($CURUSER['notifs'], '[inclbookmarked=1]')) {
-                $inclbookmarked = 1;
-            } elseif (str_contains($CURUSER['notifs'], '[inclbookmarked=2]')) {
-                $inclbookmarked = 2;
-            }
-        }
 
-        if (! in_array($inclbookmarked, [0, 1, 2])) {
-            $inclbookmarked = 0;
-            Log::writeWithContext('User '.$CURUSER['username'].','.$CURUSER['ip'].' is hacking inclbookmarked field in'.Input::serverValue('SCRIPT_NAME', ''), 'mod');
-        }
-        if ($inclbookmarked == 0) {  // all(bookmarked,not)
-            $addparam .= 'inclbookmarked=0&';
-        } elseif ($inclbookmarked == 1) {		// bookmarked
-            $addparam .= 'inclbookmarked=1&';
-            if (! empty($CURUSER['id'])) {
-                $this->pushWhere($wherea, $whereBindings, 'torrents.id IN (SELECT torrentid FROM bookmarks WHERE userid = ?)', [(int) $CURUSER['id']]);
-            }
-        } elseif ($inclbookmarked == 2) {		// not bookmarked
-            $addparam .= 'inclbookmarked=2&';
-            if (! empty($CURUSER['id'])) {
-                $this->pushWhere($wherea, $whereBindings, 'torrents.id NOT IN (SELECT torrentid FROM bookmarks WHERE userid = ?)', [(int) $CURUSER['id']]);
-            }
-        }
-        // ----------------- end bookmarked ---------------------//
+        $sorting = app(QueryBuilder::class)->buildSorting($searchParams);
+        $column = $sorting['column'];
+        $ascdesc = $sorting['ascdesc'];
+        $linkascdesc = $sorting['linkascdesc'];
+        $orderBy = $sorting['orderBy'];
+        $pagerlink = $sorting['pagerlink'];
 
-        // ----------------- start include dead ---------------------//
-        if (isset($searchParams['incldead'])) {
-            $include_dead = intval($searchParams['incldead'] ?? 0);
-        } elseif ($CURUSER['notifs']) {
-            if (str_contains($CURUSER['notifs'], '[incldead=0]')) {
-                $include_dead = 0;
-            } elseif (str_contains($CURUSER['notifs'], '[incldead=1]')) {
-                $include_dead = 1;
-            } elseif (str_contains($CURUSER['notifs'], '[incldead=2]')) {
-                $include_dead = 2;
-            } else {
-                $include_dead = 1;
-            }
-        } else {
-            $include_dead = 1;
-        }
+        $filters = app(FilterParser::class)->parse(
+            $searchParams,
+            $CURUSER,
+            $hasSearchParams,
+            $showsubcat,
+            $showsource,
+            $showmedium,
+            $showcodec,
+            $showstandard,
+            $showprocessing,
+            $showaudiocodec,
+            $cats,
+            $sources,
+            $media,
+            $codecs,
+            $standards,
+            $processings,
+            $audiocodecs,
+        );
+        $wherea = $filters['wherea'];
+        $whereBindings = $filters['whereBindings'];
+        $whereothera = $filters['whereothera'];
+        $wherecatina = $filters['wherecatina'];
+        $wheresourceina = $filters['wheresourceina'];
+        $wheremediumina = $filters['wheremediumina'];
+        $wherecodecina = $filters['wherecodecina'];
+        $wherestandardina = $filters['wherestandardina'];
+        $whereprocessingina = $filters['whereprocessingina'];
+        $whereaudiocodecina = $filters['whereaudiocodecina'];
+        $addparam = $filters['addparam'];
+        $all = $filters['all'];
+        $inclbookmarked = $filters['inclbookmarked'];
+        $include_dead = $filters['include_dead'];
+        $special_state = $filters['special_state'];
+        $allsec = $filters['allsec'];
+        $searchParams = $filters['searchParams'];
 
-        if (! in_array($include_dead, [0, 1, 2])) {
-            $include_dead = 0;
-            Log::writeWithContext('User '.$CURUSER['username'].','.$CURUSER['ip'].' is hacking incldead field in'.Input::serverValue('SCRIPT_NAME', ''), 'mod');
-        }
-        if ($include_dead == 0) {  // all(active,dead)
-            $addparam .= 'incldead=0&';
-        } elseif ($include_dead == 1) {		// active
-            $addparam .= 'incldead=1&';
-            $whereothera[] = 'visible = 1';
-        } elseif ($include_dead == 2) {		// dead
-            $addparam .= 'incldead=2&';
-            $whereothera[] = 'visible = 0';
-        }
-        // ----------------- end include dead ---------------------//
-
-        if (empty($CURUSER['id']) || ! Permission::canViewBannedTorrent()) {
-            $whereothera[] = 'banned = 0';
-            $searchParams['banned'] = 0;
-        }
-
-        $special_state = 0;
-        if ($hasSearchParams) {
-            $special_state = intval($searchParams['spstate'] ?? 0);
-        } elseif ($CURUSER['notifs']) {
-            if (str_contains($CURUSER['notifs'], '[spstate=0]')) {
-                $special_state = 0;
-            } elseif (str_contains($CURUSER['notifs'], '[spstate=1]')) {
-                $special_state = 1;
-            } elseif (str_contains($CURUSER['notifs'], '[spstate=2]')) {
-                $special_state = 2;
-            } elseif (str_contains($CURUSER['notifs'], '[spstate=3]')) {
-                $special_state = 3;
-            } elseif (str_contains($CURUSER['notifs'], '[spstate=4]')) {
-                $special_state = 4;
-            } elseif (str_contains($CURUSER['notifs'], '[spstate=5]')) {
-                $special_state = 5;
-            } elseif (str_contains($CURUSER['notifs'], '[spstate=6]')) {
-                $special_state = 6;
-            } elseif (str_contains($CURUSER['notifs'], '[spstate=7]')) {
-                $special_state = 7;
-            }
-        }
-
-        if (! in_array($special_state, [0, 1, 2, 3, 4, 5, 6, 7])) {
-            $special_state = 0;
-            Log::writeWithContext('User '.$CURUSER['username'].','.$CURUSER['ip'].' is hacking spstate field in '.Input::serverValue('SCRIPT_NAME', ''), 'mod');
-        }
-        $globalSpecialState = Promotion::globalSpecialState();
-        // Pass globalSpecialState to MeiliSearch so it can apply the same
-        // sp_state filtering logic as the SQL path (see getFilters).
-        $searchParams['global_special_state'] = $globalSpecialState;
-        if ($special_state == 0) {	// all
-            $addparam .= 'spstate=0&';
-        } elseif ($special_state == 1) {	// normal
-            $addparam .= 'spstate=1&';
-
-            $wherea[] = 'sp_state = 1';
-        } elseif ($special_state == 2) {	// free
-            $addparam .= 'spstate=2&';
-
-            if ($globalSpecialState == 1) {
-                $wherea[] = 'sp_state = 2';
-            } elseif ($globalSpecialState == 2) {
-
-            }
-        } elseif ($special_state == 3) {	// 2x up
-            $addparam .= 'spstate=3&';
-            if ($globalSpecialState == 1) {	// only sp state
-                $wherea[] = 'sp_state = 3';
-            } elseif ($globalSpecialState == 3) {	// all
-
-            }
-        } elseif ($special_state == 4) {	// 2x up and free
-            $addparam .= 'spstate=4&';
-
-            if ($globalSpecialState == 1) {	// only sp state
-                $wherea[] = 'sp_state = 4';
-            } elseif ($globalSpecialState == 4) {	// all
-
-            }
-        } elseif ($special_state == 5) {	// half down
-            $addparam .= 'spstate=5&';
-
-            if ($globalSpecialState == 1) {	// only sp state
-                $wherea[] = 'sp_state = 5';
-            } elseif ($globalSpecialState == 5) {	// all
-
-            }
-        } elseif ($special_state == 6) {	// half down
-            $addparam .= 'spstate=6&';
-
-            if ($globalSpecialState == 1) {	// only sp state
-                $wherea[] = 'sp_state = 6';
-            } elseif ($globalSpecialState == 6) {	// all
-
-            }
-        } elseif ($special_state == 7) {	// 30% down
-            $addparam .= 'spstate=7&';
-
-            if ($globalSpecialState == 1) {	// only sp state
-                $wherea[] = 'sp_state = 7';
-            } elseif ($globalSpecialState == 7) {	// all
-
-            }
-        }
-
-        $category_get = intval($searchParams['cat'] ?? 0);
-        $source_get = $medium_get = $codec_get = $standard_get = $processing_get = $audiocodec_get = 0;
-        if ($showsubcat) {
-            if ($showsource) {
-                $source_get = intval($searchParams['source'] ?? 0);
-            }
-            if ($showmedium) {
-                $medium_get = intval($searchParams['medium'] ?? 0);
-            }
-            if ($showcodec) {
-                $codec_get = intval($searchParams['codec'] ?? 0);
-            }
-            if ($showstandard) {
-                $standard_get = intval($searchParams['standard'] ?? 0);
-            }
-            if ($showprocessing) {
-                $processing_get = intval($searchParams['processing'] ?? 0);
-            }
-            if ($showaudiocodec) {
-                $audiocodec_get = intval($searchParams['audiocodec'] ?? 0);
-            }
-        }
-
-        $all = intval($searchParams['all'] ?? 0);
-
-        if (! $all) {
-            if (! $hasSearchParams && $CURUSER['notifs']) {
-                $all = true;
-                foreach ($cats as $cat) {
-                    $mystring = $CURUSER['notifs'];
-                    $findme = '[cat'.$cat['id'].']';
-                    $search = strpos($mystring, $findme);
-                    if ($search === false) {
-                        $catcheck = false;
-                    } else {
-                        $catcheck = true;
-                    }
-
-                    $all = $all && $catcheck;
-                    if ($catcheck) {
-                        $wherecatina[] = $cat['id'];
-                        $addparam .= "cat$cat[id]=1&";
-                    }
-                }
-                if ($showsubcat) {
-                    if ($showsource) {
-                        foreach ($sources as $source) {
-                            $mystring = $CURUSER['notifs'];
-                            $findme = '[sou'.$source['id'].']';
-                            $search = strpos($mystring, $findme);
-                            if ($search === false) {
-                                $sourcecheck = false;
-                            } else {
-                                $sourcecheck = true;
-                            }
-
-                            $all = $all && $sourcecheck;
-                            if ($sourcecheck) {
-                                $wheresourceina[] = $source['id'];
-                                $addparam .= "source{$source['id']}=1&";
-                            }
-                        }
-                    }
-                    if ($showmedium) {
-                        foreach ($media as $medium) {
-                            $mystring = $CURUSER['notifs'];
-                            $findme = '[med'.$medium['id'].']';
-                            $search = strpos($mystring, $findme);
-                            if ($search === false) {
-                                $mediumcheck = false;
-                            } else {
-                                $mediumcheck = true;
-                            }
-
-                            $all = $all && $mediumcheck;
-                            if ($mediumcheck) {
-                                $wheremediumina[] = $medium['id'];
-                                $addparam .= "medium{$medium['id']}=1&";
-                            }
-                        }
-                    }
-                    if ($showcodec) {
-                        foreach ($codecs as $codec) {
-                            $mystring = $CURUSER['notifs'];
-                            $findme = '[cod'.$codec['id'].']';
-                            $search = strpos($mystring, $findme);
-                            if ($search === false) {
-                                $codeccheck = false;
-                            } else {
-                                $codeccheck = true;
-                            }
-
-                            $all = $all && $codeccheck;
-                            if ($codeccheck) {
-                                $wherecodecina[] = $codec['id'];
-                                $addparam .= "codec{$codec['id']}=1&";
-                            }
-                        }
-                    }
-                    if ($showstandard) {
-                        foreach ($standards as $standard) {
-                            $mystring = $CURUSER['notifs'];
-                            $findme = '[sta'.$standard['id'].']';
-                            $search = strpos($mystring, $findme);
-                            if ($search === false) {
-                                $standardcheck = false;
-                            } else {
-                                $standardcheck = true;
-                            }
-
-                            $all = $all && $standardcheck;
-                            if ($standardcheck) {
-                                $wherestandardina[] = $standard['id'];
-                                $addparam .= "standard{$standard['id']}=1&";
-                            }
-                        }
-                    }
-                    if ($showprocessing) {
-                        foreach ($processings as $processing) {
-                            $mystring = $CURUSER['notifs'];
-                            $findme = '[pro'.$processing['id'].']';
-                            $search = strpos($mystring, $findme);
-                            if ($search === false) {
-                                $processingcheck = false;
-                            } else {
-                                $processingcheck = true;
-                            }
-
-                            $all = $all && $processingcheck;
-                            if ($processingcheck) {
-                                $whereprocessingina[] = $processing['id'];
-                                $addparam .= "processing{$processing['id']}=1&";
-                            }
-                        }
-                    }
-                    if ($showaudiocodec) {
-                        foreach ($audiocodecs as $audiocodec) {
-                            $mystring = $CURUSER['notifs'];
-                            $findme = '[aud'.$audiocodec['id'].']';
-                            $search = strpos($mystring, $findme);
-                            if ($search === false) {
-                                $audiocodeccheck = false;
-                            } else {
-                                $audiocodeccheck = true;
-                            }
-
-                            $all = $all && $audiocodeccheck;
-                            if ($audiocodeccheck) {
-                                $whereaudiocodecina[] = $audiocodec['id'];
-                                $addparam .= "audiocodec{$audiocodec['id']}=1&";
-                            }
-                        }
-                    }
-                }
-            }
-            // when one clicked the cat, source, etc. name/image
-            elseif ($category_get) {
-                LegacyResponse::assertId($category_get, true, true, true);
-                $wherecatina[] = $category_get;
-                $addparam .= "cat=$category_get&";
-            } elseif ($medium_get) {
-                LegacyResponse::assertId($medium_get, true, true, true);
-                $wheremediumina[] = $medium_get;
-                $addparam .= "medium=$medium_get&";
-            } elseif ($source_get) {
-                LegacyResponse::assertId($source_get, true, true, true);
-                $wheresourceina[] = $source_get;
-                $addparam .= "source=$source_get&";
-            } elseif ($codec_get) {
-                LegacyResponse::assertId($codec_get, true, true, true);
-                $wherecodecina[] = $codec_get;
-                $addparam .= "codec=$codec_get&";
-            } elseif ($standard_get) {
-                LegacyResponse::assertId($standard_get, true, true, true);
-                $wherestandardina[] = $standard_get;
-                $addparam .= "standard=$standard_get&";
-            } elseif ($processing_get) {
-                LegacyResponse::assertId($processing_get, true, true, true);
-                $whereprocessingina[] = $processing_get;
-                $addparam .= "processing=$processing_get&";
-            } elseif ($audiocodec_get) {
-                LegacyResponse::assertId($audiocodec_get, true, true, true);
-                $whereaudiocodecina[] = $audiocodec_get;
-                $addparam .= "audiocodec=$audiocodec_get&";
-            } else { // select and go
-                $all = true;
-                foreach ($cats as $cat) {
-                    $__is = (isset($searchParams["cat{$cat['id']}"]) && $searchParams["cat{$cat['id']}"]);
-                    $all &= $__is;
-                    if ($__is) {
-                        $wherecatina[] = $cat['id'];
-                        $addparam .= "cat{$cat['id']}=1&";
-                    }
-                }
-                if ($showsubcat) {
-                    if ($showsource) {
-                        foreach ($sources as $source) {
-                            $__is = (isset($searchParams["source{$source['id']}"]) && $searchParams["source{$source['id']}"]);
-                            $all &= $__is;
-                            if ($__is) {
-                                $wheresourceina[] = $source['id'];
-                                $addparam .= "source{$source['id']}=1&";
-                            }
-                        }
-                    }
-                    if ($showmedium) {
-                        foreach ($media as $medium) {
-                            $__is = (isset($searchParams["medium{$medium['id']}"]) && $searchParams["medium{$medium['id']}"]);
-                            $all &= $__is;
-                            if ($__is) {
-                                $wheremediumina[] = $medium['id'];
-                                $addparam .= "medium{$medium['id']}=1&";
-                            }
-                        }
-                    }
-                    if ($showcodec) {
-                        foreach ($codecs as $codec) {
-                            $__is = (isset($searchParams["codec{$codec['id']}"]) && $searchParams["codec{$codec['id']}"]);
-                            $all &= $__is;
-                            if ($__is) {
-                                $wherecodecina[] = $codec['id'];
-                                $addparam .= "codec{$codec['id']}=1&";
-                            }
-                        }
-                    }
-                    if ($showstandard) {
-                        foreach ($standards as $standard) {
-                            $__is = (isset($searchParams["standard{$standard['id']}"]) && $searchParams["standard{$standard['id']}"]);
-                            $all &= $__is;
-                            if ($__is) {
-                                $wherestandardina[] = $standard['id'];
-                                $addparam .= "standard{$standard['id']}=1&";
-                            }
-                        }
-                    }
-                    if ($showprocessing) {
-                        foreach ($processings as $processing) {
-                            $__is = (isset($searchParams["processing{$processing['id']}"]) && $searchParams["processing{$processing['id']}"]);
-                            $all &= $__is;
-                            if ($__is) {
-                                $whereprocessingina[] = $processing['id'];
-                                $addparam .= "processing{$processing['id']}=1&";
-                            }
-                        }
-                    }
-                    if ($showaudiocodec) {
-                        foreach ($audiocodecs as $audiocodec) {
-                            $__is = (isset($searchParams["audiocodec{$audiocodec['id']}"]) && $searchParams["audiocodec{$audiocodec['id']}"]);
-                            $all &= $__is;
-                            if ($__is) {
-                                $whereaudiocodecina[] = $audiocodec['id'];
-                                $addparam .= "audiocodec{$audiocodec['id']}=1&";
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        if ($all) {
-            $wherecatina = [];
-            if ($showsubcat) {
-                $wheresourceina = [];
-                $wheremediumina = [];
-                $wherecodecina = [];
-                $wherestandardina = [];
-                $whereprocessingina = [];
-                $whereaudiocodecina = [];
-            }
-            $addparam .= '';
-        }
-        $wherecatin = $wheresourcein = $wheremediumin = $wherecodecin = $wherestandardin = $whereprocessingin = $whereaudiocodecin = '';
-        if (empty($wherecatina) && ! (in_array($inclbookmarked, [1, 2]) && $allsec == 1)) {
-            // require limit in some category
-            $wherecatina = $allCategoryId;
-        }
-        $wherecatina = is_array($wherecatina) ? $wherecatina : [];
-        if (count($wherecatina) > 1) {
-            $wherecatin = implode(',', $wherecatina);
-        } elseif (count($wherecatina) == 1) {
-            $wherea[] = "category = $wherecatina[0]";
-        }
-
-        if ($showsubcat) {
-            if ($showsource) {
-                if (count($wheresourceina) > 1) {
-                    $wheresourcein = implode(',', $wheresourceina);
-                } elseif (count($wheresourceina) == 1) {
-                    $wherea[] = "source = $wheresourceina[0]";
-                }
-            }
-
-            if ($showmedium) {
-                if (count($wheremediumina) > 1) {
-                    $wheremediumin = implode(',', $wheremediumina);
-                } elseif (count($wheremediumina) == 1) {
-                    $wherea[] = "medium = $wheremediumina[0]";
-                }
-            }
-
-            if ($showcodec) {
-                if (count($wherecodecina) > 1) {
-                    $wherecodecin = implode(',', $wherecodecina);
-                } elseif (count($wherecodecina) == 1) {
-                    $wherea[] = "codec = $wherecodecina[0]";
-                }
-            }
-
-            if ($showstandard) {
-                if (count($wherestandardina) > 1) {
-                    $wherestandardin = implode(',', $wherestandardina);
-                } elseif (count($wherestandardina) == 1) {
-                    $wherea[] = "standard = $wherestandardina[0]";
-                }
-            }
-
-            if ($showprocessing) {
-                if (count($whereprocessingina) > 1) {
-                    $whereprocessingin = implode(',', $whereprocessingina);
-                } elseif (count($whereprocessingina) == 1) {
-                    $wherea[] = "processing = $whereprocessingina[0]";
-                }
-            }
-        }
-
-        if ($showaudiocodec) {
-            if (count($whereaudiocodecina) > 1) {
-                $whereaudiocodecin = implode(',', $whereaudiocodecina);
-            } elseif (count($whereaudiocodecina) == 1) {
-                $wherea[] = "audiocodec = $whereaudiocodecina[0]";
-            }
-        }
-
-        $wherebase = $wherea;
-        $search_area = 0;
-        if (isset($searchstr)) {
-            if (! isset($searchParams['notnewword']) || ! $searchParams['notnewword']) {
-                $notnewword = '';
-            } else {
-                $notnewword = 'notnewword=1&';
-            }
-            $search_mode = intval($searchParams['search_mode'] ?? 0);
-            /**
-             * Deprecated search mode: 1(OR)
-             *
-             * @since 1.8
-             */
-            if (! in_array($search_mode, [0, 2])) {
-                $search_mode = 0;
-                Log::writeWithContext('User '.$CURUSER['username'].','.$CURUSER['ip'].' is hacking search_mode field in'.Input::serverValue('SCRIPT_NAME', ''), 'mod');
-            }
-
-            $search_area = intval($searchParams['search_area'] ?? 0);
-
-            $likePatterns = [];
-            $searchTerm = trim($searchstr_raw);
-            switch ($search_mode) {
-                case 0:	// AND, OR
-                case 1:
-
-                    $searchTerm = str_replace('.', ' ', $searchTerm);
-                    $searchstr_exploded = explode(' ', $searchTerm);
-                    $searchstr_exploded_count = 0;
-                    foreach ($searchstr_exploded as $searchstr_element) {
-                        $searchstr_element = trim($searchstr_element);
-                        if ($searchstr_element === '') {
-                            continue;
-                        }
-                        $searchstr_exploded_count++;
-                        if ($searchstr_exploded_count > 3) {    // maximum 3 keywords
-                            break;
-                        }
-                        $likePatterns[] = '%'.$searchstr_element.'%';
-                    }
-                    break;
-
-                case 2:	// exact
-
-                    $likePatterns[] = '%'.$searchTerm.'%';
-                    break;
-            }
-            $ANDOR = ($search_mode == 0 ? ' AND ' : ' OR ');	// only affects mode 0 and mode 1
-
-            $searchColumn = match ($search_area) {
-                1 => 'torrent_extras.descr',
-                3 => 'users.username',
-                0 => 'torrents.name',
-                default => 'torrents.name',
-            };
-
-            if ($search_area === 3) {
-                $likeClauses = array_fill(0, count($likePatterns), $searchColumn.' LIKE ?');
-                $likeSql = implode($ANDOR, $likeClauses);
-
-                if (empty($CURUSER['id'])) {
-                    // not registered user, only show not anonymous torrents
-                    $this->pushWhere($wherea, $whereBindings, $likeSql.' AND torrents.anonymous = 0', $likePatterns);
-                } elseif (Permission::canManageTorrent()) {
-                    // moderator or above, show all
-                    $this->pushWhere($wherea, $whereBindings, $likeSql, $likePatterns);
-                } else {
-                    // only show normal torrents and anonymous torrents from himself
-                    $sql = "({$likeSql} AND torrents.anonymous = 0) OR ({$likeSql} AND torrents.anonymous = 1 AND users.id = ?)";
-                    $this->pushWhere($wherea, $whereBindings, $sql, array_merge($likePatterns, $likePatterns, [(int) $CURUSER['id']]));
-                }
-            } else {
-                if (empty($likePatterns)) {
-                    $likePatterns[] = '%'.$searchTerm.'%';
-                }
-                $likeClauses = array_fill(0, count($likePatterns), $searchColumn.' LIKE ?');
-
-                if ($search_area !== 0 && $search_area !== 1) {
-                    $search_area = 0;
-                    Log::writeWithContext('User '.$CURUSER['username'].','.$CURUSER['ip'].' is hacking search_area field in'.Input::serverValue('SCRIPT_NAME', ''), 'mod');
-                }
-
-                $this->pushWhere($wherea, $whereBindings, '('.implode($ANDOR, $likeClauses).')', $likePatterns);
-            }
-
-            $addparam .= 'search_area='.$search_area.'&';
-            $addparam .= 'search='.rawurlencode($searchstr).'&'.$notnewword;
-            $addparam .= 'search_mode='.$search_mode.'&';
-        }
-
-        // approval status
-        $approvalStatusNoneVisible = SiteConfig::current()->torrent->approvalStatusNoneVisible();
-        $approvalStatusIconEnabled = SiteConfig::current()->torrent->approvalStatusIconEnabled();
-        $approvalStatus = null;
-        $showApprovalStatusFilter = false;
-        // when enable approval status icon, all user can use this filter, otherwise only staff member and approval none visible is 'no' can use
-        if ($approvalStatusIconEnabled || (Permission::canApproveTorrent() && ! $approvalStatusNoneVisible)) {
-            $showApprovalStatusFilter = true;
-        }
-        // when user can use approval status filter, and pass `approval_status` parameter, will affect
-        // OR if [not approval can not be view] and not staff member, force to view  approval allowed
-        if ($showApprovalStatusFilter && isset($searchParams['approval_status']) && is_numeric($searchParams['approval_status'])) {
-            $approvalStatus = intval($searchParams['approval_status']);
-            $this->pushWhere($wherea, $whereBindings, 'torrents.approval_status = ?', [(int) $approvalStatus]);
-            $searchParams['approval_status'] = $approvalStatus;
-            $addparam .= "approval_status=$approvalStatus&";
-        } elseif (! $approvalStatusNoneVisible && ! Permission::canApproveTorrent()) {
-            $this->pushWhere($wherea, $whereBindings, 'torrents.approval_status = ?', [(int) TorrentApprovalStatus::ALLOW->value]);
-            $searchParams['approval_status'] = TorrentApprovalStatus::ALLOW->value;
-        }
-
-        if (isset($searchParams['size_begin']) && ctype_digit($searchParams['size_begin'])) {
-            $this->pushWhere($wherea, $whereBindings, 'torrents.size >= ?', [intval($searchParams['size_begin']) * 1024 * 1024 * 1024]);
-            $addparam .= 'size_begin='.intval($searchParams['size_begin']).'&';
-        }
-        if (isset($searchParams['size_end']) && ctype_digit($searchParams['size_end'])) {
-            $this->pushWhere($wherea, $whereBindings, 'torrents.size <= ?', [intval($searchParams['size_end']) * 1024 * 1024 * 1024]);
-            $addparam .= 'size_end='.intval($searchParams['size_end']).'&';
-        }
-
-        if (isset($searchParams['seeders_begin']) && ctype_digit($searchParams['seeders_begin'])) {
-            $this->pushWhere($wherea, $whereBindings, 'torrents.seeders >= ?', [(int) $searchParams['seeders_begin']]);
-            $addparam .= 'seeders_begin='.intval($searchParams['seeders_begin']).'&';
-        }
-        if (isset($searchParams['seeders_end']) && ctype_digit($searchParams['seeders_end'])) {
-            $this->pushWhere($wherea, $whereBindings, 'torrents.seeders <= ?', [(int) $searchParams['seeders_end']]);
-            $addparam .= 'seeders_end='.intval($searchParams['seeders_end']).'&';
-        }
-
-        if (isset($searchParams['leechers_begin']) && ctype_digit($searchParams['leechers_begin'])) {
-            $this->pushWhere($wherea, $whereBindings, 'torrents.leechers >= ?', [(int) $searchParams['leechers_begin']]);
-            $addparam .= 'leechers_begin='.intval($searchParams['leechers_begin']).'&';
-        }
-        if (isset($searchParams['leechers_end']) && ctype_digit($searchParams['leechers_end'])) {
-            $this->pushWhere($wherea, $whereBindings, 'torrents.leechers <= ?', [(int) $searchParams['leechers_end']]);
-            $addparam .= 'leechers_end='.intval($searchParams['leechers_end']).'&';
-        }
-
-        if (isset($searchParams['times_completed_begin']) && ctype_digit($searchParams['times_completed_begin'])) {
-            $this->pushWhere($wherea, $whereBindings, 'torrents.times_completed >= ?', [(int) $searchParams['times_completed_begin']]);
-            $addparam .= 'times_completed_begin='.intval($searchParams['times_completed_begin']).'&';
-        }
-        if (isset($searchParams['times_completed_end']) && ctype_digit($searchParams['times_completed_end'])) {
-            $this->pushWhere($wherea, $whereBindings, 'torrents.times_completed <= ?', [(int) $searchParams['times_completed_end']]);
-            $addparam .= 'times_completed_end='.intval($searchParams['times_completed_end']).'&';
-        }
-
-        if (isset($searchParams['added_begin']) && ! empty($searchParams['added_begin'])) {
-            $this->pushWhere($wherea, $whereBindings, 'torrents.added >= ?', [(string) $searchParams['added_begin']]);
-            $addparam .= 'added_begin='.$searchParams['added_begin'].'&';
-        }
-        if (isset($searchParams['added_end']) && ! empty($searchParams['added_end'])) {
-            $this->pushWhere($wherea, $whereBindings, 'torrents.added <= ?', [Carbon::parse($searchParams['added_end'])->endOfDay()->toDateTimeString()]);
-            $addparam .= 'added_end='.$searchParams['added_end'].'&';
-        }
-
-        $where = implode(' AND ', $wherea);
-
-        if ($wherecatin) {
-            $where .= ($where ? ' AND ' : '').'category IN('.$wherecatin.')';
-        }
-        if ($showsubcat) {
-            if ($wheresourcein) {
-                $where .= ($where ? ' AND ' : '').'source IN('.$wheresourcein.')';
-            }
-            if ($wheremediumin) {
-                $where .= ($where ? ' AND ' : '').'medium IN('.$wheremediumin.')';
-            }
-            if ($wherecodecin) {
-                $where .= ($where ? ' AND ' : '').'codec IN('.$wherecodecin.')';
-            }
-            if ($wherestandardin) {
-                $where .= ($where ? ' AND ' : '').'standard IN('.$wherestandardin.')';
-            }
-            if ($whereprocessingin) {
-                $where .= ($where ? ' AND ' : '').'processing IN('.$whereprocessingin.')';
-            }
-            if ($whereaudiocodecin) {
-                $where .= ($where ? ' AND ' : '').'audiocodec IN('.$whereaudiocodecin.')';
-            }
-        }
-        // last
-        if (! empty($whereothera)) {
-            $where .= ($where ? ' AND ' : '').implode(' AND ', $whereothera);
-        }
-
-        $tagId = intval($searchParams['tag_id'] ?? 0);
-        if ($tagId > 0) {
-            $addparam .= "tag_id={$tagId}&";
-        }
-        $listingOptions = [
-            'where' => $where,
-            'where_bindings' => $whereBindings,
-            'join_users' => ($search_area == 3 || $column == 'owner'),
-            'join_torrent_tags' => $tagId > 0,
-            'tag_id' => $tagId,
-            'join_torrent_extras' => $search_area == 1,
-        ];
+        $built = app(QueryBuilder::class)->buildWhere(
+            $searchParams,
+            $CURUSER,
+            $wherea,
+            $whereBindings,
+            $whereothera,
+            $wherecatina,
+            $wheresourceina,
+            $wheremediumina,
+            $wherecodecina,
+            $wherestandardina,
+            $whereprocessingina,
+            $whereaudiocodecina,
+            $addparam,
+            $showsubcat,
+            $showsource,
+            $showmedium,
+            $showcodec,
+            $showstandard,
+            $showprocessing,
+            $showaudiocodec,
+            $allCategoryId,
+            $inclbookmarked,
+            $allsec,
+            $searchstr,
+            $searchstr_raw,
+            $column,
+        );
+        $where = $built['where'];
+        $whereBindings = $built['where_bindings'];
+        $listingOptions = $built['listingOptions'];
+        $search_area = $built['search_area'];
+        $addparam = $built['addparam'];
+        $approvalStatus = $built['approvalStatus'];
+        $showApprovalStatusFilter = $built['showApprovalStatusFilter'];
+        $tagId = $built['tagId'];
+        $searchParams = $built['searchParams'];
 
         if ($shouldUseMeili) {
             try {
-                $searchRep = app(MeiliSearchRepository::class);
-                $resultFromSearchRep = $searchRep->search($searchParams, $CURUSER['id']);
+                $resultFromSearchRep = app(MeiliAdapter::class)->search($searchParams, $CURUSER['id']);
                 $count = $resultFromSearchRep['total'];
             } catch (\Throwable $e) {
                 Logger::writeWithContext((string) ('MeiliSearch search failed, falling back to SQL: '.$e->getMessage()), (string) 'error', (bool) false);
                 $shouldUseMeili = false;
-                $count = app(TorrentListingRepository::class)->getCount($listingOptions);
+                $count = app(SqlFallback::class)->getCount($listingOptions);
             }
         } else {
-            $count = app(TorrentListingRepository::class)->getCount($listingOptions);
+            $count = app(SqlFallback::class)->getCount($listingOptions);
         }
         $maxPageSize = 100;
         if (! empty($searchParams['pageSize'])) {
@@ -908,7 +213,7 @@ class TorrentSearchRepository
         $torrentsperpage = min($maxPageSize, $torrentsperpage);
 
         if ($count) {
-            if (isset($searchstr) && (! isset($searchParams['notnewword']) || ! $searchParams['notnewword'])) {
+            if ($searchstr !== null && (! isset($searchParams['notnewword']) || ! $searchParams['notnewword'])) {
                 SearchSuggest::add((string) $searchstr, $CURUSER['id'], (bool) true);
             }
             if ($pagerlink !== '') {
@@ -924,7 +229,7 @@ class TorrentSearchRepository
             $fieldsArr = Torrent::getFieldsForList(true);
             $rows = $shouldUseMeili
                 ? $resultFromSearchRep['list']
-                : app(TorrentListingRepository::class)->getList(array_merge($listingOptions, [
+                : app(SqlFallback::class)->getList(array_merge($listingOptions, [
                     'fields' => $fieldsArr,
                     'search_box_id' => $sectiontype,
                     'order_by' => $orderBy,
@@ -933,7 +238,7 @@ class TorrentSearchRepository
                 ]));
         }
 
-        if (isset($searchstr)) {
+        if ($searchstr !== null) {
             $pageTitle = $lang_torrents['head_search_results_for'].$searchstr_ori;
         } elseif ($sectiontype == $browsecatmode) {
             $pageTitle = $lang_torrents['head_torrents'];
@@ -942,20 +247,5 @@ class TorrentSearchRepository
         }
 
         return get_defined_vars();
-    }
-
-    /**
-     * Append a parameterized where fragment and its bindings.
-     *
-     * @param  list<string>  $wherea
-     * @param  list<mixed>  $whereBindings
-     * @param  list<mixed>  $bindings
-     */
-    private function pushWhere(array &$wherea, array &$whereBindings, string $sql, array $bindings = []): void
-    {
-        $wherea[] = $sql;
-        foreach ($bindings as $binding) {
-            $whereBindings[] = $binding;
-        }
     }
 }

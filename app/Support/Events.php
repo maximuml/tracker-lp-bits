@@ -6,7 +6,6 @@ namespace App\Support;
 
 use App\Enums\ModelEventEnum;
 use App\Jobs\FireEvent;
-use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Redis;
@@ -57,7 +56,7 @@ final class Events
                     $params[] = $oldModel;
                 }
             }
-            app(Dispatcher::class)->dispatch(new $eventClass(...$params));
+            event(new $eventClass(...$params));
             self::publishModel($name, (int) $model->getKey(), $model->toJson());
             Logger::writeWithContext('success fire_event in laravel, name: '.$name.', id: '.$model->getKey().', oldId: '.($oldModel ? $oldModel->getKey() : ''));
         }

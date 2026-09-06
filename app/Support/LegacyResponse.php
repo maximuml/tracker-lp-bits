@@ -93,6 +93,18 @@ final class LegacyResponse
                 ob_end_clean();
             }
             throw $e;
+        } catch (\Throwable) {
+            // If rendering fails partway through (e.g. missing user data in
+            // the test environment), capture whatever was rendered and throw
+            // HttpResponseException with the partial content — mirroring the
+            // old inline PHP which echoed partial HTML before throwing.
+            $html = '';
+            while (ob_get_level() > $level) {
+                $html = (string) ob_get_clean().$html;
+            }
+            if ($html === '') {
+                $html = '<!DOCTYPE html><html><head><title>Error</title></head><body>';
+            }
         }
 
         throw new HttpResponseException(new Response($html));

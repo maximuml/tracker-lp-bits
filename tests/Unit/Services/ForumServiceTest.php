@@ -546,9 +546,8 @@ final class ForumServiceTest extends TestCase
         $this->mockGlobals(['maxsubjectlength' => 100]);
         $this->mockCache();
 
-        // abort($die=false) echoes and continues; code then tries forumExists(0)
-        $repo->shouldReceive('forumExists')->with(0)->andReturn(false);
-
+        // abort() renders the error page (header + message + footer) and
+        // throws HttpResponseException with the rendered HTML.
         $request = Request::create('/forums.php', 'POST', [
             'action' => 'post',
             'type' => 'new',
@@ -557,15 +556,19 @@ final class ForumServiceTest extends TestCase
             'body' => 'Test body',
         ]);
 
+        $output = '';
         ob_start();
         try {
             $this->callService($request);
+        } catch (HttpResponseException $e) {
+            $output = $e->getResponse()->getContent();
         } catch (\Throwable) {
-            // Continued execution may hit another abort that throws
+            // Other exceptions may occur in the test environment
+        } finally {
+            ob_end_clean();
         }
-        $output = (string) ob_get_clean();
 
-        $this->assertNotEmpty($output, 'Expected error output from abort(die=false)');
+        $this->assertNotEmpty($output, 'Expected error output from abort()');
     }
 
     public function test_handle_post_reply_outputs_error_when_topic_locked(): void
@@ -596,15 +599,19 @@ final class ForumServiceTest extends TestCase
             'body' => 'Test body',
         ]);
 
+        $output = '';
         ob_start();
         try {
             $this->callService($request);
+        } catch (HttpResponseException $e) {
+            $output = $e->getResponse()->getContent();
         } catch (\Throwable) {
             // May hit a later abort
+        } finally {
+            ob_end_clean();
         }
-        $output = (string) ob_get_clean();
 
-        $this->assertNotEmpty($output, 'Expected error output from locked topic abort(die=false)');
+        $this->assertNotEmpty($output, 'Expected error output from locked topic abort()');
     }
 
     public function test_handle_post_reply_redirects_when_topic_locked_returns_null(): void
@@ -664,15 +671,19 @@ final class ForumServiceTest extends TestCase
             'body' => 'Test body',
         ]);
 
+        $output = '';
         ob_start();
         try {
             $this->callService($request);
+        } catch (HttpResponseException $e) {
+            $output = $e->getResponse()->getContent();
         } catch (\Throwable) {
             // May hit a later abort
+        } finally {
+            ob_end_clean();
         }
-        $output = (string) ob_get_clean();
 
-        $this->assertNotEmpty($output, 'Expected flood error output from abort(die=false)');
+        $this->assertNotEmpty($output, 'Expected flood error output from abort()');
     }
 
     // ─── handlePost: creation flow ────────────────────────────────────

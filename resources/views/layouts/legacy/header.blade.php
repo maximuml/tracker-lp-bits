@@ -68,7 +68,7 @@
 <table class="mainouter" width="{{ $contentWidth }}" cellspacing="0" cellpadding="5" align="center">
 	<tr><td id="nav_block" class="text" align="center">
 @if(!$user)
-			<a href="login.php"><font class="big"><b>{!! $lang['text_login'] !!}</b></font></a> / <a href="signup.php"><font class="big"><b>{!! $lang['text_signup'] !!}</b></font></a>
+			<a href="login.php"><font class="big"><b>{!! $lang['text_login'] ?? '' !!}</b></font></a> / <a href="signup.php"><font class="big"><b>{!! $lang['text_signup'] ?? '' !!}</b></font></a>
 @else
 {!! $menuHtml !!}
 
@@ -76,24 +76,24 @@
 	<td><table width="100%" cellspacing="0" cellpadding="0" border="0"><tr>
 		<td class="bottom" align="left">
             <span class="medium">
-                {!! $lang['text_welcome_back'] !!}, {!! $username !!}
-                [<form method="post" action="logout.php" style="display:inline">@csrf<button type="submit" style="background:none;border:none;padding:0;margin:0;color:inherit;cursor:pointer;text-decoration:underline;display:inline">{!! $lang['text_logout'] !!}</button></form>]
-                [<a href="usercp.php">{!! $lang['text_user_cp'] !!}</a>]
-                @if($isModerator) [<a href="staffpanel.php">{!! $lang['text_staff_panel'] !!}</a>] @endif
-                @if($isSysop) [<a href="settings.php">{!! $lang['text_site_settings'] !!}</a>]@endif
-                [<a href="torrents.php?inclbookmarked=1&amp;allsec=1&amp;incldead=0">{!! $lang['text_bookmarks'] !!}</a>]
-                <font class = 'color_bonus'>{!! $lang['text_bonus'] !!}</font>[<a href="mybonus.php">{!! $lang['text_use'] !!}</a>]: {{ $seedbonus }}
+                {!! $lang['text_welcome_back'] ?? '' !!}, {!! $username !!}
+                [<form method="post" action="logout.php" style="display:inline">@csrf<button type="submit" style="background:none;border:none;padding:0;margin:0;color:inherit;cursor:pointer;text-decoration:underline;display:inline">{!! $lang['text_logout'] ?? '' !!}</button></form>]
+                [<a href="usercp.php">{!! $lang['text_user_cp'] ?? '' !!}</a>]
+                @if($isModerator) [<a href="staffpanel.php">{!! $lang['text_staff_panel'] ?? '' !!}</a>] @endif
+                @if($isSysop) [<a href="settings.php">{!! $lang['text_site_settings'] ?? '' !!}</a>]@endif
+                [<a href="torrents.php?inclbookmarked=1&amp;allsec=1&amp;incldead=0">{!! $lang['text_bookmarks'] ?? '' !!}</a>]
+                <font class = 'color_bonus'>{!! $lang['text_bonus'] ?? '' !!}</font>[<a href="mybonus.php">{!! $lang['text_use'] ?? '' !!}</a>]: {{ $seedbonus }}
                 {!! $attendanceLink !!}
                 <a href="medal.php">[{!! $medalLabel !!}]</a>
                 <a href="task.php">[{!! $taskLabel !!}]</a>
-                <font class = 'color_invite'>{!! $lang['text_invite'] !!}</font>[<a href="invite.php?id={{ $userId }}">{!! $lang['text_send'] !!}</a>]: {{ $invites }}({{ $pendingInviteCount }})
+                <font class = 'color_invite'>{!! $lang['text_invite'] ?? '' !!}</font>[<a href="invite.php?id={{ $userId }}">{!! $lang['text_send'] ?? '' !!}</a>]: {{ $invites }}({{ $pendingInviteCount }})
                 {!! $managementSystemLink !!}
                 <br />
-	            <font class="color_ratio">{!! $lang['text_ratio'] !!}</font> {{ $ratio }}
-                <font class='color_uploaded'>{!! $lang['text_uploaded'] !!}</font> {!! $uploaded !!}
-                <font class='color_downloaded'> {!! $lang['text_downloaded'] !!}</font> {!! $downloaded !!}
-                <font class='color_active'>{!! $lang['text_active_torrents'] !!}</font> <img class="arrowup" alt="Torrents seeding" title="{!! $lang['title_torrents_seeding'] !!}" src="pic/trans.gif" />{{ $activeseed }}  <img class="arrowdown" alt="Torrents leeching" title="{!! $lang['title_torrents_leeching'] !!}" src="pic/trans.gif" />{{ $activeleech }}&nbsp;&nbsp;
-                <font class='color_connectable'>{!! $lang['text_connectable'] !!}</font>{!! $connectable !!} {!! $slotsDisplay !!}
+	            <font class="color_ratio">{!! $lang['text_ratio'] ?? '' !!}</font> {{ $ratio }}
+                <font class='color_uploaded'>{!! $lang['text_uploaded'] ?? '' !!}</font> {!! $uploaded !!}
+                <font class='color_downloaded'> {!! $lang['text_downloaded'] ?? '' !!}</font> {!! $downloaded !!}
+                <font class='color_active'>{!! $lang['text_active_torrents'] ?? '' !!}</font> <img class="arrowup" alt="Torrents seeding" title="{!! $lang['title_torrents_seeding'] ?? '' !!}" src="pic/trans.gif" />{{ $activeseed }}  <img class="arrowdown" alt="Torrents leeching" title="{!! $lang['title_torrents_leeching'] ?? '' !!}" src="pic/trans.gif" />{{ $activeleech }}&nbsp;&nbsp;
+                <font class='color_connectable'>{!! $lang['text_connectable'] ?? '' !!}</font>{!! $connectable !!} {!! $slotsDisplay !!}
                 @if($hitAndRunEnabled)<font class='color_bonus'>H&R: </font> {!! $hitAndRunStatus !!} @endif
             </span>
         </td>

@@ -53,6 +53,11 @@ class PageLayout
 
         $cspNonce = (string) (request()->attributes->get('csp_nonce', ''));
 
+        self::renderHeader($context, $title, $msgalert, $script, $place, $cspNonce);
+    }
+
+    private static function renderHeader(PageLayoutContext $context, string $title, bool $msgalert, string $script, string $place, string $cspNonce): void
+    {
         $context->cache?->setLanguage($context->langDir);
         if ($title == '') {
             $title = $context->siteName;
@@ -175,7 +180,7 @@ class PageLayout
             $username = UserDisplay::username($context->user['id']);
             $isModerator = $context->userClass() >= $context->moderatorClass;
             $isSysop = $context->userClass() >= $context->sysopClass;
-            $seedbonus = number_format($context->user['seedbonus'], 1);
+            $seedbonus = number_format((float) ($context->user['seedbonus'] ?? 0), 1);
 
             $attendanceRep = app(AttendanceRepository::class);
             $attendance = $attendanceRep->getAttendance($context->user['id'], date('Ymd'));
@@ -195,8 +200,8 @@ class PageLayout
                 $managementSystemLink = sprintf('[<a href="%s" target="_blank">%s</a>]', Env::get('FILAMENT_PATH', 'nexusphp'), $context->lang['text_management_system']);
             }
 
-            $uploaded = Format::size($context->user['uploaded']);
-            $downloaded = Format::size($context->user['downloaded']);
+            $uploaded = Format::size((int) ($context->user['uploaded'] ?? 0));
+            $downloaded = Format::size((int) ($context->user['downloaded'] ?? 0));
             $slotsDisplay = Slots::display((int) $context->user['uploaded'], (int) $context->user['downloaded'], $context->maxdlSystem, $context->userClass(), $context->vipClass, $context->lang['text_slots'] ?? '', $context->lang['text_unlimited'] ?? '');
 
             $hitAndRunEnabled = HitAndRun::getIsEnabled();

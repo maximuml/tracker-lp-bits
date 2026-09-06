@@ -10,6 +10,7 @@ use App\Http\Requests\AnnounceRequest;
 use App\Services\AnnounceService;
 use App\Support\Json;
 use App\Support\Logger;
+use App\Support\Metrics\AnnounceMetricsRecorder;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Rhilip\Bencode\Bencode;
@@ -32,9 +33,12 @@ class AnnounceController extends Controller
             $response = $this->service->handle($request, $validated);
         } catch (ValidationException $e) {
             $msg = collect($e->errors())->flatten()->first();
+            AnnounceMetricsRecorder::recordRejection('validation error');
 
             return $this->bencodeResponse(['failure reason' => (string) $msg]);
         } catch (TrackerException $e) {
+            AnnounceMetricsRecorder::recordRejection($e->getMessage());
+
             return $this->bencodeResponse(['failure reason' => $e->getMessage()]);
         } catch (TrackerWarningException $e) {
             return $this->bencodeResponse($e->getResponse());

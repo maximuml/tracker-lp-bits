@@ -10,12 +10,15 @@ use App\Events\TorrentUpdated;
 use App\Listeners\AppendQueryCountHeader;
 use App\Listeners\ClearTorrentCache;
 use App\Listeners\DeductUserBonusWhenTorrentDeleted;
+use App\Listeners\RecordCacheMetrics;
 use App\Listeners\ResetNexus;
 use App\Listeners\ResetQueryLog;
 use App\Listeners\SendEmailNotificationWhenTorrentCreated;
 use App\Listeners\SyncTorrentToMeilisearch;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
+use Illuminate\Cache\Events\CacheHit;
+use Illuminate\Cache\Events\CacheMissed;
 use Illuminate\Foundation\Http\Events\RequestHandled;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Queue\Events\JobProcessing;
@@ -73,6 +76,8 @@ class EventServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // T-23: Cache hit/miss metrics recording
+        Event::listen(CacheHit::class, [RecordCacheMetrics::class, 'handleHit']);
+        Event::listen(CacheMissed::class, [RecordCacheMetrics::class, 'handleMiss']);
     }
 }

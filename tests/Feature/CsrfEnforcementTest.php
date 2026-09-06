@@ -65,16 +65,16 @@ final class CsrfEnforcementTest extends TestCase
 
     public function test_csrf_meta_tag_in_page_layout_header(): void
     {
-        // PageLayout::header() renders the meta tag for all legacy pages.
-        // Verify the source includes the csrf-token meta tag.
-        $source = file_get_contents(app_path('Support/PageLayout.php'));
-        $this->assertStringContainsString('csrf-token', $source, 'PageLayout must include csrf-token meta tag in header');
+        // PageLayout::header() renders the Blade layout which includes the
+        // csrf-token meta tag for all legacy pages.
+        $source = file_get_contents(resource_path('views/layouts/legacy/header.blade.php'));
+        $this->assertStringContainsString('csrf-token', $source, 'PageLayout header Blade must include csrf-token meta tag');
     }
 
     public function test_csrf_js_included_in_page_layout_footer(): void
     {
-        // PageLayout::footer() includes csrf.js for all legacy pages.
-        // Verify by checking the source file for the include.
+        // PageLayout::footer() pre-computes the JS block (including csrf.js)
+        // and passes it to the Blade layout for all legacy pages.
         $source = file_get_contents(app_path('Support/PageLayout.php'));
         $this->assertStringContainsString('csrf.js', $source, 'PageLayout must include csrf.js in footer');
     }

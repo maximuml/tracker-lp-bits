@@ -28,7 +28,7 @@ final class HitAndRunRepositoryTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->repository = new HitAndRunRepository;
+        $this->repository = app(HitAndRunRepository::class);
     }
 
     public function test_get_list_returns_paginated_hit_and_runs(): void

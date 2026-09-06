@@ -22,7 +22,7 @@ final class SmtpTlsProxiesCronTest extends TestCase
      */
     public function test_smtp_transport_enforces_tls_peer_verification(): void
     {
-        $source = file_get_contents(app_path('Repositories/ToolRepository.php'));
+        $source = file_get_contents(app_path('Services/ToolMaintenanceService.php'));
         $this->assertStringContainsString('verify_peer', $source, 'SMTP must verify TLS peer');
         $this->assertStringContainsString('verify_peer_name', $source, 'SMTP must verify TLS peer name');
         $this->assertStringContainsString("'allow_self_signed' => false", $source, 'SMTP must not allow self-signed certs');

@@ -23,20 +23,21 @@ class TorrentRepositoryDownHashTest extends TestCase
     {
         parent::setUp();
         $this->downloadRepository = new TorrentDownloadRepository;
+        $meiliSearchRepository = app(MeiliSearchRepository::class);
         $this->repository = new TorrentRepository(
             $this->downloadRepository,
             new TorrentPurchaseRepository,
             new TorrentModerationRepository(
                 new SearchBoxRepository,
                 $this->downloadRepository,
-                new MeiliSearchRepository,
+                $meiliSearchRepository,
             ),
             new TorrentStatsService,
             new TorrentPromotionService(
                 new TorrentModerationRepository(
                     new SearchBoxRepository,
                     $this->downloadRepository,
-                    new MeiliSearchRepository,
+                    $meiliSearchRepository,
                 ),
             ),
         );

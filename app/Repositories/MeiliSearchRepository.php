@@ -4,25 +4,15 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
-use App\Auth\Permission;
-use App\Enums\TorrentApprovalStatus;
 use App\Exceptions\NexusException;
-use App\Models\Bookmark;
-use App\Models\Category;
-use App\Models\SearchBox;
-use App\Models\Setting;
 use App\Models\Torrent;
 use App\Models\User;
+use App\Services\MeiliSearchService;
 use App\Support\Config;
 use App\Support\Config\SiteConfig;
-use App\Support\Env;
-use App\Support\Json;
 use App\Support\Logger;
-use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
-use LogicException;
 use Meilisearch\Client;
 use Meilisearch\Endpoints\Indexes;
 
@@ -31,60 +21,14 @@ class MeiliSearchRepository extends BaseRepository
     /** @var mixed */
     private static $client;
 
-    const INDEX_NAME = 'torrents';
+    public const INDEX_NAME = 'torrents';
 
-    const SEARCH_AREA_TITLE = '0';
+    public const SEARCH_AREA_TITLE = '0';
 
-    const SEARCH_AREA_DESC = '1';
+    public const SEARCH_AREA_DESC = '1';
 
-    const SEARCH_AREA_OWNER = '3';
+    public const SEARCH_AREA_OWNER = '3';
 
-    /** @var array<int|string, mixed> */
-    /** @var array<int|string, mixed> */
-    /** @var array<int|string, mixed> */
-    /** @var array<int|string, mixed> */
-    /** @var array<int|string, mixed> */
-    private static array $searchAreas = [
-        self::SEARCH_AREA_TITLE => ['text' => 'title'],
-        self::SEARCH_AREA_DESC => ['text' => 'desc'],
-        self::SEARCH_AREA_OWNER => ['text' => 'owner'],
-    ];
-
-    /** @var array<int|string, mixed> */
-    /** @var array<int|string, mixed> */
-    /** @var array<int|string, mixed> */
-    /** @var array<int|string, mixed> */
-    /** @var array<int|string, mixed> */
-    private static array $queryFieldToTorrentFieldMaps = [
-        'cat' => 'category',
-        'source' => 'source',
-        'medium' => 'medium',
-        'codec' => 'codec',
-        'audiocodec' => 'audiocodec',
-        'standard' => 'standard',
-        'processing' => 'processing',
-    ];
-
-    /** @var array<int|string, mixed> */
-    /** @var array<int|string, mixed> */
-    /** @var array<int|string, mixed> */
-    /** @var array<int|string, mixed> */
-    /** @var array<int|string, mixed> */
-    private static array $sortFieldMaps = [
-        '1' => 'name',
-        '3' => 'comments',
-        '4' => 'added',
-        '5' => 'size',
-        '6' => 'times_completed',
-        '7' => 'seeders',
-        '8' => 'leechers',
-        '9' => 'owner',
-    ];
-
-    /** @var array<int|string, mixed> */
-    /** @var array<int|string, mixed> */
-    /** @var array<int|string, mixed> */
-    /** @var array<int|string, mixed> */
     /** @var array<int|string, mixed> */
     private static array $filterableAttributes = [
         'id', 'category', 'source', 'medium', 'codec', 'standard', 'processing', 'audiocodec', 'owner',
@@ -92,19 +36,11 @@ class MeiliSearchRepository extends BaseRepository
     ];
 
     /** @var array<int|string, mixed> */
-    /** @var array<int|string, mixed> */
-    /** @var array<int|string, mixed> */
-    /** @var array<int|string, mixed> */
-    /** @var array<int|string, mixed> */
     private static array $sortableAttributes = [
         'id', 'name', 'comments', 'added', 'size', 'leechers', 'seeders', 'times_completed', 'owner',
         'pos_state', 'anonymous',
     ];
 
-    /** @var array<int|string, mixed> */
-    /** @var array<int|string, mixed> */
-    /** @var array<int|string, mixed> */
-    /** @var array<int|string, mixed> */
     /** @var array<int|string, mixed> */
     private static array $intFields = [
         'id', 'category', 'source', 'medium', 'codec', 'standard', 'processing', 'audiocodec', 'owner',
@@ -112,18 +48,14 @@ class MeiliSearchRepository extends BaseRepository
     ];
 
     /** @var array<int|string, mixed> */
-    /** @var array<int|string, mixed> */
-    /** @var array<int|string, mixed> */
-    /** @var array<int|string, mixed> */
-    /** @var array<int|string, mixed> */
     private static array $timestampFields = ['added'];
 
     /** @var array<int|string, mixed> */
-    /** @var array<int|string, mixed> */
-    /** @var array<int|string, mixed> */
-    /** @var array<int|string, mixed> */
-    /** @var array<int|string, mixed> */
     private static array $yesOrNoFields = ['visible', 'anonymous', 'banned'];
+
+    public function __construct(
+        private MeiliSearchService $searchService,
+    ) {}
 
     public function getClient(): Client
     {
@@ -205,7 +137,7 @@ class MeiliSearchRepository extends BaseRepository
         $settings = [
             'distinctAttribute' => 'id',
             'displayedAttributes' => $this->getRequiredFields(),
-            'searchableAttributes' => $this->getSearchableAttributes(),
+            'searchableAttributes' => $this->searchService->getSearchableAttributes(),
             'filterableAttributes' => self::$filterableAttributes,
             'sortableAttributes' => self::$sortableAttributes,
             'rankingRules' => [
@@ -227,7 +159,7 @@ class MeiliSearchRepository extends BaseRepository
     public function getRequiredFields(): array
     {
         return array_values(array_unique(array_merge(
-            self::$filterableAttributes, self::$sortableAttributes, $this->getSearchableAttributes()
+            self::$filterableAttributes, self::$sortableAttributes, $this->searchService->getSearchableAttributes()
         )));
     }
 
@@ -288,85 +220,7 @@ class MeiliSearchRepository extends BaseRepository
      */
     public function search(array $params, $user)
     {
-        $results = ['total' => 0, 'list' => []];
-        if (! $this->isEnabled()) {
-            Logger::writeWithContext((string) 'Not enabled!', (string) 'info', (bool) false);
-
-            return $results;
-        }
-        $filters = [];
-        // think about search area
-        $searchArea = $this->getSearchArea($params);
-        $searchQuery = is_scalar($params['search'] ?? '') ? (string) ($params['search'] ?? '') : '';
-        if ($searchArea == self::SEARCH_AREA_OWNER) {
-            // Use LIKE to match partial usernames, consistent with the SQL
-            // path in TorrentSearchRepository which does username LIKE %term%.
-            $searchOwnerIds = User::query()
-                ->where('username', 'LIKE', '%'.trim($searchQuery).'%')
-                ->pluck('id')
-                ->all();
-            if (empty($searchOwnerIds)) {
-                return $results;
-            }
-            $filters[] = 'owner IN ['.implode(',', $searchOwnerIds).']';
-        }
-        if (! ($user instanceof User)) {
-            $user = User::query()->findOrFail(intval($user));
-        }
-        $filters = array_merge($filters, $this->getFilters($params, $user));
-        $query = $this->getQuery($params);
-        $page = isset($params['page']) && is_numeric($params['page']) ? (int) $params['page'] : 0;
-        if ($page < 0) {
-            $page = 0;
-        }
-        $perPage = $this->getPerPage($user);
-
-        $options = [
-            'filter' => implode(' AND ', $filters),
-            'attributesToRetrieve' => $this->getAttributesToRetrieve(),
-        ];
-        $sort = $this->getSort($params);
-        if (! empty($sort)) {
-            $options['sort'] = $sort;
-        }
-
-        // Clamp page to valid range: MeiliSearch returns empty for pages
-        // beyond the last, but we want the caller to get the last page's
-        // data so the pager and results are consistent.
-        // First do a count-only query to determine max page.
-        $countOptions = $options;
-        $countOptions['attributesToRetrieve'] = ['id'];
-        $countPaginator = Torrent::search($query)->options($countOptions)->paginate(1, 'page', 1);
-        $total = $countPaginator->total();
-        $maxPage = $perPage > 0 ? (int) ceil($total / $perPage) - 1 : 0;
-        if ($maxPage < 0) {
-            $maxPage = 0;
-        }
-        if ($page > $maxPage) {
-            $page = $maxPage;
-        }
-
-        $paginator = Torrent::search($query)->options($options)->paginate($perPage, 'page', $page + 1);
-        $torrents = new Collection($paginator->items());
-        $total = $paginator->total();
-        Logger::writeWithContext((string) ('search params: '.Json::encode($options).', page: '.($page + 1).", perPage: {$perPage}, total: {$total}"), (string) 'info', (bool) false);
-        if ($total > 0) {
-            $torrents->load('basic_category');
-            $list = [];
-            foreach ($torrents as $torrent) {
-                if (! $torrent instanceof Torrent) {
-                    throw new LogicException('Expected torrent to be a Torrent instance.');
-                }
-                $searchBoxId = $torrent->basic_category->mode;
-                $arr = $torrent->toArray();
-                $arr['search_box_id'] = $searchBoxId;
-                $list[] = $arr;
-            }
-            $results['list'] = $list;
-        }
-        $results['total'] = $total;
-
-        return $results;
+        return $this->searchService->search($params, $user);
     }
 
     /**
@@ -376,293 +230,12 @@ class MeiliSearchRepository extends BaseRepository
      */
     public function autocomplete(string $query, int $limit, User $user): array
     {
-        if (! $this->isEnabled()) {
-            return [];
-        }
-
-        $params = ['mode' => SearchBox::listAuthorizedSectionId()];
-        if (! Permission::canViewBannedTorrent()) {
-            $params['banned'] = 0;
-        }
-        if (! SiteConfig::current()->torrent->approvalStatusNoneVisible() && ! Permission::canApproveTorrent()) {
-            $params['approval_status'] = TorrentApprovalStatus::ALLOW->value;
-        }
-        $filters = $this->getFilters($params, $user);
-
-        $options = [
-            'limit' => $limit,
-            'attributesToRetrieve' => ['id', 'name'],
-            'filter' => implode(' AND ', $filters),
-        ];
-        $result = Torrent::search($query)->options($options)->take($limit)->raw();
-
-        $torrents = [];
-        foreach ($result['hits'] ?? [] as $hit) {
-            $torrents[] = [
-                'id' => (int) $hit['id'],
-                'name' => (string) $hit['name'],
-            ];
-        }
-
-        return $torrents;
-    }
-
-    /**
-     * @param  array<int|string, mixed>  $params
-     * @return array<int|string, mixed>
-     */
-    private function getFilters(array $params, User $user): array
-    {
-        $filters = [];
-        $taxonomies = [];
-        $categoryIdArr = [];
-        // [cat401][cat404][sou1][med1][cod1][sta2][sta3][pro2][tea2][aud2][incldead=0][spstate=3][inclbookmarked=2]
-        $userSetting = (string) $user->notifs;
-        // cat401=1&source2=1&medium10=1&codec2=1&audiocodec2=1&standard3=1&processing2=1&incldead=2&spstate=1&inclbookmarked=0&approval_status=&size_begin=&size_end=&seeders_begin=&seeders_end=&leechers_begin=&leechers_end=&times_completed_begin=&times_completed_end=&added_begin=&added_end=&search=a+b&search_area=0&search_mode=2
-        $queryString = http_build_query($params);
-        // section
-        if (! empty($params['mode'])) {
-            $categoryIdArr = Category::query()->whereIn('mode', Arr::wrap($params['mode']))->pluck('id')->toArray();
-        }
-        foreach (self::$queryFieldToTorrentFieldMaps as $queryField => $torrentField) {
-            if (isset($params[$queryField]) && $params[$queryField] !== '') {
-                $taxonomies[$torrentField][] = $params[$queryField];
-                Logger::writeWithContext((string) "{$torrentField} from params through {$queryField}: {$params[$queryField]}", (string) 'info', (bool) false);
-            } elseif (preg_match_all("/{$queryField}(\d+)=/", $queryString, $matches)) {
-                if (count($matches) == 2 && ! empty($matches[1])) {
-                    foreach ($matches[1] as $match) {
-                        $taxonomies[$torrentField][] = $match;
-                        Logger::writeWithContext((string) "{$torrentField} from params through {$queryField}: {$match}", (string) 'info', (bool) false);
-                    }
-                }
-            } else {
-                // get user setting
-                $pattern = sprintf("/\[%s([\d]+)\]/", substr((string) $queryField, 0, 3));
-                if (preg_match($pattern, $userSetting, $matches)) {
-                    if (count($matches) == 2 && ! empty($matches[1])) {
-                        $match = $matches[1];
-                        $taxonomies[$torrentField][] = $match;
-                        Logger::writeWithContext((string) "{$torrentField} from user setting through {$queryField}: {$match}", (string) 'info', (bool) false);
-                    }
-                }
-            }
-        }
-        if (empty($taxonomies['category']) && ! empty($categoryIdArr)) {
-            // Restricted to the category of the specified section
-            $taxonomies['category'] = $categoryIdArr;
-        }
-        foreach ($taxonomies as $key => $values) {
-            if (! empty($values)) {
-                $filters[] = sprintf('%s IN [%s]', $key, implode(', ', array_map('intval', $values)));
-            }
-        }
-
-        $includeDead = 1;
-        if (isset($params['incldead'])) {
-            $includeDead = (int) $params['incldead'];
-        } elseif (preg_match("/\[incldead=(\d+)\]/", $userSetting, $matches)) {
-            $includeDead = $matches[1];
-        }
-        if ($includeDead == 1) {
-            // active torrent
-            $filters[] = 'visible = 1';
-            Logger::writeWithContext((string) "visible = yes through incldead: {$includeDead}", (string) 'info', (bool) false);
-        } elseif ($includeDead == 2) {
-            // dead torrent
-            $filters[] = 'visible = 0';
-            Logger::writeWithContext((string) "visible = no through incldead: {$includeDead}", (string) 'info', (bool) false);
-        }
-
-        $includeBookmarked = 0;
-        if (isset($params['inclbookmarked'])) {
-            $includeBookmarked = (int) $params['inclbookmarked'];
-        } elseif (preg_match("/\[inclbookmarked=(\d+)\]/", $userSetting, $matches)) {
-            $includeBookmarked = $matches[1];
-        }
-        if ($includeBookmarked > 0) {
-            $userBookmarkedTorrentIdStr = Bookmark::query()->where('userid', $user->id)->pluck('torrentid')->implode(',');
-            if ($includeBookmarked == 1) {
-                // only bookmark
-                $filters[] = "id IN [$userBookmarkedTorrentIdStr]";
-                Logger::writeWithContext((string) "bookmark through inclbookmarked: {$includeBookmarked}", (string) 'info', (bool) false);
-            } elseif ($includeBookmarked == 2) {
-                // only not bookmark
-                $filters[] = "id NOT IN [$userBookmarkedTorrentIdStr]";
-                Logger::writeWithContext((string) "bookmark through inclbookmarked: {$includeBookmarked}", (string) 'info', (bool) false);
-            }
-        }
-
-        $spState = 0;
-        if (isset($params['spstate'])) {
-            $spState = (int) $params['spstate'];
-            Logger::writeWithContext((string) 'spstate from params', (string) 'info', (bool) false);
-        } elseif (preg_match("/\[spstate=(\d+)\]/", $userSetting, $matches)) {
-            $spState = $matches[1];
-            Logger::writeWithContext((string) 'spstate from user setting', (string) 'info', (bool) false);
-        }
-        // Mirror the SQL path's sp_state logic: only apply the filter when
-        // globalSpecialState == 1 (only sp state) or when globalSpecialState
-        // matches the requested state (all = that state). Otherwise the SQL
-        // path doesn't filter sp_state, so MeiliSearch shouldn't either.
-        $globalSpecialState = (int) ($params['global_special_state'] ?? 0);
-        if ($spState > 0 && ($globalSpecialState == 1 || $globalSpecialState == $spState)) {
-            $filters[] = "sp_state = $spState";
-            Logger::writeWithContext((string) "sp_state = {$spState} through spstate: {$spState}", (string) 'info', (bool) false);
-        }
-
-        if (isset($params['approval_status']) && is_numeric($params['approval_status'])) {
-            $filters[] = 'approval_status = '.(int) $params['approval_status'];
-            Logger::writeWithContext((string) "approval_status = {$params['approval_status']} through approval_status: {$params['approval_status']}", (string) 'info', (bool) false);
-        }
-
-        // size
-        if (! empty($params['size_begin'])) {
-            $atomicValue = intval($params['size_begin']) * 1024 * 1024 * 1024;
-            $filters[] = "size >= $atomicValue";
-            Logger::writeWithContext((string) "size >= {$atomicValue} through size_begin: {$atomicValue}", (string) 'info', (bool) false);
-        }
-        if (! empty($params['size_end'])) {
-            $atomicValue = intval($params['size_end']) * 1024 * 1024 * 1024;
-            $filters[] = "size <= $atomicValue";
-            Logger::writeWithContext((string) "size <= {$atomicValue} through size_end: {$atomicValue}", (string) 'info', (bool) false);
-        }
-
-        // seeders
-        if (! empty($params['seeders_begin'])) {
-            $atomicValue = intval($params['seeders_begin']);
-            $filters[] = "seeders >= $atomicValue";
-            Logger::writeWithContext((string) "seeders >= {$atomicValue} through seeders_begin: {$atomicValue}", (string) 'info', (bool) false);
-        }
-        if (! empty($params['seeders_end'])) {
-            $atomicValue = intval($params['seeders_end']);
-            $filters[] = "seeders <= $atomicValue";
-            Logger::writeWithContext((string) "seeders <= {$atomicValue} through seeders_end: {$atomicValue}", (string) 'info', (bool) false);
-        }
-
-        // leechers
-        if (! empty($params['leechers_begin'])) {
-            $atomicValue = intval($params['leechers_begin']);
-            $filters[] = "leechers >= $atomicValue";
-            Logger::writeWithContext((string) "leechers >= {$atomicValue} through leechers_begin: {$atomicValue}", (string) 'info', (bool) false);
-        }
-        if (! empty($params['leechers_end'])) {
-            $atomicValue = intval($params['leechers_end']);
-            $filters[] = "leechers <= $atomicValue";
-            Logger::writeWithContext((string) "leechers <= {$atomicValue} through leechers_end: {$atomicValue}", (string) 'info', (bool) false);
-        }
-
-        // times_completed
-        if (! empty($params['times_completed_begin'])) {
-            $atomicValue = intval($params['times_completed_begin']);
-            $filters[] = "times_completed >= $atomicValue";
-            Logger::writeWithContext((string) "times_completed >= {$atomicValue} through times_completed_begin: {$atomicValue}", (string) 'info', (bool) false);
-        }
-        if (! empty($params['times_completed_end'])) {
-            $atomicValue = intval($params['times_completed_end']);
-            $filters[] = "times_completed <= $atomicValue";
-            Logger::writeWithContext((string) "times_completed <= {$atomicValue} through times_completed_end: {$atomicValue}", (string) 'info', (bool) false);
-        }
-
-        // added
-        if (! empty($params['added_begin'])) {
-            $atomicValue = $params['added_begin'];
-            $filters[] = 'added >= '.strtotime($atomicValue);
-            Logger::writeWithContext((string) "added >= {$atomicValue} through added_begin: {$atomicValue}", (string) 'info', (bool) false);
-        }
-        if (! empty($params['added_end'])) {
-            $atomicValue = Carbon::parse($params['added_end'])->endOfDay()->toDateTimeString();
-            $filters[] = 'added <= '.strtotime($atomicValue);
-            Logger::writeWithContext((string) "added <= {$atomicValue} through added_end: {$atomicValue}", (string) 'info', (bool) false);
-        }
-
-        // permission see banned
-        if (isset($params['banned']) && in_array($params['banned'], [1, 0, 'yes', 'no'])) {
-            if ($params['banned'] == 1 || $params['banned'] == 'yes') {
-                $filters[] = 'banned = 1';
-            } else {
-                $filters[] = 'banned = 0';
-            }
-        }
-
-        Logger::writeWithContext((string) ('[GET_FILTERS]: '.json_encode($filters)), (string) 'info', (bool) false);
-
-        return $filters;
-    }
-
-    /** @param  array<int|string, mixed>  $params */
-    private function getQuery(array $params): string
-    {
-        $q = trim(is_scalar($params['search'] ?? '') ? (string) ($params['search'] ?? '') : '');
-        $searchMode = SearchBox::getDefaultSearchMode();
-        if (isset($params['search_mode']) && is_scalar($params['search_mode']) && isset(SearchBox::$searchModes[(string) $params['search_mode']])) {
-            $searchMode = (string) $params['search_mode'];
-        }
-        Logger::writeWithContext((string) ('search mode: '.SearchBox::$searchModes[$searchMode]['text']), (string) 'info', (bool) false);
-        if ($searchMode == SearchBox::SEARCH_MODE_AND) {
-            return $q;
-        }
-
-        return sprintf('"%s"', $q);
-    }
-
-    /**
-     * @param  array<int|string, mixed>  $params
-     * @return mixed
-     */
-    private function getSearchArea(array $params)
-    {
-        $searchArea = is_scalar($params['search_area'] ?? '') ? (string) ($params['search_area'] ?? '') : '';
-        if (isset(self::$searchAreas[$searchArea])) {
-            return $searchArea;
-        }
-
-        return self::SEARCH_AREA_TITLE;
+        return $this->searchService->autocomplete($query, $limit, $user);
     }
 
     public function getIndex(): Indexes
     {
         return $this->getClient()->index(self::INDEX_NAME);
-    }
-
-    /**
-     * @param  array<int|string, mixed>  $params
-     * @return array<int|string, mixed>
-     */
-    private function getSort(array $params): array
-    {
-        if (! isset($params['sort']) || ! isset($params['type'])) {
-            // Use default
-            return [];
-        }
-        if (isset($params['sort'], self::$sortFieldMaps[$params['sort']]) && isset($params['type']) && in_array($params['type'], ['asc', 'desc'])) {
-            $sortField = self::$sortFieldMaps[$params['sort']];
-        } else {
-            $sortField = 'id';
-        }
-        if (isset($params['type']) && in_array($params['type'], ['desc', 'asc'])) {
-            $sortType = $params['type'];
-        } else {
-            $sortType = 'desc';
-        }
-        // when searching, ignore promotion
-
-        return ["$sortField:$sortType"];
-    }
-
-    /**
-     * @return mixed
-     */
-    private function getPerPage(User $user)
-    {
-        if ($user->torrentsperpage) {
-            $size = $user->torrentsperpage;
-        } elseif (($sizeFromConfig = SiteConfig::current()->main->torrentsPerPage()) > 0) {
-            $size = $sizeFromConfig;
-        } else {
-            $size = 100;
-        }
-
-        return intval(min($size, 200));
     }
 
     /**
@@ -700,26 +273,5 @@ class MeiliSearchRepository extends BaseRepository
         if ($this->isEnabled()) {
             return $this->getIndex()->deleteDocuments(Arr::wrap($id));
         }
-    }
-
-    /** @return  array<int|string, mixed> */
-    private function getAttributesToRetrieve(): array
-    {
-        if (Env::get('APP_ENV', null) == 'production') {
-            return ['id'];
-        }
-
-        return ['*'];
-    }
-
-    /** @return  array<int|string, mixed> */
-    private function getSearchableAttributes(): array
-    {
-        $attributes = ['name', 'url'];
-        if (SiteConfig::current()->meiliSearch->searchDescription()) {
-            $attributes[] = 'descr';
-        }
-
-        return $attributes;
     }
 }

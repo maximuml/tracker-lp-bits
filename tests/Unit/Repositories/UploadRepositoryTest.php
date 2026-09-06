@@ -26,7 +26,7 @@ final class UploadRepositoryTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->repository = new UploadRepository;
+        $this->repository = app(UploadRepository::class);
     }
 
     public function test_get_cover_returns_empty_string_when_no_description(): void

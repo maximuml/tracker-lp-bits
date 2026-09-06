@@ -60,6 +60,7 @@ class Kernel extends ConsoleKernel
         $schedule->job(new RemoveUserWarning)->everyTwentySeconds();
         $schedule->job(new RemoveUserVipStatus)->everyMinute();
         $schedule->job(new RemoveUserDonorStatus)->everyMinute();
+        $schedule->command('outbox:dispatch --batch=50')->everyMinute()->withoutOverlapping()->onOneServer();
 
     }
 

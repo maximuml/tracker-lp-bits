@@ -18,6 +18,7 @@ use App\Models\Torrent;
 use App\Models\TorrentBuyLog;
 use App\Models\User;
 use App\Models\UserMeta;
+use App\Services\OutboxService;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
 use App\Support\Json;
@@ -30,6 +31,10 @@ use Illuminate\Support\Facades\DB;
 
 class BonusRepository extends BaseRepository
 {
+    public function __construct(
+        private readonly OutboxService $outboxService = new OutboxService,
+    ) {}
+
     /**
      * @param  mixed  $uid
      * @param  mixed  $hitAndRunId
@@ -355,6 +360,17 @@ class BonusRepository extends BaseRepository
                 'msg' => Locale::trans('message.buy_torrent_success.body', ['torrent_name' => $torrent->name, 'bonus' => $requireBonus, 'url' => sprintf('details.php?id=%s&hit=1', $torrent->id)], $buyerLocale),
             ];
             Message::add($buyTorrentSuccessMessage);
+
+            // T-24: Record purchase completed event in outbox (same transaction)
+            $this->outboxService->recordPurchaseCompleted(
+                userId: (int) $user->id,
+                torrentId: (int) $torrent->id,
+                purchaseData: [
+                    'price' => $requireBonus,
+                    'channel' => $channel,
+                    'owner_id' => $owner->id ?? null,
+                ],
+            );
 
             return $buyLog;
         });

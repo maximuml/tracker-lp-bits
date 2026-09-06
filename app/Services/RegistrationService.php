@@ -45,6 +45,7 @@ class RegistrationService
     public function __construct(
         private WebAuthService $authService,
         private UserRepository $userRepository,
+        private readonly OutboxService $outboxService = new OutboxService,
     ) {}
 
     /**
@@ -222,6 +223,17 @@ class RegistrationService
         $user->makeVisible(['secret']);
 
         Events::fire(ModelEventEnum::USER_CREATED, $user, null);
+
+        // T-24: Record user registered event in outbox
+        $this->outboxService->recordUserRegistered(
+            userId: (int) $user->id,
+            userData: [
+                'username' => $user->username,
+                'email' => $user->email,
+                'class' => $user->class,
+                'invited_by' => $isInvite ? (int) $invite->inviter : null,
+            ],
+        );
 
         $this->sendWelcomeMessage($user, $langTakesignup);
         $this->maybeAddTemporaryInvite($id);
@@ -478,6 +490,17 @@ class RegistrationService
             'invitee_register_email' => $email,
             'invitee_register_username' => $username,
         ]);
+
+        // T-24: Record invite consumed event in outbox
+        $this->outboxService->recordInviteConsumed(
+            inviteId: (int) $invite->id,
+            inviterId: (int) $invite->inviter,
+            inviteeId: $userId,
+            inviteData: [
+                'email' => $email,
+                'username' => $username,
+            ],
+        );
 
         $inviter = (int) $invite->inviter;
         $locale = Locale::userLocale($inviter);

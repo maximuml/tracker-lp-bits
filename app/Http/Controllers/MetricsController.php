@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Models\OutboxEvent;
 use App\Support\Metrics\AnnounceMetricsRecorder;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
@@ -25,6 +26,8 @@ use Laravel\Horizon\Horizon;
  * - nexus_horizon_pending_jobs / nexus_horizon_failed_jobs (gauge, per queue)
  * - nexus_announce_rejections_total (counter, by reason)
  * - nexus_meili_up / nexus_meili_lag_seconds (gauge)
+ * - nexus_outbox_pending_events / nexus_outbox_dead_letter_events (gauge)
+ * - nexus_outbox_oldest_pending_age_seconds / nexus_outbox_latency_seconds (gauge)
  * - nexus_app_info (gauge with labels)
  *
  * Access is controlled by the MetricsAccess middleware (internal network
@@ -51,6 +54,7 @@ final class MetricsController extends Controller
         $lines = array_merge($lines, $this->horizonMetrics());
         $lines = array_merge($lines, $this->announceMetrics());
         $lines = array_merge($lines, $this->meiliMetrics());
+        $lines = array_merge($lines, $this->outboxMetrics());
         $lines = array_merge($lines, $this->appInfo());
 
         return response(implode("\n", $lines)."\n", 200, [
@@ -364,6 +368,57 @@ final class MetricsController extends Controller
             $lines[] = "nexus_meili_lag_seconds {$lag}";
         } catch (\Throwable) {
             $lines[] = 'nexus_meili_lag_seconds -1';
+        }
+
+        return $lines;
+    }
+
+    /**
+     * Outbox metrics (T-24): pending count, dead-letter count, oldest pending age, average latency.
+     *
+     * @return list<string>
+     */
+    private function outboxMetrics(): array
+    {
+        $lines = [];
+        $lines[] = '# HELP nexus_outbox_pending_events Pending outbox events';
+        $lines[] = '# TYPE nexus_outbox_pending_events gauge';
+        $lines[] = '# HELP nexus_outbox_dead_letter_events Dead-lettered outbox events';
+        $lines[] = '# TYPE nexus_outbox_dead_letter_events gauge';
+        $lines[] = '# HELP nexus_outbox_oldest_pending_age_seconds Age of oldest pending event';
+        $lines[] = '# TYPE nexus_outbox_oldest_pending_age_seconds gauge';
+        $lines[] = '# HELP nexus_outbox_latency_seconds Average processing latency';
+        $lines[] = '# TYPE nexus_outbox_latency_seconds gauge';
+
+        try {
+            // Single query for all outbox stats to respect query budget
+            $stats = DB::table('outbox_events')
+                ->selectRaw(
+                    'SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as pending, '.
+                    'SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as dead_letter, '.
+                    'MIN(CASE WHEN status = ? THEN created_at END) as oldest_pending, '.
+                    'AVG(CASE WHEN status = ? AND completed_at IS NOT NULL THEN TIMESTAMPDIFF(SECOND, created_at, completed_at) END) as avg_latency',
+                )
+                ->addBinding([
+                    OutboxEvent::STATUS_PENDING,
+                    OutboxEvent::STATUS_DEAD_LETTER,
+                    OutboxEvent::STATUS_PENDING,
+                    OutboxEvent::STATUS_COMPLETED,
+                ], 'select')
+                ->first();
+
+            $pending = (int) ($stats->pending ?? 0);
+            $deadLetter = (int) ($stats->dead_letter ?? 0);
+            $oldest = $stats?->oldest_pending;
+            $age = $oldest !== null ? abs((int) now()->diffInSeconds($oldest)) : 0;
+            $avgLatency = (float) ($stats->avg_latency ?? 0);
+
+            $lines[] = "nexus_outbox_pending_events {$pending}";
+            $lines[] = "nexus_outbox_dead_letter_events {$deadLetter}";
+            $lines[] = "nexus_outbox_oldest_pending_age_seconds {$age}";
+            $lines[] = 'nexus_outbox_latency_seconds '.number_format($avgLatency, 6);
+        } catch (\Throwable) {
+            // Skip on error
         }
 
         return $lines;

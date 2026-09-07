@@ -45,11 +45,11 @@ final class ResponseBuilder
         $end1 = (int) (($announceInterval + $annInterTwo) / 2);
         $end2 = (int) (($annInterTwo + $annInterThree) / 2);
 
-        $this->realAnnounceInterval = mt_rand($begin, $end1);
+        $this->realAnnounceInterval = random_int($begin, $end1);
         if ($annInterThreeAge && $annInterThree > MIN_ANNOUNCE_WAIT_SECOND && (TIMENOW - (int) ($this->torrent['ts'] ?? 0)) >= ($annInterThreeAge * 86400)) {
-            $this->realAnnounceInterval = mt_rand($end2, $annInterThree);
+            $this->realAnnounceInterval = random_int($end2, $annInterThree);
         } elseif ($annInterTwoAge && $annInterTwo > MIN_ANNOUNCE_WAIT_SECOND && (TIMENOW - (int) ($this->torrent['ts'] ?? 0)) >= ($annInterTwoAge * 86400)) {
-            $this->realAnnounceInterval = mt_rand($end1, $end2);
+            $this->realAnnounceInterval = random_int($end1, $end2);
         }
 
         $counts = $this->countPeers($torrentId) ?: (object) ['seeders' => 0, 'leechers' => 0];

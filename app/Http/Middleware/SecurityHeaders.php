@@ -28,12 +28,13 @@ final class SecurityHeaders
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
         $response->headers->set('X-XSS-Protection', '1; mode=block');
 
-        // Filament/Livewire admin panel requires unsafe-eval (Alpine.js)
-        // and inline styles. Use a more permissive CSP for admin routes
-        // (behind auth + admin guard) while keeping strict CSP for public
-        // and legacy pages.
+        // Filament/Livewire admin panel: Livewire 4 + Alpine 3 support
+        // nonce-based CSP. We use the per-request nonce for script-src and
+        // style-src instead of 'unsafe-inline'/'unsafe-eval'. Livewire
+        // automatically adds the nonce to its injected scripts when the
+        // CSP nonce is shared via config.
         if ($this->isFilamentRoute($request)) {
-            $response->headers->set('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https://challenges.cloudflare.com; font-src 'self' data:; frame-ancestors 'self'; form-action 'self' https://www.paypal.com https://www.alipay.com; base-uri 'self'; object-src 'none';");
+            $response->headers->set('Content-Security-Policy', "default-src 'self'; script-src 'self' 'nonce-{$nonce}' https://challenges.cloudflare.com; style-src 'self' 'nonce-{$nonce}'; img-src 'self' data: blob: https:; connect-src 'self' https://challenges.cloudflare.com; font-src 'self' data:; frame-ancestors 'self'; form-action 'self' https://www.paypal.com https://www.alipay.com; base-uri 'self'; object-src 'none';");
         } else {
             $response->headers->set('Content-Security-Policy', "default-src 'self'; script-src 'self' 'nonce-{$nonce}' https://challenges.cloudflare.com; style-src 'self' 'nonce-{$nonce}'; img-src 'self' data: blob: https:; connect-src 'self' https://challenges.cloudflare.com; font-src 'self' data:; frame-ancestors 'self'; form-action 'self' https://www.paypal.com https://www.alipay.com; base-uri 'self'; object-src 'none';");
         }

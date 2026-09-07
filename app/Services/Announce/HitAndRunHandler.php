@@ -59,7 +59,7 @@ final class HitAndRunHandler
         }
 
         $hrCacheKey = HitAndRun::getCacheKey($userId, $torrentId);
-        $hrExists = Cache::remember($hrCacheKey, mt_rand(86400, 86400 * 3), function () use ($userId, $torrentId) {
+        $hrExists = Cache::remember($hrCacheKey, random_int(86400, 86400 * 3), function () use ($userId, $torrentId) {
             $record = HitAndRun::query()->where('uid', $userId)->where('torrent_id', $torrentId)->first();
 
             return $record ? $record->toJson() : false;

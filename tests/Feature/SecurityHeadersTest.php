@@ -39,18 +39,19 @@ final class SecurityHeadersTest extends TestCase
     }
 
     /**
-     * Filament/Livewire admin routes require unsafe-eval (Alpine.js) and
-     * unsafe-inline for scripts/styles. This is acceptable because Filament
-     * routes are behind admin auth. Legacy/public routes keep strict CSP.
+     * W1-03: Filament/Livewire admin routes now use nonce-based CSP
+     * (Livewire 4 + Alpine 3 support nonce). No 'unsafe-inline' or
+     * 'unsafe-eval' should be present in any route's CSP.
      */
-    public function test_filament_csp_allows_unsafe_eval_for_alpine(): void
+    public function test_filament_csp_uses_nonce_not_unsafe(): void
     {
         $response = $this->get('/nexusphp');
 
         $csp = $response->headers->get('Content-Security-Policy');
         $this->assertNotNull($csp);
-        $this->assertStringContainsString("'unsafe-eval'", $csp);
-        $this->assertStringContainsString("'unsafe-inline'", $csp);
+        $this->assertStringContainsString("'nonce-", $csp);
+        $this->assertStringNotContainsString("'unsafe-inline'", $csp);
+        $this->assertStringNotContainsString("'unsafe-eval'", $csp);
         $this->assertStringContainsString("object-src 'none'", $csp);
     }
 }

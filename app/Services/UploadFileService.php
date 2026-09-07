@@ -202,7 +202,7 @@ class UploadFileService
 
                 return TorrentPromotion::NORMAL->value;
             }
-            $random = mt_rand(1, $sum);
+            $random = random_int(1, $sum);
             $currentProbability = 0;
             foreach ($probabilities as $k => $v) {
                 $currentProbability += $v;

@@ -28,6 +28,9 @@ final class PruneActivityLogJobTest extends TestCase
         if (DB::getSchemaBuilder()->hasTable('login_logs')) {
             DB::table('login_logs')->delete();
         }
+        if (DB::getSchemaBuilder()->hasTable('iplog')) {
+            DB::table('iplog')->delete();
+        }
     }
 
     public function test_job_prunes_old_activity_log_records(): void
@@ -145,11 +148,73 @@ final class PruneActivityLogJobTest extends TestCase
             ->expectsOutputToContain('does not exist');
     }
 
+    public function test_job_archives_old_login_logs_before_deletion(): void
+    {
+        if (! DB::getSchemaBuilder()->hasTable('login_logs')) {
+            $this->markTestSkipped('login_logs table does not exist');
+        }
+        if (! DB::getSchemaBuilder()->hasTable('login_logs_archive')) {
+            $this->markTestSkipped('login_logs_archive table does not exist');
+        }
+
+        $user = User::factory()->create();
+        $oldDate = now()->subDays(200)->toDateTimeString();
+
+        DB::table('login_logs')->insert([
+            ['uid' => $user->id, 'ip' => '10.0.0.1', 'created_at' => $oldDate, 'updated_at' => $oldDate],
+        ]);
+        DB::table('login_logs_archive')->delete();
+
+        (new PruneActivityLogJob)->handle();
+
+        // Record deleted from source
+        $this->assertSame(0, DB::table('login_logs')->count());
+        // Record archived
+        $this->assertSame(1, DB::table('login_logs_archive')->count());
+        $archived = DB::table('login_logs_archive')->first();
+        $this->assertSame('10.0.0.1', $archived->ip);
+        $this->assertNotNull($archived->archived_at);
+    }
+
+    public function test_job_archives_old_iplog_before_deletion(): void
+    {
+        if (! DB::getSchemaBuilder()->hasTable('iplog')) {
+            $this->markTestSkipped('iplog table does not exist');
+        }
+        if (! DB::getSchemaBuilder()->hasTable('iplog_archive')) {
+            $this->markTestSkipped('iplog_archive table does not exist');
+        }
+
+        $user = User::factory()->create();
+        $oldDate = now()->subDays(200)->toDateTimeString();
+
+        DB::table('iplog')->insert([
+            ['ip' => '10.0.0.2', 'userid' => $user->id, 'access' => $oldDate, 'uri' => '/test', 'count' => 1],
+        ]);
+        DB::table('iplog_archive')->delete();
+
+        (new PruneActivityLogJob)->handle();
+
+        // Record deleted from source
+        $this->assertSame(0, DB::table('iplog')->where('userid', $user->id)->count());
+        // Record archived
+        $this->assertSame(1, DB::table('iplog_archive')->where('userid', $user->id)->count());
+        $archived = DB::table('iplog_archive')->where('userid', $user->id)->first();
+        $this->assertSame('10.0.0.2', $archived->ip);
+        $this->assertSame('/test', $archived->uri);
+    }
+
     protected function tearDown(): void
     {
         DB::table('activity_log')->delete();
         if (DB::getSchemaBuilder()->hasTable('login_logs')) {
             DB::table('login_logs')->delete();
+        }
+        if (DB::getSchemaBuilder()->hasTable('login_logs_archive')) {
+            DB::table('login_logs_archive')->delete();
+        }
+        if (DB::getSchemaBuilder()->hasTable('iplog_archive')) {
+            DB::table('iplog_archive')->delete();
         }
 
         parent::tearDown();

@@ -18,6 +18,11 @@ use Illuminate\Support\Facades\DB;
  *   activity_log: 90 days
  *   iplog:        180 days
  *   login_logs:   180 days
+ *
+ * For iplog and login_logs, old records are archived to *_archive
+ * tables before deletion (monthly partitioning alternative — MySQL
+ * native partitioning does not support the foreign keys these tables
+ * have).
  */
 final class PruneActivityLogJob implements ShouldQueue
 {
@@ -33,6 +38,12 @@ final class PruneActivityLogJob implements ShouldQueue
         'login_logs' => 180,
     ];
 
+    /** @var array<string, string> */
+    private const ARCHIVE_TABLES = [
+        'iplog' => 'iplog_archive',
+        'login_logs' => 'login_logs_archive',
+    ];
+
     public function handle(): void
     {
         foreach (self::RETENTION as $table => $days) {
@@ -42,6 +53,11 @@ final class PruneActivityLogJob implements ShouldQueue
 
             $column = $this->dateColumn($table);
             $cutoff = now()->subDays($days);
+
+            // Archive old records before deletion (for tables with archive tables)
+            if (isset(self::ARCHIVE_TABLES[$table]) && DB::getSchemaBuilder()->hasTable(self::ARCHIVE_TABLES[$table])) {
+                $this->archiveRecords($table, self::ARCHIVE_TABLES[$table], $column, $cutoff->toDateTimeString());
+            }
 
             DB::table($table)
                 ->where($column, '<', $cutoff->toDateTimeString())
@@ -56,6 +72,39 @@ final class PruneActivityLogJob implements ShouldQueue
             'iplog' => 'access',
             'login_logs' => 'created_at',
             default => 'created_at',
+        };
+    }
+
+    /**
+     * Copy old records into the archive table before they are pruned.
+     * Uses INSERT ... SELECT to avoid loading rows into PHP memory.
+     */
+    private function archiveRecords(string $source, string $archive, string $column, string $cutoff): void
+    {
+        $columns = $this->archiveColumns($source);
+
+        // Insert into archive, adding archived_at timestamp
+        $columnList = implode(', ', $columns);
+        $selectList = implode(', ', $columns);
+
+        DB::statement(
+            "INSERT INTO `{$archive}` ({$columnList}, `archived_at`) "
+            ."SELECT {$selectList}, NOW() FROM `{$source}` WHERE `{$column}` < ?",
+            [$cutoff],
+        );
+    }
+
+    /**
+     * Get the column list for a given source table (excluding auto-increment id).
+     *
+     * @return list<string>
+     */
+    private function archiveColumns(string $table): array
+    {
+        return match ($table) {
+            'iplog' => ['`id`', '`ip`', '`userid`', '`access`', '`uri`', '`count`'],
+            'login_logs' => ['`id`', '`uid`', '`ip`', '`country`', '`city`', '`client`', '`created_at`', '`updated_at`'],
+            default => ['`id`'],
         };
     }
 }

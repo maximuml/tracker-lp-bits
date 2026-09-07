@@ -114,7 +114,7 @@ class ExamProgressRepository extends BaseRepository
          * Updating progress is more performance intensive and will only be done with a certain probability
          */
         $probability = (int) Env::get('EXAM_PROGRESS_UPDATE_PROBABILITY', 60);
-        $random = mt_rand(1, 100);
+        $random = random_int(1, 100);
         Logger::writeWithContext((string) "probability: {$probability}, random: {$random}", (string) 'info', (bool) false);
         if ($random > $probability) {
             Logger::writeWithContext((string) "[SKIP_UPDATE_PROGRESS], random: {$random} > probability: {$probability}", (string) 'warning', (bool) false);

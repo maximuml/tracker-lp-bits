@@ -30,6 +30,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\PersonalAccessToken;
 use Laravel\Sanctum\Sanctum;
@@ -97,6 +98,14 @@ class AppServiceProvider extends ServiceProvider
         // Query log only in non-production (avoids memory leak in prod)
         if (! app()->isProduction()) {
             DB::connection(config('database.default'))->enableQueryLog();
+        }
+
+        // W1-03: Share the per-request CSP nonce with Vite/Livewire so
+        // that injected scripts and styles use nonce-based CSP instead
+        // of 'unsafe-inline'/'unsafe-eval'.
+        $cspNonce = (string) request()->attributes->get('csp_nonce', '');
+        if ($cspNonce !== '') {
+            Vite::useCspNonce($cspNonce);
         }
 
         // Strict models: catch lazy loading and silently discarded attributes

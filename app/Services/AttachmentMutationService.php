@@ -225,7 +225,7 @@ class AttachmentMutationService
                                     $watermark_height = imagesy($watermark);
                                     // the position of the watermark
                                     if ($watermarkpos == 'random') {
-                                        $watermarkpos = mt_rand(1, 9);
+                                        $watermarkpos = random_int(1, 9);
                                     }
                                     switch ($watermarkpos) {
                                         case 1:

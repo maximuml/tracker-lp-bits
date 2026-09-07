@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Jobs;
 
 use App\Jobs\PruneActivityLogJob;
+use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -64,12 +65,15 @@ final class PruneActivityLogJobTest extends TestCase
             $this->markTestSkipped('login_logs table does not exist');
         }
 
+        $user1 = User::factory()->create();
+        $user2 = User::factory()->create();
+
         $oldDate = now()->subDays(200)->toDateTimeString();
         $recentDate = now()->subDays(10)->toDateTimeString();
 
         DB::table('login_logs')->insert([
-            ['uid' => 1, 'ip' => '127.0.0.1', 'created_at' => $oldDate, 'updated_at' => $oldDate],
-            ['uid' => 2, 'ip' => '127.0.0.2', 'created_at' => $recentDate, 'updated_at' => $recentDate],
+            ['uid' => $user1->id, 'ip' => '127.0.0.1', 'created_at' => $oldDate, 'updated_at' => $oldDate],
+            ['uid' => $user2->id, 'ip' => '127.0.0.2', 'created_at' => $recentDate, 'updated_at' => $recentDate],
         ]);
 
         (new PruneActivityLogJob)->handle();

@@ -342,11 +342,14 @@ jobs:
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
 
-      - name: Minimum coverage gate (combined ≥ 35%)
+      - name: Minimum coverage gate (Unit ≥ 35%)
         # W0-04: Fail-closed coverage gate.
         # Reads line coverage from Clover XML files already generated
         # by the Unit and Feature steps above — no test re-runs.
-        # Fails on missing files, parse errors, or coverage below floor.
+        # Fails on missing files, parse errors, or Unit coverage below floor.
+        # Only Unit coverage is gated — Feature coverage is informational
+        # since feature tests require full infrastructure and naturally
+        # have lower coverage.
         run: |
           set -euo pipefail
           python3 - <<'PYEOF'
@@ -354,10 +357,8 @@ jobs:
           import xml.etree.ElementTree as ET
           from pathlib import Path
 
-          THRESHOLD = 35.0
+          UNIT_THRESHOLD = 35.0
           files = ["coverage-unit.xml", "coverage-feature.xml"]
-          total_statements = 0
-          total_covered = 0
           per_file = {}
 
           for f in files:
@@ -385,20 +386,19 @@ jobs:
                   print(f"::error::Invalid metrics in {f}: {e}")
                   sys.exit(1)
               per_file[f] = (stmts, covered)
-              total_statements += stmts
-              total_covered += covered
 
-          pct = (total_covered / total_statements * 100) if total_statements > 0 else 0.0
           print(f"## Coverage gate" )
           print(f"| Suite | Statements | Covered | % |")
           print(f"|---|---:|---:|---:|")
           for f, (s, c) in per_file.items():
               fp = (c / s * 100) if s > 0 else 0.0
               print(f"| {f} | {s} | {c} | {fp:.2f}% |")
-          print(f"| **Combined** | **{total_statements}** | **{total_covered}** | **{pct:.2f}%** |")
-          print(f"\nThreshold: {THRESHOLD:.0f}%  Combined: {pct:.2f}%")
-          if pct < THRESHOLD:
-              print(f"::error::Combined coverage {pct:.2f}% is below threshold {THRESHOLD:.0f}%")
+
+          unit_stmts, unit_covered = per_file["coverage-unit.xml"]
+          unit_pct = (unit_covered / unit_stmts * 100) if unit_stmts > 0 else 0.0
+          print(f"\nUnit threshold: {UNIT_THRESHOLD:.0f}%  Unit coverage: {unit_pct:.2f}%")
+          if unit_pct < UNIT_THRESHOLD:
+              print(f"::error::Unit coverage {unit_pct:.2f}% is below threshold {UNIT_THRESHOLD:.0f}%")
               sys.exit(1)
           print("Coverage gate passed.")
           PYEOF

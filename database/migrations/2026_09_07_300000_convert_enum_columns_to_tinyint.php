@@ -76,18 +76,20 @@ return new class extends Migration
         }
 
         // The column drop/recreate cycle removes any indexes that included
-        // the converted column. Recreate the users(status, added) composite
-        // index if it no longer exists (it may survive on some MySQL versions
-        // or be recreated by a prior migration on fresh installs).
+        // the converted column. On some MySQL versions the composite index
+        // survives but loses the dropped column, leaving a partial index.
+        // Always drop and recreate to ensure (status, added) ordering.
         $indexExists = DB::table('information_schema.statistics')
             ->where('table_schema', DB::getDatabaseName())
             ->where('table_name', 'users')
             ->where('index_name', 'users_status_added_index')
             ->exists();
 
-        if (! $indexExists) {
-            DB::statement('ALTER TABLE `users` ADD INDEX `users_status_added_index` (`status`, `added`)');
+        if ($indexExists) {
+            DB::statement('ALTER TABLE `users` DROP INDEX `users_status_added_index`');
         }
+
+        DB::statement('ALTER TABLE `users` ADD INDEX `users_status_added_index` (`status`, `added`)');
     }
 
     /**

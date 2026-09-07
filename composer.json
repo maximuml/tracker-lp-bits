@@ -96,6 +96,22 @@
         "post-update-cmd": [
             "@php artisan filament:upgrade",
             "@php artisan livewire:publish --assets"
+        ],
+        "test": [
+            "@php artisan test --parallel"
+        ],
+        "test:unit": [
+            "@php artisan test --testsuite=Unit"
+        ],
+        "test:feature": [
+            "@php artisan test --testsuite=Feature"
+        ],
+        "test:architecture": [
+            "@php artisan test --testsuite=Architecture"
+        ],
+        "test:lint": [
+            "vendor/bin/pint --test",
+            "vendor/bin/phpstan analyse --no-progress --memory-limit=2G"
         ]
     },
     "extra": {

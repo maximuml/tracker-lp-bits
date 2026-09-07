@@ -45,13 +45,22 @@ docker compose exec php php artisan user:reset_id_auto_increment \
 ## Verification commands
 
 ```bash
-# Lint
+# One-command test runner (W0-06): uses docker-compose.test.yml overlay
+# with isolated DB_DATABASE=nexusphp_testing and REDIS_PREFIX=test_
+make test              # all suites (migrate:fresh + phpunit --parallel)
+make test-unit         # unit only
+make test-feature      # feature only
+make test-architecture # architecture ratchets only
+make test-lint         # Pint + PHPStan
+
+# Or via composer (inside the php container)
+docker compose exec -T php composer test
+docker compose exec -T php composer test:unit
+docker compose exec -T php composer test:lint
+
+# Manual (legacy approach)
 docker compose exec -T php vendor/bin/pint --test
-
-# Static analysis (level 8, single canonical phpstan.neon)
 docker compose exec -T php vendor/bin/phpstan analyse --no-progress --memory-limit=2G
-
-# Tests (uses isolated nexusphp_testing DB — never truncates dev tables)
 docker compose exec -T redis redis-cli -a "${REDIS_PASSWORD}" FLUSHDB
 DB_DATABASE=nexusphp_testing docker compose exec -T -e DB_DATABASE=nexusphp_testing php vendor/bin/phpunit --no-coverage
 

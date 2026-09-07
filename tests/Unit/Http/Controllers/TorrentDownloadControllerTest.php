@@ -128,7 +128,7 @@ final class TorrentDownloadControllerTest extends TestCase
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->downloadnotice($request);
+        $response = $controller->downloadnoticeAction($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertSame('error', (string) $response->getContent());
@@ -146,7 +146,7 @@ final class TorrentDownloadControllerTest extends TestCase
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->downloadnotice($request);
+        $response = $controller->downloadnoticeAction($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertSame('error', (string) $response->getContent());

@@ -75,7 +75,7 @@ final class SettingsControllerTest extends TestCase
         $request = Request::create('/settings', 'POST', ['action' => 'unknown']);
         app()->instance('request', $request);
 
-        $response = $controller->settings($request);
+        $response = $controller->settingsAction($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertStringContainsString('/settings.php', $response->getTargetUrl());

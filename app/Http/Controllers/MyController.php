@@ -42,7 +42,7 @@ class MyController extends Controller
             return redirect('/mybonus.php'.($qs ? '?'.$qs : ''));
         }
 
-        $data = $this->bonusPageService->build($request);
+        $data = $this->bonusPageService->build($request)->toArray();
 
         $actionRedirect = $this->bonusService->handleExchangeActionPublic(
             $request,

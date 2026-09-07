@@ -17,6 +17,7 @@ use App\Support\Ratio;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
 use App\Support\Validators;
+use App\ViewModels\UsersearchPageViewModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 
@@ -31,10 +32,8 @@ final class UsersearchPageService
 {
     /**
      * Build the data for the user search page.
-     *
-     * @return array<string, mixed>
      */
-    public function build(Request $request): array
+    public function build(Request $request): UsersearchPageViewModel
     {
         $curUser = (array) (app(CurrentUser::class)->get() ?? []);
         $requestUri = (string) Input::serverValue('REQUEST_URI');
@@ -63,16 +62,16 @@ final class UsersearchPageService
             }
         }
 
-        return [
-            'requestUri' => $requestUri,
-            'showHelp' => $showHelp,
-            'form' => $form,
-            'hasResults' => $hasResults,
-            'resultsHtml' => $resultsHtml,
-            'resultsError' => $resultsError,
-            'pagemenu' => '',
-            'browsemenu' => '',
-        ];
+        return new UsersearchPageViewModel(
+            requestUri: $requestUri,
+            showHelp: $showHelp,
+            form: $form,
+            hasResults: $hasResults,
+            resultsHtml: $resultsHtml,
+            resultsError: $resultsError,
+            pagemenu: '',
+            browsemenu: '',
+        );
     }
 
     /**

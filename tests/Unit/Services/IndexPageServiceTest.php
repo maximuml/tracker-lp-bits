@@ -158,7 +158,7 @@ final class IndexPageServiceTest extends TestCase
             'maxnewsnum_main' => 0,
         ], $globalsOverrides));
 
-        return $this->service->build();
+        return $this->service->build()->toArray();
     }
 
     // ─── Instantiation ────────────────────────────────────────────────
@@ -209,7 +209,7 @@ final class IndexPageServiceTest extends TestCase
             'showtrackerload' => 'no',
         ]);
 
-        $result = $this->service->build();
+        $result = $this->service->build()->toArray();
 
         $this->assertSame(99, (int) $result['curUser']['id']);
         $this->assertSame('myuser', $result['curUser']['username']);
@@ -256,7 +256,7 @@ final class IndexPageServiceTest extends TestCase
             'showtrackerload' => 'no',
         ]);
 
-        $result = $this->service->build();
+        $result = $this->service->build()->toArray();
 
         // Empty curUser means forum posts should not show
         $this->assertFalse($result['forumPosts']['show']);

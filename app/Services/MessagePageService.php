@@ -14,6 +14,7 @@ use App\Support\LegacyResponse;
 use App\Support\Pagination;
 use App\Support\Time;
 use App\Support\UserDisplay;
+use App\ViewModels\MessagePageViewModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 
@@ -35,10 +36,8 @@ class MessagePageService
 
     /**
      * Build the data for the requested action.
-     *
-     * @return array<string, mixed>
      */
-    public function build(Request $request): array
+    public function build(Request $request): MessagePageViewModel
     {
         $curUser = (array) (app(CurrentUser::class)->get() ?? []);
         $lang = (array) (app(Globals::class)->get('lang_messages') ?? []);
@@ -77,7 +76,18 @@ class MessagePageService
                 break;
         }
 
-        return $data;
+        return new MessagePageViewModel(
+            lang: $data['lang'],
+            curUser: $data['curUser'],
+            userId: $data['userId'],
+            action: $data['action'],
+            baseUrl: $data['baseUrl'],
+            contentWidth: $data['contentWidth'],
+            viewmessage: $data['viewmessage'] ?? null,
+            forward: $data['forward'] ?? null,
+            editmailboxes: $data['editmailboxes'] ?? null,
+            viewmailbox: $data['viewmailbox'] ?? null,
+        );
     }
 
     /**

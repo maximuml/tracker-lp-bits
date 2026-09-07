@@ -58,7 +58,7 @@ class UtilityController extends LegacyController
 
     public function usersearch(Request $request): View|Response|RedirectResponse
     {
-        $data = $this->usersearchPageService->build($request);
+        $data = $this->usersearchPageService->build($request)->toArray();
 
         return $this->legacyPage($request, 'usersearch', true, $data);
     }

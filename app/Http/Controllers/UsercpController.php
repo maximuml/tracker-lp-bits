@@ -119,7 +119,7 @@ class UsercpController extends LegacyController
             );
         }
 
-        $data = $this->pageService->build($action, $type);
+        $data = $this->pageService->build($action, $type)->toArray();
 
         return $this->legacyPage($request, 'usercp', true, $data);
     }

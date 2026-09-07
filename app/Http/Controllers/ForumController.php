@@ -45,7 +45,7 @@ class ForumController extends LegacyController
             return $result;
         }
 
-        $data = $this->pageService->build($request);
+        $data = $this->pageService->build($request)->toArray();
 
         return $this->legacyPage($request, 'forum', true, $data);
     }

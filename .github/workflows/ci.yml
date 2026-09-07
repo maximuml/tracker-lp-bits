@@ -369,7 +369,10 @@ jobs:
                   tree = ET.parse(f)
                   root = tree.getroot()
                   # Clover <metrics> attributes: statements, coveredstatements
-                  metrics = root.find(".//metrics")
+                  # Use project-level metrics for aggregate counts
+                  metrics = root.find(".//project/metrics")
+                  if metrics is None:
+                      metrics = root.find(".//metrics")
                   if metrics is None:
                       print(f"::error::No <metrics> element in {f}")
                       sys.exit(1)

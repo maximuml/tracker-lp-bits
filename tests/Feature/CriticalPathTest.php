@@ -208,7 +208,7 @@ class CriticalPathTest extends TestCase
             'passagain' => $password,
             'email' => $email,
             'country' => '1',
-            'gender' => 0,
+            'gender' => 'Male',
             'rulesverify' => 'yes',
             'faqverify' => 'yes',
             'ageverify' => 'yes',

@@ -37,7 +37,7 @@ class TorrentCustomFieldForm
                 Textarea::make('options')
                     ->label(__('label.field.options'))
                     ->rows(3)
-                    ->hiddenJs("\$get('type') !== 'radio' && \$get('type') !== 'checkbox' && \$get('type') !== 'select'")
+                    ->hiddenJs("\$get('type') !== '3' && \$get('type') !== '4' && \$get('type') !== '2'")
                     ->helperText(__('label.field.options_help')),
                 Checkbox::make('is_single_row')
                     ->label(__('label.field.is_single_row')),

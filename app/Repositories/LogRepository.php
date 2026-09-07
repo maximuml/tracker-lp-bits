@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Auth\Permission;
+use App\Enums\SitelogSecurityLevel;
 use App\Models\News;
 use App\Models\Poll;
 use App\Models\PollAnswer;
@@ -46,10 +47,10 @@ class LogRepository
 
         if (Permission::canViewConfidentialLog()) {
             if (in_array($filters['search'] ?? '', ['mod', 'normal'], true)) {
-                $query->where('security_level', $filters['search']);
+                $query->where('security_level', SitelogSecurityLevel::fromStringSafe($filters['search'])->value);
             }
         } else {
-            $query->where('security_level', 'normal');
+            $query->where('security_level', SitelogSecurityLevel::NORMAL->value);
         }
 
         if (! empty($filters['query'])) {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Enums\UserStatus;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
@@ -22,7 +23,7 @@ class InviteRepository
     public function countPendingInvitees(int $inviterId): int
     {
         return User::query()
-            ->where('status', 'pending')
+            ->where('status', UserStatus::PENDING->value)
             ->where('invited_by', $inviterId)
             ->count();
     }
@@ -34,10 +35,10 @@ class InviteRepository
     {
         $query = DB::table('users as u')->where('u.invited_by', $inviterId);
 
-        if (! empty($filters['status'])) {
+        if (isset($filters['status']) && $filters['status'] !== '') {
             $query->where('u.status', $filters['status']);
         }
-        if (! empty($filters['enabled'])) {
+        if (isset($filters['enabled']) && $filters['enabled'] !== '') {
             $query->where('u.enabled', $filters['enabled'] === 'yes');
         }
 
@@ -54,10 +55,10 @@ class InviteRepository
             ->where('u.invited_by', $inviterId)
             ->leftJoin('torrents as t', 't.owner', '=', 'u.id');
 
-        if (! empty($filters['status'])) {
+        if (isset($filters['status']) && $filters['status'] !== '') {
             $query->where('u.status', $filters['status']);
         }
-        if (! empty($filters['enabled'])) {
+        if (isset($filters['enabled']) && $filters['enabled'] !== '') {
             $query->where('u.enabled', $filters['enabled'] === 'yes');
         }
 

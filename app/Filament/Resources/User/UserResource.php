@@ -121,7 +121,7 @@ class UserResource extends Resource
                 TextColumn::make('downloaded')->label('Downloaded')
                     ->formatStateUsing(fn (Column $column) => ($record = $column->getRecord()) instanceof User ? $record->downloadedText : '')
                     ->sortable()->label(__('label.downloaded')),
-                TextColumn::make('status')->badge()->colors(['success' => 'confirmed', 'warning' => 'pending'])->label(__('label.user.status')),
+                TextColumn::make('status')->badge()->colors(['success' => UserStatus::CONFIRMED->value, 'warning' => UserStatus::PENDING->value])->label(__('label.user.status')),
                 TextColumn::make('enabled')->badge()->colors($yesNoOptions)->label(__('label.user.enabled'))
                     ->formatStateUsing(fn ($state) => $state ? 'yes' : 'no'),
                 TextColumn::make('downloadpos')->badge()->colors($yesNoOptions)->label(__('label.user.downloadpos'))
@@ -148,7 +148,7 @@ class UserResource extends Resource
                         return $query->when($data['id'], fn (Builder $query, $id) => $query->where('id', $id));
                     }),
                 SelectFilter::make('class')->options(User::listClass())->label(__('label.user.class')),
-                SelectFilter::make('status')->options(['confirmed' => 'confirmed', 'pending' => 'pending'])->label(__('label.user.status')),
+                SelectFilter::make('status')->options([UserStatus::CONFIRMED->value => 'confirmed', UserStatus::PENDING->value => 'pending'])->label(__('label.user.status')),
                 SelectFilter::make('enabled')->options(self::$yesOrNo)->label(__('label.user.enabled'))
                     ->query(function (Builder $query, array $data) {
                         if ($data['value'] === 'yes') {

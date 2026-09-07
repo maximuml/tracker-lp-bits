@@ -7,6 +7,8 @@ namespace App\Services;
 use App\Enums\InviteValid;
 use App\Enums\ModelEventEnum;
 use App\Enums\UserClass as UserClassEnum;
+use App\Enums\UserGender;
+use App\Enums\UserStatus;
 use App\Exceptions\AuthenticationException;
 use App\Models\Invite;
 use App\Models\Message;
@@ -208,8 +210,8 @@ class RegistrationService
             'editsecret' => $editsecret,
             'email' => $email,
             'country' => $country,
-            'gender' => $gender,
-            'status' => 'pending',
+            'gender' => UserGender::fromStringSafe($gender)->value,
+            'status' => UserStatus::PENDING->value,
             'class' => SiteConfig::current()->authority->defaultClass((int) UserClassEnum::USER->value),
             'invites' => (int) SiteConfig::current()->main->inviteCount(0),
             'added' => now()->toDateTimeString(),
@@ -268,11 +270,11 @@ class RegistrationService
             abort(404);
         }
 
-        if ($user->status === 'confirmed') {
+        if ($user->status === UserStatus::CONFIRMED) {
             return $user;
         }
 
-        if ($user->status !== 'pending') {
+        if ($user->status !== UserStatus::PENDING) {
             abort(404);
         }
 
@@ -285,8 +287,8 @@ class RegistrationService
             abort(404);
         }
 
-        $affected = User::query()->where('id', $id)->where('status', 'pending')->update([
-            'status' => 'confirmed',
+        $affected = User::query()->where('id', $id)->where('status', UserStatus::PENDING->value)->update([
+            'status' => UserStatus::CONFIRMED->value,
             'editsecret' => '',
         ]);
 
@@ -339,7 +341,7 @@ class RegistrationService
             throw new AuthenticationException($this->msg($langConfirmResend, 'std_email_not_found', 'The email address was not found in the database.'));
         }
 
-        if ($user->status !== 'pending') {
+        if ($user->status !== UserStatus::PENDING) {
             $this->authService->recordFailedAttempt($ip);
             throw new AuthenticationException($this->msg($langConfirmResend, 'std_user_already_confirm', 'User using this email address is already confirmed.'));
         }
@@ -437,7 +439,7 @@ class RegistrationService
 
         $this->validatePassword($password, $passAgain, $username, $langTakesignup);
 
-        $allowedGenders = ['Male', 'Female'];
+        $allowedGenders = [UserGender::MALE->stringValue(), UserGender::FEMALE->stringValue()];
         if (! in_array($gender, $allowedGenders, true)) {
             throw new AuthenticationException($this->msg($langTakesignup, 'std_invalid_gender', 'Invalid Gender!'));
         }

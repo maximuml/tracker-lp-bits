@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\DTOs\Usercp;
 
+use App\Enums\UserAppendPromotion;
+use App\Enums\UserFontsize;
+use App\Enums\UserTimeType;
+use App\Enums\UserTooltip;
 use App\Support\Validators;
 use Illuminate\Http\Request;
 
@@ -29,10 +33,10 @@ final readonly class TrackerSettingsDto
         public ?int $sitelanguage,
         public ?string $currentLangFolder,
         public int $torrentsperpage,
-        public string $timetype,
+        public int $timetype,
         public bool $appendsticky,
         public bool $appendnew,
-        public string $appendpromotion,
+        public int $appendpromotion,
         public bool $appendpicked,
         public bool $dlicon,
         public bool $bmicon,
@@ -43,9 +47,9 @@ final readonly class TrackerSettingsDto
         public int $pmnum,
         public int $sbnum,
         public int $sbrefresh,
-        public ?string $tooltip,
+        public ?int $tooltip,
         public ?bool $showlastcom,
-        public string $fontsize,
+        public int $fontsize,
     ) {}
 
     public static function fromRequest(Request $request): self
@@ -64,10 +68,10 @@ final readonly class TrackerSettingsDto
             self::intId($request->input('sitelanguage', 0)),
             self::stringOrEmpty($request->cookie('c_lang_folder', '')),
             max(0, min(100, self::intInput($request->input('torrentsperpage', 0)))),
-            self::enumValue($request->input('timetype', ''), ['timeadded', 'timealive'], 'timealive'),
+            self::enumIntOrString($request->input('timetype', ''), UserTimeType::class),
             self::yesNo($request->input('appendsticky')),
             self::yesNo($request->input('appendnew')),
-            self::enumValue($request->input('appendpromotion', ''), ['highlight', 'word', 'icon', 'off'], 'icon'),
+            self::enumIntOrString($request->input('appendpromotion', ''), UserAppendPromotion::class),
             self::yesNo($request->input('appendpicked')),
             self::yesNo($request->input('dlicon')),
             self::yesNo($request->input('bmicon')),
@@ -78,7 +82,7 @@ final readonly class TrackerSettingsDto
             max(1, min(100, self::intInput($request->input('pmnum', 20)))),
             max(10, min(500, self::intInput($request->input('sbnum', 70)))),
             max(10, min(3600, self::intInput($request->input('sbrefresh', 120)))),
-            $request->has('tooltip') ? self::stringOrEmpty($request->input('tooltip', '')) : null,
+            $request->has('tooltip') ? self::enumIntOrString($request->input('tooltip', ''), UserTooltip::class) : null,
             $request->has('showlastcom') ? self::yesNo($request->input('showlastcom')) : null,
             self::fontSize($request),
         );
@@ -164,21 +168,25 @@ final readonly class TrackerSettingsDto
         return null;
     }
 
-    private static function fontSize(Request $request): string
+    /**
+     * @param  class-string  $enumClass
+     */
+    private static function enumIntOrString(mixed $value, string $enumClass): int
     {
-        $size = self::stringOrEmpty($request->input('fontsize', ''));
+        if (is_int($value) || (is_string($value) && ctype_digit($value))) {
+            return (int) $value;
+        }
 
-        return in_array($size, ['small', 'medium', 'large'], true) ? $size : 'medium';
+        return $enumClass::fromStringSafe(self::stringOrEmpty($value))->value;
     }
 
-    /**
-     * Return the input value if it is one of the allowed enum values,
-     * otherwise fall back to the MySQL column default.
-     *
-     * @param  list<string>  $allowed
-     */
-    private static function enumValue(mixed $value, array $allowed, string $default): string
+    private static function fontSize(Request $request): int
     {
-        return in_array($value, $allowed, true) ? (string) $value : $default;
+        $raw = $request->input('fontsize', '');
+        if (is_int($raw) || (is_string($raw) && ctype_digit($raw))) {
+            return (int) $raw;
+        }
+
+        return UserFontsize::fromStringSafe(self::stringOrEmpty($raw))->value;
     }
 }

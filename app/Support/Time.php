@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Enums\UserTimeType;
 use Carbon\Carbon;
 
 /**
@@ -248,7 +249,7 @@ final class Time
         $CURUSER = app(CurrentUser::class)->get();
         $TIMENOW = defined('TIMENOW') ? (int) TIMENOW : time();
 
-        if (isset($CURUSER) && ($CURUSER['timetype'] ?? '') != 'timealive' && ! $forceago) {
+        if (isset($CURUSER) && ($CURUSER['timetype'] ?? 1) != UserTimeType::TIMEALIVE->value && ! $forceago) {
             return self::formatAbsoluteTime($time instanceof Carbon ? $time->toDateTimeString() : (string) $time, (bool) $twoline);
         }
 

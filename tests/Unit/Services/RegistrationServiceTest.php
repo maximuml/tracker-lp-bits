@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Services;
 
 use App\Enums\UserClass as UserClassEnum;
+use App\Enums\UserStatus;
 use App\Exceptions\AuthenticationException;
 use App\Repositories\UserRepository;
 use App\Services\RegistrationService;
@@ -92,7 +93,7 @@ final class RegistrationServiceTest extends TestCase
             'class' => UserClassEnum::USER->value,
             'added' => now()->toDateTimeString(),
             'last_access' => now()->toDateTimeString(),
-            'status' => 'confirmed',
+            'status' => 1,
             'enabled' => 1,
         ];
 
@@ -215,13 +216,13 @@ final class RegistrationServiceTest extends TestCase
             'email' => 'confirmed@test.com',
             'secret' => $secret,
             'passkey' => 'passkey123',
-            'status' => 'confirmed',
+            'status' => 1,
             'editsecret' => '',
         ]);
 
         $user = $this->service()->confirm($id, 'wrongtoken', '1.2.3.4');
 
-        $this->assertSame('confirmed', $user->status);
+        $this->assertSame(UserStatus::CONFIRMED, $user->status);
     }
 
     public function test_confirm_throws_404_for_pending_user_with_wrong_token(): void
@@ -231,7 +232,7 @@ final class RegistrationServiceTest extends TestCase
             'email' => 'pending@test.com',
             'secret' => 'testsecret456',
             'passkey' => 'passkey456',
-            'status' => 'pending',
+            'status' => 0,
             'editsecret' => 'testsecret456',
         ]);
 
@@ -247,7 +248,7 @@ final class RegistrationServiceTest extends TestCase
             'email' => 'pending2@test.com',
             'secret' => 'testsecret789',
             'passkey' => 'passkey789',
-            'status' => 'pending',
+            'status' => 0,
             'editsecret' => 'testsecret789',
         ]);
 
@@ -261,7 +262,7 @@ final class RegistrationServiceTest extends TestCase
 
         $user = $this->service()->confirm($id, $token, '1.2.3.4');
 
-        $this->assertSame('confirmed', $user->status);
+        $this->assertSame(UserStatus::CONFIRMED, $user->status);
         $this->assertSame('', $user->editsecret);
     }
 
@@ -270,13 +271,13 @@ final class RegistrationServiceTest extends TestCase
         $id1 = $this->insertUser([
             'username' => 'pendinguser3',
             'email' => 'pending3@test.com',
-            'status' => 'pending',
+            'status' => 0,
             'editsecret' => 'secret3',
         ]);
         $id2 = $this->insertUser([
             'username' => 'pendinguser4',
             'email' => 'pending4@test.com',
-            'status' => 'pending',
+            'status' => 0,
             'editsecret' => 'secret4',
         ]);
 

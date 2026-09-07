@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserClass as UserClassEnum;
+use App\Enums\UserStatus;
 use App\Models\Invite;
 use App\Models\Setting;
 use App\Models\User;
@@ -447,7 +448,7 @@ class SystemBulkController extends LegacyController
             $users = DB::table('users')
                 ->whereIn('class', $classIds)
                 ->where('enabled', true)
-                ->where('status', 'confirmed')
+                ->where('status', UserStatus::CONFIRMED->value)
                 ->offset($offset)
                 ->limit($size)
                 ->get(['id']);

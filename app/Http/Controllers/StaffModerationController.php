@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UsernameChangeType;
+use App\Enums\UserPrivacy;
 use App\Models\Message;
 use App\Models\User;
 use App\Models\UserModifyLog;
@@ -275,7 +276,7 @@ class StaffModerationController extends LegacyController
         }
 
         if (in_array($privacy, ['low', 'normal', 'strong'], true)) {
-            $updateset['privacy'] = $privacy;
+            $updateset['privacy'] = UserPrivacy::fromStringSafe($privacy)->value;
         }
 
         if (request()->post('resetkey') !== null && request()->post('resetkey') === 'yes') {

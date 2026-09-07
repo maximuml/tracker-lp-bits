@@ -361,7 +361,7 @@ final class ShoutboxRepositoryTest extends TestCase
             'userid' => $userId,
             'date' => $date,
             'text' => $text,
-            'type' => 'sb',
+            'type' => 0,
         ]);
     }
 }

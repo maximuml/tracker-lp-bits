@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Repositories;
 
+use App\Enums\OfferAllowed;
 use App\Models\User;
 use App\Repositories\TorrentUploadRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -199,10 +200,10 @@ final class TorrentUploadRepositoryTest extends TestCase
         $offerId = $this->createOffer($uploader->id, 'allowed');
 
         DB::table('offervotes')->insert([
-            ['offerid' => $offerId, 'userid' => $voter1->id, 'vote' => 'yeah'],
-            ['offerid' => $offerId, 'userid' => $voter2->id, 'vote' => 'yeah'],
-            ['offerid' => $offerId, 'userid' => $uploader->id, 'vote' => 'yeah'],
-            ['offerid' => $offerId, 'userid' => $voter3->id, 'vote' => 'against'],
+            ['offerid' => $offerId, 'userid' => $voter1->id, 'vote' => 0],
+            ['offerid' => $offerId, 'userid' => $voter2->id, 'vote' => 0],
+            ['offerid' => $offerId, 'userid' => $uploader->id, 'vote' => 0],
+            ['offerid' => $offerId, 'userid' => $voter3->id, 'vote' => 1],
         ]);
 
         $result = $this->repository->getOfferVoterIds($offerId, $uploader->id);
@@ -221,8 +222,8 @@ final class TorrentUploadRepositoryTest extends TestCase
         $otherOfferId = $this->createOffer($uploader->id, 'allowed');
 
         DB::table('offervotes')->insert([
-            ['offerid' => $offerId, 'userid' => $voter->id, 'vote' => 'yeah'],
-            ['offerid' => $otherOfferId, 'userid' => $voter->id, 'vote' => 'yeah'],
+            ['offerid' => $offerId, 'userid' => $voter->id, 'vote' => 0],
+            ['offerid' => $otherOfferId, 'userid' => $voter->id, 'vote' => 0],
         ]);
 
         $result = $this->repository->getOfferVoterIds($offerId, $uploader->id);
@@ -240,7 +241,7 @@ final class TorrentUploadRepositoryTest extends TestCase
         $commenter = User::factory()->create();
         $offerId = $this->createOffer($uploader->id, 'allowed');
         DB::table('offervotes')->insert([
-            ['offerid' => $offerId, 'userid' => $voter->id, 'vote' => 'yeah'],
+            ['offerid' => $offerId, 'userid' => $voter->id, 'vote' => 0],
         ]);
         DB::table('comments')->insert([
             ['user' => $commenter->id, 'offer' => $offerId, 'added' => now()->toDateTimeString(), 'text' => 'c', 'ori_text' => 'c'],
@@ -262,7 +263,7 @@ final class TorrentUploadRepositoryTest extends TestCase
         return (int) DB::table('offers')->insertGetId([
             'userid' => $userId,
             'name' => 'offer',
-            'allowed' => $allowed,
+            'allowed' => OfferAllowed::fromStringSafe($allowed)->value,
             'added' => now()->toDateTimeString(),
         ]);
     }
@@ -275,7 +276,7 @@ final class TorrentUploadRepositoryTest extends TestCase
             'save_as' => 'test',
             'category' => 1,
             'size' => 1024,
-            'type' => 'single',
+            'type' => 0,
             'numfiles' => 1,
             'owner' => $ownerId,
             'info_hash' => random_bytes(20),

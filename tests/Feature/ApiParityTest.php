@@ -49,9 +49,9 @@ class ApiParityTest extends TestCase
 
         $this->postJson('/api/v1/usercp/settings', [
             'parked' => false,
-            'acceptpms' => 'friends',
+            'acceptpms' => 1,
             'commentpm' => 'no',
-            'gender' => 'Male',
+            'gender' => 0,
             'country' => $country,
             'info' => 'Updated info',
             'notifs' => ['topic_reply' => 'yes'],
@@ -63,8 +63,8 @@ class ApiParityTest extends TestCase
 
         $this->assertDatabaseHas('users', [
             'id' => $user->id,
-            'acceptpms' => 'friends',
-            'gender' => 'Male',
+            'acceptpms' => 1,
+            'gender' => 0,
         ]);
     }
 
@@ -79,7 +79,7 @@ class ApiParityTest extends TestCase
             'postsperpage' => 15,
             'avatars' => 'yes',
             'signatures' => 'yes',
-            'clicktopic' => 'firstpage',
+            'clicktopic' => 0,
             'signature' => 'My signature',
             'ttlastpost' => 'yes',
         ])
@@ -103,10 +103,10 @@ class ApiParityTest extends TestCase
             'pmnum' => 5,
             'sbnum' => 20,
             'sbrefresh' => 60,
-            'timetype' => 'timeadded',
+            'timetype' => 0,
             'appendsticky' => 'yes',
             'appendnew' => 'yes',
-            'appendpromotion' => 'icon',
+            'appendpromotion' => 2,
             'appendpicked' => 'yes',
             'dlicon' => 'yes',
             'bmicon' => 'yes',
@@ -114,7 +114,7 @@ class ApiParityTest extends TestCase
             'showdescription' => 'yes',
             'smalldescr' => 'yes',
             'showcomment' => 'yes',
-            'fontsize' => 'large',
+            'fontsize' => 2,
             'pmnotif' => 'yes',
             'emailnotif' => 'yes',
             'incldead' => 0,
@@ -145,7 +145,7 @@ class ApiParityTest extends TestCase
             'current_password' => '123456',
             'new_password' => 'newpass123',
             'new_password_confirmation' => 'newpass123',
-            'privacy' => 'strong',
+            'privacy' => 0,
             'resetpasskey' => '1',
         ])
             ->assertStatus(200)

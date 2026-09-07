@@ -6,6 +6,7 @@ namespace App\Policies;
 
 use App\Auth\Permission;
 use App\Enums\UserClass as UserClassEnum;
+use App\Enums\UserPrivacy;
 use App\Models\User;
 use App\Support\Logger;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -32,14 +33,14 @@ class UserPolicy extends BasePolicy
      */
     public function view(User $user, User $model)
     {
-        return $model->privacy != 'strong' || $user->id == $model->id || Permission::canManageUserBasicInfo();
+        return $model->privacy !== UserPrivacy::STRONG || $user->id == $model->id || Permission::canManageUserBasicInfo();
     }
 
     public function viewEmail(User $user, User $model): bool
     {
         Logger::writeWithContext((string) sprintf('user: %s, model: %s', $user->id, $model->id), (string) 'info', (bool) false);
 
-        return $model->privacy == 'low' || $user->id == $model->id || Permission::canViewUserConfidentialInfo();
+        return $model->privacy === UserPrivacy::LOW || $user->id == $model->id || Permission::canViewUserConfidentialInfo();
     }
 
     /**

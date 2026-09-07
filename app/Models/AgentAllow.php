@@ -46,9 +46,11 @@ class AgentAllow extends NexusModel
     protected $casts = [
         'exception' => 'boolean',
         'allowhttps' => 'boolean',
+        'agent_matchtype' => AgentAllowMatchType::class,
+        'peer_id_matchtype' => AgentAllowMatchType::class,
     ];
 
-    /** @var array<int|string, mixed> */
+    /** @var array<int, string> */
     public static $matchTypes = [
         AgentAllowMatchType::DEC->value => 'dec',
         AgentAllowMatchType::HEX->value => 'hex',

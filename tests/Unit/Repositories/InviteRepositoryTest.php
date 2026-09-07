@@ -61,9 +61,9 @@ final class InviteRepositoryTest extends TestCase
         /** @var User $inviter */
         $inviter = User::factory()->create();
 
-        User::factory()->create(['invited_by' => $inviter->id, 'status' => 'pending']);
-        User::factory()->create(['invited_by' => $inviter->id, 'status' => 'pending']);
-        User::factory()->create(['invited_by' => $inviter->id, 'status' => 'confirmed']);
+        User::factory()->create(['invited_by' => $inviter->id, 'status' => 0]);
+        User::factory()->create(['invited_by' => $inviter->id, 'status' => 0]);
+        User::factory()->create(['invited_by' => $inviter->id, 'status' => 1]);
 
         $this->assertSame(2, $this->repository->countPendingInvitees($inviter->id));
     }
@@ -75,8 +75,8 @@ final class InviteRepositoryTest extends TestCase
         /** @var User $other */
         $other = User::factory()->create();
 
-        User::factory()->create(['invited_by' => $inviter->id, 'status' => 'pending']);
-        User::factory()->create(['invited_by' => $other->id, 'status' => 'pending']);
+        User::factory()->create(['invited_by' => $inviter->id, 'status' => 0]);
+        User::factory()->create(['invited_by' => $other->id, 'status' => 0]);
 
         $this->assertSame(1, $this->repository->countPendingInvitees($inviter->id));
     }
@@ -86,8 +86,8 @@ final class InviteRepositoryTest extends TestCase
         /** @var User $inviter */
         $inviter = User::factory()->create();
 
-        User::factory()->create(['invited_by' => $inviter->id, 'status' => 'confirmed']);
-        User::factory()->create(['invited_by' => $inviter->id, 'status' => 'pending']);
+        User::factory()->create(['invited_by' => $inviter->id, 'status' => 1]);
+        User::factory()->create(['invited_by' => $inviter->id, 'status' => 0]);
 
         $this->assertSame(2, $this->repository->countInvitees($inviter->id, []));
     }
@@ -97,10 +97,10 @@ final class InviteRepositoryTest extends TestCase
         /** @var User $inviter */
         $inviter = User::factory()->create();
 
-        User::factory()->create(['invited_by' => $inviter->id, 'status' => 'confirmed']);
-        User::factory()->create(['invited_by' => $inviter->id, 'status' => 'pending']);
+        User::factory()->create(['invited_by' => $inviter->id, 'status' => 1]);
+        User::factory()->create(['invited_by' => $inviter->id, 'status' => 0]);
 
-        $this->assertSame(1, $this->repository->countInvitees($inviter->id, ['status' => 'pending']));
+        $this->assertSame(1, $this->repository->countInvitees($inviter->id, ['status' => 0]));
     }
 
     public function test_count_invitees_with_enabled_filter(): void
@@ -128,7 +128,7 @@ final class InviteRepositoryTest extends TestCase
             'save_as' => 'test',
             'category' => 1,
             'size' => 1024,
-            'type' => 'single',
+            'type' => 0,
             'numfiles' => 1,
             'owner' => $invitee->id,
             'info_hash' => random_bytes(20),

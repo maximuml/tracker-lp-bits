@@ -66,7 +66,7 @@ final class UsercpPageServiceTest extends TestCase
             'class' => 1,
             'added' => now()->subDays(30)->toDateTimeString(),
             'last_access' => now()->toDateTimeString(),
-            'status' => 'confirmed',
+            'status' => 1,
             'enabled' => 1,
             'parked' => 0,
             'downloadpos' => 1,
@@ -74,9 +74,9 @@ final class UsercpPageServiceTest extends TestCase
             'avatar' => '',
             'invites' => 5,
             'notifs' => '',
-            'privacy' => 'normal',
+            'privacy' => 1,
             'stylesheet' => 1,
-            'acceptpms' => 'yes',
+            'acceptpms' => 0,
             'ip' => '127.0.0.1',
         ]);
     }
@@ -107,7 +107,7 @@ final class UsercpPageServiceTest extends TestCase
             'added' => now()->subDays(30)->toDateTimeString(),
             'ip' => '127.0.0.1',
             'notifs' => '',
-            'privacy' => 'normal',
+            'privacy' => 1,
             'stylesheet' => 1,
             'two_step_secret' => '',
         ], $overrides));

@@ -257,8 +257,8 @@ final class UserSearchRepositoryTest extends TestCase
 
     public function test_administrative_search_filters_by_status_confirmed(): void
     {
-        User::factory()->create(['status' => 'confirmed']);
-        User::factory()->create(['status' => 'pending']);
+        User::factory()->create(['status' => 1]);
+        User::factory()->create(['status' => 0]);
 
         $result = $this->repository->administrativeSearch(['st' => '1'], false);
 

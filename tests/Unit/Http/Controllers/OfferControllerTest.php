@@ -41,7 +41,7 @@ final class OfferControllerTest extends TestCase
             'name' => 'Test Offer',
             'descr' => 'A test offer description',
             'added' => now()->toDateTimeString(),
-            'allowed' => 'allowed',
+            'allowed' => 0,
             'category' => $category->id,
             'yeah' => 5,
             'against' => 1,

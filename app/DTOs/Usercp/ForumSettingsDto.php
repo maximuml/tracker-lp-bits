@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\DTOs\Usercp;
 
+use App\Enums\UserClickTopic;
 use Illuminate\Http\Request;
 
 /**
@@ -16,7 +17,7 @@ final readonly class ForumSettingsDto
         public int $postsperpage,
         public bool $avatars,
         public bool $signatures,
-        public string $clicktopic,
+        public ?int $clicktopic,
         public string $signature,
         public ?bool $showlastpost,
     ) {}
@@ -28,8 +29,14 @@ final readonly class ForumSettingsDto
         $avatars = $request->input('avatars') === 'yes';
         $signatures = $request->input('signatures') === 'yes';
 
-        $clicktopicRaw = (string) $request->input('clicktopic', '');
-        $clicktopic = in_array($clicktopicRaw, ['firstpage', 'lastpage'], true) ? $clicktopicRaw : '';
+        $clicktopicRaw = $request->input('clicktopic', '');
+        if (is_int($clicktopicRaw) || (is_string($clicktopicRaw) && ctype_digit($clicktopicRaw))) {
+            $clicktopic = (int) $clicktopicRaw;
+        } elseif (is_string($clicktopicRaw) && $clicktopicRaw !== '') {
+            $clicktopic = UserClickTopic::fromStringSafe($clicktopicRaw)->value;
+        } else {
+            $clicktopic = null;
+        }
 
         $signature = htmlspecialchars(trim((string) $request->input('signature', '')));
 

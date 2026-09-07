@@ -65,7 +65,7 @@ final class BitbucketServiceTest extends TestCase
             'class' => 1,
             'added' => now()->toDateTimeString(),
             'last_access' => now()->toDateTimeString(),
-            'status' => 'confirmed',
+            'status' => 1,
             'enabled' => 1,
             'parked' => 0,
             'downloadpos' => 1,
@@ -233,7 +233,7 @@ final class BitbucketServiceTest extends TestCase
         $record = DB::table('bitbucket')->where('name', $filename)->first();
         $this->assertNotNull($record);
         $this->assertSame(1, (int) $record->owner);
-        $this->assertSame('1', $record->public);
+        $this->assertSame(1, (int) $record->public);
     }
 
     public function test_upload_avatar_updates_user_avatar(): void
@@ -263,7 +263,7 @@ final class BitbucketServiceTest extends TestCase
 
         $record = DB::table('bitbucket')->where('name', $filename)->first();
         $this->assertNotNull($record);
-        $this->assertSame('0', $record->public);
+        $this->assertSame(0, (int) $record->public);
     }
 
     public function test_upload_avatar_succeeds_for_valid_gif(): void

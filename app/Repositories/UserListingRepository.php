@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Enums\UserStatus;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 
@@ -53,7 +54,7 @@ class UserListingRepository
         $country = (int) ($filters['country'] ?? 0);
         $letter = trim($filters['letter'] ?? '');
 
-        $query = DB::table('users as u')->where('u.status', 'confirmed');
+        $query = DB::table('users as u')->where('u.status', UserStatus::CONFIRMED->value);
 
         if ($search !== '') {
             $query->where('u.username', 'like', "%{$search}%");

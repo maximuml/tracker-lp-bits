@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Enums\AgentAllowMatchType;
 use App\Exceptions\ClientNotAllowedException;
 use App\Models\AgentAllow;
 use App\Models\AgentDeny;
@@ -290,10 +291,11 @@ class AgentAllowRepository extends BaseRepository
             if (! isset($matchBench[$i]) || ! isset($matchTarget[$i])) {
                 break;
             }
-            if ($matchType == 'dec') {
+            $matchTypeValue = $matchType instanceof AgentAllowMatchType ? $matchType->stringValue() : (string) $matchType;
+            if ($matchTypeValue === AgentAllowMatchType::DEC->stringValue()) {
                 $matchBench[$i] = intval($matchBench[$i]);
                 $matchTarget[$i] = intval($matchTarget[$i]);
-            } elseif ($matchType == 'hex') {
+            } elseif ($matchTypeValue === AgentAllowMatchType::HEX->stringValue()) {
                 $matchBench[$i] = hexdec((string) $matchBench[$i]);
                 $matchTarget[$i] = hexdec((string) $matchTarget[$i]);
             } else {

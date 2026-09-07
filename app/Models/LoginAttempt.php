@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\LoginAttemptType;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null $added
  * @property bool $banned
  * @property int $attempts
- * @property string $type
+ * @property LoginAttemptType $type
  */
 class LoginAttempt extends Model
 {
@@ -25,6 +26,7 @@ class LoginAttempt extends Model
         'added' => 'datetime',
         'banned' => 'boolean',
         'attempts' => 'integer',
+        'type' => LoginAttemptType::class,
     ];
 
     protected $fillable = ['ip', 'added', 'banned', 'attempts', 'type'];

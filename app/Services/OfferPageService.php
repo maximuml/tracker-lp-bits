@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Auth\Permission;
+use App\Enums\OfferAllowed;
 use App\Enums\Permission\PermissionEnum;
+use App\Enums\UserTimeType;
 use App\Repositories\OfferRepository;
 use App\Repositories\UsercpRepository;
 use App\Support\Cache\LegacyRedisCache;
@@ -153,13 +155,13 @@ final class OfferPageService
         $num = $offer->toArray();
 
         $timeFormat = Time::format((string) $num['added'], true, false);
-        $offertime = ($curUser['timetype'] ?? '') !== 'timealive'
+        $offertime = ($curUser['timetype'] ?? 1) !== UserTimeType::TIMEALIVE->value
             ? (string) ($lang['text_at'] ?? '').$timeFormat
             : (string) ($lang['text_blank'] ?? '').$timeFormat;
 
-        $status = match ($num['allowed'] ?? '') {
-            'pending' => '<font color="red">'.htmlspecialchars((string) ($lang['text_pending'] ?? '')).'</font>',
-            'allowed' => '<font color="green">'.htmlspecialchars((string) ($lang['text_allowed'] ?? '')).'</font>',
+        $status = match ((int) ($num['allowed'] ?? 1)) {
+            OfferAllowed::PENDING->value => '<font color="red">'.htmlspecialchars((string) ($lang['text_pending'] ?? '')).'</font>',
+            OfferAllowed::ALLOWED->value => '<font color="green">'.htmlspecialchars((string) ($lang['text_allowed'] ?? '')).'</font>',
             default => '<font color="red">'.htmlspecialchars((string) ($lang['text_denied'] ?? '')).'</font>',
         };
 
@@ -168,7 +170,7 @@ final class OfferPageService
         $against = (int) $voteCounts['against'];
 
         $allowRow = '';
-        if (Permission::can(PermissionEnum::OFFER_MANAGE) && ($num['allowed'] ?? '') === 'pending') {
+        if (Permission::can(PermissionEnum::OFFER_MANAGE) && (int) ($num['allowed'] ?? 1) === OfferAllowed::PENDING->value) {
             $allowRow = '<table><tr><td class="embedded"><form method="post" action="?allow_offer=1"><input type="hidden" value="'.$id.'" name="offerid" />'.
                 '<input class="btn" type="submit" value="'.htmlspecialchars((string) ($lang['submit_allow'] ?? '')).'" />&nbsp;&nbsp;</form></td><td class="embedded"><form method="post" action="?id='.$id.'&amp;finish_offer=1">'.
                 '<input type="hidden" value="'.$id.'" name="finish" /><input class="btn" type="submit" value="'.htmlspecialchars((string) ($lang['submit_let_votes_decide'] ?? '')).'" /></form></td></tr></table>';
@@ -176,17 +178,17 @@ final class OfferPageService
 
         $voteRow = '';
         $voteResultsRow = '';
-        if (($num['allowed'] ?? '') === 'pending') {
+        if ((int) ($num['allowed'] ?? 1) === OfferAllowed::PENDING->value) {
             $voteRow = '<b><a href="?id='.$id.'&amp;vote=yeah"><font color="green">'.htmlspecialchars((string) ($lang['text_for'] ?? '')).'</font></a></b>'.
                 (Permission::can(PermissionEnum::AGAINST_OFFER) ? ' - <b><a href="?id='.$id.'&amp;vote=against"><font color="red">'.htmlspecialchars((string) ($lang['text_against'] ?? '')).'</font></a></b>' : '');
             $voteResultsRow = '<b>'.htmlspecialchars((string) ($lang['text_for'] ?? '')).":</b> {$yeah}  <b>".htmlspecialchars((string) ($lang['text_against'] ?? ''))."</b> {$against} &nbsp; &nbsp; <a href=\"?id=".$id.'&amp;offer_vote=1"><i>'.htmlspecialchars((string) ($lang['text_see_vote_detail'] ?? '')).'</i></a>';
         }
 
         $allowedNote = '';
-        if (($num['allowed'] ?? '') === 'allowed' && $userId !== (int) ($num['userid'] ?? 0)) {
+        if ((int) ($num['allowed'] ?? 1) === OfferAllowed::ALLOWED->value && $userId !== (int) ($num['userid'] ?? 0)) {
             $allowedNote = (string) ($lang['text_voter_receives_pm_note'] ?? '');
         }
-        if (($num['allowed'] ?? '') === 'allowed' && $userId === (int) ($num['userid'] ?? 0)) {
+        if ((int) ($num['allowed'] ?? 1) === OfferAllowed::ALLOWED->value && $userId === (int) ($num['userid'] ?? 0)) {
             $allowedNote = (string) ($lang['text_urge_upload_offer_note'] ?? '');
         }
 
@@ -499,7 +501,7 @@ final class OfferPageService
                     if (($curUser['showlastcom'] ?? true)) {
                         $title = '';
                         if (! empty($lastcom)) {
-                            if (($curUser['timetype'] ?? '') !== 'timealive') {
+                            if (($curUser['timetype'] ?? 1) !== UserTimeType::TIMEALIVE->value) {
                                 $lastcomtime = (string) ($lang['text_at_time'] ?? '').($lastcom['added'] ?? '');
                             } else {
                                 $lastcomtime = (string) ($lang['text_blank'] ?? '').Time::format((string) ($lastcom['added'] ?? 'now'), true, false, true);
@@ -518,9 +520,9 @@ final class OfferPageService
                     $comment = '<b><a'.$title.' href="?id='.(int) $arr['id'].'&amp;off_details=1#startcomments" '.$onmouseover.'>'.($hasnewcom ? "<font class='new'>" : '').$comms.($hasnewcom ? '</font>' : '').'</a></b>';
                 }
 
-                $allowed = match ($arr['allowed'] ?? '') {
-                    'allowed' => '&nbsp;<b>[<font color="green">'.htmlspecialchars((string) ($lang['text_allowed'] ?? '')).'</font>]</b>',
-                    'denied' => '&nbsp;<b>[<font color="red">'.htmlspecialchars((string) ($lang['text_denied'] ?? '')).'</font>]</b>',
+                $allowed = match ((int) ($arr['allowed'] ?? 1)) {
+                    OfferAllowed::ALLOWED->value => '&nbsp;<b>[<font color="green">'.htmlspecialchars((string) ($lang['text_allowed'] ?? '')).'</font>]</b>',
+                    OfferAllowed::DENIED->value => '&nbsp;<b>[<font color="red">'.htmlspecialchars((string) ($lang['text_denied'] ?? '')).'</font>]</b>',
                     default => '&nbsp;<b>[<font color="orange">'.htmlspecialchars((string) ($lang['text_pending'] ?? '')).'</font>]</b>',
                 };
 
@@ -546,10 +548,10 @@ final class OfferPageService
                 echo '<td class="rowfollow">'.$comment.'</td><td class="rowfollow nowrap">'.$addtime.'</td>';
                 if ($globalData['offervotetimeoutMain'] > 0 && $globalData['offeruptimeoutMain'] > 0) {
                     $timeout = '';
-                    if (($arr['allowed'] ?? '') === 'allowed') {
+                    if ((int) ($arr['allowed'] ?? 1) === OfferAllowed::ALLOWED->value) {
                         $futuretime = strtotime((string) ($arr['allowedtime'] ?? 'now')) + $globalData['offeruptimeoutMain'];
                         $timeout = Time::format(date('Y-m-d H:i:s', $futuretime), false, true, true, false, true);
-                    } elseif (($arr['allowed'] ?? '') === 'pending') {
+                    } elseif ((int) ($arr['allowed'] ?? 1) === OfferAllowed::PENDING->value) {
                         $futuretime = strtotime((string) ($arr['added'] ?? 'now')) + $globalData['offervotetimeoutMain'];
                         $timeout = Time::format(date('Y-m-d H:i:s', $futuretime), false, true, true, false, true);
                     }

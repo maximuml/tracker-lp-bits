@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\DTOs\Usercp;
 
+use App\Enums\UserAcceptPms;
+use App\Enums\UserGender;
 use App\Models\User;
 use App\Support\Validators;
 use Illuminate\Http\Request;
@@ -15,11 +17,11 @@ final readonly class PersonalSettingsDto
 {
     public function __construct(
         public bool $parked,
-        public string $acceptpms,
+        public int $acceptpms,
         public bool $deletepms,
         public bool $savepms,
         public bool $commentpm,
-        public string $gender,
+        public int $gender,
         public ?int $country,
         public ?int $trackerUrlId,
         public ?string $avatar,
@@ -30,13 +32,17 @@ final readonly class PersonalSettingsDto
     public static function fromRequest(Request $request): self
     {
         $parked = $request->input('parked') === 'yes';
-        $acceptpmsRaw = (string) $request->input('acceptpms', 'yes');
-        $acceptpms = in_array($acceptpmsRaw, ['yes', 'friends', 'no'], true) ? $acceptpmsRaw : 'yes';
+        $acceptpmsRaw = $request->input('acceptpms', 'yes');
+        $acceptpms = is_int($acceptpmsRaw) || (is_string($acceptpmsRaw) && ctype_digit($acceptpmsRaw))
+            ? (int) $acceptpmsRaw
+            : UserAcceptPms::fromStringSafe((string) $acceptpmsRaw)->value;
         $deletepms = $request->has('deletepms');
         $savepms = $request->has('savepms');
         $commentpm = $request->input('commentpm') === 'yes';
-        $genderRaw = (string) $request->input('gender', 'N/A');
-        $gender = in_array($genderRaw, ['N/A', 'Male', 'Female'], true) ? $genderRaw : 'N/A';
+        $genderRaw = $request->input('gender', 'N/A');
+        $gender = is_int($genderRaw) || (is_string($genderRaw) && ctype_digit($genderRaw))
+            ? (int) $genderRaw
+            : UserGender::fromStringSafe((string) $genderRaw)->value;
 
         $country = (int) $request->input('country', 0);
         $country = Validators::isId($country) ? $country : null;

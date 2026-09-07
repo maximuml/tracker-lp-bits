@@ -52,13 +52,13 @@ final class OctaneCrossRequestIsolationTest extends TestCase
     {
         $userA = User::factory()->create([
             'username' => 'userA_isolation',
-            'status' => 'confirmed',
+            'status' => 1,
             'enabled' => true,
         ]);
 
         $userB = User::factory()->create([
             'username' => 'userB_isolation',
-            'status' => 'confirmed',
+            'status' => 1,
             'enabled' => true,
         ]);
 
@@ -87,7 +87,7 @@ final class OctaneCrossRequestIsolationTest extends TestCase
     {
         $userA = User::factory()->create([
             'username' => 'guardA_isolation',
-            'status' => 'confirmed',
+            'status' => 1,
             'enabled' => true,
         ]);
 
@@ -138,14 +138,14 @@ final class OctaneCrossRequestIsolationTest extends TestCase
         $userA = User::factory()->create([
             'username' => 'alt_userA',
             'class' => 3,
-            'status' => 'confirmed',
+            'status' => 1,
             'enabled' => true,
         ]);
 
         $userB = User::factory()->create([
             'username' => 'alt_userB',
             'class' => 1,
-            'status' => 'confirmed',
+            'status' => 1,
             'enabled' => true,
         ]);
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Enums\UserStatus;
 use App\Exceptions\AuthenticationException;
 use App\Models\User;
 use App\Support\Cache;
@@ -65,7 +66,7 @@ class PasswordRecoveryService
             throw new AuthenticationException($this->msg($langRecover, 'std_email_not_in_database', 'The email address was not found in the database.'));
         }
 
-        if (($user['status'] ?? '') === 'pending') {
+        if (($user['status'] ?? null) === UserStatus::PENDING->value) {
             $this->authService->recordFailedAttempt($ip);
             throw new AuthenticationException($this->msg($langRecover, 'std_user_account_unconfirmed', 'The account has not been verified yet.'));
         }

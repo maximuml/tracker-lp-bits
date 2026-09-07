@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Enums\ReportType;
 use Illuminate\Support\Facades\DB;
 
 class ModerationRepository extends BaseRepository
@@ -13,13 +14,16 @@ class ModerationRepository extends BaseRepository
         return DB::table('reports')
             ->where('addedby', $addedBy)
             ->where('reportid', $reportId)
-            ->where('type', $type)
+            ->where('type', ReportType::fromStringSafe($type)->value)
             ->exists();
     }
 
     /** @param  array<string, mixed>  $data */
     public function createReport(array $data): void
     {
+        if (isset($data['type']) && is_string($data['type'])) {
+            $data['type'] = ReportType::fromStringSafe($data['type'])->value;
+        }
         DB::table('reports')->insert($data);
     }
 

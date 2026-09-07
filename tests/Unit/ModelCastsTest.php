@@ -110,7 +110,7 @@ final class ModelCastsTest extends TestCase
     public function test_language_trans_state_cast_returns_enum(): void
     {
         $language = new Language;
-        $language->trans_state = 'up-to-date';
+        $language->trans_state = LanguageTranslationState::UP_TO_DATE->value;
 
         $this->assertInstanceOf(LanguageTranslationState::class, $language->trans_state);
         $this->assertSame(LanguageTranslationState::UP_TO_DATE, $language->trans_state);

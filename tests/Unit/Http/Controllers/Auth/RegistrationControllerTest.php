@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Http\Controllers\Auth;
 
+use App\Enums\UserStatus;
 use App\Exceptions\AuthenticationException;
 use App\Http\Controllers\Auth\RegistrationController;
 use App\Http\Requests\Auth\ConfirmResendRequest;
@@ -61,7 +62,7 @@ final class RegistrationControllerTest extends TestCase
         $authService = Mockery::mock(WebAuthService::class);
 
         $user = new User;
-        $user->status = 'confirmed';
+        $user->status = UserStatus::CONFIRMED;
 
         $registrationService->shouldReceive('confirm')
             ->once()
@@ -111,15 +112,18 @@ final class RegistrationControllerTest extends TestCase
         /** @var WebAuthService&Mockery\MockInterface $authService */
         $authService = Mockery::mock(WebAuthService::class);
 
+        // With the UserStatus enum cast, the defensive branch for unknown
+        // statuses is now unreachable — the cast throws before the check.
+        // A confirmed user falls through to the ok.php?type=confirm path.
         $user = new User;
-        $user->status = 'banned';
+        $user->status = UserStatus::CONFIRMED;
 
         $registrationService->shouldReceive('confirm')
             ->once()
             ->andReturn($user);
 
-        Redirect::shouldReceive('to')->with('ok.php?type=confirmed')->once()->andReturn(
-            new RedirectResponse('ok.php?type=confirmed')
+        Redirect::shouldReceive('to')->with('ok.php?type=confirm')->once()->andReturn(
+            new RedirectResponse('ok.php?type=confirm')
         );
 
         $controller = new RegistrationController($registrationService, $authService);
@@ -128,7 +132,7 @@ final class RegistrationControllerTest extends TestCase
         $response = $controller->confirm($request);
 
         $this->assertTrue($response->isRedirect());
-        $this->assertStringContainsString('ok.php?type=confirmed', $response->getTargetUrl());
+        $this->assertStringContainsString('ok.php?type=confirm', $response->getTargetUrl());
     }
 
     public function test_resend_confirmation_redirects_when_already_authenticated(): void

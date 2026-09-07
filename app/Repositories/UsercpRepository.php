@@ -8,6 +8,9 @@ use App\DTOs\Usercp\ForumSettingsDto;
 use App\DTOs\Usercp\PersonalSettingsDto;
 use App\DTOs\Usercp\SecuritySettingsDto;
 use App\DTOs\Usercp\TrackerSettingsDto;
+use App\Enums\BitbucketPublic;
+use App\Enums\UserPrivacy;
+use App\Enums\UserTooltip;
 use App\Models\Comment;
 use App\Models\Post;
 use App\Models\User;
@@ -174,7 +177,7 @@ final class UsercpRepository extends BaseRepository
     public function getBitbucketOptions(): array
     {
         return DB::table('bitbucket')
-            ->where('public', '1')
+            ->where('public', BitbucketPublic::YES->value)
             ->get()
             ->all();
     }
@@ -198,7 +201,7 @@ final class UsercpRepository extends BaseRepository
         /** @var User $user */
         $user = Auth::user();
 
-        return $user->toArray();
+        return $user->toApiArray();
     }
 
     /**
@@ -240,7 +243,7 @@ final class UsercpRepository extends BaseRepository
         User::query()->where('id', $user->id)->update($data);
         Cache::clearUser($user->id, (string) $user->passkey);
 
-        return User::query()->find($user->id)?->toArray() ?? [];
+        return User::query()->find($user->id)?->toApiArray() ?? [];
     }
 
     /**
@@ -261,7 +264,7 @@ final class UsercpRepository extends BaseRepository
             'postsperpage' => $dto->postsperpage,
             'avatars' => $dto->avatars,
             'signatures' => $dto->signatures,
-            'clicktopic' => $dto->clicktopic !== '' ? $dto->clicktopic : $user->clicktopic,
+            'clicktopic' => $dto->clicktopic !== null ? $dto->clicktopic : $user->clicktopic,
             'signature' => $dto->signature,
         ];
 
@@ -272,7 +275,7 @@ final class UsercpRepository extends BaseRepository
         User::query()->where('id', $user->id)->update($data);
         Cache::clearUser($user->id, (string) $user->passkey);
 
-        return User::query()->find($user->id)?->toArray() ?? [];
+        return User::query()->find($user->id)?->toApiArray() ?? [];
     }
 
     /**
@@ -380,14 +383,14 @@ final class UsercpRepository extends BaseRepository
 
         $showTooltip = (string) app(Globals::class)->get('enabletooltip_tweak', '') === 'yes';
         if ($showTooltip) {
-            $data['tooltip'] = $dto->tooltip ?? 'off';
+            $data['tooltip'] = $dto->tooltip ?? UserTooltip::OFF->value;
             $data['showlastcom'] = $dto->showlastcom ?? false;
         }
 
         User::query()->where('id', $user->id)->update($data);
         Cache::clearUser($user->id, (string) $user->passkey);
 
-        return User::query()->find($user->id)?->toArray() ?? [];
+        return User::query()->find($user->id)?->toApiArray() ?? [];
     }
 
     /**
@@ -519,8 +522,8 @@ final class UsercpRepository extends BaseRepository
             $privacy = 'normal';
         }
 
-        $data['privacy'] = $privacy;
-        if ($user->privacy !== $privacy) {
+        $data['privacy'] = UserPrivacy::fromStringSafe($privacy)->value;
+        if ($user->privacy !== UserPrivacy::fromStringSafe($privacy)) {
             $privacyupdated = 1;
         }
 
@@ -629,10 +632,7 @@ final class UsercpRepository extends BaseRepository
         }
 
         if ($dto->privacy !== null && $dto->privacy !== '') {
-            $privacy = in_array($dto->privacy, ['normal', 'low', 'strong'], true)
-                ? $dto->privacy
-                : 'normal';
-            $data['privacy'] = $privacy;
+            $data['privacy'] = UserPrivacy::fromStringSafe($dto->privacy)->value;
         }
 
         if ($data !== []) {
@@ -640,6 +640,6 @@ final class UsercpRepository extends BaseRepository
             Cache::clearUser($user->id, '');
         }
 
-        return User::query()->find($user->id)?->toArray() ?? [];
+        return User::query()->find($user->id)?->toApiArray() ?? [];
     }
 }

@@ -78,7 +78,7 @@ final class OfferPageServiceTest extends TestCase
             'class' => $class,
             'added' => now()->toDateTimeString(),
             'last_access' => now()->toDateTimeString(),
-            'status' => 'confirmed',
+            'status' => 1,
             'enabled' => 1,
             'parked' => 0,
             'downloadpos' => 1,
@@ -110,7 +110,7 @@ final class OfferPageServiceTest extends TestCase
             'against' => 0,
             'category' => $categoryId,
             'comments' => 0,
-            'allowed' => 'pending',
+            'allowed' => 1,
         ], $overrides));
     }
 

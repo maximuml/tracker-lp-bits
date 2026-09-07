@@ -74,7 +74,7 @@ final class PasskeyLoginV2Test extends TestCase
         $this->registerRoute();
         $user = User::factory()->create([
             'passkey' => str_repeat('a', 32),
-            'status' => 'confirmed',
+            'status' => 1,
             'enabled' => true,
         ]);
 
@@ -88,7 +88,7 @@ final class PasskeyLoginV2Test extends TestCase
         $this->registerRoute();
         $user = User::factory()->create([
             'passkey' => str_repeat('b', 32),
-            'status' => 'confirmed',
+            'status' => 1,
             'enabled' => true,
         ]);
 
@@ -106,7 +106,7 @@ final class PasskeyLoginV2Test extends TestCase
         $this->registerRoute();
         $user = User::factory()->create([
             'passkey' => str_repeat('d', 32),
-            'status' => 'confirmed',
+            'status' => 1,
             'enabled' => true,
         ]);
 
@@ -124,7 +124,7 @@ final class PasskeyLoginV2Test extends TestCase
         $this->registerRoute();
         $user = User::factory()->create([
             'passkey' => str_repeat('e', 32),
-            'status' => 'confirmed',
+            'status' => 1,
             'enabled' => true,
         ]);
 
@@ -144,7 +144,7 @@ final class PasskeyLoginV2Test extends TestCase
         $this->registerRoute();
         $user = User::factory()->create([
             'passkey' => str_repeat('f', 32),
-            'status' => 'confirmed',
+            'status' => 1,
             'enabled' => true,
         ]);
 
@@ -162,7 +162,7 @@ final class PasskeyLoginV2Test extends TestCase
         $this->registerRoute();
         $user = User::factory()->create([
             'passkey' => str_repeat('1', 32),
-            'status' => 'confirmed',
+            'status' => 1,
             'enabled' => true,
         ]);
 
@@ -235,7 +235,7 @@ final class PasskeyLoginV2Test extends TestCase
         $this->registerRoute();
         $user = User::factory()->create([
             'passkey' => str_repeat('2', 32),
-            'status' => 'confirmed',
+            'status' => 1,
             'enabled' => true,
         ]);
 
@@ -254,7 +254,7 @@ final class PasskeyLoginV2Test extends TestCase
         $this->registerRoute();
         $user = User::factory()->create([
             'passkey' => str_repeat('3', 32),
-            'status' => 'confirmed',
+            'status' => 1,
             'enabled' => true,
         ]);
 

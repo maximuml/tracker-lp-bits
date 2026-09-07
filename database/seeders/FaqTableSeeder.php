@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\FaqType;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -22,7 +23,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 401,
                 'link_id' => 1,
                 'lang_id' => 6,
-                'type' => 'categ',
+                'type' => FaqType::CATEG->value,
                 'question' => 'Site information',
                 'answer' => '',
                 'flag' => 1,
@@ -33,7 +34,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 402,
                 'link_id' => 2,
                 'lang_id' => 6,
-                'type' => 'categ',
+                'type' => FaqType::CATEG->value,
                 'question' => 'User information',
                 'answer' => '',
                 'flag' => 1,
@@ -44,7 +45,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 403,
                 'link_id' => 3,
                 'lang_id' => 6,
-                'type' => 'categ',
+                'type' => FaqType::CATEG->value,
                 'question' => 'Stats',
                 'answer' => '',
                 'flag' => 1,
@@ -55,7 +56,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 404,
                 'link_id' => 4,
                 'lang_id' => 6,
-                'type' => 'categ',
+                'type' => FaqType::CATEG->value,
                 'question' => 'Uploading',
                 'answer' => '',
                 'flag' => 1,
@@ -66,7 +67,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 405,
                 'link_id' => 5,
                 'lang_id' => 6,
-                'type' => 'categ',
+                'type' => FaqType::CATEG->value,
                 'question' => 'Downloading',
                 'answer' => '',
                 'flag' => 1,
@@ -77,7 +78,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 406,
                 'link_id' => 6,
                 'lang_id' => 6,
-                'type' => 'categ',
+                'type' => FaqType::CATEG->value,
                 'question' => 'How can I improve my download speed?',
                 'answer' => '',
                 'flag' => 1,
@@ -88,7 +89,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 407,
                 'link_id' => 7,
                 'lang_id' => 6,
-                'type' => 'categ',
+                'type' => FaqType::CATEG->value,
                 'question' => 'My ISP uses a transparent proxy. What should I do?',
                 'answer' => '',
                 'flag' => 1,
@@ -99,7 +100,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 408,
                 'link_id' => 8,
                 'lang_id' => 6,
-                'type' => 'categ',
+                'type' => FaqType::CATEG->value,
                 'question' => 'Why can\'t I connect? Is the site blocking me?',
                 'answer' => '',
                 'flag' => 1,
@@ -110,7 +111,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 409,
                 'link_id' => 9,
                 'lang_id' => 6,
-                'type' => 'categ',
+                'type' => FaqType::CATEG->value,
                 'question' => 'What if I can\'t find the answer to my problem here?',
                 'answer' => '',
                 'flag' => 1,
@@ -121,7 +122,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 410,
                 'link_id' => 10,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'What is this bittorrent all about anyway? How do I get the files?',
                 'answer' => 'Check out <a class="faqlink" href="http://www.btfaq.com/">Brian\'s BitTorrent FAQ and Guide</a>.',
                 'flag' => 1,
@@ -132,7 +133,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 411,
                 'link_id' => 11,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'Where does the donated money go?',
                 'answer' => 'All donated money goes to the cost of server that this tracker is on.',
                 'flag' => 1,
@@ -143,7 +144,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 412,
                 'link_id' => 12,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'Where can I get a copy of the source code?',
                 'answer' => 'This tracker is powered by NexusPHP. If you like to use NexusPHP to power your tracker, <a class="faqlink" href="aboutnexus.php">Contact Us</a>.<br />
             The first stage of NexusPHP forks from TBSource. You may find more information about TBSource at <a class="faqlink" href="http://www.tbdev.net/">TBDev.net</a>.',
@@ -155,7 +156,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 413,
                 'link_id' => 13,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'I registered an account but did not receive the confirmation e-mail!',
                 'answer' => 'One possible reason may be that the network around the tracker has encountered some problems. You can use <a href="confirm_resend.php" class="faqlink">this form</a> ask the tracker to resend confirmation e-mail.<br />
             Typically registered users would be deleted after 24 hours if not confirmed, so you may try again the next day. Note though that if you didn\'t receive the email the first time it will probably not succeed the second time either so you should really try another email address.',
@@ -167,7 +168,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 414,
                 'link_id' => 14,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'I\'ve lost my user name or password! Can you send it to me?',
                 'answer' => 'Please use <a class="faqlink" href="recover.php">this form</a> to have the login details mailed back to you.',
                 'flag' => 1,
@@ -178,7 +179,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 415,
                 'link_id' => 15,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'Can you rename my account? ',
                 'answer' => 'No, we do not rename accounts. Don\'t ask for it.',
                 'flag' => 1,
@@ -189,7 +190,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 416,
                 'link_id' => 16,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'Can you delete my (confirmed) account?',
                 'answer' => 'No, we don\'t delete accounts. Don\'t ask for it.',
                 'flag' => 1,
@@ -200,7 +201,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 417,
                 'link_id' => 17,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'So, what\'s MY ratio?',
                 'answer' => 'It\'s on the left-top of pages.<br />
             <br />
@@ -220,7 +221,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 418,
                 'link_id' => 18,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'Why is my IP displayed on my details page?',
                 'answer' => 'Only you and the site moderators can view your IP address and email. Regular users do not see that information.',
                 'flag' => 1,
@@ -231,7 +232,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 421,
                 'link_id' => 21,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'Why am I listed as not connectable? (And why should I care?)',
                 'answer' => 'The tracker has determined that you are firewalled or NATed and cannot accept incoming connections.
             <br />
@@ -249,7 +250,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 422,
                 'link_id' => 22,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'What are the different user classes?',
                 'answer' => '<table cellspacing="3" cellpadding="0">
             <tr>
@@ -357,7 +358,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 423,
                 'link_id' => 23,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'How does this promotion thing work anyway?',
                 'answer' => '<table cellspacing=\\\\\\\\\\\\\\"3\\\\\\\\\\\\\\" cellpadding=\\\\\\\\\\\\\\"0\\\\\\\\\\\\\\">
             <tr>
@@ -457,7 +458,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 425,
                 'link_id' => 25,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'Why can\'t my friend become a member?',
                 'answer' => 'There is a users limit (it is list at Home -&gt; Tracker Statistics -&gt; Limit). When that number is reached we stop accepting new members. Accounts inactive (i.e. not logged in for a long time) are automatically deleted, so keep trying.<br />
             When are inactive user accounts deleted? See <a class="faqlink" href="rules.php">Rules</a>',
@@ -469,7 +470,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 426,
                 'link_id' => 26,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'How do I add an avatar to my profile?',
                 'answer' => 'First, find an image that you like, and that is within the <a class="faqlink" href="rules.php">rules</a>. Then you will have to find a place to host it, such as our own <a class="faqlink" href="bitbucket-upload.php">BitBucket</a>. To lighten tracker\'s load, we recommend you upload it to other websites and copy the URL you were given when uploading it to the Avatar URL field in <a class="faqlink" href="usercp.php?action=personal">UserCP</a>.<br />
             <br />
@@ -482,7 +483,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 427,
                 'link_id' => 27,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'Most common reason for stats not updating',
                 'answer' => '<ul>
             <li>The server is overloaded and unresponsive. Just try to keep the session open until the server responds again. (Flooding the server with consecutive manual updates is not recommended.)</li>
@@ -496,7 +497,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 428,
                 'link_id' => 28,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'Best practices',
                 'answer' => '<ul>
             <li>If a torrent you are currently leeching/seeding is not listed on your detail page, just wait or force a manual update.</li>
@@ -511,7 +512,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 429,
                 'link_id' => 29,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'May I use any bittorrent client?',
                 'answer' => 'No. According to tests of common bittorrent clients by <a class="faqlink" href="aboutnexus.php">NexusPHP</a>, we allowed <b>only</b> the following bittorrent clients.<br />
             The test report by <a class="faqlink" href="aboutnexus.php">NexusPHP</a> is <a class="faqlink" href="https://nexusphp.org/wiki/%E5%AE%A2%E6%88%B7%E7%AB%AF%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A">here</a>.
@@ -560,7 +561,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 430,
                 'link_id' => 30,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'Why is a torrent I\'m leeching/seeding listed several times in my profile?',
                 'answer' => 'If for some reason (e.g. PC crash, or frozen client) your client exits improperly and you restart it, it will have a new peer_id, so it will show as a new torrent. The old one will never receive a "event=completed" or "event=stopped" and will be listed until some tracker timeout. Just ignore it, it will eventually go away.',
                 'flag' => 1,
@@ -571,7 +572,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 431,
                 'link_id' => 31,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'I\'ve finished or cancelled a torrent. Why is it still listed in my profile?',
                 'answer' => 'Some clients, notably TorrentStorm and Nova Torrent, do not report properly to the tracker when canceling or finishing a torrent. In that case the tracker will keep waiting for some message - and thus listing the torrent as seeding or leeching - until some timeout occurs. Just ignore it, it will eventually go away.',
                 'flag' => 1,
@@ -582,7 +583,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 433,
                 'link_id' => 33,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'Multiple IPs (Can I login from different computers?)',
                 'answer' => 'Yes, the tracker is capable of following sessions from different IPs for the same user. You may access the site and seed/leech simultaneously from as many computers as you want with the same account.<br />
             However, there is a limit for a single torrent. Per torrent 3 simultaneous connections are permitted per user, and in case of leeching only 1, which means you can leech a torrent from one location only at a time.',
@@ -594,7 +595,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 436,
                 'link_id' => 36,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'Why can\'t I upload torrents?',
                 'answer' => 'See <a class="faqlink" href="rules.php">Rules</a>.',
                 'flag' => 1,
@@ -605,7 +606,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 437,
                 'link_id' => 37,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'What criteria must I meet before I can join the Uploader team?',
                 'answer' => 'You must:
             <ul>
@@ -629,7 +630,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 438,
                 'link_id' => 38,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'Can I upload your torrents to other trackers?',
                 'answer' => 'No. We are a closed, limited-membership community. Only registered users can use the tracker. Posting our torrents on other trackers is useless, since most people who attempt to download them will be unable to connect with us. This generates a lot of frustration and bad-will against us, and will therefore not be tolerated.<br />
             <br />
@@ -645,7 +646,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 439,
                 'link_id' => 39,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'How do I use the files I\'ve downloaded?',
                 'answer' => 'Check out <a class="faqlink" href="formats.php">this guide</a>.',
                 'flag' => 1,
@@ -656,7 +657,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 440,
                 'link_id' => 40,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'Downloaded a movie and don\'t know what CAM/TS/TC/SCR means?',
                 'answer' => 'Check out <a class="faqlink" href="videoformats.php">this guide</a>.',
                 'flag' => 1,
@@ -667,7 +668,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 441,
                 'link_id' => 41,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'Why did an active torrent suddenly disappear?',
                 'answer' => 'There may be three reasons for this:<br />
             (<b>1</b>) The torrent may have been against the site <a class="faqlink" href="rules.php">rules</a>.
@@ -682,7 +683,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 442,
                 'link_id' => 42,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'How do I resume a broken download or reseed something?',
                 'answer' => 'Open the .torrent file. When your client asks you for a location, choose the location of the existing file(s) and it will resume/reseed the torrent.',
                 'flag' => 1,
@@ -693,7 +694,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 443,
                 'link_id' => 43,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'Why do my downloads sometimes stall at 99%?',
                 'answer' => 'The more pieces you have, the harder it becomes to find peers who have pieces you are missing. That is why downloads sometimes slow down or even stall when there are just a few percent remaining. Just be patient and you will, sooner or later, get the remaining pieces.',
                 'flag' => 1,
@@ -704,7 +705,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 444,
                 'link_id' => 44,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'What are these "a piece has failed a hash check" messages? ',
                 'answer' => 'Bittorrent clients check the data they receive for integrity. When a piece fails this check it is automatically re-downloaded. Occasional hash fails are a common occurrence, and you shouldn\'t worry.<br />
             <br />
@@ -717,7 +718,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 445,
                 'link_id' => 45,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'The torrent is supposed to be 100MB. How come I downloaded 120MB? ',
                 'answer' => 'See the hash fails topic. If your client receives bad data it will have to re-download it, therefore the total downloaded may be larger than the torrent size. Make sure the "kick/ban" option is turned on to minimize the extra downloads.',
                 'flag' => 1,
@@ -728,7 +729,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 446,
                 'link_id' => 46,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'Why do I get a "Your ratio is too low! You need to wait xx h to start" error?',
                 'answer' => 'From the time that each <b>new</b> torrent is uploaded to the tracker, there is a period of time that some users must wait before they can download it.<br />
             This delay in downloading will only affect users with a low ratio and downloaded amount above 10 GB.<br />
@@ -771,7 +772,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 447,
                 'link_id' => 47,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'Why do I get a "Port xxxx is blacklisted" error?',
                 'answer' => 'Your client is reporting to the tracker that it uses one of the default bittorrent ports (6881-6889) or any other common p2p port for incoming connections.<br />
             <br />
@@ -823,7 +824,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 448,
                 'link_id' => 48,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'What\'s this "IOError - [Errno13] Permission denied" error?',
                 'answer' => 'If you just want to fix it reboot your computer, it should solve the problem. Otherwise read on.<br />
             IOError means Input-Output Error, and that is a file system error, not a tracker one. It shows up when your client is for some reason unable to open the partially downloaded torrent files. The most common cause is two instances of the client to be running simultaneously: the last time the client was closed it somehow didn\'t really close but kept running in the background, and is therefore still locking the files, making it impossible for the new instance to open them.<br />
@@ -837,7 +838,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 450,
                 'link_id' => 50,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'Do not immediately jump on new torrents',
                 'answer' => 'The download speed mostly depends on the seeder-to-leecher ratio (SLR). Poor download speed is mainly a problem with new and very popular torrents where the SLR is low.<br />
             (Note: make sure you remember that you did not enjoy the low speed. Seed so that others will not endure the same.)<br />
@@ -850,7 +851,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 451,
                 'link_id' => 51,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'Limit your upload speed',
                 'answer' => 'The upload speed affects the download speed in essentially two ways:
             <ul>
@@ -868,7 +869,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 452,
                 'link_id' => 52,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'Limit the number of simultaneous connections',
                 'answer' => 'Some operating systems (like Windows 9x) do not deal well with a large number of connections, and may even crash. Also some home routers (particularly when running NAT and/or firewall with stateful inspection services) tend to become slow or crash when having to deal with too many connections. There are no fixed values for this, you may try 60 or 100 and experiment with the value. Note that these numbers are additive, if you have two instances of a client running the numbers add up.',
                 'flag' => 1,
@@ -879,7 +880,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 453,
                 'link_id' => 53,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'Limit the number of simultaneous uploads',
                 'answer' => 'Isn\'t this the same as above? No. Connections limit the number of peers your client is talking to and/or downloading from. Uploads limit the number of peers your client is actually uploading to. The ideal number is typically much lower than the number of connections, and highly dependent on your (physical) connection.',
                 'flag' => 1,
@@ -890,7 +891,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 454,
                 'link_id' => 54,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'Just give it some time',
                 'answer' => 'As explained above peers favour other peers that upload to them. When you start leeching a new torrent you have nothing to offer to other peers and they will tend to ignore you. This makes the starts slow, in particular if, by chance, the peers you are connected to include few or no seeders. The download speed should increase as soon as you have some pieces to share.',
                 'flag' => 1,
@@ -901,7 +902,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 455,
                 'link_id' => 55,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'Why is my browsing so slow while leeching?',
                 'answer' => 'Your download speed is always finite. If you are a peer in a fast torrent it will almost certainly saturate your download bandwidth, and your browsing will suffer. Many clients allows you to limit the download speed and try it.<br />
             <br />
@@ -914,7 +915,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 456,
                 'link_id' => 56,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'What is a proxy?',
                 'answer' => 'Basically a middleman. When you are browsing a site through a proxy your requests are sent to the proxy and the proxy forwards them to the site instead of you connecting directly to the site. There are several classifications (the terminology is far from standard):<br />
             <br />
@@ -955,7 +956,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 457,
                 'link_id' => 57,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'How do I find out if I\'m behind a (transparent/anonymous) proxy?',
                 'answer' => 'Try <a href="http://proxyjudge.org" class="faqlink">ProxyJudge</a>. It lists the HTTP headers that the server where it is running received from you. The relevant ones are HTTP_CLIENT_IP, HTTP_X_FORWARDED_FOR and REMOTE_ADDR.',
                 'flag' => 1,
@@ -966,7 +967,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 475,
                 'link_id' => 75,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'Why am I listed as not connectable even though I\'m not NAT/Firewalled?',
                 'answer' => 'The tracker is quite smart at finding your real IP, but it does need the proxy to send the HTTP header HTTP_X_FORWARDED_FOR. If your ISP\'s proxy does not then what happens is that the tracker will interpret the proxy\'s IP address as the client\'s IP address. So when you login and the tracker tries to connect to your client to see if you are NAT/firewalled it will actually try to connect to the proxy on the port your client reports to be using for incoming connections. Naturally the proxy will not be listening on that port, the connection will fail and the tracker will think you are NAT/firewalled.',
                 'flag' => 1,
@@ -977,7 +978,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 462,
                 'link_id' => 62,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'Maybe my address is blacklisted?',
                 'answer' => 'The site keeps a list of blocked IP addresses for banned users or attackers. This works at Apache/PHP level, and only blocks <i>logins</i> from those addresses. It should not stop you from reaching the site. In particular it does not block lower level protocols, you should be able to ping/traceroute the server even if your address is blacklisted. If you cannot then the reason for the problem lies elsewhere.<br />
             <br />
@@ -990,7 +991,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 463,
                 'link_id' => 63,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'Your ISP blocks the site\'s address',
                 'answer' => '(In first place, it\'s unlikely your ISP is doing so. DNS name resolution and/or network problems are the usual culprits.)
             <br />
@@ -1005,7 +1006,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 465,
                 'link_id' => 65,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'You may try this',
                 'answer' => 'Post in the <a class="faqlink" href="forums.php">Forums</a>, by all means. You\'ll find they are usually a friendly and helpful place, provided you follow a few basic guidelines: <ul>
             <li>Make sure your problem is not really in this FAQ. There\'s no point in posting just to be sent back here. </li>
@@ -1020,7 +1021,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 466,
                 'link_id' => 66,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'Why do I get a "Your slot limit is reached! You may at most download xx torrents at the same time" error?',
                 'answer' => 'This is part of the "Slot System". The slot system is being used to limit the concurrent downloads for users that have low ratio and downloaded amount above 10 GB<br /><br />
             Rules: <br />
@@ -1073,7 +1074,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 467,
                 'link_id' => 67,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'What is the passkey System? How does it work?',
                 'answer' => 'The passkey system is implemented to verify if you are registered with the tracker. Every user has a personal passkey, a random key generated by the system. When a user tries to download a torrent, his personal passkey is imprinted in the tracker URL of the torrent, allowing to the tracker to identify any source connected on it. In this way, you can seed a torrent for example, at home and at your office simultaneously without any problem with the 2 different IPs.
             ',
@@ -1085,7 +1086,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 468,
                 'link_id' => 68,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'Why do I get an "Unknown passkey" error? ',
                 'answer' => 'You will get this error, firstly if you are not registered on our tracker, or if you haven\'t downloaded the torrent to use from our webpage, when you were logged in. In this case, just register or log in and re-download the torrent.<br />
             There is a chance to get this error also, at the first time you download anything as a new user, or at the first download after you reset your passkey. The reason is simply that the tracker reviews the changes in the passkeys every few minutes and not instantly. For that reason just leave the torrent running for a few minutes, and you will get eventually an OK message from the tracker.',
@@ -1097,7 +1098,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 469,
                 'link_id' => 69,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'When do I need to reset my passkey?',
                 'answer' => '<ul><li>If your passkey has been leaked and other user(s) uses it to download torrents using your account. In this case, you will see torrents stated in your account that you are not leeching or seeding . </li>
             <li>When your clients hangs up or your connection is terminated without pressing the stop button of your client. In this case, in your account you will see that you are still leeching/seeding the torrents even that your client has been closed. Normally these "ghost peers" will be cleaned automatically within 30 minutes, but if you want to resume your downloads and the tracker denied that due to the fact that you "already are downloading the same torrent" then you should reset your passkey and re-download the torrent, then resume it.  </li></ul>',
@@ -1109,7 +1110,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 470,
                 'link_id' => 70,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'What is DHT? Why must I turn it off and how?',
                 'answer' => 'DHT must be disabled in your client. DHT can cause your stats to be recorded incorrectly and could be seen as cheating. Anyone using this will be banned for cheating the system.
             <br />
@@ -1122,7 +1123,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 471,
                 'link_id' => 71,
                 'lang_id' => 6,
-                'type' => 'categ',
+                'type' => FaqType::CATEG->value,
                 'question' => 'How can I help translate the site language into my native language?',
                 'answer' => '',
                 'flag' => 1,
@@ -1133,7 +1134,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 472,
                 'link_id' => 72,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'What skills do I need to do the translation?',
                 'answer' => 'Translate the site into another language is quite easy. You needn\'t be skilled in PHP or dynamic website design. In fact, all you need is proficient understanding of English (the default site language) and the language you plan to translate into. Maybe some basic knowledge in HTML would help.<br /><br />
             Moreover, we give a detailed tutorial on how to do the translation <a href="#73" class="faqlink"><b>HERE</b></a>. And our coders would be more than pleased to answer the questions you may encounter.<br /><br />
@@ -1147,7 +1148,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 473,
                 'link_id' => 73,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'The translation tutorial',
                 'answer' => '<ul>
             <li>How does multi-language work?<br />
@@ -1177,7 +1178,7 @@ class FaqTableSeeder extends Seeder
                 'id' => 474,
                 'link_id' => 74,
                 'lang_id' => 6,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'question' => 'Why does my client notify me of low disk space even if there is plenty left?',
                 'answer' => 'Most possible reason is that the file system of your disk partitions is FAT32, which has a maximum file size limit of 4 GB. If your operation system is Windows, consider converting file system to NTFS. Check <a class="faqlink" href="http://technet.microsoft.com/en-us/library/bb456984.aspx">here</a> for details.
             ',

@@ -45,12 +45,12 @@ final class RepositorySizeTest extends TestCase
         'app/Repositories/SearchBoxRepository.php' => 526,
         'app/Repositories/ToptenRepository.php' => 525,
         // Services (6 files > 500 lines)
-        'app/Services/RegistrationService.php' => 686,
-        'app/Services/OfferPageService.php' => 588,
+        'app/Services/RegistrationService.php' => 688,
+        'app/Services/OfferPageService.php' => 590,
         'app/Services/ForumService.php' => 558,
-        'app/Services/UsercpPageService.php' => 529,
+        'app/Services/UsercpPageService.php' => 531,
         'app/Services/IndexPageService.php' => 525,
-        'app/Services/MessageService.php' => 514,
+        'app/Services/MessageService.php' => 515,
     ];
 
     public function test_no_new_oversized_files_in_repositories_or_services(): void

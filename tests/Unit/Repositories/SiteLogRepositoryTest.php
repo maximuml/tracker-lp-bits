@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Repositories;
 
+use App\Enums\SitelogSecurityLevel;
 use App\Repositories\SiteLogRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
@@ -32,7 +33,7 @@ final class SiteLogRepositoryTest extends TestCase
 
         $this->assertNotNull($record);
         $this->assertSame('something happened', $record->txt);
-        $this->assertSame('normal', $record->security_level);
+        $this->assertSame(SitelogSecurityLevel::NORMAL->value, (int) $record->security_level);
         $this->assertSame(0, (int) $record->uid);
         $this->assertNotNull($record->added);
     }
@@ -45,7 +46,7 @@ final class SiteLogRepositoryTest extends TestCase
 
         $this->assertNotNull($record);
         $this->assertSame('mod action', $record->txt);
-        $this->assertSame('mod', $record->security_level);
+        $this->assertSame(SitelogSecurityLevel::MOD->value, (int) $record->security_level);
         $this->assertSame(42, (int) $record->uid);
     }
 

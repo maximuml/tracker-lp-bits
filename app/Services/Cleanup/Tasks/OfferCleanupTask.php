@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Cleanup\Tasks;
 
+use App\Enums\OfferAllowed;
 use App\Services\Cleanup\Contracts\CleanupTask;
 use App\Support\Config\SiteConfig;
 use App\Support\Log;
@@ -25,7 +26,7 @@ final class OfferCleanupTask implements CleanupTask
             $dt = date('Y-m-d H:i:s', time() - $offerVoteTimeout);
             $offerIds = DB::table('offers')
                 ->where('added', '<', $dt)
-                ->where('allowed', '<>', 'allowed')
+                ->where('allowed', '<>', OfferAllowed::ALLOWED->value)
                 ->pluck('id', 'name')
                 ->all();
 
@@ -37,7 +38,7 @@ final class OfferCleanupTask implements CleanupTask
             $dt = date('Y-m-d H:i:s', time() - $offerUploadTimeout);
             $offerIds = DB::table('offers')
                 ->where('allowedtime', '<', $dt)
-                ->where('allowed', 'allowed')
+                ->where('allowed', OfferAllowed::ALLOWED->value)
                 ->pluck('id', 'name')
                 ->all();
 

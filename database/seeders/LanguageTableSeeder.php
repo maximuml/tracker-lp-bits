@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\LanguageTranslationState;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -26,7 +27,7 @@ class LanguageTableSeeder extends Seeder
                 'rule_lang' => 1,
                 'site_lang' => 1,
                 'site_lang_folder' => 'en',
-                'trans_state' => 'up-to-date',
+                'trans_state' => LanguageTranslationState::UP_TO_DATE->value,
             ],
         ]);
 

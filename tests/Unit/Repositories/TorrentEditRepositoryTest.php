@@ -252,7 +252,7 @@ final class TorrentEditRepositoryTest extends TestCase
             'save_as' => 'test',
             'category' => $this->categoryId,
             'size' => 1024,
-            'type' => 'single',
+            'type' => 0,
             'numfiles' => 1,
             'owner' => $ownerId,
             'info_hash' => random_bytes(20),

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Repositories;
 
+use App\Enums\ReportType;
 use App\Models\User;
 use App\Repositories\PageLayoutRepository;
 use App\Support\CurrentUser;
@@ -187,8 +188,8 @@ final class PageLayoutRepositoryTest extends TestCase
     public function test_get_total_reports_counts_all(): void
     {
         DB::table('reports')->insert([
-            ['addedby' => 1, 'added' => now()->toDateTimeString(), 'type' => 'torrent', 'reason' => 'x', 'dealtwith' => 0],
-            ['addedby' => 2, 'added' => now()->toDateTimeString(), 'type' => 'user', 'reason' => 'y', 'dealtwith' => 1],
+            ['addedby' => 1, 'added' => now()->toDateTimeString(), 'type' => ReportType::TORRENT->value, 'reason' => 'x', 'dealtwith' => 0],
+            ['addedby' => 2, 'added' => now()->toDateTimeString(), 'type' => ReportType::USER->value, 'reason' => 'y', 'dealtwith' => 1],
         ]);
 
         $this->assertSame(2, $this->repository->getTotalReports());
@@ -216,8 +217,8 @@ final class PageLayoutRepositoryTest extends TestCase
     public function test_get_torrent_approval_none_count_counts_unapproved(): void
     {
         DB::table('torrents')->insert([
-            ['name' => 'a', 'filename' => 'a.torrent', 'save_as' => 'a', 'category' => 1, 'size' => 1, 'type' => 'single', 'numfiles' => 1, 'owner' => 1, 'info_hash' => random_bytes(20), 'visible' => 1, 'banned' => 0, 'approval_status' => 0, 'added' => now()->toDateTimeString()],
-            ['name' => 'b', 'filename' => 'b.torrent', 'save_as' => 'b', 'category' => 1, 'size' => 1, 'type' => 'single', 'numfiles' => 1, 'owner' => 1, 'info_hash' => random_bytes(20), 'visible' => 1, 'banned' => 0, 'approval_status' => 1, 'added' => now()->toDateTimeString()],
+            ['name' => 'a', 'filename' => 'a.torrent', 'save_as' => 'a', 'category' => 1, 'size' => 1, 'type' => 0, 'numfiles' => 1, 'owner' => 1, 'info_hash' => random_bytes(20), 'visible' => 1, 'banned' => 0, 'approval_status' => 0, 'added' => now()->toDateTimeString()],
+            ['name' => 'b', 'filename' => 'b.torrent', 'save_as' => 'b', 'category' => 1, 'size' => 1, 'type' => 0, 'numfiles' => 1, 'owner' => 1, 'info_hash' => random_bytes(20), 'visible' => 1, 'banned' => 0, 'approval_status' => 1, 'added' => now()->toDateTimeString()],
         ]);
 
         $this->assertSame(1, $this->repository->getTorrentApprovalNoneCount());
@@ -246,8 +247,8 @@ final class PageLayoutRepositoryTest extends TestCase
     public function test_get_open_reports_count_counts_undealt(): void
     {
         DB::table('reports')->insert([
-            ['addedby' => 1, 'added' => now()->toDateTimeString(), 'type' => 'torrent', 'reason' => 'x', 'dealtwith' => 0],
-            ['addedby' => 2, 'added' => now()->toDateTimeString(), 'type' => 'user', 'reason' => 'y', 'dealtwith' => 1],
+            ['addedby' => 1, 'added' => now()->toDateTimeString(), 'type' => ReportType::TORRENT->value, 'reason' => 'x', 'dealtwith' => 0],
+            ['addedby' => 2, 'added' => now()->toDateTimeString(), 'type' => ReportType::USER->value, 'reason' => 'y', 'dealtwith' => 1],
         ]);
 
         $this->assertSame(1, $this->repository->getOpenReportsCount());

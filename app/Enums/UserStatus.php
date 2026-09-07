@@ -8,23 +8,35 @@ namespace App\Enums;
  * Backed enum for user account status.
  *
  * Mirrors the string constants from App\Models\User:
- *   STATUS_CONFIRMED ('confirmed'), STATUS_PENDING ('pending').
+ *   STATUS_PENDING ('pending'), STATUS_CONFIRMED ('confirmed').
  */
-enum UserStatus: string
+enum UserStatus: int
 {
-    case CONFIRMED = 'confirmed';
-    case PENDING = 'pending';
+    case PENDING = 0;
+    case CONFIRMED = 1;
 
     public function label(): string
     {
         return match ($this) {
-            self::CONFIRMED => 'Confirmed',
             self::PENDING => 'Pending',
+            self::CONFIRMED => 'Confirmed',
+        };
+    }
+
+    public function stringValue(): string
+    {
+        return match ($this) {
+            self::PENDING => 'pending',
+            self::CONFIRMED => 'confirmed',
         };
     }
 
     public static function fromStringSafe(?string $value): self
     {
-        return self::tryFrom((string) $value) ?? self::PENDING;
+        return match ($value) {
+            'confirmed' => self::CONFIRMED,
+            'pending' => self::PENDING,
+            default => self::PENDING,
+        };
     }
 }

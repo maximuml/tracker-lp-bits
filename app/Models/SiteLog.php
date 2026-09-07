@@ -6,11 +6,13 @@ declare(strict_types=1);
  * @property int $id
  * @property string|null $added
  * @property string $txt
- * @property string $security_level
+ * @property SitelogSecurityLevel $security_level
  * @property int $uid
  */
 
 namespace App\Models;
+
+use App\Enums\SitelogSecurityLevel;
 
 class SiteLog extends NexusModel
 {
@@ -24,6 +26,7 @@ class SiteLog extends NexusModel
     protected $casts = [
         'added' => 'datetime',
         'uid' => 'integer',
+        'security_level' => SitelogSecurityLevel::class,
     ];
 
     /**
@@ -36,7 +39,7 @@ class SiteLog extends NexusModel
         self::query()->insert([
             'uid' => $uid,
             'txt' => $content,
-            'security_level' => $isMod ? 'mod' : 'normal',
+            'security_level' => $isMod ? SitelogSecurityLevel::MOD->value : SitelogSecurityLevel::NORMAL->value,
             'added' => now(),
         ]);
     }

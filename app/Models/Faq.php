@@ -16,6 +16,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\FaqType;
+
 class Faq extends NexusModel
 {
     /** @var string */
@@ -28,7 +30,7 @@ class Faq extends NexusModel
     protected $casts = [
         'link_id' => 'integer',
         'lang_id' => 'integer',
-        'type' => 'integer',
+        'type' => FaqType::class,
         'flag' => 'integer',
         'categ' => 'integer',
         'order' => 'integer',

@@ -7,10 +7,17 @@ namespace App\Models;
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\Permission\RoutePermissionEnum;
+use App\Enums\UserAcceptPms;
+use App\Enums\UserAppendPromotion;
 use App\Enums\UserClass;
+use App\Enums\UserClickTopic;
 use App\Enums\UserDonate;
+use App\Enums\UserFontsize;
 use App\Enums\UserGender;
+use App\Enums\UserPrivacy;
 use App\Enums\UserStatus;
+use App\Enums\UserTimeType;
+use App\Enums\UserTooltip;
 use App\Exceptions\NexusException;
 use App\Models\Traits\HasClassLadder;
 use App\Models\Traits\HasFilamentAccess;
@@ -37,7 +44,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string|null $secret
  * @property string|null $auth_key
  * @property string|null $email
- * @property string|null $status
+ * @property int|null $status
  * @property string|null $added
  * @property Carbon|null $last_login
  * @property string|null $last_access
@@ -52,12 +59,12 @@ use Laravel\Sanctum\HasApiTokens;
  * @property int|null $last_music
  * @property int|null $last_catchup
  * @property string|null $editsecret
- * @property string|null $privacy
+ * @property int|null $privacy
  * @property int|null $stylesheet
  * @property int|null $caticon
- * @property string|null $fontsize
+ * @property int|null $fontsize
  * @property string|null $info
- * @property string|null $acceptpms
+ * @property int|null $acceptpms
  * @property bool $commentpm
  * @property string|null $ip
  * @property int|null $class
@@ -84,7 +91,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property int|null $torrentsperpage
  * @property int|null $topicsperpage
  * @property int|null $postsperpage
- * @property string|null $clicktopic
+ * @property int|null $clicktopic
  * @property bool $deletepms
  * @property bool $savepms
  * @property bool $support
@@ -105,7 +112,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property int|null $cheat
  * @property int|null $invites
  * @property int|null $invited_by
- * @property string|null $gender
+ * @property int|null $gender
  * @property bool $vip_added
  * @property string|null $vip_until
  * @property float|null $seedbonus
@@ -123,12 +130,12 @@ use Laravel\Sanctum\HasApiTokens;
  * @property bool $showcomment
  * @property bool $showclienterror
  * @property int|null $showdlnotice
- * @property string|null $tooltip
+ * @property int|null $tooltip
  * @property bool $shownfo
- * @property string|null $timetype
+ * @property int|null $timetype
  * @property bool $appendsticky
  * @property bool $appendnew
- * @property string|null $appendpromotion
+ * @property int|null $appendpromotion
  * @property bool $appendpicked
  * @property bool $dlicon
  * @property bool $bmicon
@@ -168,11 +175,24 @@ class User extends Authenticatable implements FilamentUser, HasName
         UserDonate::NO->value => ['text' => 'No'],
     ];
 
-    /** @var array<string, string> */
+    /** @var array<int, string> */
     public static array $genders = [
         UserGender::MALE->value => 'Male',
         UserGender::FEMALE->value => 'Female',
         UserGender::UNKNOWN->value => 'N/A',
+    ];
+
+    /** @var array<string, class-string> */
+    public static array $ENUM_STRING_KEYS = [
+        'status' => UserStatus::class,
+        'privacy' => UserPrivacy::class,
+        'fontsize' => UserFontsize::class,
+        'acceptpms' => UserAcceptPms::class,
+        'clicktopic' => UserClickTopic::class,
+        'gender' => UserGender::class,
+        'tooltip' => UserTooltip::class,
+        'timetype' => UserTimeType::class,
+        'appendpromotion' => UserAppendPromotion::class,
     ];
 
     /** @var array<string, string> */
@@ -343,6 +363,15 @@ class User extends Authenticatable implements FilamentUser, HasName
         'noaduntil' => 'datetime',
         'vip_until' => 'datetime',
         'leechwarnuntil' => 'datetime',
+        'status' => UserStatus::class,
+        'privacy' => UserPrivacy::class,
+        'fontsize' => UserFontsize::class,
+        'acceptpms' => UserAcceptPms::class,
+        'clicktopic' => UserClickTopic::class,
+        'gender' => UserGender::class,
+        'tooltip' => UserTooltip::class,
+        'timetype' => UserTimeType::class,
+        'appendpromotion' => UserAppendPromotion::class,
         'appendnew' => 'boolean',
         'appendpicked' => 'boolean',
         'appendsticky' => 'boolean',
@@ -425,6 +454,29 @@ class User extends Authenticatable implements FilamentUser, HasName
     }
 
     /**
+     * Convert the model to an array with enum-cast attributes serialized
+     * as their string values for API responses.
+     *
+     * @return array<string, mixed>
+     */
+    public function toApiArray(): array
+    {
+        $data = $this->toArray();
+        foreach (self::$ENUM_STRING_KEYS as $key => $enumClass) {
+            $raw = $this->getAttributes()[$key] ?? null;
+            if ($raw !== null) {
+                /** @var \BackedEnum $enum */
+                $enum = $enumClass::from($raw);
+                $data[$key] = method_exists($enum, 'stringValue')
+                    ? $enum->stringValue()
+                    : $enum->value;
+            }
+        }
+
+        return $data;
+    }
+
+    /**
      * @param  list<string>  $fields
      */
     public function checkIsNormal(array $fields = ['status', 'enabled']): bool
@@ -433,7 +485,7 @@ class User extends Authenticatable implements FilamentUser, HasName
             'user_id' => $this->id,
             'username' => $this->username,
         ];
-        if (in_array('status', $fields) && $this->getAttribute('status') != UserStatus::CONFIRMED->value) {
+        if (in_array('status', $fields) && $this->getAttribute('status') !== UserStatus::CONFIRMED) {
             throw new NexusException(Locale::trans('user.user_is_not_confirmed', $params, null));
         }
         if (in_array('enabled', $fields) && ! $this->getAttribute('enabled')) {

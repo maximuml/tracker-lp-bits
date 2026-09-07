@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Enums\UserStatus;
 use App\Support\Validators;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
@@ -328,7 +329,7 @@ final class UserSearchRepository
             // status
             $status = (string) ($params['st'] ?? '');
             if ($status) {
-                $userQuery->where('u.status', $status == '1' ? 'confirmed' : 'pending');
+                $userQuery->where('u.status', $status == '1' ? UserStatus::CONFIRMED->value : UserStatus::PENDING->value);
                 $q = $this->appendQueryParam($q, 'st='.$status);
             }
 

@@ -333,7 +333,7 @@ final class CommentRepositoryTest extends TestCase
             'save_as' => 'test',
             'category' => 1,
             'size' => 1024,
-            'type' => 'single',
+            'type' => 0,
             'numfiles' => 1,
             'owner' => $ownerId,
             'info_hash' => random_bytes(20),
@@ -350,7 +350,7 @@ final class CommentRepositoryTest extends TestCase
             'userid' => $userId,
             'name' => 'Test Offer',
             'added' => now()->toDateTimeString(),
-            'allowed' => 'allowed',
+            'allowed' => 0,
             'comments' => 0,
         ]);
     }

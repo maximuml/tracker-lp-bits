@@ -8,25 +8,39 @@ namespace App\Enums;
  * Backed enum for user gender.
  *
  * Mirrors the string constants from App\Models\User:
- *   GENDER_FEMALE ('Female'), GENDER_MALE ('Male'), GENDER_UNKNOWN ('N/A').
+ *   GENDER_MALE ('Male'), GENDER_FEMALE ('Female'), GENDER_UNKNOWN ('N/A').
  */
-enum UserGender: string
+enum UserGender: int
 {
-    case FEMALE = 'Female';
-    case MALE = 'Male';
-    case UNKNOWN = 'N/A';
+    case MALE = 0;
+    case FEMALE = 1;
+    case UNKNOWN = 2;
 
     public function label(): string
     {
         return match ($this) {
-            self::FEMALE => 'Female',
             self::MALE => 'Male',
+            self::FEMALE => 'Female',
             self::UNKNOWN => 'Unknown',
+        };
+    }
+
+    public function stringValue(): string
+    {
+        return match ($this) {
+            self::MALE => 'Male',
+            self::FEMALE => 'Female',
+            self::UNKNOWN => 'N/A',
         };
     }
 
     public static function fromStringSafe(?string $value): self
     {
-        return self::tryFrom((string) $value) ?? self::UNKNOWN;
+        return match ($value) {
+            'Male' => self::MALE,
+            'Female' => self::FEMALE,
+            'N/A' => self::UNKNOWN,
+            default => self::UNKNOWN,
+        };
     }
 }

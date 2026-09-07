@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Enums\UserFontsize;
 use App\Support\Cache\LegacyRedisCache;
 
 /**
@@ -157,6 +158,19 @@ final class PageLayoutContext
 
     public function userFontSize(): ?string
     {
-        return $this->user['fontsize'] ?? null;
+        $value = $this->user['fontsize'] ?? null;
+        if ($value === null) {
+            return null;
+        }
+
+        if ($value instanceof UserFontsize) {
+            return $value->stringValue();
+        }
+
+        if (is_int($value) || (is_string($value) && ctype_digit($value))) {
+            return UserFontsize::from((int) $value)->stringValue();
+        }
+
+        return (string) $value;
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Enums\UserPrivacy;
 use App\Models\Setting;
 use App\Models\TrackerUrl;
 use App\Models\User;
@@ -456,10 +457,11 @@ final class UsercpPageService
         }
 
         // Privacy radios
+        $currentPrivacy = UserPrivacy::tryFrom((int) ($curUser['privacy'] ?? 1)) ?? UserPrivacy::NORMAL;
         $privacyRadios = [
-            'normal' => $this->privacyRadio('normal', $lang['radio_normal'] ?? 'normal', (string) ($curUser['privacy'] ?? '')),
-            'low' => $this->privacyRadio('low', $lang['radio_low'] ?? 'low', (string) ($curUser['privacy'] ?? '')),
-            'strong' => $this->privacyRadio('strong', $lang['radio_strong'] ?? 'strong', (string) ($curUser['privacy'] ?? '')),
+            'normal' => $this->privacyRadio('normal', $lang['radio_normal'] ?? 'normal', $currentPrivacy->stringValue()),
+            'low' => $this->privacyRadio('low', $lang['radio_low'] ?? 'low', $currentPrivacy->stringValue()),
+            'strong' => $this->privacyRadio('strong', $lang['radio_strong'] ?? 'strong', $currentPrivacy->stringValue()),
         ];
 
         // For the confirm step, capture the posted values to re-render as hidden fields

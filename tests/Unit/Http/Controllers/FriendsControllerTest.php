@@ -304,7 +304,7 @@ final class FriendsControllerTest extends TestCase
         $user = User::factory()->create([
             'class' => $class,
             'enabled' => true,
-            'status' => 'confirmed',
+            'status' => 1,
         ]);
         $userId = (int) $user->id;
 
@@ -319,7 +319,7 @@ final class FriendsControllerTest extends TestCase
             'seedtime' => 0,
             'leechtime' => 0,
             'enabled' => true,
-            'status' => 'confirmed',
+            'status' => 1,
             'last_access' => date('Y-m-d H:i:s'),
             'added' => date('Y-m-d H:i:s'),
             'stylesheet' => 1,
@@ -329,7 +329,7 @@ final class FriendsControllerTest extends TestCase
             'last_home' => null,
             'passkey' => 'test',
             'auth_key' => 'test',
-            'privacy' => 'normal',
+            'privacy' => 1,
             'noad' => false,
             'downloadpos' => true,
             'donor' => false,
@@ -384,7 +384,7 @@ final class FriendsControllerTest extends TestCase
             'shownfo' => true,
             'showsmalldescr' => true,
             'uploadpos' => true,
-            'timetype' => 'timealive',
+            'timetype' => 1,
             'editsecret' => '',
             'secret' => '',
             'passhash' => '',

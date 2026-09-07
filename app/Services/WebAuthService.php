@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Enums\UserStatus;
 use App\Exceptions\AuthenticationException;
 use App\Models\User;
 use App\Repositories\UserRepository;
@@ -152,7 +153,7 @@ class WebAuthService
         $user->makeVisible(['passhash', 'secret', 'auth_key']);
         $row = $user->toArray();
 
-        if ($row['status'] === 'pending') {
+        if ($row['status'] === UserStatus::PENDING->value) {
             $this->recordFailedAttempt($ip);
             throw new AuthenticationException('Account unconfirmed.');
         }

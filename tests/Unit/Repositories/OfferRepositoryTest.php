@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Repositories;
 
+use App\Enums\OfferAllowed;
+use App\Enums\OfferVote;
 use App\Models\Offer;
 use App\Models\User;
 use App\Repositories\OfferRepository;
@@ -87,7 +89,7 @@ final class OfferRepositoryTest extends TestCase
         $this->assertInstanceOf(Offer::class, $offer);
         $this->assertSame(3, (int) $offer->yeah);
         $this->assertSame(2, (int) $offer->against);
-        $this->assertSame('pending', $offer->allowed);
+        $this->assertSame(OfferAllowed::PENDING, $offer->allowed);
     }
 
     public function test_offer_name_exists_returns_false_when_not_found(): void
@@ -230,7 +232,7 @@ final class OfferRepositoryTest extends TestCase
         $this->repository->recordVote($id, $this->userId, 'against');
 
         $this->assertSame(1, DB::table('offervotes')->where('offerid', $id)->where('userid', $this->userId)->count());
-        $this->assertSame('against', DB::table('offervotes')->where('offerid', $id)->value('vote'));
+        $this->assertSame(OfferVote::AGAINST->value, (int) DB::table('offervotes')->where('offerid', $id)->value('vote'));
     }
 
     public function test_increment_vote_increments_yeah_column(): void
@@ -261,7 +263,7 @@ final class OfferRepositoryTest extends TestCase
         $result = $this->repository->allowOffer($id, $time);
 
         $this->assertTrue($result);
-        $this->assertSame('allowed', DB::table('offers')->where('id', $id)->value('allowed'));
+        $this->assertSame(OfferAllowed::ALLOWED->value, (int) DB::table('offers')->where('id', $id)->value('allowed'));
         $this->assertSame($time, DB::table('offers')->where('id', $id)->value('allowedtime'));
     }
 
@@ -272,7 +274,7 @@ final class OfferRepositoryTest extends TestCase
         $result = $this->repository->denyOffer($id);
 
         $this->assertTrue($result);
-        $this->assertSame('denied', DB::table('offers')->where('id', $id)->value('allowed'));
+        $this->assertSame(OfferAllowed::DENIED->value, (int) DB::table('offers')->where('id', $id)->value('allowed'));
     }
 
     public function test_update_offer_modifies_columns(): void
@@ -540,7 +542,7 @@ final class OfferRepositoryTest extends TestCase
             'against' => $against,
             'category' => $category,
             'comments' => 0,
-            'allowed' => 'pending',
+            'allowed' => 1,
         ]);
     }
 

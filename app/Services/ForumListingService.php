@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Enums\UserTimeType;
 use App\Repositories\ForumRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Format;
@@ -175,7 +176,7 @@ final class ForumListingService
                 $onmouseover = '';
                 $lastpost_tooltip = [];
                 if ($enabletooltipTweak == 'yes' && ($curUser['showlastpost'] ?? '') != 'no') {
-                    if (($curUser['timetype'] ?? '') != 'timealive') {
+                    if (($curUser['timetype'] ?? 1) != UserTimeType::TIMEALIVE->value) {
                         $lastposttime = ($lang['text_at_time'] ?? '').($arr['added'] ?? '');
                     } else {
                         $lastposttime = ($lang['text_blank'] ?? '').Time::format($arr['added'] ?? '', true, false, true);

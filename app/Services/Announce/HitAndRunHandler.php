@@ -5,11 +5,10 @@ declare(strict_types=1);
 namespace App\Services\Announce;
 
 use App\Enums\HitAndRunMode;
-use App\Enums\ModelEventEnum;
 use App\Enums\TorrentHr;
 use App\Enums\UserClass as UserClassEnum;
+use App\Events\HitAndRunCreated;
 use App\Models\HitAndRun;
-use App\Support\Events;
 use App\Support\LegacyDb;
 use App\Support\Logger;
 use Illuminate\Support\Facades\Cache;
@@ -92,7 +91,7 @@ final class HitAndRunHandler
                 $hitAndRunRecord = HitAndRun::query()->where('uid', $userId)->where('torrent_id', $torrentId)->first();
                 if ($hitAndRunRecord) {
                     DB::table('snatched')->where('id', (int) $snatchInfo['id'])->update(['hit_and_run_id' => $hitAndRunRecord->id]);
-                    Events::fire(ModelEventEnum::HIT_AND_RUN_CREATED, $hitAndRunRecord, null);
+                    event(new HitAndRunCreated($hitAndRunRecord));
                 }
             }
         } else {

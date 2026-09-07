@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Events\UserUpdated;
 use App\Models\Setting;
 use App\Repositories\MessageRepository;
 use App\Repositories\SearchBoxRepository;
@@ -213,7 +214,7 @@ final class Cache
 
         $userInfo = app(UserRepository::class)->findForCacheClear($uid);
         if ($userInfo) {
-            Events::fire('user_updated', $userInfo, null);
+            event(new UserUpdated($userInfo));
         }
     }
 

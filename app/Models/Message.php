@@ -16,9 +16,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Enums\ModelEventEnum;
+use App\Events\MessageCreated;
 use App\Support\Cache;
-use App\Support\Events;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Message extends NexusModel
@@ -55,7 +54,7 @@ class Message extends NexusModel
     {
         Cache::clearInboxCount($data['receiver']);
         $message = self::query()->create($data);
-        Events::fire(ModelEventEnum::MESSAGE_CREATED, $message, null);
+        event(new MessageCreated($message));
 
         return $message;
     }

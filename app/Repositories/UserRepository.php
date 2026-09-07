@@ -7,6 +7,7 @@ namespace App\Repositories;
 use App\Enums\UserClass as UserClassEnum;
 use App\Enums\UsernameChangeType;
 use App\Enums\UserStatus;
+use App\Events\UserCreated;
 use App\Exceptions\InsufficientPermissionException;
 use App\Http\Resources\UserResource;
 use App\Models\LoginLog;
@@ -19,7 +20,6 @@ use App\Support\Cache;
 use App\Support\Config\SiteConfig;
 use App\Support\Email;
 use App\Support\Environment;
-use App\Support\Events;
 use App\Support\Locale;
 use App\Support\Logger;
 use App\Support\Network;
@@ -218,7 +218,7 @@ class UserRepository extends BaseRepository
             $user->id = $params['id'];
         }
         $user->save();
-        Events::fire('user_created', $user, null);
+        event(new UserCreated($user));
 
         return $user;
     }

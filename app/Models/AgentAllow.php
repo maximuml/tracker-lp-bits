@@ -23,9 +23,10 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\AgentAllowMatchType;
-use App\Enums\ModelEventEnum;
+use App\Events\AgentAllowCreated;
+use App\Events\AgentAllowDeleted;
+use App\Events\AgentAllowUpdated;
 use App\Models\Traits\NexusActivityLogTrait;
-use App\Support\Events;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class AgentAllow extends NexusModel
@@ -60,13 +61,13 @@ class AgentAllow extends NexusModel
     protected static function booted()
     {
         static::created(function ($model) {
-            Events::fire(ModelEventEnum::AGENT_ALLOW_CREATED, $model, null);
+            event(new AgentAllowCreated($model));
         });
         static::updated(function ($model) {
-            Events::fire(ModelEventEnum::AGENT_ALLOW_UPDATED, $model, null);
+            event(new AgentAllowUpdated($model));
         });
         static::deleted(function ($model) {
-            Events::fire(ModelEventEnum::AGENT_ALLOW_DELETED, $model, null);
+            event(new AgentAllowDeleted($model->toArray()));
         });
     }
 

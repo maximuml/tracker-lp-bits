@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Filament\Resources\User\UserResource\Pages;
 
 use App\Auth\Permission;
-use App\Enums\ModelEventEnum;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserClass as UserClassEnum;
 use App\Enums\UserStatus;
+use App\Events\UserUpdated;
 use App\Filament\OptionsTrait;
 use App\Filament\Resources\User\UserResource;
 use App\Models\Invite;
@@ -20,7 +20,6 @@ use App\Repositories\MedalRepository;
 use App\Repositories\UserRepository;
 use App\Support\Admin;
 use App\Support\Config\SiteConfig;
-use App\Support\Events;
 use App\Support\Mail;
 use App\Support\Url;
 use Carbon\Carbon;
@@ -294,7 +293,7 @@ class UserProfile extends ViewRecord implements HasActions
                 $record->info = null;
                 $record->save();
 
-                Events::fire(ModelEventEnum::USER_UPDATED, $record, null);
+                event(new UserUpdated($record));
 
                 if (! empty($data['send_email']) && $record->email !== '') {
                     $siteName = SiteConfig::current()->basic->siteName('');

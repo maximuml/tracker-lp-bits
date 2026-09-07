@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Enums\InviteValid;
-use App\Enums\ModelEventEnum;
 use App\Enums\UserClass as UserClassEnum;
 use App\Enums\UserGender;
 use App\Enums\UserStatus;
+use App\Events\UserCreated;
+use App\Events\UserUpdated;
 use App\Exceptions\AuthenticationException;
 use App\Models\Invite;
 use App\Models\Message;
@@ -20,7 +21,6 @@ use App\Support\Cache;
 use App\Support\Captcha;
 use App\Support\Config\SiteConfig;
 use App\Support\Email;
-use App\Support\Events;
 use App\Support\Http;
 use App\Support\Locale;
 use App\Support\Mail;
@@ -231,7 +231,7 @@ class RegistrationService
         $user = User::query()->findOrFail($id);
         $user->makeVisible(['secret']);
 
-        Events::fire(ModelEventEnum::USER_CREATED, $user, null);
+        event(new UserCreated($user));
 
         // T-24: Record user registered event in outbox
         $this->outboxService->recordUserRegistered(
@@ -298,7 +298,7 @@ class RegistrationService
 
         $user->refresh();
 
-        Events::fire(ModelEventEnum::USER_UPDATED, $user, null);
+        event(new UserUpdated($user));
         Cache::clearUser($id, '');
         AuthCookie::setLoginCookie($id);
 

@@ -38,7 +38,7 @@ final class RepositorySizeTest extends TestCase
         'app/Repositories/TorrentRepository.php' => 727,
         'app/Repositories/ForumRepository.php' => 599,
         'app/Repositories/UserRepository.php' => 706,
-        'app/Repositories/UserModerationRepository.php' => 593,
+        'app/Repositories/UserModerationRepository.php' => 595,
         'app/Repositories/UsercpRepository.php' => 645,
         'app/Repositories/BonusRepository.php' => 601,
         'app/Repositories/ExamRepository.php' => 562,

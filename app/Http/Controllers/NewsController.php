@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
+use App\Events\NewsCreated;
 use App\Http\Requests\NewsStoreRequest;
 use App\Http\Requests\NewsUpdateRequest;
 use App\Http\Resources\NewsResource;
@@ -13,7 +14,6 @@ use App\Models\News;
 use App\Repositories\IndexRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
-use App\Support\Events;
 use App\Support\Globals;
 use App\Support\Http\SafeReturnUrl;
 use Illuminate\Http\RedirectResponse;
@@ -117,7 +117,7 @@ class NewsController extends LegacyController
             if (! $news) {
                 return $this->legacyAbortResponse($langNews['std_error'] ?? 'Error', $langNews['std_something_weird_happened'] ?? 'Something weird happened.');
             }
-            Events::fire('news_created', $news, null);
+            event(new NewsCreated($news));
 
             return redirect('/');
         }
@@ -221,7 +221,7 @@ class NewsController extends LegacyController
         $data['notify'] = ($data['notify'] ?? 'no') === 'yes';
 
         $news = News::query()->create($data);
-        Events::fire('news_created', $news, null);
+        event(new NewsCreated($news));
 
         $cache = app(LegacyRedisCache::class);
         $cache?->delete_value('recent_news', true);

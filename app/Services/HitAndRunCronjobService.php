@@ -6,14 +6,13 @@ namespace App\Services;
 
 use App\Enums\HitAndRunMode;
 use App\Enums\HitAndRunStatus;
-use App\Enums\ModelEventEnum;
 use App\Enums\UserClass as UserClassEnum;
+use App\Events\UserUpdated;
 use App\Models\HitAndRun;
 use App\Models\Message;
 use App\Models\User;
 use App\Models\UserBanLog;
 use App\Support\Config\SiteConfig;
-use App\Support\Events;
 use App\Support\Json;
 use App\Support\LegacyDb;
 use App\Support\Locale;
@@ -252,7 +251,7 @@ class HitAndRunCronjobService
                 'reason' => $comment,
             ];
             UserBanLog::query()->insert($userBanLog);
-            Events::fire(ModelEventEnum::USER_UPDATED, $user, null);
+            event(new UserUpdated($user));
             Logger::writeWithContext((string) ('Disable user: '.Json::encode($userBanLog)), (string) 'info', (bool) false);
         }
     }

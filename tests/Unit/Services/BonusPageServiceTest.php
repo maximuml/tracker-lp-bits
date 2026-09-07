@@ -251,7 +251,7 @@ final class BonusPageServiceTest extends TestCase
 
         $request = $this->requestWithQuery(['action' => 'exchange']);
 
-        $result = $this->service->build($request);
+        $result = $this->service->build($request)->toArray();
 
         $this->assertSame('', $result['shopHtml']);
         $this->assertSame('', $result['infoHtml']);
@@ -268,7 +268,7 @@ final class BonusPageServiceTest extends TestCase
 
         $request = $this->requestWithQuery(['action' => 'exchange']);
 
-        $result = $this->service->build($request);
+        $result = $this->service->build($request)->toArray();
 
         $this->assertArrayHasKey('lang', $result);
         $this->assertArrayHasKey('curUser', $result);
@@ -293,7 +293,7 @@ final class BonusPageServiceTest extends TestCase
 
         $request = $this->requestWithQuery(['action' => 'exchange', 'do' => 'upload']);
 
-        $result = $this->service->build($request);
+        $result = $this->service->build($request)->toArray();
 
         // msg should be non-empty for known do values
         $this->assertIsString($result['msg']);
@@ -309,7 +309,7 @@ final class BonusPageServiceTest extends TestCase
 
         $request = $this->requestWithQuery(['action' => 'exchange', 'do' => 'unknown_action']);
 
-        $result = $this->service->build($request);
+        $result = $this->service->build($request)->toArray();
 
         $this->assertSame('', $result['msg']);
     }
@@ -324,7 +324,7 @@ final class BonusPageServiceTest extends TestCase
 
         $request = $this->requestWithQuery(['action' => 'exchange']);
 
-        $result = $this->service->build($request);
+        $result = $this->service->build($request)->toArray();
 
         $this->assertSame('1,234.6', $result['bonus']);
     }
@@ -341,7 +341,7 @@ final class BonusPageServiceTest extends TestCase
 
         $threw = false;
         try {
-            $this->service->build($request);
+            $this->service->build($request)->toArray();
         } catch (\Throwable) {
             $threw = true;
         }
@@ -360,7 +360,7 @@ final class BonusPageServiceTest extends TestCase
 
         $threw = false;
         try {
-            $this->service->build($request);
+            $this->service->build($request)->toArray();
         } catch (\Throwable) {
             $threw = true;
         }
@@ -377,7 +377,7 @@ final class BonusPageServiceTest extends TestCase
 
         $request = $this->requestWithQuery(['action' => 'exchange']);
 
-        $result = $this->service->build($request);
+        $result = $this->service->build($request)->toArray();
 
         $this->assertSame(42, $result['userId']);
     }
@@ -392,7 +392,7 @@ final class BonusPageServiceTest extends TestCase
 
         $request = $this->requestWithQuery(['action' => 'exchange']);
 
-        $result = $this->service->build($request);
+        $result = $this->service->build($request)->toArray();
 
         $this->assertNotEmpty($result['allBonus']);
         $arts = array_column($result['allBonus'], 'art');

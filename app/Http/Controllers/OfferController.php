@@ -51,7 +51,7 @@ class OfferController extends LegacyController
             return $actionRedirect;
         }
 
-        $data = $this->pageService->build($request);
+        $data = $this->pageService->build($request)->toArray();
 
         return $this->legacyPage($request, 'offers', true, $data);
     }

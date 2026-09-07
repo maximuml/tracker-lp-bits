@@ -148,7 +148,7 @@ final class ForumPageServiceTest extends TestCase
         $this->setUser();
         $this->setRequest();
 
-        $result = $this->callWithSuppressedErrors(fn () => $this->service->build(Request::create('/forums.php', 'GET')));
+        $result = $this->callWithSuppressedErrors(fn () => $this->service->build(Request::create('/forums.php', 'GET'))->toArray());
 
         $this->assertSame('forums', $result['action']);
         $this->assertSame(999, $result['userId']);
@@ -168,7 +168,7 @@ final class ForumPageServiceTest extends TestCase
         $this->setUser();
         $this->setRequest();
 
-        $result = $this->callWithSuppressedErrors(fn () => $this->service->build(Request::create('/forums.php', 'GET')));
+        $result = $this->callWithSuppressedErrors(fn () => $this->service->build(Request::create('/forums.php', 'GET'))->toArray());
 
         $this->assertArrayHasKey('lang', $result);
         $this->assertArrayHasKey('curUser', $result);
@@ -193,7 +193,7 @@ final class ForumPageServiceTest extends TestCase
         $repo->shouldReceive('clearReadPosts')->once()->andReturn(true);
         $repo->shouldReceive('getLastPostId')->once()->andReturn(0);
 
-        $result = $this->service->build($request);
+        $result = $this->service->build($request)->toArray();
 
         $this->assertSame('forums', $result['action']);
     }
@@ -225,7 +225,7 @@ final class ForumPageServiceTest extends TestCase
         $this->setUser(['postsperpage' => 25, 'topicsperpage' => 30]);
         $this->setRequest();
 
-        $result = $this->callWithSuppressedErrors(fn () => $this->service->build(Request::create('/forums.php', 'GET')));
+        $result = $this->callWithSuppressedErrors(fn () => $this->service->build(Request::create('/forums.php', 'GET'))->toArray());
 
         $this->assertSame(25, $result['postsperpage']);
         $this->assertSame(30, $result['topicsperpage']);
@@ -243,7 +243,7 @@ final class ForumPageServiceTest extends TestCase
         app(Globals::class)->set('forumpostsperpage', 15);
         app(Globals::class)->set('forumtopicsperpage_main', 25);
 
-        $result = $this->callWithSuppressedErrors(fn () => $this->service->build(Request::create('/forums.php', 'GET')));
+        $result = $this->callWithSuppressedErrors(fn () => $this->service->build(Request::create('/forums.php', 'GET'))->toArray());
 
         $this->assertSame(15, $result['postsperpage']);
         $this->assertSame(25, $result['topicsperpage']);
@@ -261,7 +261,7 @@ final class ForumPageServiceTest extends TestCase
         app(Globals::class)->set('forumpostsperpage', null);
         app(Globals::class)->set('forumtopicsperpage_main', null);
 
-        $result = $this->callWithSuppressedErrors(fn () => $this->service->build(Request::create('/forums.php', 'GET')));
+        $result = $this->callWithSuppressedErrors(fn () => $this->service->build(Request::create('/forums.php', 'GET'))->toArray());
 
         $this->assertSame(10, $result['postsperpage']);
         $this->assertSame(20, $result['topicsperpage']);

@@ -24,6 +24,7 @@ use App\Support\Pagination;
 use App\Support\Time;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
+use App\ViewModels\OfferPageViewModel;
 use Illuminate\Http\Request;
 
 /**
@@ -41,10 +42,8 @@ final class OfferPageService
 {
     /**
      * Build the data for the requested action.
-     *
-     * @return array<string, mixed>
      */
-    public function build(Request $request): array
+    public function build(Request $request): OfferPageViewModel
     {
         $curUser = (array) (app(CurrentUser::class)->get() ?? []);
         $lang = (array) (app(Globals::class)->get('lang_offers') ?? []);
@@ -94,7 +93,28 @@ final class OfferPageService
                 break;
         }
 
-        return $data;
+        return new OfferPageViewModel(
+            lang: $data['lang'],
+            curUser: $data['curUser'],
+            userId: $data['userId'],
+            action: $data['action'],
+            baseUrl: $data['baseUrl'],
+            contentWidth: $data['contentWidth'],
+            browsecatmode: $data['browsecatmode'],
+            enableoffer: $data['enableoffer'],
+            minoffervotes: $data['minoffervotes'],
+            offervotetimeoutMain: $data['offervotetimeoutMain'],
+            offeruptimeoutMain: $data['offeruptimeoutMain'],
+            offervoteBonus: $data['offervoteBonus'],
+            uploadClass: $data['uploadClass'],
+            addofferClass: $data['addofferClass'],
+            againstofferClass: $data['againstofferClass'],
+            add_offer: $data['add_offer'] ?? null,
+            off_details: $data['off_details'] ?? null,
+            edit_offer: $data['edit_offer'] ?? null,
+            offer_vote: $data['offer_vote'] ?? null,
+            list: $data['list'] ?? null,
+        );
     }
 
     private function resolveAction(Request $request): string

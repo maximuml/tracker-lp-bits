@@ -176,7 +176,7 @@ final class UsercpPageServiceTest extends TestCase
     {
         $this->setupCommon();
 
-        $result = $this->service->build('forum', '');
+        $result = $this->service->build('forum', '')->toArray();
 
         $this->assertArrayHasKey('lang', $result);
         $this->assertArrayHasKey('curUser', $result);
@@ -191,7 +191,7 @@ final class UsercpPageServiceTest extends TestCase
     {
         $this->setupCommon();
 
-        $result = $this->service->build('personal', 'edit');
+        $result = $this->service->build('personal', 'edit')->toArray();
 
         $this->assertSame('personal', $result['action']);
         $this->assertSame('edit', $result['type']);
@@ -201,7 +201,7 @@ final class UsercpPageServiceTest extends TestCase
     {
         $this->setupCommon();
 
-        $result = $this->service->build('forum', '');
+        $result = $this->service->build('forum', '')->toArray();
 
         $this->assertInstanceOf(User::class, $result['userInfo']);
         $this->assertSame($this->userId, $result['userInfo']->id);
@@ -213,7 +213,7 @@ final class UsercpPageServiceTest extends TestCase
     {
         $this->setupCommon(['enabletooltip_tweak' => 'yes']);
 
-        $result = $this->service->build('forum', '');
+        $result = $this->service->build('forum', '')->toArray();
 
         $this->assertArrayHasKey('forum', $result);
         $this->assertTrue($result['forum']['showTooltipSetting']);
@@ -223,7 +223,7 @@ final class UsercpPageServiceTest extends TestCase
     {
         $this->setupCommon(['enabletooltip_tweak' => 'no']);
 
-        $result = $this->service->build('forum', '');
+        $result = $this->service->build('forum', '')->toArray();
 
         $this->assertFalse($result['forum']['showTooltipSetting']);
     }
@@ -234,7 +234,7 @@ final class UsercpPageServiceTest extends TestCase
     {
         $this->setupCommon();
 
-        $result = $this->service->build('unknown', '');
+        $result = $this->service->build('unknown', '')->toArray();
 
         $this->assertArrayHasKey('home', $result);
         $this->assertArrayHasKey('commentCount', $result['home']);
@@ -248,7 +248,7 @@ final class UsercpPageServiceTest extends TestCase
     {
         $this->setupCommon();
 
-        $result = $this->service->build('home', '');
+        $result = $this->service->build('home', '')->toArray();
 
         $this->assertSame(0, $result['home']['commentCount']);
     }
@@ -257,7 +257,7 @@ final class UsercpPageServiceTest extends TestCase
     {
         $this->setupCommon();
 
-        $result = $this->service->build('home', '');
+        $result = $this->service->build('home', '')->toArray();
 
         $this->assertSame(0, $result['home']['forumPosts']);
     }
@@ -266,7 +266,7 @@ final class UsercpPageServiceTest extends TestCase
     {
         $this->setupCommon();
 
-        $result = $this->service->build('home', '');
+        $result = $this->service->build('home', '')->toArray();
 
         $this->assertArrayHasKey('items', $result['home']['readTopics']);
         $this->assertSame([], $result['home']['readTopics']['items']);
@@ -276,7 +276,7 @@ final class UsercpPageServiceTest extends TestCase
     {
         $this->setupCommon();
 
-        $result = $this->service->build('home', '');
+        $result = $this->service->build('home', '')->toArray();
 
         $this->assertSame('testuser@test.com', $result['home']['email']);
         $this->assertSame(5, $result['home']['invites']);
@@ -286,7 +286,7 @@ final class UsercpPageServiceTest extends TestCase
     {
         $this->setupCommon();
 
-        $result = $this->service->build('home', '');
+        $result = $this->service->build('home', '')->toArray();
 
         $this->assertFalse($result['home']['showAvatar']);
     }
@@ -297,7 +297,7 @@ final class UsercpPageServiceTest extends TestCase
     {
         $this->setupCommon();
 
-        $result = $this->service->build('personal', '');
+        $result = $this->service->build('personal', '')->toArray();
 
         $this->assertArrayHasKey('personal', $result);
         $this->assertArrayHasKey('countryOptions', $result['personal']);
@@ -311,7 +311,7 @@ final class UsercpPageServiceTest extends TestCase
     {
         $this->setupCommon(['enablebitbucket_main' => 'yes']);
 
-        $result = $this->service->build('personal', '');
+        $result = $this->service->build('personal', '')->toArray();
 
         $this->assertTrue($result['personal']['enableBitbucket']);
     }
@@ -323,7 +323,7 @@ final class UsercpPageServiceTest extends TestCase
         $this->setupCommon();
         $this->mockPasskeyRepo();
 
-        $result = $this->service->build('security', '');
+        $result = $this->service->build('security', '')->toArray();
 
         $this->assertArrayHasKey('security', $result);
         $this->assertArrayHasKey('showEmailChange', $result['security']);
@@ -337,7 +337,7 @@ final class UsercpPageServiceTest extends TestCase
         $this->setupCommon();
         $this->mockPasskeyRepo();
 
-        $result = $this->service->build('security', '');
+        $result = $this->service->build('security', '')->toArray();
 
         $this->assertFalse($result['security']['twoStep']['hasSecret']);
         $this->assertNotEmpty($result['security']['twoStep']['secret']);
@@ -350,7 +350,7 @@ final class UsercpPageServiceTest extends TestCase
         $this->mockPasskeyRepo();
         $this->setCurrentUser(['two_step_secret' => 'EXISTINGSECRET']);
 
-        $result = $this->service->build('security', '');
+        $result = $this->service->build('security', '')->toArray();
 
         $this->assertTrue($result['security']['twoStep']['hasSecret']);
         $this->assertSame('', $result['security']['twoStep']['secret']);
@@ -362,7 +362,7 @@ final class UsercpPageServiceTest extends TestCase
         $this->setupCommon();
         $this->mockPasskeyRepo();
 
-        $result = $this->service->build('security', 'save');
+        $result = $this->service->build('security', 'save')->toArray();
 
         $this->assertTrue($result['security']['isConfirm']);
         $this->assertArrayHasKey('confirmHidden', $result['security']);
@@ -375,7 +375,7 @@ final class UsercpPageServiceTest extends TestCase
         $this->setupCommon();
         $this->mockPasskeyRepo();
 
-        $result = $this->service->build('security', '');
+        $result = $this->service->build('security', '')->toArray();
 
         $this->assertFalse($result['security']['isConfirm']);
     }

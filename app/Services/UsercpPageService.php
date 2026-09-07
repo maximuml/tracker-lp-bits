@@ -28,6 +28,7 @@ use App\Support\Time;
 use App\Support\TwoFactorAuthHelper;
 use App\Support\Url;
 use App\Support\UserDisplay;
+use App\ViewModels\UsercpPageViewModel;
 
 /**
  * Prepares section data for the user control panel, replacing the legacy
@@ -44,10 +45,8 @@ final class UsercpPageService
 {
     /**
      * Build the data for the requested section.
-     *
-     * @return array<string, mixed>
      */
-    public function build(string $action, string $type): array
+    public function build(string $action, string $type): UsercpPageViewModel
     {
         $curUser = (array) (app(CurrentUser::class)->get() ?? []);
         $lang = (array) (app(Globals::class)->get('lang_usercp') ?? []);
@@ -85,7 +84,20 @@ final class UsercpPageService
 
         AssetAppender::js('vendor/jquery-loading/jquery.loading.min.js', 'footer', true);
 
-        return $data;
+        return new UsercpPageViewModel(
+            lang: $data['lang'],
+            curUser: $data['curUser'],
+            userInfo: $data['userInfo'],
+            siteName: $data['siteName'],
+            action: $data['action'],
+            type: $data['type'],
+            contentWidth: $data['contentWidth'],
+            personal: $data['personal'] ?? null,
+            tracker: $data['tracker'] ?? null,
+            forum: $data['forum'] ?? null,
+            security: $data['security'] ?? null,
+            home: $data['home'] ?? null,
+        );
     }
 
     /**

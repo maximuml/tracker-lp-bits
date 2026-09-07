@@ -1,0 +1,32 @@
+# Test overlay for docker-compose.yml
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.test.yml run --rm php composer test
+#   make test
+#
+# This overlay isolates test databases from the dev database:
+#   - DB_DATABASE=nexusphp_testing (unit + architecture suites)
+#   - REDIS_PREFIX=test_ (separate keyspace)
+#   - APP_ENV=testing
+#
+# The DestructiveEnvironmentGuard refuses to run migrations if the
+# database name does not contain "test" or "testing".
+
+services:
+  php:
+    environment:
+      APP_ENV: testing
+      DB_DATABASE: nexusphp_testing
+      REDIS_PREFIX: test_
+      CACHE_DRIVER: array
+      SESSION_DRIVER: array
+    build:
+      args:
+        NEXUSPHP_ENV: testing
+
+  mysql:
+    environment:
+      MYSQL_DATABASE: nexusphp_testing
+
+  redis:
+    command: redis-server --requirepass ${REDIS_PASSWORD:?REDIS_PASSWORD is required}

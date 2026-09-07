@@ -808,12 +808,14 @@ jobs:
         if: always()
         with:
           sarif_file: trivy-php-results.sarif
+          category: trivy-php
 
       - name: Upload Trivy OpenResty scan results to GitHub Security
         uses: github/codeql-action/upload-sarif@6f5948dfacef28e207b48d0905cf90c03365536d # v3
         if: always()
         with:
           sarif_file: trivy-openresty-results.sarif
+          category: trivy-openresty
 
   sbom:
     name: SBOM generation

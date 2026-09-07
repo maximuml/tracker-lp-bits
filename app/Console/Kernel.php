@@ -8,6 +8,7 @@ use App\Jobs\AttendanceJob;
 use App\Jobs\CheckQueueFailedJobs;
 use App\Jobs\CleanupJob;
 use App\Jobs\HrCheckJob;
+use App\Jobs\PruneActivityLogJob;
 use App\Jobs\RemoveUserDonorStatus;
 use App\Jobs\RemoveUserVipStatus;
 use App\Jobs\RemoveUserWarning;
@@ -61,6 +62,9 @@ class Kernel extends ConsoleKernel
         $schedule->job(new RemoveUserVipStatus)->everyMinute();
         $schedule->job(new RemoveUserDonorStatus)->everyMinute();
         $schedule->command('outbox:dispatch --batch=50')->everyMinute()->withoutOverlapping()->onOneServer();
+
+        // W3-06: Prune old log records daily in the maintenance queue.
+        $schedule->job(new PruneActivityLogJob, 'maintenance')->dailyAt('03:00')->onOneServer();
 
     }
 

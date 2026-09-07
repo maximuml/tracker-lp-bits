@@ -122,6 +122,22 @@ W3-06 established retention policies for log tables:
 | `iplog` | 180 days | `PruneActivityLogJob` |
 | `login_logs` | 180 days | `PruneActivityLogJob` |
 
+### Archival (W3-06)
+
+`iplog` and `login_logs` have foreign keys to `users(id)` with
+`ON DELETE CASCADE`. MySQL native partitioning does not support
+foreign keys on InnoDB tables, so instead of monthly partitions we
+use **archival tables**: `PruneActivityLogJob` copies old records
+into `iplog_archive` and `login_logs_archive` (with an
+`archived_at` timestamp) before deleting them from the source
+tables. This separates cold data from the hot table without
+breaking referential integrity.
+
+| Archive table | Source | Retention before archival |
+|---|---|---|
+| `iplog_archive` | `iplog` | 180 days |
+| `login_logs_archive` | `login_logs` | 180 days |
+
 Manual pruning:
 ```bash
 # Dry run — show what would be deleted

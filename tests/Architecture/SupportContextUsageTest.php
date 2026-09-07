@@ -36,7 +36,7 @@ final class SupportContextUsageTest extends TestCase
         'Support/LegacyBootstrap.php',
         'Support/Bootstrap.php',
         'Listeners/ResetNexus.php',
-        'DTOs/AnnounceRequestDto.php',
+        'Services/Announce/AnnounceRequestFactory.php',
     ];
 
     public function test_support_context_only_used_in_wrappers(): void

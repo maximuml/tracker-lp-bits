@@ -338,34 +338,66 @@ jobs:
           # T-16: Patch coverage target — 60% of new/changed lines must
           # be covered. Codecov enforces this server-side when configured
           # in codecov.yml. The token is needed for patch coverage to work.
-          fail_ci_if_error: false
+          fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
 
-      - name: Minimum coverage gate (Unit ≥ 35%)
-        # T-16: Local minimum coverage gate — fails CI if Unit test
-        # coverage drops below 35%. This is a floor, not a ceiling:
-        # the goal is to prevent regressions, not to enforce a high
-        # bar immediately. Raise gradually as coverage improves.
-        # Uses PHPUnit's --coverage-text output to extract the percentage.
+      - name: Minimum coverage gate (combined ≥ 35%)
+        # W0-04: Fail-closed coverage gate.
+        # Reads line coverage from Clover XML files already generated
+        # by the Unit and Feature steps above — no test re-runs.
+        # Fails on missing files, parse errors, or coverage below floor.
         run: |
-          DB_DATABASE=nexusphp_unit_testing vendor/bin/phpunit \
-            --testsuite Unit \
-            --coverage-text=php://stdout \
-            --no-coverage-html \
-            > /tmp/coverage-output.txt 2>&1 || true
-          # Extract the Lines percentage from the Code Coverage report
-          COVERAGE=$(grep -oP 'Lines:\s+\K[0-9.]+' /tmp/coverage-output.txt | head -1)
-          if [ -z "$COVERAGE" ]; then
-            echo "::warning::Could not parse coverage percentage from output"
-            exit 0
-          fi
-          THRESHOLD=35
-          echo "Unit coverage: ${COVERAGE}% (threshold: ${THRESHOLD}%)"
-          if (( $(echo "$COVERAGE < $THRESHOLD" | bc -l) )); then
-            echo "::error::Unit coverage ${COVERAGE}% is below threshold ${THRESHOLD}%"
-            exit 1
-          fi
-          echo "Coverage gate passed."
+          set -euo pipefail
+          python3 - <<'PYEOF'
+          import sys
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+
+          THRESHOLD = 35.0
+          files = ["coverage-unit.xml", "coverage-feature.xml"]
+          total_statements = 0
+          total_covered = 0
+          per_file = {}
+
+          for f in files:
+              p = Path(f)
+              if not p.exists():
+                  print(f"::error::Coverage file not found: {f}")
+                  sys.exit(1)
+              try:
+                  tree = ET.parse(f)
+                  root = tree.getroot()
+                  # Clover <metrics> attributes: statements, coveredstatements
+                  metrics = root.find(".//metrics")
+                  if metrics is None:
+                      print(f"::error::No <metrics> element in {f}")
+                      sys.exit(1)
+                  stmts = int(metrics.get("statements", "0"))
+                  covered = int(metrics.get("coveredstatements", "0"))
+              except ET.ParseError as e:
+                  print(f"::error::Failed to parse {f}: {e}")
+                  sys.exit(1)
+              except (TypeError, ValueError) as e:
+                  print(f"::error::Invalid metrics in {f}: {e}")
+                  sys.exit(1)
+              per_file[f] = (stmts, covered)
+              total_statements += stmts
+              total_covered += covered
+
+          pct = (total_covered / total_statements * 100) if total_statements > 0 else 0.0
+          print(f"## Coverage gate" )
+          print(f"| Suite | Statements | Covered | % |")
+          print(f"|---|---:|---:|---:|")
+          for f, (s, c) in per_file.items():
+              fp = (c / s * 100) if s > 0 else 0.0
+              print(f"| {f} | {s} | {c} | {fp:.2f}% |")
+          print(f"| **Combined** | **{total_statements}** | **{total_covered}** | **{pct:.2f}%** |")
+          print(f"\nThreshold: {THRESHOLD:.0f}%  Combined: {pct:.2f}%")
+          if pct < THRESHOLD:
+              print(f"::error::Combined coverage {pct:.2f}% is below threshold {THRESHOLD:.0f}%")
+              sys.exit(1)
+          print("Coverage gate passed.")
+          PYEOF
 
       - name: Upload HTML coverage artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -374,6 +406,18 @@ jobs:
           name: coverage-html
           path: coverage-html
           retention-days: 14
+
+      - name: Generate app() usage report (W2-01)
+        run: php artisan app:usage-report --top=20 --output=app-usage-report.md
+        continue-on-error: true
+
+      - name: Upload app() usage report artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: app-usage-report
+          path: app-usage-report.md
+          retention-days: 30
 
   smoke-test:
     name: Docker smoke test
@@ -516,8 +560,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  semgrep:
-    name: Semgrep static analysis
+  semgrep-blocking:
+    name: Semgrep blocking rules
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -528,21 +572,75 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Install Semgrep
-        run: pip install semgrep
+        run: pip install semgrep==1.89.0
 
-      - name: Run Semgrep
+      - name: Run blocking Semgrep rules
         run: |
-          semgrep ci \
-            --config p/php \
-            --config p/laravel \
-            --config .semgrep.yml \
-            --sarif --output semgrep-results.sarif || true
+          set -euo pipefail
+          semgrep scan --config .semgrep.blocking.yml --sarif --output semgrep-blocking-results.sarif
+          echo "## Semgrep blocking results" >> "$GITHUB_STEP_SUMMARY"
+          echo "0 blocking findings — all clear." >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Upload Semgrep results to GitHub Security
+      - name: Upload blocking results to GitHub Security
         uses: github/codeql-action/upload-sarif@6f5948dfacef28e207b48d0905cf90c03365536d # v3
         if: always()
         with:
-          sarif_file: semgrep-results.sarif
+          sarif_file: semgrep-blocking-results.sarif
+
+  semgrep-informational:
+    name: Semgrep informational rules
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Install Semgrep
+        run: pip install semgrep==1.89.0
+
+      - name: Run informational Semgrep rules
+        id: semgrep-info
+        run: |
+          set -euo pipefail
+          semgrep scan --config .semgrep.informational.yml --sarif --output semgrep-info-results.sarif --json > semgrep-info.json 2>/dev/null || true
+          TOTAL=$(python3 -c "import json; print(json.load(open('semgrep-info.json'))['results'].__len__())")
+          echo "total=$TOTAL" >> "$GITHUB_OUTPUT"
+          {
+            echo "## Semgrep informational results"
+            echo "Total findings: **$TOTAL**"
+            echo ""
+            echo "| Rule | Count |"
+            echo "|---|---:|"
+            python3 -c "
+          import json
+          from collections import Counter
+          d = json.load(open('semgrep-info.json'))
+          c = Counter(r['check_id'] for r in d['results'])
+          for k, v in sorted(c.items()):
+              print(f'| {k} | {v} |')
+          "
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Compare with baseline
+        run: |
+          set -euo pipefail
+          CURRENT=${{ steps.semgrep-info.outputs.total }}
+          BASELINE=$(python3 -c "import json; print(json.load(open('.semgrep-baseline.json'))['total'])")
+          echo "Current: $CURRENT  Baseline: $BASELINE"
+          if [ "$CURRENT" -gt "$BASELINE" ]; then
+            echo "::error::Semgrep informational findings increased: $CURRENT > $BASELINE (baseline). Fix new findings or update baseline with justification."
+            exit 1
+          fi
+          echo "Findings within baseline ($CURRENT <= $BASELINE)."
+
+      - name: Upload informational results to GitHub Security
+        uses: github/codeql-action/upload-sarif@6f5948dfacef28e207b48d0905cf90c03365536d # v3
+        if: always()
+        with:
+          sarif_file: semgrep-info-results.sarif
 
   dependency-review:
     name: Dependency review
@@ -557,13 +655,13 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Dependency review
-        uses: actions/dependency-review-action@v4
-        # Skip if Dependency graph is not enabled on the repository
-        # (e.g. forks, private repos without Advanced Security).
-        continue-on-error: true
+        uses: actions/dependency-review-action@05fe4576374b728f0c523d6a13d64c25081e0803 # v4.8.3
         with:
           fail-on-severity: moderate
           comment-summary-in-pr: on-failure
+          # Block GPL-incompatible licenses in production dependencies.
+          # tracker-lp-bits is GPL-2.0-only — allow GPL-2.0-compatible licenses.
+          deny-licenses: AGPL-3.0,AGPL-3.0-only,AGPL-3.0-or-later,Apache-2.0,BSD-4-Clause,CC-BY-NC-1.0,CC-BY-NC-2.0,CC-BY-NC-2.5,CC-BY-NC-3.0,CC-BY-NC-4.0,CC-BY-NC-ND-1.0,CC-BY-NC-ND-2.0,CC-BY-NC-ND-2.5,CC-BY-NC-ND-3.0,CC-BY-NC-ND-4.0,CC-BY-NC-SA-1.0,CC-BY-NC-SA-2.0,CC-BY-NC-SA-2.5,CC-BY-NC-SA-3.0,CC-BY-NC-SA-4.0,MS-RL,NonCommercial,Proprietary,Unlicensed
 
   container-scan:
     name: Container image scan (Trivy)
@@ -588,12 +686,50 @@ jobs:
       - name: Build Docker images
         run: docker compose build php openresty
 
+      - name: Validate .trivyignore entries
+        run: |
+          set -euo pipefail
+          if [ ! -f .trivyignore ]; then
+            echo "No .trivyignore file — nothing to validate."
+            exit 0
+          fi
+          TODAY=$(date -u +%Y-%m-%d)
+          ERRORS=0
+          CVE=""
+          while IFS= read -r line; do
+            # Skip empty lines and full-line comments
+            case "$line" in
+              ""|"#"*) continue ;;
+            esac
+            if echo "$line" | grep -qE '^CVE-[0-9]'; then
+              CVE="$line"
+            elif echo "$line" | grep -qE '^# expires:'; then
+              if [ -z "$CVE" ]; then
+                echo "::error::Expiry comment without preceding CVE ID: $line"
+                ERRORS=$((ERRORS + 1))
+                continue
+              fi
+              EXPIRY=$(echo "$line" | sed -nE 's/^# expires: ([0-9]{4}-[0-9]{2}-[0-9]{2}).*/\1/p')
+              if [ -z "$EXPIRY" ]; then
+                echo "::error::Missing expiry date for $CVE: $line"
+                ERRORS=$((ERRORS + 1))
+              elif [ "$EXPIRY" \< "$TODAY" ]; then
+                echo "::error::Expired .trivyignore entry: $CVE (expired $EXPIRY). Remove or update."
+                ERRORS=$((ERRORS + 1))
+              else
+                echo "OK: $CVE expires $EXPIRY"
+              fi
+              CVE=""
+            fi
+          done < .trivyignore
+          if [ "$ERRORS" -gt 0 ]; then
+            echo "::error::$ERRORS invalid or expired .trivyignore entries found."
+            exit 1
+          fi
+          echo "All .trivyignore entries are valid and not expired."
+
       - name: Run Trivy on PHP image
         uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
-        # Trivy 0.70 has a bug with rejected CVEs (CVE-2026-80256)
-        # causing exit code 1 even when .trivyignore lists them.
-        # Use continue-on-error until the action ships Trivy >= 0.74.
-        continue-on-error: true
         with:
           image-ref: nexusphp_php:latest
           format: sarif
@@ -602,10 +738,10 @@ jobs:
           exit-code: '1'
           ignore-unfixed: true
           trivyignores: .trivyignore
+          version: v0.74.0
 
       - name: Run Trivy on OpenResty image
         uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
-        continue-on-error: true
         with:
           image-ref: nexusphp_openresty:latest
           format: sarif
@@ -614,12 +750,19 @@ jobs:
           exit-code: '1'
           ignore-unfixed: true
           trivyignores: .trivyignore
+          version: v0.74.0
 
-      - name: Upload Trivy scan results to GitHub Security
+      - name: Upload Trivy PHP scan results to GitHub Security
         uses: github/codeql-action/upload-sarif@6f5948dfacef28e207b48d0905cf90c03365536d # v3
         if: always()
         with:
           sarif_file: trivy-php-results.sarif
+
+      - name: Upload Trivy OpenResty scan results to GitHub Security
+        uses: github/codeql-action/upload-sarif@6f5948dfacef28e207b48d0905cf90c03365536d # v3
+        if: always()
+        with:
+          sarif_file: trivy-openresty-results.sarif
 
   sbom:
     name: SBOM generation

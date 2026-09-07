@@ -44,15 +44,24 @@ use App\ViewModels\UsercpPageViewModel;
  */
 final class UsercpPageService
 {
+    public function __construct(
+        private readonly CurrentUser $currentUser,
+        private readonly Globals $globals,
+        private readonly LegacyRedisCache $cache,
+        private readonly UsercpRepository $usercpRepository,
+        private readonly TokenRepository $tokenRepository,
+        private readonly UserPasskeyRepository $passkeyRepository,
+    ) {}
+
     /**
      * Build the data for the requested section.
      */
     public function build(string $action, string $type): UsercpPageViewModel
     {
-        $curUser = (array) (app(CurrentUser::class)->get() ?? []);
-        $lang = (array) (app(Globals::class)->get('lang_usercp') ?? []);
-        $cache = app(LegacyRedisCache::class);
-        $userInfo = app(UsercpRepository::class)->getUserById((int) ($curUser['id'] ?? 0));
+        $curUser = (array) ($this->currentUser->get() ?? []);
+        $lang = (array) ($this->globals->get('lang_usercp') ?? []);
+        $cache = $this->cache;
+        $userInfo = $this->usercpRepository->getUserById((int) ($curUser['id'] ?? 0));
         $siteName = Setting::getSiteName();
 
         $data = [
@@ -62,7 +71,7 @@ final class UsercpPageService
             'siteName' => $siteName,
             'action' => $action,
             'type' => $type,
-            'contentWidth' => (string) (app(Globals::class)->get('CONTENT_WIDTH', '737')),
+            'contentWidth' => (string) ($this->globals->get('CONTENT_WIDTH', '737')),
         ];
 
         switch ($action) {
@@ -113,7 +122,7 @@ final class UsercpPageService
         $userId = (int) ($curUser['id'] ?? 0);
 
         // Comment count
-        $commentCount = app(UsercpRepository::class)->getCommentCount($userId);
+        $commentCount = $this->usercpRepository->getCommentCount($userId);
 
         // Join date
         $added = (string) ($curUser['added'] ?? '');
@@ -134,7 +143,7 @@ final class UsercpPageService
             }
         }
         if ($forumPosts === 0) {
-            $forumPosts = app(UsercpRepository::class)->getForumPostCount($userId);
+            $forumPosts = $this->usercpRepository->getForumPostCount($userId);
             if ($cache !== null) {
                 $cache->cache_value('user_'.$userId.'_post_count', $forumPosts, 3600);
             }
@@ -153,7 +162,7 @@ final class UsercpPageService
                 }
             }
             if ($postCount === 0) {
-                $postCount = app(UsercpRepository::class)->getTotalPostCount();
+                $postCount = $this->usercpRepository->getTotalPostCount();
                 if ($cache !== null) {
                     $cache->cache_value('total_posts_count', $postCount, 96400);
                 }
@@ -164,7 +173,7 @@ final class UsercpPageService
         }
 
         // IP location
-        $enableLocationTweak = (string) app(Globals::class)->get('enablelocation_tweak', '') === 'yes';
+        $enableLocationTweak = (string) $this->globals->get('enablelocation_tweak', '') === 'yes';
         $ipLocation = '';
         if ($enableLocationTweak) {
             [$locPub, $locMod] = Network::ipLocationWithContext((string) ($curUser['ip'] ?? ''));
@@ -231,15 +240,15 @@ final class UsercpPageService
      */
     private function buildTokens(array $lang, User $userInfo): array
     {
-        $langFunctions = (array) (app(Globals::class)->get('lang_functions') ?? []);
+        $langFunctions = (array) ($this->globals->get('lang_functions') ?? []);
 
-        $permissions = app(TokenRepository::class)->listUserTokenPermissionAllowed();
+        $permissions = $this->tokenRepository->listUserTokenPermissionAllowed();
         $permissionOptions = [];
         foreach ($permissions as $name => $label) {
             $permissionOptions[] = sprintf('<label><input type="checkbox" name="permissions[]" value="%s">%s</label>', $name, $label);
         }
 
-        $tokens = app(UsercpRepository::class)->getUserTokens($userInfo);
+        $tokens = $this->usercpRepository->getUserTokens($userInfo);
 
         return [
             'label' => Locale::trans('token.label', [], null),
@@ -263,7 +272,7 @@ final class UsercpPageService
      */
     private function buildReadTopics(array $lang, int $userId, ?LegacyRedisCache $cache): array
     {
-        $topicRows = app(UsercpRepository::class)->getReadTopics($userId);
+        $topicRows = $this->usercpRepository->getReadTopics($userId);
         $items = [];
         foreach ($topicRows as $topicArr) {
             $topicId = (int) $topicArr['id'];
@@ -278,7 +287,7 @@ final class UsercpPageService
                 }
             }
             if ($posts === 0) {
-                $posts = app(UsercpRepository::class)->getTopicPostCount($topicId);
+                $posts = $this->usercpRepository->getTopicPostCount($topicId);
                 if ($cache !== null) {
                     $cache->cache_value('topic_'.$topicId.'_post_count', $posts, 3600);
                 }
@@ -326,7 +335,7 @@ final class UsercpPageService
     {
         // Countries
         $countryOptions = '';
-        $countryRows = app(UsercpRepository::class)->getCountryOptions();
+        $countryRows = $this->usercpRepository->getCountryOptions();
         foreach ($countryRows as $ct) {
             $countryOptions .= '<option value='.htmlspecialchars((string) $ct->id).''
                 .(htmlspecialchars((string) ($curUser['country'] ?? '')) === htmlspecialchars((string) $ct->id) ? ' selected' : '')
@@ -343,9 +352,9 @@ final class UsercpPageService
         }
 
         // Bitbucket avatars
-        $bitbucketRows = app(UsercpRepository::class)->getBitbucketOptions();
+        $bitbucketRows = $this->usercpRepository->getBitbucketOptions();
         $bitbucketOptions = '';
-        $baseUrl = (string) app(Globals::class)->get('BASEURL', '');
+        $baseUrl = (string) $this->globals->get('BASEURL', '');
         foreach ($bitbucketRows as $sor) {
             $bitbucketOptions .= '<option value="'.Http::protocolPrefix(Url::isSecure()).$baseUrl.'/bitbucket/'.htmlspecialchars((string) $sor->name).'">'.htmlspecialchars((string) $sor->name).'</option>';
         }
@@ -358,7 +367,7 @@ final class UsercpPageService
             'trackerUrlOptions' => $trackerUrlOptions,
             'bitbucketOptions' => $bitbucketOptions,
             'notificationOptions' => $notificationOptions,
-            'enableBitbucket' => (string) app(Globals::class)->get('enablebitbucket_main', '') === 'yes',
+            'enableBitbucket' => (string) $this->globals->get('enablebitbucket_main', '') === 'yes',
             'baseUrl' => $baseUrl,
             'selectNoneLabel' => $lang['select_none_selected'] ?? 'None',
             'selectChooseAvatar' => $lang['select_choose_avatar'] ?? 'Choose avatar',
@@ -376,8 +385,8 @@ final class UsercpPageService
      */
     private function buildTracker(array $lang, array $curUser): array
     {
-        $showTooltipSetting = (string) app(Globals::class)->get('enabletooltip_tweak', '') === 'yes';
-        $browsecatmode = (int) app(Globals::class)->get('browsecatmode', 1);
+        $showTooltipSetting = (string) $this->globals->get('enabletooltip_tweak', '') === 'yes';
+        $browsecatmode = (int) $this->globals->get('browsecatmode', 1);
 
         // Special state from notifs
         $notifs = (string) ($curUser['notifs'] ?? '');
@@ -393,7 +402,7 @@ final class UsercpPageService
         $categories = SearchBox::buildCategoryTableWithContext($browsecatmode, 'yes', 'torrents.php?allsec=1', '', 3, $notifs, ['section_name' => true]);
 
         // Stylesheets
-        $ssSa = app(UsercpRepository::class)->getStylesheetOptions();
+        $ssSa = $this->usercpRepository->getStylesheetOptions();
         ksort($ssSa);
         $stylesheetOptions = '';
         foreach ($ssSa as $ssName => $ssId) {
@@ -411,9 +420,9 @@ final class UsercpPageService
         }
 
         // Email notification row visibility
-        $showEmailNotify = (string) app(Globals::class)->get('emailnotify_smtp', '') === 'yes'
-            && (string) app(Globals::class)->get('smtptype', '') !== 'none';
-        $showShoutbox = (string) app(Globals::class)->get('showshoutbox_main', '') === 'yes';
+        $showEmailNotify = (string) $this->globals->get('emailnotify_smtp', '') === 'yes'
+            && (string) $this->globals->get('smtptype', '') !== 'none';
+        $showShoutbox = (string) $this->globals->get('showshoutbox_main', '') === 'yes';
 
         return [
             'showTooltipSetting' => $showTooltipSetting,
@@ -438,7 +447,7 @@ final class UsercpPageService
     private function buildForum(array $lang, array $curUser): array
     {
         return [
-            'showTooltipSetting' => (string) app(Globals::class)->get('enabletooltip_tweak', '') === 'yes',
+            'showTooltipSetting' => (string) $this->globals->get('enabletooltip_tweak', '') === 'yes',
         ];
     }
 
@@ -451,8 +460,8 @@ final class UsercpPageService
      */
     private function buildSecurity(array $lang, array $curUser, string $type): array
     {
-        $showEmailChange = (string) app(Globals::class)->get('disableemailchange', '') !== 'no'
-            && (string) app(Globals::class)->get('smtptype', '') !== 'none';
+        $showEmailChange = (string) $this->globals->get('disableemailchange', '') !== 'no'
+            && (string) $this->globals->get('smtptype', '') !== 'none';
 
         // Two-step auth
         $twoStep = [
@@ -528,7 +537,7 @@ final class UsercpPageService
     private function capturePasskeyList(int $userId): string
     {
         ob_start();
-        app(UserPasskeyRepository::class)->renderList($userId);
+        $this->passkeyRepository->renderList($userId);
 
         return (string) ob_get_clean();
     }

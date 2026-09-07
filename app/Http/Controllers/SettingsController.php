@@ -106,10 +106,6 @@ class SettingsController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Permission denied.');
         }
 
-        if ($request->isMethod('post')) {
-            return $this->handleSave($request) ?? redirect('/settings.php');
-        }
-
         $action = (string) ($request->query('action') ?? 'showmenu');
         $allowedActions = ['showmenu', 'basicsettings', 'mainsettings', 'smtpsettings', 'securitysettings', 'authoritysettings', 'tweaksettings', 'bonussettings', 'accountsettings', 'torrentsettings', 'attachmentsettings', 'codesettings', 'miscsettings'];
         if (! in_array($action, $allowedActions, true)) {
@@ -169,6 +165,20 @@ class SettingsController extends LegacyController
         }
 
         return view('settings.index', $data);
+    }
+
+    public function settingsAction(Request $request): RedirectResponse|Response
+    {
+        $currentUser = app(CurrentUser::class)->get();
+        if ($currentUser === null) {
+            return redirect('/settings.php');
+        }
+
+        if (UserDisplay::currentClass() < UserClassEnum::SYSOP->value) {
+            return $this->legacyAbortResponse('Error', 'Permission denied.');
+        }
+
+        return $this->handleSave($request) ?? redirect('/settings.php');
     }
 
     private function handleSave(Request $request): RedirectResponse|Response|null

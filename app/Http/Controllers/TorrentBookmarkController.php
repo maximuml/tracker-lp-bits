@@ -42,6 +42,11 @@ class TorrentBookmarkController extends LegacyController
         return response($status, 200, $headers);
     }
 
+    public function bookmarkToggle(Request $request): Response
+    {
+        return $this->bookmark($request);
+    }
+
     public function thanks(Request $request): Response|RedirectResponse
     {
         if (app(CurrentUser::class)->get() === null) {

@@ -5,7 +5,12 @@ declare(strict_types=1);
 namespace Tests\Unit\DTOs;
 
 use App\DTOs\AnnounceRequestDto;
+use App\Services\Announce\AnnounceRequestFactory;
 use App\Support\Network;
+use App\Support\Network\ClientIpResolver;
+use App\ValueObjects\InfoHash;
+use App\ValueObjects\Passkey;
+use App\ValueObjects\PeerId;
 use Illuminate\Http\Request;
 use PHPUnit\Framework\TestCase;
 
@@ -23,7 +28,7 @@ final class AnnounceRequestDtoTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_from_request_parses_all_fields(): void
+    public function test_build_parses_all_fields(): void
     {
         $passkey = str_repeat('a', 32);
         $infoHash = str_repeat("\x00", 20);
@@ -48,7 +53,8 @@ final class AnnounceRequestDtoTest extends TestCase
         ]);
         app()->instance('request', $request);
 
-        $dto = AnnounceRequestDto::fromRequest($request, $request->query->all());
+        $factory = new AnnounceRequestFactory(new ClientIpResolver);
+        $dto = $factory->create($request, $request->query->all());
 
         $this->assertSame($passkey, $dto->passkey->toString());
         $this->assertSame($infoHash, $dto->infoHash->toBinary());
@@ -80,9 +86,13 @@ final class AnnounceRequestDtoTest extends TestCase
             'downloaded' => '0',
             'left' => '100',
             'event' => 'invalid_event',
+        ], [], [], [
+            'REMOTE_ADDR' => '10.0.0.1',
         ]);
+        app()->instance('request', $request);
 
-        $dto = AnnounceRequestDto::fromRequest($request, $request->query->all());
+        $factory = new AnnounceRequestFactory(new ClientIpResolver);
+        $dto = $factory->create($request, $request->query->all());
 
         $this->assertNull($dto->event);
         $this->assertFalse($dto->isSeeder());
@@ -100,9 +110,13 @@ final class AnnounceRequestDtoTest extends TestCase
             'downloaded' => '0',
             'left' => '100',
             'numwant' => '500',
+        ], [], [], [
+            'REMOTE_ADDR' => '10.0.0.1',
         ]);
+        app()->instance('request', $request);
 
-        $dto = AnnounceRequestDto::fromRequest($request, $request->query->all());
+        $factory = new AnnounceRequestFactory(new ClientIpResolver);
+        $dto = $factory->create($request, $request->query->all());
 
         $this->assertSame(200, $dto->numWant);
     }
@@ -121,9 +135,13 @@ final class AnnounceRequestDtoTest extends TestCase
             'uploaded' => '0',
             'downloaded' => '0',
             'left' => '100',
+        ], [], [], [
+            'REMOTE_ADDR' => '10.0.0.1',
         ]);
+        app()->instance('request', $request);
 
-        $dto = AnnounceRequestDto::fromRequest($request, $request->query->all());
+        $factory = new AnnounceRequestFactory(new ClientIpResolver);
+        $dto = $factory->create($request, $request->query->all());
         $params = $dto->toParams();
 
         $this->assertSame($passkey, $params['passkey']);
@@ -131,5 +149,31 @@ final class AnnounceRequestDtoTest extends TestCase
         $this->assertSame($peerId, $params['peer_id']);
         $this->assertArrayHasKey('ip', $params);
         $this->assertSame($dto->ip, $params['ip']);
+    }
+
+    public function test_dto_is_pure_data_container_without_side_effects(): void
+    {
+        // W2-03: The DTO constructor does not touch global state.
+        // It can be created directly without a request or container.
+        $dto = new AnnounceRequestDto(
+            passkey: Passkey::fromString(str_repeat('a', 32)),
+            infoHash: InfoHash::fromBinary(str_repeat("\x00", 20)),
+            peerId: PeerId::fromBinary(str_repeat("\x01", 20)),
+            port: 6881,
+            uploaded: 0,
+            downloaded: 0,
+            left: 100,
+            event: null,
+            numWant: 50,
+            compact: false,
+            ipv4: '10.0.0.1',
+            ipv6: null,
+            ip: '10.0.0.1',
+            userAgent: 'Test/1.0',
+        );
+
+        $this->assertSame(6881, $dto->port);
+        $this->assertFalse($dto->isSeeder());
+        $this->assertFalse($dto->isStopped());
     }
 }

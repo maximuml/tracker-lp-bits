@@ -22,6 +22,13 @@ use App\Support\UserDisplay;
  */
 final class ForumIndexService
 {
+    public function __construct(
+        private readonly CurrentUser $currentUser,
+        private readonly Globals $globals,
+        private readonly ForumRepository $forumRepository,
+        private readonly LegacyRedisCache $cache,
+    ) {}
+
     /**
      * Build the default forums index (overforums + forums list + stats).
      *
@@ -31,24 +38,24 @@ final class ForumIndexService
      */
     public function buildForumsIndex(array $lang, array $curUser, int $userId): array
     {
-        $Cache = app(LegacyRedisCache::class);
+        $Cache = $this->cache;
         $todayDate = date('Y-m-d');
 
         if ($curUser) {
-            app(ForumRepository::class)->updateUserForumAccess((int) ($curUser['id'] ?? 0), date('Y-m-d H:i:s'));
+            $this->forumRepository->updateUserForumAccess((int) ($curUser['id'] ?? 0), date('Y-m-d H:i:s'));
         }
 
-        $SITENAME = (string) app(Globals::class)->get('SITENAME', '');
-        $showforumstatsMain = (string) app(Globals::class)->get('showforumstats_main', '');
+        $SITENAME = (string) $this->globals->get('SITENAME', '');
+        $showforumstatsMain = (string) $this->globals->get('showforumstats_main', '');
 
         ob_start();
         echo '<h1 align="center">'.$SITENAME.'&nbsp;'.($lang['text_forums'] ?? '').'</h1>';
         echo '<p align="center"><a href="?action=search"><b>'.($lang['text_search'] ?? '').'</b></a> | <a href="?action=viewunread"><b>'.($lang['text_view_unread'] ?? '').'</b></a> | <a href="?catchup=1"><b>'.($lang['text_catch_up'] ?? '').'</b></a> '.(Permission::can(PermissionEnum::FORUM_MANAGE) ? '| <a href="forummanage.php"><b>'.($lang['text_forum_manager'] ?? '').'</b></a>' : '').'</p>';
         echo "<table border=\"1\" cellspacing=\"0\" cellpadding=\"5\" width=\"100%\">\n";
 
-        if (! $overforums = $Cache?->get_value('overforums_list')) {
-            $overforums = app(ForumRepository::class)->getOverforumsList();
-            $Cache?->cache_value('overforums_list', $overforums, 86400);
+        if (! $overforums = $Cache->get_value('overforums_list')) {
+            $overforums = $this->forumRepository->getOverforumsList();
+            $Cache->cache_value('overforums_list', $overforums, 86400);
         }
         foreach ($overforums as $a) {
             if (UserDisplay::currentClass() < (int) ($a['minclassview'] ?? 0)) {
@@ -82,10 +89,10 @@ final class ForumIndexService
                 $topiccount = number_format((int) $forums_arr['topiccount']);
                 $postcount = number_format((int) $forums_arr['postcount']);
 
-                if (! $arr = $Cache?->get_value('forum_'.$forumid.'_last_replied_topic_content')) {
-                    $lastTopic = app(ForumRepository::class)->getLastTopicByForum((int) $forumid);
+                if (! $arr = $Cache->get_value('forum_'.$forumid.'_last_replied_topic_content')) {
+                    $lastTopic = $this->forumRepository->getLastTopicByForum((int) $forumid);
                     $arr = $lastTopic ? $lastTopic->toArray() : false;
-                    $Cache?->cache_value('forum_'.$forumid.'_last_replied_topic_content', $arr, 900);
+                    $Cache->cache_value('forum_'.$forumid.'_last_replied_topic_content', $arr, 900);
                 }
 
                 if ($arr) {
@@ -116,10 +123,10 @@ final class ForumIndexService
                     $lastpost = 'N/A';
                     $img = $this->getTopicImage('read', $lang);
                 }
-                $posttodaycount = $Cache?->get_value('forum_'.$forumid.'_post_'.$todayDate.'_count');
+                $posttodaycount = $Cache->get_value('forum_'.$forumid.'_post_'.$todayDate.'_count');
                 if ($posttodaycount == '') {
-                    $posttodaycount = app(ForumRepository::class)->getForumTodayPostCount((int) $forumid, date('Y-m-d'));
-                    $Cache?->cache_value('forum_'.$forumid.'_post_'.$todayDate.'_count', $posttodaycount, 1800);
+                    $posttodaycount = $this->forumRepository->getForumTodayPostCount((int) $forumid, date('Y-m-d'));
+                    $Cache->cache_value('forum_'.$forumid.'_post_'.$todayDate.'_count', $posttodaycount, 1800);
                 }
                 if ($posttodaycount > 0) {
                     $posttoday = '&nbsp;&nbsp;('.($lang['text_today'] ?? '').'<b><font class="new">'.$posttodaycount.'</font></b>)';
@@ -146,11 +153,11 @@ final class ForumIndexService
      */
     public function forumStats(array $lang, string $todayDate): string
     {
-        $Cache = app(LegacyRedisCache::class);
+        $Cache = $this->cache;
 
-        if (! $activeforumuser_num = $Cache?->get_value('active_forum_user_count')) {
-            $activeforumuser_num = app(ForumRepository::class)->getActiveForumUserCount();
-            $Cache?->cache_value('active_forum_user_count', $activeforumuser_num, 300);
+        if (! $activeforumuser_num = $Cache->get_value('active_forum_user_count')) {
+            $activeforumuser_num = $this->forumRepository->getActiveForumUserCount();
+            $Cache->cache_value('active_forum_user_count', $activeforumuser_num, 300);
         }
         if ($activeforumuser_num) {
             $forumusers = ($lang['text_there'] ?? '').Strings::isOrAre((int) $activeforumuser_num).'<b>'.$activeforumuser_num.'</b>'.($lang['text_online_user'] ?? '').Strings::addS((int) $activeforumuser_num).($lang['text_in_forum_now'] ?? '');
@@ -163,17 +170,17 @@ final class ForumIndexService
 <h2 align="left"><?php echo $lang['text_stats'] ?? '' ?></h2>
 <table width="100%"><tr><td class="text">
 <?php
-        if (! $postcount = $Cache?->get_value('total_posts_count')) {
-            $postcount = app(ForumRepository::class)->getTotalPostsCount();
-            $Cache?->cache_value('total_posts_count', $postcount, 96400);
+        if (! $postcount = $Cache->get_value('total_posts_count')) {
+            $postcount = $this->forumRepository->getTotalPostsCount();
+            $Cache->cache_value('total_posts_count', $postcount, 96400);
         }
-        if (! $topiccount = $Cache?->get_value('total_topics_count')) {
-            $topiccount = app(ForumRepository::class)->getTotalTopicsCount();
-            $Cache?->cache_value('total_topics_count', $topiccount, 96500);
+        if (! $topiccount = $Cache->get_value('total_topics_count')) {
+            $topiccount = $this->forumRepository->getTotalTopicsCount();
+            $Cache->cache_value('total_topics_count', $topiccount, 96500);
         }
-        if (! $todaypostcount = $Cache?->get_value('today_'.$todayDate.'_posts_count')) {
-            $todaypostcount = app(ForumRepository::class)->getTodayPostsCount($todayDate);
-            $Cache?->cache_value('today_'.$todayDate.'_posts_count', $todaypostcount, 700);
+        if (! $todaypostcount = $Cache->get_value('today_'.$todayDate.'_posts_count')) {
+            $todaypostcount = $this->forumRepository->getTodayPostsCount($todayDate);
+            $Cache->cache_value('today_'.$todayDate.'_posts_count', $todaypostcount, 700);
         }
         echo ($lang['text_our_members_have'] ?? '').'<b>'.$postcount.'</b>'.($lang['text_posts_in_topics'] ?? '').'<b>'.$topiccount.'</b>'.($lang['text_in_topics'] ?? '').'<b><font class="new">'.$todaypostcount.'</font></b>'.($lang['text_new_post'] ?? '').Strings::addS((int) $todaypostcount).($lang['text_posts_today'] ?? '').'<br /><br />';
         echo $forumusers;
@@ -188,18 +195,18 @@ final class ForumIndexService
      */
     public function catchUp(): void
     {
-        $CURUSER = (array) (app(CurrentUser::class)->get() ?? []);
-        $Cache = app(LegacyRedisCache::class);
+        $CURUSER = (array) ($this->currentUser->get() ?? []);
+        $Cache = $this->cache;
 
         if (! $CURUSER) {
             return;
         }
-        app(ForumRepository::class)->clearReadPosts((int) $CURUSER['id']);
-        $Cache?->delete_value('user_'.$CURUSER['id'].'_last_read_post_list');
-        $lastpostid = app(ForumRepository::class)->getLastPostId();
+        $this->forumRepository->clearReadPosts((int) $CURUSER['id']);
+        $Cache->delete_value('user_'.$CURUSER['id'].'_last_read_post_list');
+        $lastpostid = $this->forumRepository->getLastPostId();
         if ($lastpostid) {
             $CURUSER['last_catchup'] = $lastpostid;
-            app(ForumRepository::class)->updateLastCatchup((int) $CURUSER['id'], (int) $lastpostid);
+            $this->forumRepository->updateLastCatchup((int) $CURUSER['id'], (int) $lastpostid);
         }
     }
 
@@ -208,10 +215,10 @@ final class ForumIndexService
      */
     public function getForumRow(int $forumid = 0): ?array
     {
-        $Cache = app(LegacyRedisCache::class);
-        if (! $forums = $Cache?->get_value('forums_list')) {
-            $forums = app(ForumRepository::class)->getForumsList();
-            $Cache?->cache_value('forums_list', $forums, 86400);
+        $Cache = $this->cache;
+        if (! $forums = $Cache->get_value('forums_list')) {
+            $forums = $this->forumRepository->getForumsList();
+            $Cache->cache_value('forums_list', $forums, 86400);
         }
         if (! $forumid) {
             return $forums;
@@ -225,14 +232,14 @@ final class ForumIndexService
      */
     public function getLastReadPostId(int $topicid, array $curUser): int
     {
-        $Cache = app(LegacyRedisCache::class);
+        $Cache = $this->cache;
         static $ret = null;
-        if (! $ret && ! $ret = $Cache?->get_value('user_'.($curUser['id'] ?? 0).'_last_read_post_list')) {
-            $ret = app(ForumRepository::class)->getLastReadPosts((int) ($curUser['id'] ?? 0));
+        if (! $ret && ! $ret = $Cache->get_value('user_'.($curUser['id'] ?? 0).'_last_read_post_list')) {
+            $ret = $this->forumRepository->getLastReadPosts((int) ($curUser['id'] ?? 0));
             if ($ret !== null) {
-                $Cache?->cache_value('user_'.($curUser['id'] ?? 0).'_last_read_post_list', $ret, 900);
+                $Cache->cache_value('user_'.($curUser['id'] ?? 0).'_last_read_post_list', $ret, 900);
             } else {
-                $Cache?->cache_value('user_'.($curUser['id'] ?? 0).'_last_read_post_list', 'no record', 900);
+                $Cache->cache_value('user_'.($curUser['id'] ?? 0).'_last_read_post_list', 'no record', 900);
             }
         }
         if (is_array($ret) && (isset($ret[$topicid])) && (int) ($curUser['last_catchup'] ?? 0) < (int) $ret[$topicid]) {

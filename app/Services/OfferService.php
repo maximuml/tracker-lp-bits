@@ -27,6 +27,12 @@ use LogicException;
  */
 final class OfferService
 {
+    public function __construct(
+        private readonly CurrentUser $currentUser,
+        private readonly Globals $globals,
+        private readonly OfferRepository $offerRepository,
+    ) {}
+
     public function handleActionPublic(Request $request): ?RedirectResponse
     {
         $action = $this->action($request);
@@ -71,7 +77,7 @@ final class OfferService
 
     private function lang(string $key): string
     {
-        $lang = (array) (app(Globals::class)->get('lang_offers') ?? []);
+        $lang = (array) ($this->globals->get('lang_offers') ?? []);
 
         return (string) ($lang[$key] ?? '');
     }
@@ -81,12 +87,12 @@ final class OfferService
      */
     private function curUser(): array
     {
-        return (array) (app(CurrentUser::class)->get() ?? []);
+        return (array) ($this->currentUser->get() ?? []);
     }
 
     private function baseUrl(): string
     {
-        return (string) app(Globals::class)->get('BASEURL', '');
+        return (string) $this->globals->get('BASEURL', '');
     }
 
     private function isSecure(): bool
@@ -145,11 +151,11 @@ final class OfferService
 
         $descr = $pic.$descrmain;
 
-        if (app(OfferRepository::class)->offerNameExists($name)) {
+        if ($this->offerRepository->offerNameExists($name)) {
             $this->abort($this->lang('std_error'), $this->lang('std_offer_exists').'<a class=altlink href=offers.php>'.$this->lang('text_view_all_offers').'</a>', false);
         }
 
-        $id = app(OfferRepository::class)->createOffer([
+        $id = $this->offerRepository->createOffer([
             'userid' => $userId,
             'name' => $name,
             'descr' => $descr,
@@ -165,7 +171,7 @@ final class OfferService
             $this->abort($this->lang('std_error'), 'mysql puked');
         }
 
-        app(OfferRepository::class)->addStaffMessage($userId, (string) ($curuser['username'] ?? ''), $name, $id);
+        $this->offerRepository->addStaffMessage($userId, (string) ($curuser['username'] ?? ''), $name, $id);
         Cache::clearStaffMessage();
         Log::writeWithContext("offer {$name} was added by ".($curuser['username'] ?? ''), 'normal');
 
@@ -187,7 +193,7 @@ final class OfferService
             $this->abort($this->lang('std_error'), $this->lang('std_smell_rat'));
         }
 
-        $offer = app(OfferRepository::class)->findOfferWithUser($offid);
+        $offer = $this->offerRepository->findOfferWithUser($offid);
         if (! $offer) {
             $this->abort($this->lang('std_error'), $this->lang('text_nothing_found'));
         }
@@ -198,7 +204,7 @@ final class OfferService
         $arr = $offer->toArray();
         $arr['username'] = $offer->user->username ?? '';
         $locale = Locale::userLocale((int) $arr['userid']);
-        $offeruptimeout = (int) (app(Globals::class)->get('offeruptimeout_main') ?? 0);
+        $offeruptimeout = (int) ($this->globals->get('offeruptimeout_main') ?? 0);
 
         if ($offeruptimeout) {
             $timeouthour = (int) floor($offeruptimeout / 3600);
@@ -221,7 +227,7 @@ final class OfferService
             'added' => $allowedtime,
         ]);
 
-        app(OfferRepository::class)->allowOffer($offid, $allowedtime);
+        $this->offerRepository->allowOffer($offid, $allowedtime);
         Log::writeWithContext(($curuser['username'] ?? '')." allowed offer {$arr['name']}", 'normal');
 
         return redirect("/offers.php?id={$offid}&off_details=1");
@@ -242,7 +248,7 @@ final class OfferService
             $this->abort($this->lang('std_error'), $this->lang('std_smell_rat'));
         }
 
-        $offer = app(OfferRepository::class)->findOfferWithUser($offid);
+        $offer = $this->offerRepository->findOfferWithUser($offid);
         if (! $offer) {
             $this->abort($this->lang('std_error'), $this->lang('text_nothing_found'));
         }
@@ -253,11 +259,11 @@ final class OfferService
         $arr = $offer->toArray();
         $arr['username'] = $offer->user->username ?? '';
         $locale = Locale::userLocale((int) $arr['userid']);
-        $offeruptimeout = (int) (app(Globals::class)->get('offeruptimeout_main') ?? 0);
-        $minoffervotes = (int) (app(Globals::class)->get('minoffervotes') ?? 0);
+        $offeruptimeout = (int) ($this->globals->get('offeruptimeout_main') ?? 0);
+        $minoffervotes = (int) ($this->globals->get('minoffervotes') ?? 0);
         $curuser = $this->curUser();
 
-        $voteCounts = app(OfferRepository::class)->getVoteCounts($offid);
+        $voteCounts = $this->offerRepository->getVoteCounts($offid);
         $yes = (int) $voteCounts['yeah'];
         $no = (int) $voteCounts['against'];
 
@@ -278,11 +284,11 @@ final class OfferService
 
             $msg = Locale::trans('offer.msg_offer_voted_on', [], $locale)."[b][url={$url}]".$arr['name'].'[/url][/b].'.Locale::trans('offer.msg_find_offer_option', [], $locale).$timeoutnote;
             $subject = Locale::trans('offer.msg_your_offer_allowed', [], $locale);
-            app(OfferRepository::class)->allowOffer($offid, $finishvotetime);
+            $this->offerRepository->allowOffer($offid, $finishvotetime);
         } elseif (($no - $yes) >= $minoffervotes) {
             $msg = Locale::trans('offer.msg_offer_voted_off', [], $locale)."[b][url={$url}]".$arr['name'].'[/url][/b].'.Locale::trans('offer.msg_offer_deleted', [], $locale);
             $subject = Locale::trans('offer.msg_offer_deleted', [], $locale);
-            app(OfferRepository::class)->denyOffer($offid);
+            $this->offerRepository->denyOffer($offid);
         } else {
             return redirect("/offers.php?id={$offid}&off_details=1");
         }
@@ -312,7 +318,7 @@ final class OfferService
             $this->abort($this->lang('std_error'), $this->lang('std_smell_rat'));
         }
 
-        $offerRecord = app(OfferRepository::class)->findOffer($offerId);
+        $offerRecord = $this->offerRepository->findOffer($offerId);
         if (! $offerRecord) {
             $this->abort($this->lang('std_error'), $this->lang('text_nothing_found'));
         }
@@ -338,9 +344,9 @@ final class OfferService
         }
 
         $reason = (string) $request->input('reason');
-        app(OfferRepository::class)->deleteOffer($offerId);
-        app(OfferRepository::class)->deleteOfferVotes($offerId);
-        app(OfferRepository::class)->deleteOfferComments($offerId);
+        $this->offerRepository->deleteOffer($offerId);
+        $this->offerRepository->deleteOfferVotes($offerId);
+        $this->offerRepository->deleteOfferComments($offerId);
 
         if ($userId !== (int) $num['userid']) {
             $locale = Locale::userLocale((int) $num['userid']);
@@ -372,7 +378,7 @@ final class OfferService
             $this->abort($this->lang('std_error'), $this->lang('std_smell_rat'));
         }
 
-        $offerOwner = app(OfferRepository::class)->getOfferOwner($id);
+        $offerOwner = $this->offerRepository->getOfferOwner($id);
         $curuser = $this->curUser();
         $userId = (int) ($curuser['id'] ?? 0);
 
@@ -405,7 +411,7 @@ final class OfferService
             $this->abort($this->lang('std_error'), $this->lang('std_must_select_category'));
         }
 
-        app(OfferRepository::class)->updateOffer($id, [
+        $this->offerRepository->updateOffer($id, [
             'category' => $cat,
             'name' => $name,
             'descr' => $descr,

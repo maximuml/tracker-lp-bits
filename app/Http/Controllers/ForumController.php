@@ -50,6 +50,20 @@ class ForumController extends LegacyController
         return $this->legacyPage($request, 'forum', true, $data);
     }
 
+    public function legacyAction(Request $request): Response|RedirectResponse
+    {
+        if (app(CurrentUser::class)->get() === null) {
+            return redirect('/forums.php?'.$request->getQueryString());
+        }
+
+        $result = $this->service->legacy($request);
+        if ($result instanceof RedirectResponse) {
+            return $result;
+        }
+
+        return redirect('/forums');
+    }
+
     public function latestcomments(Request $request): View|RedirectResponse|Response
     {
         $perpage = 20;

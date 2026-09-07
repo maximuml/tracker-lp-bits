@@ -89,8 +89,8 @@ Route::group(['middleware' => ['auth.nexus:nexus-web', 'throttle:legacy']], base
 Route::get('/forums', [ForumController::class, 'legacy'])
     ->middleware(['auth.nexus:nexus-web', 'throttle:legacy'])
     ->name('forums.legacy');
-Route::post('/forums', [ForumController::class, 'legacy'])
-    ->middleware(['auth.nexus:nexus-web', 'throttle:legacy']);
+Route::post('/forums', [ForumController::class, 'legacyAction'])
+    ->middleware(['auth.nexus:nexus-web', 'throttle:legacy', 'reject.get.mutations']);
 
 Route::get('/userdetails', [UserDetailController::class, 'show'])
     ->middleware(['auth.nexus:nexus-web', 'throttle:legacy'])
@@ -99,8 +99,8 @@ Route::get('/userdetails', [UserDetailController::class, 'show'])
 Route::get('/usercp', [UsercpController::class, 'legacy'])
     ->middleware(['auth.nexus:nexus-web', 'throttle:legacy'])
     ->name('usercp.legacy');
-Route::post('/usercp', [UsercpController::class, 'legacy'])
-    ->middleware(['auth.nexus:nexus-web', 'throttle:legacy']);
+Route::post('/usercp', [UsercpController::class, 'legacyAction'])
+    ->middleware(['auth.nexus:nexus-web', 'throttle:legacy', 'reject.get.mutations']);
 
 Route::group(['prefix' => 'web', 'middleware' => ['auth.nexus:nexus-web', 'throttle:legacy']], function () {
     Route::get('torrent-approval-page', [TorrentController::class, 'approvalPage']);

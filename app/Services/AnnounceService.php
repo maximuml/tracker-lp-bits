@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\DTOs\Announce\AnnounceContext;
-use App\DTOs\AnnounceRequestDto;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\TorrentApprovalStatus;
 use App\Enums\UserClass as UserClassEnum;
@@ -20,6 +19,7 @@ use App\Repositories\RequireSeedTorrentRepository;
 use App\Repositories\TorrentPurchaseRepository;
 use App\Repositories\TorrentRepository;
 use App\Repositories\UserRepository;
+use App\Services\Announce\AnnounceRequestFactory;
 use App\Services\Announce\PeerLifecycle;
 use App\Services\Announce\PeerLifecycleResult;
 use App\Services\Announce\ResponseBuilder;
@@ -51,6 +51,7 @@ class AnnounceService
         private readonly Announce\TrafficAccountant $trafficAccountant,
         private readonly Announce\CheaterDetector $cheaterDetector,
         private readonly Announce\HitAndRunHandler $hitAndRunHandler,
+        private readonly AnnounceRequestFactory $requestFactory,
     ) {}
 
     /**
@@ -59,7 +60,7 @@ class AnnounceService
      */
     public function handle(Request $request, array $params): array
     {
-        $dto = AnnounceRequestDto::fromRequest($request, $params);
+        $dto = $this->requestFactory->create($request, $params);
 
         $ctx = new AnnounceContext(
             dto: $dto,
@@ -95,6 +96,7 @@ class AnnounceService
 
         $initialResult = $ctx->responseBuilder->initial($ctx->torrentId());
         $ctx = $ctx->withAutocleanIntervalOne($initialResult->autocleanIntervalOne);
+        $ctx = $ctx->withResponseBuilder($ctx->responseBuilder->withRealAnnounceInterval($initialResult->realAnnounceInterval));
         $repDict = $initialResult->response;
 
         if ($ctx->isReAnnounce) {

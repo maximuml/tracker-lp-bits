@@ -78,35 +78,6 @@ class UsercpController extends LegacyController
             return redirect('/usercp.php'.($qs ? '?'.$qs : ''));
         }
 
-        if ($request->isMethod('POST')) {
-            $action = (string) $request->input('action');
-            $type = (string) $request->input('type');
-
-            if ($type === 'save' && $action === 'personal') {
-                $this->repository->updatePersonal(PersonalSettingsDto::fromRequest($request));
-
-                return redirect('/usercp.php?action=personal&type=saved');
-            }
-
-            if ($type === 'save' && $action === 'forum') {
-                $this->repository->updateForum(ForumSettingsDto::fromRequest($request));
-
-                return redirect('/usercp.php?action=forum&type=saved');
-            }
-
-            if ($type === 'save' && $action === 'tracker') {
-                $this->repository->updateTracker(TrackerSettingsDto::fromRequest($request));
-
-                return redirect('/usercp.php?action=tracker&type=saved');
-            }
-
-            if ($type === 'confirm' && $action === 'security') {
-                $to = $this->repository->updateSecurityFromLegacyRequest($request);
-
-                return redirect($to);
-            }
-        }
-
         $action = (string) $request->input('action', '');
         $type = (string) $request->input('type', '');
 
@@ -122,5 +93,42 @@ class UsercpController extends LegacyController
         $data = $this->pageService->build($action, $type)->toArray();
 
         return $this->legacyPage($request, 'usercp', true, $data);
+    }
+
+    public function legacyAction(Request $request): RedirectResponse
+    {
+        $user = app(CurrentUser::class)->get();
+        if ($user === null) {
+            return redirect('/usercp.php');
+        }
+
+        $action = (string) $request->input('action');
+        $type = (string) $request->input('type');
+
+        if ($type === 'save' && $action === 'personal') {
+            $this->repository->updatePersonal(PersonalSettingsDto::fromRequest($request));
+
+            return redirect('/usercp.php?action=personal&type=saved');
+        }
+
+        if ($type === 'save' && $action === 'forum') {
+            $this->repository->updateForum(ForumSettingsDto::fromRequest($request));
+
+            return redirect('/usercp.php?action=forum&type=saved');
+        }
+
+        if ($type === 'save' && $action === 'tracker') {
+            $this->repository->updateTracker(TrackerSettingsDto::fromRequest($request));
+
+            return redirect('/usercp.php?action=tracker&type=saved');
+        }
+
+        if ($type === 'confirm' && $action === 'security') {
+            $to = $this->repository->updateSecurityFromLegacyRequest($request);
+
+            return redirect($to);
+        }
+
+        return redirect('/usercp.php');
     }
 }

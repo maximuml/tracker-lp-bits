@@ -144,30 +144,6 @@ class TorrentDownloadController extends LegacyController
             return redirect('/downloadnotice.php'.($qs ? '?'.$qs : ''));
         }
 
-        if ($request->isMethod('POST')) {
-            $torrentid = (int) $request->input('id', 0);
-            $type = $request->input('type');
-            $hidenotice = $request->input('hidenotice');
-            if (! $torrentid || ! in_array($type, ['firsttime', 'client', 'ratio'], true)) {
-                return response('error');
-            }
-
-            $userId = (int) ($curUser['id'] ?? 0);
-            if ($hidenotice && $userId > 0) {
-                $update = [];
-                if ($type === 'firsttime') {
-                    $update['showdlnotice'] = 0;
-                } elseif ($type === 'client') {
-                    $update['showclienterror'] = false;
-                }
-                if (! empty($update)) {
-                    User::query()->where('id', $userId)->update($update);
-                }
-            }
-
-            return redirect('/download?id='.$torrentid.'&letdown=1');
-        }
-
         $torrentid = (int) $request->input('torrentid');
         $type = $request->input('type');
         $lang = (array) (app(Globals::class)->get('lang_downloadnotice') ?? []);
@@ -220,5 +196,35 @@ class TorrentDownloadController extends LegacyController
             'tdattr' => $tdattr,
             'lang_downloadnotice' => $lang,
         ]);
+    }
+
+    public function downloadnoticeAction(Request $request): Response|RedirectResponse
+    {
+        $curUser = app(CurrentUser::class)->get();
+        if ($curUser === null) {
+            return redirect('/downloadnotice.php');
+        }
+
+        $torrentid = (int) $request->input('id', 0);
+        $type = $request->input('type');
+        $hidenotice = $request->input('hidenotice');
+        if (! $torrentid || ! in_array($type, ['firsttime', 'client', 'ratio'], true)) {
+            return response('error');
+        }
+
+        $userId = (int) ($curUser['id'] ?? 0);
+        if ($hidenotice && $userId > 0) {
+            $update = [];
+            if ($type === 'firsttime') {
+                $update['showdlnotice'] = 0;
+            } elseif ($type === 'client') {
+                $update['showclienterror'] = false;
+            }
+            if (! empty($update)) {
+                User::query()->where('id', $userId)->update($update);
+            }
+        }
+
+        return redirect('/download?id='.$torrentid.'&letdown=1');
     }
 }

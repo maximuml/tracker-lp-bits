@@ -332,6 +332,7 @@ jobs:
 
       - name: Upload coverage to Codecov (Unit + Feature flags)
         uses: codecov/codecov-action@a99c28d3f0da835de33ff2feb2e15691c7b9641f # v7
+        continue-on-error: true
         with:
           files: ./coverage-unit.xml,./coverage-feature.xml
           flags: unit,feature

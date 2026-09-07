@@ -1,0 +1,156 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+        "securelogin": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "enum": [
+                "yes",
+                "no",
+                null
+            ]
+        },
+        "securetracker": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "enum": [
+                "yes",
+                "no",
+                null
+            ]
+        },
+        "https_announce_url": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "iv": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "enum": [
+                "yes",
+                "no",
+                null
+            ]
+        },
+        "maxip": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "maxloginattempts": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "port_blacklist": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "changeemail": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "enum": [
+                "yes",
+                "no",
+                null
+            ]
+        },
+        "cheaterdet": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "nodetect": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "guest_visit_type": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "guest_visit_value_static_page": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "guest_visit_value_custom_content": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "guest_visit_value_redirect": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "login_type": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "login_secret_lifetime": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "login_secret_deadline": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "login_secret": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "use_challenge_response_authentication": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "enum": [
+                "yes",
+                "no",
+                null
+            ]
+        }
+    },
+    "additionalProperties": true
+}

@@ -1,0 +1,391 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+        "defaultclass": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "staffmem": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "newsmanage": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "sbmanage": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "pollmanage": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "postmanage": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "commanage": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "forummanage": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "viewuserlist": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "torrentmanage": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "torrentsticky": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "torrentonpromotion": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "askreseed": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "viewnfo": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "torrentstructure": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "sendinvite": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "viewhistory": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "topten": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "log": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "confilog": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "userprofile": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "torrenthistory": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "prfmanage": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "cruprfmanage": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "uploadsub": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "delownsub": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "submanage": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "updateextinfo": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "viewanonymous": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "beanonymous": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "addoffer": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "offermanage": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "upload": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "movetorrent": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "chrmanage": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "viewinvite": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "buyinvite": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "seebanned": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "againstoffer": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "userbar": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "torrent_hr": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "torrent-approval": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "torrent-delete": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "user-delete": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "user-change-class": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "torrent-set-special-tag": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "torrent-approval-allow-automatic": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "torrent-set-price": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        }
+    },
+    "additionalProperties": true
+}

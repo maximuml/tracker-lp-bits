@@ -1,0 +1,45 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+        "mode": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "inspect_time": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "seed_time_minimum": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "ignore_when_ratio_reach": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "ban_user_when_counts_reach": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "include_rate": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        }
+    },
+    "additionalProperties": true
+}

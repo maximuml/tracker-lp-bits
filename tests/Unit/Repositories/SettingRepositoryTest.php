@@ -27,7 +27,7 @@ final class SettingRepositoryTest extends TestCase
     {
         parent::setUp();
         DB::table('settings')->where('name', 'like', 'test_%')->delete();
-        $this->repository = new SettingRepository;
+        $this->repository = app(SettingRepository::class);
     }
 
     public function test_get_all_returns_autoload_settings(): void

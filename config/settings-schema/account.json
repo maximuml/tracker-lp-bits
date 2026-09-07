@@ -1,0 +1,414 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+        "neverdelete": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "neverdeletepacked": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "deletepacked": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "deleteunpacked": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "deletenotransfer": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "deletenotransfertwo": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "deletepeasant": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "psdlone": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "psratioone": {
+            "type": [
+                "number",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+\\.[0-9]+$"
+        },
+        "psdltwo": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "psratiotwo": {
+            "type": [
+                "number",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+\\.[0-9]+$"
+        },
+        "psdlthree": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "psratiothree": {
+            "type": [
+                "number",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+\\.[0-9]+$"
+        },
+        "psdlfour": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "psratiofour": {
+            "type": [
+                "number",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+\\.[0-9]+$"
+        },
+        "psdlfive": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "psratiofive": {
+            "type": [
+                "number",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+\\.[0-9]+$"
+        },
+        "putime": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "pudl": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "puprratio": {
+            "type": [
+                "number",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+\\.[0-9]+$"
+        },
+        "puderatio": {
+            "type": [
+                "number",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+\\.[0-9]+$"
+        },
+        "eutime": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "eudl": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "euprratio": {
+            "type": [
+                "number",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+\\.[0-9]+$"
+        },
+        "euderatio": {
+            "type": [
+                "number",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+\\.[0-9]+$"
+        },
+        "cutime": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "cudl": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "cuprratio": {
+            "type": [
+                "number",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+\\.[0-9]+$"
+        },
+        "cuderatio": {
+            "type": [
+                "number",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+\\.[0-9]+$"
+        },
+        "iutime": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "iudl": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "iuprratio": {
+            "type": [
+                "number",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+\\.[0-9]+$"
+        },
+        "iuderatio": {
+            "type": [
+                "number",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+\\.[0-9]+$"
+        },
+        "vutime": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "vudl": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "vuprratio": {
+            "type": [
+                "number",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+\\.[0-9]+$"
+        },
+        "vuderatio": {
+            "type": [
+                "number",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+\\.[0-9]+$"
+        },
+        "exutime": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "exudl": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "exuprratio": {
+            "type": [
+                "number",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+\\.[0-9]+$"
+        },
+        "exuderatio": {
+            "type": [
+                "number",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+\\.[0-9]+$"
+        },
+        "uutime": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "uudl": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "uuprratio": {
+            "type": [
+                "number",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+\\.[0-9]+$"
+        },
+        "uuderatio": {
+            "type": [
+                "number",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+\\.[0-9]+$"
+        },
+        "nmtime": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "nmdl": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "nmprratio": {
+            "type": [
+                "number",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+\\.[0-9]+$"
+        },
+        "nmderatio": {
+            "type": [
+                "number",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+\\.[0-9]+$"
+        },
+        "getInvitesByPromotion": {
+            "type": [
+                "array",
+                "string",
+                "null"
+            ]
+        },
+        "destroy_disabled": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        }
+    },
+    "additionalProperties": true
+}

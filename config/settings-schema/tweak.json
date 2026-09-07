@@ -1,0 +1,112 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+        "where": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "enum": [
+                "yes",
+                "no",
+                null
+            ]
+        },
+        "iplog1": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "enum": [
+                "yes",
+                "no",
+                null
+            ]
+        },
+        "bonus": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "datefounded": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "enablelocation": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "enum": [
+                "yes",
+                "no",
+                null
+            ]
+        },
+        "titlekeywords": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "metakeywords": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "metadescription": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "enablesqldebug": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "enum": [
+                "yes",
+                "no",
+                null
+            ]
+        },
+        "sqldebug": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "cssdate": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "enabletooltip": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "enum": [
+                "yes",
+                "no",
+                null
+            ]
+        },
+        "analyticscode": {
+            "type": [
+                "string",
+                "null"
+            ]
+        }
+    },
+    "additionalProperties": true
+}

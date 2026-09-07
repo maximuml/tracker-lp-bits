@@ -1,0 +1,312 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+        "prorules": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "enum": [
+                "yes",
+                "no",
+                null
+            ]
+        },
+        "randomhalfleech": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "randomfree": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "randomtwoup": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "randomtwoupfree": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "randomtwouphalfdown": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "largesize": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "largepro": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "expirehalfleech": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "expirefree": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "expiretwoup": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "expiretwoupfree": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "expiretwouphalfleech": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "expirenormal": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "hotdays": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "hotseeder": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "halfleechbecome": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "freebecome": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "twoupbecome": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "twoupfreebecome": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "twouphalfleechbecome": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "normalbecome": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "uploaderdouble": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "deldeadtorrent": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "randomthirtypercentdown": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "thirtypercentleechbecome": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "expirethirtypercentleech": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "minvotes": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "sticky_first_level_background_color": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "sticky_second_level_background_color": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "download_support_passkey": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "enum": [
+                "yes",
+                "no",
+                null
+            ]
+        },
+        "approval_status_icon_enabled": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "enum": [
+                "yes",
+                "no",
+                null
+            ]
+        },
+        "approval_status_none_visible": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "enum": [
+                "yes",
+                "no",
+                null
+            ]
+        },
+        "nfo_view_style_default": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "tax_factor": {
+            "type": [
+                "number",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+\\.[0-9]+$"
+        },
+        "paid_torrent_enabled": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "enum": [
+                "yes",
+                "no",
+                null
+            ]
+        },
+        "max_price": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        }
+    },
+    "additionalProperties": true
+}

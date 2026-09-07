@@ -1,0 +1,31 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+        "mainversion": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "subversion": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "releasedate": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "website": {
+            "type": [
+                "string",
+                "null"
+            ]
+        }
+    },
+    "additionalProperties": true
+}

@@ -1,0 +1,64 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+        "change_username_min_interval_in_days": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "change_username_card_allow_characters_outside_the_alphabets": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "enum": [
+                "yes",
+                "no",
+                null
+            ]
+        },
+        "maximum_number_of_medals_can_be_worn": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "cookie_valid_days": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "maximum_upload_speed": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "is_invite_pre_email_and_username": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "access_admin_class_min": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        }
+    },
+    "additionalProperties": true
+}

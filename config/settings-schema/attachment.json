@@ -6,11 +6,6 @@
             "type": [
                 "string",
                 "null"
-            ],
-            "enum": [
-                "yes",
-                "no",
-                null
             ]
         },
         "classone": {

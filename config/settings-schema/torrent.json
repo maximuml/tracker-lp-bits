@@ -6,11 +6,6 @@
             "type": [
                 "string",
                 "null"
-            ],
-            "enum": [
-                "yes",
-                "no",
-                null
             ]
         },
         "randomhalfleech": {
@@ -245,33 +240,18 @@
             "type": [
                 "string",
                 "null"
-            ],
-            "enum": [
-                "yes",
-                "no",
-                null
             ]
         },
         "approval_status_icon_enabled": {
             "type": [
                 "string",
                 "null"
-            ],
-            "enum": [
-                "yes",
-                "no",
-                null
             ]
         },
         "approval_status_none_visible": {
             "type": [
                 "string",
                 "null"
-            ],
-            "enum": [
-                "yes",
-                "no",
-                null
             ]
         },
         "nfo_view_style_default": {
@@ -292,11 +272,6 @@
             "type": [
                 "string",
                 "null"
-            ],
-            "enum": [
-                "yes",
-                "no",
-                null
             ]
         },
         "max_price": {

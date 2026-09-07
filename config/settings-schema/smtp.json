@@ -12,11 +12,6 @@
             "type": [
                 "string",
                 "null"
-            ],
-            "enum": [
-                "yes",
-                "no",
-                null
             ]
         },
         "smtp_host": {

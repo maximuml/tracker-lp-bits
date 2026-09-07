@@ -6,11 +6,6 @@
             "type": [
                 "string",
                 "null"
-            ],
-            "enum": [
-                "yes",
-                "no",
-                null
             ]
         },
         "max_torrent_size": {
@@ -252,132 +247,72 @@
             "type": [
                 "string",
                 "null"
-            ],
-            "enum": [
-                "yes",
-                "no",
-                null
             ]
         },
         "registration": {
             "type": [
                 "string",
                 "null"
-            ],
-            "enum": [
-                "yes",
-                "no",
-                null
             ]
         },
         "enablenfo": {
             "type": [
                 "string",
                 "null"
-            ],
-            "enum": [
-                "yes",
-                "no",
-                null
             ]
         },
         "showpolls": {
             "type": [
                 "string",
                 "null"
-            ],
-            "enum": [
-                "yes",
-                "no",
-                null
             ]
         },
         "showstats": {
             "type": [
                 "string",
                 "null"
-            ],
-            "enum": [
-                "yes",
-                "no",
-                null
             ]
         },
         "showlastxtorrents": {
             "type": [
                 "string",
                 "null"
-            ],
-            "enum": [
-                "yes",
-                "no",
-                null
             ]
         },
         "showtrackerload": {
             "type": [
                 "string",
                 "null"
-            ],
-            "enum": [
-                "yes",
-                "no",
-                null
             ]
         },
         "showshoutbox": {
             "type": [
                 "string",
                 "null"
-            ],
-            "enum": [
-                "yes",
-                "no",
-                null
             ]
         },
         "showoffer": {
             "type": [
                 "string",
                 "null"
-            ],
-            "enum": [
-                "yes",
-                "no",
-                null
             ]
         },
         "sptime": {
             "type": [
                 "string",
                 "null"
-            ],
-            "enum": [
-                "yes",
-                "no",
-                null
             ]
         },
         "enablebitbucket": {
             "type": [
                 "string",
                 "null"
-            ],
-            "enum": [
-                "yes",
-                "no",
-                null
             ]
         },
         "smalldescription": {
             "type": [
                 "string",
                 "null"
-            ],
-            "enum": [
-                "yes",
-                "no",
-                null
             ]
         },
         "altname": {
@@ -404,11 +339,6 @@
             "type": [
                 "string",
                 "null"
-            ],
-            "enum": [
-                "yes",
-                "no",
-                null
             ]
         },
         "browsecat": {
@@ -423,22 +353,12 @@
             "type": [
                 "string",
                 "null"
-            ],
-            "enum": [
-                "yes",
-                "no",
-                null
             ]
         },
         "maxdlsystem": {
             "type": [
                 "string",
                 "null"
-            ],
-            "enum": [
-                "yes",
-                "no",
-                null
             ]
         },
         "bitbucket": {
@@ -457,11 +377,6 @@
             "type": [
                 "string",
                 "null"
-            ],
-            "enum": [
-                "yes",
-                "no",
-                null
             ]
         },
         "verification": {
@@ -508,22 +423,12 @@
             "type": [
                 "string",
                 "null"
-            ],
-            "enum": [
-                "yes",
-                "no",
-                null
             ]
         },
         "enable_technical_info": {
             "type": [
                 "string",
                 "null"
-            ],
-            "enum": [
-                "yes",
-                "no",
-                null
             ]
         },
         "site_language_enabled": {
@@ -537,11 +442,6 @@
             "type": [
                 "string",
                 "null"
-            ],
-            "enum": [
-                "yes",
-                "no",
-                null
             ]
         },
         "offer_skip_approved_count": {
@@ -564,11 +464,6 @@
             "type": [
                 "string",
                 "null"
-            ],
-            "enum": [
-                "yes",
-                "no",
-                null
             ]
         },
         "tmp_invite_count": {
@@ -583,11 +478,6 @@
             "type": [
                 "string",
                 "null"
-            ],
-            "enum": [
-                "yes",
-                "no",
-                null
             ]
         }
     },

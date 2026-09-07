@@ -14,11 +14,6 @@
             "type": [
                 "string",
                 "null"
-            ],
-            "enum": [
-                "yes",
-                "no",
-                null
             ]
         },
         "maximum_number_of_medals_can_be_worn": {

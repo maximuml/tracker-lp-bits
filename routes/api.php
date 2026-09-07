@@ -155,7 +155,9 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::get('offers', [OfferController::class, 'index'])
             ->middleware(Permissions::abilityLabel(RoutePermissionEnum::OFFER_LIST));
 
-        Route::match(['get', 'post'], 'usercp/settings', [UsercpController::class, 'settings'])
+        Route::get('usercp/settings', [UsercpController::class, 'settings'])
+            ->middleware(Permissions::abilityLabel(RoutePermissionEnum::USERCP_SETTINGS));
+        Route::post('usercp/settings', [UsercpController::class, 'settings'])
             ->middleware(Permissions::abilityLabel(RoutePermissionEnum::USERCP_SETTINGS));
 
         Route::post('usercp/forum', [UsercpController::class, 'forum'])

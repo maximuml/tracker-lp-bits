@@ -58,9 +58,11 @@ Route::get('/confirm', [RegistrationController::class, 'confirm'])->name('confir
 Route::get('/confirm_resend', [RegistrationController::class, 'showConfirmResend'])->name('confirm_resend');
 Route::post('/confirm_resend', [RegistrationController::class, 'resendConfirmation'])->middleware('throttle:login');
 
-Route::match(['get', 'post'], '/recover', [RecoveryController::class, 'recover'])
+Route::get('/recover', [RecoveryController::class, 'recover'])
     ->middleware('throttle:login')
     ->name('recover');
+Route::post('/recover', [RecoveryController::class, 'recover'])
+    ->middleware('throttle:login');
 
 Route::get('/error', [ToolController::class, 'error']);
 
@@ -84,17 +86,21 @@ Route::middleware(['web', 'locale', 'throttle:legacy'])->group(base_path('routes
 
 Route::group(['middleware' => ['auth.nexus:nexus-web', 'throttle:legacy']], base_path('routes/legacy/auth.php'));
 
-Route::match(['get', 'post'], '/forums', [ForumController::class, 'legacy'])
+Route::get('/forums', [ForumController::class, 'legacy'])
     ->middleware(['auth.nexus:nexus-web', 'throttle:legacy'])
     ->name('forums.legacy');
+Route::post('/forums', [ForumController::class, 'legacy'])
+    ->middleware(['auth.nexus:nexus-web', 'throttle:legacy']);
 
 Route::get('/userdetails', [UserDetailController::class, 'show'])
     ->middleware(['auth.nexus:nexus-web', 'throttle:legacy'])
     ->name('user.details');
 
-Route::match(['get', 'post'], '/usercp', [UsercpController::class, 'legacy'])
+Route::get('/usercp', [UsercpController::class, 'legacy'])
     ->middleware(['auth.nexus:nexus-web', 'throttle:legacy'])
     ->name('usercp.legacy');
+Route::post('/usercp', [UsercpController::class, 'legacy'])
+    ->middleware(['auth.nexus:nexus-web', 'throttle:legacy']);
 
 Route::group(['prefix' => 'web', 'middleware' => ['auth.nexus:nexus-web', 'throttle:legacy']], function () {
     Route::get('torrent-approval-page', [TorrentController::class, 'approvalPage']);

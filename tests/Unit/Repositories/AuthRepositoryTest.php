@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Repositories;
 
+use App\Enums\LoginAttemptType;
 use App\Exceptions\NexusException;
 use App\Models\User;
 use App\Repositories\AuthRepository;
@@ -45,9 +46,9 @@ final class AuthRepositoryTest extends TestCase
     public function test_get_login_attempts_sum_sums_attempts_for_ip(): void
     {
         DB::table('loginattempts')->insert([
-            ['ip' => '1.2.3.4', 'added' => now()->toDateTimeString(), 'attempts' => 3, 'banned' => 0, 'type' => 'login'],
-            ['ip' => '1.2.3.4', 'added' => now()->toDateTimeString(), 'attempts' => 2, 'banned' => 0, 'type' => 'login'],
-            ['ip' => '5.6.7.8', 'added' => now()->toDateTimeString(), 'attempts' => 10, 'banned' => 0, 'type' => 'login'],
+            ['ip' => '1.2.3.4', 'added' => now()->toDateTimeString(), 'attempts' => 3, 'banned' => 0, 'type' => 0],
+            ['ip' => '1.2.3.4', 'added' => now()->toDateTimeString(), 'attempts' => 2, 'banned' => 0, 'type' => 0],
+            ['ip' => '5.6.7.8', 'added' => now()->toDateTimeString(), 'attempts' => 10, 'banned' => 0, 'type' => 0],
         ]);
 
         $this->assertSame(5, $this->repository->getLoginAttemptsSum('1.2.3.4'));
@@ -56,8 +57,8 @@ final class AuthRepositoryTest extends TestCase
     public function test_ban_login_attempts_updates_rows(): void
     {
         DB::table('loginattempts')->insert([
-            ['ip' => '1.2.3.4', 'added' => now()->toDateTimeString(), 'attempts' => 3, 'banned' => 0, 'type' => 'login'],
-            ['ip' => '5.6.7.8', 'added' => now()->toDateTimeString(), 'attempts' => 1, 'banned' => 0, 'type' => 'login'],
+            ['ip' => '1.2.3.4', 'added' => now()->toDateTimeString(), 'attempts' => 3, 'banned' => 0, 'type' => 0],
+            ['ip' => '5.6.7.8', 'added' => now()->toDateTimeString(), 'attempts' => 1, 'banned' => 0, 'type' => 0],
         ]);
 
         $this->repository->banLoginAttempts('1.2.3.4');
@@ -77,13 +78,13 @@ final class AuthRepositoryTest extends TestCase
 
         $this->assertNotNull($row);
         $this->assertSame(1, (int) $row->attempts);
-        $this->assertSame('login', $row->type);
+        $this->assertSame(LoginAttemptType::LOGIN->value, (int) $row->type);
     }
 
     public function test_record_failed_login_increments_existing_row(): void
     {
         DB::table('loginattempts')->insert([
-            'ip' => '1.2.3.4', 'added' => now()->toDateTimeString(), 'attempts' => 2, 'banned' => 0, 'type' => 'login',
+            'ip' => '1.2.3.4', 'added' => now()->toDateTimeString(), 'attempts' => 2, 'banned' => 0, 'type' => 0,
         ]);
 
         $this->repository->recordFailedLogin('1.2.3.4', false);
@@ -95,7 +96,7 @@ final class AuthRepositoryTest extends TestCase
     {
         $this->repository->recordFailedLogin('1.2.3.4', true);
 
-        $this->assertSame('recover', DB::table('loginattempts')->where('ip', '1.2.3.4')->value('type'));
+        $this->assertSame(LoginAttemptType::RECOVER->value, (int) DB::table('loginattempts')->where('ip', '1.2.3.4')->value('type'));
     }
 
     public function test_update_user_lang_updates_lang(): void
@@ -207,7 +208,7 @@ final class AuthRepositoryTest extends TestCase
     public function test_find_user_array_for_cookie_returns_data_when_confirmed_and_enabled(): void
     {
         /** @var User $user */
-        $user = User::factory()->create(['status' => 'confirmed', 'enabled' => 1]);
+        $user = User::factory()->create(['status' => 1, 'enabled' => 1]);
 
         $result = $this->repository->findUserArrayForCookie($user->id, false);
 
@@ -218,7 +219,7 @@ final class AuthRepositoryTest extends TestCase
     public function test_find_user_array_for_cookie_returns_null_when_not_confirmed(): void
     {
         /** @var User $user */
-        $user = User::factory()->create(['status' => 'pending', 'enabled' => 1]);
+        $user = User::factory()->create(['status' => 0, 'enabled' => 1]);
 
         $this->assertNull($this->repository->findUserArrayForCookie($user->id, false));
     }
@@ -226,7 +227,7 @@ final class AuthRepositoryTest extends TestCase
     public function test_find_user_array_for_cookie_returns_null_when_disabled_and_not_ignored(): void
     {
         /** @var User $user */
-        $user = User::factory()->disabled()->create(['status' => 'confirmed']);
+        $user = User::factory()->disabled()->create(['status' => 1]);
 
         $this->assertNull($this->repository->findUserArrayForCookie($user->id, false));
     }
@@ -234,7 +235,7 @@ final class AuthRepositoryTest extends TestCase
     public function test_find_user_array_for_cookie_returns_data_when_disabled_but_ignored(): void
     {
         /** @var User $user */
-        $user = User::factory()->disabled()->create(['status' => 'confirmed']);
+        $user = User::factory()->disabled()->create(['status' => 1]);
 
         $result = $this->repository->findUserArrayForCookie($user->id, true);
 
@@ -250,7 +251,7 @@ final class AuthRepositoryTest extends TestCase
     public function test_find_user_model_for_cookie_returns_user_when_normal(): void
     {
         /** @var User $user */
-        $user = User::factory()->create(['status' => 'confirmed', 'enabled' => 1]);
+        $user = User::factory()->create(['status' => 1, 'enabled' => 1]);
 
         $result = $this->repository->findUserModelForCookie($user->id, false);
 
@@ -261,7 +262,7 @@ final class AuthRepositoryTest extends TestCase
     public function test_find_user_model_for_cookie_throws_when_disabled_and_not_ignored(): void
     {
         /** @var User $user */
-        $user = User::factory()->disabled()->create(['status' => 'confirmed']);
+        $user = User::factory()->disabled()->create(['status' => 1]);
 
         $this->expectException(NexusException::class);
 
@@ -271,7 +272,7 @@ final class AuthRepositoryTest extends TestCase
     public function test_find_user_model_for_cookie_returns_user_when_disabled_but_ignored(): void
     {
         /** @var User $user */
-        $user = User::factory()->disabled()->create(['status' => 'confirmed']);
+        $user = User::factory()->disabled()->create(['status' => 1]);
 
         $result = $this->repository->findUserModelForCookie($user->id, true);
 

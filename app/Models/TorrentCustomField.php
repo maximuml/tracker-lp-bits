@@ -6,7 +6,7 @@ declare(strict_types=1);
  * @property int $id
  * @property string $name
  * @property string $label
- * @property string $type
+ * @property TorrentCustomFieldType $type
  * @property int $required
  * @property int $is_single_row
  * @property string|null $options
@@ -18,6 +18,8 @@ declare(strict_types=1);
  */
 
 namespace App\Models;
+
+use App\Enums\TorrentCustomFieldType;
 
 class TorrentCustomField extends NexusModel
 {
@@ -34,7 +36,7 @@ class TorrentCustomField extends NexusModel
 
     /** @var array<string, string> */
     protected $casts = [
-        'type' => 'string',
+        'type' => TorrentCustomFieldType::class,
     ];
 
     /** @return  array<int|string, mixed> */

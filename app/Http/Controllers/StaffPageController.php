@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Enums\Permission\PermissionEnum;
+use App\Enums\UserStatus;
 use App\Models\Setting;
 use App\Models\User;
 use App\Support\Country;
@@ -54,13 +55,13 @@ class StaffPageController extends LegacyController
 
         $supportRows = User::query()
             ->where('support', true)
-            ->where('status', 'confirmed')
+            ->where('status', UserStatus::CONFIRMED->value)
             ->orderBy('username')
             ->get(['id', 'country', 'last_access', 'supportlang', 'supportfor']);
 
         $pickerRows = User::query()
             ->where('picker', true)
-            ->where('status', 'confirmed')
+            ->where('status', UserStatus::CONFIRMED->value)
             ->orderBy('username')
             ->get(['id', 'country', 'last_access', 'pickfor']);
 
@@ -107,7 +108,7 @@ class StaffPageController extends LegacyController
         $vipClass = defined('UC_VIP') ? \constant('UC_VIP') : 0;
         $staffUsers = User::query()
             ->where('class', '>', $vipClass)
-            ->where('status', 'confirmed')
+            ->where('status', UserStatus::CONFIRMED->value)
             ->orderByDesc('class')
             ->orderBy('username')
             ->get()
@@ -125,7 +126,7 @@ class StaffPageController extends LegacyController
 
         $vipRows = User::query()
             ->where('class', $vipClass)
-            ->where('status', 'confirmed')
+            ->where('status', UserStatus::CONFIRMED->value)
             ->orderBy('username')
             ->get()
             ->map(fn ($r) => $buildUserRow((array) $r->getAttributes(), 'stafffor'))

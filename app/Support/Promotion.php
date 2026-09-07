@@ -6,6 +6,7 @@ namespace App\Support;
 
 use App\Enums\TorrentPosState;
 use App\Enums\TorrentPromotion;
+use App\Enums\UserAppendPromotion;
 use App\Models\Torrent;
 use App\Models\TorrentState;
 use App\Support\Config\SiteConfig;
@@ -92,7 +93,7 @@ final class Promotion
             $promotion,
             (string) ($posState ?? ''),
             $torrent ?? [],
-            (string) ($user['appendpromotion'] ?? ''),
+            UserAppendPromotion::tryFrom((int) ($user['appendpromotion'] ?? 2))?->stringValue() ?? 'icon',
         );
     }
 
@@ -260,7 +261,7 @@ final class Promotion
             $promotionTimeType,
             $promotionUntil,
             $ignoreGlobal,
-            (string) ($user['appendpromotion'] ?? ''),
+            UserAppendPromotion::tryFrom((int) ($user['appendpromotion'] ?? 2))?->stringValue() ?? 'icon',
             app(Language::class)->functions(),
             $expires,
         );
@@ -290,7 +291,7 @@ final class Promotion
             $promotionTimeType,
             $promotionUntil,
             $ignoreGlobal,
-            (string) ($user['appendpromotion'] ?? ''),
+            UserAppendPromotion::tryFrom((int) ($user['appendpromotion'] ?? 2))?->stringValue() ?? 'icon',
             app(Language::class)->functions(),
             $expires,
         );

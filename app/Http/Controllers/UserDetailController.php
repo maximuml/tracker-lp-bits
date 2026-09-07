@@ -6,6 +6,8 @@ namespace App\Http\Controllers;
 
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
+use App\Enums\UserAcceptPms;
+use App\Enums\UserStatus;
 use App\Models\HitAndRun;
 use App\Models\User;
 use App\Models\UserMeta;
@@ -69,7 +71,7 @@ class UserDetailController extends Controller
             return redirect('/userdetails.php');
         }
 
-        if (($user['status'] ?? '') === 'pending') {
+        if (($user['status'] ?? null) === UserStatus::PENDING->stringValue()) {
             LegacyResponse::abort(
                 $lang['std_sorry'] ?? 'Sorry',
                 $lang['std_user_not_confirmed'] ?? 'This user is not confirmed.'
@@ -117,9 +119,9 @@ class UserDetailController extends Controller
         if ($currentUserId !== $id) {
             if ($staffMember) {
                 $showPmButton = true;
-            } elseif ($user['acceptpms'] === 'yes') {
+            } elseif ($user['acceptpms'] === UserAcceptPms::YES->value) {
                 $showPmButton = ! $targetBlockedMe;
-            } elseif ($user['acceptpms'] === 'friends') {
+            } elseif ($user['acceptpms'] === UserAcceptPms::FRIENDS->value) {
                 $showPmButton = $currentUserIsFriendOfTarget;
             }
         }

@@ -12,19 +12,19 @@ use Illuminate\Support\Facades\DB;
 
 class CustomField
 {
-    const TYPE_TEXT = 'text';
+    const TYPE_TEXT = 0;
 
-    const TYPE_TEXTAREA = 'textarea';
+    const TYPE_TEXTAREA = 1;
 
-    const TYPE_RADIO = 'radio';
+    const TYPE_RADIO = 3;
 
-    const TYPE_CHECKBOX = 'checkbox';
+    const TYPE_CHECKBOX = 4;
 
-    const TYPE_SELECT = 'select';
+    const TYPE_SELECT = 2;
 
-    const TYPE_IMAGE = 'image';
+    const TYPE_IMAGE = 5;
 
-    /** @var array<string, array{text: string, has_option: bool, is_value_multiple: bool}> */
+    /** @var array<int, array{text: string, has_option: bool, is_value_multiple: bool}> */
     public static array $types = [
         self::TYPE_TEXT => [
             'text' => 'text',
@@ -61,7 +61,7 @@ class CustomField
     /** @var array<int|string, array<int|string, mixed>> */
     private array $preparedTorrentCustomFieldValues = [];
 
-    public function getTypeHuman(string $type): string
+    public function getTypeHuman(int $type): string
     {
         $map = [
             self::TYPE_TEXT => Locale::trans('field.type.text', [], null),
@@ -75,12 +75,12 @@ class CustomField
         return $map[$type] ?? '';
     }
 
-    /** @return array<string, string> */
+    /** @return array<int, string> */
     public function getTypeRadioOptions(): array
     {
         $out = [];
         foreach (self::$types as $key => $value) {
-            $out[$key] = sprintf('%s(%s)', $value['text'], $this->getTypeHuman($key));
+            $out[$key] = sprintf('%s(%s)', $value['text'], $this->getTypeHuman((int) $key));
         }
 
         return $out;
@@ -172,7 +172,7 @@ HTML;
             $row = (array) $row;
             $row['required_text'] = $row['required'] ? $lang_functions['text_yes'] : $lang_functions['text_no'];
             $row['is_single_row_text'] = $row['is_single_row'] ? $lang_functions['text_yes'] : $lang_functions['text_no'];
-            $row['type_text'] = sprintf('%s(%s)', $this->getTypeHuman($row['type']), $row['type']);
+            $row['type_text'] = sprintf('%s(%s)', $this->getTypeHuman((int) $row['type']), $row['type']);
             $row['action'] = sprintf(
                 "<a href=\"javascript:confirm_delete('%s', '%s', '');\">%s</a> | <a href=\"?action=edit&id=%s\">%s</a>",
                 $row['id'], $lang_fields['js_sure_to_delete_this'], $lang_fields['text_delete'], $row['id'], $lang_fields['text_edit']

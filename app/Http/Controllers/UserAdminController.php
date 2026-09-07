@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\BusinessType;
 use App\Enums\Permission\PermissionEnum;
+use App\Enums\UserStatus;
 use App\Models\Setting;
 use App\Models\User;
 use App\Models\UserBanLog;
@@ -281,7 +282,7 @@ class UserAdminController extends LegacyController
         }
 
         $rows = User::query()
-            ->where('status', 'pending')
+            ->where('status', UserStatus::PENDING->value)
             ->orderBy('username')
             ->get()
             ->map(fn ($user) => $user->getAttributes())

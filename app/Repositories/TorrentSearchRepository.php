@@ -60,13 +60,13 @@ class TorrentSearchRepository
         $hasSearchParams = ! empty($searchParams);
         $searchParams['mode'] = $sectiontype;
 
-        $showsubcat = SearchBox::valueWithContext($sectiontype, 'showsubcat'); // whether show subcategory (i.e. sources, codecs) or not
-        $showsource = SearchBox::valueWithContext($sectiontype, 'showsource'); // whether show sources or not
-        $showmedium = SearchBox::valueWithContext($sectiontype, 'showmedium'); // whether show media or not
-        $showcodec = SearchBox::valueWithContext($sectiontype, 'showcodec'); // whether show codecs or not
-        $showstandard = SearchBox::valueWithContext($sectiontype, 'showstandard'); // whether show standards or not
-        $showprocessing = SearchBox::valueWithContext($sectiontype, 'showprocessing'); // whether show processings or not
-        $showaudiocodec = SearchBox::valueWithContext($sectiontype, 'showaudiocodec'); // whether show audio codec or not
+        $showsubcat = (int) SearchBox::valueWithContext($sectiontype, 'showsubcat'); // whether show subcategory (i.e. sources, codecs) or not
+        $showsource = (int) SearchBox::valueWithContext($sectiontype, 'showsource'); // whether show sources or not
+        $showmedium = (int) SearchBox::valueWithContext($sectiontype, 'showmedium'); // whether show media or not
+        $showcodec = (int) SearchBox::valueWithContext($sectiontype, 'showcodec'); // whether show codecs or not
+        $showstandard = (int) SearchBox::valueWithContext($sectiontype, 'showstandard'); // whether show standards or not
+        $showprocessing = (int) SearchBox::valueWithContext($sectiontype, 'showprocessing'); // whether show processings or not
+        $showaudiocodec = (int) SearchBox::valueWithContext($sectiontype, 'showaudiocodec'); // whether show audio codec or not
         $catsperrow = SearchBox::valueWithContext($sectiontype, 'catsperrow'); // show how many cats per line in search box
         $catpadding = SearchBox::valueWithContext($sectiontype, 'catpadding'); // padding space between categories in pixel
 

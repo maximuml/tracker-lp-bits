@@ -21,7 +21,7 @@ use Tests\TestCase;
  * getPollsExceptFirst(), deletePoll(), and getPollVoteCounts().
  *
  * Site log tests run without authentication, so the confidential-log
- * filter restricts results to security_level='normal' only.
+ * filter restricts results to security_level=0 only.
  */
 final class LogRepositoryTest extends TestCase
 {
@@ -60,24 +60,24 @@ final class LogRepositoryTest extends TestCase
 
     public function test_count_site_log_counts_only_normal_without_auth(): void
     {
-        $this->insertSiteLog('normal action', 'normal');
-        $this->insertSiteLog('mod action', 'mod');
+        $this->insertSiteLog('normal action', 0);
+        $this->insertSiteLog('mod action', 1);
 
         $this->assertSame(1, $this->repository->countSiteLog([]));
     }
 
     public function test_count_site_log_filters_by_query_text(): void
     {
-        $this->insertSiteLog('user logged in', 'normal');
-        $this->insertSiteLog('user logged out', 'normal');
+        $this->insertSiteLog('user logged in', 0);
+        $this->insertSiteLog('user logged out', 0);
 
         $this->assertSame(1, $this->repository->countSiteLog(['query' => 'logged in']));
     }
 
     public function test_get_site_log_returns_ordered_by_added_desc(): void
     {
-        $this->insertSiteLog('older log', 'normal', '2025-01-01 00:00:00');
-        $this->insertSiteLog('newer log', 'normal', '2025-06-01 00:00:00');
+        $this->insertSiteLog('older log', 0, '2025-01-01 00:00:00');
+        $this->insertSiteLog('newer log', 0, '2025-06-01 00:00:00');
 
         $result = $this->repository->getSiteLog([], 0, 10);
 
@@ -88,9 +88,9 @@ final class LogRepositoryTest extends TestCase
 
     public function test_get_site_log_respects_offset_and_limit(): void
     {
-        $this->insertSiteLog('log A', 'normal', '2025-01-01 00:00:00');
-        $this->insertSiteLog('log B', 'normal', '2025-02-01 00:00:00');
-        $this->insertSiteLog('log C', 'normal', '2025-03-01 00:00:00');
+        $this->insertSiteLog('log A', 0, '2025-01-01 00:00:00');
+        $this->insertSiteLog('log B', 0, '2025-02-01 00:00:00');
+        $this->insertSiteLog('log C', 0, '2025-03-01 00:00:00');
 
         $result = $this->repository->getSiteLog([], 1, 1);
 
@@ -365,7 +365,7 @@ final class LogRepositoryTest extends TestCase
         $this->assertArrayNotHasKey(20, $result);
     }
 
-    private function insertSiteLog(string $txt, string $securityLevel, ?string $added = null): int
+    private function insertSiteLog(string $txt, int $securityLevel, ?string $added = null): int
     {
         return (int) DB::table('sitelog')->insertGetId([
             'txt' => $txt,

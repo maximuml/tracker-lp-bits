@@ -10,10 +10,10 @@ namespace App\Enums;
  * Mirrors the string constants from App\Models\AgentAllow:
  *   MATCH_TYPE_DEC ('dec'), MATCH_TYPE_HEX ('hex').
  */
-enum AgentAllowMatchType: string
+enum AgentAllowMatchType: int
 {
-    case DEC = 'dec';
-    case HEX = 'hex';
+    case DEC = 0;
+    case HEX = 1;
 
     public function label(): string
     {
@@ -23,8 +23,20 @@ enum AgentAllowMatchType: string
         };
     }
 
+    public function stringValue(): string
+    {
+        return match ($this) {
+            self::DEC => 'dec',
+            self::HEX => 'hex',
+        };
+    }
+
     public static function fromStringSafe(?string $value): self
     {
-        return self::tryFrom((string) $value) ?? self::DEC;
+        return match ($value) {
+            'hex' => self::HEX,
+            'dec' => self::DEC,
+            default => self::DEC,
+        };
     }
 }

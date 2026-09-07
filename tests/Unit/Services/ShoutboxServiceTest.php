@@ -53,7 +53,7 @@ final class ShoutboxServiceTest extends TestCase
             'class' => 1,
             'added' => now()->toDateTimeString(),
             'last_access' => now()->toDateTimeString(),
-            'status' => 'confirmed',
+            'status' => 1,
             'enabled' => 1,
         ]);
     }
@@ -83,7 +83,7 @@ final class ShoutboxServiceTest extends TestCase
             'userid' => $userId,
             'date' => $date ?? time(),
             'text' => $text,
-            'type' => 'sb',
+            'type' => 0,
         ]);
     }
 
@@ -129,7 +129,7 @@ final class ShoutboxServiceTest extends TestCase
         $this->assertNotNull($msg);
         $this->assertSame(1, (int) $msg->userid);
         $this->assertSame('Hello world', $msg->text);
-        $this->assertSame('sb', $msg->type);
+        $this->assertSame(0, (int) $msg->type);
     }
 
     public function test_post_message_at_max_length_succeeds(): void

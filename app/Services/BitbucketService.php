@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Enums\BitbucketPublic;
 use App\Models\User;
 use App\Support\Globals;
 use App\Support\Http;
@@ -93,7 +94,7 @@ final class BitbucketService
 
         $baseUrl = (string) app(Globals::class)->get('BASEURL', '');
         $url = str_replace(' ', '%20', htmlspecialchars(Http::protocolPrefix(Url::isSecure())."{$baseUrl}/bitbucket/{$filename}"));
-        $public = $isPublic ? '1' : '0';
+        $public = $isPublic ? BitbucketPublic::YES->value : BitbucketPublic::NO->value;
 
         DB::table('bitbucket')->insert([
             'owner' => $currentUser['id'],

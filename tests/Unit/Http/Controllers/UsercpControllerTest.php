@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Http\Controllers;
 
+use App\Enums\UserGender;
+use App\Enums\UserTimeType;
 use App\Http\Controllers\UsercpController;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -30,11 +32,11 @@ final class UsercpControllerTest extends TestCase
         $controller = app(UsercpController::class);
         $request = Request::create('/api/usercp/settings', 'POST', [
             'parked' => 'yes',
-            'acceptpms' => 'friends',
+            'acceptpms' => 1,
             'deletepms' => true,
             'savepms' => true,
             'commentpm' => 'yes',
-            'gender' => 'Male',
+            'gender' => 0,
             'info' => 'Updated info',
         ]);
         app()->instance('request', $request);
@@ -45,8 +47,8 @@ final class UsercpControllerTest extends TestCase
         $this->assertNotEmpty($result['data']);
 
         $updated = DB::table('users')->where('id', $user->id)->first();
-        $this->assertSame('friends', $updated->acceptpms);
-        $this->assertSame('Male', $updated->gender);
+        $this->assertSame(1, (int) $updated->acceptpms);
+        $this->assertSame(UserGender::MALE->value, (int) $updated->gender);
     }
 
     public function test_forum_updates_forum_settings(): void
@@ -60,7 +62,7 @@ final class UsercpControllerTest extends TestCase
             'postsperpage' => 30,
             'avatars' => 'yes',
             'signatures' => 'yes',
-            'clicktopic' => 'lastpage',
+            'clicktopic' => 1,
             'signature' => 'My signature',
         ]);
         app()->instance('request', $request);
@@ -73,7 +75,7 @@ final class UsercpControllerTest extends TestCase
         $updated = DB::table('users')->where('id', $user->id)->first();
         $this->assertSame(25, (int) $updated->topicsperpage);
         $this->assertSame(30, (int) $updated->postsperpage);
-        $this->assertSame('lastpage', $updated->clicktopic);
+        $this->assertSame(1, (int) $updated->clicktopic);
     }
 
     public function test_tracker_updates_tracker_settings(): void
@@ -84,10 +86,10 @@ final class UsercpControllerTest extends TestCase
         $controller = app(UsercpController::class);
         $request = Request::create('/api/usercp/tracker', 'POST', [
             'torrentsperpage' => 50,
-            'timetype' => 'timeadded',
+            'timetype' => 0,
             'appendsticky' => 'yes',
             'appendnew' => 'yes',
-            'appendpromotion' => 'word',
+            'appendpromotion' => 1,
             'appendpicked' => 'yes',
             'dlicon' => 'yes',
             'bmicon' => 'yes',
@@ -98,7 +100,7 @@ final class UsercpControllerTest extends TestCase
             'pmnum' => 20,
             'sbnum' => 70,
             'sbrefresh' => 120,
-            'fontsize' => 'large',
+            'fontsize' => 2,
         ]);
         app()->instance('request', $request);
 
@@ -109,8 +111,8 @@ final class UsercpControllerTest extends TestCase
 
         $updated = DB::table('users')->where('id', $user->id)->first();
         $this->assertSame(50, (int) $updated->torrentsperpage);
-        $this->assertSame('timeadded', $updated->timetype);
-        $this->assertSame('large', $updated->fontsize);
+        $this->assertSame(UserTimeType::TIMEADDED->value, (int) $updated->timetype);
+        $this->assertSame(2, (int) $updated->fontsize);
     }
 
     public function test_security_updates_security_settings(): void
@@ -121,7 +123,7 @@ final class UsercpControllerTest extends TestCase
         $controller = app(UsercpController::class);
         $request = Request::create('/api/usercp/security', 'POST', [
             'current_password' => '123456',
-            'privacy' => 'strong',
+            'privacy' => 0,
         ]);
         app()->instance('request', $request);
 
@@ -131,6 +133,6 @@ final class UsercpControllerTest extends TestCase
         $this->assertNotEmpty($result['data']);
 
         $updated = DB::table('users')->where('id', $user->id)->first();
-        $this->assertSame('strong', $updated->privacy);
+        $this->assertSame(0, (int) $updated->privacy);
     }
 }

@@ -1,0 +1,485 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+        "site_online": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "max_torrent_size": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "announce_interval": {
+            "type": [
+                "integer",
+                "string",
+                "array",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "annintertwoage": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "annintertwo": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "anninterthreeage": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "anninterthree": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "signup_timeout": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "minoffervotes": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "offervotetimeout": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "offeruptimeout": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "maxsubsize": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "postsperpage": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "topicsperpage": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "torrentsperpage": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "maxnewsnum": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "max_dead_torrent_time": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "maxusers": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "torrent_dir": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "iniupload": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "SITEEMAIL": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "ACCOUNTANTID": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "ALIPAYACCOUNT": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "PAYPALACCOUNT": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "SLOGAN": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "icplicense": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "autoclean_interval_one": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "autoclean_interval_two": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "autoclean_interval_three": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "autoclean_interval_four": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "autoclean_interval_five": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "reportemail": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "invitesystem": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "registration": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "enablenfo": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "showpolls": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "showstats": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "showlastxtorrents": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "showtrackerload": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "showshoutbox": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "showoffer": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "sptime": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "enablebitbucket": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "smalldescription": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "altname": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "defaultlang": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "defstylesheet": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "donation": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "browsecat": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "waitsystem": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "maxdlsystem": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "bitbucket": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "torrentnameprefix": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "showforumstats": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "verification": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "invite_count": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "invite_timeout": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "seeding_leeching_time_calc_start": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "startsubid": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "logo": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "showlastxforumposts": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "enable_technical_info": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "site_language_enabled": {
+            "type": [
+                "array",
+                "string",
+                "null"
+            ]
+        },
+        "show_top_uploader": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "offer_skip_approved_count": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "upload_deny_approval_deny_count": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "enable_global_search": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "tmp_invite_count": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "complain_enabled": {
+            "type": [
+                "string",
+                "null"
+            ]
+        }
+    },
+    "additionalProperties": true
+}

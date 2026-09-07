@@ -21,7 +21,7 @@ class UserDetailRepository
     {
         $user = User::query()->find($id);
 
-        return $user === null ? null : $user->toArray();
+        return $user === null ? null : $user->toApiArray();
     }
 
     public function isFriend(int $userId, int $friendId): bool

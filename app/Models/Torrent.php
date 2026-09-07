@@ -54,6 +54,7 @@ use App\Enums\TorrentHr;
 use App\Enums\TorrentNfoViewStyle;
 use App\Enums\TorrentPosState;
 use App\Enums\TorrentPromotion;
+use App\Enums\TorrentType;
 use App\Enums\TorrentVisible;
 use App\Models\Traits\HasTorrentAccessors;
 use App\Models\Traits\HasTorrentRelationships;
@@ -108,6 +109,7 @@ class Torrent extends NexusModel
         'anonymous' => 'boolean',
         'banned' => 'boolean',
         'visible' => 'boolean',
+        'type' => TorrentType::class,
     ];
 
     /** @var list<string> */

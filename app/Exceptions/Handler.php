@@ -132,6 +132,20 @@ class Handler extends ExceptionHandler
                 return response()->json(Api::failWithContext($exception->getMessage(), []));
             }
         });
+
+        $this->renderable(function (SettingsValidationException $e) use ($request) {
+            if ($this->isApiRoute($request)) {
+                return ProblemDetails::validation(
+                    ['errors' => $e->getErrors()],
+                    $request->path(),
+                )->toResponse();
+            }
+
+            return response()->json(
+                Api::failWithContext($e->getMessage(), ['errors' => $e->getErrors()]),
+                $e->getStatusCode(),
+            );
+        });
     }
 
     /**
@@ -189,6 +203,10 @@ class Handler extends ExceptionHandler
     protected function getHttpStatusCode(Throwable $e): int
     {
         if ($e instanceof HttpExceptionInterface) {
+            return $e->getStatusCode();
+        }
+
+        if ($e instanceof SettingsValidationException) {
             return $e->getStatusCode();
         }
 

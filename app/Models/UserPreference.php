@@ -4,6 +4,12 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\UserAcceptPms;
+use App\Enums\UserAppendPromotion;
+use App\Enums\UserClickTopic;
+use App\Enums\UserFontsize;
+use App\Enums\UserTimeType;
+use App\Enums\UserTooltip;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Config;
@@ -65,6 +71,16 @@ class UserPreference extends Model
     public $incrementing = false;
 
     public $timestamps = false;
+
+    /** @var array<string, string> */
+    protected $casts = [
+        'fontsize' => UserFontsize::class,
+        'clicktopic' => UserClickTopic::class,
+        'tooltip' => UserTooltip::class,
+        'timetype' => UserTimeType::class,
+        'appendpromotion' => UserAppendPromotion::class,
+        'acceptpms' => UserAcceptPms::class,
+    ];
 
     /** @var list<string> */
     protected $fillable = [

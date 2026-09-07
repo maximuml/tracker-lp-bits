@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
+use App\Enums\ShoutboxType;
 use App\Support\Lock;
 use App\Support\Shoutbox;
 use Illuminate\Support\Facades\DB;
@@ -51,7 +52,7 @@ final class ShoutboxService
             'userid' => $userId,
             'date' => time(),
             'text' => $text,
-            'type' => 'sb',
+            'type' => ShoutboxType::SB->value,
         ]);
 
         return true;

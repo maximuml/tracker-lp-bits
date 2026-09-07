@@ -142,7 +142,7 @@ final class BaseRepositoryTest extends TestCase
         $method->setAccessible(true);
 
         /** @var User $user */
-        $user = User::factory()->create(['privacy' => 'normal']);
+        $user = User::factory()->create(['privacy' => 1]);
         /** @var User $authenticator */
         $authenticator = User::factory()->create();
 
@@ -155,7 +155,7 @@ final class BaseRepositoryTest extends TestCase
         $method->setAccessible(true);
 
         /** @var User $user */
-        $user = User::factory()->create(['privacy' => 'strong']);
+        $user = User::factory()->create(['privacy' => 0]);
         /** @var User $authenticator */
         $authenticator = User::factory()->create(['class' => UserClass::STAFFLEADER->value]);
 
@@ -170,7 +170,7 @@ final class BaseRepositoryTest extends TestCase
         $method->setAccessible(true);
 
         /** @var User $user */
-        $user = User::factory()->create(['privacy' => 'strong']);
+        $user = User::factory()->create(['privacy' => 0]);
         /** @var User $authenticator */
         $authenticator = User::factory()->create();
 
@@ -189,7 +189,7 @@ final class BaseRepositoryTest extends TestCase
         $method->setAccessible(true);
 
         /** @var User $user */
-        $user = User::factory()->create(['privacy' => 'strong']);
+        $user = User::factory()->create(['privacy' => 0]);
 
         $this->setUserCanCache('viewanonymous', $user->id, false);
 
@@ -204,7 +204,7 @@ final class BaseRepositoryTest extends TestCase
         $method->setAccessible(true);
 
         /** @var User $owner */
-        $owner = User::factory()->create(['privacy' => 'normal']);
+        $owner = User::factory()->create(['privacy' => 1]);
         /** @var User $authenticator */
         $authenticator = User::factory()->create(['class' => UserClass::STAFFLEADER->value]);
 
@@ -214,7 +214,7 @@ final class BaseRepositoryTest extends TestCase
             'save_as' => 'test',
             'category' => 1,
             'size' => 1024,
-            'type' => 'single',
+            'type' => 0,
             'numfiles' => 1,
             'owner' => $owner->id,
             'info_hash' => random_bytes(20),

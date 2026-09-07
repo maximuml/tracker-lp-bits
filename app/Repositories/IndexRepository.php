@@ -6,6 +6,8 @@ namespace App\Repositories;
 
 use App\Enums\PeerSeeder;
 use App\Enums\TorrentVisible;
+use App\Enums\UserGender;
+use App\Enums\UserStatus;
 use App\Models\News;
 use App\Models\Peer;
 use App\Models\Poll;
@@ -84,15 +86,15 @@ class IndexRepository
 
             return [
                 'registered' => User::count(),
-                'unverified' => User::where('status', 'pending')->where('enabled', true)->count(),
+                'unverified' => User::where('status', UserStatus::PENDING->value)->where('enabled', true)->count(),
                 'totalonlinetoday' => User::where('last_access', '>=', $cutoffDay)->count(),
                 'totalonlineweek' => User::where('last_access', '>=', $cutoffWeek)->count(),
                 'vip' => User::where('class', UC_VIP)->count(),
                 'donated' => User::where('donor', true)->count(),
                 'warned' => User::where('warned', true)->count(),
                 'disabled' => User::where('enabled', false)->count(),
-                'registered_male' => User::where('gender', 'Male')->count(),
-                'registered_female' => User::where('gender', 'Female')->count(),
+                'registered_male' => User::where('gender', UserGender::MALE->value)->count(),
+                'registered_female' => User::where('gender', UserGender::FEMALE->value)->count(),
             ];
         });
     }

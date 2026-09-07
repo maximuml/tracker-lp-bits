@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
+use App\Enums\UserAcceptPms;
 use App\Models\Message;
 use App\Models\User;
 use App\Repositories\MessageRepository;
@@ -129,7 +130,7 @@ class MessageService
                 LegacyResponse::abort($lang['std_refused'] ?? 'Refused', $lang['std_account_parked'] ?? 'Account is parked.');
             }
 
-            if ($recipient->acceptpms === 'yes') {
+            if ($recipient->acceptpms === UserAcceptPms::YES) {
                 $blocked = DB::table('blocks')
                     ->where('userid', $recipient->id)
                     ->where('blockid', $sender->id)
@@ -137,7 +138,7 @@ class MessageService
                 if ($blocked) {
                     LegacyResponse::abort($lang['std_refused'] ?? 'Refused', $lang['std_user_blocks_your_pms'] ?? 'User blocks your PMs.');
                 }
-            } elseif ($recipient->acceptpms === 'friends') {
+            } elseif ($recipient->acceptpms === UserAcceptPms::FRIENDS) {
                 $isFriend = DB::table('friends')
                     ->where('userid', $recipient->id)
                     ->where('friendid', $sender->id)
@@ -145,7 +146,7 @@ class MessageService
                 if (! $isFriend) {
                     LegacyResponse::abort($lang['std_refused'] ?? 'Refused', $lang['std_user_accepts_friends_pms'] ?? 'User accepts PMs from friends only.');
                 }
-            } elseif ($recipient->acceptpms === 'no') {
+            } elseif ($recipient->acceptpms === UserAcceptPms::NO) {
                 LegacyResponse::abort($lang['std_refused'] ?? 'Refused', $lang['std_user_blocks_all_pms'] ?? 'User blocks all PMs.');
             }
         }

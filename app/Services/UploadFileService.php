@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Enums\TorrentPromotion;
+use App\Enums\TorrentType;
 use App\Exceptions\NexusException;
 use App\Support\Config\SiteConfig;
 use App\Support\Locale;
@@ -118,7 +119,7 @@ class UploadFileService
         if (isset($info['length'])) {
             $totallen = $info['length'];
             $filelist[] = [$dname, $totallen];
-            $type = 'single';
+            $type = TorrentType::SINGLE->stringValue();
         } else {
             $flist = $this->checkTorrentDict($info, 'files', 'array');
 
@@ -145,7 +146,7 @@ class UploadFileService
                 $ffe = implode('/', $ffa);
                 $filelist[] = [$ffe, $ll];
             }
-            $type = 'multi';
+            $type = TorrentType::MULTI->stringValue();
         }
 
         return [

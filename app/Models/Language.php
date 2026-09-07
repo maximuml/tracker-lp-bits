@@ -44,7 +44,7 @@ class Language extends NexusModel
         'lang_name', 'site_lang_folder',
     ];
 
-    /** @var array<string, string> */
+    /** @var array<string, class-string> */
     protected $casts = [
         'trans_state' => LanguageTranslationState::class,
     ];

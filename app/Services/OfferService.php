@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Auth\Permission;
+use App\Enums\OfferAllowed;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\Message;
 use App\Repositories\OfferRepository;
@@ -154,7 +155,7 @@ final class OfferService
             'descr' => $descr,
             'category' => $cat,
             'added' => date('Y-m-d H:i:s'),
-            'allowed' => 'pending',
+            'allowed' => OfferAllowed::PENDING->value,
             'yeah' => 0,
             'against' => 0,
             'comments' => 0,

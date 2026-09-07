@@ -314,7 +314,7 @@ final class TorrentDetailRepositoryTest extends TestCase
             'save_as' => 'test',
             'category' => 1,
             'size' => 1024,
-            'type' => 'single',
+            'type' => 0,
             'numfiles' => 1,
             'owner' => 1,
             'info_hash' => random_bytes(20),

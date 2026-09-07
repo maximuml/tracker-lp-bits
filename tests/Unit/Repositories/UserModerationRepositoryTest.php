@@ -65,7 +65,7 @@ final class UserModerationRepositoryTest extends TestCase
         $result = $this->repository->confirmUser($user->id);
 
         $this->assertTrue($result);
-        $this->assertSame(UserStatus::CONFIRMED->value, User::query()->where('id', $user->id)->value('status'));
+        $this->assertSame(UserStatus::CONFIRMED, User::query()->where('id', $user->id)->value('status'));
     }
 
     public function test_confirm_user_returns_true_when_no_pending_users(): void
@@ -85,8 +85,8 @@ final class UserModerationRepositoryTest extends TestCase
         $result = $this->repository->confirmUser([$user1->id, $user2->id]);
 
         $this->assertTrue($result);
-        $this->assertSame(UserStatus::CONFIRMED->value, User::query()->where('id', $user1->id)->value('status'));
-        $this->assertSame(UserStatus::CONFIRMED->value, User::query()->where('id', $user2->id)->value('status'));
+        $this->assertSame(UserStatus::CONFIRMED, User::query()->where('id', $user1->id)->value('status'));
+        $this->assertSame(UserStatus::CONFIRMED, User::query()->where('id', $user2->id)->value('status'));
     }
 
     public function test_remove_warnings_clears_warning_for_warned_users(): void

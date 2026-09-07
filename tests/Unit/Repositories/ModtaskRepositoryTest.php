@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Repositories;
 
+use App\Enums\UserStatus;
 use App\Models\User;
 use App\Repositories\ModtaskRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -33,7 +34,7 @@ final class ModtaskRepositoryTest extends TestCase
         /** @var User $user */
         $user = User::factory()->create();
         DB::table('users')->where('id', $user->id)->update([
-            'status' => 'pending',
+            'status' => 0,
             'info' => 'awaiting review',
         ]);
 
@@ -42,7 +43,7 @@ final class ModtaskRepositoryTest extends TestCase
         $record = DB::table('users')->where('id', $user->id)->first();
 
         $this->assertNotNull($record);
-        $this->assertSame('confirmed', $record->status);
+        $this->assertSame(UserStatus::CONFIRMED->value, (int) $record->status);
         $this->assertNull($record->info);
     }
 

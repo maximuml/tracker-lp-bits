@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Auth\Permission;
 use App\Enums\BusinessType;
 use App\Enums\ModelEventEnum;
+use App\Enums\TorrentType;
 use App\Exceptions\NexusException;
 use App\Exceptions\TorrentAlreadyExistsException;
 use App\Models\BonusLogs;
@@ -115,7 +116,7 @@ class UploadService
             'name' => $request->name,
             'size' => $fileListInfo['totalLength'],
             'numfiles' => count($fileListInfo['fileList']),
-            'type' => $fileListInfo['type'],
+            'type' => TorrentType::fromStringSafe($fileListInfo['type'])->value,
             'url' => null,
             'category' => $category->id,
             'source' => $subCategoriesAngTags['subCategories']['source'],

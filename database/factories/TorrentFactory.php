@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\TorrentPosState;
+use App\Enums\TorrentType;
 use App\Enums\TorrentVisible;
 use App\Models\Category;
 use App\Models\Torrent;
@@ -27,7 +28,7 @@ class TorrentFactory extends Factory
      */
     public function definition(): array
     {
-        $type = $this->faker->randomElement(['single', 'multi']);
+        $type = $this->faker->randomElement([TorrentType::SINGLE, TorrentType::MULTI]);
 
         return [
             'name' => $this->faker->sentence(3),
@@ -45,7 +46,7 @@ class TorrentFactory extends Factory
             'size' => $this->faker->numberBetween(1024, 1073741824),
             'added' => now()->toDateTimeString(),
             'type' => $type,
-            'numfiles' => $type === 'single' ? 1 : $this->faker->numberBetween(2, 50),
+            'numfiles' => $type === TorrentType::SINGLE ? 1 : $this->faker->numberBetween(2, 50),
             'comments' => 0,
             'views' => 0,
             'hits' => 0,

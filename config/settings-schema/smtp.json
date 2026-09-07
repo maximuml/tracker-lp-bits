@@ -1,0 +1,71 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+        "smtptype": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "emailnotify": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "smtp_host": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "smtp_port": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "smtp_from": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "smtpaddress": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "smtpport": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        },
+        "encryption": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "accountname": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "accountpassword": {
+            "type": [
+                "string",
+                "null"
+            ]
+        }
+    },
+    "additionalProperties": true
+}

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Auth;
 
 use App\Enums\InviteValid;
+use App\Enums\UserStatus;
 use App\Exceptions\AuthenticationException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\ConfirmResendRequest;
@@ -134,7 +135,7 @@ class RegistrationController extends Controller
             return Redirect::to('ok.php?type=confirmed');
         }
 
-        if ($user->status !== 'pending' && $user->status !== 'confirmed') {
+        if ($user->status !== UserStatus::PENDING && $user->status !== UserStatus::CONFIRMED) {
             return Redirect::to('ok.php?type=confirmed');
         }
 

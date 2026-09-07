@@ -70,10 +70,10 @@ final class InfoRepositoryTest extends TestCase
     public function test_faq_categories_returns_categories_with_items(): void
     {
         $langId = $this->ensureLanguage();
-        $this->insertFaq(['link_id' => 1, 'lang_id' => $langId, 'type' => 'categ', 'question' => 'Category 1', 'order' => 1]);
-        $this->insertFaq(['link_id' => 2, 'lang_id' => $langId, 'type' => 'categ', 'question' => 'Category 2', 'order' => 2]);
-        $this->insertFaq(['link_id' => 0, 'lang_id' => $langId, 'type' => 'item', 'categ' => 1, 'question' => 'Q1', 'answer' => 'A1', 'order' => 1]);
-        $this->insertFaq(['link_id' => 0, 'lang_id' => $langId, 'type' => 'item', 'categ' => 2, 'question' => 'Q2', 'answer' => 'A2', 'order' => 2]);
+        $this->insertFaq(['link_id' => 1, 'lang_id' => $langId, 'type' => 0, 'question' => 'Category 1', 'order' => 1]);
+        $this->insertFaq(['link_id' => 2, 'lang_id' => $langId, 'type' => 0, 'question' => 'Category 2', 'order' => 2]);
+        $this->insertFaq(['link_id' => 0, 'lang_id' => $langId, 'type' => 1, 'categ' => 1, 'question' => 'Q1', 'answer' => 'A1', 'order' => 1]);
+        $this->insertFaq(['link_id' => 0, 'lang_id' => $langId, 'type' => 1, 'categ' => 2, 'question' => 'Q2', 'answer' => 'A2', 'order' => 2]);
 
         $result = $this->repository->faqCategories($langId);
 
@@ -114,8 +114,8 @@ final class InfoRepositoryTest extends TestCase
     public function test_faq_manage_data_returns_categories_grouped_by_lang(): void
     {
         $langId = $this->ensureLanguage();
-        $this->insertFaq(['link_id' => 1, 'lang_id' => $langId, 'type' => 'categ', 'question' => 'Cat 1', 'order' => 1]);
-        $this->insertFaq(['link_id' => 0, 'lang_id' => $langId, 'type' => 'item', 'categ' => 1, 'question' => 'Item 1', 'order' => 1]);
+        $this->insertFaq(['link_id' => 1, 'lang_id' => $langId, 'type' => 0, 'question' => 'Cat 1', 'order' => 1]);
+        $this->insertFaq(['link_id' => 0, 'lang_id' => $langId, 'type' => 1, 'categ' => 1, 'question' => 'Item 1', 'order' => 1]);
 
         $result = $this->repository->faqManageData();
 
@@ -131,7 +131,7 @@ final class InfoRepositoryTest extends TestCase
     {
         $langId = $this->ensureLanguage();
         // Item with categ=99 but no category with link_id=99 → orphaned
-        $itemId = $this->insertFaq(['link_id' => 0, 'lang_id' => $langId, 'type' => 'item', 'categ' => 99, 'question' => 'Orphan', 'order' => 1]);
+        $itemId = $this->insertFaq(['link_id' => 0, 'lang_id' => $langId, 'type' => 1, 'categ' => 99, 'question' => 'Orphan', 'order' => 1]);
 
         $result = $this->repository->faqManageData();
 
@@ -144,8 +144,8 @@ final class InfoRepositoryTest extends TestCase
 
     public function test_reorder_faq_updates_order(): void
     {
-        $id1 = $this->insertFaq(['link_id' => 1, 'lang_id' => 6, 'type' => 'categ', 'question' => 'Q', 'order' => 1]);
-        $id2 = $this->insertFaq(['link_id' => 2, 'lang_id' => 6, 'type' => 'categ', 'question' => 'Q2', 'order' => 2]);
+        $id1 = $this->insertFaq(['link_id' => 1, 'lang_id' => 6, 'type' => 0, 'question' => 'Q', 'order' => 1]);
+        $id2 = $this->insertFaq(['link_id' => 2, 'lang_id' => 6, 'type' => 0, 'question' => 'Q2', 'order' => 2]);
 
         $this->repository->reorderFaq([$id1 => 5, $id2 => 3]);
 
@@ -155,7 +155,7 @@ final class InfoRepositoryTest extends TestCase
 
     public function test_update_faq_modifies_row(): void
     {
-        $id = $this->insertFaq(['link_id' => 1, 'lang_id' => 6, 'type' => 'categ', 'question' => 'Old Q', 'order' => 1]);
+        $id = $this->insertFaq(['link_id' => 1, 'lang_id' => 6, 'type' => 0, 'question' => 'Old Q', 'order' => 1]);
 
         $this->repository->updateFaq($id, ['question' => 'New Q']);
 
@@ -164,7 +164,7 @@ final class InfoRepositoryTest extends TestCase
 
     public function test_delete_faq_removes_row(): void
     {
-        $id = $this->insertFaq(['link_id' => 1, 'lang_id' => 6, 'type' => 'categ', 'question' => 'Delete Me', 'order' => 1]);
+        $id = $this->insertFaq(['link_id' => 1, 'lang_id' => 6, 'type' => 0, 'question' => 'Delete Me', 'order' => 1]);
 
         $this->repository->deleteFaq($id);
 
@@ -178,7 +178,7 @@ final class InfoRepositoryTest extends TestCase
 
     public function test_get_faq_by_id_returns_array_when_found(): void
     {
-        $id = $this->insertFaq(['link_id' => 1, 'lang_id' => 6, 'type' => 'categ', 'question' => 'Find Me', 'order' => 1]);
+        $id = $this->insertFaq(['link_id' => 1, 'lang_id' => 6, 'type' => 0, 'question' => 'Find Me', 'order' => 1]);
 
         $result = $this->repository->getFaqById($id);
 
@@ -197,8 +197,8 @@ final class InfoRepositoryTest extends TestCase
     public function test_get_faq_categories_by_lang_returns_categories(): void
     {
         $langId = $this->ensureLanguage();
-        $this->insertFaq(['link_id' => 1, 'lang_id' => $langId, 'type' => 'categ', 'question' => 'Cat A', 'order' => 2]);
-        $this->insertFaq(['link_id' => 2, 'lang_id' => $langId, 'type' => 'categ', 'question' => 'Cat B', 'order' => 1]);
+        $this->insertFaq(['link_id' => 1, 'lang_id' => $langId, 'type' => 0, 'question' => 'Cat A', 'order' => 2]);
+        $this->insertFaq(['link_id' => 2, 'lang_id' => $langId, 'type' => 0, 'question' => 'Cat B', 'order' => 1]);
 
         $result = $this->repository->getFaqCategoriesByLang($langId);
 
@@ -232,8 +232,8 @@ final class InfoRepositoryTest extends TestCase
     public function test_get_faq_max_order_and_link_id_returns_maxima(): void
     {
         $langId = $this->ensureLanguage();
-        $this->insertFaq(['link_id' => 1, 'lang_id' => $langId, 'type' => 'categ', 'question' => 'Q1', 'order' => 5]);
-        $this->insertFaq(['link_id' => 3, 'lang_id' => $langId, 'type' => 'categ', 'question' => 'Q2', 'order' => 10]);
+        $this->insertFaq(['link_id' => 1, 'lang_id' => $langId, 'type' => 0, 'question' => 'Q1', 'order' => 5]);
+        $this->insertFaq(['link_id' => 3, 'lang_id' => $langId, 'type' => 0, 'question' => 'Q2', 'order' => 10]);
 
         $result = $this->repository->getFaqMaxOrderAndLinkId('categ', $langId);
 
@@ -246,7 +246,7 @@ final class InfoRepositoryTest extends TestCase
         $this->repository->insertFaq([
             'link_id' => 1,
             'lang_id' => 6,
-            'type' => 'categ',
+            'type' => 0,
             'question' => 'Inserted Q',
             'answer' => '',
             'flag' => 1,
@@ -382,7 +382,7 @@ final class InfoRepositoryTest extends TestCase
                 'rule_lang' => 0,
                 'site_lang' => 0,
                 'site_lang_folder' => 'test',
-                'trans_state' => 'up-to-date',
+                'trans_state' => 0,
             ], $overrides));
 
             return $id;
@@ -402,7 +402,7 @@ final class InfoRepositoryTest extends TestCase
         return (int) DB::table('faq')->insertGetId(array_merge([
             'link_id' => 0,
             'lang_id' => 6,
-            'type' => 'item',
+            'type' => 1,
             'question' => 'Question',
             'answer' => 'Answer',
             'flag' => 1,
@@ -456,7 +456,7 @@ final class InfoRepositoryTest extends TestCase
             'save_as' => 'test',
             'category' => 1,
             'size' => 1024,
-            'type' => 'single',
+            'type' => 0,
             'numfiles' => 1,
             'owner' => $ownerId,
             'info_hash' => random_bytes(20),

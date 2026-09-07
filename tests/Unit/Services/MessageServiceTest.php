@@ -71,12 +71,12 @@ final class MessageServiceTest extends TestCase
             'class' => 1,
             'added' => now()->toDateTimeString(),
             'last_access' => now()->toDateTimeString(),
-            'status' => 'confirmed',
+            'status' => 1,
             'enabled' => 1,
             'parked' => 0,
             'downloadpos' => 1,
             'seedbonus' => 100.0,
-            'acceptpms' => 'yes',
+            'acceptpms' => 0,
             'notifs' => '',
             'last_pm' => null,
         ], $overrides));
@@ -257,7 +257,7 @@ final class MessageServiceTest extends TestCase
     {
         $this->mockGlobals();
         $sender = $this->createUser();
-        $recipient = $this->createUser(['acceptpms' => 'no']);
+        $recipient = $this->createUser(['acceptpms' => 2]);
         $this->login($sender);
 
         $request = Request::create('/messages.php', 'POST', [
@@ -273,7 +273,7 @@ final class MessageServiceTest extends TestCase
     {
         $this->mockGlobals();
         $sender = $this->createUser();
-        $recipient = $this->createUser(['acceptpms' => 'friends']);
+        $recipient = $this->createUser(['acceptpms' => 1]);
         $this->login($sender);
 
         $request = Request::create('/messages.php', 'POST', [
@@ -291,7 +291,7 @@ final class MessageServiceTest extends TestCase
     {
         $this->mockGlobals();
         $sender = $this->createUser(['last_pm' => null]);
-        $recipient = $this->createUser(['acceptpms' => 'yes', 'notifs' => '']);
+        $recipient = $this->createUser(['acceptpms' => 0, 'notifs' => '']);
         $this->login($sender);
 
         $request = Request::create('/messages.php', 'POST', [
@@ -316,7 +316,7 @@ final class MessageServiceTest extends TestCase
     {
         $this->mockGlobals();
         $sender = $this->createUser(['last_pm' => null]);
-        $recipient = $this->createUser(['acceptpms' => 'yes', 'notifs' => '']);
+        $recipient = $this->createUser(['acceptpms' => 0, 'notifs' => '']);
         $this->login($sender);
 
         $request = Request::create('/messages.php', 'POST', [
@@ -336,7 +336,7 @@ final class MessageServiceTest extends TestCase
     {
         $this->mockGlobals();
         $sender = $this->createUser(['last_pm' => null]);
-        $recipient = $this->createUser(['acceptpms' => 'yes', 'notifs' => '']);
+        $recipient = $this->createUser(['acceptpms' => 0, 'notifs' => '']);
         $this->login($sender);
 
         $request = Request::create('/messages.php', 'POST', [

@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
+use App\Enums\UserClickTopic;
 use App\Models\User;
 use App\Repositories\ForumRepository;
 use App\Support\Cache\LegacyRedisCache;
@@ -112,7 +113,7 @@ final class ForumTopicViewService
             $page = 0;
         } elseif ($page > $pages - 1) {
             $page = $pages - 1;
-        } elseif (($curUser['clicktopic'] ?? '') == 'firstpage') {
+        } elseif (($curUser['clicktopic'] ?? 1) == UserClickTopic::FIRSTPAGE->value) {
             $page = 0;
         } else {
             $page = $pages - 1;

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Services\Cleanup;
 
+use App\Enums\ReportType;
 use App\Enums\UserClass;
 use App\Enums\UserStatus;
 use App\Services\Cleanup\Tasks;
@@ -151,11 +152,11 @@ final class TasksTest extends TestCase
             'start_name' => '',
             'peer_id_pattern' => '',
             'peer_id_match_num' => 0,
-            'peer_id_matchtype' => 'dec',
+            'peer_id_matchtype' => 0,
             'peer_id_start' => '',
             'agent_pattern' => '',
             'agent_match_num' => 0,
-            'agent_matchtype' => 'dec',
+            'agent_matchtype' => 0,
             'agent_start' => '',
             'exception' => 0,
             'allowhttps' => 0,
@@ -289,7 +290,7 @@ final class TasksTest extends TestCase
         return (int) DB::table('reports')->insertGetId(array_merge([
             'addedby' => 1,
             'reportid' => 1,
-            'type' => 'torrent',
+            'type' => ReportType::TORRENT->value,
             'reason' => 'test',
             'dealtwith' => 0,
             'added' => Carbon::now()->toDateTimeString(),

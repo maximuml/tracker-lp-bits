@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Enums\UserStatus;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -13,7 +14,7 @@ class ModtaskRepository
     public function confirmUser(int $userId, string $status): void
     {
         User::query()->where('id', $userId)->update([
-            'status' => $status,
+            'status' => UserStatus::fromStringSafe($status)->value,
             'info' => null,
         ]);
     }

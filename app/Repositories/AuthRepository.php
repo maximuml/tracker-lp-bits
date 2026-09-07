@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Enums\LoginAttemptType;
+use App\Enums\UserStatus;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
@@ -36,7 +38,7 @@ class AuthRepository extends BaseRepository
         }
 
         if ($recover) {
-            DB::table('loginattempts')->where('ip', $ip)->update(['type' => 'recover']);
+            DB::table('loginattempts')->where('ip', $ip)->update(['type' => LoginAttemptType::RECOVER->value]);
         }
     }
 
@@ -99,7 +101,7 @@ class AuthRepository extends BaseRepository
     {
         $query = DB::table('users')
             ->where('id', $userId)
-            ->where('status', 'confirmed');
+            ->where('status', UserStatus::CONFIRMED->value);
         if (! $shouldIgnoreEnabled) {
             $query->where('enabled', true);
         }

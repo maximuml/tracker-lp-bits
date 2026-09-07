@@ -185,11 +185,11 @@ final class AgentAllowControllerTest extends TestCase
         $agentAllow->start_name = 'uTorrent 3.0';
         $agentAllow->peer_id_pattern = '-UT3';
         $agentAllow->peer_id_match_num = 4;
-        $agentAllow->peer_id_matchtype = 'dec';
+        $agentAllow->peer_id_matchtype = 0;
         $agentAllow->peer_id_start = 'UT3100';
         $agentAllow->agent_pattern = 'uTorrent/3.0';
         $agentAllow->agent_match_num = 4;
-        $agentAllow->agent_matchtype = 'dec';
+        $agentAllow->agent_matchtype = 0;
         $agentAllow->agent_start = 'uTorrent/3.0';
         $agentAllow->exception = false;
         $agentAllow->comment = 'Test';
@@ -211,11 +211,11 @@ final class AgentAllowControllerTest extends TestCase
             'start_name' => 'uTorrent 3.0',
             'peer_id_pattern' => '-UT3',
             'peer_id_match_num' => 4,
-            'peer_id_matchtype' => 'dec',
+            'peer_id_matchtype' => 0,
             'peer_id_start' => 'UT3100',
             'agent_pattern' => 'uTorrent/3.0',
             'agent_match_num' => 4,
-            'agent_matchtype' => 'dec',
+            'agent_matchtype' => 0,
             'agent_start' => 'uTorrent/3.0',
             'exception' => 'no',
             'allowhttps' => 'yes',

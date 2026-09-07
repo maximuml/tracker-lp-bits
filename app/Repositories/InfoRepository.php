@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Enums\FaqType;
 use App\Models\Faq;
 use App\Models\Language;
 use App\Models\User;
@@ -53,7 +54,7 @@ final class InfoRepository
         $faqCategories = [];
 
         $categories = Faq::query()
-            ->where('type', 'categ')
+            ->where('type', FaqType::CATEG->value)
             ->where('lang_id', $langId)
             ->orderBy('order')
             ->get(['question', 'flag', 'link_id']);
@@ -68,7 +69,7 @@ final class InfoRepository
         }
 
         $items = Faq::query()
-            ->where('type', 'item')
+            ->where('type', FaqType::ITEM->value)
             ->where('lang_id', $langId)
             ->get(['id', 'question', 'answer', 'flag', 'categ', 'link_id']);
 
@@ -235,7 +236,7 @@ final class InfoRepository
     {
         $categRows = DB::table('faq')
             ->leftJoin('language', 'faq.lang_id', '=', 'language.id')
-            ->where('faq.type', 'categ')
+            ->where('faq.type', FaqType::CATEG->value)
             ->orderBy('language.lang_name')
             ->orderBy('faq.order')
             ->get(['faq.id', 'faq.link_id', 'faq.lang_id', 'language.lang_name', 'faq.question', 'faq.flag', 'faq.order']);
@@ -254,7 +255,7 @@ final class InfoRepository
         }
 
         $itemRows = DB::table('faq')
-            ->where('type', 'item')
+            ->where('type', FaqType::ITEM->value)
             ->orderBy('order')
             ->get(['id', 'question', 'lang_id', 'flag', 'categ', 'order']);
 
@@ -325,7 +326,7 @@ final class InfoRepository
     public function getFaqCategoriesByLang(int $langId): array
     {
         return DB::table('faq')
-            ->where('type', 'categ')
+            ->where('type', FaqType::CATEG->value)
             ->where('lang_id', $langId)
             ->orderBy('order')
             ->get(['id', 'question', 'link_id'])
@@ -344,7 +345,7 @@ final class InfoRepository
     public function getFaqMaxOrderAndLinkId(string $type, int $langId): array
     {
         $maxRow = (array) DB::table('faq')
-            ->where('type', $type)
+            ->where('type', FaqType::fromStringSafe($type)->value)
             ->where('lang_id', $langId)
             ->selectRaw('MAX(`order`) AS maxorder, MAX(`link_id`) AS maxlinkid')
             ->first();

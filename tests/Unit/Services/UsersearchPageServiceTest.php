@@ -75,7 +75,7 @@ final class UsersearchPageServiceTest extends TestCase
             'class' => $class,
             'added' => now()->toDateTimeString(),
             'last_access' => now()->toDateTimeString(),
-            'status' => 'confirmed',
+            'status' => 1,
             'enabled' => 1,
             'parked' => 0,
             'downloadpos' => 1,

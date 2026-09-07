@@ -6,6 +6,7 @@ namespace App\Repositories;
 
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
+use App\Enums\UserPrivacy;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Support\Environment;
@@ -70,7 +71,7 @@ class BaseRepository
         if (! $user) {
             return '';
         }
-        if ($user->privacy == 'strong' || ($torrent && $torrent->anonymous == 1 && $user->id == $torrent->owner)) {
+        if ($user->privacy === UserPrivacy::STRONG || ($torrent && $torrent->anonymous == 1 && $user->id == $torrent->owner)) {
             // 用户强私密，或者种子作者匿名而当前项作者刚好为种子作者
             $anonymousText = Locale::trans('label.anonymous', [], null);
             if (Permission::can(PermissionEnum::VIEW_ANONYMOUS, $authenticator) || $user->id == $authenticator->id) {

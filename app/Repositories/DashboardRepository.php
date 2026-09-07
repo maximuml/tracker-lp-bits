@@ -196,12 +196,13 @@ class DashboardRepository extends BaseRepository
             'value' => number_format(User::query()->where('enabled', false)->count()),
         ];
 
-        $statGender = User::query()->groupBy('gender')->selectRaw('gender, count(*) as counts')->get()->pluck('counts', 'gender');
+        $statGender = DB::table('users')->groupBy('gender')->selectRaw('gender, count(*) as counts')->pluck('counts', 'gender');
         foreach ($statGender as $gender => $value) {
-            if (! isset(User::$genders[$gender])) {
-                $gender = UserGender::UNKNOWN->value;
+            $genderKey = (int) $gender;
+            if (! isset(User::$genders[$genderKey])) {
+                $genderKey = UserGender::UNKNOWN->value;
             }
-            $name = "gender_$gender";
+            $name = "gender_$genderKey";
             $result[$name] = [
                 'name' => $name,
                 'text' => Locale::trans("dashboard.user.{$name}", [], null),

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Enums\OfferAllowed;
+use App\Enums\OfferVote;
 use App\Models\Comment;
 use App\Models\Offer;
 use App\Models\StaffMessage;
@@ -54,8 +56,8 @@ final class OfferRepository extends BaseRepository
     public function getVoteCounts(int $offerId): array
     {
         return [
-            'yeah' => (int) DB::table('offervotes')->where('vote', 'yeah')->where('offerid', $offerId)->count(),
-            'against' => (int) DB::table('offervotes')->where('vote', 'against')->where('offerid', $offerId)->count(),
+            'yeah' => (int) DB::table('offervotes')->where('vote', OfferVote::YEAH->value)->where('offerid', $offerId)->count(),
+            'against' => (int) DB::table('offervotes')->where('vote', OfferVote::AGAINST->value)->where('offerid', $offerId)->count(),
         ];
     }
 
@@ -99,7 +101,7 @@ final class OfferRepository extends BaseRepository
         DB::table('offervotes')->insert([
             'offerid' => $offerId,
             'userid' => $userId,
-            'vote' => $vote,
+            'vote' => OfferVote::fromStringSafe($vote)->value,
         ]);
     }
 
@@ -110,12 +112,12 @@ final class OfferRepository extends BaseRepository
 
     public function allowOffer(int $offerId, string $allowedTime): bool
     {
-        return (bool) Offer::query()->where('id', $offerId)->update(['allowed' => 'allowed', 'allowedtime' => $allowedTime]);
+        return (bool) Offer::query()->where('id', $offerId)->update(['allowed' => OfferAllowed::ALLOWED->value, 'allowedtime' => $allowedTime]);
     }
 
     public function denyOffer(int $offerId): bool
     {
-        return (bool) Offer::query()->where('id', $offerId)->update(['allowed' => 'denied']);
+        return (bool) Offer::query()->where('id', $offerId)->update(['allowed' => OfferAllowed::DENIED->value]);
     }
 
     /**

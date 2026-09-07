@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Auth\Permission;
+use App\Enums\UserAppendPromotion;
+use App\Enums\UserTimeType;
 use App\Models\Torrent;
 use App\Repositories\TagRepository;
 use App\Repositories\TorrentRepository;
@@ -118,7 +120,7 @@ final class TorrentTable
 <td class="colhead"><a href="?<?php echo $oldlink?>sort=3&amp;type=<?php echo $link[3]?>"><img class="comments" src="pic/trans.gif" alt="comments" title="<?php echo $lang_functions['title_number_of_comments'] ?>" /></a></td>
 <?php } ?>
 
-<td class="colhead"><a href="?<?php echo $oldlink?>sort=4&amp;type=<?php echo $link[4]?>"><img class="time" src="pic/trans.gif" alt="time" title="<?php echo $user['timetype'] != 'timealive' ? $lang_functions['title_time_added'] : $lang_functions['title_time_alive']?>" /></a></td>
+<td class="colhead"><a href="?<?php echo $oldlink?>sort=4&amp;type=<?php echo $link[4]?>"><img class="time" src="pic/trans.gif" alt="time" title="<?php echo $user['timetype'] != UserTimeType::TIMEALIVE->value ? $lang_functions['title_time_added'] : $lang_functions['title_time_alive']?>" /></a></td>
 <td class="colhead"><a href="?<?php echo $oldlink?>sort=5&amp;type=<?php echo $link[5]?>"><img class="size" src="pic/trans.gif" alt="size" title="<?php echo $lang_functions['title_size'] ?>" /></a></td>
 <td class="colhead"><a href="?<?php echo $oldlink?>sort=7&amp;type=<?php echo $link[7]?>"><img class="seeders" src="pic/trans.gif" alt="seeders" title="<?php echo $lang_functions['title_number_of_seeders'] ?>" /></a></td>
 <td class="colhead"><a href="?<?php echo $oldlink?>sort=8&amp;type=<?php echo $link[8]?>"><img class="leechers" src="pic/trans.gif" alt="leechers" title="<?php echo $lang_functions['title_number_of_leechers'] ?>" /></a></td>
@@ -254,7 +256,7 @@ if (Permission::canManageTorrent()) { ?>
                         $hasnewcom = ($lastcom['user'] != $user['id'] && $timestamp >= $last_browse);
                         $onmouseover = '';
                         if ($lastcom) {
-                            if ($user['timetype'] != 'timealive') {
+                            if ($user['timetype'] != UserTimeType::TIMEALIVE->value) {
                                 $lastcomtime = $lang_functions['text_at_time'].$lastcom['added'];
                             } else {
                                 $lastcomtime = $lang_functions['text_blank'].Time::format($lastcom['added'], true, false, true);
@@ -326,7 +328,7 @@ if (Permission::canManageTorrent()) { ?>
             $counter++;
         }
         echo '</table>';
-        if ($user['appendpromotion'] == 'highlight') {
+        if ($user['appendpromotion'] == UserAppendPromotion::HIGHLIGHT->value) {
             echo '<p align="center"> '.$lang_functions['text_promoted_torrents_note']."</p>\n";
         }
 

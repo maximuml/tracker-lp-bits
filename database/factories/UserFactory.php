@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Enums\UserClass;
 use App\Enums\UserEnabled;
 use App\Enums\UserStatus;
+use App\Enums\UserTimeType;
 use App\Models\User;
 use App\Support\Config\SiteConfig;
 use App\Support\PasswordHasher;
@@ -67,7 +68,7 @@ class UserFactory extends Factory
             'status' => UserStatus::CONFIRMED->value,
             'class' => $class,
             'enabled' => UserEnabled::YES->value,
-            'timetype' => 'timealive',
+            'timetype' => UserTimeType::TIMEALIVE->value,
             'downloadpos' => true,
             'avatars' => true,
             'uploaded' => 0,

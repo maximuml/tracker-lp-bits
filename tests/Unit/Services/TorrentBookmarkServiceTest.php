@@ -51,7 +51,7 @@ final class TorrentBookmarkServiceTest extends TestCase
             'category' => 1,
             'visible' => 1,
             'banned' => 0,
-            'type' => 'single',
+            'type' => 0,
             'save_as' => 'test'.$id,
             'numfiles' => 1,
         ]);
@@ -73,7 +73,7 @@ final class TorrentBookmarkServiceTest extends TestCase
             'class' => 1,
             'added' => now()->toDateTimeString(),
             'last_access' => now()->toDateTimeString(),
-            'status' => 'confirmed',
+            'status' => 1,
             'enabled' => 1,
         ]);
     }

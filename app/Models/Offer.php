@@ -13,11 +13,12 @@ declare(strict_types=1);
  * @property int $against
  * @property int $category
  * @property int $comments
- * @property string $allowed
+ * @property OfferAllowed $allowed
  */
 
 namespace App\Models;
 
+use App\Enums\OfferAllowed;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Offer extends NexusModel
@@ -28,6 +29,7 @@ class Offer extends NexusModel
     /** @var array<string, string> */
     protected $casts = [
         'added' => 'datetime',
+        'allowed' => OfferAllowed::class,
     ];
 
     /** @return  BelongsTo<User, $this> */

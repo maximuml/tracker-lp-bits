@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Enums\UserStatus;
 use App\Models\Message;
 use App\Models\StaffMessage;
 use App\Models\User;
@@ -83,7 +84,7 @@ class StaffMessageController extends LegacyController
             $rows = DB::table('users')
                 ->whereIn('class', $classIds)
                 ->where('enabled', true)
-                ->where('status', 'confirmed')
+                ->where('status', UserStatus::CONFIRMED->value)
                 ->offset($offset)
                 ->limit($size)
                 ->get(['id']);

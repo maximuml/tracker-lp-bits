@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Enums\OfferAllowed;
 use App\Models\Category;
 use App\Models\Torrent;
 use App\Models\User;
@@ -21,7 +22,7 @@ class TorrentUploadRepository
     public function allowedOfferCount(int $userId): int
     {
         return DB::table('offers')
-            ->where('allowed', 'allowed')
+            ->where('allowed', OfferAllowed::ALLOWED->value)
             ->where('userid', $userId)
             ->count();
     }
@@ -30,7 +31,7 @@ class TorrentUploadRepository
     {
         return DB::table('offers')
             ->where('id', $offerId)
-            ->where('allowed', 'allowed')
+            ->where('allowed', OfferAllowed::ALLOWED->value)
             ->where('userid', $userId)
             ->exists();
     }

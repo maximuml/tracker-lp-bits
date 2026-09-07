@@ -154,7 +154,7 @@ final class PasskeyPostLoginTest extends TestCase
 
         $user = User::factory()->create([
             'passkey' => str_repeat('e', 32),
-            'status' => 'confirmed',
+            'status' => 1,
             'enabled' => true,
         ]);
 

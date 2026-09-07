@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Enums\ShoutboxType;
 use App\Models\Torrent;
 use App\Models\User;
 use Illuminate\Database\Query\Builder;
@@ -32,10 +33,10 @@ final class ShoutboxRepository extends BaseRepository
         ];
 
         $query = DB::table('shoutbox')
-            ->where('type', 'sb')
+            ->where('type', ShoutboxType::SB->value)
             ->orderByDesc('date');
 
-        $countQuery = DB::table('shoutbox')->where('type', 'sb');
+        $countQuery = DB::table('shoutbox')->where('type', ShoutboxType::SB->value);
 
         if ($filters['user'] !== '') {
             $userId = User::query()->whereRaw('LOWER(username) = LOWER(?)', [$filters['user']])->value('id');
@@ -240,6 +241,6 @@ final class ShoutboxRepository extends BaseRepository
      */
     public function applyTypeFilter($query, string $type, $user = null): void
     {
-        $query->where('type', 'sb');
+        $query->where('type', ShoutboxType::SB->value);
     }
 }

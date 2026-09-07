@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Enums\FaqType;
 use App\Repositories\InfoRepository;
 use App\Support\Globals;
 use App\Support\Http;
@@ -103,10 +104,10 @@ class FaqController extends LegacyController
         if ($action === 'addnewitem' && $request->isMethod('post')) {
             $categ = (int) (request()->post('categ') ?? 0);
             $langId = (int) (request()->post('langid') ?? 0);
-            $max = app(InfoRepository::class)->getFaqMaxOrderAndLinkId('item', $langId);
+            $max = app(InfoRepository::class)->getFaqMaxOrderAndLinkId(FaqType::ITEM->stringValue(), $langId);
             app(InfoRepository::class)->insertFaq([
                 'link_id' => $max['maxlinkid'] + 1,
-                'type' => 'item',
+                'type' => FaqType::ITEM->value,
                 'lang_id' => $langId,
                 'question' => (string) request()->post('question'),
                 'answer' => (string) request()->post('answer'),
@@ -120,10 +121,10 @@ class FaqController extends LegacyController
 
         if ($action === 'addnewsect' && $request->isMethod('post')) {
             $language = (int) (request()->post('language') ?? 0);
-            $max = app(InfoRepository::class)->getFaqMaxOrderAndLinkId('categ', $language);
+            $max = app(InfoRepository::class)->getFaqMaxOrderAndLinkId(FaqType::CATEG->stringValue(), $language);
             app(InfoRepository::class)->insertFaq([
                 'link_id' => $max['maxlinkid'] + 1,
-                'type' => 'categ',
+                'type' => FaqType::CATEG->value,
                 'lang_id' => $language,
                 'question' => (string) request()->post('title'),
                 'answer' => '',
@@ -145,9 +146,9 @@ class FaqController extends LegacyController
             $arr['answer'] = htmlspecialchars((string) $arr['answer']);
 
             $categories = [];
-            if ($arr['type'] === 'item') {
+            if ($arr['type'] === FaqType::ITEM->value) {
                 $categories = app(InfoRepository::class)->getFaqCategoriesByLang((int) $arr['lang_id']);
-            } elseif ($arr['type'] === 'categ') {
+            } elseif ($arr['type'] === FaqType::CATEG->value) {
                 $arr['lang_name'] = app(InfoRepository::class)->getLanguageName((int) $arr['lang_id']);
             }
 

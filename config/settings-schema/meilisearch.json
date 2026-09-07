@@ -1,0 +1,27 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+        "enabled": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "search_description": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "default_search_mode": {
+            "type": [
+                "integer",
+                "string",
+                "null"
+            ],
+            "pattern": "^[0-9]+$"
+        }
+    },
+    "additionalProperties": true
+}

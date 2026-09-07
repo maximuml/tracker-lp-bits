@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Enums\OfferAllowed;
 use App\Exceptions\TorrentAlreadyExistsException;
 use App\Models\Offer;
 use App\Models\User;
@@ -83,7 +84,7 @@ class TorrentUploadController extends Controller
         $offerRows = [];
         if ($enableoffer === 'yes') {
             $offerRows = Offer::query()
-                ->where('allowed', 'allowed')
+                ->where('allowed', OfferAllowed::ALLOWED->value)
                 ->where('userid', $currentUser['id'])
                 ->orderBy('name')
                 ->get()

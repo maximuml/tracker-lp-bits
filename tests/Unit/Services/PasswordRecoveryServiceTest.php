@@ -74,7 +74,7 @@ final class PasswordRecoveryServiceTest extends TestCase
             'class' => 1,
             'added' => now()->toDateTimeString(),
             'last_access' => now()->toDateTimeString(),
-            'status' => 'confirmed',
+            'status' => 1,
             'enabled' => 1,
             'parked' => 0,
             'downloadpos' => 1,
@@ -115,7 +115,7 @@ final class PasswordRecoveryServiceTest extends TestCase
     {
         $this->createUser([
             'email' => 'pending@test.com',
-            'status' => 'pending',
+            'status' => 0,
         ]);
 
         $this->expectException(AuthenticationException::class);

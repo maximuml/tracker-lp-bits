@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Http\Controllers;
 
+use App\Enums\UserStatus;
 use App\Http\Controllers\UserController;
 use App\Http\Requests\UidRequest;
 use App\Http\Requests\UserDisableRequest;
@@ -75,7 +76,7 @@ final class UserControllerTest extends TestCase
         $user->username = 'testuser';
         $user->email = 'test@example.com';
         $user->avatar = 'default.png';
-        $user->status = 'confirmed';
+        $user->status = UserStatus::CONFIRMED;
         $user->enabled = 'yes';
         $user->added = now()->toDateTimeString();
         $user->last_access = now()->toDateTimeString();

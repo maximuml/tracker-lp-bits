@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Repositories;
 
+use App\Enums\ReportType;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\ModerationRepository;
@@ -349,7 +350,7 @@ final class ModerationRepositoryTest extends TestCase
             'addedby' => $addedBy,
             'added' => now()->toDateTimeString(),
             'reportid' => $reportId,
-            'type' => $type,
+            'type' => ReportType::fromStringSafe($type)->value,
             'reason' => 'test',
             'dealtby' => 0,
             'dealtwith' => $dealtwith,

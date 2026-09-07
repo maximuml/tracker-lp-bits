@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Enums\TorrentType;
+use App\Enums\UserStatus;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Support\Settings;
@@ -100,7 +102,7 @@ class PerformanceTestDatasetSeeder extends Seeder
                 'passkey' => Str::random(32),
                 'class' => $class,
                 'enabled' => 1,
-                'status' => 'confirmed',
+                'status' => UserStatus::CONFIRMED->value,
                 'uploaded' => 10 * 1024 * 1024 * 1024, // 10 GB
                 'downloaded' => 1 * 1024 * 1024 * 1024, // 1 GB
                 'added' => now(),
@@ -169,7 +171,7 @@ class PerformanceTestDatasetSeeder extends Seeder
                     'seeders' => ($i % 5) + 1,
                     'leechers' => ($i % 3),
                     'times_completed' => $i * 2,
-                    'type' => 'single',
+                    'type' => TorrentType::SINGLE->value,
                     'numfiles' => 1,
                     'anonymous' => false,
                 ]);

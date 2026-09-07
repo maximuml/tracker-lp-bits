@@ -4,14 +4,20 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Exceptions\SettingsValidationException;
 use App\Models\Setting;
 use App\Support\Cache;
 use App\Support\Logger;
+use App\Support\SettingsSchemaValidator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
 class SettingRepository extends BaseRepository
 {
+    public function __construct(
+        private readonly SettingsSchemaValidator $schemaValidator,
+    ) {}
+
     /**
      * @return array<string, mixed>
      */
@@ -85,6 +91,13 @@ class SettingRepository extends BaseRepository
     public function saveBatch(string $prefix, array $nameAndValue, bool $autoload = true): void
     {
         $prefix = strtolower($prefix);
+
+        // Validate against JSON schema before persisting.
+        $errors = $this->schemaValidator->validatePrefix($prefix, $nameAndValue);
+        if (! empty($errors)) {
+            throw new SettingsValidationException($prefix, $errors);
+        }
+
         $datetimeNow = date('Y-m-d H:i:s');
         $records = [];
 

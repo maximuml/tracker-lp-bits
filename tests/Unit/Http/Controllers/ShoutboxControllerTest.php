@@ -25,8 +25,8 @@ final class ShoutboxControllerTest extends TestCase
     public function test_index_returns_shoutbox_history(): void
     {
         DB::table('shoutbox')->insert([
-            ['userid' => 1, 'date' => time(), 'text' => 'Hello', 'type' => 'sb'],
-            ['userid' => 1, 'date' => time(), 'text' => 'World', 'type' => 'sb'],
+            ['userid' => 1, 'date' => time(), 'text' => 'Hello', 'type' => 0],
+            ['userid' => 1, 'date' => time(), 'text' => 'World', 'type' => 0],
         ]);
 
         $controller = app(ShoutboxController::class);

@@ -26,9 +26,12 @@ use App\Models\Snatch;
 use App\Models\Thank;
 use App\Models\Torrent;
 use App\Models\User;
+use App\Models\UserActivity;
 use App\Models\UserMeta;
 use App\Models\UserModifyLog;
 use App\Models\UsernameChangeLog;
+use App\Models\UserPreference;
+use App\Models\UserSeedStats;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -252,5 +255,23 @@ trait HasUserRelationships
     public function modifyLogs(): HasMany
     {
         return $this->hasMany(UserModifyLog::class, 'user_id');
+    }
+
+    /** @return HasOne<UserPreference, $this> */
+    public function preference(): HasOne
+    {
+        return $this->hasOne(UserPreference::class, 'user_id');
+    }
+
+    /** @return HasOne<UserActivity, $this> */
+    public function activity(): HasOne
+    {
+        return $this->hasOne(UserActivity::class, 'user_id');
+    }
+
+    /** @return HasOne<UserSeedStats, $this> */
+    public function seedStats(): HasOne
+    {
+        return $this->hasOne(UserSeedStats::class, 'user_id');
     }
 }

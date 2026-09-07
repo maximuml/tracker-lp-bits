@@ -54,7 +54,12 @@ final class ForumPageServiceTest extends TestCase
             'std_forum_error' => 'Error', 'std_unknown_action' => 'Unknown action',
         ]);
 
-        $indexService = new ForumIndexService;
+        $indexService = new ForumIndexService(
+            $this->app->make(CurrentUser::class),
+            $this->app->make(Globals::class),
+            $this->app->make(ForumRepository::class),
+            $this->app->make(LegacyRedisCache::class),
+        );
         $composeService = new ForumComposeService;
         $topicViewService = new ForumTopicViewService($indexService);
         $listingService = new ForumListingService($indexService);
@@ -80,6 +85,7 @@ final class ForumPageServiceTest extends TestCase
         $repo->shouldReceive('getOverforumsList')->andReturn([]);
         $repo->shouldReceive('getForumsList')->andReturn([]);
         $this->app->instance(ForumRepository::class, $repo);
+        $this->rebuildService($repo);
 
         return $repo;
     }
@@ -93,6 +99,24 @@ final class ForumPageServiceTest extends TestCase
         $cache->shouldReceive('cache_value')->andReturn(true);
         $cache->shouldReceive('delete_value')->andReturn(true);
         $this->app->instance(LegacyRedisCache::class, $cache);
+        $this->rebuildService(null, $cache);
+    }
+
+    private function rebuildService(?ForumRepository $repo = null, ?LegacyRedisCache $cache = null): void
+    {
+        $forumRepo = $repo ?? $this->app->make(ForumRepository::class);
+        $cacheInstance = $cache ?? $this->app->make(LegacyRedisCache::class);
+
+        $indexService = new ForumIndexService(
+            $this->app->make(CurrentUser::class),
+            $this->app->make(Globals::class),
+            $forumRepo,
+            $cacheInstance,
+        );
+        $composeService = new ForumComposeService;
+        $topicViewService = new ForumTopicViewService($indexService);
+        $listingService = new ForumListingService($indexService);
+        $this->service = new ForumPageService($indexService, $composeService, $topicViewService, $listingService);
     }
 
     /**

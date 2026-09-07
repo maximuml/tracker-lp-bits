@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Repositories\MessageRepository;
 use App\Services\MessageService;
 use App\Support\Globals;
+use App\Support\Language;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -32,6 +33,8 @@ final class MessageServiceTest extends TestCase
 
     private MessageService $service;
 
+    private Globals $globals;
+
     private int $initialObLevel;
 
     protected function setUp(): void
@@ -47,7 +50,13 @@ final class MessageServiceTest extends TestCase
         DB::table('users')->truncate();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
-        $this->service = new MessageService;
+        $this->globals = new Globals;
+        $this->app->instance(Globals::class, $this->globals);
+        $this->service = new MessageService(
+            app(MessageRepository::class),
+            $this->globals,
+            app(Language::class),
+        );
     }
 
     protected function tearDown(): void
@@ -106,8 +115,7 @@ final class MessageServiceTest extends TestCase
 
     private function mockGlobals(): void
     {
-        $globals = new Globals;
-        $this->app->instance(Globals::class, $globals);
+        $this->app->instance(Globals::class, $this->globals);
     }
 
     /** @return MessageRepository&MockInterface */
@@ -117,6 +125,11 @@ final class MessageServiceTest extends TestCase
         $repo = Mockery::mock(MessageRepository::class);
         $repo->shouldIgnoreMissing();
         $this->app->instance(MessageRepository::class, $repo);
+        $this->service = new MessageService(
+            $repo,
+            $this->globals,
+            app(Language::class),
+        );
 
         return $repo;
     }
@@ -157,7 +170,11 @@ final class MessageServiceTest extends TestCase
 
     public function test_can_instantiate_service(): void
     {
-        $service = new MessageService;
+        $service = new MessageService(
+            app(MessageRepository::class),
+            new Globals,
+            app(Language::class),
+        );
 
         $this->assertInstanceOf(MessageService::class, $service);
     }

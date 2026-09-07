@@ -54,7 +54,12 @@ final class ForumListingServiceTest extends TestCase
             'text_more_smilies' => 'More',
         ]);
 
-        $indexService = new ForumIndexService;
+        $indexService = new ForumIndexService(
+            $this->app->make(CurrentUser::class),
+            $this->app->make(Globals::class),
+            $this->app->make(ForumRepository::class),
+            $this->app->make(LegacyRedisCache::class),
+        );
         $this->service = new ForumListingService($indexService);
     }
 
@@ -75,6 +80,7 @@ final class ForumListingServiceTest extends TestCase
         $repo->shouldIgnoreMissing(false);
         $repo->shouldReceive('getModeratorArray')->andReturn([]);
         $this->app->instance(ForumRepository::class, $repo);
+        $this->rebuildService($repo);
 
         return $repo;
     }
@@ -88,6 +94,21 @@ final class ForumListingServiceTest extends TestCase
         $cache->shouldReceive('delete_value')->andReturn(true);
         $cache->shouldReceive('cache_value')->andReturn(true);
         $this->app->instance(LegacyRedisCache::class, $cache);
+        $this->rebuildService(null, $cache);
+    }
+
+    private function rebuildService(?ForumRepository $repo = null, ?LegacyRedisCache $cache = null): void
+    {
+        $forumRepo = $repo ?? $this->app->make(ForumRepository::class);
+        $cacheInstance = $cache ?? $this->app->make(LegacyRedisCache::class);
+
+        $indexService = new ForumIndexService(
+            $this->app->make(CurrentUser::class),
+            $this->app->make(Globals::class),
+            $forumRepo,
+            $cacheInstance,
+        );
+        $this->service = new ForumListingService($indexService);
     }
 
     /**

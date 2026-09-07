@@ -34,6 +34,10 @@ final class BonusPageServiceTest extends TestCase
     /** @var BonusRepository&MockInterface */
     private $bonusRep;
 
+    private CurrentUser $currentUser;
+
+    private Globals $globals;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -48,7 +52,13 @@ final class BonusPageServiceTest extends TestCase
         $rep->shouldIgnoreMissing();
         $this->bonusRep = $rep;
 
-        $this->service = new BonusPageService($rep);
+        $this->currentUser = new CurrentUser;
+        $this->app->instance(CurrentUser::class, $this->currentUser);
+
+        $this->globals = new Globals;
+        $this->app->instance(Globals::class, $this->globals);
+
+        $this->service = new BonusPageService($rep, $this->currentUser, $this->globals);
     }
 
     protected function tearDown(): void
@@ -63,23 +73,19 @@ final class BonusPageServiceTest extends TestCase
     /** @param  array<string, mixed>  $values */
     private function mockGlobals(array $values = []): void
     {
-        $globals = new Globals;
         foreach ($values as $key => $value) {
-            $globals->set($key, $value);
+            $this->globals->set($key, $value);
         }
-        $this->app->instance(Globals::class, $globals);
     }
 
     /** @param  array<string, mixed>  $userData */
     private function setCurrentUser(array $userData = []): void
     {
-        $currentUser = new CurrentUser;
-        $currentUser->set(array_merge([
+        $this->currentUser->set(array_merge([
             'id' => 1,
             'username' => 'testuser',
             'seedbonus' => 500.0,
         ], $userData));
-        $this->app->instance(CurrentUser::class, $currentUser);
     }
 
     /** @param  array<string, mixed>  $query */
@@ -92,7 +98,7 @@ final class BonusPageServiceTest extends TestCase
 
     public function test_can_instantiate_service(): void
     {
-        $service = new BonusPageService($this->bonusRep);
+        $service = new BonusPageService($this->bonusRep, $this->currentUser, $this->globals);
 
         $this->assertInstanceOf(BonusPageService::class, $service);
     }

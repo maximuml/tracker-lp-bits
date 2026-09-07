@@ -104,9 +104,12 @@ final class ForumServiceTest extends TestCase
 
     private function service(): ForumService
     {
-        $repo = $this->app->make(ForumRepository::class);
-
-        return new ForumService($repo);
+        return new ForumService(
+            $this->app->make(ForumRepository::class),
+            $this->app->make(CurrentUser::class),
+            $this->app->make(Globals::class),
+            $this->app->make(LegacyRedisCache::class),
+        );
     }
 
     private function unauthenticatedUser(): void

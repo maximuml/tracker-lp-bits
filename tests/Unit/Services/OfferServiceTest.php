@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Services;
 
+use App\Repositories\OfferRepository;
 use App\Services\OfferService;
 use App\Support\CurrentUser;
 use App\Support\Globals;
@@ -32,6 +33,10 @@ final class OfferServiceTest extends TestCase
 
     private OfferService $service;
 
+    private CurrentUser $currentUser;
+
+    private Globals $globals;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -50,7 +55,13 @@ final class OfferServiceTest extends TestCase
         DB::table('comments')->truncate();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
-        $this->service = new OfferService;
+        $this->currentUser = new CurrentUser;
+        $this->globals = new Globals;
+        $this->service = new OfferService(
+            $this->currentUser,
+            $this->globals,
+            new OfferRepository,
+        );
     }
 
     protected function tearDown(): void
@@ -99,26 +110,20 @@ final class OfferServiceTest extends TestCase
 
     private function unauthenticatedUser(): void
     {
-        $currentUser = new CurrentUser;
-        $currentUser->set([]);
-        $this->app->instance(CurrentUser::class, $currentUser);
+        $this->currentUser->set([]);
     }
 
     /** @param array<string, mixed> $userData */
     private function authenticatedUser(array $userData = []): void
     {
         $defaults = ['id' => 1, 'username' => 'testuser', 'class' => 1];
-        $currentUser = new CurrentUser;
-        $currentUser->set(array_merge($defaults, $userData));
-        $this->app->instance(CurrentUser::class, $currentUser);
+        $this->currentUser->set(array_merge($defaults, $userData));
     }
 
     private function mockGlobals(): void
     {
-        $globals = new Globals;
-        $globals->set('BASEURL', 'example.com');
-        $globals->set('lang_offers', []);
-        $this->app->instance(Globals::class, $globals);
+        $this->globals->set('BASEURL', 'example.com');
+        $this->globals->set('lang_offers', []);
     }
 
     /**

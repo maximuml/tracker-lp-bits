@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Services;
 
+use App\DTOs\Auth\ActorContext;
+use App\Enums\UserClass;
 use App\Repositories\AttendanceRepository;
 use App\Repositories\BonusRepository;
 use App\Repositories\ExamRepository;
@@ -59,6 +61,10 @@ final class AjaxServiceTest extends TestCase
     /** @var UserPasskeyRepository&MockInterface */
     private UserPasskeyRepository $passkeyRepo;
 
+    private CurrentUser $currentUser;
+
+    private ActorContext $actorContext;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -99,6 +105,21 @@ final class AjaxServiceTest extends TestCase
         $passkeyRepo = Mockery::mock(UserPasskeyRepository::class);
         $this->passkeyRepo = $passkeyRepo;
 
+        $this->currentUser = new CurrentUser;
+        $this->app->instance(CurrentUser::class, $this->currentUser);
+
+        $this->actorContext = new ActorContext(
+            id: 0,
+            username: '',
+            class: UserClass::PEASANT,
+            locale: 'en',
+            stylesheet: 0,
+            page: 0,
+            passkey: null,
+            permissions: [],
+            user: null,
+        );
+
         $this->service = new AjaxService(
             $this->medalRepo,
             $this->attendanceRepo,
@@ -108,6 +129,8 @@ final class AjaxServiceTest extends TestCase
             $this->examRepo,
             $this->passkeyRepo,
             new ShoutboxService,
+            $this->currentUser,
+            $this->actorContext,
         );
     }
 
@@ -139,13 +162,36 @@ final class AjaxServiceTest extends TestCase
 
     private function authenticateUser(int $userId): void
     {
-        $currentUser = new CurrentUser;
-        $currentUser->set([
+        $this->currentUser->set([
             'id' => $userId,
             'username' => 'testuser',
             'class' => 1,
         ]);
-        $this->app->instance(CurrentUser::class, $currentUser);
+
+        $this->actorContext = new ActorContext(
+            id: $userId,
+            username: 'testuser',
+            class: UserClass::tryFrom(1) ?? UserClass::PEASANT,
+            locale: 'en',
+            stylesheet: 0,
+            page: 0,
+            passkey: null,
+            permissions: [],
+            user: null,
+        );
+
+        $this->service = new AjaxService(
+            $this->medalRepo,
+            $this->attendanceRepo,
+            $this->userRepo,
+            $this->torrentRepo,
+            $this->bonusRepo,
+            $this->examRepo,
+            $this->passkeyRepo,
+            new ShoutboxService,
+            $this->currentUser,
+            $this->actorContext,
+        );
     }
 
     private function insertOffer(int $userId): int

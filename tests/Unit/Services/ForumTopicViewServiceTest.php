@@ -74,7 +74,12 @@ final class ForumTopicViewServiceTest extends TestCase
             'std_unpermitted_viewing_topic' => 'No permission',
         ]);
 
-        $indexService = new ForumIndexService;
+        $indexService = new ForumIndexService(
+            $this->app->make(CurrentUser::class),
+            $this->app->make(Globals::class),
+            $this->app->make(ForumRepository::class),
+            $this->app->make(LegacyRedisCache::class),
+        );
         $this->service = new ForumTopicViewService($indexService);
     }
 
@@ -96,6 +101,7 @@ final class ForumTopicViewServiceTest extends TestCase
         $repo->shouldReceive('getModeratorArray')->andReturn([]);
         $repo->shouldReceive('getLastReadPosts')->andReturn(null);
         $this->app->instance(ForumRepository::class, $repo);
+        $this->rebuildService($repo);
 
         return $repo;
     }
@@ -109,6 +115,21 @@ final class ForumTopicViewServiceTest extends TestCase
         $cache->shouldReceive('cache_value')->andReturn(true);
         $cache->shouldReceive('delete_value')->andReturn(true);
         $this->app->instance(LegacyRedisCache::class, $cache);
+        $this->rebuildService(null, $cache);
+    }
+
+    private function rebuildService(?ForumRepository $repo = null, ?LegacyRedisCache $cache = null): void
+    {
+        $forumRepo = $repo ?? $this->app->make(ForumRepository::class);
+        $cacheInstance = $cache ?? $this->app->make(LegacyRedisCache::class);
+
+        $indexService = new ForumIndexService(
+            $this->app->make(CurrentUser::class),
+            $this->app->make(Globals::class),
+            $forumRepo,
+            $cacheInstance,
+        );
+        $this->service = new ForumTopicViewService($indexService);
     }
 
     /**

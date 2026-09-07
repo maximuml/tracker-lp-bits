@@ -28,6 +28,7 @@ use App\Events\UserUpdated;
 use App\Listeners\AppendQueryCountHeader;
 use App\Listeners\ClearTorrentCache;
 use App\Listeners\DeductUserBonusWhenTorrentDeleted;
+use App\Listeners\PublishModelEventToRedis;
 use App\Listeners\RecordCacheMetrics;
 use App\Listeners\RecordModelEventToOutbox;
 use App\Listeners\ResetNexus;
@@ -59,36 +60,39 @@ class EventServiceProvider extends ServiceProvider
         TorrentUpdated::class => [
             SyncTorrentToMeilisearch::class,
             RecordModelEventToOutbox::class,
+            PublishModelEventToRedis::class,
         ],
         TorrentCreated::class => [
             SyncTorrentToMeilisearch::class,
             SendEmailNotificationWhenTorrentCreated::class,
             ClearTorrentCache::class,
             RecordModelEventToOutbox::class,
+            PublishModelEventToRedis::class,
         ],
         TorrentDeleted::class => [
             DeductUserBonusWhenTorrentDeleted::class,
             RecordModelEventToOutbox::class,
+            PublishModelEventToRedis::class,
         ],
-        // W2-10: Record all model events to the outbox
-        UserCreated::class => [RecordModelEventToOutbox::class],
-        UserUpdated::class => [RecordModelEventToOutbox::class],
-        UserDeleted::class => [RecordModelEventToOutbox::class],
-        UserEnabled::class => [RecordModelEventToOutbox::class],
-        UserDisabled::class => [RecordModelEventToOutbox::class],
-        NewsCreated::class => [RecordModelEventToOutbox::class],
-        HitAndRunCreated::class => [RecordModelEventToOutbox::class],
-        HitAndRunUpdated::class => [RecordModelEventToOutbox::class],
-        HitAndRunDeleted::class => [RecordModelEventToOutbox::class],
-        MessageCreated::class => [RecordModelEventToOutbox::class],
-        StaffMessageCreated::class => [RecordModelEventToOutbox::class],
-        SnatchedUpdated::class => [RecordModelEventToOutbox::class],
-        AgentAllowCreated::class => [RecordModelEventToOutbox::class],
-        AgentAllowUpdated::class => [RecordModelEventToOutbox::class],
-        AgentAllowDeleted::class => [RecordModelEventToOutbox::class],
-        AgentDenyCreated::class => [RecordModelEventToOutbox::class],
-        AgentDenyUpdated::class => [RecordModelEventToOutbox::class],
-        AgentDenyDeleted::class => [RecordModelEventToOutbox::class],
+        // W2-10: Record all model events to the outbox + publish to Redis
+        UserCreated::class => [RecordModelEventToOutbox::class, PublishModelEventToRedis::class],
+        UserUpdated::class => [RecordModelEventToOutbox::class, PublishModelEventToRedis::class],
+        UserDeleted::class => [RecordModelEventToOutbox::class, PublishModelEventToRedis::class],
+        UserEnabled::class => [RecordModelEventToOutbox::class, PublishModelEventToRedis::class],
+        UserDisabled::class => [RecordModelEventToOutbox::class, PublishModelEventToRedis::class],
+        NewsCreated::class => [RecordModelEventToOutbox::class, PublishModelEventToRedis::class],
+        HitAndRunCreated::class => [RecordModelEventToOutbox::class, PublishModelEventToRedis::class],
+        HitAndRunUpdated::class => [RecordModelEventToOutbox::class, PublishModelEventToRedis::class],
+        HitAndRunDeleted::class => [RecordModelEventToOutbox::class, PublishModelEventToRedis::class],
+        MessageCreated::class => [RecordModelEventToOutbox::class, PublishModelEventToRedis::class],
+        StaffMessageCreated::class => [RecordModelEventToOutbox::class, PublishModelEventToRedis::class],
+        SnatchedUpdated::class => [RecordModelEventToOutbox::class, PublishModelEventToRedis::class],
+        AgentAllowCreated::class => [RecordModelEventToOutbox::class, PublishModelEventToRedis::class],
+        AgentAllowUpdated::class => [RecordModelEventToOutbox::class, PublishModelEventToRedis::class],
+        AgentAllowDeleted::class => [RecordModelEventToOutbox::class, PublishModelEventToRedis::class],
+        AgentDenyCreated::class => [RecordModelEventToOutbox::class, PublishModelEventToRedis::class],
+        AgentDenyUpdated::class => [RecordModelEventToOutbox::class, PublishModelEventToRedis::class],
+        AgentDenyDeleted::class => [RecordModelEventToOutbox::class, PublishModelEventToRedis::class],
         Looping::class => [
             ResetNexus::class,
         ],

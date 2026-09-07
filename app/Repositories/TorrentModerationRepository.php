@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Auth\Permission;
-use App\Enums\ModelEventEnum;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\PromotionTimeType;
 use App\Enums\TorrentApprovalStatus;
 use App\Enums\TorrentOperationAction;
 use App\Enums\TorrentPosState;
 use App\Enums\TorrentPromotion;
+use App\Events\TorrentDeleted;
+use App\Events\TorrentUpdated;
 use App\Exceptions\InsufficientPermissionException;
 use App\Exceptions\NexusException;
 use App\Models\Category;
@@ -23,7 +24,6 @@ use App\Models\TorrentOperationLog;
 use App\Models\TorrentTag;
 use App\Models\User;
 use App\Support\Config\SiteConfig;
-use App\Support\Events;
 use App\Support\Json;
 use App\Support\Locale;
 use App\Support\Logger;
@@ -419,7 +419,7 @@ class TorrentModerationRepository extends BaseRepository
             Torrent::query()->whereIn('id', $torrentIdArr)->update(['category' => $categoryId]);
         });
         foreach ($torrents as $torrent) {
-            Events::fire(ModelEventEnum::TORRENT_UPDATED, $torrent, null);
+            event(new TorrentUpdated($torrent));
         }
         Logger::writeWithContext((string) ("success change to section {$sectionId}, torrent count:".$torrents->count()), (string) 'info', (bool) false);
     }
@@ -462,7 +462,7 @@ class TorrentModerationRepository extends BaseRepository
             ], $notify);
 
             if ($torrent instanceof Torrent) {
-                Events::fire('torrent_deleted', $torrent);
+                event(new TorrentDeleted($torrent->toArray()));
             }
         }
 

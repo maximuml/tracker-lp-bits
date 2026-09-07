@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Auth\Permission;
-use App\Enums\ModelEventEnum;
 use App\Enums\ModerationAction;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserClass as UserClassEnum;
 use App\Enums\UserStatus;
+use App\Events\UserDeleted;
+use App\Events\UserDisabled;
+use App\Events\UserEnabled;
+use App\Events\UserUpdated;
 use App\Exceptions\InsufficientPermissionException;
 use App\Exceptions\NexusException;
 use App\Models\Invite;
@@ -22,7 +25,6 @@ use App\Services\OutboxService;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
 use App\Support\Environment;
-use App\Support\Events;
 use App\Support\Format;
 use App\Support\Locale;
 use App\Support\Logger;
@@ -81,7 +83,7 @@ class UserModerationRepository extends BaseRepository
         });
         Logger::writeWithContext((string) "user: {$uid}, {$modCommentText}", (string) 'info', (bool) false);
         $this->clearCache($targetUser);
-        Events::fire('user_disabled', $targetUser, null);
+        event(new UserDisabled($targetUser));
 
         return true;
     }
@@ -114,7 +116,7 @@ class UserModerationRepository extends BaseRepository
         $targetUser->updateWithModComment($update, $modCommentText);
         Logger::writeWithContext((string) ("user: {$uid}, {$modCommentText}, update: ".json_encode($update)), (string) 'info', (bool) false);
         $this->clearCache($targetUser);
-        Events::fire('user_enabled', $targetUser, null);
+        event(new UserEnabled($targetUser));
         $this->setEnableLatelyCache($targetUser->id);
 
         return true;
@@ -409,7 +411,7 @@ class UserModerationRepository extends BaseRepository
         foreach ($users as $user) {
             $user->status = UserStatus::CONFIRMED->value;
             $user->editsecret = '';
-            Events::fire(ModelEventEnum::USER_UPDATED, $user, null);
+            event(new UserUpdated($user));
         }
 
         return true;
@@ -446,7 +448,7 @@ class UserModerationRepository extends BaseRepository
             $user->warned = false;
             $user->warneduntil = null;
 
-            Events::fire(ModelEventEnum::USER_UPDATED, $user, null);
+            event(new UserUpdated($user));
         }
     }
 
@@ -503,7 +505,7 @@ class UserModerationRepository extends BaseRepository
             })
             ->delete();
         if (is_int($id)) {
-            Events::fire(ModelEventEnum::USER_DELETED, $users->first(), null);
+            event(new UserDeleted($users->first()->toArray()));
         }
 
         return true;

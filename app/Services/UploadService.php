@@ -6,8 +6,8 @@ namespace App\Services;
 
 use App\Auth\Permission;
 use App\Enums\BusinessType;
-use App\Enums\ModelEventEnum;
 use App\Enums\TorrentType;
+use App\Events\TorrentCreated;
 use App\Exceptions\NexusException;
 use App\Exceptions\TorrentAlreadyExistsException;
 use App\Models\BonusLogs;
@@ -21,7 +21,6 @@ use App\Repositories\TorrentRepository;
 use App\Repositories\TorrentUploadRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\CustomField;
-use App\Support\Events;
 use App\Support\Locale;
 use App\Support\Log;
 use App\Support\Logger;
@@ -178,7 +177,7 @@ class UploadService
         $torrentRep->addPiecesHashCache($id, $newTorrent->pieces_hash);
         $this->handleOffer($request, $newTorrent, $user);
         Log::writeWithContext("Torrent $id ($newTorrent->name) was uploaded by $uploaderUsername");
-        Events::fire(ModelEventEnum::TORRENT_CREATED, $newTorrent, null);
+        event(new TorrentCreated($newTorrent));
 
         return $newTorrent;
     }

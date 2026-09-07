@@ -16,8 +16,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Enums\ModelEventEnum;
-use App\Support\Events;
+use App\Events\StaffMessageCreated;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class StaffMessage extends NexusModel
@@ -58,7 +57,7 @@ class StaffMessage extends NexusModel
             'msg' => $msg,
             'added' => now(),
         ]);
-        Events::fire(ModelEventEnum::STAFF_MESSAGE_CREATED, $record, null);
+        event(new StaffMessageCreated($record));
 
         return $record;
     }

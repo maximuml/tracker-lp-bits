@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Auth\Permission;
-use App\Enums\ModelEventEnum;
 use App\Enums\TorrentOperationAction;
 use App\Enums\TorrentPosState;
 use App\Enums\TorrentPromotion;
+use App\Events\TorrentUpdated;
 use App\Exceptions\NexusException;
 use App\Models\Category;
 use App\Models\SearchBox;
@@ -17,7 +17,6 @@ use App\Models\Torrent;
 use App\Models\TorrentOperationLog;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
-use App\Support\Events;
 use App\Support\Locale;
 use App\Support\Log;
 use App\Support\Logger;
@@ -200,7 +199,7 @@ class TorrentEditRepository extends BaseRepository
             ], true);
         }
 
-        Events::fire(ModelEventEnum::TORRENT_UPDATED, $torrentNew, $torrentOld);
+        event(new TorrentUpdated($torrentNew, $torrentOld));
 
         try {
             $meiliSearch = app(MeiliSearchRepository::class);

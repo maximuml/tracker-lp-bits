@@ -13,9 +13,10 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Enums\ModelEventEnum;
+use App\Events\AgentDenyCreated;
+use App\Events\AgentDenyDeleted;
+use App\Events\AgentDenyUpdated;
 use App\Models\Traits\NexusActivityLogTrait;
-use App\Support\Events;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AgentDeny extends NexusModel
@@ -34,13 +35,13 @@ class AgentDeny extends NexusModel
     protected static function booted()
     {
         static::created(function ($model) {
-            Events::fire(ModelEventEnum::AGENT_DENY_CREATED, $model, null);
+            event(new AgentDenyCreated($model));
         });
         static::updated(function ($model) {
-            Events::fire(ModelEventEnum::AGENT_DENY_UPDATED, $model, null);
+            event(new AgentDenyUpdated($model));
         });
         static::deleted(function ($model) {
-            Events::fire(ModelEventEnum::AGENT_DENY_DELETED, $model, null);
+            event(new AgentDenyDeleted($model->toArray()));
         });
     }
 

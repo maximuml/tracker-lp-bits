@@ -20,9 +20,11 @@ use App\Enums\HitAndRunMode;
 use App\Enums\HitAndRunStatus;
 use App\Enums\ModelEventEnum;
 use App\Enums\UserClass as UserClassEnum;
+use App\Events\HitAndRunCreated;
+use App\Events\HitAndRunDeleted;
+use App\Events\HitAndRunUpdated;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
-use App\Support\Events;
 use App\Support\Format;
 use App\Support\Locale;
 use App\Support\Logger;
@@ -89,7 +91,12 @@ class HitAndRun extends NexusModel
     public static function clearCache(HitAndRun $hitAndRun, string $event = ModelEventEnum::HIT_AND_RUN_UPDATED): void
     {
         Cache::forgetWithLocales(self::getCacheKey($hitAndRun->uid, $hitAndRun->torrent_id));
-        Events::fire($event, $hitAndRun, null);
+        match ($event) {
+            ModelEventEnum::HIT_AND_RUN_CREATED => event(new HitAndRunCreated($hitAndRun)),
+            ModelEventEnum::HIT_AND_RUN_UPDATED => event(new HitAndRunUpdated($hitAndRun)),
+            ModelEventEnum::HIT_AND_RUN_DELETED => event(new HitAndRunDeleted($hitAndRun->toArray())),
+            default => null,
+        };
         Logger::writeWithContext((string) sprintf('userId: %s, torrentId: %s hit and run cache cleared, and trigger event: %s', $hitAndRun->uid, $hitAndRun->torrent_id, $event), (string) 'info', (bool) false);
     }
 

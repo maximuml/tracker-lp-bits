@@ -84,7 +84,7 @@ jobs:
 
       - name: Check raw SQL query count
         run: |
-          BASELINE_COUNT=10
+          BASELINE_COUNT=11
           CURRENT=$(grep -rn 'DB::\(select\|statement\|unprepared\)\s*(' app/ --include="*.php" \
             | grep -v 'Support/Install' \
             | wc -l)

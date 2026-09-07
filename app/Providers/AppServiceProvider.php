@@ -8,6 +8,7 @@ use App\DTOs\Auth\ActorContext;
 use App\Models\User;
 use App\Observers\UserPartitionObserver;
 use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\TaggedCacheService;
 use App\Support\CurrentUser;
 use App\Support\DestructiveEnvironmentGuard;
 use App\Support\Env;
@@ -46,6 +47,7 @@ class AppServiceProvider extends ServiceProvider
 
             return $cache;
         });
+        $this->app->singleton(TaggedCacheService::class);
         $this->app->singleton(CurrentUser::class);
         $this->app->singleton(Language::class);
         $this->app->singleton(Globals::class);

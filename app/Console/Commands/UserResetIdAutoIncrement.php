@@ -65,11 +65,13 @@ class UserResetIdAutoIncrement extends Command
             'torrent_operation_logs', 'torrent_secrets', 'torrents', 'user_ban_logs', 'user_medals', 'user_metas', 'user_permissions', 'user_roles',
             'username_change_logs', 'users',
         ];
-        $allTables = DB::select('show tables');
+        $allTables = array_map(
+            static fn (array $t): string => (string) $t['name'],
+            DB::getSchemaBuilder()->getTables(),
+        );
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
         try {
-            foreach ($allTables as $tableObj) {
-                $tableName = current($tableObj);
+            foreach ($allTables as $tableName) {
                 if (in_array($tableName, $tablesToTruncate)) {
                     $this->info("truncate table: $tableName ...");
                     DB::table($tableName)->truncate();

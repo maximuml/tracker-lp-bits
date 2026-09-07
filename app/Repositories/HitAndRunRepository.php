@@ -250,11 +250,13 @@ class HitAndRunRepository extends BaseRepository
         }
         $prefix = 'Pardon by '.$user->username;
         $ids = $list->pluck('id')->map('intval')->all();
-        $placeholders = implode(',', array_fill(0, count($ids), '?'));
-        $affected = DB::update(
-            "UPDATE hit_and_runs SET status = ?, updated_at = ?, comment = CASE WHEN comment = '' THEN ? ELSE CONCAT('\\n', ?, comment) END WHERE id IN ({$placeholders})",
-            array_merge([HitAndRunStatus::PARDONED->value, Carbon::now()->toDateTimeString(), $prefix, $prefix], $ids)
-        );
+        $affected = DB::table('hit_and_runs')
+            ->whereIn('id', $ids)
+            ->update([
+                'status' => HitAndRunStatus::PARDONED->value,
+                'updated_at' => Carbon::now()->toDateTimeString(),
+                'comment' => DB::raw("CASE WHEN comment = '' THEN ".DB::getPdo()->quote($prefix)." ELSE CONCAT('\\n', ".DB::getPdo()->quote($prefix).', comment) END'), // @phpstan-ignore argument.type
+            ]);
         Logger::writeWithContext((string) sprintf('user: %s bulk pardon by filter: %s, affected: %s', $user->id, json_encode($params), $affected), (string) 'alert', (bool) false);
         if ($affected) {
             foreach ($list as $item) {

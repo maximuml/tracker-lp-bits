@@ -1108,9 +1108,14 @@ jobs:
 
       - name: Verify Redis connectivity
         run: |
-          # Use redis-cli directly from the php container
-          docker compose exec -T php sh -c 'redis-cli -h redis -p 6379 -a "${REDIS_PASSWORD:-}" ping 2>/dev/null | grep -q PONG'
-          echo "OK: Redis connectivity verified"
+          # Use PHP's redis extension directly (redis-cli may not be installed)
+          docker compose exec -T php php -r '
+          $r = new Redis();
+          $r->connect(getenv("REDIS_HOST") ?: "redis", (int)(getenv("REDIS_PORT") ?: 6379));
+          $pass = getenv("REDIS_PASSWORD") ?: "";
+          if ($pass) { $r->auth($pass); }
+          echo $r->ping() ? "Redis OK" : "Redis FAIL";
+          '
 
       - name: Verify MeiliSearch connectivity
         run: |

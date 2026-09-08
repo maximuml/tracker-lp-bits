@@ -4,9 +4,9 @@ namespace Tests\Unit\Http\Controllers;
 
 use App\Exceptions\TorrentAlreadyExistsException;
 use App\Http\Controllers\TorrentUploadController;
+use App\Http\Requests\TorrentUploadRequest;
 use App\Models\Torrent;
 use App\Repositories\UploadRepository;
-use Illuminate\Http\Request;
 use Mockery;
 use Tests\TestCase;
 
@@ -27,10 +27,10 @@ final class TorrentUploadControllerTest extends TestCase
         $repository = Mockery::mock(UploadRepository::class);
         /** @var Mockery\Expectation $expectation */
         $expectation = $repository->shouldReceive('upload');
-        $expectation->once()->with(Mockery::type(Request::class))->andReturn($torrent);
+        $expectation->once()->with(Mockery::type(TorrentUploadRequest::class))->andReturn($torrent);
 
         $controller = app(TorrentUploadController::class);
-        $request = Request::create('/takeupload', 'POST', [
+        $request = TorrentUploadRequest::create('/takeupload', 'POST', [
             'name' => 'Test torrent',
             'descr' => 'Description',
             'type' => 1,
@@ -51,7 +51,7 @@ final class TorrentUploadControllerTest extends TestCase
         $expectation->once()->andThrow(new TorrentAlreadyExistsException(99, 'Torrent already exists'));
 
         $controller = app(TorrentUploadController::class);
-        $request = Request::create('/takeupload', 'POST', [
+        $request = TorrentUploadRequest::create('/takeupload', 'POST', [
             'name' => 'Duplicate',
             'descr' => 'Description',
             'type' => 1,

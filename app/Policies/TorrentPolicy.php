@@ -93,4 +93,39 @@ class TorrentPolicy extends BasePolicy
 
         return true;
     }
+
+    public function move(User $user): bool
+    {
+        return Permission::canMoveTorrent($user);
+    }
+
+    public function manage(User $user): bool
+    {
+        return Permission::canManageTorrent($user);
+    }
+
+    public function setPromotion(User $user): bool
+    {
+        return Permission::canSetTorrentOnPromotion($user);
+    }
+
+    public function setPosState(User $user): bool
+    {
+        return Permission::canSetTorrentPosState($user);
+    }
+
+    public function setHitAndRun(User $user): bool
+    {
+        return Permission::canSetTorrentHitAndRun($user);
+    }
+
+    public function setPrice(User $user): bool
+    {
+        return Permission::canSetTorrentPrice($user);
+    }
+
+    public function upload(User $user): bool
+    {
+        return (bool) $user->uploadpos;
+    }
 }

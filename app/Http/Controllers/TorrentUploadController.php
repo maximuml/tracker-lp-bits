@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\OfferAllowed;
 use App\Exceptions\TorrentAlreadyExistsException;
+use App\Http\Requests\TorrentUploadRequest;
 use App\Models\Offer;
 use App\Models\User;
 use App\Repositories\HitAndRunRepository;
@@ -114,7 +115,7 @@ class TorrentUploadController extends Controller
         ]);
     }
 
-    public function legacyStore(Request $request, UploadRepository $repository): RedirectResponse
+    public function legacyStore(TorrentUploadRequest $request, UploadRepository $repository): RedirectResponse
     {
         try {
             $torrent = $repository->upload($request);

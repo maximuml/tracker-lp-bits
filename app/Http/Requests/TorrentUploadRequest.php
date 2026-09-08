@@ -28,7 +28,7 @@ class TorrentUploadRequest extends FormRequest
             'price' => 'sometimes|integer|min:0',
             'cover' => 'sometimes|nullable|string|max:500',
             'technical_info' => 'sometimes|nullable|string|max:5000',
-            'torrent' => 'required|file|mimetypes:application/x-bittorrent|max:2048',
+            'file' => 'required|file|mimetypes:application/x-bittorrent|max:2048',
         ];
     }
 }

@@ -13,8 +13,6 @@ use Illuminate\Support\Facades\DB;
 
 final class ResponseBuilder
 {
-    private int $realAnnounceInterval = MIN_ANNOUNCE_WAIT_SECOND;
-
     /**
      * @param  array<string, mixed>|null  $torrent
      */
@@ -22,6 +20,7 @@ final class ResponseBuilder
         private readonly AnnounceRequestDto $dto,
         private readonly ?array $torrent = null,
         private readonly int $baseInterval = MIN_ANNOUNCE_WAIT_SECOND,
+        private readonly int $realAnnounceInterval = MIN_ANNOUNCE_WAIT_SECOND,
     ) {}
 
     /**
@@ -29,7 +28,15 @@ final class ResponseBuilder
      */
     public function withTorrent(array $torrent): self
     {
-        return new self($this->dto, $torrent, $this->baseInterval);
+        return new self($this->dto, $torrent, $this->baseInterval, $this->realAnnounceInterval);
+    }
+
+    /**
+     * Returns a new instance with the resolved announce interval.
+     */
+    public function withRealAnnounceInterval(int $interval): self
+    {
+        return new self($this->dto, $this->torrent, $this->baseInterval, $interval);
     }
 
     public function initial(int $torrentId): InitialResponseResult
@@ -45,17 +52,17 @@ final class ResponseBuilder
         $end1 = (int) (($announceInterval + $annInterTwo) / 2);
         $end2 = (int) (($annInterTwo + $annInterThree) / 2);
 
-        $this->realAnnounceInterval = random_int($begin, $end1);
+        $realInterval = random_int($begin, $end1);
         if ($annInterThreeAge && $annInterThree > MIN_ANNOUNCE_WAIT_SECOND && (TIMENOW - (int) ($this->torrent['ts'] ?? 0)) >= ($annInterThreeAge * 86400)) {
-            $this->realAnnounceInterval = random_int($end2, $annInterThree);
+            $realInterval = random_int($end2, $annInterThree);
         } elseif ($annInterTwoAge && $annInterTwo > MIN_ANNOUNCE_WAIT_SECOND && (TIMENOW - (int) ($this->torrent['ts'] ?? 0)) >= ($annInterTwoAge * 86400)) {
-            $this->realAnnounceInterval = random_int($end1, $end2);
+            $realInterval = random_int($end1, $end2);
         }
 
         $counts = $this->countPeers($torrentId) ?: (object) ['seeders' => 0, 'leechers' => 0];
 
         $response = [
-            'interval' => $this->realAnnounceInterval,
+            'interval' => $realInterval,
             'min interval' => MIN_ANNOUNCE_WAIT_SECOND,
             'complete' => (int) ($counts->seeders ?? 0),
             'incomplete' => (int) ($counts->leechers ?? 0),
@@ -64,7 +71,7 @@ final class ResponseBuilder
             'peers6' => '',
         ];
 
-        return new InitialResponseResult($response, $this->realAnnounceInterval, $autocleanIntervalOne);
+        return new InitialResponseResult($response, $realInterval, $autocleanIntervalOne);
     }
 
     /**

@@ -27,11 +27,17 @@ use App\ViewModels\IndexPageViewModel;
  */
 final class IndexPageService
 {
+    public function __construct(
+        private readonly CurrentUser $currentUser,
+        private readonly Globals $globals,
+        private readonly LegacyRedisCache $cache,
+        private readonly IndexRepository $indexRepository,
+    ) {}
+
     public function build(): IndexPageViewModel
     {
-        $curUser = (array) (app(CurrentUser::class)->get() ?? []);
-        $lang = (array) (app(Globals::class)->get('lang_index') ?? []);
-        $cache = app(LegacyRedisCache::class);
+        $curUser = (array) ($this->currentUser->get() ?? []);
+        $lang = (array) ($this->globals->get('lang_index') ?? []);
 
         $data = [
             'lang' => $lang,
@@ -43,7 +49,7 @@ final class IndexPageService
         ];
 
         // News
-        $data['news'] = $this->buildNews($lang, $data['canNewsManage'], $cache);
+        $data['news'] = $this->buildNews($lang, $data['canNewsManage'], $this->cache);
 
         // Shoutbox
         $data['shoutbox'] = $this->buildShoutbox($lang, $data['canSbManage'], (int) ($curUser['id'] ?? 0));
@@ -54,16 +60,16 @@ final class IndexPageService
         $data['forumPosts'] = $this->buildForumPosts($lang, $curUser);
 
         // Latest torrents
-        $data['latestTorrents'] = $this->buildLatestTorrents($lang, $cache);
+        $data['latestTorrents'] = $this->buildLatestTorrents($lang, $this->cache);
 
         // Top uploaders
         $data['topUploaders'] = $this->buildTopUploaders($lang);
 
         // Polls
-        $data['polls'] = $this->buildPolls($lang, $curUser, $data['canPollManage'], $data['canLog'], $cache);
+        $data['polls'] = $this->buildPolls($lang, $curUser, $data['canPollManage'], $data['canLog'], $this->cache);
 
         // Stats
-        $data['stats'] = $this->buildStats($lang, $cache);
+        $data['stats'] = $this->buildStats($lang, $this->cache);
 
         // Tracker load
         $data['trackerLoad'] = $this->buildTrackerLoad($lang);
@@ -75,8 +81,8 @@ final class IndexPageService
         $data['browserNote'] = $this->buildBrowserNote($lang);
 
         // Reset unread news count
-        if (! empty($curUser['id']) && $cache !== null) {
-            $cache->delete_value('user_'.(int) $curUser['id'].'_unread_news_count');
+        if (! empty($curUser['id'])) {
+            $this->cache->delete_value('user_'.(int) $curUser['id'].'_unread_news_count');
         }
 
         return new IndexPageViewModel(
@@ -104,16 +110,16 @@ final class IndexPageService
      * @param  array<string, mixed>  $lang
      * @return array<string, mixed>
      */
-    private function buildNews(array $lang, bool $canManage, ?LegacyRedisCache $cache): array
+    private function buildNews(array $lang, bool $canManage, LegacyRedisCache $cache): array
     {
-        $maxNews = (int) app(Globals::class)->get('maxnewsnum_main', 0);
+        $maxNews = (int) $this->globals->get('maxnewsnum_main', 0);
 
         return [
             'show' => true,
             'title' => $lang['text_recent_news'] ?? 'Recent news',
             'canManage' => $canManage,
             'manageLink' => $lang['text_news_page'] ?? 'News page',
-            'items' => app(IndexRepository::class)->getLatestNews($maxNews),
+            'items' => $this->indexRepository->getLatestNews($maxNews),
             'showHideTitle' => $lang['title_show_or_hide'] ?? 'Show/Hide',
             'editLabel' => $lang['text_e'] ?? 'E',
             'deleteLabel' => $lang['text_d'] ?? 'D',
@@ -126,7 +132,7 @@ final class IndexPageService
      */
     private function buildShoutbox(array $lang, bool $canManage, int $userId): array
     {
-        $show = app(Globals::class)->get('showshoutbox_main', '') === 'yes';
+        $show = $this->globals->get('showshoutbox_main', '') === 'yes';
 
         if (! $show) {
             return ['show' => false];
@@ -176,13 +182,13 @@ JS;
      */
     private function buildForumPosts(array $lang, array $curUser): array
     {
-        $show = app(Globals::class)->get('showlastxforumposts_main', '') === 'yes' && ! empty($curUser);
+        $show = $this->globals->get('showlastxforumposts_main', '') === 'yes' && ! empty($curUser);
 
         if (! $show) {
             return ['show' => false];
         }
 
-        $posts = app(IndexRepository::class)->getLatestForumPosts(5, (int) UserDisplay::currentClass());
+        $posts = $this->indexRepository->getLatestForumPosts(5, (int) UserDisplay::currentClass());
 
         return [
             'show' => count($posts) > 0,
@@ -200,9 +206,9 @@ JS;
      * @param  array<string, mixed>  $lang
      * @return array<string, mixed>
      */
-    private function buildLatestTorrents(array $lang, ?LegacyRedisCache $cache): array
+    private function buildLatestTorrents(array $lang, LegacyRedisCache $cache): array
     {
-        $show = app(Globals::class)->get('showlastxtorrents_main', '') === 'yes';
+        $show = $this->globals->get('showlastxtorrents_main', '') === 'yes';
 
         if (! $show) {
             return ['show' => false];
@@ -210,10 +216,10 @@ JS;
 
         $cacheKey = 'index_latest_torrents_grid_v2';
         $cacheTtl = 120;
-        $html = $cache !== null ? $cache->get_value($cacheKey) : false;
+        $html = $cache->get_value($cacheKey);
 
         if ($html === false || $html === null || $html === '') {
-            $torrents = app(IndexRepository::class)->getLatestTorrents(9);
+            $torrents = $this->indexRepository->getLatestTorrents(9);
             if ($torrents->isNotEmpty()) {
                 $items = [];
                 foreach ($torrents as $torrent) {
@@ -244,10 +250,10 @@ JS;
                     'colSeeder' => $lang['col_seeder'] ?? 'Seeders',
                     'colLeecher' => $lang['col_leecher'] ?? 'Leechers',
                 ])->render();
-                $cache?->cache_value($cacheKey, $html, $cacheTtl);
+                $cache->cache_value($cacheKey, $html, $cacheTtl);
             } else {
                 $html = '';
-                $cache?->cache_value($cacheKey, $html, $cacheTtl);
+                $cache->cache_value($cacheKey, $html, $cacheTtl);
             }
         }
 
@@ -264,7 +270,7 @@ JS;
             return ['show' => false];
         }
 
-        $allUploaders = app(IndexRepository::class)->getTopUploaders(10);
+        $allUploaders = $this->indexRepository->getTopUploaders(10);
         if ($allUploaders->isEmpty()) {
             return ['show' => false];
         }
@@ -292,7 +298,7 @@ document.querySelector(".tr-top-uploader-tab").addEventListener("click", functio
 JS;
         AssetAppender::js($toggleJs, 'footer', false);
 
-        $recentUploaders = app(IndexRepository::class)->getTopUploaders(10, 30);
+        $recentUploaders = $this->indexRepository->getTopUploaders(10, 30);
 
         $buildRows = function ($uploaders): array {
             $rows = [];
@@ -326,18 +332,18 @@ JS;
      * @param  array<string, mixed>  $curUser
      * @return array<string, mixed>
      */
-    private function buildPolls(array $lang, array $curUser, bool $canManage, bool $canLog, ?LegacyRedisCache $cache): array
+    private function buildPolls(array $lang, array $curUser, bool $canManage, bool $canLog, LegacyRedisCache $cache): array
     {
-        $show = ! empty($curUser) && app(Globals::class)->get('showpolls_main', '') === 'yes';
+        $show = ! empty($curUser) && $this->globals->get('showpolls_main', '') === 'yes';
 
         if (! $show) {
             return ['show' => false];
         }
 
-        $pollArr = $cache !== null ? $cache->get_value('current_poll_content') : false;
+        $pollArr = $cache->get_value('current_poll_content');
         if ($pollArr === false || $pollArr === null) {
-            $pollArr = app(IndexRepository::class)->getCurrentPoll();
-            if ($pollArr && $cache !== null) {
+            $pollArr = $this->indexRepository->getCurrentPoll();
+            if ($pollArr) {
                 $cache->cache_value('current_poll_content', $pollArr, 7226);
             }
         }
@@ -366,7 +372,7 @@ JS;
                 }
             }
 
-            $uservote = app(IndexRepository::class)->getUserVote($pollid, (int) ($curUser['id'] ?? 0));
+            $uservote = $this->indexRepository->getUserVote($pollid, (int) ($curUser['id'] ?? 0));
             $result['pollId'] = $pollid;
             $result['question'] = $question;
             $result['options'] = $options;
@@ -378,10 +384,10 @@ JS;
             $result['votesLabel'] = $lang['text_votes'] ?? 'Votes';
 
             if ($uservote !== null) {
-                $results = $cache !== null ? $cache->get_value('current_poll_result') : false;
+                $results = $cache->get_value('current_poll_result');
                 if ($results === false || $results === null) {
-                    $results = app(IndexRepository::class)->getPollResults($pollid);
-                    $cache?->cache_value('current_poll_result', $results, 3652);
+                    $results = $this->indexRepository->getPollResults($pollid);
+                    $cache->cache_value('current_poll_result', $results, 3652);
                 }
                 $tvotes = array_sum(array_column($results, 'count'));
                 $bars = [];
@@ -406,18 +412,18 @@ JS;
      * @param  array<string, mixed>  $lang
      * @return array<string, mixed>
      */
-    private function buildStats(array $lang, ?LegacyRedisCache $cache): array
+    private function buildStats(array $lang, LegacyRedisCache $cache): array
     {
-        $show = app(Globals::class)->get('showstats_main', '') === 'yes';
+        $show = $this->globals->get('showstats_main', '') === 'yes';
 
         if (! $show) {
             return ['show' => false];
         }
 
-        $userStats = app(IndexRepository::class)->getUserStats();
-        $torrentStats = app(IndexRepository::class)->getTorrentStats();
-        $classStats = app(IndexRepository::class)->getClassStats();
-        $maxusers = (int) app(Globals::class)->get('maxusers', 0);
+        $userStats = $this->indexRepository->getUserStats();
+        $torrentStats = $this->indexRepository->getTorrentStats();
+        $classStats = $this->indexRepository->getClassStats();
+        $maxusers = (int) $this->globals->get('maxusers', 0);
 
         return [
             'show' => true,
@@ -493,7 +499,7 @@ JS;
      */
     private function buildTrackerLoad(array $lang): array
     {
-        $show = app(Globals::class)->get('showtrackerload', '') === 'yes';
+        $show = $this->globals->get('showtrackerload', '') === 'yes';
 
         if (! $show) {
             return ['show' => false];
@@ -536,8 +542,8 @@ JS;
         return [
             'show' => true,
             'note' => $lang['text_browser_note'] ?? '',
-            'nexusUrl' => (string) app(Globals::class)->get('NEXUSPHPURL', ''),
-            'projectName' => (string) app(Globals::class)->get('PROJECTNAME', ''),
+            'nexusUrl' => (string) $this->globals->get('NEXUSPHPURL', ''),
+            'projectName' => (string) $this->globals->get('PROJECTNAME', ''),
         ];
     }
 }

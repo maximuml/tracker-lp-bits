@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Services;
 
+use App\Repositories\OfferRepository;
+use App\Repositories\UsercpRepository;
 use App\Services\OfferPageService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
@@ -64,7 +66,13 @@ final class OfferPageServiceTest extends TestCase
 
     private function service(): OfferPageService
     {
-        return new OfferPageService;
+        return new OfferPageService(
+            app(CurrentUser::class),
+            app(Globals::class),
+            app(OfferRepository::class),
+            app(LegacyRedisCache::class),
+            app(UsercpRepository::class),
+        );
     }
 
     private function insertUser(string $username = 'testuser', int $class = 1): int

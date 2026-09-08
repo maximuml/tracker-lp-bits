@@ -68,12 +68,14 @@ final class AjaxService
         private readonly ExamRepository $examRepository,
         private readonly UserPasskeyRepository $userPasskeyRepository,
         private readonly ShoutboxService $shoutboxService,
+        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actorContext,
     ) {}
 
     /** @param array<string, mixed> $params */
     public function toggleUserMedalStatus(array $params): mixed
     {
-        $CURUSER = app(CurrentUser::class)->get() ?? [];
+        $CURUSER = $this->currentUser->get() ?? [];
         $rep = $this->medalRepository;
 
         return $rep->toggleUserMedalStatus($params['id'], $CURUSER['id']);
@@ -82,7 +84,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public function attendanceRetroactive(array $params): mixed
     {
-        $CURUSER = app(CurrentUser::class)->get() ?? [];
+        $CURUSER = $this->currentUser->get() ?? [];
         $rep = $this->attendanceRepository;
 
         return $rep->retroactive($CURUSER['id'], $params['date']);
@@ -91,7 +93,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public function removeUserLeechWarn(array $params): mixed
     {
-        $CURUSER = app(CurrentUser::class)->get() ?? [];
+        $CURUSER = $this->currentUser->get() ?? [];
         $rep = $this->userRepository;
 
         return $rep->removeLeechWarn($CURUSER['id'], $params['uid']);
@@ -108,7 +110,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public function approvalModal(array $params): mixed
     {
-        $CURUSER = app(CurrentUser::class)->get() ?? [];
+        $CURUSER = $this->currentUser->get() ?? [];
         $rep = $this->torrentRepository;
 
         return $rep->buildApprovalModal($CURUSER['id'], (int) $params['torrent_id']);
@@ -117,7 +119,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public function approval(array $params): mixed
     {
-        $CURUSER = app(CurrentUser::class)->get() ?? [];
+        $CURUSER = $this->currentUser->get() ?? [];
         foreach (['torrent_id', 'approval_status'] as $field) {
             if (! (isset($params[$field]))) {
                 throw new \InvalidArgumentException("Require $field");
@@ -131,7 +133,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public function removeHitAndRun(array $params): mixed
     {
-        $CURUSER = app(CurrentUser::class)->get() ?? [];
+        $CURUSER = $this->currentUser->get() ?? [];
         $rep = $this->bonusRepository;
 
         return $rep->consumeToCancelHitAndRun($CURUSER['id'], $params['id']);
@@ -140,7 +142,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public function consumeBenefit(array $params): mixed
     {
-        $CURUSER = app(CurrentUser::class)->get() ?? [];
+        $CURUSER = $this->currentUser->get() ?? [];
         $rep = $this->userRepository;
 
         return $rep->consumeBenefit($CURUSER['id'], $params);
@@ -149,7 +151,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public function clearShoutBox(array $params): mixed
     {
-        $actor = app(ActorContext::class);
+        $actor = $this->actorContext;
         if (! $this->shoutboxService->clearAll($actor)) {
             throw new \RuntimeException('No permission');
         }
@@ -160,7 +162,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public function shoutboxPost(array $params): mixed
     {
-        $actor = app(ActorContext::class);
+        $actor = $this->actorContext;
         $text = trim((string) ($params['text'] ?? $params['content'] ?? ''));
         if ($text === '') {
             throw new \InvalidArgumentException('Message cannot be empty');
@@ -178,7 +180,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public function shoutboxEdit(array $params): mixed
     {
-        $actor = app(ActorContext::class);
+        $actor = $this->actorContext;
         $id = (int) ($params['id'] ?? 0);
         $text = trim((string) ($params['text'] ?? ''));
         if ($id <= 0 || $text === '') {
@@ -197,7 +199,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public function shoutboxDelete(array $params): mixed
     {
-        $actor = app(ActorContext::class);
+        $actor = $this->actorContext;
         $id = (int) ($params['id'] ?? 0);
         if ($id <= 0) {
             throw new \InvalidArgumentException('Invalid input');
@@ -212,7 +214,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public function shoutboxReact(array $params): mixed
     {
-        $actor = app(ActorContext::class);
+        $actor = $this->actorContext;
         $id = (int) ($params['id'] ?? 0);
         $reaction = (string) ($params['reaction'] ?? '');
         $result = $this->shoutboxService->toggleReaction($actor, $id, $reaction);
@@ -226,7 +228,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public function buyMedal(array $params): mixed
     {
-        $CURUSER = app(CurrentUser::class)->get() ?? [];
+        $CURUSER = $this->currentUser->get() ?? [];
         $rep = $this->bonusRepository;
 
         return $rep->consumeToBuyMedal($CURUSER['id'], $params['medal_id']);
@@ -235,7 +237,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public function giftMedal(array $params): mixed
     {
-        $CURUSER = app(CurrentUser::class)->get() ?? [];
+        $CURUSER = $this->currentUser->get() ?? [];
         $rep = $this->bonusRepository;
 
         return $rep->consumeToGiftMedal($CURUSER['id'], $params['medal_id'], $params['uid']);
@@ -244,7 +246,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public function saveUserMedal(array $params): mixed
     {
-        $CURUSER = app(CurrentUser::class)->get() ?? [];
+        $CURUSER = $this->currentUser->get() ?? [];
         $data = [];
         foreach ($params as $param) {
             if (! is_array($param) || ! isset($param['name'], $param['value'])) {
@@ -267,7 +269,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public function claimTask(array $params): mixed
     {
-        $CURUSER = app(CurrentUser::class)->get() ?? [];
+        $CURUSER = $this->currentUser->get() ?? [];
         $rep = $this->examRepository;
 
         return $rep->assignToUser($CURUSER['id'], $params['exam_id']);
@@ -276,7 +278,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public function addToken(array $params): mixed
     {
-        $CURUSER = app(CurrentUser::class)->get() ?? [];
+        $CURUSER = $this->currentUser->get() ?? [];
         if (empty($params['name'])) {
             throw new \InvalidArgumentException('Name is required');
         }
@@ -290,7 +292,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public function removeToken(array $params): mixed
     {
-        $CURUSER = app(CurrentUser::class)->get() ?? [];
+        $CURUSER = $this->currentUser->get() ?? [];
         if (empty($params['id'])) {
             throw new \InvalidArgumentException('id is required');
         }
@@ -304,7 +306,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public function getPasskeyCreateArgs(array $params): mixed
     {
-        $CURUSER = app(CurrentUser::class)->get() ?? [];
+        $CURUSER = $this->currentUser->get() ?? [];
         $rep = $this->userPasskeyRepository;
 
         return $rep->getCreateArgs($CURUSER['id'], $CURUSER['username']);
@@ -313,7 +315,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public function processPasskeyCreate(array $params): mixed
     {
-        $CURUSER = app(CurrentUser::class)->get() ?? [];
+        $CURUSER = $this->currentUser->get() ?? [];
         $rep = $this->userPasskeyRepository;
 
         return $rep->processCreate($CURUSER['id'], $params['challengeId'], $params['clientDataJSON'], $params['attestationObject']);
@@ -322,7 +324,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public function deletePasskey(array $params): mixed
     {
-        $CURUSER = app(CurrentUser::class)->get() ?? [];
+        $CURUSER = $this->currentUser->get() ?? [];
         $rep = $this->userPasskeyRepository;
 
         return $rep->delete($CURUSER['id'], $params['credentialId']);
@@ -331,7 +333,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public function getPasskeyList(array $params): mixed
     {
-        $CURUSER = app(CurrentUser::class)->get() ?? [];
+        $CURUSER = $this->currentUser->get() ?? [];
         $rep = $this->userPasskeyRepository;
 
         return $rep->getList($CURUSER['id']);
@@ -340,7 +342,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public function getPasskeyGetArgs(array $params): mixed
     {
-        $CURUSER = app(CurrentUser::class)->get() ?? [];
+        $CURUSER = $this->currentUser->get() ?? [];
         $rep = $this->userPasskeyRepository;
 
         return $rep->getGetArgs();
@@ -349,7 +351,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public function processPasskeyGet(array $params): mixed
     {
-        $CURUSER = app(CurrentUser::class)->get() ?? [];
+        $CURUSER = $this->currentUser->get() ?? [];
         $rep = $this->userPasskeyRepository;
 
         return $rep->processGet($params['challengeId'], $params['id'], $params['clientDataJSON'], $params['authenticatorData'], $params['signature'], $params['userHandle']);
@@ -358,7 +360,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     public function getToastNotifications(array $params): mixed
     {
-        $CURUSER = app(CurrentUser::class)->get() ?? [];
+        $CURUSER = $this->currentUser->get() ?? [];
         $lastPmId = (int) ($params['last_pm_id'] ?? 0);
         $lastShoutId = (int) ($params['last_shout_id'] ?? 0);
         $init = ! empty($params['init']);

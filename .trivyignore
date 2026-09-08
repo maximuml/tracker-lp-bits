@@ -13,7 +13,32 @@
 # CVE-2024-12345
 # # expires: 2026-12-31 — reason: no fix available for php-8.5-alpine yet
 
-# Rejected CVE — Trivy fails to fetch details from the DB, causing
+# Rejected CVE — Trivy 0.70 fails to fetch details from the DB, causing
 # exit code 1 even though the vulnerability is not actionable.
+# Trivy v0.74.0+ should handle this correctly; remove after verifying.
 CVE-2026-80256
 # expires: 2026-12-31 — reason: rejected CVE, no fix available, Trivy DB issue
+
+# OpenResty image vulnerabilities — no upstream fix available yet.
+# These are in the OpenResty base image, not in tracker-lp-bits code.
+# Review monthly and remove when upstream OpenResty images are patched.
+CVE-2026-78410
+# expires: 2026-12-31 — reason: OpenResty base image, no fix available
+CVE-2026-78408
+# expires: 2026-12-31 — reason: OpenResty base image, no fix available
+CVE-2026-76642
+# expires: 2026-12-31 — reason: OpenResty base image, no fix available
+CVE-2026-53614
+# expires: 2026-12-31 — reason: OpenResty base image, no fix available
+CVE-2026-53613
+# expires: 2026-12-31 — reason: OpenResty base image, no fix available
+CVE-2026-53612
+# expires: 2026-12-31 — reason: OpenResty base image, no fix available
+CVE-2026-76957
+# expires: 2026-12-31 — reason: OpenResty base image, no fix available
+CVE-2026-76956
+# expires: 2026-12-31 — reason: OpenResty base image, no fix available
+CVE-2026-76641
+# expires: 2026-12-31 — reason: OpenResty base image, no fix available
+CVE-2026-66046
+# expires: 2026-12-31 — reason: OpenResty base image, no fix available

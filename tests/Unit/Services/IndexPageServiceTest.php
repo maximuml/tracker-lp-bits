@@ -31,6 +31,15 @@ final class IndexPageServiceTest extends TestCase
 
     private IndexPageService $service;
 
+    private CurrentUser $currentUser;
+
+    private Globals $globals;
+
+    private LegacyRedisCache $cache;
+
+    /** @var IndexRepository&MockInterface */
+    private IndexRepository $indexRepository;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -42,7 +51,20 @@ final class IndexPageServiceTest extends TestCase
         DB::table('users')->truncate();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
-        $this->service = new IndexPageService;
+        $this->currentUser = new CurrentUser;
+        $this->globals = new Globals;
+        $this->cache = new LegacyRedisCache;
+
+        /** @var IndexRepository&MockInterface $repo */
+        $repo = Mockery::mock(IndexRepository::class);
+        $this->indexRepository = $repo;
+
+        $this->service = new IndexPageService(
+            $this->currentUser,
+            $this->globals,
+            $this->cache,
+            $this->indexRepository,
+        );
     }
 
     protected function tearDown(): void
@@ -54,49 +76,34 @@ final class IndexPageServiceTest extends TestCase
     /** @param  array<string, mixed>  $values */
     private function mockGlobals(array $values = []): void
     {
-        $globals = new Globals;
         foreach ($values as $key => $value) {
-            $globals->set($key, $value);
+            $this->globals->set($key, $value);
         }
-        $this->app->instance(Globals::class, $globals);
     }
 
     /** @param  array<string, mixed>  $userData */
     private function setCurrentUser(array $userData = []): void
     {
-        $currentUser = new CurrentUser;
-        $currentUser->set(array_merge([
+        $this->currentUser->set(array_merge([
             'id' => 0,
             'username' => '',
             'class' => 1,
         ], $userData));
-        $this->app->instance(CurrentUser::class, $currentUser);
     }
 
-    private function mockCache(): void
-    {
-        /** @var LegacyRedisCache&MockInterface $cache */
-        $cache = Mockery::mock(LegacyRedisCache::class);
-        $cache->shouldIgnoreMissing();
-        $cache->shouldReceive('get_value')->andReturn(false);
-        $cache->shouldReceive('delete_value')->andReturn(true);
-        $cache->shouldReceive('cache_value')->andReturn(true);
-        $this->app->instance(LegacyRedisCache::class, $cache);
-    }
+    private function mockCache(): void {}
 
     /** @return IndexRepository&MockInterface */
     private function mockIndexRepo(): mixed
     {
-        /** @var IndexRepository&MockInterface $repo */
-        $repo = Mockery::mock(IndexRepository::class);
-        $repo->shouldReceive('getLatestNews')->andReturn([]);
-        $repo->shouldReceive('getLatestForumPosts')->andReturn([]);
-        $repo->shouldReceive('getLatestTorrents')->andReturn(new Collection);
-        $repo->shouldReceive('getTopUploaders')->andReturn(new Collection);
-        $repo->shouldReceive('getCurrentPoll')->andReturn(null);
-        $repo->shouldReceive('getUserVote')->andReturn(null);
-        $repo->shouldReceive('getPollResults')->andReturn([]);
-        $repo->shouldReceive('getUserStats')->andReturn([
+        $this->indexRepository->shouldReceive('getLatestNews')->andReturn([]);
+        $this->indexRepository->shouldReceive('getLatestForumPosts')->andReturn([]);
+        $this->indexRepository->shouldReceive('getLatestTorrents')->andReturn(new Collection);
+        $this->indexRepository->shouldReceive('getTopUploaders')->andReturn(new Collection);
+        $this->indexRepository->shouldReceive('getCurrentPoll')->andReturn(null);
+        $this->indexRepository->shouldReceive('getUserVote')->andReturn(null);
+        $this->indexRepository->shouldReceive('getPollResults')->andReturn([]);
+        $this->indexRepository->shouldReceive('getUserStats')->andReturn([
             'registered' => 0,
             'unverified' => 0,
             'totalonlinetoday' => 0,
@@ -108,7 +115,7 @@ final class IndexPageServiceTest extends TestCase
             'registered_male' => 0,
             'registered_female' => 0,
         ]);
-        $repo->shouldReceive('getTorrentStats')->andReturn([
+        $this->indexRepository->shouldReceive('getTorrentStats')->andReturn([
             'torrents' => 0,
             'dead' => 0,
             'seeders' => 0,
@@ -122,7 +129,7 @@ final class IndexPageServiceTest extends TestCase
             'totaldownloaded' => 0,
             'totaldata' => 0,
         ]);
-        $repo->shouldReceive('getClassStats')->andReturn([
+        $this->indexRepository->shouldReceive('getClassStats')->andReturn([
             UC_PEASANT => 0,
             UC_USER => 0,
             UC_POWER_USER => 0,
@@ -134,9 +141,8 @@ final class IndexPageServiceTest extends TestCase
             UC_ULTIMATE_USER => 0,
             UC_NEXUS_MASTER => 0,
         ]);
-        $this->app->instance(IndexRepository::class, $repo);
 
-        return $repo;
+        return $this->indexRepository;
     }
 
     /**
@@ -165,7 +171,12 @@ final class IndexPageServiceTest extends TestCase
 
     public function test_can_instantiate_service(): void
     {
-        $service = new IndexPageService;
+        $service = new IndexPageService(
+            $this->currentUser,
+            $this->globals,
+            $this->cache,
+            $this->indexRepository,
+        );
 
         $this->assertInstanceOf(IndexPageService::class, $service);
     }

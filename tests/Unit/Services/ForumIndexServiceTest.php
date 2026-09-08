@@ -8,6 +8,7 @@ use App\Repositories\ForumRepository;
 use App\Services\ForumIndexService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
+use App\Support\Globals;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Redis;
 use Mockery;
@@ -28,6 +29,16 @@ final class ForumIndexServiceTest extends TestCase
 
     private ForumIndexService $service;
 
+    /** @var ForumRepository&MockInterface */
+    private ForumRepository $forumRepo;
+
+    /** @var LegacyRedisCache&MockInterface */
+    private LegacyRedisCache $cache;
+
+    private CurrentUser $currentUser;
+
+    private Globals $globals;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -35,7 +46,29 @@ final class ForumIndexServiceTest extends TestCase
         if (! defined('IN_NEXUS')) {
             define('IN_NEXUS', true);
         }
-        $this->service = new ForumIndexService;
+
+        $this->currentUser = new CurrentUser;
+        $this->globals = new Globals;
+
+        /** @var ForumRepository&MockInterface $repo */
+        $repo = Mockery::mock(ForumRepository::class);
+        $repo->shouldIgnoreMissing(false);
+        $this->forumRepo = $repo;
+
+        /** @var LegacyRedisCache&MockInterface $cache */
+        $cache = Mockery::mock(LegacyRedisCache::class);
+        $cache->shouldIgnoreMissing();
+        $cache->shouldReceive('get_value')->andReturn(false);
+        $cache->shouldReceive('delete_value')->andReturn(true);
+        $cache->shouldReceive('cache_value')->andReturn(true);
+        $this->cache = $cache;
+
+        $this->service = new ForumIndexService(
+            $this->currentUser,
+            $this->globals,
+            $this->forumRepo,
+            $this->cache,
+        );
     }
 
     protected function tearDown(): void
@@ -47,31 +80,15 @@ final class ForumIndexServiceTest extends TestCase
     /** @return ForumRepository&MockInterface */
     private function mockForumRepo(): mixed
     {
-        /** @var ForumRepository&MockInterface $repo */
-        $repo = Mockery::mock(ForumRepository::class);
-        $repo->shouldIgnoreMissing(false);
-        $this->app->instance(ForumRepository::class, $repo);
-
-        return $repo;
+        return $this->forumRepo;
     }
 
-    private function mockCache(): void
-    {
-        /** @var LegacyRedisCache&MockInterface $cache */
-        $cache = Mockery::mock(LegacyRedisCache::class);
-        $cache->shouldIgnoreMissing();
-        $cache->shouldReceive('get_value')->andReturn(false);
-        $cache->shouldReceive('delete_value')->andReturn(true);
-        $cache->shouldReceive('cache_value')->andReturn(true);
-        $this->app->instance(LegacyRedisCache::class, $cache);
-    }
+    private function mockCache(): void {}
 
     /** @param  array<string, mixed>  $data */
     private function setUser(array $data = []): void
     {
-        $currentUser = new CurrentUser;
-        $currentUser->set(array_merge(['id' => 1, 'username' => 'testuser', 'class' => 1], $data));
-        $this->app->instance(CurrentUser::class, $currentUser);
+        $this->currentUser->set(array_merge(['id' => 1, 'username' => 'testuser', 'class' => 1], $data));
     }
 
     // --- getTopicImage ---
@@ -251,9 +268,7 @@ final class ForumIndexServiceTest extends TestCase
         $this->mockForumRepo();
         $this->mockCache();
 
-        $currentUser = new CurrentUser;
-        $currentUser->set(null);
-        $this->app->instance(CurrentUser::class, $currentUser);
+        $this->currentUser->set(null);
 
         $this->service->catchUp();
 

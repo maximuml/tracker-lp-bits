@@ -137,8 +137,8 @@ final class SystemMaintenanceControllerTest extends TestCase
 
     private function mockCurrentUser(?array $user): void
     {
-        $mock = Mockery::mock(new CurrentUser);
-        $mock->shouldReceive('get')->andReturn($user);
-        app()->instance(CurrentUser::class, $mock);
+        $real = new CurrentUser;
+        $real->set($user);
+        app()->instance(CurrentUser::class, $real);
     }
 }

@@ -1,0 +1,59 @@
+# Semgrep informational configuration for tracker-lp-bits
+#
+# Contains project-specific rules that track code-quality debt.
+# Findings are reported to GitHub Security tab as SARIF but do NOT
+# fail the CI job. They are governed by a ratchet baseline in
+# .semgrep-baseline.json — new findings outside the baseline are
+# surfaced for review.
+#
+# Run locally:
+#   semgrep scan --config .semgrep.informational.yml
+#
+# CI runs this via .github/workflows/ci.yml in the semgrep-informational job.
+
+rules:
+  # Rule 1: Detect $request->all() in controllers (should use $request->validated())
+  - id: laravel-request-all-in-controller
+    languages: [php]
+    severity: WARNING
+    message: "$request->all() in controller — use $request->validated() to restrict input fields."
+    pattern: $REQUEST->all()
+    paths:
+      include:
+        - "app/Http/Controllers/**/*.php"
+
+  # Rule 2: Detect unescaped output in Blade (potential XSS)
+  - id: laravel-unescaped-blade-output
+    languages: [php]
+    severity: WARNING
+    message: "Unescaped Blade output {!! !!} — ensure the content is sanitized."
+    pattern-regex: '\{!!.*\$.*!!\}'
+    paths:
+      include:
+        - "resources/views/**/*.blade.php"
+
+  # Rule 3: Detect md5() usage for security-sensitive operations
+  - id: md5-for-security
+    languages: [php]
+    severity: WARNING
+    message: "md5() used in security context — use hash_hmac('sha256', ...) or password_hash()."
+    pattern: md5(...)
+    paths:
+      include:
+        - "app/Services/**/*.php"
+        - "app/Http/Controllers/**/*.php"
+        - "app/Repositories/**/*.php"
+      exclude:
+        - "tests/**/*.php"
+
+  # Rule 4: Detect mt_rand() for security-sensitive randomness
+  - id: mt-rand-for-security
+    languages: [php]
+    severity: WARNING
+    message: "mt_rand() is not CSPRNG — use random_int() or random_bytes() for security tokens."
+    pattern: mt_rand(...)
+    paths:
+      include:
+        - "app/**/*.php"
+      exclude:
+        - "tests/**/*.php"

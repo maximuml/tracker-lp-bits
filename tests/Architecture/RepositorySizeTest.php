@@ -33,8 +33,7 @@ final class RepositorySizeTest extends TestCase
      * @var array<string, int>
      */
     private const BASELINE_FILES = [
-        // Repositories (10 files > 500 lines)
-        'app/Repositories/TorrentSearchRepository.php' => 251,
+        // Repositories (9 files > 500 lines)
         'app/Repositories/TorrentRepository.php' => 727,
         'app/Repositories/ForumRepository.php' => 599,
         'app/Repositories/UserRepository.php' => 706,
@@ -46,11 +45,11 @@ final class RepositorySizeTest extends TestCase
         'app/Repositories/ToptenRepository.php' => 525,
         // Services (6 files > 500 lines)
         'app/Services/RegistrationService.php' => 688,
-        'app/Services/OfferPageService.php' => 610,
-        'app/Services/ForumService.php' => 558,
-        'app/Services/UsercpPageService.php' => 543,
-        'app/Services/IndexPageService.php' => 543,
-        'app/Services/MessageService.php' => 515,
+        'app/Services/OfferPageService.php' => 617,
+        'app/Services/ForumService.php' => 553,
+        'app/Services/UsercpPageService.php' => 552,
+        'app/Services/IndexPageService.php' => 549,
+        'app/Services/MessageService.php' => 521,
     ];
 
     public function test_no_new_oversized_files_in_repositories_or_services(): void
@@ -128,6 +127,38 @@ final class RepositorySizeTest extends TestCase
             "Baseline files were removed but not removed from BASELINE_FILES:\n".
             implode("\n", $missing)."\n\n".
             'Update the BASELINE_FILES constant in this test to remove stale entries.',
+        );
+    }
+
+    public function test_no_stale_baseline_entries(): void
+    {
+        $stale = [];
+
+        foreach (self::BASELINE_FILES as $relativePath => $baselineLines) {
+            $absPath = self::APP_DIR.'/'.substr($relativePath, 4); // strip 'app/'
+            if (! file_exists($absPath)) {
+                continue; // handled by test_baseline_files_still_exist
+            }
+
+            $actualLines = $this->countLines($absPath);
+
+            // If a baseline file no longer exceeds the threshold, it's stale
+            if ($actualLines <= self::MAX_LINES_NEW_FILE) {
+                $stale[] = sprintf(
+                    '%s is %d lines (≤ %d threshold) — remove from BASELINE_FILES.',
+                    $relativePath,
+                    $actualLines,
+                    self::MAX_LINES_NEW_FILE,
+                );
+            }
+        }
+
+        $this->assertSame(
+            [],
+            $stale,
+            "Found stale baseline entries (files no longer exceed threshold):\n".
+            implode("\n", $stale)."\n\n".
+            'Remove these entries from BASELINE_FILES — the files are within limits now.',
         );
     }
 

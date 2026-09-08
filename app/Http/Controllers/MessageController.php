@@ -52,6 +52,16 @@ class MessageController extends LegacyController
         return $this->legacyPage($request, 'messages', true, $data);
     }
 
+    public function messagesAction(Request $request): RedirectResponse
+    {
+        $redirect = $this->legacyService->handleMessagesActionPublic($request);
+        if ($redirect instanceof RedirectResponse) {
+            return $redirect;
+        }
+
+        return redirect('/messages');
+    }
+
     public function sendmessage(Request $request): Response|RedirectResponse|View
     {
         $langSendmessage = (array) (app(Globals::class)->get('lang_sendmessage') ?? []);

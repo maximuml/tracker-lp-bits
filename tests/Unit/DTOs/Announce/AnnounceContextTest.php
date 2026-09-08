@@ -6,8 +6,10 @@ namespace Tests\Unit\DTOs\Announce;
 
 use App\DTOs\Announce\AnnounceContext;
 use App\DTOs\AnnounceRequestDto;
+use App\Services\Announce\AnnounceRequestFactory;
 use App\Services\Announce\ResponseBuilder;
 use App\Services\Announce\TrafficResult;
+use App\Support\Network\ClientIpResolver;
 use Illuminate\Http\Request;
 use PHPUnit\Framework\TestCase;
 
@@ -150,18 +152,14 @@ class AnnounceContextTest extends TestCase
             'uploaded' => 0,
             'downloaded' => 0,
             'left' => 100,
+        ], [], [], [
+            'REMOTE_ADDR' => '127.0.0.1',
+            'HTTP_USER_AGENT' => 'PHPUnit/TestClient',
         ]);
+        app()->instance('request', $request);
 
-        $params = [
-            'passkey' => 'abcdef0123456789abcdef0123456789',
-            'info_hash' => str_repeat("\x00", 20),
-            'peer_id' => '-qB4'.str_repeat("\x01", 16),
-            'port' => 6881,
-            'uploaded' => 0,
-            'downloaded' => 0,
-            'left' => 100,
-        ];
+        $factory = new AnnounceRequestFactory(new ClientIpResolver);
 
-        return AnnounceRequestDto::fromRequest($request, $params);
+        return $factory->create($request, $request->query->all());
     }
 }

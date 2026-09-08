@@ -17,12 +17,12 @@ Route::get('/aboutnexus', [RulesController::class, 'aboutNexus'])->name('aboutne
 Route::get('/rules', [RulesController::class, 'rules'])->name('rules.legacy');
 Route::get('/useragreement', [RulesController::class, 'userAgreement'])->name('useragreement.legacy');
 Route::get('/faq', [FaqController::class, 'faq'])->name('faq.legacy');
-Route::post('/faq', [FaqController::class, 'faq']);
+Route::post('/faq', [FaqController::class, 'faq'])->middleware('auth.nexus:nexus-web');
 Route::get('/donate', [InfoController::class, 'donate'])->name('donate.legacy');
-Route::post('/donate', [InfoController::class, 'donate']);
+Route::post('/donate', [InfoController::class, 'donate'])->middleware('auth.nexus:nexus-web');
 Route::get('/getusertorrentlistajax', [TorrentAjaxController::class, 'getUserTorrentListAjax'])->name('getusertorrentlistajax.legacy');
 Route::get('/searchsuggest', [TorrentAjaxController::class, 'searchSuggest'])->name('searchsuggest.legacy');
-Route::post('/ajax', [UtilityController::class, 'ajax'])->middleware(['throttle:ajax', 'reject.get.mutations'])->name('ajax.legacy');
+Route::post('/ajax', [UtilityController::class, 'ajax'])->middleware(['auth.nexus:nexus-web', 'throttle:ajax', 'reject.get.mutations'])->name('ajax.legacy');
 
 Route::get('/image', [UtilityController::class, 'image'])->name('image.legacy');
 Route::get('/shoutbox_sse', [ShoutboxController::class, 'shoutboxSse'])->name('shoutbox_sse.legacy');
@@ -39,11 +39,10 @@ Route::get('/cron', [SystemMaintenanceController::class, 'cron'])->middleware('c
 Route::get('/ok', [UtilityController::class, 'ok'])->name('ok.legacy');
 
 Route::get('/complains', [SupportController::class, 'complains'])->name('complains.legacy');
-Route::post('/complains', [SupportController::class, 'complains']);
+Route::post('/complains', [SupportController::class, 'complains'])->middleware('auth.nexus:nexus-web');
 Route::get('/shoutbox', [ShoutboxController::class, 'shoutbox'])->middleware('throttle:shoutbox')->name('shoutbox.legacy');
-Route::post('/shoutbox', [ShoutboxController::class, 'shoutbox'])->middleware('throttle:shoutbox');
 
 Route::get('/bookmark', [TorrentBookmarkController::class, 'bookmark'])->name('bookmark.legacy');
-Route::post('/bookmark', [TorrentBookmarkController::class, 'bookmark']);
+Route::post('/bookmark', [TorrentBookmarkController::class, 'bookmarkToggle'])->middleware(['auth.nexus:nexus-web', 'reject.get.mutations']);
 Route::get('/viewfilelist', [TorrentAjaxController::class, 'viewFileList'])->name('viewfilelist.legacy');
 Route::get('/viewpeerlist', [TorrentAjaxController::class, 'viewPeerList'])->name('viewpeerlist.legacy');

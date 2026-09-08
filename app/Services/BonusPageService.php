@@ -33,23 +33,22 @@ use Illuminate\Http\Request;
  */
 final class BonusPageService
 {
-    private BonusRepository $bonusRep;
-
-    public function __construct(BonusRepository $bonusRep)
-    {
-        $this->bonusRep = $bonusRep;
-    }
+    public function __construct(
+        private readonly BonusRepository $bonusRep,
+        private readonly CurrentUser $currentUser,
+        private readonly Globals $globals,
+    ) {}
 
     /**
      * Build the data for the requested action.
      */
     public function build(Request $request): BonusPageViewModel
     {
-        $curUser = (array) (app(CurrentUser::class)->get() ?? []);
-        $lang = (array) (app(Globals::class)->get('lang_mybonus') ?? []);
+        $curUser = (array) ($this->currentUser->get() ?? []);
+        $lang = (array) ($this->globals->get('lang_mybonus') ?? []);
         $userId = (int) ($curUser['id'] ?? 0);
 
-        $bonusTweak = (string) app(Globals::class)->get('bonus_tweak', '');
+        $bonusTweak = (string) $this->globals->get('bonus_tweak', '');
         if ($bonusTweak === 'disable' || $bonusTweak === 'disablesave') {
             LegacyResponse::abort(
                 (string) ($lang['std_sorry'] ?? ''),
@@ -89,7 +88,7 @@ final class BonusPageService
             allBonus: $allBonus,
             shopHtml: $shopHtml,
             infoHtml: $infoHtml,
-            sitename: (string) app(Globals::class)->get('SITENAME', ''),
+            sitename: (string) $this->globals->get('SITENAME', ''),
         );
     }
 
@@ -99,14 +98,14 @@ final class BonusPageService
      */
     public function buildBonusArray(array $lang): array
     {
-        $onegbuploadBonus = (float) app(Globals::class)->get('onegbupload_bonus', 0);
-        $fivegbuploadBonus = (float) app(Globals::class)->get('fivegbupload_bonus', 0);
-        $tengbuploadBonus = (float) app(Globals::class)->get('tengbupload_bonus', 0);
-        $oneinviteBonus = (float) app(Globals::class)->get('oneinvite_bonus', 0);
-        $customtitleBonus = (float) app(Globals::class)->get('customtitle_bonus', 0);
-        $vipstatusBonus = (float) app(Globals::class)->get('vipstatus_bonus', 0);
-        $basictaxBonus = (float) app(Globals::class)->get('basictax_bonus', 0);
-        $taxpercentageBonus = (float) app(Globals::class)->get('taxpercentage_bonus', 0);
+        $onegbuploadBonus = (float) $this->globals->get('onegbupload_bonus', 0);
+        $fivegbuploadBonus = (float) $this->globals->get('fivegbupload_bonus', 0);
+        $tengbuploadBonus = (float) $this->globals->get('tengbupload_bonus', 0);
+        $oneinviteBonus = (float) $this->globals->get('oneinvite_bonus', 0);
+        $customtitleBonus = (float) $this->globals->get('customtitle_bonus', 0);
+        $vipstatusBonus = (float) $this->globals->get('vipstatus_bonus', 0);
+        $basictaxBonus = (float) $this->globals->get('basictax_bonus', 0);
+        $taxpercentageBonus = (float) $this->globals->get('taxpercentage_bonus', 0);
 
         $results = [];
 
@@ -217,10 +216,10 @@ final class BonusPageService
      */
     private function buildShopTable(array $allBonus, array $curUser, array $lang, string $bonus, string $msg, string $lockText): string
     {
-        $bonusgiftBonus = (string) app(Globals::class)->get('bonusgift_bonus', 'yes');
-        $ratiolimitBonus = (float) app(Globals::class)->get('ratiolimit_bonus', 0);
-        $dlamountlimitBonus = (int) app(Globals::class)->get('dlamountlimit_bonus', 0);
-        $SITENAME = (string) app(Globals::class)->get('SITENAME', '');
+        $bonusgiftBonus = (string) $this->globals->get('bonusgift_bonus', 'yes');
+        $ratiolimitBonus = (float) $this->globals->get('ratiolimit_bonus', 0);
+        $dlamountlimitBonus = (int) $this->globals->get('dlamountlimit_bonus', 0);
+        $SITENAME = (string) $this->globals->get('SITENAME', '');
 
         ob_start();
         echo "<table align=\"center\" width=\"97%\" border=\"1\" cellspacing=\"0\" cellpadding=\"3\">\n";
@@ -355,23 +354,23 @@ final class BonusPageService
      */
     private function buildInfoSection(array $curUser, array $lang): string
     {
-        $perseedingBonus = (float) app(Globals::class)->get('perseeding_bonus', 0);
-        $maxseedingBonus = (int) app(Globals::class)->get('maxseeding_bonus', 0);
-        $tzeroBonus = (float) app(Globals::class)->get('tzero_bonus', 0);
-        $nzeroBonus = (float) app(Globals::class)->get('nzero_bonus', 0);
-        $bzeroBonus = (float) app(Globals::class)->get('bzero_bonus', 0);
-        $lBonus = (float) app(Globals::class)->get('l_bonus', 0);
-        $donortimesBonus = (float) app(Globals::class)->get('donortimes_bonus', 0);
-        $uploadtorrentBonus = (float) app(Globals::class)->get('uploadtorrent_bonus', 0);
-        $starttopicBonus = (float) app(Globals::class)->get('starttopic_bonus', 0);
-        $makepostBonus = (float) app(Globals::class)->get('makepost_bonus', 0);
-        $addcommentBonus = (float) app(Globals::class)->get('addcomment_bonus', 0);
-        $pollvoteBonus = (float) app(Globals::class)->get('pollvote_bonus', 0);
-        $offervoteBonus = (float) app(Globals::class)->get('offervote_bonus', 0);
-        $saythanksBonus = (float) app(Globals::class)->get('saythanks_bonus', 0);
-        $receivethanksBonus = (float) app(Globals::class)->get('receivethanks_bonus', 0);
-        $ratiolimitBonus = (float) app(Globals::class)->get('ratiolimit_bonus', 0);
-        $dlamountlimitBonus = (int) app(Globals::class)->get('dlamountlimit_bonus', 0);
+        $perseedingBonus = (float) $this->globals->get('perseeding_bonus', 0);
+        $maxseedingBonus = (int) $this->globals->get('maxseeding_bonus', 0);
+        $tzeroBonus = (float) $this->globals->get('tzero_bonus', 0);
+        $nzeroBonus = (float) $this->globals->get('nzero_bonus', 0);
+        $bzeroBonus = (float) $this->globals->get('bzero_bonus', 0);
+        $lBonus = (float) $this->globals->get('l_bonus', 0);
+        $donortimesBonus = (float) $this->globals->get('donortimes_bonus', 0);
+        $uploadtorrentBonus = (float) $this->globals->get('uploadtorrent_bonus', 0);
+        $starttopicBonus = (float) $this->globals->get('starttopic_bonus', 0);
+        $makepostBonus = (float) $this->globals->get('makepost_bonus', 0);
+        $addcommentBonus = (float) $this->globals->get('addcomment_bonus', 0);
+        $pollvoteBonus = (float) $this->globals->get('pollvote_bonus', 0);
+        $offervoteBonus = (float) $this->globals->get('offervote_bonus', 0);
+        $saythanksBonus = (float) $this->globals->get('saythanks_bonus', 0);
+        $receivethanksBonus = (float) $this->globals->get('receivethanks_bonus', 0);
+        $ratiolimitBonus = (float) $this->globals->get('ratiolimit_bonus', 0);
+        $dlamountlimitBonus = (int) $this->globals->get('dlamountlimit_bonus', 0);
 
         ob_start();
         echo '<table width="97%" cellpadding="3">';

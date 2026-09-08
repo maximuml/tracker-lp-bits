@@ -1,0 +1,47 @@
+# Semgrep blocking configuration for tracker-lp-bits
+#
+# Contains project-specific rules that MUST pass on every PR.
+# A single finding from any rule in this file fails the CI job.
+#
+# Run locally:
+#   semgrep scan --config .semgrep.blocking.yml
+#
+# CI runs this via .github/workflows/ci.yml in the semgrep-blocking job.
+
+rules:
+  # Rule 1: Detect raw SQL with string interpolation (SQL injection risk)
+  - id: laravel-raw-sql-interpolation
+    languages: [php]
+    severity: ERROR
+    message: "Raw SQL query with variable interpolation — potential SQL injection. Use parameter binding."
+    patterns:
+      - pattern: DB::select(...)
+      - pattern-not: DB::select("...")
+      - pattern-either:
+          - pattern-regex: 'DB::select\s*\(\s*"[^"]*\$'
+          - pattern-regex: "DB::select\\s*\\(\\s*'[^']*\\$"
+    paths:
+      include:
+        - "app/**/*.php"
+      exclude:
+        - "app/Support/Install/**"
+
+  # Rule 2: Detect hardcoded secrets/credentials
+  #
+  # Excludes URL parameters (e.g. '&secret='.$token) and string
+  # concatenation with variables. Only matches literal quoted
+  # strings of 8+ characters assigned to a credential-like name.
+  - id: hardcoded-secret
+    languages: [php]
+    severity: ERROR
+    message: "Hardcoded secret detected — use environment variables or config."
+    pattern-either:
+      - pattern-regex: '(password|secret|api_key|token)\s*=\s*["\x27][^"\x27$\x27]{8,}["\x27]\s*;'
+    paths:
+      include:
+        - "app/**/*.php"
+        - "config/**/*.php"
+      exclude:
+        - "config/**/*.php"
+        - "**/Test*.php"
+        - "tests/**/*.php"

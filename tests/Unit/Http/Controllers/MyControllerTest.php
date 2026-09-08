@@ -68,15 +68,14 @@ final class MyControllerTest extends TestCase
     }
 
     /**
-     * Bind a partial mock of CurrentUser that returns the given user array.
+     * Bind a real CurrentUser instance with the given user array.
      *
      * @param  array<string, mixed>|null  $user
      */
     private function mockCurrentUser(?array $user): void
     {
         $real = new CurrentUser;
-        $mock = Mockery::mock($real);
-        $mock->shouldReceive('get')->andReturn($user);
-        app()->instance(CurrentUser::class, $mock);
+        $real->set($user);
+        app()->instance(CurrentUser::class, $real);
     }
 }

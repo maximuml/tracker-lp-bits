@@ -1,0 +1,1360 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>План улучшения tracker-lp-bits</title>
+<style>
+  :root {
+    --bg: #f7f8fa;
+    --card: #ffffff;
+    --text: #1f2328;
+    --muted: #57606a;
+    --border: #d0d7de;
+    --accent: #0969da;
+    --accent-bg: #ddf4ff;
+    --green: #1a7f37;
+    --green-bg: #dafbe1;
+    --yellow: #9a6700;
+    --yellow-bg: #fff8c5;
+    --red: #cf222e;
+    --red-bg: #ffebe9;
+    --purple: #8250df;
+    --code-bg: #eff1f3;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.65;
+    color: var(--text);
+    background: var(--bg);
+  }
+  .layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 0;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  nav.toc {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    max-height: 100vh;
+    overflow-y: auto;
+    padding: 24px 18px;
+    background: var(--card);
+    border-right: 1px solid var(--border);
+    font-size: 14px;
+  }
+  nav.toc h2 {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin: 0 0 12px;
+  }
+  nav.toc ol { list-style: none; padding: 0; margin: 0; counter-reset: toc; }
+  nav.toc ol > li { counter-increment: toc; margin: 2px 0; }
+  nav.toc ol > li > a::before {
+    content: counter(toc) ". ";
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  nav.toc a {
+    display: block;
+    padding: 4px 8px;
+    border-radius: 6px;
+    color: var(--text);
+    text-decoration: none;
+  }
+  nav.toc a:hover { background: var(--accent-bg); color: var(--accent); }
+  nav.toc ol ol { padding-left: 16px; margin: 2px 0 6px; counter-reset: sub; }
+  nav.toc ol ol > li { counter-increment: sub; }
+  nav.toc ol ol > li > a::before { content: counter(toc) "." counter(sub) " "; }
+  main {
+    padding: 40px 48px 80px;
+    background: var(--card);
+    min-width: 0;
+  }
+  header.title {
+    padding-bottom: 24px;
+    margin-bottom: 32px;
+    border-bottom: 2px solid var(--border);
+  }
+  header.title h1 {
+    margin: 0 0 8px;
+    font-size: 32px;
+    line-height: 1.2;
+  }
+  header.title p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 16px;
+  }
+  h2 {
+    font-size: 24px;
+    margin: 48px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    scroll-margin-top: 16px;
+  }
+  h3 {
+    font-size: 19px;
+    margin: 32px 0 12px;
+    color: var(--text);
+    scroll-margin-top: 16px;
+  }
+  h4 { font-size: 16px; margin: 20px 0 8px; }
+  p { margin: 10px 0; }
+  ul, ol { padding-left: 24px; margin: 10px 0; }
+  li { margin: 4px 0; }
+  li > ul, li > ol { margin: 4px 0; }
+  a { color: var(--accent); }
+  code {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 0.9em;
+    background: var(--code-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  pre {
+    background: var(--code-bg);
+    padding: 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    border: 1px solid var(--border);
+  }
+  pre code { background: none; padding: 0; font-size: 13px; line-height: 1.5; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 14px;
+  }
+  th, td {
+    text-align: left;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    vertical-align: top;
+  }
+  th { background: #f3f4f6; font-weight: 600; }
+  tr:nth-child(even) td { background: #fbfcfd; }
+  td:nth-child(2):not([align]) { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.5;
+  }
+  .badge.p0 { background: var(--red-bg); color: var(--red); }
+  .badge.p1 { background: var(--yellow-bg); color: var(--yellow); }
+  .badge.p2 { background: var(--accent-bg); color: var(--accent); }
+  .badge.p3 { background: var(--green-bg); color: var(--green); }
+  .callout {
+    padding: 16px 20px;
+    border-radius: 8px;
+    margin: 16px 0;
+    border-left: 4px solid;
+  }
+  .callout.goal { background: var(--green-bg); border-color: var(--green); }
+  .callout.depends { background: var(--accent-bg); border-color: var(--accent); }
+  .callout.result { background: #f0f6ff; border-color: var(--purple); }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout-title { font-weight: 700; display: block; margin-bottom: 4px; }
+  .wave-header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .wave-header h2 { margin: 0; border: none; padding: 0; }
+  .criteria {
+    background: #f6f8fa;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 12px 0;
+  }
+  .criteria h4 { margin-top: 0; color: var(--green); }
+  .metric-table td:nth-child(2),
+  .metric-table td:nth-child(3) { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .progress-list { list-style: none; padding-left: 0; counter-reset: pl; }
+  .progress-list > li {
+    counter-increment: pl;
+    padding: 10px 0 10px 36px;
+    position: relative;
+    border-bottom: 1px solid #eaecef;
+  }
+  .progress-list > li::before {
+    content: counter(pl);
+    position: absolute;
+    left: 0;
+    top: 10px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .section { scroll-margin-top: 16px; }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    nav.toc { position: static; max-height: none; border-right: none; border-bottom: 1px solid var(--border); }
+    main { padding: 24px 18px 60px; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<nav class="toc">
+  <h2>Содержание</h2>
+  <ol>
+    <li><a href="#sec-1">Назначение документа</a></li>
+    <li><a href="#sec-2">Исходное состояние</a>
+      <ol>
+        <li><a href="#sec-2-1">Сильные стороны</a></li>
+        <li><a href="#sec-2-2">Текущие baseline</a></li>
+        <li><a href="#sec-2-3">Основные проблемы</a></li>
+      </ol>
+    </li>
+    <li><a href="#sec-3">Общие принципы выполнения</a></li>
+    <li><a href="#sec-4">Волна 0 — CI и baseline</a></li>
+    <li><a href="#sec-5">Волна 1 — HTTP boundaries</a></li>
+    <li><a href="#sec-6">Волна 2 — Dependency Injection</a></li>
+    <li><a href="#sec-7">Волна 3 — тестовая стратегия</a></li>
+    <li><a href="#sec-8">Волна 4 — декомпозиция</a></li>
+    <li><a href="#sec-9">Волна 5 — SQL и производительность</a></li>
+    <li><a href="#sec-10">Волна 6 — observability</a></li>
+    <li><a href="#sec-11">Волна 7 — legacy UI</a></li>
+    <li><a href="#sec-12">Волна 8 — production readiness</a></li>
+    <li><a href="#sec-13">Волна 9 — документация</a></li>
+    <li><a href="#sec-14">Приоритетный backlog</a></li>
+    <li><a href="#sec-15">Последовательность PR</a></li>
+    <li><a href="#sec-16">Метрики прогресса</a></li>
+    <li><a href="#sec-17">Риски</a></li>
+    <li><a href="#sec-18">Критерии завершения</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<header class="title">
+  <h1>План улучшения tracker-lp-bits</h1>
+  <p>Подробный поэтапный roadmap модернизации приватного BitTorrent-трекера на базе NexusPHP / Laravel 13.</p>
+</header>
+
+<section class="section" id="sec-1">
+<h2>1. Назначение документа</h2>
+<p>Этот документ описывает поэтапный план дальнейшего улучшения <code>tracker-lp-bits</code> после завершённых спринтов модернизации. План ориентирован на снижение эксплуатационных и security-рисков, упрощение архитектуры, повышение достоверности CI и постепенное сокращение legacy-поверхности без нарушения совместимости с существующими URL, BitTorrent-клиентами и пользовательскими сценариями.</p>
+<p>План не задаёт календарные сроки. Работы следует выполнять небольшими изолированными pull request, каждый из которых имеет измеримый результат, тесты и понятный rollback.</p>
+</section>
+
+<section class="section" id="sec-2">
+<h2>2. Исходное состояние</h2>
+
+<h3 id="sec-2-1">2.1. Сильные стороны</h3>
+<ul>
+  <li>Laravel 13, PHP 8.4/8.5, Filament 5, MySQL, Redis и MeiliSearch.</li>
+  <li>PHPStan level 8 и Laravel Pint выполняются в CI.</li>
+  <li>Unit, Feature, Architecture, Docker smoke, accessibility и performance workflows.</li>
+  <li>Изолированные тестовые базы и <code>DestructiveEnvironmentGuard</code>.</li>
+  <li>Stateless announce pipeline с <code>AnnounceContext</code>.</li>
+  <li>Query budgets для ключевых страниц и tracker endpoint.</li>
+  <li>CodeQL, gitleaks, Semgrep, Trivy, dependency review и SBOM generation.</li>
+  <li>Production image запускается от <code>www-data</code> с read-only root filesystem.</li>
+  <li>Архитектурные ratchet-тесты ограничивают рост legacy-паттернов.</li>
+  <li>Concrete controllers имеют соответствующие controller tests, хотя глубина HTTP-покрытия различается.</li>
+</ul>
+
+<h3 id="sec-2-2">2.2. Текущие измеримые baseline</h3>
+<p>Перед началом каждой волны baseline необходимо пересчитать тем же способом, которым он проверяется в CI.</p>
+<table>
+  <thead><tr><th>Область</th><th>Текущее состояние</th></tr></thead>
+  <tbody>
+    <tr><td><code>app()</code> в controllers</td><td>около 376 строк</td></tr>
+    <tr><td><code>app()</code> в services</td><td>около 350 строк</td></tr>
+    <tr><td><code>app()</code> во всём <code>app/</code></td><td>baseline 1521 строка</td></tr>
+    <tr><td><code>Globals</code> references</td><td>baseline 652 строки</td></tr>
+    <tr><td>Прямые вызовы <code>SupportContext</code></td><td>разрешены в 7 wrapper/adapter файлах</td></tr>
+    <tr><td>Oversized repositories/services</td><td>16 baseline entries</td></tr>
+    <tr><td>Raw Blade output</td><td>baseline 415 строк</td></tr>
+    <tr><td><code>@php</code> в Blade</td><td>baseline 279 строк</td></tr>
+    <tr><td><code>App\Support\Html</code> в Blade</td><td>baseline 373 строки</td></tr>
+    <tr><td><code>&lt;table&gt;</code> в views</td><td>baseline 224 строки</td></tr>
+    <tr><td>Inline event handlers</td><td>baseline 36 строк</td></tr>
+    <tr><td>Direct superglobal access</td><td>baseline 9 строк</td></tr>
+    <tr><td>Unit coverage floor</td><td>35%</td></tr>
+    <tr><td>Patch coverage target</td><td>60%, informational</td></tr>
+    <tr><td>Mutation score</td><td>MSI 40, covered MSI 50 для выбранных модулей</td></tr>
+  </tbody>
+</table>
+
+<h3 id="sec-2-3">2.3. Основные проблемы</h3>
+<ol>
+  <li>CI содержит fail-open проверки, которые могут завершиться успешно при ошибке анализа.</li>
+  <li>Coverage gate повторно запускает тесты и пропускает ошибку парсинга результата.</li>
+  <li>Разделённые GET/POST routes часто ведут в один controller action, совмещающий чтение и mutation.</li>
+  <li>Controllers и services активно используют <code>app()</code> и скрытые зависимости.</li>
+  <li>Крупные repositories/services объединяют несколько use cases.</li>
+  <li>Значительная доля controller tests вызывает методы напрямую и не проверяет весь HTTP pipeline.</li>
+  <li>Legacy Blade содержит много PHP-логики, raw output, layout tables и inline JavaScript.</li>
+  <li>Production Compose не проверяется полноценным cold-start тестом на новых volumes.</li>
+  <li>Observability-код сконцентрирован в крупных controllers и частично раскрывает технические детали.</li>
+  <li>Документация и отдельные ratchet-комментарии местами отстают от фактического состояния кода.</li>
+</ol>
+</section>
+
+<section class="section" id="sec-3">
+<h2>3. Общие принципы выполнения</h2>
+
+<h3>3.1. Размер изменений</h3>
+<ul>
+  <li>Один PR должен решать одну архитектурную или функциональную задачу.</li>
+  <li>Нельзя объединять массовый рефакторинг с изменением пользовательского поведения.</li>
+  <li>Сначала фиксируется текущее поведение тестом, затем выполняется рефакторинг.</li>
+  <li>Legacy URL и <code>.php</code> aliases сохраняются до отдельного решения об их удалении.</li>
+  <li>Ratchet baseline можно только уменьшать. Исключение требует отдельного архитектурного решения.</li>
+</ul>
+
+<h3>3.2. Обязательные проверки каждого PR</h3>
+<p>Минимальный набор:</p>
+<pre><code>make test-lint
+make test-unit
+make test-feature
+make test-architecture
+npm run build</code></pre>
+<p>Для изменений tracker, legacy pages, Docker или MeiliSearch дополнительно:</p>
+<pre><code>make test
+docker compose config
+docker compose exec -T php php artisan route:cache
+docker compose exec -T php php artisan view:cache</code></pre>
+<p>Для security-sensitive изменений:</p>
+<pre><code>docker compose exec -T php composer audit
+npm audit</code></pre>
+<p>Для announce/scrape, auth, uploads, comments, usercp и staff pages выполняются соответствующие Docker E2E сценарии из <code>.agents/skills/</code>.</p>
+
+<h3>3.3. Definition of Done</h3>
+<p>Задача считается завершённой, когда:</p>
+<ul>
+  <li>добавлены или обновлены тесты, фиксирующие требуемое поведение;</li>
+  <li>PHPStan, Pint и релевантные suites проходят;</li>
+  <li>нет повышения architecture baseline;</li>
+  <li>новые зависимости не разрешаются через service locator без обоснования;</li>
+  <li>security и authorization проверяются на HTTP-уровне;</li>
+  <li>обновлена существующая документация, если изменились команды или архитектурные решения;</li>
+  <li>проверен rollback или обратная совместимость, если изменение затрагивает данные, маршруты или deployment.</li>
+</ul>
+</section>
+
+<section class="section" id="sec-4">
+<div class="wave-header">
+  <h2>4. Волна 0 — достоверность CI и baseline</h2>
+  <span class="badge p0">P0</span>
+</div>
+<div class="callout goal"><span class="callout-title">Цель</span><p>гарантировать, что зелёный CI действительно означает успешное выполнение проверок.</p></div>
+
+<h3>W0-01. Сделать Semgrep обязательным</h3>
+<p><strong>Работы:</strong></p>
+<ol>
+  <li>Удалить безусловный <code>|| true</code> из основного Semgrep job.</li>
+  <li>Разделить правила на два набора:
+    <ul>
+      <li>blocking: локальные проверенные правила из <code>.semgrep.yml</code>;</li>
+      <li>informational: шумные community rules.</li>
+    </ul>
+  </li>
+  <li>Зафиксировать версию Semgrep вместо установки непредсказуемой последней версии.</li>
+  <li>Добавить явный artifact или job summary с количеством findings.</li>
+  <li>Создать baseline только для подтверждённых старых findings; новые findings должны блокировать PR.</li>
+</ol>
+<div class="criteria"><h4>Критерии приёмки</h4><ul>
+  <li>синтаксическая ошибка Semgrep или невозможность запустить scanner приводит к failed job;</li>
+  <li>новый finding blocking-категории приводит к failed job;</li>
+  <li>существующие принятые findings перечислены явно, а не скрыты общим <code>|| true</code>.</li>
+</ul></div>
+
+<h3>W0-02. Вернуть blocking Trivy gate</h3>
+<p><strong>Работы:</strong></p>
+<ol>
+  <li>Обновить Trivy action/version до версии без известного бага с rejected CVE.</li>
+  <li>Удалить <code>continue-on-error</code> с PHP и OpenResty scans.</li>
+  <li>Проверять <code>CRITICAL,HIGH</code> на каждом PR.</li>
+  <li>Оставить полный <code>CRITICAL,HIGH,MEDIUM,LOW</code> scan по расписанию.</li>
+  <li>Каждая запись <code>.trivyignore</code> должна содержать причину и срок пересмотра.</li>
+  <li>Добавить отдельную проверку, запрещающую бессрочные или неизвестные ignore entries.</li>
+</ol>
+<div class="criteria"><h4>Критерии приёмки</h4><ul>
+  <li>подтверждённая неисключённая CRITICAL/HIGH vulnerability блокирует PR;</li>
+  <li>scanner failure не считается успехом;</li>
+  <li>scheduled scan публикует SARIF даже при отсутствии blocking findings.</li>
+</ul></div>
+
+<h3>W0-03. Исправить dependency review</h3>
+<p><strong>Работы:</strong></p>
+<ol>
+  <li>Проверить доступность dependency graph для целевого GitHub repository.</li>
+  <li>Если доступно — убрать <code>continue-on-error</code> и блокировать зависимости severity <code>moderate</code> и выше.</li>
+  <li>Если недоступно — явно помечать job как skipped с причиной и компенсировать Composer/npm audit.</li>
+  <li>Добавить проверку лицензий для новых production dependencies.</li>
+</ol>
+<div class="criteria"><h4>Критерии приёмки</h4><ul>
+  <li>новый vulnerable production package не может пройти незамеченным;</li>
+  <li>отключённая GitHub capability отображается как отдельное состояние, а не маскируется зелёным job.</li>
+</ul></div>
+
+<h3>W0-04. Сделать coverage gate fail-closed</h3>
+<p><strong>Работы:</strong></p>
+<ol>
+  <li>Удалить повторный запуск Unit suite только ради получения процента.</li>
+  <li>Читать line coverage из уже созданных Clover XML.</li>
+  <li>Валидировать наличие и корректность обоих файлов: Unit и Feature.</li>
+  <li>Считать объединённое project coverage либо использовать отдельные обязательные thresholds.</li>
+  <li>Убрать <code>|| true</code> и успешный выход при невозможности распарсить coverage.</li>
+  <li>Сделать Codecov patch status обязательным, если token и GitHub integration доступны.</li>
+  <li>Сохранить начальный floor 35%, затем повышать только после стабилизации.</li>
+</ol>
+<div class="criteria"><h4>Критерии приёмки</h4><ul>
+  <li>отсутствующий или повреждённый report ломает job;</li>
+  <li>project coverage ниже floor ломает job;</li>
+  <li>patch coverage ниже 60% ломает PR, кроме явно исключённых generated/migration файлов;</li>
+  <li>coverage suite запускается один раз на тип тестов.</li>
+</ul></div>
+
+<h3>W0-05. Исправить архитектурные ratchets</h3>
+<p><strong>Работы:</strong></p>
+<ol>
+  <li>Пересчитать все baseline текущими тестами.</li>
+  <li>Исправить <code>RepositorySizeTest</code>: удалить entry файла, который не превышает 500 строк, и синхронизировать комментарии с массивом.</li>
+  <li>Не считать стандартные API <code>PUT+PATCH</code> routes долгом, который обязательно должен дойти до нуля.</li>
+  <li>Добавить тест, находящий одинаковые <code>URI + controller action</code>, зарегистрированные отдельно для GET и POST.</li>
+  <li>Добавить отдельный ratchet на <code>app()</code>:
+    <ul><li>controllers;</li><li>services;</li><li>repositories;</li><li>прочие namespaces.</li></ul>
+  </li>
+  <li>Добавить проверку stale baseline entries.</li>
+  <li>Обновить описание modernisation status и актуальное количество tests/controllers.</li>
+</ol>
+<div class="criteria"><h4>Критерии приёмки</h4><ul>
+  <li>ratchet отражает архитектурный риск, а не нормальное REST-поведение;</li>
+  <li>ни один baseline не содержит файл вне определяемой категории;</li>
+  <li>одинаковый GET/POST action нельзя добавить без явного allow-list и причины.</li>
+</ul></div>
+
+<div class="callout result"><span class="callout-title">Результат волны 0</span>
+<p>Все quality/security checks fail-closed. Coverage измеряется воспроизводимо. Baseline соответствует фактическому коду. Последующие волны получают надёжную систему контроля регрессий.</p>
+</div>
+</section>
+
+<section class="section" id="sec-5">
+<div class="wave-header">
+  <h2>5. Волна 1 — HTTP boundaries и authorization</h2>
+  <span class="badge p0">P0–P1</span>
+</div>
+<div class="callout depends"><span class="callout-title">Зависит от</span><p>Волна 0</p></div>
+<div class="callout goal"><span class="callout-title">Цель</span><p>отделить rendering/query actions от mutations и проверять безопасность через реальный HTTP pipeline.</p></div>
+
+<h3>W1-01. Инвентаризация legacy routes</h3>
+<p>Сформировать генерируемый отчёт со столбцами:</p>
+<ul>
+  <li>URI и legacy alias;</li>
+  <li>HTTP method;</li>
+  <li>controller action;</li>
+  <li>middleware;</li>
+  <li>authentication guard;</li>
+  <li>authorization policy/gate;</li>
+  <li>FormRequest;</li>
+  <li>read-only или mutation;</li>
+  <li>Feature test;</li>
+  <li>E2E test.</li>
+</ul>
+<p>Распределить routes по доменам:</p>
+<ol>
+  <li>Auth и registration.</li>
+  <li>Torrent read paths.</li>
+  <li>Torrent mutations.</li>
+  <li>Forum и comments.</li>
+  <li>Messages и friends.</li>
+  <li>Usercp и settings.</li>
+  <li>Bonus/invites/attendance.</li>
+  <li>Moderation/staff/admin.</li>
+  <li>Utility, attachments и search.</li>
+  <li>Tracker protocol.</li>
+</ol>
+<div class="criteria"><h4>Критерий приёмки</h4><p>все зарегистрированные web/legacy/API routes представлены в отчёте, а mutation route без authorization отмечен как blocker.</p></div>
+
+<h3>W1-02. Строгая authorization matrix</h3>
+<p><strong>Работы:</strong></p>
+<ol>
+  <li>Заменить ожидания <code>403 или 404</code> точными статусами.</li>
+  <li>Заменить проверку <code>status != 401</code> проверкой конкретного success/validation результата.</li>
+  <li>Добавить роли:
+    <ul>
+      <li>anonymous;</li>
+      <li>authenticated user;</li>
+      <li>uploader;</li>
+      <li>moderator;</li>
+      <li>administrator/sysop;</li>
+      <li>disabled/banned user.</li>
+    </ul>
+  </li>
+  <li>Проверять и Sanctum abilities, и underlying domain permission.</li>
+  <li>Добавить object-level authorization для чужих messages, comments, torrents и user data.</li>
+  <li>Проверять 405 для неправильного HTTP method.</li>
+</ol>
+<div class="criteria"><h4>Критерии приёмки</h4><ul>
+  <li>каждый API mutation имеет negative и positive authorization test;</li>
+  <li>401, 403, 404, 405 и 422 не считаются взаимозаменяемыми;</li>
+  <li>тест подтверждает database side effect либо его отсутствие.</li>
+</ul></div>
+
+<h3>W1-03. Разделить GET/POST actions: messages</h3>
+<p><strong>Работы:</strong></p>
+<ul>
+  <li>GET mailbox/show/create form вынести в query/display actions;</li>
+  <li>POST send/update/delete вынести в command actions;</li>
+  <li>validation перенести в FormRequest;</li>
+  <li>ownership и staff permissions перенести в policies;</li>
+  <li>сохранить legacy redirects и response shape API;</li>
+  <li>добавить HTTP Feature tests и legacy E2E.</li>
+</ul>
+<div class="criteria"><h4>Критерии приёмки</h4><ul>
+  <li>GET не изменяет messages/read state без явно документированного решения;</li>
+  <li>mutations недоступны через GET;</li>
+  <li>прямой вызов service locator из новых actions отсутствует;</li>
+  <li>legacy и API сценарии дают эквивалентный доменный результат.</li>
+</ul></div>
+
+<h3>W1-04. Разделить GET/POST actions: forum и comments</h3>
+<p><strong>Работы:</strong></p>
+<ul>
+  <li>разделить list/show/new topic/reply/edit/delete/moderation;</li>
+  <li>использовать route model binding там, где это не ломает legacy aliases;</li>
+  <li>вынести anti-flood в отдельный domain service/policy;</li>
+  <li>унифицировать authorization legacy и API paths;</li>
+  <li>добавить tests для locked topic, deleted post, чужого post и moderator override.</li>
+</ul>
+<div class="criteria"><h4>Критерии приёмки</h4><ul>
+  <li>каждый mutation имеет отдельный method и FormRequest;</li>
+  <li>policy применяется одинаково для legacy и API;</li>
+  <li>нет GET deletion links, выполняющих удаление без POST/DELETE confirmation.</li>
+</ul></div>
+
+<h3>W1-05. Разделить GET/POST actions: usercp/settings</h3>
+<p><strong>Работы:</strong></p>
+<ul>
+  <li>отдельные actions для personal/forum/tracker/security preferences;</li>
+  <li>typed DTO для каждой группы настроек;</li>
+  <li>password/passkey операции отделить от обычных preferences;</li>
+  <li>sensitive changes защищать current-password confirmation;</li>
+  <li>сброс caches выполнять через domain event/listener.</li>
+</ul>
+<div class="criteria"><h4>Критерии приёмки</h4><ul>
+  <li>изменение security settings невозможно без требуемого подтверждения;</li>
+  <li>неизвестные поля не приводят к mass assignment;</li>
+  <li>legacy forms и API используют один application service.</li>
+</ul></div>
+
+<h3>W1-06. Разделить torrent mutations</h3>
+<p><strong>Область:</strong></p>
+<ul>
+  <li>upload;</li>
+  <li>edit;</li>
+  <li>delete/fast delete;</li>
+  <li>bookmark/thanks;</li>
+  <li>reseed;</li>
+  <li>promotion/state changes;</li>
+  <li>download notice preferences.</li>
+</ul>
+<p><strong>Работы:</strong></p>
+<ul>
+  <li>отдельные command services и transaction boundaries;</li>
+  <li>file system operation согласовать с DB transaction через staged file/outbox cleanup;</li>
+  <li>policy на каждый mutation;</li>
+  <li>idempotency для повторной отправки формы, где применимо;</li>
+  <li>audit event для staff mutations.</li>
+</ul>
+<div class="criteria"><h4>Критерии приёмки</h4><ul>
+  <li>частичная ошибка не оставляет orphan torrent files или неполные DB rows;</li>
+  <li>повторный request не создаёт дубль;</li>
+  <li>все destructive actions имеют точные permission tests.</li>
+</ul></div>
+
+<h3>W1-07. Staff/admin mutations</h3>
+<p><strong>Работы:</strong></p>
+<ul>
+  <li>инвентаризировать legacy admin endpoints, которые уже редиректятся в Filament;</li>
+  <li>удалить недостижимую реализацию после периода совместимости;</li>
+  <li>оставшиеся mass/bulk operations оформить как jobs с audit trail;</li>
+  <li>добавить dry-run для потенциально массовых операций;</li>
+  <li>ограничить batch size и добавить idempotency key.</li>
+</ul>
+<div class="criteria"><h4>Критерии приёмки</h4><ul>
+  <li>массовая операция не выполняется синхронно в web request;</li>
+  <li>actor, параметры и результат записываются в activity log;</li>
+  <li>повтор job безопасен.</li>
+</ul></div>
+</section>
+
+<section class="section" id="sec-6">
+<div class="wave-header">
+  <h2>6. Волна 2 — Dependency Injection и request context</h2>
+  <span class="badge p1">P1</span>
+</div>
+<div class="callout depends"><span class="callout-title">Зависит от</span><p>Волна 1 для соответствующего домена</p></div>
+<div class="callout goal"><span class="callout-title">Цель</span><p>сделать зависимости явными и уменьшить риск cross-request state leakage.</p></div>
+
+<h3>W2-01. Детализированный ratchet на <code>app()</code></h3>
+<p><strong>Работы:</strong></p>
+<ul>
+  <li>зафиксировать baseline по namespace и файлам;</li>
+  <li>запретить новые <code>app()</code> в controllers/services;</li>
+  <li>разрешить container access только в framework adapters/providers/factories;</li>
+  <li>публиковать top-20 файлов по количеству вызовов в CI artifact.</li>
+</ul>
+<p><strong>Целевая метрика первой итерации:</strong></p>
+<ul>
+  <li>controllers: снижение минимум на 20%;</li>
+  <li>services: снижение минимум на 20%;</li>
+  <li>отсутствие новых файлов с <code>app()</code> вне allow-list.</li>
+</ul>
+
+<h3>W2-02. Constructor injection в критичных flows</h3>
+<p><strong>Порядок:</strong></p>
+<ol>
+  <li>Auth/passkey/recovery.</li>
+  <li>Announce/scrape.</li>
+  <li>Torrent mutations.</li>
+  <li>Messages/forum.</li>
+  <li>Usercp.</li>
+  <li>Moderation/cleanup.</li>
+</ol>
+<p><strong>Правила:</strong></p>
+<ul>
+  <li>не создавать интерфейс для каждого repository автоматически;</li>
+  <li>интерфейсы использовать на внешних границах: clock, network, cache, search, queue, mail, filesystem;</li>
+  <li>Laravel facades допустимы в infrastructure adapters, но не в domain logic;</li>
+  <li>зависимости request scope не должны регистрироваться singleton.</li>
+</ul>
+<div class="criteria"><h4>Критерий приёмки</h4><p>новый или изменённый application service можно создать в unit test без boot полного Laravel container.</p></div>
+
+<h3>W2-03. Убрать side effect из <code>AnnounceRequestDto</code></h3>
+<p><strong>Работы:</strong></p>
+<ul>
+  <li><code>AnnounceRequestDto::fromRequest()</code> не должен вызывать <code>SupportContext::fromRequest()</code>;</li>
+  <li>вынести parsing в <code>AnnounceRequestFactory</code>;</li>
+  <li>внедрить <code>ClientIpResolver</code> и user-agent source;</li>
+  <li>оставить DTO immutable и не связанным с глобальным состоянием;</li>
+  <li>добавить IPv4/IPv6/trusted proxy tests.</li>
+</ul>
+<div class="criteria"><h4>Критерии приёмки</h4><ul>
+  <li>создание DTO не меняет request/global context;</li>
+  <li>parser тестируется без Laravel application;</li>
+  <li>spoofed forwarding headers обрабатываются согласно trusted proxy configuration.</li>
+</ul></div>
+
+<h3>W2-04. Завершить stateless announce response</h3>
+<p><strong>Работы:</strong></p>
+<ul>
+  <li>проверить lifecycle и registration <code>ResponseBuilder</code>;</li>
+  <li>сделать его immutable либо гарантированно request-scoped;</li>
+  <li>добавить Octane/RoadRunner cross-request tests;</li>
+  <li>проверить повторные <code>started</code>, <code>completed</code>, <code>stopped</code> events;</li>
+  <li>проверить параллельные announces одного пользователя и разных peers;</li>
+  <li>проверить lock expiration и transaction retry при deadlock.</li>
+</ul>
+<div class="criteria"><h4>Критерии приёмки</h4><ul>
+  <li>response/state одного request не видны следующему request;</li>
+  <li>concurrency tests воспроизводимы и не зависят от случайных sleep;</li>
+  <li>повторный completed event не удваивает accounting.</li>
+</ul></div>
+
+<h3>W2-05. Сократить typed global configuration debt</h3>
+<p><strong>Работы:</strong></p>
+<ul>
+  <li>сгруппировать оставшиеся <code>Globals</code> usage по доменам;</li>
+  <li>расширять typed config objects небольшими тематическими наборами;</li>
+  <li>запретить передачу необработанного массива settings в domain services;</li>
+  <li>обновлять config caches через единый механизм;</li>
+  <li>добавить schema/default validation для обязательных settings.</li>
+</ul>
+<p><strong>Целевая метрика:</strong> снижать <code>Globals</code> baseline минимум на 10–15% за волну без создания нового универсального config god object.</p>
+</section>
+
+<section class="section" id="sec-7">
+<div class="wave-header">
+  <h2>7. Волна 3 — тестовая стратегия</h2>
+  <span class="badge p1">P1</span>
+</div>
+<div class="callout goal"><span class="callout-title">Цель</span><p>повысить способность тестов обнаруживать реальные regressions, а не только увеличить их количество.</p></div>
+
+<h3>W3-01. Классифицировать существующие tests</h3>
+<p>Для каждого critical flow отметить:</p>
+<ul>
+  <li>pure unit;</li>
+  <li>service integration;</li>
+  <li>HTTP feature;</li>
+  <li>Docker E2E;</li>
+  <li>concurrency;</li>
+  <li>mutation testing;</li>
+  <li>performance budget.</li>
+</ul>
+<p>Удалять дублирующие direct-controller tests можно только после появления более сильного HTTP или service-level теста.</p>
+
+<h3>W3-02. HTTP contract tests</h3>
+<p>Добавить data-driven contract tests для:</p>
+<ul>
+  <li>expected route methods;</li>
+  <li>middleware presence;</li>
+  <li>auth guard;</li>
+  <li>content type;</li>
+  <li>redirects;</li>
+  <li>API response envelope;</li>
+  <li>validation errors;</li>
+  <li>legacy alias parity.</li>
+</ul>
+<div class="criteria"><h4>Критерий приёмки</h4><p>изменение route method, middleware или response contract приводит к понятному точечному падению теста.</p></div>
+
+<h3>W3-03. Concurrency tests</h3>
+<p><strong>Приоритетные сценарии:</strong></p>
+<ul>
+  <li>announce accounting;</li>
+  <li>seed bonus начисление;</li>
+  <li>attendance claim;</li>
+  <li>bookmark/thanks duplicate submission;</li>
+  <li>invite consumption;</li>
+  <li>torrent delete/edit collision;</li>
+  <li>outbox claim/retry/dead-letter;</li>
+  <li>cleanup jobs overlap.</li>
+</ul>
+<p><strong>Требования:</strong></p>
+<ul>
+  <li>использовать отдельную test database;</li>
+  <li>проверять инварианты после завершения параллельных операций;</li>
+  <li>не считать тест пройденным только из-за отсутствия exception.</li>
+</ul>
+
+<h3>W3-04. Mutation testing на PR</h3>
+<p><strong>Работы:</strong></p>
+<ul>
+  <li>вычислять изменённые critical files;</li>
+  <li>запускать Infection только для них на PR;</li>
+  <li>полный scope оставлять на push/nightly;</li>
+  <li>добавить policies, torrent mutations и outbox;</li>
+  <li>после стабилизации поднять MSI до 50, затем рассмотреть 60.</li>
+</ul>
+<div class="criteria"><h4>Критерий приёмки</h4><p>изменение security/validation condition, которое не ловят tests, отображается как escaped mutant и требует решения.</p></div>
+
+<h3>W3-05. Реалистичные fixtures</h3>
+<p><strong>Работы:</strong></p>
+<ul>
+  <li>добавить builders/scenarios вместо несвязанных factory calls;</li>
+  <li>создать datasets для torrent listing, forum, messages и moderation;</li>
+  <li>query budget tests выполнять на десятках/сотнях связанных records;</li>
+  <li>исключить зависимость tests от фиксированных production-like ID.</li>
+</ul>
+<div class="criteria"><h4>Критерий приёмки</h4><p>N+1 regression обнаруживается на локальном/CI dataset.</p></div>
+
+<h3>W3-06. Увеличение coverage thresholds</h3>
+<p>После завершения W1–W3:</p>
+<ol>
+  <li>Зафиксировать стабильное объединённое coverage.</li>
+  <li>Поднять project floor с 35% до ближайшего безопасного значения.</li>
+  <li>Далее повышать не более чем небольшими шагами.</li>
+  <li>Для critical namespaces установить отдельные более высокие thresholds.</li>
+</ol>
+<p><strong>Предлагаемые конечные ориентиры:</strong></p>
+<ul>
+  <li>Auth/Tracker/Policies: не менее 80% line coverage плюс mutation testing;</li>
+  <li>application services: не менее 70%;</li>
+  <li>общий project floor: сначала 45%, затем 55% при сохранении качества tests.</li>
+</ul>
+<div class="callout goal"><p>Coverage не является самостоятельной целью и не заменяет scenario/authorization/concurrency tests.</p></div>
+</section>
+
+<section class="section" id="sec-8">
+<div class="wave-header">
+  <h2>8. Волна 4 — декомпозиция repositories и services</h2>
+  <span class="badge p1">P1–P2</span>
+</div>
+<div class="callout depends"><span class="callout-title">Зависит от</span><p>тестовое покрытие соответствующего модуля</p></div>
+<div class="callout goal"><span class="callout-title">Цель</span><p>уменьшить связность и размер классов по границам use case.</p></div>
+
+<h3>W4-01. Torrent domain</h3>
+<p><strong>Кандидаты для выделения:</strong></p>
+<ul>
+  <li><code>TorrentFinder</code>;</li>
+  <li><code>TorrentMutationRepository</code>;</li>
+  <li><code>TorrentPeerRepository</code>;</li>
+  <li><code>TorrentPromotionRepository</code>;</li>
+  <li><code>TorrentStatsRepository</code>;</li>
+  <li><code>TorrentFileStorage</code>;</li>
+  <li><code>TorrentSearchCriteria</code> value object.</li>
+</ul>
+<p><strong>Порядок:</strong></p>
+<ol>
+  <li>Составить карту public methods и callers.</li>
+  <li>Сгруппировать methods по данным и transaction boundary.</li>
+  <li>Добавить characterization tests.</li>
+  <li>Перенести одну группу за PR.</li>
+  <li>Уменьшить baseline исходного файла.</li>
+</ol>
+
+<h3>W4-02. User и registration domain</h3>
+<p>Разделить:</p>
+<ul>
+  <li>registration workflow;</li>
+  <li>confirmation;</li>
+  <li>password setup/recovery;</li>
+  <li>invite validation;</li>
+  <li>user profile query;</li>
+  <li>moderation mutation;</li>
+  <li>user settings mutation.</li>
+</ul>
+<p>Sensitive операции должны использовать отдельные command DTO и audit events.</p>
+
+<h3>W4-03. Forum/messages domain</h3>
+<p>Разделить query и command responsibilities:</p>
+<ul>
+  <li>topic/post reads;</li>
+  <li>create/edit/delete;</li>
+  <li>unread/read state;</li>
+  <li>moderation;</li>
+  <li>subscriptions/notifications;</li>
+  <li>mailbox reads;</li>
+  <li>message sending/deletion.</li>
+</ul>
+
+<h3>W4-04. Bonus/exam/cleanup domain</h3>
+<p><strong>Работы:</strong></p>
+<ul>
+  <li>отделить расчёт правил от persistence;</li>
+  <li>расчёты выполнять pure functions/value objects, где возможно;</li>
+  <li>transaction/locking оставить в application/infrastructure layer;</li>
+  <li>добавить invariant и property-style tests для ratio/bonus calculations.</li>
+</ul>
+
+<h3>W4-05. Ограничение размера новых классов</h3>
+<p>После декомпозиции:</p>
+<ul>
+  <li>снизить лимит нового repository/service с 500 до 400 строк;</li>
+  <li>дополнительно ограничить число public methods;</li>
+  <li>не создавать новые универсальные <code>Manager</code>, <code>Helper</code> или <code>Utils</code> classes;</li>
+  <li>каждый extracted class должен иметь одну понятную причину изменения.</li>
+</ul>
+</section>
+
+<section class="section" id="sec-9">
+<div class="wave-header">
+  <h2>9. Волна 5 — SQL и производительность</h2>
+  <span class="badge p2">P2</span>
+</div>
+<div class="callout goal"><span class="callout-title">Цель</span><p>контролировать не только количество raw SQL, но и его безопасность и стоимость.</p></div>
+
+<h3>W5-01. Реестр raw SQL</h3>
+<p>Для каждого raw expression/query хранить:</p>
+<ul>
+  <li>файл и метод;</li>
+  <li>назначение;</li>
+  <li>database compatibility;</li>
+  <li>наличие bindings;</li>
+  <li>ожидаемый индекс;</li>
+  <li>причина невозможности выразить через query builder;</li>
+  <li>owning domain.</li>
+</ul>
+<p><strong>Правила:</strong></p>
+<ul>
+  <li>пользовательские значения передаются только bindings;</li>
+  <li>динамические identifiers выбираются из allow-list;</li>
+  <li>string concatenation для пользовательских values запрещена;</li>
+  <li>Install/Upgrade SQL рассматривается отдельно от runtime SQL.</li>
+</ul>
+
+<h3>W5-02. EXPLAIN regression tests</h3>
+<p><strong>Приоритетные queries:</strong></p>
+<ul>
+  <li>torrent listing/search;</li>
+  <li>torrent details relationships;</li>
+  <li>top ten;</li>
+  <li>user search/IP moderation;</li>
+  <li>unread forum/messages;</li>
+  <li>announce peer lookup;</li>
+  <li>outbox pending events;</li>
+  <li>cleanup selection.</li>
+</ul>
+<p><strong>Проверять:</strong></p>
+<ul>
+  <li>отсутствие неожиданного full table scan на realistic fixture;</li>
+  <li>использование ожидаемого composite index;</li>
+  <li>отсутствие filesort/temp table там, где это критично;</li>
+  <li>одинаковую корректность на MySQL 8 и 9.</li>
+</ul>
+
+<h3>W5-03. Query budgets</h3>
+<p><strong>Работы:</strong></p>
+<ul>
+  <li>измерить фактические counts на realistic fixtures;</li>
+  <li>сузить слишком щедрые budgets;</li>
+  <li>добавить budgets для messages, forum, staff dashboard и API list endpoints;</li>
+  <li>отдельно учитывать lazy-loading violations;</li>
+  <li>сохранять диагностический список queries при превышении budget.</li>
+</ul>
+
+<h3>W5-04. Tracker load test</h3>
+<p><strong>Сценарии:</strong></p>
+<ul>
+  <li>invalid passkey flood;</li>
+  <li>valid steady announce load;</li>
+  <li>many peers for one torrent;</li>
+  <li>many torrents for one user;</li>
+  <li>repeated early announce;</li>
+  <li>scrape with multiple info hashes;</li>
+  <li>Redis degradation;</li>
+  <li>DB deadlock/retry.</li>
+</ul>
+<p><strong>Метрики:</strong></p>
+<ul>
+  <li>requests/sec;</li>
+  <li>p50/p95/p99 latency;</li>
+  <li>DB queries/request;</li>
+  <li>Redis operations/request;</li>
+  <li>error/rejection rate;</li>
+  <li>CPU/memory;</li>
+  <li>lock contention.</li>
+</ul>
+<p>Результаты фиксировать как versioned benchmark artifact, а не как жёсткое требование к конкретному developer machine.</p>
+</section>
+
+<section class="section" id="sec-10">
+<div class="wave-header">
+  <h2>10. Волна 6 — observability</h2>
+  <span class="badge p2">P2</span>
+</div>
+<div class="callout goal"><span class="callout-title">Цель</span><p>сделать metrics и health расширяемыми, безопасными и дешёвыми.</p></div>
+
+<h3>W6-01. Декомпозиция MetricsController</h3>
+<p>Выделить collectors:</p>
+<ul>
+  <li><code>HttpMetricsCollector</code>;</li>
+  <li><code>DatabaseMetricsCollector</code>;</li>
+  <li><code>RedisMetricsCollector</code>;</li>
+  <li><code>CacheMetricsCollector</code>;</li>
+  <li><code>SchedulerMetricsCollector</code>;</li>
+  <li><code>QueueMetricsCollector</code>;</li>
+  <li><code>TrackerMetricsCollector</code>;</li>
+  <li><code>SearchMetricsCollector</code>;</li>
+  <li><code>OutboxMetricsCollector</code>.</li>
+</ul>
+<p>Добавить:</p>
+<ul>
+  <li>общий <code>MetricsCollector</code> contract;</li>
+  <li><code>PrometheusFormatter</code>;</li>
+  <li>unit tests каждого collector;</li>
+  <li>timeout/error isolation;</li>
+  <li>budget на latency и число DB/Redis operations самого <code>/metrics</code>.</li>
+</ul>
+<div class="criteria"><h4>Критерий приёмки</h4><p>controller только оркестрирует collectors и формирует HTTP response.</p></div>
+
+<h3>W6-02. Исправить семантику метрик</h3>
+<p><strong>Работы:</strong></p>
+<ul>
+  <li>проверить, включён ли query log для <code>nexus_db_query_count</code>; если нет — собирать count через listener/middleware;</li>
+  <li>проверить корректность Horizon queue keys;</li>
+  <li>исключить неограниченную cardinality labels;</li>
+  <li>добавить process/runtime version labels без секретов;</li>
+  <li>документировать reset/persistence semantics Redis counters;</li>
+  <li>согласовать histogram buckets с фактической latency.</li>
+</ul>
+
+<h3>W6-03. Разделить liveness/readiness/diagnostics</h3>
+<ul>
+  <li><code>/health/live</code>: только способность процесса ответить.</li>
+  <li><code>/health/ready</code>: только зависимости, без которых instance не должен получать traffic.</li>
+  <li>authenticated diagnostics: подробности MeiliSearch, Horizon, scheduler и outbox.</li>
+</ul>
+<p><strong>Решить и задокументировать:</strong></p>
+<ul>
+  <li>является ли отсутствие queue worker readiness failure;</li>
+  <li>является ли отсутствие scheduler readiness failure;</li>
+  <li>допустим ли SQL fallback при отказе MeiliSearch;</li>
+  <li>какие timeout используются для каждого probe.</li>
+</ul>
+<p>Не возвращать публично exception messages, hostnames или внутренние endpoints. Подробности писать в structured logs/Sentry.</p>
+
+<h3>W6-04. Защита <code>/metrics</code></h3>
+<p><strong>Работы:</strong></p>
+<ul>
+  <li>в production требовать bearer token независимо от private source IP;</li>
+  <li>проверить trusted proxy configuration;</li>
+  <li>не доверять произвольному <code>X-Forwarded-For</code>;</li>
+  <li>поддержать token rotation;</li>
+  <li>добавить rate limit и access log без записи самого token;</li>
+  <li>добавить tests для IPv4, IPv6, proxy и неверного token.</li>
+</ul>
+</section>
+
+<section class="section" id="sec-11">
+<div class="wave-header">
+  <h2>11. Волна 7 — legacy UI и accessibility</h2>
+  <span class="badge p2">P2</span>
+</div>
+<div class="callout goal"><span class="callout-title">Цель</span><p>постепенно уменьшить Blade/PHP legacy-поверхность без массового переписывания интерфейса.</p></div>
+
+<h3>W7-01. Общий component layer</h3>
+<p>Подготовить переиспользуемые компоненты:</p>
+<ul>
+  <li>layout/page header;</li>
+  <li>alerts/errors;</li>
+  <li>forms и field errors;</li>
+  <li>buttons/links;</li>
+  <li>data table;</li>
+  <li>pagination;</li>
+  <li>tabs;</li>
+  <li>modal/confirmation;</li>
+  <li>empty state;</li>
+  <li>user/torrent badges.</li>
+</ul>
+<p>Компоненты должны иметь tests для escaping и accessibility attributes.</p>
+
+<h3>W7-02. Миграция страниц по приоритету</h3>
+<p><strong>Порядок:</strong></p>
+<ol>
+  <li>Login/signup/recovery.</li>
+  <li>Torrent listing/details/upload/edit.</li>
+  <li>Forum/messages/comments.</li>
+  <li>Usercp.</li>
+  <li>Staff moderation.</li>
+  <li>Остальные admin/community pages.</li>
+</ol>
+<p><strong>Для каждой страницы:</strong></p>
+<ul>
+  <li>удалить PHP business logic из view;</li>
+  <li>передавать typed view model;</li>
+  <li>заменить raw output безопасным escaped output или audited SafeHtml;</li>
+  <li>заменить inline handlers Alpine/unobtrusive JS;</li>
+  <li>layout tables заменить grid/flex, data tables оставить семантическими;</li>
+  <li>проверить desktop/mobile и supported themes;</li>
+  <li>снизить ratchet constants в том же PR.</li>
+</ul>
+
+<h3>W7-03. Целевые UI baseline</h3>
+<p><strong>Первая цель:</strong></p>
+<table class="metric-table">
+  <thead><tr><th>Метрика</th><th>Текущий baseline</th><th>Цель этапа 1</th></tr></thead>
+  <tbody>
+    <tr><td>Raw output</td><td>415</td><td>&lt; 300</td></tr>
+    <tr><td><code>@php</code></td><td>279</td><td>&lt; 200</td></tr>
+    <tr><td>Static Html calls</td><td>373</td><td>&lt; 250</td></tr>
+    <tr><td>Tables</td><td>224</td><td>уменьшить layout tables, не запрещая data tables</td></tr>
+    <tr><td>Inline handlers</td><td>36</td><td>0</td></tr>
+  </tbody>
+</table>
+<p>Следующая цель определяется после пересчёта и не должна стимулировать небезопасные массовые замены.</p>
+
+<h3>W7-04. Accessibility gate</h3>
+<p><strong>Проверять:</strong></p>
+<ul>
+  <li>skip link;</li>
+  <li>landmarks;</li>
+  <li>keyboard navigation;</li>
+  <li>visible focus;</li>
+  <li>labels и errors;</li>
+  <li>table headers/scope;</li>
+  <li>modal focus trap;</li>
+  <li>reduced motion;</li>
+  <li>contrast;</li>
+  <li>desktop/mobile screenshots для тем.</li>
+</ul>
+<p>Axe violations critical/serious должны блокировать PR для изменённых страниц.</p>
+
+<h3>W7-05. Frontend tests</h3>
+<p>Добавить минимальный browser test layer для:</p>
+<ul>
+  <li>login/signup form submission;</li>
+  <li>torrent search/filter;</li>
+  <li>upload form client behavior;</li>
+  <li>forum reply;</li>
+  <li>message send;</li>
+  <li>usercp settings;</li>
+  <li>critical admin action confirmation.</li>
+</ul>
+<p>Tests должны проверять поведение, а не внутреннюю структуру Alpine components.</p>
+</section>
+
+<section class="section" id="sec-12">
+<div class="wave-header">
+  <h2>12. Волна 8 — production readiness и delivery</h2>
+  <span class="badge p1">P1–P2</span>
+</div>
+<div class="callout goal"><span class="callout-title">Цель</span><p>доказать, что production artifacts запускаются с нуля и могут безопасно обновляться.</p></div>
+
+<h3>W8-01. Exact production Compose smoke test</h3>
+<p>В CI собирать production image и запускать:</p>
+<pre><code>docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --wait</code></pre>
+<p><strong>Тестировать на новых named volumes:</strong></p>
+<ul>
+  <li>PHP health;</li>
+  <li>OpenResty config;</li>
+  <li>Vite assets и manifest;</li>
+  <li>static files из <code>public/build</code>;</li>
+  <li>writable storage/cache/attachments/torrents;</li>
+  <li>read-only rootfs;</li>
+  <li>non-root UID;</li>
+  <li>queue worker;</li>
+  <li>scheduler heartbeat;</li>
+  <li>DB/Redis/MeiliSearch connectivity;</li>
+  <li>route/config/view caches.</li>
+</ul>
+<p>Отдельно подтвердить механизм заполнения <code>public-build</code> volume. Если он не нужен, удалить volume и обслуживать assets напрямую из immutable artifact. Если нужен — добавить явный init/copy step.</p>
+
+<h3>W8-02. Migration strategy</h3>
+<p><strong>Работы:</strong></p>
+<ul>
+  <li>разделить backward-compatible expand и contract migrations;</li>
+  <li>запрещать длительные blocking schema changes без отдельного плана;</li>
+  <li>измерять migration duration на production-like dataset;</li>
+  <li>перед destructive migration требовать backup verification;</li>
+  <li>документировать rollback и application compatibility window;</li>
+  <li>проверять миграции с предыдущего release, а не только <code>migrate:fresh</code>.</li>
+</ul>
+
+<h3>W8-03. Backup/restore verification</h3>
+<p>Автоматизировать test restore:</p>
+<ul>
+  <li>MySQL dump/restore;</li>
+  <li>Redis data, если оно содержит незаменимое состояние;</li>
+  <li>torrent files;</li>
+  <li>attachments;</li>
+  <li>required encryption keys/config references.</li>
+</ul>
+<div class="criteria"><h4>Критерий приёмки</h4><p>восстановленный environment проходит critical smoke tests и содержит ожидаемые checksums/counts.</p></div>
+
+<h3>W8-04. Graceful deployment</h3>
+<p><strong>Проверить:</strong></p>
+<ul>
+  <li>queue restart без потери jobs;</li>
+  <li>scheduler singleton/overlap behavior;</li>
+  <li>Horizon termination;</li>
+  <li>FPM/OpenResty graceful reload;</li>
+  <li>cache warming;</li>
+  <li>readiness до включения traffic;</li>
+  <li>rollback на предыдущий image при совместимой schema.</li>
+</ul>
+
+<h3>W8-05. Supply-chain hardening</h3>
+<p><strong>Работы:</strong></p>
+<ul>
+  <li>pin GitHub Actions на immutable SHA;</li>
+  <li>не устанавливать инструменты без зафиксированной версии;</li>
+  <li>генерировать SBOM без изменения project dependencies во время CI;</li>
+  <li>подписывать конечные images digest, а не mutable tag;</li>
+  <li>прикреплять provenance/SBOM к тому же digest;</li>
+  <li>проверять signature перед deployment.</li>
+</ul>
+</section>
+
+<section class="section" id="sec-13">
+<div class="wave-header">
+  <h2>13. Волна 9 — документация и сопровождение</h2>
+  <span class="badge p2">P2–P3</span>
+</div>
+<div class="callout goal"><span class="callout-title">Цель</span><p>не допускать расхождения документации и фактической реализации.</p></div>
+
+<h3>W9-01. Автоматически проверяемая документация</h3>
+<ul>
+  <li>Commands в README/AGENTS должны соответствовать Makefile/Composer scripts.</li>
+  <li>Версии PHP/MySQL/Node извлекать или проверять из source of truth.</li>
+  <li>Количество tests/controllers не хранить как быстро устаревающий вручную обновляемый факт либо генерировать автоматически.</li>
+  <li>Ссылки на удалённые paths проверять в CI.</li>
+</ul>
+
+<h3>W9-02. ADR для ключевых решений</h3>
+<p>Добавить ADR при принятии решений о:</p>
+<ul>
+  <li>HTTP command/query split;</li>
+  <li>DI boundaries и допустимом facade usage;</li>
+  <li>metrics/health model;</li>
+  <li>production asset delivery;</li>
+  <li>migration/deployment strategy;</li>
+  <li>retirement legacy URLs.</li>
+</ul>
+<p>ADR фиксирует контекст и trade-offs, но не заменяет task roadmap.</p>
+
+<h3>W9-03. Operational runbooks</h3>
+<p>Подготовить runbooks для:</p>
+<ul>
+  <li>DB недоступна;</li>
+  <li>Redis недоступен;</li>
+  <li>MeiliSearch lag/unavailable;</li>
+  <li>очередь растёт или jobs падают;</li>
+  <li>scheduler heartbeat stale;</li>
+  <li>outbox dead letters;</li>
+  <li>tracker announce latency/error spike;</li>
+  <li>disk near full;</li>
+  <li>backup restore;</li>
+  <li>credential/token rotation.</li>
+</ul>
+<p>В каждом runbook: симптомы, dashboards/queries, безопасные действия, rollback/escalation и post-incident checks.</p>
+</section>
+
+<section class="section" id="sec-14">
+<h2>14. Приоритетный backlog</h2>
+
+<h3><span class="badge p0">P0</span> &nbsp;выполнить первым</h3>
+<ol class="progress-list">
+  <li>W0-01 Blocking Semgrep.</li>
+  <li>W0-02 Blocking Trivy.</li>
+  <li>W0-04 Fail-closed coverage.</li>
+  <li>W0-05 Исправление ratchets.</li>
+  <li>W1-01 Route inventory.</li>
+  <li>W1-02 Строгая authorization matrix.</li>
+</ol>
+
+<h3><span class="badge p1">P1</span> &nbsp;высокий архитектурный и эксплуатационный эффект</h3>
+<ol class="progress-list">
+  <li>W1-03 Messages split.</li>
+  <li>W1-04 Forum/comments split.</li>
+  <li>W1-05 Usercp/settings split.</li>
+  <li>W1-06 Torrent mutations split.</li>
+  <li>W2-01/W2-02 Сокращение <code>app()</code> и DI.</li>
+  <li>W2-03/W2-04 Stateless announce completion.</li>
+  <li>W3-03 Concurrency tests.</li>
+  <li>W8-01 Exact production smoke.</li>
+</ol>
+
+<h3><span class="badge p2">P2</span> &nbsp;последовательное сокращение долга</h3>
+<ol class="progress-list">
+  <li>W4 Repository/service decomposition.</li>
+  <li>W5 SQL/performance.</li>
+  <li>W6 Observability.</li>
+  <li>W7 Legacy UI/accessibility.</li>
+  <li>W8 Migration/backup/deployment.</li>
+  <li>W9 Documentation/runbooks.</li>
+</ol>
+</section>
+
+<section class="section" id="sec-15">
+<h2>15. Предлагаемая последовательность pull requests</h2>
+<p>Первые PR рекомендуется делать в следующем порядке:</p>
+<ol class="progress-list">
+  <li><code>CI: make coverage parsing fail closed</code>.</li>
+  <li><code>CI: enforce Semgrep local rules</code>.</li>
+  <li><code>CI: restore blocking Trivy scans</code>.</li>
+  <li><code>Architecture: correct ratchets and baselines</code>.</li>
+  <li><code>Tests: strict API authorization matrix</code>.</li>
+  <li><code>Architecture: inventory shared GET/POST actions</code>.</li>
+  <li><code>Messages: split read and mutation actions</code>.</li>
+  <li><code>Forum: split topic/post mutations</code>.</li>
+  <li><code>Usercp: typed settings commands</code>.</li>
+  <li><code>Torrent: transactional mutation services</code>.</li>
+  <li><code>DI: remove service locator from auth/tracker paths</code>.</li>
+  <li><code>Tracker: remove SupportContext side effect from request DTO</code>.</li>
+  <li><code>Tests: announce/accounting concurrency coverage</code>.</li>
+  <li><code>Production: cold-start compose smoke test</code>.</li>
+  <li><code>Observability: extract metrics collectors</code>.</li>
+</ol>
+<p>Каждый следующий PR начинается только после стабилизации релевантных gates предыдущего PR.</p>
+</section>
+
+<section class="section" id="sec-16">
+<h2>16. Метрики прогресса</h2>
+<p>Публиковать на каждый release или завершённую волну:</p>
+
+<h3>Quality</h3>
+<ul>
+  <li>project и patch coverage;</li>
+  <li>mutation score critical modules;</li>
+  <li>число flaky/retried tests;</li>
+  <li>длительность CI по jobs;</li>
+  <li>количество fail-open steps.</li>
+</ul>
+
+<h3>Architecture</h3>
+<ul>
+  <li><code>app()</code> по namespace;</li>
+  <li><code>Globals</code>/<code>SupportContext</code> references;</li>
+  <li>число shared GET/POST actions;</li>
+  <li>число oversized classes;</li>
+  <li>число public methods в top oversized classes;</li>
+  <li>legacy view baselines.</li>
+</ul>
+
+<h3>Security</h3>
+<ul>
+  <li>открытые Critical/High findings;</li>
+  <li>возраст ignore entries;</li>
+  <li>endpoints без точной authorization matrix;</li>
+  <li>secrets/dependency scan status.</li>
+</ul>
+
+<h3>Performance</h3>
+<ul>
+  <li>announce p95/p99;</li>
+  <li>torrent listing p95/p99;</li>
+  <li>queries per critical request;</li>
+  <li>queue depth/oldest job;</li>
+  <li>outbox pending/dead-letter/oldest age;</li>
+  <li>MeiliSearch indexing lag.</li>
+</ul>
+
+<h3>Operations</h3>
+<ul>
+  <li>production cold-start success;</li>
+  <li>backup restore success date;</li>
+  <li>migration duration;</li>
+  <li>deployment rollback verification;</li>
+  <li>readiness failure rate.</li>
+</ul>
+</section>
+
+<section class="section" id="sec-17">
+<h2>17. Риски и способы снижения</h2>
+<table>
+  <thead><tr><th>Риск</th><th>Снижение</th></tr></thead>
+  <tbody>
+    <tr><td>Рефакторинг ломает legacy URLs</td><td>Characterization + alias parity tests</td></tr>
+    <tr><td>DI migration создаёт десятки бесполезных interfaces</td><td>Интерфейсы только на внешних границах</td></tr>
+    <tr><td>Coverage растёт за счёт слабых tests</td><td>HTTP contracts, mutation и concurrency tests</td></tr>
+    <tr><td>UI migration нарушает themes</td><td>Per-theme screenshots и a11y workflow</td></tr>
+    <tr><td>Repository split меняет transaction behavior</td><td>Сначала зафиксировать transaction/invariant tests</td></tr>
+    <tr><td>Security gates становятся шумными</td><td>Разделить blocking и informational rules, вести точный baseline</td></tr>
+    <tr><td>Production smoke меняет реальные данные</td><td>Только fresh isolated volumes и test database</td></tr>
+    <tr><td>Performance tests нестабильны на shared runners</td><td>Сравнивать бюджеты/регрессии и хранить benchmark artifacts</td></tr>
+    <tr><td>Массовое обновление baseline скрывает regressions</td><td>Baseline уменьшается в том же PR, где удалён долг</td></tr>
+  </tbody>
+</table>
+</section>
+
+<section class="section" id="sec-18">
+<h2>18. Итоговые критерии завершения программы</h2>
+<p>Программа улучшений может считаться выполненной, когда:</p>
+<ul>
+  <li>обязательные CI/security/coverage проверки работают fail-closed;</li>
+  <li>каждый state-changing endpoint имеет отдельный HTTP action, validation и authorization;</li>
+  <li>critical application services не зависят от service locator или глобального request state;</li>
+  <li>announce/accounting выдерживает concurrency и cross-request isolation tests;</li>
+  <li>oversized classes существенно сокращены, а новый лимит не превышает 400 строк;</li>
+  <li>patch coverage и mutation score обязательны для critical modules;</li>
+  <li>inline handlers устранены, а legacy Blade baseline устойчиво снижается;</li>
+  <li>exact production Compose проходит cold-start test на пустых volumes;</li>
+  <li>migration, backup restore и rollback регулярно проверяются;</li>
+  <li>health, metrics и diagnostics имеют безопасные и однозначные semantics;</li>
+  <li>документация и ADR соответствуют фактическому состоянию проекта.</li>
+</ul>
+</section>
+
+</main>
+</div>
+</body>
+</html>

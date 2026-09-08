@@ -42,13 +42,21 @@ use Illuminate\Http\Request;
  */
 final class OfferPageService
 {
+    public function __construct(
+        private readonly CurrentUser $currentUser,
+        private readonly Globals $globals,
+        private readonly OfferRepository $offerRepository,
+        private readonly LegacyRedisCache $cache,
+        private readonly UsercpRepository $usercpRepository,
+    ) {}
+
     /**
      * Build the data for the requested action.
      */
     public function build(Request $request): OfferPageViewModel
     {
-        $curUser = (array) (app(CurrentUser::class)->get() ?? []);
-        $lang = (array) (app(Globals::class)->get('lang_offers') ?? []);
+        $curUser = (array) ($this->currentUser->get() ?? []);
+        $lang = (array) ($this->globals->get('lang_offers') ?? []);
         $userId = (int) ($curUser['id'] ?? 0);
 
         $action = $this->resolveAction($request);
@@ -58,17 +66,17 @@ final class OfferPageService
             'curUser' => $curUser,
             'userId' => $userId,
             'action' => $action,
-            'baseUrl' => (string) app(Globals::class)->get('BASEURL', ''),
-            'contentWidth' => (string) app(Globals::class)->get('CONTENT_WIDTH', '737'),
-            'browsecatmode' => app(Globals::class)->get('browsecatmode', 1),
-            'enableoffer' => (string) app(Globals::class)->get('enableoffer', 'yes'),
-            'minoffervotes' => (int) app(Globals::class)->get('minoffervotes', 0),
-            'offervotetimeoutMain' => (int) app(Globals::class)->get('offervotetimeout_main', 0),
-            'offeruptimeoutMain' => (int) app(Globals::class)->get('offeruptimeout_main', 0),
-            'offervoteBonus' => (float) app(Globals::class)->get('offervote_bonus', 0),
-            'uploadClass' => (int) app(Globals::class)->get('upload_class', 0),
-            'addofferClass' => (int) app(Globals::class)->get('addoffer_class', 0),
-            'againstofferClass' => (int) app(Globals::class)->get('againstoffer_class', 0),
+            'baseUrl' => (string) $this->globals->get('BASEURL', ''),
+            'contentWidth' => (string) $this->globals->get('CONTENT_WIDTH', '737'),
+            'browsecatmode' => $this->globals->get('browsecatmode', 1),
+            'enableoffer' => (string) $this->globals->get('enableoffer', 'yes'),
+            'minoffervotes' => (int) $this->globals->get('minoffervotes', 0),
+            'offervotetimeoutMain' => (int) $this->globals->get('offervotetimeout_main', 0),
+            'offeruptimeoutMain' => (int) $this->globals->get('offeruptimeout_main', 0),
+            'offervoteBonus' => (float) $this->globals->get('offervote_bonus', 0),
+            'uploadClass' => (int) $this->globals->get('upload_class', 0),
+            'addofferClass' => (int) $this->globals->get('addoffer_class', 0),
+            'againstofferClass' => (int) $this->globals->get('againstoffer_class', 0),
         ];
 
         if ($data['enableoffer'] === 'no') {
@@ -166,7 +174,7 @@ final class OfferPageService
             LegacyResponse::abort((string) ($lang['std_error'] ?? ''), (string) ($lang['std_smell_rat'] ?? ''));
         }
 
-        $offer = app(OfferRepository::class)->findOffer($id);
+        $offer = $this->offerRepository->findOffer($id);
         if (! $offer) {
             Html::stdMessage((string) ($lang['std_error'] ?? ''), (string) ($lang['text_nothing_found'] ?? ''));
 
@@ -185,7 +193,7 @@ final class OfferPageService
             default => '<font color="red">'.htmlspecialchars((string) ($lang['text_denied'] ?? '')).'</font>',
         };
 
-        $voteCounts = app(OfferRepository::class)->getVoteCounts($id);
+        $voteCounts = $this->offerRepository->getVoteCounts($id);
         $yeah = (int) $voteCounts['yeah'];
         $against = (int) $voteCounts['against'];
 
@@ -226,7 +234,7 @@ final class OfferPageService
         }
 
         // Comments section
-        $commentCount = app(OfferRepository::class)->countComments($id);
+        $commentCount = $this->offerRepository->countComments($id);
         $commentbar = '<p align="center"><a class="index" href="comment.php?action=add&amp;pid='.$id.'&amp;type=offer">'.htmlspecialchars((string) ($lang['text_add_comment'] ?? '')).'</a></p>'."\n";
 
         $commentsHtml = '';
@@ -236,7 +244,7 @@ final class OfferPageService
             $commentsHtml = '<h1 id="startcomments" align="center">'.htmlspecialchars((string) ($lang['text_no_comments'] ?? '')).'</h1>'."\n";
         } else {
             [$pagerTop, $pagerBottom, , $offset, $perpage] = Pagination::pager(10, $commentCount, "offers.php?id={$id}&off_details=1&", ['lastpagedefault' => 1]);
-            $commentRows = app(OfferRepository::class)->getComments($id, (int) $offset, (int) $perpage);
+            $commentRows = $this->offerRepository->getComments($id, (int) $offset, (int) $perpage);
             $allrows = [];
             foreach ($commentRows as $commentObj) {
                 $allrows[] = $commentObj->toArray();
@@ -290,7 +298,7 @@ final class OfferPageService
     private function buildEditOffer(array $lang, array $curUser, int $userId, Request $request, mixed $browsecatmode): array
     {
         $id = (int) $request->query('id', 0);
-        $offer = app(OfferRepository::class)->findOffer($id);
+        $offer = $this->offerRepository->findOffer($id);
         if (! $offer) {
             Html::stdMessage((string) ($lang['std_error'] ?? ''), (string) ($lang['text_nothing_found'] ?? ''));
 
@@ -330,13 +338,13 @@ final class OfferPageService
     private function buildOfferVoteList(array $lang, Request $request): array
     {
         $offerId = (int) $request->query('id', 0);
-        $count = app(OfferRepository::class)->getVoteCount($offerId);
-        $offerName = (string) app(OfferRepository::class)->getOfferName($offerId);
+        $count = $this->offerRepository->getVoteCount($offerId);
+        $offerName = (string) $this->offerRepository->getOfferName($offerId);
 
         $perpage = 25;
         $self = Input::serverValue('PHP_SELF');
         [$pagerTop, $pagerBottom, , $offset, $perpage] = Pagination::pager($perpage, $count, $self.'?id='.$offerId.'&offer_vote=1&');
-        $voteRows = app(OfferRepository::class)->getVoteRows($offerId, (int) $offset, (int) $perpage);
+        $voteRows = $this->offerRepository->getVoteRows($offerId, (int) $offset, (int) $perpage);
 
         $rows = [];
         foreach ($voteRows as $arr) {
@@ -429,7 +437,7 @@ final class OfferPageService
         $search = (string) ($request->query('search', '') ?? '');
 
         $self = Input::serverValue('PHP_SELF');
-        $offerResult = app(OfferRepository::class)->getLegacyList($categ, $offerorid, $search, $sortColumn, $direction, 0, 0);
+        $offerResult = $this->offerRepository->getLegacyList($categ, $offerorid, $search, $sortColumn, $direction, 0, 0);
         $count = (int) $offerResult['count'];
 
         [$pagerTop, $pagerBottom, , $offset, $perpage] = Pagination::pager(
@@ -438,7 +446,7 @@ final class OfferPageService
             $self.'?'.'category='.((string) $request->query('category', '')).'&sort='.((string) $request->query('sort', '')).'&'
         );
 
-        $offerResult = app(OfferRepository::class)->getLegacyList($categ, $offerorid, $search, $sortColumn, $direction, (int) $offset, (int) $perpage);
+        $offerResult = $this->offerRepository->getLegacyList($categ, $offerorid, $search, $sortColumn, $direction, (int) $offset, (int) $perpage);
         $offerRows = $offerResult['rows'];
         $num = $offerRows->count();
 
@@ -502,7 +510,6 @@ final class OfferPageService
 
             $i = 0;
             $lastcom_tooltip = [];
-            $Cache = app(LegacyRedisCache::class);
             foreach ($offerRows as $row) {
                 $arr = (array) $row;
                 $addedby = UserDisplay::username((int) ($arr['userid'] ?? 0));
@@ -510,10 +517,10 @@ final class OfferPageService
                 if ($comms === 0) {
                     $comment = '<a href="comment.php?action=add&amp;pid='.(int) $arr['id'].'&amp;type=offer" title="'.htmlspecialchars((string) ($lang['title_add_comments'] ?? '')).'">0</a>';
                 } else {
-                    $lastcom = $Cache?->get_value('offer_'.(int) $arr['id'].'_last_comment_content');
+                    $lastcom = $this->cache->get_value('offer_'.(int) $arr['id'].'_last_comment_content');
                     if (! $lastcom) {
-                        $lastcom = app(OfferRepository::class)->getLastComment((int) $arr['id']);
-                        $Cache?->cache_value('offer_'.(int) $arr['id'].'_last_comment_content', $lastcom, 1855);
+                        $lastcom = $this->offerRepository->getLastComment((int) $arr['id']);
+                        $this->cache->cache_value('offer_'.(int) $arr['id'].'_last_comment_content', $lastcom, 1855);
                     }
                     $lastcom = (array) $lastcom;
                     $timestamp = strtotime((string) ($lastcom['added'] ?? 'now'));
@@ -593,7 +600,7 @@ final class OfferPageService
 
         // Update last_offer timestamp
         if ($curUser) {
-            app(UsercpRepository::class)->updateLastOffer($userId);
+            $this->usercpRepository->updateLastOffer($userId);
         }
 
         return [

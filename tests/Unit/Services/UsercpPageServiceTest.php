@@ -6,6 +6,7 @@ namespace Tests\Unit\Services;
 
 use App\Models\User;
 use App\Repositories\TokenRepository;
+use App\Repositories\UsercpRepository;
 use App\Repositories\UserPasskeyRepository;
 use App\Services\UsercpPageService;
 use App\Support\Cache\LegacyRedisCache;
@@ -31,6 +32,16 @@ final class UsercpPageServiceTest extends TestCase
 
     private UsercpPageService $service;
 
+    private CurrentUser $currentUser;
+
+    private Globals $globals;
+
+    /** @var TokenRepository&MockInterface */
+    private TokenRepository $tokenRepository;
+
+    /** @var UserPasskeyRepository&MockInterface */
+    private UserPasskeyRepository $passkeyRepository;
+
     private int $userId = 0;
 
     protected function setUp(): void
@@ -46,7 +57,19 @@ final class UsercpPageServiceTest extends TestCase
 
         $this->userId = $this->createUser();
 
-        $this->service = new UsercpPageService;
+        $this->currentUser = new CurrentUser;
+        $this->globals = new Globals;
+        $this->tokenRepository = Mockery::mock(TokenRepository::class);
+        $this->passkeyRepository = Mockery::mock(UserPasskeyRepository::class);
+
+        $this->service = new UsercpPageService(
+            $this->currentUser,
+            $this->globals,
+            new LegacyRedisCache,
+            new UsercpRepository,
+            $this->tokenRepository,
+            $this->passkeyRepository,
+        );
     }
 
     protected function tearDown(): void
@@ -84,18 +107,15 @@ final class UsercpPageServiceTest extends TestCase
     /** @param  array<string, mixed>  $values */
     private function mockGlobals(array $values = []): void
     {
-        $globals = new Globals;
         foreach ($values as $key => $value) {
-            $globals->set($key, $value);
+            $this->globals->set($key, $value);
         }
-        $this->app->instance(Globals::class, $globals);
     }
 
     /** @param  array<string, mixed>  $overrides */
     private function setCurrentUser(array $overrides = []): void
     {
-        $currentUser = new CurrentUser;
-        $currentUser->set(array_merge([
+        $this->currentUser->set(array_merge([
             'id' => $this->userId,
             'username' => 'testuser',
             'class' => 1,
@@ -111,41 +131,22 @@ final class UsercpPageServiceTest extends TestCase
             'stylesheet' => 1,
             'two_step_secret' => '',
         ], $overrides));
-        $this->app->instance(CurrentUser::class, $currentUser);
-    }
-
-    private function mockCache(): void
-    {
-        /** @var LegacyRedisCache&MockInterface $cache */
-        $cache = Mockery::mock(LegacyRedisCache::class);
-        $cache->shouldIgnoreMissing();
-        $cache->shouldReceive('get_value')->andReturn(false);
-        $cache->shouldReceive('cache_value')->andReturn(true);
-        $cache->shouldReceive('delete_value')->andReturn(true);
-        $this->app->instance(LegacyRedisCache::class, $cache);
     }
 
     private function mockTokenRepo(): void
     {
-        /** @var TokenRepository&MockInterface $repo */
-        $repo = Mockery::mock(TokenRepository::class);
-        $repo->shouldReceive('listUserTokenPermissionAllowed')->andReturn([]);
-        $this->app->instance(TokenRepository::class, $repo);
+        $this->tokenRepository->shouldReceive('listUserTokenPermissionAllowed')->andReturn([]);
     }
 
     private function mockPasskeyRepo(): void
     {
-        /** @var UserPasskeyRepository&MockInterface $repo */
-        $repo = Mockery::mock(UserPasskeyRepository::class);
-        $repo->shouldReceive('renderList')->andReturn(null);
-        $this->app->instance(UserPasskeyRepository::class, $repo);
+        $this->passkeyRepository->shouldReceive('renderList')->andReturn(null);
     }
 
     /** @param  array<string, mixed>  $globalsOverrides */
     private function setupCommon(array $globalsOverrides = []): void
     {
         $this->setCurrentUser();
-        $this->mockCache();
         $this->mockTokenRepo();
         $this->mockGlobals(array_merge([
             'CONTENT_WIDTH' => '737',
@@ -165,7 +166,14 @@ final class UsercpPageServiceTest extends TestCase
 
     public function test_can_instantiate_service(): void
     {
-        $service = new UsercpPageService;
+        $service = new UsercpPageService(
+            new CurrentUser,
+            new Globals,
+            new LegacyRedisCache,
+            new UsercpRepository,
+            Mockery::mock(TokenRepository::class),
+            Mockery::mock(UserPasskeyRepository::class),
+        );
 
         $this->assertInstanceOf(UsercpPageService::class, $service);
     }

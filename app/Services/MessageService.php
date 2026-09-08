@@ -9,6 +9,7 @@ use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserAcceptPms;
 use App\Models\Message;
 use App\Models\User;
+use App\Policies\MessagePolicy;
 use App\Repositories\MessageRepository;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
@@ -25,7 +26,6 @@ use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use LogicException;
 
 /**
@@ -38,6 +38,7 @@ class MessageService
         private readonly MessageRepository $messageRepository,
         private readonly Globals $globals,
         private readonly Language $language,
+        private readonly MessagePolicy $policy,
     ) {}
 
     public function takeMessage(Request $request): RedirectResponse
@@ -131,30 +132,21 @@ class MessageService
             throw new LogicException('Expected recipient to be a User instance.');
         }
 
-        if (! Permission::can(PermissionEnum::STAFF_MEMBER, $sender)) {
+        // W1-03: Use MessagePolicy for authorization checks
+        if (! $this->policy->sendTo($sender, $recipient)) {
             if ($recipient->parked) {
                 LegacyResponse::abort($lang['std_refused'] ?? 'Refused', $lang['std_account_parked'] ?? 'Account is parked.');
             }
 
             if ($recipient->acceptpms === UserAcceptPms::YES) {
-                $blocked = DB::table('blocks')
-                    ->where('userid', $recipient->id)
-                    ->where('blockid', $sender->id)
-                    ->count() > 0;
-                if ($blocked) {
-                    LegacyResponse::abort($lang['std_refused'] ?? 'Refused', $lang['std_user_blocks_your_pms'] ?? 'User blocks your PMs.');
-                }
+                LegacyResponse::abort($lang['std_refused'] ?? 'Refused', $lang['std_user_blocks_your_pms'] ?? 'User blocks your PMs.');
             } elseif ($recipient->acceptpms === UserAcceptPms::FRIENDS) {
-                $isFriend = DB::table('friends')
-                    ->where('userid', $recipient->id)
-                    ->where('friendid', $sender->id)
-                    ->count() > 0;
-                if (! $isFriend) {
-                    LegacyResponse::abort($lang['std_refused'] ?? 'Refused', $lang['std_user_accepts_friends_pms'] ?? 'User accepts PMs from friends only.');
-                }
+                LegacyResponse::abort($lang['std_refused'] ?? 'Refused', $lang['std_user_accepts_friends_pms'] ?? 'User accepts PMs from friends only.');
             } elseif ($recipient->acceptpms === UserAcceptPms::NO) {
                 LegacyResponse::abort($lang['std_refused'] ?? 'Refused', $lang['std_user_blocks_all_pms'] ?? 'User blocks all PMs.');
             }
+
+            LegacyResponse::abort($lang['std_refused'] ?? 'Refused', $lang['std_permission_denied'] ?? 'Permission denied.');
         }
 
         $message = Message::add([
@@ -217,7 +209,7 @@ class MessageService
 
         if ($type === 'in') {
             $msg = Message::query()->where('id', $id)->first(['id', 'receiver', 'sender', 'location', 'saved', 'unread']);
-            if (! $msg || $msg->receiver != $sender->id) {
+            if (! $msg || ! $this->policy->deleteInbox($sender, $msg)) {
                 LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_not_suggested'] ?? 'Not suggested.');
             }
             if ($msg === null) {
@@ -237,7 +229,7 @@ class MessageService
             Cache::clearInboxCount($sender->id);
         } elseif ($type === 'out') {
             $msg = Message::query()->where('id', $id)->first(['id', 'receiver', 'sender', 'location', 'saved', 'unread']);
-            if (! $msg || $msg->sender != $sender->id) {
+            if (! $msg || ! $this->policy->deleteSentbox($sender, $msg)) {
                 LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_not_suggested'] ?? 'Not suggested.');
             }
             if ($msg === null) {
@@ -335,7 +327,12 @@ class MessageService
         if ($action === 'viewmessage') {
             $id = (int) $request->input('id', 0);
             $user = Auth::user();
-            if ($id <= 0 || ! $user instanceof User || ! $this->messageRepository->getMessageForUser($id, (int) $user->id)) {
+            if ($id <= 0 || ! $user instanceof User) {
+                return redirect('/messages.php');
+            }
+
+            $message = Message::query()->find($id);
+            if (! $message || ! $this->policy->view($user, $message)) {
                 return redirect('/messages.php');
             }
 

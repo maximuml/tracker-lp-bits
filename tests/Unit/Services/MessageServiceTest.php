@@ -6,6 +6,7 @@ namespace Tests\Unit\Services;
 
 use App\Models\Message;
 use App\Models\User;
+use App\Policies\MessagePolicy;
 use App\Repositories\MessageRepository;
 use App\Services\MessageService;
 use App\Support\Globals;
@@ -56,6 +57,7 @@ final class MessageServiceTest extends TestCase
             app(MessageRepository::class),
             $this->globals,
             app(Language::class),
+            app(MessagePolicy::class),
         );
     }
 
@@ -129,6 +131,7 @@ final class MessageServiceTest extends TestCase
             $repo,
             $this->globals,
             app(Language::class),
+            app(MessagePolicy::class),
         );
 
         return $repo;
@@ -174,6 +177,7 @@ final class MessageServiceTest extends TestCase
             app(MessageRepository::class),
             new Globals,
             app(Language::class),
+            app(MessagePolicy::class),
         );
 
         $this->assertInstanceOf(MessageService::class, $service);

@@ -8,6 +8,9 @@ use App\DTOs\Message\ListUnreadDto;
 use App\DTOs\Message\MessageListDto;
 use App\DTOs\Message\StoreMessageDto;
 use App\DTOs\Message\UpdateMessageDto;
+use App\Http\Requests\DeleteMessageRequest;
+use App\Http\Requests\MoveOrDeleteMessageRequest;
+use App\Http\Requests\StoreMessageRequest;
 use App\Http\Resources\MessageResource;
 use App\Models\Message;
 use App\Models\User;
@@ -52,7 +55,7 @@ class MessageController extends LegacyController
         return $this->legacyPage($request, 'messages', true, $data);
     }
 
-    public function messagesAction(Request $request): RedirectResponse
+    public function messagesAction(MoveOrDeleteMessageRequest $request): RedirectResponse
     {
         $redirect = $this->legacyService->handleMessagesActionPublic($request);
         if ($redirect instanceof RedirectResponse) {
@@ -127,12 +130,12 @@ class MessageController extends LegacyController
         ]);
     }
 
-    public function takeMessage(Request $request): Response|RedirectResponse
+    public function takeMessage(StoreMessageRequest $request): Response|RedirectResponse
     {
         return $this->legacyService->takeMessage($request);
     }
 
-    public function deletemessage(Request $request): Response|RedirectResponse
+    public function deletemessage(DeleteMessageRequest $request): Response|RedirectResponse
     {
         return $this->legacyService->deletemessage($request);
     }

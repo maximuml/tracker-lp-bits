@@ -6,7 +6,8 @@ namespace App\Http\Controllers;
 
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserClass as UserClassEnum;
-use App\Enums\UserStatus;
+use App\Jobs\BulkUserIncrementJob;
+use App\Jobs\BulkUserMessageJob;
 use App\Models\Invite;
 use App\Models\Setting;
 use App\Models\User;
@@ -37,6 +38,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class SystemBulkController extends LegacyController
@@ -89,19 +91,22 @@ class SystemBulkController extends LegacyController
 
         $subject = trim((string) request()->post('subject'));
         $bytes = Format::bytesFromUnit($amount, 'G');
+        $dryRun = (bool) $request->post('dry_run', false);
+        $idempotencyKey = (string) $request->post('idempotency_key', Str::uuid()->toString());
 
-        User::query()->whereIn('class', $classSet)->increment('uploaded', $bytes);
-
-        $userIds = User::query()->whereIn('class', $classSet)->pluck('id')->all();
-        foreach ($userIds as $userId) {
-            DB::table('messages')->insert([
+        BulkUserIncrementJob::dispatch(
+            classIds: $classSet,
+            field: 'uploaded',
+            amount: $bytes,
+            actorId: $senderId,
+            idempotencyKey: $idempotencyKey,
+            message: [
                 'sender' => $senderId,
-                'receiver' => (int) $userId,
-                'added' => $added,
                 'subject' => $subject,
                 'msg' => $msg,
-            ]);
-        }
+            ],
+            dryRun: $dryRun,
+        );
 
         return redirect('takeamountupload.php?sent=1');
 
@@ -418,8 +423,6 @@ class SystemBulkController extends LegacyController
         $isTypeTmpInvite = $type === 'tmp_invites';
         $subject = trim((string) $request->input('subject', ''));
         $duration = 0;
-        $size = 2000;
-        $page = 1;
 
         $classIds = [];
         $classes = $request->input('classes', []);
@@ -438,55 +441,53 @@ class SystemBulkController extends LegacyController
             }
         }
 
-        set_time_limit(300);
+        $dryRun = (bool) $request->post('dry_run', false);
+        $idempotencyKey = (string) $request->post('idempotency_key', Str::uuid()->toString());
 
-        while (true) {
-            $msgRows = [];
-            $idArr = [];
-            $offset = ($page - 1) * $size;
-
-            $users = DB::table('users')
+        if ($isTypeTmpInvite) {
+            // Temp invites still use the legacy artisan command path; dispatch
+            // the increment job for the messages, then run the invite command
+            // synchronously (it has its own queue via GenerateTemporaryInvite).
+            $userIds = DB::table('users')
                 ->whereIn('class', $classIds)
                 ->where('enabled', true)
-                ->where('status', UserStatus::CONFIRMED->value)
-                ->offset($offset)
-                ->limit($size)
-                ->get(['id']);
+                ->where('status', 'confirmed')
+                ->pluck('id')
+                ->all();
 
-            foreach ($users as $userRow) {
-                $id = (int) $userRow->id;
-                $idArr[] = $id;
-                $msgRows[] = [
-                    'sender' => $senderId,
-                    'receiver' => $id,
-                    'added' => $added,
-                    'subject' => $subject,
-                    'msg' => $msg,
-                ];
-            }
-
-            if (empty($idArr)) {
-                break;
-            }
-
-            $idStr = implode(',', $idArr);
-            $idRedisKey = sprintf('temporary_invite:%s', microtime(true));
-            Cache::put($idRedisKey, $idStr);
-
-            if ($isTypeTmpInvite) {
+            if (! $dryRun && ! empty($userIds)) {
+                $idStr = implode(',', $userIds);
+                $idRedisKey = sprintf('temporary_invite:%s', microtime(true));
+                Cache::put($idRedisKey, $idStr);
                 $command = sprintf('invite:tmp %s %s %s', $idRedisKey, $duration, $amount);
                 $output = Environment::run($command, 'string', true, true);
                 $outputStr = is_array($output) ? implode("\n", $output) : (string) $output;
                 Log::writeWithContext((string) sprintf('command: %s, output: %s', $command, $outputStr), 'info');
-            } else {
-                DB::table('users')->whereIn('id', $idArr)->increment($type, $amount);
             }
 
-            if (! empty($msgRows)) {
-                DB::table('messages')->insert($msgRows);
-            }
-
-            $page++;
+            BulkUserMessageJob::dispatch(
+                classIds: $classIds,
+                senderId: $senderId,
+                subject: $subject,
+                body: $msg,
+                actorId: $senderId,
+                idempotencyKey: $idempotencyKey,
+                dryRun: $dryRun,
+            );
+        } else {
+            BulkUserIncrementJob::dispatch(
+                classIds: $classIds,
+                field: $type,
+                amount: $amount,
+                actorId: $senderId,
+                idempotencyKey: $idempotencyKey,
+                message: [
+                    'sender' => $senderId,
+                    'subject' => $subject,
+                    'msg' => $msg,
+                ],
+                dryRun: $dryRun,
+            );
         }
 
         return redirect('/increment-bulk.php?sent=1&type='.$type);

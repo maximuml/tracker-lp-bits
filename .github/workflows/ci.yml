@@ -740,7 +740,7 @@ jobs:
           echo "All .trivyignore entries are valid and not expired."
 
       - name: Run Trivy on PHP image
-        uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: nexusphp_php:latest
           format: sarif
@@ -752,7 +752,7 @@ jobs:
           version: v0.74.0
 
       - name: Run Trivy on OpenResty image
-        uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: nexusphp_openresty:latest
           format: sarif

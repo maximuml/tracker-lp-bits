@@ -96,7 +96,7 @@ class AnnounceContextTest extends TestCase
         $dto = $this->makeDto();
         $seederCtx = new AnnounceContext(
             dto: $dto,
-            params: ['passkey' => 'abcdef0123456789abcdef0123456789'],
+            params: ['passkey' => 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'],
             ip: '127.0.0.1',
             agent: 'qBittorrent/4.5.2',
             dt: '2026-01-01 00:00:00',
@@ -128,7 +128,7 @@ class AnnounceContextTest extends TestCase
 
         return new AnnounceContext(
             dto: $dto,
-            params: ['passkey' => 'abcdef0123456789abcdef0123456789'],
+            params: ['passkey' => 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'],
             ip: '127.0.0.1',
             agent: 'qBittorrent/4.5.2',
             dt: '2026-01-01 00:00:00',
@@ -146,7 +146,7 @@ class AnnounceContextTest extends TestCase
     {
         // W2-03: Build DTO directly without Laravel container.
         return new AnnounceRequestDto(
-            passkey: Passkey::fromString('abcdef0123456789abcdef0123456789'),
+            passkey: Passkey::fromString('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'),
             infoHash: InfoHash::fromBinary(str_repeat("\x00", 20)),
             peerId: PeerId::fromBinary('-qB4'.str_repeat("\x01", 16)),
             port: 6881,

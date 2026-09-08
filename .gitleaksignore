@@ -16,3 +16,5 @@
 8f965d5298c4f44b31489ca61c4c4283a67db6a1:tests/Unit/DTOs/Announce/AnnounceContextTest.php:generic-api-key:129
 8f965d5298c4f44b31489ca61c4c4283a67db6a1:tests/Unit/DTOs/Announce/AnnounceContextTest.php:generic-api-key:146
 8f965d5298c4f44b31489ca61c4c4283a67db6a1:tests/Unit/DTOs/Announce/AnnounceContextTest.php:generic-api-key:156
+# Dummy passkey in AnnounceRequestDtoTest is a fixed test value, not a real secret
+3298376e4ec7024469ad8d6a499411a7115add20:tests/Unit/DTOs/AnnounceRequestDtoTest.php:generic-api-key:28

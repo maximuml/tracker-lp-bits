@@ -34,13 +34,33 @@ class MessagePageService
 
     private const PM_SENT_BOX = -1;
 
+    private MessageRepository $messageRepository;
+
+    private CurrentUser $currentUser;
+
+    private Globals $globals;
+
+    private LegacyRedisCache $legacyRedisCache;
+
+    public function __construct(
+        MessageRepository $messageRepository,
+        CurrentUser $currentUser,
+        Globals $globals,
+        LegacyRedisCache $legacyRedisCache,
+    ) {
+        $this->messageRepository = $messageRepository;
+        $this->currentUser = $currentUser;
+        $this->globals = $globals;
+        $this->legacyRedisCache = $legacyRedisCache;
+    }
+
     /**
      * Build the data for the requested action.
      */
     public function build(Request $request): MessagePageViewModel
     {
-        $curUser = (array) (app(CurrentUser::class)->get() ?? []);
-        $lang = (array) (app(Globals::class)->get('lang_messages') ?? []);
+        $curUser = (array) ($this->currentUser->get() ?? []);
+        $lang = (array) ($this->globals->get('lang_messages') ?? []);
         $userId = (int) ($curUser['id'] ?? 0);
 
         $action = (string) $request->input('action', '');
@@ -56,8 +76,8 @@ class MessagePageService
             'curUser' => $curUser,
             'userId' => $userId,
             'action' => $action,
-            'baseUrl' => (string) app(Globals::class)->get('BASEURL', ''),
-            'contentWidth' => (string) app(Globals::class)->get('CONTENT_WIDTH', '737'),
+            'baseUrl' => (string) $this->globals->get('BASEURL', ''),
+            'contentWidth' => (string) $this->globals->get('CONTENT_WIDTH', '737'),
         ];
 
         switch ($action) {
@@ -106,7 +126,7 @@ class MessagePageService
 
         // Mailbox name
         if ($mailbox !== self::PM_INBOX && $mailbox !== self::PM_SENT_BOX) {
-            $pmBoxName = app(MessageRepository::class)->getMailboxName($userId, $mailbox);
+            $pmBoxName = $this->messageRepository->getMailboxName($userId, $mailbox);
             if (! $pmBoxName) {
                 LegacyResponse::abort(
                     (string) ($lang['std_error'] ?? 'Error'),
@@ -135,7 +155,7 @@ class MessagePageService
         };
         $perpage = (int) ($curUser['pmnum'] ?? 0) ?: 20;
 
-        $countResult = app(MessageRepository::class)->getMailboxMessages($userId, $mailbox, $keyword, $place, $unreadBool, 0, 0);
+        $countResult = $this->messageRepository->getMailboxMessages($userId, $mailbox, $keyword, $place, $unreadBool, 0, 0);
         $count = $countResult['count'];
 
         $pagerHref = '?action=viewmailbox'
@@ -147,7 +167,7 @@ class MessagePageService
 
         [$pagertop, $pagerbottom, , $offset, $perpage] = Pagination::pager($perpage, $count, $pagerHref);
 
-        $messageResult = app(MessageRepository::class)->getMailboxMessages($userId, $mailbox, $keyword, $place, $unreadBool, (int) $offset, (int) $perpage);
+        $messageResult = $this->messageRepository->getMailboxMessages($userId, $mailbox, $keyword, $place, $unreadBool, (int) $offset, (int) $perpage);
         $messages = $messageResult['messages'];
 
         // Build message rows
@@ -179,7 +199,7 @@ class MessagePageService
         }
 
         // User mailboxes for the "move to" select
-        $pmBoxes = app(MessageRepository::class)->getUserMailboxes($userId);
+        $pmBoxes = $this->messageRepository->getUserMailboxes($userId);
         $moveBoxOptions = '';
         foreach ($pmBoxes as $box) {
             $boxArr = (array) $box;
@@ -224,7 +244,7 @@ class MessagePageService
             );
         }
 
-        $messageModel = app(MessageRepository::class)->getMessageForUser($pmId, $userId);
+        $messageModel = $this->messageRepository->getMessageForUser($pmId, $userId);
         if (! $messageModel) {
             LegacyResponse::abort(
                 (string) ($lang['std_error'] ?? 'Error'),
@@ -269,17 +289,14 @@ class MessagePageService
         }
 
         // Mark message as read
-        app(MessageRepository::class)->markAsRead($pmId, $userId);
-        $cache = app(LegacyRedisCache::class);
-        if ($cache !== null) {
-            $cache->delete_value('user_'.$userId.'_unread_message_count', true);
-        }
+        $this->messageRepository->markAsRead($pmId, $userId);
+        $this->legacyRedisCache->delete_value('user_'.$userId.'_unread_message_count', true);
 
         // Mailbox for menu highlight
         $mailbox = $isSender ? self::PM_SENT_BOX : (int) $message['location'];
 
         // Move-to boxes
-        $pmBoxes = app(MessageRepository::class)->getUserMailboxes($userId);
+        $pmBoxes = $this->messageRepository->getUserMailboxes($userId);
         $moveBoxOptions = '';
         foreach ($pmBoxes as $box) {
             $boxArr = (array) $box;
@@ -311,7 +328,7 @@ class MessagePageService
     {
         $pmId = (int) $request->input('id', 0);
 
-        $messageModel = app(MessageRepository::class)->getMessageForForward($pmId, $userId);
+        $messageModel = $this->messageRepository->getMessageForForward($pmId, $userId);
         if (! $messageModel) {
             LegacyResponse::abort(
                 (string) ($lang['std_error'] ?? 'Error'),
@@ -333,7 +350,7 @@ class MessagePageService
             $origName2 = (string) ($lang['text_system'] ?? 'System');
         } else {
             $origName = UserDisplay::username($orig);
-            $origName2 = app(MessageRepository::class)->getUsername($orig) ?? '';
+            $origName2 = $this->messageRepository->getUsername($orig) ?? '';
         }
 
         $body = '-------- Original Message from '.htmlspecialchars($origName2).' --------<br />'.Format::formatComment((string) $message['msg']);
@@ -355,7 +372,7 @@ class MessagePageService
      */
     private function buildEditMailboxes(array $lang, int $userId): array
     {
-        $pmBoxes = app(MessageRepository::class)->getUserMailboxes($userId);
+        $pmBoxes = $this->messageRepository->getUserMailboxes($userId);
 
         $boxes = [];
         foreach ($pmBoxes as $box) {
@@ -379,7 +396,7 @@ class MessagePageService
      */
     private function buildJumpToBoxes(Collection $pmBoxes, int $selected): string
     {
-        $lang = (array) (app(Globals::class)->get('lang_messages') ?? []);
+        $lang = (array) ($this->globals->get('lang_messages') ?? []);
         $html = '<option value="1" '.($selected === self::PM_INBOX ? ' selected' : '').'>'.htmlspecialchars((string) ($lang['select_inbox'] ?? 'Inbox'))."</option>\n";
         $html .= '<option value="-1" '.($selected === self::PM_SENT_BOX ? ' selected' : '').'>'.htmlspecialchars((string) ($lang['select_sentbox'] ?? 'Sentbox'))."</option>\n";
         foreach ($pmBoxes as $row) {

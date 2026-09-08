@@ -36,10 +36,24 @@ class UserDetailController extends Controller
 
     private UserRepository $userRepository;
 
-    public function __construct(HitAndRunRepository $hitAndRunRepository, UserRepository $userRepository)
-    {
+    private UserDetailRepository $userDetailRepository;
+
+    private CurrentUser $currentUser;
+
+    private Globals $globals;
+
+    public function __construct(
+        HitAndRunRepository $hitAndRunRepository,
+        UserRepository $userRepository,
+        UserDetailRepository $userDetailRepository,
+        CurrentUser $currentUser,
+        Globals $globals,
+    ) {
         $this->hitAndRunRepository = $hitAndRunRepository;
         $this->userRepository = $userRepository;
+        $this->userDetailRepository = $userDetailRepository;
+        $this->currentUser = $currentUser;
+        $this->globals = $globals;
     }
 
     public function show(Request $request): View|RedirectResponse
@@ -47,20 +61,20 @@ class UserDetailController extends Controller
         $id = (int) $request->input('id', 0);
 
         if ($id <= 0) {
-            $currentUser = app(CurrentUser::class)->get();
+            $currentUser = $this->currentUser->get();
             $id = (int) ($currentUser['id'] ?? 0);
             if ($id <= 0) {
                 abort(404);
             }
         }
 
-        if (app(CurrentUser::class)->get() === null) {
+        if ($this->currentUser->get() === null) {
             return redirect('/userdetails.php?'.$request->getQueryString());
         }
 
-        $user = app(UserDetailRepository::class)->getUser($id);
+        $user = $this->userDetailRepository->getUser($id);
         /** @var array<string, string> $lang */
-        $lang = (array) app(Globals::class)->get('lang_userdetails', []);
+        $lang = (array) $this->globals->get('lang_userdetails', []);
 
         if ($user === null) {
             LegacyResponse::abort(
@@ -78,19 +92,19 @@ class UserDetailController extends Controller
             );
         }
 
-        $userModel = app(UserDetailRepository::class)->getUserWithMedals($id);
-        $temporaryInviteCount = $userModel instanceof User ? app(UserDetailRepository::class)->getTemporaryInviteCount($userModel) : 0;
+        $userModel = $this->userDetailRepository->getUserWithMedals($id);
+        $temporaryInviteCount = $userModel instanceof User ? $this->userDetailRepository->getTemporaryInviteCount($userModel) : 0;
 
         return view('user.details', array_merge([
             'id' => $id,
             'user' => $user,
             'lang' => $lang,
             'userModel' => $userModel,
-            'torrentcomments' => app(UserDetailRepository::class)->getCommentCount($id),
-            'forumposts' => app(UserDetailRepository::class)->getPostCount($id),
+            'torrentcomments' => $this->userDetailRepository->getCommentCount($id),
+            'forumposts' => $this->userDetailRepository->getPostCount($id),
             'temporaryInviteCount' => $temporaryInviteCount,
-            'modcomment' => app(UserDetailRepository::class)->getModComment($id),
-            'bonuscomment' => app(UserDetailRepository::class)->getBonusComment($id),
+            'modcomment' => $this->userDetailRepository->getModComment($id),
+            'bonuscomment' => $this->userDetailRepository->getBonusComment($id),
         ], $this->buildDetailsViewData($id, $user, $userModel)));
     }
 
@@ -100,7 +114,7 @@ class UserDetailController extends Controller
      */
     private function buildDetailsViewData(int $id, array $user, ?User $userModel): array
     {
-        $currentUser = app(CurrentUser::class)->get() ?? [];
+        $currentUser = $this->currentUser->get() ?? [];
         $currentUserId = (int) ($currentUser['id'] ?? 0);
         $isOwner = $currentUserId === $id;
 
@@ -110,10 +124,10 @@ class UserDetailController extends Controller
         $canDeleteUser = Permission::can(PermissionEnum::USER_DELETE);
         $staffMember = Permission::can(PermissionEnum::STAFF_MEMBER);
 
-        $isFriend = $currentUserId > 0 ? app(UserDetailRepository::class)->isFriend($currentUserId, $id) : false;
-        $currentUserBlockedTarget = $currentUserId > 0 ? app(UserDetailRepository::class)->isBlocked($currentUserId, $id) : false;
-        $targetBlockedMe = $currentUserId > 0 ? app(UserDetailRepository::class)->isBlocked($id, $currentUserId) : false;
-        $currentUserIsFriendOfTarget = $currentUserId > 0 ? app(UserDetailRepository::class)->isFriend($id, $currentUserId) : false;
+        $isFriend = $currentUserId > 0 ? $this->userDetailRepository->isFriend($currentUserId, $id) : false;
+        $currentUserBlockedTarget = $currentUserId > 0 ? $this->userDetailRepository->isBlocked($currentUserId, $id) : false;
+        $targetBlockedMe = $currentUserId > 0 ? $this->userDetailRepository->isBlocked($id, $currentUserId) : false;
+        $currentUserIsFriendOfTarget = $currentUserId > 0 ? $this->userDetailRepository->isFriend($id, $currentUserId) : false;
 
         $showPmButton = false;
         if ($currentUserId !== $id) {
@@ -130,11 +144,11 @@ class UserDetailController extends Controller
         $countryHtml = '<img src="pic/flag/'.htmlspecialchars((string) ($countryRow['flagpic'] ?? '')).'" alt="'.htmlspecialchars((string) ($countryRow['name'] ?? '')).'" style="margin-left: 8pt" />';
 
         $locationInfo = [null, null];
-        if (app(Globals::class)->get('enablelocation_tweak', '') === 'yes' && ! empty($user['ip'])) {
+        if ($this->globals->get('enablelocation_tweak', '') === 'yes' && ! empty($user['ip'])) {
             $locationInfo = Network::ipLocationWithContext($user['ip']);
         }
 
-        $peerRows = app(UserDetailRepository::class)->getPeers($id);
+        $peerRows = $this->userDetailRepository->getPeers($id);
         $clientSelectHtml = '';
         if (! empty($peerRows)) {
             $clientSelectHtml .= "<table border='1' cellspacing='0' cellpadding='5'><tr><td class='colhead'>Agent</td><td class='colhead'>IPV4</td><td class='colhead'>IPV6</td><td class='colhead'>Port</td></tr>";
@@ -158,11 +172,11 @@ class UserDetailController extends Controller
             $clientSelectHtml .= '</table>';
         }
 
-        $trueTraffic = app(UserDetailRepository::class)->getTrueTraffic($id);
+        $trueTraffic = $this->userDetailRepository->getTrueTraffic($id);
 
         $userManageSystemUrl = sprintf('%s/%s/user/users/%s', Url::schemeAndHost(false), Env::get('FILAMENT_PATH', 'nexusphp'), $user['id']);
 
-        $langDetails = (array) app(Globals::class)->get('lang_userdetails', []);
+        $langDetails = (array) $this->globals->get('lang_userdetails', []);
 
         $usernameHtml = UserDisplay::username($user['id'], true, false);
         $invitedByHtml = $user['invited_by'] > 0 ? UserDisplay::username($user['invited_by']) : '';
@@ -170,7 +184,7 @@ class UserDetailController extends Controller
 
         $warnedByHtml = '';
         if (($user['timeswarned'] ?? 0) > 0 && $user['warnedby'] !== 'System') {
-            $arr = app(UserDetailRepository::class)->getWarnedBy((int) $user['warnedby']);
+            $arr = $this->userDetailRepository->getWarnedBy((int) $user['warnedby']);
             if ($arr !== null) {
                 $warnedByHtml = '<br />['.$langDetails['text_by'].'<u>'.UserDisplay::username($arr['id']).'</u></a>]';
             }
@@ -187,7 +201,7 @@ class UserDetailController extends Controller
             $hrStatusHtml = $this->hitAndRunRepository->getStatusStats($id);
         }
 
-        $ipHistoryCount = $canViewConfidential ? app(UserDetailRepository::class)->getIplogCount($id) : 0;
+        $ipHistoryCount = $canViewConfidential ? $this->userDetailRepository->getIplogCount($id) : 0;
 
         $claimAllSeedingConfirmation = Locale::trans('claim.claim_all_seeding_confirmation', [], null);
         $claimJs = '';

@@ -19,15 +19,25 @@ use Illuminate\View\View;
 
 class FaqController extends LegacyController
 {
+    private InfoRepository $infoRepository;
+
+    private Globals $globals;
+
+    public function __construct(InfoRepository $infoRepository, Globals $globals)
+    {
+        $this->infoRepository = $infoRepository;
+        $this->globals = $globals;
+    }
+
     public function faq(Request $request): Response|RedirectResponse
     {
-        $langFolder = (string) app(Globals::class)->get('CURLANGDIR', 'en');
+        $langFolder = (string) $this->globals->get('CURLANGDIR', 'en');
         $cacheKey = "{$langFolder}_faq";
 
         $html = Cache::remember($cacheKey, 900, function () {
-            $langId = app(InfoRepository::class)->resolveRuleLangId(Locale::guestIdWithContext());
+            $langId = $this->infoRepository->resolveRuleLangId(Locale::guestIdWithContext());
 
-            return view('faq.index', ['faqCategories' => app(InfoRepository::class)->faqCategories($langId)])->render();
+            return view('faq.index', ['faqCategories' => $this->infoRepository->faqCategories($langId)])->render();
         });
 
         return response($html);
@@ -40,7 +50,7 @@ class FaqController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Permission denied.');
         }
 
-        $faqData = app(InfoRepository::class)->faqManageData();
+        $faqData = $this->infoRepository->faqManageData();
 
         return $this->legacyPage($request, 'faqmanage', true, $faqData);
     }
@@ -52,18 +62,18 @@ class FaqController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Only Administrators and above can modify the FAQ, sorry.');
         }
 
-        $baseUrl = (string) app(Globals::class)->get('BASEURL', '');
+        $baseUrl = (string) $this->globals->get('BASEURL', '');
         $redirectBase = Http::protocolPrefix(Url::isSecure()).$baseUrl;
         $action = (string) (request()->query('action') ?? '');
 
         if ($action === 'reorder' && $request->isMethod('post')) {
-            app(InfoRepository::class)->reorderFaq((array) request()->post('order'));
+            $this->infoRepository->reorderFaq((array) request()->post('order'));
 
             return redirect($redirectBase.'/faqmanage.php');
         }
 
         if ($action === 'edititem' && $request->isMethod('post')) {
-            app(InfoRepository::class)->updateFaq((int) request()->post('id'), [
+            $this->infoRepository->updateFaq((int) request()->post('id'), [
                 'question' => (string) request()->post('question'),
                 'answer' => (string) request()->post('answer'),
                 'flag' => (int) request()->post('flag'),
@@ -74,7 +84,7 @@ class FaqController extends LegacyController
         }
 
         if ($action === 'editsect' && $request->isMethod('post')) {
-            app(InfoRepository::class)->updateFaq((int) request()->post('id'), [
+            $this->infoRepository->updateFaq((int) request()->post('id'), [
                 'question' => (string) request()->post('title'),
                 'answer' => '',
                 'flag' => (int) request()->post('flag'),
@@ -90,7 +100,7 @@ class FaqController extends LegacyController
             }
             $id = (int) (request()->query('id') ?? 0);
             if (request()->query('confirm') === 'yes') {
-                app(InfoRepository::class)->deleteFaq($id);
+                $this->infoRepository->deleteFaq($id);
 
                 return redirect($redirectBase.'/faqmanage.php');
             }
@@ -104,8 +114,8 @@ class FaqController extends LegacyController
         if ($action === 'addnewitem' && $request->isMethod('post')) {
             $categ = (int) (request()->post('categ') ?? 0);
             $langId = (int) (request()->post('langid') ?? 0);
-            $max = app(InfoRepository::class)->getFaqMaxOrderAndLinkId(FaqType::ITEM->stringValue(), $langId);
-            app(InfoRepository::class)->insertFaq([
+            $max = $this->infoRepository->getFaqMaxOrderAndLinkId(FaqType::ITEM->stringValue(), $langId);
+            $this->infoRepository->insertFaq([
                 'link_id' => $max['maxlinkid'] + 1,
                 'type' => FaqType::ITEM->value,
                 'lang_id' => $langId,
@@ -121,8 +131,8 @@ class FaqController extends LegacyController
 
         if ($action === 'addnewsect' && $request->isMethod('post')) {
             $language = (int) (request()->post('language') ?? 0);
-            $max = app(InfoRepository::class)->getFaqMaxOrderAndLinkId(FaqType::CATEG->stringValue(), $language);
-            app(InfoRepository::class)->insertFaq([
+            $max = $this->infoRepository->getFaqMaxOrderAndLinkId(FaqType::CATEG->stringValue(), $language);
+            $this->infoRepository->insertFaq([
                 'link_id' => $max['maxlinkid'] + 1,
                 'type' => FaqType::CATEG->value,
                 'lang_id' => $language,
@@ -138,7 +148,7 @@ class FaqController extends LegacyController
 
         if ($action === 'edit') {
             $id = (int) (request()->query('id') ?? 0);
-            $arr = app(InfoRepository::class)->getFaqById($id);
+            $arr = $this->infoRepository->getFaqById($id);
             if ($arr === null) {
                 return $this->legacyAbortResponse('Error', 'Invalid id');
             }
@@ -147,9 +157,9 @@ class FaqController extends LegacyController
 
             $categories = [];
             if ($arr['type'] === FaqType::ITEM->value) {
-                $categories = app(InfoRepository::class)->getFaqCategoriesByLang((int) $arr['lang_id']);
+                $categories = $this->infoRepository->getFaqCategoriesByLang((int) $arr['lang_id']);
             } elseif ($arr['type'] === FaqType::CATEG->value) {
-                $arr['lang_name'] = app(InfoRepository::class)->getLanguageName((int) $arr['lang_id']);
+                $arr['lang_name'] = $this->infoRepository->getLanguageName((int) $arr['lang_id']);
             }
 
             return $this->legacyPage($request, 'faqactions', true, [
@@ -172,7 +182,7 @@ class FaqController extends LegacyController
 
         if ($action === 'addsection') {
             $languages = Locale::languageList('rule_lang', null);
-            $defLang = app(Globals::class)->get('deflang', '');
+            $defLang = $this->globals->get('deflang', '');
 
             return $this->legacyPage($request, 'faqactions', true, [
                 'mode' => 'addsection',

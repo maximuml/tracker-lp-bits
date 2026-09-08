@@ -8,4 +8,12 @@ RUN apk add --no-cache gettext bash curl openssl socat
 COPY .docker/openresty/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
+# Copy nginx config, site templates, and lua scripts into the image.
+# In dev, these are bind-mounted from .docker/openresty/. In production,
+# they must be baked into the image because named volumes are empty
+# on first mount and would hide the image content.
+COPY .docker/openresty/nginx.conf /usr/local/openresty/nginx/conf/nginx.conf
+COPY .docker/openresty/sites/ /etc/nginx/conf.d/sites/
+COPY .docker/openresty/lua/ /usr/local/openresty/lua/
+
 CMD ["/bin/sh", "/usr/local/bin/entrypoint.sh"]

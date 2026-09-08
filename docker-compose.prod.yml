@@ -78,9 +78,6 @@ services:
 
   openresty:
     volumes:
-      - openresty-sites:/etc/nginx/conf.d/sites:ro
-      - openresty-certs:/certs:ro
-      - openresty-lua:/usr/local/openresty/lua:ro
       - storage-data:/var/www/html/storage:ro
       - attachments-data:/var/www/html/attachments:ro
       - torrents-data:/var/www/html/torrents:ro
@@ -88,6 +85,7 @@ services:
     # No bind-mount of source — openresty reads static files from the php image's
     # public/ via a shared volume. For simplicity in this compose, we mount the
     # static assets volume (populated by the php build).
+    # Site templates, lua scripts, and nginx.conf are baked into the image.
 
 volumes:
   storage-data:
@@ -95,6 +93,3 @@ volumes:
   attachments-data:
   torrents-data:
   public-build:
-  openresty-sites:
-  openresty-certs:
-  openresty-lua:

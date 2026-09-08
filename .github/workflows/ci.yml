@@ -1123,7 +1123,9 @@ jobs:
       - name: Verify queue worker is running
         run: |
           # Queue container should be up and horizon should report active
-          docker compose exec -T queue php artisan horizon:status | grep -q "running\|active" || \
+          status=$(docker compose exec -T queue php artisan horizon:status 2>&1)
+          echo "Horizon status: $status"
+          echo "$status" | grep -q "running\|active" || \
             (echo "FAIL: horizon not running"; exit 1)
           echo "OK: queue worker (horizon) is running"
 

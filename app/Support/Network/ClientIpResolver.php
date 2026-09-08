@@ -12,7 +12,7 @@ use App\Support\Network;
  * Wraps the static Network::clientIp() method so it can be injected
  * and mocked in unit tests without touching $_SERVER.
  */
-final class ClientIpResolver
+class ClientIpResolver
 {
     /**
      * Resolve the real client IP (first address in the chain).

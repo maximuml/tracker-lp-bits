@@ -168,7 +168,8 @@ RUN cd /var/www/html \
     && php artisan route:cache \
     && php artisan view:cache \
     && php artisan icons:cache \
-    && php artisan filament:cache-components
+    && php artisan filament:cache-components \
+    && chown -R www-data:www-data /var/www/html/bootstrap/cache
 
 # Production entrypoint — no composer install, no install-script copy
 COPY .docker/php/entrypoint.prod.sh /usr/local/bin/entrypoint.sh

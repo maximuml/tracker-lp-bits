@@ -48,7 +48,8 @@ ROOT_PATH="/var/www/html"
 # Ensure writable directories exist (these are mounted as volumes in prod)
 mkdir -p ${ROOT_PATH}/attachments ${ROOT_PATH}/torrents \
     ${ROOT_PATH}/storage/framework/views ${ROOT_PATH}/storage/logs \
-    ${ROOT_PATH}/storage/app ${ROOT_PATH}/bootstrap/cache
+    ${ROOT_PATH}/storage/framework/sessions ${ROOT_PATH}/storage/framework/cache/data \
+    ${ROOT_PATH}/storage/app/public ${ROOT_PATH}/bootstrap/cache
 
 # Writable dirs are volumes — chmod is safe (we're www-data or root)
 if [ "$(id -u)" = "0" ]; then
@@ -65,12 +66,14 @@ if [ "$SERVICE_NAME" = "php" ]; then
     php artisan app:validate-production
     echo_success "Production config validated."
 
-    # Laravel caches are pre-baked at build time, but storage:link needs the
-    # storage volume to exist. Re-run safe-to-repeat commands.
+    # Laravel caches are pre-baked at build time, but storage:link and cache
+    # warming need to run after volumes are mounted.
     # T-14: No `|| true` — if cache warming fails, the container should
     # not start with stale/missing caches.
-    echo_info "Linking storage + warming caches..."
-    php artisan storage:link --force
+    # Note: storage:link is NOT re-run here because the symlink is baked
+    # into the image at build time and the rootfs is read-only in prod.
+    # The storage/app/public directory is created by mkdir above.
+    echo_info "Warming caches..."
     php artisan config:cache
     php artisan route:cache
     php artisan view:cache

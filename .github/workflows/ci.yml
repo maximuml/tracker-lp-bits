@@ -977,3 +977,187 @@ jobs:
             infection.log
             infection-summary.log
           retention-days: 14
+
+  prod-compose-smoke:
+    name: Production Compose smoke test
+    runs-on: ubuntu-latest
+    needs: [smoke-test]
+    # W8-01: Build the production image and verify the full prod stack
+    # starts cleanly from scratch with named volumes, read-only rootfs,
+    # non-root UID, and all required services.
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          sed -i 's|DB_HOST=127.0.0.1|DB_HOST=mysql|g' .env
+          sed -i 's|REDIS_HOST=127.0.0.1|REDIS_HOST=redis|g' .env
+          sed -i 's|LOG_FILE=.*|LOG_FILE=php://stdout|g' .env
+          # Use a non-default password — validate-production rejects defaults
+          sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=prod_test_strong_pass_2026/' .env
+          sed -i 's|^MEILISEARCH_MASTER_KEY=.*|MEILISEARCH_MASTER_KEY=nexusphp_default_key|' .env
+          # Use an isolated testing database (DestructiveEnvironmentGuard requires "test")
+          sed -i 's/^DB_DATABASE=.*/DB_DATABASE=nexusphp_e2e_testing/' .env
+          # Production environment settings required by validate-production
+          sed -i 's/^APP_ENV=.*/APP_ENV=production/' .env
+          sed -i 's/^APP_DEBUG=.*/APP_DEBUG=false/' .env
+          sed -i 's/^SESSION_SECURE_COOKIE=.*/SESSION_SECURE_COOKIE=true/' .env
+          # Generate APP_KEY — required by validate-production
+          # (can't use artisan key:generate without composer install on host)
+          echo "APP_KEY=base64:$(openssl rand -base64 32)" >> .env
+          # Use production overrides (read-only rootfs, named volumes, prod image)
+          echo "COMPOSE_FILE=docker-compose.yml:docker-compose.prod.yml" >> "$GITHUB_ENV"
+
+      - name: Build production Docker image
+        run: docker compose build php
+
+      - name: Start core services and wait
+        run: docker compose up -d --wait mysql redis php
+
+      - name: Debug PHP container logs (on failure)
+        if: failure()
+        run: |
+          echo "=== PHP container logs ==="
+          docker compose logs php 2>&1 || true
+          echo "=== PHP container status ==="
+          docker compose ps -a php 2>&1 || true
+
+      - name: Install database
+        run: docker compose exec -T php php artisan migrate:fresh --seed --force
+
+      - name: Start remaining services and wait
+        run: docker compose up -d --wait
+
+      - name: Debug all container logs (on failure)
+        if: failure()
+        run: |
+          echo "=== All containers ==="
+          docker compose ps -a 2>&1 || true
+          for svc in php openresty queue scheduler meilisearch; do
+            echo "=== $svc logs ==="
+            docker compose logs --tail=50 $svc 2>&1 || true
+          done
+
+      - name: Verify PHP health
+        run: |
+          # PHP-FPM must respond to a basic artisan command
+          docker compose exec -T php php artisan about --no-interaction
+
+      - name: Verify non-root UID
+        run: |
+          uid=$(docker compose exec -T php id -u)
+          if [ "$uid" = "0" ]; then
+            echo "FAIL: PHP container running as root (uid=0)"
+            exit 1
+          fi
+          echo "OK: PHP container running as uid=$uid"
+
+      - name: Verify read-only rootfs
+        run: |
+          # Writing to rootfs (outside writable volumes) must fail
+          if docker compose exec -T php sh -c 'echo test > /var/www/html/test_write 2>/dev/null'; then
+            echo "FAIL: rootfs is writable"
+            exit 1
+          fi
+          echo "OK: rootfs is read-only"
+
+      - name: Verify writable storage volume
+        run: |
+          docker compose exec -T php sh -c 'echo test > /var/www/html/storage/framework/cache/test_write && rm /var/www/html/storage/framework/cache/test_write'
+          echo "OK: storage volume is writable"
+
+      - name: Verify writable attachments volume
+        run: |
+          docker compose exec -T php sh -c 'echo test > /var/www/html/attachments/test_write && rm /var/www/html/attachments/test_write'
+          echo "OK: attachments volume is writable"
+
+      - name: Verify writable torrents volume
+        run: |
+          docker compose exec -T php sh -c 'echo test > /var/www/html/torrents/test_write && rm /var/www/html/torrents/test_write'
+          echo "OK: torrents volume is writable"
+
+      - name: Verify Vite assets and manifest exist
+        run: |
+          docker compose exec -T php sh -c 'test -f /var/www/html/public/build/manifest.json || test -f /var/www/html/public/build/.vite/manifest.json'
+          echo "OK: Vite manifest exists in public/build"
+
+      - name: Verify static files in public/build
+        run: |
+          # At least one CSS or JS asset should exist
+          docker compose exec -T php sh -c 'ls /var/www/html/public/build/assets/ | head -1 | grep -q .'
+          echo "OK: static assets exist in public/build/assets/"
+
+      - name: Verify route/config/view caches
+        run: |
+          # Laravel 13 uses routes-v7.php (new route caching format)
+          docker compose exec -T php sh -c 'test -f /var/www/html/bootstrap/cache/routes-v7.php'
+          docker compose exec -T php sh -c 'test -f /var/www/html/bootstrap/cache/config.php'
+          # view:cache compiles templates to storage/framework/views/, not a single file
+          docker compose exec -T php sh -c 'test -d /var/www/html/storage/framework/views && [ "$(ls -A /var/www/html/storage/framework/views/)" ]'
+          echo "OK: route/config/view caches exist"
+
+      - name: Verify DB connectivity
+        run: |
+          # tinker is dev-only; use migrate:status which always works
+          docker compose exec -T php php artisan migrate:status --no-interaction >/dev/null 2>&1
+          echo "OK: DB connectivity verified"
+
+      - name: Verify Redis connectivity
+        run: |
+          # Redis container health is verified by --wait (healthcheck uses
+          # redis-cli with auth). Verify the container is healthy.
+          docker compose ps redis --format '{{.Status}}' | grep -qi "healthy\|up"
+          echo "OK: Redis connectivity verified"
+
+      - name: Verify MeiliSearch connectivity
+        run: |
+          # Use curl to check MeiliSearch health endpoint
+          docker compose exec -T php sh -c 'curl -sf http://${MEILISEARCH_HOST:-meilisearch}:7700/health 2>/dev/null'
+          echo ""
+          echo "OK: MeiliSearch connectivity verified"
+
+      - name: Verify queue worker is running
+        run: |
+          # Queue container should be up and horizon should report active
+          status=$(docker compose exec -T queue php artisan horizon:status 2>&1)
+          echo "Horizon status: $status"
+          echo "$status" | grep -q "running\|active" || \
+            (echo "FAIL: horizon not running"; exit 1)
+          echo "OK: queue worker (horizon) is running"
+
+      - name: Verify scheduler heartbeat
+        run: |
+          # Scheduler container should be running and cycling
+          docker compose ps scheduler --format '{{.Status}}' | grep -q "Up\|running"
+          echo "OK: scheduler container is up"
+
+      - name: Verify OpenResty config is valid
+        run: |
+          docker compose exec -T openresty openresty -t 2>&1 | grep -q "syntax is ok\|test is successful"
+          echo "OK: OpenResty config is valid"
+
+      - name: Smoke test public pages via OpenResty
+        run: |
+          set -e
+          for page in / /login /signup; do
+            echo "Testing $page"
+            status=$(curl -sL --max-time 10 -o /dev/null -w "%{http_code}" "http://localhost${page}")
+            echo "  Status: $status"
+            # Accept 200-399 (200 OK, 302 redirect to login, etc.)
+            if [ "$status" -ge 200 ] && [ "$status" -lt 400 ]; then
+              echo "  OK"
+            else
+              echo "  FAIL: unexpected status $status"
+              exit 1
+            fi
+          done
+          echo "OK: public pages respond via OpenResty"
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker compose down -v --remove-orphans || true

@@ -34,3 +34,9 @@ crowdin.yml
 /modernization-*.md
 /audit-*.md
 /.gitleaksignore
+
+# Octane is a dev-only dependency (require-dev). The octane.yml workflow
+# runs Octane tests directly on the runner with composer install (not in
+# Docker). Excluding config/octane.php prevents config:cache from failing
+# in the production image where Laravel\Octane\Octane is not available.
+/config/octane.php

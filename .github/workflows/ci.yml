@@ -1018,6 +1018,14 @@ jobs:
       - name: Start core services and wait
         run: docker compose up -d --wait mysql redis php
 
+      - name: Debug PHP container logs (on failure)
+        if: failure()
+        run: |
+          echo "=== PHP container logs ==="
+          docker compose logs php 2>&1 || true
+          echo "=== PHP container status ==="
+          docker compose ps -a php 2>&1 || true
+
       - name: Install database
         run: docker compose exec -T php php artisan migrate:fresh --seed --force
 

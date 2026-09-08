@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Services;
 
+use App\Models\Topic;
 use App\Models\User;
+use App\Policies\PostPolicy;
+use App\Policies\TopicPolicy;
 use App\Repositories\ForumRepository;
 use App\Services\ForumService;
 use App\Support\Cache\LegacyRedisCache;
@@ -109,6 +112,8 @@ final class ForumServiceTest extends TestCase
             $this->app->make(CurrentUser::class),
             $this->app->make(Globals::class),
             $this->app->make(LegacyRedisCache::class),
+            $this->app->make(TopicPolicy::class),
+            $this->app->make(PostPolicy::class),
         );
     }
 
@@ -256,14 +261,13 @@ final class ForumServiceTest extends TestCase
         $this->mockGlobals();
         $this->mockCache();
 
-        $repo->shouldReceive('getTopicForumAndUser')->with(1)->andReturn([
-            'forumid' => 1,
-            'userid' => 5,
-        ]);
+        // W1-04: handleDeleteTopic now uses Topic model instead of repo
+        $topic = Topic::factory()->create();
+        $repo->shouldReceive('countTopicPosts')->with($topic->id)->andReturn(0);
 
         $request = Request::create('/forums.php', 'GET', [
             'action' => 'deletetopic',
-            'topicid' => 1,
+            'topicid' => (string) $topic->id,
         ]);
 
         $this->assertServiceThrows($request);
@@ -784,14 +788,13 @@ final class ForumServiceTest extends TestCase
         $this->mockGlobals();
         $this->mockCache();
 
-        $repo->shouldReceive('getTopicForumAndUser')->with(1)->andReturn([
-            'forumid' => 1,
-            'userid' => 5,
-        ]);
+        // W1-04: handleDeleteTopic now uses Topic model instead of repo
+        $topic = Topic::factory()->create();
+        $repo->shouldReceive('countTopicPosts')->with($topic->id)->andReturn(0);
 
         $request = Request::create('/forums.php', 'GET', [
             'action' => 'deletetopic',
-            'topicid' => 1,
+            'topicid' => (string) $topic->id,
         ]);
 
         $this->assertServiceThrows($request);

@@ -12,16 +12,20 @@ use App\Models\Codec;
 use App\Models\Icon;
 use App\Models\Media;
 use App\Models\Message;
+use App\Models\Post;
 use App\Models\Processing;
 use App\Models\SearchBox;
 use App\Models\SecondIcon;
 use App\Models\Source;
 use App\Models\Standard;
+use App\Models\Topic;
 use App\Models\Torrent;
 use App\Models\TorrentCustomField;
 use App\Models\User;
 use App\Policies\CodecPolicy;
 use App\Policies\MessagePolicy;
+use App\Policies\PostPolicy;
+use App\Policies\TopicPolicy;
 use App\Policies\TorrentPolicy;
 use App\Support\AuthCookie;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
@@ -50,6 +54,8 @@ class AuthServiceProvider extends ServiceProvider
 
         Torrent::class => TorrentPolicy::class,
 
+        Topic::class => TopicPolicy::class,
+        Post::class => PostPolicy::class,
         Message::class => MessagePolicy::class,
     ];
 

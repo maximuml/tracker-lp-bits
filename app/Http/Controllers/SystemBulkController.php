@@ -50,13 +50,13 @@ class SystemBulkController extends LegacyController
 
     private Globals $globals;
 
-    private LegacyRedisCache $legacyRedisCache;
+    private ?LegacyRedisCache $legacyRedisCache;
 
     public function __construct(
         UserRepository $userRepository,
         CurrentUser $currentUser,
         Globals $globals,
-        LegacyRedisCache $legacyRedisCache,
+        ?LegacyRedisCache $legacyRedisCache,
     ) {
         $this->userRepository = $userRepository;
         $this->currentUser = $currentUser;
@@ -322,11 +322,11 @@ class SystemBulkController extends LegacyController
                 ->whereIn('id', $delreportIds)
                 ->where('dealtwith', 0)
                 ->update(['dealtwith' => 1, 'dealtby' => $currentUserId]);
-            $this->legacyRedisCache->delete_value('staff_new_report_count', true);
+            $this->legacyRedisCache?->delete_value('staff_new_report_count', true);
         } elseif (request()->post('delete')) {
             DB::table('reports')->whereIn('id', $delreportIds)->delete();
-            $this->legacyRedisCache->delete_value('staff_new_report_count', true);
-            $this->legacyRedisCache->delete_value('staff_report_count', true);
+            $this->legacyRedisCache?->delete_value('staff_new_report_count', true);
+            $this->legacyRedisCache?->delete_value('staff_report_count', true);
         }
 
         return redirect('/reports.php');

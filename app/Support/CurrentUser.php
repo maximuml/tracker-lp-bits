@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Auth;
  * like 'id', 'class', 'passkey') is preserved so existing call sites that
  * use `$user['key']` access patterns continue to work.
  */
-final class CurrentUser
+class CurrentUser
 {
     /** @var array<string, mixed>|null */
     private ?array $cached = null;

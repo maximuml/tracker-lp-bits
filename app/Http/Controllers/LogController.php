@@ -28,9 +28,9 @@ class LogController extends LegacyController
 
     private Globals $globals;
 
-    private LegacyRedisCache $legacyRedisCache;
+    private ?LegacyRedisCache $legacyRedisCache;
 
-    public function __construct(LogRepository $logRepository, CurrentUser $currentUser, Globals $globals, LegacyRedisCache $legacyRedisCache)
+    public function __construct(LogRepository $logRepository, CurrentUser $currentUser, Globals $globals, ?LegacyRedisCache $legacyRedisCache)
     {
         $this->logRepository = $logRepository;
         $this->currentUser = $currentUser;
@@ -264,8 +264,10 @@ class LogController extends LegacyController
             }
             $this->logRepository->deletePoll($pollid);
 
-            $this->legacyRedisCache->delete_value('current_poll_content');
-            $this->legacyRedisCache->delete_value('current_poll_result', true);
+            if ($this->legacyRedisCache !== null) {
+                $this->legacyRedisCache->delete_value('current_poll_content');
+                $this->legacyRedisCache->delete_value('current_poll_result', true);
+            }
 
             if ($returnto === 'main') {
                 return redirect('/');

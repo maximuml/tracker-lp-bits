@@ -32,14 +32,14 @@ class PollController extends LegacyController
 
     private Globals $globals;
 
-    private LegacyRedisCache $legacyRedisCache;
+    private ?LegacyRedisCache $legacyRedisCache;
 
     public function __construct(
         PollRepository $pollRepository,
         IndexRepository $indexRepository,
         CurrentUser $currentUser,
         Globals $globals,
-        LegacyRedisCache $legacyRedisCache,
+        ?LegacyRedisCache $legacyRedisCache,
     ) {
         $this->pollRepository = $pollRepository;
         $this->indexRepository = $indexRepository;
@@ -270,8 +270,10 @@ class PollController extends LegacyController
 
         // Invalidate legacy poll cache so the index page shows fresh results
         // after an API vote — mirrors IndexController::handlePollVote().
-        $this->legacyRedisCache->delete_value('current_poll_content');
-        $this->legacyRedisCache->delete_value('current_poll_result', true);
+        if ($this->legacyRedisCache !== null) {
+            $this->legacyRedisCache->delete_value('current_poll_content');
+            $this->legacyRedisCache->delete_value('current_poll_result', true);
+        }
 
         return $this->success(['success' => true], 'Vote recorded');
     }

@@ -40,13 +40,13 @@ class MessagePageService
 
     private Globals $globals;
 
-    private LegacyRedisCache $legacyRedisCache;
+    private ?LegacyRedisCache $legacyRedisCache;
 
     public function __construct(
         MessageRepository $messageRepository,
         CurrentUser $currentUser,
         Globals $globals,
-        LegacyRedisCache $legacyRedisCache,
+        ?LegacyRedisCache $legacyRedisCache,
     ) {
         $this->messageRepository = $messageRepository;
         $this->currentUser = $currentUser;
@@ -290,7 +290,9 @@ class MessagePageService
 
         // Mark message as read
         $this->messageRepository->markAsRead($pmId, $userId);
-        $this->legacyRedisCache->delete_value('user_'.$userId.'_unread_message_count', true);
+        if ($this->legacyRedisCache !== null) {
+            $this->legacyRedisCache->delete_value('user_'.$userId.'_unread_message_count', true);
+        }
 
         // Mailbox for menu highlight
         $mailbox = $isSender ? self::PM_SENT_BOX : (int) $message['location'];

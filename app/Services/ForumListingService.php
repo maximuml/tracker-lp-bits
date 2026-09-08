@@ -28,7 +28,7 @@ final class ForumListingService
         private readonly ForumIndexService $index,
         private readonly ForumRepository $forumRepository,
         private readonly Globals $globals,
-        private readonly LegacyRedisCache $legacyRedisCache,
+        private readonly ?LegacyRedisCache $legacyRedisCache,
     ) {}
 
     /**
@@ -138,9 +138,9 @@ final class ForumListingService
                 $sticky = $topicarr['sticky'] == 1;
                 $hlcolor = (int) $topicarr['hlcolor'];
 
-                if (! $posts = $this->legacyRedisCache->get_value('topic_'.$topicid.'_post_count')) {
+                if (! $posts = $this->legacyRedisCache?->get_value('topic_'.$topicid.'_post_count')) {
                     $posts = $this->forumRepository->countTopicPosts((int) $topicid);
-                    $this->legacyRedisCache->cache_value('topic_'.$topicid.'_post_count', $posts, 3600);
+                    $this->legacyRedisCache?->cache_value('topic_'.$topicid.'_post_count', $posts, 3600);
                 }
 
                 $replies = max(0, $posts - 1);

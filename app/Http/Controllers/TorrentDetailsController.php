@@ -16,6 +16,7 @@ use App\Repositories\SearchBoxRepository;
 use App\Repositories\TagRepository;
 use App\Repositories\TorrentDetailRepository;
 use App\Repositories\TorrentRepository;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\CustomField;
@@ -52,6 +53,8 @@ class TorrentDetailsController extends Controller
 
     private Globals $globals;
 
+    private ?LegacyRedisCache $legacyRedisCache;
+
     public function __construct(
         TorrentRepository $torrentRepository,
         SearchBoxRepository $searchBoxRepository,
@@ -59,6 +62,7 @@ class TorrentDetailsController extends Controller
         TorrentDetailRepository $torrentDetailRepository,
         CurrentUser $currentUser,
         Globals $globals,
+        ?LegacyRedisCache $legacyRedisCache = null,
     ) {
         $this->torrentRepository = $torrentRepository;
         $this->searchBoxRepository = $searchBoxRepository;
@@ -66,6 +70,7 @@ class TorrentDetailsController extends Controller
         $this->torrentDetailRepository = $torrentDetailRepository;
         $this->currentUser = $currentUser;
         $this->globals = $globals;
+        $this->legacyRedisCache = $legacyRedisCache;
     }
 
     public function show(Request $request, int $id): View|RedirectResponse|Response
@@ -85,6 +90,13 @@ class TorrentDetailsController extends Controller
         }
 
         Gate::forUser($user)->authorize('view', $torrent);
+
+        if ($this->legacyRedisCache === null) {
+            $query = $request->query->all();
+            unset($query['id']);
+
+            return redirect('/details.php?id='.$id.($query ? '&'.http_build_query($query) : ''));
+        }
 
         $row = $this->torrentDetailRepository->getTorrent($id);
         if (empty($row)) {

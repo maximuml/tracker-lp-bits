@@ -42,7 +42,7 @@ class UtilityController extends LegacyController
 
     private Globals $globals;
 
-    private LegacyRedisCache $legacyRedisCache;
+    private ?LegacyRedisCache $legacyRedisCache;
 
     private LegacyHeaderBag $legacyHeaderBag;
 
@@ -52,7 +52,7 @@ class UtilityController extends LegacyController
         SearchPageRepository $searchPageRepository,
         CurrentUser $currentUser,
         Globals $globals,
-        LegacyRedisCache $legacyRedisCache,
+        ?LegacyRedisCache $legacyRedisCache,
         LegacyHeaderBag $legacyHeaderBag,
     ) {
         $this->usersearchPageService = $usersearchPageService;
@@ -87,6 +87,12 @@ class UtilityController extends LegacyController
 
     public function ajax(Request $request): JsonResponse|RedirectResponse
     {
+        if ($this->legacyRedisCache === null) {
+            $qs = $request->getQueryString();
+
+            return redirect('/ajax.php'.($qs ? '?'.$qs : ''));
+        }
+
         $action = (string) $request->input('action', '');
         $params = $request->input('params', []);
 
@@ -196,7 +202,9 @@ class UtilityController extends LegacyController
 
         DB::table('attachments')->where('id', $id)->increment('downloads');
 
-        $this->legacyRedisCache->delete_value('attachment_'.$dlkey.'_content');
+        if ($this->legacyRedisCache !== null) {
+            $this->legacyRedisCache->delete_value('attachment_'.$dlkey.'_content');
+        }
 
         return new StreamedResponse(function () use ($realFile) {
             $f = fopen($realFile, 'rb');

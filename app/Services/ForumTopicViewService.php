@@ -33,7 +33,7 @@ final class ForumTopicViewService
         private readonly ForumIndexService $index,
         private readonly ForumRepository $forumRepository,
         private readonly Globals $globals,
-        private readonly LegacyRedisCache $legacyRedisCache,
+        private readonly ?LegacyRedisCache $legacyRedisCache,
     ) {}
 
     /**
@@ -93,7 +93,7 @@ final class ForumTopicViewService
 
         $postcount = $this->forumRepository->countTopicPosts((int) $topicid, $authorid ?: null);
         if (! $authorid) {
-            $this->legacyRedisCache->cache_value('topic_'.$topicid.'_post_count', $postcount, 3600);
+            $this->legacyRedisCache?->cache_value('topic_'.$topicid.'_post_count', $postcount, 3600);
         }
 
         $pagerarr = [];
@@ -212,9 +212,9 @@ final class ForumTopicViewService
             $downloaded = Format::size($arr2['downloaded']);
             $ratio = Ratio::forUserId((int) $arr2['id']);
 
-            if (! $forumposts = $this->legacyRedisCache->get_value('user_'.$posterid.'_post_count')) {
+            if (! $forumposts = $this->legacyRedisCache?->get_value('user_'.$posterid.'_post_count')) {
                 $forumposts = $this->forumRepository->countUserPosts((int) $posterid);
-                $this->legacyRedisCache->cache_value('user_'.$posterid.'_post_count', $forumposts, 3600);
+                $this->legacyRedisCache?->cache_value('user_'.$posterid.'_post_count', $forumposts, 3600);
             }
 
             $signature = (($curUser['signatures'] ?? '') == 'yes' ? ($arr2['signature'] ?? '') : '');
@@ -231,7 +231,7 @@ final class ForumTopicViewService
                 echo "<span id=\"last\"></span>\n";
                 if ($postid > $lpr) {
                     $this->forumRepository->markPostRead((int) $userId, (int) $topicid, (int) $postid, (int) ($curUser['last_catchup'] ?? 0));
-                    $this->legacyRedisCache->delete_value('user_'.($curUser['id'] ?? 0).'_last_read_post_list');
+                    $this->legacyRedisCache?->delete_value('user_'.($curUser['id'] ?? 0).'_last_read_post_list');
                 }
             }
 

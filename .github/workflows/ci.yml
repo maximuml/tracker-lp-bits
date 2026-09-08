@@ -1141,9 +1141,17 @@ jobs:
       - name: Smoke test public pages via OpenResty
         run: |
           set -e
-          for page in /index /login /signup; do
+          for page in / /login /signup; do
             echo "Testing $page"
-            curl -sfL --max-time 10 "http://localhost$page" -o /dev/null
+            status=$(curl -sL --max-time 10 -o /dev/null -w "%{http_code}" "http://localhost${page}")
+            echo "  Status: $status"
+            # Accept 200-399 (200 OK, 302 redirect to login, etc.)
+            if [ "$status" -ge 200 ] && [ "$status" -lt 400 ]; then
+              echo "  OK"
+            else
+              echo "  FAIL: unexpected status $status"
+              exit 1
+            fi
           done
           echo "OK: public pages respond via OpenResty"
 

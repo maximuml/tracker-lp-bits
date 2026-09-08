@@ -25,6 +25,7 @@ services:
       - bootstrap-cache:/var/www/html/bootstrap/cache
       - attachments-data:/var/www/html/attachments
       - torrents-data:/var/www/html/torrents
+      - public-data:/var/www/html/public
       - ${NP_BACKUP_EXPORT_PATH:-/tmp/nexusphp_backup}:${NP_BACKUP_EXPORT_PATH:-/tmp/nexusphp_backup}
     # Resource limits — tune based on measured memory usage
     deploy:
@@ -78,18 +79,17 @@ services:
 
   openresty:
     volumes:
+      - public-data:/var/www/html/public:ro
       - storage-data:/var/www/html/storage:ro
       - attachments-data:/var/www/html/attachments:ro
       - torrents-data:/var/www/html/torrents:ro
-      - public-build:/var/www/html/public/build:ro
     # No bind-mount of source — openresty reads static files from the php image's
-    # public/ via a shared volume. For simplicity in this compose, we mount the
-    # static assets volume (populated by the php build).
-    # Site templates, lua scripts, and nginx.conf are baked into the image.
+    # public/ via a shared named volume (public-data), populated from the PHP
+    # image on first mount. Site templates, lua, and nginx.conf are baked in.
 
 volumes:
   storage-data:
   bootstrap-cache:
   attachments-data:
   torrents-data:
-  public-build:
+  public-data:

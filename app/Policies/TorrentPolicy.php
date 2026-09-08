@@ -5,92 +5,82 @@ declare(strict_types=1);
 namespace App\Policies;
 
 use App\Auth\Permission;
-use App\Enums\TorrentApprovalStatus;
 use App\Models\Torrent;
 use App\Models\User;
-use App\Support\Config\SiteConfig;
-use App\Support\Logger;
-use App\Support\TorrentAccess;
 
+/**
+ * W1-06: Authorization policy for torrent mutations.
+ * Extracts ownership/management checks that were previously inline in
+ * TorrentEditRepository and TorrentUploadController.
+ */
 class TorrentPolicy extends BasePolicy
 {
-    public function before(User $user, $ability)
-    {
-        if ($ability === 'download') {
-            return null;
-        }
-
-        return parent::before($user, $ability);
-    }
-
-    public function viewAny(User $user): bool
-    {
-        return true;
-    }
-
-    public function view(User $user, Torrent $torrent): bool
-    {
-        if ($torrent->banned && ! Permission::canViewBannedTorrent($user) && $torrent->owner != $user->id) {
-            return false;
-        }
-
-        if (! TorrentAccess::canAccess($torrent->id, $user->id) && $torrent->owner != $user->id) {
-            return false;
-        }
-
-        return true;
-    }
-
-    public function create(User $user): bool
-    {
-        return false;
-    }
-
+    /**
+     * Whether the user can edit a torrent.
+     * The owner and staff with TORRENT_MANAGE can edit.
+     */
     public function update(User $user, Torrent $torrent): bool
     {
-        return $torrent->owner == $user->id || Permission::canManageTorrent($user);
-    }
-
-    public function delete(User $user, Torrent $torrent): bool
-    {
-        return false;
-    }
-
-    public function restore(User $user, Torrent $torrent): bool
-    {
-        return false;
-    }
-
-    public function forceDelete(User $user, Torrent $torrent): bool
-    {
-        return false;
-    }
-
-    public function comment(User $user, Torrent $torrent): bool
-    {
-        return ! $user->parked;
-    }
-
-    public function download(User $user, Torrent $torrent): bool
-    {
-        if (! $user->downloadpos) {
-            return false;
+        if ($user->id === (int) $torrent->owner) {
+            return true;
         }
 
-        $approvalNotAllowed = $torrent->approval_status != TorrentApprovalStatus::ALLOW->value
-            && ! SiteConfig::current()->torrent->approvalStatusNoneVisible();
-        $allowOwnerDownload = $torrent->owner == $user->id;
-        $canSeedBanned = Permission::canViewBannedTorrent($user);
-        $canAccessTorrent = TorrentAccess::canAccess($torrent->id, $user->id);
+        return Permission::canManageTorrent($user);
+    }
 
-        if ((($torrent->banned || ($approvalNotAllowed && ! $allowOwnerDownload)) && ! $canSeedBanned)
-            || ! $canAccessTorrent
-        ) {
-            Logger::writeWithContext((string) sprintf('[DENY_DOWNLOAD], user: %s, approvalNotAllowed: %s, allowOwnerDownload: %s, canSeedBanned: %s, canAccessTorrent: %s', $user->id, $approvalNotAllowed ? 'true' : 'false', $allowOwnerDownload ? 'true' : 'false', $canSeedBanned ? 'true' : 'false', $canAccessTorrent ? 'true' : 'false'), (string) 'error', (bool) false);
+    /**
+     * Whether the user can move a torrent to a different category mode.
+     */
+    public function move(User $user): bool
+    {
+        return Permission::canMoveTorrent($user);
+    }
 
-            return false;
-        }
+    /**
+     * Whether the user can manage torrent visibility/promotion/pos state.
+     */
+    public function manage(User $user): bool
+    {
+        return Permission::canManageTorrent($user);
+    }
 
-        return true;
+    /**
+     * Whether the user can set torrent promotion state.
+     */
+    public function setPromotion(User $user): bool
+    {
+        return Permission::canSetTorrentOnPromotion($user);
+    }
+
+    /**
+     * Whether the user can set torrent pos state (sticky/position).
+     */
+    public function setPosState(User $user): bool
+    {
+        return Permission::canSetTorrentPosState($user);
+    }
+
+    /**
+     * Whether the user can set torrent hit-and-run.
+     */
+    public function setHitAndRun(User $user): bool
+    {
+        return Permission::canSetTorrentHitAndRun($user);
+    }
+
+    /**
+     * Whether the user can set torrent price.
+     */
+    public function setPrice(User $user): bool
+    {
+        return Permission::canSetTorrentPrice($user);
+    }
+
+    /**
+     * Whether the user can upload torrents.
+     */
+    public function upload(User $user): bool
+    {
+        return (bool) $user->uploadpos;
     }
 }

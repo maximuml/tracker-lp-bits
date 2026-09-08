@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\TorrentEditRequest;
 use App\Models\Torrent;
+use App\Models\User;
 use App\Repositories\HitAndRunRepository;
 use App\Repositories\SearchBoxRepository;
 use App\Repositories\TagRepository;
@@ -38,7 +40,8 @@ class TorrentEditController extends Controller
 
     public function legacy(Request $request): View|RedirectResponse
     {
-        if (app(CurrentUser::class)->get() === null) {
+        $user = Auth::guard('nexus-web')->user();
+        if (! $user instanceof User) {
             $qs = $request->getQueryString();
 
             return redirect('/edit.php'.($qs ? '?'.$qs : ''));
@@ -60,11 +63,6 @@ class TorrentEditController extends Controller
         }
         $sectionmode = (int) ($row['search_box_id'] ?? 0);
         $row['cat_mode'] = $sectionmode;
-
-        $user = Auth::guard('nexus-web')->user();
-        if ($user === null) {
-            return redirect('/login.php?returnto='.urlencode($request->fullUrl()));
-        }
 
         if (empty(app(Globals::class)->get('lang_edit')) || empty(app(Globals::class)->get('lang_functions'))) {
             Input::setServerValue('SCRIPT_NAME', '/edit.php');
@@ -96,7 +94,7 @@ class TorrentEditController extends Controller
         ]);
     }
 
-    public function legacyUpdate(Request $request, TorrentEditRepository $repository): RedirectResponse
+    public function legacyUpdate(TorrentEditRequest $request, TorrentEditRepository $repository): RedirectResponse
     {
         $torrent = $repository->update($request);
 
@@ -104,7 +102,7 @@ class TorrentEditController extends Controller
         $defaultUrl = "details.php?id=$id&edited=1";
         $returl = $request->input('returnto', $defaultUrl);
 
-        return redirect($this->safeReturnUrl($returl, $defaultUrl));
+        return redirect($this->safeReturnUrl((string) $returl, $defaultUrl));
     }
 
     private function safeReturnUrl(string $returl, string $defaultUrl): string

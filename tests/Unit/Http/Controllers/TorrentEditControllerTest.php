@@ -3,9 +3,9 @@
 namespace Tests\Unit\Http\Controllers;
 
 use App\Http\Controllers\TorrentEditController;
+use App\Http\Requests\TorrentEditRequest;
 use App\Models\Torrent;
 use App\Repositories\TorrentEditRepository;
-use Illuminate\Http\Request;
 use Mockery;
 use Tests\TestCase;
 
@@ -24,10 +24,10 @@ final class TorrentEditControllerTest extends TestCase
 
         /** @var TorrentEditRepository&Mockery\MockInterface $repository */
         $repository = Mockery::mock(TorrentEditRepository::class);
-        $repository->shouldReceive('update')->once()->with(Mockery::type(Request::class))->andReturn($torrent);
+        $repository->shouldReceive('update')->once()->with(Mockery::type(TorrentEditRequest::class))->andReturn($torrent);
 
         $controller = app(TorrentEditController::class);
-        $request = Request::create('/takeedit', 'POST', [
+        $request = TorrentEditRequest::create('/takeedit', 'POST', [
             'id' => 42,
             'name' => 'Updated torrent',
             'descr' => 'Updated description',
@@ -50,7 +50,7 @@ final class TorrentEditControllerTest extends TestCase
         $repository->shouldReceive('update')->once()->andReturn($torrent);
 
         $controller = app(TorrentEditController::class);
-        $request = Request::create('/takeedit', 'POST', [
+        $request = TorrentEditRequest::create('/takeedit', 'POST', [
             'id' => 42,
             'name' => 'Updated torrent',
             'descr' => 'Updated description',
@@ -74,7 +74,7 @@ final class TorrentEditControllerTest extends TestCase
         $repository->shouldReceive('update')->once()->andReturn($torrent);
 
         $controller = app(TorrentEditController::class);
-        $request = Request::create('/takeedit', 'POST', [
+        $request = TorrentEditRequest::create('/takeedit', 'POST', [
             'id' => 42,
             'name' => 'Updated torrent',
             'descr' => 'Updated description',

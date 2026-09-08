@@ -18,7 +18,9 @@ final class BulkUserIncrementJobTest extends TestCase
 {
     use DatabaseTransactions;
 
-    private const CONFIRMED = 'confirmed';
+    private const CONFIRMED = 1;
+
+    private const PENDING = 0;
 
     protected function setUp(): void
     {
@@ -188,7 +190,7 @@ final class BulkUserIncrementJobTest extends TestCase
         $actor = $this->createUser(['class' => 94]);
         $enabled = $this->createUser(['class' => 7, 'enabled' => true, 'status' => self::CONFIRMED, 'uploaded' => 1000]);
         $disabled = $this->createUser(['class' => 7, 'enabled' => false, 'status' => self::CONFIRMED, 'uploaded' => 2000]);
-        $pending = $this->createUser(['class' => 7, 'enabled' => true, 'status' => 'pending', 'uploaded' => 3000]);
+        $pending = $this->createUser(['class' => 7, 'enabled' => true, 'status' => self::PENDING, 'uploaded' => 3000]);
 
         $job = new BulkUserIncrementJob(
             classIds: [7],

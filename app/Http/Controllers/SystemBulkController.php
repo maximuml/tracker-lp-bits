@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserClass as UserClassEnum;
+use App\Enums\UserStatus;
 use App\Jobs\BulkUserIncrementJob;
 use App\Jobs\BulkUserMessageJob;
 use App\Models\Invite;
@@ -451,7 +452,7 @@ class SystemBulkController extends LegacyController
             $userIds = DB::table('users')
                 ->whereIn('class', $classIds)
                 ->where('enabled', true)
-                ->where('status', 'confirmed')
+                ->where('status', UserStatus::CONFIRMED->value)
                 ->pluck('id')
                 ->all();
 

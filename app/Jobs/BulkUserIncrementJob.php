@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Jobs;
 
+use App\Enums\UserStatus;
 use App\Models\UserModifyLog;
 use App\Support\Logger;
 use Illuminate\Bus\Queueable;
@@ -84,7 +85,7 @@ class BulkUserIncrementJob implements ShouldQueue
             $users = DB::table('users')
                 ->whereIn('class', $this->classIds)
                 ->where('enabled', true)
-                ->where('status', 'confirmed')
+                ->where('status', UserStatus::CONFIRMED->value)
                 ->offset($offset)
                 ->limit($size)
                 ->get(['id']);

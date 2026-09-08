@@ -18,7 +18,9 @@ final class BulkUserMessageJobTest extends TestCase
 {
     use DatabaseTransactions;
 
-    private const CONFIRMED = 'confirmed';
+    private const CONFIRMED = 1;
+
+    private const PENDING = 0;
 
     protected function setUp(): void
     {
@@ -169,7 +171,7 @@ final class BulkUserMessageJobTest extends TestCase
         $actor = $this->createUser(['class' => 94]);
         $enabled = $this->createUser(['class' => 6, 'enabled' => true, 'status' => self::CONFIRMED]);
         $disabled = $this->createUser(['class' => 6, 'enabled' => false, 'status' => self::CONFIRMED]);
-        $pending = $this->createUser(['class' => 6, 'enabled' => true, 'status' => 'pending']);
+        $pending = $this->createUser(['class' => 6, 'enabled' => true, 'status' => self::PENDING]);
 
         $job = new BulkUserMessageJob(
             classIds: [6],

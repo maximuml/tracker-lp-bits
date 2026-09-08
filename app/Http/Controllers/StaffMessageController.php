@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Enums\UserStatus;
-use App\Models\Message;
+use App\Jobs\BulkUserMessageJob;
 use App\Models\StaffMessage;
 use App\Models\User;
 use App\Support\Cache;
@@ -17,7 +16,7 @@ use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class StaffMessageController extends LegacyController
@@ -72,40 +71,20 @@ class StaffMessageController extends LegacyController
             }
         }
 
-        $size = 10000;
-        $page = 1;
-        $dt = now()->toDateTimeString();
         $classIds = array_map('intval', $selectedClasses);
 
-        set_time_limit(300);
+        $dryRun = (bool) $request->post('dry_run', false);
+        $idempotencyKey = (string) $request->post('idempotency_key', Str::uuid()->toString());
 
-        while (true) {
-            $offset = ($page - 1) * $size;
-            $rows = DB::table('users')
-                ->whereIn('class', $classIds)
-                ->where('enabled', true)
-                ->where('status', UserStatus::CONFIRMED->value)
-                ->offset($offset)
-                ->limit($size)
-                ->get(['id']);
-
-            if ($rows->isEmpty()) {
-                break;
-            }
-
-            $msgRecords = [];
-            foreach ($rows as $dat) {
-                $msgRecords[] = [
-                    'sender' => $senderId,
-                    'receiver' => $dat->id,
-                    'added' => $dt,
-                    'subject' => $subject,
-                    'msg' => $msg,
-                ];
-            }
-            Message::query()->insert($msgRecords);
-            $page++;
-        }
+        BulkUserMessageJob::dispatch(
+            classIds: $classIds,
+            senderId: $senderId,
+            subject: $subject,
+            body: $msg,
+            actorId: $senderId,
+            idempotencyKey: $idempotencyKey,
+            dryRun: $dryRun,
+        );
 
         return redirect('staffmess.php?sent=1');
     }

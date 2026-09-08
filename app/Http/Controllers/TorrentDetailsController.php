@@ -16,7 +16,6 @@ use App\Repositories\SearchBoxRepository;
 use App\Repositories\TagRepository;
 use App\Repositories\TorrentDetailRepository;
 use App\Repositories\TorrentRepository;
-use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\CustomField;
@@ -47,11 +46,26 @@ class TorrentDetailsController extends Controller
 
     private TagRepository $tagRepository;
 
-    public function __construct(TorrentRepository $torrentRepository, SearchBoxRepository $searchBoxRepository, TagRepository $tagRepository)
-    {
+    private TorrentDetailRepository $torrentDetailRepository;
+
+    private CurrentUser $currentUser;
+
+    private Globals $globals;
+
+    public function __construct(
+        TorrentRepository $torrentRepository,
+        SearchBoxRepository $searchBoxRepository,
+        TagRepository $tagRepository,
+        TorrentDetailRepository $torrentDetailRepository,
+        CurrentUser $currentUser,
+        Globals $globals,
+    ) {
         $this->torrentRepository = $torrentRepository;
         $this->searchBoxRepository = $searchBoxRepository;
         $this->tagRepository = $tagRepository;
+        $this->torrentDetailRepository = $torrentDetailRepository;
+        $this->currentUser = $currentUser;
+        $this->globals = $globals;
     }
 
     public function show(Request $request, int $id): View|RedirectResponse|Response
@@ -72,37 +86,30 @@ class TorrentDetailsController extends Controller
 
         Gate::forUser($user)->authorize('view', $torrent);
 
-        if (app(LegacyRedisCache::class) === null) {
-            $query = $request->query->all();
-            unset($query['id']);
-
-            return redirect('/details.php?id='.$id.($query ? '&'.http_build_query($query) : ''));
-        }
-
-        $row = app(TorrentDetailRepository::class)->getTorrent($id);
+        $row = $this->torrentDetailRepository->getTorrent($id);
         if (empty($row)) {
             Logger::writeWithContext((string) "TorrentDetailsRepository getTorrent empty: {$id}", (string) 'info', (bool) false);
             abort(404);
         }
 
-        $currentUser = app(CurrentUser::class)->get() ?? $user->toLegacyArray();
-        app(CurrentUser::class)->set($currentUser);
+        $currentUser = $this->currentUser->get() ?? $user->toLegacyArray();
+        $this->currentUser->set($currentUser);
 
-        if (empty(app(Globals::class)->get('lang_functions')) || empty(app(Globals::class)->get('lang_details'))) {
+        if (empty($this->globals->get('lang_functions')) || empty($this->globals->get('lang_details'))) {
             Input::setServerValue('SCRIPT_NAME', '/details.php');
             require base_path(Locale::scriptFilePath((string) 'functions.php', (bool) false, (string) ''));
-            app(Globals::class)->set('lang_functions', $lang_functions ?? []);
+            $this->globals->set('lang_functions', $lang_functions ?? []);
             require base_path(Locale::scriptFilePath((string) '', (bool) false, (string) ''));
-            app(Globals::class)->set('lang_details', $lang_details ?? []);
+            $this->globals->set('lang_details', $lang_details ?? []);
         }
 
-        $langDetails = app(Globals::class)->get('lang_details') ?? [];
+        $langDetails = $this->globals->get('lang_details') ?? [];
         $headTitle = empty($request->input('cmtpage'))
             ? ($langDetails['head_details_for_torrent'] ?? '').'"'.$row['name'].'"'
             : ($langDetails['head_comments_for_torrent'] ?? '').'"'.$row['name'].'"';
 
         $denyLog = $row['approval_status'] == TorrentApprovalStatus::DENY->value
-            ? app(TorrentDetailRepository::class)->getLatestApprovalDenyLog($id)
+            ? $this->torrentDetailRepository->getLatestApprovalDenyLog($id)
             : null;
 
         $hasBuy = TorrentBuyLog::query()->where('uid', $currentUser['id'] ?? 0)->where('torrent_id', $id)->exists();
@@ -118,7 +125,7 @@ class TorrentDetailsController extends Controller
         ];
 
         if ($requestFlags['hit']) {
-            app(TorrentDetailRepository::class)->incrementViews($id);
+            $this->torrentDetailRepository->incrementViews($id);
         }
 
         $headers = [];
@@ -126,7 +133,7 @@ class TorrentDetailsController extends Controller
             $headers['Refresh'] = "1; url=download.php?id={$id}";
         }
 
-        $tagIds = app(TorrentDetailRepository::class)->getTagIds($id);
+        $tagIds = $this->torrentDetailRepository->getTagIds($id);
 
         $viewData = $this->buildDetailsViewData($id, $row, $currentUser, $user, $denyLog, $hasBuy, $tagIds, $requestFlags);
 
@@ -153,8 +160,8 @@ class TorrentDetailsController extends Controller
      */
     private function buildDetailsViewData(int $id, array $row, array $currentUser, User $user, ?TorrentOperationLog $denyLog, bool $hasBuy, array $tagIds, array $requestFlags): array
     {
-        $langFunctions = app(Globals::class)->get('lang_functions') ?? [];
-        $langDetails = app(Globals::class)->get('lang_details') ?? [];
+        $langFunctions = $this->globals->get('lang_functions') ?? [];
+        $langDetails = $this->globals->get('lang_details') ?? [];
 
         $torrentRep = $this->torrentRepository;
         $searchBoxRep = $this->searchBoxRepository;
@@ -242,8 +249,8 @@ class TorrentDetailsController extends Controller
         $descr = ! empty($row['descr']) ? Format::formatComment((string) $row['descr']) : '';
         $bonusOptions = Setting::getBonusRewardOptions();
 
-        $magicInfo = app(TorrentDetailRepository::class)->getMagicInfo($id, (int) $currentUser['id']);
-        $thanksInfo = app(TorrentDetailRepository::class)->getThanksInfo($id, (int) $currentUser['id']);
+        $magicInfo = $this->torrentDetailRepository->getMagicInfo($id, (int) $currentUser['id']);
+        $thanksInfo = $this->torrentDetailRepository->getThanksInfo($id, (int) $currentUser['id']);
 
         $userIds = array_filter(array_unique([
             (int) ($row['owner'] ?? 0),

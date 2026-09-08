@@ -36,14 +36,36 @@ class UtilityController extends LegacyController
 {
     private UsersearchPageService $usersearchPageService;
 
-    public function __construct(UsersearchPageService $usersearchPageService, private readonly AjaxService $ajaxService)
-    {
+    private SearchPageRepository $searchPageRepository;
+
+    private CurrentUser $currentUser;
+
+    private Globals $globals;
+
+    private LegacyRedisCache $legacyRedisCache;
+
+    private LegacyHeaderBag $legacyHeaderBag;
+
+    public function __construct(
+        UsersearchPageService $usersearchPageService,
+        private readonly AjaxService $ajaxService,
+        SearchPageRepository $searchPageRepository,
+        CurrentUser $currentUser,
+        Globals $globals,
+        LegacyRedisCache $legacyRedisCache,
+        LegacyHeaderBag $legacyHeaderBag,
+    ) {
         $this->usersearchPageService = $usersearchPageService;
+        $this->searchPageRepository = $searchPageRepository;
+        $this->currentUser = $currentUser;
+        $this->globals = $globals;
+        $this->legacyRedisCache = $legacyRedisCache;
+        $this->legacyHeaderBag = $legacyHeaderBag;
     }
 
     public function search(Request $request): View|RedirectResponse
     {
-        $curUser = app(CurrentUser::class)->get() ?? [];
+        $curUser = $this->currentUser->get() ?? [];
         $currentUser = ! empty($curUser) ? User::query()->find((int) ($curUser['id'] ?? 0)) : null;
         if ($currentUser === null) {
             $qs = $request->getQueryString();
@@ -51,7 +73,7 @@ class UtilityController extends LegacyController
             return redirect('/search.php'.($qs ? '?'.$qs : ''));
         }
 
-        $data = app(SearchPageRepository::class)->dataForSearch($request, $currentUser);
+        $data = $this->searchPageRepository->dataForSearch($request, $currentUser);
 
         return $this->legacyPage($request, 'search', true, $data);
     }
@@ -65,12 +87,6 @@ class UtilityController extends LegacyController
 
     public function ajax(Request $request): JsonResponse|RedirectResponse
     {
-        if (app(LegacyRedisCache::class) === null) {
-            $qs = $request->getQueryString();
-
-            return redirect('/ajax.php'.($qs ? '?'.$qs : ''));
-        }
-
         $action = (string) $request->input('action', '');
         $params = $request->input('params', []);
 
@@ -80,7 +96,7 @@ class UtilityController extends LegacyController
         }
 
         if (! in_array($action, AjaxService::ALLOWED_ACTIONS, true)) {
-            $currentUser = app(CurrentUser::class)->get() ?? [];
+            $currentUser = $this->currentUser->get() ?? [];
             Logger::writeWithContext((string) ('hacking attempt made by '.($currentUser['username'] ?? 'guest').',uid '.($currentUser['id'] ?? 0)), (string) 'error', (bool) false);
 
             return response()->json(Api::call(1, "Invalid action: {$action}", $request->only(['action', 'params'])));
@@ -99,7 +115,7 @@ class UtilityController extends LegacyController
 
     public function attachment(Request $request): Response
     {
-        $currentUser = app(CurrentUser::class)->get() ?? [];
+        $currentUser = $this->currentUser->get() ?? [];
         $Attach = new AttachmentService((int) ($currentUser['id'] ?? 0));
 
         $count_limit = (int) $Attach->get_count_limit();
@@ -124,7 +140,7 @@ class UtilityController extends LegacyController
                 ];
             }
 
-            $lang_attachment = (array) (app(Globals::class)->get('lang_attachment') ?? []);
+            $lang_attachment = (array) ($this->globals->get('lang_attachment') ?? []);
             $result = AttachmentMutationService::processUpload($currentUser, $Attach, $lang_attachment, $altsize, $callback_func, $file);
             $warning = (string) ($result['warning'] ?? '');
             $script = (string) ($result['script'] ?? '');
@@ -133,7 +149,7 @@ class UtilityController extends LegacyController
 
         $content = view('attachment.index', [
             'CURUSER' => $currentUser,
-            'lang_attachment' => (array) (app(Globals::class)->get('lang_attachment') ?? []),
+            'lang_attachment' => (array) ($this->globals->get('lang_attachment') ?? []),
             'Attach' => $Attach,
             'count_limit' => $count_limit,
             'count_left' => $count_left,
@@ -163,7 +179,7 @@ class UtilityController extends LegacyController
             return response('No attachment found.', 404, ['Content-Type' => 'text/plain; charset=utf-8']);
         }
 
-        $httpdirectory = (string) app(Globals::class)->get('httpdirectory_attachment', '');
+        $httpdirectory = (string) $this->globals->get('httpdirectory_attachment', '');
         $basePath = realpath($httpdirectory);
         $filelocation = $httpdirectory.'/'.$row['location'];
         $realFile = realpath($filelocation);
@@ -180,10 +196,7 @@ class UtilityController extends LegacyController
 
         DB::table('attachments')->where('id', $id)->increment('downloads');
 
-        $cache = app(LegacyRedisCache::class);
-        if ($cache !== null) {
-            $cache->delete_value('attachment_'.$dlkey.'_content');
-        }
+        $this->legacyRedisCache->delete_value('attachment_'.$dlkey.'_content');
 
         return new StreamedResponse(function () use ($realFile) {
             $f = fopen($realFile, 'rb');
@@ -225,7 +238,7 @@ class UtilityController extends LegacyController
 
         // T-11: Read from the per-request LegacyHeaderBag instead of SAPI
         // globals that leak state across Octane worker requests.
-        $headerBag = app(LegacyHeaderBag::class);
+        $headerBag = $this->legacyHeaderBag;
         $status = $headerBag->getStatusCode();
         $headers = $headerBag->toResponseHeaders();
         $headerBag->flush();
@@ -316,12 +329,12 @@ class UtilityController extends LegacyController
 
     private function buildOpensearchXml(): string
     {
-        $siteName = (string) (app(Globals::class)->get('SITENAME', '') ?? '');
-        $siteEmail = (string) (app(Globals::class)->get('SITEEMAIL', '') ?? '');
-        $slogan = (string) (app(Globals::class)->get('SLOGAN', '') ?? '');
-        $baseUrl = (string) (app(Globals::class)->get('BASEURL', '') ?? '');
-        $dateFounded = (string) (app(Globals::class)->get('datefounded', '') ?? '');
-        $projectName = (string) (app(Globals::class)->get('PROJECTNAME', '') ?? '');
+        $siteName = (string) ($this->globals->get('SITENAME', '') ?? '');
+        $siteEmail = (string) ($this->globals->get('SITEEMAIL', '') ?? '');
+        $slogan = (string) ($this->globals->get('SLOGAN', '') ?? '');
+        $baseUrl = (string) ($this->globals->get('BASEURL', '') ?? '');
+        $dateFounded = (string) ($this->globals->get('datefounded', '') ?? '');
+        $projectName = (string) ($this->globals->get('PROJECTNAME', '') ?? '');
 
         $url = Http::protocolPrefix(Url::isSecure()).$baseUrl;
         $year = substr($dateFounded, 0, 4);
@@ -423,7 +436,7 @@ XML;
         }
 
         /** @var array<string, string> $langOk */
-        $langOk = (array) app(Globals::class)->get('lang_ok', []);
+        $langOk = (array) $this->globals->get('lang_ok', []);
         $title = match ($type) {
             'adminactivate', 'inviter', 'signup' => $langOk['head_user_signup'] ?? '',
             'sysop' => $langOk['head_sysop_activation'] ?? '',
@@ -437,7 +450,7 @@ XML;
             'email' => $email,
             'title' => $title,
             'siteName' => Setting::getSiteName(),
-            'CURUSER' => app(CurrentUser::class)->get(),
+            'CURUSER' => $this->currentUser->get(),
         ]);
     }
 }

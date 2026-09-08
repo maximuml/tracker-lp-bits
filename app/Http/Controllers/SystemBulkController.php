@@ -46,9 +46,22 @@ class SystemBulkController extends LegacyController
 {
     private UserRepository $userRepository;
 
-    public function __construct(UserRepository $userRepository)
-    {
+    private CurrentUser $currentUser;
+
+    private Globals $globals;
+
+    private LegacyRedisCache $legacyRedisCache;
+
+    public function __construct(
+        UserRepository $userRepository,
+        CurrentUser $currentUser,
+        Globals $globals,
+        LegacyRedisCache $legacyRedisCache,
+    ) {
         $this->userRepository = $userRepository;
+        $this->currentUser = $currentUser;
+        $this->globals = $globals;
+        $this->legacyRedisCache = $legacyRedisCache;
     }
 
     public function takeamountupload(Request $request): Response|RedirectResponse|View
@@ -70,7 +83,7 @@ class SystemBulkController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Permission denied!');
         }
 
-        $curUser = app(CurrentUser::class)->get() ?? [];
+        $curUser = $this->currentUser->get() ?? [];
         $senderId = request()->post('sender') === 'system' ? null : (int) ($curUser['id'] ?? 0);
         $added = date('Y-m-d H:i:s');
         $msg = trim((string) request()->post('msg'));
@@ -115,7 +128,7 @@ class SystemBulkController extends LegacyController
 
     public function takeinvite(Request $request): Response|RedirectResponse
     {
-        $curUser = app(CurrentUser::class)->get();
+        $curUser = $this->currentUser->get();
         if ($curUser === null) {
             $qs = $request->getQueryString();
 
@@ -138,7 +151,7 @@ class SystemBulkController extends LegacyController
             try {
                 $sendText = $userRep->getInviteBtnText($currentUserId);
             } catch (\Exception $exception) {
-                $lang = (array) app(Globals::class)->get('lang_takeinvite', []);
+                $lang = (array) $this->globals->get('lang_takeinvite', []);
 
                 return $this->legacyAbortResponse($lang['std_error'] ?? 'Error', $exception->getMessage());
             }
@@ -147,7 +160,7 @@ class SystemBulkController extends LegacyController
             $email = Email::sanitizeForDisplay($email);
             $preRegisterUsername = (string) request()->post('pre_register_username');
             $isPreRegisterEmailAndUsername = SiteConfig::current()->system->isInvitePreEmailAndUsername();
-            $lang = (array) app(Globals::class)->get('lang_takeinvite', []);
+            $lang = (array) $this->globals->get('lang_takeinvite', []);
 
             if (strlen($preRegisterUsername) > 12) {
                 return $this->legacyAbortResponse($lang['head_invitation_failed'] ?? 'Error', $lang['std_username_too_long'] ?? 'Username too long.');
@@ -198,7 +211,7 @@ class SystemBulkController extends LegacyController
             }
 
             $hashRecord = null;
-            $timeNow = (int) app(Globals::class)->get('TIMENOW', time());
+            $timeNow = (int) $this->globals->get('TIMENOW', time());
             if ($hashPost === 'permanent') {
                 // Use CSPRNG for invite token generation (T-08)
                 // Legacy: md5(mt_rand(1, 10000).username.time.passhash) — not CSPRNG, leaked passhash
@@ -222,9 +235,9 @@ class SystemBulkController extends LegacyController
             $signupUrl = Url::schemeAndHost(Url::isSecure())."/signup.php?type=invite&invitenumber=$hash";
             $mailTwo = sprintf($lang['mail_two'], $siteName, $siteName);
             $mailFour = sprintf($lang['mail_four'], $siteName);
-            $reportMail = (string) app(Globals::class)->get('REPORTMAIL', '');
+            $reportMail = (string) $this->globals->get('REPORTMAIL', '');
             $mailSix = sprintf($lang['mail_six'], $reportMail, $siteName);
-            $inviteTimeout = (string) app(Globals::class)->get('invite_timeout', '');
+            $inviteTimeout = (string) $this->globals->get('invite_timeout', '');
 
             $message = $lang['mail_one'].$curUser['username'].$mailTwo.PHP_EOL
                 .'<b><a href="javascript:void(null)" onclick="window.open('.$signupUrl.')">'.$lang['mail_here'].'</a></b><br />'.PHP_EOL
@@ -236,7 +249,7 @@ class SystemBulkController extends LegacyController
             $sendResult = Mail::sentLegacy(
                 $email,
                 $siteName,
-                (string) app(Globals::class)->get('SITEEMAIL', ''),
+                (string) $this->globals->get('SITEEMAIL', ''),
                 $title,
                 $message,
                 'invitesignup',
@@ -280,7 +293,7 @@ class SystemBulkController extends LegacyController
 
     public function takeupdate(Request $request): Response|RedirectResponse
     {
-        $curUser = app(CurrentUser::class)->get();
+        $curUser = $this->currentUser->get();
         if ($curUser === null) {
             $qs = $request->getQueryString();
 
@@ -294,7 +307,7 @@ class SystemBulkController extends LegacyController
 
         $delreport = (array) request()->post('delreport');
         if (empty($delreport)) {
-            $langFunctions = (array) app(Globals::class)->get('lang_functions', []);
+            $langFunctions = (array) $this->globals->get('lang_functions', []);
 
             return $this->legacyAbortResponse('Error', $langFunctions['select_at_least_one_record'] ?? 'Select at least one record.');
         }
@@ -304,17 +317,16 @@ class SystemBulkController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Invalid report ids.');
         }
 
-        $cache = app(LegacyRedisCache::class);
         if (request()->post('setdealt')) {
             DB::table('reports')
                 ->whereIn('id', $delreportIds)
                 ->where('dealtwith', 0)
                 ->update(['dealtwith' => 1, 'dealtby' => $currentUserId]);
-            $cache?->delete_value('staff_new_report_count', true);
+            $this->legacyRedisCache->delete_value('staff_new_report_count', true);
         } elseif (request()->post('delete')) {
             DB::table('reports')->whereIn('id', $delreportIds)->delete();
-            $cache?->delete_value('staff_new_report_count', true);
-            $cache?->delete_value('staff_report_count', true);
+            $this->legacyRedisCache->delete_value('staff_new_report_count', true);
+            $this->legacyRedisCache->delete_value('staff_report_count', true);
         }
 
         return redirect('/reports.php');
@@ -322,7 +334,7 @@ class SystemBulkController extends LegacyController
 
     public function incrementBulk(Request $request): View|RedirectResponse|Response
     {
-        $curUser = app(CurrentUser::class)->get();
+        $curUser = $this->currentUser->get();
         if ($curUser === null) {
             $qs = $request->getQueryString();
 
@@ -333,7 +345,7 @@ class SystemBulkController extends LegacyController
             return $this->legacyAbortResponse('Sorry', 'Access denied.');
         }
 
-        $langIncrementbulk = (array) (app(Globals::class)->get('lang_incrementbulk') ?? []);
+        $langIncrementbulk = (array) ($this->globals->get('lang_incrementbulk') ?? []);
         $validTypeMap = (array) ($langIncrementbulk['types'] ?? []);
         $type = (string) $request->input('type', '');
         $classes = array_chunk(User::listClass(), 4, true);
@@ -393,10 +405,10 @@ class SystemBulkController extends LegacyController
             return $this->legacyAbortResponse('Sorry', 'Permission denied.');
         }
 
-        $lang = (array) (app(Globals::class)->get('lang_incrementbulk') ?? []);
+        $lang = (array) ($this->globals->get('lang_incrementbulk') ?? []);
         $validTypeMap = (array) ($lang['types'] ?? []);
 
-        $currentUser = app(CurrentUser::class)->get() ?? [];
+        $currentUser = $this->currentUser->get() ?? [];
         $senderId = $request->input('sender') === 'system' ? null : ((int) ($currentUser['id'] ?? 0));
         $added = date('Y-m-d H:i:s');
         $msg = trim((string) $request->input('msg', ''));

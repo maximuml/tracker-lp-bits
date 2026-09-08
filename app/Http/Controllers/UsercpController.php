@@ -8,14 +8,20 @@ use App\DTOs\Usercp\ForumSettingsDto;
 use App\DTOs\Usercp\PersonalSettingsDto;
 use App\DTOs\Usercp\SecuritySettingsDto;
 use App\DTOs\Usercp\TrackerSettingsDto;
+use App\Http\Requests\UpdateForumSettingsRequest;
+use App\Http\Requests\UpdatePersonalSettingsRequest;
+use App\Http\Requests\UpdateSecuritySettingsRequest;
+use App\Http\Requests\UpdateTrackerSettingsRequest;
+use App\Models\User;
+use App\Policies\UsercpPolicy;
 use App\Repositories\UsercpRepository;
 use App\Services\UsercpPageService;
-use App\Support\CurrentUser;
 use App\Support\Globals;
 use App\Support\LegacyResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class UsercpController extends LegacyController
@@ -24,8 +30,11 @@ class UsercpController extends LegacyController
 
     private UsercpPageService $pageService;
 
-    public function __construct(UsercpRepository $repository, UsercpPageService $pageService)
-    {
+    public function __construct(
+        UsercpRepository $repository,
+        UsercpPageService $pageService,
+        private readonly UsercpPolicy $policy,
+    ) {
         $this->repository = $repository;
         $this->pageService = $pageService;
     }
@@ -71,8 +80,8 @@ class UsercpController extends LegacyController
      */
     public function legacy(Request $request): View|Response|RedirectResponse
     {
-        $user = app(CurrentUser::class)->get();
-        if ($user === null) {
+        $user = Auth::user();
+        if (! $user instanceof User) {
             $qs = $request->getQueryString();
 
             return redirect('/usercp.php'.($qs ? '?'.$qs : ''));
@@ -97,33 +106,61 @@ class UsercpController extends LegacyController
 
     public function legacyAction(Request $request): RedirectResponse
     {
-        $user = app(CurrentUser::class)->get();
-        if ($user === null) {
+        $user = Auth::user();
+        if (! $user instanceof User) {
             return redirect('/usercp.php');
         }
 
         $action = (string) $request->input('action');
         $type = (string) $request->input('type');
 
+        // W1-05: Validate POST mutations by action/type before delegating
+        $rules = match (true) {
+            $type === 'save' && $action === 'personal' => (new UpdatePersonalSettingsRequest)->rules(),
+            $type === 'save' && $action === 'forum' => (new UpdateForumSettingsRequest)->rules(),
+            $type === 'save' && $action === 'tracker' => (new UpdateTrackerSettingsRequest)->rules(),
+            $type === 'confirm' && $action === 'security' => (new UpdateSecuritySettingsRequest)->rules(),
+            default => null,
+        };
+
+        if ($rules !== null) {
+            $validator = validator($request->all(), $rules);
+            if ($validator->fails()) {
+                return redirect('/usercp.php?action='.$action);
+            }
+        }
+
         if ($type === 'save' && $action === 'personal') {
+            if (! $this->policy->updatePersonal($user, $user)) {
+                return redirect('/usercp.php?action=personal');
+            }
             $this->repository->updatePersonal(PersonalSettingsDto::fromRequest($request));
 
             return redirect('/usercp.php?action=personal&type=saved');
         }
 
         if ($type === 'save' && $action === 'forum') {
+            if (! $this->policy->updateForum($user, $user)) {
+                return redirect('/usercp.php?action=forum');
+            }
             $this->repository->updateForum(ForumSettingsDto::fromRequest($request));
 
             return redirect('/usercp.php?action=forum&type=saved');
         }
 
         if ($type === 'save' && $action === 'tracker') {
+            if (! $this->policy->updateTracker($user, $user)) {
+                return redirect('/usercp.php?action=tracker');
+            }
             $this->repository->updateTracker(TrackerSettingsDto::fromRequest($request));
 
             return redirect('/usercp.php?action=tracker&type=saved');
         }
 
         if ($type === 'confirm' && $action === 'security') {
+            if (! $this->policy->updateSecurity($user, $user)) {
+                return redirect('/usercp.php?action=security');
+            }
             $to = $this->repository->updateSecurityFromLegacyRequest($request);
 
             return redirect($to);

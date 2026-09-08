@@ -1108,19 +1108,23 @@ jobs:
 
       - name: Verify Redis connectivity
         run: |
-          # Use PHP's redis extension directly (redis-cli may not be installed)
+          # Redis container health is verified by --wait; also verify from PHP
+          # using Laravel's config (which has the password from cached config).
           docker compose exec -T php php -r '
-          $r = new Redis();
-          $r->connect(getenv("REDIS_HOST") ?: "redis", (int)(getenv("REDIS_PORT") ?: 6379));
-          $pass = getenv("REDIS_PASSWORD") ?: "";
-          if ($pass) { $r->auth($pass); }
-          echo $r->ping() ? "Redis OK" : "Redis FAIL";
+          require "/var/www/html/vendor/autoload.php";
+          $app = require "/var/www/html/bootstrap/app.php";
+          $container = $app->boot();
+          try {
+            $pong = Illuminate\Support\Facades\Redis::connection()->ping();
+            echo is_string($pong) ? "Redis OK: $pong\n" : "Redis OK\n";
+          } catch (Exception $e) { echo "Redis FAIL: " . $e->getMessage() . "\n"; exit(1); }
           '
 
       - name: Verify MeiliSearch connectivity
         run: |
           # Use curl to check MeiliSearch health endpoint
           docker compose exec -T php sh -c 'curl -sf http://${MEILISEARCH_HOST:-meilisearch}:7700/health 2>/dev/null'
+          echo ""
           echo "OK: MeiliSearch connectivity verified"
 
       - name: Verify queue worker is running

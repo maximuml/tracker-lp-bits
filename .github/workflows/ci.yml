@@ -1093,30 +1093,30 @@ jobs:
 
       - name: Verify route/config/view caches
         run: |
-          echo "Checking routes.php..."
-          docker compose exec -T php sh -c 'ls -la /var/www/html/bootstrap/cache/routes.php 2>&1 || echo "MISSING: routes.php"'
-          echo "Checking config.php..."
-          docker compose exec -T php sh -c 'ls -la /var/www/html/bootstrap/cache/config.php 2>&1 || echo "MISSING: config.php"'
-          echo "Checking views.php..."
-          docker compose exec -T php sh -c 'ls -la /var/www/html/bootstrap/cache/views.php 2>&1 || echo "MISSING: views.php"'
-          echo "Listing bootstrap/cache..."
-          docker compose exec -T php sh -c 'ls -la /var/www/html/bootstrap/cache/'
-          docker compose exec -T php sh -c 'test -f /var/www/html/bootstrap/cache/routes.php'
+          # Laravel 13 uses routes-v7.php (new route caching format)
+          docker compose exec -T php sh -c 'test -f /var/www/html/bootstrap/cache/routes-v7.php'
           docker compose exec -T php sh -c 'test -f /var/www/html/bootstrap/cache/config.php'
-          docker compose exec -T php sh -c 'test -f /var/www/html/bootstrap/cache/views.php'
+          # view:cache compiles templates to storage/framework/views/, not a single file
+          docker compose exec -T php sh -c 'test -d /var/www/html/storage/framework/views && [ "$(ls -A /var/www/html/storage/framework/views/)" ]'
           echo "OK: route/config/view caches exist"
 
       - name: Verify DB connectivity
         run: |
-          docker compose exec -T php php artisan tinker --execute='echo DB::connection()->getPdo() ? "DB OK" : "DB FAIL";'
+          # tinker is dev-only; use migrate:status which always works
+          docker compose exec -T php php artisan migrate:status --no-interaction >/dev/null 2>&1
+          echo "OK: DB connectivity verified"
 
       - name: Verify Redis connectivity
         run: |
-          docker compose exec -T php php artisan tinker --execute='echo Redis::connection()->ping();'
+          # Use redis-cli directly from the php container
+          docker compose exec -T php sh -c 'redis-cli -h redis -p 6379 -a "${REDIS_PASSWORD:-}" ping 2>/dev/null | grep -q PONG'
+          echo "OK: Redis connectivity verified"
 
       - name: Verify MeiliSearch connectivity
         run: |
-          docker compose exec -T php php artisan tinker --execute='echo json_encode(App\Models\Torrent::search("test")->raw() !== null ? "Meili OK" : "Meili FAIL");'
+          # Use curl to check MeiliSearch health endpoint
+          docker compose exec -T php sh -c 'curl -sf http://${MEILISEARCH_HOST:-meilisearch}:7700/health 2>/dev/null'
+          echo "OK: MeiliSearch connectivity verified"
 
       - name: Verify queue worker is running
         run: |

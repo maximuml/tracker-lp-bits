@@ -1093,6 +1093,14 @@ jobs:
 
       - name: Verify route/config/view caches
         run: |
+          echo "Checking routes.php..."
+          docker compose exec -T php sh -c 'ls -la /var/www/html/bootstrap/cache/routes.php 2>&1 || echo "MISSING: routes.php"'
+          echo "Checking config.php..."
+          docker compose exec -T php sh -c 'ls -la /var/www/html/bootstrap/cache/config.php 2>&1 || echo "MISSING: config.php"'
+          echo "Checking views.php..."
+          docker compose exec -T php sh -c 'ls -la /var/www/html/bootstrap/cache/views.php 2>&1 || echo "MISSING: views.php"'
+          echo "Listing bootstrap/cache..."
+          docker compose exec -T php sh -c 'ls -la /var/www/html/bootstrap/cache/'
           docker compose exec -T php sh -c 'test -f /var/www/html/bootstrap/cache/routes.php'
           docker compose exec -T php sh -c 'test -f /var/www/html/bootstrap/cache/config.php'
           docker compose exec -T php sh -c 'test -f /var/www/html/bootstrap/cache/views.php'

@@ -6,6 +6,9 @@ namespace App\Http\Controllers;
 
 use App\DTOs\Forum\StoreForumDto;
 use App\DTOs\Forum\UpdateForumDto;
+use App\Http\Requests\ForumMoveTopicRequest;
+use App\Http\Requests\ForumPostRequest;
+use App\Http\Requests\ForumTopicActionRequest;
 use App\Http\Resources\ForumResource;
 use App\Models\Forum;
 use App\Repositories\CommentRepository;
@@ -54,6 +57,22 @@ class ForumController extends LegacyController
     {
         if (app(CurrentUser::class)->get() === null) {
             return redirect('/forums.php?'.$request->getQueryString());
+        }
+
+        // W1-04: Validate POST mutations by action type before delegating
+        $action = (string) $request->input('action', '');
+        $rules = match ($action) {
+            'post' => (new ForumPostRequest)->rules(),
+            'movetopic' => (new ForumMoveTopicRequest)->rules(),
+            'setlocked', 'setsticky', 'hltopic' => (new ForumTopicActionRequest)->rules(),
+            default => [],
+        };
+
+        if ($rules !== []) {
+            $validator = validator($request->all(), $rules);
+            if ($validator->fails()) {
+                return redirect('/forums');
+            }
         }
 
         $result = $this->service->legacy($request);

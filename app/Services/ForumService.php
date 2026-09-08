@@ -7,20 +7,24 @@ namespace App\Services;
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\Message;
+use App\Models\Post;
+use App\Models\Topic;
+use App\Models\User;
+use App\Policies\PostPolicy;
+use App\Policies\TopicPolicy;
 use App\Repositories\ForumRepository;
 use App\Support\Bonus;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
-use App\Support\Forum;
 use App\Support\Globals;
 use App\Support\Http\SafeReturnUrl;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Palette;
 use App\Support\UserDisplay;
-use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use LogicException;
 
 /**
@@ -67,6 +71,8 @@ final class ForumService
         private readonly CurrentUser $currentUser,
         private readonly Globals $globals,
         private readonly LegacyRedisCache $cache,
+        private readonly TopicPolicy $topicPolicy,
+        private readonly PostPolicy $postPolicy,
     ) {}
 
     /**
@@ -188,36 +194,32 @@ final class ForumService
         $date = date('Y-m-d H:i:s');
 
         if ($type !== 'new') {
-            $locked = $this->repository->isTopicLocked($topicid);
-            if ($locked === null) {
+            $topicModel = Topic::query()->whereKey($topicid)->first();
+            if ($topicModel === null) {
                 return $this->redirectTo('/forums.php');
             }
-            if (
-                $locked
-                && ! Permission::can(PermissionEnum::POST_MANAGE)
-                && ! Forum::isModerator($topicid, 'topic')
-            ) {
+
+            // W1-04: Use TopicPolicy for locked-topic reply authorization
+            $authUser = Auth::user();
+            if ($topicModel->locked && (! $authUser instanceof User || ! $this->topicPolicy->reply($authUser, $topicModel))) {
                 LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_topic_locked'] ?? 'Topic locked.');
+                throw new LogicException('Expected authenticated user.');
             }
         }
 
         if ($type === 'edit') {
             $postInfo = $this->repository->getPostWithUser($postid);
             $topicInfo = $this->repository->getTopicWithUser($topicid);
-            if (
-                $postInfo === null
-                || $topicInfo === null
-                || (
-                    $postInfo->userid !== $user['id']
-                    && ! Forum::isModerator($postid, 'post')
-                    && ! Permission::can(PermissionEnum::POST_MANAGE)
-                )
-            ) {
-                LegacyResponse::permissionDenied();
-            }
-
             if ($postInfo === null || $topicInfo === null) {
                 return $this->redirectTo('/forums.php');
+            }
+
+            // W1-04: Use PostPolicy for edit authorization
+            $postModel = Post::query()->whereKey($postid)->first();
+            $authUser = Auth::user();
+            if (! $authUser instanceof User || $postModel === null || ! $this->postPolicy->update($authUser, $postModel)) {
+                LegacyResponse::permissionDenied();
+                throw new LogicException('Expected authenticated user and non-null post.');
             }
 
             if ($hassubject) {
@@ -346,14 +348,18 @@ final class ForumService
         $lang = $this->lang();
         $forumid = (int) $request->input('forumid');
         $topicid = (int) $request->query('topicid');
-        $ismod = Forum::isModerator($topicid, 'topic');
 
-        if (
-            ! Validators::isId($forumid)
-            || ! Validators::isId($topicid)
-            || (! Permission::can(PermissionEnum::POST_MANAGE) && ! $ismod)
-        ) {
+        $topic = Topic::query()->whereKey($topicid)->first();
+        if ($topic === null) {
+            LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_topic_not_found'] ?? 'Topic not found.');
+            throw new LogicException('Expected non-null topic.');
+        }
+
+        // W1-04: Use TopicPolicy for authorization
+        $user = Auth::user();
+        if (! $user instanceof User || ! $this->topicPolicy->move($user, $topic)) {
             LegacyResponse::permissionDenied();
+            throw new LogicException('Expected authenticated user.');
         }
 
         $minclasswrite = $this->repository->getForumMinclasswrite($forumid);
@@ -386,24 +392,22 @@ final class ForumService
 
     private function handleDeleteTopic(Request $request): RedirectResponse
     {
-        $user = $this->user();
         $lang = $this->lang();
         $topicid = (int) $request->query('topicid');
-        $topic = $this->repository->getTopicForumAndUser($topicid);
+        $topic = Topic::query()->whereKey($topicid)->first();
 
         if ($topic === null) {
             return $this->redirectTo('/forums.php');
         }
 
-        $forumid = (int) $topic['forumid'];
-        $targetUserid = (int) $topic['userid'];
-        $ismod = Forum::isModerator($topicid, 'topic');
+        $forumid = (int) $topic->forumid;
+        $targetUserid = (int) $topic->userid;
 
-        if (
-            ! Validators::isId($topicid)
-            || (! Permission::can(PermissionEnum::POST_MANAGE) && ! $ismod)
-        ) {
+        // W1-04: Use TopicPolicy for authorization
+        $user = Auth::user();
+        if (! $user instanceof User || ! $this->topicPolicy->delete($user, $topic)) {
             LegacyResponse::permissionDenied();
+            throw new LogicException('Expected authenticated user.');
         }
 
         $sure = (int) $request->query('sure', 0);
@@ -431,29 +435,25 @@ final class ForumService
 
     private function handleDeletePost(Request $request): RedirectResponse
     {
-        $user = $this->user();
         $lang = $this->lang();
         $postid = (int) $request->query('postid');
         $sure = (int) $request->query('sure', 0);
-        $ismod = Forum::isModerator($postid, 'post');
 
-        if (
-            (! Permission::can(PermissionEnum::POST_MANAGE) && ! $ismod)
-            || ! Validators::isId($postid)
-        ) {
-            LegacyResponse::permissionDenied();
-        }
-
-        $post = $this->repository->getPostTopicAndUser($postid);
+        $post = Post::query()->whereKey($postid)->first();
         if ($post === null) {
             LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_post_not_found'] ?? 'Post not found.');
-        }
-        if ($post === null) {
             throw new LogicException('Expected non-null post.');
         }
 
-        $topicid = $post['topicid'];
-        $targetUserid = $post['userid'];
+        // W1-04: Use PostPolicy for authorization
+        $user = Auth::user();
+        if (! $user instanceof User || ! $this->postPolicy->delete($user, $post)) {
+            LegacyResponse::permissionDenied();
+            throw new LogicException('Expected authenticated user.');
+        }
+
+        $topicid = (int) $post->topicid;
+        $targetUserid = (int) $post->userid;
         $prevPostId = $this->repository->getPreviousPostId($topicid, $postid);
 
         if ($prevPostId === null || $prevPostId === 0) {
@@ -490,13 +490,18 @@ final class ForumService
     private function handleSetLocked(Request $request): RedirectResponse
     {
         $topicid = (int) $request->input('topicid');
-        $ismod = Forum::isModerator($topicid, 'topic');
+        $topic = Topic::query()->whereKey($topicid)->first();
 
-        if (
-            ! $topicid
-            || (! Permission::can(PermissionEnum::POST_MANAGE) && ! $ismod)
-        ) {
+        if ($topic === null) {
             LegacyResponse::permissionDenied();
+            throw new LogicException('Expected non-null topic.');
+        }
+
+        // W1-04: Use TopicPolicy for authorization
+        $user = Auth::user();
+        if (! $user instanceof User || ! $this->topicPolicy->lock($user, $topic)) {
+            LegacyResponse::permissionDenied();
+            throw new LogicException('Expected authenticated user.');
         }
 
         $locked = (bool) $request->input('locked');
@@ -508,13 +513,18 @@ final class ForumService
     private function handleHighlightTopic(Request $request): RedirectResponse
     {
         $topicid = (int) $request->query('topicid');
-        $ismod = Forum::isModerator($topicid, 'topic');
+        $topic = Topic::query()->whereKey($topicid)->first();
 
-        if (
-            ! $topicid
-            || (! Permission::can(PermissionEnum::POST_MANAGE) && ! $ismod)
-        ) {
+        if ($topic === null) {
             LegacyResponse::permissionDenied();
+            throw new LogicException('Expected non-null topic.');
+        }
+
+        // W1-04: Use TopicPolicy for authorization
+        $user = Auth::user();
+        if (! $user instanceof User || ! $this->topicPolicy->highlight($user, $topic)) {
+            LegacyResponse::permissionDenied();
+            throw new LogicException('Expected authenticated user.');
         }
 
         $color = (int) $request->input('color');
@@ -536,13 +546,18 @@ final class ForumService
     private function handleSetSticky(Request $request): RedirectResponse
     {
         $topicid = (int) $request->input('topicid');
-        $ismod = Forum::isModerator($topicid, 'topic');
+        $topic = Topic::query()->whereKey($topicid)->first();
 
-        if (
-            ! $topicid
-            || (! Permission::can(PermissionEnum::POST_MANAGE) && ! $ismod)
-        ) {
+        if ($topic === null) {
             LegacyResponse::permissionDenied();
+            throw new LogicException('Expected non-null topic.');
+        }
+
+        // W1-04: Use TopicPolicy for authorization
+        $user = Auth::user();
+        if (! $user instanceof User || ! $this->topicPolicy->sticky($user, $topic)) {
+            LegacyResponse::permissionDenied();
+            throw new LogicException('Expected authenticated user.');
         }
 
         $sticky = (string) $request->input('sticky');

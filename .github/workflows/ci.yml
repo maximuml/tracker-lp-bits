@@ -1032,6 +1032,16 @@ jobs:
       - name: Start remaining services and wait
         run: docker compose up -d --wait
 
+      - name: Debug all container logs (on failure)
+        if: failure()
+        run: |
+          echo "=== All containers ==="
+          docker compose ps -a 2>&1 || true
+          for svc in php openresty queue scheduler meilisearch; do
+            echo "=== $svc logs ==="
+            docker compose logs --tail=50 $svc 2>&1 || true
+          done
+
       - name: Verify PHP health
         run: |
           # PHP-FPM must respond to a basic artisan command

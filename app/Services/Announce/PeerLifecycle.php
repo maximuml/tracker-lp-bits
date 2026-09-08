@@ -266,7 +266,15 @@ final class PeerLifecycle
             $peerUpdate['finishedat'] = TIMENOW;
             $snatchUpdate['completedat'] = $this->dt;
             $snatchUpdate['finished'] = 1;
-            $this->torrentUpdate['times_completed'] = DB::raw('times_completed + 1');
+
+            // W2-04: Idempotency guard — only increment times_completed if
+            // this peer has not already completed this torrent. Without this
+            // check, a duplicate/retried "completed" event would double-count.
+            $alreadyFinished = is_array($this->snatchInfo)
+                && (int) ($this->snatchInfo['finished'] ?? 0) === 1;
+            if (! $alreadyFinished) {
+                $this->torrentUpdate['times_completed'] = DB::raw('times_completed + 1');
+            }
         }
 
         $peerUpdate = array_merge($peerUpdate, $peerIPUpdate);

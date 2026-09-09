@@ -2,9 +2,11 @@
     "$schema": "vendor/infection/infection/resources/schema.json",
     "source": {
         "directories": [
+            "app/Services/Announce/"
+        ],
+        "files": [
             "app/Http/Controllers/AuthenticateController.php",
             "app/Http/Controllers/TokenController.php",
-            "app/Services/Announce/",
             "app/Services/BonusService.php",
             "app/Services/AttachmentMutationService.php",
             "app/Services/OutboxService.php",

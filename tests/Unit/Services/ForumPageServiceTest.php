@@ -14,6 +14,7 @@ use App\Services\ForumTopicViewService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
+use App\Support\Settings;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redis;
@@ -43,11 +44,11 @@ final class ForumPageServiceTest extends TestCase
             define('IN_NEXUS', true);
         }
         $this->initialObLevel = ob_get_level();
-        app(Globals::class)->set('SITENAME', 'TestSite');
+        Settings::saveBatch('basic', ['SITENAME' => 'TestSite']);
+        Settings::saveBatch('main', ['postsperpage' => 10, 'topicsperpage' => 20]);
+        Settings::resetCache();
         app(Globals::class)->set('CURLANGDIR', 'en');
         app(Globals::class)->set('showforumstats_main', 'no');
-        app(Globals::class)->set('forumpostsperpage', 10);
-        app(Globals::class)->set('forumtopicsperpage_main', 20);
         app(Globals::class)->set('lang_forums', [
             'text_forums' => 'Forums', 'text_search' => 'Search',
             'text_view_unread' => 'Unread', 'text_catch_up' => 'Catch Up',
@@ -284,8 +285,8 @@ final class ForumPageServiceTest extends TestCase
         $this->setUser();
         $this->setRequest();
 
-        app(Globals::class)->set('forumpostsperpage', 15);
-        app(Globals::class)->set('forumtopicsperpage_main', 25);
+        Settings::saveBatch('main', ['postsperpage' => 15, 'topicsperpage' => 25]);
+        Settings::resetCache();
 
         $result = $this->callWithSuppressedErrors(fn () => $this->service->build(Request::create('/forums.php', 'GET'))->toArray());
 

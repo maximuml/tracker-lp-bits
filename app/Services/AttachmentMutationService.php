@@ -8,7 +8,6 @@ use App\Models\Attachment;
 use App\Support\Attachment\AttachmentService;
 use App\Support\AttachmentStorage;
 use App\Support\Config\SiteConfig;
-use App\Support\Globals;
 use App\Support\Logger;
 use App\Support\Path;
 use Illuminate\Support\Facades\DB;
@@ -33,19 +32,20 @@ class AttachmentMutationService
             return ['warning' => $lang['text_nothing_received'] ?? 'Nothing received.', 'script' => '', 'count_left' => $count_left];
         }
 
-        $savedirectorytype_attachment = (string) (app(Globals::class)->get('savedirectorytype_attachment') ?? 'monthdir');
-        $savedirectory_attachment = (string) (app(Globals::class)->get('savedirectory_attachment') ?? 'attachments');
-        $httpdirectory_attachment = (string) (app(Globals::class)->get('httpdirectory_attachment') ?? 'attachments');
-        $thumbnailtype_attachment = (string) (app(Globals::class)->get('thumbnailtype_attachment') ?? 'createthumb');
-        $thumbwidth_attachment = (int) (app(Globals::class)->get('thumbwidth_attachment') ?? 200);
-        $thumbheight_attachment = (int) (app(Globals::class)->get('thumbheight_attachment') ?? 200);
-        $thumbquality_attachment = (int) (app(Globals::class)->get('thumbquality_attachment') ?? 80);
-        $watermarkpos_attachment = (string) (app(Globals::class)->get('watermarkpos_attachment') ?? 'no');
-        $watermarkwidth_attachment = (int) (app(Globals::class)->get('watermarkwidth_attachment') ?? 100);
-        $watermarkheight_attachment = (int) (app(Globals::class)->get('watermarkheight_attachment') ?? 100);
-        $watermarkquality_attachment = (int) (app(Globals::class)->get('watermarkquality_attachment') ?? 90);
-        $altthumbwidth_attachment = (int) (app(Globals::class)->get('altthumbwidth_attachment') ?? 100);
-        $altthumbheight_attachment = (int) (app(Globals::class)->get('altthumbheight_attachment') ?? 100);
+        $config = SiteConfig::current()->attachment;
+        $savedirectorytype_attachment = $config->saveDirectoryType('monthdir');
+        $savedirectory_attachment = $config->saveDirectory('attachments');
+        $httpdirectory_attachment = $config->httpDirectory('attachments');
+        $thumbnailtype_attachment = $config->thumbnailType('createthumb');
+        $thumbwidth_attachment = $config->thumbWidth(200);
+        $thumbheight_attachment = $config->thumbHeight(200);
+        $thumbquality_attachment = $config->thumbQuality(80);
+        $watermarkpos_attachment = $config->watermarkPos('no');
+        $watermarkwidth_attachment = $config->watermarkWidth(100);
+        $watermarkheight_attachment = $config->watermarkHeight(100);
+        $watermarkquality_attachment = $config->watermarkQuality(90);
+        $altthumbwidth_attachment = $config->altThumbWidth(100);
+        $altthumbheight_attachment = $config->altThumbHeight(100);
 
         $isimage = false;
         $width = 0;

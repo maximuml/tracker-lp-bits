@@ -16,6 +16,7 @@ use App\Repositories\TorrentRepository;
 use App\Repositories\UploadRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Category;
+use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\CustomField;
 use App\Support\Globals;
@@ -80,7 +81,7 @@ class TorrentUploadController extends Controller
             LegacyResponse::abort($lang_upload['std_sorry'] ?? '', $lang_upload['std_unauthorized_to_upload'] ?? '', false);
         }
 
-        $enableoffer = app(Globals::class)->get('enableoffer', 'no');
+        $enableoffer = SiteConfig::current()->main->showOffer(false) ? 'yes' : 'no';
         $has_allowed_offer = 0;
         $offerRows = [];
         if ($enableoffer === 'yes') {
@@ -99,7 +100,7 @@ class TorrentUploadController extends Controller
             LegacyResponse::abort($lang_upload['std_sorry'] ?? '', $lang_upload['std_please_offer'] ?? '', false);
         }
 
-        $browsecatmode = (int) (app(Globals::class)->get('browsecatmode') ?? 1);
+        $browsecatmode = SiteConfig::current()->main->browseCat(1);
 
         return view('torrents.upload', [
             'uploadFreely' => $uploadFreely,

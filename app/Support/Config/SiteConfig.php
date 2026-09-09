@@ -36,6 +36,8 @@ final class SiteConfig
 
     public readonly ImageHostingConfig $imageHosting;
 
+    public readonly TweakConfig $tweak;
+
     /** @param array<string, mixed> $data */
     public function __construct(array $data = [])
     {
@@ -52,6 +54,7 @@ final class SiteConfig
         $this->backup = new BackupConfig($data['backup'] ?? []);
         $this->captcha = new CaptchaConfig($data['captcha'] ?? []);
         $this->authority = new AuthorityConfig($data['authority'] ?? []);
+        $this->tweak = new TweakConfig($data['tweak'] ?? []);
 
         $imageHostingData = $data['image_hosting'] ?? [];
         if (! empty($data['image_hosting_chevereto'])) {

@@ -6,6 +6,11 @@ namespace App\Support\Config;
 
 final class SecurityConfig extends Config
 {
+    public function disableEmailChange(bool $default = false): bool
+    {
+        return $this->bool('changeemail', $default);
+    }
+
     public function cheaterdet(int $default = 0): int
     {
         return $this->int('cheaterdet', $default);

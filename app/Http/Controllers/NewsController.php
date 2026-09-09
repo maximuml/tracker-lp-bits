@@ -13,6 +13,7 @@ use App\Http\Resources\NewsResource;
 use App\Models\News;
 use App\Repositories\IndexRepository;
 use App\Support\Cache\LegacyRedisCache;
+use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Globals;
 use App\Support\Http\SafeReturnUrl;
@@ -26,7 +27,7 @@ class NewsController extends LegacyController
     public function news(Request $request): Response|RedirectResponse|View
     {
         $langNews = (array) (app(Globals::class)->get('lang_news') ?? []);
-        $baseUrl = (string) app(Globals::class)->get('BASEURL', '');
+        $baseUrl = SiteConfig::current()->basic->baseUrl();
 
         $action = (string) ($request->input('action') ?? '');
 
@@ -266,7 +267,7 @@ class NewsController extends LegacyController
      */
     public function latest(): array
     {
-        $maxNews = (int) app(Globals::class)->get('maxnewsnum_main', 5);
+        $maxNews = SiteConfig::current()->main->maxNewsNum(5);
 
         $items = app(IndexRepository::class)->getLatestNews($maxNews);
 

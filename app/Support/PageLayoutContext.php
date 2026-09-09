@@ -6,6 +6,7 @@ namespace App\Support;
 
 use App\Enums\UserFontsize;
 use App\Support\Cache\LegacyRedisCache;
+use App\Support\Config\SiteConfig;
 
 /**
  * Context bundle for the legacy page header/footer (`PageLayout`).
@@ -97,40 +98,46 @@ final class PageLayoutContext
             }
         }
 
+        $siteConfig = SiteConfig::current();
+        $main = $siteConfig->main;
+        $tweak = $siteConfig->tweak;
+        $account = $siteConfig->account;
+        $basic = $siteConfig->basic;
+
         return new self(
             user: app(CurrentUser::class)->get(),
             lang: app(Language::class)->functions(),
             cache: app(LegacyRedisCache::class),
-            defaultStylesheet: (int) app(Globals::class)->get('defcss', 0),
+            defaultStylesheet: $main->defStylesheet(0),
             langDir: (string) app(Globals::class)->get('CURLANGDIR', ''),
-            siteName: (string) app(Globals::class)->get('SITENAME', ''),
-            slogan: (string) app(Globals::class)->get('SLOGAN', ''),
-            logoMain: (string) app(Globals::class)->get('logo_main', ''),
-            baseUrl: (string) app(Globals::class)->get('BASEURL', ''),
-            siteOnline: (string) app(Globals::class)->get('SITE_ONLINE', 'yes'),
-            enableDonation: (string) app(Globals::class)->get('enabledonation', 'no'),
-            titleKeywordsTweak: (string) app(Globals::class)->get('titlekeywords_tweak', ''),
-            metaKeywordsTweak: (string) app(Globals::class)->get('metakeywords_tweak', ''),
-            metaDescriptionTweak: (string) app(Globals::class)->get('metadescription_tweak', ''),
-            cssDateTweak: (string) app(Globals::class)->get('cssdate_tweak', ''),
-            deleteNotTransferTwoAccount: (int) app(Globals::class)->get('deletenotransfertwo_account', 0),
-            neverDeleteAccount: (int) app(Globals::class)->get('neverdelete_account', 0),
-            iniUploadMain: (int) app(Globals::class)->get('iniupload_main', 0),
-            dateFounded: (string) app(Globals::class)->get('datefounded', ''),
-            icpLicenseMain: (string) app(Globals::class)->get('icplicense_main', ''),
+            siteName: $basic->siteName(),
+            slogan: $main->slogan(),
+            logoMain: $main->logo(),
+            baseUrl: $basic->baseUrl(),
+            siteOnline: $main->siteOnline(true) ? 'yes' : 'no',
+            enableDonation: $main->donation(false) ? 'yes' : 'no',
+            titleKeywordsTweak: $tweak->titleKeywords(),
+            metaKeywordsTweak: $tweak->metaKeywords(),
+            metaDescriptionTweak: $tweak->metaDescription(),
+            cssDateTweak: $tweak->cssDate(),
+            deleteNotTransferTwoAccount: $account->deleteNoTransferTwo(0),
+            neverDeleteAccount: $account->neverdelete(),
+            iniUploadMain: $main->iniUpload(0),
+            dateFounded: $tweak->dateFounded(),
+            icpLicenseMain: $main->icpLicense(),
             addKeyShortcut: (string) app(Globals::class)->get('add_key_shortcut', ''),
             queryName: (array) app(Globals::class)->get('query_name', []),
-            enableSqlDebugTweak: (string) app(Globals::class)->get('enablesqldebug_tweak', 'no'),
-            sqlDebugTweak: (int) app(Globals::class)->get('sqldebug_tweak', 0),
-            analyticsCodeTweak: (string) app(Globals::class)->get('analyticscode_tweak', ''),
+            enableSqlDebugTweak: $tweak->enableSqlDebug(false) ? 'yes' : 'no',
+            sqlDebugTweak: $tweak->sqlDebug(0),
+            analyticsCodeTweak: $tweak->analyticsCode(),
             requestSearch: is_scalar(request()->query('search', '')) ? (string) request()->query('search', '') : '',
             requestSearchArea: is_scalar(request()->query('search_area', '')) ? (string) request()->query('search_area', '') : '',
             scriptFileName: Input::serverValue('SCRIPT_FILENAME', ''),
             script: $script,
-            enableOffer: (string) app(Globals::class)->get('enableoffer', ''),
+            enableOffer: $main->showOffer(false) ? 'yes' : '',
             customMenu: null,
-            maxdlSystem: (string) app(Globals::class)->get('maxdlsystem', ''),
-            whereTweak: (string) app(Globals::class)->get('where_tweak', ''),
+            maxdlSystem: $main->maxDlSystem(false) ? 'yes' : '',
+            whereTweak: $tweak->where(),
             menuHtml: (string) app(Globals::class)->get('nexus_menu_html', ''),
             menuSelected: (string) app(Globals::class)->get('nexus_menu_selected', ''),
             adminClass: defined('UC_ADMINISTRATOR') ? (int) \constant('UC_ADMINISTRATOR') : 0,

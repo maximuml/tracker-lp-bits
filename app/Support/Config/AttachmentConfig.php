@@ -41,6 +41,66 @@ final class AttachmentConfig extends Config
         return $this->string("ext{$this->tierName($tier)}", '');
     }
 
+    public function saveDirectory(string $default = ''): string
+    {
+        return $this->string('savedirectory', $default);
+    }
+
+    public function saveDirectoryType(string $default = 'monthdir'): string
+    {
+        return $this->string('savedirectorytype', $default);
+    }
+
+    public function thumbnailType(string $default = 'createthumb'): string
+    {
+        return $this->string('thumbnailtype', $default);
+    }
+
+    public function thumbWidth(int $default = 200): int
+    {
+        return $this->int('thumbwidth', $default);
+    }
+
+    public function thumbHeight(int $default = 200): int
+    {
+        return $this->int('thumbheight', $default);
+    }
+
+    public function thumbQuality(int $default = 80): int
+    {
+        return $this->int('thumbquality', $default);
+    }
+
+    public function watermarkPos(string $default = 'no'): string
+    {
+        return $this->string('watermarkpos', $default);
+    }
+
+    public function watermarkWidth(int $default = 100): int
+    {
+        return $this->int('watermarkwidth', $default);
+    }
+
+    public function watermarkHeight(int $default = 100): int
+    {
+        return $this->int('watermarkheight', $default);
+    }
+
+    public function watermarkQuality(int $default = 90): int
+    {
+        return $this->int('watermarkquality', $default);
+    }
+
+    public function altThumbWidth(int $default = 100): int
+    {
+        return $this->int('altthumbwidth', $default);
+    }
+
+    public function altThumbHeight(int $default = 100): int
+    {
+        return $this->int('altthumbheight', $default);
+    }
+
     private function tierName(int $tier): string
     {
         return match ($tier) {

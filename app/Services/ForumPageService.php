@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Globals;
 use App\Support\LegacyResponse;
@@ -41,24 +42,15 @@ final class ForumPageService
         $userId = (int) ($curUser['id'] ?? 0);
 
         // Global variables previously set by the procedural partial.
-        $maxsubjectlength = 100;
+        $mainConfig = SiteConfig::current()->main;
+        $maxsubjectlength = $mainConfig->maxSubjectLength(100);
         $postsperpage = (int) ($curUser['postsperpage'] ?? 0);
         if (! $postsperpage) {
-            $forumpostsperpage = app(Globals::class)->get('forumpostsperpage');
-            if (is_numeric($forumpostsperpage)) {
-                $postsperpage = (int) $forumpostsperpage;
-            } else {
-                $postsperpage = 10;
-            }
+            $postsperpage = $mainConfig->forumPostsPerPage(10);
         }
         $topicsperpage = (int) ($curUser['topicsperpage'] ?? 0);
         if (! $topicsperpage) {
-            $forumtopicsperpageMain = app(Globals::class)->get('forumtopicsperpage_main');
-            if (is_numeric($forumtopicsperpageMain)) {
-                $topicsperpage = (int) $forumtopicsperpageMain;
-            } else {
-                $topicsperpage = 20;
-            }
+            $topicsperpage = $mainConfig->forumTopicsPerPage(20);
         }
         $todayDate = date('Y-m-d');
         app(Globals::class)->set('maxsubjectlength', $maxsubjectlength);
@@ -68,7 +60,7 @@ final class ForumPageService
 
         $action = htmlspecialchars(trim((string) request()->query('action')));
 
-        $sitename = (string) app(Globals::class)->get('SITENAME', '');
+        $sitename = SiteConfig::current()->basic->siteName();
 
         // catchup is a query-flag action, not a dispatched section.
         if (((request()->query('catchup') !== null)) && request()->query('catchup') == 1) {

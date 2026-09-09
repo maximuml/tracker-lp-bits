@@ -24,6 +24,30 @@ use Illuminate\View\View;
 
 class PollController extends LegacyController
 {
+    private PollRepository $pollRepository;
+
+    private IndexRepository $indexRepository;
+
+    private CurrentUser $currentUser;
+
+    private Globals $globals;
+
+    private ?LegacyRedisCache $legacyRedisCache;
+
+    public function __construct(
+        PollRepository $pollRepository,
+        IndexRepository $indexRepository,
+        CurrentUser $currentUser,
+        Globals $globals,
+        ?LegacyRedisCache $legacyRedisCache,
+    ) {
+        $this->pollRepository = $pollRepository;
+        $this->indexRepository = $indexRepository;
+        $this->currentUser = $currentUser;
+        $this->globals = $globals;
+        $this->legacyRedisCache = $legacyRedisCache;
+    }
+
     public function makepoll(Request $request): Response|RedirectResponse|View
     {
         $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;
@@ -39,7 +63,7 @@ class PollController extends LegacyController
             if ($pollid <= 0) {
                 return $this->legacyAbortResponse('Error', 'Invalid poll id.');
             }
-            $poll = app(PollRepository::class)->findForEdit($pollid);
+            $poll = $this->pollRepository->findForEdit($pollid);
             if (! $poll) {
                 return $this->legacyAbortResponse('Error', 'No poll with that ID.');
             }
@@ -60,7 +84,7 @@ class PollController extends LegacyController
             }
 
             $data = array_merge(['question' => $question], $options);
-            $newId = app(PollRepository::class)->createOrUpdate($data, $pollid > 0 ? $pollid : null);
+            $newId = $this->pollRepository->createOrUpdate($data, $pollid > 0 ? $pollid : null);
 
             if ($returnto === 'main') {
                 return redirect(url('/'));
@@ -73,11 +97,11 @@ class PollController extends LegacyController
 
         $ageWarning = '';
         if ($pollid <= 0) {
-            $lastPoll = app(PollRepository::class)->lastPoll();
+            $lastPoll = $this->pollRepository->lastPoll();
             if (! empty($lastPoll)) {
                 $hours = (int) floor((time() - strtotime((string) $lastPoll['added'])) / 3600);
                 $days = (int) floor($hours / 24);
-                $lang = (array) (app(Globals::class)->get('lang_makepoll') ?? []);
+                $lang = (array) ($this->globals->get('lang_makepoll') ?? []);
                 if ($days >= 1) {
                     $t = $days.($lang['text_day'] ?? ' day').Strings::addS($days);
                 } else {
@@ -100,14 +124,14 @@ class PollController extends LegacyController
         $pollid = (int) $request->input('id', 0);
 
         if ($pollid > 0) {
-            $poll = app(PollRepository::class)->findWithOptions($pollid);
+            $poll = $this->pollRepository->findWithOptions($pollid);
             if (! $poll) {
-                $lang = (array) (app(Globals::class)->get('lang_polloverview') ?? []);
+                $lang = (array) ($this->globals->get('lang_polloverview') ?? []);
 
                 return $this->legacyAbortResponse($lang['std_error'] ?? 'Error', $lang['text_no_poll_id'] ?? 'Invalid poll ID.');
             }
 
-            $count = app(PollRepository::class)->countAnswers($pollid);
+            $count = $this->pollRepository->countAnswers($pollid);
             $answers = [];
             $pagertop = '';
             $pagerbottom = '';
@@ -116,8 +140,8 @@ class PollController extends LegacyController
             if ($count > 0) {
                 $perpage = 100;
                 [$pagertop, $pagerbottom, , $offset, $perpage] = Pagination::pager($perpage, $count, "?id={$pollid}&");
-                $answers = app(PollRepository::class)->answers($pollid, $offset, $perpage);
-                $userDisplayMap = app(PollRepository::class)->userDisplayMap($answers);
+                $answers = $this->pollRepository->answers($pollid, $offset, $perpage);
+                $userDisplayMap = $this->pollRepository->userDisplayMap($answers);
             }
 
             return $this->legacyPage($request, 'polloverview', true, [
@@ -131,7 +155,7 @@ class PollController extends LegacyController
             ]);
         }
 
-        $polls = app(PollRepository::class)->listAll();
+        $polls = $this->pollRepository->listAll();
 
         return $this->legacyPage($request, 'polloverview', true, [
             'mode' => 'list',
@@ -205,7 +229,7 @@ class PollController extends LegacyController
      */
     public function latest(): array
     {
-        $pollArr = app(IndexRepository::class)->getCurrentPoll();
+        $pollArr = $this->indexRepository->getCurrentPoll();
 
         if ($pollArr === null) {
             return $this->success([], 'No poll');
@@ -221,7 +245,7 @@ class PollController extends LegacyController
      */
     public function vote(PollVoteRequest $request): array
     {
-        $currentUser = (array) (app(CurrentUser::class)->get() ?? []);
+        $currentUser = (array) ($this->currentUser->get() ?? []);
         $userId = (int) ($currentUser['id'] ?? 0);
 
         $data = $request->validated();
@@ -238,18 +262,17 @@ class PollController extends LegacyController
             return $this->fail([], 'Invalid poll choice');
         }
 
-        if (app(IndexRepository::class)->hasVoted($pollId, $userId)) {
+        if ($this->indexRepository->hasVoted($pollId, $userId)) {
             return $this->fail([], 'Already voted');
         }
 
-        app(IndexRepository::class)->recordPollVote($pollId, $userId, $choice);
+        $this->indexRepository->recordPollVote($pollId, $userId, $choice);
 
         // Invalidate legacy poll cache so the index page shows fresh results
         // after an API vote — mirrors IndexController::handlePollVote().
-        $cache = app(LegacyRedisCache::class);
-        if ($cache !== null) {
-            $cache->delete_value('current_poll_content');
-            $cache->delete_value('current_poll_result', true);
+        if ($this->legacyRedisCache !== null) {
+            $this->legacyRedisCache->delete_value('current_poll_content');
+            $this->legacyRedisCache->delete_value('current_poll_result', true);
         }
 
         return $this->success(['success' => true], 'Vote recorded');

@@ -20,7 +20,7 @@ namespace App\Support;
  * The bag is bound as a singleton in the container and reset by
  * {@see ResetNexus} between requests, so it is safe under Octane.
  */
-final class LegacyHeaderBag
+class LegacyHeaderBag
 {
     /** @var array<string, list<string>> */
     private array $headers = [];

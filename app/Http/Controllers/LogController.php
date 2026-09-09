@@ -22,12 +22,28 @@ use Illuminate\View\View;
 
 class LogController extends LegacyController
 {
+    private LogRepository $logRepository;
+
+    private CurrentUser $currentUser;
+
+    private Globals $globals;
+
+    private ?LegacyRedisCache $legacyRedisCache;
+
+    public function __construct(LogRepository $logRepository, CurrentUser $currentUser, Globals $globals, ?LegacyRedisCache $legacyRedisCache)
+    {
+        $this->logRepository = $logRepository;
+        $this->currentUser = $currentUser;
+        $this->globals = $globals;
+        $this->legacyRedisCache = $legacyRedisCache;
+    }
+
     public function legacy(Request $request): View|RedirectResponse|Response
     {
-        $langLog = (array) (app(Globals::class)->get('lang_log') ?? []);
+        $langLog = (array) ($this->globals->get('lang_log') ?? []);
 
         if (! Permission::can(PermissionEnum::LOG)) {
-            $logClass = (int) app(Globals::class)->get('log_class', 0);
+            $logClass = (int) $this->globals->get('log_class', 0);
 
             return $this->legacyAbortResponse(
                 $langLog['std_sorry'] ?? 'Sorry',
@@ -36,7 +52,7 @@ class LogController extends LegacyController
             );
         }
 
-        $currentUser = (array) (app(CurrentUser::class)->get() ?? []);
+        $currentUser = (array) ($this->currentUser->get() ?? []);
         $userId = (int) ($currentUser['id'] ?? 0);
 
         $action = (string) ($request->input('action', 'dailylog'));
@@ -63,13 +79,13 @@ class LogController extends LegacyController
         $canConfidential = Permission::can(PermissionEnum::CONFIDENTIAL_LOG);
 
         $filters = ['search' => $search, 'query' => $q];
-        $count = app(LogRepository::class)->countSiteLog($filters);
+        $count = $this->logRepository->countSiteLog($filters);
 
         $perpage = 50;
         $base = '?action=dailylog&'.($search !== '' && $canConfidential ? 'search='.rawurlencode($search).'&' : '').($q !== '' ? 'query='.rawurlencode($q).'&' : '');
         [$pagertop, $pagerbottom, , $offset] = Pagination::pager($perpage, $count, $base);
 
-        $logRows = app(LogRepository::class)->getSiteLog($filters, (int) $offset, $perpage);
+        $logRows = $this->logRepository->getSiteLog($filters, (int) $offset, $perpage);
 
         $userIds = array_filter(array_unique(array_column($logRows, 'uid')));
         UserDisplay::preload(array_map('intval', $userIds));
@@ -109,7 +125,7 @@ class LogController extends LegacyController
                 return $this->legacyAbortResponse($langLog['std_error'] ?? 'Error', $langLog['std_permission_denied'] ?? 'Permission denied.');
             }
             $id = (int) $request->input('id', 0);
-            $editItem = $id > 0 ? app(LogRepository::class)->getChronicleById($id) : null;
+            $editItem = $id > 0 ? $this->logRepository->getChronicleById($id) : null;
             if ($editItem === null) {
                 return redirect('/log.php?action=chronicle');
             }
@@ -125,7 +141,7 @@ class LogController extends LegacyController
             if ($do === 'add') {
                 $txt = (string) ($request->input('txt') ?? '');
                 if ($txt !== '') {
-                    app(LogRepository::class)->addChronicle($userId, $txt);
+                    $this->logRepository->addChronicle($userId, $txt);
                 }
 
                 return redirect('/log.php?action=chronicle');
@@ -138,7 +154,7 @@ class LogController extends LegacyController
                     return redirect('/log.php?action=chronicle');
                 }
                 if ($txt !== '') {
-                    app(LogRepository::class)->updateChronicle($id, $txt);
+                    $this->logRepository->updateChronicle($id, $txt);
                 }
 
                 return redirect('/log.php?action=chronicle');
@@ -149,7 +165,7 @@ class LogController extends LegacyController
                 if ($id <= 0) {
                     return redirect('/log.php?action=chronicle');
                 }
-                app(LogRepository::class)->deleteChronicle($id);
+                $this->logRepository->deleteChronicle($id);
 
                 return redirect('/log.php?action=chronicle');
             }
@@ -164,12 +180,12 @@ class LogController extends LegacyController
      */
     private function chronicleList(Request $request, string $q, bool $canManage, array $langLog, ?array $editItem): View|RedirectResponse
     {
-        $count = app(LogRepository::class)->countChronicle($q);
+        $count = $this->logRepository->countChronicle($q);
         $perpage = 50;
         $base = '?action=chronicle&'.($q !== '' ? 'query='.rawurlencode($q).'&' : '');
         [$pagertop, $pagerbottom, , $offset] = Pagination::pager($perpage, $count, $base);
 
-        $chronicleRows = app(LogRepository::class)->getChronicle($q, (int) $offset, $perpage);
+        $chronicleRows = $this->logRepository->getChronicle($q, (int) $offset, $perpage);
 
         return $this->legacyPage($request, 'log', true, [
             'mode' => 'chronicle',
@@ -193,13 +209,13 @@ class LogController extends LegacyController
         $search = (string) ($request->input('search') ?? '');
 
         $filters = ['search' => $search, 'query' => $q];
-        $count = app(LogRepository::class)->countNews($filters);
+        $count = $this->logRepository->countNews($filters);
 
         $perpage = 20;
         $base = '?action=news&'.($search !== '' ? 'search='.rawurlencode($search).'&' : '').($q !== '' ? 'query='.rawurlencode($q).'&' : '');
         [$pagertop, $pagerbottom, , $offset] = Pagination::pager($perpage, $count, $base);
 
-        $newsRows = app(LogRepository::class)->getNews($filters, (int) $offset, $perpage);
+        $newsRows = $this->logRepository->getNews($filters, (int) $offset, $perpage);
 
         return $this->legacyPage($request, 'log', true, [
             'mode' => 'news',
@@ -246,12 +262,11 @@ class LogController extends LegacyController
             if ((int) $request->input('sure', 0) !== 1) {
                 return $this->legacyAbortResponse($langLog['std_error'] ?? 'Error', $langLog['std_permission_denied'] ?? 'Permission denied.');
             }
-            app(LogRepository::class)->deletePoll($pollid);
+            $this->logRepository->deletePoll($pollid);
 
-            $cache = app(LegacyRedisCache::class);
-            if ($cache !== null) {
-                $cache->delete_value('current_poll_content');
-                $cache->delete_value('current_poll_result', true);
+            if ($this->legacyRedisCache !== null) {
+                $this->legacyRedisCache->delete_value('current_poll_content');
+                $this->legacyRedisCache->delete_value('current_poll_result', true);
             }
 
             if ($returnto === 'main') {
@@ -261,12 +276,12 @@ class LogController extends LegacyController
             return redirect('/log.php?action=poll&deleted=1');
         }
 
-        $pollcount = app(LogRepository::class)->getPollCount();
+        $pollcount = $this->logRepository->getPollCount();
         if ($pollcount === 0) {
             return $this->legacyAbortResponse($langLog['std_sorry'] ?? 'Sorry', $langLog['std_no_polls'] ?? 'No polls.');
         }
 
-        $polls = app(LogRepository::class)->getPollsExceptFirst();
+        $polls = $this->logRepository->getPollsExceptFirst();
         $pollData = [];
         foreach ($polls as $poll) {
             $options = [];
@@ -277,7 +292,7 @@ class LogController extends LegacyController
                 }
             }
 
-            $voteCounts = app(LogRepository::class)->getPollVoteCounts((int) ($poll['id'] ?? 0));
+            $voteCounts = $this->logRepository->getPollVoteCounts((int) ($poll['id'] ?? 0));
             $totalVotes = array_sum($voteCounts);
 
             $computedOptions = [];

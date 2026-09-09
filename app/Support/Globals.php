@@ -12,7 +12,7 @@ namespace App\Support;
  * actual array storage, so getGlobalsForView() and other code that
  * reads from NexusContext::$globals continue to work.
  */
-final class Globals
+class Globals
 {
     /**
      * Get a global value by key, or default if not set.

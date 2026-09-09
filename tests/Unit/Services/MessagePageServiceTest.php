@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Services;
 
+use App\Repositories\MessageRepository;
 use App\Services\MessagePageService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
@@ -44,7 +45,12 @@ final class MessagePageServiceTest extends TestCase
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
         $this->mockCache();
-        $this->service = new MessagePageService;
+        $this->service = new MessagePageService(
+            $this->app->make(MessageRepository::class),
+            $this->app->make(CurrentUser::class),
+            $this->app->make(Globals::class),
+            $this->app->make(LegacyRedisCache::class),
+        );
     }
 
     protected function tearDown(): void
@@ -121,14 +127,13 @@ final class MessagePageServiceTest extends TestCase
     private function authenticatedUser(array $userData = []): void
     {
         $defaults = ['id' => 1, 'username' => 'testuser', 'class' => 1, 'pmnum' => 20];
-        $currentUser = new CurrentUser;
+        $currentUser = $this->app->make(CurrentUser::class);
         $currentUser->set(array_merge($defaults, $userData));
-        $this->app->instance(CurrentUser::class, $currentUser);
     }
 
     private function mockGlobals(): void
     {
-        $globals = new Globals;
+        $globals = $this->app->make(Globals::class);
         $globals->set('BASEURL', 'example.com');
         $globals->set('CONTENT_WIDTH', '737');
         $globals->set('lang_messages', [
@@ -149,7 +154,6 @@ final class MessagePageServiceTest extends TestCase
             'select_inbox' => 'Inbox',
             'select_sentbox' => 'Sentbox',
         ]);
-        $this->app->instance(Globals::class, $globals);
     }
 
     /**

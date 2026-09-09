@@ -80,7 +80,12 @@ final class ForumTopicViewServiceTest extends TestCase
             $this->app->make(ForumRepository::class),
             $this->app->make(LegacyRedisCache::class),
         );
-        $this->service = new ForumTopicViewService($indexService);
+        $this->service = new ForumTopicViewService(
+            $indexService,
+            $this->app->make(ForumRepository::class),
+            $this->app->make(Globals::class),
+            $this->app->make(LegacyRedisCache::class),
+        );
     }
 
     protected function tearDown(): void
@@ -129,7 +134,12 @@ final class ForumTopicViewServiceTest extends TestCase
             $forumRepo,
             $cacheInstance,
         );
-        $this->service = new ForumTopicViewService($indexService);
+        $this->service = new ForumTopicViewService(
+            $indexService,
+            $forumRepo,
+            $this->app->make(Globals::class),
+            $cacheInstance,
+        );
     }
 
     /**
@@ -145,7 +155,7 @@ final class ForumTopicViewServiceTest extends TestCase
         ];
         $merged = array_merge($defaults, $data);
 
-        $currentUser = new CurrentUser;
+        $currentUser = $this->app->make(CurrentUser::class);
         $currentUser->set($merged);
         $this->app->instance(CurrentUser::class, $currentUser);
 

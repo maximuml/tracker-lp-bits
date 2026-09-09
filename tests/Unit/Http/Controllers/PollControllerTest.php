@@ -31,7 +31,7 @@ final class PollControllerTest extends TestCase
         Poll::factory()->create(['question' => 'Test poll 1']);
         Poll::factory()->create(['question' => 'Test poll 2']);
 
-        $controller = new PollController;
+        $controller = app(PollController::class);
         $request = PollStoreRequest::create('/api/polls', 'GET', ['limit' => 10]);
 
         $result = $controller->index($request);
@@ -44,7 +44,7 @@ final class PollControllerTest extends TestCase
     {
         $poll = Poll::factory()->create(['question' => 'Show me']);
 
-        $controller = new PollController;
+        $controller = app(PollController::class);
         $result = $controller->show($poll);
 
         $this->assertSame(0, $result['ret']);
@@ -59,7 +59,7 @@ final class PollControllerTest extends TestCase
 
     public function test_store_creates_new_poll(): void
     {
-        $controller = new PollController;
+        $controller = app(PollController::class);
         $request = PollStoreRequest::create('/api/polls', 'POST', [
             'question' => 'New poll?',
             'option0' => 'Yes',
@@ -79,7 +79,7 @@ final class PollControllerTest extends TestCase
     {
         $poll = Poll::factory()->create(['question' => 'Old question']);
 
-        $controller = new PollController;
+        $controller = app(PollController::class);
         $request = PollUpdateRequest::create('/api/polls/'.$poll->id, 'PUT', [
             'question' => 'Updated question',
         ]);
@@ -97,7 +97,7 @@ final class PollControllerTest extends TestCase
     {
         $poll = Poll::factory()->create(['question' => 'Delete me']);
 
-        $controller = new PollController;
+        $controller = app(PollController::class);
         $result = $controller->destroy($poll);
 
         $this->assertSame(0, $result['ret']);
@@ -124,7 +124,7 @@ final class PollControllerTest extends TestCase
         $cache->shouldReceive('delete_value')->twice();
         app()->instance(LegacyRedisCache::class, $cache);
 
-        $controller = new PollController;
+        $controller = app(PollController::class);
         $request = PollVoteRequest::create('/api/polls/vote', 'POST', [
             'poll_id' => $poll->id,
             'choice' => 0,
@@ -158,7 +158,7 @@ final class PollControllerTest extends TestCase
         $cache->shouldReceive('delete_value')->twice();
         app()->instance(LegacyRedisCache::class, $cache);
 
-        $controller = new PollController;
+        $controller = app(PollController::class);
         $request = PollVoteRequest::create('/api/polls/vote', 'POST', [
             'poll_id' => $poll->id,
             'choice' => 255,
@@ -177,7 +177,7 @@ final class PollControllerTest extends TestCase
         $currentUser = ['id' => 997, 'username' => 'tester'];
         app(CurrentUser::class)->set($currentUser);
 
-        $controller = new PollController;
+        $controller = app(PollController::class);
         $request = PollVoteRequest::create('/api/polls/vote', 'POST', [
             'poll_id' => 999999,
             'choice' => 0,
@@ -204,7 +204,7 @@ final class PollControllerTest extends TestCase
         $currentUser = ['id' => 996, 'username' => 'tester'];
         app(CurrentUser::class)->set($currentUser);
 
-        $controller = new PollController;
+        $controller = app(PollController::class);
         $request = PollVoteRequest::create('/api/polls/vote', 'POST', [
             'poll_id' => $poll->id,
             'choice' => 5, // option5 is empty
@@ -234,7 +234,7 @@ final class PollControllerTest extends TestCase
         $indexRepo->shouldNotReceive('recordPollVote');
         app()->instance(IndexRepository::class, $indexRepo);
 
-        $controller = new PollController;
+        $controller = app(PollController::class);
         $request = PollVoteRequest::create('/api/polls/vote', 'POST', [
             'poll_id' => $poll->id,
             'choice' => 0,
@@ -273,7 +273,7 @@ final class PollControllerTest extends TestCase
             ->once();
         app()->instance(LegacyRedisCache::class, $cache);
 
-        $controller = new PollController;
+        $controller = app(PollController::class);
         $request = PollVoteRequest::create('/api/polls/vote', 'POST', [
             'poll_id' => $poll->id,
             'choice' => 0,

@@ -26,6 +26,9 @@ final class ForumListingService
 {
     public function __construct(
         private readonly ForumIndexService $index,
+        private readonly ForumRepository $forumRepository,
+        private readonly Globals $globals,
+        private readonly ?LegacyRedisCache $legacyRedisCache,
     ) {}
 
     /**
@@ -37,7 +40,6 @@ final class ForumListingService
      */
     public function buildViewForum(array $lang, array $curUser, Request $request, int $topicsperpage, int $postsperpage): array
     {
-        $Cache = app(LegacyRedisCache::class);
         $forumid = (int) (request()->query('forumid') ?? 0);
         LegacyResponse::assertId($forumid, true);
         $userid = (int) ($curUser['id'] ?? 0);
@@ -83,16 +85,16 @@ final class ForumListingService
                 $sortDirection = 'desc';
         }
 
-        $topicResult = app(ForumRepository::class)->getTopicsByForum((int) $forumid, (string) $search, (string) $sortColumn, (string) $sortDirection, 0, 0);
+        $topicResult = $this->forumRepository->getTopicsByForum((int) $forumid, (string) $search, (string) $sortColumn, (string) $sortDirection, 0, 0);
         $num = (int) $topicResult['count'];
 
         [$pagertop, $pagerbottom, , $offset, $perpage] = Pagination::pager($topicsperpage, $num, '?'.'action=viewforum&forumid='.$forumid.$addparam.'&');
-        $topicResult = app(ForumRepository::class)->getTopicsByForum((int) $forumid, (string) $search, (string) $sortColumn, (string) $sortDirection, (int) $offset, (int) $perpage);
+        $topicResult = $this->forumRepository->getTopicsByForum((int) $forumid, (string) $search, (string) $sortColumn, (string) $sortDirection, (int) $offset, (int) $perpage);
         $topicRows = $topicResult['rows'];
         $numtopics = $topicRows->count();
 
-        $SITENAME = (string) app(Globals::class)->get('SITENAME', '');
-        $enabletooltipTweak = (string) app(Globals::class)->get('enabletooltip_tweak', '');
+        $SITENAME = (string) $this->globals->get('SITENAME', '');
+        $enabletooltipTweak = (string) $this->globals->get('enabletooltip_tweak', '');
 
         ob_start();
         echo '<h1 align="center"><a class="faqlink" href="forums.php">'.$SITENAME.'&nbsp;'.($lang['text_forums'] ?? '').'</a>--><a class="faqlink" href="'.htmlspecialchars('forums.php?action=viewforum&forumid='.$forumid).'">'.$forumname."</a></h1>\n";
@@ -136,9 +138,9 @@ final class ForumListingService
                 $sticky = $topicarr['sticky'] == 1;
                 $hlcolor = (int) $topicarr['hlcolor'];
 
-                if (! $posts = $Cache?->get_value('topic_'.$topicid.'_post_count')) {
-                    $posts = app(ForumRepository::class)->countTopicPosts((int) $topicid);
-                    $Cache?->cache_value('topic_'.$topicid.'_post_count', $posts, 3600);
+                if (! $posts = $this->legacyRedisCache?->get_value('topic_'.$topicid.'_post_count')) {
+                    $posts = $this->forumRepository->countTopicPosts((int) $topicid);
+                    $this->legacyRedisCache?->cache_value('topic_'.$topicid.'_post_count', $posts, 3600);
                 }
 
                 $replies = max(0, $posts - 1);
@@ -265,9 +267,9 @@ final class ForumListingService
         $beforepostid = (int) (request()->query('beforepostid') ?? 0);
         $maxresults = 25;
         $lastCatchup = (int) ($curUser['last_catchup'] ?? 0);
-        $unreadTopics = app(ForumRepository::class)->getUnreadTopics($lastCatchup, $beforepostid ?: null, 100);
+        $unreadTopics = $this->forumRepository->getUnreadTopics($lastCatchup, $beforepostid ?: null, 100);
 
-        $SITENAME = (string) app(Globals::class)->get('SITENAME', '');
+        $SITENAME = (string) $this->globals->get('SITENAME', '');
 
         ob_start();
         echo '<h1 align="center"><a class="faqlink" href="forums.php">'.$SITENAME.'&nbsp;'.($lang['text_forums'] ?? '').'</a>-->'.($lang['text_topics_with_unread_posts'] ?? '').'</h1>';
@@ -333,7 +335,7 @@ final class ForumListingService
         $found = '';
         $keywords = htmlspecialchars(trim((string) (request()->query('keywords') ?? '')));
         if ($keywords != '') {
-            $searchResult = app(ForumRepository::class)->searchForumPosts((string) $keywords, (int) UserDisplay::currentClass(), 0, 0);
+            $searchResult = $this->forumRepository->searchForumPosts((string) $keywords, (int) UserDisplay::currentClass(), 0, 0);
             $hits = (int) $searchResult['hits'];
             if ($hits) {
                 $error = false;
@@ -392,7 +394,7 @@ final class ForumListingService
         if (! $error) {
             $perpage = $topicsperpage;
             [$pagertop, $pagerbottom, , $offset, $perpage] = Pagination::pager($perpage, $hits, 'forums.php?action=search&keywords='.rawurlencode($keywords).'&');
-            $searchResult = app(ForumRepository::class)->searchForumPosts((string) $keywords, (int) UserDisplay::currentClass(), (int) $offset, (int) $perpage);
+            $searchResult = $this->forumRepository->searchForumPosts((string) $keywords, (int) UserDisplay::currentClass(), (int) $offset, (int) $perpage);
             $posts = $searchResult['rows'];
 
             echo $pagertop;

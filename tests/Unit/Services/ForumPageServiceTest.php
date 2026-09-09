@@ -61,8 +61,18 @@ final class ForumPageServiceTest extends TestCase
             $this->app->make(LegacyRedisCache::class),
         );
         $composeService = new ForumComposeService;
-        $topicViewService = new ForumTopicViewService($indexService);
-        $listingService = new ForumListingService($indexService);
+        $topicViewService = new ForumTopicViewService(
+            $indexService,
+            $this->app->make(ForumRepository::class),
+            $this->app->make(Globals::class),
+            $this->app->make(LegacyRedisCache::class),
+        );
+        $listingService = new ForumListingService(
+            $indexService,
+            $this->app->make(ForumRepository::class),
+            $this->app->make(Globals::class),
+            $this->app->make(LegacyRedisCache::class),
+        );
         $this->service = new ForumPageService($indexService, $composeService, $topicViewService, $listingService);
     }
 
@@ -114,8 +124,18 @@ final class ForumPageServiceTest extends TestCase
             $cacheInstance,
         );
         $composeService = new ForumComposeService;
-        $topicViewService = new ForumTopicViewService($indexService);
-        $listingService = new ForumListingService($indexService);
+        $topicViewService = new ForumTopicViewService(
+            $indexService,
+            $forumRepo,
+            $this->app->make(Globals::class),
+            $cacheInstance,
+        );
+        $listingService = new ForumListingService(
+            $indexService,
+            $forumRepo,
+            $this->app->make(Globals::class),
+            $cacheInstance,
+        );
         $this->service = new ForumPageService($indexService, $composeService, $topicViewService, $listingService);
     }
 

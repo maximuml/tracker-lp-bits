@@ -31,6 +31,9 @@ final class ForumTopicViewService
 {
     public function __construct(
         private readonly ForumIndexService $index,
+        private readonly ForumRepository $forumRepository,
+        private readonly Globals $globals,
+        private readonly ?LegacyRedisCache $legacyRedisCache,
     ) {}
 
     /**
@@ -42,7 +45,6 @@ final class ForumTopicViewService
      */
     public function buildViewTopic(array $lang, array $curUser, int $userId, Request $request, int $postsperpage): array
     {
-        $Cache = app(LegacyRedisCache::class);
         $highlight = htmlspecialchars(trim((string) (request()->query('highlight') ?? '')));
         $topicid = (int) (request()->query('topicid') ?? 0);
         LegacyResponse::assertId($topicid, true);
@@ -54,7 +56,7 @@ final class ForumTopicViewService
             $addparam = 'action=viewtopic&topicid='.$topicid;
         }
 
-        $topic = app(ForumRepository::class)->getTopic((int) $topicid);
+        $topic = $this->forumRepository->getTopic((int) $topicid);
         if (! $topic) {
             LegacyResponse::abort($lang['std_forum_error'] ?? '', $lang['std_topic_not_found'] ?? '');
 
@@ -87,11 +89,11 @@ final class ForumTopicViewService
             $maypost = false;
         }
 
-        app(ForumRepository::class)->incrementTopicViews((int) $topicid);
+        $this->forumRepository->incrementTopicViews((int) $topicid);
 
-        $postcount = app(ForumRepository::class)->countTopicPosts((int) $topicid, $authorid ?: null);
+        $postcount = $this->forumRepository->countTopicPosts((int) $topicid, $authorid ?: null);
         if (! $authorid) {
-            $Cache?->cache_value('topic_'.$topicid.'_post_count', $postcount, 3600);
+            $this->legacyRedisCache?->cache_value('topic_'.$topicid.'_post_count', $postcount, 3600);
         }
 
         $pagerarr = [];
@@ -100,7 +102,7 @@ final class ForumTopicViewService
 
         if ((isset($page[0])) && $page[0] == 'p') {
             $findpost = substr($page, 1);
-            $postIds = app(ForumRepository::class)->getTopicPostIds((int) $topicid, $authorid ?: null);
+            $postIds = $this->forumRepository->getTopicPostIds((int) $topicid, $authorid ?: null);
             $i = array_search($findpost, $postIds);
             if ($i === false) {
                 $i = 0;
@@ -159,7 +161,7 @@ final class ForumTopicViewService
         $pagertop = '<p align="center">'.$pager.'<br />'.$pagerstr."</p>\n";
         $pagerbottom = '<p align="center">'.$pagerstr.'<br />'.$pager."</p>\n";
 
-        $postRows = app(ForumRepository::class)->getTopicPosts((int) $topicid, $authorid ?: null, (int) $offset, (int) $perpage);
+        $postRows = $this->forumRepository->getTopicPosts((int) $topicid, $authorid ?: null, (int) $offset, (int) $perpage);
         $pc = $postRows->count();
         $allPosts = [];
         $uidArr = [];
@@ -171,7 +173,7 @@ final class ForumTopicViewService
         $uidArr = array_keys($uidArr);
         unset($arr);
 
-        $SITENAME = (string) app(Globals::class)->get('SITENAME', '');
+        $SITENAME = (string) $this->globals->get('SITENAME', '');
 
         ob_start();
         echo '<h1 align="center"><a class="faqlink" href="forums.php">'.$SITENAME.'&nbsp;'.($lang['text_forums'] ?? '').'</a>--><a class="faqlink" href="'.htmlspecialchars('?action=viewforum&forumid='.$forumid).'">'.$forumname.'</a><b>--></b><span id="top">'.$subject.($locked ? '&nbsp;&nbsp;<b>[<font class="striking">'.($lang['text_locked'] ?? '').'</font>]</b>' : '')."</span></h1>\n";
@@ -189,7 +191,7 @@ final class ForumTopicViewService
         Html::beginFrame();
 
         $neededColumns = ['id', 'class', 'enabled', 'privacy', 'avatar', 'signature', 'uploaded', 'downloaded', 'last_access', 'username', 'donor', 'leechwarn', 'warned', 'title'];
-        $userInfoArr = app(ForumRepository::class)->getUsersByIds($uidArr, $neededColumns);
+        $userInfoArr = $this->forumRepository->getUsersByIds($uidArr, $neededColumns);
         $pn = 0;
         $lpr = $this->index->getLastReadPostId($topicid, $curUser);
 
@@ -210,9 +212,9 @@ final class ForumTopicViewService
             $downloaded = Format::size($arr2['downloaded']);
             $ratio = Ratio::forUserId((int) $arr2['id']);
 
-            if (! $forumposts = $Cache?->get_value('user_'.$posterid.'_post_count')) {
-                $forumposts = app(ForumRepository::class)->countUserPosts((int) $posterid);
-                $Cache?->cache_value('user_'.$posterid.'_post_count', $forumposts, 3600);
+            if (! $forumposts = $this->legacyRedisCache?->get_value('user_'.$posterid.'_post_count')) {
+                $forumposts = $this->forumRepository->countUserPosts((int) $posterid);
+                $this->legacyRedisCache?->cache_value('user_'.$posterid.'_post_count', $forumposts, 3600);
             }
 
             $signature = (($curUser['signatures'] ?? '') == 'yes' ? ($arr2['signature'] ?? '') : '');
@@ -228,8 +230,8 @@ final class ForumTopicViewService
             if ($pn == $pc) {
                 echo "<span id=\"last\"></span>\n";
                 if ($postid > $lpr) {
-                    app(ForumRepository::class)->markPostRead((int) $userId, (int) $topicid, (int) $postid, (int) ($curUser['last_catchup'] ?? 0));
-                    $Cache?->delete_value('user_'.($curUser['id'] ?? 0).'_last_read_post_list');
+                    $this->forumRepository->markPostRead((int) $userId, (int) $topicid, (int) $postid, (int) ($curUser['last_catchup'] ?? 0));
+                    $this->legacyRedisCache?->delete_value('user_'.($curUser['id'] ?? 0).'_last_read_post_list');
                 }
             }
 

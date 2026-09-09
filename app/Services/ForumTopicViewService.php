@@ -9,6 +9,7 @@ use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserClickTopic;
 use App\Models\User;
 use App\Repositories\ForumRepository;
+use App\Repositories\PostRepository;
 use App\Repositories\TopicReadStateRepository;
 use App\Repositories\TopicRepository;
 use App\Support\Cache\LegacyRedisCache;
@@ -38,6 +39,7 @@ final class ForumTopicViewService
         private readonly ?LegacyRedisCache $legacyRedisCache,
         private readonly TopicRepository $topicRepository,
         private readonly TopicReadStateRepository $readStateRepository,
+        private readonly PostRepository $postRepository,
     ) {}
 
     /**
@@ -95,7 +97,7 @@ final class ForumTopicViewService
 
         $this->topicRepository->incrementTopicViews((int) $topicid);
 
-        $postcount = $this->forumRepository->countTopicPosts((int) $topicid, $authorid ?: null);
+        $postcount = $this->postRepository->countTopicPosts((int) $topicid, $authorid ?: null);
         if (! $authorid) {
             $this->legacyRedisCache?->cache_value('topic_'.$topicid.'_post_count', $postcount, 3600);
         }
@@ -106,7 +108,7 @@ final class ForumTopicViewService
 
         if ((isset($page[0])) && $page[0] == 'p') {
             $findpost = substr($page, 1);
-            $postIds = $this->forumRepository->getTopicPostIds((int) $topicid, $authorid ?: null);
+            $postIds = $this->postRepository->getTopicPostIds((int) $topicid, $authorid ?: null);
             $i = array_search($findpost, $postIds);
             if ($i === false) {
                 $i = 0;
@@ -165,7 +167,7 @@ final class ForumTopicViewService
         $pagertop = '<p align="center">'.$pager.'<br />'.$pagerstr."</p>\n";
         $pagerbottom = '<p align="center">'.$pagerstr.'<br />'.$pager."</p>\n";
 
-        $postRows = $this->forumRepository->getTopicPosts((int) $topicid, $authorid ?: null, (int) $offset, (int) $perpage);
+        $postRows = $this->postRepository->getTopicPosts((int) $topicid, $authorid ?: null, (int) $offset, (int) $perpage);
         $pc = $postRows->count();
         $allPosts = [];
         $uidArr = [];
@@ -217,7 +219,7 @@ final class ForumTopicViewService
             $ratio = Ratio::forUserId((int) $arr2['id']);
 
             if (! $forumposts = $this->legacyRedisCache?->get_value('user_'.$posterid.'_post_count')) {
-                $forumposts = $this->forumRepository->countUserPosts((int) $posterid);
+                $forumposts = $this->postRepository->countUserPosts((int) $posterid);
                 $this->legacyRedisCache?->cache_value('user_'.$posterid.'_post_count', $forumposts, 3600);
             }
 

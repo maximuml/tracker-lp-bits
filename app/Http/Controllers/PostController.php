@@ -15,6 +15,7 @@ use App\Models\Post;
 use App\Models\Topic;
 use App\Models\User;
 use App\Repositories\ForumRepository;
+use App\Repositories\PostRepository;
 use App\Repositories\TopicRepository;
 use App\Support\CurrentUser;
 use Illuminate\Http\Request;
@@ -36,7 +37,7 @@ class PostController extends Controller
         }
 
         $dto = ListPostsDto::fromRequest($request);
-        $posts = app(ForumRepository::class)->getTopicPosts((int) $topic->id, null, $dto->offset(), $dto->perPage);
+        $posts = app(PostRepository::class)->getTopicPosts((int) $topic->id, null, $dto->offset(), $dto->perPage);
 
         return $this->success(PostResource::collection($posts));
     }
@@ -65,11 +66,11 @@ class PostController extends Controller
         $dto = StorePostDto::fromRequest($request);
 
         $date = now()->toDateTimeString();
-        $postId = app(ForumRepository::class)->createPost((int) $topic->id, (int) $user->id, $dto->body, $date);
+        $postId = app(PostRepository::class)->createPost((int) $topic->id, (int) $user->id, $dto->body, $date);
 
         app(TopicRepository::class)->setTopicLastPost((int) $topic->id, $postId);
         app(ForumRepository::class)->incrementForumPostCount((int) $forum->id);
-        app(ForumRepository::class)->updateUserLastPost((int) $user->id, $date);
+        app(PostRepository::class)->updateUserLastPost((int) $user->id, $date);
 
         $post = Post::query()->findOrFail($postId);
         $post->load('user');
@@ -113,9 +114,9 @@ class PostController extends Controller
         $dto = UpdatePostDto::fromRequest($request);
 
         $date = now()->toDateTimeString();
-        app(ForumRepository::class)->updatePostBody((int) $post->id, $dto->body, $date, (int) $user->id);
+        app(PostRepository::class)->updatePostBody((int) $post->id, $dto->body, $date, (int) $user->id);
 
-        $postInfo = app(ForumRepository::class)->getPostEditInfo((int) $post->id);
+        $postInfo = app(PostRepository::class)->getPostEditInfo((int) $post->id);
         if ($dto->subject !== null && $dto->subject !== '' && ! empty($postInfo['is_first_post'])) {
             $topic->update(['subject' => $dto->subject]);
         }
@@ -141,7 +142,7 @@ class PostController extends Controller
             throw ValidationException::withMessages(['post' => ['Permission denied.']]);
         }
 
-        app(ForumRepository::class)->deletePost((int) $post->id, (int) $topic->id, (int) $topic->forumid);
+        app(PostRepository::class)->deletePost((int) $post->id, (int) $topic->id, (int) $topic->forumid);
 
         return $this->success(['success' => true], 'Post deleted');
     }

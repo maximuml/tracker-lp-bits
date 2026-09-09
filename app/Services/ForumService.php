@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Policies\PostPolicy;
 use App\Policies\TopicPolicy;
 use App\Repositories\ForumRepository;
+use App\Repositories\PostRepository;
 use App\Repositories\TopicRepository;
 use App\Support\Bonus;
 use App\Support\Cache\LegacyRedisCache;
@@ -75,6 +76,7 @@ final class ForumService
         private readonly TopicPolicy $topicPolicy,
         private readonly PostPolicy $postPolicy,
         private readonly TopicRepository $topicRepository,
+        private readonly PostRepository $postRepository,
     ) {}
 
     /**
@@ -149,7 +151,7 @@ final class ForumService
                 break;
 
             case 'edit':
-                $post = $this->repository->getPostEditInfo($id);
+                $post = $this->postRepository->getPostEditInfo($id);
                 if ($post === null) {
                     return $this->redirectTo('/forums.php');
                 }
@@ -210,7 +212,7 @@ final class ForumService
         }
 
         if ($type === 'edit') {
-            $postInfo = $this->repository->getPostWithUser($postid);
+            $postInfo = $this->postRepository->getPostWithUser($postid);
             $topicInfo = $this->topicRepository->getTopicWithUser($topicid);
             if ($postInfo === null || $topicInfo === null) {
                 return $this->redirectTo('/forums.php');
@@ -232,7 +234,7 @@ final class ForumService
                 }
             }
 
-            $this->repository->updatePostBody($postid, $body, $date, $userid);
+            $this->postRepository->updatePostBody($postid, $body, $date, $userid);
             $this->cacheDelete('post_'.$postid.'_content');
 
             $postUrl = sprintf('[url=/forums.php?action=viewtopic&topicid=%s&page=p%s#pid%s]%s[/url]', $topicid, $postid, $postid, $topicInfo->subject ?? '');
@@ -284,7 +286,7 @@ final class ForumService
             $this->repository->incrementForumPostCount($forumid);
         }
 
-        $newPostId = $this->repository->createPost($topicid, $userid, $body, $date);
+        $newPostId = $this->postRepository->createPost($topicid, $userid, $body, $date);
         if ($newPostId <= 0) {
             return $this->redirectTo('/forums.php');
         }
@@ -308,7 +310,7 @@ final class ForumService
             }
 
             if ($quotepostid > 0) {
-                $quotePostInfo = $this->repository->getPostWithUser($quotepostid);
+                $quotePostInfo = $this->postRepository->getPostWithUser($quotepostid);
                 if ($quotePostInfo !== null && $quotePostInfo->userid !== $userid) {
                     $receiver = $quotePostInfo->user;
                     if ($receiver !== null && $receiver->acceptNotification('topic_reply')) {
@@ -338,7 +340,7 @@ final class ForumService
             $this->topicRepository->setTopicLastPost($topicid, $newPostId);
         }
 
-        $this->repository->updateUserLastPost($userid, $date);
+        $this->postRepository->updateUserLastPost($userid, $date);
 
         $headerstr = '/forums.php?action=viewtopic&topicid='.$topicid;
 
@@ -378,7 +380,7 @@ final class ForumService
             LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_topic_not_found'] ?? 'Topic not found.');
         }
 
-        $postCount = $this->repository->countTopicPosts($topicid);
+        $postCount = $this->postRepository->countTopicPosts($topicid);
         $this->topicRepository->moveTopic($topicid, $forumid, $postCount, (int) $oldForumid);
 
         if ($oldForumid !== $forumid) {
@@ -417,7 +419,7 @@ final class ForumService
             LegacyResponse::abort($lang['std_delete_topic'] ?? 'Delete topic', ($lang['std_delete_topic_note'] ?? '')."<a class=altlink href=?action=deletetopic&topicid={$topicid}&sure=1>".($lang['std_here_if_sure'] ?? ''), false);
         }
 
-        $postCount = $this->repository->countTopicPosts($topicid);
+        $postCount = $this->postRepository->countTopicPosts($topicid);
         $this->topicRepository->deleteTopic($topicid, $forumid, $postCount);
 
         $todayDate = date('Y-m-d');
@@ -456,7 +458,7 @@ final class ForumService
 
         $topicid = (int) $post->topicid;
         $targetUserid = (int) $post->userid;
-        $prevPostId = $this->repository->getPreviousPostId($topicid, $postid);
+        $prevPostId = $this->postRepository->getPreviousPostId($topicid, $postid);
 
         if ($prevPostId === null || $prevPostId === 0) {
             LegacyResponse::abort($lang['std_error'] ?? 'Error', ($lang['std_cannot_delete_post'] ?? '')."<a class=altlink href=?action=deletetopic&topicid={$topicid}&sure=1>".($lang['std_delete_topic_instead'] ?? ''), false);
@@ -472,7 +474,7 @@ final class ForumService
             return $this->redirectTo('/forums.php');
         }
 
-        $this->repository->deletePost($postid, $topicid, $forumid);
+        $this->postRepository->deletePost($postid, $topicid, $forumid);
         $this->cacheDelete('user_'.$targetUserid.'_post_count');
         $this->cacheDelete('topic_'.$topicid.'_post_count');
         $cached = $this->cacheGet('forum_'.$forumid.'_last_replied_topic_content');

@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
 use App\Repositories\ForumRepository;
+use App\Repositories\PostRepository;
 use App\Repositories\TopicReadStateRepository;
 use App\Repositories\TopicRepository;
 use App\Support\Cache\LegacyRedisCache;
@@ -31,6 +32,7 @@ final class ForumIndexService
         private readonly LegacyRedisCache $cache,
         private readonly TopicRepository $topicRepository,
         private readonly TopicReadStateRepository $readStateRepository,
+        private readonly PostRepository $postRepository,
     ) {}
 
     /**
@@ -129,7 +131,7 @@ final class ForumIndexService
                 }
                 $posttodaycount = $Cache->get_value('forum_'.$forumid.'_post_'.$todayDate.'_count');
                 if ($posttodaycount == '') {
-                    $posttodaycount = $this->forumRepository->getForumTodayPostCount((int) $forumid, date('Y-m-d'));
+                    $posttodaycount = $this->postRepository->getForumTodayPostCount((int) $forumid, date('Y-m-d'));
                     $Cache->cache_value('forum_'.$forumid.'_post_'.$todayDate.'_count', $posttodaycount, 1800);
                 }
                 if ($posttodaycount > 0) {
@@ -175,7 +177,7 @@ final class ForumIndexService
 <table width="100%"><tr><td class="text">
 <?php
         if (! $postcount = $Cache->get_value('total_posts_count')) {
-            $postcount = $this->forumRepository->getTotalPostsCount();
+            $postcount = $this->postRepository->getTotalPostsCount();
             $Cache->cache_value('total_posts_count', $postcount, 96400);
         }
         if (! $topiccount = $Cache->get_value('total_topics_count')) {
@@ -183,7 +185,7 @@ final class ForumIndexService
             $Cache->cache_value('total_topics_count', $topiccount, 96500);
         }
         if (! $todaypostcount = $Cache->get_value('today_'.$todayDate.'_posts_count')) {
-            $todaypostcount = $this->forumRepository->getTodayPostsCount($todayDate);
+            $todaypostcount = $this->postRepository->getTodayPostsCount($todayDate);
             $Cache->cache_value('today_'.$todayDate.'_posts_count', $todaypostcount, 700);
         }
         echo ($lang['text_our_members_have'] ?? '').'<b>'.$postcount.'</b>'.($lang['text_posts_in_topics'] ?? '').'<b>'.$topiccount.'</b>'.($lang['text_in_topics'] ?? '').'<b><font class="new">'.$todaypostcount.'</font></b>'.($lang['text_new_post'] ?? '').Strings::addS((int) $todaypostcount).($lang['text_posts_today'] ?? '').'<br /><br />';
@@ -207,10 +209,10 @@ final class ForumIndexService
         }
         $this->readStateRepository->clearReadPosts((int) $CURUSER['id']);
         $Cache->delete_value('user_'.$CURUSER['id'].'_last_read_post_list');
-        $lastpostid = $this->forumRepository->getLastPostId();
+        $lastpostid = $this->postRepository->getLastPostId();
         if ($lastpostid) {
             $CURUSER['last_catchup'] = $lastpostid;
-            $this->forumRepository->updateLastCatchup((int) $CURUSER['id'], (int) $lastpostid);
+            $this->postRepository->updateLastCatchup((int) $CURUSER['id'], (int) $lastpostid);
         }
     }
 

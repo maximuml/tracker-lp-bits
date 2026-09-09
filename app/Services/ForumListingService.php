@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Enums\UserTimeType;
-use App\Repositories\ForumRepository;
+use App\Repositories\PostRepository;
 use App\Repositories\TopicRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Format;
@@ -27,10 +27,10 @@ final class ForumListingService
 {
     public function __construct(
         private readonly ForumIndexService $index,
-        private readonly ForumRepository $forumRepository,
         private readonly Globals $globals,
         private readonly ?LegacyRedisCache $legacyRedisCache,
         private readonly TopicRepository $topicRepository,
+        private readonly PostRepository $postRepository,
     ) {}
 
     /**
@@ -141,7 +141,7 @@ final class ForumListingService
                 $hlcolor = (int) $topicarr['hlcolor'];
 
                 if (! $posts = $this->legacyRedisCache?->get_value('topic_'.$topicid.'_post_count')) {
-                    $posts = $this->forumRepository->countTopicPosts((int) $topicid);
+                    $posts = $this->postRepository->countTopicPosts((int) $topicid);
                     $this->legacyRedisCache?->cache_value('topic_'.$topicid.'_post_count', $posts, 3600);
                 }
 
@@ -337,7 +337,7 @@ final class ForumListingService
         $found = '';
         $keywords = htmlspecialchars(trim((string) (request()->query('keywords') ?? '')));
         if ($keywords != '') {
-            $searchResult = $this->forumRepository->searchForumPosts((string) $keywords, (int) UserDisplay::currentClass(), 0, 0);
+            $searchResult = $this->postRepository->searchForumPosts((string) $keywords, (int) UserDisplay::currentClass(), 0, 0);
             $hits = (int) $searchResult['hits'];
             if ($hits) {
                 $error = false;
@@ -396,7 +396,7 @@ final class ForumListingService
         if (! $error) {
             $perpage = $topicsperpage;
             [$pagertop, $pagerbottom, , $offset, $perpage] = Pagination::pager($perpage, $hits, 'forums.php?action=search&keywords='.rawurlencode($keywords).'&');
-            $searchResult = $this->forumRepository->searchForumPosts((string) $keywords, (int) UserDisplay::currentClass(), (int) $offset, (int) $perpage);
+            $searchResult = $this->postRepository->searchForumPosts((string) $keywords, (int) UserDisplay::currentClass(), (int) $offset, (int) $perpage);
             $posts = $searchResult['rows'];
 
             echo $pagertop;

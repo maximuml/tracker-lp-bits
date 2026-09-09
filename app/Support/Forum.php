@@ -8,6 +8,7 @@ use App\Enums\UserClass as UserClassEnum;
 use App\Models\Topic;
 use App\Models\User;
 use App\Repositories\ForumRepository;
+use App\Repositories\PostRepository;
 use App\Repositories\SettingRepository;
 use App\Repositories\TopicRepository;
 use App\Support\Cache\LegacyRedisCache;
@@ -137,7 +138,7 @@ final class Forum
         static $forumMods = null;
 
         if (! is_array($post)) {
-            $post = app(ForumRepository::class)->getPostArrayById((int) $post);
+            $post = app(PostRepository::class)->getPostArrayById((int) $post);
         }
 
         $topicId = $post['topicid'];
@@ -202,7 +203,7 @@ final class Forum
         $row = $cache !== null ? $cache->get_value($cacheKey) : false;
 
         if ($row === false) {
-            $row = app(ForumRepository::class)->findPostArrayById((int) $postId);
+            $row = app(PostRepository::class)->findPostArrayById((int) $postId);
             if ($cache !== null) {
                 $cache->cache_value($cacheKey, $row, 7200);
             }

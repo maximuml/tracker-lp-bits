@@ -6,20 +6,13 @@ namespace App\Repositories;
 
 use App\Models\Forum;
 use App\Models\ForumMod;
-use App\Models\Post;
 use App\Models\User;
-use App\Services\PostService;
 use App\Support\Cache;
-use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class ForumRepository extends BaseRepository
 {
-    public function __construct(
-        private readonly PostService $postService,
-    ) {}
-
     public function deleteForum(int $id): void
     {
         $topics = DB::table('topics')->where('forumid', $id)->get(['id']);
@@ -261,167 +254,5 @@ class ForumRepository extends BaseRepository
     public function getUsersByIds(array $ids, array $columns): Collection
     {
         return User::query()->find($ids, $columns)->keyBy('id');
-    }
-
-    // ---- Post operations (delegated to PostService) ----
-
-    public function getTotalPostsCount(): int
-    {
-        return $this->postService->getTotalPostsCount();
-    }
-
-    public function getTodayPostsCount(string $todayDate): int
-    {
-        return $this->postService->getTodayPostsCount($todayDate);
-    }
-
-    public function getLastPostId(): ?int
-    {
-        return $this->postService->getLastPostId();
-    }
-
-    public function updateLastCatchup(int $userId, int $lastPostId): bool
-    {
-        return $this->postService->updateLastCatchup($userId, $lastPostId);
-    }
-
-    public function postExists(int $id): ?int
-    {
-        return $this->postService->postExists($id);
-    }
-
-    /**
-     * @return array<string, mixed>|null
-     */
-    public function getPostForQuote(int $id): ?array
-    {
-        return $this->postService->getPostForQuote($id);
-    }
-
-    /**
-     * @return array<string, mixed>|null
-     */
-    public function getPostForEdit(int $id): ?array
-    {
-        return $this->postService->getPostForEdit($id);
-    }
-
-    /**
-     * @return array<string, mixed>|null
-     */
-    public function getPostWithTopic(int $postid): ?array
-    {
-        return $this->postService->getPostWithTopic($postid);
-    }
-
-    /**
-     * @return array<string, mixed>|null
-     */
-    public function getPostEditInfo(int $postid): ?array
-    {
-        return $this->postService->getPostEditInfo($postid);
-    }
-
-    public function getPost(int $id): ?Post
-    {
-        return $this->postService->getPost($id);
-    }
-
-    public function getPostWithUser(int $id): ?Post
-    {
-        return $this->postService->getPostWithUser($id);
-    }
-
-    public function updatePostBody(int $postid, string $body, string $date, int $editedBy): bool
-    {
-        return $this->postService->updatePostBody($postid, $body, $date, $editedBy);
-    }
-
-    public function getFirstPostId(int $topicid): int
-    {
-        return $this->postService->getFirstPostId($topicid);
-    }
-
-    public function createPost(int $topicId, int $userId, string $body, string $date): int
-    {
-        return $this->postService->createPost($topicId, $userId, $body, $date);
-    }
-
-    public function countTopicPosts(int $topicid, ?int $authorId = null): int
-    {
-        return $this->postService->countTopicPosts($topicid, $authorId);
-    }
-
-    /**
-     * @return array<int>
-     */
-    public function getTopicPostIds(int $topicid, ?int $authorId = null): array
-    {
-        return $this->postService->getTopicPostIds($topicid, $authorId);
-    }
-
-    /**
-     * @return EloquentCollection<int, Post>
-     */
-    public function getTopicPosts(int $topicid, ?int $authorId, int $offset, int $perPage): EloquentCollection
-    {
-        return $this->postService->getTopicPosts($topicid, $authorId, $offset, $perPage);
-    }
-
-    public function countUserPosts(int $userId): int
-    {
-        return $this->postService->countUserPosts($userId);
-    }
-
-    public function updateUserLastPost(int $userId, string $date): bool
-    {
-        return $this->postService->updateUserLastPost($userId, $date);
-    }
-
-    /**
-     * @return array{topicid: int, userid: int}|null
-     */
-    public function getPostTopicAndUser(int $postid): ?array
-    {
-        return $this->postService->getPostTopicAndUser($postid);
-    }
-
-    public function getPreviousPostId(int $topicid, int $postid): ?int
-    {
-        return $this->postService->getPreviousPostId($topicid, $postid);
-    }
-
-    public function deletePost(int $postid, int $topicid, int $forumid): bool
-    {
-        return $this->postService->deletePost($postid, $topicid, $forumid);
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    public function getPostArrayById(int $id): array
-    {
-        return $this->postService->getPostArrayById($id);
-    }
-
-    /**
-     * @return array<string, mixed>|null
-     */
-    public function findPostArrayById(int $id): ?array
-    {
-        return $this->postService->findPostArrayById($id);
-    }
-
-    /**
-     * @return array{hits: int, rows: Collection<int, \stdClass>}
-     */
-    public function searchForumPosts(string $keywords, int $minClass, int $offset, int $perPage): array
-    {
-        return $this->postService->searchForumPosts($keywords, $minClass, $offset, $perPage);
-    }
-
-    public function getForumTodayPostCount(int $forumid, string $todayDate): int
-    {
-        return $this->postService->getForumTodayPostCount($forumid, $todayDate);
     }
 }

@@ -10,6 +10,7 @@ use App\Enums\UserAcceptPms;
 use App\Models\Message;
 use App\Models\User;
 use App\Policies\MessagePolicy;
+use App\Repositories\MailboxRepository;
 use App\Repositories\MessageRepository;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
@@ -36,6 +37,7 @@ class MessageService
 {
     public function __construct(
         private readonly MessageRepository $messageRepository,
+        private readonly MailboxRepository $mailboxRepository,
         private readonly Globals $globals,
         private readonly Language $language,
         private readonly MessagePolicy $policy,
@@ -458,7 +460,7 @@ class MessageService
         $lang = (array) ($this->globals->get('lang_messages') ?? []);
 
         if ($action2 === 'add') {
-            $this->messageRepository->addMailboxes($userId, [
+            $this->mailboxRepository->addMailboxes($userId, [
                 $request->input('new1'),
                 $request->input('new2'),
                 $request->input('new3'),
@@ -468,16 +470,16 @@ class MessageService
         }
 
         if ($action2 === 'edit') {
-            $pmBoxes = $this->messageRepository->getUserMailboxes($userId);
+            $pmBoxes = $this->mailboxRepository->getUserMailboxes($userId);
             if ($pmBoxes->isEmpty()) {
                 LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['text_no_mailboxes_to_edit'] ?? 'No mailboxes to edit.'));
             }
             foreach ($pmBoxes as $pmBox) {
                 $newValue = (string) ($request->input('edit'.$pmBox->id) ?? '');
                 if ($newValue !== '' && $newValue !== $pmBox->name) {
-                    $this->messageRepository->updateMailbox($userId, (int) $pmBox->id, $newValue);
+                    $this->mailboxRepository->updateMailbox($userId, (int) $pmBox->id, $newValue);
                 } elseif ($newValue === '') {
-                    $this->messageRepository->deleteMailbox($userId, (int) $pmBox->id, (int) $pmBox->boxnumber);
+                    $this->mailboxRepository->deleteMailbox($userId, (int) $pmBox->id, (int) $pmBox->boxnumber);
                 }
             }
 

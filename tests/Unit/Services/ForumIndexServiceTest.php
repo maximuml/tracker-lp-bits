@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace Tests\Unit\Services;
 
 use App\Repositories\ForumRepository;
+use App\Repositories\PostRepository;
+use App\Repositories\TopicReadStateRepository;
+use App\Repositories\TopicRepository;
 use App\Services\ForumIndexService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
@@ -37,6 +40,15 @@ final class ForumIndexServiceTest extends TestCase
     /** @var LegacyRedisCache&MockInterface */
     private LegacyRedisCache $cache;
 
+    /** @var TopicRepository&MockInterface */
+    private TopicRepository $topicRepo;
+
+    /** @var TopicReadStateRepository&MockInterface */
+    private TopicReadStateRepository $readStateRepo;
+
+    /** @var PostRepository&MockInterface */
+    private PostRepository $postRepo;
+
     private CurrentUser $currentUser;
 
     private Globals $globals;
@@ -65,11 +77,29 @@ final class ForumIndexServiceTest extends TestCase
         $cache->shouldReceive('cache_value')->andReturn(true);
         $this->cache = $cache;
 
+        /** @var TopicRepository&MockInterface $topicRepo */
+        $topicRepo = Mockery::mock(TopicRepository::class);
+        $topicRepo->shouldIgnoreMissing();
+        $this->topicRepo = $topicRepo;
+
+        /** @var TopicReadStateRepository&MockInterface $readStateRepo */
+        $readStateRepo = Mockery::mock(TopicReadStateRepository::class);
+        $readStateRepo->shouldIgnoreMissing();
+        $this->readStateRepo = $readStateRepo;
+
+        /** @var PostRepository&MockInterface $postRepo */
+        $postRepo = Mockery::mock(PostRepository::class);
+        $postRepo->shouldIgnoreMissing();
+        $this->postRepo = $postRepo;
+
         $this->service = new ForumIndexService(
             $this->currentUser,
             $this->globals,
             $this->forumRepo,
             $this->cache,
+            $this->topicRepo,
+            $this->readStateRepo,
+            $this->postRepo,
         );
     }
 
@@ -232,7 +262,7 @@ final class ForumIndexServiceTest extends TestCase
         $repo = $this->mockForumRepo();
         $this->mockCache();
 
-        $repo->shouldReceive('getLastReadPosts')->andReturn(null);
+        $this->readStateRepo->shouldReceive('getLastReadPosts')->andReturn(null);
 
         $result = $this->service->getLastReadPostId(1, ['id' => 1]);
 
@@ -244,7 +274,7 @@ final class ForumIndexServiceTest extends TestCase
         $repo = $this->mockForumRepo();
         $this->mockCache();
 
-        $repo->shouldReceive('getLastReadPosts')->andReturn(null);
+        $this->readStateRepo->shouldReceive('getLastReadPosts')->andReturn(null);
 
         $result = $this->service->getLastReadPostId(1, ['id' => 1, 'last_catchup' => 50]);
 
@@ -256,7 +286,7 @@ final class ForumIndexServiceTest extends TestCase
         $repo = $this->mockForumRepo();
         $this->mockCache();
 
-        $repo->shouldReceive('getLastReadPosts')->andReturn([1 => 100]);
+        $this->readStateRepo->shouldReceive('getLastReadPosts')->andReturn([1 => 100]);
 
         $result = $this->service->getLastReadPostId(1, ['id' => 1, 'last_catchup' => 50]);
 
@@ -283,9 +313,9 @@ final class ForumIndexServiceTest extends TestCase
         $this->mockCache();
         $this->setUser();
 
-        $repo->shouldReceive('clearReadPosts')->with(1)->once();
-        $repo->shouldReceive('getLastPostId')->andReturn(100);
-        $repo->shouldReceive('updateLastCatchup')->with(1, 100)->once();
+        $this->readStateRepo->shouldReceive('clearReadPosts')->with(1)->once();
+        $this->postRepo->shouldReceive('getLastPostId')->andReturn(100);
+        $this->postRepo->shouldReceive('updateLastCatchup')->with(1, 100)->once();
 
         $this->service->catchUp();
 
@@ -300,9 +330,9 @@ final class ForumIndexServiceTest extends TestCase
         $this->mockCache();
         $this->setUser();
 
-        $repo->shouldReceive('clearReadPosts')->with(1)->once();
-        $repo->shouldReceive('getLastPostId')->andReturn(null);
-        $repo->shouldReceive('updateLastCatchup')->never();
+        $this->readStateRepo->shouldReceive('clearReadPosts')->with(1)->once();
+        $this->postRepo->shouldReceive('getLastPostId')->andReturn(null);
+        $this->postRepo->shouldReceive('updateLastCatchup')->never();
 
         $this->service->catchUp();
 
@@ -319,9 +349,9 @@ final class ForumIndexServiceTest extends TestCase
         $this->mockCache();
 
         $repo->shouldReceive('getActiveForumUserCount')->andReturn(5);
-        $repo->shouldReceive('getTotalPostsCount')->andReturn(100);
-        $repo->shouldReceive('getTotalTopicsCount')->andReturn(50);
-        $repo->shouldReceive('getTodayPostsCount')->andReturn(10);
+        $this->postRepo->shouldReceive('getTotalPostsCount')->andReturn(100);
+        $this->topicRepo->shouldReceive('getTotalTopicsCount')->andReturn(50);
+        $this->postRepo->shouldReceive('getTodayPostsCount')->andReturn(10);
 
         $result = $this->service->forumStats(['text_stats' => 'Stats', 'text_our_members_have' => 'Members'], date('Y-m-d'));
 
@@ -336,9 +366,9 @@ final class ForumIndexServiceTest extends TestCase
         $this->mockCache();
 
         $repo->shouldReceive('getActiveForumUserCount')->andReturn(0);
-        $repo->shouldReceive('getTotalPostsCount')->andReturn(0);
-        $repo->shouldReceive('getTotalTopicsCount')->andReturn(0);
-        $repo->shouldReceive('getTodayPostsCount')->andReturn(0);
+        $this->postRepo->shouldReceive('getTotalPostsCount')->andReturn(0);
+        $this->topicRepo->shouldReceive('getTotalTopicsCount')->andReturn(0);
+        $this->postRepo->shouldReceive('getTodayPostsCount')->andReturn(0);
 
         $result = $this->service->forumStats(['text_no_active_users' => 'No active users'], date('Y-m-d'));
 

@@ -6,8 +6,8 @@ namespace App\Support;
 
 use App\Events\UserUpdated;
 use App\Models\Setting;
-use App\Repositories\MessageRepository;
 use App\Repositories\SearchBoxRepository;
+use App\Repositories\StaffMessageRepository;
 use App\Repositories\TorrentDownloadRepository;
 use App\Repositories\UserRepository;
 use Illuminate\Support\Arr;
@@ -251,7 +251,7 @@ final class Cache
     public static function clearStaffMessage(): void
     {
         Logger::writeWithContext('clear_staff_message_cache');
-        app(MessageRepository::class)->updateStaffMessageCountCache(false);
+        app(StaffMessageRepository::class)->updateStaffMessageCountCache(false);
     }
 
     public static function clearSearchBox(): void

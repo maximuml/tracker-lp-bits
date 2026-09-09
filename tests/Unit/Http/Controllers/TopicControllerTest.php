@@ -9,6 +9,8 @@ use App\Models\Forum;
 use App\Models\Topic;
 use App\Models\User;
 use App\Repositories\ForumRepository;
+use App\Repositories\PostRepository;
+use App\Repositories\TopicRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -96,13 +98,21 @@ final class TopicControllerTest extends TestCase
 
         /** @var ForumRepository&Mockery\MockInterface $repo */
         $repo = Mockery::mock(ForumRepository::class);
-        $repo->shouldReceive('createTopic')->once()->andReturn(500);
-        $repo->shouldReceive('createPost')->once()->andReturn(501);
-        $repo->shouldReceive('updateTopicFirstLastPost')->once();
         $repo->shouldReceive('incrementForumTopicCount')->once();
         $repo->shouldReceive('incrementForumPostCount')->once();
-        $repo->shouldReceive('updateUserLastPost')->once();
         app()->instance(ForumRepository::class, $repo);
+
+        /** @var TopicRepository&Mockery\MockInterface $topicRepo */
+        $topicRepo = Mockery::mock(TopicRepository::class);
+        $topicRepo->shouldReceive('createTopic')->once()->andReturn(500);
+        $topicRepo->shouldReceive('updateTopicFirstLastPost')->once();
+        app()->instance(TopicRepository::class, $topicRepo);
+
+        /** @var PostRepository&Mockery\MockInterface $postRepo */
+        $postRepo = Mockery::mock(PostRepository::class);
+        $postRepo->shouldReceive('createPost')->once()->andReturn(501);
+        $postRepo->shouldReceive('updateUserLastPost')->once();
+        app()->instance(PostRepository::class, $postRepo);
 
         Topic::factory()->create(['id' => 500, 'forumid' => $forum->id, 'subject' => 'New Topic', 'userid' => $user->id]);
 
@@ -165,10 +175,10 @@ final class TopicControllerTest extends TestCase
 
         $this->actingAs($user);
 
-        /** @var ForumRepository&Mockery\MockInterface $repo */
-        $repo = Mockery::mock(ForumRepository::class);
-        $repo->shouldReceive('isModeratorOfTopic')->andReturn(false);
-        app()->instance(ForumRepository::class, $repo);
+        /** @var TopicRepository&Mockery\MockInterface $topicRepo */
+        $topicRepo = Mockery::mock(TopicRepository::class);
+        $topicRepo->shouldReceive('isModeratorOfTopic')->andReturn(false);
+        app()->instance(TopicRepository::class, $topicRepo);
 
         $controller = app(TopicController::class);
         $request = Request::create('/api/topics/'.$topic->id, 'PUT', [
@@ -190,12 +200,16 @@ final class TopicControllerTest extends TestCase
 
         $this->actingAs($user);
 
-        /** @var ForumRepository&Mockery\MockInterface $repo */
-        $repo = Mockery::mock(ForumRepository::class);
-        $repo->shouldReceive('isModeratorOfTopic')->once()->andReturn(true);
-        $repo->shouldReceive('countTopicPosts')->once()->andReturn(5);
-        $repo->shouldReceive('deleteTopic')->once();
-        app()->instance(ForumRepository::class, $repo);
+        /** @var TopicRepository&Mockery\MockInterface $topicRepo */
+        $topicRepo = Mockery::mock(TopicRepository::class);
+        $topicRepo->shouldReceive('isModeratorOfTopic')->once()->andReturn(true);
+        $topicRepo->shouldReceive('deleteTopic')->once();
+        app()->instance(TopicRepository::class, $topicRepo);
+
+        /** @var PostRepository&Mockery\MockInterface $postRepo */
+        $postRepo = Mockery::mock(PostRepository::class);
+        $postRepo->shouldReceive('countTopicPosts')->once()->andReturn(5);
+        app()->instance(PostRepository::class, $postRepo);
 
         $controller = app(TopicController::class);
         app()->instance('request', request());

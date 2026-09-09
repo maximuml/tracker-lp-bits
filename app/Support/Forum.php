@@ -8,7 +8,9 @@ use App\Enums\UserClass as UserClassEnum;
 use App\Models\Topic;
 use App\Models\User;
 use App\Repositories\ForumRepository;
+use App\Repositories\PostRepository;
 use App\Repositories\SettingRepository;
+use App\Repositories\TopicRepository;
 use App\Support\Cache\LegacyRedisCache;
 use Illuminate\Support\Facades\Cache;
 
@@ -100,7 +102,7 @@ final class Forum
 
         switch ($in) {
             case 'post':
-                $topicId = $forumRep->getTopicIdByPost((int) $id);
+                $topicId = app(TopicRepository::class)->getTopicIdByPost((int) $id);
                 if ($topicId !== null) {
                     return self::isModerator($topicId, 'topic');
                 }
@@ -108,7 +110,7 @@ final class Forum
                 return false;
 
             case 'topic':
-                return $forumRep->isModeratorOfTopic((int) $id, $userId);
+                return app(TopicRepository::class)->isModeratorOfTopic((int) $id, $userId);
 
             case 'forum':
                 return $forumRep->isModeratorOfForum((int) $id, $userId);
@@ -136,12 +138,12 @@ final class Forum
         static $forumMods = null;
 
         if (! is_array($post)) {
-            $post = app(ForumRepository::class)->getPostArrayById((int) $post);
+            $post = app(PostRepository::class)->getPostArrayById((int) $post);
         }
 
         $topicId = $post['topicid'];
         if (! isset($topics[$topicId])) {
-            $topics[$topicId] = app(ForumRepository::class)->getTopicById($topicId);
+            $topics[$topicId] = app(TopicRepository::class)->getTopicById($topicId);
         }
         /** @var Topic $topicInfo */
         $topicInfo = $topics[$topicId];
@@ -201,7 +203,7 @@ final class Forum
         $row = $cache !== null ? $cache->get_value($cacheKey) : false;
 
         if ($row === false) {
-            $row = app(ForumRepository::class)->findPostArrayById((int) $postId);
+            $row = app(PostRepository::class)->findPostArrayById((int) $postId);
             if ($cache !== null) {
                 $cache->cache_value($cacheKey, $row, 7200);
             }

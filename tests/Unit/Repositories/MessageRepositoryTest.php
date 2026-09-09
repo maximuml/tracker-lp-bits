@@ -7,14 +7,16 @@ namespace Tests\Unit\Repositories;
 use App\DTOs\Message\StoreMessageDto;
 use App\Models\Message;
 use App\Models\User;
+use App\Repositories\MailboxRepository;
 use App\Repositories\MessageRepository;
+use App\Repositories\StaffMessageRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
- * Unit tests for MessageRepository.
+ * Unit tests for MessageRepository, MailboxRepository, and StaffMessageRepository.
  *
  * Covers getUserMailboxes(), getMailboxName(), getMailboxMessages(),
  * getMessageForUser(), getMessageForForward(), markAsRead(), moveMessages(),
@@ -29,6 +31,10 @@ final class MessageRepositoryTest extends TestCase
     use DatabaseTransactions;
 
     private MessageRepository $repository;
+
+    private MailboxRepository $mailboxRepository;
+
+    private StaffMessageRepository $staffMessageRepository;
 
     private int $userId;
 
@@ -46,6 +52,8 @@ final class MessageRepositoryTest extends TestCase
         DB::table('staffmessages')->delete();
 
         $this->repository = new MessageRepository;
+        $this->mailboxRepository = new MailboxRepository;
+        $this->staffMessageRepository = new StaffMessageRepository;
 
         /** @var User $user */
         $user = User::factory()->create();
@@ -63,7 +71,7 @@ final class MessageRepositoryTest extends TestCase
 
     public function test_get_user_mailboxes_returns_empty_when_none(): void
     {
-        $this->assertTrue($this->repository->getUserMailboxes($this->userId)->isEmpty());
+        $this->assertTrue($this->mailboxRepository->getUserMailboxes($this->userId)->isEmpty());
     }
 
     public function test_get_user_mailboxes_returns_mailboxes_ordered_by_boxnumber(): void
@@ -73,7 +81,7 @@ final class MessageRepositoryTest extends TestCase
             ['userid' => $this->userId, 'boxnumber' => 1, 'name' => 'Box A'],
         ]);
 
-        $result = $this->repository->getUserMailboxes($this->userId);
+        $result = $this->mailboxRepository->getUserMailboxes($this->userId);
         $boxes = $result->all();
 
         $this->assertCount(2, $boxes);
@@ -83,7 +91,7 @@ final class MessageRepositoryTest extends TestCase
 
     public function test_get_mailbox_name_returns_null_when_not_found(): void
     {
-        $this->assertNull($this->repository->getMailboxName($this->userId, 1));
+        $this->assertNull($this->mailboxRepository->getMailboxName($this->userId, 1));
     }
 
     public function test_get_mailbox_name_returns_name_when_found(): void
@@ -92,7 +100,7 @@ final class MessageRepositoryTest extends TestCase
             'userid' => $this->userId, 'boxnumber' => 2, 'name' => 'My Box',
         ]);
 
-        $this->assertSame('My Box', $this->repository->getMailboxName($this->userId, 2));
+        $this->assertSame('My Box', $this->mailboxRepository->getMailboxName($this->userId, 2));
     }
 
     public function test_get_mailbox_messages_returns_count_and_messages(): void
@@ -304,7 +312,7 @@ final class MessageRepositoryTest extends TestCase
 
     public function test_get_next_mailbox_number_returns_one_when_no_mailboxes(): void
     {
-        $this->assertSame(1, $this->repository->getNextMailboxNumber($this->userId));
+        $this->assertSame(1, $this->mailboxRepository->getNextMailboxNumber($this->userId));
     }
 
     public function test_get_next_mailbox_number_returns_max(): void
@@ -313,12 +321,12 @@ final class MessageRepositoryTest extends TestCase
             'userid' => $this->userId, 'boxnumber' => 5, 'name' => 'Box',
         ]);
 
-        $this->assertSame(5, $this->repository->getNextMailboxNumber($this->userId));
+        $this->assertSame(5, $this->mailboxRepository->getNextMailboxNumber($this->userId));
     }
 
     public function test_add_mailboxes_inserts_new_boxes(): void
     {
-        $this->repository->addMailboxes($this->userId, ['First Box', 'Second Box']);
+        $this->mailboxRepository->addMailboxes($this->userId, ['First Box', 'Second Box']);
 
         $boxes = DB::table('pmboxes')->where('userid', $this->userId)->orderBy('boxnumber')->get()->all();
         $this->assertCount(2, $boxes);
@@ -329,7 +337,7 @@ final class MessageRepositoryTest extends TestCase
 
     public function test_add_mailboxes_skips_empty_names(): void
     {
-        $this->repository->addMailboxes($this->userId, ['Valid', '', '  ', 'Also Valid']);
+        $this->mailboxRepository->addMailboxes($this->userId, ['Valid', '', '  ', 'Also Valid']);
 
         $this->assertSame(2, DB::table('pmboxes')->where('userid', $this->userId)->count());
     }
@@ -340,7 +348,7 @@ final class MessageRepositoryTest extends TestCase
             'userid' => $this->userId, 'boxnumber' => 2, 'name' => 'Old Name',
         ]);
 
-        $this->repository->updateMailbox($this->userId, $boxId, 'New Name');
+        $this->mailboxRepository->updateMailbox($this->userId, $boxId, 'New Name');
 
         $this->assertSame('New Name', DB::table('pmboxes')->where('id', $boxId)->value('name'));
     }
@@ -353,7 +361,7 @@ final class MessageRepositoryTest extends TestCase
             'userid' => $user2->id, 'boxnumber' => 2, 'name' => 'User2 Box',
         ]);
 
-        $this->repository->updateMailbox($this->userId, $boxId, 'Hacked');
+        $this->mailboxRepository->updateMailbox($this->userId, $boxId, 'Hacked');
 
         $this->assertSame('User2 Box', DB::table('pmboxes')->where('id', $boxId)->value('name'));
     }
@@ -364,7 +372,7 @@ final class MessageRepositoryTest extends TestCase
             'userid' => $this->userId, 'boxnumber' => 3, 'name' => 'Delete Me',
         ]);
 
-        $this->repository->deleteMailbox($this->userId, $boxId, 3);
+        $this->mailboxRepository->deleteMailbox($this->userId, $boxId, 3);
 
         $this->assertSame(0, DB::table('pmboxes')->where('id', $boxId)->count());
     }
@@ -481,7 +489,7 @@ final class MessageRepositoryTest extends TestCase
 
     public function test_count_staff_message_returns_zero_when_none(): void
     {
-        $this->assertSame(0, $this->repository->countStaffMessage($this->userId));
+        $this->assertSame(0, $this->staffMessageRepository->countStaffMessage($this->userId));
     }
 
     public function test_count_staff_message_returns_count(): void
@@ -500,7 +508,7 @@ final class MessageRepositoryTest extends TestCase
             'permission' => '',
         ]);
 
-        $this->assertSame(1, $this->repository->countStaffMessage($admin->id));
+        $this->assertSame(1, $this->staffMessageRepository->countStaffMessage($admin->id));
     }
 
     /**

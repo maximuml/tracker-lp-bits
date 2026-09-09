@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services;
+namespace App\Repositories;
 
 use App\Models\Forum;
 use App\Models\Post;
@@ -12,7 +12,10 @@ use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
-class PostService
+/**
+ * Post repository: reads, create/edit/delete, and search for forum posts.
+ */
+class PostRepository extends BaseRepository
 {
     public function getTotalPostsCount(): int
     {

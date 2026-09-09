@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\Message;
+use App\Repositories\MailboxRepository;
 use App\Repositories\MessageRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
@@ -36,6 +37,8 @@ class MessagePageService
 
     private MessageRepository $messageRepository;
 
+    private MailboxRepository $mailboxRepository;
+
     private CurrentUser $currentUser;
 
     private Globals $globals;
@@ -44,11 +47,13 @@ class MessagePageService
 
     public function __construct(
         MessageRepository $messageRepository,
+        MailboxRepository $mailboxRepository,
         CurrentUser $currentUser,
         Globals $globals,
         ?LegacyRedisCache $legacyRedisCache,
     ) {
         $this->messageRepository = $messageRepository;
+        $this->mailboxRepository = $mailboxRepository;
         $this->currentUser = $currentUser;
         $this->globals = $globals;
         $this->legacyRedisCache = $legacyRedisCache;
@@ -126,7 +131,7 @@ class MessagePageService
 
         // Mailbox name
         if ($mailbox !== self::PM_INBOX && $mailbox !== self::PM_SENT_BOX) {
-            $pmBoxName = $this->messageRepository->getMailboxName($userId, $mailbox);
+            $pmBoxName = $this->mailboxRepository->getMailboxName($userId, $mailbox);
             if (! $pmBoxName) {
                 LegacyResponse::abort(
                     (string) ($lang['std_error'] ?? 'Error'),
@@ -199,7 +204,7 @@ class MessagePageService
         }
 
         // User mailboxes for the "move to" select
-        $pmBoxes = $this->messageRepository->getUserMailboxes($userId);
+        $pmBoxes = $this->mailboxRepository->getUserMailboxes($userId);
         $moveBoxOptions = '';
         foreach ($pmBoxes as $box) {
             $boxArr = (array) $box;
@@ -298,7 +303,7 @@ class MessagePageService
         $mailbox = $isSender ? self::PM_SENT_BOX : (int) $message['location'];
 
         // Move-to boxes
-        $pmBoxes = $this->messageRepository->getUserMailboxes($userId);
+        $pmBoxes = $this->mailboxRepository->getUserMailboxes($userId);
         $moveBoxOptions = '';
         foreach ($pmBoxes as $box) {
             $boxArr = (array) $box;
@@ -374,7 +379,7 @@ class MessagePageService
      */
     private function buildEditMailboxes(array $lang, int $userId): array
     {
-        $pmBoxes = $this->messageRepository->getUserMailboxes($userId);
+        $pmBoxes = $this->mailboxRepository->getUserMailboxes($userId);
 
         $boxes = [];
         foreach ($pmBoxes as $box) {

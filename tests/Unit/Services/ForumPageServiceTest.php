@@ -6,6 +6,9 @@ namespace Tests\Unit\Services;
 
 use App\Models\User;
 use App\Repositories\ForumRepository;
+use App\Repositories\PostRepository;
+use App\Repositories\TopicReadStateRepository;
+use App\Repositories\TopicRepository;
 use App\Services\ForumComposeService;
 use App\Services\ForumIndexService;
 use App\Services\ForumListingService;
@@ -38,6 +41,15 @@ final class ForumPageServiceTest extends TestCase
 
     private int $initialObLevel;
 
+    /** @var TopicRepository&MockInterface */
+    private TopicRepository $topicRepo;
+
+    /** @var TopicReadStateRepository&MockInterface */
+    private TopicReadStateRepository $readStateRepo;
+
+    /** @var PostRepository&MockInterface */
+    private PostRepository $postRepo;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -62,6 +74,9 @@ final class ForumPageServiceTest extends TestCase
             $this->app->make(Globals::class),
             $this->app->make(ForumRepository::class),
             $this->app->make(LegacyRedisCache::class),
+            $this->app->make(TopicRepository::class),
+            $this->app->make(TopicReadStateRepository::class),
+            $this->app->make(PostRepository::class),
         );
         $composeService = new ForumComposeService;
         $topicViewService = new ForumTopicViewService(
@@ -69,12 +84,16 @@ final class ForumPageServiceTest extends TestCase
             $this->app->make(ForumRepository::class),
             $this->app->make(Globals::class),
             $this->app->make(LegacyRedisCache::class),
+            $this->app->make(TopicRepository::class),
+            $this->app->make(TopicReadStateRepository::class),
+            $this->app->make(PostRepository::class),
         );
         $listingService = new ForumListingService(
             $indexService,
-            $this->app->make(ForumRepository::class),
             $this->app->make(Globals::class),
             $this->app->make(LegacyRedisCache::class),
+            $this->app->make(TopicRepository::class),
+            $this->app->make(PostRepository::class),
         );
         $this->service = new ForumPageService($indexService, $composeService, $topicViewService, $listingService);
     }
@@ -98,6 +117,25 @@ final class ForumPageServiceTest extends TestCase
         $repo->shouldReceive('getOverforumsList')->andReturn([]);
         $repo->shouldReceive('getForumsList')->andReturn([]);
         $this->app->instance(ForumRepository::class, $repo);
+
+        /** @var TopicRepository&MockInterface $topicRepo */
+        $topicRepo = Mockery::mock(TopicRepository::class);
+        $topicRepo->shouldIgnoreMissing();
+        $this->app->instance(TopicRepository::class, $topicRepo);
+        $this->topicRepo = $topicRepo;
+
+        /** @var TopicReadStateRepository&MockInterface $readStateRepo */
+        $readStateRepo = Mockery::mock(TopicReadStateRepository::class);
+        $readStateRepo->shouldIgnoreMissing();
+        $this->app->instance(TopicReadStateRepository::class, $readStateRepo);
+        $this->readStateRepo = $readStateRepo;
+
+        /** @var PostRepository&MockInterface $postRepo */
+        $postRepo = Mockery::mock(PostRepository::class);
+        $postRepo->shouldIgnoreMissing();
+        $this->app->instance(PostRepository::class, $postRepo);
+        $this->postRepo = $postRepo;
+
         $this->rebuildService($repo);
 
         return $repo;
@@ -125,6 +163,9 @@ final class ForumPageServiceTest extends TestCase
             $this->app->make(Globals::class),
             $forumRepo,
             $cacheInstance,
+            $this->app->make(TopicRepository::class),
+            $this->app->make(TopicReadStateRepository::class),
+            $this->app->make(PostRepository::class),
         );
         $composeService = new ForumComposeService;
         $topicViewService = new ForumTopicViewService(
@@ -132,12 +173,16 @@ final class ForumPageServiceTest extends TestCase
             $forumRepo,
             $this->app->make(Globals::class),
             $cacheInstance,
+            $this->app->make(TopicRepository::class),
+            $this->app->make(TopicReadStateRepository::class),
+            $this->app->make(PostRepository::class),
         );
         $listingService = new ForumListingService(
             $indexService,
-            $forumRepo,
             $this->app->make(Globals::class),
             $cacheInstance,
+            $this->app->make(TopicRepository::class),
+            $this->app->make(PostRepository::class),
         );
         $this->service = new ForumPageService($indexService, $composeService, $topicViewService, $listingService);
     }
@@ -237,8 +282,8 @@ final class ForumPageServiceTest extends TestCase
         $request = Request::create('/forums.php', 'GET', ['catchup' => 1]);
         $this->app->instance('request', $request);
 
-        $repo->shouldReceive('clearReadPosts')->once()->andReturn(true);
-        $repo->shouldReceive('getLastPostId')->once()->andReturn(0);
+        $this->readStateRepo->shouldReceive('clearReadPosts')->once()->andReturn(true);
+        $this->postRepo->shouldReceive('getLastPostId')->once()->andReturn(0);
 
         $result = $this->service->build($request)->toArray();
 

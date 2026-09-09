@@ -6,6 +6,9 @@ namespace Tests\Unit\Services;
 
 use App\Models\User;
 use App\Repositories\ForumRepository;
+use App\Repositories\PostRepository;
+use App\Repositories\TopicReadStateRepository;
+use App\Repositories\TopicRepository;
 use App\Services\ForumIndexService;
 use App\Services\ForumListingService;
 use App\Support\Cache\LegacyRedisCache;
@@ -36,6 +39,12 @@ final class ForumListingServiceTest extends TestCase
 
     private int $initialObLevel;
 
+    /** @var TopicRepository&MockInterface */
+    private TopicRepository $topicRepo;
+
+    /** @var PostRepository&MockInterface */
+    private PostRepository $postRepo;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -61,12 +70,16 @@ final class ForumListingServiceTest extends TestCase
             $this->app->make(Globals::class),
             $this->app->make(ForumRepository::class),
             $this->app->make(LegacyRedisCache::class),
+            $this->app->make(TopicRepository::class),
+            $this->app->make(TopicReadStateRepository::class),
+            $this->app->make(PostRepository::class),
         );
         $this->service = new ForumListingService(
             $indexService,
-            $this->app->make(ForumRepository::class),
             $this->app->make(Globals::class),
             $this->app->make(LegacyRedisCache::class),
+            $this->app->make(TopicRepository::class),
+            $this->app->make(PostRepository::class),
         );
     }
 
@@ -87,6 +100,19 @@ final class ForumListingServiceTest extends TestCase
         $repo->shouldIgnoreMissing(false);
         $repo->shouldReceive('getModeratorArray')->andReturn([]);
         $this->app->instance(ForumRepository::class, $repo);
+
+        /** @var TopicRepository&MockInterface $topicRepo */
+        $topicRepo = Mockery::mock(TopicRepository::class);
+        $topicRepo->shouldIgnoreMissing();
+        $this->app->instance(TopicRepository::class, $topicRepo);
+        $this->topicRepo = $topicRepo;
+
+        /** @var PostRepository&MockInterface $postRepo */
+        $postRepo = Mockery::mock(PostRepository::class);
+        $postRepo->shouldIgnoreMissing();
+        $this->app->instance(PostRepository::class, $postRepo);
+        $this->postRepo = $postRepo;
+
         $this->rebuildService($repo);
 
         return $repo;
@@ -114,12 +140,16 @@ final class ForumListingServiceTest extends TestCase
             $this->app->make(Globals::class),
             $forumRepo,
             $cacheInstance,
+            $this->app->make(TopicRepository::class),
+            $this->app->make(TopicReadStateRepository::class),
+            $this->app->make(PostRepository::class),
         );
         $this->service = new ForumListingService(
             $indexService,
-            $forumRepo,
             $this->app->make(Globals::class),
             $cacheInstance,
+            $this->app->make(TopicRepository::class),
+            $this->app->make(PostRepository::class),
         );
     }
 
@@ -175,7 +205,7 @@ final class ForumListingServiceTest extends TestCase
         $this->setUser();
         $this->setRequest();
 
-        $repo->shouldReceive('getUnreadTopics')->andReturn(new Collection);
+        $this->topicRepo->shouldReceive('getUnreadTopics')->andReturn(new Collection);
 
         $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewUnread(['text_nothing_found' => 'Nothing found', 'text_forums' => 'Forums'], ['id' => 1, 'username' => 'test', 'class' => 10]));
 
@@ -190,7 +220,7 @@ final class ForumListingServiceTest extends TestCase
         $this->setUser();
         $this->setRequest();
 
-        $repo->shouldReceive('getUnreadTopics')->andReturn(new Collection);
+        $this->topicRepo->shouldReceive('getUnreadTopics')->andReturn(new Collection);
         $repo->shouldReceive('getForumsList')->andReturn([]);
 
         $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewUnread(['text_forums' => 'Forums', 'text_nothing_found' => 'Nothing'], ['id' => 1, 'username' => 'test', 'class' => 10]));
@@ -222,7 +252,7 @@ final class ForumListingServiceTest extends TestCase
         $this->setUser();
         $this->setRequest(['keywords' => 'notfound']);
 
-        $repo->shouldReceive('searchForumPosts')->andReturn(['hits' => 0, 'rows' => new Collection]);
+        $this->postRepo->shouldReceive('searchForumPosts')->andReturn(['hits' => 0, 'rows' => new Collection]);
 
         $result = $this->callWithSuppressedErrors(fn () => $this->service->buildSearch(['text_search_on_forum' => 'Search', 'text_nothing_found' => 'Nothing found', 'text_by_keyword' => 'Keyword'], 20));
 
@@ -237,7 +267,7 @@ final class ForumListingServiceTest extends TestCase
         $this->setUser();
         $this->setRequest(['keywords' => 'test']);
 
-        $repo->shouldReceive('searchForumPosts')->andReturn(['hits' => 1, 'rows' => new Collection]);
+        $this->postRepo->shouldReceive('searchForumPosts')->andReturn(['hits' => 1, 'rows' => new Collection]);
 
         $result = $this->callWithSuppressedErrors(fn () => $this->service->buildSearch(['text_search_on_forum' => 'Search', 'text_found' => 'Found ', 'text_num_posts' => ' posts', 'text_by_keyword' => 'Keyword'], 20));
 
@@ -291,7 +321,7 @@ final class ForumListingServiceTest extends TestCase
         $repo->shouldReceive('getForumsList')->andReturn([
             1 => ['id' => 1, 'name' => 'Test Forum', 'forid' => 1, 'minclassread' => 0, 'minclasswrite' => 0, 'minclasscreate' => 0, 'topiccount' => 0, 'postcount' => 0, 'description' => 'Test'],
         ]);
-        $repo->shouldReceive('getTopicsByForum')->andReturn(['count' => 0, 'rows' => new Collection]);
+        $this->topicRepo->shouldReceive('getTopicsByForum')->andReturn(['count' => 0, 'rows' => new Collection]);
 
         $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewForum(
             ['text_forums' => 'Forums', 'text_no_topics_found' => 'No topics found', 'col_topic' => 'Topic', 'col_author' => 'Author', 'col_replies' => 'Replies', 'col_views' => 'Views', 'col_last_post' => 'Last Post', 'text_fast_search' => 'Search', 'text_go' => 'Go', 'text_order' => 'Order'],

@@ -9,6 +9,8 @@ use App\Models\User;
 use App\Policies\PostPolicy;
 use App\Policies\TopicPolicy;
 use App\Repositories\ForumRepository;
+use App\Repositories\PostRepository;
+use App\Repositories\TopicRepository;
 use App\Services\ForumService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
@@ -32,6 +34,12 @@ use Tests\TestCase;
 final class ForumServiceTest extends TestCase
 {
     private int $initialObLevel;
+
+    /** @var TopicRepository&Mockery\MockInterface */
+    private TopicRepository $topicRepo;
+
+    /** @var PostRepository&Mockery\MockInterface */
+    private PostRepository $postRepo;
 
     protected function setUp(): void
     {
@@ -104,6 +112,18 @@ final class ForumServiceTest extends TestCase
         $repo->shouldReceive('isModeratorOfForum')->andReturn(false);
         $this->app->instance(ForumRepository::class, $repo);
 
+        /** @var TopicRepository&Mockery\MockInterface $topicRepo */
+        $topicRepo = Mockery::mock(TopicRepository::class);
+        $topicRepo->shouldIgnoreMissing();
+        $this->app->instance(TopicRepository::class, $topicRepo);
+        $this->topicRepo = $topicRepo;
+
+        /** @var PostRepository&Mockery\MockInterface $postRepo */
+        $postRepo = Mockery::mock(PostRepository::class);
+        $postRepo->shouldIgnoreMissing();
+        $this->app->instance(PostRepository::class, $postRepo);
+        $this->postRepo = $postRepo;
+
         return $repo;
     }
 
@@ -116,6 +136,8 @@ final class ForumServiceTest extends TestCase
             $this->app->make(LegacyRedisCache::class),
             $this->app->make(TopicPolicy::class),
             $this->app->make(PostPolicy::class),
+            $this->app->make(TopicRepository::class),
+            $this->app->make(PostRepository::class),
         );
     }
 
@@ -265,7 +287,7 @@ final class ForumServiceTest extends TestCase
 
         // W1-04: handleDeleteTopic now uses Topic model instead of repo
         $topic = Topic::factory()->create();
-        $repo->shouldReceive('countTopicPosts')->with($topic->id)->andReturn(0);
+        $this->postRepo->shouldReceive('countTopicPosts')->with($topic->id)->andReturn(0);
 
         $request = Request::create('/forums.php', 'GET', [
             'action' => 'deletetopic',
@@ -587,19 +609,20 @@ final class ForumServiceTest extends TestCase
         $this->mockGlobals(['maxsubjectlength' => 100]);
         $this->mockCache();
 
-        $repo->shouldReceive('topicExists')->with(1)->andReturn(1);
         $repo->shouldReceive('getForumRow')->with(1)->andReturn([
             'minclassread' => 0,
             'minclasswrite' => 0,
             'minclasscreate' => 0,
         ]);
-        $repo->shouldReceive('isTopicLocked')->with(1)->andReturn(true);
+        $this->topicRepo->shouldReceive('topicExists')->with(1)->andReturn(1);
+        // W1-04: locked-topic check now uses Topic model + TopicPolicy
+        Topic::query()->updateOrCreate(['id' => 1], Topic::factory()->raw(['locked' => true, 'forumid' => 1]));
         // Code continues after abort(die=false) to flood check and post creation
         $repo->shouldReceive('incrementForumPostCount')->with(1)->andReturn(true);
-        $repo->shouldReceive('createPost')->andReturn(1);
-        $repo->shouldReceive('getTopicWithUser')->with(1)->andReturn(null);
-        $repo->shouldReceive('setTopicLastPost')->with(1, 1)->andReturn(true);
-        $repo->shouldReceive('updateUserLastPost')->with(1, Mockery::any())->andReturn(true);
+        $this->postRepo->shouldReceive('createPost')->andReturn(1);
+        $this->topicRepo->shouldReceive('getTopicWithUser')->with(1)->andReturn(null);
+        $this->topicRepo->shouldReceive('setTopicLastPost')->with(1, 1)->andReturn(true);
+        $this->postRepo->shouldReceive('updateUserLastPost')->with(1, Mockery::any())->andReturn(true);
 
         $request = Request::create('/forums.php', 'POST', [
             'action' => 'post',
@@ -630,13 +653,14 @@ final class ForumServiceTest extends TestCase
         $this->mockGlobals(['maxsubjectlength' => 100]);
         $this->mockCache();
 
-        $repo->shouldReceive('topicExists')->with(1)->andReturn(1);
+        $this->topicRepo->shouldReceive('topicExists')->with(1)->andReturn(1);
         $repo->shouldReceive('getForumRow')->with(1)->andReturn([
             'minclassread' => 0,
             'minclasswrite' => 0,
             'minclasscreate' => 0,
         ]);
-        $repo->shouldReceive('isTopicLocked')->with(1)->andReturn(null);
+        // W1-04: locked-topic check now uses Topic model; ensure topic is not locked
+        Topic::query()->updateOrCreate(['id' => 1], Topic::factory()->raw(['locked' => false, 'forumid' => 1]));
 
         $request = Request::create('/forums.php', 'POST', [
             'action' => 'post',
@@ -660,18 +684,19 @@ final class ForumServiceTest extends TestCase
         $this->mockGlobals(['maxsubjectlength' => 100]);
         $this->mockCache();
 
-        $repo->shouldReceive('topicExists')->with(1)->andReturn(1);
+        $this->topicRepo->shouldReceive('topicExists')->with(1)->andReturn(1);
         $repo->shouldReceive('getForumRow')->with(1)->andReturn([
             'minclassread' => 0,
             'minclasswrite' => 0,
             'minclasscreate' => 0,
         ]);
-        $repo->shouldReceive('isTopicLocked')->with(1)->andReturn(false);
+        // W1-04: locked-topic check now uses Topic model + TopicPolicy
+        Topic::query()->updateOrCreate(['id' => 1], Topic::factory()->raw(['locked' => false, 'forumid' => 1]));
         $repo->shouldReceive('incrementForumPostCount')->with(1)->andReturn(true);
-        $repo->shouldReceive('createPost')->andReturn(1);
-        $repo->shouldReceive('getTopicWithUser')->with(1)->andReturn(null);
-        $repo->shouldReceive('setTopicLastPost')->with(1, 1)->andReturn(true);
-        $repo->shouldReceive('updateUserLastPost')->with(1, Mockery::any())->andReturn(true);
+        $this->postRepo->shouldReceive('createPost')->andReturn(1);
+        $this->topicRepo->shouldReceive('getTopicWithUser')->with(1)->andReturn(null);
+        $this->topicRepo->shouldReceive('setTopicLastPost')->with(1, 1)->andReturn(true);
+        $this->postRepo->shouldReceive('updateUserLastPost')->with(1, Mockery::any())->andReturn(true);
 
         $request = Request::create('/forums.php', 'POST', [
             'action' => 'post',
@@ -713,7 +738,7 @@ final class ForumServiceTest extends TestCase
             'minclasswrite' => 0,
             'minclasscreate' => 0,
         ]);
-        $repo->shouldReceive('createTopic')->with(1, 1, 'Test subject')->andReturn(0);
+        $this->topicRepo->shouldReceive('createTopic')->with(1, 1, 'Test subject')->andReturn(0);
         $repo->shouldReceive('incrementForumTopicCount')->with(1)->andReturn(true);
         $repo->shouldReceive('incrementForumPostCount')->with(1)->andReturn(true);
 
@@ -738,15 +763,16 @@ final class ForumServiceTest extends TestCase
         ]);
         $this->mockCache();
 
-        $repo->shouldReceive('topicExists')->with(1)->andReturn(1);
+        $this->topicRepo->shouldReceive('topicExists')->with(1)->andReturn(1);
         $repo->shouldReceive('getForumRow')->with(1)->andReturn([
             'minclassread' => 0,
             'minclasswrite' => 0,
             'minclasscreate' => 0,
         ]);
-        $repo->shouldReceive('isTopicLocked')->with(1)->andReturn(false);
+        // W1-04: locked-topic check now uses Topic model + TopicPolicy
+        Topic::query()->updateOrCreate(['id' => 1], Topic::factory()->raw(['locked' => false, 'forumid' => 1]));
         $repo->shouldReceive('incrementForumPostCount')->with(1)->andReturn(true);
-        $repo->shouldReceive('createPost')->with(1, 1, Mockery::any(), Mockery::any())->andReturn(0);
+        $this->postRepo->shouldReceive('createPost')->with(1, 1, Mockery::any(), Mockery::any())->andReturn(0);
 
         $request = Request::create('/forums.php', 'POST', [
             'action' => 'post',
@@ -792,7 +818,7 @@ final class ForumServiceTest extends TestCase
 
         // W1-04: handleDeleteTopic now uses Topic model instead of repo
         $topic = Topic::factory()->create();
-        $repo->shouldReceive('countTopicPosts')->with($topic->id)->andReturn(0);
+        $this->postRepo->shouldReceive('countTopicPosts')->with($topic->id)->andReturn(0);
 
         $request = Request::create('/forums.php', 'GET', [
             'action' => 'deletetopic',

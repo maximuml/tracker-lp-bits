@@ -11,9 +11,9 @@ use App\Models\TorrentState;
 use App\Models\User;
 use App\Repositories\AttendanceRepository;
 use App\Repositories\HitAndRunRepository;
-use App\Repositories\MessageRepository;
 use App\Repositories\PageLayoutRepository;
 use App\Repositories\SearchBoxRepository;
+use App\Repositories\StaffMessageRepository;
 use App\Utils\MsgAlert;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Response;
@@ -233,10 +233,10 @@ class PageLayout
             $staffIcons .= ' <a href="friends.php"><img class="buddylist" alt="Buddylist" title="'.$context->lang['title_buddylist'].'" src="pic/trans.gif" /></a>';
             $staffIcons .= ' <a href="getrss.php"><img class="rss" alt="RSS" title="'.$context->lang['title_get_rss'].'" src="pic/trans.gif" /></a>';
             $staffIcons .= '<br/>';
-            $totalsm = app(MessageRepository::class)->getStaffMessageCountCache($context->user['id'], 'total');
+            $totalsm = app(StaffMessageRepository::class)->getStaffMessageCountCache($context->user['id'], 'total');
             if ($totalsm === false) {
-                $totalsm = app(MessageRepository::class)->countStaffMessage($context->user['id']);
-                app(MessageRepository::class)->updateStaffMessageCountCache($context->user['id'], 'total', $totalsm);
+                $totalsm = app(StaffMessageRepository::class)->countStaffMessage($context->user['id']);
+                app(StaffMessageRepository::class)->updateStaffMessageCountCache($context->user['id'], 'total', $totalsm);
             }
             if ($totalsm > 0) {
                 $staffIcons .= '  <a href="staffbox.php"><img class="staffbox" alt="staffbox" title="'.$context->lang['title_staffbox'].'" src="pic/trans.gif" />  </a>'.$totalsm.'  ';
@@ -316,10 +316,10 @@ class PageLayout
                         Html::messageAlertVoid('index.php', $text, 'green');
                     }
                 }
-                $nummessages = app(MessageRepository::class)->getStaffMessageCountCache($context->user['id'], 'new');
+                $nummessages = app(StaffMessageRepository::class)->getStaffMessageCountCache($context->user['id'], 'new');
                 if ($nummessages === false) {
-                    $nummessages = app(MessageRepository::class)->countStaffMessage($context->user['id'], 0);
-                    app(MessageRepository::class)->updateStaffMessageCountCache($context->user['id'], 'new', $nummessages);
+                    $nummessages = app(StaffMessageRepository::class)->countStaffMessage($context->user['id'], 0);
+                    app(StaffMessageRepository::class)->updateStaffMessageCountCache($context->user['id'], 'new', $nummessages);
                 }
                 $nummessages = (int) $nummessages;
                 if ($nummessages > 0) {

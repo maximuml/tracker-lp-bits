@@ -7,6 +7,8 @@ namespace App\Services;
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
 use App\Repositories\ForumRepository;
+use App\Repositories\PostRepository;
+use App\Repositories\TopicRepository;
 use App\Support\CurrentUser;
 use App\Support\Forum;
 use App\Support\Frame;
@@ -47,12 +49,12 @@ final class ForumComposeService
                 break;
 
             case 'reply':
-                $topicname = app(ForumRepository::class)->getTopicSubject((int) $id) ?? '';
+                $topicname = app(TopicRepository::class)->getTopicSubject((int) $id) ?? '';
                 $title = ($lang['text_reply_to_topic'] ?? '').' <a href="'.htmlspecialchars('?action=viewtopic&topicid='.$id).'">'.htmlspecialchars($topicname).'</a> ';
                 break;
 
             case 'quote':
-                $post = app(ForumRepository::class)->getPostForQuote((int) $id);
+                $post = app(PostRepository::class)->getPostForQuote((int) $id);
                 if (! $post) {
                     ob_get_clean();
                     LegacyResponse::abort($lang['std_error'] ?? '', $lang['std_no_post_id'] ?? '');
@@ -69,7 +71,7 @@ final class ForumComposeService
                 break;
 
             case 'edit':
-                $post = app(ForumRepository::class)->getPostForEdit((int) $id);
+                $post = app(PostRepository::class)->getPostForEdit((int) $id);
                 if (! $post) {
                     ob_get_clean();
 
@@ -148,7 +150,7 @@ final class ForumComposeService
         $postid = (int) (request()->query('postid') ?? 0);
         $this->checkWhetherExist($postid, 'post', $lang);
 
-        $post = app(ForumRepository::class)->getPostWithTopic((int) $postid);
+        $post = app(PostRepository::class)->getPostWithTopic((int) $postid);
         if (! $post) {
             LegacyResponse::abort($lang['std_error'] ?? '', $lang['std_no_post_id'] ?? '');
 
@@ -178,7 +180,7 @@ final class ForumComposeService
                 break;
 
             case 'topic':
-                $forumid = app(ForumRepository::class)->topicExists((int) $id);
+                $forumid = app(TopicRepository::class)->topicExists((int) $id);
                 if (! $forumid) {
                     LegacyResponse::abort($lang['std_error'] ?? '', $lang['std_bad_topic_id'] ?? '');
                 }
@@ -186,7 +188,7 @@ final class ForumComposeService
                 break;
 
             case 'post':
-                $topicid = app(ForumRepository::class)->postExists((int) $id);
+                $topicid = app(PostRepository::class)->postExists((int) $id);
                 if (! $topicid) {
                     LegacyResponse::abort($lang['std_error'] ?? '', $lang['std_no_post_id'] ?? '');
                 }

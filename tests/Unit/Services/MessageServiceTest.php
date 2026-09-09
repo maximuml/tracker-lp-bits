@@ -7,6 +7,7 @@ namespace Tests\Unit\Services;
 use App\Models\Message;
 use App\Models\User;
 use App\Policies\MessagePolicy;
+use App\Repositories\MailboxRepository;
 use App\Repositories\MessageRepository;
 use App\Services\MessageService;
 use App\Support\Globals;
@@ -57,6 +58,7 @@ final class MessageServiceTest extends TestCase
         $this->app->instance(Globals::class, $this->globals);
         $this->service = new MessageService(
             app(MessageRepository::class),
+            app(MailboxRepository::class),
             $this->globals,
             app(Language::class),
             app(MessagePolicy::class),
@@ -131,6 +133,7 @@ final class MessageServiceTest extends TestCase
         $this->app->instance(MessageRepository::class, $repo);
         $this->service = new MessageService(
             $repo,
+            app(MailboxRepository::class),
             $this->globals,
             app(Language::class),
             app(MessagePolicy::class),
@@ -177,6 +180,7 @@ final class MessageServiceTest extends TestCase
     {
         $service = new MessageService(
             app(MessageRepository::class),
+            app(MailboxRepository::class),
             new Globals,
             app(Language::class),
             app(MessagePolicy::class),

@@ -49,10 +49,10 @@ class TorrentRepositoryDownHashTest extends TestCase
     {
         $user = ['id' => 42, 'passkey' => 'abc123def456ghi789jkl012mno345pq'];
 
-        $hash = $this->repository->encryptDownHash(123, $user);
+        $hash = $this->downloadRepository->encryptDownHash(123, $user);
 
         $this->assertNotEmpty($hash);
-        $this->assertSame([123], $this->repository->decryptDownHash($hash, $user));
+        $this->assertSame([123], $this->downloadRepository->decryptDownHash($hash, $user));
     }
 
     public function test_legacy_md5_downhash_still_decrypts(): void
@@ -61,7 +61,7 @@ class TorrentRepositoryDownHashTest extends TestCase
         $legacyKey = md5($user['passkey'].date('Ymd').$user['id']);
         $legacyHash = JWT::encode(['id' => 456, 'exp' => time() + 3600], $legacyKey, 'HS256');
 
-        $this->assertSame([456], $this->repository->decryptDownHash($legacyHash, $user));
+        $this->assertSame([456], $this->downloadRepository->decryptDownHash($legacyHash, $user));
     }
 
     public function test_downhash_fails_after_passkey_change(): void
@@ -72,17 +72,17 @@ class TorrentRepositoryDownHashTest extends TestCase
 
         $newUser = ['id' => 42, 'passkey' => 'newpasskey1234567890123456789012'];
 
-        $this->assertSame([], $this->repository->decryptDownHash($legacyHash, $newUser));
+        $this->assertSame([], $this->downloadRepository->decryptDownHash($legacyHash, $newUser));
     }
 
     public function test_tampered_downhash_fails(): void
     {
         $user = ['id' => 42, 'passkey' => 'abc123def456ghi789jkl012mno345pq'];
-        $hash = $this->repository->encryptDownHash(123, $user);
+        $hash = $this->downloadRepository->encryptDownHash(123, $user);
 
         $tampered = substr($hash, 0, -4).'xxxx';
 
-        $this->assertSame([], $this->repository->decryptDownHash($tampered, $user));
+        $this->assertSame([], $this->downloadRepository->decryptDownHash($tampered, $user));
     }
 
     public function test_expired_downhash_fails(): void
@@ -91,7 +91,7 @@ class TorrentRepositoryDownHashTest extends TestCase
         $key = $this->invokeHkdfKey($user);
         $expiredHash = JWT::encode(['id' => 999, 'exp' => time() - 10], $key, 'HS256');
 
-        $this->assertSame([], $this->repository->decryptDownHash($expiredHash, $user));
+        $this->assertSame([], $this->downloadRepository->decryptDownHash($expiredHash, $user));
     }
 
     /**

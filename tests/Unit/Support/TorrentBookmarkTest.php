@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Support;
 
-use App\Repositories\TorrentRepository;
+use App\Services\TorrentStatsService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\TorrentBookmark;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -62,12 +62,12 @@ final class TorrentBookmarkTest extends TestCase
             ->with('user_99_bookmark_array', Mockery::type('array'), Mockery::type('int'))
             ->once();
 
-        $repo = Mockery::mock(TorrentRepository::class);
+        $repo = Mockery::mock(TorrentStatsService::class);
         $repo->shouldReceive('getBookmarkTorrentIds')
             ->with(99)
             ->once()
             ->andReturn([5, 15]);
-        $this->app->instance(TorrentRepository::class, $repo);
+        $this->app->instance(TorrentStatsService::class, $repo);
 
         $result = TorrentBookmark::bookmarkArray($cache, 99);
 
@@ -76,12 +76,12 @@ final class TorrentBookmarkTest extends TestCase
 
     public function test_bookmark_array_with_null_cache_falls_back_to_repo(): void
     {
-        $repo = Mockery::mock(TorrentRepository::class);
+        $repo = Mockery::mock(TorrentStatsService::class);
         $repo->shouldReceive('getBookmarkTorrentIds')
             ->with(7)
             ->once()
             ->andReturn([]);
-        $this->app->instance(TorrentRepository::class, $repo);
+        $this->app->instance(TorrentStatsService::class, $repo);
 
         $result = TorrentBookmark::bookmarkArray(null, 7);
 

@@ -10,6 +10,8 @@ use App\Models\Post;
 use App\Models\Topic;
 use App\Models\User;
 use App\Repositories\ForumRepository;
+use App\Repositories\PostRepository;
+use App\Repositories\TopicRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -50,12 +52,12 @@ final class PostControllerTest extends TestCase
 
         $this->actingAs($user);
 
-        /** @var ForumRepository&Mockery\MockInterface $repo */
-        $repo = Mockery::mock(ForumRepository::class);
-        $repo->shouldReceive('getTopicPosts')->once()->andReturn(
+        /** @var PostRepository&Mockery\MockInterface $postRepo */
+        $postRepo = Mockery::mock(PostRepository::class);
+        $postRepo->shouldReceive('getTopicPosts')->once()->andReturn(
             Post::query()->where('topicid', $topic->id)->orderBy('id')->get()
         );
-        app()->instance(ForumRepository::class, $repo);
+        app()->instance(PostRepository::class, $postRepo);
 
         $controller = app(PostController::class);
         $request = Request::create('/api/topics/'.$topic->id.'/posts', 'GET');
@@ -96,12 +98,19 @@ final class PostControllerTest extends TestCase
 
         /** @var ForumRepository&Mockery\MockInterface $repo */
         $repo = Mockery::mock(ForumRepository::class);
-        $repo->shouldReceive('isModeratorOfTopic')->andReturn(false);
-        $repo->shouldReceive('createPost')->once()->andReturn(501);
-        $repo->shouldReceive('setTopicLastPost')->once();
         $repo->shouldReceive('incrementForumPostCount')->once();
-        $repo->shouldReceive('updateUserLastPost')->once();
         app()->instance(ForumRepository::class, $repo);
+
+        /** @var PostRepository&Mockery\MockInterface $postRepo */
+        $postRepo = Mockery::mock(PostRepository::class);
+        $postRepo->shouldReceive('createPost')->once()->andReturn(501);
+        $postRepo->shouldReceive('updateUserLastPost')->once();
+        app()->instance(PostRepository::class, $postRepo);
+
+        /** @var TopicRepository&Mockery\MockInterface $topicRepo */
+        $topicRepo = Mockery::mock(TopicRepository::class);
+        $topicRepo->shouldReceive('setTopicLastPost')->once();
+        app()->instance(TopicRepository::class, $topicRepo);
 
         Post::factory()->create([
             'id' => 501,
@@ -131,10 +140,10 @@ final class PostControllerTest extends TestCase
 
         $this->actingAs($user);
 
-        /** @var ForumRepository&Mockery\MockInterface $repo */
-        $repo = Mockery::mock(ForumRepository::class);
-        $repo->shouldReceive('isModeratorOfTopic')->andReturn(false);
-        app()->instance(ForumRepository::class, $repo);
+        /** @var TopicRepository&Mockery\MockInterface $topicRepo */
+        $topicRepo = Mockery::mock(TopicRepository::class);
+        $topicRepo->shouldReceive('isModeratorOfTopic')->andReturn(false);
+        app()->instance(TopicRepository::class, $topicRepo);
 
         $controller = app(PostController::class);
         $request = Request::create('/api/topics/'.$topic->id.'/posts', 'POST', [
@@ -172,11 +181,15 @@ final class PostControllerTest extends TestCase
 
         $this->actingAs($user);
 
-        /** @var ForumRepository&Mockery\MockInterface $repo */
-        $repo = Mockery::mock(ForumRepository::class);
-        $repo->shouldReceive('isModeratorOfTopic')->once()->andReturn(true);
-        $repo->shouldReceive('deletePost')->once();
-        app()->instance(ForumRepository::class, $repo);
+        /** @var TopicRepository&Mockery\MockInterface $topicRepo */
+        $topicRepo = Mockery::mock(TopicRepository::class);
+        $topicRepo->shouldReceive('isModeratorOfTopic')->once()->andReturn(true);
+        app()->instance(TopicRepository::class, $topicRepo);
+
+        /** @var PostRepository&Mockery\MockInterface $postRepo */
+        $postRepo = Mockery::mock(PostRepository::class);
+        $postRepo->shouldReceive('deletePost')->once();
+        app()->instance(PostRepository::class, $postRepo);
 
         $controller = app(PostController::class);
         app()->instance('request', request());

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Services;
 
+use App\Repositories\MailboxRepository;
 use App\Repositories\MessageRepository;
 use App\Services\MessagePageService;
 use App\Support\Cache\LegacyRedisCache;
@@ -49,6 +50,7 @@ final class MessagePageServiceTest extends TestCase
         $this->mockCache();
         $this->service = new MessagePageService(
             $this->app->make(MessageRepository::class),
+            $this->app->make(MailboxRepository::class),
             $this->app->make(CurrentUser::class),
             $this->app->make(Globals::class),
             $this->app->make(LegacyRedisCache::class),

@@ -111,10 +111,11 @@ final class TopicRepositoryTest extends TestCase
     public function test_delete_topic_removes_topic_posts_and_readposts(): void
     {
         $forum = Forum::factory()->create(['topiccount' => 5, 'postcount' => 10]);
+        $user = User::factory()->create();
         $topic = Topic::factory()->create(['forumid' => $forum->id]);
         Post::factory()->create(['topicid' => $topic->id]);
         DB::table('readposts')->insert([
-            'userid' => 1,
+            'userid' => $user->id,
             'topicid' => $topic->id,
             'lastpostread' => 1,
         ]);

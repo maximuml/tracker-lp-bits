@@ -9,6 +9,9 @@ use App\Models\Post;
 use App\Models\Topic;
 use App\Models\User;
 use App\Repositories\ForumRepository;
+use App\Repositories\PostRepository;
+use App\Repositories\TopicReadStateRepository;
+use App\Repositories\TopicRepository;
 use App\Services\ForumIndexService;
 use App\Services\ForumTopicViewService;
 use App\Support\Cache\LegacyRedisCache;
@@ -39,6 +42,15 @@ final class ForumTopicViewServiceTest extends TestCase
     private ForumTopicViewService $service;
 
     private int $initialObLevel;
+
+    /** @var TopicRepository&MockInterface */
+    private TopicRepository $topicRepo;
+
+    /** @var TopicReadStateRepository&MockInterface */
+    private TopicReadStateRepository $readStateRepo;
+
+    /** @var PostRepository&MockInterface */
+    private PostRepository $postRepo;
 
     protected function setUp(): void
     {
@@ -81,12 +93,18 @@ final class ForumTopicViewServiceTest extends TestCase
             $this->app->make(Globals::class),
             $this->app->make(ForumRepository::class),
             $this->app->make(LegacyRedisCache::class),
+            $this->app->make(TopicRepository::class),
+            $this->app->make(TopicReadStateRepository::class),
+            $this->app->make(PostRepository::class),
         );
         $this->service = new ForumTopicViewService(
             $indexService,
             $this->app->make(ForumRepository::class),
             $this->app->make(Globals::class),
             $this->app->make(LegacyRedisCache::class),
+            $this->app->make(TopicRepository::class),
+            $this->app->make(TopicReadStateRepository::class),
+            $this->app->make(PostRepository::class),
         );
     }
 
@@ -106,8 +124,27 @@ final class ForumTopicViewServiceTest extends TestCase
         $repo = Mockery::mock(ForumRepository::class);
         $repo->shouldReceive('isModeratorOfForum')->andReturn(false);
         $repo->shouldReceive('getModeratorArray')->andReturn([]);
-        $repo->shouldReceive('getLastReadPosts')->andReturn(null);
         $this->app->instance(ForumRepository::class, $repo);
+
+        /** @var TopicRepository&MockInterface $topicRepo */
+        $topicRepo = Mockery::mock(TopicRepository::class);
+        $topicRepo->shouldIgnoreMissing();
+        $this->app->instance(TopicRepository::class, $topicRepo);
+        $this->topicRepo = $topicRepo;
+
+        /** @var TopicReadStateRepository&MockInterface $readStateRepo */
+        $readStateRepo = Mockery::mock(TopicReadStateRepository::class);
+        $readStateRepo->shouldIgnoreMissing();
+        $readStateRepo->shouldReceive('getLastReadPosts')->andReturn(null);
+        $this->app->instance(TopicReadStateRepository::class, $readStateRepo);
+        $this->readStateRepo = $readStateRepo;
+
+        /** @var PostRepository&MockInterface $postRepo */
+        $postRepo = Mockery::mock(PostRepository::class);
+        $postRepo->shouldIgnoreMissing();
+        $this->app->instance(PostRepository::class, $postRepo);
+        $this->postRepo = $postRepo;
+
         $this->rebuildService($repo);
 
         return $repo;
@@ -135,12 +172,18 @@ final class ForumTopicViewServiceTest extends TestCase
             $this->app->make(Globals::class),
             $forumRepo,
             $cacheInstance,
+            $this->app->make(TopicRepository::class),
+            $this->app->make(TopicReadStateRepository::class),
+            $this->app->make(PostRepository::class),
         );
         $this->service = new ForumTopicViewService(
             $indexService,
             $forumRepo,
             $this->app->make(Globals::class),
             $cacheInstance,
+            $this->app->make(TopicRepository::class),
+            $this->app->make(TopicReadStateRepository::class),
+            $this->app->make(PostRepository::class),
         );
     }
 
@@ -265,7 +308,7 @@ final class ForumTopicViewServiceTest extends TestCase
         $this->setUser();
         $this->setRequest(['topicid' => 999]);
 
-        $repo->shouldReceive('getTopic')->with(999)->andReturn(null);
+        $this->topicRepo->shouldReceive('getTopic')->with(999)->andReturn(null);
 
         $threw = false;
         try {
@@ -301,7 +344,7 @@ final class ForumTopicViewServiceTest extends TestCase
         $topic->hlcolor = 0;
         $topic->views = 0;
 
-        $repo->shouldReceive('getTopic')->with(1)->andReturn($topic);
+        $this->topicRepo->shouldReceive('getTopic')->with(1)->andReturn($topic);
         $repo->shouldReceive('getForumsList')->andReturn([
             1 => ['id' => 1, 'name' => 'Test Forum', 'minclassread' => 50, 'minclasswrite' => 50, 'minclasscreate' => 50],
         ]);
@@ -340,17 +383,17 @@ final class ForumTopicViewServiceTest extends TestCase
         $topic->hlcolor = 0;
         $topic->views = 5;
 
-        $repo->shouldReceive('getTopic')->with(1)->andReturn($topic);
+        $this->topicRepo->shouldReceive('getTopic')->with(1)->andReturn($topic);
         $repo->shouldReceive('getForumsList')->andReturn([
             1 => ['id' => 1, 'name' => 'Test Forum', 'minclassread' => 0, 'minclasswrite' => 0, 'minclasscreate' => 0],
         ]);
-        $repo->shouldReceive('incrementTopicViews')->with(1)->andReturn(true);
-        $repo->shouldReceive('countTopicPosts')->with(1, null)->andReturn(0);
-        $repo->shouldReceive('getTopicPosts')->withAnyArgs()->andReturn(new EloquentCollection);
+        $this->topicRepo->shouldReceive('incrementTopicViews')->with(1)->andReturn(true);
+        $this->postRepo->shouldReceive('countTopicPosts')->with(1, null)->andReturn(0);
+        $this->postRepo->shouldReceive('getTopicPosts')->withAnyArgs()->andReturn(new EloquentCollection);
         $repo->shouldReceive('getUsersByIds')->andReturn(new EloquentCollection);
-        $repo->shouldReceive('countUserPosts')->andReturn(0);
-        $repo->shouldReceive('markPostRead')->andReturn(true);
-        $repo->shouldReceive('getTopicById')->andReturn($topic);
+        $this->postRepo->shouldReceive('countUserPosts')->andReturn(0);
+        $this->readStateRepo->shouldReceive('markPostRead')->andReturn(true);
+        $this->topicRepo->shouldReceive('getTopicById')->andReturn($topic);
 
         $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewTopic(
             ['text_forums' => 'Forums', 'text_prev' => 'Prev', 'text_next' => 'Next',
@@ -434,17 +477,17 @@ final class ForumTopicViewServiceTest extends TestCase
 
         $userCollection = new EloquentCollection([$userId => $user]);
 
-        $repo->shouldReceive('getTopic')->with(1)->andReturn($topic);
+        $this->topicRepo->shouldReceive('getTopic')->with(1)->andReturn($topic);
         $repo->shouldReceive('getForumsList')->andReturn([
             1 => ['id' => 1, 'name' => 'Test Forum', 'minclassread' => 0, 'minclasswrite' => 0, 'minclasscreate' => 0],
         ]);
-        $repo->shouldReceive('incrementTopicViews')->with(1)->andReturn(true);
-        $repo->shouldReceive('countTopicPosts')->with(1, null)->andReturn(1);
-        $repo->shouldReceive('getTopicPosts')->withAnyArgs()->andReturn(new EloquentCollection([$post]));
+        $this->topicRepo->shouldReceive('incrementTopicViews')->with(1)->andReturn(true);
+        $this->postRepo->shouldReceive('countTopicPosts')->with(1, null)->andReturn(1);
+        $this->postRepo->shouldReceive('getTopicPosts')->withAnyArgs()->andReturn(new EloquentCollection([$post]));
         $repo->shouldReceive('getUsersByIds')->andReturn($userCollection);
-        $repo->shouldReceive('countUserPosts')->andReturn(0);
-        $repo->shouldReceive('markPostRead')->andReturn(true);
-        $repo->shouldReceive('getTopicById')->with(1)->andReturn($topic);
+        $this->postRepo->shouldReceive('countUserPosts')->andReturn(0);
+        $this->readStateRepo->shouldReceive('markPostRead')->andReturn(true);
+        $this->topicRepo->shouldReceive('getTopicById')->with(1)->andReturn($topic);
 
         $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewTopic(
             ['text_forums' => 'Forums', 'text_prev' => 'Prev', 'text_next' => 'Next',
@@ -501,17 +544,17 @@ final class ForumTopicViewServiceTest extends TestCase
         $topic->hlcolor = 0;
         $topic->views = 3;
 
-        $repo->shouldReceive('getTopic')->with(1)->andReturn($topic);
+        $this->topicRepo->shouldReceive('getTopic')->with(1)->andReturn($topic);
         $repo->shouldReceive('getForumsList')->andReturn([
             1 => ['id' => 1, 'name' => 'Test Forum', 'minclassread' => 0, 'minclasswrite' => 0, 'minclasscreate' => 0],
         ]);
-        $repo->shouldReceive('incrementTopicViews')->with(1)->andReturn(true);
-        $repo->shouldReceive('countTopicPosts')->with(1, null)->andReturn(0);
-        $repo->shouldReceive('getTopicPosts')->withAnyArgs()->andReturn(new EloquentCollection);
+        $this->topicRepo->shouldReceive('incrementTopicViews')->with(1)->andReturn(true);
+        $this->postRepo->shouldReceive('countTopicPosts')->with(1, null)->andReturn(0);
+        $this->postRepo->shouldReceive('getTopicPosts')->withAnyArgs()->andReturn(new EloquentCollection);
         $repo->shouldReceive('getUsersByIds')->andReturn(new EloquentCollection);
-        $repo->shouldReceive('countUserPosts')->andReturn(0);
-        $repo->shouldReceive('markPostRead')->andReturn(true);
-        $repo->shouldReceive('getTopicById')->andReturn($topic);
+        $this->postRepo->shouldReceive('countUserPosts')->andReturn(0);
+        $this->readStateRepo->shouldReceive('markPostRead')->andReturn(true);
+        $this->topicRepo->shouldReceive('getTopicById')->andReturn($topic);
 
         $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewTopic(
             ['text_forums' => 'Forums', 'text_prev' => 'Prev', 'text_next' => 'Next',

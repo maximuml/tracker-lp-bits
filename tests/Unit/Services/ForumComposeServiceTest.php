@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tests\Unit\Services;
 
 use App\Repositories\ForumRepository;
+use App\Repositories\PostRepository;
+use App\Repositories\TopicRepository;
 use App\Services\ForumComposeService;
 use App\Support\CurrentUser;
 use App\Support\Globals;
@@ -81,6 +83,32 @@ final class ForumComposeServiceTest extends TestCase
         $repo->shouldIgnoreMissing(false);
         $this->app->instance(ForumRepository::class, $repo);
 
+        $topicRepo = Mockery::mock(TopicRepository::class);
+        $topicRepo->shouldIgnoreMissing(false);
+        $this->app->instance(TopicRepository::class, $topicRepo);
+
+        $postRepo = Mockery::mock(PostRepository::class);
+        $postRepo->shouldIgnoreMissing(false);
+        $this->app->instance(PostRepository::class, $postRepo);
+
+        return $repo;
+    }
+
+    /** @return TopicRepository&MockInterface */
+    private function mockTopicRepo(): mixed
+    {
+        /** @var TopicRepository&MockInterface $repo */
+        $repo = $this->app->make(TopicRepository::class);
+
+        return $repo;
+    }
+
+    /** @return PostRepository&MockInterface */
+    private function mockPostRepo(): mixed
+    {
+        /** @var PostRepository&MockInterface $repo */
+        $repo = $this->app->make(PostRepository::class);
+
         return $repo;
     }
 
@@ -135,7 +163,7 @@ final class ForumComposeServiceTest extends TestCase
         $repo = $this->mockForumRepo();
         $this->setUser();
 
-        $repo->shouldReceive('getPostForQuote')->with(999)->andReturn(null);
+        $this->mockPostRepo()->shouldReceive('getPostForQuote')->with(999)->andReturn(null);
 
         $threw = false;
         try {
@@ -153,7 +181,7 @@ final class ForumComposeServiceTest extends TestCase
         $repo = $this->mockForumRepo();
         $this->setUser();
 
-        $repo->shouldReceive('getPostForEdit')->with(999)->andReturn(null);
+        $this->mockPostRepo()->shouldReceive('getPostForEdit')->with(999)->andReturn(null);
 
         $result = $this->service->buildComposeFrame(999, 'edit', []);
 
@@ -185,7 +213,7 @@ final class ForumComposeServiceTest extends TestCase
         $repo = $this->mockForumRepo();
         $this->setUser();
 
-        $repo->shouldReceive('getTopicSubject')->with(1)->andReturn('Test Topic');
+        $this->mockTopicRepo()->shouldReceive('getTopicSubject')->with(1)->andReturn('Test Topic');
 
         $result = $this->callWithSuppressedErrors(fn () => $this->service->buildComposeFrame(1, 'reply', ['text_reply_to_topic' => 'Reply to']));
 
@@ -203,7 +231,7 @@ final class ForumComposeServiceTest extends TestCase
         $repo = $this->mockForumRepo();
         $this->setUser();
 
-        $repo->shouldReceive('getPostForQuote')->with(1)->andReturn([
+        $this->mockPostRepo()->shouldReceive('getPostForQuote')->with(1)->andReturn([
             'topicid' => 5,
             'topic_subject' => 'Quoted Topic',
             'username' => 'poster',
@@ -226,7 +254,7 @@ final class ForumComposeServiceTest extends TestCase
         $repo = $this->mockForumRepo();
         $this->setUser();
 
-        $repo->shouldReceive('getPostForEdit')->with(1)->andReturn([
+        $this->mockPostRepo()->shouldReceive('getPostForEdit')->with(1)->andReturn([
             'topicid' => 5,
             'topic_subject' => 'Edit Topic',
             'body' => 'Edit text',
@@ -264,7 +292,7 @@ final class ForumComposeServiceTest extends TestCase
         $repo = $this->mockForumRepo();
         $this->setUser();
 
-        $repo->shouldReceive('topicExists')->with(999)->andReturn(null);
+        $this->mockTopicRepo()->shouldReceive('topicExists')->with(999)->andReturn(null);
 
         $threw = false;
         try {
@@ -280,7 +308,7 @@ final class ForumComposeServiceTest extends TestCase
         $repo = $this->mockForumRepo();
         $this->setUser();
 
-        $repo->shouldReceive('postExists')->with(999)->andReturn(null);
+        $this->mockPostRepo()->shouldReceive('postExists')->with(999)->andReturn(null);
 
         $threw = false;
         try {
@@ -342,9 +370,9 @@ final class ForumComposeServiceTest extends TestCase
         $this->setUser();
         $this->setRequest(['topicid' => 1]);
 
-        $repo->shouldReceive('topicExists')->with(1)->andReturn(1);
+        $this->mockTopicRepo()->shouldReceive('topicExists')->with(1)->andReturn(1);
         $repo->shouldReceive('forumExists')->with(1)->andReturn(true);
-        $repo->shouldReceive('getTopicSubject')->with(1)->andReturn('Test Topic');
+        $this->mockTopicRepo()->shouldReceive('getTopicSubject')->with(1)->andReturn('Test Topic');
 
         $result = $this->callWithSuppressedErrors(fn () => $this->service->buildReply(['text_reply_to_topic' => 'Reply to'], Request::create('/forums.php', 'GET', ['topicid' => 1])));
 

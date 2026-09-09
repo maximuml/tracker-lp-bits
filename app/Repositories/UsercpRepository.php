@@ -17,6 +17,7 @@ use App\Models\User;
 use App\Services\WebAuthService;
 use App\Support\AuthCookie;
 use App\Support\Cache;
+use App\Support\Config\SiteConfig;
 use App\Support\Globals;
 use App\Support\Http;
 use App\Support\LegacyResponse;
@@ -381,7 +382,7 @@ final class UsercpRepository extends BaseRepository
             $data['lang'] = $dto->sitelanguage;
         }
 
-        $showTooltip = (string) app(Globals::class)->get('enabletooltip_tweak', '') === 'yes';
+        $showTooltip = SiteConfig::current()->tweak->enableTooltip(false);
         if ($showTooltip) {
             $data['tooltip'] = $dto->tooltip ?? UserTooltip::OFF->value;
             $data['showlastcom'] = $dto->showlastcom ?? false;
@@ -468,8 +469,9 @@ final class UsercpRepository extends BaseRepository
             $passupdated = 1;
         }
 
-        $disableEmailChange = (string) app(Globals::class)->get('disableemailchange', 'no');
-        $smtpType = (string) app(Globals::class)->get('smtptype', 'none');
+        $config = SiteConfig::current();
+        $disableEmailChange = $config->security->disableEmailChange(false) ? 'yes' : 'no';
+        $smtpType = $config->smtp->type('none');
 
         if ($disableEmailChange !== 'no' && $smtpType !== 'none' && $email !== '' && $email !== $user->email) {
             if (! Validators::isEmail($email)) {
@@ -487,9 +489,9 @@ final class UsercpRepository extends BaseRepository
             $data['passkey'] = app(PasskeyGenerator::class)->generate();
         }
 
-        $siteName = (string) app(Globals::class)->get('SITENAME', '');
-        $siteEmail = (string) app(Globals::class)->get('SITEEMAIL', '');
-        $baseUrl = (string) app(Globals::class)->get('BASEURL', '');
+        $siteName = $config->basic->siteName();
+        $siteEmail = $config->main->siteEmail();
+        $baseUrl = $config->basic->baseUrl();
         $scheme = Http::protocolPrefix(Url::isSecure());
 
         if ($changedemail === 1) {
@@ -578,11 +580,12 @@ final class UsercpRepository extends BaseRepository
         }
 
         $email = (string) ($dto->email ?? '');
-        $disableEmailChange = (string) app(Globals::class)->get('disableemailchange', 'no');
-        $smtpType = (string) app(Globals::class)->get('smtptype', 'none');
-        $siteName = (string) app(Globals::class)->get('SITENAME', '');
-        $siteEmail = (string) app(Globals::class)->get('SITEEMAIL', '');
-        $baseUrl = (string) app(Globals::class)->get('BASEURL', '');
+        $config = SiteConfig::current();
+        $disableEmailChange = $config->security->disableEmailChange(false) ? 'yes' : 'no';
+        $smtpType = $config->smtp->type('none');
+        $siteName = $config->basic->siteName();
+        $siteEmail = $config->main->siteEmail();
+        $baseUrl = $config->basic->baseUrl();
         $scheme = Http::protocolPrefix(Url::isSecure());
         $lang = (array) (app(Globals::class)->get('lang_usercp') ?? []);
 

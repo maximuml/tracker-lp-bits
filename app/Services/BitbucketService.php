@@ -6,7 +6,7 @@ namespace App\Services;
 
 use App\Enums\BitbucketPublic;
 use App\Models\User;
-use App\Support\Globals;
+use App\Support\Config\SiteConfig;
 use App\Support\Http;
 use App\Support\Path;
 use App\Support\Url;
@@ -43,7 +43,7 @@ final class BitbucketService
             throw new LogicException('Bad file name.');
         }
 
-        $bitbucket = (string) app(Globals::class)->get('bitbucket', 'bitbucket');
+        $bitbucket = SiteConfig::current()->main->bitbucket('bitbucket');
         $tgtfile = Path::resolve("{$bitbucket}/{$filename}", \ROOT_PATH);
         if (file_exists($tgtfile)) {
             throw new LogicException('File already exists: '.$filename);
@@ -92,7 +92,7 @@ final class BitbucketService
             default => imagepng($thumb, $tgtfile),
         };
 
-        $baseUrl = (string) app(Globals::class)->get('BASEURL', '');
+        $baseUrl = SiteConfig::current()->basic->baseUrl();
         $url = str_replace(' ', '%20', htmlspecialchars(Http::protocolPrefix(Url::isSecure())."{$baseUrl}/bitbucket/{$filename}"));
         $public = $isPublic ? BitbucketPublic::YES->value : BitbucketPublic::NO->value;
 

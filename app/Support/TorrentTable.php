@@ -11,6 +11,7 @@ use App\Models\Torrent;
 use App\Repositories\TagRepository;
 use App\Repositories\TorrentRepository;
 use App\Support\Cache\LegacyRedisCache;
+use App\Support\Config\SiteConfig;
 use App\Support\Torrent\TorrentStatus;
 
 final class TorrentTable
@@ -28,8 +29,9 @@ final class TorrentTable
         }
         $lang_functions = app(Language::class)->functions();
         $user = app(CurrentUser::class)->get() ?? [];
-        $waitsystem = (string) app(Globals::class)->get('waitsystem', '');
-        $enabletooltip_tweak = (string) app(Globals::class)->get('enabletooltip_tweak', '');
+        $config = SiteConfig::current();
+        $waitsystem = $config->main->waitSystem(false) ? 'yes' : 'no';
+        $enabletooltip_tweak = $config->tweak->enableTooltip(false) ? 'yes' : '';
 
         $torrent = new TorrentStatus;
         $torrentRep = app(TorrentRepository::class);

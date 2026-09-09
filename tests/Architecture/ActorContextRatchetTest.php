@@ -36,7 +36,7 @@ final class ActorContextRatchetTest extends TestCase
      */
     private const BASELINE_APP_CALLS = 1133;
 
-    private const BASELINE_GLOBALS_REFS = 559;
+    private const BASELINE_GLOBALS_REFS = 453;
 
     private const APP_DIR = __DIR__.'/../../app';
 

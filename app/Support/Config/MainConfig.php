@@ -218,6 +218,56 @@ final class MainConfig extends Config
         return array_values(array_map('strval', $value));
     }
 
+    public function maxNewsNum(int $default = 5): int
+    {
+        return $this->int('maxnewsnum', $default);
+    }
+
+    public function forumPostsPerPage(int $default = 25): int
+    {
+        return $this->int('postsperpage', $default);
+    }
+
+    public function forumTopicsPerPage(int $default = 20): int
+    {
+        return $this->int('topicsperpage', $default);
+    }
+
+    public function bitbucket(string $default = 'bitbucket'): string
+    {
+        return $this->string('bitbucket', $default);
+    }
+
+    public function maxSubjectLength(int $default = 100): int
+    {
+        return $this->int('maxsubjectlength', $default);
+    }
+
+    public function slogan(string $default = ''): string
+    {
+        return $this->string('SLOGAN', $default);
+    }
+
+    public function logo(string $default = ''): string
+    {
+        return $this->string('logo', $default);
+    }
+
+    public function siteOnline(bool $default = true): bool
+    {
+        return $this->bool('site_online', $default);
+    }
+
+    public function donation(bool $default = false): bool
+    {
+        return $this->bool('donation', $default);
+    }
+
+    public function icpLicense(string $default = ''): string
+    {
+        return $this->string('icplicense', $default);
+    }
+
     public function torrentsPerPageNullable(?string $default = null): ?string
     {
         $value = $this->data['torrentsperpage'] ?? $default;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Jobs;
 
-use App\Repositories\TorrentRepository;
+use App\Repositories\TorrentPurchaseRepository;
 use App\Support\Logger;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -42,7 +42,7 @@ class LoadTorrentBoughtUsers implements ShouldQueue
      */
     public function handle()
     {
-        $rep = app(TorrentRepository::class);
+        $rep = app(TorrentPurchaseRepository::class);
         $result = $rep->loadBoughtUser($this->torrentId);
         Logger::writeWithContext((string) "result: {$result}", (string) 'info', (bool) false);
     }

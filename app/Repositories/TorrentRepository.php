@@ -42,7 +42,6 @@ class TorrentRepository extends BaseRepository
 {
     public function __construct(
         private readonly TorrentDownloadRepository $downloadRepository,
-        private readonly TorrentPurchaseRepository $purchaseRepository,
         private readonly TorrentModerationRepository $moderationRepository,
         private readonly TorrentPromotionService $promotionService,
     ) {}
@@ -350,72 +349,8 @@ HTML;
 
     // ──────────────────────────────────────────────────────────────────────────
     //  Delegating methods — backward compatibility for callers not yet updated
-    //  to use TorrentPurchaseRepository, TorrentDownloadRepository, or
-    //  TorrentModerationRepository directly.
+    //  to use TorrentDownloadRepository or TorrentModerationRepository directly.
     // ──────────────────────────────────────────────────────────────────────────
-
-    /**
-     * @param  mixed  $torrentId
-     */
-    public function loadBoughtUser($torrentId): int
-    {
-        return $this->purchaseRepository->loadBoughtUser($torrentId);
-    }
-
-    /**
-     * @param  mixed  $uid
-     * @param  mixed  $torrentId
-     * @param  mixed  $buyLogId
-     */
-    public function addBuySuccessCache($uid, $torrentId, $buyLogId): void
-    {
-        ($this->purchaseRepository)->addBuySuccessCache($uid, $torrentId, $buyLogId);
-    }
-
-    /**
-     * @param  mixed  $uid
-     * @param  mixed  $torrentId
-     */
-    public function hasBuySuccessCache($uid, $torrentId): bool
-    {
-        return $this->purchaseRepository->hasBuySuccessCache($uid, $torrentId);
-    }
-
-    /**
-     * @param  mixed  $uid
-     * @param  mixed  $torrentId
-     */
-    public function hasBuySuccess($uid, $torrentId): bool
-    {
-        return $this->purchaseRepository->hasBuySuccess($uid, $torrentId);
-    }
-
-    /**
-     * @param  mixed  $uid
-     * @param  mixed  $torrentId
-     */
-    public function getBuyStatus($uid, $torrentId): int
-    {
-        return $this->purchaseRepository->getBuyStatus($uid, $torrentId);
-    }
-
-    /**
-     * @param  mixed  $uid
-     * @param  mixed  $torrentId
-     */
-    public function addBuyFailCache($uid, $torrentId): void
-    {
-        ($this->purchaseRepository)->addBuyFailCache($uid, $torrentId);
-    }
-
-    /**
-     * @param  mixed  $uid
-     * @param  mixed  $torrentId
-     */
-    public function getBuyFailCache($uid, $torrentId): int
-    {
-        return $this->purchaseRepository->getBuyFailCache($uid, $torrentId);
-    }
 
     /**
      * @param  mixed  $id

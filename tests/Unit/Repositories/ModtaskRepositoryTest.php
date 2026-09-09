@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Repositories\ModtaskRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -17,6 +18,7 @@ use Tests\TestCase;
  * Covers confirmUser(), getUserArray(), addFund(), updateUser(), and
  * addWarning() public methods.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class ModtaskRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

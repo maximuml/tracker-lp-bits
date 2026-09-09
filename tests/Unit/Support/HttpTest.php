@@ -4,7 +4,9 @@ namespace Tests\Unit\Support;
 
 use App\Support\Http;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 class HttpTest extends TestCase
 {
     public function test_content_disposition_default_is_attachment_with_ascii_filename(): void

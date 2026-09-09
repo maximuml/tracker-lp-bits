@@ -12,6 +12,7 @@ use App\Support\PasswordHasher;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Mockery;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -20,6 +21,7 @@ use Tests\TestCase;
  * Covers password validation (argon2id/sha256/md5), login attempt
  * tracking, IP banning, and remaining attempt calculation.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class WebAuthServiceTest extends TestCase
 {
     use DatabaseTransactions;

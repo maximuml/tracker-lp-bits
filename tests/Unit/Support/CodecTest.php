@@ -4,7 +4,9 @@ namespace Tests\Unit\Support;
 
 use App\Support\Codec;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 class CodecTest extends TestCase
 {
     // ---------- base64Encode / base64Decode ----------

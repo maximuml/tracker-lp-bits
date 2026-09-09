@@ -4,7 +4,9 @@ namespace Tests\Unit\Support;
 
 use App\Support\Locale;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class LocaleTest extends TestCase
 {
     public function test_file_path_uses_language_folder_by_default(): void

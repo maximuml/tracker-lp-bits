@@ -4,7 +4,9 @@ namespace Tests\Unit\Support;
 
 use App\Support\Image;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class ImageTest extends TestCase
 {
     public function test_weserv_url_with_scheme_only(): void

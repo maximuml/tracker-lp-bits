@@ -8,6 +8,7 @@ use App\Repositories\IpLogRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -18,6 +19,7 @@ use Tests\TestCase;
  * throw and never touch Redis. saveToDB() is exercised against an empty
  * Redis to confirm it completes without error.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class IpLogRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

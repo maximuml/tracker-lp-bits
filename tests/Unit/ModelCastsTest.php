@@ -13,6 +13,7 @@ use App\Models\TorrentCustomField;
 use App\Models\UserMedal;
 use App\Models\UserRequireSeedTorrent;
 use Illuminate\Database\Eloquent\Model;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -23,6 +24,7 @@ use Tests\TestCase;
  * - The 7 previously-missing models now have proper casts
  * - Model::preventLazyLoading() is enabled in non-production
  */
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class ModelCastsTest extends TestCase
 {
     /**

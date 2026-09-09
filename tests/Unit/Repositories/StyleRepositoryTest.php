@@ -7,6 +7,7 @@ namespace Tests\Unit\Repositories;
 use App\Repositories\StyleRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -15,6 +16,7 @@ use Tests\TestCase;
  * Covers all(), row(), uri(), highlightColor(), and firstId().
  * The static $rows cache is reset between tests via reflection.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class StyleRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

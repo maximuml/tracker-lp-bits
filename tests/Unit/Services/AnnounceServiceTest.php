@@ -6,7 +6,9 @@ use App\Exceptions\TrackerException;
 use App\Exceptions\TrackerWarningException;
 use App\Http\Requests\AnnounceRequest;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 class AnnounceServiceTest extends TestCase
 {
     public function test_tracker_exception_failure(): void

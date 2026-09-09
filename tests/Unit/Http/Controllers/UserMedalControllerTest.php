@@ -13,8 +13,10 @@ use App\Repositories\MedalRepository;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Validation\ValidationException;
 use Mockery;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::PURE_UNIT, TestCategory::MUTATION)]
 final class UserMedalControllerTest extends TestCase
 {
     protected function tearDown(): void

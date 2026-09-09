@@ -4,12 +4,14 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
  * Phase 5.5: verify that the legacy stats/allagents endpoints redirect
  * to the Filament dashboard, which now hosts the equivalent widgets.
  */
+#[TestCategory(TestCategory::HTTP_FEATURE)]
 final class DashboardWidgetsRedirectTest extends TestCase
 {
     use DatabaseTransactions;

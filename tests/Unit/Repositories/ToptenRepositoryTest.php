@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Repositories\ToptenRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -17,6 +18,7 @@ use Tests\TestCase;
  * Covers page() with all type values (1=user, 2=torrent, 3=country,
  * 5=community, 6=other), limit clamping, and invalid type fallback.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class ToptenRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

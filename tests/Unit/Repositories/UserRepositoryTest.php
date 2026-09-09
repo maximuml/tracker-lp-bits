@@ -11,6 +11,7 @@ use App\Repositories\UserModerationRepository;
 use App\Repositories\UserRepository;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -19,6 +20,7 @@ use Tests\TestCase;
  * Covers getBase(), findForCacheClear(), findForDisplay(), getByIds(),
  * listMetas(), logModify().
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class UserRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

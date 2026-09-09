@@ -7,6 +7,7 @@ namespace Tests\Unit\Support;
 use App\Models\Torrent;
 use App\Support\TorrentAccess;
 use Illuminate\Support\HtmlString;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -14,6 +15,7 @@ use Tests\TestCase;
  *
  * Covers canAccess (always true stub) and adminName (HTML builder).
  */
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class TorrentAccessTest extends TestCase
 {
     public function test_can_access_always_returns_true(): void

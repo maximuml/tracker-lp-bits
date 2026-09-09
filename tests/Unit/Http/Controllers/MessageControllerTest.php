@@ -10,8 +10,10 @@ use App\Services\MessagePageService;
 use App\Services\MessageService;
 use Illuminate\Http\Request;
 use Mockery;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::PURE_UNIT, TestCategory::MUTATION)]
 final class MessageControllerTest extends TestCase
 {
     protected function tearDown(): void

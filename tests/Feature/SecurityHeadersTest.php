@@ -2,8 +2,10 @@
 
 namespace Tests\Feature;
 
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::HTTP_FEATURE)]
 final class SecurityHeadersTest extends TestCase
 {
     public function test_public_page_has_baseline_security_headers(): void

@@ -8,11 +8,13 @@ use App\Models\OutboxEvent;
 use App\Services\OutboxService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
  * T-24: Transactional Outbox tests.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class OutboxServiceTest extends TestCase
 {
     use DatabaseTransactions;

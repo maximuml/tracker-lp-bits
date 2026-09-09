@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Http\Middleware\VerifyCsrfToken;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -12,6 +13,7 @@ use Tests\TestCase;
  * Filament StaffMessageResource, and that modtask actions (warn, uploadpos,
  * downloadpos, forumpost) are available as UserProfile header actions.
  */
+#[TestCategory(TestCategory::HTTP_FEATURE)]
 final class ModtaskStaffMessageRedirectTest extends TestCase
 {
     use DatabaseTransactions;

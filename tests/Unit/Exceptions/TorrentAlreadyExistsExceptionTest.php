@@ -5,7 +5,9 @@ namespace Tests\Unit\Exceptions;
 use App\Exceptions\NexusException;
 use App\Exceptions\TorrentAlreadyExistsException;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class TorrentAlreadyExistsExceptionTest extends TestCase
 {
     public function test_it_exposes_the_existing_torrent_id(): void

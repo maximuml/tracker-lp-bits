@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Mockery;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -24,6 +25,7 @@ use Tests\TestCase;
  * nonexistent), editmailboxes (with and without boxes), and unknown
  * action defaulting to viewmailbox.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class MessagePageServiceTest extends TestCase
 {
     use DatabaseTransactions;

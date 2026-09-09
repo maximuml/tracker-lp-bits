@@ -7,6 +7,7 @@ namespace Tests\Unit;
 use App\Support\Html\HtmlSanitizer;
 use App\Support\Html\SafeHtml;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -16,6 +17,7 @@ use Tests\TestCase;
  * that SafeHtml value objects enforce the type boundary between
  * untrusted strings and sanitized HTML.
  */
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class SafeHtmlTest extends TestCase
 {
     /**

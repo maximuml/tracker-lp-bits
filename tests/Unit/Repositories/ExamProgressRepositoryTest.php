@@ -16,6 +16,7 @@ use App\Repositories\ExamProgressRepository;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -24,6 +25,7 @@ use Tests\TestCase;
  * Covers addProgress(), updateProgress(), getUserExamProgress(),
  * calculateProgress(), getProgressFormatted(), and updateProgressBulk().
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class ExamProgressRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

@@ -15,6 +15,7 @@ use App\Http\Controllers\ThankController;
 use App\Http\Controllers\TorrentController;
 use App\Http\Controllers\TorrentDownloadController;
 use App\Http\Controllers\UserController;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -26,6 +27,7 @@ use Tests\TestCase;
  * - Routes that pointed to stub methods are removed
  * - Real API routes still work
  */
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class DeadRestStubsTest extends TestCase
 {
     /**

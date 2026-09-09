@@ -7,6 +7,7 @@ namespace Tests\Unit\Repositories;
 use App\Repositories\SettingRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -17,6 +18,7 @@ use Tests\TestCase;
  * Uses unique test-prefixed setting names (test_*) to avoid polluting
  * the Setting::get() function-level static cache that other tests depend on.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class SettingRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

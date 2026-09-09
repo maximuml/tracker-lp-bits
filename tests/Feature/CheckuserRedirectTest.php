@@ -5,12 +5,14 @@ namespace Tests\Feature;
 use App\Http\Middleware\VerifyCsrfToken;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
  * Phase 5.1: verify that the legacy checkuser/takeconfirm endpoints redirect
  * to the Filament UserResource instead of rendering the old admin pages.
  */
+#[TestCategory(TestCategory::HTTP_FEATURE)]
 final class CheckuserRedirectTest extends TestCase
 {
     use DatabaseTransactions;

@@ -7,8 +7,10 @@ namespace Tests\Unit\Http\Controllers;
 use App\Http\Controllers\BonusHistoryController;
 use App\Repositories\BonusRepository;
 use Mockery;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::PURE_UNIT, TestCategory::MUTATION)]
 final class BonusHistoryControllerTest extends TestCase
 {
     protected function tearDown(): void

@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -20,6 +21,7 @@ use Tests\TestCase;
  * Covers getList(), store(), update(), getDetail(), delete(),
  * getPatternMatches(), and checkClientSimple().
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class AgentAllowRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

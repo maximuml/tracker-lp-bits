@@ -10,8 +10,10 @@ use App\Repositories\SearchBoxRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Mockery;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::PURE_UNIT, TestCategory::MUTATION)]
 final class UploadControllerTest extends TestCase
 {
     protected function tearDown(): void

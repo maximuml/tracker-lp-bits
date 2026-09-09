@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Architecture;
 
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
 /**
  * W0-04: Ratchet on large files in app/Repositories and app/Services.
@@ -19,6 +20,7 @@ use PHPUnit\Framework\TestCase;
  * To update after a legitimate split (e.g. extracting a service from a
  * repository), remove the entry from BASELINE_FILES and commit.
  */
+#[TestCategory(TestCategory::ARCHITECTURE)]
 final class RepositorySizeTest extends TestCase
 {
     private const APP_DIR = __DIR__.'/../../app';

@@ -11,6 +11,7 @@ use App\Repositories\AttendanceRepository;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -20,6 +21,7 @@ use Tests\TestCase;
  * getContinuousDays(), cleanup(), migrateAttendance(), and
  * buildViewData().
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class AttendanceRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

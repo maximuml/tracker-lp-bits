@@ -9,8 +9,10 @@ use App\Models\User;
 use App\Repositories\DashboardRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Mockery;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::PURE_UNIT, TestCategory::MUTATION)]
 final class DashboardControllerTest extends TestCase
 {
     protected function tearDown(): void

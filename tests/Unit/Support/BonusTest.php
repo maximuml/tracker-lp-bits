@@ -4,6 +4,7 @@ namespace Tests\Unit\Support;
 
 use App\Support\Bonus;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
 /**
  * Pins down the seeding-bonus math drained out of
@@ -12,6 +13,7 @@ use PHPUnit\Framework\TestCase;
  * The formula depends on time() (via weeks-alive), so expected values
  * are recomputed in-test using the same constants rather than hardcoded.
  */
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class BonusTest extends TestCase
 {
     /** A representative `bonus` setting group. */

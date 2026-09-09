@@ -7,6 +7,7 @@ namespace Tests\Unit\Services;
 use App\Services\LocationService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -15,6 +16,7 @@ use Tests\TestCase;
  * Covers createLocation (validation + insert), updateLocation
  * (validation + update), deleteLocation, and findLocation.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class LocationServiceTest extends TestCase
 {
     use DatabaseTransactions;

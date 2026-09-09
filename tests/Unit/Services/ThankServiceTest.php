@@ -12,6 +12,7 @@ use App\Support\Config\SiteConfig;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -21,6 +22,7 @@ use Tests\TestCase;
  * disabled owner rejection, successful thank with bonus grant, and
  * bonus increment verification.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class ThankServiceTest extends TestCase
 {
     use DatabaseTransactions;

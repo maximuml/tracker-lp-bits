@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Mockery;
 use Mockery\MockInterface;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -28,6 +29,7 @@ use Tests\TestCase;
  * unknown type), and handleMessagesActionPublic (action routing,
  * viewmessage redirect, non-POST guard).
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class MessageServiceTest extends TestCase
 {
     use DatabaseTransactions;

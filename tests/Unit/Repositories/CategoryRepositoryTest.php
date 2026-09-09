@@ -7,6 +7,7 @@ namespace Tests\Unit\Repositories;
 use App\Repositories\CategoryRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -18,6 +19,7 @@ use Tests\TestCase;
  * getIconRows(), getCategoryRows(), findSecondIcon(), and
  * getCategoriesByMode().
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class CategoryRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

@@ -16,8 +16,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Mockery;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::SERVICE_INTEGRATION, TestCategory::MUTATION)]
 final class PostControllerTest extends TestCase
 {
     use DatabaseTransactions;

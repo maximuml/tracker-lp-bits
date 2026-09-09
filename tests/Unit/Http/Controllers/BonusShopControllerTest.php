@@ -10,8 +10,10 @@ use App\Support\Globals;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Mockery;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::PURE_UNIT, TestCategory::MUTATION)]
 final class BonusShopControllerTest extends TestCase
 {
     protected function setUp(): void

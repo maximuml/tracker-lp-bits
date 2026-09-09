@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Mockery;
 use Mockery\MockInterface;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -21,6 +22,7 @@ use Tests\TestCase;
  * extension, dangerous MIME type, valid non-image file (local driver
  * move failure), and callback function script generation.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class AttachmentMutationServiceTest extends TestCase
 {
     use DatabaseTransactions;

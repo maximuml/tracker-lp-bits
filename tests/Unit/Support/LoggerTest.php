@@ -5,7 +5,9 @@ namespace Tests\Unit\Support;
 use App\Support\Logger;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 class LoggerTest extends TestCase
 {
     private string|false|null $originalLogDir = null;

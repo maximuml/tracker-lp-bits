@@ -7,8 +7,10 @@ use App\Http\Requests\TorrentEditRequest;
 use App\Models\Torrent;
 use App\Repositories\TorrentEditRepository;
 use Mockery;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::PURE_UNIT, TestCategory::MUTATION)]
 final class TorrentEditControllerTest extends TestCase
 {
     protected function tearDown(): void

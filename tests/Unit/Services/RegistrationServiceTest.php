@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\DB;
 use Mockery;
 use ReflectionClass;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -25,6 +26,7 @@ use Tests\TestCase;
  * Covers assertCanRegister (IP ban, registration toggles, max users,
  * max accounts per IP) and confirm (account confirmation flow).
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class RegistrationServiceTest extends TestCase
 {
     use DatabaseTransactions;

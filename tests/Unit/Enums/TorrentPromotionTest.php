@@ -6,7 +6,9 @@ namespace Tests\Unit\Enums;
 
 use App\Enums\TorrentPromotion;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class TorrentPromotionTest extends TestCase
 {
     public function test_cases_match_legacy_constants(): void

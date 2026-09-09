@@ -6,8 +6,10 @@ namespace Tests\Unit\Repositories;
 
 use App\Repositories\BaseRepository;
 use App\Repositories\UpgradeRepository;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class UpgradeRepositoryTest extends TestCase
 {
     public function test_is_instantiable(): void

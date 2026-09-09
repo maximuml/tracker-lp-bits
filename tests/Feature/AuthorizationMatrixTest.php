@@ -14,6 +14,7 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Laravel\Sanctum\Sanctum;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -27,6 +28,7 @@ use Tests\TestCase;
  *
  * Status codes 401, 403, 404, 405, and 422 are NOT interchangeable.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 class AuthorizationMatrixTest extends TestCase
 {
     use DatabaseTransactions;

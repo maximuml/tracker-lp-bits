@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Repositories\PollRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -16,6 +17,7 @@ use Tests\TestCase;
  * Covers findForEdit(), lastPoll(), createOrUpdate(), listAll(),
  * findWithOptions(), countAnswers(), answers(), and userDisplayMap().
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class PollRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

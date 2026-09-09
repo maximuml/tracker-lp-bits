@@ -12,6 +12,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Mockery;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -21,6 +22,7 @@ use Tests\TestCase;
  * (nonexistent, record-only, with-file), and uploadAvatar (bad filename,
  * existing file, invalid image, valid PNG, public/private flag).
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class BitbucketServiceTest extends TestCase
 {
     use DatabaseTransactions;

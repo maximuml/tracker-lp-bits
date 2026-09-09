@@ -4,7 +4,9 @@ namespace Tests\Unit\Support;
 
 use App\Support\Arrays;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 class ArraysTest extends TestCase
 {
     public function test_get_dot_notation(): void

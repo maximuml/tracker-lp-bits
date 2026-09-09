@@ -8,8 +8,10 @@ use App\Enums\SitelogSecurityLevel;
 use App\Repositories\SiteLogRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class SiteLogRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

@@ -15,6 +15,7 @@ use App\Repositories\ExamRepository;
 use App\Repositories\ExamUserRepository;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -23,6 +24,7 @@ use Tests\TestCase;
  * Covers getList(), getDetail(), delete(), listIndexes(),
  * listValid(), and isExamMatchUser().
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class ExamRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

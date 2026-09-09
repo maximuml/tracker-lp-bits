@@ -6,6 +6,7 @@ namespace Tests\Unit\Repositories;
 
 use App\Repositories\MysqlStatsRepository;
 use Carbon\Carbon;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -15,6 +16,7 @@ use Tests\TestCase;
  * These methods are pure computation or read-only MySQL status queries, so
  * no DatabaseTransactions trait is needed.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class MysqlStatsRepositoryTest extends TestCase
 {
     private MysqlStatsRepository $repository;

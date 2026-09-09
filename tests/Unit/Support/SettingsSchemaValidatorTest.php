@@ -8,8 +8,10 @@ use App\Exceptions\SettingsValidationException;
 use App\Repositories\SettingRepository;
 use App\Support\Settings;
 use App\Support\SettingsSchemaValidator;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 class SettingsSchemaValidatorTest extends TestCase
 {
     private SettingsSchemaValidator $validator;

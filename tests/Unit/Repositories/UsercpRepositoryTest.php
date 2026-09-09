@@ -11,6 +11,7 @@ use App\Repositories\UsercpRepository;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -20,6 +21,7 @@ use Tests\TestCase;
  * getCommentCount(), getForumPostCount(), getTotalPostCount(),
  * getTopicPostCount(), getStylesheetOptions(), getCountryOptions().
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class UsercpRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

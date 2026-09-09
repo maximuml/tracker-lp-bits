@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -15,6 +16,7 @@ use Tests\TestCase;
  * - FPM pm.max_children is configured in Dockerfile.prod
  * - Resource limits are set in docker-compose.prod.yml
  */
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class PerformanceBudgetTest extends TestCase
 {
     /**

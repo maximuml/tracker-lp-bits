@@ -6,6 +6,7 @@ namespace Tests\Unit\Support;
 
 use App\Support\PasswordHasher;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
 /**
  * Unit tests for the centralised PasswordHasher utility.
@@ -13,6 +14,7 @@ use PHPUnit\Framework\TestCase;
  * Covers argon2id hashing/verification, legacy sha256 and md5
  * verification, rehash detection, and edge cases.
  */
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class PasswordHasherTest extends TestCase
 {
     public function test_hash_returns_argon2id_hash(): void

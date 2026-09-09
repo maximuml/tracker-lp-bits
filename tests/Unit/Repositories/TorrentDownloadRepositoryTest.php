@@ -13,6 +13,7 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -23,6 +24,7 @@ use Tests\TestCase;
  * resetTrackerReportAuthKeySecret(), pieces-hash cache methods,
  * and touch/reset cache stamp.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class TorrentDownloadRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

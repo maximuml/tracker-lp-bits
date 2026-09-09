@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -23,6 +24,7 @@ use Tests\TestCase;
  * store(), update(), getDetail(), delete(), listIcon(), getOrderedIds(),
  * findForCategoryTable(), and getCategoriesForTable().
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class SearchBoxRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

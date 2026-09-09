@@ -17,6 +17,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Redis;
 use Mockery;
 use Mockery\MockInterface;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -26,6 +27,7 @@ use Tests\TestCase;
  * (no keywords, no hits, with hits), and buildViewForum
  * (invalid ID, nonexistent forum, valid forum with no topics).
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class ForumListingServiceTest extends TestCase
 {
     use DatabaseTransactions;

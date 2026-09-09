@@ -8,6 +8,7 @@ use App\Models\Torrent;
 use App\Models\User;
 use App\ValueObjects\InfoHash;
 use Laravel\Sanctum\Sanctum;
+use Tests\Attributes\TestCategory;
 use Tests\Concerns\AssertsQueryCount;
 use Tests\TestCase;
 
@@ -27,6 +28,7 @@ use Tests\TestCase;
  *
  * @group query-budget
  */
+#[TestCategory(TestCategory::PERFORMANCE)]
 final class QueryBudgetTest extends TestCase
 {
     use AssertsQueryCount;

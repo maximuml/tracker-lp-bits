@@ -18,8 +18,10 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Mockery;
 use Mockery\MockInterface;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::SERVICE_INTEGRATION, TestCategory::MUTATION)]
 final class SupportControllerTest extends TestCase
 {
     use DatabaseTransactions;

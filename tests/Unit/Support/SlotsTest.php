@@ -4,7 +4,9 @@ namespace Tests\Unit\Support;
 
 use App\Support\Slots;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 class SlotsTest extends TestCase
 {
     /** One gibibyte, mirroring the legacy `1024*1024*1024` divisor. */

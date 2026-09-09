@@ -4,7 +4,9 @@ namespace Tests\Unit\Support;
 
 use App\Support\Smilies;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class SmiliesTest extends TestCase
 {
     // ---------- link ----------

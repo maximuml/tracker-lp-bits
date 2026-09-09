@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -20,6 +21,7 @@ use Tests\TestCase;
  *
  * @group database
  */
+#[TestCategory(TestCategory::HTTP_FEATURE)]
 final class ReadReplicaStickyTest extends TestCase
 {
     /**

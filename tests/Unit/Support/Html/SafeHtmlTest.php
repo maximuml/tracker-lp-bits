@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Tests\Unit\Support\Html;
 
 use App\Support\Html\SafeHtml;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class SafeHtmlTest extends TestCase
 {
     public function test_from_trusted_html_preserves_markup(): void

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Architecture;
 
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
 /**
  * W2-12: Ratchet on SupportContext usage.
@@ -19,6 +20,7 @@ use PHPUnit\Framework\TestCase;
  *
  * Baseline: 11 calls in 7 wrapper files (captured 2026-09-07).
  */
+#[TestCategory(TestCategory::ARCHITECTURE)]
 final class SupportContextUsageTest extends TestCase
 {
     private const APP_DIR = __DIR__.'/../../app';

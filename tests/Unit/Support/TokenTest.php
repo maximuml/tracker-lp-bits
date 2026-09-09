@@ -4,7 +4,9 @@ namespace Tests\Unit\Support;
 
 use App\Support\Token;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 class TokenTest extends TestCase
 {
     public function test_random_hex_default_returns_40_hex_chars(): void

@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Support\Metrics\AnnounceMetricsRecorder;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::HTTP_FEATURE)]
 final class MetricsEndpointTest extends TestCase
 {
     public function test_metrics_returns_prometheus_format(): void

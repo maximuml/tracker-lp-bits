@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -11,6 +12,7 @@ use Tests\TestCase;
  * The guard lives in AppServiceProvider::boot() and fires only
  * when app()->isProduction() is true.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class AppKeyProductionGuardTest extends TestCase
 {
     /**

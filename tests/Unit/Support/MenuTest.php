@@ -4,7 +4,9 @@ namespace Tests\Unit\Support;
 
 use App\Support\Menu;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 class MenuTest extends TestCase
 {
     public function test_custom_menu_short_circuits_database_lookup(): void

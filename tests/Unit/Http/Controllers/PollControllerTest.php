@@ -14,8 +14,10 @@ use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Mockery;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::SERVICE_INTEGRATION, TestCategory::MUTATION)]
 final class PollControllerTest extends TestCase
 {
     use DatabaseTransactions;

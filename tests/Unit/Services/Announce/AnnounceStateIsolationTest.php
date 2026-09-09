@@ -12,6 +12,7 @@ use App\ValueObjects\InfoHash;
 use App\ValueObjects\Passkey;
 use App\ValueObjects\PeerId;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
 /**
  * W2-04: Octane/RoadRunner cross-request state isolation tests.
@@ -24,6 +25,7 @@ use PHPUnit\Framework\TestCase;
  *
  * @group w2-04
  */
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class AnnounceStateIsolationTest extends TestCase
 {
     /**

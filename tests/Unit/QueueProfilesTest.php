@@ -19,6 +19,7 @@ use App\Jobs\SendLoginNotify;
 use App\Jobs\UpdateTorrentSeedersEtc;
 use App\Jobs\UpdateUserDownloadPrivilege;
 use App\Jobs\UpdateUserSeedingLeechingTime;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -28,6 +29,7 @@ use Tests\TestCase;
  * queue profile (tracker-critical, default, mail, search, maintenance)
  * matching the Horizon supervisor configuration.
  */
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class QueueProfilesTest extends TestCase
 {
     /**

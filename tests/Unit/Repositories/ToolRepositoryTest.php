@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Repositories\ToolRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Str;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -19,6 +20,7 @@ use Tests\TestCase;
  * Covers getNotificationCount(), generateUniqueInviteHash(),
  * getBackupExportPathDefault().
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class ToolRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

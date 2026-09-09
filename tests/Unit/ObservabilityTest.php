@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Http\Controllers\MetricsController;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -16,6 +17,7 @@ use Tests\TestCase;
  * - JSON log channel exists with request_id injection
  * - .env.example documents LOG_STACK=daily,json for production
  */
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class ObservabilityTest extends TestCase
 {
     /**

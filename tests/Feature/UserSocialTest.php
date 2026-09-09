@@ -9,8 +9,10 @@ use App\Models\Torrent;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Laravel\Sanctum\Sanctum;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::HTTP_FEATURE)]
 class UserSocialTest extends TestCase
 {
     use DatabaseTransactions;

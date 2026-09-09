@@ -2,8 +2,10 @@
 
 namespace Tests\Unit;
 
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 class RemovedFeaturesTest extends TestCase
 {
     public function test_promotion_link_feature_is_removed(): void

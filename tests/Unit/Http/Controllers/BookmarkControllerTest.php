@@ -11,8 +11,10 @@ use App\Models\User;
 use App\Repositories\BookmarkRepository;
 use Illuminate\Support\Facades\Auth;
 use Mockery;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::PURE_UNIT, TestCategory::MUTATION)]
 final class BookmarkControllerTest extends TestCase
 {
     protected function tearDown(): void

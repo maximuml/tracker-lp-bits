@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit;
 
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -16,6 +17,7 @@ use Tests\TestCase;
  * - WCAG 2.1 tags are included (not just WCAG 2.0)
  * - A local .axerc.json config exists for developer use
  */
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class A11yCiGateTest extends TestCase
 {
     private string $workflowPath;

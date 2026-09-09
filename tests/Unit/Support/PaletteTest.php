@@ -4,7 +4,9 @@ namespace Tests\Unit\Support;
 
 use App\Support\Palette;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class PaletteTest extends TestCase
 {
     // ---------- forumHighlight ----------

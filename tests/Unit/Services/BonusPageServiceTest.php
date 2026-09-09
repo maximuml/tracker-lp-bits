@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Mockery;
 use Mockery\MockInterface;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -23,6 +24,7 @@ use Tests\TestCase;
  * build (action routing, bonus_tweak disable, do-message resolution,
  * empty action shop/info), and constructor instantiation.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class BonusPageServiceTest extends TestCase
 {
     use DatabaseTransactions;

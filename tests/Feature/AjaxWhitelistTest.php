@@ -6,12 +6,14 @@ use App\Models\User;
 use App\Services\AjaxService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Str;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
  * Phase 1.6: verify that the /ajax endpoint only dispatches actions
  * that are explicitly listed in AjaxService::ALLOWED_ACTIONS.
  */
+#[TestCategory(TestCategory::HTTP_FEATURE)]
 final class AjaxWhitelistTest extends TestCase
 {
     use DatabaseTransactions;

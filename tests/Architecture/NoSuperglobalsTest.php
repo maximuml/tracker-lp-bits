@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Architecture;
 
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
 /**
  * W0-05: Ratchet on direct PHP superglobal access in app/.
@@ -25,6 +26,7 @@ use PHPUnit\Framework\TestCase;
  * To fix a failure: replace $_SERVER/$GET/$POST with $request->server()/
  * $request->input()/etc. via DI.
  */
+#[TestCategory(TestCategory::ARCHITECTURE)]
 final class NoSuperglobalsTest extends TestCase
 {
     private const APP_DIR = __DIR__.'/../../app';

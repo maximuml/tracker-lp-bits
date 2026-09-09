@@ -5,12 +5,14 @@ namespace Tests\Feature;
 use App\Http\Middleware\VerifyCsrfToken;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
  * Phase 5.2: verify that the legacy donorlist/warned/nowarn endpoints redirect
  * to the Filament UserResource with appropriate filters.
  */
+#[TestCategory(TestCategory::HTTP_FEATURE)]
 final class DonorWarnedRedirectTest extends TestCase
 {
     use DatabaseTransactions;

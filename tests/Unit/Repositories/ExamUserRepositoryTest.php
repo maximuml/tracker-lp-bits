@@ -11,6 +11,7 @@ use App\Repositories\ExamUserRepository;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -24,6 +25,7 @@ use Tests\TestCase;
  * progress calculation, and Message::add() event firing, which are better
  * suited to feature-level integration tests.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class ExamUserRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

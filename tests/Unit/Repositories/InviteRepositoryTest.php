@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Repositories\InviteRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -16,6 +17,7 @@ use Tests\TestCase;
  * Covers getUserArray(), countPendingInvitees(), countInvitees(),
  * getInvitees(), countInvites(), and getInvites().
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class InviteRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

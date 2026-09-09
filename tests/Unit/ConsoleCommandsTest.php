@@ -11,6 +11,7 @@ use App\Console\Commands\HitAndRunUpdateStatus;
 use App\Console\Commands\TrackerCalculateSeedBonus;
 use Illuminate\Support\Facades\Artisan;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -19,6 +20,7 @@ use Tests\TestCase;
  * Verifies that all cron-commands referenced by the scheduler are
  * registered with Artisan and have the correct signature.
  */
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class ConsoleCommandsTest extends TestCase
 {
     /**

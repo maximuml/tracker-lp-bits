@@ -3,8 +3,10 @@
 namespace Tests\Unit\Support;
 
 use App\Support\Api;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 class ApiTest extends TestCase
 {
     protected function setUp(): void

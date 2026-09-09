@@ -13,8 +13,10 @@ use App\ValueObjects\PeerId;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Laravel\Sanctum\Sanctum;
 use Rhilip\Bencode\Bencode;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::HTTP_FEATURE)]
 class CoreTrackerTest extends TestCase
 {
     use DatabaseTransactions;

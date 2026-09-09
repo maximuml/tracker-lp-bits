@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Support;
 
 use App\Support\TorrentTags;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -13,6 +14,7 @@ use Tests\TestCase;
  * The render method is a pure function that builds HTML for tag
  * checkboxes or tag spans based on a bitmask. No DI, no DB, no cache.
  */
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class TorrentTagsTest extends TestCase
 {
     /** @return array<string, string> */

@@ -15,6 +15,7 @@ use App\Services\TorrentPromotionService;
 use App\Services\TorrentStatsService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -23,6 +24,7 @@ use Tests\TestCase;
  * Covers getShareRatio(), getPaidIcon(), getBookmarkTorrentIds(),
  * findForUserValue(), getLastComment(), getSnatchInfo().
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class TorrentRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

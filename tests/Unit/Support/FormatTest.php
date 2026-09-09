@@ -4,7 +4,9 @@ namespace Tests\Unit\Support;
 
 use App\Support\Format;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 class FormatTest extends TestCase
 {
     // ---------- size() / sizeCompact() / sizeLoose() ----------

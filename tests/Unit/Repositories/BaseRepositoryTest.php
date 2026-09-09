@@ -12,6 +12,7 @@ use App\Support\Permissions;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -21,6 +22,7 @@ use Tests\TestCase;
  * allowedSortColumns(), getSortFieldAndType(), getPerPageFromRequest(),
  * handleAnonymous(), getUser(), and executeCommand().
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class BaseRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

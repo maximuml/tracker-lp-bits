@@ -8,6 +8,7 @@ use App\Services\TorrentBookmarkService;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -16,6 +17,7 @@ use Tests\TestCase;
  * Covers toggleBookmark (add/delete/cache invalidation) and
  * thankTorrent (invalid torrent, duplicate thanks, success).
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class TorrentBookmarkServiceTest extends TestCase
 {
     use DatabaseTransactions;

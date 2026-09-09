@@ -4,8 +4,10 @@ namespace Tests\Unit\Support;
 
 use App\Support\SupportContext;
 use Illuminate\Http\Request;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class SupportContextTest extends TestCase
 {
     protected function setUp(): void

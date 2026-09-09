@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Tests\Unit\Http\Responses;
 
 use App\Http\Responses\ProblemDetails;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class ProblemDetailsTest extends TestCase
 {
     public function test_validation_factory_creates_correct_structure(): void

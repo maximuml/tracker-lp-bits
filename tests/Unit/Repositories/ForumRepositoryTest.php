@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Repositories\ForumRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -20,6 +21,7 @@ use Tests\TestCase;
  * replaceModerators(), getModeratorArray(), getTopicIdByPost(),
  * isModeratorOfTopic(), isModeratorOfForum().
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class ForumRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

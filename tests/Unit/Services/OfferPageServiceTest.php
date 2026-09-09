@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Mockery;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -30,6 +31,7 @@ use Tests\TestCase;
  * are final and cannot be mocked, so real DB rows are inserted via
  * DB::table() to avoid Scout/MeiliSearch indexing.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class OfferPageServiceTest extends TestCase
 {
     use DatabaseTransactions;

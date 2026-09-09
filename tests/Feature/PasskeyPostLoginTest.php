@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Support\Config\SiteConfig;
 use App\Support\Settings;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -17,6 +18,7 @@ use Tests\TestCase;
  * - signature = hmac_sha256(passkey + timestamp, login_secret)
  * - timestamp must be within ±5 minutes of server time
  */
+#[TestCategory(TestCategory::HTTP_FEATURE)]
 final class PasskeyPostLoginTest extends TestCase
 {
     use DatabaseTransactions;

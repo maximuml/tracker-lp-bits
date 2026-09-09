@@ -15,8 +15,10 @@ use App\Repositories\ExamRepository;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Mockery;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::PURE_UNIT, TestCategory::MUTATION)]
 final class ExamUserControllerTest extends TestCase
 {
     protected function tearDown(): void

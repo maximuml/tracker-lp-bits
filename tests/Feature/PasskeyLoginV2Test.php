@@ -10,6 +10,7 @@ use App\Services\PasskeyLoginService;
 use App\Support\Settings;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Redis;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -18,6 +19,7 @@ use Tests\TestCase;
  * Covers: valid login, altered payload, reused nonce, expired timestamp,
  * invalid format, rotated key, rate limit, and legacy fallback.
  */
+#[TestCategory(TestCategory::HTTP_FEATURE)]
 final class PasskeyLoginV2Test extends TestCase
 {
     use DatabaseTransactions;

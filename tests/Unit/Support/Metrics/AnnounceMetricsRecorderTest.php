@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Tests\Unit\Support\Metrics;
 
 use App\Support\Metrics\AnnounceMetricsRecorder;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class AnnounceMetricsRecorderTest extends TestCase
 {
     public function test_categorize_invalid_passkey(): void

@@ -12,7 +12,9 @@ use App\Services\TorrentPromotionService;
 use App\Services\TorrentStatsService;
 use Firebase\JWT\JWT;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 class TorrentRepositoryDownHashTest extends TestCase
 {
     private TorrentRepository $repository;

@@ -4,7 +4,9 @@ namespace Tests\Unit\Support;
 
 use App\Support\Debug;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class DebugTest extends TestCase
 {
     public function test_print_line_outputs_timestamp_and_line(): void

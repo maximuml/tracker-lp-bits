@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Architecture;
 
 use Illuminate\Support\Facades\Route;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -23,6 +24,7 @@ use Tests\TestCase;
  * 2. If it cannot be split yet, add the URI to BASELINE_URIS below
  *    with a justification comment.
  */
+#[TestCategory(TestCategory::ARCHITECTURE)]
 final class SharedGetPostActionTest extends TestCase
 {
     /**

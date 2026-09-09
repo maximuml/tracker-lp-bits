@@ -4,7 +4,9 @@ namespace Tests\Unit\Support;
 
 use App\Support\Http\SafeReturnUrl;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 class SafeReturnUrlTest extends TestCase
 {
     public function test_empty_returns_fallback(): void

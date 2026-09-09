@@ -4,11 +4,13 @@ namespace Tests\Unit\Support;
 
 use App\Support\Promotion;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
 /**
  * Pins down the promotion → CSS background-class mapping drained out of
  * get_torrent_bg_color() into App\Support\Promotion (Phase 5).
  */
+#[TestCategory(TestCategory::PURE_UNIT)]
 class PromotionTest extends TestCase
 {
     public function test_no_promotion_returns_empty_string_not_null(): void

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Architecture;
 
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
 /**
  * W2-10: Ratchet on Events::fire() calls.
@@ -19,6 +20,7 @@ use PHPUnit\Framework\TestCase;
  *
  * Baseline: 28 calls (captured 2026-09-07).
  */
+#[TestCategory(TestCategory::ARCHITECTURE)]
 final class EventsFireRatchetTest extends TestCase
 {
     private const APP_DIR = __DIR__.'/../../app';

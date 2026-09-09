@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Tests\Unit\Http\Controllers;
 
 use App\Http\Controllers\MetricsController;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::PURE_UNIT, TestCategory::MUTATION)]
 final class MetricsControllerTest extends TestCase
 {
     public function test_index_returns_prometheus_format(): void

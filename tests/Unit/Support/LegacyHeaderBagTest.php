@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace Tests\Unit\Support;
 
 use App\Support\LegacyHeaderBag;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
  * Unit tests for LegacyHeaderBag — per-request replacement for
  * PHP SAPI globals headers_list()/http_response_code()/header_remove().
  */
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class LegacyHeaderBagTest extends TestCase
 {
     private LegacyHeaderBag $bag;

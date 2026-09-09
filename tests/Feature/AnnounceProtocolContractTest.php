@@ -11,8 +11,10 @@ use App\ValueObjects\PeerId;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Rhilip\Bencode\Bencode;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::HTTP_FEATURE)]
 class AnnounceProtocolContractTest extends TestCase
 {
     use DatabaseTransactions;

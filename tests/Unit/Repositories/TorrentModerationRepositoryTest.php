@@ -21,6 +21,7 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Mockery;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -33,6 +34,7 @@ use Tests\TestCase;
  * Permission-gated methods use a STAFFLEADER user which bypasses
  * the permission table lookup.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class TorrentModerationRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

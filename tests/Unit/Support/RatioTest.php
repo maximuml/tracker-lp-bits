@@ -4,7 +4,9 @@ namespace Tests\Unit\Support;
 
 use App\Support\Ratio;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 class RatioTest extends TestCase
 {
     public function test_share_returns_dash_when_both_zero(): void

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit;
 
 use App\Support\Html;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -24,6 +25,7 @@ use Tests\TestCase;
  * - NexusContext, SupportContext, PageLayoutContext: distinct context objects
  * - LegacyAuth, AuthCookie, LegacyAuthContext: auth logic, cookies, context DTO
  */
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class AbstractionConsolidationTest extends TestCase
 {
     /**

@@ -4,7 +4,9 @@ namespace Tests\Unit\Support;
 
 use App\Support\Forum;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class ForumTest extends TestCase
 {
     public function test_pic_folder_builds_relative_path(): void

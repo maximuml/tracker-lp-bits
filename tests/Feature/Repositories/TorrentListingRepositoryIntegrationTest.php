@@ -10,8 +10,10 @@ use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\TorrentListingRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 class TorrentListingRepositoryIntegrationTest extends TestCase
 {
     use DatabaseTransactions;

@@ -403,6 +403,26 @@ jobs:
           print("Coverage gate passed.")
           PYEOF
 
+      - name: Per-module coverage ratchet (W3-06)
+        # W3-06: Enforce per-module coverage thresholds.
+        # Each app/ subdirectory has its own minimum coverage floor.
+        # The baseline file ratchets up — coverage can only increase,
+        # never decrease. Fails if any module falls below its threshold.
+        run: |
+          php artisan coverage:ratchet coverage-unit.xml \
+            --baseline=.coverage-baseline.json \
+            --report
+
+      - name: Upload coverage baseline
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: coverage-baseline
+          path: |
+            .coverage-baseline.json
+            coverage-report.json
+          retention-days: 30
+
       - name: Upload HTML coverage artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()

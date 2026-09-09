@@ -24,14 +24,19 @@ final class SecurityHeadersTest extends TestCase
         $response->assertHeader('X-Content-Type-Options', 'nosniff');
     }
 
-    public function test_csp_header_contains_nonce_and_no_unsafe_inline(): void
+    public function test_csp_header_contains_nonce_for_legacy_routes(): void
     {
         $response = $this->get('/login');
 
         $csp = $response->headers->get('Content-Security-Policy');
         $this->assertNotNull($csp);
+        // script-src stays nonce-strict on legacy routes.
         $this->assertStringContainsString("'nonce-", $csp);
-        $this->assertStringNotContainsString("'unsafe-inline'", $csp);
+        // Legacy routes embed third-party widgets (FullCalendar, domTT,
+        // layer.js) that set element.style.cssText dynamically. CSP cannot
+        // hash style attributes, and 'unsafe-inline' is ignored when a nonce
+        // is present, so style-src uses 'unsafe-inline' without a nonce.
+        $this->assertStringContainsString("style-src 'self' 'unsafe-inline'", $csp);
         $this->assertStringNotContainsString("'unsafe-eval'", $csp);
         $this->assertStringContainsString("object-src 'none'", $csp);
         $this->assertStringContainsString('https://challenges.cloudflare.com', $csp);

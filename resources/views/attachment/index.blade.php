@@ -14,6 +14,7 @@ $script = (string) ($script ?? '');
 @endphp
 <html>
 <head>
+<base href="{{ url('/') }}/" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="stylesheet" href="{{ \App\Support\Style::fontCssUriWithContext() }}" type="text/css">
 <link rel="stylesheet" href="{{ $css_uri.'theme.css' }}" type="text/css">

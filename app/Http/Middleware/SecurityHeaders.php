@@ -33,10 +33,17 @@ final class SecurityHeaders
         // style-src instead of 'unsafe-inline'/'unsafe-eval'. Livewire
         // automatically adds the nonce to its injected scripts when the
         // CSP nonce is shared via config.
+        //
+        // Legacy pages embed third-party widgets (FullCalendar 5,
+        // layer.js, domTT) that set element.style.cssText dynamically
+        // and inject <style> tags via JS. CSP cannot hash style
+        // attributes, so legacy routes use 'unsafe-inline' for style-src
+        // (without a nonce — per CSP spec, 'unsafe-inline' is ignored
+        // when a nonce is also present). script-src stays nonce-strict.
         if ($this->isFilamentRoute($request)) {
             $response->headers->set('Content-Security-Policy', "default-src 'self'; script-src 'self' 'nonce-{$nonce}' https://challenges.cloudflare.com; style-src 'self' 'nonce-{$nonce}'; img-src 'self' data: blob: https:; connect-src 'self' https://challenges.cloudflare.com; font-src 'self' data:; frame-ancestors 'self'; form-action 'self' https://www.paypal.com https://www.alipay.com; base-uri 'self'; object-src 'none';");
         } else {
-            $response->headers->set('Content-Security-Policy', "default-src 'self'; script-src 'self' 'nonce-{$nonce}' https://challenges.cloudflare.com; style-src 'self' 'nonce-{$nonce}'; img-src 'self' data: blob: https:; connect-src 'self' https://challenges.cloudflare.com; font-src 'self' data:; frame-ancestors 'self'; form-action 'self' https://www.paypal.com https://www.alipay.com; base-uri 'self'; object-src 'none';");
+            $response->headers->set('Content-Security-Policy', "default-src 'self'; script-src 'self' 'nonce-{$nonce}' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https://challenges.cloudflare.com; font-src 'self' data:; frame-ancestors 'self'; form-action 'self' https://www.paypal.com https://www.alipay.com; base-uri 'self'; object-src 'none';");
         }
 
         if ($request->isSecure()) {

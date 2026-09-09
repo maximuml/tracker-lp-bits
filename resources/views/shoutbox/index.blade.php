@@ -12,6 +12,7 @@ $reactionData = (array) ($reactionData ?? ['counts' => [], 'mine' => [], 'users'
 @endphp
 @if (! $isAjax)
 <html><head>
+<base href="{{ url('/') }}/" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="stylesheet" href="{{ \App\Support\Style::fontCssUriWithContext() }}" type="text/css">
 <link rel="stylesheet" href="{{ \App\Support\Style::cssUriWithContext().'theme.css' }}" type="text/css">

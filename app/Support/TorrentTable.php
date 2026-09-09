@@ -10,6 +10,7 @@ use App\Enums\UserTimeType;
 use App\Models\Torrent;
 use App\Repositories\TagRepository;
 use App\Repositories\TorrentRepository;
+use App\Services\TorrentStatsService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\Torrent\TorrentStatus;
@@ -35,6 +36,7 @@ final class TorrentTable
 
         $torrent = new TorrentStatus;
         $torrentRep = app(TorrentRepository::class);
+        $statsService = app(TorrentStatsService::class);
         $torrentIdArr = $ownerIdArr = [];
         foreach ($rows as $row) {
             $torrentIdArr[] = $row['id'];
@@ -46,7 +48,7 @@ final class TorrentTable
 
         $torrentSeedingLeechingStatus = $torrent->listLeechingSeedingStatus($user['id'], $torrentIdArr);
         $tagRep = app(TagRepository::class);
-        $torrentTagResult = $torrentRep->getTorrentTagsGrouped($torrentIdArr);
+        $torrentTagResult = $statsService->getTorrentTagsGrouped($torrentIdArr);
         $showCover = false;
         if ($searchBoxId) {
             $searchBoxExtra = SearchBox::value($cache, $searchBoxId, 'extra');
@@ -251,7 +253,7 @@ if (Permission::canManageTorrent()) { ?>
                 } else {
                     if ($enabletooltip_tweak == 'yes' && $user['showlastcom']) {
                         if (! $lastcom = $cache->get_value('torrent_'.$id.'_last_comment_content')) {
-                            $lastcom = $torrentRep->getLastComment((int) $id);
+                            $lastcom = $statsService->getLastComment((int) $id);
                             $cache->cache_value('torrent_'.$id.'_last_comment_content', $lastcom, 1855);
                         }
                         $timestamp = strtotime($lastcom['added']);

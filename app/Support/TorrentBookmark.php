@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
-use App\Repositories\TorrentRepository;
+use App\Services\TorrentStatsService;
 use App\Support\Cache\LegacyRedisCache;
 
 /**
@@ -33,7 +33,7 @@ final class TorrentBookmark
             }
         }
 
-        $ret = app(TorrentRepository::class)->getBookmarkTorrentIds($userId);
+        $ret = app(TorrentStatsService::class)->getBookmarkTorrentIds($userId);
 
         if (is_object($cache) && method_exists($cache, 'cache_value')) {
             $cache->cache_value($cacheKey, $ret, 132800);

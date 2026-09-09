@@ -9,6 +9,7 @@ use App\Enums\UserClass as UserClassEnum;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\TorrentRepository;
+use App\Services\TorrentStatsService;
 use App\Support\Config\SiteConfig;
 
 /**
@@ -41,7 +42,7 @@ final class TorrentOps
     {
         $torrent2UserValue = 1.0;
 
-        $torrentArr = app(TorrentRepository::class)->findForUserValue((int) ($userSnatched['torrentid'] ?? 0));
+        $torrentArr = app(TorrentStatsService::class)->findForUserValue((int) ($userSnatched['torrentid'] ?? 0));
 
         if ($torrentArr) {
             if ($torrentArr['owner'] == $userSnatched['userid']) {

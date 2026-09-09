@@ -17,10 +17,8 @@ use App\Models\SearchBox;
 use App\Models\Source;
 use App\Models\Standard;
 use App\Models\Torrent;
-use App\Models\TorrentTag;
 use App\Models\User;
 use App\Services\TorrentPromotionService;
-use App\Services\TorrentStatsService;
 use App\Support\Config\SiteConfig;
 use App\Support\Description;
 use App\Support\Locale;
@@ -46,7 +44,6 @@ class TorrentRepository extends BaseRepository
         private readonly TorrentDownloadRepository $downloadRepository,
         private readonly TorrentPurchaseRepository $purchaseRepository,
         private readonly TorrentModerationRepository $moderationRepository,
-        private readonly TorrentStatsService $statsService,
         private readonly TorrentPromotionService $promotionService,
     ) {}
 
@@ -305,69 +302,6 @@ class TorrentRepository extends BaseRepository
     }
 
     /**
-     * @param  mixed  $torrentId
-     * @return array<int|string, mixed>
-     */
-    public function listPeers($torrentId)
-    {
-        return $this->statsService->listPeers($torrentId);
-    }
-
-    /** @param  mixed  $peer */
-    public function getPeerUploadSpeed($peer): string
-    {
-        return $this->statsService->getPeerUploadSpeed($peer);
-    }
-
-    /** @param  mixed  $peer */
-    public function getPeerDownloadSpeed($peer): string
-    {
-        return $this->statsService->getPeerDownloadSpeed($peer);
-    }
-
-    /** @param  mixed  $peer */
-    public function getDownloadProgress($peer): string
-    {
-        return $this->statsService->getDownloadProgress($peer);
-    }
-
-    /**
-     * @param  mixed  $peer
-     * @return mixed
-     */
-    public function getShareRatio($peer)
-    {
-        return $this->statsService->getShareRatio($peer);
-    }
-
-    /**
-     * @param  mixed  $torrentId
-     * @return mixed
-     */
-    public function listSnatches($torrentId)
-    {
-        return $this->statsService->listSnatches($torrentId);
-    }
-
-    /**
-     * @param  mixed  $snatch
-     * @return mixed
-     */
-    public function getSnatchUploadSpeed($snatch)
-    {
-        return $this->statsService->getSnatchUploadSpeed($snatch);
-    }
-
-    /**
-     * @param  mixed  $snatch
-     * @return mixed
-     */
-    public function getSnatchDownloadSpeed($snatch)
-    {
-        return $this->statsService->getSnatchDownloadSpeed($snatch);
-    }
-
-    /**
      * @param  array<int|string, mixed>  $torrentInfo
      * @param  mixed  $size
      * @param  mixed  $verticalAlign
@@ -412,49 +346,6 @@ class TorrentRepository extends BaseRepository
 HTML;
 
         return $input;
-    }
-
-    /**
-     * Get the latest comment for a torrent, or null if none exists.
-     *
-     * @return array<string, mixed>|null
-     */
-    public function getLastComment(int $torrentId): ?array
-    {
-        return $this->statsService->getLastComment($torrentId);
-    }
-
-    /**
-     * Get torrent tag records keyed by torrent id.
-     *
-     * @param  array<int, int>  $torrentIds
-     * @return Collection<int|string, \Illuminate\Database\Eloquent\Collection<int, TorrentTag>>
-     */
-    public function getTorrentTagsGrouped(array $torrentIds)
-    {
-        return $this->statsService->getTorrentTagsGrouped($torrentIds);
-    }
-
-    /**
-     * Fetch a torrent as an array for the legacy "torrent to user" value calculation.
-     *
-     * @return array<string, mixed>|null
-     */
-    public function findForUserValue(int $torrentId): ?array
-    {
-        return $this->statsService->findForUserValue($torrentId);
-    }
-
-    /**
-     * Return the bookmarked torrent ids for a user.
-     *
-     * Mirrors the legacy {@see TorrentBookmark::bookmarkArray()}.
-     *
-     * @return array<int, int>
-     */
-    public function getBookmarkTorrentIds(int $userId): array
-    {
-        return $this->statsService->getBookmarkTorrentIds($userId);
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -657,14 +548,6 @@ HTML;
     public function getApprovalDenyCount(int $ownerId): int
     {
         return app(TorrentModerationRepository::class)->getApprovalDenyCount($ownerId);
-    }
-
-    /**
-     * @return array<string, mixed>|false
-     */
-    public function getSnatchInfo(int|string $torrentId, int|string $userId): array|false
-    {
-        return $this->statsService->getSnatchInfo($torrentId, $userId);
     }
 
     /**

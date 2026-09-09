@@ -6,18 +6,18 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\SnatchRequest;
 use App\Http\Resources\SnatchResource;
-use App\Repositories\TorrentRepository;
+use App\Services\TorrentStatsService;
 
 class SnatchController extends Controller
 {
-    private TorrentRepository $repository;
+    private TorrentStatsService $statsService;
 
     /**
      * @return mixed
      */
-    public function __construct(TorrentRepository $repository)
+    public function __construct(TorrentStatsService $statsService)
     {
-        $this->repository = $repository;
+        $this->statsService = $statsService;
     }
 
     /**
@@ -25,7 +25,7 @@ class SnatchController extends Controller
      */
     public function index(SnatchRequest $request): array
     {
-        $snatches = $this->repository->listSnatches($request->torrent_id);
+        $snatches = $this->statsService->listSnatches($request->torrent_id);
         $resource = SnatchResource::collection($snatches);
 
         return $this->success($resource);

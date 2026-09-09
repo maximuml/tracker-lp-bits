@@ -10,7 +10,7 @@ use App\Enums\UserStatus;
 use App\Models\User;
 use App\Models\UserBanLog;
 use App\Models\UserModifyLog;
-use App\Repositories\UserRepository;
+use App\Repositories\UserModerationRepository;
 use App\Services\Cleanup\Contracts\CleanupTask;
 use App\Support\Config\SiteConfig;
 use App\Support\Events;
@@ -26,7 +26,7 @@ use Illuminate\Support\Facades\Cache;
 final class InactiveUserCleanupTask implements CleanupTask
 {
     public function __construct(
-        private readonly UserRepository $userRepository,
+        private readonly UserModerationRepository $userRepository,
     ) {}
 
     /**

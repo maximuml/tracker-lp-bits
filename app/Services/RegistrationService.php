@@ -15,7 +15,7 @@ use App\Models\Invite;
 use App\Models\Message;
 use App\Models\MessageTemplate;
 use App\Models\User;
-use App\Repositories\UserRepository;
+use App\Repositories\UserModerationRepository;
 use App\Support\AuthCookie;
 use App\Support\Cache;
 use App\Support\Captcha;
@@ -52,7 +52,7 @@ class RegistrationService
 
     public function __construct(
         private WebAuthService $authService,
-        private UserRepository $userRepository,
+        private UserModerationRepository $userModerationRepository,
         private readonly SecureTokenService $tokenService = new SecureTokenService,
         private readonly OutboxService $outboxService = new OutboxService,
     ) {}
@@ -501,7 +501,7 @@ class RegistrationService
             return;
         }
 
-        $this->userRepository->addTemporaryInvite(null, $userId, 'increment', $tmpInviteCount, 7);
+        $this->userModerationRepository->addTemporaryInvite(null, $userId, 'increment', $tmpInviteCount, 7);
     }
 
     private function consumeInvite(Invite $invite, int $userId, string $email, string $username): void

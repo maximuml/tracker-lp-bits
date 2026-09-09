@@ -6,7 +6,7 @@ namespace App\Filament\Pages;
 
 use App\Enums\UserClass as UserClassEnum;
 use App\Models\User;
-use App\Repositories\UserRepository;
+use App\Repositories\UserModerationRepository;
 use App\Support\Globals;
 use App\Support\Mail;
 use Filament\Forms\Components\Select;
@@ -115,7 +115,7 @@ class SystemActions extends Page implements HasForms
         }
 
         $name = $user->username;
-        $userRep = app(UserRepository::class);
+        $userRep = app(UserModerationRepository::class);
         $userRep->destroy((int) $user->id);
 
         Notification::make()

@@ -11,7 +11,7 @@ use App\Models\Invite;
 use App\Models\Setting;
 use App\Models\User;
 use App\Repositories\InviteRepository;
-use App\Repositories\UserRepository;
+use App\Repositories\UserModerationRepository;
 use App\Support\AssetAppender;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
@@ -27,11 +27,11 @@ use Illuminate\View\View;
 
 class InviteController extends LegacyController
 {
-    private UserRepository $userRepository;
+    private UserModerationRepository $userModerationRepository;
 
-    public function __construct(UserRepository $userRepository)
+    public function __construct(UserModerationRepository $userModerationRepository)
     {
-        $this->userRepository = $userRepository;
+        $this->userModerationRepository = $userModerationRepository;
     }
 
     public function invite(Request $request): View|RedirectResponse|Response
@@ -55,7 +55,6 @@ class InviteController extends LegacyController
         $enabled = (string) $request->input('enabled', '');
         $status = (string) $request->input('status', '');
         $sent = (string) $request->input('sent', '');
-        $userRep = $this->userRepository;
         $SITENAME = Setting::getSiteName();
         $invitesystem = SiteConfig::current()->main->inviteSystem() ? 'yes' : 'no';
 
@@ -68,7 +67,6 @@ class InviteController extends LegacyController
             'lang_invite' => $langInvite,
             'lang_functions' => (array) (app(Globals::class)->get('lang_functions') ?? []),
             'SITENAME' => $SITENAME,
-            'userRep' => $userRep,
             'invitesystem' => $invitesystem,
             '__server_REQUEST_URI' => $request->getRequestUri(),
             'enabled' => $enabled,
@@ -83,7 +81,7 @@ class InviteController extends LegacyController
             }
 
             try {
-                $sendBtnText = $userRep->getInviteBtnText($currentUserId);
+                $sendBtnText = $this->userModerationRepository->getInviteBtnText($currentUserId);
                 $disabled = '';
             } catch (\Exception $exception) {
                 return $this->legacyAbortResponse(
@@ -126,7 +124,7 @@ class InviteController extends LegacyController
             ]);
         } else {
             // invitee / sent / tmp modes — fetch data in the controller
-            $data = array_merge($data, $this->inviteMenuData($id, $menuSelected, $currentUserId, $langInvite, $userRep));
+            $data = array_merge($data, $this->inviteMenuData($id, $menuSelected, $currentUserId, $langInvite));
 
             if ($menuSelected === 'invitee') {
                 $data = array_merge($data, $this->inviteeData($id, $enabled, $status, $currentUserId, $langInvite, $request->getRequestUri()));
@@ -144,13 +142,13 @@ class InviteController extends LegacyController
      * @param  array<string, mixed>  $langInvite
      * @return array<string, mixed>
      */
-    private function inviteMenuData(int $id, string $menuSelected, int $currentUserId, array $langInvite, UserRepository $userRep): array
+    private function inviteMenuData(int $id, string $menuSelected, int $currentUserId, array $langInvite): array
     {
         $sendBtnText = '';
         $sendBtnDisabled = '';
         if ($currentUserId === $id) {
             try {
-                $sendBtnText = $userRep->getInviteBtnText($currentUserId);
+                $sendBtnText = $this->userModerationRepository->getInviteBtnText($currentUserId);
             } catch (\Exception $exception) {
                 $sendBtnText = $exception->getMessage();
                 $sendBtnDisabled = ' disabled';

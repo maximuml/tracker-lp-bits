@@ -31,8 +31,8 @@ use App\Support\Validators;
 use App\Utils\ApiQueryBuilder;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -47,7 +47,6 @@ use Illuminate\Support\Facades\Gate;
 class UserRepository extends BaseRepository
 {
     public function __construct(
-        private readonly UserModerationRepository $userModerationRepository,
         private readonly UserStatsService $statsService = new UserStatsService,
     ) {
         //
@@ -539,168 +538,10 @@ class UserRepository extends BaseRepository
     /**
      * @param  list<int>  $ids
      * @param  list<string>  $columns
-     * @return \Illuminate\Database\Eloquent\Collection<int, User>
+     * @return Collection<int, User>
      */
-    public function getByIds(array $ids, array $columns = ['*']): \Illuminate\Database\Eloquent\Collection
+    public function getByIds(array $ids, array $columns = ['*']): Collection
     {
         return User::query()->find($ids, $columns)->keyBy('id');
-    }
-
-    // ──────────────────────────────────────────────────────────────────────────
-    //  Delegating methods — backward compatibility for callers not yet updated
-    //  to use UserModerationRepository directly.
-    // ──────────────────────────────────────────────────────────────────────────
-
-    /**
-     * @param  mixed  $uid
-     * @param  mixed  $reason
-     * @return mixed
-     */
-    public function disableUser(User $operator, $uid, $reason = '')
-    {
-        return $this->userModerationRepository->disableUser($operator, $uid, $reason);
-    }
-
-    /**
-     * @param  mixed  $uid
-     * @param  mixed  $reason
-     * @return mixed
-     */
-    public function enableUser(User $operator, $uid, $reason = '')
-    {
-        return $this->userModerationRepository->enableUser($operator, $uid, $reason);
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getModComment(int $id)
-    {
-        return $this->userModerationRepository->getModComment($id);
-    }
-
-    /**
-     * @param  mixed  $uid
-     * @param  mixed  $action
-     * @param  mixed  $field
-     * @param  mixed  $value
-     * @param  mixed  $reason
-     */
-    public function incrementDecrement(User $operator, $uid, $action, $field, $value, $reason = ''): bool
-    {
-        return $this->userModerationRepository->incrementDecrement($operator, $uid, $action, $field, $value, $reason);
-    }
-
-    /**
-     * @param  mixed  $operator
-     * @param  mixed  $uid
-     */
-    public function removeLeechWarn($operator, $uid): bool
-    {
-        return $this->userModerationRepository->removeLeechWarn($operator, $uid);
-    }
-
-    /**
-     * @param  mixed  $operator
-     * @param  mixed  $uid
-     */
-    public function removeTwoStepAuthentication($operator, $uid): bool
-    {
-        return $this->userModerationRepository->removeTwoStepAuthentication($operator, $uid);
-    }
-
-    /**
-     * @param  mixed  $operator
-     * @param  mixed  $user
-     * @param  mixed  $disableReasonKey
-     * @return mixed
-     */
-    public function updateDownloadPrivileges($operator, $user, bool $status, $disableReasonKey = null)
-    {
-        return $this->userModerationRepository->updateDownloadPrivileges($operator, $user, $status, $disableReasonKey);
-    }
-
-    /**
-     * @param  mixed  $operator
-     * @param  mixed  $user
-     * @return mixed
-     */
-    public function updateUploadPrivileges($operator, $user, bool $status)
-    {
-        return $this->userModerationRepository->updateUploadPrivileges($operator, $user, $status);
-    }
-
-    /**
-     * @param  mixed  $operator
-     * @param  mixed  $user
-     * @return mixed
-     */
-    public function updateForumPost($operator, $user, bool $status)
-    {
-        return $this->userModerationRepository->updateForumPost($operator, $user, $status);
-    }
-
-    /**
-     * @param  mixed  $operator
-     * @param  mixed  $user
-     * @param  int  $weeks  0 = remove warning, 255 = indefinite
-     * @param  string  $reason  PM reason text
-     * @return mixed
-     */
-    public function warnUser($operator, $user, int $weeks, string $reason = '')
-    {
-        return $this->userModerationRepository->warnUser($operator, $user, $weeks, $reason);
-    }
-
-    /**
-     * @param  mixed  $operator
-     * @param  mixed  $targetUser
-     * @param  mixed  $newClass
-     * @param  mixed  $reason
-     * @param  array<int|string, mixed>  $extra
-     */
-    public function changeClass($operator, $targetUser, $newClass, $reason = '', array $extra = []): bool
-    {
-        return $this->userModerationRepository->changeClass($operator, $targetUser, $newClass, $reason, $extra);
-    }
-
-    /** @param  mixed  $id */
-    public function confirmUser($id): bool
-    {
-        return $this->userModerationRepository->confirmUser($id);
-    }
-
-    /**
-     * @param  array<int>  $userIds
-     */
-    public function removeWarnings(User $operator, array $userIds): void
-    {
-        $this->userModerationRepository->removeWarnings($operator, $userIds);
-    }
-
-    /**
-     * @param  Collection<int, mixed>|int  $id
-     * @param  mixed  $reasonKey
-     * @return mixed
-     */
-    public function destroy(Collection|int $id, $reasonKey = 'user.destroy_by_admin')
-    {
-        return $this->userModerationRepository->destroy($id, $reasonKey);
-    }
-
-    /**
-     * @return mixed
-     */
-    public function addTemporaryInvite(?User $operator, int $uid, string $action, int $count, ?int $days, ?string $reason = '')
-    {
-        return $this->userModerationRepository->addTemporaryInvite($operator, $uid, $action, $count, $days, $reason);
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getInviteBtnText(int $uid)
-    {
-        return $this->userModerationRepository->getInviteBtnText($uid);
     }
 }

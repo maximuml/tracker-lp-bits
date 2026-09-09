@@ -12,7 +12,7 @@ use App\Jobs\BulkUserMessageJob;
 use App\Models\Invite;
 use App\Models\Setting;
 use App\Models\User;
-use App\Repositories\UserRepository;
+use App\Repositories\UserModerationRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
@@ -44,7 +44,7 @@ use Illuminate\View\View;
 
 class SystemBulkController extends LegacyController
 {
-    private UserRepository $userRepository;
+    private UserModerationRepository $userModerationRepository;
 
     private CurrentUser $currentUser;
 
@@ -53,12 +53,12 @@ class SystemBulkController extends LegacyController
     private ?LegacyRedisCache $legacyRedisCache;
 
     public function __construct(
-        UserRepository $userRepository,
+        UserModerationRepository $userModerationRepository,
         CurrentUser $currentUser,
         Globals $globals,
         ?LegacyRedisCache $legacyRedisCache,
     ) {
-        $this->userRepository = $userRepository;
+        $this->userModerationRepository = $userModerationRepository;
         $this->currentUser = $currentUser;
         $this->globals = $globals;
         $this->legacyRedisCache = $legacyRedisCache;
@@ -147,7 +147,7 @@ class SystemBulkController extends LegacyController
         try {
             LegacyAuth::registrationCheckFromContext('invitesystem', true, false);
 
-            $userRep = $this->userRepository;
+            $userRep = $this->userModerationRepository;
             try {
                 $sendText = $userRep->getInviteBtnText($currentUserId);
             } catch (\Exception $exception) {

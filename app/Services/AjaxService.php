@@ -12,6 +12,7 @@ use App\Repositories\BonusRepository;
 use App\Repositories\ExamRepository;
 use App\Repositories\MedalRepository;
 use App\Repositories\TorrentRepository;
+use App\Repositories\UserModerationRepository;
 use App\Repositories\UserPasskeyRepository;
 use App\Repositories\UserRepository;
 use App\Support\CurrentUser;
@@ -63,6 +64,7 @@ final class AjaxService
         private readonly MedalRepository $medalRepository,
         private readonly AttendanceRepository $attendanceRepository,
         private readonly UserRepository $userRepository,
+        private readonly UserModerationRepository $userModerationRepository,
         private readonly TorrentRepository $torrentRepository,
         private readonly BonusRepository $bonusRepository,
         private readonly ExamRepository $examRepository,
@@ -94,7 +96,7 @@ final class AjaxService
     public function removeUserLeechWarn(array $params): mixed
     {
         $CURUSER = $this->currentUser->get() ?? [];
-        $rep = $this->userRepository;
+        $rep = $this->userModerationRepository;
 
         return $rep->removeLeechWarn($CURUSER['id'], $params['uid']);
     }

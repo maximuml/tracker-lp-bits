@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Models\UserBanLog;
 use App\Repositories\BonusRepository;
 use App\Repositories\UserListingRepository;
+use App\Repositories\UserModerationRepository;
 use App\Repositories\UserRepository;
 use App\Support\CurrentUser;
 use App\Support\Globals;
@@ -33,11 +34,14 @@ class UserAdminController extends LegacyController
 {
     private UserRepository $userRepository;
 
+    private UserModerationRepository $userModerationRepository;
+
     private BonusRepository $bonusRepository;
 
-    public function __construct(UserRepository $userRepository, BonusRepository $bonusRepository)
+    public function __construct(UserRepository $userRepository, UserModerationRepository $userModerationRepository, BonusRepository $bonusRepository)
     {
         $this->userRepository = $userRepository;
+        $this->userModerationRepository = $userModerationRepository;
         $this->bonusRepository = $bonusRepository;
     }
 
@@ -248,12 +252,11 @@ class UserAdminController extends LegacyController
             $operator = User::query()->find($currentUserId);
             if ($operator) {
                 $bonusRep->consumeUserBonus($currentUserId, $total, BusinessType::SELF_ENABLE->value, $title);
-                $userRep->enableUser($operator, $currentUserId, $title);
+                $this->userModerationRepository->enableUser($operator, $currentUserId, $title);
             }
 
             return redirect('index.php');
         }
-
         $viewData['latestBanLog'] = $latestBanLog;
         $viewData['elapsedDay'] = $elapsedDay;
         $viewData['total'] = $total;

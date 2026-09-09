@@ -11,6 +11,7 @@ use App\Repositories\BonusRepository;
 use App\Repositories\ExamRepository;
 use App\Repositories\MedalRepository;
 use App\Repositories\TorrentRepository;
+use App\Repositories\UserModerationRepository;
 use App\Repositories\UserPasskeyRepository;
 use App\Repositories\UserRepository;
 use App\Services\AjaxService;
@@ -60,6 +61,9 @@ final class AjaxServiceTest extends TestCase
     /** @var ExamRepository&MockInterface */
     private ExamRepository $examRepo;
 
+    /** @var UserModerationRepository&MockInterface */
+    private UserModerationRepository $userModerationRepo;
+
     /** @var UserPasskeyRepository&MockInterface */
     private UserPasskeyRepository $passkeyRepo;
 
@@ -103,6 +107,10 @@ final class AjaxServiceTest extends TestCase
         $examRepo = Mockery::mock(ExamRepository::class);
         $this->examRepo = $examRepo;
 
+        /** @var UserModerationRepository&MockInterface $userModerationRepo */
+        $userModerationRepo = Mockery::mock(UserModerationRepository::class);
+        $this->userModerationRepo = $userModerationRepo;
+
         /** @var UserPasskeyRepository&MockInterface $passkeyRepo */
         $passkeyRepo = Mockery::mock(UserPasskeyRepository::class);
         $this->passkeyRepo = $passkeyRepo;
@@ -126,6 +134,7 @@ final class AjaxServiceTest extends TestCase
             $this->medalRepo,
             $this->attendanceRepo,
             $this->userRepo,
+            $this->userModerationRepo,
             $this->torrentRepo,
             $this->bonusRepo,
             $this->examRepo,
@@ -186,6 +195,7 @@ final class AjaxServiceTest extends TestCase
             $this->medalRepo,
             $this->attendanceRepo,
             $this->userRepo,
+            $this->userModerationRepo,
             $this->torrentRepo,
             $this->bonusRepo,
             $this->examRepo,

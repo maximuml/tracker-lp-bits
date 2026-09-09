@@ -4,8 +4,19 @@
         "directories": [
             "app/Http/Controllers/AuthenticateController.php",
             "app/Http/Controllers/TokenController.php",
-            "app/Services/Bonus/",
-            "app/Services/Tracker/"
+            "app/Services/Announce/",
+            "app/Services/BonusService.php",
+            "app/Services/AttachmentMutationService.php",
+            "app/Services/OutboxService.php",
+            "app/Services/OutboxDispatcher.php",
+            "app/Services/ThankService.php",
+            "app/Services/TorrentBookmarkService.php",
+            "app/Policies/TorrentPolicy.php",
+            "app/Policies/UserPolicy.php",
+            "app/Policies/UsercpPolicy.php",
+            "app/Policies/TopicPolicy.php",
+            "app/Policies/PostPolicy.php",
+            "app/Policies/MessagePolicy.php"
         ]
     },
     "logs": {

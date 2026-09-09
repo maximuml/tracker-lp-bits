@@ -17,7 +17,6 @@ use App\Repositories\CleanupRepository;
 use App\Repositories\IpLogRepository;
 use App\Repositories\RequireSeedTorrentRepository;
 use App\Repositories\TorrentPurchaseRepository;
-use App\Repositories\TorrentRepository;
 use App\Repositories\UserRepository;
 use App\Services\Announce\AnnounceRequestFactory;
 use App\Services\Announce\PeerLifecycle;
@@ -45,7 +44,7 @@ class AnnounceService
 {
     public function __construct(
         private readonly AgentAllowRepository $agentAllowRepository,
-        private readonly TorrentRepository $torrentRepository,
+        private readonly TorrentPurchaseRepository $purchaseRepository,
         private readonly UserRepository $userRepository,
         private readonly Announce\RateLimiter $rateLimiter,
         private readonly Announce\TrafficAccountant $trafficAccountant,
@@ -353,8 +352,8 @@ class AnnounceService
             return;
         }
 
-        $torrentRep = $this->torrentRepository;
-        $buyStatus = $torrentRep->getBuyStatus($ctx->userId(), $ctx->torrentId());
+        $purchaseRep = $this->purchaseRepository;
+        $buyStatus = $purchaseRep->getBuyStatus($ctx->userId(), $ctx->torrentId());
         Logger::writeWithContext((string) "user: {$ctx->userId()} buy torrent: {$ctx->torrentId()}, status: {$buyStatus}", (string) 'info', (bool) false);
 
         if ($buyStatus > 0) {
@@ -372,7 +371,7 @@ class AnnounceService
                 $this->userRepository->updateDownloadPrivileges(null, $ctx->userId(), false, 'announce_paid_torrent_too_many_times');
             }
             dispatch(new BuyTorrent($ctx->userId(), $ctx->torrentId()));
-            $torrentRep->addBuyFailCache($ctx->userId(), $ctx->torrentId());
+            $purchaseRep->addBuyFailCache($ctx->userId(), $ctx->torrentId());
             $ctx->responseBuilder->warn('purchase in progress, please try again later, and make sure you have enough bonus', 300);
         }
 

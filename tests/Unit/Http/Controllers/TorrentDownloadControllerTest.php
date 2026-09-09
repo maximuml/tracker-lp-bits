@@ -6,7 +6,7 @@ namespace Tests\Unit\Http\Controllers;
 
 use App\Exceptions\NexusException;
 use App\Http\Controllers\TorrentDownloadController;
-use App\Repositories\TorrentRepository;
+use App\Repositories\TorrentDownloadRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
@@ -35,7 +35,7 @@ final class TorrentDownloadControllerTest extends TestCase
 
     public function test_download_aborts_for_zero_id_without_passkey_or_downhash(): void
     {
-        $this->bindTorrentRepository();
+        $this->bindTorrentDownloadRepository();
 
         $controller = app(TorrentDownloadController::class);
         $request = Request::create('/download', 'GET', ['id' => 0]);
@@ -43,18 +43,18 @@ final class TorrentDownloadControllerTest extends TestCase
 
         $this->expectException(NotFoundHttpException::class);
 
-        $controller->download($request, app(TorrentRepository::class));
+        $controller->download($request, app(TorrentDownloadRepository::class));
     }
 
     public function test_download_redirects_guest_to_login(): void
     {
-        $this->bindTorrentRepository();
+        $this->bindTorrentDownloadRepository();
 
         $controller = app(TorrentDownloadController::class);
         $request = Request::create('/download', 'GET', ['id' => 5]);
         app()->instance('request', $request);
 
-        $response = $controller->download($request, app(TorrentRepository::class));
+        $response = $controller->download($request, app(TorrentDownloadRepository::class));
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertStringContainsString('/login.php', $response->getTargetUrl());
@@ -63,7 +63,7 @@ final class TorrentDownloadControllerTest extends TestCase
 
     public function test_download_throws_for_invalid_downhash_format_without_dot(): void
     {
-        $this->bindTorrentRepository();
+        $this->bindTorrentDownloadRepository();
 
         $controller = app(TorrentDownloadController::class);
         $request = Request::create('/download', 'GET', ['downhash' => 'invalid']);
@@ -72,12 +72,12 @@ final class TorrentDownloadControllerTest extends TestCase
         $this->expectException(NexusException::class);
         $this->expectExceptionMessage('download.invalid_downhash_format');
 
-        $controller->download($request, app(TorrentRepository::class));
+        $controller->download($request, app(TorrentDownloadRepository::class));
     }
 
     public function test_download_throws_for_downhash_with_empty_second_part(): void
     {
-        $this->bindTorrentRepository();
+        $this->bindTorrentDownloadRepository();
 
         $controller = app(TorrentDownloadController::class);
         $request = Request::create('/download', 'GET', ['downhash' => '123.']);
@@ -86,12 +86,12 @@ final class TorrentDownloadControllerTest extends TestCase
         $this->expectException(NexusException::class);
         $this->expectExceptionMessage('download.invalid_downhash_format');
 
-        $controller->download($request, app(TorrentRepository::class));
+        $controller->download($request, app(TorrentDownloadRepository::class));
     }
 
     public function test_download_throws_for_downhash_with_empty_first_part(): void
     {
-        $this->bindTorrentRepository();
+        $this->bindTorrentDownloadRepository();
 
         $controller = app(TorrentDownloadController::class);
         $request = Request::create('/download', 'GET', ['downhash' => '.abc']);
@@ -100,7 +100,7 @@ final class TorrentDownloadControllerTest extends TestCase
         $this->expectException(NexusException::class);
         $this->expectExceptionMessage('download.invalid_downhash_format');
 
-        $controller->download($request, app(TorrentRepository::class));
+        $controller->download($request, app(TorrentDownloadRepository::class));
     }
 
     public function test_downloadnotice_redirects_guest_to_downloadnotice_php(): void
@@ -155,13 +155,13 @@ final class TorrentDownloadControllerTest extends TestCase
     }
 
     /**
-     * Bind a mock TorrentRepository so it can be resolved from the container.
+     * Bind a mock TorrentDownloadRepository so it can be resolved from the container.
      */
-    private function bindTorrentRepository(): void
+    private function bindTorrentDownloadRepository(): void
     {
-        /** @var TorrentRepository&Mockery\MockInterface $torrentRepository */
-        $torrentRepository = Mockery::mock(TorrentRepository::class);
-        app()->instance(TorrentRepository::class, $torrentRepository);
+        /** @var TorrentDownloadRepository&Mockery\MockInterface $torrentRepository */
+        $torrentRepository = Mockery::mock(TorrentDownloadRepository::class);
+        app()->instance(TorrentDownloadRepository::class, $torrentRepository);
     }
 
     /**

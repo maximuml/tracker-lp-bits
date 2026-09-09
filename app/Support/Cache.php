@@ -8,7 +8,7 @@ use App\Events\UserUpdated;
 use App\Models\Setting;
 use App\Repositories\MessageRepository;
 use App\Repositories\SearchBoxRepository;
-use App\Repositories\TorrentRepository;
+use App\Repositories\TorrentDownloadRepository;
 use App\Repositories\UserRepository;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache as CacheFacade;
@@ -184,7 +184,7 @@ final class Cache
      */
     public static function touchTorrent(int|string $torrentId, string $field = 'cache_stamp'): void
     {
-        app(TorrentRepository::class)->touchCacheStamp($torrentId, $field);
+        app(TorrentDownloadRepository::class)->touchCacheStamp($torrentId, $field);
     }
 
     /**
@@ -194,7 +194,7 @@ final class Cache
      */
     public static function resetTorrent(int|string $torrentId, string $field = 'cache_stamp'): void
     {
-        app(TorrentRepository::class)->resetCacheStamp($torrentId, $field);
+        app(TorrentDownloadRepository::class)->resetCacheStamp($torrentId, $field);
     }
 
     public static function clearUser(int|string $uid, string $passkey = ''): void

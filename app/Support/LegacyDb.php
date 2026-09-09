@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
-use App\Repositories\TorrentRepository;
+use App\Services\TorrentStatsService;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 
@@ -87,6 +87,6 @@ final class LegacyDb
      */
     public static function snatchInfo(int|string $torrentId, int|string $userId): array|false
     {
-        return app(TorrentRepository::class)->getSnatchInfo($torrentId, $userId);
+        return app(TorrentStatsService::class)->getSnatchInfo($torrentId, $userId);
     }
 }

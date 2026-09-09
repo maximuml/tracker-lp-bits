@@ -7,7 +7,7 @@ namespace Tests\Unit\Http\Controllers;
 use App\Http\Controllers\PeerController;
 use App\Http\Requests\PeerRequest;
 use App\Models\Peer;
-use App\Repositories\TorrentRepository;
+use App\Services\TorrentStatsService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Validation\ValidationException;
 use Mockery;
@@ -30,8 +30,8 @@ final class PeerControllerTest extends TestCase
         $seederList = new Collection([$seeder]);
         $leecherList = new Collection([]);
 
-        /** @var TorrentRepository&Mockery\MockInterface $repository */
-        $repository = Mockery::mock(TorrentRepository::class);
+        /** @var TorrentStatsService&Mockery\MockInterface $repository */
+        $repository = Mockery::mock(TorrentStatsService::class);
         $repository->shouldReceive('listPeers')
             ->once()
             ->with(10)
@@ -56,8 +56,8 @@ final class PeerControllerTest extends TestCase
 
     public function test_index_returns_empty_lists_when_no_peers(): void
     {
-        /** @var TorrentRepository&Mockery\MockInterface $repository */
-        $repository = Mockery::mock(TorrentRepository::class);
+        /** @var TorrentStatsService&Mockery\MockInterface $repository */
+        $repository = Mockery::mock(TorrentStatsService::class);
         $repository->shouldReceive('listPeers')
             ->once()
             ->with(10)
@@ -83,8 +83,8 @@ final class PeerControllerTest extends TestCase
     {
         $this->expectException(ValidationException::class);
 
-        /** @var TorrentRepository&Mockery\MockInterface $repository */
-        $repository = Mockery::mock(TorrentRepository::class);
+        /** @var TorrentStatsService&Mockery\MockInterface $repository */
+        $repository = Mockery::mock(TorrentStatsService::class);
         $repository->shouldNotReceive('listPeers');
 
         $controller = new PeerController($repository);

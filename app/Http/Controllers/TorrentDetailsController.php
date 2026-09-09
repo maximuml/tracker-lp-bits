@@ -15,6 +15,8 @@ use App\Models\User;
 use App\Repositories\SearchBoxRepository;
 use App\Repositories\TagRepository;
 use App\Repositories\TorrentDetailRepository;
+use App\Repositories\TorrentDownloadRepository;
+use App\Repositories\TorrentModerationRepository;
 use App\Repositories\TorrentRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
@@ -43,6 +45,10 @@ class TorrentDetailsController extends Controller
 {
     private TorrentRepository $torrentRepository;
 
+    private TorrentDownloadRepository $downloadRepository;
+
+    private TorrentModerationRepository $moderationRepository;
+
     private SearchBoxRepository $searchBoxRepository;
 
     private TagRepository $tagRepository;
@@ -57,6 +63,8 @@ class TorrentDetailsController extends Controller
 
     public function __construct(
         TorrentRepository $torrentRepository,
+        TorrentDownloadRepository $downloadRepository,
+        TorrentModerationRepository $moderationRepository,
         SearchBoxRepository $searchBoxRepository,
         TagRepository $tagRepository,
         TorrentDetailRepository $torrentDetailRepository,
@@ -65,6 +73,8 @@ class TorrentDetailsController extends Controller
         ?LegacyRedisCache $legacyRedisCache = null,
     ) {
         $this->torrentRepository = $torrentRepository;
+        $this->downloadRepository = $downloadRepository;
+        $this->moderationRepository = $moderationRepository;
         $this->searchBoxRepository = $searchBoxRepository;
         $this->tagRepository = $tagRepository;
         $this->torrentDetailRepository = $torrentDetailRepository;
@@ -200,7 +210,7 @@ class TorrentDetailsController extends Controller
             .($spTorrent ? '&nbsp;&nbsp;&nbsp;'.$spTorrent : '')
             .$spTorrentSub
             .TorrentAccess::hrImage($row, (int) ($row['search_box_id'] ?? 0))
-            .$torrentRep->renderApprovalStatus($row['approval_status'] ?? null);
+            .$this->moderationRepository->renderApprovalStatus($row['approval_status'] ?? null);
 
         $editUrl = "edit.php?id={$id}";
         if ($requestFlags['returnto'] ?? '') {
@@ -230,7 +240,7 @@ class TorrentDetailsController extends Controller
             $taxonomyRendered .= sprintf('&nbsp;&nbsp;&nbsp;<b>%s: </b>%s', $item['label'] ?? '', $item['value'] ?? '');
         }
 
-        $downloadUrl = $torrentRep->getDownloadUrl($id, $currentUser);
+        $downloadUrl = $this->downloadRepository->getDownloadUrl($id, $currentUser);
         $customFieldsHtml = $customField->renderOnTorrentDetailsPage($id, (int) ($row['search_box_id'] ?? 0));
 
         $technicalInfoResult = null;

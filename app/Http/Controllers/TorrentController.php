@@ -18,6 +18,8 @@ use App\Models\Torrent;
 use App\Models\TorrentDenyReason;
 use App\Models\TorrentOperationLog;
 use App\Models\User;
+use App\Repositories\TorrentDownloadRepository;
+use App\Repositories\TorrentModerationRepository;
 use App\Repositories\TorrentRepository;
 use App\Repositories\UploadRepository;
 use App\Support\Logger;
@@ -30,11 +32,17 @@ class TorrentController extends Controller
 {
     private TorrentRepository $repository;
 
+    private TorrentDownloadRepository $downloadRepository;
+
+    private TorrentModerationRepository $moderationRepository;
+
     private UploadRepository $uploadRepository;
 
-    public function __construct(TorrentRepository $repository, UploadRepository $uploadRepository)
+    public function __construct(TorrentRepository $repository, TorrentDownloadRepository $downloadRepository, TorrentModerationRepository $moderationRepository, UploadRepository $uploadRepository)
     {
         $this->repository = $repository;
+        $this->downloadRepository = $downloadRepository;
+        $this->moderationRepository = $moderationRepository;
         $this->uploadRepository = $uploadRepository;
     }
 
@@ -145,7 +153,7 @@ class TorrentController extends Controller
     {
         Permission::assertCan(PermissionEnum::TORRENT_APPROVAL);
         $params = $request->validated();
-        $this->repository->approval(Auth::user(), $params);
+        $this->moderationRepository->approval(Auth::user(), $params);
 
         return $this->success($params);
     }
@@ -155,7 +163,7 @@ class TorrentController extends Controller
      */
     public function queryByPiecesHash(TorrentPiecesHashRequest $request): array
     {
-        $result = $this->repository->getPiecesHashCache($request->pieces_hash);
+        $result = $this->downloadRepository->getPiecesHashCache($request->pieces_hash);
 
         return $this->success($result ?: (object) []);
     }

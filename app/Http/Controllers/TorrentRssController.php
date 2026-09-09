@@ -9,6 +9,7 @@ use App\Enums\TorrentApprovalStatus;
 use App\Enums\TorrentPosState;
 use App\Models\SearchBox;
 use App\Models\Torrent;
+use App\Repositories\TorrentDownloadRepository;
 use App\Repositories\TorrentRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
@@ -32,9 +33,12 @@ class TorrentRssController extends LegacyController
 {
     private TorrentRepository $torrentRepository;
 
-    public function __construct(TorrentRepository $torrentRepository)
+    private TorrentDownloadRepository $downloadRepository;
+
+    public function __construct(TorrentRepository $torrentRepository, TorrentDownloadRepository $downloadRepository)
     {
         $this->torrentRepository = $torrentRepository;
+        $this->downloadRepository = $downloadRepository;
     }
 
     public function torrentrss(Request $request): Response
@@ -265,7 +269,7 @@ class TorrentRssController extends LegacyController
 
             $itemurl = $baseUrl.'/details.php?id='.(int) ($row['id'] ?? 0);
             if ($dllink) {
-                $itemdlurl = $torrentRep->getDownloadUrl((int) ($row['id'] ?? 0), $rssUser);
+                $itemdlurl = $this->downloadRepository->getDownloadUrl((int) ($row['id'] ?? 0), $rssUser);
             } else {
                 $itemdlurl = $baseUrl.'/download.php?id='.(int) ($row['id'] ?? 0);
             }

@@ -8,7 +8,7 @@ use App\Exceptions\NexusException;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\IpLogRepository;
-use App\Repositories\TorrentRepository;
+use App\Repositories\TorrentDownloadRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Globals;
@@ -31,7 +31,7 @@ use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class TorrentDownloadController extends LegacyController
 {
-    public function download(Request $request, TorrentRepository $torrentRepository): SymfonyResponse
+    public function download(Request $request, TorrentDownloadRepository $torrentRepository): SymfonyResponse
     {
         $downhash = $request->downhash;
         $passkey = $request->passkey;

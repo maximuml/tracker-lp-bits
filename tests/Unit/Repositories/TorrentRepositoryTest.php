@@ -31,14 +31,17 @@ final class TorrentRepositoryTest extends TestCase
 
     private TorrentRepository $repository;
 
+    private TorrentStatsService $statsService;
+
     protected function setUp(): void
     {
         parent::setUp();
+        $this->statsService = app(TorrentStatsService::class);
         $this->repository = new TorrentRepository(
             app(TorrentDownloadRepository::class),
             app(TorrentPurchaseRepository::class),
             app(TorrentModerationRepository::class),
-            app(TorrentStatsService::class),
+            $this->statsService,
             app(TorrentPromotionService::class),
         );
     }
@@ -49,7 +52,7 @@ final class TorrentRepositoryTest extends TestCase
         $peer->uploaded = 2000;
         $peer->downloaded = 1000;
 
-        $ratio = $this->repository->getShareRatio($peer);
+        $ratio = $this->statsService->getShareRatio($peer);
 
         $this->assertSame(2.0, $ratio);
     }
@@ -60,7 +63,7 @@ final class TorrentRepositoryTest extends TestCase
         $peer->uploaded = 1000;
         $peer->downloaded = 0;
 
-        $ratio = $this->repository->getShareRatio($peer);
+        $ratio = $this->statsService->getShareRatio($peer);
 
         $this->assertSame('Infinity', $ratio);
     }
@@ -71,7 +74,7 @@ final class TorrentRepositoryTest extends TestCase
         $peer->uploaded = 0;
         $peer->downloaded = 0;
 
-        $ratio = $this->repository->getShareRatio($peer);
+        $ratio = $this->statsService->getShareRatio($peer);
 
         $this->assertSame('---', $ratio);
     }
@@ -82,7 +85,7 @@ final class TorrentRepositoryTest extends TestCase
         $peer->uploaded = 1000;
         $peer->downloaded = 3000;
 
-        $ratio = $this->repository->getShareRatio($peer);
+        $ratio = $this->statsService->getShareRatio($peer);
 
         $this->assertSame(0.333, $ratio);
     }
@@ -122,7 +125,7 @@ final class TorrentRepositoryTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $result = $this->repository->getBookmarkTorrentIds($user->id);
+        $result = $this->statsService->getBookmarkTorrentIds($user->id);
 
         $this->assertSame([0], $result);
     }
@@ -135,7 +138,7 @@ final class TorrentRepositoryTest extends TestCase
         Bookmark::query()->create(['userid' => $user->id, 'torrentid' => $torrent1->id]);
         Bookmark::query()->create(['userid' => $user->id, 'torrentid' => $torrent2->id]);
 
-        $result = $this->repository->getBookmarkTorrentIds($user->id);
+        $result = $this->statsService->getBookmarkTorrentIds($user->id);
 
         $this->assertCount(2, $result);
         $this->assertContains($torrent1->id, $result);
@@ -146,7 +149,7 @@ final class TorrentRepositoryTest extends TestCase
     {
         $torrent = Torrent::factory()->create();
 
-        $result = $this->repository->findForUserValue($torrent->id);
+        $result = $this->statsService->findForUserValue($torrent->id);
 
         $this->assertNotNull($result);
         $this->assertSame($torrent->id, $result['id']);
@@ -154,7 +157,7 @@ final class TorrentRepositoryTest extends TestCase
 
     public function test_find_for_user_value_returns_null_when_not_found(): void
     {
-        $result = $this->repository->findForUserValue(999999);
+        $result = $this->statsService->findForUserValue(999999);
 
         $this->assertNull($result);
     }
@@ -163,7 +166,7 @@ final class TorrentRepositoryTest extends TestCase
     {
         $torrent = Torrent::factory()->create();
 
-        $result = $this->repository->getLastComment($torrent->id);
+        $result = $this->statsService->getLastComment($torrent->id);
 
         $this->assertNull($result);
     }
@@ -189,7 +192,7 @@ final class TorrentRepositoryTest extends TestCase
             'anonymous' => 0,
         ]);
 
-        $result = $this->repository->getLastComment($torrent->id);
+        $result = $this->statsService->getLastComment($torrent->id);
 
         $this->assertNotNull($result);
         $this->assertSame('Second comment', $result['text']);
@@ -200,7 +203,7 @@ final class TorrentRepositoryTest extends TestCase
         $torrent = Torrent::factory()->create();
         $user = User::factory()->create();
 
-        $result = $this->repository->getSnatchInfo($torrent->id, $user->id);
+        $result = $this->statsService->getSnatchInfo($torrent->id, $user->id);
 
         $this->assertFalse($result);
     }
@@ -221,7 +224,7 @@ final class TorrentRepositoryTest extends TestCase
             'last_action' => now()->toDateTimeString(),
         ]);
 
-        $result = $this->repository->getSnatchInfo($torrent->id, $user->id);
+        $result = $this->statsService->getSnatchInfo($torrent->id, $user->id);
 
         $this->assertIsArray($result);
         $this->assertSame($torrent->id, $result['torrentid']);

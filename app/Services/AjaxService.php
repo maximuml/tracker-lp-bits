@@ -11,7 +11,7 @@ use App\Repositories\AttendanceRepository;
 use App\Repositories\BonusRepository;
 use App\Repositories\ExamRepository;
 use App\Repositories\MedalRepository;
-use App\Repositories\TorrentRepository;
+use App\Repositories\TorrentModerationRepository;
 use App\Repositories\UserPasskeyRepository;
 use App\Repositories\UserRepository;
 use App\Support\CurrentUser;
@@ -63,7 +63,7 @@ final class AjaxService
         private readonly MedalRepository $medalRepository,
         private readonly AttendanceRepository $attendanceRepository,
         private readonly UserRepository $userRepository,
-        private readonly TorrentRepository $torrentRepository,
+        private readonly TorrentModerationRepository $torrentModerationRepository,
         private readonly BonusRepository $bonusRepository,
         private readonly ExamRepository $examRepository,
         private readonly UserPasskeyRepository $userPasskeyRepository,
@@ -111,7 +111,7 @@ final class AjaxService
     public function approvalModal(array $params): mixed
     {
         $CURUSER = $this->currentUser->get() ?? [];
-        $rep = $this->torrentRepository;
+        $rep = $this->torrentModerationRepository;
 
         return $rep->buildApprovalModal($CURUSER['id'], (int) $params['torrent_id']);
     }
@@ -125,7 +125,7 @@ final class AjaxService
                 throw new \InvalidArgumentException("Require $field");
             }
         }
-        $rep = $this->torrentRepository;
+        $rep = $this->torrentModerationRepository;
 
         return $rep->approval($CURUSER['id'], $params);
     }

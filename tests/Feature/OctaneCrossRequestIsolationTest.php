@@ -13,6 +13,7 @@ use App\Support\Settings;
 use App\Support\SupportContext;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Auth;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -30,6 +31,7 @@ use Tests\TestCase;
  * 3. Setting up state for "request B" (user B, settings B)
  * 4. Asserting that request B sees only its own state
  */
+#[TestCategory(TestCategory::HTTP_FEATURE)]
 final class OctaneCrossRequestIsolationTest extends TestCase
 {
     use DatabaseTransactions;

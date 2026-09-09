@@ -7,6 +7,7 @@ namespace Tests\Feature;
 use App\Listeners\ResetNexus;
 use App\Support\LegacyHeaderBag;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -16,6 +17,7 @@ use Tests\TestCase;
  * do not leak from one request to the next under Octane-style
  * sequential request handling.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class LegacyHeaderIsolationTest extends TestCase
 {
     use DatabaseTransactions;

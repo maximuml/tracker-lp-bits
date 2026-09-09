@@ -4,7 +4,9 @@ namespace Tests\Unit\Support;
 
 use App\Support\Description;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class DescriptionTest extends TestCase
 {
     public function test_image_urls_empty_array_returns_empty_list(): void

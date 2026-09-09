@@ -10,6 +10,7 @@ use App\Repositories\CommentRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -22,6 +23,7 @@ use Tests\TestCase;
  * The 'request' comment type is not tested because the requests table
  * does not exist in the test database schema.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class CommentRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

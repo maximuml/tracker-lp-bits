@@ -12,6 +12,7 @@ use App\Repositories\OfferRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -24,6 +25,7 @@ use Tests\TestCase;
  * deleteOfferComments(), getLastComment(), countComments(), getComments(),
  * addStaffMessage(), getUsername(), getLegacyList(), and list().
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class OfferRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

@@ -13,8 +13,10 @@ use App\Support\Bonus;
 use App\Support\Globals;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::CONCURRENCY, TestCategory::SERVICE_INTEGRATION)]
 class BonusConcurrencyTest extends TestCase
 {
     use DatabaseTransactions;

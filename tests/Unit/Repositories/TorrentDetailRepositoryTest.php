@@ -12,6 +12,7 @@ use App\Models\TorrentTag;
 use App\Repositories\TorrentDetailRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -21,6 +22,7 @@ use Tests\TestCase;
  * getComments(), incrementViews(), getTagIds(), and
  * getLatestApprovalDenyLog().
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class TorrentDetailRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

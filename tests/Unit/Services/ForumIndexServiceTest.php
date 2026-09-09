@@ -13,6 +13,7 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Redis;
 use Mockery;
 use Mockery\MockInterface;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -23,6 +24,7 @@ use Tests\TestCase;
  * getLastReadPostId, catchUp (no-user/user), forumStats, and
  * buildForumsIndex (empty data, with overforums).
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class ForumIndexServiceTest extends TestCase
 {
     use DatabaseTransactions;

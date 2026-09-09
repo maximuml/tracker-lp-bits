@@ -15,6 +15,7 @@ use App\Repositories\IndexRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -28,6 +29,7 @@ use Tests\TestCase;
  * Cache::flush() is called in setUp() since every method uses
  * Cache::remember().
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class IndexRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

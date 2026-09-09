@@ -6,6 +6,7 @@ namespace Tests\Architecture;
 
 use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\Route as RouteFacade;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -20,6 +21,7 @@ use Tests\TestCase;
  *
  * Framework routes (Horizon, Livewire, Filament) are excluded.
  */
+#[TestCategory(TestCategory::ARCHITECTURE)]
 final class RouteInventoryTest extends TestCase
 {
     /**

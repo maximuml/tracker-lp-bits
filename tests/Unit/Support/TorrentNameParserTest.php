@@ -4,7 +4,9 @@ namespace Tests\Unit\Support;
 
 use App\Support\TorrentNameParser;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class TorrentNameParserTest extends TestCase
 {
     public function test_parses_standard_artist_city_country_event_date(): void

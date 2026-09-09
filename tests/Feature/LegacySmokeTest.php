@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -12,6 +13,7 @@ use Tests\TestCase;
  * Pages that need per-page legacy language files are covered by the
  * CriticalPathTest end-to-end suite instead.
  */
+#[TestCategory(TestCategory::DOCKER_E2E)]
 final class LegacySmokeTest extends TestCase
 {
     public function test_public_legacy_pages_are_reachable(): void

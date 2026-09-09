@@ -8,8 +8,10 @@ use App\Models\News;
 use App\Support\Cache\LegacyRedisCache;
 use Illuminate\Http\Request;
 use Mockery;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::PURE_UNIT, TestCategory::MUTATION)]
 final class NewsControllerTest extends TestCase
 {
     protected function tearDown(): void

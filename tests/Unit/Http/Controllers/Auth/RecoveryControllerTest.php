@@ -13,8 +13,10 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Mockery;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::PURE_UNIT, TestCategory::MUTATION)]
 final class RecoveryControllerTest extends TestCase
 {
     protected function tearDown(): void

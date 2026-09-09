@@ -7,12 +7,14 @@ namespace Tests\Unit\Services;
 use App\Services\SecureTokenService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
  * Unit tests for SecureTokenService — CSPRNG token generation,
  * SHA-256 digest storage, atomic consumption, and legacy fallback.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class SecureTokenServiceTest extends TestCase
 {
     use DatabaseTransactions;

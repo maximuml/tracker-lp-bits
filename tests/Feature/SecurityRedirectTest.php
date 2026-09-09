@@ -4,12 +4,14 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
  * Phase 5.3: verify that the legacy bans/cheaters/iphistory/ipcheck/ipsearch
  * endpoints redirect to the Filament SecurityResource group.
  */
+#[TestCategory(TestCategory::HTTP_FEATURE)]
 final class SecurityRedirectTest extends TestCase
 {
     use DatabaseTransactions;

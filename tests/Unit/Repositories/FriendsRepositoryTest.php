@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Repositories\FriendsRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -15,6 +16,7 @@ use Tests\TestCase;
  *
  * Covers getFriends(), getBlocks(), exists(), add(), and delete().
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class FriendsRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

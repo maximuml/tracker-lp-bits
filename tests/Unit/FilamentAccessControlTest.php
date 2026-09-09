@@ -14,6 +14,7 @@ use App\Filament\Resources\Security\StaffMessageResource;
 use App\Filament\Resources\User\UserResource;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -25,6 +26,7 @@ use Tests\TestCase;
  * - SYSOP/ADMINISTRATOR/MODERATOR gain access where appropriate
  * - Console cron-commands are registered with correct signatures
  */
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class FilamentAccessControlTest extends TestCase
 {
     /**

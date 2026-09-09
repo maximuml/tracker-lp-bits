@@ -8,6 +8,7 @@ use App\Support\PasswordHasher;
 use App\Support\Token;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Schema;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -15,6 +16,7 @@ use Tests\TestCase;
  * legacy sha256/md5 hashes are verified correctly, and rehash-on-login
  * upgrades legacy hashes to argon2id.
  */
+#[TestCategory(TestCategory::HTTP_FEATURE)]
 final class PasswordArgon2idTest extends TestCase
 {
     use DatabaseTransactions;

@@ -17,6 +17,7 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Mockery;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -27,6 +28,7 @@ use Tests\TestCase;
  * handleMoveTopic, handleDeleteTopic, handleDeletePost, handleSetLocked,
  * handleHighlightTopic, and handleSetSticky.
  */
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class ForumServiceTest extends TestCase
 {
     private int $initialObLevel;

@@ -6,6 +6,7 @@ namespace Tests\Architecture;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
 /**
  * Enforces that Blade views do not contain side-effect calls.
@@ -14,6 +15,7 @@ use PHPUnit\Framework\TestCase;
  * no email sending, no LegacyResponse::abort(), no die/exit.
  * All such logic belongs in controllers or middleware.
  */
+#[TestCategory(TestCategory::ARCHITECTURE)]
 final class ViewsHaveNoSideEffectsTest extends TestCase
 {
     /**

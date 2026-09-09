@@ -6,7 +6,9 @@ namespace Tests\Unit\ValueObjects;
 
 use App\ValueObjects\PeerId;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class PeerIdTest extends TestCase
 {
     private function validBinary(): string

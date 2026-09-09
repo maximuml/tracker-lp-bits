@@ -9,6 +9,7 @@ use App\Repositories\TokenRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -24,6 +25,7 @@ use Tests\TestCase;
  * By running the Setting-dependent test first, the static is still null
  * and the updateOrInsert + Cache::forget forces a fresh DB read.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class TokenRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

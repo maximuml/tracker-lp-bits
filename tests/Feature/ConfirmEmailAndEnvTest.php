@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -11,6 +12,7 @@ use Tests\TestCase;
  * address before writing it to the database, and that .env.example is
  * sanitized (no real secrets).
  */
+#[TestCategory(TestCategory::HTTP_FEATURE)]
 final class ConfirmEmailAndEnvTest extends TestCase
 {
     use DatabaseTransactions;

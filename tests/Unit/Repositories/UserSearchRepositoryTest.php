@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Repositories\UserSearchRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -16,6 +17,7 @@ use Tests\TestCase;
  * Covers administrativeSearch() with various filter combinations,
  * validation errors, pagination, and edge cases.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class UserSearchRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

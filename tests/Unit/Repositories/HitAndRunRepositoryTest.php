@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Repositories\HitAndRunRepository;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -19,6 +20,7 @@ use Tests\TestCase;
  *
  * Covers getList(), store(), update(), getDetail(), delete().
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class HitAndRunRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

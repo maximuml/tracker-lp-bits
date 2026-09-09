@@ -4,7 +4,9 @@ namespace Tests\Unit\Support;
 
 use App\Support\Pagination;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class PaginationTest extends TestCase
 {
     private const LABELS = [

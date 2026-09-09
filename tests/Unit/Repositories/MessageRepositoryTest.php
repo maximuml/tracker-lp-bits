@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Repositories\MessageRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -22,6 +23,7 @@ use Tests\TestCase;
  * getList(), store(), update(), getDetail(), delete(), getLastPmId(),
  * getUnreadPmNotifications(), and countStaffMessage().
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class MessageRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

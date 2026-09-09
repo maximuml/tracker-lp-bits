@@ -6,7 +6,9 @@ namespace Tests\Unit\ValueObjects;
 
 use App\ValueObjects\Passkey;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class PasskeyTest extends TestCase
 {
     public function test_can_be_built_from_valid_string(): void

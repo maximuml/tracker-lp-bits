@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Repositories\DashboardRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -20,6 +21,7 @@ use Tests\TestCase;
  * statTorrents(), latestUser(), latestTorrent(), statTracker(),
  * uploaderActivity(), categoryActivity(), peerAgents(), and donorSummary().
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class DashboardRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

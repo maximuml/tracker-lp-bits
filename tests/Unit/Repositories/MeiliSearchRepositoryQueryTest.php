@@ -6,8 +6,10 @@ use App\Models\SearchBox;
 use App\Repositories\MeiliSearchRepository;
 use App\Services\MeiliSearchService;
 use App\Support\Settings;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class MeiliSearchRepositoryQueryTest extends TestCase
 {
     protected function setUp(): void

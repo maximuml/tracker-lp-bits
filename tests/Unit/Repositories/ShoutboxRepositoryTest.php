@@ -10,6 +10,7 @@ use App\Repositories\ShoutboxRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -19,6 +20,7 @@ use Tests\TestCase;
  * getMentions(), getLastShoutId(), findUserByUsername(), torrentExists(),
  * and applyTypeFilter().
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class ShoutboxRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

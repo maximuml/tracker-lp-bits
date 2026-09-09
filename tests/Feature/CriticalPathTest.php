@@ -10,6 +10,7 @@ use App\Support\Settings;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Rhilip\Bencode\Bencode;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -20,6 +21,7 @@ use Tests\TestCase;
  * Laravel. It must therefore run inside the php container with network
  * access to the openresty container.
  */
+#[TestCategory(TestCategory::DOCKER_E2E)]
 class CriticalPathTest extends TestCase
 {
     private string $baseUrl;

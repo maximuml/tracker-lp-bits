@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -12,6 +13,7 @@ use Tests\TestCase;
  * not via direct nginx URLs. The nginx /attachments/ location is
  * marked `internal` so only X-Accel-Redirect can reach it.
  */
+#[TestCategory(TestCategory::HTTP_FEATURE)]
 final class PrivateAttachmentsTest extends TestCase
 {
     /**

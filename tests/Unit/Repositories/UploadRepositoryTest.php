@@ -10,6 +10,7 @@ use App\Models\Category;
 use App\Repositories\UploadRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -17,6 +18,7 @@ use Tests\TestCase;
  *
  * Covers getCover(), getPrice(), getHitAndRun(), getPosStateInfo().
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class UploadRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

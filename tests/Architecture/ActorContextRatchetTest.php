@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Architecture;
 
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
 /**
  * T-20 CI ratchet: the number of `app()` calls and `Globals::class`
@@ -21,6 +22,7 @@ use PHPUnit\Framework\TestCase;
  *
  * and commit the updated constant.
  */
+#[TestCategory(TestCategory::ARCHITECTURE)]
 final class ActorContextRatchetTest extends TestCase
 {
     /**

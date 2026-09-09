@@ -10,11 +10,13 @@ use App\Services\OutboxService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
  * T-24: OutboxDispatcher tests.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class OutboxDispatcherTest extends TestCase
 {
     use DatabaseTransactions;

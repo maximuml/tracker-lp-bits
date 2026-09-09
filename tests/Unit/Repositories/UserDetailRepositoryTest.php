@@ -12,6 +12,7 @@ use App\Models\UserModifyLog;
 use App\Repositories\UserDetailRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -22,6 +23,7 @@ use Tests\TestCase;
  * getPostCount(), getTemporaryInviteCount(), getModComment(), and
  * getBonusComment().
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class UserDetailRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

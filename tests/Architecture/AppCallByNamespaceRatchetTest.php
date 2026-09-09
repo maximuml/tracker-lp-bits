@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Architecture;
 
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
 /**
  * W0-05: Detailed ratchet on app() usage by namespace.
@@ -16,6 +17,7 @@ use PHPUnit\Framework\TestCase;
  *
  * Baselines captured on 2026-09-07.
  */
+#[TestCategory(TestCategory::ARCHITECTURE)]
 final class AppCallByNamespaceRatchetTest extends TestCase
 {
     private const APP_DIR = __DIR__.'/../../app';

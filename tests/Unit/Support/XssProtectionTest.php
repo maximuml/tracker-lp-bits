@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Tests\Unit\Support;
 
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class XssProtectionTest extends TestCase
 {
     /**

@@ -11,6 +11,7 @@ use App\ValueObjects\InfoHash;
 use App\ValueObjects\Passkey;
 use App\ValueObjects\PeerId;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
 /**
  * W2-03: AnnounceRequestDto and AnnounceRequestFactory tests.
@@ -23,6 +24,7 @@ use PHPUnit\Framework\TestCase;
  * has the SupportContext::fromRequest() side effect, which is not tested
  * here but in the integration tests.
  */
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class AnnounceRequestDtoTest extends TestCase
 {
     private const PASSKEY = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';

@@ -10,6 +10,7 @@ use App\Repositories\TorrentPurchaseRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -22,6 +23,7 @@ use Tests\TestCase;
  * Uses Redis directly and cleans up keys in tearDown to avoid cross-test
  * contamination.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class TorrentPurchaseRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

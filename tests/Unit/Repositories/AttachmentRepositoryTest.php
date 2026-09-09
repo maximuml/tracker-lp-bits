@@ -7,8 +7,10 @@ namespace Tests\Unit\Repositories;
 use App\Repositories\AttachmentRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class AttachmentRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

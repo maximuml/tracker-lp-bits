@@ -9,6 +9,7 @@ use App\Support\Cache\LegacyRedisCache;
 use App\Support\TorrentBookmark;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Mockery;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -17,6 +18,7 @@ use Tests\TestCase;
  * Covers bookmarkArray (cache hit/miss) and stateMarkup (bookmarked/
  * unbookmarked, text mode, icon mode).
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class TorrentBookmarkTest extends TestCase
 {
     use DatabaseTransactions;

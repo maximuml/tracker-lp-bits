@@ -8,6 +8,7 @@ use App\Repositories\CleanupRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -19,6 +20,7 @@ use Tests\TestCase;
  * Batch-job methods that dispatch queued jobs are tested for their
  * no-op / early-return paths to avoid actually dispatching jobs.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class CleanupRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

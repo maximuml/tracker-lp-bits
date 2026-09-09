@@ -10,8 +10,10 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Mockery;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::PURE_UNIT, TestCategory::MUTATION)]
 final class MyControllerTest extends TestCase
 {
     protected function tearDown(): void

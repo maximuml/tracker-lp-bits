@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -15,6 +16,7 @@ use Tests\TestCase;
  * - entrypoint.prod.sh does not run composer install
  * - .dockerignore excludes dev-only files from prod image
  */
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class ProdImageTest extends TestCase
 {
     /**

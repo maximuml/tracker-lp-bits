@@ -3,8 +3,10 @@
 namespace Tests\Unit\Support;
 
 use App\Support\BBCode;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 class BBCodeTest extends TestCase
 {
     // ---------- url ----------

@@ -4,7 +4,9 @@ namespace Tests\Unit\Support;
 
 use App\Support\Progress;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class ProgressTest extends TestCase
 {
     public function test_zero_percent_emits_rest_bar(): void

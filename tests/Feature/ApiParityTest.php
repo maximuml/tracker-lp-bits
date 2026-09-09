@@ -13,8 +13,10 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Laravel\Sanctum\Sanctum;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 class ApiParityTest extends TestCase
 {
     use DatabaseTransactions;

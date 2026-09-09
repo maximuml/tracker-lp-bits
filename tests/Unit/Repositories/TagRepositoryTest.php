@@ -10,6 +10,7 @@ use App\Repositories\TagRepository;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -22,6 +23,7 @@ use Tests\TestCase;
  * Static caches ($allTags, $orderByFieldIdString) are reset via reflection
  * in setUp() to avoid cross-test contamination.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class TagRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

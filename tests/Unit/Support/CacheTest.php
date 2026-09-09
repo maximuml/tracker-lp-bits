@@ -4,7 +4,9 @@ namespace Tests\Unit\Support;
 
 use App\Support\Cache;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 class CacheTest extends TestCase
 {
     private string $tmpDir = '';

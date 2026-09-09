@@ -10,6 +10,7 @@ use App\Support\Globals;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Mockery;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -19,6 +20,7 @@ use Tests\TestCase;
  * action routing, POST enforcement, insufficient bonus guard,
  * and unknown art type handling.
  */
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class BonusServiceTest extends TestCase
 {
     protected function tearDown(): void

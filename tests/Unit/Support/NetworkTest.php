@@ -5,7 +5,9 @@ namespace Tests\Unit\Support;
 use App\Support\Network;
 use Illuminate\Http\Request;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 class NetworkTest extends TestCase
 {
     // ---------- ipInRange(): single-IP form ($ipTwo === false) ----------

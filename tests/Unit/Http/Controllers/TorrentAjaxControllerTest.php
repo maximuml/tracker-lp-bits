@@ -14,8 +14,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Mockery;
 use Mockery\MockInterface;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::SERVICE_INTEGRATION, TestCategory::MUTATION)]
 final class TorrentAjaxControllerTest extends TestCase
 {
     use DatabaseTransactions;

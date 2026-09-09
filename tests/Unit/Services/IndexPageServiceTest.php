@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Mockery;
 use Mockery\MockInterface;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -25,6 +26,7 @@ use Tests\TestCase;
  * visibility toggles, guest vs authenticated user, top-level key
  * structure, disclaimer, browser note, and tracker load.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class IndexPageServiceTest extends TestCase
 {
     use DatabaseTransactions;

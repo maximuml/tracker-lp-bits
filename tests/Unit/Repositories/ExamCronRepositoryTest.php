@@ -24,6 +24,7 @@ use App\Repositories\ExamProgressRepository;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -35,6 +36,7 @@ use Tests\TestCase;
  * check out expired exam users (marking them as finished, sending messages,
  * banning failing users, or rewarding passing users).
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class ExamCronRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

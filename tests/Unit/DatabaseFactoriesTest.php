@@ -18,11 +18,13 @@ use App\Models\Topic;
 use App\Models\Torrent;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
  * Ensure the new model factories produce valid, storable records.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class DatabaseFactoriesTest extends TestCase
 {
     use DatabaseTransactions;

@@ -4,7 +4,9 @@ namespace Tests\Unit\Support;
 
 use App\Support\Env;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 class EnvTest extends TestCase
 {
     public function test_load_and_normalize_env_file(): void

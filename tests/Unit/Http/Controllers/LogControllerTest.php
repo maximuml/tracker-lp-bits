@@ -20,8 +20,10 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
 use Mockery;
 use Mockery\MockInterface;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::SERVICE_INTEGRATION, TestCategory::MUTATION)]
 final class LogControllerTest extends TestCase
 {
     use DatabaseTransactions;

@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Repositories\BookmarkRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -19,6 +20,7 @@ use Tests\TestCase;
  * already-bookmarked rejection, successful add, not-bookmarked rejection
  * on remove, and successful remove.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class BookmarkRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

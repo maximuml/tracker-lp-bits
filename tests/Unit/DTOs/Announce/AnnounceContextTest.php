@@ -12,7 +12,9 @@ use App\ValueObjects\InfoHash;
 use App\ValueObjects\Passkey;
 use App\ValueObjects\PeerId;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 class AnnounceContextTest extends TestCase
 {
     public function test_context_is_immutable_with_methods_return_new_instances(): void

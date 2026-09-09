@@ -8,6 +8,7 @@ use App\Http\Middleware\VerifyCsrfToken;
 use App\Models\Message;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -15,6 +16,7 @@ use Tests\TestCase;
  * Tests the actual HTTP pipeline including FormRequest validation,
  * authorization, and legacy redirect behavior.
  */
+#[TestCategory(TestCategory::HTTP_FEATURE)]
 final class MessageHttpTest extends TestCase
 {
     use DatabaseTransactions;

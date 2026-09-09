@@ -8,8 +8,10 @@ use App\Http\Controllers\OverForumController;
 use App\Models\OverForum;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::SERVICE_INTEGRATION, TestCategory::MUTATION)]
 final class OverForumControllerTest extends TestCase
 {
     use DatabaseTransactions;

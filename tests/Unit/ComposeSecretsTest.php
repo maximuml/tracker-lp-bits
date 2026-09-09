@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -12,6 +13,7 @@ use Tests\TestCase;
  * (refuses to start without them), Redis must require a password,
  * and .env.example must not ship with real passwords as defaults.
  */
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class ComposeSecretsTest extends TestCase
 {
     /**

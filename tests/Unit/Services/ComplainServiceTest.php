@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Mockery;
 use Mockery\MockInterface;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -21,6 +22,7 @@ use Tests\TestCase;
  * success with/without email), and createComplain (disabled user
  * requirement, lock contention).
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class ComplainServiceTest extends TestCase
 {
     use DatabaseTransactions;

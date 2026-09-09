@@ -4,12 +4,14 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
  * Phase 5.6: verify that the legacy delacctadmin/deletedisabled/massmail/maxlogin
  * endpoints redirect to the Filament SystemActions page and LoginAttemptResource.
  */
+#[TestCategory(TestCategory::HTTP_FEATURE)]
 final class DestructiveActionsRedirectTest extends TestCase
 {
     use DatabaseTransactions;

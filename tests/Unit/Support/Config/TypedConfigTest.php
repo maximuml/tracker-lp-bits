@@ -10,7 +10,9 @@ use App\Support\Config\SecurityConfig;
 use App\Support\Config\SiteConfig;
 use App\Support\Config\TweakConfig;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class TypedConfigTest extends TestCase
 {
     public function test_attachment_config_save_directory_type(): void

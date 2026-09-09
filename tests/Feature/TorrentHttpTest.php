@@ -8,6 +8,7 @@ use App\Http\Middleware\VerifyCsrfToken;
 use App\Models\Torrent;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -15,6 +16,7 @@ use Tests\TestCase;
  * Tests FormRequest validation, authorization via TorrentPolicy,
  * HTTP method boundaries, and legacy redirect behavior.
  */
+#[TestCategory(TestCategory::HTTP_FEATURE)]
 final class TorrentHttpTest extends TestCase
 {
     use DatabaseTransactions;

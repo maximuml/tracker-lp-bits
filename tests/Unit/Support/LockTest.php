@@ -6,6 +6,7 @@ namespace Tests\Unit\Support;
 
 use App\Exceptions\LockFailException;
 use App\Support\Lock;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -14,6 +15,7 @@ use Tests\TestCase;
  * Uses the real Redis cache backend (available in the test Docker stack).
  * Each test uses a unique lock name to avoid interference.
  */
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class LockTest extends TestCase
 {
     private function uniqueName(): string

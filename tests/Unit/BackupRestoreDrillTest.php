@@ -7,6 +7,7 @@ namespace Tests\Unit;
 use App\Console\Commands\BackupRestoreDrill;
 use App\Repositories\ToolRepository;
 use Illuminate\Support\Facades\Artisan;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -18,6 +19,7 @@ use Tests\TestCase;
  * - backup:restore-drill command exists with correct signature
  * - Restore drill creates and drops a temporary database
  */
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class BackupRestoreDrillTest extends TestCase
 {
     /**

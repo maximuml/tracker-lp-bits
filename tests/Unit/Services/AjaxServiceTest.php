@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Mockery;
 use Mockery\MockInterface;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -34,6 +35,7 @@ use Tests\TestCase;
  * repository-delegated actions (buyMedal, claimTask, getPasskeyList,
  * toggleUserMedalStatus, attendanceRetroactive).
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class AjaxServiceTest extends TestCase
 {
     use DatabaseTransactions;

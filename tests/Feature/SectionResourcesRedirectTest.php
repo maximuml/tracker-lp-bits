@@ -4,12 +4,14 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
  * Phase 5.7: verify that the legacy catmanage/forummanage/moforums/fields/formats/videoformats
  * endpoints redirect to the corresponding Filament Section resources.
  */
+#[TestCategory(TestCategory::HTTP_FEATURE)]
 final class SectionResourcesRedirectTest extends TestCase
 {
     use DatabaseTransactions;

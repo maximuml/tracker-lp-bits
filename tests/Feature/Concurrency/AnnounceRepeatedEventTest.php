@@ -13,6 +13,7 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Testing\TestResponse;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -24,6 +25,7 @@ use Tests\TestCase;
  *
  * @group w2-04
  */
+#[TestCategory(TestCategory::CONCURRENCY)]
 final class AnnounceRepeatedEventTest extends TestCase
 {
     use DatabaseTransactions;

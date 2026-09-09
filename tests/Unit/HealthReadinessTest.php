@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Http\Controllers\HealthController;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -15,6 +16,7 @@ use Tests\TestCase;
  * - Scheduler healthcheck in docker-compose uses process check, not file check
  * - OpenResty healthcheck uses /health/live
  */
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class HealthReadinessTest extends TestCase
 {
     /**

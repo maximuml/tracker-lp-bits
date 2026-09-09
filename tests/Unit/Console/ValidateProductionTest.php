@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Console;
 
 use Illuminate\Support\Facades\Artisan;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -14,6 +15,7 @@ use Tests\TestCase;
  * In the test environment (APP_ENV=testing), it should detect that
  * APP_DEBUG, APP_ENV, session.secure, and DB_PASSWORD are not production-ready.
  */
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class ValidateProductionTest extends TestCase
 {
     public function test_command_is_registered(): void

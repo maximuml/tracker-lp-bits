@@ -10,6 +10,7 @@ use App\Repositories\LogRepository;
 use App\Support\Permissions;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -23,6 +24,7 @@ use Tests\TestCase;
  * Site log tests run without authentication, so the confidential-log
  * filter restricts results to security_level=0 only.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class LogRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

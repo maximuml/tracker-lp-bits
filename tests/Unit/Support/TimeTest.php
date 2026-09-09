@@ -5,7 +5,9 @@ namespace Tests\Unit\Support;
 use App\Support\Time;
 use Carbon\Carbon;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 class TimeTest extends TestCase
 {
     private const LABELS = [

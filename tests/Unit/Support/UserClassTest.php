@@ -5,7 +5,9 @@ namespace Tests\Unit\Support;
 use App\Support\UserClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 class UserClassTest extends TestCase
 {
     /**

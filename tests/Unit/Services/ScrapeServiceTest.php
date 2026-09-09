@@ -14,6 +14,7 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -23,6 +24,7 @@ use Tests\TestCase;
  * passkeys), empty info_hash warning, successful scrape with cache,
  * and torrent-not-registered warning.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class ScrapeServiceTest extends TestCase
 {
     use DatabaseTransactions;

@@ -4,7 +4,9 @@ namespace Tests\Unit\Support;
 
 use App\Support\Comment;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class CommentTest extends TestCase
 {
     protected function setUp(): void

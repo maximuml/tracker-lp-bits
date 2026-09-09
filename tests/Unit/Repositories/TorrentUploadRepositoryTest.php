@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Repositories\TorrentUploadRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -17,6 +18,7 @@ use Tests\TestCase;
  * Covers getCategoryMode(), allowedOfferCount(), isAllowedOffer(),
  * rollbackTorrent(), syncFiles(), getOfferVoterIds() and finalizeOffer().
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class TorrentUploadRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

@@ -7,8 +7,10 @@ namespace Tests\Unit\Http\Controllers;
 use App\Http\Controllers\HealthController;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::PURE_UNIT, TestCategory::MUTATION)]
 final class HealthControllerTest extends TestCase
 {
     public function test_live_returns_ok_status(): void

@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Repositories\UserPasskeyRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -25,6 +26,7 @@ use Tests\TestCase;
  * fillable uses lowercase 'aaguid' while the repository passes uppercase
  * 'AAGUID', causing a MassAssignmentException on Passkey::create().
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class UserPasskeyRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

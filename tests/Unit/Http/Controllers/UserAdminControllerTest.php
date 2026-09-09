@@ -8,8 +8,10 @@ use App\Http\Controllers\UserAdminController;
 use App\Repositories\BonusRepository;
 use App\Repositories\UserRepository;
 use Mockery;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::PURE_UNIT, TestCategory::MUTATION)]
 final class UserAdminControllerTest extends TestCase
 {
     protected function tearDown(): void

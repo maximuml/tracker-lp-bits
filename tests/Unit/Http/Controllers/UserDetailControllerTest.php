@@ -12,8 +12,10 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Mockery;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::PURE_UNIT, TestCategory::MUTATION)]
 final class UserDetailControllerTest extends TestCase
 {
     protected function tearDown(): void

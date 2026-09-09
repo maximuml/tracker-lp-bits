@@ -10,6 +10,7 @@ use App\Repositories\NewsRepository;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -17,6 +18,7 @@ use Tests\TestCase;
  *
  * Covers getList(), store(), update(), getDetail(), and delete().
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class NewsRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

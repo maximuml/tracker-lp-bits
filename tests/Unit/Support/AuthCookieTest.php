@@ -4,8 +4,10 @@ namespace Tests\Unit\Support;
 
 use App\Support\AuthCookie;
 use Illuminate\Support\Facades\Crypt;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class AuthCookieTest extends TestCase
 {
     private const LEGACY_AUTH_KEY = 'test-secret-key-abc123';

@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Http\Middleware\CronToken;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -13,6 +14,7 @@ use Tests\TestCase;
  * when a valid CRON_TOKEN query parameter is supplied; all other
  * requests receive 403 Forbidden.
  */
+#[TestCategory(TestCategory::HTTP_FEATURE)]
 final class CronTokenTest extends TestCase
 {
     use DatabaseTransactions;

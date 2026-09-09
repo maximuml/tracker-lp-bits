@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit;
 
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -16,6 +17,7 @@ use Tests\TestCase;
  * - k6 baseline uses canonical URLs
  * - root route redirects to /index (not /index.php)
  */
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class LegacyRedirectsTest extends TestCase
 {
     /**

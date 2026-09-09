@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -12,6 +13,7 @@ use Tests\TestCase;
  * list has been reduced to only webhooks and legacy AJAX endpoints
  * that cannot use CSRF tokens (external services, raw XHR without csrf.js).
  */
+#[TestCategory(TestCategory::HTTP_FEATURE)]
 final class CsrfEnforcementTest extends TestCase
 {
     use DatabaseTransactions;

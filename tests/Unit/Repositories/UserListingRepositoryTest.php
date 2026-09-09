@@ -7,6 +7,7 @@ namespace Tests\Unit\Repositories;
 use App\Repositories\UserListingRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -15,6 +16,7 @@ use Tests\TestCase;
  * Covers getCountries(), countUsers(), listUsers(), and
  * getSearchExtraStats().
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class UserListingRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

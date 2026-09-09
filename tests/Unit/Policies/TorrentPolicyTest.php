@@ -6,7 +6,9 @@ use App\Models\Torrent;
 use App\Models\User;
 use App\Policies\TorrentPolicy;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class TorrentPolicyTest extends TestCase
 {
     public function test_download_is_denied_when_user_has_no_download_position(): void

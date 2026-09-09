@@ -6,7 +6,9 @@ namespace Tests\Unit\ValueObjects;
 
 use App\ValueObjects\InfoHash;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class InfoHashTest extends TestCase
 {
     private function validBinary(): string

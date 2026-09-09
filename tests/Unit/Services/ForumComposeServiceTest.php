@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redis;
 use Mockery;
 use Mockery\MockInterface;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -22,6 +23,7 @@ use Tests\TestCase;
  * checkWhetherExist (forum/topic/post not found, invalid ID),
  * buildNewTopic, and buildReply.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class ForumComposeServiceTest extends TestCase
 {
     use DatabaseTransactions;

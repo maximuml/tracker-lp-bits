@@ -13,8 +13,10 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Mockery;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::SERVICE_INTEGRATION, TestCategory::MUTATION)]
 final class StaffPageControllerTest extends TestCase
 {
     use DatabaseTransactions;

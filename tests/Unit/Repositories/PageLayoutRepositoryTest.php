@@ -11,6 +11,7 @@ use App\Support\CurrentUser;
 use App\Support\UserUpdateBatch;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -24,6 +25,7 @@ use Tests\TestCase;
  * updateUser) and the early-return guards in prepareAccess() and
  * flushAccess().
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class PageLayoutRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

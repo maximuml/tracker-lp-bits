@@ -4,7 +4,9 @@ namespace Tests\Unit\Support;
 
 use App\Support\PageLayoutContext;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 class PageLayoutContextTest extends TestCase
 {
     /**

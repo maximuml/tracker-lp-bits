@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Architecture;
 
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
 /**
  * W0-03: Ratchet on the legacy view surface in Blade templates.
@@ -33,6 +34,7 @@ use PHPUnit\Framework\TestCase;
  *   grep -rn '<table' resources/views --include='*.blade.php' | wc -l
  *   grep -rniE ' (onclick|onchange|onsubmit|onload|onerror|onfocus|onblur|onmouseover|onmouseout|onkeyup|onkeydown|onkeypress)=' resources/views --include='*.blade.php' | wc -l
  */
+#[TestCategory(TestCategory::ARCHITECTURE)]
 final class LegacyViewSurfaceTest extends TestCase
 {
     private const VIEWS_DIR = __DIR__.'/../../resources/views';

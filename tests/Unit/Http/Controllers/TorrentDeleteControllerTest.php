@@ -9,8 +9,10 @@ use App\Support\CurrentUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Mockery;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::PURE_UNIT, TestCategory::MUTATION)]
 final class TorrentDeleteControllerTest extends TestCase
 {
     protected function tearDown(): void

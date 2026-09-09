@@ -6,7 +6,9 @@ use App\Http\Middleware\RejectGetMutations;
 use Illuminate\Http\Request;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Response;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 class RejectGetMutationsTest extends TestCase
 {
     public function test_get_returns_405(): void

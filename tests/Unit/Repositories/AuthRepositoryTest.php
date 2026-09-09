@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Repositories\AuthRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -20,6 +21,7 @@ use Tests\TestCase;
  * isIpBanned(), updateUserPasskey(), updateLogin(), getPasskeyByUserId(),
  * findUserArrayForCookie(), and findUserModelForCookie().
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class AuthRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

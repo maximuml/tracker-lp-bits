@@ -14,6 +14,7 @@ use App\Repositories\SearchBoxRepository;
 use App\Repositories\UserRepository;
 use App\Support\Query\SortDirection;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -23,6 +24,7 @@ use Tests\TestCase;
  * columns defined in each repository's allowedSortColumns() whitelist,
  * preventing SQL injection via the sort_field request parameter.
  */
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class TypedSortFilterTest extends TestCase
 {
     /**

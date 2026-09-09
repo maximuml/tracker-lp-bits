@@ -6,6 +6,7 @@ namespace Tests\Unit\Repositories;
 
 use App\Repositories\MeiliSearchRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -15,6 +16,7 @@ use Tests\TestCase;
  * Methods that require a live MeiliSearch server (search, import,
  * deleteDocuments, getClient) are excluded from unit testing.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class MeiliSearchRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

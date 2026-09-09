@@ -9,6 +9,7 @@ use App\Repositories\InfoRepository;
 use App\Support\Settings;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -23,6 +24,7 @@ use Tests\TestCase;
  * Settings::resetCache() is called in setUp to clear the Support\Settings
  * static cache so that each test reads fresh values from the database.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class InfoRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

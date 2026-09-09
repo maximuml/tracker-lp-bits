@@ -11,6 +11,7 @@ use App\Support\Shoutbox;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -21,6 +22,7 @@ use Tests\TestCase;
  * validation), toggleReaction (invalid, add, remove), and clearAll
  * (non-admin rejection).
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class ShoutboxServiceTest extends TestCase
 {
     use DatabaseTransactions;

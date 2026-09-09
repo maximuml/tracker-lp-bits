@@ -9,6 +9,7 @@ use App\Repositories\LanguageRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -17,6 +18,7 @@ use Tests\TestCase;
  * Covers getUserFolder(), getFolderForId(), getIdFromFolder(),
  * getLanguageList(), getGuestId() and getUserLocale().
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class LanguageRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

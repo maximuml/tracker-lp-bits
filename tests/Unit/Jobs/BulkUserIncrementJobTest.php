@@ -7,6 +7,7 @@ namespace Tests\Unit\Jobs;
 use App\Jobs\BulkUserIncrementJob;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -14,6 +15,7 @@ use Tests\TestCase;
  *
  * @group w1-07
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class BulkUserIncrementJobTest extends TestCase
 {
     use DatabaseTransactions;

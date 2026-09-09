@@ -6,6 +6,7 @@ namespace Tests\Architecture;
 
 use App\Support\Http\MixedRouteAllowList;
 use Illuminate\Support\Facades\Route;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -22,6 +23,7 @@ use Tests\TestCase;
  * 2. If the route genuinely needs both methods, add it to
  *    MixedRouteAllowList::entries() with a justification.
  */
+#[TestCategory(TestCategory::ARCHITECTURE)]
 final class MixedRouteAllowListTest extends TestCase
 {
     /**

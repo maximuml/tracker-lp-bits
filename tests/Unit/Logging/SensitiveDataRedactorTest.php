@@ -13,6 +13,7 @@ use Monolog\Logger;
 use Monolog\LogRecord;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
 /**
  * Sentinel test: verifies that the SensitiveDataRedactor processor
@@ -23,6 +24,7 @@ use PHPUnit\Framework\TestCase;
  * that none of them survive redaction in the message, context, or
  * extra sections of the record.
  */
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class SensitiveDataRedactorTest extends TestCase
 {
     private SensitiveDataRedactor $redactor;

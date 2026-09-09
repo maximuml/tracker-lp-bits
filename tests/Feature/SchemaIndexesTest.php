@@ -6,6 +6,7 @@ namespace Tests\Feature;
 
 use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -18,6 +19,7 @@ use Tests\TestCase;
  * The expected indexes are keyed by table name and index name, with the
  * expected column list in ordinal order.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class SchemaIndexesTest extends TestCase
 {
     /**

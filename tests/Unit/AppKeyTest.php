@@ -4,6 +4,7 @@ namespace Tests\Unit;
 
 use App\Support\Env;
 use App\Support\Install\Install;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -13,6 +14,7 @@ use Tests\TestCase;
  * is created, set restrictive permissions (0640), and the application
  * must refuse to boot in production with a placeholder or missing key.
  */
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class AppKeyTest extends TestCase
 {
     /**

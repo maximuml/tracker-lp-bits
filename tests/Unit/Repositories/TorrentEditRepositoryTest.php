@@ -17,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Mockery;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -29,6 +30,7 @@ use Tests\TestCase;
  * UploadRepository is mocked to isolate the edit logic from the upload
  * pipeline (sub-category/tag validation, custom fields, cover extraction).
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class TorrentEditRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

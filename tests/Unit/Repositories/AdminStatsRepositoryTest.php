@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Repositories\AdminStatsRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -15,6 +16,7 @@ use Tests\TestCase;
  *
  * Covers stats() and allagents() public methods.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class AdminStatsRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

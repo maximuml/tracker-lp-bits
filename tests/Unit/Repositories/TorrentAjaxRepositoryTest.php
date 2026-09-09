@@ -10,6 +10,7 @@ use App\Repositories\TorrentAjaxRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -21,6 +22,7 @@ use Tests\TestCase;
  * they depend on MeiliSearch, Network::ipLocationWithContext(), and
  * UserDisplay rendering that require full web request context.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class TorrentAjaxRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Testing\TestResponse;
 use Rhilip\Bencode\Bencode;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -26,6 +27,7 @@ use Tests\TestCase;
  * exercise the same code paths and verify the invariants that the
  * locking is designed to protect.
  */
+#[TestCategory(TestCategory::CONCURRENCY)]
 final class AnnounceConcurrencyTest extends TestCase
 {
     use DatabaseTransactions;

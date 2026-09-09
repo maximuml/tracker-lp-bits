@@ -4,7 +4,9 @@ namespace Tests\Unit\Support;
 
 use App\Support\Strings;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 class StringsTest extends TestCase
 {
     // ---------- pluralize() ----------

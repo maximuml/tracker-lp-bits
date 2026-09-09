@@ -4,7 +4,9 @@ namespace Tests\Unit\Support;
 
 use App\Support\Attachment;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class AttachmentTest extends TestCase
 {
     public function test_render_image_includes_id_and_filename(): void

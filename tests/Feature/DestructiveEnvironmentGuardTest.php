@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Support\DestructiveEnvironmentGuard;
 use RuntimeException;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -15,6 +16,7 @@ use Tests\TestCase;
  * developer or CI accidentally sets DB_DATABASE to the dev/production
  * database, the test suite fails before any query runs.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class DestructiveEnvironmentGuardTest extends TestCase
 {
     /**

@@ -4,7 +4,9 @@ namespace Tests\Unit\Support;
 
 use App\Support\Html;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class HtmlTest extends TestCase
 {
     // ---------- tableRow ----------

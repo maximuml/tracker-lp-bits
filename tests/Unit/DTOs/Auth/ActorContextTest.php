@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Support\CurrentUser;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -20,6 +21,7 @@ use Tests\TestCase;
  * Verifies that the immutable DTO correctly wraps the authenticated
  * user, pre-computes permissions, and provides a guest fallback.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class ActorContextTest extends TestCase
 {
     use DatabaseTransactions;

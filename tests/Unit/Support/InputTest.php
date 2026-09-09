@@ -5,7 +5,9 @@ namespace Tests\Unit\Support;
 use App\Support\Input;
 use App\Support\SupportContext;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class InputTest extends TestCase
 {
     protected function setUp(): void

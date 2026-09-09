@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -15,6 +16,7 @@ use Tests\TestCase;
  * - HSTS header is set on HTTPS responses
  * - SESSION_SECURE_COOKIE is configurable
  */
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class SmtpTlsProxiesCronTest extends TestCase
 {
     /**

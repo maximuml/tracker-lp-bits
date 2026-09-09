@@ -7,12 +7,14 @@ namespace Tests\Unit\Support;
 use App\Support\Cache\Keys;
 use App\Support\Cache\TaggedCacheService;
 use Illuminate\Support\Facades\Cache;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
  * @covers \App\Support\Cache\Keys
  * @covers \App\Support\Cache\TaggedCacheService
  */
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class CacheKeysTest extends TestCase
 {
     public function test_key_substitutes_placeholders(): void

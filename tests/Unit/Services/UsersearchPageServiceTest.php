@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Mockery;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -27,6 +28,7 @@ use Tests\TestCase;
  * inserted via DB::table() for search tests. UserListingRepository is
  * not final and is mocked to return empty extra stats.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class UsersearchPageServiceTest extends TestCase
 {
     use DatabaseTransactions;

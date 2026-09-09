@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Support\Security\PasskeyGenerator;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -13,6 +14,7 @@ use Tests\TestCase;
  * (CSPRNG via random_bytes(16) → 32 hex chars), not the legacy
  * md5($username . date() . $passhash) pattern.
  */
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class PasskeyCsprngTest extends TestCase
 {
     public function test_passkey_generator_produces_32_hex_chars(): void

@@ -11,8 +11,10 @@ use App\Services\ScrapeService;
 use Illuminate\Http\Request;
 use Mockery;
 use Rhilip\Bencode\Bencode;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::PURE_UNIT, TestCategory::MUTATION)]
 final class ScrapeControllerTest extends TestCase
 {
     protected function tearDown(): void

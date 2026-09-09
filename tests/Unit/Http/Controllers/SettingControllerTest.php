@@ -10,8 +10,10 @@ use App\Http\Requests\SettingStoreRequest;
 use App\Repositories\SettingRepository;
 use Illuminate\Validation\ValidationException;
 use Mockery;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::PURE_UNIT, TestCategory::MUTATION)]
 final class SettingControllerTest extends TestCase
 {
     protected function tearDown(): void

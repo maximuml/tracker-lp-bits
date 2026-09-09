@@ -11,6 +11,7 @@ use App\Repositories\RequireSeedTorrentRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -26,6 +27,7 @@ use Tests\TestCase;
  * of test execution order. The doRemove() and recordUser() methods are
  * tested directly because their Setting dependency has a default fallback.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class RequireSeedTorrentRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

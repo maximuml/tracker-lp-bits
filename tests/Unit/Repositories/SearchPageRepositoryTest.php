@@ -11,6 +11,7 @@ use App\Support\Settings;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -23,6 +24,7 @@ use Tests\TestCase;
  * configure the browse category, then reset in tearDown to avoid
  * polluting other tests.
  */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class SearchPageRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

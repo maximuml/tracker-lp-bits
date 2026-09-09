@@ -7,6 +7,7 @@ namespace Tests\Unit\Support;
 use App\Support\TwoFactorAuthHelper;
 use RobThree\Auth\Providers\Qr\GoogleChartsQrCodeProvider;
 use RobThree\Auth\TwoFactorAuth;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
@@ -16,6 +17,7 @@ use Tests\TestCase;
  * building. These exercise the wrapped RobThree\Auth\TwoFactorAuth
  * library through the helper's static API.
  */
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class TwoFactorAuthHelperTest extends TestCase
 {
     public function test_create_secret_returns_base32_string(): void

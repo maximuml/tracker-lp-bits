@@ -30,7 +30,7 @@
     "testFramework": "phpunit",
     "bootstrap": "vendor/autoload.php",
     "phpUnit": {
-        "configPath": "phpunit.xml"
+        "configDir": "."
     },
     "minMsi": 40,
     "minCoveredMsi": 50,

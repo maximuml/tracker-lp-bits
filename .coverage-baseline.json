@@ -1,0 +1,15 @@
+{
+    "app/Auth": 0.0,
+    "app/Console": 0.0,
+    "app/DTOs": 0.0,
+    "app/Enums": 0.0,
+    "app/Http/Controllers": 0.0,
+    "app/Jobs": 0.0,
+    "app/Models": 0.0,
+    "app/Policies": 0.0,
+    "app/Repositories": 0.0,
+    "app/Services": 0.0,
+    "app/Support": 0.0,
+    "app/Utils": 0.0,
+    "app/ValueObjects": 0.0
+}

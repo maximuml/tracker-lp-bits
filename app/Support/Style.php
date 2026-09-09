@@ -143,7 +143,9 @@ final class Style
     {
         $user = app(CurrentUser::class)->get() ?? [];
 
-        return self::fontCssUri($user['fontsize'] ?? null);
+        $fontSize = $user['fontsize'] ?? null;
+
+        return self::fontCssUri(is_string($fontSize) ? $fontSize : null);
     }
 
     /**

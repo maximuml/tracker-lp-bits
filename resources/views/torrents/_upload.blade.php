@@ -89,7 +89,7 @@ $offerRows = (array) ($offerRows ?? []);
 
 */
                 $customField = new \App\Support\CustomField();
-                $hitAndRunRep = new \App\Repositories\HitAndRunRepository();
+                $hitAndRunRep = app(\App\Repositories\HitAndRunRepository::class);
                 echo "<tbody id=\"browsecat_section\" data-mode=\"$browsecatmode\">\n";
 				$selectNormal = $searchBoxRep->renderTaxonomySelect($browsecatmode);
 				\App\Support\Html::tr($lang_upload['row_quality'], $selectNormal, 1, "mode_$browsecatmode");

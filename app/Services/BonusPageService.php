@@ -9,7 +9,7 @@ use App\Enums\Permission\PermissionEnum;
 use App\Models\BonusLogs;
 use App\Models\HitAndRun;
 use App\Models\User;
-use App\Repositories\BonusRepository;
+use App\Repositories\BonusCalculationRepository;
 use App\Support\Bonus;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
@@ -34,7 +34,7 @@ use Illuminate\Http\Request;
 final class BonusPageService
 {
     public function __construct(
-        private readonly BonusRepository $bonusRep,
+        private readonly BonusCalculationRepository $bonusCalculationRepository,
         private readonly CurrentUser $currentUser,
         private readonly Globals $globals,
     ) {}
@@ -331,14 +331,14 @@ final class BonusPageService
             return '<td class="rowfollow" align="center"><input type="submit" name="submit" value="'.($lang['submit_exchange'] ?? '').'" /></td>';
         }
         if ($art === 'change_username_card') {
-            if ($this->bonusRep->hasChangeUsernameCard((int) ($curUser['id'] ?? 0))) {
+            if ($this->bonusCalculationRepository->hasChangeUsernameCard((int) ($curUser['id'] ?? 0))) {
                 return '<td class="rowfollow" align="center"><input type="submit" name="submit" value="'.($lang['text_change_username_card_already_has'] ?? '').'" disabled="disabled"/></td>';
             }
 
             return '<td class="rowfollow" align="center"><input type="submit" name="submit" value="'.($lang['submit_exchange'] ?? '').'" /></td>';
         }
         if ($art === 'rainbow_id') {
-            if ($this->bonusRep->hasRainbowIdForever((int) ($curUser['id'] ?? 0))) {
+            if ($this->bonusCalculationRepository->hasRainbowIdForever((int) ($curUser['id'] ?? 0))) {
                 return '<td class="rowfollow" align="center"><input type="submit" name="submit" value="'.($lang['text_rainbow_id_already_valid_forever'] ?? '').'" disabled="disabled"/></td>';
             }
 

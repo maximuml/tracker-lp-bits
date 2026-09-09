@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Http\Controllers;
 
 use App\Http\Controllers\BonusHistoryController;
-use App\Repositories\BonusRepository;
+use App\Repositories\BonusCalculationRepository;
 use Mockery;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
@@ -21,10 +21,10 @@ final class BonusHistoryControllerTest extends TestCase
 
     public function test_controller_can_be_constructed_with_repository(): void
     {
-        /** @var BonusRepository&Mockery\MockInterface $repository */
-        $repository = Mockery::mock(BonusRepository::class);
+        /** @var BonusCalculationRepository&Mockery\MockInterface $calculationRepository */
+        $calculationRepository = Mockery::mock(BonusCalculationRepository::class);
 
-        $controller = new BonusHistoryController($repository);
+        $controller = new BonusHistoryController($calculationRepository);
 
         $this->assertInstanceOf(BonusHistoryController::class, $controller);
     }

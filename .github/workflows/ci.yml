@@ -1045,6 +1045,7 @@ jobs:
     needs: [coverage]
     # W3-04: Run Infection only on changed critical files in PRs.
     # Full-scope mutation testing runs on push to php8 (see infection job).
+    # PR-scope results are informational — full enforcement happens on push.
     if: github.event_name == 'pull_request'
 
     services:
@@ -1145,15 +1146,15 @@ jobs:
 
       - name: Run Infection (changed files only)
         if: steps.changed.outputs.skip != 'true'
+        continue-on-error: true
         run: |
           # Run Infection with --filter to limit to changed files
-          # --ignore-msi-errors allows PR runs to show results without failing
-          # on threshold (full-scope run on push enforces thresholds)
+          # PR runs show results without enforcing MSI thresholds
+          # (full-scope run on push enforces thresholds)
           DB_DATABASE=nexusphp_unit_testing vendor/bin/infection \
             --configuration=infection.json5 \
             --threads=4 \
             --no-progress \
-            --ignore-msi-errors \
             --logger-github \
             --filter="${{ steps.changed.outputs.filter }}"
 

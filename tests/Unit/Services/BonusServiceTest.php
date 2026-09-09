@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Services;
 
+use App\Repositories\BonusCalculationRepository;
 use App\Repositories\BonusRepository;
 use App\Services\BonusService;
 use App\Support\Globals;
@@ -33,8 +34,10 @@ final class BonusServiceTest extends TestCase
     {
         /** @var BonusRepository&Mockery\MockInterface $repo */
         $repo = Mockery::mock(BonusRepository::class);
+        /** @var BonusCalculationRepository&Mockery\MockInterface $calcRepo */
+        $calcRepo = Mockery::mock(BonusCalculationRepository::class);
 
-        return new BonusService($repo);
+        return new BonusService($repo, $calcRepo);
     }
 
     public function test_returns_null_when_action_is_not_exchange(): void

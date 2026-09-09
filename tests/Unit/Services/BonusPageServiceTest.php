@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Services;
 
-use App\Repositories\BonusRepository;
+use App\Repositories\BonusCalculationRepository;
 use App\Services\BonusPageService;
 use App\Support\CurrentUser;
 use App\Support\Globals;
@@ -33,8 +33,8 @@ final class BonusPageServiceTest extends TestCase
 
     private int $initialObLevel;
 
-    /** @var BonusRepository&MockInterface */
-    private $bonusRep;
+    /** @var BonusCalculationRepository&MockInterface */
+    private $bonusCalcRep;
 
     private CurrentUser $currentUser;
 
@@ -49,10 +49,10 @@ final class BonusPageServiceTest extends TestCase
         DB::table('users')->truncate();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
-        /** @var BonusRepository&MockInterface $rep */
-        $rep = Mockery::mock(BonusRepository::class);
+        /** @var BonusCalculationRepository&MockInterface $rep */
+        $rep = Mockery::mock(BonusCalculationRepository::class);
         $rep->shouldIgnoreMissing();
-        $this->bonusRep = $rep;
+        $this->bonusCalcRep = $rep;
 
         $this->currentUser = new CurrentUser;
         $this->app->instance(CurrentUser::class, $this->currentUser);
@@ -100,7 +100,7 @@ final class BonusPageServiceTest extends TestCase
 
     public function test_can_instantiate_service(): void
     {
-        $service = new BonusPageService($this->bonusRep, $this->currentUser, $this->globals);
+        $service = new BonusPageService($this->bonusCalcRep, $this->currentUser, $this->globals);
 
         $this->assertInstanceOf(BonusPageService::class, $service);
     }

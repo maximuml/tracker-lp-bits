@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\DB;
  * Covers peer/snatch listing, speed/ratio calculations, and aggregate
  * lookups (comments, tags, bookmarks, snatch info, user-value fetch).
  */
-final class TorrentStatsService
+class TorrentStatsService
 {
     /**
      * @param  mixed  $torrentId

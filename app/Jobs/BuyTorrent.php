@@ -6,7 +6,7 @@ namespace App\Jobs;
 
 use App\Models\TorrentBuyLog;
 use App\Repositories\BonusRepository;
-use App\Repositories\TorrentRepository;
+use App\Repositories\TorrentPurchaseRepository;
 use App\Support\Logger;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -62,7 +62,7 @@ class BuyTorrent implements ShouldBeUnique, ShouldQueue
     public function handle()
     {
         $logPrefix = sprintf('user: %s, torrent: %s', $this->userId, $this->torrentId);
-        $torrentRep = app(TorrentRepository::class);
+        $purchaseRep = app(TorrentPurchaseRepository::class);
         $userId = $this->userId;
         $torrentId = $this->torrentId;
 
@@ -74,7 +74,7 @@ class BuyTorrent implements ShouldBeUnique, ShouldQueue
         if ($buyLog) {
             // 标记购买成功
             Logger::writeWithContext((string) "{$logPrefix}, already bought", (string) 'info', (bool) false);
-            $torrentRep->addBuySuccessCache($userId, $torrentId, $buyLog->id);
+            $purchaseRep->addBuySuccessCache($userId, $torrentId, $buyLog->id);
 
             return;
         }
@@ -83,11 +83,11 @@ class BuyTorrent implements ShouldBeUnique, ShouldQueue
             $buyLog = $bonusRep->consumeToBuyTorrent($this->userId, $this->torrentId);
             // 标记购买成功
             Logger::writeWithContext((string) "{$logPrefix}, buy torrent success", (string) 'info', (bool) false);
-            $torrentRep->addBuySuccessCache($userId, $torrentId, $buyLog->id);
+            $purchaseRep->addBuySuccessCache($userId, $torrentId, $buyLog->id);
         } catch (\Throwable $throwable) {
             // 标记购买失败，缓存 3600 秒，这个时间内不能再次购买
             Logger::writeWithContext((string) ("{$logPrefix}, buy torrent fail: ".$throwable->getMessage()), (string) 'error', (bool) false);
-            $torrentRep->addBuyFailCache($userId, $torrentId);
+            $purchaseRep->addBuyFailCache($userId, $torrentId);
             throw $throwable;
         }
     }

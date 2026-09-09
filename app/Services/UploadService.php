@@ -17,7 +17,7 @@ use App\Models\Message;
 use App\Models\Torrent;
 use App\Models\TorrentExtra;
 use App\Models\User;
-use App\Repositories\TorrentRepository;
+use App\Repositories\TorrentDownloadRepository;
 use App\Repositories\TorrentUploadRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\CustomField;
@@ -173,7 +173,7 @@ class UploadService
             return $newTorrent;
         });
         $id = $newTorrent->id;
-        $torrentRep = app(TorrentRepository::class);
+        $torrentRep = app(TorrentDownloadRepository::class);
         $torrentRep->addPiecesHashCache($id, $newTorrent->pieces_hash);
         $this->handleOffer($request, $newTorrent, $user);
         Log::writeWithContext("Torrent $id ($newTorrent->name) was uploaded by $uploaderUsername");

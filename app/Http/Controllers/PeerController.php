@@ -6,18 +6,18 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\PeerRequest;
 use App\Http\Resources\PeerResource;
-use App\Repositories\TorrentRepository;
+use App\Services\TorrentStatsService;
 
 class PeerController extends Controller
 {
-    private TorrentRepository $repository;
+    private TorrentStatsService $statsService;
 
     /**
      * @return mixed
      */
-    public function __construct(TorrentRepository $repository)
+    public function __construct(TorrentStatsService $statsService)
     {
-        $this->repository = $repository;
+        $this->statsService = $statsService;
     }
 
     /**
@@ -31,7 +31,7 @@ class PeerController extends Controller
             'seeder_list' => [],
             'leecher_list' => [],
         ];
-        $result = $this->repository->listPeers($request->torrent_id);
+        $result = $this->statsService->listPeers($request->torrent_id);
         if ($result['seeder_list']->isNotEmpty()) {
             $response['seeder_list'] = PeerResource::collection($result['seeder_list']);
         }

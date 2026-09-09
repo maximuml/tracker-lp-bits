@@ -35,8 +35,7 @@ final class RepositorySizeTest extends TestCase
      * @var array<string, int>
      */
     private const BASELINE_FILES = [
-        // Repositories (9 files > 500 lines)
-        'app/Repositories/TorrentRepository.php' => 727,
+        // Repositories (8 files > 500 lines)
         'app/Repositories/ForumRepository.php' => 599,
         'app/Repositories/UserRepository.php' => 547,
         'app/Repositories/UserModerationRepository.php' => 595,

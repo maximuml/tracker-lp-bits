@@ -9,7 +9,9 @@ use App\Enums\UserAppendPromotion;
 use App\Enums\UserTimeType;
 use App\Models\Torrent;
 use App\Repositories\TagRepository;
+use App\Repositories\TorrentModerationRepository;
 use App\Repositories\TorrentRepository;
+use App\Services\TorrentStatsService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\Torrent\TorrentStatus;
@@ -35,6 +37,8 @@ final class TorrentTable
 
         $torrent = new TorrentStatus;
         $torrentRep = app(TorrentRepository::class);
+        $moderationRep = app(TorrentModerationRepository::class);
+        $statsService = app(TorrentStatsService::class);
         $torrentIdArr = $ownerIdArr = [];
         foreach ($rows as $row) {
             $torrentIdArr[] = $row['id'];
@@ -46,7 +50,7 @@ final class TorrentTable
 
         $torrentSeedingLeechingStatus = $torrent->listLeechingSeedingStatus($user['id'], $torrentIdArr);
         $tagRep = app(TagRepository::class);
-        $torrentTagResult = $torrentRep->getTorrentTagsGrouped($torrentIdArr);
+        $torrentTagResult = $statsService->getTorrentTagsGrouped($torrentIdArr);
         $showCover = false;
         if ($searchBoxId) {
             $searchBoxExtra = SearchBox::value($cache, $searchBoxId, 'extra');
@@ -195,7 +199,7 @@ if (Permission::canManageTorrent()) { ?>
 
             $banned_torrent = ($row['banned'] == 1 ? ' <b>(<font class="striking">'.$lang_functions['text_banned'].'</font>)</b>' : '');
             $sp_torrent_sub = Promotion::appendSubWithContext($row['sp_state'], '', true, $row['added'], $row['promotion_time_type'], $row['promotion_until'], $row['__ignore_global_sp_state'] ?? false);
-            $approvalStatusIcon = $torrentRep->renderApprovalStatus($row['approval_status']);
+            $approvalStatusIcon = $moderationRep->renderApprovalStatus($row['approval_status']);
             $paidIcon = $torrentRep->getPaidIcon($row);
             $titleSuffix = $banned_torrent.$paidIcon.$sp_torrent.$sp_torrent_sub.$hrImg.$approvalStatusIcon;
             echo $titleSuffix;
@@ -251,7 +255,7 @@ if (Permission::canManageTorrent()) { ?>
                 } else {
                     if ($enabletooltip_tweak == 'yes' && $user['showlastcom']) {
                         if (! $lastcom = $cache->get_value('torrent_'.$id.'_last_comment_content')) {
-                            $lastcom = $torrentRep->getLastComment((int) $id);
+                            $lastcom = $statsService->getLastComment((int) $id);
                             $cache->cache_value('torrent_'.$id.'_last_comment_content', $lastcom, 1855);
                         }
                         $timestamp = strtotime($lastcom['added']);

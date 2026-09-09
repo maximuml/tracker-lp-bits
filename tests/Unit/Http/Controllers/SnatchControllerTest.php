@@ -7,7 +7,7 @@ namespace Tests\Unit\Http\Controllers;
 use App\Http\Controllers\SnatchController;
 use App\Http\Requests\SnatchRequest;
 use App\Models\Snatch;
-use App\Repositories\TorrentRepository;
+use App\Services\TorrentStatsService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Validation\ValidationException;
 use Mockery;
@@ -29,8 +29,8 @@ final class SnatchControllerTest extends TestCase
 
         $collection = new Collection([$snatch]);
 
-        /** @var TorrentRepository&Mockery\MockInterface $repository */
-        $repository = Mockery::mock(TorrentRepository::class);
+        /** @var TorrentStatsService&Mockery\MockInterface $repository */
+        $repository = Mockery::mock(TorrentStatsService::class);
         $repository->shouldReceive('listSnatches')
             ->once()
             ->with(10)
@@ -50,8 +50,8 @@ final class SnatchControllerTest extends TestCase
 
     public function test_index_returns_empty_list_when_no_snatches(): void
     {
-        /** @var TorrentRepository&Mockery\MockInterface $repository */
-        $repository = Mockery::mock(TorrentRepository::class);
+        /** @var TorrentStatsService&Mockery\MockInterface $repository */
+        $repository = Mockery::mock(TorrentStatsService::class);
         $repository->shouldReceive('listSnatches')
             ->once()
             ->with(10)
@@ -73,8 +73,8 @@ final class SnatchControllerTest extends TestCase
     {
         $this->expectException(ValidationException::class);
 
-        /** @var TorrentRepository&Mockery\MockInterface $repository */
-        $repository = Mockery::mock(TorrentRepository::class);
+        /** @var TorrentStatsService&Mockery\MockInterface $repository */
+        $repository = Mockery::mock(TorrentStatsService::class);
         $repository->shouldNotReceive('listSnatches');
 
         $controller = new SnatchController($repository);

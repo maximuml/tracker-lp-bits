@@ -10,7 +10,7 @@ use App\Repositories\AttendanceRepository;
 use App\Repositories\BonusRepository;
 use App\Repositories\ExamRepository;
 use App\Repositories\MedalRepository;
-use App\Repositories\TorrentRepository;
+use App\Repositories\TorrentModerationRepository;
 use App\Repositories\UserModerationRepository;
 use App\Repositories\UserPasskeyRepository;
 use App\Repositories\UserRepository;
@@ -52,8 +52,8 @@ final class AjaxServiceTest extends TestCase
     /** @var UserRepository&MockInterface */
     private UserRepository $userRepo;
 
-    /** @var TorrentRepository&MockInterface */
-    private TorrentRepository $torrentRepo;
+    /** @var TorrentModerationRepository&MockInterface */
+    private TorrentModerationRepository $torrentModerationRepo;
 
     /** @var BonusRepository&MockInterface */
     private BonusRepository $bonusRepo;
@@ -95,9 +95,9 @@ final class AjaxServiceTest extends TestCase
         $userRepo = Mockery::mock(UserRepository::class);
         $this->userRepo = $userRepo;
 
-        /** @var TorrentRepository&MockInterface $torrentRepo */
-        $torrentRepo = Mockery::mock(TorrentRepository::class);
-        $this->torrentRepo = $torrentRepo;
+        /** @var TorrentModerationRepository&MockInterface $torrentModerationRepo */
+        $torrentModerationRepo = Mockery::mock(TorrentModerationRepository::class);
+        $this->torrentModerationRepo = $torrentModerationRepo;
 
         /** @var BonusRepository&MockInterface $bonusRepo */
         $bonusRepo = Mockery::mock(BonusRepository::class);
@@ -135,7 +135,7 @@ final class AjaxServiceTest extends TestCase
             $this->attendanceRepo,
             $this->userRepo,
             $this->userModerationRepo,
-            $this->torrentRepo,
+            $this->torrentModerationRepo,
             $this->bonusRepo,
             $this->examRepo,
             $this->passkeyRepo,
@@ -196,7 +196,7 @@ final class AjaxServiceTest extends TestCase
             $this->attendanceRepo,
             $this->userRepo,
             $this->userModerationRepo,
-            $this->torrentRepo,
+            $this->torrentModerationRepo,
             $this->bonusRepo,
             $this->examRepo,
             $this->passkeyRepo,
@@ -287,7 +287,7 @@ final class AjaxServiceTest extends TestCase
         $userId = $this->createUser();
         $this->authenticateUser($userId);
 
-        $this->torrentRepo->shouldReceive('approval')
+        $this->torrentModerationRepo->shouldReceive('approval')
             ->with($userId, ['torrent_id' => 1, 'approval_status' => 'approved'])
             ->once()
             ->andReturn(['status' => 'ok']);

@@ -6,6 +6,7 @@ namespace Tests\Unit\Http\Controllers;
 
 use App\Http\Controllers\UserAdminController;
 use App\Repositories\BonusRepository;
+use App\Repositories\UserModerationRepository;
 use App\Repositories\UserRepository;
 use Mockery;
 use Tests\Attributes\TestCategory;
@@ -25,10 +26,13 @@ final class UserAdminControllerTest extends TestCase
         /** @var UserRepository&Mockery\MockInterface $userRepository */
         $userRepository = Mockery::mock(UserRepository::class);
 
+        /** @var UserModerationRepository&Mockery\MockInterface $userModerationRepository */
+        $userModerationRepository = Mockery::mock(UserModerationRepository::class);
+
         /** @var BonusRepository&Mockery\MockInterface $bonusRepository */
         $bonusRepository = Mockery::mock(BonusRepository::class);
 
-        $controller = new UserAdminController($userRepository, $bonusRepository);
+        $controller = new UserAdminController($userRepository, $userModerationRepository, $bonusRepository);
 
         $this->assertInstanceOf(UserAdminController::class, $controller);
     }

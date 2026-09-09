@@ -4,24 +4,16 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
-use App\Auth\Permission;
 use App\DTOs\Message\StoreMessageDto;
-use App\Enums\Permission\PermissionEnum;
 use App\Models\Message;
-use App\Models\StaffMessage;
 use App\Models\User;
-use App\Support\Cache;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Redis;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 
+/**
+ * Message repository: PM reads, read state, deletion, and generic CRUD.
+ */
 class MessageRepository extends BaseRepository
 {
-    const STAFF_MESSAGE_TOTAL_CACHE_KEY = 'staff_message_count';
-
-    const STAFF_MESSAGE_NEW_CACHE_KEY = 'staff_new_message_count';
-
     /** @return list<string> */
     protected function allowedSortColumns(): array
     {
@@ -29,26 +21,7 @@ class MessageRepository extends BaseRepository
     }
 
     /**
-     * @return Collection<int, \stdClass>
-     */
-    public function getUserMailboxes(int $userId): Collection
-    {
-        return DB::table('pmboxes')
-            ->where('userid', $userId)
-            ->orderBy('boxnumber')
-            ->get(['id', 'boxnumber', 'name']);
-    }
-
-    public function getMailboxName(int $userId, int $mailbox): ?string
-    {
-        return DB::table('pmboxes')
-            ->where('userid', $userId)
-            ->where('boxnumber', $mailbox)
-            ->value('name');
-    }
-
-    /**
-     * @return array{count: int, messages: \Illuminate\Database\Eloquent\Collection<int, Message>}
+     * @return array{count: int, messages: EloquentCollection<int, Message>}
      */
     public function getMailboxMessages(int $userId, int $mailbox, string $keyword, string $place, ?bool $unread, int $offset, int $perPage): array
     {
@@ -177,43 +150,6 @@ class MessageRepository extends BaseRepository
         return $deleted;
     }
 
-    public function getNextMailboxNumber(int $userId): int
-    {
-        $max = (int) DB::table('pmboxes')->where('userid', $userId)->max('boxnumber');
-
-        return max(1, $max);
-    }
-
-    /**
-     * @param  array<int|string, mixed>  $names
-     */
-    public function addMailboxes(int $userId, array $names): void
-    {
-        $box = $this->getNextMailboxNumber($userId);
-        foreach ($names as $name) {
-            $name = trim((string) $name);
-            if ($name === '') {
-                continue;
-            }
-            $box++;
-            DB::table('pmboxes')->insert(['userid' => $userId, 'name' => $name, 'boxnumber' => $box]);
-        }
-    }
-
-    public function updateMailbox(int $userId, int $boxId, string $newName): void
-    {
-        DB::table('pmboxes')->where('id', $boxId)->where('userid', $userId)->update(['name' => $newName]);
-    }
-
-    public function deleteMailbox(int $userId, int $boxId, int $boxNumber): void
-    {
-        DB::table('pmboxes')->where('id', $boxId)->where('userid', $userId)->delete();
-        Message::query()->where('saved', true)->where('location', $boxNumber)->where('receiver', $userId)->update(['location' => 0]);
-        Message::query()->where('saved', true)->where('sender', $userId)->update(['saved' => false]);
-        Message::query()->where('saved', false)->where('location', $boxNumber)->where('receiver', $userId)->delete();
-        Message::query()->where('location', 0)->where('saved', true)->where('sender', $userId)->delete();
-    }
-
     public function getUsername(int $userId): ?string
     {
         return User::query()->where('id', $userId)->value('username');
@@ -272,72 +208,6 @@ class MessageRepository extends BaseRepository
         $result = $model->delete();
 
         return $result;
-    }
-
-    /**
-     * @param  mixed  $uid
-     * @param  mixed  $answered
-     */
-    public function countStaffMessage($uid, $answered = null): int
-    {
-        return $this->buildStaffMessageQuery($uid, $answered)->count();
-    }
-
-    /**
-     * @param  mixed  $uid
-     * @param  mixed  $answered
-     * @return Builder<StaffMessage>
-     */
-    public function buildStaffMessageQuery($uid, $answered = null): Builder
-    {
-        $query = StaffMessage::query();
-        if ($answered !== null) {
-            $query->where('answered', $answered);
-        }
-        if (! Permission::can(PermissionEnum::STAFF_MEMBER, User::findOrFail((int) $uid))) {
-            // Not staff member only can see authorized
-            $permissions = app(ToolRepository::class)->listUserAllPermissions($uid);
-            $query->whereIn('permission', $permissions);
-        }
-
-        return $query;
-    }
-
-    /**
-     * @param  mixed  $uid
-     * @param  mixed  $type
-     * @param  mixed  $value
-     * @return mixed
-     */
-    public function updateStaffMessageCountCache($uid = 0, $type = '', $value = '')
-    {
-        if ($uid === false) {
-            Cache::forgetWithLocales(self::STAFF_MESSAGE_NEW_CACHE_KEY);
-            Cache::forgetWithLocales(self::STAFF_MESSAGE_TOTAL_CACHE_KEY);
-        } else {
-            $redis = Redis::connection()->client();
-            match ($type) {
-                'total' => $redis->hSet(self::STAFF_MESSAGE_TOTAL_CACHE_KEY, $uid, $value),
-                'new' => $redis->hSet(self::STAFF_MESSAGE_NEW_CACHE_KEY, $uid, $value),
-                default => throw new \InvalidArgumentException("Invalid type: $type")
-            };
-        }
-    }
-
-    /**
-     * @param  mixed  $uid
-     * @param  mixed  $type
-     * @return mixed
-     */
-    public function getStaffMessageCountCache($uid = 0, $type = '')
-    {
-        $redis = Redis::connection()->client();
-
-        return match ($type) {
-            'total' => $redis->hGet(self::STAFF_MESSAGE_TOTAL_CACHE_KEY, (string) $uid),
-            'new' => $redis->hGet(self::STAFF_MESSAGE_NEW_CACHE_KEY, (string) $uid),
-            default => throw new \InvalidArgumentException("Invalid type: $type")
-        };
     }
 
     public function getLastPmId(int $userId): int

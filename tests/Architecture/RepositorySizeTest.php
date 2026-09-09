@@ -49,7 +49,7 @@ final class RepositorySizeTest extends TestCase
         'app/Services/ForumService.php' => 572,
         'app/Services/UsercpPageService.php' => 552,
         'app/Services/IndexPageService.php' => 549,
-        'app/Services/MessageService.php' => 521,
+        'app/Services/MessageService.php' => 520,
     ];
 
     public function test_no_new_oversized_files_in_repositories_or_services(): void

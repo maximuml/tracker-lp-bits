@@ -18,7 +18,6 @@ use App\Models\Source;
 use App\Models\Standard;
 use App\Models\Torrent;
 use App\Models\User;
-use App\Services\TorrentPromotionService;
 use App\Support\Config\SiteConfig;
 use App\Support\Description;
 use App\Support\Locale;
@@ -27,7 +26,6 @@ use App\Support\Torrent\TorrentStatus;
 use App\Utils\ApiQueryBuilder;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 
 /**
  * Torrent repository: listing, detail, peer/snatch, and presentation helpers.
@@ -42,8 +40,6 @@ class TorrentRepository extends BaseRepository
 {
     public function __construct(
         private readonly TorrentDownloadRepository $downloadRepository,
-        private readonly TorrentModerationRepository $moderationRepository,
-        private readonly TorrentPromotionService $promotionService,
     ) {}
 
     /** @var array<int, string> */
@@ -345,107 +341,5 @@ class TorrentRepository extends BaseRepository
 HTML;
 
         return $input;
-    }
-
-    // ──────────────────────────────────────────────────────────────────────────
-    //  Delegating methods — backward compatibility for callers not yet updated
-    //  to use TorrentModerationRepository directly.
-    // ──────────────────────────────────────────────────────────────────────────
-
-    /**
-     * @param  mixed  $user
-     * @return array<int|string, mixed>
-     */
-    public function buildApprovalModal($user, int $torrentId)
-    {
-        return $this->moderationRepository->buildApprovalModal($user, $torrentId);
-    }
-
-    /**
-     * @param  mixed  $user
-     * @param  array<int|string, mixed>  $params
-     * @return array<int|string, mixed>
-     */
-    public function approval($user, array $params): array
-    {
-        return $this->moderationRepository->approval($user, $params);
-    }
-
-    /**
-     * @param  mixed  $approvalStatus
-     * @param  mixed  $show
-     */
-    public function renderApprovalStatus($approvalStatus, $show = null): string
-    {
-        return $this->moderationRepository->renderApprovalStatus($approvalStatus, $show);
-    }
-
-    /** @param  mixed  $approvalStatus */
-    public function shouldShowApprovalStatusIcon($approvalStatus): bool
-    {
-        return $this->moderationRepository->shouldShowApprovalStatusIcon($approvalStatus);
-    }
-
-    public function getApprovalDenyCount(int $ownerId): int
-    {
-        return app(TorrentModerationRepository::class)->getApprovalDenyCount($ownerId);
-    }
-
-    /**
-     * @param  mixed  $id
-     * @param  array<int|string, mixed>  $tagIdArr
-     * @param  mixed  $remove
-     * @return mixed
-     */
-    public function syncTags($id, array $tagIdArr = [], $remove = true)
-    {
-        return $this->moderationRepository->syncTags($id, $tagIdArr, $remove);
-    }
-
-    /**
-     * @param  mixed  $id
-     * @param  mixed  $posState
-     * @param  mixed  $posStateUntil
-     */
-    public function setPosState($id, $posState, $posStateUntil = null): int
-    {
-        return $this->promotionService->setPosState($id, $posState, $posStateUntil);
-    }
-
-    /**
-     * @param  mixed  $id
-     * @param  mixed  $hrStatus
-     */
-    public function setHr($id, $hrStatus): int
-    {
-        return $this->promotionService->setHr($id, $hrStatus);
-    }
-
-    /**
-     * @param  mixed  $id
-     * @param  mixed  $spState
-     * @param  mixed  $promotionTimeType
-     * @param  mixed  $promotionUntil
-     */
-    public function setSpState($id, $spState, $promotionTimeType, $promotionUntil = null): int
-    {
-        return $this->promotionService->setSpState($id, $spState, $promotionTimeType, $promotionUntil);
-    }
-
-    /**
-     * @param  Collection<int, mixed>|\Illuminate\Database\Eloquent\Collection<int, mixed>  $torrents
-     * @param  array<int|string, mixed>  $specificSubCategoryAndTags
-     */
-    public function changeCategory(Collection|\Illuminate\Database\Eloquent\Collection $torrents, int $sectionId, array $specificSubCategoryAndTags): void
-    {
-        ($this->moderationRepository)->changeCategory($torrents, $sectionId, $specificSubCategoryAndTags);
-    }
-
-    /**
-     * @param  int|int[]  $id
-     */
-    public function deleteTorrents(int|array $id, bool $notify = false): void
-    {
-        ($this->moderationRepository)->deleteTorrents($id, $notify);
     }
 }

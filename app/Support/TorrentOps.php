@@ -8,7 +8,7 @@ use App\Enums\TorrentPromotion;
 use App\Enums\UserClass as UserClassEnum;
 use App\Models\Torrent;
 use App\Models\User;
-use App\Repositories\TorrentRepository;
+use App\Repositories\TorrentModerationRepository;
 use App\Services\TorrentStatsService;
 use App\Support\Config\SiteConfig;
 
@@ -28,7 +28,7 @@ final class TorrentOps
      */
     public static function deleteTorrents($id, bool $notify = false): void
     {
-        app(TorrentRepository::class)->deleteTorrents($id, $notify);
+        app(TorrentModerationRepository::class)->deleteTorrents($id, $notify);
     }
 
     /**

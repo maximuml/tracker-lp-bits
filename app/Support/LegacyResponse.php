@@ -6,7 +6,7 @@ namespace App\Support;
 
 use App\Auth\Permission;
 use App\Models\User;
-use App\Repositories\TorrentRepository;
+use App\Repositories\TorrentModerationRepository;
 use App\Support\Config\SiteConfig;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Response;
@@ -235,7 +235,7 @@ final class LegacyResponse
         }
 
         $uploadDenyApprovalDenyCount = (int) SiteConfig::current()->main->uploadDenyApprovalDenyCount();
-        $approvalDenyCount = app(TorrentRepository::class)->getApprovalDenyCount((int) ($CURUSER['id'] ?? 0));
+        $approvalDenyCount = app(TorrentModerationRepository::class)->getApprovalDenyCount((int) ($CURUSER['id'] ?? 0));
 
         if ($uploadDenyApprovalDenyCount > 0 && $approvalDenyCount >= $uploadDenyApprovalDenyCount) {
             self::abort(

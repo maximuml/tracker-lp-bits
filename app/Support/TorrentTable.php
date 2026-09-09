@@ -9,6 +9,7 @@ use App\Enums\UserAppendPromotion;
 use App\Enums\UserTimeType;
 use App\Models\Torrent;
 use App\Repositories\TagRepository;
+use App\Repositories\TorrentModerationRepository;
 use App\Repositories\TorrentRepository;
 use App\Services\TorrentStatsService;
 use App\Support\Cache\LegacyRedisCache;
@@ -36,6 +37,7 @@ final class TorrentTable
 
         $torrent = new TorrentStatus;
         $torrentRep = app(TorrentRepository::class);
+        $moderationRep = app(TorrentModerationRepository::class);
         $statsService = app(TorrentStatsService::class);
         $torrentIdArr = $ownerIdArr = [];
         foreach ($rows as $row) {
@@ -197,7 +199,7 @@ if (Permission::canManageTorrent()) { ?>
 
             $banned_torrent = ($row['banned'] == 1 ? ' <b>(<font class="striking">'.$lang_functions['text_banned'].'</font>)</b>' : '');
             $sp_torrent_sub = Promotion::appendSubWithContext($row['sp_state'], '', true, $row['added'], $row['promotion_time_type'], $row['promotion_until'], $row['__ignore_global_sp_state'] ?? false);
-            $approvalStatusIcon = $torrentRep->renderApprovalStatus($row['approval_status']);
+            $approvalStatusIcon = $moderationRep->renderApprovalStatus($row['approval_status']);
             $paidIcon = $torrentRep->getPaidIcon($row);
             $titleSuffix = $banned_torrent.$paidIcon.$sp_torrent.$sp_torrent_sub.$hrImg.$approvalStatusIcon;
             echo $titleSuffix;

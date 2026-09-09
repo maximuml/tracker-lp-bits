@@ -1043,7 +1043,6 @@ jobs:
     name: Mutation testing (PR scope)
     runs-on: ubuntu-latest
     needs: [coverage]
-    continue-on-error: true
     # W3-04: Run Infection only on changed critical files in PRs.
     # Full-scope mutation testing runs on push to php8 (see infection job).
     # PR-scope results are informational — full enforcement happens on push.
@@ -1147,6 +1146,7 @@ jobs:
 
       - name: Run Infection (changed files only)
         if: steps.changed.outputs.skip != 'true'
+        continue-on-error: true
         run: |
           # Run Infection with --filter to limit to changed files
           # PR runs show results without enforcing MSI thresholds

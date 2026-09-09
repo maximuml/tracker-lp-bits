@@ -6,7 +6,7 @@ namespace App\Support;
 
 use App\Models\User;
 use App\Repositories\AuthRepository;
-use App\Repositories\TorrentRepository;
+use App\Repositories\TorrentDownloadRepository;
 use App\Support\Config\SiteConfig;
 use Dotenv\Dotenv;
 use Illuminate\Encryption\Encrypter;
@@ -275,7 +275,7 @@ final class AuthCookie
                 throw new \InvalidArgumentException("Invalid authkey: $authkey, format error");
             }
             $uid = $arr[1];
-            $decrypted = app(TorrentRepository::class)->checkTrackerReportAuthKey($authkey);
+            $decrypted = app(TorrentDownloadRepository::class)->checkTrackerReportAuthKey($authkey);
             if (empty($decrypted)) {
                 throw new \InvalidArgumentException("Invalid authkey: $authkey");
             }

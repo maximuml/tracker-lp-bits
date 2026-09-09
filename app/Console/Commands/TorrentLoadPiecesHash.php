@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Repositories\TorrentRepository;
+use App\Repositories\TorrentDownloadRepository;
 use App\Support\RequestContext;
 use Illuminate\Console\Command;
 
@@ -33,7 +33,7 @@ class TorrentLoadPiecesHash extends Command
     {
         $begin = time();
         $id = $this->option('id');
-        $rep = app(TorrentRepository::class);
+        $rep = app(TorrentDownloadRepository::class);
         $this->info("id: $id, going to load pieces hash...");
         $result = $rep->loadPiecesHashCache($id);
         $this->info(sprintf('%s, result: %s, cost time: %s seconds.', RequestContext::instance()->getRequestId(), json_encode($result), time() - $begin));

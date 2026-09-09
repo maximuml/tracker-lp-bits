@@ -8,6 +8,7 @@ use App\Exceptions\InsufficientPermissionException;
 use App\Http\Controllers\TorrentController;
 use App\Http\Requests\TorrentApprovalRequest;
 use App\Http\Requests\TorrentPiecesHashRequest;
+use App\Repositories\TorrentDownloadRepository;
 use App\Repositories\TorrentRepository;
 use App\Repositories\UploadRepository;
 use Illuminate\Validation\ValidationException;
@@ -37,7 +38,10 @@ final class TorrentControllerTest extends TestCase
         /** @var UploadRepository&Mockery\MockInterface $uploadRepository */
         $uploadRepository = Mockery::mock(UploadRepository::class);
 
-        $controller = new TorrentController($torrentRepository, $uploadRepository);
+        /** @var TorrentDownloadRepository&Mockery\MockInterface $downloadRepository */
+        $downloadRepository = Mockery::mock(TorrentDownloadRepository::class);
+
+        $controller = new TorrentController($torrentRepository, $downloadRepository, $uploadRepository);
 
         $result = $controller->searchBox();
 
@@ -51,15 +55,18 @@ final class TorrentControllerTest extends TestCase
 
         /** @var TorrentRepository&Mockery\MockInterface $torrentRepository */
         $torrentRepository = Mockery::mock(TorrentRepository::class);
-        $torrentRepository->shouldReceive('getPiecesHashCache')
-            ->once()
-            ->with(['abc123', 'def456'])
-            ->andReturn($cachedData);
 
         /** @var UploadRepository&Mockery\MockInterface $uploadRepository */
         $uploadRepository = Mockery::mock(UploadRepository::class);
 
-        $controller = new TorrentController($torrentRepository, $uploadRepository);
+        /** @var TorrentDownloadRepository&Mockery\MockInterface $downloadRepository */
+        $downloadRepository = Mockery::mock(TorrentDownloadRepository::class);
+        $downloadRepository->shouldReceive('getPiecesHashCache')
+            ->once()
+            ->with(['abc123', 'def456'])
+            ->andReturn($cachedData);
+
+        $controller = new TorrentController($torrentRepository, $downloadRepository, $uploadRepository);
         $request = TorrentPiecesHashRequest::create('/api/v1/torrents/query-by-pieces-hash', 'POST', [
             'pieces_hash' => ['abc123', 'def456'],
         ]);
@@ -79,12 +86,15 @@ final class TorrentControllerTest extends TestCase
 
         /** @var TorrentRepository&Mockery\MockInterface $torrentRepository */
         $torrentRepository = Mockery::mock(TorrentRepository::class);
-        $torrentRepository->shouldNotReceive('getPiecesHashCache');
 
         /** @var UploadRepository&Mockery\MockInterface $uploadRepository */
         $uploadRepository = Mockery::mock(UploadRepository::class);
 
-        $controller = new TorrentController($torrentRepository, $uploadRepository);
+        /** @var TorrentDownloadRepository&Mockery\MockInterface $downloadRepository */
+        $downloadRepository = Mockery::mock(TorrentDownloadRepository::class);
+        $downloadRepository->shouldNotReceive('getPiecesHashCache');
+
+        $controller = new TorrentController($torrentRepository, $downloadRepository, $uploadRepository);
         $request = TorrentPiecesHashRequest::create('/api/v1/torrents/query-by-pieces-hash', 'POST', []);
         $request->setContainer(app());
         $request->setRedirector(app('redirect'));
@@ -97,15 +107,18 @@ final class TorrentControllerTest extends TestCase
     {
         /** @var TorrentRepository&Mockery\MockInterface $torrentRepository */
         $torrentRepository = Mockery::mock(TorrentRepository::class);
-        $torrentRepository->shouldReceive('getPiecesHashCache')
-            ->once()
-            ->with(['notfound'])
-            ->andReturn([]);
 
         /** @var UploadRepository&Mockery\MockInterface $uploadRepository */
         $uploadRepository = Mockery::mock(UploadRepository::class);
 
-        $controller = new TorrentController($torrentRepository, $uploadRepository);
+        /** @var TorrentDownloadRepository&Mockery\MockInterface $downloadRepository */
+        $downloadRepository = Mockery::mock(TorrentDownloadRepository::class);
+        $downloadRepository->shouldReceive('getPiecesHashCache')
+            ->once()
+            ->with(['notfound'])
+            ->andReturn([]);
+
+        $controller = new TorrentController($torrentRepository, $downloadRepository, $uploadRepository);
         $request = TorrentPiecesHashRequest::create('/api/v1/torrents/query-by-pieces-hash', 'POST', [
             'pieces_hash' => ['notfound'],
         ]);
@@ -129,7 +142,10 @@ final class TorrentControllerTest extends TestCase
         /** @var UploadRepository&Mockery\MockInterface $uploadRepository */
         $uploadRepository = Mockery::mock(UploadRepository::class);
 
-        $controller = new TorrentController($torrentRepository, $uploadRepository);
+        /** @var TorrentDownloadRepository&Mockery\MockInterface $downloadRepository */
+        $downloadRepository = Mockery::mock(TorrentDownloadRepository::class);
+
+        $controller = new TorrentController($torrentRepository, $downloadRepository, $uploadRepository);
         $request = TorrentApprovalRequest::create('/api/v1/torrents/approval', 'POST', [
             'torrent_id' => 1,
             'approval_status' => 1,

@@ -110,7 +110,7 @@ final class UsercpRepository extends BaseRepository
         return (bool) DB::transaction(function () use ($userId, $data, $resetAuthKey) {
             $this->updateUser($userId, $data);
             if ($resetAuthKey) {
-                $torrentRep = app(TorrentRepository::class);
+                $torrentRep = app(TorrentDownloadRepository::class);
                 $torrentRep->resetTrackerReportAuthKeySecret($userId);
             }
 

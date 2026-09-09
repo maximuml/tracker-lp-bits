@@ -44,6 +44,7 @@
         alert: {btnAlign: 'c', title: 'Info', btn: ['OK', 'Cancel']}
     }
 </script>
+<script type="text/javascript" src="vendor/jquery-3.7.1.min.js{!! $cssUpdateDate !!}"></script>
 <script type="text/javascript" src="vendor/layer-v3.5.1/layer/layer.js{!! $cssUpdateDate !!}"></script>
 </head>
 <body>

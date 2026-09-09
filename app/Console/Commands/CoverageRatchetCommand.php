@@ -162,7 +162,12 @@ final class CoverageRatchetCommand extends Command
 
         foreach ($fileNodes as $fileNode) {
             $filePath = (string) $fileNode['name'];
-            if (! str_starts_with($filePath, 'app/')) {
+            // Normalize to relative path — CI generates absolute paths
+            // like /home/runner/work/repo/app/Services/Foo.php
+            $appPos = strpos($filePath, '/app/');
+            if ($appPos !== false) {
+                $filePath = substr($filePath, $appPos + 1); // strip leading /
+            } elseif (! str_starts_with($filePath, 'app/')) {
                 continue;
             }
 

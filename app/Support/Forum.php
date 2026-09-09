@@ -9,6 +9,7 @@ use App\Models\Topic;
 use App\Models\User;
 use App\Repositories\ForumRepository;
 use App\Repositories\SettingRepository;
+use App\Repositories\TopicRepository;
 use App\Support\Cache\LegacyRedisCache;
 use Illuminate\Support\Facades\Cache;
 
@@ -100,7 +101,7 @@ final class Forum
 
         switch ($in) {
             case 'post':
-                $topicId = $forumRep->getTopicIdByPost((int) $id);
+                $topicId = app(TopicRepository::class)->getTopicIdByPost((int) $id);
                 if ($topicId !== null) {
                     return self::isModerator($topicId, 'topic');
                 }
@@ -108,7 +109,7 @@ final class Forum
                 return false;
 
             case 'topic':
-                return $forumRep->isModeratorOfTopic((int) $id, $userId);
+                return app(TopicRepository::class)->isModeratorOfTopic((int) $id, $userId);
 
             case 'forum':
                 return $forumRep->isModeratorOfForum((int) $id, $userId);
@@ -141,7 +142,7 @@ final class Forum
 
         $topicId = $post['topicid'];
         if (! isset($topics[$topicId])) {
-            $topics[$topicId] = app(ForumRepository::class)->getTopicById($topicId);
+            $topics[$topicId] = app(TopicRepository::class)->getTopicById($topicId);
         }
         /** @var Topic $topicInfo */
         $topicInfo = $topics[$topicId];

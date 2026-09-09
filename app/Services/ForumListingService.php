@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Enums\UserTimeType;
 use App\Repositories\ForumRepository;
+use App\Repositories\TopicRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Format;
 use App\Support\Forum;
@@ -29,6 +30,7 @@ final class ForumListingService
         private readonly ForumRepository $forumRepository,
         private readonly Globals $globals,
         private readonly ?LegacyRedisCache $legacyRedisCache,
+        private readonly TopicRepository $topicRepository,
     ) {}
 
     /**
@@ -85,11 +87,11 @@ final class ForumListingService
                 $sortDirection = 'desc';
         }
 
-        $topicResult = $this->forumRepository->getTopicsByForum((int) $forumid, (string) $search, (string) $sortColumn, (string) $sortDirection, 0, 0);
+        $topicResult = $this->topicRepository->getTopicsByForum((int) $forumid, (string) $search, (string) $sortColumn, (string) $sortDirection, 0, 0);
         $num = (int) $topicResult['count'];
 
         [$pagertop, $pagerbottom, , $offset, $perpage] = Pagination::pager($topicsperpage, $num, '?'.'action=viewforum&forumid='.$forumid.$addparam.'&');
-        $topicResult = $this->forumRepository->getTopicsByForum((int) $forumid, (string) $search, (string) $sortColumn, (string) $sortDirection, (int) $offset, (int) $perpage);
+        $topicResult = $this->topicRepository->getTopicsByForum((int) $forumid, (string) $search, (string) $sortColumn, (string) $sortDirection, (int) $offset, (int) $perpage);
         $topicRows = $topicResult['rows'];
         $numtopics = $topicRows->count();
 
@@ -267,7 +269,7 @@ final class ForumListingService
         $beforepostid = (int) (request()->query('beforepostid') ?? 0);
         $maxresults = 25;
         $lastCatchup = (int) ($curUser['last_catchup'] ?? 0);
-        $unreadTopics = $this->forumRepository->getUnreadTopics($lastCatchup, $beforepostid ?: null, 100);
+        $unreadTopics = $this->topicRepository->getUnreadTopics($lastCatchup, $beforepostid ?: null, 100);
 
         $SITENAME = (string) $this->globals->get('SITENAME', '');
 

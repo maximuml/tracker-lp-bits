@@ -35,8 +35,7 @@ final class RepositorySizeTest extends TestCase
      * @var array<string, int>
      */
     private const BASELINE_FILES = [
-        // Repositories (8 files > 500 lines)
-        'app/Repositories/ForumRepository.php' => 599,
+        // Repositories (7 files > 500 lines)
         'app/Repositories/UserRepository.php' => 547,
         'app/Repositories/UserModerationRepository.php' => 595,
         'app/Repositories/UsercpRepository.php' => 648,
@@ -47,7 +46,7 @@ final class RepositorySizeTest extends TestCase
         // Services (6 files > 500 lines)
         'app/Services/RegistrationService.php' => 688,
         'app/Services/OfferPageService.php' => 617,
-        'app/Services/ForumService.php' => 568,
+        'app/Services/ForumService.php' => 570,
         'app/Services/UsercpPageService.php' => 552,
         'app/Services/IndexPageService.php' => 549,
         'app/Services/MessageService.php' => 521,

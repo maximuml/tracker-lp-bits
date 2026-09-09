@@ -8,6 +8,7 @@ use App\Models\Post;
 use App\Models\Topic;
 use App\Models\User;
 use App\Repositories\ForumRepository;
+use App\Repositories\TopicRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Tests\Attributes\TestCategory;
@@ -28,10 +29,13 @@ final class ForumRepositoryTest extends TestCase
 
     private ForumRepository $repository;
 
+    private TopicRepository $topicRepository;
+
     protected function setUp(): void
     {
         parent::setUp();
         $this->repository = app(ForumRepository::class);
+        $this->topicRepository = app(TopicRepository::class);
     }
 
     public function test_create_forum_returns_id(): void
@@ -241,14 +245,14 @@ final class ForumRepositoryTest extends TestCase
         // Update topic's lastpost to point to the new post
         DB::table('topics')->where('id', $topicId)->update(['lastpost' => $postId]);
 
-        $found = $this->repository->getTopicIdByPost($postId);
+        $found = $this->topicRepository->getTopicIdByPost($postId);
 
         $this->assertSame($topicId, $found);
     }
 
     public function test_get_topic_id_by_post_returns_null_for_nonexistent(): void
     {
-        $found = $this->repository->getTopicIdByPost(999999);
+        $found = $this->topicRepository->getTopicIdByPost(999999);
 
         $this->assertNull($found);
     }

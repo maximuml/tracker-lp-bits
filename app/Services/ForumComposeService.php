@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
 use App\Repositories\ForumRepository;
+use App\Repositories\TopicRepository;
 use App\Support\CurrentUser;
 use App\Support\Forum;
 use App\Support\Frame;
@@ -47,7 +48,7 @@ final class ForumComposeService
                 break;
 
             case 'reply':
-                $topicname = app(ForumRepository::class)->getTopicSubject((int) $id) ?? '';
+                $topicname = app(TopicRepository::class)->getTopicSubject((int) $id) ?? '';
                 $title = ($lang['text_reply_to_topic'] ?? '').' <a href="'.htmlspecialchars('?action=viewtopic&topicid='.$id).'">'.htmlspecialchars($topicname).'</a> ';
                 break;
 
@@ -178,7 +179,7 @@ final class ForumComposeService
                 break;
 
             case 'topic':
-                $forumid = app(ForumRepository::class)->topicExists((int) $id);
+                $forumid = app(TopicRepository::class)->topicExists((int) $id);
                 if (! $forumid) {
                     LegacyResponse::abort($lang['std_error'] ?? '', $lang['std_bad_topic_id'] ?? '');
                 }

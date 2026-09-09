@@ -7,10 +7,8 @@ namespace App\Repositories;
 use App\Models\Forum;
 use App\Models\ForumMod;
 use App\Models\Post;
-use App\Models\Topic;
 use App\Models\User;
 use App\Services\PostService;
-use App\Services\TopicService;
 use App\Support\Cache;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
@@ -19,7 +17,6 @@ use Illuminate\Support\Facades\DB;
 class ForumRepository extends BaseRepository
 {
     public function __construct(
-        private readonly TopicService $topicService,
         private readonly PostService $postService,
     ) {}
 
@@ -264,175 +261,6 @@ class ForumRepository extends BaseRepository
     public function getUsersByIds(array $ids, array $columns): Collection
     {
         return User::query()->find($ids, $columns)->keyBy('id');
-    }
-
-    // ---- Topic operations (delegated to TopicService) ----
-
-    public function getTopicIdByPost(int $postId): ?int
-    {
-        return $this->topicService->getTopicIdByPost($postId);
-    }
-
-    public function isModeratorOfTopic(int $topicId, int $userId): bool
-    {
-        return $this->topicService->isModeratorOfTopic($topicId, $userId);
-    }
-
-    public function getTotalTopicsCount(): int
-    {
-        return $this->topicService->getTotalTopicsCount();
-    }
-
-    public function topicExists(int $id): ?int
-    {
-        return $this->topicService->topicExists($id);
-    }
-
-    public function updateTopicLastPost(int $topicId): bool
-    {
-        return $this->topicService->updateTopicLastPost($topicId);
-    }
-
-    public function getTopicSubject(int $id): ?string
-    {
-        return $this->topicService->getTopicSubject($id);
-    }
-
-    public function getTopicForumId(int $topicid): ?int
-    {
-        return $this->topicService->getTopicForumId($topicid);
-    }
-
-    public function isTopicLocked(int $topicid): ?bool
-    {
-        return $this->topicService->isTopicLocked($topicid);
-    }
-
-    public function getTopic(int $id): ?Topic
-    {
-        return $this->topicService->getTopic($id);
-    }
-
-    public function getTopicWithUser(int $id): ?Topic
-    {
-        return $this->topicService->getTopicWithUser($id);
-    }
-
-    public function updateTopicSubject(int $topicid, string $subject): bool
-    {
-        return $this->topicService->updateTopicSubject($topicid, $subject);
-    }
-
-    public function createTopic(int $userId, int $forumId, string $subject): int
-    {
-        return $this->topicService->createTopic($userId, $forumId, $subject);
-    }
-
-    public function updateTopicFirstLastPost(int $topicid, int $postid): bool
-    {
-        return $this->topicService->updateTopicFirstLastPost($topicid, $postid);
-    }
-
-    public function setTopicLastPost(int $topicid, int $postid): bool
-    {
-        return $this->topicService->setTopicLastPost($topicid, $postid);
-    }
-
-    public function incrementTopicViews(int $topicid): bool
-    {
-        return $this->topicService->incrementTopicViews($topicid);
-    }
-
-    public function moveTopic(int $topicid, int $newForumid, int $postCount, int $oldForumid): bool
-    {
-        return $this->topicService->moveTopic($topicid, $newForumid, $postCount, $oldForumid);
-    }
-
-    /**
-     * @return array<string, int>|null
-     */
-    public function getTopicForumAndUser(int $topicid): ?array
-    {
-        return $this->topicService->getTopicForumAndUser($topicid);
-    }
-
-    public function deleteTopic(int $topicid, int $forumid, int $postCount): bool
-    {
-        return $this->topicService->deleteTopic($topicid, $forumid, $postCount);
-    }
-
-    public function updateTopicLocked(int $topicid, bool $locked): bool
-    {
-        return $this->topicService->updateTopicLocked($topicid, $locked);
-    }
-
-    public function updateTopicSticky(int $topicid, string $sticky): bool
-    {
-        return $this->topicService->updateTopicSticky($topicid, $sticky);
-    }
-
-    public function updateTopicHighlight(int $topicid, int $color): bool
-    {
-        return $this->topicService->updateTopicHighlight($topicid, $color);
-    }
-
-    /**
-     * @return array{count: int, rows: Collection<int, Topic>}
-     */
-    public function getTopicsByForum(int $forumid, string $search, string $sortColumn, string $direction, int $offset, int $perPage): array
-    {
-        return $this->topicService->getTopicsByForum($forumid, $search, $sortColumn, $direction, $offset, $perPage);
-    }
-
-    /**
-     * @return Collection<int, Topic>
-     */
-    public function getUnreadTopics(int $lastCatchup, ?int $beforePostId, int $limit): Collection
-    {
-        return $this->topicService->getUnreadTopics($lastCatchup, $beforePostId, $limit);
-    }
-
-    public function getTopicById(int $id): Topic
-    {
-        return $this->topicService->getTopicById($id);
-    }
-
-    /**
-     * @return array<int, int>|null
-     */
-    public function getLastReadPosts(int $userId): ?array
-    {
-        return $this->topicService->getLastReadPosts($userId);
-    }
-
-    public function getReadPost(int $userId, int $topicId): ?\stdClass
-    {
-        return $this->topicService->getReadPost($userId, $topicId);
-    }
-
-    public function insertReadPost(int $userId, int $topicId, int $postId): bool
-    {
-        return $this->topicService->insertReadPost($userId, $topicId, $postId);
-    }
-
-    public function updateReadPost(int $userId, int $topicId, int $postId): bool
-    {
-        return $this->topicService->updateReadPost($userId, $topicId, $postId);
-    }
-
-    public function markPostRead(int $userId, int $topicId, int $postId, int $lastCatchup): bool
-    {
-        return $this->topicService->markPostRead($userId, $topicId, $postId, $lastCatchup);
-    }
-
-    public function clearReadPosts(int $userId): void
-    {
-        $this->topicService->clearReadPosts($userId);
-    }
-
-    public function getLastTopicByForum(int $forumid): ?Topic
-    {
-        return $this->topicService->getLastTopicByForum($forumid);
     }
 
     // ---- Post operations (delegated to PostService) ----

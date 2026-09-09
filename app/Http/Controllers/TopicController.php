@@ -14,6 +14,7 @@ use App\Models\Forum;
 use App\Models\Topic;
 use App\Models\User;
 use App\Repositories\ForumRepository;
+use App\Repositories\TopicRepository;
 use App\Support\CurrentUser;
 use App\Support\Forum as SupportForum;
 use Illuminate\Http\Request;
@@ -64,10 +65,10 @@ class TopicController extends Controller
         }
 
         $date = now()->toDateTimeString();
-        $topicId = app(ForumRepository::class)->createTopic((int) $user->id, (int) $forum->id, $dto->subject);
+        $topicId = app(TopicRepository::class)->createTopic((int) $user->id, (int) $forum->id, $dto->subject);
         $postId = app(ForumRepository::class)->createPost($topicId, (int) $user->id, $dto->body, $date);
 
-        app(ForumRepository::class)->updateTopicFirstLastPost($topicId, $postId);
+        app(TopicRepository::class)->updateTopicFirstLastPost($topicId, $postId);
         app(ForumRepository::class)->incrementForumTopicCount((int) $forum->id);
         app(ForumRepository::class)->incrementForumPostCount((int) $forum->id);
         app(ForumRepository::class)->updateUserLastPost((int) $user->id, $date);
@@ -153,7 +154,7 @@ class TopicController extends Controller
         }
 
         $postCount = app(ForumRepository::class)->countTopicPosts((int) $topic->id);
-        app(ForumRepository::class)->deleteTopic((int) $topic->id, (int) $topic->forumid, $postCount);
+        app(TopicRepository::class)->deleteTopic((int) $topic->id, (int) $topic->forumid, $postCount);
 
         return $this->success(['success' => true], 'Topic deleted');
     }

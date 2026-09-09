@@ -9,6 +9,8 @@ use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserClickTopic;
 use App\Models\User;
 use App\Repositories\ForumRepository;
+use App\Repositories\TopicReadStateRepository;
+use App\Repositories\TopicRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Format;
 use App\Support\Forum;
@@ -34,6 +36,8 @@ final class ForumTopicViewService
         private readonly ForumRepository $forumRepository,
         private readonly Globals $globals,
         private readonly ?LegacyRedisCache $legacyRedisCache,
+        private readonly TopicRepository $topicRepository,
+        private readonly TopicReadStateRepository $readStateRepository,
     ) {}
 
     /**
@@ -56,7 +60,7 @@ final class ForumTopicViewService
             $addparam = 'action=viewtopic&topicid='.$topicid;
         }
 
-        $topic = $this->forumRepository->getTopic((int) $topicid);
+        $topic = $this->topicRepository->getTopic((int) $topicid);
         if (! $topic) {
             LegacyResponse::abort($lang['std_forum_error'] ?? '', $lang['std_topic_not_found'] ?? '');
 
@@ -89,7 +93,7 @@ final class ForumTopicViewService
             $maypost = false;
         }
 
-        $this->forumRepository->incrementTopicViews((int) $topicid);
+        $this->topicRepository->incrementTopicViews((int) $topicid);
 
         $postcount = $this->forumRepository->countTopicPosts((int) $topicid, $authorid ?: null);
         if (! $authorid) {
@@ -230,7 +234,7 @@ final class ForumTopicViewService
             if ($pn == $pc) {
                 echo "<span id=\"last\"></span>\n";
                 if ($postid > $lpr) {
-                    $this->forumRepository->markPostRead((int) $userId, (int) $topicid, (int) $postid, (int) ($curUser['last_catchup'] ?? 0));
+                    $this->readStateRepository->markPostRead((int) $userId, (int) $topicid, (int) $postid, (int) ($curUser['last_catchup'] ?? 0));
                     $this->legacyRedisCache?->delete_value('user_'.($curUser['id'] ?? 0).'_last_read_post_list');
                 }
             }

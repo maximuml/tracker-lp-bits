@@ -15,6 +15,7 @@ use App\Models\Post;
 use App\Models\Topic;
 use App\Models\User;
 use App\Repositories\ForumRepository;
+use App\Repositories\TopicRepository;
 use App\Support\CurrentUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -66,7 +67,7 @@ class PostController extends Controller
         $date = now()->toDateTimeString();
         $postId = app(ForumRepository::class)->createPost((int) $topic->id, (int) $user->id, $dto->body, $date);
 
-        app(ForumRepository::class)->setTopicLastPost((int) $topic->id, $postId);
+        app(TopicRepository::class)->setTopicLastPost((int) $topic->id, $postId);
         app(ForumRepository::class)->incrementForumPostCount((int) $forum->id);
         app(ForumRepository::class)->updateUserLastPost((int) $user->id, $date);
 

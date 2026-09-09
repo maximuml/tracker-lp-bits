@@ -17,7 +17,7 @@ use App\Repositories\CleanupRepository;
 use App\Repositories\IpLogRepository;
 use App\Repositories\RequireSeedTorrentRepository;
 use App\Repositories\TorrentPurchaseRepository;
-use App\Repositories\UserRepository;
+use App\Repositories\UserModerationRepository;
 use App\Services\Announce\AnnounceRequestFactory;
 use App\Services\Announce\PeerLifecycle;
 use App\Services\Announce\PeerLifecycleResult;
@@ -45,7 +45,7 @@ class AnnounceService
     public function __construct(
         private readonly AgentAllowRepository $agentAllowRepository,
         private readonly TorrentPurchaseRepository $purchaseRepository,
-        private readonly UserRepository $userRepository,
+        private readonly UserModerationRepository $userModerationRepository,
         private readonly Announce\RateLimiter $rateLimiter,
         private readonly Announce\TrafficAccountant $trafficAccountant,
         private readonly Announce\CheaterDetector $cheaterDetector,
@@ -315,7 +315,7 @@ class AnnounceService
         $ctx = $ctx->withResponseBuilder($ctx->responseBuilder->withTorrent($torrent));
 
         if ($ctx->dto->left > (int) $torrent['size']) {
-            $this->userRepository->updateDownloadPrivileges(null, $ctx->userId(), false, 'fake_announce');
+            $this->userModerationRepository->updateDownloadPrivileges(null, $ctx->userId(), false, 'fake_announce');
             Logger::writeWithContext((string) sprintf('fake announce, user: %s, torrent: %s, announce left: %s > size: %s', $ctx->userId(), $ctx->torrentId(), $ctx->dto->left, $torrent['size']), (string) 'warn', (bool) false);
             $ctx->responseBuilder->warn('fake announce', 300);
         }
@@ -368,7 +368,7 @@ class AnnounceService
                 );
             }
             if ($buyStatus > 10) {
-                $this->userRepository->updateDownloadPrivileges(null, $ctx->userId(), false, 'announce_paid_torrent_too_many_times');
+                $this->userModerationRepository->updateDownloadPrivileges(null, $ctx->userId(), false, 'announce_paid_torrent_too_many_times');
             }
             dispatch(new BuyTorrent($ctx->userId(), $ctx->torrentId()));
             $purchaseRep->addBuyFailCache($ctx->userId(), $ctx->torrentId());

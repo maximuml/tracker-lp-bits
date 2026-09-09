@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Jobs;
 
-use App\Repositories\UserRepository;
+use App\Repositories\UserModerationRepository;
 use App\Support\Logger;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -32,7 +32,7 @@ class UpdateUserDownloadPrivilege implements ShouldQueue
      */
     public function handle(): void
     {
-        $rep = app(UserRepository::class);
+        $rep = app(UserModerationRepository::class);
         $rep->updateDownloadPrivileges(null, $this->userId, $this->status, $this->reasonKey);
         Logger::writeWithContext((string) "Updating user download privilege for user {$this->userId} to {$this->status} by reason {$this->reasonKey}", (string) 'info', (bool) false);
     }

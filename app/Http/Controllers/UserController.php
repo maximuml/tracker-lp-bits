@@ -18,6 +18,7 @@ use App\Http\Resources\TorrentResource;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Repositories\ExamRepository;
+use App\Repositories\UserModerationRepository;
 use App\Repositories\UserRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -26,11 +27,14 @@ class UserController extends Controller
 {
     private UserRepository $repository;
 
+    private UserModerationRepository $moderationRepository;
+
     private ExamRepository $examRepository;
 
-    public function __construct(UserRepository $repository, ExamRepository $examRepository)
+    public function __construct(UserRepository $repository, UserModerationRepository $moderationRepository, ExamRepository $examRepository)
     {
         $this->repository = $repository;
+        $this->moderationRepository = $moderationRepository;
         $this->examRepository = $examRepository;
     }
 
@@ -130,7 +134,7 @@ class UserController extends Controller
         if (! $user instanceof User) {
             throw new \RuntimeException('unauthenticated');
         }
-        $result = $this->repository->disableUser($user, (int) $request->uid, $request->reason);
+        $result = $this->moderationRepository->disableUser($user, (int) $request->uid, $request->reason);
 
         return $this->success($result, 'Disable user success!');
     }
@@ -144,7 +148,7 @@ class UserController extends Controller
         if (! $user instanceof User) {
             throw new \RuntimeException('unauthenticated');
         }
-        $result = $this->repository->enableUser($user, (int) $request->uid);
+        $result = $this->moderationRepository->enableUser($user, (int) $request->uid);
 
         return $this->success($result, 'Enable user success!');
     }
@@ -165,7 +169,7 @@ class UserController extends Controller
      */
     public function modComment(UidRequest $request): array
     {
-        $result = $this->repository->getModComment((int) $request->uid);
+        $result = $this->moderationRepository->getModComment((int) $request->uid);
 
         return $this->success($result);
     }
@@ -309,7 +313,7 @@ class UserController extends Controller
         if (! $user instanceof User) {
             throw new \RuntimeException('unauthenticated');
         }
-        $result = $this->repository->incrementDecrement($user, $request->uid, $request->action, $request->field, $request->value, $request->reason);
+        $result = $this->moderationRepository->incrementDecrement($user, $request->uid, $request->action, $request->field, $request->value, $request->reason);
 
         return $this->success(['success' => $result]);
     }
@@ -320,7 +324,7 @@ class UserController extends Controller
     public function removeTwoStepAuthentication(UidRequest $request): array
     {
         $user = Auth::user();
-        $result = $this->repository->removeTwoStepAuthentication($user, $request->uid);
+        $result = $this->moderationRepository->removeTwoStepAuthentication($user, $request->uid);
 
         return $this->success(['success' => $result]);
     }

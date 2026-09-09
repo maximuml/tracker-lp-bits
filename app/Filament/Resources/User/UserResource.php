@@ -13,7 +13,7 @@ use App\Filament\Resources\User\UserResource\Pages\CreateUser;
 use App\Filament\Resources\User\UserResource\Pages\ListUsers;
 use App\Filament\Resources\User\UserResource\Pages\UserProfile;
 use App\Models\User;
-use App\Repositories\UserRepository;
+use App\Repositories\UserModerationRepository;
 use App\Support\Admin;
 use App\Support\Config\SiteConfig;
 use App\Support\Mail;
@@ -57,7 +57,7 @@ class UserResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
-    private static ?UserRepository $rep = null;
+    private static ?UserModerationRepository $rep = null;
 
     private static function currentUser(): User
     {
@@ -69,10 +69,10 @@ class UserResource extends Resource
         return $user;
     }
 
-    private static function getRep(): UserRepository
+    private static function getRep(): UserModerationRepository
     {
         if (self::$rep === null) {
-            self::$rep = app(UserRepository::class);
+            self::$rep = app(UserModerationRepository::class);
         }
 
         return self::$rep;

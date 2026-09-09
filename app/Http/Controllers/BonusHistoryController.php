@@ -13,7 +13,7 @@ use App\Models\Reward;
 use App\Models\Setting;
 use App\Models\Torrent;
 use App\Models\User;
-use App\Repositories\BonusRepository;
+use App\Repositories\BonusCalculationRepository;
 use App\Support\Api;
 use App\Support\AssetAppender;
 use App\Support\Bonus;
@@ -32,11 +32,11 @@ use Illuminate\View\View;
 
 class BonusHistoryController extends LegacyController
 {
-    private BonusRepository $bonusRepository;
+    private BonusCalculationRepository $bonusCalculationRepository;
 
-    public function __construct(BonusRepository $bonusRepository)
+    public function __construct(BonusCalculationRepository $bonusCalculationRepository)
     {
-        $this->bonusRepository = $bonusRepository;
+        $this->bonusCalculationRepository = $bonusCalculationRepository;
     }
 
     public function bonusLog(Request $request): View|RedirectResponse|Response
@@ -93,7 +93,7 @@ class BonusHistoryController extends LegacyController
             $businessTypeOptionsHtml .= sprintf('<option value="%s"%s>%s</option>', htmlspecialchars((string) $name), $selected, htmlspecialchars($text));
         }
 
-        $rep = $this->bonusRepository;
+        $rep = $this->bonusCalculationRepository;
         $total = $rep->getCount($category, $uid, $businessType);
         [$pagertop, $pagerbottom, , , $pageSize, $page] = Pagination::pager(50, $total, "{$pagerParam}&");
         $list = $rep->getList($category, $uid, $businessType, $page + 1, $pageSize);

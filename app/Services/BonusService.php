@@ -9,6 +9,7 @@ use App\Enums\BusinessType;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\BonusLogs;
 use App\Models\Message;
+use App\Repositories\BonusCalculationRepository;
 use App\Repositories\BonusRepository;
 use App\Support\Globals;
 use App\Support\Html;
@@ -35,9 +36,12 @@ final class BonusService
 
     private BonusRepository $bonusRep;
 
-    public function __construct(BonusRepository $bonusRep)
+    private BonusCalculationRepository $bonusCalculationRepository;
+
+    public function __construct(BonusRepository $bonusRep, BonusCalculationRepository $bonusCalculationRepository)
     {
         $this->bonusRep = $bonusRep;
+        $this->bonusCalculationRepository = $bonusCalculationRepository;
     }
 
     /**
@@ -277,7 +281,7 @@ final class BonusService
         if (($curUser['seedbonus'] ?? 0) < $points) {
             return null;
         }
-        $charityReceiverCount = $this->bonusRep->getCharityReceiverCount($ratiocharity);
+        $charityReceiverCount = $this->bonusCalculationRepository->getCharityReceiverCount($ratiocharity);
         if (! $charityReceiverCount) {
             Html::stdMessage((string) ($lang['std_sorry'] ?? ''), (string) ($lang['std_no_users_need_charity'] ?? ''));
 
@@ -303,7 +307,7 @@ final class BonusService
         $points = (float) $request->post('bonusgift', 0);
         $message = (string) $request->post('message', '');
         $usernamegift = trim((string) $request->post('username', ''));
-        $arr = $this->bonusRep->findGiftReceiver($usernamegift);
+        $arr = $this->bonusCalculationRepository->findGiftReceiver($usernamegift);
         if (empty($arr)) {
             Html::stdMessage((string) ($lang['text_error'] ?? ''), (string) ($lang['text_receiver_not_exists'] ?? ''), false);
 

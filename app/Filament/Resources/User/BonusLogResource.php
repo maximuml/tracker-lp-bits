@@ -6,7 +6,7 @@ namespace App\Filament\Resources\User;
 
 use App\Filament\Resources\User\BonusLogResource\Pages\ManageBonusLogs;
 use App\Models\BonusLogs;
-use App\Repositories\BonusRepository;
+use App\Repositories\BonusCalculationRepository;
 use App\Support\UserDisplay;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
@@ -105,7 +105,7 @@ class BonusLogResource extends Resource
      */
     private static function listRecords(int $page, int $perPage, array $filters = []): LengthAwarePaginator
     {
-        $rep = app(BonusRepository::class);
+        $rep = app(BonusCalculationRepository::class);
         $category = $filters['category']['value'] ?: BonusLogs::CATEGORY_COMMON;
         $userId = intval($filters['userId']['value'] ?? 0);
         $businessType = intval($filters['businessType']['value'] ?? 0);

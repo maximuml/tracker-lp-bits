@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Repositories\BonusCalculationRepository;
 use App\Repositories\BonusRepository;
 use App\Support\Config\SiteConfig;
 
@@ -39,7 +40,7 @@ class Bonus
         $nowStr = date('Y-m-d H:i:s');
         $logPrefix = "[CALCULATE_SEED_BONUS], uid: $uid, torrentIdArr: ".json_encode($torrentIdArr);
 
-        $bonusRep = app(BonusRepository::class);
+        $bonusRep = app(BonusCalculationRepository::class);
         $torrentData = $bonusRep->getTorrentRowsForBonusCalculation($uid, $torrentIdArr, $minSize);
         $sql = $torrentData['sql'];
         $torrentResult = $torrentData['torrentResult'];
@@ -315,7 +316,7 @@ class Bonus
      */
     public static function haremAddition(int|string $uid): float|int|string
     {
-        return app(BonusRepository::class)->getHaremAddition($uid);
+        return app(BonusCalculationRepository::class)->getHaremAddition($uid);
     }
 
     /**

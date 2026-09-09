@@ -46,19 +46,24 @@ final class SecurityHeadersTest extends TestCase
     }
 
     /**
-     * W1-03: Filament/Livewire admin routes now use nonce-based CSP
-     * (Livewire 4 + Alpine 3 support nonce). No 'unsafe-inline' or
-     * 'unsafe-eval' should be present in any route's CSP.
+     * Filament/Livewire admin routes use the same CSP as legacy routes.
+     * style-src uses 'unsafe-inline' (no nonce) because Filament/Livewire/
+     * Alpine inject inline styles dynamically via JavaScript (element.style,
+     * <style> tags, x-bind:style). Per CSP spec, 'unsafe-inline' is ignored
+     * when a nonce is present, so we cannot use both. script-src stays
+     * nonce-strict on all routes, providing the primary XSS protection.
      */
-    public function test_filament_csp_uses_nonce_not_unsafe(): void
+    public function test_filament_csp_uses_nonce_for_scripts_unsafe_inline_for_styles(): void
     {
         $response = $this->get('/nexusphp');
 
         $csp = $response->headers->get('Content-Security-Policy');
         $this->assertNotNull($csp);
+        // script-src is nonce-strict
         $this->assertStringContainsString("'nonce-", $csp);
-        $this->assertStringNotContainsString("'unsafe-inline'", $csp);
         $this->assertStringNotContainsString("'unsafe-eval'", $csp);
+        // style-src uses 'unsafe-inline' (no nonce) for dynamic style injection
+        $this->assertStringContainsString("style-src 'self' 'unsafe-inline'", $csp);
         $this->assertStringContainsString("object-src 'none'", $csp);
     }
 }

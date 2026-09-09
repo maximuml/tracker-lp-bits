@@ -939,6 +939,23 @@ jobs:
     # Runs only on push to php8 (not PRs) to keep PR CI fast.
     if: github.event_name == 'push' && github.ref == 'refs/heads/php8'
 
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: nexusphp
+          MYSQL_USER: nexusphp
+          MYSQL_PASSWORD: nexusphp
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: --health-cmd="redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -952,16 +969,39 @@ jobs:
           ini-values: memory_limit=2G
 
       - name: Install Composer dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction
+        run: composer install --prefer-dist --no-progress --no-interaction --no-scripts
 
       - name: Prepare environment
         run: |
           cp .env.example .env
+          sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=nexusphp/' .env
+          sed -i 's/^CACHE_DRIVER=.*/CACHE_DRIVER=array/' .env
+          sed -i 's/^QUEUE_CONNECTION=.*/QUEUE_CONNECTION=sync/' .env
+          sed -i 's/^REDIS_PASSWORD=.*/REDIS_PASSWORD=/' .env
+          sed -i 's/^REDIS_DB=.*/REDIS_DB=15/' .env
+          echo "SCOUT_DRIVER=null" >> .env
           php artisan key:generate
+          composer run-script post-autoload-dump
+
+      - name: Wait for MySQL and migrate
+        run: |
+          for i in $(seq 1 60); do
+            nc -z 127.0.0.1 3306 && break
+            sleep 1
+          done
+          nc -z 127.0.0.1 3306 || { echo "MySQL did not become ready in time"; exit 1; }
+          php artisan migrate:fresh --seed --force
+          mysql -h 127.0.0.1 -u root -proot -e "
+            CREATE DATABASE IF NOT EXISTS nexusphp_unit_testing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+            GRANT ALL PRIVILEGES ON nexusphp_unit_testing.* TO 'nexusphp'@'%';
+            FLUSH PRIVILEGES;
+          "
+          mysqldump -h 127.0.0.1 -u root -proot --no-data --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp | mysql -h 127.0.0.1 -u root -proot nexusphp_unit_testing
+          mysqldump -h 127.0.0.1 -u root -proot --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users | mysql -h 127.0.0.1 -u root -proot nexusphp_unit_testing
 
       - name: Run Infection (full scope)
         run: |
-          vendor/bin/infection \
+          DB_DATABASE=nexusphp_unit_testing vendor/bin/infection \
             --configuration=infection.json5 \
             --threads=4 \
             --min-msi=40 \
@@ -987,6 +1027,23 @@ jobs:
     # Full-scope mutation testing runs on push to php8 (see infection job).
     if: github.event_name == 'pull_request'
 
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: nexusphp
+          MYSQL_USER: nexusphp
+          MYSQL_PASSWORD: nexusphp
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: --health-cmd="redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -1002,12 +1059,35 @@ jobs:
           ini-values: memory_limit=2G
 
       - name: Install Composer dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction
+        run: composer install --prefer-dist --no-progress --no-interaction --no-scripts
 
       - name: Prepare environment
         run: |
           cp .env.example .env
+          sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=nexusphp/' .env
+          sed -i 's/^CACHE_DRIVER=.*/CACHE_DRIVER=array/' .env
+          sed -i 's/^QUEUE_CONNECTION=.*/QUEUE_CONNECTION=sync/' .env
+          sed -i 's/^REDIS_PASSWORD=.*/REDIS_PASSWORD=/' .env
+          sed -i 's/^REDIS_DB=.*/REDIS_DB=15/' .env
+          echo "SCOUT_DRIVER=null" >> .env
           php artisan key:generate
+          composer run-script post-autoload-dump
+
+      - name: Wait for MySQL and migrate
+        run: |
+          for i in $(seq 1 60); do
+            nc -z 127.0.0.1 3306 && break
+            sleep 1
+          done
+          nc -z 127.0.0.1 3306 || { echo "MySQL did not become ready in time"; exit 1; }
+          php artisan migrate:fresh --seed --force
+          mysql -h 127.0.0.1 -u root -proot -e "
+            CREATE DATABASE IF NOT EXISTS nexusphp_unit_testing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+            GRANT ALL PRIVILEGES ON nexusphp_unit_testing.* TO 'nexusphp'@'%';
+            FLUSH PRIVILEGES;
+          "
+          mysqldump -h 127.0.0.1 -u root -proot --no-data --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp | mysql -h 127.0.0.1 -u root -proot nexusphp_unit_testing
+          mysqldump -h 127.0.0.1 -u root -proot --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users | mysql -h 127.0.0.1 -u root -proot nexusphp_unit_testing
 
       - name: Detect changed critical files
         id: changed
@@ -1049,7 +1129,7 @@ jobs:
           # Run Infection with --filter to limit to changed files
           # --ignore-msi-errors allows PR runs to show results without failing
           # on threshold (full-scope run on push enforces thresholds)
-          vendor/bin/infection \
+          DB_DATABASE=nexusphp_unit_testing vendor/bin/infection \
             --configuration=infection.json5 \
             --threads=4 \
             --no-progress \

@@ -37,7 +37,7 @@ final class BonusServiceTest extends TestCase
         /** @var BonusCalculationRepository&Mockery\MockInterface $calcRepo */
         $calcRepo = Mockery::mock(BonusCalculationRepository::class);
 
-        return new BonusService($repo, $calcRepo);
+        return new BonusService($repo, $calcRepo, $this->app->make(Globals::class));
     }
 
     public function test_returns_null_when_action_is_not_exchange(): void

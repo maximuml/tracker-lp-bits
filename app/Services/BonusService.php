@@ -38,10 +38,13 @@ final class BonusService
 
     private BonusCalculationRepository $bonusCalculationRepository;
 
-    public function __construct(BonusRepository $bonusRep, BonusCalculationRepository $bonusCalculationRepository)
+    private Globals $globals;
+
+    public function __construct(BonusRepository $bonusRep, BonusCalculationRepository $bonusCalculationRepository, Globals $globals)
     {
         $this->bonusRep = $bonusRep;
         $this->bonusCalculationRepository = $bonusCalculationRepository;
+        $this->globals = $globals;
     }
 
     /**
@@ -70,13 +73,13 @@ final class BonusService
      */
     private function handleExchange(Request $request, array $allBonus, array $curUser, array $lang, string $lockText): ?RedirectResponse
     {
-        $baseUrl = (string) app(Globals::class)->get('BASEURL', '');
-        $bonusgiftBonus = (string) app(Globals::class)->get('bonusgift_bonus', 'yes');
-        $ratiolimitBonus = (float) app(Globals::class)->get('ratiolimit_bonus', 0);
-        $dlamountlimitBonus = (int) app(Globals::class)->get('dlamountlimit_bonus', 0);
-        $buyinviteClass = (int) app(Globals::class)->get('buyinvite_class', 0);
-        $taxpercentageBonus = (float) app(Globals::class)->get('taxpercentage_bonus', 0);
-        $basictaxBonus = (float) app(Globals::class)->get('basictax_bonus', 0);
+        $baseUrl = (string) $this->globals->get('BASEURL', '');
+        $bonusgiftBonus = (string) $this->globals->get('bonusgift_bonus', 'yes');
+        $ratiolimitBonus = (float) $this->globals->get('ratiolimit_bonus', 0);
+        $dlamountlimitBonus = (int) $this->globals->get('dlamountlimit_bonus', 0);
+        $buyinviteClass = (int) $this->globals->get('buyinvite_class', 0);
+        $taxpercentageBonus = (float) $this->globals->get('taxpercentage_bonus', 0);
+        $basictaxBonus = (float) $this->globals->get('basictax_bonus', 0);
 
         // Cheat detection
         if (
@@ -168,7 +171,7 @@ final class BonusService
      */
     private function exchangeTraffic(array $curUser, array $bonusarray, float $points, float $ratiolimitBonus, int $dlamountlimitBonus, array $lang): RedirectResponse
     {
-        $baseUrl = (string) app(Globals::class)->get('BASEURL', '');
+        $baseUrl = (string) $this->globals->get('BASEURL', '');
         if (($curUser['uploaded'] ?? 0) > $dlamountlimitBonus * 1073741824) {
             $ratio = ($curUser['downloaded'] ?? 0) > 0
                 ? ($curUser['uploaded'] ?? 0) / ($curUser['downloaded'] ?? 1)

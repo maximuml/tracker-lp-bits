@@ -26,14 +26,21 @@ use Illuminate\View\View;
 
 class ModerationController extends LegacyController
 {
+    public function __construct(
+        private readonly CurrentUser $currentUser,
+        private readonly Globals $globals,
+        private readonly ?LegacyRedisCache $legacyRedisCache,
+        private readonly ModerationRepository $moderationRepository,
+    ) {}
+
     public function report(Request $request): View|RedirectResponse|Response
     {
-        $curUser = app(CurrentUser::class)->get() ?? [];
+        $curUser = $this->currentUser->get() ?? [];
         $currentUserId = (int) ($curUser['id'] ?? 0);
         $staffmemClass = defined('UC_STAFFMEM') ? \constant('UC_STAFFMEM') : (defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0);
 
-        $langReport = (array) app(Globals::class)->get('lang_report', []);
-        $cache = app(LegacyRedisCache::class);
+        $langReport = (array) $this->globals->get('lang_report', []);
+        $cache = $this->legacyRedisCache;
 
         $reportofferid = (int) (request()->query('reportofferid') ?? 0);
         $user = (int) (request()->query('user') ?? 0);
@@ -48,7 +55,7 @@ class ModerationController extends LegacyController
         $takereportofferid = (int) (request()->post('takereportofferid') ?? 0);
         $takereason = trim((string) request()->post('reason'));
 
-        $repo = app(ModerationRepository::class);
+        $repo = $this->moderationRepository;
         $doTakeReport = function (int $reportid, string $type, string $reason) use ($currentUserId, $langReport, $cache, $repo): Response {
             if (! Validators::isId($reportid) || $reason === '') {
                 return $this->legacyAbortResponse($langReport['std_error'] ?? 'Error', $langReport['std_missing_reason'] ?? 'Missing reason.');
@@ -119,7 +126,7 @@ class ModerationController extends LegacyController
         }
 
         if ($forumpost && Validators::isId($forumpost)) {
-            $arr = app(ModerationRepository::class)->getForumPost($forumpost);
+            $arr = $this->moderationRepository->getForumPost($forumpost);
             if ($arr === null) {
                 return $this->legacyAbortResponse($langReport['std_error'] ?? 'Error', $langReport['std_invalid_post_id'] ?? 'Invalid post ID.');
             }
@@ -167,16 +174,16 @@ class ModerationController extends LegacyController
 
     public function reports(Request $request): View|RedirectResponse|Response
     {
-        $curUser = app(CurrentUser::class)->get() ?? [];
+        $curUser = $this->currentUser->get() ?? [];
         $currentUserId = (int) ($curUser['id'] ?? 0);
 
         if (! Permissions::userCan(PermissionEnum::STAFF_MEMBER->value, false, $currentUserId)) {
             return $this->legacyAbortResponse('Error', 'Permission denied.');
         }
 
-        $langReports = (array) app(Globals::class)->get('lang_reports', []);
+        $langReports = (array) $this->globals->get('lang_reports', []);
 
-        $repo = app(ModerationRepository::class);
+        $repo = $this->moderationRepository;
         $count = $repo->countReports();
         if (! $count) {
             return $this->legacyAbortResponse($langReports['std_oho'] ?? 'Oho', $langReports['std_no_report'] ?? 'No report.');
@@ -231,7 +238,7 @@ class ModerationController extends LegacyController
                     break;
                 case 'post':
                     $type = $langReports['text_forum_post'] ?? 'Forum post';
-                    $arr = app(ModerationRepository::class)->getForumPost((int) $row['reportid']);
+                    $arr = $this->moderationRepository->getForumPost((int) $row['reportid']);
                     if ($arr === null) {
                         $reporting = $langReports['text_post_does_not_exist'] ?? 'Post does not exist';
                     } else {

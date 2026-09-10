@@ -25,18 +25,14 @@ use Illuminate\View\View;
 
 class TorrentEditController extends Controller
 {
-    private SearchBoxRepository $searchBoxRepository;
-
-    private TagRepository $tagRepository;
-
-    private HitAndRunRepository $hitAndRunRepository;
-
-    public function __construct(SearchBoxRepository $searchBoxRepository, TagRepository $tagRepository, HitAndRunRepository $hitAndRunRepository)
-    {
-        $this->searchBoxRepository = $searchBoxRepository;
-        $this->tagRepository = $tagRepository;
-        $this->hitAndRunRepository = $hitAndRunRepository;
-    }
+    public function __construct(
+        private readonly SearchBoxRepository $searchBoxRepository,
+        private readonly TagRepository $tagRepository,
+        private readonly HitAndRunRepository $hitAndRunRepository,
+        private readonly CurrentUser $currentUser,
+        private readonly Globals $globals,
+        private readonly TorrentDetailRepository $torrentDetailRepository,
+    ) {}
 
     public function legacy(Request $request): View|RedirectResponse
     {
@@ -57,25 +53,25 @@ class TorrentEditController extends Controller
             abort(404);
         }
 
-        $row = app(TorrentDetailRepository::class)->getTorrent($id);
+        $row = $this->torrentDetailRepository->getTorrent($id);
         if (empty($row)) {
             abort(404);
         }
         $sectionmode = (int) ($row['search_box_id'] ?? 0);
         $row['cat_mode'] = $sectionmode;
 
-        if (empty(app(Globals::class)->get('lang_edit')) || empty(app(Globals::class)->get('lang_functions'))) {
+        if (empty($this->globals->get('lang_edit')) || empty($this->globals->get('lang_functions'))) {
             Input::setServerValue('SCRIPT_NAME', '/edit.php');
             require base_path(Locale::scriptFilePath((string) 'functions.php', (bool) false, (string) ''));
-            app(Globals::class)->set('lang_functions', $lang_functions ?? []);
+            $this->globals->set('lang_functions', $lang_functions ?? []);
             require base_path(Locale::scriptFilePath((string) '', (bool) false, (string) ''));
-            app(Globals::class)->set('lang_edit', $lang_edit ?? []);
+            $this->globals->set('lang_edit', $lang_edit ?? []);
         }
 
-        $currentUser = app(CurrentUser::class)->get();
-        app(CurrentUser::class)->set($currentUser);
+        $currentUser = $this->currentUser->get();
+        $this->currentUser->set($currentUser);
 
-        $langEdit = app(Globals::class)->get('lang_edit') ?? [];
+        $langEdit = $this->globals->get('lang_edit') ?? [];
         $headTitle = ($langEdit['head_edit_torrent'] ?? '').'"'.$row['name'].'"';
 
         return view('torrent.edit', [
@@ -83,12 +79,12 @@ class TorrentEditController extends Controller
             'torrentRow' => $row,
             'currentUser' => $currentUser,
             'headTitle' => $headTitle,
-            'tagIds' => app(TorrentDetailRepository::class)->getTagIds($id),
+            'tagIds' => $this->torrentDetailRepository->getTagIds($id),
             'cats' => Category::listByModeWithContext($sectionmode),
             'returnto' => (string) $request->input('returnto', ''),
             'requestUri' => is_string($request->server('REQUEST_URI')) ? $request->server('REQUEST_URI') : '',
             'taxonomySelect' => $this->searchBoxRepository->renderTaxonomySelect($sectionmode, $row),
-            'tagCheckbox' => $this->tagRepository->renderCheckbox($sectionmode, (array) app(TorrentDetailRepository::class)->getTagIds($id)),
+            'tagCheckbox' => $this->tagRepository->renderCheckbox($sectionmode, (array) $this->torrentDetailRepository->getTagIds($id)),
             'customFieldsHtml' => (new CustomField)->renderOnUploadPage($id, $sectionmode),
             'hitAndRunHtml' => $this->hitAndRunRepository->renderOnUploadPage($row['hr'] ?? 0, $sectionmode),
         ]);

@@ -24,6 +24,13 @@ use Illuminate\Validation\ValidationException;
 
 class TopicController extends Controller
 {
+    public function __construct(
+        private readonly ForumRepository $forumRepository,
+        private readonly PostRepository $postRepository,
+        private readonly TopicRepository $topicRepository,
+        private readonly CurrentUser $currentUser,
+    ) {}
+
     /**
      * Display a listing of the resource.
      *
@@ -56,7 +63,7 @@ class TopicController extends Controller
             abort(401);
         }
 
-        app(CurrentUser::class)->set($user->toLegacyArray());
+        $this->currentUser->set($user->toLegacyArray());
 
         $dto = StoreTopicDto::fromRequest($request);
 
@@ -66,13 +73,13 @@ class TopicController extends Controller
         }
 
         $date = now()->toDateTimeString();
-        $topicId = app(TopicRepository::class)->createTopic((int) $user->id, (int) $forum->id, $dto->subject);
-        $postId = app(PostRepository::class)->createPost($topicId, (int) $user->id, $dto->body, $date);
+        $topicId = $this->topicRepository->createTopic((int) $user->id, (int) $forum->id, $dto->subject);
+        $postId = $this->postRepository->createPost($topicId, (int) $user->id, $dto->body, $date);
 
-        app(TopicRepository::class)->updateTopicFirstLastPost($topicId, $postId);
-        app(ForumRepository::class)->incrementForumTopicCount((int) $forum->id);
-        app(ForumRepository::class)->incrementForumPostCount((int) $forum->id);
-        app(PostRepository::class)->updateUserLastPost((int) $user->id, $date);
+        $this->topicRepository->updateTopicFirstLastPost($topicId, $postId);
+        $this->forumRepository->incrementForumTopicCount((int) $forum->id);
+        $this->forumRepository->incrementForumPostCount((int) $forum->id);
+        $this->postRepository->updateUserLastPost((int) $user->id, $date);
 
         $topic = Topic::query()->findOrFail($topicId);
 
@@ -103,7 +110,7 @@ class TopicController extends Controller
             abort(401);
         }
 
-        app(CurrentUser::class)->set($user->toLegacyArray());
+        $this->currentUser->set($user->toLegacyArray());
 
         $dto = UpdateTopicDto::fromRequest($request);
 
@@ -148,14 +155,14 @@ class TopicController extends Controller
             abort(401);
         }
 
-        app(CurrentUser::class)->set($user->toLegacyArray());
+        $this->currentUser->set($user->toLegacyArray());
 
         if (! SupportForum::isModerator((int) $topic->id, 'topic') && ! Permission::can(PermissionEnum::POST_MANAGE, $user)) {
             throw ValidationException::withMessages(['topic' => ['Permission denied.']]);
         }
 
-        $postCount = app(PostRepository::class)->countTopicPosts((int) $topic->id);
-        app(TopicRepository::class)->deleteTopic((int) $topic->id, (int) $topic->forumid, $postCount);
+        $postCount = $this->postRepository->countTopicPosts((int) $topic->id);
+        $this->topicRepository->deleteTopic((int) $topic->id, (int) $topic->forumid, $postCount);
 
         return $this->success(['success' => true], 'Topic deleted');
     }

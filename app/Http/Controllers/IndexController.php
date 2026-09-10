@@ -20,20 +20,24 @@ class IndexController extends Controller
 {
     public function __construct(
         private readonly IndexPageService $indexPageService,
+        private readonly CurrentUser $currentUser,
+        private readonly Globals $globals,
+        private readonly IndexRepository $indexRepository,
+        private readonly ?LegacyRedisCache $legacyRedisCache,
     ) {}
 
     public function legacy(Request $request): View|Response|RedirectResponse
     {
-        $user = app(CurrentUser::class)->get();
+        $user = $this->currentUser->get();
         if ($user === null) {
             $qs = $request->getQueryString();
 
             return redirect('/index.php'.($qs ? '?'.$qs : ''));
         }
 
-        app(IndexRepository::class)->touchLastHome((int) $user['id']);
+        $this->indexRepository->touchLastHome((int) $user['id']);
 
-        if ($request->isMethod('post') && app(Globals::class)->get('showpolls_main', '') === 'yes') {
+        if ($request->isMethod('post') && $this->globals->get('showpolls_main', '') === 'yes') {
             return $this->handlePollVote($request);
         }
 
@@ -45,7 +49,7 @@ class IndexController extends Controller
     private function handlePollVote(Request $request): RedirectResponse
     {
         $choice = $request->input('choice');
-        $user = app(CurrentUser::class)->get();
+        $user = $this->currentUser->get();
 
         if ($choice === null || $choice === '' || (int) $choice != floor((float) $choice)) {
             return redirect('/index.php');
@@ -57,7 +61,7 @@ class IndexController extends Controller
             return redirect('/index.php');
         }
 
-        $poll = app(IndexRepository::class)->getCurrentPoll();
+        $poll = $this->indexRepository->getCurrentPoll();
         if (! is_array($poll) || ! isset($poll['id']) || ! is_array($user)) {
             return redirect('/index.php');
         }
@@ -69,19 +73,19 @@ class IndexController extends Controller
             return redirect('/index.php');
         }
 
-        if (app(IndexRepository::class)->hasVoted($pollId, $user['id'])) {
+        if ($this->indexRepository->hasVoted($pollId, $user['id'])) {
             return redirect('/index.php');
         }
 
-        app(IndexRepository::class)->recordPollVote($pollId, $user['id'], $choiceInt);
+        $this->indexRepository->recordPollVote($pollId, $user['id'], $choiceInt);
 
-        $cache = app(LegacyRedisCache::class);
+        $cache = $this->legacyRedisCache;
         if ($cache !== null) {
             $cache->delete_value('current_poll_content');
             $cache->delete_value('current_poll_result', true);
         }
 
-        $pollvoteBonus = (float) app(Globals::class)->get('pollvote_bonus', 0);
+        $pollvoteBonus = (float) $this->globals->get('pollvote_bonus', 0);
         if ($pollvoteBonus > 0) {
             Bonus::updatePoints((string) '+', (float) $pollvoteBonus, $user['id']);
         }

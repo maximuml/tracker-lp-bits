@@ -24,9 +24,16 @@ use Illuminate\View\View;
 
 class NewsController extends LegacyController
 {
+    public function __construct(
+        private readonly CurrentUser $currentUser,
+        private readonly Globals $globals,
+        private readonly ?LegacyRedisCache $legacyRedisCache,
+        private readonly IndexRepository $indexRepository,
+    ) {}
+
     public function news(Request $request): Response|RedirectResponse|View
     {
-        $langNews = (array) (app(Globals::class)->get('lang_news') ?? []);
+        $langNews = (array) ($this->globals->get('lang_news') ?? []);
         $baseUrl = SiteConfig::current()->basic->baseUrl();
 
         $action = (string) ($request->input('action') ?? '');
@@ -63,7 +70,7 @@ class NewsController extends LegacyController
             }
 
             News::query()->where('id', $newsid)->delete();
-            $cache = app(LegacyRedisCache::class);
+            $cache = $this->legacyRedisCache;
             if ($cache !== null) {
                 $cache->delete_value('recent_news', true);
             }
@@ -96,7 +103,7 @@ class NewsController extends LegacyController
             }
             $notify = $request->input('notify') === 'yes';
 
-            $currentUser = (array) (app(CurrentUser::class)->get() ?? []);
+            $currentUser = (array) ($this->currentUser->get() ?? []);
             $newsId = (int) News::query()->insertGetId([
                 'userid' => (int) ($currentUser['id'] ?? 0),
                 'added' => $added,
@@ -109,7 +116,7 @@ class NewsController extends LegacyController
                 return $this->legacyAbortResponse($langNews['std_error'] ?? 'Error', $langNews['std_something_weird_happened'] ?? 'Something weird happened.');
             }
 
-            $cache = app(LegacyRedisCache::class);
+            $cache = $this->legacyRedisCache;
             if ($cache !== null) {
                 $cache->delete_value('recent_news', true);
             }
@@ -154,7 +161,7 @@ class NewsController extends LegacyController
                     'notify' => $notify,
                 ]);
 
-                $cache = app(LegacyRedisCache::class);
+                $cache = $this->legacyRedisCache;
                 if ($cache !== null) {
                     $cache->delete_value('recent_news', true);
                 }
@@ -216,7 +223,7 @@ class NewsController extends LegacyController
     {
         $data = $request->validated();
 
-        $currentUser = (array) (app(CurrentUser::class)->get() ?? []);
+        $currentUser = (array) ($this->currentUser->get() ?? []);
         $data['userid'] = (int) ($currentUser['id'] ?? 0);
         $data['added'] = now()->toDateTimeString();
         $data['notify'] = ($data['notify'] ?? 'no') === 'yes';
@@ -224,7 +231,7 @@ class NewsController extends LegacyController
         $news = News::query()->create($data);
         event(new NewsCreated($news));
 
-        $cache = app(LegacyRedisCache::class);
+        $cache = $this->legacyRedisCache;
         $cache?->delete_value('recent_news', true);
 
         return $this->success(new NewsResource($news), 'News created');
@@ -243,7 +250,7 @@ class NewsController extends LegacyController
 
         $news->update($data);
 
-        $cache = app(LegacyRedisCache::class);
+        $cache = $this->legacyRedisCache;
         $cache?->delete_value('recent_news', true);
 
         return $this->success(new NewsResource($news->fresh()), 'News updated');
@@ -256,7 +263,7 @@ class NewsController extends LegacyController
     {
         $news->delete();
 
-        $cache = app(LegacyRedisCache::class);
+        $cache = $this->legacyRedisCache;
         $cache?->delete_value('recent_news', true);
 
         return $this->success(['success' => true], 'News deleted');
@@ -269,7 +276,7 @@ class NewsController extends LegacyController
     {
         $maxNews = SiteConfig::current()->main->maxNewsNum(5);
 
-        $items = app(IndexRepository::class)->getLatestNews($maxNews);
+        $items = $this->indexRepository->getLatestNews($maxNews);
 
         return $this->success(NewsResource::collection($items));
     }

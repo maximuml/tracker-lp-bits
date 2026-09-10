@@ -22,9 +22,14 @@ use Illuminate\View\View;
 
 class TorrentDeleteController extends LegacyController
 {
+    public function __construct(
+        private readonly CurrentUser $currentUser,
+        private readonly Globals $globals,
+    ) {}
+
     public function fastDelete(Request $request): Response|RedirectResponse
     {
-        $curUser = app(CurrentUser::class)->get();
+        $curUser = $this->currentUser->get();
         if ($curUser === null) {
             $qs = $request->getQueryString();
 
@@ -35,14 +40,14 @@ class TorrentDeleteController extends LegacyController
 
         $id = (int) request()->input('id');
         if ($id <= 0) {
-            $lang = (array) app(Globals::class)->get('lang_fastdelete', []);
+            $lang = (array) $this->globals->get('lang_fastdelete', []);
 
             return $this->legacyAbortResponse($lang['std_delete_failed'] ?? 'Error', $lang['std_missing_form_data'] ?? 'Invalid id.');
         }
 
         if (! Permissions::userCan(PermissionEnum::TORRENT_MANAGE->value, false, $currentUserId)
             || ! Permissions::userCan(PermissionEnum::TORRENT_DELETE->value, false, $currentUserId)) {
-            $lang = (array) app(Globals::class)->get('lang_fastdelete', []);
+            $lang = (array) $this->globals->get('lang_fastdelete', []);
 
             return $this->legacyAbortResponse($lang['std_delete_failed'] ?? 'Error', $lang['text_no_permission'] ?? 'No permission.');
         }
@@ -55,7 +60,7 @@ class TorrentDeleteController extends LegacyController
 
         $sure = request()->query('sure');
         if (empty($sure)) {
-            $lang = (array) app(Globals::class)->get('lang_fastdelete', []);
+            $lang = (array) $this->globals->get('lang_fastdelete', []);
 
             return $this->legacyAbortResponse(
                 $lang['std_delete_torrent'] ?? 'Delete torrent',
@@ -66,7 +71,7 @@ class TorrentDeleteController extends LegacyController
 
         TorrentOps::deleteTorrents($id, false);
 
-        $uploadtorrentBonus = (float) app(Globals::class)->get('uploadtorrent_bonus', 0);
+        $uploadtorrentBonus = (float) $this->globals->get('uploadtorrent_bonus', 0);
         Bonus::updatePoints('-', $uploadtorrentBonus, (int) $row['owner']);
 
         if ($row['anonymous'] == 1 && $currentUserId == $row['owner']) {
@@ -96,7 +101,7 @@ class TorrentDeleteController extends LegacyController
 
     public function delete(Request $request): View|RedirectResponse|Response
     {
-        $curUser = app(CurrentUser::class)->get();
+        $curUser = $this->currentUser->get();
         if ($curUser === null) {
             $qs = $request->getQueryString();
 
@@ -110,7 +115,7 @@ class TorrentDeleteController extends LegacyController
         }
 
         $id = request()->post('id');
-        $lang = (array) app(Globals::class)->get('lang_delete', []);
+        $lang = (array) $this->globals->get('lang_delete', []);
 
         if ($id === null) {
             return $this->legacyAbortResponse($lang['std_delete_failed'] ?? 'Error', $lang['std_missing_form_date'] ?? 'Missing form data');
@@ -151,7 +156,7 @@ class TorrentDeleteController extends LegacyController
             if (empty($reason[2])) {
                 return $this->legacyAbortResponse($lang['std_delete_failed'] ?? 'Error', $lang['std_describe_violated_rule'] ?? 'Describe violated rule.');
             }
-            $siteName = (string) app(Globals::class)->get('SITENAME', '');
+            $siteName = (string) $this->globals->get('SITENAME', '');
             $reasonstr = $siteName.' rules broken: '.trim($reason[2]);
         } else {
             if (empty($reason[3])) {
@@ -168,7 +173,7 @@ class TorrentDeleteController extends LegacyController
             Log::writeWithContext("Torrent $id ({$row['name']}) was deleted by {$curUser['username']} ($reasonstr)", 'normal');
         }
 
-        $uploadtorrentBonus = (float) app(Globals::class)->get('uploadtorrent_bonus', 0);
+        $uploadtorrentBonus = (float) $this->globals->get('uploadtorrent_bonus', 0);
         Bonus::updatePoints('-', $uploadtorrentBonus, (int) $row['owner']);
 
         if ($currentUserId != $row['owner'] && User::query()->where('id', $row['owner'])->exists()) {

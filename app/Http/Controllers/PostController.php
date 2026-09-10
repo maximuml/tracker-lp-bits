@@ -24,6 +24,13 @@ use Illuminate\Validation\ValidationException;
 
 class PostController extends Controller
 {
+    public function __construct(
+        private readonly ForumRepository $forumRepository,
+        private readonly PostRepository $postRepository,
+        private readonly TopicRepository $topicRepository,
+        private readonly CurrentUser $currentUser,
+    ) {}
+
     /**
      * @return array<string, mixed>
      */
@@ -37,7 +44,7 @@ class PostController extends Controller
         }
 
         $dto = ListPostsDto::fromRequest($request);
-        $posts = app(PostRepository::class)->getTopicPosts((int) $topic->id, null, $dto->offset(), $dto->perPage);
+        $posts = $this->postRepository->getTopicPosts((int) $topic->id, null, $dto->offset(), $dto->perPage);
 
         return $this->success(PostResource::collection($posts));
     }
@@ -66,11 +73,11 @@ class PostController extends Controller
         $dto = StorePostDto::fromRequest($request);
 
         $date = now()->toDateTimeString();
-        $postId = app(PostRepository::class)->createPost((int) $topic->id, (int) $user->id, $dto->body, $date);
+        $postId = $this->postRepository->createPost((int) $topic->id, (int) $user->id, $dto->body, $date);
 
-        app(TopicRepository::class)->setTopicLastPost((int) $topic->id, $postId);
-        app(ForumRepository::class)->incrementForumPostCount((int) $forum->id);
-        app(PostRepository::class)->updateUserLastPost((int) $user->id, $date);
+        $this->topicRepository->setTopicLastPost((int) $topic->id, $postId);
+        $this->forumRepository->incrementForumPostCount((int) $forum->id);
+        $this->postRepository->updateUserLastPost((int) $user->id, $date);
 
         $post = Post::query()->findOrFail($postId);
         $post->load('user');
@@ -114,9 +121,9 @@ class PostController extends Controller
         $dto = UpdatePostDto::fromRequest($request);
 
         $date = now()->toDateTimeString();
-        app(PostRepository::class)->updatePostBody((int) $post->id, $dto->body, $date, (int) $user->id);
+        $this->postRepository->updatePostBody((int) $post->id, $dto->body, $date, (int) $user->id);
 
-        $postInfo = app(PostRepository::class)->getPostEditInfo((int) $post->id);
+        $postInfo = $this->postRepository->getPostEditInfo((int) $post->id);
         if ($dto->subject !== null && $dto->subject !== '' && ! empty($postInfo['is_first_post'])) {
             $topic->update(['subject' => $dto->subject]);
         }
@@ -142,7 +149,7 @@ class PostController extends Controller
             throw ValidationException::withMessages(['post' => ['Permission denied.']]);
         }
 
-        app(PostRepository::class)->deletePost((int) $post->id, (int) $topic->id, (int) $topic->forumid);
+        $this->postRepository->deletePost((int) $post->id, (int) $topic->id, (int) $topic->forumid);
 
         return $this->success(['success' => true], 'Post deleted');
     }
@@ -151,7 +158,7 @@ class PostController extends Controller
     {
         $user = Auth::user();
         if ($user instanceof User) {
-            app(CurrentUser::class)->set($user->toLegacyArray());
+            $this->currentUser->set($user->toLegacyArray());
         }
     }
 

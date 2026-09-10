@@ -23,11 +23,14 @@ class BitbucketUploadController extends Controller
 {
     public function __construct(
         private readonly BitbucketService $bitbucketService,
+        private readonly ?LegacyRedisCache $legacyRedisCache,
+        private readonly CurrentUser $currentUser,
+        private readonly Globals $globals,
     ) {}
 
     public function create(Request $request): View|RedirectResponse
     {
-        if (app(LegacyRedisCache::class) === null) {
+        if ($this->legacyRedisCache === null) {
             return redirect('/bitbucket-upload.php?'.$request->getQueryString());
         }
 
@@ -36,8 +39,8 @@ class BitbucketUploadController extends Controller
             return redirect('/login.php?returnto='.urlencode($request->fullUrl()));
         }
 
-        $currentUser = app(CurrentUser::class)->get() ?? $user->toLegacyArray();
-        app(CurrentUser::class)->set($currentUser);
+        $currentUser = $this->currentUser->get() ?? $user->toLegacyArray();
+        $this->currentUser->set($currentUser);
 
         $lang = $this->loadLang();
 
@@ -45,7 +48,7 @@ class BitbucketUploadController extends Controller
             LegacyResponse::abort($lang['std_sorry'] ?? '', $lang['std_unauthorized_to_upload'] ?? '', false);
         }
 
-        if (app(Globals::class)->get('enablebitbucket_main', 'no') !== 'yes') {
+        if ($this->globals->get('enablebitbucket_main', 'no') !== 'yes') {
             LegacyResponse::permissionDenied();
         }
 
@@ -60,7 +63,7 @@ class BitbucketUploadController extends Controller
 
     public function store(Request $request): View|RedirectResponse
     {
-        if (app(LegacyRedisCache::class) === null) {
+        if ($this->legacyRedisCache === null) {
             return redirect('/bitbucket-upload.php', 307);
         }
 
@@ -69,8 +72,8 @@ class BitbucketUploadController extends Controller
             return redirect('/login.php?returnto='.urlencode($request->fullUrl()));
         }
 
-        $currentUser = app(CurrentUser::class)->get() ?? $user->toLegacyArray();
-        app(CurrentUser::class)->set($currentUser);
+        $currentUser = $this->currentUser->get() ?? $user->toLegacyArray();
+        $this->currentUser->set($currentUser);
 
         $lang = $this->loadLang();
 
@@ -78,7 +81,7 @@ class BitbucketUploadController extends Controller
             LegacyResponse::abort($lang['std_sorry'] ?? '', $lang['std_unauthorized_to_upload'] ?? '', false);
         }
 
-        if (app(Globals::class)->get('enablebitbucket_main', 'no') !== 'yes') {
+        if ($this->globals->get('enablebitbucket_main', 'no') !== 'yes') {
             LegacyResponse::permissionDenied();
         }
 
@@ -145,12 +148,12 @@ class BitbucketUploadController extends Controller
     /** @return array<string, string> */
     private function loadLang(): array
     {
-        if (empty(app(Globals::class)->get('lang_bitbucketupload'))) {
+        if (empty($this->globals->get('lang_bitbucketupload'))) {
             Input::setServerValue('SCRIPT_NAME', '/bitbucket-upload.php');
             require base_path(Locale::scriptFilePath((string) '', (bool) false, (string) ''));
-            app(Globals::class)->set('lang_bitbucketupload', $lang_bitbucketupload ?? []);
+            $this->globals->set('lang_bitbucketupload', $lang_bitbucketupload ?? []);
         }
 
-        return (array) app(Globals::class)->get('lang_bitbucketupload', []);
+        return (array) $this->globals->get('lang_bitbucketupload', []);
     }
 }

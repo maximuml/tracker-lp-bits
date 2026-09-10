@@ -51,7 +51,7 @@ final class CleanupServiceTest extends TestCase
         /** @var Tasks $tasks */
         $tasks = $this->app->make(Tasks::class);
 
-        return new CleanupService($tasks);
+        return new CleanupService($tasks, $this->app->make(Globals::class), $this->app->make(CleanupRepository::class));
     }
 
     private function mockCleanupRepo(): void

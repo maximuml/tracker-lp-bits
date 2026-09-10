@@ -13,6 +13,7 @@ use App\Support\Logger;
 use App\Support\RequestContext;
 use App\Support\Time;
 use App\Support\UserDisplay;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -49,6 +50,8 @@ final class CleanupService
 
     public function __construct(
         private readonly Tasks $tasks,
+        private readonly Globals $globals,
+        private readonly CleanupRepository $cleanupRepository,
     ) {}
 
     /**
@@ -58,7 +61,7 @@ final class CleanupService
      */
     public function triggerCron(): string
     {
-        $useCronTriggerCleanUp = (bool) app(Globals::class)->get('useCronTriggerCleanUp', true);
+        $useCronTriggerCleanUp = (bool) $this->globals->get('useCronTriggerCleanUp', true);
 
         if (! $useCronTriggerCleanUp) {
             return "Forbidden. Clean-up is set to be browser-triggered.\n";
@@ -81,7 +84,7 @@ final class CleanupService
      */
     public function runFull(bool $forceAll = false, bool $printProgress = true): string
     {
-        if (! \app()->runningInConsole() && UserDisplay::currentClass() < \constant('UC_SYSOP')) {
+        if (! App::runningInConsole() && UserDisplay::currentClass() < \constant('UC_SYSOP')) {
             return 'forbidden';
         }
 
@@ -202,11 +205,11 @@ final class CleanupService
 
         // Class-specific batch jobs are kept in their existing repository form.
         if ($level === 1) {
-            app(CleanupRepository::class)->runBatchJobCalculateUserSeedBonus($requestId);
+            $this->cleanupRepository->runBatchJobCalculateUserSeedBonus($requestId);
         } elseif ($level === 3) {
-            app(CleanupRepository::class)->runBatchJobUpdateTorrentSeedersEtc($requestId);
+            $this->cleanupRepository->runBatchJobUpdateTorrentSeedersEtc($requestId);
         } elseif ($level === 4) {
-            app(CleanupRepository::class)->runBatchJobUpdateUserSeedingLeechingTime($requestId);
+            $this->cleanupRepository->runBatchJobUpdateUserSeedingLeechingTime($requestId);
         }
 
         return $output;

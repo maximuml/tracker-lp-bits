@@ -25,15 +25,6 @@ require __DIR__.'/vendor/autoload.php';
 
 $app = require_once __DIR__.'/bootstrap/app.php';
 
-// Load the legacy bootstrap for artisan commands that still need legacy helpers.
-// Web requests load this via public/index.php; migration/install commands must
-// not load it because the database is not yet populated.
-$command = $_SERVER['argv'][1] ?? '';
-if (in_array($command, ['cleanup:run', 'cleanup:tasks'], true)) {
-    $rootpath = __DIR__ . '/';
-    \App\Support\LegacyBootstrap::bootConsole($rootpath);
-}
-
 /*
 |--------------------------------------------------------------------------
 | Run The Artisan Application
@@ -46,6 +37,17 @@ if (in_array($command, ['cleanup:run', 'cleanup:tasks'], true)) {
 */
 
 $kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+
+// Load the legacy bootstrap for artisan commands that still need legacy
+// helpers. Web requests load this via public/index.php; migration/install
+// commands must not load it because the database is not yet populated. The
+// kernel must be bootstrapped first so facades and the console 'request'
+// binding (SetRequestForConsole) exist for legacy components.
+$command = $_SERVER['argv'][1] ?? '';
+if (in_array($command, ['cleanup:run', 'cleanup:tasks'], true)) {
+    $kernel->bootstrap();
+    \App\Support\LegacyBootstrap::bootConsole(__DIR__ . '/');
+}
 
 $status = $kernel->handle(
     $input = new Symfony\Component\Console\Input\ArgvInput,

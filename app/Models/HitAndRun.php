@@ -151,6 +151,7 @@ class HitAndRun extends NexusModel
             return '---';
         }
         $seedTimeMinimum = HitAndRun::getConfig('seed_time_minimum', $searchBoxId);
+        $seedTimeMinimum = is_numeric($seedTimeMinimum) ? (float) $seedTimeMinimum : 0;
         $diffInSeconds = 3600 * $seedTimeMinimum - $this->snatch->seedtime;
 
         return Format::prettyTimeWithLocale($diffInSeconds);

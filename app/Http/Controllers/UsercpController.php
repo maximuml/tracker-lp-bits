@@ -124,7 +124,9 @@ class UsercpController extends LegacyController
         };
 
         if ($rules !== null) {
-            $validator = validator($request->all(), $rules);
+            // W2-02: validate only the subset of request fields that have rules.
+            // This keeps the dynamic rule selection while avoiding $request->all().
+            $validator = validator($request->only(array_keys($rules)), $rules);
             if ($validator->fails()) {
                 return redirect('/usercp.php?action='.$action);
             }

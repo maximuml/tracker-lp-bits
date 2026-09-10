@@ -7,7 +7,6 @@ namespace Tests\Unit\Services;
 use App\Enums\UserClass as UserClassEnum;
 use App\Enums\UserStatus;
 use App\Exceptions\AuthenticationException;
-use App\Repositories\UserModerationRepository;
 use App\Services\RegistrationService;
 use App\Services\SecureTokenService;
 use App\Services\WebAuthService;
@@ -63,18 +62,16 @@ final class RegistrationServiceTest extends TestCase
     {
         /** @var WebAuthService&Mockery\MockInterface $authService */
         $authService = Mockery::mock(WebAuthService::class);
-        /** @var UserModerationRepository&Mockery\MockInterface $userModerationRepository */
-        $userModerationRepository = Mockery::mock(UserModerationRepository::class);
+        $this->app->instance(WebAuthService::class, $authService);
 
-        return new RegistrationService($authService, $userModerationRepository);
+        return app(RegistrationService::class);
     }
 
     private function serviceWithAuth(WebAuthService $authService): RegistrationService
     {
-        /** @var UserModerationRepository&Mockery\MockInterface $userModerationRepository */
-        $userModerationRepository = Mockery::mock(UserModerationRepository::class);
+        $this->app->instance(WebAuthService::class, $authService);
 
-        return new RegistrationService($authService, $userModerationRepository);
+        return app(RegistrationService::class);
     }
 
     /** @return array<string, string> */

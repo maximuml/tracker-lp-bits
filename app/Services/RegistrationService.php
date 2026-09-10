@@ -4,57 +4,40 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Enums\InviteValid;
 use App\Enums\UserClass as UserClassEnum;
 use App\Enums\UserGender;
 use App\Enums\UserStatus;
 use App\Events\UserCreated;
-use App\Events\UserUpdated;
 use App\Exceptions\AuthenticationException;
 use App\Models\Invite;
 use App\Models\Message;
 use App\Models\MessageTemplate;
 use App\Models\User;
 use App\Repositories\UserModerationRepository;
-use App\Support\AuthCookie;
-use App\Support\Cache;
-use App\Support\Captcha;
 use App\Support\Config\SiteConfig;
 use App\Support\Email;
 use App\Support\Http;
 use App\Support\Locale;
-use App\Support\Mail;
 use App\Support\Network;
-use App\Support\PasswordHasher;
-use App\Support\Security\PasskeyGenerator;
 use App\Support\Token;
 use App\Support\Url;
 use App\Support\Validators;
-use Illuminate\Support\Facades\Cache as CacheFacade;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Handles user registration, account confirmation, and confirmation-resend flows.
+ * Orchestrates the user registration flow.
  */
 class RegistrationService
 {
     private const MAX_USERNAME_LENGTH = 12;
 
-    private const MIN_PASSWORD_LENGTH = 6;
-
-    private const MAX_PASSWORD_LENGTH = 40;
-
-    private const CONFIRMATION_TOKEN_TABLE = 'email_confirmation_tokens';
-
-    private const RESEND_RATE_LIMIT = 5;
-
-    private const RESEND_RATE_LIMIT_TTL = 3600;
-
     public function __construct(
         private WebAuthService $authService,
+        private EmailConfirmation $emailConfirmation,
+        private InviteValidator $inviteValidator,
+        private PasswordSetup $passwordSetup,
         private UserModerationRepository $userModerationRepository,
-        private readonly SecureTokenService $tokenService = new SecureTokenService,
-        private readonly OutboxService $outboxService = new OutboxService,
+        private OutboxService $outboxService,
     ) {}
 
     /**
@@ -112,34 +95,12 @@ class RegistrationService
         $type = ($data['type'] ?? '') === 'invite' ? 'invite' : 'normal';
         $this->assertCanRegister($type, $ip, $langSignup, $langFunctions);
 
-        $this->verifyCaptcha($data, $ip, $langFunctions);
+        $this->emailConfirmation->verifyCaptcha($data, $ip, $langFunctions);
 
         $isInvite = $type === 'invite';
         $code = $isInvite ? trim((string) ($data['hash'] ?? '')) : '';
         $inviter = $isInvite ? (int) ($data['inviter'] ?? 0) : 0;
-        $invite = null;
-
-        if ($isInvite) {
-            if ($code === '') {
-                throw new AuthenticationException(
-                    $this->msg($langSignup, 'std_error', 'Error').': '.$this->msg($langSignup, 'std_uninvited', 'Require invitation number.')
-                );
-            }
-
-            $invite = Invite::query()
-                ->where('hash', $code)
-                ->where('valid', InviteValid::YES->value)
-                ->first();
-
-            if (! $invite) {
-                throw new AuthenticationException($this->msg($langSignup, 'std_uninvited', 'Incorrect invitation code.'));
-            }
-
-            if ((int) $invite->inviter !== $inviter) {
-                Invite::query()->where('id', $invite->id)->update(['valid' => InviteValid::NO->value]);
-                throw new AuthenticationException(Locale::trans('invite.invalid_inviter', [], $langFolder));
-            }
-        }
+        $invite = $isInvite ? $this->inviteValidator->validate($code, $inviter, $langSignup, $langFolder) : null;
 
         $isPreRegister = SiteConfig::current()->system->isInvitePreEmailAndUsername();
 
@@ -189,25 +150,18 @@ class RegistrationService
             );
         }
 
-        // Always use argon2id for new passwords. The client sends plaintext
-        // over HTTPS (see Form::passwordHashJs), so we always have the raw
-        // password to feed to password_hash().
-        $passhash = PasswordHasher::hash($passwordInput);
-        $secret = Token::randomHex();
-        $passhashAlgo = PasswordHasher::ALGO_ARGON2ID;
+        $passwordData = $this->passwordSetup->forNewUser($passwordInput);
         $authKey = Token::randomHex();
-        $passkey = app(PasskeyGenerator::class)->generate();
         $verification = (string) SiteConfig::current()->main->verification('email');
-        $editsecret = $verification === 'admin' ? '' : $secret;
 
         $userData = [
             'username' => $username,
-            'passhash' => $passhash,
-            'passhash_algo' => $passhashAlgo,
-            'passkey' => $passkey,
-            'secret' => $secret,
+            'passhash' => $passwordData['passhash'],
+            'passhash_algo' => $passwordData['passhash_algo'],
+            'passkey' => $passwordData['passkey'],
+            'secret' => $passwordData['secret'],
             'auth_key' => $authKey,
-            'editsecret' => $editsecret,
+            'editsecret' => $verification === 'admin' ? '' : $passwordData['secret'],
             'email' => $email,
             'country' => $country,
             'gender' => UserGender::fromStringSafe($gender)->value,
@@ -222,7 +176,7 @@ class RegistrationService
             'ip' => $ip,
         ];
 
-        if ($isInvite) {
+        if ($isInvite && $invite !== null) {
             $userData['invited_by'] = (int) $invite->inviter;
         }
 
@@ -240,19 +194,19 @@ class RegistrationService
                 'username' => $user->username,
                 'email' => $user->email,
                 'class' => $user->class,
-                'invited_by' => $isInvite ? (int) $invite->inviter : null,
+                'invited_by' => $isInvite && $invite !== null ? (int) $invite->inviter : null,
             ],
         );
 
         $this->sendWelcomeMessage($user, $langTakesignup);
         $this->maybeAddTemporaryInvite($id);
 
-        if ($isInvite) {
-            $this->consumeInvite($invite, $id, $email, $username);
+        if ($isInvite && $invite !== null) {
+            $this->inviteValidator->consume($invite, $id, $email, $username);
         }
 
         // W1-05: Generate a secure confirmation token (CSPRNG + SHA-256 digest)
-        $confirmToken = $this->generateConfirmationToken($id, $ip);
+        $confirmToken = $this->emailConfirmation->generateConfirmationToken($id, $ip);
 
         $redirect = $this->resolveSignupRedirect($id, $confirmToken, $user, $verification, $email, $langFolder, $langTakesignup);
 
@@ -264,45 +218,7 @@ class RegistrationService
      */
     public function confirm(int $id, string $confirmToken, string $ip): User
     {
-        $user = User::query()->find($id, ['id', 'passhash', 'secret', 'auth_key', 'editsecret', 'status', 'username']);
-
-        if (! $user) {
-            abort(404);
-        }
-
-        if ($user->status === UserStatus::CONFIRMED) {
-            return $user;
-        }
-
-        if ($user->status !== UserStatus::PENDING) {
-            abort(404);
-        }
-
-        // W1-05: Verify token via SecureTokenService (atomic consumption)
-        $tokenRow = $this->tokenService->consume(self::CONFIRMATION_TOKEN_TABLE, $confirmToken, [
-            'consumed_at' => now()->toDateTimeString(),
-        ]);
-
-        if ($tokenRow === null || (int) $tokenRow['user_id'] !== $id) {
-            abort(404);
-        }
-
-        $affected = User::query()->where('id', $id)->where('status', UserStatus::PENDING->value)->update([
-            'status' => UserStatus::CONFIRMED->value,
-            'editsecret' => '',
-        ]);
-
-        if (! $affected) {
-            abort(404);
-        }
-
-        $user->refresh();
-
-        event(new UserUpdated($user));
-        Cache::clearUser($id, '');
-        AuthCookie::setLoginCookie($id);
-
-        return $user;
+        return $this->emailConfirmation->confirm($id, $confirmToken, $ip);
     }
 
     /**
@@ -314,161 +230,7 @@ class RegistrationService
      */
     public function resendConfirmation(array $data, string $ip, string $langFolder, array $langConfirmResend, array $langFunctions): string
     {
-        if (SiteConfig::current()->main->verification('email') === 'admin') {
-            throw new AuthenticationException($this->msg($langConfirmResend, 'std_need_admin_verification', 'Account needs manual verification from administrators.'));
-        }
-
-        $this->authService->assertNotBanned($ip);
-        $this->verifyCaptcha($data, $ip, $langFunctions);
-
-        $email = Email::sanitizeForDisplay(trim((string) ($data['email'] ?? '')));
-        $password = trim((string) ($data['wantpassword'] ?? ''));
-        $passAgain = trim((string) ($data['passagain'] ?? ''));
-
-        if ($email === '' || $password === '' || $passAgain === '') {
-            throw new AuthenticationException($this->msg($langConfirmResend, 'std_fields_blank', 'Don\'t leave any fields blank.'));
-        }
-
-        if (! Email::isWellFormed($email)) {
-            $this->authService->recordFailedAttempt($ip);
-            throw new AuthenticationException($this->msg($langConfirmResend, 'std_invalid_email_address', 'Invalid email address!'));
-        }
-
-        $user = User::query()->where('email', $email)->first();
-
-        if (! $user) {
-            $this->authService->recordFailedAttempt($ip);
-            throw new AuthenticationException($this->msg($langConfirmResend, 'std_email_not_found', 'The email address was not found in the database.'));
-        }
-
-        if ($user->status !== UserStatus::PENDING) {
-            $this->authService->recordFailedAttempt($ip);
-            throw new AuthenticationException($this->msg($langConfirmResend, 'std_user_already_confirm', 'User using this email address is already confirmed.'));
-        }
-
-        $this->validatePassword($password, $passAgain, (string) $user->username, $langConfirmResend);
-
-        // W1-05: Rate-limit resend requests (max 5 per hour per IP)
-        $this->assertResendRateLimit($ip, $langConfirmResend);
-
-        $secret = Token::randomHex();
-        $passhash = PasswordHasher::hash($password);
-        $verification = (string) SiteConfig::current()->main->verification('email');
-        $editsecret = $verification === 'admin' ? '' : $secret;
-
-        $affected = User::query()->where('id', $user->id)->update([
-            'passhash' => $passhash,
-            'passhash_algo' => PasswordHasher::ALGO_ARGON2ID,
-            'secret' => $secret,
-            'editsecret' => $editsecret,
-        ]);
-
-        if (! $affected) {
-            throw new AuthenticationException($this->msg($langConfirmResend, 'std_database_error', 'Database error. Please contact an administrator about this.'));
-        }
-
-        Cache::clearUser($user->id, '');
-
-        // W1-05: Revoke old confirmation tokens and generate a new secure one
-        $this->revokeConfirmationTokens($user->id);
-        $confirmToken = $this->generateConfirmationToken((int) $user->id, $ip);
-
-        $this->sendConfirmationEmail((string) $user->username, $email, (int) $user->id, $confirmToken, $ip, $langFolder, $langConfirmResend);
-
-        return 'ok.php?type=signup&email='.rawurlencode($email);
-    }
-
-    /**
-     * @param  array<string, string>  $langFunctions
-     * @param  array<string, mixed>  $data
-     */
-    private function verifyCaptcha(array $data, string $ip, array $langFunctions): void
-    {
-        if (! $this->authService->isCaptchaEnabled()) {
-            return;
-        }
-
-        $payload = [
-            'imagehash' => (string) ($data['imagehash'] ?? ''),
-            'imagestring' => (string) ($data['imagestring'] ?? ''),
-            'request' => $data,
-        ];
-
-        try {
-            $verified = Captcha::manager()->driver()->verify($payload, ['ip' => $ip]);
-        } catch (\Throwable $exception) {
-            $verified = false;
-        }
-
-        if (! $verified) {
-            $this->authService->recordFailedAttempt($ip);
-            throw new AuthenticationException($this->msg($langFunctions, 'std_invalid_image_code', 'Invalid captcha response.'));
-        }
-    }
-
-    /**
-     * @param  array<string, string>  $langSignup
-     * @param  array<string, string>  $langTakesignup
-     */
-    private function validateSignupFields(
-        string $username,
-        string $email,
-        string $password,
-        string $passAgain,
-        string $gender,
-        int $country,
-        bool $preRegistered,
-        array $langSignup,
-        array $langTakesignup,
-    ): void {
-        if (! $preRegistered && ($username === '' || $password === '' || $email === '' || $country === 0 || $gender === '')) {
-            throw new AuthenticationException($this->msg($langTakesignup, 'std_blank_field', 'Don\'t leave any fields blank.'));
-        }
-
-        if (strlen($username) > self::MAX_USERNAME_LENGTH) {
-            throw new AuthenticationException($this->msg($langTakesignup, 'std_username_too_long', 'Sorry, username is too long (max is 12 chars).'));
-        }
-
-        if (! $preRegistered && ! Validators::isUsername($username)) {
-            throw new AuthenticationException($this->msg($langTakesignup, 'std_invalid_username', 'Invalid username.'));
-        }
-
-        if (! Email::isWellFormed($email)) {
-            throw new AuthenticationException($this->msg($langTakesignup, 'std_wrong_email_address_format', 'That doesn\'t look like a valid email address.'));
-        }
-
-        $this->validatePassword($password, $passAgain, $username, $langTakesignup);
-
-        $allowedGenders = [UserGender::MALE->stringValue(), UserGender::FEMALE->stringValue()];
-        if (! in_array($gender, $allowedGenders, true)) {
-            throw new AuthenticationException($this->msg($langTakesignup, 'std_invalid_gender', 'Invalid Gender!'));
-        }
-
-        if (DB::table('countries')->where('id', $country)->doesntExist()) {
-            throw new AuthenticationException($this->msg($langTakesignup, 'std_invalid_gender', 'Invalid country.'));
-        }
-    }
-
-    /**
-     * @param  array<string, string>  $lang
-     */
-    private function validatePassword(string $password, string $passAgain, string $username, array $lang): void
-    {
-        if ($password !== $passAgain) {
-            throw new AuthenticationException($this->msg($lang, 'std_passwords_unmatched', 'The passwords didn\'t match!'));
-        }
-
-        if (strlen($password) < self::MIN_PASSWORD_LENGTH) {
-            throw new AuthenticationException($this->msg($lang, 'std_password_too_short', 'Sorry, password is too short (min is 6 chars).'));
-        }
-
-        if (strlen($password) > self::MAX_PASSWORD_LENGTH) {
-            throw new AuthenticationException($this->msg($lang, 'std_password_too_long', 'Sorry, password is too long (max is 40 chars).'));
-        }
-
-        if ($password === $username) {
-            throw new AuthenticationException($this->msg($lang, 'std_password_equals_username', 'Sorry, password cannot be same as user name.'));
-        }
+        return $this->emailConfirmation->resendConfirmation($data, $ip, $langFolder, $langConfirmResend, $langFunctions);
     }
 
     /**
@@ -504,44 +266,6 @@ class RegistrationService
         $this->userModerationRepository->addTemporaryInvite(null, $userId, 'increment', $tmpInviteCount, 7);
     }
 
-    private function consumeInvite(Invite $invite, int $userId, string $email, string $username): void
-    {
-        Invite::query()->where('id', $invite->id)->update([
-            'valid' => InviteValid::NO->value,
-            'invitee_register_uid' => $userId,
-            'invitee_register_email' => $email,
-            'invitee_register_username' => $username,
-        ]);
-
-        // T-24: Record invite consumed event in outbox
-        $this->outboxService->recordInviteConsumed(
-            inviteId: (int) $invite->id,
-            inviterId: (int) $invite->inviter,
-            inviteeId: $userId,
-            inviteData: [
-                'email' => $email,
-                'username' => $username,
-            ],
-        );
-
-        $inviter = (int) $invite->inviter;
-        $locale = Locale::userLocale($inviter);
-        $subject = Locale::trans('user.msg_invited_user_has_registered', [], $locale);
-        $msg = Locale::trans('user.msg_user_you_invited', [], $locale)
-            .$username
-            .Locale::trans('user.msg_has_registered', [], $locale);
-
-        Message::add([
-            'sender' => null,
-            'receiver' => $inviter,
-            'subject' => $subject,
-            'added' => now()->toDateTimeString(),
-            'msg' => $msg,
-        ]);
-
-        Cache::clearUser($inviter, '');
-    }
-
     /**
      * @param  array<string, string>  $langTakesignup
      */
@@ -564,72 +288,52 @@ class RegistrationService
             return $baseUrl.'/confirm.php?id='.$userId.'&secret='.$confirmToken;
         }
 
-        $this->sendConfirmationEmail((string) $user->username, $email, $userId, $confirmToken, Network::clientIp(), $langFolder, $langTakesignup);
+        $this->emailConfirmation->sendConfirmationEmail((string) $user->username, $email, $userId, $confirmToken, Network::clientIp(), $langFolder, $langTakesignup);
 
         return 'ok.php?type=signup&email='.rawurlencode($email);
     }
 
     /**
-     * @param  array<string, string>  $langMail  Either $lang_takesignup or $lang_confirm_resend
+     * @param  array<string, string>  $langSignup
+     * @param  array<string, string>  $langTakesignup
      */
-    private function sendConfirmationEmail(
+    private function validateSignupFields(
         string $username,
         string $email,
-        int $userId,
-        string $confirmToken,
-        string $ip,
-        string $langFolder,
-        array $langMail,
+        string $password,
+        string $passAgain,
+        string $gender,
+        int $country,
+        bool $preRegistered,
+        array $langSignup,
+        array $langTakesignup,
     ): void {
-        $baseUrl = SiteConfig::current()->basic->baseUrl();
-        if (! str_contains($baseUrl, '://')) {
-            $baseUrl = Http::protocolPrefix(Url::isSecure()).$baseUrl;
+        if (! $preRegistered && ($username === '' || $password === '' || $email === '' || $country === 0 || $gender === '')) {
+            throw new AuthenticationException($this->msg($langTakesignup, 'std_blank_field', 'Don\'t leave any fields blank.'));
         }
-        $baseUrl = rtrim($baseUrl, '/');
-        $confirmUrl = $baseUrl.'/confirm.php?id='.$userId.'&secret='.$confirmToken;
-        $resendUrl = $baseUrl.'/confirm_resend.php';
-        $siteName = SiteConfig::current()->basic->siteName();
-        $reportEmail = SiteConfig::current()->main->reportEmail('');
 
-        $mailOne = $langMail['mail_one'] ?? 'Hi ';
-        $mailTwo = sprintf($langMail['mail_two'] ?? ',<br /><br />You have requested a new user account on %s and you have <br />specified this address ', $siteName);
-        $mailThree = $langMail['mail_three'] ?? ' as user contact.<br /><br />If you did not do this, please ignore this email. The person who entered your <br />email address had the IP address ';
-        $mailFour = $langMail['mail_four'] ?? '. Please do not reply.<br /><br />To confirm your user registration, you have to follow ';
-        $mailFourOne = $langMail['mail_four_1'] ?? '<br /><br />If the Link above is broken or expired, try to send a new confirmation email again from ';
-        $mailThisLink = $langMail['mail_this_link'] ?? 'THIS LINK';
-        $mailHere = $langMail['mail_here'] ?? 'HERE';
-        $mailFive = sprintf($langMail['mail_five'] ?? '', $siteName, $siteName, $reportEmail, $siteName);
-        $title = $siteName.($langMail['mail_title'] ?? ' User Registration Confirmation');
+        if (strlen($username) > self::MAX_USERNAME_LENGTH) {
+            throw new AuthenticationException($this->msg($langTakesignup, 'std_username_too_long', 'Sorry, username is too long (max is 12 chars).'));
+        }
 
-        $body = $mailOne
-            .htmlspecialchars($username)
-            .$mailTwo
-            .'('.htmlspecialchars($email).')'
-            .$mailThree
-            .htmlspecialchars($ip)
-            .$mailFour
-            .'<b><a href="javascript:void(null)" onclick="window.open(\''.$confirmUrl.'\')">'
-            .$mailThisLink
-            .'</a></b><br />'
-            .$confirmUrl
-            .$mailFourOne
-            .'<b><a href="javascript:void(null)" onclick="window.open(\''.$resendUrl.'\')">'.$mailHere.'</a></b><br />'
-            .$resendUrl
-            .'<br />'
-            .$mailFive;
+        if (! $preRegistered && ! Validators::isUsername($username)) {
+            throw new AuthenticationException($this->msg($langTakesignup, 'std_invalid_username', 'Invalid username.'));
+        }
 
-        Mail::sentLegacy(
-            $email,
-            $siteName,
-            SiteConfig::current()->main->siteEmail(''),
-            $title,
-            $body,
-            'signup',
-            false,
-            false,
-            '',
-            'UTF-8',
-        );
+        if (! Email::isWellFormed($email)) {
+            throw new AuthenticationException($this->msg($langTakesignup, 'std_wrong_email_address_format', 'That doesn\'t look like a valid email address.'));
+        }
+
+        $this->passwordSetup->validate($password, $passAgain, $username, $langTakesignup);
+
+        $allowedGenders = [UserGender::MALE->stringValue(), UserGender::FEMALE->stringValue()];
+        if (! in_array($gender, $allowedGenders, true)) {
+            throw new AuthenticationException($this->msg($langTakesignup, 'std_invalid_gender', 'Invalid Gender!'));
+        }
+
+        if (DB::table('countries')->where('id', $country)->doesntExist()) {
+            throw new AuthenticationException($this->msg($langTakesignup, 'std_invalid_gender', 'Invalid country.'));
+        }
     }
 
     /**
@@ -638,51 +342,5 @@ class RegistrationService
     private function msg(array $lang, string $key, string $fallback): string
     {
         return (string) ($lang[$key] ?? $fallback);
-    }
-
-    /**
-     * W1-05: Generate a secure confirmation token and store its digest.
-     */
-    private function generateConfirmationToken(int $userId, string $ip): string
-    {
-        $token = $this->tokenService->generate();
-        $this->tokenService->store(self::CONFIRMATION_TOKEN_TABLE, $token, [
-            'user_id' => $userId,
-            'ip' => $ip,
-        ]);
-
-        return $token;
-    }
-
-    /**
-     * W1-05: Revoke all existing confirmation tokens for a user.
-     */
-    private function revokeConfirmationTokens(int $userId): void
-    {
-        DB::table(self::CONFIRMATION_TOKEN_TABLE)
-            ->where('user_id', $userId)
-            ->whereNull('consumed_at')
-            ->update(['revoked' => 1]);
-    }
-
-    /**
-     * W1-05: Rate-limit resend requests per IP (max 5 per hour).
-     *
-     * @param  array<string, string>  $langConfirmResend
-     */
-    private function assertResendRateLimit(string $ip, array $langConfirmResend): void
-    {
-        $cacheKey = "confirm_resend_rate:{$ip}";
-        $count = (int) (CacheFacade::get($cacheKey, 0));
-
-        if ($count >= self::RESEND_RATE_LIMIT) {
-            throw new AuthenticationException($this->msg(
-                $langConfirmResend,
-                'std_rate_limited',
-                'Too many confirmation email requests. Please try again later.',
-            ));
-        }
-
-        CacheFacade::put($cacheKey, $count + 1, self::RESEND_RATE_LIMIT_TTL);
     }
 }

@@ -30,6 +30,8 @@ final class ForumPageService
         private readonly ForumComposeService $composeService,
         private readonly ForumTopicViewService $topicViewService,
         private readonly ForumListingService $listingService,
+        private readonly CurrentUser $currentUser,
+        private readonly Globals $globals,
     ) {}
 
     /**
@@ -37,8 +39,8 @@ final class ForumPageService
      */
     public function build(Request $request): ForumPageViewModel
     {
-        $curUser = (array) (app(CurrentUser::class)->get() ?? []);
-        $lang = (array) (app(Globals::class)->get('lang_forums') ?? []);
+        $curUser = (array) ($this->currentUser->get() ?? []);
+        $lang = (array) ($this->globals->get('lang_forums') ?? []);
         $userId = (int) ($curUser['id'] ?? 0);
 
         // Global variables previously set by the procedural partial.
@@ -53,10 +55,10 @@ final class ForumPageService
             $topicsperpage = $mainConfig->forumTopicsPerPage(20);
         }
         $todayDate = date('Y-m-d');
-        app(Globals::class)->set('maxsubjectlength', $maxsubjectlength);
-        app(Globals::class)->set('postsperpage', $postsperpage);
-        app(Globals::class)->set('topicsperpage', $topicsperpage);
-        app(Globals::class)->set('today_date', $todayDate);
+        $this->globals->set('maxsubjectlength', $maxsubjectlength);
+        $this->globals->set('postsperpage', $postsperpage);
+        $this->globals->set('topicsperpage', $topicsperpage);
+        $this->globals->set('today_date', $todayDate);
 
         $action = htmlspecialchars(trim((string) request()->query('action')));
 

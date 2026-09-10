@@ -23,6 +23,14 @@ use Illuminate\Http\Request;
  */
 final class ForumComposeService
 {
+    public function __construct(
+        private readonly ForumRepository $forumRepository,
+        private readonly TopicRepository $topicRepository,
+        private readonly PostRepository $postRepository,
+        private readonly CurrentUser $currentUser,
+        private readonly Globals $globals,
+    ) {}
+
     /**
      * Build the compose-frame HTML for the requested type.
      *
@@ -31,8 +39,8 @@ final class ForumComposeService
      */
     public function buildComposeFrame(int $id, string $type, array $lang): array
     {
-        $maxsubjectlength = (int) app(Globals::class)->get('maxsubjectlength');
-        $CURUSER = (array) (app(CurrentUser::class)->get() ?? []);
+        $maxsubjectlength = (int) $this->globals->get('maxsubjectlength');
+        $CURUSER = (array) ($this->currentUser->get() ?? []);
         $hassubject = false;
         $subject = '';
         $body = '';
@@ -43,18 +51,18 @@ final class ForumComposeService
         echo "<form id=\"compose\" method=\"post\" name=\"compose\" action=\"?action=post\">\n";
         switch ($type) {
             case 'new':
-                $forumname = app(ForumRepository::class)->getForumName((int) $id) ?? '';
+                $forumname = $this->forumRepository->getForumName((int) $id) ?? '';
                 $title = ($lang['text_new_topic_in'] ?? '').' <a href="'.htmlspecialchars('?action=viewforum&forumid='.$id).'">'.htmlspecialchars($forumname).'</a> '.($lang['text_forum'] ?? '');
                 $hassubject = true;
                 break;
 
             case 'reply':
-                $topicname = app(TopicRepository::class)->getTopicSubject((int) $id) ?? '';
+                $topicname = $this->topicRepository->getTopicSubject((int) $id) ?? '';
                 $title = ($lang['text_reply_to_topic'] ?? '').' <a href="'.htmlspecialchars('?action=viewtopic&topicid='.$id).'">'.htmlspecialchars($topicname).'</a> ';
                 break;
 
             case 'quote':
-                $post = app(PostRepository::class)->getPostForQuote((int) $id);
+                $post = $this->postRepository->getPostForQuote((int) $id);
                 if (! $post) {
                     ob_get_clean();
                     LegacyResponse::abort($lang['std_error'] ?? '', $lang['std_no_post_id'] ?? '');
@@ -71,7 +79,7 @@ final class ForumComposeService
                 break;
 
             case 'edit':
-                $post = app(PostRepository::class)->getPostForEdit((int) $id);
+                $post = $this->postRepository->getPostForEdit((int) $id);
                 if (! $post) {
                     ob_get_clean();
 
@@ -150,7 +158,7 @@ final class ForumComposeService
         $postid = (int) (request()->query('postid') ?? 0);
         $this->checkWhetherExist($postid, 'post', $lang);
 
-        $post = app(PostRepository::class)->getPostWithTopic((int) $postid);
+        $post = $this->postRepository->getPostWithTopic((int) $postid);
         if (! $post) {
             LegacyResponse::abort($lang['std_error'] ?? '', $lang['std_no_post_id'] ?? '');
 
@@ -174,13 +182,13 @@ final class ForumComposeService
         LegacyResponse::assertId($id, true);
         switch ($place) {
             case 'forum':
-                if (! app(ForumRepository::class)->forumExists((int) $id)) {
+                if (! $this->forumRepository->forumExists((int) $id)) {
                     LegacyResponse::abort($lang['std_error'] ?? '', $lang['std_no_forum_id'] ?? '');
                 }
                 break;
 
             case 'topic':
-                $forumid = app(TopicRepository::class)->topicExists((int) $id);
+                $forumid = $this->topicRepository->topicExists((int) $id);
                 if (! $forumid) {
                     LegacyResponse::abort($lang['std_error'] ?? '', $lang['std_bad_topic_id'] ?? '');
                 }
@@ -188,7 +196,7 @@ final class ForumComposeService
                 break;
 
             case 'post':
-                $topicid = app(PostRepository::class)->postExists((int) $id);
+                $topicid = $this->postRepository->postExists((int) $id);
                 if (! $topicid) {
                     LegacyResponse::abort($lang['std_error'] ?? '', $lang['std_no_post_id'] ?? '');
                 }

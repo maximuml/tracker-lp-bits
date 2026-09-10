@@ -29,9 +29,9 @@ final class AppCallByNamespaceRatchetTest extends TestCase
      */
     private const BASELINES = [
         'Controllers' => 255,
-        'Services' => 71,
-        'Repositories' => 74,
-        'Other' => 733,
+        'Services' => 37,
+        'Repositories' => 62,
+        'Other' => 708,
     ];
 
     public function test_app_calls_in_controllers_do_not_exceed_baseline(): void

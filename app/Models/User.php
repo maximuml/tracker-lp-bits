@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Auth\Permission;
-use App\Enums\Permission\PermissionEnum;
-use App\Enums\Permission\RoutePermissionEnum;
 use App\Enums\UserAcceptPms;
 use App\Enums\UserAppendPromotion;
 use App\Enums\UserClass;
@@ -18,10 +15,12 @@ use App\Enums\UserPrivacy;
 use App\Enums\UserStatus;
 use App\Enums\UserTimeType;
 use App\Enums\UserTooltip;
-use App\Exceptions\NexusException;
 use App\Models\Traits\HasClassLadder;
 use App\Models\Traits\HasFilamentAccess;
 use App\Models\Traits\HasUserAccessors;
+use App\Models\Traits\HasUserApi;
+use App\Models\Traits\HasUserAuth;
+use App\Models\Traits\HasUserModeration;
 use App\Models\Traits\HasUserRelationships;
 use App\Models\Traits\HasUserScopes;
 use App\Models\Traits\NexusActivityLogTrait;
@@ -34,7 +33,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\HasApiTokens;
 
 /**
@@ -163,7 +161,9 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable implements FilamentUser, HasName
 {
     /** @use HasFactory<UserFactory> */
-    use HasApiTokens, HasClassLadder, HasFactory, HasFilamentAccess, HasUserAccessors, HasUserRelationships, HasUserScopes, NexusActivityLogTrait, Notifiable;
+    use HasApiTokens, HasClassLadder, HasFactory, HasFilamentAccess, HasUserAccessors, HasUserApi, HasUserAuth, HasUserModeration, HasUserRelationships, HasUserScopes, NexusActivityLogTrait, Notifiable {
+        HasUserAuth::tokenCan insteadof HasApiTokens;
+    }
 
     public $timestamps = false;
 
@@ -439,136 +439,5 @@ class User extends Authenticatable implements FilamentUser, HasName
     public static function defaultUser(): self
     {
         return (new self)->forceFill(self::getDefaultUserAttributes());
-    }
-
-    /**
-     * Return the user as an array with the legacy columns that are normally
-     * hidden (passkey, auth_key) included. Used when populating SupportContext
-     * for legacy views that need those values.
-     *
-     * @return array<string, mixed>
-     */
-    public function toLegacyArray(): array
-    {
-        return $this->makeVisible(['passkey', 'auth_key'])->toArray();
-    }
-
-    /**
-     * Convert the model to an array with enum-cast attributes serialized
-     * as their string values for API responses.
-     *
-     * @return array<string, mixed>
-     */
-    public function toApiArray(): array
-    {
-        $data = $this->toArray();
-        foreach (self::$ENUM_STRING_KEYS as $key => $enumClass) {
-            $raw = $this->getAttributes()[$key] ?? null;
-            if ($raw !== null) {
-                /** @var \BackedEnum $enum */
-                $enum = $enumClass::from($raw);
-                $data[$key] = method_exists($enum, 'stringValue')
-                    ? $enum->stringValue()
-                    : $enum->value;
-            }
-        }
-
-        return $data;
-    }
-
-    /**
-     * @param  list<string>  $fields
-     */
-    public function checkIsNormal(array $fields = ['status', 'enabled']): bool
-    {
-        $params = [
-            'user_id' => $this->id,
-            'username' => $this->username,
-        ];
-        if (in_array('status', $fields) && $this->getAttribute('status') !== UserStatus::CONFIRMED) {
-            throw new NexusException(Locale::trans('user.user_is_not_confirmed', $params, null));
-        }
-        if (in_array('enabled', $fields) && ! $this->getAttribute('enabled')) {
-            throw new NexusException(Locale::trans('user.user_is_disabled', $params, null));
-        }
-
-        return true;
-    }
-
-    /**
-     * @param  array<string, mixed>  $update
-     * @param  string  $modComment
-     */
-    public function updateWithModComment(array $update, $modComment): bool
-    {
-        return $this->updateWithComment($update, $modComment, 'modcomment');
-    }
-
-    /**
-     * @param  array<string, mixed>  $update
-     * @param  string  $comment
-     * @param  string  $commentField
-     */
-    public function updateWithComment(array $update, $comment, $commentField): bool
-    {
-        if (! $this->exists) {
-            throw new \RuntimeException('This method only works when user exists !');
-        }
-
-        if ($commentField != 'modcomment') {
-            throw new \RuntimeException("unsupported commentField: $commentField !");
-        }
-
-        return DB::transaction(function () use ($update, $comment) {
-            $this->modifyLogs()->create(['content' => $comment]);
-
-            return $this->update($update);
-        });
-    }
-
-    public function isDonating(): bool
-    {
-        $rawDonorUntil = $this->getRawOriginal('donoruntil');
-        $donorUntil = $this->donoruntil;
-        if (
-            $this->donor === true
-            && ($rawDonorUntil === null || $rawDonorUntil == '0000-00-00 00:00:00' || ($donorUntil instanceof Carbon && $donorUntil->gte(Carbon::now())))
-        ) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /** @param string $name */
-    public function acceptNotification($name): bool
-    {
-        return $this->original['notifs'] === null || str_contains((string) $this->notifs, "[{$name}]");
-    }
-
-    public function tokenCan(string $ability): bool
-    {
-        if ($this->accessToken === null) {
-            return false;
-        }
-
-        $routePermission = RoutePermissionEnum::tryFrom($ability);
-        if ($routePermission !== null) {
-            $legacyPermission = $routePermission->toPermissionEnum();
-            if ($legacyPermission === null) {
-                return $this->accessToken->can($ability);
-            }
-
-            return Permission::can($legacyPermission, $this)
-                && $this->accessToken->can($ability);
-        }
-
-        $legacyPermission = PermissionEnum::tryFrom($ability);
-        if ($legacyPermission !== null) {
-            return Permission::can($legacyPermission, $this)
-                && $this->accessToken->can($ability);
-        }
-
-        return $this->accessToken->can($ability);
     }
 }

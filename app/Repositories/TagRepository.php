@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Auth\Permission;
+use App\Contracts\Repositories\TagRepositoryInterface;
 use App\Models\Tag;
 use App\Models\Torrent;
 use App\Models\TorrentTag;
@@ -15,7 +16,7 @@ use App\Support\TorrentTags;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Facades\DB;
 
-class TagRepository extends BaseRepository
+class TagRepository extends BaseRepository implements TagRepositoryInterface
 {
     /** @var mixed */
     private static $orderByFieldIdString;

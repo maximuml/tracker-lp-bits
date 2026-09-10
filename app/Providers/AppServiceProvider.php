@@ -4,9 +4,29 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Contracts\Repositories\AuthRepositoryInterface;
+use App\Contracts\Repositories\ExamRepositoryInterface;
+use App\Contracts\Repositories\ForumRepositoryInterface;
+use App\Contracts\Repositories\MeiliSearchRepositoryInterface;
+use App\Contracts\Repositories\PageLayoutRepositoryInterface;
+use App\Contracts\Repositories\PostRepositoryInterface;
+use App\Contracts\Repositories\SearchBoxRepositoryInterface;
+use App\Contracts\Repositories\TagRepositoryInterface;
+use App\Contracts\Repositories\ToolRepositoryInterface;
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\DTOs\Auth\ActorContext;
 use App\Models\User;
 use App\Observers\UserPartitionObserver;
+use App\Repositories\AuthRepository;
+use App\Repositories\ExamRepository;
+use App\Repositories\ForumRepository;
+use App\Repositories\MeiliSearchRepository;
+use App\Repositories\PageLayoutRepository;
+use App\Repositories\PostRepository;
+use App\Repositories\SearchBoxRepository;
+use App\Repositories\TagRepository;
+use App\Repositories\ToolRepository;
+use App\Repositories\UserRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Cache\TaggedCacheService;
 use App\Support\CurrentUser;
@@ -63,6 +83,18 @@ class AppServiceProvider extends ServiceProvider
         // SAPI globals headers_list()/http_response_code()/header_remove()
         // that leak state across Octane worker requests.
         $this->app->singleton(LegacyHeaderBag::class);
+
+        // W3-07: Repository contracts for the 10 most-used repositories.
+        $this->app->bind(AuthRepositoryInterface::class, AuthRepository::class);
+        $this->app->bind(ExamRepositoryInterface::class, ExamRepository::class);
+        $this->app->bind(ForumRepositoryInterface::class, ForumRepository::class);
+        $this->app->bind(MeiliSearchRepositoryInterface::class, MeiliSearchRepository::class);
+        $this->app->bind(PageLayoutRepositoryInterface::class, PageLayoutRepository::class);
+        $this->app->bind(PostRepositoryInterface::class, PostRepository::class);
+        $this->app->bind(SearchBoxRepositoryInterface::class, SearchBoxRepository::class);
+        $this->app->bind(TagRepositoryInterface::class, TagRepository::class);
+        $this->app->bind(ToolRepositoryInterface::class, ToolRepository::class);
+        $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
     }
 
     /**

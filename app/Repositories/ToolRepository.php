@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\ToolRepositoryInterface;
 use App\Models\User;
 use App\Services\BackupService;
 use App\Services\BackupTransferService;
 use App\Services\ToolCleanupService;
 use App\Services\ToolMaintenanceService;
 
-class ToolRepository extends BaseRepository
+class ToolRepository extends BaseRepository implements ToolRepositoryInterface
 {
     public const BACKUP_EXCLUDES = BackupService::BACKUP_EXCLUDES;
 

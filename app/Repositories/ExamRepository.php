@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\ExamRepositoryInterface;
 use App\Enums\ExamFilterUser;
 use App\Enums\ExamStatus;
 use App\Enums\ExamType;
@@ -25,7 +26,7 @@ use Illuminate\Support\Facades\DB;
  * @see ExamProgressRepository
  * @see ExamCronRepository
  */
-class ExamRepository extends BaseRepository
+class ExamRepository extends BaseRepository implements ExamRepositoryInterface
 {
     public function __construct(
         private readonly ExamUserRepository $examUserRepository,

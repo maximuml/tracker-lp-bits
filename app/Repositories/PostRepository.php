@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\PostRepositoryInterface;
 use App\Models\Forum;
 use App\Models\Post;
 use App\Models\Topic;
@@ -15,7 +16,7 @@ use Illuminate\Support\Facades\DB;
 /**
  * Post repository: reads, create/edit/delete, and search for forum posts.
  */
-class PostRepository extends BaseRepository
+class PostRepository extends BaseRepository implements PostRepositoryInterface
 {
     public function getTotalPostsCount(): int
     {

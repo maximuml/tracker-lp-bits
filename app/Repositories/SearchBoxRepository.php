@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\SearchBoxRepositoryInterface;
 use App\Enums\UserClass as UserClassEnum;
 use App\Exceptions\InsufficientPermissionException;
 use App\Http\Middleware\Locale;
@@ -23,7 +24,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
-class SearchBoxRepository extends BaseRepository
+class SearchBoxRepository extends BaseRepository implements SearchBoxRepositoryInterface
 {
     /** @return list<string> */
     protected function allowedSortColumns(): array

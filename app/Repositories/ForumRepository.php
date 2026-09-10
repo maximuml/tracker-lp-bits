@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\ForumRepositoryInterface;
 use App\Models\Forum;
 use App\Models\ForumMod;
 use App\Models\User;
@@ -11,7 +12,7 @@ use App\Support\Cache;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
-class ForumRepository extends BaseRepository
+class ForumRepository extends BaseRepository implements ForumRepositoryInterface
 {
     public function deleteForum(int $id): void
     {

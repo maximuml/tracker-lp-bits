@@ -9,11 +9,7 @@ use App\Repositories\ForumRepository;
 use App\Repositories\PostRepository;
 use App\Repositories\TopicReadStateRepository;
 use App\Repositories\TopicRepository;
-use App\Services\ForumComposeService;
-use App\Services\ForumIndexService;
-use App\Services\ForumListingService;
 use App\Services\ForumPageService;
-use App\Services\ForumTopicViewService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
@@ -68,34 +64,15 @@ final class ForumPageServiceTest extends TestCase
             'text_view_unread' => 'Unread', 'text_catch_up' => 'Catch Up',
             'std_forum_error' => 'Error', 'std_unknown_action' => 'Unknown action',
         ]);
+    }
 
-        $indexService = new ForumIndexService(
-            $this->app->make(CurrentUser::class),
-            $this->app->make(Globals::class),
-            $this->app->make(ForumRepository::class),
-            $this->app->make(LegacyRedisCache::class),
-            $this->app->make(TopicRepository::class),
-            $this->app->make(TopicReadStateRepository::class),
-            $this->app->make(PostRepository::class),
-        );
-        $composeService = new ForumComposeService;
-        $topicViewService = new ForumTopicViewService(
-            $indexService,
-            $this->app->make(ForumRepository::class),
-            $this->app->make(Globals::class),
-            $this->app->make(LegacyRedisCache::class),
-            $this->app->make(TopicRepository::class),
-            $this->app->make(TopicReadStateRepository::class),
-            $this->app->make(PostRepository::class),
-        );
-        $listingService = new ForumListingService(
-            $indexService,
-            $this->app->make(Globals::class),
-            $this->app->make(LegacyRedisCache::class),
-            $this->app->make(TopicRepository::class),
-            $this->app->make(PostRepository::class),
-        );
-        $this->service = new ForumPageService($indexService, $composeService, $topicViewService, $listingService);
+    /**
+     * Resolve a fresh `ForumPageService` from the container so that any
+     * mocks bound in the test are injected.
+     */
+    private function service(): ForumPageService
+    {
+        return $this->app->make(ForumPageService::class);
     }
 
     protected function tearDown(): void
@@ -155,36 +132,12 @@ final class ForumPageServiceTest extends TestCase
 
     private function rebuildService(?ForumRepository $repo = null, ?LegacyRedisCache $cache = null): void
     {
-        $forumRepo = $repo ?? $this->app->make(ForumRepository::class);
-        $cacheInstance = $cache ?? $this->app->make(LegacyRedisCache::class);
-
-        $indexService = new ForumIndexService(
-            $this->app->make(CurrentUser::class),
-            $this->app->make(Globals::class),
-            $forumRepo,
-            $cacheInstance,
-            $this->app->make(TopicRepository::class),
-            $this->app->make(TopicReadStateRepository::class),
-            $this->app->make(PostRepository::class),
-        );
-        $composeService = new ForumComposeService;
-        $topicViewService = new ForumTopicViewService(
-            $indexService,
-            $forumRepo,
-            $this->app->make(Globals::class),
-            $cacheInstance,
-            $this->app->make(TopicRepository::class),
-            $this->app->make(TopicReadStateRepository::class),
-            $this->app->make(PostRepository::class),
-        );
-        $listingService = new ForumListingService(
-            $indexService,
-            $this->app->make(Globals::class),
-            $cacheInstance,
-            $this->app->make(TopicRepository::class),
-            $this->app->make(PostRepository::class),
-        );
-        $this->service = new ForumPageService($indexService, $composeService, $topicViewService, $listingService);
+        if ($repo !== null) {
+            $this->app->instance(ForumRepository::class, $repo);
+        }
+        if ($cache !== null) {
+            $this->app->instance(LegacyRedisCache::class, $cache);
+        }
     }
 
     /**
@@ -240,7 +193,7 @@ final class ForumPageServiceTest extends TestCase
         $this->setUser();
         $this->setRequest();
 
-        $result = $this->callWithSuppressedErrors(fn () => $this->service->build(Request::create('/forums.php', 'GET'))->toArray());
+        $result = $this->callWithSuppressedErrors(fn () => $this->service()->build(Request::create('/forums.php', 'GET'))->toArray());
 
         $this->assertSame('forums', $result['action']);
         $this->assertSame(999, $result['userId']);
@@ -260,7 +213,7 @@ final class ForumPageServiceTest extends TestCase
         $this->setUser();
         $this->setRequest();
 
-        $result = $this->callWithSuppressedErrors(fn () => $this->service->build(Request::create('/forums.php', 'GET'))->toArray());
+        $result = $this->callWithSuppressedErrors(fn () => $this->service()->build(Request::create('/forums.php', 'GET'))->toArray());
 
         $this->assertArrayHasKey('lang', $result);
         $this->assertArrayHasKey('curUser', $result);
@@ -285,7 +238,7 @@ final class ForumPageServiceTest extends TestCase
         $this->readStateRepo->shouldReceive('clearReadPosts')->once()->andReturn(true);
         $this->postRepo->shouldReceive('getLastPostId')->once()->andReturn(0);
 
-        $result = $this->service->build($request)->toArray();
+        $result = $this->service()->build($request)->toArray();
 
         $this->assertSame('forums', $result['action']);
     }
@@ -301,7 +254,7 @@ final class ForumPageServiceTest extends TestCase
 
         $threw = false;
         try {
-            $this->callWithSuppressedErrors(fn () => $this->service->build(Request::create('/forums.php', 'GET', ['action' => 'invalidaction'])));
+            $this->callWithSuppressedErrors(fn () => $this->service()->build(Request::create('/forums.php', 'GET', ['action' => 'invalidaction'])));
         } catch (\Throwable) {
             $threw = true;
         }
@@ -317,7 +270,7 @@ final class ForumPageServiceTest extends TestCase
         $this->setUser(['postsperpage' => 25, 'topicsperpage' => 30]);
         $this->setRequest();
 
-        $result = $this->callWithSuppressedErrors(fn () => $this->service->build(Request::create('/forums.php', 'GET'))->toArray());
+        $result = $this->callWithSuppressedErrors(fn () => $this->service()->build(Request::create('/forums.php', 'GET'))->toArray());
 
         $this->assertSame(25, $result['postsperpage']);
         $this->assertSame(30, $result['topicsperpage']);
@@ -335,7 +288,7 @@ final class ForumPageServiceTest extends TestCase
         Settings::saveBatch('main', ['postsperpage' => 15, 'topicsperpage' => 25]);
         Settings::resetCache();
 
-        $result = $this->callWithSuppressedErrors(fn () => $this->service->build(Request::create('/forums.php', 'GET'))->toArray());
+        $result = $this->callWithSuppressedErrors(fn () => $this->service()->build(Request::create('/forums.php', 'GET'))->toArray());
 
         $this->assertSame(15, $result['postsperpage']);
         $this->assertSame(25, $result['topicsperpage']);
@@ -353,7 +306,7 @@ final class ForumPageServiceTest extends TestCase
         app(Globals::class)->set('forumpostsperpage', null);
         app(Globals::class)->set('forumtopicsperpage_main', null);
 
-        $result = $this->callWithSuppressedErrors(fn () => $this->service->build(Request::create('/forums.php', 'GET'))->toArray());
+        $result = $this->callWithSuppressedErrors(fn () => $this->service()->build(Request::create('/forums.php', 'GET'))->toArray());
 
         $this->assertSame(10, $result['postsperpage']);
         $this->assertSame(20, $result['topicsperpage']);

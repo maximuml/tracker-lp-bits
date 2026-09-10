@@ -27,6 +27,16 @@ use Illuminate\Support\Facades\Gate;
 
 class WebCommentController extends Controller
 {
+    private CommentRepository $commentRepository;
+
+    private Globals $globals;
+
+    public function __construct(CommentRepository $commentRepository, Globals $globals)
+    {
+        $this->commentRepository = $commentRepository;
+        $this->globals = $globals;
+    }
+
     public function create(Request $request): View
     {
         $type = $this->type($request);
@@ -34,7 +44,7 @@ class WebCommentController extends Controller
 
         $this->authorizeComment($type, $parentId);
 
-        $parent = app(CommentRepository::class)->getParent($parentId, $type);
+        $parent = $this->commentRepository->getParent($parentId, $type);
         if (! $parent) {
             abort(404, $this->lang('std_no_torrent_id'));
         }
@@ -46,7 +56,7 @@ class WebCommentController extends Controller
             if ($commentId <= 0) {
                 abort(404, $this->lang('std_no_comment_id'));
             }
-            $quote = app(CommentRepository::class)->getQuote($commentId);
+            $quote = $this->commentRepository->getQuote($commentId);
             if (! $quote) {
                 abort(404, $this->lang('std_no_comment_id'));
             }
@@ -77,12 +87,12 @@ class WebCommentController extends Controller
         $this->authorizeComment($type, $parentId);
         $this->assertNotFlood($user);
 
-        $parent = app(CommentRepository::class)->getParent($parentId, $type);
+        $parent = $this->commentRepository->getParent($parentId, $type);
         if (! $parent) {
             abort(404, $this->lang('std_no_torrent_id'));
         }
 
-        $newId = app(CommentRepository::class)->create($parentId, $type, $body, (int) $user->id);
+        $newId = $this->commentRepository->create($parentId, $type, $body, (int) $user->id);
         $this->deleteCache($type, $parentId);
         $this->sendCommentPm($type, $parentId, (int) $parent['owner'], (string) $parent['name'], (int) $user->id);
         $this->applyBonus('+', (int) $user->id);
@@ -94,7 +104,7 @@ class WebCommentController extends Controller
     {
         $type = $this->type($request);
 
-        $arr = app(CommentRepository::class)->getForEdit($commentId, $type);
+        $arr = $this->commentRepository->getForEdit($commentId, $type);
         if (! $arr) {
             abort(404, $this->lang('std_invalid_id'));
         }
@@ -127,7 +137,7 @@ class WebCommentController extends Controller
 
         $user = $this->currentUser();
 
-        $arr = app(CommentRepository::class)->getForEdit($commentId, $type);
+        $arr = $this->commentRepository->getForEdit($commentId, $type);
         if (! $arr) {
             abort(404, $this->lang('std_invalid_id'));
         }
@@ -135,7 +145,7 @@ class WebCommentController extends Controller
             abort(403, $this->lang('std_permission_denied'));
         }
 
-        app(CommentRepository::class)->update($commentId, $body, (int) $user->id);
+        $this->commentRepository->update($commentId, $body, (int) $user->id);
         $this->deleteCache($type, (int) $arr['parent_id']);
 
         $defaultUrl = $this->buildScript($type, (int) $arr['parent_id']);
@@ -178,7 +188,7 @@ class WebCommentController extends Controller
             abort(403, $this->lang('std_permission_denied'));
         }
 
-        $arr = app(CommentRepository::class)->getForDelete($commentId, $type);
+        $arr = $this->commentRepository->getForDelete($commentId, $type);
         if (! $arr) {
             abort(404, $this->lang('std_invalid_id'));
         }
@@ -186,7 +196,7 @@ class WebCommentController extends Controller
         $parentId = (int) $arr['pid'];
         $userPostId = (int) $arr['user'];
 
-        if (app(CommentRepository::class)->delete($commentId, $type, $parentId)) {
+        if ($this->commentRepository->delete($commentId, $type, $parentId)) {
             $this->deleteCache($type, $parentId);
         }
         $this->applyBonus('-', $userPostId);
@@ -209,7 +219,7 @@ class WebCommentController extends Controller
             abort(403, $this->lang('std_permission_denied'));
         }
 
-        $arr = app(CommentRepository::class)->getForViewOriginal($commentId, $type);
+        $arr = $this->commentRepository->getForViewOriginal($commentId, $type);
         if (! $arr) {
             abort(404, $this->lang('std_invalid_id'));
         }
@@ -313,7 +323,7 @@ class WebCommentController extends Controller
             return;
         }
 
-        if (! app(CommentRepository::class)->getCommentPmSetting($ownerId)) {
+        if (! $this->commentRepository->getCommentPmSetting($ownerId)) {
             return;
         }
 
@@ -365,7 +375,7 @@ class WebCommentController extends Controller
     /** @return array<string, string> */
     private function langComment(): array
     {
-        return (array) app(Globals::class)->get('lang_comment', []);
+        return (array) $this->globals->get('lang_comment', []);
     }
 
     private function lang(string $key): string

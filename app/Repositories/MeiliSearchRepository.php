@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\MeiliSearchRepositoryInterface;
 use App\Exceptions\NexusException;
 use App\Models\Torrent;
 use App\Models\User;
@@ -16,7 +17,7 @@ use Illuminate\Support\Facades\DB;
 use Meilisearch\Client;
 use Meilisearch\Endpoints\Indexes;
 
-class MeiliSearchRepository extends BaseRepository
+class MeiliSearchRepository extends BaseRepository implements MeiliSearchRepositoryInterface
 {
     /** @var mixed */
     private static $client;

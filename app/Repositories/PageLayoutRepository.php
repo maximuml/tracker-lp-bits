@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\PageLayoutRepositoryInterface;
 use App\Models\Invite;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
@@ -15,7 +16,7 @@ use App\Support\RequestContext;
 use App\Support\UserUpdateBatch;
 use Illuminate\Support\Facades\DB;
 
-class PageLayoutRepository extends BaseRepository
+class PageLayoutRepository extends BaseRepository implements PageLayoutRepositoryInterface
 {
     public function getInboxCount(int $userId): int
     {

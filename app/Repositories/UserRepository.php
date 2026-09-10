@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\UserClass as UserClassEnum;
 use App\Enums\UsernameChangeType;
 use App\Enums\UserStatus;
@@ -44,7 +45,7 @@ use Illuminate\Support\Facades\Gate;
  *
  * @see UserModerationRepository
  */
-class UserRepository extends BaseRepository
+class UserRepository extends BaseRepository implements UserRepositoryInterface
 {
     public function __construct(
         private readonly UserStatsService $statsService = new UserStatsService,

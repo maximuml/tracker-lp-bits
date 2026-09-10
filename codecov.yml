@@ -12,12 +12,17 @@ coverage:
       default:
         target: 35%
         threshold: 1%
+        # W0-04 follow-up: keep project coverage informational until the
+        # per-module ratchet has been running fail-closed for one release.
         informational: true
     patch:
       default:
         target: 60%
         threshold: 5%
-        informational: true
+        # W0-04: patch coverage is now fail-closed. PRs must cover 60% of
+        # changed lines. Use `codecov-bypass` label with maintainer approval
+        # if a PR legitimately cannot be covered (e.g., configuration only).
+        informational: false
 
 flags:
   unit:

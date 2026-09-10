@@ -1,15 +1,15 @@
 {
-    "app/Auth": 0.0,
-    "app/Console": 0.0,
-    "app/DTOs": 0.0,
-    "app/Enums": 0.0,
-    "app/Http/Controllers": 0.0,
-    "app/Jobs": 0.0,
-    "app/Models": 0.0,
-    "app/Policies": 0.0,
-    "app/Repositories": 0.0,
-    "app/Services": 0.0,
-    "app/Support": 0.0,
-    "app/Utils": 0.0,
-    "app/ValueObjects": 0.0
+    "app/Auth": 22.89,
+    "app/Console": 10.06,
+    "app/DTOs": 61.95,
+    "app/Enums": 20.09,
+    "app/Http/Controllers": 26.02,
+    "app/Jobs": 25.73,
+    "app/Models": 32.95,
+    "app/Policies": 13.96,
+    "app/Repositories": 57.55,
+    "app/Services": 42.26,
+    "app/Support": 31.69,
+    "app/Utils": 6.46,
+    "app/ValueObjects": 95.65
 }

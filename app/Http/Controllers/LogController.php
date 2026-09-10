@@ -104,7 +104,7 @@ class LogController extends LegacyController
             'pagerbottom' => $pagerbottom,
             'userDisplayMap' => $userDisplayMap,
             'canConfidentialLog' => $canConfidential,
-            'title' => $langLog['text_log'] ?? 'Log',
+            'title' => $langLog['head_site_log'] ?? 'Daily log',
         ]);
     }
 
@@ -196,7 +196,7 @@ class LogController extends LegacyController
             'pagertop' => $pagertop,
             'pagerbottom' => $pagerbottom,
             'canManage' => $canManage,
-            'title' => $langLog['text_chronicle'] ?? 'Chronicle',
+            'title' => $langLog['head_chronicle'] ?? 'Chronicle',
         ]);
     }
 
@@ -225,7 +225,7 @@ class LogController extends LegacyController
             'count' => $count,
             'pagertop' => $pagertop,
             'pagerbottom' => $pagerbottom,
-            'title' => $langLog['text_news'] ?? 'News log',
+            'title' => $langLog['head_news'] ?? 'News log',
         ]);
     }
 
@@ -318,7 +318,7 @@ class LogController extends LegacyController
             'mode' => 'poll',
             'pollData' => $pollData,
             'canPollManage' => Permission::can(PermissionEnum::POLL_MANAGE),
-            'title' => $langLog['text_poll'] ?? 'Poll archive',
+            'title' => $langLog['head_previous_polls'] ?? 'Poll archive',
         ]);
     }
 }

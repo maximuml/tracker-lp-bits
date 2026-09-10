@@ -31,6 +31,9 @@ jobs:
       - name: Build Docker images
         run: docker compose build php openresty
 
+      - name: Check .trivyignore expiry dates
+        run: bash scripts/check_trivy_expiry.sh
+
       - name: Run Trivy on PHP image (all severities)
         uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
         with:

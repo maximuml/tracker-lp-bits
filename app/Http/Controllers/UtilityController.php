@@ -124,17 +124,19 @@ class UtilityController extends LegacyController
         $currentUser = $this->currentUser->get() ?? [];
         $Attach = new AttachmentService((int) ($currentUser['id'] ?? 0));
 
-        $count_limit = (int) $Attach->get_count_limit();
-        $count_left = $Attach->get_count_left();
-        $size_limit = $Attach->get_size_limit_byte();
-        $allowed_exts = $Attach->get_allowed_ext();
+        return $this->renderAttachment($request, $currentUser, $Attach);
+    }
 
-        $altsize = (string) $request->input('altsize', '');
-        $callback_func = (string) $request->input('callback_func', '');
+    public function attachmentStore(Request $request): Response
+    {
+        $currentUser = $this->currentUser->get() ?? [];
+        $Attach = new AttachmentService((int) ($currentUser['id'] ?? 0));
+
         $warning = '';
         $script = '';
+        $countLeft = null;
 
-        if ($request->isMethod('POST') && $Attach->enable_attachment()) {
+        if ($Attach->enable_attachment()) {
             $uploaded = $request->file('file');
             $file = null;
             if ($uploaded !== null) {
@@ -147,23 +149,33 @@ class UtilityController extends LegacyController
             }
 
             $lang_attachment = (array) ($this->globals->get('lang_attachment') ?? []);
-            $result = AttachmentMutationService::processUpload($currentUser, $Attach, $lang_attachment, $altsize, $callback_func, $file);
+            $altsize = (string) $request->input('altsize', '');
+            $callbackFunc = (string) $request->input('callback_func', '');
+            $result = AttachmentMutationService::processUpload($currentUser, $Attach, $lang_attachment, $altsize, $callbackFunc, $file);
             $warning = (string) ($result['warning'] ?? '');
             $script = (string) ($result['script'] ?? '');
-            $count_left = (int) ($result['count_left'] ?? $count_left);
+            $countLeft = isset($result['count_left']) ? (int) $result['count_left'] : null;
         }
 
+        return $this->renderAttachment($request, $currentUser, $Attach, $warning, $script, $countLeft);
+    }
+
+    /**
+     * @param  array<string, mixed>  $currentUser
+     */
+    private function renderAttachment(Request $request, array $currentUser, AttachmentService $Attach, string $warning = '', string $script = '', ?int $countLeft = null): Response
+    {
         $content = view('attachment.index', [
             'CURUSER' => $currentUser,
             'lang_attachment' => (array) ($this->globals->get('lang_attachment') ?? []),
             'Attach' => $Attach,
-            'count_limit' => $count_limit,
-            'count_left' => $count_left,
-            'size_limit' => $size_limit,
-            'allowed_exts' => $allowed_exts,
+            'count_limit' => (int) $Attach->get_count_limit(),
+            'count_left' => $countLeft ?? $Attach->get_count_left(),
+            'size_limit' => $Attach->get_size_limit_byte(),
+            'allowed_exts' => $Attach->get_allowed_ext(),
             'css_uri' => Style::cssUriWithContext(),
-            'altsize' => $altsize,
-            'callback_func' => $callback_func,
+            'altsize' => (string) $request->input('altsize', ''),
+            'callback_func' => (string) $request->input('callback_func', ''),
             'warning' => $warning,
             'script' => $script,
         ])->render();
@@ -186,9 +198,11 @@ class UtilityController extends LegacyController
         }
 
         $httpdirectory = (string) $this->globals->get('httpdirectory_attachment', '');
-        $basePath = realpath($httpdirectory);
-        $filelocation = $httpdirectory.'/'.$row['location'];
-        $realFile = realpath($filelocation);
+        // savedirectory is resolved against ROOT_PATH on upload; resolve the
+        // same way here — a bare relative path would resolve against the
+        // php-fpm CWD (public/) and miss the real location.
+        $basePath = realpath(base_path($httpdirectory));
+        $realFile = realpath(base_path($httpdirectory.'/'.$row['location']));
 
         if ($basePath === false || $realFile === false || ! str_starts_with($realFile, $basePath) || ! is_file($realFile) || ! is_readable($realFile)) {
             return response('File not found or cannot be read.', 404, ['Content-Type' => 'text/plain; charset=utf-8']);

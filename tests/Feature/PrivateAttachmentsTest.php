@@ -123,4 +123,20 @@ final class PrivateAttachmentsTest extends TestCase
         // 401/302 if auth fails first, 404 if auth passes but record not found
         $this->assertContains($response->status(), [404, 401, 302]);
     }
+
+    /**
+     * POST /attachment must exist — the attachment popup submits uploads there
+     * (removed once by a GET/POST split regression).
+     */
+    public function test_post_attachment_route_exists(): void
+    {
+        $found = false;
+        foreach (app('router')->getRoutes() as $r) {
+            if ($r->uri() === 'attachment' && in_array('POST', $r->methods())) {
+                $found = true;
+                break;
+            }
+        }
+        $this->assertTrue($found, 'POST /attachment route must exist for attachment uploads');
+    }
 }

@@ -111,6 +111,15 @@ final class AuthCookieTest extends TestCase
         $this->assertNull(AuthCookie::verifyToken(base64_encode($tampered), self::LEGACY_AUTH_KEY));
     }
 
+    public function test_verify_legacy_token_returns_null_when_fallback_disabled(): void
+    {
+        config()->set('auth.legacy_cookie_fallback', false);
+
+        $token = $this->buildLegacyToken(99, self::LEGACY_AUTH_KEY, time() + 3600);
+
+        $this->assertNull(AuthCookie::verifyToken($token, self::LEGACY_AUTH_KEY));
+    }
+
     // ---------- computeExpires() ----------
 
     public function test_compute_expires_adds_duration_to_now(): void

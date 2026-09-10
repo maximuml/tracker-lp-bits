@@ -11,6 +11,7 @@ use App\Support\Config\SiteConfig;
 use Dotenv\Dotenv;
 use Illuminate\Encryption\Encrypter;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Auth-cookie helpers extracted from `include/functions.php` (Phase 5
@@ -92,7 +93,7 @@ final class AuthCookie
             // try legacy HMAC below
         }
 
-        if ($authKey === null || $authKey === '') {
+        if (! self::legacyCookieFallbackEnabled() || $authKey === null || $authKey === '') {
             return null;
         }
 
@@ -111,10 +112,30 @@ final class AuthCookie
             return null;
         }
 
+        // W1-04: measure the remaining legacy-cookie traffic before removing
+        // this fallback. Log each accepted legacy cookie so the ops team can
+        // watch the rate drop to zero before flipping the flag off.
+        Log::info('Legacy HMAC auth cookie accepted', [
+            'user_id' => (int) $data['user_id'],
+            'ip' => request()->ip(),
+        ]);
+
         return [
             'user_id' => (int) $data['user_id'],
             'expires' => (int) $data['expires'],
         ];
+    }
+
+    /**
+     * Whether the legacy HMAC cookie fallback is enabled.
+     *
+     * The fallback is on by default for the migration window. Once the
+     * log line above stops appearing for a full cookie lifetime, set
+     * `auth.legacy_cookie_fallback=false` to hard-disable it.
+     */
+    private static function legacyCookieFallbackEnabled(): bool
+    {
+        return (bool) config('auth.legacy_cookie_fallback', true);
     }
 
     /**

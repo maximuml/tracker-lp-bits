@@ -120,4 +120,18 @@ return [
 
     'password_timeout' => 10800,
 
+    /*
+    |--------------------------------------------------------------------------
+    | Legacy cookie fallback
+    |--------------------------------------------------------------------------
+    |
+    | Controls whether the legacy HMAC-signed `c_secure_pass` cookies are
+    | accepted alongside the modern Laravel-encrypted ones. Set to false once
+    | the log line "Legacy HMAC auth cookie accepted" stops appearing for
+    | the duration of a cookie lifetime (W1-04).
+    |
+    */
+
+    'legacy_cookie_fallback' => (bool) env('ALLOW_LEGACY_COOKIE_FALLBACK', true),
+
 ];

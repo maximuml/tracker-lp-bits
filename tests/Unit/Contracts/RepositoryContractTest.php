@@ -25,8 +25,10 @@ use App\Repositories\TagRepository;
 use App\Repositories\ToolRepository;
 use App\Repositories\UserRepository;
 use Mockery;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class RepositoryContractTest extends TestCase
 {
     public function test_auth_repository_interface_binding(): void

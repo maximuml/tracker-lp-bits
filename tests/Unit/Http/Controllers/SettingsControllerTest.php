@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Http\Controllers;
 
+use App\Contracts\Repositories\TagRepositoryInterface;
 use App\Enums\UserClass;
 use App\Http\Controllers\SettingsController;
 use App\Models\User;
-use App\Repositories\TagRepository;
 use App\Support\CurrentUser;
 use App\Support\Globals;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -84,13 +84,13 @@ final class SettingsControllerTest extends TestCase
     }
 
     /**
-     * Bind a mock TagRepository so the controller can be resolved from the container.
+     * Bind a mock TagRepositoryInterface so the controller can be resolved from the container.
      */
     private function bindTagRepository(): void
     {
-        /** @var TagRepository&Mockery\MockInterface $tagRepository */
-        $tagRepository = Mockery::mock(TagRepository::class);
-        app()->instance(TagRepository::class, $tagRepository);
+        /** @var TagRepositoryInterface&Mockery\MockInterface $tagRepository */
+        $tagRepository = Mockery::mock(TagRepositoryInterface::class);
+        app()->instance(TagRepositoryInterface::class, $tagRepository);
     }
 
     /**

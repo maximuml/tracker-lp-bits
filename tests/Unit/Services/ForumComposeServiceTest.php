@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Services;
 
-use App\Repositories\ForumRepository;
-use App\Repositories\PostRepository;
+use App\Contracts\Repositories\ForumRepositoryInterface;
+use App\Contracts\Repositories\PostRepositoryInterface;
 use App\Repositories\TopicRepository;
 use App\Services\ForumComposeService;
 use App\Support\CurrentUser;
@@ -83,21 +83,21 @@ final class ForumComposeServiceTest extends TestCase
         parent::tearDown();
     }
 
-    /** @return ForumRepository&MockInterface */
+    /** @return ForumRepositoryInterface&MockInterface */
     private function mockForumRepo(): mixed
     {
-        /** @var ForumRepository&MockInterface $repo */
-        $repo = Mockery::mock(ForumRepository::class);
+        /** @var ForumRepositoryInterface&MockInterface $repo */
+        $repo = Mockery::mock(ForumRepositoryInterface::class);
         $repo->shouldIgnoreMissing(false);
-        $this->app->instance(ForumRepository::class, $repo);
+        $this->app->instance(ForumRepositoryInterface::class, $repo);
 
         $topicRepo = Mockery::mock(TopicRepository::class);
         $topicRepo->shouldIgnoreMissing(false);
         $this->app->instance(TopicRepository::class, $topicRepo);
 
-        $postRepo = Mockery::mock(PostRepository::class);
+        $postRepo = Mockery::mock(PostRepositoryInterface::class);
         $postRepo->shouldIgnoreMissing(false);
-        $this->app->instance(PostRepository::class, $postRepo);
+        $this->app->instance(PostRepositoryInterface::class, $postRepo);
 
         return $repo;
     }
@@ -111,11 +111,11 @@ final class ForumComposeServiceTest extends TestCase
         return $repo;
     }
 
-    /** @return PostRepository&MockInterface */
+    /** @return PostRepositoryInterface&MockInterface */
     private function mockPostRepo(): mixed
     {
-        /** @var PostRepository&MockInterface $repo */
-        $repo = $this->app->make(PostRepository::class);
+        /** @var PostRepositoryInterface&MockInterface $repo */
+        $repo = $this->app->make(PostRepositoryInterface::class);
 
         return $repo;
     }

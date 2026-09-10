@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Repositories\TagRepositoryInterface;
 use App\Enums\UserClass as UserClassEnum;
 use App\Models\Language;
 use App\Models\Setting;
 use App\Models\Torrent;
 use App\Models\User;
-use App\Repositories\TagRepository;
 use App\Support\CurrentUser;
 use App\Support\Globals;
 use App\Support\Log;
@@ -24,13 +24,13 @@ use Illuminate\View\View;
 
 class SettingsController extends LegacyController
 {
-    private TagRepository $tagRepository;
+    private TagRepositoryInterface $tagRepository;
 
     private CurrentUser $currentUser;
 
     private Globals $globals;
 
-    public function __construct(TagRepository $tagRepository, CurrentUser $currentUser, Globals $globals)
+    public function __construct(TagRepositoryInterface $tagRepository, CurrentUser $currentUser, Globals $globals)
     {
         $this->tagRepository = $tagRepository;
         $this->currentUser = $currentUser;

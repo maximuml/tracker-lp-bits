@@ -60,7 +60,7 @@ final class PasskeyCsprngTest extends TestCase
             'app/Services/RegistrationService.php',
             'app/Support/LegacyAuth.php',
             'app/Repositories/UserRepository.php',
-            'app/Repositories/UsercpRepository.php',
+            'app/Repositories/UsercpSecurityCommand.php',
             'app/Http/Controllers/TorrentDownloadController.php',
             'app/Http/Controllers/StaffModerationController.php',
         ];

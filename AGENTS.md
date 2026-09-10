@@ -15,18 +15,22 @@ PHP 8.4+, MySQL, Redis, MeiliSearch. Docker Compose stack for local development.
 
 ## Key directories
 
-- `app/Http/Controllers/` — 78 controllers (legacy + modern)
-- `app/Services/` — 36 service classes (PageService, domain services)
+- `app/Http/Controllers/` — controllers (legacy + modern)
+- `app/Services/` — service classes (PageService, domain services)
 - `app/Repositories/` — data access layer
 - `app/Support/` — helper classes (Cache, Logger, Auth, HTML, etc.)
-- `app/Models/` — 83 Eloquent models
+- `app/Models/` — Eloquent models
 - `app/Filament/` — Filament admin resources
 - `app/Support/Install/` — legacy NexusPHP install/update scripts (standalone, `IN_NEXUS=true`)
 - `routes/legacy/` — legacy route mappings (PHP file routes)
 - `config/` — Laravel configuration
-- `database/migrations/` — 215 migrations
-- `tests/` — 3465 tests (Unit + Feature + Architecture)
+- `database/migrations/` — migrations
+- `tests/` — PHPUnit test suites (Unit + Feature + Architecture)
 - `.agents/skills/` — E2E testing playbooks; architecture decisions are recorded in this file (see "Architecture Decision Records")
+
+Directory and test counts are intentionally not hard-coded here — they
+drifted repeatedly. See `DocsConsistencyTest` for the automated checks
+that keep this file in sync.
 
 ## Build & run commands
 
@@ -217,43 +221,24 @@ match the connection used by HTTP requests through OpenResty.
 
 ## Modernisation status
 
-Sprints 0–55 complete. Recent work:
-- Sprint 46: service decomposition (extract ShoutboxService, ThankService,
-  TorrentBookmarkService, ComplainService, LocationService, BitbucketService;
-  AnnounceService DI cleanup)
-- Sprint 47: major dependency upgrades — Laravel 12→13, Tailwind 3→4,
-  laravel-vite-plugin 1→3 + Vite 6→8
-- Sprint 48: test coverage — added 25 unit tests for 5 API controllers
-  (RewardController, HitAndRunController, PeerController, SnatchController,
-  AttendanceController) using Mockery + FormRequest validation pattern;
-  test count 767 → 792
-- Sprint 49: test coverage batch 2 — added 38 unit tests for 5 admin
-  CRUD controllers (TagController, MedalController, AgentDenyController,
-  ExamController, ExamUserController) with paginator mocks and enum
-  validation; test count 792 → 830
-- Sprint 50: test coverage batch 3 — added 27 unit tests for 5 admin
-  controllers (SettingController, DashboardController, AgentAllowController,
-  UploadController, UserMedalController) with paginator mocks and enum
-  validation; test count 830 → 857
-- Sprint 51: test coverage batch 4 — added 15 unit tests for
-  AuthenticateController (login, logout, nasToolsApprove, iyuuApprove,
-  challenge) and TorrentController (searchBox, queryByPiecesHash,
-  approval permission); test count 857 → 872
-- Sprint 52: test coverage batch 5 — added 12 unit tests for
-  UserController (index, classes, base, unauthenticated guards for
-  show/disable/enable/me/publishTorrent/incrementDecrement, modComment,
-  inviteInfo, removeTwoStepAuthentication); test count 872 → 884
-- Sprint 53: test coverage batch 6 — added 6 unit tests for
-  BookmarkController (store/destroy success + unauthenticated guards)
-  and ToolController (notifications success + unauthenticated guard);
-  test count 884 → 890
-- Sprint 54: test coverage batch 7 — added 3 unit tests for
-  TokenController (addToken/delToken unauthenticated guards, delToken
-  validation failure); test count 882 → 885
-- Sprint 55: Docker PHP 8.5 upgrade — updated Dockerfile (Alpine) and
-  DockerfileDebian from php:8.4-fpm to php:8.5-fpm, removed explicit
-  opcache install (built-in since 8.5), fixed ReflectionMethod::
-  setAccessible() deprecation in test; all 885 tests pass on PHP 8.5.9
+- **Sprints T-01 — T-24:** build/test/CI and observability hardening.
+- **Sprints 0–55:** core-to-Laravel migration, test seeding and DI cleanup.
+- **Waves W0–W4:** architecture ratchets, HTTP contract tests, DI reduction,
+  domain decomposition (torrent, user, forum, messages, bonus/exam/cleanup).
+  PRs #648–#670.
+
+### Next work (W5–W9)
+
+1. **W5 — SQL & performance:** raw-SQL registry, EXPLAIN regression tests,
+   query budgets, tracker load test as a blocking gate.
+2. **W6 — Observability:** decompose `MetricsController`, semantic metrics,
+   liveness/readiness/diagnostics, secure `/metrics` endpoint.
+3. **W7 — Legacy UI & a11y:** component layer, migrate pages by priority,
+   reduce `LegacyViewSurfaceTest` baselines, Axe violations as a blocker.
+4. **W8 — Production readiness:** exact prod smoke, migration strategy,
+   backup/restore verification, graceful deployment, supply-chain hardening.
+5. **W9 — Documentation & runbooks:** self-checking docs (see
+   `DocsConsistencyTest`), ADRs for new decisions, operational runbooks.
 
 ## PHP version
 
@@ -262,8 +247,8 @@ Sprints 0–55 complete. Recent work:
 - **composer.json:** `>=8.4 <8.6` — allows both 8.4 and 8.5
 - **PHP 8.5 compatibility:** verified — no deprecated features used
   (no backtick operator, no non-canonical casts, no semicolon-terminated
-  case statements, no ReflectionMethod::setAccessible()). All 885 tests
+  case statements, no ReflectionMethod::setAccessible()). All PHPUnit suites
   pass on PHP 8.5.9 in Docker and CI.
 
-Key remaining work: test coverage expansion (50+ controllers still
-untested — many blocked by final repository classes or static methods).
+Key remaining work: expand unit-test coverage for controllers (many blocked
+by final repository classes or static methods — see W2-01/W2-02).

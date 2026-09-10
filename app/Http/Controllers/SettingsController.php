@@ -26,9 +26,15 @@ class SettingsController extends LegacyController
 {
     private TagRepository $tagRepository;
 
-    public function __construct(TagRepository $tagRepository)
+    private CurrentUser $currentUser;
+
+    private Globals $globals;
+
+    public function __construct(TagRepository $tagRepository, CurrentUser $currentUser, Globals $globals)
     {
         $this->tagRepository = $tagRepository;
+        $this->currentUser = $currentUser;
+        $this->globals = $globals;
     }
 
     /** @var array<string, array<int, string>> */
@@ -97,7 +103,7 @@ class SettingsController extends LegacyController
 
     public function settings(Request $request): View|RedirectResponse|Response
     {
-        $currentUser = app(CurrentUser::class)->get();
+        $currentUser = $this->currentUser->get();
         if ($currentUser === null) {
             return redirect('/settings.php');
         }
@@ -112,7 +118,7 @@ class SettingsController extends LegacyController
             $action = 'showmenu';
         }
 
-        $lang = (array) (app(Globals::class)->get('lang_settings') ?? []);
+        $lang = (array) ($this->globals->get('lang_settings') ?? []);
 
         $data = [
             'action' => $action,
@@ -169,7 +175,7 @@ class SettingsController extends LegacyController
 
     public function settingsAction(Request $request): RedirectResponse|Response
     {
-        $currentUser = app(CurrentUser::class)->get();
+        $currentUser = $this->currentUser->get();
         if ($currentUser === null) {
             return redirect('/settings.php');
         }
@@ -184,7 +190,7 @@ class SettingsController extends LegacyController
     private function handleSave(Request $request): RedirectResponse|Response|null
     {
         $action = (string) ($request->post('action') ?? '');
-        $currentUser = (array) (app(CurrentUser::class)->get() ?? []);
+        $currentUser = (array) ($this->currentUser->get() ?? []);
         $username = (string) ($currentUser['username'] ?? 'unknown');
         $actiontime = date('F j, Y, g:i a');
 

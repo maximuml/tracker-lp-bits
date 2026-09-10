@@ -11,8 +11,7 @@ use Symfony\Component\HttpFoundation\IpUtils;
 /**
  * IP helpers extracted from `include/functions.php`.
  *
- * Phase 5 of the legacy migration — see
- * `docs/legacy-strategy.md` § "Phase 5 — drain `include/functions.php`".
+ * Phase 5 of the legacy migration.
  * The legacy procedural helpers
  *
  *   - `in_ip_range($long, $targetip, $ip_one, $ip_two = false)`

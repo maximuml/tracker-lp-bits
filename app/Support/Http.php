@@ -10,8 +10,7 @@ use Symfony\Component\HttpFoundation\HeaderUtils;
 /**
  * Stateless HTTP-header / HTTP-URL helpers extracted from
  * `include/functions.php` and `include/globalfunctions.php`
- * (Phase 5 of the legacy migration — see `docs/legacy-strategy.md`
- * § "Phase 5 — drain `include/functions.php`").
+ * (Phase 5 of the legacy migration).
  *
  * Legacy procedural helpers backed by this class:
  *

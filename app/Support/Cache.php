@@ -17,8 +17,7 @@ use Illuminate\Support\Facades\Redis;
 /**
  * Stateless filesystem-cache helpers extracted from `include/functions.php`.
  *
- * Phase 5 of the legacy migration — see
- * `docs/legacy-strategy.md` § "Phase 5 — drain `include/functions.php`".
+ * Phase 5 of the legacy migration.
  * The legacy procedural helpers
  *
  *   - `cache_check()`  (build a per-language cache path, decide whether the

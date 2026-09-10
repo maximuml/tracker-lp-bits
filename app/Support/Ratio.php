@@ -8,8 +8,7 @@ namespace App\Support;
  * Stateless helpers for computing and rendering share / seed-leech
  * ratios.
  *
- * Phase 5 of the legacy migration — see
- * `docs/legacy-strategy.md` § "Phase 5 — drain `include/functions.php`".
+ * Phase 5 of the legacy migration.
  * The legacy procedural helpers
  *
  *   - `get_share_ratio()`

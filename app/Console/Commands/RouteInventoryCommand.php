@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Route as RouteFacade;
  *
  * Usage:
  *   php artisan route:inventory
- *   php artisan route:inventory --output=docs/route-inventory.md
+ *   php artisan route:inventory --output=route-inventory.md
  *   php artisan route:inventory --format=json --output=route-inventory.json
  */
 final class RouteInventoryCommand extends Command

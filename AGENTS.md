@@ -26,7 +26,7 @@ PHP 8.4+, MySQL, Redis, MeiliSearch. Docker Compose stack for local development.
 - `config/` — Laravel configuration
 - `database/migrations/` — 215 migrations
 - `tests/` — 3465 tests (Unit + Feature + Architecture)
-- `docs/` — project documentation (runtime binaries, ADRs)
+- `.agents/skills/` — E2E testing playbooks; architecture decisions are recorded in this file (see "Architecture Decision Records")
 
 ## Build & run commands
 
@@ -90,6 +90,97 @@ docker compose exec -T php composer audit
 - **Settings:** `settings` table → `App\Support\Settings` / `Globals` singleton (cached in Redis)
 - **Auth:** custom `NexusWebGuard` + challenge-response authentication + HMAC passkey login
 - **Cache:** `LegacyRedisCache` with `allowed_classes: false` (Sprint 19 hardening)
+
+## Architecture Decision Records
+
+Condensed from the former `docs/adr/` directory (Nygard format: Context →
+Decision → Consequences). Add new ADRs here as numbered subsections.
+
+### ADR 0001: NexusWebGuard for cookie-based auth (Accepted, Sprint 0)
+
+- **Context:** NexusPHP authenticates via a signed `c_secure_pass` cookie
+  (user ID + expiry, encrypted with the app key, or HMAC-signed with the
+  per-user `auth_key` in the legacy format). The standard `session` guard
+  could not accept existing cookies without forcing re-login, and
+  BitTorrent clients authenticate via passkey, not sessions.
+- **Decision:** Custom `NexusWebGuard` (`StatefulGuard`) reads the cookie via
+  `AuthCookie::verifyToken()`, falls back to legacy HMAC verification using
+  `users.auth_key`, resolves the `User` via `NexusWebUserProvider`, and is
+  registered as the `nexus-web` guard in `config/auth.php`. A separate
+  `passkey` guard handles tracker clients; Sanctum handles the API.
+- **Consequences:** Sessions survive the migration; clear web/API/tracker
+  separation. Cost: custom guard needs its own security review and manual
+  implementation of standard auth features. The legacy HMAC fallback should
+  be removed once all cookies have rotated to the encrypted format (W1-04).
+
+### ADR 0002: LegacyRequestMiddleware for URL rewriting (Accepted, Sprint 17; Octane-safe since T-11)
+
+- **Context:** Legacy URLs (`/details.php?id=5`, `/torrents.php`, …) must
+  keep working for bookmarks, search engines and announce URLs embedded in
+  `.torrent` files. Web-server rewrite rules are untestable and differ per
+  server; explicit routes per script would need hundreds of entries.
+- **Decision:** Global `LegacyRequestMiddleware` detects the script name
+  from `SCRIPT_FILENAME`/`SCRIPT_NAME`, rewrites `/foo.php?id=5` to `/foo?id=5`
+  (or `/foo/5`), skips Laravel-only prefixes (`api/`, `livewire/`,
+  `filament/`, `horizon/`, `nexusphp/`, `web/`), boots the legacy context
+  (`LegacyBootstrap::boot`) and treats Octane worker scripts as `index.php`.
+- **Consequences:** All legacy URLs work without web-server config; tested
+  by `LegacySmokeTest` / `LegacyHeaderIsolationTest`; per-request reset via
+  `CurrentUser::reset()`. Cost: ~0.1 ms regex per request and a 200+ line
+  middleware with many edge cases. W2-11 proposes moving rewriting to
+  `RouteServiceProvider` or OpenResty, leaving only context bootstrap.
+
+### ADR 0003: SiteConfig typed configuration (Accepted, Sprint 20)
+
+- **Context:** Site settings live in the `settings` table as dot-prefixed
+  key/value pairs (`main.sitename`, `security.iv`, …). `Globals::get()`
+  returned `mixed`, causing PHPStan level 8 violations, `'yes'` vs `true`
+  bugs, and no autocompletion or validation.
+- **Decision:** `App\Support\Config\SiteConfig::current()` returns a cached
+  `MainConfig`; each prefix has a typed config class (`BasicConfig`,
+  `TorrentConfig`, `SecurityConfig`, `BonusConfig`, …) whose accessors cast
+  to `bool`/`int`/`string`/enum (e.g. `SecurityConfig::loginType()` returns
+  `LoginType`). `Globals` still backs it from the table + Redis cache.
+- **Consequences:** Type-safe, IDE-friendly configuration access. Cost:
+  each new setting needs a method in the right config class; full removal
+  of the `Globals` singleton is deferred to W3-03 (settings schema
+  validation).
+
+### ADR 0004: Stateless AnnounceService with AnnounceContext (Accepted, T-18, PR #616)
+
+- **Context:** `/announce` is the hottest path (every client every
+  30–90 s). The original service kept mutable per-request state on
+  properties (`$this->user`, `$this->torrent`, …), making it untestable in
+  isolation and prone to Octane cross-request contamination.
+- **Decision:** All state flows through an immutable readonly
+  `AnnounceContext` DTO with `with*()` methods (`withUser()`,
+  `withTorrent()`, `withTraffic()`, …). Each pipeline step
+  (`authenticateUser`, `checkClient`, `loadTorrent`, …) takes a context and
+  returns a new one. `lockRowsForUpdate` runs inside `DB::transaction()`
+  with the context captured. Sub-components (`TrafficAccountant`,
+  `CheaterDetector`, `HitAndRunHandler`, `RateLimiter`, `PeerLifecycle`)
+  are stateless and constructor-injected.
+- **Consequences:** Octane-safe, each step independently testable, explicit
+  data flow, PHPStan level 8 clean. Cost: `AnnounceContext` is ~400 lines
+  of `with*()` boilerplate, and the carried `ResponseBuilder` is still
+  mutable (candidate for a future immutable refinement).
+
+### ADR 0005: Architecture ratchet tests (Accepted, W0)
+
+- **Context:** Measurable debt (`{!! !!}`, `@php`, `<table>` layouts,
+  >500-line repositories, superglobals, GET+POST mixed routes) regressed
+  silently because the three existing architecture tests were not in any
+  PHPUnit suite and never ran in CI.
+- **Decision:** (1) `Architecture` testsuite in `phpunit.xml`; (2) run it
+  in CI on every push/PR; (3) new ratchets with baselines captured at the
+  time — `LegacyViewSurfaceTest`, `RepositorySizeTest`, `NoSuperglobalsTest`;
+  (4) `MAX_ALLOWED_ENTRIES` countdown on `MixedRouteAllowListTest`;
+  (5) semantics `assertLessThanOrEqual(baseline, current)` — baselines may
+  only be lowered, never raised.
+- **Consequences:** Any PR adding a new `{!! !!}` or a 600-line repository
+  fails CI; existing ratchets are enforced for the first time. Cost:
+  developers must lower baseline constants when reducing counts, and
+  `RepositorySizeTest` flags renamed/removed baseline files.
 
 ## Testing
 

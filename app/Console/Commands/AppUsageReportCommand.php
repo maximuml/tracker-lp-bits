@@ -14,7 +14,7 @@ use Illuminate\Console\Command;
  *
  * Usage:
  *   php artisan app:usage-report
- *   php artisan app:usage-report --top=50 --output=docs/app-usage.md
+ *   php artisan app:usage-report --top=50 --output=app-usage-report.md
  */
 final class AppUsageReportCommand extends Command
 {

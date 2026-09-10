@@ -8,8 +8,7 @@ namespace App\Support;
  * Stateless HTML builders for BBCode tags, extracted from
  * `include/functions.php`.
  *
- * Phase 5 of the legacy migration — see
- * `docs/legacy-strategy.md` § "Phase 5 — drain `include/functions.php`".
+ * Phase 5 of the legacy migration.
  * The legacy procedural helpers
  *
  *   - `formatUrl()`        (`<a>` tag with optional class and `target=_blank`)

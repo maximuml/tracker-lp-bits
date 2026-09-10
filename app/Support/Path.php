@@ -7,8 +7,7 @@ namespace App\Support;
 /**
  * Filesystem-path helpers extracted from `include/functions.php`.
  *
- * Phase 5 of the legacy migration — see
- * `docs/legacy-strategy.md` § "Phase 5 — drain `include/functions.php`".
+ * Phase 5 of the legacy migration.
  * Backs the legacy `getFullDirectory($dir)` and `make_folder($pre, $name)`
  * which both consult the global `ROOT_PATH` constant. The typed API
  * takes `$rootPath` as an explicit parameter so the legacy proxies are

@@ -9,8 +9,7 @@ use App\Repositories\AttachmentRepository;
 /**
  * Description-AST helpers extracted from `include/functions.php`.
  *
- * Phase 5 of the legacy migration — see
- * `docs/legacy-strategy.md` § "Phase 5 — drain `include/functions.php`".
+ * Phase 5 of the legacy migration.
  * Backs the legacy `get_image_from_description($arr, $first, $useDefault)`
  * which had a dual-shape return type — `string` when `$first === true`,
  * `list<string>` otherwise. The dual shape is split into two

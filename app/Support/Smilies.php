@@ -6,7 +6,7 @@ namespace App\Support;
 
 /**
  * Smiley markup helpers extracted from `include/functions.php`
- * (Phase 5 of the legacy migration — see `docs/legacy-strategy.md`).
+ * (Phase 5 of the legacy migration).
  *
  * Backs `getSmileIt` / `smile_row` / `insert_smilies_frame`. Every
  * method returns a string; the legacy proxies for the first two

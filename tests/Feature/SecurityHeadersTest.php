@@ -32,11 +32,12 @@ final class SecurityHeadersTest extends TestCase
         $this->assertNotNull($csp);
         // script-src stays nonce-strict on legacy routes.
         $this->assertStringContainsString("'nonce-", $csp);
-        // Legacy routes embed third-party widgets (FullCalendar, domTT,
-        // layer.js) that set element.style.cssText dynamically. CSP cannot
-        // hash style attributes, and 'unsafe-inline' is ignored when a nonce
-        // is present, so style-src uses 'unsafe-inline' without a nonce.
-        $this->assertStringContainsString("style-src 'self' 'unsafe-inline'", $csp);
+        // Legacy routes keep nonce-strict style-src to preserve the existing
+        // visual behavior — inline style attributes on legacy pages (e.g.
+        // <span style="color:#aaaaaa">) were already blocked by the nonce-only
+        // policy, and allowing them would cause color-contrast regressions.
+        $this->assertStringContainsString("style-src 'self' 'nonce-", $csp);
+        $this->assertStringNotContainsString("style-src 'self' 'unsafe-inline'", $csp);
         $this->assertStringNotContainsString("'unsafe-eval'", $csp);
         $this->assertStringContainsString("object-src 'none'", $csp);
         $this->assertStringContainsString('https://challenges.cloudflare.com', $csp);
@@ -46,12 +47,12 @@ final class SecurityHeadersTest extends TestCase
     }
 
     /**
-     * Filament/Livewire admin routes use the same CSP as legacy routes.
-     * style-src uses 'unsafe-inline' (no nonce) because Filament/Livewire/
-     * Alpine inject inline styles dynamically via JavaScript (element.style,
-     * <style> tags, x-bind:style). Per CSP spec, 'unsafe-inline' is ignored
-     * when a nonce is present, so we cannot use both. script-src stays
-     * nonce-strict on all routes, providing the primary XSS protection.
+     * Filament/Livewire admin routes use 'unsafe-inline' for style-src
+     * because Filament/Livewire/Alpine inject inline styles dynamically via
+     * JavaScript (element.style, <style> tags, x-bind:style). Per CSP spec,
+     * 'unsafe-inline' is ignored when a nonce is present, so we cannot use
+     * both. script-src stays nonce-strict on all routes, providing the
+     * primary XSS protection.
      */
     public function test_filament_csp_uses_nonce_for_scripts_unsafe_inline_for_styles(): void
     {

@@ -35,6 +35,18 @@ crowdin.yml
 /audit-*.md
 /.gitleaksignore
 
+# Local runtime binaries (downloaded by `vendor/bin/rr get-binary` / Octane)
+# and local test screenshots — dev-only, never part of the image.
+/frankenphp
+/frankenphp-worker.php
+/rr
+/.rr.yaml
+/screenshots
+/MODERNIZATION_PLAN.md
+/release-notes.md
+/LICENSE
+/README.md
+
 # Octane is a dev-only dependency (require-dev). The octane.yml workflow
 # runs Octane tests directly on the runner with composer install (not in
 # Docker). Excluding config/octane.php prevents config:cache from failing

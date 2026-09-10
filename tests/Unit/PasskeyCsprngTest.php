@@ -57,7 +57,7 @@ final class PasskeyCsprngTest extends TestCase
     public function test_all_passkey_generation_sites_use_passkey_generator(): void
     {
         $filesToCheck = [
-            'app/Services/RegistrationService.php',
+            'app/Services/PasswordSetup.php',
             'app/Support/LegacyAuth.php',
             'app/Repositories/UserRepository.php',
             'app/Repositories/UsercpRepository.php',

@@ -1137,7 +1137,6 @@ jobs:
             'app/Http/Controllers/AuthenticateController.php' \
             'app/Http/Controllers/TokenController.php' \
             'app/Services/Announce/*.php' \
-            'app/Services/BonusService.php' \
             'app/Services/AttachmentMutationService.php' \
             'app/Services/OutboxService.php' \
             'app/Services/OutboxDispatcher.php' \

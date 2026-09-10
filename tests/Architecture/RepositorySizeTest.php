@@ -45,7 +45,7 @@ final class RepositorySizeTest extends TestCase
         // Repositories > 400 lines (16 files)
         'app/Repositories/UserRepository.php' => 548,
         'app/Repositories/UserModerationRepository.php' => 595,
-        'app/Repositories/UsercpRepository.php' => 655,
+
         'app/Repositories/SearchBoxRepository.php' => 527,
         'app/Repositories/ToptenRepository.php' => 525,
         'app/Repositories/TorrentModerationRepository.php' => 491,

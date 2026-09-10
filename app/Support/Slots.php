@@ -10,8 +10,7 @@ use App\Models\User;
 /**
  * Stateless helper for the legacy download-slot ("max slots") tier.
  *
- * Phase 5 of the legacy migration — see
- * `docs/legacy-strategy.md` § "Phase 5 — drain `include/functions.php`".
+ * Phase 5 of the legacy migration.
  * The procedural `maxslots()` helper mixed three concerns: the pure
  * tier calculation, a `get_user_class() < UC_VIP` gate, and the HTML
  * that gets echoed into the page. Only the first is portable, so it

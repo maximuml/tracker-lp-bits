@@ -12,8 +12,7 @@ use App\Support\Config\SiteConfig;
 /**
  * Stateless mapping helpers for the legacy user-class ladder.
  *
- * Phase 5 of the legacy migration — see
- * `docs/legacy-strategy.md` § "Phase 5 — drain `include/functions.php`".
+ * Phase 5 of the legacy migration.
  *
  * `\App\Support\UserClass::name()` in `include/functions.php` carried two
  * identical 17-case `switch` blocks: one to pick the display label in

@@ -9,8 +9,7 @@ use Illuminate\Support\Str;
 /**
  * Stateless string helpers extracted from `include/functions.php`.
  *
- * Phase 5 of the legacy migration — see
- * `docs/legacy-strategy.md` § "Phase 5 — drain `include/functions.php`".
+ * Phase 5 of the legacy migration.
  * The legacy procedural helpers
  *
  *   - `add_s()`        (pick `''` / `"s"` / `"es"` suffix by count)

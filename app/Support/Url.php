@@ -9,8 +9,7 @@ use App\Support\Config\SiteConfig;
 /**
  * Request/URL helpers extracted from `include/globalfunctions.php`.
  *
- * Phase 5 of the legacy migration — see
- * `docs/legacy-strategy.md` § "Phase 5 — drain `include/functions.php`".
+ * Phase 5 of the legacy migration.
  */
 final class Url
 {

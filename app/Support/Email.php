@@ -7,8 +7,7 @@ namespace App\Support;
 /**
  * Stateless email helpers extracted from `include/functions.php`.
  *
- * Phase 5 of the legacy migration — see
- * `docs/legacy-strategy.md` § "Phase 5 — drain `include/functions.php`".
+ * Phase 5 of the legacy migration.
  * The legacy procedural helpers
  *
  *   - `safe_email()`           (strip a small set of metacharacters

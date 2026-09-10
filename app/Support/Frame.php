@@ -6,7 +6,7 @@ namespace App\Support;
 
 /**
  * Legacy "frame" HTML emitters extracted from `include/functions.php`
- * (Phase 5 of the legacy migration — see `docs/legacy-strategy.md`).
+ * (Phase 5 of the legacy migration).
  *
  * Backs `begin_main_frame` / `end_main_frame` / `begin_frame` /
  * `end_frame` / `begin_table` / `end_table`. Every method returns

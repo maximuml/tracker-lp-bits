@@ -10,8 +10,7 @@ use App\Support\Html\Tag;
 
 /**
  * Stateless HTML-string emitters extracted from `include/functions.php`
- * (Phase 5 of the legacy migration — see `docs/legacy-strategy.md`
- * § "Phase 5 — drain `include/functions.php`").
+ * (Phase 5 of the legacy migration).
  *
  * Lives under `App\Support` (not `App\Services`) because every method
  * is pure — no DI, no DB, no config, no global state.

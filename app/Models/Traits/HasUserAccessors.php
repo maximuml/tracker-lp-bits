@@ -10,6 +10,7 @@ use App\Support\Format;
 use App\Support\Logger;
 use App\Support\Url;
 use App\Support\UserDisplay;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 
 /**
@@ -17,6 +18,20 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
  */
 trait HasUserAccessors
 {
+    public function isDonating(): bool
+    {
+        $rawDonorUntil = $this->getRawOriginal('donoruntil');
+        $donorUntil = $this->donoruntil;
+        if (
+            $this->donor === true
+            && ($rawDonorUntil === null || $rawDonorUntil == '0000-00-00 00:00:00' || ($donorUntil instanceof Carbon && $donorUntil->gte(Carbon::now())))
+        ) {
+            return true;
+        }
+
+        return false;
+    }
+
     public function getDonateStatusAttribute(): string
     {
         if ($this->isDonating()) {

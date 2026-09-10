@@ -18,6 +18,15 @@ use Illuminate\Support\Facades\DB;
 
 class PageLayoutRepository extends BaseRepository implements PageLayoutRepositoryInterface
 {
+    public function __construct(
+        private readonly CurrentUser $currentUser,
+        private readonly Globals $globals,
+        private readonly IpLogRepository $ipLogRepository,
+        private readonly Language $language,
+        private readonly ?LegacyRedisCache $legacyRedisCache,
+        private readonly UserUpdateBatch $userUpdateBatch,
+    ) {}
+
     public function getInboxCount(int $userId): int
     {
         return (int) DB::table('messages')
@@ -129,7 +138,7 @@ class PageLayoutRepository extends BaseRepository implements PageLayoutRepositor
      */
     public function prepareAccess(): void
     {
-        $user = app(CurrentUser::class)->get();
+        $user = $this->currentUser->get();
         if ($user === null || empty($user['id'])) {
             return;
         }
@@ -139,26 +148,26 @@ class PageLayoutRepository extends BaseRepository implements PageLayoutRepositor
             return;
         }
 
-        app(UserUpdateBatch::class)->add('last_access', date('Y-m-d H:i:s'));
-        app(UserUpdateBatch::class)->add('ip', $user['ip'] ?? Input::serverValue('REMOTE_ADDR', ''));
+        $this->userUpdateBatch->add('last_access', date('Y-m-d H:i:s'));
+        $this->userUpdateBatch->add('ip', $user['ip'] ?? Input::serverValue('REMOTE_ADDR', ''));
 
-        app(IpLogRepository::class)->saveToCache((int) $user['id']);
+        $this->ipLogRepository->saveToCache((int) $user['id']);
 
         $menuResult = Menu::render(
             $script,
-            app(Language::class)->functions(),
-            (string) app(Globals::class)->get('enableoffer', ''),
+            $this->language->functions(),
+            (string) $this->globals->get('enableoffer', ''),
             null,
             $user,
-            app(LegacyRedisCache::class),
-            (string) app(Globals::class)->get('CURLANGDIR', ''),
+            $this->legacyRedisCache,
+            (string) $this->globals->get('CURLANGDIR', ''),
         );
 
-        app(Globals::class)->set('nexus_menu_html', $menuResult['html']);
-        app(Globals::class)->set('nexus_menu_selected', $menuResult['selected']);
+        $this->globals->set('nexus_menu_html', $menuResult['html']);
+        $this->globals->set('nexus_menu_selected', $menuResult['selected']);
 
-        if ((string) app(Globals::class)->get('where_tweak', '') === 'yes') {
-            app(UserUpdateBatch::class)->add('page', $menuResult['selected']);
+        if ((string) $this->globals->get('where_tweak', '') === 'yes') {
+            $this->userUpdateBatch->add('page', $menuResult['selected']);
         }
     }
 
@@ -167,12 +176,12 @@ class PageLayoutRepository extends BaseRepository implements PageLayoutRepositor
      */
     public function flushAccess(): void
     {
-        $user = app(CurrentUser::class)->get();
+        $user = $this->currentUser->get();
         if ($user === null || empty($user['id'])) {
             return;
         }
 
-        $userUpdateSet = app(UserUpdateBatch::class)->all();
+        $userUpdateSet = $this->userUpdateBatch->all();
         if (empty($userUpdateSet)) {
             return;
         }

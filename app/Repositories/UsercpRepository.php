@@ -37,6 +37,13 @@ use Illuminate\Validation\ValidationException;
 
 final class UsercpRepository extends BaseRepository
 {
+    public function __construct(
+        private readonly Globals $globals,
+        private readonly PasskeyGenerator $passkeyGenerator,
+        private readonly TorrentDownloadRepository $torrentDownloadRepository,
+        private readonly WebAuthService $webAuthService,
+    ) {}
+
     public function getUserById(int $userId): User
     {
         return User::query()->findOrFail($userId);
@@ -110,7 +117,7 @@ final class UsercpRepository extends BaseRepository
         return (bool) DB::transaction(function () use ($userId, $data, $resetAuthKey) {
             $this->updateUser($userId, $data);
             if ($resetAuthKey) {
-                $torrentRep = app(TorrentDownloadRepository::class);
+                $torrentRep = $this->torrentDownloadRepository;
                 $torrentRep->resetTrackerReportAuthKeySecret($userId);
             }
 
@@ -404,7 +411,7 @@ final class UsercpRepository extends BaseRepository
         if (! $user instanceof User) {
             throw new \RuntimeException('Unauthenticated');
         }
-        $lang = (array) (app(Globals::class)->get('lang_usercp') ?? []);
+        $lang = (array) ($this->globals->get('lang_usercp') ?? []);
 
         $response = (string) $request->input('response', '');
         $oldPassword = (string) $request->input('oldpassword', '');
@@ -486,7 +493,7 @@ final class UsercpRepository extends BaseRepository
         }
 
         if ($resetpasskey === 1) {
-            $data['passkey'] = app(PasskeyGenerator::class)->generate();
+            $data['passkey'] = $this->passkeyGenerator->generate();
         }
 
         $siteName = $config->basic->siteName();
@@ -564,7 +571,7 @@ final class UsercpRepository extends BaseRepository
             throw new \RuntimeException('Unauthenticated');
         }
 
-        if (! app(WebAuthService::class)->validatePassword($user, $dto->currentPassword)) {
+        if (! $this->webAuthService->validatePassword($user, $dto->currentPassword)) {
             throw ValidationException::withMessages(['current_password' => ['Wrong password.']]);
         }
 
@@ -587,7 +594,7 @@ final class UsercpRepository extends BaseRepository
         $siteEmail = $config->main->siteEmail();
         $baseUrl = $config->basic->baseUrl();
         $scheme = Http::protocolPrefix(Url::isSecure());
-        $lang = (array) (app(Globals::class)->get('lang_usercp') ?? []);
+        $lang = (array) ($this->globals->get('lang_usercp') ?? []);
 
         if ($disableEmailChange !== 'no' && $smtpType !== 'none' && $email !== '' && $email !== $user->email) {
             if (! Validators::isEmail($email)) {
@@ -622,7 +629,7 @@ final class UsercpRepository extends BaseRepository
         }
 
         if ($resetpasskey) {
-            $data['passkey'] = app(PasskeyGenerator::class)->generate();
+            $data['passkey'] = $this->passkeyGenerator->generate();
         }
 
         if ($dto->twoStepCode !== null && $dto->twoStepCode !== '') {

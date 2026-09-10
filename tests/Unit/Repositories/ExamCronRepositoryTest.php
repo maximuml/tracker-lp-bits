@@ -20,7 +20,6 @@ use App\Models\ExamProgress;
 use App\Models\ExamUser;
 use App\Models\User;
 use App\Repositories\ExamCronRepository;
-use App\Repositories\ExamProgressRepository;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
@@ -57,7 +56,7 @@ final class ExamCronRepositoryTest extends TestCase
         DB::table('user_modify_logs')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
-        $this->repository = new ExamCronRepository(new ExamProgressRepository);
+        $this->repository = app(ExamCronRepository::class);
     }
 
     protected function tearDown(): void

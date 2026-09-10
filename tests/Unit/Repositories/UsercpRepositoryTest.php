@@ -31,7 +31,7 @@ final class UsercpRepositoryTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->repository = new UsercpRepository;
+        $this->repository = app(UsercpRepository::class);
     }
 
     public function test_get_user_by_id_returns_user(): void

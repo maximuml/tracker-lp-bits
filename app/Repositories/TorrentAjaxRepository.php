@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\MeiliSearchRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\Snatch;
 use App\Models\Torrent;
@@ -24,6 +25,12 @@ use Meilisearch\Exceptions\ApiException;
 
 final class TorrentAjaxRepository
 {
+    public function __construct(
+        private readonly Globals $globals,
+        private readonly MeiliSearchRepositoryInterface $meiliSearchRepository,
+        private readonly TorrentRepository $torrentRepository,
+    ) {}
+
     /**
      * @return Collection<int, \stdClass>
      */
@@ -127,7 +134,7 @@ final class TorrentAjaxRepository
         }
 
         try {
-            $torrents = app(MeiliSearchRepository::class)->autocomplete($query, 10, $user);
+            $torrents = $this->meiliSearchRepository->autocomplete($query, 10, $user);
         } catch (ApiException) {
             $torrents = [];
         }
@@ -211,7 +218,7 @@ final class TorrentAjaxRepository
             $usernameHtmlMap[(int) $uid] = UserDisplay::username((int) $uid, false, true, true, true);
         }
 
-        $enablelocationTweak = app(Globals::class)->get('enablelocation_tweak');
+        $enablelocationTweak = $this->globals->get('enablelocation_tweak');
         $showLocationColumn = $enablelocationTweak === 'yes' || ($currentUser !== null && Permissions::userCan(PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO->value, false, $currentUser->id));
 
         return [
@@ -279,7 +286,7 @@ final class TorrentAjaxRepository
             'total_size' => $totalSize,
             'pagertop' => (string) $pager[0],
             'pagerbottom' => (string) $pager[1],
-            'torrentRep' => app(TorrentRepository::class),
+            'torrentRep' => $this->torrentRepository,
             'seedTimeAndUploaded' => $seedTimeAndUploaded,
         ];
     }

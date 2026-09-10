@@ -22,16 +22,26 @@ use Illuminate\Support\Facades\DB;
 
 class TorrentSearchRepository
 {
+    public function __construct(
+        private readonly CurrentUser $currentUser,
+        private readonly Globals $globals,
+        private readonly TagRepository $tagRepository,
+        private readonly QueryBuilder $queryBuilder,
+        private readonly FilterParser $filterParser,
+        private readonly MeiliAdapter $meiliAdapter,
+        private readonly SqlFallback $sqlFallback,
+    ) {}
+
     /**
      * @param  array<string, mixed>  $query  Query parameters to use instead of $_GET
      * @return array<string, mixed>
      */
     public function getListingData(array $query = []): array
     {
-        $CURUSER = app(CurrentUser::class)->get() ?? [];
-        $lang_torrents = app(Globals::class)->get('lang_torrents', []);
-        $browsecatmode = (int) app(Globals::class)->get('browsecatmode', 1);
-        $torrentsperpage_main = (int) app(Globals::class)->get('torrentsperpage_main', 0);
+        $CURUSER = $this->currentUser->get() ?? [];
+        $lang_torrents = $this->globals->get('lang_torrents', []);
+        $browsecatmode = (int) $this->globals->get('browsecatmode', 1);
+        $torrentsperpage_main = (int) $this->globals->get('torrentsperpage_main', 0);
         $catimgurl = '';
         $catpadding = 0;
         $catsperrow = 0;
@@ -53,7 +63,7 @@ class TorrentSearchRepository
         /**
          * tags
          */
-        $tagRep = app(TagRepository::class);
+        $tagRep = $this->tagRepository;
         $allTags = $tagRep->listAll($sectiontype);
         $filterInputWidth = 62;
         $searchParams = $query ?: request()->query();
@@ -106,14 +116,14 @@ class TorrentSearchRepository
         // sorting by MarkoStamcar
         $allCategoryId = \App\Models\SearchBox::listCategoryId($sectiontype);
 
-        $sorting = app(QueryBuilder::class)->buildSorting($searchParams);
+        $sorting = $this->queryBuilder->buildSorting($searchParams);
         $column = $sorting['column'];
         $ascdesc = $sorting['ascdesc'];
         $linkascdesc = $sorting['linkascdesc'];
         $orderBy = $sorting['orderBy'];
         $pagerlink = $sorting['pagerlink'];
 
-        $filters = app(FilterParser::class)->parse(
+        $filters = $this->filterParser->parse(
             $searchParams,
             $CURUSER,
             $hasSearchParams,
@@ -150,7 +160,7 @@ class TorrentSearchRepository
         $allsec = $filters['allsec'];
         $searchParams = $filters['searchParams'];
 
-        $built = app(QueryBuilder::class)->buildWhere(
+        $built = $this->queryBuilder->buildWhere(
             $searchParams,
             $CURUSER,
             $wherea,
@@ -190,15 +200,15 @@ class TorrentSearchRepository
 
         if ($shouldUseMeili) {
             try {
-                $resultFromSearchRep = app(MeiliAdapter::class)->search($searchParams, $CURUSER['id']);
+                $resultFromSearchRep = $this->meiliAdapter->search($searchParams, $CURUSER['id']);
                 $count = $resultFromSearchRep['total'];
             } catch (\Throwable $e) {
                 Logger::writeWithContext((string) ('MeiliSearch search failed, falling back to SQL: '.$e->getMessage()), (string) 'error', (bool) false);
                 $shouldUseMeili = false;
-                $count = app(SqlFallback::class)->getCount($listingOptions);
+                $count = $this->sqlFallback->getCount($listingOptions);
             }
         } else {
-            $count = app(SqlFallback::class)->getCount($listingOptions);
+            $count = $this->sqlFallback->getCount($listingOptions);
         }
         $maxPageSize = 100;
         if (! empty($searchParams['pageSize'])) {
@@ -229,7 +239,7 @@ class TorrentSearchRepository
             $fieldsArr = Torrent::getFieldsForList(true);
             $rows = $shouldUseMeili
                 ? $resultFromSearchRep['list']
-                : app(SqlFallback::class)->getList(array_merge($listingOptions, [
+                : $this->sqlFallback->getList(array_merge($listingOptions, [
                     'fields' => $fieldsArr,
                     'search_box_id' => $sectiontype,
                     'order_by' => $orderBy,

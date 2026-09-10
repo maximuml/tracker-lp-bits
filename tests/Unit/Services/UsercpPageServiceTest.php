@@ -68,7 +68,7 @@ final class UsercpPageServiceTest extends TestCase
             $this->currentUser,
             $this->globals,
             new LegacyRedisCache,
-            new UsercpRepository,
+            app(UsercpRepository::class),
             $this->tokenRepository,
             $this->passkeyRepository,
         );
@@ -172,7 +172,7 @@ final class UsercpPageServiceTest extends TestCase
             new CurrentUser,
             new Globals,
             new LegacyRedisCache,
-            new UsercpRepository,
+            app(UsercpRepository::class),
             Mockery::mock(TokenRepository::class),
             Mockery::mock(UserPasskeyRepository::class),
         );

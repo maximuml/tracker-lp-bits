@@ -40,7 +40,7 @@ final class TorrentAjaxRepositoryTest extends TestCase
         DB::table('torrents')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
-        $this->repository = new TorrentAjaxRepository;
+        $this->repository = app(TorrentAjaxRepository::class);
     }
 
     public function test_file_list_returns_empty_when_no_files(): void

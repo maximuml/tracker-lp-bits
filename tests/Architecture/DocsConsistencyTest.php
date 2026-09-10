@@ -31,7 +31,26 @@ final class DocsConsistencyTest extends TestCase
 
     private const ROOT = __DIR__.'/../..';
 
-    public function testKeyDirectoriesExist(): void
+    /**
+     * Generated / build / VCS-ignored paths that should never be checked for
+     * existence. They are mentioned in the docs as artifacts, not as tracked
+     * repo paths.
+     */
+    private const GENERATED_PATHS = [
+        'public/build',
+        'public/build/assets',
+        'public/build/manifest.json',
+        'vendor',
+        'node_modules',
+        'bootstrap/cache',
+        'storage/framework',
+        'storage/logs',
+        'storage/app',
+        'storage/debugbar',
+        'public/hot',
+    ];
+
+    public function test_key_directories_exist(): void
     {
         $content = (string) file_get_contents(self::ROOT.'/AGENTS.md');
         $section = $this->section($content, 'Key directories');
@@ -48,7 +67,7 @@ final class DocsConsistencyTest extends TestCase
         }
     }
 
-    public function testKeyDirectoriesHaveNoHardCodedCounts(): void
+    public function test_key_directories_have_no_hard_coded_counts(): void
     {
         $content = (string) file_get_contents(self::ROOT.'/AGENTS.md');
         $section = $this->section($content, 'Key directories');
@@ -61,7 +80,7 @@ final class DocsConsistencyTest extends TestCase
         );
     }
 
-    public function testBashCommandsReferenceExistingTargets(): void
+    public function test_bash_commands_reference_existing_targets(): void
     {
         $makeTargets = $this->makefileTargets();
         $composerScripts = $this->composerScripts();
@@ -99,7 +118,7 @@ final class DocsConsistencyTest extends TestCase
      * Paths in backticks inside bash blocks must exist unless the block or
      * the surrounding line marks them as historical.
      */
-    public function testDocumentedPathsExist(): void
+    public function test_documented_paths_exist(): void
     {
         $failures = [];
         $historical = '/\b(former|removed|deleted|no longer|legacy file)\b/i';
@@ -117,6 +136,7 @@ final class DocsConsistencyTest extends TestCase
             foreach ($lines as $i => $line) {
                 if (preg_match('/^```/', $line)) {
                     $inBlock = ! $inBlock;
+
                     continue;
                 }
                 if ($inBlock) {
@@ -134,6 +154,11 @@ final class DocsConsistencyTest extends TestCase
                         if (str_contains($p, '..') || str_contains($p, '://')) {
                             continue;
                         }
+
+                        if (in_array($p, self::GENERATED_PATHS, true) || in_array(dirname($p), self::GENERATED_PATHS, true)) {
+                            continue;
+                        }
+
                         $knownRoot = preg_match(
                             '#^(app|config|database|docs|public|resources|routes|scripts|storage|tests|\.agents|\.docker|\.devin|\.github|vendor|node_modules|docker-compose|bootstrap|lang)/#',
                             $p.'/'

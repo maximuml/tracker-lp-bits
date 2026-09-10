@@ -247,7 +247,7 @@ final class TorrentAjaxControllerTest extends TestCase
      */
     private function mockTorrentAjaxRepository(): MockInterface
     {
-        $real = new TorrentAjaxRepository;
+        $real = app(TorrentAjaxRepository::class);
         $mock = Mockery::mock($real);
         app()->instance(TorrentAjaxRepository::class, $mock);
 

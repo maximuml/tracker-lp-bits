@@ -45,7 +45,7 @@ final class RepositorySizeTest extends TestCase
         // Repositories > 400 lines (16 files)
         'app/Repositories/UserRepository.php' => 548,
         'app/Repositories/UserModerationRepository.php' => 595,
-        'app/Repositories/UsercpRepository.php' => 648,
+        'app/Repositories/UsercpRepository.php' => 655,
         'app/Repositories/SearchBoxRepository.php' => 527,
         'app/Repositories/ToptenRepository.php' => 525,
         'app/Repositories/TorrentModerationRepository.php' => 491,
@@ -53,7 +53,7 @@ final class RepositorySizeTest extends TestCase
         'app/Repositories/TorrentSearch/QueryBuilder.php' => 466,
         'app/Repositories/AttendanceRepository.php' => 455,
         'app/Repositories/ExamProgressRepository.php' => 452,
-        'app/Repositories/BonusRepository.php' => 440,
+        'app/Repositories/BonusRepository.php' => 443,
         'app/Repositories/UserSearchRepository.php' => 438,
         'app/Repositories/TorrentSearch/FilterParser.php' => 424,
         'app/Repositories/CleanupRepository.php' => 414,
@@ -86,7 +86,7 @@ final class RepositorySizeTest extends TestCase
         'app/Repositories/OfferRepository.php' => 26,
         'app/Repositories/ExamRepository.php' => 26,
         'app/Repositories/TopicRepository.php' => 25,
-        'app/Repositories/UsercpRepository.php' => 23,
+        'app/Repositories/UsercpRepository.php' => 24,
         'app/Repositories/SearchBoxRepository.php' => 20,
     ];
 

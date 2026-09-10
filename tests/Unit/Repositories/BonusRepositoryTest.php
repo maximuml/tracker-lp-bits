@@ -29,7 +29,7 @@ final class BonusRepositoryTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->repository = new BonusRepository;
+        $this->repository = app(BonusRepository::class);
     }
 
     public function test_increment_user_seedbonus_adds_amount(): void

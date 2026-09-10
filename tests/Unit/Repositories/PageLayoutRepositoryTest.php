@@ -50,7 +50,7 @@ final class PageLayoutRepositoryTest extends TestCase
         DB::table('messages')->delete();
         DB::table('peers')->delete();
         DB::table('users')->delete();
-        $this->repository = new PageLayoutRepository;
+        $this->repository = app(PageLayoutRepository::class);
     }
 
     protected function tearDown(): void

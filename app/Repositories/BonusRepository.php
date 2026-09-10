@@ -30,7 +30,10 @@ use Illuminate\Support\Facades\DB;
 class BonusRepository extends BaseRepository
 {
     public function __construct(
-        private readonly OutboxService $outboxService = new OutboxService,
+        private readonly OutboxService $outboxService,
+        private readonly MedalRepository $medalRepository,
+        private readonly ToolRepository $toolRepository,
+        private readonly UserRepository $userRepository,
     ) {}
 
     /**
@@ -105,7 +108,7 @@ class BonusRepository extends BaseRepository
             $comment = Locale::trans('bonus.comment_buy_medal', ['bonus' => $requireBonus, 'medal_name' => $medal->name], $user->locale);
             Logger::writeWithContext((string) "comment: {$comment}", (string) 'info', (bool) false);
             $this->consumeUserBonus($user, $requireBonus, BusinessType::BUY_MEDAL->value, "$comment(medal ID: {$medal->id})");
-            $medalRep = app(MedalRepository::class);
+            $medalRep = $this->medalRepository;
             $medalRep->userAttachMedal($user, $medal);
             if ($medal->inventory !== null) {
                 $affectedRows = DB::table('medals')
@@ -202,7 +205,7 @@ class BonusRepository extends BaseRepository
             throw new \RuntimeException('Temporary invite require bonus <= 0 !');
         }
         $user = User::query()->findOrFail((int) $uid);
-        $toolRep = app(ToolRepository::class);
+        $toolRep = $this->toolRepository;
         $hashArr = $toolRep->generateUniqueInviteHash([], $count, $count);
         DB::transaction(function () use ($user, $requireBonus, $hashArr) {
             $comment = Locale::trans('bonus.comment_buy_temporary_invite', ['bonus' => $requireBonus, 'count' => count($hashArr)], $user->locale);
@@ -242,7 +245,7 @@ class BonusRepository extends BaseRepository
                 'meta_key' => UserMeta::META_KEY_PERSONALIZED_USERNAME,
                 'duration' => $duration,
             ];
-            $userRep = app(UserRepository::class);
+            $userRep = $this->userRepository;
             $userRep->addMeta($user, $metaData, $metaData, false);
         });
 
@@ -265,7 +268,7 @@ class BonusRepository extends BaseRepository
             $metaData = [
                 'meta_key' => UserMeta::META_KEY_CHANGE_USERNAME,
             ];
-            $userRep = app(UserRepository::class);
+            $userRep = $this->userRepository;
             $userRep->addMeta($user, $metaData, $metaData, false);
         });
 

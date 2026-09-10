@@ -168,6 +168,7 @@ Route::get('/fields', fn () => redirect('/nexusphp/torrent-custom-fields'))->nam
 Route::get('/formats', fn () => redirect('/nexusphp/section/codecs'))->name('formats.legacy');
 Route::get('/videoformats', fn () => redirect('/nexusphp/section/standards'))->name('videoformats.legacy');
 Route::get('/attachment', [UtilityController::class, 'attachment'])->middleware('throttle:attachment')->name('attachment.legacy');
+Route::post('/attachment', [UtilityController::class, 'attachmentStore'])->middleware('throttle:attachment');
 Route::get('/getattachment', [UtilityController::class, 'getattachment'])->middleware('throttle:attachment')->name('getattachment.legacy');
 Route::get('/shoutbox_history', [ShoutboxController::class, 'shoutboxHistory'])->name('shoutbox_history.legacy');
 Route::get('/latestcomments', [ForumController::class, 'latestcomments'])->name('latestcomments.legacy');

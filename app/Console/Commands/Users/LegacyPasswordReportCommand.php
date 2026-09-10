@@ -75,11 +75,19 @@ final class LegacyPasswordReportCommand extends Command
         }
 
         if ($this->option('format') === 'json') {
-            $this->line(json_encode([
+            $json = json_encode([
                 'summary' => $byAlgo,
                 'total' => count($rows),
                 'users' => $rows,
-            ], JSON_PRETTY_PRINT));
+            ], JSON_PRETTY_PRINT);
+
+            if ($json === false) {
+                $this->error('Failed to encode report to JSON.');
+
+                return self::FAILURE;
+            }
+
+            $this->line($json);
 
             return self::SUCCESS;
         }

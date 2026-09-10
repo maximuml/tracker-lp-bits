@@ -27,19 +27,19 @@ use Illuminate\View\View;
 
 class InviteController extends LegacyController
 {
-    private UserModerationRepository $userModerationRepository;
-
-    public function __construct(UserModerationRepository $userModerationRepository)
-    {
-        $this->userModerationRepository = $userModerationRepository;
-    }
+    public function __construct(
+        private readonly UserModerationRepository $userModerationRepository,
+        private readonly CurrentUser $currentUser,
+        private readonly Globals $globals,
+        private readonly InviteRepository $inviteRepository,
+    ) {}
 
     public function invite(Request $request): View|RedirectResponse|Response
     {
-        $currentUser = app(CurrentUser::class)->get() ?? [];
+        $currentUser = $this->currentUser->get() ?? [];
         $currentUserId = (int) ($currentUser['id'] ?? 0);
         $id = $request->input('id') !== null ? (int) $request->input('id') : $currentUserId;
-        $langInvite = (array) (app(Globals::class)->get('lang_invite') ?? []);
+        $langInvite = (array) ($this->globals->get('lang_invite') ?? []);
 
         if (! Validators::isId($id) || ($currentUserId !== $id && ! Permission::can(PermissionEnum::VIEW_INVITE))) {
             return $this->legacyAbortResponse($langInvite['std_sorry'] ?? 'Sorry', $langInvite['std_permission_denied'] ?? 'Permission denied.');
@@ -65,7 +65,7 @@ class InviteController extends LegacyController
             'user' => $user->toArray(),
             'CURUSER' => $currentUser,
             'lang_invite' => $langInvite,
-            'lang_functions' => (array) (app(Globals::class)->get('lang_functions') ?? []),
+            'lang_functions' => (array) ($this->globals->get('lang_functions') ?? []),
             'SITENAME' => $SITENAME,
             'invitesystem' => $invitesystem,
             '__server_REQUEST_URI' => $request->getRequestUri(),
@@ -129,7 +129,7 @@ class InviteController extends LegacyController
             if ($menuSelected === 'invitee') {
                 $data = array_merge($data, $this->inviteeData($id, $enabled, $status, $currentUserId, $langInvite, $request->getRequestUri()));
             } elseif (in_array($menuSelected, ['sent', 'tmp'], true)) {
-                $data = array_merge($data, $this->sentTmpData($id, $menuSelected, $langInvite, $langFunctions = (array) (app(Globals::class)->get('lang_functions') ?? [])));
+                $data = array_merge($data, $this->sentTmpData($id, $menuSelected, $langInvite, $langFunctions = (array) ($this->globals->get('lang_functions') ?? [])));
             }
         }
 
@@ -170,7 +170,7 @@ class InviteController extends LegacyController
     private function inviteeData(int $id, string $enabled, string $status, int $currentUserId, array $langInvite, string $requestUri): array
     {
         $filters = ['status' => $status, 'enabled' => $enabled];
-        $number = app(InviteRepository::class)->countInvitees($id, $filters);
+        $number = $this->inviteRepository->countInvitees($id, $filters);
         $pageSize = 50;
 
         $enabledOptions = '';
@@ -190,11 +190,11 @@ class InviteController extends LegacyController
 
         if ($number > 0) {
             [$pagertop, $pagerbottom, , $offset] = Pagination::pager($pageSize, $number, "?id=$id&menu=invitee&");
-            $inviteRows = app(InviteRepository::class)->getInvitees($id, $filters, (int) $offset, $pageSize);
+            $inviteRows = $this->inviteRepository->getInvitees($id, $filters, (int) $offset, $pageSize);
         }
 
         if ($currentUserId === $id || UserDisplay::currentClass() >= (int) UserClassEnum::SYSOP->value) {
-            $pendingCount = app(InviteRepository::class)->countPendingInvitees($currentUserId);
+            $pendingCount = $this->inviteRepository->countPendingInvitees($currentUserId);
         }
 
         // Register reset JS
@@ -232,7 +232,7 @@ JS;
      */
     private function sentTmpData(int $id, string $menuSelected, array $langInvite, array $langFunctions): array
     {
-        $number = app(InviteRepository::class)->countInvites($id, $menuSelected);
+        $number = $this->inviteRepository->countInvites($id, $menuSelected);
         $pageSize = 50;
         $inviteRows = [];
         $pagertop = '';
@@ -240,7 +240,7 @@ JS;
 
         if ($number > 0) {
             [$pagertop, $pagerbottom, , $offset] = Pagination::pager($pageSize, $number, "?id=$id&menu=$menuSelected&");
-            $inviteRows = app(InviteRepository::class)->getInvites($id, $menuSelected, (int) $offset, $pageSize);
+            $inviteRows = $this->inviteRepository->getInvites($id, $menuSelected, (int) $offset, $pageSize);
         }
 
         return [

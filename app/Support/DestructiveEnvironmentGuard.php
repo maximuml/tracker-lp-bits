@@ -104,8 +104,9 @@ final class DestructiveEnvironmentGuard
      */
     private static function resolveClaim(string $envKey, string $configKey, string $default): string
     {
-        if (isset($_SERVER[$envKey]) && is_string($_SERVER[$envKey]) && $_SERVER[$envKey] !== '') {
-            return $_SERVER[$envKey];
+        $value = self::serverValue($envKey);
+        if ($value !== null) {
+            return $value;
         }
 
         $value = config($configKey);
@@ -129,21 +130,19 @@ final class DestructiveEnvironmentGuard
             return $value;
         }
 
-        if (isset($_SERVER[$envKey]) && is_string($_SERVER[$envKey]) && $_SERVER[$envKey] !== '') {
-            return $_SERVER[$envKey];
-        }
-
-        return $default;
+        return self::serverValue($envKey) ?? $default;
     }
 
     /**
      * Explain the common failure mode: env claims a test value while the
      * resolved (possibly cached) config still points at the dev database.
+     *
+     * @param  non-empty-string  $envKey
      */
     private static function staleConfigHint(string $envKey, string $resolved): string
     {
-        $claimed = $_SERVER[$envKey] ?? null;
-        if (! is_string($claimed) || $claimed === '' || $claimed === $resolved) {
+        $claimed = self::serverValue($envKey);
+        if ($claimed === null || $claimed === $resolved) {
             return '';
         }
 
@@ -154,5 +153,20 @@ final class DestructiveEnvironmentGuard
             $claimed,
             $resolved,
         );
+    }
+
+    /**
+     * Read a single $_SERVER entry. The guard is the one place in app/ where
+     * superglobal access is intentional: it exists precisely to compare the
+     * claimed env (phpunit.xml <server>, docker -e) against the resolved
+     * config before the request ever boots.
+     *
+     * @param  non-empty-string  $key
+     */
+    private static function serverValue(string $key): ?string
+    {
+        $value = $_SERVER[$key] ?? null;
+
+        return is_string($value) && $value !== '' ? $value : null;
     }
 }

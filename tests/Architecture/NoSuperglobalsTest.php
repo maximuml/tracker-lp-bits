@@ -20,7 +20,8 @@ use Tests\Attributes\TestCategory;
  *
  * Baseline captured on 2026-09-06: 9 lines of actual code usage, all in
  * legitimate wrapper classes:
- *   - DestructiveEnvironmentGuard (2 lines) — reads $_SERVER for test config
+ *   - DestructiveEnvironmentGuard (1 line) — reads $_SERVER to compare the
+ *     claimed env with the resolved config before the request boots
  *   - RequestContext (7 lines) — fallback when Request is unavailable
  *
  * To fix a failure: replace $_SERVER/$GET/$POST with $request->server()/

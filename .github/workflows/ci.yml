@@ -241,9 +241,11 @@ jobs:
           # truncating tables in the seed database. The name carries the
           # "testing" marker required by DestructiveEnvironmentGuard.
           mysql -h 127.0.0.1 -u root -proot -e "CREATE DATABASE IF NOT EXISTS nexusphp_unit_testing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; GRANT ALL PRIVILEGES ON nexusphp_unit_testing.* TO 'nexusphp'@'%'; FLUSH PRIVILEGES;"
-          # Copy schema + seed data for tables tests depend on (settings, users)
+          # Copy schema + seed data for tables tests depend on:
+          # settings/users — config + auth, categories/forums — FK and
+          # inner joins, searchbox/searchbox_fields — browse mode.
           mysqldump -h 127.0.0.1 -u root -proot --no-data --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp | mysql -h 127.0.0.1 -u root -proot nexusphp_unit_testing
-          mysqldump -h 127.0.0.1 -u root -proot --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users | mysql -h 127.0.0.1 -u root -proot nexusphp_unit_testing
+          mysqldump -h 127.0.0.1 -u root -proot --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users categories forums searchbox searchbox_fields agent_allowed_family agent_allowed_exception | mysql -h 127.0.0.1 -u root -proot nexusphp_unit_testing
 
       - name: Run PHPUnit unit tests
         run: DB_DATABASE=nexusphp_unit_testing vendor/bin/phpunit --testsuite Unit --no-coverage
@@ -335,8 +337,11 @@ jobs:
           for db in nexusphp_unit_testing nexusphp_feature_testing; do
             mysqldump -h 127.0.0.1 -u root -proot --no-data --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp | mysql -h 127.0.0.1 -u root -proot "$db"
           done
-          # Unit tests need: settings, users
-          mysqldump -h 127.0.0.1 -u root -proot --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users | mysql -h 127.0.0.1 -u root -proot nexusphp_unit_testing
+          # Unit tests need: settings/users — config + auth,
+          # categories/forums — FK targets and inner joins,
+          # searchbox/searchbox_fields — browse mode,
+          # agent_allowed_* — announce client check
+          mysqldump -h 127.0.0.1 -u root -proot --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users categories forums searchbox searchbox_fields agent_allowed_family agent_allowed_exception | mysql -h 127.0.0.1 -u root -proot nexusphp_unit_testing
           # Feature tests need: settings/users — config + auth, searchbox/searchbox_fields — browse mode,
           # categories — torrent listing, agent_allowed_family/agent_allowed_exception — announce client check
           mysqldump -h 127.0.0.1 -u root -proot --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users searchbox searchbox_fields categories agent_allowed_family agent_allowed_exception | mysql -h 127.0.0.1 -u root -proot nexusphp_feature_testing
@@ -1034,7 +1039,7 @@ jobs:
             FLUSH PRIVILEGES;
           "
           mysqldump -h 127.0.0.1 -u root -proot --no-data --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp | mysql -h 127.0.0.1 -u root -proot nexusphp_unit_testing
-          mysqldump -h 127.0.0.1 -u root -proot --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users | mysql -h 127.0.0.1 -u root -proot nexusphp_unit_testing
+          mysqldump -h 127.0.0.1 -u root -proot --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users categories forums searchbox searchbox_fields agent_allowed_family agent_allowed_exception | mysql -h 127.0.0.1 -u root -proot nexusphp_unit_testing
 
       - name: Run Infection (full scope)
         run: |
@@ -1131,7 +1136,7 @@ jobs:
             FLUSH PRIVILEGES;
           "
           mysqldump -h 127.0.0.1 -u root -proot --no-data --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp | mysql -h 127.0.0.1 -u root -proot nexusphp_unit_testing
-          mysqldump -h 127.0.0.1 -u root -proot --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users | mysql -h 127.0.0.1 -u root -proot nexusphp_unit_testing
+          mysqldump -h 127.0.0.1 -u root -proot --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users categories forums searchbox searchbox_fields agent_allowed_family agent_allowed_exception | mysql -h 127.0.0.1 -u root -proot nexusphp_unit_testing
 
       - name: Detect changed critical files
         id: changed

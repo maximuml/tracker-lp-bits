@@ -12,15 +12,25 @@
 # CI runs this via .github/workflows/ci.yml in the semgrep-informational job.
 
 rules:
-  # Rule 1: Detect $request->all() in controllers (should use $request->validated())
+  # Rule 1: Detect request()->all() / $request->all() — reads the whole input
+  # bag instead of validated()/only(). NB: a bare `$X->all()` metavariable
+  # pattern would also flag Collection::all() and $request->query->all();
+  # the metavariable-regex below restricts matches to variables whose name
+  # ends in "request" plus the request() helper.
   - id: laravel-request-all-in-controller
     languages: [php]
     severity: WARNING
-    message: "$request->all() in controller — use $request->validated() to restrict input fields."
-    pattern: $REQUEST->all()
+    message: "request->all() reads all input — use $request->validated() or ->only() to restrict fields."
+    pattern-either:
+      - pattern: request()->all()
+      - patterns:
+          - pattern: $REQ->all()
+          - metavariable-regex:
+              metavariable: $REQ
+              regex: '^\$\w*[Rr]equest$'
     paths:
       include:
-        - "app/Http/Controllers/**/*.php"
+        - "app/**/*.php"
 
   # Rule 2: Detect unescaped output in Blade (potential XSS)
   - id: laravel-unescaped-blade-output

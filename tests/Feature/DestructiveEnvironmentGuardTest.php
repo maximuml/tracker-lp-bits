@@ -151,4 +151,39 @@ final class DestructiveEnvironmentGuardTest extends TestCase
             'redis_prefix' => '',
         ]);
     }
+
+    /**
+     * Cached-config trap: $_SERVER claims a testing database (e.g. a
+     * docker-exec env var or a phpunit.xml <server> entry) while the resolved
+     * config — what the connection will actually use — still points at the
+     * dev database. The guard must trust the resolved config, not the claim.
+     */
+    public function test_guard_prefers_resolved_config_over_server_claim(): void
+    {
+        $previousDatabase = $_SERVER['DB_DATABASE'] ?? null;
+        $previousRedis = $_SERVER['REDIS_PREFIX'] ?? null;
+        $_SERVER['DB_DATABASE'] = 'nexusphp_unit_testing';
+        $_SERVER['REDIS_PREFIX'] = 'test_';
+        config(['database.connections.mysql.database' => 'nexusphp']);
+        config(['database.redis.options.prefix' => 'test_']);
+
+        try {
+            DestructiveEnvironmentGuard::assertTestingEnvironment();
+            $this->fail('Expected RuntimeException for dev database behind a testing claim.');
+        } catch (RuntimeException $e) {
+            $this->assertStringContainsString('Refusing to run tests against database "nexusphp"', $e->getMessage());
+            $this->assertStringContainsString('config:clear', $e->getMessage());
+        } finally {
+            if ($previousDatabase === null) {
+                unset($_SERVER['DB_DATABASE']);
+            } else {
+                $_SERVER['DB_DATABASE'] = $previousDatabase;
+            }
+            if ($previousRedis === null) {
+                unset($_SERVER['REDIS_PREFIX']);
+            } else {
+                $_SERVER['REDIS_PREFIX'] = $previousRedis;
+            }
+        }
+    }
 }

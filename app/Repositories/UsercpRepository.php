@@ -90,11 +90,10 @@ final class UsercpRepository extends BaseRepository
 
     /**
      * @param  array<string, mixed>  $data
-     * @param  array<string, mixed>  $allPost
      */
-    public function updateSecurity(int $userId, array $data, bool $resetAuthKey, array $allPost): bool
+    public function updateSecurity(int $userId, array $data, bool $resetAuthKey): bool
     {
-        return $this->security->updateSecurity($userId, $data, $resetAuthKey, $allPost);
+        return $this->security->updateSecurity($userId, $data, $resetAuthKey);
     }
 
     public function getCommentCount(int $userId): int

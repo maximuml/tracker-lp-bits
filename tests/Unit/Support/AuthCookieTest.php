@@ -3,6 +3,7 @@
 namespace Tests\Unit\Support;
 
 use App\Support\AuthCookie;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Crypt;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
@@ -118,6 +119,29 @@ final class AuthCookieTest extends TestCase
         $token = $this->buildLegacyToken(99, self::LEGACY_AUTH_KEY, time() + 3600);
 
         $this->assertNull(AuthCookie::verifyToken($token, self::LEGACY_AUTH_KEY));
+    }
+
+    public function test_verify_legacy_token_increments_retirement_counter(): void
+    {
+        Cache::forget(AuthCookie::LEGACY_COOKIE_COUNTER_KEY);
+
+        $token = $this->buildLegacyToken(99, self::LEGACY_AUTH_KEY, time() + 3600);
+
+        AuthCookie::verifyToken($token, self::LEGACY_AUTH_KEY);
+        AuthCookie::verifyToken($token, self::LEGACY_AUTH_KEY);
+
+        $this->assertSame(2, (int) Cache::get(AuthCookie::LEGACY_COOKIE_COUNTER_KEY, 0));
+    }
+
+    public function test_verify_modern_token_does_not_increment_retirement_counter(): void
+    {
+        Cache::forget(AuthCookie::LEGACY_COOKIE_COUNTER_KEY);
+
+        $token = AuthCookie::buildToken(99, null, time() + 3600);
+
+        AuthCookie::verifyToken($token);
+
+        $this->assertSame(0, (int) Cache::get(AuthCookie::LEGACY_COOKIE_COUNTER_KEY, 0));
     }
 
     // ---------- computeExpires() ----------

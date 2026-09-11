@@ -15,26 +15,31 @@ build: ## Build images
 	docker compose build
 
 # --- Testing (uses docker-compose.test.yml overlay) ---
-TEST_COMPOSE = docker compose -f docker-compose.yml -f docker-compose.test.yml
-TEST_RUN = $(TEST_COMPOSE) run --rm -T php
+# NB: the dev overlay is required for the source bind-mount (the image has
+# no code baked in), and --entrypoint sh bypasses entrypoint.sh, which
+# ignores the command and would exec php-fpm instead. config:clear drops a
+# stale bootstrap/cache/config.php left by the dev container — a cached
+# config makes the test env overrides (DB_DATABASE, REDIS_PREFIX) inert.
+TEST_COMPOSE = docker compose -f docker-compose.yml -f docker-compose.dev.yml -f docker-compose.test.yml
+TEST_RUN = $(TEST_COMPOSE) run --rm -T --entrypoint sh php -c
 
 test: ## Run all test suites (unit + feature + architecture) in isolated test DB
-	$(TEST_RUN) sh -c 'php artisan migrate:fresh --force && composer test'
+	$(TEST_RUN) 'php artisan config:clear && php artisan migrate:fresh --force && composer test'
 
 test-unit: ## Run unit tests only
-	$(TEST_RUN) sh -c 'php artisan migrate:fresh --force && composer test:unit'
+	$(TEST_RUN) 'php artisan config:clear && php artisan migrate:fresh --force && composer test:unit'
 
 test-feature: ## Run feature tests only
-	$(TEST_RUN) sh -c 'php artisan migrate:fresh --force && composer test:feature'
+	$(TEST_RUN) 'php artisan config:clear && php artisan migrate:fresh --force && composer test:feature'
 
 test-architecture: ## Run architecture ratchet tests only
-	$(TEST_RUN) composer test:architecture
+	$(TEST_RUN) 'php artisan config:clear && composer test:architecture'
 
 test-lint: ## Run Pint + PHPStan
-	$(TEST_RUN) composer test:lint
+	$(TEST_RUN) 'composer test:lint'
 
 migrate-test: ## Run migrations against test DB
-	$(TEST_RUN) php artisan migrate:fresh --force
+	$(TEST_RUN) 'php artisan config:clear && php artisan migrate:fresh --force'
 
 # --- Lint (local, without Docker) ---
 lint: ## Run Pint --test locally

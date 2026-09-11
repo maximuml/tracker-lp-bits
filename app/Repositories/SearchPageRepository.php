@@ -25,7 +25,7 @@ class SearchPageRepository
      */
     public function dataForSearch(Request $request, User $currentUser): array
     {
-        $searchParams = $request->all();
+        $searchParams = $request->only(['search', 'search_area', 'sort', 'type']);
         $searchRaw = is_scalar($searchParams['search'] ?? '') ? trim((string) ($searchParams['search'] ?? '')) : '';
         $search = str_replace('.', ' ', $searchRaw);
         $searchArea = is_scalar($searchParams['search_area'] ?? '') ? (int) ($searchParams['search_area'] ?? MeiliSearchRepository::SEARCH_AREA_TITLE) : (int) MeiliSearchRepository::SEARCH_AREA_TITLE;

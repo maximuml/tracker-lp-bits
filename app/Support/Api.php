@@ -119,7 +119,7 @@ final class Api
      */
     public static function successWithContext(mixed ...$args): array
     {
-        $request = request()->all();
+        $request = request()->only(['__format', 'draw']);
 
         return match (count($args)) {
             0 => self::success('OK', [], $request),
@@ -138,7 +138,7 @@ final class Api
      */
     public static function failWithContext(mixed ...$args): array
     {
-        $request = request()->all();
+        $request = request()->only(['__format', 'draw']);
 
         return match (count($args)) {
             0 => self::fail('ERROR', [], $request),

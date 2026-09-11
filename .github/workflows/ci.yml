@@ -1185,6 +1185,7 @@ jobs:
             --min-msi=0 \
             --min-covered-msi=50 \
             --filter="${{ steps.changed.outputs.filter }}" \
+            --map-source-class-to-test \
             --test-framework-extra-args="--testsuite=Unit"
 
       - name: Upload Infection PR logs

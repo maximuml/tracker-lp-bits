@@ -189,7 +189,7 @@ class MessagePageService
                 $username = (string) ($lang['text_system'] ?? 'System');
             }
 
-            $subject = htmlspecialchars((string) $row['subject']);
+            $subject = (string) $row['subject'];
             if (strlen($subject) <= 0) {
                 $subject = (string) ($lang['text_no_subject'] ?? 'No subject');
             }
@@ -219,7 +219,7 @@ class MessagePageService
             'mailboxName' => $mailboxName,
             'senderReceiver' => $senderReceiver,
             'isSentBox' => $mailbox === self::PM_SENT_BOX,
-            'keyword' => htmlspecialchars($keyword),
+            'keyword' => $keyword,
             'place' => $place,
             'unread' => is_string($unreadRaw) ? $unreadRaw : '',
             'pagertop' => $pagertop,
@@ -288,7 +288,7 @@ class MessagePageService
                 : '';
         }
 
-        $subject = htmlspecialchars((string) $message['subject']);
+        $subject = (string) $message['subject'];
         if (strlen($subject) <= 0) {
             $subject = (string) ($lang['text_no_subject'] ?? 'No subject');
         }

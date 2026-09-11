@@ -37,7 +37,7 @@ $unreadImg = $row['unread']
 <td class=rowfollow align=center>{!! $unreadImg !!}</td>
 <td class=rowfollow align=left><a href="messages.php?action=viewmessage&id={{ $row['id'] }}">{{ $row['subject'] }}</a></td>
 <td class=rowfollow align=left>{!! $row['username'] !!}</td>
-<td class=rowfollow nowrap>{{ $row['added'] }}</td>
+<td class=rowfollow nowrap>{!! $row['added'] !!}</td>
 <td class=rowfollow><input class=checkbox type="checkbox" name="messages[]" value="{{ $row['id'] }}"></td>
 </tr>
 @endforeach
@@ -46,7 +46,7 @@ $unreadImg = $row['unread']
 @if (! $vm['isSentBox'])
 <input class=btn type="submit" name="markread" value="{{ $lang_messages['submit_mark_as_read'] ?? 'Mark as read' }}">
 @endif
-<input class=btn type="submit" name="delete" value={{ $lang_messages['submit_delete'] ?? 'Delete' }}>
+<input class=btn type="submit" name="delete" value="{{ $lang_messages['submit_delete'] ?? 'Delete' }}">
 @if (! $vm['isSentBox'])
 {{ $lang_messages['text_or'] ?? 'or' }}
 <input class=btn type="submit" name="move" value="{{ $lang_messages['submit_move_to'] ?? 'Move to' }}"> <select name="box"><option value="1">{{ $lang_messages['text_inbox'] ?? 'Inbox' }}</option>

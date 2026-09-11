@@ -10,8 +10,8 @@
 @if($metaDescription)
 <meta name="description" content="{{ $metaDescription }}" />
 @endif
-<meta name="generator" content="{!! $projectName !!}" />
-<meta name="csrf-token" content="{!! $csrfToken !!}" />
+<meta name="generator" content="{{ $projectName }}" />
+<meta name="csrf-token" content="{{ $csrfToken }}" />
 {!! $addiCode !!}
 <title>{!! $title !!}</title>
 <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />

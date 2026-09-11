@@ -15,7 +15,7 @@ $vm = $viewmessage;
 </tr>
 <tr>
 <td class="rowfollow" align="left">{!! $vm['sender'] !!}</td>
-<td class="rowfollow" align="left">{{ $vm['added'] }}&nbsp;&nbsp;{!! $vm['unread'] !!}</td>
+<td class="rowfollow" align="left">{!! $vm['added'] !!}&nbsp;&nbsp;{!! $vm['unread'] !!}</td>
 </tr>
 <tr>
 <td colspan="2" align="left">{!! $vm['body'] !!}</td>

@@ -29,7 +29,7 @@ crowdin.yml
 /.github
 /.agents
 /.devin
-/.raw-queries-baseline.txt
+/raw-queries.json
 /AGENTS.md
 /modernization-*.md
 /audit-*.md

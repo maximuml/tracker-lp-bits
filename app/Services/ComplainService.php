@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\Repositories\ToolRepositoryInterface;
 use App\Models\Complain;
 use App\Models\User;
-use App\Repositories\ToolRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\Lock;
@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\DB;
 final class ComplainService
 {
     public function __construct(
-        private readonly ToolRepository $toolRepository,
+        private readonly ToolRepositoryInterface $toolRepository,
     ) {}
 
     /**

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Auth\Permission;
+use App\Contracts\Repositories\SearchBoxRepositoryInterface;
 use App\Enums\TorrentApprovalStatus;
 use App\Enums\TorrentPosState;
 use App\Exceptions\NexusException;
@@ -14,7 +15,6 @@ use App\Models\SearchBox;
 use App\Models\Setting;
 use App\Models\Torrent;
 use App\Models\User;
-use App\Repositories\SearchBoxRepository;
 use App\Repositories\TorrentUploadRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\Description;
@@ -33,7 +33,7 @@ class UploadMetadataService
      */
     public function getSubCategoriesAndTags(Request $request, Category $category, bool $checkUploadPermission = true): array
     {
-        $searchBoxRep = app(SearchBoxRepository::class);
+        $searchBoxRep = app(SearchBoxRepositoryInterface::class);
         $sections = $searchBoxRep->listSections(SearchBox::listAllSectionId())->keyBy('id');
         if (! $sections->has($category->mode)) {
             throw new NexusException(Locale::trans('upload.invalid_section', [], null));

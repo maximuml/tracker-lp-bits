@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\Repositories\PostRepositoryInterface;
 use App\Enums\UserTimeType;
-use App\Repositories\PostRepository;
 use App\Repositories\TopicRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Format;
@@ -30,7 +30,7 @@ final class ForumListingService
         private readonly Globals $globals,
         private readonly ?LegacyRedisCache $legacyRedisCache,
         private readonly TopicRepository $topicRepository,
-        private readonly PostRepository $postRepository,
+        private readonly PostRepositoryInterface $postRepository,
     ) {}
 
     /**

@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Auth\Permission;
+use App\Contracts\Repositories\SearchBoxRepositoryInterface;
+use App\Contracts\Repositories\TagRepositoryInterface;
+use App\Contracts\Repositories\TorrentDownloadRepositoryInterface;
+use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\TorrentApprovalStatus;
 use App\Models\Setting;
@@ -12,12 +16,8 @@ use App\Models\Torrent;
 use App\Models\TorrentBuyLog;
 use App\Models\TorrentOperationLog;
 use App\Models\User;
-use App\Repositories\SearchBoxRepository;
-use App\Repositories\TagRepository;
 use App\Repositories\TorrentDetailRepository;
-use App\Repositories\TorrentDownloadRepository;
 use App\Repositories\TorrentModerationRepository;
-use App\Repositories\TorrentRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
@@ -43,15 +43,15 @@ use Illuminate\Support\Facades\Gate;
 
 class TorrentDetailsController extends Controller
 {
-    private TorrentRepository $torrentRepository;
+    private TorrentRepositoryInterface $torrentRepository;
 
-    private TorrentDownloadRepository $downloadRepository;
+    private TorrentDownloadRepositoryInterface $downloadRepository;
 
     private TorrentModerationRepository $moderationRepository;
 
-    private SearchBoxRepository $searchBoxRepository;
+    private SearchBoxRepositoryInterface $searchBoxRepository;
 
-    private TagRepository $tagRepository;
+    private TagRepositoryInterface $tagRepository;
 
     private TorrentDetailRepository $torrentDetailRepository;
 
@@ -62,11 +62,11 @@ class TorrentDetailsController extends Controller
     private ?LegacyRedisCache $legacyRedisCache;
 
     public function __construct(
-        TorrentRepository $torrentRepository,
-        TorrentDownloadRepository $downloadRepository,
+        TorrentRepositoryInterface $torrentRepository,
+        TorrentDownloadRepositoryInterface $downloadRepository,
         TorrentModerationRepository $moderationRepository,
-        SearchBoxRepository $searchBoxRepository,
-        TagRepository $tagRepository,
+        SearchBoxRepositoryInterface $searchBoxRepository,
+        TagRepositoryInterface $tagRepository,
         TorrentDetailRepository $torrentDetailRepository,
         CurrentUser $currentUser,
         Globals $globals,

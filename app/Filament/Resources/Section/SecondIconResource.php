@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Section;
 
+use App\Contracts\Repositories\SearchBoxRepositoryInterface;
 use App\Filament\Resources\Section\SecondIconResource\Pages\CreateSecondIcon;
 use App\Filament\Resources\Section\SecondIconResource\Pages\EditSecondIcon;
 use App\Filament\Resources\Section\SecondIconResource\Pages\ListSecondIcons;
 use App\Models\SearchBox;
 use App\Models\SecondIcon;
-use App\Repositories\SearchBoxRepository;
 use App\Support\Config\SiteConfig;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -47,7 +47,7 @@ class SecondIconResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        $searchBoxRep = app(SearchBoxRepository::class);
+        $searchBoxRep = app(SearchBoxRepositoryInterface::class);
         $torrentMode = SiteConfig::current()->main->browseCat();
         $torrentTaxonomySchema = $searchBoxRep->listTaxonomyFormSchema($torrentMode);
         $modeOptions = SearchBox::listModeOptions();

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Repositories\MeiliSearchRepository;
+use App\Contracts\Repositories\MeiliSearchRepositoryInterface;
 use Illuminate\Console\Command;
 
 class MeiliSearchStats extends Command
@@ -30,7 +30,7 @@ class MeiliSearchStats extends Command
      */
     public function handle()
     {
-        $rep = app(MeiliSearchRepository::class);
+        $rep = app(MeiliSearchRepositoryInterface::class);
         $stats = json_encode($rep->getClient()->stats(), JSON_PRETTY_PRINT);
         $this->info(is_string($stats) ? $stats : '{}');
 

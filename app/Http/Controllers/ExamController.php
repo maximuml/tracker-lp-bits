@@ -4,21 +4,21 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Repositories\ExamRepositoryInterface;
 use App\Http\Requests\ExamRequest;
 use App\Http\Requests\GenericIndexRequest;
 use App\Http\Resources\ExamResource;
 use App\Models\Exam;
-use App\Repositories\ExamRepository;
 use App\Support\Locale;
 
 class ExamController extends Controller
 {
-    private ExamRepository $repository;
+    private ExamRepositoryInterface $repository;
 
     /**
      * @return mixed
      */
-    public function __construct(ExamRepository $repository)
+    public function __construct(ExamRepositoryInterface $repository)
     {
         $this->repository = $repository;
     }

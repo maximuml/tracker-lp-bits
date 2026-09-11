@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Traits;
 
+use App\Contracts\Repositories\TagRepositoryInterface;
 use App\Enums\PeerSeeder;
 use App\Models\AudioCodec;
 use App\Models\Bookmark;
@@ -24,7 +25,6 @@ use App\Models\TorrentExtra;
 use App\Models\TorrentOperationLog;
 use App\Models\TorrentTag;
 use App\Models\User;
-use App\Repositories\TagRepository;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -155,7 +155,7 @@ trait HasTorrentRelationships
     /** @return BelongsToMany<Tag, $this> */
     public function tags(): BelongsToMany
     {
-        $idsString = app(TagRepository::class)->getOrderByFieldIdString();
+        $idsString = app(TagRepositoryInterface::class)->getOrderByFieldIdString();
         if (DB::connection()->getDriverName() === 'pgsql') {
             $orderByRaw = "array_position(ARRAY[$idsString]::int[], tags.id)";
         } elseif (DB::connection()->getDriverName() === 'mysql') {

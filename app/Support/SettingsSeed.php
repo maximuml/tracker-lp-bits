@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Contracts\Repositories\SearchBoxRepositoryInterface;
 use App\Enums\UserClass as UserClassEnum;
 use App\Models\Attendance;
 use App\Models\User;
-use App\Repositories\SearchBoxRepository;
 use App\Repositories\StyleRepository;
 
 /**
@@ -93,7 +93,7 @@ final class SettingsSeed
         $firstStylesheetId = app(StyleRepository::class)->firstId() ?? 3;
         app(Globals::class)->set('defcss', (int) ($MAIN['defstylesheet'] ?: $firstStylesheetId));
         app(Globals::class)->set('enabledonation', $MAIN['donation']);
-        $searchBoxIds = app(SearchBoxRepository::class)->getOrderedIds();
+        $searchBoxIds = app(SearchBoxRepositoryInterface::class)->getOrderedIds();
         $defaultBrowsecat = (int) ($searchBoxIds[0] ?? 1);
         app(Globals::class)->set('browsecatmode', (int) ($MAIN['browsecat'] ?? $defaultBrowsecat));
         app(Globals::class)->set('waitsystem', $MAIN['waitsystem']);

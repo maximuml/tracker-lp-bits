@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Repositories\UserModerationRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserClass as UserClassEnum;
 use App\Enums\UserStatus;
@@ -12,7 +13,6 @@ use App\Jobs\BulkUserMessageJob;
 use App\Models\Invite;
 use App\Models\Setting;
 use App\Models\User;
-use App\Repositories\UserModerationRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
@@ -44,7 +44,7 @@ use Illuminate\View\View;
 
 class SystemBulkController extends LegacyController
 {
-    private UserModerationRepository $userModerationRepository;
+    private UserModerationRepositoryInterface $userModerationRepository;
 
     private CurrentUser $currentUser;
 
@@ -53,7 +53,7 @@ class SystemBulkController extends LegacyController
     private ?LegacyRedisCache $legacyRedisCache;
 
     public function __construct(
-        UserModerationRepository $userModerationRepository,
+        UserModerationRepositoryInterface $userModerationRepository,
         CurrentUser $currentUser,
         Globals $globals,
         ?LegacyRedisCache $legacyRedisCache,

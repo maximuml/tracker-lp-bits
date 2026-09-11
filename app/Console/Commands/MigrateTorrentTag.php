@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Repositories\TagRepository;
+use App\Contracts\Repositories\TagRepositoryInterface;
 use App\Support\LegacyDb;
 use App\Support\Logger;
 use App\Support\RequestContext;
@@ -43,7 +43,7 @@ class MigrateTorrentTag extends Command
      */
     public function handle()
     {
-        $rep = app(TagRepository::class);
+        $rep = app(TagRepositoryInterface::class);
         $result = $rep->migrateTorrentTag();
         $log = sprintf('[%s], %s, result: %s, query: %s', RequestContext::instance()->getRequestId(), __METHOD__, var_export($result, true), LegacyDb::lastQuery(false, 'json'));
         $this->info($log);

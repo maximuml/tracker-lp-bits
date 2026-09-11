@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Repositories\SearchBoxRepositoryInterface;
+use App\Contracts\Repositories\TagRepositoryInterface;
+use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Enums\OfferAllowed;
 use App\Exceptions\TorrentAlreadyExistsException;
 use App\Http\Requests\TorrentUploadRequest;
 use App\Models\Offer;
 use App\Models\User;
 use App\Repositories\HitAndRunRepository;
-use App\Repositories\SearchBoxRepository;
-use App\Repositories\TagRepository;
-use App\Repositories\TorrentRepository;
 use App\Repositories\UploadRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Category;
@@ -30,15 +30,15 @@ use Illuminate\Support\Facades\Auth;
 
 class TorrentUploadController extends Controller
 {
-    private TorrentRepository $torrentRepository;
+    private TorrentRepositoryInterface $torrentRepository;
 
-    private SearchBoxRepository $searchBoxRepository;
+    private SearchBoxRepositoryInterface $searchBoxRepository;
 
-    private TagRepository $tagRepository;
+    private TagRepositoryInterface $tagRepository;
 
     private HitAndRunRepository $hitAndRunRepository;
 
-    public function __construct(TorrentRepository $torrentRepository, SearchBoxRepository $searchBoxRepository, TagRepository $tagRepository, HitAndRunRepository $hitAndRunRepository)
+    public function __construct(TorrentRepositoryInterface $torrentRepository, SearchBoxRepositoryInterface $searchBoxRepository, TagRepositoryInterface $tagRepository, HitAndRunRepository $hitAndRunRepository)
     {
         $this->torrentRepository = $torrentRepository;
         $this->searchBoxRepository = $searchBoxRepository;

@@ -186,6 +186,25 @@ Decision → Consequences). Add new ADRs here as numbered subsections.
   developers must lower baseline constants when reducing counts, and
   `RepositorySizeTest` flags renamed/removed baseline files.
 
+### ADR 0006: Repository contracts for the most-injected repositories (Accepted, step 3.1)
+
+- **Context:** Repositories are injected by concrete class everywhere,
+  which blocked unit tests: the hot classes are (or were) `final` and
+  Mockery cannot mock final classes, so controllers/services depending on
+  e.g. `UserRepository` could only be tested against a real database.
+- **Decision:** The ten most-injected repositories expose a contract in
+  `App\Contracts\Repositories\<Name>RepositoryInterface`, implemented by
+  the concrete class and bound in `AppServiceProvider` (`bind`, not
+  `singleton` — repositories are stateless per call site). Consumers
+  type-hint the interface in constructors/properties; call sites that only
+  need constants or static data keep the concrete import.
+- **Consequences:** `Mockery::mock(XInterface::class)` +
+  `app()->instance()` works for every covered dependency; verified by
+  `RepositoryContractTest` (binding + swap) and
+  `RepositoryInterfaceInjectionTest` (controller receives the mock). Cost:
+  interface and implementation signatures must be kept in sync; new public
+  methods on a covered repository must be added to its interface.
+
 ## Testing
 
 - **Unit tests:** `tests/Unit/` — support classes, repositories, services

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Auth\Permission;
+use App\Contracts\Repositories\ForumRepositoryInterface;
+use App\Contracts\Repositories\PostRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\Message;
 use App\Models\Post;
@@ -12,8 +14,6 @@ use App\Models\Topic;
 use App\Models\User;
 use App\Policies\PostPolicy;
 use App\Policies\TopicPolicy;
-use App\Repositories\ForumRepository;
-use App\Repositories\PostRepository;
 use App\Repositories\TopicRepository;
 use App\Support\Bonus;
 use App\Support\Cache\LegacyRedisCache;
@@ -69,14 +69,14 @@ final class ForumService
     }
 
     public function __construct(
-        private readonly ForumRepository $repository,
+        private readonly ForumRepositoryInterface $repository,
         private readonly CurrentUser $currentUser,
         private readonly Globals $globals,
         private readonly LegacyRedisCache $cache,
         private readonly TopicPolicy $topicPolicy,
         private readonly PostPolicy $postPolicy,
         private readonly TopicRepository $topicRepository,
-        private readonly PostRepository $postRepository,
+        private readonly PostRepositoryInterface $postRepository,
     ) {}
 
     /**

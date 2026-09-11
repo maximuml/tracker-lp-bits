@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Contracts\Repositories\AuthRepositoryInterface;
+use App\Contracts\Repositories\TorrentDownloadRepositoryInterface;
 use App\Models\User;
-use App\Repositories\AuthRepository;
-use App\Repositories\TorrentDownloadRepository;
 use App\Support\Config\SiteConfig;
 use Dotenv\Dotenv;
 use Illuminate\Encryption\Encrypter;
@@ -210,7 +210,7 @@ final class AuthCookie
             $update['lang'] = $langId;
         }
 
-        app(AuthRepository::class)->updateLogin($userId, $update);
+        app(AuthRepositoryInterface::class)->updateLogin($userId, $update);
     }
 
     /**
@@ -315,12 +315,12 @@ final class AuthCookie
                 throw new \InvalidArgumentException("Invalid authkey: $authkey, format error");
             }
             $uid = $arr[1];
-            $decrypted = app(TorrentDownloadRepository::class)->checkTrackerReportAuthKey($authkey);
+            $decrypted = app(TorrentDownloadRepositoryInterface::class)->checkTrackerReportAuthKey($authkey);
             if (empty($decrypted)) {
                 throw new \InvalidArgumentException("Invalid authkey: $authkey");
             }
 
-            return app(AuthRepository::class)->getPasskeyByUserId((int) $uid) ?? '';
+            return app(AuthRepositoryInterface::class)->getPasskeyByUserId((int) $uid) ?? '';
         });
     }
 
@@ -462,7 +462,7 @@ final class AuthCookie
         $shouldIgnoreEnabled = defined('IN_NEXUS') && IN_NEXUS && ! $isAjax && $selfEnableBonus > 0;
 
         if ($isArray) {
-            $row = app(AuthRepository::class)->findUserArrayForCookie($id, $shouldIgnoreEnabled);
+            $row = app(AuthRepositoryInterface::class)->findUserArrayForCookie($id, $shouldIgnoreEnabled);
             if ($row === null) {
                 Logger::writeWithContext("$log, user not exists");
 
@@ -472,7 +472,7 @@ final class AuthCookie
             return $row;
         }
 
-        $row = app(AuthRepository::class)->findUserModelForCookie($id, $shouldIgnoreEnabled);
+        $row = app(AuthRepositoryInterface::class)->findUserModelForCookie($id, $shouldIgnoreEnabled);
         if ($row === null) {
             Logger::writeWithContext("$log, user not exists");
 

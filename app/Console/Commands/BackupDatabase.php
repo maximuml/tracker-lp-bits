@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Repositories\ToolRepository;
+use App\Contracts\Repositories\ToolRepositoryInterface;
 use App\Support\Logger;
 use App\Support\RequestContext;
 use Illuminate\Console\Command;
@@ -42,7 +42,7 @@ class BackupDatabase extends Command
      */
     public function handle()
     {
-        $rep = app(ToolRepository::class);
+        $rep = app(ToolRepositoryInterface::class);
         $transfer = $this->option('transfer');
         $this->info("transfer: $transfer");
         $result = $rep->backupDatabase($transfer);

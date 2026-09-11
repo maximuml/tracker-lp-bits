@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Repositories\SearchBoxRepositoryInterface;
 use App\Http\Resources\SearchBoxResource;
 use App\Models\SearchBox;
-use App\Repositories\SearchBoxRepository;
 use Illuminate\Http\Request;
 
 class UploadController extends Controller
 {
-    private SearchBoxRepository $searchBoxRepository;
+    private SearchBoxRepositoryInterface $searchBoxRepository;
 
     /**
      * @return mixed
      */
-    public function __construct(SearchBoxRepository $searchBoxRepository)
+    public function __construct(SearchBoxRepositoryInterface $searchBoxRepository)
     {
         $this->searchBoxRepository = $searchBoxRepository;
     }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Traits;
 
 use App\Auth\Permission;
+use App\Contracts\Repositories\TagRepositoryInterface;
 use App\Models\AudioCodec;
 use App\Models\Category;
 use App\Models\Codec;
@@ -14,7 +15,6 @@ use App\Models\SearchBox;
 use App\Models\Source;
 use App\Models\Standard;
 use App\Models\Tag;
-use App\Repositories\TagRepository;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
@@ -90,7 +90,7 @@ trait HasSearchBoxRelationships
 
     public function loadTags(): void
     {
-        $allTags = app(TagRepository::class)->listAll($this->getKey());
+        $allTags = app(TagRepositoryInterface::class)->listAll($this->getKey());
         if (! Permission::canSetTorrentSpecialTag()) {
             $specialTagIdList = Tag::listSpecial();
             $allTags = $allTags->filter(fn ($item) => ! in_array($item->id, $specialTagIdList));

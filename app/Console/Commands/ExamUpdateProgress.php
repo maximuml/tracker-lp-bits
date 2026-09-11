@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Repositories\ExamRepository;
+use App\Contracts\Repositories\ExamRepositoryInterface;
 use App\Support\RequestContext;
 use Illuminate\Console\Command;
 
@@ -43,7 +43,7 @@ class ExamUpdateProgress extends Command
     {
         $uid = $this->option('uid');
         $bulk = $this->option('bulk');
-        $examRep = app(ExamRepository::class);
+        $examRep = app(ExamRepositoryInterface::class);
         $log = "uid: $uid, bulk: $bulk";
         $this->info($log);
         if (is_numeric($uid) && $uid) {

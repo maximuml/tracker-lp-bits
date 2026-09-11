@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Auth\Permission;
+use App\Contracts\Repositories\ForumRepositoryInterface;
+use App\Contracts\Repositories\PostRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
-use App\Repositories\ForumRepository;
-use App\Repositories\PostRepository;
 use App\Repositories\TopicReadStateRepository;
 use App\Repositories\TopicRepository;
 use App\Support\Cache\LegacyRedisCache;
@@ -28,11 +28,11 @@ final class ForumIndexService
     public function __construct(
         private readonly CurrentUser $currentUser,
         private readonly Globals $globals,
-        private readonly ForumRepository $forumRepository,
+        private readonly ForumRepositoryInterface $forumRepository,
         private readonly LegacyRedisCache $cache,
         private readonly TopicRepository $topicRepository,
         private readonly TopicReadStateRepository $readStateRepository,
-        private readonly PostRepository $postRepository,
+        private readonly PostRepositoryInterface $postRepository,
     ) {}
 
     /**

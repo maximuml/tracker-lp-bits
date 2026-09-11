@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\System;
 
+use App\Contracts\Repositories\ExamRepositoryInterface;
 use App\Enums\ExamType;
 use App\Filament\OptionsTrait;
 use App\Filament\Resources\System\ExamResource\Pages\CreateExam;
@@ -11,7 +12,6 @@ use App\Filament\Resources\System\ExamResource\Pages\EditExam;
 use App\Filament\Resources\System\ExamResource\Pages\ListExams;
 use App\Models\Exam;
 use App\Models\User;
-use App\Repositories\ExamRepository;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\CheckboxList;
@@ -184,7 +184,7 @@ class ExamResource extends Resource
             ->recordActions([
                 EditAction::make(),
                 DeleteAction::make()->using(function ($record) {
-                    $rep = app(ExamRepository::class);
+                    $rep = app(ExamRepositoryInterface::class);
                     $rep->delete($record->id);
                 }),
             ])

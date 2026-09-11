@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\Repositories\UserModerationRepositoryInterface;
 use App\Enums\UserClass as UserClassEnum;
 use App\Enums\UserGender;
 use App\Enums\UserStatus;
@@ -13,7 +14,6 @@ use App\Models\Invite;
 use App\Models\Message;
 use App\Models\MessageTemplate;
 use App\Models\User;
-use App\Repositories\UserModerationRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\Email;
 use App\Support\Http;
@@ -36,7 +36,7 @@ class RegistrationService
         private EmailConfirmation $emailConfirmation,
         private InviteValidator $inviteValidator,
         private PasswordSetup $passwordSetup,
-        private UserModerationRepository $userModerationRepository,
+        private UserModerationRepositoryInterface $userModerationRepository,
         private OutboxService $outboxService,
     ) {}
 

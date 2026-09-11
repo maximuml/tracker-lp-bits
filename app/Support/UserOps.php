@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
-use App\Repositories\UserRepository;
+use App\Contracts\Repositories\UserRepositoryInterface;
 
 /**
  * Legacy user-operation helpers drained out of `include/functions.php`.
@@ -18,6 +18,6 @@ final class UserOps
      */
     public static function logModify(int|string $userId, string $comment): void
     {
-        app(UserRepository::class)->logModify($userId, $comment);
+        app(UserRepositoryInterface::class)->logModify($userId, $comment);
     }
 }

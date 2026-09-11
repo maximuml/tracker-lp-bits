@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Section;
 
+use App\Contracts\Repositories\ForumRepositoryInterface;
 use App\Enums\UserClass as UserClassEnum;
 use App\Filament\Resources\Section\ForumResource\Pages\CreateForum;
 use App\Filament\Resources\Section\ForumResource\Pages\EditForum;
@@ -11,7 +12,6 @@ use App\Filament\Resources\Section\ForumResource\Pages\ListForums;
 use App\Models\Forum;
 use App\Models\OverForum;
 use App\Models\User;
-use App\Repositories\ForumRepository;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -94,7 +94,7 @@ class ForumResource extends Resource
             ->recordActions([
                 EditAction::make(),
                 DeleteAction::make()
-                    ->using(fn ($record) => app(ForumRepository::class)->deleteForum($record->id)),
+                    ->using(fn ($record) => app(ForumRepositoryInterface::class)->deleteForum($record->id)),
             ])
             ->toolbarActions([
                 DeleteBulkAction::make(),

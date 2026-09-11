@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Section;
 
+use App\Contracts\Repositories\SearchBoxRepositoryInterface;
 use App\Filament\Resources\Section\CategoryResource\Pages\CreateCategory;
 use App\Filament\Resources\Section\CategoryResource\Pages\EditCategory;
 use App\Filament\Resources\Section\CategoryResource\Pages\ListCategories;
@@ -11,7 +12,6 @@ use App\Models\Category;
 use App\Models\Icon;
 use App\Models\SearchBox;
 use App\Models\Torrent;
-use App\Repositories\SearchBoxRepository;
 use App\Support\Logger;
 use Exception;
 use Filament\Actions\DeleteAction;
@@ -105,7 +105,7 @@ class CategoryResource extends Resource
                 EditAction::make(),
                 DeleteAction::make()->using(function (Category $record) {
                     try {
-                        $rep = app(SearchBoxRepository::class);
+                        $rep = app(SearchBoxRepositoryInterface::class);
                         $rep->deleteCategory($record->id);
                     } catch (Exception $exception) {
                         Notification::make()->danger()->body($exception->getMessage() ?: class_basename($exception))->send();
@@ -115,7 +115,7 @@ class CategoryResource extends Resource
             ->toolbarActions([
                 DeleteBulkAction::make()->using(function (Collection $records) {
                     try {
-                        $rep = app(SearchBoxRepository::class);
+                        $rep = app(SearchBoxRepositoryInterface::class);
                         $rep->deleteCategory($records->pluck('id')->toArray());
                     } catch (Exception $exception) {
                         Notification::make()->danger()->body($exception->getMessage() ?: class_basename($exception))->send();

@@ -4,25 +4,25 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Repositories\ExamRepositoryInterface;
 use App\Http\Requests\ExamUserAvoidRequest;
 use App\Http\Requests\ExamUserBulkRequest;
 use App\Http\Requests\ExamUserIndexRequest;
 use App\Http\Requests\UidRequest;
 use App\Http\Resources\ExamUserResource;
 use App\Models\User;
-use App\Repositories\ExamRepository;
 use App\Support\Locale;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class ExamUserController extends Controller
 {
-    private ExamRepository $repository;
+    private ExamRepositoryInterface $repository;
 
     /**
      * @return mixed
      */
-    public function __construct(ExamRepository $repository)
+    public function __construct(ExamRepositoryInterface $repository)
     {
         $this->repository = $repository;
     }

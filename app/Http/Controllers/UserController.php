@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Repositories\ExamRepositoryInterface;
+use App\Contracts\Repositories\UserModerationRepositoryInterface;
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\PeerSeeder;
 use App\Enums\SnatchFinished;
 use App\Http\Requests\UidRequest;
@@ -17,21 +20,18 @@ use App\Http\Resources\InviteResource;
 use App\Http\Resources\TorrentResource;
 use App\Http\Resources\UserResource;
 use App\Models\User;
-use App\Repositories\ExamRepository;
-use App\Repositories\UserModerationRepository;
-use App\Repositories\UserRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
-    private UserRepository $repository;
+    private UserRepositoryInterface $repository;
 
-    private UserModerationRepository $moderationRepository;
+    private UserModerationRepositoryInterface $moderationRepository;
 
-    private ExamRepository $examRepository;
+    private ExamRepositoryInterface $examRepository;
 
-    public function __construct(UserRepository $repository, UserModerationRepository $moderationRepository, ExamRepository $examRepository)
+    public function __construct(UserRepositoryInterface $repository, UserModerationRepositoryInterface $moderationRepository, ExamRepositoryInterface $examRepository)
     {
         $this->repository = $repository;
         $this->moderationRepository = $moderationRepository;

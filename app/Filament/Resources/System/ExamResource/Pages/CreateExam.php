@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\System\ExamResource\Pages;
 
+use App\Contracts\Repositories\ExamRepositoryInterface;
 use App\Filament\Resources\System\ExamResource;
-use App\Repositories\ExamRepository;
 use App\Support\Admin;
 use App\Support\Logger;
 use Exception;
@@ -18,7 +18,7 @@ class CreateExam extends CreateRecord
     public function create(bool $another = false): void
     {
         $data = $this->form->getState();
-        $examRep = app(ExamRepository::class);
+        $examRep = app(ExamRepositoryInterface::class);
         try {
             $this->record = $examRep->store($data);
             Admin::successNotification('');

@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Http\Requests\Auth\ChallengeRequest;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\PasskeyLoginRequest;
 use App\Http\Requests\Auth\PasskeyLoginV2Request;
 use App\Models\User;
 use App\Repositories\AuthenticateRepository;
-use App\Repositories\UserRepository;
 use App\Services\PasskeyLoginService;
 use App\Support\AuthCookie;
 use App\Support\Config\SiteConfig;
@@ -26,11 +26,11 @@ class AuthenticateController extends Controller
 {
     private AuthenticateRepository $repository;
 
-    private UserRepository $userRepository;
+    private UserRepositoryInterface $userRepository;
 
     public function __construct(
         AuthenticateRepository $repository,
-        UserRepository $userRepository,
+        UserRepositoryInterface $userRepository,
     ) {
         $this->repository = $repository;
         $this->userRepository = $userRepository;

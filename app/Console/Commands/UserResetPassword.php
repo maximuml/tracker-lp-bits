@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Repositories\UserRepository;
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Support\Logger;
 use App\Support\RequestContext;
 use Illuminate\Console\Command;
@@ -49,7 +49,7 @@ class UserResetPassword extends Command
         $this->info($log);
         Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
 
-        $rep = app(UserRepository::class);
+        $rep = app(UserRepositoryInterface::class);
         $result = $rep->resetPassword($uid, $password, $passwordConfirmation);
         $log = sprintf('[%s], %s, result: %s', RequestContext::instance()->getRequestId(), __METHOD__, var_export($result, true));
         $this->info($log);

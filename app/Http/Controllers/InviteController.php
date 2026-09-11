@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Auth\Permission;
+use App\Contracts\Repositories\UserModerationRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserClass as UserClassEnum;
 use App\Models\Invite;
 use App\Models\Setting;
 use App\Models\User;
 use App\Repositories\InviteRepository;
-use App\Repositories\UserModerationRepository;
 use App\Support\AssetAppender;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
@@ -28,7 +28,7 @@ use Illuminate\View\View;
 class InviteController extends LegacyController
 {
     public function __construct(
-        private readonly UserModerationRepository $userModerationRepository,
+        private readonly UserModerationRepositoryInterface $userModerationRepository,
         private readonly CurrentUser $currentUser,
         private readonly Globals $globals,
         private readonly InviteRepository $inviteRepository,

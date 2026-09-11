@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Auth\Permission;
+use App\Contracts\Repositories\TorrentDownloadRepositoryInterface;
+use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\TorrentOperationAction;
 use App\Http\Requests\TorrentApprovalRequest;
@@ -18,9 +20,7 @@ use App\Models\Torrent;
 use App\Models\TorrentDenyReason;
 use App\Models\TorrentOperationLog;
 use App\Models\User;
-use App\Repositories\TorrentDownloadRepository;
 use App\Repositories\TorrentModerationRepository;
-use App\Repositories\TorrentRepository;
 use App\Repositories\UploadRepository;
 use App\Support\Logger;
 use Illuminate\Contracts\View\View;
@@ -30,15 +30,15 @@ use Illuminate\Support\Facades\Auth;
 
 class TorrentController extends Controller
 {
-    private TorrentRepository $repository;
+    private TorrentRepositoryInterface $repository;
 
-    private TorrentDownloadRepository $downloadRepository;
+    private TorrentDownloadRepositoryInterface $downloadRepository;
 
     private TorrentModerationRepository $moderationRepository;
 
     private UploadRepository $uploadRepository;
 
-    public function __construct(TorrentRepository $repository, TorrentDownloadRepository $downloadRepository, TorrentModerationRepository $moderationRepository, UploadRepository $uploadRepository)
+    public function __construct(TorrentRepositoryInterface $repository, TorrentDownloadRepositoryInterface $downloadRepository, TorrentModerationRepository $moderationRepository, UploadRepository $uploadRepository)
     {
         $this->repository = $repository;
         $this->downloadRepository = $downloadRepository;

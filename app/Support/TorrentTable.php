@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Auth\Permission;
+use App\Contracts\Repositories\TagRepositoryInterface;
+use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Enums\UserAppendPromotion;
 use App\Enums\UserTimeType;
 use App\Models\Torrent;
-use App\Repositories\TagRepository;
 use App\Repositories\TorrentModerationRepository;
-use App\Repositories\TorrentRepository;
 use App\Services\TorrentStatsService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
@@ -36,7 +36,7 @@ final class TorrentTable
         $enabletooltip_tweak = $config->tweak->enableTooltip(false) ? 'yes' : '';
 
         $torrent = new TorrentStatus;
-        $torrentRep = app(TorrentRepository::class);
+        $torrentRep = app(TorrentRepositoryInterface::class);
         $moderationRep = app(TorrentModerationRepository::class);
         $statsService = app(TorrentStatsService::class);
         $torrentIdArr = $ownerIdArr = [];
@@ -49,7 +49,7 @@ final class TorrentTable
         UserDisplay::preload($ownerIdArr);
 
         $torrentSeedingLeechingStatus = $torrent->listLeechingSeedingStatus($user['id'], $torrentIdArr);
-        $tagRep = app(TagRepository::class);
+        $tagRep = app(TagRepositoryInterface::class);
         $torrentTagResult = $statsService->getTorrentTagsGrouped($torrentIdArr);
         $showCover = false;
         if ($searchBoxId) {

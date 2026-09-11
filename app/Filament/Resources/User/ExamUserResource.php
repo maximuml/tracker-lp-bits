@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\User;
 
+use App\Contracts\Repositories\ExamRepositoryInterface;
 use App\Filament\Resources\User\ExamUserResource\Pages\ListExamUsers;
 use App\Filament\Resources\User\ExamUserResource\Pages\ViewExamUser;
 use App\Models\Exam;
 use App\Models\ExamUser;
 use App\Models\User;
-use App\Repositories\ExamRepository;
 use App\Support\Logger;
 use App\Support\UserDisplay;
 use Carbon\Carbon;
@@ -117,7 +117,7 @@ class ExamUserResource extends Resource
                     if (! $user instanceof User) {
                         throw new \RuntimeException('Expected an authenticated user.');
                     }
-                    $rep = app(ExamRepository::class);
+                    $rep = app(ExamRepositoryInterface::class);
                     $rep->avoidExamUserBulk(['id' => $idArr], $user);
                 })
                     ->deselectRecordsAfterCompletion()
@@ -135,7 +135,7 @@ class ExamUserResource extends Resource
                     ])
                     ->action(function (Collection $records, array $data) {
                         $end = Carbon::parse($data['end']);
-                        $rep = app(ExamRepository::class);
+                        $rep = app(ExamRepositoryInterface::class);
                         foreach ($records as $record) {
                             if ($end->isAfter($record->begin)) {
                                 $rep->updateExamUserEnd($record, $end, $data['reason'] ?? '');

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\TorrentDownloadRepositoryInterface;
 use App\Exceptions\NexusException;
 use App\Models\Torrent;
 use App\Models\TorrentSecret;
@@ -27,7 +28,7 @@ use Rhilip\Bencode\Bencode;
  *
  * Extracted from TorrentRepository to reduce god-object surface area.
  */
-class TorrentDownloadRepository extends BaseRepository
+class TorrentDownloadRepository extends BaseRepository implements TorrentDownloadRepositoryInterface
 {
     public const PIECES_HASH_CACHE_KEY = 'torrent_pieces_hash';
 

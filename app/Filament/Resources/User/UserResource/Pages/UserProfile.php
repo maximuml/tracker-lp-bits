@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Filament\Resources\User\UserResource\Pages;
 
 use App\Auth\Permission;
+use App\Contracts\Repositories\ExamRepositoryInterface;
+use App\Contracts\Repositories\UserModerationRepositoryInterface;
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserClass as UserClassEnum;
 use App\Enums\UserStatus;
@@ -15,10 +18,7 @@ use App\Models\Invite;
 use App\Models\Medal;
 use App\Models\User;
 use App\Models\UserMeta;
-use App\Repositories\ExamRepository;
 use App\Repositories\MedalRepository;
-use App\Repositories\UserModerationRepository;
-use App\Repositories\UserRepository;
 use App\Support\Admin;
 use App\Support\Config\SiteConfig;
 use App\Support\Mail;
@@ -47,25 +47,25 @@ class UserProfile extends ViewRecord implements HasActions
     use InteractsWithRecord;
     use OptionsTrait;
 
-    private static ?UserRepository $rep = null;
+    private static ?UserRepositoryInterface $rep = null;
 
-    private static ?UserModerationRepository $moderationRep = null;
+    private static ?UserModerationRepositoryInterface $moderationRep = null;
 
     protected static string $resource = UserResource::class;
 
-    private function getRep(): UserRepository
+    private function getRep(): UserRepositoryInterface
     {
         if (! self::$rep) {
-            self::$rep = app(UserRepository::class);
+            self::$rep = app(UserRepositoryInterface::class);
         }
 
         return self::$rep;
     }
 
-    private function getModerationRep(): UserModerationRepository
+    private function getModerationRep(): UserModerationRepositoryInterface
     {
         if (! self::$moderationRep) {
-            self::$moderationRep = app(UserModerationRepository::class);
+            self::$moderationRep = app(UserModerationRepositoryInterface::class);
         }
 
         return self::$moderationRep;
@@ -238,7 +238,7 @@ class UserProfile extends ViewRecord implements HasActions
             ->modalHeading(__('admin.resources.user.actions.assign_exam_btn'))
             ->schema([
                 Select::make('exam_id')
-                    ->options(app(ExamRepository::class)->listMatchExam($this->getUserRecord()->id)->pluck('name', 'id'))
+                    ->options(app(ExamRepositoryInterface::class)->listMatchExam($this->getUserRecord()->id)->pluck('name', 'id'))
                     ->label(__('admin.resources.user.actions.assign_exam_exam_label'))->required(),
                 DateTimePicker::make('begin')->label(__('admin.resources.user.actions.assign_exam_begin_label')),
                 DateTimePicker::make('end')->label(__('admin.resources.user.actions.assign_exam_end_label'))
@@ -246,7 +246,7 @@ class UserProfile extends ViewRecord implements HasActions
 
             ])
             ->action(function ($data) {
-                $examRep = app(ExamRepository::class);
+                $examRep = app(ExamRepositoryInterface::class);
                 try {
                     $examRep->assignToUser($this->getUserRecord()->id, $data['exam_id'], $data['begin'], $data['end']);
                     $this->sendSuccessNotification();

@@ -13,6 +13,9 @@ use App\Contracts\Repositories\PostRepositoryInterface;
 use App\Contracts\Repositories\SearchBoxRepositoryInterface;
 use App\Contracts\Repositories\TagRepositoryInterface;
 use App\Contracts\Repositories\ToolRepositoryInterface;
+use App\Contracts\Repositories\TorrentDownloadRepositoryInterface;
+use App\Contracts\Repositories\TorrentRepositoryInterface;
+use App\Contracts\Repositories\UserModerationRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Repositories\AuthRepository;
 use App\Repositories\ExamRepository;
@@ -23,6 +26,9 @@ use App\Repositories\PostRepository;
 use App\Repositories\SearchBoxRepository;
 use App\Repositories\TagRepository;
 use App\Repositories\ToolRepository;
+use App\Repositories\TorrentDownloadRepository;
+use App\Repositories\TorrentRepository;
+use App\Repositories\UserModerationRepository;
 use App\Repositories\UserRepository;
 use Mockery;
 use Tests\Attributes\TestCategory;
@@ -101,6 +107,30 @@ final class RepositoryContractTest extends TestCase
         $mock = Mockery::mock(ToolRepositoryInterface::class);
         $this->app->instance(ToolRepositoryInterface::class, $mock);
         $this->assertSame($mock, $this->app->make(ToolRepositoryInterface::class));
+    }
+
+    public function test_torrent_repository_interface_binding(): void
+    {
+        $this->assertInstanceOf(TorrentRepository::class, $this->app->make(TorrentRepositoryInterface::class));
+        $mock = Mockery::mock(TorrentRepositoryInterface::class);
+        $this->app->instance(TorrentRepositoryInterface::class, $mock);
+        $this->assertSame($mock, $this->app->make(TorrentRepositoryInterface::class));
+    }
+
+    public function test_torrent_download_repository_interface_binding(): void
+    {
+        $this->assertInstanceOf(TorrentDownloadRepository::class, $this->app->make(TorrentDownloadRepositoryInterface::class));
+        $mock = Mockery::mock(TorrentDownloadRepositoryInterface::class);
+        $this->app->instance(TorrentDownloadRepositoryInterface::class, $mock);
+        $this->assertSame($mock, $this->app->make(TorrentDownloadRepositoryInterface::class));
+    }
+
+    public function test_user_moderation_repository_interface_binding(): void
+    {
+        $this->assertInstanceOf(UserModerationRepository::class, $this->app->make(UserModerationRepositoryInterface::class));
+        $mock = Mockery::mock(UserModerationRepositoryInterface::class);
+        $this->app->instance(UserModerationRepositoryInterface::class, $mock);
+        $this->assertSame($mock, $this->app->make(UserModerationRepositoryInterface::class));
     }
 
     public function test_user_repository_interface_binding(): void

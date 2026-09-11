@@ -19,6 +19,7 @@ use App\Http\Middleware\PreventRequestsDuringMaintenance;
 use App\Http\Middleware\RecordHttpMetrics;
 use App\Http\Middleware\RedirectIfAuthenticated;
 use App\Http\Middleware\RejectGetMutations;
+use App\Http\Middleware\RequirePasswordChange;
 use App\Http\Middleware\ResponseTimeHeader;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\TrimStrings;
@@ -64,6 +65,7 @@ class Kernel extends HttpKernel
         SecurityHeaders::class,
         ResponseTimeHeader::class,
         RecordHttpMetrics::class,
+        RequirePasswordChange::class,
     ];
 
     /**

@@ -90,7 +90,12 @@ class WebAuthService
 
         // For legacy md5 hashes, only verify if auth_key is empty (very old accounts)
         if ($algo === PasswordHasher::ALGO_MD5 && empty($authKey)) {
-            return PasswordHasher::verify($password, $passhash, $secret, PasswordHasher::ALGO_MD5);
+            $ok = PasswordHasher::verify($password, $passhash, $secret, PasswordHasher::ALGO_MD5);
+            if ($ok) {
+                $this->upgradePasswordHash((int) ($row['id'] ?? 0), $password, true);
+            }
+
+            return $ok;
         }
 
         if (! PasswordHasher::verify($password, $passhash, $secret, $algo)) {
@@ -104,7 +109,7 @@ class WebAuthService
 
         // Upgrade legacy hash to argon2id on successful login
         if (PasswordHasher::needsRehash($algo, $passhash)) {
-            $this->upgradePasswordHash((int) $row['id'], $password);
+            $this->upgradePasswordHash((int) ($row['id'] ?? 0), $password, $algo !== PasswordHasher::ALGO_ARGON2ID);
         }
 
         return true;
@@ -112,13 +117,18 @@ class WebAuthService
 
     /**
      * Rehash a user's password to argon2id and update the database.
+     *
+     * @param  bool  $forceChange  stored algo was legacy (md5/sha256) —
+     *                             require a password change at next request
+     *                             even though the hash was just upgraded
      */
-    private function upgradePasswordHash(int $userId, string $password): void
+    private function upgradePasswordHash(int $userId, string $password, bool $forceChange = false): void
     {
         $newHash = PasswordHasher::hash($password);
         User::query()->where('id', $userId)->update([
             'passhash' => $newHash,
             'passhash_algo' => PasswordHasher::ALGO_ARGON2ID,
+            'must_change_password' => $forceChange,
         ]);
     }
 

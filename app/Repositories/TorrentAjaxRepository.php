@@ -28,7 +28,7 @@ final class TorrentAjaxRepository
     public function __construct(
         private readonly Globals $globals,
         private readonly MeiliSearchRepositoryInterface $meiliSearchRepository,
-        private readonly TorrentRepository $torrentRepository,
+        private readonly TorrentModerationRepository $torrentModerationRepository,
     ) {}
 
     /**
@@ -286,7 +286,7 @@ final class TorrentAjaxRepository
             'total_size' => $totalSize,
             'pagertop' => (string) $pager[0],
             'pagerbottom' => (string) $pager[1],
-            'torrentRep' => $this->torrentRepository,
+            'torrentRep' => $this->torrentModerationRepository,
             'seedTimeAndUploaded' => $seedTimeAndUploaded,
         ];
     }

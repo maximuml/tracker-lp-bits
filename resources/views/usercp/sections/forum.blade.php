@@ -27,7 +27,7 @@ if ($showtooltipsetting):
     \App\Support\Html::tr($lang_usercp['row_tooltip_last_post'] ?? 'Tooltip last post', '<input type=checkbox name=ttlastpost'.(($CURUSER['showlastpost'] ?? '') === 'yes' ? ' checked' : '').'>'.htmlspecialchars($lang_usercp['checkbox_last_post_note'] ?? ''), 1);
 endif;
 \App\Support\Html::trSmall($lang_usercp['row_click_on_topic'] ?? 'Click on topic', '<input type=radio name=clicktopic'.(($CURUSER['clicktopic'] ?? '') === 'firstpage' ? ' checked' : '').' value="firstpage">'.htmlspecialchars($lang_usercp['text_go_to_first_page'] ?? '').'<input type=radio name=clicktopic'.(($CURUSER['clicktopic'] ?? '') === 'lastpage' ? ' checked' : '').' value="lastpage">'.htmlspecialchars($lang_usercp['text_go_to_last_page'] ?? ''), 1);
-\App\Support\Html::trSmall($lang_usercp['row_forum_signature'] ?? 'Forum signature', '<textarea name=signature style="width:700px" rows=10>'.htmlspecialchars((string) ($CURUSER['signature'] ?? '')).'</textarea><br />'.htmlspecialchars($lang_usercp['text_signature_note'] ?? ''), 1);
+\App\Support\Html::trSmall($lang_usercp['row_forum_signature'] ?? 'Forum signature', '<textarea name=signature style="width:700px" rows=10>'.htmlspecialchars((string) ($CURUSER['signature'] ?? '')).'</textarea><br />'.($lang_usercp['text_signature_note'] ?? ''), 1);
 @endphp
 <tr><td class="rowhead" valign="top" align="right">{{ $lang_usercp['row_save_settings'] ?? 'Save' }}</td><td class="rowfollow" valign="top" align=left><input type=submit value="{{ $lang_usercp['submit_save_settings'] ?? 'Save' }}"></td></tr>
 </table></form>

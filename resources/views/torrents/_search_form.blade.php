@@ -170,7 +170,7 @@ $browsecatmode = $browsecatmode ?? 0;
 							</table>
 						</td>
 						<td class="embedded">
-							{{ '&nbsp;'.($lang_torrents['text_in'] ?? '') }}
+							&nbsp;{{ $lang_torrents['text_in'] ?? '' }}
 
 							<select name="search_area">
 								<option value="0">{{ $lang_torrents['select_title'] ?? '' }}</option>

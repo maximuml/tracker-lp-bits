@@ -27,7 +27,7 @@ if ($ch['resetauthkey'] === '1') { echo '<input type="hidden" name="resetauthkey
 <input type="hidden" name="privacy" value="{{ $ch['privacy'] }}">
 <input type="hidden" name="two_step_secret" value="{{ $ch['two_step_secret'] }}">
 <input type="hidden" name="two_step_code" value="{{ $ch['two_step_code'] }}">
-<tr><td class="rowhead nowrap" valign="top" align="right" width=1%>{{ $lang_usercp['row_security_check'] ?? 'Check' }}</td><td valign="top" align="left" width="99%"><input type=password class=oldpassword style="width: 200px"><br /><font class=small>{{ $lang_usercp['text_security_check_note'] ?? '' }}</font></td></tr>
+<tr><td class="rowhead nowrap" valign="top" align="right" width=1%>{!! $lang_usercp['row_security_check'] ?? 'Check'  !!}</td><td valign="top" align="left" width="99%"><input type=password class=oldpassword style="width: 200px"><br /><font class=small>{!! $lang_usercp['text_security_check_note'] ?? ''  !!}</font></td></tr>
 <input type=hidden name=username value="{{ htmlspecialchars((string) ($CURUSER['username'] ?? '')) }}">
 <input type=hidden name=response>
 {!! $sec['confirmHtml'] !!}
@@ -48,25 +48,25 @@ if ($sec['savedFlags']['privacy']) { $savedMsg .= ' '.htmlspecialchars($lang_use
 <tr><td colspan=2 class="heading" valign="top" align="center"><font color=red>{{ $savedMsg }}</font></td></tr>
 @endif
 @php
-\App\Support\Html::trSmall($lang_usercp['row_reset_passkey'] ?? 'Reset passkey', '<input type=checkbox name=resetpasskey value=1 />'.htmlspecialchars($lang_usercp['checkbox_reset_my_passkey'] ?? '').'<br /><font class=small>'.htmlspecialchars($lang_usercp['text_reset_passkey_note'] ?? '').'</font>', 1);
+\App\Support\Html::trSmall($lang_usercp['row_reset_passkey'] ?? 'Reset passkey', '<input type=checkbox name=resetpasskey value=1 />'.htmlspecialchars($lang_usercp['checkbox_reset_my_passkey'] ?? '').'<br /><font class=small>'.($lang_usercp['text_reset_passkey_note'] ?? '').'</font>', 1);
 
 // Two-step authentication
 if ($sec['twoStep']['hasSecret']):
     \App\Support\Html::trSmall($lang_usercp['row_two_step_secret'] ?? 'Two-step secret', '<input type=text name=two_step_code />'.htmlspecialchars($lang_usercp['text_two_step_secret_unbind_note'] ?? ''), 1);
 else:
     $ts = $sec['twoStep'];
-    $twoStepY = '<div style="display: flex;align-items:center">';
+    $twoStepY = sprintf('<style nonce="%s">.tfa-row{display:flex;align-items:center}.tfa-row>div+div{padding-left:20px}</style><div class="tfa-row">', htmlspecialchars($cspNonce));
     $twoStepY .= sprintf('<div><img src="%s" /></div>', htmlspecialchars($ts['qrCodeUrl']));
     $twoStepY .= sprintf(
-        '<div style="padding-left: 20px">%s<a href="%s" target="_blank">Link</a><br /><br />%s%s<br/><br/>%s<input type=hidden name=two_step_secret value="%s" /><input type=text name=two_step_code readonly onfocus="this.removeAttribute(\'readonly\')"/></div>',
-        htmlspecialchars($lang_usercp['text_two_step_secret_bind_by_qrdoe_note'] ?? ''),
+        '<div>%s<a href="%s" target="_blank">Link</a><br /><br />%s%s<br/><br/>%s<input type=hidden name=two_step_secret value="%s" /><input type=text name=two_step_code readonly /></div>',
+        ($lang_usercp['text_two_step_secret_bind_by_qrdoe_note'] ?? ''),
         htmlspecialchars($ts['qrCodeUrl']),
         htmlspecialchars($lang_usercp['text_two_step_secret_bind_manually_note'] ?? ''),
         htmlspecialchars($ts['secret']),
         htmlspecialchars($lang_usercp['text_two_step_secret_bind_complete_note'] ?? ''),
         htmlspecialchars($ts['secret'])
     );
-    $twoStepY .= '</div>';
+    $twoStepY .= sprintf('</div><script nonce="%s">document.addEventListener("focusin",function(e){if(e.target&&e.target.name==="two_step_code"){e.target.removeAttribute("readonly")}})</script>', htmlspecialchars($cspNonce));
     \App\Support\Html::trSmall($lang_usercp['row_two_step_secret'] ?? 'Two-step secret', $twoStepY, 1);
 endif;
 
@@ -76,7 +76,7 @@ echo $sec['passkeyListHtml'];
 printf('</td></tr>');
 
 if ($sec['showEmailChange']):
-    \App\Support\Html::trSmall($lang_usercp['row_email_address'] ?? 'Email', '<input type="text" name="email" style="width: 200px" value="'.htmlspecialchars((string) ($CURUSER['email'] ?? '')).'" /> <br /><font class=small>'.htmlspecialchars($lang_usercp['text_email_address_note'] ?? '').'</font>', 1);
+    \App\Support\Html::trSmall($lang_usercp['row_email_address'] ?? 'Email', '<input type="text" name="email" style="width: 200px" value="'.htmlspecialchars((string) ($CURUSER['email'] ?? '')).'" /> <br /><font class=small>'.($lang_usercp['text_email_address_note'] ?? '').'</font>', 1);
 endif;
 
 \App\Support\Html::trSmall($lang_usercp['row_change_password'] ?? 'Change password', '<input type="password" class="password" style="width: 200px" />', 1);

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Support;
 
+use App\Support\LocalQrCodeProvider;
 use App\Support\TwoFactorAuthHelper;
-use RobThree\Auth\Providers\Qr\GoogleChartsQrCodeProvider;
 use RobThree\Auth\TwoFactorAuth;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
@@ -68,7 +68,7 @@ final class TwoFactorAuthHelperTest extends TestCase
 
         // Generate a valid TOTP code using the underlying library
         $tfa = new TwoFactorAuth(
-            new GoogleChartsQrCodeProvider,
+            new LocalQrCodeProvider,
             'Test'
         );
         $code = $tfa->getCode($secret);
@@ -76,34 +76,37 @@ final class TwoFactorAuthHelperTest extends TestCase
         $this->assertTrue(TwoFactorAuthHelper::verifyCode($secret, $code));
     }
 
-    public function test_qr_code_url_returns_google_charts_url(): void
+    public function test_qr_code_url_returns_local_png_data_uri(): void
     {
         $secret = TwoFactorAuthHelper::createSecret();
         $url = TwoFactorAuthHelper::qrCodeUrl('test@example.com', $secret);
 
-        $this->assertStringStartsWith('https://chart.googleapis.com/chart', $url);
-        $this->assertStringContainsString('cht=qr', $url);
-        $this->assertStringContainsString('chl=otpauth%3A%2F%2Ftotp%2F', $url);
-        $this->assertStringContainsString(urlencode($secret), $url);
+        $this->assertStringStartsWith('data:image/png;base64,', $url);
+        $png = base64_decode(substr($url, 22), true);
+        $this->assertNotFalse($png);
+        $this->assertStringStartsWith("\x89PNG", $png);
     }
 
     public function test_qr_code_url_includes_label(): void
     {
         $secret = TwoFactorAuthHelper::createSecret();
-        $label = 'user@example.com';
-        $url = TwoFactorAuthHelper::qrCodeUrl($label, $secret);
+        $url1 = TwoFactorAuthHelper::qrCodeUrl('user@example.com', $secret);
+        $url2 = TwoFactorAuthHelper::qrCodeUrl('other@example.com', $secret);
 
-        // The label is double-encoded in the URL (once by QRText, once by Google Charts)
-        $this->assertStringContainsString('user', $url);
-        $this->assertStringContainsString('example.com', $url);
+        $this->assertNotSame($url1, $url2);
     }
 
     public function test_qr_code_url_with_custom_size(): void
     {
         $secret = TwoFactorAuthHelper::createSecret();
-        $url = TwoFactorAuthHelper::qrCodeUrl('test', $secret, 300);
+        $small = TwoFactorAuthHelper::qrCodeUrl('test', $secret, 100);
+        $large = TwoFactorAuthHelper::qrCodeUrl('test', $secret, 300);
 
-        $this->assertStringContainsString('chs=300x300', $url);
+        $pngS = getimagesizefromstring(base64_decode(substr($small, 22), true));
+        $pngL = getimagesizefromstring(base64_decode(substr($large, 22), true));
+        $this->assertNotFalse($pngS);
+        $this->assertNotFalse($pngL);
+        $this->assertGreaterThan($pngS[0], $pngL[0]);
     }
 
     public function test_qr_code_url_default_size_200(): void
@@ -111,6 +114,9 @@ final class TwoFactorAuthHelperTest extends TestCase
         $secret = TwoFactorAuthHelper::createSecret();
         $url = TwoFactorAuthHelper::qrCodeUrl('test', $secret);
 
-        $this->assertStringContainsString('chs=200x200', $url);
+        $png = getimagesizefromstring(base64_decode(substr($url, 22), true));
+        $this->assertNotFalse($png);
+        $this->assertSame($png[0], $png[1]);
+        $this->assertGreaterThanOrEqual(100, $png[0]);
     }
 }

@@ -119,6 +119,20 @@ final class UsercpHttpTest extends TestCase
             ->assertRedirect();
     }
 
+    public function test_personal_save_accepts_legacy_string_values(): void
+    {
+        $user = User::factory()->create();
+
+        $this->withNexusCookie($user)
+            ->post('/usercp', [
+                'action' => 'personal',
+                'type' => 'save',
+                'acceptpms' => 'friends',
+                'gender' => 'Male',
+            ])
+            ->assertRedirect('/usercp.php?action=personal&type=saved');
+    }
+
     public function test_forum_save_redirects_on_success(): void
     {
         $user = User::factory()->create();
@@ -135,6 +149,19 @@ final class UsercpHttpTest extends TestCase
                 'signature' => 'My signature',
             ])
             ->assertRedirect();
+    }
+
+    public function test_forum_save_accepts_legacy_string_values(): void
+    {
+        $user = User::factory()->create();
+
+        $this->withNexusCookie($user)
+            ->post('/usercp', [
+                'action' => 'forum',
+                'type' => 'save',
+                'clicktopic' => 'lastpage',
+            ])
+            ->assertRedirect('/usercp.php?action=forum&type=saved');
     }
 
     public function test_tracker_save_redirects_on_success(): void
@@ -163,6 +190,22 @@ final class UsercpHttpTest extends TestCase
                 'fontsize' => 2,
             ])
             ->assertRedirect();
+    }
+
+    public function test_tracker_save_accepts_legacy_string_values(): void
+    {
+        $user = User::factory()->create();
+
+        $this->withNexusCookie($user)
+            ->post('/usercp', [
+                'action' => 'tracker',
+                'type' => 'save',
+                'fontsize' => 'small',
+                'timetype' => 'timeadded',
+                'appendpromotion' => 'highlight',
+                'tooltip' => 'off',
+            ])
+            ->assertRedirect('/usercp.php?action=tracker&type=saved');
     }
 
     // ─── HTTP method boundaries ─────────────────────────────────────

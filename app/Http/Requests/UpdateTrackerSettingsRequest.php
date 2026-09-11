@@ -30,10 +30,10 @@ class UpdateTrackerSettingsRequest extends FormRequest
             'stylesheet' => 'sometimes|integer|min:0',
             'sitelanguage' => 'sometimes|integer|min:0',
             'torrentsperpage' => 'sometimes|integer|min:0|max:100',
-            'timetype' => 'sometimes|integer|min:0|max:1',
+            'timetype' => 'sometimes|in:timeadded,timealive,0,1',
             'appendsticky' => 'sometimes|in:yes',
             'appendnew' => 'sometimes|in:yes',
-            'appendpromotion' => 'sometimes|integer|min:0|max:3',
+            'appendpromotion' => 'sometimes|in:highlight,word,icon,off,0,1,2,3',
             'appendpicked' => 'sometimes|in:yes',
             'dlicon' => 'sometimes|in:yes',
             'bmicon' => 'sometimes|in:yes',
@@ -44,9 +44,9 @@ class UpdateTrackerSettingsRequest extends FormRequest
             'pmnum' => 'sometimes|integer|min:1|max:100',
             'sbnum' => 'sometimes|integer|min:10|max:500',
             'sbrefresh' => 'sometimes|integer|min:10|max:3600',
-            'tooltip' => 'sometimes|integer|min:0|max:2',
+            'tooltip' => 'sometimes|in:minorimdb,medianimdb,off,0,1,2',
             'showlastcom' => 'sometimes|in:yes',
-            'fontsize' => 'sometimes|integer|min:0|max:4',
+            'fontsize' => 'sometimes|in:small,medium,large,0,1,2',
         ];
     }
 }

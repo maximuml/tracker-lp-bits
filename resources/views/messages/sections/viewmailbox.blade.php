@@ -7,7 +7,7 @@ $vm = $viewmailbox;
 @endphp
 @include('messages.sections._menu', ['selected' => $vm['mailbox']])
 
-<table border="0" cellpadding="4" cellspacing="0" width={{ $CONTENT_WIDTH }}>
+<table border="0" cellpadding="4" cellspacing="0" width={{ $CONTENT_WIDTH }} align="center">
 <tr><td class=colhead align=left>{{ $lang_messages['col_search_message'] ?? 'Search message' }}</td></tr>
 <tr><td class=toolbox align=center>@include('messages.sections._jump_to')</td></tr>
 </table>
@@ -19,7 +19,7 @@ $vm = $viewmailbox;
 <form action="/messages" method="post">
 @csrf
 <input type="hidden" name="action" value="moveordel">
-<table border="0" cellpadding="4" cellspacing="0" width={{ $CONTENT_WIDTH }}>
+<table border="0" cellpadding="4" cellspacing="0" width={{ $CONTENT_WIDTH }} align="center">
 <tr>
 <td width="1%" class="colhead" align="center">{{ $lang_messages['col_status'] ?? 'Status' }}</td>
 <td class="colhead" align="left">{{ $lang_messages['col_subject'] ?? 'Subject' }} </td>

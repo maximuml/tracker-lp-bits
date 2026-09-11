@@ -11,26 +11,28 @@ final class SmiliesTest extends TestCase
 {
     // ---------- link ----------
 
-    public function test_link_emits_legacy_anchor_with_double_space_before_onmouseover(): void
+    public function test_link_emits_csp_safe_data_attribute_anchor(): void
     {
-        // Legacy quirk: the format string concatenates `"\")\"  onmouseover=..."`
-        // with two spaces between the closing quote of `href` and `onmouseover`.
-        // Preserved bit-for-bit.
-        $escaped = '&lt;table&gt;&lt;tr&gt;&lt;td&gt;&lt;img src=\\&#039;pic/smilies/4.gif\\&#039; alt=\\&#039;\\&#039; /&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;';
-        $expected = '<a href="javascript: SmileIT(\'[em4]\',\'myform\',\'myta\')"  '
-            .'onmouseover="domTT_activate(this, event, \'content\', \''.$escaped.'\', '
-            .'\'trail\', false, \'delay\', 0,\'lifetime\',10000,\'styleClass\',\'smilies\',\'maxWidth\', 400);">'
+        // Inline javascript: URLs and on*= handlers are blocked by the
+        // nonce-strict CSP — the link carries data-* attributes that the
+        // delegated listeners in public/js/common.js dispatch to SmileIT()
+        // and domTT_activate().
+        $escaped = '&lt;table&gt;&lt;tr&gt;&lt;td&gt;&lt;img src=&#039;pic/smilies/4.gif&#039; alt=&#039;&#039; /&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;';
+        $expected = '<a href="#" data-smile="[em4]"'
+            .' data-smile-form="myform"'
+            .' data-smile-text="myta"'
+            .' data-domtt-content="'.$escaped.'">'
             .'<img style="max-width: 25px;" src="pic/smilies/4.gif" alt="" /></a>';
         $this->assertSame($expected, Smilies::link('myform', 'myta', 4));
     }
 
-    public function test_link_does_not_escape_formname_or_taname_legacy_quirk(): void
+    public function test_link_escapes_formname_and_taname(): void
     {
-        // Legacy quirk: `$formname` and `$taname` are concatenated raw —
-        // single quotes inside them break out of the JS string. Preserved
-        // verbatim so existing pages with safe form/ta names keep working.
+        // form/ta names land in quoted data attributes — quotes must be
+        // escaped so they cannot break out of the attribute.
         $result = Smilies::link("o'malley", "ta'name", 1);
-        $this->assertStringContainsString("SmileIT('[em1]','o'malley','ta'name')", $result);
+        $this->assertStringContainsString('data-smile-form="o&#039;malley"', $result);
+        $this->assertStringContainsString('data-smile-text="ta&#039;name"', $result);
     }
 
     public function test_link_uses_smily_number_in_three_places(): void
@@ -60,16 +62,15 @@ final class SmiliesTest extends TestCase
         $result = Smilies::quickRow('f', 't');
 
         $matches = [];
-        preg_match_all('/SmileIT\(\'\[em(\d+)\]\'/', $result, $matches);
+        preg_match_all('/data-smile="\[em(\d+)\]"/', $result, $matches);
         $this->assertSame(array_map('strval', $expectedNumbers), $matches[1]);
     }
 
     public function test_quick_row_passes_form_and_taname_to_each_link(): void
     {
         $result = Smilies::quickRow('formX', 'taX');
-        // 17 links × 1 SmileIT call each = 17 occurrences of the
-        // `'formX','taX'` pair.
-        $this->assertSame(17, substr_count($result, "'formX','taX'"));
+        // 17 links × 1 data attribute pair each.
+        $this->assertSame(17, substr_count($result, 'data-smile-form="formX" data-smile-text="taX"'));
     }
 
     // ---------- framedTable ----------

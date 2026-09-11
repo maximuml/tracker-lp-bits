@@ -146,8 +146,8 @@ final class Frame
     {
         return '</div></td></tr>'."\n"
             .'<tr><td colspan="2" align="center"><table><tr><td class="embedded"><input id="qr" type="submit" class="btn" value="'.($lang['submit_submit'] ?? '').'" /></td><td class="embedded">'
-            .'<input type="button" class="btn2" name="previewbutton" id="previewbutton" value="'.($lang['submit_preview'] ?? '').'" onclick="javascript:preview(this.parentNode);" />'
-            .'<input type="button" class="btn2" style="display: none;" name="unpreviewbutton" id="unpreviewbutton" value="'.($lang['submit_edit'] ?? '').'" onclick="javascript:unpreview(this.parentNode);" />'
+            .'<input type="button" class="btn2" name="previewbutton" id="previewbutton" value="'.($lang['submit_preview'] ?? '').'" data-preview-toggle="preview" />'
+            .'<input type="button" class="btn2" style="display: none;" name="unpreviewbutton" id="unpreviewbutton" value="'.($lang['submit_edit'] ?? '').'" data-preview-toggle="unpreview" />'
             .'</td></tr></table>'
             .'</td></tr>'
             .'</table>'."\n"

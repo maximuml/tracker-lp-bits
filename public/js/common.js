@@ -428,3 +428,79 @@ function lookupSetlist() {
         }
     });
 }
+
+// CSP-safe delegated bindings for legacy bbcode editor controls.
+// Inline on*= handlers and javascript: URLs are blocked by the nonce-based
+// Content-Security-Policy, so legacy markup carries data-* attributes that
+// these document-level listeners dispatch to the existing global functions.
+document.addEventListener('click', function (e) {
+    var target = e.target;
+    if (!target || !target.closest) { return; }
+
+    var action = target.closest('[data-bbcode-action]');
+    if (action) {
+        var name = action.getAttribute('data-bbcode-action');
+        var handled = true;
+        if (name === 'simpletag' && typeof simpletag === 'function') {
+            simpletag(action.getAttribute('data-bbcode-tag'));
+        } else if (name === 'closeall' && typeof closeall === 'function') {
+            closeall();
+        } else if (name === 'tag_url' && typeof tag_url === 'function') {
+            tag_url(action.getAttribute('data-prompt1'), action.getAttribute('data-prompt2'), action.getAttribute('data-prompt3'));
+        } else if (name === 'tag_image' && typeof tag_image === 'function') {
+            tag_image(action.getAttribute('data-prompt1'), action.getAttribute('data-prompt2'));
+        } else if (name === 'tag_list' && typeof tag_list === 'function') {
+            tag_list(action.getAttribute('data-prompt1'), action.getAttribute('data-prompt2'));
+        } else if (name === 'winop' && typeof winop === 'function') {
+            winop();
+        } else if (name === 'preview' && typeof textBBCodePreview === 'function') {
+            textBBCodePreview();
+        } else if (name === 'edit' && typeof textBBCodeEdit === 'function') {
+            textBBCodeEdit();
+        } else {
+            handled = false;
+        }
+        if (handled) { e.preventDefault(); }
+        return;
+    }
+
+    var toggle = target.closest('[data-preview-toggle]');
+    if (toggle) {
+        var mode = toggle.getAttribute('data-preview-toggle');
+        if (mode === 'preview' && typeof preview === 'function') { preview(toggle.parentNode); }
+        if (mode === 'unpreview' && typeof unpreview === 'function') { unpreview(toggle.parentNode); }
+        e.preventDefault();
+        return;
+    }
+
+    var smile = target.closest('[data-smile]');
+    if (smile) {
+        if (typeof SmileIT === 'function') {
+            SmileIT(smile.getAttribute('data-smile'), smile.getAttribute('data-smile-form'), smile.getAttribute('data-smile-text'));
+        }
+        e.preventDefault();
+    }
+});
+
+document.addEventListener('change', function (e) {
+    var el = e.target && e.target.closest ? e.target.closest('[data-bbcode-alterfont]') : null;
+    if (el && typeof alterfont === 'function') {
+        alterfont(el.value, el.getAttribute('data-bbcode-alterfont'));
+    }
+});
+
+document.addEventListener('keydown', function (e) {
+    var el = e.target && e.target.closest ? e.target.closest('[data-ctrlenter]') : null;
+    if (el && typeof ctrlenter === 'function') {
+        var parts = el.getAttribute('data-ctrlenter').split(':');
+        ctrlenter(e, parts[0], parts[1]);
+    }
+});
+
+document.addEventListener('mouseover', function (e) {
+    var el = e.target && e.target.closest ? e.target.closest('[data-domtt-content]') : null;
+    if (el && typeof domTT_activate === 'function') {
+        domTT_activate(el, e, 'content', el.getAttribute('data-domtt-content'),
+            'trail', false, 'delay', 0, 'lifetime', 10000, 'styleClass', 'smilies', 'maxWidth', 400);
+    }
+});

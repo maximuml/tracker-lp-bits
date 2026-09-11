@@ -1038,13 +1038,17 @@ jobs:
 
       - name: Run Infection (full scope)
         run: |
+          # --testsuite=Unit: Feature/Architecture suites run against
+          # nexusphp_feature_testing/e2e elsewhere and are not valid on the
+          # unit dump used here.
           DB_DATABASE=nexusphp_unit_testing vendor/bin/infection \
             --configuration=infection.json5 \
             --threads=4 \
             --min-msi=40 \
             --min-covered-msi=50 \
             --no-progress \
-            --logger-github
+            --logger-github \
+            --test-framework-extra-args="--testsuite=Unit"
 
       - name: Upload Infection logs
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -1175,7 +1179,8 @@ jobs:
             --logger-github \
             --min-msi=0 \
             --min-covered-msi=50 \
-            --filter="${{ steps.changed.outputs.filter }}"
+            --filter="${{ steps.changed.outputs.filter }}" \
+            --test-framework-extra-args="--testsuite=Unit"
 
       - name: Upload Infection PR logs
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

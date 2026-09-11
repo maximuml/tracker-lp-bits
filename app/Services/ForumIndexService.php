@@ -25,6 +25,9 @@ use App\Support\UserDisplay;
  */
 final class ForumIndexService
 {
+    /** @var array<int|string, mixed>|string|null Per-instance memo for getLastReadPostId(). */
+    private array|string|null $lastReadPostList = null;
+
     public function __construct(
         private readonly CurrentUser $currentUser,
         private readonly Globals $globals,
@@ -239,7 +242,7 @@ final class ForumIndexService
     public function getLastReadPostId(int $topicid, array $curUser): int
     {
         $Cache = $this->cache;
-        static $ret = null;
+        $ret = $this->lastReadPostList;
         if (! $ret && ! $ret = $Cache->get_value('user_'.($curUser['id'] ?? 0).'_last_read_post_list')) {
             $ret = $this->readStateRepository->getLastReadPosts((int) ($curUser['id'] ?? 0));
             if ($ret !== null) {
@@ -248,6 +251,7 @@ final class ForumIndexService
                 $Cache->cache_value('user_'.($curUser['id'] ?? 0).'_last_read_post_list', 'no record', 900);
             }
         }
+        $this->lastReadPostList = $ret;
         if (is_array($ret) && (isset($ret[$topicid])) && (int) ($curUser['last_catchup'] ?? 0) < (int) $ret[$topicid]) {
             return (int) $ret[$topicid];
         } elseif ((int) ($curUser['last_catchup'] ?? 0)) {

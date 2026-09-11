@@ -134,6 +134,18 @@ font[color="red"] {
     color: #B00000;
 }
 
+/* Center page content tables. td#outer/td.embedded carry align="center" in
+   the markup, but that attribute only aligns inline content — block-level
+   <table> children of the frame cell were left-aligned. Restores the
+   classic centered look for pages whose fixed-width tables lost their
+   align attribute during the Blade migration. */
+#main-content > table,
+#main-content > form > table,
+#main-content > div > table {
+    margin-left: auto;
+    margin-right: auto;
+}
+
 /* Site alert banner (new PM / news / warnings). Replaces the CSP-blocked
    inline styles from the legacy msgalert() table. */
 table.msg-alert {

@@ -27,6 +27,20 @@ final class UserDisplay
     private static array $usernameCache = [];
 
     /**
+     * Clear the in-process caches. Called between tests and on each
+     * Octane/queue job reset so rows read under a rolled-back transaction
+     * or a previous request cannot leak stale data.
+     */
+    public static function resetState(): void
+    {
+        foreach (array_keys(self::$rowCache) as $id) {
+            Cache::forget("user_{$id}_content");
+        }
+        self::$rowCache = [];
+        self::$usernameCache = [];
+    }
+
+    /**
      * Return the current user's class value, or '' in the legacy context
      * when the user is not loaded.
      *

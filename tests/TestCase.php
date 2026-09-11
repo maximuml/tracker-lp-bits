@@ -5,7 +5,9 @@ namespace Tests;
 use App\Models\User;
 use App\Support\AuthCookie;
 use App\Support\DestructiveEnvironmentGuard;
+use App\Support\Permissions;
 use App\Support\Settings;
+use App\Support\UserDisplay;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
@@ -28,6 +30,12 @@ abstract class TestCase extends BaseTestCase
         // made by one test (and rolled back via DatabaseTransactions) don't
         // leak stale values into the next test in the same process.
         Settings::resetCache();
+
+        // Same for per-process static caches: rolled-back rows reuse ids,
+        // so a cached user row or permission verdict from a previous test
+        // must not leak into the next one.
+        Permissions::resetState();
+        UserDisplay::resetState();
     }
 
     /**

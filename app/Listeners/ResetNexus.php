@@ -13,6 +13,7 @@ use App\Support\Permissions;
 use App\Support\RequestContext;
 use App\Support\Settings;
 use App\Support\SupportContext;
+use App\Support\UserDisplay;
 use App\Utils\MsgAlert;
 use Illuminate\Support\Facades\Auth;
 
@@ -36,6 +37,7 @@ class ResetNexus
         PageLayout::resetState();
         Permissions::resetState();
         MsgAlert::resetState();
+        UserDisplay::resetState();
         // T-11: Flush the per-request legacy header bag so headers/status
         // set by one request do not leak into the next under Octane.
         app(LegacyHeaderBag::class)->flush();

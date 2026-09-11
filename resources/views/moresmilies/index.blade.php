@@ -17,6 +17,20 @@ function SmileIT(smile,form,text){
    window.opener.document.forms[form].elements[text].focus();
    window.close();
 }
+document.addEventListener('click', function (e) {
+    var t = e.target && e.target.closest ? e.target : null;
+    if (!t) { return; }
+    var s = t.closest('[data-smile]');
+    if (s) {
+        SmileIT(s.getAttribute('data-smile'), s.getAttribute('data-smile-form'), s.getAttribute('data-smile-text'));
+        e.preventDefault();
+        return;
+    }
+    if (t.closest('[data-window-close]')) {
+        window.close();
+        e.preventDefault();
+    }
+});
 </script>
 
 <table class="lista" width="100%" cellpadding="1" cellspacing="1">
@@ -25,7 +39,7 @@ function SmileIT(smile,form,text){
     @if ($count % 3 == 0)
         <tr>
     @endif
-    <td class="lista" align="center"><a href="javascript: SmileIT('[em{{ $i }}]','{{ $form }}','{{ $text }}')"><img src="pic/smilies/{{ $i }}.gif" alt="" ></a></td>
+    <td class="lista" align="center"><a href="#" data-smile="[em{{ $i }}]" data-smile-form="{{ $form }}" data-smile-text="{{ $text }}"><img src="pic/smilies/{{ $i }}.gif" alt="" ></a></td>
     @php $count++; @endphp
     @if ($count % 3 == 0)
         </tr>
@@ -33,7 +47,7 @@ function SmileIT(smile,form,text){
 @endfor
 </table>
 <div align="center">
- <a href="javascript: window.close()">{{ $lang_moresmilies['text_close'] }}</a>
+ <a href="#" data-window-close>{{ $lang_moresmilies['text_close'] }}</a>
 </div>
 </body>
 </html>

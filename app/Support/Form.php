@@ -59,14 +59,15 @@ final class Form
         $previewTbodyId = "$form-$text-preview";
         $btnEditId = "$form-$text-btn-edit";
         $btnPreviewId = "$form-$text-btn-preview";
+        $cspNonce = (string) (request()->attributes->get('csp_nonce', ''));
         ?>
 
-<script type="text/javascript">
-    let textareaId = <?php echo json_encode($text, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>
-    let editTbodyId = <?php echo json_encode($editTbodyId, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>
-    let previewTbodyId = <?php echo json_encode($previewTbodyId, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>
-    let btnEditId = <?php echo json_encode($btnEditId, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>
-    let btnPreviewId = <?php echo json_encode($btnPreviewId, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>
+<script type="text/javascript" nonce="<?php echo htmlspecialchars($cspNonce, ENT_QUOTES) ?>">
+    let textareaId = <?php echo json_encode($text, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+    let editTbodyId = <?php echo json_encode($editTbodyId, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+    let previewTbodyId = <?php echo json_encode($previewTbodyId, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+    let btnEditId = <?php echo json_encode($btnEditId, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+    let btnPreviewId = <?php echo json_encode($btnPreviewId, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
 //<![CDATA[
 var b_open = 0;
 var i_open = 0;
@@ -294,17 +295,17 @@ function textBBCodeEdit() {
 <tr><td align="left" colspan="2">
 <table cellspacing="1" cellpadding="2" border="0">
 <tr>
-<td class="embedded"><input style="font-weight: bold;font-size:11px; margin-right:3px" type="button" name="b" value="B" onclick="javascript: simpletag('b')" /></td>
-<td class="embedded"><input class="codebuttons" style="font-style: italic;font-size:11px;margin-right:3px" type="button" name="i" value="I" onclick="javascript: simpletag('i')" /></td>
-<td class="embedded"><input class="codebuttons" style="text-decoration: underline;font-size:11px;margin-right:3px" type="button" name="u" value="U" onclick="javascript: simpletag('u')" /></td>
+<td class="embedded"><input style="font-weight: bold;font-size:11px; margin-right:3px" type="button" name="b" value="B" data-bbcode-action="simpletag" data-bbcode-tag="b" /></td>
+<td class="embedded"><input class="codebuttons" style="font-style: italic;font-size:11px;margin-right:3px" type="button" name="i" value="I" data-bbcode-action="simpletag" data-bbcode-tag="i" /></td>
+<td class="embedded"><input class="codebuttons" style="text-decoration: underline;font-size:11px;margin-right:3px" type="button" name="u" value="U" data-bbcode-action="simpletag" data-bbcode-tag="u" /></td>
 <?php
-        echo "<td class=\"embedded\"><input class=\"codebuttons\" style=\"font-size:11px;margin-right:3px\" type=\"button\" name='url' value='URL' onclick=\"javascript:tag_url('".$lang_functions['js_prompt_enter_url']."','".$lang_functions['js_prompt_enter_title']."','".$lang_functions['js_prompt_error']."')\" /></td>";
-        echo "<td class=\"embedded\"><input class=\"codebuttons\" style=\"font-size:11px;margin-right:3px\" type=\"button\" name=\"IMG\" value=\"IMG\" onclick=\"javascript: tag_image('".$lang_functions['js_prompt_enter_image_url']."','".$lang_functions['js_prompt_error']."')\" /></td>";
-        echo "<td class=\"embedded\"><input type=\"button\" style=\"font-size:11px;margin-right:3px\" name=\"list\" value=\"List\" onclick=\"tag_list('".addslashes($lang_functions['js_prompt_enter_item'])."','".$lang_functions['js_prompt_error']."')\" /></td>";
+        echo "<td class=\"embedded\"><input class=\"codebuttons\" style=\"font-size:11px;margin-right:3px\" type=\"button\" name='url' value='URL' data-bbcode-action=\"tag_url\" data-prompt1=\"".htmlspecialchars((string) ($lang_functions['js_prompt_enter_url'] ?? ''), ENT_QUOTES).'" data-prompt2="'.htmlspecialchars((string) ($lang_functions['js_prompt_enter_title'] ?? ''), ENT_QUOTES).'" data-prompt3="'.htmlspecialchars((string) ($lang_functions['js_prompt_error'] ?? ''), ENT_QUOTES).'" /></td>';
+        echo '<td class="embedded"><input class="codebuttons" style="font-size:11px;margin-right:3px" type="button" name="IMG" value="IMG" data-bbcode-action="tag_image" data-prompt1="'.htmlspecialchars((string) ($lang_functions['js_prompt_enter_image_url'] ?? ''), ENT_QUOTES).'" data-prompt2="'.htmlspecialchars((string) ($lang_functions['js_prompt_error'] ?? ''), ENT_QUOTES).'" /></td>';
+        echo '<td class="embedded"><input type="button" style="font-size:11px;margin-right:3px" name="list" value="List" data-bbcode-action="tag_list" data-prompt1="'.htmlspecialchars((string) ($lang_functions['js_prompt_enter_item'] ?? ''), ENT_QUOTES).'" data-prompt2="'.htmlspecialchars((string) ($lang_functions['js_prompt_error'] ?? ''), ENT_QUOTES).'" /></td>';
         ?>
-<td class="embedded"><input class="codebuttons" style="font-size:11px;margin-right:3px" type="button" name="quote" value="QUOTE" onclick="javascript: simpletag('quote')" /></td>
-<td class="embedded"><input style="font-size:11px;margin-right:3px" type="button" onclick='javascript:closeall();' name='tagcount' value="Close all tags" /></td>
-<td class="embedded"><select class="med codebuttons" style="margin-right:3px" name='color' onchange="alterfont(this.options[this.selectedIndex].value, 'color')">
+<td class="embedded"><input class="codebuttons" style="font-size:11px;margin-right:3px" type="button" name="quote" value="QUOTE" data-bbcode-action="simpletag" data-bbcode-tag="quote" /></td>
+<td class="embedded"><input style="font-size:11px;margin-right:3px" type="button" name='tagcount' value="Close all tags" data-bbcode-action="closeall" /></td>
+<td class="embedded"><select class="med codebuttons" style="margin-right:3px" name='color' data-bbcode-alterfont="color">
 <option value='0'>--- <?php echo $lang_functions['select_color'] ?> ---</option>
 <option style="background-color: black" value="Black">Black</option>
 <option style="background-color: sienna" value="Sienna">Sienna</option>
@@ -348,7 +349,7 @@ function textBBCodeEdit() {
 <option style="background-color: white" value="White">White</option>
 </select></td>
 <td class="embedded">
-<select class="med codebuttons" name='font' onchange="alterfont(this.options[this.selectedIndex].value, 'font')">
+<select class="med codebuttons" name='font' data-bbcode-alterfont="font">
 <option value="0">--- <?php echo $lang_functions['select_font'] ?> ---</option>
 <option value="Arial">Arial</option>
 <option value="Arial Black">Arial Black</option>
@@ -373,7 +374,7 @@ function textBBCodeEdit() {
 </select>
 </td>
 <td class="embedded">
-<select class="med codebuttons" name='size' onchange="alterfont(this.options[this.selectedIndex].value, 'size')">
+<select class="med codebuttons" name='size' data-bbcode-alterfont="size">
 <option value="0">--- <?php echo $lang_functions['select_size'] ?> ---</option>
 <option value="1">1</option>
 <option value="2">2</option>
@@ -397,7 +398,7 @@ if ($enableattach_attachment == 'yes') {
 <?php
 }
         echo '<tr>';
-        echo '<td align="left"><textarea class="bbcode" cols="100" style="width: 100%;" name="'.$text.'" id="'.$text."\" rows=\"20\" onkeydown=\"ctrlenter(event,'compose','qr')\">".htmlspecialchars($content).'</textarea>';
+        echo '<td align="left"><textarea class="bbcode" cols="100" style="width: 100%;" name="'.$text.'" id="'.$text.'" rows="20" data-ctrlenter="compose:qr">'.htmlspecialchars($content).'</textarea>';
         ?>
 </td>
 <td align="center" width="">
@@ -416,14 +417,14 @@ if ($enableattach_attachment == 'yes') {
         ?>
 </tr></table>
 <br />
-<a href="javascript:winop();"><?php echo $lang_functions['text_more_smilies'] ?></a>
+<a href="#" data-bbcode-action="winop"><?php echo $lang_functions['text_more_smilies'] ?></a>
 </td></tr></tobdy>
     <?php if ($withPreview) {?>
     <tbody id="<?php echo $previewTbodyId?>"></tbody>
     <tbody>
         <tr><td colspan="2" style="text-align: center;border: none">
-            <input id="<?php echo $btnPreviewId ?>" type="button" class="btn" value="<?php echo $lang_functions['submit_preview']?>" onclick="javascript:textBBCodePreview()">
-            <input id="<?php echo $btnEditId ?>" type="button" class="btn" style="display: none" value="<?php echo $lang_functions['submit_edit']?>" onclick="javascript:textBBCodeEdit()">
+            <input id="<?php echo $btnPreviewId ?>" type="button" class="btn" value="<?php echo $lang_functions['submit_preview']?>" data-bbcode-action="preview">
+            <input id="<?php echo $btnEditId ?>" type="button" class="btn" style="display: none" value="<?php echo $lang_functions['submit_edit']?>" data-bbcode-action="edit">
         </td></tr>
     </tbody>
     <?php }?>

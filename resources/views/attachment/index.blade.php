@@ -11,6 +11,12 @@ $altsize = (string) ($altsize ?? '');
 $callback_func = (string) ($callback_func ?? '');
 $warning = (string) ($warning ?? '');
 $script = (string) ($script ?? '');
+// The upload callback arrives as a <script> block from AttachmentMutationService;
+// the nonce-strict CSP requires adding the per-request nonce before output.
+$cspNonce = (string) ($cspNonce ?? '');
+if ($script !== '' && $cspNonce !== '') {
+    $script = (string) preg_replace('/<script(?![^>]*\snonce=)/i', '<script nonce="'.htmlspecialchars($cspNonce, ENT_QUOTES).'"', $script);
+}
 @endphp
 <html>
 <head>

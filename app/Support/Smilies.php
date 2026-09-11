@@ -34,12 +34,14 @@ final class Smilies
     public static function link(string $formname, string $taname, int $smilyNumber): string
     {
         $tooltipBody = htmlspecialchars(
-            "<table><tr><td><img src=\\'pic/smilies/$smilyNumber.gif\\' alt=\\'\\' /></td></tr></table>"
+            "<table><tr><td><img src='pic/smilies/$smilyNumber.gif' alt='' /></td></tr></table>",
+            ENT_QUOTES
         );
 
-        return '<a href="javascript: SmileIT(\'[em'.$smilyNumber.']\',\''.$formname.'\',\''.$taname.'\')"  '
-            .'onmouseover="domTT_activate(this, event, \'content\', \''.$tooltipBody.'\', '
-            .'\'trail\', false, \'delay\', 0,\'lifetime\',10000,\'styleClass\',\'smilies\',\'maxWidth\', 400);">'
+        return '<a href="#" data-smile="[em'.$smilyNumber.']"'
+            .' data-smile-form="'.htmlspecialchars($formname, ENT_QUOTES).'"'
+            .' data-smile-text="'.htmlspecialchars($taname, ENT_QUOTES).'"'
+            .' data-domtt-content="'.$tooltipBody.'">'
             .'<img style="max-width: 25px;" src="pic/smilies/'.$smilyNumber.'.gif" alt="" /></a>';
     }
 

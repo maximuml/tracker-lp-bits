@@ -3,6 +3,8 @@ name: A11y accessibility scan
 on:
   push:
     branches: [php8]
+  pull_request:
+    branches: [php8]
 
 permissions:
   contents: read

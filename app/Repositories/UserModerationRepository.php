@@ -5,31 +5,21 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Auth\Permission;
-use App\Enums\ModerationAction;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserClass as UserClassEnum;
-use App\Enums\UserStatus;
-use App\Events\UserDeleted;
 use App\Events\UserDisabled;
 use App\Events\UserEnabled;
 use App\Events\UserUpdated;
 use App\Exceptions\InsufficientPermissionException;
 use App\Exceptions\NexusException;
-use App\Models\Invite;
 use App\Models\Message;
 use App\Models\User;
-use App\Models\UserBanLog;
-use App\Models\UserModifyLog;
 use App\Services\ModerationService;
-use App\Services\OutboxService;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
-use App\Support\Environment;
-use App\Support\Format;
 use App\Support\Locale;
 use App\Support\Logger;
 use Carbon\Carbon;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache as CacheFacade;
 use Illuminate\Support\Facades\DB;
@@ -42,8 +32,9 @@ use Illuminate\Support\Facades\DB;
 class UserModerationRepository extends BaseRepository
 {
     public function __construct(
-        private readonly ToolRepository $toolRepository,
-        private readonly OutboxService $outboxService = new OutboxService,
+        private readonly UserModerationAccountCommand $account,
+        private readonly UserModerationCommentCommand $comment,
+        private readonly UserModerationInviteCommand $invite,
         private readonly ModerationService $moderationService = new ModerationService,
     ) {}
 
@@ -62,26 +53,7 @@ class UserModerationRepository extends BaseRepository
             $reason = Locale::trans('user.disable_by_admin', [], null);
         }
         $this->checkPermission($operator, $targetUser);
-        $banLog = [
-            'uid' => $uid,
-            'username' => $targetUser->username,
-            'reason' => $reason,
-            'operator' => $operator->id,
-        ];
-        $modCommentText = sprintf('%s - Disable by %s, reason: %s.', now()->format('Y-m-d'), $operator->username, $reason);
-        DB::transaction(function () use ($targetUser, $banLog, $modCommentText, $operator, $reason) {
-            $targetUser->updateWithModComment(['enabled' => false], $modCommentText);
-            UserBanLog::query()->create($banLog);
-
-            // T-24: Record moderation action event in outbox (same transaction)
-            $this->outboxService->recordModerationAction(
-                moderatorId: (int) $operator->id,
-                action: 'disable',
-                targetUserId: (int) $targetUser->id,
-                actionData: ['reason' => $reason],
-            );
-        });
-        Logger::writeWithContext((string) "user: {$uid}, {$modCommentText}", (string) 'info', (bool) false);
+        $this->account->disable($operator, $targetUser, $reason);
         $this->clearCache($targetUser);
         event(new UserDisabled($targetUser));
 
@@ -100,31 +72,12 @@ class UserModerationRepository extends BaseRepository
             throw new NexusException('Already enabled !');
         }
         $this->checkPermission($operator, $targetUser);
-        $update = [
-            'enabled' => true,
-        ];
-        if ($targetUser->class == UserClassEnum::PEASANT->value) {
-            // warn users until 30 days
-            $until = now()->addDays(30)->toDateTimeString();
-            $update['leechwarn'] = true;
-            $update['leechwarnuntil'] = $until;
-        } else {
-            $update['leechwarn'] = false;
-            $update['leechwarnuntil'] = null;
-        }
-        $modCommentText = sprintf('%s - Enable by %s, reason: %s', now()->format('Y-m-d'), $operator->username, $reason);
-        $targetUser->updateWithModComment($update, $modCommentText);
-        Logger::writeWithContext((string) ("user: {$uid}, {$modCommentText}, update: ".json_encode($update)), (string) 'info', (bool) false);
+        $this->account->enable($operator, $targetUser, $reason);
         $this->clearCache($targetUser);
         event(new UserEnabled($targetUser));
         $this->setEnableLatelyCache($targetUser->id);
 
         return true;
-    }
-
-    private function setEnableLatelyCache(int $userId): void
-    {
-        CacheFacade::put(User::getUserEnableLatelyCacheKey($userId), now()->toDateTimeString(), 86400);
     }
 
     /**
@@ -138,9 +91,7 @@ class UserModerationRepository extends BaseRepository
      */
     public function getModComment(int $id)
     {
-        $user = User::query()->findOrFail((int) $id);
-
-        return (string) $user->modifyLogs()->orderByDesc('id')->value('content');
+        return $this->comment->getModComment($id);
     }
 
     /**
@@ -152,72 +103,9 @@ class UserModerationRepository extends BaseRepository
      */
     public function incrementDecrement(User $operator, $uid, $action, $field, $value, $reason = ''): bool
     {
-        $fieldMap = [
-            'uploaded' => 'uploaded',
-            'downloaded' => 'downloaded',
-            'seedbonus' => 'seedbonus',
-            'invites' => 'invites',
-            'attendance_card' => 'attendance_card',
-        ];
-        if (! isset($fieldMap[$field])) {
-            throw new \InvalidArgumentException("Invalid field: $field, only support: ".implode(', ', array_keys($fieldMap)));
-        }
-        $sourceField = $fieldMap[$field];
         $targetUser = User::query()->findOrFail((int) $uid, User::$commonFields);
         $this->checkPermission($operator, $targetUser);
-        $old = (float) $targetUser->{$sourceField};
-        $valueAtomic = (float) $value;
-        $formatSize = false;
-        if (in_array($field, ['uploaded', 'downloaded'])) {
-            // Frontend unit: GB
-            $valueAtomic = $valueAtomic * 1024 * 1024 * 1024;
-            $formatSize = true;
-        }
-        $actionEnum = ModerationAction::tryFrom((string) $action);
-        if ($actionEnum === null) {
-            throw new \InvalidArgumentException("Invalid action: $action.");
-        }
-        if ($actionEnum === ModerationAction::INCREMENT) {
-            $new = $old + abs($valueAtomic);
-        } else {
-            $new = $old - abs($valueAtomic);
-        }
-        if ($new < 0) {
-            throw new NexusException("New value($new) lte 0");
-        }
-        // for administrator, use english
-        $modCommentText = Locale::trans('message.field_value_change_message_body', ['field' => Locale::trans("user.labels.{$sourceField}", [], 'en'), 'operator' => $operator->username, 'old' => $formatSize ? Format::size((float) $old) : $old, 'new' => $formatSize ? Format::size((float) $new) : $new, 'reason' => $reason], 'en');
-        Logger::writeWithContext((string) "user: {$uid}, {$modCommentText}", (string) 'alert', (bool) false);
-        $update = [
-            $sourceField => $new,
-            //            'modcomment' => DB::raw("if(modcomment = '', '$modCommentText', concat_ws('\n', '$modCommentText', modcomment))"),
-        ];
-        $locale = $targetUser->locale;
-        $fieldLabel = Locale::trans("user.labels.{$sourceField}", [], $locale);
-        $msg = Locale::trans('message.field_value_change_message_body', ['field' => $fieldLabel, 'operator' => $operator->username, 'old' => $formatSize ? Format::size((float) $old) : $old, 'new' => $formatSize ? Format::size((float) $new) : $new, 'reason' => $reason], $locale);
-        $message = [
-            'sender' => null,
-            'receiver' => $targetUser->id,
-            'subject' => Locale::trans('message.field_value_change_message_subject', ['field' => $fieldLabel], $locale),
-            'msg' => $msg,
-            'added' => Carbon::now(),
-        ];
-        DB::transaction(function () use ($uid, $sourceField, $old, $update, $message, $modCommentText) {
-            $affectedRows = User::query()
-                ->where('id', $uid)
-                ->where($sourceField, $old)
-                ->update($update);
-            if ($affectedRows != 1) {
-                throw new \RuntimeException("Change fail, affected rows != 1($affectedRows)");
-            }
-            Message::query()->insert($message);
-            UserModifyLog::query()->insert([
-                'user_id' => $uid,
-                'content' => $modCommentText,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ]);
-        });
+        $this->comment->incrementDecrement($operator, $targetUser, $action, $field, $value, $reason);
         $this->clearCache($targetUser);
 
         return true;
@@ -291,34 +179,38 @@ class UserModerationRepository extends BaseRepository
     }
 
     /**
-     * @param  mixed  $operator
-     * @param  mixed  $minAuthClass
-     * @return void
+     * Remove warnings from the given user IDs.
+     *
+     * Mirrors the legacy nowarn action: sets warned='no', warneduntil=NULL,
+     * and prepends a modcomment noting who removed the warning.
+     *
+     * @param  array<int>  $userIds
      */
-    private function checkPermission($operator, User $user, $minAuthClass = 'authority.prfmanage')
+    public function removeWarnings(User $operator, array $userIds): void
     {
-        $operator = $this->getUser($operator);
-        if ($operator === null) {
-            throw new \RuntimeException('Operator not found');
-        }
-        if ($operator->id == $user->id) {
+        $userIds = array_values(array_filter(array_map('intval', $userIds)));
+        if (empty($userIds)) {
             return;
         }
-        $permissionName = str_starts_with($minAuthClass, 'authority.')
-            ? substr($minAuthClass, strlen('authority.'))
-            : $minAuthClass;
-        $classRequire = SiteConfig::current()->authority->permission($permissionName);
-        if ($classRequire === null || $operator->class < $classRequire || $operator->class <= $user->class) {
-            throw new InsufficientPermissionException;
-        }
-    }
 
-    /**
-     * @return mixed
-     */
-    private function clearCache(User $user)
-    {
-        Cache::clearUser($user->id, (string) $user->passkey);
+        $modcomment = date('Y-m-d').' - Warning Removed By '.$operator->username;
+
+        foreach ($userIds as $uid) {
+            $user = User::query()->find($uid, ['id', 'warned']);
+            if ($user === null || ! $user->warned) {
+                continue;
+            }
+
+            DB::table('users')->where('id', $uid)->update([
+                'warned' => 0,
+                'warneduntil' => null,
+            ]);
+            $user->modifyLogs()->create(['content' => $modcomment]);
+            $user->warned = false;
+            $user->warneduntil = null;
+
+            event(new UserUpdated($user));
+        }
     }
 
     /**
@@ -387,71 +279,6 @@ class UserModerationRepository extends BaseRepository
         return true;
     }
 
-    /** @param  mixed  $id */
-    public function confirmUser($id): bool
-    {
-        $ids = Arr::wrap($id);
-        $users = User::query()
-            ->whereIn('id', $ids)
-            ->where('status', UserStatus::PENDING->value)
-            ->get();
-
-        if ($users->isEmpty()) {
-            return true;
-        }
-
-        $update = [
-            'status' => UserStatus::CONFIRMED->value,
-            'editsecret' => '',
-        ];
-        User::query()
-            ->whereIn('id', $users->pluck('id'))
-            ->update($update);
-
-        foreach ($users as $user) {
-            $user->status = UserStatus::CONFIRMED->value;
-            $user->editsecret = '';
-            event(new UserUpdated($user));
-        }
-
-        return true;
-    }
-
-    /**
-     * Remove warnings from the given user IDs.
-     *
-     * Mirrors the legacy nowarn action: sets warned='no', warneduntil=NULL,
-     * and prepends a modcomment noting who removed the warning.
-     *
-     * @param  array<int>  $userIds
-     */
-    public function removeWarnings(User $operator, array $userIds): void
-    {
-        $userIds = array_values(array_filter(array_map('intval', $userIds)));
-        if (empty($userIds)) {
-            return;
-        }
-
-        $modcomment = date('Y-m-d').' - Warning Removed By '.$operator->username;
-
-        foreach ($userIds as $uid) {
-            $user = User::query()->find($uid, ['id', 'warned']);
-            if ($user === null || ! $user->warned) {
-                continue;
-            }
-
-            DB::table('users')->where('id', $uid)->update([
-                'warned' => 0,
-                'warneduntil' => null,
-            ]);
-            $user->modifyLogs()->create(['content' => $modcomment]);
-            $user->warned = false;
-            $user->warneduntil = null;
-
-            event(new UserUpdated($user));
-        }
-    }
-
     /**
      * @param  Collection<int, mixed>|int  $id
      * @param  mixed  $reasonKey
@@ -459,56 +286,13 @@ class UserModerationRepository extends BaseRepository
      */
     public function destroy(Collection|int $id, $reasonKey = 'user.destroy_by_admin')
     {
-        if (! Environment::isConsole()) {
-            Permission::assertCan(PermissionEnum::USER_DELETE);
-        }
-        if (is_int($id)) {
-            $uidArr = Arr::wrap($id);
-        } else {
-            $uidArr = $id->pluck('id')->toArray();
-        }
-        $users = User::query()->with('language')->whereIn('id', $uidArr)->get();
-        if ($users->isEmpty()) {
-            return true;
-        }
-        $tables = [
-            'users' => 'id',
-            'hit_and_runs' => 'uid',
-            'exam_users' => 'uid',
-            'exam_progress' => 'uid',
-            'user_metas' => 'uid',
-            'user_medals' => 'uid',
-            'attendance' => 'uid',
-            'attendance_logs' => 'uid',
-            'login_logs' => 'uid',
-            'user_modify_logs' => 'user_id',
-            'messages' => 'receiver',
-        ];
-        foreach ($tables as $table => $key) {
-            DB::table($table)->whereIn($key, $uidArr)->delete();
-        }
-        Logger::writeWithContext((string) ('[DESTROY_USER]: '.json_encode($uidArr)), (string) 'error', (bool) false);
-        $userBanLogs = [];
-        foreach ($users as $user) {
-            $userBanLogs[] = [
-                'uid' => $user->id,
-                'username' => $user->username,
-                'reason' => Locale::trans($reasonKey, [], $user->locale),
-            ];
-        }
-        UserBanLog::query()->insert($userBanLogs);
-        // delete by user, make sure torrent is deleted
-        DB::table('snatched')
-            ->whereIn('userid', $uidArr)
-            ->whereNotExists(function ($query) {
-                $query->selectRaw('1')->from('torrents')->whereColumn('torrents.id', '=', 'snatched.torrentid');
-            })
-            ->delete();
-        if (is_int($id)) {
-            event(new UserDeleted($users->first()->toArray()));
-        }
+        return $this->account->destroy($id, $reasonKey);
+    }
 
-        return true;
+    /** @param  mixed  $id */
+    public function confirmUser($id): bool
+    {
+        return $this->account->confirm($id);
     }
 
     /**
@@ -516,60 +300,12 @@ class UserModerationRepository extends BaseRepository
      */
     public function addTemporaryInvite(?User $operator, int $uid, string $action, int $count, ?int $days, ?string $reason = '')
     {
-        Logger::writeWithContext((string) "uid: {$uid}, action: {$action}, count: {$count}, days: {$days}, reason: {$reason}", (string) 'info', (bool) false);
-        $action = strtolower($action);
-        if ($count <= 0 || ($action == 'increment' && $days <= 0)) {
-            throw new \InvalidArgumentException('days or count lte 0');
-        }
         $targetUser = User::query()->findOrFail((int) $uid, User::$commonFields);
         if ($operator) {
             $this->checkPermission($operator, $targetUser);
         }
-        $toolRep = $this->toolRepository;
-        $locale = $targetUser->locale;
 
-        $changeType = Locale::trans("nexus.{$action}", [], $locale);
-        $subject = Locale::trans('message.temporary_invite_change.subject', ['change_type' => $changeType], $locale);
-        $body = Locale::trans('message.temporary_invite_change.body', ['change_type' => $changeType, 'count' => $count, 'operator' => $operator->username ?? '', 'reason' => $reason], $locale);
-        $message = [
-            'sender' => null,
-            'receiver' => $targetUser->id,
-            'subject' => $subject,
-            'msg' => $body,
-            'added' => Carbon::now(),
-        ];
-        $inviteData = [];
-        if ($action == 'increment') {
-            $hashArr = $toolRep->generateUniqueInviteHash([], $count, $count);
-            foreach ($hashArr as $hash) {
-                $inviteData[] = [
-                    'inviter' => $uid,
-                    'invitee' => '',
-                    'hash' => $hash,
-                    'valid' => 0,
-                    'expired_at' => Carbon::now()->addDays((int) $days),
-                    'created_at' => Carbon::now(),
-                ];
-            }
-        }
-        DB::transaction(function () use ($uid, $message, $inviteData, $count, $operator) {
-            if (! empty($inviteData)) {
-                Invite::query()->insert($inviteData);
-                Logger::writeWithContext((string) "[INSERT TEMPORARY INVITE] to {$uid}, count: {$count}", (string) 'info', (bool) false);
-            } else {
-                Invite::query()->where('inviter', $uid)
-                    ->where('invitee', '')
-                    ->orderBy('expired_at', 'asc')
-                    ->limit($count)
-                    ->delete();
-                Logger::writeWithContext((string) "[DELETE TEMPORARY INVITE] of {$uid}, count: {$count}", (string) 'info', (bool) false);
-            }
-            if ($operator) {
-                Message::add($message);
-            }
-        });
-
-        return true;
+        return $this->invite->addTemporaryInvite($operator, $targetUser, $action, $count, $days, $reason);
     }
 
     /**
@@ -577,19 +313,41 @@ class UserModerationRepository extends BaseRepository
      */
     public function getInviteBtnText(int $uid)
     {
-        if (! SiteConfig::current()->main->inviteSystem()) {
-            throw new NexusException(Locale::trans('invite.send_deny_reasons.invite_system_closed', [], null));
-        }
-        if (! Permission::can(PermissionEnum::SEND_INVITE, User::findOrFail((int) $uid))) {
-            $requireClass = SiteConfig::current()->authority->permission(PermissionEnum::SEND_INVITE->value);
-            throw new NexusException(Locale::trans('invite.send_deny_reasons.no_permission', ['class' => User::getClassText((int) $requireClass)], null));
-        }
-        $userInfo = User::query()->findOrFail((int) $uid, User::$commonFields);
-        $temporaryInviteCount = $userInfo->temporary_invites()->count();
-        if ($userInfo->invites + $temporaryInviteCount < 1) {
-            throw new NexusException(Locale::trans('invite.send_deny_reasons.invite_not_enough', [], null));
-        }
+        return $this->invite->getInviteBtnText($uid);
+    }
 
-        return Locale::trans('invite.send_allow_text', [], null);
+    private function setEnableLatelyCache(int $userId): void
+    {
+        CacheFacade::put(User::getUserEnableLatelyCacheKey($userId), now()->toDateTimeString(), 86400);
+    }
+
+    /**
+     * @param  mixed  $operator
+     * @param  mixed  $minAuthClass
+     */
+    private function checkPermission($operator, User $user, $minAuthClass = 'authority.prfmanage'): void
+    {
+        $operator = $this->getUser($operator);
+        if ($operator === null) {
+            throw new \RuntimeException('Operator not found');
+        }
+        if ($operator->id == $user->id) {
+            return;
+        }
+        $permissionName = str_starts_with($minAuthClass, 'authority.')
+            ? substr($minAuthClass, strlen('authority.'))
+            : $minAuthClass;
+        $classRequire = SiteConfig::current()->authority->permission($permissionName);
+        if ($classRequire === null || $operator->class < $classRequire || $operator->class <= $user->class) {
+            throw new InsufficientPermissionException;
+        }
+    }
+
+    /**
+     * @return mixed
+     */
+    private function clearCache(User $user)
+    {
+        Cache::clearUser($user->id, (string) $user->passkey);
     }
 }

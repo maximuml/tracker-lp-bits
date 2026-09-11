@@ -7,7 +7,6 @@ namespace Tests\Unit\Repositories;
 use App\Enums\UserClass as UserClassEnum;
 use App\Enums\UserStatus;
 use App\Models\User;
-use App\Repositories\ToolRepository;
 use App\Repositories\UserModerationRepository;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -30,7 +29,7 @@ final class UserModerationRepositoryTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->repository = new UserModerationRepository(app(ToolRepository::class));
+        $this->repository = app(UserModerationRepository::class);
     }
 
     public function test_get_mod_comment_returns_latest_modify_log(): void

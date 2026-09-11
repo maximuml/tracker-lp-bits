@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support\Install;
 
+use App\Contracts\Repositories\TagRepositoryInterface;
 use App\Enums\UserClass as UserClassEnum;
 use App\Models\Attendance;
 use App\Models\Category;
@@ -16,7 +17,6 @@ use App\Models\Torrent;
 use App\Models\TorrentTag;
 use App\Models\User;
 use App\Repositories\AttendanceRepository;
-use App\Repositories\TagRepository;
 use App\Repositories\TokenRepository;
 use App\Repositories\ToolRepository;
 use App\Support\Cache;
@@ -379,7 +379,7 @@ class Update extends Install
         if (Schema::hasColumn('torrents', 'tags')) {
             if (Torrent::query()->where('tags', '>', 0)->count() > 0 && TorrentTag::query()->count() == 0) {
                 $this->doLog('[MIGRATE_TORRENT_TAG]...');
-                $tagRep = app(TagRepository::class);
+                $tagRep = app(TagRepositoryInterface::class);
                 $tagRep->migrateTorrentTag();
                 $this->doLog('[MIGRATE_TORRENT_TAG] done!');
             }

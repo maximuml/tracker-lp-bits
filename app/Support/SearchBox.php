@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
-use App\Repositories\SearchBoxRepository;
+use App\Contracts\Repositories\SearchBoxRepositoryInterface;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use Illuminate\Support\Arr;
@@ -31,7 +31,7 @@ final class SearchBox
             if ($cached !== false && is_array($cached)) {
                 self::$rows = $cached;
             } else {
-                self::$rows = app(SearchBoxRepository::class)->getAllRows();
+                self::$rows = app(SearchBoxRepositoryInterface::class)->getAllRows();
                 if ($cache !== null) {
                     $cache->cache_value('search_box_content', self::$rows, 100500);
                 }
@@ -61,9 +61,9 @@ final class SearchBox
         }
 
         if ($mode > 0) {
-            $ret = app(SearchBoxRepository::class)->getTaxonomyList($table, $mode);
+            $ret = app(SearchBoxRepositoryInterface::class)->getTaxonomyList($table, $mode);
         } else {
-            $ret = app(SearchBoxRepository::class)->getTaxonomyList($table, 0);
+            $ret = app(SearchBoxRepositoryInterface::class)->getTaxonomyList($table, 0);
         }
 
         if ($cache !== null) {
@@ -121,7 +121,7 @@ final class SearchBox
         $checkedValues = (string) $checkedValues;
 
         parse_str($checkedValues, $checkedValuesArr);
-        $searchBox = app(SearchBoxRepository::class)->findForCategoryTable($mode);
+        $searchBox = app(SearchBoxRepositoryInterface::class)->findForCategoryTable($mode);
         $lang = Locale::folderFromCookie(Input::cookieValue('c_lang_folder'));
         $withTaxonomies = [];
 
@@ -151,7 +151,7 @@ final class SearchBox
 
         $html .= sprintf('<tr><td class="embedded" align="left">%s</td></tr>', Locale::trans('label.search_box.category', [], null));
 
-        $categoryCollection = app(SearchBoxRepository::class)->getCategoriesForTable($searchBox, ! empty($options['select_unselect']));
+        $categoryCollection = app(SearchBoxRepositoryInterface::class)->getCategoriesForTable($searchBox, ! empty($options['select_unselect']));
         $categoryChunks = $categoryCollection->chunk($searchBox->catsperrow);
         $checkPrefix = 'cat';
 
@@ -221,7 +221,7 @@ TD;
             $namePrefix = $taxonomyNameLength > 0 ? substr($torrentField, 0, $taxonomyNameLength) : $torrentField;
             $html .= sprintf('<tr><td class="embedded" align="left">%s</td></tr>', $searchBox->getTaxonomyLabel($torrentField));
 
-            $taxonomyCollection = app(SearchBoxRepository::class)->getTaxonomyRows($tableName, $mode);
+            $taxonomyCollection = app(SearchBoxRepositoryInterface::class)->getTaxonomyRows($tableName, $mode);
 
             $modelName = \App\Models\SearchBox::$taxonomies[$torrentField]['model'];
             $checkPrefix = $torrentField;

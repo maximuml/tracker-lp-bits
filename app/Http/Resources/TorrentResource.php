@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
+use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Models\SearchBox;
 use App\Models\Torrent;
-use App\Repositories\TorrentRepository;
 use App\Support\Format;
 use App\Support\Time;
 
@@ -17,7 +17,7 @@ class TorrentResource extends BaseResource
 {
     const NAME = 'torrent';
 
-    protected static TorrentRepository $torrentRep;
+    protected static TorrentRepositoryInterface $torrentRep;
 
     /**
      * Transform the resource into an array.

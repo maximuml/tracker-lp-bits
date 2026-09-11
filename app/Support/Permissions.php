@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Auth\Permission;
+use App\Contracts\Repositories\ToolRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\Permission\RoutePermissionEnum;
 use App\Enums\UserClass as UserClassEnum;
 use App\Exceptions\InsufficientPermissionException;
 use App\Models\User;
-use App\Repositories\ToolRepository;
 use App\Support\Config\SiteConfig;
 
 /**
@@ -74,7 +74,7 @@ final class Permissions
             return true;
         }
 
-        $userAllPermissions = app(ToolRepository::class)->listUserAllPermissions($uid);
+        $userAllPermissions = app(ToolRepositoryInterface::class)->listUserAllPermissions($uid);
         $result = isset($userAllPermissions[$permission]);
 
         if (self::$sequence === 0) {

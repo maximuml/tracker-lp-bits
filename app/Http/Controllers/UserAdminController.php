@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Repositories\UserModerationRepositoryInterface;
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\BusinessType;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserStatus;
@@ -12,8 +14,6 @@ use App\Models\User;
 use App\Models\UserBanLog;
 use App\Repositories\BonusRepository;
 use App\Repositories\UserListingRepository;
-use App\Repositories\UserModerationRepository;
-use App\Repositories\UserRepository;
 use App\Support\CurrentUser;
 use App\Support\Globals;
 use App\Support\LegacyResponse;
@@ -32,13 +32,13 @@ use Illuminate\View\View;
 
 class UserAdminController extends LegacyController
 {
-    private UserRepository $userRepository;
+    private UserRepositoryInterface $userRepository;
 
-    private UserModerationRepository $userModerationRepository;
+    private UserModerationRepositoryInterface $userModerationRepository;
 
     private BonusRepository $bonusRepository;
 
-    public function __construct(UserRepository $userRepository, UserModerationRepository $userModerationRepository, BonusRepository $bonusRepository)
+    public function __construct(UserRepositoryInterface $userRepository, UserModerationRepositoryInterface $userModerationRepository, BonusRepository $bonusRepository)
     {
         $this->userRepository = $userRepository;
         $this->userModerationRepository = $userModerationRepository;

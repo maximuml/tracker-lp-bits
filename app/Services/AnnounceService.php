@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\Repositories\UserModerationRepositoryInterface;
 use App\DTOs\Announce\AnnounceContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\TorrentApprovalStatus;
@@ -17,7 +18,6 @@ use App\Repositories\CleanupRepository;
 use App\Repositories\IpLogRepository;
 use App\Repositories\RequireSeedTorrentRepository;
 use App\Repositories\TorrentPurchaseRepository;
-use App\Repositories\UserModerationRepository;
 use App\Services\Announce\AnnounceRequestFactory;
 use App\Services\Announce\PeerLifecycle;
 use App\Services\Announce\PeerLifecycleResult;
@@ -45,7 +45,7 @@ class AnnounceService
     public function __construct(
         private readonly AgentAllowRepository $agentAllowRepository,
         private readonly TorrentPurchaseRepository $purchaseRepository,
-        private readonly UserModerationRepository $userModerationRepository,
+        private readonly UserModerationRepositoryInterface $userModerationRepository,
         private readonly Announce\RateLimiter $rateLimiter,
         private readonly Announce\TrafficAccountant $trafficAccountant,
         private readonly Announce\CheaterDetector $cheaterDetector,

@@ -85,10 +85,18 @@ final class ModerationRepositoryTest extends TestCase
         $topicUser = User::factory()->create();
         /** @var User $postUser */
         $postUser = User::factory()->create();
+        $forumId = (int) DB::table('forums')->insertGetId([
+            'name' => 'test-forum-'.substr(md5((string) mt_rand()), 0, 8),
+            'description' => 'test',
+            'minclassread' => 0,
+            'minclasswrite' => 0,
+            'minclasscreate' => 0,
+            'forid' => 0,
+        ]);
         $topicId = (int) DB::table('topics')->insertGetId([
             'userid' => $topicUser->id,
             'subject' => 'Test Topic',
-            'forumid' => 1,
+            'forumid' => $forumId,
             'firstpost' => 0,
             'lastpost' => 0,
         ]);

@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Repositories\TorrentDownloadRepositoryInterface;
+use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\TorrentApprovalStatus;
 use App\Enums\TorrentPosState;
 use App\Models\SearchBox;
 use App\Models\Torrent;
-use App\Repositories\TorrentDownloadRepository;
-use App\Repositories\TorrentRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
@@ -31,11 +31,11 @@ use Illuminate\Support\Facades\DB;
 
 class TorrentRssController extends LegacyController
 {
-    private TorrentRepository $torrentRepository;
+    private TorrentRepositoryInterface $torrentRepository;
 
-    private TorrentDownloadRepository $downloadRepository;
+    private TorrentDownloadRepositoryInterface $downloadRepository;
 
-    public function __construct(TorrentRepository $torrentRepository, TorrentDownloadRepository $downloadRepository)
+    public function __construct(TorrentRepositoryInterface $torrentRepository, TorrentDownloadRepositoryInterface $downloadRepository)
     {
         $this->torrentRepository = $torrentRepository;
         $this->downloadRepository = $downloadRepository;

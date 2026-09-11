@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Repositories\SearchBoxRepositoryInterface;
+use App\Contracts\Repositories\TagRepositoryInterface;
 use App\Http\Requests\TorrentEditRequest;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\HitAndRunRepository;
-use App\Repositories\SearchBoxRepository;
-use App\Repositories\TagRepository;
 use App\Repositories\TorrentDetailRepository;
 use App\Repositories\TorrentEditRepository;
 use App\Support\Category;
@@ -26,8 +26,8 @@ use Illuminate\View\View;
 class TorrentEditController extends Controller
 {
     public function __construct(
-        private readonly SearchBoxRepository $searchBoxRepository,
-        private readonly TagRepository $tagRepository,
+        private readonly SearchBoxRepositoryInterface $searchBoxRepository,
+        private readonly TagRepositoryInterface $tagRepository,
         private readonly HitAndRunRepository $hitAndRunRepository,
         private readonly CurrentUser $currentUser,
         private readonly Globals $globals,

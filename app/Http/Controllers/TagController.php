@@ -4,21 +4,21 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Repositories\TagRepositoryInterface;
 use App\Http\Requests\GenericIndexRequest;
 use App\Http\Requests\TagStoreRequest;
 use App\Http\Requests\TagUpdateRequest;
 use App\Http\Resources\TagResource;
 use App\Models\Tag;
-use App\Repositories\TagRepository;
 
 class TagController extends Controller
 {
-    private TagRepository $repository;
+    private TagRepositoryInterface $repository;
 
     /**
      * @return mixed
      */
-    public function __construct(TagRepository $repository)
+    public function __construct(TagRepositoryInterface $repository)
     {
         $this->repository = $repository;
     }

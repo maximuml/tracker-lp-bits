@@ -48,6 +48,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Contracts\Repositories\MeiliSearchRepositoryInterface;
 use App\Enums\PromotionTimeType;
 use App\Enums\TorrentApprovalStatus;
 use App\Enums\TorrentHr;
@@ -59,7 +60,6 @@ use App\Enums\TorrentVisible;
 use App\Models\Traits\HasTorrentAccessors;
 use App\Models\Traits\HasTorrentRelationships;
 use App\Models\Traits\HasTorrentScopes;
-use App\Repositories\MeiliSearchRepository;
 use App\Support\Locale;
 use Illuminate\Database\Eloquent\Collection;
 use Laravel\Scout\ModelObserver;
@@ -266,16 +266,16 @@ class Torrent extends NexusModel
      */
     public function shouldBeSearchable(): bool
     {
-        return app(MeiliSearchRepository::class)->isEnabled();
+        return app(MeiliSearchRepositoryInterface::class)->isEnabled();
     }
 
     /** @return  array<int|string, mixed> */
     public function toSearchableArray(): array
     {
-        $fields = app(MeiliSearchRepository::class)->getRequiredFields();
+        $fields = app(MeiliSearchRepositoryInterface::class)->getRequiredFields();
         $row = [];
         foreach ($fields as $field) {
-            $row[$field] = app(MeiliSearchRepository::class)->formatValueForMeili($field, $this->getAttribute($field));
+            $row[$field] = app(MeiliSearchRepositoryInterface::class)->formatValueForMeili($field, $this->getAttribute($field));
         }
 
         return $row;

@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Security;
 
 use App\Auth\Permission;
+use App\Contracts\Repositories\ToolRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserClass as UserClassEnum;
 use App\Filament\Resources\Security\StaffMessageResource\Pages\ListStaffMessages;
 use App\Filament\Resources\Security\StaffMessageResource\Pages\ViewStaffMessage;
 use App\Models\StaffMessage;
 use App\Models\User;
-use App\Repositories\ToolRepository;
 use App\Support\Cache;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
@@ -63,7 +63,7 @@ class StaffMessageResource extends Resource
             return $query;
         }
         // Non-staff-member users can only see messages whose permission they hold
-        $userPerms = app(ToolRepository::class)->listUserAllPermissions((int) $user?->id);
+        $userPerms = app(ToolRepositoryInterface::class)->listUserAllPermissions((int) $user?->id);
 
         return $query->where(function (Builder $q) use ($userPerms) {
             $q->whereNull('permission')->orWhereIn('permission', $userPerms);

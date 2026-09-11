@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Section\ForumResource\Pages;
 
+use App\Contracts\Repositories\ForumRepositoryInterface;
 use App\Filament\Resources\Section\ForumResource;
-use App\Repositories\ForumRepository;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
@@ -18,7 +18,7 @@ class EditForum extends EditRecord
     {
         return [
             DeleteAction::make()
-                ->using(fn ($record) => app(ForumRepository::class)->deleteForum($record->id)),
+                ->using(fn ($record) => app(ForumRepositoryInterface::class)->deleteForum($record->id)),
         ];
     }
 }

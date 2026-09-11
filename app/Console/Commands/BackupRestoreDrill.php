@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Repositories\ToolRepository;
+use App\Contracts\Repositories\ToolRepositoryInterface;
 use App\Support\Environment;
 use App\Support\Logger;
 use Illuminate\Console\Command;
@@ -141,7 +141,7 @@ class BackupRestoreDrill extends Command
             return $file;
         }
 
-        $rep = app(ToolRepository::class);
+        $rep = app(ToolRepositoryInterface::class);
         $path = $rep->getBackupExportPathDefault();
         if (! is_dir($path)) {
             return null;

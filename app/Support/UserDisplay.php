@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\UserMedalStatus;
 use App\Models\UserMedal;
 use App\Models\UserMeta;
-use App\Repositories\UserRepository;
 use App\Support\Config\SiteConfig;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\HtmlString;
@@ -25,6 +25,20 @@ final class UserDisplay
 
     /** @var array<int, string> */
     private static array $usernameCache = [];
+
+    /**
+     * Clear the in-process caches. Called between tests and on each
+     * Octane/queue job reset so rows read under a rolled-back transaction
+     * or a previous request cannot leak stale data.
+     */
+    public static function resetState(): void
+    {
+        foreach (array_keys(self::$rowCache) as $id) {
+            Cache::forget("user_{$id}_content");
+        }
+        self::$rowCache = [];
+        self::$usernameCache = [];
+    }
 
     /**
      * Return the current user's class value, or '' in the legacy context
@@ -127,14 +141,14 @@ final class UserDisplay
         }
 
         $row = Cache::remember("user_{$id}_content", 3600, function () use ($id) {
-            $user = app(UserRepository::class)->findForDisplay($id);
+            $user = app(UserRepositoryInterface::class)->findForDisplay($id);
 
             if (! $user) {
                 return false;
             }
 
             $arr = $user->toArray();
-            $metas = app(UserRepository::class)->listMetas($id, UserMeta::META_KEY_PERSONALIZED_USERNAME);
+            $metas = app(UserRepositoryInterface::class)->listMetas($id, UserMeta::META_KEY_PERSONALIZED_USERNAME);
             $arr['__is_rainbow'] = $metas->isNotEmpty() ? 1 : 0;
             $arr['__is_donor'] = self::isDonor($arr);
 
@@ -180,7 +194,7 @@ final class UserDisplay
             'downloadpos', 'parked', 'clientselect', 'showclienterror',
         ];
 
-        $users = app(UserRepository::class)->getByIds($missing, $columns);
+        $users = app(UserRepositoryInterface::class)->getByIds($missing, $columns);
         if ($users->isEmpty()) {
             foreach ($missing as $id) {
                 self::$rowCache[$id] = false;

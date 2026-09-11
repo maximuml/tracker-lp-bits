@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Torrent;
 
 use App\Auth\Permission;
+use App\Contracts\Repositories\TagRepositoryInterface;
+use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Filament\OptionsTrait;
 use App\Filament\Resources\Torrent\TorrentResource\Pages\CreateTorrent;
 use App\Filament\Resources\Torrent\TorrentResource\Pages\EditTorrent;
@@ -12,9 +14,7 @@ use App\Filament\Resources\Torrent\TorrentResource\Pages\ListTorrents;
 use App\Models\Category;
 use App\Models\SearchBox;
 use App\Models\Torrent;
-use App\Repositories\TagRepository;
 use App\Repositories\TorrentModerationRepository;
-use App\Repositories\TorrentRepository;
 use App\Services\TorrentPromotionService;
 use App\Support\Format;
 use App\Support\Logger;
@@ -60,7 +60,7 @@ class TorrentResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
-    private static ?TorrentRepository $rep = null;
+    private static ?TorrentRepositoryInterface $rep = null;
 
     public static function getNavigationLabel(): string
     {
@@ -80,10 +80,10 @@ class TorrentResource extends Resource
             ]);
     }
 
-    public static function getRep(): TorrentRepository
+    public static function getRep(): TorrentRepositoryInterface
     {
         if (self::$rep === null) {
-            self::$rep = app(TorrentRepository::class);
+            self::$rep = app(TorrentRepositoryInterface::class);
         }
 
         return self::$rep;
@@ -233,7 +233,7 @@ class TorrentResource extends Resource
                     CheckboxList::make('tags')
                         ->label(__('label.tag.label'))
                         ->columns(4)
-                        ->options(app(TagRepository::class)->createBasicQuery()->pluck('name', 'id')->toArray())
+                        ->options(app(TagRepositoryInterface::class)->createBasicQuery()->pluck('name', 'id')->toArray())
                         ->required(),
 
                 ])

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Repositories;
 
+use App\Models\Category;
 use App\Models\User;
 use App\Repositories\SearchPageRepository;
 use App\Support\Permissions;
@@ -40,10 +41,15 @@ final class SearchPageRepositoryTest extends TestCase
         parent::setUp();
         Permissions::resetState();
 
-        // Find an existing category from the seeded data
+        // Find an existing category from the seeded data, or create one —
+        // dataForSearch() inner-joins torrents.category → categories.id, so
+        // a category row must exist or every search returns zero rows.
         $category = DB::table('categories')->first();
-        $this->categoryId = $category ? (int) $category->id : 1;
-        $this->categoryMode = $category ? (int) $category->mode : 1;
+        if (! $category) {
+            $category = DB::table('categories')->where('id', Category::factory()->create()->id)->first();
+        }
+        $this->categoryId = (int) $category->id;
+        $this->categoryMode = (int) $category->mode;
 
         // Disable MeiliSearch, set browse_cat to match the seeded category mode,
         // and make all approval statuses visible so the query is not filtered.

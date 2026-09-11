@@ -17,9 +17,9 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Contracts\Repositories\ExamRepositoryInterface;
 use App\Enums\ExamUserIsDone;
 use App\Enums\ExamUserStatus;
-use App\Repositories\ExamRepository;
 use App\Support\Locale;
 use App\Support\Logger;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -69,7 +69,7 @@ class ExamUser extends NexusModel
     /** @return  array<int|string, mixed> */
     public function getProgressFormattedAttribute(): array
     {
-        $examRep = app(ExamRepository::class);
+        $examRep = app(ExamRepositoryInterface::class);
 
         return $examRep->getProgressFormatted($this->exam, (array) $this->progress);
     }

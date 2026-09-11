@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Contracts\Repositories\SearchBoxRepositoryInterface;
+use App\Contracts\Repositories\TorrentDownloadRepositoryInterface;
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Events\UserUpdated;
 use App\Models\Setting;
-use App\Repositories\SearchBoxRepository;
 use App\Repositories\StaffMessageRepository;
-use App\Repositories\TorrentDownloadRepository;
-use App\Repositories\UserRepository;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache as CacheFacade;
 use Illuminate\Support\Facades\Redis;
@@ -183,7 +183,7 @@ final class Cache
      */
     public static function touchTorrent(int|string $torrentId, string $field = 'cache_stamp'): void
     {
-        app(TorrentDownloadRepository::class)->touchCacheStamp($torrentId, $field);
+        app(TorrentDownloadRepositoryInterface::class)->touchCacheStamp($torrentId, $field);
     }
 
     /**
@@ -193,7 +193,7 @@ final class Cache
      */
     public static function resetTorrent(int|string $torrentId, string $field = 'cache_stamp'): void
     {
-        app(TorrentDownloadRepository::class)->resetCacheStamp($torrentId, $field);
+        app(TorrentDownloadRepositoryInterface::class)->resetCacheStamp($torrentId, $field);
     }
 
     public static function clearUser(int|string $uid, string $passkey = ''): void
@@ -211,7 +211,7 @@ final class Cache
             self::forgetWithLocales('user_passkey_'.$passkey.'_rss');
         }
 
-        $userInfo = app(UserRepository::class)->findForCacheClear($uid);
+        $userInfo = app(UserRepositoryInterface::class)->findForCacheClear($uid);
         if ($userInfo) {
             event(new UserUpdated($userInfo));
         }
@@ -233,7 +233,7 @@ final class Cache
     {
         Logger::writeWithContext('clear_category_cache');
         self::forgetWithLocales('category_content');
-        foreach (app(SearchBoxRepository::class)->getOrderedIds() as $id) {
+        foreach (app(SearchBoxRepositoryInterface::class)->getOrderedIds() as $id) {
             self::forgetWithLocales("category_list_mode_{$id}");
         }
     }
@@ -241,7 +241,7 @@ final class Cache
     public static function clearTaxonomy(string $table): void
     {
         Logger::writeWithContext("clear_taxonomy_cache: $table");
-        foreach (app(SearchBoxRepository::class)->getOrderedIds() as $id) {
+        foreach (app(SearchBoxRepositoryInterface::class)->getOrderedIds() as $id) {
             self::forgetWithLocales("{$table}_list_mode_{$id}");
         }
         self::forgetWithLocales("{$table}_list_mode_0");

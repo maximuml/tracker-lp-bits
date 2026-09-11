@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\UserClass as UserClassEnum;
-use App\Repositories\UserRepository;
 use App\Support\Logger;
 use App\Support\RequestContext;
 use Illuminate\Console\Command;
@@ -84,7 +84,7 @@ class UserResetIdAutoIncrement extends Command
         $this->info($statement);
         $result = DB::statement($statement);
 
-        $userRep = app(UserRepository::class);
+        $userRep = app(UserRepositoryInterface::class);
         $insert = [
             'username' => $options['admin'],
             'email' => $options['email'],

@@ -13,6 +13,9 @@ use App\Contracts\Repositories\PostRepositoryInterface;
 use App\Contracts\Repositories\SearchBoxRepositoryInterface;
 use App\Contracts\Repositories\TagRepositoryInterface;
 use App\Contracts\Repositories\ToolRepositoryInterface;
+use App\Contracts\Repositories\TorrentDownloadRepositoryInterface;
+use App\Contracts\Repositories\TorrentRepositoryInterface;
+use App\Contracts\Repositories\UserModerationRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
 use App\DTOs\Auth\ActorContext;
 use App\Models\User;
@@ -26,6 +29,9 @@ use App\Repositories\PostRepository;
 use App\Repositories\SearchBoxRepository;
 use App\Repositories\TagRepository;
 use App\Repositories\ToolRepository;
+use App\Repositories\TorrentDownloadRepository;
+use App\Repositories\TorrentRepository;
+use App\Repositories\UserModerationRepository;
 use App\Repositories\UserRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Cache\TaggedCacheService;
@@ -94,6 +100,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(SearchBoxRepositoryInterface::class, SearchBoxRepository::class);
         $this->app->bind(TagRepositoryInterface::class, TagRepository::class);
         $this->app->bind(ToolRepositoryInterface::class, ToolRepository::class);
+        $this->app->bind(TorrentDownloadRepositoryInterface::class, TorrentDownloadRepository::class);
+        $this->app->bind(TorrentRepositoryInterface::class, TorrentRepository::class);
+        $this->app->bind(UserModerationRepositoryInterface::class, UserModerationRepository::class);
         $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
     }
 

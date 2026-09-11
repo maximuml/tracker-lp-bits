@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Jobs;
 
+use App\Contracts\Repositories\ToolRepositoryInterface;
 use App\Models\Invite;
-use App\Repositories\ToolRepository;
 use App\Support\Cache as AppCache;
 use App\Support\Logger;
 use Carbon\Carbon;
@@ -53,7 +53,7 @@ class GenerateTemporaryInvite implements ShouldQueue
     public function handle()
     {
         $beginTimestamp = microtime(true);
-        $toolRep = app(ToolRepository::class);
+        $toolRep = app(ToolRepositoryInterface::class);
         $idStr = Cache::get($this->idRedisKey);
         $logPrefix = 'idRedisKey: '.$this->idRedisKey;
         if (empty($idStr)) {

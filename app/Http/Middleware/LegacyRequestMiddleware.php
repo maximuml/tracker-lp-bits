@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Contracts\Repositories\PageLayoutRepositoryInterface;
 use App\Http\LegacyScriptContext;
 use App\Http\LegacyUrlRewriter;
-use App\Repositories\PageLayoutRepository;
 use App\Support\Bootstrap;
 use App\Support\CurrentUser;
 use App\Support\LegacyBootstrap;
@@ -52,14 +52,14 @@ final class LegacyRequestMiddleware
 
         $this->scriptContext->boot($script, $rootpath);
 
-        app(PageLayoutRepository::class)->prepareAccess();
+        app(PageLayoutRepositoryInterface::class)->prepareAccess();
 
         return $next($request);
     }
 
     public function terminate(Request $request, Response $response): void
     {
-        app(PageLayoutRepository::class)->flushAccess();
+        app(PageLayoutRepositoryInterface::class)->flushAccess();
 
         if ($this->detectScript($request) === 'index') {
             Bootstrap::autoClean((bool) false);

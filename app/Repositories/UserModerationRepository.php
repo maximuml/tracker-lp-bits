@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Auth\Permission;
+use App\Contracts\Repositories\UserModerationRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserClass as UserClassEnum;
 use App\Events\UserDisabled;
@@ -29,7 +30,7 @@ use Illuminate\Support\Facades\DB;
  *
  * Extracted from UserRepository to reduce god-object surface area.
  */
-class UserModerationRepository extends BaseRepository
+class UserModerationRepository extends BaseRepository implements UserModerationRepositoryInterface
 {
     public function __construct(
         private readonly UserModerationAccountCommand $account,

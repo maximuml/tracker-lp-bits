@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\System\ExamResource\Pages;
 
+use App\Contracts\Repositories\ExamRepositoryInterface;
 use App\Filament\Resources\System\ExamResource;
 use App\Models\Exam;
-use App\Repositories\ExamRepository;
 use App\Support\Admin;
 use Exception;
 use Filament\Actions\DeleteAction;
@@ -36,7 +36,7 @@ class EditExam extends EditRecord
     public function save(bool $shouldRedirect = true, bool $shouldSendSavedNotification = true): void
     {
         $data = $this->form->getState();
-        $examRep = app(ExamRepository::class);
+        $examRep = app(ExamRepositoryInterface::class);
         try {
             $this->record = $examRep->update($data, $this->getExamRecord()->id);
             Admin::successNotification('');

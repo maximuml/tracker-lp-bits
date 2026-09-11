@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\User\UserResource\Pages;
 
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Filament\Resources\User\UserResource;
-use App\Repositories\UserRepository;
 use App\Support\Admin;
 use Exception;
 use Filament\Actions\Contracts\HasActions;
@@ -17,7 +17,7 @@ class CreateUser extends CreateRecord implements HasActions
 
     public function create(bool $another = false): void
     {
-        $userRep = app(UserRepository::class);
+        $userRep = app(UserRepositoryInterface::class);
         $data = $this->form->getState();
         try {
             $this->record = $userRep->store($data);

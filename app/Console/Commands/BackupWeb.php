@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Repositories\ToolRepository;
+use App\Contracts\Repositories\ToolRepositoryInterface;
 use App\Support\Logger;
 use App\Support\RequestContext;
 use Illuminate\Console\Command;
@@ -45,7 +45,7 @@ class BackupWeb extends Command
         $method = $this->option('method');
         $transfer = $this->option('transfer');
         $this->info("method: $method, transfer: $transfer");
-        $rep = app(ToolRepository::class);
+        $rep = app(ToolRepositoryInterface::class);
         $result = $rep->backupWeb($method, $transfer);
         $log = sprintf('[%s], %s, result: %s', RequestContext::instance()->getRequestId(), __METHOD__, var_export($result, true));
         $this->info($log);

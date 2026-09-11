@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\TorrentDownloadRepositoryInterface;
+use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Enums\BookmarkFilter;
 use App\Enums\TorrentVisible;
 use App\Exceptions\NexusException;
@@ -36,10 +38,10 @@ use Illuminate\Http\Request;
  * @see TorrentDownloadRepository
  * @see TorrentModerationRepository
  */
-class TorrentRepository extends BaseRepository
+class TorrentRepository extends BaseRepository implements TorrentRepositoryInterface
 {
     public function __construct(
-        private readonly TorrentDownloadRepository $downloadRepository,
+        private readonly TorrentDownloadRepositoryInterface $downloadRepository,
     ) {}
 
     /** @var array<int, string> */

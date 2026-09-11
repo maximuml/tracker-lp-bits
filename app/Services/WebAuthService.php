@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\UserStatus;
 use App\Exceptions\AuthenticationException;
 use App\Models\User;
-use App\Repositories\UserRepository;
 use App\Services\Captcha\Exceptions\CaptchaValidationException;
 use App\Support\AuthCookie;
 use App\Support\Cache;
@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\DB;
 class WebAuthService
 {
     public function __construct(
-        private readonly UserRepository $userRepository,
+        private readonly UserRepositoryInterface $userRepository,
     ) {}
 
     private static function getMaxLoginAttempts(): int

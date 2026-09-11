@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Auth\Permission;
+use App\Contracts\Repositories\ForumRepositoryInterface;
+use App\Contracts\Repositories\PostRepositoryInterface;
 use App\DTOs\Forum\ListPostsDto;
 use App\DTOs\Forum\StorePostDto;
 use App\DTOs\Forum\UpdatePostDto;
@@ -14,8 +16,6 @@ use App\Models\Forum;
 use App\Models\Post;
 use App\Models\Topic;
 use App\Models\User;
-use App\Repositories\ForumRepository;
-use App\Repositories\PostRepository;
 use App\Repositories\TopicRepository;
 use App\Support\CurrentUser;
 use Illuminate\Http\Request;
@@ -25,8 +25,8 @@ use Illuminate\Validation\ValidationException;
 class PostController extends Controller
 {
     public function __construct(
-        private readonly ForumRepository $forumRepository,
-        private readonly PostRepository $postRepository,
+        private readonly ForumRepositoryInterface $forumRepository,
+        private readonly PostRepositoryInterface $postRepository,
         private readonly TopicRepository $topicRepository,
         private readonly CurrentUser $currentUser,
     ) {}

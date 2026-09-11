@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Auth\Permission;
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserAcceptPms;
 use App\Enums\UserStatus;
@@ -13,7 +14,6 @@ use App\Models\User;
 use App\Models\UserMeta;
 use App\Repositories\HitAndRunRepository;
 use App\Repositories\UserDetailRepository;
-use App\Repositories\UserRepository;
 use App\Support\Bonus;
 use App\Support\Country;
 use App\Support\CurrentUser;
@@ -34,7 +34,7 @@ class UserDetailController extends Controller
 {
     private HitAndRunRepository $hitAndRunRepository;
 
-    private UserRepository $userRepository;
+    private UserRepositoryInterface $userRepository;
 
     private UserDetailRepository $userDetailRepository;
 
@@ -44,7 +44,7 @@ class UserDetailController extends Controller
 
     public function __construct(
         HitAndRunRepository $hitAndRunRepository,
-        UserRepository $userRepository,
+        UserRepositoryInterface $userRepository,
         UserDetailRepository $userDetailRepository,
         CurrentUser $currentUser,
         Globals $globals,

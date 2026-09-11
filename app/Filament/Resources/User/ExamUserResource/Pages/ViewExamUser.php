@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\User\ExamUserResource\Pages;
 
+use App\Contracts\Repositories\ExamRepositoryInterface;
 use App\Filament\Resources\User\ExamUserResource;
 use App\Models\ExamUser;
-use App\Repositories\ExamRepository;
 use App\Support\Admin;
 use Carbon\Carbon;
 use Exception;
@@ -95,7 +95,7 @@ class ViewExamUser extends ViewRecord
             Action::make('Avoid')
                 ->requiresConfirmation()
                 ->action(function () {
-                    $examRep = app(ExamRepository::class);
+                    $examRep = app(ExamRepositoryInterface::class);
                     try {
                         $examRep->avoidExamUser($this->getExamUserRecord()->id);
                         Admin::successNotification('');
@@ -118,7 +118,7 @@ class ViewExamUser extends ViewRecord
                         ->label(__('label.reason')),
                 ])
                 ->action(function (array $data) {
-                    $examRep = app(ExamRepository::class);
+                    $examRep = app(ExamRepositoryInterface::class);
                     try {
                         $examRep->updateExamUserEnd($this->getExamUserRecord(), Carbon::parse($data['end']), $data['reason'] ?? '');
                         Admin::successNotification('');

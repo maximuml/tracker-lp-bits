@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\Repositories\ExamRepositoryInterface;
+use App\Contracts\Repositories\UserModerationRepositoryInterface;
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\DTOs\Auth\ActorContext;
 use App\Models\Offer;
 use App\Models\User;
 use App\Repositories\AttendanceRepository;
 use App\Repositories\BonusRepository;
-use App\Repositories\ExamRepository;
 use App\Repositories\MedalRepository;
 use App\Repositories\TorrentModerationRepository;
-use App\Repositories\UserModerationRepository;
 use App\Repositories\UserPasskeyRepository;
-use App\Repositories\UserRepository;
 use App\Support\CurrentUser;
 use App\Support\Shoutbox;
 use App\Support\ToastNotifications;
@@ -63,11 +63,11 @@ final class AjaxService
     public function __construct(
         private readonly MedalRepository $medalRepository,
         private readonly AttendanceRepository $attendanceRepository,
-        private readonly UserRepository $userRepository,
-        private readonly UserModerationRepository $userModerationRepository,
+        private readonly UserRepositoryInterface $userRepository,
+        private readonly UserModerationRepositoryInterface $userModerationRepository,
         private readonly TorrentModerationRepository $torrentModerationRepository,
         private readonly BonusRepository $bonusRepository,
-        private readonly ExamRepository $examRepository,
+        private readonly ExamRepositoryInterface $examRepository,
         private readonly UserPasskeyRepository $userPasskeyRepository,
         private readonly ShoutboxService $shoutboxService,
         private readonly CurrentUser $currentUser,

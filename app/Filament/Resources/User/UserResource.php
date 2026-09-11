@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\User;
 
+use App\Contracts\Repositories\UserModerationRepositoryInterface;
 use App\Enums\UserClass as UserClassEnum;
 use App\Enums\UserStatus;
 use App\Events\UserUpdated;
@@ -13,7 +14,6 @@ use App\Filament\Resources\User\UserResource\Pages\CreateUser;
 use App\Filament\Resources\User\UserResource\Pages\ListUsers;
 use App\Filament\Resources\User\UserResource\Pages\UserProfile;
 use App\Models\User;
-use App\Repositories\UserModerationRepository;
 use App\Support\Admin;
 use App\Support\Config\SiteConfig;
 use App\Support\Mail;
@@ -57,7 +57,7 @@ class UserResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
-    private static ?UserModerationRepository $rep = null;
+    private static ?UserModerationRepositoryInterface $rep = null;
 
     private static function currentUser(): User
     {
@@ -69,10 +69,10 @@ class UserResource extends Resource
         return $user;
     }
 
-    private static function getRep(): UserModerationRepository
+    private static function getRep(): UserModerationRepositoryInterface
     {
         if (self::$rep === null) {
-            self::$rep = app(UserModerationRepository::class);
+            self::$rep = app(UserModerationRepositoryInterface::class);
         }
 
         return self::$rep;

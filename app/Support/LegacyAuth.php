@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Contracts\Repositories\AuthRepositoryInterface;
 use App\Models\Setting;
 use App\Models\User;
-use App\Repositories\AuthRepository;
 use App\Services\Captcha\Exceptions\CaptchaValidationException;
 use App\Support\Security\PasskeyGenerator;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -33,10 +33,10 @@ final class LegacyAuth
         $maxAttempts = $context->maxLoginAttempts;
         $ip = $context->ip;
 
-        $total = app(AuthRepository::class)->getLoginAttemptsSum($ip);
+        $total = app(AuthRepositoryInterface::class)->getLoginAttemptsSum($ip);
 
         if ($total >= $maxAttempts) {
-            app(AuthRepository::class)->banLoginAttempts($ip);
+            app(AuthRepositoryInterface::class)->banLoginAttempts($ip);
 
             LegacyResponse::abort(
                 $type.($lang['std_locked'] ?? '').$maxAttempts.($lang['std_attempts_reached'] ?? ''),
@@ -134,7 +134,7 @@ final class LegacyAuth
         $lang = $context->lang;
         $ip = $context->ip;
 
-        app(AuthRepository::class)->recordFailedLogin($ip, $recover);
+        app(AuthRepositoryInterface::class)->recordFailedLogin($ip, $recover);
 
         if ($type === 'silent') {
             return;
@@ -165,7 +165,7 @@ final class LegacyAuth
         $lang = $context->lang;
 
         if ($context->isLoggedIn()) {
-            app(AuthRepository::class)->updateUserLang((int) ($context->user['id'] ?? 0), $context->langId());
+            app(AuthRepositoryInterface::class)->updateUserLang((int) ($context->user['id'] ?? 0), $context->langId());
 
             LegacyResponse::abort(
                 (string) ($lang['std_permission_denied'] ?? ''),
@@ -224,7 +224,7 @@ final class LegacyAuth
         }
 
         if ($maxuserscheck) {
-            $userCount = app(AuthRepository::class)->countUsers();
+            $userCount = app(AuthRepositoryInterface::class)->countUsers();
             if ($userCount >= $settings['maxusers']) {
                 LegacyResponse::abort(
                     (string) ($lang['std_sorry'] ?? ''),
@@ -237,7 +237,7 @@ final class LegacyAuth
 
         if ($ipcheck) {
             $ip = $context->ip;
-            $ipCount = app(AuthRepository::class)->countUsersByIp($ip);
+            $ipCount = app(AuthRepositoryInterface::class)->countUsersByIp($ip);
             if ($ipCount > $settings['maxip']) {
                 LegacyResponse::abort(
                     (string) ($lang['std_sorry'] ?? ''),
@@ -267,7 +267,7 @@ final class LegacyAuth
 
     public static function remainingAttempts(string $type, int $maxAttempts, string $ip): string
     {
-        $total = app(AuthRepository::class)->getLoginAttemptsSum($ip);
+        $total = app(AuthRepositoryInterface::class)->getLoginAttemptsSum($ip);
 
         $remaining = $maxAttempts - $total;
 
@@ -314,7 +314,7 @@ final class LegacyAuth
     {
         $lang = $context->lang;
 
-        $id = app(AuthRepository::class)->getUserIdByUsername($username);
+        $id = app(AuthRepositoryInterface::class)->getUserIdByUsername($username);
 
         if ($id === null) {
             LegacyResponse::abort(
@@ -344,7 +344,7 @@ final class LegacyAuth
         $ip = $context->ip;
         $nip = ip2long($ip);
 
-        if ($nip && app(AuthRepository::class)->isIpBanned($nip)) {
+        if ($nip && app(AuthRepositoryInterface::class)->isIpBanned($nip)) {
             $html = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head><body>'.($lang['text_unauthorized_ip'] ?? '')."</body></html>\n";
             throw new HttpResponseException(new Response($html, 403));
         }
@@ -359,7 +359,7 @@ final class LegacyAuth
 
         if (empty($row['passkey'])) {
             $passkey = app(PasskeyGenerator::class)->generate();
-            app(AuthRepository::class)->updateUserPasskey((int) $row['id'], $passkey);
+            app(AuthRepositoryInterface::class)->updateUserPasskey((int) $row['id'], $passkey);
         }
 
         $row['old_ip'] = $row['ip'];

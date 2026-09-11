@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Policies;
 
 use App\Auth\Permission;
+use App\Contracts\Repositories\ForumRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\Topic;
 use App\Models\User;
-use App\Repositories\ForumRepository;
 use App\Support\Forum;
 
 /**
@@ -18,7 +18,7 @@ use App\Support\Forum;
 class TopicPolicy extends BasePolicy
 {
     public function __construct(
-        private readonly ForumRepository $repository,
+        private readonly ForumRepositoryInterface $repository,
     ) {}
 
     /**

@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Auth\Permission;
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\User;
-use App\Repositories\UserRepository;
 use App\Support\Config\SiteConfig;
 
 /**
@@ -292,7 +292,7 @@ final class Comment
 
         $uidArr = array_values(array_filter(array_map('intval', array_column($rows, 'user'))));
         $neededColumns = ['id', 'class', 'enabled', 'privacy', 'avatar', 'signature', 'uploaded', 'downloaded', 'last_access', 'username', 'donor', 'leechwarn', 'warned', 'title'];
-        $userInfoArr = app(UserRepository::class)->getByIds($uidArr, $neededColumns);
+        $userInfoArr = app(UserRepositoryInterface::class)->getByIds($uidArr, $neededColumns);
 
         foreach ($rows as $row) {
             $userInfo = $userInfoArr->get($row['user'], User::defaultUser());

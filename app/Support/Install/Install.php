@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Support\Install;
 
+use App\Contracts\Repositories\SearchBoxRepositoryInterface;
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\UserClass as UserClassEnum;
 use App\Models\Setting;
 use App\Models\TrackerUrl;
 use App\Models\User;
-use App\Repositories\SearchBoxRepository;
-use App\Repositories\UserRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\Database;
 use App\Support\Env;
@@ -540,7 +540,7 @@ class Install
             'class' => $class,
             'id' => 1,
         ];
-        $user = app(UserRepository::class)->store($data);
+        $user = app(UserRepositoryInterface::class)->store($data);
         $this->doLog('[CREATE ADMINISTRATOR] '.$user->toJson());
 
         return $user;
@@ -820,7 +820,7 @@ class Install
     public function migrateSearchBoxModeRelated()
     {
         $this->doLog('[migrateSearchBoxModeRelated]');
-        $searchBoxRep = app(SearchBoxRepository::class);
+        $searchBoxRep = app(SearchBoxRepositoryInterface::class);
         $searchBoxRep->migrateToModeRelated();
     }
 

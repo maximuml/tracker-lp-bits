@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Repositories\MeiliSearchRepository;
+use App\Contracts\Repositories\MeiliSearchRepositoryInterface;
 use Illuminate\Console\Command;
 
 class MeiliSearchImport extends Command
@@ -30,7 +30,7 @@ class MeiliSearchImport extends Command
      */
     public function handle()
     {
-        $rep = app(MeiliSearchRepository::class);
+        $rep = app(MeiliSearchRepositoryInterface::class);
         $this->info('going to import torrents...');
         $total = $rep->import();
         $this->info("import $total torrents.");

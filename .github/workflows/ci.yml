@@ -157,14 +157,31 @@ jobs:
             sleep 10
           done
 
+  unit-tests-matrix:
+    name: Resolve PHPUnit matrix
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - id: matrix
+        env:
+          EVENT: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT" = "pull_request" ]; then
+            # PRs: only the supported-matrix edges (newest + oldest).
+            echo 'matrix={"php":["8.5","8.4"],"mysql":["9.0","8.0"],"exclude":[{"php":"8.5","mysql":"8.0"},{"php":"8.4","mysql":"9.0"}]}' >> "$GITHUB_OUTPUT"
+          else
+            # Push: full matrix.
+            echo 'matrix={"php":["8.4","8.5"],"mysql":["8.0","9.0"]}' >> "$GITHUB_OUTPUT"
+          fi
+
   unit-tests:
     name: PHPUnit Unit (PHP ${{ matrix.php }}, MySQL ${{ matrix.mysql }})
     runs-on: ubuntu-latest
+    needs: [unit-tests-matrix]
     strategy:
       fail-fast: false
-      matrix:
-        php: ['8.4', '8.5']
-        mysql: ['8.0', '9.0']
+      matrix: ${{ fromJSON(needs.unit-tests-matrix.outputs.matrix) }}
 
     services:
       mysql:
@@ -241,9 +258,11 @@ jobs:
           # truncating tables in the seed database. The name carries the
           # "testing" marker required by DestructiveEnvironmentGuard.
           mysql -h 127.0.0.1 -u root -proot -e "CREATE DATABASE IF NOT EXISTS nexusphp_unit_testing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; GRANT ALL PRIVILEGES ON nexusphp_unit_testing.* TO 'nexusphp'@'%'; FLUSH PRIVILEGES;"
-          # Copy schema + seed data for tables tests depend on (settings, users)
+          # Copy schema + seed data for tables tests depend on:
+          # settings/users — config + auth, categories/forums — FK and
+          # inner joins, searchbox/searchbox_fields — browse mode.
           mysqldump -h 127.0.0.1 -u root -proot --no-data --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp | mysql -h 127.0.0.1 -u root -proot nexusphp_unit_testing
-          mysqldump -h 127.0.0.1 -u root -proot --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users | mysql -h 127.0.0.1 -u root -proot nexusphp_unit_testing
+          mysqldump -h 127.0.0.1 -u root -proot --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users categories forums searchbox searchbox_fields agent_allowed_family agent_allowed_exception | mysql -h 127.0.0.1 -u root -proot nexusphp_unit_testing
 
       - name: Run PHPUnit unit tests
         run: DB_DATABASE=nexusphp_unit_testing vendor/bin/phpunit --testsuite Unit --no-coverage
@@ -335,8 +354,11 @@ jobs:
           for db in nexusphp_unit_testing nexusphp_feature_testing; do
             mysqldump -h 127.0.0.1 -u root -proot --no-data --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp | mysql -h 127.0.0.1 -u root -proot "$db"
           done
-          # Unit tests need: settings, users
-          mysqldump -h 127.0.0.1 -u root -proot --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users | mysql -h 127.0.0.1 -u root -proot nexusphp_unit_testing
+          # Unit tests need: settings/users — config + auth,
+          # categories/forums — FK targets and inner joins,
+          # searchbox/searchbox_fields — browse mode,
+          # agent_allowed_* — announce client check
+          mysqldump -h 127.0.0.1 -u root -proot --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users categories forums searchbox searchbox_fields agent_allowed_family agent_allowed_exception | mysql -h 127.0.0.1 -u root -proot nexusphp_unit_testing
           # Feature tests need: settings/users — config + auth, searchbox/searchbox_fields — browse mode,
           # categories — torrent listing, agent_allowed_family/agent_allowed_exception — announce client check
           mysqldump -h 127.0.0.1 -u root -proot --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users searchbox searchbox_fields categories agent_allowed_family agent_allowed_exception | mysql -h 127.0.0.1 -u root -proot nexusphp_feature_testing
@@ -1034,17 +1056,21 @@ jobs:
             FLUSH PRIVILEGES;
           "
           mysqldump -h 127.0.0.1 -u root -proot --no-data --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp | mysql -h 127.0.0.1 -u root -proot nexusphp_unit_testing
-          mysqldump -h 127.0.0.1 -u root -proot --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users | mysql -h 127.0.0.1 -u root -proot nexusphp_unit_testing
+          mysqldump -h 127.0.0.1 -u root -proot --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users categories forums searchbox searchbox_fields agent_allowed_family agent_allowed_exception | mysql -h 127.0.0.1 -u root -proot nexusphp_unit_testing
 
       - name: Run Infection (full scope)
         run: |
+          # --testsuite=Unit: Feature/Architecture suites run against
+          # nexusphp_feature_testing/e2e elsewhere and are not valid on the
+          # unit dump used here.
           DB_DATABASE=nexusphp_unit_testing vendor/bin/infection \
             --configuration=infection.json5 \
             --threads=4 \
             --min-msi=40 \
             --min-covered-msi=50 \
             --no-progress \
-            --logger-github
+            --logger-github \
+            --test-framework-extra-args="--testsuite=Unit"
 
       - name: Upload Infection logs
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -1059,7 +1085,8 @@ jobs:
   infection-pr:
     name: Mutation testing (PR scope)
     runs-on: ubuntu-latest
-    needs: [coverage]
+    # Generates its own coverage via --map-source-class-to-test; no need
+    # to wait for the coverage job to finish first.
     # W3-04: Run Infection only on changed critical files in PRs.
     # Full-scope mutation testing runs on push to php8 (see infection job).
     # PR scope enforces covered-MSI ≥ 50 on the filtered file set; the
@@ -1127,7 +1154,7 @@ jobs:
             FLUSH PRIVILEGES;
           "
           mysqldump -h 127.0.0.1 -u root -proot --no-data --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp | mysql -h 127.0.0.1 -u root -proot nexusphp_unit_testing
-          mysqldump -h 127.0.0.1 -u root -proot --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users | mysql -h 127.0.0.1 -u root -proot nexusphp_unit_testing
+          mysqldump -h 127.0.0.1 -u root -proot --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users categories forums searchbox searchbox_fields agent_allowed_family agent_allowed_exception | mysql -h 127.0.0.1 -u root -proot nexusphp_unit_testing
 
       - name: Detect changed critical files
         id: changed
@@ -1175,7 +1202,9 @@ jobs:
             --logger-github \
             --min-msi=0 \
             --min-covered-msi=50 \
-            --filter="${{ steps.changed.outputs.filter }}"
+            --filter="${{ steps.changed.outputs.filter }}" \
+            --map-source-class-to-test \
+            --test-framework-extra-args="--testsuite=Unit"
 
       - name: Upload Infection PR logs
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -1194,6 +1223,9 @@ jobs:
     # W8-01: Build the production image and verify the full prod stack
     # starts cleanly from scratch with named volumes, read-only rootfs,
     # non-root UID, and all required services.
+    # Push-only: the prod image build is the slowest smoke and rarely
+    # catches app-code regressions that PR checks miss.
+    if: github.event_name == 'push'
     timeout-minutes: 20
 
     steps:

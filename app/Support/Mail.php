@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Contracts\Repositories\ToolRepositoryInterface;
 use App\Models\Setting;
-use App\Repositories\ToolRepository;
 use App\Support\Config\SiteConfig;
 use Illuminate\Support\Facades\Request;
 
@@ -166,7 +166,7 @@ final class Mail
         }
 
         if ($smtpType === 'external') {
-            $toolRep = app(ToolRepository::class);
+            $toolRep = app(ToolRepositoryInterface::class);
 
             return (bool) $toolRep->sendMail($to, $subject, $body);
         }

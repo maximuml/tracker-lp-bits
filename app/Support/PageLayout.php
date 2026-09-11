@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Contracts\Repositories\PageLayoutRepositoryInterface;
+use App\Contracts\Repositories\SearchBoxRepositoryInterface;
 use App\Enums\ExamType;
 use App\Enums\TorrentPromotion;
 use App\Models\HitAndRun;
@@ -11,8 +13,6 @@ use App\Models\TorrentState;
 use App\Models\User;
 use App\Repositories\AttendanceRepository;
 use App\Repositories\HitAndRunRepository;
-use App\Repositories\PageLayoutRepository;
-use App\Repositories\SearchBoxRepository;
 use App\Repositories\StaffMessageRepository;
 use App\Utils\MsgAlert;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -93,7 +93,7 @@ class PageLayout
         if ($context->user) {
             $requireSearchBoxIdAr = SearchBox::requiredIds();
             if (! empty($requireSearchBoxIdAr)) {
-                $icons = app(SearchBoxRepository::class)->listIcon($requireSearchBoxIdAr);
+                $icons = app(SearchBoxRepositoryInterface::class)->listIcon($requireSearchBoxIdAr);
                 foreach ($icons as $icon) {
                     $searchBoxIcons[] = trim($icon['cssfile'] ?? '', '/');
                 }
@@ -140,17 +140,17 @@ class PageLayout
             $ratio = (string) Ratio::forUserId($context->user['id']);
             $messages = $context->cache?->get_value('user_'.$context->user['id'].'_inbox_count');
             if ($messages == '') {
-                $messages = app(PageLayoutRepository::class)->getInboxCount((int) $context->user['id']);
+                $messages = app(PageLayoutRepositoryInterface::class)->getInboxCount((int) $context->user['id']);
                 $context->cache?->cache_value('user_'.$context->user['id'].'_inbox_count', $messages, 900);
             }
             $outmessages = $context->cache?->get_value('user_'.$context->user['id'].'_outbox_count');
             if ($outmessages == '') {
-                $outmessages = app(PageLayoutRepository::class)->getOutboxCount((int) $context->user['id']);
+                $outmessages = app(PageLayoutRepositoryInterface::class)->getOutboxCount((int) $context->user['id']);
                 $context->cache?->cache_value('user_'.$context->user['id'].'_outbox_count', $outmessages, 900);
             }
             $connect = $context->cache?->get_value('user_'.$context->user['id'].'_connect');
             if ($connect === false || $connect === null) {
-                $connect = app(PageLayoutRepository::class)->getConnectable((int) $context->user['id']);
+                $connect = app(PageLayoutRepositoryInterface::class)->getConnectable((int) $context->user['id']);
                 $context->cache?->cache_value('user_'.$context->user['id'].'_connect', $connect, 900);
             }
             if ($connect === 1) {
@@ -162,17 +162,17 @@ class PageLayout
             }
             $activeseed = $context->cache?->get_value('user_'.$context->user['id'].'_active_seed_count');
             if ($activeseed == '') {
-                $activeseed = app(PageLayoutRepository::class)->getActiveSeedCount((int) $context->user['id']);
+                $activeseed = app(PageLayoutRepositoryInterface::class)->getActiveSeedCount((int) $context->user['id']);
                 $context->cache?->cache_value('user_'.$context->user['id'].'_active_seed_count', $activeseed, 60);
             }
             $activeleech = $context->cache?->get_value('user_'.$context->user['id'].'_active_leech_count');
             if ($activeleech == '') {
-                $activeleech = app(PageLayoutRepository::class)->getActiveLeechCount((int) $context->user['id']);
+                $activeleech = app(PageLayoutRepositoryInterface::class)->getActiveLeechCount((int) $context->user['id']);
                 $context->cache?->cache_value('user_'.$context->user['id'].'_active_leech_count', $activeleech, 60);
             }
             $unread = $context->cache?->get_value('user_'.$context->user['id'].'_unread_message_count');
             if ($unread == '') {
-                $unread = app(PageLayoutRepository::class)->getUnreadMessageCount((int) $context->user['id']);
+                $unread = app(PageLayoutRepositoryInterface::class)->getUnreadMessageCount((int) $context->user['id']);
                 $context->cache?->cache_value('user_'.$context->user['id'].'_unread_message_count', $unread, 60);
             }
             $inboxpic = '<img class="'.($unread ? 'inboxnew' : 'inbox').'" src="pic/trans.gif" alt="inbox" title="'.($unread ? $context->lang['title_inbox_new_messages'] : $context->lang['title_inbox_no_new_messages']).'" />';
@@ -194,7 +194,7 @@ class PageLayout
             $taskLabel = Locale::trans('exam.type_task');
             $userId = $context->user['id'];
             $invites = $context->user['invites'];
-            $pendingInviteCount = app(PageLayoutRepository::class)->getPendingInviteCount((int) $context->user['id']);
+            $pendingInviteCount = app(PageLayoutRepositoryInterface::class)->getPendingInviteCount((int) $context->user['id']);
 
             if ($context->userClass() >= User::getAccessAdminClassMin()) {
                 $managementSystemLink = sprintf('[<a href="%s" target="_blank">%s</a>]', Env::get('FILAMENT_PATH', 'nexusphp'), $context->lang['text_management_system']);
@@ -220,12 +220,12 @@ class PageLayout
             if (Permissions::userCan('staffmem', false, (int) ($context->user['id'] ?? 0))) {
                 $totalreports = $context->cache?->get_value('staff_report_count');
                 if ($totalreports == '') {
-                    $totalreports = app(PageLayoutRepository::class)->getTotalReports();
+                    $totalreports = app(PageLayoutRepositoryInterface::class)->getTotalReports();
                     $context->cache?->cache_value('staff_report_count', $totalreports, 900);
                 }
                 $totalcheaters = $context->cache?->get_value('staff_cheater_count');
                 if ($totalcheaters == '') {
-                    $totalcheaters = app(PageLayoutRepository::class)->getTotalCheaters();
+                    $totalcheaters = app(PageLayoutRepositoryInterface::class)->getTotalCheaters();
                     $context->cache?->cache_value('staff_cheater_count', $totalcheaters, 900);
                 }
                 $staffIcons .= '<a href="cheaterbox.php"><img class="cheaterbox" alt="cheaterbox" title="'.$context->lang['title_cheaterbox'].'" src="pic/trans.gif" />  </a>'.$totalcheaters.'  <a href="reports.php"><img class="reportbox" alt="reportbox" title="'.$context->lang['title_reportbox'].'" src="pic/trans.gif" />  </a>'.$totalreports;
@@ -307,7 +307,7 @@ class PageLayout
                     $new_news = $context->cache?->get_value('user_'.$context->user['id'].'_unread_news_count');
                     if ($new_news == '') {
                         $lastHome = $context->user['last_home'] ?? null;
-                        $new_news = app(PageLayoutRepository::class)->getUnreadNewsCount($lastHome);
+                        $new_news = app(PageLayoutRepositoryInterface::class)->getUnreadNewsCount($lastHome);
                         $context->cache?->cache_value('user_'.$context->user['id'].'_unread_news_count', $new_news, 300);
                     }
                     $new_news = (int) $new_news;
@@ -330,7 +330,7 @@ class PageLayout
                     $cacheKey = 'TORRENT_APPROVAL_NONE';
                     $toApprovalCounts = $context->cache?->get_value($cacheKey);
                     if ($toApprovalCounts === false) {
-                        $toApprovalCounts = app(PageLayoutRepository::class)->getTorrentApprovalNoneCount();
+                        $toApprovalCounts = app(PageLayoutRepositoryInterface::class)->getTorrentApprovalNoneCount();
                         $context->cache->cache_value($cacheKey, $toApprovalCounts, 60);
                     }
                     $toApprovalCounts = (int) $toApprovalCounts;
@@ -340,7 +340,7 @@ class PageLayout
                 }
                 if (Permissions::userCan('staffmem', false, (int) ($context->user['id'] ?? 0))) {
                     if (($complaints = $context->cache?->get_value('COMPLAINTS_COUNT_CACHE')) === false) {
-                        $complaints = app(PageLayoutRepository::class)->getOpenComplaintsCount();
+                        $complaints = app(PageLayoutRepositoryInterface::class)->getOpenComplaintsCount();
                         $context->cache->cache_value('COMPLAINTS_COUNT_CACHE', $complaints, 600);
                     }
                     $complaints = (int) $complaints;
@@ -349,7 +349,7 @@ class PageLayout
                     }
                     $numreports = $context->cache?->get_value('staff_new_report_count');
                     if ($numreports == '') {
-                        $numreports = app(PageLayoutRepository::class)->getOpenReportsCount();
+                        $numreports = app(PageLayoutRepositoryInterface::class)->getOpenReportsCount();
                         $context->cache?->cache_value('staff_new_report_count', $numreports, 900);
                     }
                     $numreports = (int) $numreports;
@@ -359,7 +359,7 @@ class PageLayout
                     }
                     $numcheaters = $context->cache?->get_value('staff_new_cheater_count');
                     if ($numcheaters == '') {
-                        $numcheaters = app(PageLayoutRepository::class)->getOpenCheatersCount();
+                        $numcheaters = app(PageLayoutRepositoryInterface::class)->getOpenCheatersCount();
                         $context->cache?->cache_value('staff_new_cheater_count', $numcheaters, 900);
                     }
                     $numcheaters = (int) $numcheaters;

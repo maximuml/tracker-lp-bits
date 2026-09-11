@@ -29,7 +29,7 @@ class AttendanceController extends LegacyController
         $captchaEnabled = SiteConfig::current()->captcha->attendanceEnabled((bool) config('captcha.attendance.enabled', true));
 
         if ($request->isMethod('post')) {
-            if ($captchaEnabled && app(Globals::class)->get('iv', '') === 'yes') {
+            if ($captchaEnabled && SiteConfig::current()->security->captchaRequired()) {
                 Captcha::checkCode(
                     (string) (request()->post('imagehash') ?? ''),
                     (string) (request()->post('imagestring') ?? ''),

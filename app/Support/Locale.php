@@ -8,6 +8,7 @@ use App\Http\Middleware\Locale as LocaleMiddleware;
 use App\Models\Language;
 use App\Models\Setting;
 use App\Repositories\LanguageRepository;
+use App\Support\Config\SiteConfig;
 
 /**
  * Legacy locale helpers extracted from `include/functions.php`.
@@ -92,7 +93,7 @@ final class Locale
      */
     public static function folderForIdWithContext(int|string $langId): string
     {
-        return self::folderForId($langId, (string) app(Globals::class)->get('deflang', 'en'));
+        return self::folderForId($langId, SiteConfig::current()->main->defaultLang('en'));
     }
 
     /**
@@ -189,11 +190,21 @@ final class Locale
     }
 
     /**
+     * Return the current request's language folder (legacy `$CURLANGDIR`).
+     */
+    public static function currentLangDir(string $default = ''): string
+    {
+        $dir = app(Globals::class)->get('CURLANGDIR', $default);
+
+        return is_string($dir) ? $dir : $default;
+    }
+
+    /**
      * Context-aware wrapper for {@see guestId()}.
      */
     public static function guestIdWithContext(): int
     {
-        return self::guestId((string) app(Globals::class)->get('CURLANGDIR', ''));
+        return self::guestId(self::currentLangDir());
     }
 
     /**

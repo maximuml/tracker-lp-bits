@@ -1,0 +1,118 @@
+{
+    "_meta": {
+        "description": "Registry of all DB::select/DB::statement/DB::unprepared and DB::table(DB::raw(...)) call sites in app/, excluding app/Support/Install (legacy install scripts). Source of truth for the CI 'Raw SQL ratchet' job and tests/Architecture/RawQueriesRegistryTest.php. Entries are matched by file+line: if a registered call site moves, update the 'line' field — drift fails the test loudly. To add a new raw query: get it reviewed and add an entry here.",
+        "schema_version": 1
+    },
+    "queries": [
+        {
+            "file": "app/Console/Commands/Upgrade/MigrateSnatchedHitAndRunId.php",
+            "line": 33,
+            "method": "handle",
+            "pattern": "DB::statement",
+            "purpose": "One-off upgrade: backfill snatched.hit_and_run_id from hit_and_runs via UPDATE ... INNER JOIN",
+            "bindings": false,
+            "expected_index": "hit_and_runs (uid, torrent_id) join lookup",
+            "reason": "Multi-table UPDATE ... INNER JOIN kept verbatim from the legacy upgrade script; rewriting it as a builder join-update would re-derive an already audited statement for a command that runs once"
+        },
+        {
+            "file": "app/Console/Commands/Upgrade/MigrateTorrentsTableTextColumn.php",
+            "line": 36,
+            "method": "handle",
+            "pattern": "DB::statement",
+            "purpose": "One-off upgrade: copy torrents descr/technical_info/nfo into torrent_extras via INSERT ... SELECT with an ON DUPLICATE KEY upsert clause",
+            "bindings": false,
+            "expected_index": "torrent_extras key on torrent_id used by the upsert",
+            "reason": "INSERT ... SELECT ... ON DUPLICATE KEY UPDATE with a generated upsert clause (Database::upsertField) has no query-builder equivalent"
+        },
+        {
+            "file": "app/Console/Commands/Upgrade/MigrateTorrentsTableTextColumn.php",
+            "line": 48,
+            "method": "handle",
+            "pattern": "DB::statement",
+            "purpose": "One-off upgrade: ALTER TABLE torrents dropping the legacy text columns that were migrated to torrent_extras",
+            "bindings": false,
+            "expected_index": "n/a",
+            "reason": "DDL; the DROP COLUMN list is built dynamically from Schema::hasColumn() checks and issued as a single ALTER TABLE, which the schema builder cannot express conditionally in one statement"
+        },
+        {
+            "file": "app/Console/Commands/Upgrade/UpdateSnatchedBuyLogId.php",
+            "line": 33,
+            "method": "handle",
+            "pattern": "DB::statement",
+            "purpose": "One-off upgrade: backfill snatched.buy_log_id from torrent_buy_logs via UPDATE ... INNER JOIN",
+            "bindings": false,
+            "expected_index": "torrent_buy_logs (uid, torrent_id) join lookup",
+            "reason": "Multi-table UPDATE ... INNER JOIN kept verbatim from the legacy upgrade script; rewriting it as a builder join-update would re-derive an already audited statement for a command that runs once"
+        },
+        {
+            "file": "app/Console/Commands/UserResetIdAutoIncrement.php",
+            "line": 72,
+            "method": "handle",
+            "pattern": "DB::statement",
+            "purpose": "Disable foreign key checks before truncating all data tables (fresh-install/seed reset command)",
+            "bindings": false,
+            "expected_index": "n/a",
+            "reason": "Session-level SET statement, not table DML; the explicit off/on pair around the try/finally truncate loop is intentional for auditability"
+        },
+        {
+            "file": "app/Console/Commands/UserResetIdAutoIncrement.php",
+            "line": 81,
+            "method": "handle",
+            "pattern": "DB::statement",
+            "purpose": "Re-enable foreign key checks in the finally block after the truncate loop",
+            "bindings": false,
+            "expected_index": "n/a",
+            "reason": "Session-level SET statement, not table DML; must run unconditionally in finally even when truncation fails"
+        },
+        {
+            "file": "app/Console/Commands/UserResetIdAutoIncrement.php",
+            "line": 85,
+            "method": "handle",
+            "pattern": "DB::statement",
+            "purpose": "ALTER TABLE users AUTO_INCREMENT = <option> to reset the primary key counter for a fresh install",
+            "bindings": false,
+            "expected_index": "n/a",
+            "reason": "ALTER TABLE ... AUTO_INCREMENT is DDL with no schema-builder equivalent; the value is interpolated from the CLI option, not a bound parameter"
+        },
+        {
+            "file": "app/Jobs/PruneActivityLogJob.php",
+            "line": 90,
+            "method": "archiveRecords",
+            "pattern": "DB::statement",
+            "purpose": "Archive expired iplog/login_logs rows into *_archive tables via INSERT ... SELECT with an added archived_at timestamp",
+            "bindings": true,
+            "expected_index": "Range scan on the retention date column (iplog.access / login_logs.created_at)",
+            "reason": "INSERT ... SELECT with a literal NOW() column appended cannot be expressed by the query builder (insertUsing cannot append expressions)"
+        },
+        {
+            "file": "app/Repositories/ModerationRepository.php",
+            "line": 210,
+            "method": "getIpsearchRows",
+            "pattern": "DB::table(DB::raw",
+            "purpose": "Staff IP search: paginate a UNION of users and iplog matches wrapped as a derived table",
+            "bindings": true,
+            "expected_index": "n/a — INET_ATON() on the ip columns defeats index use; staff-only query",
+            "reason": "The query builder cannot use a UNION as a FROM source; the compiled union SQL is wrapped in DB::raw() and bindings are carried over via mergeBindings()"
+        },
+        {
+            "file": "app/Repositories/ModerationRepository.php",
+            "line": 246,
+            "method": "countIpsearch",
+            "pattern": "DB::table(DB::raw",
+            "purpose": "Staff IP search: count DISTINCT user ids across the users/iplog union wrapped as a derived table",
+            "bindings": true,
+            "expected_index": "n/a — INET_ATON() on the ip columns defeats index use; staff-only query",
+            "reason": "The query builder cannot use a UNION as a FROM source; the compiled union SQL is wrapped in DB::raw() and bindings are carried over via mergeBindings()"
+        },
+        {
+            "file": "app/Repositories/MysqlStatsRepository.php",
+            "line": 29,
+            "method": "status",
+            "pattern": "DB::select",
+            "purpose": "Read MySQL server status variables (SHOW STATUS) for the admin stats page",
+            "bindings": false,
+            "expected_index": "n/a",
+            "reason": "SHOW STATUS is a server administration statement, not table DML; there is no query-builder equivalent"
+        }
+    ]
+}

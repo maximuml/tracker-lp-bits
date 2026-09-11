@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Support\Cache\LegacyRedisCache;
+use App\Support\Config\SiteConfig;
 
 /**
  * Legacy main-menu helper extracted from `include/functions.php`.
@@ -82,15 +83,15 @@ final class Menu
         $result = self::render(
             \function_exists('nexus') ? RequestContext::instance()->getScript() : '',
             app(Language::class)->functions(),
-            (string) app(Globals::class)->get('enableoffer', ''),
+            SiteConfig::current()->main->showOffer() ? 'yes' : 'no',
             null,
             app(CurrentUser::class)->get(),
             app(LegacyRedisCache::class),
-            (string) app(Globals::class)->get('CURLANGDIR', ''),
+            Locale::currentLangDir(),
         );
 
         $user = app(CurrentUser::class)->get();
-        if ($user && app(Globals::class)->get('where_tweak', '') === 'yes') {
+        if ($user && SiteConfig::current()->tweak->where() === 'yes') {
             app(UserUpdateBatch::class)->add('page', $result['selected']);
         }
 

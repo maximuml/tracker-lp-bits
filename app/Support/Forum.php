@@ -37,7 +37,7 @@ final class Forum
      */
     public static function picFolderWithContext(): string
     {
-        return self::picFolder((string) app(Globals::class)->get('CURLANGDIR', ''));
+        return self::picFolder(Locale::currentLangDir());
     }
 
     /**

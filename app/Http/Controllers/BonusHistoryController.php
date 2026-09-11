@@ -17,6 +17,7 @@ use App\Repositories\BonusCalculationRepository;
 use App\Support\Api;
 use App\Support\AssetAppender;
 use App\Support\Bonus;
+use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Globals;
 use App\Support\Locale;
@@ -173,7 +174,7 @@ JS;
         };
         $sortDirection = $order === 'username' ? 'asc' : 'desc';
 
-        $dateFounded = (string) app(Globals::class)->get('datefounded', '2010-08-19');
+        $dateFounded = SiteConfig::current()->tweak->dateFounded('2010-08-19');
         $yearFounded = (int) substr($dateFounded, 0, 4);
         if (! $yearFounded) {
             $yearFounded = 2007;

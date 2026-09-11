@@ -125,7 +125,7 @@ final class Cache
     {
         $rootpath = app(Globals::class)->get('rootpath', defined('ROOT_PATH') ? constant('ROOT_PATH') : '');
         $cacheDir = app(Globals::class)->get('cache', '');
-        $langDir = app(Globals::class)->get('CURLANGDIR', '');
+        $langDir = Locale::currentLangDir();
         $lang = app(Language::class)->functions();
 
         $cachefile = self::path($rootpath, $cacheDir, $langDir, $file);
@@ -156,7 +156,7 @@ final class Cache
     {
         $rootpath = app(Globals::class)->get('rootpath', defined('ROOT_PATH') ? constant('ROOT_PATH') : '');
         $cacheDir = app(Globals::class)->get('cache', '');
-        $langDir = app(Globals::class)->get('CURLANGDIR', '');
+        $langDir = Locale::currentLangDir();
 
         $cachefile = self::path($rootpath, $cacheDir, $langDir, $file);
         $contents = ob_get_contents();

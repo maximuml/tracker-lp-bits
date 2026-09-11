@@ -10,7 +10,7 @@ use App\Enums\Permission\PermissionEnum;
 use App\Repositories\ShoutboxRepository;
 use App\Services\ShoutboxService;
 use App\Support\CurrentUser;
-use App\Support\Globals;
+use App\Support\Language;
 use App\Support\LegacyHeaderBag;
 use App\Support\Lock;
 use App\Support\Shoutbox;
@@ -85,7 +85,7 @@ class ShoutboxController extends LegacyController
             }
         }
 
-        $langShoutbox = (array) (app(Globals::class)->get('lang_shoutbox') ?? []);
+        $langShoutbox = app(Language::class)->shoutbox();
         $isStaff = $actor->can(PermissionEnum::SB_MANAGE);
 
         $content = view('shoutbox.index', [

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http;
 
+use App\Support\Config\SiteConfig;
 use App\Support\Globals;
 use App\Support\LegacyAuth;
 use App\Support\Locale;
@@ -60,8 +61,8 @@ final class LegacyScriptContext
             }
 
             $SITENAME = app(Globals::class)->get('SITENAME');
-            $SITEEMAIL = app(Globals::class)->get('SITEEMAIL');
-            $REPORTMAIL = app(Globals::class)->get('REPORTMAIL');
+            $SITEEMAIL = SiteConfig::current()->main->siteEmail();
+            $REPORTMAIL = SiteConfig::current()->main->reportEmail();
             $BASEURL = app(Globals::class)->get('BASEURL');
             $before = get_defined_vars();
             require $langPath;

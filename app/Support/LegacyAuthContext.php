@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Support\Cache\LegacyRedisCache;
+use App\Support\Config\SiteConfig;
 
 /**
  * Context bundle for legacy authentication helpers.
@@ -79,13 +80,13 @@ final class LegacyAuthContext
             queryParams: request()->query(),
             request: array_merge(request()->post(), request()->query()),
             cookies: request()->cookies->all(),
-            maxLoginAttempts: (int) app(Globals::class)->get('maxloginattempts', 0),
-            captchaEnabled: app(Globals::class)->get('iv', '') === 'yes',
+            maxLoginAttempts: SiteConfig::current()->security->maxLoginAttempts(0),
+            captchaEnabled: SiteConfig::current()->security->captchaRequired(),
             registration: [
-                'invitesystem' => (string) app(Globals::class)->get('invitesystem', ''),
-                'registration' => (string) app(Globals::class)->get('registration', ''),
-                'maxusers' => (int) app(Globals::class)->get('maxusers', 0),
-                'maxip' => (int) app(Globals::class)->get('maxip', 0),
+                'invitesystem' => SiteConfig::current()->main->inviteSystem(true) ? 'yes' : 'no',
+                'registration' => SiteConfig::current()->main->registration(true) ? 'yes' : 'no',
+                'maxusers' => SiteConfig::current()->main->maxUsers(0),
+                'maxip' => SiteConfig::current()->security->maxIp(0),
             ],
             langFolder: Input::cookieValue('c_lang_folder'),
             moderatorClass: defined('UC_MODERATOR') ? (int) \constant('UC_MODERATOR') : 0,

@@ -9,6 +9,7 @@ use App\Services\CleanupService;
 use App\Support\CurrentUser;
 use App\Support\Email;
 use App\Support\Globals;
+use App\Support\Language;
 use App\Support\Mail;
 use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
@@ -42,7 +43,7 @@ class SystemMaintenanceController extends LegacyController
         }
 
         $langMailtest = (array) (app(Globals::class)->get('lang_mailtest') ?? []);
-        $langFunctions = (array) (app(Globals::class)->get('lang_functions') ?? []);
+        $langFunctions = app(Language::class)->functions();
 
         if ($request->post('action') === 'sendmail') {
             $email = Email::sanitizeForDisplay((string) trim((string) $request->post('email', '')));

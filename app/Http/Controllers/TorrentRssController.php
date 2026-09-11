@@ -220,10 +220,10 @@ class TorrentRssController extends LegacyController
         $torrentRep = $this->torrentRepository;
         $baseUrl = Http::protocolPrefix(Url::isSecure()).(string) app(Globals::class)->get('BASEURL', '');
         $siteName = (string) app(Globals::class)->get('SITENAME', '');
-        $slogan = (string) app(Globals::class)->get('SLOGAN', '');
-        $siteEmail = (string) app(Globals::class)->get('SITEEMAIL', '');
+        $slogan = SiteConfig::current()->main->slogan();
+        $siteEmail = SiteConfig::current()->main->siteEmail();
         $projectName = (string) app(Globals::class)->get('PROJECTNAME', '');
-        $dateFounded = (string) app(Globals::class)->get('datefounded', '');
+        $dateFounded = SiteConfig::current()->tweak->dateFounded();
         $year = substr($dateFounded, 0, 4);
         $yearFounded = $year !== '' ? $year : '2007';
         $copyright = 'Copyright (c) '.$siteName.' '.(date('Y') !== $yearFounded ? $yearFounded.'-' : '').date('Y').', all rights reserved';

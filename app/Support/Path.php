@@ -133,6 +133,6 @@ final class Path
      */
     public static function categoryFolderForIdWithContext(int|string $cat): string
     {
-        return self::categoryFolderForId($cat, (string) app(Globals::class)->get('CURLANGDIR', ''));
+        return self::categoryFolderForId($cat, Locale::currentLangDir());
     }
 }

@@ -6,6 +6,7 @@ namespace App\Support;
 
 use App\Services\Captcha\CaptchaManager;
 use App\Services\Captcha\Drivers\ImageCaptchaDriver;
+use App\Support\Config\SiteConfig;
 
 /**
  * Legacy captcha helpers extracted from `include/functions.php`.
@@ -103,7 +104,7 @@ final class Captcha
     public static function showImageCode(): void
     {
         $lang_functions = app(Language::class)->functions();
-        $iv = (string) app(Globals::class)->get('iv', '');
+        $iv = SiteConfig::current()->security->captchaRequired() ? 'yes' : 'no';
 
         self::render($iv, [
             'row_security_image' => $lang_functions['row_security_image'] ?? '',

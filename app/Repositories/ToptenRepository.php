@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Support\Config\SiteConfig;
 use App\Support\Globals;
 use App\Support\Settings;
 use Illuminate\Database\Query\Builder;
@@ -17,17 +18,12 @@ final class ToptenRepository
      */
     public function page(int $type, int $limit, ?string $subtype): array
     {
-        if (! in_array($type, [1, 2, 3, 5, 6], true)) {
-            $type = 1;
-        }
-
-        if ($limit < 1 || $limit > 250) {
-            $limit = 10;
-        }
+        $type = in_array($type, [1, 2, 3, 5, 6], true) ? $type : 1;
+        $limit = $limit < 1 || $limit > 250 ? 10 : $limit;
 
         $lang = (array) app(Globals::class)->get('lang_topten', []);
         $enabledDonation = ((string) Settings::get('main.donation', 'no')) === 'yes';
-        $dateFounded = (string) app(Globals::class)->get('datefounded', '');
+        $dateFounded = SiteConfig::current()->tweak->dateFounded();
 
         $sections = match ($type) {
             1 => $this->userSections($limit, $subtype, $lang),

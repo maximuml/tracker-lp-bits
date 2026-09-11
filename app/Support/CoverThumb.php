@@ -6,6 +6,7 @@ namespace App\Support;
 
 use App\Jobs\GenerateCoverThumbnail;
 use App\Support\Cache\LegacyRedisCache;
+use App\Support\Config\SiteConfig;
 
 /**
  * Cover-thumbnail URL resolver extracted from `include/functions.php`.
@@ -64,8 +65,9 @@ final class CoverThumb
      */
     public static function urlWithContext(string $url, int $maxWidth = 240, int $maxHeight = 360, int $quality = 82): string
     {
-        $saveDirectory = (string) app(Globals::class)->get('savedirectory_attachment', '');
-        $httpDirectory = (string) app(Globals::class)->get('httpdirectory_attachment', '');
+        $attachmentConfig = SiteConfig::current()->attachment;
+        $saveDirectory = $attachmentConfig->saveDirectory();
+        $httpDirectory = $attachmentConfig->httpDirectory();
 
         return self::url(
             $url,

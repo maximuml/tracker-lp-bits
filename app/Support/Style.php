@@ -6,6 +6,7 @@ namespace App\Support;
 
 use App\Repositories\StyleRepository;
 use App\Support\Cache\LegacyRedisCache;
+use App\Support\Config\SiteConfig;
 
 /**
  * Legacy stylesheet helpers extracted from `include/functions.php`.
@@ -118,7 +119,7 @@ final class Style
     public static function cssRowWithContext(): ?array
     {
         $user = app(CurrentUser::class)->get() ?? [];
-        $defaultId = (int) app(Globals::class)->get('defcss', 0);
+        $defaultId = self::defaultStylesheetId();
 
         return self::cssRow(app(LegacyRedisCache::class), $user ? $user['stylesheet'] : $defaultId, $defaultId);
     }
@@ -130,7 +131,7 @@ final class Style
     public static function cssUriWithContext(string $file = ''): string
     {
         $user = app(CurrentUser::class)->get() ?? [];
-        $defaultId = (int) app(Globals::class)->get('defcss', 0);
+        $defaultId = self::defaultStylesheetId();
 
         return self::cssUri(app(LegacyRedisCache::class), $user ? $user['stylesheet'] : $defaultId, $defaultId, $file);
     }
@@ -155,7 +156,7 @@ final class Style
     public static function addiCodeWithContext(): string
     {
         $user = app(CurrentUser::class)->get() ?? [];
-        $defaultId = (int) app(Globals::class)->get('defcss', 0);
+        $defaultId = self::defaultStylesheetId();
 
         return self::addiCode(app(LegacyRedisCache::class), $user ? $user['stylesheet'] : $defaultId, $defaultId);
     }
@@ -169,5 +170,20 @@ final class Style
         $user = app(CurrentUser::class)->get() ?? [];
 
         return self::highlightColor($user ? (int) $user['stylesheet'] : null);
+    }
+
+    /**
+     * Resolve the default stylesheet id, matching the `defcss` seeding in
+     * {@see SettingsSeed}: the `main.defstylesheet` setting, falling back
+     * to the first stylesheet row (id 3 when the table is empty).
+     */
+    private static function defaultStylesheetId(): int
+    {
+        $configured = SiteConfig::current()->main->defStylesheet(0);
+        if ($configured !== 0) {
+            return $configured;
+        }
+
+        return app(StyleRepository::class)->firstId() ?? 3;
     }
 }

@@ -12,6 +12,7 @@ use App\Services\ComplainService;
 use App\Support\Captcha;
 use App\Support\CurrentUser;
 use App\Support\Globals;
+use App\Support\Language;
 use App\Support\Network;
 use App\Support\Pagination;
 use App\Support\UserDisplay;
@@ -33,7 +34,7 @@ class SupportController extends LegacyController
         $uid = (int) ($currentUser['id'] ?? 0);
         $isAdmin = Permission::can(PermissionEnum::STAFF_MEMBER);
         $langComplains = (array) (app(Globals::class)->get('lang_complains') ?? []);
-        $langFunctions = (array) (app(Globals::class)->get('lang_functions') ?? []);
+        $langFunctions = app(Language::class)->functions();
 
         if ($uid > 0 && ! $isAdmin) {
             return $this->legacyAbortResponse($langComplains['std_error'] ?? 'Error', 'Permission denied.');

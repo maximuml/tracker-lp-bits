@@ -109,7 +109,7 @@ final class PageLayoutContext
             lang: app(Language::class)->functions(),
             cache: app(LegacyRedisCache::class),
             defaultStylesheet: $main->defStylesheet(0),
-            langDir: (string) app(Globals::class)->get('CURLANGDIR', ''),
+            langDir: Locale::currentLangDir(),
             siteName: $basic->siteName(),
             slogan: $main->slogan(),
             logoMain: $main->logo(),

@@ -6,6 +6,7 @@ namespace App\Support;
 
 use App\Enums\UserClass as UserClassEnum;
 use App\Models\User;
+use App\Support\Config\SiteConfig;
 
 /**
  * Stateless helper for the legacy download-slot ("max slots") tier.
@@ -113,7 +114,7 @@ final class Slots
         return self::display(
             (float) ($user['uploaded'] ?? 0),
             (float) ($user['downloaded'] ?? 0),
-            (string) app(Globals::class)->get('maxdlsystem', ''),
+            SiteConfig::current()->main->maxDlSystem() ? 'yes' : 'no',
             (int) ($user['class'] ?? 0),
             (int) UserClassEnum::VIP->value,
             (string) ($lang['text_slots'] ?? ''),

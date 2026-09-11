@@ -6,7 +6,7 @@ namespace App\Services;
 
 use App\Support\Bonus;
 use App\Support\Cache\LegacyRedisCache;
-use App\Support\Globals;
+use App\Support\Config\SiteConfig;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -86,8 +86,9 @@ final class TorrentBookmarkService
             'userid' => $userId,
         ]);
 
-        $saythanksBonus = (float) app(Globals::class)->get('saythanks_bonus', 0);
-        $receivethanksBonus = (float) app(Globals::class)->get('receivethanks_bonus', 0);
+        $bonusConfig = SiteConfig::current()->bonus;
+        $saythanksBonus = $bonusConfig->sayThanks();
+        $receivethanksBonus = $bonusConfig->receiveThanks();
         Bonus::updatePoints('+', $saythanksBonus, $userId);
         Bonus::updatePoints('+', $receivethanksBonus, $torrentOwner);
 

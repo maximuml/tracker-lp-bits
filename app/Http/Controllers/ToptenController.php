@@ -8,7 +8,7 @@ use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
 use App\Repositories\ToptenRepository;
 use App\Support\CurrentUser;
-use App\Support\Globals;
+use App\Support\Locale;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -33,7 +33,7 @@ class ToptenController extends Controller
         $subtype = $request->query('subtype');
         $subtype = is_string($subtype) ? $subtype : null;
 
-        $langFolder = (string) app(Globals::class)->get('CURLANGDIR', 'en');
+        $langFolder = Locale::currentLangDir('en');
         $cacheKey = "topten_{$type}_{$limit}_{$subtype}_{$langFolder}";
 
         $html = Cache::remember($cacheKey, 3600, function () use ($type, $limit, $subtype) {

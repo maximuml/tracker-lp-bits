@@ -14,6 +14,7 @@ use App\Models\UserModifyLog;
 use App\Models\UsernameChangeLog;
 use App\Repositories\ModtaskRepository;
 use App\Support\Cache;
+use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Globals;
 use App\Support\Http;
@@ -421,7 +422,7 @@ class StaffModerationController extends LegacyController
 
         if ($act === 'newsect') {
             $langs = Locale::languageList('rule_lang', null);
-            $defLang = (string) app(Globals::class)->get('deflang', '');
+            $defLang = SiteConfig::current()->main->defaultLang();
 
             return $this->legacyPage($request, 'modrules', true, [
                 'mode' => 'newsect',

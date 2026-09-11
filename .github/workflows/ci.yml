@@ -157,14 +157,31 @@ jobs:
             sleep 10
           done
 
+  unit-tests-matrix:
+    name: Resolve PHPUnit matrix
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - id: matrix
+        env:
+          EVENT: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT" = "pull_request" ]; then
+            # PRs: only the supported-matrix edges (newest + oldest).
+            echo 'matrix={"php":["8.5","8.4"],"mysql":["9.0","8.0"],"exclude":[{"php":"8.5","mysql":"8.0"},{"php":"8.4","mysql":"9.0"}]}' >> "$GITHUB_OUTPUT"
+          else
+            # Push: full matrix.
+            echo 'matrix={"php":["8.4","8.5"],"mysql":["8.0","9.0"]}' >> "$GITHUB_OUTPUT"
+          fi
+
   unit-tests:
     name: PHPUnit Unit (PHP ${{ matrix.php }}, MySQL ${{ matrix.mysql }})
     runs-on: ubuntu-latest
+    needs: [unit-tests-matrix]
     strategy:
       fail-fast: false
-      matrix:
-        php: ['8.4', '8.5']
-        mysql: ['8.0', '9.0']
+      matrix: ${{ fromJSON(needs.unit-tests-matrix.outputs.matrix) }}
 
     services:
       mysql:
@@ -1068,7 +1085,8 @@ jobs:
   infection-pr:
     name: Mutation testing (PR scope)
     runs-on: ubuntu-latest
-    needs: [coverage]
+    # Generates its own coverage via --map-source-class-to-test; no need
+    # to wait for the coverage job to finish first.
     # W3-04: Run Infection only on changed critical files in PRs.
     # Full-scope mutation testing runs on push to php8 (see infection job).
     # PR scope enforces covered-MSI ≥ 50 on the filtered file set; the
@@ -1205,6 +1223,9 @@ jobs:
     # W8-01: Build the production image and verify the full prod stack
     # starts cleanly from scratch with named volumes, read-only rootfs,
     # non-root UID, and all required services.
+    # Push-only: the prod image build is the slowest smoke and rarely
+    # catches app-code regressions that PR checks miss.
+    if: github.event_name == 'push'
     timeout-minutes: 20
 
     steps:

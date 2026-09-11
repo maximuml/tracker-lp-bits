@@ -111,6 +111,7 @@ class NexusWebUserProvider implements UserProvider
             User::query()->where('id', $user->id)->update([
                 'passhash' => PasswordHasher::hash($password),
                 'passhash_algo' => PasswordHasher::ALGO_ARGON2ID,
+                'must_change_password' => $algo !== PasswordHasher::ALGO_ARGON2ID,
             ]);
         }
     }

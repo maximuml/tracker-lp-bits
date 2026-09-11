@@ -130,6 +130,7 @@ final class UsercpSecurityCommand
             $passhash = PasswordHasher::hash($chpassword);
             $data['passhash'] = $passhash;
             $data['passhash_algo'] = PasswordHasher::ALGO_ARGON2ID;
+            $data['must_change_password'] = 0;
             $authKey = Token::randomHex(20);
             $data['auth_key'] = $authKey;
 
@@ -244,6 +245,7 @@ final class UsercpSecurityCommand
         if ($dto->newPassword !== null && $dto->newPassword !== '') {
             $data['passhash'] = PasswordHasher::hash($dto->newPassword);
             $data['passhash_algo'] = PasswordHasher::ALGO_ARGON2ID;
+            $data['must_change_password'] = 0;
             $data['auth_key'] = Token::randomHex(20);
         }
 

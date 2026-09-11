@@ -344,6 +344,7 @@ class User extends Authenticatable implements FilamentUser, HasName
      * @var array<string, string>
      */
     protected $casts = [
+        'must_change_password' => 'boolean',
         'added' => 'datetime',
         'last_login' => 'datetime',
         'last_access' => 'datetime',

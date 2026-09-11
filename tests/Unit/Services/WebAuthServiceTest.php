@@ -298,4 +298,31 @@ final class WebAuthServiceTest extends TestCase
 
         $this->assertGreaterThan(0, $max);
     }
+
+    // --- plan 2.1: forced password change for legacy-hash logins ---
+
+    public function test_legacy_hash_login_flags_must_change_password(): void
+    {
+        // Factory users are md5 with password '123456'.
+        $user = User::factory()->create();
+
+        $this->assertTrue($this->service()->validatePassword($user, '123456'));
+
+        $fresh = User::query()->findOrFail($user->id);
+        $this->assertSame(PasswordHasher::ALGO_ARGON2ID, $fresh->passhash_algo);
+        $this->assertTrue((bool) $fresh->must_change_password);
+    }
+
+    public function test_argon2id_login_does_not_flag_must_change_password(): void
+    {
+        $password = 'argon2idPassword!';
+        $user = User::factory()->create([
+            'passhash' => PasswordHasher::hash($password),
+            'passhash_algo' => PasswordHasher::ALGO_ARGON2ID,
+        ]);
+
+        $this->assertTrue($this->service()->validatePassword($user, $password));
+
+        $this->assertFalse((bool) $user->fresh()->must_change_password);
+    }
 }

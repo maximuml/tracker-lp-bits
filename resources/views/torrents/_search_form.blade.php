@@ -163,7 +163,7 @@ $browsecatmode = $browsecatmode ?? 0;
 							<table>
 								<tr>
 									<td class="embedded">
-										<input id="searchinput" name="search" type="text" value="{{ $searchstr_ori }}" autocomplete="off" style="width: 200px" oninput="meiliSuggestInput(this.value)" onkeydown="meiliSuggestKey(event)"/>
+										<input id="searchinput" name="search" type="text" value="{{ $searchstr_ori }}" autocomplete="off" style="width: 200px"/>
 										<script src="js/meili_autocomplete.js" type="text/javascript"></script>
 									</td>
 								</tr>

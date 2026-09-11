@@ -21,7 +21,7 @@ use Tests\Attributes\TestCategory;
  *   - @php blocks in views       : 279
  *   - \App\Support\Html:: calls  : 373
  *   - <table> layout tables      : 224
- *   - inline on*= handlers       : 36
+ *   - inline on*= handlers       : 34
  *
  * Each PR that migrates a page to Blade components should reduce one or
  * more of these counts. The baseline constants should be lowered — never
@@ -52,7 +52,7 @@ final class LegacyViewSurfaceTest extends TestCase
     private const BASELINE_TABLE_TAGS = 224;
 
     /** Baseline: inline on*= event handler attributes. */
-    private const BASELINE_INLINE_HANDLERS = 36;
+    private const BASELINE_INLINE_HANDLERS = 34;
 
     public function test_raw_output_count_does_not_exceed_baseline(): void
     {

@@ -14,6 +14,13 @@ function meiliAutoInit()
         return;
     }
 
+    meiliAutoInput.addEventListener('input', function () {
+        meiliSuggestInput(this.value);
+    });
+    meiliAutoInput.addEventListener('keydown', function (e) {
+        meiliSuggestKey(e);
+    });
+
     meiliAutoContainer = document.createElement('div');
     meiliAutoContainer.id = 'meili-autocomplete-container';
     meiliAutoContainer.style.display = 'none';

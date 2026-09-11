@@ -39,7 +39,7 @@ endforeach;
 \App\Support\Html::trSmall($lang_usercp['row_country'] ?? 'Country', "<select name=country>\n".'<option value=0>---- '.htmlspecialchars($personal['selectNoneLabel'])." ----</option>\n".$personal['countryOptions']."\n</select>", 1);
 
 $avatarCell = '<img src='.($CURUSER['avatar'] ?? '' ? "'".htmlspecialchars((string) $CURUSER['avatar'])."'" : "'".htmlspecialchars($personal['defaultAvatarUrl'])."'")." name='avatarimg'><br />
-  <select name=savatar OnChange=\"document.forms[0].avatarimg.src=this.value;this.form.avatar.value=this.value;\">
+  <select name=savatar >
   <option value='".htmlspecialchars((string) ($CURUSER['avatar'] ?? ''))."'>".htmlspecialchars($personal['selectChooseAvatar'])."</option>
   <option value='".htmlspecialchars($personal['defaultAvatarUrl'])."'>".htmlspecialchars($personal['selectNothing'])."</option>
   ".$personal['bitbucketOptions']."

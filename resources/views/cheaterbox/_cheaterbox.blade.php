@@ -32,7 +32,7 @@ foreach ($rows as $row) {
 	);
 }
 ?>
-<tr><td class="colhead" colspan="12" style="text-align: right"><input class=btn type="button" value="<?php echo $lang_functions['input_check_all']; ?>" onClick="this.value=check(form,'<?php echo $lang_functions['input_check_all'] ?>','<?php echo $lang_functions['input_uncheck_all'] ?>')"><input type="submit" name="setdealt" value="<?php echo $lang_cheaterbox['submit_set_dealt']?>" /><input type="submit" name="delete" value="<?php echo $lang_cheaterbox['submit_delete']?>" /></td></tr>
+<tr><td class="colhead" colspan="12" style="text-align: right"><input class=btn type="button" data-checkall data-label-check="<?php echo $lang_functions['input_check_all']; ?>" data-label-uncheck="<?php echo $lang_functions['input_uncheck_all']; ?>" value="<?php echo $lang_functions['input_check_all']; ?>"><input type="submit" name="setdealt" value="<?php echo $lang_cheaterbox['submit_set_dealt']?>" /><input type="submit" name="delete" value="<?php echo $lang_cheaterbox['submit_delete']?>" /></td></tr>
 </form>
 <?php
 print("</table>");

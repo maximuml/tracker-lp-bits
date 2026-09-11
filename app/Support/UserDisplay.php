@@ -298,7 +298,7 @@ final class UserDisplay
      */
     public static function avatarImage(string $url, string $langFolder): string
     {
-        return '<img src="'.$url.'" alt="avatar" width="150px" onload="check_avatar(this, \''.$langFolder.'\');" />';
+        return '<img src="'.$url.'" alt="avatar" width="150px" data-avatar-check="'.$langFolder.'" />';
     }
 
     /**

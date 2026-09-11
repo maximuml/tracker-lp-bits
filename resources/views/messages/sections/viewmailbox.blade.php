@@ -42,7 +42,7 @@ $unreadImg = $row['unread']
 </tr>
 @endforeach
 <tr class="colhead">
-<td colspan="5" align="right" class="colhead"><input class=btn type="button" value="{{ $lang_messages['input_check_all'] ?? 'Check all' }}" onClick="this.value=check(form,'{{ $lang_messages['input_check_all'] ?? 'Check all' }}','{{ $lang_messages['input_uncheck_all'] ?? 'Uncheck all' }}')">
+<td colspan="5" align="right" class="colhead"><input class=btn type="button" data-checkall data-label-check="{{ $lang_messages['input_check_all'] ?? 'Check all' }}" data-label-uncheck="{{ $lang_messages['input_uncheck_all'] ?? 'Uncheck all' }}" value="{{ $lang_messages['input_check_all'] ?? 'Check all' }}">
 @if (! $vm['isSentBox'])
 <input class=btn type="submit" name="markread" value="{{ $lang_messages['submit_mark_as_read'] ?? 'Mark as read' }}">
 @endif

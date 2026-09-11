@@ -13,7 +13,7 @@ $error = (string) ($error ?? '');
     <p align="center"><font class="striking">Cache cleared</font></p>
 @endif
 @if ($error !== '')
-    <p align="center"><font class="striking">{{ htmlspecialchars($error) }}</font></p>
+    <p align="center"><font class="striking">{{ $error }}</font></p>
 @endif
 
 <form method="post" action="clearcache.php">

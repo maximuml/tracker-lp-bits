@@ -20,9 +20,9 @@ $browsecatmode = $browsecatmode ?? 0;
 	<table border="1" class="searchbox" cellspacing="0" cellpadding="5" width="100%">
 		<tbody>
 		<tr>
-		<td class="colhead" align="center" colspan="2"><a href="javascript: klappe_news('searchboxmain')"><img class="plus" src="pic/trans.gif" id="picsearchboxmain" alt="Show/Hide" />{{ $lang_torrents['text_search_box'] ?? '' }}</a></td>
+		<td class="colhead" align="center" colspan="2"><a href="#" data-klappe="searchboxmain"><img class="plus" src="pic/trans.gif" id="picsearchboxmain" alt="Show/Hide" />{{ $lang_torrents['text_search_box'] ?? '' }}</a></td>
 		</tr></tbody>
-		<tbody id="ksearchboxmain" style="display:none">
+		<tbody id="ksearchboxmain" class="nx-hidden">
 		<tr>
 			<td class="rowfollow" align="left">
                 {!! \App\Support\SearchBox::buildCategoryTableWithContext($sectiontype, '1', '?', '?', 0, $__server_QUERY_STRING, ['select_unselect' => true, 'user_notifs' => $CURUSER['notifs'] ?? null]) !!}
@@ -95,7 +95,7 @@ $browsecatmode = $browsecatmode ?? 0;
                     </tr>
                     <tr>
                         <td class="bottom" style="{{ $searchBoxRightTdStyle }}">
-                            <input type="number" min="1" name="size_begin" style="width: {{ $filterInputWidth }}px" value="{{ htmlspecialchars(\request()->query('size_begin') ?? '') }}"/> ~ <input type="number" min="1" name="size_end" style="width: {{ $filterInputWidth }}px" value="{{ htmlspecialchars(\request()->query('size_end') ?? '') }}"/>
+                            <input type="number" min="1" name="size_begin" style="width: {{ $filterInputWidth }}px" value="{{ \request()->query('size_begin') ?? '' }}"/> ~ <input type="number" min="1" name="size_end" style="width: {{ $filterInputWidth }}px" value="{{ \request()->query('size_end') ?? '' }}"/>
                         </td>
                     </tr>
 
@@ -106,7 +106,7 @@ $browsecatmode = $browsecatmode ?? 0;
                     </tr>
                     <tr>
                         <td class="bottom" style="{{ $searchBoxRightTdStyle }}">
-                            <input type="number" min="1" name="seeders_begin" style="width: {{ $filterInputWidth }}px" value="{{ htmlspecialchars(\request()->query('seeders_begin') ?? '') }}"/> ~ <input type="number" min="1" name="seeders_end" style="width: {{ $filterInputWidth }}px" value="{{ htmlspecialchars(\request()->query('seeders_end') ?? '') }}"/>
+                            <input type="number" min="1" name="seeders_begin" style="width: {{ $filterInputWidth }}px" value="{{ \request()->query('seeders_begin') ?? '' }}"/> ~ <input type="number" min="1" name="seeders_end" style="width: {{ $filterInputWidth }}px" value="{{ \request()->query('seeders_end') ?? '' }}"/>
                         </td>
                     </tr>
 
@@ -117,7 +117,7 @@ $browsecatmode = $browsecatmode ?? 0;
                     </tr>
                     <tr>
                         <td class="bottom" style="{{ $searchBoxRightTdStyle }}">
-                            <input type="number" min="1" name="leechers_begin" style="width: {{ $filterInputWidth }}px" value="{{ htmlspecialchars(\request()->query('leechers_begin') ?? '') }}"/> ~ <input type="number" min="1" name="leechers_end" style="width: {{ $filterInputWidth }}px" value="{{ htmlspecialchars(\request()->query('leechers_end') ?? '') }}"/>
+                            <input type="number" min="1" name="leechers_begin" style="width: {{ $filterInputWidth }}px" value="{{ \request()->query('leechers_begin') ?? '' }}"/> ~ <input type="number" min="1" name="leechers_end" style="width: {{ $filterInputWidth }}px" value="{{ \request()->query('leechers_end') ?? '' }}"/>
                         </td>
                     </tr>
 
@@ -128,7 +128,7 @@ $browsecatmode = $browsecatmode ?? 0;
                     </tr>
                     <tr>
                         <td class="bottom" style="{{ $searchBoxRightTdStyle }}">
-                            <input type="number" min="1" name="times_completed_begin" style="width: {{ $filterInputWidth }}px" value="{{ htmlspecialchars(\request()->query('times_completed_begin') ?? '') }}"/> ~ <input type="number" min="1" name="times_completed_end" style="width: {{ $filterInputWidth }}px" value="{{ htmlspecialchars(\request()->query('times_completed_end') ?? '') }}"/>
+                            <input type="number" min="1" name="times_completed_begin" style="width: {{ $filterInputWidth }}px" value="{{ \request()->query('times_completed_begin') ?? '' }}"/> ~ <input type="number" min="1" name="times_completed_end" style="width: {{ $filterInputWidth }}px" value="{{ \request()->query('times_completed_end') ?? '' }}"/>
                         </td>
                     </tr>
 

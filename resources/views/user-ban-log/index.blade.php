@@ -15,7 +15,7 @@ $paginationBottom = (string) ($paginationBottom ?? '');
     <form id="filterForm" action="{{ $__server_REQUEST_URI }}" method="get">
         <input id="q" type="text" name="q" value="{{ $q }}" placeholder="username">
         <input type="submit">
-        <input type="reset" onclick="document.getElementById('q').value='';document.getElementById('filterForm').submit();">
+        <input type="reset" class="js-filter-reset">
     </form>
 </div>
 

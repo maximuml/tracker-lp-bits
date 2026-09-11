@@ -55,7 +55,7 @@ final class Attachment
         $onclick = $imageResizer ? ' data-zoomable data-zoom-src="'.htmlspecialchars($url).'"' : '';
         $tooltip = htmlspecialchars("<strong>$sizeLabel</strong>: $sizeText<br />$timeText");
 
-        return '<img id="attach'.$id.'" style="max-width: 700px" alt="'.htmlspecialchars($filename).'" src="'.htmlspecialchars($url).'"'.$onclick.' onmouseover="domTT_activate(this, event, \'content\', \''.$tooltip.'\', \'styleClass\', \'attach\', \'x\', findPosition(this)[0], \'y\', findPosition(this)[1]-58);" />';
+        return '<img id="attach'.$id.'" style="max-width: 700px" alt="'.htmlspecialchars($filename).'" src="'.htmlspecialchars($url).'"'.$onclick.' data-domtt-promo="'.$tooltip.'" />';
     }
 
     /**

@@ -188,7 +188,7 @@ final class ForumListingService
                     $lptext = Format::formatComment(mb_substr((string) ($arr['body'] ?? ''), 0, 100, 'UTF-8').(mb_strlen((string) ($arr['body'] ?? ''), 'UTF-8') > 100 ? ' ......' : ''), true, false, false, true, 600, false, false);
                     $lastpost_tooltip[$counter]['id'] = 'lastpost_'.$counter;
                     $lastpost_tooltip[$counter]['content'] = ($lang['text_last_posted_by'] ?? '').$lpusername.$lastposttime.'<br />'.$lptext;
-                    $onmouseover = "onmouseover=\"domTT_activate(this, event, 'content', document.getElementById('".$lastpost_tooltip[$counter]['id']."'), 'trail', false,'lifetime', 5000,'styleClass','niceTitle','fadeMax', 87,'maxWidth', 400);\"";
+                    $onmouseover = ' data-domtt-src="'.$lastpost_tooltip[$counter]['id'].'"';
                 }
 
                 $arr = Forum::postRowWithContext((int) $topicarr['firstpost']);
@@ -229,8 +229,8 @@ final class ForumListingService
             echo '</td>';
             ?>
 <td align="left" colspan="3">
-<span id="order" onclick="dropmenu(this);"><span style="cursor: pointer;"><b><?php echo $lang['text_order'] ?? '' ?></b></span>
-<span id="orderlist" class="dropmenu" style="display: none"><ul>
+<span id="order" style="cursor:pointer"><span style="cursor: pointer;"><b><?php echo $lang['text_order'] ?? '' ?></b></span>
+<span id="orderlist" class="dropmenu nx-hidden"><ul>
 <li><a href="?action=viewforum&amp;forumid=<?php echo $forumid.$addparam ?>&amp;sort=firstpostdesc"><?php echo $lang['text_topic_desc'] ?? '' ?></a></li>
 <li><a href="?action=viewforum&amp;forumid=<?php echo $forumid.$addparam ?>&amp;sort=firstpostasc"><?php echo $lang['text_topic_asc'] ?? '' ?></a></li>
 <li><a href="?action=viewforum&amp;forumid=<?php echo $forumid.$addparam ?>&amp;sort=lastpostdesc"><?php echo $lang['text_post_desc'] ?? '' ?></a></li>

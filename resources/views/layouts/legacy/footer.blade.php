@@ -12,5 +12,5 @@
 {!! $value !!}
 @endforeach
 {!! $jsBlock !!}
-<img id="nexus-preview" alt="" role="presentation" style="display: none; position: absolute" src="" />
+<img id="nexus-preview" alt="" role="presentation" class="nx-hidden" style="position: absolute" src="" />
 </body></html>

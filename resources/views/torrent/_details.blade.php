@@ -52,7 +52,7 @@ if (empty($requestFlags['cmtpage'])) {
         if ($row['approval_status'] == \App\Enums\TorrentApprovalStatus::DENY->value && $denyLog !== null) {
             $dangerIcon = '<svg t="1655242121471" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="46590" width="16" height="16"><path d="M963.555556 856.888889a55.978667 55.978667 0 0 1-55.978667 56.007111c-0.284444 0-0.540444-0.085333-0.824889-0.085333l-0.056889 0.085333H110.734222l-0.654222-1.137778A55.409778 55.409778 0 0 1 56.888889 856.462222c0-9.756444 2.730667-18.773333 7.139555-26.737778l-3.726222-6.599111L453.461333 156.302222A59.335111 59.335111 0 0 1 510.236444 113.777778c26.936889 0 49.436444 18.005333 56.803556 42.552889l389.973333 661.447111-3.669333 6.997333c6.4 9.102222 10.211556 20.138667 10.211556 32.113778z m-497.777778-541.326222l16.014222 312.888889h56.888889l16.014222-312.888889h-88.917333z m44.458666 398.222222a56.888889 56.888889 0 1 0-0.028444 113.749333 56.888889 56.888889 0 0 0 0.028444-113.749333z" p-id="46591" fill="#d81e06" data-spm-anchor-id="a313x.7781069.0.i61" class="selected"></path></svg>';
             printf(
-                '<div style="display: flex; justify-content: center;margin-bottom: 10px"><div style="display: flex;background-color: black; color: white;font-weight: bold; padding: 10px 100px">%s&nbsp;%s</div></div>',
+                '<div class="nx-flex-center" style="margin-bottom: 10px"><div style="background-color: black; color: white;font-weight: bold; padding: 10px 100px">%s&nbsp;%s</div></div>',
                 $dangerIcon, \App\Support\Locale::trans('torrent.approval.deny_comment_show', ['reason' => $denyLog->comment], null)
             );
         }
@@ -106,7 +106,7 @@ if (empty($requestFlags['cmtpage'])) {
         if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_APPROVAL) && (\App\Support\Config\SiteConfig::current()->torrent->approvalStatusIconEnabled() || !\App\Support\Config\SiteConfig::current()->torrent->approvalStatusNoneVisible())) {
             $approvalIcon = '<svg t="1655224943277" class="icon" viewBox="0 0 1397 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="45530" width="16" height="16"><path d="M1396.363636 121.018182c0 0-223.418182 74.472727-484.072727 372.363636-242.036364 269.963636-297.890909 381.672727-390.981818 530.618182C512 1014.690909 372.363636 744.727273 0 549.236364l195.490909-186.181818c0 0 176.872727 121.018182 297.890909 344.436364 0 0 307.2-474.763636 902.981818-707.490909L1396.363636 121.018182 1396.363636 121.018182zM1396.363636 121.018182" p-id="45531" fill="#e78d0f"></path></svg>';
             $actions[] = sprintf(
-                '<a href="javascript:;"><b><font id="approval" class="small approval" data-torrent_id="%s">%s&nbsp;%s</font></b></a>',
+                '<a href="#"><b><font id="approval" class="small approval" data-torrent_id="%s">%s&nbsp;%s</font></b></a>',
                 $row['id'], $approvalIcon, $lang_details['action_approval']
             );
             $title = \App\Support\Locale::trans('torrent.approval.modal_title', [], null);
@@ -141,7 +141,7 @@ JS;
         }
 
 		if ($CURUSER['showdescription'] != 'no' && !empty($descr)){
-            \App\Support\Html::tr("<a href=\"javascript: klappe_news('descr')\"><span class=\"nowrap\"><img class=\"minus\" src=\"pic/trans.gif\" alt=\"Show/Hide\" id=\"picdescr\" title=\"".($lang_details['title_show_or_hide'] ?? '')."\" /> ".$lang_details['row_description']."</span></a>", "<div id='kdescr'>".$descr."</div>", 1);
+            \App\Support\Html::tr("<a href=\"#\" data-klappe=\"descr\"><span class=\"nowrap\"><img class=\"minus\" src=\"pic/trans.gif\" alt=\"Show/Hide\" id=\"picdescr\" title=\"".($lang_details['title_show_or_hide'] ?? '')."\" /> ".$lang_details['row_description']."</span></a>", "<div id='kdescr'>".$descr."</div>", 1);
 		}
 
 
@@ -149,7 +149,7 @@ JS;
 		if ($row["type"] == "multi")
 		{
 			$files_info = "<b>".$lang_details['text_num_files']."</b>". $row["numfiles"] . $lang_details['text_files'] . "<br />";
-			$files_info .= "<span id=\"showfl\"><a href=\"javascript: viewfilelist(".$id.")\" >".$lang_details['text_see_full_list']."</a></span><span id=\"hidefl\" style=\"display: none;\"><a href=\"javascript: hidefilelist()\">".$lang_details['text_hide_list']."</a></span>";
+			$files_info .= "<span id=\"showfl\"><a href=\"#\" data-filelist=\"".$id."\">".$lang_details['text_see_full_list']."</a></span><span id=\"hidefl\" class=\"nx-hidden\"><a href=\"#\" data-filelist=\"".$id."\" data-filelist-mode=\"hide\">".$lang_details['text_hide_list']."</a></span>";
 		}
 		function hex_esc($matches) {
 			return sprintf("%02x", ord($matches[0]));
@@ -165,7 +165,7 @@ JS;
         \App\Support\Html::tr($lang_details['row_torrent_info'], "<table><tr>" . implode("", $infoTds) . "</tr></table><span id='filelist'></span>",1);
 		\App\Support\Html::tr($lang_details['row_hot_meter'], "<table><tr><td class=\"no_border_wide\"><b>" . $lang_details['text_views']."</b>". $row["views"] . "</td><td class=\"no_border_wide\"><b>" . $lang_details['text_hits']. "</b>" . $row["hits"] . "</td><td class=\"no_border_wide\"><b>" .$lang_details['text_snatched'] . "</b><a href=\"viewsnatches.php?id=".$id."\"><b>" . $row["times_completed"]. $lang_details['text_view_snatches'] . "</td><td class=\"no_border_wide\"><b>" . $lang_details['row_last_seeder']. "</b>" . \App\Support\Time::format($row["last_action"]) . "</td></tr></table>",1);
 
-		\App\Support\Html::tr("<span id=\"seeders\"></span><span id=\"leechers\"></span>".$lang_details['row_peers']."<br /><span id=\"showpeer\"><a href=\"javascript: viewpeerlist(".$row['id'].");\" class=\"sublink\">".$lang_details['text_see_full_list']."</a></span><span id=\"hidepeer\" style=\"display: none;\"><a href=\"javascript: hidepeerlist();\" class=\"sublink\">".$lang_details['text_hide_list']."</a></span>", "<div id=\"peercount\"><b>".$row['seeders'].$lang_details['text_seeders'].\App\Support\Strings::addS($row['seeders'])."</b> | <b>".$row['leechers'].$lang_details['text_leechers'].\App\Support\Strings::addS($row['leechers'])."</b></div><div id=\"peerlist\"></div>" , 1);
+		\App\Support\Html::tr("<span id=\"seeders\"></span><span id=\"leechers\"></span>".$lang_details['row_peers']."<br /><span id=\"showpeer\"><a href=\"#\" data-peerlist=\"".$row['id']."\" class=\"sublink\">".$lang_details['text_see_full_list']."</a></span><span id=\"hidepeer\" class=\"nx-hidden\"><a href=\"#\" data-peerlist=\"".$row['id']."\" data-peerlist-mode=\"hide\" class=\"sublink\">".$lang_details['text_hide_list']."</a></span>", "<div id=\"peercount\"><b>".$row['seeders'].$lang_details['text_seeders'].\App\Support\Strings::addS($row['seeders'])."</b> | <b>".$row['leechers'].$lang_details['text_leechers'].\App\Support\Strings::addS($row['leechers'])."</b></div><div id=\"peerlist\"></div>" , 1);
 		if ($requestFlags['dllist'] ?? false)
 		{
 			$scronload = "viewpeerlist(".$row['id'].")";
@@ -213,7 +213,7 @@ echo "</script>";
                         $magic_button_id = 'magic_value_'.$key;
                         $each_temp_font = '<font style="font-size:8pt;padding-right:5px;">'.('+'.$each_temp).'</font>';
                         $error_bonus_message = $lang_details['magic_have_no_enough_bonus_value'];
-                        $button_name = "<li onclick=\"saveMagicValue(".$id.",$each_temp);\">".$each_temp_font."</li>";
+                        $button_name = "<li data-torrent-id=\"".$id."\" data-magic-value=\"".$each_temp."\" style=\"cursor:pointer\">".$each_temp_font."</li>";
 
                         $magic_value_button .= $button_name;
                     }
@@ -222,7 +222,7 @@ echo "</script>";
         }
 
         $span_description = $lang_details['span_description_have_given'];
-        $span = '<input class="btn" type="button" id="magic_add" style="display:none" value="'.$span_description.'" disabled="disabled" />&nbsp;';
+        $span = '<input class="btn nx-hidden" type="button" id="magic_add" value="'.$span_description.'" disabled="disabled" />&nbsp;';
         $whether_have_give_value = 0;
         $give_value = array();
         $no_give = "";
@@ -268,18 +268,18 @@ echo "</script>";
             if(count($give_value) > $show_list_new_number){
                 $show_list .= '<span id="ellipsis">&nbsp;......&nbsp;</span>';
                 $show_all_description = '['.$lang_details['magic_show_all_description'].']';
-                $show_all = '<a herf="#" style="cursor:pointer" onclick="displayOtherUserList()">'.$show_all_description.'</a>'.'<br/>';
+                $show_all = '<a href="#" id="magic_show_all" style="cursor:pointer">'.$show_all_description.'</a>'.'<br/>';
                 $other_user_list = array_slice($give_value, $show_list_new_number, count($give_value));
                 foreach($other_user_list as $each){
                     $other_user_str .= $each.'  ';
                 }
-                $other_user_span = '<span id="other_user_list" style="display:none">'.$other_user_str.'</span>';
+                $other_user_span = '<span id="other_user_list" class="nx-hidden">'.$other_user_str.'</span>';
             }
         }else{
             $show_list_description = null;
             $haveGotBonus = $no_give;
         }
-        $current_user_magic = "<span id='current_user_magic' style='display:none'>".$currentUserHtml."</span>&nbsp;";
+        $current_user_magic = "<span id='current_user_magic' class='nx-hidden'>".$currentUserHtml."</span>&nbsp;";
         $haveGotBonus = $lang_details['magic_haveGotBonus'].'&nbsp';
         $spanSumAll = '<span id="spanSumAll">'.$sum_value.'</span>';
         $haveGotBonus = str_replace('Number',$spanSumAll,$haveGotBonus);
@@ -315,8 +315,8 @@ echo "</script>";
 			$buttonvalue = " value=\"".$lang_details['submit_you_said_thanks']."\" disabled=\"disabled\"";
 			$thanksby = $currentUserHtml." ".$thanksby;
 		}
-		$thanksbutton = "<input class=\"btn\" type=\"button\" id=\"saythanks\"  onclick=\"saythanks(".$torrentid.");\" ".$buttonvalue." />";
-		\App\Support\Html::tr($lang_details['row_thanks_by'],"<span id=\"thanksadded\" style=\"display: none;\"><input class=\"btn\" type=\"button\" value=\"".$lang_details['text_thanks_added']."\" disabled=\"disabled\" /></span><span id=\"curuser\" style=\"display: none;\">".$currentUserHtml." </span><span id=\"thanksbutton\">".$thanksbutton."</span>&nbsp;&nbsp;<span id=\"nothanks\">".$nothanks."</span><span id=\"addcuruser\"></span>".$thanksby.($thanks_all < $thanksCount ? $lang_details['text_and_more'].$thanksCount.$lang_details['text_users_in_total'] : ""),1);
+		$thanksbutton = "<input class=\"btn\" type=\"button\" id=\"saythanks\" data-torrent-id=\"".$torrentid."\" ".$buttonvalue." />";
+		\App\Support\Html::tr($lang_details['row_thanks_by'],"<span id=\"thanksadded\" class=\"nx-hidden\"><input class=\"btn\" type=\"button\" value=\"".$lang_details['text_thanks_added']."\" disabled=\"disabled\" /></span><span id=\"curuser\" class=\"nx-hidden\">".$currentUserHtml." </span><span id=\"thanksbutton\">".$thanksbutton."</span>&nbsp;&nbsp;<span id=\"nothanks\">".$nothanks."</span><span id=\"addcuruser\"></span>".$thanksby.($thanks_all < $thanksCount ? $lang_details['text_and_more'].$thanksCount.$lang_details['text_users_in_total'] : ""),1);
 		// ------------- end thanked-by block--------------//
 
 		print("</table>\n");

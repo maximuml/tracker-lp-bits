@@ -38,7 +38,7 @@ $sendBtnDisabled = (string) ($sendBtnDisabled ?? '');
         $preUsernameTr = $preUsernameTr ?? '';
         $invitation_body = $invitation_body ?? sprintf($lang_invite['text_invitation_body'] ?? '', $SITENAME).($CURUSER['username'] ?? '');
     @endphp
-    <form method=post action=takeinvite.php?id={{ htmlspecialchars((string) $id) }}>
+    <form method=post action=takeinvite.php?id={{ (string) $id }}>
     <table border=1 width=100% cellspacing=0 cellpadding=5>
     <tr align=center><td colspan=2><b>{{ $lang_invite['text_invite_someone'] ?? '' }}{{ $SITENAME }} ({{ $inv['invites'] ?? 0 }}{{ $lang_invite['text_invitation'] ?? '' }}{{ $_s }}{{ $lang_invite['text_left'] ?? '' }} + {{ sprintf($lang_invite['text_temporary_left'] ?? '%d', count($temporaryInvites)) }})</b></td></tr>
     <tr><td class="rowhead nowrap" valign="top" align="right">{{ $lang_invite['text_email_address'] ?? '' }}</td><td align=left><input type=text size=40 name=email><br /><font align=left class=small>{{ $lang_invite['text_email_address_note'] ?? '' }}</font></td></tr>
@@ -55,7 +55,7 @@ $sendBtnDisabled = (string) ($sendBtnDisabled ?? '');
     <li{{ $menuSelected == 'sent' ? ' class=selected' : '' }}><a href="?id={{ $id }}&menu=sent">{{ $lang_invite['text_sent_invites_status'] ?? '' }}</a></li>
     <li{{ $menuSelected == 'tmp' ? ' class=selected' : '' }}><a href="?id={{ $id }}&menu=tmp">{{ $lang_invite['text_tmp_status'] ?? '' }}</a></li>
     @if (($CURUSER['id'] ?? 0) == $id)
-        </ul><form style='position: absolute;top:0;right:0' method=post action=invite.php?id={{ htmlspecialchars((string) $id) }}&type=new><input type=submit{{ $sendBtnDisabled }} value='{{ $sendBtnText }}'></form></div>
+        </ul><form style='position: absolute;top:0;right:0' method=post action=invite.php?id={{ (string) $id }}&type=new><input type=submit{{ $sendBtnDisabled }} value='{{ $sendBtnText }}'></form></div>
     @else
         </ul></div>
     @endif
@@ -97,7 +97,7 @@ $sendBtnDisabled = (string) ($sendBtnDisabled ?? '');
             </form>
         </div>
         <table border=1 width=100% cellspacing=0 cellpadding=5>
-        <form method=post action=takeconfirm.php?id={{ htmlspecialchars((string) $id) }}>
+        <form method=post action=takeconfirm.php?id={{ (string) $id }}>
 
         @if (! $inviteeCount)
             <tr><td colspan=7 align=center>{{ $lang_invite['text_no_invites'] ?? '' }}</tr>

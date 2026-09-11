@@ -115,16 +115,16 @@ final class Shoutbox
         $emoji = $lang['toolbar_emoji'] ?? 'emoji';
 
         $html = '<div class="shoutbox-toolbar">';
-        $html .= '<button type="button" class="btn shoutbox-tool" onclick="shoutboxWrap(\'b\', \''.$formName.'\', \''.$fieldName.'\')" title="[b]"><b>'.$b.'</b></button>';
-        $html .= '<button type="button" class="btn shoutbox-tool" onclick="shoutboxWrap(\'i\', \''.$formName.'\', \''.$fieldName.'\')" title="[i]"><i>'.$i.'</i></button>';
-        $html .= '<button type="button" class="btn shoutbox-tool" onclick="shoutboxSpoiler(\''.$formName.'\', \''.$fieldName.'\')" title="[spoiler]">'.$spoiler.'</button>';
-        $html .= '<button type="button" class="btn shoutbox-tool" onclick="shoutboxWrap(\'code\', \''.$formName.'\', \''.$fieldName.'\')" title="[code]">'.$code.'</button>';
-        $html .= '<button type="button" class="btn shoutbox-tool" onclick="shoutboxQuote(\''.$formName.'\', \''.$fieldName.'\')" title="[quote]">'.$quote.'</button>';
-        $html .= '<button type="button" class="btn shoutbox-tool" onclick="shoutboxLink(\''.$formName.'\', \''.$fieldName.'\')" title="[url]">'.$link.'</button>';
-        $html .= '<button type="button" class="btn shoutbox-tool" onclick="shoutboxToggleEmoji(\''.$formName.'\', \''.$fieldName.'\')" title="Emoji">'.$emoji.'</button>';
+        $html .= '<button type="button" class="btn shoutbox-tool" data-shout-tool="wrap" data-tag="b" data-form="'.$formName.'" data-field="'.$fieldName.'" title="[b]"><b>'.$b.'</b></button>';
+        $html .= '<button type="button" class="btn shoutbox-tool" data-shout-tool="wrap" data-tag="i" data-form="'.$formName.'" data-field="'.$fieldName.'" title="[i]"><i>'.$i.'</i></button>';
+        $html .= '<button type="button" class="btn shoutbox-tool" data-shout-tool="spoiler" data-form="'.$formName.'" data-field="'.$fieldName.'" title="[spoiler]">'.$spoiler.'</button>';
+        $html .= '<button type="button" class="btn shoutbox-tool" data-shout-tool="wrap" data-tag="code" data-form="'.$formName.'" data-field="'.$fieldName.'" title="[code]">'.$code.'</button>';
+        $html .= '<button type="button" class="btn shoutbox-tool" data-shout-tool="quote" data-form="'.$formName.'" data-field="'.$fieldName.'" title="[quote]">'.$quote.'</button>';
+        $html .= '<button type="button" class="btn shoutbox-tool" data-shout-tool="link" data-form="'.$formName.'" data-field="'.$fieldName.'" title="[url]">'.$link.'</button>';
+        $html .= '<button type="button" class="btn shoutbox-tool" data-shout-tool="emoji" data-form="'.$formName.'" data-field="'.$fieldName.'" title="Emoji">'.$emoji.'</button>';
         $html .= '</div>';
 
-        $html .= '<div id="'.$panelId.'" class="shoutbox-emoji-panel" style="display:none">';
+        $html .= '<div id="'.$panelId.'" class="shoutbox-emoji-panel nx-hidden">';
         $html .= Smilies::quickRow($formName, $fieldName);
         $html .= '</div>';
 
@@ -216,10 +216,10 @@ final class Shoutbox
         $delLabel = $lang['text_del'] ?? 'del';
         $html = '<span class="shout-actions">';
         if ($canEdit) {
-            $html .= ' <a href="javascript:void(0)" class="shout-action-edit" onclick="shoutboxEdit('.$msgId.')" title="'.htmlspecialchars((string) ($lang['title_edit_shout'] ?? 'Edit'), ENT_QUOTES).'">['.htmlspecialchars($editLabel).']</a>';
+            $html .= ' <a href="#" class="shout-action-edit" data-shout-edit="'.$msgId.'" title="'.htmlspecialchars((string) ($lang['title_edit_shout'] ?? 'Edit'), ENT_QUOTES).'">['.htmlspecialchars($editLabel).']</a>';
         }
         if ($canDelete) {
-            $html .= ' <a href="javascript:void(0)" class="shout-action-del" onclick="shoutboxDelete('.$msgId.')" title="'.htmlspecialchars((string) ($lang['title_delete_shout'] ?? 'Delete'), ENT_QUOTES).'">['.htmlspecialchars($delLabel).']</a>';
+            $html .= ' <a href="#" class="shout-action-del" data-shout-del="'.$msgId.'" title="'.htmlspecialchars((string) ($lang['title_delete_shout'] ?? 'Delete'), ENT_QUOTES).'">['.htmlspecialchars($delLabel).']</a>';
         }
         $html .= '</span>';
 
@@ -282,15 +282,14 @@ final class Shoutbox
             $active = in_array($emoji, $myReactions, true) ? ' active' : '';
             $encoded = (string) json_encode($emoji, JSON_UNESCAPED_UNICODE);
             $title = self::buildReactorTooltip($cnt, $reactors[$emoji] ?? []);
-            $html .= '<button type="button" class="shout-reaction'.$active.'" onclick="shoutboxReact('.$shoutId.', '.htmlspecialchars($encoded, ENT_QUOTES, 'UTF-8').')" title="'.htmlspecialchars($title, ENT_QUOTES, 'UTF-8').'">'.$emoji.' '.$cnt.'</button>';
+            $html .= '<button type="button" class="shout-reaction'.$active.'" data-shout-react="'.$shoutId.'" data-emoji="'.htmlspecialchars($emoji, ENT_QUOTES, 'UTF-8').'" title="'.htmlspecialchars($title, ENT_QUOTES, 'UTF-8').'">'.$emoji.' '.$cnt.'</button>';
         }
 
         if ($currentUserId > 0) {
-            $html .= '<button type="button" class="shout-reaction shout-reaction-add" onclick="shoutboxToggleReactionPicker('.$shoutId.')" title="'.htmlspecialchars($titleAdd, ENT_QUOTES, 'UTF-8').'">+</button>';
-            $html .= '<span class="shout-reaction-picker" id="shout-reaction-picker-'.$shoutId.'" style="display:none">';
+            $html .= '<button type="button" class="shout-reaction shout-reaction-add" data-shout-picker="'.$shoutId.'" title="'.htmlspecialchars($titleAdd, ENT_QUOTES, 'UTF-8').'">+</button>';
+            $html .= '<span class="shout-reaction-picker nx-hidden" id="shout-reaction-picker-'.$shoutId.'">';
             foreach (self::REACTIONS as $emoji) {
-                $encoded = (string) json_encode($emoji, JSON_UNESCAPED_UNICODE);
-                $html .= '<button type="button" class="shout-reaction" onclick="shoutboxReact('.$shoutId.', '.htmlspecialchars($encoded, ENT_QUOTES, 'UTF-8').'); shoutboxToggleReactionPicker('.$shoutId.')" title="'.htmlspecialchars($titleReact, ENT_QUOTES, 'UTF-8').'">'.$emoji.'</button>';
+                $html .= '<button type="button" class="shout-reaction" data-shout-react="'.$shoutId.'" data-emoji="'.htmlspecialchars($emoji, ENT_QUOTES, 'UTF-8').'" data-close-picker="'.$shoutId.'" title="'.htmlspecialchars($titleReact, ENT_QUOTES, 'UTF-8').'">'.$emoji.'</button>';
             }
             $html .= '</span>';
         }
@@ -366,9 +365,7 @@ final class Shoutbox
                     $title = ' title="'.htmlspecialchars((string) $shoutboxLang['tooltip_nick_reply'], ENT_QUOTES).'"';
                 }
                 if ($currentUserId > 0) {
-                    $onclick = 'return shoutReply('.htmlspecialchars((string) json_encode($name, JSON_UNESCAPED_UNICODE), ENT_QUOTES).')';
-
-                    return '<a class="'.$cls.'" href="userdetails.php?id='.$cache[$key]['id'].'" onclick="'.$onclick.'"'.$title.'>@'.htmlspecialchars($name).'</a>';
+                    return '<a class="'.$cls.' shout-nick-reply" href="userdetails.php?id='.$cache[$key]['id'].'" data-nick="'.htmlspecialchars($name, ENT_QUOTES).'"'.$title.'>@'.htmlspecialchars($name).'</a>';
                 }
 
                 return '<a class="'.$cls.'" href="userdetails.php?id='.$cache[$key]['id'].'">@'.htmlspecialchars($name).'</a>';

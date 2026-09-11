@@ -36,7 +36,7 @@ if ($mode === 'list'):
             <?php endforeach; ?>
             <tr>
                 <td class=rowfollow align=right colspan=5>
-                    <input type="button" value="<?php echo $lang_functions['input_check_all'] ?? 'Check all'; ?>" onclick="this.value=check(form, '<?php echo $lang_functions['input_check_all'] ?? 'Check all'; ?>', '<?php echo $lang_functions['input_uncheck_all'] ?? 'Uncheck all'; ?>')"/>
+                    <input type="button" data-checkall data-label-check="<?php echo $lang_functions['input_check_all'] ?? 'Check all'; ?>" data-label-uncheck="<?php echo $lang_functions['input_uncheck_all'] ?? 'Uncheck all'; ?>" value="<?php echo $lang_functions['input_check_all'] ?? 'Check all'; ?>"/>
                     <input type="submit" name="setdealt" value="<?php echo $lang_staffbox['submit_set_answered'] ?? 'Set answered'; ?>" />
                     <input type="submit" name="delete" value="<?php echo $lang_staffbox['submit_delete'] ?? 'Delete'; ?>" />
                 </td>

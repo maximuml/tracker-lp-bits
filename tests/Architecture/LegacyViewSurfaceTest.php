@@ -52,7 +52,7 @@ final class LegacyViewSurfaceTest extends TestCase
     private const BASELINE_TABLE_TAGS = 224;
 
     /** Baseline: inline on*= event handler attributes. */
-    private const BASELINE_INLINE_HANDLERS = 34;
+    private const BASELINE_INLINE_HANDLERS = 0;
 
     public function test_raw_output_count_does_not_exceed_baseline(): void
     {

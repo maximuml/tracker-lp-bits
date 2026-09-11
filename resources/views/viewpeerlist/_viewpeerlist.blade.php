@@ -47,7 +47,7 @@ if (! function_exists('get_location_column')) {
             $result = $location;
         }
 
-        return "<td class=rowfollow align=left width=1%><div style='display: flex;white-space: nowrap;align-items: center'>" . $result . '</div></td>';
+        return "<td class=rowfollow align=left width=1%><div class='nx-flex' style='white-space: nowrap;align-items: center'>" . $result . '</div></td>';
     }
 }
 

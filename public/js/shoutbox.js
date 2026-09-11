@@ -232,3 +232,95 @@ function shoutboxInitSSE(type, lastId) {
         if (typeof schedulePoll === 'function') { schedulePoll(); }
     }
 }
+
+// Init (replaces CSP-blocked <body onload>) + delegated handlers for
+// nick-reply links and avatar fallbacks (replacing inline on*=).
+document.addEventListener('DOMContentLoaded', function () {
+    if (typeof SHOUT_TYPE !== 'undefined') {
+        try { if (typeof startcountdown === 'function') { startcountdown(SHOUT_REFRESH); } } catch (e) {}
+        try { if (typeof shoutboxInitSSE === 'function') { shoutboxInitSSE(SHOUT_TYPE, SHOUT_LASTID); } } catch (e) {}
+        try { if (typeof shoutAttachToggleHandler === 'function') { shoutAttachToggleHandler(); } } catch (e) {}
+    }
+});
+
+document.addEventListener('click', function (e) {
+    var link = e.target && e.target.closest ? e.target.closest('a.shout-nick-reply') : null;
+    if (link) {
+        if (typeof shoutReply === 'function') { shoutReply(link.getAttribute('data-nick') || ''); }
+        e.preventDefault();
+    }
+});
+
+document.addEventListener('error', function (e) {
+    var img = e.target;
+    if (img && img.tagName === 'IMG' && img.classList && img.classList.contains('shout-avatar')) {
+        var fb = img.getAttribute('data-fallback');
+        if (fb && img.src.indexOf(fb) === -1) { img.src = fb; }
+    }
+}, true);
+
+// Toolbar + reaction delegated bindings (CSP-safe replacements for the
+// inline onclick handlers previously emitted by Shoutbox::toolbar()
+// and renderReactions()).
+document.addEventListener('click', function (e) {
+    var t = e.target;
+    if (!t || !t.closest) { return; }
+
+    var tool = t.closest('button[data-shout-tool]');
+    if (tool) {
+        var kind = tool.getAttribute('data-shout-tool');
+        var form = tool.getAttribute('data-form');
+        var field = tool.getAttribute('data-field');
+        if (kind === 'wrap' && typeof shoutboxWrap === 'function') {
+            shoutboxWrap(tool.getAttribute('data-tag'), form, field);
+        } else if (kind === 'spoiler' && typeof shoutboxSpoiler === 'function') {
+            shoutboxSpoiler(form, field);
+        } else if (kind === 'quote' && typeof shoutboxQuote === 'function') {
+            shoutboxQuote(form, field);
+        } else if (kind === 'link' && typeof shoutboxLink === 'function') {
+            shoutboxLink(form, field);
+        } else if (kind === 'emoji' && typeof shoutboxToggleEmoji === 'function') {
+            shoutboxToggleEmoji(form, field);
+        }
+        e.preventDefault();
+        return;
+    }
+
+    var react = t.closest('button[data-shout-react]');
+    if (react) {
+        if (typeof shoutboxReact === 'function') {
+            shoutboxReact(parseInt(react.getAttribute('data-shout-react'), 10), react.getAttribute('data-emoji'));
+        }
+        var closePicker = react.getAttribute('data-close-picker');
+        if (closePicker && typeof shoutboxToggleReactionPicker === 'function') {
+            shoutboxToggleReactionPicker(parseInt(closePicker, 10));
+        }
+        e.preventDefault();
+        return;
+    }
+
+    var picker = t.closest('button[data-shout-picker]');
+    if (picker && typeof shoutboxToggleReactionPicker === 'function') {
+        shoutboxToggleReactionPicker(parseInt(picker.getAttribute('data-shout-picker'), 10));
+        e.preventDefault();
+        return;
+    }
+});
+
+// Shout edit/delete action links (were onclick= attributes).
+document.addEventListener('click', function (e) {
+    var t = e.target;
+    if (!t || !t.closest) { return; }
+    var editLink = t.closest('a[data-shout-edit]');
+    if (editLink) {
+        if (typeof shoutboxEdit === 'function') { shoutboxEdit(parseInt(editLink.getAttribute('data-shout-edit'), 10)); }
+        e.preventDefault();
+        return;
+    }
+    var delLink = t.closest('a[data-shout-del]');
+    if (delLink) {
+        if (typeof shoutboxDelete === 'function') { shoutboxDelete(parseInt(delLink.getAttribute('data-shout-del'), 10)); }
+        e.preventDefault();
+        return;
+    }
+});

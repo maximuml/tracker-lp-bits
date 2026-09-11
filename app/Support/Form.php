@@ -424,7 +424,7 @@ if ($enableattach_attachment == 'yes') {
     <tbody>
         <tr><td colspan="2" style="text-align: center;border: none">
             <input id="<?php echo $btnPreviewId ?>" type="button" class="btn" value="<?php echo $lang_functions['submit_preview']?>" data-bbcode-action="preview">
-            <input id="<?php echo $btnEditId ?>" type="button" class="btn" style="display: none" value="<?php echo $lang_functions['submit_edit']?>" data-bbcode-action="edit">
+            <input id="<?php echo $btnEditId ?>" type="button" class="btn nx-hidden" value="<?php echo $lang_functions['submit_edit']?>" data-bbcode-action="edit">
         </td></tr>
     </tbody>
     <?php }?>

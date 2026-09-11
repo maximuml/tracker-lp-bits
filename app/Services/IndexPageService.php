@@ -237,8 +237,8 @@ JS;
                         'thumbUrl' => $thumbUrl,
                         'typeLabel' => $typeLabel,
                         'ownerHtml' => $ownerHtml,
-                        'nameSafe' => htmlspecialchars($torrent->name),
-                        'nameShort' => htmlspecialchars(mb_substr($torrent->name, 0, 60)),
+                        'name' => (string) $torrent->name,
+                        'nameShort' => mb_substr((string) $torrent->name, 0, 60),
                         'seeders' => (int) $torrent->seeders,
                         'leechers' => (int) $torrent->leechers,
                         'size' => Format::size((int) $torrent->size),
@@ -286,10 +286,10 @@ document.querySelector(".tr-top-uploader-tab").addEventListener("click", functio
     }
     td.classList.add("colhead");
     var tables = document.querySelectorAll(".top-uploader");
-    tables.forEach(function (t) { t.style.display = 'none'; });
+    tables.forEach(function (t) { t.classList.add('nx-hidden'); });
     var target = document.querySelectorAll("." + td.getAttribute("data-table"));
     target.forEach(function (t) {
-        t.style.display = '';
+        t.classList.remove('nx-hidden');
         t.style.opacity = '0';
         t.style.transition = 'opacity 0.2s';
         requestAnimationFrame(function () { t.style.opacity = '1'; });

@@ -18,11 +18,8 @@ $reactionData = (array) ($reactionData ?? ['counts' => [], 'mine' => [], 'users'
 <link rel="stylesheet" href="{{ \App\Support\Style::cssUriWithContext().'theme.css' }}" type="text/css">
 <link rel="stylesheet" href="styles/curtain_imageresizer.css" type="text/css">
 <link rel="stylesheet" href="styles/nexus.css" type="text/css">
-<script src="js/curtain_imageresizer.js" type="text/javascript"></script><script nonce="{{ $cspNonce ?? '' }}">var SHOUT_CSRF = '{{ htmlspecialchars(\App\Support\Shoutbox::csrfToken((int) ($CURUSER['id'] ?? 0))) }}';</script><script src="js/shoutbox.js" type="text/javascript"></script><link rel="stylesheet" href="styles/shoutbox.css" type="text/css">
+<script src="js/curtain_imageresizer.js" type="text/javascript"></script><script nonce="{{ $cspNonce ?? '' }}">var SHOUT_CSRF = '{{ \App\Support\Shoutbox::csrfToken((int) ($CURUSER['id'] ?? 0)) }}';</script><script src="js/shoutbox.js" type="text/javascript"></script><link rel="stylesheet" href="styles/shoutbox.css" type="text/css">
 {!! \App\Support\Style::addiCodeWithContext() !!}
-@php
-    $startcountdown = 'startcountdown('.$refresh.');shoutboxInitSSE('.htmlspecialchars(json_encode($where, JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8').','.$lastId.');shoutAttachToggleHandler();';
-@endphp
 <script type="text/javascript" nonce="{{ $cspNonce ?? '' }}">
 //<![CDATA[
 var t;
@@ -56,6 +53,7 @@ function shoutReply(nick) {
 }
 var SHOUT_REFRESH = {{ (int) $refresh }};
 var SHOUT_TYPE = @json($where, JSON_UNESCAPED_UNICODE);
+var SHOUT_LASTID = {{ (int) $lastId }};
 var pollTimer = null;
 function schedulePoll() {
 	if (pollTimer) { clearTimeout(pollTimer); }
@@ -102,7 +100,7 @@ function shoutAttachToggleHandler() {
 //]]>
 </script>
 </head>
-<body class='inframe' onload="{!! $startcountdown !!}">
+<body class='inframe'>
 @endif
 @php
     $reactionCounts = $reactionData['counts'] ?? [];
@@ -164,16 +162,9 @@ function shoutAttachToggleHandler() {
                     }
                 }
                 if ($nickReplyName !== '' && (int) ($CURUSER['id'] ?? 0) > 0) {
-                    $onclickAttr = 'return shoutReply('.htmlspecialchars(json_encode($nickReplyName, JSON_UNESCAPED_UNICODE), ENT_QUOTES).')';
                     $username = preg_replace(
                         '#href="[^"]*userdetails\.php\?id=\d+"#',
-                        'href="javascript:void(0)" onclick="'.$onclickAttr.'" title="'.htmlspecialchars($tooltipReply, ENT_QUOTES).'"',
-                        $username,
-                        1
-                    );
-                    $username = preg_replace(
-                        '#<a\s([^>]*onclick="return shoutReply\()#',
-                        '<a class="shout-nick-reply" $1',
+                        'href="#" class="shout-nick-reply" data-nick="'.htmlspecialchars($nickReplyName, ENT_QUOTES).'" title="'.htmlspecialchars($tooltipReply, ENT_QUOTES).'"',
                         $username,
                         1
                     );
@@ -182,7 +173,7 @@ function shoutAttachToggleHandler() {
                 $username = $lang_shoutbox['text_guest'] ?? '';
                 $classBadge = '';
             }
-            $avatarImg = '<img class="shout-avatar" src="'.htmlspecialchars($avatarUrl).'" alt="" onerror="this.onerror=null;this.src=\'pic/default_avatar.png\';" />';
+            $avatarImg = '<img class="shout-avatar" src="'.htmlspecialchars($avatarUrl).'" alt="" data-fallback="pic/default_avatar.png" />';
             if ($currUserId > 0) {
                 $avatarHtml = '<a class="shout-avatar-link" href="userdetails.php?id='.$currUserId.'" target="_blank" title="'.htmlspecialchars($tooltipAvatar, ENT_QUOTES).'">'.$avatarImg.'</a>';
             } else {
@@ -196,7 +187,7 @@ function shoutAttachToggleHandler() {
             $msgClass = $isLong ? 'shout-msg shout-msg-clamped' : 'shout-msg';
             $messageHtml = '<span id="shout-msg-'.$arr['id'].'" class="'.$msgClass.'" data-raw="'.htmlspecialchars((string) $arr['text'], ENT_QUOTES).'">'.$message.'</span>';
             if ($isLong) {
-                $messageHtml .= '<a class="shout-msg-toggle" href="javascript:void(0)" data-on="'.htmlspecialchars($labelLess, ENT_QUOTES).'" data-off="'.htmlspecialchars($labelMore, ENT_QUOTES).'">'.htmlspecialchars($labelMore).'</a>';
+                $messageHtml .= '<a class="shout-msg-toggle" href="#" data-on="'.htmlspecialchars($labelLess, ENT_QUOTES).'" data-off="'.htmlspecialchars($labelMore, ENT_QUOTES).'">'.htmlspecialchars($labelMore).'</a>';
             }
             $messageHtml .= $editedNote;
             $rowClasses = ['shoutrow'];

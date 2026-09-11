@@ -207,7 +207,7 @@ final class Promotion
                             ? " <font color=\"$color\">".($labels['text_will_end_in'] ?? '').$timeout.'</font>'
                             : ' '.($labels['text_will_end_in'] ?? '').$timeout;
                     } else {
-                        $onmouseover = " onmouseover=\"domTT_activate(this, event, 'content', '".htmlspecialchars("<b><font class=\"{$config['class']}\">$text</font></b>".($labels['text_will_end_in'] ?? '')."<b>$timeout</b>")."', 'trail', false, 'delay',500,'lifetime',3000,'fade','both','styleClass','niceTitle', 'fadeMax',87, 'maxWidth', 300);\"";
+                        $onmouseover = ' data-domtt-promo="'.htmlspecialchars("<b><font class=\"{$config['class']}\">$text</font></b>".($labels['text_will_end_in'] ?? '')."<b>$timeout</b>").'"';
                     }
                 } else {
                     $promotion = 1;

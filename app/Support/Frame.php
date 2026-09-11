@@ -127,7 +127,7 @@ final class Frame
                 .'<td class="rowfollow" align="left"><input type="text" style="width: 99%;" name="subject" maxlength="'.(int) $maxsubjectlength.'" value="'.htmlspecialchars($subject).'" /></td></tr>'."\n";
         }
 
-        $html .= '<tr><td class="rowhead" valign="top">'.($lang['row_body'] ?? '').'</td><td class="rowfollow" align="left"><span style="display: none;" id="previewouter"></span><div id="editorouter">';
+        $html .= '<tr><td class="rowhead" valign="top">'.($lang['row_body'] ?? '').'</td><td class="rowfollow" align="left"><span class="nx-hidden" id="previewouter"></span><div id="editorouter">';
 
         return $html;
     }
@@ -147,7 +147,7 @@ final class Frame
         return '</div></td></tr>'."\n"
             .'<tr><td colspan="2" align="center"><table><tr><td class="embedded"><input id="qr" type="submit" class="btn" value="'.($lang['submit_submit'] ?? '').'" /></td><td class="embedded">'
             .'<input type="button" class="btn2" name="previewbutton" id="previewbutton" value="'.($lang['submit_preview'] ?? '').'" data-preview-toggle="preview" />'
-            .'<input type="button" class="btn2" style="display: none;" name="unpreviewbutton" id="unpreviewbutton" value="'.($lang['submit_edit'] ?? '').'" data-preview-toggle="unpreview" />'
+            .'<input type="button" class="btn2 nx-hidden" name="unpreviewbutton" id="unpreviewbutton" value="'.($lang['submit_edit'] ?? '').'" data-preview-toggle="unpreview" />'
             .'</td></tr></table>'
             .'</td></tr>'
             .'</table>'."\n"

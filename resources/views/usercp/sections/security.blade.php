@@ -28,7 +28,7 @@ if ($ch['resetauthkey'] === '1') { echo '<input type="hidden" name="resetauthkey
 <input type="hidden" name="two_step_secret" value="{{ $ch['two_step_secret'] }}">
 <input type="hidden" name="two_step_code" value="{{ $ch['two_step_code'] }}">
 <tr><td class="rowhead nowrap" valign="top" align="right" width=1%>{!! $lang_usercp['row_security_check'] ?? 'Check'  !!}</td><td valign="top" align="left" width="99%"><input type=password class=oldpassword style="width: 200px"><br /><font class=small>{!! $lang_usercp['text_security_check_note'] ?? ''  !!}</font></td></tr>
-<input type=hidden name=username value="{{ htmlspecialchars((string) ($CURUSER['username'] ?? '')) }}">
+<input type=hidden name=username value="{{ (string) ($CURUSER['username'] ?? '') }}">
 <input type=hidden name=response>
 {!! $sec['confirmHtml'] !!}
 <tr><td class="rowhead" valign="top" align="right">{{ $lang_usercp['row_save_settings'] ?? 'Save' }}</td><td class="rowfollow" valign="top" align=left><input type=button value="{{ $lang_usercp['submit_save_settings'] ?? 'Save' }}"></td></tr>

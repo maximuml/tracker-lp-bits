@@ -4,7 +4,8 @@ function postvalid(form){
 }
 
 function dropmenu(obj){
-$(obj.id + 'list').style.display = $(obj.id + 'list').style.display == 'none' ? '' : 'none';
+var list = document.getElementById(obj.id + 'list');
+if (list) { list.classList.toggle('nx-hidden'); }
 }
 
 function confirm_delete(id, note, addon)
@@ -116,47 +117,27 @@ function saveMagicValue(torrentid,value)
 function klappe(id)
 {
 var klappText = document.getElementById('k' + id);
-var klappBild = document.getElementById('pic' + id);
-
-if (klappText.style.display == 'none') {
- klappText.style.display = 'block';
- // klappBild.src = 'pic/blank.gif';
-}
-else {
- klappText.style.display = 'none';
- // klappBild.src = 'pic/blank.gif';
-}
+if (!klappText) { return; }
+klappText.classList.toggle('nx-hidden');
 }
 
 function klappe_news(id)
 {
 var klappText = document.getElementById('k' + id);
 var klappBild = document.getElementById('pic' + id);
-
-if (klappText.style.display == 'none') {
- klappText.style.display = '';
- klappBild.className = 'minus';
-}
-else {
- klappText.style.display = 'none';
- klappBild.className = 'plus';
-}
+if (!klappText) { return; }
+var hidden = klappText.classList.toggle('nx-hidden');
+if (klappBild) { klappBild.className = hidden ? 'plus' : 'minus'; }
 }
 function klappe_ext(id)
 {
 var klappText = document.getElementById('k' + id);
 var klappBild = document.getElementById('pic' + id);
 var klappPoster = document.getElementById('poster' + id);
-if (klappText.style.display == 'none') {
- klappText.style.display = 'block';
- klappPoster.style.display = 'block';
- klappBild.className = 'minus';
-}
-else {
- klappText.style.display = 'none';
- klappPoster.style.display = 'none';
- klappBild.className = 'plus';
-}
+if (!klappText) { return; }
+var hidden = klappText.classList.toggle('nx-hidden');
+if (klappPoster) { klappPoster.classList.toggle('nx-hidden', hidden); }
+if (klappBild) { klappBild.className = hidden ? 'plus' : 'minus'; }
 }
 
 // ctrlenter.js
@@ -502,5 +483,281 @@ document.addEventListener('mouseover', function (e) {
     if (el && typeof domTT_activate === 'function') {
         domTT_activate(el, e, 'content', el.getAttribute('data-domtt-content'),
             'trail', false, 'delay', 0, 'lifetime', 10000, 'styleClass', 'smilies', 'maxWidth', 400);
+    }
+});
+
+// CSP-safe delegated bindings for legacy interactive controls.
+// Inline on*= handlers and javascript: URLs are blocked by the
+// nonce-based Content-Security-Policy; markup carries data-* hooks
+// dispatched here to the existing global functions.
+document.addEventListener('click', function (e) {
+    var target = e.target;
+    if (!target || !target.closest) { return; }
+
+    var confirmEl = target.closest('[data-confirm]');
+    if (confirmEl) {
+        if (!window.confirm(confirmEl.getAttribute('data-confirm'))) {
+            e.preventDefault();
+        }
+        return;
+    }
+
+    var setChecked = target.closest('input[data-setchecked]');
+    if (setChecked && typeof SetChecked === 'function') {
+        SetChecked(setChecked.getAttribute('data-setchecked'), setChecked.getAttribute('data-setchecked-ctrl'), setChecked.getAttribute('data-checkall'), setChecked.getAttribute('data-uncheckall'), -1, 10);
+        return;
+    }
+
+    var confirmDel = target.closest('a[data-confirm-del]');
+    if (confirmDel && typeof confirm_delete === 'function') {
+        confirm_delete(confirmDel.getAttribute('data-confirm-del'), confirmDel.getAttribute('data-confirm-note') || '', confirmDel.getAttribute('data-confirm-addon') || '');
+        e.preventDefault();
+        return;
+    }
+
+    var newRow = target.closest('a.js-newrow');
+    if (newRow && typeof NewRow === 'function') {
+        NewRow(newRow, newRow.getAttribute('data-newrow') === 'before');
+        e.preventDefault();
+        return;
+    }
+
+    var klappeLink = target.closest('a[data-klappe]');
+    if (klappeLink) {
+        if (typeof klappe_news === 'function') { klappe_news(klappeLink.getAttribute('data-klappe')); }
+        e.preventDefault();
+        return;
+    }
+
+    var checkAll = target.closest('input[data-checkall]');
+    if (checkAll && typeof check === 'function') {
+        var form = checkAll.form || document.forms['form'];
+        if (form) {
+            checkAll.value = check(form, checkAll.getAttribute('data-label-check'), checkAll.getAttribute('data-label-uncheck'));
+        }
+        return;
+    }
+
+    var resetFilter = target.closest('input.js-filter-reset');
+    if (resetFilter) {
+        var q = document.getElementById('q');
+        if (q) { q.value = ''; }
+        var filterForm = document.getElementById('filterForm');
+        if (filterForm) { filterForm.submit(); }
+        e.preventDefault();
+        return;
+    }
+
+    var orderBtn = target.closest('#order');
+    if (orderBtn && typeof dropmenu === 'function') {
+        dropmenu(orderBtn);
+        return;
+    }
+
+    var magicItem = target.closest('li[data-magic-value]');
+    if (magicItem && typeof saveMagicValue === 'function') {
+        saveMagicValue(parseInt(magicItem.getAttribute('data-torrent-id'), 10), parseInt(magicItem.getAttribute('data-magic-value'), 10));
+        return;
+    }
+
+    var showAll = target.closest('#magic_show_all');
+    if (showAll) {
+        var other = document.getElementById('other_user_list');
+        var ellipsis = document.getElementById('ellipsis');
+        if (other) { other.classList.remove('nx-hidden'); }
+        if (ellipsis) { ellipsis.classList.add('nx-hidden'); }
+        showAll.classList.add('nx-hidden');
+        e.preventDefault();
+        return;
+    }
+
+    var thanksBtn = target.closest('#saythanks');
+    if (thanksBtn && typeof saythanks === 'function') {
+        saythanks(parseInt(thanksBtn.getAttribute('data-torrent-id'), 10));
+        return;
+    }
+
+    var delRow = target.closest('a.js-delrow');
+    if (delRow && typeof DelRow === 'function') {
+        DelRow(delRow);
+        e.preventDefault();
+        return;
+    }
+
+    var infoToggle = target.closest('a.js-info-toggle');
+    if (infoToggle) {
+        var ul = infoToggle.parentNode && infoToggle.parentNode.nextElementSibling;
+        if (ul) { ul.classList.toggle('nx-hidden'); }
+        e.preventDefault();
+        return;
+    }
+
+    var fileListLink = target.closest('a[data-filelist]');
+    if (fileListLink) {
+        var tid = parseInt(fileListLink.getAttribute('data-filelist'), 10);
+        if (fileListLink.getAttribute('data-filelist-mode') === 'hide' && typeof hidefilelist === 'function') {
+            hidefilelist();
+        } else if (typeof viewfilelist === 'function') {
+            viewfilelist(tid);
+        }
+        e.preventDefault();
+        return;
+    }
+
+    var peerListLink = target.closest('a[data-peerlist]');
+    if (peerListLink) {
+        var pid = parseInt(peerListLink.getAttribute('data-peerlist'), 10);
+        if (peerListLink.getAttribute('data-peerlist-mode') === 'hide' && typeof hidepeerlist === 'function') {
+            hidepeerlist();
+        } else if (typeof viewpeerlist === 'function') {
+            viewpeerlist(pid);
+        }
+        e.preventDefault();
+        return;
+    }
+
+    var utlLink = target.closest('a[data-utl]');
+    if (utlLink) {
+        if (typeof getusertorrentlistajax === 'function') {
+            getusertorrentlistajax(utlLink.getAttribute('data-utl-user'), utlLink.getAttribute('data-utl'), utlLink.getAttribute('data-utl-block'));
+        }
+        if (utlLink.hasAttribute('data-klappe') && typeof klappe_news === 'function') {
+            klappe_news(utlLink.getAttribute('data-klappe'));
+        }
+        e.preventDefault();
+        return;
+    }
+
+    var backLink = target.closest('a.js-history-back');
+    if (backLink) {
+        history.back();
+        e.preventDefault();
+        return;
+    }
+});
+
+document.addEventListener('submit', function (e) {
+    var form = e.target;
+    if (form && form.matches && (form.id === 'compose' || form.id === 'reply') && typeof postvalid === 'function') {
+        if (!postvalid(form)) { e.preventDefault(); }
+    }
+});
+
+document.addEventListener('change', function (e) {
+    var el = e.target;
+    if (!el || !el.name) { return; }
+
+    if (el.id === 'torrent' && el.type === 'file' && typeof getname === 'function') {
+        getname();
+        return;
+    }
+
+    if (el.name === 'delenable') {
+        if (el.checked && typeof enabledel === 'function') {
+            enabledel(el.getAttribute('data-del-msg') || '');
+        } else if (!el.checked && typeof disabledel === 'function') {
+            disabledel();
+        }
+        return;
+    }
+
+    if (el.name === 'promotion_time_type') {
+        var note = document.getElementById('promotion_until_note');
+        if (note) { note.classList.toggle('nx-hidden', el.value !== '2'); }
+        return;
+    }
+
+    if (el.name === 'promotionaddedtime') {
+        var until = document.getElementById('promotionuntiltime');
+        if (until) { until.value = el.value; }
+        return;
+    }
+
+    if (el.name === 'smtptype') {
+        var adv = document.getElementById('smtp_advanced');
+        var ext = document.getElementById('smtp_external');
+        if (adv) { adv.classList.toggle('nx-hidden', el.value !== 'advanced'); }
+        if (ext) { ext.classList.toggle('nx-hidden', el.value !== 'external'); }
+        return;
+    }
+
+    if (el.name === 'savatar') {
+        var avatarImg = document.getElementById('avatarimg');
+        if (avatarImg) { avatarImg.src = el.value; }
+        if (el.form && el.form.avatar) { el.form.avatar.value = el.value; }
+        return;
+    }
+
+    if (el.id === 'letmedown') {
+        var cont = document.getElementById('continuedownload');
+        if (cont) { cont.disabled = !el.checked; }
+        return;
+    }
+
+    if (el.name === 'sitelanguage' && el.form) {
+        el.form.submit();
+        return;
+    }
+});
+
+// Cover images on the index grid: swap to the text fallback on load error.
+// Capture phase is required — error events do not bubble.
+document.addEventListener('error', function (e) {
+    var img = e.target;
+    if (img && img.tagName === 'IMG' && img.closest && img.closest('.lt-cover')) {
+        img.classList.add('lt-broken');
+    }
+}, true);
+
+// domTT tooltips whose content is another element on the page
+// (torrent last-comment / last-post previews) or a literal string
+// (promotion expiry hints). Replaces inline onmouseover= attributes.
+document.addEventListener('mouseover', function (e) {
+    var el = e.target && e.target.closest ? e.target.closest('[data-domtt-src]') : null;
+    if (el && typeof domTT_activate === 'function') {
+        var src = document.getElementById(el.getAttribute('data-domtt-src'));
+        if (src) {
+            domTT_activate(el, e, 'content', src, 'trail', false, 'delay', 500, 'lifetime', 3000, 'fade', 'both', 'styleClass', 'niceTitle', 'fadeMax', 87, 'maxWidth', 400);
+        }
+        return;
+    }
+    var promo = e.target && e.target.closest ? e.target.closest('[data-domtt-promo]') : null;
+    if (promo && typeof domTT_activate === 'function') {
+        domTT_activate(promo, e, 'content', promo.getAttribute('data-domtt-promo'), 'trail', false, 'delay', 500, 'lifetime', 3000, 'fade', 'both', 'styleClass', 'niceTitle', 'fadeMax', 87, 'maxWidth', 300);
+    }
+});
+
+// img load handlers (capture phase — load does not bubble):
+// data-scale="WxH" resizes large BBCode images, data-avatar-check swaps
+// oversized avatars for the placeholder.
+document.addEventListener('load', function (e) {
+    var img = e.target;
+    if (!img || img.tagName !== 'IMG') { return; }
+    var scale = img.getAttribute('data-scale');
+    if (scale && typeof Scale === 'function') {
+        var parts = scale.split('x');
+        Scale(img, parseInt(parts[0], 10), parseInt(parts[1], 10));
+    }
+    var avatarCheck = img.getAttribute('data-avatar-check');
+    if (avatarCheck !== null && typeof check_avatar === 'function') {
+        check_avatar(img, avatarCheck);
+    }
+}, true);
+
+document.addEventListener('error', function (e) {
+    var img = e.target;
+    if (img && img.tagName === 'IMG') {
+        var fb = img.getAttribute('data-img-fallback');
+        if (fb && typeof handleImageError === 'function') {
+            handleImageError(img, fb);
+        }
+    }
+}, true);
+
+// Attachment/custom-field preview images open in the lightbox.
+document.addEventListener('click', function (e) {
+    var img = e.target && e.target.closest ? e.target.closest('img.js-previewable') : null;
+    if (img && typeof Preview === 'function') {
+        Preview(img);
     }
 });

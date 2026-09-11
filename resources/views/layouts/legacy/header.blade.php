@@ -48,7 +48,7 @@
 <script type="text/javascript" src="vendor/layer-v3.5.1/layer/layer.js{!! $cssUpdateDate !!}"></script>
 </head>
 <body>
-<a href="#main-content" class="skip-link" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;" onfocus="this.style.left='0';this.style.width='auto';this.style.height='auto';" onblur="this.style.left='-9999px';this.style.width='1px';this.style.height='1px';">Skip to main content</a>
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <table class="head" cellspacing="0" cellpadding="0" align="center" style="width: {{ $headTableWidth }}px">
 	<tr>
 		<td class="clear">
@@ -79,7 +79,7 @@
 		<td class="bottom" align="left">
             <span class="medium">
                 {!! $lang['text_welcome_back'] ?? '' !!}, {!! $username !!}
-                [<form method="post" action="logout.php" style="display:inline">@csrf<button type="submit" style="background:none;border:none;padding:0;margin:0;color:inherit;cursor:pointer;text-decoration:underline;display:inline">{!! $lang['text_logout'] ?? '' !!}</button></form>]
+                [<form method="post" action="logout.php" class="nx-inline">@csrf<button type="submit" class="nx-btn-link">{!! $lang['text_logout'] ?? '' !!}</button></form>]
                 [<a href="usercp.php">{!! $lang['text_user_cp'] ?? '' !!}</a>]
                 @if($isModerator) [<a href="staffpanel.php">{!! $lang['text_staff_panel'] ?? '' !!}</a>] @endif
                 @if($isSysop) [<a href="settings.php">{!! $lang['text_site_settings'] ?? '' !!}</a>]@endif
@@ -102,8 +102,8 @@
                 @if($globalSearchEnabled)
         <td class="bottom" align="left" style="border: none">
             <form action="search.php" method="get" target="{{ $searchFormTarget }}">
-                <div style="display: flex;align-items: center">
-                    <div style="display: flex;flex-direction: column">
+                <div class="nx-flex" style="align-items: center">
+                    <div class="nx-flex-col">
                         <div>
                             <span><input type="text" name="search" style="width: 80px;height: 12px" value="{!! $requestSearchEscaped !!}" placeholder="{!! $searchKeywordPlaceholder !!}"/></span>
                         </div>

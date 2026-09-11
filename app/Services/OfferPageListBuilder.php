@@ -195,7 +195,7 @@ final class OfferPageListBuilder
                             $counter = $i;
                             $lastcom_tooltip[$counter]['id'] = 'lastcom_'.$counter;
                             $lastcom_tooltip[$counter]['content'] = ($hasnewcom ? "<b>(<font class='new'>".htmlspecialchars((string) ($lang['text_new'] ?? '')).'</font>)</b> ' : '').htmlspecialchars((string) ($lang['text_last_commented_by'] ?? '')).UserDisplay::username((int) ($lastcom['user'] ?? 0)).$lastcomtime.'<br />'.Format::formatComment(mb_substr((string) ($lastcom['text'] ?? ''), 0, 100, 'UTF-8').(mb_strlen((string) ($lastcom['text'] ?? ''), 'UTF-8') > 100 ? ' ......' : ''), true, false, false, true, 600, false, false);
-                            $onmouseover = "onmouseover=\"domTT_activate(this, event, 'content', document.getElementById('".$lastcom_tooltip[$counter]['id']."'), 'trail', false, 'delay', 500,'lifetime',3000,'fade','both','styleClass','niceTitle','fadeMax', 87,'maxWidth', 400);\"";
+                            $onmouseover = ' data-domtt-src="'.$lastcom_tooltip[$counter]['id'].'"';
                         } else {
                             $onmouseover = '';
                         }

@@ -28,9 +28,9 @@ $title = $title ?? ($pollid > 0
 input.mp { width: 450px; }
 </style>
 <table border=1 cellspacing=0 cellpadding=5>
-<tr><td class=rowhead>{{ $lang_makepoll['text_question'] ?? 'Question' }} <font color=red>*</font></td><td align=left><input name=question class=mp maxlength=255 value="{{ htmlspecialchars((string) ($poll['question'] ?? '')) }}"></td></tr>
+<tr><td class=rowhead>{{ $lang_makepoll['text_question'] ?? 'Question' }} <font color=red>*</font></td><td align=left><input name=question class=mp maxlength=255 value="{{ (string) ($poll['question'] ?? '') }}"></td></tr>
 @for ($i = 0; $i <= 19; $i++)
-<tr><td class=rowhead>{{ ($lang_makepoll['text_option'] ?? 'Option').($i + 1) }}@if ($i < 2) <font color=red>*</font>@endif</td><td align=left><input name=option{{ $i }} class=mp maxlength=40 value="{{ htmlspecialchars((string) ($poll["option{$i}"] ?? '')) }}"><br /></td></tr>
+<tr><td class=rowhead>{{ ($lang_makepoll['text_option'] ?? 'Option').($i + 1) }}@if ($i < 2) <font color=red>*</font>@endif</td><td align=left><input name=option{{ $i }} class=mp maxlength=40 value="{{ (string) ($poll["option{$i}"] ?? '') }}"><br /></td></tr>
 @endfor
 <tr><td colspan=2 align=center><input type=submit value="{{ $pollid ? ($lang_makepoll['submit_edit_poll'] ?? 'Edit poll') : ($lang_makepoll['submit_create_poll'] ?? 'Create poll') }}" style='height: 20pt'></td></tr>
 </table>
@@ -38,6 +38,6 @@ input.mp { width: 450px; }
 @if ($pollid > 0)
 <input type=hidden name=pollid value="{{ $pollid }}">
 @endif
-<input type=hidden name=returnto value="{{ htmlspecialchars($returnto) }}">
+<input type=hidden name=returnto value="{{ $returnto }}">
 </form>
 @endsection

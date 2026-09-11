@@ -28,15 +28,18 @@ class MyController extends Controller
 
     private BonusService $bonusService;
 
-    public function __construct(BonusPageService $bonusPageService, BonusService $bonusService)
+    private CurrentUser $currentUser;
+
+    public function __construct(BonusPageService $bonusPageService, BonusService $bonusService, CurrentUser $currentUser)
     {
         $this->bonusPageService = $bonusPageService;
         $this->bonusService = $bonusService;
+        $this->currentUser = $currentUser;
     }
 
     public function bonus(Request $request): View|Response|RedirectResponse
     {
-        if (app(CurrentUser::class)->get() === null) {
+        if ($this->currentUser->get() === null) {
             $qs = $request->getQueryString();
 
             return redirect('/mybonus.php'.($qs ? '?'.$qs : ''));
@@ -58,9 +61,33 @@ class MyController extends Controller
         return view('my.bonus', $data);
     }
 
+    public function bonusExchange(Request $request): RedirectResponse
+    {
+        if ($this->currentUser->get() === null) {
+            $qs = $request->getQueryString();
+
+            return redirect('/mybonus.php'.($qs ? '?'.$qs : ''));
+        }
+
+        $data = $this->bonusPageService->build($request)->toArray();
+
+        $actionRedirect = $this->bonusService->handleExchangeActionPublic(
+            $request,
+            $data['allBonus'],
+            $data['curUser'],
+            $data['lang'],
+            $data['lockText']
+        );
+        if ($actionRedirect instanceof RedirectResponse) {
+            return $actionRedirect;
+        }
+
+        return redirect('/mybonus.php');
+    }
+
     public function hr(Request $request): View|RedirectResponse
     {
-        $curUser = app(CurrentUser::class)->get();
+        $curUser = $this->currentUser->get();
         if ($curUser === null) {
             $qs = $request->getQueryString();
 

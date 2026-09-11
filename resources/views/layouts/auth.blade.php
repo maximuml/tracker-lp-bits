@@ -20,8 +20,11 @@
         .small { font-size: 0.85em; }
         p { margin: 0.5em 0; }
         a { color: #06c; }
+        .skip-link { position: absolute; left: -9999px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+        .skip-link:focus { left: 0; width: auto; height: auto; z-index: 1000; }
     </style>
     <script type="text/javascript" src="js/csrf.js"></script>
+    <script type="text/javascript" src="js/auth.js"></script>
     <script type="text/javascript" src="vendor/jquery-3.7.1.min.js"></script>
     <script type="text/javascript" src="vendor/layer-v3.5.1/layer/layer.js"></script>
     @foreach (\App\Support\AssetAppender::getAppendHeaders() as $html)
@@ -29,7 +32,7 @@
     @endforeach
 </head>
 <body>
-    <a href="#main-content" class="skip-link" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;" onfocus="this.style.left='0';this.style.width='auto';this.style.height='auto';" onblur="this.style.left='-9999px';this.style.width='1px';this.style.height='1px';">Skip to main content</a>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
     <div class="container" id="main-content" tabindex="-1">
         @yield('content')
     </div>

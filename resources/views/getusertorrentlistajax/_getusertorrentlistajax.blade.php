@@ -172,7 +172,7 @@ if ($total_size) {
     $hasData = true;
 }
 if ($hasData) {
-    $header = sprintf('<div style="display: flex;justify-content: space-between"><div>%s</div><div></div></div>', $summary);
+    $header = sprintf('<div class="nx-flex-between"><div>%s</div><div></div></div>', $summary);
     echo '<br/>' . $header . $table;
 } else {
     echo $lang_getusertorrentlistajax['text_no_record'];

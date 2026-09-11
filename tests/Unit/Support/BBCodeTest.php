@@ -122,23 +122,25 @@ class BBCodeTest extends TestCase
         $html = BBCode::img('pic.png', false, 800, 600, 'myid');
         $this->assertStringContainsString('src="pic.png"', $html);
         $this->assertStringContainsString('id="myid"', $html);
-        $this->assertStringContainsString("onerror=\"handleImageError(this, 'pic.png');\"", $html);
+        $this->assertStringContainsString('data-img-fallback="pic.png"', $html);
+        $this->assertStringNotContainsString('onerror=', $html);
         $this->assertStringNotContainsString('onload=', $html);
         $this->assertStringNotContainsString('data-zoomable', $html);
+        $this->assertStringNotContainsString('data-scale', $html);
     }
 
     public function test_img_with_resizer_emits_scale_and_zoomable(): void
     {
         // Pinned legacy contract: the resizer attaches the `Scale()`
-        // JS hook on `onload` AND tags the element with
-        // `data-zoomable` for the lightbox script. There is a
-        // deliberate trailing space inside `data-zoomable ` which
-        // results in TWO consecutive spaces before `onerror`. We
-        // pin the two-space variant exactly.
+        // JS hook via `data-scale` (bound by common.js in the load
+        // capture phase — CSP blocks inline `onload`) AND tags the
+        // element with `data-zoomable` for the lightbox script.
         $html = BBCode::img('pic.png', true, 800, 600);
-        $this->assertStringContainsString('onload="Scale(this, 800, 600);"', $html);
-        $this->assertStringContainsString('data-zoomable ', $html);
-        $this->assertStringContainsString('data-zoomable  onerror=', $html);
+        $this->assertStringContainsString('data-scale="800x600"', $html);
+        $this->assertStringContainsString('data-zoomable', $html);
+        $this->assertStringContainsString('data-img-fallback="pic.png"', $html);
+        $this->assertStringNotContainsString('onload=', $html);
+        $this->assertStringNotContainsString('onerror=', $html);
     }
 
     public function test_img_id_attribute_defaults_to_empty(): void

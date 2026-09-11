@@ -68,13 +68,7 @@ final class OfferPageServiceTest extends TestCase
 
     private function service(): OfferPageService
     {
-        return new OfferPageService(
-            app(CurrentUser::class),
-            app(Globals::class),
-            app(OfferRepository::class),
-            app(LegacyRedisCache::class),
-            app(UsercpRepository::class),
-        );
+        return app(OfferPageService::class);
     }
 
     private function insertUser(string $username = 'testuser', int $class = 1): int

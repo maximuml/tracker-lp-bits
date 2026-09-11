@@ -1,7 +1,7 @@
 {
-  "total": 438,
+  "total": 417,
   "by_rule": {
-    "laravel-request-all-in-controller": 21,
+    "laravel-request-all-in-controller": 0,
     "md5-for-security": 12,
     "laravel-unescaped-blade-output": 405
   }

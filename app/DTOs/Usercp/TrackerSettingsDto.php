@@ -139,6 +139,9 @@ final readonly class TrackerSettingsDto
      */
     private static function collectNotifPreferences(Request $request): array
     {
+        // Notification keys are dynamic (<prefix><event>), so they cannot be
+        // enumerated in validation rules; the whole input map is required here.
+        // nosemgrep: laravel-request-all-in-controller
         $inputs = $request->all();
         $preferences = [];
         foreach (array_keys($inputs) as $key) {

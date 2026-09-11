@@ -38,7 +38,9 @@ final class DestructiveEnvironmentGuard
      */
     public static function assertTestingEnvironment(?array $config = null): void
     {
-        $env = (string) ($config['app_env'] ?? self::resolveEnv('APP_ENV', 'app.env', ''));
+        // APP_ENV is the *claim* ("this run intends to be a test") — read the
+        // superglobal first because phpunit.xml sets it via <server>.
+        $env = (string) ($config['app_env'] ?? self::resolveClaim('APP_ENV', 'app.env', ''));
 
         // Only enforce when the application believes it is in the testing
         // environment. Production and local dev are not gated here — they have
@@ -47,24 +49,31 @@ final class DestructiveEnvironmentGuard
             return;
         }
 
-        $database = (string) ($config['db_database'] ?? self::resolveEnv('DB_DATABASE', 'database.connections.mysql.database', ''));
-        $redisPrefix = (string) ($config['redis_prefix'] ?? self::resolveEnv('REDIS_PREFIX', 'database.redis.options.prefix', ''));
+        // DB_DATABASE / REDIS_PREFIX describe *reality* — what the connection
+        // will actually use. The resolved config repository wins over
+        // $_SERVER: when bootstrap/cache/config.php exists, env overrides are
+        // inert, so trusting them would let a "testing" claim pass while
+        // queries still hit the dev database.
+        $database = (string) ($config['db_database'] ?? self::resolveReality('DB_DATABASE', 'database.connections.mysql.database', ''));
+        $redisPrefix = (string) ($config['redis_prefix'] ?? self::resolveReality('REDIS_PREFIX', 'database.redis.options.prefix', ''));
 
         if (! self::matchesAnyMarker($database, self::DB_MARKERS)) {
             throw new RuntimeException(sprintf(
                 'Refusing to run tests against database "%s": the name must contain one of %s. '
-                .'Set DB_DATABASE to a *_testing / *_test / *_e2e database to prevent data loss.',
+                .'Set DB_DATABASE to a *_testing / *_test / *_e2e database to prevent data loss.%s',
                 $database,
                 implode(', ', array_map(fn (string $m): string => "\"{$m}\"", self::DB_MARKERS)),
+                self::staleConfigHint('DB_DATABASE', $database),
             ));
         }
 
         if (stripos($redisPrefix, self::REDIS_MARKER) === false) {
             throw new RuntimeException(sprintf(
                 'Refusing to run tests with Redis prefix "%s": the prefix must contain "%s". '
-                .'Set REDIS_PREFIX to a test-specific value to prevent clobbering dev data.',
+                .'Set REDIS_PREFIX to a test-specific value to prevent clobbering dev data.%s',
                 $redisPrefix,
                 self::REDIS_MARKER,
+                self::staleConfigHint('REDIS_PREFIX', $redisPrefix),
             ));
         }
     }
@@ -86,31 +95,78 @@ final class DestructiveEnvironmentGuard
     }
 
     /**
-     * Resolve a configuration value from $_SERVER (set by phpunit.xml),
-     * falling back to the Laravel config repository (which reads from .env
-     * or the cached config). This ensures the guard works both when the
-     * config is cached (Docker) and when it is not (CI).
+     * Resolve the *claimed* environment name: $_SERVER first (phpunit.xml
+     * <server> directive), then the config repository.
      *
-     * @param  non-empty-string  $envKey  The $_SERVER key (e.g. 'DB_DATABASE').
-     * @param  non-empty-string  $configKey  The Laravel config key (e.g. 'database.connections.mysql.database').
+     * @param  non-empty-string  $envKey  The $_SERVER key (e.g. 'APP_ENV').
+     * @param  non-empty-string  $configKey  The Laravel config key.
      * @param  string  $default  Fallback when neither source has a value.
      */
-    private static function resolveEnv(string $envKey, string $configKey, string $default): string
+    private static function resolveClaim(string $envKey, string $configKey, string $default): string
     {
-        // PHPUnit's <server> directive populates $_SERVER, which survives
-        // config caching. Check it first so the guard sees the test-specific
-        // values even when the config cache holds the dev/production values.
-        if (isset($_SERVER[$envKey]) && is_string($_SERVER[$envKey]) && $_SERVER[$envKey] !== '') {
-            return $_SERVER[$envKey];
+        $value = self::serverValue($envKey);
+        if ($value !== null) {
+            return $value;
         }
 
-        // Fall back to the Laravel config repository for Artisan commands
-        // (where $_SERVER is not populated by phpunit.xml).
+        $value = config($configKey);
+
+        return is_string($value) && $value !== '' ? $value : $default;
+    }
+
+    /**
+     * Resolve the value the app will *actually* use: the config repository
+     * first (authoritative — when the config is cached, env vars are inert),
+     * then $_SERVER for pre-boot contexts.
+     *
+     * @param  non-empty-string  $envKey  The $_SERVER key (e.g. 'DB_DATABASE').
+     * @param  non-empty-string  $configKey  The Laravel config key.
+     * @param  string  $default  Fallback when neither source has a value.
+     */
+    private static function resolveReality(string $envKey, string $configKey, string $default): string
+    {
         $value = config($configKey);
         if (is_string($value) && $value !== '') {
             return $value;
         }
 
-        return $default;
+        return self::serverValue($envKey) ?? $default;
+    }
+
+    /**
+     * Explain the common failure mode: env claims a test value while the
+     * resolved (possibly cached) config still points at the dev database.
+     *
+     * @param  non-empty-string  $envKey
+     */
+    private static function staleConfigHint(string $envKey, string $resolved): string
+    {
+        $claimed = self::serverValue($envKey);
+        if ($claimed === null || $claimed === $resolved) {
+            return '';
+        }
+
+        return sprintf(
+            ' Note: %s="%s" is set but the resolved config uses "%s" — a stale '
+            .'config cache makes env overrides inert; run `php artisan config:clear`.',
+            $envKey,
+            $claimed,
+            $resolved,
+        );
+    }
+
+    /**
+     * Read a single $_SERVER entry. The guard is the one place in app/ where
+     * superglobal access is intentional: it exists precisely to compare the
+     * claimed env (phpunit.xml <server>, docker -e) against the resolved
+     * config before the request ever boots.
+     *
+     * @param  non-empty-string  $key
+     */
+    private static function serverValue(string $key): ?string
+    {
+        $value = $_SERVER[$key] ?? null;
+
+        return is_string($value) && $value !== '' ? $value : null;
     }
 }

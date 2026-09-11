@@ -119,11 +119,31 @@ final class AuthCookie
             'user_id' => (int) $data['user_id'],
             'ip' => request()->ip(),
         ]);
+        self::incrementLegacyCookieCounter();
 
         return [
             'user_id' => (int) $data['user_id'],
             'expires' => (int) $data['expires'],
         ];
+    }
+
+    /**
+     * Cache key counting accepted legacy HMAC cookies (W1-04 retirement
+     * signal — readable via `redis-cli GET` without log plumbing).
+     */
+    public const LEGACY_COOKIE_COUNTER_KEY = 'auth:legacy_cookie_accepted';
+
+    /**
+     * Increment the legacy-cookie acceptance counter. Metrics must never
+     * break authentication, so any store failure is swallowed.
+     */
+    private static function incrementLegacyCookieCounter(): void
+    {
+        try {
+            Cache::increment(self::LEGACY_COOKIE_COUNTER_KEY);
+        } catch (\Throwable) {
+            // Intentionally ignored.
+        }
     }
 
     /**

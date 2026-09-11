@@ -49,9 +49,8 @@ final class UsercpSecurityCommand
 
     /**
      * @param  array<string, mixed>  $data
-     * @param  array<string, mixed>  $allPost
      */
-    public function updateSecurity(int $userId, array $data, bool $resetAuthKey, array $allPost): bool
+    public function updateSecurity(int $userId, array $data, bool $resetAuthKey): bool
     {
         return (bool) DB::transaction(function () use ($userId, $data, $resetAuthKey) {
             User::query()->where('id', $userId)->update($data);
@@ -198,7 +197,7 @@ final class UsercpSecurityCommand
             $privacyupdated = 1;
         }
 
-        $this->updateSecurity((int) $user->id, $data, $resetAuthKey, (array) $request->all());
+        $this->updateSecurity((int) $user->id, $data, $resetAuthKey);
 
         $to = 'usercp.php?action=security&type=saved';
         if ($changedemail === 1) {
@@ -308,7 +307,7 @@ final class UsercpSecurityCommand
         }
 
         if ($data !== []) {
-            $this->updateSecurity((int) $user->id, $data, $resetAuthKey, $dto->allInputs);
+            $this->updateSecurity((int) $user->id, $data, $resetAuthKey);
             Cache::clearUser($user->id, '');
         }
 

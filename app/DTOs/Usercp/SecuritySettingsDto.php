@@ -12,9 +12,6 @@ use Illuminate\Http\Request;
  */
 final readonly class SecuritySettingsDto
 {
-    /**
-     * @param  array<string, mixed>  $allInputs  Original request inputs for compatibility hooks.
-     */
     public function __construct(
         public string $currentPassword,
         public ?string $email,
@@ -25,7 +22,6 @@ final readonly class SecuritySettingsDto
         public ?string $twoStepSecret,
         public ?string $twoStepCode,
         public string $ip,
-        public array $allInputs,
     ) {}
 
     public static function fromRequest(Request $request): self
@@ -55,7 +51,6 @@ final readonly class SecuritySettingsDto
             isset($validated['two_step_secret']) ? (string) $validated['two_step_secret'] : null,
             isset($validated['two_step_code']) ? (string) $validated['two_step_code'] : null,
             (string) ($request->ip() ?? ''),
-            (array) $request->all(),
         );
     }
 

@@ -50,6 +50,7 @@ final class PasskeyUserLookupTest extends TestCase
         $found = $this->lookup->find($user->passkey);
 
         $this->assertSame($user->id, $found['id']);
+        $this->assertSame($user->id, Cache::get("user_passkey_{$user->passkey}_content")['id']);
     }
 
     public function test_find_returns_empty_array_for_unknown_passkey(): void

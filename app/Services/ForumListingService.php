@@ -13,6 +13,7 @@ use App\Support\Forum;
 use App\Support\Globals;
 use App\Support\Html;
 use App\Support\LegacyResponse;
+use App\Support\LegacyYesNo;
 use App\Support\Log;
 use App\Support\Pagination;
 use App\Support\Time;
@@ -101,7 +102,7 @@ final class ForumListingService
         ob_start();
         echo '<h1 align="center"><a class="faqlink" href="forums.php">'.$SITENAME.'&nbsp;'.($lang['text_forums'] ?? '').'</a>--><a class="faqlink" href="'.htmlspecialchars('forums.php?action=viewforum&forumid='.$forumid).'">'.$forumname."</a></h1>\n";
         echo '<br />';
-        $maypost = UserDisplay::currentClass() >= (int) ($row['minclasswrite'] ?? 0) && UserDisplay::currentClass() >= (int) ($row['minclasscreate'] ?? 0) && ($curUser['forumpost'] ?? '') == 'yes';
+        $maypost = UserDisplay::currentClass() >= (int) ($row['minclasswrite'] ?? 0) && UserDisplay::currentClass() >= (int) ($row['minclasscreate'] ?? 0) && LegacyYesNo::isYes($curUser['forumpost'] ?? null);
 
         if (! $maypost) {
             echo '<p><i>'.($lang['text_unpermitted_starting_new_topics'] ?? '')."</i></p>\n";
@@ -179,7 +180,7 @@ final class ForumListingService
                 $lpadded = Time::format($arr['added'] ?? '', true, false);
                 $onmouseover = '';
                 $lastpost_tooltip = [];
-                if ($enabletooltipTweak == 'yes' && ($curUser['showlastpost'] ?? '') != 'no') {
+                if ($enabletooltipTweak == 'yes' && ! LegacyYesNo::isNo($curUser['showlastpost'] ?? null)) {
                     if (($curUser['timetype'] ?? 1) != UserTimeType::TIMEALIVE->value) {
                         $lastposttime = ($lang['text_at_time'] ?? '').($arr['added'] ?? '');
                     } else {
@@ -240,9 +241,8 @@ final class ForumListingService
 </span>
 </td>
 <?php
-            echo '</tr></table>';
-            echo $pagerbottom;
-            if ($enabletooltipTweak == 'yes' && ($curUser['showlastpost'] ?? '') != 'no') {
+            echo '</tr></table>'.$pagerbottom;
+            if ($enabletooltipTweak == 'yes' && ! LegacyYesNo::isNo($curUser['showlastpost'] ?? null)) {
                 echo Html::tooltipContainer($lastpost_tooltip, 400);
             }
         } else {

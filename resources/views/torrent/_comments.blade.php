@@ -1,5 +1,5 @@
 @php
-$showComments = ($CURUSER['showcomment'] ?? '') !== 'no';
+$showComments = ! \App\Support\LegacyYesNo::isNo($CURUSER['showcomment'] ?? null);
 @endphp
 
 @if ($showComments)

@@ -16,6 +16,7 @@ use App\Support\Globals;
 use App\Support\Input;
 use App\Support\LegacyResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\HtmlString;
 
 /**
  * Builds the compose-frame sections (new topic, reply, quote, edit)
@@ -101,7 +102,7 @@ final class ForumComposeService
         }
         echo '<input type="hidden" name="id" value="'.$hiddenId.'" />';
         echo '<input type="hidden" name="type" value="'.$hiddenType.'" />';
-        Frame::composeBeginVoid($title, $hiddenType, $body, $hassubject, $subject);
+        Frame::composeBeginVoid(new HtmlString((string) $title), $hiddenType, $body, $hassubject, $subject);
         Frame::composeEndVoid();
         echo '</form>';
 

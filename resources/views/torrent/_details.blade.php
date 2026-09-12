@@ -64,7 +64,7 @@ if (empty($requestFlags['cmtpage'])) {
 		// ------------- start upped by block ------------------//
 		if ($CURUSER["id"] == $row["owner"])
 			$CURUSER["downloadpos"] = "yes";
-		if ($CURUSER["downloadpos"] != "no")
+		if (! \App\Support\LegacyYesNo::isNo($CURUSER["downloadpos"] ?? null))
 		{
 			print("<tr><td class=\"rowhead\" width=\"13%\">".$lang_details['row_download']."</td><td class=\"rowfollow\" width=\"87%\" align=\"left\">");
 			if ($CURUSER['timetype'] != 'timealive')
@@ -84,7 +84,7 @@ if (empty($requestFlags['cmtpage'])) {
 		$type_info = "&nbsp;&nbsp;&nbsp;<b>".$lang_details['row_type'].":</b>&nbsp;".$row["cat_name"];
         \App\Support\Html::tr($lang_details['row_basic_info'], $size_info.$type_info.$taxonomyRendered, 1);
 		$actions = [];
-        if ($CURUSER["downloadpos"] != "no") {
+        if (! \App\Support\LegacyYesNo::isNo($CURUSER["downloadpos"] ?? null)) {
             $hasBuy = (bool) ($hasBuy ?? false);
             if ($row['price'] > 0) {
                 if ($hasBuy) {
@@ -140,7 +140,7 @@ JS;
             \App\Support\Html::tr($lang_functions['text_technical_info'], $technicalInfoResult, 1);
         }
 
-		if ($CURUSER['showdescription'] != 'no' && !empty($descr)){
+		if (! \App\Support\LegacyYesNo::isNo($CURUSER['showdescription'] ?? null) && !empty($descr)){
             \App\Support\Html::tr("<a href=\"#\" data-klappe=\"descr\"><span class=\"nowrap\"><img class=\"minus\" src=\"pic/trans.gif\" alt=\"Show/Hide\" id=\"picdescr\" title=\"".($lang_details['title_show_or_hide'] ?? '')."\" /> ".$lang_details['row_description']."</span></a>", "<div id='kdescr'>".$descr."</div>", 1);
 		}
 

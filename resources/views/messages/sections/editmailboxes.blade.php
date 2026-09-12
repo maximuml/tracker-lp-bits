@@ -25,7 +25,7 @@ $em = $editmailboxes;
 <td class="colhead" align=left>{{ $lang_messages['text_edit_mailboxes'] ?? 'Edit mailboxes' }}</td>
 </tr>
 <tr>
-<td align=left>{{ $lang_messages['text_edit_mailboxes_note'] ?? '' }}
+<td align=left>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($lang_messages['text_edit_mailboxes_note'] ?? ''))
 <form action="/messages" method="get">
 <input type="hidden" name="action" value="editmailboxes2">
 <input type="hidden" name="action2" value="edit">

@@ -60,7 +60,7 @@ final class InactiveUserCleanupTask implements CleanupTask
         $iniupload = SiteConfig::current()->main->iniUpload(0);
 
         $query = User::query()
-            ->where('parked', 'no')
+            ->where('parked', 0)
             ->where('status', UserStatus::CONFIRMED->value)
             ->where('class', '<', $maxclass)
             ->where('last_access', '<', $dt)
@@ -85,7 +85,7 @@ final class InactiveUserCleanupTask implements CleanupTask
         $iniupload = SiteConfig::current()->main->iniUpload(0);
 
         $query = User::query()
-            ->where('parked', 'no')
+            ->where('parked', 0)
             ->where('status', UserStatus::CONFIRMED->value)
             ->where('class', '<', $maxclass)
             ->where('added', '<', $dt)
@@ -109,7 +109,7 @@ final class InactiveUserCleanupTask implements CleanupTask
         $maxclass = $this->neverDeleteClass();
 
         $query = User::query()
-            ->where('parked', 'no')
+            ->where('parked', 0)
             ->where('status', UserStatus::CONFIRMED->value)
             ->where('class', '<', $maxclass)
             ->where('last_access', '<', $dt);
@@ -129,7 +129,7 @@ final class InactiveUserCleanupTask implements CleanupTask
         $maxclass = $this->neverDeleteParkedClass();
 
         $query = User::query()
-            ->where('parked', 'yes')
+            ->where('parked', 1)
             ->where('status', UserStatus::CONFIRMED->value)
             ->where('class', '<', $maxclass)
             ->where('last_access', '<', $dt);

@@ -121,7 +121,7 @@ final class UserClassManagementTask implements CleanupTask
 
         User::query()->whereIn('id', $uidArr)->update([
             'class' => UserClassEnum::USER->value,
-            'leechwarn' => 'no',
+            'leechwarn' => false,
             'leechwarnuntil' => null,
         ]);
 
@@ -368,7 +368,7 @@ final class UserClassManagementTask implements CleanupTask
 
         User::query()->whereIn('id', $uidArr)->update([
             'class' => UserClassEnum::PEASANT->value,
-            'leechwarn' => 'yes',
+            'leechwarn' => true,
             'leechwarnuntil' => $until,
         ]);
 

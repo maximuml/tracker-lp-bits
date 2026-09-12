@@ -23,7 +23,7 @@ $tdattr = (string) ($tdattr ?? '');
 @if (! empty($showrationotice))
 <td class="text" align="left" valign="top" {{ $tdattr }}>
 <h3>{{ $lang_downloadnotice['text_this_is_private_tracker'] ?? '' }}</h3>
-<p>{{ $lang_downloadnotice['text_private_tracker_note_one'] ?? '' }}<i>({{ $lang_downloadnotice['text_learn_more'] ?? '' }}<a class="faqlink" href="{{ NEXUSWIKIURL ?? '' }}/Private Tracker" target="_blank">{{ $lang_downloadnotice['text_nexuswiki'] ?? '' }}</a>)</i></p>
+<p>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($lang_downloadnotice['text_private_tracker_note_one'] ?? ''))<i>({{ $lang_downloadnotice['text_learn_more'] ?? '' }}<a class="faqlink" href="{{ NEXUSWIKIURL ?? '' }}/Private Tracker" target="_blank">{{ $lang_downloadnotice['text_nexuswiki'] ?? '' }}</a>)</i></p>
 <p>{{ $lang_downloadnotice['text_private_tracker_note_two'] ?? '' }}<i>({{ $lang_downloadnotice['text_see_ratio'] ?? '' }}<a class="faqlink" href="faq.php#id23" target="_blank">{{ $lang_downloadnotice['text_faq'] ?? '' }}</a>)</i></p>
 <p>{{ $lang_downloadnotice['text_private_tracker_note_three'] ?? '' }}</p>
 <img src="pic/ratio.png" alt="ratio" />

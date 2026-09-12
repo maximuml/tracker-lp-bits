@@ -34,7 +34,7 @@ $fw = $forward;
 <td class="rowfollow" align=left><textarea name="body" style="width: 500px" rows="8"></textarea><br />{!! $fw['body'] !!}</td>
 </tr>
 <tr>
-<td class=toolbox colspan="2" align="center"><input class=checkbox type="checkbox" name="save" value="yes"{{ ($CURUSER['savepms'] ?? '') === 'yes' ? ' checked' : '' }}>{{ $lang_messages['checkbox_save_message'] ?? 'Save message' }}&nbsp;
+<td class=toolbox colspan="2" align="center"><input class=checkbox type="checkbox" name="save" value="yes"{{ \App\Support\LegacyYesNo::isYes($CURUSER['savepms'] ?? null) ? ' checked' : '' }}>{{ $lang_messages['checkbox_save_message'] ?? 'Save message' }}&nbsp;
 <input type="submit" class="btn" value={{ $lang_messages['submit_forward'] ?? 'Forward' }}></td>
 </tr>
 </table>

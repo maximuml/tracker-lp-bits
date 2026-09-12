@@ -19,6 +19,7 @@ use App\Support\Globals;
 use App\Support\Html;
 use App\Support\Input;
 use App\Support\LegacyResponse;
+use App\Support\LegacyYesNo;
 use App\Support\Ratio;
 use App\Support\Time;
 use App\Support\UserClass;
@@ -89,7 +90,7 @@ final class ForumTopicViewService
         if (UserDisplay::currentClass() < (int) ($row['minclassread'] ?? 0)) {
             LegacyResponse::abort($lang['std_error'] ?? '', $lang['std_unpermitted_viewing_topic'] ?? '');
         }
-        if (((UserDisplay::currentClass() >= (int) ($row['minclasswrite'] ?? 0) && ! $locked) || Permission::can(PermissionEnum::POST_MANAGE) || $isForummod) && ($curUser['forumpost'] ?? '') == 'yes') {
+        if (((UserDisplay::currentClass() >= (int) ($row['minclasswrite'] ?? 0) && ! $locked) || Permission::can(PermissionEnum::POST_MANAGE) || $isForummod) && LegacyYesNo::isYes($curUser['forumpost'] ?? null)) {
             $maypost = true;
         } else {
             $maypost = false;
@@ -223,8 +224,8 @@ final class ForumTopicViewService
                 $this->legacyRedisCache?->cache_value('user_'.$posterid.'_post_count', $forumposts, 3600);
             }
 
-            $signature = (($curUser['signatures'] ?? '') == 'yes' ? ($arr2['signature'] ?? '') : '');
-            $avatar = (($curUser['avatars'] ?? '') == 'yes' ? htmlspecialchars((string) ($arr2['avatar'] ?? '')) : '');
+            $signature = (LegacyYesNo::isYes($curUser['signatures'] ?? null) ? ($arr2['signature'] ?? '') : '');
+            $avatar = (LegacyYesNo::isYes($curUser['avatars'] ?? null) ? htmlspecialchars((string) ($arr2['avatar'] ?? '')) : '');
 
             $uclass = UserClass::imagePath((int) ($arr2['class'] ?? 0));
             $by = UserDisplay::username($posterid, false, true, true, false, false, true);

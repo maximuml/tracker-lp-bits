@@ -72,7 +72,7 @@ if (! function_exists('maketable')) {
             $catname = htmlspecialchars($arr["catname"]);
 
             $sphighlight = \App\Support\Promotion::backgroundStyleWithContext($arr['sp_state']);
-            $banned_torrent = ($arr["banned"] == 'yes' ? " <b>(<font class=\"striking\">".$lang_functions['text_banned']."</font>)</b>" : "");
+            $banned_torrent = (\App\Support\LegacyYesNo::isYes($arr["banned"] ?? null) ? " <b>(<font class=\"striking\">".$lang_functions['text_banned']."</font>)</b>" : "");
             $sp_torrent = \App\Support\Promotion::appendWithContext($arr['sp_state'], '', false, '', 0, '', $arr['__ignore_global_sp_state'] ?? false);
             if ($showtotalsize) {
                 $total_size += $arr['size'];

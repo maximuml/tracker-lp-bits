@@ -192,21 +192,7 @@ class AnnounceService
     {
         $passkey = $ctx->params['passkey'];
 
-        $lookupUser = static function () use ($passkey): array {
-            $user = User::query()
-                ->select([
-                    'id', 'username', 'downloadpos', 'enabled', 'uploaded', 'downloaded',
-                    'class', 'parked', 'clientselect', 'showclienterror', 'passkey',
-                    'donor', 'donoruntil', 'seedbonus', 'tracker_url_id',
-                ])
-                ->where('passkey', $passkey)
-                ->first();
-
-            return $user ? $user->toArray() : [];
-        };
-
-        $user = RedisGuard::attempt(static fn () => Cache::remember("user_passkey_{$passkey}_content", 3600, $lookupUser))
-            ?? $lookupUser();
+        $user = app(PasskeyUserLookup::class)->find($passkey);
 
         if (! $user) {
             RedisGuard::attempt(static fn () => Redis::connection()->client()->set("passkey_invalid:{$passkey}", TIMENOW, ['ex' => 24 * 3600]));
@@ -297,8 +283,14 @@ class AnnounceService
             return $torrent ? (array) $torrent : false;
         };
 
-        $torrent = RedisGuard::attempt(static fn () => Cache::remember("torrent_hash_{$ctx->infoHashBinary()}_content", 350, $lookupTorrent))
-            ?? $lookupTorrent();
+        $torrentCacheKey = "torrent_hash_{$ctx->infoHashBinary()}_content";
+        $torrent = RedisGuard::attempt(static fn () => Cache::get($torrentCacheKey));
+        if (! is_array($torrent)) {
+            $torrent = $lookupTorrent();
+            if ($torrent !== false) {
+                RedisGuard::attempt(static fn () => Cache::put($torrentCacheKey, $torrent, 350));
+            }
+        }
 
         if ($torrent === false) {
             Logger::writeWithContext((string) ('[TORRENT NOT EXISTS] info_hash: '.$infoHashHex), (string) 'info', (bool) false);

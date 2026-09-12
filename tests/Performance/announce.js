@@ -203,7 +203,9 @@ export function steadyAnnounce() {
     steadyRequests.add(1);
     const ok = check(res, {
       'announce 200': (r) => r.status === 200,
-      'announce no failure': (r) => r.body.indexOf('failure reason') === -1,
+      // 'Passkey invalid' arrives as a warning, not a failure reason — a
+      // poisoned/unknown passkey must still fail the gate.
+      'announce no failure': (r) => r.body.indexOf('failure reason') === -1 && r.body.indexOf('Passkey invalid') === -1,
     });
     if (!ok) {
       debugBody('steady_announce', res);
@@ -229,7 +231,7 @@ export function manyPeers() {
     manyPeersRequests.add(1);
     const ok = check(res, {
       'peer announce 200': (r) => r.status === 200,
-      'peer no failure': (r) => r.body.indexOf('failure reason') === -1,
+      'peer no failure': (r) => r.body.indexOf('failure reason') === -1 && r.body.indexOf('Passkey invalid') === -1,
     });
     if (!ok) {
       debugBody('many_peers_one_torrent', res);

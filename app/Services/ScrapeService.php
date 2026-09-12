@@ -8,7 +8,6 @@ use App\DTOs\ScrapeRequestDto;
 use App\Exceptions\TrackerException;
 use App\Exceptions\TrackerWarningException;
 use App\Models\Torrent;
-use App\Models\User;
 use App\Support\Config\SiteConfig;
 use App\Support\RedisGuard;
 use App\ValueObjects\InfoHash;
@@ -41,22 +40,7 @@ class ScrapeService
     {
         $passkey = $dto->passkey->toString();
 
-        $lookupUser = static function () use ($passkey): array {
-            $record = User::query()
-                ->select([
-                    'id', 'username', 'downloadpos', 'enabled', 'uploaded', 'downloaded',
-                    'class', 'parked', 'clientselect', 'showclienterror', 'passkey',
-                    'donor', 'donoruntil', 'seedbonus', 'tracker_url_id',
-                ])
-                ->where('passkey', $passkey)
-                ->first();
-
-            return $record ? $record->toArray() : [];
-        };
-
-        $user = RedisGuard::attempt(
-            static fn () => Cache::remember("user_passkey_{$passkey}_content", 3600, $lookupUser),
-        ) ?? $lookupUser();
+        $user = app(PasskeyUserLookup::class)->find($passkey);
 
         if (empty($user)) {
             RedisGuard::attempt(static fn () => Redis::connection()->client()->set("passkey_invalid:{$passkey}", TIMENOW, ['ex' => 24 * 3600]));

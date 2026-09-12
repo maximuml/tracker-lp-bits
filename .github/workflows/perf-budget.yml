@@ -135,6 +135,15 @@ jobs:
             --env PASSWORD=PerfTest2026! \
             tests/Performance/baseline.js
 
+      - name: Clear seeded perf peer rows
+        run: |
+          # The dataset seeds '-perf-<uid>-<tid>' peer rows on every perf
+          # torrent; the tracker allows only one leeching peer per
+          # (user, torrent), so announce scenarios must start clean to
+          # control (user, torrent, peer_id) themselves.
+          docker compose exec -T php php artisan tinker \
+            --execute='DB::table("peers")->where("peer_id","like","-perf-%")->delete();'
+
       - name: Run k6 tracker load test (announce + scrape)
         run: |
           mkdir -p perf-results

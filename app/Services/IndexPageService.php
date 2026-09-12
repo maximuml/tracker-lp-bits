@@ -20,6 +20,7 @@ use App\Support\Shoutbox;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
 use App\ViewModels\IndexPageViewModel;
+use Illuminate\Support\HtmlString;
 
 /**
  * Prepares section data for the index page, replacing the legacy
@@ -541,7 +542,7 @@ JS;
     {
         return [
             'show' => true,
-            'note' => $lang['text_browser_note'] ?? '',
+            'note' => new HtmlString((string) ($lang['text_browser_note'] ?? '')),
             'nexusUrl' => (string) $this->globals->get('NEXUSPHPURL', ''),
             'projectName' => (string) $this->globals->get('PROJECTNAME', ''),
         ];

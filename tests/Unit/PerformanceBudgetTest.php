@@ -87,10 +87,10 @@ final class PerformanceBudgetTest extends TestCase
         $this->assertFileExists(base_path('tests/Performance/announce.js'));
         $announce = file_get_contents(base_path('tests/Performance/announce.js'));
         $this->assertStringContainsString('announce.php', $announce, 'announce.js must test announce.php');
-        $this->assertStringContainsString('announce_duration', $announce, 'announce.js must track announce duration');
+        $this->assertStringContainsString('announce_steady_duration', $announce, 'announce.js must track announce duration');
         $this->assertStringContainsString('scrape.php', $announce, 'announce.js must test scrape.php (T-17)');
         $this->assertStringContainsString('passkey', $announce, 'announce.js must use passkey auth (T-17)');
-        $this->assertStringContainsString('scrape_duration', $announce, 'announce.js must track scrape duration (T-17)');
+        $this->assertStringContainsString('scrape_multi_duration', $announce, 'announce.js must track scrape duration (T-17)');
     }
 
     /**

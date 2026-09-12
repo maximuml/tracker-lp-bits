@@ -109,6 +109,9 @@
         "test:architecture": [
             "@php artisan test --testsuite=Architecture"
         ],
+        "test:performance": [
+            "@php artisan test --testsuite=Performance"
+        ],
         "test:lint": [
             "vendor/bin/pint --test",
             "vendor/bin/phpstan analyse --no-progress --memory-limit=2G"

@@ -10,6 +10,9 @@
     <testsuite name="Architecture">
       <directory suffix="Test.php">./tests/Architecture</directory>
     </testsuite>
+    <testsuite name="Performance">
+      <directory suffix="Test.php">./tests/Performance</directory>
+    </testsuite>
   </testsuites>
   <php>
     <server name="APP_ENV" value="testing"/>

@@ -35,6 +35,9 @@ test-feature: ## Run feature tests only
 test-architecture: ## Run architecture ratchet tests only
 	$(TEST_RUN) 'php artisan config:clear && composer test:architecture'
 
+test-performance: ## Run performance/EXPLAIN regression tests only
+	$(TEST_RUN) 'php artisan config:clear && php artisan migrate:fresh --seed --force && composer test:performance'
+
 test-lint: ## Run Pint + PHPStan
 	$(TEST_RUN) 'composer test:lint'
 

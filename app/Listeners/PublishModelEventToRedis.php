@@ -27,6 +27,7 @@ use App\Events\UserEnabled;
 use App\Events\UserUpdated;
 use App\Support\Env;
 use App\Support\Logger;
+use App\Support\RedisGuard;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Redis;
 
@@ -92,10 +93,12 @@ final class PublishModelEventToRedis
         $channel = Env::get('CHANNEL_NAME_MODEL_EVENT', null);
 
         if (! empty($channel)) {
-            Redis::connection()->client()->publish(
+            // Best-effort fan-out: a dead Redis costs ~5-10s of connect
+            // stalls per event — the breaker keeps callers fast instead.
+            RedisGuard::attempt(static fn () => Redis::connection()->client()->publish(
                 $channel,
                 json_encode(['event' => $name, 'id' => $id, 'json' => $json], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
-            );
+            ));
         } else {
             Logger::writeWithContext("event: $name, id: $id, channel: ".(is_scalar($channel) ? (string) $channel : '').', channel is empty!', 'error');
         }

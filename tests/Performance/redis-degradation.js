@@ -12,12 +12,20 @@
  */
 
 import http from 'k6/http';
+import exec from 'k6/execution';
 import { check, group } from 'k6';
 import { Trend, Counter, Rate } from 'k6/metrics';
 
 const BASE_URL = __ENV.BASE_URL || 'http://127.0.0.1:80';
 const PASSKEY = __ENV.PASSKEY || '';
 const INFO_HASH = __ENV.INFO_HASH || '';
+// The tracker allows one leeching peer per (user, torrent) — rotate the
+// seeded perf users and keep a stable peer_id per user so iterations are
+// legal re-announces, not rejected second leechers.
+const PASSKEYS = (__ENV.PASSKEYS || PASSKEY).split(',').filter((k) => k.length > 0);
+// A torrent the other scenarios never touch — earlier runs leave peer rows,
+// and a second leeching peer per (user, torrent) is rejected.
+const DEGRADED_HASH = __ENV.DEGRADED_HASH || INFO_HASH;
 
 const degradedDuration = new Trend('announce_redis_down_duration', true);
 const degradedAnswered = new Rate('announce_redis_down_answered_rate');
@@ -49,12 +57,16 @@ export const options = {
 
 export function degradedAnnounce() {
   group('redis_down_announce', () => {
-    // Exactly 20 bytes — the tracker rejects shorter peer_ids.
-    const peerId = ('-k6D' + __ITER.toString(36)).padEnd(20, '0');
+    // Exactly 20 bytes in a qBittorrent-5.x layout so the seeded agent
+    // allowlist accepts it; matching User-Agent goes in the header.
+    // iterationInTest is scenario-global (unlike __ITER, which is per-VU)
+    // — consecutive requests rotate to different users deterministically.
+    const u = exec.scenario.iterationInTest % PASSKEYS.length;
+    const peerId = ('-qB5000-D' + u.toString(36)).padEnd(20, '0');
     const res = http.get(
-      `${BASE_URL}/announce.php?passkey=${PASSKEY}&info_hash=${INFO_HASH}` +
-      `&peer_id=${peerId}&port=51413&uploaded=0&downloaded=0&left=1&compact=1`,
-      { timeout: '10s' },
+      `${BASE_URL}/announce.php?passkey=${PASSKEYS[u]}&info_hash=${DEGRADED_HASH}` +
+      `&peer_id=${encodeURIComponent(peerId)}&port=51413&uploaded=0&downloaded=0&left=1&compact=1`,
+      { timeout: '10s', headers: { 'User-Agent': 'qBittorrent/5.0.0' } },
     );
     degradedDuration.add(res.timings.duration);
     degradedRequests.add(1);

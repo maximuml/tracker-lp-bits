@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Listeners;
 
+use App\Support\RedisGuard;
 use Illuminate\Cache\Events\CacheHit;
 use Illuminate\Cache\Events\CacheMissed;
 use Illuminate\Support\Facades\Redis;
@@ -25,10 +26,7 @@ final class RecordCacheMetrics
 
     private function increment(string $key): void
     {
-        try {
-            Redis::connection()->incr($key);
-        } catch (\Throwable) {
-            // Non-critical: metrics are best-effort
-        }
+        // Best-effort — the breaker keeps a dead Redis from stalling callers.
+        RedisGuard::attempt(static fn () => Redis::connection()->incr($key));
     }
 }

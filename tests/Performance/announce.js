@@ -23,6 +23,7 @@
  */
 
 import http from 'k6/http';
+import exec from 'k6/execution';
 import { check, group, sleep } from 'k6';
 import { Trend, Counter, Rate } from 'k6/metrics';
 
@@ -33,6 +34,10 @@ const PASSKEY = __ENV.PASSKEY || '';
 const INFO_HASH = __ENV.INFO_HASH || '';
 // Comma-separated extra hashes for multi-hash scrape (perf-torrent-1..5)
 const INFO_HASHES = (__ENV.INFO_HASHES || INFO_HASH).split(',').filter((h) => h.length > 0);
+// Comma-separated passkeys (perf_user_1..10) — the tracker allows only ONE
+// leeching peer per (user, torrent), so multi-peer scenarios must spread
+// across users, not just peer_ids.
+const PASSKEYS = (__ENV.PASSKEYS || PASSKEY).split(',').filter((k) => k.length > 0);
 const DEBUG_BODY = __ENV.DEBUG_BODY === '1';
 
 // Per-scenario metrics
@@ -66,11 +71,16 @@ function debugBody(scenario, res) {
 }
 
 /**
- * Build a protocol-valid peer_id: exactly 20 bytes, unique per (tag, n).
- * Layout: '-k6' + tag char + base36 number, right-padded with '0'.
+ * Build a protocol-valid peer_id that passes the seeded agent allowlist:
+ * qBittorrent 5.x layout '-qB5' + 2 digits + '-' + 12 chars = 20 bytes,
+ * unique per (tag, n). The matching User-Agent header is sent per request.
  */
+const PEER_ID_PREFIX = '-qB5000-';
+const CLIENT_UA = 'qBittorrent/5.0.0';
+const TRACKER_PARAMS = { headers: { 'User-Agent': CLIENT_UA } };
+
 function peerId(tag, n) {
-  return ('-k6' + tag + n.toString(36)).padEnd(20, '0');
+  return (PEER_ID_PREFIX + tag + n.toString(36)).padEnd(20, '0');
 }
 
 export const options = {
@@ -87,10 +97,12 @@ export const options = {
       exec: 'steadyAnnounce',
       startTime: '0s',
     },
-    // Many distinct peers joining one torrent.
+    // Many distinct peers joining one torrent — 8 concurrent VUs x 2
+    // iterations = 16 announces spread across users 2-9 (users 0-1 are
+    // taken by steady_announce; a second leecher per user+torrent fails).
     many_peers_one_torrent: {
       executor: 'per-vu-iterations',
-      vus: 15,
+      vus: 8,
       iterations: 2,
       maxDuration: '30s',
       exec: 'manyPeers',
@@ -142,10 +154,10 @@ export const options = {
   },
 };
 
-function announceUrl(peerId, infoHash) {
+function announceUrl(peerId, infoHash, passkey) {
   const key = Math.random().toString(36).substring(7);
-  return `${BASE_URL}/announce.php?passkey=${PASSKEY}&info_hash=${infoHash}` +
-    `&peer_id=${peerId}&port=51413&uploaded=0&downloaded=1024&left=1048576` +
+  return `${BASE_URL}/announce.php?passkey=${passkey || PASSKEY}&info_hash=${infoHash}` +
+    `&peer_id=${encodeURIComponent(peerId)}&port=51413&uploaded=0&downloaded=1024&left=1048576` +
     `&numwant=50&key=${key}&compact=1&supportcrypto=0`;
 }
 
@@ -155,7 +167,8 @@ export function invalidPasskeyFlood() {
     const badKey = 'deadbeef' + Math.random().toString(16).substring(2, 26).padEnd(24, '0');
     const res = http.get(
       `${BASE_URL}/announce.php?passkey=${badKey}&info_hash=${INFO_HASH}` +
-      `&peer_id=${peerId('F', __ITER)}&port=51413&uploaded=0&downloaded=0&left=1&compact=1`,
+      `&peer_id=${encodeURIComponent(peerId('F', __ITER))}&port=51413&uploaded=0&downloaded=0&left=1&compact=1`,
+      TRACKER_PARAMS,
     );
     floodDuration.add(res.timings.duration);
     floodRequests.add(1);
@@ -172,11 +185,20 @@ export function invalidPasskeyFlood() {
 
 export function steadyAnnounce() {
   group('steady_announce', () => {
-    // A small stable set of clients per VU, rotating across torrents so the
-    // frequency limiter does not collapse everything into the warning path.
-    const peer = peerId('S', __VU * 100 + (__ITER % 10));
-    const infoHash = INFO_HASHES.length > 0 ? INFO_HASHES[__ITER % INFO_HASHES.length] : INFO_HASH;
-    const res = http.get(announceUrl(peer, infoHash));
+    // The tracker allows one leeching peer per (user, torrent). We keep a
+    // stable peer_id per (user, info_hash) pair: the first announce for a
+    // pair inserts, later iterations are legal re-announces of the same
+    // peer. iterationInTest is scenario-global, so the mapping does not
+    // depend on which VU executes the iteration. Users 0-1 are reserved
+    // for this scenario — many_peers_one_torrent takes users 2-9.
+    const n = INFO_HASHES.length > 0 ? INFO_HASHES.length : 1;
+    const seq = exec.scenario.iterationInTest;
+    const hashIdx = seq % n;
+    const userIdx = Math.floor(seq / n) % 2;
+    const peer = peerId('S', userIdx * n + hashIdx);
+    const infoHash = INFO_HASHES.length > 0 ? INFO_HASHES[hashIdx] : INFO_HASH;
+    const passkey = PASSKEYS[userIdx];
+    const res = http.get(announceUrl(peer, infoHash, passkey), TRACKER_PARAMS);
     steadyDuration.add(res.timings.duration);
     steadyRequests.add(1);
     const ok = check(res, {
@@ -194,8 +216,15 @@ export function steadyAnnounce() {
 
 export function manyPeers() {
   group('many_peers_one_torrent', () => {
-    const peer = peerId('M', __VU * 100 + __ITER);
-    const res = http.get(announceUrl(peer, INFO_HASH));
+    // Each iteration maps to one of users 2-9 (users 0-1 are taken by
+    // steady_announce) leeching the same torrent. The peer_id is stable
+    // per user, so a user's second iteration is a legal re-announce.
+    // iterationInTest is scenario-global — VU scheduling does not matter.
+    const i = exec.scenario.iterationInTest;
+    const userIdx = 2 + (i % (PASSKEYS.length - 2));
+    const peer = peerId('M', userIdx);
+    const passkey = PASSKEYS[userIdx];
+    const res = http.get(announceUrl(peer, INFO_HASH, passkey), TRACKER_PARAMS);
     manyPeersDuration.add(res.timings.duration);
     manyPeersRequests.add(1);
     const ok = check(res, {
@@ -212,7 +241,10 @@ export function manyPeers() {
 
 export function earlyAnnounce() {
   group('early_announce', () => {
-    const res = http.get(announceUrl(peerId('E', 1), INFO_HASH));
+    // Last hash + last user — steady_announce already leeches the first
+    // hashes as users 0-1, and a second leecher per user+torrent fails.
+    const hash = INFO_HASHES.length > 0 ? INFO_HASHES[INFO_HASHES.length - 1] : INFO_HASH;
+    const res = http.get(announceUrl(peerId('E', 1), hash, PASSKEYS[PASSKEYS.length - 1]), TRACKER_PARAMS);
     earlyDuration.add(res.timings.duration);
     earlyRequests.add(1);
     // Dedup window answers with a warning response — still HTTP 200 and fast.
@@ -230,7 +262,7 @@ export function earlyAnnounce() {
 export function multiHashScrape() {
   group('multi_hash_scrape', () => {
     const qs = INFO_HASHES.map((h) => `info_hash=${h}`).join('&');
-    const res = http.get(`${BASE_URL}/scrape.php?passkey=${PASSKEY}&${qs}`);
+    const res = http.get(`${BASE_URL}/scrape.php?passkey=${PASSKEY}&${qs}`, TRACKER_PARAMS);
     scrapeMultiDuration.add(res.timings.duration);
     scrapeRequests.add(1);
     const ok = check(res, {

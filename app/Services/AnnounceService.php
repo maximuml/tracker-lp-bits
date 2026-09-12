@@ -132,7 +132,7 @@ class AnnounceService
 
         $response = DB::transaction(function () use ($ctx, $peerLifecycle, $traffic): array {
             return $this->process($ctx, $peerLifecycle, $traffic);
-        });
+        }, 3);
 
         $this->postProcess($ctx);
 

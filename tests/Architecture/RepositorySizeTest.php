@@ -67,7 +67,6 @@ final class RepositorySizeTest extends TestCase
         'app/Services/OfferService.php' => 422,
         'app/Services/Announce/PeerLifecycle.php' => 418,
         'app/Services/MessagePageService.php' => 417,
-        'app/Services/ForumListingService.php' => 417,
         'app/Services/Cleanup/Tasks/UserClassManagementTask.php' => 430,
     ];
 

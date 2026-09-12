@@ -48,6 +48,10 @@ final class HttpContractTest extends TestCase
         'confirmemail',
         // Passkey-auth routes — use passkey, not session/token guard
         'api/pieces-hash',
+        // ajax.php — per-action guard inside UtilityController::ajax()
+        // (passkey actions are guest-facing, the rest get a JSON 401 via
+        // LegacyAuth::requireLoginFromContext)
+        'ajax',
     ];
 
     /**

@@ -45,12 +45,13 @@ final class Tag
      * `pic/key_shortcut.js`. The order is `maxpage` first, then
      * `currentpage` — preserved verbatim.
      */
-    public static function keyShortcutScript(int $page = 1, int $pages = 1): string
+    public static function keyShortcutScript(int $page = 1, int $pages = 1, string $nonce = ''): string
     {
         $currentpage = 'var currentpage='.$page.';';
         $maxpage = 'var maxpage='.$pages.';';
+        $nonceAttr = $nonce !== '' ? ' nonce="'.htmlspecialchars($nonce, ENT_QUOTES).'"' : '';
 
-        return "\n<script type=\"text/javascript\">\n//<![CDATA[\n".$maxpage."\n".$currentpage."\n//]]>\n</script>\n";
+        return "\n<script type=\"text/javascript\"".$nonceAttr.">\n//<![CDATA[\n".$maxpage."\n".$currentpage."\n//]]>\n</script>\n";
     }
 
     /**

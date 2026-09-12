@@ -311,7 +311,9 @@ final class LegacyResponse
         // cross-request state leakage under Octane. If output has already
         // been emitted (ob_get_level() > 0 with content), use a JS redirect.
         if (ob_get_level() > 0 && (string) ob_get_status()['name'] !== '') {
-            throw new HttpResponseException(new Response("<script type=\"text/javascript\">window.location.href = '".htmlspecialchars($url, ENT_QUOTES)."';</script>"));
+            $nonce = (string) request()->attributes->get('csp_nonce', '');
+            $nonceAttr = $nonce !== '' ? ' nonce="'.htmlspecialchars($nonce, ENT_QUOTES).'"' : '';
+            throw new HttpResponseException(new Response('<script type="text/javascript"'.$nonceAttr.">window.location.href = '".htmlspecialchars($url, ENT_QUOTES)."';</script>"));
         }
 
         throw new HttpResponseException(new RedirectResponse($url, 302));

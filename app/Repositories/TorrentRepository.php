@@ -319,15 +319,13 @@ class TorrentRepository extends BaseRepository implements TorrentRepositoryInter
      * @param  mixed  $noteText
      * @param  mixed  $btnText
      * @param  mixed  $btnId
-     * @param  mixed  $btnOnClick
      */
-    public function buildUploadFieldInput($name, $value, $noteText, $btnText, $btnId = '', $btnOnClick = ''): string
+    public function buildUploadFieldInput($name, $value, $noteText, $btnText, $btnId = ''): string
     {
         $btn = $note = '';
         if ($btnText) {
             $idAttr = $btnId ? ' id="'.htmlspecialchars($btnId, ENT_QUOTES, 'UTF-8').'"' : '';
-            $onClickAttr = $btnOnClick ? ' onclick="'.htmlspecialchars($btnOnClick, ENT_QUOTES, 'UTF-8').'"' : '';
-            $btn = '<div><input type="button" class="nexus-action-btn" value="'.$btnText.'"'.$idAttr.$onClickAttr.'></div>';
+            $btn = '<div><input type="button" class="nexus-action-btn" value="'.$btnText.'"'.$idAttr.'></div>';
         }
         if ($noteText) {
             $note = '<span class="medium">'.$noteText.'</span>';

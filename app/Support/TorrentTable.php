@@ -225,7 +225,7 @@ if (Permission::canManageTorrent()) { ?>
                 $act .= '<a href="download.php?id='.$id."\"><img class=\"download\" src=\"pic/trans.gif\" style='padding-bottom: 2px;' alt=\"download\" title=\"".$lang_functions['title_download_torrent'].'" /></a>';
             }
             if ($user['bmicon']) {
-                $bookmark = ' href="javascript: bookmark('.$id.','.$counter.');"';
+                $bookmark = ' href="#" data-bookmark-torrent="'.$id.'" data-bookmark-counter="'.$counter.'"';
                 $act .= ($act ? '<br />' : '').'<a id="bookmark'.$counter.'" '.$bookmark.' >'.TorrentBookmark::stateMarkupWithContext($user['id'], $id).'</a>';
             }
 

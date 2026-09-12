@@ -174,8 +174,8 @@ HTML;
             $row['is_single_row_text'] = $row['is_single_row'] ? $lang_functions['text_yes'] : $lang_functions['text_no'];
             $row['type_text'] = sprintf('%s(%s)', $this->getTypeHuman((int) $row['type']), $row['type']);
             $row['action'] = sprintf(
-                "<a href=\"javascript:confirm_delete('%s', '%s', '');\">%s</a> | <a href=\"?action=edit&id=%s\">%s</a>",
-                $row['id'], $lang_fields['js_sure_to_delete_this'], $lang_fields['text_delete'], $row['id'], $lang_fields['text_edit']
+                '<a href="#" data-confirm-del="%s" data-confirm-note="%s">%s</a> | <a href="?action=edit&id=%s">%s</a>',
+                $row['id'], htmlspecialchars((string) $lang_fields['js_sure_to_delete_this'], ENT_QUOTES), $lang_fields['text_delete'], $row['id'], $lang_fields['text_edit']
             );
             $rows[] = $row;
         }
@@ -386,8 +386,11 @@ HEAD;
                     }
                 }
                 $y .= '</div>';
+                $nonceAttr = ($cspNonce = (string) request()->attributes->get('csp_nonce', '')) !== ''
+                    ? ' nonce="'.htmlspecialchars($cspNonce, ENT_QUOTES).'"'
+                    : '';
                 $y .= <<<JS
-<script>
+<script{$nonceAttr}>
     function {$callbackFunc}(delkey, url)
     {
         var previewBox = $('$previewBoxId')

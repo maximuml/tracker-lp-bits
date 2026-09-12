@@ -22,7 +22,7 @@ $lang_signup =
     'checkbox_read_faq' => 'I agree to read the <a href=faq.php><u>FAQ</u></a> before asking questions.',
     'checkbox_age' => 'I am at least 13 years old.',
     'text_all_fields_required' => 'All Fields are required! ',
-    'submit_sign_up' => 'Sign&nbsp;up!&nbsp;(PRESS&nbsp;ONLY&nbsp;ONCE)',
+    'submit_sign_up' => 'Sign up! (PRESS ONLY ONCE)',
     'select_none_selected' => 'None selected',
     'text_select_lang' => 'Select Site Language: ',
     'row_school' => 'School',

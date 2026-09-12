@@ -417,7 +417,7 @@ $lang_topten = (array) (\app(\App\Support\Globals::class)->get('lang_topten') ??
 	\App\Support\Html::endFrame();
 } }
 
-function topten_link_line(int $type, string $subtype, array $limits, array $lang): string
+if (!function_exists('topten_link_line')) { function topten_link_line(int $type, string $subtype, array $limits, array $lang): string
 {
     if (empty($limits)) {
         return '';
@@ -436,7 +436,7 @@ function topten_link_line(int $type, string $subtype, array $limits, array $lang
     }
 
     return ' <font class="small"> - [' . implode('] - [', $links) . ']</font>';
-}
+} }
 
 
 $isDefault = ($limit === 10 && $subtype === null);

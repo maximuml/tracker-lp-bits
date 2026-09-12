@@ -151,14 +151,11 @@ JS;
 			$files_info = "<b>".$lang_details['text_num_files']."</b>". $row["numfiles"] . $lang_details['text_files'] . "<br />";
 			$files_info .= "<span id=\"showfl\"><a href=\"#\" data-filelist=\"".$id."\">".$lang_details['text_see_full_list']."</a></span><span id=\"hidefl\" class=\"nx-hidden\"><a href=\"#\" data-filelist=\"".$id."\" data-filelist-mode=\"hide\">".$lang_details['text_hide_list']."</a></span>";
 		}
-		function hex_esc($matches) {
-			return sprintf("%02x", ord($matches[0]));
-		}
 		$infoTds = [];
 		if (!empty($files_info)) {
 		    $infoTds[] = "<td class=\"no_border_wide\">" . $files_info . "</td>";
         }
-		$infoTds[] = "<td class=\"no_border_wide\"><b>".$lang_details['row_info_hash'].":</b>&nbsp;".preg_replace_callback('/./s', "hex_esc", \App\Support\Strings::padHash($row["info_hash"]))."</td>";
+		$infoTds[] = "<td class=\"no_border_wide\"><b>".$lang_details['row_info_hash'].":</b>&nbsp;".bin2hex(\App\Support\Strings::padHash($row["info_hash"]))."</td>";
 		if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_STRUCTURE)) {
 		    $infoTds[] = "<td class=\"no_border_wide\"><b>" . $lang_details['text_torrent_structure'] . "</b><a href=\"torrent_info.php?id=".$id."\">".$lang_details['text_torrent_info_note']."</a></td>";
         }

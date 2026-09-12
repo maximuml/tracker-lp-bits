@@ -543,8 +543,6 @@ JS;
         return [
             'show' => true,
             'note' => new HtmlString((string) ($lang['text_browser_note'] ?? '')),
-            'nexusUrl' => (string) $this->globals->get('NEXUSPHPURL', ''),
-            'projectName' => (string) $this->globals->get('PROJECTNAME', ''),
         ];
     }
 }

@@ -305,3 +305,26 @@ button.nx-btn-link {
     font-size: 20pt;
     height: 40px;
 }
+
+/* MediaInfo technical-info block on details page (was an inline <style>
+   emitted by TechnicalInformation::renderOnDetailsPage — blocked by CSP
+   style-src without a nonce). */
+.nti-wrap { margin: 4px 0; }
+.nti-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.nti-col { border: 1px solid rgba(127,127,127,.30); border-radius: 6px; padding: 8px 10px; background: rgba(127,127,127,.05); min-width: 0; }
+.nti-col h4 { margin: 0 0 6px; font-size: 13px; letter-spacing: .3px; text-transform: uppercase; opacity: .85; border-bottom: 1px solid rgba(127,127,127,.25); padding-bottom: 4px; }
+.nti-kv { margin: 0; padding: 0; font-size: 12px; line-height: 1.45; }
+.nti-kv .nti-row { display: flex; gap: 6px; padding: 1px 0; word-break: break-word; }
+.nti-kv .nti-k { flex: 0 0 38%; opacity: .75; }
+.nti-kv .nti-v { flex: 1 1 auto; }
+.nti-track { padding: 4px 0; border-top: 1px dashed rgba(127,127,127,.25); }
+.nti-track:first-child { border-top: 0; padding-top: 0; }
+.nti-track .nti-track-head { font-weight: bold; font-size: 12px; margin-bottom: 2px; }
+.nti-track .nti-badge { display: inline-block; font-size: 10px; padding: 0 4px; margin-left: 4px; border-radius: 3px; background: rgba(0,150,80,.20); color: inherit; vertical-align: 1px; }
+.nti-more { margin-top: 6px; font-size: 11px; opacity: .9; }
+.nti-raw { margin-top: 8px; }
+@media (max-width: 760px) { .nti-grid { grid-template-columns: 1fr; } }
+
+/* Torrent tag chips: baseline spacing/shape so tags stay readable when
+   the per-tag inline style="" (dynamic colors) is blocked by CSP. */
+.nx-tag { display: inline-block; margin: 0 4px 0 0; padding: 1px 6px; border-radius: 4px; }

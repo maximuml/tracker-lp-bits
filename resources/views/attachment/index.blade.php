@@ -29,7 +29,8 @@ if ($script !== '' && $cspNonce !== '') {
 <table width="100%">
 {!! $script !!}
 @if ($Attach->enable_attachment())
-    <form enctype="multipart/form-data" name="attachment" method="post" action="attachment.php?callback_func={{ htmlspecialchars($callback_func) }}">
+    <form enctype="multipart/form-data" name="attachment" method="post" action="attachment.php?callback_func={{ $callback_func }}">
+    @csrf
     <tr>
     <td class="embedded" colspan="2" align=left>
     <input type="file" name="file"@if (! $count_left) disabled="disabled"@endif />&nbsp;
@@ -49,7 +50,7 @@ if ($script !== '' && $cspNonce !== '') {
             }
         @endphp
         <b>{{ $lang_attachment['text_left'] ?? '' }}</b><font color="red">{{ $count_left }}</font>{{ $lang_attachment['text_of'] ?? '' }}{{ $count_limit }}&nbsp;&nbsp;&nbsp;<b>{{ $lang_attachment['text_size_limit'] ?? '' }}</b>{{ \App\Support\Format::size($size_limit) }}&nbsp;&nbsp;&nbsp;<b>{{ $lang_attachment['text_file_extensions'] ?? '' }}</b>
-        <span title="{{ htmlspecialchars($allowedextsblock) }}"><i>{{ $lang_attachment['text_mouse_over_here'] ?? '' }}</i></span>
+        <span title="{{ $allowedextsblock }}"><i>{{ $lang_attachment['text_mouse_over_here'] ?? '' }}</i></span>
     @endif
     </td>
     </tr>

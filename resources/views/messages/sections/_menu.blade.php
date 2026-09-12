@@ -10,6 +10,6 @@ $pmBoxes = app(\App\Repositories\MailboxRepository::class)->getUserMailboxes((in
 <li{{ $selected === -1 ? ' class=selected' : '' }}><a href="{{ \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) }}{{ $BASEURL }}/messages.php?action=viewmailbox&box=-1">{{ $lang_messages['text_sentbox'] ?? 'Sentbox' }}</a></li>
 @foreach ($pmBoxes as $row)
 @php $rowArr = (array) $row; @endphp
-<li{{ $selected === (int) $rowArr['boxnumber'] ? ' class=selected' : '' }}><a href="{{ \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) }}{{ $BASEURL }}/messages.php?action=viewmailbox&box={{ (int) $rowArr['boxnumber'] }}">{{ htmlspecialchars((string) $rowArr['name']) }}</a></li>
+<li{{ $selected === (int) $rowArr['boxnumber'] ? ' class=selected' : '' }}><a href="{{ \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) }}{{ $BASEURL }}/messages.php?action=viewmailbox&box={{ (int) $rowArr['boxnumber'] }}">{{ (string) $rowArr['name'] }}</a></li>
 @endforeach
 </ul></div>

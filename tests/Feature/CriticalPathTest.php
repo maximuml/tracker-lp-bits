@@ -26,7 +26,8 @@ class CriticalPathTest extends TestCase
 {
     private string $baseUrl;
 
-    private string $cookieFile;
+    /** @var array<string, string> */
+    private array $cookies = [];
 
     private string $torrentFile;
 
@@ -55,8 +56,7 @@ class CriticalPathTest extends TestCase
         DB::purge('mysql');
 
         $this->baseUrl = rtrim($base, '/');
-        $this->cookieFile = sys_get_temp_dir().'/critical_path_'.uniqid().'.txt';
-        touch($this->cookieFile);
+        $this->cookies = [];
 
         // Disable CAPTCHA and challenge/response so forms can be submitted
         // without browser interaction. Allow the test user to upload.
@@ -87,9 +87,6 @@ class CriticalPathTest extends TestCase
 
     protected function tearDown(): void
     {
-        if (! empty($this->cookieFile) && file_exists($this->cookieFile)) {
-            @unlink($this->cookieFile);
-        }
         if (! empty($this->torrentFile) && file_exists($this->torrentFile)) {
             @unlink($this->torrentFile);
         }
@@ -137,14 +134,22 @@ class CriticalPathTest extends TestCase
         $url = $this->baseUrl.'/'.ltrim($path, '/');
         $headers = [];
 
+        // libcurl >= 8.22 drops jar-loaded cookies for single-label Docker
+        // hostnames (e.g. "openresty"), so cookies are tracked manually.
+        if ($this->cookies !== []) {
+            $pairs = [];
+            foreach ($this->cookies as $name => $value) {
+                $pairs[] = $name.'='.$value;
+            }
+            $headers[] = 'Cookie: '.implode('; ', $pairs);
+        }
+
         $ch = curl_init($url);
         $options = [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_FOLLOWLOCATION => $follow,
-            CURLOPT_COOKIEJAR => $this->cookieFile,
-            CURLOPT_COOKIEFILE => $this->cookieFile,
             CURLOPT_TIMEOUT => 30,
-            CURLOPT_HEADER => false,
+            CURLOPT_HEADER => true,
             CURLOPT_USERAGENT => 'qBittorrent/4.5.2',
             CURLOPT_HTTPHEADER => $headers,
         ];
@@ -155,12 +160,29 @@ class CriticalPathTest extends TestCase
         }
 
         curl_setopt_array($ch, $options);
-        $body = curl_exec($ch);
+        $raw = curl_exec($ch);
         $info = curl_getinfo($ch);
         $error = curl_error($ch);
         curl_close($ch);
 
         $this->assertSame('', $error, "cURL error for {$url}: {$error}");
+
+        $headerSize = (int) ($info['header_size'] ?? 0);
+        $headerBlock = substr((string) $raw, 0, $headerSize);
+        $body = substr((string) $raw, $headerSize);
+
+        foreach (preg_split('/\r\n|\n/', $headerBlock) ?: [] as $line) {
+            if (stripos($line, 'Set-Cookie:') === 0) {
+                $pair = explode('=', trim(explode(';', substr($line, 11), 2)[0]), 2);
+                if (count($pair) === 2 && $pair[0] !== '') {
+                    if ($pair[1] === '' || strcasecmp($pair[1], 'deleted') === 0) {
+                        unset($this->cookies[$pair[0]]);
+                    } else {
+                        $this->cookies[$pair[0]] = $pair[1];
+                    }
+                }
+            }
+        }
 
         return [
             'status' => (int) ($info['http_code'] ?? 0),

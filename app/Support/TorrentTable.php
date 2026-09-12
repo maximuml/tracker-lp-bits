@@ -269,7 +269,7 @@ if (Permission::canManageTorrent()) { ?>
                             }
                             $lastcom_tooltip[$counter]['id'] = 'lastcom_'.$counter;
                             $lastcom_tooltip[$counter]['content'] = ($hasnewcom ? "<b>(<font class='new'>".$lang_functions['text_new_uppercase'].'</font>)</b> ' : '').$lang_functions['text_last_commented_by'].UserDisplay::username($lastcom['user']).$lastcomtime.'<br />'.Format::formatComment(mb_substr($lastcom['text'], 0, 100, 'UTF-8').(mb_strlen($lastcom['text'], 'UTF-8') > 100 ? ' ......' : ''), true, false, false, true, 600, false, false);
-                            $onmouseover = "onmouseover=\"domTT_activate(this, event, 'content', document.getElementById('".$lastcom_tooltip[$counter]['id']."'), 'trail', false, 'delay', 500,'lifetime',3000,'fade','both','styleClass','niceTitle','fadeMax', 87,'maxWidth', 400);\"";
+                            $onmouseover = ' data-domtt-src="'.$lastcom_tooltip[$counter]['id'].'"';
                         }
                     } else {
                         $hasnewcom = false;

@@ -20,9 +20,9 @@ if ($home['showAvatar']) {
 if ($home['passkeyLoginForm'] !== '') {
     \App\Support\Html::trSmall($lang_usercp['row_passkey_login_url'] ?? 'Passkey login URL', $home['passkeyLoginForm'], 1);
 }
-\App\Support\Html::trSmall($lang_usercp['row_invitations'] ?? 'Invitations', $home['invites'].' [<a href="invite.php?id='.(int) ($curUser['id'] ?? 0).'" title="'.htmlspecialchars($lang_usercp['link_send_invitation'] ?? '').'">'.htmlspecialchars($lang_usercp['text_send'] ?? '').'</a>]', 1);
-\App\Support\Html::trSmall($lang_usercp['row_karma_points'] ?? 'Karma', $home['seedbonus'].' [<a href="mybonus.php" title="'.htmlspecialchars($lang_usercp['link_use_karma_points'] ?? '').'">'.htmlspecialchars($lang_usercp['text_use'] ?? '').'</a>]', 1);
-\App\Support\Html::trSmall($lang_usercp['row_written_comments'] ?? 'Comments', $home['commentCount'].' [<a href="userhistory.php?action=viewcomments&id='.(int) ($curUser['id'] ?? 0).'" title="'.htmlspecialchars($lang_usercp['link_view_comments'] ?? '').'">'.htmlspecialchars($lang_usercp['text_view'] ?? '').'</a>]', 1);
+\App\Support\Html::trSmall($lang_usercp['row_invitations'] ?? 'Invitations', $home['invites'].' [<a href="invite.php?id='.(int) ($curUser['id'] ?? 0).'" title="'.($lang_usercp['link_send_invitation'] ?? '').'">'.htmlspecialchars($lang_usercp['text_send'] ?? '').'</a>]', 1);
+\App\Support\Html::trSmall($lang_usercp['row_karma_points'] ?? 'Karma', $home['seedbonus'].' [<a href="mybonus.php" title="'.($lang_usercp['link_use_karma_points'] ?? '').'">'.htmlspecialchars($lang_usercp['text_use'] ?? '').'</a>]', 1);
+\App\Support\Html::trSmall($lang_usercp['row_written_comments'] ?? 'Comments', $home['commentCount'].' [<a href="userhistory.php?action=viewcomments&id='.(int) ($curUser['id'] ?? 0).'" title="'.($lang_usercp['link_view_comments'] ?? '').'">'.htmlspecialchars($lang_usercp['text_view'] ?? '').'</a>]', 1);
 @endphp
 
 @php
@@ -108,7 +108,7 @@ JS;
 
 // Forum posts row
 if ($home['forumPosts']):
-    $fpHtml = $home['forumPosts'].' [<a href="userhistory.php?action=viewposts&id='.(int) ($curUser['id'] ?? 0).'" title="'.htmlspecialchars($lang_usercp['link_view_posts'] ?? '').'">'.htmlspecialchars($lang_usercp['text_view'] ?? '').'</a>] ('.$home['dayPosts'].htmlspecialchars($lang_usercp['text_posts_per_day'] ?? '').'; '.$home['percentages'].htmlspecialchars($lang_usercp['text_of_total_posts'] ?? '').')';
+    $fpHtml = $home['forumPosts'].' [<a href="userhistory.php?action=viewposts&id='.(int) ($curUser['id'] ?? 0).'" title="'.($lang_usercp['link_view_posts'] ?? '').'">'.htmlspecialchars($lang_usercp['text_view'] ?? '').'</a>] ('.$home['dayPosts'].htmlspecialchars($lang_usercp['text_posts_per_day'] ?? '').'; '.$home['percentages'].htmlspecialchars($lang_usercp['text_of_total_posts'] ?? '').')';
     \App\Support\Html::tr($lang_usercp['row_forum_posts'] ?? 'Forum posts', $fpHtml, 1);
 endif;
 @endphp

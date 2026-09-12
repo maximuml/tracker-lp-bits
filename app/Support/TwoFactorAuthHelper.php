@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Support\Config\SiteConfig;
-use RobThree\Auth\Providers\Qr\GoogleChartsQrCodeProvider;
 use RobThree\Auth\TwoFactorAuth;
 
 class TwoFactorAuthHelper
@@ -15,7 +14,7 @@ class TwoFactorAuthHelper
     private static function getTfa(): TwoFactorAuth
     {
         if (self::$tfa === null) {
-            self::$tfa = new TwoFactorAuth(new GoogleChartsQrCodeProvider, SiteConfig::current()->basic->siteName());
+            self::$tfa = new TwoFactorAuth(new LocalQrCodeProvider, SiteConfig::current()->basic->siteName());
         }
 
         return self::$tfa;
@@ -33,8 +32,6 @@ class TwoFactorAuthHelper
 
     public static function qrCodeUrl(string $label, string $secret, int $size = 200): string
     {
-        $provider = new GoogleChartsQrCodeProvider;
-
-        return $provider->getUrl(self::getTfa()->getQRText($label, $secret), $size);
+        return LocalQrCodeProvider::dataUri(self::getTfa()->getQRText($label, $secret), $size);
     }
 }

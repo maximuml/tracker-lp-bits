@@ -9,7 +9,7 @@ $error = (string) ($error ?? '');
 @section('content')
 <h1>Update Users Donated Amounts</h1>
 @if ($error !== '')
-    <p align="center"><font class="striking">{{ htmlspecialchars($error) }}</font></p>
+    <p align="center"><font class="striking">{{ $error }}</font></p>
 @endif
 <form method="post" action="donated.php">
 @csrf

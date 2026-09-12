@@ -30,7 +30,7 @@ $preEmail = $isInvite && $isPreRegisterEmailAndUsername && ! empty($invite->pre_
         <input type="hidden" name="secret" value="{{ $secret }}" />
         <div align="right">
             {{ $lang['text_select_lang'] ?? 'Select Site Language:' }}
-            <select name="sitelanguage" aria-label="{{ $lang['text_select_lang'] ?? 'Select Site Language' }}" onchange="this.form.submit()">
+            <select name="sitelanguage" aria-label="{{ $lang['text_select_lang'] ?? 'Select Site Language' }}">
                 @foreach ($languages as $row)
                     <option value="{{ $row['id'] }}" @if (($row['site_lang_folder'] ?? '') === $langFolder) selected @endif>
                         {{ $row['lang_name'] }}

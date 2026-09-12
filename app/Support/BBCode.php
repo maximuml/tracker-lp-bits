@@ -191,14 +191,12 @@ final class BBCode
         }
         // Escape src for HTML attribute and JS string contexts.
         $escapedSrc = htmlspecialchars($src, ENT_QUOTES, 'UTF-8');
-        // For the JS string argument, escape single quotes and backslashes.
-        $jsSrc = addcslashes($src, "'\\");
 
         $resizerAttrs = $enableResizer
-            ? " onload=\"Scale(this, $maxWidth, $maxHeight);\" data-zoomable "
+            ? " data-scale=\"{$maxWidth}x{$maxHeight}\" data-zoomable "
             : '';
 
-        return "<img style=\"max-width: 100%\" id=\"$imgId\" alt=\"image\" src=\"$escapedSrc\"".$resizerAttrs." onerror=\"handleImageError(this, '$jsSrc');\" />";
+        return "<img style=\"max-width: 100%\" id=\"$imgId\" alt=\"image\" src=\"$escapedSrc\"".$resizerAttrs." data-img-fallback=\"$escapedSrc\" />";
     }
 
     /**

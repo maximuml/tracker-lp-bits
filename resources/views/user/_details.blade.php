@@ -209,19 +209,19 @@ if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_
 
 if ($user["ip"] && (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_HISTORY) || $user["id"] == $CURUSER["id"])){
 
-\App\Support\Html::trSmall($lang_userdetails['row_uploaded_torrents'], "<a href=\"javascript: getusertorrentlistajax('".$user['id']."', 'uploaded', 'ka'); klappe_news('a')\"><img class=\"plus\" src=\"pic/trans.gif\" id=\"pica\" alt=\"Show/Hide\" title=\"".$lang_userdetails['title_show_or_hide'] ."\" />   <u>".$lang_userdetails['text_show_or_hide']."</u></a><div id=\"ka\" style=\"display: none;\" data-type='uploaded'></div>", 1);
+\App\Support\Html::trSmall($lang_userdetails['row_uploaded_torrents'], "<a href=\"#\" data-utl=\"uploaded\" data-utl-user=\"".$user['id']."\" data-utl-block=\"ka\" data-klappe=\"a\"><img class=\"plus\" src=\"pic/trans.gif\" id=\"pica\" alt=\"Show/Hide\" title=\"".$lang_userdetails['title_show_or_hide'] ."\" />   <u>".$lang_userdetails['text_show_or_hide']."</u></a><div id=\"ka\" class=\"nx-hidden\" data-type='uploaded'></div>", 1);
 
 
-\App\Support\Html::trSmall($lang_userdetails['row_current_seeding'], "<a href=\"javascript: getusertorrentlistajax('".$user['id']."', 'seeding', 'ka1'); klappe_news('a1')\"><img class=\"plus\" src=\"pic/trans.gif\" id=\"pica1\" alt=\"Show/Hide\" title=\"".$lang_userdetails['title_show_or_hide']."\" />   <u>".$lang_userdetails['text_show_or_hide']."</u></a><div id=\"ka1\" style=\"display: none;\" data-type='seeding'></div>", 1);
+\App\Support\Html::trSmall($lang_userdetails['row_current_seeding'], "<a href=\"#\" data-utl=\"seeding\" data-utl-user=\"".$user['id']."\" data-utl-block=\"ka1\" data-klappe=\"a1\"><img class=\"plus\" src=\"pic/trans.gif\" id=\"pica1\" alt=\"Show/Hide\" title=\"".$lang_userdetails['title_show_or_hide']."\" />   <u>".$lang_userdetails['text_show_or_hide']."</u></a><div id=\"ka1\" class=\"nx-hidden\" data-type='seeding'></div>", 1);
 
 
-\App\Support\Html::trSmall($lang_userdetails['row_current_leeching'], "<a href=\"javascript: getusertorrentlistajax('".$user['id']."', 'leeching', 'ka2'); klappe_news('a2')\"><img class=\"plus\" src=\"pic/trans.gif\" id=\"pica2\" alt=\"Show/Hide\" title=\"".$lang_userdetails['title_show_or_hide']."\" />   <u>".$lang_userdetails['text_show_or_hide']."</u></a><div id=\"ka2\" style=\"display: none;\" data-type='leeching'></div>", 1);
+\App\Support\Html::trSmall($lang_userdetails['row_current_leeching'], "<a href=\"#\" data-utl=\"leeching\" data-utl-user=\"".$user['id']."\" data-utl-block=\"ka2\" data-klappe=\"a2\"><img class=\"plus\" src=\"pic/trans.gif\" id=\"pica2\" alt=\"Show/Hide\" title=\"".$lang_userdetails['title_show_or_hide']."\" />   <u>".$lang_userdetails['text_show_or_hide']."</u></a><div id=\"ka2\" class=\"nx-hidden\" data-type='leeching'></div>", 1);
 
 
-\App\Support\Html::trSmall($lang_userdetails['row_completed_torrents'], "<a href=\"javascript: getusertorrentlistajax('".$user['id']."', 'completed', 'ka3'); klappe_news('a3')\"><img class=\"plus\" src=\"pic/trans.gif\" id=\"pica3\" alt=\"Show/Hide\" title=\"".$lang_userdetails['title_show_or_hide']."\" />   <u>".$lang_userdetails['text_show_or_hide']."</u></a><div id=\"ka3\" style=\"display: none;\" data-type='completed'></div>", 1);
+\App\Support\Html::trSmall($lang_userdetails['row_completed_torrents'], "<a href=\"#\" data-utl=\"completed\" data-utl-user=\"".$user['id']."\" data-utl-block=\"ka3\" data-klappe=\"a3\"><img class=\"plus\" src=\"pic/trans.gif\" id=\"pica3\" alt=\"Show/Hide\" title=\"".$lang_userdetails['title_show_or_hide']."\" />   <u>".$lang_userdetails['text_show_or_hide']."</u></a><div id=\"ka3\" class=\"nx-hidden\" data-type='completed'></div>", 1);
 
 
-\App\Support\Html::trSmall($lang_userdetails['row_incomplete_torrents'], "<a href=\"javascript: getusertorrentlistajax('".$user['id']."', 'incomplete', 'ka4'); klappe_news('a4')\"><img class=\"plus\" src=\"pic/trans.gif\" id=\"pica4\" alt=\"Show/Hide\" title=\"".$lang_userdetails['title_show_or_hide']."\" />   <u>".$lang_userdetails['text_show_or_hide']."</u></a><div id=\"ka4\" style=\"display: none;\" data-type='incomplete'></div>", 1);
+\App\Support\Html::trSmall($lang_userdetails['row_incomplete_torrents'], "<a href=\"#\" data-utl=\"incomplete\" data-utl-user=\"".$user['id']."\" data-utl-block=\"ka4\" data-klappe=\"a4\"><img class=\"plus\" src=\"pic/trans.gif\" id=\"pica4\" alt=\"Show/Hide\" title=\"".$lang_userdetails['title_show_or_hide']."\" />   <u>".$lang_userdetails['text_show_or_hide']."</u></a><div id=\"ka4\" class=\"nx-hidden\" data-type='incomplete'></div>", 1);
 }
 if ($user["info"])
 	print("<tr><td align=\"left\" colspan=\"2\" class=\"text\">" . \App\Support\Format::formatComment($user["info"],false) . "</td></tr>\n");
@@ -404,7 +404,7 @@ JS;
 		\App\Support\Html::beginFrame($lang_userdetails['text_delete_user'], true);
 		print("<form method=\"post\" action=\"delacctadmin.php\" name=\"deluser\">
 		<input name=\"userid\" size=\"10\" type=\"hidden\" value=\"". $user["id"] ."\" />
-		<input name=\"delenable\" type=\"checkbox\" onclick=\"if (this.checked) {enabledel('".$lang_userdetails['js_delete_user_note']."');}else{disabledel();}\" /><input name=\"submit\" type=\"submit\" value=\"".$lang_userdetails['submit_delete']."\" disabled=\"disabled\" /></form>");
+		<input name=\"delenable\" type=\"checkbox\" data-del-msg=\"".$lang_userdetails['js_delete_user_note']."\" /><input name=\"submit\" type=\"submit\" value=\"".$lang_userdetails['submit_delete']."\" disabled=\"disabled\" /></form>");
 		\App\Support\Html::endFrame();
 	}
 }

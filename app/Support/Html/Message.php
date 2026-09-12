@@ -40,7 +40,11 @@ final class Message
             ? '<b><a href="'.$safeUrl.'" target=\'_blank\'><font color="white">'.$text.'</font></a></b>'
             : '<b><font color="white">'.$text.'</font></b>';
 
-        return '<table border="0" cellspacing="0" cellpadding="10" style="margin: 0 auto;"><tr><td style=\'border: none; padding: 10px; background: '.htmlspecialchars($bgcolor, ENT_QUOTES).'; text-align: center;\'>'."\n".$inner.'</td></tr></table><br />';
+        $colorClass = in_array($bgcolor, ['red', 'green', 'black', 'blue', 'orange', 'gray'], true)
+            ? 'msg-alert-'.$bgcolor
+            : 'msg-alert-red';
+
+        return '<table border="0" cellspacing="0" cellpadding="10" class="msg-alert"><tr><td class="'.$colorClass.'">'."\n".$inner.'</td></tr></table><br />';
     }
 
     /**

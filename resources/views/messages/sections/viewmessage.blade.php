@@ -15,7 +15,7 @@ $vm = $viewmessage;
 </tr>
 <tr>
 <td class="rowfollow" align="left">{!! $vm['sender'] !!}</td>
-<td class="rowfollow" align="left">{{ $vm['added'] }}&nbsp;&nbsp;{!! $vm['unread'] !!}</td>
+<td class="rowfollow" align="left">{!! $vm['added'] !!}&nbsp;&nbsp;{!! $vm['unread'] !!}</td>
 </tr>
 <tr>
 <td colspan="2" align="left">{!! $vm['body'] !!}</td>
@@ -28,6 +28,6 @@ $vm = $viewmessage;
 {!! $vm['moveBoxOptions'] !!}
 </select></form>
 @endif
-</td><td align="right" ><font color=white>[ <form action="/messages" method="post" style="display:inline;">@csrf<input type="hidden" name="action" value="deletemessage"><input type="hidden" name="id" value="{{ $vm['pmId'] }}"><input type="submit" value="{{ $lang_messages['text_delete'] ?? 'Delete' }}" style="display:inline;"></form> ]{!! $vm['reply'] !!} [ <a href="messages.php?action=forward&id={{ $vm['pmId'] }}">{{ $lang_messages['text_forward_pm'] ?? 'Forward' }}</a> ]</font></td>
+</td><td align="right" ><font color=white>[ <form action="/messages" method="post" class="nx-inline">@csrf<input type="hidden" name="action" value="deletemessage"><input type="hidden" name="id" value="{{ $vm['pmId'] }}"><input type="submit" value="{{ $lang_messages['text_delete'] ?? 'Delete' }}"></form> ]{!! $vm['reply'] !!} [ <a href="messages.php?action=forward&id={{ $vm['pmId'] }}">{{ $lang_messages['text_forward_pm'] ?? 'Forward' }}</a> ]</font></td>
 </tr>
 </table>

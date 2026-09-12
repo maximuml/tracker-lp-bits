@@ -197,7 +197,7 @@ final class SearchBox
 TDCONTENT;
                 } else {
                     $tdContent = sprintf(
-                        "<input name=\"%s_check\" value=\"%s\" class=\"btn medium\" type=\"button\" onclick=\"javascript:SetChecked('%s','%s_check','%s','%s',-1,10)\">",
+                        '<input name="%s_check" value="%s" class="btn medium" type="button" data-setchecked="%s" data-setchecked-ctrl="%s_check" data-checkall="%s" data-uncheckall="%s">',
                         $checkPrefix,
                         Locale::trans('nexus.select_all', [], null),
                         $checkPrefix,
@@ -264,7 +264,7 @@ TD;
 TDCONTENT;
                     } else {
                         $tdContent = sprintf(
-                            "<input name=\"%s_check\" value=\"%s\" class=\"btn medium\" type=\"button\" onclick=\"javascript:SetChecked('%s','%s_check','%s','%s',-1,10)\">",
+                            '<input name="%s_check" value="%s" class="btn medium" type="button" data-setchecked="%s" data-setchecked-ctrl="%s_check" data-checkall="%s" data-uncheckall="%s">',
                             $checkPrefix,
                             Locale::trans('nexus.select_all', [], null),
                             $checkPrefix,

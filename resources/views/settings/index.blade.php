@@ -201,20 +201,17 @@ $classSelect = function (string $name, int $maxClass, mixed $selected, int $min 
     $smtpRadio = '';
     foreach (['default' => 'text_smtp_default', 'advanced' => 'text_smtp_advanced', 'external' => 'text_smtp_external', 'none' => 'text_smtp_none'] as $val => $label) {
         $checked = $smtpType === $val ? ' checked' : '';
-        $onclick = $val === 'advanced' ? "onclick=\"document.getElementById('smtp_advanced').style.display=''; document.getElementById('smtp_external').style.display='none';\"" : '';
-        $onclick = $val === 'external' ? "onclick=\"document.getElementById('smtp_advanced').style.display='none'; document.getElementById('smtp_external').style.display='';\"" : $onclick;
-        $onclick = in_array($val, ['default', 'none']) ? "onclick=\"document.getElementById('smtp_advanced').style.display='none'; document.getElementById('smtp_external').style.display='none';\"" : $onclick;
-        $smtpRadio .= "<input type=\"radio\" name=\"smtptype\" value=\"{$val}\"{$onclick}{$checked}> ".($lang[$label] ?? $val).' <br />';
+        $smtpRadio .= "<input type=\"radio\" name=\"smtptype\" value=\"{$val}\"{$checked}> ".($lang[$label] ?? $val).' <br />';
     }
     @endphp
     {!! \App\Support\Html::tr($lang['row_mail_function_type'] ?? 'Mail type', $smtpRadio, 1) !!}
-    <tbody id="smtp_advanced" style="display: {{ $smtpType === 'advanced' ? '' : 'none' }}">
+    <tbody id="smtp_advanced"@if($smtpType !== 'advanced') class="nx-hidden"@endif>
     <tr><td colspan=2 align=center><b>{{ $lang['text_setting_for_advanced_type'] ?? 'Advanced' }}</b></td></tr>
     {!! $textRow($lang['row_smtp_host'] ?? 'SMTP host', 'smtp_host', $SMTP['smtp_host'] ?? 'localhost', $lang['text_smtp_host_note'] ?? '', '300px') !!}
     {!! $textRow($lang['row_smtp_port'] ?? 'SMTP port', 'smtp_port', $SMTP['smtp_port'] ?? 25, $lang['text_smtp_port_note'] ?? '', '300px') !!}
     {!! $textRow($lang['row_smtp_sendmail_from'] ?? 'Sendmail from', 'smtp_from', $SMTP['smtp_from'] ?? '', $lang['text_smtp_sendmail_from_note'] ?? '', '300px') !!}
     </tbody>
-    <tbody id="smtp_external" style="display: {{ $smtpType === 'external' ? '' : 'none' }}">
+    <tbody id="smtp_external"@if($smtpType !== 'external') class="nx-hidden"@endif>
     <tr><td colspan=2 align=center><b>{{ $lang['text_setting_for_external_type'] ?? 'External' }}</b></td></tr>
     {!! $textRow($lang['row_outgoing_mail_address'] ?? 'SMTP address', 'smtpaddress', $SMTP['smtpaddress'] ?? '', $lang['text_outgoing_mail_address_note'] ?? '', '300px') !!}
     {!! $textRow($lang['row_outgoing_mail_port'] ?? 'SMTP port', 'smtpport', $SMTP['smtpport'] ?? '', $lang['text_outgoing_mail_port_note'] ?? '', '300px') !!}
@@ -227,7 +224,7 @@ $classSelect = function (string $name, int $maxClass, mixed $selected, int $min 
     @endphp
     {!! \App\Support\Html::tr($lang['row_outgoing_mail_encryption'] ?? 'Encryption', $encRadio, 1) !!}
     {!! $textRow($lang['row_smtp_account_name'] ?? 'Account name', 'accountname', $SMTP['accountname'] ?? '', $lang['text_smtp_account_name_note'] ?? '', '300px') !!}
-    <tr><td class="rowhead nowrap">{{ $lang['row_smtp_account_password'] ?? 'Password' }}</td><td><input type=password name=accountpassword style="width: 300px" value="{{ htmlspecialchars((string)($SMTP['accountpassword'] ?? '')) }}"> {{ $lang['text_smtp_account_password_note'] ?? '' }}</td></tr>
+    <tr><td class="rowhead nowrap">{{ $lang['row_smtp_account_password'] ?? 'Password' }}</td><td><input type=password name=accountpassword style="width: 300px" value="{{ (string)($SMTP['accountpassword'] ?? '') }}"> {{ $lang['text_smtp_account_password_note'] ?? '' }}</td></tr>
     </tbody>
     {!! \App\Support\Html::tr($lang['row_save_settings'] ?? 'Save', "<input type='submit' name='save' value='".($lang['submit_save_settings'] ?? 'Save')."'>", 1) !!}
     </form>
@@ -267,7 +264,7 @@ $classSelect = function (string $name, int $maxClass, mixed $selected, int $min 
     }
     @endphp
     {!! \App\Support\Html::tr($lang['row_guest_visit_type'] ?? 'Guest visit', $guestRadio, 1) !!}
-    <tbody id="tbody_static_page" style="display: {{ ($SECURITY['guest_visit_type'] ?? '') === 'static_page' ? 'table-row-group' : 'none' }}">
+    <tbody id="tbody_static_page"@if(($SECURITY['guest_visit_type'] ?? '') !== 'static_page') class="nx-hidden"@endif>
     @php
     $staticSelect = '<select name="guest_visit_value_static_page">';
     foreach (($staticPages ?? []) as $page) {
@@ -278,10 +275,10 @@ $classSelect = function (string $name, int $maxClass, mixed $selected, int $min 
     @endphp
     {!! \App\Support\Html::tr($lang['row_guest_visit_value_static_page'] ?? 'Static page', $staticSelect, 1) !!}
     </tbody>
-    <tbody id="tbody_custom_content" style="display: {{ ($SECURITY['guest_visit_type'] ?? '') === 'custom_content' ? 'table-row-group' : 'none' }}">
+    <tbody id="tbody_custom_content"@if(($SECURITY['guest_visit_type'] ?? '') !== 'custom_content') class="nx-hidden"@endif>
     <tr><td class="rowhead nowrap" valign="top">{{ $lang['row_guest_visit_value_custom_content'] ?? 'Custom content' }}</td><td>{!! \App\Support\Form::bbcodeEditor('securitysettings_form', 'guest_visit_value_custom_content', $SECURITY['guest_visit_value_custom_content'] ?? '') !!}</td></tr>
     </tbody>
-    <tbody id="tbody_redirect" style="display: {{ ($SECURITY['guest_visit_type'] ?? '') === 'redirect' ? 'table-row-group' : 'none' }}">
+    <tbody id="tbody_redirect"@if(($SECURITY['guest_visit_type'] ?? '') !== 'redirect') class="nx-hidden"@endif>
     {!! $textRow($lang['row_guest_visit_value_redirect'] ?? 'Redirect URL', 'guest_visit_value_redirect', $SECURITY['guest_visit_value_redirect'] ?? '', '', '300px') !!}
     </tbody>
     @php
@@ -294,7 +291,7 @@ $classSelect = function (string $name, int $maxClass, mixed $selected, int $min 
     $loginRadio .= sprintf('<b style="color: #DC143C; margin-left: 20px">%s</b>', $lang['text_login_type_warning'] ?? '');
     @endphp
     {!! \App\Support\Html::tr($lang['row_login_type'] ?? 'Login type', $loginRadio, 1) !!}
-    <tbody id="tbody_login_secret" style="display: {{ in_array($SECURITY['login_type'] ?? '', ['secret', 'passkey']) ? 'table-row-group' : 'none' }}">
+    <tbody id="tbody_login_secret"@if(!in_array($SECURITY['login_type'] ?? '', ['secret', 'passkey'])) class="nx-hidden"@endif>
     @php
     $loginSecret = sprintf('%s：%s', $lang['text_login_secret_current'] ?? 'Current secret', $SECURITY['login_secret'] ?? '');
     if (! empty($SECURITY['login_secret'])) {
@@ -304,7 +301,7 @@ $classSelect = function (string $name, int $maxClass, mixed $selected, int $min 
     $loginSecret .= sprintf('<br/><label><input type="radio" name="login_secret_regenerate" value="yes"%s />%s</label>', empty($SECURITY['login_secret']) ? ' checked' : '', $lang['text_login_secret_regenerate_yes'] ?? 'Yes');
     @endphp
     {!! \App\Support\Html::tr($lang['row_login_secret'] ?? 'Login secret', $loginSecret, 1) !!}
-    <tr><td class="rowhead nowrap">{{ $lang['row_login_secret_lifetime'] ?? 'Secret lifetime' }}</td><td><input type="text" name="login_secret_lifetime" value="{{ htmlspecialchars((string)($SECURITY['login_secret_lifetime'] ?? '')) }}">{{ $lang['text_login_secret_lifetime_unit'] ?? ' min' }}</td></tr>
+    <tr><td class="rowhead nowrap">{{ $lang['row_login_secret_lifetime'] ?? 'Secret lifetime' }}</td><td><input type="text" name="login_secret_lifetime" value="{{ (string)($SECURITY['login_secret_lifetime'] ?? '') }}">{{ $lang['text_login_secret_lifetime_unit'] ?? ' min' }}</td></tr>
     </tbody>
     {!! \App\Support\Html::tr($lang['row_save_settings'] ?? 'Save', "<input type='submit' name='save' value='".($lang['submit_save_settings'] ?? 'Save')."'>", 1) !!}
     </form>
@@ -391,8 +388,8 @@ $classSelect = function (string $name, int $maxClass, mixed $selected, int $min 
     {!! $yesorno($lang['row_enable_tooltip'] ?? 'Enable tooltip', 'enabletooltip', $TWEAK['enabletooltip'] ?? 'no', $lang['text_enable_tooltip_note'] ?? '') !!}
     {!! $textRow($lang['row_title_keywords'] ?? 'Title keywords', 'titlekeywords', $TWEAK['titlekeywords'] ?? '', $lang['text_title_keywords_note'] ?? '', '300px') !!}
     {!! $textRow($lang['row_meta_keywords'] ?? 'Meta keywords', 'metakeywords', $TWEAK['metakeywords'] ?? '', $lang['text_meta_keywords_note'] ?? '', '300px') !!}
-    <tr><td class="rowhead nowrap" valign="top">{{ $lang['row_meta_description'] ?? 'Meta description' }}</td><td><textarea cols="100" style="width: 450px;" rows="5" name='metadescription'>{{ htmlspecialchars((string)($TWEAK['metadescription'] ?? '')) }}</textarea><br />{{ $lang['text_meta_description_note'] ?? '' }}</td></tr>
-    <tr><td class="rowhead nowrap" valign="top">{{ $lang['row_web_analytics_code'] ?? 'Analytics code' }}</td><td><textarea cols="100" style="width: 450px;" rows="5" name='analyticscode'>{{ htmlspecialchars((string)($TWEAK['analyticscode'] ?? '')) }}</textarea><br />{{ $lang['text_web_analytics_code_note'] ?? '' }}</td></tr>
+    <tr><td class="rowhead nowrap" valign="top">{{ $lang['row_meta_description'] ?? 'Meta description' }}</td><td><textarea cols="100" style="width: 450px;" rows="5" name='metadescription'>{{ (string)($TWEAK['metadescription'] ?? '') }}</textarea><br />{{ $lang['text_meta_description_note'] ?? '' }}</td></tr>
+    <tr><td class="rowhead nowrap" valign="top">{{ $lang['row_web_analytics_code'] ?? 'Analytics code' }}</td><td><textarea cols="100" style="width: 450px;" rows="5" name='analyticscode'>{{ (string)($TWEAK['analyticscode'] ?? '') }}</textarea><br />{{ $lang['text_web_analytics_code_note'] ?? '' }}</td></tr>
     <tr><td class="rowhead nowrap">{{ $lang['row_see_sql_debug'] ?? 'SQL debug' }}</td><td><input type='checkbox' name='enablesqldebug' value='yes'{{ ($TWEAK['enablesqldebug'] ?? 'no') === 'yes' ? " checked='checked'" : '' }}>{{ $lang['text_allow'] ?? 'Allow' }}{!! $classSelect('sqldebug', UserClass::STAFFLEADER->value, $TWEAK['sqldebug'] ?? UserClass::MODERATOR->value) !!}{{ $lang['text_see_sql_list'] ?? '' }}{!! \App\Support\UserClass::name(UserClass::SYSOP->value, false, true, true) !!}</td></tr>
     {!! $textRow($lang['row_tracker_founded_date'] ?? 'Founded date', 'datefounded', $TWEAK['datefounded'] ?? '2007-12-24', $lang['text_tracker_founded_date_note'] ?? '', '300px') !!}
     {!! $textRow($lang['row_css_date'] ?? 'CSS date', 'cssdate', $TWEAK['cssdate'] ?? '', $lang['text_css_date'] ?? '', '300px') !!}
@@ -456,9 +453,9 @@ $classSelect = function (string $name, int $maxClass, mixed $selected, int $min 
     @php
     $continuousRows = '';
     foreach (($attendance_continuous ?? []) as $days => $value) {
-        $continuousRows .= sprintf('<tr><td><input type="number" min="0" style="width: 40px" name="attendance_continuous_day[]" value="%u" /> %s</td><td><input type="number" min="0" style="width: 50px;" name="attendance_continuous_value[]" value="%u" /> %s</td><td><a href="javascript:;" onclick="DelRow(this);">%s</a></td></tr>', $days, $lang['text_attendance_continuous_unit'] ?? 'days', $value, $lang['text_attendance_input_suffix'] ?? '', $lang['text_attendance_continuous_item_action_remove'] ?? 'Remove');
+        $continuousRows .= sprintf('<tr><td><input type="number" min="0" style="width: 40px" name="attendance_continuous_day[]" value="%u" /> %s</td><td><input type="number" min="0" style="width: 50px;" name="attendance_continuous_value[]" value="%u" /> %s</td><td><a href="#" class="js-delrow">%s</a></td></tr>', $days, $lang['text_attendance_continuous_unit'] ?? 'days', $value, $lang['text_attendance_input_suffix'] ?? '', $lang['text_attendance_continuous_item_action_remove'] ?? 'Remove');
     }
-    $continuousRows .= '<tr><td colspan="3">'.($lang['text_attendance_continuous_add_rules'] ?? '').'</td></tr><tr><td><input type="number" min="0" style="width: 40px" name="attendance_continuous_day[]" value="" /> '.($lang['text_attendance_continuous_unit'] ?? 'days').'</td><td><input type="number" min="0" style="width: 50px;" name="attendance_continuous_value[]" value="" /> '.($lang['text_attendance_input_suffix'] ?? '').'</td><td><a href="javascript:;" onclick="NewRow(this,false);">'.($lang['text_attendance_continuous_item_action_add'] ?? 'Add').'</a></td></tr>';
+    $continuousRows .= '<tr><td colspan="3">'.($lang['text_attendance_continuous_add_rules'] ?? '').'</td></tr><tr><td><input type="number" min="0" style="width: 40px" name="attendance_continuous_day[]" value="" /> '.($lang['text_attendance_continuous_unit'] ?? 'days').'</td><td><input type="number" min="0" style="width: 50px;" name="attendance_continuous_value[]" value="" /> '.($lang['text_attendance_input_suffix'] ?? '').'</td><td><a href="#" class="js-newrow">'.($lang['text_attendance_continuous_item_action_add'] ?? 'Add').'</a></td></tr>';
     @endphp
     {!! \App\Support\Html::tr($lang['text_attendance_continuous'] ?? 'Continuous', '<table><tr><td class="colhead">'.($lang['text_attendance_continuous_days'] ?? 'Days').'</td><td class="colhead">'.($lang['text_attendance_continuous_days_additional_reward'] ?? 'Reward').'</td><td class="colhead">'.($lang['text_attendance_continuous_days_action'] ?? 'Action').'</td></tr>'.$continuousRows.'</table>', true) !!}
     {!! \App\Support\Html::tr($lang['row_save_settings'] ?? 'Save', "<input type='submit' name='save' value='".($lang['submit_save_settings'] ?? 'Save')."'>", 1) !!}
@@ -526,10 +523,10 @@ $classSelect = function (string $name, int $maxClass, mixed $selected, int $min 
     @endphp
     {!! \App\Support\Html::tr($lang['row_nfo_view_style_default'] ?? 'NFO view style', $nfoRadio, 1) !!}
     {!! $yesorno($lang['row_paid_torrent_enabled'] ?? 'Paid torrents', 'paid_torrent_enabled', $TORRENT['paid_torrent_enabled'] ?? 'no', $lang['text_paid_torrent_enabled_note'] ?? '') !!}
-    <tr><td class="rowhead nowrap">{{ $lang['row_tax_factor'] ?? 'Tax factor' }}</td><td><input type='number' name=tax_factor style="width: 100px" value="{{ htmlspecialchars((string)($TORRENT['tax_factor'] ?? 0)) }}"> {{ $lang['text_tax_factor_note'] ?? '' }}</td></tr>
-    <tr><td class="rowhead nowrap">{{ $lang['row_max_price'] ?? 'Max price' }}</td><td><input type='number' name=max_price style="width: 100px" value="{{ htmlspecialchars((string)($TORRENT['max_price'] ?? 0)) }}"> {{ $lang['text_max_price_note'] ?? '' }}</td></tr>
+    <tr><td class="rowhead nowrap">{{ $lang['row_tax_factor'] ?? 'Tax factor' }}</td><td><input type='number' name=tax_factor style="width: 100px" value="{{ (string)($TORRENT['tax_factor'] ?? 0) }}"> {{ $lang['text_tax_factor_note'] ?? '' }}</td></tr>
+    <tr><td class="rowhead nowrap">{{ $lang['row_max_price'] ?? 'Max price' }}</td><td><input type='number' name=max_price style="width: 100px" value="{{ (string)($TORRENT['max_price'] ?? 0) }}"> {{ $lang['text_max_price_note'] ?? '' }}</td></tr>
     {!! $textRow($lang['row_reward_bonus_options'] ?? 'Reward options', 'reward_bonus_options', $TORRENT['reward_bonus_options'] ?? '', $lang['text_reward_bonus_options_note'] ?? '', '200px') !!}
-    <tr><td class="rowhead nowrap">{{ $lang['row_reward_times_limit'] ?? 'Reward limit' }}</td><td><input type='number' name=reward_times_limit style="width: 100px" value="{{ htmlspecialchars((string)($TORRENT['reward_times_limit'] ?? 0)) }}"> {{ $lang['text_reward_times_limit_note'] ?? '' }}</td></tr>
+    <tr><td class="rowhead nowrap">{{ $lang['row_reward_times_limit'] ?? 'Reward limit' }}</td><td><input type='number' name=reward_times_limit style="width: 100px" value="{{ (string)($TORRENT['reward_times_limit'] ?? 0) }}"> {{ $lang['text_reward_times_limit_note'] ?? '' }}</td></tr>
     @php
     $randomFields = [
         ['randomhalfleech', 5, 'text_halfleech_chance_becoming'],
@@ -612,8 +609,8 @@ $classSelect = function (string $name, int $maxClass, mixed $selected, int $min 
     @endphp
     {!! \App\Support\Html::tr($lang['row_image_thumbnails'] ?? 'Thumbnails', $thumbRadio.($lang['text_image_thumbnail_note'] ?? ''), 1) !!}
     {!! $textRow($lang['row_thumbnail_quality'] ?? 'Thumb quality', 'thumbquality', $ATTACHMENT['thumbquality'] ?? 80, $lang['text_thumbnail_quality_note'] ?? '', '100px') !!}
-    <tr><td class="rowhead nowrap">{{ $lang['row_thumbnail_size'] ?? 'Thumb size' }}</td><td><input type='text' style="width: 100px" name="thumbwidth" value="{{ htmlspecialchars((string)($ATTACHMENT['thumbwidth'] ?? 500)) }}"> * <input type='text' style="width: 100px" name="thumbheight" value="{{ htmlspecialchars((string)($ATTACHMENT['thumbheight'] ?? 500)) }}"> {{ $lang['text_thumbnail_size_note'] ?? '' }}</td></tr>
-    <tr><td class="rowhead nowrap">{{ $lang['row_alternative_thumbnail_size'] ?? 'Alt thumb size' }}</td><td><input type='text' style="width: 100px" name="altthumbwidth" value="{{ htmlspecialchars((string)($ATTACHMENT['altthumbwidth'] ?? 180)) }}"> * <input type='text' style="width: 100px" name="altthumbheight" value="{{ htmlspecialchars((string)($ATTACHMENT['altthumbheight'] ?? 135)) }}"> {{ $lang['text_alternative_thumbnail_size_note'] ?? '' }}</td></tr>
+    <tr><td class="rowhead nowrap">{{ $lang['row_thumbnail_size'] ?? 'Thumb size' }}</td><td><input type='text' style="width: 100px" name="thumbwidth" value="{{ (string)($ATTACHMENT['thumbwidth'] ?? 500) }}"> * <input type='text' style="width: 100px" name="thumbheight" value="{{ (string)($ATTACHMENT['thumbheight'] ?? 500) }}"> {{ $lang['text_thumbnail_size_note'] ?? '' }}</td></tr>
+    <tr><td class="rowhead nowrap">{{ $lang['row_alternative_thumbnail_size'] ?? 'Alt thumb size' }}</td><td><input type='text' style="width: 100px" name="altthumbwidth" value="{{ (string)($ATTACHMENT['altthumbwidth'] ?? 180) }}"> * <input type='text' style="width: 100px" name="altthumbheight" value="{{ (string)($ATTACHMENT['altthumbheight'] ?? 135) }}"> {{ $lang['text_alternative_thumbnail_size_note'] ?? '' }}</td></tr>
     {!! \App\Support\Html::tr($lang['row_save_settings'] ?? 'Save', "<input type='submit' name='save' value='".($lang['submit_save_settings'] ?? 'Save')."'>", 1) !!}
     </form>
 
@@ -630,7 +627,7 @@ $classSelect = function (string $name, int $maxClass, mixed $selected, int $min 
 @elseif ($action === 'miscsettings')
     @php $misc = $config ?? []; @endphp
     <form method="post" action="{{ $scriptName }}"><input type="hidden" name="action" value="savesettings_misc">@csrf
-    <tr><td class="rowhead nowrap" valign="top">{{ $lang['row_misc_donation_custom'] ?? 'Donation custom' }}</td><td><textarea cols="100" rows="10" name='donation_custom'>{{ htmlspecialchars((string)($misc['donation_custom'] ?? '')) }}</textarea><br/>{{ $lang['text_donation_custom_note'] ?? '' }}</td></tr>
+    <tr><td class="rowhead nowrap" valign="top">{{ $lang['row_misc_donation_custom'] ?? 'Donation custom' }}</td><td><textarea cols="100" rows="10" name='donation_custom'>{{ (string)($misc['donation_custom'] ?? '') }}</textarea><br/>{{ $lang['text_donation_custom_note'] ?? '' }}</td></tr>
     {!! $textRow($lang['row_protected_forum'] ?? 'Protected forum', 'protected_forum', $misc['protected_forum'] ?? '', $lang['text_protected_forum'] ?? '', '100px') !!}
     {!! \App\Support\Html::tr($lang['row_save_settings'] ?? 'Save', "<input type='submit' name='save' value='".($lang['submit_save_settings'] ?? 'Save')."'>", 1) !!}
     </form>

@@ -341,7 +341,7 @@ final class ForumTopicViewService
         if ($maypost) {
             echo "<br /><table style='border:1px solid #000000;'><tr>".
 '<td class="text" align="center"><b>'.($lang['text_quick_reply'] ?? '').'</b><br /><br />'.
-'<form id="compose" name="compose" method="post" action="?action=post" onsubmit="return postvalid(this);">'.
+'<form id="compose" name="compose" method="post" action="?action=post" >'.
 '<input type="hidden" name="id" value="'.$topicid.'" /><input type="hidden" name="type" value="reply" /><br />';
             Html::quickReplyVoid('compose', 'body', (string) ($lang['submit_add_reply'] ?? ''));
             echo '</form></td></tr></table>';

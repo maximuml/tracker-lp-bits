@@ -48,7 +48,9 @@ Route::get('/offers', [OfferController::class, 'legacy'])->name('offers.legacy')
 Route::get('/torrents', [TorrentListingController::class, 'index'])->middleware('throttle:torrents')->name('torrents.index');
 Route::get('/details/{id}', [TorrentDetailsController::class, 'show'])->where('id', '[0-9]+')->name('torrent.details');
 Route::get('/mybonus', [MyController::class, 'bonus'])->name('my.bonus');
+Route::post('/mybonus', [MyController::class, 'bonusExchange'])->middleware('reject.get.mutations');
 Route::get('/my_bonus', [MyController::class, 'bonus'])->name('my.bonus.underscore');
+Route::post('/my_bonus', [MyController::class, 'bonusExchange'])->middleware('reject.get.mutations');
 Route::get('/myhr', [MyController::class, 'hr'])->name('my.hr');
 Route::get('/topten', [ToptenController::class, 'legacy'])->name('topten.legacy');
 Route::get('/log', [LogController::class, 'legacy'])->name('log.legacy');

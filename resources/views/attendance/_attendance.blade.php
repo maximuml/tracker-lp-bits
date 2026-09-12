@@ -62,7 +62,7 @@ EOP;
 
     \App\Support\AssetAppender::js($calendarScript, 'footer', false);
 
-    echo '<div style="display: flex;justify-content: center;padding: 20px 0"><div id="calendar" style="width: 60%"></div></div>';
+    echo '<div class="nx-flex-center" style="padding: 20px 0"><div id="calendar" style="width: 60%"></div></div>';
     echo '<ul>';
     printf('<li>'.$lang_attendance['initial'].'</li>', $attendance_initial_bonus);
     printf('<li>'.$lang_attendance['steps'].'</li>', $attendance_step_bonus, $attendance_max_bonus);
@@ -78,7 +78,7 @@ EOP;
     echo '<table width="100%" border="1" cellspacing="0" cellpadding="10"><tbody>';
     echo '<tr><td class="text">';
     echo '<div style="margin-top: 20px; text-align: center;">';
-    echo '<form method="post" action="attendance.php" style="display: inline-block;">';
+    echo '<form method="post" action="attendance.php" class="nx-inline-block">';
     echo '<table border="0" cellpadding="5">';
     if ($attendanceCaptchaEnabled && $iv == 'yes') {
         \App\Support\Captcha::showImageCode();

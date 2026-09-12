@@ -22,16 +22,16 @@ $title = $title ?? ($lang_shoutbox['text_history_title'] ?? 'Shoutbox history');
 @section('title', $title)
 
 @section('content')
-<script nonce="{{ $cspNonce ?? '' }}">var SHOUT_CSRF = '{{ htmlspecialchars($csrfToken) }}';</script>
+<script nonce="{{ $cspNonce ?? '' }}">var SHOUT_CSRF = '{{ $csrfToken }}';</script>
 
 <h2>{{ $lang_shoutbox['text_history_title'] ?? 'Shoutbox history' }}</h2>
-<form action="{{ htmlspecialchars($formAction) }}" method="get">
+<form action="{{ $formAction }}" method="get">
 <table border="0" cellspacing="0" cellpadding="5">
-<tr><td>{{ $lang_shoutbox['text_username'] ?? 'Username' }}</td><td><input type="text" name="user" value="{{ htmlspecialchars($filters['user'] ?? '') }}" /></td>
-<td>{{ $lang_shoutbox['text_from'] ?? 'From' }}</td><td><input type="date" name="from" value="{{ htmlspecialchars($filters['from'] ?? '') }}" /></td>
-<td>{{ $lang_shoutbox['text_to'] ?? 'To' }}</td><td><input type="date" name="to" value="{{ htmlspecialchars($filters['to'] ?? '') }}" /></td></tr>
-<tr><td>{{ $lang_shoutbox['text_search'] ?? 'Search' }}</td><td><input type="text" name="search" value="{{ htmlspecialchars($filters['search'] ?? '') }}" /></td>
-<td colspan="4"><input type="submit" class="btn" value="{{ htmlspecialchars($lang_shoutbox['text_filter'] ?? 'Filter') }}" /></td></tr>
+<tr><td>{{ $lang_shoutbox['text_username'] ?? 'Username' }}</td><td><input type="text" name="user" value="{{ $filters['user'] ?? '' }}" /></td>
+<td>{{ $lang_shoutbox['text_from'] ?? 'From' }}</td><td><input type="date" name="from" value="{{ $filters['from'] ?? '' }}" /></td>
+<td>{{ $lang_shoutbox['text_to'] ?? 'To' }}</td><td><input type="date" name="to" value="{{ $filters['to'] ?? '' }}" /></td></tr>
+<tr><td>{{ $lang_shoutbox['text_search'] ?? 'Search' }}</td><td><input type="text" name="search" value="{{ $filters['search'] ?? '' }}" /></td>
+<td colspan="4"><input type="submit" class="btn" value="{{ $lang_shoutbox['text_filter'] ?? 'Filter' }}" /></td></tr>
 </table></form>
 
 <table border="0" cellspacing="0" cellpadding="2" width="100%">
@@ -76,7 +76,7 @@ $title = $title ?? ($lang_shoutbox['text_history_title'] ?? 'Shoutbox history');
         @if ($i == $page)
             <b>{{ $i }}</b>
         @else
-            <a href="{{ htmlspecialchars($base.$i) }}">{{ $i }}</a>
+            <a href="{{ $base.$i }}">{{ $i }}</a>
         @endif
     @endfor
     </div>

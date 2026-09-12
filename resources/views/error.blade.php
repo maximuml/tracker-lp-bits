@@ -180,7 +180,7 @@
 
     <div class="action-links">
         <a href="/" class="btn btn-primary">Go home</a>
-        <a href="javascript:history.back()" class="btn btn-secondary">Go back</a>
+        <a href="#" class="btn btn-secondary js-history-back">Go back</a>
     </div>
 </div>
 </body>

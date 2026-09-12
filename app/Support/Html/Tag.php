@@ -311,7 +311,7 @@ final class Tag
             return '';
         }
 
-        return '<div style="display: none">'.$children.'</div>';
+        return '<div class="nx-hidden">'.$children.'</div>';
     }
 
     /**

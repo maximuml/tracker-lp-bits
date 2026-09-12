@@ -66,15 +66,15 @@ $title = $title ?? ($lang_complains['text_complain'] ?? 'Complain');
     @endif
 
     {!! \App\Support\Html::beginFrame($lang_complains['text_new_body'] ?? 'Body') !!}
-    {{ $lang_complains['text_added'] ?? 'Added' }}：{{ \App\Support\Time::format($complain['added'] ?? '') }}<br />{{ $lang_complains['text_new_email'] ?? 'Email' }} {{ htmlspecialchars((string) ($complain['email'] ?? '')) }}
+    {{ $lang_complains['text_added'] ?? 'Added' }}：{{ \App\Support\Time::format($complain['added'] ?? '') }}<br />{{ $lang_complains['text_new_email'] ?? 'Email' }} {{ (string) ($complain['email'] ?? '') }}
     @if ($isAdmin)
         @if (! empty($user))
-            [<a href="userdetails.php?id={{ (int) ($user['id'] ?? 0) }}" class="faqlink" target="_blank">{{ htmlspecialchars((string) ($user['username'] ?? '')) }}</a>]
+            [<a href="userdetails.php?id={{ (int) ($user['id'] ?? 0) }}" class="faqlink" target="_blank">{{ (string) ($user['username'] ?? '') }}</a>]
             [<a href="user-ban-log.php?q={{ urlencode((string) ($user['username'] ?? '')) }}" class="faqlink" target="_blank">{{ $lang_complains['text_view_band_log'] ?? 'View ban log' }}</a>]
         @else
             [<a href="usersearch.php?em={{ urlencode((string) ($complain['email'] ?? '')) }}" class="faqlink" target="_blank">{{ $lang_complains['text_search_account'] ?? 'Search account' }}</a>]
         @endif
-        <br />IP: {{ htmlspecialchars((string) ($complain['ip'] ?? '')) }}
+        <br />IP: {{ (string) ($complain['ip'] ?? '') }}
     @endif
     <hr />{!! \App\Support\Format::formatComment($complain['body'] ?? '') !!}
     {!! \App\Support\Html::endFrame() !!}
@@ -88,7 +88,7 @@ $title = $title ?? ($lang_complains['text_complain'] ?? 'Complain');
             @endphp
             <b>{{ $replyUser }} @ {{ \App\Support\Time::format($row['added'] ?? '') }}
             @if ($isAdmin)
-                ({{ htmlspecialchars((string) ($row['ip'] ?? '')) }})
+                ({{ (string) ($row['ip'] ?? '') }})
             @endif
             : </b>
             {!! \App\Support\Format::formatComment($row['body'] ?? '') !!}<hr />
@@ -101,7 +101,7 @@ $title = $title ?? ($lang_complains['text_complain'] ?? 'Complain');
     @if (! empty($complain['answered']) && (int) $complain['answered'] !== 0)
         <p align="center">{{ $lang_complains['text_closed'] ?? 'This complain has been closed.' }}</p>
     @else
-        <br /><br /><table style="border:1px solid #000000;" align="center"><tr><td class="text" align="center"><b>{{ $lang_complains['text_reply'] ?? 'Reply' }}</b><br /><br /><form id="reply" method="post" action="" onsubmit="return postvalid(this);"><input type="hidden" name="action" value="reply" /><input type="hidden" name="id" value="{{ (int) ($complain['id'] ?? 0) }}" /><br />
+        <br /><br /><table style="border:1px solid #000000;" align="center"><tr><td class="text" align="center"><b>{{ $lang_complains['text_reply'] ?? 'Reply' }}</b><br /><br /><form id="reply" method="post" action=""><input type="hidden" name="action" value="reply" /><input type="hidden" name="id" value="{{ (int) ($complain['id'] ?? 0) }}" /><br />
         @php \App\Support\Html::quickReplyVoid('reply', 'body', $lang_complains['text_reply'] ?? 'Reply'); @endphp
         </form></td></tr></table>
     @endif

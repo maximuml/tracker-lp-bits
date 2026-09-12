@@ -120,7 +120,7 @@ final class OfferPageDetailsBuilder
 
         $quickComment = '<table style=\'border:1px solid #000000;\'><tr>'.
             '<td class="text" align="center"><b>'.htmlspecialchars((string) ($lang['text_quick_comment'] ?? '')).'</b><br /><br />'.
-            '<form id="compose" name="comment" method="post" action="comment.php?action=add&amp;type=offer" onsubmit="return postvalid(this);">'.
+            '<form id="compose" name="comment" method="post" action="comment.php?action=add&amp;type=offer" >'.
             '<input type="hidden" name="pid" value="'.$id.'" /><br />';
         ob_start();
         Html::quickReplyVoid('comment', 'body', (string) ($lang['submit_add_comment'] ?? ''));

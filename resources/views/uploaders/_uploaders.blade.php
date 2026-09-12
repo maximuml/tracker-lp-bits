@@ -40,8 +40,8 @@
 </table>
 </div>
 <div style="margin-top: 8px; margin-bottom: 8px;">
-<span id="order" onclick="dropmenu(this);"><span style="cursor: pointer;" class="big"><b><?php echo $lang_uploaders['text_order_by'] ?? 'Order by'; ?></b></span>
-<span id="orderlist" class="dropmenu" style="display: none"><ul>
+<span id="order" style="cursor:pointer"><span style="cursor: pointer;" class="big"><b><?php echo $lang_uploaders['text_order_by'] ?? 'Order by'; ?></b></span>
+<span id="orderlist" class="dropmenu nx-hidden"><ul>
 <li><a href="?year=<?php echo (int) $year; ?>&amp;month=<?php echo (int) $month; ?>&amp;order=username"><?php echo $lang_uploaders['text_username'] ?? 'Username'; ?></a></li>
 <li><a href="?year=<?php echo (int) $year; ?>&amp;month=<?php echo (int) $month; ?>&amp;order=torrent_size"><?php echo $lang_uploaders['text_torrent_size'] ?? 'Torrent size'; ?></a></li>
 <li><a href="?year=<?php echo (int) $year; ?>&amp;month=<?php echo (int) $month; ?>&amp;order=torrent_count"><?php echo $lang_uploaders['text_torrent_num'] ?? 'Torrent num'; ?></a></li>

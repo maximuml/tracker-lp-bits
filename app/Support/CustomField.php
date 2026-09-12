@@ -399,8 +399,8 @@ HEAD;
         }
         var img = document.createElement('img')
         img.src=url
-        img.setAttribute('onload', 'Scale(this, 700, 0);')
-        img.setAttribute('onclick', 'Preview(this);')
+        img.setAttribute('data-scale', '700x0')
+        img.classList.add('js-previewable')
         input.value = '[attach]' + delkey + '[/attach]'
         img.id='$imgId'
         previewBox.appendChild(img)

@@ -25,8 +25,8 @@ if (!function_exists('torrent_structure_builder')) { function torrent_structure_
         $value_length = strlen(\Rhilip\Bencode\Bencode::encode($value));
         if (is_iterable($value)) {  // It may `dictionary` or `list`
             $type = is_indexed_array($value) ? 'list' : 'dictionary';
-            $ret .= "<li><div align='left' class='" . $type . "'><a href='javascript:void(0);' onclick='var ul=this.parentNode.nextElementSibling;ul.style.display=ul.style.display===\"none\"?\"\":\"none\"'> + <span class=title>[" . $item . "]</span> <span class='icon'>(" . ucfirst($type) . ")</span> <span class=length>[" . $value_length . "]</span></a></div>";
-            $ret .= "<ul style='display:none'>" . torrent_structure_builder($value, $item) . "</ul></li>";
+            $ret .= "<li><div align='left' class='" . $type . "'><a href='#' class='js-info-toggle'> + <span class=title>[" . $item . "]</span> <span class='icon'>(" . ucfirst($type) . ")</span> <span class=length>[" . $value_length . "]</span></a></div>";
+            $ret .= "<ul class='nx-hidden'>" . torrent_structure_builder($value, $item) . "</ul></li>";
         } else { // It may `interger` or `string`
             $type = is_integer($value) ? 'integer' : 'string';
             $value = ($parent == 'info' && $item == 'pieces') ? "0x" . bin2hex(substr($value, 0, 25)) . "..." : $value;  // Cut the info pieces....

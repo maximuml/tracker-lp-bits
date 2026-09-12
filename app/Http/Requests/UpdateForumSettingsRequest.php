@@ -26,7 +26,7 @@ class UpdateForumSettingsRequest extends FormRequest
             'postsperpage' => 'sometimes|integer|min:0|max:100',
             'avatars' => 'sometimes|in:yes',
             'signatures' => 'sometimes|in:yes',
-            'clicktopic' => 'sometimes|integer|min:0|max:2',
+            'clicktopic' => 'sometimes|in:firstpage,lastpage,0,1',
             'signature' => 'sometimes|nullable|string|max:30000',
             'ttlastpost' => 'sometimes|in:yes',
         ];

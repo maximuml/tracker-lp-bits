@@ -15,7 +15,7 @@ $lang_messages =
     'text_no_messages' => 'No Messages.',
     'text_remove_from_friends' => '[remove from friends]',
     'text_add_to_friends' => '[add to friends]',
-    'submit_move_to' => 'Move&nbsp;to',
+    'submit_move_to' => 'Move to',
     'text_or' => ' or ',
     'submit_delete' => 'Delete',
     'text_unread_messages' => ' Unread Messages.',
@@ -73,7 +73,7 @@ $lang_messages =
     'select_title' => 'title',
     'select_body' => 'body',
     'select_both' => 'both',
-    'submit_mark_as_read' => 'Mark&nbsp;as&nbsp;read',
+    'submit_mark_as_read' => 'Mark as read',
     'std_cannot_mark_messages' => 'Could not mark message as read.',
     'std_no_message_selected' => 'No message selected.',
 ];

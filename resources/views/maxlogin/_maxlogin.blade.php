@@ -25,7 +25,7 @@ if ($action === 'showlist') {
             $statusLabel = $arr['banned'] === 'yes'
                 ? '<font color=red><b>banned</b></font> <a href=maxlogin.php?action=unban&id=' . $arr['id'] . '><font color=green>[<b>unban</b>]</font></a>'
                 : '<font color=green><b>not banned</b></font> <a href=maxlogin.php?action=ban&id=' . $arr['id'] . '><font color=red>[<b>ban</b>]</font></a>';
-            print('<tr><td align=>' . $arr['id'] . '</td><td align=left>' . $arr['ip'] . ' ' . $userLink . '</td><td align=left>' . $arr['added'] . '</td><td align=left>' . $arr['attempts'] . '</td><td align=left>' . $typeLabel . '</td><td align=left>' . $statusLabel . '  <a OnClick="return confirm(\'Are you wish to delete this attempt?\');" href=maxlogin.php?action=delete&id=' . $arr['id'] . '>[<b>delete</b></a>] <a href=maxlogin.php?action=edit&id=' . $arr['id'] . '><font color=blue>[<b>edit</b></a>]</font></td></tr>\n');
+            print('<tr><td align=>' . $arr['id'] . '</td><td align=left>' . $arr['ip'] . ' ' . $userLink . '</td><td align=left>' . $arr['added'] . '</td><td align=left>' . $arr['attempts'] . '</td><td align=left>' . $typeLabel . '</td><td align=left>' . $statusLabel . '  <a data-confirm="Are you wish to delete this attempt?" href=maxlogin.php?action=delete&id=' . $arr['id'] . '>[<b>delete</b></a>] <a href=maxlogin.php?action=edit&id=' . $arr['id'] . '><font color=blue>[<b>edit</b></a>]</font></td></tr>\n');
         }
     }
     print('</table>');
@@ -64,7 +64,7 @@ if ($action === 'showlist') {
             $statusLabel = $arr['banned'] === 'yes'
                 ? '<font color=red><b>banned</b></font> <a href=maxlogin.php?action=unban&id=' . $arr['id'] . '><font color=green>[<b>unban</b>]</font></a>'
                 : '<font color=green><b>not banned</b></font> <a href=maxlogin.php?action=ban&id=' . $arr['id'] . '><font color=red>[<b>ban</b>]</font></a>';
-            print('<tr><td align=>' . $arr['id'] . '</td><td align=left>' . $arr['ip'] . ' ' . $userLink . '</td><td align=left>' . $arr['added'] . '</td><td align=left>' . $arr['attempts'] . '</td><td align=left>' . $typeLabel . '</td><td align=left>' . $statusLabel . '  <a OnClick="return confirm(\'Are you wish to delete this attempt?\');" href=maxlogin.php?action=delete&id=' . $arr['id'] . '>[<b>delete</b></a>] <a href=maxlogin.php?action=edit&id=' . $arr['id'] . '><font color=blue>[<b>edit</b></a>]</font></td></tr>\n');
+            print('<tr><td align=>' . $arr['id'] . '</td><td align=left>' . $arr['ip'] . ' ' . $userLink . '</td><td align=left>' . $arr['added'] . '</td><td align=left>' . $arr['attempts'] . '</td><td align=left>' . $typeLabel . '</td><td align=left>' . $statusLabel . '  <a data-confirm="Are you wish to delete this attempt?" href=maxlogin.php?action=delete&id=' . $arr['id'] . '>[<b>delete</b></a>] <a href=maxlogin.php?action=edit&id=' . $arr['id'] . '><font color=blue>[<b>edit</b></a>]</font></td></tr>\n');
         }
     }
     print('</table>\n');

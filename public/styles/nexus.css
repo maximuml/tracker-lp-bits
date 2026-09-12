@@ -133,3 +133,175 @@ details[open] summary {
 font[color="red"] {
     color: #B00000;
 }
+
+/* Center page content tables. td#outer/td.embedded carry align="center" in
+   the markup, but that attribute only aligns inline content — block-level
+   <table> children of the frame cell were left-aligned. Restores the
+   classic centered look for pages whose fixed-width tables lost their
+   align attribute during the Blade migration. */
+#main-content > table,
+#main-content > form > table,
+#main-content > div > table {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Site alert banner (new PM / news / warnings). Replaces the CSP-blocked
+   inline styles from the legacy msgalert() table. */
+table.msg-alert {
+    margin: 0 auto;
+}
+table.msg-alert td {
+    border: none;
+    padding: 10px;
+    text-align: center;
+}
+table.msg-alert td.msg-alert-red { background: red; }
+table.msg-alert td.msg-alert-green { background: green; }
+table.msg-alert td.msg-alert-black { background: black; }
+table.msg-alert td.msg-alert-blue { background: blue; }
+table.msg-alert td.msg-alert-orange { background: orange; }
+table.msg-alert td.msg-alert-gray { background: gray; }
+
+/* Latest torrents cover grid (index). Lives here — not in the cached
+   section fragment — because the fragment is cached for 120s and a
+   per-request CSP nonce inside it goes stale. */
+.lt-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin: 8px 0 16px;
+}
+.lt-grid .lt-card {
+    border: 1px solid rgba(127,127,127,.35);
+    border-radius: 6px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background: rgba(127,127,127,.05);
+}
+.lt-grid .lt-cover {
+    position: relative;
+    display: block;
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    max-height: 240px;
+    background: rgba(0,0,0,.08);
+    overflow: hidden;
+}
+.lt-grid .lt-cover img {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.lt-grid .lt-cover img.lt-broken { display: none; }
+.lt-grid .lt-cover .lt-cover-fallback {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    box-sizing: border-box;
+    font-size: 12px;
+    line-height: 1.3;
+    color: rgba(127,127,127,.85);
+    text-align: center;
+    word-break: break-word;
+}
+.lt-grid .lt-type {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    z-index: 2;
+    background: rgba(0,0,0,.78);
+    color: #fff;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 3px;
+    line-height: 1.2;
+    letter-spacing: .3px;
+    pointer-events: none;
+}
+.lt-grid .lt-title {
+    padding: 6px 8px 4px;
+    font-size: 12px;
+    line-height: 1.3;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+.lt-grid .lt-title a { text-decoration: none; }
+.lt-grid .lt-meta {
+    margin-top: auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+    padding: 6px 8px;
+    font-size: 11px;
+    border-top: 1px solid rgba(127,127,127,.2);
+}
+.lt-grid .lt-seed { color: #2fad2f; font-weight: bold; }
+.lt-grid .lt-leech { color: #d04848; font-weight: bold; }
+@media (max-width: 700px) {
+    .lt-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 420px) {
+    .lt-grid { grid-template-columns: 1fr; }
+}
+
+/* CSP-safe visibility/layout helpers. Inline style="" attributes are
+   blocked by style-src (no unsafe-inline), so display/layout intent in
+   markup must go through classes. JS may still toggle via classList or
+   el.style (CSSOM is not governed by style-src). */
+.nx-hidden { display: none; }
+.nx-inline { display: inline; }
+.nx-inline-block { display: inline-block; }
+.nx-flex { display: flex; }
+.nx-flex-col { display: flex; flex-direction: column; }
+.nx-flex-between { display: flex; justify-content: space-between; }
+.nx-flex-center { display: flex; justify-content: center; }
+
+/* Skip link: visible only on keyboard focus (was onfocus/onblur — CSP
+   blocked the handlers and the inline base styles). */
+.skip-link {
+    position: absolute;
+    left: -9999px;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+.skip-link:focus {
+    left: 0;
+    width: auto;
+    height: auto;
+    z-index: 1000;
+}
+
+/* Bitbucket log screenshots: scale to max 400px (was onload=SetSize —
+   the function no longer exists and the handler was CSP-blocked). */
+img.bitbucket-shot { max-width: 400px; }
+
+.nx-grow { flex-grow: 1; }
+button.nx-btn-link {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    color: inherit;
+    cursor: pointer;
+    text-decoration: underline;
+    display: inline;
+    font: inherit;
+}
+
+.dlnotice-submit {
+    font-size: 20pt;
+    height: 40px;
+}

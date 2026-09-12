@@ -63,13 +63,13 @@ $tdattr = (string) ($tdattr ?? '');
 <td class="text" colspan="2">
 <form action="?" method="post"><p>{{ $lang_downloadnotice['text_for_more_information_read'] ?? '' }}<a class="faqlink" href="rules.php" target="_blank">{{ $lang_downloadnotice['text_rules'] ?? '' }}</a>{{ $lang_downloadnotice['text_and'] ?? '' }}<a class="faqlink" href="faq.php" target="_blank">{{ $lang_downloadnotice['text_faq'] ?? '' }}</a><br />
 <input type="hidden" name="id" value="{{ $torrentid }}" />
-<input type="hidden" name="type" value="{{ htmlspecialchars((string) $type) }}" />
+<input type="hidden" name="type" value="{{ (string) $type }}" />
 <input type="checkbox" name="hidenotice" id="hidenotice" value="1"@if (! empty($forcecheck)) disabled="disabled"@else checked="checked"@endif /><label for="hidenotice">{{ $noticenexttime }}</label>
 @if (! empty($forcecheck))
-<br /><input type="checkbox" name="letmedown" id="letmedown" value="{{ htmlspecialchars((string) $type) }}" onclick="if (this.checked) {document.getElementById('continuedownload').disabled = false;}else{document.getElementById('continuedownload').disabled = true;}" /><label for="letmedown"><span class="big">{{ $lang_downloadnotice['text_let_me_download'] ?? '' }}</span></label>
+<br /><input type="checkbox" name="letmedown" id="letmedown" value="{{ (string) $type }}" /><label for="letmedown"><span class="big">{{ $lang_downloadnotice['text_let_me_download'] ?? '' }}</span></label>
 @endif
 </p>
-<div><input type="submit" name="submit" id="continuedownload" style="font-size: 20pt; height: 40px;" value="{{ $lang_downloadnotice['submit_download_the_torrent'] ?? '' }}"@if (! empty($forcecheck)) disabled="disabled"@endif /></div>
+<div><input type="submit" name="submit" id="continuedownload" class="dlnotice-submit" value="{{ $lang_downloadnotice['submit_download_the_torrent'] ?? '' }}"@if (! empty($forcecheck)) disabled="disabled"@endif /></div>
 </form>
 </td>
 </tr>

@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Enums\TorrentPosState;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 /**
  * W1-06: Validation for legacy POST /takeedit.
@@ -30,10 +32,10 @@ class TorrentEditRequest extends FormRequest
             'sel_spstate' => 'sometimes|integer|in:2,3,4,5,6,7',
             'promotion_time_type' => 'sometimes|integer|in:0,1,2',
             'promotionuntil' => 'sometimes|nullable|string|max:30',
-            'pos_state' => 'sometimes|integer',
+            'pos_state' => ['sometimes', Rule::enum(TorrentPosState::class)],
             'pos_state_until' => 'sometimes|nullable|string|max:30',
             'cover' => 'sometimes|nullable|string|max:500',
-            'technical_info' => 'sometimes|nullable|string|max:5000',
+            'technical_info' => 'sometimes|nullable|string|max:30000',
             'returnto' => 'sometimes|nullable|string|max:500',
         ];
     }

@@ -62,6 +62,10 @@ RUN apk add --no-cache \
     mysql-client \
     mariadb-connector-c
 
+# Upgrade curl/libcurl past the pinned base image (8.21.0-r0 has
+# CVE-2026-82209/-80229/-80230/-80255/-13608/-18924/-19931).
+RUN apk upgrade --no-cache curl libcurl
+
 # 配置 www.conf
 RUN sed -i \
     -e 's/;catch_workers_output = .*/catch_workers_output = yes/g' \

@@ -9,6 +9,7 @@ use App\Models\Snatch;
 use App\Models\TorrentBuyLog;
 use App\Support\Events;
 use App\Support\Logger;
+use App\Support\RedisGuard;
 use Illuminate\Support\Facades\Redis;
 
 /**
@@ -62,7 +63,7 @@ class TorrentPurchaseRepository extends BaseRepository
      */
     public function addBuySuccessCache($uid, $torrentId, $buyLogId): void
     {
-        Redis::connection()->client()->set($this->getBoughtUserCacheKey($torrentId, $uid), 1, ['NX', 'EX' => 86400 * 30]);
+        RedisGuard::attempt(fn () => Redis::connection()->client()->set($this->getBoughtUserCacheKey($torrentId, $uid), 1, ['NX', 'EX' => 86400 * 30]));
         $record = Snatch::query()
             ->where('torrentid', $torrentId)
             ->where('userid', $uid)
@@ -84,7 +85,7 @@ class TorrentPurchaseRepository extends BaseRepository
     public function hasBuySuccessCache($uid, $torrentId): bool
     {
         $key = $this->getBoughtUserCacheKey($torrentId, $uid);
-        if (Redis::connection()->client()->exists($key)) {
+        if (RedisGuard::attempt(static fn () => Redis::connection()->client()->exists($key))) {
             return true;
         }
 
@@ -137,9 +138,9 @@ class TorrentPurchaseRepository extends BaseRepository
     public function addBuyFailCache($uid, $torrentId): void
     {
         $key = $this->getBuyFailCacheKey((int) $uid, (int) $torrentId);
-        $result = Redis::connection()->client()->incr($key);
+        $result = RedisGuard::attempt(static fn () => Redis::connection()->client()->incr($key));
         if ($result == 1) {
-            Redis::connection()->client()->expire($key, 3600);
+            RedisGuard::attempt(static fn () => Redis::connection()->client()->expire($key, 3600));
         }
     }
 
@@ -151,7 +152,10 @@ class TorrentPurchaseRepository extends BaseRepository
      */
     public function getBuyFailCache($uid, $torrentId): int
     {
-        return intval(Redis::connection()->client()->get($this->getBuyFailCacheKey((int) $uid, (int) $torrentId)));
+        return intval(RedisGuard::attempt(
+            fn () => Redis::connection()->client()->get($this->getBuyFailCacheKey((int) $uid, (int) $torrentId)),
+            0,
+        ));
     }
 
     /**

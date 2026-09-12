@@ -9,6 +9,7 @@ use App\Support\Environment;
 use App\Support\Input;
 use App\Support\Logger;
 use App\Support\Network;
+use App\Support\RedisGuard;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Redis;
 
@@ -33,7 +34,10 @@ class IpLogRepository extends BaseRepository
         if (Environment::isTesting()) {
             return;
         }
-        $redis = Redis::connection()->client();
+        $redis = RedisGuard::attempt(static fn () => Redis::connection()->client());
+        if ($redis === null) {
+            return;
+        }
         if ($uri === null) {
             $parsed_uri = parse_url(Input::serverValue('REQUEST_URI', ''));
             $uri = $parsed_uri['path'] ?? '/';
@@ -44,10 +48,10 @@ class IpLogRepository extends BaseRepository
         $key = sprintf('%s:%s', self::CACHE_KEY_PREFIX, date('Y-m-d-H'));
         foreach ($ipArr as $ip) {
             $field = sprintf('%s|%s|%s', $userId, $ip, $uri);
-            $result = $redis->hincrby($key, $field, 1);
+            $result = RedisGuard::attempt(static fn () => $redis->hincrby($key, $field, 1));
             Logger::writeWithContext((string) "success hincrby {$key} {$field}, result: {$result}", (string) 'debug', (bool) false);
             if ($result === 1) {
-                $redis->expire($key, self::CACHE_TIME);
+                RedisGuard::attempt(static fn () => $redis->expire($key, self::CACHE_TIME));
             }
         }
     }

@@ -31,6 +31,7 @@ use App\Support\Json;
 use App\Support\LegacyDb;
 use App\Support\Logger;
 use App\Support\Permissions;
+use App\Support\RedisGuard;
 use App\Support\Tracker;
 use App\Support\Url;
 use App\Support\UserDisplay;
@@ -191,7 +192,7 @@ class AnnounceService
     {
         $passkey = $ctx->params['passkey'];
 
-        $user = Cache::remember("user_passkey_{$passkey}_content", 3600, function () use ($passkey) {
+        $lookupUser = static function () use ($passkey): array {
             $user = User::query()
                 ->select([
                     'id', 'username', 'downloadpos', 'enabled', 'uploaded', 'downloaded',
@@ -202,10 +203,13 @@ class AnnounceService
                 ->first();
 
             return $user ? $user->toArray() : [];
-        });
+        };
+
+        $user = RedisGuard::attempt(static fn () => Cache::remember("user_passkey_{$passkey}_content", 3600, $lookupUser))
+            ?? $lookupUser();
 
         if (! $user) {
-            Redis::connection()->client()->set("passkey_invalid:{$passkey}", TIMENOW, ['ex' => 24 * 3600]);
+            RedisGuard::attempt(static fn () => Redis::connection()->client()->set("passkey_invalid:{$passkey}", TIMENOW, ['ex' => 24 * 3600]));
             throw TrackerException::failure('Invalid passkey! Re-download the .torrent from '.Url::schemeAndHost(true));
         }
 
@@ -233,8 +237,8 @@ class AnnounceService
 
     private function checkTrackerUrl(AnnounceContext $ctx): void
     {
-        $trackerUrlRaw = Tracker::schemaAndHost((int) $ctx->user['tracker_url_id'], true);
-        $trackerUrl = is_array($trackerUrlRaw) ? implode('', $trackerUrlRaw) : $trackerUrlRaw;
+        $trackerUrl = Tracker::schemaAndHost((int) $ctx->user['tracker_url_id'], true);
+        $trackerUrl = is_array($trackerUrl) ? implode('', $trackerUrl) : $trackerUrl;
         $currentUrl = Url::schemeAndHost();
 
         if (! str_contains($trackerUrl, $currentUrl)) {
@@ -258,7 +262,7 @@ class AnnounceService
         if ($clicheckRes) {
             if (! $ctx->user['showclienterror']) {
                 User::query()->where('id', $ctx->userId())->update(['showclienterror' => true]);
-                AppCache::forgetWithLocales("user_passkey_{$ctx->params['passkey']}_content");
+                RedisGuard::attempt(static fn () => AppCache::forgetWithLocales("user_passkey_{$ctx->params['passkey']}_content"));
             }
             throw TrackerException::failure($clicheckRes);
         }
@@ -266,7 +270,7 @@ class AnnounceService
         $userUpdate = $ctx->userUpdate;
         if ($ctx->user['showclienterror']) {
             $userUpdate['showclienterror'] = false;
-            AppCache::forgetWithLocales("user_passkey_{$ctx->params['passkey']}_content");
+            RedisGuard::attempt(static fn () => AppCache::forgetWithLocales("user_passkey_{$ctx->params['passkey']}_content"));
         }
 
         return $ctx->withUserUpdate($userUpdate);
@@ -276,7 +280,7 @@ class AnnounceService
     {
         $infoHashHex = bin2hex($ctx->infoHashBinary());
 
-        $torrent = Cache::remember("torrent_hash_{$ctx->infoHashBinary()}_content", 350, function () use ($ctx) {
+        $lookupTorrent = static function () use ($ctx) {
             $tsField = Database::unixTimestampField('added');
             $torrent = DB::table('torrents')
                 ->leftJoin('categories', 'torrents.category', '=', 'categories.id')
@@ -291,11 +295,14 @@ class AnnounceService
                 ->first();
 
             return $torrent ? (array) $torrent : false;
-        });
+        };
+
+        $torrent = RedisGuard::attempt(static fn () => Cache::remember("torrent_hash_{$ctx->infoHashBinary()}_content", 350, $lookupTorrent))
+            ?? $lookupTorrent();
 
         if ($torrent === false) {
             Logger::writeWithContext((string) ('[TORRENT NOT EXISTS] info_hash: '.$infoHashHex), (string) 'info', (bool) false);
-            Redis::connection()->client()->set('torrent_not_exists:'.$ctx->infoHashBinary(), TIMENOW, ['ex' => 24 * 3600]);
+            RedisGuard::attempt(static fn () => Redis::connection()->client()->set('torrent_not_exists:'.$ctx->infoHashBinary(), TIMENOW, ['ex' => 24 * 3600]));
             throw TrackerException::failure('torrent not registered with this tracker');
         }
 
@@ -326,11 +333,7 @@ class AnnounceService
     /** @return array<string, mixed>|false */
     private function loadSnatchInfo(AnnounceContext $ctx): array|false
     {
-        if ($ctx->self !== null) {
-            return LegacyDb::snatchInfo($ctx->torrentId(), $ctx->userId());
-        }
-
-        return false;
+        return $ctx->self !== null ? LegacyDb::snatchInfo($ctx->torrentId(), $ctx->userId()) : false;
     }
 
     private function validateAnnounceTime(AnnounceContext $ctx): void
@@ -370,13 +373,13 @@ class AnnounceService
             if ($buyStatus > 10) {
                 $this->userModerationRepository->updateDownloadPrivileges(null, $ctx->userId(), false, 'announce_paid_torrent_too_many_times');
             }
-            dispatch(new BuyTorrent($ctx->userId(), $ctx->torrentId()));
+            RedisGuard::attempt(static fn () => dispatch(new BuyTorrent($ctx->userId(), $ctx->torrentId())));
             $purchaseRep->addBuyFailCache($ctx->userId(), $ctx->torrentId());
             $ctx->responseBuilder->warn('purchase in progress, please try again later, and make sure you have enough bonus', 300);
         }
 
         if ($buyStatus == TorrentPurchaseRepository::BUY_STATUS_UNKNOWN) {
-            dispatch(new BuyTorrent($ctx->userId(), $ctx->torrentId()));
+            RedisGuard::attempt(static fn () => dispatch(new BuyTorrent($ctx->userId(), $ctx->torrentId())));
             $ctx->responseBuilder->warn('purchase started, please wait', 300);
         }
     }
@@ -398,11 +401,8 @@ class AnnounceService
 
         $result = $peerLifecycle->process($traffic->upthis, $traffic->downthis, $traffic->snatchTimeColumn, $traffic->snatchTimeIncrement, $traffic->leechTimeNoSeederIncrement);
 
-        $snatchInfo = $result->snatchInfo;
-        $hitAndRunResult = $this->hitAndRunHandler->handle($ctx->dto->left, $ctx->dto->event, $ctx->user, $torrent, $ctx->userId(), $ctx->torrentId(), $ctx->isDonor, $ctx->dt, $snatchInfo);
-        if ($hitAndRunResult !== null) {
-            $snatchInfo = $hitAndRunResult;
-        }
+        $snatchInfo = $this->hitAndRunHandler->handle($ctx->dto->left, $ctx->dto->event, $ctx->user, $torrent, $ctx->userId(), $ctx->torrentId(), $ctx->isDonor, $ctx->dt, $result->snatchInfo)
+            ?? $result->snatchInfo;
 
         $this->applyUserUpdate($ctx, $result);
 
@@ -417,10 +417,7 @@ class AnnounceService
         return $ctx->responseBuilder->peerList($ctx->torrentId(), $ctx->userId(), $ctx->seeder === 1);
     }
 
-    /**
-     * Lock peer, snatch, and user rows for update within the transaction
-     * to prevent concurrent announce races on the same peer.
-     */
+    /** Lock peer, snatch, and user rows to prevent concurrent announce races. */
     private function lockRowsForUpdate(AnnounceContext $ctx): void
     {
         // Lock the existing peer row if present
@@ -475,19 +472,22 @@ class AnnounceService
 
     private function postProcess(AnnounceContext $ctx): void
     {
-        $redis = Redis::connection()->client();
+        // Batched writes go through Redis — skipped when it is down; the announce itself must still complete.
+        RedisGuard::attempt(function () use ($ctx) {
+            $redis = Redis::connection()->client();
 
-        $lockKey = sprintf('record_batch_lock:%s:%s', $ctx->userId(), $ctx->torrentId());
-        if ($redis->set($lockKey, TIMENOW, ['nx', 'ex' => $ctx->autocleanIntervalOne])) {
-            app(CleanupRepository::class)->recordBatch($redis, $ctx->userId(), $ctx->torrentId());
-            app(IpLogRepository::class)->saveToCache($ctx->userId(), null, [$ctx->ip]);
-        }
-
-        if (app(RequireSeedTorrentRepository::class)->shouldRecordUser($redis, $ctx->userId(), $ctx->torrentId())) {
-            $snatchInfo = LegacyDb::snatchInfo($ctx->torrentId(), $ctx->userId());
-            if ($snatchInfo) {
-                app(RequireSeedTorrentRepository::class)->recordUser($redis, $ctx->userId(), $ctx->torrentId(), $snatchInfo);
+            $lockKey = sprintf('record_batch_lock:%s:%s', $ctx->userId(), $ctx->torrentId());
+            if ($redis->set($lockKey, TIMENOW, ['nx', 'ex' => $ctx->autocleanIntervalOne])) {
+                app(CleanupRepository::class)->recordBatch($redis, $ctx->userId(), $ctx->torrentId());
+                app(IpLogRepository::class)->saveToCache($ctx->userId(), null, [$ctx->ip]);
             }
-        }
+
+            if (app(RequireSeedTorrentRepository::class)->shouldRecordUser($redis, $ctx->userId(), $ctx->torrentId())) {
+                $snatchInfo = LegacyDb::snatchInfo($ctx->torrentId(), $ctx->userId());
+                if ($snatchInfo) {
+                    app(RequireSeedTorrentRepository::class)->recordUser($redis, $ctx->userId(), $ctx->torrentId(), $snatchInfo);
+                }
+            }
+        });
     }
 }

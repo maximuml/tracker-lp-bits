@@ -206,6 +206,30 @@ Decision → Consequences). Add new ADRs here as numbered subsections.
   interface and implementation signatures must be kept in sync; new public
   methods on a covered repository must be added to its interface.
 
+### ADR 0007: RedisGuard fail-open circuit breaker (Accepted, W5-04)
+
+- **Context:** `/announce` and `/scrape` touch Redis in ~10 places (cache,
+  rate limiting, tracker-URL lookup, metrics, IP log, purchase flow). A
+  stopped Redis made every request pay ~5–10 s of `getaddrinfo` stalls and
+  then 500 — under real announce load PHP-FPM workers pile up within
+  seconds. `getaddrinfo` cost is not boundable by the socket timeout, so
+  per-call timeouts cannot fix it.
+- **Decision:** `App\Support\RedisGuard` — `attempt(callable, $fallback)`
+  catches `RedisException`/`RedisClusterException`, marks Redis down via a
+  shared flag file (redis-down under `storage/framework/cache/`, visible to all
+  FPM workers), and returns a fallback. While flagged (30 s TTL) every call
+  site fails fast; on expiry exactly one request becomes the prober
+  (half-open, via `flock`-guarded probe window) instead of a stampede.
+  Noncritical Redis touches are wrapped: `TrackerThrottle` (bypasses the
+  limiter), `TrackerUrl` (reads the table directly), `Setting::get`,
+  `AgentAllowRepository`, `LegacyRedisCache`, announce/scrape internals,
+  metrics, IP log, purchase flow. Domain exceptions still propagate.
+- **Consequences:** With Redis stopped, announce/scrape keep answering
+  HTTP 200 in ~100–150 ms from the database path (measured by the k6
+  `redis-degradation` scenario: p95 < 3 s, success > 80%). Cost: up to
+  30 s of degraded (uncached, unthrottled) mode after Redis returns, and
+  every new Redis call site on hot paths should go through `attempt()`.
+
 ## Testing
 
 - **Unit tests:** `tests/Unit/` — support classes, repositories, services

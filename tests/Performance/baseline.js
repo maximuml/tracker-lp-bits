@@ -277,6 +277,7 @@ export function handleSummary(data) {
     },
   };
 
+  const scenarios = {};
   for (const [metric, budget] of Object.entries(BUDGETS)) {
     const actual = data.metrics[metric]?.values?.['p(95)'] ?? 0;
     const passed = actual <= budget;
@@ -285,9 +286,18 @@ export function handleSummary(data) {
       actual_p95_ms: Math.round(actual),
       passed: passed,
     };
+    // Same {scenarios: {name: {p95_ms}}} shape compare-results.js consumes.
+    scenarios[metric] = { p95_ms: Math.round(actual) };
   }
+
+  const artifact = {
+    commit: __ENV.GITHUB_SHA || 'local',
+    run_at: new Date().toISOString(),
+    scenarios,
+  };
 
   return {
     stdout: JSON.stringify(budgetReport, null, 2) + '\n',
+    'perf-results/baseline.json': JSON.stringify(artifact, null, 2),
   };
 }

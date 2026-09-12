@@ -12,6 +12,7 @@ use App\Models\NexusModel;
 use App\Support\Env;
 use App\Support\Json;
 use App\Support\Logger;
+use App\Support\RedisGuard;
 use App\Support\Url;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -122,12 +123,13 @@ class AgentAllowRepository extends BaseRepository
     {
         // check from high version to low version, if high version allow, stop!
         $cacheKey = Env::get('CACHE_KEY_AGENT_ALLOW', 'all_agent_allows').':php';
-        $allows = Cache::remember($cacheKey, 3600, function () {
-            return AgentAllow::query()
-                ->orderBy('peer_id_start', 'desc')
-                ->orderBy('agent_start', 'desc')
-                ->get();
-        });
+        $lookupAllows = static fn () => AgentAllow::query()
+            ->orderBy('peer_id_start', 'desc')
+            ->orderBy('agent_start', 'desc')
+            ->get();
+        $allows = RedisGuard::attempt(
+            static fn () => Cache::remember($cacheKey, 3600, $lookupAllows),
+        ) ?? $lookupAllows();
         $agentAllowPassed = null;
         $versionTooLowStr = '';
         foreach ($allows as $agentAllow) {
@@ -239,10 +241,11 @@ class AgentAllowRepository extends BaseRepository
     private function checkIsDenied($peerId, $agent, $familyId)
     {
         $cacheKey = Env::get('CACHE_KEY_AGENT_DENY', 'all_agent_denies').':php';
+        $lookupDenies = static fn () => AgentDeny::query()->get()->groupBy('family_id');
         /** @var Collection<int, mixed> $allDenies */
-        $allDenies = Cache::remember($cacheKey, 3600, function () {
-            return AgentDeny::query()->get()->groupBy('family_id');
-        });
+        $allDenies = RedisGuard::attempt(
+            static fn () => Cache::remember($cacheKey, 3600, $lookupDenies),
+        ) ?? $lookupDenies();
         $agentDenies = $allDenies->get($familyId, []);
         foreach ($agentDenies as $agentDeny) {
             if ($agentDeny->agent == $agent && preg_match('/^'.$agentDeny->peer_id.'/', $peerId)) {
@@ -324,12 +327,13 @@ class AgentAllowRepository extends BaseRepository
     {
         // check from high version to low version, if high version allow, stop!
         $cacheKey = Env::get('CACHE_KEY_AGENT_ALLOW', 'all_agent_allows').':php';
-        $allows = Cache::remember($cacheKey, 3600, function () {
-            return AgentAllow::query()
-                ->orderBy('peer_id_start', 'desc')
-                ->orderBy('agent_start', 'desc')
-                ->get();
-        });
+        $lookupAllows = static fn () => AgentAllow::query()
+            ->orderBy('peer_id_start', 'desc')
+            ->orderBy('agent_start', 'desc')
+            ->get();
+        $allows = RedisGuard::attempt(
+            static fn () => Cache::remember($cacheKey, 3600, $lookupAllows),
+        ) ?? $lookupAllows();
         $agentAllowPassed = null;
         foreach ($allows as $agentAllow) {
             $agentAllowId = $agentAllow->id;

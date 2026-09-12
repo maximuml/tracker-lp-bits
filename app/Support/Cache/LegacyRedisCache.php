@@ -7,6 +7,7 @@ namespace App\Support\Cache;
 use App\Support\Config;
 use App\Support\Environment;
 use App\Support\Logger;
+use App\Support\RedisGuard;
 
 class LegacyRedisCache
 {
@@ -51,6 +52,13 @@ class LegacyRedisCache
 
     private function connect(): bool
     {
+        // Skip the connection attempt entirely while the shared breaker is
+        // open — a dead Redis costs ~5-10s of DNS/connect stalls otherwise.
+        if (! RedisGuard::available()) {
+            $this->isEnabled = false;
+
+            return false;
+        }
         $config = Config::get('nexus.redis', null);
         $redis = new \Redis;
         $params = [
@@ -69,7 +77,11 @@ class LegacyRedisCache
                 Logger::writeWithContext((string) "redis pconnect failed: {$e->getMessage()}, retry one time", (string) 'error', (bool) false);
                 $redis->close();
                 $redis = new \Redis;
-                $connectResult = $redis->pconnect(...$params);
+                try {
+                    $connectResult = $redis->pconnect(...$params);
+                } catch (\Exception) {
+                    $connectResult = false;
+                }
             }
             Logger::writeWithContext((string) "redis pconnect: {$connectResult}", (string) 'debug', (bool) false);
         } else {
@@ -80,21 +92,30 @@ class LegacyRedisCache
             }
             Logger::writeWithContext((string) "redis connect: {$connectResult}", (string) 'debug', (bool) false);
         }
-        if (! empty($config['password'])) {
-            $connectResult = $connectResult && $redis->auth($config['password']);
-        }
         if ($connectResult) {
-            $this->redis = $redis;
-            if (is_numeric($config['database'])) {
-                $redis->select((int) $config['database']);
+            try {
+                if (! empty($config['password'])) {
+                    $connectResult = (bool) $redis->auth($config['password']);
+                }
+                if ($connectResult) {
+                    $this->redis = $redis;
+                    if (is_numeric($config['database'])) {
+                        $redis->select((int) $config['database']);
+                    }
+                }
+            } catch (\Exception) {
+                $connectResult = false;
+                $this->redis = null;
             }
-        } else {
-            if (Environment::isTesting()) {
-                $this->isEnabled = false;
+        }
+        if (! $connectResult) {
+            RedisGuard::markDown();
+            // A cache that cannot connect is a disabled cache — callers
+            // already treat isEnabled=false as a miss and fall back to the
+            // database. Throwing here 500s every request during an outage.
+            $this->isEnabled = false;
 
-                return false;
-            }
-            throw new \RuntimeException('Redis connect fail.');
+            return false;
         }
 
         return true;
@@ -239,7 +260,8 @@ class LegacyRedisCache
         if ($this->redis === null) {
             return;
         }
-        $this->redis->del('lock_'.$Key);
+        $redis = $this->redis;
+        RedisGuard::attempt(fn () => $redis->del('lock_'.$Key));
     }
 
     // ---------- Caching functions ----------//
@@ -268,7 +290,8 @@ class LegacyRedisCache
             return;
         }
         $Value = $this->serialize($Value);
-        $this->redis->set($Key, $Value, $Duration);
+        $redis = $this->redis;
+        RedisGuard::attempt(fn () => $redis->set($Key, $Value, $Duration));
         $this->cacheWriteTimes++;
         $this->keyHits['write'][$Key] = ! isset($this->keyHits['write'][$Key]) ? 1 : $this->keyHits['write'][$Key] + 1;
     }
@@ -343,7 +366,8 @@ class LegacyRedisCache
         if ($this->redis === null) {
             return false;
         }
-        $Return = $this->redis->get($Key);
+        $redis = $this->redis;
+        $Return = RedisGuard::attempt(fn () => $redis->get($Key), false);
         $Return = $Return !== null ? $this->unserialize($Return) : null;
         $this->cacheReadTimes++;
         $this->keyHits['read'][$Key] = ! isset($this->keyHits['read'][$Key]) ? 1 : $this->keyHits['read'][$Key] + 1;
@@ -357,15 +381,16 @@ class LegacyRedisCache
         if (! $this->getIsEnabled() || $this->redis === null) {
             return 0;
         }
-        $deleted = $this->redis->del($Key);
+        $redis = $this->redis;
+        $deleted = (int) RedisGuard::attempt(fn () => $redis->del($Key), 0);
         if ($AllLang) {
             $langfolder_array = $this->getLanguageFolderArray();
             foreach ($langfolder_array as $lf) {
-                $this->redis->del($lf.'_'.$Key);
+                RedisGuard::attempt(fn () => $redis->del($lf.'_'.$Key));
             }
         }
 
-        return (int) $deleted;
+        return $deleted;
     }
 
     public function getCacheReadTimes(): int

@@ -16,6 +16,7 @@ namespace App\Models;
 
 use App\Models\Traits\NexusActivityLogTrait;
 use App\Support\Logger;
+use App\Support\RedisGuard;
 use Illuminate\Support\Facades\Redis;
 
 class TrackerUrl extends NexusModel
@@ -49,8 +50,11 @@ class TrackerUrl extends NexusModel
 
     public static function saveUrlCache(): void
     {
-        // 添加 id 与 URL 映射
-        $redis = Redis::connection()->client();
+        // 添加 id 与 URL 映射 — best-effort: skip when Redis is down.
+        $redis = RedisGuard::attempt(static fn () => Redis::connection()->client());
+        if ($redis === null) {
+            return;
+        }
         $redis->unlink(self::TRACKER_URL_CACHE_KEY);
         $list = self::listAll();
         $first = $list->first();
@@ -82,7 +86,17 @@ class TrackerUrl extends NexusModel
      */
     public static function getById(int $trackerUrlId)
     {
-        $redis = Redis::connection()->client();
+        $redis = RedisGuard::attempt(static fn () => Redis::connection()->client());
+        if ($redis === null) {
+            // Redis down — read straight from the table. listAll() is ordered
+            // by is_default first, matching the cached default semantics.
+            $list = self::listAll();
+            $row = $trackerUrlId == 0
+                ? $list->first()
+                : ($list->firstWhere('id', $trackerUrlId) ?? $list->first());
+
+            return $row->url ?? false;
+        }
         $notFoundFlagKey = "TRACKER_URL_NOT_FOUND:$trackerUrlId";
         if ($trackerUrlId == 0) {
             return self::getFromRedisWithRetry($redis, 'get', [self::TRACKER_URL_DEFAULT_CACHE_KEY], $notFoundFlagKey);

@@ -16,6 +16,7 @@ namespace App\Models;
 use App\Models\Traits\NexusActivityLogTrait;
 use App\Support\Input;
 use App\Support\Locale;
+use App\Support\RedisGuard;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Redis;
@@ -55,9 +56,9 @@ class Setting extends NexusModel
     {
         static $settings = null;
         if ($settings === null) {
-            $settings = Cache::remember('nexus_settings_in_laravel', 600, function () {
-                return self::getFromDb();
-            });
+            $settings = RedisGuard::attempt(
+                static fn () => Cache::remember('nexus_settings_in_laravel', 600, static fn () => self::getFromDb()),
+            ) ?? self::getFromDb();
         }
         if ($name === null) {
             return $settings;

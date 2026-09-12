@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Support\RedisGuard;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redis;
@@ -42,7 +43,7 @@ final class RecordHttpMetrics
         $status = (string) $response->getStatusCode();
         $elapsed = (hrtime(true) - $startTime) / 1_000_000_000;
 
-        try {
+        RedisGuard::attempt(static function () use ($status, $elapsed) {
             $redis = Redis::connection();
             $redis->incr("metrics:http_requests:{$status}");
 
@@ -55,9 +56,9 @@ final class RecordHttpMetrics
             $redis->incr('metrics:http_latency_bucket:+Inf');
             $redis->incrByFloat('metrics:http_latency_sum', $elapsed);
             $redis->incr('metrics:http_latency_count');
-        } catch (\Throwable) {
-            // Non-critical: metrics are best-effort
-        }
+
+            return null;
+        });
 
         return $response;
     }

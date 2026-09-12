@@ -55,7 +55,7 @@ class RouteServiceProvider extends ServiceProvider
                 ->middleware('throttle:third-party')
                 ->group(base_path('routes/third-party.php'));
 
-            Route::middleware('throttle:tracker')
+            Route::middleware('throttle.tracker:tracker')
                 ->namespace($this->namespace)
                 ->group(base_path('routes/tracker.php'));
 

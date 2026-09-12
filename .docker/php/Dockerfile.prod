@@ -88,7 +88,7 @@ COPY package.json package-lock.json ./
 RUN npm ci --prefer-offline
 
 COPY . .
-# Filament CSS (resources/css/app.css imports vendor/filament/support/resources/css/index.css)
+# Filament CSS (resources/css/app.css imports vendor/filament/filament/resources/css/theme.css)
 # vendor/ is excluded by .dockerignore, so we copy it from the vendor-builder stage
 COPY --from=vendor-builder /app/vendor /app/vendor
 RUN npm run build

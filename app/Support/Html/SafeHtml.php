@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Support\Html;
 
+use Illuminate\Contracts\Support\Htmlable;
+
 /**
  * SafeHtml value object.
  *
@@ -16,7 +18,7 @@ namespace App\Support\Html;
  * "HTML that has been sanitized", preventing accidental raw output
  * of user-controlled data.
  */
-final class SafeHtml
+final class SafeHtml implements Htmlable
 {
     private string $html;
 

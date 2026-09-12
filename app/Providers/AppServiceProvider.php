@@ -201,8 +201,9 @@ class AppServiceProvider extends ServiceProvider
         });
 
         // Register SafeHtml as a stringable type so {{ $safeHtml }}
-        // automatically calls __toString() → toHtml()
-        Blade::stringable(SafeHtml::class, static fn (SafeHtml $html): string => $html->toHtml());
+        // renders its sanitized HTML verbatim (SafeHtml is Htmlable,
+        // so e() passes it through unescaped).
+        Blade::stringable(SafeHtml::class, static fn (SafeHtml $html): SafeHtml => $html);
 
         // W3-01: Register the dual-write observer for user partitioning.
         User::observe(UserPartitionObserver::class);

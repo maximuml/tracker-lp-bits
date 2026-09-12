@@ -436,7 +436,7 @@ final class HtmlTest extends TestCase
     public function test_tooltip_container_single_child(): void
     {
         $this->assertSame(
-            '<div style="display: none"><div id="lastpost-1">Post body</div></div>',
+            '<div class="nx-hidden"><div id="lastpost-1">Post body</div></div>',
             Html::tooltipContainer([['id' => 'lastpost-1', 'content' => 'Post body']]),
         );
     }
@@ -450,7 +450,7 @@ final class HtmlTest extends TestCase
         ];
 
         $this->assertSame(
-            '<div style="display: none"><div id="a"><b>first</b></div><div id="b"><i>second</i></div><div id="c">third</div></div>',
+            '<div class="nx-hidden"><div id="a"><b>first</b></div><div id="b"><i>second</i></div><div id="c">third</div></div>',
             Html::tooltipContainer($items),
         );
     }
@@ -458,7 +458,7 @@ final class HtmlTest extends TestCase
     public function test_tooltip_container_does_not_escape_id_or_content(): void
     {
         $this->assertSame(
-            '<div style="display: none"><div id="row & 1"><table><tr><td>raw</td></tr></table></div></div>',
+            '<div class="nx-hidden"><div id="row & 1"><table><tr><td>raw</td></tr></table></div></div>',
             Html::tooltipContainer([
                 ['id' => 'row & 1', 'content' => '<table><tr><td>raw</td></tr></table>'],
             ]),
@@ -468,7 +468,7 @@ final class HtmlTest extends TestCase
     public function test_tooltip_container_missing_keys_degrade_to_empty_strings(): void
     {
         $this->assertSame(
-            '<div style="display: none"><div id=""></div></div>',
+            '<div class="nx-hidden"><div id=""></div></div>',
             Html::tooltipContainer([[]]),
         );
     }
@@ -481,7 +481,7 @@ final class HtmlTest extends TestCase
         })();
 
         $this->assertSame(
-            '<div style="display: none"><div id="x">1</div><div id="y">2</div></div>',
+            '<div class="nx-hidden"><div id="x">1</div><div id="y">2</div></div>',
             Html::tooltipContainer($generator),
         );
     }
@@ -491,7 +491,7 @@ final class HtmlTest extends TestCase
     public function test_message_alert_with_url_wraps_text_in_anchor(): void
     {
         $this->assertSame(
-            '<table border="0" cellspacing="0" cellpadding="10" style="margin: 0 auto;"><tr><td style=\'border: none; padding: 10px; background: red; text-align: center;\'>'."\n"
+            '<table border="0" cellspacing="0" cellpadding="10" class="msg-alert"><tr><td class="msg-alert-red">'."\n"
             .'<b><a href="https://example.com/notice" target=\'_blank\'><font color="white">Important notice</font></a></b></td></tr></table><br />',
             Html::messageAlert('https://example.com/notice', 'Important notice'),
         );
@@ -500,7 +500,7 @@ final class HtmlTest extends TestCase
     public function test_message_alert_with_empty_url_omits_anchor(): void
     {
         $this->assertSame(
-            '<table border="0" cellspacing="0" cellpadding="10" style="margin: 0 auto;"><tr><td style=\'border: none; padding: 10px; background: red; text-align: center;\'>'."\n"
+            '<table border="0" cellspacing="0" cellpadding="10" class="msg-alert"><tr><td class="msg-alert-red">'."\n"
             .'<b><font color="white">Plain alert</font></b></td></tr></table><br />',
             Html::messageAlert('', 'Plain alert'),
         );
@@ -509,18 +509,18 @@ final class HtmlTest extends TestCase
     public function test_message_alert_custom_background_color(): void
     {
         // Used by `Sysop\AnnouncementResource` (orange) and the
-        // legacy "important" stream (yellow) — bgcolor is interpolated
-        // verbatim into the inline style attribute.
+        // legacy "important" stream — bgcolor maps to a whitelisted
+        // msg-alert-* class (inline styles are blocked by CSP).
         $output = Html::messageAlert('', 'Maintenance window', 'orange');
 
-        $this->assertStringContainsString('background: orange;', $output);
+        $this->assertStringContainsString('msg-alert-orange', $output);
     }
 
     public function test_message_alert_default_color_is_red(): void
     {
         $output = Html::messageAlert('', 'Bad news');
 
-        $this->assertStringContainsString('background: red;', $output);
+        $this->assertStringContainsString('msg-alert-red', $output);
     }
 
     public function test_message_alert_escapes_url_but_preserves_text_html(): void

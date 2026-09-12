@@ -404,7 +404,7 @@ JS;
 		\App\Support\Html::beginFrame($lang_userdetails['text_delete_user'], true);
 		print("<form method=\"post\" action=\"delacctadmin.php\" name=\"deluser\">
 		<input name=\"userid\" size=\"10\" type=\"hidden\" value=\"". $user["id"] ."\" />
-		<input name=\"delenable\" type=\"checkbox\" data-del-msg=\""'.$lang_userdetails['js_delete_user_note'].'\" /><input name=\"submit\" type=\"submit\" value=\"".$lang_userdetails['submit_delete']."\" disabled=\"disabled\" /></form>");
+		<input name=\"delenable\" type=\"checkbox\" data-del-msg=\"".$lang_userdetails['js_delete_user_note']."\" /><input name=\"submit\" type=\"submit\" value=\"".$lang_userdetails['submit_delete']."\" disabled=\"disabled\" /></form>");
 		\App\Support\Html::endFrame();
 	}
 }

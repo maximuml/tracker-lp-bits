@@ -40,7 +40,7 @@ final class Message
             ? '<b><a href="'.$safeUrl.'" target=\'_blank\'><font color="white">'.$text.'</font></a></b>'
             : '<b><font color="white">'.$text.'</font></b>';
 
-        $colorClass = in_array($bgcolor, ['red', 'green', 'black'], true)
+        $colorClass = in_array($bgcolor, ['red', 'green', 'black', 'blue', 'orange', 'gray'], true)
             ? 'msg-alert-'.$bgcolor
             : 'msg-alert-red';
 

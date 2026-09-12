@@ -159,6 +159,9 @@ table.msg-alert td {
 table.msg-alert td.msg-alert-red { background: red; }
 table.msg-alert td.msg-alert-green { background: green; }
 table.msg-alert td.msg-alert-black { background: black; }
+table.msg-alert td.msg-alert-blue { background: blue; }
+table.msg-alert td.msg-alert-orange { background: orange; }
+table.msg-alert td.msg-alert-gray { background: gray; }
 
 /* Latest torrents cover grid (index). Lives here — not in the cached
    section fragment — because the fragment is cached for 120s and a

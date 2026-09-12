@@ -267,6 +267,9 @@ jobs:
       - name: Run PHPUnit unit tests
         run: DB_DATABASE=nexusphp_unit_testing vendor/bin/phpunit --testsuite Unit --no-coverage
 
+      - name: Run PHPUnit performance tests
+        run: DB_DATABASE=nexusphp_unit_testing vendor/bin/phpunit --testsuite Performance --no-coverage
+
       - name: Run architecture ratchet tests
         if: matrix.php == '8.5' && matrix.mysql == '9.0'
         run: DB_DATABASE=nexusphp_unit_testing vendor/bin/phpunit --testsuite Architecture --no-coverage
@@ -368,6 +371,9 @@ jobs:
 
       - name: Run PHPUnit Feature with coverage
         run: DB_DATABASE=nexusphp_feature_testing vendor/bin/phpunit --testsuite Feature --coverage-clover=coverage-feature.xml --coverage-html=coverage-html
+
+      - name: Run PHPUnit Performance
+        run: DB_DATABASE=nexusphp_feature_testing vendor/bin/phpunit --testsuite Performance --no-coverage
 
       - name: Upload coverage to Codecov (Unit + Feature flags)
         uses: codecov/codecov-action@a99c28d3f0da835de33ff2feb2e15691c7b9641f # v7

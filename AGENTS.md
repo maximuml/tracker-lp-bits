@@ -55,6 +55,7 @@ make test              # all suites (migrate:fresh + phpunit --parallel)
 make test-unit         # unit only
 make test-feature      # feature only
 make test-architecture # architecture ratchets only
+make test-performance  # EXPLAIN/query-plan regression tests
 make test-lint         # Pint + PHPStan
 
 # Or via composer (inside the php container)

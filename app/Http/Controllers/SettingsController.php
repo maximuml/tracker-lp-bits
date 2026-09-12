@@ -12,6 +12,7 @@ use App\Models\Torrent;
 use App\Models\User;
 use App\Support\CurrentUser;
 use App\Support\Globals;
+use App\Support\Html\SafeHtml;
 use App\Support\Log;
 use App\Support\Settings;
 use App\Support\UserDisplay;
@@ -118,12 +119,18 @@ class SettingsController extends LegacyController
             $action = 'showmenu';
         }
 
-        $lang = (array) ($this->globals->get('lang_settings') ?? []);
+        // Legacy lang strings are trusted markup: wrap in SafeHtml so that
+        // escaped Blade output renders them verbatim, like {!! !!} did.
+        $lang = array_map(
+            fn (mixed $v): SafeHtml => SafeHtml::fromTrustedHtml(is_scalar($v) ? (string) $v : ''),
+            (array) ($this->globals->get('lang_settings') ?? []),
+        );
 
         $data = [
             'action' => $action,
             'lang' => $lang,
             'currentUser' => (array) $currentUser,
+            'scriptName' => '/settings.php',
         ];
 
         $sectionMap = [

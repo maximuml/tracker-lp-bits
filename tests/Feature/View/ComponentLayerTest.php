@@ -252,4 +252,198 @@ final class ComponentLayerTest extends TestCase
         $this->assertStringContainsString('nx-tbadge--sticky', $html);
         $this->assertStringContainsString('Sticky', $html);
     }
+
+    // --- settings row components (W7-02) ---------------------------------
+
+    public function test_settings_row_escapes_label_and_keeps_legacy_classes(): void
+    {
+        $html = $this->render('<x-settings-row :label="$l"><input name="x"></x-settings-row>', ['l' => 'Row <b>x</b>']);
+
+        $this->assertStringContainsString('class="rowhead nowrap"', $html);
+        $this->assertStringContainsString('class="rowfollow"', $html);
+        $this->assertStringContainsString('Row &lt;b&gt;x&lt;/b&gt;', $html);
+        $this->assertStringContainsString('<input name="x">', $html);
+    }
+
+    public function test_settings_yesno_marks_checked_and_pairs_labels(): void
+    {
+        $html = $this->render(
+            '<x-settings-yesno label="Feat" name="flag" value="yes" :note="$n" yes-label="Da" no-label="Net" />',
+            ['n' => 'n<b>'],
+        );
+
+        $this->assertStringContainsString('id="flagyes"', $html);
+        $this->assertStringContainsString('for="flagyes"', $html);
+        $this->assertStringContainsString('id="flagno"', $html);
+        $this->assertStringContainsString('for="flagno"', $html);
+        $this->assertStringContainsString('Da', $html);
+        $this->assertStringContainsString('n&lt;b&gt;', $html);
+        $this->assertMatchesRegularExpression('/id="flagyes"[^>]*checked/', $html);
+        $this->assertDoesNotMatchRegularExpression('/id="flagno"[^>]*checked/', $html);
+    }
+
+    public function test_settings_yesno_renders_trusted_html_note(): void
+    {
+        $html = $this->render(
+            '<x-settings-yesno label="F" name="flag" value="yes" :note="$n" />',
+            ['n' => SafeHtml::fromTrustedHtml('see <a href="/faq">FAQ</a>')],
+        );
+
+        $this->assertStringContainsString('<a href="/faq">FAQ</a>', $html);
+    }
+
+    public function test_settings_yesno_checks_no_when_value_is_no(): void
+    {
+        $html = $this->render('<x-settings-yesno label="F" name="flag" value="no" />');
+
+        $this->assertMatchesRegularExpression('/id="flagno"[^>]*checked/', $html);
+        $this->assertDoesNotMatchRegularExpression('/id="flagyes"[^>]*checked/', $html);
+    }
+
+    public function test_settings_text_escapes_value_and_renders_width(): void
+    {
+        $html = $this->render(
+            '<x-settings-text label="T" :name="$n" :value="$v" note="hint" width="50px" />',
+            ['n' => 'f"><b>', 'v' => '"><script>'],
+        );
+
+        $this->assertStringContainsString('width: 50px', $html);
+        $this->assertStringContainsString('hint', $html);
+        $this->assertStringNotContainsString('<script>', $html);
+        $this->assertStringContainsString('value="&quot;&gt;&lt;script&gt;', $html);
+    }
+
+    public function test_settings_radios_marks_selected_and_escapes(): void
+    {
+        $html = $this->render(
+            '<x-settings-radios label="V" name="ver" :options="$o" selected="admin" :note="$n" />',
+            ['o' => ['email' => 'E<b>', 'admin' => 'Admin'], 'n' => 'note'],
+        );
+
+        $this->assertStringContainsString('value="admin" checked', $html);
+        $this->assertStringContainsString('E&lt;b&gt;', $html);
+        $this->assertStringContainsString('note', $html);
+        $this->assertDoesNotMatchRegularExpression('/value="email"[^>]*checked/', $html);
+    }
+
+    public function test_settings_radios_supports_disabled_array_options(): void
+    {
+        $html = $this->render(
+            '<x-settings-radios label="L" name="lang" :options="$o" selected="en" />',
+            ['o' => [
+                ['value' => 'en', 'label' => 'English', 'disabled' => false],
+                ['value' => 'ru', 'label' => 'Russian', 'disabled' => true],
+            ]],
+        );
+
+        $this->assertMatchesRegularExpression('/value="en"[^>]*checked/', $html);
+        $this->assertMatchesRegularExpression('/value="ru"[^>]*disabled/', $html);
+        $this->assertStringContainsString('Russian', $html);
+    }
+
+    public function test_settings_select_marks_selected_and_escapes(): void
+    {
+        $html = $this->render(
+            '<x-settings-select label="S" name="css" :options="$o" selected="2" note="pick" />',
+            ['o' => ['1' => 'A<', '2' => 'B']],
+        );
+
+        $this->assertStringContainsString('value="2" selected', $html);
+        $this->assertStringContainsString('A&lt;', $html);
+        $this->assertStringContainsString('pick', $html);
+        $this->assertDoesNotMatchRegularExpression('/value="1"[^>]*selected/', $html);
+    }
+
+    public function test_settings_checkboxes_marks_checked_and_disabled(): void
+    {
+        $html = $this->render(
+            '<x-settings-checkboxes label="L" name="l[]" :options="$o" />',
+            ['o' => [
+                ['value' => 'en', 'label' => 'En', 'checked' => true],
+                ['value' => 'ru', 'label' => 'Ru<', 'checked' => false, 'disabled' => true],
+            ]],
+        );
+
+        $this->assertMatchesRegularExpression('/value="en"[^>]*checked/', $html);
+        $this->assertMatchesRegularExpression('/value="ru"[^>]*disabled/', $html);
+        $this->assertDoesNotMatchRegularExpression('/value="ru"[^>]*checked/', $html);
+        $this->assertStringContainsString('Ru&lt;', $html);
+    }
+
+    public function test_settings_save_renders_submit(): void
+    {
+        $html = $this->render('<x-settings-save :label="$l" text="Save now" />', ['l' => 'S<b>']);
+
+        $this->assertStringContainsString('type="submit"', $html);
+        $this->assertStringContainsString('name="save"', $html);
+        $this->assertStringContainsString('value="Save now"', $html);
+        $this->assertStringContainsString('S&lt;b&gt;', $html);
+    }
+
+    // --- settings/index integration ---------------------------------------
+
+    public function test_settings_main_section_renders_component_inputs(): void
+    {
+        $html = view('settings.index', [
+            'action' => 'mainsettings',
+            'lang' => [],
+            'scriptName' => '/settings.php',
+            'config' => ['site_online' => 'no', 'verification' => 'admin'],
+            'searchboxes' => [],
+            'allSiteLanguages' => [],
+            'allEnabledLangs' => [],
+            'stylesheets' => [],
+        ])->render();
+
+        $this->assertStringContainsString('name="site_online"', $html);
+        $this->assertMatchesRegularExpression('/id="site_onlineno"[^>]*checked/', $html);
+        $this->assertStringContainsString('name="verification"', $html);
+        $this->assertStringContainsString('value="admin" checked', $html);
+        $this->assertStringContainsString('name="save"', $html);
+        $this->assertStringNotContainsString('{!!', $html);
+    }
+
+    public function test_settings_bonus_section_renders_cost_fields(): void
+    {
+        $html = view('settings.index', [
+            'action' => 'bonussettings',
+            'lang' => [],
+            'scriptName' => '/settings.php',
+            'config' => ['oneinvite' => 42, 'bonusgift' => 'yes'],
+            'attendance_continuous' => [7 => 100],
+        ])->render();
+
+        $this->assertStringContainsString('name="oneinvite"', $html);
+        $this->assertStringContainsString('value="42"', $html);
+        $this->assertStringContainsString('name="attendance_continuous_day[]"', $html);
+        $this->assertStringContainsString('value="7"', $html);
+        $this->assertMatchesRegularExpression('/id="bonusgiftyes"[^>]*checked/', $html);
+    }
+
+    public function test_settings_smtp_hides_conditional_tbody(): void
+    {
+        $html = view('settings.index', [
+            'action' => 'smtpsettings',
+            'lang' => [],
+            'scriptName' => '/settings.php',
+            'config' => ['smtptype' => 'external'],
+        ])->render();
+
+        $this->assertMatchesRegularExpression('/id="smtp_advanced"[^>]*nx-hidden/', $html);
+        $this->assertDoesNotMatchRegularExpression('/id="smtp_external"[^>]*nx-hidden/', $html);
+        $this->assertStringContainsString('name="smtpaddress"', $html);
+    }
+
+    public function test_settings_escapes_config_values(): void
+    {
+        $html = view('settings.index', [
+            'action' => 'basicsettings',
+            'lang' => [],
+            'scriptName' => '/settings.php',
+            'config' => ['SITENAME' => '"><script>alert(1)</script>'],
+        ])->render();
+
+        $this->assertStringNotContainsString('<script>alert(1)</script>', $html);
+        $this->assertStringContainsString('&lt;script&gt;', $html);
+    }
 }

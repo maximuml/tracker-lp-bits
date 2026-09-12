@@ -44,6 +44,9 @@ use App\Support\Html\SafeHtml;
 use App\Support\Language;
 use App\Support\LegacyHeaderBag;
 use App\Support\Locale;
+use App\Support\Metrics\Collectors;
+use App\Support\Metrics\MetricsRegistry;
+use App\Support\Metrics\PrometheusFormatter;
 use App\Support\UserUpdateBatch;
 use Filament\Facades\Filament;
 use Filament\Support\Assets\Css;
@@ -58,6 +61,7 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Horizon\Contracts\JobRepository;
 use Laravel\Sanctum\PersonalAccessToken;
 use Laravel\Sanctum\Sanctum;
 
@@ -104,6 +108,27 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(TorrentRepositoryInterface::class, TorrentRepository::class);
         $this->app->bind(UserModerationRepositoryInterface::class, UserModerationRepository::class);
         $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
+
+        // W6-01: /metrics collectors — one per domain, resolved once per request.
+        $this->app->singleton(MetricsRegistry::class, static function ($app): MetricsRegistry {
+            $fmt = new PrometheusFormatter;
+
+            return new MetricsRegistry([
+                new Collectors\HttpMetricsCollector($fmt),
+                new Collectors\DatabaseMetricsCollector($fmt),
+                new Collectors\RedisMetricsCollector($fmt),
+                new Collectors\CacheMetricsCollector($fmt),
+                new Collectors\SchedulerMetricsCollector($fmt),
+                new Collectors\QueueMetricsCollector(
+                    $fmt,
+                    $app->bound(JobRepository::class) ? $app->make(JobRepository::class) : null,
+                ),
+                new Collectors\TrackerMetricsCollector($fmt),
+                new Collectors\SearchMetricsCollector($fmt),
+                new Collectors\OutboxMetricsCollector($fmt),
+                new Collectors\AppInfoCollector($fmt),
+            ]);
+        });
     }
 
     /**

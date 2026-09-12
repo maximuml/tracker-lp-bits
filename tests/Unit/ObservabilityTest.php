@@ -35,7 +35,7 @@ final class ObservabilityTest extends TestCase
      */
     public function test_metrics_controller_returns_prometheus_format(): void
     {
-        $controller = new MetricsController;
+        $controller = app(MetricsController::class);
         $response = $controller->index();
 
         $this->assertEquals(200, $response->getStatusCode());
@@ -52,7 +52,7 @@ final class ObservabilityTest extends TestCase
      */
     public function test_metrics_controller_exposes_db_metric(): void
     {
-        $controller = new MetricsController;
+        $controller = app(MetricsController::class);
         $response = $controller->index();
         $content = $response->getContent();
         $this->assertIsString($content);
@@ -64,7 +64,7 @@ final class ObservabilityTest extends TestCase
      */
     public function test_metrics_controller_exposes_redis_metric(): void
     {
-        $controller = new MetricsController;
+        $controller = app(MetricsController::class);
         $response = $controller->index();
         $content = $response->getContent();
         $this->assertIsString($content);
@@ -76,7 +76,7 @@ final class ObservabilityTest extends TestCase
      */
     public function test_metrics_controller_exposes_scheduler_metric(): void
     {
-        $controller = new MetricsController;
+        $controller = app(MetricsController::class);
         $response = $controller->index();
         $content = $response->getContent();
         $this->assertIsString($content);
@@ -88,7 +88,7 @@ final class ObservabilityTest extends TestCase
      */
     public function test_metrics_controller_exposes_http_metric(): void
     {
-        $controller = new MetricsController;
+        $controller = app(MetricsController::class);
         $response = $controller->index();
         $content = $response->getContent();
         $this->assertIsString($content);
@@ -100,7 +100,7 @@ final class ObservabilityTest extends TestCase
      */
     public function test_metrics_controller_exposes_app_info(): void
     {
-        $controller = new MetricsController;
+        $controller = app(MetricsController::class);
         $response = $controller->index();
         $content = $response->getContent();
         $this->assertIsString($content);

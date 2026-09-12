@@ -54,6 +54,15 @@ final class LegacyViewSurfaceTest extends TestCase
     /** Baseline: inline on*= event handler attributes. */
     private const BASELINE_INLINE_HANDLERS = 0;
 
+    /**
+     * Views whose <table> tags are exempt from the layout-table ratchet:
+     * semantic data tables (the x-data-table component and similar).
+     * Paths are relative to resources/views.
+     */
+    private const TABLE_EXEMPT_FILES = [
+        'components/data-table.blade.php',
+    ];
+
     public function test_raw_output_count_does_not_exceed_baseline(): void
     {
         $count = $this->countPatternInViews('/\{!!/');
@@ -107,7 +116,7 @@ final class LegacyViewSurfaceTest extends TestCase
 
     public function test_table_tag_count_does_not_exceed_baseline(): void
     {
-        $count = $this->countPatternInViews('/<table\b/i');
+        $count = $this->countPatternInViews('/<table\b/i', self::TABLE_EXEMPT_FILES);
 
         $this->assertLessThanOrEqual(
             self::BASELINE_TABLE_TAGS,
@@ -144,16 +153,24 @@ final class LegacyViewSurfaceTest extends TestCase
 
     /**
      * Count lines matching a pattern across all Blade templates.
+     *
+     * @param  list<string>  $exemptFiles  paths relative to resources/views to skip
      */
-    private function countPatternInViews(string $pattern): int
+    private function countPatternInViews(string $pattern, array $exemptFiles = []): int
     {
         $count = 0;
+        $exempt = array_fill_keys($exemptFiles, true);
         $iterator = new \RecursiveIteratorIterator(
             new \RecursiveDirectoryIterator(self::VIEWS_DIR, \RecursiveDirectoryIterator::SKIP_DOTS),
         );
 
         foreach ($iterator as $file) {
             if (! $file->isFile() || ($file->getExtension() !== 'blade.php' && $file->getExtension() !== 'php')) {
+                continue;
+            }
+
+            $relative = substr($file->getPathname(), strlen(self::VIEWS_DIR) + 1);
+            if (isset($exempt[$relative])) {
                 continue;
             }
 

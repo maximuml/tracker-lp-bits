@@ -167,14 +167,15 @@ final class QueryBudgetTest extends TestCase
     }
 
     /**
-     * /forums.php index — actual ~24 → budget 29.
+     * /forums.php index — actual ~31 with the seeded 5 forums (per-forum
+     * topic/post lookups) → budget 38.
      */
     public function test_forums_query_budget(): void
     {
         $user = User::factory()->create();
         $this->withNexusCookie($user);
 
-        $this->assertQueryCountBelow(29, function (): void {
+        $this->assertQueryCountBelow(38, function (): void {
             $this->get('/forums.php');
         });
     }

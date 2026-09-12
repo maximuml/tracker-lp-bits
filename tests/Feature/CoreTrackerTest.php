@@ -101,6 +101,21 @@ class CoreTrackerTest extends TestCase
             ->assertSee($torrent->name);
     }
 
+    public function test_web_details_page_renders_twice_in_same_process(): void
+    {
+        $user = User::factory()->create();
+        $torrent = Torrent::factory()->owner($user)->create();
+
+        $this->withNexusCookie($user)
+            ->get('/details/'.$torrent->id)
+            ->assertStatus(200);
+
+        $this->withNexusCookie($user)
+            ->get('/details/'.$torrent->id)
+            ->assertStatus(200)
+            ->assertSee($torrent->name);
+    }
+
     public function test_web_comment_post_creates_comment_and_redirects(): void
     {
         $owner = User::factory()->create();

@@ -3,9 +3,12 @@ name: Performance budget
 on:
   push:
     branches: [php8]
+  pull_request:
+    branches: [php8]
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: perf-budget-${{ github.ref }}
@@ -108,21 +111,102 @@ jobs:
           # T-17: Extract passkey from perf_user_1 and info_hash from perf-torrent-1
           PASSKEY=$(docker compose exec -T php php artisan tinker --execute='echo App\Models\User::where("username","perf_user_1")->value("passkey") ?? "";' 2>/dev/null | tr -d '[:space:]')
           INFO_HASH=$(docker compose exec -T php php artisan tinker --execute='echo App\Models\Torrent::where("name","perf-torrent-1")->value("info_hash") ?? "";' 2>/dev/null | tr -d '[:space:]')
+          INFO_HASHES=$(docker compose exec -T php php artisan tinker --execute='echo App\Models\Torrent::where("name","like","perf-torrent-%")->orderBy("id")->limit(5)->pluck("info_hash")->implode(",");' 2>/dev/null | tr -d '[:space:]')
+          # The tracker allows one leeching peer per (user, torrent) — multi-peer
+          # scenarios need several distinct users.
+          PASSKEYS=$(docker compose exec -T php php artisan tinker --execute='echo App\Models\User::where("username","like","perf_user_%")->orderBy("id")->limit(10)->pluck("passkey")->implode(",");' 2>/dev/null | tr -d '[:space:]')
+          # Degradation runs after announce.js left peer rows — use a torrent
+          # no other scenario touches.
+          DEGRADED_HASH=$(docker compose exec -T php php artisan tinker --execute='echo App\Models\Torrent::where("name","perf-torrent-6")->value("info_hash") ?? "";' 2>/dev/null | tr -d '[:space:]')
           echo "Extracted passkey: ${PASSKEY:0:8}..."
           echo "Extracted info_hash: ${INFO_HASH:0:8}..."
+          echo "Extracted info_hashes: ${INFO_HASHES:0:8}... (${INFO_HASHES//,/ } | wc -w) hashes"
           echo "passkey=$PASSKEY" >> "$GITHUB_OUTPUT"
           echo "info_hash=$INFO_HASH" >> "$GITHUB_OUTPUT"
+          echo "info_hashes=$INFO_HASHES" >> "$GITHUB_OUTPUT"
+          echo "passkeys=$PASSKEYS" >> "$GITHUB_OUTPUT"
+          echo "degraded_hash=$DEGRADED_HASH" >> "$GITHUB_OUTPUT"
 
       - name: Run k6 performance baseline (web UI)
         run: |
+          mkdir -p perf-results
           k6 run --env BASE_URL=http://127.0.0.1:80 \
             --env USERNAME=perf_user_1 \
             --env PASSWORD=PerfTest2026! \
             tests/Performance/baseline.js
 
+      - name: Clear seeded perf peer rows
+        run: |
+          # The dataset seeds '-perf-<uid>-<tid>' peer rows on every perf
+          # torrent; the tracker allows only one leeching peer per
+          # (user, torrent), so announce scenarios must start clean to
+          # control (user, torrent, peer_id) themselves.
+          docker compose exec -T php php artisan tinker \
+            --execute='DB::table("peers")->where("peer_id","like","-perf-%")->delete();'
+
       - name: Run k6 tracker load test (announce + scrape)
         run: |
+          mkdir -p perf-results
           k6 run --env BASE_URL=http://127.0.0.1:80 \
+            --env DEBUG_BODY=1 \
             --env PASSKEY=${{ steps.tracker-creds.outputs.passkey }} \
             --env INFO_HASH=${{ steps.tracker-creds.outputs.info_hash }} \
+            --env INFO_HASHES=${{ steps.tracker-creds.outputs.info_hashes }} \
+            --env PASSKEYS=${{ steps.tracker-creds.outputs.passkeys }} \
+            --env GITHUB_SHA=${{ github.sha }} \
             tests/Performance/announce.js
+
+      - name: Run k6 tracker load with Redis down (degradation)
+        run: |
+          docker compose stop redis
+          sleep 2
+          # Trip the Redis circuit breaker before measuring: the first request
+          # pays the ~5-10s DNS/connect detection stall, then RedisGuard marks
+          # Redis down and subsequent requests fail fast from the DB path.
+          curl -s -o /dev/null -m 30 --get \
+            -H "User-Agent: qBittorrent/5.0.0" \
+            --data-urlencode "passkey=${{ steps.tracker-creds.outputs.passkey }}" \
+            --data-urlencode "info_hash=${{ steps.tracker-creds.outputs.info_hash }}" \
+            --data-urlencode "peer_id=-qB5000-WARMUP000000" \
+            --data-urlencode "port=51413" --data-urlencode "uploaded=0" \
+            --data-urlencode "downloaded=0" --data-urlencode "left=1" \
+            --data-urlencode "event=stopped" \
+            "http://127.0.0.1:80/announce.php" || true
+          # The tracker must keep answering — bounded response or fast failure.
+          mkdir -p perf-results
+          K6_EXIT=0
+          k6 run --env BASE_URL=http://127.0.0.1:80 \
+            --env PASSKEY=${{ steps.tracker-creds.outputs.passkey }} \
+            --env PASSKEYS=${{ steps.tracker-creds.outputs.passkeys }} \
+            --env INFO_HASH=${{ steps.tracker-creds.outputs.info_hash }} \
+            --env DEGRADED_HASH=${{ steps.tracker-creds.outputs.degraded_hash }} \
+            --env GITHUB_SHA=${{ github.sha }} \
+            tests/Performance/redis-degradation.js || K6_EXIT=$?
+          docker compose start redis
+          exit $K6_EXIT
+
+      - name: Upload perf results artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: k6-perf-results
+          path: perf-results/
+          retention-days: 90
+
+      - name: Compare against baseline (>20% regression fails)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p perf-baseline
+          # Baseline = artifact of the latest successful run on the default branch.
+          RUN_ID=$(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/perf-budget.yml/runs?branch=php8&status=success&per_page=10" \
+            --jq '[.workflow_runs[] | select(.head_sha != "'"${GITHUB_SHA}"'")][0].id // empty')
+          if [ -z "$RUN_ID" ]; then
+            echo "::warning::No baseline run found — skipping regression compare"
+            exit 0
+          fi
+          echo "Baseline run: $RUN_ID"
+          if ! gh run download "$RUN_ID" -n k6-perf-results -D perf-baseline; then
+            echo "::warning::Baseline artifact unavailable — skipping regression compare"
+            exit 0
+          fi
+          node tests/Performance/compare-results.js perf-baseline perf-results

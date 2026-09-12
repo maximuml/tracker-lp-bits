@@ -7,6 +7,7 @@ namespace App\Services\Announce;
 use App\DTOs\AnnounceRequestDto;
 use App\Exceptions\TrackerException;
 use App\Exceptions\TrackerWarningException;
+use App\Support\RedisGuard;
 use Illuminate\Support\Facades\Redis;
 
 /**
@@ -27,21 +28,30 @@ final class RateLimiter
 
     public function check(AnnounceRequestDto $dto): RateLimitResult
     {
-        $redis = Redis::connection()->client();
+        // Fail open when Redis is down: rate limiting and dedup are
+        // best-effort — announce must keep serving from the database.
+        if (! RedisGuard::available()) {
+            return new RateLimitResult(false);
+        }
+
+        $redis = RedisGuard::attempt(static fn () => Redis::connection()->client());
+        if ($redis === null) {
+            return new RateLimitResult(false);
+        }
 
         $passkey = $dto->passkey->toString();
         $infoHashBinary = $dto->infoHash->toBinary();
         $infoHashFingerprint = $dto->infoHash->fingerprint();
 
-        if ($redis->get("passkey_invalid:{$passkey}")) {
+        if (RedisGuard::attempt(static fn () => $redis->get("passkey_invalid:{$passkey}"))) {
             $this->warn($dto, 'Passkey invalid');
         }
 
         $lockParams = ['info_hash' => $infoHashBinary, 'passkey' => $passkey];
         $reAnnounceKey = 'isReAnnounce:'.md5(http_build_query($lockParams));
-        $isReAnnounce = ! $redis->set($reAnnounceKey, TIMENOW, ['nx', 'ex' => self::RE_ANNOUNCE_INTERVAL]);
+        $isReAnnounce = ! RedisGuard::attempt(static fn () => $redis->set($reAnnounceKey, TIMENOW, ['nx', 'ex' => self::RE_ANNOUNCE_INTERVAL]));
 
-        if ($redis->get("torrent_not_exists:{$infoHashBinary}")) {
+        if (RedisGuard::attempt(static fn () => $redis->get("torrent_not_exists:{$infoHashBinary}"))) {
             throw TrackerException::failure('torrent not registered with this tracker');
         }
 
@@ -51,7 +61,7 @@ final class RateLimiter
         if (
             ! $isStoppedOrCompleted
             && ! $isReAnnounce
-            && ! $redis->set($frequencyKey, TIMENOW, ['nx', 'ex' => self::FREQUENCY_INTERVAL])
+            && ! RedisGuard::attempt(static fn () => $redis->set($frequencyKey, TIMENOW, ['nx', 'ex' => self::FREQUENCY_INTERVAL]))
         ) {
             $this->warn($dto, 'Request too frequent(h)', 300);
         }

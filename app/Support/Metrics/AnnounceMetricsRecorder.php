@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support\Metrics;
 
+use App\Support\RedisGuard;
 use Illuminate\Support\Facades\Redis;
 
 /**
@@ -43,11 +44,9 @@ final class AnnounceMetricsRecorder
     {
         $category = self::categorize($rawReason);
 
-        try {
-            Redis::connection()->incr("metrics:announce_rejections:{$category}");
-        } catch (\Throwable) {
-            // Non-critical: metrics are best-effort
-        }
+        // Best-effort — when Redis is down the breaker fails fast instead of
+        // paying ~5-10s of connect stalls on every rejected announce.
+        RedisGuard::attempt(static fn () => Redis::connection()->incr("metrics:announce_rejections:{$category}"));
     }
 
     /**

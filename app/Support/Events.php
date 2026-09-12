@@ -71,7 +71,7 @@ final class Events
     {
         $channel = Env::get('CHANNEL_NAME_MODEL_EVENT', null);
         if (! empty($channel)) {
-            Redis::connection()->client()->publish($channel, json_encode(['event' => $event, 'id' => $id, 'json' => $json]));
+            RedisGuard::attempt(static fn () => Redis::connection()->client()->publish($channel, json_encode(['event' => $event, 'id' => $id, 'json' => $json])));
         } else {
             Logger::writeWithContext("event: $event, id: $id, channel: ".(is_scalar($channel) ? (string) $channel : '').', channel is empty!', 'error');
         }

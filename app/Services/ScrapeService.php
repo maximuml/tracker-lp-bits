@@ -8,8 +8,8 @@ use App\DTOs\ScrapeRequestDto;
 use App\Exceptions\TrackerException;
 use App\Exceptions\TrackerWarningException;
 use App\Models\Torrent;
-use App\Models\User;
 use App\Support\Config\SiteConfig;
+use App\Support\RedisGuard;
 use App\ValueObjects\InfoHash;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -31,30 +31,19 @@ class ScrapeService
 
         $cacheKey = $this->cacheKey($dto->infoHashes);
 
-        return Cache::remember($cacheKey, 1200, function () use ($dto) {
-            return $this->buildScrapeData($dto->infoHashes);
-        });
+        return RedisGuard::attempt(
+            fn () => Cache::remember($cacheKey, 1200, fn () => $this->buildScrapeData($dto->infoHashes)),
+        ) ?? $this->buildScrapeData($dto->infoHashes);
     }
 
     private function authenticateUser(ScrapeRequestDto $dto): void
     {
         $passkey = $dto->passkey->toString();
 
-        $user = Cache::remember("user_passkey_{$passkey}_content", 3600, function () use ($passkey) {
-            $record = User::query()
-                ->select([
-                    'id', 'username', 'downloadpos', 'enabled', 'uploaded', 'downloaded',
-                    'class', 'parked', 'clientselect', 'showclienterror', 'passkey',
-                    'donor', 'donoruntil', 'seedbonus', 'tracker_url_id',
-                ])
-                ->where('passkey', $passkey)
-                ->first();
-
-            return $record ? $record->toArray() : [];
-        });
+        $user = app(PasskeyUserLookup::class)->find($passkey);
 
         if (empty($user)) {
-            Redis::connection()->client()->set("passkey_invalid:{$passkey}", TIMENOW, ['ex' => 24 * 3600]);
+            RedisGuard::attempt(static fn () => Redis::connection()->client()->set("passkey_invalid:{$passkey}", TIMENOW, ['ex' => 24 * 3600]));
             throw TrackerException::failure('Invalid passkey! Re-download the .torrent from '.SiteConfig::current()->basic->baseUrl());
         }
 

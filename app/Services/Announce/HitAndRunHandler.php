@@ -11,6 +11,7 @@ use App\Events\HitAndRunCreated;
 use App\Models\HitAndRun;
 use App\Support\LegacyDb;
 use App\Support\Logger;
+use App\Support\RedisGuard;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
@@ -58,11 +59,14 @@ final class HitAndRunHandler
         }
 
         $hrCacheKey = HitAndRun::getCacheKey($userId, $torrentId);
-        $hrExists = Cache::remember($hrCacheKey, random_int(86400, 86400 * 3), function () use ($userId, $torrentId) {
+        $lookupHr = static function () use ($userId, $torrentId) {
             $record = HitAndRun::query()->where('uid', $userId)->where('torrent_id', $torrentId)->first();
 
             return $record ? $record->toJson() : false;
-        });
+        };
+        $hrExists = RedisGuard::attempt(
+            static fn () => Cache::remember($hrCacheKey, random_int(86400, 86400 * 3), $lookupHr),
+        ) ?? $lookupHr();
 
         if ($hrExists) {
             Logger::writeWithContext((string) "[HR_LOG] user: {$userId}, torrent: {$torrentId}, already exists", (string) 'debug', (bool) false);

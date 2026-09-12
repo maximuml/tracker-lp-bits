@@ -184,8 +184,8 @@ class PerformanceTestDatasetSeeder extends Seeder
      */
     private function createTestPeers(): void
     {
-        $torrents = Torrent::where('name', 'like', self::TEST_TORRENT_PREFIX.'%')->get();
-        $users = User::where('username', 'like', self::TEST_USER_PREFIX.'%')->get();
+        $torrents = Torrent::where('name', 'like', self::TEST_TORRENT_PREFIX.'%')->orderBy('id')->get();
+        $users = User::where('username', 'like', self::TEST_USER_PREFIX.'%')->orderBy('id')->get();
 
         if ($torrents->isEmpty() || $users->isEmpty()) {
             return;
@@ -223,8 +223,8 @@ class PerformanceTestDatasetSeeder extends Seeder
      */
     private function createTestSnatched(): void
     {
-        $torrents = Torrent::where('name', 'like', self::TEST_TORRENT_PREFIX.'%')->get();
-        $users = User::where('username', 'like', self::TEST_USER_PREFIX.'%')->get();
+        $torrents = Torrent::where('name', 'like', self::TEST_TORRENT_PREFIX.'%')->orderBy('id')->get();
+        $users = User::where('username', 'like', self::TEST_USER_PREFIX.'%')->orderBy('id')->get();
 
         if ($torrents->isEmpty() || $users->isEmpty()) {
             return;
@@ -256,8 +256,8 @@ class PerformanceTestDatasetSeeder extends Seeder
      */
     private function createTestComments(): void
     {
-        $torrents = Torrent::where('name', 'like', self::TEST_TORRENT_PREFIX.'%')->get();
-        $users = User::where('username', 'like', self::TEST_USER_PREFIX.'%')->get();
+        $torrents = Torrent::where('name', 'like', self::TEST_TORRENT_PREFIX.'%')->orderBy('id')->get();
+        $users = User::where('username', 'like', self::TEST_USER_PREFIX.'%')->orderBy('id')->get();
 
         if ($torrents->isEmpty() || $users->isEmpty()) {
             return;
@@ -286,7 +286,7 @@ class PerformanceTestDatasetSeeder extends Seeder
             return;
         }
 
-        $users = User::where('username', 'like', self::TEST_USER_PREFIX.'%')->get();
+        $users = User::where('username', 'like', self::TEST_USER_PREFIX.'%')->orderBy('id')->get();
         if ($users->isEmpty()) {
             return;
         }
@@ -324,7 +324,7 @@ class PerformanceTestDatasetSeeder extends Seeder
      */
     private function createTestMessages(): void
     {
-        $users = User::where('username', 'like', self::TEST_USER_PREFIX.'%')->get();
+        $users = User::where('username', 'like', self::TEST_USER_PREFIX.'%')->orderBy('id')->get();
         if ($users->count() < 2) {
             return;
         }

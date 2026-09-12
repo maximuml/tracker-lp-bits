@@ -22,6 +22,7 @@ use App\Http\Middleware\RejectGetMutations;
 use App\Http\Middleware\RequirePasswordChange;
 use App\Http\Middleware\ResponseTimeHeader;
 use App\Http\Middleware\SecurityHeaders;
+use App\Http\Middleware\TrackerThrottle;
 use App\Http\Middleware\TrimStrings;
 use App\Http\Middleware\TrustProxies;
 use App\Http\Middleware\VerifyCsrfToken;
@@ -112,6 +113,7 @@ class Kernel extends HttpKernel
         'password.confirm' => RequirePassword::class,
         'signed' => ValidateSignature::class,
         'throttle' => ThrottleRequests::class,
+        'throttle.tracker' => TrackerThrottle::class,
         'verified' => EnsureEmailIsVerified::class,
         'locale' => Locale::class,
         'checkUserStatus' => CheckUserStatus::class,

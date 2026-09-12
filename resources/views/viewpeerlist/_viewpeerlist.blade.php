@@ -94,7 +94,7 @@ if (! function_exists('dltable')) {
             $secs = max(1, ($e['la'] - $e['st']));
             $columnLocation = '';
             $currentUserId = (int) ($CURUSER['id'] ?? 0);
-            $isStrongPrivacy = $privacy == 'strong' || ($torrent['anonymous'] == 'yes' && $e['userid'] == $torrent['owner']);
+            $isStrongPrivacy = $privacy == 'strong' || (\App\Support\LegacyYesNo::isYes($torrent['anonymous'] ?? null) && $e['userid'] == $torrent['owner']);
             $canView = \App\Support\Permissions::userCan('viewanonymous', false, $currentUserId) || $e['userid'] == $currentUserId;
             if ($showLocationColumn) {
                 $columnLocation = get_location_column($e, $isStrongPrivacy, $canView, $enablelocationTweak, $peerIpInfo, $lang_functions, $lang_viewpeerlist);
@@ -113,12 +113,12 @@ if (! function_exists('dltable')) {
 
             $s .= $columnUsername . $columnLocation;
 
-            $s .= '<td class=rowfollow align=center width=1%><nobr>' . ($e['connectable'] == 'yes' ? $lang_viewpeerlist['text_yes'] : '<font color=red>'.$lang_viewpeerlist['text_no'].'</font>') . "</nobr></td>\n";
+            $s .= '<td class=rowfollow align=center width=1%><nobr>' . (\App\Support\LegacyYesNo::isYes($e['connectable'] ?? null) ? $lang_viewpeerlist['text_yes'] : '<font color=red>'.$lang_viewpeerlist['text_no'].'</font>') . "</nobr></td>\n";
             $s .= '<td class=rowfollow align=center width=1%><nobr>' . \App\Support\Format::size($e['uploaded']) . "</nobr></td>\n";
             $s .= '<td class=rowfollow align=center width=1%><nobr>' . \App\Support\Format::size(($e['uploaded'] - $e['uploadoffset']) / $secs) . "/s</nobr></td>\n";
             $s .= '<td class=rowfollow align=center width=1%><nobr>' . \App\Support\Format::size($e['downloaded']) . "</nobr></td>\n";
 
-            if ($e['seeder'] == 'no') {
+            if (\App\Support\LegacyYesNo::isNo($e['seeder'] ?? null)) {
                 $s .= '<td class=rowfollow align=center width=1%><nobr>' . \App\Support\Format::size(($e['downloaded'] - $e['downloadoffset']) / $secs) . "/s</nobr></td>\n";
             } else {
                 $s .= '<td class=rowfollow align=center width=1%><nobr>' . \App\Support\Format::size(($e['downloaded'] - $e['downloadoffset']) / max(1, $e['finishedat'] - $e['st'])) . "/s</nobr></td>\n";

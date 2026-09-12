@@ -94,7 +94,7 @@ elseif ($mode === 'answermessage'):
         <input type=hidden name=answeringto value="<?php echo (int) $answeringto; ?>">
         <?php
         $title = ($lang_staffbox['text_answering_to'] ?? 'Answering to') . '<a href="staffbox.php?action=viewpm&pmid=' . (int) $staffmsg['id'] . '">' . htmlspecialchars((string) $staffmsg['subject']) . '</a>' . ($lang_staffbox['text_sent_by'] ?? ' sent by ') . \App\Support\UserDisplay::username($staffmsg['sender']);
-        \App\Support\Frame::composeBeginVoid($title, 'reply', '', false);
+        \App\Support\Frame::composeBeginVoid(new \Illuminate\Support\HtmlString($title), 'reply', '', false);
         \App\Support\Frame::composeEndVoid();
         ?>
     </form>

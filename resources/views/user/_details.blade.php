@@ -41,8 +41,8 @@ $gender = "<img class='female' src='pic/trans.gif' alt='Female' title='".$lang_u
 elseif ($user["gender"] == "N/A")
 $gender = "<img class='no_gender' src='pic/trans.gif' alt='N/A' title='".$lang_userdetails['title_not_available']."' style='margin-left: 4pt' />";
 
-$enabled = $user["enabled"] == 'yes';
-$moviepicker = $user["picker"] == 'yes';
+$enabled = \App\Support\LegacyYesNo::isYes($user["enabled"] ?? null);
+$moviepicker = \App\Support\LegacyYesNo::isYes($user["picker"] ?? null);
 
 print("<h1 style='margin:0px'>" . (string) ($usernameHtml ?? '') . $country."</h1>");
 if ($userInfo->valid_medals->isNotEmpty()) {
@@ -259,7 +259,7 @@ if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_
 
 	if (\App\Support\UserDisplay::currentClass() == UC_STAFFLEADER)
 	{
-		\App\Support\Html::tr($lang_userdetails['row_donor_status'], "<input type=\"radio\" name=\"donor\" value=\"yes\"" .($user["donor"] == "yes" ? " checked=\"checked\"" : "")." />".$lang_userdetails['radio_yes']." <input type=\"radio\" name=\"donor\" value=\"no\"" .($user["donor"] == "no" ? " checked=\"checked\"" : "").">".$lang_userdetails['radio_no'], 1);
+		\App\Support\Html::tr($lang_userdetails['row_donor_status'], "<input type=\"radio\" name=\"donor\" value=\"yes\"" .(\App\Support\LegacyYesNo::isYes($user["donor"] ?? null) ? " checked=\"checked\"" : "")." />".$lang_userdetails['radio_yes']." <input type=\"radio\" name=\"donor\" value=\"no\"" .(\App\Support\LegacyYesNo::isNo($user["donor"] ?? null) ? " checked=\"checked\"" : "").">".$lang_userdetails['radio_no'], 1);
 		\App\Support\Html::tr($lang_userdetails['row_donated'], "USD: <input type=\"text\" size=\"5\" name=\"donated\" value=\"" . htmlspecialchars((string)$user['donated']) . "\" />&nbsp;&nbsp;&nbsp;&nbsp;CNY: <input type=\"text\" size=\"5\" name=\"donated_cny\" value=\"" . htmlspecialchars((string)$user['donated_cny']) . "\" />" . $lang_userdetails['text_transaction_memo'] . "<input type=\"text\" size=\"50\" name=\"donation_memo\" />", 1);
         \App\Support\Html::tr($lang_userdetails['row_donoruntil'], "<input type=\"text\" name=\"donoruntil\" value=\"".htmlspecialchars((string)$user["donoruntil"])."\" /> ".$lang_userdetails['text_donoruntil_note'], 1);
 	}
@@ -268,7 +268,7 @@ if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_
         $classselect=\App\Support\UserClass::classSelectWithContext('class', $maxclass, $user["class"], 0, false, true);
         \App\Support\Html::tr($lang_userdetails['row_class'], $classselect . $migratedHelp, 1);
     }
-	\App\Support\Html::tr($lang_userdetails['row_vip_by_bonus'], "<input type=\"radio\" name=\"vip_added\" value=\"yes\"" .($user["vip_added"] == "yes" ? " checked=\"checked\"" : "")." disabled='disabled'/>".$lang_userdetails['radio_yes']." <input type=\"radio\" name=\"vip_added\" value=\"no\"" .($user["vip_added"] == "no" ? " checked=\"checked\"" : "")." disabled='disabled'/>".$lang_userdetails['radio_no'].$migratedHelp, 1);
+	\App\Support\Html::tr($lang_userdetails['row_vip_by_bonus'], "<input type=\"radio\" name=\"vip_added\" value=\"yes\"" .(\App\Support\LegacyYesNo::isYes($user["vip_added"] ?? null) ? " checked=\"checked\"" : "")." disabled='disabled'/>".$lang_userdetails['radio_yes']." <input type=\"radio\" name=\"vip_added\" value=\"no\"" .(\App\Support\LegacyYesNo::isNo($user["vip_added"] ?? null) ? " checked=\"checked\"" : "")." disabled='disabled'/>".$lang_userdetails['radio_no'].$migratedHelp, 1);
 	\App\Support\Html::tr($lang_userdetails['row_vip_until'], "<input type=\"text\" name=\"vip_until\" value=\"".htmlspecialchars((string)$user["vip_until"])."\" disabled='disabled'/> ".$lang_userdetails['text_vip_until_note']. $migratedHelp, 1);
 	$supportlang = htmlspecialchars((string)$user["supportlang"]);
 	$supportfor = htmlspecialchars((string)$user["supportfor"]);
@@ -277,7 +277,7 @@ if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_
 
 	\App\Support\Html::tr($lang_userdetails['row_staff_duties'], "<textarea cols=\"60\" rows=\"6\" name=\"staffduties\">".$staffduties."</textarea>", 1);
 	\App\Support\Html::tr($lang_userdetails['row_support_language'], "<input type=\"text\" name=\"supportlang\" value=\"".$supportlang."\" />", 1);
-	\App\Support\Html::tr($lang_userdetails['row_support'], "<input type=\"radio\" name=\"support\" value=\"yes\"" .($user["support"] == "yes" ? " checked=\"checked\"" : "")." />".$lang_userdetails['radio_yes']." <input type=\"radio\" name=\"support\" value=\"no\"" .($user["support"] == "no" ? " checked=\"checked\"" : "")." />".$lang_userdetails['radio_no'], 1);
+	\App\Support\Html::tr($lang_userdetails['row_support'], "<input type=\"radio\" name=\"support\" value=\"yes\"" .(\App\Support\LegacyYesNo::isYes($user["support"] ?? null) ? " checked=\"checked\"" : "")." />".$lang_userdetails['radio_yes']." <input type=\"radio\" name=\"support\" value=\"no\"" .(\App\Support\LegacyYesNo::isNo($user["support"] ?? null) ? " checked=\"checked\"" : "")." />".$lang_userdetails['radio_no'], 1);
 	\App\Support\Html::tr($lang_userdetails['row_support_for'], "<textarea cols=\"60\" rows=\"6\" name=\"supportfor\">".$supportfor."</textarea>", 1);
 
 	\App\Support\Html::tr($lang_userdetails['row_movie_picker'], "<input name=\"moviepicker\" value=\"yes\" type=\"radio\"" . ($moviepicker ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_yes']."<input name=\"moviepicker\" value=\"no\" type=\"radio\"" . (!$moviepicker ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_no'], 1);
@@ -288,7 +288,7 @@ if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_
 		\App\Support\Html::tr($lang_userdetails['row_comment'], "<textarea cols=\"60\" rows=\"6\" name=\"modcomment\">".$modcomment."</textarea>", 1);
 		\App\Support\Html::tr($lang_userdetails['row_seeding_karma'], "<textarea cols=\"60\" rows=\"6\" name=\"bonuscomment\" readonly=\"readonly\">".$bonuscomment."</textarea>", 1);
 	}
-	$warned = $user["warned"] == "yes";
+	$warned = \App\Support\LegacyYesNo::isYes($user["warned"] ?? null);
 
 	print("<tr><td class=\"rowhead\">".$lang_userdetails['row_warning_system']."</td><td class=\"rowfollow\" align=\"left\" ><table class=\"main\" cellspacing=\"0\" cellpadding=\"5\"><tr><td class=\"rowfollow\">" . ($warned ? "<input name=\"warned\" value=\"yes\" type=\"radio\" checked=\"checked\" />".$lang_userdetails['radio_yes']."<input name=\"warned\" value=\"no\" type=\"radio\" />".$lang_userdetails['radio_no'] : $lang_userdetails['text_not_warned'] ) ."</td>");
 
@@ -335,7 +335,7 @@ if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_
 		print("<tr><td class=\"rowfollow\">".$lang_userdetails['text_last_warning']."</td><td align=\"left\" class=\"rowfollow\"> {$user['lastwarned']} ($elapsedlw".$lang_userdetails['text_ago'].")   ".$warnedby."</td></tr>\n");
 	}
 
-	$leechwarn = $user["leechwarn"] == "yes";
+	$leechwarn = \App\Support\LegacyYesNo::isYes($user["leechwarn"] ?? null);
 	print("<tr><td class=\"rowfollow\">".$lang_userdetails['row_auto_warning']."<br /><i>(".$lang_userdetails['text_low_ratio'].")</i></td>");
 
 	if ($leechwarn)
@@ -373,9 +373,9 @@ JS;
 	}
 	print("</table></td></tr>");
 	\App\Support\Html::tr($lang_userdetails['row_enabled'], $migratedHelp, 1);
-	\App\Support\Html::tr($lang_userdetails['row_forum_post_possible'], "<input type=\"radio\" name=\"forumpost\" value=\"yes\"" .($user["forumpost"]=="yes" ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_yes']."<input type=\"radio\" name=\"forumpost\" value=\"no\"" .($user["forumpost"]=="no" ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_no'], 1);
-	\App\Support\Html::tr($lang_userdetails['row_upload_possible'], "<input type=\"radio\" name=\"uploadpos\" value=\"yes\"" .($user["uploadpos"]=="yes" ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_yes']."<input type=\"radio\" name=\"uploadpos\" value=\"no\"" .($user["uploadpos"]=="no" ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_no'], 1);
-	\App\Support\Html::tr($lang_userdetails['row_download_possible'], "<input type=\"radio\" name=\"downloadpos\" value=\"yes\"" .($user["downloadpos"]=="yes" ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_yes']."<input type=\"radio\" name=\"downloadpos\" value=\"no\"" .($user["downloadpos"]=="no" ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_no'], 1);
+	\App\Support\Html::tr($lang_userdetails['row_forum_post_possible'], "<input type=\"radio\" name=\"forumpost\" value=\"yes\"" .(\App\Support\LegacyYesNo::isYes($user["forumpost"] ?? null) ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_yes']."<input type=\"radio\" name=\"forumpost\" value=\"no\"" .(\App\Support\LegacyYesNo::isNo($user["forumpost"] ?? null) ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_no'], 1);
+	\App\Support\Html::tr($lang_userdetails['row_upload_possible'], "<input type=\"radio\" name=\"uploadpos\" value=\"yes\"" .(\App\Support\LegacyYesNo::isYes($user["uploadpos"] ?? null) ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_yes']."<input type=\"radio\" name=\"uploadpos\" value=\"no\"" .(\App\Support\LegacyYesNo::isNo($user["uploadpos"] ?? null) ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_no'], 1);
+	\App\Support\Html::tr($lang_userdetails['row_download_possible'], "<input type=\"radio\" name=\"downloadpos\" value=\"yes\"" .(\App\Support\LegacyYesNo::isYes($user["downloadpos"] ?? null) ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_yes']."<input type=\"radio\" name=\"downloadpos\" value=\"no\"" .(\App\Support\LegacyYesNo::isNo($user["downloadpos"] ?? null) ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_no'], 1);
 	if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_CONFIDENTIAL_INFO))
 	{
 		\App\Support\Html::tr($lang_userdetails['row_change_username'], "<input type=\"text\" size=\"25\" name=\"username\" value=\"" . htmlspecialchars($user['username']) . "\" />", 1);

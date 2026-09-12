@@ -7,7 +7,7 @@ if (! empty($parentId)) {
 if (! empty($returnto)) {
     echo '<input type="hidden" name="returnto" value="' . e($returnto) . '" />' . "\n";
 }
-echo \App\Support\Frame::composeBegin($pageTitle, $composeType, e($body ?? ''), false, '', 100);
+echo \App\Support\Frame::composeBegin(new \Illuminate\Support\HtmlString($pageTitle), $composeType, e($body ?? ''), false, '', 100);
 echo \App\Support\Frame::composeEnd();
 echo '</form>';
 @endphp

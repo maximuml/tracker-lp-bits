@@ -353,3 +353,73 @@ button.nx-btn-link {
 	border: none;
 	background-color: #ffffff;
 }
+
+/* Component layer (W7-01): nx-* primitives used by resources/views/components.
+   Theme-neutral defaults — per-theme stylesheets may override. */
+.nx-page-header{margin:0 0 12px}
+.nx-page-header__title{margin:0;font-size:18px;font-weight:bold}
+.nx-page-header__subtitle{margin:4px 0 0;color:#666}
+.nx-page-header__actions{margin-top:8px}
+
+.nx-alert{margin:8px 0;padding:8px 12px;border:1px solid #b8daff;border-radius:4px;background:#eef6fd}
+.nx-alert--success{border-color:#b7e4c7;background:#effaf2}
+.nx-alert--warning{border-color:#ffe3a3;background:#fff8e5}
+.nx-alert--error{border-color:#f5c2c7;background:#fdf0f0}
+.nx-alert__title{margin:0 0 4px;font-weight:bold}
+.nx-alert__body>:first-child{margin-top:0}
+.nx-alert__body>:last-child{margin-bottom:0}
+
+.nx-field{margin-bottom:12px}
+.nx-field__label{display:block;margin-bottom:4px;font-weight:bold}
+.nx-field__required{color:#c00}
+.nx-field__input{box-sizing:border-box;width:100%;padding:4px 6px;border:1px solid #bbb;border-radius:3px}
+.nx-field__input[aria-invalid="true"]{border-color:#c00}
+.nx-field__error{margin:4px 0 0;color:#c00;font-size:12px}
+.nx-field__help{margin:4px 0 0;color:#666;font-size:12px}
+
+.nx-btn{display:inline-block;padding:4px 14px;border:1px solid #999;border-radius:3px;background:#f0f0f0;color:#222;cursor:pointer;text-decoration:none;font-size:12px}
+.nx-btn:hover{background:#e4e4e4}
+.nx-btn--primary{border-color:#0062AE;background:#0062AE;color:#fff}
+.nx-btn--danger{border-color:#c00;background:#c00;color:#fff}
+.nx-btn:focus-visible{outline:2px solid #0062AE;outline-offset:2px}
+
+.nx-table-wrap{overflow-x:auto}
+.nx-table{border-collapse:collapse;width:100%}
+.nx-table__caption{text-align:left;font-weight:bold;padding:4px 0}
+.nx-table th,.nx-table td{padding:5px 8px;border:1px solid #d0d0d0;text-align:left}
+.nx-table thead th{background:#efefef}
+
+.nx-pagination{margin:10px 0}
+.nx-pagination__list{display:flex;flex-wrap:wrap;gap:2px;list-style:none;margin:0;padding:0}
+.nx-pagination__link{display:inline-block;padding:3px 9px;border:1px solid #bbb;text-decoration:none;color:#0062AE}
+.nx-pagination__link--current{background:#0062AE;border-color:#0062AE;color:#fff;font-weight:bold}
+.nx-pagination__item--gap{padding:3px 6px;color:#666}
+.nx-pagination__link:focus-visible{outline:2px solid #0062AE;outline-offset:1px}
+
+.nx-tabs__list{display:flex;flex-wrap:wrap;gap:2px;list-style:none;margin:0;padding:0;border-bottom:1px solid #bbb}
+.nx-tabs__link{display:inline-block;padding:5px 12px;text-decoration:none;color:#0062AE;border:1px solid transparent;border-bottom:none}
+.nx-tabs__link--active{border-color:#bbb;background:#fff;font-weight:bold;color:#222}
+.nx-tabs__link:focus-visible{outline:2px solid #0062AE;outline-offset:1px}
+
+.nx-modal{position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.4)}
+.nx-modal__box{position:relative;max-width:520px;margin:10vh auto;background:#fff;border-radius:4px;padding:16px}
+.nx-modal__header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.nx-modal__title{margin:0;font-size:16px}
+.nx-modal__close{border:none;background:none;font-size:20px;cursor:pointer;line-height:1;padding:4px 8px}
+.nx-modal__close:focus-visible{outline:2px solid #0062AE}
+.nx-modal[hidden]{display:none}
+
+.nx-empty{padding:24px;text-align:center;color:#666}
+.nx-empty__title{margin:0;font-weight:bold}
+.nx-empty__desc{margin:4px 0 0}
+.nx-empty__actions{margin-top:10px}
+
+.nx-user-badge{font-weight:bold}
+.nx-user-badge--staff{color:#a00}
+.nx-user-badge--donor{color:#06a}
+.nx-user-badge--warned{color:#c60}
+
+.nx-tbadge{display:inline-block;padding:1px 6px;border-radius:3px;font-size:11px;font-weight:bold}
+.nx-tbadge--sticky{background:#ffe3a3;color:#5c4400}
+.nx-tbadge--promo{background:#b7e4c7;color:#1c5c2e}
+.nx-tbadge--banned{background:#f5c2c7;color:#7a1f24}

@@ -38,6 +38,10 @@ final class RouteInventoryTest extends TestCase
         'confirm_resend' => true,
         'api/v1/login' => true,
         'api/challenge' => true,
+        // ajax.php — per-action guard inside UtilityController::ajax()
+        // (passkey actions are guest-facing, the rest get a JSON 401 via
+        // LegacyAuth::requireLoginFromContext)
+        'ajax' => true,
         // Tracker protocol — uses passkey, not session/token guard
         'announce' => true,
         'announce.php' => true,

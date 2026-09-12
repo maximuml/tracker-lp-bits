@@ -256,7 +256,7 @@ class UserPasskeyRepository extends BaseRepository
                         location.href = '/index.php';
                     }
                 }).catch((e) => {
-                    if (e.name === 'NotAllowedError' || e.name === 'AbortError' || e.name === 'NotSupportedError') {
+                    if (conditional || e.name === 'NotAllowedError' || e.name === 'AbortError' || e.name === 'NotSupportedError') {
                         return;
                     }
                     layer.alert(e.message);

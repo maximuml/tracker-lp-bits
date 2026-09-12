@@ -339,10 +339,13 @@ class AttachmentMutationService
                     'driver' => $storageDriver,
                 ]);
                 $count_left--;
+                $nonceAttr = ($cspNonce = (string) request()->attributes->get('csp_nonce', '')) !== ''
+                    ? ' nonce="'.htmlspecialchars($cspNonce, ENT_QUOTES).'"'
+                    : '';
                 if (! empty($callbackFunc) && preg_match('/^preview_custom_field_image_\d+$/', $callbackFunc)) {
-                    $script = sprintf('<script type="text/javascript">parent.%s("%s", "%s")</script>', $callbackFunc, $dlkey, addslashes($url));
+                    $script = sprintf('<script type="text/javascript"%s>parent.%s("%s", "%s")</script>', $nonceAttr, $callbackFunc, $dlkey, addslashes($url));
                 } else {
-                    $script = "<script type=\"text/javascript\">parent.tag_extimage('[attach]".$dlkey."[/attach]');</script>";
+                    $script = '<script type="text/javascript"'.$nonceAttr.">parent.tag_extimage('[attach]".$dlkey."[/attach]');</script>";
                 }
             }
         }

@@ -328,3 +328,28 @@ button.nx-btn-link {
 /* Torrent tag chips: baseline spacing/shape so tags stay readable when
    the per-tag inline style="" (dynamic colors) is blocked by CSP. */
 .nx-tag { display: inline-block; margin: 0 4px 0 0; padding: 1px 6px; border-radius: 4px; }
+
+/* Forum search box (was an inline <style> in ForumListingService — blocked
+   by CSP style-src without a nonce). Only used on the forums search panel. */
+.search{
+	background-image:url(/pic/search.gif);
+	background-repeat:no-repeat;
+	width:579px;
+	height:95px;
+	margin:5px 0 5px 0;
+	text-align:left;
+}
+.search_title{
+	color:#0062AE;
+	background-color:#DAF3FB;
+	font-size:12px;
+	font-weight:bold;
+	text-align:left;
+	padding:7px 0 0 15px;
+}
+
+.search_table {
+	border-collapse: collapse;
+	border: none;
+	background-color: #ffffff;
+}

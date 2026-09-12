@@ -70,7 +70,7 @@ if (empty($requestFlags['cmtpage'])) {
 			if ($CURUSER['timetype'] != 'timealive')
 				$uploadtime = $lang_details['text_at'].$row['added'];
 			else $uploadtime = $lang_details['text_blank'].\App\Support\Time::format($row['added'],true,false);
-			print("<a class=\"index\" href=\"download.php?id=$id\">" . htmlspecialchars($torrentnameprefix ."." .$row["save_as"]) . ".torrent</a>&nbsp;&nbsp;<a id=\"bookmark0\" href=\"javascript: bookmark(".$row['id'].",0);\">".$bookmarkMarkup."</a>&nbsp;&nbsp;&nbsp;".$lang_details['row_upped_by']."&nbsp;".$uprow.$uploadtime);
+			print("<a class=\"index\" href=\"download.php?id=$id\">" . htmlspecialchars($torrentnameprefix ."." .$row["save_as"]) . ".torrent</a>&nbsp;&nbsp;<a id=\"bookmark0\" href=\"#\" data-bookmark-torrent=\"".$row['id']."\" data-bookmark-counter=\"0\">".$bookmarkMarkup."</a>&nbsp;&nbsp;&nbsp;".$lang_details['row_upped_by']."&nbsp;".$uprow.$uploadtime);
 			print("</td></tr>");
 		}
 		else

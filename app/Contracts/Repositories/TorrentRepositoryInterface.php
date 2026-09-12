@@ -17,5 +17,5 @@ interface TorrentRepositoryInterface
 
     public function getPaidIcon(array $torrentInfo, $size = 16, $verticalAlign = 'sub');
 
-    public function buildUploadFieldInput($name, $value, $noteText, $btnText, $btnId = '', $btnOnClick = ''): string;
+    public function buildUploadFieldInput($name, $value, $noteText, $btnText, $btnId = ''): string;
 }

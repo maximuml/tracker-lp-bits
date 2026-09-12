@@ -347,31 +347,6 @@ final class ForumListingService
 
         ob_start();
         ?>
-<style type="text/css">
-.search{
-	background-image:url(pic/search.gif);
-	background-repeat:no-repeat;
-	width:579px;
-	height:95px;
-	margin:5px 0 5px 0;
-	text-align:left;
-}
-.search_title{
-	color:#0062AE;
-	background-color:#DAF3FB;
-	font-size:12px;
-	font-weight:bold;
-	text-align:left;
-	padding:7px 0 0 15px;
-}
-
-.search_table {
-	border-collapse: collapse;
-	border: none;
-	background-color: #ffffff;
-}
-
-</style>
 <div class="search">
 	<div class="search_title"><?php echo $lang['text_search_on_forum'] ?? '' ?> <?php echo $error && $keywords != '' ? '[<b><font color=striking> '.($lang['text_nothing_found'] ?? '').'</font></b> ]' : $found ?></div>
 	<div style="margin-left: 53px; margin-top: 13px;">

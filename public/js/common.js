@@ -554,6 +554,19 @@ document.addEventListener('click', function (e) {
         return;
     }
 
+    var bmLink = target.closest('a[data-bookmark-torrent]');
+    if (bmLink && typeof bookmark === 'function') {
+        bookmark(parseInt(bmLink.getAttribute('data-bookmark-torrent'), 10), bmLink.getAttribute('data-bookmark-counter') || '0');
+        e.preventDefault();
+        return;
+    }
+
+    var setlistBtn = target.closest('#setlistLookupBtn');
+    if (setlistBtn && typeof lookupSetlist === 'function') {
+        lookupSetlist();
+        return;
+    }
+
     var magicItem = target.closest('li[data-magic-value]');
     if (magicItem && typeof saveMagicValue === 'function') {
         saveMagicValue(parseInt(magicItem.getAttribute('data-torrent-id'), 10), parseInt(magicItem.getAttribute('data-magic-value'), 10));

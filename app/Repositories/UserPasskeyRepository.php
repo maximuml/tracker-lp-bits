@@ -226,8 +226,11 @@ class UserPasskeyRepository extends BaseRepository
     public function renderLogin()
     {
         printf('<p id="passkey_box"><button type="button" id="passkey_login"><img style="width:32px" src="%s" alt="%s"><br>%s</button></p>', self::$passkeyvg, Locale::trans('passkey.passkey', [], null), Locale::trans('passkey.passkey', [], null));
+        $nonceAttr = ($cspNonce = (string) request()->attributes->get('csp_nonce', '')) !== ''
+            ? ' nonce="'.htmlspecialchars($cspNonce, ENT_QUOTES).'"'
+            : '';
         ?>
-        <script>
+        <script<?php echo $nonceAttr; ?>>
             document.addEventListener("DOMContentLoaded", function () {
                 if (Passkey.conditionalSupported()) {
                     Passkey.isCMA().then(async (isCMA) => {
@@ -302,7 +305,12 @@ class UserPasskeyRepository extends BaseRepository
                 }
             } ?>
         </table>
-        <script>
+        <?php
+        $nonceAttr = ($cspNonce = (string) request()->attributes->get('csp_nonce', '')) !== ''
+            ? ' nonce="'.htmlspecialchars($cspNonce, ENT_QUOTES).'"'
+            : '';
+        ?>
+        <script<?php echo $nonceAttr; ?>>
             document.addEventListener("DOMContentLoaded", function () {
                 document.getElementById('passkey_create').addEventListener('click', () => {
                     if (!Passkey.supported()) {

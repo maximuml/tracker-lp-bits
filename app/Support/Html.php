@@ -39,9 +39,9 @@ final class Html
         return Tag::tableRow($class, ...$cells);
     }
 
-    public static function keyShortcutScript(int $page = 1, int $pages = 1): string
+    public static function keyShortcutScript(int $page = 1, int $pages = 1, string $nonce = ''): string
     {
-        return Tag::keyShortcutScript($page, $pages);
+        return Tag::keyShortcutScript($page, $pages, $nonce);
     }
 
     /**

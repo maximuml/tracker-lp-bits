@@ -11,5 +11,5 @@ $lang_checkuser =
     'row_gender' => 'Gender',
     'row_email' => 'E-Mail',
     'row_ip' => 'IP',
-    'submit_confirm_this_user' => 'Confirm&nbsp;this&nbsp;user',
+    'submit_confirm_this_user' => 'Confirm this user',
 ];

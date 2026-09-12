@@ -18,6 +18,7 @@ use App\Support\Frame;
 use App\Support\Html;
 use App\Support\Input;
 use App\Support\LegacyResponse;
+use App\Support\LegacyYesNo;
 use App\Support\Pagination;
 use App\Support\Time;
 use App\Support\UserClass;
@@ -229,7 +230,7 @@ final class OfferPageListBuilder
                     $dispname = mb_substr($dispname, 0, $maxLength - 2, 'UTF-8').'..';
                 }
 
-                echo '<tr><td class="rowfollow" style="padding: 0px"><a href="?category='.(int) ($arr['cat_id'] ?? 0).'">'.Category::imageTagWithContext((int) ($arr['cat_id'] ?? 0), '')."</a></td><td style='text-align: left'><a href=\"?id=".(int) $arr['id'].'&amp;off_details=1" title="'.htmlspecialchars((string) ($arr['name'] ?? '')).'"><b>'.htmlspecialchars($dispname).'</b></a>'.(($curUser['appendnew'] ?? '') !== 'no' && strtotime((string) ($arr['added'] ?? 'now')) >= $last_offer ? "<b> (<font class='new'>".htmlspecialchars((string) ($lang['text_new'] ?? '')).'</font>)</b>' : '').$allowed."</td><td class=\"rowfollow nowrap\" style='padding: 5px' align=\"center\">".$v_res.'</td><td class="rowfollow nowrap" '.(! Permission::can(PermissionEnum::AGAINST_OFFER) ? ' colspan="2" ' : '')." style='padding: 5px'><a href=\"?id=".(int) $arr['id'].'&amp;vote=yeah" title="'.htmlspecialchars((string) ($lang['title_i_want_this'] ?? '')).'"><font color="green"><b>'.htmlspecialchars((string) ($lang['text_yep'] ?? '')).'</b></font></a></td>'.(UserDisplay::currentClass() >= $globalData['againstofferClass'] ? '<td class="rowfollow nowrap" align="center"><a href="?id='.(int) $arr['id'].'&amp;vote=against" title="'.htmlspecialchars((string) ($lang['title_do_not_want_it'] ?? '')).'"><font color="red"><b>'.htmlspecialchars((string) ($lang['text_nah'] ?? '')).'</b></font></a></td>' : '');
+                echo '<tr><td class="rowfollow" style="padding: 0px"><a href="?category='.(int) ($arr['cat_id'] ?? 0).'">'.Category::imageTagWithContext((int) ($arr['cat_id'] ?? 0), '')."</a></td><td style='text-align: left'><a href=\"?id=".(int) $arr['id'].'&amp;off_details=1" title="'.htmlspecialchars((string) ($arr['name'] ?? '')).'"><b>'.htmlspecialchars($dispname).'</b></a>'.(! LegacyYesNo::isNo($curUser['appendnew'] ?? null) && strtotime((string) ($arr['added'] ?? 'now')) >= $last_offer ? "<b> (<font class='new'>".htmlspecialchars((string) ($lang['text_new'] ?? '')).'</font>)</b>' : '').$allowed."</td><td class=\"rowfollow nowrap\" style='padding: 5px' align=\"center\">".$v_res.'</td><td class="rowfollow nowrap" '.(! Permission::can(PermissionEnum::AGAINST_OFFER) ? ' colspan="2" ' : '')." style='padding: 5px'><a href=\"?id=".(int) $arr['id'].'&amp;vote=yeah" title="'.htmlspecialchars((string) ($lang['title_i_want_this'] ?? '')).'"><font color="green"><b>'.htmlspecialchars((string) ($lang['text_yep'] ?? '')).'</b></font></a></td>'.(UserDisplay::currentClass() >= $globalData['againstofferClass'] ? '<td class="rowfollow nowrap" align="center"><a href="?id='.(int) $arr['id'].'&amp;vote=against" title="'.htmlspecialchars((string) ($lang['title_do_not_want_it'] ?? '')).'"><font color="red"><b>'.htmlspecialchars((string) ($lang['text_nah'] ?? '')).'</b></font></a></td>' : '');
 
                 echo '<td class="rowfollow">'.$comment.'</td><td class="rowfollow nowrap">'.$addtime.'</td>';
                 if ($globalData['offervotetimeoutMain'] > 0 && $globalData['offeruptimeoutMain'] > 0) {

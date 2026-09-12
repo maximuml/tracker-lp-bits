@@ -122,7 +122,7 @@ else {
         \App\Support\Html::tr($lang_edit['row_check'], implode('&nbsp;&nbsp;', $rowChecks), 1);
     }
 
-	if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_SET_STICKY) || (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_MANAGE) && $CURUSER["picker"] == 'yes')){
+	if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_SET_STICKY) || (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_MANAGE) && \App\Support\LegacyYesNo::isYes($CURUSER['picker'] ?? null))){
 		$pickcontent = $pickcontentPrefix =  "";
 
         if(\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_ON_PROMOTION))

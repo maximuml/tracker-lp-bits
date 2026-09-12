@@ -31,7 +31,7 @@ $title = $title ?? (($lang_friends['head_personal_lists_for'] ?? 'Personal lists
             $friendId = (int) ($friend['id'] ?? 0);
             $friendTitle = htmlspecialchars((string) ($friend['title'] ?? ''), ENT_QUOTES, 'UTF-8');
             $lastAccess = (string) ($friend['last_access'] ?? '');
-            $avatar = ($CURUSER['avatars'] ?? '') === 'yes' ? htmlspecialchars((string) ($friend['avatar'] ?? '')) : '';
+            $avatar = \App\Support\LegacyYesNo::isYes($CURUSER['avatars'] ?? null) ? htmlspecialchars((string) ($friend['avatar'] ?? '')) : '';
             if (! $avatar) {
                 $avatar = 'pic/default_avatar.png';
             }

@@ -7,8 +7,8 @@ $subject = (string) ($subject ?? '');
 $body = (string) ($body ?? '');
 $returnto = (string) ($returnto ?? '');
 $title = (string) ($title ?? ($lang_sendmessage['head_send_message'] ?? 'Send message'));
-$deleteChecked = ($CURUSER['deletepms'] ?? '') == 'yes' ? ' checked' : '';
-$saveChecked = ($CURUSER['savepms'] ?? '') == 'yes' ? ' checked' : '';
+$deleteChecked = \App\Support\LegacyYesNo::isYes($CURUSER['deletepms'] ?? null) ? ' checked' : '';
+$saveChecked = \App\Support\LegacyYesNo::isYes($CURUSER['savepms'] ?? null) ? ' checked' : '';
 $stdheadMsgalert = false;
 @endphp
 @extends('layouts.legacy')
@@ -22,7 +22,7 @@ $stdheadMsgalert = false;
 @if ($returnto !== '')
     <input type="hidden" name="returnto" value="{{ $returnto }}">
 @endif
-{!! \App\Support\Frame::composeBegin($title, $replyto ? 'reply' : 'new', $body, true, $subject, 100) !!}
+{!! \App\Support\Frame::composeBegin($frameTitle ?? $title, $replyto ? 'reply' : 'new', $body, true, $subject, 100) !!}
 <tr><td class="toolbox" colspan="2" align="center">
 @if ($replyto)
     <input type="checkbox" name="delete" value="yes"{{ $deleteChecked }}> {{ $lang_sendmessage['checkbox_delete_message_replying_to'] ?? 'Delete message replying to' }}

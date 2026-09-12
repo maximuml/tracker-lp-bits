@@ -26,6 +26,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\HtmlString;
 use Illuminate\View\View;
 
 class MessageController extends LegacyController
@@ -118,7 +119,9 @@ class MessageController extends LegacyController
             $returnto = htmlspecialchars((string) $request->headers->get('referer'));
         }
 
-        $title = ($langSendmessage['text_message_to'] ?? 'Message to ').UserDisplay::username($receiver);
+        $messageTo = (string) ($langSendmessage['text_message_to'] ?? 'Message to ');
+        $title = $messageTo.$user->username;
+        $frameTitle = new HtmlString($messageTo.UserDisplay::username($receiver));
 
         return $this->legacyPageRaw($request, 'sendmessage', true, [
             'receiver' => $receiver,
@@ -127,6 +130,7 @@ class MessageController extends LegacyController
             'body' => $body,
             'returnto' => $returnto,
             'title' => $title,
+            'frameTitle' => $frameTitle,
         ]);
     }
 

@@ -140,7 +140,7 @@ JS;
             \App\Support\Html::tr($lang_functions['text_technical_info'], $technicalInfoResult, 1);
         }
 
-		if ($CURUSER['showdescription'] != 'no' && !empty($descr)){
+		if (! \App\Support\LegacyYesNo::isNo($CURUSER['showdescription'] ?? null) && !empty($descr)){
             \App\Support\Html::tr("<a href=\"#\" data-klappe=\"descr\"><span class=\"nowrap\"><img class=\"minus\" src=\"pic/trans.gif\" alt=\"Show/Hide\" id=\"picdescr\" title=\"".($lang_details['title_show_or_hide'] ?? '')."\" /> ".$lang_details['row_description']."</span></a>", "<div id='kdescr'>".$descr."</div>", 1);
 		}
 

@@ -35,7 +35,7 @@ $userDisplayMap = (array) ($userDisplayMap ?? []);
                 $parentUrl = "offers.php?id={$parentId}&off_details=1#cid{$commentId}";
             }
 
-            $avatar = ($CURUSER['avatars'] ?? '') === 'yes' ? htmlspecialchars(trim((string) ($row['avatar'] ?? ''))) : '';
+            $avatar = \App\Support\LegacyYesNo::isYes($CURUSER['avatars'] ?? null) ? htmlspecialchars(trim((string) ($row['avatar'] ?? ''))) : '';
             if (! $avatar) {
                 $avatar = 'pic/default_avatar.png';
             }

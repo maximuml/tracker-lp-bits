@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use Illuminate\Contracts\Support\Htmlable;
+
 /**
  * Legacy "frame" HTML emitters extracted from `include/functions.php`
  * (Phase 5 of the legacy migration).
@@ -99,7 +101,7 @@ final class Frame
      * @param  array<string, string>  $lang
      */
     public static function composeOpen(
-        string $title,
+        string|Htmlable $title,
         string $type,
         bool $hassubject,
         string $subject,
@@ -107,8 +109,13 @@ final class Frame
         array $lang,
     ): string {
         $html = '';
-        if ($title !== '') {
-            $html .= '<h1 align="center">'.htmlspecialchars($title).'</h1>';
+        if ($title instanceof Htmlable) {
+            $titleHtml = $title->toHtml();
+        } else {
+            $titleHtml = htmlspecialchars($title);
+        }
+        if ($titleHtml !== '') {
+            $html .= '<h1 align="center">'.$titleHtml.'</h1>';
         }
 
         $typeKey = match ($type) {
@@ -161,7 +168,7 @@ final class Frame
      * Backs the legacy `begin_compose()` helper.
      */
     public static function composeBegin(
-        string $title,
+        string|Htmlable $title,
         string $type,
         string $body,
         bool $hasSubject,
@@ -222,7 +229,7 @@ final class Frame
      * Emit a full compose-form opener. Backs the legacy `begin_compose()` helper.
      */
     public static function composeBeginVoid(
-        string $title = '',
+        string|Htmlable $title = '',
         string $type = 'new',
         string $body = '',
         bool $hasSubject = true,

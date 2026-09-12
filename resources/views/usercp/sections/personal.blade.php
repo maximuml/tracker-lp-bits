@@ -20,12 +20,12 @@ $formId = 'form'.\App\Support\Strings::randomCode(6);
 <tr><td colspan=2 class="heading" valign="top" align="center"><font color=red>{{ $lang_usercp['text_saved'] ?? 'Saved' }}</font></td></tr>
 @endif
 @php
-\App\Support\Html::trSmall($lang_usercp['row_account_parked'] ?? 'Account parked', '<input type=checkbox name=parked'.($CURUSER['parked'] ?? '' === 'yes' ? ' checked' : '').' value=yes>'.htmlspecialchars($lang_usercp['checkbox_pack_my_account'] ?? '').'<br /><font class=small size=1>'.($lang_usercp['text_account_pack_note'] ?? '').'</font>', 1);
+\App\Support\Html::trSmall($lang_usercp['row_account_parked'] ?? 'Account parked', '<input type=checkbox name=parked'.(\App\Support\LegacyYesNo::isYes($CURUSER['parked'] ?? null) ? ' checked' : '').' value=yes>'.htmlspecialchars($lang_usercp['checkbox_pack_my_account'] ?? '').'<br /><font class=small size=1>'.($lang_usercp['text_account_pack_note'] ?? '').'</font>', 1);
 
 $pmY = ($lang_usercp['text_accept_pms'] ?? '').'<input type=radio name=acceptpms'.(($CURUSER['acceptpms'] ?? '') === 'yes' ? ' checked' : '').' value=yes>'.htmlspecialchars($lang_usercp['radio_all_except_blocks'] ?? '').'<input type=radio name=acceptpms'.(($CURUSER['acceptpms'] ?? '') === 'friends' ? ' checked' : '').' value=friends>'.htmlspecialchars($lang_usercp['radio_friends_only'] ?? '').'<input type=radio name=acceptpms'.(($CURUSER['acceptpms'] ?? '') === 'no' ? ' checked' : '').' value=no>'.htmlspecialchars($lang_usercp['radio_staff_only'] ?? '')
-    .'<br /><input type=checkbox name=deletepms'.(($CURUSER['deletepms'] ?? '') === 'yes' ? ' checked' : '').'> '.($lang_usercp['checkbox_delete_pms'] ?? '')
-    .'<br /><input type=checkbox name=savepms'.(($CURUSER['savepms'] ?? '') === 'yes' ? ' checked' : '').'> '.($lang_usercp['checkbox_save_pms'] ?? '')
-    .'<br /><input type=checkbox name=commentpm'.(($CURUSER['commentpm'] ?? '') === 'yes' ? ' checked' : '').' value=yes> '.($lang_usercp['checkbox_pm_on_comments'] ?? '');
+    .'<br /><input type=checkbox name=deletepms'.(\App\Support\LegacyYesNo::isYes($CURUSER['deletepms'] ?? null) ? ' checked' : '').'> '.($lang_usercp['checkbox_delete_pms'] ?? '')
+    .'<br /><input type=checkbox name=savepms'.(\App\Support\LegacyYesNo::isYes($CURUSER['savepms'] ?? null) ? ' checked' : '').'> '.($lang_usercp['checkbox_save_pms'] ?? '')
+    .'<br /><input type=checkbox name=commentpm'.(\App\Support\LegacyYesNo::isYes($CURUSER['commentpm'] ?? null) ? ' checked' : '').' value=yes> '.($lang_usercp['checkbox_pm_on_comments'] ?? '');
 $notifs = (string) ($CURUSER['notifs'] ?? '');
 foreach ($personal['notificationOptions'] as $option):
     $pmY .= sprintf('<br /><input type="checkbox" name="notifs[%s]"%s value="yes" /> %s', $option, (is_null($CURUSER['notifs'] ?? null) || str_contains($notifs, "[{$option}]") ? ' checked' : ''), htmlspecialchars($lang_usercp["checkbox_pm_on_{$option}"] ?? $option));

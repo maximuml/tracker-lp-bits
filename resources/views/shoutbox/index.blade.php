@@ -111,7 +111,7 @@ function shoutAttachToggleHandler() {
 @else
     @php
         $rows = $rows->map(fn ($r) => (array) $r);
-        $showAvatars = (isset($CURUSER['avatars'])) && $CURUSER['avatars'] === 'yes';
+        $showAvatars = \App\Support\LegacyYesNo::isYes($CURUSER['avatars'] ?? null);
         $tooltipAvatar = $lang_shoutbox['tooltip_avatar'] ?? 'Open profile';
         $tooltipReply = $lang_shoutbox['tooltip_nick_reply'] ?? 'Reply via @';
         $labelMore = $lang_shoutbox['shout_show_more'] ?? 'more';

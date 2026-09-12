@@ -241,8 +241,7 @@ final class ForumListingService
 </span>
 </td>
 <?php
-            echo '</tr></table>';
-            echo $pagerbottom;
+            echo '</tr></table>'.$pagerbottom;
             if ($enabletooltipTweak == 'yes' && ! LegacyYesNo::isNo($curUser['showlastpost'] ?? null)) {
                 echo Html::tooltipContainer($lastpost_tooltip, 400);
             }

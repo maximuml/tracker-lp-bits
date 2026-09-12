@@ -22,7 +22,7 @@ $sendBtnDisabled = (string) ($sendBtnDisabled ?? '');
 
 <h1 align=center><a href="invite.php?id={{ $id }}">{{ $user['username'] ?? '' }}{{ $lang_invite['text_invite_system'] ?? '' }}</a></h1>
 @if ($sent == 1)
-    <p align=center><font color=red>{{ $lang_invite['text_invite_code_sent'] ?? '' }}</font></p>
+    <p align=center><font color=red>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($lang_invite['text_invite_code_sent'] ?? ''))</font></p>
 @endif
 
 @php
@@ -41,7 +41,7 @@ $sendBtnDisabled = (string) ($sendBtnDisabled ?? '');
     <form method=post action=takeinvite.php?id={{ (string) $id }}>
     <table border=1 width=100% cellspacing=0 cellpadding=5>
     <tr align=center><td colspan=2><b>{{ $lang_invite['text_invite_someone'] ?? '' }}{{ $SITENAME }} ({{ $inv['invites'] ?? 0 }}{{ $lang_invite['text_invitation'] ?? '' }}{{ $_s }}{{ $lang_invite['text_left'] ?? '' }} + {{ sprintf($lang_invite['text_temporary_left'] ?? '%d', count($temporaryInvites)) }})</b></td></tr>
-    <tr><td class="rowhead nowrap" valign="top" align="right">{{ $lang_invite['text_email_address'] ?? '' }}</td><td align=left><input type=text size=40 name=email><br /><font align=left class=small>{{ $lang_invite['text_email_address_note'] ?? '' }}</font></td></tr>
+    <tr><td class="rowhead nowrap" valign="top" align="right">{{ $lang_invite['text_email_address'] ?? '' }}</td><td align=left><input type=text size=40 name=email><br /><font align=left class=small>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($lang_invite['text_email_address_note'] ?? ''))</font></td></tr>
     {!! $preUsernameTr !!}
     <tr><td class="rowhead nowrap" valign="top" align="right">{{ $lang_invite['text_consume_invite'] ?? '' }}</td><td align=left><select name='hash'>{!! $inviteSelectOptions !!}</select></td></tr>
     <tr><td class="rowhead nowrap" valign="top" align="right">{{ $lang_invite['text_message'] ?? '' }}</td><td align=left><textarea name=body rows=10 style='width: 100%'>{{ $invitation_body }}</textarea></td></tr>

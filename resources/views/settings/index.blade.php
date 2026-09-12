@@ -224,7 +224,7 @@ $classSelect = function (string $name, int $maxClass, mixed $selected, int $min 
     @endphp
     {!! \App\Support\Html::tr($lang['row_outgoing_mail_encryption'] ?? 'Encryption', $encRadio, 1) !!}
     {!! $textRow($lang['row_smtp_account_name'] ?? 'Account name', 'accountname', $SMTP['accountname'] ?? '', $lang['text_smtp_account_name_note'] ?? '', '300px') !!}
-    <tr><td class="rowhead nowrap">{{ $lang['row_smtp_account_password'] ?? 'Password' }}</td><td><input type=password name=accountpassword style="width: 300px" value="{{ (string)($SMTP['accountpassword'] ?? '') }}"> {{ $lang['text_smtp_account_password_note'] ?? '' }}</td></tr>
+    <tr><td class="rowhead nowrap">{{ $lang['row_smtp_account_password'] ?? 'Password' }}</td><td><input type=password name=accountpassword style="width: 300px" value="{{ (string)($SMTP['accountpassword'] ?? '') }}"> @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($lang['text_smtp_account_password_note'] ?? ''))</td></tr>
     </tbody>
     {!! \App\Support\Html::tr($lang['row_save_settings'] ?? 'Save', "<input type='submit' name='save' value='".($lang['submit_save_settings'] ?? 'Save')."'>", 1) !!}
     </form>
@@ -389,7 +389,7 @@ $classSelect = function (string $name, int $maxClass, mixed $selected, int $min 
     {!! $textRow($lang['row_title_keywords'] ?? 'Title keywords', 'titlekeywords', $TWEAK['titlekeywords'] ?? '', $lang['text_title_keywords_note'] ?? '', '300px') !!}
     {!! $textRow($lang['row_meta_keywords'] ?? 'Meta keywords', 'metakeywords', $TWEAK['metakeywords'] ?? '', $lang['text_meta_keywords_note'] ?? '', '300px') !!}
     <tr><td class="rowhead nowrap" valign="top">{{ $lang['row_meta_description'] ?? 'Meta description' }}</td><td><textarea cols="100" style="width: 450px;" rows="5" name='metadescription'>{{ (string)($TWEAK['metadescription'] ?? '') }}</textarea><br />{{ $lang['text_meta_description_note'] ?? '' }}</td></tr>
-    <tr><td class="rowhead nowrap" valign="top">{{ $lang['row_web_analytics_code'] ?? 'Analytics code' }}</td><td><textarea cols="100" style="width: 450px;" rows="5" name='analyticscode'>{{ (string)($TWEAK['analyticscode'] ?? '') }}</textarea><br />{{ $lang['text_web_analytics_code_note'] ?? '' }}</td></tr>
+    <tr><td class="rowhead nowrap" valign="top">{{ $lang['row_web_analytics_code'] ?? 'Analytics code' }}</td><td><textarea cols="100" style="width: 450px;" rows="5" name='analyticscode'>{{ (string)($TWEAK['analyticscode'] ?? '') }}</textarea><br />@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($lang['text_web_analytics_code_note'] ?? ''))</td></tr>
     <tr><td class="rowhead nowrap">{{ $lang['row_see_sql_debug'] ?? 'SQL debug' }}</td><td><input type='checkbox' name='enablesqldebug' value='yes'{{ ($TWEAK['enablesqldebug'] ?? 'no') === 'yes' ? " checked='checked'" : '' }}>{{ $lang['text_allow'] ?? 'Allow' }}{!! $classSelect('sqldebug', UserClass::STAFFLEADER->value, $TWEAK['sqldebug'] ?? UserClass::MODERATOR->value) !!}{{ $lang['text_see_sql_list'] ?? '' }}{!! \App\Support\UserClass::name(UserClass::SYSOP->value, false, true, true) !!}</td></tr>
     {!! $textRow($lang['row_tracker_founded_date'] ?? 'Founded date', 'datefounded', $TWEAK['datefounded'] ?? '2007-12-24', $lang['text_tracker_founded_date_note'] ?? '', '300px') !!}
     {!! $textRow($lang['row_css_date'] ?? 'CSS date', 'cssdate', $TWEAK['cssdate'] ?? '', $lang['text_css_date'] ?? '', '300px') !!}
@@ -627,7 +627,7 @@ $classSelect = function (string $name, int $maxClass, mixed $selected, int $min 
 @elseif ($action === 'miscsettings')
     @php $misc = $config ?? []; @endphp
     <form method="post" action="{{ $scriptName }}"><input type="hidden" name="action" value="savesettings_misc">@csrf
-    <tr><td class="rowhead nowrap" valign="top">{{ $lang['row_misc_donation_custom'] ?? 'Donation custom' }}</td><td><textarea cols="100" rows="10" name='donation_custom'>{{ (string)($misc['donation_custom'] ?? '') }}</textarea><br/>{{ $lang['text_donation_custom_note'] ?? '' }}</td></tr>
+    <tr><td class="rowhead nowrap" valign="top">{{ $lang['row_misc_donation_custom'] ?? 'Donation custom' }}</td><td><textarea cols="100" rows="10" name='donation_custom'>{{ (string)($misc['donation_custom'] ?? '') }}</textarea><br/>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($lang['text_donation_custom_note'] ?? ''))</td></tr>
     {!! $textRow($lang['row_protected_forum'] ?? 'Protected forum', 'protected_forum', $misc['protected_forum'] ?? '', $lang['text_protected_forum'] ?? '', '100px') !!}
     {!! \App\Support\Html::tr($lang['row_save_settings'] ?? 'Save', "<input type='submit' name='save' value='".($lang['submit_save_settings'] ?? 'Save')."'>", 1) !!}
     </form>

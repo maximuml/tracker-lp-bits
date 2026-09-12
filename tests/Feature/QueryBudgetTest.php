@@ -85,14 +85,16 @@ final class QueryBudgetTest extends TestCase
     }
 
     /**
-     * /torrents.php listing — actual ~30 → budget 36.
+     * /torrents.php listing — actual ~37 in the E2E job (CriticalPathTest
+     * commits a torrent row through OpenResty outside the test transaction)
+     * → budget 45.
      */
     public function test_torrents_listing_query_budget(): void
     {
         $user = User::factory()->create();
         $this->withNexusCookie($user);
 
-        $this->assertQueryCountBelow(36, function (): void {
+        $this->assertQueryCountBelow(45, function (): void {
             $this->get('/torrents.php');
         });
     }
@@ -241,7 +243,8 @@ final class QueryBudgetTest extends TestCase
     }
 
     /**
-     * GET /api/v1/torrents — actual ~5 → budget 6.
+     * GET /api/v1/torrents — actual ~13 in the E2E job (each visible torrent
+     * pulls codec/source/media/… lookup tables) → budget 16.
      */
     public function test_api_torrents_query_budget(): void
     {
@@ -249,7 +252,7 @@ final class QueryBudgetTest extends TestCase
         Torrent::factory()->owner($user)->create();
         Sanctum::actingAs($user, ['*']);
 
-        $this->assertQueryCountBelow(6, function (): void {
+        $this->assertQueryCountBelow(16, function (): void {
             $this->getJson('/api/v1/torrents');
         });
     }

@@ -80,7 +80,7 @@ class TagResource extends Resource
                 TextColumn::make('border_radius')->label(__('label.tag.border_radius')),
                 TextColumn::make('priority')->label(__('label.priority'))->sortable(),
                 TextColumn::make('torrents_count')->label(__('label.tag.torrents_count')),
-                TextColumn::make('torrents_sum_size')->label(__('label.tag.torrents_sum_size'))->formatStateUsing(fn ($state) => Format::size($state)),
+                TextColumn::make('torrents_sum_size')->label(__('label.tag.torrents_sum_size'))->formatStateUsing(fn ($state) => Format::size((float) ($state ?? 0))),
             ])
             ->defaultSort('priority', 'desc')
             ->filters([

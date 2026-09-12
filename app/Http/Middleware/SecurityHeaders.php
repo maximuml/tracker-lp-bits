@@ -37,11 +37,19 @@ final class SecurityHeaders
         // (e.g. <span style="color:#aaaaaa">) were already blocked by the
         // nonce-only policy, and allowing them would cause color-contrast
         // regressions detected by axe-core.
-        $styleSrc = $this->isFilamentRoute($request)
+        // Same for script-src: Livewire 3 / Alpine evaluate expressions with
+        // new Function() (unsafe-eval) and Filament ships inline boot scripts —
+        // a nonce-strict script-src leaves the whole panel dead (login button
+        // does nothing). Filament routes get the pragmatic admin policy.
+        $isFilament = $this->isFilamentRoute($request);
+        $styleSrc = $isFilament
             ? "style-src 'self' 'unsafe-inline'"
             : "style-src 'self' 'nonce-{$nonce}'";
+        $scriptSrc = $isFilament
+            ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com"
+            : "script-src 'self' 'nonce-{$nonce}' https://challenges.cloudflare.com";
 
-        $response->headers->set('Content-Security-Policy', "default-src 'self'; script-src 'self' 'nonce-{$nonce}' https://challenges.cloudflare.com; {$styleSrc}; img-src 'self' data: blob: https:; connect-src 'self' https://challenges.cloudflare.com; font-src 'self' data:; frame-ancestors 'self'; form-action 'self' https://www.paypal.com https://www.alipay.com; base-uri 'self'; object-src 'none';");
+        $response->headers->set('Content-Security-Policy', "default-src 'self'; {$scriptSrc}; {$styleSrc}; img-src 'self' data: blob: https:; connect-src 'self' https://challenges.cloudflare.com; font-src 'self' data:; frame-ancestors 'self'; form-action 'self' https://www.paypal.com https://www.alipay.com; base-uri 'self'; object-src 'none';");
 
         if ($request->isSecure()) {
             $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');

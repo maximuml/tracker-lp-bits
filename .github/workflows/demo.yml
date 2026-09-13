@@ -13,8 +13,9 @@ on:
   push:
     tags:
       - 'v*'
-    branches: []
-  # Remove push to php8 — deployments must be intentional.
+  # No `branches` filter list: `branches: []` means "no branch restriction",
+  # which triggered this deploy on every push to php8. Only v* tags and
+  # manual dispatch deploy now — deployments must be intentional.
 
 # Environment variables available to all jobs and steps in this workflow
 env:

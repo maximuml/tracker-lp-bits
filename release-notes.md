@@ -64,6 +64,29 @@
   (hourly/daily). RTO is dump restore time + file extraction; the CI job
   reports wall-clock timings per phase.
 
+## Deployments
+
+- **Graceful deploy:** `scripts/deploy.sh` — drains the queue/scheduler
+  (SIGTERM; Horizon finishes in-flight jobs within `stop_grace_period`),
+  resyncs the public-assets volume, recreates `php`, runs `migrate
+  --force`, recreates `openresty`, then gates on `/health/ready` before
+  bringing workers back. `--skip-build` reuses the current image.
+- **Signals:** `php`/`openresty` stop via `SIGQUIT` (graceful for php-fpm
+  and nginx); `queue`/`scheduler` via `SIGTERM` — the `php:fpm` base image
+  default (`SIGQUIT`) is *not* trapped by artisan/Horizon and would end in
+  SIGKILL after the grace window.
+- **Grace windows:** queue 125s (covers all supervisors except
+  `maintenance`, whose 600s jobs are requeued via `retry_after`),
+  scheduler 70s, php 60s, openresty 30s.
+- **Rollback:** `docker tag <prev-digest> nexusphp_php:prod && scripts/
+  deploy.sh --skip-build`; the script prints the previous image id at
+  build time.
+- **Caveat:** single `php` upstream → a brief 502 window during its
+  recreate is expected; zero-downtime needs a second backend (blue-green).
+- **Queue liveness:** `php artisan queue:probe --wait` dispatches a probe
+  job and waits for its marker — proves workers actually run jobs, not
+  just that Horizon is up.
+
 ## Highlights
 
 This release ships the shoutbox modernization, MeiliSearch-by-default, setlist lookup on upload, and several runtime hardening fixes across the `php8` branch.

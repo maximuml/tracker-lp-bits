@@ -108,7 +108,10 @@ elif [ "$SERVICE_NAME" = "queue" ]; then
     while true; do
       if [ -f "$ENV_FILE" ] && [ -f "$VENDOR_AUTOLOAD_FILE" ]; then
         echo_success "[Queue] env: $ENV_FILE and vendor autoload file: $VENDOR_AUTOLOAD_FILE exists, Run horizon at $(date '+%Y-%m-%d %H:%M:%S')";
-        php artisan horizon;
+        # exec makes horizon PID 1 so docker stop signals reach it and
+        # Horizon can drain in-flight jobs (a wrapping sh PID 1 would
+        # ignore SIGTERM and the container would always end in SIGKILL).
+        exec php artisan horizon;
       else
         echo_info "[Queue] .env or vendor not exists，wait 5 seconds ...";
         sleep 5;
@@ -118,9 +121,11 @@ elif [ "$SERVICE_NAME" = "scheduler" ]; then
     echo_info "Start Scheduler ...";
     while true; do
       if [ -f "$ENV_FILE" ] && [ -f "$VENDOR_AUTOLOAD_FILE" ]; then
-        echo_success "[Scheduler] env: $ENV_FILE and vendor autoload file: $VENDOR_AUTOLOAD_FILE exists, Run schedule:run at $(date '+%Y-%m-%d %H:%M:%S')";
-        php artisan schedule:run --verbose --no-interaction;
-        sleep 60;
+        echo_success "[Scheduler] env: $ENV_FILE and vendor autoload file: $VENDOR_AUTOLOAD_FILE exists, Run schedule:work at $(date '+%Y-%m-%d %H:%M:%S')";
+        # exec + schedule:work = foreground minute-ticker as PID 1, so
+        # SIGTERM stops the scheduler between ticks instead of SIGKILLing
+        # a mid-flight schedule:run inside a shell wrapper.
+        exec php artisan schedule:work --verbose --no-interaction;
       else
         echo_info "[Scheduler] .env or vendor not exists，wait 5 seconds...";
         sleep 5;

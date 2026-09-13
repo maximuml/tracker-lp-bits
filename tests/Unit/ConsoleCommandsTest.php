@@ -53,6 +53,7 @@ final class ConsoleCommandsTest extends TestCase
             'meilisearch:import' => ['meilisearch:import'],
             'meilisearch:stats' => ['meilisearch:stats'],
             'nexus:update' => ['nexus:update'],
+            'queue:probe' => ['queue:probe'],
         ];
     }
 

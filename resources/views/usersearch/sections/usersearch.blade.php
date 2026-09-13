@@ -1,15 +1,3 @@
-@php
-/** @var array<string, mixed> $form */
-/** @var string $requestUri */
-/** @var bool $showHelp */
-/** @var bool $hasResults */
-/** @var string $resultsHtml */
-/** @var string $resultsError */
-/** @var string $pagemenu */
-/** @var string $browsemenu */
-$f = $form;
-@endphp
-
 <h1>Administrative User Search</h1>
 
 @if ($showHelp)
@@ -42,72 +30,72 @@ $f = $form;
 <table border="1" cellspacing="0" cellpadding="5">
 <tr>
   <td valign="middle" class=rowhead>Name:</td>
-  <td{!! $f['n_hl'] !!}><input name="n" type="text" value="{{ $f['n'] }}" size=35></td>
+  <td @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['n_hl'] ?? ''))><input name="n" type="text" value="{{ $form['n'] }}" size=35></td>
   <td valign="middle" class=rowhead>Ratio:</td>
-  <td{!! $f['r'] ? $f['r_hl'] ?? '' : '' !!}><select name="rt">
-{!! $f['rt_options'] !!}
+  <td @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['r'] ? ($form['r_hl'] ?? '') : ''))><select name="rt">
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['rt_options'] ?? ''))
     </select>
-    <input name="r" type="text" value="{{ $f['r'] }}" size="5" maxlength="4">
-    <input name="r2" type="text" value="{{ $f['r2'] }}" size="5" maxlength="4"></td>
+    <input name="r" type="text" value="{{ $form['r'] }}" size="5" maxlength="4">
+    <input name="r2" type="text" value="{{ $form['r2'] }}" size="5" maxlength="4"></td>
   <td valign="middle" class=rowhead>Member status:</td>
-  <td{!! $f['st'] ? $f['st_hl'] ?? '' : '' !!}><select name="st">
-{!! $f['st_options'] !!}
+  <td @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['st'] ? ($form['st_hl'] ?? '') : ''))><select name="st">
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['st_options'] ?? ''))
     </select></td></tr>
 <tr><td valign="middle" class=rowhead>Email:</td>
-  <td{!! $f['em_hl'] !!}><input name="em" type="text" value="{{ $f['em'] }}" size="35"></td>
+  <td @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['em_hl'] ?? ''))><input name="em" type="text" value="{{ $form['em'] }}" size="35"></td>
   <td valign="middle" class=rowhead>IP:</td>
-  <td{!! $f['ip_hl'] !!}><input name="ip" type="text" value="{{ $f['ip'] }}" maxlength="64"></td>
+  <td @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['ip_hl'] ?? ''))><input name="ip" type="text" value="{{ $form['ip'] }}" maxlength="64"></td>
   <td valign="middle" class=rowhead>Account status:</td>
-  <td{!! $f['as'] ? $f['as_hl'] ?? '' : '' !!}><select name="as">
-{!! $f['as_options'] !!}
+  <td @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['as'] ? ($form['as_hl'] ?? '') : ''))><select name="as">
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['as_options'] ?? ''))
     </select></td></tr>
 <tr>
   <td valign="middle" class=rowhead>Comment:</td>
-  <td{!! $f['co_hl'] !!}><input name="co" type="text" value="{{ $f['co'] }}" size="35"></td>
+  <td @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['co_hl'] ?? ''))><input name="co" type="text" value="{{ $form['co'] }}" size="35"></td>
   <td valign="middle" class=rowhead>Mask:</td>
-  <td{!! $f['ma_hl'] !!}><input name="ma" type="text" value="{{ $f['ma'] }}" maxlength="17"></td>
+  <td @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['ma_hl'] ?? ''))><input name="ma" type="text" value="{{ $form['ma'] }}" maxlength="17"></td>
   <td valign="middle" class=rowhead>Class:</td>
-  <td{!! $f['c_hl'] !!}><select name="c">{!! $f['c_options'] !!}
+  <td @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['c_hl'] ?? ''))><select name="c">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['c_options'] ?? ''))
     </select></td></tr>
 <tr>
     <td valign="middle" class=rowhead>Joined:</td>
-  <td{!! $f['d_hl'] !!}><select name="dt">
-{!! $f['dt_options'] !!}
+  <td @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['d_hl'] ?? ''))><select name="dt">
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['dt_options'] ?? ''))
     </select>
-    <input name="d" type="text" value="{{ $f['d'] }}" size="12" maxlength="10">
-    <input name="d2" type="text" value="{{ $f['d2'] }}" size="12" maxlength="10"></td>
+    <input name="d" type="text" value="{{ $form['d'] }}" size="12" maxlength="10">
+    <input name="d2" type="text" value="{{ $form['d2'] }}" size="12" maxlength="10"></td>
   <td valign="middle" class=rowhead>Uploaded:</td>
-  <td{!! $f['ul_hl'] !!}><select name="ult" id="ult">
-{!! $f['ult_options'] !!}
+  <td @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['ul_hl'] ?? ''))><select name="ult" id="ult">
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['ult_options'] ?? ''))
     </select>
-    <input name="ul" type="text" id="ul" size="8" maxlength="7" value="{{ $f['ul'] }}">
-    <input name="ul2" type="text" id="ul2" size="8" maxlength="7" value="{{ $f['ul2'] }}"></td>
+    <input name="ul" type="text" id="ul" size="8" maxlength="7" value="{{ $form['ul'] }}">
+    <input name="ul2" type="text" id="ul2" size="8" maxlength="7" value="{{ $form['ul2'] }}"></td>
   <td valign="middle" class="rowhead">Donor:</td>
-  <td{!! $f['do_hl'] !!}><select name="do">
-{!! $f['do_options'] !!}
+  <td @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['do_hl'] ?? ''))><select name="do">
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['do_options'] ?? ''))
 	</select></td></tr>
 <tr>
 <td valign="middle" class=rowhead>Last seen:</td>
-  <td {!! $f['ls_hl'] !!}><select name="lst">
-{!! $f['lst_options'] !!}
+  <td @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['ls_hl'] ?? ''))><select name="lst">
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['lst_options'] ?? ''))
   </select>
-  <input name="ls" type="text" value="{{ $f['ls'] }}" size="12" maxlength="10">
-  <input name="ls2" type="text" value="{{ $f['ls2'] }}" size="12" maxlength="10"></td>
+  <input name="ls" type="text" value="{{ $form['ls'] }}" size="12" maxlength="10">
+  <input name="ls2" type="text" value="{{ $form['ls2'] }}" size="12" maxlength="10"></td>
 	  <td valign="middle" class=rowhead>Downloaded:</td>
-  <td{!! $f['dl_hl'] !!}><select name="dlt" id="dlt">
-{!! $f['dlt_options'] !!}
+  <td @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['dl_hl'] ?? ''))><select name="dlt" id="dlt">
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['dlt_options'] ?? ''))
     </select>
-    <input name="dl" type="text" id="dl" size="8" maxlength="7" value="{{ $f['dl'] }}">
-    <input name="dl2" type="text" id="dl2" size="8" maxlength="7" value="{{ $f['dl2'] }}"></td>
+    <input name="dl" type="text" id="dl" size="8" maxlength="7" value="{{ $form['dl'] }}">
+    <input name="dl2" type="text" id="dl2" size="8" maxlength="7" value="{{ $form['dl2'] }}"></td>
 	<td valign="middle" class=rowhead>Warned:</td>
-	<td{!! $f['w_hl'] !!}><select name="w">
-{!! $f['w_options'] !!}
+	<td @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['w_hl'] ?? ''))><select name="w">
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['w_options'] ?? ''))
 	</select></td></tr>
 <tr><td class="rowhead"></td><td></td>
   <td valign="middle" class=rowhead>Active only:</td>
-	<td{!! $f['ac_hl'] !!}><input name="ac" type="checkbox" value="1" {{ $f['ac'] ? 'checked' : '' }}></td>
+	<td @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['ac_hl'] ?? ''))><input name="ac" type="checkbox" value="1" {{ $form['ac'] ? 'checked' : '' }}></td>
   <td valign="middle" class=rowhead>Disabled IP: </td>
-  <td{!! $f['dip_hl'] !!}><input name="dip" type="checkbox" value="1" {{ $f['dip'] ? 'checked' : '' }}></td>
+  <td @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['dip_hl'] ?? ''))><input name="dip" type="checkbox" value="1" {{ $form['dip'] ? 'checked' : '' }}></td>
   </tr>
 <tr><td colspan="6" align=center><input name="submit" type=submit class=btn></td></tr>
 </table>
@@ -115,9 +103,9 @@ $f = $form;
 </form>
 
 @if ($resultsError)
-{!! $resultsError !!}
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($resultsError))
 @elseif ($hasResults)
-{!! $resultsHtml !!}
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($resultsHtml))
 @endif
 
 <p>{{ $pagemenu }}<br />{{ $browsemenu }}</p>

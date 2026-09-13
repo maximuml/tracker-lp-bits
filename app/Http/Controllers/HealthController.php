@@ -124,19 +124,13 @@ final class HealthController extends Controller
                 return 'degraded';
             }
 
-            // Use file_get_contents for a lightweight HTTP check (no SDK dependency)
-            $url = rtrim($host, '/').'/health';
-            $context = stream_context_create(['http' => ['timeout' => 3]]);
-            $response = @file_get_contents($url, false, $context);
+            $data = $this->fetchMeiliHealth($host);
 
-            if ($response !== false) {
-                $data = json_decode($response, true);
-                if (is_array($data) && ($data['status'] ?? '') === 'available') {
-                    return 'ok';
-                }
+            if (is_array($data) && ($data['status'] ?? '') === 'available') {
+                return 'ok';
             }
 
-            $warnings[] = 'MeiliSearch not responding at '.$host;
+            $warnings[] = 'MeiliSearch not responding';
 
             return 'degraded';
         } catch (\Throwable $e) {
@@ -279,10 +273,39 @@ final class HealthController extends Controller
         if (! is_string($host) || $host === '') {
             throw new \RuntimeException('unconfigured');
         }
-        $context = stream_context_create(['http' => ['timeout' => 3]]);
-        if (@file_get_contents(rtrim($host, '/').'/health', false, $context) === false) {
+        if ($this->fetchMeiliHealth($host) === null) {
             throw new \RuntimeException('unreachable');
         }
+    }
+
+    /**
+     * Fetch MeiliSearch /health with a bounded connect+total timeout.
+     * file_get_contents' http.timeout does not cover the TCP connect phase,
+     * which can stall for seconds on an unreachable host — curl bounds both.
+     *
+     * @return array<string, mixed>|null decoded body, or null on failure
+     */
+    private function fetchMeiliHealth(string $host): ?array
+    {
+        $ch = curl_init(rtrim($host, '/').'/health');
+        if ($ch === false) {
+            return null;
+        }
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CONNECTTIMEOUT_MS => 1000,
+            CURLOPT_TIMEOUT_MS => 3000,
+        ]);
+        $response = curl_exec($ch);
+        curl_close($ch);
+
+        if (! is_string($response)) {
+            return null;
+        }
+
+        $data = json_decode($response, true);
+
+        return is_array($data) ? $data : null;
     }
 
     private function schedulerHeartbeatAge(): ?int

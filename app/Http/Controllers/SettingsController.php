@@ -10,6 +10,8 @@ use App\Models\Language;
 use App\Models\Setting;
 use App\Models\Torrent;
 use App\Models\User;
+use App\Repositories\IndexRepository;
+use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Globals;
 use App\Support\Html\SafeHtml;
@@ -31,11 +33,14 @@ class SettingsController extends LegacyController
 
     private Globals $globals;
 
-    public function __construct(TagRepositoryInterface $tagRepository, CurrentUser $currentUser, Globals $globals)
+    private IndexRepository $indexRepository;
+
+    public function __construct(TagRepositoryInterface $tagRepository, CurrentUser $currentUser, Globals $globals, IndexRepository $indexRepository)
     {
         $this->tagRepository = $tagRepository;
         $this->currentUser = $currentUser;
         $this->globals = $globals;
+        $this->indexRepository = $indexRepository;
     }
 
     /** @var array<string, array<int, string>> */
@@ -307,14 +312,12 @@ class SettingsController extends LegacyController
 
         // Cache clearing
         if ($section === 'main') {
-            Cache::forget('recent_news');
-            Cache::forget('stats_users');
-            Cache::forget('stats_torrents');
-            Cache::forget('peers_count');
+            $this->indexRepository->forgetLatestNews(SiteConfig::current()->main->maxNewsNum(5));
+            $this->indexRepository->forgetStats();
             Cache::forget('site_lang_lang_list');
         }
         if ($section === 'account') {
-            Cache::forget('stats_classes');
+            $this->indexRepository->forgetStats();
         }
 
         $sectionLabel = ucfirst($section);

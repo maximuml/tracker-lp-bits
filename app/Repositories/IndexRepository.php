@@ -245,6 +245,18 @@ class IndexRepository
         );
     }
 
+    public function forgetLatestNews(int $limit): void
+    {
+        Cache::forget($this->cacheKey('latest_news', [(string) $limit]));
+    }
+
+    public function forgetStats(): void
+    {
+        Cache::forget($this->cacheKey('user_stats', []));
+        Cache::forget($this->cacheKey('torrent_stats', []));
+        Cache::forget($this->cacheKey('class_stats', []));
+    }
+
     /**
      * @return array<int, array<string, mixed>>
      */

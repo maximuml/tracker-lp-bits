@@ -271,6 +271,97 @@ Decision → Consequences). Add new ADRs here as numbered subsections.
   deploys should use `sha-*` tags or digests. Keyless signatures depend
   on Fulcio/Rekor availability at verify time.
 
+### ADR 0010: Schema snapshot + upgrade-parity job for migrations (Accepted, W8-02)
+
+- **Context:** Old migrations are not replayable under current code —
+  enum constants moved (`Exam::TYPE_EXAM`), the `NexusDB` namespace was
+  drained, and the `activitylog.table_name` config key shifted. A fresh
+  `migrate` on an empty DB is therefore not proof that a *real*
+  production database upgrades cleanly; edited-in-place historical
+  migrations had already produced schema drift (`activity_log` missing
+  `attribute_changes`, vestigial `batch_uuid`).
+- **Decision:** Commit a per-release schema snapshot
+  (`database/schema/v2.0.1.mysql.sql`, mysqldump including `migrations`
+  rows) as the single correct "previous release" state. The push-only
+  `migrations` CI job loads the snapshot, applies a production-like
+  fixture (`scripts/ci/migration-upgrade-fixture.sql` — sentinel rows
+  exercising enum transforms plus bulk users/peers/iplog), runs
+  `migrate --force` with timing, then `scripts/ci/verify-migration-upgrade.sh`
+  asserts all migrations Ran, sentinel transforms landed, and the
+  upgraded schema matches a fresh install order-insensitively
+  (columns/indexes/FK/table set). Migrations are immutable once
+  released; `PREVIOUS_RELEASE` moves with each tag.
+- **Consequences:** The real upgrade path (snapshot → migrate → parity)
+  is proven every merge-push, and it already caught two live bugs
+  (activity_log drift, NULL-update ordering in
+  `normalize_column_types_for_foreign_keys`). Cost: one snapshot file
+  per release and a fixture to maintain; historical migrations must
+  never be edited — parity fixes go in new idempotent migrations.
+
+### ADR 0011: Health endpoint model — live / ready / diag (Accepted, W6-03)
+
+- **Context:** A single health endpoint cannot serve both load-balancer
+  liveness (must be cheap and never auth-gated) and deploy readiness
+  (must verify DB/Redis/MeiliSearch/Horizon/scheduler) — and operators
+  need diagnostics without exposing internals to the internet.
+- **Decision:** Three endpoints in `HealthController`: `/health/live`
+  (always 200 if PHP responds — liveness only), `/health/ready`
+  (dependency pings; DB/Redis failures → 503, MeiliSearch/Horizon/
+  scheduler degradations → warnings, no exception messages in the
+  response), `/health/diag` (authenticated via `auth.nexus:nexus-web`
+  + sysop class: php/laravel/env, ping latencies, heartbeat age,
+  horizon masters, disk/memory). `LegacyUrlRewriter` was extended with
+  `LARAVEL_PATH_PREFIXES` so `/health/*` and `/metrics` are not
+  collapsed into the legacy first-segment rewrite.
+- **Consequences:** Deploy scripts gate on `/health/ready`; staff get
+  real diagnostics without a public info leak. Cost: three endpoints to
+  keep honest — a probe that lies (200 while DB is down) is worse than
+  none, so dependency pings must stay cheap and truthful.
+
+### ADR 0012: Graceful deployment signal model (Accepted, W8-04)
+
+- **Context:** Docker's default stop is SIGTERM + 10 s then SIGKILL.
+  Horizon's longest timeout is 600 s (`maintenance` supervisor), so the
+  default truncated jobs; worse, the php:fpm base image carries
+  `STOPSIGNAL SIGQUIT`, which Horizon does not handle — the container
+  idled out the grace window and was SIGKILLed anyway. The entrypoint
+  shell wrappers (`while: artisan` under `sh` as PID 1) also swallowed
+  signals because a PID-1 shell does not forward them.
+- **Decision:** Explicit `stop_signal`/`stop_grace_period` per service:
+  queue `SIGTERM` + 125 s, scheduler `SIGTERM` + 70 s (both override the
+  inherited SIGQUIT so Horizon/`schedule:work` actually drain), php
+  `SIGQUIT` + 60 s (FPM graceful), openresty `SIGQUIT` + 30 s.
+  Entrypoints `exec` artisan so it is PID 1 and receives the signal.
+  `scripts/deploy.sh` encodes the order: drain queue + scheduler →
+  `assets-init` → recreate php → `migrate --force` → recreate
+  openresty → `/health/ready` must return 200 → restart workers.
+  `scripts/ci/verify-graceful-deploy.sh` (push-only `deploy-graceful`
+  job) proves drain end-to-end with a signal-resilient probe job.
+- **Consequences:** In-flight jobs up to ~2 min survive deploys; the
+  readiness gate prevents serving traffic on a half-migrated stack.
+  Cost: the single-PHP topology still has a brief 502 window during
+  php recreate (documented in `release-notes.md`); zero-downtime needs
+  ≥2 php containers behind the LB — future work.
+
+### ADR 0013: Keep URL rewriting in LegacyRequestMiddleware (Deferred, W2-11)
+
+- **Context:** W2-11 proposed moving the legacy `/foo.php` rewrite logic
+  out of `LegacyRequestMiddleware` into `RouteServiceProvider` or
+  OpenResty config, leaving the middleware to only boot the legacy
+  context.
+- **Decision:** Deferred. The middleware is the one place where
+  rewriting and legacy-context bootstrap are tested together
+  (`LegacySmokeTest`, `LegacyHeaderIsolationTest`); splitting them moves
+  half the contract into untestable web-server config. The measured cost
+  is ~0.1 ms regex per request — not a hot-path concern next to
+  announce. Revisit only if Octane long-running mode or a dedicated
+  edge tier makes the middleware the bottleneck.
+- **Consequences:** `LegacyRequestMiddleware` stays the single source of
+  truth for URL rewriting; `LARAVEL_PATH_PREFIXES` (ADR 0011) is the
+  extension point for new Laravel-only prefixes. Risk accepted: a
+  ~200-line middleware with edge cases remains, but its behaviour is
+  pinned by tests.
+
 ## Testing
 
 - **Unit tests:** `tests/Unit/` — support classes, repositories, services
@@ -311,19 +402,30 @@ match the connection used by HTTP requests through OpenResty.
 - **Waves W0–W4:** architecture ratchets, HTTP contract tests, DI reduction,
   domain decomposition (torrent, user, forum, messages, bonus/exam/cleanup).
   PRs #648–#670.
+- **W5 — SQL & performance:** done. Raw-SQL registry + `RawQueriesRegistryTest`,
+  `tests/Performance` EXPLAIN/budget suite, blocking k6 tracker load gate
+  (`.github/workflows/perf-budget.yml`), `RedisGuard` fail-open circuit
+  breaker (ADR 0007).
+- **W6 — Observability:** done. `MetricsController` decomposed into
+  collector registry (ADR 0008), semantic metric families fixed,
+  `/health/live`+`/health/ready`+`/health/diag` (ADR 0011), `/metrics`
+  Bearer-token fail-closed in production (`METRICS_TOKEN`).
+- **W8 — Production readiness:** done. Exact prod Compose smoke,
+  schema-snapshot migration-upgrade gate (ADR 0010), backup/restore
+  drill, graceful deployment (ADR 0012), GHCR publish + cosign keyless
+  signing + pin ratchet (ADR 0009). PRs #721–#730.
 
-### Next work (W5–W9)
+### Next work (W7, W9)
 
-1. **W5 — SQL & performance:** raw-SQL registry, EXPLAIN regression tests,
-   query budgets, tracker load test as a blocking gate.
-2. **W6 — Observability:** decompose `MetricsController`, semantic metrics,
-   liveness/readiness/diagnostics, secure `/metrics` endpoint.
-3. **W7 — Legacy UI & a11y:** component layer, migrate pages by priority,
-   reduce `LegacyViewSurfaceTest` baselines, Axe violations as a blocker.
-4. **W8 — Production readiness:** exact prod smoke, migration strategy,
-   backup/restore verification, graceful deployment, supply-chain hardening.
-5. **W9 — Documentation & runbooks:** self-checking docs (see
-   `DocsConsistencyTest`), ADRs for new decisions, operational runbooks.
+1. **W7 — Legacy UI & a11y (in progress):** `x-*` component layer done
+   (PR #711); page migration by priority — `settings/index` done
+   (#712), next `topten`/`user/_details` → auth pages → torrent
+   pages → forum/messages → rest. Lower `LegacyViewSurfaceTest`
+   baselines per page; axe critical/serious as a blocking gate;
+   Playwright browser tests; retire `Support\Form` (jQuery → Alpine).
+2. **W9 — Documentation & runbooks (background):** `DocsConsistencyTest`
+   keeps AGENTS.md/README.md honest; ADRs for new decisions recorded
+   here (0006–0013); `RUNBOOKS.md` covers 10 operational scenarios.
 
 ## PHP version
 

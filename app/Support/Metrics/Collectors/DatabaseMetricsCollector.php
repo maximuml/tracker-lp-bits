@@ -6,6 +6,7 @@ namespace App\Support\Metrics\Collectors;
 
 use App\Support\Metrics\MetricsCollector;
 use App\Support\Metrics\PrometheusFormatter;
+use App\Support\RequestContext;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
@@ -36,7 +37,7 @@ final class DatabaseMetricsCollector implements MetricsCollector
         $lines[] = "nexus_db_up {$up}";
 
         $lines = array_merge($lines, $this->fmt->head('nexus_db_query_count', 'Total DB queries in current request', 'gauge'));
-        $lines[] = 'nexus_db_query_count '.count(DB::connection()->getQueryLog());
+        $lines[] = 'nexus_db_query_count '.RequestContext::instance()->getDbQueryCount();
 
         return $lines;
     }

@@ -35,11 +35,12 @@ final class HttpMetricsCollector implements MetricsCollector
 
         try {
             $redis = Redis::connection();
-            $statuses = ['200', '301', '302', '400', '401', '403', '404', '419', '422', '429', '500', '503'];
+            $statuses = (array) $redis->smembers('metrics:http_statuses');
+            sort($statuses);
             foreach ($statuses as $status) {
                 $count = $redis->get("metrics:http_requests:{$status}");
                 if ($count !== null) {
-                    $lines[] = $this->fmt->line('nexus_http_requests_total', (float) $count, ['status' => $status]);
+                    $lines[] = $this->fmt->line('nexus_http_requests_total', (float) $count, ['status' => (string) $status]);
                 }
             }
         } catch (\Throwable) {
@@ -60,26 +61,18 @@ final class HttpMetricsCollector implements MetricsCollector
             $redis = Redis::connection();
 
             foreach (self::LATENCY_BUCKETS as $bucket) {
-                $count = $redis->get("metrics:http_latency_bucket:{$bucket}");
-                if ($count !== null) {
-                    $lines[] = $this->fmt->line('nexus_http_request_duration_seconds_bucket', (float) $count, ['le' => $this->fmt->bucket($bucket)]);
-                }
+                $count = $redis->get("metrics:http_latency_bucket:{$bucket}") ?? 0;
+                $lines[] = $this->fmt->line('nexus_http_request_duration_seconds_bucket', (float) $count, ['le' => $this->fmt->bucket($bucket)]);
             }
 
-            $infCount = $redis->get('metrics:http_latency_bucket:+Inf');
-            if ($infCount !== null) {
-                $lines[] = $this->fmt->line('nexus_http_request_duration_seconds_bucket', (float) $infCount, ['le' => '+Inf']);
-            }
+            $infCount = $redis->get('metrics:http_latency_bucket:+Inf') ?? 0;
+            $lines[] = $this->fmt->line('nexus_http_request_duration_seconds_bucket', (float) $infCount, ['le' => '+Inf']);
 
-            $sum = $redis->get('metrics:http_latency_sum');
-            if ($sum !== null) {
-                $lines[] = "nexus_http_request_duration_seconds_sum {$sum}";
-            }
+            $sum = $redis->get('metrics:http_latency_sum') ?? 0;
+            $lines[] = "nexus_http_request_duration_seconds_sum {$sum}";
 
-            $count = $redis->get('metrics:http_latency_count');
-            if ($count !== null) {
-                $lines[] = "nexus_http_request_duration_seconds_count {$count}";
-            }
+            $count = $redis->get('metrics:http_latency_count') ?? 0;
+            $lines[] = "nexus_http_request_duration_seconds_count {$count}";
         } catch (\Throwable) {
             // Redis unavailable — skip
         }

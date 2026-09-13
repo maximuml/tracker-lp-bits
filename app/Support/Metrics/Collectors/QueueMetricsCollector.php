@@ -25,7 +25,9 @@ final class QueueMetricsCollector implements MetricsCollector
     public function collect(): array
     {
         $lines = array_merge(
-            $this->fmt->head('nexus_horizon_pending_jobs', 'Pending jobs per queue', 'gauge'),
+            $this->fmt->head('nexus_horizon_pending_jobs', 'Ready (pending) jobs per queue', 'gauge'),
+            $this->fmt->head('nexus_horizon_delayed_jobs', 'Delayed jobs per queue', 'gauge'),
+            $this->fmt->head('nexus_horizon_reserved_jobs', 'Reserved (in-flight) jobs per queue', 'gauge'),
             $this->fmt->head('nexus_horizon_failed_jobs', 'Total failed jobs', 'gauge'),
         );
 
@@ -40,8 +42,9 @@ final class QueueMetricsCollector implements MetricsCollector
             ]);
 
             foreach ($queues as $queue) {
-                $pending = $redis->llen("queues:{$queue}:notify");
-                $lines[] = $this->fmt->line('nexus_horizon_pending_jobs', (float) $pending, ['queue' => $queue]);
+                $lines[] = $this->fmt->line('nexus_horizon_pending_jobs', (float) $redis->llen("queues:{$queue}"), ['queue' => $queue]);
+                $lines[] = $this->fmt->line('nexus_horizon_delayed_jobs', (float) $redis->zcard("queues:{$queue}:delayed"), ['queue' => $queue]);
+                $lines[] = $this->fmt->line('nexus_horizon_reserved_jobs', (float) $redis->zcard("queues:{$queue}:reserved"), ['queue' => $queue]);
             }
 
             $lines[] = 'nexus_horizon_failed_jobs '.$this->jobs->countFailed();

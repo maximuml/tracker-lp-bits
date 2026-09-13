@@ -9,6 +9,7 @@ use App\Repositories\TokenRepository;
 use App\Repositories\UsercpRepository;
 use App\Repositories\UserPasskeyRepository;
 use App\Services\UsercpPageService;
+use App\Services\UsercpTokenSectionBuilder;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
@@ -69,8 +70,8 @@ final class UsercpPageServiceTest extends TestCase
             $this->globals,
             new LegacyRedisCache,
             app(UsercpRepository::class),
-            $this->tokenRepository,
             $this->passkeyRepository,
+            new UsercpTokenSectionBuilder($this->globals, app(UsercpRepository::class), $this->tokenRepository),
         );
     }
 
@@ -173,8 +174,8 @@ final class UsercpPageServiceTest extends TestCase
             new Globals,
             new LegacyRedisCache,
             app(UsercpRepository::class),
-            Mockery::mock(TokenRepository::class),
             Mockery::mock(UserPasskeyRepository::class),
+            new UsercpTokenSectionBuilder(new Globals, app(UsercpRepository::class), Mockery::mock(TokenRepository::class)),
         );
 
         $this->assertInstanceOf(UsercpPageService::class, $service);

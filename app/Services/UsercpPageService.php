@@ -8,7 +8,6 @@ use App\Enums\UserPrivacy;
 use App\Models\Setting;
 use App\Models\TrackerUrl;
 use App\Models\User;
-use App\Repositories\TokenRepository;
 use App\Repositories\UsercpRepository;
 use App\Repositories\UserPasskeyRepository;
 use App\Support\AssetAppender;
@@ -49,8 +48,8 @@ final class UsercpPageService
         private readonly Globals $globals,
         private readonly LegacyRedisCache $cache,
         private readonly UsercpRepository $usercpRepository,
-        private readonly TokenRepository $tokenRepository,
         private readonly UserPasskeyRepository $passkeyRepository,
+        private readonly UsercpTokenSectionBuilder $tokenSectionBuilder,
     ) {}
 
     /**
@@ -208,10 +207,24 @@ final class UsercpPageService
         }
 
         // Tokens
-        $tokens = $this->buildTokens($lang, $userInfo);
+        $tokens = $this->tokenSectionBuilder->build($lang, $userInfo);
 
         // Recently read topics
         $readTopics = $this->buildReadTopics($lang, $userId, $cache);
+
+        $avatarHtml = '';
+        if (! empty($curUser['avatar'])) {
+            $avatarHtml = '<img src="'.htmlspecialchars((string) $curUser['avatar']).'" border=0>';
+        }
+
+        $invitesHtml = ((int) ($curUser['invites'] ?? 0)).' [<a href="invite.php?id='.$userId.'" title="'.($lang['link_send_invitation'] ?? '').'">'.htmlspecialchars($lang['text_send'] ?? '').'</a>]';
+        $karmaHtml = ((string) ($curUser['seedbonus'] ?? '0')).' [<a href="mybonus.php" title="'.($lang['link_use_karma_points'] ?? '').'">'.htmlspecialchars($lang['text_use'] ?? '').'</a>]';
+        $commentsHtml = $commentCount.' [<a href="userhistory.php?action=viewcomments&id='.$userId.'" title="'.($lang['link_view_comments'] ?? '').'">'.htmlspecialchars($lang['text_view'] ?? '').'</a>]';
+
+        $forumPostsHtml = null;
+        if ($forumPosts > 0) {
+            $forumPostsHtml = $forumPosts.' [<a href="userhistory.php?action=viewposts&id='.$userId.'" title="'.($lang['link_view_posts'] ?? '').'">'.htmlspecialchars($lang['text_view'] ?? '').'</a>] ('.$dayPosts.htmlspecialchars($lang['text_posts_per_day'] ?? '').'; '.$percentages.htmlspecialchars($lang['text_of_total_posts'] ?? '').')';
+        }
 
         return [
             'commentCount' => $commentCount,
@@ -229,38 +242,11 @@ final class UsercpPageService
             'email' => (string) ($curUser['email'] ?? ''),
             'invites' => (int) ($curUser['invites'] ?? 0),
             'seedbonus' => (string) ($curUser['seedbonus'] ?? '0'),
-        ];
-    }
-
-    /**
-     * Build tokens section data.
-     *
-     * @param  array<string, mixed>  $lang
-     * @return array<string, mixed>
-     */
-    private function buildTokens(array $lang, User $userInfo): array
-    {
-        $langFunctions = (array) ($this->globals->get('lang_functions') ?? []);
-
-        $permissions = $this->tokenRepository->listUserTokenPermissionAllowed();
-        $permissionOptions = [];
-        foreach ($permissions as $name => $label) {
-            $permissionOptions[] = sprintf('<label><input type="checkbox" name="permissions[]" value="%s">%s</label>', $name, $label);
-        }
-
-        $tokens = $this->usercpRepository->getUserTokens($userInfo);
-
-        return [
-            'label' => Locale::trans('token.label', [], null),
-            'columnName' => Locale::trans('label.name', [], null),
-            'columnPermission' => Locale::trans('token.permission', [], null),
-            'columnCreatedAt' => Locale::trans('label.created_at', [], null),
-            'actionLabel' => Locale::trans('label.action', [], null),
-            'actionCreate' => Locale::trans('label.create', [], null),
-            'permissionCheckbox' => implode('', $permissionOptions),
-            'tokens' => $tokens,
-            'deleteLabel' => $langFunctions['text_delete'] ?? 'Delete',
-            'confirmRemoveLabel' => $langFunctions['std_confirm_remove'] ?? 'Confirm remove?',
+            'avatarHtml' => $avatarHtml,
+            'invitesHtml' => $invitesHtml,
+            'karmaHtml' => $karmaHtml,
+            'commentsHtml' => $commentsHtml,
+            'forumPostsHtml' => $forumPostsHtml,
         ];
     }
 

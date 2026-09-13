@@ -59,7 +59,13 @@ services:
       resources:
         limits:
           cpus: '1.0'
-          memory: 512M
+          # Measured: horizon master + 5 supervisors + min workers ≈ 1.2G
+          # RSS (~90M per PHP process), plus a ~100M spike each 30s from
+          # the horizon:status healthcheck booting a second Laravel in
+          # the same cgroup. 512M OOM-cycled the container; full
+          # autoscale to 23 workers needs ~2G — raise further for real
+          # queue load.
+          memory: 1536M
         reservations:
           memory: 256M
 

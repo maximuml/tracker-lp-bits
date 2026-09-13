@@ -14,6 +14,19 @@ class BackupService
 {
     public const BACKUP_EXCLUDES = ['vendor', 'node_modules', '.git', '.idea', '.settings', '.DS_Store', '.github'];
 
+    // Volatile or derived paths relative to the web root: caches and logs
+    // change while tar reads them (tar exits 1 = "file changed as we read
+    // it"), and storage/app/backups must never nest backups inside backups.
+    public const BACKUP_EXCLUDE_PATHS = [
+        'storage/app/backups',
+        'storage/logs',
+        'storage/framework/cache',
+        'storage/framework/sessions',
+        'storage/framework/testing',
+        'storage/framework/views',
+        'bootstrap/cache',
+    ];
+
     public const BACKUP_RETENTION_COUNT_DEFAULT = 10;
 
     public function __construct(
@@ -34,7 +47,7 @@ class BackupService
         if (Environment::commandExists('tar') && ($method === 'tar' || $method === null)) {
             $filename = $baseFilename.'.tar.gz';
             $command = 'tar';
-            foreach ($excludes as $item) {
+            foreach (array_merge($excludes, self::BACKUP_EXCLUDE_PATHS) as $item) {
                 $command .= ' --exclude='.escapeshellarg("$dirName/$item");
             }
             $command .= sprintf(
@@ -45,6 +58,12 @@ class BackupService
             );
             $result = exec($command, $output, $result_code);
             Logger::writeWithContext((string) sprintf('command: %s, output: %s, result_code: %s, result: %s, filename: %s', $command, json_encode($output), $result_code, $result, $filename), (string) 'info', (bool) false);
+            // GNU tar exits 1 when a file changed while being read — a
+            // warning, not a failure. Only exit codes >1 are fatal.
+            if ($result_code === 1) {
+                Logger::writeWithContext((string) sprintf('tar exited 1 (files changed during backup, archive still valid): %s', $filename), (string) 'warning', (bool) false);
+                $result_code = 0;
+            }
         } else {
             // use php zip
             $filename = $baseFilename.'.zip';
@@ -59,17 +78,24 @@ class BackupService
             foreach ($files as $name => $file) {
                 $localeName = substr($name, strlen($webRoot) + 1);
                 $start = strstr($localeName, DIRECTORY_SEPARATOR, true) ?: $localeName;
+                if (in_array($start, $excludes)) {
+                    continue;
+                }
+                $normalized = str_replace(DIRECTORY_SEPARATOR, '/', $localeName);
+                foreach (self::BACKUP_EXCLUDE_PATHS as $excludePath) {
+                    if ($normalized === $excludePath || str_starts_with($normalized, $excludePath.'/')) {
+                        continue 2;
+                    }
+                }
                 // add a directory
                 $localeName = $dirName.DIRECTORY_SEPARATOR.$localeName;
-                if (! in_array($start, $excludes)) {
-                    if (is_file($name)) {
-                        $zip->addFile($name, $localeName);
-                    } elseif (is_dir($name)) {
-                        Logger::writeWithContext((string) "Is dir: {$name}.", (string) 'info', (bool) false);
-                        $zip->addEmptyDir($localeName);
-                    } else {
-                        Logger::writeWithContext((string) "Not file or dir {$name}.", (string) 'error', (bool) false);
-                    }
+                if (is_file($name)) {
+                    $zip->addFile($name, $localeName);
+                } elseif (is_dir($name)) {
+                    Logger::writeWithContext((string) "Is dir: {$name}.", (string) 'info', (bool) false);
+                    $zip->addEmptyDir($localeName);
+                } else {
+                    Logger::writeWithContext((string) "Not file or dir {$name}.", (string) 'error', (bool) false);
                 }
             }
             $zip->close();
@@ -154,6 +180,10 @@ class BackupService
             );
             $result = exec($command, $output, $result_code);
             Logger::writeWithContext((string) sprintf('command: %s, output: %s, result_code: %s, result: %s, filename: %s', $command, json_encode($output), $result_code, $result, $filename), (string) 'info', (bool) false);
+            // GNU tar exits 1 on mid-read file changes — warning, not fatal.
+            if ($result_code === 1) {
+                $result_code = 0;
+            }
         } else {
             // use php zip
             $filename = $baseFilename.'.zip';
@@ -203,6 +233,7 @@ class BackupService
         if (empty($path)) {
             $path = $this->getBackupExportPathDefault();
         }
+        File::ensureDirectoryExists($path);
 
         return $path;
     }

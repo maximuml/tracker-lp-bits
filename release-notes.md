@@ -28,6 +28,42 @@
   runs `migrate` against the existing database — the CI `migrations` job
   mirrors exactly this path.
 
+## Backup & restore
+
+- **What is backed up:** `php artisan backup:all --method=tar` produces
+  `storage/app/backups/<base>.<ts>.tar.gz` containing a `mysqldump
+  --single-transaction` of the database and a `tar.gz` of the web root —
+  which includes the data directories `torrents/`, `attachments/` and
+  `bitbucket/` (they live outside `public/`, so they are part of the code
+  tree). Volatile paths (logs, framework caches, `storage/app/backups`
+  itself) are excluded; `.env` **is** included — treat archives as secrets.
+- **Scheduled backups:** `backup:cronjob` (every 5 min, gated by the
+  `backup.*` site settings: enabled, hourly/daily frequency, retention
+  count) calls the same `backupAll` path and can transfer the bundle to
+  remote storage; `BACKUP_GPG_RECIPIENT` enables GPG encryption.
+- **Restore (operator path):**
+
+  ```bash
+  tar -xzf <base>.<ts>.tar.gz -C /tmp/restore
+  mysql -u nexusphp -p <db> < /tmp/restore/<base>.database.<ts>.sql
+  tar -xzf /tmp/restore/<base>.web.<ts>.tar.gz -C <parent-of-webroot> \
+    <base>/torrents <base>/attachments <base>/bitbucket
+  ```
+
+  For a code+data restore, extract the web tar fully instead of the three
+  directories.
+- **Verification:** `php artisan backup:restore-drill --latest` restores the
+  newest dump into a scratch database and checks table count; add
+  `--compare` to also compare per-table row counts against the source
+  (point-in-time check — run it on a quiet window, since live counters
+  drift). The push-only CI job `backup-restore`
+  (`scripts/ci/verify-backup-restore.sh`) exercises the full cycle
+  end-to-end: backup → drill → destroy DB+files → restore → CHECKSUM TABLE
+  and sha256 manifest parity → HTTP smoke.
+- **RPO/RTO:** RPO is bounded by the configured backup frequency
+  (hourly/daily). RTO is dump restore time + file extraction; the CI job
+  reports wall-clock timings per phase.
+
 ## Highlights
 
 This release ships the shoutbox modernization, MeiliSearch-by-default, setlist lookup on upload, and several runtime hardening fixes across the `php8` branch.

@@ -114,6 +114,7 @@ final class ConsoleCommandsTest extends TestCase
         $this->assertStringContainsString('--latest', $signature);
         $this->assertStringContainsString('--file=', $signature);
         $this->assertStringContainsString('--test-db=', $signature);
+        $this->assertStringContainsString('--compare', $signature);
     }
 
     /**

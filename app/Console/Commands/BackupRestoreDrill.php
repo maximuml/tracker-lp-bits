@@ -20,7 +20,8 @@ class BackupRestoreDrill extends Command
     protected $signature = 'backup:restore-drill
                             {--latest : Use the most recent backup file}
                             {--file= : Path to a specific .sql backup file}
-                            {--test-db= : Temporary database name for restore verification}';
+                            {--test-db= : Temporary database name for restore verification}
+                            {--compare : Compare per-table row counts against the source database}';
 
     /**
      * The console command description.
@@ -82,6 +83,18 @@ class BackupRestoreDrill extends Command
                 return 1;
             }
 
+            if ($this->option('compare')) {
+                $mismatches = $this->compareRowCounts($credsFile, (string) $config['database'], $testDb);
+                if ($mismatches !== []) {
+                    foreach ($mismatches as $mismatch) {
+                        $this->error($mismatch);
+                    }
+
+                    return 1;
+                }
+                $this->info('Row counts match source database for all restored tables.');
+            }
+
             $this->info("Restore drill PASSED: {$count} tables restored successfully.");
             Logger::writeWithContext(
                 (string) "Backup restore drill passed: {$count} tables from {$sqlFile}",
@@ -112,6 +125,70 @@ class BackupRestoreDrill extends Command
         if ($resultCode !== 0) {
             throw new \RuntimeException('MySQL command failed: '.implode("\n", $output));
         }
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function compareRowCounts(string $credsFile, string $sourceDb, string $testDb): array
+    {
+        $tables = $this->getTableNames($credsFile, $testDb);
+        $mismatches = [];
+        foreach ($tables as $table) {
+            $restored = $this->getRowCount($credsFile, $testDb, $table);
+            $source = $this->getRowCount($credsFile, $sourceDb, $table);
+            if ($source === null) {
+                $mismatches[] = "Table `{$table}` exists in the restored backup but not in {$sourceDb}.";
+            } elseif ($restored !== $source) {
+                $mismatches[] = "Table `{$table}` row count mismatch: restored={$restored}, source={$source}.";
+            }
+        }
+
+        return $mismatches;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function getTableNames(string $credsFile, string $db): array
+    {
+        $output = $this->queryMysql($credsFile, "SELECT table_name FROM information_schema.tables WHERE table_schema = '{$db}' AND table_type = 'BASE TABLE'");
+
+        return array_values(array_filter(array_map('trim', $output)));
+    }
+
+    private function getRowCount(string $credsFile, string $db, string $table): ?int
+    {
+        $exists = $this->queryMysql($credsFile, "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = '{$db}' AND table_name = '{$table}'");
+        if ((int) ($exists[0] ?? 0) === 0) {
+            return null;
+        }
+        $output = $this->queryMysql($credsFile, "SELECT COUNT(*) FROM `{$db}`.`{$table}`");
+
+        return (int) ($output[0] ?? 0);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function queryMysql(string $credsFile, string $sql): array
+    {
+        $client = Environment::commandExists('mariadb') ? 'mariadb' : 'mysql';
+        $sslFlag = Environment::commandExists('mariadb') ? '--ssl=0' : '--ssl-mode=DISABLED';
+        $command = sprintf(
+            '%s --defaults-extra-file=%s %s -N -e %s 2>&1',
+            $client,
+            escapeshellarg($credsFile),
+            $sslFlag,
+            escapeshellarg($sql)
+        );
+        $output = [];
+        exec($command, $output, $resultCode);
+        if ($resultCode !== 0) {
+            throw new \RuntimeException('MySQL query failed: '.implode("\n", $output));
+        }
+
+        return $output;
     }
 
     private function getTableCount(string $credsFile, string $testDb): int

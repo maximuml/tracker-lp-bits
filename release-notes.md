@@ -87,6 +87,25 @@
   job and waits for its marker — proves workers actually run jobs, not
   just that Horizon is up.
 
+## Supply chain (W8-05)
+
+- **Signed images:** every merge to `php8` that passes the three prod
+  gates (compose smoke, backup/restore, graceful deploy) publishes
+  `ghcr.io/<owner>/<repo>/php` and `.../openresty` tagged `sha-<short>`
+  and `latest`, cosign-signed keyless (GitHub OIDC → Fulcio) with SLSA
+  build-provenance attestations on the digests.
+- **Verified deploy:** `scripts/deploy.sh --image ghcr.io/.../php@sha256:…`
+  verifies the signature (`scripts/verify-image.sh`), then pulls by the
+  *verified digest* — a tag can be re-pointed after signing, a digest
+  cannot. Requires `cosign` on PATH; `--skip-verify` exists for local
+  testing only. `docker login ghcr.io` is needed while the packages are
+  private.
+- **Pin ratchet:** `scripts/ci/check-supply-chain-pins.sh` blocks PRs that
+  add unpinned `uses:` actions, undigested `FROM`/`image:` references,
+  unversioned tool packages (`wget`, `curl`, `git`, …) in Dockerfiles, or
+  remote downloads in entrypoints. Existing pins use `~=` (survives apk
+  patch bumps) or `@sha256:` digests.
+
 ## Highlights
 
 This release ships the shoutbox modernization, MeiliSearch-by-default, setlist lookup on upload, and several runtime hardening fixes across the `php8` branch.

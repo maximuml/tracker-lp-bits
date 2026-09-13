@@ -2,7 +2,7 @@
 FROM openresty/openresty:alpine@sha256:9a80f210927074afde534ae008b843a1afa259b4fb3183e152151a600a8d1f45
 
 # 安装基础依赖
-RUN apk add --no-cache gettext bash curl openssl socat
+RUN apk add --no-cache gettext~=0.24 bash~=5.3 curl~=8.22 openssl~=3.5 socat~=1.8
 
 # 拷贝 entrypoint
 COPY .docker/openresty/entrypoint.sh /usr/local/bin/entrypoint.sh

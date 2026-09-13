@@ -102,7 +102,7 @@ COPY --from=ext-builder /usr/local/etc/php/conf.d/ /usr/local/etc/php/conf.d/
 
 # Install only runtime libraries (no build tools, no git, no mysql-client)
 RUN apk add --no-cache \
-    wget \
+    wget~=1.25 \
     libzip \
     libpng \
     libjpeg-turbo \

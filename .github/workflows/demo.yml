@@ -31,7 +31,7 @@ permissions:
 
 concurrency:
   group: demo-deploy
-  cancel-progress: false
+  cancel-in-progress: false
 
 jobs:
   # Gate job: `secrets` is not a valid context in `jobs.*.if` (only github,

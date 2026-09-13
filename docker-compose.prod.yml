@@ -21,6 +21,9 @@ services:
       - /tmp:size=64M
       - /var/run:size=1M
     volumes:
+      # .env is mounted, not baked: published images must not contain the
+      # builder's secrets (W8-05). Entrypoint re-warms caches against it.
+      - ./.env:/var/www/html/.env:ro
       - storage-data:/var/www/html/storage
       - bootstrap-cache:/var/www/html/bootstrap/cache
       - attachments-data:/var/www/html/attachments
@@ -47,6 +50,7 @@ services:
       - /tmp:size=64M
       - /var/run:size=1M
     volumes:
+      - ./.env:/var/www/html/.env:ro
       - storage-data:/var/www/html/storage
       - bootstrap-cache:/var/www/html/bootstrap/cache
       - attachments-data:/var/www/html/attachments
@@ -67,6 +71,7 @@ services:
       - /tmp:size=64M
       - /var/run:size=1M
     volumes:
+      - ./.env:/var/www/html/.env:ro
       - storage-data:/var/www/html/storage
       - bootstrap-cache:/var/www/html/bootstrap/cache
       - attachments-data:/var/www/html/attachments

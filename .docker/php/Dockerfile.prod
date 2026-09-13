@@ -165,13 +165,23 @@ RUN mkdir -p /var/www/html/attachments /var/www/html/torrents \
 # T-14: Fail-fast — no `|| true` or `2>/dev/null`. If any cache command
 # fails, the image build fails. This catches missing extensions, broken
 # config, and invalid routes before the image reaches production.
-RUN cd /var/www/html \
+# W8-05: .env is dockerignored so published images carry no secrets. The
+# artisan boots below need *a* valid APP_KEY (AppServiceProvider throws on
+# a placeholder) — a per-build throwaway, overwritten when the entrypoint
+# re-warms caches against the mounted runtime .env. config.php is then
+# removed: a baked config makes Laravel skip .env entirely at runtime
+# (configurationIsCached short-circuits LoadEnvironmentVariables), and
+# named volumes inherit image contents on first mount — a stale build
+# cache would mask the real runtime secrets permanently.
+RUN export APP_KEY="base64:$(head -c 32 /dev/urandom | base64 | tr -d '\n')" \
+    && cd /var/www/html \
     && php artisan storage:link --force \
     && php artisan config:cache \
     && php artisan route:cache \
     && php artisan view:cache \
     && php artisan icons:cache \
     && php artisan filament:cache-components \
+    && rm -f bootstrap/cache/config.php \
     && chown -R www-data:www-data /var/www/html/bootstrap/cache
 
 # Production entrypoint — no composer install, no install-script copy

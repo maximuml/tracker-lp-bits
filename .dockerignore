@@ -19,7 +19,29 @@ yarn-error.log
 /.vscode
 /.history
 crowdin.yml
-.env.bak
+# W8-05: never bake env files into images — a published image would carry
+# the builder's secrets in a layer. Runtime .env arrives via the read-only
+# bind-mount in docker-compose.prod.yml; the build-time cache warm uses an
+# inline throwaway APP_KEY. .env.example stays for install-time flows.
+/.env
+/.env.*
+!/.env.example
+
+# Runtime/generated state — dev containers write caches, logs and backups
+# into these bind-mounted dirs. Baking them in leaks secrets (cached config
+# contains DB creds) and breaks bootstrap: a stale dev-generated
+# bootstrap/cache/config.php references dev-only packages absent from
+# --no-dev builds (observed: LaravelLang\LocaleList\Direction).
+/bootstrap/cache/*
+!/bootstrap/cache/.gitignore
+/storage/*
+!/storage/**/.gitignore
+/attachments/*
+!/attachments/.htaccess
+/torrents/*
+!/torrents/.htaccess
+/bitbucket/*
+!/bitbucket/.htaccess
 
 # Dev-only files — not needed in production image
 # Note: .docker/php/entrypoint.sh and opcache.dev.ini are still needed by the

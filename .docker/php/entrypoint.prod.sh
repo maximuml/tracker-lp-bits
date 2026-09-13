@@ -59,6 +59,13 @@ if [ "$(id -u)" = "0" ]; then
       ${ROOT_PATH}/attachments ${ROOT_PATH}/torrents
 fi
 
+# Drop any cached config inherited from the image or a previous release's
+# volume: while bootstrap/cache/config.php exists Laravel skips .env
+# entirely (configurationIsCached short-circuits LoadEnvironmentVariables),
+# so a stale cache would mask runtime secrets and make validate-production
+# read build-time placeholders. The php service re-warms it right after.
+rm -f ${ROOT_PATH}/bootstrap/cache/config.php
+
 if [ "$SERVICE_NAME" = "php" ]; then
     # T-14: Validate production config before starting — fail fast if
     # APP_KEY is missing, APP_DEBUG is on, or writable paths are broken.

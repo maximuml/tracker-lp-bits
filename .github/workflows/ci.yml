@@ -1338,6 +1338,13 @@ jobs:
           docker compose exec -T php sh -c 'ls /var/www/html/public/build/assets/ | head -1 | grep -q .'
           echo "OK: static assets exist in public/build/assets/"
 
+      - name: Verify public-data volume init ran
+        run: |
+          # assets-init must have completed before php/openresty mounted it
+          docker compose ps assets-init --format '{{.State}}' | grep -qi "exited"
+          docker compose logs assets-init | grep -q "public-data volume synced"
+          echo "OK: public-data volume synced from image"
+
       - name: Verify route/config/view caches
         run: |
           # Laravel 13 uses routes-v7.php (new route caching format)
@@ -1381,6 +1388,34 @@ jobs:
           # Scheduler container should be running and cycling
           docker compose ps scheduler --format '{{.Status}}' | grep -q "Up\|running"
           echo "OK: scheduler container is up"
+
+      - name: Verify scheduler heartbeat lands in Redis
+        run: |
+          # The heartbeat job writes scheduler:heartbeat every minute (TTL 120s).
+          REDIS_PASSWORD=$(grep '^REDIS_PASSWORD=' .env | cut -d= -f2-)
+          for i in $(seq 1 90); do
+            hb=$(docker compose exec -T redis redis-cli -a "$REDIS_PASSWORD" --no-auth-warning GET scheduler:heartbeat 2>/dev/null | tr -d '[:space:]')
+            if [ -n "$hb" ]; then
+              echo "OK: scheduler heartbeat in Redis ($hb) after ${i} polls"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "FAIL: no scheduler:heartbeat key in Redis after 180s"
+          docker compose logs --tail=40 scheduler || true
+          exit 1
+
+      - name: Verify /metrics requires bearer token in production
+        run: |
+          # W6-04: production must not expose metrics without METRICS_TOKEN.
+          # APP_ENV=production + no token configured => endpoint fails closed.
+          status=$(curl -s --max-time 10 -o /dev/null -w "%{http_code}" "http://localhost/metrics")
+          echo "GET /metrics without token: $status"
+          if [ "$status" != "403" ]; then
+            echo "FAIL: expected 403, got $status"
+            exit 1
+          fi
+          echo "OK: /metrics closed without bearer token in production"
 
       - name: Verify OpenResty config is valid
         run: |

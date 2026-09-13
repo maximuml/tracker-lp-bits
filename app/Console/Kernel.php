@@ -38,9 +38,9 @@ class Kernel extends ConsoleKernel
         // Scheduler heartbeat — written to Redis every minute for health checks.
         $schedule->call(function (): void {
             try {
-                Redis::connection()->set('scheduler:heartbeat', (string) time(), ['ex' => 120]);
-            } catch (\Throwable) {
-                // Non-critical: health check will report stale heartbeat.
+                Redis::connection()->setex('scheduler:heartbeat', 120, (string) time());
+            } catch (\Throwable $e) {
+                logger()->warning('scheduler heartbeat write failed', ['error' => $e->getMessage()]);
             }
         })->everyMinute()->name('scheduler-heartbeat')->withoutOverlapping()->onOneServer();
 

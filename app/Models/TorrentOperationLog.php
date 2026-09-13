@@ -84,6 +84,11 @@ class TorrentOperationLog extends NexusModel
     {
         $actionType = $torrentOperationLog->action_type;
         $receiver = $torrentOperationLog->torrent->user;
+        if (! $receiver->exists || (int) $receiver->id <= 0) {
+            Logger::writeWithContext((string) "skip notify user: torrent {$torrentOperationLog->torrent_id} has no existing owner", (string) 'info', (bool) false);
+
+            return;
+        }
         $locale = $receiver->locale;
         $subject = Locale::trans("torrent.operation_log.{$actionType}.notify_subject", [], $locale);
         $msg = Locale::trans("torrent.operation_log.{$actionType}.notify_msg", ['torrent_name' => $torrentOperationLog->torrent->name, 'detail_url' => sprintf('details.php?id=%s', $torrentOperationLog->torrent_id), 'operator' => $torrentOperationLog->user->username, 'reason' => $torrentOperationLog->comment], $locale);

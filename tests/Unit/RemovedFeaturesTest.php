@@ -16,13 +16,16 @@ class RemovedFeaturesTest extends TestCase
 
         // The legacy per-page wrappers are gone; verify the strings are not
         // present in the migrated views/controllers either.
-        foreach ([
+        $files = [
             base_path('resources/views/usercp/index.blade.php'),
             base_path('resources/views/my/bonus.blade.php'),
             base_path('resources/views/my/sections/bonus.blade.php'),
             base_path('resources/views/topten/index.blade.php'),
-            base_path('resources/views/topten/_topten.blade.php'),
-        ] as $file) {
+            ...glob(base_path('resources/views/components/topten/*.blade.php')) ?: [],
+        ];
+        $this->assertNotEmpty($files);
+
+        foreach ($files as $file) {
             $this->assertFileExists($file);
             $content = file_get_contents($file);
             $this->assertStringNotContainsString('promotionlink', $content);

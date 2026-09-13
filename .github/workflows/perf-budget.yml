@@ -197,16 +197,26 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir -p perf-baseline
-          # Baseline = artifact of the latest successful run on the default branch.
-          RUN_ID=$(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/perf-budget.yml/runs?branch=php8&status=success&per_page=10" \
-            --jq '[.workflow_runs[] | select(.head_sha != "'"${GITHUB_SHA}"'")][0].id // empty')
-          if [ -z "$RUN_ID" ]; then
+          # Baseline = median p95 across up to 5 latest successful runs on the
+          # default branch. A single fast/slow runner must not poison the gate;
+          # using only the latest run made it self-jam after a fast runner.
+          RUN_IDS=$(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/perf-budget.yml/runs?branch=php8&status=success&per_page=10" \
+            --jq '[.workflow_runs[] | select(.head_sha != "'"${GITHUB_SHA}"'")][0:5][].id // empty')
+          if [ -z "$RUN_IDS" ]; then
             echo "::warning::No baseline run found — skipping regression compare"
             exit 0
           fi
-          echo "Baseline run: $RUN_ID"
-          if ! gh run download "$RUN_ID" -n k6-perf-results -D perf-baseline; then
-            echo "::warning::Baseline artifact unavailable — skipping regression compare"
+          i=0
+          for id in $RUN_IDS; do
+            i=$((i + 1))
+            if gh run download "$id" -n k6-perf-results -D "perf-baseline/run$i" 2>/dev/null; then
+              echo "Baseline run $i: $id"
+            else
+              rmdir "perf-baseline/run$i" 2>/dev/null || true
+            fi
+          done
+          if [ "$i" -eq 0 ] || ! find perf-baseline -name '*.json' | grep -q .; then
+            echo "::warning::Baseline artifacts unavailable — skipping regression compare"
             exit 0
           fi
           node tests/Performance/compare-results.js perf-baseline perf-results

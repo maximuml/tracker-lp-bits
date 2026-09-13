@@ -54,6 +54,12 @@ dc() { docker compose "$@"; }
 step() { echo; echo "=== $* ==="; }
 fail() { echo "FAIL: $*" >&2; exit 1; }
 
+# .env drives compose variable interpolation AND is bind-mounted read-only
+# into php/queue/scheduler (W8-05 — it is deliberately not baked into the
+# image). Fail early with a clear message instead of a cryptic compose
+# "bind source path does not exist" at container create.
+[ -f .env ] || fail ".env missing — copy .env.example and fill in secrets"
+
 verify_pull() {  # $1=registry ref $2=local compose image name
     local ref="$1" local_name="$2" pull_ref="$1"
     if [ "$SKIP_VERIFY" = "0" ]; then

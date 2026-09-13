@@ -105,6 +105,13 @@
   unversioned tool packages (`wget`, `curl`, `git`, …) in Dockerfiles, or
   remote downloads in entrypoints. Existing pins use `~=` (survives apk
   patch bumps) or `@sha256:` digests.
+- **No secrets in images:** `.env`, `bootstrap/cache/*`, `storage/*` and
+  the upload/backup dirs are dockerignored — a published image can never
+  carry the builder's secrets, dev caches or local backups. At runtime
+  `./.env` is bind-mounted read-only into `php`/`queue`/`scheduler`
+  (required — `deploy.sh` fails fast without it), and the entrypoint
+  deletes any inherited `bootstrap/cache/config.php` before validating,
+  because a cached config makes Laravel skip `.env` entirely.
 
 ## Highlights
 

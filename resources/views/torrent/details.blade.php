@@ -42,11 +42,11 @@
 <x-settings-row :label="$lang_functions['text_technical_info'] ?? ''">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($technicalInfoResult))</x-settings-row>
 @endif
 @if ($showDescription)
-<x-settings-row :label="\App\Support\Html\SafeHtml::fromTrustedHtml($descrHeadHtml)"><div id='kdescr'>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($descr))</div></x-settings-row>
+<x-settings-row :label="$descrHeadHtml"><div id='kdescr'>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($descr))</div></x-settings-row>
 @endif
-<x-settings-row :label="\App\Support\Html\SafeHtml::fromTrustedHtml($lang_details['row_torrent_info'] ?? '')">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($torrentInfoRowHtml))</x-settings-row>
+<x-settings-row :label="$lang_details['row_torrent_info'] ?? ''">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($torrentInfoRowHtml))</x-settings-row>
 <x-settings-row :label="$lang_details['row_hot_meter'] ?? ''">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($hotMeterHtml))</x-settings-row>
-<x-settings-row :label="\App\Support\Html\SafeHtml::fromTrustedHtml($peersHeadHtml)">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($peersBodyHtml))</x-settings-row>
+<x-settings-row :label="$peersHeadHtml">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($peersBodyHtml))</x-settings-row>
 <x-settings-row :label="$lang_details['magic_value_award'] ?? ''">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($magicRowHtml))</x-settings-row>
 <x-settings-row :label="$lang_details['row_thanks_by'] ?? ''">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($thanksRowHtml))</x-settings-row>
 </table>

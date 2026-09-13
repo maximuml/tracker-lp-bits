@@ -17,9 +17,11 @@ class QueueProbe extends Command
      * @var string
      */
     protected $signature = 'queue:probe
-                            {--sleep=0 : Seconds the probe job sleeps before writing its marker}
+                            {--sleep=0 : Seconds the probe job stays busy before writing its marker}
                             {--wait : Poll until the marker lands (job actually ran)}
-                            {--timeout=90 : Max seconds --wait polls before failing}';
+                            {--wait-started : Poll until the job reports running (it is in-flight)}
+                            {--token= : Poll an existing probe job instead of dispatching a new one}
+                            {--timeout=90 : Max seconds --wait/--wait-started polls before failing}';
 
     /**
      * The console command description.
@@ -33,13 +35,17 @@ class QueueProbe extends Command
      */
     public function handle(): int
     {
-        $token = (string) Str::uuid();
-        $sleep = max(0, (int) $this->option('sleep'));
-        QueueProbeJob::dispatch($token, $sleep);
-        $this->info("Probe dispatched (token={$token}, sleep={$sleep}s, queue=default)");
+        $token = (string) ($this->option('token') ?: '');
+        if ($token === '') {
+            $token = (string) Str::uuid();
+            $sleep = max(0, (int) $this->option('sleep'));
+            QueueProbeJob::dispatch($token, $sleep);
+            $this->info("Probe dispatched (token={$token}, sleep={$sleep}s, queue=default)");
+        }
 
-        if (! $this->option('wait')) {
-            $this->info('Not waiting — poll Cache key '.QueueProbeJob::CACHE_KEY.' for the token.');
+        $expect = $this->option('wait-started') ? 'running' : 'done';
+        if (! $this->option('wait') && ! $this->option('wait-started')) {
+            $this->info("Not waiting — poll Cache key queue:probe:state:{$token} for 'done'.");
 
             return 0;
         }
@@ -47,15 +53,16 @@ class QueueProbe extends Command
         $timeout = max(1, (int) $this->option('timeout'));
         $deadline = time() + $timeout;
         while (time() < $deadline) {
-            if (Cache::get(QueueProbeJob::CACHE_KEY) === $token) {
-                $this->info("PROBE_OK: job completed within {$timeout}s budget");
+            $state = Cache::get("queue:probe:state:{$token}");
+            if ($state === $expect || ($expect === 'running' && $state === 'done')) {
+                $this->info("PROBE_OK: job is {$expect}");
 
                 return 0;
             }
             usleep(500000);
         }
 
-        $this->error("PROBE_TIMEOUT: marker not observed within {$timeout}s — jobs are not completing");
+        $this->error("PROBE_TIMEOUT: job never reached '{$expect}' within {$timeout}s");
 
         return 1;
     }

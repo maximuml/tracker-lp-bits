@@ -17,14 +17,17 @@ step() { echo; echo "=== $* ==="; }
 fail() { echo "FAIL: $*" >&2; exit 1; }
 
 step "1/4 Queue drain: in-flight job survives compose-stop"
-dc exec -T php php artisan queue:probe --sleep=25 --wait --timeout=120 &
-PROBE_PID=$!
-sleep 5  # let Horizon pick the job up
+TOKEN=$(dc exec -T php php artisan queue:probe --sleep=25 | grep -o 'token=[a-f0-9-]*' | cut -d= -f2 | tr -d '\r')
+[ -n "$TOKEN" ] || fail "probe dispatch produced no token"
+# Race-free: wait until the job reports 'running' (in-flight), then stop.
+dc exec -T php php artisan queue:probe --token="$TOKEN" --wait-started --timeout=60 \
+    || fail "probe job never started — Horizon not picking up work"
 START=$SECONDS
 dc stop queue
 ELAPSED=$((SECONDS - START))
 echo "compose stop queue took ${ELAPSED}s"
-wait "$PROBE_PID" || fail "probe job marker never landed — in-flight job lost on stop"
+dc exec -T php php artisan queue:probe --token="$TOKEN" --wait --timeout=90 \
+    || fail "probe job marker never landed — in-flight job lost on stop"
 # Drain means the container stays up until the ~25s job finishes (~15-30s
 # from this point). If the signal were ignored, docker would SIGKILL at the
 # 125s grace; if the job were cut, the marker would be missing (checked).

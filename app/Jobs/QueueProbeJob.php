@@ -38,6 +38,7 @@ final class QueueProbeJob implements ShouldQueue
     public function handle(): void
     {
         $started = microtime(true);
+        Cache::put("queue:probe:state:{$this->token}", 'running', 600);
         // Wall-time loop, not sleep(): SIGTERM interrupts sleep()/usleep()
         // via the worker's async pcntl handlers, which would fake a short
         // job and make drain tests meaningless. A real long job (chunked
@@ -49,6 +50,7 @@ final class QueueProbeJob implements ShouldQueue
             }
         }
         Cache::put(self::CACHE_KEY, $this->token, 600);
+        Cache::put("queue:probe:state:{$this->token}", 'done', 600);
         Cache::put(self::META_KEY, sprintf('%.1fs', microtime(true) - $started), 600);
     }
 }

@@ -27,6 +27,9 @@ services:
       - torrents-data:/var/www/html/torrents
       - public-data:/var/www/html/public
       - ${NP_BACKUP_EXPORT_PATH:-/tmp/nexusphp_backup}:${NP_BACKUP_EXPORT_PATH:-/tmp/nexusphp_backup}
+    depends_on:
+      assets-init:
+        condition: service_completed_successfully
     # Resource limits — tune based on measured memory usage
     deploy:
       resources:
@@ -77,12 +80,34 @@ services:
         reservations:
           memory: 128M
 
+  # One-shot init: refresh public-data volume from the image on every deploy.
+  # Docker populates named volumes only on FIRST mount — without this step
+  # upgrades would keep serving stale public/ assets (W8-01).
+  assets-init:
+    image: nexusphp_php:prod
+    # Runs as root: a fresh named volume is root-owned, and cp -a preserves
+    # the image's www-data ownership for the synced files.
+    read_only: true
+    tmpfs:
+      - /tmp:size=32M
+    volumes:
+      - public-data:/mnt/public-data
+    # Must override ENTRYPOINT too — the image entrypoint waits for mysql
+    # and would never let a one-shot init complete.
+    entrypoint: ["sh", "-c"]
+    command:
+      - cp -a /var/www/html/public/. /mnt/public-data/ && echo "public-data volume synced"
+    restart: "no"
+
   openresty:
     volumes:
       - public-data:/var/www/html/public:ro
       - storage-data:/var/www/html/storage:ro
       - attachments-data:/var/www/html/attachments:ro
       - torrents-data:/var/www/html/torrents:ro
+    depends_on:
+      assets-init:
+        condition: service_completed_successfully
     # No bind-mount of source — openresty reads static files from the php image's
     # public/ via a shared named volume (public-data), populated from the PHP
     # image on first mount. Site templates, lua, and nginx.conf are baked in.

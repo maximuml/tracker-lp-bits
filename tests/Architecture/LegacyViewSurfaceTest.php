@@ -43,10 +43,10 @@ final class LegacyViewSurfaceTest extends TestCase
     private const BASELINE_RAW_OUTPUT = 216;
 
     /** Baseline: @php directives in views. */
-    private const BASELINE_PHP_BLOCKS = 230;
+    private const BASELINE_PHP_BLOCKS = 214;
 
     /** Baseline: \App\Support\Html:: static calls in views. */
-    private const BASELINE_HTML_CALLS = 178;
+    private const BASELINE_HTML_CALLS = 162;
 
     /** Baseline: <table> elements (layout tables, not data tables). */
     private const BASELINE_TABLE_TAGS = 222;

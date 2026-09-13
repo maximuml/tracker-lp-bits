@@ -6,6 +6,7 @@ namespace Tests\Unit\Repositories;
 
 use App\Models\User;
 use App\Repositories\InfoRepository;
+use App\Support\Globals;
 use App\Support\Settings;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
@@ -37,7 +38,7 @@ final class InfoRepositoryTest extends TestCase
         DB::table('faq')->delete();
         DB::table('rules')->delete();
         Settings::resetCache();
-        $this->repository = new InfoRepository;
+        $this->repository = new InfoRepository(new Globals);
     }
 
     protected function tearDown(): void

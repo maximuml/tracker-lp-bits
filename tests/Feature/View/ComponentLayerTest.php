@@ -255,13 +255,13 @@ final class ComponentLayerTest extends TestCase
 
     // --- settings row components (W7-02) ---------------------------------
 
-    public function test_settings_row_escapes_label_and_keeps_legacy_classes(): void
+    public function test_settings_row_renders_label_as_trusted_html_and_keeps_legacy_classes(): void
     {
-        $html = $this->render('<x-settings-row :label="$l"><input name="x"></x-settings-row>', ['l' => 'Row <b>x</b>']);
+        $html = $this->render('<x-settings-row :label="$l"><input name="x"></x-settings-row>', ['l' => 'Row&nbsp;<b>x</b>']);
 
         $this->assertStringContainsString('class="rowhead nowrap"', $html);
         $this->assertStringContainsString('class="rowfollow"', $html);
-        $this->assertStringContainsString('Row &lt;b&gt;x&lt;/b&gt;', $html);
+        $this->assertStringContainsString('Row&nbsp;<b>x</b>', $html);
         $this->assertStringContainsString('<input name="x">', $html);
     }
 

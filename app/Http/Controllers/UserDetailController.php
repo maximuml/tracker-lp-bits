@@ -14,20 +14,26 @@ use App\Models\User;
 use App\Models\UserMeta;
 use App\Repositories\HitAndRunRepository;
 use App\Repositories\UserDetailRepository;
+use App\Support\AssetAppender;
 use App\Support\Bonus;
 use App\Support\Country;
 use App\Support\CurrentUser;
 use App\Support\Env;
+use App\Support\Format;
 use App\Support\Globals;
 use App\Support\LegacyResponse;
+use App\Support\LegacyYesNo;
 use App\Support\Locale;
+use App\Support\Medal;
 use App\Support\Network;
 use App\Support\Permissions;
 use App\Support\Strings;
 use App\Support\Url;
+use App\Support\UserClass;
 use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\View\View;
 
 class UserDetailController extends Controller
@@ -121,8 +127,13 @@ class UserDetailController extends Controller
         $canViewConfidential = Permission::can(PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO);
         $canViewHistory = Permission::can(PermissionEnum::VIEW_USER_HISTORY);
         $canManageBasic = Permission::can(PermissionEnum::MANAGE_USER_BASIC_INFO);
+        $canManageConfidential = Permission::can(PermissionEnum::MANAGE_USER_CONFIDENTIAL_INFO);
         $canDeleteUser = Permission::can(PermissionEnum::USER_DELETE);
+        $canViewTorrentHistory = Permission::can(PermissionEnum::TORRENT_HISTORY);
+        $canChangeClass = Permission::can(PermissionEnum::USER_CHANGE_CLASS);
+        $canViewInvite = Permission::can(PermissionEnum::VIEW_INVITE);
         $staffMember = Permission::can(PermissionEnum::STAFF_MEMBER);
+        $currentClass = (int) UserDisplay::currentClass();
 
         $isFriend = $currentUserId > 0 ? $this->userDetailRepository->isFriend($currentUserId, $id) : false;
         $currentUserBlockedTarget = $currentUserId > 0 ? $this->userDetailRepository->isBlocked($currentUserId, $id) : false;
@@ -144,8 +155,13 @@ class UserDetailController extends Controller
         $countryHtml = '<img src="pic/flag/'.htmlspecialchars((string) ($countryRow['flagpic'] ?? '')).'" alt="'.htmlspecialchars((string) ($countryRow['name'] ?? '')).'" style="margin-left: 8pt" />';
 
         $locationInfo = [null, null];
-        if ($this->globals->get('enablelocation_tweak', '') === 'yes' && ! empty($user['ip'])) {
-            $locationInfo = Network::ipLocationWithContext($user['ip']);
+        $locationInfoHtml = '';
+        if ($this->globals->get('enablelocation_tweak', '') === 'yes') {
+            if (! empty($user['ip'])) {
+                $locationInfo = Network::ipLocationWithContext($user['ip']);
+            }
+            $locationInfoHtml = '<span title="'.htmlspecialchars((string) $locationInfo[1]).'">['
+                .htmlspecialchars((string) $locationInfo[0]).']</span>';
         }
 
         $peerRows = $this->userDetailRepository->getPeers($id);
@@ -177,10 +193,100 @@ class UserDetailController extends Controller
         $userManageSystemUrl = sprintf('%s/%s/user/users/%s', Url::schemeAndHost(false), Env::get('FILAMENT_PATH', 'nexusphp'), $user['id']);
 
         $langDetails = (array) $this->globals->get('lang_userdetails', []);
+        $langFunctions = (array) $this->globals->get('lang_functions', []);
+        $userManageSystemText = sprintf(
+            '<a href="%s" target="_blank" class="altlink">%s</a>',
+            $userManageSystemUrl,
+            $langFunctions['text_management_system'] ?? ''
+        );
+        $migratedHelp = '&nbsp;&nbsp;'.sprintf(
+            $langDetails['change_field_value_migrated'] ?? '%s',
+            $userManageSystemText
+        );
 
         $usernameHtml = UserDisplay::username($user['id'], true, false);
         $invitedByHtml = $user['invited_by'] > 0 ? UserDisplay::username($user['invited_by']) : '';
         $avatarHtml = $user['avatar'] ? UserDisplay::avatarImageWithContext(htmlspecialchars(trim((string) $user['avatar']))) : '';
+
+        $medalImagesHtml = '';
+        if ($userModel instanceof User && $userModel->valid_medals->isNotEmpty()) {
+            $medalImagesHtml = Medal::buildImages($userModel->valid_medals, 120, $currentUserId === (int) $user['id']);
+            AssetAppender::js(<<<'JS'
+document.getElementById('save-user-medal-btn').addEventListener("click", function (e) {
+    var form = this.closest('form');
+    var data = serializeForm(form);
+    nativePost('ajax.php', {params: data, action: 'saveUserMedal'}, function (response) {
+        console.log(response)
+        if (response.ret != 0) {
+            layer.alert(response.msg)
+        } else {
+            window.location.reload()
+        }
+    })
+})
+JS, 'footer', false);
+        }
+
+        $joinWeeks = '';
+        if ($user['added'] !== null && $user['added'] !== '0000-00-00 00:00:00' && $userModel instanceof User) {
+            $joinWeeks = number_format(abs(Carbon::parse((string) $user['added'])->diffInWeeks()), 1).Locale::trans('nexus.time_units.week', [], null);
+        }
+
+        $shareRatio = null;
+        $trueRatio = null;
+        $trueDownload = (float) ($trueTraffic['downloaded'] ?? 0);
+        $trueUpload = (float) ($trueTraffic['uploaded'] ?? 0);
+        if ((float) $user['downloaded'] > 0 && $trueDownload > 0) {
+            $shareRatio = floor($user['uploaded'] / $user['downloaded'] * 1000) / 1000;
+            $trueRatio = floor($trueUpload / $trueDownload * 1000) / 1000;
+        }
+
+        $seedLeechRatio = null;
+        if ((float) ($user['leechtime'] ?? 0) > 0) {
+            $seedLeechRatio = floor($user['seedtime'] / $user['leechtime'] * 1000) / 1000;
+        }
+
+        $warned = LegacyYesNo::isYes($user['warned'] ?? null);
+        $leechwarn = LegacyYesNo::isYes($user['leechwarn'] ?? null);
+        $lastwarnedTs = ($user['lastwarned'] ?? null) !== null && $user['lastwarned'] !== ''
+            ? strtotime((string) $user['lastwarned'])
+            : false;
+        $elapsedLastWarn = $lastwarnedTs !== false ? Format::getElapsedTime($lastwarnedTs) : '';
+        $warnedUntilPretty = null;
+        $warnedUntilTs = $warned && ($user['warneduntil'] ?? null) !== null && $user['warneduntil'] !== '0000-00-00 00:00:00'
+            ? strtotime((string) $user['warneduntil'])
+            : false;
+        if ($warnedUntilTs !== false) {
+            $warnedUntilPretty = Format::prettyTimeWithLocale($warnedUntilTs - time());
+        }
+        $leechwarnUntilPretty = null;
+        $leechwarnUntilTs = $leechwarn ? strtotime((string) $user['leechwarnuntil']) : false;
+        if ($leechwarnUntilTs !== false) {
+            $leechwarnUntilPretty = Format::prettyTimeWithLocale($leechwarnUntilTs - time());
+        }
+        if ($leechwarn) {
+            AssetAppender::js(sprintf(<<<'JS'
+document.getElementById('remove-leech-warn').addEventListener('click', function () {
+    if (!window.confirm(%s)) {
+        return
+    }
+    var params = {action: 'removeUserLeechWarn', params: {uid: this.getAttribute('data-uid')}}
+    nativePost('ajax.php', params, function (response) {
+        console.log(response)
+        if (response.ret == 0) {
+            location.reload()
+        } else {
+            alert(response.msg)
+        }
+    })
+})
+JS, \json_encode($langDetails['sure_to_remove_leech_warn'] ?? '')), 'footer', false);
+        }
+
+        $classSelectHtml = '';
+        if ($canChangeClass) {
+            $classSelectHtml = UserClass::classSelectWithContext('class', $currentClass - 1, (int) $user['class'], 0, false, true);
+        }
 
         $warnedByHtml = '';
         if (($user['timeswarned'] ?? 0) > 0 && $user['warnedby'] !== 'System') {
@@ -222,9 +328,22 @@ document.body.addEventListener("click", function (e) {
 JS;
         }
 
+        AssetAppender::js(<<<JS
+document.body.addEventListener("click", function (e) {
+    if (!e.target || !e.target.matches || !e.target.matches(".nexus-pagination a")) return;
+    e.preventDefault()
+    var link = e.target
+    var box = link.closest("[data-type]")
+    var type = box.getAttribute("data-type");
+    var url = link.getAttribute("href") + "&userid={$user['id']}&type=" + type;
+    var result = ajax.gets(url);
+    box.innerHTML = result
+})
+$claimJs
+JS, 'footer', false);
+
         $metas = $this->userRepository->listMetas($id);
         $userPropsHtml = '';
-        $consumeChangeUsernameJs = '';
         $consumeChangeUsernameForm = '';
         $triggerId = '';
         $props = [];
@@ -254,7 +373,7 @@ JS;
 </form>
 </div>
 HTML;
-                $consumeChangeUsernameJs = <<<JS
+                AssetAppender::js(<<<JS
 document.getElementById('{$triggerId}').addEventListener("click", function () {
     layer.open({
         type: 1,
@@ -277,7 +396,7 @@ document.getElementById('{$triggerId}').addEventListener("click", function () {
         }
     })
 })
-JS;
+JS, 'footer', false);
             }
         }
 
@@ -302,7 +421,12 @@ JS;
             'canViewConfidential' => $canViewConfidential,
             'canViewHistory' => $canViewHistory,
             'canManageBasic' => $canManageBasic,
+            'canManageConfidential' => $canManageConfidential,
             'canDeleteUser' => $canDeleteUser,
+            'canViewTorrentHistory' => $canViewTorrentHistory,
+            'canChangeClass' => $canChangeClass,
+            'canViewInvite' => $canViewInvite,
+            'currentClass' => $currentClass,
             'isFriend' => $isFriend,
             'currentUserBlockedTarget' => $currentUserBlockedTarget,
             'targetBlockedMe' => $targetBlockedMe,
@@ -310,8 +434,23 @@ JS;
             'showPmButton' => $showPmButton,
             'countryHtml' => $countryHtml,
             'locationInfo' => $locationInfo,
+            'locationInfoHtml' => $locationInfoHtml,
             'clientSelectHtml' => $clientSelectHtml,
             'trueTraffic' => $trueTraffic,
+            'trueDownload' => $trueDownload,
+            'trueUpload' => $trueUpload,
+            'shareRatio' => $shareRatio,
+            'trueRatio' => $trueRatio,
+            'seedLeechRatio' => $seedLeechRatio,
+            'joinWeeks' => $joinWeeks,
+            'medalImagesHtml' => $medalImagesHtml,
+            'warned' => $warned,
+            'leechwarn' => $leechwarn,
+            'elapsedLastWarn' => $elapsedLastWarn,
+            'warnedUntilPretty' => $warnedUntilPretty,
+            'leechwarnUntilPretty' => $leechwarnUntilPretty,
+            'classSelectHtml' => $classSelectHtml,
+            'migratedHelp' => $migratedHelp,
             'userManageSystemUrl' => $userManageSystemUrl,
             'usernameHtml' => $usernameHtml,
             'invitedByHtml' => $invitedByHtml,
@@ -320,10 +459,7 @@ JS;
             'bonusTableHtml' => $bonusTableHtml,
             'hrStatusHtml' => $hrStatusHtml,
             'ipHistoryCount' => $ipHistoryCount,
-            'claimJs' => $claimJs,
-            'claimAllSeedingConfirmation' => $claimAllSeedingConfirmation,
             'userPropsHtml' => $userPropsHtml,
-            'consumeChangeUsernameJs' => $consumeChangeUsernameJs,
             'consumeChangeUsernameForm' => $consumeChangeUsernameForm,
             'triggerId' => $triggerId,
         ];

@@ -35,6 +35,13 @@ return new class extends Migration
         // Step 1: Clean orphan rows
         // ──────────────────────────────────────────────────────────────
 
+        // Columns receiving NULL orphan values must be made nullable first —
+        // they are NOT NULL in the previous-release schema and the updates
+        // below fail on real data otherwise.
+        DB::statement('ALTER TABLE `exam_progress` MODIFY `torrent_id` MEDIUMINT UNSIGNED NULL DEFAULT NULL');
+        DB::statement('ALTER TABLE `messages` MODIFY `sender` BIGINT UNSIGNED NULL DEFAULT NULL');
+        DB::statement('ALTER TABLE `posts` MODIFY `editedby` BIGINT UNSIGNED NULL DEFAULT NULL');
+
         // comments.user=2 → user does not exist, set to 0 (anonymous)
         DB::table('comments')
             ->whereNotIn('user', function ($q) {
@@ -68,13 +75,13 @@ return new class extends Migration
             'thanks' => ['userid'],
             'friends' => ['userid', 'friendid'],
             'blocks' => ['userid', 'blockid'],
-            'posts' => ['userid', 'editedby'],
+            'posts' => ['userid'],
             'topics' => ['userid'],
             'readposts' => ['userid'],
             'pollanswers' => ['userid'],
             'offervotes' => ['userid'],
             'iplog' => ['userid'],
-            'messages' => ['sender', 'receiver'],
+            'messages' => ['receiver'],
             'news' => ['userid'],
             'offers' => ['userid'],
             'user_passkeys' => ['user_id'],
@@ -122,9 +129,6 @@ return new class extends Migration
             }
         }
 
-        // exam_progress.torrent_id: int → mediumint unsigned, make nullable
-        DB::statement('ALTER TABLE `exam_progress` MODIFY `torrent_id` MEDIUMINT UNSIGNED NULL DEFAULT NULL');
-
         // tags.id = bigint unsigned → torrent_tags.tag_id: int → bigint unsigned
         DB::statement('ALTER TABLE `torrent_tags` MODIFY `tag_id` BIGINT UNSIGNED NOT NULL DEFAULT 0');
 
@@ -144,12 +148,8 @@ return new class extends Migration
         // shoutbox.id = int → shoutbox_reactions.shoutbox_id: int unsigned → int
         DB::statement('ALTER TABLE `shoutbox_reactions` MODIFY `shoutbox_id` INT NOT NULL DEFAULT 0');
 
-        // messages.sender: make nullable (for system messages with NULL sender)
-        DB::statement('ALTER TABLE `messages` MODIFY `sender` BIGINT UNSIGNED NULL DEFAULT NULL');
-
-        // posts.editedby: make nullable (for SET NULL FK, 0 → NULL)
+        // posts.editedby=0 → NULL (column was made nullable in Step 1)
         DB::table('posts')->where('editedby', 0)->update(['editedby' => null]);
-        DB::statement('ALTER TABLE `posts` MODIFY `editedby` BIGINT UNSIGNED NULL DEFAULT NULL');
 
         // ──────────────────────────────────────────────────────────────
         // Step 3: Add foreign keys with ON DELETE CASCADE / SET NULL

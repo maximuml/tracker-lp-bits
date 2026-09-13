@@ -1,5 +1,33 @@
 # Release Notes
 
+## Release process & migration policy
+
+- **Cadence:** releases are tagged `v*` (e.g. `v2.0.1`). A tag is cut when a
+  wave of work is merged and green on `php8`; there is no fixed calendar —
+  each tag must leave `php8` in a deployable state.
+- **Previous-release fixture:** CI job `migrations` upgrades a database
+  snapshot of the previous tag to HEAD. After tagging a release `vX.Y.Z`,
+  regenerate the fixture from a database fully migrated **at that tag**:
+
+  ```bash
+  mysqldump -u nexusphp --single-transaction --no-tablespaces \
+    --set-gtid-purged=OFF --skip-comments nexusphp \
+    > database/schema/vX.Y.Z.mysql.sql
+  ```
+
+  then update `PREVIOUS_RELEASE` in `.github/workflows/ci.yml` (`migrations`
+  job env). The job fails fast if the snapshot file is missing, so a stale
+  pointer can never silently pass.
+- **Expand/contract rules:** never edit a migration that shipped in a tag —
+  shipped migrations are immutable. Add columns/tables in a new migration
+  (expand), migrate data, and drop old structures in a later release
+  (contract) once all supported upgrade paths have passed it. Data-writing
+  migrations must be idempotent and must make columns nullable *before*
+  writing `NULL` into them.
+- **Upgrade command:** `php artisan nexus:update` (used by `demo.yml`)
+  runs `migrate` against the existing database — the CI `migrations` job
+  mirrors exactly this path.
+
 ## Highlights
 
 This release ships the shoutbox modernization, MeiliSearch-by-default, setlist lookup on upload, and several runtime hardening fixes across the `php8` branch.

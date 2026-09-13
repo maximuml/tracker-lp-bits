@@ -99,11 +99,10 @@ elif [ "$SERVICE_NAME" = "scheduler" ]; then
     echo_success "Production config validated."
 
     echo_info "Start Scheduler..."
-    while true; do
-        echo_success "[Scheduler] Running schedule:run at $(date '+%Y-%m-%d %H:%M:%S')"
-        php artisan schedule:run --verbose --no-interaction 2>&1
-        sleep 60
-    done
+    # exec + schedule:work = foreground minute-ticker as PID 1, so SIGTERM
+    # stops the scheduler between ticks instead of SIGKILLing a mid-flight
+    # schedule:run inside a shell wrapper (which ignores signals as init).
+    exec php artisan schedule:work --verbose --no-interaction
 
 else
     echo_error "Unknown SERVICE_NAME: $SERVICE_NAME, exiting."

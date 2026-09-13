@@ -14,6 +14,10 @@ services:
         NEXUSPHP_ENV: dev
     image: nexusphp_php
     container_name: nexusphp-php
+    # php-fpm treats SIGQUIT as a graceful stop (finishes in-flight requests);
+    # the default SIGTERM cuts them. SIGQUIT + grace window = drained shutdown.
+    stop_signal: SIGQUIT
+    stop_grace_period: 60s
     environment:
       SERVICE_NAME: php
       MEILISEARCH_HOST: ${MEILISEARCH_HOST:-meilisearch}
@@ -41,6 +45,14 @@ services:
   queue:
     image: nexusphp_php
     container_name: nexusphp-queue
+    # The php:fpm base image sets STOPSIGNAL SIGQUIT (right for php-fpm,
+    # wrong for artisan): Horizon only traps SIGTERM/SIGINT, so the image
+    # default would be ignored and docker would SIGKILL after grace.
+    stop_signal: SIGTERM
+    # Horizon drains in-flight jobs on SIGTERM (fast_termination=false).
+    # Grace must cover the longest non-maintenance supervisor timeout (120s)
+    # or docker escalates to SIGKILL and in-flight jobs are requeued mid-run.
+    stop_grace_period: 125s
     user: www-data
     environment:
       SERVICE_NAME: queue
@@ -71,6 +83,12 @@ services:
   scheduler:
     image: nexusphp_php
     container_name: nexusphp-scheduler
+    # The php:fpm base image defaults to STOPSIGNAL SIGQUIT which artisan
+    # does not trap — schedule:work must get SIGTERM to exit cleanly.
+    stop_signal: SIGTERM
+    # Grace covers a full schedule:run minute-cycle so a stop does not kill
+    # cron work mid-flight (the entrypoint loops every 60s).
+    stop_grace_period: 70s
     user: www-data
     environment:
       SERVICE_NAME: scheduler
@@ -103,6 +121,10 @@ services:
       dockerfile: .docker/openresty/Dockerfile
     image: nexusphp_openresty
     container_name: nexusphp-openresty
+    # nginx treats SIGQUIT as graceful (finishes in-flight connections);
+    # SIGTERM is a fast shutdown that drops keepalives mid-request.
+    stop_signal: SIGQUIT
+    stop_grace_period: 30s
     environment:
       NP_DOMAIN: ${NP_DOMAIN:-localhost}
       NP_PORT: ${NP_PORT:-80}

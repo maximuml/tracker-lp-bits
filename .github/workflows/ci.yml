@@ -104,6 +104,20 @@ jobs:
           fi
           echo "OK: raw SQL query count ($TOTAL) <= baseline ($BASELINE_COUNT)"
 
+  supply-chain-pins:
+    name: Supply-chain pin ratchet
+    runs-on: ubuntu-latest
+    # W8-05: new third-party material must not enter unpinned — actions by
+    # SHA, base images by digest, tool packages by version, no runtime
+    # downloads in entrypoints. Cheap grep gate, blocks every PR.
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Check supply-chain pins
+        run: bash scripts/ci/check-supply-chain-pins.sh
+
   migrations:
     name: Migration upgrade (previous release → HEAD)
     runs-on: ubuntu-latest
@@ -1631,3 +1645,95 @@ jobs:
         if: always()
         run: |
           docker compose down -v --remove-orphans || true
+
+  publish-images:
+    name: Publish + sign production images
+    runs-on: ubuntu-latest
+    needs: [prod-compose-smoke, backup-restore, deploy-graceful]
+    # W8-05: only merge-proven images get published and signed — the job
+    # runs after all three heavy prod gates pass on the merge push.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/php8'
+    permissions:
+      contents: read
+      packages: write      # push to ghcr.io
+      id-token: write      # cosign keyless OIDC
+      attestations: write  # build-provenance attestations
+    timeout-minutes: 30
+    env:
+      REGISTRY: ghcr.io
+      # ghcr.io/<owner>/<repo>/php and .../openresty
+      IMAGE_NS: ghcr.io/${{ github.repository }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+
+      - name: Log in to GHCR
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build + push production images
+        run: |
+          set -euo pipefail
+          NS=$(echo "$IMAGE_NS" | tr '[:upper:]' '[:lower:]')
+          SHORT=${GITHUB_SHA::7}
+          OCI_LABELS="--label org.opencontainers.image.source=https://github.com/${GITHUB_REPOSITORY} \
+                      --label org.opencontainers.image.revision=${GITHUB_SHA}"
+
+          docker build -f .docker/php/Dockerfile.prod \
+            --build-arg NEXUSPHP_ENV=prod \
+            $OCI_LABELS \
+            -t "${NS}/php:sha-${SHORT}" -t "${NS}/php:latest" .
+
+          docker build -f .docker/openresty/Dockerfile \
+            $OCI_LABELS \
+            -t "${NS}/openresty:sha-${SHORT}" -t "${NS}/openresty:latest" .
+
+          docker push "${NS}/php:sha-${SHORT}"
+          docker push "${NS}/php:latest"
+          docker push "${NS}/openresty:sha-${SHORT}"
+          docker push "${NS}/openresty:latest"
+
+          # RepoDigests on the local image is populated by `docker push`.
+          PHP_DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "${NS}/php:sha-${SHORT}" | cut -d@ -f2)
+          OPENRESTY_DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "${NS}/openresty:sha-${SHORT}" | cut -d@ -f2)
+          [ -n "$PHP_DIGEST" ] && [ -n "$OPENRESTY_DIGEST" ] || { echo "digest resolution failed"; exit 1; }
+          echo "php-digest=${PHP_DIGEST}" >> "$GITHUB_OUTPUT"
+          echo "openresty-digest=${OPENRESTY_DIGEST}" >> "$GITHUB_OUTPUT"
+          echo "image-ns=${NS}" >> "$GITHUB_OUTPUT"
+          echo "PHP_IMAGE_REF=${NS}/php@${PHP_DIGEST}" >> "$GITHUB_ENV"
+          echo "OPENRESTY_IMAGE_REF=${NS}/openresty@${OPENRESTY_DIGEST}" >> "$GITHUB_ENV"
+        id: build
+
+      - name: Sign image digests (keyless)
+        run: |
+          cosign sign --yes "${PHP_IMAGE_REF}"
+          cosign sign --yes "${OPENRESTY_IMAGE_REF}"
+
+      - name: Attest build provenance (php)
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-name: ${{ steps.build.outputs.image-ns }}/php
+          subject-digest: ${{ steps.build.outputs.php-digest }}
+          push-to-registry: true
+
+      - name: Attest build provenance (openresty)
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-name: ${{ steps.build.outputs.image-ns }}/openresty
+          subject-digest: ${{ steps.build.outputs.openresty-digest }}
+          push-to-registry: true
+
+      # Round-trip: the exact verification operators run in verify-image.sh
+      # must succeed against what we just pushed — a signature nobody can
+      # verify is worse than none.
+      - name: Verify signatures round-trip
+        run: |
+          bash scripts/verify-image.sh "${PHP_IMAGE_REF}"
+          bash scripts/verify-image.sh "${OPENRESTY_IMAGE_REF}"

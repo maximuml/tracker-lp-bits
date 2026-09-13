@@ -47,8 +47,8 @@ COPY --from=builder /usr/local/etc/php/conf.d/ /usr/local/etc/php/conf.d/
 
 # 安装运行时所需依赖
 RUN apk add --no-cache \
-    wget \
-    rsync \
+    wget~=1.25 \
+    rsync~=3.5 \
     libzip \
     libpng \
     libjpeg-turbo \
@@ -58,9 +58,9 @@ RUN apk add --no-cache \
     libxml2 \
     gmp \
     oniguruma \
-    git \
-    mysql-client \
-    mariadb-connector-c
+    git~=2.54 \
+    mysql-client~=11.8 \
+    mariadb-connector-c~=3.4
 
 # Upgrade curl/libcurl past the pinned base image (8.21.0-r0 has
 # CVE-2026-82209/-80229/-80230/-80255/-13608/-18924/-19931).

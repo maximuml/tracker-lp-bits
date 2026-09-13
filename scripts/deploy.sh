@@ -19,21 +19,61 @@
 # jobs, drained connections, readiness-gated return — not zero downtime.
 # True zero-downtime needs a second php backend (blue-green).
 #
-# Usage: scripts/deploy.sh [--skip-build]
+# Usage:
+#   scripts/deploy.sh [--skip-build]
+#   scripts/deploy.sh --image ghcr.io/<owner>/<repo>/php[:tag|@digest]
+#                     [--openresty-image <ref>] [--skip-verify]
+#
+# W8-05 registry deploy: --image pulls a signed image instead of building.
+# The cosign signature is verified first (scripts/verify-image.sh) and the
+# verified DIGEST is what gets pulled — a tag could be re-pointed after
+# signing. Requires cosign unless --skip-verify (local testing only).
+#
 # Rollback: re-tag the previous image (`docker tag <prev-digest>
 # nexusphp_php:prod`) or `git checkout <prev-tag>` + rerun this script.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
 SKIP_BUILD=0
-[ "${1:-}" = "--skip-build" ] && SKIP_BUILD=1
+IMAGE_REF=""
+OPENRESTY_REF=""
+SKIP_VERIFY=0
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --skip-build) SKIP_BUILD=1 ;;
+        --image) IMAGE_REF="${2:?--image needs a ref}"; shift ;;
+        --openresty-image) OPENRESTY_REF="${2:?--openresty-image needs a ref}"; shift ;;
+        --skip-verify) SKIP_VERIFY=1 ;;
+        *) echo "unknown arg: $1" >&2; exit 2 ;;
+    esac
+    shift
+done
+[ -z "$IMAGE_REF" ] || SKIP_BUILD=1
 
 dc() { docker compose "$@"; }
 step() { echo; echo "=== $* ==="; }
 fail() { echo "FAIL: $*" >&2; exit 1; }
 
+verify_pull() {  # $1=registry ref $2=local compose image name
+    local ref="$1" local_name="$2" pull_ref="$1"
+    if [ "$SKIP_VERIFY" = "0" ]; then
+        pull_ref=$(bash scripts/verify-image.sh "$ref" | awk -F= '/^VERIFIED_REF=/{print $2}')
+        [ -n "$pull_ref" ] || fail "signature verification produced no digest for $ref"
+    else
+        echo "WARNING: --skip-verify — pulling unverified $ref"
+    fi
+    docker pull "$pull_ref"
+    docker tag "$pull_ref" "$local_name"
+    echo "deploying $local_name <- $pull_ref"
+}
+
 step "1/7 Build images"
-if [ "$SKIP_BUILD" = "0" ]; then
+if [ -n "$IMAGE_REF" ]; then
+    PREV_IMAGE=$(docker image inspect nexusphp_php:prod --format '{{.Id}}' 2>/dev/null || true)
+    echo "Previous image (rollback target): ${PREV_IMAGE:-none}"
+    verify_pull "$IMAGE_REF" nexusphp_php:prod
+    [ -z "$OPENRESTY_REF" ] || verify_pull "$OPENRESTY_REF" nexusphp_openresty
+elif [ "$SKIP_BUILD" = "0" ]; then
     PREV_IMAGE=$(docker image inspect nexusphp_php:prod --format '{{.Id}}' 2>/dev/null || true)
     echo "Previous image (rollback target): ${PREV_IMAGE:-none}"
     dc build php

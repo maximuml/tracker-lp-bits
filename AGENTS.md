@@ -249,6 +249,28 @@ Decision → Consequences). Add new ADRs here as numbered subsections.
   registry line instead of growing the controller. Cost: eleven more
   classes under `app/Support/Metrics/`.
 
+### ADR 0009: GHCR publish + keyless cosign signing (Accepted, W8-05)
+
+- **Context:** Production images were built locally on each deploy host
+  and never published; the earlier cosign job was removed (PR #722)
+  because signing local-only images is unverifiable. Without a registry
+  there is no artifact identity to attest, and deploys can't prove the
+  bytes they run match what CI tested.
+- **Decision:** The `publish-images` job runs after the three prod gates
+  on merge pushes to `php8`: it builds `Dockerfile.prod` + openresty,
+  pushes `ghcr.io/<repo>/{php,openresty}` as `sha-<short>` + `latest`,
+  signs both digests with cosign keyless (workflow OIDC identity, no
+  private key to leak), attaches SLSA build-provenance attestations, then
+  verifies the round-trip with `scripts/verify-image.sh` — the same
+  script operators run. `deploy.sh --image` pulls the *verified digest*.
+  `check-supply-chain-pins.sh` ratchets pins (SHA actions, digest base
+  images, versioned tools, no runtime downloads).
+- **Consequences:** Deploys can verify image provenance; rollback by
+  digest is trivial. Cost: GHCR packages are private (repo is private)
+  so deploy hosts need `docker login`; `latest` is a convenience tag —
+  deploys should use `sha-*` tags or digests. Keyless signatures depend
+  on Fulcio/Rekor availability at verify time.
+
 ## Testing
 
 - **Unit tests:** `tests/Unit/` — support classes, repositories, services

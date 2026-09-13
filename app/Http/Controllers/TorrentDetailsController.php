@@ -18,6 +18,7 @@ use App\Models\TorrentOperationLog;
 use App\Models\User;
 use App\Repositories\TorrentDetailRepository;
 use App\Repositories\TorrentModerationRepository;
+use App\Support\AssetAppender;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
@@ -25,10 +26,12 @@ use App\Support\CustomField;
 use App\Support\Format;
 use App\Support\Globals;
 use App\Support\Input;
+use App\Support\LegacyYesNo;
 use App\Support\Locale;
 use App\Support\Logger;
 use App\Support\Promotion;
 use App\Support\Strings;
+use App\Support\Time;
 use App\Support\Torrent\BdInfoExtra;
 use App\Support\Torrent\TechnicalInformation;
 use App\Support\TorrentAccess;
@@ -160,6 +163,7 @@ class TorrentDetailsController extends Controller
         $viewData = $this->buildDetailsViewData($id, $row, $currentUser, $user, $denyLog, $hasBuy, $tagIds, $requestFlags);
 
         return response()->view('torrent.details', array_merge([
+            'id' => $id,
             'torrentId' => $id,
             'torrentRow' => $row,
             'user' => $user,
@@ -271,6 +275,184 @@ class TorrentDetailsController extends Controller
         $descr = ! empty($row['descr']) ? Format::formatComment((string) $row['descr']) : '';
         $bonusOptions = Setting::getBonusRewardOptions();
 
+        $isOwner = (int) $currentUser['id'] === (int) ($row['owner'] ?? 0);
+        $owned = Permission::can(PermissionEnum::TORRENT_MANAGE) || $isOwner;
+        $downloadAllowed = $isOwner || ! LegacyYesNo::isNo($currentUser['downloadpos'] ?? null);
+
+        $uploadTime = ($currentUser['timetype'] ?? '') !== 'timealive'
+            ? ($langDetails['text_at'] ?? '').$row['added']
+            : ($langDetails['text_blank'] ?? '').Time::format((string) $row['added'], true, false);
+
+        $denyBannerHtml = '';
+        if (($row['approval_status'] ?? null) == TorrentApprovalStatus::DENY->value && $denyLog !== null) {
+            $dangerIcon = '<svg t="1655242121471" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="46590" width="16" height="16"><path d="M963.555556 856.888889a55.978667 55.978667 0 0 1-55.978667 56.007111c-0.284444 0-0.540444-0.085333-0.824889-0.085333l-0.056889 0.085333H110.734222l-0.654222-1.137778A55.409778 55.409778 0 0 1 56.888889 856.462222c0-9.756444 2.730667-18.773333 7.139555-26.737778l-3.726222-6.599111L453.461333 156.302222A59.335111 59.335111 0 0 1 510.236444 113.777778c26.936889 0 49.436444 18.005333 56.803556 42.552889l389.973333 661.447111-3.669333 6.997333c6.4 9.102222 10.211556 20.138667 10.211556 32.113778z m-497.777778-541.326222l16.014222 312.888889h56.888889l16.014222-312.888889h-88.917333z m44.458666 398.222222a56.888889 56.888889 0 1 0-0.028444 113.749333 56.888889 56.888889 0 0 0 0.028444-113.749333z" p-id="46591" fill="#d81e06" data-spm-anchor-id="a313x.7781069.0.i61" class="selected"></path></svg>';
+            $denyBannerHtml = sprintf(
+                '<div class="nx-flex-center" style="margin-bottom: 10px"><div style="background-color: black; color: white;font-weight: bold; padding: 10px 100px">%s&nbsp;%s</div></div>',
+                $dangerIcon,
+                Locale::trans('torrent.approval.deny_comment_show', ['reason' => $denyLog->comment], null)
+            );
+        }
+
+        $actions = [];
+        if ($downloadAllowed) {
+            if ($row['price'] > 0) {
+                $downloadBtn = $hasBuy
+                    ? $langDetails['text_download_bought_torrent']
+                    : sprintf($langDetails['text_download_paid_torrent'], number_format((float) $row['price']));
+            } else {
+                $downloadBtn = $langDetails['text_download_torrent'];
+            }
+            $actions[] = sprintf(
+                '<a title="%s" href="download.php?id=%s"><img class="dt_download" src="pic/trans.gif" alt="download" />&nbsp;<b><font class="small">%s</font></b></a>',
+                $langDetails['title_download_torrent'],
+                $id,
+                $downloadBtn
+            );
+        }
+        if ($owned) {
+            $actions[] = sprintf(
+                '<a title="%s" href="%s"><img class="dt_edit" src="pic/trans.gif" alt="edit" />&nbsp;<b><font class="small">%s</font></b></a>',
+                $langDetails['title_edit_torrent'],
+                $editUrl,
+                Permission::can(PermissionEnum::TORRENT_MANAGE)
+                    ? $langDetails['text_edit_and_delete_torrent']
+                    : $langDetails['text_edit_torrent']
+            );
+        }
+        if (Permission::can(PermissionEnum::ASK_RESEED) && (int) $row['seeders'] === 0) {
+            $actions[] = sprintf(
+                '<a title="%s" href="takereseed.php?reseedid=%s"><img class="dt_reseed" src="pic/trans.gif" alt="reseed">&nbsp;<b><font class="small">%s</font></b></a>',
+                $langDetails['title_ask_for_reseed'],
+                $id,
+                $langDetails['text_ask_for_reseed']
+            );
+        }
+        if (
+            Permission::can(PermissionEnum::TORRENT_APPROVAL)
+            && (SiteConfig::current()->torrent->approvalStatusIconEnabled() || ! SiteConfig::current()->torrent->approvalStatusNoneVisible())
+        ) {
+            $approvalIcon = '<svg t="1655224943277" class="icon" viewBox="0 0 1397 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="45530" width="16" height="16"><path d="M1396.363636 121.018182c0 0-223.418182 74.472727-484.072727 372.363636-242.036364 269.963636-297.890909 381.672727-390.981818 530.618182C512 1014.690909 372.363636 744.727273 0 549.236364l195.490909-186.181818c0 0 176.872727 121.018182 297.890909 344.436364 0 0 307.2-474.763636 902.981818-707.490909L1396.363636 121.018182 1396.363636 121.018182zM1396.363636 121.018182" p-id="45531" fill="#e78d0f"></path></svg>';
+            $actions[] = sprintf(
+                '<a href="#"><b><font id="approval" class="small approval" data-torrent_id="%s">%s&nbsp;%s</font></b></a>',
+                $row['id'],
+                $approvalIcon,
+                $langDetails['action_approval']
+            );
+            $approvalTitle = Locale::trans('torrent.approval.modal_title', [], null);
+            AssetAppender::js(sprintf(<<<'JS'
+document.getElementById('approval').addEventListener("click", function () {
+    var torrentId = this.getAttribute('data-torrent_id')
+    layer.open({
+        type: 2,
+        title: %s,
+        area: ['60%%', '600px'],
+        content: '/web/torrent-approval-page?torrent_id=' + torrentId,
+    })
+})
+JS, \json_encode($approvalTitle)), 'footer', false);
+        }
+        $actions[] = sprintf(
+            '<a title="%s" href="report.php?torrent=%s"><img class="dt_report" src="pic/trans.gif" alt="report" />&nbsp;<b><font class="small">%s</font></b></a>',
+            $langDetails['title_report_torrent'],
+            $id,
+            $langDetails['text_report_torrent']
+        );
+        $actionsHtml = implode('&nbsp;|&nbsp;', $actions);
+
+        $filesInfo = '';
+        if (($row['type'] ?? '') === 'multi') {
+            $filesInfo = sprintf(
+                '<b>%s</b>%s%s<br /><span id="showfl"><a href="#" data-filelist="%s">%s</a></span><span id="hidefl" class="nx-hidden"><a href="#" data-filelist="%s" data-filelist-mode="hide">%s</a></span>',
+                $langDetails['text_num_files'],
+                $row['numfiles'],
+                $langDetails['text_files'],
+                $id,
+                $langDetails['text_see_full_list'],
+                $id,
+                $langDetails['text_hide_list']
+            );
+        }
+        $infoTds = [];
+        if ($filesInfo !== '') {
+            $infoTds[] = '<td class="no_border_wide">'.$filesInfo.'</td>';
+        }
+        $infoTds[] = sprintf(
+            '<td class="no_border_wide"><b>%s:</b>&nbsp;%s</td>',
+            $langDetails['row_info_hash'],
+            bin2hex(Strings::padHash($row['info_hash']))
+        );
+        if (Permission::can(PermissionEnum::TORRENT_STRUCTURE)) {
+            $infoTds[] = sprintf(
+                '<td class="no_border_wide"><b>%s</b><a href="torrent_info.php?id=%s">%s</a></td>',
+                $langDetails['text_torrent_structure'],
+                $id,
+                $langDetails['text_torrent_info_note']
+            );
+        }
+        $torrentInfoRowHtml = '<table><tr>'.implode('', $infoTds).'</tr></table><span id=\'filelist\'></span>';
+
+        $hotMeterHtml = sprintf(
+            '<table><tr><td class="no_border_wide"><b>%s</b>%s</td><td class="no_border_wide"><b>%s</b>%s</td><td class="no_border_wide"><b>%s</b><a href="viewsnatches.php?id=%s"><b>%s%s</td><td class="no_border_wide"><b>%s</b>%s</td></tr></table>',
+            $langDetails['text_views'],
+            $row['views'],
+            $langDetails['text_hits'],
+            $row['hits'],
+            $langDetails['text_snatched'],
+            $id,
+            $row['times_completed'],
+            $langDetails['text_view_snatches'],
+            $langDetails['row_last_seeder'],
+            Time::format((string) $row['last_action'])
+        );
+
+        $peersHeadHtml = sprintf(
+            '<span id="seeders"></span><span id="leechers"></span>%s<br /><span id="showpeer"><a href="#" data-peerlist="%s" class="sublink">%s</a></span><span id="hidepeer" class="nx-hidden"><a href="#" data-peerlist="%s" data-peerlist-mode="hide" class="sublink">%s</a></span>',
+            $langDetails['row_peers'],
+            $row['id'],
+            $langDetails['text_see_full_list'],
+            $row['id'],
+            $langDetails['text_hide_list']
+        );
+        $peersBodyHtml = sprintf(
+            '<div id="peercount"><b>%s%s%s</b> | <b>%s%s%s</b></div><div id="peerlist"></div>',
+            $row['seeders'],
+            $langDetails['text_seeders'],
+            Strings::addS((int) $row['seeders']),
+            $row['leechers'],
+            $langDetails['text_leechers'],
+            Strings::addS((int) $row['leechers'])
+        );
+
+        if ($requestFlags['dllist'] ?? false) {
+            AssetAppender::js(sprintf('viewpeerlist(%s)', (int) $row['id']), 'footer', false);
+        }
+
+        AssetAppender::css(<<<'CSS'
+ul.magic
+{
+    cursor:pointer;
+    list-style-type:none;
+    padding-left:0px;
+}
+ul.magic li
+{
+    margin:0px;text-align:center;float:left;width:40px;margin-right:15px; height:21px;background:url("styles/huise.png") no-repeat;
+    padding-left:5px;padding-right:5px;
+    line-height:20px;
+}
+ul.magic li:hover
+{
+    background:url("styles/boli.png") no-repeat
+}
+CSS, 'header', false);
+
+        $descrHeadHtml = sprintf(
+            '<a href="#" data-klappe="descr"><span class="nowrap"><img class="minus" src="pic/trans.gif" alt="Show/Hide" id="picdescr" title="%s" /> %s</span></a>',
+            $langDetails['title_show_or_hide'] ?? '',
+            $langDetails['row_description']
+        );
+        $showDescription = ! LegacyYesNo::isNo($currentUser['showdescription'] ?? null) && $descr !== '';
+
         $magicInfo = $this->torrentDetailRepository->getMagicInfo($id, (int) $currentUser['id']);
         $thanksInfo = $this->torrentDetailRepository->getThanksInfo($id, (int) $currentUser['id']);
 
@@ -292,6 +474,97 @@ class TorrentDetailsController extends Controller
         }
         $currentUserHtml = UserDisplay::username((int) ($currentUser['id'] ?? 0), false, true, true, false, false, true);
 
+        $magicButtonsInner = '';
+        $bonusHas = (float) ($currentUser['seedbonus'] ?? 0);
+        if (! $isOwner) {
+            if ((int) $bonusHas < (int) ($bonusOptions[0] ?? 0)) {
+                $magicButtonsInner = sprintf(
+                    '<input class="btn" type="button" value="%s" disabled="disabled" />',
+                    $langDetails['magic_have_no_enough_bonus_value']
+                );
+            } else {
+                foreach ($bonusOptions as $key => $eachTemp) {
+                    $eachTemp = (int) $eachTemp;
+                    if ($eachTemp > 0 && $eachTemp <= $bonusHas) {
+                        $magicButtonsInner .= sprintf(
+                            '<li data-torrent-id="%s" data-magic-value="%s" style="cursor:pointer"><font style="font-size:8pt;padding-right:5px;">%s</font></li>',
+                            $id,
+                            $eachTemp,
+                            '+'.$eachTemp
+                        );
+                    }
+                }
+            }
+        }
+        $magicSpan = sprintf(
+            '<input class="btn nx-hidden" type="button" id="magic_add" value="%s" disabled="disabled" />&nbsp;',
+            $langDetails['span_description_have_given']
+        );
+        $giveValue = [];
+        foreach ($magicInfo['givers'] as $giver) {
+            $giveValue[] = ($userDisplayMap[(int) $giver->userid] ?? '').' ';
+        }
+        $magicValueButton = $magicButtonsInner;
+        $lowBonus = ! $isOwner && (int) $bonusHas < (int) ($bonusOptions[0] ?? 0);
+        if (! $lowBonus) {
+            if ((int) $magicInfo['whether_have_give_value'] === 0) {
+                $magicValueButton = '<ul id="listNumber" class="magic">'.$magicValueButton.'</ul>';
+            } else {
+                $addValueText = str_replace('Number', (string) $magicInfo['add_value'], (string) $langDetails['magic_value_number']);
+                $magicValueButton = sprintf('<input class="btn" type="button" value="%s" disabled="disabled" />', $addValueText);
+            }
+        }
+
+        $showList = '';
+        $showAll = '';
+        $otherUserSpan = '';
+        $showListDescription = '';
+        $showListNewNumber = 6;
+        if (count($giveValue) > 0) {
+            $countUserSpan = '<span id="count_user_spa">'.$magicInfo['count_user_number'].'</span>';
+            $newestRecord = '<span id="magic_newest_record">'.$langDetails['magic_newest_record'].'</span>';
+            $showListDescription = str_replace('Number', $countUserSpan, '('.$newestRecord.$langDetails['magic_sum_user_give_number'].')');
+            $showList = implode('', array_map(static fn ($v) => $v.'  ', array_slice($giveValue, 0, $showListNewNumber)));
+            if (count($giveValue) > $showListNewNumber) {
+                $showList .= '<span id="ellipsis">&nbsp;......&nbsp;</span>';
+                $showAll = '<a href="#" id="magic_show_all" style="cursor:pointer">['.$langDetails['magic_show_all_description'].']</a>'.'<br/>';
+                $otherUserSpan = '<span id="other_user_list" class="nx-hidden">'
+                    .implode('', array_map(static fn ($v) => $v.'  ', array_slice($giveValue, $showListNewNumber)))
+                    .'</span>';
+            }
+        }
+        $currentUserMagic = "<span id='current_user_magic' class='nx-hidden'>".$currentUserHtml.'</span>&nbsp;';
+        $haveGotBonus = str_replace(
+            'Number',
+            '<span id="spanSumAll">'.$magicInfo['sum_value'].'</span>',
+            $langDetails['magic_haveGotBonus'].'&nbsp'
+        );
+        $magicRowHtml = '<div style="height:25px">'.$magicValueButton.$magicSpan.$haveGotBonus.$showAll.'</div>'
+            .'<div>'.$currentUserMagic.$showList.$otherUserSpan.$showListDescription.'</div>';
+
+        $thanksBy = '';
+        foreach ($thanksInfo['thanks'] as $t) {
+            if ((int) $t->userid !== (int) $currentUser['id']) {
+                $thanksBy .= ($userDisplayMap[(int) $t->userid] ?? '').' ';
+            }
+        }
+        $thanksAll = count($thanksInfo['thanks']);
+        $noThanks = $thanksAll === 0 ? $langDetails['text_no_thanks_added'] : '';
+        if ($thanksInfo['has_thanked']) {
+            $buttonValue = ' value="'.$langDetails['submit_you_said_thanks'].'" disabled="disabled"';
+            $thanksBy = $currentUserHtml.' '.$thanksBy;
+        } else {
+            $buttonValue = ' value="'.$langDetails['submit_say_thanks'].'"';
+        }
+        $thanksButton = '<input class="btn" type="button" id="saythanks" data-torrent-id="'.$id.'" '.$buttonValue.' />';
+        $andMore = $thanksAll < $thanksInfo['count']
+            ? $langDetails['text_and_more'].$thanksInfo['count'].$langDetails['text_users_in_total']
+            : '';
+        $thanksRowHtml = '<span id="thanksadded" class="nx-hidden"><input class="btn" type="button" value="'
+            .$langDetails['text_thanks_added'].'" disabled="disabled" /></span><span id="curuser" class="nx-hidden">'
+            .$currentUserHtml.' </span><span id="thanksbutton">'.$thanksButton.'</span>&nbsp;&nbsp;<span id="nothanks">'
+            .$noThanks.'</span><span id="addcuruser"></span>'.$thanksBy.$andMore;
+
         return [
             'torrentTopHtml' => $torrentTopHtml,
             'editUrl' => $editUrl,
@@ -308,6 +581,21 @@ class TorrentDetailsController extends Controller
             'thanksInfo' => $thanksInfo,
             'userDisplayMap' => $userDisplayMap,
             'currentUserHtml' => $currentUserHtml,
+            'owned' => $owned,
+            'isOwner' => $isOwner,
+            'downloadAllowed' => $downloadAllowed,
+            'uploadTime' => $uploadTime,
+            'denyBannerHtml' => $denyBannerHtml,
+            'actionsHtml' => $actionsHtml,
+            'torrentInfoRowHtml' => $torrentInfoRowHtml,
+            'hotMeterHtml' => $hotMeterHtml,
+            'peersHeadHtml' => $peersHeadHtml,
+            'peersBodyHtml' => $peersBodyHtml,
+            'descrHeadHtml' => $descrHeadHtml,
+            'showDescription' => $showDescription,
+            'magicRowHtml' => $magicRowHtml,
+            'thanksRowHtml' => $thanksRowHtml,
+            'torrentNamePrefix' => $this->globals->get('torrentnameprefix') ?? '',
         ];
     }
 }

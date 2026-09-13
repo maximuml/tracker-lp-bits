@@ -49,7 +49,7 @@ final class LegacyViewSurfaceTest extends TestCase
     private const BASELINE_HTML_CALLS = 178;
 
     /** Baseline: <table> elements (layout tables, not data tables). */
-    private const BASELINE_TABLE_TAGS = 224;
+    private const BASELINE_TABLE_TAGS = 222;
 
     /** Baseline: inline on*= event handler attributes. */
     private const BASELINE_INLINE_HANDLERS = 0;

@@ -45,6 +45,7 @@ Route::get('/upload', [TorrentUploadController::class, 'create'])->middleware('t
 Route::get('/bitbucket-upload', [BitbucketUploadController::class, 'create'])->middleware('throttle:upload')->name('bitbucket.upload');
 Route::post('/bitbucket-upload', [BitbucketUploadController::class, 'store'])->middleware('throttle:upload');
 Route::get('/offers', [OfferController::class, 'legacy'])->name('offers.legacy');
+Route::post('/offers', [OfferController::class, 'legacyAction'])->middleware('reject.get.mutations');
 Route::get('/torrents', [TorrentListingController::class, 'index'])->middleware('throttle:torrents')->name('torrents.index');
 Route::get('/details/{id}', [TorrentDetailsController::class, 'show'])->where('id', '[0-9]+')->name('torrent.details');
 Route::get('/mybonus', [MyController::class, 'bonus'])->name('my.bonus');
@@ -66,6 +67,7 @@ Route::post('/getrss', [RssController::class, 'getrss']);
 Route::get('/sendmessage', [MessageController::class, 'sendmessage'])->name('sendmessage.legacy');
 Route::get('/userhistory', [InfoController::class, 'userhistory'])->name('userhistory.legacy');
 Route::get('/invite', [InviteController::class, 'invite'])->name('invite.legacy');
+Route::post('/invite', [InviteController::class, 'inviteAction'])->middleware('reject.get.mutations');
 Route::get('/news', [NewsController::class, 'news'])->name('news.legacy');
 Route::post('/news', [NewsController::class, 'news']);
 Route::get('/makepoll', [PollController::class, 'makepoll'])->name('makepoll.legacy');
@@ -77,6 +79,7 @@ Route::post('/attendance', [AttendanceController::class, 'attendance']);
 Route::post('/takemessage', [MessageController::class, 'takeMessage'])->middleware('reject.get.mutations')->name('takemessage.legacy');
 Route::post('/deletemessage', [MessageController::class, 'deletemessage'])->middleware('reject.get.mutations')->name('deletemessage.legacy');
 Route::get('/report', [ModerationController::class, 'report'])->name('report.legacy');
+Route::post('/report', [ModerationController::class, 'reportAction']);
 Route::get('/reports', [ModerationController::class, 'reports'])->name('reports.legacy');
 
 // Phase 5.3: bans/cheaters/ipcheck migrated to Filament SecurityResource group
@@ -84,15 +87,15 @@ Route::get('/bans', fn () => redirect('/nexusphp/security/bans'))->name('bans.le
 Route::post('/bans', fn () => redirect('/nexusphp/security/bans'))->name('bans.legacy.post');
 Route::get('/cheaterbox', fn () => redirect('/nexusphp/security/cheaters'))->name('cheaterbox.legacy');
 Route::get('/cheaters', fn () => redirect('/nexusphp/security/cheaters'))->name('cheaters.legacy');
-Route::get('/ipcheck', fn () => redirect('/nexusphp/users'))->name('ipcheck.legacy');
+Route::get('/ipcheck', fn () => redirect('/nexusphp/user/users'))->name('ipcheck.legacy');
 
 // Phase 5.3: iphistory/ipsearch redirect to Filament user view (IP shown on profile for moderators)
 Route::get('/iphistory', function (Request $request) {
     $id = (int) $request->query('id', 0);
 
-    return $id > 0 ? redirect("/nexusphp/users/{$id}") : redirect('/nexusphp/users');
+    return $id > 0 ? redirect("/nexusphp/user/users/{$id}") : redirect('/nexusphp/user/users');
 })->name('iphistory.legacy');
-Route::get('/ipsearch', fn () => redirect('/nexusphp/users'))->name('ipsearch.legacy');
+Route::get('/ipsearch', fn () => redirect('/nexusphp/user/users'))->name('ipsearch.legacy');
 Route::get('/modtask', [StaffModerationController::class, 'modtask'])->name('modtask.legacy');
 Route::post('/modtask', [StaffModerationController::class, 'modtask']);
 Route::get('/staff', [StaffPageController::class, 'staff'])->name('staff.legacy');
@@ -118,24 +121,24 @@ Route::get('/stats', fn () => redirect('/nexusphp'))->name('stats.legacy');
 Route::get('/allagents', fn () => redirect('/nexusphp'))->name('allagents.legacy');
 
 // Phase 5.2: donorlist/warned/nowarn migrated to Filament UserResource filters + bulk actions
-Route::get('/donorlist', fn () => redirect('/nexusphp/users?tableFilters[is_donating][value]=yes'))->name('donorlist.legacy');
-Route::get('/warned', fn () => redirect('/nexusphp/users?tableFilters[warned][value]=yes'))->name('warned.legacy');
-Route::post('/nowarn', fn () => redirect('/nexusphp/users?tableFilters[warned][value]=yes'))->name('nowarn.legacy');
+Route::get('/donorlist', fn () => redirect('/nexusphp/user/users?tableFilters[is_donating][value]=yes'))->name('donorlist.legacy');
+Route::get('/warned', fn () => redirect('/nexusphp/user/users?tableFilters[warned][value]=yes'))->name('warned.legacy');
+Route::post('/nowarn', fn () => redirect('/nexusphp/user/users?tableFilters[warned][value]=yes'))->name('nowarn.legacy');
 
 // Phase 5.1: checkuser/takeconfirm migrated to Filament UserResource
 Route::get('/checkuser', function (Request $request) {
     $id = (int) $request->query('id', 0);
 
     return $id > 0
-        ? redirect("/nexusphp/users/{$id}")
-        : redirect('/nexusphp/users');
+        ? redirect("/nexusphp/user/users/{$id}")
+        : redirect('/nexusphp/user/users');
 })->name('checkuser.legacy');
 Route::post('/takeconfirm', function (Request $request) {
     $id = (int) $request->input('id', $request->query('id', 0));
 
     return $id > 0
-        ? redirect("/nexusphp/users/{$id}")
-        : redirect('/nexusphp/users');
+        ? redirect("/nexusphp/user/users/{$id}")
+        : redirect('/nexusphp/user/users');
 })->name('takeconfirm.legacy');
 Route::get('/user-ban-log', [AdminToolsController::class, 'userBanLog'])->name('user-ban-log.legacy');
 Route::post('/user-ban-log', [AdminToolsController::class, 'userBanLog']);
@@ -201,6 +204,7 @@ Route::get('/preview', [UtilityController::class, 'preview'])->name('preview.leg
 Route::get('/moresmilies', [UtilityController::class, 'moresmilies'])->name('moresmilies.legacy');
 Route::get('/smilies', [UtilityController::class, 'smilies'])->name('smilies.legacy');
 Route::get('/mailtest', [SystemMaintenanceController::class, 'mailtest'])->name('mailtest.legacy');
+Route::post('/mailtest', [SystemMaintenanceController::class, 'mailtestAction']);
 Route::get('/mysql_stats', [SystemMaintenanceController::class, 'mysqlStats'])->name('mysql_stats.legacy');
 Route::get('/reset', [UserAdminController::class, 'reset'])->name('reset.legacy');
 Route::post('/reset', [UserAdminController::class, 'reset']);
@@ -218,8 +222,8 @@ Route::post('/downloadnotice', [TorrentDownloadController::class, 'downloadnotic
 Route::post('/thanks', [TorrentBookmarkController::class, 'thanks'])->middleware('reject.get.mutations')->name('thanks.legacy');
 Route::get('/increment-bulk', [SystemBulkController::class, 'incrementBulk'])->name('increment-bulk.legacy');
 // Phase 5.6: maxlogin migrated to Filament LoginAttemptResource
-Route::get('/maxlogin', fn () => redirect('/nexusphp/login-attempts'))->name('maxlogin.legacy');
-Route::post('/maxlogin', fn () => redirect('/nexusphp/login-attempts'))->name('maxlogin.legacy.post');
+Route::get('/maxlogin', fn () => redirect('/nexusphp/security/login-attempts'))->name('maxlogin.legacy');
+Route::post('/maxlogin', fn () => redirect('/nexusphp/security/login-attempts'))->name('maxlogin.legacy.post');
 Route::get('/setlist_lookup', [SystemBulkController::class, 'setlistLookup'])->name('setlist_lookup.legacy');
 Route::post('/take-increment-bulk', [SystemBulkController::class, 'takeIncrementBulk'])->middleware('reject.get.mutations')->name('take-increment-bulk.legacy');
 Route::get('/testip', [AdminToolsController::class, 'testip'])->name('testip.legacy');

@@ -10,6 +10,7 @@ use App\Services\OfferService;
 use App\Support\CurrentUser;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\View\View;
 
 class OfferController extends LegacyController
@@ -38,12 +39,22 @@ class OfferController extends LegacyController
     /**
      * Serve the legacy offers.php page from a Laravel view.
      */
-    public function legacy(Request $request): View|RedirectResponse
+    public function legacyAction(Request $request): View|RedirectResponse|Response
+    {
+        return $this->legacy($request);
+    }
+
+    public function legacy(Request $request): View|RedirectResponse|Response
     {
         if (app(CurrentUser::class)->get() === null) {
             $qs = $request->getQueryString();
 
             return redirect('/offers.php'.($qs ? '?'.$qs : ''));
+        }
+
+        $voteResponse = $this->offerService->handleVote($request);
+        if ($voteResponse instanceof Response) {
+            return $voteResponse;
         }
 
         $actionRedirect = $this->offerService->handleActionPublic($request);

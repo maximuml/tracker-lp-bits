@@ -30,6 +30,11 @@ class SystemMaintenanceController extends LegacyController
 
     }
 
+    public function mailtestAction(Request $request): View|RedirectResponse|Response
+    {
+        return $this->mailtest($request);
+    }
+
     public function mailtest(Request $request): View|RedirectResponse|Response
     {
         if (app(CurrentUser::class)->get() === null) {

@@ -6,16 +6,21 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
+use Symfony\Component\HttpFoundation\IpUtils;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
  * T-23: Restricts /metrics access to internal networks or valid bearer tokens.
  *
- * Access is granted if ANY of the following conditions are met:
- * 1. The request comes from a private/internal IP (10.x, 172.16-31.x, 192.168.x, 127.x, ::1)
- * 2. A valid bearer token is provided via the Authorization header
- *    (configured via METRICS_TOKEN env var)
- * 3. The METRICS_TOKEN env var is empty/unset (open access — for dev only)
+ * Access rules:
+ * - Production: a valid METRICS_TOKEN bearer is MANDATORY (W6-04).
+ *   Private-network exemption is dev-only: behind a reverse proxy
+ *   REMOTE_ADDR is always the proxy's private IP, so "private" cannot be
+ *   trusted. If METRICS_TOKEN is unset in production the endpoint fails
+ *   closed (403 for everyone) rather than silently opening.
+ * - Non-production: private/internal IP, or a valid bearer token when
+ *   METRICS_TOKEN is configured.
  */
 final class MetricsAccess
 {
@@ -32,32 +37,46 @@ final class MetricsAccess
     {
         $token = (string) config('metrics.token', '');
 
-        // If no token is configured, allow from private networks only
-        if ($token === '') {
-            if ($this->isPrivateNetwork($request)) {
+        if (App::isProduction()) {
+            if ($token === '') {
+                logger()->warning('metrics: METRICS_TOKEN unset in production — endpoint closed');
+
+                return $this->deny('Metrics access denied: bearer token required');
+            }
+
+            if ($this->bearerMatches($request, $token)) {
                 return $next($request);
             }
 
-            return response('Metrics access denied: internal network or bearer token required', 403, [
-                'Content-Type' => 'text/plain; charset=utf-8',
-            ]);
+            return $this->deny('Metrics access denied: invalid or missing bearer token');
         }
 
-        // Check bearer token
-        $authHeader = $request->header('Authorization', '');
-        if (str_starts_with($authHeader, 'Bearer ')) {
-            $provided = trim(substr($authHeader, 7));
-            if (hash_equals($token, $provided)) {
-                return $next($request);
-            }
+        if ($token !== '' && $this->bearerMatches($request, $token)) {
+            return $next($request);
         }
 
-        // Also allow private network without token
         if ($this->isPrivateNetwork($request)) {
             return $next($request);
         }
 
-        return response('Metrics access denied: invalid or missing bearer token', 403, [
+        return $this->deny($token === ''
+            ? 'Metrics access denied: internal network or bearer token required'
+            : 'Metrics access denied: invalid or missing bearer token');
+    }
+
+    private function bearerMatches(Request $request, string $token): bool
+    {
+        $authHeader = $request->header('Authorization', '');
+        if (! str_starts_with($authHeader, 'Bearer ')) {
+            return false;
+        }
+
+        return hash_equals($token, trim(substr($authHeader, 7)));
+    }
+
+    private function deny(string $message): Response
+    {
+        return response($message, 403, [
             'Content-Type' => 'text/plain; charset=utf-8',
         ]);
     }
@@ -69,44 +88,6 @@ final class MetricsAccess
             return false;
         }
 
-        // Check IPv4 loopback
-        if ($ip === '127.0.0.1') {
-            return true;
-        }
-
-        // Check IPv6 loopback
-        if ($ip === '::1') {
-            return true;
-        }
-
-        foreach (self::PRIVATE_RANGES as $range) {
-            if ($this->ipInRange($ip, $range)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private function ipInRange(string $ip, string $range): bool
-    {
-        if (! str_contains($range, '/')) {
-            return $ip === $range;
-        }
-
-        [$subnet, $bits] = explode('/', $range, 2);
-        $bits = (int) $bits;
-
-        $ipLong = ip2long($ip);
-        $subnetLong = ip2long($subnet);
-
-        if ($ipLong === false || $subnetLong === false) {
-            // IPv6 or invalid — skip CIDR check for IPv4 ranges
-            return false;
-        }
-
-        $mask = $bits === 0 ? 0 : (~0 << (32 - $bits));
-
-        return ($ipLong & $mask) === ($subnetLong & $mask);
+        return IpUtils::checkIp($ip, self::PRIVATE_RANGES);
     }
 }

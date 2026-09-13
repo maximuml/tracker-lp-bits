@@ -6,7 +6,7 @@
  *
  * Reads *.json reports produced by handleSummary() file outputs
  * ({ scenarios: { name: { p95_ms, ... } } }) and fails (exit 1) when any
- * scenario p95 regresses by more than REGRESSION_THRESHOLD (20%).
+ * scenario p95 regresses by more than REGRESSION_THRESHOLD (50%).
  *
  * <baselineDir> may contain either flat *.json files (single baseline run)
  * or one subdirectory per past successful run. With multiple runs the
@@ -21,7 +21,11 @@
 const fs = require('fs');
 const path = require('path');
 
-const REGRESSION_THRESHOLD = 1.20;
+// +50% over the multi-run median: shared-runner p95 variance was observed
+// up to ~+40% vs the median, while code-level regressions (N+1, dropped
+// index) land at ×2–10. 20% over a single-run baseline false-positived
+// on roughly every third runner draw.
+const REGRESSION_THRESHOLD = 1.50;
 
 const [, , baselineDir, currentDir] = process.argv;
 if (!baselineDir || !currentDir) {
@@ -127,6 +131,6 @@ for (const file of fs.readdirSync(currentDir).filter((f) => f.endsWith('.json'))
 console.log(`\nCompared ${compared} scenario(s): ${regressions} regression(s), ${skipped} skipped.`);
 
 if (regressions > 0) {
-  console.error(`FAIL: ${regressions} scenario(s) regressed by more than 20%.`);
+  console.error(`FAIL: ${regressions} scenario(s) regressed by more than 50%.`);
   process.exit(1);
 }

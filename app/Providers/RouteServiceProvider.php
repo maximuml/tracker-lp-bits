@@ -104,6 +104,12 @@ class RouteServiceProvider extends ServiceProvider
             return Limit::perMinute(120)->by($request->ip() ?? 'default');
         });
 
+        // Prometheus scrapes typically run every 15-30s; 60/min is generous
+        // headroom while still bounding abuse of the metrics payload.
+        RateLimiter::for('metrics', function (Request $request) {
+            return Limit::perMinute(60)->by($request->ip() ?? 'default');
+        });
+
         RateLimiter::for('login', function (Request $request) {
             return Limit::perMinute(10)->by($request->ip() ?? 'default');
         });

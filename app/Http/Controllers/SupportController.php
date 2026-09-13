@@ -12,6 +12,7 @@ use App\Services\ComplainService;
 use App\Support\Captcha;
 use App\Support\CurrentUser;
 use App\Support\Globals;
+use App\Support\Html;
 use App\Support\Language;
 use App\Support\Network;
 use App\Support\Pagination;
@@ -187,6 +188,9 @@ class SupportController extends LegacyController
             'pagerbottom' => $pagerbottom,
             'page' => $request->input('page'),
             'title' => $langComplains['text_complain'] ?? 'Complain',
+            'langComplains' => $langComplains,
+            'isAdmin' => $isAdmin,
+            'isLogin' => true,
         ]);
     }
 
@@ -221,6 +225,10 @@ class SupportController extends LegacyController
             $replyUserMap[(int) $rUid] = UserDisplay::plainUsername((int) $rUid);
         }
 
+        ob_start();
+        Html::quickReplyVoid('reply', 'body', $langComplains['text_reply'] ?? 'Reply');
+        $replyBoxHtml = (string) ob_get_clean();
+
         return $this->legacyPage($request, 'complains', false, [
             'mode' => 'view',
             'complain' => $complain,
@@ -230,6 +238,8 @@ class SupportController extends LegacyController
             'isAdmin' => $isAdmin,
             'isLogin' => $uid > 0,
             'title' => $langComplains['text_complain'] ?? 'Complain',
+            'langComplains' => $langComplains,
+            'replyBoxHtml' => $replyBoxHtml,
         ]);
     }
 
@@ -243,9 +253,15 @@ class SupportController extends LegacyController
             return $this->legacyAbortResponse($langFunctions['std_error'] ?? 'Error', 'Permission denied.');
         }
 
+        ob_start();
+        Captcha::showImageCode();
+        $captchaHtml = (string) ob_get_clean();
+
         return $this->legacyPage($request, 'complains', false, [
             'mode' => 'compose',
             'title' => $langComplains['text_complain'] ?? 'Complain',
+            'langComplains' => $langComplains,
+            'captchaHtml' => $captchaHtml,
         ]);
     }
 }

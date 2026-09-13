@@ -34,14 +34,38 @@ concurrency:
   cancel-progress: false
 
 jobs:
+  # Gate job: `secrets` is not a valid context in `jobs.*.if` (only github,
+  # needs, vars, inputs are allowed) — the previous inline check made the
+  # workflow invalid, so every push created a failed run with zero jobs.
+  check-demo-secrets:
+    name: Check demo secrets configured
+    runs-on: ubuntu-latest
+    # Same environment as the deploy jobs so env-scoped secrets resolve.
+    environment: production
+    outputs:
+      has: ${{ steps.s.outputs.has }}
+    steps:
+      - id: s
+        env:
+          KEY: ${{ secrets.DEMO_SSH_KEY }}
+          HOST: ${{ secrets.DEMO_SSH_HOST }}
+        run: |
+          if [ -n "$KEY" ] && [ -n "$HOST" ]; then
+            echo "has=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Demo secrets not configured — deploy will be skipped."
+            echo "has=false" >> "$GITHUB_OUTPUT"
+          fi
+
   # ── Job 1: Pre-deploy checks ──────────────────────────────────────────────
   pre-deploy:
     name: Pre-deploy checks
     runs-on: ubuntu-latest
     environment: production
+    needs: check-demo-secrets
     # Skip when demo secrets are not configured — avoids red check on
     # forks and repos without a demo server.
-    if: ${{ secrets.DEMO_SSH_KEY != '' && secrets.DEMO_SSH_HOST != '' }}
+    if: ${{ needs.check-demo-secrets.outputs.has == 'true' }}
     outputs:
       deploy-ref: ${{ steps.resolve-ref.outputs.deploy-ref }}
       previous-ref: ${{ steps.record-previous.outputs.previous-ref }}

@@ -47,6 +47,7 @@ use App\Support\Locale;
 use App\Support\Metrics\Collectors;
 use App\Support\Metrics\MetricsRegistry;
 use App\Support\Metrics\PrometheusFormatter;
+use App\Support\RequestContext;
 use App\Support\UserUpdateBatch;
 use Filament\Facades\Filament;
 use Filament\Support\Assets\Css;
@@ -161,10 +162,15 @@ class AppServiceProvider extends ServiceProvider
                 logger()->warning('CRON_TOKEN is set but shorter than 32 characters — consider using a stronger token.');
             }
         }
-        // Query log only in non-production (avoids memory leak in prod)
+        // Query log only in non-production (avoids memory leak in prod).
+        // The DB::listen counter is registered unconditionally so that
+        // nexus_db_query_count stays truthful when the query log is off.
         if (! app()->isProduction()) {
             DB::connection(config('database.default'))->enableQueryLog();
         }
+        DB::listen(static function (): void {
+            RequestContext::instance()->incrementDbQueryCount();
+        });
 
         // W1-03: Share the per-request CSP nonce with Vite/Livewire so
         // that injected scripts and styles use nonce-based CSP instead

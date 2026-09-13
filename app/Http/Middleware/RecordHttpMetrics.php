@@ -46,6 +46,7 @@ final class RecordHttpMetrics
         RedisGuard::attempt(static function () use ($status, $elapsed) {
             $redis = Redis::connection();
             $redis->incr("metrics:http_requests:{$status}");
+            $redis->sadd('metrics:http_statuses', $status);
 
             // Record latency in histogram buckets
             foreach (self::LATENCY_BUCKETS as $bucket) {

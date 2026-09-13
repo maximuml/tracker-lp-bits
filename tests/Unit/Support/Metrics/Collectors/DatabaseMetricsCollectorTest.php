@@ -6,6 +6,8 @@ namespace Tests\Unit\Support\Metrics\Collectors;
 
 use App\Support\Metrics\Collectors\DatabaseMetricsCollector;
 use App\Support\Metrics\PrometheusFormatter;
+use App\Support\RequestContext;
+use Illuminate\Support\Facades\DB;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
@@ -23,5 +25,15 @@ final class DatabaseMetricsCollectorTest extends TestCase
 
         $count = array_values(array_filter($lines, static fn (string $l) => str_starts_with($l, 'nexus_db_query_count ')));
         $this->assertCount(1, $count);
+    }
+
+    public function test_query_count_tracks_queries_via_listener(): void
+    {
+        $before = RequestContext::instance()->getDbQueryCount();
+
+        DB::table('settings')->limit(1)->get();
+        DB::table('settings')->limit(1)->get();
+
+        $this->assertSame($before + 2, RequestContext::instance()->getDbQueryCount());
     }
 }

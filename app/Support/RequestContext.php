@@ -13,6 +13,8 @@ final class RequestContext
 
     private int $logSequence = 0;
 
+    private int $dbQueryCount = 0;
+
     private float $startTimestamp;
 
     private string $script;
@@ -69,6 +71,16 @@ final class RequestContext
     public function incrementLogSequence(): void
     {
         $this->logSequence++;
+    }
+
+    public function incrementDbQueryCount(): void
+    {
+        $this->dbQueryCount++;
+    }
+
+    public function getDbQueryCount(): int
+    {
+        return $this->dbQueryCount;
     }
 
     private function getFirst(?string $result): string

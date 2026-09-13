@@ -230,6 +230,25 @@ Decision → Consequences). Add new ADRs here as numbered subsections.
   30 s of degraded (uncached, unthrottled) mode after Redis returns, and
   every new Redis call site on hot paths should go through `attempt()`.
 
+### ADR 0008: MetricsCollector registry for /metrics (Accepted, W6-01)
+
+- **Context:** `MetricsController` was a 491-line god file mixing ten
+  metric domains (HTTP, DB, Redis, cache, scheduler, Horizon, tracker,
+  MeiliSearch, outbox, app info) with Prometheus text formatting. Any new
+  metric family grew the controller and had no isolated test seam.
+- **Decision:** Each domain is a `MetricsCollector`
+  (`App\Support\Metrics\Collectors\*`) emitting `list<string>` exposition
+  lines; shared label/bucket/escaping logic lives in
+  `PrometheusFormatter`; `MetricsRegistry` (bound in
+  `AppServiceProvider`) holds the ordered collector list and injects
+  `JobRepository` into `QueueMetricsCollector` only when the Horizon
+  binding exists. The controller iterates the registry behind per-
+  collector try/catch so one broken dependency cannot 500 the endpoint.
+- **Consequences:** Controller is ~55 lines of orchestration; every
+  collector has a unit test; new metric families add one collector +
+  registry line instead of growing the controller. Cost: eleven more
+  classes under `app/Support/Metrics/`.
+
 ## Testing
 
 - **Unit tests:** `tests/Unit/` — support classes, repositories, services

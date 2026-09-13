@@ -937,64 +937,6 @@ jobs:
             npm-sbom.json
           retention-days: 30
 
-  cosign:
-    name: Cosign keyless signing
-    runs-on: ubuntu-latest
-    needs: [smoke-test, container-scan]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/php8'
-    permissions:
-      contents: read
-      packages: write
-      id-token: write
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-
-      - name: Prepare environment
-        run: |
-          cp .env.example .env
-          sed -i 's|DB_HOST=127.0.0.1|DB_HOST=mysql|g' .env
-          sed -i 's|REDIS_HOST=127.0.0.1|REDIS_HOST=redis|g' .env
-          sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=nexusphp/' .env
-          sed -i 's|^MEILISEARCH_MASTER_KEY=.*|MEILISEARCH_MASTER_KEY=nexusphp_default_key|' .env
-          echo "COMPOSE_FILE=docker-compose.yml:docker-compose.dev.yml" >> "$GITHUB_ENV"
-
-      - name: Build Docker images
-        run: docker compose build php openresty
-
-      - name: Install cosign
-        uses: sigstore/cosign-installer@v3
-
-      - name: Keyless signing of PHP image
-        env:
-          COSIGN_EXPERIMENTAL: '1'
-        run: |
-          digest=$(docker inspect --format='{{index .RepoDigests 0}}' nexusphp_php:latest 2>/dev/null | sed 's/.*@//')
-          if [ -z "$digest" ]; then
-            # Image has no repo digest (not pushed to registry).
-            # Tag it as local and sign the local reference.
-            docker tag nexusphp_php:latest "ghcr.io/${{ github.repository }}/php:latest"
-            digest=$(docker inspect --format='{{json .RepoTags}}' nexusphp_php:latest)
-            echo "No registry digest — signing attestation only"
-          fi
-          # Sign the image using keyless signing (OIDC token from GitHub Actions)
-          cosign sign --yes nexusphp_php:latest
-
-      - name: Keyless signing of OpenResty image
-        env:
-          COSIGN_EXPERIMENTAL: '1'
-        run: |
-          cosign sign --yes nexusphp_openresty:latest
-
-      - name: Attach SBOM attestation to PHP image
-        env:
-          COSIGN_EXPERIMENTAL: '1'
-        run: |
-          if [ -f composer-sbom.json ]; then
-            cosign attest --yes --predicate composer-sbom.json --type cyclonedx nexusphp_php:latest
-          fi
-
   infection:
     name: Mutation testing (Infection)
     runs-on: ubuntu-latest
@@ -1031,7 +973,10 @@ jobs:
           php-version: '8.5'
           extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, pdo_mysql, redis, sqlite3, xml, zip
           coverage: xdebug
-          ini-values: memory_limit=2G
+          # sendmail_path=/bin/true: legacy Mail::sent() calls @mail() which
+          # spawns /usr/sbin/sendmail — absent on CI runners, its "not found"
+          # stderr makes Infection stop the initial test run (exit 143).
+          ini-values: memory_limit=2G, sendmail_path=/bin/true
 
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-progress --no-interaction --no-scripts
@@ -1129,7 +1074,10 @@ jobs:
           php-version: '8.5'
           extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, pdo_mysql, redis, sqlite3, xml, zip
           coverage: xdebug
-          ini-values: memory_limit=2G
+          # sendmail_path=/bin/true: legacy Mail::sent() calls @mail() which
+          # spawns /usr/sbin/sendmail — absent on CI runners, its "not found"
+          # stderr makes Infection stop the initial test run (exit 143).
+          ini-values: memory_limit=2G, sendmail_path=/bin/true
 
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-progress --no-interaction --no-scripts
@@ -1340,8 +1288,9 @@ jobs:
 
       - name: Verify public-data volume init ran
         run: |
-          # assets-init must have completed before php/openresty mounted it
-          docker compose ps assets-init --format '{{.State}}' | grep -qi "exited"
+          # assets-init must have completed before php/openresty mounted it.
+          # -a is required: `compose ps` hides exited one-shot containers.
+          docker compose ps -a assets-init --format '{{.State}} {{.ExitCode}}' | grep -qi "exited 0"
           docker compose logs assets-init | grep -q "public-data volume synced"
           echo "OK: public-data volume synced from image"
 

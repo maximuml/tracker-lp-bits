@@ -55,7 +55,7 @@ final class ToptenRepository
 
         if ($limit === 10 || $subtype === 'ul') {
             $sections[] = [
-                'renderer' => 'usershare_table',
+                'view' => 'usershare',
                 'data' => $this->toArray((clone $base)->orderBy('uploaded', 'desc')->limit($limit)->get()),
                 'caption' => $this->caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_uploaders'] ?? 'Uploaders'),
                 'limits' => [100, 250],
@@ -65,7 +65,7 @@ final class ToptenRepository
 
         if ($limit === 10 || $subtype === 'dl') {
             $sections[] = [
-                'renderer' => 'usershare_table',
+                'view' => 'usershare',
                 'data' => $this->toArray((clone $base)->orderBy('downloaded', 'desc')->limit($limit)->get()),
                 'caption' => $this->caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_downloaders'] ?? 'Downloaders'),
                 'limits' => [100, 250],
@@ -76,7 +76,7 @@ final class ToptenRepository
         if ($limit === 10 || $subtype === 'uls') {
             $note = $lang['text_fastest_up_note'] ?? '';
             $sections[] = [
-                'renderer' => 'usershare_table',
+                'view' => 'usershare',
                 'data' => $this->toArray((clone $base)->where('uploaded', '>', 53687091200)->orderBy('upspeed', 'desc')->limit($limit)->get()),
                 'caption' => $this->caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_fastest_uploaders'] ?? 'Fastest Uploaders', $note),
                 'limits' => [100, 250],
@@ -87,7 +87,7 @@ final class ToptenRepository
         if ($limit === 10 || $subtype === 'dls') {
             $note = $lang['text_fastest_note'] ?? '';
             $sections[] = [
-                'renderer' => 'usershare_table',
+                'view' => 'usershare',
                 'data' => $this->toArray((clone $base)->orderBy('downspeed', 'desc')->limit($limit)->get()),
                 'caption' => $this->caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_fastest_downloaders'] ?? 'Fastest Downloaders', $note),
                 'limits' => [100, 250],
@@ -97,7 +97,7 @@ final class ToptenRepository
 
         if ($limit === 10 || $subtype === 'bsh') {
             $sections[] = [
-                'renderer' => 'usershare_table',
+                'view' => 'usershare',
                 'data' => $this->toArray((clone $base)->where('downloaded', '>', 53687091200)->orderByRaw('uploaded / downloaded DESC')->limit($limit)->get()),
                 'caption' => $this->caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_best_sharers'] ?? 'Best Sharers', $lang['text_sharers_note'] ?? ''),
                 'limits' => [100, 250],
@@ -107,7 +107,7 @@ final class ToptenRepository
 
         if ($limit === 10 || $subtype === 'wsh') {
             $sections[] = [
-                'renderer' => 'usershare_table',
+                'view' => 'usershare',
                 'data' => $this->toArray((clone $base)->where('downloaded', '>', 53687091200)->orderByRaw('uploaded / downloaded ASC, downloaded DESC')->limit($limit)->get()),
                 'caption' => $this->caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_worst_sharers'] ?? 'Worst Sharers', $lang['text_sharers_note'] ?? ''),
                 'limits' => [100, 250],
@@ -149,7 +149,7 @@ final class ToptenRepository
 
         if ($limit === 10 || $subtype === 'act') {
             $sections[] = [
-                'renderer' => '_torrenttable',
+                'view' => 'torrents',
                 'data' => $this->toArray((clone $base)->orderByRaw('seeders + leechers DESC, seeders DESC, added ASC')->limit($limit)->get()),
                 'caption' => $this->caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_most_active_torrents'] ?? 'Most Active Torrents'),
                 'limits' => [25, 50],
@@ -159,7 +159,7 @@ final class ToptenRepository
 
         if ($limit === 10 || $subtype === 'sna') {
             $sections[] = [
-                'renderer' => '_torrenttable',
+                'view' => 'torrents',
                 'data' => $this->toArray((clone $base)->orderBy('times_completed', 'desc')->limit($limit)->get()),
                 'caption' => $this->caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_most_snatched_torrents'] ?? 'Most Snatched Torrents'),
                 'limits' => [25, 50],
@@ -169,7 +169,7 @@ final class ToptenRepository
 
         if ($limit === 10 || $subtype === 'mdt') {
             $sections[] = [
-                'renderer' => '_torrenttable',
+                'view' => 'torrents',
                 'data' => $this->toArray((clone $base)->where('times_completed', '>', 0)->orderBy('data', 'desc')->orderBy('added', 'asc')->limit($limit)->get()),
                 'caption' => $this->caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_most_data_transferred_torrents'] ?? 'Most Data Transferred Torrents'),
                 'limits' => [25, 50],
@@ -179,7 +179,7 @@ final class ToptenRepository
 
         if ($limit === 10 || $subtype === 'bse') {
             $sections[] = [
-                'renderer' => '_torrenttable',
+                'view' => 'torrents',
                 'data' => $this->toArray((clone $base)->where('seeders', '>=', 5)->orderByRaw('seeders / leechers DESC, seeders DESC, added ASC')->limit($limit)->get()),
                 'caption' => $this->caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_best_seeded_torrents'] ?? 'Best Seeded Torrents', $lang['text_best_seeded_torrents_note'] ?? ''),
                 'limits' => [25, 50],
@@ -189,7 +189,7 @@ final class ToptenRepository
 
         if ($limit === 10 || $subtype === 'wse') {
             $sections[] = [
-                'renderer' => '_torrenttable',
+                'view' => 'torrents',
                 'data' => $this->toArray(
                     DB::table('torrents as t')
                         ->selectRaw('t.*, (t.size * t.times_completed) AS data')
@@ -218,7 +218,7 @@ final class ToptenRepository
 
         if ($limit === 10 || $subtype === 'us') {
             $sections[] = [
-                'renderer' => 'countriestable',
+                'view' => 'countries',
                 'data' => $this->toArray(
                     DB::table('countries')
                         ->leftJoin('users', 'users.country', '=', 'countries.id')
@@ -237,7 +237,7 @@ final class ToptenRepository
 
         if ($limit === 10 || $subtype === 'ul') {
             $sections[] = [
-                'renderer' => 'countriestable',
+                'view' => 'countries',
                 'data' => $this->toArray(
                     DB::table('users as u')
                         ->leftJoin('countries as c', 'u.country', '=', 'c.id')
@@ -257,7 +257,7 @@ final class ToptenRepository
 
         if ($limit === 10 || $subtype === 'avg') {
             $sections[] = [
-                'renderer' => 'countriestable',
+                'view' => 'countries',
                 'data' => $this->toArray(
                     DB::table('users as u')
                         ->leftJoin('countries as c', 'u.country', '=', 'c.id')
@@ -278,7 +278,7 @@ final class ToptenRepository
 
         if ($limit === 10 || $subtype === 'r') {
             $sections[] = [
-                'renderer' => 'countriestable',
+                'view' => 'countries',
                 'data' => $this->toArray(
                     DB::table('users as u')
                         ->leftJoin('countries as c', 'u.country', '=', 'c.id')
@@ -316,7 +316,7 @@ final class ToptenRepository
 
         if ($limit === 10 || $subtype === 'mtop') {
             $sections[] = [
-                'renderer' => 'postable',
+                'view' => 'posts',
                 'data' => $this->toArray((clone $postBase)->orderBy('usertopics', 'desc')->limit($limit)->get()),
                 'caption' => $this->caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_most_topic'] ?? ' Forum Topic Starters '),
                 'limits' => [100, 250],
@@ -326,7 +326,7 @@ final class ToptenRepository
 
         if ($limit === 10 || $subtype === 'mpos') {
             $sections[] = [
-                'renderer' => 'postable',
+                'view' => 'posts',
                 'data' => $this->toArray((clone $postBase)->orderBy('userposts', 'desc')->limit($limit)->get()),
                 'caption' => $this->caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_most_post'] ?? ' Forum Posters '),
                 'limits' => [100, 250],
@@ -336,7 +336,7 @@ final class ToptenRepository
 
         if ($limit === 10 || $subtype === 'mcmt') {
             $sections[] = [
-                'renderer' => 'cmttable',
+                'view' => 'comments',
                 'data' => $this->toArray(
                     DB::table('users')
                         ->leftJoin('comments', 'users.id', '=', 'comments.user')
@@ -355,7 +355,7 @@ final class ToptenRepository
 
         if ($limit === 10 || $subtype === 'btop') {
             $sections[] = [
-                'renderer' => 'bigtopic_table',
+                'view' => 'bigtopic',
                 'data' => $this->toArray(
                     DB::table('topics as tp')
                         ->leftJoin('posts', 'tp.id', '=', 'posts.topicid')
@@ -387,7 +387,7 @@ final class ToptenRepository
 
         if ($limit === 10 || $subtype === 'bo') {
             $sections[] = [
-                'renderer' => 'bonustable',
+                'view' => 'bonus',
                 'data' => $this->toArray(DB::table('users')->select('id', 'seedbonus')->orderBy('seedbonus', 'desc')->limit($limit)->get()),
                 'caption' => $this->caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_most_bonuses'] ?? 'Bonuses'),
                 'limits' => [100, 250],
@@ -397,7 +397,7 @@ final class ToptenRepository
 
         if ($limit === 10 || $subtype === 'charity') {
             $sections[] = [
-                'renderer' => 'charityTable',
+                'view' => 'charity',
                 'data' => $this->toArray(DB::table('users')->select('id', 'charity')->orderBy('charity', 'desc')->limit($limit)->get()),
                 'caption' => $this->caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_charity_giver'] ?? 'Charity Givers'),
                 'limits' => [100, 250],
@@ -408,7 +408,7 @@ final class ToptenRepository
         if ($enabledDonation) {
             if ($limit === 10 || $subtype === 'do_usd') {
                 $sections[] = [
-                    'renderer' => 'donortable',
+                    'view' => 'donors',
                     'data' => $this->toArray(
                         DB::table('users')
                             ->select('id', 'donated', 'donated_cny')
@@ -425,7 +425,7 @@ final class ToptenRepository
 
             if ($limit === 10 || $subtype === 'do_cny') {
                 $sections[] = [
-                    'renderer' => 'donortable',
+                    'view' => 'donors',
                     'data' => $this->toArray(
                         DB::table('users')
                             ->select('id', 'donated', 'donated_cny')
@@ -443,7 +443,7 @@ final class ToptenRepository
 
         if ($limit === 10 || $subtype === 'mcli') {
             $sections[] = [
-                'renderer' => 'clienttable',
+                'view' => 'clients',
                 'data' => $this->toArray(
                     DB::table('users')
                         ->rightJoin('agent_allowed_family', 'users.clientselect', '=', 'agent_allowed_family.id')
@@ -461,7 +461,7 @@ final class ToptenRepository
 
         if ($limit === 10 || $subtype === 'ss') {
             $sections[] = [
-                'renderer' => 'stylesheettable',
+                'view' => 'stylesheet',
                 'data' => $this->toArray(
                     DB::table('users')
                         ->join('stylesheets', 'users.stylesheet', '=', 'stylesheets.id')
@@ -479,7 +479,7 @@ final class ToptenRepository
 
         if ($limit === 10 || $subtype === 'lang') {
             $sections[] = [
-                'renderer' => 'languagetable',
+                'view' => 'language',
                 'data' => $this->toArray(
                     DB::table('users')
                         ->join('language', 'users.lang', '=', 'language.id')

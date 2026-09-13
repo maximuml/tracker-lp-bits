@@ -272,6 +272,25 @@ final class Ratio
     }
 
     /**
+     * Leaderboard ratio cell: `number_format($up/$down, $decimals)` wrapped
+     * in `<font color>` when {@see color()} flags the ratio — or always
+     * wrapped when `$alwaysWrap` (torrent-table legacy quirk emits
+     * `<font color="">` for healthy ratios). Caller renders the
+     * `$infinite` label when `$down <= 0` (views stay free of division).
+     */
+    public static function leaderboard(int|float $up, int|float $down, int $decimals = 2, bool $alwaysWrap = false): string
+    {
+        $ratio = $up / $down;
+        $color = self::color($ratio);
+        $formatted = number_format($ratio, $decimals);
+        if ($color !== '' || $alwaysWrap) {
+            return '<font color="'.$color.'">'.$formatted.'</font>';
+        }
+
+        return $formatted;
+    }
+
+    /**
      * User ratio by id — fetches the user row and renders the numeric
      * or HTML form. Mirrors `get_ratio()`.
      */

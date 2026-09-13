@@ -1492,3 +1492,83 @@ jobs:
         if: always()
         run: |
           docker compose down -v --remove-orphans || true
+
+  backup-restore:
+    name: Backup/restore verification
+    runs-on: ubuntu-latest
+    needs: [smoke-test]
+    # W8-03: a backup that was never restored is not a backup. Proves the
+    # production code path end-to-end: backup:all (web tar + mysqldump
+    # bundle) -> restore-drill into a scratch DB (row-count comparison) ->
+    # destroy the live DB and data dirs -> restore from the bundle ->
+    # CHECKSUM TABLE + sha256 manifest parity -> HTTP smoke.
+    # Push-only like prod-compose-smoke: the docker bring-up dominates and
+    # the backup path rarely regresses with app-code changes.
+    if: github.event_name == 'push'
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@b604ade2a87db23f8871b7182e69ec5e75effb45 # v2
+        with:
+          php-version: '8.5'
+          extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, pdo_mysql, redis, sqlite3, xml, zip
+          coverage: none
+
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          sed -i 's|DB_HOST=127.0.0.1|DB_HOST=mysql|g' .env
+          sed -i 's|REDIS_HOST=127.0.0.1|REDIS_HOST=redis|g' .env
+          sed -i 's|LOG_FILE=.*|LOG_FILE=php://stdout|g' .env
+          sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=nexusphp/' .env
+          sed -i 's|^MEILISEARCH_MASTER_KEY=.*|MEILISEARCH_MASTER_KEY=nexusphp_default_key|' .env
+          sed -i 's/^DB_DATABASE=.*/DB_DATABASE=nexusphp_e2e_testing/' .env
+          echo "COMPOSE_FILE=docker-compose.yml:docker-compose.dev.yml" >> "$GITHUB_ENV"
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: ~/.composer/cache
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install PHP dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction --no-scripts
+
+      - name: Dump autoload
+        run: composer dump-autoload --no-interaction --no-scripts
+
+      - name: Build Docker images
+        run: docker compose build
+
+      # queue/scheduler are deliberately not started: their background writes
+      # would drift table checksums between the snapshot and the restore.
+      - name: Start core services and wait
+        run: docker compose up -d --wait mysql redis php
+
+      - name: Install database
+        run: docker compose exec -T php php artisan migrate:fresh --seed --force
+
+      - name: Start OpenResty and wait
+        run: docker compose up -d --wait openresty
+
+      - name: Debug container logs (on failure)
+        if: failure()
+        run: |
+          docker compose ps -a 2>&1 || true
+          for svc in php openresty mysql; do
+            echo "=== $svc logs ==="
+            docker compose logs --tail=50 $svc 2>&1 || true
+          done
+
+      - name: Run backup/destroy/restore verification
+        run: bash scripts/ci/verify-backup-restore.sh
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker compose down -v --remove-orphans || true

@@ -81,7 +81,7 @@ class PageLayout
             $addiCode = (string) preg_replace('/<style(?![^>]*\snonce=)/i', '<style nonce="'.$cspNonce.'"', $addiCode);
         }
         $cssUri = Style::cssUri($context->cache, $context->userStylesheet(), $context->defaultStylesheet);
-        $cssUpdateDate = $context->cssDateTweak ? '?'.htmlspecialchars($context->cssDateTweak) : '';
+        $cssUpdateDate = $context->cssDateTweak ? '?'.$context->cssDateTweak : '';
         $locale = str_replace('_', '-', app()->getLocale());
         $fontCssUri = Style::fontCssUri($context->userFontSize());
         $forumPicFolder = Forum::picFolder($context->langDir);

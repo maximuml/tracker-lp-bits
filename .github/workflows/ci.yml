@@ -50,7 +50,10 @@ jobs:
           curl -sSfL "https://github.com/rhysd/actionlint/releases/download/v${AL_VER}/actionlint_${AL_VER}_linux_amd64.tar.gz" -o /tmp/actionlint.tgz
           echo "${AL_SHA256}  /tmp/actionlint.tgz" | sha256sum -c -
           tar xzf /tmp/actionlint.tgz -C /tmp actionlint
-          /tmp/actionlint .github/workflows/*.yml
+          # -shellcheck= disables the embedded shellcheck pass: the repo does
+          # not enforce shellcheck style; this gate exists for schema errors
+          # (invalid keys, bad contexts) that produce phantom 0-job failures.
+          /tmp/actionlint -shellcheck= .github/workflows/*.yml
 
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --no-interaction --no-scripts

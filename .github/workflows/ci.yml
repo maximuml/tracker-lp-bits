@@ -104,6 +104,106 @@ jobs:
           fi
           echo "OK: raw SQL query count ($TOTAL) <= baseline ($BASELINE_COUNT)"
 
+  migrations:
+    name: Migration upgrade (previous release → HEAD)
+    runs-on: ubuntu-latest
+    # W8-02: proves `php artisan migrate` upgrades a database left by the
+    # previous release — schema parity with migrate:fresh, data-transform
+    # correctness and duration on a production-like fixture volume.
+    # PREVIOUS_RELEASE must be updated (and the snapshot regenerated) with
+    # each tagged release — see release-notes.md.
+    env:
+      PREVIOUS_RELEASE: v2.0.1
+      UPGRADE_DB: nexusphp_upgrade_testing
+      FRESH_DB: nexusphp_fresh_testing
+
+    services:
+      mysql:
+        image: mysql:9
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_USER: nexusphp
+          MYSQL_PASSWORD: nexusphp
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: --health-cmd="redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@b604ade2a87db23f8871b7182e69ec5e75effb45 # v2
+        with:
+          php-version: '8.5'
+          extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, pdo_mysql, redis, sqlite3, xml, zip
+          coverage: none
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: ~/.composer/cache
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction --no-scripts
+
+      - name: Dump autoload
+        run: composer dump-autoload --no-interaction --no-scripts
+
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=nexusphp/' .env
+          sed -i 's/^CACHE_DRIVER=.*/CACHE_DRIVER=array/' .env
+          sed -i 's/^QUEUE_CONNECTION=.*/QUEUE_CONNECTION=sync/' .env
+          sed -i 's/^CHANNEL_NAME_SETTING=.*/CHANNEL_NAME_SETTING=/' .env
+          sed -i 's/^CHANNEL_NAME_MODEL_EVENT=.*/CHANNEL_NAME_MODEL_EVENT=/' .env
+          sed -i 's/^REDIS_PASSWORD=.*/REDIS_PASSWORD=/' .env
+          sed -i 's/^REDIS_DB=.*/REDIS_DB=15/' .env
+          echo "SCOUT_DRIVER=null" >> .env
+
+      - name: Wait for MySQL
+        run: |
+          for i in $(seq 1 60); do
+            nc -z 127.0.0.1 3306 && break
+            sleep 1
+          done
+          nc -z 127.0.0.1 3306 || { echo "MySQL did not become ready in time"; exit 1; }
+
+      - name: Load previous-release schema snapshot
+        run: |
+          SNAPSHOT="database/schema/${PREVIOUS_RELEASE}.mysql.sql"
+          [ -f "$SNAPSHOT" ] || { echo "::error::snapshot $SNAPSHOT missing — regenerate per release-notes.md"; exit 1; }
+          mysql -h 127.0.0.1 -u root -proot -e \
+            "CREATE DATABASE $UPGRADE_DB; CREATE DATABASE $FRESH_DB; \
+             GRANT ALL ON $UPGRADE_DB.* TO 'nexusphp'@'%'; GRANT ALL ON $FRESH_DB.* TO 'nexusphp'@'%';"
+          mysql -h 127.0.0.1 -u root -proot "$UPGRADE_DB" < "$SNAPSHOT"
+          echo "Snapshot $PREVIOUS_RELEASE loaded: $(mysql -h 127.0.0.1 -u root -proot -N -e "SELECT COUNT(*) FROM $UPGRADE_DB.migrations") migrations recorded"
+
+      - name: Insert production-like fixture data
+        run: mysql -h 127.0.0.1 -u root -proot "$UPGRADE_DB" < scripts/ci/migration-upgrade-fixture.sql
+
+      - name: Run HEAD migrations on previous-release database
+        run: |
+          START=$(date +%s)
+          DB_DATABASE=$UPGRADE_DB php artisan migrate --force
+          DURATION=$(( $(date +%s) - START ))
+          echo "migration_duration_seconds=$DURATION" >> "$GITHUB_STEP_SUMMARY"
+          echo "HEAD migrations completed in ${DURATION}s"
+
+      - name: Build fresh reference schema
+        run: DB_DATABASE=$FRESH_DB php artisan migrate:fresh --force
+
+      - name: Verify upgrade result
+        run: bash scripts/ci/verify-migration-upgrade.sh "$UPGRADE_DB" "$FRESH_DB"
+
   frontend:
     name: Build + audit npm
     runs-on: ubuntu-latest

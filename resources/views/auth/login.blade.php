@@ -1,8 +1,3 @@
-@php
-$siteName = \App\Models\Setting::getSiteName();
-$showWarn = $returnto !== '' && ! $nowarn;
-@endphp
-
 @extends('layouts.auth')
 
 @section('title', ($lang['head_login'] ?? 'Login') . ' :: ' . $siteName)
@@ -52,7 +47,7 @@ $showWarn = $returnto !== '' && ! $nowarn;
         @if ($returnto !== '')
             <input type="hidden" name="returnto" value="{{ $returnto }}" />
         @endif
-        <p>{!! $lang['p_need_cookies_enables'] ?? 'Note: You need cookies enabled to log in or switch language.' !!}<br />
+        <p>@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($lang['p_need_cookies_enables'] ?? 'Note: You need cookies enabled to log in or switch language.'))<br />
             [<b>{{ $maxAttempts }}</b>] {{ $lang['p_fail_ban'] ?? 'failed logins in a row will result in banning your ip!' }}
         </p>
         <p>{{ $lang['p_you_have'] ?? 'You have' }} <b>{{ $remaining }}</b> {{ $lang['p_remaining_tries'] ?? 'remaining tries.' }}</p>
@@ -71,7 +66,7 @@ $showWarn = $returnto !== '' && ! $nowarn;
                 <td class="rowfollow"><input type="text" name="two_step_code" aria-label="{{ $lang['rowhead_two_step_code'] ?? 'Two-Factor Authentication' }}" inputmode="numeric" pattern="[0-9]*" placeholder="{{ $lang['two_step_code_tooltip'] ?? '' }}" /></td>
             </tr>
             @if ($captchaEnabled && $captchaMarkup !== '')
-                {!! $captchaMarkup !!}
+                @safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($captchaMarkup))
             @endif
             <tr>
                 <td class="toolbox" colspan="2">
@@ -87,21 +82,17 @@ $showWarn = $returnto !== '' && ! $nowarn;
             </tr>
         </table>
 
-        {!! $passkeyLoginHtml !!}
+        @safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($passkeyLoginHtml))
     </form>
 
     @if ($isComplainEnabled)
         <p>[<b><a href="complains.php">{{ $lang['text_complain'] ?? 'Complain' }}</a></b>]</p>
     @endif
 
-    @php
-        $isSmtpEnabled = \App\Support\Config\SiteConfig::current()->smtp->type() !== 'none';
-    @endphp
-
-    <p>{!! $lang['p_no_account_signup'] ?? 'Don\'t have an account? Sign up!' !!}</p>
+    <p>@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($lang['p_no_account_signup'] ?? 'Don\'t have an account? Sign up!'))</p>
     @if ($isSmtpEnabled)
-        <p>{!! $lang['p_forget_pass_recover'] ?? 'Forget your password? Recover via email' !!}</p>
-        <p>{!! $lang['p_account_banned'] ?? 'Account banned? View user ban log' !!}</p>
-        <p>{!! $lang['p_resend_confirm'] ?? 'Did not receive confirmation mail? Send again' !!}</p>
+        <p>@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($lang['p_forget_pass_recover'] ?? 'Forget your password? Recover via email'))</p>
+        <p>@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($lang['p_account_banned'] ?? 'Account banned? View user ban log'))</p>
+        <p>@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($lang['p_resend_confirm'] ?? 'Did not receive confirmation mail? Send again'))</p>
     @endif
 @endsection

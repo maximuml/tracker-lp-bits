@@ -13,6 +13,7 @@ use App\Services\Captcha\Drivers\ImageCaptchaDriver;
 use App\Services\WebAuthService;
 use App\Support\AssetAppender;
 use App\Support\Captcha;
+use App\Support\Config\SiteConfig;
 use App\Support\Locale;
 use App\Support\Network;
 use Illuminate\Http\RedirectResponse;
@@ -89,6 +90,9 @@ class WebController extends Controller
             'error' => $request->session()->get('error'),
             'isComplainEnabled' => Setting::getIsComplainEnabled(),
             'passkeyLoginHtml' => $this->renderPasskeyLogin(),
+            'siteName' => Setting::getSiteName(),
+            'showWarn' => $returnto !== '' && ! $nowarn,
+            'isSmtpEnabled' => SiteConfig::current()->smtp->type() !== 'none',
         ]);
     }
 

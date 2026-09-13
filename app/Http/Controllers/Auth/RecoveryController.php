@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Auth;
 use App\Exceptions\AuthenticationException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RecoverRequest;
+use App\Models\Setting;
 use App\Services\PasswordRecoveryService;
 use App\Services\WebAuthService;
 use App\Support\Captcha;
@@ -92,6 +93,7 @@ class RecoveryController extends Controller
             'status' => $request->query('status', ''),
             'remaining' => $this->authService->remainingAttempts(Network::clientIp()),
             'maxAttempts' => $this->authService->maxLoginAttempts(),
+            'siteName' => Setting::getSiteName(),
             'error' => $request->session()->get('error'),
         ]);
     }

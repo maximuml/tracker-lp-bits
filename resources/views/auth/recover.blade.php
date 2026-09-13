@@ -1,7 +1,3 @@
-@php
-$siteName = \App\Models\Setting::getSiteName();
-@endphp
-
 @extends('layouts.auth')
 
 @section('title', ($lang['text_recover_user'] ?? 'Recover lost user name or password') . ' :: ' . $siteName)
@@ -53,7 +49,7 @@ $siteName = \App\Models\Setting::getSiteName();
             </tr>
 
             @if ($captchaEnabled && $captchaMarkup !== '')
-                {!! $captchaMarkup !!}
+                @safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($captchaMarkup))
             @endif
 
             <tr>

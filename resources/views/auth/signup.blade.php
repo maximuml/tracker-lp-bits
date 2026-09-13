@@ -1,10 +1,3 @@
-@php
-$siteName = \App\Models\Setting::getSiteName();
-$headTitle = $isInvite ? ($lang['head_invite_signup'] ?? 'Invite Signup') : ($lang['head_signup'] ?? 'Signup');
-$preUsername = $isInvite && $isPreRegisterEmailAndUsername && ! empty($invite->pre_register_username) ? (string) $invite->pre_register_username : '';
-$preEmail = $isInvite && $isPreRegisterEmailAndUsername && ! empty($invite->pre_register_email) ? (string) $invite->pre_register_email : '';
-@endphp
-
 @extends('layouts.auth')
 
 @section('title', $headTitle . ' :: ' . $siteName)
@@ -50,46 +43,36 @@ $preEmail = $isInvite && $isPreRegisterEmailAndUsername && ! empty($invite->pre_
         @endif
 
         <table border="1" cellspacing="0" cellpadding="10" style="width: 100%;">
-            <tr><td class="toolbox" align="center" colspan="2">{!! $lang['text_cookies_note'] !!}</td></tr>
-
-            @php
-                $inputStyle = 'style="width: min(100%, 320px); min-width: 180px; border: 1px solid gray; box-sizing: border-box"';
-                $usernameInput = $preUsername !== ''
-                    ? '<input type="text" ' . $inputStyle . ' name="wantusername" aria-label="' . e($lang['row_desired_username'] ?? 'Desired username') . '" value="' . e($preUsername) . '" readonly autocomplete="username" />'
-                    : '<input type="text" ' . $inputStyle . ' name="wantusername" aria-label="' . e($lang['row_desired_username'] ?? 'Desired username') . '" value="' . e(old('wantusername')) . '" autocomplete="username" />';
-                $emailInput = $preEmail !== ''
-                    ? '<input type="email" ' . $inputStyle . ' name="email" aria-label="' . e($lang['row_email_address'] ?? 'Email address') . '" value="' . e($preEmail) . '" readonly autocomplete="email" />'
-                    : '<input type="email" ' . $inputStyle . ' name="email" aria-label="' . e($lang['row_email_address'] ?? 'Email address') . '" value="' . e(old('email')) . '" autocomplete="email" />';
-            @endphp
+            <tr><td class="toolbox" align="center" colspan="2">@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($lang['text_cookies_note']))</td></tr>
 
             <tr>
                 <td class="rowhead">{{ $lang['row_desired_username'] ?? 'Desired username' }}</td>
                 <td class="rowfollow" align="left">
-                    {!! $usernameInput !!}<br />
+                    @safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($usernameInput))<br />
                     <font class="small">{{ $lang['text_allowed_characters'] ?? 'Allowed Characters: (a-z), (A-Z), (0-9), Maximum is 12 characters' }}</font>
                 </td>
             </tr>
             <tr>
                 <td class="rowhead">{{ $lang['row_pick_a_password'] }}</td>
                 <td class="rowfollow" align="left">
-                    <input type="password" {!! $inputStyle !!} class="wantpassword" aria-label="{{ $lang['row_pick_a_password'] ?? 'Pick a password' }}" autocomplete="new-password" /><br />
+                    <input type="password" style="width: min(100%, 320px); min-width: 180px; border: 1px solid gray; box-sizing: border-box" class="wantpassword" aria-label="{{ $lang['row_pick_a_password'] ?? 'Pick a password' }}" autocomplete="new-password" /><br />
                     <font class="small">{{ $lang['text_minimum_six_characters'] ?? 'Minimum is 6 characters' }}</font>
                 </td>
             </tr>
             <tr>
                 <td class="rowhead">{{ $lang['row_enter_password_again'] ?? 'Enter password again' }}</td>
                 <td class="rowfollow" align="left">
-                    <input type="password" {!! $inputStyle !!} class="passagain" aria-label="{{ $lang['row_enter_password_again'] ?? 'Enter password again' }}" autocomplete="new-password" />
+                    <input type="password" style="width: min(100%, 320px); min-width: 180px; border: 1px solid gray; box-sizing: border-box" class="passagain" aria-label="{{ $lang['row_enter_password_again'] ?? 'Enter password again' }}" autocomplete="new-password" />
                 </td>
             </tr>
 
             @if ($captchaEnabled && $captchaMarkup !== '')
-                {!! $captchaMarkup !!}
+                @safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($captchaMarkup))
             @endif
 
             <tr>
                 <td class="rowhead">{{ $lang['row_email_address'] ?? 'Email address' }}</td>
-                <td class="rowfollow" align="left">{!! $emailInput !!}</td>
+                <td class="rowfollow" align="left">@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($emailInput))</td>
             </tr>
 
             <tr>
@@ -115,9 +98,9 @@ $preEmail = $isInvite && $isPreRegisterEmailAndUsername && ! empty($invite->pre_
             <tr>
                 <td class="rowhead">{{ $lang['row_verification'] ?? 'Verification' }}</td>
                 <td class="rowfollow" align="left">
-                    <input type="checkbox" name="rulesverify" value="yes" aria-label="{{ $lang['checkbox_read_rules_plain'] ?? 'I have read the site rules page' }}" @if (old('rulesverify') === 'yes') checked @endif />{!! $lang['checkbox_read_rules'] ?? 'I have read the site <a href="rules.php"><u>rules</u></a> page.' !!}<br />
-                    <input type="checkbox" name="faqverify" value="yes" aria-label="{{ $lang['checkbox_read_faq_plain'] ?? 'I agree to read the FAQ before asking questions' }}" @if (old('faqverify') === 'yes') checked @endif />{!! $lang['checkbox_read_faq'] ?? 'I agree to read the <a href="faq.php"><u>FAQ</u></a> before asking questions.' !!}<br />
-                    <input type="checkbox" name="ageverify" value="yes" aria-label="{{ $lang['checkbox_age'] ?? 'I am at least 13 years old' }}" @if (old('ageverify') === 'yes') checked @endif />{!! $lang['checkbox_age'] ?? 'I am at least 13 years old.' !!}
+                    <input type="checkbox" name="rulesverify" value="yes" aria-label="{{ $lang['checkbox_read_rules_plain'] ?? 'I have read the site rules page' }}" @if (old('rulesverify') === 'yes') checked @endif />@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($lang['checkbox_read_rules'] ?? 'I have read the site <a href="rules.php"><u>rules</u></a> page.'))<br />
+                    <input type="checkbox" name="faqverify" value="yes" aria-label="{{ $lang['checkbox_read_faq_plain'] ?? 'I agree to read the FAQ before asking questions' }}" @if (old('faqverify') === 'yes') checked @endif />@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($lang['checkbox_read_faq'] ?? 'I agree to read the <a href="faq.php"><u>FAQ</u></a> before asking questions.'))<br />
+                    <input type="checkbox" name="ageverify" value="yes" aria-label="{{ $lang['checkbox_age'] ?? 'I am at least 13 years old' }}" @if (old('ageverify') === 'yes') checked @endif />@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($lang['checkbox_age'] ?? 'I am at least 13 years old.'))
                 </td>
             </tr>
 
@@ -127,16 +110,11 @@ $preEmail = $isInvite && $isPreRegisterEmailAndUsername && ! empty($invite->pre_
             <tr>
                 <td class="toolbox" colspan="2" align="center">
                     <font color="#a00"><b>{{ $lang['text_all_fields_required'] ?? 'All Fields are required!' }}</b></font><p></p>
-                    <input id="submit-btn" type="button" value="{!! $lang['submit_sign_up'] ?? 'Sign up!' !!}" style="height: 25px" />
+                    <input id="submit-btn" type="button" value="@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($lang['submit_sign_up'] ?? 'Sign up!'))" style="height: 25px" />
                 </td>
             </tr>
         </table>
     </form>
 
-    @php
-        ob_start();
-        \App\Support\Form::passwordHashJs('signup-form', 'wantpassword', 'wantpassword', true, 'passagain', 'wantusername');
-        $passwordHashJs = ob_get_clean();
-    @endphp
-    {!! $passwordHashJs !!}
+    @safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($passwordHashJs))
 @endsection

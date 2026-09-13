@@ -1,7 +1,3 @@
-@php
-$siteName = \App\Models\Setting::getSiteName();
-@endphp
-
 @extends('layouts.auth')
 
 @section('title', ($lang['resend_confirmation_email_failed'] ?? 'Send confirmation e-mail failed') . ' :: ' . $siteName)
@@ -33,7 +29,7 @@ $siteName = \App\Models\Setting::getSiteName();
         </div>
     </form>
 
-    {!! sprintf($lang['text_resend_confirmation_mail_note'] ?? '<h1>Send confirmation mail again</h1>', $maxAttempts) !!}
+    @safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml(sprintf($lang['text_resend_confirmation_mail_note'] ?? '<h1>Send confirmation mail again</h1>', $maxAttempts)))
 
     <p>{{ $lang['text_you_have'] ?? 'You have' }} <b>{{ $remaining }}</b> {{ $lang['text_remaining_tries'] ?? ' remaining tries.' }}</p>
 
@@ -58,7 +54,7 @@ $siteName = \App\Models\Setting::getSiteName();
             </tr>
 
             @if ($captchaEnabled && $captchaMarkup !== '')
-                {!! $captchaMarkup !!}
+                @safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($captchaMarkup))
             @endif
 
             <tr>

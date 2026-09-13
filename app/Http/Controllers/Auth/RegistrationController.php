@@ -11,10 +11,12 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\ConfirmResendRequest;
 use App\Http\Requests\Auth\SignupRequest;
 use App\Models\Invite;
+use App\Models\Setting;
 use App\Services\RegistrationService;
 use App\Services\WebAuthService;
 use App\Support\Captcha;
 use App\Support\Config\SiteConfig;
+use App\Support\Form;
 use App\Support\Locale;
 use App\Support\Network;
 use Illuminate\Http\RedirectResponse;
@@ -77,6 +79,30 @@ class RegistrationController extends Controller
 
         $countries = DB::table('countries')->orderBy('name')->get(['id', 'name']);
 
+        $isPreRegister = SiteConfig::current()->system->isInvitePreEmailAndUsername();
+        $preUsername = $isInvite && $isPreRegister && ! empty($invite->pre_register_username)
+            ? (string) $invite->pre_register_username
+            : '';
+        $preEmail = $isInvite && $isPreRegister && ! empty($invite->pre_register_email)
+            ? (string) $invite->pre_register_email
+            : '';
+
+        $inputStyle = 'style="width: min(100%, 320px); min-width: 180px; border: 1px solid gray; box-sizing: border-box"';
+        $oldUsername = old('wantusername');
+        $oldEmail = old('email');
+        $usernameInput = '<input type="text" '.$inputStyle.' name="wantusername" aria-label="'
+            .e($langSignup['row_desired_username'] ?? 'Desired username').'" value="'
+            .e($preUsername !== '' ? $preUsername : (is_string($oldUsername) ? $oldUsername : '')).'"'
+            .($preUsername !== '' ? ' readonly' : '').' autocomplete="username" />';
+        $emailInput = '<input type="email" '.$inputStyle.' name="email" aria-label="'
+            .e($langSignup['row_email_address'] ?? 'Email address').'" value="'
+            .e($preEmail !== '' ? $preEmail : (is_string($oldEmail) ? $oldEmail : '')).'"'
+            .($preEmail !== '' ? ' readonly' : '').' autocomplete="email" />';
+
+        ob_start();
+        Form::passwordHashJs('signup-form', 'wantpassword', 'wantpassword', true, 'passagain', 'wantusername');
+        $passwordHashJs = (string) ob_get_clean();
+
         return view('auth.signup', [
             'lang' => $langSignup,
             'langFunctions' => $langFunctions,
@@ -89,11 +115,17 @@ class RegistrationController extends Controller
             'isInvite' => $isInvite,
             'invite' => $invite,
             'code' => $code,
-            'isPreRegisterEmailAndUsername' => SiteConfig::current()->system->isInvitePreEmailAndUsername(),
             'countries' => $countries,
             'remaining' => $this->authService->remainingAttempts(Network::clientIp()),
             'maxAttempts' => $this->authService->maxLoginAttempts(),
             'error' => $request->session()->get('error'),
+            'siteName' => Setting::getSiteName(),
+            'headTitle' => $isInvite
+                ? ($langSignup['head_invite_signup'] ?? 'Invite Signup')
+                : ($langSignup['head_signup'] ?? 'Signup'),
+            'usernameInput' => $usernameInput,
+            'emailInput' => $emailInput,
+            'passwordHashJs' => $passwordHashJs,
         ]);
     }
 
@@ -185,6 +217,7 @@ class RegistrationController extends Controller
             'remaining' => $this->authService->remainingAttempts(Network::clientIp()),
             'maxAttempts' => $this->authService->maxLoginAttempts(),
             'error' => $request->session()->get('error'),
+            'siteName' => Setting::getSiteName(),
         ]);
     }
 

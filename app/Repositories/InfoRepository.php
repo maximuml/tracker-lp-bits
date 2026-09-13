@@ -10,17 +10,24 @@ use App\Models\Language;
 use App\Models\User;
 use App\Support\Cache;
 use App\Support\Email;
+use App\Support\Globals;
 use App\Support\Pagination;
 use App\Support\Settings;
 use Illuminate\Support\Facades\DB;
 
 final class InfoRepository
 {
+    public function __construct(private readonly Globals $globals) {}
+
     /**
      * @return array<string, mixed>
      */
     public function aboutNexus(): array
     {
+        /** @var array<string, string> $lang */
+        $lang = $this->globals->get('lang_aboutnexus') ?? [];
+        $siteName = (string) Settings::get('basic.SITENAME', '');
+
         return [
             'languages' => Language::query()
                 ->orderBy('trans_state')
@@ -31,7 +38,23 @@ final class InfoRepository
                 ->get(['name', 'designer', 'comment'])
                 ->map(fn ($row) => (array) $row)
                 ->all(),
-            'siteName' => (string) Settings::get('basic.SITENAME', ''),
+            'siteName' => $siteName,
+            'captions' => [
+                'version' => '<span id="version">'.($lang['text_version'] ?? '').'</span>',
+                'nexus' => '<span id="nexus">'.($lang['text_nexus'] ?? '').PROJECTNAME.'</span>',
+                'authorization' => '<span id="authorization">'.($lang['text_authorization'] ?? '').'</span>',
+                'translation' => '<span id="translation">'.($lang['text_translation'] ?? '').'</span>',
+                'stylesheet' => '<span id="stylesheet">'.($lang['text_stylesheet'] ?? '').PROJECTNAME.'</span>',
+                'contact' => '<span id="contact">'.($lang['text_contact'] ?? '').PROJECTNAME.'</span>',
+            ],
+            'notes' => [
+                'version' => sprintf($lang['text_version_note'] ?? '', $siteName, PROJECTNAME),
+                'nexus' => sprintf(PROJECTNAME.($lang['text_nexus_note'] ?? ''), PROJECTNAME),
+                'authorization' => sprintf($lang['text_authorization_note'] ?? '', PROJECTNAME),
+                'translation' => PROJECTNAME.($lang['text_translation_note'] ?? ''),
+                'stylesheet' => sprintf($lang['text_stylesheet_note'] ?? '', PROJECTNAME, $siteName),
+                'contact' => $lang['text_contact_note'] ?? '',
+            ],
         ];
     }
 

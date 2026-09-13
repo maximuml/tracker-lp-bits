@@ -21,11 +21,17 @@
 const fs = require('fs');
 const path = require('path');
 
-// +50% over the multi-run median: shared-runner p95 variance was observed
-// up to ~+40% vs the median, while code-level regressions (N+1, dropped
-// index) land at ×2–10. 20% over a single-run baseline false-positived
-// on roughly every third runner draw.
-const REGRESSION_THRESHOLD = 1.50;
+// A regression needs BOTH legs: p95 above 1.5x the multi-run median AND
+// more than 100ms worse in absolute terms. Shared-runner noise was
+// observed up to +110% on ~60ms-baseline pages (deltas 65-77ms), so a
+// purely relative threshold false-positives on the lightest scenarios,
+// while a purely absolute one misses big relative hits on fast paths.
+// Code-level regressions (N+1, dropped index) land at ×2-10 with
+// deltas well past 100ms. What this gate honestly cannot see: a uniform
+// +50-80ms regression — that sits below the noise floor of shared
+// runners and needs trend-watching, not a blocking gate.
+const REGRESSION_RATIO = 1.50;
+const REGRESSION_ABS_MS = 100;
 
 const [, , baselineDir, currentDir] = process.argv;
 if (!baselineDir || !currentDir) {
@@ -115,9 +121,10 @@ for (const file of fs.readdirSync(currentDir).filter((f) => f.endsWith('.json'))
     const pct = ((ratio - 1) * 100).toFixed(1);
     compared++;
 
-    if (ratio > REGRESSION_THRESHOLD) {
+    const delta = cur.p95_ms - baseP95;
+    if (ratio > REGRESSION_RATIO && delta > REGRESSION_ABS_MS) {
       console.log(
-        `REGRESSION ${file}:${scenario}: p95 median(${values.length}) ${baseP95.toFixed(0)}ms -> ${cur.p95_ms}ms (+${pct}%)`
+        `REGRESSION ${file}:${scenario}: p95 median(${values.length}) ${baseP95.toFixed(0)}ms -> ${cur.p95_ms}ms (+${pct}%, +${delta.toFixed(0)}ms)`
       );
       regressions++;
     } else {
@@ -131,6 +138,6 @@ for (const file of fs.readdirSync(currentDir).filter((f) => f.endsWith('.json'))
 console.log(`\nCompared ${compared} scenario(s): ${regressions} regression(s), ${skipped} skipped.`);
 
 if (regressions > 0) {
-  console.error(`FAIL: ${regressions} scenario(s) regressed by more than 50%.`);
+  console.error(`FAIL: ${regressions} scenario(s) regressed (>${((REGRESSION_RATIO - 1) * 100).toFixed(0)}% AND >${REGRESSION_ABS_MS}ms).`);
   process.exit(1);
 }

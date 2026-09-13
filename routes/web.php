@@ -40,6 +40,7 @@ Route::get('/nexus', function () {
 
 Route::get('/health/live', [HealthController::class, 'live'])->name('health.live');
 Route::get('/health/ready', [HealthController::class, 'ready'])->name('health.ready');
+Route::get('/health/diag', [HealthController::class, 'diag'])->middleware('auth.nexus:nexus-web')->name('health.diag');
 Route::get('/health', [HealthController::class, 'live'])->name('health');
 
 // Prometheus-compatible metrics endpoint (T-23: access-controlled)

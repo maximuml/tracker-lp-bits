@@ -19,6 +19,15 @@ final class LegacyUrlRewriter
     /** Paths that are routed directly by Laravel/Filament/Livewire and must not be rewritten to legacy /script.php. */
     private const LARAVEL_ONLY_PREFIXES = ['api', 'livewire', 'filament', 'nexusphp', 'horizon', 'web'];
 
+    /**
+     * Laravel-native multi-segment paths that still boot the legacy context.
+     * Unlike LARAVEL_ONLY_PREFIXES these keep their first segment as the
+     * legacy script name (so terminate() does not run index autoclean), but
+     * the full path is preserved for routing (e.g. /health/diag must not
+     * collapse to /health).
+     */
+    private const LARAVEL_PATH_PREFIXES = ['health', 'metrics'];
+
     public function rewrite(Request $request): Request
     {
         $server = $request->server->all();
@@ -83,8 +92,13 @@ final class LegacyUrlRewriter
                 $routePath = '/';
                 $pathInfo = '';
             } elseif (preg_match('#^/([a-zA-Z0-9_-]+)(?:\.php)?(/.*)?$#', $requestPath, $matches)) {
-                $routePath = '/'.$matches[1];
-                $pathInfo = $matches[2] ?? '';
+                if (in_array($matches[1], self::LARAVEL_PATH_PREFIXES, true)) {
+                    $routePath = $requestPath;
+                    $pathInfo = '';
+                } else {
+                    $routePath = '/'.$matches[1];
+                    $pathInfo = $matches[2] ?? '';
+                }
             } else {
                 $routePath = $requestPath;
                 $pathInfo = (string) ($server['PATH_INFO'] ?? '');

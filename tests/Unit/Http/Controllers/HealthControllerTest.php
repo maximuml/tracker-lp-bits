@@ -7,6 +7,7 @@ namespace Tests\Unit\Http\Controllers;
 use App\Http\Controllers\HealthController;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
@@ -111,6 +112,28 @@ final class HealthControllerTest extends TestCase
         $body = json_decode((string) $response->getContent(), true);
 
         $this->assertSame('skip', $body['checks']['meilisearch']);
+    }
+
+    public function test_ready_does_not_leak_exception_messages(): void
+    {
+        Redis::shouldReceive('connection->ping')->andThrow(new \RuntimeException('secret connection string detail'));
+        Redis::shouldReceive('connection->get')->andThrow(new \RuntimeException('secret connection string detail'));
+
+        $controller = app(HealthController::class);
+
+        $response = $controller->ready();
+        $body = (string) $response->getContent();
+
+        $this->assertStringNotContainsString('secret connection string detail', $body);
+        $this->assertSame(503, $response->getStatusCode());
+    }
+
+    public function test_diag_aborts_for_guest(): void
+    {
+        $controller = app(HealthController::class);
+
+        $this->expectException(HttpException::class);
+        $controller->diag();
     }
 
     protected function tearDown(): void

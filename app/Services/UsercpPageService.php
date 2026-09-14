@@ -283,7 +283,7 @@ final class UsercpPageService
             $arr = Forum::postRowWithContext((int) $topicArr['lastpost']);
             $postid = (int) ($arr['id'] ?? 0);
             $userid = (int) ($arr['userid'] ?? 0);
-            $added = Time::format((string) ($arr['added'] ?? ''), true, false);
+            $added = (string) (Time::format((string) ($arr['added'] ?? ''), true, false) ?? '');
 
             $items[] = [
                 'id' => $topicId,

@@ -29,7 +29,7 @@
 
     <x-frame :caption="$langComplains['complaints_processed'] ?? 'Processed complaints'" :center="false">
         @if (! empty($processedRows))
-            {{ $pagertop }}
+            @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagertop ?? ''))
             <table width="100%">
             <tr>
                 <td class="colhead">{{ $langComplains['th_complain_at'] ?? 'Added' }}</td>
@@ -44,7 +44,7 @@
                 </tr>
             @endforeach
             </table>
-            {{ $pagerbottom }}
+            @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagerbottom ?? ''))
         @else
             {{ $langComplains['no_complaints_have_been_processed'] ?? 'No complaints have been processed.' }}
         @endif

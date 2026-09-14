@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Enums\Permission\PermissionEnum;
+use App\Enums\ReportType;
 use App\Models\Comment;
 use App\Models\Offer;
 use App\Models\Torrent;
@@ -211,7 +212,9 @@ class ModerationController extends LegacyController
 
             $type = '';
             $reporting = '';
-            switch ($row['type']) {
+            $typeEnum = is_numeric($row['type']) ? ReportType::tryFrom((int) $row['type']) : null;
+            $typeString = $typeEnum?->stringValue() ?? (string) $row['type'];
+            switch ($typeString) {
                 case 'torrent':
                     $type = $langReports['text_torrent'] ?? 'Torrent';
                     $torrent = Torrent::query()->where('id', $row['reportid'])->first(['id', 'name']);
@@ -277,7 +280,8 @@ class ModerationController extends LegacyController
 
             $row['type_label'] = $type;
             $row['reporting'] = $reporting;
-            $row['added_formatted'] = Time::format($row['added']);
+            $row['added_formatted'] = (string) Time::format($row['added']);
+            $row['reporterHtml'] = UserDisplay::username($row['addedby']);
             $rows[] = $row;
         }
 

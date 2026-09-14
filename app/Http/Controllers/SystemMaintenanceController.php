@@ -97,7 +97,76 @@ class SystemMaintenanceController extends LegacyController
             abort(403);
         }
 
-        return $this->legacyPage($request, 'mysql_stats', true, app(MysqlStatsRepository::class)->status());
+        $rep = app(MysqlStatsRepository::class);
+        $status = $rep->status();
+
+        $uptimeSeconds = max(1, (int) $status['uptimeSeconds']);
+        $connections = (int) $status['connections'];
+        $questions = (int) $status['questions'];
+        $queryStatsDenominator = max(1, $questions - $connections);
+
+        $byteTotal = fn (float $v): string => implode(' ', $rep->formatByteDown($v));
+        $num = fn (float $v, int $dec = 0): string => number_format($v, $dec, '.', ',');
+
+        $queryStatRows = [];
+        foreach ($status['queryStats'] as $name => $value) {
+            $queryStatRows[] = [
+                'name' => (string) $name,
+                'value' => $num((float) $value),
+                'perHour' => $num((float) $value * 3600 / $uptimeSeconds, 2),
+                'pct' => $num((float) $value * 100 / $queryStatsDenominator, 2),
+            ];
+        }
+        $queryStatColumns = [[]];
+        $querySplitAt = (int) ceil(count($queryStatRows) / 2);
+        $countRows = 0;
+        foreach ($queryStatRows as $r) {
+            $queryStatColumns[array_key_last($queryStatColumns)][] = $r;
+            if (++$countRows === $querySplitAt) {
+                $queryStatColumns[] = [];
+            }
+        }
+
+        $statusRows = [];
+        foreach ($status['serverStatus'] as $name => $value) {
+            $statusRows[] = ['name' => str_replace('_', ' ', (string) $name), 'value' => (string) $value];
+        }
+        $statusColumns = [[]];
+        $totalRows = count($statusRows);
+        $split1 = (int) ceil($totalRows / 3);
+        $split2 = (int) ceil($totalRows * 2 / 3);
+        $countRows = 0;
+        foreach ($statusRows as $r) {
+            $statusColumns[array_key_last($statusColumns)][] = $r;
+            if (++$countRows === $split1 || $countRows === $split2) {
+                $statusColumns[] = [];
+            }
+        }
+
+        return $this->legacyPage($request, 'mysql_stats', true, [
+            'serverRunningText' => 'This MySQL server has been running for '.$rep->timespanFormat($uptimeSeconds).'. It started up on '.$rep->localisedDate($status['startTime']),
+            'receivedTotal' => $byteTotal($status['bytesReceived']),
+            'receivedPerHour' => $byteTotal($status['bytesReceived'] * 3600 / $uptimeSeconds),
+            'sentTotal' => $byteTotal($status['bytesSent']),
+            'sentPerHour' => $byteTotal($status['bytesSent'] * 3600 / $uptimeSeconds),
+            'totalBytesTotal' => $byteTotal($status['totalBytes']),
+            'totalBytesPerHour' => $byteTotal($status['totalBytes'] * 3600 / $uptimeSeconds),
+            'abortedConnects' => $num($status['abortedConnects']),
+            'abortedConnectsPerHour' => $num($status['abortedConnects'] * 3600 / $uptimeSeconds, 2),
+            'abortedConnectsPct' => $connections > 0 ? $num($status['abortedConnects'] * 100 / $connections, 2).'&nbsp;%' : '---',
+            'abortedClients' => $num($status['abortedClients']),
+            'abortedClientsPerHour' => $num($status['abortedClients'] * 3600 / $uptimeSeconds, 2),
+            'abortedClientsPct' => $connections > 0 ? $num($status['abortedClients'] * 100 / $connections, 2).'&nbsp;%' : '---',
+            'connectionsTotal' => $num($connections),
+            'connectionsPerHour' => $num($connections * 3600 / $uptimeSeconds, 2),
+            'questionsTotal' => $num($questions),
+            'questionsPerHour' => $num($questions * 3600 / $uptimeSeconds, 2),
+            'questionsPerMinute' => $num($questions * 60 / $uptimeSeconds, 2),
+            'questionsPerSecond' => $num($questions / $uptimeSeconds, 2),
+            'queryStatColumns' => $queryStatColumns,
+            'statusColumns' => $statusColumns,
+            'hasServerStatus' => $statusRows !== [],
+        ]);
     }
 
     public function cron(Request $request): Response

@@ -23,6 +23,7 @@ use App\Support\Log;
 use App\Support\Logger;
 use App\Support\Pagination;
 use App\Support\Permissions;
+use App\Support\Time;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
 use Carbon\Carbon;
@@ -106,11 +107,22 @@ class UserAdminController extends LegacyController
             $rows[] = [
                 'id' => (int) $arr['id'],
                 'username_html' => UserDisplay::username((int) $arr['id']),
-                'added' => $arr['added'],
-                'last_access' => $arr['last_access'],
+                'addedFormatted' => (string) Time::format($arr['added'], true, false),
+                'lastAccessFormatted' => (string) Time::format($arr['last_access'], true, false),
                 'class_name' => UserClass::name((int) $arr['class'], false, true, true),
                 'country' => $arr['country'],
             ];
+        }
+
+        $letterItems = [];
+        for ($i = 97; $i < 123; $i++) {
+            $l = chr($i);
+            $L = chr($i - 32);
+            $href = null;
+            if ($l !== $letter) {
+                $href = "?letter={$l}".($class !== '-' ? "&class={$class}" : '').($country > 0 ? "&country={$country}" : '');
+            }
+            $letterItems[] = ['label' => $L, 'href' => $href];
         }
 
         return $this->legacyPage($request, 'users', true, [
@@ -125,6 +137,7 @@ class UserAdminController extends LegacyController
             'pagertop' => $pagertop,
             'pagerbottom' => $pagerbottom,
             'rows' => $rows,
+            'letterItems' => $letterItems,
         ]);
 
     }

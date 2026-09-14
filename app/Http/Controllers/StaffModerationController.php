@@ -16,6 +16,7 @@ use App\Repositories\ModtaskRepository;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
+use App\Support\Format;
 use App\Support\Globals;
 use App\Support\Http;
 use App\Support\Locale;
@@ -448,7 +449,12 @@ class StaffModerationController extends LegacyController
             ->orderBy('lang_name')
             ->orderBy('rules.id')
             ->get(['rules.*', 'language.lang_name'])
-            ->map(fn ($r) => (array) $r)
+            ->map(function ($r): array {
+                $arr = (array) $r;
+                $arr['textHtml'] = Format::formatComment($arr['text']);
+
+                return $arr;
+            })
             ->all();
 
         return $this->legacyPage($request, 'modrules', true, [

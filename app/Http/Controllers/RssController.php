@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Support\Category;
+use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Globals;
@@ -91,6 +92,7 @@ class RssController extends LegacyController
         }
 
         $data['categories'] = SearchBox::buildCategoryTableWithContext($browsecatmode, 'yes', 'torrents.php?allsec=1&', '', 3, '', ['section_name' => true]);
+        $data['paidTorrentEnabled'] = SiteConfig::current()->torrent->paidTorrentEnabled();
         $data['allowed_showrows'] = ['10', '50'];
         $data['stickyTypes'] = [
             0 => Locale::trans('torrent.pos_state_normal', [], null),

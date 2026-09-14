@@ -1,1 +1,2 @@
-@include('viewpeerlist._viewpeerlist')
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($seederTableHtml ?? ''))
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($leecherTableHtml ?? ''))

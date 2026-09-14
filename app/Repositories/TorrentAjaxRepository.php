@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Contracts\Repositories\MeiliSearchRepositoryInterface;
+use App\Contracts\Repositories\TorrentAjaxRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\Snatch;
 use App\Models\Torrent;
@@ -23,7 +24,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Meilisearch\Exceptions\ApiException;
 
-final class TorrentAjaxRepository
+final class TorrentAjaxRepository implements TorrentAjaxRepositoryInterface
 {
     public function __construct(
         private readonly Globals $globals,

@@ -55,7 +55,7 @@ final class LegacyViewSurfaceTest extends TestCase
     private const BASELINE_INLINE_HANDLERS = 0;
 
     /** Baseline: raw <?php open tags inside Blade views (legacy partials). */
-    private const BASELINE_RAW_PHP_TAGS = 286;
+    private const BASELINE_RAW_PHP_TAGS = 282;
 
     /**
      * Views whose <table> tags are exempt from the layout-table ratchet:

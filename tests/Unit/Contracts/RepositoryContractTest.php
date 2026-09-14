@@ -13,6 +13,7 @@ use App\Contracts\Repositories\PostRepositoryInterface;
 use App\Contracts\Repositories\SearchBoxRepositoryInterface;
 use App\Contracts\Repositories\TagRepositoryInterface;
 use App\Contracts\Repositories\ToolRepositoryInterface;
+use App\Contracts\Repositories\TorrentAjaxRepositoryInterface;
 use App\Contracts\Repositories\TorrentDownloadRepositoryInterface;
 use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Contracts\Repositories\UserModerationRepositoryInterface;
@@ -26,6 +27,7 @@ use App\Repositories\PostRepository;
 use App\Repositories\SearchBoxRepository;
 use App\Repositories\TagRepository;
 use App\Repositories\ToolRepository;
+use App\Repositories\TorrentAjaxRepository;
 use App\Repositories\TorrentDownloadRepository;
 use App\Repositories\TorrentRepository;
 use App\Repositories\UserModerationRepository;
@@ -115,6 +117,14 @@ final class RepositoryContractTest extends TestCase
         $mock = Mockery::mock(TorrentRepositoryInterface::class);
         $this->app->instance(TorrentRepositoryInterface::class, $mock);
         $this->assertSame($mock, $this->app->make(TorrentRepositoryInterface::class));
+    }
+
+    public function test_torrent_ajax_repository_interface_binding(): void
+    {
+        $this->assertInstanceOf(TorrentAjaxRepository::class, $this->app->make(TorrentAjaxRepositoryInterface::class));
+        $mock = Mockery::mock(TorrentAjaxRepositoryInterface::class);
+        $this->app->instance(TorrentAjaxRepositoryInterface::class, $mock);
+        $this->assertSame($mock, $this->app->make(TorrentAjaxRepositoryInterface::class));
     }
 
     public function test_torrent_download_repository_interface_binding(): void

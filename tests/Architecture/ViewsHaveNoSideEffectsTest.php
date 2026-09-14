@@ -62,7 +62,6 @@ final class ViewsHaveNoSideEffectsTest extends TestCase
         'resources/views/forums/_viewthread.blade.php',
         'resources/views/image/_image.blade.php',
         'resources/views/increment-bulk/_increment-bulk.blade.php',
-        'resources/views/invite/index.blade.php',
         'resources/views/moresmilies/index.blade.php',
         'resources/views/my/_hr.blade.php',
         'resources/views/page/_page.blade.php',

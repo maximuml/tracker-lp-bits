@@ -4,25 +4,30 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Auth\Permission;
 use App\Contracts\Repositories\SearchBoxRepositoryInterface;
 use App\Contracts\Repositories\TagRepositoryInterface;
 use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Enums\OfferAllowed;
+use App\Enums\Permission\PermissionEnum;
 use App\Exceptions\TorrentAlreadyExistsException;
 use App\Http\Requests\TorrentUploadRequest;
 use App\Models\Offer;
+use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\HitAndRunRepository;
 use App\Repositories\UploadRepository;
-use App\Support\Cache\LegacyRedisCache;
 use App\Support\Category;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\CustomField;
+use App\Support\Form;
 use App\Support\Globals;
 use App\Support\Input;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
+use App\Support\Path;
+use App\Support\Tracker;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -30,48 +35,37 @@ use Illuminate\Support\Facades\Auth;
 
 class TorrentUploadController extends Controller
 {
-    private TorrentRepositoryInterface $torrentRepository;
-
-    private SearchBoxRepositoryInterface $searchBoxRepository;
-
-    private TagRepositoryInterface $tagRepository;
-
-    private HitAndRunRepository $hitAndRunRepository;
-
-    public function __construct(TorrentRepositoryInterface $torrentRepository, SearchBoxRepositoryInterface $searchBoxRepository, TagRepositoryInterface $tagRepository, HitAndRunRepository $hitAndRunRepository)
-    {
-        $this->torrentRepository = $torrentRepository;
-        $this->searchBoxRepository = $searchBoxRepository;
-        $this->tagRepository = $tagRepository;
-        $this->hitAndRunRepository = $hitAndRunRepository;
-    }
+    public function __construct(
+        private TorrentRepositoryInterface $torrentRepository,
+        private SearchBoxRepositoryInterface $searchBoxRepository,
+        private TagRepositoryInterface $tagRepository,
+        private HitAndRunRepository $hitAndRunRepository,
+        private Globals $globals,
+        private CurrentUser $currentUser,
+    ) {}
 
     public function create(Request $request): View|RedirectResponse
     {
-        if (app(LegacyRedisCache::class) === null) {
-            return redirect('/upload.php?'.$request->getQueryString());
-        }
-
         $user = Auth::guard('nexus-web')->user();
         if (! $user instanceof User) {
             return redirect('/login.php?returnto='.urlencode($request->fullUrl()));
         }
 
-        $currentUser = app(CurrentUser::class)->get() ?? $user->toLegacyArray();
-        app(CurrentUser::class)->set($currentUser);
+        $currentUser = $this->currentUser->get() ?? $user->toLegacyArray();
+        $this->currentUser->set($currentUser);
 
-        if (empty(app(Globals::class)->get('lang_upload')) || empty(app(Globals::class)->get('lang_edit'))) {
+        if (empty($this->globals->get('lang_upload')) || empty($this->globals->get('lang_edit'))) {
             Input::setServerValue('SCRIPT_NAME', '/upload.php');
             require base_path(Locale::scriptFilePath((string) '', (bool) false, (string) ''));
-            app(Globals::class)->set('lang_upload', $lang_upload ?? []);
+            $this->globals->set('lang_upload', $lang_upload ?? []);
             require base_path(Locale::scriptFilePath((string) 'edit.php', (bool) false, (string) ''));
-            app(Globals::class)->set('lang_edit', $lang_edit ?? []);
+            $this->globals->set('lang_edit', $lang_edit ?? []);
         }
 
         /** @var array<string, string> $lang_upload */
-        $lang_upload = app(Globals::class)->get('lang_upload') ?? [];
+        $lang_upload = $this->globals->get('lang_upload') ?? [];
         /** @var array<string, string> $lang_edit */
-        $lang_edit = app(Globals::class)->get('lang_edit') ?? [];
+        $lang_edit = $this->globals->get('lang_edit') ?? [];
 
         if ($currentUser['parked']) {
             LegacyResponse::abort($lang_upload['std_sorry'] ?? '', $lang_upload['std_unauthorized_to_upload'] ?? '', false);
@@ -101,18 +95,54 @@ class TorrentUploadController extends Controller
         }
 
         $browsecatmode = SiteConfig::current()->main->browseCat(1);
+        $torrentConfig = SiteConfig::current()->torrent;
+
+        $nameInputHtml = $this->torrentRepository->buildUploadFieldInput(
+            'name', '', $lang_upload['text_torrent_name_note'] ?? '', $lang_upload['fill_setlist'] ?? '', 'setlistLookupBtn',
+        );
+
+        $priceCellHtml = '';
+        if (Permission::can(PermissionEnum::TORRENT_SET_PRICE) && $torrentConfig->paidTorrentEnabled()) {
+            $maxPrice = $torrentConfig->maxPrice();
+            $pricePlaceholder = $maxPrice > 0
+                ? Locale::trans('label.torrent.max_price_help', ['max_price' => $maxPrice], null)
+                : '';
+            $priceCellHtml = '<input type="number" min="0" name="price" placeholder="'.$pricePlaceholder.'" />&nbsp;&nbsp;'
+                .Locale::trans('label.torrent.price_help', ['tax_factor' => $torrentConfig->taxFactor() * 100 .'%'], null);
+        }
+
+        $pickCellHtml = '';
+        if (Permission::can(PermissionEnum::TORRENT_SET_STICKY)) {
+            $options = '';
+            foreach (Torrent::listPosStates() as $key => $value) {
+                $options .= '<option value="'.$key.'">'.$value['text'].'</option>';
+            }
+            $pickCellHtml = '<b>'.$lang_edit['row_torrent_position'].':&nbsp;</b>'
+                .'<select name="pos_state" style="width: 100px;">'.$options.'</select>&nbsp;&nbsp;&nbsp;'
+                .Form::datetimepickerInput('pos_state_until', '', Locale::trans('label.deadline', [], null).':&nbsp;', ['require_files' => true]);
+        }
+
+        $customField = new CustomField;
 
         return view('torrents.upload', [
             'uploadFreely' => $uploadFreely,
             'allowtorrents' => $allowtorrents,
             'offerRows' => $offerRows,
-            'torrentRep' => $this->torrentRepository,
-            'searchBoxRep' => $this->searchBoxRepository,
-            'tagRep' => $this->tagRepository,
-            'customField' => new CustomField,
-            'hitAndRunRep' => $this->hitAndRunRepository,
             'pageTitle' => $lang_upload['head_upload'] ?? '',
             'cats' => Category::listByModeWithContext($browsecatmode),
+            'trackerUrl' => Tracker::schemaAndHost((int) ($currentUser['tracker_url_id'] ?? 0), true),
+            'torrentDirWritable' => is_writable(Path::resolve((string) ($this->globals->get('torrent_dir') ?? ''), ROOT_PATH)),
+            'nameInputHtml' => $nameInputHtml,
+            'priceLabel' => Locale::trans('label.torrent.price', [], null),
+            'priceCellHtml' => $priceCellHtml,
+            'descrEditorHtml' => Form::bbcodeEditor('upload', 'descr', '', false, 130, true),
+            'enableTechnicalInfo' => SiteConfig::current()->main->enableTechnicalInfo(),
+            'taxonomySelectHtml' => $this->searchBoxRepository->renderTaxonomySelect($browsecatmode),
+            'customFieldsHtml' => $customField->renderOnUploadPage(0, $browsecatmode),
+            'hitAndRunHtml' => $this->hitAndRunRepository->renderOnUploadPage('', $browsecatmode),
+            'tagsHtml' => $this->tagRepository->renderCheckbox($browsecatmode),
+            'pickCellHtml' => $pickCellHtml,
+            'canBeAnonymous' => Permission::can(PermissionEnum::BE_ANONYMOUS),
         ]);
     }
 

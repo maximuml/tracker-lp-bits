@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Auth\Permission;
 use App\Contracts\Repositories\UserModerationRepositoryInterface;
+use App\Enums\InviteValid;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserClass as UserClassEnum;
 use App\Models\Invite;
@@ -18,6 +19,7 @@ use App\Support\CurrentUser;
 use App\Support\Globals;
 use App\Support\Locale;
 use App\Support\Pagination;
+use App\Support\Ratio;
 use App\Support\UserDisplay;
 use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;
@@ -198,9 +200,24 @@ class InviteController extends LegacyController
             $inviteRows = $this->inviteRepository->getInvitees($id, $filters, (int) $offset, $pageSize);
         }
 
-        if ($currentUserId === $id || UserDisplay::currentClass() >= (int) UserClassEnum::SYSOP->value) {
+        $canConfirm = $currentUserId === $id || UserDisplay::currentClass() >= (int) UserClassEnum::SYSOP->value;
+        if ($canConfirm) {
             $pendingCount = $this->inviteRepository->countPendingInvitees($currentUserId);
         }
+
+        foreach ($inviteRows as &$row) {
+            $row['usernameHtml'] = UserDisplay::username((int) $row['id']);
+            if ((float) $row['downloaded'] > 0) {
+                $ratio = number_format($row['uploaded'] / $row['downloaded'], 3);
+                $row['ratioHtml'] = '<font color='.Ratio::color($ratio).">$ratio</font>";
+            } else {
+                $row['ratioHtml'] = $row['uploaded'] > 0 ? 'Inf.' : '---';
+            }
+            $row['statusHtml'] = $row['status'] === 'confirmed'
+                ? '<a href=userdetails.php?id='.(int) $row['id'].'><font color=#1f7309>'.e($langInvite['text_confirmed'] ?? '').'</font></a>'
+                : '<a href=checkuser.php?id='.(int) $row['id'].'><font color=#ca0226>'.e($langInvite['text_pending'] ?? '').'</font></a>';
+        }
+        unset($row);
 
         // Register reset JS
         $resetJs = <<<'JS'
@@ -222,6 +239,8 @@ JS;
             'inviteeStatusOptions' => $statusOptions,
             'haremAdditionFactor' => $haremAdditionFactor,
             'pendingCount' => $pendingCount,
+            'canConfirm' => $canConfirm,
+            'inviteeColSpan' => $haremAdditionFactor > 0 ? 13 : 12,
             'textSelectOnePlease' => Locale::trans('nexus.select_one_please', [], null),
             'resetText' => Locale::trans('label.reset', [], null),
             'submitText' => Locale::trans('label.submit', [], null),
@@ -247,6 +266,18 @@ JS;
             [$pagertop, $pagerbottom, , $offset] = Pagination::pager($pageSize, $number, "?id=$id&menu=$menuSelected&");
             $inviteRows = $this->inviteRepository->getInvites($id, $menuSelected, (int) $offset, $pageSize);
         }
+
+        foreach ($inviteRows as &$row) {
+            $isHashValid = (int) $row['valid'] === InviteValid::YES->value;
+            $row['registerLink'] = $isHashValid
+                ? sprintf('&nbsp;<a href="signup.php?type=invite&invitenumber=%s" title="%s" target="_blank"><small>[%s]</small></a>', e($row['hash']), e($langInvite['signup_link_help'] ?? ''), e($langInvite['signup_link'] ?? ''))
+                : '';
+            $row['validText'] = Invite::$validInfo[$row['valid']]['text'] ?? '';
+            $row['inviteeUserHtml'] = ! $isHashValid
+                ? '<a href=userdetails.php?id='.(int) $row['invitee_register_uid'].'><font color=#1f7309>'.e($row['invitee_register_username']).'</font></a>'
+                : '';
+        }
+        unset($row);
 
         return [
             'sentTmpCount' => $number,

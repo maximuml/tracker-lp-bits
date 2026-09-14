@@ -40,10 +40,10 @@ final class LegacyViewSurfaceTest extends TestCase
     private const VIEWS_DIR = __DIR__.'/../../resources/views';
 
     /** Baseline: {!! !!} raw output blocks. */
-    private const BASELINE_RAW_OUTPUT = 113;
+    private const BASELINE_RAW_OUTPUT = 105;
 
     /** Baseline: @php directives in views. */
-    private const BASELINE_PHP_BLOCKS = 139;
+    private const BASELINE_PHP_BLOCKS = 131;
 
     /** Baseline: \App\Support\Html:: static calls in views. */
     private const BASELINE_HTML_CALLS = 94;

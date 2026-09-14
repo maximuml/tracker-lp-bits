@@ -1,35 +1,25 @@
-@php
-/** @var array<string, mixed> $off_details */
-/** @var array<string, mixed> $lang */
-$lang_offers = $lang;
-$d = $off_details;
-@endphp
-<h1 align="center" id="top">{{ $d['name'] }}</h1>
+<h1 align="center" id="top">{{ $off_details['name'] }}</h1>
 <table width="97%" cellspacing="0" cellpadding="5">
-<tr><td class="rowhead" align="right">{{ $lang_offers['row_info'] ?? '' }}</td><td class="rowfollow" align="left">{{ $lang_offers['text_offered_by'] ?? '' }}{!! $d['offeredBy'] !!}{!! $d['offerTime'] !!}</td></tr>
-<tr><td class="rowhead" align="right">{{ $lang_offers['row_status'] ?? '' }}</td><td class="rowfollow" align="left">{!! $d['status'] !!}</td></tr>
-@if (! empty($d['allowRow']))
-<tr><td class="rowhead" align="right">{{ $lang_offers['row_allow'] ?? '' }}</td><td class="rowfollow" align="left">{!! $d['allowRow'] !!}</td></tr>
+<tr><td class="rowhead" align="right">{{ $lang['row_info'] ?? '' }}</td><td class="rowfollow" align="left">{{ $lang['text_offered_by'] ?? '' }}@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($off_details['offeredBy'] ?? ''))@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($off_details['offerTime'] ?? ''))</td></tr>
+<tr><td class="rowhead" align="right">{{ $lang['row_status'] ?? '' }}</td><td class="rowfollow" align="left">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($off_details['status'] ?? ''))</td></tr>
+@if (! empty($off_details['allowRow']))
+<tr><td class="rowhead" align="right">{{ $lang['row_allow'] ?? '' }}</td><td class="rowfollow" align="left">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($off_details['allowRow']))</td></tr>
 @endif
-@if (! empty($d['voteRow']))
-<tr><td class="rowhead" align="right">{{ $lang_offers['row_vote'] ?? '' }}</td><td class="rowfollow" align="left">{!! $d['voteRow'] !!}</td></tr>
+@if (! empty($off_details['voteRow']))
+<tr><td class="rowhead" align="right">{{ $lang['row_vote'] ?? '' }}</td><td class="rowfollow" align="left">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($off_details['voteRow']))</td></tr>
 @endif
-@if (! empty($d['voteResultsRow']))
-<tr><td class="rowhead" align="right">{{ $lang_offers['row_vote_results'] ?? '' }}</td><td class="rowfollow" align="left">{!! $d['voteResultsRow'] !!}</td></tr>
+@if (! empty($off_details['voteResultsRow']))
+<tr><td class="rowhead" align="right">{{ $lang['row_vote_results'] ?? '' }}</td><td class="rowfollow" align="left">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($off_details['voteResultsRow']))</td></tr>
 @endif
-@if (! empty($d['allowedNote']))
-<tr><td class="rowhead" align="right">{{ $lang_offers['row_offer_allowed'] ?? '' }}</td><td class="rowfollow" align="left">{{ $d['allowedNote'] }}</td></tr>
+@if (! empty($off_details['allowedNote']))
+<tr><td class="rowhead" align="right">{{ $lang['row_offer_allowed'] ?? '' }}</td><td class="rowfollow" align="left">{{ $off_details['allowedNote'] }}</td></tr>
 @endif
-<tr><td class="rowhead" align="right">{{ $lang_offers['row_action'] ?? '' }}</td><td class="rowfollow" align="left">{!! $d['editLink'] !!}{!! $d['deleteLink'] !!}{!! $d['reportLink'] !!}</td></tr>
-@if (! empty($d['description']))
-<tr><td class="rowhead" align="right">{{ $lang_offers['row_description'] ?? '' }}</td><td class="rowfollow" align="left">{!! $d['description'] !!}</td></tr>
+<tr><td class="rowhead" align="right">{{ $lang['row_action'] ?? '' }}</td><td class="rowfollow" align="left">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($off_details['editLink'] ?? ''))@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($off_details['deleteLink'] ?? ''))@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($off_details['reportLink'] ?? ''))</td></tr>
+@if (! empty($off_details['description']))
+<tr><td class="rowhead" align="right">{{ $lang['row_description'] ?? '' }}</td><td class="rowfollow" align="left">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($off_details['description']))</td></tr>
 @endif
 </table>
-{!! $d['commentbar'] !!}
-@if ($d['commentCount'] === 0)
-{!! $d['commentsHtml'] !!}
-@else
-{!! $d['commentsHtml'] !!}
-@endif
-{!! $d['quickComment'] !!}
-{!! $d['commentbar'] !!}
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($off_details['commentbar'] ?? ''))
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($off_details['commentsHtml'] ?? ''))
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($off_details['quickComment'] ?? ''))
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($off_details['commentbar'] ?? ''))

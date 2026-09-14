@@ -10,7 +10,7 @@ use App\Enums\Permission\PermissionEnum;
 use App\Repositories\ShoutboxRepository;
 use App\Services\ShoutboxService;
 use App\Support\CurrentUser;
-use App\Support\Language;
+use App\Support\Globals;
 use App\Support\LegacyHeaderBag;
 use App\Support\LegacyYesNo;
 use App\Support\Lock;
@@ -31,6 +31,7 @@ class ShoutboxController extends LegacyController
     public function __construct(
         private readonly ShoutboxRepository $repository,
         private readonly ShoutboxService $shoutboxService,
+        private readonly Globals $globals,
     ) {}
 
     /**
@@ -86,7 +87,7 @@ class ShoutboxController extends LegacyController
             }
         }
 
-        $langShoutbox = app(Language::class)->shoutbox();
+        $langShoutbox = $this->langShoutbox();
         $isStaff = $actor->can(PermissionEnum::SB_MANAGE);
         $items = $this->decorateShoutRows($rows, $currentUser, $currentUserId, $isStaff, $reactionData, $langShoutbox);
 
@@ -237,18 +238,88 @@ class ShoutboxController extends LegacyController
             }
         }
 
+        $isStaff = Permission::can(PermissionEnum::SB_MANAGE);
+        $reactionData = Shoutbox::prefetchReactions(array_values($shoutIds), $currentUserId);
+        $filters = (array) ($result['filters'] ?? []);
+        $perPage = (int) ($result['per_page'] ?? 50);
+        $total = (int) ($result['total'] ?? 0);
+        $totalPages = $perPage > 0 ? (int) ceil($total / $perPage) : 0;
+        $paginationBase = $totalPages > 1
+            ? 'shoutbox_history.php?'.http_build_query(array_filter($filters, fn ($v) => $v !== '')).'&page='
+            : '';
+
+        $lang = $this->langShoutbox();
+
         return $this->legacyPage($request, 'shoutbox_history', true, [
-            'rows' => $rows,
-            'total' => (int) ($result['total'] ?? 0),
+            'lang_shoutbox' => $lang,
+            'items' => $this->decorateHistoryRows($rows, $currentUserId, $isStaff, $reactionData, $userDisplayMap, $lang),
             'page' => (int) ($result['page'] ?? 1),
-            'perPage' => (int) ($result['per_page'] ?? 50),
-            'filters' => (array) ($result['filters'] ?? []),
-            'currentUserId' => $currentUserId,
-            'isStaff' => Permission::can(PermissionEnum::SB_MANAGE),
+            'totalPages' => $totalPages,
+            'paginationBase' => $paginationBase,
+            'filters' => $filters,
             'csrfToken' => Shoutbox::csrfToken($currentUserId),
-            'reactionData' => Shoutbox::prefetchReactions(array_values($shoutIds), $currentUserId),
-            'userDisplayMap' => $userDisplayMap,
         ]);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function langShoutbox(): array
+    {
+        $lang = $this->globals->get('lang_shoutbox');
+
+        return is_array($lang) ? $lang : [];
+    }
+
+    /**
+     * @param  array<int|string, mixed>  $rows
+     * @param  array<string, mixed>  $reactionData
+     * @param  array<int, string>  $userDisplayMap
+     * @param  array<string, mixed>  $lang
+     * @return list<array<string, mixed>>
+     */
+    private function decorateHistoryRows(array $rows, int $currentUserId, bool $isStaff, array $reactionData, array $userDisplayMap, array $lang): array
+    {
+        $reactionCounts = (array) ($reactionData['counts'] ?? []);
+        $reactionMine = (array) ($reactionData['mine'] ?? []);
+        $reactionUsers = (array) ($reactionData['users'] ?? []);
+
+        $items = [];
+        foreach ($rows as $arr) {
+            if (! is_array($arr)) {
+                continue;
+            }
+            $shoutId = (int) ($arr['id'] ?? 0);
+            $uid = (int) ($arr['userid'] ?? 0);
+            $username = $uid > 0
+                ? (string) ($userDisplayMap[$uid] ?? '')
+                : (string) ($lang['text_guest'] ?? '<b>Guest</b>');
+            $mentionsMe = false;
+            $message = Shoutbox::formatMessage((string) ($arr['text'] ?? ''), $currentUserId, $mentionsMe);
+            $editedNote = '';
+            if (! empty($arr['edited_at']) && (int) $arr['edited_at'] > 0) {
+                $editedNote = ' <span class="shout-edited-note">('
+                    .htmlspecialchars((string) ($lang['text_edited'] ?? 'edited')).' '
+                    .Shoutbox::formatTime((int) $arr['edited_at'], true).')</span>';
+            }
+            $items[] = [
+                'time' => Shoutbox::formatTime((int) ($arr['date'] ?? 0), true),
+                'actions' => Shoutbox::renderActions($arr, $currentUserId, $isStaff),
+                'username' => $username,
+                'reactions' => Shoutbox::renderReactions(
+                    $shoutId,
+                    $currentUserId,
+                    is_array($reactionCounts[$shoutId] ?? null) ? $reactionCounts[$shoutId] : [],
+                    is_array($reactionMine[$shoutId] ?? null) ? array_values($reactionMine[$shoutId]) : [],
+                    is_array($reactionUsers[$shoutId] ?? null) ? $reactionUsers[$shoutId] : []
+                ),
+                'mentionsMe' => $mentionsMe,
+                'messageHtml' => '<span id="shout-msg-'.$shoutId.'" class="shout-msg" data-raw="'
+                    .htmlspecialchars((string) ($arr['text'] ?? ''), ENT_QUOTES).'">'.$message.'</span>'.$editedNote,
+            ];
+        }
+
+        return $items;
     }
 
     public function shoutboxSse(Request $request): SymfonyResponse

@@ -1,31 +1,12 @@
-@php
-$lang_shoutbox = (array) (\app(\App\Support\Globals::class)->get('lang_shoutbox') ?? []);
-$CURUSER = (array) (\app(\App\Support\CurrentUser::class)->get() ?? []);
-$perPage = (int) ($perPage ?? 50);
-$page = (int) ($page ?? 1);
-$filters = (array) ($filters ?? []);
-$rows = (array) ($rows ?? []);
-$total = (int) ($total ?? 0);
-$currentUserId = (int) ($currentUserId ?? 0);
-$isStaff = (bool) ($isStaff ?? false);
-$csrfToken = (string) ($csrfToken ?? '');
-$reactionData = (array) ($reactionData ?? ['counts' => [], 'mine' => [], 'users' => []]);
-$userDisplayMap = (array) ($userDisplayMap ?? []);
-$reactionCounts = $reactionData['counts'] ?? [];
-$reactionMine = $reactionData['mine'] ?? [];
-$reactionUsers = $reactionData['users'] ?? [];
-$formAction = 'shoutbox_history.php';
-$title = $title ?? ($lang_shoutbox['text_history_title'] ?? 'Shoutbox history');
-@endphp
 @extends('layouts.legacy')
 
-@section('title', $title)
+@section('title', $title ?? ($lang_shoutbox['text_history_title'] ?? 'Shoutbox history'))
 
 @section('content')
-<script nonce="{{ $cspNonce ?? '' }}">var SHOUT_CSRF = '{{ $csrfToken }}';</script>
+<script nonce="{{ $cspNonce ?? '' }}">var SHOUT_CSRF = '{{ $csrfToken ?? '' }}';</script>
 
 <h2>{{ $lang_shoutbox['text_history_title'] ?? 'Shoutbox history' }}</h2>
-<form action="{{ $formAction }}" method="get">
+<form action="shoutbox_history.php" method="get">
 <table border="0" cellspacing="0" cellpadding="5">
 <tr><td>{{ $lang_shoutbox['text_username'] ?? 'Username' }}</td><td><input type="text" name="user" value="{{ $filters['user'] ?? '' }}" /></td>
 <td>{{ $lang_shoutbox['text_from'] ?? 'From' }}</td><td><input type="date" name="from" value="{{ $filters['from'] ?? '' }}" /></td>
@@ -35,48 +16,21 @@ $title = $title ?? ($lang_shoutbox['text_history_title'] ?? 'Shoutbox history');
 </table></form>
 
 <table border="0" cellspacing="0" cellpadding="2" width="100%">
-@foreach ($rows as $arr)
-    @php
-        $time = \App\Support\Shoutbox::formatTime((int) $arr['date'], true);
-        $uid = (int) $arr['userid'];
-        $username = $uid > 0 ? ($userDisplayMap[$uid] ?? '') : ($lang_shoutbox['text_guest'] ?? '<b>Guest</b>');
-        $shoutId = (int) $arr['id'];
-        $actions = \App\Support\Shoutbox::renderActions($arr, $currentUserId, $isStaff);
-        $reactions = \App\Support\Shoutbox::renderReactions(
-            $shoutId,
-            $currentUserId,
-            $reactionCounts[$shoutId] ?? [],
-            $reactionMine[$shoutId] ?? [],
-            $reactionUsers[$shoutId] ?? []
-        );
-        $mentionsMe = false;
-        $message = \App\Support\Shoutbox::formatMessage($arr['text'], $currentUserId, $mentionsMe);
-        $editedNote = '';
-        if (! empty($arr['edited_at']) && (int) $arr['edited_at'] > 0) {
-            $editedNote = ' <span class="shout-edited-note">('.htmlspecialchars((string) ($lang_shoutbox['text_edited'] ?? 'edited')).' '.\App\Support\Shoutbox::formatTime((int) $arr['edited_at'], true).')</span>';
-        }
-        $messageHtml = '<span id="shout-msg-'.$shoutId.'" class="shout-msg" data-raw="'.htmlspecialchars((string) $arr['text'], ENT_QUOTES).'">'.$message.'</span>'.$editedNote;
-    @endphp
-    <tr><td class="shoutrow{{ $mentionsMe ? ' shoutrow-mentions-me' : '' }}">
-    <span class="date">[{!! $time !!}]</span> {!! $actions !!} {!! $username !!} {!! $reactions !!}
-    <div>{!! $messageHtml !!}</div>
+@foreach ($items ?? [] as $item)
+    <tr><td class="shoutrow{{ $item['mentionsMe'] ? ' shoutrow-mentions-me' : '' }}">
+    <span class="date">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml('['.$item['time'].']'))</span> @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['actions'])) @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['username'])) @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['reactions']))
+    <div>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['messageHtml']))</div>
     </td></tr>
 @endforeach
 </table>
 
-@php
-    $totalPages = (int) ceil($total / $perPage);
-    if ($totalPages > 1) {
-        $base = $formAction.'?'.http_build_query(array_filter($filters, fn ($v) => $v !== '')).'&page=';
-    }
-@endphp
-@if ($totalPages > 1 ?? false)
+@if (($totalPages ?? 0) > 1)
     <div class="pagination">
     @for ($i = 1; $i <= $totalPages; $i++)
-        @if ($i == $page)
+        @if ($i == ($page ?? 1))
             <b>{{ $i }}</b>
         @else
-            <a href="{{ $base.$i }}">{{ $i }}</a>
+            <a href="{{ ($paginationBase ?? '').$i }}">{{ $i }}</a>
         @endif
     @endfor
     </div>

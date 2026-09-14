@@ -161,13 +161,32 @@ class InfoController extends LegacyController
             }
         }
 
+        $isModerator = $currentClass >= (defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0);
+        $items = [];
+        foreach ($rows as $row) {
+            $id = (int) ($row['id'] ?? 0);
+            $name = (string) ($row['name'] ?? '');
+            $owner = (int) ($row['owner'] ?? 0);
+            $added = (string) ($row['added'] ?? '');
+            $dim = $imageDimensions[$id] ?? ['width' => 0, 'height' => 0];
+            $items[] = [
+                'id' => $id,
+                'name' => $name,
+                'url' => str_replace(' ', '%20', htmlspecialchars("bitbucket/$name")),
+                'date' => substr($added, 0, (int) strpos($added, ' ')),
+                'time' => substr($added, (int) strpos($added, ' ') + 1),
+                'width' => $dim['width'],
+                'height' => $dim['height'],
+                'usernameHtml' => (string) ($userDisplayMap[$owner] ?? UserDisplay::username($owner)),
+            ];
+        }
+
         return $this->legacyPage($request, 'bitbucketlog', true, [
-            'rows' => $rows,
+            'items' => $items,
             'count' => $count,
             'pagertop' => $pagertop,
             'pagerbottom' => $pagerbottom,
-            'userDisplayMap' => $userDisplayMap,
-            'imageDimensions' => $imageDimensions,
+            'isModerator' => $isModerator,
         ]);
     }
 }

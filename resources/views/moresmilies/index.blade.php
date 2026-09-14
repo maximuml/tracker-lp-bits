@@ -1,7 +1,3 @@
-@php
-$form = \request()->query('form');
-$text = \request()->query('text');
-@endphp
 <html><head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>{{ $lang_moresmilies['head_more_smilies'] }}</title>
@@ -34,14 +30,12 @@ document.addEventListener('click', function (e) {
 </script>
 
 <table class="lista" width="100%" cellpadding="1" cellspacing="1">
-@php $count = 0; @endphp
 @for ($i = 1; $i < 192; $i++)
-    @if ($count % 3 == 0)
+    @if (($i - 1) % 3 == 0)
         <tr>
     @endif
-    <td class="lista" align="center"><a href="#" data-smile="[em{{ $i }}]" data-smile-form="{{ $form }}" data-smile-text="{{ $text }}"><img src="pic/smilies/{{ $i }}.gif" alt="" ></a></td>
-    @php $count++; @endphp
-    @if ($count % 3 == 0)
+    <td class="lista" align="center"><a href="#" data-smile="[em{{ $i }}]" data-smile-form="{{ $form ?? '' }}" data-smile-text="{{ $text ?? '' }}"><img src="pic/smilies/{{ $i }}.gif" alt="" ></a></td>
+    @if ($i % 3 == 0)
         </tr>
     @endif
 @endfor

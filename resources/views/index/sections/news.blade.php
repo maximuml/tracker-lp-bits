@@ -6,12 +6,10 @@
 </h2>
 @if(count($news['items']) > 0)
 <table width="100%"><tr><td class="text"><div style="margin-left: 16pt;">
-@php $news_flag = 0; @endphp
 @foreach($news['items'] as $newsItem)
-    @if($news_flag < 1)
+    @if($loop->first)
         <a href="#" data-klappe="a{{ $newsItem['id'] }}"><img class="minus" src="pic/trans.gif" id="pica{{ $newsItem['id'] }}" alt="Show/Hide" title="{{ $news['showHideTitle'] }}" />&nbsp;{{ date('Y.m.d', strtotime($newsItem['added'])) }} - <b>{{ $newsItem['title'] }}</b></a>
         <div id="ka{{ $newsItem['id'] }}"> {{ \App\Support\Format::formatComment($newsItem['body'], 0) }} </div>
-        @php $news_flag++; @endphp
     @else
         <a href="#" data-klappe="a{{ $newsItem['id'] }}"><br /><img class="plus" src="pic/trans.gif" id="pica{{ $newsItem['id'] }}" alt="Show/Hide" title="{{ $news['showHideTitle'] }}" />&nbsp;{{ date('Y.m.d', strtotime($newsItem['added'])) }} - <b>{{ $newsItem['title'] }}</b></a>
         <div id="ka{{ $newsItem['id'] }}" class="nx-hidden"> {{ \App\Support\Format::formatComment($newsItem['body'], 0) }} </div>

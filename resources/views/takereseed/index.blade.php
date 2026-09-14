@@ -1,17 +1,7 @@
-@php
-$lang_takereseed = (array) (\app(\App\Support\Globals::class)->get('lang_takereseed') ?? []);
-@endphp
-
 @extends('layouts.legacy')
 
 @section('title', $lang_takereseed['head_reseed_request'] ?? 'Reseed request')
 
 @section('content')
-@php
-$lang_takereseed = (array) (\app(\App\Support\Globals::class)->get('lang_takereseed') ?? []);
-$message = (string) ($message ?? $lang_takereseed['std_it_worked'] ?? 'Reseed request sent.');
-
-print('<center>' . $message . '</center>');
-@endphp
-
+<center>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($message ?? ($lang_takereseed['std_it_worked'] ?? 'Reseed request sent.')))</center>
 @endsection

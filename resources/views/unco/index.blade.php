@@ -3,15 +3,10 @@
 @section('title', 'Unconfirmed Users')
 
 @section('content')
-@php
-$status = $status ?? '';
-$rows = (array) ($rows ?? []);
-@endphp
-
-@if (! empty($rows))
-    @php \App\Support\Html::beginFrame(''); @endphp
+@if (! empty($rows ?? []))
+    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::open('', false, 10, '100%', 'left')))
     <table width="100%" border="1" cellspacing="0" cellpadding="5">
-        @if ($status)
+        @if ($status ?? '')
             <tr>
                 <td class="rowhead" colspan="5"><font color="red" size="1">The User account has been updated!</font></td>
             </tr>
@@ -24,13 +19,10 @@ $rows = (array) ($rows ?? []);
             <td class="rowhead"><center>Confirm</center></td>
         </tr>
         @foreach ($rows as $row)
-            @php
-            $id = $row['id'];
-            @endphp
             <tr>
                 <form method="post" action="modtask.php">
                     <input type="hidden" name="action" value="confirmuser">
-                    <input type="hidden" name="userid" value="{{ $id }}">
+                    <input type="hidden" name="userid" value="{{ $row['id'] }}">
                     <a href="userdetails.php?id={{ $row['id'] }}"><td><center>{{ $row['username'] }}</center></td></a>
                     <td align="center">&nbsp;&nbsp;&nbsp;&nbsp;{{ $row['email'] }}</td>
                     <td align="center">&nbsp;&nbsp;&nbsp;&nbsp;{{ $row['added'] }}</td>
@@ -45,6 +37,6 @@ $rows = (array) ($rows ?? []);
             </tr>
         @endforeach
     </table>
-    @php \App\Support\Html::endFrame(); @endphp
+    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::CLOSE))
 @endif
 @endsection

@@ -7,14 +7,13 @@
 <table border="1" cellspacing="0" cellpadding="5">
     <form method="post" action="mailtest.php">
         <input type="hidden" name="action" value="sendmail">
-        @php
-            $row = \App\Support\Html::tr(
-                $lang_mailtest['row_enter_email'] ?? 'Enter email',
-                "<input type='text' name='email' size=35><br />" . ($lang_mailtest['text_enter_email_note'] ?? ''),
-                1
-            );
-        @endphp
-        {!! $row !!}
+        @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml((string) \App\Support\Html::tr(
+            $lang_mailtest['row_enter_email'] ?? 'Enter email',
+            "<input type='text' name='email' size=35><br />".($lang_mailtest['text_enter_email_note'] ?? ''),
+            1,
+            '',
+            true
+        )))
         <tr><td colspan="2" align="center"><input type="submit" name="sendmail" value="{{ $lang_mailtest['submit_send_it'] ?? 'Send it' }}"></td></tr>
     </form>
 </table>

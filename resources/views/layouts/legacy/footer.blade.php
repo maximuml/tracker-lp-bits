@@ -1,16 +1,16 @@
 </td></tr></table>
 <div id="footer">
 <div style="margin-top: 10px; margin-bottom: 30px;" align="center">
-{!! $copyrightHtml !!}{!! $pageStatsLine !!}
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($copyrightHtml.$pageStatsLine))
 </div>
 @if($debugQuery)
-{!! $debugQueryHtml !!}
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($debugQueryHtml))
 @endif
-{!! $keyShortcut !!}</div>
-{!! $analyticsCode !!}
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($keyShortcut))</div>
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($analyticsCode))
 @foreach($appendFooters as $value)
-{!! $value !!}
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($value))
 @endforeach
-{!! $jsBlock !!}
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($jsBlock))
 <img id="nexus-preview" alt="" role="presentation" class="nx-hidden" style="position: absolute" src="" />
 </body></html>

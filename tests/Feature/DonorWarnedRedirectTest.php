@@ -30,7 +30,7 @@ final class DonorWarnedRedirectTest extends TestCase
         $response = $this->withNexusCookie($admin)->get('/donorlist');
 
         $response->assertStatus(302);
-        $response->assertRedirect('/nexusphp/users?tableFilters[is_donating][value]=yes');
+        $response->assertRedirect('/nexusphp/user/users?tableFilters[is_donating][value]=yes');
     }
 
     public function test_warned_redirects_to_filament_user_list_with_warned_filter(): void
@@ -39,7 +39,7 @@ final class DonorWarnedRedirectTest extends TestCase
         $response = $this->withNexusCookie($admin)->get('/warned');
 
         $response->assertStatus(302);
-        $response->assertRedirect('/nexusphp/users?tableFilters[warned][value]=yes');
+        $response->assertRedirect('/nexusphp/user/users?tableFilters[warned][value]=yes');
     }
 
     public function test_nowarn_post_redirects_to_filament_user_list_with_warned_filter(): void
@@ -48,6 +48,6 @@ final class DonorWarnedRedirectTest extends TestCase
         $response = $this->withNexusCookie($admin)->post('/nowarn', ['usernw' => [1, 2]]);
 
         $response->assertStatus(302);
-        $response->assertRedirect('/nexusphp/users?tableFilters[warned][value]=yes');
+        $response->assertRedirect('/nexusphp/user/users?tableFilters[warned][value]=yes');
     }
 }

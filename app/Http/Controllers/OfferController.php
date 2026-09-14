@@ -7,9 +7,11 @@ namespace App\Http\Controllers;
 use App\Repositories\OfferRepository;
 use App\Services\OfferPageService;
 use App\Services\OfferService;
+use App\Services\OfferVoteService;
 use App\Support\CurrentUser;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\View\View;
 
 class OfferController extends LegacyController
@@ -20,11 +22,14 @@ class OfferController extends LegacyController
 
     private OfferPageService $pageService;
 
-    public function __construct(OfferRepository $repository, OfferService $offerService, OfferPageService $pageService)
+    private OfferVoteService $offerVoteService;
+
+    public function __construct(OfferRepository $repository, OfferService $offerService, OfferPageService $pageService, OfferVoteService $offerVoteService)
     {
         $this->repository = $repository;
         $this->offerService = $offerService;
         $this->pageService = $pageService;
+        $this->offerVoteService = $offerVoteService;
     }
 
     /**
@@ -38,12 +43,22 @@ class OfferController extends LegacyController
     /**
      * Serve the legacy offers.php page from a Laravel view.
      */
-    public function legacy(Request $request): View|RedirectResponse
+    public function legacyAction(Request $request): View|RedirectResponse|Response
+    {
+        return $this->legacy($request);
+    }
+
+    public function legacy(Request $request): View|RedirectResponse|Response
     {
         if (app(CurrentUser::class)->get() === null) {
             $qs = $request->getQueryString();
 
             return redirect('/offers.php'.($qs ? '?'.$qs : ''));
+        }
+
+        $voteResponse = $this->offerVoteService->handleVote($request);
+        if ($voteResponse instanceof Response) {
+            return $voteResponse;
         }
 
         $actionRedirect = $this->offerService->handleActionPublic($request);

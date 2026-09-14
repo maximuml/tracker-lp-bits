@@ -33,6 +33,11 @@ class ModerationController extends LegacyController
         private readonly ModerationRepository $moderationRepository,
     ) {}
 
+    public function reportAction(Request $request): View|RedirectResponse|Response
+    {
+        return $this->report($request);
+    }
+
     public function report(Request $request): View|RedirectResponse|Response
     {
         $curUser = $this->currentUser->get() ?? [];

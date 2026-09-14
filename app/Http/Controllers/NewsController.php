@@ -70,10 +70,7 @@ class NewsController extends LegacyController
             }
 
             News::query()->where('id', $newsid)->delete();
-            $cache = $this->legacyRedisCache;
-            if ($cache !== null) {
-                $cache->delete_value('recent_news', true);
-            }
+            $this->invalidateNewsCache();
 
             if ($returnto !== '') {
                 return redirect(SafeReturnUrl::filter($returnto));
@@ -116,10 +113,7 @@ class NewsController extends LegacyController
                 return $this->legacyAbortResponse($langNews['std_error'] ?? 'Error', $langNews['std_something_weird_happened'] ?? 'Something weird happened.');
             }
 
-            $cache = $this->legacyRedisCache;
-            if ($cache !== null) {
-                $cache->delete_value('recent_news', true);
-            }
+            $this->invalidateNewsCache();
 
             $news = News::query()->find($newsId);
             if (! $news) {
@@ -161,10 +155,7 @@ class NewsController extends LegacyController
                     'notify' => $notify,
                 ]);
 
-                $cache = $this->legacyRedisCache;
-                if ($cache !== null) {
-                    $cache->delete_value('recent_news', true);
-                }
+                $this->invalidateNewsCache();
 
                 return redirect('/');
             }
@@ -231,8 +222,7 @@ class NewsController extends LegacyController
         $news = News::query()->create($data);
         event(new NewsCreated($news));
 
-        $cache = $this->legacyRedisCache;
-        $cache?->delete_value('recent_news', true);
+        $this->invalidateNewsCache();
 
         return $this->success(new NewsResource($news), 'News created');
     }
@@ -250,8 +240,7 @@ class NewsController extends LegacyController
 
         $news->update($data);
 
-        $cache = $this->legacyRedisCache;
-        $cache?->delete_value('recent_news', true);
+        $this->invalidateNewsCache();
 
         return $this->success(new NewsResource($news->fresh()), 'News updated');
     }
@@ -263,8 +252,7 @@ class NewsController extends LegacyController
     {
         $news->delete();
 
-        $cache = $this->legacyRedisCache;
-        $cache?->delete_value('recent_news', true);
+        $this->invalidateNewsCache();
 
         return $this->success(['success' => true], 'News deleted');
     }
@@ -279,5 +267,11 @@ class NewsController extends LegacyController
         $items = $this->indexRepository->getLatestNews($maxNews);
 
         return $this->success(NewsResource::collection($items));
+    }
+
+    private function invalidateNewsCache(): void
+    {
+        $this->legacyRedisCache?->delete_value('recent_news', true);
+        $this->indexRepository->forgetLatestNews(SiteConfig::current()->main->maxNewsNum(5));
     }
 }

@@ -34,6 +34,11 @@ class InviteController extends LegacyController
         private readonly InviteRepository $inviteRepository,
     ) {}
 
+    public function inviteAction(Request $request): View|RedirectResponse|Response
+    {
+        return $this->invite($request);
+    }
+
     public function invite(Request $request): View|RedirectResponse|Response
     {
         $currentUser = $this->currentUser->get() ?? [];

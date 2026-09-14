@@ -1,5 +1,6 @@
 @php
-\App\Support\Html::stdhead(
+\App\Support\PageLayout::setContext(\App\Support\PageLayoutContext::fromSupportContext());
+\App\Support\PageLayout::header(
     $title ?? $__env->yieldContent('title'),
     $stdheadMsgalert ?? true,
     $stdheadScript ?? '',
@@ -14,5 +15,5 @@
 
 @php
 \App\Support\Frame::mainFrameClose();
-\App\Support\Html::stdfoot();
+\App\Support\PageLayout::footer();
 @endphp

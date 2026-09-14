@@ -9,11 +9,15 @@ use App\Models\User;
 use App\Repositories\InfoRepository;
 use App\Services\BitbucketService;
 use App\Support\CurrentUser;
+use App\Support\Format;
+use App\Support\Globals;
 use App\Support\Input;
 use App\Support\LegacyResponse;
 use App\Support\Pagination;
 use App\Support\Permissions;
+use App\Support\Time;
 use App\Support\UserDisplay;
+use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -24,6 +28,7 @@ class InfoController extends LegacyController
 {
     public function __construct(
         private readonly BitbucketService $bitbucketService,
+        private readonly Globals $globals,
     ) {}
 
     public function userhistory(Request $request): View|RedirectResponse|Response
@@ -47,20 +52,129 @@ class InfoController extends LegacyController
         $perpage = 15;
         $phpSelf = Input::serverValue('PHP_SELF');
         $subject = UserDisplay::username($userid);
+        $lang = $this->langUserhistory();
 
         $data = [
             'action' => $action,
             'userid' => $userid,
             'subject' => $subject,
+            'lang_userhistory' => $lang,
+            'title' => match ($action) {
+                'viewposts' => (string) ($lang['head_posts_history'] ?? 'Posts history'),
+                'viewcomments' => (string) ($lang['head_comments_history'] ?? 'Comments history'),
+                default => (string) ($lang['head_user_history'] ?? 'User history'),
+            },
         ];
 
         if ($action === 'viewposts') {
-            $data = array_merge($data, app(InfoRepository::class)->getUserHistoryPosts($userid, (int) ($curUser['class'] ?? 0), $perpage, $phpSelf));
+            $result = app(InfoRepository::class)->getUserHistoryPosts($userid, (int) ($curUser['class'] ?? 0), $perpage, $phpSelf);
+            if (empty($result['posts'])) {
+                return $this->legacyAbortResponse((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_no_posts_found'] ?? 'No posts found'));
+            }
+            $data = array_merge($data, $result);
+            $data['items'] = $this->decorateHistoryPosts(
+                (array) $result['posts'],
+                (array) ($result['editorNames'] ?? []),
+                $viewerId,
+                $userid,
+                $lang,
+            );
         } elseif ($action === 'viewcomments') {
-            $data = array_merge($data, app(InfoRepository::class)->getUserHistoryComments($userid, $perpage, $phpSelf));
+            $result = app(InfoRepository::class)->getUserHistoryComments($userid, $perpage, $phpSelf);
+            if (empty($result['comments'])) {
+                return $this->legacyAbortResponse((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_no_comments_found'] ?? 'No comments found'));
+            }
+            $data = array_merge($data, $result);
+            $data['items'] = $this->decorateHistoryComments(
+                (array) $result['comments'],
+                (array) ($result['commentPageMap'] ?? []),
+            );
+        } elseif ($action === '') {
+            return $this->legacyAbortResponse((string) ($lang['std_history_error'] ?? 'Error'), (string) ($lang['std_unkown_action'] ?? 'Unknown action'), false);
+        } else {
+            return $this->legacyAbortResponse((string) ($lang['std_history_error'] ?? 'Error'), (string) ($lang['std_unkown_action'] ?? 'Unknown action'));
         }
 
         return $this->legacyPage($request, 'userhistory', true, $data);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function langUserhistory(): array
+    {
+        $lang = $this->globals->get('lang_userhistory');
+
+        return is_array($lang) ? $lang : [];
+    }
+
+    /**
+     * @param  array<int|string, mixed>  $posts
+     * @param  array<int|string, string>  $editorNames
+     * @param  array<string, mixed>  $lang
+     * @return list<array<string, mixed>>
+     */
+    private function decorateHistoryPosts(array $posts, array $editorNames, int $viewerId, int $userid, array $lang): array
+    {
+        $items = [];
+        foreach ($posts as $arr) {
+            if (! is_array($arr)) {
+                continue;
+            }
+            $body = Format::formatComment((string) ($arr['body'] ?? ''));
+            $editedBy = $arr['editedby'] ?? 0;
+            if (Validators::isId($editedBy) && ! empty($editorNames[(int) $editedBy])) {
+                $body .= '<p><font size=1 class=small>'
+                    .(string) ($lang['text_last_edited'] ?? '')
+                    .UserDisplay::username((int) $editedBy)
+                    .(string) ($lang['text_at'] ?? '')
+                    .(string) ($arr['editdate'] ?? '')
+                    .'</font></p>\n';
+            }
+            $items[] = [
+                'added' => Time::format((string) ($arr['added'] ?? ''), true, false, false),
+                'forumid' => (int) ($arr['f_id'] ?? 0),
+                'forumname' => (string) ($arr['name'] ?? ''),
+                'topicid' => (int) ($arr['t_id'] ?? 0),
+                'topicname' => (string) ($arr['subject'] ?? ''),
+                'postid' => (int) ($arr['id'] ?? 0),
+                'isNew' => ((int) ($arr['lastpostread'] ?? 0) < (int) ($arr['lastpost'] ?? 0)) && $viewerId === $userid,
+                'bodyHtml' => $body,
+            ];
+        }
+
+        return $items;
+    }
+
+    /**
+     * @param  array<int|string, mixed>  $comments
+     * @param  array<int, int>  $commentPageMap
+     * @return list<array<string, mixed>>
+     */
+    private function decorateHistoryComments(array $comments, array $commentPageMap): array
+    {
+        $items = [];
+        foreach ($comments as $arr) {
+            if (! is_array($arr)) {
+                continue;
+            }
+            $commentId = (int) ($arr['id'] ?? 0);
+            $torrent = (string) ($arr['name'] ?? '');
+            if (strlen($torrent) > 55) {
+                $torrent = substr($torrent, 0, 52).'...';
+            }
+            $commPage = (int) floor(($commentPageMap[$commentId] ?? 0) / 20);
+            $items[] = [
+                'added' => Time::format((string) ($arr['added'] ?? ''), true, false, false),
+                'torrentid' => (int) ($arr['t_id'] ?? 0),
+                'torrentName' => $torrent,
+                'commentid' => $commentId,
+                'pageUrl' => $commPage > 0 ? '&page='.$commPage : '',
+                'bodyHtml' => Format::formatComment((string) ($arr['text'] ?? '')),
+            ];
+        }
+
+        return $items;
     }
 
     public function donate(Request $request): View|RedirectResponse|Response

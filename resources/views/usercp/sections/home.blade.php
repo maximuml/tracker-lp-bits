@@ -1,7 +1,7 @@
 @include('usercp.sections._menu', ['selected' => 'home'])
 
 <table border="0" cellspacing="0" cellpadding="5" width={{ $contentWidth }}>
-<x-settings-row-small :label="\App\Support\Html\SafeHtml::fromTrustedHtml($lang['row_join_date'] ?? 'Join date')">{{ $home['joinDate'] }}</x-settings-row-small>
+<x-settings-row-small :label="\App\Support\Html\SafeHtml::fromTrustedHtml($lang['row_join_date'] ?? 'Join date')">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($home['joinDate']))</x-settings-row-small>
 <x-settings-row-small :label="\App\Support\Html\SafeHtml::fromTrustedHtml($lang['row_email_address'] ?? 'Email')">{{ $home['email'] }}</x-settings-row-small>
 <x-settings-row-small :label="\App\Support\Html\SafeHtml::fromTrustedHtml($lang['row_ip_location'] ?? 'IP location')">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($home['ipLocation']))</x-settings-row-small>
 @if ($home['showAvatar'])
@@ -34,6 +34,6 @@
 <tr class=tableb><td style='padding-left: 10px' align=left class=rowfollow><a href=forums.php?action=viewtopic&topicid={{ (int) $topic['id'] }}><b>{{ $topic['subject'] }}</b></a></td>
 <td align=center class=rowfollow>{{ $topic['replies'] }}/{{ $topic['views'] }}</td>
 <td align=center class=rowfollow>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($topic['author']))</td>
-<td align=center class=rowfollow><nobr>{{ $topic['lastPostAdded'] }} | @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($topic['lastPostUsername']))</nobr></td></tr>
+<td align=center class=rowfollow><nobr>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($topic['lastPostAdded'])) | @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($topic['lastPostUsername']))</nobr></td></tr>
 @endforeach
 </table>

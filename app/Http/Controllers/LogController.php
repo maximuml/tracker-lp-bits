@@ -10,6 +10,7 @@ use App\Models\Setting;
 use App\Repositories\LogRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
+use App\Support\Format;
 use App\Support\Globals;
 use App\Support\Pagination;
 use App\Support\Time;
@@ -93,6 +94,22 @@ class LogController extends LegacyController
         foreach ($userIds as $uid) {
             $userDisplayMap[(int) $uid] = (int) $uid > 0 ? UserDisplay::username((int) $uid) : 'System';
         }
+
+        foreach ($logRows as &$row) {
+            $txt = (string) ($row['txt'] ?? '');
+            $row['color'] = match (true) {
+                str_contains($txt, 'settings updated by') => 'darkred',
+                str_contains($txt, 'was edited by') => 'blue',
+                str_contains($txt, 'was added to the Request section') => 'purple',
+                str_contains($txt, 'was deleted by') => 'red',
+                str_contains($txt, 'was uploaded by') => 'green',
+                default => '',
+            };
+            $row['dateHtml'] = (string) (Time::format((string) ($row['added'] ?? ''), true, false) ?? '');
+            $uid = (int) ($row['uid'] ?? 0);
+            $row['usernameHtml'] = $uid > 0 ? (string) ($userDisplayMap[$uid] ?? UserDisplay::username($uid)) : 'System';
+        }
+        unset($row);
 
         return $this->legacyPage($request, 'log', true, [
             'mode' => 'dailylog',
@@ -187,6 +204,12 @@ class LogController extends LegacyController
 
         $chronicleRows = $this->logRepository->getChronicle($q, (int) $offset, $perpage);
 
+        foreach ($chronicleRows as &$row) {
+            $row['dateHtml'] = (string) (Time::format((string) ($row['added'] ?? ''), true, false) ?? '');
+            $row['bodyHtml'] = Format::formatComment((string) ($row['txt'] ?? ''), true, false, true);
+        }
+        unset($row);
+
         return $this->legacyPage($request, 'log', true, [
             'mode' => 'chronicle',
             'q' => $q,
@@ -216,6 +239,12 @@ class LogController extends LegacyController
         [$pagertop, $pagerbottom, , $offset] = Pagination::pager($perpage, $count, $base);
 
         $newsRows = $this->logRepository->getNews($filters, (int) $offset, $perpage);
+
+        foreach ($newsRows as &$row) {
+            $row['dateHtml'] = (string) (Time::format((string) ($row['added'] ?? ''), true, false) ?? '');
+            $row['bodyHtml'] = Format::formatComment((string) ($row['body'] ?? ''), false, false, true);
+        }
+        unset($row);
 
         return $this->legacyPage($request, 'log', true, [
             'mode' => 'news',

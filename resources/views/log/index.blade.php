@@ -1,19 +1,6 @@
-@php
-$lang_log = (array) (\app(\App\Support\Globals::class)->get('lang_log') ?? []);
-$CURUSER = (array) (\app(\App\Support\CurrentUser::class)->get() ?? []);
-$BASEURL = \app(\App\Support\Globals::class)->get('BASEURL', '');
-$mode = (string) ($mode ?? 'dailylog');
-$title = $title ?? match ($mode) {
-    'chronicle' => $lang_log['head_chronicle'] ?? 'Chronicle',
-    'news' => $lang_log['head_news'] ?? 'News log',
-    'poll' => $lang_log['head_previous_polls'] ?? 'Previous polls',
-    default => $lang_log['head_site_log'] ?? 'Site log',
-};
-$canPollManage = (bool) ($canPollManage ?? false);
-@endphp
 @extends('layouts.legacy')
 
-@section('title', $title)
+@section('title', $title ?? ($lang_log['head_site_log'] ?? 'Site log'))
 
 @section('content')
 <div id="lognav"><ul id="logmenu" class="menu">
@@ -23,16 +10,6 @@ $canPollManage = (bool) ($canPollManage ?? false);
 </ul></div>
 
 @if ($mode === 'dailylog')
-    @php
-        $q = (string) ($q ?? '');
-        $search = (string) ($search ?? '');
-        $canConfidentialLog = (bool) ($canConfidentialLog ?? false);
-        $logRows = (array) ($logRows ?? []);
-        $pagertop = (string) ($pagertop ?? '');
-        $pagerbottom = (string) ($pagerbottom ?? '');
-        $userDisplayMap = (array) ($userDisplayMap ?? []);
-        $opts = ['all' => ($lang_log['text_all'] ?? 'All'), 'normal' => ($lang_log['text_normal'] ?? 'Normal'), 'mod' => ($lang_log['text_mod'] ?? 'Mod')];
-    @endphp
     <table border=1 cellspacing=0 width=940 cellpadding=5>
         <tr><td class=colhead align=left>{{ $lang_log['text_search_log'] ?? 'Search log' }}</td></tr>
         <tr><td class=toolbox align=left>
@@ -40,7 +17,7 @@ $canPollManage = (bool) ($canPollManage ?? false);
                 <input type="text" name="query" style="width:500px" value="{{ $q }}">
                 @if ($canConfidentialLog)
                     {{ $lang_log['text_in'] ?? 'in' }}<select name="search">
-                    @foreach ($opts as $value => $text)
+                    @foreach (['all' => ($lang_log['text_all'] ?? 'All'), 'normal' => ($lang_log['text_normal'] ?? 'Normal'), 'mod' => ($lang_log['text_mod'] ?? 'Mod')] as $value => $text)
                         <option value='{{ $value }}'{{ $value === $search ? ' selected' : '' }}>{{ $text }}</option>
                     @endforeach
                     </select>
@@ -59,36 +36,18 @@ $canPollManage = (bool) ($canPollManage ?? false);
         @endif
         </td></tr>
         @foreach ($logRows as $arr)
-            @php
-                $color = '';
-                $txt = (string) ($arr['txt'] ?? '');
-                if (strpos($txt, 'was uploaded by') !== false) { $color = 'green'; }
-                if (strpos($txt, 'was deleted by') !== false) { $color = 'red'; }
-                if (strpos($txt, 'was added to the Request section') !== false) { $color = 'purple'; }
-                if (strpos($txt, 'was edited by') !== false) { $color = 'blue'; }
-                if (strpos($txt, 'settings updated by') !== false) { $color = 'darkred'; }
-            @endphp
-            <tr><td class="rowfollow nowrap" align=center>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml((string) (\App\Support\Time::format((string) ($arr['added'] ?? ''), true, false) ?? '')))</td><td class=rowfollow align=left><font color='{{ $color }}'>{{ $txt }}</font></td>
+            <tr><td class="rowfollow nowrap" align=center>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($arr['dateHtml'] ?? ''))</td><td class=rowfollow align=left><font color='{{ $arr['color'] ?? '' }}'>{{ $arr['txt'] ?? '' }}</font></td>
             @if ($canConfidentialLog)
-                @php $uid = (int) ($arr['uid'] ?? 0); @endphp
-                <td class=rowfollow align=left>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml((string) ($uid > 0 ? ($userDisplayMap[$uid] ?? \App\Support\UserDisplay::username($uid)) : 'System')))</td>
+                <td class=rowfollow align=left>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($arr['usernameHtml'] ?? ''))</td>
             @endif
             </tr>
         @endforeach
         </table>
-        @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagerbottom))
+        @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagerbottom ?? ''))
     @endif
     @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($lang_log['time_zone_note'] ?? ''))
 
 @elseif ($mode === 'chronicle')
-    @php
-        $q = (string) ($q ?? '');
-        $canManage = (bool) ($canManage ?? false);
-        $chronicleRows = (array) ($chronicleRows ?? []);
-        $editItem = (array) ($editItem ?? []);
-        $pagertop = (string) ($pagertop ?? '');
-        $pagerbottom = (string) ($pagerbottom ?? '');
-    @endphp
     <table border=1 cellspacing=0 width=940 cellpadding=5>
         <tr><td class=colhead align=left>{{ $lang_log['text_search_chronicle'] ?? 'Search chronicle' }}</td></tr>
         <tr><td class=toolbox align=left>
@@ -99,26 +58,16 @@ $canPollManage = (bool) ($canPollManage ?? false);
         </td></tr>
     </table><br />
     @if ($canManage)
-        @php
-            $cTitle = $lang_log['text_add_chronicle'] ?? 'Add chronicle';
-            $value = $cTitle;
-            $do = 'add';
-            $editId = '';
-            if (! empty($editItem)) {
-                $cTitle = $lang_log['text_edit_chronicle'] ?? 'Edit chronicle';
-                $value = (string) ($editItem['txt'] ?? '');
-                $do = 'update';
-                $editId = '<input type="hidden" name="id" value="'.(int) ($editItem['id'] ?? 0).'">';
-            }
-        @endphp
         <table border=1 cellspacing=0 width=940 cellpadding=5>
-            <tr><td class=colhead align=left>{{ $cTitle }}</td></tr>
+            <tr><td class=colhead align=left>{{ ! empty($editItem) ? ($lang_log['text_edit_chronicle'] ?? 'Edit chronicle') : ($lang_log['text_add_chronicle'] ?? 'Add chronicle') }}</td></tr>
             <tr><td class=toolbox align=left>
                 <form method="post" action="">
-                    <textarea name="txt" style="width:500px" rows="3">{{ $value }}</textarea>
+                    <textarea name="txt" style="width:500px" rows="3">{{ ! empty($editItem) ? ($editItem['txt'] ?? '') : ($lang_log['text_add_chronicle'] ?? 'Add chronicle') }}</textarea>
                     <input type="hidden" name="action" value="chronicle">
-                    <input type="hidden" name="do" value="{{ $do }}">
-                    {!! $editId !!}
+                    <input type="hidden" name="do" value="{{ ! empty($editItem) ? 'update' : 'add' }}">
+                    @if (! empty($editItem))
+                        <input type="hidden" name="id" value="{{ (int) ($editItem['id'] ?? 0) }}">
+                    @endif
                     <input type=submit value="{{ $lang_log['submit_add'] ?? 'Add' }}"></form>
             </td></tr>
         </table><br />
@@ -129,30 +78,21 @@ $canPollManage = (bool) ($canPollManage ?? false);
         <table width=940 border=1 cellspacing=0 cellpadding=5>
         <tr><td class=colhead align=center>{{ $lang_log['col_date'] ?? 'Date' }}</td><td class=colhead align=left>{{ $lang_log['col_event'] ?? 'Event' }}</td>@if ($canManage)<td class=colhead align=center>{{ $lang_log['col_modify'] ?? 'Modify' }}</td>@endif</tr>
         @foreach ($chronicleRows as $arr)
-            @php $date = (string) (\App\Support\Time::format((string) ($arr['added'] ?? ''), true, false) ?? ''); @endphp
-            <tr><td class=rowfollow align=center><nobr>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($date))</nobr></td><td class=rowfollow align=left>{!! \App\Support\Format::formatComment((string) ($arr['txt'] ?? ''), true, false, true) !!}</td>@if ($canManage)<td align=center nowrap><b><a href="?action=chronicle&do=edit&id={{ (int) ($arr['id'] ?? 0) }}">{{ $lang_log['text_edit'] ?? 'Edit' }}</a>&nbsp;|&nbsp;<form method="post" action="?action=chronicle&do=del" class="nx-inline"><input type="hidden" name="id" value="{{ (int) ($arr['id'] ?? 0) }}"><button type="submit" class="nx-btn-link" style="color:red;font-weight:bold">{{ $lang_log['text_delete'] ?? 'Delete' }}</button></form></b></td>@endif</tr>
+            <tr><td class=rowfollow align=center><nobr>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($arr['dateHtml'] ?? ''))</nobr></td><td class=rowfollow align=left>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($arr['bodyHtml'] ?? ''))</td>@if ($canManage)<td align=center nowrap><b><a href="?action=chronicle&do=edit&id={{ (int) ($arr['id'] ?? 0) }}">{{ $lang_log['text_edit'] ?? 'Edit' }}</a>&nbsp;|&nbsp;<form method="post" action="?action=chronicle&do=del" class="nx-inline"><input type="hidden" name="id" value="{{ (int) ($arr['id'] ?? 0) }}"><button type="submit" class="nx-btn-link" style="color:red;font-weight:bold">{{ $lang_log['text_delete'] ?? 'Delete' }}</button></form></b></td>@endif</tr>
         @endforeach
         </table>
-        @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagerbottom))
+        @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagerbottom ?? ''))
     @endif
     @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($lang_log['time_zone_note'] ?? ''))
 
 @elseif ($mode === 'news')
-    @php
-        $q = (string) ($q ?? '');
-        $search = (string) ($search ?? '');
-        $newsRows = (array) ($newsRows ?? []);
-        $pagertop = (string) ($pagertop ?? '');
-        $pagerbottom = (string) ($pagerbottom ?? '');
-        $opts = ['title' => ($lang_log['text_title'] ?? 'Title'), 'body' => ($lang_log['text_body'] ?? 'Body'), 'both' => ($lang_log['text_both'] ?? 'Both')];
-    @endphp
     <table border=1 cellspacing=0 width=940 cellpadding=5>
         <tr><td class=colhead align=left>{{ $lang_log['text_search_news'] ?? 'Search news' }}</td></tr>
         <tr><td class=toolbox align=left>
             <form method="get" action="">
                 <input type="text" name="query" style="width:500px" value="{{ $q }}">
                 {{ $lang_log['text_in'] ?? 'in' }}<select name="search">
-                @foreach ($opts as $value => $text)
+                @foreach (['title' => ($lang_log['text_title'] ?? 'Title'), 'body' => ($lang_log['text_body'] ?? 'Body'), 'both' => ($lang_log['text_both'] ?? 'Both')] as $value => $text)
                     <option value='{{ $value }}'{{ $value === $search ? ' selected' : '' }}>{{ $text }}</option>
                 @endforeach
                 </select>
@@ -164,41 +104,33 @@ $canPollManage = (bool) ($canPollManage ?? false);
         @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($lang_log['text_news_empty'] ?? 'No news found.'))
     @else
         @foreach ($newsRows as $arr)
-            @php $date = (string) (\App\Support\Time::format((string) ($arr['added'] ?? ''), true, false) ?? ''); @endphp
             <table width=940 border=1 cellspacing=0 cellpadding=5>
-            <tr><td class=rowhead width='10%'>{{ $lang_log['col_title'] ?? 'Title' }}</td><td class=rowfollow align=left>{{ $arr['title'] ?? '' }}</td></tr><tr><td class=rowhead width='10%'>{{ $lang_log['col_date'] ?? 'Date' }}</td><td class=rowfollow align=left>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($date))</td></tr><tr><td class=rowhead width='10%'>{{ $lang_log['col_body'] ?? 'Body' }}</td><td class=rowfollow align=left>{!! \App\Support\Format::formatComment((string) ($arr['body'] ?? ''), false, false, true) !!}</td></tr>
+            <tr><td class=rowhead width='10%'>{{ $lang_log['col_title'] ?? 'Title' }}</td><td class=rowfollow align=left>{{ $arr['title'] ?? '' }}</td></tr><tr><td class=rowhead width='10%'>{{ $lang_log['col_date'] ?? 'Date' }}</td><td class=rowfollow align=left>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($arr['dateHtml'] ?? ''))</td></tr><tr><td class=rowhead width='10%'>{{ $lang_log['col_body'] ?? 'Body' }}</td><td class=rowfollow align=left>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($arr['bodyHtml'] ?? ''))</td></tr>
             </table><br />
         @endforeach
-        @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagerbottom))
+        @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagerbottom ?? ''))
     @endif
     @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($lang_log['time_zone_note'] ?? ''))
 
 @elseif ($mode === 'poll')
-    @php $pollData = (array) ($pollData ?? []); @endphp
     <table border=1 cellspacing=0 width=940 cellpadding=5>
         <tr><td class=colhead align=center>{{ $lang_log['text_previous_polls'] ?? 'Previous polls' }}</td></tr>
     @foreach ($pollData as $item)
-        @php
-            $poll = (array) ($item['poll'] ?? []);
-            $added = (string) ($item['added'] ?? '');
-            $totalVotes = (string) ($item['totalVotes'] ?? '0');
-            $options = (array) ($item['options'] ?? []);
-        @endphp
         <tr><td align=center>
-        <p class=sub>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($added))
+        <p class=sub>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['added'] ?? ''))
         @if ($canPollManage)
-            - [<a href="makepoll.php?action=edit&pollid={{ (int) ($poll['id'] ?? 0) }}"><b>{{ $lang_log['text_edit'] ?? 'Edit' }}</b></a>]
-            - [<a href="?action=poll&do=delete&pollid={{ (int) ($poll['id'] ?? 0) }}"><b>{{ $lang_log['text_delete'] ?? 'Delete' }}</b></a>]
+            - [<a href="makepoll.php?action=edit&pollid={{ (int) ($item['poll']['id'] ?? 0) }}"><b>{{ $lang_log['text_edit'] ?? 'Edit' }}</b></a>]
+            - [<a href="?action=poll&do=delete&pollid={{ (int) ($item['poll']['id'] ?? 0) }}"><b>{{ $lang_log['text_delete'] ?? 'Delete' }}</b></a>]
         @endif
-        <a name="{{ (int) ($poll['id'] ?? 0) }}"></a></p>
+        <a name="{{ (int) ($item['poll']['id'] ?? 0) }}"></a></p>
         <table class=main border=1 cellspacing=0 cellpadding=5><tr><td class=text>
-        <p align=center><b>{{ $poll['question'] ?? '' }}</b></p>
+        <p align=center><b>{{ $item['poll']['question'] ?? '' }}</b></p>
         <table width=100% class=main border=0 cellspacing=0 cellpadding=0>
-        @foreach ($options as $opt)
+        @foreach ($item['options'] ?? [] as $opt)
             <tr><td class=embedded>{{ $opt['text'] ?? '' }}&nbsp;&nbsp;</td><td class="embedded nowrap"><img class="bar_end" src="pic/trans.gif" alt="" /><img class="unsltbar" src="pic/trans.gif" style="width: {{ (int) ($opt['percent'] ?? 0) * 3 }}px" /><img class="bar_end" src="pic/trans.gif" alt="" /> {{ (int) ($opt['percent'] ?? 0) }}%</td></tr>
         @endforeach
         </table>
-        <p align=center>{{ $lang_log['text_votes'] ?? 'Votes: ' }}{{ $totalVotes }}</p>
+        <p align=center>{{ $lang_log['text_votes'] ?? 'Votes: ' }}{{ $item['totalVotes'] ?? '0' }}</p>
         </td></tr></table><br /><br />
         </td></tr>
     @endforeach

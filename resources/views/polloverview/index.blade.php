@@ -1,76 +1,46 @@
-@php
-$lang_polloverview = (array) (\app(\App\Support\Globals::class)->get('lang_polloverview') ?? []);
-$mode = (string) ($mode ?? 'list');
-$poll = (array) ($poll ?? []);
-$polls = (array) ($polls ?? []);
-$answers = (array) ($answers ?? []);
-$count = (int) ($count ?? 0);
-$pagertop = (string) ($pagertop ?? '');
-$pagerbottom = (string) ($pagerbottom ?? '');
-$userDisplayMap = (array) ($userDisplayMap ?? []);
-$title = $title ?? ($lang_polloverview['head_poll_overview'] ?? 'Poll overview');
-@endphp
 @extends('layouts.legacy')
 
-@section('title', $title)
+@section('title', $title ?? ($lang['head_poll_overview'] ?? 'Poll overview'))
 
 @section('content')
 @if ($mode === 'detail')
-    @php $pollid = (int) ($poll['id'] ?? 0); @endphp
-    <h1 align="center">{{ $lang_polloverview['text_polls_overview'] ?? 'Polls overview' }}</h1>
+    <h1 align="center">{{ $lang['text_polls_overview'] ?? 'Polls overview' }}</h1>
 
     <table width=737 border=1 cellspacing=0 cellpadding=5><tr>
-    <td class=colhead align=center><nobr>{{ $lang_polloverview['col_id'] ?? 'ID' }}</nobr></td><td class=colhead><nobr>{{ $lang_polloverview['col_added'] ?? 'Added' }}</nobr></td><td class=colhead><nobr>{{ $lang_polloverview['col_question'] ?? 'Question' }}</nobr></td></tr>
+    <td class=colhead align=center><nobr>{{ $lang['col_id'] ?? 'ID' }}</nobr></td><td class=colhead><nobr>{{ $lang['col_added'] ?? 'Added' }}</nobr></td><td class=colhead><nobr>{{ $lang['col_question'] ?? 'Question' }}</nobr></td></tr>
 
-    @php $added = \App\Support\Time::format($poll['added'] ?? ''); @endphp
-    <tr><td align=center><a href="polloverview.php?id={{ $pollid }}">{{ $pollid }}</a></td><td>{{ $added }}</td><td><a href="polloverview.php?id={{ $pollid }}">{{ $poll['question'] ?? '' }}</a></td></tr>
+    <tr><td align=center><a href="polloverview.php?id={{ (int) ($poll['id'] ?? 0) }}">{{ (int) ($poll['id'] ?? 0) }}</a></td><td>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pollAdded ?? ''))</td><td><a href="polloverview.php?id={{ (int) ($poll['id'] ?? 0) }}">{{ $poll['question'] ?? '' }}</a></td></tr>
     </table>
 
-    <h1 align="center">{{ $lang_polloverview['text_poll_question'] ?? 'Poll question' }}</h1><br />
-    <table width=737 border=1 cellspacing=0 cellpadding=5><tr><td class=colhead>{{ $lang_polloverview['col_option_no'] ?? 'Option #' }}</td><td class=colhead>{{ $lang_polloverview['col_options'] ?? 'Options' }}</td></tr>
-    @for ($i = 0; $i < 20; $i++)
-        @php $option = (string) ($poll["option{$i}"] ?? ''); @endphp
-        @if ($option !== '')
-            <tr><td>{{ $i }}</td><td>{{ $option }}</td></tr>
-        @endif
-    @endfor
+    <h1 align="center">{{ $lang['text_poll_question'] ?? 'Poll question' }}</h1><br />
+    <table width=737 border=1 cellspacing=0 cellpadding=5><tr><td class=colhead>{{ $lang['col_option_no'] ?? 'Option #' }}</td><td class=colhead>{{ $lang['col_options'] ?? 'Options' }}</td></tr>
+    @foreach ($pollOptions as $pollOption)
+        <tr><td>{{ $pollOption['index'] }}</td><td>{{ $pollOption['text'] }}</td></tr>
+    @endforeach
     </table>
 
-    <h1 align="center">{{ $lang_polloverview['text_polls_user_overview'] ?? 'Users voted' }}</h1>
+    <h1 align="center">{{ $lang['text_polls_user_overview'] ?? 'Users voted' }}</h1>
 
     @if ($count == 0)
-        <p align="center">{{ $lang_polloverview['text_no_users_voted'] ?? 'No users voted.' }}</p>
+        <p align="center">{{ $lang['text_no_users_voted'] ?? 'No users voted.' }}</p>
     @else
-        {{ $pagertop }}
+        @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagertop ?? ''))
         <table width=737 border=1 cellspacing=0 cellpadding=5>
-        <tr><td class=colhead align=center><nobr>{{ $lang_polloverview['col_username'] ?? 'Username' }}</nobr></td><td class=colhead align=center><nobr>{{ $lang_polloverview['col_selection'] ?? 'Selection' }}<nobr></td></tr>
+        <tr><td class=colhead align=center><nobr>{{ $lang['col_username'] ?? 'Username' }}</nobr></td><td class=colhead align=center><nobr>{{ $lang['col_selection'] ?? 'Selection' }}<nobr></td></tr>
         @foreach ($answers as $answerRow)
-            @php
-                $useras = (array) $answerRow;
-                $uid = (int) ($useras['userid'] ?? 0);
-                $selection = (int) ($useras['selection'] ?? 0);
-                $username = $userDisplayMap[$uid] ?? \App\Support\UserDisplay::username($uid);
-            @endphp
-            <tr><td>{!! $username !!}</td><td>{{ $poll["option{$selection}"] ?? '' }}</td></tr>
+            <tr><td>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($answerRow['usernameHtml'] ?? ''))</td><td>{{ $poll["option{$answerRow['selection']}"] ?? '' }}</td></tr>
         @endforeach
         </table>
-        {{ $pagerbottom }}
+        @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagerbottom ?? ''))
     @endif
 
 @else
-    @if (empty($polls))
-        @php \App\Support\LegacyResponse::abort($lang_polloverview['std_error'] ?? 'Error', $lang_polloverview['text_no_users_voted'] ?? 'No polls found.'); @endphp
-    @endif
-    <h1 align="center">{{ $lang_polloverview['text_polls_overview'] ?? 'Polls overview' }}</h1>
+    <h1 align="center">{{ $lang['text_polls_overview'] ?? 'Polls overview' }}</h1>
 
     <table width=737 border=1 cellspacing=0 cellpadding=5><tr>
-    <td class=colhead align=center><nobr>{{ $lang_polloverview['col_id'] ?? 'ID' }}</nobr></td><td class=colhead>{{ $lang_polloverview['col_added'] ?? 'Added' }}</td><td class=colhead><nobr>{{ $lang_polloverview['col_question'] ?? 'Question' }}</nobr></td></tr>
+    <td class=colhead align=center><nobr>{{ $lang['col_id'] ?? 'ID' }}</nobr></td><td class=colhead>{{ $lang['col_added'] ?? 'Added' }}</td><td class=colhead><nobr>{{ $lang['col_question'] ?? 'Question' }}</nobr></td></tr>
     @foreach ($polls as $pollRow)
-        @php
-            $poll = (array) $pollRow;
-            $added = \App\Support\Time::format($poll['added'] ?? '');
-        @endphp
-        <tr><td align=center><a href="polloverview.php?id={{ $poll['id'] }}">{{ $poll['id'] }}</a></td><td>{{ $added }}</td><td><a href="polloverview.php?id={{ $poll['id'] }}">{{ $poll['question'] }}</a></td></tr>
+        <tr><td align=center><a href="polloverview.php?id={{ $pollRow['id'] }}">{{ $pollRow['id'] }}</a></td><td>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pollRow['addedHtml'] ?? ''))</td><td><a href="polloverview.php?id={{ $pollRow['id'] }}">{{ $pollRow['question'] }}</a></td></tr>
     @endforeach
     </table>
 @endif

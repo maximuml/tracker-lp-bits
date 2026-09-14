@@ -4,17 +4,14 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Enums\UserPrivacy;
 use App\Models\Setting;
 use App\Models\TrackerUrl;
 use App\Models\User;
 use App\Repositories\UsercpRepository;
-use App\Repositories\UserPasskeyRepository;
 use App\Support\AssetAppender;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
-use App\Support\Form;
 use App\Support\Forum;
 use App\Support\Globals;
 use App\Support\Html;
@@ -25,7 +22,6 @@ use App\Support\Network;
 use App\Support\SearchBox;
 use App\Support\Strings;
 use App\Support\Time;
-use App\Support\TwoFactorAuthHelper;
 use App\Support\Url;
 use App\Support\UserDisplay;
 use App\ViewModels\UsercpPageViewModel;
@@ -48,8 +44,8 @@ final class UsercpPageService
         private readonly Globals $globals,
         private readonly LegacyRedisCache $cache,
         private readonly UsercpRepository $usercpRepository,
-        private readonly UserPasskeyRepository $passkeyRepository,
         private readonly UsercpTokenSectionBuilder $tokenSectionBuilder,
+        private readonly UsercpSecuritySectionBuilder $securitySectionBuilder,
     ) {}
 
     /**
@@ -84,7 +80,7 @@ final class UsercpPageService
                 $data['forum'] = $this->buildForum($lang, $curUser);
                 break;
             case 'security':
-                $data['security'] = $this->buildSecurity($lang, $curUser, $type);
+                $data['security'] = $this->securitySectionBuilder->build($lang, $curUser, $type);
                 break;
             default:
                 $data['home'] = $this->buildHome($lang, $curUser, $cache, $userInfo);
@@ -435,104 +431,5 @@ final class UsercpPageService
         return [
             'showTooltipSetting' => (string) $this->globals->get('enabletooltip_tweak', '') === 'yes',
         ];
-    }
-
-    /**
-     * Build the security settings form data.
-     *
-     * @param  array<string, mixed>  $lang
-     * @param  array<string, mixed>  $curUser
-     * @return array<string, mixed>
-     */
-    private function buildSecurity(array $lang, array $curUser, string $type): array
-    {
-        $showEmailChange = (string) $this->globals->get('disableemailchange', '') !== 'no'
-            && (string) $this->globals->get('smtptype', '') !== 'none';
-
-        // Two-step auth
-        $twoStep = [
-            'hasSecret' => ! empty($curUser['two_step_secret']),
-            'secret' => '',
-            'qrCodeUrl' => '',
-        ];
-        if (! $twoStep['hasSecret']) {
-            $secret = TwoFactorAuthHelper::createSecret();
-            $siteConfig = SiteConfig::current();
-            $label = sprintf('%s(%s)', $siteConfig->basic->siteName(), (string) ($curUser['username'] ?? ''));
-            $twoStep['secret'] = $secret;
-            $twoStep['qrCodeUrl'] = TwoFactorAuthHelper::qrCodeUrl($label, $secret);
-        }
-
-        // Privacy radios
-        $currentPrivacy = UserPrivacy::tryFrom((int) ($curUser['privacy'] ?? 1)) ?? UserPrivacy::NORMAL;
-        $privacyRadios = [
-            'normal' => $this->privacyRadio('normal', $lang['radio_normal'] ?? 'normal', $currentPrivacy->stringValue()),
-            'low' => $this->privacyRadio('low', $lang['radio_low'] ?? 'low', $currentPrivacy->stringValue()),
-            'strong' => $this->privacyRadio('strong', $lang['radio_strong'] ?? 'strong', $currentPrivacy->stringValue()),
-        ];
-
-        // For the confirm step, capture the posted values to re-render as hidden fields
-        $confirmHidden = [];
-        $isConfirm = $type === 'save';
-        if ($isConfirm) {
-            $confirmHidden = [
-                'resetpasskey' => (string) (request()->post('resetpasskey') ?? ''),
-                'resetauthkey' => (string) (request()->post('resetauthkey') ?? ''),
-                'email' => htmlspecialchars(trim((string) request()->post('email'))),
-                'chpassword' => (string) (request()->post('chpassword') ?? ''),
-                'privacy' => (string) (request()->post('privacy') ?? ''),
-                'two_step_secret' => (string) (request()->post('two_step_secret') ?? ''),
-                'two_step_code' => (string) (request()->post('two_step_code') ?? ''),
-            ];
-        }
-
-        // Saved message flags
-        $savedFlags = [
-            'mail' => request()->query('mail') === '1',
-            'passkey' => request()->query('passkey') === '1',
-            'password' => request()->query('password') === '1',
-            'privacy' => request()->query('privacy') === '1',
-        ];
-
-        return [
-            'type' => $type,
-            'isConfirm' => $isConfirm,
-            'confirmHidden' => $confirmHidden,
-            'savedFlags' => $savedFlags,
-            'showEmailChange' => $showEmailChange,
-            'twoStep' => $twoStep,
-            'privacyRadios' => $privacyRadios,
-            'passkeyListHtml' => $this->capturePasskeyList((int) ($curUser['id'] ?? 0)),
-            'confirmHtml' => $isConfirm ? $this->captureConfirmExtras() : '',
-        ];
-    }
-
-    /**
-     * Render a privacy radio input.
-     */
-    private function privacyRadio(string $name, string $descr, string $current): string
-    {
-        $checked = $current === $name ? ' checked="checked"' : '';
-
-        return '<input type="radio" name="privacy" value="'.htmlspecialchars($name).'"'.$checked.' /> '.htmlspecialchars($descr);
-    }
-
-    /**
-     * Capture the passkey list HTML (UserPasskeyRepository::renderList echoes).
-     */
-    private function capturePasskeyList(int $userId): string
-    {
-        ob_start();
-        $this->passkeyRepository->renderList($userId);
-
-        return (string) ob_get_clean();
-    }
-
-    /**
-     * Capture any extra HTML emitted by the usercp_security_setting_form hook.
-     */
-    private function captureConfirmExtras(): string
-    {
-        return '';
     }
 }

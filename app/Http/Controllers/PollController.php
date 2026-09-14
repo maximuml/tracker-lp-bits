@@ -16,6 +16,7 @@ use App\Support\CurrentUser;
 use App\Support\Globals;
 use App\Support\Pagination;
 use App\Support\Strings;
+use App\Support\Time;
 use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -122,12 +123,11 @@ class PollController extends LegacyController
     public function polloverview(Request $request): View|RedirectResponse|Response
     {
         $pollid = (int) $request->input('id', 0);
+        $lang = (array) ($this->globals->get('lang_polloverview') ?? []);
 
         if ($pollid > 0) {
             $poll = $this->pollRepository->findWithOptions($pollid);
             if (! $poll) {
-                $lang = (array) ($this->globals->get('lang_polloverview') ?? []);
-
                 return $this->legacyAbortResponse($lang['std_error'] ?? 'Error', $lang['text_no_poll_id'] ?? 'Invalid poll ID.');
             }
 
@@ -135,31 +135,59 @@ class PollController extends LegacyController
             $answers = [];
             $pagertop = '';
             $pagerbottom = '';
-            $userDisplayMap = [];
 
             if ($count > 0) {
                 $perpage = 100;
                 [$pagertop, $pagerbottom, , $offset, $perpage] = Pagination::pager($perpage, $count, "?id={$pollid}&");
                 $answers = $this->pollRepository->answers($pollid, $offset, $perpage);
-                $userDisplayMap = $this->pollRepository->userDisplayMap($answers);
+            }
+            $userDisplayMap = $this->pollRepository->userDisplayMap($answers);
+
+            $answerRows = array_map(static function ($answerRow) use ($userDisplayMap) {
+                $row = (array) $answerRow;
+                $uid = (int) ($row['userid'] ?? 0);
+                $row['usernameHtml'] = (string) ($userDisplayMap[$uid] ?? UserDisplay::username($uid));
+
+                return $row;
+            }, $answers);
+
+            $pollOptions = [];
+            for ($i = 0; $i < 20; $i++) {
+                $option = (string) ($poll["option{$i}"] ?? '');
+                if ($option !== '') {
+                    $pollOptions[] = ['index' => $i, 'text' => $option];
+                }
             }
 
             return $this->legacyPage($request, 'polloverview', true, [
                 'mode' => 'detail',
+                'lang' => $lang,
                 'poll' => $poll,
+                'pollAdded' => (string) Time::format($poll['added'] ?? ''),
+                'pollOptions' => $pollOptions,
                 'count' => $count,
-                'answers' => $answers,
+                'answers' => $answerRows,
                 'pagertop' => $pagertop,
                 'pagerbottom' => $pagerbottom,
-                'userDisplayMap' => $userDisplayMap,
             ]);
         }
 
         $polls = $this->pollRepository->listAll();
+        if (empty($polls)) {
+            return $this->legacyAbortResponse($lang['std_error'] ?? 'Error', $lang['text_no_users_voted'] ?? 'No polls found.');
+        }
+
+        $pollRows = array_map(static function ($pollRow) {
+            $row = (array) $pollRow;
+            $row['addedHtml'] = (string) Time::format($row['added'] ?? '');
+
+            return $row;
+        }, $polls);
 
         return $this->legacyPage($request, 'polloverview', true, [
             'mode' => 'list',
-            'polls' => $polls,
+            'lang' => $lang,
+            'polls' => $pollRows,
         ]);
     }
 

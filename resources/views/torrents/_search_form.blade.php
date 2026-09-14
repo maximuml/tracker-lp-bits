@@ -34,7 +34,7 @@
 						<td class="bottom" style="padding: 1px;padding-left: 10px">
 							<select class="med" name="spstate" style="width: 100px;">
 								<option value="0">{{ $lang_torrents['select_all'] ?? '' }}</option>
-								@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Html::promotionSelection($special_state, 0)))
+								@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Html\Tag::promotionSelection($special_state, 0)))
 							</select>
 						</td>
 					</tr>

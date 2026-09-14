@@ -1,6 +1,3 @@
-@php
-$lang_users = (array) (\app(\App\Support\Globals::class)->get('lang_users') ?? []);
-@endphp
 
 @extends('layouts.legacy')
 

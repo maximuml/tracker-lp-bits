@@ -54,21 +54,17 @@ final class ViewsHaveNoSideEffectsTest extends TestCase
         // Pre-existing side-effects — to be refactored in future sprints
         'resources/views/auth/login.blade.php',
         'resources/views/bitbucket/_bitbucket.blade.php',
-        'resources/views/bitbucketlog/index.blade.php',
         'resources/views/comments/_comments.blade.php',
         'resources/views/forums/_viewforum.blade.php',
         'resources/views/forums/_viewthread.blade.php',
         'resources/views/image/_image.blade.php',
         'resources/views/increment-bulk/_increment-bulk.blade.php',
-        'resources/views/moresmilies/index.blade.php',
         'resources/views/my/_hr.blade.php',
         'resources/views/page/_page.blade.php',
         'resources/views/reports/_reports.blade.php',
         'resources/views/staffmess/_staffmess.blade.php',
         'resources/views/torrent/_edit.blade.php',
-        'resources/views/user-ban-log/index.blade.php',
         'resources/views/user/_details.blade.php',
-        'resources/views/userhistory/_userhistory.blade.php',
     ];
 
     /**

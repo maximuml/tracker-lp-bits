@@ -453,7 +453,7 @@
         {{ $lang['text_random_promotion_note_two'] ?? '' }}
     </x-settings-row>
     <x-settings-row :label="$lang['row_large_torrent_promotion'] ?? 'Large torrent'">
-        {{ $lang['text_torrent_larger_than'] ?? '' }}<input type="text" style="width: 50px" name="largesize" value="{{ (string)($config['largesize'] ?? 20) }}">{{ $lang['text_gb_promoted_to'] ?? '' }}<select name="largepro">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Html::promotionSelection((int)($config['largepro'] ?? 2), 1)))</select>{{ $lang['text_by_system_upon_uploading'] ?? '' }}<br>{{ $lang['text_large_torrent_promotion_note'] ?? '' }}
+        {{ $lang['text_torrent_larger_than'] ?? '' }}<input type="text" style="width: 50px" name="largesize" value="{{ (string)($config['largesize'] ?? 20) }}">{{ $lang['text_gb_promoted_to'] ?? '' }}<select name="largepro">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($promotionSelects['largepro'] ?? ''))</select>{{ $lang['text_by_system_upon_uploading'] ?? '' }}<br>{{ $lang['text_large_torrent_promotion_note'] ?? '' }}
     </x-settings-row>
     <x-settings-row :label="$lang['row_promotion_timeout'] ?? 'Promotion timeout'">
         {{ $lang['text_promotion_timeout_note_one'] ?? '' }}
@@ -467,7 +467,7 @@
                 ['thirtypercentleechbecome', 'expirethirtypercentleech', 1, 7, 'text_thirtypercentleech_will_become', 'text_thirtypercentleech_timeout_default', 30],
                 ['normalbecome', 'expirenormal', 1, 0, 'text_normal_will_become', 'text_normal_timeout_default', 0],
             ] as [$become, $expire, $defBecome, $hide, $willKey, $defKey, $defExpire])
-                <li>{{ $lang[$willKey] ?? '' }}<select name="{{ $become }}">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Html::promotionSelection((int)($config[$become] ?? $defBecome), $hide)))</select>{{ $lang['text_after'] ?? ' after ' }}<input type="text" style="width: 50px" name="{{ $expire }}" value="{{ (string)($config[$expire] ?? $defExpire) }}">{{ $lang[$defKey] ?? '' }}</li>
+                <li>{{ $lang[$willKey] ?? '' }}<select name="{{ $become }}">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($promotionSelects[$become] ?? ''))</select>{{ $lang['text_after'] ?? ' after ' }}<input type="text" style="width: 50px" name="{{ $expire }}" value="{{ (string)($config[$expire] ?? $defExpire) }}">{{ $lang[$defKey] ?? '' }}</li>
             @endforeach
         </ul>
         {{ $lang['text_promotion_timeout_note_two'] ?? '' }}

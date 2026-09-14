@@ -5,8 +5,8 @@ $lang_ipsearch = (array) ($lang_ipsearch ?? \app(\App\Support\Globals::class)->g
 print('<h1 align="center">' . ($lang_ipsearch['text_search_ip_history'] ?? 'Search IP History') . '</h1>' . "\n");
 print('<form method="get" action="">');
 print('<table align=center border=1 cellspacing=0 width=115 cellpadding=5>' . "\n");
-\App\Support\Html::tr(($lang_ipsearch['row_ip'] ?? 'IP') . '<font color=red>*</font>', '<input type="text" name="ip" size="40" value="' . htmlspecialchars($ip) . '" />', 1);
-\App\Support\Html::tr('<nobr>' . ($lang_ipsearch['row_subnet_mask'] ?? 'Subnet Mask') . '</nobr>', '<input type="text" name="mask" size="40" value="' . htmlspecialchars($mask) . '" />', 1);
+echo \App\Support\Html\Tag::settingsRow(($lang_ipsearch['row_ip'] ?? 'IP') . '<font color=red>*</font>', '<input type="text" name="ip" size="40" value="' . htmlspecialchars($ip) . '" />', false);
+echo \App\Support\Html\Tag::settingsRow('<nobr>' . ($lang_ipsearch['row_subnet_mask'] ?? 'Subnet Mask') . '</nobr>', '<input type="text" name="mask" size="40" value="' . htmlspecialchars($mask) . '" />', false);
 print('<tr><td align="right" colspan="2"><input type="submit" value="' . ($lang_ipsearch['submit_search'] ?? 'Search') . '"/></td></tr>');
 print('</table></form>' . "\n");
 

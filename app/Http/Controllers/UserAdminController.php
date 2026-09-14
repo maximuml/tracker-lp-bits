@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Models\UserBanLog;
 use App\Repositories\BonusRepository;
 use App\Repositories\UserListingRepository;
+use App\Support\AssetAppender;
 use App\Support\CurrentUser;
 use App\Support\Globals;
 use App\Support\LegacyResponse;
@@ -210,7 +211,19 @@ class UserAdminController extends LegacyController
             'total' => 0,
             'isUserBonusEnough' => false,
             'insufficientMessage' => '',
+            't' => [
+                'featureDisabled' => Locale::trans('self-enable.feature_disabled', [], null),
+                'statusNormal' => Locale::trans('self-enable.enable_status_normal', [], null),
+                'noBanInfo' => Locale::trans('self-enable.no_ban_info', [], null),
+                'latestBanInfo' => Locale::trans('self-enable.latest_ban_info', [], null),
+                'deductPerDay' => Locale::trans('self-enable.deduct_bonus_per_day', ['unit' => number_format($unit)], null),
+                'deductTotal' => '',
+                'enableDesc' => Locale::trans('self-enable.enable_desc', [], null),
+                'enableButton' => Locale::trans('self-enable.enable_button', [], null),
+            ],
         ];
+
+        AssetAppender::css('#ban-info td {border: none}', 'header', false);
 
         if ($unit <= 0) {
             return $this->legacyPage($request, 'self-enable', true, $viewData);
@@ -234,6 +247,7 @@ class UserAdminController extends LegacyController
         $total = $unit * $elapsedDay;
         $isUserBonusEnough = (float) ($curUser['seedbonus'] ?? 0) >= $total;
         $insufficientMessage = Locale::trans('self-enable.bonus_not_enough', ['bonus' => $curUser['seedbonus'] ?? 0], null);
+        $viewData['t']['deductTotal'] = Locale::trans('self-enable.deduct_bonus_total', ['days' => number_format($elapsedDay), 'total' => number_format($total)], null);
 
         if ($request->isMethod('post') && $request->post('submit')) {
             if (! $isUserBonusEnough) {

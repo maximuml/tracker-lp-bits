@@ -15,11 +15,13 @@ use App\Support\Attachment\AttachmentService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Captcha;
 use App\Support\CurrentUser;
+use App\Support\Format;
 use App\Support\Globals;
 use App\Support\Http;
 use App\Support\LegacyAuth;
 use App\Support\LegacyHeaderBag;
 use App\Support\Logger;
+use App\Support\Smilies;
 use App\Support\Strings;
 use App\Support\Style;
 use App\Support\Url;
@@ -288,9 +290,67 @@ class UtilityController extends LegacyController
 
     public function tags(Request $request): View|RedirectResponse
     {
+        $lang = (array) ($this->globals->get('lang_tags') ?? []);
+        $siteName = Setting::getSiteName();
+        $username = (string) (($this->currentUser->get() ?? [])['username'] ?? '');
+
         return $this->legacyPage($request, 'tags', false, [
             'test' => (string) $request->post('test', ''),
+            'lang_tags' => $lang,
+            'siteName' => $siteName,
+            'tagItems' => $this->tagItems($lang, $siteName, $username),
         ]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $lang
+     * @return list<array<string, string>>
+     */
+    private function tagItems(array $lang, string $siteName, string $username): array
+    {
+        $schemeHost = Url::schemeAndHost(false);
+        $t = fn (string $key): string => (string) ($lang[$key] ?? '');
+        $tag = function (string $name, string $description, string $syntax, string $example, string $remarks = ''): array {
+            return [
+                'name' => $name,
+                'description' => $description,
+                'syntax' => $syntax,
+                'example' => $example,
+                'result' => Format::formatComment($example),
+                'remarks' => $remarks,
+            ];
+        };
+
+        return [
+            $tag($t('text_bold'), $t('text_bold_description'), $t('text_bold_syntax'), $t('text_bold_example')),
+            $tag($t('text_italic'), $t('text_italic_description'), $t('text_italic_syntax'), $t('text_italic_example')),
+            $tag($t('text_underline'), $t('text_underline_description'), $t('text_underline_syntax'), $t('text_underline_example')),
+            $tag($t('text_strikethrough'), $t('text_strikethrough_description'), $t('text_strikethrough_syntax'), $t('text_strikethrough_example')),
+            $tag($t('text_hide'), $t('text_hide_description'), $t('text_hide_syntax'), $t('text_hide_example')),
+            $tag($t('text_color_one'), $t('text_color_one_description'), $t('text_color_one_syntax'), $t('text_color_one_example'), $t('text_color_one_remarks')),
+            $tag($t('text_color_two'), $t('text_color_two_description'), $t('text_color_two_syntax'), $t('text_color_two_example'), $t('text_color_two_remarks')),
+            $tag($t('text_size'), $t('text_size_description'), $t('text_size_syntax'), $t('text_size_example'), $t('text_size_remarks')),
+            $tag($t('text_font'), $t('text_font_description'), $t('text_font_syntax'), $t('text_font_example'), $t('text_font_remarks')),
+            $tag($t('text_hyperlink_one'), $t('text_hyperlink_one_description'), $t('text_hyperlink_one_syntax'), sprintf($t('text_hyperlink_one_example'), $schemeHost), $t('text_hyperlink_one_remarks')),
+            $tag($t('text_hyperlink_two'), $t('text_hyperlink_two_description'), $t('text_hyperlink_two_syntax'), sprintf($t('text_hyperlink_two_example'), $schemeHost, $siteName), $t('text_hyperlink_two_remarks')),
+            $tag($t('text_image_one'), $t('text_image_one_description'), $t('text_image_one_syntax'), sprintf($t('text_image_one_example'), $schemeHost), $t('text_image_one_remarks')),
+            $tag($t('text_image_two'), $t('text_image_two_description'), $t('text_image_two_syntax'), sprintf($t('text_image_two_example'), $schemeHost), $t('text_image_two_remarks')),
+            $tag($t('text_quote_one'), $t('text_quote_one_description'), $t('text_quote_one_syntax'), sprintf($t('text_quote_one_example'), $siteName)),
+            $tag($t('text_quote_two'), $t('text_quote_two_description'), $t('text_quote_two_syntax'), sprintf($t('text_quote_two_example'), $username, $siteName)),
+            $tag($t('text_list'), $t('text_description'), $t('text_list_syntax'), $t('text_list_example')),
+            $tag($t('text_preformat'), $t('text_preformat_description'), $t('text_preformat_syntax'), $t('text_preformat_example')),
+            $tag($t('text_code'), $t('text_code_description'), $t('text_code_syntax'), $t('text_code_example')),
+            $tag($t('text_site'), $t('text_site_description'), $t('text_site_syntax'), $t('text_site_example')),
+            $tag($t('text_siteurl'), $t('text_siteurl_description'), $t('text_siteurl_syntax'), $t('text_siteurl_example')),
+            $tag($t('text_left'), $t('text_left_description'), $t('text_left_syntax'), $t('text_left_example')),
+            $tag($t('text_center'), $t('text_center_description'), $t('text_center_syntax'), $t('text_center_example')),
+            $tag($t('text_right'), $t('text_right_description'), $t('text_right_syntax'), $t('text_right_example')),
+            $tag($t('text_youtube'), $t('text_youtube_description'), $t('text_youtube_syntax'), $t('text_youtube_example')),
+            $tag($t('text_video'), $t('text_video_description'), $t('text_video_syntax'), $t('text_video_example')),
+            $tag($t('text_audio'), $t('text_audio_description'), $t('text_audio_syntax'), $t('text_audio_example')),
+            $tag($t('text_spoiler'), $t('text_spoiler_description'), $t('text_spoiler_syntax'), $t('text_spoiler_example')),
+            $tag($t('text_hr'), $t('text_hr_description'), $t('text_hr_syntax'), $t('text_hr_example')),
+        ];
     }
 
     public function suggest(Request $request): Response
@@ -351,7 +411,15 @@ class UtilityController extends LegacyController
 
     public function smilies(Request $request): View|RedirectResponse
     {
-        return $this->legacyPage($request, 'smilies', true);
+        $lang = (array) ($this->globals->get('lang_functions') ?? []);
+
+        return $this->legacyPage($request, 'smilies', true, [
+            'smiliesFrame' => Smilies::framedTable(
+                (string) ($lang['text_smilies'] ?? ''),
+                (string) ($lang['col_type_something'] ?? ''),
+                (string) ($lang['col_to_make_a'] ?? ''),
+            ),
+        ]);
     }
 
     public function opensearch(Request $request): Response

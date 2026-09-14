@@ -19,7 +19,7 @@ if ($hasResults) {
     echo \App\Support\TorrentTable::render($rows);
     print($pagerbottom);
 } elseif ($search !== '') {
-    \App\Support\Html::stdMessage($lang_torrents['std_search_results_for'] . $searchstr_ori . "\"", $lang_torrents['std_try_again']);
+    echo \App\Support\Frame::stdMessage($lang_torrents['std_search_results_for'] . $searchstr_ori . "\"", $lang_torrents['std_try_again'], false);
 }
 
 print("</td></tr></table>");

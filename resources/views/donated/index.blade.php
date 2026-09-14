@@ -1,14 +1,10 @@
-@php
-$title = 'Update Users Donated Amounts';
-$error = (string) ($error ?? '');
-@endphp
 @extends('layouts.legacy')
 
-@section('title', $title)
+@section('title', 'Update Users Donated Amounts')
 
 @section('content')
 <h1>Update Users Donated Amounts</h1>
-@if ($error !== '')
+@if (($error ?? '') !== '')
     <p align="center"><font class="striking">{{ $error }}</font></p>
 @endif
 <form method="post" action="donated.php">

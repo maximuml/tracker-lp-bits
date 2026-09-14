@@ -4,7 +4,7 @@ if ($mode === 'list'):
     <h1 align=center><?php echo $lang_staffbox['text_staff_pm'] ?? 'Staff PM'; ?></h1>
     <?php
     if (empty($rows)) {
-        \App\Support\Html::stdMessage($lang_staffbox['std_sorry'] ?? 'Sorry', $lang_staffbox['std_no_messages_yet'] ?? 'No messages yet.');
+        echo \App\Support\Frame::stdMessage($lang_staffbox['std_sorry'] ?? 'Sorry', $lang_staffbox['std_no_messages_yet'] ?? 'No messages yet.', false);
     } else {
         ?>
         <form method=post action="staffbox.php?action=takecontactanswered">

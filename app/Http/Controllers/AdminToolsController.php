@@ -11,6 +11,7 @@ use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
 use App\Support\Html;
+use App\Support\Input;
 use App\Support\Network;
 use App\Support\Pagination;
 use App\Support\UserDisplay;
@@ -67,6 +68,7 @@ class AdminToolsController extends LegacyController
             'table' => $table,
             'paginationTop' => $paginationTop,
             'paginationBottom' => $paginationBottom,
+            'serverRequestUri' => Input::serverValue('REQUEST_URI'),
         ]);
     }
 
@@ -184,6 +186,7 @@ class AdminToolsController extends LegacyController
                 return $this->legacyPage($request, 'location', true, [
                     'mode' => $mode,
                     'editRow' => $editRow,
+                    'actionUrl' => $actionUrl,
                 ]);
             }
         }

@@ -43,5 +43,5 @@ if ($count){
 }
 else
 {
-	\App\Support\Html::stdMessage($lang_viewsnatches['std_sorry'], $lang_viewsnatches['std_no_snatched_users']);
+	echo \App\Support\Frame::stdMessage($lang_viewsnatches['std_sorry'], $lang_viewsnatches['std_no_snatched_users'], false);
 }

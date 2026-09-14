@@ -1,6 +1,3 @@
-@php
-$lang_ipsearch = (array) (\app(\App\Support\Globals::class)->get('lang_ipsearch') ?? []);
-@endphp
 
 @extends('layouts.legacy')
 

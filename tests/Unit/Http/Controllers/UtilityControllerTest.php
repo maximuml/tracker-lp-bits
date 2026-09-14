@@ -175,7 +175,11 @@ final class UtilityControllerTest extends TestCase
     public function test_tags_passes_post_data_to_view(): void
     {
         $this->mockCurrentUser(null);
-        View::shouldReceive('make')->once()->with('tags.index', ['test' => 'abc'])->andReturn($this->fakeView());
+        View::shouldReceive('make')->once()->with(
+            'tags.index',
+            Mockery::on(fn (array $data): bool => ($data['test'] ?? null) === 'abc'
+                && isset($data['tagItems'], $data['siteName'], $data['lang_tags'])),
+        )->andReturn($this->fakeView());
 
         $controller = app(UtilityController::class);
         $request = Request::create('/tags', 'POST', ['test' => 'abc']);
@@ -246,7 +250,10 @@ final class UtilityControllerTest extends TestCase
     public function test_smilies_renders_legacy_page(): void
     {
         $this->mockCurrentUser(['id' => 1]);
-        View::shouldReceive('make')->once()->with('smilies.index', [])->andReturn($this->fakeView());
+        View::shouldReceive('make')->once()->with(
+            'smilies.index',
+            Mockery::on(fn (array $data): bool => isset($data['smiliesFrame'])),
+        )->andReturn($this->fakeView());
 
         $controller = app(UtilityController::class);
         $request = Request::create('/smilies', 'GET');

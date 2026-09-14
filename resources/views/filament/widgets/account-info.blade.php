@@ -1,12 +1,8 @@
-@php
-    $user = filament()->auth()->user();
-@endphp
-
 <x-filament-widgets::widget class="fi-account-widget">
     <x-filament::section>
         <x-filament-panels::avatar.user
             size="lg"
-            :user="$user"
+            :user="filament()->auth()->user()"
             loading="lazy"
         />
 
@@ -16,7 +12,7 @@
             </h2>
 
             <p class="fi-account-widget-user-name">
-                {{ filament()->getUserName($user) . ' (' . $user->classText . ')' }}
+                {{ filament()->getUserName(filament()->auth()->user()) . ' (' . filament()->auth()->user()->classText . ')' }}
             </p>
         </div>
     </x-filament::section>

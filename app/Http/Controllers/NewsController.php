@@ -172,6 +172,9 @@ class NewsController extends LegacyController
                 'notify' => ($arr['notify'] ?? false) ? 'yes' : 'no',
                 'returnto' => $returnto,
                 'title' => $newsTitle,
+                'composeTitle' => $newsTitle,
+                'checked' => ($arr['notify'] ?? false) ? ' checked' : '',
+                'actionUrl' => htmlspecialchars('?action=edit&newsid='.$newsid),
             ]);
         }
 
@@ -183,7 +186,15 @@ class NewsController extends LegacyController
 
         return $this->legacyPageRaw($request, 'news', true, [
             'mode' => 'add',
+            'newsid' => 0,
+            'body' => '',
+            'subject' => '',
+            'notify' => 'no',
+            'returnto' => '',
             'title' => $composeTitle,
+            'composeTitle' => $composeTitle,
+            'checked' => '',
+            'actionUrl' => '?action=add',
         ]);
     }
 

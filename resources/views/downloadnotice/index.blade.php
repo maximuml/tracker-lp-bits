@@ -1,39 +1,26 @@
-@php
-$lang_downloadnotice = (array) (\app(\App\Support\Globals::class)->get('lang_downloadnotice') ?? []);
-$CURUSER = (array) (\app(\App\Support\CurrentUser::class)->get() ?? []);
-$torrentid = (int) ($torrentid ?? 0);
-$type = (string) ($type ?? 'firsttime');
-$title = $title ?? ($lang_downloadnotice['head_download_notice'] ?? 'Download Notice');
-$note = (string) ($note ?? '');
-$noticenexttime = (string) ($noticenexttime ?? '');
-$showrationotice = (bool) ($showrationotice ?? false);
-$showclientnotice = (bool) ($showclientnotice ?? false);
-$forcecheck = (bool) ($forcecheck ?? false);
-$tdattr = (string) ($tdattr ?? '');
-@endphp
 @extends('layouts.legacy')
 
-@section('title', $title)
+@section('title', $title ?? ($lang_downloadnotice['head_download_notice'] ?? 'Download Notice'))
 
 @section('content')
 <h2>{{ $title }}</h2>
 <table width="100%"><tr>
-<td colspan="2" class="text" align="left"><p>{{ $note }}</p></td></tr>
+<td colspan="2" class="text" align="left"><p>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($note))</p></td></tr>
 <tr>
 @if (! empty($showrationotice))
 <td class="text" align="left" valign="top" {{ $tdattr }}>
 <h3>{{ $lang_downloadnotice['text_this_is_private_tracker'] ?? '' }}</h3>
 <p>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($lang_downloadnotice['text_private_tracker_note_one'] ?? ''))<i>({{ $lang_downloadnotice['text_learn_more'] ?? '' }}<a class="faqlink" href="{{ NEXUSWIKIURL ?? '' }}/Private Tracker" target="_blank">{{ $lang_downloadnotice['text_nexuswiki'] ?? '' }}</a>)</i></p>
-<p>{{ $lang_downloadnotice['text_private_tracker_note_two'] ?? '' }}<i>({{ $lang_downloadnotice['text_see_ratio'] ?? '' }}<a class="faqlink" href="faq.php#id23" target="_blank">{{ $lang_downloadnotice['text_faq'] ?? '' }}</a>)</i></p>
+<p>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($lang_downloadnotice['text_private_tracker_note_two'] ?? ''))<i>({{ $lang_downloadnotice['text_see_ratio'] ?? '' }}<a class="faqlink" href="faq.php#id23" target="_blank">{{ $lang_downloadnotice['text_faq'] ?? '' }}</a>)</i></p>
 <p>{{ $lang_downloadnotice['text_private_tracker_note_three'] ?? '' }}</p>
 <img src="pic/ratio.png" alt="ratio" />
-<p>{{ $lang_downloadnotice['text_private_tracker_note_four'] ?? '' }}</p>
+<p>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($lang_downloadnotice['text_private_tracker_note_four'] ?? ''))</p>
 </td>
 @endif
 @if (! empty($showclientnotice))
 <td class="text" align="left" valign="top" {{ $tdattr }}>
 <h3>{{ $lang_downloadnotice['text_use_allowed_clients'] ?? '' }}</h3>
-<p>{{ $lang_downloadnotice['text_allowed_clients_note_one'] ?? '' }}</p>
+<p>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($lang_downloadnotice['text_allowed_clients_note_one'] ?? ''))</p>
 <p>{{ $lang_downloadnotice['text_allowed_clients_note_two'] ?? '' }}<a class='faqlink' href='faq.php#id29' target='_blank'>{{ $lang_downloadnotice['text_faq'] ?? '' }}</a>{{ $lang_downloadnotice['text_allowed_clients_note_three'] ?? '' }}</p>
 <table width="100%">
 <tr>

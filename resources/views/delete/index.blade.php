@@ -1,6 +1,3 @@
-@php
-$lang_delete = (array) (\app(\App\Support\Globals::class)->get('lang_delete') ?? []);
-@endphp
 
 @extends('layouts.legacy')
 

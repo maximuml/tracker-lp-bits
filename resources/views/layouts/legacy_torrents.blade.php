@@ -1,9 +1,5 @@
-@php
-\App\Support\Html::stdhead($__env->yieldContent('title'));
-@endphp
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\PageLayout::headerHtml($__env->yieldContent('title'))))
 <div id="main-content" tabindex="-1">
 @yield('content')
 </div>
-@php
-\App\Support\Html::stdfoot();
-@endphp
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\PageLayout::footerHtml()))

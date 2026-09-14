@@ -14,6 +14,7 @@ use App\Repositories\IndexRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Globals;
+use App\Support\Html;
 use App\Support\Html\SafeHtml;
 use App\Support\Log;
 use App\Support\Settings;
@@ -174,6 +175,20 @@ class SettingsController extends LegacyController
 
             if ($section === 'torrent') {
                 $data['nfoViewStyles'] = Torrent::$nfoViewStyles;
+                $promotionDefs = [
+                    'largepro' => [2, 1],
+                    'halfleechbecome' => [1, 5],
+                    'freebecome' => [1, 2],
+                    'twoupbecome' => [1, 3],
+                    'twoupfreebecome' => [1, 4],
+                    'twouphalfleechbecome' => [1, 6],
+                    'thirtypercentleechbecome' => [1, 7],
+                    'normalbecome' => [1, 0],
+                ];
+                $data['promotionSelects'] = [];
+                foreach ($promotionDefs as $name => [$def, $hide]) {
+                    $data['promotionSelects'][$name] = Html::promotionSelection((int) ($data['config'][$name] ?? $def), $hide);
+                }
             }
 
             if ($section === 'security') {

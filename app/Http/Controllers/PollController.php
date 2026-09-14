@@ -97,12 +97,12 @@ class PollController extends LegacyController
         }
 
         $ageWarning = '';
+        $lang = (array) ($this->globals->get('lang_makepoll') ?? []);
         if ($pollid <= 0) {
             $lastPoll = $this->pollRepository->lastPoll();
             if (! empty($lastPoll)) {
                 $hours = (int) floor((time() - strtotime((string) $lastPoll['added'])) / 3600);
                 $days = (int) floor($hours / 24);
-                $lang = (array) ($this->globals->get('lang_makepoll') ?? []);
                 if ($days >= 1) {
                     $t = $days.($lang['text_day'] ?? ' day').Strings::addS($days);
                 } else {
@@ -112,11 +112,16 @@ class PollController extends LegacyController
             }
         }
 
+        $pollid = (int) ($poll['id'] ?? $pollid);
+
         return $this->legacyPage($request, 'makepoll', true, [
             'poll' => $poll,
-            'pollid' => $poll['id'] ?? $pollid,
+            'pollid' => $pollid,
             'returnto' => htmlspecialchars((string) ($request->input('returnto') ?? $request->headers->get('referer') ?? '')),
             'ageWarning' => $ageWarning,
+            'title' => $pollid > 0
+                ? ($lang['head_edit_poll'] ?? 'Edit poll')
+                : ($lang['head_new_poll'] ?? 'New poll'),
         ]);
     }
 

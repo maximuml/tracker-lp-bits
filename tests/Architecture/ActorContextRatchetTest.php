@@ -36,9 +36,9 @@ final class ActorContextRatchetTest extends TestCase
      * least one match counts as 1, regardless of how many matches
      * appear on that line.
      */
-    private const BASELINE_APP_CALLS = 566;
+    private const BASELINE_APP_CALLS = 565;
 
-    private const BASELINE_GLOBALS_REFS = 65;
+    private const BASELINE_GLOBALS_REFS = 64;
 
     private const APP_DIR = __DIR__.'/../../app';
 

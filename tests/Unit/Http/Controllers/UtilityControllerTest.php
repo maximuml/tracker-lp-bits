@@ -232,7 +232,7 @@ final class UtilityControllerTest extends TestCase
     public function test_moresmilies_renders_legacy_page(): void
     {
         $this->mockCurrentUser(['id' => 1]);
-        View::shouldReceive('make')->once()->with('moresmilies.index', [])->andReturn($this->fakeView());
+        View::shouldReceive('make')->once()->with('moresmilies.index', ['form' => '', 'text' => ''])->andReturn($this->fakeView());
 
         $controller = app(UtilityController::class);
         $request = Request::create('/moresmilies', 'GET');

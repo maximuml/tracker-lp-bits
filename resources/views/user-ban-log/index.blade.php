@@ -19,6 +19,6 @@ $paginationBottom = (string) ($paginationBottom ?? '');
     </form>
 </div>
 
-{!! $table !!}
-{!! $paginationBottom !!}
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(($table ?? '')))
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(($paginationBottom ?? '')))
 @endsection

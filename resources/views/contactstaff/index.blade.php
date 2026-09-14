@@ -4,7 +4,7 @@
 
 @section('content')
 <form id="compose" method="post" name="compose" action="/takecontact">
-    @php \App\Support\Frame::composeBeginVoid($lang_contactstaff['text_message_to_staff'], 'new'); @endphp
-    @php \App\Support\Frame::composeEndVoid(); @endphp
+    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::composeBegin($lang_contactstaff['text_message_to_staff'] ?? '', 'new', '', true, '', 100)))
+    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::composeEnd()))
 </form>
 @endsection

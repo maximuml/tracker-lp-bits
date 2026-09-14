@@ -165,14 +165,25 @@ class UtilityController extends LegacyController
      */
     private function renderAttachment(Request $request, array $currentUser, AttachmentService $Attach, string $warning = '', string $script = '', ?int $countLeft = null): Response
     {
+        $allowedextsblock = rtrim(implode('/', $Attach->get_allowed_ext()), '/');
+        if ($allowedextsblock === '') {
+            $allowedextsblock = 'N/A';
+        }
+
+        $cspNonce = (string) $request->attributes->get('csp_nonce', '');
+        if ($script !== '' && $cspNonce !== '') {
+            $script = (string) preg_replace('/<script(?![^>]*\snonce=)/i', '<script nonce="'.htmlspecialchars($cspNonce, ENT_QUOTES).'"', $script);
+        }
+
         $content = view('attachment.index', [
             'CURUSER' => $currentUser,
             'lang_attachment' => (array) ($this->globals->get('lang_attachment') ?? []),
             'Attach' => $Attach,
+            'enableAttachment' => $Attach->enable_attachment(),
             'count_limit' => (int) $Attach->get_count_limit(),
             'count_left' => $countLeft ?? $Attach->get_count_left(),
             'size_limit' => $Attach->get_size_limit_byte(),
-            'allowed_exts' => $Attach->get_allowed_ext(),
+            'allowedextsblock' => $allowedextsblock,
             'css_uri' => Style::cssUriWithContext(),
             'altsize' => (string) $request->input('altsize', ''),
             'callback_func' => (string) $request->input('callback_func', ''),
@@ -332,7 +343,10 @@ class UtilityController extends LegacyController
 
     public function moresmilies(Request $request): View|RedirectResponse
     {
-        return $this->legacyPage($request, 'moresmilies', true);
+        return $this->legacyPage($request, 'moresmilies', true, [
+            'form' => (string) $request->query('form', ''),
+            'text' => (string) $request->query('text', ''),
+        ]);
     }
 
     public function smilies(Request $request): View|RedirectResponse

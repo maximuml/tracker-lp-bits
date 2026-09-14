@@ -22,7 +22,7 @@ $stdheadMsgalert = false;
 @if ($returnto !== '')
     <input type="hidden" name="returnto" value="{{ $returnto }}">
 @endif
-{!! \App\Support\Frame::composeBegin($frameTitle ?? $title, $replyto ? 'reply' : 'new', $body, true, $subject, 100) !!}
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::composeBegin($frameTitle ?? $title, $replyto ? 'reply' : 'new', $body, true, $subject, 100)))
 <tr><td class="toolbox" colspan="2" align="center">
 @if ($replyto)
     <input type="checkbox" name="delete" value="yes"{{ $deleteChecked }}> {{ $lang_sendmessage['checkbox_delete_message_replying_to'] ?? 'Delete message replying to' }}
@@ -30,6 +30,6 @@ $stdheadMsgalert = false;
 @endif
     <input type="checkbox" name="save" value="yes"{{ $saveChecked }}> {{ $lang_sendmessage['checkbox_save_message_to_sendbox'] ?? 'Save message to sendbox' }}
 </td></tr>
-{!! \App\Support\Frame::composeEnd() !!}
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::composeEnd()))
 </form>
 @endsection

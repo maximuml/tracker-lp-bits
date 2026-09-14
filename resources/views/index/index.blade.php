@@ -21,12 +21,12 @@ $toastLang = json_encode([
 @section('content')
 @include('index.sections.news')
 @if(!empty($extraModules))
-{!! $extraModules !!}
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(($extraModules ?? '')))
 @endif
 @include('index.sections.shoutbox')
 @include('index.sections.forum_posts')
 @if($latestTorrents['show'])
-{!! $latestTorrents['html'] !!}
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(($latestTorrents['html'] ?? '')))
 @endif
 @include('index.sections.top_uploaders')
 @include('index.sections.polls')

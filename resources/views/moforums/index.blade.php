@@ -1,6 +1,3 @@
-@php
-$lang_moforums = (array) (\app(\App\Support\Globals::class)->get('lang_moforums') ?? []);
-@endphp
 
 @extends('layouts.legacy')
 

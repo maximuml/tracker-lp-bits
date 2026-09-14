@@ -1,6 +1,3 @@
-@php
-$lang_uploaders = (array) (\app(\App\Support\Globals::class)->get('lang_uploaders') ?? []);
-@endphp
 
 @extends('layouts.legacy')
 

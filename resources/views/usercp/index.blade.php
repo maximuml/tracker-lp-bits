@@ -1,21 +1,16 @@
-@php
-$lang_usercp = (array) (\app(\App\Support\Globals::class)->get('lang_usercp') ?? []);
-$title = $title ?? ($lang_usercp['head_control_panel'] ?? 'Control Panel');
-$action = $action ?? '';
-$type = $type ?? '';
-@endphp
+
 @extends('layouts.legacy')
 
-@section('title', $title)
+@section('title', $title ?? ($lang_usercp['head_control_panel'] ?? 'Control Panel'))
 
 @section('content')
-@if ($action === 'personal')
+@if (($action ?? '') === 'personal')
 @include('usercp.sections.personal')
-@elseif ($action === 'tracker')
+@elseif (($action ?? '') === 'tracker')
 @include('usercp.sections.tracker')
-@elseif ($action === 'forum')
+@elseif (($action ?? '') === 'forum')
 @include('usercp.sections.forum')
-@elseif ($action === 'security')
+@elseif (($action ?? '') === 'security')
 @include('usercp.sections.security')
 @else
 @include('usercp.sections.home')

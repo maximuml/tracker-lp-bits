@@ -1,23 +1,13 @@
-@php
-$lang_makepoll = (array) (\app(\App\Support\Globals::class)->get('lang_makepoll') ?? []);
-$poll = (array) ($poll ?? []);
-$pollid = (int) ($poll['id'] ?? 0);
-$ageWarning = (string) ($ageWarning ?? '');
-$returnto = (string) ($returnto ?? '');
-$title = $title ?? ($pollid > 0
-    ? ($lang_makepoll['head_edit_poll'] ?? 'Edit poll')
-    : ($lang_makepoll['head_new_poll'] ?? 'New poll'));
-@endphp
 @extends('layouts.legacy')
 
-@section('title', $title)
+@section('title', $title ?? ($lang_makepoll['head_new_poll'] ?? 'New poll'))
 
 @section('content')
-@if ($pollid > 0)
+@if (($pollid ?? 0) > 0)
     <h1>{{ $lang_makepoll['text_edit_poll'] ?? 'Edit poll' }}</h1>
 @else
-    @if ($ageWarning !== '')
-        <p><font class=striking><b>{{ $ageWarning }}</b></font></p>
+    @if (($ageWarning ?? '') !== '')
+        <p><font class=striking><b>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($ageWarning))</b></font></p>
     @endif
     <h1>{{ $lang_makepoll['text_make_poll'] ?? 'Make poll' }}</h1>
 @endif

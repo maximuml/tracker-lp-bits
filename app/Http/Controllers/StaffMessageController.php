@@ -32,6 +32,7 @@ class StaffMessageController extends LegacyController
         $classes = array_chunk(User::$classes, 4, true);
 
         return $this->legacyPage($request, 'staffmess', true, [
+            'stdheadMsgalert' => false,
             'classes' => $classes,
             'body' => htmlspecialchars((string) request()->query('body')),
             'receiver' => (int) (request()->query('receiver') ?? 0),

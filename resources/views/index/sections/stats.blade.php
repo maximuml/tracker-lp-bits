@@ -48,17 +48,16 @@
 <td>{{ $stats['labels']['rowTotalData'] }}</td><td>{{ $stats['torrentStats']['totalData'] }}</td>
 </tr>
 <tr><td colspan="4" class="rowhead">&nbsp;</td></tr>
-@php($classRows = $stats['classStats'])
-@for($i = 0; $i < count($classRows); $i += 2)
+@foreach (array_chunk($stats['classStats'], 2) as $pair)
 <tr>
-<td>{{ $classRows[$i]['label'] }}@if(!empty($classRows[$i]['icon'])) <img class="{{ $classRows[$i]['icon'] }}" src="pic/trans.gif" alt="{{ $classRows[$i]['icon'] }}" />@endif</td><td>{{ $classRows[$i]['value'] }}</td>
-@if($i + 1 < count($classRows))
-<td>{{ $classRows[$i+1]['label'] }}</td><td>{{ $classRows[$i+1]['value'] }}</td>
+<td>{{ $pair[0]['label'] }}@if(!empty($pair[0]['icon'])) <img class="{{ $pair[0]['icon'] }}" src="pic/trans.gif" alt="{{ $pair[0]['icon'] }}" />@endif</td><td>{{ $pair[0]['value'] }}</td>
+@if(isset($pair[1]))
+<td>{{ $pair[1]['label'] }}</td><td>{{ $pair[1]['value'] }}</td>
 @else
 <td></td><td></td>
 @endif
 </tr>
-@endfor
+@endforeach
 </table>
 </td></tr></table>
 @endif

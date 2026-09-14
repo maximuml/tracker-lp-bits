@@ -1,6 +1,3 @@
-@php
-$lang_staffpanel = (array) (\app(\App\Support\Globals::class)->get('lang_staffpanel') ?? []);
-@endphp
 
 @extends('layouts.legacy')
 

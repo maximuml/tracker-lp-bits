@@ -1,6 +1,3 @@
-@php
-$lang_forummanage = (array) (\app(\App\Support\Globals::class)->get('lang_forummanage') ?? []);
-@endphp
 
 @extends('layouts.legacy')
 

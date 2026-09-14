@@ -1,6 +1,3 @@
-@php
-$lang_viewsnatches = (array) (\app(\App\Support\Globals::class)->get('lang_viewsnatches') ?? []);
-@endphp
 
 @extends('layouts.legacy')
 

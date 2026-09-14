@@ -1,9 +1,7 @@
-@php
-$title = $title ?? 'Administrative User Search';
-@endphp
+
 @extends('layouts.legacy')
 
-@section('title', $title)
+@section('title', $title ?? 'Administrative User Search')
 
 @section('content')
 @include('usersearch.sections.usersearch')

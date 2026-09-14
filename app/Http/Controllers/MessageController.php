@@ -19,6 +19,7 @@ use App\Services\MessagePageService;
 use App\Services\MessageService;
 use App\Support\CurrentUser;
 use App\Support\Globals;
+use App\Support\LegacyYesNo;
 use App\Support\UserDisplay;
 use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;
@@ -69,6 +70,7 @@ class MessageController extends LegacyController
     public function sendmessage(Request $request): Response|RedirectResponse|View
     {
         $langSendmessage = (array) (app(Globals::class)->get('lang_sendmessage') ?? []);
+        $currentUser = (array) (app(CurrentUser::class)->get() ?? []);
 
         $receiver = (int) $request->input('receiver', 0);
         if ($receiver <= 0) {
@@ -94,7 +96,6 @@ class MessageController extends LegacyController
                 return $this->legacyAbortResponse($langSendmessage['std_error'] ?? 'Error', $langSendmessage['std_permission_denied'] ?? 'Permission denied.');
             }
             $msga = $msg->toArray();
-            $currentUser = (array) (app(CurrentUser::class)->get() ?? []);
             if ((int) ($msga['receiver'] ?? 0) !== (int) ($currentUser['id'] ?? 0)) {
                 return $this->legacyAbortResponse($langSendmessage['std_error'] ?? 'Error', $langSendmessage['std_permission_denied'] ?? 'Permission denied.');
             }
@@ -131,6 +132,9 @@ class MessageController extends LegacyController
             'returnto' => $returnto,
             'title' => $title,
             'frameTitle' => $frameTitle,
+            'stdheadMsgalert' => false,
+            'deleteChecked' => LegacyYesNo::isYes($currentUser['deletepms'] ?? null) ? ' checked' : '',
+            'saveChecked' => LegacyYesNo::isYes($currentUser['savepms'] ?? null) ? ' checked' : '',
         ]);
     }
 

@@ -1,19 +1,6 @@
-@php
-$lang_sendmessage = (array) (\app(\App\Support\Globals::class)->get('lang_sendmessage') ?? []);
-$CURUSER = (array) (\app(\App\Support\CurrentUser::class)->get() ?? []);
-$receiver = (int) ($receiver ?? 0);
-$replyto = (int) ($replyto ?? 0);
-$subject = (string) ($subject ?? '');
-$body = (string) ($body ?? '');
-$returnto = (string) ($returnto ?? '');
-$title = (string) ($title ?? ($lang_sendmessage['head_send_message'] ?? 'Send message'));
-$deleteChecked = \App\Support\LegacyYesNo::isYes($CURUSER['deletepms'] ?? null) ? ' checked' : '';
-$saveChecked = \App\Support\LegacyYesNo::isYes($CURUSER['savepms'] ?? null) ? ' checked' : '';
-$stdheadMsgalert = false;
-@endphp
 @extends('layouts.legacy')
 
-@section('title', $title)
+@section('title', $title ?? ($lang_sendmessage['head_send_message'] ?? 'Send message'))
 
 @section('content')
 <form id="compose" name="compose" method="post" action="/takemessage">

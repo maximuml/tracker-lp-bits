@@ -1,9 +1,7 @@
-@php
-$pageTitle = ($userInfo->username ?? '') . ' - H&R';
-@endphp
+
 @extends('layouts.legacy')
 
-@section('title', $pageTitle)
+@section('title', ($userInfo->username ?? '') . ' - H&R')
 
 @section('content')
 @include('my._hr')

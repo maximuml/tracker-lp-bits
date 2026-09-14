@@ -355,6 +355,7 @@ class SystemBulkController extends LegacyController
         $returnto = $request->query('returnto', '');
 
         return $this->legacyPage($request, 'increment-bulk', true, [
+            'stdheadMsgalert' => false,
             'lang_incrementbulk' => $langIncrementbulk,
             'validTypeMap' => $validTypeMap,
             'type' => $type,

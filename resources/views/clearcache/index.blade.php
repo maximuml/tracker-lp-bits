@@ -1,18 +1,13 @@
-@php
-$title = 'Clear cache';
-$done = (bool) ($done ?? false);
-$error = (string) ($error ?? '');
-@endphp
 @extends('layouts.legacy')
 
-@section('title', $title)
+@section('title', 'Clear cache')
 
 @section('content')
 <h1>Clear cache</h1>
-@if ($done)
+@if ($done ?? false)
     <p align="center"><font class="striking">Cache cleared</font></p>
 @endif
-@if ($error !== '')
+@if (($error ?? '') !== '')
     <p align="center"><font class="striking">{{ $error }}</font></p>
 @endif
 

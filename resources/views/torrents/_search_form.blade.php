@@ -1,21 +1,3 @@
-@php
-$lang_torrents = (array) (\app(\App\Support\Globals::class)->get('lang_torrents') ?? []);
-$CURUSER = (array) (\app(\App\Support\CurrentUser::class)->get() ?? []);
-$Cache = \app(\App\Support\Cache\LegacyRedisCache::class);
-$__server_QUERY_STRING = \App\Support\Input::serverValue('QUERY_STRING');
-$searchBoxRightTdStyle = 'padding: 1px;padding-left: 10px;white-space: nowrap';
-$sectiontype = $sectiontype ?? 0;
-$include_dead = (int) ($include_dead ?? 0);
-$special_state = $special_state ?? 0;
-$inclbookmarked = (int) ($inclbookmarked ?? 0);
-$showApprovalStatusFilter = (bool) ($showApprovalStatusFilter ?? false);
-$approvalStatus = $approvalStatus ?? '';
-$filterInputWidth = (int) ($filterInputWidth ?? 80);
-$searchstr_ori = (string) ($searchstr_ori ?? '');
-$allTags = $allTags ?? collect();
-$tagRep = $tagRep ?? app(\App\Repositories\TagRepository::class);
-$browsecatmode = $browsecatmode ?? 0;
-@endphp
 <form method="get" name="searchbox" action="?">
 	<table border="1" class="searchbox" cellspacing="0" cellpadding="5" width="100%">
 		<tbody>
@@ -25,8 +7,7 @@ $browsecatmode = $browsecatmode ?? 0;
 		<tbody id="ksearchboxmain" class="nx-hidden">
 		<tr>
 			<td class="rowfollow" align="left">
-                {!! \App\Support\SearchBox::buildCategoryTableWithContext($sectiontype, '1', '?', '?', 0, $__server_QUERY_STRING, ['select_unselect' => true, 'user_notifs' => $CURUSER['notifs'] ?? null]) !!}
-			</td>
+                @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($categoryTableHtml))</td>
 
 			<td class="rowfollow" valign="middle">
 				<table>
@@ -53,7 +34,7 @@ $browsecatmode = $browsecatmode ?? 0;
 						<td class="bottom" style="padding: 1px;padding-left: 10px">
 							<select class="med" name="spstate" style="width: 100px;">
 								<option value="0">{{ $lang_torrents['select_all'] ?? '' }}</option>
-								{!! \App\Support\Html::promotionSelection($special_state, 0) !!}
+								@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Html::promotionSelection($special_state, 0)))
 							</select>
 						</td>
 					</tr>
@@ -89,61 +70,61 @@ $browsecatmode = $browsecatmode ?? 0;
                     </tr>
                     @endif
                     <tr>
-                        <td class="bottom" style="{{ $searchBoxRightTdStyle }}">
+                        <td class="bottom" style="padding: 1px;padding-left: 10px;white-space: nowrap">
                             <font class="medium">{{ $lang_torrents['size_range'] ?? '' }}</font>
                         </td>
                     </tr>
                     <tr>
-                        <td class="bottom" style="{{ $searchBoxRightTdStyle }}">
-                            <input type="number" min="1" name="size_begin" style="width: {{ $filterInputWidth }}px" value="{{ \request()->query('size_begin') ?? '' }}"/> ~ <input type="number" min="1" name="size_end" style="width: {{ $filterInputWidth }}px" value="{{ \request()->query('size_end') ?? '' }}"/>
+                        <td class="bottom" style="padding: 1px;padding-left: 10px;white-space: nowrap">
+                            <input type="number" min="1" name="size_begin" style="width: {{ $filterInputWidth }}px" value="{{ $filterInput['size_begin'] ?? '' }}"/> ~ <input type="number" min="1" name="size_end" style="width: {{ $filterInputWidth }}px" value="{{ $filterInput['size_end'] ?? '' }}"/>
                         </td>
                     </tr>
 
                     <tr>
-                        <td class="bottom" style="{{ $searchBoxRightTdStyle }}">
+                        <td class="bottom" style="padding: 1px;padding-left: 10px;white-space: nowrap">
                             <font class="medium">{{ $lang_torrents['seeders_range'] ?? '' }}</font>
                         </td>
                     </tr>
                     <tr>
-                        <td class="bottom" style="{{ $searchBoxRightTdStyle }}">
-                            <input type="number" min="1" name="seeders_begin" style="width: {{ $filterInputWidth }}px" value="{{ \request()->query('seeders_begin') ?? '' }}"/> ~ <input type="number" min="1" name="seeders_end" style="width: {{ $filterInputWidth }}px" value="{{ \request()->query('seeders_end') ?? '' }}"/>
+                        <td class="bottom" style="padding: 1px;padding-left: 10px;white-space: nowrap">
+                            <input type="number" min="1" name="seeders_begin" style="width: {{ $filterInputWidth }}px" value="{{ $filterInput['seeders_begin'] ?? '' }}"/> ~ <input type="number" min="1" name="seeders_end" style="width: {{ $filterInputWidth }}px" value="{{ $filterInput['seeders_end'] ?? '' }}"/>
                         </td>
                     </tr>
 
                     <tr>
-                        <td class="bottom" style="{{ $searchBoxRightTdStyle }}">
+                        <td class="bottom" style="padding: 1px;padding-left: 10px;white-space: nowrap">
                             <font class="medium">{{ $lang_torrents['leechers_range'] ?? '' }}</font>
                         </td>
                     </tr>
                     <tr>
-                        <td class="bottom" style="{{ $searchBoxRightTdStyle }}">
-                            <input type="number" min="1" name="leechers_begin" style="width: {{ $filterInputWidth }}px" value="{{ \request()->query('leechers_begin') ?? '' }}"/> ~ <input type="number" min="1" name="leechers_end" style="width: {{ $filterInputWidth }}px" value="{{ \request()->query('leechers_end') ?? '' }}"/>
+                        <td class="bottom" style="padding: 1px;padding-left: 10px;white-space: nowrap">
+                            <input type="number" min="1" name="leechers_begin" style="width: {{ $filterInputWidth }}px" value="{{ $filterInput['leechers_begin'] ?? '' }}"/> ~ <input type="number" min="1" name="leechers_end" style="width: {{ $filterInputWidth }}px" value="{{ $filterInput['leechers_end'] ?? '' }}"/>
                         </td>
                     </tr>
 
                     <tr>
-                        <td class="bottom" style="{{ $searchBoxRightTdStyle }}">
+                        <td class="bottom" style="padding: 1px;padding-left: 10px;white-space: nowrap">
                             <font class="medium">{{ $lang_torrents['times_completed_range'] ?? '' }}</font>
                         </td>
                     </tr>
                     <tr>
-                        <td class="bottom" style="{{ $searchBoxRightTdStyle }}">
-                            <input type="number" min="1" name="times_completed_begin" style="width: {{ $filterInputWidth }}px" value="{{ \request()->query('times_completed_begin') ?? '' }}"/> ~ <input type="number" min="1" name="times_completed_end" style="width: {{ $filterInputWidth }}px" value="{{ \request()->query('times_completed_end') ?? '' }}"/>
+                        <td class="bottom" style="padding: 1px;padding-left: 10px;white-space: nowrap">
+                            <input type="number" min="1" name="times_completed_begin" style="width: {{ $filterInputWidth }}px" value="{{ $filterInput['times_completed_begin'] ?? '' }}"/> ~ <input type="number" min="1" name="times_completed_end" style="width: {{ $filterInputWidth }}px" value="{{ $filterInput['times_completed_end'] ?? '' }}"/>
                         </td>
                     </tr>
 
                     <tr>
-                        <td class="bottom" style="{{ $searchBoxRightTdStyle }}">
+                        <td class="bottom" style="padding: 1px;padding-left: 10px;white-space: nowrap">
                             <font class="medium">{{ $lang_torrents['added_range'] ?? '' }}</font>
                         </td>
                     </tr>
                     <tr>
-                        <td class="bottom" style="{{ $searchBoxRightTdStyle }}">
-                            {!! sprintf(
+                        <td class="bottom" style="padding: 1px;padding-left: 10px;white-space: nowrap">
+                            @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(sprintf(
                                 '%s ~ %s',
-                                \App\Support\Form::datetimepickerInput('added_begin', htmlspecialchars(\request()->query('added_begin') ?? ''), '', ['require_files' => true, 'format' => 'Y-m-d', 'style' => 'width: '.$filterInputWidth.'px']),
-                                \App\Support\Form::datetimepickerInput('added_end', htmlspecialchars(\request()->query('added_end') ?? ''), '', ['require_files' => false, 'format' => 'Y-m-d', 'style' => 'width: '.$filterInputWidth.'px']),
-                            ) !!}
+                                \App\Support\Form::datetimepickerInput('added_begin', htmlspecialchars($filterInput['added_begin'] ?? ''), '', ['require_files' => true, 'format' => 'Y-m-d', 'style' => 'width: '.$filterInputWidth.'px']),
+                                \App\Support\Form::datetimepickerInput('added_end', htmlspecialchars($filterInput['added_end'] ?? ''), '', ['require_files' => false, 'format' => 'Y-m-d', 'style' => 'width: '.$filterInputWidth.'px']),
+                            )))
                         </td>
                     </tr>
 
@@ -174,45 +155,22 @@ $browsecatmode = $browsecatmode ?? 0;
 
 							<select name="search_area">
 								<option value="0">{{ $lang_torrents['select_title'] ?? '' }}</option>
-								<option value="1"@if (\request()->query('search_area') !== null && \request()->query('search_area') == 1) selected="selected"@endif>{{ $lang_torrents['select_description'] ?? '' }}</option>
-								<option value="3"@if (\request()->query('search_area') !== null && \request()->query('search_area') == 3) selected="selected"@endif>{{ $lang_torrents['select_uploader'] ?? '' }}</option>
+								<option value="1"@if (($filterInput['search_area'] ?? null) == 1) selected="selected"@endif>{{ $lang_torrents['select_description'] ?? '' }}</option>
+								<option value="3"@if (($filterInput['search_area'] ?? null) == 3) selected="selected"@endif>{{ $lang_torrents['select_uploader'] ?? '' }}</option>
 							</select>
 
 							{{ $lang_torrents['text_with'] ?? '' }}
 
 							<select name="search_mode" style="width: 60px;">
-                                {!! \App\Models\SearchBox::listSelectModeOptions(\request()->query('search_mode') ?? '') !!}
+                                @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Models\SearchBox::listSelectModeOptions($filterInput['search_mode'] ?? '')))
 							</select>
 
 							{{ $lang_torrents['text_mode'] ?? '' }}
 						</td>
 					</tr>
-@php
-    $Cache->new_page('hot_search', 3670, true);
-    if (! $Cache->get_page()) {
-        \app(\App\Repositories\TorrentListingRepository::class)->cleanupSuggest();
-        $searchres = \app(\App\Repositories\TorrentListingRepository::class)->getHotSearch();
-        $hotcount = 0;
-        $hotsearch = '';
-        foreach ($searchres as $searchrow) {
-            $hotsearch .= '<a href="'.htmlspecialchars('?search='.rawurlencode($searchrow['keywords']).'&notnewword=1').'"><u>'.htmlspecialchars($searchrow['keywords']).'</u></a>&nbsp;&nbsp;';
-            $hotcount += mb_strlen($searchrow['keywords'], 'UTF-8');
-            if ($hotcount > 60) {
-                break;
-            }
-        }
-        $Cache->add_whole_row();
-        if ($hotsearch) {
-            echo '<tr><td class="embedded" colspan="3">&nbsp;&nbsp;'.$hotsearch.'</td></tr>';
-        }
-        $Cache->end_whole_row();
-        $Cache->cache_page();
-    }
-    echo $Cache->next_row();
-@endphp
-
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($hotSearchHtml))
 @if ($allTags->isNotEmpty())
-    <tr><td colspan="3" class="embedded" style="padding-top: 4px">{!! $tagRep->renderSpan($sectiontype, ['*'], true) !!}</td></tr>
+    <tr><td colspan="3" class="embedded" style="padding-top: 4px">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($tagRep->renderSpan($sectiontype, ['*'], true)))</td></tr>
 @endif
 
 				</table>

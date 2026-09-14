@@ -9,15 +9,19 @@ use App\Repositories\TorrentSearch\FilterParser;
 use App\Repositories\TorrentSearch\MeiliAdapter;
 use App\Repositories\TorrentSearch\QueryBuilder;
 use App\Repositories\TorrentSearch\SqlFallback;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Category;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
+use App\Support\Frame;
 use App\Support\Globals;
+use App\Support\Input;
 use App\Support\Logger;
 use App\Support\Pagination;
 use App\Support\RequestContext;
 use App\Support\SearchBox;
 use App\Support\SearchSuggest;
+use App\Support\UserUpdateBatch;
 use Illuminate\Support\Facades\DB;
 
 class TorrentSearchRepository
@@ -30,6 +34,9 @@ class TorrentSearchRepository
         private readonly FilterParser $filterParser,
         private readonly MeiliAdapter $meiliAdapter,
         private readonly SqlFallback $sqlFallback,
+        private readonly TorrentListingRepository $listingRepository,
+        private readonly LegacyRedisCache $cache,
+        private readonly UserUpdateBatch $userUpdateBatch,
     ) {}
 
     /**
@@ -68,6 +75,7 @@ class TorrentSearchRepository
         $filterInputWidth = 62;
         $searchParams = $query ?: request()->query();
         $hasSearchParams = ! empty($searchParams);
+        $filterInput = $searchParams;
         $searchParams['mode'] = $sectiontype;
 
         $showsubcat = (int) SearchBox::valueWithContext($sectiontype, 'showsubcat'); // whether show subcategory (i.e. sources, codecs) or not
@@ -256,6 +264,54 @@ class TorrentSearchRepository
             $pageTitle = $lang_torrents['head_special'];
         }
 
+        $categoryTableHtml = SearchBox::buildCategoryTableWithContext(
+            $sectiontype,
+            '1',
+            '?',
+            '?',
+            0,
+            Input::serverValue('QUERY_STRING'),
+            ['select_unselect' => true, 'user_notifs' => $CURUSER['notifs'] ?? null],
+        );
+        $hotSearchHtml = $this->hotSearchHtml();
+        $emptyMessageHtml = '';
+        if (! $count) {
+            if (isset($searchstr)) {
+                $emptyMessageHtml = '<br />'.Frame::stdMessage($lang_torrents['std_search_results_for'].$searchstr_ori.'"', $lang_torrents['std_try_again'], false);
+            } else {
+                $emptyMessageHtml = Frame::stdMessage($lang_torrents['std_nothing_found'], $lang_torrents['std_no_active_torrents'], false);
+            }
+        }
+        if ($CURUSER !== []) {
+            $this->userUpdateBatch->add($sectiontype == $browsecatmode ? 'last_browse' : 'last_music', TIMENOW);
+        }
+
         return get_defined_vars();
+    }
+
+    private function hotSearchHtml(): string
+    {
+        $this->cache->new_page('hot_search', 3670, true);
+        if (! $this->cache->get_page()) {
+            $this->listingRepository->cleanupSuggest();
+            $hotcount = 0;
+            $hotsearch = '';
+            foreach ($this->listingRepository->getHotSearch() as $searchrow) {
+                $keywords = (string) ($searchrow['keywords'] ?? '');
+                $hotsearch .= '<a href="'.htmlspecialchars('?search='.rawurlencode($keywords).'&notnewword=1').'"><u>'.htmlspecialchars($keywords).'</u></a>&nbsp;&nbsp;';
+                $hotcount += mb_strlen($keywords, 'UTF-8');
+                if ($hotcount > 60) {
+                    break;
+                }
+            }
+            $this->cache->add_whole_row();
+            if ($hotsearch !== '') {
+                echo '<tr><td class="embedded" colspan="3">&nbsp;&nbsp;'.$hotsearch.'</td></tr>';
+            }
+            $this->cache->end_whole_row();
+            $this->cache->cache_page();
+        }
+
+        return (string) $this->cache->next_row();
     }
 }

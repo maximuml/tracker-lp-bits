@@ -3,5 +3,5 @@
 @section('title', $lang_smilies['text_smilies'] ?? '')
 
 @section('content')
-    @php \App\Support\Html::smiliesFrame(); @endphp
+    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($smiliesFrame ?? ''))
 @endsection

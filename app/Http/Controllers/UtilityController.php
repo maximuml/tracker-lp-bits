@@ -21,6 +21,7 @@ use App\Support\Http;
 use App\Support\LegacyAuth;
 use App\Support\LegacyHeaderBag;
 use App\Support\Logger;
+use App\Support\Smilies;
 use App\Support\Strings;
 use App\Support\Style;
 use App\Support\Url;
@@ -410,7 +411,15 @@ class UtilityController extends LegacyController
 
     public function smilies(Request $request): View|RedirectResponse
     {
-        return $this->legacyPage($request, 'smilies', true);
+        $lang = (array) ($this->globals->get('lang_functions') ?? []);
+
+        return $this->legacyPage($request, 'smilies', true, [
+            'smiliesFrame' => Smilies::framedTable(
+                (string) ($lang['text_smilies'] ?? ''),
+                (string) ($lang['col_type_something'] ?? ''),
+                (string) ($lang['col_to_make_a'] ?? ''),
+            ),
+        ]);
     }
 
     public function opensearch(Request $request): Response

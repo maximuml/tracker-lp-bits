@@ -250,7 +250,10 @@ final class UtilityControllerTest extends TestCase
     public function test_smilies_renders_legacy_page(): void
     {
         $this->mockCurrentUser(['id' => 1]);
-        View::shouldReceive('make')->once()->with('smilies.index', [])->andReturn($this->fakeView());
+        View::shouldReceive('make')->once()->with(
+            'smilies.index',
+            Mockery::on(fn (array $data): bool => isset($data['smiliesFrame'])),
+        )->andReturn($this->fakeView());
 
         $controller = app(UtilityController::class);
         $request = Request::create('/smilies', 'GET');

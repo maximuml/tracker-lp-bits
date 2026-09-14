@@ -1,11 +1,6 @@
-@php
-$lang_offers = (array) (\app(\App\Support\Globals::class)->get('lang_offers') ?? []);
-$title = $title ?? ($lang_offers['head_offer'] ?? 'Offers');
-$action = $action ?? 'list';
-@endphp
 @extends('layouts.legacy')
 
-@section('title', $title)
+@section('title', $title ?? ($lang_offers['head_offer'] ?? 'Offers'))
 
 @section('content')
 @if ($action === 'add_offer')

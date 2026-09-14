@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Models\Setting;
 use App\Repositories\InfoRepository;
 use App\Support\Locale;
+use App\Support\Url;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -30,7 +32,10 @@ class RulesController extends LegacyController
 
     public function userAgreement(Request $request): View|RedirectResponse|Response
     {
-        return $this->legacyPage($request, 'useragreement', false);
+        return $this->legacyPage($request, 'useragreement', false, [
+            'SITENAME' => Setting::getSiteName(),
+            'BASEURL' => Url::schemeAndHost(false),
+        ]);
     }
 
     public function aboutNexus(Request $request): View|RedirectResponse|Response

@@ -184,6 +184,7 @@ class AdminToolsController extends LegacyController
                 return $this->legacyPage($request, 'location', true, [
                     'mode' => $mode,
                     'editRow' => $editRow,
+                    'actionUrl' => $actionUrl,
                 ]);
             }
         }

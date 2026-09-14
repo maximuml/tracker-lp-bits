@@ -7,7 +7,7 @@
 		<tbody id="ksearchboxmain" class="nx-hidden">
 		<tr>
 			<td class="rowfollow" align="left">
-                @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($categoryTableHtml))</td>
+                @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($categoryTableHtml ?? ''))</td>
 
 			<td class="rowfollow" valign="middle">
 				<table>
@@ -168,7 +168,7 @@
 							{{ $lang_torrents['text_mode'] ?? '' }}
 						</td>
 					</tr>
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($hotSearchHtml))
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($hotSearchHtml ?? ''))
 @if ($allTags->isNotEmpty())
     <tr><td colspan="3" class="embedded" style="padding-top: 4px">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($tagRep->renderSpan($sectiontype, ['*'], true)))</td></tr>
 @endif

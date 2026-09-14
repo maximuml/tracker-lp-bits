@@ -1,4 +1,1 @@
-@php
-/** @var array<string, mixed> $viewtopic */
-@endphp
-{!! $viewtopic['html'] !!}
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($viewtopic['html'] ?? ''))

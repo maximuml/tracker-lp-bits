@@ -10,15 +10,15 @@
 
 @if ($count && isset($rows))
 
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagertop))
+    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagertop ?? ''))
     @if ($sectiontype == $browsecatmode)
         @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\TorrentTable::render($rows, 'torrents', $sectiontype)))
     @else
         @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\TorrentTable::render($rows, 'bookmarks', $sectiontype)))
     @endif
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagerbottom))
+    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagerbottom ?? ''))
 @else
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($emptyMessageHtml))
+    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($emptyMessageHtml ?? ''))
 @endif
 
 </td></tr></table>

@@ -1,4 +1,1 @@
-@php
-/** @var array<string, mixed> $viewunread */
-@endphp
-{!! $viewunread['html'] !!}
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($viewunread['html'] ?? ''))

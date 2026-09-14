@@ -22,19 +22,19 @@
 					</x-settings-row>
 				@else
 					<x-settings-row :label="$lang_upload['row_torrent_name'] ?? ''">
-						@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($nameInputHtml))
+						@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($nameInputHtml ?? ''))
 					</x-settings-row>
 				@endif
 
 				@if ($priceCellHtml !== '')
 					<x-settings-row :label="$priceLabel">
-						@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($priceCellHtml))
+						@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($priceCellHtml ?? ''))
 					</x-settings-row>
 				@endif
 
 				<tr>
 					<td class="rowhead" style='padding: 3px' valign="top">{{ $lang_upload['row_description'] ?? '' }}<font color="red">*</font></td>
-					<td class="rowfollow">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($descrEditorHtml))</td>
+					<td class="rowfollow">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($descrEditorHtml ?? ''))</td>
 				</tr>
 
 				@if ($enableTechnicalInfo)
@@ -54,12 +54,12 @@
 
 				<tbody id="browsecat_section" data-mode="{{ $browsecatmode }}">
 					<x-settings-row :label="$lang_upload['row_quality'] ?? ''" :relation="'mode_'.$browsecatmode">
-						@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($taxonomySelectHtml))
+						@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($taxonomySelectHtml ?? ''))
 					</x-settings-row>
-					@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($customFieldsHtml))
-					@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($hitAndRunHtml))
+					@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($customFieldsHtml ?? ''))
+					@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($hitAndRunHtml ?? ''))
 					<x-settings-row :label="$lang_functions['text_tags'] ?? ''" :relation="'mode_'.$browsecatmode">
-						@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($tagsHtml))
+						@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($tagsHtml ?? ''))
 					</x-settings-row>
 				</tbody>
 
@@ -76,7 +76,7 @@
 
 				@if ($pickCellHtml !== '')
 					<x-settings-row :label="$lang_edit['row_pick'] ?? ''">
-						@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pickCellHtml))
+						@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pickCellHtml ?? ''))
 					</x-settings-row>
 				@endif
 

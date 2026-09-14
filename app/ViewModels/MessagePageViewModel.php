@@ -18,6 +18,7 @@ final class MessagePageViewModel extends ViewModel
      * @param  array<string, mixed>|null  $forward
      * @param  array<string, mixed>|null  $editmailboxes
      * @param  array<string, mixed>|null  $viewmailbox
+     * @param  iterable<int, mixed>  $mailboxes
      */
     public function __construct(
         public readonly array $lang,
@@ -26,6 +27,7 @@ final class MessagePageViewModel extends ViewModel
         public readonly string $action,
         public readonly string $baseUrl,
         public readonly string $contentWidth,
+        public readonly iterable $mailboxes = [],
         public readonly ?array $viewmessage = null,
         public readonly ?array $forward = null,
         public readonly ?array $editmailboxes = null,
@@ -44,6 +46,7 @@ final class MessagePageViewModel extends ViewModel
             'action' => $this->action,
             'baseUrl' => $this->baseUrl,
             'contentWidth' => $this->contentWidth,
+            'mailboxes' => $this->mailboxes,
             'viewmessage' => $this->viewmessage,
             'forward' => $this->forward,
             'editmailboxes' => $this->editmailboxes,

@@ -1,4 +1,1 @@
-@php
-/** @var array<string, mixed> $search */
-@endphp
-{!! $search['html'] !!}
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($search['html'] ?? ''))

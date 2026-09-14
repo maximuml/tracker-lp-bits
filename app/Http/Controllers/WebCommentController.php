@@ -171,7 +171,7 @@ class WebCommentController extends Controller
         $formAction = $this->legacyAction('delete', ['type' => $type]);
         $heading = $this->lang('std_delete_comment');
         $message = $this->lang('std_delete_comment_note');
-        $confirmLabel = ltrim($this->lang('std_here_if_sure'), '>');
+        $confirmLabel = ltrim(strip_tags($this->lang('std_here_if_sure')), '>');
         $cancelLabel = $this->lang('text_cancel');
         $cancelUrl = $referer !== '' ? $referer : $this->buildScript($type, 0);
         $returnto = $referer;

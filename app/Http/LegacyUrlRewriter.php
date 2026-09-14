@@ -151,7 +151,7 @@ final class LegacyUrlRewriter
             $commentId = (int) ($query['cid'] ?? 0);
             if (in_array($commentAction, ['edit', 'delete', 'vieworiginal'], true)) {
                 unset($query['action'], $query['cid']);
-                $routePath = '/comment/'.$commentId.'/'.$commentAction;
+                $routePath = '/comment/'.$commentId.'/'.($commentAction === 'vieworiginal' ? 'original' : $commentAction);
             } elseif ($commentAction === 'add' && $method === 'GET') {
                 unset($query['action']);
                 $routePath = '/comment/add';

@@ -1,4 +1,1 @@
-@php
-/** @var array<string, mixed> $viewforum */
-@endphp
-{!! $viewforum['html'] !!}
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($viewforum['html'] ?? ''))

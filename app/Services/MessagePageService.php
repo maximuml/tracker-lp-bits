@@ -70,9 +70,6 @@ class MessagePageService
 
         $action = (string) $request->input('action', '');
         if ($action === '') {
-            $action = (string) $request->input('action', 'viewmailbox');
-        }
-        if ($action === '') {
             $action = 'viewmailbox';
         }
 
@@ -108,6 +105,7 @@ class MessagePageService
             action: $data['action'],
             baseUrl: $data['baseUrl'],
             contentWidth: $data['contentWidth'],
+            mailboxes: $this->mailboxRepository->getUserMailboxes($userId),
             viewmessage: $data['viewmessage'] ?? null,
             forward: $data['forward'] ?? null,
             editmailboxes: $data['editmailboxes'] ?? null,

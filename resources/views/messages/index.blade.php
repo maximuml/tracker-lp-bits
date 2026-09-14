@@ -1,11 +1,6 @@
-@php
-$lang_messages = (array) (\app(\App\Support\Globals::class)->get('lang_messages') ?? []);
-$title = $title ?? ($lang_messages['head_private_messages'] ?? 'Private messages');
-$action = $action ?? 'viewmailbox';
-@endphp
 @extends('layouts.legacy')
 
-@section('title', $title)
+@section('title', $title ?? ($lang['head_private_messages'] ?? 'Private messages'))
 
 @section('content')
 @if ($action === 'viewmessage')

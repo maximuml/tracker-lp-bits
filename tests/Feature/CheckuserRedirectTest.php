@@ -30,7 +30,7 @@ final class CheckuserRedirectTest extends TestCase
         $response = $this->withNexusCookie($admin)->get('/checkuser?id=42');
 
         $response->assertStatus(302);
-        $response->assertRedirect('/nexusphp/users/42');
+        $response->assertRedirect('/nexusphp/user/users/42');
     }
 
     public function test_checkuser_without_id_redirects_to_filament_user_list(): void
@@ -39,7 +39,7 @@ final class CheckuserRedirectTest extends TestCase
         $response = $this->withNexusCookie($admin)->get('/checkuser');
 
         $response->assertStatus(302);
-        $response->assertRedirect('/nexusphp/users');
+        $response->assertRedirect('/nexusphp/user/users');
     }
 
     public function test_takeconfirm_post_with_id_redirects_to_filament_user_view(): void
@@ -48,7 +48,7 @@ final class CheckuserRedirectTest extends TestCase
         $response = $this->withNexusCookie($admin)->post('/takeconfirm', ['id' => 99]);
 
         $response->assertStatus(302);
-        $response->assertRedirect('/nexusphp/users/99');
+        $response->assertRedirect('/nexusphp/user/users/99');
     }
 
     public function test_takeconfirm_post_without_id_redirects_to_filament_user_list(): void
@@ -57,7 +57,7 @@ final class CheckuserRedirectTest extends TestCase
         $response = $this->withNexusCookie($admin)->post('/takeconfirm', []);
 
         $response->assertStatus(302);
-        $response->assertRedirect('/nexusphp/users');
+        $response->assertRedirect('/nexusphp/user/users');
     }
 
     public function test_checkuser_with_invalid_id_redirects_to_list(): void
@@ -66,6 +66,6 @@ final class CheckuserRedirectTest extends TestCase
         $response = $this->withNexusCookie($admin)->get('/checkuser?id=0');
 
         $response->assertStatus(302);
-        $response->assertRedirect('/nexusphp/users');
+        $response->assertRedirect('/nexusphp/user/users');
     }
 }

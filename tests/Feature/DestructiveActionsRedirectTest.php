@@ -55,6 +55,6 @@ final class DestructiveActionsRedirectTest extends TestCase
         $response = $this->withNexusCookie($admin)->get('/maxlogin');
 
         $response->assertStatus(302);
-        $response->assertRedirect('/nexusphp/login-attempts');
+        $response->assertRedirect('/nexusphp/security/login-attempts');
     }
 }

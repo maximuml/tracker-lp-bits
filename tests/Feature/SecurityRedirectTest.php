@@ -55,7 +55,7 @@ final class SecurityRedirectTest extends TestCase
         $response = $this->withNexusCookie($admin)->get('/ipcheck');
 
         $response->assertStatus(302);
-        $response->assertRedirect('/nexusphp/users');
+        $response->assertRedirect('/nexusphp/user/users');
     }
 
     public function test_iphistory_with_id_redirects_to_filament_user_view(): void
@@ -64,7 +64,7 @@ final class SecurityRedirectTest extends TestCase
         $response = $this->withNexusCookie($admin)->get('/iphistory?id=42');
 
         $response->assertStatus(302);
-        $response->assertRedirect('/nexusphp/users/42');
+        $response->assertRedirect('/nexusphp/user/users/42');
     }
 
     public function test_iphistory_without_id_redirects_to_filament_user_list(): void
@@ -73,7 +73,7 @@ final class SecurityRedirectTest extends TestCase
         $response = $this->withNexusCookie($admin)->get('/iphistory');
 
         $response->assertStatus(302);
-        $response->assertRedirect('/nexusphp/users');
+        $response->assertRedirect('/nexusphp/user/users');
     }
 
     public function test_ipsearch_redirects_to_filament_user_list(): void
@@ -82,6 +82,6 @@ final class SecurityRedirectTest extends TestCase
         $response = $this->withNexusCookie($admin)->get('/ipsearch?ip=1.2.3.4');
 
         $response->assertStatus(302);
-        $response->assertRedirect('/nexusphp/users');
+        $response->assertRedirect('/nexusphp/user/users');
     }
 }

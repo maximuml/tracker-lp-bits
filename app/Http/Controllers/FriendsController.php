@@ -10,7 +10,9 @@ use App\Repositories\FriendsRepository;
 use App\Support\CurrentUser;
 use App\Support\Globals;
 use App\Support\Input;
+use App\Support\LegacyYesNo;
 use App\Support\Locale;
+use App\Support\Time;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
 use App\Support\Validators;
@@ -67,22 +69,60 @@ class FriendsController extends LegacyController
 
         $friendsList = [];
         foreach ($friendRows as $friend) {
-            $friend['title'] = (string) ($friend['title'] ?? '');
-            if ($friend['title'] === '') {
-                $friend['title'] = UserClass::name((int) ($friend['class'] ?? 0), false, true, true);
+            $friendId = (int) ($friend['id'] ?? 0);
+            $title = (string) ($friend['title'] ?? '');
+            $titleHtml = $title === ''
+                ? UserClass::name((int) ($friend['class'] ?? 0), false, true, true)
+                : htmlspecialchars($title, ENT_QUOTES, 'UTF-8');
+            $avatar = '';
+            if (LegacyYesNo::isYes($currentUser['avatars'] ?? null)) {
+                $avatar = htmlspecialchars((string) ($friend['avatar'] ?? ''), ENT_QUOTES, 'UTF-8');
             }
+            if ($avatar === '') {
+                $avatar = 'pic/default_avatar.png';
+            }
+            $usernameHtml = $userDisplayMap[$friendId] ?? UserDisplay::username($friendId);
+            $friend['avatarSrc'] = $avatar;
+            $friend['body1Html'] = $usernameHtml.' ('.$titleHtml.')<br /><br />'
+                .($langFriends['text_last_seen_on'] ?? 'Last seen on ')
+                .(string) Time::format((string) ($friend['last_access'] ?? ''), true, false);
+            $friend['body2Html'] = "<a href=friends.php?id=$userid&action=delete&type=friend&targetid=$friendId>"
+                .htmlspecialchars($langFriends['text_remove_from_friends'] ?? 'Remove from friends', ENT_QUOTES, 'UTF-8').'</a>'
+                ."<br /><br /><a href=sendmessage.php?receiver=$friendId>"
+                .htmlspecialchars($langFriends['text_send_pm'] ?? 'Send PM', ENT_QUOTES, 'UTF-8').'</a>';
             $friendsList[] = $friend;
         }
 
-        $canViewUserList = Permission::can(PermissionEnum::VIEW_USER_LIST);
+        $blocksHtml = $langFriends['text_blocklist_empty'] ?? 'No blocked users.';
+        if ($blockRows !== []) {
+            $blocksHtml = '<table width=100% cellspacing=0 cellpadding=0>';
+            foreach (array_values($blockRows) as $i => $block) {
+                $blockId = (int) ($block['id'] ?? 0);
+                if ($i % 6 === 0) {
+                    $blocksHtml .= '<tr>';
+                }
+                $blocksHtml .= "<td style='border: none; padding: 4px; spacing: 0px;'>[<font class=small><a href=friends.php?id=$userid&action=delete&type=block&targetid=$blockId>D</a></font>] "
+                    .($userDisplayMap[$blockId] ?? UserDisplay::username($blockId)).'</td>';
+                if ($i % 6 === 5) {
+                    $blocksHtml .= '</tr>';
+                }
+            }
+            $blocksHtml .= "</table>\n";
+        }
+
+        $titleRow = UserDisplay::row($userid);
+        if ($titleRow === false) {
+            $titleRow = [];
+        }
 
         return $this->legacyPageRaw($request, 'friends', true, [
             'userid' => $userid,
             'friendsList' => $friendsList,
-            'blockRows' => $blockRows,
-            'userDisplayMap' => $userDisplayMap,
+            'blocksHtml' => $blocksHtml,
             'titleUsername' => $userDisplayMap[$userid] ?? UserDisplay::username($userid),
-            'canViewUserList' => $canViewUserList,
+            'title' => ($langFriends['head_personal_lists_for'] ?? 'Personal lists for ')
+                .(string) ($titleRow['username'] ?? $currentUser['username'] ?? ''),
+            'canViewUserList' => Permission::can(PermissionEnum::VIEW_USER_LIST),
         ]);
     }
 

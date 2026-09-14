@@ -20,15 +20,18 @@ use App\Repositories\TorrentDetailRepository;
 use App\Repositories\TorrentModerationRepository;
 use App\Support\AssetAppender;
 use App\Support\Cache\LegacyRedisCache;
+use App\Support\Comment;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\CustomField;
 use App\Support\Format;
 use App\Support\Globals;
+use App\Support\Html;
 use App\Support\Input;
 use App\Support\LegacyYesNo;
 use App\Support\Locale;
 use App\Support\Logger;
+use App\Support\Pagination;
 use App\Support\Promotion;
 use App\Support\Strings;
 use App\Support\Time;
@@ -557,6 +560,28 @@ CSS, 'header', false);
             $buttonValue = ' value="'.$langDetails['submit_say_thanks'].'"';
         }
         $thanksButton = '<input class="btn" type="button" id="saythanks" data-torrent-id="'.$id.'" '.$buttonValue.' />';
+        $commentPagerTop = '';
+        $commentPagerBottom = '';
+        $commentsTableHtml = '';
+        $commentCount = 0;
+        if (! LegacyYesNo::isNo($currentUser['showcomment'] ?? null)) {
+            $commentCount = $this->torrentDetailRepository->getCommentCount($id);
+            if ($commentCount > 0) {
+                [$commentPagerTop, $commentPagerBottom, , $commentOffset, $commentRpp] = Pagination::pager(
+                    10, $commentCount, "details.php?id=$id&cmtpage=1&", ['lastpagedefault' => 1], 'page'
+                );
+                $commentsTableHtml = Comment::table(
+                    array_values(array_map(
+                        fn ($comment) => (array) $comment,
+                        $this->torrentDetailRepository->getComments($id, (int) $commentOffset, (int) $commentRpp)
+                    )),
+                    'torrent',
+                    $id
+                );
+            }
+        }
+        $quickReplyHtml = Html::quickReply('comment', 'body', (string) ($langDetails['submit_add_comment'] ?? ''));
+
         $andMore = $thanksAll < $thanksInfo['count']
             ? $langDetails['text_and_more'].$thanksInfo['count'].$langDetails['text_users_in_total']
             : '';
@@ -596,6 +621,11 @@ CSS, 'header', false);
             'magicRowHtml' => $magicRowHtml,
             'thanksRowHtml' => $thanksRowHtml,
             'torrentNamePrefix' => $this->globals->get('torrentnameprefix') ?? '',
+            'commentCount' => $commentCount,
+            'commentPagerTop' => $commentPagerTop,
+            'commentPagerBottom' => $commentPagerBottom,
+            'commentsTableHtml' => $commentsTableHtml,
+            'quickReplyHtml' => $quickReplyHtml,
         ];
     }
 }

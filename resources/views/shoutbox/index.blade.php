@@ -1,15 +1,3 @@
-@php
-$lang_shoutbox = (array) (\app(\App\Support\Globals::class)->get('lang_shoutbox') ?? []);
-$CURUSER = (array) (\app(\App\Support\CurrentUser::class)->get() ?? []);
-$isAjax = (bool) ($isAjax ?? ! empty(\request()->query('ajax')));
-$where = (string) ($where ?? 'shoutbox');
-$refresh = (int) ($refresh ?? ($CURUSER['sbrefresh'] ?? 120));
-$lastId = (int) ($lastId ?? 0);
-$rows = $rows ?? collect();
-$currentUserId = (int) ($currentUserId ?? (int) ($CURUSER['id'] ?? 0));
-$isStaff = (bool) ($isStaff ?? false);
-$reactionData = (array) ($reactionData ?? ['counts' => [], 'mine' => [], 'users' => []]);
-@endphp
 @if (! $isAjax)
 <html><head>
 <base href="{{ url('/') }}/" />
@@ -18,8 +6,8 @@ $reactionData = (array) ($reactionData ?? ['counts' => [], 'mine' => [], 'users'
 <link rel="stylesheet" href="{{ \App\Support\Style::cssUriWithContext().'theme.css' }}" type="text/css">
 <link rel="stylesheet" href="styles/curtain_imageresizer.css" type="text/css">
 <link rel="stylesheet" href="styles/nexus.css" type="text/css">
-<script src="js/curtain_imageresizer.js" type="text/javascript"></script><script nonce="{{ $cspNonce ?? '' }}">var SHOUT_CSRF = '{{ \App\Support\Shoutbox::csrfToken((int) ($CURUSER['id'] ?? 0)) }}';</script><script src="js/shoutbox.js" type="text/javascript"></script><link rel="stylesheet" href="styles/shoutbox.css" type="text/css">
-{!! \App\Support\Style::addiCodeWithContext() !!}
+<script src="js/curtain_imageresizer.js" type="text/javascript"></script><script nonce="{{ $cspNonce ?? '' }}">var SHOUT_CSRF = '{{ $shoutCsrf }}';</script><script src="js/shoutbox.js" type="text/javascript"></script><link rel="stylesheet" href="styles/shoutbox.css" type="text/css">
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Style::addiCodeWithContext()))
 <script type="text/javascript" nonce="{{ $cspNonce ?? '' }}">
 //<![CDATA[
 var t;
@@ -102,112 +90,14 @@ function shoutAttachToggleHandler() {
 </head>
 <body class='inframe'>
 @endif
-@php
-    $reactionCounts = $reactionData['counts'] ?? [];
-    $reactionMine = $reactionData['mine'] ?? [];
-    $reactionUsers = $reactionData['users'] ?? [];
-@endphp
-@if ($rows->isEmpty())
-@else
-    @php
-        $rows = $rows->map(fn ($r) => (array) $r);
-        $showAvatars = \App\Support\LegacyYesNo::isYes($CURUSER['avatars'] ?? null);
-        $tooltipAvatar = $lang_shoutbox['tooltip_avatar'] ?? 'Open profile';
-        $tooltipReply = $lang_shoutbox['tooltip_nick_reply'] ?? 'Reply via @';
-        $labelMore = $lang_shoutbox['shout_show_more'] ?? 'more';
-        $labelLess = $lang_shoutbox['shout_show_less'] ?? 'less';
-        $groupWindowSec = 120;
-        $prevUserId = 0;
-        $prevDate = 0;
-    @endphp
+@if (! empty($items))
     @if (! $isAjax)
         <div id="shoutbox-content">
     @endif
     <table border='0' cellspacing='0' cellpadding='2' width='100%' align='left'>
-    @foreach ($rows as $arr)
-        @php
-            $arr = (array) $arr;
-            $currUserId = (int) $arr['userid'];
-            $currDate = (int) $arr['date'];
-            $isContinuation = (
-                $currUserId > 0
-                && $currUserId === $prevUserId
-                && $prevDate > 0
-                && abs($prevDate - $currDate) <= $groupWindowSec
-            );
-            $actions = \App\Support\Shoutbox::renderActions($arr, $currentUserId, $isStaff);
-            $shoutId = (int) $arr['id'];
-            $reactions = \App\Support\Shoutbox::renderReactions(
-                $shoutId,
-                $currentUserId,
-                $reactionCounts[$shoutId] ?? [],
-                $reactionMine[$shoutId] ?? [],
-                $reactionUsers[$shoutId] ?? []
-            );
-            $editedNote = '';
-            if (! empty($arr['edited_at']) && (int) $arr['edited_at'] > 0) {
-                $editedNote = ' <span class="shout-edited-note">('.htmlspecialchars((string) ($lang_shoutbox['text_edited'] ?? 'edited')).' '.\App\Support\Shoutbox::formatTime((int) $arr['edited_at'], true).')</span>';
-            }
-            $avatarUrl = 'pic/default_avatar.png';
-            $nickReplyName = '';
-            if ($arr['userid']) {
-                $username = \App\Support\UserDisplay::username($arr['userid'], false, true, true, true, false, false, '', true);
-                $userRow = \App\Support\UserDisplay::row((int) $arr['userid']);
-                $nickReplyName = trim((string) ($userRow['username'] ?? ''));
-                $classBadge = \App\Support\Shoutbox::classBadge((int) ($userRow['class'] ?? 0));
-                if ($showAvatars) {
-                    $rawAvatar = trim((string) ($userRow['avatar'] ?? ''));
-                    if ($rawAvatar !== '') {
-                        $avatarUrl = $rawAvatar;
-                    }
-                }
-                if ($nickReplyName !== '' && (int) ($CURUSER['id'] ?? 0) > 0) {
-                    $username = preg_replace(
-                        '#href="[^"]*userdetails\.php\?id=\d+"#',
-                        'href="#" class="shout-nick-reply" data-nick="'.htmlspecialchars($nickReplyName, ENT_QUOTES).'" title="'.htmlspecialchars($tooltipReply, ENT_QUOTES).'"',
-                        $username,
-                        1
-                    );
-                }
-            } else {
-                $username = $lang_shoutbox['text_guest'] ?? '';
-                $classBadge = '';
-            }
-            $avatarImg = '<img class="shout-avatar" src="'.htmlspecialchars($avatarUrl).'" alt="" data-fallback="pic/default_avatar.png" />';
-            if ($currUserId > 0) {
-                $avatarHtml = '<a class="shout-avatar-link" href="userdetails.php?id='.$currUserId.'" target="_blank" title="'.htmlspecialchars($tooltipAvatar, ENT_QUOTES).'">'.$avatarImg.'</a>';
-            } else {
-                $avatarHtml = $avatarImg;
-            }
-            $time = \App\Support\Shoutbox::formatTime($currDate, true);
-            $mentionsMe = false;
-            $message = \App\Support\Shoutbox::formatMessage($arr['text'], $currentUserId, $mentionsMe);
-            $plainLen = mb_strlen(strip_tags($message));
-            $isLong = $plainLen > 280;
-            $msgClass = $isLong ? 'shout-msg shout-msg-clamped' : 'shout-msg';
-            $messageHtml = '<span id="shout-msg-'.$arr['id'].'" class="'.$msgClass.'" data-raw="'.htmlspecialchars((string) $arr['text'], ENT_QUOTES).'">'.$message.'</span>';
-            if ($isLong) {
-                $messageHtml .= '<a class="shout-msg-toggle" href="#" data-on="'.htmlspecialchars($labelLess, ENT_QUOTES).'" data-off="'.htmlspecialchars($labelMore, ENT_QUOTES).'">'.htmlspecialchars($labelMore).'</a>';
-            }
-            $messageHtml .= $editedNote;
-            $rowClasses = ['shoutrow'];
-            if ($mentionsMe) {
-                $rowClasses[] = 'shoutrow-mentions-me';
-            }
-            if ($isContinuation) {
-                $rowClasses[] = 'shout-row-grouped';
-                $avatarHtml = '<span class="shout-avatar-spacer" aria-hidden="true"></span>';
-                $username = '';
-                $classBadge = '';
-            }
-            $rowClass = implode(' ', $rowClasses);
-        @endphp
-        <tr><td class="{{ $rowClass }}"><span class='date'>[{!! $time !!}]</span> {!! $actions !!} {!! $avatarHtml !!} {!! $classBadge !!}{!! $username !!} {!! $reactions !!} {!! $messageHtml !!}
+    @foreach ($items as $item)
+        <tr><td class="{{ $item['rowClass'] }}"><span class='date'>[@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['time']))]</span> @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['actions'])) @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['avatarHtml'])) @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['classBadge']))@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['username'])) @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['reactions'])) @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['messageHtml']))
 </td></tr>
-        @php
-            $prevUserId = $currUserId;
-            $prevDate = $currDate;
-        @endphp
     @endforeach
     </table>
     @if (! $isAjax)

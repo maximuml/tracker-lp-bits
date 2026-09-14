@@ -15,7 +15,10 @@ use App\Repositories\CommentRepository;
 use App\Services\ForumPageService;
 use App\Services\ForumService;
 use App\Support\CurrentUser;
+use App\Support\Format;
+use App\Support\LegacyYesNo;
 use App\Support\Pagination;
+use App\Support\Time;
 use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -27,6 +30,7 @@ class ForumController extends LegacyController
     public function __construct(
         private readonly ForumService $service,
         private readonly ForumPageService $pageService,
+        private readonly CurrentUser $currentUser,
     ) {}
 
     /**
@@ -100,6 +104,30 @@ class ForumController extends LegacyController
             $userDisplayMap[(int) $uid] = UserDisplay::username((int) $uid, false, true, true, false, false, true);
         }
 
+        $showAvatars = LegacyYesNo::isYes(((array) ($this->currentUser->get() ?? []))['avatars'] ?? null);
+        foreach ($rows as &$row) {
+            $row = (array) $row;
+            $commentId = (int) ($row['id'] ?? 0);
+            $parentType = (string) ($row['parent_type'] ?? '');
+            $parentId = (int) ($row['parent_id'] ?? 0);
+            $parentUrl = '';
+            if ($parentType === 'torrent' && $parentId > 0) {
+                $parentUrl = "details.php?id={$parentId}&hit=1#cid{$commentId}";
+            } elseif ($parentType === 'offer' && $parentId > 0) {
+                $parentUrl = "offers.php?id={$parentId}&off_details=1#cid{$commentId}";
+            }
+            $row['parentLinkHtml'] = $parentUrl !== ''
+                ? ' <font color="gray">on</font> <a href="'.$parentUrl.'">'.htmlspecialchars((string) ($row['parent_name'] ?? '')).'</a>'
+                : '';
+            $avatar = $showAvatars ? htmlspecialchars(trim((string) ($row['avatar'] ?? ''))) : '';
+            $row['avatarHtml'] = UserDisplay::avatarImageWithContext($avatar !== '' ? $avatar : 'pic/default_avatar.png');
+            $row['usernameHtml'] = $userDisplayMap[(int) ($row['user'] ?? 0)]
+                ?? UserDisplay::username((int) ($row['user'] ?? 0), false, true, true, false, false, true);
+            $row['timeHtml'] = (string) Time::format((string) ($row['added'] ?? ''));
+            $row['commentHtml'] = Format::formatComment((string) ($row['text'] ?? ''));
+        }
+        unset($row);
+
         return $this->legacyPage($request, 'latestcomments', true, [
             'rows' => $rows,
             'count' => $count,
@@ -107,7 +135,6 @@ class ForumController extends LegacyController
             'pagerbottom' => $pagerbottom,
             'offset' => $offset,
             'perpage' => $perpage,
-            'userDisplayMap' => $userDisplayMap,
         ]);
     }
 

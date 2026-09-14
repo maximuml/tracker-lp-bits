@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\View;
 use Illuminate\View\View as ViewInstance;
 use Mockery;
 use Mockery\MockInterface;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
@@ -158,18 +159,16 @@ final class UtilityControllerTest extends TestCase
         $this->assertSame('Invalid captcha action', $response->getContent());
     }
 
-    public function test_page_renders_raw_legacy_page(): void
+    public function test_page_requires_view_parameter(): void
     {
         $this->mockCurrentUser(null);
-        View::shouldReceive('make')->once()->with('page.index', [])->andReturn($this->fakeView('page html'));
 
         $controller = app(UtilityController::class);
         $request = Request::create('/page', 'GET');
         app()->instance('request', $request);
 
-        $response = $controller->page($request);
-
-        $this->assertSame('page html', $response->getContent());
+        $this->expectException(HttpException::class);
+        $controller->page($request);
     }
 
     public function test_tags_passes_post_data_to_view(): void

@@ -10,11 +10,13 @@ use App\Models\HitAndRun;
 use App\Models\User;
 use App\Services\BonusPageService;
 use App\Services\BonusService;
+use App\Support\AssetAppender;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Globals;
 use App\Support\Input;
 use App\Support\LegacyResponse;
+use App\Support\Locale;
 use App\Support\Pagination;
 use App\Support\Permissions;
 use Illuminate\Http\RedirectResponse;
@@ -154,6 +156,30 @@ class MyController extends Controller
         }
 
         $cancelHrBonus = SiteConfig::current()->bonus->cancelHr();
+
+        $hasActionRemove = collect($list)->contains(
+            fn ($row) => $row->uid == $curUser['id'] && in_array($row->status, HitAndRun::CAN_PARDON_STATUS)
+        );
+        if ($hasActionRemove) {
+            $msg = Locale::trans('hr.remove_confirm_msg', ['bonus' => $cancelHrBonus], null);
+            $js = <<<JS
+document.getElementById('hr-table').addEventListener('click', function (e) {
+    if (!e.target || !e.target.classList || !e.target.classList.contains('remove-hr')) return;
+    var id = e.target.getAttribute('data-id');
+    layer.confirm('{$msg}', function (index) {
+        nativePost('ajax.php', {"action": "removeHitAndRun", "params": {"id": id}}, function (response) {
+            console.log(response)
+            if (response.ret != 0) {
+                layer.alert(response.msg)
+                return
+            }
+            window.location.reload()
+        })
+    })
+})
+JS;
+            AssetAppender::js($js, 'footer', false);
+        }
 
         return view('my.hr', [
             'CURUSER' => $curUser,

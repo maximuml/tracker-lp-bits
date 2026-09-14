@@ -285,7 +285,29 @@ class UtilityController extends LegacyController
 
     public function page(Request $request): Response|RedirectResponse
     {
-        return $this->legacyPageRaw($request, 'page', false);
+        error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
+
+        $view = $request->input('view');
+        if (! empty($view)) {
+            $view = str_replace('.', '/', trim((string) $view, '/.'));
+            $viewFile = ROOT_PATH."resources/views/$view";
+            if (! str_ends_with($viewFile, '.php')) {
+                $viewFile .= '.php';
+            }
+            if (file_exists($viewFile)) {
+                ob_start();
+                require $viewFile;
+
+                return response(ob_get_clean() ?: '');
+            }
+            $msg = "viewFile: $viewFile not exists, _REQUEST: ".json_encode($request->all());
+            Logger::writeWithContext($msg, 'error', false);
+            throw new \RuntimeException($msg);
+        }
+
+        $msg = 'require view parameter, _REQUEST: '.json_encode($request->all());
+        Logger::writeWithContext($msg, 'error', false);
+        abort(400, 'require view parameter');
     }
 
     public function tags(Request $request): View|RedirectResponse

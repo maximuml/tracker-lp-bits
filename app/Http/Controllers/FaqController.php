@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Enums\FaqType;
 use App\Repositories\InfoRepository;
 use App\Support\Globals;
+use App\Support\Html;
 use App\Support\Http;
 use App\Support\Locale;
 use App\Support\Url;
@@ -36,8 +37,17 @@ class FaqController extends LegacyController
 
         $html = Cache::remember($cacheKey, 900, function () {
             $langId = $this->infoRepository->resolveRuleLangId(Locale::guestIdWithContext());
+            $categories = $this->infoRepository->faqCategories($langId);
+            foreach ($categories as &$category) {
+                foreach (($category['items'] ?? []) as &$item) {
+                    $item['answerHtml'] = Html::cleanListChildren(strip_tags(
+                        (string) ($item['answer'] ?? ''),
+                        '<a><b><i><u><s><br><p><div><span><ul><ol><li><img><font><pre><code><hr><table><tr><td><th><strong><em><h1><h2><h3><h4><h5><h6><blockquote>',
+                    ));
+                }
+            }
 
-            return view('faq.index', ['faqCategories' => $this->infoRepository->faqCategories($langId)])->render();
+            return view('faq.index', ['faqCategories' => $categories])->render();
         });
 
         return response($html);

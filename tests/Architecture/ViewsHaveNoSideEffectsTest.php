@@ -51,8 +51,6 @@ final class ViewsHaveNoSideEffectsTest extends TestCase
      * @var array<int, string>
      */
     private const EXEMPT_VIEWS = [
-        // Still uses UserDisplay::currentClass() for conditional display
-        'resources/views/warned/index.blade.php',
         // Pre-existing side-effects — to be refactored in future sprints
         'resources/views/auth/login.blade.php',
         'resources/views/bitbucket/_bitbucket.blade.php',

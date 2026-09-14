@@ -364,6 +364,8 @@ class SystemBulkController extends LegacyController
             'body' => $body,
             'sent' => $sent,
             'returnto' => $returnto,
+            'httpReferer' => Input::serverValue('HTTP_REFERER'),
+            'submitLabel' => Locale::trans('label.submit', [], null),
             'CURUSER' => $curUser,
         ]);
     }

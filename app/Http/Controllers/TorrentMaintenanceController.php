@@ -56,8 +56,38 @@ class TorrentMaintenanceController extends LegacyController
 
         return $this->legacyPage($request, 'torrent_info', true, [
             'torrentName' => (string) $torrent->name,
-            'dict' => $dict,
+            'structureHtml' => $this->torrentStructureBuilder(['root' => $dict]),
         ]);
+    }
+
+    /**
+     * @param  array<string|int, mixed>  $arr
+     */
+    private function isIndexedArray(array $arr): bool
+    {
+        return count(array_filter(array_keys($arr), 'is_string')) === 0;
+    }
+
+    /**
+     * @param  array<string|int, mixed>  $array
+     */
+    private function torrentStructureBuilder(array $array, string $parent = ''): string
+    {
+        $ret = '';
+        foreach ($array as $item => $value) {
+            $value_length = strlen(Bencode::encode($value));
+            if (is_iterable($value)) {
+                $type = $this->isIndexedArray(is_array($value) ? $value : iterator_to_array($value)) ? 'list' : 'dictionary';
+                $ret .= "<li><div align='left' class='".$type."'><a href='#' class='js-info-toggle'> + <span class=title>[".$item."]</span> <span class='icon'>(".ucfirst($type).')</span> <span class=length>['.$value_length.']</span></a></div>';
+                $ret .= "<ul class='nx-hidden'>".$this->torrentStructureBuilder(is_array($value) ? $value : iterator_to_array($value), (string) $item).'</ul></li>';
+            } else {
+                $type = is_int($value) ? 'integer' : 'string';
+                $value = ($parent === 'info' && $item === 'pieces') ? '0x'.bin2hex(substr((string) $value, 0, 25)).'...' : $value;
+                $ret .= '<li><div align=left class='.$type.'> - <span class=title>['.$item.']</span> <span class=icon>('.ucfirst($type).')</span> <span class=length>['.$value_length.']</span>: <span class=value>'.$value.'</span></div></li>';
+            }
+        }
+
+        return $ret;
     }
 
     public function takeFlush(Request $request): Response|RedirectResponse

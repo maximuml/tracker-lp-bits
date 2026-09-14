@@ -54,6 +54,9 @@ final class LegacyViewSurfaceTest extends TestCase
     /** Baseline: inline on*= event handler attributes. */
     private const BASELINE_INLINE_HANDLERS = 0;
 
+    /** Baseline: raw <?php open tags inside Blade views (legacy partials). */
+    private const BASELINE_RAW_PHP_TAGS = 0;
+
     /**
      * Views whose <table> tags are exempt from the layout-table ratchet:
      * semantic data tables (the x-data-table component and similar).
@@ -92,6 +95,23 @@ final class LegacyViewSurfaceTest extends TestCase
                .'Move logic to controllers/services and pass data to views. '
                .'If this increase is intentional, lower the baseline after removing @php elsewhere.',
                 self::BASELINE_PHP_BLOCKS,
+                $count,
+            ),
+        );
+    }
+
+    public function test_raw_php_tag_count_does_not_exceed_baseline(): void
+    {
+        $count = $this->countPatternInViews('/<\?php\b/');
+
+        $this->assertLessThanOrEqual(
+            self::BASELINE_RAW_PHP_TAGS,
+            $count,
+            sprintf(
+                'raw <?php tag count in views increased from baseline %d to %d. '
+               .'Convert the partial to Blade and move logic to controllers/services. '
+               .'If this increase is intentional, lower the baseline after removing <?php elsewhere.',
+                self::BASELINE_RAW_PHP_TAGS,
                 $count,
             ),
         );

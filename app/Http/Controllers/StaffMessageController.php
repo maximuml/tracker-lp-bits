@@ -11,6 +11,7 @@ use App\Support\Cache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
 use App\Support\Http\SafeReturnUrl;
+use App\Support\Input;
 use App\Support\UserDisplay;
 use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;
@@ -30,6 +31,8 @@ class StaffMessageController extends LegacyController
 
         $currentUser = app(CurrentUser::class)->get() ?? [];
         $classes = array_chunk(User::$classes, 4, true);
+        $returntoQuery = $request->query('returnto');
+        $httpReferer = Input::serverValue('HTTP_REFERER');
 
         return $this->legacyPage($request, 'staffmess', true, [
             'stdheadMsgalert' => false,
@@ -38,6 +41,8 @@ class StaffMessageController extends LegacyController
             'receiver' => (int) (request()->query('receiver') ?? 0),
             'username' => htmlspecialchars((string) ($currentUser['username'] ?? '')),
             'sent' => (int) (request()->query('sent') ?? 0),
+            'showReturnto' => (bool) ($returntoQuery || $httpReferer),
+            'returnto' => htmlspecialchars((string) ($returntoQuery ?? $httpReferer)),
         ]);
     }
 

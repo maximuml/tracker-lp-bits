@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Http\Controllers;
 
+use App\Contracts\Repositories\TorrentAjaxRepositoryInterface;
 use App\Http\Controllers\TorrentAjaxController;
 use App\Models\User;
-use App\Repositories\TorrentAjaxRepository;
 use App\Support\CurrentUser;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\JsonResponse;
@@ -30,7 +30,7 @@ final class TorrentAjaxControllerTest extends TestCase
 
     public function test_view_file_list_returns_400_for_invalid_id(): void
     {
-        $controller = new TorrentAjaxController;
+        $controller = app(TorrentAjaxController::class);
         $request = Request::create('/viewfilelist', 'GET', ['id' => 0]);
         app()->instance('request', $request);
 
@@ -44,7 +44,7 @@ final class TorrentAjaxControllerTest extends TestCase
         $repo = $this->mockTorrentAjaxRepository();
         $repo->shouldReceive('fileList')->once()->with(1)->andReturn(new Collection);
 
-        $controller = new TorrentAjaxController;
+        $controller = app(TorrentAjaxController::class);
         $request = Request::create('/viewfilelist', 'GET', ['id' => 1]);
         app()->instance('request', $request);
 
@@ -55,7 +55,7 @@ final class TorrentAjaxControllerTest extends TestCase
 
     public function test_view_peer_list_returns_400_for_invalid_id(): void
     {
-        $controller = new TorrentAjaxController;
+        $controller = app(TorrentAjaxController::class);
         $request = Request::create('/viewpeerlist', 'GET', ['id' => 0]);
         app()->instance('request', $request);
 
@@ -82,7 +82,7 @@ final class TorrentAjaxControllerTest extends TestCase
             'lang_viewpeerlist' => $this->viewPeerListLang(),
         ]);
 
-        $controller = new TorrentAjaxController;
+        $controller = app(TorrentAjaxController::class);
         $request = Request::create('/viewpeerlist', 'GET', ['id' => 1]);
         app()->instance('request', $request);
 
@@ -93,7 +93,7 @@ final class TorrentAjaxControllerTest extends TestCase
 
     public function test_get_user_torrent_list_returns_400_for_invalid_userid(): void
     {
-        $controller = new TorrentAjaxController;
+        $controller = app(TorrentAjaxController::class);
         $request = Request::create('/getusertorrentlistajax', 'GET', ['userid' => 0, 'type' => 'uploaded']);
         app()->instance('request', $request);
 
@@ -104,7 +104,7 @@ final class TorrentAjaxControllerTest extends TestCase
 
     public function test_get_user_torrent_list_returns_400_for_invalid_type(): void
     {
-        $controller = new TorrentAjaxController;
+        $controller = app(TorrentAjaxController::class);
         $request = Request::create('/getusertorrentlistajax', 'GET', ['userid' => 1, 'type' => 'invalid']);
         app()->instance('request', $request);
 
@@ -117,7 +117,7 @@ final class TorrentAjaxControllerTest extends TestCase
     {
         $this->mockCurrentUser(null);
 
-        $controller = new TorrentAjaxController;
+        $controller = app(TorrentAjaxController::class);
         $request = Request::create('/getusertorrentlistajax', 'GET', ['userid' => 1, 'type' => 'uploaded']);
         app()->instance('request', $request);
 
@@ -149,7 +149,7 @@ final class TorrentAjaxControllerTest extends TestCase
             'lang_functions' => ['text_banned' => 'Banned'],
         ]);
 
-        $controller = new TorrentAjaxController;
+        $controller = app(TorrentAjaxController::class);
         $request = Request::create('/getusertorrentlistajax', 'GET', ['userid' => $userId, 'type' => 'uploaded']);
         app()->instance('request', $request);
 
@@ -160,7 +160,7 @@ final class TorrentAjaxControllerTest extends TestCase
 
     public function test_search_suggest_returns_empty_array_for_empty_query(): void
     {
-        $controller = new TorrentAjaxController;
+        $controller = app(TorrentAjaxController::class);
         $request = Request::create('/searchsuggest', 'GET', ['q' => '']);
         app()->instance('request', $request);
 
@@ -175,7 +175,7 @@ final class TorrentAjaxControllerTest extends TestCase
         $repo = $this->mockTorrentAjaxRepository();
         $repo->shouldReceive('searchSuggest')->once()->with('test')->andReturn(['test', ['foo', 'bar'], [10, 20]]);
 
-        $controller = new TorrentAjaxController;
+        $controller = app(TorrentAjaxController::class);
         $request = Request::create('/searchsuggest', 'GET', ['q' => 'test']);
         app()->instance('request', $request);
 
@@ -190,7 +190,7 @@ final class TorrentAjaxControllerTest extends TestCase
 
     public function test_autocomplete_torrents_returns_empty_for_empty_query(): void
     {
-        $controller = new TorrentAjaxController;
+        $controller = app(TorrentAjaxController::class);
         $request = Request::create('/autocomplete', 'GET', ['q' => '']);
         app()->instance('request', $request);
 
@@ -206,7 +206,7 @@ final class TorrentAjaxControllerTest extends TestCase
     {
         $this->mockCurrentUser(['id' => 99999]);
 
-        $controller = new TorrentAjaxController;
+        $controller = app(TorrentAjaxController::class);
         $request = Request::create('/autocomplete', 'GET', ['q' => 'test']);
         app()->instance('request', $request);
 
@@ -228,7 +228,7 @@ final class TorrentAjaxControllerTest extends TestCase
         $repo = $this->mockTorrentAjaxRepository();
         $repo->shouldReceive('autocompleteTorrents')->once()->andReturn(['torrents' => [['id' => 1, 'name' => 'Test Torrent']]]);
 
-        $controller = new TorrentAjaxController;
+        $controller = app(TorrentAjaxController::class);
         $request = Request::create('/autocomplete', 'GET', ['q' => 'test']);
         app()->instance('request', $request);
 
@@ -247,9 +247,8 @@ final class TorrentAjaxControllerTest extends TestCase
      */
     private function mockTorrentAjaxRepository(): MockInterface
     {
-        $real = app(TorrentAjaxRepository::class);
-        $mock = Mockery::mock($real);
-        app()->instance(TorrentAjaxRepository::class, $mock);
+        $mock = Mockery::mock(TorrentAjaxRepositoryInterface::class);
+        app()->instance(TorrentAjaxRepositoryInterface::class, $mock);
 
         return $mock;
     }

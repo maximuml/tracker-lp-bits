@@ -19,9 +19,11 @@ use App\Support\AssetAppender;
 use App\Support\Bonus;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
+use App\Support\Format;
 use App\Support\Globals;
 use App\Support\Locale;
 use App\Support\Pagination;
+use App\Support\Time;
 use App\Support\UserDisplay;
 use App\Support\Validators;
 use Illuminate\Http\JsonResponse;
@@ -141,6 +143,13 @@ JS;
             'pagertop' => $pagertop,
             'pagerbottom' => $pagerbottom,
             'rows' => $rows,
+            'requestUri' => (string) request()->server->get('REQUEST_URI', ''),
+            'columnBusinessTypeLabel' => Locale::trans('bonus-log.fields.business_type', [], null),
+            'columnOldTotalLabel' => Locale::trans('bonus-log.fields.old_total_value', [], null),
+            'columnValueLabel' => Locale::trans('bonus-log.fields.value', [], null),
+            'columnNewTotalLabel' => Locale::trans('bonus-log.fields.new_total_value', [], null),
+            'columnCommentLabel' => Locale::trans('label.comment', [], null),
+            'columnCreatedAtLabel' => Locale::trans('label.created_at', [], null),
         ]);
 
     }
@@ -246,6 +255,17 @@ JS;
                 'last_name' => $last['name'] ?? '',
             ];
         }
+
+        $naText = $langUploaders['text_not_available'] ?? 'N/A';
+        foreach ($rows as &$row) {
+            $row['usernameHtml'] = (string) UserDisplay::username($row['userid'], false, true, true, false, false, true);
+            $row['sizeFormatted'] = $row['torrent_size'] ? Format::size($row['torrent_size']) : '0';
+            $row['lastAddedFormatted'] = $row['last_added'] ? (string) Time::format($row['last_added']) : $naText;
+            $row['lastTorrentHtml'] = $row['last_name'] !== ''
+                ? '<a href="details.php?id='.(int) $row['last_id'].'">'.e($row['last_name']).'</a>'
+                : e($naText);
+        }
+        unset($row);
 
         $yearOptions = '';
         for ($i = $yearFounded; $i <= $yearNow; $i++) {

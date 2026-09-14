@@ -194,9 +194,14 @@ JS;
             ->get()
             ->keyBy('id');
 
+        $claimBtnText = Locale::trans('exam.action_claim_task', [], null);
+        $claimedText = Locale::trans('exam.claimed_already', [], null);
+        $infiniteText = Locale::trans('label.infinite', [], null);
+
         $rows = [];
         foreach ($examRows as $row) {
             $isClaimed = $userTasks->has($row->id);
+            $btnText = $isClaimed ? $claimedText : $claimBtnText;
             $rows[] = [
                 'id' => $row->id,
                 'name' => $row->name,
@@ -204,12 +209,17 @@ JS;
                 'beginForUser' => $row->getBeginForUser(),
                 'endForUser' => $row->getEndForUser(),
                 'filterFormatted' => $row->filterFormatted,
-                'success_reward_bonus' => $row->success_reward_bonus,
-                'fail_deduct_bonus' => $row->fail_deduct_bonus,
-                'on_going_users_count' => $row->on_going_users_count ?? 0,
-                'max_user_count' => $row->max_user_count,
+                'rewardFormatted' => number_format((float) $row->success_reward_bonus),
+                'deductFormatted' => number_format((float) $row->fail_deduct_bonus),
+                'claimedCount' => ($row->on_going_users_count ?? 0).'/'.($row->max_user_count ?: $infiniteText),
                 'description' => $row->description,
-                'claimed' => $isClaimed,
+                'claimActionHtml' => sprintf(
+                    '<input type="button" class="%s" data-id="%s" value="%s"%s>',
+                    $isClaimed ? '' : 'claim',
+                    (int) $row->id,
+                    e($btnText),
+                    $isClaimed ? ' disabled' : ''
+                ),
             ];
         }
 
@@ -247,9 +257,6 @@ JS;
             'pagertop' => $pagertop,
             'pagerbottom' => $pagerbottom,
             'rows' => $rows,
-            'claimBtnText' => Locale::trans('exam.action_claim_task', [], null),
-            'claimedText' => Locale::trans('exam.claimed_already', [], null),
-            'infiniteText' => Locale::trans('label.infinite', [], null),
             'columnNameLabel' => Locale::trans('label.name', [], null),
             'columnIndexLabel' => Locale::trans('exam.index', [], null),
             'columnBeginTimeLabel' => Locale::trans('label.begin', [], null),

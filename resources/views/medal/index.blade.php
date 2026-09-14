@@ -3,5 +3,48 @@
 @section('title', $title)
 
 @section('content')
-@include('medal._medal')
+<h1 style="text-align: center">{{ $title }}</h1>
+
+<div>
+    <form id="filterForm" action="" method="get">
+        <input id="q" type="text" name="q" value="{{ $q }}" placeholder="username">
+        <input type="submit">
+        <input type="reset" class="js-filter-reset">
+    </form>
+</div>
+
+<table border="1" cellspacing="0" cellpadding="5" width="100%">
+<thead>
+<tr>
+    <td class="colhead">ID</td>
+    <td class="colhead">{{ $columnImageLargeLabel }}</td>
+    <td class="colhead">{{ $columnDescriptionLabel }}</td>
+    <td class="colhead" style="width: 115px">{{ $columnSaleBeginEndTimeLabel }}</td>
+    <td class="colhead">{{ $columnDurationLabel }}</td>
+    <td class="colhead">{{ $columnBonusAdditionLabel }}</td>
+    <td class="colhead">{{ $columnPriceLabel }}</td>
+    <td class="colhead">{{ $columnInventoryLabel }}</td>
+    <td class="colhead">{{ $columnBuyLabel }}</td>
+    <td class="colhead">{{ $columnGiftLabel }}</td>
+</tr>
+</thead>
+<tbody>
+@foreach ($rows as $row)
+<tr>
+    <td>{{ (int) $row['id'] }}</td>
+    <td><img src="{{ $row['image_large'] }}" style="max-width: 60px;max-height: 60px;" class="preview" /></td>
+    <td><h1>{{ $row['name'] }}</h1>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['description']))</td>
+    <td>{{ $row['sale_begin_time'] }} ~<br>{{ $row['sale_end_time'] }}</td>
+    <td>{{ $row['durationText'] }}</td>
+    <td>{{ $row['bonus_addition_factor'] }}%</td>
+    <td>{{ number_format((float) $row['price']) }}</td>
+    <td>{{ $row['inventory'] }}</td>
+    <td>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['buy_action']))</td>
+    <td>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['gift_action']))</td>
+</tr>
+@endforeach
+</tbody>
+</table>
+
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagerbottom ?? ''))
 @endsection

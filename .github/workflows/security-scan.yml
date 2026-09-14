@@ -57,13 +57,13 @@ jobs:
           version: v0.74.0
 
       - name: Upload Trivy full scan results to GitHub Security
-        uses: github/codeql-action/upload-sarif@6f5948dfacef28e207b48d0905cf90c03365536d # v3
+        uses: github/codeql-action/upload-sarif@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v3
         if: always()
         with:
           sarif_file: trivy-php-full.sarif
 
       - name: Upload OpenResty scan results
-        uses: github/codeql-action/upload-sarif@6f5948dfacef28e207b48d0905cf90c03365536d # v3
+        uses: github/codeql-action/upload-sarif@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v3
         if: always()
         with:
           sarif_file: trivy-openresty-full.sarif
@@ -91,13 +91,13 @@ jobs:
           semgrep scan --config .semgrep.informational.yml --sarif --output semgrep-info-results.sarif
 
       - name: Upload blocking results to GitHub Security
-        uses: github/codeql-action/upload-sarif@6f5948dfacef28e207b48d0905cf90c03365536d # v3
+        uses: github/codeql-action/upload-sarif@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v3
         if: always()
         with:
           sarif_file: semgrep-blocking-results.sarif
 
       - name: Upload informational results to GitHub Security
-        uses: github/codeql-action/upload-sarif@6f5948dfacef28e207b48d0905cf90c03365536d # v3
+        uses: github/codeql-action/upload-sarif@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v3
         if: always()
         with:
           sarif_file: semgrep-info-results.sarif

@@ -8,9 +8,12 @@ use App\Models\User;
 use App\Repositories\TokenRepository;
 use App\Repositories\UsercpRepository;
 use App\Repositories\UserPasskeyRepository;
+use App\Services\UsercpForumSectionBuilder;
 use App\Services\UsercpPageService;
+use App\Services\UsercpPersonalSectionBuilder;
 use App\Services\UsercpSecuritySectionBuilder;
 use App\Services\UsercpTokenSectionBuilder;
+use App\Services\UsercpTrackerSectionBuilder;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
@@ -73,6 +76,9 @@ final class UsercpPageServiceTest extends TestCase
             app(UsercpRepository::class),
             new UsercpTokenSectionBuilder($this->globals, app(UsercpRepository::class), $this->tokenRepository),
             new UsercpSecuritySectionBuilder($this->globals, $this->passkeyRepository),
+            new UsercpTrackerSectionBuilder($this->globals, app(UsercpRepository::class)),
+            new UsercpPersonalSectionBuilder($this->globals, app(UsercpRepository::class)),
+            new UsercpForumSectionBuilder($this->globals),
         );
     }
 
@@ -177,6 +183,9 @@ final class UsercpPageServiceTest extends TestCase
             app(UsercpRepository::class),
             new UsercpTokenSectionBuilder(new Globals, app(UsercpRepository::class), Mockery::mock(TokenRepository::class)),
             new UsercpSecuritySectionBuilder(new Globals, Mockery::mock(UserPasskeyRepository::class)),
+            new UsercpTrackerSectionBuilder(new Globals, app(UsercpRepository::class)),
+            new UsercpPersonalSectionBuilder(new Globals, app(UsercpRepository::class)),
+            new UsercpForumSectionBuilder(new Globals),
         );
 
         $this->assertInstanceOf(UsercpPageService::class, $service);
@@ -312,10 +321,8 @@ final class UsercpPageServiceTest extends TestCase
         $result = $this->service->build('personal', '')->toArray();
 
         $this->assertArrayHasKey('personal', $result);
-        $this->assertArrayHasKey('countryOptions', $result['personal']);
-        $this->assertArrayHasKey('trackerUrlOptions', $result['personal']);
-        $this->assertArrayHasKey('bitbucketOptions', $result['personal']);
-        $this->assertArrayHasKey('notificationOptions', $result['personal']);
+        $this->assertArrayHasKey('rowsHtml', $result['personal']);
+        $this->assertArrayHasKey('formId', $result['personal']);
         $this->assertArrayHasKey('enableBitbucket', $result['personal']);
     }
 

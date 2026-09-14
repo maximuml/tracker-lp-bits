@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\Setting;
-use App\Models\TrackerUrl;
 use App\Models\User;
 use App\Repositories\UsercpRepository;
 use App\Support\AssetAppender;
@@ -14,12 +13,7 @@ use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Forum;
 use App\Support\Globals;
-use App\Support\Html;
-use App\Support\Http;
-use App\Support\Input;
-use App\Support\Locale;
 use App\Support\Network;
-use App\Support\SearchBox;
 use App\Support\Strings;
 use App\Support\Time;
 use App\Support\Url;
@@ -46,6 +40,9 @@ final class UsercpPageService
         private readonly UsercpRepository $usercpRepository,
         private readonly UsercpTokenSectionBuilder $tokenSectionBuilder,
         private readonly UsercpSecuritySectionBuilder $securitySectionBuilder,
+        private readonly UsercpTrackerSectionBuilder $trackerSectionBuilder,
+        private readonly UsercpPersonalSectionBuilder $personalSectionBuilder,
+        private readonly UsercpForumSectionBuilder $forumSectionBuilder,
     ) {}
 
     /**
@@ -71,13 +68,13 @@ final class UsercpPageService
 
         switch ($action) {
             case 'personal':
-                $data['personal'] = $this->buildPersonal($lang, $curUser);
+                $data['personal'] = $this->personalSectionBuilder->build($lang, $curUser);
                 break;
             case 'tracker':
-                $data['tracker'] = $this->buildTracker($lang, $curUser);
+                $data['tracker'] = $this->trackerSectionBuilder->build($lang, $curUser);
                 break;
             case 'forum':
-                $data['forum'] = $this->buildForum($lang, $curUser);
+                $data['forum'] = $this->forumSectionBuilder->build($lang, $curUser);
                 break;
             case 'security':
                 $data['security'] = $this->securitySectionBuilder->build($lang, $curUser, $type);
@@ -303,133 +300,6 @@ final class UsercpPageService
             'colTopicStarter' => $lang['col_topic_starter'] ?? 'Topic starter',
             'colLastPost' => $lang['col_last_post'] ?? 'Last post',
             'title' => $lang['text_recently_read_topics'] ?? 'Recently read topics',
-        ];
-    }
-
-    /**
-     * Build the personal settings form data.
-     *
-     * @param  array<string, mixed>  $lang
-     * @param  array<string, mixed>  $curUser
-     * @return array<string, mixed>
-     */
-    private function buildPersonal(array $lang, array $curUser): array
-    {
-        // Countries
-        $countryOptions = '';
-        $countryRows = $this->usercpRepository->getCountryOptions();
-        foreach ($countryRows as $ct) {
-            $countryOptions .= '<option value='.htmlspecialchars((string) $ct->id).''
-                .(htmlspecialchars((string) ($curUser['country'] ?? '')) === htmlspecialchars((string) $ct->id) ? ' selected' : '')
-                .'>'.htmlspecialchars((string) $ct->name)."</option>\n";
-        }
-
-        // Tracker URLs
-        $trackerUrlOptions = '';
-        $trackerUrlList = TrackerUrl::listAll();
-        foreach ($trackerUrlList as $item) {
-            $trackerUrlOptions .= '<option value='.htmlspecialchars((string) $item->id).''
-                .(htmlspecialchars((string) ($curUser['tracker_url_id'] ?? '')) === htmlspecialchars((string) $item->id) ? ' selected' : '')
-                .'>'.htmlspecialchars((string) $item->url)."</option>\n";
-        }
-
-        // Bitbucket avatars
-        $bitbucketRows = $this->usercpRepository->getBitbucketOptions();
-        $bitbucketOptions = '';
-        $baseUrl = (string) $this->globals->get('BASEURL', '');
-        foreach ($bitbucketRows as $sor) {
-            $bitbucketOptions .= '<option value="'.Http::protocolPrefix(Url::isSecure()).$baseUrl.'/bitbucket/'.htmlspecialchars((string) $sor->name).'">'.htmlspecialchars((string) $sor->name).'</option>';
-        }
-
-        // Notification options
-        $notificationOptions = User::$notificationOptions;
-
-        return [
-            'countryOptions' => $countryOptions,
-            'trackerUrlOptions' => $trackerUrlOptions,
-            'bitbucketOptions' => $bitbucketOptions,
-            'notificationOptions' => $notificationOptions,
-            'enableBitbucket' => (string) $this->globals->get('enablebitbucket_main', '') === 'yes',
-            'baseUrl' => $baseUrl,
-            'selectNoneLabel' => $lang['select_none_selected'] ?? 'None',
-            'selectChooseAvatar' => $lang['select_choose_avatar'] ?? 'Choose avatar',
-            'selectNothing' => $lang['select_nothing'] ?? 'Nothing',
-            'defaultAvatarUrl' => Http::protocolPrefix(Url::isSecure()).$baseUrl.'/pic/default_avatar.png',
-        ];
-    }
-
-    /**
-     * Build the tracker/browse settings form data.
-     *
-     * @param  array<string, mixed>  $lang
-     * @param  array<string, mixed>  $curUser
-     * @return array<string, mixed>
-     */
-    private function buildTracker(array $lang, array $curUser): array
-    {
-        $showTooltipSetting = (string) $this->globals->get('enabletooltip_tweak', '') === 'yes';
-        $browsecatmode = (int) $this->globals->get('browsecatmode', 1);
-
-        // Special state from notifs
-        $notifs = (string) ($curUser['notifs'] ?? '');
-        $specialState = 0;
-        for ($i = 7; $i >= 0; $i--) {
-            if (str_contains($notifs, "[spstate={$i}]")) {
-                $specialState = $i;
-                break;
-            }
-        }
-
-        // Categories table
-        $categories = SearchBox::buildCategoryTableWithContext($browsecatmode, 'yes', 'torrents.php?allsec=1', '', 3, $notifs, ['section_name' => true]);
-
-        // Stylesheets
-        $ssSa = $this->usercpRepository->getStylesheetOptions();
-        ksort($ssSa);
-        $stylesheetOptions = '';
-        foreach ($ssSa as $ssName => $ssId) {
-            $selected = ((int) $ssId === (int) ($curUser['stylesheet'] ?? 0)) ? ' selected' : '';
-            $stylesheetOptions .= "<option value={$ssId}{$selected}>{$ssName}</option>\n";
-        }
-
-        // Site languages
-        $siteLangs = Locale::languageList('site_lang', true);
-        $currentFolder = Locale::folderFromCookie((string) Input::cookieValue('c_lang_folder', ''), false);
-        $langOptions = '';
-        foreach ($siteLangs as $row) {
-            $se = ($row['site_lang_folder'] === $currentFolder) ? ' selected' : '';
-            $langOptions .= '<option value='.(int) $row['id'].$se.'>'.htmlspecialchars((string) $row['lang_name'])."</option>\n";
-        }
-
-        // Email notification row visibility
-        $showEmailNotify = (string) $this->globals->get('emailnotify_smtp', '') === 'yes'
-            && (string) $this->globals->get('smtptype', '') !== 'none';
-        $showShoutbox = (string) $this->globals->get('showshoutbox_main', '') === 'yes';
-
-        return [
-            'showTooltipSetting' => $showTooltipSetting,
-            'specialState' => $specialState,
-            'categories' => $categories,
-            'delimiter' => '<div style="height: 1px;background-color: #eee;margin: 10px 0"></div>',
-            'stylesheetOptions' => $stylesheetOptions,
-            'langOptions' => $langOptions,
-            'showEmailNotify' => $showEmailNotify,
-            'showShoutbox' => $showShoutbox,
-            'promotionSelection' => Html::promotionSelection($specialState),
-        ];
-    }
-
-    /**
-     * Build the forum settings form data.
-     *
-     * @param  array<string, mixed>  $lang
-     * @param  array<string, mixed>  $curUser
-     * @return array<string, mixed>
-     */
-    private function buildForum(array $lang, array $curUser): array
-    {
-        return [
-            'showTooltipSetting' => (string) $this->globals->get('enabletooltip_tweak', '') === 'yes',
         ];
     }
 }

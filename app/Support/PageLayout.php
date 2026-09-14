@@ -56,6 +56,42 @@ class PageLayout
         self::renderHeader($context, $title, $msgalert, $script, $place, $cspNonce);
     }
 
+    /**
+     * Buffered variant of stdhead(): sets the context from SupportContext
+     * and returns the header markup instead of echoing it.
+     */
+    public static function headerHtml(string $title = '', bool $msgalert = true, string $script = '', string $place = ''): string
+    {
+        self::setContext(PageLayoutContext::fromSupportContext());
+
+        return self::buffered(fn () => self::header($title, $msgalert, $script, $place));
+    }
+
+    /**
+     * Buffered variant of stdfoot(): returns the footer markup.
+     */
+    public static function footerHtml(): string
+    {
+        return self::buffered(fn () => self::footer());
+    }
+
+    /**
+     * @param  callable(): void  $fn
+     */
+    private static function buffered(callable $fn): string
+    {
+        ob_start();
+        try {
+            $fn();
+
+            return (string) ob_get_clean();
+        } catch (\Throwable $e) {
+            ob_end_clean();
+
+            throw $e;
+        }
+    }
+
     private static function renderHeader(PageLayoutContext $context, string $title, bool $msgalert, string $script, string $place, string $cspNonce): void
     {
         $context->cache?->setLanguage($context->langDir);

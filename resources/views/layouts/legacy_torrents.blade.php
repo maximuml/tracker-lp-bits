@@ -1,10 +1,5 @@
-@php
-\App\Support\PageLayout::setContext(\App\Support\PageLayoutContext::fromSupportContext());
-\App\Support\PageLayout::header($__env->yieldContent('title'));
-@endphp
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\PageLayout::headerHtml($__env->yieldContent('title'))))
 <div id="main-content" tabindex="-1">
 @yield('content')
 </div>
-@php
-\App\Support\PageLayout::footer();
-@endphp
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\PageLayout::footerHtml()))

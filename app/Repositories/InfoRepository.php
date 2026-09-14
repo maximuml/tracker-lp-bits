@@ -13,6 +13,7 @@ use App\Support\Email;
 use App\Support\Globals;
 use App\Support\Pagination;
 use App\Support\Settings;
+use App\Support\Url;
 use Illuminate\Support\Facades\DB;
 
 final class InfoRepository
@@ -142,6 +143,12 @@ final class InfoRepository
             $tdAttr = 'colspan="2" width="100%"';
         }
 
+        $accountantId = (int) Settings::get('main.ACCOUNTANTID', 1);
+        $langDonate = (array) ($this->globals->get('lang_donate') ?? []);
+        $successMessage = ($langDonate['std_donation_success_note_one'] ?? '')
+            .'<a href="sendmessage.php?receiver='.$accountantId.'"><b>'.($langDonate['std_here'] ?? 'here').'</b></a>'
+            .($langDonate['std_donation_success_note_two'] ?? '');
+
         return [
             'enabled' => $enabled,
             'custom' => $custom,
@@ -152,7 +159,9 @@ final class InfoRepository
             'showCustom' => $custom !== '',
             'showAny' => $showPaypal || $showAlipay || $custom !== '',
             'tdAttr' => $tdAttr,
-            'accountantId' => (int) Settings::get('main.ACCOUNTANTID', 1),
+            'accountantId' => $accountantId,
+            'baseUrl' => Url::schemeAndHost(false),
+            'successMessage' => $successMessage,
         ];
     }
 

@@ -12,7 +12,7 @@
 <table width=737 border=1 cellspacing=0 cellpadding=5><tr class=tablea><td>
 
 @if (empty($friendsList))
-    {{ $lang_friends['text_friends_empty'] ?? 'No friends.' }}
+    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($lang_friends['text_friends_empty'] ?? 'No friends.'))
 @else
     @foreach ($friendsList as $friend)
         @if ($loop->index % 2 == 0)

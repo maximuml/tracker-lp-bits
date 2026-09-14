@@ -1,4 +1,4 @@
-<h1 align="center" id="top">{{ $off_details['name'] }}</h1>
+<h1 align="center" id="top">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($off_details['name'] ?? ''))</h1>
 <table width="97%" cellspacing="0" cellpadding="5">
 <tr><td class="rowhead" align="right">{{ $lang['row_info'] ?? '' }}</td><td class="rowfollow" align="left">{{ $lang['text_offered_by'] ?? '' }}@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($off_details['offeredBy'] ?? ''))@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($off_details['offerTime'] ?? ''))</td></tr>
 <tr><td class="rowhead" align="right">{{ $lang['row_status'] ?? '' }}</td><td class="rowfollow" align="left">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($off_details['status'] ?? ''))</td></tr>

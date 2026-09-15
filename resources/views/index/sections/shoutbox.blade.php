@@ -7,7 +7,7 @@
         - <font class="small" id="clear-shout-box">[<a class="altlink" href="#"><b>{{ $shoutbox['clearLabel'] }}</b></a>]</font>
     @endif
 </h2>
-<table width="100%"><tr><td class="text">
+<div class="nx-text">
 <iframe id='iframe-shout-box' src='shoutbox.php?type=shoutbox' width='100%' height='180' frameborder='0' name='sbox' marginwidth='0' marginheight='0'></iframe><br /><br />
 <form action='shoutbox.php' method='get' target='sbox' name='shbox'>
 @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(($shoutbox['toolbar'] ?? '')))
@@ -15,5 +15,5 @@
 <label for='shbox_text'>{{ $shoutbox['messageLabel'] }}</label><input type='text' name='shbox_text' id='shbox_text' size='100' style='border: 1px solid gray;' class="nx-grow" />  <input type='submit' id='hbsubmit' class='btn' name='shout' value="{{ $shoutbox['submitLabel'] }}" />
 <input type='reset' class='btn' value="{{ $shoutbox['clearButtonLabel'] }}" /> <input type='hidden' name='sent' value='yes' /><input type='hidden' name='type' value='shoutbox' />
 </div>
-</form></td></tr></table>
+</form></div>
 @endif

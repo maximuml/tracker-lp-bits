@@ -21,10 +21,8 @@
 <x-settings-row :label="\App\Support\Html\SafeHtml::fromTrustedHtml($lang['row_forum_posts'] ?? 'Forum posts')">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($home['forumPostsHtml']))</x-settings-row>
 @endif
 </table>
-<table border="0" cellspacing="0" cellpadding="5" width={{ $contentWidth }}>
-    <td align=center class=tabletitle><b>{{ $home['readTopics']['title'] }}</b></td>
-</table>
-<table border=0 cellspacing=0 cellpadding=3 width={{ $contentWidth }}><tr>
+<div class="nx-center nx-cell-5"><b>{{ $home['readTopics']['title'] }}</b></div>
+<table data-nx="data" border=0 cellspacing=0 cellpadding=3 width={{ $contentWidth }}><tr>
 <td class=colhead align=left width=80%>{{ $home['readTopics']['colTopicTitle'] }}</td>
 <td class=colhead align=center><nobr>{{ $home['readTopics']['colReplies'] }}/{{ $home['readTopics']['colViews'] }}</nobr></td>
 <td class=colhead align=center>{{ $home['readTopics']['colTopicStarter'] }}</td>

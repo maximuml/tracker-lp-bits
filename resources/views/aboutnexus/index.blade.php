@@ -5,7 +5,7 @@
 @section('content')
 <x-frame :caption="$captions['version']" :center="false">
 @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($notes['version']))
-<table class="main" border="1" cellspacing="0" cellpadding="5" align="center">
+<table data-nx="data" class="main" border="1" cellspacing="0" cellpadding="5" align="center">
     <x-settings-row :label="\App\Support\Html\SafeHtml::fromTrustedHtml($lang_aboutnexus['text_main_version'] ?? '')">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(PROJECTNAME))</x-settings-row>
     <x-settings-row :label="\App\Support\Html\SafeHtml::fromTrustedHtml($lang_aboutnexus['text_sub_version'] ?? '')">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(VERSION_NUMBER))</x-settings-row>
     <x-settings-row :label="\App\Support\Html\SafeHtml::fromTrustedHtml($lang_aboutnexus['text_release_date'] ?? '')">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(RELEASE_DATE))</x-settings-row>
@@ -66,7 +66,7 @@
 <x-frame :caption="$captions['contact']" :center="false">
 @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($notes['contact']))
 <br /><br />
-<table class="main" border="1" cellspacing="0" cellpadding="5" align="center">
+<table data-nx="data" class="main" border="1" cellspacing="0" cellpadding="5" align="center">
     <x-settings-row :label="\App\Support\Html\SafeHtml::fromTrustedHtml($lang_aboutnexus['text_web_site'] ?? '')">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml('<a href="' . NEXUSPHPURL . '" target="_blank">' . NEXUSPHPURL . '</a>'))</x-settings-row>
 </table>
 <br /><br />

@@ -25,9 +25,9 @@ li span.title {font-weight: bold;}
 
 </style>
 <div align=center><h1>{{ $torrentName ?? '' }}</h1>
-<table width=750 border=1 cellspacing=0 cellpadding=5><td>
+<div class="nx-box nx-box--750">
 <ul id='torrent-structure'>
 @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($structureHtml ?? ''))
 </ul>
-</td></table>
+</div>
 @endsection

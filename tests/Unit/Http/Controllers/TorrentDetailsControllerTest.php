@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Http\Controllers;
 
 use App\Http\Controllers\TorrentDetailsController;
-use App\Repositories\SearchBoxRepository;
+use App\Repositories\SearchBoxSchemaBuilder;
 use App\Repositories\TagRepository;
 use App\Repositories\TorrentRepository;
 use App\Support\Cache\LegacyRedisCache;
@@ -92,9 +92,9 @@ final class TorrentDetailsControllerTest extends TestCase
         $torrentRepository = Mockery::mock(TorrentRepository::class);
         app()->instance(TorrentRepository::class, $torrentRepository);
 
-        /** @var SearchBoxRepository&Mockery\MockInterface $searchBoxRepository */
-        $searchBoxRepository = Mockery::mock(SearchBoxRepository::class);
-        app()->instance(SearchBoxRepository::class, $searchBoxRepository);
+        /** @var SearchBoxSchemaBuilder&Mockery\MockInterface $searchBoxSchemaBuilder */
+        $searchBoxSchemaBuilder = Mockery::mock(SearchBoxSchemaBuilder::class);
+        app()->instance(SearchBoxSchemaBuilder::class, $searchBoxSchemaBuilder);
 
         /** @var TagRepository&Mockery\MockInterface $tagRepository */
         $tagRepository = Mockery::mock(TagRepository::class);

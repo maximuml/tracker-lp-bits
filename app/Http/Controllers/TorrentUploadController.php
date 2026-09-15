@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Auth\Permission;
-use App\Contracts\Repositories\SearchBoxRepositoryInterface;
 use App\Contracts\Repositories\TagRepositoryInterface;
 use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Enums\OfferAllowed;
@@ -16,6 +15,7 @@ use App\Models\Offer;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\HitAndRunRepository;
+use App\Repositories\SearchBoxSchemaBuilder;
 use App\Repositories\UploadRepository;
 use App\Support\Category;
 use App\Support\Config\SiteConfig;
@@ -37,7 +37,7 @@ class TorrentUploadController extends Controller
 {
     public function __construct(
         private TorrentRepositoryInterface $torrentRepository,
-        private SearchBoxRepositoryInterface $searchBoxRepository,
+        private SearchBoxSchemaBuilder $searchBoxSchemaBuilder,
         private TagRepositoryInterface $tagRepository,
         private HitAndRunRepository $hitAndRunRepository,
         private Globals $globals,
@@ -137,7 +137,7 @@ class TorrentUploadController extends Controller
             'priceCellHtml' => $priceCellHtml,
             'descrEditorHtml' => Form::bbcodeEditor('upload', 'descr', '', false, 130, true),
             'enableTechnicalInfo' => SiteConfig::current()->main->enableTechnicalInfo(),
-            'taxonomySelectHtml' => $this->searchBoxRepository->renderTaxonomySelect($browsecatmode),
+            'taxonomySelectHtml' => $this->searchBoxSchemaBuilder->renderTaxonomySelect($browsecatmode),
             'customFieldsHtml' => $customField->renderOnUploadPage(0, $browsecatmode),
             'hitAndRunHtml' => $this->hitAndRunRepository->renderOnUploadPage('', $browsecatmode),
             'tagsHtml' => $this->tagRepository->renderCheckbox($browsecatmode),

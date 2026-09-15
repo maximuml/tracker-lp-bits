@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Auth\Permission;
-use App\Contracts\Repositories\SearchBoxRepositoryInterface;
 use App\Contracts\Repositories\TagRepositoryInterface;
 use App\Contracts\Repositories\TorrentDownloadRepositoryInterface;
 use App\Contracts\Repositories\TorrentRepositoryInterface;
@@ -16,6 +15,7 @@ use App\Models\Torrent;
 use App\Models\TorrentBuyLog;
 use App\Models\TorrentOperationLog;
 use App\Models\User;
+use App\Repositories\SearchBoxSchemaBuilder;
 use App\Repositories\TorrentDetailRepository;
 use App\Repositories\TorrentModerationRepository;
 use App\Support\AssetAppender;
@@ -55,7 +55,7 @@ class TorrentDetailsController extends Controller
 
     private TorrentModerationRepository $moderationRepository;
 
-    private SearchBoxRepositoryInterface $searchBoxRepository;
+    private SearchBoxSchemaBuilder $searchBoxSchemaBuilder;
 
     private TagRepositoryInterface $tagRepository;
 
@@ -71,7 +71,7 @@ class TorrentDetailsController extends Controller
         TorrentRepositoryInterface $torrentRepository,
         TorrentDownloadRepositoryInterface $downloadRepository,
         TorrentModerationRepository $moderationRepository,
-        SearchBoxRepositoryInterface $searchBoxRepository,
+        SearchBoxSchemaBuilder $searchBoxSchemaBuilder,
         TagRepositoryInterface $tagRepository,
         TorrentDetailRepository $torrentDetailRepository,
         CurrentUser $currentUser,
@@ -81,7 +81,7 @@ class TorrentDetailsController extends Controller
         $this->torrentRepository = $torrentRepository;
         $this->downloadRepository = $downloadRepository;
         $this->moderationRepository = $moderationRepository;
-        $this->searchBoxRepository = $searchBoxRepository;
+        $this->searchBoxSchemaBuilder = $searchBoxSchemaBuilder;
         $this->tagRepository = $tagRepository;
         $this->torrentDetailRepository = $torrentDetailRepository;
         $this->currentUser = $currentUser;
@@ -193,7 +193,7 @@ class TorrentDetailsController extends Controller
         $langDetails = $this->globals->get('lang_details') ?? [];
 
         $torrentRep = $this->torrentRepository;
-        $searchBoxRep = $this->searchBoxRepository;
+        $searchBoxRep = $this->searchBoxSchemaBuilder;
         $tagRep = $this->tagRepository;
         $customField = new CustomField;
 

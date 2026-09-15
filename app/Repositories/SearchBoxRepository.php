@@ -14,7 +14,6 @@ use App\Models\SearchBox;
 use App\Models\Torrent;
 use App\Support\Cache;
 use App\Support\UserDisplay;
-use Filament\Schemas\Components\Section;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Arr;
@@ -23,10 +22,6 @@ use Illuminate\Support\Facades\DB;
 
 class SearchBoxRepository extends BaseRepository implements SearchBoxRepositoryInterface
 {
-    public function __construct(
-        private readonly SearchBoxSchemaBuilder $schemaBuilder = new SearchBoxSchemaBuilder,
-    ) {}
-
     /** @return list<string> */
     protected function allowedSortColumns(): array
     {
@@ -252,46 +247,5 @@ class SearchBoxRepository extends BaseRepository implements SearchBoxRepositoryI
         }
 
         return $categories;
-    }
-
-    /**
-     * @param  mixed  $searchBox
-     * @param  array<int|string, mixed>  $torrentInfo
-     */
-    public function renderTaxonomySelect($searchBox, array $torrentInfo = []): string
-    {
-        return $this->schemaBuilder->renderTaxonomySelect($searchBox, $torrentInfo);
-    }
-
-    /**
-     * @param  mixed  $searchBox
-     * @param  array<int|string, mixed>  $torrentWithTaxonomy
-     * @return array<int|string, mixed>
-     */
-    public function listTaxonomyInfo($searchBox, array $torrentWithTaxonomy): array
-    {
-        return $this->schemaBuilder->listTaxonomyInfo($searchBox, $torrentWithTaxonomy);
-    }
-
-    /**
-     * @param  mixed  $searchBox
-     * @return array<int|string, mixed>
-     */
-    public function listTaxonomyFormSchema($searchBox): array
-    {
-        return $this->schemaBuilder->listTaxonomyFormSchema($searchBox);
-    }
-
-    public function buildSearchBoxFormSchema(SearchBox $searchBox, string $namePrefix): Section
-    {
-        return $this->schemaBuilder->buildSearchBoxFormSchema($searchBox, $namePrefix);
-    }
-
-    /**
-     * @return array<int|string, mixed>
-     */
-    public function buildCategoryTaxonomyTagSchema(SearchBox $searchBox, bool $multiple, string $namePrefix): array
-    {
-        return $this->schemaBuilder->buildCategoryTaxonomyTagSchema($searchBox, $multiple, $namePrefix);
     }
 }

@@ -1,0 +1,162 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Unit\Repositories;
+
+use App\Models\Comment;
+use App\Models\Post;
+use App\Models\User;
+use App\Repositories\UsercpLookupRepository;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\DB;
+use Tests\Attributes\TestCategory;
+use Tests\TestCase;
+
+/**
+ * Unit tests for UsercpLookupRepository.
+ *
+ * Covers getCommentCount(), getForumPostCount(), getTotalPostCount(),
+ * getTopicPostCount(), getStylesheetOptions(), getCountryOptions().
+ */
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
+final class UsercpLookupRepositoryTest extends TestCase
+{
+    use DatabaseTransactions;
+
+    private UsercpLookupRepository $repository;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->repository = app(UsercpLookupRepository::class);
+    }
+
+    public function test_get_comment_count_returns_count_for_user(): void
+    {
+        $user = User::factory()->create();
+        Comment::query()->create([
+            'user' => $user->id,
+            'torrent' => 0,
+            'added' => now()->toDateTimeString(),
+            'text' => 'Test comment',
+            'ori_text' => 'Test comment',
+            'anonymous' => false,
+        ]);
+
+        $count = $this->repository->getCommentCount($user->id);
+
+        $this->assertGreaterThanOrEqual(1, $count);
+    }
+
+    public function test_get_comment_count_returns_zero_for_user_without_comments(): void
+    {
+        $user = User::factory()->create();
+
+        $count = $this->repository->getCommentCount($user->id);
+
+        $this->assertSame(0, $count);
+    }
+
+    public function test_get_forum_post_count_returns_count_for_user(): void
+    {
+        $user = User::factory()->create();
+        $topicId = (int) DB::table('topics')->insertGetId([
+            'userid' => $user->id,
+            'subject' => 'Test topic',
+            'forumid' => 1,
+            'lastpost' => 0,
+        ]);
+        Post::query()->create([
+            'topicid' => $topicId,
+            'userid' => $user->id,
+            'added' => now()->toDateTimeString(),
+            'body' => 'Test post',
+            'ori_body' => 'Test post',
+        ]);
+
+        $count = $this->repository->getForumPostCount($user->id);
+
+        $this->assertGreaterThanOrEqual(1, $count);
+    }
+
+    public function test_get_total_post_count_returns_all_posts(): void
+    {
+        $initial = $this->repository->getTotalPostCount();
+
+        $user = User::factory()->create();
+        $topicId = (int) DB::table('topics')->insertGetId([
+            'userid' => $user->id,
+            'subject' => 'Total count test',
+            'forumid' => 1,
+            'lastpost' => 0,
+        ]);
+        Post::query()->create([
+            'topicid' => $topicId,
+            'userid' => $user->id,
+            'added' => now()->toDateTimeString(),
+            'body' => 'Test post',
+            'ori_body' => 'Test post',
+        ]);
+
+        $after = $this->repository->getTotalPostCount();
+
+        $this->assertSame($initial + 1, $after);
+    }
+
+    public function test_get_topic_post_count_returns_count_for_topic(): void
+    {
+        $user = User::factory()->create();
+        $topicId = (int) DB::table('topics')->insertGetId([
+            'userid' => $user->id,
+            'subject' => 'Topic count test',
+            'forumid' => 1,
+            'lastpost' => 0,
+        ]);
+        Post::query()->create([
+            'topicid' => $topicId,
+            'userid' => $user->id,
+            'added' => now()->toDateTimeString(),
+            'body' => 'Test post 1',
+            'ori_body' => 'Test post 1',
+        ]);
+        Post::query()->create([
+            'topicid' => $topicId,
+            'userid' => $user->id,
+            'added' => now()->toDateTimeString(),
+            'body' => 'Test post 2',
+            'ori_body' => 'Test post 2',
+        ]);
+
+        $count = $this->repository->getTopicPostCount($topicId);
+
+        $this->assertSame(2, $count);
+    }
+
+    public function test_get_stylesheet_options_returns_array(): void
+    {
+        DB::table('stylesheets')->insert([
+            'name' => 'TestTheme',
+            'uri' => 'TestTheme',
+        ]);
+
+        $options = $this->repository->getStylesheetOptions();
+
+        $this->assertIsArray($options);
+        $this->assertNotEmpty($options);
+        $this->assertArrayHasKey('TestTheme', $options);
+    }
+
+    public function test_get_country_options_returns_array(): void
+    {
+        DB::table('countries')->insert([
+            'name' => 'TestCountry',
+            'flagpic' => 'test.gif',
+        ]);
+
+        $options = $this->repository->getCountryOptions();
+
+        $this->assertIsArray($options);
+        $this->assertNotEmpty($options);
+    }
+}

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Services;
 
 use App\Repositories\OfferRepository;
+use App\Services\OfferModerationService;
 use App\Services\OfferService;
 use App\Support\CurrentUser;
 use App\Support\Globals;
@@ -63,6 +64,7 @@ final class OfferServiceTest extends TestCase
             $this->currentUser,
             $this->globals,
             new OfferRepository,
+            new OfferModerationService($this->currentUser, $this->globals, new OfferRepository),
         );
     }
 

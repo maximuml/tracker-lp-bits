@@ -473,9 +473,12 @@ button.nx-btn-link {
 .nx-hl{background:#BBAF9B}
 .nx-grouprow{display:contents}
 .nx-panel{width:65%;margin-left:auto;margin-right:auto;background:#F5F4EA}
-.nx-fcell{padding:5px;vertical-align:top}
+.nx-fcell{padding:5px;vertical-align:top;text-align:left}
 .nx-fhead{padding:5px;font-weight:bold;text-align:right;vertical-align:top}
 .nx-ffull{grid-column:1/-1;padding:5px}
+/* CSP style-src on legacy routes strips inline style attributes, so the
+   bbcode editor width must come from the stylesheet, not style="width:100%". */
+textarea.bbcode{width:100%;box-sizing:border-box}
 .nx-ffield{padding:1px;padding-left:10px}
 .nx-vam{align-self:center}
 /* Black notice banner (settings page): restores the background the

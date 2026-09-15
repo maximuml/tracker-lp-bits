@@ -398,7 +398,7 @@ if ($enableattach_attachment == 'yes') {
 <?php
 }
         echo '<tr>';
-        echo '<td align="left"><textarea class="bbcode" cols="100" style="width: 100%;" name="'.$text.'" id="'.$text.'" rows="20" data-ctrlenter="compose:qr">'.htmlspecialchars($content).'</textarea>';
+        echo '<td align="left"><textarea class="bbcode" cols="100" name="'.$text.'" id="'.$text.'" rows="20" data-ctrlenter="compose:qr">'.htmlspecialchars($content).'</textarea>';
         ?>
 </td>
 <td align="center" width="">

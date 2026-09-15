@@ -51,7 +51,6 @@ final class RepositorySizeTest extends TestCase
         'app/Repositories/BonusRepository.php' => 443,
         'app/Repositories/UserSearchRepository.php' => 438,
         'app/Repositories/TorrentSearch/FilterParser.php' => 424,
-        'app/Repositories/CleanupRepository.php' => 414,
         // Services > 400 lines (0 files)
     ];
 

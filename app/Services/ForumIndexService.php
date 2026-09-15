@@ -8,6 +8,7 @@ use App\Auth\Permission;
 use App\Contracts\Repositories\ForumRepositoryInterface;
 use App\Contracts\Repositories\PostRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
+use App\Repositories\OverforumRepository;
 use App\Repositories\TopicReadStateRepository;
 use App\Repositories\TopicRepository;
 use App\Support\Cache\LegacyRedisCache;
@@ -32,6 +33,7 @@ final class ForumIndexService
         private readonly CurrentUser $currentUser,
         private readonly Globals $globals,
         private readonly ForumRepositoryInterface $forumRepository,
+        private readonly OverforumRepository $overforumRepository,
         private readonly LegacyRedisCache $cache,
         private readonly TopicRepository $topicRepository,
         private readonly TopicReadStateRepository $readStateRepository,
@@ -63,7 +65,7 @@ final class ForumIndexService
         echo "<table border=\"1\" cellspacing=\"0\" cellpadding=\"5\" width=\"100%\">\n";
 
         if (! $overforums = $Cache->get_value('overforums_list')) {
-            $overforums = $this->forumRepository->getOverforumsList();
+            $overforums = $this->overforumRepository->getOverforumsList();
             $Cache->cache_value('overforums_list', $overforums, 86400);
         }
         foreach ($overforums as $a) {

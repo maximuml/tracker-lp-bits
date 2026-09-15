@@ -6,6 +6,7 @@ namespace Tests\Unit\Services;
 
 use App\Models\User;
 use App\Repositories\ForumRepository;
+use App\Repositories\OverforumRepository;
 use App\Repositories\PostRepository;
 use App\Repositories\TopicReadStateRepository;
 use App\Repositories\TopicRepository;
@@ -69,6 +70,7 @@ final class ForumListingServiceTest extends TestCase
             $this->app->make(CurrentUser::class),
             $this->app->make(Globals::class),
             $this->app->make(ForumRepository::class),
+            new OverforumRepository,
             $this->app->make(LegacyRedisCache::class),
             $this->app->make(TopicRepository::class),
             $this->app->make(TopicReadStateRepository::class),
@@ -139,6 +141,7 @@ final class ForumListingServiceTest extends TestCase
             $this->app->make(CurrentUser::class),
             $this->app->make(Globals::class),
             $forumRepo,
+            new OverforumRepository,
             $cacheInstance,
             $this->app->make(TopicRepository::class),
             $this->app->make(TopicReadStateRepository::class),

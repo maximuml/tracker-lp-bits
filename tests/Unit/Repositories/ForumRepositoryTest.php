@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Repositories;
 
-use App\Models\Post;
-use App\Models\Topic;
 use App\Models\User;
 use App\Repositories\ForumRepository;
 use App\Repositories\TopicRepository;
@@ -18,9 +16,7 @@ use Tests\TestCase;
  * Unit tests for ForumRepository.
  *
  * Covers createForum(), updateForum(), deleteForum(), getForumRow(),
- * getMaxForumSort(), getOverqueries(), createOverquery(),
- * replaceModerators(), getModeratorArray(), getTopicIdByPost(),
- * isModeratorOfTopic(), isModeratorOfForum().
+ * getMaxForumSort(), getTopicIdByPost(), isModeratorOfTopic().
  */
 #[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class ForumRepositoryTest extends TestCase
@@ -117,107 +113,6 @@ final class ForumRepositoryTest extends TestCase
         $this->assertDatabaseMissing('forums', ['id' => $id]);
     }
 
-    public function test_create_overforum(): void
-    {
-        $this->repository->createOverforum([
-            'name' => 'Test Overforum',
-            'sort' => 1,
-        ]);
-
-        $this->assertDatabaseHas('overforums', ['name' => 'Test Overforum']);
-    }
-
-    public function test_get_overforums_returns_array(): void
-    {
-        $this->repository->createOverforum(['name' => 'Over 1', 'sort' => 1]);
-
-        $overforums = $this->repository->getOverforums();
-
-        $this->assertIsArray($overforums);
-        $this->assertNotEmpty($overforums);
-    }
-
-    public function test_get_overforum_row_returns_array(): void
-    {
-        $this->repository->createOverforum(['name' => 'Row Test', 'sort' => 1]);
-        $id = DB::table('overforums')->where('name', 'Row Test')->value('id');
-
-        $row = $this->repository->getOverforumRow((int) $id);
-
-        $this->assertNotNull($row);
-        $this->assertSame('Row Test', $row['name']);
-    }
-
-    public function test_get_overforum_row_returns_null_for_nonexistent(): void
-    {
-        $row = $this->repository->getOverforumRow(999999);
-
-        $this->assertNull($row);
-    }
-
-    public function test_replace_moderators_sets_new_moderators(): void
-    {
-        $forumId = $this->repository->createForum([
-            'name' => 'Mod Test',
-            'description' => '',
-            'sort' => 1,
-            'forid' => 0,
-        ]);
-
-        $this->repository->replaceModerators($forumId, [1, 2, 3]);
-
-        $mods = DB::table('forummods')->where('forumid', $forumId)->get();
-        $this->assertCount(3, $mods);
-    }
-
-    public function test_replace_moderators_replaces_existing(): void
-    {
-        $forumId = $this->repository->createForum([
-            'name' => 'Mod Replace',
-            'description' => '',
-            'sort' => 1,
-            'forid' => 0,
-        ]);
-
-        $this->repository->replaceModerators($forumId, [1, 2]);
-        $this->repository->replaceModerators($forumId, [3]);
-
-        $mods = DB::table('forummods')->where('forumid', $forumId)->get();
-        $this->assertCount(1, $mods);
-        $this->assertSame(3, $mods->first()->userid);
-    }
-
-    public function test_replace_moderators_respects_limit(): void
-    {
-        $forumId = $this->repository->createForum([
-            'name' => 'Mod Limit',
-            'description' => '',
-            'sort' => 1,
-            'forid' => 0,
-        ]);
-
-        $this->repository->replaceModerators($forumId, [1, 2, 3, 4, 5], 2);
-
-        $mods = DB::table('forummods')->where('forumid', $forumId)->get();
-        $this->assertCount(2, $mods);
-    }
-
-    public function test_get_moderator_array_groups_by_forum(): void
-    {
-        $forumId = $this->repository->createForum([
-            'name' => 'Mod Array',
-            'description' => '',
-            'sort' => 1,
-            'forid' => 0,
-        ]);
-        $this->repository->replaceModerators($forumId, [1, 2]);
-
-        $array = $this->repository->getModeratorArray();
-
-        $this->assertArrayHasKey($forumId, $array);
-        $this->assertCount(2, $array[$forumId]);
-    }
-
     public function test_get_topic_id_by_post_returns_topic_id(): void
     {
         $user = User::factory()->create();
@@ -255,31 +150,5 @@ final class ForumRepositoryTest extends TestCase
         $found = $this->topicRepository->getTopicIdByPost(999999);
 
         $this->assertNull($found);
-    }
-
-    public function test_is_moderator_of_forum_returns_true_for_moderator(): void
-    {
-        $forumId = $this->repository->createForum([
-            'name' => 'IsMod Forum',
-            'description' => '',
-            'sort' => 1,
-            'forid' => 0,
-        ]);
-        $this->repository->replaceModerators($forumId, [1]);
-
-        $this->assertTrue($this->repository->isModeratorOfForum($forumId, 1));
-    }
-
-    public function test_is_moderator_of_forum_returns_false_for_non_moderator(): void
-    {
-        $forumId = $this->repository->createForum([
-            'name' => 'NotMod Forum',
-            'description' => '',
-            'sort' => 1,
-            'forid' => 0,
-        ]);
-        $this->repository->replaceModerators($forumId, [1]);
-
-        $this->assertFalse($this->repository->isModeratorOfForum($forumId, 999));
     }
 }

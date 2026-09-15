@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Section;
 
-use App\Contracts\Repositories\ForumRepositoryInterface;
 use App\Enums\UserClass as UserClassEnum;
 use App\Filament\Resources\Section\OverForumResource\Pages\CreateOverForum;
 use App\Filament\Resources\Section\OverForumResource\Pages\EditOverForum;
 use App\Filament\Resources\Section\OverForumResource\Pages\ListOverForums;
 use App\Models\OverForum;
 use App\Models\User;
+use App\Repositories\OverforumRepository;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -82,7 +82,7 @@ class OverForumResource extends Resource
             ->recordActions([
                 EditAction::make(),
                 DeleteAction::make()
-                    ->using(fn ($record) => app(ForumRepositoryInterface::class)->deleteOverforum($record->id)),
+                    ->using(fn ($record) => app(OverforumRepository::class)->deleteOverforum($record->id)),
             ])
             ->toolbarActions([
                 DeleteBulkAction::make(),

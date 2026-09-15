@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Support;
 
-use App\Contracts\Repositories\ForumRepositoryInterface;
 use App\Contracts\Repositories\PostRepositoryInterface;
 use App\Enums\UserClass as UserClassEnum;
 use App\Models\Topic;
 use App\Models\User;
+use App\Repositories\ForumModRepository;
 use App\Repositories\SettingRepository;
 use App\Repositories\TopicRepository;
 use App\Support\Cache\LegacyRedisCache;
@@ -54,7 +54,7 @@ final class Forum
             if ($cached !== false && is_array($cached)) {
                 $moderatorsArray = $cached;
             } else {
-                $moderatorsArray = app(ForumRepositoryInterface::class)->getModeratorArray();
+                $moderatorsArray = app(ForumModRepository::class)->getModeratorArray();
                 if ($cache !== null) {
                     $cache->cache_value('forum_moderator_array', $moderatorsArray, 86200);
                 }
@@ -84,7 +84,7 @@ final class Forum
             $userIds[] = UserDisplay::userIdFromName(trim($user));
         }
 
-        app(ForumRepositoryInterface::class)->replaceModerators((int) $forumId, $userIds, $limit);
+        app(ForumModRepository::class)->replaceModerators((int) $forumId, $userIds, $limit);
     }
 
     /**
@@ -97,7 +97,7 @@ final class Forum
     {
         $CURUSER = app(CurrentUser::class)->get() ?? [];
 
-        $forumRep = app(ForumRepositoryInterface::class);
+        $forumRep = app(ForumModRepository::class);
         $userId = (int) ($CURUSER['id'] ?? 0);
 
         switch ($in) {
@@ -157,7 +157,7 @@ final class Forum
         }
 
         if ($forumMods === null) {
-            $forumMods = app(ForumRepositoryInterface::class)->getForumMods();
+            $forumMods = app(ForumModRepository::class)->getForumMods();
         }
 
         $isForumMod = isset($forumMods[$forumId]) && $forumMods[$forumId] == $uid;

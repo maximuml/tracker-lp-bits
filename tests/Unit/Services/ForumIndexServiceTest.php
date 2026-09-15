@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Services;
 
 use App\Repositories\ForumRepository;
+use App\Repositories\OverforumRepository;
 use App\Repositories\PostRepository;
 use App\Repositories\TopicReadStateRepository;
 use App\Repositories\TopicRepository;
@@ -96,6 +97,7 @@ final class ForumIndexServiceTest extends TestCase
             $this->currentUser,
             $this->globals,
             $this->forumRepo,
+            new OverforumRepository,
             $this->cache,
             $this->topicRepo,
             $this->readStateRepo,

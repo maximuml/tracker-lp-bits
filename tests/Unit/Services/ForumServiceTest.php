@@ -11,6 +11,7 @@ use App\Policies\TopicPolicy;
 use App\Repositories\ForumRepository;
 use App\Repositories\PostRepository;
 use App\Repositories\TopicRepository;
+use App\Services\ForumModerationService;
 use App\Services\ForumService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
@@ -139,6 +140,7 @@ final class ForumServiceTest extends TestCase
             $this->app->make(PostPolicy::class),
             $this->app->make(TopicRepository::class),
             $this->app->make(PostRepository::class),
+            $this->app->make(ForumModerationService::class),
         );
     }
 

@@ -184,7 +184,7 @@ final class TopicRepositoryTest extends TestCase
     {
         $topic = Topic::factory()->create(['sticky' => false]);
 
-        $this->repository->updateTopicSticky($topic->id, '1');
+        $this->repository->updateTopicSticky($topic->id, true);
 
         $this->assertTrue((bool) Topic::query()->where('id', $topic->id)->value('sticky'));
     }

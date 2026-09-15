@@ -163,7 +163,7 @@ class TopicRepository extends BaseRepository
         return (bool) Topic::query()->where('id', $topicid)->update(['locked' => $locked]);
     }
 
-    public function updateTopicSticky(int $topicid, string $sticky): bool
+    public function updateTopicSticky(int $topicid, bool $sticky): bool
     {
         return (bool) Topic::query()->where('id', $topicid)->update(['sticky' => $sticky]);
     }

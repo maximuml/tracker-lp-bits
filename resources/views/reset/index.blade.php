@@ -6,13 +6,13 @@
 @if (! empty($success))
 <p>{{ $message ?? '' }}</p>
 @endif
-<table border=1 cellspacing=0 cellpadding=5>
 <form method=post>
-<tr><td class=colhead align="center" colspan=2>Reset User's Lost Password</td></tr>
-<tr><td class=rowhead align="right">User Name:</td><td class=rowfollow><input size=40 name=username></td></tr>
-<tr><td class=rowhead align="right">New Password:</td><td class=rowfollow><input type="password" size=40 name=newpassword><br /><font class=small>Minimum is 6 characters</font></td></tr>
-<tr><td class=rowhead align="right">Confirm New Password:</td><td class=rowfollow><input type="password" size=40 name=newpasswordagain></td></tr>
-<tr><td class=toolbox colspan=2 align="center"><input type=submit class=btn value='Reset'></td></tr>
+<div class="nx-fgrid">
+<div class="nx-colhead nx-ffull nx-center">Reset User's Lost Password</div>
+<div class="nx-fhead">User Name:</div><div class="nx-fcell"><input size=40 name=username></div>
+<div class="nx-fhead">New Password:</div><div class="nx-fcell"><input type="password" size=40 name=newpassword><br /><font class=small>Minimum is 6 characters</font></div>
+<div class="nx-fhead">Confirm New Password:</div><div class="nx-fcell"><input type="password" size=40 name=newpasswordagain></div>
+<div class="nx-ffull nx-center"><input type=submit class=btn value='Reset'></div>
+</div>
 </form>
-</table>
 @endsection

@@ -430,14 +430,41 @@ button.nx-btn-link {
 .nx-text{padding:10pt}
 .nx-embedded{padding:0}
 .nx-box{border:1px solid rgba(127,127,127,.35);padding:10pt}
+.nx-box--tight{padding:5px}
 .nx-box--737{width:737px;max-width:100%}
 .nx-box--750{width:750px;max-width:100%}
 .nx-box--59{width:59%;margin-left:auto;margin-right:auto}
 .nx-w-97{width:97%}
+.nx-w-940{width:940px}
+.nx-w-48{width:48%}
+.nx-w-50{width:50%}
+.nx-w-80{width:80%}
+.nx-w-20{width:20%}
+.nx-fcards{display:grid;grid-template-columns:1fr 1fr}
+.nx-fcards>*{padding:5px}
+.nx-fcard{display:flex;min-height:75px}
+.nx-mx-auto{margin-left:auto;margin-right:auto}
 .nx-smilegrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px}
 .nx-nowrap{white-space:nowrap}
 .nx-center{text-align:center}
-.nx-row{display:flex}
+.nx-row{display:flex;align-items:flex-start}
+.nx-row--spread{justify-content:space-between}
 .nx-cell-5{padding:5px}
 .nx-w-150{flex:0 0 150px}
 .nx-valign-top>*{vertical-align:top}
+
+/* Form grids: replace legacy border=1 rowhead/rowfollow field tables.
+   2 columns (max-content label + fluid field) replicate the auto-width
+   label column; .nx-ffull spans both for title/submit rows. */
+.nx-fgrid{display:grid;grid-template-columns:max-content 1fr;border:1px solid rgba(127,127,127,.35)}
+.nx-fgrid--flat{border:none}
+.nx-fgrid--auto{width:max-content;margin-left:auto;margin-right:auto}
+.nx-fgrid--auto .nx-ffull{text-align:center}
+.nx-fgrid--pad10>.nx-fcell,.nx-fgrid--pad10>.nx-fhead,.nx-fgrid--pad10>.nx-ffull{padding:10px}
+.nx-fgrid--6{grid-template-columns:repeat(3,max-content 1fr);align-items:center}
+.nx-hl{background:#BBAF9B}
+.nx-grouprow{display:contents}
+.nx-panel{width:65%;margin-left:auto;margin-right:auto;background:#F5F4EA}
+.nx-fcell{padding:5px;vertical-align:top}
+.nx-fhead{padding:5px;font-weight:bold;text-align:right;vertical-align:top}
+.nx-ffull{grid-column:1/-1;padding:5px}

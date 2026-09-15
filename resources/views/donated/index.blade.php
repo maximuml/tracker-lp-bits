@@ -9,10 +9,10 @@
 @endif
 <form method="post" action="donated.php">
 @csrf
-<table border="1" cellspacing="0" cellpadding="5">
-    <tr><td class="rowhead">User name</td><td><input type="text" name="username" size="40"></td></tr>
-    <tr><td class="rowhead">Donated</td><td><input type="text" name="donated" size="5"></td></tr>
-    <tr><td colspan="2" align="center"><input type="submit" value="Okay" class="btn"></td></tr>
-</table>
+<div class="nx-fgrid">
+    <div class="nx-fhead">User name</div><div class="nx-fcell"><input type="text" name="username" size="40"></div>
+    <div class="nx-fhead">Donated</div><div class="nx-fcell"><input type="text" name="donated" size="5"></div>
+    <div class="nx-ffull nx-center"><input type="submit" value="Okay" class="btn"></div>
+</div>
 </form>
 @endsection

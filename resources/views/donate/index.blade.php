@@ -11,15 +11,15 @@
     @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::stdMessage($lang_donate['std_error'] ?? 'Error', $lang_donate['std_no_donation_account_available'] ?? 'No donation account available.', false)))
 @else
     <h2>{{ $lang_donate['text_donate'] }}</h2>
-    <table width="100%">
-        <tr><td class="text" colspan="2" align="left">{{ $lang_donate['text_donation_note'] }}</td></tr>
+    <div>
+        <div class="nx-text">{{ $lang_donate['text_donation_note'] }}</div>
         @if ($showCustom)
-            <tr><td class="text" align="left" colspan="2">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Format::formatComment($custom)))</td></tr>
+            <div class="nx-text">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Format::formatComment($custom)))</div>
         @endif
         @if ($showPaypal || $showAlipay)
-            <tr>
+            <div class="nx-row">
                 @if ($showPaypal)
-                    <td class="text" align="left" valign="top" @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($tdAttr))>
+                    <div class="nx-text nx-grow">
                         <b>{{ $lang_donate['text_donate_with_paypal'] }}</b><br /><br />
                         @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($lang_donate['text_donate_paypal_note'] ?? ''))
                         <form action="https://www.paypal.com/cgi-bin/webscr" method="post">
@@ -50,10 +50,10 @@
                                 <br /><br />
                             </p>
                         </form>
-                    </td>
+                    </div>
                 @endif
                 @if ($showAlipay)
-                    <td class="text" align="left" valign="top" @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($tdAttr))>
+                    <div class="nx-text nx-grow">
                         <b>{{ $lang_donate['text_donate_with_alipay'] }}</b><br /><br />
                         <form action="https://www.alipay.com/trade/fast_pay.htm" method="get">
                             @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($lang_donate['text_donate_alipay_note_one'] ?? ''))<b>{{ $alipay }}</b>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($lang_donate['text_donate_alipay_note_two'] ?? ''))
@@ -63,15 +63,15 @@
                                 <br /><br />
                             </p>
                         </form>
-                    </td>
+                    </div>
                 @endif
-            </tr>
+            </div>
         @endif
-        <tr><td class="text" colspan="2" align="left">
+        <div class="nx-text">
             @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($lang_donate['text_after_donation_note_one'] ?? ''))
             <a href="sendmessage.php?receiver={{ $accountantId }}"><font class="striking"><b>{{ $lang_donate['text_send_us'] }}</b></font></a>
             @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($lang_donate['text_after_donation_note_two'] ?? ''))
-        </td></tr>
-    </table>
+        </div>
+    </div>
 @endif
 @endsection

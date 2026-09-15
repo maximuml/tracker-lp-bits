@@ -12,49 +12,49 @@
 <form name='form1' method='get' action='{{ $actionUrl ?? '' }}'>
 <input type='hidden' name='id' value='{{ (int) $editRow['id'] }}'>
 <input type='hidden' name='edited' value='1'>
-<table class='main' cellspacing=0 cellpadding=5 width=50%>
-<tr><td class=colhead align=center colspan=2>Editing Locations</td></tr>
-<tr><td class=rowhead>Name:</td><td class=rowfollow align=left><input type='text' size=10 name='name' value='{{ $editRow['name'] }}'></td></tr>
-<tr><td class=rowhead><nobr>Main Location:</nobr></td><td class=rowfollow align=left><input type='text' size=50 name='location_main' value='{{ $editRow['location_main'] }}'></td></tr>
-<tr><td class=rowhead><nobr>Sub Location:</nobr></td><td class=rowfollow align=left><input type='text' size=50 name='location_sub' value='{{ $editRow['location_sub'] }}'></td></tr>
-<tr><td class=rowhead><nobr>Start IP:</nobr></td><td class=rowfollow align=left><input type='text' size=30 name='start_ip' value='{{ $editRow['start_ip'] }}'></td></tr>
-<tr><td class=rowhead><nobr>End IP:</nobr></td><td class=rowfollow align=left><input type='text' size=30 name='end_ip' value='{{ $editRow['end_ip'] }}'></td></tr>
-<tr><td class=rowhead><nobr>Theory Up:</nobr></td><td class=rowfollow align=left><input type='text' size=10 name='theory_upspeed' value='{{ $editRow['theory_upspeed'] }}'></td></tr>
-<tr><td class=rowhead><nobr>Theory Down:</nobr></td><td class=rowfollow align=left><input type='text' size=10 name='theory_downspeed' value='{{ $editRow['theory_downspeed'] }}'></td></tr>
-<tr><td class=rowhead><nobr>Practical Up:</nobr></td><td class=rowfollow align=left><input type='text' size=10 name='practical_upspeed' value='{{ $editRow['practical_upspeed'] }}'></td></tr>
-<tr><td class=rowhead><nobr>Practical Down:</nobr></td><td class=rowfollow align=left><input type='text' size=10 name='practical_downspeed' value='{{ $editRow['practical_downspeed'] }}'></td></tr>
-<tr><td class=rowhead>Picture:</td><td class=rowfollow align=left><input type='text' size=50 name='flagpic' value='{{ $editRow['flagpic'] }}'></td></tr>
-<tr><td class=toolbox align=center colspan=2><input class=btn type='Submit'></td></tr>
-</table>
+<div class="nx-fgrid nx-fgrid--flat nx-main nx-w-50">
+<div class="nx-ffull nx-colhead nx-center">Editing Locations</div>
+<div class="nx-fhead">Name:</div><div class="nx-fcell"><input type='text' size=10 name='name' value='{{ $editRow['name'] }}'></div>
+<div class="nx-fhead"><nobr>Main Location:</nobr></div><div class="nx-fcell"><input type='text' size=50 name='location_main' value='{{ $editRow['location_main'] }}'></div>
+<div class="nx-fhead"><nobr>Sub Location:</nobr></div><div class="nx-fcell"><input type='text' size=50 name='location_sub' value='{{ $editRow['location_sub'] }}'></div>
+<div class="nx-fhead"><nobr>Start IP:</nobr></div><div class="nx-fcell"><input type='text' size=30 name='start_ip' value='{{ $editRow['start_ip'] }}'></div>
+<div class="nx-fhead"><nobr>End IP:</nobr></div><div class="nx-fcell"><input type='text' size=30 name='end_ip' value='{{ $editRow['end_ip'] }}'></div>
+<div class="nx-fhead"><nobr>Theory Up:</nobr></div><div class="nx-fcell"><input type='text' size=10 name='theory_upspeed' value='{{ $editRow['theory_upspeed'] }}'></div>
+<div class="nx-fhead"><nobr>Theory Down:</nobr></div><div class="nx-fcell"><input type='text' size=10 name='theory_downspeed' value='{{ $editRow['theory_downspeed'] }}'></div>
+<div class="nx-fhead"><nobr>Practical Up:</nobr></div><div class="nx-fcell"><input type='text' size=10 name='practical_upspeed' value='{{ $editRow['practical_upspeed'] }}'></div>
+<div class="nx-fhead"><nobr>Practical Down:</nobr></div><div class="nx-fcell"><input type='text' size=10 name='practical_downspeed' value='{{ $editRow['practical_downspeed'] }}'></div>
+<div class="nx-fhead">Picture:</div><div class="nx-fcell"><input type='text' size=50 name='flagpic' value='{{ $editRow['flagpic'] }}'></div>
+<div class="nx-ffull nx-toolbox nx-center"><input class=btn type='Submit'></div>
+</div>
 </form>
 @else
-<form name='form1' method='get' action='{{ $actionUrl ?? '' }}'>
-<table class='main' cellspacing=0 cellpadding=5 width=48% align=left>
-<tr><td class=colhead align=center colspan=2>Add New Locations</td></tr>
-<tr><td class=rowhead>Name:</td><td class=rowfollow align=left><input type='text' size=10 name='name'></td></tr>
-<tr><td class=rowhead><nobr>Main Location:</nobr></td><td class=rowfollow align=left><input type='text' size=50 name='location_main'></td></tr>
-<tr><td class=rowhead><nobr>Sub Location:</nobr></td><td class=rowfollow align=left><input type='text' size=50 name='location_sub'></td></tr>
-<tr><td class=rowhead><nobr>Start IP:</nobr></td><td class=rowfollow align=left><input type='text' size=30 name='start_ip'></td></tr>
-<tr><td class=rowhead><nobr>End IP:</nobr></td><td class=rowfollow align=left><input type='text' size=30 name='end_ip'></td></tr>
-<tr><td class=rowhead><nobr>Theory Up:</nobr></td><td class=rowfollow align=left><input type='text' size=10 name='theory_upspeed'></td></tr>
-<tr><td class=rowhead><nobr>Theory Down:</nobr></td><td class=rowfollow align=left><input type='text' size=10 name='theory_downspeed'></td></tr>
-<tr><td class=rowhead><nobr>Practical Up:</nobr></td><td class=rowfollow align=left><input type='text' size=10 name='practical_upspeed'></td></tr>
-<tr><td class=rowhead><nobr>Practical Down:</nobr></td><td class=rowfollow align=left><input type='text' size=10 name='practical_downspeed'></td></tr>
-<tr><td class=rowhead>Picture:</td><td class=rowfollow align=left><input type='text' size=50 name='flagpic'><input type='hidden' name='add' value='true'></td></tr>
-<tr><td class=toolbox align=center colspan=2><input class=btn type='Submit'></td></tr>
-</table>
+<div class="nx-row nx-row--spread">
+<form name='form1' method='get' action='{{ $actionUrl ?? '' }}' class="nx-w-48">
+<div class="nx-fgrid nx-fgrid--flat nx-main">
+<div class="nx-ffull nx-colhead nx-center">Add New Locations</div>
+<div class="nx-fhead">Name:</div><div class="nx-fcell"><input type='text' size=10 name='name'></div>
+<div class="nx-fhead"><nobr>Main Location:</nobr></div><div class="nx-fcell"><input type='text' size=50 name='location_main'></div>
+<div class="nx-fhead"><nobr>Sub Location:</nobr></div><div class="nx-fcell"><input type='text' size=50 name='location_sub'></div>
+<div class="nx-fhead"><nobr>Start IP:</nobr></div><div class="nx-fcell"><input type='text' size=30 name='start_ip'></div>
+<div class="nx-fhead"><nobr>End IP:</nobr></div><div class="nx-fcell"><input type='text' size=30 name='end_ip'></div>
+<div class="nx-fhead"><nobr>Theory Up:</nobr></div><div class="nx-fcell"><input type='text' size=10 name='theory_upspeed'></div>
+<div class="nx-fhead"><nobr>Theory Down:</nobr></div><div class="nx-fcell"><input type='text' size=10 name='theory_downspeed'></div>
+<div class="nx-fhead"><nobr>Practical Up:</nobr></div><div class="nx-fcell"><input type='text' size=10 name='practical_upspeed'></div>
+<div class="nx-fhead"><nobr>Practical Down:</nobr></div><div class="nx-fcell"><input type='text' size=10 name='practical_downspeed'></div>
+<div class="nx-fhead">Picture:</div><div class="nx-fcell"><input type='text' size=50 name='flagpic'><input type='hidden' name='add' value='true'></div>
+<div class="nx-ffull nx-toolbox nx-center"><input class=btn type='Submit'></div>
+</div>
 </form>
 
-<form name='form2' method='get' action='{{ $actionUrl ?? '' }}'>
-<table class='main' cellspacing=0 cellpadding=5 width=48% align=right>
-<tr><td class=colhead align=center colspan=2>Check IP Range</td></tr>
-<tr><td class=rowhead><nobr>Start IP:</nobr></td><td class=rowfollow align=left><input type='text' size=30 name='range_start_ip' value='{{ $rangeStartIp ?? '' }}'></td></tr>
-<tr><td class=rowhead><nobr>End IP:</nobr></td><td class=rowfollow align=left><input type='text' size=30 name='range_end_ip' value='{{ $rangeEndIp ?? '' }}'><input type='hidden' name='check_range' value='true'></td></tr>
-<tr><td class=toolbox align=center colspan=2><input class=btn type='Submit'></td></tr>
-</table>
+<form name='form2' method='get' action='{{ $actionUrl ?? '' }}' class="nx-w-48">
+<div class="nx-fgrid nx-fgrid--flat nx-main">
+<div class="nx-ffull nx-colhead nx-center">Check IP Range</div>
+<div class="nx-fhead"><nobr>Start IP:</nobr></div><div class="nx-fcell"><input type='text' size=30 name='range_start_ip' value='{{ $rangeStartIp ?? '' }}'></div>
+<div class="nx-fhead"><nobr>End IP:</nobr></div><div class="nx-fcell"><input type='text' size=30 name='range_end_ip' value='{{ $rangeEndIp ?? '' }}'><input type='hidden' name='check_range' value='true'></div>
+<div class="nx-ffull nx-toolbox nx-center"><input class=btn type='Submit'></div>
+</div>
 </form>
-
-<br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
+</div>
 
 @if ($hasRangeFilter ?? false)
     <p><strong>{{ $message ?? '' }}</strong></p>

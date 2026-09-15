@@ -1,7 +1,7 @@
 <h1>Administrative User Search</h1>
 
 @if ($showHelp)
-<table width=65% border=0 align=center><tr><td class=embedded bgcolor='#F5F4EA'><div align=left>
+<div class="nx-panel nx-embedded"><div align=left>
 	Fields left blank will be ignored;
 	Wildcards * and ? may be used in Name, Email and Comments, as well as multiple values
 	separated by spaces (e.g. 'wyz Max*' in Name will list both users named
@@ -20,85 +20,95 @@
 	of the torrents in progress. <br /><br />
 	The History column lists the number of forum posts and torrent comments,
 	respectively, as well as linking to the history page.
-	</div></td></tr></table><br /><br />
+	</div></div><br /><br />
 @else
 <p align=center>(<a href="{{ $requestUri }}?h=1">Instructions</a>)
 &nbsp;-&nbsp;(<a href="{{ $requestUri }}">Reset</a>)</p>
 @endif
 
 <form method=get action="{{ $requestUri }}">
-<table border="1" cellspacing="0" cellpadding="5">
-<tr>
-  <td valign="middle" class=rowhead>Name:</td>
-  <td @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['n_hl'] ?? ''))><input name="n" type="text" value="{{ $form['n'] }}" size=35></td>
-  <td valign="middle" class=rowhead>Ratio:</td>
-  <td @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['r'] ? ($form['r_hl'] ?? '') : ''))><select name="rt">
+<div class="nx-fgrid nx-fgrid--6">
+<div class="nx-grouprow">
+<div class="nx-fhead">Name:</div>
+<div class="nx-fcell {{ $form['n_hl'] ?? '' }}"><input name="n" type="text" value="{{ $form['n'] }}" size=35></div>
+<div class="nx-fhead">Ratio:</div>
+<div class="nx-fcell {{ $form['r_hl'] ?? '' }}"><select name="rt">
 @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['rt_options'] ?? ''))
     </select>
     <input name="r" type="text" value="{{ $form['r'] }}" size="5" maxlength="4">
-    <input name="r2" type="text" value="{{ $form['r2'] }}" size="5" maxlength="4"></td>
-  <td valign="middle" class=rowhead>Member status:</td>
-  <td @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['st'] ? ($form['st_hl'] ?? '') : ''))><select name="st">
+    <input name="r2" type="text" value="{{ $form['r2'] }}" size="5" maxlength="4"></div>
+<div class="nx-fhead">Member status:</div>
+<div class="nx-fcell {{ $form['st_hl'] ?? '' }}"><select name="st">
 @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['st_options'] ?? ''))
-    </select></td></tr>
-<tr><td valign="middle" class=rowhead>Email:</td>
-  <td @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['em_hl'] ?? ''))><input name="em" type="text" value="{{ $form['em'] }}" size="35"></td>
-  <td valign="middle" class=rowhead>IP:</td>
-  <td @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['ip_hl'] ?? ''))><input name="ip" type="text" value="{{ $form['ip'] }}" maxlength="64"></td>
-  <td valign="middle" class=rowhead>Account status:</td>
-  <td @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['as'] ? ($form['as_hl'] ?? '') : ''))><select name="as">
+    </select></div>
+</div>
+<div class="nx-grouprow">
+<div class="nx-fhead">Email:</div>
+<div class="nx-fcell {{ $form['em_hl'] ?? '' }}"><input name="em" type="text" value="{{ $form['em'] }}" size="35"></div>
+<div class="nx-fhead">IP:</div>
+<div class="nx-fcell {{ $form['ip_hl'] ?? '' }}"><input name="ip" type="text" value="{{ $form['ip'] }}" maxlength="64"></div>
+<div class="nx-fhead">Account status:</div>
+<div class="nx-fcell {{ $form['as_hl'] ?? '' }}"><select name="as">
 @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['as_options'] ?? ''))
-    </select></td></tr>
-<tr>
-  <td valign="middle" class=rowhead>Comment:</td>
-  <td @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['co_hl'] ?? ''))><input name="co" type="text" value="{{ $form['co'] }}" size="35"></td>
-  <td valign="middle" class=rowhead>Mask:</td>
-  <td @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['ma_hl'] ?? ''))><input name="ma" type="text" value="{{ $form['ma'] }}" maxlength="17"></td>
-  <td valign="middle" class=rowhead>Class:</td>
-  <td @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['c_hl'] ?? ''))><select name="c">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['c_options'] ?? ''))
-    </select></td></tr>
-<tr>
-    <td valign="middle" class=rowhead>Joined:</td>
-  <td @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['d_hl'] ?? ''))><select name="dt">
+    </select></div>
+</div>
+<div class="nx-grouprow">
+<div class="nx-fhead">Comment:</div>
+<div class="nx-fcell {{ $form['co_hl'] ?? '' }}"><input name="co" type="text" value="{{ $form['co'] }}" size="35"></div>
+<div class="nx-fhead">Mask:</div>
+<div class="nx-fcell {{ $form['ma_hl'] ?? '' }}"><input name="ma" type="text" value="{{ $form['ma'] }}" maxlength="17"></div>
+<div class="nx-fhead">Class:</div>
+<div class="nx-fcell {{ $form['c_hl'] ?? '' }}"><select name="c">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['c_options'] ?? ''))
+    </select></div>
+</div>
+<div class="nx-grouprow">
+<div class="nx-fhead">Joined:</div>
+<div class="nx-fcell {{ $form['d_hl'] ?? '' }}"><select name="dt">
 @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['dt_options'] ?? ''))
     </select>
     <input name="d" type="text" value="{{ $form['d'] }}" size="12" maxlength="10">
-    <input name="d2" type="text" value="{{ $form['d2'] }}" size="12" maxlength="10"></td>
-  <td valign="middle" class=rowhead>Uploaded:</td>
-  <td @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['ul_hl'] ?? ''))><select name="ult" id="ult">
+    <input name="d2" type="text" value="{{ $form['d2'] }}" size="12" maxlength="10"></div>
+<div class="nx-fhead">Uploaded:</div>
+<div class="nx-fcell {{ $form['ul_hl'] ?? '' }}"><select name="ult" id="ult">
 @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['ult_options'] ?? ''))
     </select>
     <input name="ul" type="text" id="ul" size="8" maxlength="7" value="{{ $form['ul'] }}">
-    <input name="ul2" type="text" id="ul2" size="8" maxlength="7" value="{{ $form['ul2'] }}"></td>
-  <td valign="middle" class="rowhead">Donor:</td>
-  <td @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['do_hl'] ?? ''))><select name="do">
+    <input name="ul2" type="text" id="ul2" size="8" maxlength="7" value="{{ $form['ul2'] }}"></div>
+<div class="nx-fhead">Donor:</div>
+<div class="nx-fcell {{ $form['do_hl'] ?? '' }}"><select name="do">
 @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['do_options'] ?? ''))
-	</select></td></tr>
-<tr>
-<td valign="middle" class=rowhead>Last seen:</td>
-  <td @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['ls_hl'] ?? ''))><select name="lst">
+	</select></div>
+</div>
+<div class="nx-grouprow">
+<div class="nx-fhead">Last seen:</div>
+<div class="nx-fcell {{ $form['ls_hl'] ?? '' }}"><select name="lst">
 @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['lst_options'] ?? ''))
   </select>
   <input name="ls" type="text" value="{{ $form['ls'] }}" size="12" maxlength="10">
-  <input name="ls2" type="text" value="{{ $form['ls2'] }}" size="12" maxlength="10"></td>
-	  <td valign="middle" class=rowhead>Downloaded:</td>
-  <td @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['dl_hl'] ?? ''))><select name="dlt" id="dlt">
+  <input name="ls2" type="text" value="{{ $form['ls2'] }}" size="12" maxlength="10"></div>
+<div class="nx-fhead">Downloaded:</div>
+<div class="nx-fcell {{ $form['dl_hl'] ?? '' }}"><select name="dlt" id="dlt">
 @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['dlt_options'] ?? ''))
     </select>
     <input name="dl" type="text" id="dl" size="8" maxlength="7" value="{{ $form['dl'] }}">
-    <input name="dl2" type="text" id="dl2" size="8" maxlength="7" value="{{ $form['dl2'] }}"></td>
-	<td valign="middle" class=rowhead>Warned:</td>
-	<td @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['w_hl'] ?? ''))><select name="w">
+    <input name="dl2" type="text" id="dl2" size="8" maxlength="7" value="{{ $form['dl2'] }}"></div>
+<div class="nx-fhead">Warned:</div>
+<div class="nx-fcell {{ $form['w_hl'] ?? '' }}"><select name="w">
 @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['w_options'] ?? ''))
-	</select></td></tr>
-<tr><td class="rowhead"></td><td></td>
-  <td valign="middle" class=rowhead>Active only:</td>
-	<td @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['ac_hl'] ?? ''))><input name="ac" type="checkbox" value="1" {{ $form['ac'] ? 'checked' : '' }}></td>
-  <td valign="middle" class=rowhead>Disabled IP: </td>
-  <td @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['dip_hl'] ?? ''))><input name="dip" type="checkbox" value="1" {{ $form['dip'] ? 'checked' : '' }}></td>
-  </tr>
-<tr><td colspan="6" align=center><input name="submit" type=submit class=btn></td></tr>
-</table>
+	</select></div>
+</div>
+<div class="nx-grouprow">
+<div class="nx-fhead"></div>
+<div class="nx-fcell"></div>
+<div class="nx-fhead">Active only:</div>
+<div class="nx-fcell {{ $form['ac_hl'] ?? '' }}"><input name="ac" type="checkbox" value="1" {{ $form['ac'] ? 'checked' : '' }}></div>
+<div class="nx-fhead">Disabled IP: </div>
+<div class="nx-fcell {{ $form['dip_hl'] ?? '' }}"><input name="dip" type="checkbox" value="1" {{ $form['dip'] ? 'checked' : '' }}></div>
+</div>
+<div class="nx-grouprow">
+<div class="nx-ffull nx-center"><input name="submit" type=submit class=btn></div>
+</div>
+</div>
 <br /><br />
 </form>
 

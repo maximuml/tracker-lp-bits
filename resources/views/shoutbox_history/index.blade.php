@@ -7,15 +7,16 @@
 
 <h2>{{ $lang_shoutbox['text_history_title'] ?? 'Shoutbox history' }}</h2>
 <form action="shoutbox_history.php" method="get">
-<table border="0" cellspacing="0" cellpadding="5">
-<tr><td>{{ $lang_shoutbox['text_username'] ?? 'Username' }}</td><td><input type="text" name="user" value="{{ $filters['user'] ?? '' }}" /></td>
-<td>{{ $lang_shoutbox['text_from'] ?? 'From' }}</td><td><input type="date" name="from" value="{{ $filters['from'] ?? '' }}" /></td>
-<td>{{ $lang_shoutbox['text_to'] ?? 'To' }}</td><td><input type="date" name="to" value="{{ $filters['to'] ?? '' }}" /></td></tr>
-<tr><td>{{ $lang_shoutbox['text_search'] ?? 'Search' }}</td><td><input type="text" name="search" value="{{ $filters['search'] ?? '' }}" /></td>
-<td colspan="4"><input type="submit" class="btn" value="{{ $lang_shoutbox['text_filter'] ?? 'Filter' }}" /></td></tr>
-</table></form>
+<div class="nx-row">
+<div class="nx-cell-5">{{ $lang_shoutbox['text_username'] ?? 'Username' }}</div><div class="nx-cell-5"><input type="text" name="user" value="{{ $filters['user'] ?? '' }}" /></div>
+<div class="nx-cell-5">{{ $lang_shoutbox['text_from'] ?? 'From' }}</div><div class="nx-cell-5"><input type="date" name="from" value="{{ $filters['from'] ?? '' }}" /></div>
+<div class="nx-cell-5">{{ $lang_shoutbox['text_to'] ?? 'To' }}</div><div class="nx-cell-5"><input type="date" name="to" value="{{ $filters['to'] ?? '' }}" /></div></div>
+<div class="nx-row">
+<div class="nx-cell-5">{{ $lang_shoutbox['text_search'] ?? 'Search' }}</div><div class="nx-cell-5"><input type="text" name="search" value="{{ $filters['search'] ?? '' }}" /></div>
+<div class="nx-cell-5"><input type="submit" class="btn" value="{{ $lang_shoutbox['text_filter'] ?? 'Filter' }}" /></div></div>
+</form>
 
-<table border="0" cellspacing="0" cellpadding="2" width="100%">
+<table data-nx="data" border="0" cellspacing="0" cellpadding="2" width="100%">
 @foreach ($items ?? [] as $item)
     <tr><td class="shoutrow{{ $item['mentionsMe'] ? ' shoutrow-mentions-me' : '' }}">
     <span class="date">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml('['.$item['time'].']'))</span> @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['actions'])) @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['username'])) @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['reactions']))

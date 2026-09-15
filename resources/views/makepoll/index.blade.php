@@ -17,13 +17,13 @@
 <style type="text/css" nonce="{{ $cspNonce ?? '' }}">
 input.mp { width: 450px; }
 </style>
-<table border=1 cellspacing=0 cellpadding=5>
-<tr><td class=rowhead>{{ $lang_makepoll['text_question'] ?? 'Question' }} <font color=red>*</font></td><td align=left><input name=question class=mp maxlength=255 value="{{ (string) ($poll['question'] ?? '') }}"></td></tr>
+<div class="nx-fgrid">
+<div class="nx-fhead">{{ $lang_makepoll['text_question'] ?? 'Question' }} <font color=red>*</font></div><div class="nx-fcell"><input name=question class=mp maxlength=255 value="{{ (string) ($poll['question'] ?? '') }}"></div>
 @for ($i = 0; $i <= 19; $i++)
-<tr><td class=rowhead>{{ ($lang_makepoll['text_option'] ?? 'Option').($i + 1) }}@if ($i < 2) <font color=red>*</font>@endif</td><td align=left><input name=option{{ $i }} class=mp maxlength=40 value="{{ (string) ($poll["option{$i}"] ?? '') }}"><br /></td></tr>
+<div class="nx-fhead">{{ ($lang_makepoll['text_option'] ?? 'Option').($i + 1) }}@if ($i < 2) <font color=red>*</font>@endif</div><div class="nx-fcell"><input name=option{{ $i }} class=mp maxlength=40 value="{{ (string) ($poll["option{$i}"] ?? '') }}"><br /></div>
 @endfor
-<tr><td colspan=2 align=center><input type=submit value="{{ $pollid ? ($lang_makepoll['submit_edit_poll'] ?? 'Edit poll') : ($lang_makepoll['submit_create_poll'] ?? 'Create poll') }}" style='height: 20pt'></td></tr>
-</table>
+<div class="nx-ffull nx-center"><input type=submit value="{{ $pollid ? ($lang_makepoll['submit_edit_poll'] ?? 'Edit poll') : ($lang_makepoll['submit_create_poll'] ?? 'Create poll') }}" style='height: 20pt'></div>
+</div>
 <p><font color=red>*</font>{{ $lang_makepoll['text_required'] ?? 'Required' }}</p>
 @if ($pollid > 0)
 <input type=hidden name=pollid value="{{ $pollid }}">

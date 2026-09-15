@@ -53,7 +53,7 @@ final class LegacyViewSurfaceTest extends TestCase
      * Semantic data tables carry data-nx="data" and stay exempt from the
      * countdown; only unmarked (layout) tables are ratcheted toward zero.
      */
-    private const BASELINE_TABLE_TAGS = 88;
+    private const BASELINE_TABLE_TAGS = 26;
 
     /** Baseline: inline on*= event handler attributes. */
     private const BASELINE_INLINE_HANDLERS = 0;

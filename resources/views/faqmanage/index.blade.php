@@ -42,9 +42,9 @@
 </table>
 @endif
 <br />
-<table border="1" cellspacing="0" cellpadding="5" align="center" width="95%">
-    <tr><td align="center"><a href="faqactions.php?action=addsection">Add new section</a></td></tr>
-</table>
+<div class="nx-box nx-box--tight nx-w-97 nx-mx-auto nx-center">
+    <a href="faqactions.php?action=addsection">Add new section</a>
+</div>
 <p align="center"><input type="submit" name="reorder" value="Reorder"></p>
 </form>
 <p>When the position numbers don't reflect the position in the table, it means the order id is bigger than the total number of sections/items and you should check all the order id's in the table and click "reorder"</p>

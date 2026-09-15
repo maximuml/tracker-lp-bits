@@ -4,11 +4,11 @@
 
 @section('content')
 <h1>Delete account</h1>
-<table border="1" cellspacing="0" cellpadding="5">
-    <form method="post" action="delacctadmin.php">
+<form method="post" action="delacctadmin.php">
         @csrf
-        <tr><td class="rowhead">User name</td><td><input size="40" name="userid"></td></tr>
-        <tr><td colspan="2"><input type="submit" class="btn" value="Delete"></td></tr>
-    </form>
-</table>
+        <div class="nx-fgrid">
+        <div class="nx-fhead">User name</div><div class="nx-fcell"><input size="40" name="userid"></div>
+        <div class="nx-ffull"><input type="submit" class="btn" value="Delete"></div>
+    </div>
+</form>
 @endsection

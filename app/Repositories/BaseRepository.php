@@ -7,8 +7,10 @@ namespace App\Repositories;
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserPrivacy;
+use App\Exceptions\InsufficientPermissionException;
 use App\Models\Torrent;
 use App\Models\User;
+use App\Support\Config\SiteConfig;
 use App\Support\Environment;
 use App\Support\Locale;
 use App\Support\Logger;
@@ -102,6 +104,29 @@ class BaseRepository
         }
 
         return User::query()->findOrFail(intval($user), $fields);
+    }
+
+    /**
+     * @param  mixed  $operator
+     * @param  mixed  $minAuthClass
+     * @return void
+     */
+    protected function checkPermission($operator, User $user, $minAuthClass = 'authority.prfmanage')
+    {
+        $operator = $this->getUser($operator);
+        if ($operator === null) {
+            throw new \RuntimeException('Operator not found');
+        }
+        if ($operator->id == $user->id) {
+            return;
+        }
+        $permissionName = str_starts_with($minAuthClass, 'authority.')
+            ? substr($minAuthClass, strlen('authority.'))
+            : $minAuthClass;
+        $classRequire = SiteConfig::current()->authority->permission($permissionName);
+        if ($classRequire === null || $operator->class < $classRequire || $operator->class <= $user->class) {
+            throw new InsufficientPermissionException;
+        }
     }
 
     /**

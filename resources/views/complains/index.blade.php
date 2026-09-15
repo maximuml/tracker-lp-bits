@@ -102,12 +102,12 @@
     <h2>{{ $langComplains['text_new_complain'] ?? 'New complain' }}</h2>
     <form action="" method="post">
         <input type="hidden" name="action" value="new" />
-        <table border="0" cellpadding="5">
-            <tr><td class="rowhead">{{ $langComplains['text_new_email'] ?? 'Email' }}</td><td class="rowfollow" align="left"><input type="email" name="email" style="width: min(100%, 420px); min-width: 180px; border: 1px solid gray; box-sizing: border-box" autocomplete="email" /></td></tr>
-            <tr><td class="rowhead">{{ $langComplains['text_new_body'] ?? 'Body' }}</td><td class="rowfollow" align="left"><textarea name="body" style="width: min(100%, 420px); min-width: 180px; border: 1px solid gray; box-sizing: border-box; height: 250px; resize: vertical;" placeholder="{{ $langComplains['text_new_body_placeholder'] ?? '' }}"></textarea></td></tr>
+        <div class="nx-fgrid nx-fgrid--flat">
+            <div class="nx-fhead">{{ $langComplains['text_new_email'] ?? 'Email' }}</div><div class="nx-fcell"><input type="email" name="email" style="width: min(100%, 420px); min-width: 180px; border: 1px solid gray; box-sizing: border-box" autocomplete="email" /></div>
+            <div class="nx-fhead">{{ $langComplains['text_new_body'] ?? 'Body' }}</div><div class="nx-fcell"><textarea name="body" style="width: min(100%, 420px); min-width: 180px; border: 1px solid gray; box-sizing: border-box; height: 250px; resize: vertical;" placeholder="{{ $langComplains['text_new_body_placeholder'] ?? '' }}"></textarea></div>
             @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($captchaHtml))
-            <tr><td class="toolbox" colspan="2" align="center"><input type="submit" value="{{ $langComplains['text_new_submit'] ?? 'Submit' }}" class="btn" /></td></tr>
-        </table>
+            <div class="nx-ffull nx-center"><input type="submit" value="{{ $langComplains['text_new_submit'] ?? 'Submit' }}" class="btn" /></div>
+        </div>
     </form>
 @endif
 @endsection

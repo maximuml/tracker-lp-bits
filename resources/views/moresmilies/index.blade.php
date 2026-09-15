@@ -4,6 +4,8 @@
 <style type="text/css" nonce="{{ $cspNonce ?? '' }}">
 img {border: none;}
 body {color: #000000; background-color: #ffffff}
+.smilegrid {display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px}
+.smilegrid > div {text-align: center; padding: 1px}
 </style>
 </head>
 <body>
@@ -29,17 +31,11 @@ document.addEventListener('click', function (e) {
 });
 </script>
 
-<table class="lista" width="100%" cellpadding="1" cellspacing="1">
+<div class="smilegrid">
 @for ($i = 1; $i < 192; $i++)
-    @if (($i - 1) % 3 == 0)
-        <tr>
-    @endif
-    <td class="lista" align="center"><a href="#" data-smile="[em{{ $i }}]" data-smile-form="{{ $form ?? '' }}" data-smile-text="{{ $text ?? '' }}"><img src="pic/smilies/{{ $i }}.gif" alt="" ></a></td>
-    @if ($i % 3 == 0)
-        </tr>
-    @endif
+    <div><a href="#" data-smile="[em{{ $i }}]" data-smile-form="{{ $form ?? '' }}" data-smile-text="{{ $text ?? '' }}"><img src="pic/smilies/{{ $i }}.gif" alt="" ></a></div>
 @endfor
-</table>
+</div>
 <div align="center">
  <a href="#" data-window-close>{{ $lang_moresmilies['text_close'] }}</a>
 </div>

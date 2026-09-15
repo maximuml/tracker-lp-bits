@@ -42,21 +42,17 @@
     <form method="post" action="/recover">
         @csrf
         <input type="hidden" name="secret" value="{{ $secret }}" />
-        <table border="1" cellspacing="0" cellpadding="10" style="width: 100%;">
-            <tr>
-                <td class="rowhead"><label for="email">{{ $lang['row_registered_email'] ?? 'Registered email:' }}</label></td>
-                <td class="rowfollow"><input type="email" id="email" name="email" autocomplete="email" value="{{ old('email') }}" style="width: min(100%, 320px); min-width: 180px; border: 1px solid gray; box-sizing: border-box" /></td>
-            </tr>
+        <div class="nx-fgrid nx-fgrid--b">
+            <div class="nx-fhead"><label for="email">{{ $lang['row_registered_email'] ?? 'Registered email:' }}</label></div>
+            <div class="nx-fcell"><input type="email" id="email" name="email" autocomplete="email" value="{{ old('email') }}" style="width: min(100%, 320px); min-width: 180px; border: 1px solid gray; box-sizing: border-box" /></div>
 
             @if ($captchaEnabled && $captchaMarkup !== '')
                 @safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($captchaMarkup))
             @endif
 
-            <tr>
-                <td class="toolbox" colspan="2" align="center">
-                    <input type="submit" value="{{ $lang['submit_recover_it'] ?? 'Recover It!' }}" class="btn" />
-                </td>
-            </tr>
-        </table>
+            <div class="toolbox nx-ffull">
+                <input type="submit" value="{{ $lang['submit_recover_it'] ?? 'Recover It!' }}" class="btn" />
+            </div>
+        </div>
     </form>
 @endsection

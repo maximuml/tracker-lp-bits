@@ -52,35 +52,25 @@
         </p>
         <p>{{ $lang['p_you_have'] ?? 'You have' }} <b>{{ $remaining }}</b> {{ $lang['p_remaining_tries'] ?? 'remaining tries.' }}</p>
 
-        <table border="0" cellpadding="5">
-            <tr>
-                <td class="rowhead">{{ $lang['rowhead_username'] ?? 'Username:' }}</td>
-                <td class="rowfollow"><input type="text" name="username" aria-label="{{ $lang['rowhead_username'] ?? 'Username' }}" autocomplete="username" value="{{ old('username') }}" /></td>
-            </tr>
-            <tr>
-                <td class="rowhead">{{ $lang['rowhead_password'] ?? 'Password:' }}</td>
-                <td class="rowfollow"><input type="password" name="password" aria-label="{{ $lang['rowhead_password'] ?? 'Password' }}" autocomplete="current-password" /></td>
-            </tr>
-            <tr>
-                <td class="rowhead">{{ $lang['rowhead_two_step_code'] ?? 'Two-Factor Authentication:' }}</td>
-                <td class="rowfollow"><input type="text" name="two_step_code" aria-label="{{ $lang['rowhead_two_step_code'] ?? 'Two-Factor Authentication' }}" inputmode="numeric" pattern="[0-9]*" placeholder="{{ $lang['two_step_code_tooltip'] ?? '' }}" /></td>
-            </tr>
+        <div class="nx-fgrid">
+            <div class="nx-fhead">{{ $lang['rowhead_username'] ?? 'Username:' }}</div>
+            <div class="nx-fcell"><input type="text" name="username" aria-label="{{ $lang['rowhead_username'] ?? 'Username' }}" autocomplete="username" value="{{ old('username') }}" /></div>
+            <div class="nx-fhead">{{ $lang['rowhead_password'] ?? 'Password:' }}</div>
+            <div class="nx-fcell"><input type="password" name="password" aria-label="{{ $lang['rowhead_password'] ?? 'Password' }}" autocomplete="current-password" /></div>
+            <div class="nx-fhead">{{ $lang['rowhead_two_step_code'] ?? 'Two-Factor Authentication:' }}</div>
+            <div class="nx-fcell"><input type="text" name="two_step_code" aria-label="{{ $lang['rowhead_two_step_code'] ?? 'Two-Factor Authentication' }}" inputmode="numeric" pattern="[0-9]*" placeholder="{{ $lang['two_step_code_tooltip'] ?? '' }}" /></div>
             @if ($captchaEnabled && $captchaMarkup !== '')
                 @safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($captchaMarkup))
             @endif
-            <tr>
-                <td class="toolbox" colspan="2">
-                    {{ $lang['text_auto_logout'] ?? 'Auto Logout:' }}
-                    <input type="checkbox" name="logout" value="yes" aria-label="{{ $lang['checkbox_auto_logout'] ?? 'Log me out after 15 minutes' }}" /> {{ $lang['checkbox_auto_logout'] ?? 'Log me out after 15 minutes' }}
-                </td>
-            </tr>
-            <tr>
-                <td class="toolbox" colspan="2" align="center">
-                    <input type="submit" value="{{ $lang['button_login'] ?? 'Login!' }}" class="btn" />
-                    <input type="reset" value="{{ $lang['button_reset'] ?? 'Reset' }}" class="btn" />
-                </td>
-            </tr>
-        </table>
+            <div class="toolbox nx-ffull">
+                {{ $lang['text_auto_logout'] ?? 'Auto Logout:' }}
+                <input type="checkbox" name="logout" value="yes" aria-label="{{ $lang['checkbox_auto_logout'] ?? 'Log me out after 15 minutes' }}" /> {{ $lang['checkbox_auto_logout'] ?? 'Log me out after 15 minutes' }}
+            </div>
+            <div class="toolbox nx-ffull">
+                <input type="submit" value="{{ $lang['button_login'] ?? 'Login!' }}" class="btn" />
+                <input type="reset" value="{{ $lang['button_reset'] ?? 'Reset' }}" class="btn" />
+            </div>
+        </div>
 
         @safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($passkeyLoginHtml))
     </form>

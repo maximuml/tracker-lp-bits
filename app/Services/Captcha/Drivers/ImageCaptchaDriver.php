@@ -7,6 +7,7 @@ namespace App\Services\Captcha\Drivers;
 use App\Models\RegImage;
 use App\Services\Captcha\CaptchaDriverInterface;
 use App\Services\Captcha\Exceptions\CaptchaValidationException;
+use App\Support\Captcha;
 use App\Support\LegacyHeaderBag;
 use App\Support\Strings;
 
@@ -41,9 +42,11 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
         $imagehash = $this->issue();
         $imageUrl = htmlspecialchars(sprintf('image.php?action=regimage&imagehash=%s&secret=%s', $imagehash, $secret), ENT_QUOTES, 'UTF-8');
 
+        $tpl = Captcha::rowTemplate((string) ($context['layout'] ?? ''));
+
         return implode("\n", [
-            sprintf('<tr><td class="rowhead">%s</td><td align="left"><img src="%s" border="0" alt="CAPTCHA" /></td></tr>', htmlspecialchars($imageLabel, ENT_QUOTES, 'UTF-8'), $imageUrl),
-            sprintf('<tr><td class="rowhead">%s</td><td align="left"><input type="text" autocomplete="off" aria-label="%s" style="width: 100%%; min-width: 180px; border: 1px solid gray; box-sizing: border-box" name="imagestring" value="" /><input type="hidden" name="imagehash" value="%s" /></td></tr>', htmlspecialchars($codeLabel, ENT_QUOTES, 'UTF-8'), htmlspecialchars($codeLabel, ENT_QUOTES, 'UTF-8'), htmlspecialchars($imagehash, ENT_QUOTES, 'UTF-8')),
+            sprintf($tpl, htmlspecialchars($imageLabel, ENT_QUOTES, 'UTF-8'), sprintf('<img src="%s" border="0" alt="CAPTCHA" />', $imageUrl)),
+            sprintf($tpl, htmlspecialchars($codeLabel, ENT_QUOTES, 'UTF-8'), sprintf('<input type="text" autocomplete="off" aria-label="%s" style="width: 100%%; min-width: 180px; border: 1px solid gray; box-sizing: border-box" name="imagestring" value="" /><input type="hidden" name="imagehash" value="%s" />', htmlspecialchars($codeLabel, ENT_QUOTES, 'UTF-8'), htmlspecialchars($imagehash, ENT_QUOTES, 'UTF-8'))),
         ]);
     }
 

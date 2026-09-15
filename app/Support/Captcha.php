@@ -48,6 +48,17 @@ final class Captcha
     }
 
     /**
+     * Row template for captcha markup: legacy `<tr>` for table hosts or
+     * `nx-fhead`/`nx-fcell` divs for `.nx-fgrid` hosts.
+     */
+    public static function rowTemplate(string $layout): string
+    {
+        return $layout === 'grid'
+            ? '<div class="nx-fhead">%s</div><div class="nx-fcell">%s</div>'
+            : '<tr><td class="rowhead">%s</td><td align="left">%s</td></tr>';
+    }
+
+    /**
      * Render the active captcha markup when enabled.
      *
      * Mirrors `show_image_code()`. The `$secret` value is passed by the
@@ -55,7 +66,7 @@ final class Captcha
      *
      * @param  array<string, string>  $labels
      */
-    public static function render(string $enabledFlag, array $labels = [], ?string $secret = null): void
+    public static function render(string $enabledFlag, array $labels = [], ?string $secret = null, string $layout = 'tr'): void
     {
         if ($enabledFlag !== 'yes') {
             return;
@@ -78,6 +89,7 @@ final class Captcha
                 'code' => $labels['row_security_code'] ?? '',
             ],
             'secret' => $secret ?? '',
+            'layout' => $layout,
         ]);
 
         if ($markup !== '') {
@@ -101,7 +113,7 @@ final class Captcha
     /**
      * Render the active captcha markup when enabled. Backs the legacy `show_image_code()` helper.
      */
-    public static function showImageCode(): void
+    public static function showImageCode(string $layout = 'tr'): void
     {
         $lang_functions = app(Language::class)->functions();
         $iv = SiteConfig::current()->security->captchaRequired() ? 'yes' : 'no';
@@ -110,6 +122,6 @@ final class Captcha
             'row_security_image' => $lang_functions['row_security_image'] ?? '',
             'row_security_challenge' => $lang_functions['row_security_challenge'] ?? '',
             'row_security_code' => $lang_functions['row_security_code'] ?? '',
-        ], (string) request()->query('secret', ''));
+        ], (string) request()->query('secret', ''), $layout);
     }
 }

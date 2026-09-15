@@ -103,7 +103,7 @@ final class UsercpSecuritySectionBuilder
                 $savedMessage .= ' '.($lang['std_privacy_level_updated'] ?? '');
             }
 
-            $rowsHtml .= (string) Html::trSmall(
+            $rowsHtml .= (string) Html::frowSmall(
                 $lang['row_reset_passkey'] ?? 'Reset passkey',
                 '<input type=checkbox name=resetpasskey value=1 />'.htmlspecialchars($lang['checkbox_reset_my_passkey'] ?? '').'<br /><font class=small>'.($lang['text_reset_passkey_note'] ?? '').'</font>',
                 1,
@@ -128,13 +128,13 @@ final class UsercpSecuritySectionBuilder
                 );
                 $twoStepCell .= sprintf('</div><script nonce="%s">document.addEventListener("focusin",function(e){if(e.target&&e.target.name==="two_step_code"){e.target.removeAttribute("readonly")}})</script>', htmlspecialchars($cspNonce));
             }
-            $rowsHtml .= (string) Html::trSmall($lang['row_two_step_secret'] ?? 'Two-step secret', $twoStepCell, 1, '', true);
+            $rowsHtml .= (string) Html::frowSmall($lang['row_two_step_secret'] ?? 'Two-step secret', $twoStepCell, 1, '', true);
 
             $passkeyListHtml = $this->capturePasskeyList((int) ($curUser['id'] ?? 0));
             $rowsHtml .= '<tr><td class="rowhead" valign="top" align="right">'.htmlspecialchars(Locale::trans('passkey.passkey', [], null)).'</td><td class="rowfollow" valign="top" align="left">'.$passkeyListHtml.'</td></tr>';
 
             if ($showEmailChange) {
-                $rowsHtml .= (string) Html::trSmall(
+                $rowsHtml .= (string) Html::frowSmall(
                     $lang['row_email_address'] ?? 'Email',
                     '<input type="text" name="email" style="width: 200px" value="'.htmlspecialchars((string) ($curUser['email'] ?? '')).'" /> <br /><font class=small>'.($lang['text_email_address_note'] ?? '').'</font>',
                     1,
@@ -143,9 +143,9 @@ final class UsercpSecuritySectionBuilder
                 );
             }
 
-            $rowsHtml .= (string) Html::trSmall($lang['row_change_password'] ?? 'Change password', '<input type="password" class="password" style="width: 200px" />', 1, '', true);
-            $rowsHtml .= (string) Html::trSmall($lang['row_type_password_again'] ?? 'Password again', '<input type="password" class="passagain" style="width: 200px" />', 1, '', true);
-            $rowsHtml .= (string) Html::trSmall($lang['row_privacy_level'] ?? 'Privacy', $privacyRadios['normal'].' '.$privacyRadios['low'].' '.$privacyRadios['strong'], 1, '', true);
+            $rowsHtml .= (string) Html::frowSmall($lang['row_change_password'] ?? 'Change password', '<input type="password" class="password" style="width: 200px" />', 1, '', true);
+            $rowsHtml .= (string) Html::frowSmall($lang['row_type_password_again'] ?? 'Password again', '<input type="password" class="passagain" style="width: 200px" />', 1, '', true);
+            $rowsHtml .= (string) Html::frowSmall($lang['row_privacy_level'] ?? 'Privacy', $privacyRadios['normal'].' '.$privacyRadios['low'].' '.$privacyRadios['strong'], 1, '', true);
         }
 
         return [

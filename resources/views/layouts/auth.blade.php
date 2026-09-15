@@ -17,6 +17,13 @@
         input[type="text"], input[type="password"], input[type="email"], select { width: 100%; box-sizing: border-box; padding: 0.3em; }
         .btn { padding: 0.4em 1em; margin: 0.2em; }
         .toolbox { padding: 0.5em; text-align: center; background: #f0f0f0; }
+        .nx-fgrid { display: grid; grid-template-columns: 30% 1fr; width: 100%; }
+        .nx-fhead { padding: 5px; background: #eee; font-weight: bold; text-align: right; }
+        .nx-fcell { padding: 5px; }
+        .nx-ffull { grid-column: 1 / -1; padding: 5px; }
+        .nx-fgrid--b { border: 1px solid #999; }
+        .nx-fgrid--b > .nx-fhead, .nx-fgrid--b > .nx-fcell, .nx-fgrid--b > .nx-ffull { padding: 10px; border-bottom: 1px solid #ccc; }
+        .nx-fgrid--b > :last-child { border-bottom: none; }
         .small { font-size: 0.85em; }
         p { margin: 0.5em 0; }
         a { color: #06c; }

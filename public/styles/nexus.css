@@ -476,3 +476,8 @@ button.nx-btn-link {
 .nx-fcell{padding:5px;vertical-align:top}
 .nx-fhead{padding:5px;font-weight:bold;text-align:right;vertical-align:top}
 .nx-ffull{grid-column:1/-1;padding:5px}
+.nx-ffield{padding:1px;padding-left:10px}
+.nx-vam{align-self:center}
+/* Black notice banner (settings page): restores the background the
+   CSP-blocked inline style used to provide. */
+.nx-fbanner{background:#000;color:#fff;text-align:center;padding:10px}

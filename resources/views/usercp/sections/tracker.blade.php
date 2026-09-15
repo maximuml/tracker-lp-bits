@@ -1,10 +1,10 @@
 @include('usercp.sections._menu', ['selected' => 'tracker'])
 
 <form method=post action=usercp.php id="{{ $tracker['formId'] ?? '' }}"><input type=hidden name=action value=tracker><input type=hidden name=type value=save>
-<table border=0 cellspacing=0 cellpadding=5 width={{ $contentWidth }}>
+<div class="nx-fgrid nx-fgrid--flat">
 @if ($type === 'saved')
-<tr><td colspan=2 class="heading" valign="top" align="center"><font color=red>{{ $lang['text_saved'] ?? 'Saved' }}</font></td></tr>
+<div class="nx-ffull nx-center"><font color=red><b>{{ $lang['text_saved'] ?? 'Saved' }}</b></font></div>
 @endif
 @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($tracker['rowsHtml'] ?? ''))
-<tr><td class="rowhead" valign="top" align="right">{{ $lang['row_save_settings'] ?? 'Save' }}</td><td class="rowfollow" valign="top" align=left><input type=submit value="{{ $lang['submit_save_settings'] ?? 'Save' }}"></td></tr>
-</table></form>
+<div class="nx-fhead">{{ $lang['row_save_settings'] ?? 'Save' }}</div><div class="nx-fcell"><input type=submit value="{{ $lang['submit_save_settings'] ?? 'Save' }}"></div>
+</div></form>

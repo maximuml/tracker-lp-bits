@@ -23,10 +23,10 @@
     <div class="nx-box">
     <div style="margin-top: 20px; text-align: center;">
     <form method="post" action="attendance.php" class="nx-inline-block">
-    <table border="0" cellpadding="5">
+    <div class="nx-fgrid nx-fgrid--flat">
     @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($captchaHtml ?? ''))
-    <tr><td class="toolbox" colspan="2" align="center"><input type="submit" value="{{ $lang_attendance['attend_button'] ?? 'Check in' }}" class="btn" /></td></tr>
-    </table>
+    <div class="nx-ffull nx-center"><input type="submit" value="{{ $lang_attendance['attend_button'] ?? 'Check in' }}" class="btn" /></div>
+    </div>
     </form>
     </div>
     </div>

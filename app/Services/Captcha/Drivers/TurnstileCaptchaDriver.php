@@ -6,6 +6,7 @@ namespace App\Services\Captcha\Drivers;
 
 use App\Services\Captcha\CaptchaDriverInterface;
 use App\Services\Captcha\Exceptions\CaptchaValidationException;
+use App\Support\Captcha;
 
 class TurnstileCaptchaDriver implements CaptchaDriverInterface
 {
@@ -56,10 +57,9 @@ class TurnstileCaptchaDriver implements CaptchaDriverInterface
         );
 
         $markup = sprintf(
-            '<tr><td class="rowhead">%s</td><td align="left"><div %s></div>%s</td></tr>',
+            Captcha::rowTemplate((string) ($context['layout'] ?? '')),
             htmlspecialchars($label, ENT_QUOTES, 'UTF-8'),
-            $attributes,
-            self::$scriptInjected ? '' : '<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>'
+            sprintf('<div %s></div>%s', $attributes, self::$scriptInjected ? '' : '<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>')
         );
 
         self::$scriptInjected = true;

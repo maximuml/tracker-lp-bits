@@ -15,6 +15,7 @@ use App\Http\Resources\TopicResource;
 use App\Models\Forum;
 use App\Models\Topic;
 use App\Models\User;
+use App\Repositories\TopicModerationRepository;
 use App\Repositories\TopicRepository;
 use App\Support\CurrentUser;
 use App\Support\Forum as SupportForum;
@@ -28,6 +29,7 @@ class TopicController extends Controller
         private readonly ForumRepositoryInterface $forumRepository,
         private readonly PostRepositoryInterface $postRepository,
         private readonly TopicRepository $topicRepository,
+        private readonly TopicModerationRepository $topicModerationRepository,
         private readonly CurrentUser $currentUser,
     ) {}
 
@@ -162,7 +164,7 @@ class TopicController extends Controller
         }
 
         $postCount = $this->postRepository->countTopicPosts((int) $topic->id);
-        $this->topicRepository->deleteTopic((int) $topic->id, (int) $topic->forumid, $postCount);
+        $this->topicModerationRepository->deleteTopic((int) $topic->id, (int) $topic->forumid, $postCount);
 
         return $this->success(['success' => true], 'Topic deleted');
     }

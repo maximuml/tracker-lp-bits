@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Policies\PostPolicy;
 use App\Policies\TopicPolicy;
 use App\Repositories\PostLookupRepository;
+use App\Repositories\TopicModerationRepository;
 use App\Repositories\TopicRepository;
 use App\Support\Bonus;
 use App\Support\Cache\LegacyRedisCache;
@@ -39,6 +40,7 @@ final class ForumModerationService
         private readonly TopicPolicy $topicPolicy,
         private readonly PostPolicy $postPolicy,
         private readonly TopicRepository $topicRepository,
+        private readonly TopicModerationRepository $topicModerationRepository,
         private readonly PostRepositoryInterface $postRepository,
         private readonly PostLookupRepository $postLookupRepository,
     ) {}
@@ -104,7 +106,7 @@ final class ForumModerationService
         }
 
         $postCount = $this->postRepository->countTopicPosts($topicid);
-        $this->topicRepository->moveTopic($topicid, $forumid, $postCount, (int) $oldForumid);
+        $this->topicModerationRepository->moveTopic($topicid, $forumid, $postCount, (int) $oldForumid);
 
         if ($oldForumid !== $forumid) {
             $todayDate = date('Y-m-d');
@@ -143,7 +145,7 @@ final class ForumModerationService
         }
 
         $postCount = $this->postRepository->countTopicPosts($topicid);
-        $this->topicRepository->deleteTopic($topicid, $forumid, $postCount);
+        $this->topicModerationRepository->deleteTopic($topicid, $forumid, $postCount);
 
         $todayDate = date('Y-m-d');
         $this->cacheDelete('forum_'.$forumid.'_post_'.$todayDate.'_count');
@@ -232,7 +234,7 @@ final class ForumModerationService
         }
 
         $locked = (bool) $request->input('locked');
-        $this->topicRepository->updateTopicLocked($topicid, $locked);
+        $this->topicModerationRepository->updateTopicLocked($topicid, $locked);
 
         return $this->redirectTo((string) $request->input('returnto', '?action=viewforum'));
     }
@@ -256,7 +258,7 @@ final class ForumModerationService
 
         $color = (int) $request->input('color');
         if ($color === 0 || Palette::forumHighlight($color)) {
-            $this->topicRepository->updateTopicHighlight($topicid, $color);
+            $this->topicModerationRepository->updateTopicHighlight($topicid, $color);
         }
 
         $forumid = $this->topicRepository->getTopicForumId($topicid) ?? 0;
@@ -288,7 +290,7 @@ final class ForumModerationService
         }
 
         $sticky = $request->input('sticky');
-        $this->topicRepository->updateTopicSticky($topicid, $sticky === 'yes' || $sticky === '1' || $sticky === 1 || $sticky === true);
+        $this->topicModerationRepository->updateTopicSticky($topicid, $sticky === 'yes' || $sticky === '1' || $sticky === 1 || $sticky === true);
 
         return $this->redirectTo((string) $request->input('returnto', '?action=viewforum'));
     }

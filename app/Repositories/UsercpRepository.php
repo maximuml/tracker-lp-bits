@@ -8,10 +8,7 @@ use App\DTOs\Usercp\ForumSettingsDto;
 use App\DTOs\Usercp\PersonalSettingsDto;
 use App\DTOs\Usercp\SecuritySettingsDto;
 use App\DTOs\Usercp\TrackerSettingsDto;
-use App\Enums\BitbucketPublic;
 use App\Enums\UserTooltip;
-use App\Models\Comment;
-use App\Models\Post;
 use App\Models\User;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
@@ -96,80 +93,12 @@ final class UsercpRepository extends BaseRepository
         return $this->security->updateSecurity($userId, $data, $resetAuthKey);
     }
 
-    public function getCommentCount(int $userId): int
-    {
-        return (int) Comment::query()->where('user', $userId)->count();
-    }
-
-    public function getForumPostCount(int $userId): int
-    {
-        return (int) Post::query()->where('userid', $userId)->count();
-    }
-
-    public function getTotalPostCount(): int
-    {
-        return (int) Post::query()->count();
-    }
-
-    public function getTopicPostCount(int $topicId): int
-    {
-        return (int) Post::query()->where('topicid', $topicId)->count();
-    }
-
     /**
      * @return array<int, int>
      */
     public function getTableIds(string $table): array
     {
         return DB::table($table)->pluck('id')->all();
-    }
-
-    /**
-     * @return array<int, array<string, mixed>>
-     */
-    public function getReadTopics(int $userId, int $limit = 5): array
-    {
-        return DB::table('readposts')
-            ->join('topics', 'topics.id', '=', 'readposts.topicid')
-            ->where('readposts.userid', $userId)
-            ->orderByDesc('readposts.id')
-            ->limit($limit)
-            ->get(['topics.id as id', 'topics.userid', 'topics.subject', 'topics.lastpost', 'topics.views'])
-            ->map(fn ($row) => (array) $row)
-            ->all();
-    }
-
-    /**
-     * @return array<int, \stdClass>
-     */
-    public function getCountryOptions(): array
-    {
-        return DB::table('countries')
-            ->orderBy('name')
-            ->get(['id', 'name'])
-            ->all();
-    }
-
-    /**
-     * @return array<int, \stdClass>
-     */
-    public function getBitbucketOptions(): array
-    {
-        return DB::table('bitbucket')
-            ->where('public', BitbucketPublic::YES->value)
-            ->get()
-            ->all();
-    }
-
-    /**
-     * @return array<string, int>
-     */
-    public function getStylesheetOptions(): array
-    {
-        return DB::table('stylesheets')
-            ->orderBy('name')
-            ->pluck('id', 'name')
-            ->all();
     }
 
     /**

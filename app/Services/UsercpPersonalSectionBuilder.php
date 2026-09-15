@@ -6,7 +6,7 @@ namespace App\Services;
 
 use App\Models\TrackerUrl;
 use App\Models\User;
-use App\Repositories\UsercpRepository;
+use App\Repositories\UsercpLookupRepository;
 use App\Support\Globals;
 use App\Support\Html;
 use App\Support\Http;
@@ -23,7 +23,7 @@ final class UsercpPersonalSectionBuilder
 {
     public function __construct(
         private readonly Globals $globals,
-        private readonly UsercpRepository $usercpRepository,
+        private readonly UsercpLookupRepository $usercpLookupRepository,
     ) {}
 
     /**
@@ -34,7 +34,7 @@ final class UsercpPersonalSectionBuilder
     public function build(array $lang, array $curUser): array
     {
         $countryOptions = '';
-        $countryRows = $this->usercpRepository->getCountryOptions();
+        $countryRows = $this->usercpLookupRepository->getCountryOptions();
         foreach ($countryRows as $ct) {
             $countryOptions .= '<option value='.htmlspecialchars((string) $ct->id).''
                 .(htmlspecialchars((string) ($curUser['country'] ?? '')) === htmlspecialchars((string) $ct->id) ? ' selected' : '')
@@ -49,7 +49,7 @@ final class UsercpPersonalSectionBuilder
                 .'>'.htmlspecialchars((string) $item->url)."</option>\n";
         }
 
-        $bitbucketRows = $this->usercpRepository->getBitbucketOptions();
+        $bitbucketRows = $this->usercpLookupRepository->getBitbucketOptions();
         $bitbucketOptions = '';
         $baseUrl = (string) $this->globals->get('BASEURL', '');
         foreach ($bitbucketRows as $sor) {

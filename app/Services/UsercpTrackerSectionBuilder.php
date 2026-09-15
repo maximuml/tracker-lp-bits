@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Repositories\UsercpRepository;
+use App\Repositories\UsercpLookupRepository;
 use App\Support\Globals;
 use App\Support\Html;
 use App\Support\Input;
@@ -22,7 +22,7 @@ final class UsercpTrackerSectionBuilder
 {
     public function __construct(
         private readonly Globals $globals,
-        private readonly UsercpRepository $usercpRepository,
+        private readonly UsercpLookupRepository $usercpLookupRepository,
     ) {}
 
     /**
@@ -46,7 +46,7 @@ final class UsercpTrackerSectionBuilder
 
         $categories = SearchBox::buildCategoryTableWithContext($browsecatmode, 'yes', 'torrents.php?allsec=1', '', 3, $notifs, ['section_name' => true]);
 
-        $ssSa = $this->usercpRepository->getStylesheetOptions();
+        $ssSa = $this->usercpLookupRepository->getStylesheetOptions();
         ksort($ssSa);
         $stylesheetOptions = '';
         foreach ($ssSa as $ssName => $ssId) {

@@ -6,6 +6,7 @@ namespace Tests\Unit\Services;
 
 use App\Models\User;
 use App\Repositories\TokenRepository;
+use App\Repositories\UsercpLookupRepository;
 use App\Repositories\UsercpRepository;
 use App\Repositories\UserPasskeyRepository;
 use App\Services\UsercpForumSectionBuilder;
@@ -74,10 +75,11 @@ final class UsercpPageServiceTest extends TestCase
             $this->globals,
             new LegacyRedisCache,
             app(UsercpRepository::class),
+            app(UsercpLookupRepository::class),
             new UsercpTokenSectionBuilder($this->globals, app(UsercpRepository::class), $this->tokenRepository),
             new UsercpSecuritySectionBuilder($this->globals, $this->passkeyRepository),
-            new UsercpTrackerSectionBuilder($this->globals, app(UsercpRepository::class)),
-            new UsercpPersonalSectionBuilder($this->globals, app(UsercpRepository::class)),
+            new UsercpTrackerSectionBuilder($this->globals, app(UsercpLookupRepository::class)),
+            new UsercpPersonalSectionBuilder($this->globals, app(UsercpLookupRepository::class)),
             new UsercpForumSectionBuilder($this->globals),
         );
     }
@@ -181,10 +183,11 @@ final class UsercpPageServiceTest extends TestCase
             new Globals,
             new LegacyRedisCache,
             app(UsercpRepository::class),
+            app(UsercpLookupRepository::class),
             new UsercpTokenSectionBuilder(new Globals, app(UsercpRepository::class), Mockery::mock(TokenRepository::class)),
             new UsercpSecuritySectionBuilder(new Globals, Mockery::mock(UserPasskeyRepository::class)),
-            new UsercpTrackerSectionBuilder(new Globals, app(UsercpRepository::class)),
-            new UsercpPersonalSectionBuilder(new Globals, app(UsercpRepository::class)),
+            new UsercpTrackerSectionBuilder(new Globals, app(UsercpLookupRepository::class)),
+            new UsercpPersonalSectionBuilder(new Globals, app(UsercpLookupRepository::class)),
             new UsercpForumSectionBuilder(new Globals),
         );
 

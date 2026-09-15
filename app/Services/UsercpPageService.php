@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Models\Setting;
 use App\Models\User;
+use App\Repositories\UsercpLookupRepository;
 use App\Repositories\UsercpRepository;
 use App\Support\AssetAppender;
 use App\Support\Cache\LegacyRedisCache;
@@ -38,6 +39,7 @@ final class UsercpPageService
         private readonly Globals $globals,
         private readonly LegacyRedisCache $cache,
         private readonly UsercpRepository $usercpRepository,
+        private readonly UsercpLookupRepository $usercpLookupRepository,
         private readonly UsercpTokenSectionBuilder $tokenSectionBuilder,
         private readonly UsercpSecuritySectionBuilder $securitySectionBuilder,
         private readonly UsercpTrackerSectionBuilder $trackerSectionBuilder,
@@ -114,7 +116,7 @@ final class UsercpPageService
         $userId = (int) ($curUser['id'] ?? 0);
 
         // Comment count
-        $commentCount = $this->usercpRepository->getCommentCount($userId);
+        $commentCount = $this->usercpLookupRepository->getCommentCount($userId);
 
         // Join date
         $added = (string) ($curUser['added'] ?? '');
@@ -135,7 +137,7 @@ final class UsercpPageService
             }
         }
         if ($forumPosts === 0) {
-            $forumPosts = $this->usercpRepository->getForumPostCount($userId);
+            $forumPosts = $this->usercpLookupRepository->getForumPostCount($userId);
             if ($cache !== null) {
                 $cache->cache_value('user_'.$userId.'_post_count', $forumPosts, 3600);
             }
@@ -154,7 +156,7 @@ final class UsercpPageService
                 }
             }
             if ($postCount === 0) {
-                $postCount = $this->usercpRepository->getTotalPostCount();
+                $postCount = $this->usercpLookupRepository->getTotalPostCount();
                 if ($cache !== null) {
                     $cache->cache_value('total_posts_count', $postCount, 96400);
                 }
@@ -251,7 +253,7 @@ final class UsercpPageService
      */
     private function buildReadTopics(array $lang, int $userId, ?LegacyRedisCache $cache): array
     {
-        $topicRows = $this->usercpRepository->getReadTopics($userId);
+        $topicRows = $this->usercpLookupRepository->getReadTopics($userId);
         $items = [];
         foreach ($topicRows as $topicArr) {
             $topicId = (int) $topicArr['id'];
@@ -266,7 +268,7 @@ final class UsercpPageService
                 }
             }
             if ($posts === 0) {
-                $posts = $this->usercpRepository->getTopicPostCount($topicId);
+                $posts = $this->usercpLookupRepository->getTopicPostCount($topicId);
                 if ($cache !== null) {
                     $cache->cache_value('topic_'.$topicId.'_post_count', $posts, 3600);
                 }

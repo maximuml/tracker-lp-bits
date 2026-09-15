@@ -78,7 +78,7 @@ class RecoveryController extends Controller
 
         if ($captchaEnabled) {
             ob_start();
-            Captcha::render('yes', $langFunctions, $secret);
+            Captcha::render('yes', $langFunctions, $secret, 'grid');
             $captchaMarkup = (string) ob_get_clean();
         }
 

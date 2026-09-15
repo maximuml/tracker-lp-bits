@@ -191,6 +191,58 @@ final class Tag
     }
 
     /**
+     * Grid-mode counterpart of {@see settingsRow()}: emits the label and
+     * value as `nx-fhead`/`nx-fcell` divs for `.nx-fgrid` hosts. When
+     * `$relation` is set the pair is wrapped in `.nx-grouprow` carrying
+     * the `relation` + class attributes so upload.js mode toggles keep
+     * working. Same `$escape` semantics (\n → <br /> on escaped output).
+     */
+    public static function settingsFrow(
+        string $head,
+        string $follow,
+        bool $escape = true,
+        string $relation = '',
+    ): string {
+        $cell = $escape
+            ? str_replace("\n", "<br />\n", htmlspecialchars($follow))
+            : $follow;
+
+        $open = $relation !== ''
+            ? sprintf('<div class="nx-grouprow %s" relation="%s">', $relation, $relation)
+            : '';
+        $close = $relation !== '' ? '</div>' : '';
+
+        return sprintf(
+            '%s<div class="nx-fhead nx-nowrap">%s</div><div class="nx-fcell">%s</div>%s',
+            $open,
+            $head,
+            $cell,
+            $close,
+        );
+    }
+
+    /**
+     * Grid-mode counterpart of {@see settingsRowSmall()}. Same escaping
+     * quirk preserved: `$escape` runs htmlspecialchars on `$follow` but
+     * does NOT do the \n → <br /> substitution.
+     */
+    public static function settingsFrowSmall(
+        string $head,
+        string $follow,
+        bool $escape = true,
+        string $relation = '',
+    ): string {
+        $cell = $escape ? htmlspecialchars($follow) : $follow;
+
+        $open = $relation !== ''
+            ? '<div class="nx-grouprow '.$relation.'" relation = "'.$relation.'">'
+            : '';
+        $close = $relation !== '' ? '</div>' : '';
+
+        return $open.'<div class="nx-fhead nx-nowrap">'.$head.'</div><div class="nx-fcell">'.$cell.'</div>'.$close;
+    }
+
+    /**
      * Emit a settings row, returning it when `$return` is true or
      * echoing it otherwise. Backs the legacy `tr()` helper.
      */
@@ -202,6 +254,47 @@ final class Tag
         bool $return = false,
     ): ?string {
         $html = self::settingsRow($head, $follow, $escape, $relation);
+        if ($return) {
+            return $html;
+        }
+        echo $html;
+
+        return null;
+    }
+
+    /**
+     * Emit a grid-mode settings row ({@see settingsFrow()}), returning it
+     * when `$return` is true or echoing it otherwise.
+     */
+    public static function emitSettingsFrow(
+        string $head,
+        string $follow,
+        bool $escape = true,
+        string $relation = '',
+        bool $return = false,
+    ): ?string {
+        $html = self::settingsFrow($head, $follow, $escape, $relation);
+        if ($return) {
+            return $html;
+        }
+        echo $html;
+
+        return null;
+    }
+
+    /**
+     * Emit a narrow-label grid-mode settings row
+     * ({@see settingsFrowSmall()}), returning it when `$return` is true
+     * or echoing it otherwise.
+     */
+    public static function emitSettingsFrowSmall(
+        string $head,
+        string $follow,
+        bool $escape = true,
+        string $relation = '',
+        bool $return = false,
+    ): ?string {
+        $html = self::settingsFrowSmall($head, $follow, $escape, $relation);
         if ($return) {
             return $html;
         }

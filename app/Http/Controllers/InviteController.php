@@ -115,7 +115,7 @@ class InviteController extends LegacyController
             $invitation_body = sprintf($langInvite['text_invitation_body'], $SITENAME).$currentUser['username'];
             $preUsernameTr = '';
             if (SiteConfig::current()->system->isInvitePreEmailAndUsername()) {
-                $preUsernameTr = '<tr><td class="rowhead nowrap" valign="top" align="right">'.Locale::trans('invite.pre_register_username', [], null).'</td><td align=left><input type=text size=40 name=pre_register_username><br /><font align=left class=small>'.Locale::trans('invite.pre_register_username_help', [], null).'</font></td></tr>';
+                $preUsernameTr = '<div class="nx-fhead nx-nowrap">'.Locale::trans('invite.pre_register_username', [], null).'</div><div class="nx-fcell"><input type=text size=40 name=pre_register_username><br /><font align=left class=small>'.Locale::trans('invite.pre_register_username_help', [], null).'</font></div>';
             }
             $_s = ((int) ($inv['invites'] ?? 0) !== 1) ? ($langInvite['text_s'] ?? 's') : '';
 

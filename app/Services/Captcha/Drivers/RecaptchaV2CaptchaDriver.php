@@ -6,6 +6,7 @@ namespace App\Services\Captcha\Drivers;
 
 use App\Services\Captcha\CaptchaDriverInterface;
 use App\Services\Captcha\Exceptions\CaptchaValidationException;
+use App\Support\Captcha;
 
 class RecaptchaV2CaptchaDriver implements CaptchaDriverInterface
 {
@@ -51,10 +52,9 @@ class RecaptchaV2CaptchaDriver implements CaptchaDriverInterface
         );
 
         return sprintf(
-            '<tr><td class="rowhead">%s</td><td align="left"><div %s></div>%s</td></tr>',
+            Captcha::rowTemplate((string) ($context['layout'] ?? '')),
             htmlspecialchars($label, ENT_QUOTES, 'UTF-8'),
-            $attributes,
-            '<script src="https://www.recaptcha.net/recaptcha/api.js" async defer></script>'
+            sprintf('<div %s></div>%s', $attributes, '<script src="https://www.recaptcha.net/recaptcha/api.js" async defer></script>')
         );
     }
 

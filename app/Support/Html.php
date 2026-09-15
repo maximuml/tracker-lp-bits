@@ -113,6 +113,26 @@ final class Html
         return Tag::emitSettingsRowSmall($head, $follow, $escape, $relation, $return);
     }
 
+    public static function emitSettingsFrow(
+        string $head,
+        string $follow,
+        bool $escape = true,
+        string $relation = '',
+        bool $return = false,
+    ): ?string {
+        return Tag::emitSettingsFrow($head, $follow, $escape, $relation, $return);
+    }
+
+    public static function emitSettingsFrowSmall(
+        string $head,
+        string $follow,
+        bool $escape = true,
+        string $relation = '',
+        bool $return = false,
+    ): ?string {
+        return Tag::emitSettingsFrowSmall($head, $follow, $escape, $relation, $return);
+    }
+
     public static function settingsCells(string $head, string $follow): string
     {
         return Tag::settingsCells($head, $follow);
@@ -292,6 +312,30 @@ final class Html
         bool $return = false,
     ): ?string {
         return self::emitSettingsRowSmall((string) $x, (string) $y, ! (bool) $noesc, $relation, $return);
+    }
+
+    /**
+     * Emit a grid-mode settings row (`nx-fhead`/`nx-fcell` divs) for
+     * `.nx-fgrid` hosts. Mirrors {@see tr()}: `$noesc` is inverted
+     * before passing to the escaping helper.
+     */
+    public static function frow(mixed $x, mixed $y, bool|int $noesc = false, string $relation = '', bool $return = false): ?string
+    {
+        return self::emitSettingsFrow((string) $x, (string) $y, ! (bool) $noesc, $relation, $return);
+    }
+
+    /**
+     * Emit a narrow-label grid-mode settings row. Mirrors
+     * {@see trSmall()}.
+     */
+    public static function frowSmall(
+        mixed $x,
+        mixed $y,
+        bool|int $noesc = false,
+        string $relation = '',
+        bool $return = false,
+    ): ?string {
+        return self::emitSettingsFrowSmall((string) $x, (string) $y, ! (bool) $noesc, $relation, $return);
     }
 
     /**

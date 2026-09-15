@@ -63,7 +63,7 @@ final class UsercpPersonalSectionBuilder
         $defaultAvatarUrl = Http::protocolPrefix(Url::isSecure()).$baseUrl.'/pic/default_avatar.png';
 
         $rowsHtml = '';
-        $rowsHtml .= (string) Html::trSmall($lang['row_account_parked'] ?? 'Account parked', '<input type=checkbox name=parked'.(LegacyYesNo::isYes($curUser['parked'] ?? null) ? ' checked' : '').' value=yes>'.htmlspecialchars($lang['checkbox_pack_my_account'] ?? '').'<br /><font class=small size=1>'.($lang['text_account_pack_note'] ?? '').'</font>', 1, '', true);
+        $rowsHtml .= (string) Html::frowSmall($lang['row_account_parked'] ?? 'Account parked', '<input type=checkbox name=parked'.(LegacyYesNo::isYes($curUser['parked'] ?? null) ? ' checked' : '').' value=yes>'.htmlspecialchars($lang['checkbox_pack_my_account'] ?? '').'<br /><font class=small size=1>'.($lang['text_account_pack_note'] ?? '').'</font>', 1, '', true);
 
         $pmY = ($lang['text_accept_pms'] ?? '').'<input type=radio name=acceptpms'.(($curUser['acceptpms'] ?? '') === 'yes' ? ' checked' : '').' value=yes>'.htmlspecialchars($lang['radio_all_except_blocks'] ?? '').'<input type=radio name=acceptpms'.(($curUser['acceptpms'] ?? '') === 'friends' ? ' checked' : '').' value=friends>'.htmlspecialchars($lang['radio_friends_only'] ?? '').'<input type=radio name=acceptpms'.(($curUser['acceptpms'] ?? '') === 'no' ? ' checked' : '').' value=no>'.htmlspecialchars($lang['radio_staff_only'] ?? '')
             .'<br /><input type=checkbox name=deletepms'.(LegacyYesNo::isYes($curUser['deletepms'] ?? null) ? ' checked' : '').'> '.($lang['checkbox_delete_pms'] ?? '')
@@ -73,13 +73,13 @@ final class UsercpPersonalSectionBuilder
         foreach (User::$notificationOptions as $option) {
             $pmY .= sprintf('<br /><input type="checkbox" name="notifs[%s]"%s value="yes" /> %s', $option, (is_null($curUser['notifs'] ?? null) || str_contains($notifs, "[{$option}]") ? ' checked' : ''), htmlspecialchars($lang["checkbox_pm_on_{$option}"] ?? $option));
         }
-        $rowsHtml .= (string) Html::trSmall($lang['row_pms'] ?? 'PMs', $pmY, 1, '', true);
+        $rowsHtml .= (string) Html::frowSmall($lang['row_pms'] ?? 'PMs', $pmY, 1, '', true);
 
-        $rowsHtml .= (string) Html::trSmall($lang['row_gender'] ?? 'Gender', '<input type=radio name=gender'.(($curUser['gender'] ?? '') === 'N/A' ? ' checked' : '').' value=N/A>'.htmlspecialchars($lang['radio_not_available'] ?? '').'
+        $rowsHtml .= (string) Html::frowSmall($lang['row_gender'] ?? 'Gender', '<input type=radio name=gender'.(($curUser['gender'] ?? '') === 'N/A' ? ' checked' : '').' value=N/A>'.htmlspecialchars($lang['radio_not_available'] ?? '').'
 <input type=radio name=gender'.(($curUser['gender'] ?? '') === 'Male' ? ' checked' : '').' value=Male>'.htmlspecialchars($lang['radio_male'] ?? '').'<input type=radio name=gender'.(($curUser['gender'] ?? '') === 'Female' ? ' checked' : '').' value=Female>'.htmlspecialchars($lang['radio_female'] ?? ''), 1, '', true);
 
-        $rowsHtml .= (string) Html::trSmall($lang['row_tracker_url'] ?? 'Tracker URL', "<select name=tracker_url_id>\n".$trackerUrlOptions."\n</select>".'<br /><font class=small size=1>'.($lang['row_tracker_url_help'] ?? '').'</font>', 1, '', true);
-        $rowsHtml .= (string) Html::trSmall($lang['row_country'] ?? 'Country', "<select name=country>\n".'<option value=0>---- '.htmlspecialchars($selectNoneLabel)." ----</option>\n".$countryOptions."\n</select>", 1, '', true);
+        $rowsHtml .= (string) Html::frowSmall($lang['row_tracker_url'] ?? 'Tracker URL', "<select name=tracker_url_id>\n".$trackerUrlOptions."\n</select>".'<br /><font class=small size=1>'.($lang['row_tracker_url_help'] ?? '').'</font>', 1, '', true);
+        $rowsHtml .= (string) Html::frowSmall($lang['row_country'] ?? 'Country', "<select name=country>\n".'<option value=0>---- '.htmlspecialchars($selectNoneLabel)." ----</option>\n".$countryOptions."\n</select>", 1, '', true);
 
         $avatarCell = '<img src='.($curUser['avatar'] ?? '' ? "'".htmlspecialchars((string) $curUser['avatar'])."'" : "'".htmlspecialchars($defaultAvatarUrl)."'")." name='avatarimg'><br />
   <select name=savatar >
@@ -88,9 +88,9 @@ final class UsercpPersonalSectionBuilder
   '.$bitbucketOptions.'
   </select><input type=text name=avatar style="width: 400px" value="'.htmlspecialchars((string) ($curUser['avatar'] ?? '')).
   "\"><br />\n".htmlspecialchars($lang['text_avatar_note'] ?? '').($enableBitbucket ? ($lang['text_bitbucket_note'] ?? '') : '');
-        $rowsHtml .= (string) Html::trSmall($lang['row_avatar_url'] ?? 'Avatar URL', $avatarCell, 1, '', true);
+        $rowsHtml .= (string) Html::frowSmall($lang['row_avatar_url'] ?? 'Avatar URL', $avatarCell, 1, '', true);
 
-        $rowsHtml .= (string) Html::tr($lang['row_info'] ?? 'Info', '<textarea name="info" style="width:700px" rows="10" >'.htmlspecialchars((string) ($curUser['info'] ?? '')).'</textarea><br />'.($lang['text_info_note'] ?? ''), 1, '', true);
+        $rowsHtml .= (string) Html::frow($lang['row_info'] ?? 'Info', '<textarea name="info" style="width:700px" rows="10" >'.htmlspecialchars((string) ($curUser['info'] ?? '')).'</textarea><br />'.($lang['text_info_note'] ?? ''), 1, '', true);
 
         return [
             'formId' => 'form'.Strings::randomCode(6),

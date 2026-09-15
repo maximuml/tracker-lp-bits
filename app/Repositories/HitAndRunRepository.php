@@ -288,7 +288,7 @@ class HitAndRunRepository extends BaseRepository
             $hrRadio = sprintf('<label><input type="radio" name="hr[%s]" value="0"%s />NO</label>', $searchBoxId, $value == 0 ? ' checked' : '');
             $hrRadio .= sprintf('<label><input type="radio" name="hr[%s]" value="1"%s />YES</label>', $searchBoxId, $value == 1 ? ' checked' : '');
 
-            return (string) Html::tr('H&R', $hrRadio, 1, "mode_$searchBoxId", true);
+            return (string) Html::frow('H&R', $hrRadio, 1, "mode_$searchBoxId", true);
         }
 
         return '';

@@ -306,7 +306,7 @@ class TorrentSearchRepository
             }
             $this->cache->add_whole_row();
             if ($hotsearch !== '') {
-                echo '<tr><td class="embedded" colspan="3">&nbsp;&nbsp;'.$hotsearch.'</td></tr>';
+                echo '<div class="nx-embedded">&nbsp;&nbsp;'.$hotsearch.'</div>';
             }
             $this->cache->end_whole_row();
             $this->cache->cache_page();

@@ -31,10 +31,10 @@ if (uploadComposeForm) {
         if (!e.target || !e.target.matches("select[name=type]")) return;
         var mode = e.target.getAttribute("data-mode");
         var value = e.target.value;
-        document.querySelectorAll("tr[relation]").forEach(function (tr) { tr.style.display = 'none'; });
+        document.querySelectorAll("[relation]").forEach(function (el) { el.style.display = 'none'; });
         if (value > 0) {
-            document.querySelectorAll('tr[relation="mode_' + mode + '"]').forEach(function (tr) { tr.style.display = ''; });
+            document.querySelectorAll('[relation="mode_' + mode + '"]').forEach(function (el) { el.style.display = ''; });
         }
     });
 }
-document.querySelectorAll("tr[relation]").forEach(function (tr) { tr.style.display = 'none'; });
+document.querySelectorAll("[relation]").forEach(function (el) { el.style.display = 'none'; });

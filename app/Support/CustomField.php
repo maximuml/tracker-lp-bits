@@ -321,9 +321,9 @@ HEAD;
             $trLabel = $row['label'].$requireText;
             $trRelation = "mode_$searchBoxId";
             if ($row['type'] == self::TYPE_TEXT) {
-                $html .= Html::tr($trLabel, sprintf('<input type="text" name="%s" value="%s" style="width: %s"/>', $name, $currentValue, '99%'), 1, $trRelation);
+                $html .= Html::frow($trLabel, sprintf('<input type="text" name="%s" value="%s" style="width: %s"/>', $name, $currentValue, '99%'), 1, $trRelation);
             } elseif ($row['type'] == self::TYPE_TEXTAREA) {
-                $html .= Html::tr($trLabel, sprintf('<textarea name="%s" rows="4" style="width: %s">%s</textarea>', $name, '99%', $currentValue), 1, $trRelation);
+                $html .= Html::frow($trLabel, sprintf('<textarea name="%s" rows="4" style="width: %s">%s</textarea>', $name, '99%', $currentValue), 1, $trRelation);
             } elseif ($row['type'] == self::TYPE_RADIO || $row['type'] == self::TYPE_CHECKBOX) {
                 if ($row['type'] == self::TYPE_CHECKBOX) {
                     $name .= '[]';
@@ -348,7 +348,7 @@ HEAD;
                         $row['type'], $name, $value, $checked, $label
                     );
                 }
-                $html .= Html::tr($trLabel, $part, 1, $trRelation);
+                $html .= Html::frow($trLabel, $part, 1, $trRelation);
             } elseif ($row['type'] == self::TYPE_SELECT) {
                 $part = '<select name="'.$name.'">';
                 $options = preg_split('/[\r\n]+/', trim((string) $row['options'])) ?: [];
@@ -368,7 +368,7 @@ HEAD;
                     );
                 }
                 $part .= '</select>';
-                $html .= Html::tr($trLabel, $part, 1, $trRelation);
+                $html .= Html::frow($trLabel, $part, 1, $trRelation);
             } elseif ($row['type'] == self::TYPE_IMAGE) {
                 $callbackFunc = 'preview_custom_field_image_'.$row['id'];
                 $iframeId = "iframe_$callbackFunc";
@@ -410,7 +410,7 @@ HEAD;
     }
 </script>
 JS;
-                $html .= Html::tr($trLabel, $y, 1, $trRelation, true);
+                $html .= Html::frow($trLabel, $y, 1, $trRelation, true);
             }
         }
 

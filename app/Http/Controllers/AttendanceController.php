@@ -91,7 +91,7 @@ class AttendanceController extends LegacyController
         } else {
             if ($captchaEnabled && $data['iv'] === 'yes') {
                 ob_start();
-                Captcha::showImageCode();
+                Captcha::showImageCode('grid');
                 $data['captchaHtml'] = (string) ob_get_clean();
             }
         }

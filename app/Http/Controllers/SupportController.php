@@ -254,7 +254,7 @@ class SupportController extends LegacyController
         }
 
         ob_start();
-        Captcha::showImageCode();
+        Captcha::showImageCode('grid');
         $captchaHtml = (string) ob_get_clean();
 
         return $this->legacyPage($request, 'complains', false, [

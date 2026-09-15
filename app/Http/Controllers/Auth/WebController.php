@@ -72,6 +72,7 @@ class WebController extends Controller
                     'code' => $langFunctions['row_security_code'] ?? 'Security Code',
                 ],
                 'secret' => $secret,
+                'layout' => 'grid',
             ]);
         }
 

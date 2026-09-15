@@ -1,26 +1,26 @@
 @include('usercp.sections._menu', ['selected' => 'home'])
 
-<table border="0" cellspacing="0" cellpadding="5" width={{ $contentWidth }}>
-<x-settings-row-small :label="\App\Support\Html\SafeHtml::fromTrustedHtml($lang['row_join_date'] ?? 'Join date')">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($home['joinDate']))</x-settings-row-small>
-<x-settings-row-small :label="\App\Support\Html\SafeHtml::fromTrustedHtml($lang['row_email_address'] ?? 'Email')">{{ $home['email'] }}</x-settings-row-small>
-<x-settings-row-small :label="\App\Support\Html\SafeHtml::fromTrustedHtml($lang['row_ip_location'] ?? 'IP location')">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($home['ipLocation']))</x-settings-row-small>
+<div class="nx-fgrid nx-fgrid--flat">
+<x-settings-row-small layout="grid" :label="\App\Support\Html\SafeHtml::fromTrustedHtml($lang['row_join_date'] ?? 'Join date')">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($home['joinDate']))</x-settings-row-small>
+<x-settings-row-small layout="grid" :label="\App\Support\Html\SafeHtml::fromTrustedHtml($lang['row_email_address'] ?? 'Email')">{{ $home['email'] }}</x-settings-row-small>
+<x-settings-row-small layout="grid" :label="\App\Support\Html\SafeHtml::fromTrustedHtml($lang['row_ip_location'] ?? 'IP location')">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($home['ipLocation']))</x-settings-row-small>
 @if ($home['showAvatar'])
-<x-settings-row-small :label="\App\Support\Html\SafeHtml::fromTrustedHtml($lang['row_avatar'] ?? 'Avatar')">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($home['avatarHtml']))</x-settings-row-small>
+<x-settings-row-small layout="grid" :label="\App\Support\Html\SafeHtml::fromTrustedHtml($lang['row_avatar'] ?? 'Avatar')">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($home['avatarHtml']))</x-settings-row-small>
 @endif
-<x-settings-row-small :label="\App\Support\Html\SafeHtml::fromTrustedHtml($lang['row_passkey'] ?? 'Passkey')">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($home['passkey']))</x-settings-row-small>
+<x-settings-row-small layout="grid" :label="\App\Support\Html\SafeHtml::fromTrustedHtml($lang['row_passkey'] ?? 'Passkey')">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($home['passkey']))</x-settings-row-small>
 @if ($home['passkeyLoginForm'] !== '')
-<x-settings-row-small :label="\App\Support\Html\SafeHtml::fromTrustedHtml($lang['row_passkey_login_url'] ?? 'Passkey login URL')">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($home['passkeyLoginForm']))</x-settings-row-small>
+<x-settings-row-small layout="grid" :label="\App\Support\Html\SafeHtml::fromTrustedHtml($lang['row_passkey_login_url'] ?? 'Passkey login URL')">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($home['passkeyLoginForm']))</x-settings-row-small>
 @endif
-<x-settings-row-small :label="\App\Support\Html\SafeHtml::fromTrustedHtml($lang['row_invitations'] ?? 'Invitations')">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($home['invitesHtml']))</x-settings-row-small>
-<x-settings-row-small :label="\App\Support\Html\SafeHtml::fromTrustedHtml($lang['row_karma_points'] ?? 'Karma')">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($home['karmaHtml']))</x-settings-row-small>
-<x-settings-row-small :label="\App\Support\Html\SafeHtml::fromTrustedHtml($lang['row_written_comments'] ?? 'Comments')">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($home['commentsHtml']))</x-settings-row-small>
+<x-settings-row-small layout="grid" :label="\App\Support\Html\SafeHtml::fromTrustedHtml($lang['row_invitations'] ?? 'Invitations')">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($home['invitesHtml']))</x-settings-row-small>
+<x-settings-row-small layout="grid" :label="\App\Support\Html\SafeHtml::fromTrustedHtml($lang['row_karma_points'] ?? 'Karma')">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($home['karmaHtml']))</x-settings-row-small>
+<x-settings-row-small layout="grid" :label="\App\Support\Html\SafeHtml::fromTrustedHtml($lang['row_written_comments'] ?? 'Comments')">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($home['commentsHtml']))</x-settings-row-small>
 
-<x-settings-row-small :label="\App\Support\Html\SafeHtml::fromTrustedHtml($home['tokens']['label'])">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($home['tokens']['tableHtml']))</x-settings-row-small>
+<x-settings-row-small layout="grid" :label="\App\Support\Html\SafeHtml::fromTrustedHtml($home['tokens']['label'])">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($home['tokens']['tableHtml']))</x-settings-row-small>
 
 @if ($home['forumPostsHtml'] !== null)
-<x-settings-row :label="\App\Support\Html\SafeHtml::fromTrustedHtml($lang['row_forum_posts'] ?? 'Forum posts')">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($home['forumPostsHtml']))</x-settings-row>
+<x-settings-row layout="grid" :label="\App\Support\Html\SafeHtml::fromTrustedHtml($lang['row_forum_posts'] ?? 'Forum posts')">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($home['forumPostsHtml']))</x-settings-row>
 @endif
-</table>
+</div>
 <div class="nx-center nx-cell-5"><b>{{ $home['readTopics']['title'] }}</b></div>
 <table data-nx="data" border=0 cellspacing=0 cellpadding=3 width={{ $contentWidth }}><tr>
 <td class=colhead align=left width=80%>{{ $home['readTopics']['colTopicTitle'] }}</td>

@@ -1,9 +1,9 @@
 @include('messages.sections._menu', ['selected' => $viewmailbox['mailbox']])
 
-<table border="0" cellpadding="4" cellspacing="0" width={{ $contentWidth }} align="center">
-<tr><td class=colhead align=left>{{ $lang['col_search_message'] ?? 'Search message' }}</td></tr>
-<tr><td class=toolbox align=center>@include('messages.sections._jump_to')</td></tr>
-</table>
+<div>
+<div class="nx-colhead">{{ $lang['col_search_message'] ?? 'Search message' }}</div>
+<div class="nx-center nx-cell-5">@include('messages.sections._jump_to')</div>
+</div>
 
 @if (! $viewmailbox['hasMessages'])
 <p align="center">{{ $lang['text_no_messages'] ?? 'No messages' }}</p>

@@ -276,16 +276,16 @@ JS;
             return ['show' => false];
         }
 
-        AssetAppender::css('.tr-top-uploader-tab>td {cursor: pointer}', 'footer', false);
+        AssetAppender::css('.tr-top-uploader-tab>[data-table] {cursor: pointer}', 'footer', false);
         $toggleJs = <<<'JS'
 document.querySelector(".tr-top-uploader-tab").addEventListener("click", function (e) {
-    var td = e.target.closest("td");
-    if (!td || td.classList.contains("colhead")) return;
+    var td = e.target.closest("[data-table]");
+    if (!td || td.classList.contains("nx-colhead")) return;
     var siblings = td.parentNode.children;
     for (var i = 0; i < siblings.length; i++) {
-        siblings[i].classList.remove("colhead");
+        siblings[i].classList.remove("nx-colhead");
     }
-    td.classList.add("colhead");
+    td.classList.add("nx-colhead");
     var tables = document.querySelectorAll(".top-uploader");
     tables.forEach(function (t) { t.classList.add('nx-hidden'); });
     var target = document.querySelectorAll("." + td.getAttribute("data-table"));

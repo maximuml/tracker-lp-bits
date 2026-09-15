@@ -1,4 +1,4 @@
-<table width="97%" class="main" border="0" cellspacing="0" cellpadding="0"><tr><td class="embedded">
+<div class="nx-main nx-embedded nx-w-97 nx-mx-auto">
 
 @include('torrents._search_form')
 
@@ -21,4 +21,4 @@
     @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($emptyMessageHtml ?? ''))
 @endif
 
-</td></tr></table>
+</div>

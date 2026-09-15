@@ -1,6 +1,6 @@
 @if($topUploaders['show'])
 <h2>{{ $topUploaders['title'] }}</h2>
-<table width='100%'><tr class='tr-top-uploader-tab' title='{{ $topUploaders['toggleHint'] }}'><td class='colhead' align='center' data-table='top-uploader-recently'>{{ $topUploaders['recentlyLabel'] }}</td><td align='center' data-table='top-uploader-all'>{{ $topUploaders['allLabel'] }}</td></tr></table>
+<div class='nx-row tr-top-uploader-tab' title='{{ $topUploaders['toggleHint'] }}'><div class='nx-colhead nx-center nx-grow' data-table='top-uploader-recently'>{{ $topUploaders['recentlyLabel'] }}</div><div class='nx-center nx-grow' data-table='top-uploader-all'>{{ $topUploaders['allLabel'] }}</div></div>
 
 <table data-nx="data" class='top-uploader top-uploader-all nx-hidden' width="100%" border="1" cellspacing="0" cellpadding="5"><tr><td class="colhead" width="">{{ $topUploaders['colAuthor'] }}</td><td class="colhead" align="center">{{ $topUploaders['colCounts'] }}</td><td class="colhead" align="center">{{ $topUploaders['colRanking'] }}</td></tr>
 @foreach($topUploaders['allRows'] as $row)

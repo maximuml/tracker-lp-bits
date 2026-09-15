@@ -7,17 +7,15 @@
     Mysql Server Status
 </h1>
 
-<table id="torrenttable" border="1"><tr><td>
+<div class="nx-box">
 {{ $serverRunningText }}
-</td></tr></table>
+</div>
 
 <ul>
     <li>
         <b>Server traffic:</b> These tables show the network traffic statistics of this MySQL server since its startup
         <br />
-        <table border="0">
-            <tr>
-                <td valign="top">
+        <div class="nx-row">
                     <table data-nx="data" id="torrenttable" border="0">
                         <tr>
                             <th colspan="2" bgcolor="lightgrey">&nbsp;Traffic&nbsp;</th>
@@ -39,8 +37,6 @@
                             <td bgcolor="lightgrey" align="right">&nbsp;{{ $totalBytesPerHour }}&nbsp;</td>
                         </tr>
                     </table>
-                </td>
-                <td valign="top">
                     <table data-nx="data" id="torrenttable" border="0">
                         <tr>
                             <th colspan="2" bgcolor="lightgrey">&nbsp;Connections&nbsp;</th>
@@ -66,16 +62,12 @@
                             <td bgcolor="lightgrey" align="right">&nbsp;{{ number_format(100, 2, '.', ',') }}&nbsp;%&nbsp;</td>
                         </tr>
                     </table>
-                </td>
-            </tr>
-        </table>
+        </div>
     </li>
     <br />
     <li>
         <b>Query Statistics:</b> Since it's start up, {{ $questionsTotal }} queries have been sent to the server.
-        <table border="0">
-            <tr>
-                <td colspan="2">
+        <div>
                     <br />
                     <table data-nx="data" id="torrenttable" border="0" align="right">
                         <tr>
@@ -91,11 +83,8 @@
                             <td bgcolor="#EFF3FF" align="right">&nbsp;{{ $questionsPerSecond }}&nbsp;</td>
                         </tr>
                     </table>
-                </td>
-            </tr>
-            <tr>
+            <div class="nx-row">
 @foreach ($queryStatColumns as $column)
-                <td valign="top">
                     <table data-nx="data" id="torrenttable" border="0">
                         <tr>
                             <th colspan="2" bgcolor="lightgrey">&nbsp;Query&nbsp;Type&nbsp;</th>
@@ -111,19 +100,16 @@
                         </tr>
 @endforeach
                     </table>
-                </td>
 @endforeach
-            </tr>
-        </table>
+            </div>
+        </div>
     </li>
 @if ($hasServerStatus)
     <br />
     <li>
         <b>More status variables</b><br />
-        <table border="0">
-            <tr>
+        <div class="nx-row">
 @foreach ($statusColumns as $column)
-                <td valign="top">
                     <table data-nx="data" id="torrenttable" border="0">
                         <tr>
                             <th bgcolor="lightgrey">&nbsp;Variable&nbsp;</th>
@@ -136,10 +122,8 @@
                         </tr>
 @endforeach
                     </table>
-                </td>
 @endforeach
-            </tr>
-        </table>
+        </div>
     </li>
 @endif
 </ul>

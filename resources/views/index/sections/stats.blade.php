@@ -1,7 +1,7 @@
 @if($stats['show'])
 <h2>{{ $stats['title'] }}</h2>
-<table width="100%"><tr><td class="text" align="center">
-<table data-nx="data" width="60%" class="main" border="1" cellspacing="0" cellpadding="10">
+<div class="nx-text nx-center">
+<table data-nx="data" width="60%" class="main nx-mx-auto" border="1" cellspacing="0" cellpadding="10">
 <tr>
 <td>{{ $stats['labels']['rowUsersActiveToday'] }}</td><td>{{ $stats['userStats']['activeToday'] }}</td>
 <td>{{ $stats['labels']['rowUsersActiveThisWeek'] }}</td><td>{{ $stats['userStats']['activeThisWeek'] }}</td>
@@ -59,5 +59,5 @@
 </tr>
 @endforeach
 </table>
-</td></tr></table>
+</div>
 @endif

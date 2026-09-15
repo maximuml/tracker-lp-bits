@@ -43,7 +43,7 @@ final class UsersearchPageService
             LegacyResponse::abort('Error', 'Permission denied.');
         }
 
-        $highlight = ' bgcolor=#BBAF9B';
+        $highlight = 'nx-hl';
         $showHelp = ! empty(request()->query('h'));
 
         // Build form field values and highlight state

@@ -370,7 +370,7 @@
     <x-settings-text :label="$lang['text_attendance_continuous_increment'] ?? 'Step'" name="attendance_step" :value="$config['attendance_step'] ?? 0" width="30px" />
     <x-settings-text :label="$lang['text_attendance_reward_limit'] ?? 'Max'" name="attendance_max" :value="$config['attendance_max'] ?? 0" width="50px" />
     <x-settings-row :label="$lang['text_attendance_continuous'] ?? 'Continuous'">
-        <table>
+        <table data-nx="data">
             <tr><td class="colhead">{{ $lang['text_attendance_continuous_days'] ?? 'Days' }}</td><td class="colhead">{{ $lang['text_attendance_continuous_days_additional_reward'] ?? 'Reward' }}</td><td class="colhead">{{ $lang['text_attendance_continuous_days_action'] ?? 'Action' }}</td></tr>
             @foreach (($attendance_continuous ?? []) as $days => $value)
             <tr><td><input type="number" min="0" style="width: 40px" name="attendance_continuous_day[]" value="{{ $days }}"> {{ $lang['text_attendance_continuous_unit'] ?? 'days' }}</td><td><input type="number" min="0" style="width: 50px;" name="attendance_continuous_value[]" value="{{ $value }}"> {{ $lang['text_attendance_input_suffix'] ?? '' }}</td><td><a href="#" class="js-delrow">{{ $lang['text_attendance_continuous_item_action_remove'] ?? 'Remove' }}</a></td></tr>

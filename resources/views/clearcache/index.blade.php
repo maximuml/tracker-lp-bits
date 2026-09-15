@@ -13,10 +13,10 @@
 
 <form method="post" action="clearcache.php">
 @csrf
-<table border="1" cellspacing="0" cellpadding="5">
-    <tr><td class="rowhead">Cache name</td><td><input type="text" name="cachename" size="40"></td></tr>
-    <tr><td class="rowhead">Multi languages</td><td><input type="checkbox" name="multilang" value="yes">Yes</td></tr>
-    <tr><td colspan="2" align="center"><input type="submit" value="Okay" class="btn"></td></tr>
-</table>
+<div class="nx-fgrid">
+    <div class="nx-fhead">Cache name</div><div class="nx-fcell"><input type="text" name="cachename" size="40"></div>
+    <div class="nx-fhead">Multi languages</div><div class="nx-fcell"><input type="checkbox" name="multilang" value="yes">Yes</div>
+    <div class="nx-ffull nx-center"><input type="submit" value="Okay" class="btn"></div>
+</div>
 </form>
 @endsection

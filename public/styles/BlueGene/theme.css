@@ -194,7 +194,7 @@ td.comment
 	padding-top: 10pt;
 	text-align: left
 }
-td.colhead
+td.colhead, .nx-colhead
 {
 	white-space:nowrap;
 	font-weight: bold;
@@ -234,7 +234,7 @@ table.torrents td.rowfollow
 {
 text-align: center;
 }
-td.toolbox
+td.toolbox, .nx-toolbox
 {
 }
 td.title

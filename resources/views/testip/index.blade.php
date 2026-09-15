@@ -5,15 +5,15 @@
 @section('content')
 <h1>{{ $lang_testip['head_test_ip'] ?? 'Test IP address' }}</h1>
 @if (! empty($hasResult))
-<table border=0 cellspacing=0 cellpadding=0><tr><td class=embedded>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($message ?? ''))</td></tr></table>
+<div class="nx-embedded">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($message ?? ''))</div>
     @if (($banstable ?? '') !== '')
 <p>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($banstable))</p>
     @endif
 @endif
 <form method=post action=testip.php>
-<table border=1 cellspacing=0 cellpadding=5>
-<tr><td class=rowhead>{{ $lang_testip['text_ip_address'] ?? 'IP address' }}</td><td><input type=text name=ip value="{{ $ip ?? '' }}"></td></tr>
-<tr><td colspan=2 align=center><input type=submit class=btn value='OK'></td></tr>
+<div class="nx-fgrid">
+<div class="nx-fhead">{{ $lang_testip['text_ip_address'] ?? 'IP address' }}</div><div class="nx-fcell"><input type=text name=ip value="{{ $ip ?? '' }}"></div>
+<div class="nx-ffull nx-center"><input type=submit class=btn value='OK'></div>
+</div>
 </form>
-</table>
 @endsection

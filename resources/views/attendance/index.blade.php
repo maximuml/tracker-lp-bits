@@ -20,8 +20,7 @@
     </ul>
 @else
     @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::open((string) ($lang_attendance['title'] ?? ''), false, 10, '100%', 'left')))
-    <table width="100%" border="1" cellspacing="0" cellpadding="10"><tbody>
-    <tr><td class="text">
+    <div class="nx-box">
     <div style="margin-top: 20px; text-align: center;">
     <form method="post" action="attendance.php" class="nx-inline-block">
     <table border="0" cellpadding="5">
@@ -30,8 +29,7 @@
     </table>
     </form>
     </div>
-    </td></tr>
-    </tbody></table>
+    </div>
     @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::CLOSE))
 @endif
 @endsection

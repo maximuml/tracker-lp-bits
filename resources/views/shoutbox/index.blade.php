@@ -94,7 +94,7 @@ function shoutAttachToggleHandler() {
     @if (! $isAjax)
         <div id="shoutbox-content">
     @endif
-    <table border='0' cellspacing='0' cellpadding='2' width='100%' align='left'>
+    <table data-nx="data" border='0' cellspacing='0' cellpadding='2' width='100%' align='left'>
     @foreach ($items as $item)
         <tr><td class="{{ $item['rowClass'] }}"><span class='date'>[@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['time']))]</span> @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['actions'])) @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['avatarHtml'])) @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['classBadge']))@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['username'])) @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['reactions'])) @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['messageHtml']))
 </td></tr>

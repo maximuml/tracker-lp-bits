@@ -17,7 +17,6 @@ use App\Models\Message;
 use App\Models\User;
 use App\Services\ModerationService;
 use App\Support\Cache;
-use App\Support\Config\SiteConfig;
 use App\Support\Locale;
 use App\Support\Logger;
 use Carbon\Carbon;
@@ -326,23 +325,6 @@ class UserModerationRepository extends BaseRepository implements UserModerationR
      * @param  mixed  $operator
      * @param  mixed  $minAuthClass
      */
-    private function checkPermission($operator, User $user, $minAuthClass = 'authority.prfmanage'): void
-    {
-        $operator = $this->getUser($operator);
-        if ($operator === null) {
-            throw new \RuntimeException('Operator not found');
-        }
-        if ($operator->id == $user->id) {
-            return;
-        }
-        $permissionName = str_starts_with($minAuthClass, 'authority.')
-            ? substr($minAuthClass, strlen('authority.'))
-            : $minAuthClass;
-        $classRequire = SiteConfig::current()->authority->permission($permissionName);
-        if ($classRequire === null || $operator->class < $classRequire || $operator->class <= $user->class) {
-            throw new InsufficientPermissionException;
-        }
-    }
 
     /**
      * @return mixed

@@ -48,8 +48,12 @@ final class LegacyViewSurfaceTest extends TestCase
     /** Baseline: \App\Support\Html:: static calls in views. */
     private const BASELINE_HTML_CALLS = 0;
 
-    /** Baseline: <table> elements (layout tables, not data tables). */
-    private const BASELINE_TABLE_TAGS = 217;
+    /**
+     * Baseline: <table> elements WITHOUT a data-nx="data" marker.
+     * Semantic data tables carry data-nx="data" and stay exempt from the
+     * countdown; only unmarked (layout) tables are ratcheted toward zero.
+     */
+    private const BASELINE_TABLE_TAGS = 116;
 
     /** Baseline: inline on*= event handler attributes. */
     private const BASELINE_INLINE_HANDLERS = 0;
@@ -136,15 +140,15 @@ final class LegacyViewSurfaceTest extends TestCase
 
     public function test_table_tag_count_does_not_exceed_baseline(): void
     {
-        $count = $this->countPatternInViews('/<table\b/i', self::TABLE_EXEMPT_FILES);
+        $count = $this->countPatternInViews('/<table\b(?![^>]*\bdata-nx=)/i', self::TABLE_EXEMPT_FILES);
 
         $this->assertLessThanOrEqual(
             self::BASELINE_TABLE_TAGS,
             $count,
             sprintf(
-                '<table> count in views increased from baseline %d to %d. '
-               .'Replace layout tables with CSS grid/flex via Tailwind. '
-               .'Data tables should use <x-table> component with <thead scope="col">. '
+                'unmarked <table> count in views increased from baseline %d to %d. '
+               .'Mark semantic data tables with data-nx="data" and replace layout '
+               .'tables with CSS grid/flex. '
                .'If this increase is intentional, lower the baseline after removing tables elsewhere.',
                 self::BASELINE_TABLE_TAGS,
                 $count,

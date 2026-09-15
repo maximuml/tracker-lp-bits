@@ -13,7 +13,7 @@
     </form>
 </div>
 
-<table border="1" cellspacing="0" cellpadding="5" width="100%">
+<table data-nx="data" border="1" cellspacing="0" cellpadding="5" width="100%">
 <thead>
 <tr>
     <td class="colhead">ID</td>

@@ -23,7 +23,7 @@
 <p align="center">{{ $lang_uploaders['text_no_uploaders_yet'] ?? 'No uploaders yet.' }}</p>
 @else
 <div style="margin-top: 8px">
-<table border="1" cellspacing="0" cellpadding="5" align="center" width="97%">
+<table data-nx="data" border="1" cellspacing="0" cellpadding="5" align="center" width="97%">
 <tr>
     <td class="colhead">{{ $lang_uploaders['col_username'] ?? 'Username' }}</td>
     <td class="colhead">{{ $lang_uploaders['col_torrents_size'] ?? 'Torrents size' }}</td>

@@ -1,7 +1,7 @@
 <h1>{{ $viewmessage['subject'] }}</h1>
 @include('messages.sections._menu', ['selected' => $viewmessage['mailbox']])
 
-<table width={{ $contentWidth }} border="0" cellpadding="4" cellspacing="0">
+<table data-nx="data" width={{ $contentWidth }} border="0" cellpadding="4" cellspacing="0">
 <tr>
 <td width="50%" class="colhead" align="left">{{ $viewmessage['from'] }}</td>
 <td width="50%" class="colhead" align="left">{{ $lang['col_date'] ?? 'Date' }}</td>

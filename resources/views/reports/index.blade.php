@@ -4,7 +4,7 @@
 
 @section('content')
 <h1 align="center">{{ $lang_reports['text_reports'] ?? 'Reports' }}</h1>
-<table border=1 cellspacing=0 cellpadding=5 align=center>
+<table data-nx="data" border=1 cellspacing=0 cellpadding=5 align=center>
 <form method=post action=takeupdate.php>
 <tr>
     <td class="colhead"><nobr>{{ $lang_reports['col_added'] ?? 'Added' }}</nobr></td>

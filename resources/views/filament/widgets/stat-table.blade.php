@@ -12,7 +12,7 @@
         </div>
         <!-- Table Section -->
         <div class="fi-ta-content-ctn fi-fixed-positioning-context">
-            <table class="fi-ta-table">
+            <table data-nx="data" class="fi-ta-table">
                 <tbody>
                 @foreach(array_chunk($data, 2) as $chunk)
                     <tr>

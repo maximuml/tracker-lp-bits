@@ -20,7 +20,7 @@
         @if ($item['isNew']) &nbsp;<b>(<font class=new>{{ $lang_userhistory['text_new'] ?? 'New' }}</font>)</b>@endif
         </td></tr></table></p>
         <br />
-        <table class=main width=100% border=1 cellspacing=0 cellpadding=5>
+        <table data-nx="data" class=main width=100% border=1 cellspacing=0 cellpadding=5>
         <tr valign=top><td class=comment>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['bodyHtml']))</td></tr>
         </table>
         <br />
@@ -46,7 +46,7 @@
         &nbsp;---&nbsp;@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($lang_userhistory['text_comment'] ?? ''))</b>#<a href=details.php?id={{ $item['torrentid'] }}&tocomm=1&hit=1{{ $item['pageUrl'] }}>{{ $item['commentid'] }}</a>
         </td></tr></table></p>
         <br />
-        <table class=main width=100% border=1 cellspacing=0 cellpadding=5>
+        <table data-nx="data" class=main width=100% border=1 cellspacing=0 cellpadding=5>
         <tr valign=top><td class=comment>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['bodyHtml']))</td></tr>
         </table>
         <br />

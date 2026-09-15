@@ -26,7 +26,7 @@
 <x-frame :caption="$captions['translation']" :center="false">
 @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($notes['translation']))
 <br /><br />
-<table class="main" border="1" cellspacing="0" cellpadding="5" align="center">
+<table data-nx="data" class="main" border="1" cellspacing="0" cellpadding="5" align="center">
     <tr>
         <td class="colhead">{{ $lang_aboutnexus['text_flag'] ?? '' }}</td>
         <td class="colhead">{{ $lang_aboutnexus['text_language'] ?? '' }}</td>
@@ -46,7 +46,7 @@
 <x-frame :caption="$captions['stylesheet']" :center="false">
 @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($notes['stylesheet']))
 <br /><br />
-<table class="main" border="1" cellspacing="0" cellpadding="5" align="center">
+<table data-nx="data" class="main" border="1" cellspacing="0" cellpadding="5" align="center">
     <tr>
         <td class="colhead">{{ $lang_aboutnexus['text_name'] ?? '' }}</td>
         <td class="colhead">{{ $lang_aboutnexus['text_designer'] ?? '' }}</td>

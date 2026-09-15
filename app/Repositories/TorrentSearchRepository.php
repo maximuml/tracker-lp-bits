@@ -8,6 +8,7 @@ use App\Models\Torrent;
 use App\Repositories\TorrentSearch\FilterParser;
 use App\Repositories\TorrentSearch\MeiliAdapter;
 use App\Repositories\TorrentSearch\QueryBuilder;
+use App\Repositories\TorrentSearch\SortingBuilder;
 use App\Repositories\TorrentSearch\SqlFallback;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Category;
@@ -31,6 +32,7 @@ class TorrentSearchRepository
         private readonly Globals $globals,
         private readonly TagRepository $tagRepository,
         private readonly QueryBuilder $queryBuilder,
+        private readonly SortingBuilder $sortingBuilder,
         private readonly FilterParser $filterParser,
         private readonly MeiliAdapter $meiliAdapter,
         private readonly SqlFallback $sqlFallback,
@@ -124,7 +126,7 @@ class TorrentSearchRepository
         // sorting by MarkoStamcar
         $allCategoryId = \App\Models\SearchBox::listCategoryId($sectiontype);
 
-        $sorting = $this->queryBuilder->buildSorting($searchParams);
+        $sorting = $this->sortingBuilder->build($searchParams);
         $column = $sorting['column'];
         $ascdesc = $sorting['ascdesc'];
         $linkascdesc = $sorting['linkascdesc'];

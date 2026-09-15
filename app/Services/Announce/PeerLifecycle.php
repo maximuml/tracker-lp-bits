@@ -5,23 +5,13 @@ declare(strict_types=1);
 namespace App\Services\Announce;
 
 use App\DTOs\AnnounceRequestDto;
-use App\Enums\UserClass as UserClassEnum;
 use App\Exceptions\TrackerException;
-use App\Exceptions\TrackerWarningException;
-use App\Support\Config\SiteConfig;
-use App\Support\Format;
 use App\Support\LegacyDb;
 use App\Support\Logger;
-use App\Support\Url;
 use Illuminate\Support\Facades\DB;
 
 final class PeerLifecycle
 {
-    private AnnounceRequestDto $dto;
-
-    /** @var array<string, mixed> */
-    private array $torrent;
-
     /** @var array<string, mixed> */
     private array $user;
 
@@ -59,14 +49,15 @@ final class PeerLifecycle
     /** @var array<string, mixed> */
     private array $torrentUpdate = [];
 
+    private readonly PeerLimitGuard $limitGuard;
+
     /**
      * @param  array<string, mixed>  $torrent
      * @param  array<string, mixed>  $user
      */
     public function __construct(AnnounceRequestDto $dto, array $torrent, array $user, string $dt)
     {
-        $this->dto = $dto;
-        $this->torrent = $torrent;
+        $this->limitGuard = new PeerLimitGuard($dto, $torrent);
         $this->user = $user;
         $this->dt = $dt;
 
@@ -157,7 +148,7 @@ final class PeerLifecycle
             ->where('ip', $this->ip)
             ->value('id');
         if (! empty($sameIPRecord) && $this->seeder === 1) {
-            $this->warn('You cannot seed the same torrent in the same location from more than 1 client.', 300);
+            $this->limitGuard->warn('You cannot seed the same torrent in the same location from more than 1 client.', 300);
         }
 
         $valid = DB::table('peers')
@@ -171,7 +162,7 @@ final class PeerLifecycle
             throw TrackerException::failure('You cannot seed the same torrent from more than 3 locations.');
         }
 
-        $this->enforceWaitAndSlotLimitsForNewPeer();
+        $this->limitGuard->enforceForNewPeer($this->user, $this->userId);
 
         $peerInsert = [
             'torrent' => $this->torrentId,
@@ -314,62 +305,6 @@ final class PeerLifecycle
         }
     }
 
-    private function enforceWaitAndSlotLimitsForNewPeer(): void
-    {
-        if ((int) $this->user['class'] >= (int) UserClassEnum::VIP->value) {
-            return;
-        }
-
-        $ratio = ($this->user['downloaded'] > 0) ? ($this->user['uploaded'] / $this->user['downloaded']) : 1;
-        $gigs = $this->user['downloaded'] / (1024 * 1024 * 1024);
-
-        if ($gigs <= 10) {
-            return;
-        }
-
-        if (SiteConfig::current()->main->waitSystem()) {
-            $elapsed = TIMENOW - (int) ($this->torrent['ts'] ?? 0);
-            $wait = match (true) {
-                $ratio < 0.4 => 24,
-                $ratio < 0.5 => 12,
-                $ratio < 0.6 => 6,
-                $ratio < 0.8 => 3,
-                default => 0,
-            };
-
-            if ($elapsed < $wait) {
-                $faqUrl = Url::schemeAndHost(true).'/faq.php#id46';
-                $this->warn(
-                    'Your ratio is too low! You need to wait '.Format::prettyTimeWithLocale($wait * 3600 - $elapsed).' to start, please read '.$faqUrl.' for details',
-                    $elapsed
-                );
-            }
-        }
-
-        if (SiteConfig::current()->main->maxDlSystem()) {
-            $max = match (true) {
-                $ratio < 0.5 => 1,
-                $ratio < 0.65 => 2,
-                $ratio < 0.8 => 3,
-                $ratio < 0.95 => 4,
-                default => 0,
-            };
-
-            if ($max > 0) {
-                $leechingCount = DB::table('peers')
-                    ->where('userid', $this->userId)
-                    ->where('seeder', 0)
-                    ->count();
-
-                if ($leechingCount >= $max) {
-                    throw TrackerException::failure(
-                        "Your slot limit is reached! You may at most download $max torrents at the same time, please read ".Url::schemeAndHost(true).'/faq.php#id66 for details'
-                    );
-                }
-            }
-        }
-    }
-
     /**
      * @return array<string, mixed>
      */
@@ -391,28 +326,5 @@ final class PeerLifecycle
         }
 
         return $snatchUpdate;
-    }
-
-    private function warn(string $message, int $interval = 7200): void
-    {
-        if ($this->event !== null && in_array($this->event, ['completed', 'stopped'], true)) {
-            throw TrackerException::failure($message);
-        }
-
-        $torrentValues = $this->torrent;
-
-        $base = [
-            'interval' => MIN_ANNOUNCE_WAIT_SECOND,
-            'min interval' => MIN_ANNOUNCE_WAIT_SECOND,
-            'complete' => (int) ($torrentValues['seeders'] ?? 0),
-            'incomplete' => (int) ($torrentValues['leechers'] ?? 0),
-            'downloaded' => (int) ($torrentValues['times_completed'] ?? 0),
-            'peers' => $this->dto->compact ? '' : [],
-        ];
-        if ($this->dto->compact) {
-            $base['peers6'] = '';
-        }
-
-        throw new TrackerWarningException($message, $base, $interval);
     }
 }

@@ -447,6 +447,14 @@ button.nx-btn-link {
 .nx-smilegrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px}
 .nx-nowrap{white-space:nowrap}
 .nx-center{text-align:center}
+/* Legacy page shell (header/footer wrappers): .nx-head replaces
+   table.head, .nx-mainouter replaces table.mainouter, #info_block's
+   inner table becomes .nx-row. Theme colors come from the extended
+   table.head/table.mainouter selectors in each theme.css. */
+.nx-head{display:flex;justify-content:space-between;align-items:center;margin-left:auto;margin-right:auto}
+.nx-mainouter{width:1200px;margin-left:auto;margin-right:auto;border-collapse:separate;border-spacing:0}
+#info_block{padding:4px}
+#nav_block.nx-text{text-align:center}
 .nx-row{display:flex;align-items:flex-start}
 .nx-row--spread{justify-content:space-between}
 .nx-cell-5{padding:5px}

@@ -20,7 +20,7 @@ table
 	border-collapse: collapse;
 	background-color: #ece9d8
 }
-table.head
+table.head, .nx-head
 {
 	background: transparent;
 	height: 100px;
@@ -30,7 +30,7 @@ table.main, .nx-main
 {
 	background-color: #f5f4ea
 }
-table.mainouter
+table.mainouter, .nx-mainouter
 {
 	background-color: #f5f4ea
 }

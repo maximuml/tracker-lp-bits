@@ -22,7 +22,6 @@ use App\Support\Globals;
 use App\Support\Http\SafeReturnUrl;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
-use App\Support\Palette;
 use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -30,7 +29,9 @@ use Illuminate\Support\Facades\Auth;
 use LogicException;
 
 /**
- * Handles forum mutation actions (post, move, delete, lock, sticky, highlight).
+ * Handles forum post submission (new topic, reply, edit). Moderation
+ * mutations (move, delete, lock, sticky, highlight) live in
+ * {@see ForumModerationService}.
  */
 final class ForumService
 {
@@ -45,22 +46,22 @@ final class ForumService
             return $this->handlePost($request);
         }
         if ($action === 'movetopic') {
-            return $this->handleMoveTopic($request);
+            return $this->moderation->moveTopic($request);
         }
         if ($action === 'deletetopic') {
-            return $this->handleDeleteTopic($request);
+            return $this->moderation->deleteTopic($request);
         }
         if ($action === 'deletepost') {
-            return $this->handleDeletePost($request);
+            return $this->moderation->deletePost($request);
         }
         if ($action === 'setlocked') {
-            return $this->handleSetLocked($request);
+            return $this->moderation->setLocked($request);
         }
         if ($action === 'hltopic') {
-            return $this->handleHighlightTopic($request);
+            return $this->moderation->highlightTopic($request);
         }
         if ($action === 'setsticky') {
-            return $this->handleSetSticky($request);
+            return $this->moderation->setSticky($request);
         }
 
         // Read-only actions are rendered by ForumPageService in the
@@ -77,6 +78,7 @@ final class ForumService
         private readonly PostPolicy $postPolicy,
         private readonly TopicRepository $topicRepository,
         private readonly PostRepositoryInterface $postRepository,
+        private readonly ForumModerationService $moderation,
     ) {}
 
     /**
@@ -345,228 +347,5 @@ final class ForumService
         $headerstr = '/forums.php?action=viewtopic&topicid='.$topicid;
 
         return $this->redirectTo($headerstr.'&page=last#pid'.$newPostId);
-    }
-
-    private function handleMoveTopic(Request $request): RedirectResponse
-    {
-        $lang = $this->lang();
-        $forumid = (int) $request->input('forumid');
-        $topicid = (int) $request->query('topicid');
-
-        $topic = Topic::query()->whereKey($topicid)->first();
-        if ($topic === null) {
-            LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_topic_not_found'] ?? 'Topic not found.');
-            throw new LogicException('Expected non-null topic.');
-        }
-
-        // W1-04: Use TopicPolicy for authorization
-        $user = Auth::user();
-        if (! $user instanceof User || ! $this->topicPolicy->move($user, $topic)) {
-            LegacyResponse::permissionDenied();
-            throw new LogicException('Expected authenticated user.');
-        }
-
-        $minclasswrite = $this->repository->getForumMinclasswrite($forumid);
-        if ($minclasswrite === null) {
-            LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_forum_not_found'] ?? 'Forum not found.');
-        }
-
-        if (UserDisplay::currentClass() < $minclasswrite) {
-            LegacyResponse::permissionDenied();
-        }
-
-        $oldForumid = $this->topicRepository->getTopicForumId($topicid);
-        if ($oldForumid === null) {
-            LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_topic_not_found'] ?? 'Topic not found.');
-        }
-
-        $postCount = $this->postRepository->countTopicPosts($topicid);
-        $this->topicRepository->moveTopic($topicid, $forumid, $postCount, (int) $oldForumid);
-
-        if ($oldForumid !== $forumid) {
-            $todayDate = date('Y-m-d');
-            $this->cacheDelete('forum_'.$oldForumid.'_post_'.$todayDate.'_count');
-            $this->cacheDelete('forum_'.$oldForumid.'_last_replied_topic_content');
-            $this->cacheDelete('forum_'.$forumid.'_post_'.$todayDate.'_count');
-            $this->cacheDelete('forum_'.$forumid.'_last_replied_topic_content');
-        }
-
-        return $this->redirectTo('?action=viewforum&forumid='.$forumid);
-    }
-
-    private function handleDeleteTopic(Request $request): RedirectResponse
-    {
-        $lang = $this->lang();
-        $topicid = (int) $request->query('topicid');
-        $topic = Topic::query()->whereKey($topicid)->first();
-
-        if ($topic === null) {
-            return $this->redirectTo('/forums.php');
-        }
-
-        $forumid = (int) $topic->forumid;
-        $targetUserid = (int) $topic->userid;
-
-        // W1-04: Use TopicPolicy for authorization
-        $user = Auth::user();
-        if (! $user instanceof User || ! $this->topicPolicy->delete($user, $topic)) {
-            LegacyResponse::permissionDenied();
-            throw new LogicException('Expected authenticated user.');
-        }
-
-        $sure = (int) $request->query('sure', 0);
-        if ($sure !== 1) {
-            LegacyResponse::abort($lang['std_delete_topic'] ?? 'Delete topic', ($lang['std_delete_topic_note'] ?? '')."<a class=altlink href=?action=deletetopic&topicid={$topicid}&sure=1>".($lang['std_here_if_sure'] ?? ''), false);
-        }
-
-        $postCount = $this->postRepository->countTopicPosts($topicid);
-        $this->topicRepository->deleteTopic($topicid, $forumid, $postCount);
-
-        $todayDate = date('Y-m-d');
-        $this->cacheDelete('forum_'.$forumid.'_post_'.$todayDate.'_count');
-        $cached = $this->cacheGet('forum_'.$forumid.'_last_replied_topic_content');
-        if (is_array($cached) && ($cached['id'] ?? null) == $topicid) {
-            $this->cacheDelete('forum_'.$forumid.'_last_replied_topic_content');
-        }
-
-        $starttopicBonus = (float) ($this->globals->get('starttopic_bonus') ?? 0);
-        if ($starttopicBonus > 0) {
-            Bonus::updatePoints('-', $starttopicBonus, $targetUserid);
-        }
-
-        return $this->redirectTo('?action=viewforum&forumid='.$forumid);
-    }
-
-    private function handleDeletePost(Request $request): RedirectResponse
-    {
-        $lang = $this->lang();
-        $postid = (int) $request->query('postid');
-        $sure = (int) $request->query('sure', 0);
-
-        $post = Post::query()->whereKey($postid)->first();
-        if ($post === null) {
-            LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_post_not_found'] ?? 'Post not found.');
-            throw new LogicException('Expected non-null post.');
-        }
-
-        // W1-04: Use PostPolicy for authorization
-        $user = Auth::user();
-        if (! $user instanceof User || ! $this->postPolicy->delete($user, $post)) {
-            LegacyResponse::permissionDenied();
-            throw new LogicException('Expected authenticated user.');
-        }
-
-        $topicid = (int) $post->topicid;
-        $targetUserid = (int) $post->userid;
-        $prevPostId = $this->postRepository->getPreviousPostId($topicid, $postid);
-
-        if ($prevPostId === null || $prevPostId === 0) {
-            LegacyResponse::abort($lang['std_error'] ?? 'Error', ($lang['std_cannot_delete_post'] ?? '')."<a class=altlink href=?action=deletetopic&topicid={$topicid}&sure=1>".($lang['std_delete_topic_instead'] ?? ''), false);
-        }
-
-        if ($sure !== 1) {
-            LegacyResponse::abort($lang['std_delete_post'] ?? 'Delete post', ($lang['std_delete_post_note'] ?? '')."<a class=altlink href=?action=deletepost&postid={$postid}&sure=1>".($lang['std_here_if_sure'] ?? ''), false);
-        }
-
-        $redirtopost = '&page=p'.$prevPostId.'#pid'.$prevPostId;
-        $forumid = $this->topicRepository->getTopicForumId($topicid) ?? 0;
-        if ($forumid === 0) {
-            return $this->redirectTo('/forums.php');
-        }
-
-        $this->postRepository->deletePost($postid, $topicid, $forumid);
-        $this->cacheDelete('user_'.$targetUserid.'_post_count');
-        $this->cacheDelete('topic_'.$topicid.'_post_count');
-        $cached = $this->cacheGet('forum_'.$forumid.'_last_replied_topic_content');
-        if (is_array($cached) && ($cached['lastpost'] ?? null) == $postid) {
-            $this->cacheDelete('forum_'.$forumid.'_last_replied_topic_content');
-        }
-        $this->topicRepository->updateTopicLastPost($topicid);
-
-        $makepostBonus = (float) ($this->globals->get('makepost_bonus') ?? 0);
-        if ($makepostBonus > 0) {
-            Bonus::updatePoints('-', $makepostBonus, $targetUserid);
-        }
-
-        return $this->redirectTo('?action=viewtopic&topicid='.$topicid.$redirtopost);
-    }
-
-    private function handleSetLocked(Request $request): RedirectResponse
-    {
-        $topicid = (int) $request->input('topicid');
-        $topic = Topic::query()->whereKey($topicid)->first();
-
-        if ($topic === null) {
-            LegacyResponse::permissionDenied();
-            throw new LogicException('Expected non-null topic.');
-        }
-
-        // W1-04: Use TopicPolicy for authorization
-        $user = Auth::user();
-        if (! $user instanceof User || ! $this->topicPolicy->lock($user, $topic)) {
-            LegacyResponse::permissionDenied();
-            throw new LogicException('Expected authenticated user.');
-        }
-
-        $locked = (bool) $request->input('locked');
-        $this->topicRepository->updateTopicLocked($topicid, $locked);
-
-        return $this->redirectTo((string) $request->input('returnto', '?action=viewforum'));
-    }
-
-    private function handleHighlightTopic(Request $request): RedirectResponse
-    {
-        $topicid = (int) $request->query('topicid');
-        $topic = Topic::query()->whereKey($topicid)->first();
-
-        if ($topic === null) {
-            LegacyResponse::permissionDenied();
-            throw new LogicException('Expected non-null topic.');
-        }
-
-        // W1-04: Use TopicPolicy for authorization
-        $user = Auth::user();
-        if (! $user instanceof User || ! $this->topicPolicy->highlight($user, $topic)) {
-            LegacyResponse::permissionDenied();
-            throw new LogicException('Expected authenticated user.');
-        }
-
-        $color = (int) $request->input('color');
-        if ($color === 0 || Palette::forumHighlight($color)) {
-            $this->topicRepository->updateTopicHighlight($topicid, $color);
-        }
-
-        $forumid = $this->topicRepository->getTopicForumId($topicid) ?? 0;
-        if ($forumid > 0) {
-            $cached = $this->cacheGet('forum_'.$forumid.'_last_replied_topic_content');
-            if (is_array($cached) && ($cached['id'] ?? null) == $topicid) {
-                $this->cacheDelete('forum_'.$forumid.'_last_replied_topic_content');
-            }
-        }
-
-        return $this->redirectTo((string) $request->input('returnto', '?action=viewforum'));
-    }
-
-    private function handleSetSticky(Request $request): RedirectResponse
-    {
-        $topicid = (int) $request->input('topicid');
-        $topic = Topic::query()->whereKey($topicid)->first();
-
-        if ($topic === null) {
-            LegacyResponse::permissionDenied();
-            throw new LogicException('Expected non-null topic.');
-        }
-
-        // W1-04: Use TopicPolicy for authorization
-        $user = Auth::user();
-        if (! $user instanceof User || ! $this->topicPolicy->sticky($user, $topic)) {
-            LegacyResponse::permissionDenied();
-            throw new LogicException('Expected authenticated user.');
-        }
-
-        $sticky = (string) $request->input('sticky');
-        $this->topicRepository->updateTopicSticky($topicid, $sticky);
-
-        return $this->redirectTo((string) $request->input('returnto', '?action=viewforum'));
     }
 }

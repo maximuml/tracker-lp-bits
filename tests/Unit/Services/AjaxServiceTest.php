@@ -8,7 +8,7 @@ use App\DTOs\Auth\ActorContext;
 use App\Enums\UserClass;
 use App\Repositories\AttendanceRepository;
 use App\Repositories\BonusRepository;
-use App\Repositories\ExamRepository;
+use App\Repositories\ExamUserRepository;
 use App\Repositories\MedalRepository;
 use App\Repositories\TorrentModerationRepository;
 use App\Repositories\UserModerationRepository;
@@ -61,8 +61,8 @@ final class AjaxServiceTest extends TestCase
     /** @var BonusRepository&MockInterface */
     private BonusRepository $bonusRepo;
 
-    /** @var ExamRepository&MockInterface */
-    private ExamRepository $examRepo;
+    /** @var ExamUserRepository&MockInterface */
+    private ExamUserRepository $examRepo;
 
     /** @var UserModerationRepository&MockInterface */
     private UserModerationRepository $userModerationRepo;
@@ -106,8 +106,8 @@ final class AjaxServiceTest extends TestCase
         $bonusRepo = Mockery::mock(BonusRepository::class);
         $this->bonusRepo = $bonusRepo;
 
-        /** @var ExamRepository&MockInterface $examRepo */
-        $examRepo = Mockery::mock(ExamRepository::class);
+        /** @var ExamUserRepository&MockInterface $examRepo */
+        $examRepo = Mockery::mock(ExamUserRepository::class);
         $this->examRepo = $examRepo;
 
         /** @var UserModerationRepository&MockInterface $userModerationRepo */

@@ -18,6 +18,7 @@ use App\Models\Invite;
 use App\Models\Medal;
 use App\Models\User;
 use App\Models\UserMeta;
+use App\Repositories\ExamUserRepository;
 use App\Repositories\MedalRepository;
 use App\Support\Admin;
 use App\Support\Config\SiteConfig;
@@ -246,7 +247,7 @@ class UserProfile extends ViewRecord implements HasActions
 
             ])
             ->action(function ($data) {
-                $examRep = app(ExamRepositoryInterface::class);
+                $examRep = app(ExamUserRepository::class);
                 try {
                     $examRep->assignToUser($this->getUserRecord()->id, $data['exam_id'], $data['begin'], $data['end']);
                     $this->sendSuccessNotification();

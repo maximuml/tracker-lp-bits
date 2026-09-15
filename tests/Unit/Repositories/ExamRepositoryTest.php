@@ -9,10 +9,7 @@ use App\Enums\ExamType;
 use App\Models\Exam;
 use App\Models\ExamUser;
 use App\Models\User;
-use App\Repositories\ExamCronRepository;
-use App\Repositories\ExamProgressRepository;
 use App\Repositories\ExamRepository;
-use App\Repositories\ExamUserRepository;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\Attributes\TestCategory;
@@ -34,11 +31,7 @@ final class ExamRepositoryTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->repository = new ExamRepository(
-            app(ExamUserRepository::class),
-            app(ExamProgressRepository::class),
-            app(ExamCronRepository::class),
-        );
+        $this->repository = new ExamRepository;
     }
 
     public function test_get_list_returns_paginated_exams(): void

@@ -11,7 +11,7 @@ use App\Http\Requests\UidRequest;
 use App\Models\Exam;
 use App\Models\ExamUser;
 use App\Models\User;
-use App\Repositories\ExamRepository;
+use App\Repositories\ExamUserRepository;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Mockery;
@@ -53,8 +53,8 @@ final class ExamUserControllerTest extends TestCase
         $examUser->end = null;
         $examUser->setRelation('exam', $exam);
 
-        /** @var ExamRepository&Mockery\MockInterface $repository */
-        $repository = Mockery::mock(ExamRepository::class);
+        /** @var ExamUserRepository&Mockery\MockInterface $repository */
+        $repository = Mockery::mock(ExamUserRepository::class);
         $repository->shouldReceive('assignToUser')
             ->once()
             ->with(5, 10, null, null)
@@ -76,8 +76,8 @@ final class ExamUserControllerTest extends TestCase
     {
         $this->expectException(ValidationException::class);
 
-        /** @var ExamRepository&Mockery\MockInterface $repository */
-        $repository = Mockery::mock(ExamRepository::class);
+        /** @var ExamUserRepository&Mockery\MockInterface $repository */
+        $repository = Mockery::mock(ExamUserRepository::class);
         $repository->shouldNotReceive('assignToUser');
 
         $controller = new ExamUserController($repository);
@@ -91,8 +91,8 @@ final class ExamUserControllerTest extends TestCase
 
     public function test_destroy_removes_exam_user(): void
     {
-        /** @var ExamRepository&Mockery\MockInterface $repository */
-        $repository = Mockery::mock(ExamRepository::class);
+        /** @var ExamUserRepository&Mockery\MockInterface $repository */
+        $repository = Mockery::mock(ExamUserRepository::class);
         $repository->shouldReceive('removeExamUser')
             ->once()
             ->with(1)
@@ -107,8 +107,8 @@ final class ExamUserControllerTest extends TestCase
 
     public function test_avoid_marks_exam_user_as_avoided(): void
     {
-        /** @var ExamRepository&Mockery\MockInterface $repository */
-        $repository = Mockery::mock(ExamRepository::class);
+        /** @var ExamUserRepository&Mockery\MockInterface $repository */
+        $repository = Mockery::mock(ExamUserRepository::class);
         $repository->shouldReceive('avoidExamUser')
             ->once()
             ->with(1)
@@ -129,8 +129,8 @@ final class ExamUserControllerTest extends TestCase
     {
         $this->expectException(ValidationException::class);
 
-        /** @var ExamRepository&Mockery\MockInterface $repository */
-        $repository = Mockery::mock(ExamRepository::class);
+        /** @var ExamUserRepository&Mockery\MockInterface $repository */
+        $repository = Mockery::mock(ExamUserRepository::class);
         $repository->shouldNotReceive('avoidExamUser');
 
         $controller = new ExamUserController($repository);
@@ -144,8 +144,8 @@ final class ExamUserControllerTest extends TestCase
 
     public function test_recover_recovers_exam_user(): void
     {
-        /** @var ExamRepository&Mockery\MockInterface $repository */
-        $repository = Mockery::mock(ExamRepository::class);
+        /** @var ExamUserRepository&Mockery\MockInterface $repository */
+        $repository = Mockery::mock(ExamUserRepository::class);
         $repository->shouldReceive('recoverExamUser')
             ->once()
             ->with(1)
@@ -166,8 +166,8 @@ final class ExamUserControllerTest extends TestCase
     {
         $this->expectException(ValidationException::class);
 
-        /** @var ExamRepository&Mockery\MockInterface $repository */
-        $repository = Mockery::mock(ExamRepository::class);
+        /** @var ExamUserRepository&Mockery\MockInterface $repository */
+        $repository = Mockery::mock(ExamUserRepository::class);
         $repository->shouldNotReceive('recoverExamUser');
 
         $controller = new ExamUserController($repository);
@@ -184,8 +184,8 @@ final class ExamUserControllerTest extends TestCase
         $user = new User;
         $user->id = 5;
 
-        /** @var ExamRepository&Mockery\MockInterface $repository */
-        $repository = Mockery::mock(ExamRepository::class);
+        /** @var ExamUserRepository&Mockery\MockInterface $repository */
+        $repository = Mockery::mock(ExamUserRepository::class);
         $repository->shouldReceive('avoidExamUserBulk')
             ->once()
             ->with(['id' => [1, 2]], Mockery::type(User::class))
@@ -209,8 +209,8 @@ final class ExamUserControllerTest extends TestCase
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('unauthenticated');
 
-        /** @var ExamRepository&Mockery\MockInterface $repository */
-        $repository = Mockery::mock(ExamRepository::class);
+        /** @var ExamUserRepository&Mockery\MockInterface $repository */
+        $repository = Mockery::mock(ExamUserRepository::class);
         $repository->shouldNotReceive('avoidExamUserBulk');
 
         Auth::shouldReceive('user')->once()->andReturn(null);
@@ -227,8 +227,8 @@ final class ExamUserControllerTest extends TestCase
         $user = new User;
         $user->id = 5;
 
-        /** @var ExamRepository&Mockery\MockInterface $repository */
-        $repository = Mockery::mock(ExamRepository::class);
+        /** @var ExamUserRepository&Mockery\MockInterface $repository */
+        $repository = Mockery::mock(ExamUserRepository::class);
         $repository->shouldReceive('removeExamUserBulk')
             ->once()
             ->with(['id' => [1, 2]], Mockery::type(User::class))
@@ -252,8 +252,8 @@ final class ExamUserControllerTest extends TestCase
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('unauthenticated');
 
-        /** @var ExamRepository&Mockery\MockInterface $repository */
-        $repository = Mockery::mock(ExamRepository::class);
+        /** @var ExamUserRepository&Mockery\MockInterface $repository */
+        $repository = Mockery::mock(ExamUserRepository::class);
         $repository->shouldNotReceive('removeExamUserBulk');
 
         Auth::shouldReceive('user')->once()->andReturn(null);

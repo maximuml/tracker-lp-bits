@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Support;
 
-use App\Contracts\Repositories\ExamRepositoryInterface;
 use App\Enums\ExamUserStatus;
+use App\Repositories\ExamProgressRepository;
 
 class Exam
 {
     /** @return array{exam: \App\Models\Exam|null, html: string} */
     public function getCurrent(int $uid): array
     {
-        $examRep = app(ExamRepositoryInterface::class);
+        $examRep = app(ExamProgressRepository::class);
         $userExam = $examRep->getUserExamProgress($uid, ExamUserStatus::NORMAL->value);
         if (empty($userExam)) {
             return ['exam' => null, 'html' => ''];

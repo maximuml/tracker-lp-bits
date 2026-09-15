@@ -7,14 +7,14 @@ namespace App\Repositories;
 use App\Contracts\Repositories\PostRepositoryInterface;
 use App\Models\Forum;
 use App\Models\Post;
-use App\Models\Topic;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Post repository: reads, create/edit/delete, and search for forum posts.
+ * Post repository: counters, topic listings, create/edit/delete, and search
+ * for forum posts. Shaped single-post reads live in PostLookupRepository.
  */
 class PostRepository extends BaseRepository implements PostRepositoryInterface
 {
@@ -40,104 +40,6 @@ class PostRepository extends BaseRepository implements PostRepositoryInterface
         return (bool) User::query()->where('id', $userId)->update(['last_catchup' => $lastPostId]);
     }
 
-    public function postExists(int $id): ?int
-    {
-        $post = Post::query()->where('id', $id)->first(['topicid']);
-
-        return $post ? (int) $post->topicid : null;
-    }
-
-    /**
-     * @return array<string, mixed>|null
-     */
-    public function getPostForQuote(int $id): ?array
-    {
-        $post = Post::query()->where('id', $id)->first(['topicid', 'body', 'userid']);
-        if (! $post) {
-            return null;
-        }
-        $topic = Topic::query()->where('id', $post->topicid)->first(['subject']);
-        $username = User::query()->where('id', $post->userid)->value('username');
-
-        return [
-            'topicid' => (int) $post->topicid,
-            'body' => (string) $post->body,
-            'userid' => (int) $post->userid,
-            'username' => $username,
-            'topic_subject' => $topic ? $topic->subject : null,
-        ];
-    }
-
-    /**
-     * @return array<string, mixed>|null
-     */
-    public function getPostForEdit(int $id): ?array
-    {
-        $post = Post::query()->where('id', $id)->first(['topicid', 'body']);
-        if (! $post) {
-            return null;
-        }
-        $topicid = (int) $post->topicid;
-        $firstpost = (int) Post::query()->where('topicid', $topicid)->min('id');
-        $topic = Topic::query()->where('id', $topicid)->first(['subject']);
-
-        return [
-            'topicid' => $topicid,
-            'body' => (string) $post->body,
-            'firstpost' => $firstpost,
-            'topic_subject' => $topic ? $topic->subject : null,
-            'is_first_post' => $firstpost == $id,
-        ];
-    }
-
-    /**
-     * @return array<string, mixed>|null
-     */
-    public function getPostWithTopic(int $postid): ?array
-    {
-        $post = Post::query()->where('id', $postid)->first(['userid', 'topicid']);
-        if (! $post) {
-            return null;
-        }
-        $topic = Topic::query()->where('id', $post->topicid)->first(['locked']);
-
-        return [
-            'userid' => (int) $post->userid,
-            'topicid' => (int) $post->topicid,
-            'locked' => $topic ? $topic->locked : null,
-        ];
-    }
-
-    /**
-     * @return array<string, mixed>|null
-     */
-    public function getPostEditInfo(int $postid): ?array
-    {
-        $post = Post::query()->where('id', $postid)->first(['topicid']);
-        if (! $post) {
-            return null;
-        }
-        $topicid = (int) $post->topicid;
-        $topic = Topic::query()->where('id', $topicid)->first(['forumid']);
-        $firstpost = (int) Post::query()->where('topicid', $topicid)->min('id');
-
-        return [
-            'topicid' => $topicid,
-            'forumid' => $topic ? (int) $topic->forumid : 0,
-            'is_first_post' => $firstpost == $postid,
-        ];
-    }
-
-    public function getPost(int $id): ?Post
-    {
-        return Post::query()->where('id', $id)->first();
-    }
-
-    public function getPostWithUser(int $id): ?Post
-    {
-        return Post::query()->with('user')->where('id', $id)->first();
-    }
-
     public function updatePostBody(int $postid, string $body, string $date, int $editedBy): bool
     {
         return (bool) Post::query()->where('id', $postid)->update([
@@ -145,11 +47,6 @@ class PostRepository extends BaseRepository implements PostRepositoryInterface
             'editdate' => $date,
             'editedby' => $editedBy,
         ]);
-    }
-
-    public function getFirstPostId(int $topicid): int
-    {
-        return (int) Post::query()->where('topicid', $topicid)->min('id');
     }
 
     public function createPost(int $topicId, int $userId, string $body, string $date): int
@@ -209,52 +106,12 @@ class PostRepository extends BaseRepository implements PostRepositoryInterface
         return (bool) User::query()->where('id', $userId)->update(['last_post' => $date]);
     }
 
-    /**
-     * @return array{topicid: int, userid: int}|null
-     */
-    public function getPostTopicAndUser(int $postid): ?array
-    {
-        $post = Post::query()->where('id', $postid)->first(['topicid', 'userid']);
-
-        return $post ? [
-            'topicid' => (int) $post->topicid,
-            'userid' => (int) $post->userid,
-        ] : null;
-    }
-
-    public function getPreviousPostId(int $topicid, int $postid): ?int
-    {
-        return Post::query()
-            ->where('topicid', $topicid)
-            ->where('id', '<', $postid)
-            ->orderByDesc('id')
-            ->value('id');
-    }
-
     public function deletePost(int $postid, int $topicid, int $forumid): bool
     {
         Post::query()->where('id', $postid)->delete();
         Forum::query()->where('id', $forumid)->decrement('postcount');
 
         return true;
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    public function getPostArrayById(int $id): array
-    {
-        return Post::query()->findOrFail($id)->toArray();
-    }
-
-    /**
-     * @return array<string, mixed>|null
-     */
-    public function findPostArrayById(int $id): ?array
-    {
-        $post = Post::query()->where('id', $id)->first();
-
-        return $post ? $post->toArray() : null;
     }
 
     /**

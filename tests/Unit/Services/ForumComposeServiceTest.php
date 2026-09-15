@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Services;
 
 use App\Contracts\Repositories\ForumRepositoryInterface;
-use App\Contracts\Repositories\PostRepositoryInterface;
+use App\Repositories\PostLookupRepository;
 use App\Repositories\TopicRepository;
 use App\Services\ForumComposeService;
 use App\Support\CurrentUser;
@@ -95,9 +95,9 @@ final class ForumComposeServiceTest extends TestCase
         $topicRepo->shouldIgnoreMissing(false);
         $this->app->instance(TopicRepository::class, $topicRepo);
 
-        $postRepo = Mockery::mock(PostRepositoryInterface::class);
+        $postRepo = Mockery::mock(PostLookupRepository::class);
         $postRepo->shouldIgnoreMissing(false);
-        $this->app->instance(PostRepositoryInterface::class, $postRepo);
+        $this->app->instance(PostLookupRepository::class, $postRepo);
 
         return $repo;
     }
@@ -111,11 +111,11 @@ final class ForumComposeServiceTest extends TestCase
         return $repo;
     }
 
-    /** @return PostRepositoryInterface&MockInterface */
+    /** @return PostLookupRepository&MockInterface */
     private function mockPostRepo(): mixed
     {
-        /** @var PostRepositoryInterface&MockInterface $repo */
-        $repo = $this->app->make(PostRepositoryInterface::class);
+        /** @var PostLookupRepository&MockInterface $repo */
+        $repo = $this->app->make(PostLookupRepository::class);
 
         return $repo;
     }

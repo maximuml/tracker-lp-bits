@@ -6,8 +6,8 @@ namespace App\Services;
 
 use App\Auth\Permission;
 use App\Contracts\Repositories\ForumRepositoryInterface;
-use App\Contracts\Repositories\PostRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
+use App\Repositories\PostLookupRepository;
 use App\Repositories\TopicRepository;
 use App\Support\CurrentUser;
 use App\Support\Forum;
@@ -27,7 +27,7 @@ final class ForumComposeService
     public function __construct(
         private readonly ForumRepositoryInterface $forumRepository,
         private readonly TopicRepository $topicRepository,
-        private readonly PostRepositoryInterface $postRepository,
+        private readonly PostLookupRepository $postRepository,
         private readonly CurrentUser $currentUser,
         private readonly Globals $globals,
     ) {}

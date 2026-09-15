@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Policies\PostPolicy;
 use App\Policies\TopicPolicy;
 use App\Repositories\ForumRepository;
+use App\Repositories\PostLookupRepository;
 use App\Repositories\PostRepository;
 use App\Repositories\TopicRepository;
 use App\Services\ForumModerationService;
@@ -42,6 +43,9 @@ final class ForumServiceTest extends TestCase
 
     /** @var PostRepository&Mockery\MockInterface */
     private PostRepository $postRepo;
+
+    /** @var PostLookupRepository&Mockery\MockInterface */
+    private PostLookupRepository $postLookupRepo;
 
     protected function setUp(): void
     {
@@ -126,6 +130,12 @@ final class ForumServiceTest extends TestCase
         $this->app->instance(PostRepository::class, $postRepo);
         $this->postRepo = $postRepo;
 
+        /** @var PostLookupRepository&Mockery\MockInterface $postLookupRepo */
+        $postLookupRepo = Mockery::mock(PostLookupRepository::class);
+        $postLookupRepo->shouldIgnoreMissing();
+        $this->app->instance(PostLookupRepository::class, $postLookupRepo);
+        $this->postLookupRepo = $postLookupRepo;
+
         return $repo;
     }
 
@@ -140,6 +150,7 @@ final class ForumServiceTest extends TestCase
             $this->app->make(PostPolicy::class),
             $this->app->make(TopicRepository::class),
             $this->app->make(PostRepository::class),
+            $this->app->make(PostLookupRepository::class),
             $this->app->make(ForumModerationService::class),
         );
     }
@@ -411,7 +422,7 @@ final class ForumServiceTest extends TestCase
         $this->mockGlobals(['maxsubjectlength' => 100]);
         $this->mockCache();
 
-        $repo->shouldReceive('getPostEditInfo')->with(999)->andReturn(null);
+        $this->postLookupRepo->shouldReceive('getPostEditInfo')->with(999)->andReturn(null);
 
         $request = Request::create('/forums.php', 'POST', [
             'action' => 'post',

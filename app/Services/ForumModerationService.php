@@ -11,6 +11,7 @@ use App\Models\Topic;
 use App\Models\User;
 use App\Policies\PostPolicy;
 use App\Policies\TopicPolicy;
+use App\Repositories\PostLookupRepository;
 use App\Repositories\TopicRepository;
 use App\Support\Bonus;
 use App\Support\Cache\LegacyRedisCache;
@@ -39,6 +40,7 @@ final class ForumModerationService
         private readonly PostPolicy $postPolicy,
         private readonly TopicRepository $topicRepository,
         private readonly PostRepositoryInterface $postRepository,
+        private readonly PostLookupRepository $postLookupRepository,
     ) {}
 
     /**
@@ -179,7 +181,7 @@ final class ForumModerationService
 
         $topicid = (int) $post->topicid;
         $targetUserid = (int) $post->userid;
-        $prevPostId = $this->postRepository->getPreviousPostId($topicid, $postid);
+        $prevPostId = $this->postLookupRepository->getPreviousPostId($topicid, $postid);
 
         if ($prevPostId === null || $prevPostId === 0) {
             LegacyResponse::abort($lang['std_error'] ?? 'Error', ($lang['std_cannot_delete_post'] ?? '')."<a class=altlink href=?action=deletetopic&topicid={$topicid}&sure=1>".($lang['std_delete_topic_instead'] ?? ''), false);

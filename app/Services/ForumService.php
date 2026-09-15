@@ -14,6 +14,7 @@ use App\Models\Topic;
 use App\Models\User;
 use App\Policies\PostPolicy;
 use App\Policies\TopicPolicy;
+use App\Repositories\PostLookupRepository;
 use App\Repositories\TopicRepository;
 use App\Support\Bonus;
 use App\Support\Cache\LegacyRedisCache;
@@ -78,6 +79,7 @@ final class ForumService
         private readonly PostPolicy $postPolicy,
         private readonly TopicRepository $topicRepository,
         private readonly PostRepositoryInterface $postRepository,
+        private readonly PostLookupRepository $postLookupRepository,
         private readonly ForumModerationService $moderation,
     ) {}
 
@@ -153,7 +155,7 @@ final class ForumService
                 break;
 
             case 'edit':
-                $post = $this->postRepository->getPostEditInfo($id);
+                $post = $this->postLookupRepository->getPostEditInfo($id);
                 if ($post === null) {
                     return $this->redirectTo('/forums.php');
                 }
@@ -214,7 +216,7 @@ final class ForumService
         }
 
         if ($type === 'edit') {
-            $postInfo = $this->postRepository->getPostWithUser($postid);
+            $postInfo = $this->postLookupRepository->getPostWithUser($postid);
             $topicInfo = $this->topicRepository->getTopicWithUser($topicid);
             if ($postInfo === null || $topicInfo === null) {
                 return $this->redirectTo('/forums.php');
@@ -312,7 +314,7 @@ final class ForumService
             }
 
             if ($quotepostid > 0) {
-                $quotePostInfo = $this->postRepository->getPostWithUser($quotepostid);
+                $quotePostInfo = $this->postLookupRepository->getPostWithUser($quotepostid);
                 if ($quotePostInfo !== null && $quotePostInfo->userid !== $userid) {
                     $receiver = $quotePostInfo->user;
                     if ($receiver !== null && $receiver->acceptNotification('topic_reply')) {

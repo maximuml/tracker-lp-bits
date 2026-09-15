@@ -16,6 +16,7 @@ use App\Models\Forum;
 use App\Models\Post;
 use App\Models\Topic;
 use App\Models\User;
+use App\Repositories\PostLookupRepository;
 use App\Repositories\TopicRepository;
 use App\Support\CurrentUser;
 use Illuminate\Http\Request;
@@ -27,6 +28,7 @@ class PostController extends Controller
     public function __construct(
         private readonly ForumRepositoryInterface $forumRepository,
         private readonly PostRepositoryInterface $postRepository,
+        private readonly PostLookupRepository $postLookupRepository,
         private readonly TopicRepository $topicRepository,
         private readonly CurrentUser $currentUser,
     ) {}
@@ -123,7 +125,7 @@ class PostController extends Controller
         $date = now()->toDateTimeString();
         $this->postRepository->updatePostBody((int) $post->id, $dto->body, $date, (int) $user->id);
 
-        $postInfo = $this->postRepository->getPostEditInfo((int) $post->id);
+        $postInfo = $this->postLookupRepository->getPostEditInfo((int) $post->id);
         if ($dto->subject !== null && $dto->subject !== '' && ! empty($postInfo['is_first_post'])) {
             $topic->update(['subject' => $dto->subject]);
         }

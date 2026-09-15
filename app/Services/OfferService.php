@@ -8,7 +8,9 @@ use App\Auth\Permission;
 use App\Enums\OfferAllowed;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\Message;
+use App\Repositories\OfferCommentRepository;
 use App\Repositories\OfferRepository;
+use App\Repositories\OfferVoteRepository;
 use App\Support\Cache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
@@ -32,6 +34,8 @@ final class OfferService
         private readonly CurrentUser $currentUser,
         private readonly Globals $globals,
         private readonly OfferRepository $offerRepository,
+        private readonly OfferVoteRepository $offerVoteRepository,
+        private readonly OfferCommentRepository $offerCommentRepository,
         private readonly OfferModerationService $offerModerationService,
     ) {}
 
@@ -203,8 +207,8 @@ final class OfferService
 
         $reason = (string) $request->input('reason');
         $this->offerRepository->deleteOffer($offerId);
-        $this->offerRepository->deleteOfferVotes($offerId);
-        $this->offerRepository->deleteOfferComments($offerId);
+        $this->offerVoteRepository->deleteOfferVotes($offerId);
+        $this->offerCommentRepository->deleteOfferComments($offerId);
 
         if ($userId !== (int) $num['userid']) {
             $locale = Locale::userLocale((int) $num['userid']);

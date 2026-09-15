@@ -8,7 +8,9 @@ use App\Auth\Permission;
 use App\Enums\OfferAllowed;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserTimeType;
+use App\Repositories\OfferCommentRepository;
 use App\Repositories\OfferRepository;
+use App\Repositories\OfferVoteRepository;
 use App\Support\Comment;
 use App\Support\Format;
 use App\Support\Html;
@@ -22,6 +24,8 @@ final class OfferPageDetailsBuilder
 {
     public function __construct(
         private readonly OfferRepository $offerRepository,
+        private readonly OfferVoteRepository $offerVoteRepository,
+        private readonly OfferCommentRepository $offerCommentRepository,
     ) {}
 
     /**
@@ -55,7 +59,7 @@ final class OfferPageDetailsBuilder
             default => '<font color="red">'.htmlspecialchars((string) ($lang['text_denied'] ?? '')).'</font>',
         };
 
-        $voteCounts = $this->offerRepository->getVoteCounts($id);
+        $voteCounts = $this->offerVoteRepository->getVoteCounts($id);
         $yeah = (int) $voteCounts['yeah'];
         $against = (int) $voteCounts['against'];
 
@@ -96,7 +100,7 @@ final class OfferPageDetailsBuilder
         }
 
         // Comments section
-        $commentCount = $this->offerRepository->countComments($id);
+        $commentCount = $this->offerCommentRepository->countComments($id);
         $commentbar = '<p align="center"><a class="index" href="comment.php?action=add&amp;pid='.$id.'&amp;type=offer">'.htmlspecialchars((string) ($lang['text_add_comment'] ?? '')).'</a></p>'."\n";
 
         $commentsHtml = '';
@@ -106,7 +110,7 @@ final class OfferPageDetailsBuilder
             $commentsHtml = '<h1 id="startcomments" align="center">'.htmlspecialchars((string) ($lang['text_no_comments'] ?? '')).'</h1>'."\n";
         } else {
             [$pagerTop, $pagerBottom, , $offset, $perpage] = Pagination::pager(10, $commentCount, "offers.php?id={$id}&off_details=1&", ['lastpagedefault' => 1]);
-            $commentRows = $this->offerRepository->getComments($id, (int) $offset, (int) $perpage);
+            $commentRows = $this->offerCommentRepository->getComments($id, (int) $offset, (int) $perpage);
             $allrows = [];
             foreach ($commentRows as $commentObj) {
                 $allrows[] = $commentObj->toArray();

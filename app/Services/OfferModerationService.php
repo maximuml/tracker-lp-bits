@@ -8,6 +8,7 @@ use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\Message;
 use App\Repositories\OfferRepository;
+use App\Repositories\OfferVoteRepository;
 use App\Support\CurrentUser;
 use App\Support\Globals;
 use App\Support\Input;
@@ -30,6 +31,7 @@ final class OfferModerationService
         private readonly CurrentUser $currentUser,
         private readonly Globals $globals,
         private readonly OfferRepository $offerRepository,
+        private readonly OfferVoteRepository $offerVoteRepository,
     ) {}
 
     private function lang(string $key): string
@@ -152,7 +154,7 @@ final class OfferModerationService
         $minoffervotes = (int) ($this->globals->get('minoffervotes') ?? 0);
         $curuser = $this->curUser();
 
-        $voteCounts = $this->offerRepository->getVoteCounts($offid);
+        $voteCounts = $this->offerVoteRepository->getVoteCounts($offid);
         $yes = (int) $voteCounts['yeah'];
         $no = (int) $voteCounts['against'];
 

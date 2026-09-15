@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Enums\OfferAllowed;
-use App\Enums\OfferVote;
-use App\Models\Comment;
 use App\Models\Offer;
 use App\Models\StaffMessage;
 use App\Models\User;
@@ -15,6 +13,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Offer repository: offer reads, lifecycle (create/allow/deny/update/delete),
+ * staff notifications, and list queries. Votes and comments live in
+ * OfferVoteRepository / OfferCommentRepository.
+ */
 final class OfferRepository extends BaseRepository
 {
     private const DEFAULT_PER_PAGE = 25;
@@ -50,17 +53,6 @@ final class OfferRepository extends BaseRepository
         return (int) Offer::query()->insertGetId($data);
     }
 
-    /**
-     * @return array{yeah: int, against: int}
-     */
-    public function getVoteCounts(int $offerId): array
-    {
-        return [
-            'yeah' => (int) DB::table('offervotes')->where('vote', OfferVote::YEAH->value)->where('offerid', $offerId)->count(),
-            'against' => (int) DB::table('offervotes')->where('vote', OfferVote::AGAINST->value)->where('offerid', $offerId)->count(),
-        ];
-    }
-
     public function getOfferOwner(int $id): ?int
     {
         $value = Offer::query()->where('id', $id)->value('userid');
@@ -71,43 +63,6 @@ final class OfferRepository extends BaseRepository
     public function getOfferName(int $id): ?string
     {
         return Offer::query()->where('id', $id)->value('name');
-    }
-
-    public function getVoteCount(int $offerId): int
-    {
-        return (int) DB::table('offervotes')->where('offerid', $offerId)->count();
-    }
-
-    /**
-     * @return Collection<int, \stdClass>
-     */
-    public function getVoteRows(int $offerId, int $offset, int $perPage): Collection
-    {
-        return DB::table('offervotes')
-            ->where('offerid', $offerId)
-            ->orderBy('id')
-            ->offset($offset)
-            ->limit($perPage)
-            ->get();
-    }
-
-    public function userVoted(int $offerId, int $userId): bool
-    {
-        return (bool) DB::table('offervotes')->where('offerid', $offerId)->where('userid', $userId)->exists();
-    }
-
-    public function recordVote(int $offerId, int $userId, string $vote): void
-    {
-        DB::table('offervotes')->insert([
-            'offerid' => $offerId,
-            'userid' => $userId,
-            'vote' => OfferVote::fromStringSafe($vote)->value,
-        ]);
-    }
-
-    public function incrementVote(int $offerId, string $column): bool
-    {
-        return (bool) Offer::query()->where('id', $offerId)->increment($column);
     }
 
     public function allowOffer(int $offerId, string $allowedTime): bool
@@ -131,44 +86,6 @@ final class OfferRepository extends BaseRepository
     public function deleteOffer(int $offerId): bool
     {
         return (bool) Offer::query()->where('id', $offerId)->delete();
-    }
-
-    public function deleteOfferVotes(int $offerId): int
-    {
-        return DB::table('offervotes')->where('offerid', $offerId)->delete();
-    }
-
-    public function deleteOfferComments(int $offerId): int
-    {
-        return Comment::query()->where('offer', $offerId)->delete();
-    }
-
-    /**
-     * @return array<string, mixed>|null
-     */
-    public function getLastComment(int $offerId): ?array
-    {
-        $row = Comment::query()->where('offer', $offerId)->orderByDesc('added')->first(['user', 'added', 'text']);
-
-        return $row ? $row->toArray() : null;
-    }
-
-    public function countComments(int $offerId): int
-    {
-        return (int) Comment::query()->where('offer', $offerId)->count();
-    }
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Collection<int, Comment>
-     */
-    public function getComments(int $offerId, int $offset, int $perPage): \Illuminate\Database\Eloquent\Collection
-    {
-        return Comment::query()
-            ->where('offer', $offerId)
-            ->orderBy('id')
-            ->offset($offset)
-            ->limit($perPage)
-            ->get(['id', 'text', 'user', 'added', 'editedby', 'editdate']);
     }
 
     public function addStaffMessage(int $senderId, string $senderName, string $offerName, int $offerId): void

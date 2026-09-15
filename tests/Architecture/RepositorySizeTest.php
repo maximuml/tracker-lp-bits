@@ -56,15 +56,13 @@ final class RepositorySizeTest extends TestCase
         'app/Repositories/UserSearchRepository.php' => 438,
         'app/Repositories/TorrentSearch/FilterParser.php' => 424,
         'app/Repositories/CleanupRepository.php' => 414,
-        // Services > 400 lines (8 files)
+        // Services > 400 lines (6 files)
 
         'app/Services/IndexPageService.php' => 549,
         'app/Services/MessageService.php' => 520,
         'app/Services/AnnounceService.php' => 493,
-        'app/Services/BonusPageService.php' => 475,
         'app/Services/OfferService.php' => 422,
         'app/Services/Announce/PeerLifecycle.php' => 418,
-        'app/Services/MessagePageService.php' => 415,
         'app/Services/Cleanup/Tasks/UserClassManagementTask.php' => 430,
     ];
 

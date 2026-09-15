@@ -8,7 +8,7 @@ use App\Repositories\TorrentSearch\SortingBuilder;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
-#[TestCategory(TestCategory::UNIT, TestCategory::MUTATION)]
+#[TestCategory(TestCategory::PURE_UNIT, TestCategory::MUTATION)]
 final class SortingBuilderTest extends TestCase
 {
     private SortingBuilder $builder;

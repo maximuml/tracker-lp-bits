@@ -8,7 +8,7 @@ use App\Repositories\TorrentSearch\TaxonomySelectionParser;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
-#[TestCategory(TestCategory::UNIT, TestCategory::MUTATION)]
+#[TestCategory(TestCategory::PURE_UNIT, TestCategory::MUTATION)]
 final class TaxonomySelectionParserTest extends TestCase
 {
     private TaxonomySelectionParser $parser;

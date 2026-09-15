@@ -6,25 +6,21 @@ namespace App\Services;
 
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
-use App\Models\Poll;
-use App\Models\Setting;
 use App\Repositories\IndexRepository;
 use App\Support\AssetAppender;
 use App\Support\Cache\LegacyRedisCache;
-use App\Support\Config\SiteConfig;
 use App\Support\CoverThumb;
 use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Globals;
 use App\Support\Shoutbox;
-use App\Support\UserClass;
 use App\Support\UserDisplay;
 use App\ViewModels\IndexPageViewModel;
-use Illuminate\Support\HtmlString;
 
 /**
  * Prepares section data for the index page, replacing the legacy
  * index_content.php partial with typed Blade-rendered sections.
+ * Poll/stats/meta sections are delegated to dedicated builders.
  */
 final class IndexPageService
 {
@@ -33,6 +29,9 @@ final class IndexPageService
         private readonly Globals $globals,
         private readonly LegacyRedisCache $cache,
         private readonly IndexRepository $indexRepository,
+        private readonly IndexStatsSectionBuilder $stats,
+        private readonly IndexPollSectionBuilder $polls,
+        private readonly IndexMetaSectionBuilder $meta,
     ) {}
 
     public function build(): IndexPageViewModel
@@ -64,22 +63,22 @@ final class IndexPageService
         $data['latestTorrents'] = $this->buildLatestTorrents($lang, $this->cache);
 
         // Top uploaders
-        $data['topUploaders'] = $this->buildTopUploaders($lang);
+        $data['topUploaders'] = $this->meta->buildTopUploaders($lang);
 
         // Polls
-        $data['polls'] = $this->buildPolls($lang, $curUser, $data['canPollManage'], $data['canLog'], $this->cache);
+        $data['polls'] = $this->polls->buildPolls($lang, $curUser, $data['canPollManage'], $data['canLog'], $this->cache);
 
         // Stats
-        $data['stats'] = $this->buildStats($lang, $this->cache);
+        $data['stats'] = $this->stats->buildStats($lang, $this->cache);
 
         // Tracker load
-        $data['trackerLoad'] = $this->buildTrackerLoad($lang);
+        $data['trackerLoad'] = $this->stats->buildTrackerLoad($lang);
 
         // Disclaimer
-        $data['disclaimer'] = $this->buildDisclaimer($lang);
+        $data['disclaimer'] = $this->meta->buildDisclaimer($lang);
 
         // Browser note
-        $data['browserNote'] = $this->buildBrowserNote($lang);
+        $data['browserNote'] = $this->meta->buildBrowserNote($lang);
 
         // Reset unread news count
         if (! empty($curUser['id'])) {
@@ -259,290 +258,5 @@ JS;
         }
 
         return ['show' => true, 'html' => $html];
-    }
-
-    /**
-     * @param  array<string, mixed>  $lang
-     * @return array<string, mixed>
-     */
-    private function buildTopUploaders(array $lang): array
-    {
-        if (! SiteConfig::current()->main->showTopUploader()) {
-            return ['show' => false];
-        }
-
-        $allUploaders = $this->indexRepository->getTopUploaders(10);
-        if ($allUploaders->isEmpty()) {
-            return ['show' => false];
-        }
-
-        AssetAppender::css('.tr-top-uploader-tab>[data-table] {cursor: pointer}', 'footer', false);
-        $toggleJs = <<<'JS'
-document.querySelector(".tr-top-uploader-tab").addEventListener("click", function (e) {
-    var td = e.target.closest("[data-table]");
-    if (!td || td.classList.contains("nx-colhead")) return;
-    var siblings = td.parentNode.children;
-    for (var i = 0; i < siblings.length; i++) {
-        siblings[i].classList.remove("nx-colhead");
-    }
-    td.classList.add("nx-colhead");
-    var tables = document.querySelectorAll(".top-uploader");
-    tables.forEach(function (t) { t.classList.add('nx-hidden'); });
-    var target = document.querySelectorAll("." + td.getAttribute("data-table"));
-    target.forEach(function (t) {
-        t.classList.remove('nx-hidden');
-        t.style.opacity = '0';
-        t.style.transition = 'opacity 0.2s';
-        requestAnimationFrame(function () { t.style.opacity = '1'; });
-    });
-})
-JS;
-        AssetAppender::js($toggleJs, 'footer', false);
-
-        $recentUploaders = $this->indexRepository->getTopUploaders(10, 30);
-
-        $buildRows = function ($uploaders): array {
-            $rows = [];
-            foreach ($uploaders as $ranking => $uploader) {
-                $rows[] = [
-                    'username' => UserDisplay::username($uploader->id),
-                    'count' => $uploader->count,
-                    'rank' => $ranking + 1,
-                ];
-            }
-
-            return $rows;
-        };
-
-        return [
-            'show' => true,
-            'title' => $lang['top_uploader_title'] ?? 'Top uploaders',
-            'toggleHint' => $lang['top_uploader_toggle_time_range_tab'] ?? '',
-            'recentlyLabel' => $lang['top_uploader_toggle_time_range_recently'] ?? 'Recently',
-            'allLabel' => $lang['top_uploader_toggle_time_range_all'] ?? 'All time',
-            'colAuthor' => $lang['col_author'] ?? 'Author',
-            'colCounts' => $lang['col_counts'] ?? 'Count',
-            'colRanking' => $lang['col_ranking'] ?? 'Rank',
-            'allRows' => $buildRows($allUploaders),
-            'recentRows' => $buildRows($recentUploaders),
-        ];
-    }
-
-    /**
-     * @param  array<string, mixed>  $lang
-     * @param  array<string, mixed>  $curUser
-     * @return array<string, mixed>
-     */
-    private function buildPolls(array $lang, array $curUser, bool $canManage, bool $canLog, LegacyRedisCache $cache): array
-    {
-        $show = ! empty($curUser) && $this->globals->get('showpolls_main', '') === 'yes';
-
-        if (! $show) {
-            return ['show' => false];
-        }
-
-        $pollArr = $cache->get_value('current_poll_content');
-        if ($pollArr === false || $pollArr === null) {
-            $pollArr = $this->indexRepository->getCurrentPoll();
-            if ($pollArr) {
-                $cache->cache_value('current_poll_content', $pollArr, 7226);
-            }
-        }
-
-        $pollExists = ! empty($pollArr);
-
-        $result = [
-            'show' => true,
-            'title' => $lang['text_polls'] ?? 'Polls',
-            'canManage' => $canManage,
-            'newLabel' => $lang['text_new'] ?? 'New',
-            'editLabel' => $lang['text_edit'] ?? 'Edit',
-            'deleteLabel' => $lang['text_delete'] ?? 'Delete',
-            'detailLabel' => $lang['text_detail'] ?? 'Detail',
-            'exists' => $pollExists,
-        ];
-
-        if ($pollExists) {
-            $pollid = (int) ($pollArr['id'] ?? 0);
-            $question = (string) ($pollArr['question'] ?? '');
-            $options = [];
-            for ($i = 0; $i <= Poll::MAX_OPTION_INDEX; $i++) {
-                $opt = (string) ($pollArr["option{$i}"] ?? '');
-                if ($opt !== '') {
-                    $options[$i] = $opt;
-                }
-            }
-
-            $uservote = $this->indexRepository->getUserVote($pollid, (int) ($curUser['id'] ?? 0));
-            $result['pollId'] = $pollid;
-            $result['question'] = $question;
-            $result['options'] = $options;
-            $result['hasVoted'] = $uservote !== null;
-            $result['blankVoteLabel'] = $lang['radio_blank_vote'] ?? 'Blank vote';
-            $result['submitVoteLabel'] = $lang['submit_vote'] ?? 'Vote';
-            $result['canLog'] = $canLog;
-            $result['previousPollsLabel'] = $lang['text_previous_polls'] ?? 'Previous polls';
-            $result['votesLabel'] = $lang['text_votes'] ?? 'Votes';
-
-            if ($uservote !== null) {
-                $results = $cache->get_value('current_poll_result');
-                if ($results === false || $results === null) {
-                    $results = $this->indexRepository->getPollResults($pollid);
-                    $cache->cache_value('current_poll_result', $results, 3652);
-                }
-                $tvotes = array_sum(array_column($results, 'count'));
-                $bars = [];
-                foreach ($results as $item) {
-                    $p = $tvotes == 0 ? 0 : (int) round($item['count'] / $tvotes * 100);
-                    $bars[] = [
-                        'option' => $item['option'],
-                        'percent' => $p,
-                        'width' => $p * 3,
-                        'selected' => $item['index'] == $uservote,
-                    ];
-                }
-                $result['bars'] = $bars;
-                $result['totalVotes'] = number_format($tvotes);
-            }
-        }
-
-        return $result;
-    }
-
-    /**
-     * @param  array<string, mixed>  $lang
-     * @return array<string, mixed>
-     */
-    private function buildStats(array $lang, LegacyRedisCache $cache): array
-    {
-        $show = $this->globals->get('showstats_main', '') === 'yes';
-
-        if (! $show) {
-            return ['show' => false];
-        }
-
-        $userStats = $this->indexRepository->getUserStats();
-        $torrentStats = $this->indexRepository->getTorrentStats();
-        $classStats = $this->indexRepository->getClassStats();
-        $maxusers = (int) $this->globals->get('maxusers', 0);
-
-        return [
-            'show' => true,
-            'title' => $lang['text_tracker_statistics'] ?? 'Statistics',
-            'userStats' => [
-                'activeToday' => number_format($userStats['totalonlinetoday']),
-                'activeThisWeek' => number_format($userStats['totalonlineweek']),
-                'registered' => number_format($userStats['registered']).' / '.number_format($maxusers),
-                'unconfirmed' => number_format($userStats['unverified']),
-                'vip' => number_format($userStats['vip']),
-                'vipLabel' => UserClass::name(UC_VIP, false, false, true),
-                'donors' => number_format($userStats['donated']),
-                'donorsLabel' => $lang['row_donors'] ?? 'Donors',
-                'warned' => number_format($userStats['warned']),
-                'warnedLabel' => $lang['row_warned_users'] ?? 'Warned',
-                'banned' => number_format($userStats['disabled']),
-                'bannedLabel' => $lang['row_banned_users'] ?? 'Banned',
-                'male' => number_format($userStats['registered_male']),
-                'maleLabel' => $lang['row_male_users'] ?? 'Male',
-                'female' => number_format($userStats['registered_female']),
-                'femaleLabel' => $lang['row_female_users'] ?? 'Female',
-            ],
-            'torrentStats' => [
-                'torrents' => number_format($torrentStats['torrents']),
-                'dead' => number_format($torrentStats['dead']),
-                'seeders' => number_format($torrentStats['seeders']),
-                'leechers' => number_format($torrentStats['leechers']),
-                'peers' => number_format($torrentStats['peers']),
-                'ratio' => $torrentStats['ratio'].'%',
-                'activeBrowsing' => number_format($torrentStats['activewebusernow']),
-                'trackerActive' => number_format($torrentStats['activetrackerusernow']),
-                'totalSize' => Format::size($torrentStats['totaltorrentssize']),
-                'totalUploaded' => Format::size($torrentStats['totaluploaded']),
-                'totalDownloaded' => Format::size($torrentStats['totaldownloaded']),
-                'totalData' => Format::size($torrentStats['totaldata']),
-            ],
-            'classStats' => [
-                ['label' => UserClass::name(UC_PEASANT, false, false, true), 'value' => number_format($classStats[UC_PEASANT]), 'icon' => 'leechwarned'],
-                ['label' => UserClass::name(UC_USER, false, false, true), 'value' => number_format($classStats[UC_USER])],
-                ['label' => UserClass::name(UC_POWER_USER, false, false, true), 'value' => number_format($classStats[UC_POWER_USER])],
-                ['label' => UserClass::name(UC_ELITE_USER, false, false, true), 'value' => number_format($classStats[UC_ELITE_USER])],
-                ['label' => UserClass::name(UC_CRAZY_USER, false, false, true), 'value' => number_format($classStats[UC_CRAZY_USER])],
-                ['label' => UserClass::name(UC_INSANE_USER, false, false, true), 'value' => number_format($classStats[UC_INSANE_USER])],
-                ['label' => UserClass::name(UC_VETERAN_USER, false, false, true), 'value' => number_format($classStats[UC_VETERAN_USER])],
-                ['label' => UserClass::name(UC_EXTREME_USER, false, false, true), 'value' => number_format($classStats[UC_EXTREME_USER])],
-                ['label' => UserClass::name(UC_ULTIMATE_USER, false, false, true), 'value' => number_format($classStats[UC_ULTIMATE_USER])],
-                ['label' => UserClass::name(UC_NEXUS_MASTER, false, false, true), 'value' => number_format($classStats[UC_NEXUS_MASTER])],
-            ],
-            'labels' => [
-                'rowUsersActiveToday' => $lang['row_users_active_today'] ?? 'Active today',
-                'rowUsersActiveThisWeek' => $lang['row_users_active_this_week'] ?? 'Active this week',
-                'rowRegisteredUsers' => $lang['row_registered_users'] ?? 'Registered',
-                'rowUnconfirmedUsers' => $lang['row_unconfirmed_users'] ?? 'Unconfirmed',
-                'rowTorrents' => $lang['row_torrents'] ?? 'Torrents',
-                'rowDeadTorrents' => $lang['row_dead_torrents'] ?? 'Dead',
-                'rowSeeders' => $lang['row_seeders'] ?? 'Seeders',
-                'rowLeechers' => $lang['row_leechers'] ?? 'Leechers',
-                'rowPeers' => $lang['row_peers'] ?? 'Peers',
-                'rowSeederLeecherRatio' => $lang['row_seeder_leecher_ratio'] ?? 'Ratio',
-                'rowActiveBrowsingUsers' => $lang['row_active_browsing_users'] ?? 'Browsing',
-                'rowTrackerActiveUsers' => $lang['row_tracker_active_users'] ?? 'Tracker active',
-                'rowTotalSizeOfTorrents' => $lang['row_total_size_of_torrents'] ?? 'Total size',
-                'rowTotalUploaded' => $lang['row_total_uploaded'] ?? 'Total uploaded',
-                'rowTotalDownloaded' => $lang['row_total_downloaded'] ?? 'Total downloaded',
-                'rowTotalData' => $lang['row_total_data'] ?? 'Total data',
-            ],
-        ];
-    }
-
-    /**
-     * @param  array<string, mixed>  $lang
-     * @return array<string, mixed>
-     */
-    private function buildTrackerLoad(array $lang): array
-    {
-        $show = $this->globals->get('showtrackerload', '') === 'yes';
-
-        if (! $show) {
-            return ['show' => false];
-        }
-
-        $loadAvg = sys_getloadavg();
-        if ($loadAvg === false) {
-            $loadAvg = [0.0, 0.0, 0.0];
-        }
-        $load = sprintf('load average: %.2f, %.2f, %.2f', $loadAvg[0], $loadAvg[1], $loadAvg[2]);
-
-        return [
-            'show' => $load !== '',
-            'title' => $lang['text_tracker_load'] ?? 'Tracker load',
-            'load' => trim($load),
-        ];
-    }
-
-    /**
-     * @param  array<string, mixed>  $lang
-     * @return array<string, mixed>
-     */
-    private function buildDisclaimer(array $lang): array
-    {
-        $siteName = Setting::getSiteName();
-
-        return [
-            'show' => true,
-            'title' => $lang['text_disclaimer'] ?? 'Disclaimer',
-            'content' => sprintf($lang['text_disclaimer_content'] ?? '', $siteName, $siteName),
-        ];
-    }
-
-    /**
-     * @param  array<string, mixed>  $lang
-     * @return array<string, mixed>
-     */
-    private function buildBrowserNote(array $lang): array
-    {
-        return [
-            'show' => true,
-            'note' => new HtmlString((string) ($lang['text_browser_note'] ?? '')),
-        ];
     }
 }

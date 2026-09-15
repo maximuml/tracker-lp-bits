@@ -58,8 +58,6 @@ final class RepositorySizeTest extends TestCase
         'app/Repositories/CleanupRepository.php' => 414,
         // Services > 400 lines (6 files)
 
-        'app/Services/IndexPageService.php' => 549,
-        'app/Services/MessageService.php' => 520,
         'app/Services/AnnounceService.php' => 493,
         'app/Services/OfferService.php' => 422,
         'app/Services/Announce/PeerLifecycle.php' => 418,

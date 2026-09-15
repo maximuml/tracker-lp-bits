@@ -9,6 +9,7 @@ use App\Enums\OfferAllowed;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\Message;
 use App\Repositories\OfferRepository;
+use App\Repositories\OfferVoteRepository;
 use App\Support\Bonus;
 use App\Support\CurrentUser;
 use App\Support\Globals;
@@ -32,6 +33,7 @@ final class OfferVoteService
         private readonly CurrentUser $currentUser,
         private readonly Globals $globals,
         private readonly OfferRepository $offerRepository,
+        private readonly OfferVoteRepository $offerVoteRepository,
     ) {}
 
     public function handleVote(Request $request): ?Response
@@ -55,7 +57,7 @@ final class OfferVoteService
         if ($this->offerRepository->getOfferOwner($offerid) === $userid) {
             $this->abort($this->lang('std_error'), $this->lang('std_cannot_vote_youself'));
         }
-        if ($this->offerRepository->userVoted($offerid, $userid)) {
+        if ($this->offerVoteRepository->userVoted($offerid, $userid)) {
             $this->abort($this->lang('std_already_voted'), $this->lang('std_already_voted_note')."<a  href=offers.php?id={$offerid}&off_details=1>".$this->lang('std_back_to_offer_detail'), false);
         }
 
@@ -65,7 +67,7 @@ final class OfferVoteService
             throw new LogicException('Expected non-null offer.');
         }
 
-        $this->offerRepository->incrementVote($offerid, $vote);
+        $this->offerVoteRepository->incrementVote($offerid, $vote);
         $locale = Locale::userLocale((int) $offer->userid);
 
         $offerVotes = $this->offerRepository->findOfferWithVotes($offerid);
@@ -109,7 +111,7 @@ final class OfferVoteService
             Log::writeWithContext("System denied offer {$offerVotes->name}", 'normal');
         }
 
-        $this->offerRepository->recordVote($offerid, $userid, $vote);
+        $this->offerVoteRepository->recordVote($offerid, $userid, $vote);
         Bonus::updatePoints('+', $offervoteBonus, $userid);
 
         return response(

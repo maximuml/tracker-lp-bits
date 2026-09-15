@@ -8,6 +8,7 @@ use App\Auth\Permission;
 use App\Enums\OfferAllowed;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserTimeType;
+use App\Repositories\OfferCommentRepository;
 use App\Repositories\OfferRepository;
 use App\Repositories\UsercpRepository;
 use App\Support\Cache\LegacyRedisCache;
@@ -29,6 +30,7 @@ final class OfferPageListBuilder
 {
     public function __construct(
         private readonly OfferRepository $offerRepository,
+        private readonly OfferCommentRepository $offerCommentRepository,
         private readonly LegacyRedisCache $cache,
         private readonly UsercpRepository $usercpRepository,
     ) {}
@@ -179,7 +181,7 @@ final class OfferPageListBuilder
                 } else {
                     $lastcom = $this->cache->get_value('offer_'.(int) $arr['id'].'_last_comment_content');
                     if (! $lastcom) {
-                        $lastcom = $this->offerRepository->getLastComment((int) $arr['id']);
+                        $lastcom = $this->offerCommentRepository->getLastComment((int) $arr['id']);
                         $this->cache->cache_value('offer_'.(int) $arr['id'].'_last_comment_content', $lastcom, 1855);
                     }
                     $lastcom = (array) $lastcom;

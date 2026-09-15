@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Tests\Unit\Repositories;
 
 use App\Enums\OfferAllowed;
-use App\Enums\OfferVote;
 use App\Models\Offer;
 use App\Models\User;
 use App\Repositories\OfferRepository;
@@ -19,11 +18,10 @@ use Tests\TestCase;
  * Unit tests for OfferRepository.
  *
  * Covers findOffer(), findOfferWithUser(), findOfferWithVotes(), offerNameExists(),
- * createOffer(), getVoteCounts(), getOfferOwner(), getOfferName(), getVoteCount(),
- * getVoteRows(), userVoted(), recordVote(), incrementVote(), allowOffer(),
- * denyOffer(), updateOffer(), deleteOffer(), deleteOfferVotes(),
- * deleteOfferComments(), getLastComment(), countComments(), getComments(),
- * addStaffMessage(), getUsername(), getLegacyList(), and list().
+ * createOffer(), getOfferOwner(), getOfferName(), allowOffer(), denyOffer(),
+ * updateOffer(), deleteOffer(), addStaffMessage(), getUsername(),
+ * getLegacyList(), and list(). Votes/comments live in
+ * OfferVoteRepositoryTest / OfferCommentRepositoryTest.
  */
 #[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class OfferRepositoryTest extends TestCase
@@ -118,30 +116,6 @@ final class OfferRepositoryTest extends TestCase
         $this->assertSame('Created Offer', DB::table('offers')->where('id', $id)->value('name'));
     }
 
-    public function test_get_vote_counts_returns_zero_when_no_votes(): void
-    {
-        $id = $this->insertOffer('No Votes');
-
-        $counts = $this->repository->getVoteCounts($id);
-
-        $this->assertSame(['yeah' => 0, 'against' => 0], $counts);
-    }
-
-    public function test_get_vote_counts_returns_counts_by_type(): void
-    {
-        $id = $this->insertOffer('With Votes');
-
-        $this->repository->recordVote($id, $this->userId, 'yeah');
-        /** @var User $user2 */
-        $user2 = User::factory()->create();
-        $this->repository->recordVote($id, $user2->id, 'against');
-
-        $counts = $this->repository->getVoteCounts($id);
-
-        $this->assertSame(1, $counts['yeah']);
-        $this->assertSame(1, $counts['against']);
-    }
-
     public function test_get_offer_owner_returns_null_when_not_found(): void
     {
         $this->assertNull($this->repository->getOfferOwner(999999));
@@ -164,97 +138,6 @@ final class OfferRepositoryTest extends TestCase
         $id = $this->insertOffer('Named Offer');
 
         $this->assertSame('Named Offer', $this->repository->getOfferName($id));
-    }
-
-    public function test_get_vote_count_returns_zero_when_no_votes(): void
-    {
-        $id = $this->insertOffer('No Votes Count');
-
-        $this->assertSame(0, $this->repository->getVoteCount($id));
-    }
-
-    public function test_get_vote_count_returns_total_count(): void
-    {
-        $id = $this->insertOffer('Vote Count Offer');
-        $this->repository->recordVote($id, $this->userId, 'yeah');
-
-        $this->assertSame(1, $this->repository->getVoteCount($id));
-    }
-
-    public function test_get_vote_rows_returns_paginated_rows_ordered_by_id(): void
-    {
-        $id = $this->insertOffer('Vote Rows Offer');
-        /** @var User $user2 */
-        $user2 = User::factory()->create();
-
-        $this->repository->recordVote($id, $this->userId, 'yeah');
-        $this->repository->recordVote($id, $user2->id, 'against');
-
-        $rows = $this->repository->getVoteRows($id, 0, 10)->all();
-
-        $this->assertCount(2, $rows);
-        $this->assertSame($this->userId, (int) $rows[0]->userid);
-        $this->assertSame($user2->id, (int) $rows[1]->userid);
-    }
-
-    public function test_get_vote_rows_respects_offset_and_limit(): void
-    {
-        $id = $this->insertOffer('Paginated Votes');
-        /** @var User $user2 */
-        $user2 = User::factory()->create();
-
-        $this->repository->recordVote($id, $this->userId, 'yeah');
-        $this->repository->recordVote($id, $user2->id, 'against');
-
-        $rows = $this->repository->getVoteRows($id, 1, 10)->all();
-
-        $this->assertCount(1, $rows);
-        $this->assertSame($user2->id, (int) $rows[0]->userid);
-    }
-
-    public function test_user_voted_returns_false_when_not_voted(): void
-    {
-        $id = $this->insertOffer('Vote Check');
-
-        $this->assertFalse($this->repository->userVoted($id, $this->userId));
-    }
-
-    public function test_user_voted_returns_true_when_voted(): void
-    {
-        $id = $this->insertOffer('Vote Check Yes');
-        $this->repository->recordVote($id, $this->userId, 'yeah');
-
-        $this->assertTrue($this->repository->userVoted($id, $this->userId));
-    }
-
-    public function test_record_vote_inserts_row(): void
-    {
-        $id = $this->insertOffer('Record Vote');
-
-        $this->repository->recordVote($id, $this->userId, 'against');
-
-        $this->assertSame(1, DB::table('offervotes')->where('offerid', $id)->where('userid', $this->userId)->count());
-        $this->assertSame(OfferVote::AGAINST->value, (int) DB::table('offervotes')->where('offerid', $id)->value('vote'));
-    }
-
-    public function test_increment_vote_increments_yeah_column(): void
-    {
-        $id = $this->insertOffer('Increment Yeah');
-
-        $result = $this->repository->incrementVote($id, 'yeah');
-
-        $this->assertTrue($result);
-        $this->assertSame(1, (int) DB::table('offers')->where('id', $id)->value('yeah'));
-    }
-
-    public function test_increment_vote_increments_against_column(): void
-    {
-        $id = $this->insertOffer('Increment Against');
-
-        $result = $this->repository->incrementVote($id, 'against');
-
-        $this->assertTrue($result);
-        $this->assertSame(1, (int) DB::table('offers')->where('id', $id)->value('against'));
     }
 
     public function test_allow_offer_sets_allowed_and_allowedtime(): void
@@ -302,104 +185,6 @@ final class OfferRepositoryTest extends TestCase
     public function test_delete_offer_returns_false_when_not_found(): void
     {
         $this->assertFalse($this->repository->deleteOffer(999999));
-    }
-
-    public function test_delete_offer_votes_removes_votes(): void
-    {
-        $id = $this->insertOffer('Delete Votes');
-        $this->repository->recordVote($id, $this->userId, 'yeah');
-
-        $count = $this->repository->deleteOfferVotes($id);
-
-        $this->assertSame(1, $count);
-        $this->assertSame(0, DB::table('offervotes')->where('offerid', $id)->count());
-    }
-
-    public function test_delete_offer_comments_removes_comments(): void
-    {
-        $id = $this->insertOffer('Delete Comments');
-        DB::table('comments')->insert([
-            'user' => $this->userId,
-            'offer' => $id,
-            'text' => 'test comment',
-            'added' => now()->toDateTimeString(),
-        ]);
-
-        $count = $this->repository->deleteOfferComments($id);
-
-        $this->assertSame(1, $count);
-        $this->assertSame(0, DB::table('comments')->where('offer', $id)->count());
-    }
-
-    public function test_get_last_comment_returns_null_when_no_comments(): void
-    {
-        $id = $this->insertOffer('No Comments');
-
-        $this->assertNull($this->repository->getLastComment($id));
-    }
-
-    public function test_get_last_comment_returns_latest_comment(): void
-    {
-        $id = $this->insertOffer('With Comments');
-        DB::table('comments')->insert([
-            'user' => $this->userId,
-            'offer' => $id,
-            'text' => 'older comment',
-            'added' => '2025-01-01 00:00:00',
-        ]);
-        DB::table('comments')->insert([
-            'user' => $this->userId,
-            'offer' => $id,
-            'text' => 'newer comment',
-            'added' => '2025-06-01 00:00:00',
-        ]);
-
-        $result = $this->repository->getLastComment($id);
-
-        $this->assertNotNull($result);
-        $this->assertSame('newer comment', $result['text']);
-    }
-
-    public function test_count_comments_returns_zero_when_none(): void
-    {
-        $id = $this->insertOffer('Count Zero');
-
-        $this->assertSame(0, $this->repository->countComments($id));
-    }
-
-    public function test_count_comments_returns_count(): void
-    {
-        $id = $this->insertOffer('Count Comments');
-        DB::table('comments')->insert([
-            'user' => $this->userId,
-            'offer' => $id,
-            'text' => 'comment 1',
-            'added' => now()->toDateTimeString(),
-        ]);
-        DB::table('comments')->insert([
-            'user' => $this->userId,
-            'offer' => $id,
-            'text' => 'comment 2',
-            'added' => now()->toDateTimeString(),
-        ]);
-
-        $this->assertSame(2, $this->repository->countComments($id));
-    }
-
-    public function test_get_comments_returns_paginated_collection(): void
-    {
-        $id = $this->insertOffer('Get Comments');
-        DB::table('comments')->insert([
-            'user' => $this->userId,
-            'offer' => $id,
-            'text' => 'comment 1',
-            'added' => now()->toDateTimeString(),
-        ]);
-
-        $comments = $this->repository->getComments($id, 0, 10)->all();
-
-        $this->assertCount(1, $comments);
-        $this->assertSame('comment 1', $comments[0]->text);
     }
 
     public function test_add_staff_message_inserts_row(): void

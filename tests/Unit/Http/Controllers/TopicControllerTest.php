@@ -10,6 +10,7 @@ use App\Models\Topic;
 use App\Models\User;
 use App\Repositories\ForumRepository;
 use App\Repositories\PostRepository;
+use App\Repositories\TopicModerationRepository;
 use App\Repositories\TopicRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
@@ -203,8 +204,12 @@ final class TopicControllerTest extends TestCase
         /** @var TopicRepository&Mockery\MockInterface $topicRepo */
         $topicRepo = Mockery::mock(TopicRepository::class);
         $topicRepo->shouldReceive('isModeratorOfTopic')->once()->andReturn(true);
-        $topicRepo->shouldReceive('deleteTopic')->once();
         app()->instance(TopicRepository::class, $topicRepo);
+
+        /** @var TopicModerationRepository&Mockery\MockInterface $topicModRepo */
+        $topicModRepo = Mockery::mock(TopicModerationRepository::class);
+        $topicModRepo->shouldReceive('deleteTopic')->once();
+        app()->instance(TopicModerationRepository::class, $topicModRepo);
 
         /** @var PostRepository&Mockery\MockInterface $postRepo */
         $postRepo = Mockery::mock(PostRepository::class);

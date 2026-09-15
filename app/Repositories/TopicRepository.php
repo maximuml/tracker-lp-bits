@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
-use App\Models\Forum;
 use App\Models\Post;
 use App\Models\Topic;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Topic repository: reads, create/edit/delete, and moderation for forum topics.
+ * Topic repository: reads and create/edit for forum topics.
+ *
+ * Moderation mutations (move, delete, lock/sticky/highlight) live in:
+ *
+ * @see TopicModerationRepository
  */
 class TopicRepository extends BaseRepository
 {
@@ -119,21 +122,6 @@ class TopicRepository extends BaseRepository
         return (bool) Topic::query()->where('id', $topicid)->increment('views');
     }
 
-    public function moveTopic(int $topicid, int $newForumid, int $postCount, int $oldForumid): bool
-    {
-        if ($oldForumid == $newForumid) {
-            return true;
-        }
-
-        Topic::query()->where('id', $topicid)->update(['forumid' => $newForumid]);
-        Forum::query()->where('id', $oldForumid)->decrement('topiccount');
-        Forum::query()->where('id', $oldForumid)->decrement('postcount', $postCount);
-        Forum::query()->where('id', $newForumid)->increment('topiccount');
-        Forum::query()->where('id', $newForumid)->increment('postcount', $postCount);
-
-        return true;
-    }
-
     /**
      * @return array<string, int>|null
      */
@@ -145,32 +133,6 @@ class TopicRepository extends BaseRepository
             'forumid' => (int) $topic->forumid,
             'userid' => (int) $topic->userid,
         ] : null;
-    }
-
-    public function deleteTopic(int $topicid, int $forumid, int $postCount): bool
-    {
-        Topic::query()->where('id', $topicid)->delete();
-        Post::query()->where('topicid', $topicid)->delete();
-        DB::table('readposts')->where('topicid', $topicid)->delete();
-        Forum::query()->where('id', $forumid)->decrement('topiccount');
-        Forum::query()->where('id', $forumid)->decrement('postcount', $postCount);
-
-        return true;
-    }
-
-    public function updateTopicLocked(int $topicid, bool $locked): bool
-    {
-        return (bool) Topic::query()->where('id', $topicid)->update(['locked' => $locked]);
-    }
-
-    public function updateTopicSticky(int $topicid, bool $sticky): bool
-    {
-        return (bool) Topic::query()->where('id', $topicid)->update(['sticky' => $sticky]);
-    }
-
-    public function updateTopicHighlight(int $topicid, int $color): bool
-    {
-        return (bool) Topic::query()->where('id', $topicid)->update(['hlcolor' => $color]);
     }
 
     /**

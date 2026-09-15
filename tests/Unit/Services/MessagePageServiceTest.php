@@ -7,6 +7,7 @@ namespace Tests\Unit\Services;
 use App\Repositories\MailboxRepository;
 use App\Repositories\MessageRepository;
 use App\Services\MessagePageService;
+use App\Services\MessageReaderPageBuilder;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
@@ -53,7 +54,7 @@ final class MessagePageServiceTest extends TestCase
             $this->app->make(MailboxRepository::class),
             $this->app->make(CurrentUser::class),
             $this->app->make(Globals::class),
-            $this->app->make(LegacyRedisCache::class),
+            $this->app->make(MessageReaderPageBuilder::class),
         );
     }
 

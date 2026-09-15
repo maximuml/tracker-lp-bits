@@ -1,7 +1,7 @@
 @if($stats['show'])
 <h2>{{ $stats['title'] }}</h2>
 <table width="100%"><tr><td class="text" align="center">
-<table width="60%" class="main" border="1" cellspacing="0" cellpadding="10">
+<table data-nx="data" width="60%" class="main" border="1" cellspacing="0" cellpadding="10">
 <tr>
 <td>{{ $stats['labels']['rowUsersActiveToday'] }}</td><td>{{ $stats['userStats']['activeToday'] }}</td>
 <td>{{ $stats['labels']['rowUsersActiveThisWeek'] }}</td><td>{{ $stats['userStats']['activeThisWeek'] }}</td>

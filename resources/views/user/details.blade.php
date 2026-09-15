@@ -21,7 +21,7 @@
 @if ($isOwner || $canManageConfidential)
 <h2>{{ $lang['text_flush_ghost_torrents'] ?? '' }}<a class="altlink" href="takeflush.php?id={{ $id }}">{{ $lang['text_here'] ?? '' }}</a></h2>
 @endif
-<table width="100%" border="1" cellspacing="0" cellpadding="5">
+<table data-nx="data" width="100%" border="1" cellspacing="0" cellpadding="5">
 @if (($user['privacy'] ?? '') !== 'strong' || $canManageBasic || $isOwner)
 <x-settings-row-small :label="$lang['text_user_id'] ?? ''">{{ $user['id'] }}@if ($canManageBasic && (int) $user['class'] < $currentClass)&nbsp;[<a href="{{ $userManageSystemUrl }}" target="_blank" class="altlink">{{ $lang_functions['text_management_system'] ?? '' }}</a>]@endif</x-settings-row-small>
 @if ($isOwner || $canViewInvite)
@@ -106,7 +106,7 @@
 <input type="hidden" name="action" value="edituser" />
 <input type="hidden" name="userid" value="{{ $id }}" />
 <input type="hidden" name="returnto" value="userdetails.php?id={{ $id }}" />
-<table width="100%" class="main" border="1" cellspacing="0" cellpadding="5">
+<table data-nx="data" width="100%" class="main" border="1" cellspacing="0" cellpadding="5">
 <x-settings-row :label="$lang['row_title'] ?? ''"><input type="text" size="60" name="title" value="{{ trim((string) $user['title']) }}" /></x-settings-row>
 <x-settings-row :label="$lang['row_privacy_level'] ?? ''"><input type="radio" name="privacy" value="low"@if (($user['privacy'] ?? '') === 'low') checked="checked"@endif />{{ $lang['radio_low'] ?? '' }}<input type="radio" name="privacy" value="normal"@if (($user['privacy'] ?? '') === 'normal') checked="checked"@endif />{{ $lang['radio_normal'] ?? '' }}<input type="radio" name="privacy" value="strong"@if (($user['privacy'] ?? '') === 'strong') checked="checked"@endif />{{ $lang['radio_strong'] ?? '' }}</x-settings-row>
 <x-settings-row :label="$lang['row_avatar_url'] ?? ''"><input type="text" size="60" name="avatar" value="{{ trim((string) $user['avatar']) }}" /></x-settings-row>

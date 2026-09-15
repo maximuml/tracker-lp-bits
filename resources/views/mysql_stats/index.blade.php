@@ -18,7 +18,7 @@
         <table border="0">
             <tr>
                 <td valign="top">
-                    <table id="torrenttable" border="0">
+                    <table data-nx="data" id="torrenttable" border="0">
                         <tr>
                             <th colspan="2" bgcolor="lightgrey">&nbsp;Traffic&nbsp;</th>
                             <th bgcolor="lightgrey">&nbsp;&nbsp;Per Hour&nbsp;</th>
@@ -41,7 +41,7 @@
                     </table>
                 </td>
                 <td valign="top">
-                    <table id="torrenttable" border="0">
+                    <table data-nx="data" id="torrenttable" border="0">
                         <tr>
                             <th colspan="2" bgcolor="lightgrey">&nbsp;Connections&nbsp;</th>
                             <th bgcolor="lightgrey">&nbsp;&oslash;&nbsp;Per Hour&nbsp;</th>
@@ -77,7 +77,7 @@
             <tr>
                 <td colspan="2">
                     <br />
-                    <table id="torrenttable" border="0" align="right">
+                    <table data-nx="data" id="torrenttable" border="0" align="right">
                         <tr>
                             <th bgcolor="lightgrey">&nbsp;Total&nbsp;</th>
                             <th bgcolor="lightgrey">&nbsp;&oslash;&nbsp;Per&nbsp;Hour&nbsp;</th>
@@ -96,7 +96,7 @@
             <tr>
 @foreach ($queryStatColumns as $column)
                 <td valign="top">
-                    <table id="torrenttable" border="0">
+                    <table data-nx="data" id="torrenttable" border="0">
                         <tr>
                             <th colspan="2" bgcolor="lightgrey">&nbsp;Query&nbsp;Type&nbsp;</th>
                             <th bgcolor="lightgrey">&nbsp;&oslash;&nbsp;Per&nbsp;Hour&nbsp;</th>
@@ -124,7 +124,7 @@
             <tr>
 @foreach ($statusColumns as $column)
                 <td valign="top">
-                    <table id="torrenttable" border="0">
+                    <table data-nx="data" id="torrenttable" border="0">
                         <tr>
                             <th bgcolor="lightgrey">&nbsp;Variable&nbsp;</th>
                             <th bgcolor="lightgrey">&nbsp;Value&nbsp;</th>

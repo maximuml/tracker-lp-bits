@@ -33,7 +33,7 @@
 
 @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagertop ?? ''))
 
-<table border=1 cellspacing=0 cellpadding=5>
+<table data-nx="data" border=1 cellspacing=0 cellpadding=5>
 <tr>
     <td class=colhead align=left>{{ $lang_users['col_user_name'] ?? 'User name' }}</td>
     <td class=colhead>{{ $lang_users['col_registered'] ?? 'Registered' }}</td>

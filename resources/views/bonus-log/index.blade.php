@@ -24,7 +24,7 @@
     </form>
 </div>
 
-<table id='bonus-log-table' width='100%' cellpadding='5'>
+<table data-nx="data" id='bonus-log-table' width='100%' cellpadding='5'>
 <tr>
     <td class='colhead' align='left'>{{ $columnBusinessTypeLabel }}</td>
     <td class='colhead' align='left'>{{ $columnOldTotalLabel }}</td>

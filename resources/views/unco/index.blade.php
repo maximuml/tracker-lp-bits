@@ -5,7 +5,7 @@
 @section('content')
 @if (! empty($rows ?? []))
     @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::open('', false, 10, '100%', 'left')))
-    <table width="100%" border="1" cellspacing="0" cellpadding="5">
+    <table data-nx="data" width="100%" border="1" cellspacing="0" cellpadding="5">
         @if ($status ?? '')
             <tr>
                 <td class="rowhead" colspan="5"><font color="red" size="1">The User account has been updated!</font></td>

@@ -10,7 +10,7 @@
     <input type="submit">
     <input type="reset" class="js-filter-reset">
 </form>
-<table width='100%' id='hr-table'>
+<table data-nx="data" width='100%' id='hr-table'>
 <tr>
     <td class='colhead' align='center'>{{ $lang_myhr['th_hr_id'] ?? '' }}</td>
     <td class='colhead' align='center'>{{ $lang_myhr['th_torrent_name'] ?? '' }}</td>

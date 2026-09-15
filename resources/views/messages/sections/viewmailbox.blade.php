@@ -12,7 +12,7 @@
 <form action="/messages" method="post">
 @csrf
 <input type="hidden" name="action" value="moveordel">
-<table border="0" cellpadding="4" cellspacing="0" width={{ $contentWidth }} align="center">
+<table data-nx="data" border="0" cellpadding="4" cellspacing="0" width={{ $contentWidth }} align="center">
 <tr>
 <td width="1%" class="colhead" align="center">{{ $lang['col_status'] ?? 'Status' }}</td>
 <td class="colhead" align="left">{{ $lang['col_subject'] ?? 'Subject' }} </td>

@@ -7,7 +7,7 @@
     @if ($page === null)
         <x-frame :caption="$langComplains['pending_complaints'] ?? 'Pending complaints'" :center="false">
             @if (! empty($pendingRows))
-                <table width="100%">
+                <table data-nx="data" width="100%">
                 <tr>
                     <td class="colhead">{{ $langComplains['th_complain_at'] ?? 'Added' }}</td>
                     <td class="colhead">{{ $langComplains['th_complain_account'] ?? 'Account' }}</td>
@@ -30,7 +30,7 @@
     <x-frame :caption="$langComplains['complaints_processed'] ?? 'Processed complaints'" :center="false">
         @if (! empty($processedRows))
             @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagertop ?? ''))
-            <table width="100%">
+            <table data-nx="data" width="100%">
             <tr>
                 <td class="colhead">{{ $langComplains['th_complain_at'] ?? 'Added' }}</td>
                 <td class="colhead">{{ $langComplains['th_complain_account'] ?? 'Account' }}</td>

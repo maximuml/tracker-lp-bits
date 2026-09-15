@@ -25,7 +25,7 @@
 @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($denyBannerHtml))
 @endif
 
-<table width="97%" cellspacing="0" cellpadding="5">
+<table data-nx="data" width="97%" cellspacing="0" cellpadding="5">
 @if ($downloadAllowed)
 <tr><td class="rowhead" width="13%">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($lang_details['row_download'] ?? ''))</td><td class="rowfollow" width="87%" align="left"><a class="index" href="download.php?id={{ $torrentId }}">{{ ($torrentNamePrefix ?? '').'.'.$torrentRow['save_as'] }}.torrent</a>&nbsp;&nbsp;<a id="bookmark0" href="#" data-bookmark-torrent="{{ $torrentRow['id'] }}" data-bookmark-counter="0">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($bookmarkMarkup))</a>&nbsp;&nbsp;&nbsp;@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($lang_details['row_upped_by'] ?? ''))&nbsp;@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($uprow))@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($uploadTime))</td></tr>
 @else

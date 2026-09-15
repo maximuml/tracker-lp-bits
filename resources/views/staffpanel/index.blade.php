@@ -8,7 +8,7 @@
 @if (! empty($sysopPanels))
 <h1 align=center>..:: {{ $lang_staffpanel['For SysOp Only'] ?? 'For SysOp Only' }} ::..</h1>
 <br /><br />
-<table width=80% border=1 cellspacing=0 cellpadding=5 align=center>
+<table data-nx="data" width=80% border=1 cellspacing=0 cellpadding=5 align=center>
 <tr><td class=colhead align=left>{{ $lang_staffpanel['Option Name'] ?? 'Option Name' }}</td><td class=colhead align=left>{{ $lang_staffpanel['Info'] ?? 'Info' }}</td></tr>
 @foreach ($sysopPanels as $row)
 <tr>
@@ -23,7 +23,7 @@
 @if (! empty($adminPanels))
 <h1 align=center>..:: {{ $lang_staffpanel['For Administrator Only'] ?? 'For Administrator Only' }} ::..</h1>
 <br /><br />
-<table width=80% border=1 cellspacing=0 cellpadding=5 align=center>
+<table data-nx="data" width=80% border=1 cellspacing=0 cellpadding=5 align=center>
 <tr><td class=colhead align=left>{{ $lang_staffpanel['Option Name'] ?? 'Option Name' }}</td><td class=colhead align=left>{{ $lang_staffpanel['Info'] ?? 'Info' }}</td></tr>
 @foreach ($adminPanels as $row)
 <tr>
@@ -38,7 +38,7 @@
 @if (! empty($modPanels))
 <h1 align=center>..:: {{ $lang_staffpanel['For Moderator Only'] ?? 'For Moderator Only' }} ::..</h1>
 <br /><br />
-<table width=80% border=1 cellspacing=0 cellpadding=5 align=center>
+<table data-nx="data" width=80% border=1 cellspacing=0 cellpadding=5 align=center>
 <tr><td class=colhead align=left>{{ $lang_staffpanel['Option Name'] ?? 'Option Name' }}</td><td class=colhead align=left>{{ $lang_staffpanel['Info'] ?? 'Info' }}</td></tr>
 @foreach ($modPanels as $row)
 <tr>

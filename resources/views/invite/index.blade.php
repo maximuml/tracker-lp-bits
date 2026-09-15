@@ -54,7 +54,7 @@
                 <input type="button" id="reset" value="{{ $resetText }}">
             </form>
         </div>
-        <table border=1 width=100% cellspacing=0 cellpadding=5>
+        <table data-nx="data" border=1 width=100% cellspacing=0 cellpadding=5>
         <form method=post action=takeconfirm.php?id={{ (string) $id }}>
 
         @if (! $inviteeCount)
@@ -118,7 +118,7 @@
         </td></tr></table>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($inviteePagertop))
 
     @elseif (in_array($menuSelected, ['sent', 'tmp'], true))
-        <table border=1 width=100% cellspacing=0 cellpadding=5>
+        <table data-nx="data" border=1 width=100% cellspacing=0 cellpadding=5>
         @if (! $sentTmpCount)
             <tr align=center><td colspan=6>{{ $lang_functions['text_none'] ?? '' }}</tr>
         @else

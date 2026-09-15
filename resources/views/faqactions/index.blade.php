@@ -51,7 +51,7 @@
     @endif
 @elseif (($mode ?? '') === 'confirm_delete')
     <h1 align="center">Confirmation required</h1>
-    <table border="1" cellspacing="0" cellpadding="5" align="center" width="95%">
+    <table data-nx="data" border="1" cellspacing="0" cellpadding="5" align="center" width="95%">
     <tr><td align="center">Please click <a href="faqactions.php?action=delete&id={{ (int) ($id ?? 0) }}&confirm=yes">here</a> to confirm.</td></tr>
     </table>
 @elseif (($mode ?? '') === 'additem')

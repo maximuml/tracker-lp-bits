@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Policies\MessagePolicy;
 use App\Repositories\MailboxRepository;
 use App\Repositories\MessageRepository;
+use App\Services\MessageMailboxService;
 use App\Services\MessageService;
 use App\Support\Globals;
 use App\Support\Language;
@@ -57,11 +58,10 @@ final class MessageServiceTest extends TestCase
         $this->globals = new Globals;
         $this->app->instance(Globals::class, $this->globals);
         $this->service = new MessageService(
-            app(MessageRepository::class),
-            app(MailboxRepository::class),
             $this->globals,
             app(Language::class),
             app(MessagePolicy::class),
+            app(MessageMailboxService::class),
         );
     }
 
@@ -132,11 +132,15 @@ final class MessageServiceTest extends TestCase
         $repo->shouldIgnoreMissing();
         $this->app->instance(MessageRepository::class, $repo);
         $this->service = new MessageService(
-            $repo,
-            app(MailboxRepository::class),
             $this->globals,
             app(Language::class),
             app(MessagePolicy::class),
+            new MessageMailboxService(
+                $repo,
+                app(MailboxRepository::class),
+                $this->globals,
+                app(Language::class),
+            ),
         );
 
         return $repo;
@@ -179,11 +183,10 @@ final class MessageServiceTest extends TestCase
     public function test_can_instantiate_service(): void
     {
         $service = new MessageService(
-            app(MessageRepository::class),
-            app(MailboxRepository::class),
             new Globals,
             app(Language::class),
             app(MessagePolicy::class),
+            app(MessageMailboxService::class),
         );
 
         $this->assertInstanceOf(MessageService::class, $service);

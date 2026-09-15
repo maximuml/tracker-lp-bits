@@ -42,8 +42,7 @@ final class RepositorySizeTest extends TestCase
      * @var array<string, int>
      */
     private const BASELINE_FILES = [
-        // Repositories > 400 lines (10 files)
-        'app/Repositories/SearchBoxRepository.php' => 527,
+        // Repositories > 400 lines (9 files)
         'app/Repositories/ToptenRepository.php' => 521,
         'app/Repositories/TorrentModerationRepository.php' => 491,
         'app/Repositories/DashboardRepository.php' => 484,
@@ -318,6 +317,7 @@ final class RepositorySizeTest extends TestCase
             return 0;
         }
 
-        return preg_match_all('/^\s*public\s+(?:static\s+)?function\s+/m', $content) ?: 0;
+        // __construct is DI wiring, not public API surface — exclude it.
+        return preg_match_all('/^\s*public\s+(?:static\s+)?function\s+(?!__construct\b)/m', $content) ?: 0;
     }
 }

@@ -53,7 +53,6 @@ final class RepositorySizeTest extends TestCase
      * @var array<string, int>
      */
     private const BASELINE_PUBLIC_METHODS = [
-        'app/Repositories/ExamRepository.php' => 26,
         'app/Repositories/TopicRepository.php' => 25,
         'app/Repositories/SearchBoxRepository.php' => 20,
     ];

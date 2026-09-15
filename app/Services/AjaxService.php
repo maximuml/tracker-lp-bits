@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Contracts\Repositories\ExamRepositoryInterface;
 use App\Contracts\Repositories\UserModerationRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Models\Offer;
 use App\Models\User;
 use App\Repositories\AttendanceRepository;
 use App\Repositories\BonusRepository;
+use App\Repositories\ExamUserRepository;
 use App\Repositories\TorrentModerationRepository;
 use App\Services\Ajax\MedalActions;
 use App\Services\Ajax\PasskeyActions;
@@ -69,7 +69,7 @@ final class AjaxService
         private readonly UserModerationRepositoryInterface $userModerationRepository,
         private readonly TorrentModerationRepository $torrentModerationRepository,
         private readonly BonusRepository $bonusRepository,
-        private readonly ExamRepositoryInterface $examRepository,
+        private readonly ExamUserRepository $examUserRepository,
         private readonly CurrentUser $currentUser,
         private readonly ShoutboxActions $shoutboxActions,
         private readonly PasskeyActions $passkeyActions,
@@ -159,7 +159,7 @@ final class AjaxService
     private function claimTask(array $params): mixed
     {
         $CURUSER = $this->currentUser->get() ?? [];
-        $rep = $this->examRepository;
+        $rep = $this->examUserRepository;
 
         return $rep->assignToUser($CURUSER['id'], $params['exam_id']);
     }

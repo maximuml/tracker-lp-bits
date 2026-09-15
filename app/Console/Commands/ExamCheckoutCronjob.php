@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Contracts\Repositories\ExamRepositoryInterface;
+use App\Repositories\ExamCronRepository;
 use App\Support\Logger;
 use App\Support\RequestContext;
 use Illuminate\Console\Command;
@@ -42,7 +42,7 @@ class ExamCheckoutCronjob extends Command
      */
     public function handle()
     {
-        $examRep = app(ExamRepositoryInterface::class);
+        $examRep = app(ExamCronRepository::class);
         $ignoreTimeRange = $this->option('ignore-time-range');
         $this->info('ignore-time-range: '.var_export($ignoreTimeRange, true));
         $result = $examRep->cronjobCheckout($ignoreTimeRange);

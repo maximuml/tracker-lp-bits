@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Contracts\Repositories\ExamRepositoryInterface;
+use App\Repositories\ExamUserRepository;
 use App\Support\Logger;
 use App\Support\RequestContext;
 use Illuminate\Console\Command;
@@ -42,7 +42,7 @@ class ExamAssign extends Command
      */
     public function handle()
     {
-        $examRep = app(ExamRepositoryInterface::class);
+        $examRep = app(ExamUserRepository::class);
         $uid = (int) $this->option('uid');
         $examId = (int) $this->option('exam_id');
         $begin = $this->option('begin');

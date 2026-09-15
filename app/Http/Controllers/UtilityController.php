@@ -111,7 +111,7 @@ class UtilityController extends LegacyController
         }
 
         try {
-            $result = $this->ajaxService->{$action}($params);
+            $result = $this->ajaxService->dispatch($action, $params);
 
             return response()->json(Api::successWithContext($result));
         } catch (\Throwable $exception) {

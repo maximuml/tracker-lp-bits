@@ -92,11 +92,11 @@ final class AjaxWhitelistTest extends TestCase
         $response->assertJsonPath('ret', 1);
     }
 
-    public function test_allowed_actions_constant_lists_all_public_methods(): void
+    public function test_only_dispatch_is_public(): void
     {
-        // Verify that every public method on AjaxService is in the
-        // whitelist — no method should be silently exposed without explicit
-        // registration.
+        // Verify that dispatch() is the only public method on AjaxService —
+        // action handlers are private or live in handler classes, so no
+        // method can be silently exposed as an AJAX endpoint.
         $reflection = new \ReflectionClass(AjaxService::class);
         $publicMethods = [];
         foreach ($reflection->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
@@ -107,10 +107,6 @@ final class AjaxWhitelistTest extends TestCase
             }
         }
 
-        $allowed = AjaxService::ALLOWED_ACTIONS;
-
-        foreach ($publicMethods as $method) {
-            $this->assertContains($method, $allowed, "Public method '{$method}' is not in AjaxService::ALLOWED_ACTIONS — add it or make it non-public.");
-        }
+        $this->assertSame(['dispatch'], $publicMethods, 'AjaxService must expose only dispatch() — handlers stay private.');
     }
 }

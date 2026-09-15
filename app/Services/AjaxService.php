@@ -7,16 +7,15 @@ namespace App\Services;
 use App\Contracts\Repositories\ExamRepositoryInterface;
 use App\Contracts\Repositories\UserModerationRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
-use App\DTOs\Auth\ActorContext;
 use App\Models\Offer;
 use App\Models\User;
 use App\Repositories\AttendanceRepository;
 use App\Repositories\BonusRepository;
-use App\Repositories\MedalRepository;
 use App\Repositories\TorrentModerationRepository;
-use App\Repositories\UserPasskeyRepository;
+use App\Services\Ajax\MedalActions;
+use App\Services\Ajax\PasskeyActions;
+use App\Services\Ajax\ShoutboxActions;
 use App\Support\CurrentUser;
-use App\Support\Shoutbox;
 use App\Support\ToastNotifications;
 
 final class AjaxService
@@ -25,14 +24,14 @@ final class AjaxService
      * Explicit whitelist of actions that may be dispatched via the /ajax endpoint.
      *
      * The controller checks `in_array($action, self::ALLOWED_ACTIONS)` before
-     * calling the method. This prevents any new public method on this class
-     * from being accidentally exposed as an AJAX endpoint without an explicit
-     * registration here.
+     * calling dispatch(). Handler groups expose their action names through
+     * their own ACTIONS constants; every remaining entry is a private method
+     * on this class, so no public method besides dispatch() can ever become
+     * an AJAX endpoint.
      *
      * @var array<int, string>
      */
     public const ALLOWED_ACTIONS = [
-        'toggleUserMedalStatus',
         'attendanceRetroactive',
         'removeUserLeechWarn',
         'getOffer',
@@ -40,51 +39,57 @@ final class AjaxService
         'approval',
         'removeHitAndRun',
         'consumeBenefit',
-        'clearShoutBox',
-        'shoutboxPost',
-        'shoutboxEdit',
-        'shoutboxDelete',
-        'shoutboxReact',
-        'buyMedal',
-        'giftMedal',
-        'saveUserMedal',
+        ...ShoutboxActions::ACTIONS,
+        ...MedalActions::ACTIONS,
         'claimTask',
         'addToken',
         'removeToken',
-        'getPasskeyCreateArgs',
-        'processPasskeyCreate',
-        'deletePasskey',
-        'getPasskeyList',
-        'getPasskeyGetArgs',
-        'processPasskeyGet',
+        ...PasskeyActions::ACTIONS,
+        'getToastNotifications',
+    ];
+
+    /** @var array<int, string> */
+    private const MISC_ACTIONS = [
+        'attendanceRetroactive',
+        'removeUserLeechWarn',
+        'getOffer',
+        'approvalModal',
+        'approval',
+        'removeHitAndRun',
+        'consumeBenefit',
+        'claimTask',
+        'addToken',
+        'removeToken',
         'getToastNotifications',
     ];
 
     public function __construct(
-        private readonly MedalRepository $medalRepository,
         private readonly AttendanceRepository $attendanceRepository,
         private readonly UserRepositoryInterface $userRepository,
         private readonly UserModerationRepositoryInterface $userModerationRepository,
         private readonly TorrentModerationRepository $torrentModerationRepository,
         private readonly BonusRepository $bonusRepository,
         private readonly ExamRepositoryInterface $examRepository,
-        private readonly UserPasskeyRepository $userPasskeyRepository,
-        private readonly ShoutboxService $shoutboxService,
         private readonly CurrentUser $currentUser,
-        private readonly ActorContext $actorContext,
+        private readonly ShoutboxActions $shoutboxActions,
+        private readonly PasskeyActions $passkeyActions,
+        private readonly MedalActions $medalActions,
     ) {}
 
     /** @param array<string, mixed> $params */
-    public function toggleUserMedalStatus(array $params): mixed
+    public function dispatch(string $action, array $params): mixed
     {
-        $CURUSER = $this->currentUser->get() ?? [];
-        $rep = $this->medalRepository;
-
-        return $rep->toggleUserMedalStatus($params['id'], $CURUSER['id']);
+        return match (true) {
+            in_array($action, ShoutboxActions::ACTIONS, true) => $this->shoutboxActions->{$action}($params),
+            in_array($action, PasskeyActions::ACTIONS, true) => $this->passkeyActions->{$action}($params),
+            in_array($action, MedalActions::ACTIONS, true) => $this->medalActions->{$action}($params),
+            in_array($action, self::MISC_ACTIONS, true) => $this->{$action}($params),
+            default => throw new \InvalidArgumentException("Unknown ajax action: {$action}"),
+        };
     }
 
     /** @param array<string, mixed> $params */
-    public function attendanceRetroactive(array $params): mixed
+    private function attendanceRetroactive(array $params): mixed
     {
         $CURUSER = $this->currentUser->get() ?? [];
         $rep = $this->attendanceRepository;
@@ -93,7 +98,7 @@ final class AjaxService
     }
 
     /** @param array<string, mixed> $params */
-    public function removeUserLeechWarn(array $params): mixed
+    private function removeUserLeechWarn(array $params): mixed
     {
         $CURUSER = $this->currentUser->get() ?? [];
         $rep = $this->userModerationRepository;
@@ -102,7 +107,7 @@ final class AjaxService
     }
 
     /** @param array<string, mixed> $params */
-    public function getOffer(array $params): mixed
+    private function getOffer(array $params): mixed
     {
         $offer = Offer::query()->findOrFail($params['id']);
 
@@ -110,7 +115,7 @@ final class AjaxService
     }
 
     /** @param array<string, mixed> $params */
-    public function approvalModal(array $params): mixed
+    private function approvalModal(array $params): mixed
     {
         $CURUSER = $this->currentUser->get() ?? [];
         $rep = $this->torrentModerationRepository;
@@ -119,7 +124,7 @@ final class AjaxService
     }
 
     /** @param array<string, mixed> $params */
-    public function approval(array $params): mixed
+    private function approval(array $params): mixed
     {
         $CURUSER = $this->currentUser->get() ?? [];
         foreach (['torrent_id', 'approval_status'] as $field) {
@@ -133,7 +138,7 @@ final class AjaxService
     }
 
     /** @param array<string, mixed> $params */
-    public function removeHitAndRun(array $params): mixed
+    private function removeHitAndRun(array $params): mixed
     {
         $CURUSER = $this->currentUser->get() ?? [];
         $rep = $this->bonusRepository;
@@ -142,7 +147,7 @@ final class AjaxService
     }
 
     /** @param array<string, mixed> $params */
-    public function consumeBenefit(array $params): mixed
+    private function consumeBenefit(array $params): mixed
     {
         $CURUSER = $this->currentUser->get() ?? [];
         $rep = $this->userRepository;
@@ -151,125 +156,7 @@ final class AjaxService
     }
 
     /** @param array<string, mixed> $params */
-    public function clearShoutBox(array $params): mixed
-    {
-        $actor = $this->actorContext;
-        if (! $this->shoutboxService->clearAll($actor)) {
-            throw new \RuntimeException('No permission');
-        }
-
-        return true;
-    }
-
-    /** @param array<string, mixed> $params */
-    public function shoutboxPost(array $params): mixed
-    {
-        $actor = $this->actorContext;
-        $text = trim((string) ($params['text'] ?? $params['content'] ?? ''));
-        if ($text === '') {
-            throw new \InvalidArgumentException('Message cannot be empty');
-        }
-        if (mb_strlen($text) > Shoutbox::MAX_MESSAGE_LENGTH) {
-            throw new \InvalidArgumentException('Message too long');
-        }
-        if (! $this->shoutboxService->postMessage($actor, $text)) {
-            throw new \RuntimeException('Speaking too often or no permission');
-        }
-
-        return true;
-    }
-
-    /** @param array<string, mixed> $params */
-    public function shoutboxEdit(array $params): mixed
-    {
-        $actor = $this->actorContext;
-        $id = (int) ($params['id'] ?? 0);
-        $text = trim((string) ($params['text'] ?? ''));
-        if ($id <= 0 || $text === '') {
-            throw new \InvalidArgumentException('Invalid input');
-        }
-        if (mb_strlen($text) > Shoutbox::MAX_MESSAGE_LENGTH) {
-            throw new \InvalidArgumentException('Message too long');
-        }
-        if (! $this->shoutboxService->editMessage($actor, $id, $text)) {
-            throw new \RuntimeException('Message not found, no permission, edit window expired, or editing too often');
-        }
-
-        return true;
-    }
-
-    /** @param array<string, mixed> $params */
-    public function shoutboxDelete(array $params): mixed
-    {
-        $actor = $this->actorContext;
-        $id = (int) ($params['id'] ?? 0);
-        if ($id <= 0) {
-            throw new \InvalidArgumentException('Invalid input');
-        }
-        if (! $this->shoutboxService->deleteMessage($actor, $id)) {
-            throw new \RuntimeException('No permission, delete window expired, or deleting too often');
-        }
-
-        return true;
-    }
-
-    /** @param array<string, mixed> $params */
-    public function shoutboxReact(array $params): mixed
-    {
-        $actor = $this->actorContext;
-        $id = (int) ($params['id'] ?? 0);
-        $reaction = (string) ($params['reaction'] ?? '');
-        $result = $this->shoutboxService->toggleReaction($actor, $id, $reaction);
-        if ($result === null) {
-            throw new \InvalidArgumentException('Invalid reaction or reacting too often');
-        }
-
-        return $result;
-    }
-
-    /** @param array<string, mixed> $params */
-    public function buyMedal(array $params): mixed
-    {
-        $CURUSER = $this->currentUser->get() ?? [];
-        $rep = $this->bonusRepository;
-
-        return $rep->consumeToBuyMedal($CURUSER['id'], $params['medal_id']);
-    }
-
-    /** @param array<string, mixed> $params */
-    public function giftMedal(array $params): mixed
-    {
-        $CURUSER = $this->currentUser->get() ?? [];
-        $rep = $this->bonusRepository;
-
-        return $rep->consumeToGiftMedal($CURUSER['id'], $params['medal_id'], $params['uid']);
-    }
-
-    /** @param array<string, mixed> $params */
-    public function saveUserMedal(array $params): mixed
-    {
-        $CURUSER = $this->currentUser->get() ?? [];
-        $data = [];
-        foreach ($params as $param) {
-            if (! is_array($param) || ! isset($param['name'], $param['value'])) {
-                continue;
-            }
-            $fieldAndId = explode('_', $param['name']);
-            if (count($fieldAndId) < 2) {
-                continue;
-            }
-            $field = $fieldAndId[0];
-            $id = $fieldAndId[1];
-            $value = $param['value'];
-            $data[$id][$field] = $value;
-        }
-        $rep = $this->medalRepository;
-
-        return $rep->saveUserMedal($CURUSER['id'], $data);
-    }
-
-    /** @param array<string, mixed> $params */
-    public function claimTask(array $params): mixed
+    private function claimTask(array $params): mixed
     {
         $CURUSER = $this->currentUser->get() ?? [];
         $rep = $this->examRepository;
@@ -278,7 +165,7 @@ final class AjaxService
     }
 
     /** @param array<string, mixed> $params */
-    public function addToken(array $params): mixed
+    private function addToken(array $params): mixed
     {
         $CURUSER = $this->currentUser->get() ?? [];
         if (empty($params['name'])) {
@@ -292,7 +179,7 @@ final class AjaxService
     }
 
     /** @param array<string, mixed> $params */
-    public function removeToken(array $params): mixed
+    private function removeToken(array $params): mixed
     {
         $CURUSER = $this->currentUser->get() ?? [];
         if (empty($params['id'])) {
@@ -306,61 +193,7 @@ final class AjaxService
     }
 
     /** @param array<string, mixed> $params */
-    public function getPasskeyCreateArgs(array $params): mixed
-    {
-        $CURUSER = $this->currentUser->get() ?? [];
-        $rep = $this->userPasskeyRepository;
-
-        return $rep->getCreateArgs($CURUSER['id'], $CURUSER['username']);
-    }
-
-    /** @param array<string, mixed> $params */
-    public function processPasskeyCreate(array $params): mixed
-    {
-        $CURUSER = $this->currentUser->get() ?? [];
-        $rep = $this->userPasskeyRepository;
-
-        return $rep->processCreate($CURUSER['id'], $params['challengeId'], $params['clientDataJSON'], $params['attestationObject']);
-    }
-
-    /** @param array<string, mixed> $params */
-    public function deletePasskey(array $params): mixed
-    {
-        $CURUSER = $this->currentUser->get() ?? [];
-        $rep = $this->userPasskeyRepository;
-
-        return $rep->delete($CURUSER['id'], $params['credentialId']);
-    }
-
-    /** @param array<string, mixed> $params */
-    public function getPasskeyList(array $params): mixed
-    {
-        $CURUSER = $this->currentUser->get() ?? [];
-        $rep = $this->userPasskeyRepository;
-
-        return $rep->getList($CURUSER['id']);
-    }
-
-    /** @param array<string, mixed> $params */
-    public function getPasskeyGetArgs(array $params): mixed
-    {
-        $CURUSER = $this->currentUser->get() ?? [];
-        $rep = $this->userPasskeyRepository;
-
-        return $rep->getGetArgs();
-    }
-
-    /** @param array<string, mixed> $params */
-    public function processPasskeyGet(array $params): mixed
-    {
-        $CURUSER = $this->currentUser->get() ?? [];
-        $rep = $this->userPasskeyRepository;
-
-        return $rep->processGet($params['challengeId'], $params['id'], $params['clientDataJSON'], $params['authenticatorData'], $params['signature'], $params['userHandle']);
-    }
-
-    /** @param array<string, mixed> $params */
-    public function getToastNotifications(array $params): mixed
+    private function getToastNotifications(array $params): mixed
     {
         $CURUSER = $this->currentUser->get() ?? [];
         $lastPmId = (int) ($params['last_pm_id'] ?? 0);

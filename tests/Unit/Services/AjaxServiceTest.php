@@ -14,6 +14,9 @@ use App\Repositories\TorrentModerationRepository;
 use App\Repositories\UserModerationRepository;
 use App\Repositories\UserPasskeyRepository;
 use App\Repositories\UserRepository;
+use App\Services\Ajax\MedalActions;
+use App\Services\Ajax\PasskeyActions;
+use App\Services\Ajax\ShoutboxActions;
 use App\Services\AjaxService;
 use App\Services\ShoutboxService;
 use App\Support\CurrentUser;
@@ -131,17 +134,16 @@ final class AjaxServiceTest extends TestCase
         );
 
         $this->service = new AjaxService(
-            $this->medalRepo,
             $this->attendanceRepo,
             $this->userRepo,
             $this->userModerationRepo,
             $this->torrentModerationRepo,
             $this->bonusRepo,
             $this->examRepo,
-            $this->passkeyRepo,
-            new ShoutboxService,
             $this->currentUser,
-            $this->actorContext,
+            new ShoutboxActions(new ShoutboxService, $this->actorContext),
+            new PasskeyActions($this->passkeyRepo, $this->currentUser),
+            new MedalActions($this->medalRepo, $this->bonusRepo, $this->currentUser),
         );
     }
 
@@ -192,17 +194,16 @@ final class AjaxServiceTest extends TestCase
         );
 
         $this->service = new AjaxService(
-            $this->medalRepo,
             $this->attendanceRepo,
             $this->userRepo,
             $this->userModerationRepo,
             $this->torrentModerationRepo,
             $this->bonusRepo,
             $this->examRepo,
-            $this->passkeyRepo,
-            new ShoutboxService,
             $this->currentUser,
-            $this->actorContext,
+            new ShoutboxActions(new ShoutboxService, $this->actorContext),
+            new PasskeyActions($this->passkeyRepo, $this->currentUser),
+            new MedalActions($this->medalRepo, $this->bonusRepo, $this->currentUser),
         );
     }
 
@@ -237,6 +238,14 @@ final class AjaxServiceTest extends TestCase
         $this->assertNotContains('nonExistentAction', AjaxService::ALLOWED_ACTIONS);
     }
 
+    public function test_dispatch_throws_for_unknown_action(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Unknown ajax action');
+
+        $this->service->dispatch('nonExistentAction', []);
+    }
+
     // --- getOffer ---
 
     public function test_get_offer_returns_array_for_existing_offer(): void
@@ -244,7 +253,7 @@ final class AjaxServiceTest extends TestCase
         $userId = $this->createUser();
         $offerId = $this->insertOffer($userId);
 
-        $result = $this->service->getOffer(['id' => $offerId]);
+        $result = $this->service->dispatch('getOffer', ['id' => $offerId]);
 
         $this->assertIsArray($result);
         $this->assertSame($offerId, (int) $result['id']);
@@ -255,7 +264,7 @@ final class AjaxServiceTest extends TestCase
     {
         $this->expectException(ModelNotFoundException::class);
 
-        $this->service->getOffer(['id' => 99999]);
+        $this->service->dispatch('getOffer', ['id' => 99999]);
     }
 
     // --- approval ---
@@ -268,7 +277,7 @@ final class AjaxServiceTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Require torrent_id');
 
-        $this->service->approval(['approval_status' => 'approved']);
+        $this->service->dispatch('approval', ['approval_status' => 'approved']);
     }
 
     public function test_approval_throws_when_approval_status_missing(): void
@@ -279,7 +288,7 @@ final class AjaxServiceTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Require approval_status');
 
-        $this->service->approval(['torrent_id' => 1]);
+        $this->service->dispatch('approval', ['torrent_id' => 1]);
     }
 
     public function test_approval_delegates_to_torrent_repository(): void
@@ -292,7 +301,7 @@ final class AjaxServiceTest extends TestCase
             ->once()
             ->andReturn(['status' => 'ok']);
 
-        $result = $this->service->approval(['torrent_id' => 1, 'approval_status' => 'approved']);
+        $result = $this->service->dispatch('approval', ['torrent_id' => 1, 'approval_status' => 'approved']);
 
         $this->assertSame(['status' => 'ok'], $result);
     }
@@ -307,7 +316,7 @@ final class AjaxServiceTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Message cannot be empty');
 
-        $this->service->shoutboxPost(['text' => '   ']);
+        $this->service->dispatch('shoutboxPost', ['text' => '   ']);
     }
 
     public function test_shoutbox_post_throws_for_too_long_text(): void
@@ -318,7 +327,7 @@ final class AjaxServiceTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Message too long');
 
-        $this->service->shoutboxPost(['text' => str_repeat('x', Shoutbox::MAX_MESSAGE_LENGTH + 1)]);
+        $this->service->dispatch('shoutboxPost', ['text' => str_repeat('x', Shoutbox::MAX_MESSAGE_LENGTH + 1)]);
     }
 
     public function test_shoutbox_post_succeeds_with_valid_text(): void
@@ -326,7 +335,7 @@ final class AjaxServiceTest extends TestCase
         $userId = $this->createUser();
         $this->authenticateUser($userId);
 
-        $result = $this->service->shoutboxPost(['text' => 'Hello world']);
+        $result = $this->service->dispatch('shoutboxPost', ['text' => 'Hello world']);
 
         $this->assertTrue($result);
         $this->assertSame(1, DB::table('shoutbox')->count());
@@ -342,7 +351,7 @@ final class AjaxServiceTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid input');
 
-        $this->service->shoutboxEdit(['id' => 0, 'text' => 'Hello']);
+        $this->service->dispatch('shoutboxEdit', ['id' => 0, 'text' => 'Hello']);
     }
 
     public function test_shoutbox_edit_throws_for_empty_text(): void
@@ -353,7 +362,7 @@ final class AjaxServiceTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid input');
 
-        $this->service->shoutboxEdit(['id' => 1, 'text' => '   ']);
+        $this->service->dispatch('shoutboxEdit', ['id' => 1, 'text' => '   ']);
     }
 
     public function test_shoutbox_edit_throws_for_too_long_text(): void
@@ -364,7 +373,7 @@ final class AjaxServiceTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Message too long');
 
-        $this->service->shoutboxEdit(['id' => 1, 'text' => str_repeat('x', Shoutbox::MAX_MESSAGE_LENGTH + 1)]);
+        $this->service->dispatch('shoutboxEdit', ['id' => 1, 'text' => str_repeat('x', Shoutbox::MAX_MESSAGE_LENGTH + 1)]);
     }
 
     // --- shoutboxDelete ---
@@ -377,7 +386,7 @@ final class AjaxServiceTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid input');
 
-        $this->service->shoutboxDelete(['id' => 0]);
+        $this->service->dispatch('shoutboxDelete', ['id' => 0]);
     }
 
     public function test_shoutbox_delete_throws_for_negative_id(): void
@@ -387,7 +396,7 @@ final class AjaxServiceTest extends TestCase
 
         $this->expectException(\InvalidArgumentException::class);
 
-        $this->service->shoutboxDelete(['id' => -1]);
+        $this->service->dispatch('shoutboxDelete', ['id' => -1]);
     }
 
     // --- shoutboxReact ---
@@ -401,7 +410,7 @@ final class AjaxServiceTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid reaction or reacting too often');
 
-        $this->service->shoutboxReact(['id' => 99999, 'reaction' => 'invalid']);
+        $this->service->dispatch('shoutboxReact', ['id' => 99999, 'reaction' => 'invalid']);
     }
 
     // --- clearShoutBox ---
@@ -415,7 +424,7 @@ final class AjaxServiceTest extends TestCase
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('No permission');
 
-        $this->service->clearShoutBox([]);
+        $this->service->dispatch('clearShoutBox', []);
     }
 
     // --- addToken ---
@@ -428,7 +437,7 @@ final class AjaxServiceTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Name is required');
 
-        $this->service->addToken(['name' => '']);
+        $this->service->dispatch('addToken', ['name' => '']);
     }
 
     public function test_add_token_succeeds_with_valid_name(): void
@@ -436,7 +445,7 @@ final class AjaxServiceTest extends TestCase
         $userId = $this->createUser();
         $this->authenticateUser($userId);
 
-        $result = $this->service->addToken(['name' => 'My API Token']);
+        $result = $this->service->dispatch('addToken', ['name' => 'My API Token']);
 
         $this->assertTrue($result);
         $this->assertSame(1, DB::table('personal_access_tokens')->count());
@@ -452,7 +461,7 @@ final class AjaxServiceTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('id is required');
 
-        $this->service->removeToken(['id' => '']);
+        $this->service->dispatch('removeToken', ['id' => '']);
     }
 
     public function test_remove_token_succeeds_for_existing_token(): void
@@ -461,10 +470,10 @@ final class AjaxServiceTest extends TestCase
         $this->authenticateUser($userId);
 
         // Create a token first
-        $this->service->addToken(['name' => 'Test Token']);
+        $this->service->dispatch('addToken', ['name' => 'Test Token']);
         $tokenId = (int) DB::table('personal_access_tokens')->value('id');
 
-        $result = $this->service->removeToken(['id' => $tokenId]);
+        $result = $this->service->dispatch('removeToken', ['id' => $tokenId]);
 
         $this->assertTrue($result);
         $this->assertSame(0, DB::table('personal_access_tokens')->count());
@@ -482,7 +491,7 @@ final class AjaxServiceTest extends TestCase
             ->once()
             ->andReturn(true);
 
-        $result = $this->service->buyMedal(['medal_id' => 5]);
+        $result = $this->service->dispatch('buyMedal', ['medal_id' => 5]);
 
         $this->assertTrue($result);
     }
@@ -499,7 +508,7 @@ final class AjaxServiceTest extends TestCase
             ->once()
             ->andReturn(true);
 
-        $result = $this->service->claimTask(['exam_id' => 3]);
+        $result = $this->service->dispatch('claimTask', ['exam_id' => 3]);
 
         $this->assertTrue($result);
     }
@@ -517,7 +526,7 @@ final class AjaxServiceTest extends TestCase
             ->once()
             ->andReturn($expectedList);
 
-        $result = $this->service->getPasskeyList([]);
+        $result = $this->service->dispatch('getPasskeyList', []);
 
         $this->assertSame($expectedList, $result);
     }
@@ -534,7 +543,7 @@ final class AjaxServiceTest extends TestCase
             ->once()
             ->andReturn(true);
 
-        $result = $this->service->toggleUserMedalStatus(['id' => 10]);
+        $result = $this->service->dispatch('toggleUserMedalStatus', ['id' => 10]);
 
         $this->assertTrue($result);
     }
@@ -551,7 +560,7 @@ final class AjaxServiceTest extends TestCase
             ->once()
             ->andReturn(true);
 
-        $result = $this->service->attendanceRetroactive(['date' => '2024-01-15']);
+        $result = $this->service->dispatch('attendanceRetroactive', ['date' => '2024-01-15']);
 
         $this->assertTrue($result);
     }
@@ -569,7 +578,7 @@ final class AjaxServiceTest extends TestCase
             ->once()
             ->andReturn($expectedArgs);
 
-        $result = $this->service->getPasskeyCreateArgs([]);
+        $result = $this->service->dispatch('getPasskeyCreateArgs', []);
 
         $this->assertSame($expectedArgs, $result);
     }
@@ -586,7 +595,7 @@ final class AjaxServiceTest extends TestCase
             ->once()
             ->andReturn(true);
 
-        $result = $this->service->deletePasskey(['credentialId' => 'cred-123']);
+        $result = $this->service->dispatch('deletePasskey', ['credentialId' => 'cred-123']);
 
         $this->assertTrue($result);
     }
@@ -611,7 +620,7 @@ final class AjaxServiceTest extends TestCase
             ['invalid' => 'nope'], // missing name/value → skipped
         ];
 
-        $result = $this->service->saveUserMedal($params); // @phpstan-ignore argument.type
+        $result = $this->service->dispatch('saveUserMedal', $params); // @phpstan-ignore argument.type
 
         $this->assertTrue($result);
     }

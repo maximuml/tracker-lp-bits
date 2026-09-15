@@ -10,29 +10,23 @@
     <h1 align="center">{{ $lang_functions['text_latest_comments'] ?? 'Latest Comments' }}</h1>
     @foreach ($rows as $row)
         <div style="margin-top: 8pt; margin-bottom: 8pt;">
-            <table id="cid{{ $row['id'] }}" border="0" cellspacing="0" cellpadding="0" width="100%">
-                <tr>
-                    <td class="embedded" width="99%">
+            <div id="cid{{ $row['id'] }}" class="nx-embedded">
                         #{{ $row['id'] }}&nbsp;&nbsp;
                         <font color="gray">{{ $lang_functions['text_by'] ?? 'by' }}</font>
                         @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['usernameHtml'] ?? ''))
                         &nbsp;&nbsp;<font color="gray">{{ $lang_functions['text_at'] ?? 'at' }}</font>
                         @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['timeHtml'] ?? ''))
                         @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['parentLinkHtml'] ?? ''))
-                    </td>
-                </tr>
-            </table>
-            <table class="main" width="100%" border="0" cellspacing="0" cellpadding="5">
-                <tr>
-                    <td class="rowfollow" width="150" valign="top" style="padding: 0px;">
+            </div>
+            <div class="nx-main nx-row">
+                <div class="nx-w-150">
                         @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['avatarHtml'] ?? ''))
-                    </td>
-                    <td class="rowfollow word-break-all" valign="top">
+                </div>
+                <div class="nx-grow nx-cell-5 word-break-all">
                         <br />
                         @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['commentHtml'] ?? ''))
-                    </td>
-                </tr>
-            </table>
+                </div>
+            </div>
         </div>
     @endforeach
     @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagerbottom))

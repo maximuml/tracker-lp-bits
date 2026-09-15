@@ -5,7 +5,7 @@
     @endif
 </h2>
 @if(count($news['items']) > 0)
-<table width="100%"><tr><td class="text"><div style="margin-left: 16pt;">
+<div class="nx-text"><div style="margin-left: 16pt;">
 @foreach($news['items'] as $newsItem)
     @if($loop->first)
         <a href="#" data-klappe="a{{ $newsItem['id'] }}"><img class="minus" src="pic/trans.gif" id="pica{{ $newsItem['id'] }}" alt="Show/Hide" title="{{ $news['showHideTitle'] }}" />&nbsp;{{ date('Y.m.d', strtotime($newsItem['added'])) }} - <b>{{ $newsItem['title'] }}</b></a>
@@ -17,6 +17,6 @@
     &nbsp; [<a class="faqlink" href="news.php?action=edit&amp;newsid={{ $newsItem['id'] }}"><b>{{ $news['editLabel'] }}</b></a>]
     <form method="post" action="/news" class="nx-inline">@csrf<input type="hidden" name="action" value="delete" /><input type="hidden" name="newsid" value="{{ $newsItem['id'] }}" /><input type="hidden" name="sure" value="1" /><button type="submit" class="faqlink"><b>{{ $news['deleteLabel'] }}</b></button></form>
 @endforeach
-</div></td></tr></table>
+</div></div>
 @endif
 @endif

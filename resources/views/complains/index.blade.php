@@ -89,9 +89,9 @@
     @if (! empty($complain['answered']) && (int) $complain['answered'] !== 0)
         <p align="center">{{ $langComplains['text_closed'] ?? 'This complain has been closed.' }}</p>
     @else
-        <br /><br /><table style="border:1px solid #000000;" align="center"><tr><td class="text" align="center"><b>{{ $langComplains['text_reply'] ?? 'Reply' }}</b><br /><br /><form id="reply" method="post" action=""><input type="hidden" name="action" value="reply" /><input type="hidden" name="id" value="{{ (int) ($complain['id'] ?? 0) }}" /><br />
+        <br /><br /><div class="nx-box nx-center"><b>{{ $langComplains['text_reply'] ?? 'Reply' }}</b><br /><br /><form id="reply" method="post" action=""><input type="hidden" name="action" value="reply" /><input type="hidden" name="id" value="{{ (int) ($complain['id'] ?? 0) }}" /><br />
         @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($replyBoxHtml))
-        </form></td></tr></table>
+        </form></div>
     @endif
 
     @if ($isAdmin)

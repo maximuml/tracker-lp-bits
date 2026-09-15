@@ -8,15 +8,13 @@
 @endif
 
 <br /><br />
-<table style="border:1px solid #000000;">
-    <tr>
-        <td class="text" align="center">
+<div class="nx-box nx-center">
+    <div class="nx-text nx-center">
             <b>{{ $lang_details['text_quick_comment'] }}</b><br /><br />
             <form id="compose" name="comment" method="post" action="{{ 'comment.php?action=add&type=torrent' }}">
                 <input type="hidden" name="pid" value="{{ $id }}" />
                 @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($quickReplyHtml))
             </form>
-        </td>
-    </tr>
-</table>
+    </div>
+</div>
 <p align="center"><a class="index" href="{{ 'comment.php?action=add&pid=' . $id . '&type=torrent' }}">{{ $lang_details['text_add_a_comment'] }}</a></p>

@@ -123,15 +123,15 @@
             - [<a href="?action=poll&do=delete&pollid={{ (int) ($item['poll']['id'] ?? 0) }}"><b>{{ $lang_log['text_delete'] ?? 'Delete' }}</b></a>]
         @endif
         <a name="{{ (int) ($item['poll']['id'] ?? 0) }}"></a></p>
-        <table class=main border=1 cellspacing=0 cellpadding=5><tr><td class=text>
+        <div class="nx-main nx-box">
         <p align=center><b>{{ $item['poll']['question'] ?? '' }}</b></p>
-        <table width=100% class=main border=0 cellspacing=0 cellpadding=0>
+        <div class="nx-main">
         @foreach ($item['options'] ?? [] as $opt)
-            <tr><td class=embedded>{{ $opt['text'] ?? '' }}&nbsp;&nbsp;</td><td class="embedded nowrap"><img class="bar_end" src="pic/trans.gif" alt="" /><img class="unsltbar" src="pic/trans.gif" style="width: {{ (int) ($opt['percent'] ?? 0) * 3 }}px" /><img class="bar_end" src="pic/trans.gif" alt="" /> {{ (int) ($opt['percent'] ?? 0) }}%</td></tr>
+            <div class="nx-row"><div class="nx-embedded">{{ $opt['text'] ?? '' }}&nbsp;&nbsp;</div><div class="nx-embedded nx-nowrap nx-grow"><img class="bar_end" src="pic/trans.gif" alt="" /><img class="unsltbar" src="pic/trans.gif" style="width: {{ (int) ($opt['percent'] ?? 0) * 3 }}px" /><img class="bar_end" src="pic/trans.gif" alt="" /> {{ (int) ($opt['percent'] ?? 0) }}%</div></div>
         @endforeach
-        </table>
+        </div>
         <p align=center>{{ $lang_log['text_votes'] ?? 'Votes: ' }}{{ $item['totalVotes'] ?? '0' }}</p>
-        </td></tr></table><br /><br />
+        </div><br /><br />
         </td></tr>
     @endforeach
     </table>

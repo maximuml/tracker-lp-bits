@@ -26,7 +26,7 @@ table.head
 	height: 100px;
 	width: 920px;
 }
-table.main
+table.main, .nx-main
 {
 	background-color: #f5f4ea
 }

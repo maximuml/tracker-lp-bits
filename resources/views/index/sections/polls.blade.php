@@ -11,15 +11,15 @@
     @endif
 </h2>
 @if($polls['exists'])
-<table width="100%"><tr><td class="text" align="center">
-<table width="59%" class="main" border="1" cellspacing="0" cellpadding="5"><tr><td class="text" align="left">
+<div class="nx-text nx-center">
+<div class="nx-main nx-box nx-box--59">
 <p align="center"><b>{{ $polls['question'] }}</b></p>
 @if($polls['hasVoted'])
-    <table class="main" width="100%" border="0" cellspacing="0" cellpadding="0">
+    <div class="nx-main">
     @foreach($polls['bars'] as $bar)
-        <tr><td width="1%" class="embedded nowrap">{{ $bar['option'] }}&nbsp;&nbsp;</td><td width="99%" class="embedded nowrap"><img class="bar_end" src="pic/trans.gif" alt="" /><img class="{{ $bar['selected'] ? 'sltbar' : 'unsltbar' }}" src="pic/trans.gif" style="width: {{ $bar['width'] }}px;" alt="" /><img class="bar_end" src="pic/trans.gif" alt="" /> {{ $bar['percent'] }}%</td></tr>
+        <div class="nx-row"><div class="nx-embedded nx-nowrap">{{ $bar['option'] }}&nbsp;&nbsp;</div><div class="nx-embedded nx-nowrap nx-grow"><img class="bar_end" src="pic/trans.gif" alt="" /><img class="{{ $bar['selected'] ? 'sltbar' : 'unsltbar' }}" src="pic/trans.gif" style="width: {{ $bar['width'] }}px;" alt="" /><img class="bar_end" src="pic/trans.gif" alt="" /> {{ $bar['percent'] }}%</div></div>
     @endforeach
-    </table>
+    </div>
     <p align="center">{{ $polls['votesLabel'] }} {{ $polls['totalVotes'] }}</p>
     @if($polls['canLog'])
         <p align="center"><a href="log.php?action=poll">{{ $polls['previousPollsLabel'] }}</a></p>
@@ -35,7 +35,7 @@
     <p align="center"><input type="submit" class="btn" value="{{ $polls['submitVoteLabel'] }}" /></p>
     </form>
 @endif
-</td></tr></table>
-</td></tr></table>
+</div>
+</div>
 @endif
 @endif

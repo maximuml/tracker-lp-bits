@@ -3,7 +3,7 @@
 @section('title', $lang_invite['head_invites'] ?? 'Invites')
 
 @section('content')
-<table width=100% class=main border=0 cellspacing=0 cellpadding=0><tr><td class=embedded>
+<div class="nx-main nx-embedded">
 
 <h1 align=center><a href="invite.php?id={{ $id }}">{{ $user['username'] ?? '' }}{{ $lang_invite['text_invite_system'] ?? '' }}</a></h1>
 @if ($sent == 1)
@@ -19,7 +19,7 @@
     <tr><td class="rowhead nowrap" valign="top" align="right">{{ $lang_invite['text_consume_invite'] ?? '' }}</td><td align=left><select name='hash'>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($inviteSelectOptions))</select></td></tr>
     <tr><td class="rowhead nowrap" valign="top" align="right">{{ $lang_invite['text_message'] ?? '' }}</td><td align=left><textarea name=body rows=10 style='width: 100%'>{{ $invitation_body }}</textarea></td></tr>
     <tr><td align=center colspan=2><input type=submit value='{{ $lang_invite['submit_invite'] ?? '' }}'></td></tr>
-    </form></table></td></tr></table>
+    </form></table></div>
 
 @else
     {{-- Invite menu nav --}}
@@ -115,7 +115,7 @@
             </form>
         @endif
         </table>
-        </td></tr></table>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($inviteePagertop))
+        </div>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($inviteePagertop))
 
     @elseif (in_array($menuSelected, ['sent', 'tmp'], true))
         <table data-nx="data" border=1 width=100% cellspacing=0 cellpadding=5>
@@ -149,7 +149,7 @@
             @endforeach
         @endif
         </table>
-        </td></tr></table>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($sentTmpPagertop))
+        </div>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($sentTmpPagertop))
     @endif
 
 @endif

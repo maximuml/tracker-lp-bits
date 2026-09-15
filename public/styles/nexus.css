@@ -423,3 +423,21 @@ button.nx-btn-link {
 .nx-tbadge--sticky{background:#ffe3a3;color:#5c4400}
 .nx-tbadge--promo{background:#b7e4c7;color:#1c5c2e}
 .nx-tbadge--banned{background:#f5c2c7;color:#7a1f24}
+
+/* Layout-table replacements (W7-04): div equivalents of legacy
+   single-cell wrappers. td.text/td.embedded/td.rowfollow are padding-only
+   in every theme (no theme colors), so these are theme-safe. */
+.nx-text{padding:10pt}
+.nx-embedded{padding:0}
+.nx-box{border:1px solid rgba(127,127,127,.35);padding:10pt}
+.nx-box--737{width:737px;max-width:100%}
+.nx-box--750{width:750px;max-width:100%}
+.nx-box--59{width:59%;margin-left:auto;margin-right:auto}
+.nx-w-97{width:97%}
+.nx-smilegrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px}
+.nx-nowrap{white-space:nowrap}
+.nx-center{text-align:center}
+.nx-row{display:flex}
+.nx-cell-5{padding:5px}
+.nx-w-150{flex:0 0 150px}
+.nx-valign-top>*{vertical-align:top}

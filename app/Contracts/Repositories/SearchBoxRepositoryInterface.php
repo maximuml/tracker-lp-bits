@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Contracts\Repositories;
 
 use App\Models\SearchBox;
-use Filament\Schemas\Components\Section;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -31,19 +30,7 @@ interface SearchBoxRepositoryInterface
 
     public function migrateToModeRelated();
 
-    public function renderTaxonomySelect($searchBox, array $torrentInfo = []): string;
-
-    public function listTaxonomyInfo($searchBox, array $torrentWithTaxonomy): array;
-
-    public function listTaxonomyFormSchema($searchBox): array;
-
-    public function deleteCategory($id);
-
     public function listSections($id, $withCategoryAndTags = true);
-
-    public function buildSearchBoxFormSchema(SearchBox $searchBox, string $namePrefix): Section;
-
-    public function buildCategoryTaxonomyTagSchema(SearchBox $searchBox, bool $multiple, string $namePrefix): array;
 
     public function getOrderedIds(): array;
 

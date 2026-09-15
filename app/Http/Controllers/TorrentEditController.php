@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Auth\Permission;
-use App\Contracts\Repositories\SearchBoxRepositoryInterface;
 use App\Contracts\Repositories\TagRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Http\Requests\TorrentEditRequest;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\HitAndRunRepository;
+use App\Repositories\SearchBoxSchemaBuilder;
 use App\Repositories\TorrentDetailRepository;
 use App\Repositories\TorrentEditRepository;
 use App\Support\Category;
@@ -33,7 +33,7 @@ use Illuminate\View\View;
 class TorrentEditController extends Controller
 {
     public function __construct(
-        private readonly SearchBoxRepositoryInterface $searchBoxRepository,
+        private readonly SearchBoxSchemaBuilder $searchBoxSchemaBuilder,
         private readonly TagRepositoryInterface $tagRepository,
         private readonly HitAndRunRepository $hitAndRunRepository,
         private readonly CurrentUser $currentUser,
@@ -161,7 +161,7 @@ class TorrentEditController extends Controller
             'cats' => $cats,
             'returnto' => (string) $request->input('returnto', ''),
             'requestUri' => is_string($request->server('REQUEST_URI')) ? $request->server('REQUEST_URI') : '',
-            'taxonomySelect' => $this->searchBoxRepository->renderTaxonomySelect($sectionmode, $row),
+            'taxonomySelect' => $this->searchBoxSchemaBuilder->renderTaxonomySelect($sectionmode, $row),
             'tagCheckbox' => $this->tagRepository->renderCheckbox($sectionmode, (array) $this->torrentDetailRepository->getTagIds($id)),
             'customFieldsHtml' => (new CustomField)->renderOnUploadPage($id, $sectionmode),
             'hitAndRunHtml' => $this->hitAndRunRepository->renderOnUploadPage($row['hr'] ?? 0, $sectionmode),

@@ -7,7 +7,6 @@ namespace Tests\Unit\Http\Controllers;
 use App\Contracts\Repositories\ExamRepositoryInterface;
 use App\Contracts\Repositories\ForumRepositoryInterface;
 use App\Contracts\Repositories\PostRepositoryInterface;
-use App\Contracts\Repositories\SearchBoxRepositoryInterface;
 use App\Contracts\Repositories\TagRepositoryInterface;
 use App\Contracts\Repositories\ToolRepositoryInterface;
 use App\Contracts\Repositories\TorrentDownloadRepositoryInterface;
@@ -22,6 +21,7 @@ use App\Http\Controllers\TorrentController;
 use App\Http\Controllers\TorrentDetailsController;
 use App\Http\Controllers\UserAdminController;
 use App\Http\Controllers\UserController;
+use App\Repositories\SearchBoxSchemaBuilder;
 use Mockery;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\Attributes\TestCategory;
@@ -55,7 +55,7 @@ final class RepositoryInterfaceInjectionTest extends TestCase
         yield 'TorrentController + TorrentRepositoryInterface' => [TorrentController::class, TorrentRepositoryInterface::class];
         yield 'TorrentController + TorrentDownloadRepositoryInterface' => [TorrentController::class, TorrentDownloadRepositoryInterface::class];
         yield 'TorrentDetailsController + TorrentRepositoryInterface' => [TorrentDetailsController::class, TorrentRepositoryInterface::class];
-        yield 'TorrentDetailsController + SearchBoxRepositoryInterface' => [TorrentDetailsController::class, SearchBoxRepositoryInterface::class];
+        yield 'TorrentDetailsController + SearchBoxSchemaBuilder' => [TorrentDetailsController::class, SearchBoxSchemaBuilder::class];
         yield 'TopicController + ForumRepositoryInterface' => [TopicController::class, ForumRepositoryInterface::class];
         yield 'TopicController + PostRepositoryInterface' => [TopicController::class, PostRepositoryInterface::class];
     }

@@ -52,9 +52,7 @@ final class RepositorySizeTest extends TestCase
      *
      * @var array<string, int>
      */
-    private const BASELINE_PUBLIC_METHODS = [
-        'app/Repositories/SearchBoxRepository.php' => 20,
-    ];
+    private const BASELINE_PUBLIC_METHODS = [];
 
     public function test_no_new_oversized_files_in_repositories_or_services(): void
     {

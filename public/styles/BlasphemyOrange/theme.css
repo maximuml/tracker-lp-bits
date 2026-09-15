@@ -19,7 +19,7 @@ table
 	border-collapse: collapse;
 	background-color: transparent
 }
-table.head
+table.head, .nx-head
 {
 	background: transparent;
 	height: 100px;
@@ -33,7 +33,7 @@ table.main, .nx-main
 	border-bottom: medium none;
 	background-color: transparent
 }
-table.mainouter
+table.mainouter, .nx-mainouter
 {
 	border-right: gray;
 	border-top: gray;

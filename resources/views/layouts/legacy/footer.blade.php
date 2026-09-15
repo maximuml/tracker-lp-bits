@@ -1,4 +1,4 @@
-</td></tr></table>
+</div></div>
 <div id="footer">
 <div style="margin-top: 10px; margin-bottom: 30px;" align="center">
 @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($copyrightHtml.$pageStatsLine))

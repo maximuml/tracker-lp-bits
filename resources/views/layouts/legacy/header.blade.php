@@ -49,34 +49,32 @@
 </head>
 <body>
 <a href="#main-content" class="skip-link">Skip to main content</a>
-<table class="head" cellspacing="0" cellpadding="0" align="center" style="width: {{ $headTableWidth }}px">
-	<tr>
-		<td class="clear">
+<div class="nx-head" style="width: {{ $headTableWidth }}px">
+		<div>
 @if($logoMain === '')
 			<div class="logo">{{ $siteName }}</div>
 			<div class="slogan">{{ $slogan }}</div>
 @else
 			<div class="logo_img"><img src="@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($logoMain))" alt="{{ $siteName }}" title="{{ $siteName }} - {{ $slogan }}" /></div>
 @endif
-		</td>
-		<td class="clear nowrap" align="right" valign="middle">
+		</div>
+		<div class="nx-nowrap">
 @if($enableDonation === 'yes')
 			<a href="donate.php"><img src="@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($forumPicFolder))/donate.gif" alt="Make a donation" style="margin-left: 5px; margin-top: 50px;" /></a>
 @endif
-		</td>
-	</tr>
-</table>
+		</div>
+</div>
 
-<table class="mainouter" width="{{ $contentWidth }}" cellspacing="0" cellpadding="5" align="center">
-	<tr><td id="nav_block" class="text" align="center">
+<div class="nx-mainouter" style="width: {{ $contentWidth }}px">
+	<div id="nav_block" class="nx-text nx-center">
 @if(!$user)
 			<a href="login.php"><font class="big"><b>@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($lang['text_login'] ?? ''))</b></font></a> / <a href="signup.php"><font class="big"><b>@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($lang['text_signup'] ?? ''))</b></font></a>
 @else
 @safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($menuHtml))
 
-<table id="info_block" cellpadding="4" cellspacing="0" border="0" width="100%"><tr>
-	<td><table width="100%" cellspacing="0" cellpadding="0" border="0"><tr>
-		<td class="bottom" align="left">
+<div id="info_block">
+	<div class="nx-row">
+		<div class="nx-grow">
             <span class="medium">
                 @safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($lang['text_welcome_back'] ?? '')), @safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($username))
                 [<form method="post" action="logout.php" class="nx-inline">@csrf<button type="submit" class="nx-btn-link">@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($lang['text_logout'] ?? ''))</button></form>]
@@ -98,9 +96,9 @@
                 <font class='color_connectable'>@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($lang['text_connectable'] ?? ''))</font>@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($connectable)) @safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($slotsDisplay))
                 @if($hitAndRunEnabled)<font class='color_bonus'>H&R: </font> @safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($hitAndRunStatus)) @endif
             </span>
-        </td>
+        </div>
                 @if($globalSearchEnabled)
-        <td class="bottom" align="left" style="border: none">
+        <div>
             <form action="search.php" method="get" target="{{ $searchFormTarget }}">
                 <div class="nx-flex" style="align-items: center">
                     <div class="nx-flex-col">
@@ -114,17 +112,17 @@
                     <div><input type="submit" value="@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($globalSearchLabel))" style="width: 39px;white-space: break-spaces;padding: 0" /></div>
                 </div>
             </form>
-        </td>
+        </div>
                 @endif
-	<td class="bottom" align="right"><span class="medium">
+	<div><span class="medium">
 @safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($staffIcons))
-	</span></td>
-	</tr></table></td>
-</tr></table>
+	</span></div>
+	</div>
+</div>
 
-</td></tr>
+</div>
 
-<tr><td id="outer" align="center" class="outer" style="padding-top: 20px; padding-bottom: 20px">
+<div id="outer" class="outer nx-center" style="padding-top: 20px; padding-bottom: 20px">
 @safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($messageAlerts))
 @if($offlineMsg)
 @safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($offlineMsgHtml))

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\ToolRepositoryInterface;
 use App\Exceptions\NexusException;
 use App\Models\Category;
 use App\Models\Torrent;
@@ -23,6 +24,7 @@ class UploadRepository extends BaseRepository
     public function __construct(
         private UploadService $uploadService,
         private UploadMetadataService $metadataService,
+        private readonly ToolRepositoryInterface $toolRepository,
     ) {}
 
     /**
@@ -100,7 +102,7 @@ class UploadRepository extends BaseRepository
 
             return 0;
         }
-        $toolRep = app(ToolRepository::class);
+        $toolRep = $this->toolRepository;
         $categoryName = $torrent->basic_category->name;
         $torrentUploader = $torrent->user;
         $successCount = 0;

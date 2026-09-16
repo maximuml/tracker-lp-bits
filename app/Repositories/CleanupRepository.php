@@ -51,7 +51,7 @@ class CleanupRepository extends BaseRepository
     private static int $scanSize = 500;
 
     public function __construct(
-        private readonly CleanupMonitorRepository $monitor = new CleanupMonitorRepository
+        private readonly CleanupMonitorRepository $monitor
     ) {}
 
     /**

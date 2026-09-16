@@ -13,6 +13,10 @@ use Illuminate\Support\Facades\DB;
 
 class AuthenticateRepository extends BaseRepository
 {
+    public function __construct(
+        private readonly WebAuthService $webAuthService,
+    ) {}
+
     /**
      * @param  mixed  $username
      * @param  mixed  $password
@@ -23,7 +27,7 @@ class AuthenticateRepository extends BaseRepository
         $user = User::query()
             ->where('username', (string) $username)
             ->first(array_merge(User::$commonFields, ['class', 'secret', 'passhash', 'auth_key', 'passhash_algo', 'two_step_secret']));
-        if (! $user instanceof User || ! app(WebAuthService::class)->validatePassword($user, $password)) {
+        if (! $user instanceof User || ! $this->webAuthService->validatePassword($user, $password)) {
             throw new \InvalidArgumentException('Username or password invalid.');
         }
         $user->checkIsNormal();

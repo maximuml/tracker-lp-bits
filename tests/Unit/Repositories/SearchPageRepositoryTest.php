@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Repositories;
 
+use App\Contracts\Repositories\MeiliSearchRepositoryInterface;
 use App\Models\Category;
 use App\Models\User;
 use App\Repositories\SearchPageRepository;
@@ -12,6 +13,7 @@ use App\Support\Settings;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Mockery;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
@@ -67,7 +69,7 @@ final class SearchPageRepositoryTest extends TestCase
         DB::table('users')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
-        $this->repository = new SearchPageRepository;
+        $this->repository = new SearchPageRepository(Mockery::mock(MeiliSearchRepositoryInterface::class));
     }
 
     protected function tearDown(): void

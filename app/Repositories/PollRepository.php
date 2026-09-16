@@ -10,6 +10,10 @@ use Illuminate\Support\Facades\DB;
 
 class PollRepository
 {
+    public function __construct(
+        private readonly ?LegacyRedisCache $legacyRedisCache = null,
+    ) {}
+
     /**
      * @return array<string, mixed>|null
      */
@@ -40,10 +44,9 @@ class PollRepository
     {
         if ($id) {
             DB::table('polls')->where('id', $id)->update($data);
-            $cache = app(LegacyRedisCache::class);
-            if ($cache !== null) {
-                $cache->delete_value('current_poll_content');
-                $cache->delete_value('current_poll_result', true);
+            if ($this->legacyRedisCache !== null) {
+                $this->legacyRedisCache->delete_value('current_poll_content');
+                $this->legacyRedisCache->delete_value('current_poll_result', true);
             }
 
             return $id;
@@ -52,10 +55,9 @@ class PollRepository
         $data['added'] = now()->toDateTimeString();
         $newId = (int) DB::table('polls')->insertGetId($data);
 
-        $cache = app(LegacyRedisCache::class);
-        if ($cache !== null) {
-            $cache->delete_value('current_poll_content');
-            $cache->delete_value('current_poll_result', true);
+        if ($this->legacyRedisCache !== null) {
+            $this->legacyRedisCache->delete_value('current_poll_content');
+            $this->legacyRedisCache->delete_value('current_poll_result', true);
         }
 
         return $newId;

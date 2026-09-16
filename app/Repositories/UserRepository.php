@@ -43,6 +43,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     public function __construct(
         private readonly UserStatsService $statsService = new UserStatsService,
         private readonly UserMetaRepository $metaRepository = new UserMetaRepository,
+        private readonly PasskeyGenerator $passkeyGenerator = new PasskeyGenerator,
     ) {
         //
     }
@@ -201,7 +202,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
             'added' => now()->toDateTimeString(),
             'status' => UserStatus::CONFIRMED->value,
             'class' => $class,
-            'passkey' => app(PasskeyGenerator::class)->generate(),
+            'passkey' => $this->passkeyGenerator->generate(),
         ];
         $user = new User($data);
         if (! empty($params['id'])) {

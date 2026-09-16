@@ -20,6 +20,10 @@ use RuntimeException;
 
 class UserPasskeyRepository extends BaseRepository
 {
+    public function __construct(
+        private readonly UserRepository $userRepository = new UserRepository,
+    ) {}
+
     /** @return  mixed */
     public function createWebAuthn()
     {
@@ -182,7 +186,7 @@ class UserPasskeyRepository extends BaseRepository
         $user->checkIsNormal();
 
         $ip = Network::clientIp();
-        $userRep = app(UserRepository::class);
+        $userRep = $this->userRepository;
         $userRep->saveLoginLog($user->id, $ip, 'Web', true);
 
         AuthCookie::setLoginCookie((int) $user->id, (string) $user->auth_key, (int) 0);

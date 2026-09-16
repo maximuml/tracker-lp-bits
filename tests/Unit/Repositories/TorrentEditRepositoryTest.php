@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Repositories;
 
+use App\Contracts\Repositories\MeiliSearchRepositoryInterface;
 use App\Enums\UserClass;
 use App\Exceptions\NexusException;
 use App\Models\Torrent;
@@ -66,7 +67,7 @@ final class TorrentEditRepositoryTest extends TestCase
         $uploadMock->shouldReceive('getPrice')->andReturn(0);
         $uploadMock->shouldReceive('getCover')->andReturn('');
 
-        $this->repository = new TorrentEditRepository($uploadMock, new TorrentPolicy); // @phpstan-ignore argument.type
+        $this->repository = new TorrentEditRepository($uploadMock, new TorrentPolicy, Mockery::mock(MeiliSearchRepositoryInterface::class)); // @phpstan-ignore argument.type
     }
 
     protected function tearDown(): void

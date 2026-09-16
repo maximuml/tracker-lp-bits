@@ -30,7 +30,7 @@ final class AppCallByNamespaceRatchetTest extends TestCase
     private const BASELINES = [
         'Controllers' => 7,
         'Services' => 3,
-        'Repositories' => 21,
+        'Repositories' => 0,
         'Other' => 391,
     ];
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Repositories;
 
+use App\Contracts\Repositories\ToolRepositoryInterface;
 use App\DTOs\Message\StoreMessageDto;
 use App\Models\Message;
 use App\Models\User;
@@ -12,6 +13,7 @@ use App\Repositories\MessageRepository;
 use App\Repositories\StaffMessageRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Mockery;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
@@ -53,7 +55,7 @@ final class MessageRepositoryTest extends TestCase
 
         $this->repository = new MessageRepository;
         $this->mailboxRepository = new MailboxRepository;
-        $this->staffMessageRepository = new StaffMessageRepository;
+        $this->staffMessageRepository = new StaffMessageRepository(tap(Mockery::mock(ToolRepositoryInterface::class), fn ($m) => $m->shouldReceive('listUserAllPermissions')->andReturn([])));
 
         /** @var User $user */
         $user = User::factory()->create();

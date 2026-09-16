@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\MeiliSearchRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\TorrentApprovalStatus;
 use App\Models\SearchBox;
@@ -19,6 +20,10 @@ use Illuminate\Support\Facades\DB;
 
 class SearchPageRepository
 {
+    public function __construct(
+        private readonly MeiliSearchRepositoryInterface $meiliSearchRepository,
+    ) {}
+
     /**
      * @return array<string, mixed>
      */
@@ -66,7 +71,7 @@ class SearchPageRepository
             }
 
             try {
-                $searchRep = app(MeiliSearchRepository::class);
+                $searchRep = $this->meiliSearchRepository;
                 $meiliResult = $searchRep->search($meiliParams, $currentUser->id);
             } catch (\Throwable $e) {
                 Logger::writeWithContext('MeiliSearch search failed, falling back to SQL: '.$e->getMessage(), 'error', false);

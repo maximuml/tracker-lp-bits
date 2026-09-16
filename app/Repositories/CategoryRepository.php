@@ -12,6 +12,10 @@ use Illuminate\Support\Facades\DB;
  */
 final class CategoryRepository
 {
+    public function __construct(
+        private readonly ?LegacyRedisCache $legacyRedisCache = null,
+    ) {}
+
     private const VALID_SUBCAT_TYPES = ['source', 'medium', 'codec', 'standard', 'processing', 'audiocodec'];
 
     public function tableNameForType(string $type): string
@@ -44,7 +48,7 @@ final class CategoryRepository
      */
     public function clearCacheAfterDelete(string $type, array $row): void
     {
-        $cache = app(LegacyRedisCache::class);
+        $cache = $this->legacyRedisCache;
         $dbtablename = $this->tableNameForType($type);
 
         if (in_array($type, self::VALID_SUBCAT_TYPES, true)) {

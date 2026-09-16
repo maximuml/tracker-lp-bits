@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories\TorrentSearch;
 
+use App\Contracts\Repositories\MeiliSearchRepositoryInterface;
 use App\Repositories\MeiliSearchRepository;
 
 /**
@@ -16,6 +17,10 @@ use App\Repositories\MeiliSearchRepository;
  */
 final class MeiliAdapter
 {
+    public function __construct(
+        private readonly MeiliSearchRepositoryInterface $meiliSearchRepository,
+    ) {}
+
     /**
      * Execute a MeiliSearch query.
      *
@@ -24,6 +29,6 @@ final class MeiliAdapter
      */
     public function search(array $searchParams, mixed $userId): mixed
     {
-        return app(MeiliSearchRepository::class)->search($searchParams, $userId);
+        return $this->meiliSearchRepository->search($searchParams, $userId);
     }
 }

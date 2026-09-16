@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Auth\Permission;
+use App\Contracts\Repositories\ToolRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\StaffMessage;
 use App\Models\User;
@@ -17,6 +18,10 @@ use Illuminate\Support\Facades\Redis;
  */
 class StaffMessageRepository extends BaseRepository
 {
+    public function __construct(
+        private readonly ToolRepositoryInterface $toolRepository,
+    ) {}
+
     const STAFF_MESSAGE_TOTAL_CACHE_KEY = 'staff_message_count';
 
     const STAFF_MESSAGE_NEW_CACHE_KEY = 'staff_new_message_count';
@@ -43,7 +48,7 @@ class StaffMessageRepository extends BaseRepository
         }
         if (! Permission::can(PermissionEnum::STAFF_MEMBER, User::findOrFail((int) $uid))) {
             // Not staff member only can see authorized
-            $permissions = app(ToolRepository::class)->listUserAllPermissions($uid);
+            $permissions = $this->toolRepository->listUserAllPermissions($uid);
             $query->whereIn('permission', $permissions);
         }
 

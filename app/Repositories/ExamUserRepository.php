@@ -28,6 +28,7 @@ class ExamUserRepository extends BaseRepository
 {
     public function __construct(
         private readonly ExamProgressRepository $examProgressRepository,
+        private readonly ExamRepository $examRepository,
     ) {}
 
     /** @return list<string> */
@@ -83,7 +84,7 @@ class ExamUserRepository extends BaseRepository
             }
         }
 
-        $examRepo = app(ExamRepository::class);
+        $examRepo = $this->examRepository;
         if (! $examRepo->isExamMatchUser($exam, $user)) {
             throw new NexusException(Locale::trans('exam.not_match_target_user', [], $locale));
         }

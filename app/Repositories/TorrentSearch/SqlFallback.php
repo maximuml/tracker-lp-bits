@@ -16,6 +16,10 @@ use App\Repositories\TorrentListingRepository;
  */
 final class SqlFallback
 {
+    public function __construct(
+        private readonly TorrentListingRepository $torrentListingRepository,
+    ) {}
+
     /**
      * Count torrents matching the listing options.
      *
@@ -23,7 +27,7 @@ final class SqlFallback
      */
     public function getCount(array $listingOptions): int
     {
-        return app(TorrentListingRepository::class)->getCount($listingOptions);
+        return $this->torrentListingRepository->getCount($listingOptions);
     }
 
     /**
@@ -34,6 +38,6 @@ final class SqlFallback
      */
     public function getList(array $listingOptions): array
     {
-        return app(TorrentListingRepository::class)->getList($listingOptions);
+        return $this->torrentListingRepository->getList($listingOptions);
     }
 }

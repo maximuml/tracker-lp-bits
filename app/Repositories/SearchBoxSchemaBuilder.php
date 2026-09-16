@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\TagRepositoryInterface;
 use App\Models\SearchBox;
 use App\Support\Input;
 use App\Support\Locale;
@@ -22,6 +23,10 @@ use Illuminate\Support\Facades\DB;
  */
 class SearchBoxSchemaBuilder
 {
+    public function __construct(
+        private readonly TagRepositoryInterface $tagRepository,
+    ) {}
+
     /**
      * @param  mixed  $searchBox
      * @param  array<int|string, mixed>  $torrentInfo
@@ -263,7 +268,7 @@ class SearchBoxSchemaBuilder
         $fieldset->schema($fieldsetSchema)->columns(1);
         $schema[] = $fieldset;
 
-        $tagRep = app(TagRepository::class);
+        $tagRep = $this->tagRepository;
         $tags = $tagRep->listAll($searchBox->id);
         $schema[] = Forms\Components\CheckboxList::make("$namePrefix.tag")
             ->options($tags->pluck('name', 'id'))

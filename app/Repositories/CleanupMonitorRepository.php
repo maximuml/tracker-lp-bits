@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\ToolRepositoryInterface;
 use App\Http\Middleware\Locale;
 use App\Models\Avp;
 use App\Models\User;
@@ -20,6 +21,10 @@ use Illuminate\Support\Facades\DB;
  */
 final class CleanupMonitorRepository
 {
+    public function __construct(
+        private readonly ToolRepositoryInterface $toolRepository,
+    ) {}
+
     /** @param  mixed  $level */
     private function getInterval($level): int
     {
@@ -30,7 +35,7 @@ final class CleanupMonitorRepository
     {
         $now = Carbon::now();
         $timestamp = $now->getTimestamp();
-        $toolRep = app(ToolRepository::class);
+        $toolRep = $this->toolRepository;
         $arvToLevel = [
             'lastcleantime' => 'one',
             'lastcleantime2' => 'two',
@@ -109,7 +114,7 @@ final class CleanupMonitorRepository
         }
         $receiverUid = SiteConfig::current()->system->alarmEmailReceiver();
         Logger::writeWithContext((string) "receiverUid: {$receiverUid}", (string) 'info', (bool) false);
-        $toolRep = app(ToolRepository::class);
+        $toolRep = $this->toolRepository;
         if (empty($receiverUid)) {
             $locale = Locale::getDefault();
             $subject = $this->getAlarmEmailSubjectForQueueFailedJobs($locale);

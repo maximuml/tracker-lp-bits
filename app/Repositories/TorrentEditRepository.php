@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\MeiliSearchRepositoryInterface;
 use App\Enums\TorrentOperationAction;
 use App\Enums\TorrentPosState;
 use App\Enums\TorrentPromotion;
@@ -31,6 +32,7 @@ class TorrentEditRepository extends BaseRepository
     public function __construct(
         private UploadRepository $uploadRepository,
         private TorrentPolicy $policy,
+        private readonly MeiliSearchRepositoryInterface $meiliSearchRepository,
     ) {}
 
     /**
@@ -203,7 +205,7 @@ class TorrentEditRepository extends BaseRepository
         event(new TorrentUpdated($torrentNew, $torrentOld));
 
         try {
-            $meiliSearch = app(MeiliSearchRepository::class);
+            $meiliSearch = $this->meiliSearchRepository;
             $meiliSearch->doImportFromDatabase($torrentOld->id);
         } catch (\Throwable $e) {
             Logger::writeWithContext((string) ('MeiliSearch update on edit failed: '.$e->getMessage()), (string) 'error', (bool) false);

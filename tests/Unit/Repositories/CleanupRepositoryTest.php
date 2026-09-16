@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Repositories;
 
+use App\Repositories\CleanupMonitorRepository;
 use App\Repositories\CleanupRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
@@ -37,7 +38,7 @@ final class CleanupRepositoryTest extends TestCase
         DB::table('avps')->delete();
         DB::table('failed_jobs')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
-        $this->repository = new CleanupRepository;
+        $this->repository = new CleanupRepository(app(CleanupMonitorRepository::class));
     }
 
     protected function tearDown(): void

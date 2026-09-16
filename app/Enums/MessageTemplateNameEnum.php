@@ -14,7 +14,6 @@ enum MessageTemplateNameEnum: string
     {
         return match ($this) {
             self::REGISTER_WELCOME => Locale::trans('message-template.register_welcome', [], null),
-            default => '',
         };
     }
 }

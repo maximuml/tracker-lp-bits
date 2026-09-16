@@ -5,29 +5,37 @@ includes:
 parameters:
     level: 8
     paths:
-        - app/Support
-        - app/Models
-        - app/Console
-        - app/Http
-        - app/Repositories
-        - app/Jobs
-        - app/Listeners
-        - app/Providers
-        - app/ValueObjects
-        - app/DTOs
-        - app/Services
-        - app/Utils
         - app/Auth
+        - app/Console
+        - app/Contracts
+        - app/DTOs
+        - app/Enums
         - app/Events
         - app/Exceptions
-        - app/Logging
-        - app/Policies
         - app/Filament
+        - app/Http
+        - app/Jobs
+        - app/Listeners
+        - app/Logging
+        - app/Models
+        - app/Observers
+        - app/Policies
+        - app/Providers
+        - app/Repositories
+        - app/Services
+        - app/Support
+        - app/Utils
+        - app/ValueObjects
+        - app/View
+        - app/ViewModels
 
     excludePaths:
         analyse:
             - app/Services/Legacy/partials (?)
             - app/Services/Legacy/*_content.php
+            # Standalone legacy installer (IN_NEXUS=true, own NexusDB layer).
+            # Removed wholesale by the installer migration step — do not add
+            # per-file fixes here, delete the directory instead.
             - app/Support/Install
 
     bootstrapFiles:

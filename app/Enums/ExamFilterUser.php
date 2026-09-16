@@ -21,7 +21,7 @@ enum ExamFilterUser: string
     public function label(): string
     {
         return match ($this) {
-            self::class => 'User class',
+            self::USER_CLASS => 'User class',
             self::REGISTER_TIME_RANGE => 'Register time range',
             self::DONATE => 'Donate status',
             self::REGISTER_DAYS_RANGE => 'Register days range',
@@ -30,6 +30,6 @@ enum ExamFilterUser: string
 
     public static function fromStringSafe(?string $value): self
     {
-        return self::tryFrom((string) $value) ?? self::class;
+        return self::tryFrom((string) $value) ?? self::USER_CLASS;
     }
 }

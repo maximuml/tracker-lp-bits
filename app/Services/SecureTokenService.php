@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Support\Token;
+use App\Support\Strings;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -198,5 +198,48 @@ final class SecureTokenService
             ->first();
 
         return $row !== null ? (array) $row : null;
+    }
+
+    /**
+     * Compute the users.editsecret digest for an email-change token.
+     *
+     * The email is bound into the digest so the bearer token cannot be
+     * retargeted to a different address by editing the confirm URL.
+     */
+    public function emailChangeDigest(string $token, string $email): string
+    {
+        return hash('sha256', $token."\x00".$email);
+    }
+
+    /**
+     * Verify an email-change token against users.editsecret.
+     *
+     * Accepts the new 64-char format (SHA-256 digest bound to the email)
+     * and, during the 30-day compatibility window, the legacy 32-char
+     * md5(sec.email.sec) format for links already in flight.
+     */
+    public function verifyEmailChangeToken(string $storedSecret, string $email, string $token): bool
+    {
+        return match (strlen($token)) {
+            64 => $storedSecret !== '' && hash_equals($storedSecret, $this->emailChangeDigest($token, $email)),
+            32 => $this->verifyLegacyEmailChange($storedSecret, $email, $token),
+            default => false,
+        };
+    }
+
+    /**
+     * Verify a legacy email-change link: md5(editsecret.email.editsecret).
+     *
+     * COMPAT: remove after 2026-10-17 — the 30-day window covers links
+     * mailed before the SecureTokenService migration.
+     */
+    private function verifyLegacyEmailChange(string $storedSecret, string $email, string $token): bool
+    {
+        $sec = Strings::padHash($storedSecret);
+        if (preg_match('/^ *$/s', $sec)) {
+            return false;
+        }
+
+        return hash_equals($token, md5($sec.$email.$sec));
     }
 }

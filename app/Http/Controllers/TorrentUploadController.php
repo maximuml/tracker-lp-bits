@@ -28,6 +28,7 @@ use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Path;
 use App\Support\Tracker;
+use App\View\Components\BbcodeEditor;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -135,7 +136,7 @@ class TorrentUploadController extends Controller
             'nameInputHtml' => $nameInputHtml,
             'priceLabel' => Locale::trans('label.torrent.price', [], null),
             'priceCellHtml' => $priceCellHtml,
-            'descrEditorHtml' => Form::bbcodeEditor('upload', 'descr', '', false, 130, true),
+            'descrEditorHtml' => BbcodeEditor::html(['form' => 'upload', 'text' => 'descr', 'withPreview' => true]),
             'enableTechnicalInfo' => SiteConfig::current()->main->enableTechnicalInfo(),
             'taxonomySelectHtml' => $this->searchBoxSchemaBuilder->renderTaxonomySelect($browsecatmode),
             'customFieldsHtml' => $customField->renderOnUploadPage(0, $browsecatmode),

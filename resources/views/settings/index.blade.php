@@ -200,7 +200,7 @@
         :note="$lang['text_guest_visit_value_static_page'] ?? ''" />
     </tbody>
     <tbody id="tbody_custom_content"@if(($config['guest_visit_type'] ?? '') !== 'custom_content') class="nx-hidden"@endif>
-    <div class="nx-fhead nx-nowrap">{{ $lang['row_guest_visit_value_custom_content'] ?? 'Custom content' }}</div><div class="nx-fcell">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Form::bbcodeEditor('securitysettings_form', 'guest_visit_value_custom_content', $config['guest_visit_value_custom_content'] ?? '')))</div>
+    <div class="nx-fhead nx-nowrap">{{ $lang['row_guest_visit_value_custom_content'] ?? 'Custom content' }}</div><div class="nx-fcell"><x-bbcode-editor form="securitysettings_form" text="guest_visit_value_custom_content" :content="$config['guest_visit_value_custom_content'] ?? ''" /></div>
     </tbody>
     <tbody id="tbody_redirect"@if(($config['guest_visit_type'] ?? '') !== 'redirect') class="nx-hidden"@endif>
     <x-settings-text layout="grid" :label="$lang['row_guest_visit_value_redirect'] ?? 'Redirect URL'" name="guest_visit_value_redirect" :value="$config['guest_visit_value_redirect'] ?? ''" width="300px" />

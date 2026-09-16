@@ -31,6 +31,13 @@ use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class TorrentDownloadController extends LegacyController
 {
+    public function __construct(
+        private readonly CurrentUser $currentUser,
+        private readonly Globals $globals,
+        private readonly IpLogRepository $ipLogRepository,
+        private readonly PasskeyGenerator $passkeyGenerator,
+    ) {}
+
     public function download(Request $request, TorrentDownloadRepositoryInterface $torrentRepository): SymfonyResponse
     {
         $downhash = $request->downhash;
@@ -95,14 +102,14 @@ class TorrentDownloadController extends LegacyController
             'last_access' => now()->toDateTimeString(),
             'ip' => $ip,
         ]);
-        app(IpLogRepository::class)->saveToCache($user->id, $request->getPathInfo(), [$ip]);
+        $this->ipLogRepository->saveToCache($user->id, $request->getPathInfo(), [$ip]);
 
         $torrent = Torrent::query()->findOrFail($id);
 
         Gate::forUser($user)->authorize('download', $torrent);
 
         if (strlen((string) $user->passkey) != 32) {
-            $passkey = app(PasskeyGenerator::class)->generate();
+            $passkey = $this->passkeyGenerator->generate();
             User::query()->where('id', $user->id)->update(['passkey' => $passkey]);
             $user->passkey = $passkey;
         }
@@ -137,7 +144,7 @@ class TorrentDownloadController extends LegacyController
 
     public function downloadnotice(Request $request): Response|RedirectResponse|View
     {
-        $curUser = app(CurrentUser::class)->get();
+        $curUser = $this->currentUser->get();
         if ($curUser === null) {
             $qs = $request->getQueryString();
 
@@ -146,7 +153,7 @@ class TorrentDownloadController extends LegacyController
 
         $torrentid = (int) $request->input('torrentid');
         $type = $request->input('type');
-        $lang = (array) (app(Globals::class)->get('lang_downloadnotice') ?? []);
+        $lang = (array) ($this->globals->get('lang_downloadnotice') ?? []);
         $timenow = time();
 
         switch ($type) {
@@ -200,7 +207,7 @@ class TorrentDownloadController extends LegacyController
 
     public function downloadnoticeAction(Request $request): Response|RedirectResponse
     {
-        $curUser = app(CurrentUser::class)->get();
+        $curUser = $this->currentUser->get();
         if ($curUser === null) {
             return redirect('/downloadnotice.php');
         }

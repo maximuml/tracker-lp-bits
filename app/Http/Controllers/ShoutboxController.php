@@ -32,6 +32,9 @@ class ShoutboxController extends LegacyController
         private readonly ShoutboxRepository $repository,
         private readonly ShoutboxService $shoutboxService,
         private readonly Globals $globals,
+        private readonly ActorContext $actorContext,
+        private readonly CurrentUser $currentUser,
+        private readonly LegacyHeaderBag $legacyHeaderBag,
     ) {}
 
     /**
@@ -44,7 +47,7 @@ class ShoutboxController extends LegacyController
 
     public function shoutbox(Request $request): Response
     {
-        $actor = app(ActorContext::class);
+        $actor = $this->actorContext;
         $currentUser = $actor->toLegacyArray();
         $currentUserId = $actor->id;
 
@@ -225,7 +228,7 @@ class ShoutboxController extends LegacyController
     {
         $result = $this->repository->history($request);
 
-        $currentUser = app(CurrentUser::class)->get() ?? [];
+        $currentUser = $this->currentUser->get() ?? [];
         $currentUserId = (int) ($currentUser['id'] ?? 0);
         $rows = (array) ($result['data'] ?? []);
         $shoutIds = array_map(fn ($r) => (int) ($r['id'] ?? 0), $rows);
@@ -324,7 +327,7 @@ class ShoutboxController extends LegacyController
 
     public function shoutboxSse(Request $request): SymfonyResponse
     {
-        $user = app(CurrentUser::class)->get();
+        $user = $this->currentUser->get();
         if ($user === null) {
             return new SymfonyResponse('', 403);
         }
@@ -352,7 +355,7 @@ class ShoutboxController extends LegacyController
                 }
                 // T-11: Use LegacyHeaderBag instead of SAPI http_response_code()
                 // to avoid cross-request status leakage under Octane.
-                app(LegacyHeaderBag::class)->setStatusCode(503);
+                $this->legacyHeaderBag->setStatusCode(503);
 
                 return;
             }
@@ -363,7 +366,7 @@ class ShoutboxController extends LegacyController
                     $redis->decr($globalKey);
                 } catch (\Throwable $e) {
                 }
-                app(LegacyHeaderBag::class)->setStatusCode(429);
+                $this->legacyHeaderBag->setStatusCode(429);
 
                 return;
             }
@@ -383,7 +386,7 @@ class ShoutboxController extends LegacyController
                 $query = DB::table('shoutbox')
                     ->orderBy('id')
                     ->where('id', '>', $lastId);
-                Shoutbox::applyTypeFilter($query, $type, app(CurrentUser::class)->get());
+                Shoutbox::applyTypeFilter($query, $type, $this->currentUser->get());
 
                 return $query;
             };

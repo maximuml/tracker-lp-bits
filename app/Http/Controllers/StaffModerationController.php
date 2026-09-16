@@ -37,11 +37,18 @@ use Illuminate\View\View;
 
 class StaffModerationController extends LegacyController
 {
+    public function __construct(
+        private readonly CurrentUser $currentUser,
+        private readonly Globals $globals,
+        private readonly ModtaskRepository $modtaskRepository,
+        private readonly PasskeyGenerator $passkeyGenerator,
+    ) {}
+
     public function modtask(Request $request): Response|RedirectResponse
     {
-        $currentUser = app(CurrentUser::class)->get() ?? [];
+        $currentUser = $this->currentUser->get() ?? [];
         $currentUserId = (int) ($currentUser['id'] ?? 0);
-        $baseUrl = (string) app(Globals::class)->get('BASEURL', '');
+        $baseUrl = (string) $this->globals->get('BASEURL', '');
 
         if (! Permission::can(PermissionEnum::MANAGE_USER_BASIC_INFO, User::findOrFail($currentUserId))) {
             Log::writeWithContext(
@@ -60,7 +67,7 @@ class StaffModerationController extends LegacyController
             if (! in_array($confirm, ['pending', 'confirmed'], true)) {
                 return $this->legacyAbortResponse('Error', 'Invalid confirmation status.');
             }
-            app(ModtaskRepository::class)->confirmUser($userId, $confirm);
+            $this->modtaskRepository->confirmUser($userId, $confirm);
 
             return redirect(Http::protocolPrefix(Url::isSecure()).$baseUrl.'/unco.php?status=1');
         }
@@ -101,7 +108,7 @@ class StaffModerationController extends LegacyController
             return $this->legacyAbortResponse('Error', "You have no permission to change user's class to ".UserClass::name((int) $class, false, false, true).'. BTW, how do you get here?');
         }
 
-        $arr = app(ModtaskRepository::class)->getUserArray($userId);
+        $arr = $this->modtaskRepository->getUserArray($userId);
         if ($arr === null) {
             Log::writeWithContext(
                 'User '.($currentUser['username'] ?? '')." (id: {$currentUserId}) is hacking user's profile. IP : ".Network::clientIp(),
@@ -195,7 +202,7 @@ class StaffModerationController extends LegacyController
             $memo = htmlspecialchars((string) request()->post('donation_memo'));
 
             if ($donated != (float) $arr['donated'] || $donatedCny != (float) $arr['donated_cny']) {
-                app(ModtaskRepository::class)->addFund($userId, $thisDonatedUsd, $thisDonatedCny, $memo);
+                $this->modtaskRepository->addFund($userId, $thisDonatedUsd, $thisDonatedCny, $memo);
                 $updateset['donated'] = $donated;
                 $updateset['donated_cny'] = $donatedCny;
             }
@@ -282,7 +289,7 @@ class StaffModerationController extends LegacyController
         }
 
         if (request()->post('resetkey') !== null && request()->post('resetkey') === 'yes') {
-            $updateset['passkey'] = app(PasskeyGenerator::class)->generate();
+            $updateset['passkey'] = $this->passkeyGenerator->generate();
         }
 
         if ($forumpost !== $curForumpost) {
@@ -345,7 +352,7 @@ class StaffModerationController extends LegacyController
             ]);
         }
 
-        app(ModtaskRepository::class)->updateUser($userId, $updateset);
+        $this->modtaskRepository->updateUser($userId, $updateset);
 
         if (! empty($userModifyLogs)) {
             $insert = [];

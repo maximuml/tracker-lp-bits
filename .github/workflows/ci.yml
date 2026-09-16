@@ -887,14 +887,34 @@ jobs:
       - name: Compare with baseline
         run: |
           set -euo pipefail
-          CURRENT=${{ steps.semgrep-info.outputs.total }}
-          BASELINE=$(python3 -c "import json; print(json.load(open('.semgrep-baseline.json'))['total'])")
-          echo "Current: $CURRENT  Baseline: $BASELINE"
-          if [ "$CURRENT" -gt "$BASELINE" ]; then
-            echo "::error::Semgrep informational findings increased: $CURRENT > $BASELINE (baseline). Fix new findings or update baseline with justification."
-            exit 1
-          fi
-          echo "Findings within baseline ($CURRENT <= $BASELINE)."
+          # Per-rule comparison: the aggregate total hid rule growth (a rule
+          # whose baseline shrank left headroom for others). Fail if ANY rule
+          # exceeds its own baseline; 'total' stays informational.
+          python3 - <<'PY'
+          import json
+          import sys
+          from collections import Counter
+
+          results = json.load(open('semgrep-info.json'))['results']
+          # check_id may carry a config prefix; rule ids never contain dots.
+          current = Counter(r['check_id'].rsplit('.', 1)[-1] for r in results)
+          baseline_doc = json.load(open('.semgrep-baseline.json'))
+          baseline = baseline_doc['by_rule']
+
+          print(f"Total findings: {sum(current.values())} (baseline {baseline_doc['total']})")
+
+          failed = False
+          for rule in sorted(set(current) | set(baseline)):
+              cur, base = current.get(rule, 0), baseline.get(rule, 0)
+              if cur > base:
+                  failed = True
+                  print(f"::error::Semgrep rule '{rule}': {cur} findings > baseline {base}. "
+                        "Fix the new findings or lower the baseline with justification.")
+              else:
+                  print(f"  {rule}: {cur} <= {base}")
+
+          sys.exit(1 if failed else 0)
+          PY
 
       - name: Upload informational results to GitHub Security
         uses: github/codeql-action/upload-sarif@6f5948dfacef28e207b48d0905cf90c03365536d # v3

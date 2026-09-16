@@ -37,9 +37,8 @@ final class CoverageRatchetCommand extends Command
      *
      * Floors live in .coverage-baseline.json (measured facts — the
      * effective threshold is max(entry here, baseline)). Entries at 0.0
-     * make the module visible in the report without gating yet; their
-     * floor is set by the next baseline bump. Every first-level app/
-     * directory must appear here — enforced by
+     * mean "counted and reported" — the baseline supplies the real floor.
+     * Every first-level app/ directory must appear here — enforced by
      * CoverageRatchetCompletenessTest.
      */
     private const MODULE_THRESHOLDS = [
@@ -282,9 +281,11 @@ final class CoverageRatchetCommand extends Command
                 ? ($data['covered'] / $data['statements']) * 100
                 : 0.0;
             $current = $baseline[$module] ?? 0.0;
-            // Ratchet up only
+            // Ratchet up only. floor() not round(): a rounded-up baseline
+            // (13.4489 -> 13.45) would sit above the real measurement and
+            // fail the very next run on unchanged code.
             if ($pct > $current) {
-                $updated[$module] = round($pct, 2);
+                $updated[$module] = floor($pct * 100) / 100;
             }
         }
 

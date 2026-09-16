@@ -23,9 +23,14 @@ use Illuminate\View\View;
 
 class BonusShopController extends LegacyController
 {
+    public function __construct(
+        private readonly CurrentUser $currentUser,
+        private readonly ?LegacyRedisCache $legacyRedisCache,
+    ) {}
+
     public function medal(Request $request): View|RedirectResponse|Response
     {
-        $curUser = app(CurrentUser::class)->get() ?? [];
+        $curUser = $this->currentUser->get() ?? [];
         $currentUserId = (int) ($curUser['id'] ?? 0);
         $seedbonus = (float) ($curUser['seedbonus'] ?? 0);
 
@@ -169,7 +174,7 @@ JS;
 
     public function task(Request $request): View|RedirectResponse|Response
     {
-        $curUser = app(CurrentUser::class)->get() ?? [];
+        $curUser = $this->currentUser->get() ?? [];
         $currentUserId = (int) ($curUser['id'] ?? 0);
 
         $query = Exam::query()
@@ -304,7 +309,7 @@ JS;
                 return $this->legacyAbortResponse('Error', 'Permission denied.');
             }
             DB::table('torrents_state')->update(['global_sp_state' => $stateMap[$action]]);
-            app(LegacyRedisCache::class)?->delete_value('global_promotion_state');
+            $this->legacyRedisCache?->delete_value('global_promotion_state');
 
             return $this->legacyAbortResponse('Success', $messages[$action]);
         }

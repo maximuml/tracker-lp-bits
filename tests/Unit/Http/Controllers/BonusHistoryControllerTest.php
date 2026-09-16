@@ -6,6 +6,8 @@ namespace Tests\Unit\Http\Controllers;
 
 use App\Http\Controllers\BonusHistoryController;
 use App\Repositories\BonusCalculationRepository;
+use App\Support\CurrentUser;
+use App\Support\Globals;
 use Mockery;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
@@ -24,7 +26,11 @@ final class BonusHistoryControllerTest extends TestCase
         /** @var BonusCalculationRepository&Mockery\MockInterface $calculationRepository */
         $calculationRepository = Mockery::mock(BonusCalculationRepository::class);
 
-        $controller = new BonusHistoryController($calculationRepository);
+        $controller = new BonusHistoryController(
+            $calculationRepository,
+            Mockery::mock(CurrentUser::class),
+            Mockery::mock(Globals::class),
+        );
 
         $this->assertInstanceOf(BonusHistoryController::class, $controller);
     }

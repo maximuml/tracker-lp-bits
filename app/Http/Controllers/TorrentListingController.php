@@ -15,9 +15,15 @@ use Illuminate\Support\Facades\Auth;
 
 class TorrentListingController extends Controller
 {
+    public function __construct(
+        private readonly CurrentUser $currentUser,
+        private readonly TorrentSearchRepository $torrentSearchRepository,
+        private readonly ?LegacyRedisCache $legacyRedisCache,
+    ) {}
+
     public function index(Request $request): View|RedirectResponse
     {
-        if (app(LegacyRedisCache::class) === null) {
+        if ($this->legacyRedisCache === null) {
             return redirect('/torrents.php?'.http_build_query($request->query->all()));
         }
 
@@ -26,10 +32,10 @@ class TorrentListingController extends Controller
             return redirect('/login.php?returnto='.urlencode($request->fullUrl()));
         }
 
-        $currentUser = app(CurrentUser::class)->get() ?? $user->toLegacyArray();
-        app(CurrentUser::class)->set($currentUser);
+        $currentUser = $this->currentUser->get() ?? $user->toLegacyArray();
+        $this->currentUser->set($currentUser);
 
-        $data = app(TorrentSearchRepository::class)->getListingData($request->query->all());
+        $data = $this->torrentSearchRepository->getListingData($request->query->all());
 
         return view('torrents.index', $data);
     }

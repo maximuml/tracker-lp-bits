@@ -15,6 +15,7 @@ class TorrentBookmarkController extends LegacyController
 {
     public function __construct(
         private readonly TorrentBookmarkService $bookmarkService,
+        private readonly CurrentUser $currentUser,
     ) {}
 
     public function bookmark(Request $request): Response
@@ -27,7 +28,7 @@ class TorrentBookmarkController extends LegacyController
             'Content-Type' => 'text/xml; charset=utf-8',
         ];
 
-        $user = app(CurrentUser::class)->get();
+        $user = $this->currentUser->get();
         if ($user === null) {
             return response('failed', 200, $headers);
         }
@@ -49,11 +50,11 @@ class TorrentBookmarkController extends LegacyController
 
     public function thanks(Request $request): Response|RedirectResponse
     {
-        if (app(CurrentUser::class)->get() === null) {
+        if ($this->currentUser->get() === null) {
             return redirect('/thanks.php'.($request->getQueryString() ? '?'.$request->getQueryString() : ''));
         }
 
-        $curUser = app(CurrentUser::class)->get();
+        $curUser = $this->currentUser->get();
 
         if ($request->query('id') !== null) {
             LegacyResponse::abort('Party is over!', "This trick doesn't work anymore. You need to click the button!");

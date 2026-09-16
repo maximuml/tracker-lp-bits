@@ -40,8 +40,14 @@ class UserAdminController extends LegacyController
 
     private BonusRepository $bonusRepository;
 
-    public function __construct(UserRepositoryInterface $userRepository, UserModerationRepositoryInterface $userModerationRepository, BonusRepository $bonusRepository)
-    {
+    public function __construct(
+        UserRepositoryInterface $userRepository,
+        UserModerationRepositoryInterface $userModerationRepository,
+        BonusRepository $bonusRepository,
+        private readonly UserListingRepository $userListingRepository,
+        private readonly CurrentUser $currentUser,
+        private readonly Globals $globals,
+    ) {
         $this->userRepository = $userRepository;
         $this->userModerationRepository = $userModerationRepository;
         $this->bonusRepository = $bonusRepository;
@@ -49,11 +55,11 @@ class UserAdminController extends LegacyController
 
     public function users(Request $request): View|RedirectResponse|Response
     {
-        if (! Permissions::userCan(PermissionEnum::VIEW_USER_LIST->value, false, (int) (app(CurrentUser::class)->get()['id'] ?? 0))) {
+        if (! Permissions::userCan(PermissionEnum::VIEW_USER_LIST->value, false, (int) ($this->currentUser->get()['id'] ?? 0))) {
             return $this->legacyAbortResponse('Error', 'Permission denied.');
         }
 
-        $langUsers = (array) app(Globals::class)->get('lang_users', []);
+        $langUsers = (array) $this->globals->get('lang_users', []);
         $search = trim((string) (request()->query('search') ?? ''));
         $class = (string) (request()->query('class') ?? '-');
         $country = (int) (request()->query('country') ?? 0);
@@ -91,15 +97,15 @@ class UserAdminController extends LegacyController
         }
 
         $countryOptions = [['value' => 0, 'label' => $langUsers['select_any_country'] ?? 'Any country', 'selected' => $country === 0]];
-        foreach (app(UserListingRepository::class)->getCountries() as $ct) {
+        foreach ($this->userListingRepository->getCountries() as $ct) {
             $countryOptions[] = ['value' => (int) $ct['id'], 'label' => (string) $ct['name'], 'selected' => $country === (int) $ct['id']];
         }
 
         $perPage = 50;
         $filters = ['search' => $search, 'class' => $class, 'country' => $country, 'letter' => $letter];
-        $count = app(UserListingRepository::class)->countUsers($filters);
+        $count = $this->userListingRepository->countUsers($filters);
         [$pagertop, $pagerbottom, , $offset] = Pagination::pager($perPage, $count, 'users.php?'.$q.($q ? '&' : ''));
-        $userRows = app(UserListingRepository::class)->listUsers($filters, (int) $offset, $perPage);
+        $userRows = $this->userListingRepository->listUsers($filters, (int) $offset, $perPage);
 
         UserDisplay::preload(array_values(array_map(fn ($arr) => (int) $arr['id'], $userRows)));
         $rows = [];
@@ -149,7 +155,7 @@ class UserAdminController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Permission denied, Administrator Only.');
         }
 
-        $curUser = app(CurrentUser::class)->get() ?? [];
+        $curUser = $this->currentUser->get() ?? [];
         $currentUsername = (string) ($curUser['username'] ?? '');
 
         $success = false;
@@ -207,7 +213,7 @@ class UserAdminController extends LegacyController
 
     public function selfEnable(Request $request): View|RedirectResponse|Response
     {
-        $curUser = app(CurrentUser::class)->get() ?? [];
+        $curUser = $this->currentUser->get() ?? [];
         $currentUserId = (int) ($curUser['id'] ?? 0);
         $currentUsername = (string) ($curUser['username'] ?? '');
 
@@ -296,7 +302,7 @@ class UserAdminController extends LegacyController
 
     public function unco(Request $request): View|RedirectResponse|Response
     {
-        if (app(CurrentUser::class)->get() === null) {
+        if ($this->currentUser->get() === null) {
             $qs = $request->getQueryString();
 
             return redirect('/unco.php'.($qs ? '?'.$qs : ''));

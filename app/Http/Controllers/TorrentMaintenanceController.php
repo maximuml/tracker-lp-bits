@@ -28,6 +28,11 @@ use Rhilip\Bencode\Bencode;
 
 class TorrentMaintenanceController extends LegacyController
 {
+    public function __construct(
+        private readonly CurrentUser $currentUser,
+        private readonly Globals $globals,
+    ) {}
+
     public function torrentInfo(Request $request): View|RedirectResponse|Response
     {
         $id = (int) $request->input('id', 0);
@@ -40,7 +45,7 @@ class TorrentMaintenanceController extends LegacyController
             abort(404);
         }
 
-        $curUser = app(CurrentUser::class)->get() ?? [];
+        $curUser = $this->currentUser->get() ?? [];
         $currentUserId = (int) ($curUser['id'] ?? 0);
         if (! Permissions::userCan(PermissionEnum::TORRENT_STRUCTURE->value, false, $currentUserId)) {
             abort(403);
@@ -97,11 +102,11 @@ class TorrentMaintenanceController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Invalid ID.');
         }
 
-        $currentUser = app(CurrentUser::class)->get() ?? [];
+        $currentUser = $this->currentUser->get() ?? [];
         $currentUserId = (int) ($currentUser['id'] ?? 0);
         $currentClass = (int) UserDisplay::currentClass();
 
-        $lang = (array) (app(Globals::class)->get('lang_takeflush') ?? []);
+        $lang = (array) ($this->globals->get('lang_takeflush') ?? []);
 
         if ($currentClass >= UserClassEnum::MODERATOR->value || $currentUserId === $id) {
             $deadtime = Time::deadThreshold(SiteConfig::current()->main->anninterthree());
@@ -122,7 +127,7 @@ class TorrentMaintenanceController extends LegacyController
 
     public function takeReseed(Request $request): View|RedirectResponse|Response
     {
-        $curUser = app(CurrentUser::class)->get();
+        $curUser = $this->currentUser->get();
         if ($curUser === null) {
             $qs = $request->getQueryString();
 
@@ -131,7 +136,7 @@ class TorrentMaintenanceController extends LegacyController
 
         $currentUserId = (int) ($curUser['id'] ?? 0);
         if (! Permissions::userCan(PermissionEnum::ASK_RESEED->value, false, $currentUserId)) {
-            $lang = (array) app(Globals::class)->get('lang_takereseed', []);
+            $lang = (array) $this->globals->get('lang_takereseed', []);
 
             return $this->legacyAbortResponse($lang['std_error'] ?? 'Error', $lang['std_permission_denied'] ?? 'Permission denied.');
         }
@@ -141,13 +146,13 @@ class TorrentMaintenanceController extends LegacyController
         $row = $torrent instanceof Torrent ? $torrent->toArray() : null;
 
         $seederCount = (int) Peer::query()->where('torrent', $reseedid)->count();
-        $lang = (array) app(Globals::class)->get('lang_takereseed', []);
+        $lang = (array) $this->globals->get('lang_takereseed', []);
 
         if ($seederCount > 0) {
             return $this->legacyAbortResponse($lang['std_error'] ?? 'Error', $lang['std_torrent_not_dead'] ?? 'Torrent is not dead.');
         }
 
-        $timeNow = (int) app(Globals::class)->get('TIMENOW', time());
+        $timeNow = (int) $this->globals->get('TIMENOW', time());
         if ($row !== null && strtotime((string) ($row['last_reseed'] ?? '')) > ($timeNow - 900)) {
             return $this->legacyAbortResponse($lang['std_error'] ?? 'Error', $lang['std_reseed_sent_recently'] ?? 'Reseed request sent recently.');
         }
@@ -162,7 +167,7 @@ class TorrentMaintenanceController extends LegacyController
             ->map(fn ($r) => (array) $r)
             ->all();
 
-        $baseUrl = (string) app(Globals::class)->get('BASEURL', '');
+        $baseUrl = (string) $this->globals->get('BASEURL', '');
         foreach ($snatchedRows as $snatchRow) {
             $locale = Locale::userLocale((int) $snatchRow['userid']);
             $rsSubject = Locale::trans('torrent.msg_reseed_request', [], $locale);

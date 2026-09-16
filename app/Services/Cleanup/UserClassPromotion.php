@@ -20,6 +20,10 @@ use Illuminate\Support\Facades\DB;
  */
 final class UserClassPromotion
 {
+    public function __construct(
+        private readonly UserOps $userOps,
+    ) {}
+
     public function promotePeasantsToUsers(): void
     {
         $this->peasantToUser(
@@ -85,7 +89,7 @@ final class UserClassPromotion
             $uid = $arr->id;
             $locale = Locale::userLocale($uid);
 
-            UserOps::logModify($uid, 'Leech Warning removed by System.');
+            $this->userOps->logModify($uid, 'Leech Warning removed by System.');
 
             $uidArr[] = $uid;
 

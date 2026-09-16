@@ -20,24 +20,29 @@ final class ToastNotifications
 
     private const MAX_BODY_LENGTH = 120;
 
+    public function __construct(
+        private readonly MessageRepository $messageRepository,
+        private readonly ShoutboxRepository $shoutboxRepository,
+    ) {}
+
     /**
      * @return array{cursors: array{last_pm_id: int, last_shout_id: int}, notifications: list<array<string, mixed>>}
      */
-    public static function get(int $userId, int $lastPmId, int $lastShoutId, bool $init = false): array
+    public function get(int $userId, int $lastPmId, int $lastShoutId, bool $init = false): array
     {
-        $cursors = self::cursors($userId);
+        $cursors = $this->cursors($userId);
 
         if ($init) {
             return ['cursors' => $cursors, 'notifications' => []];
         }
 
-        $notifications = app(MessageRepository::class)->getUnreadPmNotifications($userId, $lastPmId, self::LIMIT_PM);
-        foreach (app(ShoutboxRepository::class)->getMentions($userId, $lastShoutId) as $mention) {
+        $notifications = $this->messageRepository->getUnreadPmNotifications($userId, $lastPmId, self::LIMIT_PM);
+        foreach ($this->shoutboxRepository->getMentions($userId, $lastShoutId) as $mention) {
             $notifications[] = [
                 'id' => 'shout_'.$mention['id'],
                 'type' => 'shoutbox-mention',
                 'title' => 'Shoutbox mention',
-                'body' => self::truncate((string) $mention['text']),
+                'body' => $this->truncate((string) $mention['text']),
                 'from' => (string) ($mention['author_name'] ?? 'System'),
                 'url' => 'shoutbox_history.php',
                 'timestamp' => (int) $mention['date'],
@@ -52,15 +57,15 @@ final class ToastNotifications
     /**
      * @return array{last_pm_id: int, last_shout_id: int}
      */
-    private static function cursors(int $userId): array
+    private function cursors(int $userId): array
     {
         return [
-            'last_pm_id' => app(MessageRepository::class)->getLastPmId($userId),
-            'last_shout_id' => app(ShoutboxRepository::class)->getLastShoutId(),
+            'last_pm_id' => $this->messageRepository->getLastPmId($userId),
+            'last_shout_id' => $this->shoutboxRepository->getLastShoutId(),
         ];
     }
 
-    private static function truncate(string $text, int $length = self::MAX_BODY_LENGTH): string
+    private function truncate(string $text, int $length = self::MAX_BODY_LENGTH): string
     {
         $text = trim($text);
         if (mb_strlen($text) <= $length) {

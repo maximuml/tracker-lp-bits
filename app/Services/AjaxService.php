@@ -11,6 +11,8 @@ use App\Models\User;
 use App\Repositories\AttendanceRepository;
 use App\Repositories\BonusRepository;
 use App\Repositories\ExamUserRepository;
+use App\Repositories\MessageRepository;
+use App\Repositories\ShoutboxRepository;
 use App\Repositories\TorrentModerationRepository;
 use App\Services\Ajax\MedalActions;
 use App\Services\Ajax\PasskeyActions;
@@ -74,6 +76,7 @@ final class AjaxService
         private readonly ShoutboxActions $shoutboxActions,
         private readonly PasskeyActions $passkeyActions,
         private readonly MedalActions $medalActions,
+        private readonly ToastNotifications $toastNotifications = new ToastNotifications(new MessageRepository, new ShoutboxRepository),
     ) {}
 
     /** @param array<string, mixed> $params */
@@ -200,6 +203,6 @@ final class AjaxService
         $lastShoutId = (int) ($params['last_shout_id'] ?? 0);
         $init = ! empty($params['init']);
 
-        return ToastNotifications::get((int) $CURUSER['id'], $lastPmId, $lastShoutId, $init);
+        return $this->toastNotifications->get((int) $CURUSER['id'], $lastPmId, $lastShoutId, $init);
     }
 }

@@ -1,10 +1,10 @@
 {
-  "total": 648,
+  "total": 645,
   "by_rule": {
     "laravel-request-all-in-controller": 2,
     "laravel-unescaped-blade-output": 0,
     "laravel-unescaped-safehtml": 629,
-    "md5-for-security": 17,
+    "md5-for-security": 14,
     "mt-rand-for-security": 0
   }
 }

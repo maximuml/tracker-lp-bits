@@ -96,7 +96,7 @@ final class TorrentAjaxRepository implements TorrentAjaxRepositoryInterface
             return $result;
         }
 
-        $cacheKey = 'searchsuggest_'.md5($searchstr);
+        $cacheKey = 'searchsuggest_'.hash('sha256', $searchstr);
         $cached = Cache::get($cacheKey);
         if (is_array($cached) && count($cached) === 3) {
             return [

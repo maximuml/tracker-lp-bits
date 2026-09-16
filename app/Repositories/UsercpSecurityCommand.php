@@ -7,6 +7,7 @@ namespace App\Repositories;
 use App\DTOs\Usercp\SecuritySettingsDto;
 use App\Enums\UserPrivacy;
 use App\Models\User;
+use App\Services\SecureTokenService;
 use App\Services\WebAuthService;
 use App\Support\AuthCookie;
 use App\Support\Cache;
@@ -35,6 +36,7 @@ final class UsercpSecurityCommand
     public function __construct(
         private readonly Globals $globals,
         private readonly PasskeyGenerator $passkeyGenerator,
+        private readonly SecureTokenService $secureTokenService,
         private readonly TorrentDownloadRepository $torrentDownloadRepository,
         private readonly WebAuthService $webAuthService,
     ) {}
@@ -164,10 +166,9 @@ final class UsercpSecurityCommand
         $scheme = Http::protocolPrefix(Url::isSecure());
 
         if ($changedemail === 1) {
-            $sec = Token::randomHex(20);
-            $hash = md5($sec.$email.$sec);
+            $hash = $this->secureTokenService->generate();
             $obemail = rawurlencode($email);
-            $data['editsecret'] = $sec;
+            $data['editsecret'] = $this->secureTokenService->emailChangeDigest($hash, $email);
 
             $subject = $siteName.($lang['mail_profile_change_confirmation'] ?? '');
             $changeEmailOne = sprintf($lang['mail_change_email_one'] ?? '', $siteName);
@@ -268,10 +269,9 @@ final class UsercpSecurityCommand
                 throw ValidationException::withMessages(['email' => [$lang['std_email_in_use'] ?? 'Email in use.']]);
             }
 
-            $sec = Token::randomHex(20);
-            $hash = md5($sec.$email.$sec);
+            $hash = $this->secureTokenService->generate();
             $obemail = rawurlencode($email);
-            $data['editsecret'] = $sec;
+            $data['editsecret'] = $this->secureTokenService->emailChangeDigest($hash, $email);
             $changedemail = 1;
 
             $subject = $siteName.($lang['mail_profile_change_confirmation'] ?? '');

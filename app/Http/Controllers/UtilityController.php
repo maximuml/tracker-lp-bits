@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Repositories\SearchPageRepository;
 use App\Services\AjaxService;
 use App\Services\AttachmentMutationService;
+use App\Services\SecureTokenService;
 use App\Services\UsersearchPageService;
 use App\Support\Api;
 use App\Support\Attachment\AttachmentService;
@@ -22,7 +23,6 @@ use App\Support\LegacyAuth;
 use App\Support\LegacyHeaderBag;
 use App\Support\Logger;
 use App\Support\Smilies;
-use App\Support\Strings;
 use App\Support\Style;
 use App\Support\Url;
 use Illuminate\Http\JsonResponse;
@@ -56,6 +56,7 @@ class UtilityController extends LegacyController
         Globals $globals,
         ?LegacyRedisCache $legacyRedisCache,
         LegacyHeaderBag $legacyHeaderBag,
+        private readonly SecureTokenService $secureTokenService,
     ) {
         $this->usersearchPageService = $usersearchPageService;
         $this->searchPageRepository = $searchPageRepository;
@@ -516,12 +517,12 @@ XML;
     {
         $routePath = $request->route('path') ?? '';
         $pathInfo = $routePath !== '' ? '/'.ltrim((string) $routePath, '/') : '';
-        if (! preg_match(':^/(\d{1,10})/([\w]{32})/(.+)$:', $pathInfo, $matches)) {
+        if (! preg_match(':^/(\d{1,10})/([\w]{32,64})/(.+)$:', $pathInfo, $matches)) {
             abort(404);
         }
 
         $id = (int) $matches[1];
-        $md5 = $matches[2];
+        $token = $matches[2];
         $email = urldecode($matches[3]);
 
         if ($id <= 0) {
@@ -540,8 +541,7 @@ XML;
             abort(404);
         }
 
-        $sec = Strings::padHash($user->editsecret);
-        if (preg_match('/^ *$/s', $sec) || $md5 !== md5($sec.$email.$sec)) {
+        if (! $this->secureTokenService->verifyEmailChangeToken((string) $user->editsecret, $email, $token)) {
             abort(404);
         }
 

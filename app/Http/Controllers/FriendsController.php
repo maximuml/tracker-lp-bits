@@ -23,10 +23,16 @@ use Illuminate\View\View;
 
 class FriendsController extends LegacyController
 {
+    public function __construct(
+        private readonly FriendsRepository $friendsRepository,
+        private readonly CurrentUser $currentUser,
+        private readonly Globals $globals,
+    ) {}
+
     public function friends(Request $request): Response|RedirectResponse|View
     {
-        $currentUser = (array) (app(CurrentUser::class)->get() ?? []);
-        $langFriends = (array) (app(Globals::class)->get('lang_friends') ?? []);
+        $currentUser = (array) ($this->currentUser->get() ?? []);
+        $langFriends = (array) ($this->globals->get('lang_friends') ?? []);
 
         $userid = (int) ($request->input('id') ?? $currentUser['id'] ?? 0);
         if ($userid <= 0 || ! Validators::isId($userid)) {
@@ -51,8 +57,8 @@ class FriendsController extends LegacyController
             return $this->handleDelete($request, $userid, $langFriends);
         }
 
-        $friendRows = app(FriendsRepository::class)->getFriends($userid);
-        $blockRows = app(FriendsRepository::class)->getBlocks($userid);
+        $friendRows = $this->friendsRepository->getFriends($userid);
+        $blockRows = $this->friendsRepository->getBlocks($userid);
 
         $userIds = array_merge(
             array_column($friendRows, 'id'),
@@ -144,11 +150,11 @@ class FriendsController extends LegacyController
             return $this->legacyAbortResponse($langFriends['std_error'] ?? 'Error', ($langFriends['std_unknown_type'] ?? 'Unknown type ').$type);
         }
 
-        if (app(FriendsRepository::class)->exists($userid, $type, $targetid)) {
+        if ($this->friendsRepository->exists($userid, $type, $targetid)) {
             return $this->legacyAbortResponse($langFriends['std_error'] ?? 'Error', ($langFriends['std_user_id'] ?? 'User ').$targetid.($langFriends['std_already_in'] ?? ' is already in ').$tableIs.($langFriends['std_list'] ?? ' list.'));
         }
 
-        app(FriendsRepository::class)->add($userid, $type, $targetid);
+        $this->friendsRepository->add($userid, $type, $targetid);
         $this->purgeNeighborsCache();
 
         return redirect('/friends.php?id='.$userid.'#'.$frag);
@@ -182,7 +188,7 @@ class FriendsController extends LegacyController
             return $this->legacyAbortResponse(($langFriends['std_delete'] ?? 'Delete ').$type, $confirm, false);
         }
 
-        $deleted = app(FriendsRepository::class)->delete($userid, $type, $targetid);
+        $deleted = $this->friendsRepository->delete($userid, $type, $targetid);
         if ($deleted === 0) {
             $notFoundKey = $type === 'friend' ? 'std_no_friend_found' : 'std_no_block_found';
 
@@ -208,7 +214,7 @@ class FriendsController extends LegacyController
 
     private function purgeNeighborsCache(): void
     {
-        $currentUser = (array) (app(CurrentUser::class)->get() ?? []);
+        $currentUser = (array) ($this->currentUser->get() ?? []);
         $cachefile = 'cache/'.Locale::folderFromCookie(Input::cookieValue('c_lang_folder', ''), false).'/neighbors/'.($currentUser['id'] ?? 0).'.html';
         if (file_exists($cachefile)) {
             unlink($cachefile);

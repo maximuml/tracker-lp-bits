@@ -19,6 +19,13 @@ use Illuminate\View\View;
 
 class SystemMaintenanceController extends LegacyController
 {
+    public function __construct(
+        private readonly CurrentUser $currentUser,
+        private readonly Globals $globals,
+        private readonly Language $language,
+        private readonly MysqlStatsRepository $mysqlStatsRepository,
+    ) {}
+
     public function docleanup(Request $request): Response
     {
 
@@ -37,7 +44,7 @@ class SystemMaintenanceController extends LegacyController
 
     public function mailtest(Request $request): View|RedirectResponse|Response
     {
-        if (app(CurrentUser::class)->get() === null) {
+        if ($this->currentUser->get() === null) {
             $qs = $request->getQueryString();
 
             return redirect('/mailtest.php'.($qs ? '?'.$qs : ''));
@@ -47,8 +54,8 @@ class SystemMaintenanceController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Permission denied.');
         }
 
-        $langMailtest = (array) (app(Globals::class)->get('lang_mailtest') ?? []);
-        $langFunctions = app(Language::class)->functions();
+        $langMailtest = (array) ($this->globals->get('lang_mailtest') ?? []);
+        $langFunctions = $this->language->functions();
 
         if ($request->post('action') === 'sendmail') {
             $email = Email::sanitizeForDisplay((string) trim((string) $request->post('email', '')));
@@ -59,7 +66,7 @@ class SystemMaintenanceController extends LegacyController
                 );
             }
 
-            $globals = app(Globals::class);
+            $globals = $this->globals;
             $siteName = (string) ($globals->get('SITENAME', '') ?? '');
             $siteEmail = (string) ($globals->get('SITEEMAIL', '') ?? '');
             $title = $siteName.($langMailtest['text_smtp_testing_mail'] ?? '');
@@ -87,7 +94,7 @@ class SystemMaintenanceController extends LegacyController
 
     public function mysqlStats(Request $request): View|RedirectResponse|Response
     {
-        if (app(CurrentUser::class)->get() === null) {
+        if ($this->currentUser->get() === null) {
             $qs = $request->getQueryString();
 
             return redirect('/mysql_stats.php'.($qs ? '?'.$qs : ''));
@@ -97,7 +104,7 @@ class SystemMaintenanceController extends LegacyController
             abort(403);
         }
 
-        $rep = app(MysqlStatsRepository::class);
+        $rep = $this->mysqlStatsRepository;
         $status = $rep->status();
 
         $uptimeSeconds = max(1, (int) $status['uptimeSeconds']);

@@ -35,23 +35,38 @@ final class CoverageRatchetCommand extends Command
     /**
      * Per-module thresholds (minimum line coverage %).
      *
-     * These are conservative floors based on current coverage levels.
-     * They should be raised as coverage improves.
+     * Floors live in .coverage-baseline.json (measured facts — the
+     * effective threshold is max(entry here, baseline)). Entries at 0.0
+     * make the module visible in the report without gating yet; their
+     * floor is set by the next baseline bump. Every first-level app/
+     * directory must appear here — enforced by
+     * CoverageRatchetCompletenessTest.
      */
     private const MODULE_THRESHOLDS = [
-        'app/Services' => 25.0,
-        'app/Repositories' => 30.0,
-        'app/Support' => 25.0,
-        'app/Models' => 20.0,
-        'app/Http/Controllers' => 15.0,
-        'app/Policies' => 10.0,
-        'app/Jobs' => 20.0,
+        'app/Auth' => 15.0,
         'app/Console' => 5.0,
+        'app/Contracts' => 0.0,
+        'app/DTOs' => 40.0,
+        'app/Enums' => 15.0,
+        'app/Events' => 0.0,
+        'app/Exceptions' => 0.0,
+        'app/Filament' => 0.0,
+        'app/Http' => 0.0,
+        'app/Http/Controllers' => 15.0,
+        'app/Jobs' => 20.0,
+        'app/Listeners' => 0.0,
+        'app/Logging' => 0.0,
+        'app/Models' => 20.0,
+        'app/Observers' => 0.0,
+        'app/Policies' => 10.0,
+        'app/Providers' => 0.0,
+        'app/Repositories' => 30.0,
+        'app/Services' => 25.0,
+        'app/Support' => 25.0,
         'app/Utils' => 5.0,
         'app/ValueObjects' => 50.0,
-        'app/DTOs' => 40.0,
-        'app/Auth' => 15.0,
-        'app/Enums' => 15.0,
+        'app/View' => 0.0,
+        'app/ViewModels' => 0.0,
     ];
 
     public function handle(): int

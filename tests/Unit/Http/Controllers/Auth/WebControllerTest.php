@@ -7,6 +7,7 @@ namespace Tests\Unit\Http\Controllers\Auth;
 use App\Exceptions\AuthenticationException;
 use App\Http\Controllers\Auth\WebController;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Repositories\UserPasskeyRepository;
 use App\Services\WebAuthService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -38,7 +39,7 @@ final class WebControllerTest extends TestCase
             new RedirectResponse('index.php')
         );
 
-        $controller = new WebController($authService);
+        $controller = new WebController($authService, Mockery::mock(UserPasskeyRepository::class));
         $request = LoginRequest::create('/login', 'POST', [
             'username' => 'testuser',
             'password' => 'password',
@@ -64,7 +65,7 @@ final class WebControllerTest extends TestCase
         $guard->shouldReceive('check')->once()->andReturn(false);
         Auth::shouldReceive('guard')->with('nexus-web')->once()->andReturn($guard);
 
-        $controller = new WebController($authService);
+        $controller = new WebController($authService, Mockery::mock(UserPasskeyRepository::class));
         $request = LoginRequest::create('/login', 'POST', [
             'username' => 'testuser',
             'password' => 'password',
@@ -86,7 +87,7 @@ final class WebControllerTest extends TestCase
         /** @var WebAuthService&Mockery\MockInterface $authService */
         $authService = Mockery::mock(WebAuthService::class);
 
-        $controller = new WebController($authService);
+        $controller = new WebController($authService, Mockery::mock(UserPasskeyRepository::class));
         $request = LoginRequest::create('/login', 'POST', []);
         $request->setContainer(app());
         $request->setRedirector(app('redirect'));
@@ -106,7 +107,7 @@ final class WebControllerTest extends TestCase
         $guard->shouldReceive('check')->once()->andReturn(false);
         Auth::shouldReceive('guard')->with('nexus-web')->once()->andReturn($guard);
 
-        $controller = new WebController($authService);
+        $controller = new WebController($authService, Mockery::mock(UserPasskeyRepository::class));
         $request = LoginRequest::create('/login', 'POST', [
             'username' => 'testuser',
             'password' => 'password',
@@ -132,7 +133,7 @@ final class WebControllerTest extends TestCase
         $guard->shouldReceive('check')->once()->andReturn(false);
         Auth::shouldReceive('guard')->with('nexus-web')->once()->andReturn($guard);
 
-        $controller = new WebController($authService);
+        $controller = new WebController($authService, Mockery::mock(UserPasskeyRepository::class));
         $request = LoginRequest::create('/login', 'POST', [
             'username' => 'testuser',
             'password' => 'password',
@@ -159,7 +160,7 @@ final class WebControllerTest extends TestCase
         $guard->shouldReceive('check')->once()->andReturn(false);
         Auth::shouldReceive('guard')->with('nexus-web')->once()->andReturn($guard);
 
-        $controller = new WebController($authService);
+        $controller = new WebController($authService, Mockery::mock(UserPasskeyRepository::class));
         $request = LoginRequest::create('/login', 'POST', [
             'username' => 'testuser',
             'password' => 'password',
@@ -188,7 +189,7 @@ final class WebControllerTest extends TestCase
         $guard->shouldReceive('check')->once()->andReturn(false);
         Auth::shouldReceive('guard')->with('nexus-web')->once()->andReturn($guard);
 
-        $controller = new WebController($authService);
+        $controller = new WebController($authService, Mockery::mock(UserPasskeyRepository::class));
         $request = LoginRequest::create('/login', 'POST', [
             'username' => 'testuser',
             'password' => 'wrongpass',
@@ -213,7 +214,7 @@ final class WebControllerTest extends TestCase
         $guard->shouldReceive('logout')->once();
         Auth::shouldReceive('guard')->with('web')->once()->andReturn($guard);
 
-        $controller = new WebController($authService);
+        $controller = new WebController($authService, Mockery::mock(UserPasskeyRepository::class));
         $request = Request::create('/logout', 'GET');
 
         $response = $controller->logout($request);

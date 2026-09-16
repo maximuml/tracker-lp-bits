@@ -38,8 +38,13 @@ class MessageController extends LegacyController
 
     private MessagePageService $pageService;
 
-    public function __construct(MessageRepository $repository, MessageService $legacyService, MessagePageService $pageService)
-    {
+    public function __construct(
+        MessageRepository $repository,
+        MessageService $legacyService,
+        MessagePageService $pageService,
+        private readonly CurrentUser $currentUser,
+        private readonly Globals $globals,
+    ) {
         $this->repository = $repository;
         $this->legacyService = $legacyService;
         $this->pageService = $pageService;
@@ -69,8 +74,8 @@ class MessageController extends LegacyController
 
     public function sendmessage(Request $request): Response|RedirectResponse|View
     {
-        $langSendmessage = (array) (app(Globals::class)->get('lang_sendmessage') ?? []);
-        $currentUser = (array) (app(CurrentUser::class)->get() ?? []);
+        $langSendmessage = (array) ($this->globals->get('lang_sendmessage') ?? []);
+        $currentUser = (array) ($this->currentUser->get() ?? []);
 
         $receiver = (int) $request->input('receiver', 0);
         if ($receiver <= 0) {

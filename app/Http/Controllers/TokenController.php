@@ -14,6 +14,10 @@ use Illuminate\Support\Facades\Auth;
 
 class TokenController extends Controller
 {
+    public function __construct(
+        private readonly TokenRepository $tokenRepository,
+    ) {}
+
     /**
      * @return array<string, mixed>
      */
@@ -28,7 +32,7 @@ class TokenController extends Controller
             if ($count >= 5) {
                 throw new NexusException(Locale::trans('token.maximum_allow_number_reached', [], null));
             }
-            $allowed = app(TokenRepository::class)->listUserTokenPermissionAllowed();
+            $allowed = $this->tokenRepository->listUserTokenPermissionAllowed();
             foreach ($request->permissions as $permission) {
                 if (! isset($allowed[$permission])) {
                     throw new NexusException(Locale::trans('token.permission_not_allowed', ['permission_text' => Locale::trans("route-permission.{$permission}.text", [], null)], null));

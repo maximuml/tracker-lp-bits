@@ -39,6 +39,10 @@ use Laravel\Horizon\Horizon;
  */
 final class HealthController extends Controller
 {
+    public function __construct(
+        private readonly MasterSupervisorRepository $masterSupervisorRepository,
+    ) {}
+
     /**
      * Liveness probe — always returns 200 if PHP-FPM can serve the request.
      */
@@ -153,7 +157,7 @@ final class HealthController extends Controller
         }
 
         try {
-            $repository = app(MasterSupervisorRepository::class);
+            $repository = $this->masterSupervisorRepository;
             $masters = $repository->all();
 
             if (empty($masters)) {

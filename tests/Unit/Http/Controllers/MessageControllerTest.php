@@ -8,6 +8,8 @@ use App\Http\Controllers\MessageController;
 use App\Repositories\MessageRepository;
 use App\Services\MessagePageService;
 use App\Services\MessageService;
+use App\Support\CurrentUser;
+use App\Support\Globals;
 use Illuminate\Http\Request;
 use Mockery;
 use Tests\Attributes\TestCategory;
@@ -33,7 +35,7 @@ final class MessageControllerTest extends TestCase
         /** @var MessagePageService&Mockery\MockInterface $pageService */
         $pageService = Mockery::mock(MessagePageService::class);
 
-        $controller = new MessageController($repository, $legacyService, $pageService);
+        $controller = new MessageController($repository, $legacyService, $pageService, Mockery::mock(CurrentUser::class), Mockery::mock(Globals::class));
 
         $this->assertInstanceOf(MessageController::class, $controller);
     }
@@ -55,7 +57,7 @@ final class MessageControllerTest extends TestCase
             ->once()
             ->andReturn(['title' => 'Messages', 'rows' => []]);
 
-        $controller = new MessageController($repository, $legacyService, $pageService);
+        $controller = new MessageController($repository, $legacyService, $pageService, Mockery::mock(CurrentUser::class), Mockery::mock(Globals::class));
         $request = Request::create('/messages', 'GET');
 
         // The controller calls legacyPage which may fail on view rendering,
@@ -85,7 +87,7 @@ final class MessageControllerTest extends TestCase
         $pageService = Mockery::mock(MessagePageService::class);
         $pageService->shouldNotReceive('build');
 
-        $controller = new MessageController($repository, $legacyService, $pageService);
+        $controller = new MessageController($repository, $legacyService, $pageService, Mockery::mock(CurrentUser::class), Mockery::mock(Globals::class));
         $request = Request::create('/messages', 'GET');
 
         $response = $controller->messages($request);

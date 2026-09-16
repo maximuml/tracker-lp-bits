@@ -22,11 +22,12 @@ class AttendanceController extends LegacyController
 {
     public function __construct(
         private readonly Globals $globals,
+        private readonly CurrentUser $currentUser,
     ) {}
 
     public function attendance(Request $request, AttendanceRepository $repository): View|RedirectResponse|Response
     {
-        $curUser = app(CurrentUser::class)->get();
+        $curUser = $this->currentUser->get();
         if ($curUser === null) {
             return redirect('/attendance.php');
         }
@@ -174,7 +175,7 @@ EOP;
      */
     public function attend(Request $request, AttendanceRepository $repository): array
     {
-        $curUser = app(CurrentUser::class)->get();
+        $curUser = $this->currentUser->get();
         if ($curUser === null) {
             return $this->fail([], 'Unauthenticated');
         }

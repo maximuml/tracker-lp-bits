@@ -7,6 +7,7 @@ namespace Tests\Unit\Http\Controllers;
 use App\Http\Controllers\TokenController;
 use App\Http\Requests\TokenDeleteRequest;
 use App\Http\Requests\TokenRequest;
+use App\Repositories\TokenRepository;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Mockery;
@@ -26,7 +27,7 @@ final class TokenControllerTest extends TestCase
     {
         Auth::shouldReceive('user')->once()->andReturn(null);
 
-        $controller = new TokenController;
+        $controller = new TokenController(Mockery::mock(TokenRepository::class));
         $request = TokenRequest::create('/api/v1/token/add', 'POST', [
             'name' => 'test-token',
             'permissions' => ['torrent.list'],
@@ -44,7 +45,7 @@ final class TokenControllerTest extends TestCase
     {
         Auth::shouldReceive('user')->once()->andReturn(null);
 
-        $controller = new TokenController;
+        $controller = new TokenController(Mockery::mock(TokenRepository::class));
         $request = TokenDeleteRequest::create('/api/v1/token/delete', 'DELETE', ['id' => 1]);
         $request->setContainer(app());
         $request->setRedirector(app('redirect'));
@@ -59,7 +60,7 @@ final class TokenControllerTest extends TestCase
     {
         $this->expectException(ValidationException::class);
 
-        $controller = new TokenController;
+        $controller = new TokenController(Mockery::mock(TokenRepository::class));
         $request = TokenDeleteRequest::create('/api/v1/token/delete', 'DELETE', []);
         $request->setContainer(app());
         $request->setRedirector(app('redirect'));

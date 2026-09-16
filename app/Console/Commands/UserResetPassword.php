@@ -40,7 +40,7 @@ class UserResetPassword extends Command
      *
      * @return int
      */
-    public function handle()
+    public function handle(UserRepositoryInterface $rep)
     {
         $uid = $this->argument('uid');
         $password = $this->argument('password');
@@ -48,8 +48,6 @@ class UserResetPassword extends Command
         $log = "uid: $uid, password: $password, passwordConfirmation: $passwordConfirmation";
         $this->info($log);
         Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
-
-        $rep = app(UserRepositoryInterface::class);
         $result = $rep->resetPassword($uid, $password, $passwordConfirmation);
         $log = sprintf('[%s], %s, result: %s', RequestContext::instance()->getRequestId(), __METHOD__, var_export($result, true));
         $this->info($log);

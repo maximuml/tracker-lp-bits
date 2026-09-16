@@ -40,9 +40,8 @@ class AttendanceCleanup extends Command
      *
      * @return mixed
      */
-    public function handle()
+    public function handle(AttendanceRepository $rep)
     {
-        $rep = app(AttendanceRepository::class);
         $result = $rep->cleanup();
         $log = sprintf(
             '[%s], %s, result: %s',

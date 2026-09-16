@@ -15,10 +15,17 @@ use App\Support\Settings;
 use App\Support\SupportContext;
 use App\Support\UserDisplay;
 use App\Utils\MsgAlert;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Facades\Auth;
 
 class ResetNexus
 {
+    public function __construct(
+        private readonly CurrentUser $currentUser,
+        private readonly LegacyHeaderBag $legacyHeaderBag,
+        private readonly Application $app,
+    ) {}
+
     /**
      * Clear per-request legacy state so a worker/Octane process does not leak
      * values from one request/job into the next.
@@ -28,10 +35,10 @@ class ResetNexus
     public function handle($event): void
     {
         SupportContext::reset();
-        app(CurrentUser::class)->reset();
+        $this->currentUser->reset();
         // T-20: Flush the ActorContext singleton so the next request
         // re-resolves it from the freshly-reset auth guard.
-        app()->forgetInstance(ActorContext::class);
+        $this->app->forgetInstance(ActorContext::class);
         RequestContext::flush();
         AssetAppender::flush();
         PageLayout::resetState();
@@ -40,7 +47,7 @@ class ResetNexus
         UserDisplay::resetState();
         // T-11: Flush the per-request legacy header bag so headers/status
         // set by one request do not leak into the next under Octane.
-        app(LegacyHeaderBag::class)->flush();
+        $this->legacyHeaderBag->flush();
 
         // T-10: Reset auth guard cached user to prevent cross-request user
         // leakage under Octane. NexusWebGuard caches $this->user on the guard

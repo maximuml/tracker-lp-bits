@@ -11,6 +11,7 @@ use App\Support\Bootstrap;
 use App\Support\CurrentUser;
 use App\Support\LegacyBootstrap;
 use Closure;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -29,6 +30,9 @@ final class LegacyRequestMiddleware
     public function __construct(
         private readonly LegacyUrlRewriter $urlRewriter,
         private readonly LegacyScriptContext $scriptContext,
+        private readonly CurrentUser $currentUser,
+        private readonly PageLayoutRepositoryInterface $pageLayoutRepository,
+        private readonly Application $app,
     ) {}
 
     public function handle(Request $request, Closure $next): Response
@@ -43,7 +47,7 @@ final class LegacyRequestMiddleware
 
         // Reset the per-request CurrentUser cache so it re-reads from Auth
         // on each request (Octane/test compatibility).
-        app(CurrentUser::class)->reset();
+        $this->currentUser->reset();
 
         $rootpath = base_path().'/';
         LegacyBootstrap::boot($request, $rootpath);
@@ -52,14 +56,14 @@ final class LegacyRequestMiddleware
 
         $this->scriptContext->boot($script, $rootpath);
 
-        app(PageLayoutRepositoryInterface::class)->prepareAccess();
+        $this->pageLayoutRepository->prepareAccess();
 
         return $next($request);
     }
 
     public function terminate(Request $request, Response $response): void
     {
-        app(PageLayoutRepositoryInterface::class)->flushAccess();
+        $this->pageLayoutRepository->flushAccess();
 
         if ($this->detectScript($request) === 'index') {
             Bootstrap::autoClean((bool) false);
@@ -68,10 +72,10 @@ final class LegacyRequestMiddleware
 
     private function bindRequest(Request $request): void
     {
-        app()->instance('request', $request);
+        $this->app->instance('request', $request);
 
-        if (app()->bound('url')) {
-            app('url')->setRequest($request);
+        if ($this->app->bound('url')) {
+            $this->app->make('url')->setRequest($request);
         }
     }
 

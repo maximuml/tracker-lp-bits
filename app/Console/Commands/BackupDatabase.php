@@ -40,9 +40,8 @@ class BackupDatabase extends Command
      *
      * @return int
      */
-    public function handle()
+    public function handle(ToolRepositoryInterface $rep)
     {
-        $rep = app(ToolRepositoryInterface::class);
         $transfer = $this->option('transfer');
         $this->info("transfer: $transfer");
         $result = $rep->backupDatabase($transfer);

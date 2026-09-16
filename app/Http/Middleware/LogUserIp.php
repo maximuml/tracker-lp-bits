@@ -12,6 +12,10 @@ use Symfony\Component\HttpFoundation\Response;
 
 class LogUserIp
 {
+    public function __construct(
+        private readonly IpLogRepository $ipLogRepository,
+    ) {}
+
     /**
      * Handle an incoming request.
      */
@@ -23,7 +27,7 @@ class LogUserIp
         }
         $user = $request->user();
         if ($user) {
-            app(IpLogRepository::class)->saveToCache($user->id);
+            $this->ipLogRepository->saveToCache($user->id);
         }
 
         return $response;

@@ -39,9 +39,8 @@ class AttendanceMigrate extends Command
     /**
      * Execute the console command.
      */
-    public function handle(): int
+    public function handle(AttendanceRepository $rep): int
     {
-        $rep = app(AttendanceRepository::class);
         $result = $rep->migrateAttendance();
         $log = sprintf('[%s], %s, result: %s, query: %s', RequestContext::instance()->getRequestId(), __METHOD__, var_export($result, true), LegacyDb::lastQuery(false, 'json'));
         $this->info($log);

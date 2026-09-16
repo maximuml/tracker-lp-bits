@@ -31,8 +31,12 @@ class NexusWebGuard implements StatefulGuard
      *
      * @return void
      */
-    public function __construct(Request $request, UserProvider $provider)
-    {
+    public function __construct(
+        Request $request,
+        UserProvider $provider,
+        private readonly WebAuthService $webAuthService,
+        private readonly CurrentUser $currentUser,
+    ) {
         $this->request = $request;
         $this->provider = $provider;
     }
@@ -96,7 +100,7 @@ class NexusWebGuard implements StatefulGuard
             return false;
         }
 
-        if (! app(WebAuthService::class)->validatePassword($user, $password)) {
+        if (! $this->webAuthService->validatePassword($user, $password)) {
             return false;
         }
 
@@ -129,7 +133,7 @@ class NexusWebGuard implements StatefulGuard
             return false;
         }
 
-        if (! app(WebAuthService::class)->validatePassword($user, $password)) {
+        if (! $this->webAuthService->validatePassword($user, $password)) {
             return false;
         }
 
@@ -155,7 +159,7 @@ class NexusWebGuard implements StatefulGuard
         $duration = $remember ? 5 * 365 * 86400 : 0;
         AuthCookie::setLoginCookie((int) $user->getAuthIdentifier(), null, $duration);
 
-        app(CurrentUser::class)->set($user->toArray());
+        $this->currentUser->set($user->toArray());
     }
 
     public function loginUsingId($id, $remember = false): Authenticatable|false
@@ -193,6 +197,6 @@ class NexusWebGuard implements StatefulGuard
     {
         AuthCookie::clear();
         $this->user = null;
-        app(CurrentUser::class)->set(null);
+        $this->currentUser->set(null);
     }
 }

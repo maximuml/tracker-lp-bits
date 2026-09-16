@@ -51,7 +51,7 @@ class Handler extends ExceptionHandler
      */
     public function register()
     {
-        if (app()->runningInConsole()) {
+        if ($this->container->runningInConsole()) {
             return;
         }
         $request = request();

@@ -34,7 +34,7 @@ class FireEvent implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(): void
+    public function handle(Dispatcher $dispatcher): void
     {
         $name = $this->name;
         $idKey = $this->idKey;
@@ -68,7 +68,7 @@ class FireEvent implements ShouldQueue
                 }
             }
             /** @var class-string $eventName */
-            $result = app(Dispatcher::class)->dispatch(new $eventName(...$params));
+            $result = $dispatcher->dispatch(new $eventName(...$params));
             $log .= ', success call dispatch, result: '.var_export($result, true);
             Events::publishModel($name, (int) $model->getKey(), $model->toJson());
         } else {

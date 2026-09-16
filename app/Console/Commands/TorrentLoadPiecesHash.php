@@ -29,11 +29,10 @@ class TorrentLoadPiecesHash extends Command
      *
      * @return int
      */
-    public function handle()
+    public function handle(TorrentDownloadRepositoryInterface $rep)
     {
         $begin = time();
         $id = $this->option('id');
-        $rep = app(TorrentDownloadRepositoryInterface::class);
         $this->info("id: $id, going to load pieces hash...");
         $result = $rep->loadPiecesHashCache($id);
         $this->info(sprintf('%s, result: %s, cost time: %s seconds.', RequestContext::instance()->getRequestId(), json_encode($result), time() - $begin));

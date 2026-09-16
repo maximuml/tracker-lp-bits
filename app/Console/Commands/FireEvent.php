@@ -34,7 +34,7 @@ class FireEvent extends Command
      *
      * @return int
      */
-    public function handle()
+    public function handle(Dispatcher $dispatcher)
     {
         $name = (string) $this->option('name');
         $idKey = (string) $this->option('idKey');
@@ -75,7 +75,7 @@ class FireEvent extends Command
             $modelOld->setAttribute('id', $modelOldData['id']);
             $params[] = $useArray ? $modelOldData : $modelOld;
         }
-        $result = app(Dispatcher::class)->dispatch(new $eventName(...$params));
+        $result = $dispatcher->dispatch(new $eventName(...$params));
         $log .= ', success call dispatch, result: '.var_export($result, true);
         Events::publishModel($name, $model->getKey(), '');
         $this->info($log);

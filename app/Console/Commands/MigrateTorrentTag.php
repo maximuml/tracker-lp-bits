@@ -41,9 +41,8 @@ class MigrateTorrentTag extends Command
      *
      * @return int
      */
-    public function handle()
+    public function handle(TagRepositoryInterface $rep)
     {
-        $rep = app(TagRepositoryInterface::class);
         $result = $rep->migrateTorrentTag();
         $log = sprintf('[%s], %s, result: %s, query: %s', RequestContext::instance()->getRequestId(), __METHOD__, var_export($result, true), LegacyDb::lastQuery(false, 'json'));
         $this->info($log);

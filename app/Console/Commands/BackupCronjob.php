@@ -38,11 +38,10 @@ class BackupCronjob extends Command
     /**
      * Execute the console command.
      */
-    public function handle(): int
+    public function handle(ToolRepositoryInterface $rep): int
     {
         $force = $this->option('force');
         $this->info("force: $force");
-        $rep = app(ToolRepositoryInterface::class);
         $result = $rep->cronjobBackup($force);
         $log = sprintf(
             '[%s], %s, result: %s',

@@ -59,10 +59,9 @@ class BuyTorrent implements ShouldBeUnique, ShouldQueue
      *
      * @throws \Throwable
      */
-    public function handle()
+    public function handle(TorrentPurchaseRepository $purchaseRep, BonusRepository $bonusRep)
     {
         $logPrefix = sprintf('user: %s, torrent: %s', $this->userId, $this->torrentId);
-        $purchaseRep = app(TorrentPurchaseRepository::class);
         $userId = $this->userId;
         $torrentId = $this->torrentId;
 
@@ -79,7 +78,6 @@ class BuyTorrent implements ShouldBeUnique, ShouldQueue
             return;
         }
         try {
-            $bonusRep = app(BonusRepository::class);
             $buyLog = $bonusRep->consumeToBuyTorrent($this->userId, $this->torrentId);
             // 标记购买成功
             Logger::writeWithContext((string) "{$logPrefix}, buy torrent success", (string) 'info', (bool) false);

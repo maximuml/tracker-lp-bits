@@ -40,12 +40,11 @@ class HitAndRunUpdateStatus extends Command
      *
      * @return int
      */
-    public function handle()
+    public function handle(HitAndRunRepository $rep)
     {
         $uid = $this->option('uid');
         $torrentId = $this->option('torrent_id');
         $ignoreTime = $this->option('ignore_time');
-        $rep = app(HitAndRunRepository::class);
         $rep->cronjobUpdateStatus($uid, $torrentId, $ignoreTime);
         $log = sprintf(
             '[%s], %s, uid: %s, torrentId: %s, ignoreTime: %s',

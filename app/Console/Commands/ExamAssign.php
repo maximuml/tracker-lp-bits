@@ -40,9 +40,8 @@ class ExamAssign extends Command
      *
      * @return int
      */
-    public function handle()
+    public function handle(ExamUserRepository $examRep)
     {
-        $examRep = app(ExamUserRepository::class);
         $uid = (int) $this->option('uid');
         $examId = (int) $this->option('exam_id');
         $begin = $this->option('begin');

@@ -30,12 +30,18 @@ use Illuminate\Support\Facades\Schema;
  */
 final class UsersearchPageService
 {
+    public function __construct(
+        private readonly CurrentUser $currentUser = new CurrentUser,
+        private readonly UserSearchRepository $userSearchRepository = new UserSearchRepository,
+        private readonly UserListingRepository $userListingRepository = new UserListingRepository,
+    ) {}
+
     /**
      * Build the data for the user search page.
      */
     public function build(Request $request): UsersearchPageViewModel
     {
-        $curUser = (array) (app(CurrentUser::class)->get() ?? []);
+        $curUser = (array) ($this->currentUser->get() ?? []);
         $requestUri = (string) Input::serverValue('REQUEST_URI');
         $hasModcomment = Schema::hasColumn('users', 'modcomment');
 
@@ -177,7 +183,7 @@ final class UsersearchPageService
      */
     private function buildResults(array $curUser, bool $hasModcomment, string $requestUri): string
     {
-        $searchResult = app(UserSearchRepository::class)->administrativeSearch((array) request()->query(), $hasModcomment, 30);
+        $searchResult = $this->userSearchRepository->administrativeSearch((array) request()->query(), $hasModcomment, 30);
         $count = (int) $searchResult['count'];
         $q = (string) $searchResult['q'];
         $perpage = 30;
@@ -186,7 +192,7 @@ final class UsersearchPageService
 
         $userIds = array_map(fn ($row) => (int) ($row['id'] ?? 0), $res);
         $ips = array_map(fn ($row) => (string) ($row['ip'] ?? ''), $res);
-        $extraStats = app(UserListingRepository::class)->getSearchExtraStats($userIds, $ips, (int) ($curUser['class'] ?? 0));
+        $extraStats = $this->userListingRepository->getSearchExtraStats($userIds, $ips, (int) ($curUser['class'] ?? 0));
         $peerTotals = $extraStats['peers'];
         $postCounts = $extraStats['posts'];
         $commentCounts = $extraStats['comments'];

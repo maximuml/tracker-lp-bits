@@ -18,6 +18,10 @@ use Illuminate\Support\Facades\Redis;
 
 class ScrapeService
 {
+    public function __construct(
+        private readonly PasskeyUserLookup $passkeyUserLookup = new PasskeyUserLookup,
+    ) {}
+
     /**
      * @return array<string, mixed>
      */
@@ -40,7 +44,7 @@ class ScrapeService
     {
         $passkey = $dto->passkey->toString();
 
-        $user = app(PasskeyUserLookup::class)->find($passkey);
+        $user = $this->passkeyUserLookup->find($passkey);
 
         if (empty($user)) {
             RedisGuard::attempt(static fn () => Redis::connection()->client()->set("passkey_invalid:{$passkey}", TIMENOW, ['ex' => 24 * 3600]));

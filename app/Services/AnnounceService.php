@@ -43,6 +43,11 @@ class AnnounceService
         private readonly Announce\CheaterDetector $cheaterDetector,
         private readonly Announce\HitAndRunHandler $hitAndRunHandler,
         private readonly AnnounceRequestFactory $requestFactory,
+        private readonly PasskeyUserLookup $passkeyUserLookup,
+        private readonly CurrentUser $currentUser,
+        private readonly CleanupRepository $cleanupRepository,
+        private readonly IpLogRepository $ipLogRepository,
+        private readonly RequireSeedTorrentRepository $requireSeedTorrentRepository,
     ) {}
 
     /**
@@ -183,14 +188,14 @@ class AnnounceService
     {
         $passkey = $ctx->params['passkey'];
 
-        $user = app(PasskeyUserLookup::class)->find($passkey);
+        $user = $this->passkeyUserLookup->find($passkey);
 
         if (! $user) {
             RedisGuard::attempt(static fn () => Redis::connection()->client()->set("passkey_invalid:{$passkey}", TIMENOW, ['ex' => 24 * 3600]));
             throw TrackerException::failure('Invalid passkey! Re-download the .torrent from '.Url::schemeAndHost(true));
         }
 
-        app(CurrentUser::class)->set($user);
+        $this->currentUser->set($user);
 
         if (! $user['enabled']) {
             throw TrackerException::failure('Your account is disabled!');
@@ -360,14 +365,14 @@ class AnnounceService
 
             $lockKey = sprintf('record_batch_lock:%s:%s', $ctx->userId(), $ctx->torrentId());
             if ($redis->set($lockKey, TIMENOW, ['nx', 'ex' => $ctx->autocleanIntervalOne])) {
-                app(CleanupRepository::class)->recordBatch($redis, $ctx->userId(), $ctx->torrentId());
-                app(IpLogRepository::class)->saveToCache($ctx->userId(), null, [$ctx->ip]);
+                $this->cleanupRepository->recordBatch($redis, $ctx->userId(), $ctx->torrentId());
+                $this->ipLogRepository->saveToCache($ctx->userId(), null, [$ctx->ip]);
             }
 
-            if (app(RequireSeedTorrentRepository::class)->shouldRecordUser($redis, $ctx->userId(), $ctx->torrentId())) {
+            if ($this->requireSeedTorrentRepository->shouldRecordUser($redis, $ctx->userId(), $ctx->torrentId())) {
                 $snatchInfo = LegacyDb::snatchInfo($ctx->torrentId(), $ctx->userId());
                 if ($snatchInfo) {
-                    app(RequireSeedTorrentRepository::class)->recordUser($redis, $ctx->userId(), $ctx->torrentId(), $snatchInfo);
+                    $this->requireSeedTorrentRepository->recordUser($redis, $ctx->userId(), $ctx->torrentId(), $snatchInfo);
                 }
             }
         });

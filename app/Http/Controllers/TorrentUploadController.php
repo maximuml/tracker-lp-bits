@@ -21,8 +21,8 @@ use App\Support\Category;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\CustomField;
-use App\Support\Form;
 use App\Support\Globals;
+use App\Support\Html\SafeHtml;
 use App\Support\Input;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
@@ -120,7 +120,7 @@ class TorrentUploadController extends Controller
             }
             $pickCellHtml = '<b>'.$lang_edit['row_torrent_position'].':&nbsp;</b>'
                 .'<select name="pos_state" style="width: 100px;">'.$options.'</select>&nbsp;&nbsp;&nbsp;'
-                .Form::datetimepickerInput('pos_state_until', '', Locale::trans('label.deadline', [], null).':&nbsp;', ['require_files' => true]);
+                .view('components.datetime-input', ['label' => SafeHtml::fromTrustedHtml(Locale::trans('label.deadline', [], null).':&nbsp;'), 'name' => 'pos_state_until', 'value' => ''])->render();
         }
 
         $customField = new CustomField;

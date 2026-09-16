@@ -14,9 +14,9 @@ use App\Models\Invite;
 use App\Models\Setting;
 use App\Services\RegistrationService;
 use App\Services\WebAuthService;
+use App\Support\AssetAppender;
 use App\Support\Captcha;
 use App\Support\Config\SiteConfig;
-use App\Support\Form;
 use App\Support\Locale;
 use App\Support\Network;
 use Illuminate\Http\RedirectResponse;
@@ -99,9 +99,7 @@ class RegistrationController extends Controller
             .e($preEmail !== '' ? $preEmail : (is_string($oldEmail) ? $oldEmail : '')).'"'
             .($preEmail !== '' ? ' readonly' : '').' autocomplete="email" />';
 
-        ob_start();
-        Form::passwordHashJs('signup-form', 'wantpassword', 'wantpassword', true, 'passagain', 'wantusername');
-        $passwordHashJs = (string) ob_get_clean();
+        AssetAppender::js('js/auth-form.js', 'footer', true, 'auth-form');
 
         return view('auth.signup', [
             'lang' => $langSignup,
@@ -125,7 +123,6 @@ class RegistrationController extends Controller
                 : ($langSignup['head_signup'] ?? 'Signup'),
             'usernameInput' => $usernameInput,
             'emailInput' => $emailInput,
-            'passwordHashJs' => $passwordHashJs,
         ]);
     }
 

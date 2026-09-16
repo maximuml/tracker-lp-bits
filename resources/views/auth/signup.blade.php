@@ -34,7 +34,14 @@
     </form>
 
     <p>
-    <form method="post" action="/signup" id="signup-form">
+    <form method="post" action="/signup" id="signup-form"
+          data-auth-form="hash" data-username-name="wantusername"
+          data-password-class="wantpassword" data-password-hash-name="wantpassword"
+          data-password-confirm-class="passagain" data-password-required="1"
+          data-tip-short="{{ \App\Support\Locale::trans('signup.password_too_short', [], null) }}"
+          data-tip-long="{{ \App\Support\Locale::trans('signup.password_too_long', [], null) }}"
+          data-tip-equal-username="{{ \App\Support\Locale::trans('signup.password_equals_username', [], null) }}"
+          data-tip-unmatched="{{ \App\Support\Locale::trans('signup.passwords_unmatched', [], null) }}">
         @csrf
         @if ($isInvite)
             <input type="hidden" name="inviter" value="{{ $invite->inviter ?? $inviter ?? '' }}" />
@@ -98,6 +105,4 @@
         <input type="hidden" name="wantpassword" />
         <input type="hidden" name="passagain" />
     </form>
-
-    @safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($passwordHashJs))
 @endsection

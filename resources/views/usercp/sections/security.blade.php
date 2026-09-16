@@ -1,6 +1,14 @@
 @include('usercp.sections._menu', ['selected' => 'security'])
 
-<form method=post action=usercp.php id="security"><input type=hidden name=action value=security><input type=hidden name=type value={{ $security['isConfirm'] ? 'confirm' : 'save' }}>
+<form method=post action=usercp.php id="security"
+      data-auth-form="{{ $security['isConfirm'] ? 'challenge' : 'hash' }}"
+      data-username-name="username"
+      data-password-class="{{ $security['isConfirm'] ? 'oldpassword' : 'password' }}"
+      data-password-hash-name="chpassword" data-password-confirm-class="passagain"
+      data-tip-short="{{ \App\Support\Locale::trans('signup.password_too_short', [], null) }}"
+      data-tip-long="{{ \App\Support\Locale::trans('signup.password_too_long', [], null) }}"
+      data-tip-equal-username="{{ \App\Support\Locale::trans('signup.password_equals_username', [], null) }}"
+      data-tip-unmatched="{{ \App\Support\Locale::trans('signup.passwords_unmatched', [], null) }}"><input type=hidden name=action value=security><input type=hidden name=type value={{ $security['isConfirm'] ? 'confirm' : 'save' }}>
 <div class="nx-fgrid nx-fgrid--flat">
 @if ($security['isConfirm'])
 @if (($security['confirmHidden']['resetpasskey'] ?? '') === '1')<input type="hidden" name="resetpasskey" value="1">@endif

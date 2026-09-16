@@ -103,6 +103,50 @@ final class UsercpHttpTest extends TestCase
             ->assertStatus(200);
     }
 
+    public function test_security_section_emits_hash_mode_wiring(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->withNexusCookie($user)
+            ->get('/usercp?action=security');
+        $response->assertStatus(200);
+
+        $html = $response->getContent();
+        $this->assertIsString($html);
+        $this->assertStringContainsString('id="security"', $html);
+        $this->assertStringContainsString('data-auth-form="hash"', $html);
+        $this->assertStringContainsString('data-password-class="password"', $html);
+        $this->assertStringContainsString('data-password-hash-name="chpassword"', $html);
+        $this->assertStringContainsString('js/auth-form.js', $html);
+    }
+
+    public function test_security_save_renders_challenge_mode_wiring(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->withNexusCookie($user)
+            ->post('/usercp', [
+                'action' => 'security',
+                'type' => 'save',
+                'chpassword' => 'new-secret-pass',
+                'passagain' => 'new-secret-pass',
+            ]);
+
+        $status = $response->getStatusCode();
+        $html = $response->getContent();
+        $this->assertIsString($html);
+        if ($status === 200) {
+            // Confirm-challenge page: re-asks for the current password.
+            $this->assertStringContainsString('data-auth-form="challenge"', $html);
+            $this->assertStringContainsString('data-password-class="oldpassword"', $html);
+            $this->assertStringContainsString('js/crypto-js.js', $html);
+            $this->assertStringContainsString('js/auth-form.js', $html);
+        } else {
+            // Some configs skip the confirm step and save directly.
+            $response->assertRedirect();
+        }
+    }
+
     public function test_personal_save_redirects_on_success(): void
     {
         $user = User::factory()->create();

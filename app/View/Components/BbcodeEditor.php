@@ -80,12 +80,7 @@ final class BbcodeEditor extends Component
     public static function html(array $props): string
     {
         $component = self::resolve($props);
-        $view = $component->resolveView();
 
-        if (! $view instanceof View) {
-            return (string) $view;
-        }
-
-        return $view->with($component->data())->render();
+        return $component->render()->with($component->data())->render();
     }
 }

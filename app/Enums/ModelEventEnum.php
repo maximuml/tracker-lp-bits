@@ -79,6 +79,7 @@ final class ModelEventEnum
 
     const STAFF_MESSAGE_CREATED = 'staff_message_created';
 
+    /** @var array<string, array{event: class-string, model: class-string}> */
     public static array $eventMaps = [
         self::TORRENT_CREATED => ['event' => TorrentCreated::class, 'model' => Torrent::class],
         self::TORRENT_UPDATED => ['event' => TorrentUpdated::class, 'model' => Torrent::class],

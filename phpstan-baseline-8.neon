@@ -1,2 +1,1361 @@
 parameters:
-	ignoreErrors: []
+	# Step 0.5: type debt exposed by adding app/Contracts to paths.
+	# All entries are missingType.* on legacy repository interfaces —
+	# fix by adding signatures to the interface AND its implementation
+	# together, then regenerate: phpstan analyse --generate-baseline.
+	ignoreErrors:
+		-
+			message: '#^Method App\\Contracts\\Repositories\\AuthRepositoryInterface\:\:banLoginAttempts\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/AuthRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\AuthRepositoryInterface\:\:findUserArrayForCookie\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/AuthRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\AuthRepositoryInterface\:\:recordFailedLogin\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/AuthRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\AuthRepositoryInterface\:\:updateLogin\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/AuthRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\AuthRepositoryInterface\:\:updateLogin\(\) has parameter \$update with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/AuthRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\AuthRepositoryInterface\:\:updateUserLang\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/AuthRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\AuthRepositoryInterface\:\:updateUserPasskey\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/AuthRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ExamRepositoryInterface\:\:delete\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/ExamRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ExamRepositoryInterface\:\:getList\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/ExamRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ExamRepositoryInterface\:\:getList\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/ExamRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ExamRepositoryInterface\:\:listIndexes\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/ExamRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ExamRepositoryInterface\:\:listMatchExam\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/ExamRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ExamRepositoryInterface\:\:listMatchTask\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/ExamRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ExamRepositoryInterface\:\:listValid\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/ExamRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ExamRepositoryInterface\:\:listValid\(\) has parameter \$excludeId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/ExamRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ExamRepositoryInterface\:\:listValid\(\) has parameter \$isDiscovered with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/ExamRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ExamRepositoryInterface\:\:listValid\(\) has parameter \$type with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/ExamRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ExamRepositoryInterface\:\:store\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/ExamRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ExamRepositoryInterface\:\:update\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/ExamRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ForumRepositoryInterface\:\:clearForumCache\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/ForumRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ForumRepositoryInterface\:\:createForum\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/ForumRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ForumRepositoryInterface\:\:deleteForum\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/ForumRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ForumRepositoryInterface\:\:getForumRow\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/ForumRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ForumRepositoryInterface\:\:getForumsList\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/ForumRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ForumRepositoryInterface\:\:getForumsWithOverforum\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/ForumRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ForumRepositoryInterface\:\:getUsersByIds\(\) has parameter \$columns with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/ForumRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ForumRepositoryInterface\:\:getUsersByIds\(\) has parameter \$ids with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/ForumRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ForumRepositoryInterface\:\:getUsersByIds\(\) return type with generic class Illuminate\\Support\\Collection does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Contracts/Repositories/ForumRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ForumRepositoryInterface\:\:updateForum\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/ForumRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ForumRepositoryInterface\:\:updateForum\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/ForumRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\MeiliSearchRepositoryInterface\:\:autocomplete\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/MeiliSearchRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\MeiliSearchRepositoryInterface\:\:deleteDocuments\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/MeiliSearchRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\MeiliSearchRepositoryInterface\:\:deleteDocuments\(\) has parameter \$id with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/MeiliSearchRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\MeiliSearchRepositoryInterface\:\:doImportFromDatabase\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/MeiliSearchRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\MeiliSearchRepositoryInterface\:\:doImportFromDatabase\(\) has parameter \$id with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/MeiliSearchRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\MeiliSearchRepositoryInterface\:\:doImportFromDatabase\(\) has parameter \$index with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/MeiliSearchRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\MeiliSearchRepositoryInterface\:\:formatValueForMeili\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/MeiliSearchRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\MeiliSearchRepositoryInterface\:\:formatValueForMeili\(\) has parameter \$field with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/MeiliSearchRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\MeiliSearchRepositoryInterface\:\:formatValueForMeili\(\) has parameter \$value with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/MeiliSearchRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\MeiliSearchRepositoryInterface\:\:getRequiredFields\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/MeiliSearchRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\MeiliSearchRepositoryInterface\:\:import\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/MeiliSearchRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\MeiliSearchRepositoryInterface\:\:search\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/MeiliSearchRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\MeiliSearchRepositoryInterface\:\:search\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/MeiliSearchRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\MeiliSearchRepositoryInterface\:\:search\(\) has parameter \$user with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/MeiliSearchRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\PageLayoutRepositoryInterface\:\:flushAccess\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/PageLayoutRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\PageLayoutRepositoryInterface\:\:prepareAccess\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/PageLayoutRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\PageLayoutRepositoryInterface\:\:updateUser\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/PageLayoutRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\PageLayoutRepositoryInterface\:\:updateUser\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/PageLayoutRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\PostRepositoryInterface\:\:getTopicPostIds\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/PostRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\PostRepositoryInterface\:\:getTopicPosts\(\) return type with generic class Illuminate\\Database\\Eloquent\\Collection does not specify its types\: TKey, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Contracts/Repositories/PostRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\PostRepositoryInterface\:\:searchForumPosts\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/PostRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\SearchBoxRepositoryInterface\:\:delete\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/SearchBoxRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\SearchBoxRepositoryInterface\:\:getAllRows\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/SearchBoxRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\SearchBoxRepositoryInterface\:\:getCategoriesForTable\(\) return type with generic class Illuminate\\Database\\Eloquent\\Collection does not specify its types\: TKey, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Contracts/Repositories/SearchBoxRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\SearchBoxRepositoryInterface\:\:getDetail\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/SearchBoxRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\SearchBoxRepositoryInterface\:\:getList\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/SearchBoxRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\SearchBoxRepositoryInterface\:\:getList\(\) return type with generic interface Illuminate\\Contracts\\Pagination\\LengthAwarePaginator does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Contracts/Repositories/SearchBoxRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\SearchBoxRepositoryInterface\:\:getOrderedIds\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/SearchBoxRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\SearchBoxRepositoryInterface\:\:getTaxonomyList\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/SearchBoxRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\SearchBoxRepositoryInterface\:\:getTaxonomyRows\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/SearchBoxRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\SearchBoxRepositoryInterface\:\:listIcon\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/SearchBoxRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\SearchBoxRepositoryInterface\:\:listIcon\(\) has parameter \$idArr with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/SearchBoxRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\SearchBoxRepositoryInterface\:\:listSections\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/SearchBoxRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\SearchBoxRepositoryInterface\:\:listSections\(\) has parameter \$id with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/SearchBoxRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\SearchBoxRepositoryInterface\:\:listSections\(\) has parameter \$withCategoryAndTags with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/SearchBoxRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\SearchBoxRepositoryInterface\:\:migrateToModeRelated\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/SearchBoxRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\SearchBoxRepositoryInterface\:\:store\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/SearchBoxRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\SearchBoxRepositoryInterface\:\:store\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/SearchBoxRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\SearchBoxRepositoryInterface\:\:update\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/SearchBoxRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\SearchBoxRepositoryInterface\:\:update\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/SearchBoxRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TagRepositoryInterface\:\:buildSelect\(\) has parameter \$name with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/TagRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TagRepositoryInterface\:\:buildSelect\(\) has parameter \$value with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/TagRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TagRepositoryInterface\:\:createBasicQuery\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/TagRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TagRepositoryInterface\:\:delete\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/TagRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TagRepositoryInterface\:\:delete\(\) has parameter \$id with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/TagRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TagRepositoryInterface\:\:getDetail\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/TagRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TagRepositoryInterface\:\:getDetail\(\) has parameter \$id with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/TagRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TagRepositoryInterface\:\:getList\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/TagRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TagRepositoryInterface\:\:getList\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/TagRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TagRepositoryInterface\:\:listAll\(\) return type with generic class Illuminate\\Database\\Eloquent\\Collection does not specify its types\: TKey, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Contracts/Repositories/TagRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TagRepositoryInterface\:\:migrateTorrentTag\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/TagRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TagRepositoryInterface\:\:renderCheckbox\(\) has parameter \$checked with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/TagRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TagRepositoryInterface\:\:renderCheckbox\(\) has parameter \$ignorePermission with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/TagRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TagRepositoryInterface\:\:renderSpan\(\) has parameter \$renderIdArr with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/TagRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TagRepositoryInterface\:\:renderSpan\(\) has parameter \$withFilterLink with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/TagRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TagRepositoryInterface\:\:store\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/TagRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TagRepositoryInterface\:\:store\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/TagRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TagRepositoryInterface\:\:syncTorrentTags\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/TagRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TagRepositoryInterface\:\:syncTorrentTags\(\) has parameter \$tagIdArr with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/TagRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TagRepositoryInterface\:\:update\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/TagRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TagRepositoryInterface\:\:update\(\) has parameter \$id with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/TagRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TagRepositoryInterface\:\:update\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/TagRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ToolRepositoryInterface\:\:backupAll\(\) has parameter \$method with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/ToolRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ToolRepositoryInterface\:\:backupAll\(\) has parameter \$transfer with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/ToolRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ToolRepositoryInterface\:\:backupAll\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/ToolRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ToolRepositoryInterface\:\:backupDatabase\(\) has parameter \$transfer with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/ToolRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ToolRepositoryInterface\:\:backupDatabase\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/ToolRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ToolRepositoryInterface\:\:backupWeb\(\) has parameter \$method with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/ToolRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ToolRepositoryInterface\:\:backupWeb\(\) has parameter \$transfer with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/ToolRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ToolRepositoryInterface\:\:backupWeb\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/ToolRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ToolRepositoryInterface\:\:cronjobBackup\(\) has parameter \$force with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/ToolRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ToolRepositoryInterface\:\:cronjobBackup\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/ToolRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ToolRepositoryInterface\:\:generateUniqueInviteHash\(\) has parameter \$hashArr with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/ToolRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ToolRepositoryInterface\:\:generateUniqueInviteHash\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/ToolRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ToolRepositoryInterface\:\:getNotificationCount\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/ToolRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ToolRepositoryInterface\:\:listUserAllPermissions\(\) has parameter \$uid with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/ToolRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ToolRepositoryInterface\:\:listUserAllPermissions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/ToolRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ToolRepositoryInterface\:\:listUserClassPermissions\(\) has parameter \$class with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/ToolRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ToolRepositoryInterface\:\:listUserClassPermissions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/ToolRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ToolRepositoryInterface\:\:removeDuplicatePeer\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/ToolRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ToolRepositoryInterface\:\:removeDuplicateSnatch\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/ToolRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ToolRepositoryInterface\:\:saveToSftp\(\) has parameter \$filename with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/ToolRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ToolRepositoryInterface\:\:saveToSftp\(\) has parameter \$setting with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/ToolRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ToolRepositoryInterface\:\:sendAlarmEmail\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/ToolRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ToolRepositoryInterface\:\:sendAlarmEmail\(\) has parameter \$msgTransContext with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/ToolRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ToolRepositoryInterface\:\:sendAlarmEmail\(\) has parameter \$subjectTransContext with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/ToolRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ToolRepositoryInterface\:\:sendMail\(\) has parameter \$body with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/ToolRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ToolRepositoryInterface\:\:sendMail\(\) has parameter \$exception with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/ToolRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ToolRepositoryInterface\:\:sendMail\(\) has parameter \$subject with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/ToolRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ToolRepositoryInterface\:\:sendMail\(\) has parameter \$to with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/ToolRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ToolRepositoryInterface\:\:transfer\(\) has parameter \$filename with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/ToolRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ToolRepositoryInterface\:\:transfer\(\) has parameter \$result_code with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/ToolRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ToolRepositoryInterface\:\:transfer\(\) has parameter \$setting with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/ToolRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\ToolRepositoryInterface\:\:transfer\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/ToolRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TorrentDownloadRepositoryInterface\:\:checkTrackerReportAuthKey\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/TorrentDownloadRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TorrentDownloadRepositoryInterface\:\:checkTrackerReportAuthKey\(\) has parameter \$authKey with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/TorrentDownloadRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TorrentDownloadRepositoryInterface\:\:decryptDownHash\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/TorrentDownloadRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TorrentDownloadRepositoryInterface\:\:decryptDownHash\(\) has parameter \$downHash with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/TorrentDownloadRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TorrentDownloadRepositoryInterface\:\:decryptDownHash\(\) has parameter \$user with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/TorrentDownloadRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TorrentDownloadRepositoryInterface\:\:encryptDownHash\(\) has parameter \$id with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/TorrentDownloadRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TorrentDownloadRepositoryInterface\:\:encryptDownHash\(\) has parameter \$user with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/TorrentDownloadRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TorrentDownloadRepositoryInterface\:\:getDownloadUrl\(\) has parameter \$id with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/TorrentDownloadRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TorrentDownloadRepositoryInterface\:\:getDownloadUrl\(\) has parameter \$user with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/TorrentDownloadRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TorrentDownloadRepositoryInterface\:\:getPiecesHashCache\(\) has parameter \$piecesHash with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/TorrentDownloadRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TorrentDownloadRepositoryInterface\:\:getPiecesHashCache\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/TorrentDownloadRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TorrentDownloadRepositoryInterface\:\:getTrackerReportAuthKey\(\) has parameter \$id with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/TorrentDownloadRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TorrentDownloadRepositoryInterface\:\:getTrackerReportAuthKey\(\) has parameter \$initializeIfNotExists with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/TorrentDownloadRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TorrentDownloadRepositoryInterface\:\:getTrackerReportAuthKey\(\) has parameter \$uid with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/TorrentDownloadRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TorrentDownloadRepositoryInterface\:\:loadPiecesHashCache\(\) has parameter \$id with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/TorrentDownloadRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TorrentDownloadRepositoryInterface\:\:loadPiecesHashCache\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/TorrentDownloadRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TorrentDownloadRepositoryInterface\:\:resetTrackerReportAuthKeySecret\(\) has parameter \$torrentId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/TorrentDownloadRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TorrentDownloadRepositoryInterface\:\:resetTrackerReportAuthKeySecret\(\) has parameter \$uid with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/TorrentDownloadRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TorrentRepositoryInterface\:\:buildUploadFieldInput\(\) has parameter \$btnId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/TorrentRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TorrentRepositoryInterface\:\:buildUploadFieldInput\(\) has parameter \$btnText with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/TorrentRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TorrentRepositoryInterface\:\:buildUploadFieldInput\(\) has parameter \$name with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/TorrentRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TorrentRepositoryInterface\:\:buildUploadFieldInput\(\) has parameter \$noteText with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/TorrentRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TorrentRepositoryInterface\:\:buildUploadFieldInput\(\) has parameter \$value with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/TorrentRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TorrentRepositoryInterface\:\:getDetail\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/TorrentRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TorrentRepositoryInterface\:\:getList\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/TorrentRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TorrentRepositoryInterface\:\:getPaidIcon\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/TorrentRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TorrentRepositoryInterface\:\:getPaidIcon\(\) has parameter \$size with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/TorrentRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TorrentRepositoryInterface\:\:getPaidIcon\(\) has parameter \$torrentInfo with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/TorrentRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TorrentRepositoryInterface\:\:getPaidIcon\(\) has parameter \$verticalAlign with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/TorrentRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\TorrentRepositoryInterface\:\:getSearchBox\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/TorrentRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserModerationRepositoryInterface\:\:addTemporaryInvite\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/UserModerationRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserModerationRepositoryInterface\:\:changeClass\(\) has parameter \$extra with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/UserModerationRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserModerationRepositoryInterface\:\:changeClass\(\) has parameter \$newClass with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/UserModerationRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserModerationRepositoryInterface\:\:changeClass\(\) has parameter \$operator with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/UserModerationRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserModerationRepositoryInterface\:\:changeClass\(\) has parameter \$reason with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/UserModerationRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserModerationRepositoryInterface\:\:changeClass\(\) has parameter \$targetUser with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/UserModerationRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserModerationRepositoryInterface\:\:confirmUser\(\) has parameter \$id with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/UserModerationRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserModerationRepositoryInterface\:\:destroy\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/UserModerationRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserModerationRepositoryInterface\:\:destroy\(\) has parameter \$id with generic class Illuminate\\Support\\Collection but does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Contracts/Repositories/UserModerationRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserModerationRepositoryInterface\:\:destroy\(\) has parameter \$reasonKey with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/UserModerationRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserModerationRepositoryInterface\:\:disableUser\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/UserModerationRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserModerationRepositoryInterface\:\:disableUser\(\) has parameter \$reason with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/UserModerationRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserModerationRepositoryInterface\:\:disableUser\(\) has parameter \$uid with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/UserModerationRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserModerationRepositoryInterface\:\:enableUser\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/UserModerationRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserModerationRepositoryInterface\:\:enableUser\(\) has parameter \$reason with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/UserModerationRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserModerationRepositoryInterface\:\:enableUser\(\) has parameter \$uid with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/UserModerationRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserModerationRepositoryInterface\:\:getInviteBtnText\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/UserModerationRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserModerationRepositoryInterface\:\:getModComment\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/UserModerationRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserModerationRepositoryInterface\:\:incrementDecrement\(\) has parameter \$action with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/UserModerationRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserModerationRepositoryInterface\:\:incrementDecrement\(\) has parameter \$field with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/UserModerationRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserModerationRepositoryInterface\:\:incrementDecrement\(\) has parameter \$reason with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/UserModerationRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserModerationRepositoryInterface\:\:incrementDecrement\(\) has parameter \$uid with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/UserModerationRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserModerationRepositoryInterface\:\:incrementDecrement\(\) has parameter \$value with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/UserModerationRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserModerationRepositoryInterface\:\:removeLeechWarn\(\) has parameter \$operator with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/UserModerationRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserModerationRepositoryInterface\:\:removeLeechWarn\(\) has parameter \$uid with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/UserModerationRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserModerationRepositoryInterface\:\:removeTwoStepAuthentication\(\) has parameter \$operator with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/UserModerationRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserModerationRepositoryInterface\:\:removeTwoStepAuthentication\(\) has parameter \$uid with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/UserModerationRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserModerationRepositoryInterface\:\:removeWarnings\(\) has parameter \$userIds with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/UserModerationRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserModerationRepositoryInterface\:\:updateDownloadPrivileges\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/UserModerationRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserModerationRepositoryInterface\:\:updateDownloadPrivileges\(\) has parameter \$disableReasonKey with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/UserModerationRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserModerationRepositoryInterface\:\:updateDownloadPrivileges\(\) has parameter \$operator with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/UserModerationRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserModerationRepositoryInterface\:\:updateDownloadPrivileges\(\) has parameter \$user with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/UserModerationRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserModerationRepositoryInterface\:\:updateForumPost\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/UserModerationRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserModerationRepositoryInterface\:\:updateForumPost\(\) has parameter \$operator with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/UserModerationRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserModerationRepositoryInterface\:\:updateForumPost\(\) has parameter \$user with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/UserModerationRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserModerationRepositoryInterface\:\:updateUploadPrivileges\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/UserModerationRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserModerationRepositoryInterface\:\:updateUploadPrivileges\(\) has parameter \$operator with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/UserModerationRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserModerationRepositoryInterface\:\:updateUploadPrivileges\(\) has parameter \$user with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/UserModerationRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserModerationRepositoryInterface\:\:warnUser\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/UserModerationRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserModerationRepositoryInterface\:\:warnUser\(\) has parameter \$operator with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/UserModerationRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserModerationRepositoryInterface\:\:warnUser\(\) has parameter \$user with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/UserModerationRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserRepositoryInterface\:\:addMeta\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/UserRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserRepositoryInterface\:\:addMeta\(\) has parameter \$keyExistsUpdates with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/UserRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserRepositoryInterface\:\:addMeta\(\) has parameter \$metaData with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/UserRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserRepositoryInterface\:\:addMeta\(\) has parameter \$notify with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/UserRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserRepositoryInterface\:\:addMeta\(\) has parameter \$user with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/UserRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserRepositoryInterface\:\:consumeBenefit\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/UserRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserRepositoryInterface\:\:consumeBenefit\(\) has parameter \$uid with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/UserRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserRepositoryInterface\:\:findForCacheClear\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/UserRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserRepositoryInterface\:\:getBase\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/UserRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserRepositoryInterface\:\:getBase\(\) has parameter \$id with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/UserRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserRepositoryInterface\:\:getByIds\(\) has parameter \$columns with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/UserRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserRepositoryInterface\:\:getByIds\(\) has parameter \$ids with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/UserRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserRepositoryInterface\:\:getByIds\(\) return type with generic class Illuminate\\Database\\Eloquent\\Collection does not specify its types\: TKey, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Contracts/Repositories/UserRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserRepositoryInterface\:\:getDetail\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/UserRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserRepositoryInterface\:\:getDetail\(\) has parameter \$id with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/UserRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserRepositoryInterface\:\:getInviteInfo\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/UserRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserRepositoryInterface\:\:getInviteInfo\(\) has parameter \$id with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/UserRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserRepositoryInterface\:\:getList\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/UserRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserRepositoryInterface\:\:getList\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/UserRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserRepositoryInterface\:\:listMetas\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/UserRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserRepositoryInterface\:\:listMetas\(\) has parameter \$metaKeys with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/UserRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserRepositoryInterface\:\:listMetas\(\) has parameter \$uid with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/UserRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserRepositoryInterface\:\:listMetas\(\) has parameter \$valid with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/UserRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserRepositoryInterface\:\:logModify\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/UserRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserRepositoryInterface\:\:resetPassword\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/UserRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserRepositoryInterface\:\:resetPassword\(\) has parameter \$id with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/UserRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserRepositoryInterface\:\:resetPassword\(\) has parameter \$password with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/UserRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserRepositoryInterface\:\:resetPassword\(\) has parameter \$passwordConfirmation with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Contracts/Repositories/UserRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserRepositoryInterface\:\:saveLoginLog\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/UserRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserRepositoryInterface\:\:store\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Contracts/Repositories/UserRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Contracts\\Repositories\\UserRepositoryInterface\:\:store\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/Repositories/UserRepositoryInterface.php

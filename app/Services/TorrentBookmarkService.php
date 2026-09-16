@@ -18,6 +18,10 @@ use Illuminate\Support\Facades\DB;
  */
 final class TorrentBookmarkService
 {
+    public function __construct(
+        private readonly ?LegacyRedisCache $legacyRedisCache = null,
+    ) {}
+
     /**
      * Toggle a bookmark for a user on a torrent.
      *
@@ -48,9 +52,8 @@ final class TorrentBookmarkService
             $status = 'added';
         }
 
-        $cache = app(LegacyRedisCache::class);
-        if ($cache !== null) {
-            $cache->delete_value('user_'.$userId.'_bookmark_array');
+        if ($this->legacyRedisCache !== null) {
+            $this->legacyRedisCache->delete_value('user_'.$userId.'_bookmark_array');
         }
 
         return $status;

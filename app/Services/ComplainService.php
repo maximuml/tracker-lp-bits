@@ -24,6 +24,7 @@ final class ComplainService
 {
     public function __construct(
         private readonly ToolRepositoryInterface $toolRepository,
+        private readonly ?LegacyRedisCache $legacyRedisCache = null,
     ) {}
 
     /**
@@ -116,9 +117,8 @@ final class ComplainService
 
     private function clearCountCache(): void
     {
-        $cache = app(LegacyRedisCache::class);
-        if ($cache !== null) {
-            $cache->delete_value('COMPLAINTS_COUNT_CACHE');
+        if ($this->legacyRedisCache !== null) {
+            $this->legacyRedisCache->delete_value('COMPLAINTS_COUNT_CACHE');
         }
     }
 }

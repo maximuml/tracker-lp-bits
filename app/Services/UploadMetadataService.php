@@ -26,6 +26,11 @@ use Illuminate\Support\Facades\Auth;
 
 class UploadMetadataService
 {
+    public function __construct(
+        private readonly SearchBoxRepositoryInterface $searchBoxRepository,
+        private readonly TorrentUploadRepository $torrentUploadRepository,
+    ) {}
+
     /**
      * @return array<int|string, mixed>
      *
@@ -33,7 +38,7 @@ class UploadMetadataService
      */
     public function getSubCategoriesAndTags(Request $request, Category $category, bool $checkUploadPermission = true): array
     {
-        $searchBoxRep = app(SearchBoxRepositoryInterface::class);
+        $searchBoxRep = $this->searchBoxRepository;
         $sections = $searchBoxRep->listSections(SearchBox::listAllSectionId())->keyBy('id');
         if (! $sections->has($category->mode)) {
             throw new NexusException(Locale::trans('upload.invalid_section', [], null));
@@ -182,7 +187,7 @@ class UploadMetadataService
 
         if ($section->isSectionBrowse()) {
             $offerId = (int) $request->offer;
-            if ($offerId > 0 && SiteConfig::current()->main->showOffer() && app(TorrentUploadRepository::class)->isAllowedOffer($offerId, $user->id)) {
+            if ($offerId > 0 && SiteConfig::current()->main->showOffer() && $this->torrentUploadRepository->isAllowedOffer($offerId, $user->id)) {
                 return true;
             }
 

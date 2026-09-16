@@ -38,6 +38,8 @@ class UploadService
     public function __construct(
         private UploadMetadataService $metadataService,
         private UploadFileService $fileService,
+        private TorrentDownloadRepositoryInterface $torrentDownloadRepository,
+        private TorrentUploadRepository $torrentUploadRepository,
     ) {}
 
     /**
@@ -173,8 +175,7 @@ class UploadService
             return $newTorrent;
         });
         $id = $newTorrent->id;
-        $torrentRep = app(TorrentDownloadRepositoryInterface::class);
-        $torrentRep->addPiecesHashCache($id, $newTorrent->pieces_hash);
+        $this->torrentDownloadRepository->addPiecesHashCache($id, $newTorrent->pieces_hash);
         $this->handleOffer($request, $newTorrent, $user);
         Log::writeWithContext("Torrent $id ($newTorrent->name) was uploaded by $uploaderUsername");
         event(new TorrentCreated($newTorrent));
@@ -221,11 +222,11 @@ class UploadService
         if ($offerId <= 0) {
             return;
         }
-        if (! app(TorrentUploadRepository::class)->isAllowedOffer($offerId, $user->id)) {
+        if (! $this->torrentUploadRepository->isAllowedOffer($offerId, $user->id)) {
             return;
         }
 
-        $voterIds = app(TorrentUploadRepository::class)->getOfferVoterIds($offerId, $user->id);
+        $voterIds = $this->torrentUploadRepository->getOfferVoterIds($offerId, $user->id);
         foreach ($voterIds as $voterId) {
             $locale = Locale::userLocale($voterId);
             $msg = Locale::trans('torrent.msg_offer_you_voted', [], $locale)
@@ -247,6 +248,6 @@ class UploadService
                 'msg' => $msg,
             ]);
         }
-        app(TorrentUploadRepository::class)->finalizeOffer($offerId, $user->id);
+        $this->torrentUploadRepository->finalizeOffer($offerId, $user->id);
     }
 }

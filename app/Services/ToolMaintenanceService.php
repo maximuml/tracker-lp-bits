@@ -26,6 +26,10 @@ use Symfony\Component\Mime\Email;
 
 class ToolMaintenanceService
 {
+    public function __construct(
+        private readonly AttendanceRepository $attendanceRepository = new AttendanceRepository,
+    ) {}
+
     /**
      * @param  mixed  $to
      * @param  mixed  $subject
@@ -90,8 +94,7 @@ class ToolMaintenanceService
     {
         $result = [];
         // attend or not
-        $attendRep = app(AttendanceRepository::class);
-        $attendance = $attendRep->getAttendance($user->id, date('Ymd'));
+        $attendance = $this->attendanceRepository->getAttendance($user->id, date('Ymd'));
         $result['attendance'] = $attendance ? 0 : 1;
 
         // unread news

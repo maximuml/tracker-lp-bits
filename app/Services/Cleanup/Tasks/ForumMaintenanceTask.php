@@ -13,6 +13,10 @@ use Illuminate\Support\Facades\DB;
  */
 final class ForumMaintenanceTask implements CleanupTask
 {
+    public function __construct(
+        private readonly ?LegacyRedisCache $legacyRedisCache = null,
+    ) {}
+
     /**
      * Priority Class 3: recompute post/topic counts for every forum.
      */
@@ -56,9 +60,8 @@ final class ForumMaintenanceTask implements CleanupTask
             }
         });
 
-        $cache = app(LegacyRedisCache::class);
-        if ($cache !== null) {
-            $cache->delete_value('forums_list');
+        if ($this->legacyRedisCache !== null) {
+            $this->legacyRedisCache->delete_value('forums_list');
         }
 
         return 'update forum post/topic count';

@@ -51,6 +51,7 @@ use App\Support\Metrics\MetricsRegistry;
 use App\Support\Metrics\PrometheusFormatter;
 use App\Support\RequestContext;
 use App\Support\UserUpdateBatch;
+use App\View\Composers\SiteChromeComposer;
 use Filament\Facades\Filament;
 use Filament\Support\Assets\Css;
 use Filament\Support\Facades\FilamentAsset;
@@ -225,6 +226,11 @@ class AppServiceProvider extends ServiceProvider
             }
             $view->with('context', $context);
         });
+
+        // Variant A (ADR 0014): inject the semantic chrome view model into
+        // the modern layout. Class-based so dependencies resolve via the
+        // container rather than service location inside the view model.
+        View::composer('layouts.modern', SiteChromeComposer::class);
 
         // SafeHtml Blade directive: @safeHtml($var) renders a SafeHtml
         // value object's sanitized HTML. This replaces {!! !!} for

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Support\Html\SafeHtml;
 use Illuminate\Http\Request;
 
 final class AssetAppender
@@ -83,6 +84,30 @@ final class AssetAppender
     public static function getAppendFooters(): array
     {
         return self::$appendFooters;
+    }
+
+    /**
+     * Appended head assets as SafeHtml objects so templates can render
+     * them via `{{ }}` without calling `SafeHtml::fromTrustedHtml` inline
+     * (keeps the LegacyViewSurface baseline flat on modern layouts).
+     *
+     * @return list<SafeHtml>
+     */
+    public static function getAppendHeadersSafe(): array
+    {
+        return array_values(array_map(
+            static fn (string $html): SafeHtml => SafeHtml::fromTrustedHtml($html),
+            self::$appendHeaders,
+        ));
+    }
+
+    /** @return list<SafeHtml> */
+    public static function getAppendFootersSafe(): array
+    {
+        return array_values(array_map(
+            static fn (string $html): SafeHtml => SafeHtml::fromTrustedHtml($html),
+            self::$appendFooters,
+        ));
     }
 
     public static function flush(): void

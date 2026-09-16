@@ -27,7 +27,9 @@ use App\Policies\MessagePolicy;
 use App\Policies\PostPolicy;
 use App\Policies\TopicPolicy;
 use App\Policies\TorrentPolicy;
+use App\Services\WebAuthService;
 use App\Support\AuthCookie;
+use App\Support\CurrentUser;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -71,7 +73,7 @@ class AuthServiceProvider extends ServiceProvider
 
         Auth::extend('nexus-web', function ($app, $name, array $config) {
             // 返回 Illuminate\Contracts\Auth\Guard 的实例 ...
-            return new NexusWebGuard($app['request'], new NexusWebUserProvider);
+            return new NexusWebGuard($app['request'], new NexusWebUserProvider, $app->make(WebAuthService::class), $app->make(CurrentUser::class));
         });
 
         Auth::viaRequest('passkey', function (Request $request) {

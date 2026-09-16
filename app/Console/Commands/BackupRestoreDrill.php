@@ -33,9 +33,9 @@ class BackupRestoreDrill extends Command
     /**
      * Execute the console command.
      */
-    public function handle(): int
+    public function handle(ToolRepositoryInterface $rep): int
     {
-        $sqlFile = $this->findBackupFile();
+        $sqlFile = $this->findBackupFile($rep);
         if ($sqlFile === null) {
             $this->error('No backup SQL file found. Run backup:database first.');
 
@@ -211,14 +211,12 @@ class BackupRestoreDrill extends Command
         return (int) ($output[0] ?? 0);
     }
 
-    private function findBackupFile(): ?string
+    private function findBackupFile(ToolRepositoryInterface $rep): ?string
     {
         $file = $this->option('file');
         if ($file && File::exists($file)) {
             return $file;
         }
-
-        $rep = app(ToolRepositoryInterface::class);
         $path = $rep->getBackupExportPathDefault();
         if (! is_dir($path)) {
             return null;

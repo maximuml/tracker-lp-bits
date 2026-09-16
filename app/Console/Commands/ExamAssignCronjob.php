@@ -40,9 +40,8 @@ class ExamAssignCronjob extends Command
      *
      * @return int
      */
-    public function handle()
+    public function handle(ExamCronRepository $examRep)
     {
-        $examRep = app(ExamCronRepository::class);
         $result = $examRep->cronjonAssign();
         $log = sprintf('[%s], %s, result: %s', RequestContext::instance()->getRequestId(), __METHOD__, var_export($result, true));
         $this->info($log);

@@ -40,9 +40,8 @@ class LoadTorrentBoughtUsers implements ShouldQueue
      *
      * @return void
      */
-    public function handle()
+    public function handle(TorrentPurchaseRepository $rep)
     {
-        $rep = app(TorrentPurchaseRepository::class);
         $result = $rep->loadBoughtUser($this->torrentId);
         Logger::writeWithContext((string) "result: {$result}", (string) 'info', (bool) false);
     }

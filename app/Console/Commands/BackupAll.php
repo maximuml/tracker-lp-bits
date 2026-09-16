@@ -40,11 +40,10 @@ class BackupAll extends Command
      *
      * @return int
      */
-    public function handle()
+    public function handle(ToolRepositoryInterface $rep)
     {
         $method = $this->option('method');
         $this->info("method: $method");
-        $rep = app(ToolRepositoryInterface::class);
         $result = $rep->backupAll($method);
         $log = sprintf(
             '[%s], %s, result: %s',

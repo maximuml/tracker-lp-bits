@@ -42,7 +42,7 @@ class UserResetIdAutoIncrement extends Command
      *
      * @return int
      */
-    public function handle()
+    public function handle(UserRepositoryInterface $userRep)
     {
         $options = $this->options();
         $requires = ['auto_increment', 'admin', 'password', 'email'];
@@ -83,8 +83,6 @@ class UserResetIdAutoIncrement extends Command
         $statement = 'alter table users auto_increment = '.$options['auto_increment'];
         $this->info($statement);
         $result = DB::statement($statement);
-
-        $userRep = app(UserRepositoryInterface::class);
         $insert = [
             'username' => $options['admin'],
             'email' => $options['email'],

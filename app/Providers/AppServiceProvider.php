@@ -147,7 +147,7 @@ class AppServiceProvider extends ServiceProvider
         // missing APP_KEY. The installer generates a CSPRNG key, but if the
         // .env was copied manually or the key was cleared, encrypted cookies
         // and sessions would be silently broken or use a known key.
-        if (app()->isProduction()) {
+        if ($this->app->isProduction()) {
             $key = (string) Env::get('APP_KEY', '');
             if ($key === '' || $key === 'ChangeMeToYourGeneratedAppKeyNow') {
                 throw new \RuntimeException(
@@ -159,7 +159,7 @@ class AppServiceProvider extends ServiceProvider
         // Production startup validation: warn about missing/weak secrets.
         // Does not throw — the app may still function (e.g. cron is loopback
         // only without a token) — but logs a warning so operators notice.
-        if (app()->isProduction()) {
+        if ($this->app->isProduction()) {
             $cronToken = (string) Env::get('CRON_TOKEN', '');
             if ($cronToken !== '' && strlen($cronToken) < 32) {
                 logger()->warning('CRON_TOKEN is set but shorter than 32 characters — consider using a stronger token.');
@@ -168,7 +168,7 @@ class AppServiceProvider extends ServiceProvider
         // Query log only in non-production (avoids memory leak in prod).
         // The DB::listen counter is registered unconditionally so that
         // nexus_db_query_count stays truthful when the query log is off.
-        if (! app()->isProduction()) {
+        if (! $this->app->isProduction()) {
             DB::connection(config('database.default'))->enableQueryLog();
         }
         DB::listen(static function (): void {
@@ -188,10 +188,10 @@ class AppServiceProvider extends ServiceProvider
         // preventAccessingMissingAttributes) is intentionally not enabled
         // because legacy code accesses virtual properties not declared as
         // accessors (e.g. Poll::options before migration, dynamic columns).
-        Model::preventLazyLoading(! app()->isProduction());
-        Model::preventSilentlyDiscardingAttributes(! app()->isProduction());
+        Model::preventLazyLoading(! $this->app->isProduction());
+        Model::preventSilentlyDiscardingAttributes(! $this->app->isProduction());
         $forceScheme = strtolower((string) Env::get('FORCE_SCHEME', ''));
-        if (app()->environment('production') && in_array($forceScheme, ['https', 'http'], true)) {
+        if ($this->app->environment('production') && in_array($forceScheme, ['https', 'http'], true)) {
             URL::forceScheme($forceScheme);
         }
         $this->customScheduleTask();
@@ -216,8 +216,8 @@ class AppServiceProvider extends ServiceProvider
 
         // Pass the legacy global context into every view as individual variables
         // so Blade/PHP partials no longer need extract($context, EXTR_SKIP).
-        View::composer('*', static function (\Illuminate\View\View $view): void {
-            $context = app(Globals::class)->forView();
+        View::composer('*', function (\Illuminate\View\View $view): void {
+            $context = $this->app->make(Globals::class)->forView();
             foreach ($context as $key => $value) {
                 if (! array_key_exists($key, $view->getData())) {
                     $view->with($key, $value);

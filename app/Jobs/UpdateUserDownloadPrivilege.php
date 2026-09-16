@@ -30,9 +30,8 @@ class UpdateUserDownloadPrivilege implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(): void
+    public function handle(UserModerationRepositoryInterface $rep): void
     {
-        $rep = app(UserModerationRepositoryInterface::class);
         $rep->updateDownloadPrivileges(null, $this->userId, $this->status, $this->reasonKey);
         Logger::writeWithContext((string) "Updating user download privilege for user {$this->userId} to {$this->status} by reason {$this->reasonKey}", (string) 'info', (bool) false);
     }

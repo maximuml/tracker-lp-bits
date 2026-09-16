@@ -38,9 +38,8 @@ class Test extends Command
      *
      * @return int
      */
-    public function handle()
+    public function handle(RequireSeedTorrentRepository $rep)
     {
-        $rep = app(RequireSeedTorrentRepository::class);
         $rep->autoAddToListCronjob();
 
         return 0;

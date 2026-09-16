@@ -28,9 +28,8 @@ class MeiliSearchStats extends Command
      *
      * @return int
      */
-    public function handle()
+    public function handle(MeiliSearchRepositoryInterface $rep)
     {
-        $rep = app(MeiliSearchRepositoryInterface::class);
         $stats = json_encode($rep->getClient()->stats(), JSON_PRETTY_PRINT);
         $this->info(is_string($stats) ? $stats : '{}');
 

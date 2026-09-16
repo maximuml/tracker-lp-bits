@@ -21,10 +21,9 @@ class SendEmailNotificationWhenTorrentCreated implements ShouldQueue
     /**
      * Create the event listener.
      */
-    public function __construct()
-    {
-        //
-    }
+    public function __construct(
+        private readonly UploadRepository $uploadRepository,
+    ) {}
 
     /**
      * Handle the event.
@@ -37,8 +36,7 @@ class SendEmailNotificationWhenTorrentCreated implements ShouldQueue
 
             return;
         }
-        $uploadRepo = app(UploadRepository::class);
-        $result = $uploadRepo->sendEmailNotification($torrent);
+        $result = $this->uploadRepository->sendEmailNotification($torrent);
         Logger::writeWithContext((string) ("torrent: {$torrent->id}, sendEmailNotification result: ".var_export($result, true)), (string) 'info', (bool) false);
     }
 }

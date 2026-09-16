@@ -17,6 +17,10 @@ use App\Support\Locale;
  */
 final class LegacyScriptContext
 {
+    public function __construct(
+        private readonly Globals $globals,
+    ) {}
+
     /** @var array<string, string|array<int, string>> */
     private const EXTRA_LANG_FILES = [
         'search' => ['torrents.php'],
@@ -60,17 +64,17 @@ final class LegacyScriptContext
                 continue;
             }
 
-            $SITENAME = app(Globals::class)->get('SITENAME');
+            $SITENAME = $this->globals->get('SITENAME');
             $SITEEMAIL = SiteConfig::current()->main->siteEmail();
             $REPORTMAIL = SiteConfig::current()->main->reportEmail();
-            $BASEURL = app(Globals::class)->get('BASEURL');
+            $BASEURL = $this->globals->get('BASEURL');
             $before = get_defined_vars();
             require $langPath;
             foreach (array_diff_key(get_defined_vars(), $before) as $langKey => $langValue) {
                 if (in_array($langKey, ['before', 'path', 'langPath', 'scriptLangFiles', 'rootpath', 'scriptLangFile'], true)) {
                     continue;
                 }
-                app(Globals::class)->set($langKey, $langValue);
+                $this->globals->set($langKey, $langValue);
             }
         }
     }

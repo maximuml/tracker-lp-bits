@@ -39,11 +39,10 @@ class ExamUpdateProgress extends Command
      *
      * @return int
      */
-    public function handle()
+    public function handle(ExamProgressRepository $examRep)
     {
         $uid = $this->option('uid');
         $bulk = $this->option('bulk');
-        $examRep = app(ExamProgressRepository::class);
         $log = "uid: $uid, bulk: $bulk";
         $this->info($log);
         if (is_numeric($uid) && $uid) {

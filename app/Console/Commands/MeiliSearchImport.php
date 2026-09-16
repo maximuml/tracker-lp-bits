@@ -28,9 +28,8 @@ class MeiliSearchImport extends Command
      *
      * @return int
      */
-    public function handle()
+    public function handle(MeiliSearchRepositoryInterface $rep)
     {
-        $rep = app(MeiliSearchRepositoryInterface::class);
         $this->info('going to import torrents...');
         $total = $rep->import();
         $this->info("import $total torrents.");

@@ -40,12 +40,11 @@ class BackupWeb extends Command
      *
      * @return int
      */
-    public function handle()
+    public function handle(ToolRepositoryInterface $rep)
     {
         $method = $this->option('method');
         $transfer = $this->option('transfer');
         $this->info("method: $method, transfer: $transfer");
-        $rep = app(ToolRepositoryInterface::class);
         $result = $rep->backupWeb($method, $transfer);
         $log = sprintf('[%s], %s, result: %s', RequestContext::instance()->getRequestId(), __METHOD__, var_export($result, true));
         $this->info($log);

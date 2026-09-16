@@ -122,7 +122,7 @@ final class PerformanceBudgetTest extends TestCase
         $provider = file_get_contents(app_path('Providers/AppServiceProvider.php'));
         $this->assertStringContainsString('enableQueryLog', $provider, 'AppServiceProvider must reference enableQueryLog');
         $this->assertStringContainsString('isProduction', $provider, 'AppServiceProvider must check isProduction');
-        $this->assertStringContainsString('! app()->isProduction()', $provider, 'Query log must be disabled in production');
+        $this->assertStringContainsString('! $this->app->isProduction()', $provider, 'Query log must be disabled in production');
     }
 
     /**

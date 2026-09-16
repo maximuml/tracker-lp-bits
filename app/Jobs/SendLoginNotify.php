@@ -42,7 +42,7 @@ class SendLoginNotify implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(): void
+    public function handle(ToolRepositoryInterface $toolRep): void
     {
         /** @var LoginLog $thisLoginLog */
         $thisLoginLog = LoginLog::query()->where('id', $this->thisLoginLogId)->firstOrFail();
@@ -76,7 +76,6 @@ class SendLoginNotify implements ShouldQueue
         /** @var User $user */
         $user = User::query()->where('id', $thisLoginLog->uid)->firstOrFail(User::$commonFields);
         $locale = $user->locale;
-        $toolRep = app(ToolRepositoryInterface::class);
         $subject = Locale::trans('message.login_notify.subject', ['site_name' => SiteConfig::current()->basic->siteName()], $locale);
         $body = Locale::trans('message.login_notify.body', ['this_login_time' => $thisLoginLog->created_at, 'this_ip' => $thisLoginLog->ip, 'this_location' => sprintf('%s·%s', $thisLoginLog->city, $thisLoginLog->country), 'last_login_time' => $lastLoginLog->created_at, 'last_ip' => $lastLoginLog->ip, 'last_location' => sprintf('%s·%s', $lastLoginLog->city, $lastLoginLog->country)], $locale);
         $result = $toolRep->sendMail($user->email, $subject, $body);

@@ -50,10 +50,9 @@ class GenerateTemporaryInvite implements ShouldQueue
      *
      * @return void
      */
-    public function handle()
+    public function handle(ToolRepositoryInterface $toolRep)
     {
         $beginTimestamp = microtime(true);
-        $toolRep = app(ToolRepositoryInterface::class);
         $idStr = Cache::get($this->idRedisKey);
         $logPrefix = 'idRedisKey: '.$this->idRedisKey;
         if (empty($idStr)) {

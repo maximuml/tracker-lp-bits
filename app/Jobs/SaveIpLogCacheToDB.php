@@ -30,9 +30,9 @@ class SaveIpLogCacheToDB implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(): void
+    public function handle(IpLogRepository $ipLogRepository): void
     {
-        app(IpLogRepository::class)->saveToDB();
+        $ipLogRepository->saveToDB();
         Logger::writeWithContext((string) 'done', (string) 'info', (bool) false);
     }
 }

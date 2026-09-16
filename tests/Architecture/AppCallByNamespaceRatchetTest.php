@@ -31,7 +31,7 @@ final class AppCallByNamespaceRatchetTest extends TestCase
         'Controllers' => 7,
         'Services' => 3,
         'Repositories' => 0,
-        'Other' => 335,
+        'Other' => 324,
     ];
 
     public function test_app_calls_in_controllers_do_not_exceed_baseline(): void

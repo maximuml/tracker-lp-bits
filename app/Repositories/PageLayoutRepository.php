@@ -25,6 +25,7 @@ class PageLayoutRepository extends BaseRepository implements PageLayoutRepositor
         private readonly Language $language,
         private readonly ?LegacyRedisCache $legacyRedisCache,
         private readonly UserUpdateBatch $userUpdateBatch,
+        private readonly Menu $menu = new Menu,
     ) {}
 
     public function getInboxCount(int $userId): int
@@ -153,7 +154,7 @@ class PageLayoutRepository extends BaseRepository implements PageLayoutRepositor
 
         $this->ipLogRepository->saveToCache((int) $user['id']);
 
-        $menuResult = Menu::render(
+        $menuResult = $this->menu->render(
             $script,
             $this->language->functions(),
             (string) $this->globals->get('enableoffer', ''),

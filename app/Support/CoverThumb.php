@@ -18,10 +18,14 @@ use App\Support\Config\SiteConfig;
  */
 final class CoverThumb
 {
+    public function __construct(
+        private readonly ?LegacyRedisCache $legacyRedisCache = null,
+    ) {}
+
     /**
      * @param  object|null  $cache  Legacy cache object with a public `$redis` property.
      */
-    public static function url(
+    public function url(
         string $url,
         int $maxWidth,
         int $maxHeight,
@@ -52,24 +56,24 @@ final class CoverThumb
         }
 
         if (preg_match('#^https?://#i', $url)) {
-            self::dispatchRemote($url, $absolutePath, $maxWidth, $maxHeight, $quality, $cache);
+            $this->dispatchRemote($url, $absolutePath, $maxWidth, $maxHeight, $quality, $cache);
 
             return $url;
         }
 
-        return self::resizeLocal($url, $absolutePath, $maxWidth, $maxHeight, $quality, $rootPath, $publicUrl);
+        return $this->resizeLocal($url, $absolutePath, $maxWidth, $maxHeight, $quality, $rootPath, $publicUrl);
     }
 
     /**
      * Context-aware wrapper for {@see url()}.
      */
-    public static function urlWithContext(string $url, int $maxWidth = 240, int $maxHeight = 360, int $quality = 82): string
+    public function urlWithContext(string $url, int $maxWidth = 240, int $maxHeight = 360, int $quality = 82): string
     {
         $attachmentConfig = SiteConfig::current()->attachment;
         $saveDirectory = $attachmentConfig->saveDirectory();
         $httpDirectory = $attachmentConfig->httpDirectory();
 
-        return self::url(
+        return $this->url(
             $url,
             $maxWidth,
             $maxHeight,
@@ -77,11 +81,11 @@ final class CoverThumb
             $saveDirectory ?: 'attachments',
             $httpDirectory ?: 'attachments',
             defined('ROOT_PATH') ? (string) ROOT_PATH : '',
-            app(LegacyRedisCache::class) ?? null,
+            $this->legacyRedisCache,
         );
     }
 
-    private static function dispatchRemote(
+    private function dispatchRemote(
         string $url,
         string $absolutePath,
         int $maxWidth,
@@ -100,7 +104,7 @@ final class CoverThumb
         }
     }
 
-    private static function resizeLocal(
+    private function resizeLocal(
         string $url,
         string $absolutePath,
         int $maxWidth,

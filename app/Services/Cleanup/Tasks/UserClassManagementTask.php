@@ -25,6 +25,7 @@ final class UserClassManagementTask implements CleanupTask
 {
     public function __construct(
         private readonly UserClassPromotion $promotion,
+        private readonly UserOps $userOps,
     ) {}
 
     /**
@@ -166,7 +167,7 @@ final class UserClassManagementTask implements CleanupTask
                 .$deletepeasantAccount
                 .Locale::trans('cleanup.msg_days_or_get_banned', [], $locale);
 
-            UserOps::logModify($uid, 'Leech Warned by System - Low Ratio.');
+            $this->userOps->logModify($uid, 'Leech Warned by System - Low Ratio.');
 
             $uidArr[] = $uid;
 
@@ -225,7 +226,7 @@ final class UserClassManagementTask implements CleanupTask
             if (! empty($user->modcomment)) {
                 $comment .= ' '.$user->modcomment;
             }
-            UserOps::logModify($uid, $comment);
+            $this->userOps->logModify($uid, $comment);
         }
 
         User::query()->whereIn('id', $uidArr)->update(['enabled' => false]);

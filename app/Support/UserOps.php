@@ -11,13 +11,17 @@ use App\Contracts\Repositories\UserRepositoryInterface;
  */
 final class UserOps
 {
+    public function __construct(
+        private readonly UserRepositoryInterface $userRepository,
+    ) {}
+
     /**
      * Record a moderator comment / user modify log entry.
      *
      * Mirrors `writecomment()`.
      */
-    public static function logModify(int|string $userId, string $comment): void
+    public function logModify(int|string $userId, string $comment): void
     {
-        app(UserRepositoryInterface::class)->logModify($userId, $comment);
+        $this->userRepository->logModify($userId, $comment);
     }
 }

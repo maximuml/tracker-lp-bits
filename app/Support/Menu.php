@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Support\Cache\LegacyRedisCache;
-use App\Support\Config\SiteConfig;
 
 /**
  * Legacy main-menu helper extracted from `include/functions.php`.
@@ -24,7 +23,7 @@ final class Menu
      * @param  array<string, mixed>|null  $user
      * @return array{html: string, selected: string}
      */
-    public static function render(
+    public function render(
         string $scriptName,
         array $langFunctions,
         string $enableOffer,
@@ -33,7 +32,7 @@ final class Menu
         ?LegacyRedisCache $cache = null,
         string $langDir = '',
     ): array {
-        $selected = self::selectedItem($scriptName);
+        $selected = $this->selectedItem($scriptName);
 
         if ($customMenu !== null && $customMenu !== '') {
             return [
@@ -46,59 +45,34 @@ final class Menu
         $normalSectionName = SearchBox::value($cache, (int) (Settings::get('main.browsecat') ?? 1), 'section_name');
 
         $items = [];
-        $items[] = self::item($selected, 'home', 'index.php', $langFunctions['text_home'] ?? 'Home');
-        $items[] = self::item($selected, 'forums', 'forums.php', $langFunctions['text_forums'] ?? 'Forums');
-        $items[] = self::item($selected, 'latestcomments', 'latestcomments.php', $langFunctions['text_latest_comments'] ?? 'Latest Comments');
-        $items[] = self::item($selected, 'torrents', 'torrents.php', $normalSectionName[$langDir] ?? ($langFunctions['text_torrents'] ?? 'Torrents'), "rel='sub-menu'");
+        $items[] = $this->item($selected, 'home', 'index.php', $langFunctions['text_home'] ?? 'Home');
+        $items[] = $this->item($selected, 'forums', 'forums.php', $langFunctions['text_forums'] ?? 'Forums');
+        $items[] = $this->item($selected, 'latestcomments', 'latestcomments.php', $langFunctions['text_latest_comments'] ?? 'Latest Comments');
+        $items[] = $this->item($selected, 'torrents', 'torrents.php', $normalSectionName[$langDir] ?? ($langFunctions['text_torrents'] ?? 'Torrents'), "rel='sub-menu'");
 
         if ($enableOffer === 'yes') {
-            $items[] = self::item($selected, 'offers', 'offers.php', $langFunctions['text_offers'] ?? 'Offers');
+            $items[] = $this->item($selected, 'offers', 'offers.php', $langFunctions['text_offers'] ?? 'Offers');
         }
-        $items[] = self::item($selected, 'upload', 'upload.php', $langFunctions['text_upload'] ?? 'Upload');
+        $items[] = $this->item($selected, 'upload', 'upload.php', $langFunctions['text_upload'] ?? 'Upload');
         if (Permissions::userCan('topten', false, $userId)) {
-            $items[] = self::item($selected, 'topten', 'topten.php', $langFunctions['text_top_ten'] ?? 'Top 10');
+            $items[] = $this->item($selected, 'topten', 'topten.php', $langFunctions['text_top_ten'] ?? 'Top 10');
         }
         if (Permissions::userCan('log', false, $userId)) {
-            $items[] = self::item($selected, 'log', 'log.php', $langFunctions['text_log'] ?? 'Log');
+            $items[] = $this->item($selected, 'log', 'log.php', $langFunctions['text_log'] ?? 'Log');
         }
-        $items[] = self::item($selected, 'rules', 'rules.php', $langFunctions['text_rules'] ?? 'Rules');
-        $items[] = self::item($selected, 'faq', 'faq.php', $langFunctions['text_faq'] ?? 'FAQ');
+        $items[] = $this->item($selected, 'rules', 'rules.php', $langFunctions['text_rules'] ?? 'Rules');
+        $items[] = $this->item($selected, 'faq', 'faq.php', $langFunctions['text_faq'] ?? 'FAQ');
         if (Permissions::userCan('staffmem', false, $userId)) {
-            $items[] = self::item($selected, 'staff', 'staff.php', $langFunctions['text_staff'] ?? 'Staff');
+            $items[] = $this->item($selected, 'staff', 'staff.php', $langFunctions['text_staff'] ?? 'Staff');
         }
-        $items[] = self::item($selected, 'contactstaff', 'contactstaff.php', $langFunctions['text_contactstaff'] ?? 'Contact Staff');
+        $items[] = $this->item($selected, 'contactstaff', 'contactstaff.php', $langFunctions['text_contactstaff'] ?? 'Contact Staff');
 
         $html = '<div id="nav"><ul id="mainmenu" class="menu">'.implode('', $items).'</ul></div>';
 
         return ['html' => $html, 'selected' => $selected];
     }
 
-    /**
-     * Render and emit the main menu using values from the current request context.
-     *
-     * Backs the legacy `menu()` helper.
-     */
-    public static function outputWithContext(string $selected = 'home'): void
-    {
-        $result = self::render(
-            \function_exists('nexus') ? RequestContext::instance()->getScript() : '',
-            app(Language::class)->functions(),
-            SiteConfig::current()->main->showOffer() ? 'yes' : 'no',
-            null,
-            app(CurrentUser::class)->get(),
-            app(LegacyRedisCache::class),
-            Locale::currentLangDir(),
-        );
-
-        $user = app(CurrentUser::class)->get();
-        if ($user && SiteConfig::current()->tweak->where() === 'yes') {
-            app(UserUpdateBatch::class)->add('page', $result['selected']);
-        }
-
-        echo $result['html'];
-    }
-
-    private static function selectedItem(string $scriptName): string
+    private function selectedItem(string $scriptName): string
     {
         return match (1) {
             preg_match('/index/i', $scriptName) => 'home',
@@ -118,7 +92,7 @@ final class Menu
         };
     }
 
-    private static function item(string $selected, string $key, string $href, string $label, string $attrs = ''): string
+    private function item(string $selected, string $key, string $href, string $label, string $attrs = ''): string
     {
         $class = $selected === $key ? ' class="selected"' : '';
 

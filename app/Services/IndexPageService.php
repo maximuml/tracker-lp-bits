@@ -24,6 +24,8 @@ use App\ViewModels\IndexPageViewModel;
  */
 final class IndexPageService
 {
+    private readonly CoverThumb $coverThumb;
+
     public function __construct(
         private readonly CurrentUser $currentUser,
         private readonly Globals $globals,
@@ -32,7 +34,10 @@ final class IndexPageService
         private readonly IndexStatsSectionBuilder $stats,
         private readonly IndexPollSectionBuilder $polls,
         private readonly IndexMetaSectionBuilder $meta,
-    ) {}
+        ?CoverThumb $coverThumb = null,
+    ) {
+        $this->coverThumb = $coverThumb ?? new CoverThumb($this->cache);
+    }
 
     public function build(): IndexPageViewModel
     {
@@ -225,7 +230,7 @@ JS;
                 foreach ($torrents as $torrent) {
                     $detailsUrl = 'details.php?id='.(int) $torrent->id.'&hit=1';
                     $rawCover = trim((string) ($torrent->cover ?? ''));
-                    $thumbUrl = $rawCover !== '' ? CoverThumb::urlWithContext((string) $rawCover, (int) 240, (int) 360, (int) 82) : '';
+                    $thumbUrl = $rawCover !== '' ? $this->coverThumb->urlWithContext((string) $rawCover, (int) 240, (int) 360, (int) 82) : '';
                     $typeLabel = trim((string) ($torrent->basic_category->name ?? ''));
                     if ($torrent->anonymous) {
                         $ownerHtml = '<i>Anonymous</i>';

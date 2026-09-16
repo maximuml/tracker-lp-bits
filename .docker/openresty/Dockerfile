@@ -1,5 +1,5 @@
 # T-13: Digest-pinned for reproducible builds. Update via Renovate.
-FROM openresty/openresty:alpine@sha256:9a80f210927074afde534ae008b843a1afa259b4fb3183e152151a600a8d1f45
+FROM openresty/openresty:alpine@sha256:b3a6f1f432eabdbda4adcb6ec3e6461e621782eaa82dbe67154ddd1afd109569
 
 # 安装基础依赖
 RUN apk add --no-cache gettext~=0.24 bash~=5.3 curl~=8.22 openssl~=3.5 socat~=1.8

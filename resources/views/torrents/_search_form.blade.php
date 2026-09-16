@@ -81,11 +81,7 @@
                     <font class="medium">{{ $lang_torrents['added_range'] ?? '' }}</font>
                 </div>
                 <div class="nx-ffield nx-nowrap">
-                    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(sprintf(
-                        '%s ~ %s',
-                        \App\Support\Form::datetimepickerInput('added_begin', htmlspecialchars($filterInput['added_begin'] ?? ''), '', ['require_files' => true, 'format' => 'Y-m-d', 'style' => 'width: '.$filterInputWidth.'px']),
-                        \App\Support\Form::datetimepickerInput('added_end', htmlspecialchars($filterInput['added_end'] ?? ''), '', ['require_files' => false, 'format' => 'Y-m-d', 'style' => 'width: '.$filterInputWidth.'px']),
-                    )))
+                    <x-datetime-input name="added_begin" :value="$filterInput['added_begin'] ?? ''" :style="'width: '.$filterInputWidth.'px'" /> ~ <x-datetime-input name="added_end" :value="$filterInput['added_end'] ?? ''" :style="'width: '.$filterInputWidth.'px'" />
                 </div>
 
 			</div>

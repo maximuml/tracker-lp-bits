@@ -6,8 +6,8 @@ namespace App\Services;
 
 use App\Enums\UserPrivacy;
 use App\Repositories\UserPasskeyRepository;
+use App\Support\AssetAppender;
 use App\Support\Config\SiteConfig;
-use App\Support\Form;
 use App\Support\Globals;
 use App\Support\Html;
 use App\Support\Locale;
@@ -85,9 +85,10 @@ final class UsercpSecuritySectionBuilder
         $passkeyListHtml = '';
 
         if ($isConfirm) {
-            Form::passwordChallengeJs('security', 'username', 'oldpassword');
+            AssetAppender::js('js/crypto-js.js', 'footer', true, 'crypto-js');
+            AssetAppender::js('js/auth-form.js', 'footer', true, 'auth-form');
         } else {
-            Form::passwordHashJs('security', 'password', 'chpassword', false, 'passagain', 'username');
+            AssetAppender::js('js/auth-form.js', 'footer', true, 'auth-form');
 
             $savedMessage = (string) ($lang['text_saved'] ?? '');
             if ($savedFlags['mail']) {

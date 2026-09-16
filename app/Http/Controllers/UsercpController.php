@@ -34,6 +34,7 @@ class UsercpController extends LegacyController
         UsercpRepository $repository,
         UsercpPageService $pageService,
         private readonly UsercpPolicy $policy,
+        private readonly Globals $globals,
     ) {
         $this->repository = $repository;
         $this->pageService = $pageService;
@@ -92,7 +93,7 @@ class UsercpController extends LegacyController
 
         $allowedActions = ['personal', 'tracker', 'forum', 'security'];
         if ($action !== '' && ! in_array($action, $allowedActions, true)) {
-            $langUsercp = (array) (app(Globals::class)->get('lang_usercp') ?? []);
+            $langUsercp = (array) ($this->globals->get('lang_usercp') ?? []);
             LegacyResponse::abort(
                 (string) ($langUsercp['std_error'] ?? 'Error'),
                 (string) ($langUsercp['std_invalid_action'] ?? 'Invalid action.')

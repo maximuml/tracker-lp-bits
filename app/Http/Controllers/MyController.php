@@ -32,11 +32,14 @@ class MyController extends Controller
 
     private CurrentUser $currentUser;
 
-    public function __construct(BonusPageService $bonusPageService, BonusService $bonusService, CurrentUser $currentUser)
+    private Globals $globals;
+
+    public function __construct(BonusPageService $bonusPageService, BonusService $bonusService, CurrentUser $currentUser, Globals $globals)
     {
         $this->bonusPageService = $bonusPageService;
         $this->bonusService = $bonusService;
         $this->currentUser = $currentUser;
+        $this->globals = $globals;
     }
 
     public function bonus(Request $request): View|Response|RedirectResponse
@@ -126,7 +129,7 @@ class MyController extends Controller
         }
 
         $q = htmlspecialchars((string) (request()->query('q') ?? ''));
-        $lang_myhr = (array) app(Globals::class)->get('lang_myhr', []);
+        $lang_myhr = (array) $this->globals->get('lang_myhr', []);
 
         $baseQuery = HitAndRun::query()->where('uid', $userid)->where('status', $status);
         $rescount = (int) (clone $baseQuery)->count();

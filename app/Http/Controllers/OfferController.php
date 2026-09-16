@@ -24,8 +24,13 @@ class OfferController extends LegacyController
 
     private OfferVoteService $offerVoteService;
 
-    public function __construct(OfferRepository $repository, OfferService $offerService, OfferPageService $pageService, OfferVoteService $offerVoteService)
-    {
+    public function __construct(
+        OfferRepository $repository,
+        OfferService $offerService,
+        OfferPageService $pageService,
+        OfferVoteService $offerVoteService,
+        private readonly CurrentUser $currentUser,
+    ) {
         $this->repository = $repository;
         $this->offerService = $offerService;
         $this->pageService = $pageService;
@@ -50,7 +55,7 @@ class OfferController extends LegacyController
 
     public function legacy(Request $request): View|RedirectResponse|Response
     {
-        if (app(CurrentUser::class)->get() === null) {
+        if ($this->currentUser->get() === null) {
             $qs = $request->getQueryString();
 
             return redirect('/offers.php'.($qs ? '?'.$qs : ''));

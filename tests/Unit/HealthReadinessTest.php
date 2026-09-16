@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Http\Controllers\HealthController;
+use Laravel\Horizon\Contracts\MasterSupervisorRepository;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
@@ -139,7 +140,7 @@ final class HealthReadinessTest extends TestCase
     public function test_health_live_returns_200(): void
     {
         // Test the controller directly (unit test, not feature test)
-        $controller = new HealthController;
+        $controller = new HealthController(\Mockery::mock(MasterSupervisorRepository::class));
         $response = $controller->live();
 
         $this->assertEquals(200, $response->getStatusCode());
@@ -153,7 +154,7 @@ final class HealthReadinessTest extends TestCase
     public function test_health_ready_returns_checks(): void
     {
         // Test the controller directly (unit test, not feature test)
-        $controller = new HealthController;
+        $controller = new HealthController(\Mockery::mock(MasterSupervisorRepository::class));
         $response = $controller->ready();
 
         $this->assertEquals(200, $response->getStatusCode());

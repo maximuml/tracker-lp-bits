@@ -16,9 +16,14 @@ use Illuminate\Support\Facades\Cache;
 
 class ToptenController extends Controller
 {
+    public function __construct(
+        private readonly CurrentUser $currentUser,
+        private readonly ToptenRepository $toptenRepository,
+    ) {}
+
     public function legacy(Request $request): Response|RedirectResponse
     {
-        if (app(CurrentUser::class)->get() === null) {
+        if ($this->currentUser->get() === null) {
             $qs = $request->getQueryString();
 
             return redirect('/topten.php'.($qs ? '?'.$qs : ''));
@@ -37,7 +42,7 @@ class ToptenController extends Controller
         $cacheKey = "topten_{$type}_{$limit}_{$subtype}_{$langFolder}";
 
         $html = Cache::remember($cacheKey, 3600, function () use ($type, $limit, $subtype) {
-            $page = app(ToptenRepository::class)->page($type, $limit, $subtype);
+            $page = $this->toptenRepository->page($type, $limit, $subtype);
 
             return view('topten.index', $page)->render();
         });

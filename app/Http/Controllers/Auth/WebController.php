@@ -26,8 +26,10 @@ class WebController extends Controller
 {
     private WebAuthService $authService;
 
-    public function __construct(WebAuthService $authService)
-    {
+    public function __construct(
+        WebAuthService $authService,
+        private readonly UserPasskeyRepository $userPasskeyRepository,
+    ) {
         $this->authService = $authService;
     }
 
@@ -177,7 +179,7 @@ class WebController extends Controller
     private function renderPasskeyLogin(): string
     {
         ob_start();
-        app(UserPasskeyRepository::class)->renderLogin();
+        $this->userPasskeyRepository->renderLogin();
         AssetAppender::js('js/passkey.js', 'footer', true);
 
         return (string) ob_get_clean();

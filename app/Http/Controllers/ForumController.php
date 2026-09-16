@@ -31,6 +31,7 @@ class ForumController extends LegacyController
         private readonly ForumService $service,
         private readonly ForumPageService $pageService,
         private readonly CurrentUser $currentUser,
+        private readonly CommentRepository $commentRepository,
     ) {}
 
     /**
@@ -43,7 +44,7 @@ class ForumController extends LegacyController
      */
     public function legacy(Request $request): View|Response|RedirectResponse
     {
-        if (app(CurrentUser::class)->get() === null) {
+        if ($this->currentUser->get() === null) {
             return redirect('/forums.php?'.$request->getQueryString());
         }
 
@@ -59,7 +60,7 @@ class ForumController extends LegacyController
 
     public function legacyAction(Request $request): Response|RedirectResponse
     {
-        if (app(CurrentUser::class)->get() === null) {
+        if ($this->currentUser->get() === null) {
             return redirect('/forums.php?'.$request->getQueryString());
         }
 
@@ -92,10 +93,10 @@ class ForumController extends LegacyController
     public function latestcomments(Request $request): View|RedirectResponse|Response
     {
         $perpage = 20;
-        $count = app(CommentRepository::class)->countLatest();
+        $count = $this->commentRepository->countLatest();
 
         [$pagertop, $pagerbottom, , $offset, $perpage] = Pagination::pager($perpage, $count, 'latestcomments.php?');
-        $rows = app(CommentRepository::class)->getLatest($perpage, $offset);
+        $rows = $this->commentRepository->getLatest($perpage, $offset);
 
         $userIds = array_filter(array_unique(array_column($rows, 'user')));
         UserDisplay::preload(array_map('intval', $userIds));

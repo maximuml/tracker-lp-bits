@@ -22,16 +22,21 @@ use Illuminate\View\View;
 
 class StaffPageController extends LegacyController
 {
+    public function __construct(
+        private readonly CurrentUser $currentUser,
+        private readonly Globals $globals,
+    ) {}
+
     public function staff(Request $request): View|RedirectResponse|Response
     {
-        $curUser = app(CurrentUser::class)->get() ?? [];
+        $curUser = $this->currentUser->get() ?? [];
         $currentUserId = (int) ($curUser['id'] ?? 0);
 
         if (! Permissions::userCan(PermissionEnum::STAFF_MEMBER->value, false, $currentUserId)) {
             return $this->legacyAbortResponse('Error', 'Permission denied.');
         }
 
-        $langStaff = (array) app(Globals::class)->get('lang_staff', []);
+        $langStaff = (array) $this->globals->get('lang_staff', []);
         $secs = 900;
         $dt = time() - $secs;
 
@@ -151,7 +156,7 @@ class StaffPageController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Access denied!!!');
         }
 
-        $langStaffpanel = (array) app(Globals::class)->get('lang_staffpanel', []);
+        $langStaffpanel = (array) $this->globals->get('lang_staffpanel', []);
 
         $sysopPanels = [];
         $adminPanels = [];

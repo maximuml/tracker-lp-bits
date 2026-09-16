@@ -27,15 +27,18 @@ class SupportController extends LegacyController
 {
     public function __construct(
         private readonly ComplainService $complainService,
+        private readonly CurrentUser $currentUser,
+        private readonly Globals $globals,
+        private readonly Language $language,
     ) {}
 
     public function complains(Request $request): View|RedirectResponse|Response
     {
-        $currentUser = (array) (app(CurrentUser::class)->get() ?? []);
+        $currentUser = (array) ($this->currentUser->get() ?? []);
         $uid = (int) ($currentUser['id'] ?? 0);
         $isAdmin = Permission::can(PermissionEnum::STAFF_MEMBER);
-        $langComplains = (array) (app(Globals::class)->get('lang_complains') ?? []);
-        $langFunctions = app(Language::class)->functions();
+        $langComplains = (array) ($this->globals->get('lang_complains') ?? []);
+        $langFunctions = $this->language->functions();
 
         if ($uid > 0 && ! $isAdmin) {
             return $this->legacyAbortResponse($langComplains['std_error'] ?? 'Error', 'Permission denied.');
@@ -82,7 +85,7 @@ class SupportController extends LegacyController
      */
     private function complainNew(Request $request, array $langComplains, array $langFunctions): RedirectResponse|Response
     {
-        if ((int) (app(CurrentUser::class)->get()['id'] ?? 0) === 0) {
+        if ((int) ($this->currentUser->get()['id'] ?? 0) === 0) {
             return $this->legacyAbortResponse($langFunctions['std_error'] ?? 'Error', 'Permission denied.');
         }
 

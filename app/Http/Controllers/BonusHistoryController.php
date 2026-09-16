@@ -37,14 +37,17 @@ class BonusHistoryController extends LegacyController
 {
     private BonusCalculationRepository $bonusCalculationRepository;
 
-    public function __construct(BonusCalculationRepository $bonusCalculationRepository)
-    {
+    public function __construct(
+        BonusCalculationRepository $bonusCalculationRepository,
+        private readonly CurrentUser $currentUser,
+        private readonly Globals $globals,
+    ) {
         $this->bonusCalculationRepository = $bonusCalculationRepository;
     }
 
     public function bonusLog(Request $request): View|RedirectResponse|Response
     {
-        $curUser = app(CurrentUser::class)->get() ?? [];
+        $curUser = $this->currentUser->get() ?? [];
         $uid = (int) (request()->input('uid') ?? $curUser['id'] ?? 0);
 
         if (! Validators::isId($uid)) {
@@ -161,7 +164,7 @@ JS;
             return $this->legacyAbortResponse('Error', 'Permission denied.');
         }
 
-        $langUploaders = (array) app(Globals::class)->get('lang_uploaders', []);
+        $langUploaders = (array) $this->globals->get('lang_uploaders', []);
 
         $year = (int) (request()->query('year') ?? 0);
         if (! $year || $year < 2000) {
@@ -294,7 +297,7 @@ JS;
 
     public function magic(MagicRewardRequest $request): JsonResponse|Response
     {
-        $curUser = app(CurrentUser::class)->get() ?? [];
+        $curUser = $this->currentUser->get() ?? [];
         $userId = (int) ($curUser['id'] ?? 0);
         $validated = $request->validated();
         $torrentId = (int) $validated['id'];

@@ -27,11 +27,14 @@ class AdminToolsController extends LegacyController
     public function __construct(
         private readonly ModerationRepository $moderationRepository,
         private readonly LocationService $locationService,
+        private readonly CurrentUser $currentUser,
+        private readonly Globals $globals,
+        private readonly ?LegacyRedisCache $legacyRedisCache,
     ) {}
 
     public function userBanLog(Request $request): View|RedirectResponse|Response
     {
-        if (app(CurrentUser::class)->get() === null) {
+        if ($this->currentUser->get() === null) {
             $qs = $request->getQueryString();
 
             return redirect('/user-ban-log.php'.($qs ? '?'.$qs : ''));
@@ -86,7 +89,7 @@ class AdminToolsController extends LegacyController
                 $error = 'You must fill in cache name.';
             } else {
                 $multilang = $request->input('multilang') === 'yes';
-                $cache = app(LegacyRedisCache::class);
+                $cache = $this->legacyRedisCache;
                 if ($cache !== null) {
                     $cache->delete_value($cachename, $multilang);
                 }
@@ -292,7 +295,7 @@ class AdminToolsController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Permission denied');
         }
 
-        $langTestip = (array) app(Globals::class)->get('lang_testip', []);
+        $langTestip = (array) $this->globals->get('lang_testip', []);
 
         if ($request->isMethod('post')) {
             $ip = (string) request()->post('ip');

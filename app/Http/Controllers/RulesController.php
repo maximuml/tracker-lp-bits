@@ -16,15 +16,19 @@ use Illuminate\View\View;
 
 class RulesController extends LegacyController
 {
+    public function __construct(
+        private readonly InfoRepository $infoRepository,
+    ) {}
+
     public function rules(Request $request): Response|RedirectResponse
     {
         $langFolder = Locale::currentLangDir('en');
         $cacheKey = "{$langFolder}_rules";
 
         $html = Cache::remember($cacheKey, 900, function () {
-            $langId = app(InfoRepository::class)->resolveRuleLangId(Locale::guestIdWithContext());
+            $langId = $this->infoRepository->resolveRuleLangId(Locale::guestIdWithContext());
 
-            return view('rules.index', ['rules' => app(InfoRepository::class)->rules($langId)])->render();
+            return view('rules.index', ['rules' => $this->infoRepository->rules($langId)])->render();
         });
 
         return response($html);
@@ -40,6 +44,6 @@ class RulesController extends LegacyController
 
     public function aboutNexus(Request $request): View|RedirectResponse|Response
     {
-        return $this->legacyPage($request, 'aboutnexus', false, app(InfoRepository::class)->aboutNexus());
+        return $this->legacyPage($request, 'aboutnexus', false, $this->infoRepository->aboutNexus());
     }
 }

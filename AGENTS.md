@@ -52,7 +52,8 @@ docker compose exec php php artisan user:reset_id_auto_increment \
 # One-command test runner (W0-06): uses docker-compose.test.yml overlay
 # with isolated DB_DATABASE=nexusphp_testing and REDIS_PREFIX=test_
 make test              # all suites (migrate:fresh + phpunit --parallel)
-make test-unit         # unit only
+make test-unit         # unit only (no DB/Redis needed, fast)
+make test-integration  # service/repository layer on a live test DB
 make test-feature      # feature only
 make test-architecture # architecture ratchets only
 make test-performance  # EXPLAIN/query-plan regression tests
@@ -61,6 +62,7 @@ make test-lint         # Pint + PHPStan
 # Or via composer (inside the php container)
 docker compose exec -T php composer test
 docker compose exec -T php composer test:unit
+docker compose exec -T php composer test:integration
 docker compose exec -T php composer test:lint
 
 # Manual (legacy approach)
@@ -364,7 +366,8 @@ Decision → Consequences). Add new ADRs here as numbered subsections.
 
 ## Testing
 
-- **Unit tests:** `tests/Unit/` — support classes, repositories, services
+- **Unit tests:** `tests/Unit/` — pure unit only, no DB/Redis/MeiliSearch (enforced by `UnitSuiteIsolationTest` and the `unit-tests-fast` CI job, which runs the suite with no service containers)
+- **Integration tests:** `tests/Integration/` — services/repositories on a live test DB and Redis
 - **Feature tests:** `tests/Feature/` — CriticalPathTest, LegacySmokeTest, SecurityHeadersTest
 - **E2E:** Docker stack + curl smoke tests (see skills in `.agents/skills/`)
 - **Login for E2E:** CSRF token from `/login.php` → POST to `/takelogin.php` with `_token`, `username`, `password`
@@ -377,7 +380,7 @@ databases are used:
 
 | Database | Suite | CI job |
 |---|---|---|
-| `nexusphp_unit_testing` | Unit | `unit-tests`, `coverage`, `octane` |
+| `nexusphp_unit_testing` | Unit + Integration | `unit-tests`, `coverage`, `octane` |
 | `nexusphp_feature_testing` | Feature (no OpenResty) | `coverage` |
 | `nexusphp_e2e_testing` | Feature + OpenResty (CriticalPathTest) | `smoke-test`, `a11y`, `perf-budget` |
 

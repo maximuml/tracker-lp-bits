@@ -9,7 +9,7 @@ use App\Support\Metrics\PrometheusFormatter;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
-#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class AppInfoCollectorTest extends TestCase
 {
     public function test_collect_emits_app_info_with_labels(): void

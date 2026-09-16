@@ -12,7 +12,7 @@ use Tests\TestCase;
 /**
  * W6-01: the container must resolve the full collector list.
  */
-#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class MetricsRegistryTest extends TestCase
 {
     public function test_registry_resolves_all_collectors(): void

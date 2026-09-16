@@ -48,3 +48,6 @@ rr
 .rr.yaml
 /screenshots/
 perf-results/
+
+# Локальные рабочие документы (аудиты, черновики планов)
+*.local.md

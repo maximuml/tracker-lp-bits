@@ -5,7 +5,7 @@
 #   make test
 #
 # This overlay isolates test databases from the dev database:
-#   - DB_DATABASE=nexusphp_testing (unit + architecture suites)
+#   - DB_DATABASE=nexusphp_testing (integration + architecture suites)
 #   - REDIS_PREFIX=test_ (separate keyspace)
 #   - APP_ENV=testing
 #

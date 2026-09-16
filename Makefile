@@ -1,4 +1,4 @@
-.PHONY: help up down build test test-unit test-feature test-architecture test-lint migrate-test
+.PHONY: help up down build test test-unit test-integration test-feature test-architecture test-lint migrate-test
 
 # Default: show available commands
 help: ## Show this help
@@ -26,8 +26,14 @@ TEST_RUN = $(TEST_COMPOSE) run --rm -T --entrypoint sh php -c
 test: ## Run all test suites (unit + feature + architecture) in isolated test DB
 	$(TEST_RUN) 'php artisan config:clear && php artisan migrate:fresh --seed --force && composer test'
 
-test-unit: ## Run unit tests only
-	$(TEST_RUN) 'php artisan config:clear && php artisan migrate:fresh --seed --force && composer test:unit'
+# Unit не требует MySQL/Redis: сюит изолирован от внешних сервисов
+# (закреплено UnitSuiteIsolationTest). Поэтому здесь нет migrate:fresh —
+# это единственная быстрая цель, пригодная для прогона на каждое сохранение.
+test-unit: ## Run unit tests only (no DB required, fast)
+	$(TEST_RUN) 'php artisan config:clear && composer test:unit'
+
+test-integration: ## Run integration tests (service layer on a live DB)
+	$(TEST_RUN) 'php artisan config:clear && php artisan migrate:fresh --seed --force && composer test:integration'
 
 test-feature: ## Run feature tests only
 	$(TEST_RUN) 'php artisan config:clear && php artisan migrate:fresh --seed --force && composer test:feature'

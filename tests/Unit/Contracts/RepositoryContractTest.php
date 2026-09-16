@@ -36,7 +36,7 @@ use Mockery;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
-#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class RepositoryContractTest extends TestCase
 {
     public function test_auth_repository_interface_binding(): void

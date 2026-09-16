@@ -14,6 +14,57 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Быстрый сюит без сервисных контейнеров: ни MySQL, ни Redis, ни MeiliSearch.
+  # Это и есть смысл разделения tests/Unit — обратная связь за минуту вместо
+  # 12 минут с migrate:fresh --seed. Если этот job начал требовать БД, значит
+  # в tests/Unit просочился интеграционный тест: его ловит UnitSuiteIsolationTest,
+  # но здесь падение будет раньше и очевиднее.
+  unit-tests-fast:
+    name: Unit tests (no services)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@b604ade2a87db23f8871b7182e69ec5e75effb45 # v2
+        with:
+          php-version: '8.5'
+          extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, pdo_mysql, redis, sqlite3, xml, zip
+          coverage: none
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: ~/.composer/cache
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction --no-scripts
+
+      - name: Dump autoload
+        run: composer dump-autoload --no-interaction --no-scripts
+
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          sed -i 's/^CACHE_DRIVER=.*/CACHE_DRIVER=array/' .env
+          sed -i 's/^QUEUE_CONNECTION=.*/QUEUE_CONNECTION=sync/' .env
+          sed -i 's/^SESSION_DRIVER=.*/SESSION_DRIVER=array/' .env
+          sed -i 's/^CHANNEL_NAME_SETTING=.*/CHANNEL_NAME_SETTING=/' .env
+          sed -i 's/^CHANNEL_NAME_MODEL_EVENT=.*/CHANNEL_NAME_MODEL_EVENT=/' .env
+          echo "SCOUT_DRIVER=null" >> .env
+          # DB_HOST в никуда: соединение отваливается сразу (Connection refused),
+          # а не висит на getaddrinfo. Любой тест, которому нужна БД, упадёт.
+          sed -i 's/^DB_HOST=.*/DB_HOST=127.0.0.1/' .env
+          sed -i 's/^REDIS_HOST=.*/REDIS_HOST=127.0.0.1/' .env
+          sed -i 's/^MEILISEARCH_HOST=.*/MEILISEARCH_HOST=127.0.0.1/' .env
+
+      - name: Run PHPUnit unit tests (no DB, no Redis, no MeiliSearch)
+        run: DB_DATABASE=nexusphp_unit_testing vendor/bin/phpunit --testsuite Unit --no-coverage
+
   static-analysis:
     name: Lint + Pint + PHPStan L8
     runs-on: ubuntu-latest
@@ -395,6 +446,9 @@ jobs:
       - name: Run PHPUnit unit tests
         run: DB_DATABASE=nexusphp_unit_testing vendor/bin/phpunit --testsuite Unit --no-coverage
 
+      - name: Run PHPUnit integration tests
+        run: DB_DATABASE=nexusphp_unit_testing vendor/bin/phpunit --testsuite Integration --no-coverage
+
       - name: Run PHPUnit performance tests
         run: DB_DATABASE=nexusphp_unit_testing vendor/bin/phpunit --testsuite Performance --no-coverage
 
@@ -494,8 +548,11 @@ jobs:
           # categories — torrent listing, agent_allowed_family/agent_allowed_exception — announce client check
           mysqldump -h 127.0.0.1 -u root -proot --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users searchbox searchbox_fields categories agent_allowed_family agent_allowed_exception | mysql -h 127.0.0.1 -u root -proot nexusphp_feature_testing
 
-      - name: Run PHPUnit Unit with coverage
-        run: DB_DATABASE=nexusphp_unit_testing vendor/bin/phpunit --testsuite Unit --coverage-clover=coverage-unit.xml
+      - name: Run PHPUnit Unit + Integration with coverage
+        # Оба сюита в одном clover-файле: до разделения tests/Unit они были
+        # одним набором, и порог "Unit ≥ 35%" ниже калиброван на их сумме.
+        # Integration остаётся на nexusphp_unit_testing — та же изолированная БД.
+        run: DB_DATABASE=nexusphp_unit_testing vendor/bin/phpunit --testsuite Unit,Integration --coverage-clover=coverage-unit.xml
 
       - name: Run PHPUnit Feature with coverage
         run: DB_DATABASE=nexusphp_feature_testing vendor/bin/phpunit --testsuite Feature --coverage-clover=coverage-feature.xml --coverage-html=coverage-html
@@ -515,10 +572,10 @@ jobs:
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
 
-      - name: Minimum coverage gate (Unit ≥ 35%)
+      - name: Minimum coverage gate (Unit + Integration ≥ 35%)
         # W0-04: Fail-closed coverage gate.
         # Reads line coverage from Clover XML files already generated
-        # by the Unit and Feature steps above — no test re-runs.
+        # by the Unit+Integration and Feature steps above — no test re-runs.
         # Fails on missing files, parse errors, or Unit coverage below floor.
         # Only Unit coverage is gated — Feature coverage is informational
         # since feature tests require full infrastructure and naturally
@@ -1139,9 +1196,10 @@ jobs:
 
       - name: Run Infection (full scope)
         run: |
-          # --testsuite=Unit: Feature/Architecture suites run against
-          # nexusphp_feature_testing/e2e elsewhere and are not valid on the
-          # unit dump used here.
+          # --testsuite=Unit,Integration: оба сюита работают на дампе
+          # nexusphp_unit_testing (до разделения это был один набор Unit).
+          # Feature/Architecture идут на nexusphp_feature_testing/e2e в других
+          # job'ах и на этом дампе невалидны.
           DB_DATABASE=nexusphp_unit_testing vendor/bin/infection \
             --configuration=infection.json5 \
             --threads=4 \
@@ -1149,7 +1207,7 @@ jobs:
             --min-covered-msi=50 \
             --no-progress \
             --logger-github \
-            --test-framework-extra-args="--testsuite=Unit"
+            --test-framework-extra-args="--testsuite=Unit,Integration"
 
       - name: Upload Infection logs
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -1286,7 +1344,7 @@ jobs:
             --min-covered-msi=50 \
             --filter="${{ steps.changed.outputs.filter }}" \
             --map-source-class-to-test \
-            --test-framework-extra-args="--testsuite=Unit"
+            --test-framework-extra-args="--testsuite=Unit,Integration"
 
       - name: Upload Infection PR logs
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

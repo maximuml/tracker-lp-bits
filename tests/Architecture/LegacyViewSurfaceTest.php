@@ -23,6 +23,21 @@ use Tests\Attributes\TestCategory;
  *   - <table> layout tables      : 224
  *   - inline on*= handlers       : 34
  *
+ * Baselines captured on 2026-09-17 (audit, post-{!! !!}→@safeHtml rename):
+ *   - SafeHtml::fromTrustedHtml()  : 550 lines — unverified raw output.
+ *     fromTrustedHtml() performs NO sanitisation (it wraps the string in a
+ *     marker type, see SafeHtml.php), so
+ *
+ *     @safeHtml(SafeHtml::fromTrustedHtml($x)) emits the same bytes as
+ *     {!! $x !!} — only the spelling changed. Ratcheting it prevents the
+ *     "rename the pattern, claim -100%" failure mode: the {!! !!} baseline
+ *     above reached 0 while unverified output grew 415 → 550.
+ *   - ... over $lang[...] arrays   : 110 — plain text language strings;
+ *     these need {{ }}, not a trust marker.
+ *   - @safeHtml inside HTML attrs  : 21 — attribute context requires
+ *     context-specific escaping; raw HTML in an attribute breaks out of
+ *     the quoted context regardless of the trust marker.
+ *
  * Each PR that migrates a page to Blade components should reduce one or
  * more of these counts. The baseline constants should be lowered — never
  * raised — as migration progresses.
@@ -33,6 +48,9 @@ use Tests\Attributes\TestCategory;
  *   grep -rn '\\App\\Support\\Html::' resources/views --include='*.blade.php' | wc -l
  *   grep -rn '<table' resources/views --include='*.blade.php' | wc -l
  *   grep -rniE ' (onclick|onchange|onsubmit|onload|onerror|onfocus|onblur|onmouseover|onmouseout|onkeyup|onkeydown|onkeypress)=' resources/views --include='*.blade.php' | wc -l
+ *   grep -rn 'fromTrustedHtml' resources/views --include='*.blade.php' | wc -l
+ *   grep -rnE 'fromTrustedHtml\(\$lang(_\w+)?\[' resources/views --include='*.blade.php' | wc -l
+ *   grep -rniE '(href|src|content|title|alt|value|data-[a-z-]+)="?@safeHtml' resources/views --include='*.blade.php' | wc -l
  */
 #[TestCategory(TestCategory::ARCHITECTURE)]
 final class LegacyViewSurfaceTest extends TestCase
@@ -60,6 +78,24 @@ final class LegacyViewSurfaceTest extends TestCase
 
     /** Baseline: raw <?php open tags inside Blade views (legacy partials). */
     private const BASELINE_RAW_PHP_TAGS = 0;
+
+    /**
+     * Baseline: SafeHtml::fromTrustedHtml() calls in views.
+     * Unverified raw output — byte-identical to {!! !!}.
+     */
+    private const BASELINE_TRUSTED_HTML = 550;
+
+    /**
+     * Baseline: fromTrustedHtml() over $lang[...] arrays.
+     * Language strings are plain text and must use {{ }} instead.
+     */
+    private const BASELINE_TRUSTED_HTML_LANG = 110;
+
+    /**
+     * Baseline: @safeHtml output inside HTML attribute values.
+     * Attribute context requires context-specific escaping.
+     */
+    private const BASELINE_TRUSTED_HTML_ATTR = 21;
 
     /**
      * Views whose <table> tags are exempt from the layout-table ratchet:
@@ -170,6 +206,63 @@ final class LegacyViewSurfaceTest extends TestCase
                .'Use Alpine.js (x-on:click, @click) or unobtrusive JS instead. '
                .'If this increase is intentional, lower the baseline after removing inline handlers elsewhere.',
                 self::BASELINE_INLINE_HANDLERS,
+                $count,
+            ),
+        );
+    }
+
+    public function test_trusted_html_count_does_not_exceed_baseline(): void
+    {
+        $count = $this->countPatternInViews('/fromTrustedHtml/');
+
+        $this->assertLessThanOrEqual(
+            self::BASELINE_TRUSTED_HTML,
+            $count,
+            sprintf(
+                'fromTrustedHtml() count in views increased from baseline %d to %d. '
+               .'fromTrustedHtml() does not sanitise — it is {!! !!} under another name. '
+               .'Use {{ }} escaped output or a component that escapes internally. '
+               .'If this increase is intentional, lower the baseline after removing fromTrustedHtml elsewhere.',
+                self::BASELINE_TRUSTED_HTML,
+                $count,
+            ),
+        );
+    }
+
+    public function test_trusted_html_lang_count_does_not_exceed_baseline(): void
+    {
+        $count = $this->countPatternInViews('/fromTrustedHtml\(\$lang(_\w+)?\[/');
+
+        $this->assertLessThanOrEqual(
+            self::BASELINE_TRUSTED_HTML_LANG,
+            $count,
+            sprintf(
+                'fromTrustedHtml($lang...) count in views increased from baseline %d to %d. '
+               .'$lang[...] strings are plain text — wrap them in {{ }} escaped output, '
+               .'not in a trust marker. '
+               .'If this increase is intentional, lower the baseline after removing fromTrustedHtml elsewhere.',
+                self::BASELINE_TRUSTED_HTML_LANG,
+                $count,
+            ),
+        );
+    }
+
+    public function test_trusted_html_in_attributes_does_not_exceed_baseline(): void
+    {
+        $count = $this->countPatternInViews(
+            '/(href|src|content|title|alt|value|data-[a-z-]+)\s*=\s*["\x27]?\s*@safeHtml/i',
+        );
+
+        $this->assertLessThanOrEqual(
+            self::BASELINE_TRUSTED_HTML_ATTR,
+            $count,
+            sprintf(
+                '@safeHtml-in-attribute count in views increased from baseline %d to %d. '
+               .'Attribute values need context-specific escaping — raw HTML inside an '
+               .'attribute can break out of the quoted context. Escape the value for an '
+               .'attribute context instead of marking it trusted. '
+               .'If this increase is intentional, lower the baseline after removing it elsewhere.',
+                self::BASELINE_TRUSTED_HTML_ATTR,
                 $count,
             ),
         );

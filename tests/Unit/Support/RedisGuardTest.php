@@ -8,7 +8,7 @@ use App\Support\RedisGuard;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
-#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
+#[TestCategory(TestCategory::PURE_UNIT)]
 class RedisGuardTest extends TestCase
 {
     protected function setUp(): void

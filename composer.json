@@ -103,6 +103,9 @@
         "test:unit": [
             "@php artisan test --testsuite=Unit"
         ],
+        "test:integration": [
+            "@php artisan test --testsuite=Integration"
+        ],
         "test:feature": [
             "@php artisan test --testsuite=Feature"
         ],

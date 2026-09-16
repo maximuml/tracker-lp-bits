@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Cache;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
-#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class SearchMetricsCollectorTest extends TestCase
 {
     public function test_collect_emits_meili_up_and_lag(): void

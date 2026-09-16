@@ -493,4 +493,46 @@ final class ComponentLayerTest extends TestCase
         $this->assertStringContainsString('data-text="descr"', $html);
         $this->assertStringContainsString('upload-descr-preview', $html);
     }
+
+    // --- x-datetime-input ------------------------------------------------
+
+    public function test_datetime_input_renders_native_input(): void
+    {
+        $html = $this->render(
+            '<x-datetime-input name="added_begin" :value="$v" :style="$s" />',
+            ['v' => '2025-03-04 10:00', 's' => 'width: 150px'],
+        );
+
+        $this->assertStringContainsString('type="datetime-local"', $html);
+        $this->assertStringContainsString('id="datetime-picker-added_begin"', $html);
+        $this->assertStringContainsString('name="added_begin"', $html);
+        $this->assertStringContainsString('value="2025-03-04 10:00"', $html);
+        $this->assertStringContainsString('style="width: 150px"', $html);
+        $this->assertStringContainsString('autocomplete="off"', $html);
+    }
+
+    public function test_datetime_input_escapes_value_and_keeps_label_html(): void
+    {
+        $label = SafeHtml::fromTrustedHtml('<b>Deadline:</b>');
+        $html = $this->render(
+            '<x-datetime-input name="until" :label="$label" :value="$v" />',
+            ['label' => $label, 'v' => 'x" onfocus="alert(1)'],
+        );
+
+        $this->assertStringContainsString('<b>Deadline:</b>', $html);
+        $this->assertStringNotContainsString('x" onfocus="alert(1)"', $html);
+        $this->assertStringContainsString('x&quot; onfocus=&quot;alert(1)', $html);
+    }
+
+    public function test_datetime_input_renders_via_view_helper(): void
+    {
+        $html = view('components.datetime-input', [
+            'label' => SafeHtml::fromTrustedHtml('Deadline:&nbsp;'),
+            'name' => 'pos_state_until',
+            'value' => '2030-01-01 00:00',
+        ])->render();
+
+        $this->assertStringContainsString('Deadline:&nbsp;<input type="datetime-local"', $html);
+        $this->assertStringContainsString('name="pos_state_until"', $html);
+    }
 }

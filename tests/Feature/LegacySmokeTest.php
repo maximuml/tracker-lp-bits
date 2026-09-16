@@ -30,6 +30,22 @@ final class LegacySmokeTest extends TestCase
         }
     }
 
+    public function test_signup_page_emits_auth_form_wiring(): void
+    {
+        $response = $this->get('/signup');
+        $response->assertStatus(200);
+
+        $html = $response->getContent();
+        $this->assertIsString($html);
+        $this->assertStringContainsString('data-auth-form="hash"', $html);
+        $this->assertStringContainsString('data-username-name="wantusername"', $html);
+        $this->assertStringContainsString('data-password-class="wantpassword"', $html);
+        $this->assertStringContainsString('data-password-hash-name="wantpassword"', $html);
+        $this->assertStringContainsString('data-password-confirm-class="passagain"', $html);
+        $this->assertStringContainsString('js/auth-form.js', $html);
+        $this->assertStringNotContainsString('layer-v3.5.1', $html);
+    }
+
     public function test_unauthenticated_legacy_pages_redirect_to_login(): void
     {
         $protected = [

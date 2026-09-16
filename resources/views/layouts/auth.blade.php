@@ -33,7 +33,6 @@
     <script type="text/javascript" src="js/csrf.js"></script>
     <script type="text/javascript" src="js/auth.js"></script>
     <script type="text/javascript" src="vendor/jquery-3.7.1.min.js"></script>
-    <script type="text/javascript" src="vendor/layer-v3.5.1/layer/layer.js"></script>
     @foreach (\App\Support\AssetAppender::getAppendHeaders() as $html)
         @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(($html ?? '')))
     @endforeach

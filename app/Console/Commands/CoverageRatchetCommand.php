@@ -33,25 +33,48 @@ final class CoverageRatchetCommand extends Command
     protected $description = 'Enforce per-module coverage thresholds (ratchet)';
 
     /**
+     * Comparison tolerance in percentage points. Covered-statement
+     * counts fluctuate a few lines between identical runs (observed ±6
+     * of 7930 in app/Http/Controllers ≈ 0.08pp — a test's coverage
+     * attribution is nondeterministic), so a floor at the exact measured
+     * value fails on noise. Real regressions are ≥0.5pp.
+     */
+    private const EPSILON = 0.25;
+
+    /**
      * Per-module thresholds (minimum line coverage %).
      *
-     * These are conservative floors based on current coverage levels.
-     * They should be raised as coverage improves.
+     * Floors live in .coverage-baseline.json (measured facts — the
+     * effective threshold is max(entry here, baseline)). Entries at 0.0
+     * mean "counted and reported" — the baseline supplies the real floor.
+     * Every first-level app/ directory must appear here — enforced by
+     * CoverageRatchetCompletenessTest.
      */
     private const MODULE_THRESHOLDS = [
-        'app/Services' => 25.0,
-        'app/Repositories' => 30.0,
-        'app/Support' => 25.0,
-        'app/Models' => 20.0,
-        'app/Http/Controllers' => 15.0,
-        'app/Policies' => 10.0,
-        'app/Jobs' => 20.0,
+        'app/Auth' => 15.0,
         'app/Console' => 5.0,
+        'app/Contracts' => 0.0,
+        'app/DTOs' => 40.0,
+        'app/Enums' => 15.0,
+        'app/Events' => 0.0,
+        'app/Exceptions' => 0.0,
+        'app/Filament' => 0.0,
+        'app/Http' => 0.0,
+        'app/Http/Controllers' => 15.0,
+        'app/Jobs' => 20.0,
+        'app/Listeners' => 0.0,
+        'app/Logging' => 0.0,
+        'app/Models' => 20.0,
+        'app/Observers' => 0.0,
+        'app/Policies' => 10.0,
+        'app/Providers' => 0.0,
+        'app/Repositories' => 30.0,
+        'app/Services' => 25.0,
+        'app/Support' => 25.0,
         'app/Utils' => 5.0,
         'app/ValueObjects' => 50.0,
-        'app/DTOs' => 40.0,
-        'app/Auth' => 15.0,
-        'app/Enums' => 15.0,
+        'app/View' => 0.0,
+        'app/ViewModels' => 0.0,
     ];
 
     public function handle(): int
@@ -86,7 +109,7 @@ final class CoverageRatchetCommand extends Command
                 $effectiveThreshold = max($threshold, $baselinePct);
 
                 $status = 'OK';
-                if ($pct < $effectiveThreshold) {
+                if ($pct + self::EPSILON < $effectiveThreshold) {
                     $status = 'FAIL';
                     $failures[] = sprintf(
                         '%s: %.1f%% < %.1f%%',
@@ -267,9 +290,11 @@ final class CoverageRatchetCommand extends Command
                 ? ($data['covered'] / $data['statements']) * 100
                 : 0.0;
             $current = $baseline[$module] ?? 0.0;
-            // Ratchet up only
+            // Ratchet up only. floor() not round(): a rounded-up baseline
+            // (13.4489 -> 13.45) would sit above the real measurement and
+            // fail the very next run on unchanged code.
             if ($pct > $current) {
-                $updated[$module] = round($pct, 2);
+                $updated[$module] = floor($pct * 100) / 100;
             }
         }
 

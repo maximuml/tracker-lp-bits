@@ -1,28 +1,55 @@
 # T-16: Codecov configuration for coverage pipeline.
 #
+# NOTE: the authoritative coverage gate is the in-CI ratchet
+# (`coverage:ratchet` + .coverage-baseline.json + the Unit+Integration
+# >= 35% clover check in ci.yml) — Codecov uploads currently fail on
+# this repo (masked by continue-on-error), so these statuses never post.
+# This file is kept fail-closed so the day the token/app is fixed the
+# gates activate correctly instead of silently reporting-only.
+#
 # - Patch coverage target: 60% of new/changed lines must be covered.
-#   This is enforced server-side by Codecov when CODECOV_TOKEN is set.
-# - Project coverage target: 35% (floor — raise gradually).
-# - Flags: unit, feature (uploaded separately from CI).
-# - Carryforward: if coverage drops, the PR comment explains why.
+# - Project coverage: target auto (not below base commit), threshold 2%.
+# - Per-component gates below mirror the in-CI ratchet's sensitive
+#   modules (auth surface) — target auto, not aspirational percentages:
+#   a fixed 60% on a 24% module would fail every check instantly.
 
 coverage:
   status:
     project:
       default:
-        target: 35%
-        threshold: 1%
-        # W0-04 follow-up: keep project coverage informational until the
-        # per-module ratchet has been running fail-closed for one release.
-        informational: true
+        target: auto
+        threshold: 2%
+        informational: false
     patch:
       default:
         target: 60%
         threshold: 5%
-        # W0-04: patch coverage is now fail-closed. PRs must cover 60% of
+        # W0-04: patch coverage is fail-closed. PRs must cover 60% of
         # changed lines. Use `codecov-bypass` label with maintainer approval
         # if a PR legitimately cannot be covered (e.g., configuration only).
         informational: false
+
+component_management:
+  individual_components:
+    - component_id: auth-surface
+      name: Auth + Policies
+      paths:
+        - app/Auth
+        - app/Policies
+      statuses:
+        - type: project
+          target: auto
+          threshold: 1%
+          informational: false
+    - component_id: controllers
+      name: HTTP Controllers
+      paths:
+        - app/Http/Controllers
+      statuses:
+        - type: project
+          target: auto
+          threshold: 1%
+          informational: false
 
 flags:
   unit:

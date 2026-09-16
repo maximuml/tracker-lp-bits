@@ -648,6 +648,9 @@ jobs:
         if: always()
         with:
           name: coverage-baseline
+          # Dotfiles are skipped by the globber unless asked for —
+          # without this the artifact silently carried only the report.
+          include-hidden-files: true
           path: |
             .coverage-baseline.json
             coverage-report.json

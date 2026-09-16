@@ -33,6 +33,15 @@ final class CoverageRatchetCommand extends Command
     protected $description = 'Enforce per-module coverage thresholds (ratchet)';
 
     /**
+     * Comparison tolerance in percentage points. Covered-statement
+     * counts fluctuate a few lines between identical runs (observed ±6
+     * of 7930 in app/Http/Controllers ≈ 0.08pp — a test's coverage
+     * attribution is nondeterministic), so a floor at the exact measured
+     * value fails on noise. Real regressions are ≥0.5pp.
+     */
+    private const EPSILON = 0.25;
+
+    /**
      * Per-module thresholds (minimum line coverage %).
      *
      * Floors live in .coverage-baseline.json (measured facts — the
@@ -100,7 +109,7 @@ final class CoverageRatchetCommand extends Command
                 $effectiveThreshold = max($threshold, $baselinePct);
 
                 $status = 'OK';
-                if ($pct < $effectiveThreshold) {
+                if ($pct + self::EPSILON < $effectiveThreshold) {
                     $status = 'FAIL';
                     $failures[] = sprintf(
                         '%s: %.1f%% < %.1f%%',

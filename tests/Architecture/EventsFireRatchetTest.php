@@ -26,7 +26,7 @@ final class EventsFireRatchetTest extends TestCase
     private const APP_DIR = __DIR__.'/../../app';
 
     /** Baseline: number of Events::fire() calls in app/. */
-    private const BASELINE = 28;
+    private const BASELINE = 0;
 
     public function test_events_fire_calls_do_not_increase(): void
     {

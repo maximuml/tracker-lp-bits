@@ -72,7 +72,6 @@ final class ProdImageTest extends TestCase
         $dockerfile = file_get_contents(base_path('.docker/php/Dockerfile.prod'));
         $this->assertStringContainsString('AS ext-builder', $dockerfile, 'Must have ext-builder stage');
         $this->assertStringContainsString('AS vendor-builder', $dockerfile, 'Must have vendor-builder stage');
-        $this->assertStringContainsString('AS assets-builder', $dockerfile, 'Must have assets-builder stage');
         $this->assertStringContainsString('AS production', $dockerfile, 'Must have production stage');
     }
 

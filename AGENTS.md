@@ -11,7 +11,8 @@ PHP 8.4+, MySQL, Redis, MeiliSearch. Docker Compose stack for local development.
 - **Database:** MySQL 9 (Docker), Redis 7
 - **Search:** MeiliSearch
 - **Queue:** Redis (default), Octane-compatible
-- **Frontend:** Blade templates, legacy NexusPHP themes, Vite 8 + Tailwind CSS 4 for asset bundling
+- **Frontend:** Blade templates, legacy NexusPHP themes; Filament ships its
+  own assets — there is no Node/Vite build step (removed in step 1.1)
 
 ## Key directories
 

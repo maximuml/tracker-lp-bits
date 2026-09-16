@@ -283,59 +283,6 @@ jobs:
       - name: Verify upgrade result
         run: bash scripts/ci/verify-migration-upgrade.sh "$UPGRADE_DB" "$FRESH_DB"
 
-  frontend:
-    name: Build + audit npm
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@b604ade2a87db23f8871b7182e69ec5e75effb45 # v2
-        with:
-          php-version: '8.5'
-          extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, pdo_mysql, redis, sqlite3, xml, zip
-          coverage: none
-
-      - name: Cache Composer dependencies
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
-        with:
-          path: ~/.composer/cache
-          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
-
-      - name: Install Composer dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction --no-scripts
-
-      - name: Setup Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build frontend assets
-        run: npm run build
-
-      - name: Audit npm dependencies
-        # Retry up to 3 times — npm audit endpoint can return 503
-        # transiently (Service Unavailable).
-        run: |
-          for i in 1 2 3; do
-            if npm audit; then
-              break
-            fi
-            if [ "$i" -eq 3 ]; then
-              echo "::error::npm audit failed after 3 attempts"
-              exit 1
-            fi
-            echo "npm audit attempt $i failed, retrying in 10s..."
-            sleep 10
-          done
-
   unit-tests-matrix:
     name: Resolve PHPUnit matrix
     runs-on: ubuntu-latest
@@ -679,7 +626,7 @@ jobs:
   smoke-test:
     name: Docker smoke test
     runs-on: ubuntu-latest
-    needs: [static-analysis, unit-tests, frontend]
+    needs: [static-analysis, unit-tests]
 
     steps:
       - name: Checkout code
@@ -1121,20 +1068,6 @@ jobs:
           composer CycloneDX:make-sbom --output-format=Json --output-file=composer-sbom.json --omit=dev
           echo "Composer SBOM generated: composer-sbom.json"
 
-      - name: Setup Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Install npm dependencies
-        run: npm ci
-
-      - name: Generate npm SBOM (CycloneDX)
-        run: |
-          npx @cyclonedx/cyclonedx-npm --output-file=npm-sbom.json --omit dev
-          echo "npm SBOM generated: npm-sbom.json"
-
       - name: Upload SBOM artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
@@ -1142,7 +1075,6 @@ jobs:
           name: sbom
           path: |
             composer-sbom.json
-            npm-sbom.json
           retention-days: 30
 
   infection:

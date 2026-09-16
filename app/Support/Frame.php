@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\View\Components\BbcodeEditor;
 use Illuminate\Contracts\Support\Htmlable;
 
 /**
@@ -178,7 +179,7 @@ final class Frame
         $lang = app(Language::class)->functions();
 
         return self::composeOpen($title, $type, $hasSubject, $subject, $maxSubjectLength, $lang)
-            .Form::bbcodeEditor('compose', 'body', $body, false, 130, false);
+            .BbcodeEditor::html(['form' => 'compose', 'text' => 'body', 'content' => $body]);
     }
 
     /**

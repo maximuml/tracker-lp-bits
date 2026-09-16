@@ -479,6 +479,22 @@ button.nx-btn-link {
 /* CSP style-src on legacy routes strips inline style attributes, so the
    bbcode editor width must come from the stylesheet, not style="width:100%". */
 textarea.bbcode{width:100%;box-sizing:border-box}
+
+/* BBCode editor (components/bbcode-editor.blade.php): replaces the legacy
+   nested-table layout and the inline styles that nonce-strict CSP strips. */
+.bbcode-toolbar{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:4px}
+.bbcode-toolbar input[type=button]{font-size:11px}
+.bbcode-btn-b{font-weight:bold}
+.bbcode-btn-i{font-style:italic}
+.bbcode-btn-u{text-decoration:underline}
+.bbcode-attach{width:100%;height:24px;display:block}
+.bbcode-body{display:flex;gap:10px;align-items:flex-start}
+.bbcode-body .bbcode{flex:1 1 auto}
+.bbcode-smilies-wrap{text-align:center}
+.bbcode-smilies{display:grid;grid-template-columns:repeat(4,auto);gap:3px;margin-bottom:6px}
+.bbcode-smile img{max-width:25px}
+.bbcode-preview{display:block}
+.bbcode-actions{text-align:center;margin-top:4px}
 .nx-ffield{padding:1px;padding-left:10px}
 .nx-vam{align-self:center}
 /* Black notice banner (settings page): restores the background the

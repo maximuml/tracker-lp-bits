@@ -25,6 +25,7 @@ use App\Support\Html;
 use App\Support\Input;
 use App\Support\LegacyYesNo;
 use App\Support\Locale;
+use App\View\Components\BbcodeEditor;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -171,7 +172,7 @@ class TorrentEditController extends Controller
             'checkRowHtml' => $checkRowHtml,
             'pickContentHtml' => $pickContentHtml,
             'showDeleteForm' => $showDeleteForm,
-            'bbcodeEditorHtml' => Form::bbcodeEditor('edittorrent', 'descr', (string) ($row['descr'] ?? ''), false, 130, true),
+            'bbcodeEditorHtml' => BbcodeEditor::html(['form' => 'edittorrent', 'text' => 'descr', 'content' => (string) ($row['descr'] ?? ''), 'withPreview' => true]),
             'technicalInfoEnabled' => SiteConfig::current()->main->enableTechnicalInfo(),
             'modeClass' => 'mode_'.$sectionmode,
         ]);

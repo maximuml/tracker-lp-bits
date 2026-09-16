@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Support\Category;
-use App\Support\Form;
+use App\View\Components\BbcodeEditor;
 
 /**
  * Builds the "add offer" form section.
@@ -27,7 +27,7 @@ final class OfferPageAddBuilder
 
         return [
             'typeOptions' => $typeOptions,
-            'bbcodeEditor' => Form::bbcodeEditor('compose', 'body', '', false, 130, true),
+            'bbcodeEditor' => BbcodeEditor::html(['form' => 'compose', 'text' => 'body', 'withPreview' => true]),
         ];
     }
 }

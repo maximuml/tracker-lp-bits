@@ -8,10 +8,10 @@ use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
 use App\Repositories\OfferRepository;
 use App\Support\Category;
-use App\Support\Form;
 use App\Support\Html;
 use App\Support\Input;
 use App\Support\LegacyResponse;
+use App\View\Components\BbcodeEditor;
 use Illuminate\Http\Request;
 
 final class OfferPageEditBuilder
@@ -55,7 +55,7 @@ final class OfferPageEditBuilder
             'id' => $id,
             'title' => htmlspecialchars(trim((string) ($num['name'] ?? ''))),
             'catSelect' => $catSelect,
-            'bbcodeEditor' => Form::bbcodeEditor('compose', 'body', $body, false, 130, true),
+            'bbcodeEditor' => BbcodeEditor::html(['form' => 'compose', 'text' => 'body', 'content' => $body, 'withPreview' => true]),
         ];
     }
 }

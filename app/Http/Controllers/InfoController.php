@@ -29,11 +29,13 @@ class InfoController extends LegacyController
     public function __construct(
         private readonly BitbucketService $bitbucketService,
         private readonly Globals $globals,
+        private readonly CurrentUser $currentUser,
+        private readonly InfoRepository $infoRepository,
     ) {}
 
     public function userhistory(Request $request): View|RedirectResponse|Response
     {
-        $curUser = app(CurrentUser::class)->get();
+        $curUser = $this->currentUser->get();
         if ($curUser === null) {
             $qs = $request->getQueryString();
 
@@ -67,7 +69,7 @@ class InfoController extends LegacyController
         ];
 
         if ($action === 'viewposts') {
-            $result = app(InfoRepository::class)->getUserHistoryPosts($userid, (int) ($curUser['class'] ?? 0), $perpage, $phpSelf);
+            $result = $this->infoRepository->getUserHistoryPosts($userid, (int) ($curUser['class'] ?? 0), $perpage, $phpSelf);
             if (empty($result['posts'])) {
                 return $this->legacyAbortResponse((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_no_posts_found'] ?? 'No posts found'));
             }
@@ -80,7 +82,7 @@ class InfoController extends LegacyController
                 $lang,
             );
         } elseif ($action === 'viewcomments') {
-            $result = app(InfoRepository::class)->getUserHistoryComments($userid, $perpage, $phpSelf);
+            $result = $this->infoRepository->getUserHistoryComments($userid, $perpage, $phpSelf);
             if (empty($result['comments'])) {
                 return $this->legacyAbortResponse((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_no_comments_found'] ?? 'No comments found'));
             }
@@ -179,7 +181,7 @@ class InfoController extends LegacyController
 
     public function donate(Request $request): View|RedirectResponse|Response
     {
-        $data = app(InfoRepository::class)->donationPageData();
+        $data = $this->infoRepository->donationPageData();
         $data['thanks'] = $request->query('do') === 'thanks';
 
         return $this->legacyPage($request, 'donate', false, $data);
@@ -217,7 +219,7 @@ class InfoController extends LegacyController
 
     public function bitbucketlog(Request $request): Response|RedirectResponse|View
     {
-        $currentUser = (array) (app(CurrentUser::class)->get() ?? []);
+        $currentUser = (array) ($this->currentUser->get() ?? []);
         $currentClass = (int) UserDisplay::currentClass();
 
         if ($currentClass < (defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0)) {

@@ -22,6 +22,11 @@ use Illuminate\View\View;
 
 class StaffMessageController extends LegacyController
 {
+    public function __construct(
+        private readonly CurrentUser $currentUser,
+        private readonly Globals $globals,
+    ) {}
+
     public function staffmess(Request $request): View|RedirectResponse|Response
     {
         $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;
@@ -29,7 +34,7 @@ class StaffMessageController extends LegacyController
             return $this->legacyAbortResponse('Sorry', 'Access denied.');
         }
 
-        $currentUser = app(CurrentUser::class)->get() ?? [];
+        $currentUser = $this->currentUser->get() ?? [];
         $classes = array_chunk(User::$classes, 4, true);
         $returntoQuery = $request->query('returnto');
         $httpReferer = Input::serverValue('HTTP_REFERER');
@@ -57,7 +62,7 @@ class StaffMessageController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Permission denied.');
         }
 
-        $currentUser = app(CurrentUser::class)->get() ?? [];
+        $currentUser = $this->currentUser->get() ?? [];
         $senderId = request()->post('sender') === 'system' ? null : (int) ($currentUser['id'] ?? 0);
         $subject = trim((string) request()->post('subject'));
         $msg = trim((string) request()->post('msg'));
@@ -98,15 +103,15 @@ class StaffMessageController extends LegacyController
     public function contactstaff(Request $request): View|RedirectResponse|Response
     {
         return $this->legacyPage($request, 'contactstaff', true, [
-            'lang_contactstaff' => (array) app(Globals::class)->get('lang_contactstaff', []),
+            'lang_contactstaff' => (array) $this->globals->get('lang_contactstaff', []),
         ]);
 
     }
 
     public function takecontact(Request $request): View|RedirectResponse|Response
     {
-        $curUser = app(CurrentUser::class)->get() ?? [];
-        $langTakecontact = (array) app(Globals::class)->get('lang_takecontact', []);
+        $curUser = $this->currentUser->get() ?? [];
+        $langTakecontact = (array) $this->globals->get('lang_takecontact', []);
 
         if (! $request->isMethod('post')) {
             return $this->legacyAbortResponse($langTakecontact['std_error'] ?? 'Error', $langTakecontact['std_method'] ?? 'Method not allowed.');
@@ -124,7 +129,7 @@ class StaffMessageController extends LegacyController
 
         $currentUserId = (int) ($curUser['id'] ?? 0);
         $moderatorClass = defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0;
-        $timeNow = (int) app(Globals::class)->get('TIMENOW', time());
+        $timeNow = (int) $this->globals->get('TIMENOW', time());
 
         if (UserDisplay::currentClass() < $moderatorClass) {
             $last = $curUser['last_staffmsg'] ?? null;

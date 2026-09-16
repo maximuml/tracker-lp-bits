@@ -31,7 +31,7 @@ final class TorrentRssControllerTest extends TestCase
     {
         $this->bindTorrentRepository();
         $this->mockCurrentUser(null);
-        app()->bind(LegacyRedisCache::class, fn () => null);
+        app()->instance(LegacyRedisCache::class, Mockery::mock(LegacyRedisCache::class));
 
         $controller = app(TorrentRssController::class);
         $request = Request::create('/torrentrss', 'GET');
@@ -48,7 +48,7 @@ final class TorrentRssControllerTest extends TestCase
     {
         $this->bindTorrentRepository();
         $this->mockCurrentUser(['passkey' => '']);
-        app()->bind(LegacyRedisCache::class, fn () => null);
+        app()->instance(LegacyRedisCache::class, Mockery::mock(LegacyRedisCache::class));
 
         $controller = app(TorrentRssController::class);
         $request = Request::create('/torrentrss', 'GET', ['passkey' => '']);
@@ -65,7 +65,7 @@ final class TorrentRssControllerTest extends TestCase
     {
         $this->bindTorrentRepository();
         $this->mockCurrentUser(['passkey' => '']);
-        app()->bind(LegacyRedisCache::class, fn () => null);
+        app()->instance(LegacyRedisCache::class, Mockery::mock(LegacyRedisCache::class));
 
         $controller = app(TorrentRssController::class);
         $request = Request::create('/torrentrss', 'GET');
@@ -82,7 +82,7 @@ final class TorrentRssControllerTest extends TestCase
     {
         $this->bindTorrentRepository();
         $this->mockCurrentUser(null);
-        app()->bind(LegacyRedisCache::class, fn () => null);
+        app()->instance(LegacyRedisCache::class, Mockery::mock(LegacyRedisCache::class));
         Cache::flush();
 
         $controller = app(TorrentRssController::class);

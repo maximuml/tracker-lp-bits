@@ -35,16 +35,21 @@ class TorrentRssController extends LegacyController
 
     private TorrentDownloadRepositoryInterface $downloadRepository;
 
-    public function __construct(TorrentRepositoryInterface $torrentRepository, TorrentDownloadRepositoryInterface $downloadRepository)
-    {
+    public function __construct(
+        TorrentRepositoryInterface $torrentRepository,
+        TorrentDownloadRepositoryInterface $downloadRepository,
+        private readonly CurrentUser $currentUser,
+        private readonly Globals $globals,
+        private readonly LegacyRedisCache $legacyRedisCache,
+    ) {
         $this->torrentRepository = $torrentRepository;
         $this->downloadRepository = $downloadRepository;
     }
 
     public function torrentrss(Request $request): Response
     {
-        $cache = app(LegacyRedisCache::class);
-        $currentUser = app(CurrentUser::class)->get() ?? [];
+        $cache = $this->legacyRedisCache;
+        $currentUser = $this->currentUser->get() ?? [];
         $passkey = (string) ($request->input('passkey') ?? $currentUser['passkey'] ?? '');
 
         if ($passkey === '') {
@@ -218,11 +223,11 @@ class TorrentRssController extends LegacyController
         }
 
         $torrentRep = $this->torrentRepository;
-        $baseUrl = Http::protocolPrefix(Url::isSecure()).(string) app(Globals::class)->get('BASEURL', '');
-        $siteName = (string) app(Globals::class)->get('SITENAME', '');
+        $baseUrl = Http::protocolPrefix(Url::isSecure()).(string) $this->globals->get('BASEURL', '');
+        $siteName = (string) $this->globals->get('SITENAME', '');
         $slogan = SiteConfig::current()->main->slogan();
         $siteEmail = SiteConfig::current()->main->siteEmail();
-        $projectName = (string) app(Globals::class)->get('PROJECTNAME', '');
+        $projectName = (string) $this->globals->get('PROJECTNAME', '');
         $dateFounded = SiteConfig::current()->tweak->dateFounded();
         $year = substr($dateFounded, 0, 4);
         $yearFounded = $year !== '' ? $year : '2007';

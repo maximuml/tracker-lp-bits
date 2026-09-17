@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Integration\Http\Controllers;
 
 use App\Http\Controllers\TorrentListingController;
+use App\Models\SearchBox;
 use App\Models\User;
 use App\Repositories\TorrentSearchRepository;
 use App\Support\CurrentUser;
@@ -41,8 +42,14 @@ final class TorrentListingControllerTest extends TestCase
         $currentUser = app(CurrentUser::class);
         $currentUser->set($user->toLegacyArray());
 
+        SearchBox::factory()->create(['id' => 1]);
+
         $repo = \Mockery::mock(TorrentSearchRepository::class);
-        $repo->shouldReceive('getListingData')->andReturn(['torrents' => [], 'pageTitle' => 'Torrents']);
+        $repo->shouldReceive('getListingData')->andReturn([
+            'rows' => [],
+            'pageTitle' => 'Torrents',
+            'sectiontype' => 1,
+        ]);
         app()->instance(TorrentSearchRepository::class, $repo);
 
         $controller = app(TorrentListingController::class);

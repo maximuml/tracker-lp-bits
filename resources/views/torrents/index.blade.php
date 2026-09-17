@@ -1,4 +1,4 @@
-@extends('layouts.legacy_torrents')
+@extends('layouts.modern')
 
 @section('title', $pageTitle)
 

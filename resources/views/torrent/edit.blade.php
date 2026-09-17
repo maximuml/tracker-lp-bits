@@ -23,10 +23,10 @@
 <x-settings-row layout="grid" :label="__('legacy/functions.text_technical_info')"><textarea name="technical_info" rows="8" style="width: 99%;">{{ $torrentRow['technical_info'] ?? '' }}</textarea><br/>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/functions.text_technical_info_help_text')))</x-settings-row>
 @endif
 <div class="nx-fhead nx-nowrap">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml((__('legacy/edit.row_type')).'<font color="red">*</font>'))</div><div class="nx-fcell">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($typeSelect))</div>
-<div class="nx-grouprow {{ $modeClass }}" relation="{{ $modeClass }}"><div class="nx-fhead nx-nowrap">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/edit.row_quality')))</div><div class="nx-fcell">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($taxonomySelect))</div></div>
+<div class="nx-grouprow {{ $modeClass }}" relation="{{ $modeClass }}"><div class="nx-fhead nx-nowrap">{{ __('legacy/edit.row_quality') }}</div><div class="nx-fcell">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($taxonomySelect))</div></div>
 @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($customFieldsHtml))
 @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($hitAndRunHtml))
-<div class="nx-grouprow {{ $modeClass }}" relation="{{ $modeClass }}"><div class="nx-fhead nx-nowrap">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/functions.text_tags')))</div><div class="nx-fcell">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($tagCheckbox))</div></div>
+<div class="nx-grouprow {{ $modeClass }}" relation="{{ $modeClass }}"><div class="nx-fhead nx-nowrap">{{ __('legacy/functions.text_tags') }}</div><div class="nx-fcell">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($tagCheckbox))</div></div>
 @if ($checkRowHtml !== '')
 <x-settings-row layout="grid" :label="__('legacy/edit.row_check')">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($checkRowHtml))</x-settings-row>
 @endif
@@ -45,11 +45,11 @@
 @endif
 <div class="nx-fgrid">
 <div class="nx-ffull nx-colhead">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/edit.text_delete_torrent')))</div>
-<div class="nx-fhead nx-nowrap"><input name="reasontype" type="radio" value="1" />&nbsp;@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/edit.radio_dead')))</div><div class="nx-fcell">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/edit.text_dead_note')))</div>
-<div class="nx-fhead nx-nowrap"><input name="reasontype" type="radio" value="2" />&nbsp;@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/edit.radio_dupe')))</div><div class="nx-fcell"><input type="text" style="width: 200px" name="reason[]" /></div>
-<div class="nx-fhead nx-nowrap"><input name="reasontype" type="radio" value="3" />&nbsp;@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/edit.radio_nuked')))</div><div class="nx-fcell"><input type="text" style="width: 200px" name="reason[]" /></div>
-<div class="nx-fhead nx-nowrap"><input name="reasontype" type="radio" value="4" />&nbsp;@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/edit.radio_rules')))</div><div class="nx-fcell"><input type="text" style="width: 200px" name="reason[]" />@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/edit.text_req')))</div>
-<div class="nx-fhead nx-nowrap"><input name="reasontype" type="radio" value="5" checked="checked" />&nbsp;@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/edit.radio_other')))</div><div class="nx-fcell"><input type="text" style="width: 200px" name="reason[]" />@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/edit.text_req')))</div>
+<div class="nx-fhead nx-nowrap"><input name="reasontype" type="radio" value="1" />&nbsp;{{ __('legacy/edit.radio_dead') }}</div><div class="nx-fcell">{{ __('legacy/edit.text_dead_note') }}</div>
+<div class="nx-fhead nx-nowrap"><input name="reasontype" type="radio" value="2" />&nbsp;{{ __('legacy/edit.radio_dupe') }}</div><div class="nx-fcell"><input type="text" style="width: 200px" name="reason[]" /></div>
+<div class="nx-fhead nx-nowrap"><input name="reasontype" type="radio" value="3" />&nbsp;{{ __('legacy/edit.radio_nuked') }}</div><div class="nx-fcell"><input type="text" style="width: 200px" name="reason[]" /></div>
+<div class="nx-fhead nx-nowrap"><input name="reasontype" type="radio" value="4" />&nbsp;{{ __('legacy/edit.radio_rules') }}</div><div class="nx-fcell"><input type="text" style="width: 200px" name="reason[]" />{{ __('legacy/edit.text_req') }}</div>
+<div class="nx-fhead nx-nowrap"><input name="reasontype" type="radio" value="5" checked="checked" />&nbsp;{{ __('legacy/edit.radio_other') }}</div><div class="nx-fcell"><input type="text" style="width: 200px" name="reason[]" />{{ __('legacy/edit.text_req') }}</div>
 <div class="nx-ffull nx-center"><input type="submit" style='height: 25px' value="{{ __('legacy/edit.submit_delete_it') ?? '' }}" /></div>
 </div>
 </form>

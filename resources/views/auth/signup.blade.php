@@ -50,7 +50,7 @@
         @endif
 
         <div class="nx-fgrid nx-fgrid--b">
-            <div class="toolbox nx-ffull">@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/signup.text_cookies_note')))</div>
+            <div class="toolbox nx-ffull">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/signup.text_cookies_note')))</div>
 
             <div class="nx-fhead">{{ __('legacy/signup.row_desired_username')}}</div>
             <div class="nx-fcell">
@@ -92,9 +92,9 @@
 
             <div class="nx-fhead">{{ __('legacy/signup.row_verification')}}</div>
             <div class="nx-fcell">
-                <input type="checkbox" name="rulesverify" value="yes" aria-label="{{ ('I have read the site rules page')}}" @if (old('rulesverify') === 'yes') checked @endif />@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/signup.checkbox_read_rules')))<br />
-                <input type="checkbox" name="faqverify" value="yes" aria-label="{{ ('I agree to read the FAQ before asking questions')}}" @if (old('faqverify') === 'yes') checked @endif />@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/signup.checkbox_read_faq')))<br />
-                <input type="checkbox" name="ageverify" value="yes" aria-label="{{ __('legacy/signup.checkbox_age')}}" @if (old('ageverify') === 'yes') checked @endif />@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/signup.checkbox_age')))
+                <input type="checkbox" name="rulesverify" value="yes" aria-label="{{ ('I have read the site rules page')}}" @if (old('rulesverify') === 'yes') checked @endif />@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/signup.checkbox_read_rules')))<br />
+                <input type="checkbox" name="faqverify" value="yes" aria-label="{{ ('I agree to read the FAQ before asking questions')}}" @if (old('faqverify') === 'yes') checked @endif />@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/signup.checkbox_read_faq')))<br />
+                <input type="checkbox" name="ageverify" value="yes" aria-label="{{ __('legacy/signup.checkbox_age')}}" @if (old('ageverify') === 'yes') checked @endif />{{ __('legacy/signup.checkbox_age') }}
             </div>
 
             <div class="toolbox nx-ffull">

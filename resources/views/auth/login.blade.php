@@ -47,7 +47,7 @@
         @if ($returnto !== '')
             <input type="hidden" name="returnto" value="{{ $returnto }}" />
         @endif
-        <p>@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/login.p_need_cookies_enables')))<br />
+        <p>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/login.p_need_cookies_enables')))<br />
             [<b>{{ $maxAttempts }}</b>] {{ __('legacy/login.p_fail_ban')}}
         </p>
         <p>{{ __('legacy/login.p_you_have')}} <b>{{ $remaining }}</b> {{ __('legacy/login.p_remaining_tries')}}</p>
@@ -79,10 +79,10 @@
         <p>[<b><a href="complains.php">{{ __('legacy/login.text_complain')}}</a></b>]</p>
     @endif
 
-    <p>@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/login.p_no_account_signup')))</p>
+    <p>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/login.p_no_account_signup')))</p>
     @if ($isSmtpEnabled)
-        <p>@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/login.p_forget_pass_recover')))</p>
-        <p>@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/login.p_account_banned')))</p>
-        <p>@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/login.p_resend_confirm')))</p>
+        <p>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/login.p_forget_pass_recover')))</p>
+        <p>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/login.p_account_banned')))</p>
+        <p>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/login.p_resend_confirm')))</p>
     @endif
 @endsection

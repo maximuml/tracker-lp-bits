@@ -14,7 +14,7 @@
     <form method=post action=takeinvite.php?id={{ (string) $id }}>
     <div class="nx-fgrid">
     <div class="nx-ffull nx-center"><b>{{ __('legacy/invite.text_invite_someone')}}{{ $SITENAME }} ({{ $inv['invites'] ?? 0 }}{{ __('legacy/invite.text_invitation')}}{{ $_s }}{{ __('legacy/invite.text_left')}} + {{ sprintf(__('legacy/invite.text_temporary_left'), count($temporaryInvites)) }})</b></div>
-    <div class="nx-fhead nx-nowrap">{{ __('legacy/invite.text_email_address')}}</div><div class="nx-fcell"><input type=text size=40 name=email><br /><font align=left class=small>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/invite.text_email_address_note')))</font></div>
+    <div class="nx-fhead nx-nowrap">{{ __('legacy/invite.text_email_address')}}</div><div class="nx-fcell"><input type=text size=40 name=email><br /><font align=left class=small>{{ __('legacy/invite.text_email_address_note') }}</font></div>
     @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($preUsernameTr))
     <div class="nx-fhead nx-nowrap">{{ __('legacy/invite.text_consume_invite')}}</div><div class="nx-fcell"><select name='hash'>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($inviteSelectOptions))</select></div>
     <div class="nx-fhead nx-nowrap">{{ __('legacy/invite.text_message')}}</div><div class="nx-fcell"><textarea name=body rows=10 style='width: 100%'>{{ $invitation_body }}</textarea></div>

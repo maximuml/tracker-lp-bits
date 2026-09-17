@@ -134,7 +134,7 @@ return [
     'submit_you_said_thanks' => 'You Said Thanks!',
     'text_no_thanks_added' => 'no thanks added yet',
     'row_thanks_by' => 'Thanks by',
-    'row_torrent_info' => 'Torrent&nbsp;Info',
+    'row_torrent_info' => 'Torrent Info',
     'text_torrent_structure' => 'Structure: ',
     'text_torrent_info_note' => '[View Structure]',
     'head_comments_for_torrent' => 'Comments for torrent ',

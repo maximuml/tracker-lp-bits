@@ -17,6 +17,7 @@ use App\Support\Format;
 use App\Support\Forum;
 use App\Support\Globals;
 use App\Support\Html;
+use App\Support\Html\SafeHtml;
 use App\Support\Input;
 use App\Support\LegacyResponse;
 use App\Support\LegacyYesNo;
@@ -355,7 +356,7 @@ final class ForumTopicViewService
         echo Html::keyShortcutScript((int) $page, max(0, $pages - 1), (string) request()->attributes->get('csp_nonce', ''));
 
         return [
-            'html' => (string) ob_get_clean(),
+            'html' => SafeHtml::fromTrustedHtml((string) ob_get_clean()),
             'topicid' => $topicid,
             'forumid' => $forumid,
             'subject' => $subject,

@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Repositories\IpLogRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
+use App\Support\Html\SafeHtml;
 use App\Support\Http;
 use App\Support\Logger;
 use App\Support\Network;
@@ -192,7 +193,7 @@ class TorrentDownloadController extends LegacyController
             'torrentid' => $torrentid,
             'type' => $type,
             'title' => $title,
-            'note' => $note,
+            'note' => SafeHtml::fromTrustedHtml($note),
             'noticenexttime' => $noticenexttime,
             'showrationotice' => $showrationotice,
             'showclientnotice' => $showclientnotice,

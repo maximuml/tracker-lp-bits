@@ -4,14 +4,14 @@
 
 @section('content')
 @if ($action === 'viewposts')
-    <h1>{{ __('legacy/userhistory.text_posts_history_for')}}@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($subject))</h1>
+    <h1>{{ __('legacy/userhistory.text_posts_history_for')}}{{ $subject }}</h1>
     @if (($postcount ?? 0) > ($perpage ?? 15))
         {{ $pagertop ?? '' }}
     @endif
     {{ \App\Support\Frame::open('', false, 10, '100%', 'left') }}
     @foreach ($items ?? [] as $item)
         <p class=sub>
-        @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['added']))&nbsp;--&nbsp;@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/userhistory.text_forum')))
+        {{ $item['added'] }}&nbsp;--&nbsp;@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/userhistory.text_forum')))
         <a href=forums.php?action=viewforum&forumid={{ $item['forumid'] }}>{{ $item['forumname'] }}</a>
         &nbsp;--&nbsp;@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/userhistory.text_topic')))
         <a href=forums.php?action=viewtopic&topicid={{ $item['topicid'] }}>{{ $item['topicname'] }}</a>
@@ -21,7 +21,7 @@
         </p>
         <br />
         <table data-nx="data" class=main width=100% border=1 cellspacing=0 cellpadding=5>
-        <tr valign=top><td class=comment>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['bodyHtml']))</td></tr>
+        <tr valign=top><td class=comment>{{ $item['bodyHtml'] }}</td></tr>
         </table>
         <br />
     @endforeach
@@ -30,14 +30,14 @@
         {{ $pagerbottom ?? '' }}
     @endif
 @elseif ($action === 'viewcomments')
-    <h1>{{ __('legacy/userhistory.text_comments_history_for')}}@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($subject))</h1>
+    <h1>{{ __('legacy/userhistory.text_comments_history_for')}}{{ $subject }}</h1>
     @if (($commentcount ?? 0) > ($perpage ?? 15))
         {{ $pagertop ?? '' }}
     @endif
     {{ \App\Support\Frame::open('', false, 10, '100%', 'left') }}
     @foreach ($items ?? [] as $item)
         <p class=sub>
-        @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['added']))&nbsp;---&nbsp;@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/userhistory.text_torrent')))
+        {{ $item['added'] }}&nbsp;---&nbsp;@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/userhistory.text_torrent')))
         @if ($item['torrentName'] !== '')
             <a href=details.php?id={{ $item['torrentid'] }}&tocomm=1&hit=1>{{ $item['torrentName'] }}</a>
         @else
@@ -47,7 +47,7 @@
         </p>
         <br />
         <table data-nx="data" class=main width=100% border=1 cellspacing=0 cellpadding=5>
-        <tr valign=top><td class=comment>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['bodyHtml']))</td></tr>
+        <tr valign=top><td class=comment>{{ $item['bodyHtml'] }}</td></tr>
         </table>
         <br />
     @endforeach

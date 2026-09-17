@@ -12,6 +12,7 @@ use App\Services\ComplainService;
 use App\Support\Captcha;
 use App\Support\CurrentUser;
 use App\Support\Html;
+use App\Support\Html\SafeHtml;
 use App\Support\Network;
 use App\Support\Pagination;
 use App\Support\UserDisplay;
@@ -212,7 +213,7 @@ class SupportController extends LegacyController
             'isAdmin' => $isAdmin,
             'isLogin' => $uid > 0,
             'title' => __('legacy/complains.text_complain'),
-            'replyBoxHtml' => $replyBoxHtml,
+            'replyBoxHtml' => SafeHtml::fromTrustedHtml($replyBoxHtml),
         ]);
     }
 
@@ -229,7 +230,7 @@ class SupportController extends LegacyController
         return $this->legacyPage($request, 'complains', false, [
             'mode' => 'compose',
             'title' => __('legacy/complains.text_complain'),
-            'captchaHtml' => $captchaHtml,
+            'captchaHtml' => SafeHtml::fromTrustedHtml($captchaHtml),
         ]);
     }
 }

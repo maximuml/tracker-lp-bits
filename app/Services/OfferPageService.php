@@ -141,8 +141,8 @@ final class OfferPageService
         $typeOptions .= "</select>\n";
 
         return [
-            'typeOptions' => $typeOptions,
-            'bbcodeEditor' => BbcodeEditor::html(['form' => 'compose', 'text' => 'body', 'withPreview' => true]),
+            'typeOptions' => SafeHtml::fromTrustedHtml($typeOptions),
+            'bbcodeEditor' => SafeHtml::fromTrustedHtml(BbcodeEditor::html(['form' => 'compose', 'text' => 'body', 'withPreview' => true])),
         ];
     }
 
@@ -250,24 +250,24 @@ final class OfferPageService
 
         return [
             'id' => $id,
-            'name' => htmlspecialchars((string) ($num['name'] ?? '')),
-            'offeredBy' => UserDisplay::username((int) ($num['userid'] ?? 0)),
-            'offerTime' => $offertime,
-            'status' => $status,
-            'allowRow' => $allowRow,
-            'voteRow' => $voteRow,
-            'voteResultsRow' => $voteResultsRow,
+            'name' => SafeHtml::fromTrustedHtml(htmlspecialchars((string) ($num['name'] ?? ''))),
+            'offeredBy' => SafeHtml::fromTrustedHtml(UserDisplay::username((int) ($num['userid'] ?? 0))),
+            'offerTime' => SafeHtml::fromTrustedHtml($offertime),
+            'status' => SafeHtml::fromTrustedHtml($status),
+            'allowRow' => SafeHtml::fromTrustedHtml($allowRow),
+            'voteRow' => SafeHtml::fromTrustedHtml($voteRow),
+            'voteResultsRow' => SafeHtml::fromTrustedHtml($voteResultsRow),
             'allowedNote' => $allowedNote,
-            'editLink' => $edit,
-            'deleteLink' => $delete,
-            'reportLink' => $report,
-            'description' => $description,
+            'editLink' => SafeHtml::fromTrustedHtml($edit),
+            'deleteLink' => SafeHtml::fromTrustedHtml($delete),
+            'reportLink' => SafeHtml::fromTrustedHtml($report),
+            'description' => SafeHtml::fromTrustedHtml($description),
             'commentCount' => $commentCount,
-            'commentbar' => $commentbar,
-            'commentsHtml' => $commentsHtml,
+            'commentbar' => SafeHtml::fromTrustedHtml($commentbar),
+            'commentsHtml' => SafeHtml::fromTrustedHtml($commentsHtml),
             'pagerTop' => $pagerTop,
             'pagerBottom' => $pagerBottom,
-            'quickComment' => $quickComment,
+            'quickComment' => SafeHtml::fromTrustedHtml($quickComment),
         ];
     }
 
@@ -304,8 +304,8 @@ final class OfferPageService
         return [
             'id' => $id,
             'title' => htmlspecialchars(trim((string) ($num['name'] ?? ''))),
-            'catSelect' => $catSelect,
-            'bbcodeEditor' => BbcodeEditor::html(['form' => 'compose', 'text' => 'body', 'content' => $body, 'withPreview' => true]),
+            'catSelect' => SafeHtml::fromTrustedHtml($catSelect),
+            'bbcodeEditor' => SafeHtml::fromTrustedHtml(BbcodeEditor::html(['form' => 'compose', 'text' => 'body', 'content' => $body, 'withPreview' => true])),
         ];
     }
 
@@ -539,9 +539,9 @@ final class OfferPageService
         }
 
         return [
-            'rules' => $rules,
-            'addOfferLink' => $addOfferLink,
-            'searchBox' => $searchBox,
+            'rules' => SafeHtml::fromTrustedHtml($rules),
+            'addOfferLink' => SafeHtml::fromTrustedHtml($addOfferLink),
+            'searchBox' => SafeHtml::fromTrustedHtml($searchBox),
             'hasRows' => $num > 0,
             'tableHtml' => $tableHtml,
             'pagerTop' => $pagerTop,
@@ -573,8 +573,8 @@ final class OfferPageService
                 default => 'unknown',
             };
             $rows[] = [
-                'username' => UserDisplay::username((int) ($arrArr['userid'] ?? 0)),
-                'vote' => $vote,
+                'username' => SafeHtml::fromTrustedHtml(UserDisplay::username((int) ($arrArr['userid'] ?? 0))),
+                'vote' => SafeHtml::fromTrustedHtml($vote),
             ];
         }
 

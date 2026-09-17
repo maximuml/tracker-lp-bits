@@ -15,8 +15,8 @@
     <div class="nx-fgrid">
     <div class="nx-ffull nx-center"><b>{{ __('legacy/invite.text_invite_someone')}}{{ $SITENAME }} ({{ $inv['invites'] ?? 0 }}{{ __('legacy/invite.text_invitation')}}{{ $_s }}{{ __('legacy/invite.text_left')}} + {{ sprintf(__('legacy/invite.text_temporary_left'), count($temporaryInvites)) }})</b></div>
     <div class="nx-fhead nx-nowrap">{{ __('legacy/invite.text_email_address')}}</div><div class="nx-fcell"><input type=text size=40 name=email><br /><font align=left class=small>{{ __('legacy/invite.text_email_address_note') }}</font></div>
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($preUsernameTr))
-    <div class="nx-fhead nx-nowrap">{{ __('legacy/invite.text_consume_invite')}}</div><div class="nx-fcell"><select name='hash'>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($inviteSelectOptions))</select></div>
+    {{ $preUsernameTr }}
+    <div class="nx-fhead nx-nowrap">{{ __('legacy/invite.text_consume_invite')}}</div><div class="nx-fcell"><select name='hash'>{{ $inviteSelectOptions }}</select></div>
     <div class="nx-fhead nx-nowrap">{{ __('legacy/invite.text_message')}}</div><div class="nx-fcell"><textarea name=body rows=10 style='width: 100%'>{{ $invitation_body }}</textarea></div>
     <div class="nx-ffull nx-center"><input type=submit value='{{ __('legacy/invite.submit_invite')}}'></div>
     </form></div></div>
@@ -41,13 +41,13 @@
                 <span>{{ __('legacy/invite.text_enabled')}}:</span>
                 <select name="enabled">
                     <option value="">-{{ $textSelectOnePlease }}-</option>
-                    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($inviteeEnabledOptions))
+                    {{ $inviteeEnabledOptions }}
                 </select>
                 &nbsp;&nbsp;
                 <span>{{ __('legacy/invite.text_status')}}:</span>
                 <select name="status">
                     <option value="">-{{ $textSelectOnePlease }}-</option>
-                    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($inviteeStatusOptions))
+                    {{ $inviteeStatusOptions }}
                 </select>
                 &nbsp;&nbsp;
                 <input type="submit" value="{{ $submitText }}">
@@ -82,13 +82,13 @@
             </tr>
             @foreach ($inviteeRows as $arr)
                 <tr class=rowfollow>
-                    <td class=rowfollow>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($arr['usernameHtml'] ?? ''))</td>
+                    <td class=rowfollow>{{ $arr['usernameHtml'] ?? '' }}</td>
                     <td class=rowfollow>{{ $arr['email'] }}</td>
                     <td class=rowfollow>{{ $arr['enabled'] }}</td>
                     <td class=rowfollow>{{ $arr['torrent_count'] }}</td>
                     <td class=rowfollow>{{ \App\Support\Format::size($arr['uploaded']) }}</td>
                     <td class=rowfollow>{{ \App\Support\Format::size($arr['downloaded']) }}</td>
-                    <td class=rowfollow>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($arr['ratioHtml'] ?? ''))</td>
+                    <td class=rowfollow>{{ $arr['ratioHtml'] ?? '' }}</td>
                     <td class=rowfollow>{{ number_format($arr['seeding_torrent_count']) }}</td>
                     <td class=rowfollow>{{ \App\Support\Format::size($arr['seeding_torrent_size']) }}</td>
                     <td class=rowfollow>{{ number_format($arr['seed_points_per_hour'], 3) }}</td>
@@ -96,7 +96,7 @@
                     <td class=rowfollow>{{ number_format(floatval($arr['seed_points_per_hour']) * $haremAdditionFactor, 3) }}</td>
                 @endif
                     <td class=rowfollow>{{ $arr['last_announce_at'] }}</td>
-                    <td class=rowfollow>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($arr['statusHtml'] ?? ''))</td>
+                    <td class=rowfollow>{{ $arr['statusHtml'] ?? '' }}</td>
                     @if ($canConfirm)
                         <td class=rowfollow>
                         @if ($arr['status'] == 'pending')

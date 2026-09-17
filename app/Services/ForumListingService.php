@@ -12,6 +12,7 @@ use App\Support\Format;
 use App\Support\Forum;
 use App\Support\Globals;
 use App\Support\Html;
+use App\Support\Html\SafeHtml;
 use App\Support\LegacyResponse;
 use App\Support\LegacyYesNo;
 use App\Support\Log;
@@ -249,7 +250,7 @@ final class ForumListingService
         }
 
         return [
-            'html' => (string) ob_get_clean(),
+            'html' => SafeHtml::fromTrustedHtml((string) ob_get_clean()),
             'forumid' => $forumid,
             'forumname' => $forumname,
         ];
@@ -320,7 +321,7 @@ final class ForumListingService
             echo '<p>'.(__('legacy/forums.text_nothing_found')).'</p>';
         }
 
-        return ['html' => (string) ob_get_clean()];
+        return ['html' => SafeHtml::fromTrustedHtml((string) ob_get_clean())];
     }
 
     /**
@@ -384,6 +385,6 @@ final class ForumListingService
             echo $pagerbottom;
         }
 
-        return ['html' => (string) ob_get_clean()];
+        return ['html' => SafeHtml::fromTrustedHtml((string) ob_get_clean())];
     }
 }

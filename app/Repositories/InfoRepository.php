@@ -10,6 +10,7 @@ use App\Models\Language;
 use App\Models\User;
 use App\Support\Cache;
 use App\Support\Email;
+use App\Support\Html\SafeHtml;
 use App\Support\Pagination;
 use App\Support\Settings;
 use App\Support\Url;
@@ -36,20 +37,20 @@ final class InfoRepository
                 ->all(),
             'siteName' => $siteName,
             'captions' => [
-                'version' => '<span id="version">'.(__('legacy/aboutnexus.text_version')).'</span>',
-                'nexus' => '<span id="nexus">'.(__('legacy/aboutnexus.text_nexus')).PROJECTNAME.'</span>',
-                'authorization' => '<span id="authorization">'.(__('legacy/aboutnexus.text_authorization')).'</span>',
-                'translation' => '<span id="translation">'.(__('legacy/aboutnexus.text_translation')).'</span>',
-                'stylesheet' => '<span id="stylesheet">'.(__('legacy/aboutnexus.text_stylesheet')).PROJECTNAME.'</span>',
-                'contact' => '<span id="contact">'.(__('legacy/aboutnexus.text_contact')).PROJECTNAME.'</span>',
+                'version' => SafeHtml::fromTrustedHtml('<span id="version">'.(__('legacy/aboutnexus.text_version')).'</span>'),
+                'nexus' => SafeHtml::fromTrustedHtml('<span id="nexus">'.(__('legacy/aboutnexus.text_nexus')).PROJECTNAME.'</span>'),
+                'authorization' => SafeHtml::fromTrustedHtml('<span id="authorization">'.(__('legacy/aboutnexus.text_authorization')).'</span>'),
+                'translation' => SafeHtml::fromTrustedHtml('<span id="translation">'.(__('legacy/aboutnexus.text_translation')).'</span>'),
+                'stylesheet' => SafeHtml::fromTrustedHtml('<span id="stylesheet">'.(__('legacy/aboutnexus.text_stylesheet')).PROJECTNAME.'</span>'),
+                'contact' => SafeHtml::fromTrustedHtml('<span id="contact">'.(__('legacy/aboutnexus.text_contact')).PROJECTNAME.'</span>'),
             ],
             'notes' => [
-                'version' => sprintf(__('legacy/aboutnexus.text_version_note'), $siteName, PROJECTNAME),
-                'nexus' => sprintf(PROJECTNAME.(__('legacy/aboutnexus.text_nexus_note')), PROJECTNAME),
-                'authorization' => sprintf(__('legacy/aboutnexus.text_authorization_note'), PROJECTNAME),
-                'translation' => PROJECTNAME.(__('legacy/aboutnexus.text_translation_note')),
-                'stylesheet' => sprintf(__('legacy/aboutnexus.text_stylesheet_note'), PROJECTNAME, $siteName),
-                'contact' => __('legacy/aboutnexus.text_contact_note'),
+                'version' => SafeHtml::fromTrustedHtml(sprintf(__('legacy/aboutnexus.text_version_note'), $siteName, PROJECTNAME)),
+                'nexus' => SafeHtml::fromTrustedHtml(sprintf(PROJECTNAME.(__('legacy/aboutnexus.text_nexus_note')), PROJECTNAME)),
+                'authorization' => SafeHtml::fromTrustedHtml(sprintf(__('legacy/aboutnexus.text_authorization_note'), PROJECTNAME)),
+                'translation' => SafeHtml::fromTrustedHtml(PROJECTNAME.(__('legacy/aboutnexus.text_translation_note'))),
+                'stylesheet' => SafeHtml::fromTrustedHtml(sprintf(__('legacy/aboutnexus.text_stylesheet_note'), PROJECTNAME, $siteName)),
+                'contact' => SafeHtml::fromTrustedHtml(__('legacy/aboutnexus.text_contact_note')),
             ],
         ];
     }

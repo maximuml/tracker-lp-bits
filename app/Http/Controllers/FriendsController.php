@@ -8,6 +8,7 @@ use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
 use App\Repositories\FriendsRepository;
 use App\Support\CurrentUser;
+use App\Support\Html\SafeHtml;
 use App\Support\Input;
 use App\Support\LegacyYesNo;
 use App\Support\Locale;
@@ -85,13 +86,13 @@ class FriendsController extends LegacyController
             }
             $usernameHtml = $userDisplayMap[$friendId] ?? UserDisplay::username($friendId);
             $friend['avatarSrc'] = $avatar;
-            $friend['body1Html'] = $usernameHtml.' ('.$titleHtml.')<br /><br />'
+            $friend['body1Html'] = SafeHtml::fromTrustedHtml($usernameHtml.' ('.$titleHtml.')<br /><br />'
                 .(__('legacy/friends.text_last_seen_on'))
-                .(string) Time::format((string) ($friend['last_access'] ?? ''), true, false);
-            $friend['body2Html'] = "<a href=friends.php?id=$userid&action=delete&type=friend&targetid=$friendId>"
+                .(string) Time::format((string) ($friend['last_access'] ?? ''), true, false));
+            $friend['body2Html'] = SafeHtml::fromTrustedHtml("<a href=friends.php?id=$userid&action=delete&type=friend&targetid=$friendId>"
                 .htmlspecialchars(__('legacy/friends.text_remove_from_friends'), ENT_QUOTES, 'UTF-8').'</a>'
                 ."<br /><br /><a href=sendmessage.php?receiver=$friendId>"
-                .htmlspecialchars(__('legacy/friends.text_send_pm'), ENT_QUOTES, 'UTF-8').'</a>';
+                .htmlspecialchars(__('legacy/friends.text_send_pm'), ENT_QUOTES, 'UTF-8').'</a>');
             $friendsList[] = $friend;
         }
 
@@ -120,8 +121,8 @@ class FriendsController extends LegacyController
         return $this->legacyPageRaw($request, 'friends', true, [
             'userid' => $userid,
             'friendsList' => $friendsList,
-            'blocksHtml' => $blocksHtml,
-            'titleUsername' => $userDisplayMap[$userid] ?? UserDisplay::username($userid),
+            'blocksHtml' => SafeHtml::fromTrustedHtml($blocksHtml),
+            'titleUsername' => SafeHtml::fromTrustedHtml($userDisplayMap[$userid] ?? UserDisplay::username($userid)),
             'title' => (__('legacy/friends.head_personal_lists_for'))
                 .(string) ($titleRow['username'] ?? $currentUser['username'] ?? ''),
             'canViewUserList' => Permission::can(PermissionEnum::VIEW_USER_LIST),

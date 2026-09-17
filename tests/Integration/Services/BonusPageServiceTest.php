@@ -261,9 +261,9 @@ final class BonusPageServiceTest extends TestCase
 
         $result = $this->service->build($request)->toArray();
 
-        $this->assertSame('', $result['shopHtml']);
-        $this->assertSame('', $result['infoHtml']);
-        $this->assertSame('exchange', $result['action']);
+        $this->assertSame('', (string) ($result['shopHtml']));
+        $this->assertSame('', (string) ($result['infoHtml']));
+        $this->assertSame('exchange', (string) ($result['action']));
     }
 
     public function test_build_returns_expected_top_level_keys(): void
@@ -317,7 +317,7 @@ final class BonusPageServiceTest extends TestCase
 
         $result = $this->service->build($request)->toArray();
 
-        $this->assertSame('', $result['msg']);
+        $this->assertSame('', (string) ($result['msg']));
     }
 
     public function test_build_formats_bonus_with_one_decimal(): void
@@ -332,7 +332,7 @@ final class BonusPageServiceTest extends TestCase
 
         $result = $this->service->build($request)->toArray();
 
-        $this->assertSame('1,234.6', $result['bonus']);
+        $this->assertSame('1,234.6', (string) ($result['bonus']));
     }
 
     public function test_build_with_bonus_tweak_disable_throws(): void

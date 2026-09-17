@@ -2,9 +2,9 @@
     <br /><br />
     <h1 align="center" id="startcomments">{{ __('legacy/details.h1_user_comments') }}</h1>
 
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($commentPagerTop))
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($commentsTableHtml))
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($commentPagerBottom))
+    {{ $commentPagerTop }}
+    {{ $commentsTableHtml }}
+    {{ $commentPagerBottom }}
 @endif
 
 <br /><br />
@@ -13,7 +13,7 @@
             <b>{{ __('legacy/details.text_quick_comment') }}</b><br /><br />
             <form id="compose" name="comment" method="post" action="{{ 'comment.php?action=add&type=torrent' }}">
                 <input type="hidden" name="pid" value="{{ $id }}" />
-                @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($quickReplyHtml))
+                {{ $quickReplyHtml }}
             </form>
     </div>
 </div>

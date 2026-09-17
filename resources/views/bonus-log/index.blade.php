@@ -10,13 +10,13 @@
         <input type="hidden" name="uid" value="{{ (int) $uid }}" />
         <span>{{ $categoryText }}:</span>
         <select name="category">
-            @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($categoryOptionsHtml))
+            {{ $categoryOptionsHtml }}
         </select>
         &nbsp;&nbsp;
         <span>{{ $businessTypeText }}:</span>
         <select name="business_type">
             <option value="0">-{{ $textSelectOnePlease }}-</option>
-            @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($businessTypeOptionsHtml))
+            {{ $businessTypeOptionsHtml }}
         </select>
         &nbsp;&nbsp;
         <input type="submit" value="{{ $submitText }}">

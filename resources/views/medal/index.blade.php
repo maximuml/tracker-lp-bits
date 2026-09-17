@@ -33,14 +33,14 @@
 <tr>
     <td>{{ (int) $row['id'] }}</td>
     <td><img src="{{ $row['image_large'] }}" style="max-width: 60px;max-height: 60px;" class="preview" /></td>
-    <td><h1>{{ $row['name'] }}</h1>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['description']))</td>
+    <td><h1>{{ $row['name'] }}</h1>{{ $row['description'] }}</td>
     <td>{{ $row['sale_begin_time'] }} ~<br>{{ $row['sale_end_time'] }}</td>
     <td>{{ $row['durationText'] }}</td>
     <td>{{ $row['bonus_addition_factor'] }}%</td>
     <td>{{ number_format((float) $row['price']) }}</td>
     <td>{{ $row['inventory'] }}</td>
-    <td>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['buy_action']))</td>
-    <td>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['gift_action']))</td>
+    <td>{{ $row['buy_action'] }}</td>
+    <td>{{ $row['gift_action'] }}</td>
 </tr>
 @endforeach
 </tbody>

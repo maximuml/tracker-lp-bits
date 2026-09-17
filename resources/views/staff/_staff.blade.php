@@ -13,10 +13,10 @@
     <tr><td class=embedded colspan=6><hr color="#4040c0"></td></tr>
     @foreach ($supportRows as $row)
     <tr>
-        <td class=embedded>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['username_html'] ?? ''))</td>
-        <td class=embedded>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['flag_html'] ?? ''))</td>
-        <td class=embedded>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['online_html'] ?? ''))</td>
-        <td class=embedded>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['pm_html'] ?? ''))</td>
+        <td class=embedded>{{ $row['username_html'] ?? '' }}</td>
+        <td class=embedded>{{ $row['flag_html'] ?? '' }}</td>
+        <td class=embedded>{{ $row['online_html'] ?? '' }}</td>
+        <td class=embedded>{{ $row['pm_html'] ?? '' }}</td>
         <td class=embedded>{{ $row['extra'] ?? '' }}</td>
         <td class=embedded>{{ $row['extra'] ?? '' }}</td>
     </tr>
@@ -38,10 +38,10 @@
     <tr><td class=embedded colspan=5><hr color="#4040c0"></td></tr>
     @foreach ($pickerRows as $row)
     <tr>
-        <td class=embedded>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['username_html'] ?? ''))</td>
-        <td class=embedded>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['flag_html'] ?? ''))</td>
-        <td class=embedded>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['online_html'] ?? ''))</td>
-        <td class=embedded>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['pm_html'] ?? ''))</td>
+        <td class=embedded>{{ $row['username_html'] ?? '' }}</td>
+        <td class=embedded>{{ $row['flag_html'] ?? '' }}</td>
+        <td class=embedded>{{ $row['online_html'] ?? '' }}</td>
+        <td class=embedded>{{ $row['pm_html'] ?? '' }}</td>
         <td class=embedded>{{ $row['extra'] ?? '' }}</td>
     </tr>
     @endforeach
@@ -62,11 +62,11 @@
     <tr><td class=embedded colspan=5><hr color="#4040c0"></td></tr>
     @foreach ($forumModRows as $row)
     <tr>
-        <td class=embedded>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['username_html'] ?? ''))</td>
-        <td class=embedded>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['flag_html'] ?? ''))</td>
-        <td class=embedded>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['online_html'] ?? ''))</td>
-        <td class=embedded>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['pm_html'] ?? ''))</td>
-        <td class=embedded>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['forums_html'] ?? ''))</td>
+        <td class=embedded>{{ $row['username_html'] ?? '' }}</td>
+        <td class=embedded>{{ $row['flag_html'] ?? '' }}</td>
+        <td class=embedded>{{ $row['online_html'] ?? '' }}</td>
+        <td class=embedded>{{ $row['pm_html'] ?? '' }}</td>
+        <td class=embedded>{{ $row['forums_html'] ?? '' }}</td>
     </tr>
     @endforeach
 </table>
@@ -79,7 +79,7 @@
     @foreach ($staffRows as $row)
         @if (isset($row['header']))
             @if (! $loop->first)<tr height=15><td class=embedded colspan=5 align=right>&nbsp;</td></tr>@endif
-            <tr height=15><td class=embedded colspan=5 align=right>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['class_name'] ?? ''))</td></tr>
+            <tr height=15><td class=embedded colspan=5 align=right>{{ $row['class_name'] ?? '' }}</td></tr>
             <tr>
                 <td class=embedded><b>{{ __('legacy/staff.text_username')}}</b></td>
                 <td class=embedded align=center><b>{{ __('legacy/staff.text_country')}}</b></td>
@@ -90,10 +90,10 @@
             <tr height=15><td class=embedded colspan=5><hr color="#4040c0"></td></tr>
         @else
             <tr>
-                <td class=embedded>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['username_html'] ?? ''))</td>
-                <td class=embedded>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['flag_html'] ?? ''))</td>
-                <td class=embedded>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['online_html'] ?? ''))</td>
-                <td class=embedded>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['pm_html'] ?? ''))</td>
+                <td class=embedded>{{ $row['username_html'] ?? '' }}</td>
+                <td class=embedded>{{ $row['flag_html'] ?? '' }}</td>
+                <td class=embedded>{{ $row['online_html'] ?? '' }}</td>
+                <td class=embedded>{{ $row['pm_html'] ?? '' }}</td>
                 <td class=embedded>{{ $row['extra'] ?? '' }}</td>
             </tr>
         @endif
@@ -115,10 +115,10 @@
     <tr><td class=embedded colspan=5><hr color="#4040c0"></td></tr>
     @foreach ($vipRows as $row)
     <tr>
-        <td class=embedded>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['username_html'] ?? ''))</td>
-        <td class=embedded>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['flag_html'] ?? ''))</td>
-        <td class=embedded>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['online_html'] ?? ''))</td>
-        <td class=embedded>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['pm_html'] ?? ''))</td>
+        <td class=embedded>{{ $row['username_html'] ?? '' }}</td>
+        <td class=embedded>{{ $row['flag_html'] ?? '' }}</td>
+        <td class=embedded>{{ $row['online_html'] ?? '' }}</td>
+        <td class=embedded>{{ $row['pm_html'] ?? '' }}</td>
         <td class=embedded>{{ $row['extra'] ?? '' }}</td>
     </tr>
     @endforeach

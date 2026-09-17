@@ -13,18 +13,18 @@
             <div id="cid{{ $row['id'] }}" class="nx-embedded">
                         #{{ $row['id'] }}&nbsp;&nbsp;
                         <font color="gray">{{ __('legacy/functions.text_by')}}</font>
-                        @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['usernameHtml'] ?? ''))
+                        {{ $row['usernameHtml'] ?? '' }}
                         &nbsp;&nbsp;<font color="gray">{{ __('legacy/functions.text_at')}}</font>
-                        @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['timeHtml'] ?? ''))
-                        @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['parentLinkHtml'] ?? ''))
+                        {{ $row['timeHtml'] ?? '' }}
+                        {{ $row['parentLinkHtml'] ?? '' }}
             </div>
             <div class="nx-main nx-row">
                 <div class="nx-w-150">
-                        @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['avatarHtml'] ?? ''))
+                        {{ $row['avatarHtml'] ?? '' }}
                 </div>
                 <div class="nx-grow nx-cell-5 word-break-all">
                         <br />
-                        @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['commentHtml'] ?? ''))
+                        {{ $row['commentHtml'] ?? '' }}
                 </div>
             </div>
         </div>

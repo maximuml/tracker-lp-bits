@@ -12,6 +12,7 @@ use App\Models\Torrent;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Globals;
+use App\Support\Html\SafeHtml;
 use App\Support\Http;
 use App\Support\Locale;
 use App\Support\Path;
@@ -61,7 +62,7 @@ class TorrentMaintenanceController extends LegacyController
 
         return $this->legacyPage($request, 'torrent_info', true, [
             'torrentName' => (string) $torrent->name,
-            'structureHtml' => $this->torrentStructureBuilder(['root' => $dict]),
+            'structureHtml' => SafeHtml::fromTrustedHtml($this->torrentStructureBuilder(['root' => $dict])),
         ]);
     }
 

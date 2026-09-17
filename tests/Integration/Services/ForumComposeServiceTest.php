@@ -10,6 +10,7 @@ use App\Repositories\TopicRepository;
 use App\Services\ForumComposeService;
 use App\Support\CurrentUser;
 use App\Support\Globals;
+use App\Support\Html\SafeHtml;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redis;
@@ -161,7 +162,8 @@ final class ForumComposeServiceTest extends TestCase
 
         $result = $this->service()->buildComposeFrame(1, 'invalid_type', []);
 
-        $this->assertSame(['title' => '', 'body' => ''], $result);
+        $this->assertSame('', $result['title']);
+        $this->assertTrue($result['body'] instanceof SafeHtml ? $result['body']->isEmpty() : $result['body'] === '');
     }
 
     // --- buildComposeFrame: quote with post not found ---
@@ -193,7 +195,8 @@ final class ForumComposeServiceTest extends TestCase
 
         $result = $this->service()->buildComposeFrame(999, 'edit', []);
 
-        $this->assertSame(['title' => '', 'body' => ''], $result);
+        $this->assertSame('', $result['title']);
+        $this->assertTrue($result['body'] instanceof SafeHtml ? $result['body']->isEmpty() : $result['body'] === '');
     }
 
     // --- buildComposeFrame: new topic (golden path) ---
@@ -210,8 +213,8 @@ final class ForumComposeServiceTest extends TestCase
         $this->assertIsArray($result);
         $this->assertArrayHasKey('title', $result);
         $this->assertArrayHasKey('body', $result);
-        $this->assertStringContainsString('Test Forum', $result['title']);
-        $this->assertStringContainsString('<form', $result['body']);
+        $this->assertStringContainsString('Test Forum', (string) $result['title']);
+        $this->assertStringContainsString('<form', (string) $result['body']);
     }
 
     // --- buildComposeFrame: reply (golden path) ---
@@ -228,8 +231,8 @@ final class ForumComposeServiceTest extends TestCase
         $this->assertIsArray($result);
         $this->assertArrayHasKey('title', $result);
         $this->assertArrayHasKey('body', $result);
-        $this->assertStringContainsString('Test Topic', $result['title']);
-        $this->assertStringContainsString('<form', $result['body']);
+        $this->assertStringContainsString('Test Topic', (string) $result['title']);
+        $this->assertStringContainsString('<form', (string) $result['body']);
     }
 
     // --- buildComposeFrame: quote (golden path) ---
@@ -251,8 +254,8 @@ final class ForumComposeServiceTest extends TestCase
         $this->assertIsArray($result);
         $this->assertArrayHasKey('title', $result);
         $this->assertArrayHasKey('body', $result);
-        $this->assertStringContainsString('Quoted Topic', $result['title']);
-        $this->assertStringContainsString('[quote=', $result['body']);
+        $this->assertStringContainsString('Quoted Topic', (string) $result['title']);
+        $this->assertStringContainsString('[quote=', (string) $result['body']);
     }
 
     // --- buildComposeFrame: edit (golden path) ---
@@ -274,7 +277,7 @@ final class ForumComposeServiceTest extends TestCase
         $this->assertIsArray($result);
         $this->assertArrayHasKey('title', $result);
         $this->assertArrayHasKey('body', $result);
-        $this->assertStringContainsString('Edit Post', $result['title']);
+        $this->assertStringContainsString('Edit Post', (string) $result['title']);
     }
 
     // --- checkWhetherExist ---
@@ -367,7 +370,7 @@ final class ForumComposeServiceTest extends TestCase
         $result = $this->callWithSuppressedErrors(fn () => $this->service()->buildNewTopic(Request::create('/forums.php', 'GET', ['forumid' => 1])));
 
         $this->assertIsArray($result);
-        $this->assertStringContainsString('Test Forum', $result['title']);
+        $this->assertStringContainsString('Test Forum', (string) $result['title']);
     }
 
     // --- buildReply ---
@@ -385,6 +388,6 @@ final class ForumComposeServiceTest extends TestCase
         $result = $this->callWithSuppressedErrors(fn () => $this->service()->buildReply(Request::create('/forums.php', 'GET', ['topicid' => 1])));
 
         $this->assertIsArray($result);
-        $this->assertStringContainsString('Test Topic', $result['title']);
+        $this->assertStringContainsString('Test Topic', (string) $result['title']);
     }
 }

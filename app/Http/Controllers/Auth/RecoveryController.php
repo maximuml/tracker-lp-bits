@@ -11,6 +11,7 @@ use App\Models\Setting;
 use App\Services\PasswordRecoveryService;
 use App\Services\WebAuthService;
 use App\Support\Captcha;
+use App\Support\Html\SafeHtml;
 use App\Support\Locale;
 use App\Support\Network;
 use Illuminate\Http\RedirectResponse;
@@ -83,7 +84,7 @@ class RecoveryController extends Controller
             'langFolder' => $langFolder,
             'languages' => Locale::languageList('site_lang', true),
             'captchaEnabled' => $captchaEnabled,
-            'captchaMarkup' => $captchaMarkup,
+            'captchaMarkup' => SafeHtml::fromTrustedHtml($captchaMarkup),
             'secret' => $secret,
             'status' => $request->query('status', ''),
             'remaining' => $this->authService->remainingAttempts(Network::clientIp()),

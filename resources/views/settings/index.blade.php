@@ -442,7 +442,7 @@
         {{ __('legacy/settings.text_random_promotion_note_two') ?? '' }}
     </x-settings-row>
     <x-settings-row layout="grid" :label="__('legacy/settings.row_large_torrent_promotion')">
-        {{ __('legacy/settings.text_torrent_larger_than') ?? '' }}<input type="text" style="width: 50px" name="largesize" value="{{ (string)($config['largesize'] ?? 20) }}">{{ __('legacy/settings.text_gb_promoted_to') ?? '' }}<select name="largepro">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($promotionSelects['largepro'] ?? ''))</select>{{ __('legacy/settings.text_by_system_upon_uploading') ?? '' }}<br>{{ __('legacy/settings.text_large_torrent_promotion_note') ?? '' }}
+        {{ __('legacy/settings.text_torrent_larger_than') ?? '' }}<input type="text" style="width: 50px" name="largesize" value="{{ (string)($config['largesize'] ?? 20) }}">{{ __('legacy/settings.text_gb_promoted_to') ?? '' }}<select name="largepro">{{ $promotionSelects['largepro'] ?? '' }}</select>{{ __('legacy/settings.text_by_system_upon_uploading') ?? '' }}<br>{{ __('legacy/settings.text_large_torrent_promotion_note') ?? '' }}
     </x-settings-row>
     <x-settings-row layout="grid" :label="__('legacy/settings.row_promotion_timeout')">
         {{ __('legacy/settings.text_promotion_timeout_note_one') ?? '' }}
@@ -456,7 +456,7 @@
                 ['thirtypercentleechbecome', 'expirethirtypercentleech', 1, 7, 'text_thirtypercentleech_will_become', 'text_thirtypercentleech_timeout_default', 30],
                 ['normalbecome', 'expirenormal', 1, 0, 'text_normal_will_become', 'text_normal_timeout_default', 0],
             ] as [$become, $expire, $defBecome, $hide, $willKey, $defKey, $defExpire])
-                <li>{{ __('legacy/settings.'.$willKey) }}<select name="{{ $become }}">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($promotionSelects[$become] ?? ''))</select>{{ __('legacy/settings.text_after') ?? ' after ' }}<input type="text" style="width: 50px" name="{{ $expire }}" value="{{ (string)($config[$expire] ?? $defExpire) }}">{{ __('legacy/settings.'.$defKey) }}</li>
+                <li>{{ __('legacy/settings.'.$willKey) }}<select name="{{ $become }}">{{ $promotionSelects[$become] ?? '' }}</select>{{ __('legacy/settings.text_after') ?? ' after ' }}<input type="text" style="width: 50px" name="{{ $expire }}" value="{{ (string)($config[$expire] ?? $defExpire) }}">{{ __('legacy/settings.'.$defKey) }}</li>
             @endforeach
         </ul>
         {{ __('legacy/settings.text_promotion_timeout_note_two') ?? '' }}

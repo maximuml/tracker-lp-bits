@@ -8,6 +8,7 @@ use App\Enums\FaqType;
 use App\Repositories\InfoRepository;
 use App\Support\Globals;
 use App\Support\Html;
+use App\Support\Html\SafeHtml;
 use App\Support\Http;
 use App\Support\Locale;
 use App\Support\Url;
@@ -40,10 +41,10 @@ class FaqController extends LegacyController
             $categories = $this->infoRepository->faqCategories($langId);
             foreach ($categories as &$category) {
                 foreach (($category['items'] ?? []) as &$item) {
-                    $item['answerHtml'] = Html::cleanListChildren(strip_tags(
+                    $item['answerHtml'] = SafeHtml::fromTrustedHtml(Html::cleanListChildren(strip_tags(
                         (string) ($item['answer'] ?? ''),
                         '<a><b><i><u><s><br><p><div><span><ul><ol><li><img><font><pre><code><hr><table><tr><td><th><strong><em><h1><h2><h3><h4><h5><h6><blockquote>',
-                    ));
+                    )));
                 }
             }
 

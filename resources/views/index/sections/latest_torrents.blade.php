@@ -18,7 +18,7 @@
             <span class="lt-seed" title="{{ $colSeeder }}">&#x25B2; {{ $item['seeders'] }}</span>
             <span class="lt-leech" title="{{ $colLeecher }}">&#x25BC; {{ $item['leechers'] }}</span>
             <span>{{ $item['size'] }}</span>
-            <span>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(($item['ownerHtml'] ?? '')))</span>
+            <span>{{ ($item['ownerHtml'] ?? '') }}</span>
         </div>
     </div>
 @endforeach

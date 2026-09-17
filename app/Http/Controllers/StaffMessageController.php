@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Support\Cache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
+use App\Support\Html\SafeHtml;
 use App\Support\Http\SafeReturnUrl;
 use App\Support\Input;
 use App\Support\UserDisplay;
@@ -42,9 +43,9 @@ class StaffMessageController extends LegacyController
         return $this->legacyPage($request, 'staffmess', true, [
             'stdheadMsgalert' => false,
             'classes' => $classes,
-            'body' => htmlspecialchars((string) request()->query('body')),
+            'body' => SafeHtml::fromTrustedHtml(htmlspecialchars((string) request()->query('body'))),
             'receiver' => (int) (request()->query('receiver') ?? 0),
-            'username' => htmlspecialchars((string) ($currentUser['username'] ?? '')),
+            'username' => SafeHtml::fromTrustedHtml(htmlspecialchars((string) ($currentUser['username'] ?? ''))),
             'sent' => (int) (request()->query('sent') ?? 0),
             'showReturnto' => (bool) ($returntoQuery || $httpReferer),
             'returnto' => htmlspecialchars((string) ($returntoQuery ?? $httpReferer)),

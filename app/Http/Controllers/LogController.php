@@ -12,6 +12,7 @@ use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Globals;
+use App\Support\Html\SafeHtml;
 use App\Support\Pagination;
 use App\Support\Time;
 use App\Support\UserClass;
@@ -100,9 +101,9 @@ class LogController extends LegacyController
                 str_contains($txt, 'was uploaded by') => 'green',
                 default => '',
             };
-            $row['dateHtml'] = (string) (Time::format((string) ($row['added'] ?? ''), true, false) ?? '');
+            $row['dateHtml'] = SafeHtml::fromTrustedHtml((string) (Time::format((string) ($row['added'] ?? ''), true, false) ?? ''));
             $uid = (int) ($row['uid'] ?? 0);
-            $row['usernameHtml'] = $uid > 0 ? (string) ($userDisplayMap[$uid] ?? UserDisplay::username($uid)) : 'System';
+            $row['usernameHtml'] = SafeHtml::fromTrustedHtml($uid > 0 ? (string) ($userDisplayMap[$uid] ?? UserDisplay::username($uid)) : 'System');
         }
         unset($row);
 
@@ -196,8 +197,8 @@ class LogController extends LegacyController
         $chronicleRows = $this->logRepository->getChronicle($q, (int) $offset, $perpage);
 
         foreach ($chronicleRows as &$row) {
-            $row['dateHtml'] = (string) (Time::format((string) ($row['added'] ?? ''), true, false) ?? '');
-            $row['bodyHtml'] = Format::formatComment((string) ($row['txt'] ?? ''), true, false, true);
+            $row['dateHtml'] = SafeHtml::fromTrustedHtml((string) (Time::format((string) ($row['added'] ?? ''), true, false) ?? ''));
+            $row['bodyHtml'] = SafeHtml::fromTrustedHtml(Format::formatComment((string) ($row['txt'] ?? ''), true, false, true));
         }
         unset($row);
 
@@ -229,8 +230,8 @@ class LogController extends LegacyController
         $newsRows = $this->logRepository->getNews($filters, (int) $offset, $perpage);
 
         foreach ($newsRows as &$row) {
-            $row['dateHtml'] = (string) (Time::format((string) ($row['added'] ?? ''), true, false) ?? '');
-            $row['bodyHtml'] = Format::formatComment((string) ($row['body'] ?? ''), false, false, true);
+            $row['dateHtml'] = SafeHtml::fromTrustedHtml((string) (Time::format((string) ($row['added'] ?? ''), true, false) ?? ''));
+            $row['bodyHtml'] = SafeHtml::fromTrustedHtml(Format::formatComment((string) ($row['body'] ?? ''), false, false, true));
         }
         unset($row);
 
@@ -322,7 +323,7 @@ class LogController extends LegacyController
 
             $pollData[] = [
                 'poll' => $poll,
-                'added' => Time::format($poll['added'] ?? '', true, false),
+                'added' => SafeHtml::fromTrustedHtml((string) Time::format($poll['added'] ?? '', true, false)),
                 'totalVotes' => number_format($totalVotes),
                 'options' => $computedOptions,
             ];

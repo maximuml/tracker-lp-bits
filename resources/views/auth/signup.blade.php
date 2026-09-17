@@ -54,7 +54,7 @@
 
             <div class="nx-fhead">{{ __('legacy/signup.row_desired_username')}}</div>
             <div class="nx-fcell">
-                @safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($usernameInput))<br />
+                {{ $usernameInput }}<br />
                 <font class="small">{{ __('legacy/signup.text_allowed_characters')}}</font>
             </div>
             <div class="nx-fhead">{{ __('legacy/signup.row_pick_a_password') }}</div>
@@ -68,11 +68,11 @@
             </div>
 
             @if ($captchaEnabled && $captchaMarkup !== '')
-                @safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($captchaMarkup))
+                {{ $captchaMarkup }}
             @endif
 
             <div class="nx-fhead">{{ __('legacy/signup.row_email_address')}}</div>
-            <div class="nx-fcell">@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($emailInput))</div>
+            <div class="nx-fcell">{{ $emailInput }}</div>
 
             <div class="nx-fhead">{{ __('legacy/signup.row_country')}}</div>
             <div class="nx-fcell">

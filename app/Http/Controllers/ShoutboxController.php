@@ -10,6 +10,7 @@ use App\Enums\Permission\PermissionEnum;
 use App\Repositories\ShoutboxRepository;
 use App\Services\ShoutboxService;
 use App\Support\CurrentUser;
+use App\Support\Html\SafeHtml;
 use App\Support\LegacyHeaderBag;
 use App\Support\LegacyYesNo;
 use App\Support\Lock;
@@ -107,7 +108,7 @@ class ShoutboxController extends LegacyController
      * @param  iterable<int, mixed>  $rows
      * @param  array<string, mixed>  $currentUser
      * @param  array<string, mixed>  $reactionData
-     * @return list<array<string, string>>
+     * @return list<array<string, string|SafeHtml>>
      */
     private function decorateShoutRows(iterable $rows, array $currentUser, int $currentUserId, bool $isStaff, array $reactionData): array
     {
@@ -197,19 +198,19 @@ class ShoutboxController extends LegacyController
 
             $items[] = [
                 'rowClass' => implode(' ', $rowClasses),
-                'time' => Shoutbox::formatTime($currDate, true),
-                'actions' => Shoutbox::renderActions($arr, $currentUserId, $isStaff),
-                'avatarHtml' => $avatarHtml,
-                'classBadge' => $classBadge,
-                'username' => $username,
-                'reactions' => Shoutbox::renderReactions(
+                'time' => SafeHtml::fromTrustedHtml(Shoutbox::formatTime($currDate, true)),
+                'actions' => SafeHtml::fromTrustedHtml(Shoutbox::renderActions($arr, $currentUserId, $isStaff)),
+                'avatarHtml' => SafeHtml::fromTrustedHtml($avatarHtml),
+                'classBadge' => SafeHtml::fromTrustedHtml($classBadge),
+                'username' => SafeHtml::fromTrustedHtml($username),
+                'reactions' => SafeHtml::fromTrustedHtml(Shoutbox::renderReactions(
                     $shoutId,
                     $currentUserId,
                     is_array($reactionCounts[$shoutId] ?? null) ? $reactionCounts[$shoutId] : [],
                     is_array($reactionMine[$shoutId] ?? null) ? array_values($reactionMine[$shoutId]) : [],
                     is_array($reactionUsers[$shoutId] ?? null) ? $reactionUsers[$shoutId] : []
-                ),
-                'messageHtml' => $messageHtml,
+                )),
+                'messageHtml' => SafeHtml::fromTrustedHtml($messageHtml),
             ];
 
             $prevUserId = $currUserId;
@@ -287,19 +288,19 @@ class ShoutboxController extends LegacyController
                     .Shoutbox::formatTime((int) $arr['edited_at'], true).')</span>';
             }
             $items[] = [
-                'time' => Shoutbox::formatTime((int) ($arr['date'] ?? 0), true),
-                'actions' => Shoutbox::renderActions($arr, $currentUserId, $isStaff),
-                'username' => $username,
-                'reactions' => Shoutbox::renderReactions(
+                'time' => SafeHtml::fromTrustedHtml(Shoutbox::formatTime((int) ($arr['date'] ?? 0), true)),
+                'actions' => SafeHtml::fromTrustedHtml(Shoutbox::renderActions($arr, $currentUserId, $isStaff)),
+                'username' => SafeHtml::fromTrustedHtml($username),
+                'reactions' => SafeHtml::fromTrustedHtml(Shoutbox::renderReactions(
                     $shoutId,
                     $currentUserId,
                     is_array($reactionCounts[$shoutId] ?? null) ? $reactionCounts[$shoutId] : [],
                     is_array($reactionMine[$shoutId] ?? null) ? array_values($reactionMine[$shoutId]) : [],
                     is_array($reactionUsers[$shoutId] ?? null) ? $reactionUsers[$shoutId] : []
-                ),
+                )),
                 'mentionsMe' => $mentionsMe,
-                'messageHtml' => '<span id="shout-msg-'.$shoutId.'" class="shout-msg" data-raw="'
-                    .htmlspecialchars((string) ($arr['text'] ?? ''), ENT_QUOTES).'">'.$message.'</span>'.$editedNote,
+                'messageHtml' => SafeHtml::fromTrustedHtml('<span id="shout-msg-'.$shoutId.'" class="shout-msg" data-raw="'
+                    .htmlspecialchars((string) ($arr['text'] ?? ''), ENT_QUOTES).'">'.$message.'</span>'.$editedNote),
             ];
         }
 

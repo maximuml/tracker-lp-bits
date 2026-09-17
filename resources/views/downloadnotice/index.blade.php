@@ -5,7 +5,7 @@
 @section('content')
 <h2>{{ $title }}</h2>
 <div>
-<div class="nx-text"><p>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($note))</p></div>
+<div class="nx-text"><p>{{ $note }}</p></div>
 <div class="nx-row">
 @if (! empty($showrationotice))
 <div class="nx-text nx-grow">

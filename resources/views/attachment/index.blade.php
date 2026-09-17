@@ -7,7 +7,7 @@
 </head>
 <body class="inframe">
 <div>
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($script ?? ''))
+{{ $script ?? '' }}
 @if ($enableAttachment ?? false)
     <form enctype="multipart/form-data" name="attachment" method="post" action="attachment.php?callback_func={{ $callback_func }}">
     @csrf

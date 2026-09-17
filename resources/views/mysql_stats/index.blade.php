@@ -47,13 +47,13 @@
                             <td bgcolor="#EFF3FF">&nbsp;Failed Attempts&nbsp;</td>
                             <td bgcolor="#EFF3FF" align="right">&nbsp;{{ $abortedConnects }}&nbsp;</td>
                             <td bgcolor="#EFF3FF" align="right">&nbsp;{{ $abortedConnectsPerHour }}&nbsp;</td>
-                            <td bgcolor="#EFF3FF" align="right">&nbsp;@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($abortedConnectsPct))&nbsp;</td>
+                            <td bgcolor="#EFF3FF" align="right">&nbsp;{{ $abortedConnectsPct }}&nbsp;</td>
                         </tr>
                         <tr>
                             <td bgcolor="#EFF3FF">&nbsp;Aborted Clients&nbsp;</td>
                             <td bgcolor="#EFF3FF" align="right">&nbsp;{{ $abortedClients }}&nbsp;</td>
                             <td bgcolor="#EFF3FF" align="right">&nbsp;{{ $abortedClientsPerHour }}&nbsp;</td>
-                            <td bgcolor="#EFF3FF" align="right">&nbsp;@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($abortedClientsPct))&nbsp;</td>
+                            <td bgcolor="#EFF3FF" align="right">&nbsp;{{ $abortedClientsPct }}&nbsp;</td>
                         </tr>
                         <tr>
                             <td bgcolor="lightgrey">&nbsp;Total&nbsp;</td>

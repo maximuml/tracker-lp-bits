@@ -28,9 +28,9 @@
     <div class="nx-fhead">Subject</div>
     <div class="nx-fcell"><input type=text name=subject size=75></div>
     <div class="nx-fhead">Message</div>
-    <div class="nx-fcell"><textarea name=msg cols=80 rows=15>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($body))</textarea></div>
+    <div class="nx-fcell"><textarea name=msg cols=80 rows=15>{{ $body }}</textarea></div>
 <div class="nx-ffull"><div align="center"><b>Sender:&nbsp;&nbsp;</b>
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($username))
+{{ $username }}
 <input name="sender" type="radio" value="self" checked>
 &nbsp; System
 <input name="sender" type="radio" value="system">

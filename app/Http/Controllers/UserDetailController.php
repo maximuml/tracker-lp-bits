@@ -21,6 +21,7 @@ use App\Support\CurrentUser;
 use App\Support\Env;
 use App\Support\Format;
 use App\Support\Globals;
+use App\Support\Html\SafeHtml;
 use App\Support\LegacyResponse;
 use App\Support\LegacyYesNo;
 use App\Support\Locale;
@@ -429,10 +430,10 @@ JS, 'footer', false);
             'targetBlockedMe' => $targetBlockedMe,
             'currentUserIsFriendOfTarget' => $currentUserIsFriendOfTarget,
             'showPmButton' => $showPmButton,
-            'countryHtml' => $countryHtml,
+            'countryHtml' => SafeHtml::fromTrustedHtml($countryHtml),
             'locationInfo' => $locationInfo,
             'locationInfoHtml' => $locationInfoHtml,
-            'clientSelectHtml' => $clientSelectHtml,
+            'clientSelectHtml' => SafeHtml::fromTrustedHtml($clientSelectHtml),
             'trueTraffic' => $trueTraffic,
             'trueDownload' => $trueDownload,
             'trueUpload' => $trueUpload,
@@ -440,23 +441,23 @@ JS, 'footer', false);
             'trueRatio' => $trueRatio,
             'seedLeechRatio' => $seedLeechRatio,
             'joinWeeks' => $joinWeeks,
-            'medalImagesHtml' => $medalImagesHtml,
+            'medalImagesHtml' => SafeHtml::fromTrustedHtml($medalImagesHtml),
             'warned' => $warned,
             'leechwarn' => $leechwarn,
             'elapsedLastWarn' => $elapsedLastWarn,
             'warnedUntilPretty' => $warnedUntilPretty,
             'leechwarnUntilPretty' => $leechwarnUntilPretty,
-            'classSelectHtml' => $classSelectHtml,
-            'migratedHelp' => $migratedHelp,
+            'classSelectHtml' => SafeHtml::fromTrustedHtml($classSelectHtml),
+            'migratedHelp' => SafeHtml::fromTrustedHtml($migratedHelp),
             'userManageSystemUrl' => $userManageSystemUrl,
-            'usernameHtml' => $usernameHtml,
-            'invitedByHtml' => $invitedByHtml,
-            'avatarHtml' => $avatarHtml,
-            'warnedByHtml' => $warnedByHtml,
-            'bonusTableHtml' => $bonusTableHtml,
-            'hrStatusHtml' => $hrStatusHtml,
+            'usernameHtml' => SafeHtml::fromTrustedHtml($usernameHtml),
+            'invitedByHtml' => SafeHtml::fromTrustedHtml($invitedByHtml),
+            'avatarHtml' => SafeHtml::fromTrustedHtml($avatarHtml),
+            'warnedByHtml' => SafeHtml::fromTrustedHtml($warnedByHtml),
+            'bonusTableHtml' => SafeHtml::fromTrustedHtml($bonusTableHtml),
+            'hrStatusHtml' => SafeHtml::fromTrustedHtml($hrStatusHtml),
             'ipHistoryCount' => $ipHistoryCount,
-            'userPropsHtml' => $userPropsHtml,
+            'userPropsHtml' => SafeHtml::fromTrustedHtml($userPropsHtml),
             'consumeChangeUsernameForm' => $consumeChangeUsernameForm,
             'triggerId' => $triggerId,
         ];

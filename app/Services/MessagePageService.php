@@ -10,6 +10,7 @@ use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Globals;
+use App\Support\Html\SafeHtml;
 use App\Support\LegacyResponse;
 use App\Support\Pagination;
 use App\Support\Time;
@@ -190,8 +191,8 @@ class MessagePageService
             $rows[] = [
                 'id' => (int) $row['id'],
                 'subject' => $subject,
-                'username' => $username,
-                'added' => Time::format((string) $row['added'], true, false),
+                'username' => SafeHtml::fromTrustedHtml($username),
+                'added' => SafeHtml::fromTrustedHtml((string) Time::format((string) $row['added'], true, false)),
                 'unread' => (bool) $row['unread'],
             ];
         }
@@ -219,8 +220,8 @@ class MessagePageService
             'pagerbottom' => $pagerbottom,
             'rows' => $rows,
             'hasMessages' => $messages->isNotEmpty(),
-            'moveBoxOptions' => $moveBoxOptions,
-            'jumpToBoxes' => $jumpToBoxes,
+            'moveBoxOptions' => SafeHtml::fromTrustedHtml($moveBoxOptions),
+            'jumpToBoxes' => SafeHtml::fromTrustedHtml($jumpToBoxes),
             'jumpToSelected' => $mailbox,
         ];
     }
@@ -348,14 +349,14 @@ class MessagePageService
             'pmId' => $pmId,
             'subject' => $subject,
             'from' => $from,
-            'sender' => $sender,
-            'added' => Time::format($added, true, false),
-            'unread' => $unread,
-            'body' => $body,
-            'reply' => $reply,
+            'sender' => SafeHtml::fromTrustedHtml($sender),
+            'added' => SafeHtml::fromTrustedHtml((string) Time::format($added, true, false)),
+            'unread' => SafeHtml::fromTrustedHtml($unread),
+            'body' => SafeHtml::fromTrustedHtml($body),
+            'reply' => SafeHtml::fromTrustedHtml($reply),
             'isSender' => $isSender,
             'mailbox' => $mailbox,
-            'moveBoxOptions' => $moveBoxOptions,
+            'moveBoxOptions' => SafeHtml::fromTrustedHtml($moveBoxOptions),
         ];
     }
 
@@ -398,9 +399,9 @@ class MessagePageService
         return [
             'pmId' => $pmId,
             'subject' => $subject,
-            'fromName' => $fromName,
-            'origName' => $origName,
-            'body' => $body,
+            'fromName' => SafeHtml::fromTrustedHtml($fromName),
+            'origName' => SafeHtml::fromTrustedHtml($origName),
+            'body' => SafeHtml::fromTrustedHtml($body),
         ];
     }
 }

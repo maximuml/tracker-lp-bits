@@ -33,13 +33,13 @@
 <div class="nx-fcell {{ $form['n_hl'] ?? '' }}"><input name="n" type="text" value="{{ $form['n'] }}" size=35></div>
 <div class="nx-fhead">Ratio:</div>
 <div class="nx-fcell {{ $form['r_hl'] ?? '' }}"><select name="rt">
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['rt_options'] ?? ''))
+{{ $form['rt_options'] ?? '' }}
     </select>
     <input name="r" type="text" value="{{ $form['r'] }}" size="5" maxlength="4">
     <input name="r2" type="text" value="{{ $form['r2'] }}" size="5" maxlength="4"></div>
 <div class="nx-fhead">Member status:</div>
 <div class="nx-fcell {{ $form['st_hl'] ?? '' }}"><select name="st">
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['st_options'] ?? ''))
+{{ $form['st_options'] ?? '' }}
     </select></div>
 </div>
 <div class="nx-grouprow">
@@ -49,7 +49,7 @@
 <div class="nx-fcell {{ $form['ip_hl'] ?? '' }}"><input name="ip" type="text" value="{{ $form['ip'] }}" maxlength="64"></div>
 <div class="nx-fhead">Account status:</div>
 <div class="nx-fcell {{ $form['as_hl'] ?? '' }}"><select name="as">
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['as_options'] ?? ''))
+{{ $form['as_options'] ?? '' }}
     </select></div>
 </div>
 <div class="nx-grouprow">
@@ -58,43 +58,43 @@
 <div class="nx-fhead">Mask:</div>
 <div class="nx-fcell {{ $form['ma_hl'] ?? '' }}"><input name="ma" type="text" value="{{ $form['ma'] }}" maxlength="17"></div>
 <div class="nx-fhead">Class:</div>
-<div class="nx-fcell {{ $form['c_hl'] ?? '' }}"><select name="c">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['c_options'] ?? ''))
+<div class="nx-fcell {{ $form['c_hl'] ?? '' }}"><select name="c">{{ $form['c_options'] ?? '' }}
     </select></div>
 </div>
 <div class="nx-grouprow">
 <div class="nx-fhead">Joined:</div>
 <div class="nx-fcell {{ $form['d_hl'] ?? '' }}"><select name="dt">
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['dt_options'] ?? ''))
+{{ $form['dt_options'] ?? '' }}
     </select>
     <input name="d" type="text" value="{{ $form['d'] }}" size="12" maxlength="10">
     <input name="d2" type="text" value="{{ $form['d2'] }}" size="12" maxlength="10"></div>
 <div class="nx-fhead">Uploaded:</div>
 <div class="nx-fcell {{ $form['ul_hl'] ?? '' }}"><select name="ult" id="ult">
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['ult_options'] ?? ''))
+{{ $form['ult_options'] ?? '' }}
     </select>
     <input name="ul" type="text" id="ul" size="8" maxlength="7" value="{{ $form['ul'] }}">
     <input name="ul2" type="text" id="ul2" size="8" maxlength="7" value="{{ $form['ul2'] }}"></div>
 <div class="nx-fhead">Donor:</div>
 <div class="nx-fcell {{ $form['do_hl'] ?? '' }}"><select name="do">
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['do_options'] ?? ''))
+{{ $form['do_options'] ?? '' }}
 	</select></div>
 </div>
 <div class="nx-grouprow">
 <div class="nx-fhead">Last seen:</div>
 <div class="nx-fcell {{ $form['ls_hl'] ?? '' }}"><select name="lst">
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['lst_options'] ?? ''))
+{{ $form['lst_options'] ?? '' }}
   </select>
   <input name="ls" type="text" value="{{ $form['ls'] }}" size="12" maxlength="10">
   <input name="ls2" type="text" value="{{ $form['ls2'] }}" size="12" maxlength="10"></div>
 <div class="nx-fhead">Downloaded:</div>
 <div class="nx-fcell {{ $form['dl_hl'] ?? '' }}"><select name="dlt" id="dlt">
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['dlt_options'] ?? ''))
+{{ $form['dlt_options'] ?? '' }}
     </select>
     <input name="dl" type="text" id="dl" size="8" maxlength="7" value="{{ $form['dl'] }}">
     <input name="dl2" type="text" id="dl2" size="8" maxlength="7" value="{{ $form['dl2'] }}"></div>
 <div class="nx-fhead">Warned:</div>
 <div class="nx-fcell {{ $form['w_hl'] ?? '' }}"><select name="w">
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($form['w_options'] ?? ''))
+{{ $form['w_options'] ?? '' }}
 	</select></div>
 </div>
 <div class="nx-grouprow">

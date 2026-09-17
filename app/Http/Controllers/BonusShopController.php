@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Support\AssetAppender;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
+use App\Support\Html\SafeHtml;
 use App\Support\Locale;
 use App\Support\Pagination;
 use App\Support\UserDisplay;
@@ -86,7 +87,7 @@ class BonusShopController extends LegacyController
                 'id' => $row->id,
                 'image_large' => $row->image_large,
                 'name' => $row->name,
-                'description' => $row->description,
+                'description' => SafeHtml::fromTrustedHtml((string) ($row->description ?? '')),
                 'sale_begin_time' => $row->sale_begin_time ?? Locale::trans('nexus.no_limit', [], null),
                 'sale_end_time' => $row->sale_end_time ?? Locale::trans('nexus.no_limit', [], null),
                 'durationText' => $row->durationText,
@@ -94,8 +95,8 @@ class BonusShopController extends LegacyController
                 'gift_fee_factor' => ($row->gift_fee_factor ?? 0) * 100,
                 'price' => $row->price,
                 'inventory' => $row->inventory ?? Locale::trans('label.infinite', [], null),
-                'buy_action' => sprintf('<input type="button" class="%s" data-id="%s" value="%s"%s>', $buyClass, $row->id, htmlspecialchars($buyBtnText), $buyDisabled),
-                'gift_action' => sprintf('<input type="number" class="uid" %s style="width: 60px" placeholder="UID"><input type="button" class="%s" data-id="%s" value="%s"%s><span class="nowrap">%s: %s</span>', $giftDisabled, $giftClass, $row->id, htmlspecialchars($giftBtnText), $giftDisabled, Locale::trans('medal.fields.gift_fee', [], null), (($row->gift_fee_factor ?? 0) * 100).'%'),
+                'buy_action' => SafeHtml::fromTrustedHtml(sprintf('<input type="button" class="%s" data-id="%s" value="%s"%s>', $buyClass, $row->id, htmlspecialchars($buyBtnText), $buyDisabled)),
+                'gift_action' => SafeHtml::fromTrustedHtml(sprintf('<input type="number" class="uid" %s style="width: 60px" placeholder="UID"><input type="button" class="%s" data-id="%s" value="%s"%s><span class="nowrap">%s: %s</span>', $giftDisabled, $giftClass, $row->id, htmlspecialchars($giftBtnText), $giftDisabled, Locale::trans('medal.fields.gift_fee', [], null), (($row->gift_fee_factor ?? 0) * 100).'%')),
             ];
         }
 
@@ -217,14 +218,14 @@ JS;
                 'rewardFormatted' => number_format((float) $row->success_reward_bonus),
                 'deductFormatted' => number_format((float) $row->fail_deduct_bonus),
                 'claimedCount' => ($row->on_going_users_count ?? 0).'/'.($row->max_user_count ?: $infiniteText),
-                'description' => $row->description,
-                'claimActionHtml' => sprintf(
+                'description' => SafeHtml::fromTrustedHtml((string) ($row->description ?? '')),
+                'claimActionHtml' => SafeHtml::fromTrustedHtml(sprintf(
                     '<input type="button" class="%s" data-id="%s" value="%s"%s>',
                     $isClaimed ? '' : 'claim',
                     (int) $row->id,
                     e($btnText),
                     $isClaimed ? ' disabled' : ''
-                ),
+                )),
             ];
         }
 

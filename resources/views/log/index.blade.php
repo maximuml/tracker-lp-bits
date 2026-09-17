@@ -5,7 +5,7 @@
 @section('content')
 <div id="lognav"><ul id="logmenu" class="menu">
 @foreach (['dailylog' => (__('legacy/log.text_daily_log')), 'chronicle' => (__('legacy/log.text_chronicle')), 'news' => (__('legacy/log.text_news')), 'poll' => (__('legacy/log.text_poll'))] as $a => $label)
-    <li{{ $mode === $a ? ' class=selected' : '' }}><a href="?action={{ $a }}">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($label))</a></li>
+    <li{{ $mode === $a ? ' class=selected' : '' }}><a href="?action={{ $a }}">{{ $label }}</a></li>
 @endforeach
 </ul></div>
 
@@ -36,9 +36,9 @@
         @endif
         </td></tr>
         @foreach ($logRows as $arr)
-            <tr><td class="rowfollow nowrap" align=center>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($arr['dateHtml'] ?? ''))</td><td class=rowfollow align=left><font color='{{ $arr['color'] ?? '' }}'>{{ $arr['txt'] ?? '' }}</font></td>
+            <tr><td class="rowfollow nowrap" align=center>{{ $arr['dateHtml'] ?? '' }}</td><td class=rowfollow align=left><font color='{{ $arr['color'] ?? '' }}'>{{ $arr['txt'] ?? '' }}</font></td>
             @if ($canConfidentialLog)
-                <td class=rowfollow align=left>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($arr['usernameHtml'] ?? ''))</td>
+                <td class=rowfollow align=left>{{ $arr['usernameHtml'] ?? '' }}</td>
             @endif
             </tr>
         @endforeach
@@ -78,7 +78,7 @@
         <table data-nx="data" width=940 border=1 cellspacing=0 cellpadding=5>
         <tr><td class=colhead align=center>{{ __('legacy/log.col_date')}}</td><td class=colhead align=left>{{ __('legacy/log.col_event')}}</td>@if ($canManage)<td class=colhead align=center>{{ __('legacy/log.col_modify')}}</td>@endif</tr>
         @foreach ($chronicleRows as $arr)
-            <tr><td class=rowfollow align=center><nobr>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($arr['dateHtml'] ?? ''))</nobr></td><td class=rowfollow align=left>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($arr['bodyHtml'] ?? ''))</td>@if ($canManage)<td align=center nowrap><b><a href="?action=chronicle&do=edit&id={{ (int) ($arr['id'] ?? 0) }}">{{ __('legacy/log.text_edit')}}</a>&nbsp;|&nbsp;<form method="post" action="?action=chronicle&do=del" class="nx-inline"><input type="hidden" name="id" value="{{ (int) ($arr['id'] ?? 0) }}"><button type="submit" class="nx-btn-link" style="color:red;font-weight:bold">{{ __('legacy/log.text_delete')}}</button></form></b></td>@endif</tr>
+            <tr><td class=rowfollow align=center><nobr>{{ $arr['dateHtml'] ?? '' }}</nobr></td><td class=rowfollow align=left>{{ $arr['bodyHtml'] ?? '' }}</td>@if ($canManage)<td align=center nowrap><b><a href="?action=chronicle&do=edit&id={{ (int) ($arr['id'] ?? 0) }}">{{ __('legacy/log.text_edit')}}</a>&nbsp;|&nbsp;<form method="post" action="?action=chronicle&do=del" class="nx-inline"><input type="hidden" name="id" value="{{ (int) ($arr['id'] ?? 0) }}"><button type="submit" class="nx-btn-link" style="color:red;font-weight:bold">{{ __('legacy/log.text_delete')}}</button></form></b></td>@endif</tr>
         @endforeach
         </table>
         {{ $pagerbottom ?? '' }}
@@ -105,7 +105,7 @@
     @else
         @foreach ($newsRows as $arr)
             <table data-nx="data" width=940 border=1 cellspacing=0 cellpadding=5>
-            <tr><td class=rowhead width='10%'>{{ __('legacy/log.col_title')}}</td><td class=rowfollow align=left>{{ $arr['title'] ?? '' }}</td></tr><tr><td class=rowhead width='10%'>{{ __('legacy/log.col_date')}}</td><td class=rowfollow align=left>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($arr['dateHtml'] ?? ''))</td></tr><tr><td class=rowhead width='10%'>{{ __('legacy/log.col_body')}}</td><td class=rowfollow align=left>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($arr['bodyHtml'] ?? ''))</td></tr>
+            <tr><td class=rowhead width='10%'>{{ __('legacy/log.col_title')}}</td><td class=rowfollow align=left>{{ $arr['title'] ?? '' }}</td></tr><tr><td class=rowhead width='10%'>{{ __('legacy/log.col_date')}}</td><td class=rowfollow align=left>{{ $arr['dateHtml'] ?? '' }}</td></tr><tr><td class=rowhead width='10%'>{{ __('legacy/log.col_body')}}</td><td class=rowfollow align=left>{{ $arr['bodyHtml'] ?? '' }}</td></tr>
             </table><br />
         @endforeach
         {{ $pagerbottom ?? '' }}
@@ -117,7 +117,7 @@
         <tr><td class=colhead align=center>{{ __('legacy/log.text_previous_polls')}}</td></tr>
     @foreach ($pollData as $item)
         <tr><td align=center>
-        <p class=sub>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['added'] ?? ''))
+        <p class=sub>{{ $item['added'] ?? '' }}
         @if ($canPollManage)
             - [<a href="makepoll.php?action=edit&pollid={{ (int) ($item['poll']['id'] ?? 0) }}"><b>{{ __('legacy/log.text_edit')}}</b></a>]
             - [<a href="?action=poll&do=delete&pollid={{ (int) ($item['poll']['id'] ?? 0) }}"><b>{{ __('legacy/log.text_delete')}}</b></a>]

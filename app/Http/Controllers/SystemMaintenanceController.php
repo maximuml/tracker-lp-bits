@@ -9,6 +9,7 @@ use App\Services\CleanupService;
 use App\Support\CurrentUser;
 use App\Support\Email;
 use App\Support\Globals;
+use App\Support\Html\SafeHtml;
 use App\Support\Mail;
 use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
@@ -154,10 +155,10 @@ class SystemMaintenanceController extends LegacyController
             'totalBytesPerHour' => $byteTotal($status['totalBytes'] * 3600 / $uptimeSeconds),
             'abortedConnects' => $num($status['abortedConnects']),
             'abortedConnectsPerHour' => $num($status['abortedConnects'] * 3600 / $uptimeSeconds, 2),
-            'abortedConnectsPct' => $connections > 0 ? $num($status['abortedConnects'] * 100 / $connections, 2).'&nbsp;%' : '---',
+            'abortedConnectsPct' => SafeHtml::fromTrustedHtml($connections > 0 ? $num($status['abortedConnects'] * 100 / $connections, 2).'&nbsp;%' : '---'),
             'abortedClients' => $num($status['abortedClients']),
             'abortedClientsPerHour' => $num($status['abortedClients'] * 3600 / $uptimeSeconds, 2),
-            'abortedClientsPct' => $connections > 0 ? $num($status['abortedClients'] * 100 / $connections, 2).'&nbsp;%' : '---',
+            'abortedClientsPct' => SafeHtml::fromTrustedHtml($connections > 0 ? $num($status['abortedClients'] * 100 / $connections, 2).'&nbsp;%' : '---'),
             'connectionsTotal' => $num($connections),
             'connectionsPerHour' => $num($connections * 3600 / $uptimeSeconds, 2),
             'questionsTotal' => $num($questions),

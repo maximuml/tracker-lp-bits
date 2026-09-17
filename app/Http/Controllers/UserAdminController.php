@@ -91,7 +91,7 @@ class UserAdminController extends LegacyController
             if (! $c) {
                 break;
             }
-            $classOptions[] = ['value' => $i, 'label' => $c, 'selected' => $class !== '-' && $class == $i];
+            $classOptions[] = ['value' => $i, 'label' => SafeHtml::fromTrustedHtml($c), 'selected' => $class !== '-' && $class == $i];
         }
 
         $countryOptions = [['value' => 0, 'label' => __('legacy/users.select_any_country'), 'selected' => $country === 0]];
@@ -110,9 +110,9 @@ class UserAdminController extends LegacyController
         foreach ($userRows as $arr) {
             $rows[] = [
                 'id' => (int) $arr['id'],
-                'username_html' => UserDisplay::username((int) $arr['id']),
-                'addedFormatted' => (string) Time::format($arr['added'], true, false),
-                'lastAccessFormatted' => (string) Time::format($arr['last_access'], true, false),
+                'username_html' => SafeHtml::fromTrustedHtml(UserDisplay::username((int) $arr['id'])),
+                'addedFormatted' => SafeHtml::fromTrustedHtml((string) Time::format($arr['added'], true, false)),
+                'lastAccessFormatted' => SafeHtml::fromTrustedHtml((string) Time::format($arr['last_access'], true, false)),
                 'class_name' => SafeHtml::fromTrustedHtml(UserClass::name((int) $arr['class'], false, true, true)),
                 'country' => SafeHtml::fromTrustedHtml((string) $arr['country']),
             ];
@@ -203,7 +203,7 @@ class UserAdminController extends LegacyController
 
         return $this->legacyPage($request, 'reset', true, [
             'success' => $success,
-            'message' => $message,
+            'message' => SafeHtml::fromTrustedHtml($message),
         ]);
 
     }

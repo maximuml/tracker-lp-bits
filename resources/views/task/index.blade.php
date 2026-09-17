@@ -32,7 +32,7 @@
     <td>{{ $row['deductFormatted'] }}</td>
     <td>{{ $row['claimedCount'] }}</td>
     <td>{{ $row['description'] }}</td>
-    <td>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['claimActionHtml']))</td>
+    <td>{{ $row['claimActionHtml'] }}</td>
 </tr>
 @endforeach
 </tbody>

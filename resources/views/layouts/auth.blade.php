@@ -34,7 +34,7 @@
     <script type="text/javascript" src="js/auth.js"></script>
     <script type="text/javascript" src="vendor/jquery-3.7.1.min.js"></script>
     @foreach (\App\Support\AssetAppender::getAppendHeaders() as $html)
-        @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(($html ?? '')))
+        {{ ($html ?? '') }}
     @endforeach
 </head>
 <body>
@@ -43,7 +43,7 @@
         @yield('content')
     </div>
     @foreach (\App\Support\AssetAppender::getAppendFooters() as $html)
-        @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(($html ?? '')))
+        {{ ($html ?? '') }}
     @endforeach
 </body>
 </html>

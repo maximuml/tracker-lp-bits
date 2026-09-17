@@ -16,14 +16,14 @@
 @endif
 
 @foreach ($tagItems ?? [] as $item)
-    <p class=sub><b>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['name']))</b></p>
+    <p class=sub><b>{{ $item['name'] }}</b></p>
     <table data-nx="data" class=main width=100% border=1 cellspacing=0 cellpadding=5>
-    <tr valign=top><td width=25%>{{ __('legacy/tags.text_description')}}</td><td>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['description']))
-    <tr valign=top><td>{{ __('legacy/tags.text_syntax')}}</td><td><tt>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['syntax']))</tt>
-    <tr valign=top><td>{{ __('legacy/tags.text_example')}}</td><td><tt>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['example']))</tt>
-    <tr valign=top><td>{{ __('legacy/tags.text_result')}}</td><td>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['result']))
+    <tr valign=top><td width=25%>{{ __('legacy/tags.text_description')}}</td><td>{{ $item['description'] }}
+    <tr valign=top><td>{{ __('legacy/tags.text_syntax')}}</td><td><tt>{{ $item['syntax'] }}</tt>
+    <tr valign=top><td>{{ __('legacy/tags.text_example')}}</td><td><tt>{{ $item['example'] }}</tt>
+    <tr valign=top><td>{{ __('legacy/tags.text_result')}}</td><td>{{ $item['result'] }}
     @if ($item['remarks'] !== '')
-        <tr><td>{{ __('legacy/tags.text_remarks')}}</td><td>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['remarks']))
+        <tr><td>{{ __('legacy/tags.text_remarks')}}</td><td>{{ $item['remarks'] }}
     @endif
     </table>
 @endforeach

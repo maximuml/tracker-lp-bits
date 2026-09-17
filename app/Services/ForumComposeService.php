@@ -13,6 +13,7 @@ use App\Support\CurrentUser;
 use App\Support\Forum;
 use App\Support\Frame;
 use App\Support\Globals;
+use App\Support\Html\SafeHtml;
 use App\Support\Input;
 use App\Support\LegacyResponse;
 use Illuminate\Http\Request;
@@ -35,7 +36,7 @@ final class ForumComposeService
     /**
      * Build the compose-frame HTML for the requested type.
      *
-     * @return array{title: string, body: string}
+     * @return array{title: string, body: SafeHtml}
      */
     public function buildComposeFrame(int $id, string $type): array
     {
@@ -67,7 +68,7 @@ final class ForumComposeService
                     ob_get_clean();
                     LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_no_post_id'));
 
-                    return ['title' => '', 'body' => ''];
+                    return ['title' => '', 'body' => SafeHtml::fromTrustedHtml('')];
                 }
                 $topicid = $post['topicid'];
                 $topicname = $post['topic_subject'] ?? '';
@@ -83,7 +84,7 @@ final class ForumComposeService
                 if (! $post) {
                     ob_get_clean();
 
-                    return ['title' => '', 'body' => ''];
+                    return ['title' => '', 'body' => SafeHtml::fromTrustedHtml('')];
                 }
                 $topicid = $post['topicid'];
                 if ($post['is_first_post']) {
@@ -97,7 +98,7 @@ final class ForumComposeService
             default:
                 ob_get_clean();
 
-                return ['title' => '', 'body' => ''];
+                return ['title' => '', 'body' => SafeHtml::fromTrustedHtml('')];
         }
         echo '<input type="hidden" name="id" value="'.$hiddenId.'" />';
         echo '<input type="hidden" name="type" value="'.$hiddenType.'" />';
@@ -105,11 +106,11 @@ final class ForumComposeService
         Frame::composeEndVoid();
         echo '</form>';
 
-        return ['title' => (string) $title, 'body' => (string) ob_get_clean()];
+        return ['title' => (string) $title, 'body' => SafeHtml::fromTrustedHtml((string) ob_get_clean())];
     }
 
     /**
-     * @return array{title: string, body: string}
+     * @return array{title: string, body: SafeHtml}
      */
     public function buildNewTopic(Request $request): array
     {
@@ -121,7 +122,7 @@ final class ForumComposeService
 
     /**
      * @param  array<string, mixed>  $curUser
-     * @return array{title: string, body: string}
+     * @return array{title: string, body: SafeHtml}
      */
     public function buildQuotePost(array $curUser, Request $request): array
     {
@@ -135,7 +136,7 @@ final class ForumComposeService
     }
 
     /**
-     * @return array{title: string, body: string}
+     * @return array{title: string, body: SafeHtml}
      */
     public function buildReply(Request $request): array
     {
@@ -147,7 +148,7 @@ final class ForumComposeService
 
     /**
      * @param  array<string, mixed>  $curUser
-     * @return array{title: string, body: string}
+     * @return array{title: string, body: SafeHtml}
      */
     public function buildEditPost(array $curUser, Request $request): array
     {
@@ -158,7 +159,7 @@ final class ForumComposeService
         if (! $post) {
             LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_no_post_id'));
 
-            return ['title' => '', 'body' => ''];
+            return ['title' => '', 'body' => SafeHtml::fromTrustedHtml('')];
         }
 
         $locked = (bool) $post['locked'];

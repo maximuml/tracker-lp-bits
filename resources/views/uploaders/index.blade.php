@@ -10,9 +10,9 @@
 <form method="get" action="?">
 <span>
 {{ __('legacy/uploaders.text_select_month')}}
-<select name="year">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($yearOptions))</select>
+<select name="year">{{ $yearOptions }}</select>
 &nbsp;&nbsp;
-<select name="month">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($monthOptions))</select>
+<select name="month">{{ $monthOptions }}</select>
 &nbsp;&nbsp;
 <input type="submit" value="{{ __('legacy/uploaders.submit_go')}}" />
 </span>
@@ -33,11 +33,11 @@
 </tr>
 @foreach ($rows as $row)
 <tr>
-    <td class="colfollow">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['usernameHtml']))</td>
+    <td class="colfollow">{{ $row['usernameHtml'] }}</td>
     <td class="colfollow">{{ $row['sizeFormatted'] }}</td>
     <td class="colfollow">{{ $row['torrent_count'] }}</td>
-    <td class="colfollow">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['lastAddedFormatted']))</td>
-    <td class="colfollow">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['lastTorrentHtml']))</td>
+    <td class="colfollow">{{ $row['lastAddedFormatted'] }}</td>
+    <td class="colfollow">{{ $row['lastTorrentHtml'] }}</td>
 </tr>
 @endforeach
 </table>

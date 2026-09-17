@@ -7,7 +7,7 @@
     <h1>{{ __('legacy/makepoll.text_edit_poll')}}</h1>
 @else
     @if (($ageWarning ?? '') !== '')
-        <p><font class=striking><b>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($ageWarning))</b></font></p>
+        <p><font class=striking><b>{{ $ageWarning }}</b></font></p>
     @endif
     <h1>{{ __('legacy/makepoll.text_make_poll')}}</h1>
 @endif

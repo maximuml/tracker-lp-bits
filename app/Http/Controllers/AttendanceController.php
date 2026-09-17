@@ -11,6 +11,7 @@ use App\Support\Captcha;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Globals;
+use App\Support\Html\SafeHtml;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
 use Illuminate\Http\RedirectResponse;
@@ -73,18 +74,18 @@ class AttendanceController extends LegacyController
         }
 
         if ($data['hasAttendedToday']) {
-            $data['headerLeft'] = sprintf(
+            $data['headerLeft'] = SafeHtml::fromTrustedHtml(sprintf(
                 (string) (__('legacy/attendance.attend_info')).(string) (__('legacy/attendance.retroactive_description')),
                 $attendance->total_days,
                 $attendance->days,
                 $attendance->points,
                 $curUser['attendance_card'] ?? 0
-            );
-            $data['headerRight'] = Locale::trans(
+            ));
+            $data['headerRight'] = SafeHtml::fromTrustedHtml(Locale::trans(
                 'attendance.ranking',
                 ['ranking' => $data['myRanking'], 'counts' => $data['todayCounts']],
                 null
-            );
+            ));
             AssetAppender::js($this->calendarScript($data), 'footer', false);
             $data['bonusLines'] = $this->bonusLines();
         } else {

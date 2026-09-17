@@ -19,6 +19,7 @@ use App\Support\CurrentUser;
 use App\Support\Forum;
 use App\Support\Globals;
 use App\Support\Html;
+use App\Support\Html\SafeHtml;
 use App\Support\Http;
 use App\Support\Input;
 use App\Support\LegacyYesNo;
@@ -227,25 +228,25 @@ final class UsercpPageService
 
         return [
             'commentCount' => $commentCount,
-            'joinDate' => $joinDate,
+            'joinDate' => SafeHtml::fromTrustedHtml($joinDate),
             'forumPosts' => $forumPosts,
             'dayPosts' => $dayPosts,
             'percentages' => $percentages,
-            'ipLocation' => $ipLocation,
-            'passkeyLoginForm' => $passkeyLoginForm,
+            'ipLocation' => SafeHtml::fromTrustedHtml($ipLocation),
+            'passkeyLoginForm' => SafeHtml::fromTrustedHtml($passkeyLoginForm),
             'tokens' => $tokens,
             'readTopics' => $readTopics,
             'showAvatar' => ! empty($curUser['avatar']),
             'avatarUrl' => (string) ($curUser['avatar'] ?? ''),
-            'passkey' => Strings::hidden((string) ($curUser['passkey'] ?? '')),
+            'passkey' => SafeHtml::fromTrustedHtml(Strings::hidden((string) ($curUser['passkey'] ?? ''))),
             'email' => (string) ($curUser['email'] ?? ''),
             'invites' => (int) ($curUser['invites'] ?? 0),
             'seedbonus' => (string) ($curUser['seedbonus'] ?? '0'),
-            'avatarHtml' => $avatarHtml,
-            'invitesHtml' => $invitesHtml,
-            'karmaHtml' => $karmaHtml,
-            'commentsHtml' => $commentsHtml,
-            'forumPostsHtml' => $forumPostsHtml,
+            'avatarHtml' => SafeHtml::fromTrustedHtml($avatarHtml),
+            'invitesHtml' => SafeHtml::fromTrustedHtml($invitesHtml),
+            'karmaHtml' => SafeHtml::fromTrustedHtml($karmaHtml),
+            'commentsHtml' => SafeHtml::fromTrustedHtml($commentsHtml),
+            'forumPostsHtml' => SafeHtml::fromTrustedHtml((string) ($forumPostsHtml ?? '')),
         ];
     }
 
@@ -289,11 +290,11 @@ final class UsercpPageService
                 'userid' => (int) $topicArr['userid'],
                 'views' => $views,
                 'replies' => $replies,
-                'author' => UserDisplay::username((int) $topicArr['userid']),
+                'author' => SafeHtml::fromTrustedHtml(UserDisplay::username((int) $topicArr['userid'])),
                 'lastPostId' => $postid,
                 'lastPostUserId' => $userid,
-                'lastPostUsername' => UserDisplay::username($userid),
-                'lastPostAdded' => $added,
+                'lastPostUsername' => SafeHtml::fromTrustedHtml(UserDisplay::username($userid)),
+                'lastPostAdded' => SafeHtml::fromTrustedHtml($added),
             ];
         }
 
@@ -329,7 +330,7 @@ final class UsercpPageService
 
         return [
             'formId' => 'form'.Strings::randomCode(6),
-            'rowsHtml' => $rowsHtml,
+            'rowsHtml' => SafeHtml::fromTrustedHtml($rowsHtml),
             'showTooltipSetting' => $showTooltipSetting,
         ];
     }
@@ -401,7 +402,7 @@ final class UsercpPageService
 
         return [
             'formId' => 'form'.Strings::randomCode(6),
-            'rowsHtml' => $rowsHtml,
+            'rowsHtml' => SafeHtml::fromTrustedHtml($rowsHtml),
             'enableBitbucket' => $enableBitbucket,
         ];
     }
@@ -535,12 +536,12 @@ final class UsercpPageService
             'confirmHidden' => $confirmHidden,
             'savedFlags' => $savedFlags,
             'savedMessage' => $savedMessage,
-            'rowsHtml' => $rowsHtml,
+            'rowsHtml' => SafeHtml::fromTrustedHtml($rowsHtml),
             'showEmailChange' => $showEmailChange,
             'twoStep' => $twoStep,
             'privacyRadios' => $privacyRadios,
             'passkeyListHtml' => $passkeyListHtml,
-            'confirmHtml' => $isConfirm ? $this->captureConfirmExtras() : '',
+            'confirmHtml' => SafeHtml::fromTrustedHtml($isConfirm ? $this->captureConfirmExtras() : ''),
         ];
     }
 
@@ -689,7 +690,7 @@ JS;
             'tokens' => $tokens,
             'deleteLabel' => $deleteLabel,
             'confirmRemoveLabel' => $confirmRemoveLabel,
-            'tableHtml' => $tableHtml,
+            'tableHtml' => SafeHtml::fromTrustedHtml($tableHtml),
         ];
     }
 
@@ -772,7 +773,7 @@ JS;
 
         return [
             'formId' => 'form'.Strings::randomCode(6),
-            'rowsHtml' => $rowsHtml,
+            'rowsHtml' => SafeHtml::fromTrustedHtml($rowsHtml),
         ];
     }
 }

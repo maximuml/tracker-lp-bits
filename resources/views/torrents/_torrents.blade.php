@@ -1,24 +1,24 @@
-<div class="nx-main nx-embedded nx-w-97 nx-mx-auto">
+{{-- Modern torrents page body (Variant A, ADR 0014): search panel + torrent table + pager. --}}
+<div class="nxm-torrents">
 
 @include('torrents._search_form')
 
 @if ($inclbookmarked == 1)
-    <h1 align="center">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\UserDisplay::username($CURUSER['id']))){{ $lang_torrents['text_s_bookmarked_torrent'] }}</h1>
+    <h1 class="nxm-pagehead">{{ $bookmarkedUsername }}{{ $lang_torrents['text_s_bookmarked_torrent'] }}</h1>
 @elseif ($inclbookmarked == 2)
-    <h1 align="center">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\UserDisplay::username($CURUSER['id']))){{ $lang_torrents['text_s_not_bookmarked_torrent'] }}</h1>
+    <h1 class="nxm-pagehead">{{ $bookmarkedUsername }}{{ $lang_torrents['text_s_not_bookmarked_torrent'] }}</h1>
 @endif
 
 @if ($count && isset($rows))
 
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagertop ?? ''))
-    @if ($sectiontype == $browsecatmode)
-        @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\TorrentTable::render($rows, 'torrents', $sectiontype)))
-    @else
-        @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\TorrentTable::render($rows, 'bookmarks', $sectiontype)))
-    @endif
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagerbottom ?? ''))
+    {{ $pagertop }}
+    @include('torrents._table')
+    {{ $pagerbottom }}
 @else
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($emptyMessageHtml ?? ''))
+    <div class="nxm-empty" role="status">
+        <p class="nxm-empty__title">{{ $emptyTitle }}</p>
+        <p class="nxm-empty__body">{{ $emptyBody }}</p>
+    </div>
 @endif
 
 </div>

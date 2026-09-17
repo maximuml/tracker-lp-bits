@@ -14,9 +14,7 @@ use App\Support\Cache\LegacyRedisCache;
 use App\Support\Category;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
-use App\Support\Frame;
 use App\Support\Globals;
-use App\Support\Input;
 use App\Support\Logger;
 use App\Support\Pagination;
 use App\Support\RequestContext;
@@ -266,22 +264,16 @@ class TorrentSearchRepository
             $pageTitle = $lang_torrents['head_special'];
         }
 
-        $categoryTableHtml = SearchBox::buildCategoryTableWithContext(
-            $sectiontype,
-            '1',
-            '?',
-            '?',
-            0,
-            Input::serverValue('QUERY_STRING'),
-            ['select_unselect' => true, 'user_notifs' => $CURUSER['notifs'] ?? null],
-        );
-        $hotSearchHtml = $this->hotSearchHtml();
-        $emptyMessageHtml = '';
+        $hotSearches = $this->hotSearchKeywords();
+        $emptyTitle = '';
+        $emptyBody = '';
         if (! $count) {
             if (isset($searchstr)) {
-                $emptyMessageHtml = '<br />'.Frame::stdMessage($lang_torrents['std_search_results_for'].$searchstr_ori.'"', $lang_torrents['std_try_again'], false);
+                $emptyTitle = $lang_torrents['std_search_results_for'].$searchstr_ori.'"';
+                $emptyBody = $lang_torrents['std_try_again'];
             } else {
-                $emptyMessageHtml = Frame::stdMessage($lang_torrents['std_nothing_found'], $lang_torrents['std_no_active_torrents'], false);
+                $emptyTitle = $lang_torrents['std_nothing_found'];
+                $emptyBody = $lang_torrents['std_no_active_torrents'];
             }
         }
         if ($CURUSER !== []) {
@@ -291,29 +283,34 @@ class TorrentSearchRepository
         return get_defined_vars();
     }
 
-    private function hotSearchHtml(): string
+    /**
+     * Hot-search keywords for the torrents panel. Cached as a plain list
+     * (Variant A: markup is owned by the Blade template, not the repo).
+     *
+     * @return list<string>
+     */
+    private function hotSearchKeywords(): array
     {
-        $this->cache->new_page('hot_search', 3670, true);
-        if (! $this->cache->get_page()) {
-            $this->listingRepository->cleanupSuggest();
-            $hotcount = 0;
-            $hotsearch = '';
-            foreach ($this->listingRepository->getHotSearch() as $searchrow) {
-                $keywords = (string) ($searchrow['keywords'] ?? '');
-                $hotsearch .= '<a href="'.htmlspecialchars('?search='.rawurlencode($keywords).'&notnewword=1').'"><u>'.htmlspecialchars($keywords).'</u></a>&nbsp;&nbsp;';
-                $hotcount += mb_strlen($keywords, 'UTF-8');
-                if ($hotcount > 60) {
-                    break;
-                }
-            }
-            $this->cache->add_whole_row();
-            if ($hotsearch !== '') {
-                echo '<div class="nx-embedded">&nbsp;&nbsp;'.$hotsearch.'</div>';
-            }
-            $this->cache->end_whole_row();
-            $this->cache->cache_page();
+        $cached = $this->cache->get_value('hot_search_keywords');
+        if (is_array($cached)) {
+            return array_values(array_map('strval', $cached));
         }
+        $this->listingRepository->cleanupSuggest();
+        $keywords = [];
+        $hotcount = 0;
+        foreach ($this->listingRepository->getHotSearch() as $searchrow) {
+            $keyword = (string) ($searchrow['keywords'] ?? '');
+            if ($keyword === '') {
+                continue;
+            }
+            $keywords[] = $keyword;
+            $hotcount += mb_strlen($keyword, 'UTF-8');
+            if ($hotcount > 60) {
+                break;
+            }
+        }
+        $this->cache->cache_value('hot_search_keywords', $keywords, 3670);
 
-        return (string) $this->cache->next_row();
+        return $keywords;
     }
 }

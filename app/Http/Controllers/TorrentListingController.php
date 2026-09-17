@@ -8,6 +8,10 @@ use App\Models\User;
 use App\Repositories\TorrentSearchRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
+use App\Support\Html\SafeHtml;
+use App\Support\UserDisplay;
+use App\ViewModels\TorrentListViewFactory;
+use App\ViewModels\TorrentSearchPanelFactory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -19,6 +23,8 @@ class TorrentListingController extends Controller
         private readonly CurrentUser $currentUser,
         private readonly TorrentSearchRepository $torrentSearchRepository,
         private readonly ?LegacyRedisCache $legacyRedisCache,
+        private readonly TorrentListViewFactory $torrentListFactory,
+        private readonly TorrentSearchPanelFactory $searchPanelFactory,
     ) {}
 
     public function index(Request $request): View|RedirectResponse
@@ -36,6 +42,22 @@ class TorrentListingController extends Controller
         $this->currentUser->set($currentUser);
 
         $data = $this->torrentSearchRepository->getListingData($request->query->all());
+        foreach (['pagertop', 'pagerbottom'] as $pagerKey) {
+            $data[$pagerKey] = SafeHtml::fromTrustedHtml((string) ($data[$pagerKey] ?? ''));
+        }
+        $data['bookmarkedUsername'] = SafeHtml::fromTrustedHtml(
+            UserDisplay::username((int) ($currentUser['id'] ?? 0))
+        );
+        $data['listVm'] = $this->torrentListFactory->create(
+            $data['rows'] ?? [],
+            (int) ($data['sectiontype'] ?? 0),
+        );
+        $data['panelVm'] = $this->searchPanelFactory->create(
+            (int) ($data['sectiontype'] ?? 0),
+            (string) ($request->getQueryString() ?? ''),
+            isset($data['CURUSER']['notifs']) ? (string) $data['CURUSER']['notifs'] : null,
+            $data['hotSearches'] ?? [],
+        );
 
         return view('torrents.index', $data);
     }

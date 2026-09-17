@@ -17,7 +17,6 @@ final class TorrentListViewModel
     /**
      * @param  list<array{key: string, label: string, iconClass: string, iconTitle: string, sortUrl: ?string}>  $columns
      * @param  list<TorrentListRow>  $rows
-     * @param  array<string, string>  $lang
      */
     public function __construct(
         public readonly array $columns,
@@ -26,6 +25,5 @@ final class TorrentListViewModel
         public readonly bool $canManage,
         public readonly bool $showPromotionNote,
         public readonly SafeHtml $lastCommentTooltips,
-        public readonly array $lang,
     ) {}
 }

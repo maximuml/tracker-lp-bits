@@ -73,30 +73,6 @@ final class SupportContext
         self::context()->addUserUpdate($key, $value);
     }
 
-    /** @param array<string, string> $lang */
-    public static function setLangFunctions(array $lang): void
-    {
-        self::context()->setLangFunctions($lang);
-    }
-
-    /** @return array<string, string> */
-    public static function getLangFunctions(): array
-    {
-        return self::context()->getLangFunctions();
-    }
-
-    /** @param array<string, string> $lang */
-    public static function setLangShoutbox(array $lang): void
-    {
-        self::context()->setLangShoutbox($lang);
-    }
-
-    /** @return array<string, string> */
-    public static function getLangShoutbox(): array
-    {
-        return self::context()->getLangShoutbox();
-    }
-
     public static function setCache(?LegacyRedisCache $cache): void
     {
         self::context()->setCache($cache);

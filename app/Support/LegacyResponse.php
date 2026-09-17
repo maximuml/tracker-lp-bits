@@ -115,22 +115,21 @@ final class LegacyResponse
      */
     public static function permissionDenied(?int $allowMinimumClass = null): void
     {
-        $lang_functions = app(Language::class)->functions();
 
         if ($allowMinimumClass === null) {
             self::abort(
-                (string) ($lang_functions['std_error'] ?? ''),
-                (string) ($lang_functions['std_permission_denied'] ?? ''),
+                (string) (__('legacy/functions.std_error')),
+                (string) (__('legacy/functions.std_permission_denied')),
             );
 
             return;
         }
 
         self::abort(
-            (string) ($lang_functions['std_sorry'] ?? ''),
-            (string) ($lang_functions['std_permission_denied_only'] ?? '')
+            (string) (__('legacy/functions.std_sorry')),
+            (string) (__('legacy/functions.std_permission_denied_only'))
                 .UserClass::name($allowMinimumClass, false, true, true)
-                .\sprintf((string) ($lang_functions['std_or_above_can_view'] ?? ''), SiteConfig::current()->basic->siteName()),
+                .\sprintf((string) (__('legacy/functions.std_or_above_can_view')), SiteConfig::current()->basic->siteName()),
             false,
         );
     }
@@ -161,7 +160,6 @@ final class LegacyResponse
         }
 
         $CURUSER = app(CurrentUser::class)->get() ?? [];
-        $lang_functions = app(Language::class)->functions();
 
         $msg = 'Invalid ID Attempt: Username: '.($CURUSER['username'] ?? '')
             .' - UserID: '.($CURUSER['id'] ?? '')
@@ -176,16 +174,16 @@ final class LegacyResponse
 
         if ($stdhead) {
             self::abort(
-                (string) ($lang_functions['std_error'] ?? ''),
-                (string) ($lang_functions['std_invalid_id'] ?? ''),
+                (string) (__('legacy/functions.std_error')),
+                (string) (__('legacy/functions.std_invalid_id')),
             );
 
             return true;
         }
 
-        $errorHtml = '<h2>'.\htmlspecialchars((string) ($lang_functions['std_error'] ?? '')).'</h2>'
+        $errorHtml = '<h2>'.\htmlspecialchars((string) (__('legacy/functions.std_error'))).'</h2>'
             .'<table width="100%" border="1" cellspacing="0" cellpadding="10"><tr><td class="text">'
-            .\htmlspecialchars((string) ($lang_functions['std_invalid_id'] ?? ''))
+            .\htmlspecialchars((string) (__('legacy/functions.std_invalid_id')))
             .'</td></tr></table>';
 
         if ($die) {
@@ -228,7 +226,6 @@ final class LegacyResponse
     public static function canUpload(string $where = 'torrents'): bool
     {
         $CURUSER = app(CurrentUser::class)->get() ?? [];
-        $lang_functions = app(Language::class)->functions();
 
         if (! ($CURUSER['uploadpos'] ?? true)) {
             return false;
@@ -239,8 +236,8 @@ final class LegacyResponse
 
         if ($uploadDenyApprovalDenyCount > 0 && $approvalDenyCount >= $uploadDenyApprovalDenyCount) {
             self::abort(
-                (string) ($lang_functions['std_sorry'] ?? ''),
-                \sprintf((string) ($lang_functions['approval_deny_reach_upper_limit'] ?? '%s'), $uploadDenyApprovalDenyCount),
+                (string) (__('legacy/functions.std_sorry')),
+                \sprintf((string) (__('legacy/functions.approval_deny_reach_upper_limit')), $uploadDenyApprovalDenyCount),
                 false,
             );
         }

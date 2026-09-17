@@ -1,6 +1,6 @@
 @extends('layouts.legacy')
 
-@section('title', $title ?? ($lang_sendmessage['head_send_message'] ?? 'Send message'))
+@section('title', $title ?? (__('legacy/sendmessage.head_send_message')))
 
 @section('content')
 <form id="compose" name="compose" method="post" action="/takemessage">
@@ -12,10 +12,10 @@
 @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::composeBegin($frameTitle ?? $title, $replyto ? 'reply' : 'new', $body, true, $subject, 100)))
 <tr><td class="toolbox" colspan="2" align="center">
 @if ($replyto)
-    <input type="checkbox" name="delete" value="yes"{{ $deleteChecked }}> {{ $lang_sendmessage['checkbox_delete_message_replying_to'] ?? 'Delete message replying to' }}
+    <input type="checkbox" name="delete" value="yes"{{ $deleteChecked }}> {{ __('legacy/sendmessage.checkbox_delete_message_replying_to')}}
     <input type="hidden" name="origmsg" value="{{ $replyto }}">
 @endif
-    <input type="checkbox" name="save" value="yes"{{ $saveChecked }}> {{ $lang_sendmessage['checkbox_save_message_to_sendbox'] ?? 'Save message to sendbox' }}
+    <input type="checkbox" name="save" value="yes"{{ $saveChecked }}> {{ __('legacy/sendmessage.checkbox_save_message_to_sendbox')}}
 </td></tr>
 @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::composeEnd()))
 </form>

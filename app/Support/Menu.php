@@ -19,13 +19,11 @@ final class Menu
     /**
      * Build the main menu.
      *
-     * @param  array<string, string>  $langFunctions
      * @param  array<string, mixed>|null  $user
      * @return array{html: string, selected: string}
      */
     public function render(
         string $scriptName,
-        array $langFunctions,
         string $enableOffer,
         ?string $customMenu,
         ?array $user = null,
@@ -45,27 +43,27 @@ final class Menu
         $normalSectionName = SearchBox::value($cache, (int) (Settings::get('main.browsecat') ?? 1), 'section_name');
 
         $items = [];
-        $items[] = $this->item($selected, 'home', 'index.php', $langFunctions['text_home'] ?? 'Home');
-        $items[] = $this->item($selected, 'forums', 'forums.php', $langFunctions['text_forums'] ?? 'Forums');
-        $items[] = $this->item($selected, 'latestcomments', 'latestcomments.php', $langFunctions['text_latest_comments'] ?? 'Latest Comments');
-        $items[] = $this->item($selected, 'torrents', 'torrents.php', $normalSectionName[$langDir] ?? ($langFunctions['text_torrents'] ?? 'Torrents'), "rel='sub-menu'");
+        $items[] = $this->item($selected, 'home', 'index.php', __('legacy/functions.text_home'));
+        $items[] = $this->item($selected, 'forums', 'forums.php', __('legacy/functions.text_forums'));
+        $items[] = $this->item($selected, 'latestcomments', 'latestcomments.php', __('legacy/functions.text_latest_comments'));
+        $items[] = $this->item($selected, 'torrents', 'torrents.php', $normalSectionName[$langDir] ?? (__('legacy/functions.text_torrents')), "rel='sub-menu'");
 
         if ($enableOffer === 'yes') {
-            $items[] = $this->item($selected, 'offers', 'offers.php', $langFunctions['text_offers'] ?? 'Offers');
+            $items[] = $this->item($selected, 'offers', 'offers.php', __('legacy/functions.text_offers'));
         }
-        $items[] = $this->item($selected, 'upload', 'upload.php', $langFunctions['text_upload'] ?? 'Upload');
+        $items[] = $this->item($selected, 'upload', 'upload.php', __('legacy/functions.text_upload'));
         if (Permissions::userCan('topten', false, $userId)) {
-            $items[] = $this->item($selected, 'topten', 'topten.php', $langFunctions['text_top_ten'] ?? 'Top 10');
+            $items[] = $this->item($selected, 'topten', 'topten.php', __('legacy/functions.text_top_ten'));
         }
         if (Permissions::userCan('log', false, $userId)) {
-            $items[] = $this->item($selected, 'log', 'log.php', $langFunctions['text_log'] ?? 'Log');
+            $items[] = $this->item($selected, 'log', 'log.php', __('legacy/functions.text_log'));
         }
-        $items[] = $this->item($selected, 'rules', 'rules.php', $langFunctions['text_rules'] ?? 'Rules');
-        $items[] = $this->item($selected, 'faq', 'faq.php', $langFunctions['text_faq'] ?? 'FAQ');
+        $items[] = $this->item($selected, 'rules', 'rules.php', __('legacy/functions.text_rules'));
+        $items[] = $this->item($selected, 'faq', 'faq.php', __('legacy/functions.text_faq'));
         if (Permissions::userCan('staffmem', false, $userId)) {
-            $items[] = $this->item($selected, 'staff', 'staff.php', $langFunctions['text_staff'] ?? 'Staff');
+            $items[] = $this->item($selected, 'staff', 'staff.php', __('legacy/functions.text_staff'));
         }
-        $items[] = $this->item($selected, 'contactstaff', 'contactstaff.php', $langFunctions['text_contactstaff'] ?? 'Contact Staff');
+        $items[] = $this->item($selected, 'contactstaff', 'contactstaff.php', __('legacy/functions.text_contactstaff'));
 
         $html = '<div id="nav"><ul id="mainmenu" class="menu">'.implode('', $items).'</ul></div>';
 

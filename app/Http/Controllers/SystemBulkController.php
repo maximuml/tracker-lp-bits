@@ -151,63 +151,61 @@ class SystemBulkController extends LegacyController
             try {
                 $sendText = $userRep->getInviteBtnText($currentUserId);
             } catch (\Exception $exception) {
-                $lang = (array) trans('legacy/takeinvite');
 
-                return $this->legacyAbortResponse($lang['std_error'] ?? 'Error', $exception->getMessage());
+                return $this->legacyAbortResponse(__('legacy/takeinvite.std_error'), $exception->getMessage());
             }
 
             $email = Input::unescape(htmlspecialchars(trim((string) request()->post('email'))));
             $email = Email::sanitizeForDisplay($email);
             $preRegisterUsername = (string) request()->post('pre_register_username');
             $isPreRegisterEmailAndUsername = SiteConfig::current()->system->isInvitePreEmailAndUsername();
-            $lang = (array) trans('legacy/takeinvite');
 
             if (strlen($preRegisterUsername) > 12) {
-                return $this->legacyAbortResponse($lang['head_invitation_failed'] ?? 'Error', $lang['std_username_too_long'] ?? 'Username too long.');
+                return $this->legacyAbortResponse(__('legacy/takeinvite.head_invitation_failed'), __('legacy/takeinvite.std_username_too_long'));
             }
             if (! $email) {
-                return $this->legacyAbortResponse($lang['head_invitation_failed'] ?? 'Error', $lang['std_must_enter_email'] ?? 'Enter an email.');
+                return $this->legacyAbortResponse(__('legacy/takeinvite.head_invitation_failed'), __('legacy/takeinvite.std_must_enter_email'));
             }
             if (! Email::isWellFormed($email)) {
-                return $this->legacyAbortResponse($lang['head_invitation_failed'] ?? 'Error', $lang['std_invalid_email_address'] ?? 'Invalid email.');
+                return $this->legacyAbortResponse(__('legacy/takeinvite.head_invitation_failed'), __('legacy/takeinvite.std_invalid_email_address'));
             }
 
             $body = str_replace('<br />', '<br />', nl2br(trim(strip_tags((string) request()->post('body')))));
             if (! $body) {
-                return $this->legacyAbortResponse($lang['head_invitation_failed'] ?? 'Error', $lang['std_must_enter_personal_message'] ?? 'Enter a message.');
+                return $this->legacyAbortResponse(__('legacy/takeinvite.head_invitation_failed'), __('legacy/takeinvite.std_must_enter_personal_message'));
             }
 
             if ($isPreRegisterEmailAndUsername) {
                 if (empty($preRegisterUsername)) {
                     return $this->legacyAbortResponse(
-                        $lang['head_invitation_failed'] ?? 'Error',
+                        __('legacy/takeinvite.head_invitation_failed'),
                         Locale::trans('invite.require_pre_register_username', [], null)
                     );
                 }
                 if (! Validators::isUsername($preRegisterUsername)) {
                     return $this->legacyAbortResponse(
-                        $lang['head_invitation_failed'] ?? 'Error',
+                        __('legacy/takeinvite.head_invitation_failed'),
                         Locale::trans('user.username_invalid', ['username' => $preRegisterUsername], null)
                     );
                 }
                 if (User::query()->where('username', $preRegisterUsername)->exists()) {
                     return $this->legacyAbortResponse(
-                        $lang['head_invitation_failed'] ?? 'Error',
+                        __('legacy/takeinvite.head_invitation_failed'),
                         Locale::trans('user.username_already_exists', ['username' => $preRegisterUsername], null)
                     );
                 }
             }
 
             if (User::query()->where('email', $email)->count() > 0) {
-                return $this->legacyAbortResponse($lang['head_invitation_failed'] ?? 'Error', $lang['std_email_address'].htmlspecialchars($email).$lang['std_is_in_use']);
+                return $this->legacyAbortResponse(__('legacy/takeinvite.head_invitation_failed'), __('legacy/takeinvite.std_email_address').htmlspecialchars($email).__('legacy/takeinvite.std_is_in_use'));
             }
             if (Invite::query()->where('invitee', $email)->count() > 0) {
-                return $this->legacyAbortResponse($lang['head_invitation_failed'] ?? 'Error', $lang['std_invitation_already_sent_to'].htmlspecialchars($email).$lang['std_await_user_registeration']);
+                return $this->legacyAbortResponse(__('legacy/takeinvite.head_invitation_failed'), __('legacy/takeinvite.std_invitation_already_sent_to').htmlspecialchars($email).__('legacy/takeinvite.std_await_user_registeration'));
             }
 
             $hashPost = (string) request()->post('hash');
             if ($hashPost === '') {
-                return $this->legacyAbortResponse($lang['head_invitation_failed'] ?? 'Error', $lang['std_must_select_invite'] ?? 'Select an invite.');
+                return $this->legacyAbortResponse(__('legacy/takeinvite.head_invitation_failed'), __('legacy/takeinvite.std_must_select_invite'));
             }
 
             $hashRecord = null;
@@ -219,30 +217,30 @@ class SystemBulkController extends LegacyController
             } else {
                 $hashRecord = Invite::query()->where('inviter', $currentUserId)->where('hash', $hashPost)->first();
                 if (! $hashRecord instanceof Invite) {
-                    return $this->legacyAbortResponse($lang['head_invitation_failed'] ?? 'Error', $lang['hash_not_exists'] ?? 'Hash does not exist.');
+                    return $this->legacyAbortResponse(__('legacy/takeinvite.head_invitation_failed'), ('Hash does not exist.'));
                 }
                 if ($hashRecord->invitee !== '') {
-                    return $this->legacyAbortResponse($lang['head_invitation_failed'] ?? 'Error', 'hash '.$lang['std_is_in_use']);
+                    return $this->legacyAbortResponse(__('legacy/takeinvite.head_invitation_failed'), 'hash '.__('legacy/takeinvite.std_is_in_use'));
                 }
                 if ($hashRecord->expired_at !== null && $hashRecord->expired_at->lt(now())) {
-                    return $this->legacyAbortResponse($lang['head_invitation_failed'] ?? 'Error', $lang['hash_expired'] ?? 'Hash expired.');
+                    return $this->legacyAbortResponse(__('legacy/takeinvite.head_invitation_failed'), ('Hash expired.'));
                 }
                 $hash = $hashPost;
             }
 
             $siteName = Setting::getSiteName();
-            $title = $siteName.$lang['mail_tilte'];
+            $title = $siteName.__('legacy/takeinvite.mail_tilte');
             $signupUrl = Url::schemeAndHost(Url::isSecure())."/signup.php?type=invite&invitenumber=$hash";
-            $mailTwo = sprintf($lang['mail_two'], $siteName, $siteName);
-            $mailFour = sprintf($lang['mail_four'], $siteName);
+            $mailTwo = sprintf(__('legacy/takeinvite.mail_two'), $siteName, $siteName);
+            $mailFour = sprintf(__('legacy/takeinvite.mail_four'), $siteName);
             $reportMail = (string) $this->globals->get('REPORTMAIL', '');
-            $mailSix = sprintf($lang['mail_six'], $reportMail, $siteName);
+            $mailSix = sprintf(__('legacy/takeinvite.mail_six'), $reportMail, $siteName);
             $inviteTimeout = (string) $this->globals->get('invite_timeout', '');
 
-            $message = $lang['mail_one'].$curUser['username'].$mailTwo.PHP_EOL
-                .'<b><a href="javascript:void(null)" onclick="window.open('.$signupUrl.')">'.$lang['mail_here'].'</a></b><br />'.PHP_EOL
+            $message = __('legacy/takeinvite.mail_one').$curUser['username'].$mailTwo.PHP_EOL
+                .'<b><a href="javascript:void(null)" onclick="window.open('.$signupUrl.')">'.__('legacy/takeinvite.mail_here').'</a></b><br />'.PHP_EOL
                 .$signupUrl.PHP_EOL
-                .'<br />'.$lang['mail_three'].$inviteTimeout.$mailFour.$curUser['username'].$lang['mail_five'].'<br />'.PHP_EOL
+                .'<br />'.__('legacy/takeinvite.mail_three').$inviteTimeout.$mailFour.$curUser['username'].__('legacy/takeinvite.mail_five').'<br />'.PHP_EOL
                 .$body.PHP_EOL
                 .'<br /><br />'.$mailSix;
 
@@ -307,9 +305,8 @@ class SystemBulkController extends LegacyController
 
         $delreport = (array) request()->post('delreport');
         if (empty($delreport)) {
-            $langFunctions = (array) trans('legacy/functions');
 
-            return $this->legacyAbortResponse('Error', $langFunctions['select_at_least_one_record'] ?? 'Select at least one record.');
+            return $this->legacyAbortResponse('Error', __('legacy/functions.select_at_least_one_record'));
         }
 
         $delreportIds = array_map('intval', array_filter($delreport, 'is_numeric'));
@@ -345,8 +342,7 @@ class SystemBulkController extends LegacyController
             return $this->legacyAbortResponse('Sorry', 'Access denied.');
         }
 
-        $langIncrementbulk = (array) trans('legacy/incrementbulk');
-        $validTypeMap = (array) ($langIncrementbulk['types'] ?? []);
+        $validTypeMap = (array) (__('legacy/incrementbulk.types'));
         $type = (string) $request->input('type', '');
         $classes = array_chunk(User::listClass(), 4, true);
         $receiver = $request->input('receiver', '');
@@ -356,7 +352,6 @@ class SystemBulkController extends LegacyController
 
         return $this->legacyPage($request, 'increment-bulk', true, [
             'stdheadMsgalert' => false,
-            'lang_incrementbulk' => $langIncrementbulk,
             'validTypeMap' => $validTypeMap,
             'type' => $type,
             'classes' => $classes,
@@ -408,8 +403,7 @@ class SystemBulkController extends LegacyController
             return $this->legacyAbortResponse('Sorry', 'Permission denied.');
         }
 
-        $lang = (array) trans('legacy/incrementbulk');
-        $validTypeMap = (array) ($lang['types'] ?? []);
+        $validTypeMap = (array) (__('legacy/incrementbulk.types'));
 
         $currentUser = $this->currentUser->get() ?? [];
         $senderId = $request->input('sender') === 'system' ? null : ((int) ($currentUser['id'] ?? 0));

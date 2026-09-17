@@ -4,9 +4,9 @@
 @include('torrents._search_form')
 
 @if ($inclbookmarked == 1)
-    <h1 class="nxm-pagehead">{{ $bookmarkedUsername }}{{ $lang_torrents['text_s_bookmarked_torrent'] }}</h1>
+    <h1 class="nxm-pagehead">{{ $bookmarkedUsername }}{{ __('legacy/torrents.text_s_bookmarked_torrent') }}</h1>
 @elseif ($inclbookmarked == 2)
-    <h1 class="nxm-pagehead">{{ $bookmarkedUsername }}{{ $lang_torrents['text_s_not_bookmarked_torrent'] }}</h1>
+    <h1 class="nxm-pagehead">{{ $bookmarkedUsername }}{{ __('legacy/torrents.text_s_not_bookmarked_torrent') }}</h1>
 @endif
 
 @if ($count && isset($rows))

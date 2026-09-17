@@ -43,7 +43,6 @@ use App\Support\Env;
 use App\Support\Environment;
 use App\Support\Globals;
 use App\Support\Html\SafeHtml;
-use App\Support\Language;
 use App\Support\LegacyHeaderBag;
 use App\Support\Locale;
 use App\Support\Metrics\Collectors;
@@ -84,7 +83,6 @@ class AppServiceProvider extends ServiceProvider
         });
         $this->app->singleton(TaggedCacheService::class);
         $this->app->singleton(CurrentUser::class);
-        $this->app->singleton(Language::class);
         $this->app->singleton(Globals::class);
         $this->app->singleton(UserUpdateBatch::class);
         // T-20: ActorContext is a per-request singleton — the instance is

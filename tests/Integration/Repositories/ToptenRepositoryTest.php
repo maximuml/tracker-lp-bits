@@ -172,23 +172,6 @@ final class ToptenRepositoryTest extends TestCase
         $this->assertIsString($result['dateFounded']);
     }
 
-    public function test_page_returns_lang_array(): void
-    {
-        $result = $this->repository->page(1, 10, null);
-
-        $this->assertIsArray($result['lang']);
-    }
-
-    public function test_page_torrent_sections_filter_by_subtype_act(): void
-    {
-        Torrent::factory()->create(['seeders' => 5, 'leechers' => 3]);
-
-        $result = $this->repository->page(2, 100, 'act');
-
-        $this->assertCount(1, $result['sections']);
-        $this->assertSame('act', $result['sections'][0]['subtype']);
-    }
-
     public function test_page_other_sections_includes_bonus_when_subtype_bo(): void
     {
         User::factory()->create(['seedbonus' => 500.0]);

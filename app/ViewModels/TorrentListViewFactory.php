@@ -20,7 +20,6 @@ use App\Support\Format;
 use App\Support\Html\SafeHtml;
 use App\Support\Html\Tag;
 use App\Support\Input;
-use App\Support\Language;
 use App\Support\Palette;
 use App\Support\Promotion;
 use App\Support\Ratio;
@@ -45,7 +44,6 @@ final class TorrentListViewFactory
 
     public function __construct(
         private readonly LegacyRedisCache $cache,
-        private readonly Language $language,
         private readonly CurrentUser $currentUser,
         private readonly TorrentRepositoryInterface $torrentRep,
         private readonly TorrentModerationRepository $moderationRep,
@@ -59,7 +57,6 @@ final class TorrentListViewFactory
     public function create(array $rows, int $searchBoxId): TorrentListViewModel
     {
         $cache = $this->cache;
-        $lang = $this->language->functions();
         $user = $this->currentUser->get() ?? [];
         $config = SiteConfig::current();
         $waitsystem = $config->main->waitSystem(false) ? 'yes' : 'no';
@@ -108,7 +105,7 @@ final class TorrentListViewFactory
         // (and its lang lookups) for empty listings.
         $columns = $rows === []
             ? []
-            : $this->columns($lang, $wait > 0, $showComments, $canManage, (string) ($user['timetype'] ?? ''));
+            : $this->columns($wait > 0, $showComments, $canManage, (string) ($user['timetype'] ?? ''));
 
         $caticonrow = Category::iconRowWithContext($user['caticon']);
         $hasSecondIcon = is_array($caticonrow) && (bool) ($caticonrow['secondicon'] ?? false);
@@ -178,9 +175,9 @@ final class TorrentListViewFactory
                 $elapsed = floor((TIMENOW - strtotime((string) $row['added'])) / 3600);
                 if ($elapsed < $wait) {
                     $waitColor = dechex((int) (floor(127 * ($wait - $elapsed) / 48 + 128) * 65536));
-                    $waitText = number_format($wait - $elapsed).$lang['text_h'];
+                    $waitText = number_format($wait - $elapsed).__('legacy/functions.text_h');
                 } else {
-                    $waitText = (string) $lang['text_none'];
+                    $waitText = (string) __('legacy/functions.text_none');
                 }
             }
 
@@ -195,13 +192,13 @@ final class TorrentListViewFactory
                 if ($lastcom) {
                     $commentIsNew = $lastcom['user'] != $user['id'] && strtotime($lastcom['added']) >= $lastBrowse;
                     $lastcomtime = $timeAlive
-                        ? $lang['text_blank'].Time::format($lastcom['added'], true, false, true)
-                        : $lang['text_at_time'].$lastcom['added'];
+                        ? __('legacy/functions.text_blank').Time::format($lastcom['added'], true, false, true)
+                        : __('legacy/functions.text_at_time').$lastcom['added'];
                     $tooltipId = 'lastcom_'.$counter;
                     $lastcomTooltip[] = [
                         'id' => $tooltipId,
-                        'content' => ($commentIsNew ? "<b>(<font class='new'>".$lang['text_new_uppercase'].'</font>)</b> ' : '')
-                            .$lang['text_last_commented_by'].UserDisplay::username($lastcom['user']).$lastcomtime.'<br />'
+                        'content' => ($commentIsNew ? "<b>(<font class='new'>".__('legacy/functions.text_new_uppercase').'</font>)</b> ' : '')
+                            .__('legacy/functions.text_last_commented_by').UserDisplay::username($lastcom['user']).$lastcomtime.'<br />'
                             .Format::formatComment(mb_substr($lastcom['text'], 0, 100, 'UTF-8').(mb_strlen($lastcom['text'], 'UTF-8') > 100 ? ' ......' : ''), true, false, false, true, 600, false, false),
                     ];
                 }
@@ -290,7 +287,6 @@ final class TorrentListViewFactory
             canManage: $canManage,
             showPromotionNote: $promotionNote,
             lastCommentTooltips: SafeHtml::fromTrustedHtml($lastcomTooltips),
-            lang: $lang,
         );
     }
 
@@ -298,10 +294,9 @@ final class TorrentListViewFactory
      * Column descriptors for the table head. Sort links preserve the
      * current query minus sort/type, same as the legacy renderer.
      *
-     * @param  array<string, string>  $lang
      * @return list<array{key: string, label: string, iconClass: string, iconTitle: string, sortUrl: ?string}>
      */
-    private function columns(array $lang, bool $showWait, bool $showComments, bool $canManage, string $timetype): array
+    private function columns(bool $showWait, bool $showComments, bool $canManage, string $timetype): array
     {
         $queryParams = [];
         foreach (request()->query() as $getName => $getValue) {
@@ -325,23 +320,23 @@ final class TorrentListViewFactory
         };
 
         $columns = [
-            ['key' => 'type', 'label' => (string) $lang['col_type'], 'iconClass' => '', 'iconTitle' => '', 'sortUrl' => null],
-            ['key' => 'name', 'label' => (string) $lang['col_name'], 'iconClass' => '', 'iconTitle' => '', 'sortUrl' => $sortUrl(1)],
+            ['key' => 'type', 'label' => (string) __('legacy/functions.col_type'), 'iconClass' => '', 'iconTitle' => '', 'sortUrl' => null],
+            ['key' => 'name', 'label' => (string) __('legacy/functions.col_name'), 'iconClass' => '', 'iconTitle' => '', 'sortUrl' => $sortUrl(1)],
         ];
         if ($showWait) {
-            $columns[] = ['key' => 'wait', 'label' => (string) $lang['col_wait'], 'iconClass' => '', 'iconTitle' => '', 'sortUrl' => null];
+            $columns[] = ['key' => 'wait', 'label' => (string) __('legacy/functions.col_wait'), 'iconClass' => '', 'iconTitle' => '', 'sortUrl' => null];
         }
         if ($showComments) {
-            $columns[] = ['key' => 'comments', 'label' => '', 'iconClass' => 'comments', 'iconTitle' => (string) $lang['title_number_of_comments'], 'sortUrl' => $sortUrl(3)];
+            $columns[] = ['key' => 'comments', 'label' => '', 'iconClass' => 'comments', 'iconTitle' => (string) __('legacy/functions.title_number_of_comments'), 'sortUrl' => $sortUrl(3)];
         }
-        $columns[] = ['key' => 'time', 'label' => '', 'iconClass' => 'time', 'iconTitle' => $timetype != UserTimeType::TIMEALIVE->value ? (string) $lang['title_time_added'] : (string) $lang['title_time_alive'], 'sortUrl' => $sortUrl(4)];
-        $columns[] = ['key' => 'size', 'label' => '', 'iconClass' => 'size', 'iconTitle' => (string) $lang['title_size'], 'sortUrl' => $sortUrl(5)];
-        $columns[] = ['key' => 'seeders', 'label' => '', 'iconClass' => 'seeders', 'iconTitle' => (string) $lang['title_number_of_seeders'], 'sortUrl' => $sortUrl(7)];
-        $columns[] = ['key' => 'leechers', 'label' => '', 'iconClass' => 'leechers', 'iconTitle' => (string) $lang['title_number_of_leechers'], 'sortUrl' => $sortUrl(8)];
-        $columns[] = ['key' => 'snatched', 'label' => '', 'iconClass' => 'snatched', 'iconTitle' => (string) $lang['title_number_of_snatched'], 'sortUrl' => $sortUrl(6)];
-        $columns[] = ['key' => 'uploader', 'label' => (string) $lang['col_uploader'], 'iconClass' => '', 'iconTitle' => '', 'sortUrl' => $sortUrl(9)];
+        $columns[] = ['key' => 'time', 'label' => '', 'iconClass' => 'time', 'iconTitle' => $timetype != UserTimeType::TIMEALIVE->value ? (string) __('legacy/functions.title_time_added') : (string) __('legacy/functions.title_time_alive'), 'sortUrl' => $sortUrl(4)];
+        $columns[] = ['key' => 'size', 'label' => '', 'iconClass' => 'size', 'iconTitle' => (string) __('legacy/functions.title_size'), 'sortUrl' => $sortUrl(5)];
+        $columns[] = ['key' => 'seeders', 'label' => '', 'iconClass' => 'seeders', 'iconTitle' => (string) __('legacy/functions.title_number_of_seeders'), 'sortUrl' => $sortUrl(7)];
+        $columns[] = ['key' => 'leechers', 'label' => '', 'iconClass' => 'leechers', 'iconTitle' => (string) __('legacy/functions.title_number_of_leechers'), 'sortUrl' => $sortUrl(8)];
+        $columns[] = ['key' => 'snatched', 'label' => '', 'iconClass' => 'snatched', 'iconTitle' => (string) __('legacy/functions.title_number_of_snatched'), 'sortUrl' => $sortUrl(6)];
+        $columns[] = ['key' => 'uploader', 'label' => (string) __('legacy/functions.col_uploader'), 'iconClass' => '', 'iconTitle' => '', 'sortUrl' => $sortUrl(9)];
         if ($canManage) {
-            $columns[] = ['key' => 'action', 'label' => (string) $lang['col_action'], 'iconClass' => '', 'iconTitle' => '', 'sortUrl' => null];
+            $columns[] = ['key' => 'action', 'label' => (string) __('legacy/functions.col_action'), 'iconClass' => '', 'iconTitle' => '', 'sortUrl' => null];
         }
 
         return $columns;

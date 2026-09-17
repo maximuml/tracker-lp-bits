@@ -43,7 +43,6 @@ class ModerationController extends LegacyController
         $currentUserId = (int) ($curUser['id'] ?? 0);
         $staffmemClass = defined('UC_STAFFMEM') ? \constant('UC_STAFFMEM') : (defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0);
 
-        $langReport = (array) trans('legacy/report');
         $cache = $this->legacyRedisCache;
 
         $reportofferid = (int) (request()->query('reportofferid') ?? 0);
@@ -60,13 +59,13 @@ class ModerationController extends LegacyController
         $takereason = trim((string) request()->post('reason'));
 
         $repo = $this->moderationRepository;
-        $doTakeReport = function (int $reportid, string $type, string $reason) use ($currentUserId, $langReport, $cache, $repo): Response {
+        $doTakeReport = function (int $reportid, string $type, string $reason) use ($currentUserId, $cache, $repo): Response {
             if (! Validators::isId($reportid) || $reason === '') {
-                return $this->legacyAbortResponse($langReport['std_error'] ?? 'Error', $langReport['std_missing_reason'] ?? 'Missing reason.');
+                return $this->legacyAbortResponse(__('legacy/report.std_error'), __('legacy/report.std_missing_reason'));
             }
 
             if ($repo->reportExists($currentUserId, $reportid, $type)) {
-                return $this->legacyAbortResponse($langReport['std_error'] ?? 'Error', $langReport['std_already_reported_this'] ?? 'You already reported this.');
+                return $this->legacyAbortResponse(__('legacy/report.std_error'), __('legacy/report.std_already_reported_this'));
             }
 
             $repo->createReport([
@@ -80,7 +79,7 @@ class ModerationController extends LegacyController
             $cache?->delete_value('staff_report_count');
             $cache?->delete_value('staff_new_report_count');
 
-            return $this->legacyAbortResponse($langReport['std_message'] ?? 'Message', $langReport['std_successfully_reported'] ?? 'Report submitted successfully.', false);
+            return $this->legacyAbortResponse(__('legacy/report.std_message'), __('legacy/report.std_successfully_reported'), false);
         };
 
         if ($takereportofferid && Validators::isId($takereportofferid)) {
@@ -101,78 +100,78 @@ class ModerationController extends LegacyController
 
         if ($user && Validators::isId($user)) {
             if ($user == $currentUserId) {
-                return $this->legacyAbortResponse($langReport['std_sorry'] ?? 'Sorry', $langReport['std_cannot_report_oneself'] ?? 'Cannot report yourself.');
+                return $this->legacyAbortResponse(__('legacy/report.std_sorry'), __('legacy/report.std_cannot_report_oneself'));
             }
             $userRow = User::query()->where('id', $user)->first(['username', 'class']);
             if (! $userRow) {
-                return $this->legacyAbortResponse($langReport['std_error'] ?? 'Error', $langReport['std_invalid_user_id'] ?? 'Invalid user ID.');
+                return $this->legacyAbortResponse(__('legacy/report.std_error'), __('legacy/report.std_invalid_user_id'));
             }
             $arr = $userRow->toArray();
             if ((int) $arr['class'] >= $staffmemClass) {
-                $msg = ($langReport['std_cannot_report'] ?? 'Cannot report staff member ').UserClass::name((int) $arr['class'], false, true, true);
+                $msg = (__('legacy/report.std_cannot_report')).UserClass::name((int) $arr['class'], false, true, true);
 
-                return $this->legacyAbortResponse($langReport['std_sorry'] ?? 'Sorry', $msg);
+                return $this->legacyAbortResponse(__('legacy/report.std_sorry'), $msg);
             }
 
-            $form = ($langReport['text_are_you_sure_user'] ?? 'Are you sure you want to report user ').UserDisplay::username($user).($langReport['text_to_staff'] ?? ' to staff?').'<br />'.($langReport['text_not_for_leechers'] ?? '').'<br />'.($langReport['text_reason_note'] ?? '').'<br /><form method=post action=report.php><input type=hidden name=takeuser value="'.htmlspecialchars((string) $user).'">'.($langReport['text_reason_is'] ?? 'Reason: ').'<input type=text style="width: 200px" name=reason><input type=submit value="'.($langReport['submit_confirm'] ?? 'Confirm').'"></form>';
+            $form = (__('legacy/report.text_are_you_sure_user')).UserDisplay::username($user).(__('legacy/report.text_to_staff')).'<br />'.(__('legacy/report.text_not_for_leechers')).'<br />'.(__('legacy/report.text_reason_note')).'<br /><form method=post action=report.php><input type=hidden name=takeuser value="'.htmlspecialchars((string) $user).'">'.(__('legacy/report.text_reason_is')).'<input type=text style="width: 200px" name=reason><input type=submit value="'.(__('legacy/report.submit_confirm')).'"></form>';
 
-            return $this->legacyAbortResponse($langReport['std_are_you_sure'] ?? 'Are you sure?', $form, false);
+            return $this->legacyAbortResponse(__('legacy/report.std_are_you_sure'), $form, false);
         }
 
         if ($torrent && Validators::isId($torrent)) {
             $name = Torrent::query()->where('id', $torrent)->value('name');
             if (! $name) {
-                return $this->legacyAbortResponse($langReport['std_error'] ?? 'Error', $langReport['std_invalid_torrent_id'] ?? 'Invalid torrent ID.');
+                return $this->legacyAbortResponse(__('legacy/report.std_error'), __('legacy/report.std_invalid_torrent_id'));
             }
-            $form = ($langReport['text_are_you_sure_torrent'] ?? 'Are you sure you want to report torrent ').'<a href=details.php?id='.htmlspecialchars((string) $torrent).'><b>'.htmlspecialchars((string) $name).'</b></a>'.($langReport['text_to_staff'] ?? ' to staff?').'<br />'.($langReport['text_reason_note'] ?? '').'<br /><form method=post action=report.php><input type=hidden name=taketorrent value="'.htmlspecialchars((string) $torrent).'">'.($langReport['text_reason_is'] ?? 'Reason: ').'<input type=text style="width: 200px" name=reason><input type=submit value="'.($langReport['submit_confirm'] ?? 'Confirm').'"></form>';
+            $form = (__('legacy/report.text_are_you_sure_torrent')).'<a href=details.php?id='.htmlspecialchars((string) $torrent).'><b>'.htmlspecialchars((string) $name).'</b></a>'.(__('legacy/report.text_to_staff')).'<br />'.(__('legacy/report.text_reason_note')).'<br /><form method=post action=report.php><input type=hidden name=taketorrent value="'.htmlspecialchars((string) $torrent).'">'.(__('legacy/report.text_reason_is')).'<input type=text style="width: 200px" name=reason><input type=submit value="'.(__('legacy/report.submit_confirm')).'"></form>';
 
-            return $this->legacyAbortResponse($langReport['std_are_you_sure'] ?? 'Are you sure?', $form, false);
+            return $this->legacyAbortResponse(__('legacy/report.std_are_you_sure'), $form, false);
         }
 
         if ($forumpost && Validators::isId($forumpost)) {
             $arr = $this->moderationRepository->getForumPost($forumpost);
             if ($arr === null) {
-                return $this->legacyAbortResponse($langReport['std_error'] ?? 'Error', $langReport['std_invalid_post_id'] ?? 'Invalid post ID.');
+                return $this->legacyAbortResponse(__('legacy/report.std_error'), __('legacy/report.std_invalid_post_id'));
             }
-            $form = ($langReport['text_are_you_sure_post'] ?? 'Are you sure you want to report post #').$forumpost.($langReport['text_of_topic'] ?? ' of topic ').'<b><a href="forums.php?action=viewtopic&topicid='.$arr['topicid'].'&page=p'.htmlspecialchars((string) $forumpost).'#'.htmlspecialchars((string) $forumpost).'">'.htmlspecialchars($arr['subject']).'</a></b>'.($langReport['text_by'] ?? ' by ').UserDisplay::username($arr['postuserid']).($langReport['text_to_staff'] ?? ' to staff?').'<br />'.($langReport['text_reason_note'] ?? '').'<br /><form method=post action=report.php><input type=hidden name=takeforumpost value="'.htmlspecialchars((string) $forumpost).'">'.($langReport['text_reason_is'] ?? 'Reason: ').'<input type=text style="width: 200px" name=reason><input type=submit value="'.($langReport['submit_confirm'] ?? 'Confirm').'"></form>';
+            $form = (__('legacy/report.text_are_you_sure_post')).$forumpost.(__('legacy/report.text_of_topic')).'<b><a href="forums.php?action=viewtopic&topicid='.$arr['topicid'].'&page=p'.htmlspecialchars((string) $forumpost).'#'.htmlspecialchars((string) $forumpost).'">'.htmlspecialchars($arr['subject']).'</a></b>'.(__('legacy/report.text_by')).UserDisplay::username($arr['postuserid']).(__('legacy/report.text_to_staff')).'<br />'.(__('legacy/report.text_reason_note')).'<br /><form method=post action=report.php><input type=hidden name=takeforumpost value="'.htmlspecialchars((string) $forumpost).'">'.(__('legacy/report.text_reason_is')).'<input type=text style="width: 200px" name=reason><input type=submit value="'.(__('legacy/report.submit_confirm')).'"></form>';
 
-            return $this->legacyAbortResponse($langReport['std_are_you_sure'] ?? 'Are you sure?', $form, false);
+            return $this->legacyAbortResponse(__('legacy/report.std_are_you_sure'), $form, false);
         }
 
         if ($commentid && Validators::isId($commentid)) {
             $comment = Comment::query()->where('id', $commentid)->first(['id', 'user', 'torrent', 'offer']);
             if (! $comment) {
-                return $this->legacyAbortResponse($langReport['std_error'] ?? 'Error', $langReport['std_invalid_comment_id'] ?? 'Invalid comment ID.');
+                return $this->legacyAbortResponse(__('legacy/report.std_error'), __('legacy/report.std_invalid_comment_id'));
             }
             $arr = $comment->toArray();
             if ($arr['torrent']) {
                 $name = Torrent::query()->where('id', $arr['torrent'])->value('name');
                 $url = 'details.php?id='.$arr['torrent'].'#'.$commentid;
-                $of = $langReport['text_of_torrent'] ?? ' of torrent ';
+                $of = __('legacy/report.text_of_torrent');
             } elseif ($arr['offer']) {
                 $name = Offer::query()->where('id', $arr['offer'])->value('name');
                 $url = 'offers.php?id='.$arr['offer'].'&off_details=1#'.$commentid;
-                $of = $langReport['text_of_offer'] ?? ' of offer ';
+                $of = __('legacy/report.text_of_offer');
             } else {
-                return $this->legacyAbortResponse($langReport['std_error'] ?? 'Error', $langReport['std_orphaned_comment'] ?? 'Orphaned comment.');
+                return $this->legacyAbortResponse(__('legacy/report.std_error'), __('legacy/report.std_orphaned_comment'));
             }
-            $form = ($langReport['text_are_you_sure_comment'] ?? 'Are you sure you want to report comment #').$commentid.$of.'<b><a href="'.$url.'">'.htmlspecialchars((string) $name).'</a></b>'.($langReport['text_by'] ?? ' by ').UserDisplay::username($arr['user']).($langReport['text_to_staff'] ?? ' to staff?').'<br />'.($langReport['text_reason_note'] ?? '').'<br /><form method=post action=report.php><input type=hidden name=takecommentid value="'.htmlspecialchars((string) $commentid).'">'.($langReport['text_reason_is'] ?? 'Reason: ').'<input type=text style="width: 200px" name=reason><input type=submit value="'.($langReport['submit_confirm'] ?? 'Confirm').'"></form>';
+            $form = (__('legacy/report.text_are_you_sure_comment')).$commentid.$of.'<b><a href="'.$url.'">'.htmlspecialchars((string) $name).'</a></b>'.(__('legacy/report.text_by')).UserDisplay::username($arr['user']).(__('legacy/report.text_to_staff')).'<br />'.(__('legacy/report.text_reason_note')).'<br /><form method=post action=report.php><input type=hidden name=takecommentid value="'.htmlspecialchars((string) $commentid).'">'.(__('legacy/report.text_reason_is')).'<input type=text style="width: 200px" name=reason><input type=submit value="'.(__('legacy/report.submit_confirm')).'"></form>';
 
-            return $this->legacyAbortResponse($langReport['std_are_you_sure'] ?? 'Are you sure?', $form, false);
+            return $this->legacyAbortResponse(__('legacy/report.std_are_you_sure'), $form, false);
         }
 
         if ($reportofferid && Validators::isId($reportofferid)) {
             $offer = Offer::query()->where('id', $reportofferid)->first(['id', 'name']);
             if (! $offer) {
-                return $this->legacyAbortResponse($langReport['std_error'] ?? 'Error', $langReport['std_invalid_offer_id'] ?? 'Invalid offer ID.');
+                return $this->legacyAbortResponse(__('legacy/report.std_error'), __('legacy/report.std_invalid_offer_id'));
             }
             $arr = $offer->toArray();
-            $form = ($langReport['text_are_you_sure_offer'] ?? 'Are you sure you want to report offer ').'<a href="offers.php?id='.$arr['id'].'&off_details=1"><b>'.htmlspecialchars($arr['name']).'</b></a>'.($langReport['text_to_staff'] ?? ' to staff?').'<br />'.($langReport['text_reason_note'] ?? '').'<br /><form method=post action=report.php><input type=hidden name=takereportofferid value="'.htmlspecialchars((string) $reportofferid).'">'.($langReport['text_reason_is'] ?? 'Reason: ').'<input type=text style="width: 200px" name=reason><input type=submit value="'.($langReport['submit_confirm'] ?? 'Confirm').'"></form>';
+            $form = (__('legacy/report.text_are_you_sure_offer')).'<a href="offers.php?id='.$arr['id'].'&off_details=1"><b>'.htmlspecialchars($arr['name']).'</b></a>'.(__('legacy/report.text_to_staff')).'<br />'.(__('legacy/report.text_reason_note')).'<br /><form method=post action=report.php><input type=hidden name=takereportofferid value="'.htmlspecialchars((string) $reportofferid).'">'.(__('legacy/report.text_reason_is')).'<input type=text style="width: 200px" name=reason><input type=submit value="'.(__('legacy/report.submit_confirm')).'"></form>';
 
-            return $this->legacyAbortResponse($langReport['std_are_you_sure'] ?? 'Are you sure?', $form, false);
+            return $this->legacyAbortResponse(__('legacy/report.std_are_you_sure'), $form, false);
         }
 
-        return $this->legacyAbortResponse($langReport['std_error'] ?? 'Error', $langReport['std_invalid_action'] ?? 'Invalid action.');
+        return $this->legacyAbortResponse(__('legacy/report.std_error'), __('legacy/report.std_invalid_action'));
 
     }
 
@@ -185,12 +184,10 @@ class ModerationController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Permission denied.');
         }
 
-        $langReports = (array) trans('legacy/reports');
-
         $repo = $this->moderationRepository;
         $count = $repo->countReports();
         if (! $count) {
-            return $this->legacyAbortResponse($langReports['std_oho'] ?? 'Oho', $langReports['std_no_report'] ?? 'No report.');
+            return $this->legacyAbortResponse(__('legacy/reports.std_oho'), __('legacy/reports.std_no_report'));
         }
 
         $perpage = 10;
@@ -203,9 +200,9 @@ class ModerationController extends LegacyController
             $row = (array) $reportRow;
 
             if ($row['dealtwith']) {
-                $row['dealtwith_html'] = '<font color=green>'.($langReports['text_yes'] ?? 'Yes').'</font> - '.UserDisplay::username($row['dealtby']);
+                $row['dealtwith_html'] = '<font color=green>'.(__('legacy/reports.text_yes')).'</font> - '.UserDisplay::username($row['dealtby']);
             } else {
-                $row['dealtwith_html'] = '<font color=red>'.($langReports['text_no'] ?? 'No').'</font>';
+                $row['dealtwith_html'] = '<font color=red>'.(__('legacy/reports.text_no')).'</font>';
             }
 
             $type = '';
@@ -214,64 +211,64 @@ class ModerationController extends LegacyController
             $typeString = $typeEnum?->stringValue() ?? (string) $row['type'];
             switch ($typeString) {
                 case 'torrent':
-                    $type = $langReports['text_torrent'] ?? 'Torrent';
+                    $type = __('legacy/reports.text_torrent');
                     $torrent = Torrent::query()->where('id', $row['reportid'])->first(['id', 'name']);
                     if (! $torrent) {
-                        $reporting = $langReports['text_torrent_does_not_exist'] ?? 'Torrent does not exist';
+                        $reporting = __('legacy/reports.text_torrent_does_not_exist');
                     } else {
                         $arr = $torrent->toArray();
                         $reporting = '<a href=details.php?id='.$arr['id'].'>'.htmlspecialchars($arr['name']).'</a>';
                     }
                     break;
                 case 'user':
-                    $type = $langReports['text_user'] ?? 'User';
+                    $type = __('legacy/reports.text_user');
                     $userId = User::query()->where('id', $row['reportid'])->value('id');
                     if (! $userId) {
-                        $reporting = $langReports['text_user_does_not_exist'] ?? 'User does not exist';
+                        $reporting = __('legacy/reports.text_user_does_not_exist');
                     } else {
                         $reporting = UserDisplay::username($userId);
                     }
                     break;
                 case 'offer':
-                    $type = $langReports['text_offer'] ?? 'Offer';
+                    $type = __('legacy/reports.text_offer');
                     $offer = Offer::query()->where('id', $row['reportid'])->first(['id', 'name']);
                     if (! $offer) {
-                        $reporting = $langReports['text_offer_does_not_exist'] ?? 'Offer does not exist';
+                        $reporting = __('legacy/reports.text_offer_does_not_exist');
                     } else {
                         $arr = $offer->toArray();
                         $reporting = '<a href="offers.php?id='.$arr['id'].'&off_details=1">'.htmlspecialchars($arr['name']).'</a>';
                     }
                     break;
                 case 'post':
-                    $type = $langReports['text_forum_post'] ?? 'Forum post';
+                    $type = __('legacy/reports.text_forum_post');
                     $arr = $this->moderationRepository->getForumPost((int) $row['reportid']);
                     if ($arr === null) {
-                        $reporting = $langReports['text_post_does_not_exist'] ?? 'Post does not exist';
+                        $reporting = __('legacy/reports.text_post_does_not_exist');
                     } else {
-                        $reporting = ($langReports['text_post_id'] ?? 'Post #').$row['reportid'].($langReports['text_of_topic'] ?? ' of topic ').'<b><a href="forums.php?action=viewtopic&topicid='.$arr['topicid'].'&page=p'.htmlspecialchars((string) $row['reportid']).'#pid'.htmlspecialchars((string) $row['reportid']).'">'.htmlspecialchars($arr['subject']).'</a></b>'.($langReports['text_by'] ?? ' by ').UserDisplay::username($arr['postuserid']);
+                        $reporting = (__('legacy/reports.text_post_id')).$row['reportid'].(__('legacy/reports.text_of_topic')).'<b><a href="forums.php?action=viewtopic&topicid='.$arr['topicid'].'&page=p'.htmlspecialchars((string) $row['reportid']).'#pid'.htmlspecialchars((string) $row['reportid']).'">'.htmlspecialchars($arr['subject']).'</a></b>'.(__('legacy/reports.text_by')).UserDisplay::username($arr['postuserid']);
                     }
                     break;
                 case 'comment':
-                    $type = $langReports['text_comment'] ?? 'Comment';
+                    $type = __('legacy/reports.text_comment');
                     $comment = Comment::query()->where('id', $row['reportid'])->first(['id', 'user', 'torrent', 'offer']);
                     if (! $comment) {
-                        $reporting = $langReports['text_comment_does_not_exist'] ?? 'Comment does not exist';
+                        $reporting = __('legacy/reports.text_comment_does_not_exist');
                     } else {
                         $arr = $comment->toArray();
                         if ($arr['torrent']) {
                             $name = Torrent::query()->where('id', $arr['torrent'])->value('name');
                             $url = 'details.php?id='.$arr['torrent'].'#cid'.$row['reportid'];
-                            $of = $langReports['text_of_torrent'] ?? ' of torrent ';
+                            $of = __('legacy/reports.text_of_torrent');
                         } elseif ($arr['offer']) {
                             $name = Offer::query()->where('id', $arr['offer'])->value('name');
                             $url = 'offers.php?id='.$arr['offer'].'&off_details=1#cid'.$row['reportid'];
-                            $of = $langReports['text_of_offer'] ?? ' of offer ';
+                            $of = __('legacy/reports.text_of_offer');
                         } else {
                             $name = '';
                             $url = '';
                             $of = 'unknown';
                         }
-                        $reporting = ($langReports['text_comment_id'] ?? 'Comment #').$row['reportid'].$of.'<b><a href="'.$url.'">'.htmlspecialchars((string) $name).'</a></b>'.($langReports['text_by'] ?? ' by ').UserDisplay::username($arr['user']);
+                        $reporting = (__('legacy/reports.text_comment_id')).$row['reportid'].$of.'<b><a href="'.$url.'">'.htmlspecialchars((string) $name).'</a></b>'.(__('legacy/reports.text_by')).UserDisplay::username($arr['user']);
                     }
                     break;
             }

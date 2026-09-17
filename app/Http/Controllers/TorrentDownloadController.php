@@ -151,14 +151,13 @@ class TorrentDownloadController extends LegacyController
 
         $torrentid = (int) $request->input('torrentid');
         $type = $request->input('type');
-        $lang = (array) trans('legacy/downloadnotice');
         $timenow = time();
 
         switch ($type) {
             case 'client':
-                $title = $lang['text_client_banned_notice'] ?? '';
-                $note = $lang['text_client_banned_note'] ?? '';
-                $noticenexttime = $lang['text_notice_not_show_again'] ?? '';
+                $title = __('legacy/downloadnotice.text_client_banned_notice');
+                $note = __('legacy/downloadnotice.text_client_banned_note');
+                $noticenexttime = __('legacy/downloadnotice.text_notice_not_show_again');
                 $showrationotice = false;
                 $showclientnotice = true;
                 $forcecheck = false;
@@ -168,10 +167,10 @@ class TorrentDownloadController extends LegacyController
                 $note = '';
                 if ($leechwarnuntiltime && $timenow < $leechwarnuntiltime) {
                     $kicktimeout = Time::format($curUser['leechwarnuntil'], false, false, true);
-                    $note = ($lang['text_low_ratio_note_one'] ?? '').$kicktimeout.($lang['text_low_ratio_note_two'] ?? '');
+                    $note = (__('legacy/downloadnotice.text_low_ratio_note_one')).$kicktimeout.(__('legacy/downloadnotice.text_low_ratio_note_two'));
                 }
-                $title = $lang['text_low_ratio_notice'] ?? '';
-                $noticenexttime = $lang['text_notice_always_show'] ?? '';
+                $title = __('legacy/downloadnotice.text_low_ratio_notice');
+                $noticenexttime = __('legacy/downloadnotice.text_notice_always_show');
                 $showrationotice = true;
                 $showclientnotice = false;
                 $forcecheck = true;
@@ -179,9 +178,9 @@ class TorrentDownloadController extends LegacyController
             case 'firsttime':
             default:
                 $type = 'firsttime';
-                $title = $lang['text_first_time_download_notice'] ?? '';
-                $note = $lang['text_first_time_download_note'] ?? '';
-                $noticenexttime = $lang['text_notice_not_show_again'] ?? '';
+                $title = __('legacy/downloadnotice.text_first_time_download_notice');
+                $note = __('legacy/downloadnotice.text_first_time_download_note');
+                $noticenexttime = __('legacy/downloadnotice.text_notice_not_show_again');
                 $showrationotice = true;
                 $showclientnotice = true;
                 $forcecheck = false;
@@ -199,7 +198,6 @@ class TorrentDownloadController extends LegacyController
             'showclientnotice' => $showclientnotice,
             'forcecheck' => $forcecheck,
             'tdattr' => $tdattr,
-            'lang_downloadnotice' => $lang,
         ]);
     }
 

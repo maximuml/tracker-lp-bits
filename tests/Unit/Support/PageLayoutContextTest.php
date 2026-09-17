@@ -17,7 +17,6 @@ class PageLayoutContextTest extends TestCase
     {
         return new PageLayoutContext(
             user: $user,
-            lang: ['text_slots' => 'Slots', 'text_unlimited' => 'Unlimited'],
             cache: null,
             defaultStylesheet: 1,
             langDir: 'en',

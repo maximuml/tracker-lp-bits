@@ -19,10 +19,9 @@ final class OfferPageVoteListBuilder
     ) {}
 
     /**
-     * @param  array<string, mixed>  $lang
      * @return array<string, mixed>
      */
-    public function build(array $lang, Request $request): array
+    public function build(Request $request): array
     {
         $offerId = (int) $request->query('id', 0);
         $count = $this->offerVoteRepository->getVoteCount($offerId);
@@ -37,8 +36,8 @@ final class OfferPageVoteListBuilder
         foreach ($voteRows as $arr) {
             $arrArr = (array) $arr;
             $vote = match ($arrArr['vote'] ?? '') {
-                'yeah' => '<b><font color=green>'.htmlspecialchars((string) ($lang['text_for'] ?? '')).'</font></b>',
-                'against' => '<b><font color=red>'.htmlspecialchars((string) ($lang['text_against'] ?? '')).'</font></b>',
+                'yeah' => '<b><font color=green>'.htmlspecialchars((string) (__('legacy/offers.text_for'))).'</font></b>',
+                'against' => '<b><font color=red>'.htmlspecialchars((string) (__('legacy/offers.text_against'))).'</font></b>',
                 default => 'unknown',
             };
             $rows[] = [
@@ -51,7 +50,7 @@ final class OfferPageVoteListBuilder
             'offerId' => $offerId,
             'offerName' => htmlspecialchars($offerName),
             'hasVotes' => ! $voteRows->isEmpty(),
-            'noVotesNote' => (string) ($lang['std_no_votes_yet'] ?? ''),
+            'noVotesNote' => (string) (__('legacy/offers.std_no_votes_yet')),
             'pagerTop' => $pagerTop,
             'pagerBottom' => $pagerBottom,
             'rows' => $rows,

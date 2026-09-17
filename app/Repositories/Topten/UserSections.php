@@ -14,10 +14,9 @@ use Illuminate\Support\Facades\DB;
 final class UserSections extends SectionQueries
 {
     /**
-     * @param  array<string, mixed>  $lang
      * @return list<array<string, mixed>>
      */
-    public function build(int $limit, ?string $subtype, array $lang): array
+    public function build(int $limit, ?string $subtype): array
     {
         $base = $this->userBaseQuery();
         $sections = [];
@@ -26,7 +25,7 @@ final class UserSections extends SectionQueries
             $sections[] = [
                 'view' => 'usershare',
                 'data' => $this->toArray((clone $base)->orderBy('uploaded', 'desc')->limit($limit)->get()),
-                'caption' => $this->caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_uploaders'] ?? 'Uploaders'),
+                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_uploaders')),
                 'limits' => [100, 250],
                 'subtype' => 'ul',
             ];
@@ -36,29 +35,29 @@ final class UserSections extends SectionQueries
             $sections[] = [
                 'view' => 'usershare',
                 'data' => $this->toArray((clone $base)->orderBy('downloaded', 'desc')->limit($limit)->get()),
-                'caption' => $this->caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_downloaders'] ?? 'Downloaders'),
+                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_downloaders')),
                 'limits' => [100, 250],
                 'subtype' => 'dl',
             ];
         }
 
         if ($limit === 10 || $subtype === 'uls') {
-            $note = $lang['text_fastest_up_note'] ?? '';
+            $note = __('legacy/topten.text_fastest_up_note');
             $sections[] = [
                 'view' => 'usershare',
                 'data' => $this->toArray((clone $base)->where('uploaded', '>', 53687091200)->orderBy('upspeed', 'desc')->limit($limit)->get()),
-                'caption' => $this->caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_fastest_uploaders'] ?? 'Fastest Uploaders', $note),
+                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_fastest_uploaders'), $note),
                 'limits' => [100, 250],
                 'subtype' => 'uls',
             ];
         }
 
         if ($limit === 10 || $subtype === 'dls') {
-            $note = $lang['text_fastest_note'] ?? '';
+            $note = __('legacy/topten.text_fastest_note');
             $sections[] = [
                 'view' => 'usershare',
                 'data' => $this->toArray((clone $base)->orderBy('downspeed', 'desc')->limit($limit)->get()),
-                'caption' => $this->caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_fastest_downloaders'] ?? 'Fastest Downloaders', $note),
+                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_fastest_downloaders'), $note),
                 'limits' => [100, 250],
                 'subtype' => 'dls',
             ];
@@ -68,7 +67,7 @@ final class UserSections extends SectionQueries
             $sections[] = [
                 'view' => 'usershare',
                 'data' => $this->toArray((clone $base)->where('downloaded', '>', 53687091200)->orderByRaw('uploaded / downloaded DESC')->limit($limit)->get()),
-                'caption' => $this->caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_best_sharers'] ?? 'Best Sharers', $lang['text_sharers_note'] ?? ''),
+                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_best_sharers'), __('legacy/topten.text_sharers_note')),
                 'limits' => [100, 250],
                 'subtype' => 'bsh',
             ];
@@ -78,7 +77,7 @@ final class UserSections extends SectionQueries
             $sections[] = [
                 'view' => 'usershare',
                 'data' => $this->toArray((clone $base)->where('downloaded', '>', 53687091200)->orderByRaw('uploaded / downloaded ASC, downloaded DESC')->limit($limit)->get()),
-                'caption' => $this->caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_worst_sharers'] ?? 'Worst Sharers', $lang['text_sharers_note'] ?? ''),
+                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_worst_sharers'), __('legacy/topten.text_sharers_note')),
                 'limits' => [100, 250],
                 'subtype' => 'wsh',
             ];

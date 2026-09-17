@@ -1,6 +1,6 @@
 @extends('layouts.legacy')
 
-@section('title', $lang_staff['head_staff'] ?? 'Staff')
+@section('title', __('legacy/staff.head_staff'))
 
 @section('content')
 @include('staff._staff')

@@ -7,7 +7,6 @@ namespace App\Support\Html;
 use App\Support\BBCode;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Comment;
-use App\Support\Language;
 use App\Support\SearchBox;
 use App\Support\Security;
 use App\Support\Smilies;
@@ -346,7 +345,7 @@ final class Tag
     public static function torrentSelection(string $name, string $selName, string $listName, int $selectedId = 0, int $mode = 0): string
     {
         $items = SearchBox::itemList(app(LegacyRedisCache::class), $listName, $mode);
-        $chooseOne = app(Language::class)->functions()['select_choose_one'] ?? '';
+        $chooseOne = __('legacy/functions.select_choose_one');
 
         return self::torrentSelect($name, $selName, $chooseOne, $selectedId, $items);
     }
@@ -357,15 +356,14 @@ final class Tag
      */
     public static function promotionSelection(int $selected = 0, int $hide = 0): string
     {
-        $lang = app(Language::class)->functions();
         $labels = [
-            'normal' => (string) ($lang['text_normal'] ?? ''),
-            'free' => (string) ($lang['text_free'] ?? ''),
-            'two_times_up' => (string) ($lang['text_two_times_up'] ?? ''),
-            'free_two_times_up' => (string) ($lang['text_free_two_times_up'] ?? ''),
-            'half_down' => (string) ($lang['text_half_down'] ?? ''),
-            'half_down_two_up' => (string) ($lang['text_half_down_two_up'] ?? ''),
-            'thirty_percent_down' => (string) ($lang['text_thirty_percent_down'] ?? ''),
+            'normal' => (string) (__('legacy/functions.text_normal')),
+            'free' => (string) (__('legacy/functions.text_free')),
+            'two_times_up' => (string) (__('legacy/functions.text_two_times_up')),
+            'free_two_times_up' => (string) (__('legacy/functions.text_free_two_times_up')),
+            'half_down' => (string) (__('legacy/functions.text_half_down')),
+            'half_down_two_up' => (string) (__('legacy/functions.text_half_down_two_up')),
+            'thirty_percent_down' => (string) (__('legacy/functions.text_thirty_percent_down')),
         ];
 
         return self::promotionSelectOptions($selected, $hide, $labels);
@@ -573,7 +571,7 @@ final class Tag
      */
     public static function formatSpoiler(string $content, string $title = '', bool $defaultCollapsed = true): string
     {
-        $defaultTitle = app(Language::class)->functions()['spoiler_default_title'] ?? '';
+        $defaultTitle = __('legacy/functions.spoiler_default_title');
 
         return Comment::addTempCode(BBCode::spoiler($content, $title, $defaultTitle, $defaultCollapsed));
     }

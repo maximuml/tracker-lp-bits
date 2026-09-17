@@ -106,7 +106,7 @@ class PageLayout
         $title .= ' - Powered by '.PROJECTNAME;
         if ($context->siteOnline == 'no') {
             if ($context->userClass() < $context->adminClass) {
-                throw new HttpResponseException(new Response((string) ($context->lang['std_site_down_for_maintenance'] ?? 'Site down for maintenance'), 503));
+                throw new HttpResponseException(new Response((string) (__('legacy/functions.std_site_down_for_maintenance')), 503));
             } else {
                 $context->offlineMsg = true;
             }
@@ -137,7 +137,6 @@ class PageLayout
         }
 
         $user = $context->user;
-        $lang = $context->lang;
         $menuHtml = '';
         $username = '';
         $isModerator = false;
@@ -190,11 +189,11 @@ class PageLayout
                 $context->cache?->cache_value('user_'.$context->user['id'].'_connect', $connect, 900);
             }
             if ($connect === 1) {
-                $connectable = '<b><font color="green">'.$context->lang['text_yes'].'</font></b>';
+                $connectable = '<b><font color="green">'.__('legacy/functions.text_yes').'</font></b>';
             } elseif ($connect === 0) {
-                $connectable = '<a href="faq.php#id21"><b><font color="red">'.$context->lang['text_no'].'</font></b></a>';
+                $connectable = '<a href="faq.php#id21"><b><font color="red">'.__('legacy/functions.text_no').'</font></b></a>';
             } else {
-                $connectable = $context->lang['text_unknown'];
+                $connectable = __('legacy/functions.text_unknown');
             }
             $activeseed = $context->cache?->get_value('user_'.$context->user['id'].'_active_seed_count');
             if ($activeseed == '') {
@@ -211,7 +210,7 @@ class PageLayout
                 $unread = app(PageLayoutRepositoryInterface::class)->getUnreadMessageCount((int) $context->user['id']);
                 $context->cache?->cache_value('user_'.$context->user['id'].'_unread_message_count', $unread, 60);
             }
-            $inboxpic = '<img class="'.($unread ? 'inboxnew' : 'inbox').'" src="pic/trans.gif" alt="inbox" title="'.($unread ? $context->lang['title_inbox_new_messages'] : $context->lang['title_inbox_no_new_messages']).'" />';
+            $inboxpic = '<img class="'.($unread ? 'inboxnew' : 'inbox').'" src="pic/trans.gif" alt="inbox" title="'.($unread ? __('legacy/functions.title_inbox_new_messages') : __('legacy/functions.title_inbox_no_new_messages')).'" />';
 
             $username = UserDisplay::username($context->user['id']);
             $isModerator = $context->userClass() >= $context->moderatorClass;
@@ -221,9 +220,9 @@ class PageLayout
             $attendanceRep = app(AttendanceRepository::class);
             $attendance = $attendanceRep->getAttendance($context->user['id'], date('Ymd'));
             if ($attendance) {
-                $attendanceLink = sprintf(' <a href="attendance.php" class="">'.$context->lang['text_attended'].'</a>', $attendance->points, $context->user['attendance_card']);
+                $attendanceLink = sprintf(' <a href="attendance.php" class="">'.__('legacy/functions.text_attended').'</a>', $attendance->points, $context->user['attendance_card']);
             } else {
-                $attendanceLink = sprintf(' <a href="attendance.php" class="faqlink">%s</a>', $context->lang['text_attendance']);
+                $attendanceLink = sprintf(' <a href="attendance.php" class="faqlink">%s</a>', __('legacy/functions.text_attendance'));
             }
 
             $medalLabel = Locale::trans('medal.label');
@@ -233,12 +232,12 @@ class PageLayout
             $pendingInviteCount = app(PageLayoutRepositoryInterface::class)->getPendingInviteCount((int) $context->user['id']);
 
             if ($context->userClass() >= User::getAccessAdminClassMin()) {
-                $managementSystemLink = sprintf('[<a href="%s" target="_blank">%s</a>]', Env::get('FILAMENT_PATH', 'nexusphp'), $context->lang['text_management_system']);
+                $managementSystemLink = sprintf('[<a href="%s" target="_blank">%s</a>]', Env::get('FILAMENT_PATH', 'nexusphp'), __('legacy/functions.text_management_system'));
             }
 
             $uploaded = Format::size((int) ($context->user['uploaded'] ?? 0));
             $downloaded = Format::size((int) ($context->user['downloaded'] ?? 0));
-            $slotsDisplay = Slots::display((int) $context->user['uploaded'], (int) $context->user['downloaded'], $context->maxdlSystem, $context->userClass(), $context->vipClass, $context->lang['text_slots'] ?? '', $context->lang['text_unlimited'] ?? '');
+            $slotsDisplay = Slots::display((int) $context->user['uploaded'], (int) $context->user['downloaded'], $context->maxdlSystem, $context->userClass(), $context->vipClass, __('legacy/functions.text_slots'), __('legacy/functions.text_unlimited'));
 
             $hitAndRunEnabled = HitAndRun::getIsEnabled();
             if ($hitAndRunEnabled) {
@@ -265,10 +264,10 @@ class PageLayout
                     $totalcheaters = app(PageLayoutRepositoryInterface::class)->getTotalCheaters();
                     $context->cache?->cache_value('staff_cheater_count', $totalcheaters, 900);
                 }
-                $staffIcons .= '<a href="cheaterbox.php"><img class="cheaterbox" alt="cheaterbox" title="'.$context->lang['title_cheaterbox'].'" src="pic/trans.gif" />  </a>'.$totalcheaters.'  <a href="reports.php"><img class="reportbox" alt="reportbox" title="'.$context->lang['title_reportbox'].'" src="pic/trans.gif" />  </a>'.$totalreports;
+                $staffIcons .= '<a href="cheaterbox.php"><img class="cheaterbox" alt="cheaterbox" title="'.__('legacy/functions.title_cheaterbox').'" src="pic/trans.gif" />  </a>'.$totalcheaters.'  <a href="reports.php"><img class="reportbox" alt="reportbox" title="'.__('legacy/functions.title_reportbox').'" src="pic/trans.gif" />  </a>'.$totalreports;
             }
-            $staffIcons .= ' <a href="friends.php"><img class="buddylist" alt="Buddylist" title="'.$context->lang['title_buddylist'].'" src="pic/trans.gif" /></a>';
-            $staffIcons .= ' <a href="getrss.php"><img class="rss" alt="RSS" title="'.$context->lang['title_get_rss'].'" src="pic/trans.gif" /></a>';
+            $staffIcons .= ' <a href="friends.php"><img class="buddylist" alt="Buddylist" title="'.__('legacy/functions.title_buddylist').'" src="pic/trans.gif" /></a>';
+            $staffIcons .= ' <a href="getrss.php"><img class="rss" alt="RSS" title="'.__('legacy/functions.title_get_rss').'" src="pic/trans.gif" /></a>';
             $staffIcons .= '<br/>';
             $totalsm = app(StaffMessageRepository::class)->getStaffMessageCountCache($context->user['id'], 'total');
             if ($totalsm === false) {
@@ -276,22 +275,22 @@ class PageLayout
                 app(StaffMessageRepository::class)->updateStaffMessageCountCache($context->user['id'], 'total', $totalsm);
             }
             if ($totalsm > 0) {
-                $staffIcons .= '  <a href="staffbox.php"><img class="staffbox" alt="staffbox" title="'.$context->lang['title_staffbox'].'" src="pic/trans.gif" />  </a>'.$totalsm.'  ';
+                $staffIcons .= '  <a href="staffbox.php"><img class="staffbox" alt="staffbox" title="'.__('legacy/functions.title_staffbox').'" src="pic/trans.gif" />  </a>'.$totalsm.'  ';
             }
-            $staffIcons .= '<a href="messages.php">'.$inboxpic.'</a> '.($messages ? $messages.' ('.$unread.$context->lang['text_message_new'].')' : '0');
-            $staffIcons .= '  <a href="messages.php?action=viewmailbox&amp;box=-1"><img class="sentbox" alt="sentbox" title="'.$context->lang['title_sentbox'].'" src="pic/trans.gif" /></a> '.($outmessages ? $outmessages : '0');
+            $staffIcons .= '<a href="messages.php">'.$inboxpic.'</a> '.($messages ? $messages.' ('.$unread.__('legacy/functions.text_message_new').')' : '0');
+            $staffIcons .= '  <a href="messages.php?action=viewmailbox&amp;box=-1"><img class="sentbox" alt="sentbox" title="'.__('legacy/functions.title_sentbox').'" src="pic/trans.gif" /></a> '.($outmessages ? $outmessages : '0');
 
             ob_start();
             if ($msgalert) {
                 $timeline = TorrentState::resolveTimeline();
                 $currentPromotion = $timeline['current'] ?? null;
                 $upcomingPromotion = $timeline['upcoming'] ?? null;
-                $remarkTpl = $context->lang['full_site_promotion_remark'] ?? 'Remark: %s';
+                $remarkTpl = __('legacy/functions.full_site_promotion_remark');
                 if ($currentPromotion) {
                     $promotionText = TorrentPromotion::fromIntSafe((int) ($currentPromotion['global_sp_state'] ?? TorrentPromotion::NORMAL->value))->label();
-                    $msg = sprintf($context->lang['full_site_promotion_in_effect'], $promotionText);
+                    $msg = sprintf(__('legacy/functions.full_site_promotion_in_effect'), $promotionText);
                     if (! empty($currentPromotion['begin']) || ! empty($currentPromotion['deadline'])) {
-                        $timeRange = sprintf($context->lang['full_site_promotion_time_range'], $currentPromotion['begin'] ?? '-∞', $currentPromotion['deadline'] ?? '∞');
+                        $timeRange = sprintf(__('legacy/functions.full_site_promotion_time_range'), $currentPromotion['begin'] ?? '-∞', $currentPromotion['deadline'] ?? '∞');
                         $msg .= '<br/>'.$timeRange;
                     }
                     if (! empty($currentPromotion['remark'])) {
@@ -301,9 +300,9 @@ class PageLayout
                 }
                 if ($upcomingPromotion) {
                     $promotionText = TorrentPromotion::fromIntSafe((int) ($upcomingPromotion['global_sp_state'] ?? TorrentPromotion::NORMAL->value))->label();
-                    $msg = sprintf($context->lang['full_site_promotion_upcoming'] ?? 'Upcoming full site [%s]', $promotionText);
+                    $msg = sprintf(__('legacy/functions.full_site_promotion_upcoming'), $promotionText);
                     if (! empty($upcomingPromotion['begin']) || ! empty($upcomingPromotion['deadline'])) {
-                        $timeRange = sprintf($context->lang['full_site_promotion_time_range'], $upcomingPromotion['begin'] ?? '-∞', $upcomingPromotion['deadline'] ?? '∞');
+                        $timeRange = sprintf(__('legacy/functions.full_site_promotion_time_range'), $upcomingPromotion['begin'] ?? '-∞', $upcomingPromotion['deadline'] ?? '∞');
                         $msg .= '<br/>'.$timeRange;
                     }
                     if (! empty($upcomingPromotion['remark'])) {
@@ -313,7 +312,7 @@ class PageLayout
                 }
                 if ($context->user['leechwarn']) {
                     $kicktimeout = Time::format($context->user['leechwarnuntil'], false, false, true);
-                    $text = $context->lang['text_please_improve_ratio_within'].$kicktimeout.$context->lang['text_or_you_will_be_banned'];
+                    $text = __('legacy/functions.text_please_improve_ratio_within').$kicktimeout.__('legacy/functions.text_or_you_will_be_banned');
                     Html::messageAlertVoid('faq.php#id17', $text, 'orange');
                 }
                 if ($context->deleteNotTransferTwoAccount) {
@@ -324,18 +323,18 @@ class PageLayout
                             $addedtime = strtotime($context->user['added']);
                             if ($addedtime + $secs / 3 < TIMENOW) {
                                 $kicktimeout = Time::format(date('Y-m-d H:i:s', $addedtime + $secs), false, false, true);
-                                $text = $context->lang['text_please_download_something_within'].$kicktimeout.$context->lang['text_inactive_account_be_deleted'];
+                                $text = __('legacy/functions.text_please_download_something_within').$kicktimeout.__('legacy/functions.text_inactive_account_be_deleted');
                                 Html::messageAlertVoid('rules.php', $text, 'gray');
                             }
                         }
                     }
                 }
                 if ($context->user['showclienterror']) {
-                    $text = $context->lang['text_banned_client_warning'];
+                    $text = __('legacy/functions.text_banned_client_warning');
                     Html::messageAlertVoid('faq.php#id29', $text, 'black');
                 }
                 if ($unread) {
-                    $text = $context->lang['text_you_have'].$unread.$context->lang['text_new_message'].Strings::addS((int) $unread).$context->lang['text_click_here_to_read'];
+                    $text = __('legacy/functions.text_you_have').$unread.__('legacy/functions.text_new_message').Strings::addS((int) $unread).__('legacy/functions.text_click_here_to_read');
                     Html::messageAlertVoid('messages.php', $text, 'red');
                 }
                 MsgAlert::getInstance()->render();
@@ -349,7 +348,7 @@ class PageLayout
                     }
                     $new_news = (int) $new_news;
                     if ($new_news > 0) {
-                        $text = $context->lang['text_there_is'].Strings::isOrAre($new_news).$new_news.$context->lang['text_new_news'];
+                        $text = __('legacy/functions.text_there_is').Strings::isOrAre($new_news).$new_news.__('legacy/functions.text_new_news');
                         Html::messageAlertVoid('index.php', $text, 'green');
                     }
                 }
@@ -360,7 +359,7 @@ class PageLayout
                 }
                 $nummessages = (int) $nummessages;
                 if ($nummessages > 0) {
-                    $text = $context->lang['text_there_is'].Strings::isOrAre($nummessages).$nummessages.$context->lang['text_new_staff_message'].Strings::addS($nummessages);
+                    $text = __('legacy/functions.text_there_is').Strings::isOrAre($nummessages).$nummessages.__('legacy/functions.text_new_staff_message').Strings::addS($nummessages);
                     Html::messageAlertVoid('staffbox.php', $text, 'blue');
                 }
                 if (Permissions::userCan('torrent-approval', false, (int) ($context->user['id'] ?? 0)) && Settings::get('torrent.approval_status_none_visible') == 'no') {
@@ -372,7 +371,7 @@ class PageLayout
                     }
                     $toApprovalCounts = (int) $toApprovalCounts;
                     if ($toApprovalCounts) {
-                        Html::messageAlertVoid('torrents.php?approval_status=0&incldead=0', sprintf($context->lang['text_torrent_to_approval'], Strings::isOrAre($toApprovalCounts), $toApprovalCounts, Strings::addS($toApprovalCounts)), 'darkred');
+                        Html::messageAlertVoid('torrents.php?approval_status=0&incldead=0', sprintf(__('legacy/functions.text_torrent_to_approval'), Strings::isOrAre($toApprovalCounts), $toApprovalCounts, Strings::addS($toApprovalCounts)), 'darkred');
                     }
                 }
                 if (Permissions::userCan('staffmem', false, (int) ($context->user['id'] ?? 0))) {
@@ -382,7 +381,7 @@ class PageLayout
                     }
                     $complaints = (int) $complaints;
                     if ($complaints) {
-                        Html::messageAlertVoid('complains.php?action=list', sprintf($context->lang['text_complains'], Strings::isOrAre($complaints), $complaints, Strings::addS($complaints)), 'darkred');
+                        Html::messageAlertVoid('complains.php?action=list', sprintf(__('legacy/functions.text_complains'), Strings::isOrAre($complaints), $complaints, Strings::addS($complaints)), 'darkred');
                     }
                     $numreports = $context->cache?->get_value('staff_new_report_count');
                     if ($numreports == '') {
@@ -391,7 +390,7 @@ class PageLayout
                     }
                     $numreports = (int) $numreports;
                     if ($numreports) {
-                        $text = $context->lang['text_there_is'].Strings::isOrAre($numreports).$numreports.$context->lang['text_new_report'].Strings::addS($numreports);
+                        $text = __('legacy/functions.text_there_is').Strings::isOrAre($numreports).$numreports.__('legacy/functions.text_new_report').Strings::addS($numreports);
                         Html::messageAlertVoid('reports.php', $text, 'blue');
                     }
                     $numcheaters = $context->cache?->get_value('staff_new_cheater_count');
@@ -401,7 +400,7 @@ class PageLayout
                     }
                     $numcheaters = (int) $numcheaters;
                     if ($numcheaters) {
-                        $text = $context->lang['text_there_is'].Strings::isOrAre($numcheaters).$numcheaters.$context->lang['text_new_suspected_cheater'].Strings::addS($numcheaters);
+                        $text = __('legacy/functions.text_there_is').Strings::isOrAre($numcheaters).$numcheaters.__('legacy/functions.text_new_suspected_cheater').Strings::addS($numcheaters);
                         Html::messageAlertVoid('cheaterbox.php', $text, 'blue');
                     }
                 }
@@ -413,7 +412,7 @@ class PageLayout
             }
             if ($context->offlineMsg) {
                 echo "<p><table width=\"737\" border=\"1\" cellspacing=\"0\" cellpadding=\"10\"><tr><td style='padding: 10px; background: red' class=\"text\" align=\"center\">\n";
-                echo '<font color="white">'.$context->lang['text_website_offline_warning'].'</font>';
+                echo '<font color="white">'.__('legacy/functions.text_website_offline_warning').'</font>';
                 echo "</td></tr></table></p><br />\n";
             }
             $messageAlerts = (string) ob_get_clean();
@@ -441,7 +440,6 @@ class PageLayout
             'headTableWidth' => $headTableWidth,
             'searchBoxIcons' => $searchBoxIcons,
             'user' => $user,
-            'lang' => $lang,
             'menuHtml' => $menuHtml,
             'username' => $username,
             'isModerator' => $isModerator,

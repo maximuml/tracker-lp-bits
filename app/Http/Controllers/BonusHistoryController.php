@@ -162,8 +162,6 @@ JS;
             return $this->legacyAbortResponse('Error', 'Permission denied.');
         }
 
-        $langUploaders = (array) trans('legacy/uploaders');
-
         $year = (int) (request()->query('year') ?? 0);
         if (! $year || $year < 2000) {
             $year = (int) date('Y');
@@ -257,7 +255,7 @@ JS;
             ];
         }
 
-        $naText = $langUploaders['text_not_available'] ?? 'N/A';
+        $naText = __('legacy/uploaders.text_not_available');
         foreach ($rows as &$row) {
             $row['usernameHtml'] = (string) UserDisplay::username($row['userid'], false, true, true, false, false, true);
             $row['sizeFormatted'] = $row['torrent_size'] ? Format::size($row['torrent_size']) : '0';
@@ -280,7 +278,6 @@ JS;
         }
 
         return $this->legacyPage($request, 'uploaders', true, [
-            'lang_uploaders' => $langUploaders,
             'year' => $year,
             'month' => $month,
             'order' => $order,

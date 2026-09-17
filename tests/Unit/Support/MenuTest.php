@@ -13,7 +13,6 @@ class MenuTest extends TestCase
     {
         $result = (new Menu)->render(
             scriptName: 'index.php',
-            langFunctions: ['text_home' => 'Home'],
             enableOffer: 'no',
             customMenu: '<b>Custom</b>',
         );
@@ -26,7 +25,6 @@ class MenuTest extends TestCase
     {
         $result = (new Menu)->render(
             scriptName: 'forums.php',
-            langFunctions: ['text_home' => 'Home', 'text_forums' => 'Forums'],
             enableOffer: 'no',
             customMenu: '<b>Custom</b>',
         );

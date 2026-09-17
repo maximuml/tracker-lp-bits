@@ -3,6 +3,6 @@
 @section('title', '')
 
 @section('content')
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::stdMessage($lang_takecontact['std_succeeded'] ?? 'Succeeded', $lang_takecontact['std_message_succesfully_sent'] ?? 'Message successfully sent.', false)))
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::stdMessage(__('legacy/takecontact.std_succeeded'), __('legacy/takecontact.std_message_succesfully_sent'), false)))
 
 @endsection

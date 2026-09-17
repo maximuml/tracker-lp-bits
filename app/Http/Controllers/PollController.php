@@ -92,18 +92,17 @@ class PollController extends LegacyController
         }
 
         $ageWarning = '';
-        $lang = (array) trans('legacy/makepoll');
         if ($pollid <= 0) {
             $lastPoll = $this->pollRepository->lastPoll();
             if (! empty($lastPoll)) {
                 $hours = (int) floor((time() - strtotime((string) $lastPoll['added'])) / 3600);
                 $days = (int) floor($hours / 24);
                 if ($days >= 1) {
-                    $t = $days.($lang['text_day'] ?? ' day').Strings::addS($days);
+                    $t = $days.(__('legacy/makepoll.text_day')).Strings::addS($days);
                 } else {
-                    $t = $hours.($lang['text_hour'] ?? ' hour').Strings::addS($hours);
+                    $t = $hours.(__('legacy/makepoll.text_hour')).Strings::addS($hours);
                 }
-                $ageWarning = ($lang['text_current_poll'] ?? 'Current poll ').'(<i>'.htmlspecialchars((string) $lastPoll['question']).'</i>)'.($lang['text_is_only'] ?? ' is only ').$t.($lang['text_old'] ?? ' old.');
+                $ageWarning = (__('legacy/makepoll.text_current_poll')).'(<i>'.htmlspecialchars((string) $lastPoll['question']).'</i>)'.(__('legacy/makepoll.text_is_only')).$t.(__('legacy/makepoll.text_old'));
             }
         }
 
@@ -115,20 +114,19 @@ class PollController extends LegacyController
             'returnto' => htmlspecialchars((string) ($request->input('returnto') ?? $request->headers->get('referer') ?? '')),
             'ageWarning' => $ageWarning,
             'title' => $pollid > 0
-                ? ($lang['head_edit_poll'] ?? 'Edit poll')
-                : ($lang['head_new_poll'] ?? 'New poll'),
+                ? (__('legacy/makepoll.head_edit_poll'))
+                : (__('legacy/makepoll.head_new_poll')),
         ]);
     }
 
     public function polloverview(Request $request): View|RedirectResponse|Response
     {
         $pollid = (int) $request->input('id', 0);
-        $lang = (array) trans('legacy/polloverview');
 
         if ($pollid > 0) {
             $poll = $this->pollRepository->findWithOptions($pollid);
             if (! $poll) {
-                return $this->legacyAbortResponse($lang['std_error'] ?? 'Error', $lang['text_no_poll_id'] ?? 'Invalid poll ID.');
+                return $this->legacyAbortResponse(__('legacy/polloverview.std_error'), __('legacy/polloverview.text_no_poll_id'));
             }
 
             $count = $this->pollRepository->countAnswers($pollid);
@@ -161,7 +159,6 @@ class PollController extends LegacyController
 
             return $this->legacyPage($request, 'polloverview', true, [
                 'mode' => 'detail',
-                'lang' => $lang,
                 'poll' => $poll,
                 'pollAdded' => (string) Time::format($poll['added'] ?? ''),
                 'pollOptions' => $pollOptions,
@@ -174,7 +171,7 @@ class PollController extends LegacyController
 
         $polls = $this->pollRepository->listAll();
         if (empty($polls)) {
-            return $this->legacyAbortResponse($lang['std_error'] ?? 'Error', $lang['text_no_users_voted'] ?? 'No polls found.');
+            return $this->legacyAbortResponse(__('legacy/polloverview.std_error'), __('legacy/polloverview.text_no_users_voted'));
         }
 
         $pollRows = array_map(static function ($pollRow) {
@@ -186,7 +183,6 @@ class PollController extends LegacyController
 
         return $this->legacyPage($request, 'polloverview', true, [
             'mode' => 'list',
-            'lang' => $lang,
             'polls' => $pollRows,
         ]);
     }

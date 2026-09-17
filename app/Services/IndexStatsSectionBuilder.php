@@ -23,10 +23,9 @@ final class IndexStatsSectionBuilder
     ) {}
 
     /**
-     * @param  array<string, mixed>  $lang
      * @return array<string, mixed>
      */
-    public function buildStats(array $lang, LegacyRedisCache $cache): array
+    public function buildStats(LegacyRedisCache $cache): array
     {
         $show = $this->globals->get('showstats_main', '') === 'yes';
 
@@ -41,7 +40,7 @@ final class IndexStatsSectionBuilder
 
         return [
             'show' => true,
-            'title' => $lang['text_tracker_statistics'] ?? 'Statistics',
+            'title' => __('legacy/index.text_tracker_statistics'),
             'userStats' => [
                 'activeToday' => number_format($userStats['totalonlinetoday']),
                 'activeThisWeek' => number_format($userStats['totalonlineweek']),
@@ -50,15 +49,15 @@ final class IndexStatsSectionBuilder
                 'vip' => number_format($userStats['vip']),
                 'vipLabel' => UserClass::name(UC_VIP, false, false, true),
                 'donors' => number_format($userStats['donated']),
-                'donorsLabel' => $lang['row_donors'] ?? 'Donors',
+                'donorsLabel' => __('legacy/index.row_donors'),
                 'warned' => number_format($userStats['warned']),
-                'warnedLabel' => $lang['row_warned_users'] ?? 'Warned',
+                'warnedLabel' => __('legacy/index.row_warned_users'),
                 'banned' => number_format($userStats['disabled']),
-                'bannedLabel' => $lang['row_banned_users'] ?? 'Banned',
+                'bannedLabel' => __('legacy/index.row_banned_users'),
                 'male' => number_format($userStats['registered_male']),
-                'maleLabel' => $lang['row_male_users'] ?? 'Male',
+                'maleLabel' => __('legacy/index.row_male_users'),
                 'female' => number_format($userStats['registered_female']),
-                'femaleLabel' => $lang['row_female_users'] ?? 'Female',
+                'femaleLabel' => __('legacy/index.row_female_users'),
             ],
             'torrentStats' => [
                 'torrents' => number_format($torrentStats['torrents']),
@@ -87,31 +86,30 @@ final class IndexStatsSectionBuilder
                 ['label' => UserClass::name(UC_NEXUS_MASTER, false, false, true), 'value' => number_format($classStats[UC_NEXUS_MASTER])],
             ],
             'labels' => [
-                'rowUsersActiveToday' => $lang['row_users_active_today'] ?? 'Active today',
-                'rowUsersActiveThisWeek' => $lang['row_users_active_this_week'] ?? 'Active this week',
-                'rowRegisteredUsers' => $lang['row_registered_users'] ?? 'Registered',
-                'rowUnconfirmedUsers' => $lang['row_unconfirmed_users'] ?? 'Unconfirmed',
-                'rowTorrents' => $lang['row_torrents'] ?? 'Torrents',
-                'rowDeadTorrents' => $lang['row_dead_torrents'] ?? 'Dead',
-                'rowSeeders' => $lang['row_seeders'] ?? 'Seeders',
-                'rowLeechers' => $lang['row_leechers'] ?? 'Leechers',
-                'rowPeers' => $lang['row_peers'] ?? 'Peers',
-                'rowSeederLeecherRatio' => $lang['row_seeder_leecher_ratio'] ?? 'Ratio',
-                'rowActiveBrowsingUsers' => $lang['row_active_browsing_users'] ?? 'Browsing',
-                'rowTrackerActiveUsers' => $lang['row_tracker_active_users'] ?? 'Tracker active',
-                'rowTotalSizeOfTorrents' => $lang['row_total_size_of_torrents'] ?? 'Total size',
-                'rowTotalUploaded' => $lang['row_total_uploaded'] ?? 'Total uploaded',
-                'rowTotalDownloaded' => $lang['row_total_downloaded'] ?? 'Total downloaded',
-                'rowTotalData' => $lang['row_total_data'] ?? 'Total data',
+                'rowUsersActiveToday' => __('legacy/index.row_users_active_today'),
+                'rowUsersActiveThisWeek' => __('legacy/index.row_users_active_this_week'),
+                'rowRegisteredUsers' => __('legacy/index.row_registered_users'),
+                'rowUnconfirmedUsers' => __('legacy/index.row_unconfirmed_users'),
+                'rowTorrents' => __('legacy/index.row_torrents'),
+                'rowDeadTorrents' => __('legacy/index.row_dead_torrents'),
+                'rowSeeders' => __('legacy/index.row_seeders'),
+                'rowLeechers' => __('legacy/index.row_leechers'),
+                'rowPeers' => __('legacy/index.row_peers'),
+                'rowSeederLeecherRatio' => __('legacy/index.row_seeder_leecher_ratio'),
+                'rowActiveBrowsingUsers' => __('legacy/index.row_active_browsing_users'),
+                'rowTrackerActiveUsers' => __('legacy/index.row_tracker_active_users'),
+                'rowTotalSizeOfTorrents' => __('legacy/index.row_total_size_of_torrents'),
+                'rowTotalUploaded' => __('legacy/index.row_total_uploaded'),
+                'rowTotalDownloaded' => __('legacy/index.row_total_downloaded'),
+                'rowTotalData' => __('legacy/index.row_total_data'),
             ],
         ];
     }
 
     /**
-     * @param  array<string, mixed>  $lang
      * @return array<string, mixed>
      */
-    public function buildTrackerLoad(array $lang): array
+    public function buildTrackerLoad(): array
     {
         $show = $this->globals->get('showtrackerload', '') === 'yes';
 
@@ -127,7 +125,7 @@ final class IndexStatsSectionBuilder
 
         return [
             'show' => $load !== '',
-            'title' => $lang['text_tracker_load'] ?? 'Tracker load',
+            'title' => __('legacy/index.text_tracker_load'),
             'load' => trim($load),
         ];
     }

@@ -8,7 +8,6 @@ use App\Contracts\Repositories\SearchBoxRepositoryInterface;
 use App\Models\Category;
 use App\Models\SearchBox;
 use App\Support\Input;
-use App\Support\Language;
 use App\Support\Locale;
 use App\Support\Logger;
 use App\Support\Path;
@@ -25,7 +24,6 @@ final class TorrentSearchPanelFactory
 {
     public function __construct(
         private readonly SearchBoxRepositoryInterface $searchBoxes,
-        private readonly Language $language,
     ) {}
 
     /**
@@ -121,8 +119,6 @@ final class TorrentSearchPanelFactory
             $taxonomySections[] = ['label' => $searchBox->getTaxonomyLabel($torrentField), 'rows' => $rows];
         }
 
-        $langFunctions = $this->language->functions();
-
         $searchModes = [];
         foreach (SearchBox::listSearchModes() as $modeValue => $modeLabel) {
             $searchModes[(string) $modeValue] = (string) $modeLabel;
@@ -136,13 +132,13 @@ final class TorrentSearchPanelFactory
             catPadding: (int) $searchBox->catpadding,
             searchModes: $searchModes,
             promotionOptions: [
-                1 => (string) ($langFunctions['text_normal'] ?? ''),
-                2 => (string) ($langFunctions['text_free'] ?? ''),
-                3 => (string) ($langFunctions['text_two_times_up'] ?? ''),
-                4 => (string) ($langFunctions['text_free_two_times_up'] ?? ''),
-                5 => (string) ($langFunctions['text_half_down'] ?? ''),
-                6 => (string) ($langFunctions['text_half_down_two_up'] ?? ''),
-                7 => (string) ($langFunctions['text_thirty_percent_down'] ?? ''),
+                1 => (string) (__('legacy/functions.text_normal')),
+                2 => (string) (__('legacy/functions.text_free')),
+                3 => (string) (__('legacy/functions.text_two_times_up')),
+                4 => (string) (__('legacy/functions.text_free_two_times_up')),
+                5 => (string) (__('legacy/functions.text_half_down')),
+                6 => (string) (__('legacy/functions.text_half_down_two_up')),
+                7 => (string) (__('legacy/functions.text_thirty_percent_down')),
             ],
             selectAllLabel: (string) Locale::trans('nexus.select_all', [], null),
             unselectAllLabel: (string) Locale::trans('nexus.unselect_all', [], null),

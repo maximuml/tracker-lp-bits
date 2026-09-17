@@ -278,8 +278,6 @@ final class BonusPageServiceTest extends TestCase
         $request = $this->requestWithQuery(['action' => 'exchange']);
 
         $result = $this->service->build($request)->toArray();
-
-        $this->assertArrayHasKey('lang', $result);
         $this->assertArrayHasKey('curUser', $result);
         $this->assertArrayHasKey('userId', $result);
         $this->assertArrayHasKey('action', $result);

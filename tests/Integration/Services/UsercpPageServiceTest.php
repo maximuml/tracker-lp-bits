@@ -201,8 +201,6 @@ final class UsercpPageServiceTest extends TestCase
         $this->setupCommon();
 
         $result = $this->service->build('forum', '')->toArray();
-
-        $this->assertArrayHasKey('lang', $result);
         $this->assertArrayHasKey('curUser', $result);
         $this->assertArrayHasKey('userInfo', $result);
         $this->assertArrayHasKey('siteName', $result);

@@ -387,7 +387,6 @@ final class OfferPageServiceTest extends TestCase
         $data = $this->callService($request);
 
         $this->assertSame($userId, $data['userId']);
-        $this->assertArrayHasKey('lang', $data);
         $this->assertArrayHasKey('curUser', $data);
         $this->assertArrayHasKey('baseUrl', $data);
         $this->assertArrayHasKey('contentWidth', $data);

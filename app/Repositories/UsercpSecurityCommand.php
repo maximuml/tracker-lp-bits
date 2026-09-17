@@ -72,29 +72,28 @@ final class UsercpSecurityCommand
         if (! $user instanceof User) {
             throw new \RuntimeException('Unauthenticated');
         }
-        $lang = (array) trans('legacy/usercp');
 
         $response = (string) $request->input('response', '');
         $oldPassword = (string) $request->input('oldpassword', '');
         if ($response === '' && $oldPassword === '') {
-            LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_enter_old_password'] ?? 'Please enter old password.'));
+            LegacyResponse::abort((string) (__('legacy/usercp.std_error')), (string) (__('legacy/usercp.std_enter_old_password')));
         }
 
         // For argon2id users, verify via plaintext password (sent over HTTPS)
         $userAlgo = (string) ($user->passhash_algo ?? PasswordHasher::ALGO_SHA256);
         if ($oldPassword !== '' && $userAlgo === PasswordHasher::ALGO_ARGON2ID) {
             if (! password_verify($oldPassword, (string) $user->passhash)) {
-                LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_wrong_password_note'] ?? 'Wrong password.'));
+                LegacyResponse::abort((string) (__('legacy/usercp.std_error')), (string) (__('legacy/usercp.std_wrong_password_note')));
             }
         } else {
             $challenge = $this->getChallenge((string) $user->username);
             if (empty($challenge)) {
-                LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), 'expired!');
+                LegacyResponse::abort((string) (__('legacy/usercp.std_error')), 'expired!');
             }
 
             $expectedResponse = hash_hmac('sha256', (string) $user->passhash, (string) $challenge);
             if (! hash_equals($expectedResponse, $response)) {
-                LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_wrong_password_note'] ?? 'Wrong password.'));
+                LegacyResponse::abort((string) (__('legacy/usercp.std_error')), (string) (__('legacy/usercp.std_wrong_password_note')));
             }
         }
 
@@ -122,7 +121,7 @@ final class UsercpSecurityCommand
             }
 
             if (! TwoFactorAuthHelper::verifyCode($secretToVerify, $twoStepSecretHash)) {
-                LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), 'Invalid two step code');
+                LegacyResponse::abort((string) (__('legacy/usercp.std_error')), 'Invalid two step code');
             }
         }
 
@@ -144,11 +143,11 @@ final class UsercpSecurityCommand
 
         if ($disableEmailChange !== 'no' && $smtpType !== 'none' && $email !== '' && $email !== $user->email) {
             if (! Validators::isEmail($email)) {
-                LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_wrong_email_address_format'] ?? 'Wrong email format.'));
+                LegacyResponse::abort((string) (__('legacy/usercp.std_error')), (string) (__('legacy/usercp.std_wrong_email_address_format')));
             }
 
             if ($this->emailExistsForOther($email, (int) $user->id)) {
-                LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_email_in_use'] ?? 'Email in use.'));
+                LegacyResponse::abort((string) (__('legacy/usercp.std_error')), (string) (__('legacy/usercp.std_email_in_use')));
             }
 
             $changedemail = 1;
@@ -168,21 +167,21 @@ final class UsercpSecurityCommand
             $obemail = rawurlencode($email);
             $data['editsecret'] = $this->secureTokenService->emailChangeDigest($hash, $email);
 
-            $subject = $siteName.($lang['mail_profile_change_confirmation'] ?? '');
-            $changeEmailOne = sprintf($lang['mail_change_email_one'] ?? '', $siteName);
-            $changeEmailNine = sprintf($lang['mail_change_email_nine'] ?? '', $siteName);
+            $subject = $siteName.(__('legacy/usercp.mail_profile_change_confirmation'));
+            $changeEmailOne = sprintf(__('legacy/usercp.mail_change_email_one'), $siteName);
+            $changeEmailNine = sprintf(__('legacy/usercp.mail_change_email_nine'), $siteName);
 
             $body = $changeEmailOne.$user->username
-                .($lang['mail_change_email_two'] ?? '').'('.$email.')'
-                .($lang['mail_change_email_three'] ?? '')."\n\n"
-                .($lang['mail_change_email_four'] ?? '').$request->ip()
-                .($lang['mail_change_email_five'] ?? '')."\n\n"
-                .($lang['mail_change_email_six'] ?? '')
-                .'<b><a href="javascript:void(null)" onclick="window.open(\''.$scheme.$baseUrl.'/confirmemail.php/'.$user->id.'/'.$hash.'/'.$obemail.'\')">'.($lang['mail_here'] ?? '').'</a></b>'
-                .($lang['mail_change_email_six_1'] ?? '').'<br />'."\n"
+                .(__('legacy/usercp.mail_change_email_two')).'('.$email.')'
+                .(__('legacy/usercp.mail_change_email_three'))."\n\n"
+                .(__('legacy/usercp.mail_change_email_four')).$request->ip()
+                .(__('legacy/usercp.mail_change_email_five'))."\n\n"
+                .(__('legacy/usercp.mail_change_email_six'))
+                .'<b><a href="javascript:void(null)" onclick="window.open(\''.$scheme.$baseUrl.'/confirmemail.php/'.$user->id.'/'.$hash.'/'.$obemail.'\')">'.(__('legacy/usercp.mail_here')).'</a></b>'
+                .(__('legacy/usercp.mail_change_email_six_1')).'<br />'."\n"
                 .$scheme.$baseUrl.'/confirmemail.php/'.$user->id.'/'.$hash.'/'.$obemail."\n\n"
-                .($lang['mail_change_email_seven'] ?? '')."\n\n"
-                .'------'.($lang['mail_change_email_eight'] ?? '')."\n"
+                .(__('legacy/usercp.mail_change_email_seven'))."\n\n"
+                .'------'.(__('legacy/usercp.mail_change_email_eight'))."\n"
                 .$changeEmailNine;
 
             Mail::sentLegacy($email, $siteName, $siteEmail, $subject, str_replace('<br />', '<br />', nl2br($body)), 'profile change', false, false, '', 'UTF-8');
@@ -256,15 +255,14 @@ final class UsercpSecurityCommand
         $siteEmail = $config->main->siteEmail();
         $baseUrl = $config->basic->baseUrl();
         $scheme = Http::protocolPrefix(Url::isSecure());
-        $lang = (array) trans('legacy/usercp');
 
         if ($disableEmailChange !== 'no' && $smtpType !== 'none' && $email !== '' && $email !== $user->email) {
             if (! Validators::isEmail($email)) {
-                throw ValidationException::withMessages(['email' => [$lang['std_wrong_email_address_format'] ?? 'Wrong email format.']]);
+                throw ValidationException::withMessages(['email' => [__('legacy/usercp.std_wrong_email_address_format')]]);
             }
 
             if ($this->emailExistsForOther($email, (int) $user->id)) {
-                throw ValidationException::withMessages(['email' => [$lang['std_email_in_use'] ?? 'Email in use.']]);
+                throw ValidationException::withMessages(['email' => [__('legacy/usercp.std_email_in_use')]]);
             }
 
             $hash = $this->secureTokenService->generate();
@@ -272,19 +270,19 @@ final class UsercpSecurityCommand
             $data['editsecret'] = $this->secureTokenService->emailChangeDigest($hash, $email);
             $changedemail = 1;
 
-            $subject = $siteName.($lang['mail_profile_change_confirmation'] ?? '');
-            $body = ($lang['mail_change_email_one'] ?? '').$user->username
-                .($lang['mail_change_email_two'] ?? '').'('.$email.')'
-                .($lang['mail_change_email_three'] ?? '')."\n\n"
-                .($lang['mail_change_email_four'] ?? '').$dto->ip
-                .($lang['mail_change_email_five'] ?? '')."\n\n"
-                .($lang['mail_change_email_six'] ?? '')
-                .'<b><a href="javascript:void(null)" onclick="window.open(\''.$scheme.$baseUrl.'/confirmemail.php/'.$user->id.'/'.$hash.'/'.$obemail.'\')">'.($lang['mail_here'] ?? '').'</a></b>'
-                .($lang['mail_change_email_six_1'] ?? '').'<br />'."\n"
+            $subject = $siteName.(__('legacy/usercp.mail_profile_change_confirmation'));
+            $body = (__('legacy/usercp.mail_change_email_one')).$user->username
+                .(__('legacy/usercp.mail_change_email_two')).'('.$email.')'
+                .(__('legacy/usercp.mail_change_email_three'))."\n\n"
+                .(__('legacy/usercp.mail_change_email_four')).$dto->ip
+                .(__('legacy/usercp.mail_change_email_five'))."\n\n"
+                .(__('legacy/usercp.mail_change_email_six'))
+                .'<b><a href="javascript:void(null)" onclick="window.open(\''.$scheme.$baseUrl.'/confirmemail.php/'.$user->id.'/'.$hash.'/'.$obemail.'\')">'.(__('legacy/usercp.mail_here')).'</a></b>'
+                .(__('legacy/usercp.mail_change_email_six_1')).'<br />'."\n"
                 .$scheme.$baseUrl.'/confirmemail.php/'.$user->id.'/'.$hash.'/'.$obemail."\n\n"
-                .($lang['mail_change_email_seven'] ?? '')."\n\n"
-                .'------'.($lang['mail_change_email_eight'] ?? '')."\n"
-                .($lang['mail_change_email_nine'] ?? '');
+                .(__('legacy/usercp.mail_change_email_seven'))."\n\n"
+                .'------'.(__('legacy/usercp.mail_change_email_eight'))."\n"
+                .(__('legacy/usercp.mail_change_email_nine'));
 
             Mail::sentLegacy($email, $siteName, $siteEmail, $subject, str_replace('<br />', '<br />', nl2br($body)), 'profile change', false, false, '', 'UTF-8');
         }

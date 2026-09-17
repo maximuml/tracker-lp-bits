@@ -244,7 +244,6 @@ final class Time
             }
         }
 
-        $lang_functions = app(Language::class)->functions();
         $CURUSER = app(CurrentUser::class)->get();
         $TIMENOW = defined('TIMENOW') ? (int) TIMENOW : time();
 
@@ -266,17 +265,17 @@ final class Time
                 (int) $timestamp,
                 $TIMENOW,
                 [
-                    'year' => (string) ($lang_functions['text_year'] ?? ''),
-                    'year_short' => (string) ($lang_functions['text_short_year'] ?? ''),
-                    'month' => (string) ($lang_functions['text_month'] ?? ''),
-                    'month_short' => (string) ($lang_functions['text_short_month'] ?? ''),
-                    'day' => (string) ($lang_functions['text_day'] ?? ''),
-                    'day_short' => (string) ($lang_functions['text_short_day'] ?? ''),
-                    'hour' => (string) ($lang_functions['text_hour'] ?? ''),
-                    'hour_short' => (string) ($lang_functions['text_short_hour'] ?? ''),
-                    'min' => (string) ($lang_functions['text_min'] ?? ''),
-                    'min_short' => (string) ($lang_functions['text_short_min'] ?? ''),
-                    'plural_suffix' => (string) ($lang_functions['text_s'] ?? ''),
+                    'year' => (string) (__('legacy/functions.text_year')),
+                    'year_short' => (string) (__('legacy/functions.text_short_year')),
+                    'month' => (string) (__('legacy/functions.text_month')),
+                    'month_short' => (string) (__('legacy/functions.text_short_month')),
+                    'day' => (string) (__('legacy/functions.text_day')),
+                    'day_short' => (string) (__('legacy/functions.text_short_day')),
+                    'hour' => (string) (__('legacy/functions.text_hour')),
+                    'hour_short' => (string) (__('legacy/functions.text_short_hour')),
+                    'min' => (string) (__('legacy/functions.text_min')),
+                    'min_short' => (string) (__('legacy/functions.text_short_min')),
+                    'plural_suffix' => (string) (__('legacy/functions.text_s')),
                 ],
                 (bool) $oneunit,
             ),
@@ -284,8 +283,8 @@ final class Time
             (bool) $withago,
             (bool) $twoline,
             (bool) $oneunit,
-            (string) ($lang_functions['text_space'] ?? ''),
-            (string) ($lang_functions['text_ago'] ?? ''),
+            (string) (__('legacy/functions.text_space')),
+            (string) (__('legacy/functions.text_ago')),
         );
     }
 

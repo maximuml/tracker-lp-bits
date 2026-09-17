@@ -98,16 +98,12 @@ final class Frame
      * textarea.  Callers echo this, then call `textbbcode()`, then echo
      * `composeClose()`.
      */
-    /**
-     * @param  array<string, string>  $lang
-     */
     public static function composeOpen(
         string|Htmlable $title,
         string $type,
         bool $hassubject,
         string $subject,
         int $maxsubjectlength,
-        array $lang,
     ): string {
         $html = '';
         if ($title instanceof Htmlable) {
@@ -125,17 +121,17 @@ final class Frame
             'edit' => 'text_edit',
             default => 'text_new',
         };
-        $frameName = (string) ($lang[$typeKey] ?? $lang['text_new'] ?? '');
+        $frameName = (string) __('legacy/functions.'.$typeKey);
 
         $html .= self::open($frameName, true, 10, '100%', 'left');
         $html .= '<table class="main" width="100%" border="1" cellspacing="0" cellpadding="5">'."\n";
 
         if ($hassubject) {
-            $html .= '<tr><td class="rowhead">'.($lang['row_subject'] ?? '').'</td>'
+            $html .= '<tr><td class="rowhead">'.(__('legacy/functions.row_subject')).'</td>'
                 .'<td class="rowfollow" align="left"><input type="text" style="width: 99%;" name="subject" maxlength="'.(int) $maxsubjectlength.'" value="'.htmlspecialchars($subject).'" /></td></tr>'."\n";
         }
 
-        $html .= '<tr><td class="rowhead" valign="top">'.($lang['row_body'] ?? '').'</td><td class="rowfollow" align="left"><span class="nx-hidden" id="previewouter"></span><div id="editorouter">';
+        $html .= '<tr><td class="rowhead" valign="top">'.(__('legacy/functions.row_body')).'</td><td class="rowfollow" align="left"><span class="nx-hidden" id="previewouter"></span><div id="editorouter">';
 
         return $html;
     }
@@ -147,20 +143,17 @@ final class Frame
      * buttons, closes the inner table and the outer frame, and appends
      * the tags/smilies links.
      */
-    /**
-     * @param  array<string, string>  $lang
-     */
-    public static function composeClose(array $lang): string
+    public static function composeClose(): string
     {
         return '</div></td></tr>'."\n"
-            .'<tr><td colspan="2" align="center"><table><tr><td class="embedded"><input id="qr" type="submit" class="btn" value="'.($lang['submit_submit'] ?? '').'" /></td><td class="embedded">'
-            .'<input type="button" class="btn2" name="previewbutton" id="previewbutton" value="'.($lang['submit_preview'] ?? '').'" data-preview-toggle="preview" />'
-            .'<input type="button" class="btn2 nx-hidden" name="unpreviewbutton" id="unpreviewbutton" value="'.($lang['submit_edit'] ?? '').'" data-preview-toggle="unpreview" />'
+            .'<tr><td colspan="2" align="center"><table><tr><td class="embedded"><input id="qr" type="submit" class="btn" value="'.(__('legacy/functions.submit_submit')).'" /></td><td class="embedded">'
+            .'<input type="button" class="btn2" name="previewbutton" id="previewbutton" value="'.(__('legacy/functions.submit_preview')).'" data-preview-toggle="preview" />'
+            .'<input type="button" class="btn2 nx-hidden" name="unpreviewbutton" id="unpreviewbutton" value="'.(__('legacy/functions.submit_edit')).'" data-preview-toggle="unpreview" />'
             .'</td></tr></table>'
             .'</td></tr>'
             .'</table>'."\n"
             .self::CLOSE
-            .'<p align="center"><a href="tags.php" target="_blank">'.($lang['text_tags'] ?? '').'</a> | <a href="smilies.php" target="_blank">'.($lang['text_smilies'] ?? '').'</a></p>'."\n";
+            .'<p align="center"><a href="tags.php" target="_blank">'.(__('legacy/functions.text_tags')).'</a> | <a href="smilies.php" target="_blank">'.(__('legacy/functions.text_smilies')).'</a></p>'."\n";
     }
 
     /**
@@ -176,9 +169,8 @@ final class Frame
         string $subject,
         int $maxSubjectLength,
     ): string {
-        $lang = app(Language::class)->functions();
 
-        return self::composeOpen($title, $type, $hasSubject, $subject, $maxSubjectLength, $lang)
+        return self::composeOpen($title, $type, $hasSubject, $subject, $maxSubjectLength)
             .BbcodeEditor::html(['form' => 'compose', 'text' => 'body', 'content' => $body]);
     }
 
@@ -189,7 +181,7 @@ final class Frame
      */
     public static function composeEnd(): string
     {
-        return self::composeClose(app(Language::class)->functions());
+        return self::composeClose();
     }
 
     public static function sqlError(string $error, string $file, string $line): string

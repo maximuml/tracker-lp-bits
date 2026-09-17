@@ -42,10 +42,8 @@ final class IndexPageService
     public function build(): IndexPageViewModel
     {
         $curUser = (array) ($this->currentUser->get() ?? []);
-        $lang = (array) trans('legacy/index');
 
         $data = [
-            'lang' => $lang,
             'curUser' => $curUser,
             'canNewsManage' => Permission::can(PermissionEnum::NEWS_MANAGE),
             'canPollManage' => Permission::can(PermissionEnum::POLL_MANAGE),
@@ -54,36 +52,36 @@ final class IndexPageService
         ];
 
         // News
-        $data['news'] = $this->buildNews($lang, $data['canNewsManage'], $this->cache);
+        $data['news'] = $this->buildNews($data['canNewsManage'], $this->cache);
 
         // Shoutbox
-        $data['shoutbox'] = $this->buildShoutbox($lang, $data['canSbManage'], (int) ($curUser['id'] ?? 0));
+        $data['shoutbox'] = $this->buildShoutbox($data['canSbManage'], (int) ($curUser['id'] ?? 0));
 
         $data['extraModules'] = '';
 
         // Latest forum posts
-        $data['forumPosts'] = $this->buildForumPosts($lang, $curUser);
+        $data['forumPosts'] = $this->buildForumPosts($curUser);
 
         // Latest torrents
-        $data['latestTorrents'] = $this->buildLatestTorrents($lang, $this->cache);
+        $data['latestTorrents'] = $this->buildLatestTorrents($this->cache);
 
         // Top uploaders
-        $data['topUploaders'] = $this->meta->buildTopUploaders($lang);
+        $data['topUploaders'] = $this->meta->buildTopUploaders();
 
         // Polls
-        $data['polls'] = $this->polls->buildPolls($lang, $curUser, $data['canPollManage'], $data['canLog'], $this->cache);
+        $data['polls'] = $this->polls->buildPolls($curUser, $data['canPollManage'], $data['canLog'], $this->cache);
 
         // Stats
-        $data['stats'] = $this->stats->buildStats($lang, $this->cache);
+        $data['stats'] = $this->stats->buildStats($this->cache);
 
         // Tracker load
-        $data['trackerLoad'] = $this->stats->buildTrackerLoad($lang);
+        $data['trackerLoad'] = $this->stats->buildTrackerLoad();
 
         // Disclaimer
-        $data['disclaimer'] = $this->meta->buildDisclaimer($lang);
+        $data['disclaimer'] = $this->meta->buildDisclaimer();
 
         // Browser note
-        $data['browserNote'] = $this->meta->buildBrowserNote($lang);
+        $data['browserNote'] = $this->meta->buildBrowserNote();
 
         // Reset unread news count
         if (! empty($curUser['id'])) {
@@ -91,7 +89,6 @@ final class IndexPageService
         }
 
         return new IndexPageViewModel(
-            lang: $data['lang'],
             curUser: $data['curUser'],
             canNewsManage: $data['canNewsManage'],
             canPollManage: $data['canPollManage'],
@@ -112,30 +109,28 @@ final class IndexPageService
     }
 
     /**
-     * @param  array<string, mixed>  $lang
      * @return array<string, mixed>
      */
-    private function buildNews(array $lang, bool $canManage, LegacyRedisCache $cache): array
+    private function buildNews(bool $canManage, LegacyRedisCache $cache): array
     {
         $maxNews = (int) $this->globals->get('maxnewsnum_main', 0);
 
         return [
             'show' => true,
-            'title' => $lang['text_recent_news'] ?? 'Recent news',
+            'title' => __('legacy/index.text_recent_news'),
             'canManage' => $canManage,
-            'manageLink' => $lang['text_news_page'] ?? 'News page',
+            'manageLink' => __('legacy/index.text_news_page'),
             'items' => $this->indexRepository->getLatestNews($maxNews),
-            'showHideTitle' => $lang['title_show_or_hide'] ?? 'Show/Hide',
-            'editLabel' => $lang['text_e'] ?? 'E',
-            'deleteLabel' => $lang['text_d'] ?? 'D',
+            'showHideTitle' => __('legacy/index.title_show_or_hide'),
+            'editLabel' => __('legacy/index.text_e'),
+            'deleteLabel' => __('legacy/index.text_d'),
         ];
     }
 
     /**
-     * @param  array<string, mixed>  $lang
      * @return array<string, mixed>
      */
-    private function buildShoutbox(array $lang, bool $canManage, int $userId): array
+    private function buildShoutbox(bool $canManage, int $userId): array
     {
         $show = $this->globals->get('showshoutbox_main', '') === 'yes';
 
@@ -148,9 +143,10 @@ final class IndexPageService
 
         $clearJs = '';
         if ($canManage) {
+            $sureToClear = __('legacy/index.sure_to_clear_shout_box');
             $clearJs = <<<JS
 document.getElementById('clear-shout-box').addEventListener("click", function () {
-    layer.confirm("{$lang['sure_to_clear_shout_box']}", {title: "Info", btn: ['Yes', "Cancel"], btnAlign: 'c'}, function (layerIndex) {
+    layer.confirm("{$sureToClear}", {title: "Info", btn: ['Yes', "Cancel"], btnAlign: 'c'}, function (layerIndex) {
         nativePost("ajax.php", {"action": "clearShoutBox", "params": {"csrf": (typeof SHOUT_CSRF !== 'undefined' ? SHOUT_CSRF : '')}}, function (response) {
             layer.close(layerIndex)
             if (response.ret != 0) {
@@ -167,25 +163,24 @@ JS;
 
         return [
             'show' => true,
-            'title' => $lang['text_shoutbox'] ?? 'Shoutbox',
-            'autoRefreshLabel' => $lang['text_auto_refresh_after'] ?? 'Auto refresh after',
-            'secondsLabel' => $lang['text_seconds'] ?? 'seconds',
-            'historyLabel' => $lang['text_shoutbox_history'] ?? 'History',
+            'title' => __('legacy/index.text_shoutbox'),
+            'autoRefreshLabel' => __('legacy/index.text_auto_refresh_after'),
+            'secondsLabel' => __('legacy/index.text_seconds'),
+            'historyLabel' => __('legacy/index.text_shoutbox_history'),
             'canManage' => $canManage,
-            'clearLabel' => $lang['clear_shout_box'] ?? 'Clear',
+            'clearLabel' => __('legacy/index.clear_shout_box'),
             'toolbar' => Shoutbox::toolbar('shbox', 'shbox_text'),
-            'messageLabel' => $lang['text_message'] ?? 'Message',
-            'submitLabel' => $lang['sumbit_shout'] ?? 'Shout',
-            'clearButtonLabel' => $lang['submit_clear'] ?? 'Clear',
+            'messageLabel' => __('legacy/index.text_message'),
+            'submitLabel' => __('legacy/index.sumbit_shout'),
+            'clearButtonLabel' => __('legacy/index.submit_clear'),
         ];
     }
 
     /**
-     * @param  array<string, mixed>  $lang
      * @param  array<string, mixed>  $curUser
      * @return array<string, mixed>
      */
-    private function buildForumPosts(array $lang, array $curUser): array
+    private function buildForumPosts(array $curUser): array
     {
         $show = $this->globals->get('showlastxforumposts_main', '') === 'yes' && ! empty($curUser);
 
@@ -197,21 +192,20 @@ JS;
 
         return [
             'show' => count($posts) > 0,
-            'title' => $lang['text_last_five_posts'] ?? 'Last five posts',
-            'colTopicTitle' => $lang['col_topic_title'] ?? 'Topic',
-            'colView' => $lang['col_view'] ?? 'Views',
-            'colAuthor' => $lang['col_author'] ?? 'Author',
-            'colPostedAt' => $lang['col_posted_at'] ?? 'Posted at',
-            'textIn' => $lang['text_in'] ?? 'in ',
+            'title' => __('legacy/index.text_last_five_posts'),
+            'colTopicTitle' => __('legacy/index.col_topic_title'),
+            'colView' => __('legacy/index.col_view'),
+            'colAuthor' => __('legacy/index.col_author'),
+            'colPostedAt' => __('legacy/index.col_posted_at'),
+            'textIn' => __('legacy/index.text_in'),
             'items' => $posts,
         ];
     }
 
     /**
-     * @param  array<string, mixed>  $lang
      * @return array<string, mixed>
      */
-    private function buildLatestTorrents(array $lang, LegacyRedisCache $cache): array
+    private function buildLatestTorrents(LegacyRedisCache $cache): array
     {
         $show = $this->globals->get('showlastxtorrents_main', '') === 'yes';
 
@@ -251,9 +245,9 @@ JS;
                 }
                 $html = view('index.sections.latest_torrents', [
                     'items' => $items,
-                    'title' => $lang['text_last_five_torrent'] ?? 'Latest torrents',
-                    'colSeeder' => $lang['col_seeder'] ?? 'Seeders',
-                    'colLeecher' => $lang['col_leecher'] ?? 'Leechers',
+                    'title' => __('legacy/index.text_last_five_torrent'),
+                    'colSeeder' => __('legacy/index.col_seeder'),
+                    'colLeecher' => __('legacy/index.col_leecher'),
                 ])->render();
                 $cache->cache_value($cacheKey, $html, $cacheTtl);
             } else {

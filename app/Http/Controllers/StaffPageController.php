@@ -34,15 +34,14 @@ class StaffPageController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Permission denied.');
         }
 
-        $langStaff = (array) trans('legacy/staff');
         $secs = 900;
         $dt = time() - $secs;
 
-        $onlineImg = '<img class="button_online" src="pic/trans.gif" alt="online" title="'.($langStaff['title_online'] ?? 'Online').'" />';
-        $offlineImg = '<img class="button_offline" src="pic/trans.gif" alt="offline" title="'.($langStaff['title_offline'] ?? 'Offline').'" />';
+        $onlineImg = '<img class="button_online" src="pic/trans.gif" alt="online" title="'.(__('legacy/staff.title_online')).'" />';
+        $offlineImg = '<img class="button_offline" src="pic/trans.gif" alt="offline" title="'.(__('legacy/staff.title_offline')).'" />';
         $sendPmImg = '<img class="button_pm" src="pic/trans.gif" alt="pm" />';
 
-        $buildUserRow = function (array $arr, string $extraKey = '') use ($dt, $onlineImg, $offlineImg, $sendPmImg, $langStaff): array {
+        $buildUserRow = function (array $arr, string $extraKey = '') use ($dt, $onlineImg, $offlineImg, $sendPmImg): array {
             $countryrow = Country::rowWithContext($arr['country'] ?? 0) ?? ['flagpic' => '', 'name' => ''];
             $isOnline = strtotime((string) $arr['last_access']) > $dt;
 
@@ -51,7 +50,7 @@ class StaffPageController extends LegacyController
                 'username_html' => UserDisplay::username((int) $arr['id']),
                 'flag_html' => '<img width=24 height=15 src="pic/flag/'.$countryrow['flagpic'].'" title="'.$countryrow['name'].'" style="padding-bottom:1px;">',
                 'online_html' => $isOnline ? $onlineImg : $offlineImg,
-                'pm_html' => '<a href=sendmessage.php?receiver='.(int) $arr['id'].' title="'.($langStaff['title_send_pm'] ?? 'Send PM').'">'.$sendPmImg.'</a>',
+                'pm_html' => '<a href=sendmessage.php?receiver='.(int) $arr['id'].' title="'.(__('legacy/staff.title_send_pm')).'">'.$sendPmImg.'</a>',
                 'extra' => $extraKey ? ($arr[$extraKey] ?? '') : '',
             ];
         };
@@ -136,7 +135,6 @@ class StaffPageController extends LegacyController
             ->all();
 
         return $this->legacyPage($request, 'staff', true, [
-            'lang_staff' => $langStaff,
             'supportRows' => $supportRows,
             'pickerRows' => $pickerRows,
             'forumModRows' => $forumModRows,
@@ -153,8 +151,6 @@ class StaffPageController extends LegacyController
         if (UserDisplay::currentClass() < $moderatorClass) {
             return $this->legacyAbortResponse('Error', 'Access denied!!!');
         }
-
-        $langStaffpanel = (array) trans('legacy/staffpanel');
 
         $sysopPanels = [];
         $adminPanels = [];
@@ -174,7 +170,6 @@ class StaffPageController extends LegacyController
         }
 
         return $this->legacyPage($request, 'staffpanel', true, [
-            'lang_staffpanel' => $langStaffpanel,
             'sysopPanels' => $sysopPanels,
             'adminPanels' => $adminPanels,
             'modPanels' => $modPanels,

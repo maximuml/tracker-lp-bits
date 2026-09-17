@@ -415,12 +415,11 @@ final class Network
      */
     public static function ipLocationWithContext(string $ip): array
     {
-        $lang_functions = app(Language::class)->functions();
 
         return self::ipLocation(
             $ip,
-            (string) ($lang_functions['text_unknown'] ?? ''),
-            (string) ($lang_functions['text_user_ip'] ?? 'User IP'),
+            (string) (__('legacy/functions.text_unknown')),
+            (string) (__('legacy/functions.text_user_ip')),
         );
     }
 }

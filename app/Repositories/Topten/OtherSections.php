@@ -13,10 +13,9 @@ use Illuminate\Support\Facades\DB;
 final class OtherSections extends SectionQueries
 {
     /**
-     * @param  array<string, mixed>  $lang
      * @return list<array<string, mixed>>
      */
-    public function build(int $limit, ?string $subtype, array $lang, bool $enabledDonation): array
+    public function build(int $limit, ?string $subtype, bool $enabledDonation): array
     {
         $sections = [];
 
@@ -24,7 +23,7 @@ final class OtherSections extends SectionQueries
             $sections[] = [
                 'view' => 'bonus',
                 'data' => $this->toArray(DB::table('users')->select('id', 'seedbonus')->orderBy('seedbonus', 'desc')->limit($limit)->get()),
-                'caption' => $this->caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_most_bonuses'] ?? 'Bonuses'),
+                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_most_bonuses')),
                 'limits' => [100, 250],
                 'subtype' => 'bo',
             ];
@@ -34,7 +33,7 @@ final class OtherSections extends SectionQueries
             $sections[] = [
                 'view' => 'charity',
                 'data' => $this->toArray(DB::table('users')->select('id', 'charity')->orderBy('charity', 'desc')->limit($limit)->get()),
-                'caption' => $this->caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_charity_giver'] ?? 'Charity Givers'),
+                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_charity_giver')),
                 'limits' => [100, 250],
                 'subtype' => 'charity',
             ];
@@ -52,7 +51,7 @@ final class OtherSections extends SectionQueries
                             ->limit($limit)
                             ->get()
                     ),
-                    'caption' => $this->caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_most_donated_USD'] ?? 'Donors in US dollar'),
+                    'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_most_donated_USD')),
                     'limits' => [100, 250],
                     'subtype' => 'do_usd',
                 ];
@@ -69,7 +68,7 @@ final class OtherSections extends SectionQueries
                             ->limit($limit)
                             ->get()
                     ),
-                    'caption' => $this->caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_most_donated_CNY'] ?? 'Donors in Chinese yuan'),
+                    'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_most_donated_CNY')),
                     'limits' => [100, 250],
                     'subtype' => 'do_cny',
                 ];
@@ -88,7 +87,7 @@ final class OtherSections extends SectionQueries
                         ->limit($limit)
                         ->get()
                 ),
-                'caption' => $this->caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_most_client'] ?? 'Torrent Clients '),
+                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_most_client')),
                 'limits' => [100, 250],
                 'subtype' => 'mcli',
             ];
@@ -106,7 +105,7 @@ final class OtherSections extends SectionQueries
                         ->limit($limit)
                         ->get()
                 ),
-                'caption' => $this->caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_most_stylesheet'] ?? 'Stylesheets'),
+                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_most_stylesheet')),
                 'limits' => [25, 50],
                 'subtype' => 'ss',
             ];
@@ -125,7 +124,7 @@ final class OtherSections extends SectionQueries
                         ->limit($limit)
                         ->get()
                 ),
-                'caption' => $this->caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_most_language'] ?? 'User Languages'),
+                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_most_language')),
                 'limits' => [25],
                 'subtype' => 'lang',
             ];

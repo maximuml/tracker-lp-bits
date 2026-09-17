@@ -53,13 +53,11 @@ final class UsercpPageService
     public function build(string $action, string $type): UsercpPageViewModel
     {
         $curUser = (array) ($this->currentUser->get() ?? []);
-        $lang = (array) trans('legacy/usercp');
         $cache = $this->cache;
         $userInfo = $this->usercpRepository->getUserById((int) ($curUser['id'] ?? 0));
         $siteName = Setting::getSiteName();
 
         $data = [
-            'lang' => $lang,
             'curUser' => $curUser,
             'userInfo' => $userInfo,
             'siteName' => $siteName,
@@ -70,26 +68,25 @@ final class UsercpPageService
 
         switch ($action) {
             case 'personal':
-                $data['personal'] = $this->personalSectionBuilder->build($lang, $curUser);
+                $data['personal'] = $this->personalSectionBuilder->build($curUser);
                 break;
             case 'tracker':
-                $data['tracker'] = $this->trackerSectionBuilder->build($lang, $curUser);
+                $data['tracker'] = $this->trackerSectionBuilder->build($curUser);
                 break;
             case 'forum':
-                $data['forum'] = $this->forumSectionBuilder->build($lang, $curUser);
+                $data['forum'] = $this->forumSectionBuilder->build($curUser);
                 break;
             case 'security':
-                $data['security'] = $this->securitySectionBuilder->build($lang, $curUser, $type);
+                $data['security'] = $this->securitySectionBuilder->build($curUser, $type);
                 break;
             default:
-                $data['home'] = $this->buildHome($lang, $curUser, $cache, $userInfo);
+                $data['home'] = $this->buildHome($curUser, $cache, $userInfo);
                 break;
         }
 
         AssetAppender::js('vendor/jquery-loading/jquery.loading.min.js', 'footer', true);
 
         return new UsercpPageViewModel(
-            lang: $data['lang'],
             curUser: $data['curUser'],
             userInfo: $data['userInfo'],
             siteName: $data['siteName'],
@@ -107,11 +104,10 @@ final class UsercpPageService
     /**
      * Build the home dashboard section.
      *
-     * @param  array<string, mixed>  $lang
      * @param  array<string, mixed>  $curUser
      * @return array<string, mixed>
      */
-    private function buildHome(array $lang, array $curUser, ?LegacyRedisCache $cache, User $userInfo): array
+    private function buildHome(array $curUser, ?LegacyRedisCache $cache, User $userInfo): array
     {
         $userId = (int) ($curUser['id'] ?? 0);
 
@@ -197,28 +193,28 @@ final class UsercpPageService
                 htmlspecialchars($passkey, ENT_QUOTES),
                 $timestamp,
                 htmlspecialchars($signature, ENT_QUOTES),
-                $lang['text_passkey_login'] ?? 'Login'
+                ('Login')
             );
         }
 
         // Tokens
-        $tokens = $this->tokenSectionBuilder->build($lang, $userInfo);
+        $tokens = $this->tokenSectionBuilder->build($userInfo);
 
         // Recently read topics
-        $readTopics = $this->buildReadTopics($lang, $userId, $cache);
+        $readTopics = $this->buildReadTopics($userId, $cache);
 
         $avatarHtml = '';
         if (! empty($curUser['avatar'])) {
             $avatarHtml = '<img src="'.htmlspecialchars((string) $curUser['avatar']).'" border=0>';
         }
 
-        $invitesHtml = ((int) ($curUser['invites'] ?? 0)).' [<a href="invite.php?id='.$userId.'" title="'.($lang['link_send_invitation'] ?? '').'">'.htmlspecialchars($lang['text_send'] ?? '').'</a>]';
-        $karmaHtml = ((string) ($curUser['seedbonus'] ?? '0')).' [<a href="mybonus.php" title="'.($lang['link_use_karma_points'] ?? '').'">'.htmlspecialchars($lang['text_use'] ?? '').'</a>]';
-        $commentsHtml = $commentCount.' [<a href="userhistory.php?action=viewcomments&id='.$userId.'" title="'.($lang['link_view_comments'] ?? '').'">'.htmlspecialchars($lang['text_view'] ?? '').'</a>]';
+        $invitesHtml = ((int) ($curUser['invites'] ?? 0)).' [<a href="invite.php?id='.$userId.'" title="'.(__('legacy/usercp.link_send_invitation')).'">'.htmlspecialchars(__('legacy/usercp.text_send')).'</a>]';
+        $karmaHtml = ((string) ($curUser['seedbonus'] ?? '0')).' [<a href="mybonus.php" title="'.(__('legacy/usercp.link_use_karma_points')).'">'.htmlspecialchars(__('legacy/usercp.text_use')).'</a>]';
+        $commentsHtml = $commentCount.' [<a href="userhistory.php?action=viewcomments&id='.$userId.'" title="'.(__('legacy/usercp.link_view_comments')).'">'.htmlspecialchars(__('legacy/usercp.text_view')).'</a>]';
 
         $forumPostsHtml = null;
         if ($forumPosts > 0) {
-            $forumPostsHtml = $forumPosts.' [<a href="userhistory.php?action=viewposts&id='.$userId.'" title="'.($lang['link_view_posts'] ?? '').'">'.htmlspecialchars($lang['text_view'] ?? '').'</a>] ('.$dayPosts.htmlspecialchars($lang['text_posts_per_day'] ?? '').'; '.$percentages.htmlspecialchars($lang['text_of_total_posts'] ?? '').')';
+            $forumPostsHtml = $forumPosts.' [<a href="userhistory.php?action=viewposts&id='.$userId.'" title="'.(__('legacy/usercp.link_view_posts')).'">'.htmlspecialchars(__('legacy/usercp.text_view')).'</a>] ('.$dayPosts.htmlspecialchars(__('legacy/usercp.text_posts_per_day')).'; '.$percentages.htmlspecialchars(__('legacy/usercp.text_of_total_posts')).')';
         }
 
         return [
@@ -248,10 +244,9 @@ final class UsercpPageService
     /**
      * Build recently read topics section data.
      *
-     * @param  array<string, mixed>  $lang
      * @return array<string, mixed>
      */
-    private function buildReadTopics(array $lang, int $userId, ?LegacyRedisCache $cache): array
+    private function buildReadTopics(int $userId, ?LegacyRedisCache $cache): array
     {
         $topicRows = $this->usercpLookupRepository->getReadTopics($userId);
         $items = [];
@@ -296,12 +291,12 @@ final class UsercpPageService
 
         return [
             'items' => $items,
-            'colTopicTitle' => $lang['col_topic_title'] ?? 'Topic title',
-            'colReplies' => $lang['col_replies'] ?? 'Replies',
-            'colViews' => $lang['col_views'] ?? 'Views',
-            'colTopicStarter' => $lang['col_topic_starter'] ?? 'Topic starter',
-            'colLastPost' => $lang['col_last_post'] ?? 'Last post',
-            'title' => $lang['text_recently_read_topics'] ?? 'Recently read topics',
+            'colTopicTitle' => __('legacy/usercp.col_topic_title'),
+            'colReplies' => __('legacy/usercp.col_replies'),
+            'colViews' => __('legacy/usercp.col_views'),
+            'colTopicStarter' => __('legacy/usercp.col_topic_starter'),
+            'colLastPost' => __('legacy/usercp.col_last_post'),
+            'title' => __('legacy/usercp.text_recently_read_topics'),
         ];
     }
 }

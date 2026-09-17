@@ -69,7 +69,6 @@ final class Comment
 
         self::resetTempCode();
 
-        $lang_functions = app(Language::class)->functions();
         $s = $text;
 
         if ($stripHtml) {
@@ -282,7 +281,6 @@ final class Comment
      */
     public static function table(array $rows, string $type, int|string $parentId, bool $review = false): string
     {
-        $lang_functions = app(Language::class)->functions();
         $CURUSER = app(CurrentUser::class)->get();
         $commanage_class = (int) SiteConfig::current()->authority->permission('commanage', 0);
 
@@ -298,10 +296,10 @@ final class Comment
             $userInfo = $userInfoArr->get($row['user'], User::defaultUser());
             $userRow = $userInfo->toArray();
 
-            $html .= '<div style="margin-top: 8pt; margin-bottom: 8pt;"><table id="cid'.$row['id'].'" border="0" cellspacing="0" cellpadding="0" width="100%"><tr><td class="embedded" width="99%">#'.$row['id'].'&nbsp;&nbsp;<font color="gray">'.($lang_functions['text_by'] ?? '').'</font>';
+            $html .= '<div style="margin-top: 8pt; margin-bottom: 8pt;"><table id="cid'.$row['id'].'" border="0" cellspacing="0" cellpadding="0" width="100%"><tr><td class="embedded" width="99%">#'.$row['id'].'&nbsp;&nbsp;<font color="gray">'.(__('legacy/functions.text_by')).'</font>';
             $html .= UserDisplay::username($row['user'], false, true, true, false, false, true);
-            $html .= '&nbsp;&nbsp;<font color="gray">'.($lang_functions['text_at'] ?? '').'</font>'.Time::format($row['added'])
-                .($row['editedby'] && Permission::can(PermissionEnum::COM_MANAGE) ? ' - [<a href="comment.php?action=vieworiginal&amp;cid='.$row['id'].'&amp;type='.$type.'">'.($lang_functions['text_view_original'] ?? '').'</a>]' : '')
+            $html .= '&nbsp;&nbsp;<font color="gray">'.(__('legacy/functions.text_at')).'</font>'.Time::format($row['added'])
+                .($row['editedby'] && Permission::can(PermissionEnum::COM_MANAGE) ? ' - [<a href="comment.php?action=vieworiginal&amp;cid='.$row['id'].'&amp;type='.$type.'">'.(__('legacy/functions.text_view_original')).'</a>]' : '')
                 .'</td><td class="embedded nowrap" width="1%"><a href="#top"><img class="top" src="pic/trans.gif" alt="Top" title="Top" /></a>&nbsp;&nbsp;</td></tr></table></div>';
 
             $avatar = ($CURUSER['avatars'] ?? false) ? \htmlspecialchars(trim($userRow['avatar'])) : '';
@@ -312,7 +310,7 @@ final class Comment
             $textEditby = '';
             if ($row['editedby']) {
                 $lastedittime = Time::format($row['editdate'], true, false);
-                $textEditby = '<br /><p><font class="small">'.($lang_functions['text_last_edited_by'] ?? '').UserDisplay::username($row['editedby']).($lang_functions['text_edited_at'] ?? '').$lastedittime."</font></p>\n";
+                $textEditby = '<br /><p><font class="small">'.(__('legacy/functions.text_last_edited_by')).UserDisplay::username($row['editedby']).(__('legacy/functions.text_edited_at')).$lastedittime."</font></p>\n";
             }
 
             $html .= '<table class="main" width="100%" border="0" cellspacing="0" cellpadding="5">'."\n";
@@ -323,16 +321,16 @@ final class Comment
             $html .= '<td class="rowfollow word-break-all" valign="top"><br />'.$text.$textEditby.'</td>'."\n";
             $html .= '</tr>'."\n";
 
-            $actionbar = '<a href="comment.php?action=add&amp;sub=quote&amp;cid='.$row['id'].'&amp;pid='.$parentId.'&amp;type='.$type.'"><img class="f_quote" src="pic/trans.gif" alt="Quote" title="'.($lang_functions['title_reply_with_quote'] ?? '').'" /></a>'
-                .'<a href="comment.php?action=add&amp;pid='.$parentId.'&amp;type='.$type.'"><img class="f_reply" src="pic/trans.gif" alt="Add Reply" title="'.($lang_functions['title_add_reply'] ?? '').'" /></a>'
-                .(Permission::can(PermissionEnum::COM_MANAGE) ? '<a href="comment.php?action=delete&amp;cid='.$row['id'].'&amp;type='.$type.'"><img class="f_delete" src="pic/trans.gif" alt="Delete" title="'.($lang_functions['title_delete'] ?? '').'" /></a>' : '')
-                .(((is_array($CURUSER) && $row['user'] == ($CURUSER['id'] ?? 0)) || UserDisplay::currentClass() >= $commanage_class) ? '<a href="comment.php?action=edit&amp;cid='.$row['id'].'&amp;type='.$type.'"><img class="f_edit" src="pic/trans.gif" alt="Edit" title="'.($lang_functions['title_edit'] ?? '').'" /></a>' : '');
+            $actionbar = '<a href="comment.php?action=add&amp;sub=quote&amp;cid='.$row['id'].'&amp;pid='.$parentId.'&amp;type='.$type.'"><img class="f_quote" src="pic/trans.gif" alt="Quote" title="'.(__('legacy/functions.title_reply_with_quote')).'" /></a>'
+                .'<a href="comment.php?action=add&amp;pid='.$parentId.'&amp;type='.$type.'"><img class="f_reply" src="pic/trans.gif" alt="Add Reply" title="'.(__('legacy/functions.title_add_reply')).'" /></a>'
+                .(Permission::can(PermissionEnum::COM_MANAGE) ? '<a href="comment.php?action=delete&amp;cid='.$row['id'].'&amp;type='.$type.'"><img class="f_delete" src="pic/trans.gif" alt="Delete" title="'.(__('legacy/functions.title_delete')).'" /></a>' : '')
+                .(((is_array($CURUSER) && $row['user'] == ($CURUSER['id'] ?? 0)) || UserDisplay::currentClass() >= $commanage_class) ? '<a href="comment.php?action=edit&amp;cid='.$row['id'].'&amp;type='.$type.'"><img class="f_edit" src="pic/trans.gif" alt="Edit" title="'.(__('legacy/functions.title_edit')).'" /></a>' : '');
 
             $onlineIcon = (($userRow['last_access'] ?? '') > $dt)
-                ? '<img class="f_online" src="pic/trans.gif" alt="Online" title="'.($lang_functions['title_online'] ?? '').'" />'
-                : '<img class="f_offline" src="pic/trans.gif" alt="Offline" title="'.($lang_functions['title_offline'] ?? '').'" />';
+                ? '<img class="f_online" src="pic/trans.gif" alt="Online" title="'.(__('legacy/functions.title_online')).'" />'
+                : '<img class="f_offline" src="pic/trans.gif" alt="Offline" title="'.(__('legacy/functions.title_offline')).'" />';
 
-            $html .= '<tr><td class="toolbox"> '.$onlineIcon.'<a href="sendmessage.php?receiver='.\htmlspecialchars(trim((string) $row['user'])).'"><img class="f_pm" src="pic/trans.gif" alt="PM" title="'.($lang_functions['title_send_message_to'] ?? '').\htmlspecialchars($userRow['username']).'" /></a><a href="report.php?commentid='.\htmlspecialchars(trim((string) $row['id'])).'"><img class="f_report" src="pic/trans.gif" alt="Report" title="'.($lang_functions['title_report_this_comment'] ?? '').'" /></a></td><td class="toolbox" align="right">'.$actionbar.'</td>';
+            $html .= '<tr><td class="toolbox"> '.$onlineIcon.'<a href="sendmessage.php?receiver='.\htmlspecialchars(trim((string) $row['user'])).'"><img class="f_pm" src="pic/trans.gif" alt="PM" title="'.(__('legacy/functions.title_send_message_to')).\htmlspecialchars($userRow['username']).'" /></a><a href="report.php?commentid='.\htmlspecialchars(trim((string) $row['id'])).'"><img class="f_report" src="pic/trans.gif" alt="Report" title="'.(__('legacy/functions.title_report_this_comment')).'" /></a></td><td class="toolbox" align="right">'.$actionbar.'</td>';
 
             $html .= '</tr></table>'."\n";
         }

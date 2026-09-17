@@ -26,7 +26,6 @@ use App\Support\UserDisplay;
 final class SiteChromeViewModel
 {
     /**
-     * @param  array<string, string>  $lang
      * @param  array<string, mixed>|null  $user
      * @param  list<array{key: string, href: string, label: string, selected: bool, attrs: string}>  $navItems
      */
@@ -36,7 +35,6 @@ final class SiteChromeViewModel
         public readonly string $logoMain,
         public readonly string $baseUrl,
         public readonly string $title,
-        public readonly array $lang,
         public readonly ?array $user,
         public readonly array $navItems,
         public readonly SafeHtml $usernameHtml,
@@ -60,7 +58,6 @@ final class SiteChromeViewModel
     public static function load(string $title, PageLayoutRepositoryInterface $repo): self
     {
         $context = PageLayoutContext::fromSupportContext();
-        $lang = $context->lang;
         $user = $context->user;
         $cache = $context->cache;
 
@@ -105,7 +102,6 @@ final class SiteChromeViewModel
             logoMain: $context->logoMain,
             baseUrl: $context->baseUrl,
             title: $fullTitle.' - Powered by '.PROJECTNAME,
-            lang: $lang,
             user: $user,
             navItems: $navItems,
             usernameHtml: $usernameHtml,
@@ -133,7 +129,6 @@ final class SiteChromeViewModel
     private static function navItems(PageLayoutContext $context): array
     {
         $script = $context->script !== '' ? $context->script : basename((string) $context->scriptFileName, '.php');
-        $lang = $context->lang;
         $user = $context->user;
         $userId = (int) ($user['id'] ?? 0);
 
@@ -157,27 +152,27 @@ final class SiteChromeViewModel
         $normalSectionName = SearchBox::value($context->cache, (int) (Settings::get('main.browsecat') ?? 1), 'section_name');
 
         $items = [
-            ['key' => 'home', 'href' => 'index.php', 'label' => $lang['text_home'] ?? 'Home'],
-            ['key' => 'forums', 'href' => 'forums.php', 'label' => $lang['text_forums'] ?? 'Forums'],
-            ['key' => 'latestcomments', 'href' => 'latestcomments.php', 'label' => $lang['text_latest_comments'] ?? 'Latest Comments'],
-            ['key' => 'torrents', 'href' => 'torrents.php', 'label' => $normalSectionName[$context->langDir] ?? ($lang['text_torrents'] ?? 'Torrents')],
+            ['key' => 'home', 'href' => 'index.php', 'label' => __('legacy/functions.text_home')],
+            ['key' => 'forums', 'href' => 'forums.php', 'label' => __('legacy/functions.text_forums')],
+            ['key' => 'latestcomments', 'href' => 'latestcomments.php', 'label' => __('legacy/functions.text_latest_comments')],
+            ['key' => 'torrents', 'href' => 'torrents.php', 'label' => $normalSectionName[$context->langDir] ?? (__('legacy/functions.text_torrents'))],
         ];
         if ($context->enableOffer === 'yes') {
-            $items[] = ['key' => 'offers', 'href' => 'offers.php', 'label' => $lang['text_offers'] ?? 'Offers'];
+            $items[] = ['key' => 'offers', 'href' => 'offers.php', 'label' => __('legacy/functions.text_offers')];
         }
-        $items[] = ['key' => 'upload', 'href' => 'upload.php', 'label' => $lang['text_upload'] ?? 'Upload'];
+        $items[] = ['key' => 'upload', 'href' => 'upload.php', 'label' => __('legacy/functions.text_upload')];
         if (Permissions::userCan('topten', false, $userId)) {
-            $items[] = ['key' => 'topten', 'href' => 'topten.php', 'label' => $lang['text_top_ten'] ?? 'Top 10'];
+            $items[] = ['key' => 'topten', 'href' => 'topten.php', 'label' => __('legacy/functions.text_top_ten')];
         }
         if (Permissions::userCan('log', false, $userId)) {
-            $items[] = ['key' => 'log', 'href' => 'log.php', 'label' => $lang['text_log'] ?? 'Log'];
+            $items[] = ['key' => 'log', 'href' => 'log.php', 'label' => __('legacy/functions.text_log')];
         }
-        $items[] = ['key' => 'rules', 'href' => 'rules.php', 'label' => $lang['text_rules'] ?? 'Rules'];
-        $items[] = ['key' => 'faq', 'href' => 'faq.php', 'label' => $lang['text_faq'] ?? 'FAQ'];
+        $items[] = ['key' => 'rules', 'href' => 'rules.php', 'label' => __('legacy/functions.text_rules')];
+        $items[] = ['key' => 'faq', 'href' => 'faq.php', 'label' => __('legacy/functions.text_faq')];
         if (Permissions::userCan('staffmem', false, $userId)) {
-            $items[] = ['key' => 'staff', 'href' => 'staff.php', 'label' => $lang['text_staff'] ?? 'Staff'];
+            $items[] = ['key' => 'staff', 'href' => 'staff.php', 'label' => __('legacy/functions.text_staff')];
         }
-        $items[] = ['key' => 'contactstaff', 'href' => 'contactstaff.php', 'label' => $lang['text_contactstaff'] ?? 'Contact Staff'];
+        $items[] = ['key' => 'contactstaff', 'href' => 'contactstaff.php', 'label' => __('legacy/functions.text_contactstaff')];
 
         return array_values(array_map(
             fn (array $item): array => $item + ['selected' => $item['key'] === $selected, 'attrs' => ''],

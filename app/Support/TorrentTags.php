@@ -69,16 +69,15 @@ final class TorrentTags
      */
     public static function renderWithContext(int|string $tags = 0, string $type = 'checkbox'): string
     {
-        $lang = app(Language::class)->functions();
 
         return self::render($tags, $type, [
-            'text_tag_no_release_to_any_other' => $lang['text_tag_no_release_to_any_other'] ?? '',
-            'text_tag_first_release' => $lang['text_tag_first_release'] ?? '',
-            'text_tag_official' => $lang['text_tag_official'] ?? '',
-            'text_tag_diy' => $lang['text_tag_diy'] ?? '',
-            'text_tag_mother_language' => $lang['text_tag_mother_language'] ?? '',
-            'text_tag_mother_language_subtitle' => $lang['text_tag_mother_language_subtitle'] ?? '',
-            'text_tag_hdr' => $lang['text_tag_hdr'] ?? '',
+            'text_tag_no_release_to_any_other' => __('legacy/functions.text_tag_no_release_to_any_other'),
+            'text_tag_first_release' => __('legacy/functions.text_tag_first_release'),
+            'text_tag_official' => __('legacy/functions.text_tag_official'),
+            'text_tag_diy' => __('legacy/functions.text_tag_diy'),
+            'text_tag_mother_language' => __('legacy/functions.text_tag_mother_language'),
+            'text_tag_mother_language_subtitle' => __('legacy/functions.text_tag_mother_language_subtitle'),
+            'text_tag_hdr' => __('legacy/functions.text_tag_hdr'),
         ]);
     }
 }

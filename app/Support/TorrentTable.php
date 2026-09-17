@@ -29,7 +29,6 @@ final class TorrentTable
         if ($cache === null) {
             throw new \RuntimeException('Cache not initialized');
         }
-        $lang_functions = app(Language::class)->functions();
         $user = app(CurrentUser::class)->get() ?? [];
         $config = SiteConfig::current();
         $waitsystem = $config->main->waitSystem(false) ? 'yes' : 'no';
@@ -115,26 +114,26 @@ final class TorrentTable
             }
         }
         ?>
-<td class="colhead" style="padding: 0px"><?php echo $lang_functions['col_type'] ?></td>
-<td class="colhead"><a href="?<?php echo $oldlink?>sort=1&amp;type=<?php echo $link[1]?>"><?php echo $lang_functions['col_name'] ?></a></td>
+<td class="colhead" style="padding: 0px"><?php echo __('legacy/functions.col_type') ?></td>
+<td class="colhead"><a href="?<?php echo $oldlink?>sort=1&amp;type=<?php echo $link[1]?>"><?php echo __('legacy/functions.col_name') ?></a></td>
 <?php
 
         if ($wait) {
-            echo '<td class="colhead">'.$lang_functions['col_wait']."</td>\n";
+            echo '<td class="colhead">'.__('legacy/functions.col_wait')."</td>\n";
         }
         if ($user['showcomnum']) { ?>
-<td class="colhead"><a href="?<?php echo $oldlink?>sort=3&amp;type=<?php echo $link[3]?>"><img class="comments" src="pic/trans.gif" alt="comments" title="<?php echo $lang_functions['title_number_of_comments'] ?>" /></a></td>
+<td class="colhead"><a href="?<?php echo $oldlink?>sort=3&amp;type=<?php echo $link[3]?>"><img class="comments" src="pic/trans.gif" alt="comments" title="<?php echo __('legacy/functions.title_number_of_comments') ?>" /></a></td>
 <?php } ?>
 
-<td class="colhead"><a href="?<?php echo $oldlink?>sort=4&amp;type=<?php echo $link[4]?>"><img class="time" src="pic/trans.gif" alt="time" title="<?php echo $user['timetype'] != UserTimeType::TIMEALIVE->value ? $lang_functions['title_time_added'] : $lang_functions['title_time_alive']?>" /></a></td>
-<td class="colhead"><a href="?<?php echo $oldlink?>sort=5&amp;type=<?php echo $link[5]?>"><img class="size" src="pic/trans.gif" alt="size" title="<?php echo $lang_functions['title_size'] ?>" /></a></td>
-<td class="colhead"><a href="?<?php echo $oldlink?>sort=7&amp;type=<?php echo $link[7]?>"><img class="seeders" src="pic/trans.gif" alt="seeders" title="<?php echo $lang_functions['title_number_of_seeders'] ?>" /></a></td>
-<td class="colhead"><a href="?<?php echo $oldlink?>sort=8&amp;type=<?php echo $link[8]?>"><img class="leechers" src="pic/trans.gif" alt="leechers" title="<?php echo $lang_functions['title_number_of_leechers'] ?>" /></a></td>
-<td class="colhead"><a href="?<?php echo $oldlink?>sort=6&amp;type=<?php echo $link[6]?>"><img class="snatched" src="pic/trans.gif" alt="snatched" title="<?php echo $lang_functions['title_number_of_snatched']?>" /></a></td>
-<td class="colhead"><a href="?<?php echo $oldlink?>sort=9&amp;type=<?php echo $link[9]?>"><?php echo $lang_functions['col_uploader']?></a></td>
+<td class="colhead"><a href="?<?php echo $oldlink?>sort=4&amp;type=<?php echo $link[4]?>"><img class="time" src="pic/trans.gif" alt="time" title="<?php echo $user['timetype'] != UserTimeType::TIMEALIVE->value ? __('legacy/functions.title_time_added') : __('legacy/functions.title_time_alive')?>" /></a></td>
+<td class="colhead"><a href="?<?php echo $oldlink?>sort=5&amp;type=<?php echo $link[5]?>"><img class="size" src="pic/trans.gif" alt="size" title="<?php echo __('legacy/functions.title_size') ?>" /></a></td>
+<td class="colhead"><a href="?<?php echo $oldlink?>sort=7&amp;type=<?php echo $link[7]?>"><img class="seeders" src="pic/trans.gif" alt="seeders" title="<?php echo __('legacy/functions.title_number_of_seeders') ?>" /></a></td>
+<td class="colhead"><a href="?<?php echo $oldlink?>sort=8&amp;type=<?php echo $link[8]?>"><img class="leechers" src="pic/trans.gif" alt="leechers" title="<?php echo __('legacy/functions.title_number_of_leechers') ?>" /></a></td>
+<td class="colhead"><a href="?<?php echo $oldlink?>sort=6&amp;type=<?php echo $link[6]?>"><img class="snatched" src="pic/trans.gif" alt="snatched" title="<?php echo __('legacy/functions.title_number_of_snatched')?>" /></a></td>
+<td class="colhead"><a href="?<?php echo $oldlink?>sort=9&amp;type=<?php echo $link[9]?>"><?php echo __('legacy/functions.col_uploader')?></a></td>
 <?php
 if (Permission::canManageTorrent()) { ?>
-	<td class="colhead"><?php echo $lang_functions['col_action'] ?></td>
+	<td class="colhead"><?php echo __('legacy/functions.col_action') ?></td>
 <?php } ?>
 </tr>
 <?php
@@ -194,10 +193,10 @@ if (Permission::canManageTorrent()) { ?>
 
             echo "<td class=\"rowfollow\" width=\"100%\" align=\"left\" style='padding: 0px'><table class=\"torrentname\" width=\"100%\"><tr".$sphighlight.">$tdCover<td class=\"embedded\" style='padding-left: 5px'>".$stickyicon."<a $short_torrent_name_alt $mouseovertorrent href=\"details.php?id=".$id.'&amp;hit=1"><b>'.htmlspecialchars($dispname).'</b></a>';
             if ($user['appendnew'] && strtotime($row['added']) >= $last_browse) {
-                echo "<b> (<font class='new'>".$lang_functions['text_new_uppercase'].'</font>)</b>';
+                echo "<b> (<font class='new'>".__('legacy/functions.text_new_uppercase').'</font>)</b>';
             }
 
-            $banned_torrent = ($row['banned'] == 1 ? ' <b>(<font class="striking">'.$lang_functions['text_banned'].'</font>)</b>' : '');
+            $banned_torrent = ($row['banned'] == 1 ? ' <b>(<font class="striking">'.__('legacy/functions.text_banned').'</font>)</b>' : '');
             $sp_torrent_sub = Promotion::appendSubWithContext($row['sp_state'], '', true, $row['added'], $row['promotion_time_type'], $row['promotion_until'], $row['__ignore_global_sp_state'] ?? false);
             $approvalStatusIcon = $moderationRep->renderApprovalStatus($row['approval_status']);
             $paidIcon = $torrentRep->getPaidIcon($row);
@@ -222,7 +221,7 @@ if (Permission::canManageTorrent()) { ?>
 
             $act = '';
             if ($user['dlicon'] && $user['downloadpos']) {
-                $act .= '<a href="download.php?id='.$id."\"><img class=\"download\" src=\"pic/trans.gif\" style='padding-bottom: 2px;' alt=\"download\" title=\"".$lang_functions['title_download_torrent'].'" /></a>';
+                $act .= '<a href="download.php?id='.$id."\"><img class=\"download\" src=\"pic/trans.gif\" style='padding-bottom: 2px;' alt=\"download\" title=\"".__('legacy/functions.title_download_torrent').'" /></a>';
             }
             if ($user['bmicon']) {
                 $bookmark = ' href="#" data-bookmark-torrent="'.$id.'" data-bookmark-counter="'.$counter.'"';
@@ -236,9 +235,9 @@ if (Permission::canManageTorrent()) { ?>
                 $elapsed = floor((TIMENOW - strtotime($row['added'])) / 3600);
                 if ($elapsed < $wait) {
                     $color = dechex((int) (floor(127 * ($wait - $elapsed) / 48 + 128) * 65536));
-                    echo '<td class="rowfollow nowrap"><a href="faq.php#id46"><font color="'.$color.'">'.number_format($wait - $elapsed).$lang_functions['text_h']."</font></a></td>\n";
+                    echo '<td class="rowfollow nowrap"><a href="faq.php#id46"><font color="'.$color.'">'.number_format($wait - $elapsed).__('legacy/functions.text_h')."</font></a></td>\n";
                 } else {
-                    echo '<td class="rowfollow nowrap">'.$lang_functions['text_none']."</td>\n";
+                    echo '<td class="rowfollow nowrap">'.__('legacy/functions.text_none')."</td>\n";
                 }
             }
 
@@ -251,7 +250,7 @@ if (Permission::canManageTorrent()) { ?>
                 $nl = '<br />';
                 if (! $row['comments']) {
                     $commentCount = is_scalar($row['comments']) ? (string) $row['comments'] : '0';
-                    echo '<a href="comment.php?action=add&amp;pid='.$id.'&amp;type=torrent" title="'.$lang_functions['title_add_comments'].'">'.$commentCount.'</a>';
+                    echo '<a href="comment.php?action=add&amp;pid='.$id.'&amp;type=torrent" title="'.__('legacy/functions.title_add_comments').'">'.$commentCount.'</a>';
                 } else {
                     if ($enabletooltip_tweak == 'yes' && $user['showlastcom']) {
                         if (! $lastcom = $cache->get_value('torrent_'.$id.'_last_comment_content')) {
@@ -263,12 +262,12 @@ if (Permission::canManageTorrent()) { ?>
                         $onmouseover = '';
                         if ($lastcom) {
                             if ($user['timetype'] != UserTimeType::TIMEALIVE->value) {
-                                $lastcomtime = $lang_functions['text_at_time'].$lastcom['added'];
+                                $lastcomtime = __('legacy/functions.text_at_time').$lastcom['added'];
                             } else {
-                                $lastcomtime = $lang_functions['text_blank'].Time::format($lastcom['added'], true, false, true);
+                                $lastcomtime = __('legacy/functions.text_blank').Time::format($lastcom['added'], true, false, true);
                             }
                             $lastcom_tooltip[$counter]['id'] = 'lastcom_'.$counter;
-                            $lastcom_tooltip[$counter]['content'] = ($hasnewcom ? "<b>(<font class='new'>".$lang_functions['text_new_uppercase'].'</font>)</b> ' : '').$lang_functions['text_last_commented_by'].UserDisplay::username($lastcom['user']).$lastcomtime.'<br />'.Format::formatComment(mb_substr($lastcom['text'], 0, 100, 'UTF-8').(mb_strlen($lastcom['text'], 'UTF-8') > 100 ? ' ......' : ''), true, false, false, true, 600, false, false);
+                            $lastcom_tooltip[$counter]['content'] = ($hasnewcom ? "<b>(<font class='new'>".__('legacy/functions.text_new_uppercase').'</font>)</b> ' : '').__('legacy/functions.text_last_commented_by').UserDisplay::username($lastcom['user']).$lastcomtime.'<br />'.Format::formatComment(mb_substr($lastcom['text'], 0, 100, 'UTF-8').(mb_strlen($lastcom['text'], 'UTF-8') > 100 ? ' ......' : ''), true, false, false, true, 600, false, false);
                             $onmouseover = ' data-domtt-src="'.$lastcom_tooltip[$counter]['id'].'"';
                         }
                     } else {
@@ -315,19 +314,19 @@ if (Permission::canManageTorrent()) { ?>
                 $row['anonymous'] == 1
                 && (Permission::canViewAnonymous() || (isset($row['owner']) && $row['owner'] == $user['id']))
             ) {
-                echo '<td class="rowfollow" align="center"><i>'.$lang_functions['text_anonymous'].'</i><br />'.(isset($row['owner']) ? '('.UserDisplay::username($row['owner']).')' : '<i>'.$lang_functions['text_orphaned'].'</i>')."</td>\n";
+                echo '<td class="rowfollow" align="center"><i>'.__('legacy/functions.text_anonymous').'</i><br />'.(isset($row['owner']) ? '('.UserDisplay::username($row['owner']).')' : '<i>'.__('legacy/functions.text_orphaned').'</i>')."</td>\n";
             } elseif ($row['anonymous'] == 1) {
-                echo '<td class="rowfollow"><i>'.$lang_functions['text_anonymous']."</i></td>\n";
+                echo '<td class="rowfollow"><i>'.__('legacy/functions.text_anonymous')."</i></td>\n";
             } else {
-                echo '<td class="rowfollow">'.(isset($row['owner']) ? UserDisplay::username($row['owner']) : '<i>'.$lang_functions['text_orphaned'].'</i>')."</td>\n";
+                echo '<td class="rowfollow">'.(isset($row['owner']) ? UserDisplay::username($row['owner']) : '<i>'.__('legacy/functions.text_orphaned').'</i>')."</td>\n";
             }
 
             if (Permission::canManageTorrent()) {
                 $actions = [];
                 if (Permission::canDeleteTorrent()) {
-                    $actions[] = '<a href="'.htmlspecialchars('fastdelete.php?id='.$row['id']).'"><img class="staff_delete" src="pic/trans.gif" alt="D" title="'.$lang_functions['text_delete'].'" /></a>';
+                    $actions[] = '<a href="'.htmlspecialchars('fastdelete.php?id='.$row['id']).'"><img class="staff_delete" src="pic/trans.gif" alt="D" title="'.__('legacy/functions.text_delete').'" /></a>';
                 }
-                $actions[] = '<a href="edit.php?returnto='.rawurlencode(Input::serverValue('REQUEST_URI', '')).'&amp;id='.$row['id'].'"><img class="staff_edit" src="pic/trans.gif" alt="E" title="'.$lang_functions['text_edit'].'" /></a>';
+                $actions[] = '<a href="edit.php?returnto='.rawurlencode(Input::serverValue('REQUEST_URI', '')).'&amp;id='.$row['id'].'"><img class="staff_edit" src="pic/trans.gif" alt="E" title="'.__('legacy/functions.text_edit').'" /></a>';
                 echo sprintf('<td class="rowfollow">%s</td>', implode('<br />', $actions));
             }
             echo "</tr>\n";
@@ -335,7 +334,7 @@ if (Permission::canManageTorrent()) { ?>
         }
         echo '</table>';
         if ($user['appendpromotion'] == UserAppendPromotion::HIGHLIGHT->value) {
-            echo '<p align="center"> '.$lang_functions['text_promoted_torrents_note']."</p>\n";
+            echo '<p align="center"> '.__('legacy/functions.text_promoted_torrents_note')."</p>\n";
         }
 
         if ($enabletooltip_tweak == 'yes' && (empty($user) || ($user['showlastcom'] ?? false))) {

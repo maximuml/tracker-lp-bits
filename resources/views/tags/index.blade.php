@@ -1,14 +1,14 @@
 @extends('layouts.legacy')
 
-@section('title', $lang_tags['head_tags'] ?? 'Tags')
+@section('title', __('legacy/tags.head_tags'))
 
 @section('content')
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::open((string) ($lang_tags['text_tags'] ?? ''), false, 10, '100%', 'left')))
-<p>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(sprintf((string) ($lang_tags['text_bb_tags_note'] ?? '%s'), $siteName)))</p>
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::open((string) (__('legacy/tags.text_tags')), false, 10, '100%', 'left')))
+<p>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(sprintf((string) (__('legacy/tags.text_bb_tags_note')), $siteName)))</p>
 
 <form method=post action=?>
 <textarea name=test cols=60 rows=3>{{ $test ?? '' }}</textarea>
-<input type=submit style='height: 23px; margin-left: 5px' value="{{ $lang_tags['submit_test_this_code'] ?? '' }}">
+<input type=submit style='height: 23px; margin-left: 5px' value="{{ __('legacy/tags.submit_test_this_code')}}">
 </form>
 
 @if (($test ?? '') !== '')
@@ -18,12 +18,12 @@
 @foreach ($tagItems ?? [] as $item)
     <p class=sub><b>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['name']))</b></p>
     <table data-nx="data" class=main width=100% border=1 cellspacing=0 cellpadding=5>
-    <tr valign=top><td width=25%>{{ $lang_tags['text_description'] ?? '' }}</td><td>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['description']))
-    <tr valign=top><td>{{ $lang_tags['text_syntax'] ?? '' }}</td><td><tt>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['syntax']))</tt>
-    <tr valign=top><td>{{ $lang_tags['text_example'] ?? '' }}</td><td><tt>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['example']))</tt>
-    <tr valign=top><td>{{ $lang_tags['text_result'] ?? '' }}</td><td>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['result']))
+    <tr valign=top><td width=25%>{{ __('legacy/tags.text_description')}}</td><td>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['description']))
+    <tr valign=top><td>{{ __('legacy/tags.text_syntax')}}</td><td><tt>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['syntax']))</tt>
+    <tr valign=top><td>{{ __('legacy/tags.text_example')}}</td><td><tt>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['example']))</tt>
+    <tr valign=top><td>{{ __('legacy/tags.text_result')}}</td><td>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['result']))
     @if ($item['remarks'] !== '')
-        <tr><td>{{ $lang_tags['text_remarks'] ?? '' }}</td><td>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['remarks']))
+        <tr><td>{{ __('legacy/tags.text_remarks')}}</td><td>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['remarks']))
     @endif
     </table>
 @endforeach

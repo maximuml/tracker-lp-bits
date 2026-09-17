@@ -1,14 +1,14 @@
 @extends('layouts.legacy')
 
-@section('title', $lang_users['text_users'] ?? 'Users')
+@section('title', __('legacy/users.text_users'))
 
 @section('content')
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($lang_users['text_users'] ?? 'Users'))
+@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/users.text_users')))
 
 <form method=get action=?>
-{{ $lang_users['text_search'] ?? 'Search:' }} <input type=text style="width:100px" name=search value="{{ $search }}">
+{{ __('legacy/users.text_search')}} <input type=text style="width:100px" name=search value="{{ $search }}">
 <select name=class>
-<option value='-'>{{ $lang_users['select_any_class'] ?? 'Any class' }}</option>
+<option value='-'>{{ __('legacy/users.select_any_class')}}</option>
 @foreach ($classOptions as $opt)
 <option value="{{ (int) $opt['value'] }}"@if ($opt['selected']) selected @endif>{{ $opt['label'] }}</option>
 @endforeach
@@ -18,7 +18,7 @@
 <option value="{{ (int) $opt['value'] }}"@if ($opt['selected']) selected @endif>{{ $opt['label'] }}</option>
 @endforeach
 </select>
-<input type=submit value="{{ $lang_users['submit_okay'] ?? 'OK' }}">
+<input type=submit value="{{ __('legacy/users.submit_okay')}}">
 </form>
 
 <p>
@@ -35,11 +35,11 @@
 
 <table data-nx="data" border=1 cellspacing=0 cellpadding=5>
 <tr>
-    <td class=colhead align=left>{{ $lang_users['col_user_name'] ?? 'User name' }}</td>
-    <td class=colhead>{{ $lang_users['col_registered'] ?? 'Registered' }}</td>
-    <td class=colhead>{{ $lang_users['col_last_access'] ?? 'Last access' }}</td>
-    <td class=colhead align=left>{{ $lang_users['col_class'] ?? 'Class' }}</td>
-    <td class=colhead>{{ $lang_users['col_country'] ?? 'Country' }}</td>
+    <td class=colhead align=left>{{ __('legacy/users.col_user_name')}}</td>
+    <td class=colhead>{{ __('legacy/users.col_registered')}}</td>
+    <td class=colhead>{{ __('legacy/users.col_last_access')}}</td>
+    <td class=colhead align=left>{{ __('legacy/users.col_class')}}</td>
+    <td class=colhead>{{ __('legacy/users.col_country')}}</td>
 </tr>
 @foreach ($rows as $row)
 <tr>

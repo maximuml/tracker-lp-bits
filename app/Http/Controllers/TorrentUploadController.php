@@ -57,20 +57,13 @@ class TorrentUploadController extends Controller
         // Views still read $lang_upload/$lang_edit from Globals (View composer
         // injects every global) — keep populating them until the per-key
         // __('legacy/x.k') conversion lands.
-        $this->globals->set('lang_upload', (array) trans('legacy/upload'));
-        $this->globals->set('lang_edit', (array) trans('legacy/edit'));
-
-        /** @var array<string, string> $lang_upload */
-        $lang_upload = (array) trans('legacy/upload');
-        /** @var array<string, string> $lang_edit */
-        $lang_edit = (array) trans('legacy/edit');
 
         if ($currentUser['parked']) {
-            LegacyResponse::abort($lang_upload['std_sorry'] ?? '', $lang_upload['std_unauthorized_to_upload'] ?? '', false);
+            LegacyResponse::abort(__('legacy/upload.std_sorry'), __('legacy/upload.std_unauthorized_to_upload'), false);
         }
 
         if (! $currentUser['uploadpos']) {
-            LegacyResponse::abort($lang_upload['std_sorry'] ?? '', $lang_upload['std_unauthorized_to_upload'] ?? '', false);
+            LegacyResponse::abort(__('legacy/upload.std_sorry'), __('legacy/upload.std_unauthorized_to_upload'), false);
         }
 
         $enableoffer = SiteConfig::current()->main->showOffer(false) ? 'yes' : 'no';
@@ -89,14 +82,14 @@ class TorrentUploadController extends Controller
         $uploadFreely = LegacyResponse::canUpload('torrents');
         $allowtorrents = $has_allowed_offer || $uploadFreely;
         if (! $allowtorrents) {
-            LegacyResponse::abort($lang_upload['std_sorry'] ?? '', $lang_upload['std_please_offer'] ?? '', false);
+            LegacyResponse::abort(__('legacy/upload.std_sorry'), __('legacy/upload.std_please_offer'), false);
         }
 
         $browsecatmode = SiteConfig::current()->main->browseCat(1);
         $torrentConfig = SiteConfig::current()->torrent;
 
         $nameInputHtml = $this->torrentRepository->buildUploadFieldInput(
-            'name', '', $lang_upload['text_torrent_name_note'] ?? '', $lang_upload['fill_setlist'] ?? '', 'setlistLookupBtn',
+            'name', '', __('legacy/upload.text_torrent_name_note'), __('legacy/upload.fill_setlist'), 'setlistLookupBtn',
         );
 
         $priceCellHtml = '';
@@ -115,7 +108,7 @@ class TorrentUploadController extends Controller
             foreach (Torrent::listPosStates() as $key => $value) {
                 $options .= '<option value="'.$key.'">'.$value['text'].'</option>';
             }
-            $pickCellHtml = '<b>'.$lang_edit['row_torrent_position'].':&nbsp;</b>'
+            $pickCellHtml = '<b>'.__('legacy/edit.row_torrent_position').':&nbsp;</b>'
                 .'<select name="pos_state" style="width: 100px;">'.$options.'</select>&nbsp;&nbsp;&nbsp;'
                 .view('components.datetime-input', ['label' => SafeHtml::fromTrustedHtml(Locale::trans('label.deadline', [], null).':&nbsp;'), 'name' => 'pos_state_until', 'value' => ''])->render();
         }
@@ -126,7 +119,7 @@ class TorrentUploadController extends Controller
             'uploadFreely' => $uploadFreely,
             'allowtorrents' => $allowtorrents,
             'offerRows' => $offerRows,
-            'pageTitle' => $lang_upload['head_upload'] ?? '',
+            'pageTitle' => __('legacy/upload.head_upload'),
             'cats' => Category::listByModeWithContext($browsecatmode),
             'trackerUrl' => Tracker::schemaAndHost((int) ($currentUser['tracker_url_id'] ?? 0), true),
             'torrentDirWritable' => is_writable(Path::resolve((string) ($this->globals->get('torrent_dir') ?? ''), ROOT_PATH)),

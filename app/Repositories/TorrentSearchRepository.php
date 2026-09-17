@@ -46,7 +46,6 @@ class TorrentSearchRepository
     public function getListingData(array $query = []): array
     {
         $CURUSER = $this->currentUser->get() ?? [];
-        $lang_torrents = trans('legacy/torrents');
         $browsecatmode = (int) $this->globals->get('browsecatmode', 1);
         $torrentsperpage_main = (int) $this->globals->get('torrentsperpage_main', 0);
         $catimgurl = '';
@@ -257,11 +256,11 @@ class TorrentSearchRepository
         }
 
         if ($searchstr !== null) {
-            $pageTitle = $lang_torrents['head_search_results_for'].$searchstr_ori;
+            $pageTitle = __('legacy/torrents.head_search_results_for').$searchstr_ori;
         } elseif ($sectiontype == $browsecatmode) {
-            $pageTitle = $lang_torrents['head_torrents'];
+            $pageTitle = __('legacy/torrents.head_torrents');
         } else {
-            $pageTitle = $lang_torrents['head_special'];
+            $pageTitle = __('legacy/torrents.head_special');
         }
 
         $hotSearches = $this->hotSearchKeywords();
@@ -269,11 +268,11 @@ class TorrentSearchRepository
         $emptyBody = '';
         if (! $count) {
             if (isset($searchstr)) {
-                $emptyTitle = $lang_torrents['std_search_results_for'].$searchstr_ori.'"';
-                $emptyBody = $lang_torrents['std_try_again'];
+                $emptyTitle = __('legacy/torrents.std_search_results_for').$searchstr_ori.'"';
+                $emptyBody = __('legacy/torrents.std_try_again');
             } else {
-                $emptyTitle = $lang_torrents['std_nothing_found'];
-                $emptyBody = $lang_torrents['std_no_active_torrents'];
+                $emptyTitle = __('legacy/torrents.std_nothing_found');
+                $emptyBody = __('legacy/torrents.std_no_active_torrents');
             }
         }
         if ($CURUSER !== []) {

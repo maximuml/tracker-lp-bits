@@ -126,7 +126,6 @@ final class Cache
         $rootpath = app(Globals::class)->get('rootpath', defined('ROOT_PATH') ? constant('ROOT_PATH') : '');
         $cacheDir = app(Globals::class)->get('cache', '');
         $langDir = Locale::currentLangDir();
-        $lang = app(Language::class)->functions();
 
         $cachefile = self::path($rootpath, $cacheDir, $langDir, $file);
         if (self::isFresh($cachefile, $cachetime)) {
@@ -134,7 +133,7 @@ final class Cache
             if ($endpage) {
                 $cacheMtime = filemtime($cachefile);
                 $cacheMtime = $cacheMtime === false ? null : $cacheMtime;
-                echo '<p align="center"><font class="small">'.($lang['text_page_last_updated'] ?? '').date('Y-m-d H:i:s', $cacheMtime).'</font></p>';
+                echo '<p align="center"><font class="small">'.(__('legacy/functions.text_page_last_updated')).date('Y-m-d H:i:s', $cacheMtime).'</font></p>';
                 Frame::mainFrameClose();
                 Html::stdfoot();
                 exit;

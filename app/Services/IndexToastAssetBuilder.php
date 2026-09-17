@@ -14,16 +14,15 @@ use App\Support\AssetAppender;
 final class IndexToastAssetBuilder
 {
     /**
-     * @param  array<string, mixed>  $lang
      * @param  array<string, mixed>  $curUser
      */
-    public function append(array $lang, array $curUser): void
+    public function append(array $curUser): void
     {
         $toastLang = json_encode([
-            'newMessage' => $lang['toast_new_message'] ?? 'New message',
-            'shoutboxMention' => $lang['toast_shoutbox_mention'] ?? 'Shoutbox mention',
-            'from' => $lang['toast_from'] ?? 'From',
-            'close' => $lang['toast_close'] ?? 'Close',
+            'newMessage' => __('legacy/index.toast_new_message'),
+            'shoutboxMention' => __('legacy/index.toast_shoutbox_mention'),
+            'from' => __('legacy/index.toast_from'),
+            'close' => __('legacy/index.toast_close'),
             'userId' => (int) ($curUser['id'] ?? 0),
         ], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT);
         AssetAppender::css('styles/shoutbox.css', 'header', true);

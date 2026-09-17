@@ -103,7 +103,6 @@ class StaffMessageController extends LegacyController
     public function contactstaff(Request $request): View|RedirectResponse|Response
     {
         return $this->legacyPage($request, 'contactstaff', true, [
-            'lang_contactstaff' => (array) trans('legacy/contactstaff'),
         ]);
 
     }
@@ -111,20 +110,19 @@ class StaffMessageController extends LegacyController
     public function takecontact(Request $request): View|RedirectResponse|Response
     {
         $curUser = $this->currentUser->get() ?? [];
-        $langTakecontact = (array) trans('legacy/takecontact');
 
         if (! $request->isMethod('post')) {
-            return $this->legacyAbortResponse($langTakecontact['std_error'] ?? 'Error', $langTakecontact['std_method'] ?? 'Method not allowed.');
+            return $this->legacyAbortResponse(__('legacy/takecontact.std_error'), __('legacy/takecontact.std_method'));
         }
 
         $msg = trim((string) request()->post('body'));
         $subject = trim((string) request()->post('subject'));
 
         if ($msg === '') {
-            return $this->legacyAbortResponse($langTakecontact['std_error'] ?? 'Error', $langTakecontact['std_please_enter_something'] ?? 'Please enter something.');
+            return $this->legacyAbortResponse(__('legacy/takecontact.std_error'), __('legacy/takecontact.std_please_enter_something'));
         }
         if ($subject === '') {
-            return $this->legacyAbortResponse($langTakecontact['std_error'] ?? 'Error', $langTakecontact['std_please_define_subject'] ?? 'Please define a subject.');
+            return $this->legacyAbortResponse(__('legacy/takecontact.std_error'), __('legacy/takecontact.std_please_define_subject'));
         }
 
         $currentUserId = (int) ($curUser['id'] ?? 0);
@@ -137,8 +135,8 @@ class StaffMessageController extends LegacyController
                 $secs = 60 - ($timeNow - strtotime((string) $last));
 
                 return $this->legacyAbortResponse(
-                    $langTakecontact['std_error'] ?? 'Error',
-                    ($langTakecontact['std_message_flooding'] ?? 'Message flooding: wait ').$secs.($langTakecontact['std_second'] ?? ' second').($secs == 1 ? '' : ($langTakecontact['std_s'] ?? 's')).($langTakecontact['std_before_sending_pm'] ?? ' before sending PM.')
+                    __('legacy/takecontact.std_error'),
+                    (__('legacy/takecontact.std_message_flooding')).$secs.(__('legacy/takecontact.std_second')).($secs == 1 ? '' : (__('legacy/takecontact.std_s'))).(__('legacy/takecontact.std_before_sending_pm'))
                 );
             }
         }
@@ -154,7 +152,6 @@ class StaffMessageController extends LegacyController
         }
 
         return $this->legacyPage($request, 'takecontact', true, [
-            'lang_takecontact' => $langTakecontact,
         ]);
     }
 }

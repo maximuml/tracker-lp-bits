@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Support\Torrent;
 
 use App\Support\Format;
-use App\Support\Language;
 use App\Support\Locale;
 
 class BdInfoExtra
@@ -921,7 +920,6 @@ class BdInfoExtra
      */
     public function renderOnDetailsPage(): string
     {
-        $lang_functions = app(Language::class)->functions();
 
         // 获取所有DISC
         $allDiscs = $this->getAllDiscs();

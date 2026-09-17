@@ -1,15 +1,15 @@
 @extends('layouts.legacy')
 
-@section('title', $lang_faq['head_faq'] ?? '')
+@section('title', __('legacy/faq.head_faq'))
 
 @section('content')
 @if (! empty($faqCategories))
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::open($lang_faq['text_welcome_to'].$SITENAME." - ".$SLOGAN, false, 10, '100%', 'left')))
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($lang_faq['text_welcome_content_one'] ?? ''))
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(sprintf($lang_faq['text_welcome_content_two'] ?? '', $SITENAME, $SITENAME)))
+    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::open(__('legacy/faq.text_welcome_to').$SITENAME." - ".$SLOGAN, false, 10, '100%', 'left')))
+    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/faq.text_welcome_content_one')))
+    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(sprintf(__('legacy/faq.text_welcome_content_two'), $SITENAME, $SITENAME)))
     @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::CLOSE))
 
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::open("<span id=\"top\">".($lang_faq['text_contents'] ?? '')."</span>", false, 10, '100%', 'left')))
+    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::open("<span id=\"top\">".(__('legacy/faq.text_contents'))."</span>", false, 10, '100%', 'left')))
     <ul>
     @foreach ($faqCategories as $id => $temp)
         @if ($faqCategories[$id]['flag'] == "1")

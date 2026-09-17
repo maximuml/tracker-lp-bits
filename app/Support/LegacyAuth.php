@@ -29,7 +29,6 @@ final class LegacyAuth
      */
     public static function failedLoginsCheck(string $type, LegacyAuthContext $context): void
     {
-        $lang = $context->lang;
         $maxAttempts = $context->maxLoginAttempts;
         $ip = $context->ip;
 
@@ -39,8 +38,8 @@ final class LegacyAuth
             app(AuthRepositoryInterface::class)->banLoginAttempts($ip);
 
             LegacyResponse::abort(
-                $type.($lang['std_locked'] ?? '').$maxAttempts.($lang['std_attempts_reached'] ?? ''),
-                (string) ($lang['std_your_ip_banned'] ?? ''),
+                $type.(__('legacy/functions.std_locked')).$maxAttempts.(__('legacy/functions.std_attempts_reached')),
+                (string) (__('legacy/functions.std_your_ip_banned')),
                 true,
                 true,
             );
@@ -74,7 +73,6 @@ final class LegacyAuth
         bool $head,
         LegacyAuthContext $context,
     ): bool {
-        $lang = $context->lang;
 
         if (! $context->captchaEnabled) {
             return true;
@@ -106,9 +104,9 @@ final class LegacyAuth
         } catch (CaptchaValidationException $exception) {
             $message = $exception->getMessage();
 
-            $defaultMessage = ($lang['std_invalid_image_code'] ?? '')
+            $defaultMessage = (__('legacy/functions.std_invalid_image_code'))
                 .'<a href="'.\htmlspecialchars($where).'">'
-                .($lang['std_here_to_request_new'] ?? '');
+                .(__('legacy/functions.std_here_to_request_new'));
 
             if ($message === '' || $message === 'Invalid captcha response.' || $message === 'Missing captcha parameters.') {
                 $message = $defaultMessage;
@@ -131,7 +129,6 @@ final class LegacyAuth
         string $failedLangKey,
         LegacyAuthContext $context,
     ): void {
-        $lang = $context->lang;
         $ip = $context->ip;
 
         app(AuthRepositoryInterface::class)->recordFailedLogin($ip, $recover);
@@ -142,14 +139,14 @@ final class LegacyAuth
 
         if ($type === 'login') {
             LegacyResponse::abort(
-                (string) ($lang['std_login_failed'] ?? ''),
-                (string) ($lang['std_login_failed_note'] ?? ''),
+                (string) (__('legacy/functions.std_login_failed')),
+                (string) (__('legacy/functions.std_login_failed_note')),
                 false,
                 $head,
             );
         } else {
             LegacyResponse::abort(
-                (string) ($lang[$failedLangKey] ?? ''),
+                (string) (__('legacy/functions.'.$failedLangKey)),
                 $type,
                 false,
                 $head,
@@ -162,14 +159,13 @@ final class LegacyAuth
      */
     public static function currentUserCheck(LegacyAuthContext $context): void
     {
-        $lang = $context->lang;
 
         if ($context->isLoggedIn()) {
             app(AuthRepositoryInterface::class)->updateUserLang((int) ($context->user['id'] ?? 0), $context->langId());
 
             LegacyResponse::abort(
-                (string) ($lang['std_permission_denied'] ?? ''),
-                (string) ($lang['std_already_logged_in'] ?? ''),
+                (string) (__('legacy/functions.std_permission_denied')),
+                (string) (__('legacy/functions.std_already_logged_in')),
             );
         }
     }
@@ -179,12 +175,11 @@ final class LegacyAuth
      */
     public static function parked(LegacyAuthContext $context): void
     {
-        $lang = $context->lang;
 
         if (($context->user['parked'] ?? false)) {
             LegacyResponse::abort(
-                (string) ($lang['std_access_denied'] ?? ''),
-                (string) ($lang['std_your_account_parked'] ?? ''),
+                (string) (__('legacy/functions.std_access_denied')),
+                (string) (__('legacy/functions.std_your_account_parked')),
             );
         }
     }
@@ -198,14 +193,13 @@ final class LegacyAuth
         bool $ipcheck,
         LegacyAuthContext $context,
     ): bool {
-        $lang = $context->lang;
         $settings = $context->registration;
 
         if ($type === 'invitesystem') {
             if ($settings['invitesystem'] === 'no') {
                 LegacyResponse::abort(
-                    (string) ($lang['std_oops'] ?? ''),
-                    (string) ($lang['std_invite_system_disabled'] ?? ''),
+                    (string) (__('legacy/functions.std_oops')),
+                    (string) (__('legacy/functions.std_invite_system_disabled')),
                     false,
                     true,
                 );
@@ -215,8 +209,8 @@ final class LegacyAuth
         if ($type === 'normal') {
             if ($settings['registration'] === 'no') {
                 LegacyResponse::abort(
-                    (string) ($lang['std_sorry'] ?? ''),
-                    (string) ($lang['std_open_registration_disabled'] ?? ''),
+                    (string) (__('legacy/functions.std_sorry')),
+                    (string) (__('legacy/functions.std_open_registration_disabled')),
                     false,
                     true,
                 );
@@ -227,8 +221,8 @@ final class LegacyAuth
             $userCount = app(AuthRepositoryInterface::class)->countUsers();
             if ($userCount >= $settings['maxusers']) {
                 LegacyResponse::abort(
-                    (string) ($lang['std_sorry'] ?? ''),
-                    (string) ($lang['std_account_limit_reached'] ?? ''),
+                    (string) (__('legacy/functions.std_sorry')),
+                    (string) (__('legacy/functions.std_account_limit_reached')),
                     false,
                     true,
                 );
@@ -240,8 +234,8 @@ final class LegacyAuth
             $ipCount = app(AuthRepositoryInterface::class)->countUsersByIp($ip);
             if ($ipCount > $settings['maxip']) {
                 LegacyResponse::abort(
-                    (string) ($lang['std_sorry'] ?? ''),
-                    (string) ($lang['std_the_ip'] ?? '').'<b>'.\htmlspecialchars($ip).'</b>'.\sprintf((string) ($lang['std_used_many_times'] ?? ''), Setting::getSiteName()),
+                    (string) (__('legacy/functions.std_sorry')),
+                    (string) (__('legacy/functions.std_the_ip')).'<b>'.\htmlspecialchars($ip).'</b>'.\sprintf((string) (__('legacy/functions.std_used_many_times')), Setting::getSiteName()),
                     false,
                     true,
                 );
@@ -312,14 +306,13 @@ final class LegacyAuth
      */
     public static function userIdFromName(string $username, LegacyAuthContext $context): int
     {
-        $lang = $context->lang;
 
         $id = app(AuthRepositoryInterface::class)->getUserIdByUsername($username);
 
         if ($id === null) {
             LegacyResponse::abort(
-                (string) ($lang['std_error'] ?? ''),
-                (string) ($lang['std_no_user_named'] ?? '')."'".$username."'",
+                (string) (__('legacy/functions.std_error')),
+                (string) (__('legacy/functions.std_no_user_named'))."'".$username."'",
             );
         }
 
@@ -338,14 +331,13 @@ final class LegacyAuth
      */
     public static function loginFromCookie(LegacyAuthContext $context): ?array
     {
-        $lang = $context->lang;
         $cache = $context->cache;
 
         $ip = $context->ip;
         $nip = ip2long($ip);
 
         if ($nip && app(AuthRepositoryInterface::class)->isIpBanned($nip)) {
-            $html = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head><body>'.($lang['text_unauthorized_ip'] ?? '')."</body></html>\n";
+            $html = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head><body>'.(__('legacy/functions.text_unauthorized_ip'))."</body></html>\n";
             throw new HttpResponseException(new Response($html, 403));
         }
 

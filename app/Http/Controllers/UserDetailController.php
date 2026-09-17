@@ -79,13 +79,11 @@ class UserDetailController extends Controller
         }
 
         $user = $this->userDetailRepository->getUser($id);
-        /** @var array<string, string> $lang */
-        $lang = (array) trans('legacy/userdetails');
 
         if ($user === null) {
             LegacyResponse::abort(
-                $lang['std_error'] ?? 'Error',
-                $lang['std_no_such_user'] ?? 'No user with this ID!'
+                __('legacy/userdetails.std_error'),
+                __('legacy/userdetails.std_no_such_user')
             );
 
             return redirect('/userdetails.php');
@@ -93,8 +91,8 @@ class UserDetailController extends Controller
 
         if (($user['status'] ?? null) === UserStatus::PENDING->stringValue()) {
             LegacyResponse::abort(
-                $lang['std_sorry'] ?? 'Sorry',
-                $lang['std_user_not_confirmed'] ?? 'This user is not confirmed.'
+                __('legacy/userdetails.std_sorry'),
+                __('legacy/userdetails.std_user_not_confirmed')
             );
         }
 
@@ -104,7 +102,6 @@ class UserDetailController extends Controller
         return view('user.details', array_merge([
             'id' => $id,
             'user' => $user,
-            'lang' => $lang,
             'userModel' => $userModel,
             'torrentcomments' => $this->userDetailRepository->getCommentCount($id),
             'forumposts' => $this->userDetailRepository->getPostCount($id),
@@ -192,15 +189,13 @@ class UserDetailController extends Controller
 
         $userManageSystemUrl = sprintf('%s/%s/user/users/%s', Url::schemeAndHost(false), Env::get('FILAMENT_PATH', 'nexusphp'), $user['id']);
 
-        $langDetails = (array) trans('legacy/userdetails');
-        $langFunctions = (array) trans('legacy/functions');
         $userManageSystemText = sprintf(
             '<a href="%s" target="_blank" class="altlink">%s</a>',
             $userManageSystemUrl,
-            $langFunctions['text_management_system'] ?? ''
+            __('legacy/functions.text_management_system')
         );
         $migratedHelp = '&nbsp;&nbsp;'.sprintf(
-            $langDetails['change_field_value_migrated'] ?? '%s',
+            __('legacy/userdetails.change_field_value_migrated'),
             $userManageSystemText
         );
 
@@ -280,7 +275,7 @@ document.getElementById('remove-leech-warn').addEventListener('click', function 
         }
     })
 })
-JS, \json_encode($langDetails['sure_to_remove_leech_warn'] ?? '')), 'footer', false);
+JS, \json_encode(__('legacy/userdetails.sure_to_remove_leech_warn'))), 'footer', false);
         }
 
         $classSelectHtml = '';
@@ -292,7 +287,7 @@ JS, \json_encode($langDetails['sure_to_remove_leech_warn'] ?? '')), 'footer', fa
         if (($user['timeswarned'] ?? 0) > 0 && $user['warnedby'] !== 'System') {
             $arr = $this->userDetailRepository->getWarnedBy((int) $user['warnedby']);
             if ($arr !== null) {
-                $warnedByHtml = '<br />['.$langDetails['text_by'].'<u>'.UserDisplay::username($arr['id']).'</u></a>]';
+                $warnedByHtml = '<br />['.__('legacy/userdetails.text_by').'<u>'.UserDisplay::username($arr['id']).'</u></a>]';
             }
         }
 
@@ -355,29 +350,31 @@ JS, 'footer', false);
             $cardName = $changeUsernameCards->first()->meta_key_text;
             $useInput = '';
             if ($isOwner) {
-                $useInput = sprintf('<input type="button" value="%s" id="%s">', $langDetails['consume'] ?? '', $triggerId);
+                $useInput = sprintf('<input type="button" value="%s" id="%s">', __('legacy/userdetails.consume'), $triggerId);
             }
             $props = [sprintf(
                 '<div><strong>[%s]</strong>(%s)</div>%s',
                 $cardName, $changeUsernameCards->count(), $useInput
             )];
             if ($isOwner) {
+                $metaKeyLabel = __('legacy/userdetails.meta_key_change_username_username');
                 $consumeChangeUsernameForm = <<<HTML
 <div class="layer-form">
 <form id="layer-form-$metaKey">
     <input type="hidden" name="params[meta_key]" value="$metaKey">
     <div class="form-control-row">
-        <div class="label">{$langDetails['meta_key_change_username_username']}</div>
+        <div class="label">{$metaKeyLabel}</div>
         <div class="field"><input type="text" name="params[username]"></div>
     </div>
 </form>
 </div>
 HTML;
+                $consumeLabel = __('legacy/userdetails.consume');
                 AssetAppender::js(<<<JS
 document.getElementById('{$triggerId}').addEventListener("click", function () {
     layer.open({
         type: 1,
-        title: "{$langDetails['consume']} {$cardName}",
+        title: "{$consumeLabel} {$cardName}",
         content: `$consumeChangeUsernameForm`,
         btn: ['OK'],
         btnAlign: 'c',

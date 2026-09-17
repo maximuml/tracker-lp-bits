@@ -1,19 +1,19 @@
 @extends('layouts.legacy')
 
-@section('title', $title ?? ($lang_shoutbox['text_history_title'] ?? 'Shoutbox history'))
+@section('title', $title ?? (__('legacy/shoutbox.text_history_title')))
 
 @section('content')
 <script nonce="{{ $cspNonce ?? '' }}">var SHOUT_CSRF = '{{ $csrfToken ?? '' }}';</script>
 
-<h2>{{ $lang_shoutbox['text_history_title'] ?? 'Shoutbox history' }}</h2>
+<h2>{{ __('legacy/shoutbox.text_history_title')}}</h2>
 <form action="shoutbox_history.php" method="get">
 <div class="nx-row">
-<div class="nx-cell-5">{{ $lang_shoutbox['text_username'] ?? 'Username' }}</div><div class="nx-cell-5"><input type="text" name="user" value="{{ $filters['user'] ?? '' }}" /></div>
-<div class="nx-cell-5">{{ $lang_shoutbox['text_from'] ?? 'From' }}</div><div class="nx-cell-5"><input type="date" name="from" value="{{ $filters['from'] ?? '' }}" /></div>
-<div class="nx-cell-5">{{ $lang_shoutbox['text_to'] ?? 'To' }}</div><div class="nx-cell-5"><input type="date" name="to" value="{{ $filters['to'] ?? '' }}" /></div></div>
+<div class="nx-cell-5">{{ __('legacy/shoutbox.text_username')}}</div><div class="nx-cell-5"><input type="text" name="user" value="{{ $filters['user'] ?? '' }}" /></div>
+<div class="nx-cell-5">{{ __('legacy/shoutbox.text_from')}}</div><div class="nx-cell-5"><input type="date" name="from" value="{{ $filters['from'] ?? '' }}" /></div>
+<div class="nx-cell-5">{{ __('legacy/shoutbox.text_to')}}</div><div class="nx-cell-5"><input type="date" name="to" value="{{ $filters['to'] ?? '' }}" /></div></div>
 <div class="nx-row">
-<div class="nx-cell-5">{{ $lang_shoutbox['text_search'] ?? 'Search' }}</div><div class="nx-cell-5"><input type="text" name="search" value="{{ $filters['search'] ?? '' }}" /></div>
-<div class="nx-cell-5"><input type="submit" class="btn" value="{{ $lang_shoutbox['text_filter'] ?? 'Filter' }}" /></div></div>
+<div class="nx-cell-5">{{ __('legacy/shoutbox.text_search')}}</div><div class="nx-cell-5"><input type="text" name="search" value="{{ $filters['search'] ?? '' }}" /></div>
+<div class="nx-cell-5"><input type="submit" class="btn" value="{{ __('legacy/shoutbox.text_filter')}}" /></div></div>
 </form>
 
 <table data-nx="data" border="0" cellspacing="0" cellpadding="2" width="100%">

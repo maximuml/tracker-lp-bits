@@ -16,11 +16,10 @@ class AttachmentMutationService
 {
     /**
      * @param  array<string, mixed>  $CURUSER
-     * @param  array<string, string>  $lang
      * @param  array<string, mixed>|null  $file
      * @return array{warning: string, script: string, count_left: int}
      */
-    public static function processUpload(array $CURUSER, AttachmentService $Attach, array $lang, string $altsize, string $callbackFunc, ?array $file): array
+    public static function processUpload(array $CURUSER, AttachmentService $Attach, string $altsize, string $callbackFunc, ?array $file): array
     {
         $warning = '';
         $script = '';
@@ -29,7 +28,7 @@ class AttachmentMutationService
         $allowed_exts = $Attach->get_allowed_ext();
 
         if ($file === null || ! isset($file['tmp_name'], $file['size'], $file['type'], $file['name'])) {
-            return ['warning' => $lang['text_nothing_received'] ?? 'Nothing received.', 'script' => '', 'count_left' => $count_left];
+            return ['warning' => (string) __('legacy/attachment.text_nothing_received'), 'script' => '', 'count_left' => $count_left];
         }
 
         $config = SiteConfig::current()->attachment;
@@ -89,15 +88,15 @@ class AttachmentMutationService
         $img_ext = Attachment::IMG_EXTENSIONS;
 
         if ($filesize == 0 || $file['name'] == '') { // nothing received
-            $warning = $lang['text_nothing_received'];
+            $warning = (string) __('legacy/attachment.text_nothing_received');
         } elseif (! $count_left) { // user cannot upload more files
-            $warning = $lang['text_file_number_limit_reached'];
+            $warning = (string) __('legacy/attachment.text_file_number_limit_reached');
         } elseif ($filesize > $size_limit || $filesize >= 5242880) { // do not allow file bigger than 5 MB
-            $warning = $lang['text_file_size_too_big'];
+            $warning = (string) __('legacy/attachment.text_file_size_too_big');
         } elseif (! in_array($ext, $allowed_exts) || in_array($ext, $banned_ext)) { // the file extension is banned
-            $warning = $lang['text_file_extension_not_allowed'];
+            $warning = (string) __('legacy/attachment.text_file_extension_not_allowed');
         } elseif (self::isDangerousMimeType($file['tmp_name'])) { // actual file content is a script/executable
-            $warning = $lang['text_file_extension_not_allowed'];
+            $warning = (string) __('legacy/attachment.text_file_extension_not_allowed');
         } else { // everythins is okay
             if (in_array($ext, $img_ext)) {
                 $isimage = true;
@@ -109,14 +108,14 @@ class AttachmentMutationService
             if ($isimage) {
                 $imagesize = getimagesize($file['tmp_name']);
                 if ($imagesize === false) {
-                    $warning = $lang['text_invalid_image_file'] ?? 'Invalid image file.';
+                    $warning = (string) __('legacy/attachment.text_invalid_image_file');
 
                     return compact('warning', 'script', 'count_left');
                 }
                 $height = (int) $imagesize[1];
                 $width = (int) $imagesize[0];
                 if ($width <= 0 || $height <= 0) {
-                    $warning = $lang['text_invalid_image_file'] ?? 'Invalid image file.';
+                    $warning = (string) __('legacy/attachment.text_invalid_image_file');
 
                     return compact('warning', 'script', 'count_left');
                 }
@@ -169,7 +168,7 @@ class AttachmentMutationService
                                     if ($orig) {
                                         $thumb = imagecreatetruecolor($newwidth, $newheight);
                                         if ($thumb === false) {
-                                            $warning = $lang['text_invalid_image_file'] ?? 'Invalid image file.';
+                                            $warning = (string) __('legacy/attachment.text_invalid_image_file');
 
                                             return compact('warning', 'script', 'count_left');
                                         }
@@ -197,7 +196,7 @@ class AttachmentMutationService
                                     } else {
                                         $resource = imagecreatetruecolor($width, $height);
                                         if ($resource === false) {
-                                            $warning = $lang['text_invalid_image_file'] ?? 'Invalid image file.';
+                                            $warning = (string) __('legacy/attachment.text_invalid_image_file');
 
                                             return compact('warning', 'script', 'count_left');
                                         }
@@ -209,7 +208,7 @@ class AttachmentMutationService
                                             $resource_p = @imagecreatefrompng($file['tmp_name']);
                                         }
                                         if ($resource_p === false) {
-                                            $warning = $lang['text_invalid_image_file'] ?? 'Invalid image file.';
+                                            $warning = (string) __('legacy/attachment.text_invalid_image_file');
 
                                             return compact('warning', 'script', 'count_left');
                                         }
@@ -217,7 +216,7 @@ class AttachmentMutationService
                                     }
                                     $watermark = imagecreatefrompng('pic/watermark.png');
                                     if ($watermark === false) {
-                                        $warning = $lang['text_invalid_image_file'] ?? 'Invalid image file.';
+                                        $warning = (string) __('legacy/attachment.text_invalid_image_file');
 
                                         return compact('warning', 'script', 'count_left');
                                     }
@@ -290,7 +289,7 @@ class AttachmentMutationService
                             }
                             if ($maycreatethumb) { // if no watermark is added, create the thumbnail now for the above resized image.
                                 if ($thumb === false) {
-                                    $warning = $lang['text_invalid_image_file'] ?? 'Invalid image file.';
+                                    $warning = (string) __('legacy/attachment.text_invalid_image_file');
 
                                     return compact('warning', 'script', 'count_left');
                                 }
@@ -299,12 +298,12 @@ class AttachmentMutationService
                             }
                         }
                     } else {
-                        $warning = $lang['text_invalid_image_file'];
+                        $warning = (string) __('legacy/attachment.text_invalid_image_file');
                     }
                 }
                 if (! $abandonorig) {
                     if (! move_uploaded_file($file['tmp_name'], $file_location.'.'.$ext)) {
-                        $warning = $lang['text_cannot_move_file'];
+                        $warning = (string) __('legacy/attachment.text_cannot_move_file');
                     }
                 }
                 $url = $httpdirectory_attachment.'/'.$db_file_location.".$ext";

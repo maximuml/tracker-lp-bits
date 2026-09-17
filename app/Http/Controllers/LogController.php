@@ -41,14 +41,12 @@ class LogController extends LegacyController
 
     public function legacy(Request $request): View|RedirectResponse|Response
     {
-        $langLog = (array) trans('legacy/log');
-
         if (! Permission::can(PermissionEnum::LOG)) {
             $logClass = (int) $this->globals->get('log_class', 0);
 
             return $this->legacyAbortResponse(
-                $langLog['std_sorry'] ?? 'Sorry',
-                ($langLog['std_permission_denied_only'] ?? 'Permission denied. ').UserClass::name($logClass, false, true, true).sprintf($langLog['std_or_above_can_view'] ?? ' or above can view %s.', Setting::getSiteName()),
+                __('legacy/log.std_sorry'),
+                (__('legacy/log.std_permission_denied_only')).UserClass::name($logClass, false, true, true).sprintf(__('legacy/log.std_or_above_can_view'), Setting::getSiteName()),
                 false
             );
         }
@@ -59,21 +57,18 @@ class LogController extends LegacyController
         $action = (string) ($request->input('action', 'dailylog'));
         $allowed = ['dailylog', 'chronicle', 'news', 'poll'];
         if (! in_array($action, $allowed, true)) {
-            return $this->legacyAbortResponse($langLog['std_error'] ?? 'Error', $langLog['std_invalid_action'] ?? 'Invalid action.');
+            return $this->legacyAbortResponse(__('legacy/log.std_error'), __('legacy/log.std_invalid_action'));
         }
 
         return match ($action) {
-            'dailylog' => $this->dailyLog($request, $langLog),
-            'chronicle' => $this->chronicle($request, $userId, $langLog),
-            'news' => $this->newsLog($request, $langLog),
-            'poll' => $this->pollLog($request, $langLog),
+            'dailylog' => $this->dailyLog($request),
+            'chronicle' => $this->chronicle($request, $userId),
+            'news' => $this->newsLog($request),
+            'poll' => $this->pollLog($request),
         };
     }
 
-    /**
-     * @param  array<string, mixed>  $langLog
-     */
-    private function dailyLog(Request $request, array $langLog): View|RedirectResponse
+    private function dailyLog(Request $request): View|RedirectResponse
     {
         $q = htmlspecialchars(trim((string) ($request->input('query') ?? '')));
         $search = (string) ($request->input('search') ?? '');
@@ -121,14 +116,11 @@ class LogController extends LegacyController
             'pagerbottom' => $pagerbottom,
             'userDisplayMap' => $userDisplayMap,
             'canConfidentialLog' => $canConfidential,
-            'title' => $langLog['head_site_log'] ?? 'Daily log',
+            'title' => __('legacy/log.head_site_log'),
         ]);
     }
 
-    /**
-     * @param  array<string, mixed>  $langLog
-     */
-    private function chronicle(Request $request, int $userId, array $langLog): View|RedirectResponse|Response
+    private function chronicle(Request $request, int $userId): View|RedirectResponse|Response
     {
         $q = htmlspecialchars(trim((string) ($request->input('query') ?? '')));
         $canManage = Permission::can(PermissionEnum::CHR_MANAGE);
@@ -139,7 +131,7 @@ class LogController extends LegacyController
         // 'add', 'update', 'del' are state-changing and require POST.
         if ($do === 'edit') {
             if (! $canManage) {
-                return $this->legacyAbortResponse($langLog['std_error'] ?? 'Error', $langLog['std_permission_denied'] ?? 'Permission denied.');
+                return $this->legacyAbortResponse(__('legacy/log.std_error'), __('legacy/log.std_permission_denied'));
             }
             $id = (int) $request->input('id', 0);
             $editItem = $id > 0 ? $this->logRepository->getChronicleById($id) : null;
@@ -147,12 +139,12 @@ class LogController extends LegacyController
                 return redirect('/log.php?action=chronicle');
             }
 
-            return $this->chronicleList($request, $q, $canManage, $langLog, $editItem);
+            return $this->chronicleList($request, $q, $canManage, $editItem);
         }
 
         if ($request->isMethod('post') && $do !== '') {
             if (! $canManage) {
-                return $this->legacyAbortResponse($langLog['std_error'] ?? 'Error', $langLog['std_permission_denied'] ?? 'Permission denied.');
+                return $this->legacyAbortResponse(__('legacy/log.std_error'), __('legacy/log.std_permission_denied'));
             }
 
             if ($do === 'add') {
@@ -188,14 +180,13 @@ class LogController extends LegacyController
             }
         }
 
-        return $this->chronicleList($request, $q, $canManage, $langLog, null);
+        return $this->chronicleList($request, $q, $canManage, null);
     }
 
     /**
-     * @param  array<string, mixed>  $langLog
      * @param  array<int|string, mixed>|null  $editItem
      */
-    private function chronicleList(Request $request, string $q, bool $canManage, array $langLog, ?array $editItem): View|RedirectResponse
+    private function chronicleList(Request $request, string $q, bool $canManage, ?array $editItem): View|RedirectResponse
     {
         $count = $this->logRepository->countChronicle($q);
         $perpage = 50;
@@ -219,14 +210,11 @@ class LogController extends LegacyController
             'pagertop' => $pagertop,
             'pagerbottom' => $pagerbottom,
             'canManage' => $canManage,
-            'title' => $langLog['head_chronicle'] ?? 'Chronicle',
+            'title' => __('legacy/log.head_chronicle'),
         ]);
     }
 
-    /**
-     * @param  array<string, mixed>  $langLog
-     */
-    private function newsLog(Request $request, array $langLog): View|RedirectResponse
+    private function newsLog(Request $request): View|RedirectResponse
     {
         $q = htmlspecialchars(trim((string) ($request->input('query') ?? '')));
         $search = (string) ($request->input('search') ?? '');
@@ -254,14 +242,11 @@ class LogController extends LegacyController
             'count' => $count,
             'pagertop' => $pagertop,
             'pagerbottom' => $pagerbottom,
-            'title' => $langLog['head_news'] ?? 'News log',
+            'title' => __('legacy/log.head_news'),
         ]);
     }
 
-    /**
-     * @param  array<string, mixed>  $langLog
-     */
-    private function pollLog(Request $request, array $langLog): View|RedirectResponse|Response
+    private function pollLog(Request $request): View|RedirectResponse|Response
     {
         $do = (string) ($request->input('do') ?? '');
         $pollid = (int) $request->input('pollid', 0);
@@ -269,27 +254,27 @@ class LogController extends LegacyController
 
         if ($do === 'delete') {
             if (! Permission::can(PermissionEnum::POLL_MANAGE)) {
-                return $this->legacyAbortResponse($langLog['std_error'] ?? 'Error', $langLog['std_permission_denied'] ?? 'Permission denied.');
+                return $this->legacyAbortResponse(__('legacy/log.std_error'), __('legacy/log.std_permission_denied'));
             }
             if ($pollid <= 0) {
-                return $this->legacyAbortResponse($langLog['std_error'] ?? 'Error', $langLog['std_invalid_poll_id'] ?? 'Invalid poll ID.');
+                return $this->legacyAbortResponse(__('legacy/log.std_error'), ('Invalid poll ID.'));
             }
             // The actual deletion requires POST to prevent CSRF via GET
             // (e.g. <img src="/log.php?action=poll&do=delete&pollid=1&sure=1">).
             // GET with sure=0 shows a confirmation form with a POST button.
             if (! $request->isMethod('post')) {
                 $token = csrf_token();
-                $confirm = ($langLog['std_delete_poll_confirmation'] ?? 'Are you sure? ')
+                $confirm = (__('legacy/log.std_delete_poll_confirmation'))
                     ."<form method=\"post\" action=\"/log.php?action=poll&do=delete&pollid=$pollid&returnto=$returnto\">"
                     ."<input type=\"hidden\" name=\"_token\" value=\"$token\" />"
                     .'<input type="hidden" name="sure" value="1" />'
-                    .'<button type="submit">'.($langLog['std_here_if_sure'] ?? 'here').'</button>'
+                    .'<button type="submit">'.(__('legacy/log.std_here_if_sure')).'</button>'
                     .'</form>';
 
-                return $this->legacyAbortResponse($langLog['std_delete_poll'] ?? 'Delete poll', $confirm, false);
+                return $this->legacyAbortResponse(__('legacy/log.std_delete_poll'), $confirm, false);
             }
             if ((int) $request->input('sure', 0) !== 1) {
-                return $this->legacyAbortResponse($langLog['std_error'] ?? 'Error', $langLog['std_permission_denied'] ?? 'Permission denied.');
+                return $this->legacyAbortResponse(__('legacy/log.std_error'), __('legacy/log.std_permission_denied'));
             }
             $this->logRepository->deletePoll($pollid);
 
@@ -307,7 +292,7 @@ class LogController extends LegacyController
 
         $pollcount = $this->logRepository->getPollCount();
         if ($pollcount === 0) {
-            return $this->legacyAbortResponse($langLog['std_sorry'] ?? 'Sorry', $langLog['std_no_polls'] ?? 'No polls.');
+            return $this->legacyAbortResponse(__('legacy/log.std_sorry'), __('legacy/log.std_no_polls'));
         }
 
         $polls = $this->logRepository->getPollsExceptFirst();
@@ -347,7 +332,7 @@ class LogController extends LegacyController
             'mode' => 'poll',
             'pollData' => $pollData,
             'canPollManage' => Permission::can(PermissionEnum::POLL_MANAGE),
-            'title' => $langLog['head_previous_polls'] ?? 'Poll archive',
+            'title' => __('legacy/log.head_previous_polls'),
         ]);
     }
 }

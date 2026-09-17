@@ -43,40 +43,37 @@ class RegistrationService
     /**
      * Throw when registration is globally disabled, invite-only mismatch,
      * the IP is banned, max users reached, or max accounts per IP reached.
-     *
-     * @param  array<string, string>  $langSignup
-     * @param  array<string, string>  $langFunctions
      */
-    public function assertCanRegister(string $type, string $ip, array $langSignup, array $langFunctions): void
+    public function assertCanRegister(string $type, string $ip): void
     {
         try {
             $this->authService->assertNotBanned($ip);
         } catch (AuthenticationException $exception) {
-            throw new AuthenticationException($this->msg($langFunctions, 'std_your_ip_banned', $exception->getMessage()));
+            throw new AuthenticationException(__('legacy/functions.std_your_ip_banned'));
         }
 
         $isInvite = $type === 'invite';
         $isNormal = $type === 'normal';
 
         if ($isInvite && ! SiteConfig::current()->main->inviteSystem()) {
-            throw new AuthenticationException($this->msg($langFunctions, 'std_invite_system_disabled', 'The invite system is currently disabled.'));
+            throw new AuthenticationException(__('legacy/functions.std_invite_system_disabled'));
         }
 
         if ($isNormal && ! SiteConfig::current()->main->registration()) {
-            throw new AuthenticationException($this->msg($langFunctions, 'std_open_registration_disabled', 'Open registration is currently disabled.'));
+            throw new AuthenticationException(__('legacy/functions.std_open_registration_disabled'));
         }
 
         $maxUsers = (int) SiteConfig::current()->main->maxUsers(0);
         if ($maxUsers > 0 && User::query()->count() >= $maxUsers) {
-            throw new AuthenticationException($this->msg($langFunctions, 'std_account_limit_reached', 'The current user account limit has been reached.'));
+            throw new AuthenticationException(__('legacy/functions.std_account_limit_reached'));
         }
 
         $maxIp = (int) SiteConfig::current()->security->maxIp(0);
         if ($maxIp > 0 && User::query()->where('ip', $ip)->count() > $maxIp) {
             throw new AuthenticationException(
-                $this->msg($langFunctions, 'std_the_ip', 'The IP ')
+                __('legacy/functions.std_the_ip')
                 .'<b>'.htmlspecialchars($ip).'</b>'
-                .sprintf($this->msg($langFunctions, 'std_used_many_times', ' is already being used on too many accounts. No more accounts allowed at <b>%s</b>.'), SiteConfig::current()->basic->siteName())
+                .sprintf(__('legacy/functions.std_used_many_times'), SiteConfig::current()->basic->siteName())
             );
         }
     }
@@ -85,22 +82,19 @@ class RegistrationService
      * Register a new user. Returns the created user and the success redirect URL.
      *
      * @param  array<string, mixed>  $data
-     * @param  array<string, string>  $langSignup
-     * @param  array<string, string>  $langTakesignup
-     * @param  array<string, string>  $langFunctions
      * @return array{user: User, redirect: string}
      */
-    public function signup(array $data, string $ip, string $langFolder, array $langSignup, array $langTakesignup, array $langFunctions): array
+    public function signup(array $data, string $ip, string $langFolder): array
     {
         $type = ($data['type'] ?? '') === 'invite' ? 'invite' : 'normal';
-        $this->assertCanRegister($type, $ip, $langSignup, $langFunctions);
+        $this->assertCanRegister($type, $ip);
 
-        $this->emailConfirmation->verifyCaptcha($data, $ip, $langFunctions);
+        $this->emailConfirmation->verifyCaptcha($data, $ip);
 
         $isInvite = $type === 'invite';
         $code = $isInvite ? trim((string) ($data['hash'] ?? '')) : '';
         $inviter = $isInvite ? (int) ($data['inviter'] ?? 0) : 0;
-        $invite = $isInvite ? $this->inviteValidator->validate($code, $inviter, $langSignup, $langFolder) : null;
+        $invite = $isInvite ? $this->inviteValidator->validate($code, $inviter, $langFolder) : null;
 
         $isPreRegister = SiteConfig::current()->system->isInvitePreEmailAndUsername();
 
@@ -127,26 +121,24 @@ class RegistrationService
             $gender,
             $country,
             $isInvite && $isPreRegister && $invite !== null,
-            $langSignup,
-            $langTakesignup,
         );
 
         $rulesVerify = ($data['rulesverify'] ?? '') === 'yes';
         $faqVerify = ($data['faqverify'] ?? '') === 'yes';
         $ageVerify = ($data['ageverify'] ?? '') === 'yes';
         if (! $rulesVerify || ! $faqVerify || ! $ageVerify) {
-            throw new AuthenticationException($this->msg($langTakesignup, 'std_unqualified', 'Sorry, you are not qualified to become a member of this site.'));
+            throw new AuthenticationException(__('legacy/takesignup.std_unqualified'));
         }
 
         if (User::query()->where('username', $username)->exists()) {
-            throw new AuthenticationException($this->msg($langTakesignup, 'std_username_exists', 'Username already exists!'));
+            throw new AuthenticationException(__('legacy/takesignup.std_username_exists'));
         }
 
         if (User::query()->where('email', $email)->exists()) {
             throw new AuthenticationException(
-                $this->msg($langTakesignup, 'std_email_address', 'The e-mail address ')
+                __('legacy/takesignup.std_email_address')
                 .$email
-                .$this->msg($langTakesignup, 'std_in_use', ' is already in use.')
+                .__('legacy/takesignup.std_in_use')
             );
         }
 
@@ -198,7 +190,7 @@ class RegistrationService
             ],
         );
 
-        $this->sendWelcomeMessage($user, $langTakesignup);
+        $this->sendWelcomeMessage($user);
         $this->maybeAddTemporaryInvite($id);
 
         if ($isInvite && $invite !== null) {
@@ -208,7 +200,7 @@ class RegistrationService
         // W1-05: Generate a secure confirmation token (CSPRNG + SHA-256 digest)
         $confirmToken = $this->emailConfirmation->generateConfirmationToken($id, $ip);
 
-        $redirect = $this->resolveSignupRedirect($id, $confirmToken, $user, $verification, $email, $langFolder, $langTakesignup);
+        $redirect = $this->resolveSignupRedirect($id, $confirmToken, $user, $verification, $email, $langFolder);
 
         return ['user' => $user, 'redirect' => $redirect];
     }
@@ -225,26 +217,21 @@ class RegistrationService
      * Re-send a confirmation email for a pending account.
      *
      * @param  array<string, mixed>  $data
-     * @param  array<string, string>  $langConfirmResend
-     * @param  array<string, string>  $langFunctions
      */
-    public function resendConfirmation(array $data, string $ip, string $langFolder, array $langConfirmResend, array $langFunctions): string
+    public function resendConfirmation(array $data, string $ip, string $langFolder): string
     {
-        return $this->emailConfirmation->resendConfirmation($data, $ip, $langFolder, $langConfirmResend, $langFunctions);
+        return $this->emailConfirmation->resendConfirmation($data, $ip, $langFolder);
     }
 
-    /**
-     * @param  array<string, string>  $langTakesignup
-     */
-    private function sendWelcomeMessage(User $user, array $langTakesignup): void
+    private function sendWelcomeMessage(User $user): void
     {
-        $subject = $this->msg($langTakesignup, 'msg_subject', 'Welcome to ').SiteConfig::current()->basic->siteName().'!';
+        $subject = __('legacy/takesignup.msg_subject').SiteConfig::current()->basic->siteName().'!';
         $msg = MessageTemplate::forRegisterWelcome($user->lang, ['username' => $user->username]);
 
         if (empty($msg)) {
-            $msg = $this->msg($langTakesignup, 'msg_congratulations', 'Congratulations ')
+            $msg = __('legacy/takesignup.msg_congratulations')
                 .$user->username
-                .sprintf($this->msg($langTakesignup, 'msg_you_are_a_member', ''), SiteConfig::current()->basic->siteName(), SiteConfig::current()->basic->siteName());
+                .sprintf(__('legacy/takesignup.msg_you_are_a_member'), SiteConfig::current()->basic->siteName(), SiteConfig::current()->basic->siteName());
         }
 
         Message::add([
@@ -266,10 +253,7 @@ class RegistrationService
         $this->userModerationRepository->addTemporaryInvite(null, $userId, 'increment', $tmpInviteCount, 7);
     }
 
-    /**
-     * @param  array<string, string>  $langTakesignup
-     */
-    private function resolveSignupRedirect(int $userId, string $confirmToken, User $user, string $verification, string $email, string $langFolder, array $langTakesignup): string
+    private function resolveSignupRedirect(int $userId, string $confirmToken, User $user, string $verification, string $email, string $langFolder): string
     {
         $baseUrl = SiteConfig::current()->basic->baseUrl();
         if (! str_contains($baseUrl, '://')) {
@@ -288,15 +272,11 @@ class RegistrationService
             return $baseUrl.'/confirm.php?id='.$userId.'&secret='.$confirmToken;
         }
 
-        $this->emailConfirmation->sendConfirmationEmail((string) $user->username, $email, $userId, $confirmToken, Network::clientIp(), $langFolder, $langTakesignup);
+        $this->emailConfirmation->sendConfirmationEmail((string) $user->username, $email, $userId, $confirmToken, Network::clientIp(), $langFolder);
 
         return 'ok.php?type=signup&email='.rawurlencode($email);
     }
 
-    /**
-     * @param  array<string, string>  $langSignup
-     * @param  array<string, string>  $langTakesignup
-     */
     private function validateSignupFields(
         string $username,
         string $email,
@@ -305,42 +285,32 @@ class RegistrationService
         string $gender,
         int $country,
         bool $preRegistered,
-        array $langSignup,
-        array $langTakesignup,
     ): void {
         if (! $preRegistered && ($username === '' || $password === '' || $email === '' || $country === 0 || $gender === '')) {
-            throw new AuthenticationException($this->msg($langTakesignup, 'std_blank_field', 'Don\'t leave any fields blank.'));
+            throw new AuthenticationException(__('legacy/takesignup.std_blank_field'));
         }
 
         if (strlen($username) > self::MAX_USERNAME_LENGTH) {
-            throw new AuthenticationException($this->msg($langTakesignup, 'std_username_too_long', 'Sorry, username is too long (max is 12 chars).'));
+            throw new AuthenticationException(__('legacy/takesignup.std_username_too_long'));
         }
 
         if (! $preRegistered && ! Validators::isUsername($username)) {
-            throw new AuthenticationException($this->msg($langTakesignup, 'std_invalid_username', 'Invalid username.'));
+            throw new AuthenticationException(__('legacy/takesignup.std_invalid_username'));
         }
 
         if (! Email::isWellFormed($email)) {
-            throw new AuthenticationException($this->msg($langTakesignup, 'std_wrong_email_address_format', 'That doesn\'t look like a valid email address.'));
+            throw new AuthenticationException(__('legacy/takesignup.std_wrong_email_address_format'));
         }
 
-        $this->passwordSetup->validate($password, $passAgain, $username, $langTakesignup);
+        $this->passwordSetup->validate($password, $passAgain, $username, 'takesignup');
 
         $allowedGenders = [UserGender::MALE->stringValue(), UserGender::FEMALE->stringValue()];
         if (! in_array($gender, $allowedGenders, true)) {
-            throw new AuthenticationException($this->msg($langTakesignup, 'std_invalid_gender', 'Invalid Gender!'));
+            throw new AuthenticationException(__('legacy/takesignup.std_invalid_gender'));
         }
 
         if (DB::table('countries')->where('id', $country)->doesntExist()) {
-            throw new AuthenticationException($this->msg($langTakesignup, 'std_invalid_gender', 'Invalid country.'));
+            throw new AuthenticationException(__('legacy/takesignup.std_invalid_gender'));
         }
-    }
-
-    /**
-     * @param  array<string, string>  $lang
-     */
-    private function msg(array $lang, string $key, string $fallback): string
-    {
-        return (string) ($lang[$key] ?? $fallback);
     }
 }

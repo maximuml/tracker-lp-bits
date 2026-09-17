@@ -37,24 +37,22 @@ class PasswordRecoveryService
      * Request a password reset email.
      *
      * @param  array<string, mixed>  $data
-     * @param  array<string, string>  $langRecover
-     * @param  array<string, string>  $langFunctions
      */
-    public function requestReset(array $data, string $ip, array $langRecover, array $langFunctions): void
+    public function requestReset(array $data, string $ip): void
     {
         $this->authService->assertNotBanned($ip);
-        $this->verifyCaptcha($data, $ip, $langFunctions);
+        $this->verifyCaptcha($data, $ip);
 
         $email = Email::sanitizeForDisplay(trim((string) ($data['email'] ?? '')));
 
         if ($email === '') {
             $this->authService->recordFailedAttempt($ip);
-            throw new AuthenticationException($this->msg($langRecover, 'std_missing_email_address', 'You must enter an email address!'));
+            throw new AuthenticationException(__('legacy/recover.std_missing_email_address'));
         }
 
         if (! Email::isWellFormed($email)) {
             $this->authService->recordFailedAttempt($ip);
-            throw new AuthenticationException($this->msg($langRecover, 'std_invalid_email_address', 'Invalid email address!'));
+            throw new AuthenticationException(__('legacy/recover.std_invalid_email_address'));
         }
 
         $user = (array) DB::table('users')
@@ -63,12 +61,12 @@ class PasswordRecoveryService
 
         if (empty($user)) {
             $this->authService->recordFailedAttempt($ip);
-            throw new AuthenticationException($this->msg($langRecover, 'std_email_not_in_database', 'The email address was not found in the database.'));
+            throw new AuthenticationException(__('legacy/recover.std_email_not_in_database'));
         }
 
         if (($user['status'] ?? null) === UserStatus::PENDING->value) {
             $this->authService->recordFailedAttempt($ip);
-            throw new AuthenticationException($this->msg($langRecover, 'std_user_account_unconfirmed', 'The account has not been verified yet.'));
+            throw new AuthenticationException(__('legacy/recover.std_user_account_unconfirmed'));
         }
 
         $sec = Token::randomHex();
@@ -76,7 +74,7 @@ class PasswordRecoveryService
         $affected = User::query()->where('id', (int) $user['id'])->update(['editsecret' => $sec]);
 
         if (! $affected) {
-            throw new AuthenticationException($this->msg($langRecover, 'std_database_error', 'Database error. Please contact an administrator about this.'));
+            throw new AuthenticationException(__('legacy/recover.std_database_error'));
         }
 
         Cache::clearUser((int) $user['id'], '');
@@ -90,15 +88,13 @@ class PasswordRecoveryService
         ]);
 
         // Send the secure token in the reset URL
-        $this->sendResetRequestEmail($email, (int) $user['id'], $recoveryToken, $ip, $langRecover);
+        $this->sendResetRequestEmail($email, (int) $user['id'], $recoveryToken, $ip);
     }
 
     /**
      * Verify a password reset link and reset the user's password.
-     *
-     * @param  array<string, string>  $langRecover
      */
-    public function resetPassword(int $id, string $md5, array $langRecover): string
+    public function resetPassword(int $id, string $md5): string
     {
         // W1-04: Legacy md5 token path removed. Only SecureTokenService is accepted.
         $tokenRow = $this->tokenService->consume(self::RECOVERY_TOKEN_TABLE, $md5, [
@@ -106,28 +102,26 @@ class PasswordRecoveryService
         ]);
 
         if ($tokenRow === null) {
-            throw new AuthenticationException($this->msg($langRecover, 'std_unable_updating_user_data', 'The reset link is invalid or expired.'));
+            throw new AuthenticationException(__('legacy/recover.std_unable_updating_user_data'));
         }
 
         // Verify user ID matches
         if ((int) $tokenRow['user_id'] !== $id) {
-            throw new AuthenticationException($this->msg($langRecover, 'std_unable_updating_user_data', 'The reset link is invalid.'));
+            throw new AuthenticationException(__('legacy/recover.std_unable_updating_user_data'));
         }
 
         $user = User::query()->find($id, ['id', 'username', 'email', 'passhash', 'editsecret']);
         if (! $user) {
-            throw new AuthenticationException($this->msg($langRecover, 'std_unable_updating_user_data', 'Unable to update user data.'));
+            throw new AuthenticationException(__('legacy/recover.std_unable_updating_user_data'));
         }
 
-        return $this->completePasswordReset($user, $langRecover);
+        return $this->completePasswordReset($user);
     }
 
     /**
      * Complete the password reset: generate new password, update user, send email.
-     *
-     * @param  array<string, string>  $langRecover
      */
-    private function completePasswordReset(User $user, array $langRecover): string
+    private function completePasswordReset(User $user): string
     {
         $id = (int) $user->id;
         $newPassword = $this->generateRandomPassword();
@@ -144,7 +138,7 @@ class PasswordRecoveryService
         ]);
 
         if (! $affected) {
-            throw new AuthenticationException($this->msg($langRecover, 'std_unable_updating_user_data', 'Unable to update user data.'));
+            throw new AuthenticationException(__('legacy/recover.std_unable_updating_user_data'));
         }
 
         Cache::clearUser($id, '');
@@ -155,15 +149,12 @@ class PasswordRecoveryService
             resetData: ['username' => $user->username],
         );
 
-        $this->sendNewPasswordEmail($user, $newPassword, $langRecover);
+        $this->sendNewPasswordEmail($user, $newPassword);
 
         return $newPassword;
     }
 
-    /**
-     * @param  array<string, string>  $langRecover
-     */
-    private function sendResetRequestEmail(string $email, int $userId, string $hash, string $ip, array $langRecover): void
+    private function sendResetRequestEmail(string $email, int $userId, string $hash, string $ip): void
     {
         $baseUrl = SiteConfig::current()->basic->baseUrl();
         if (! str_contains($baseUrl, '://')) {
@@ -172,11 +163,11 @@ class PasswordRecoveryService
         $baseUrl = rtrim($baseUrl, '/');
         $siteName = SiteConfig::current()->basic->siteName();
 
-        $mailOne = $langRecover['mail_one'] ?? 'Hi,<br /><br />Someone, hopefully you, requested that the password for the account<br />associated with this email address ';
-        $mailTwo = $langRecover['mail_two'] ?? ' be reset.<br /><br />The request originated from ';
-        $mailThree = $langRecover['mail_three'] ?? '.<br /><br />If you did not do this ignore this email. Please do not reply.<br /><br />Should you wish to confirm this request, please follow ';
-        $mailFour = sprintf($langRecover['mail_four'] ?? '<br />After you do this, your password will be reset and emailed back to you.<br /><br />------<br />Yours,<br />The %s Team.', $siteName);
-        $thisLink = $langRecover['mail_this_link'] ?? 'THIS LINK';
+        $mailOne = __('legacy/recover.mail_one');
+        $mailTwo = __('legacy/recover.mail_two');
+        $mailThree = __('legacy/recover.mail_three');
+        $mailFour = sprintf(__('legacy/recover.mail_four'), $siteName);
+        $thisLink = __('legacy/recover.mail_this_link');
 
         $resetUrl = $baseUrl.'/recover.php?id='.$userId.'&secret='.$hash;
 
@@ -193,7 +184,7 @@ class PasswordRecoveryService
             $email,
             $siteName,
             SiteConfig::current()->main->siteEmail(''),
-            $siteName.$this->msg($langRecover, 'mail_title', ' password reset confirmation'),
+            $siteName.__('legacy/recover.mail_title'),
             $body,
             'confirmation',
             true,
@@ -203,10 +194,7 @@ class PasswordRecoveryService
         );
     }
 
-    /**
-     * @param  array<string, string>  $langRecover
-     */
-    private function sendNewPasswordEmail(User $user, string $newPassword, array $langRecover): void
+    private function sendNewPasswordEmail(User $user, string $newPassword): void
     {
         $baseUrl = SiteConfig::current()->basic->baseUrl();
         if (! str_contains($baseUrl, '://')) {
@@ -215,21 +203,21 @@ class PasswordRecoveryService
         $baseUrl = rtrim($baseUrl, '/');
         $siteName = SiteConfig::current()->basic->siteName();
 
-        $mailTwoFour = sprintf($langRecover['mail_two_four'] ?? '<br /><br />You may change your password in User CP - Security Settings after logging in.<br />------<br />Yours,<br />The %s Team.', $siteName);
+        $mailTwoFour = sprintf(__('legacy/recover.mail_two_four'), $siteName);
 
-        $body = ($langRecover['mail_two_one'] ?? 'Hi,<br /><br />As per your request we have generated a new password for your account.<br /><br />Here is the information we now have on file for this account:<br /><br />User name: ')
+        $body = (__('legacy/recover.mail_two_one'))
             .(string) $user->username
-            .($langRecover['mail_two_two'] ?? '<br />Password:  ')
+            .(__('legacy/recover.mail_two_two'))
             .$newPassword
-            .($langRecover['mail_two_three'] ?? '<br /><br />You may login from ')
-            .'<b><a href="'.$baseUrl.'/login.php">'.($langRecover['mail_here'] ?? 'HERE').'</a></b>'
+            .(__('legacy/recover.mail_two_three'))
+            .'<b><a href="'.$baseUrl.'/login.php">'.(__('legacy/recover.mail_here')).'</a></b>'
             .$mailTwoFour;
 
         Mail::sentLegacy(
             (string) $user->email,
             $siteName,
             SiteConfig::current()->main->siteEmail(''),
-            $siteName.$this->msg($langRecover, 'mail_two_title', ' account details'),
+            $siteName.__('legacy/recover.mail_two_title'),
             $body,
             'details',
             true,
@@ -254,9 +242,8 @@ class PasswordRecoveryService
 
     /**
      * @param  array<string, mixed>  $data
-     * @param  array<string, string>  $langFunctions
      */
-    private function verifyCaptcha(array $data, string $ip, array $langFunctions): void
+    private function verifyCaptcha(array $data, string $ip): void
     {
         if (! $this->authService->isCaptchaEnabled()) {
             return;
@@ -276,15 +263,7 @@ class PasswordRecoveryService
 
         if (! $verified) {
             $this->authService->recordFailedAttempt($ip);
-            throw new AuthenticationException($this->msg($langFunctions, 'std_invalid_image_code', 'Invalid captcha response.'));
+            throw new AuthenticationException(__('legacy/functions.std_invalid_image_code'));
         }
-    }
-
-    /**
-     * @param  array<string, string>  $lang
-     */
-    private function msg(array $lang, string $key, string $fallback): string
-    {
-        return (string) ($lang[$key] ?? $fallback);
     }
 }

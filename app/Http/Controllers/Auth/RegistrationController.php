@@ -66,14 +66,12 @@ class RegistrationController extends Controller
                 ->first();
         }
 
-        $langSignup = $this->langSignup($langFolder);
-        $langFunctions = $this->langFunctions($langFolder);
         $captchaEnabled = $this->authService->isCaptchaEnabled();
         $captchaMarkup = '';
 
         if ($captchaEnabled) {
             ob_start();
-            Captcha::render('yes', $langFunctions, $secret, 'grid');
+            Captcha::render('yes', $secret, 'grid');
             $captchaMarkup = (string) ob_get_clean();
         }
 
@@ -91,19 +89,17 @@ class RegistrationController extends Controller
         $oldUsername = old('wantusername');
         $oldEmail = old('email');
         $usernameInput = '<input type="text" '.$inputStyle.' name="wantusername" aria-label="'
-            .e($langSignup['row_desired_username'] ?? 'Desired username').'" value="'
+            .e(__('legacy/signup.row_desired_username')).'" value="'
             .e($preUsername !== '' ? $preUsername : (is_string($oldUsername) ? $oldUsername : '')).'"'
             .($preUsername !== '' ? ' readonly' : '').' autocomplete="username" />';
         $emailInput = '<input type="email" '.$inputStyle.' name="email" aria-label="'
-            .e($langSignup['row_email_address'] ?? 'Email address').'" value="'
+            .e(__('legacy/signup.row_email_address')).'" value="'
             .e($preEmail !== '' ? $preEmail : (is_string($oldEmail) ? $oldEmail : '')).'"'
             .($preEmail !== '' ? ' readonly' : '').' autocomplete="email" />';
 
         AssetAppender::js('js/auth-form.js', 'footer', true, 'auth-form');
 
         return view('auth.signup', [
-            'lang' => $langSignup,
-            'langFunctions' => $langFunctions,
             'langFolder' => $langFolder,
             'languages' => Locale::languageList('site_lang', true),
             'captchaEnabled' => $captchaEnabled,
@@ -119,8 +115,8 @@ class RegistrationController extends Controller
             'error' => $request->session()->get('error'),
             'siteName' => Setting::getSiteName(),
             'headTitle' => $isInvite
-                ? ($langSignup['head_invite_signup'] ?? 'Invite Signup')
-                : ($langSignup['head_signup'] ?? 'Signup'),
+                ? (__('legacy/signup.head_invite_signup'))
+                : (__('legacy/signup.head_signup')),
             'usernameInput' => $usernameInput,
             'emailInput' => $emailInput,
         ]);
@@ -133,18 +129,12 @@ class RegistrationController extends Controller
         }
 
         $langFolder = $this->resolveLangFolder($request);
-        $langSignup = $this->langSignup($langFolder);
-        $langTakesignup = $this->langTakesignup($langFolder);
-        $langFunctions = $this->langFunctions($langFolder);
 
         try {
             $result = $this->registrationService->signup(
                 $request->validated(),
                 Network::clientIp(),
                 $langFolder,
-                $langSignup,
-                $langTakesignup,
-                $langFunctions,
             );
         } catch (AuthenticationException $exception) {
             return $this->backWithError($request, $exception->getMessage());
@@ -191,21 +181,17 @@ class RegistrationController extends Controller
             }
         }
 
-        $langConfirmResend = $this->langConfirmResend($langFolder);
-        $langFunctions = $this->langFunctions($langFolder);
         $secret = (string) $request->query('secret', '');
         $captchaEnabled = $this->authService->isCaptchaEnabled();
         $captchaMarkup = '';
 
         if ($captchaEnabled) {
             ob_start();
-            Captcha::render('yes', $langFunctions, $secret, 'grid');
+            Captcha::render('yes', $secret, 'grid');
             $captchaMarkup = (string) ob_get_clean();
         }
 
         return view('auth.confirm_resend', [
-            'lang' => $langConfirmResend,
-            'langFunctions' => $langFunctions,
             'langFolder' => $langFolder,
             'languages' => Locale::languageList('site_lang', true),
             'captchaEnabled' => $captchaEnabled,
@@ -225,16 +211,12 @@ class RegistrationController extends Controller
         }
 
         $langFolder = $this->resolveLangFolder($request);
-        $langConfirmResend = $this->langConfirmResend($langFolder);
-        $langFunctions = $this->langFunctions($langFolder);
 
         try {
             $redirect = $this->registrationService->resendConfirmation(
                 $request->validated(),
                 Network::clientIp(),
                 $langFolder,
-                $langConfirmResend,
-                $langFunctions,
             );
         } catch (AuthenticationException $exception) {
             return $this->backWithError($request, $exception->getMessage());
@@ -251,30 +233,6 @@ class RegistrationController extends Controller
         }
 
         return Locale::folderFromCookie($folder);
-    }
-
-    /** @return array<string, string> */
-    private function langSignup(string $langFolder): array
-    {
-        return (array) trans('legacy/signup');
-    }
-
-    /** @return array<string, string> */
-    private function langTakesignup(string $langFolder): array
-    {
-        return (array) trans('legacy/takesignup');
-    }
-
-    /** @return array<string, string> */
-    private function langConfirmResend(string $langFolder): array
-    {
-        return (array) trans('legacy/confirm_resend');
-    }
-
-    /** @return array<string, string> */
-    private function langFunctions(string $langFolder): array
-    {
-        return (array) trans('legacy/functions');
     }
 
     private function backWithError(Request $request, string $message): RedirectResponse

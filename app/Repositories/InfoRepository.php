@@ -22,8 +22,6 @@ final class InfoRepository
      */
     public function aboutNexus(): array
     {
-        /** @var array<string, string> $lang */
-        $lang = (array) trans('legacy/aboutnexus');
         $siteName = (string) Settings::get('basic.SITENAME', '');
 
         return [
@@ -38,20 +36,20 @@ final class InfoRepository
                 ->all(),
             'siteName' => $siteName,
             'captions' => [
-                'version' => '<span id="version">'.($lang['text_version'] ?? '').'</span>',
-                'nexus' => '<span id="nexus">'.($lang['text_nexus'] ?? '').PROJECTNAME.'</span>',
-                'authorization' => '<span id="authorization">'.($lang['text_authorization'] ?? '').'</span>',
-                'translation' => '<span id="translation">'.($lang['text_translation'] ?? '').'</span>',
-                'stylesheet' => '<span id="stylesheet">'.($lang['text_stylesheet'] ?? '').PROJECTNAME.'</span>',
-                'contact' => '<span id="contact">'.($lang['text_contact'] ?? '').PROJECTNAME.'</span>',
+                'version' => '<span id="version">'.(__('legacy/aboutnexus.text_version')).'</span>',
+                'nexus' => '<span id="nexus">'.(__('legacy/aboutnexus.text_nexus')).PROJECTNAME.'</span>',
+                'authorization' => '<span id="authorization">'.(__('legacy/aboutnexus.text_authorization')).'</span>',
+                'translation' => '<span id="translation">'.(__('legacy/aboutnexus.text_translation')).'</span>',
+                'stylesheet' => '<span id="stylesheet">'.(__('legacy/aboutnexus.text_stylesheet')).PROJECTNAME.'</span>',
+                'contact' => '<span id="contact">'.(__('legacy/aboutnexus.text_contact')).PROJECTNAME.'</span>',
             ],
             'notes' => [
-                'version' => sprintf($lang['text_version_note'] ?? '', $siteName, PROJECTNAME),
-                'nexus' => sprintf(PROJECTNAME.($lang['text_nexus_note'] ?? ''), PROJECTNAME),
-                'authorization' => sprintf($lang['text_authorization_note'] ?? '', PROJECTNAME),
-                'translation' => PROJECTNAME.($lang['text_translation_note'] ?? ''),
-                'stylesheet' => sprintf($lang['text_stylesheet_note'] ?? '', PROJECTNAME, $siteName),
-                'contact' => $lang['text_contact_note'] ?? '',
+                'version' => sprintf(__('legacy/aboutnexus.text_version_note'), $siteName, PROJECTNAME),
+                'nexus' => sprintf(PROJECTNAME.(__('legacy/aboutnexus.text_nexus_note')), PROJECTNAME),
+                'authorization' => sprintf(__('legacy/aboutnexus.text_authorization_note'), PROJECTNAME),
+                'translation' => PROJECTNAME.(__('legacy/aboutnexus.text_translation_note')),
+                'stylesheet' => sprintf(__('legacy/aboutnexus.text_stylesheet_note'), PROJECTNAME, $siteName),
+                'contact' => __('legacy/aboutnexus.text_contact_note'),
             ],
         ];
     }
@@ -141,10 +139,9 @@ final class InfoRepository
         }
 
         $accountantId = (int) Settings::get('main.ACCOUNTANTID', 1);
-        $langDonate = (array) trans('legacy/donate');
-        $successMessage = ($langDonate['std_donation_success_note_one'] ?? '')
-            .'<a href="sendmessage.php?receiver='.$accountantId.'"><b>'.($langDonate['std_here'] ?? 'here').'</b></a>'
-            .($langDonate['std_donation_success_note_two'] ?? '');
+        $successMessage = (__('legacy/donate.std_donation_success_note_one'))
+            .'<a href="sendmessage.php?receiver='.$accountantId.'"><b>'.(__('legacy/donate.std_here')).'</b></a>'
+            .(__('legacy/donate.std_donation_success_note_two'));
 
         return [
             'enabled' => $enabled,

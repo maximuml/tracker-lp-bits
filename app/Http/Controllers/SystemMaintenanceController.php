@@ -9,7 +9,6 @@ use App\Services\CleanupService;
 use App\Support\CurrentUser;
 use App\Support\Email;
 use App\Support\Globals;
-use App\Support\Language;
 use App\Support\Mail;
 use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
@@ -22,7 +21,6 @@ class SystemMaintenanceController extends LegacyController
     public function __construct(
         private readonly CurrentUser $currentUser,
         private readonly Globals $globals,
-        private readonly Language $language,
         private readonly MysqlStatsRepository $mysqlStatsRepository,
     ) {}
 
@@ -54,41 +52,37 @@ class SystemMaintenanceController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Permission denied.');
         }
 
-        $langMailtest = (array) trans('legacy/mailtest');
-        $langFunctions = $this->language->functions();
-
         if ($request->post('action') === 'sendmail') {
             $email = Email::sanitizeForDisplay((string) trim((string) $request->post('email', '')));
             if (! Email::isWellFormed($email)) {
                 return $this->legacyAbortResponse(
-                    (string) ($langMailtest['std_error'] ?? 'Error'),
-                    (string) ($langMailtest['std_invalid_email_address'] ?? 'Invalid email address'),
+                    (string) (__('legacy/mailtest.std_error')),
+                    (string) (__('legacy/mailtest.std_invalid_email_address')),
                 );
             }
 
             $globals = $this->globals;
             $siteName = (string) ($globals->get('SITENAME', '') ?? '');
             $siteEmail = (string) ($globals->get('SITEEMAIL', '') ?? '');
-            $title = $siteName.($langMailtest['text_smtp_testing_mail'] ?? '');
-            $body = (string) ($langMailtest['mail_test_mail_content'] ?? '');
+            $title = $siteName.(__('legacy/mailtest.text_smtp_testing_mail'));
+            $body = (string) (__('legacy/mailtest.mail_test_mail_content'));
             $sendResult = Mail::sentLegacy($email, $siteName, $siteEmail, $title, $body, 'mailtest', false, false, '', 'UTF-8');
 
             if ($sendResult === true) {
                 return $this->legacyAbortResponse(
-                    (string) ($langMailtest['std_success'] ?? 'Success'),
-                    (string) ($langMailtest['std_success_note'] ?? 'Mail sent successfully.'),
+                    (string) (__('legacy/mailtest.std_success')),
+                    (string) (__('legacy/mailtest.std_success_note')),
                 );
             }
 
             return $this->legacyAbortResponse(
-                (string) ($langFunctions['std_error'] ?? 'Error'),
-                (string) ($langFunctions['text_unable_to_send_mail'] ?? 'Unable to send mail.').' (SMTP disabled or mail not sent)',
+                (string) (__('legacy/functions.std_error')),
+                (string) (__('legacy/functions.text_unable_to_send_mail')).' (SMTP disabled or mail not sent)',
                 false,
             );
         }
 
         return $this->legacyPage($request, 'mailtest', true, [
-            'lang_mailtest' => $langMailtest,
         ]);
     }
 

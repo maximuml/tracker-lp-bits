@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Support\Torrent;
 
 use App\Support\Format;
-use App\Support\Language;
 use App\Support\Locale;
 
 class TechnicalInformation
@@ -193,7 +192,6 @@ class TechnicalInformation
 
     public function renderOnDetailsPage(): string
     {
-        $lang_functions = app(Language::class)->functions();
         if (empty($this->mediaInfo)) {
             return '';
         }

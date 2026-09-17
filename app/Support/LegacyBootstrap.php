@@ -108,12 +108,11 @@ final class LegacyBootstrap
             return;
         }
 
-        // Legacy per-page language arrays now resolve through Laravel's
-        // translator (resources/lang/en/legacy/*.php); Globals still carries
-        // them so views reading $lang_functions keep working until the
-        // per-key __('legacy/x.k') conversion lands.
+        // Legacy per-page language arrays resolve through Laravel's
+        // translator (resources/lang/en/legacy/*.php). CURLANGDIR is the
+        // locale folder cookie still read by Locale::currentFolder() and
+        // a few repositories.
         app(Globals::class)->set('CURLANGDIR', Locale::folderFromCookie(Input::cookieValue('c_lang_folder')));
-        app(Globals::class)->set('lang_functions', (array) trans('legacy/functions'));
     }
 
     private static function bootUser(?Request $request): void

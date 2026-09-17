@@ -34,7 +34,6 @@ class AttendanceController extends LegacyController
 
         $uid = (int) ($curUser['id'] ?? 0);
         $captchaEnabled = SiteConfig::current()->captcha->attendanceEnabled((bool) config('captcha.attendance.enabled', true));
-        $langAttendance = (array) trans('legacy/attendance');
 
         if ($request->isMethod('post')) {
             if ($captchaEnabled && SiteConfig::current()->security->captchaRequired()) {
@@ -48,7 +47,7 @@ class AttendanceController extends LegacyController
             }
             $attendance = $repository->attend($uid);
             if (! $attendance->is_updated) {
-                LegacyResponse::abort($langAttendance['sorry'] ?? '', $langAttendance['already_attended'] ?? '');
+                LegacyResponse::abort(__('legacy/attendance.sorry'), __('legacy/attendance.already_attended'));
             }
         } else {
             $attendance = $repository->getAttendance($uid);
@@ -65,7 +64,6 @@ class AttendanceController extends LegacyController
 
         $data = $repository->buildViewData($attendance, $uid);
         $data['attendanceCaptchaEnabled'] = $captchaEnabled;
-        $data['lang_attendance'] = $langAttendance;
         $data['iv'] = SiteConfig::current()->security->captchaRequired() ? 'yes' : 'no';
 
         AssetAppender::css('vendor/fullcalendar-5.10.2/main.min.css', 'header', true);
@@ -76,7 +74,7 @@ class AttendanceController extends LegacyController
 
         if ($data['hasAttendedToday']) {
             $data['headerLeft'] = sprintf(
-                (string) ($langAttendance['attend_info'] ?? '').(string) ($langAttendance['retroactive_description'] ?? ''),
+                (string) (__('legacy/attendance.attend_info')).(string) (__('legacy/attendance.retroactive_description')),
                 $attendance->total_days,
                 $attendance->days,
                 $attendance->points,
@@ -87,8 +85,8 @@ class AttendanceController extends LegacyController
                 ['ranking' => $data['myRanking'], 'counts' => $data['todayCounts']],
                 null
             );
-            AssetAppender::js($this->calendarScript($data, $langAttendance), 'footer', false);
-            $data['bonusLines'] = $this->bonusLines($langAttendance);
+            AssetAppender::js($this->calendarScript($data), 'footer', false);
+            $data['bonusLines'] = $this->bonusLines();
         } else {
             if ($captchaEnabled && $data['iv'] === 'yes') {
                 ob_start();
@@ -102,14 +100,13 @@ class AttendanceController extends LegacyController
 
     /**
      * @param  array<string, mixed>  $data
-     * @param  array<string, mixed>  $lang
      */
-    private function calendarScript(array $data, array $lang): string
+    private function calendarScript(array $data): string
     {
         $eventStr = (string) json_encode($data['events'] ?? []);
         $validRangeStr = (string) json_encode($data['validRange'] ?? []);
         $localeJs = (string) ($data['localeJs'] ?? '');
-        $confirmTip = (string) ($lang['retroactive_confirm_tip'] ?? '');
+        $confirmTip = (string) (__('legacy/attendance.retroactive_confirm_tip'));
 
         return <<<EOP
 let events = JSON.parse('$eventStr')
@@ -147,10 +144,9 @@ EOP;
     }
 
     /**
-     * @param  array<string, mixed>  $lang
      * @return array{lines: list<string>, continuous: list<string>}
      */
-    private function bonusLines(array $lang): array
+    private function bonusLines(): array
     {
         $initial = (int) ($this->globals->get('attendance_initial_bonus') ?? 0);
         $step = (int) ($this->globals->get('attendance_step_bonus') ?? 0);
@@ -158,13 +154,13 @@ EOP;
         $continuous = $this->globals->get('attendance_continuous_bonus');
         $continuousLines = [];
         foreach (is_array($continuous) ? $continuous : [] as $day => $value) {
-            $continuousLines[] = sprintf((string) ($lang['continuous'] ?? ''), $day, $value);
+            $continuousLines[] = sprintf((string) (__('legacy/attendance.continuous')), $day, $value);
         }
 
         return [
             'lines' => [
-                sprintf((string) ($lang['initial'] ?? ''), $initial),
-                sprintf((string) ($lang['steps'] ?? ''), $step, $max),
+                sprintf((string) (__('legacy/attendance.initial')), $initial),
+                sprintf((string) (__('legacy/attendance.steps')), $step, $max),
             ],
             'continuous' => $continuousLines,
         ];

@@ -86,47 +86,45 @@ class EmailConfirmation
      * Re-send a confirmation email for a pending account.
      *
      * @param  array<string, mixed>  $data
-     * @param  array<string, string>  $langConfirmResend
-     * @param  array<string, string>  $langFunctions
      */
-    public function resendConfirmation(array $data, string $ip, string $langFolder, array $langConfirmResend, array $langFunctions): string
+    public function resendConfirmation(array $data, string $ip, string $langFolder): string
     {
         if (SiteConfig::current()->main->verification('email') === 'admin') {
-            throw new AuthenticationException($this->msg($langConfirmResend, 'std_need_admin_verification', 'Account needs manual verification from administrators.'));
+            throw new AuthenticationException(__('legacy/confirm_resend.std_need_admin_verification'));
         }
 
         $this->authService->assertNotBanned($ip);
-        $this->verifyCaptcha($data, $ip, $langFunctions);
+        $this->verifyCaptcha($data, $ip);
 
         $email = Email::sanitizeForDisplay(trim((string) ($data['email'] ?? '')));
         $password = trim((string) ($data['wantpassword'] ?? ''));
         $passAgain = trim((string) ($data['passagain'] ?? ''));
 
         if ($email === '' || $password === '' || $passAgain === '') {
-            throw new AuthenticationException($this->msg($langConfirmResend, 'std_fields_blank', 'Don\'t leave any fields blank.'));
+            throw new AuthenticationException(__('legacy/confirm_resend.std_fields_blank'));
         }
 
         if (! Email::isWellFormed($email)) {
             $this->authService->recordFailedAttempt($ip);
-            throw new AuthenticationException($this->msg($langConfirmResend, 'std_invalid_email_address', 'Invalid email address!'));
+            throw new AuthenticationException(__('legacy/confirm_resend.std_invalid_email_address'));
         }
 
         $user = User::query()->where('email', $email)->first();
 
         if (! $user) {
             $this->authService->recordFailedAttempt($ip);
-            throw new AuthenticationException($this->msg($langConfirmResend, 'std_email_not_found', 'The email address was not found in the database.'));
+            throw new AuthenticationException(__('legacy/confirm_resend.std_email_not_found'));
         }
 
         if ($user->status !== UserStatus::PENDING) {
             $this->authService->recordFailedAttempt($ip);
-            throw new AuthenticationException($this->msg($langConfirmResend, 'std_user_already_confirm', 'User using this email address is already confirmed.'));
+            throw new AuthenticationException(__('legacy/confirm_resend.std_user_already_confirm'));
         }
 
-        $this->passwordSetup->validate($password, $passAgain, (string) $user->username, $langConfirmResend);
+        $this->passwordSetup->validate($password, $passAgain, (string) $user->username, 'confirm_resend');
 
         // W1-05: Rate-limit resend requests (max 5 per hour per IP)
-        $this->assertResendRateLimit($ip, $langConfirmResend);
+        $this->assertResendRateLimit($ip);
 
         $passwordData = $this->passwordSetup->forResend($password);
 
@@ -138,7 +136,7 @@ class EmailConfirmation
         ]);
 
         if (! $affected) {
-            throw new AuthenticationException($this->msg($langConfirmResend, 'std_database_error', 'Database error. Please contact an administrator about this.'));
+            throw new AuthenticationException(__('legacy/confirm_resend.std_database_error'));
         }
 
         Cache::clearUser($user->id, '');
@@ -147,16 +145,15 @@ class EmailConfirmation
         $this->revokeConfirmationTokens($user->id);
         $confirmToken = $this->generateConfirmationToken((int) $user->id, $ip);
 
-        $this->sendConfirmationEmail((string) $user->username, $email, (int) $user->id, $confirmToken, $ip, $langFolder, $langConfirmResend);
+        $this->sendConfirmationEmail((string) $user->username, $email, (int) $user->id, $confirmToken, $ip, $langFolder);
 
         return 'ok.php?type=signup&email='.rawurlencode($email);
     }
 
     /**
      * @param  array<string, mixed>  $data
-     * @param  array<string, string>  $langFunctions
      */
-    public function verifyCaptcha(array $data, string $ip, array $langFunctions): void
+    public function verifyCaptcha(array $data, string $ip): void
     {
         if (! $this->authService->isCaptchaEnabled()) {
             return;
@@ -176,7 +173,7 @@ class EmailConfirmation
 
         if (! $verified) {
             $this->authService->recordFailedAttempt($ip);
-            throw new AuthenticationException($this->msg($langFunctions, 'std_invalid_image_code', 'Invalid captcha response.'));
+            throw new AuthenticationException(__('legacy/functions.std_invalid_image_code'));
         }
     }
 
@@ -207,28 +204,19 @@ class EmailConfirmation
 
     /**
      * W1-05: Rate-limit resend requests per IP (max 5 per hour).
-     *
-     * @param  array<string, string>  $langConfirmResend
      */
-    private function assertResendRateLimit(string $ip, array $langConfirmResend): void
+    private function assertResendRateLimit(string $ip): void
     {
         $cacheKey = "confirm_resend_rate:{$ip}";
         $count = (int) (CacheFacade::get($cacheKey, 0));
 
         if ($count >= self::RESEND_RATE_LIMIT) {
-            throw new AuthenticationException($this->msg(
-                $langConfirmResend,
-                'std_rate_limited',
-                'Too many confirmation email requests. Please try again later.',
-            ));
+            throw new AuthenticationException(('Too many confirmation email requests. Please try again later.'));
         }
 
         CacheFacade::put($cacheKey, $count + 1, self::RESEND_RATE_LIMIT_TTL);
     }
 
-    /**
-     * @param  array<string, string>  $langMail
-     */
     public function sendConfirmationEmail(
         string $username,
         string $email,
@@ -236,7 +224,6 @@ class EmailConfirmation
         string $confirmToken,
         string $ip,
         string $langFolder,
-        array $langMail,
     ): void {
         $baseUrl = SiteConfig::current()->basic->baseUrl();
         if (! str_contains($baseUrl, '://')) {
@@ -248,15 +235,15 @@ class EmailConfirmation
         $siteName = SiteConfig::current()->basic->siteName();
         $reportEmail = SiteConfig::current()->main->reportEmail('');
 
-        $mailOne = $langMail['mail_one'] ?? 'Hi ';
-        $mailTwo = sprintf($langMail['mail_two'] ?? ',<br /><br />You have requested a new user account on %s and you have <br />specified this address ', $siteName);
-        $mailThree = $langMail['mail_three'] ?? ' as user contact.<br /><br />If you did not do this, please ignore this email. The person who entered your <br />email address had the IP address ';
-        $mailFour = $langMail['mail_four'] ?? '. Please do not reply.<br /><br />To confirm your user registration, you have to follow ';
-        $mailFourOne = $langMail['mail_four_1'] ?? '<br /><br />If the Link above is broken or expired, try to send a new confirmation email again from ';
-        $mailThisLink = $langMail['mail_this_link'] ?? 'THIS LINK';
-        $mailHere = $langMail['mail_here'] ?? 'HERE';
-        $mailFive = sprintf($langMail['mail_five'] ?? '', $siteName, $siteName, $reportEmail, $siteName);
-        $title = $siteName.($langMail['mail_title'] ?? ' User Registration Confirmation');
+        $mailOne = __('legacy/confirm_resend.mail_one');
+        $mailTwo = sprintf(__('legacy/confirm_resend.mail_two'), $siteName);
+        $mailThree = __('legacy/confirm_resend.mail_three');
+        $mailFour = __('legacy/confirm_resend.mail_four');
+        $mailFourOne = __('legacy/confirm_resend.mail_four_1');
+        $mailThisLink = __('legacy/confirm_resend.mail_this_link');
+        $mailHere = __('legacy/confirm_resend.mail_here');
+        $mailFive = sprintf(__('legacy/confirm_resend.mail_five'), $siteName, $siteName, $reportEmail, $siteName);
+        $title = $siteName.(__('legacy/confirm_resend.mail_title'));
 
         $body = $mailOne
             .htmlspecialchars($username)
@@ -287,13 +274,5 @@ class EmailConfirmation
             '',
             'UTF-8',
         );
-    }
-
-    /**
-     * @param  array<string, string>  $lang
-     */
-    private function msg(array $lang, string $key, string $fallback): string
-    {
-        return (string) ($lang[$key] ?? $fallback);
     }
 }

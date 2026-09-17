@@ -20,7 +20,7 @@
 <script type="text/javascript" src="js/csrf.js"></script>
 </head>
 <body data-chrome="modern">
-<a href="#main-content" class="skip-link">{{ $chrome->lang['text_skip_to_content'] ?? 'Skip to main content' }}</a>
+<a href="#main-content" class="skip-link">{{ 'Skip to main content' }}</a>
 
 <header class="nxm-header" role="banner">
     <div class="nxm-header__brand">
@@ -33,7 +33,7 @@
     </div>
 
     @if($chrome->user)
-    <nav class="nxm-nav" aria-label="{{ $chrome->lang['text_main_navigation'] ?? 'Main navigation' }}">
+    <nav class="nxm-nav" aria-label="{{ 'Main navigation' }}">
         <ul class="nxm-nav__list">
             @foreach($chrome->navItems as $item)
             <li><a href="{{ $item['href'] }}" @if($item['selected']) aria-current="page" class="nxm-nav__link--active" @else class="nxm-nav__link" @endif>{{ $item['label'] }}</a></li>
@@ -41,39 +41,39 @@
         </ul>
     </nav>
 
-    <div class="nxm-userbar" role="group" aria-label="{{ $chrome->lang['text_account'] ?? 'Account' }}">
-        <span class="nxm-userbar__greeting">{{ $chrome->lang['text_welcome_back'] ?? 'Welcome back' }},</span>
+    <div class="nxm-userbar" role="group" aria-label="{{ 'Account' }}">
+        <span class="nxm-userbar__greeting">{{ __('legacy/functions.text_welcome_back') }},</span>
         {{ $chrome->usernameHtml }}
         <span class="nxm-userbar__links">
-            <form method="post" action="logout.php" class="nx-inline">@csrf<button type="submit" class="nxm-linkbtn">[{{ $chrome->lang['text_logout'] ?? 'Logout' }}]</button></form>
-            <a href="usercp.php">[{{ $chrome->lang['text_user_cp'] ?? 'User CP' }}]</a>
-            @if($chrome->isModerator)<a href="staffpanel.php">[{{ $chrome->lang['text_staff_panel'] ?? 'Staff Panel' }}]</a>@endif
-            @if($chrome->isSysop)<a href="settings.php">[{{ $chrome->lang['text_site_settings'] ?? 'Site Settings' }}]</a>@endif
-            <a href="torrents.php?inclbookmarked=1&amp;allsec=1&amp;incldead=0">[{{ $chrome->lang['text_bookmarks'] ?? 'Bookmarks' }}]</a>
-            <a href="mybonus.php">{{ $chrome->lang['text_bonus'] ?? 'Bonus' }}: {{ $chrome->seedbonus }}</a>
-            <a href="invite.php?id={{ (int) $chrome->user['id'] }}">{{ $chrome->lang['text_invite'] ?? 'Invite' }}: {{ $chrome->invites }}@if($chrome->pendingInvites > 0) ({{ $chrome->pendingInvites }})@endif</a>
+            <form method="post" action="logout.php" class="nx-inline">@csrf<button type="submit" class="nxm-linkbtn">[{{ __('legacy/functions.text_logout') }}]</button></form>
+            <a href="usercp.php">[{{ __('legacy/functions.text_user_cp') }}]</a>
+            @if($chrome->isModerator)<a href="staffpanel.php">[{{ __('legacy/functions.text_staff_panel') }}]</a>@endif
+            @if($chrome->isSysop)<a href="settings.php">[{{ __('legacy/functions.text_site_settings') }}]</a>@endif
+            <a href="torrents.php?inclbookmarked=1&amp;allsec=1&amp;incldead=0">[{{ __('legacy/functions.text_bookmarks') }}]</a>
+            <a href="mybonus.php">{{ __('legacy/functions.text_bonus') }}: {{ $chrome->seedbonus }}</a>
+            <a href="invite.php?id={{ (int) $chrome->user['id'] }}">{{ __('legacy/functions.text_invite') }}: {{ $chrome->invites }}@if($chrome->pendingInvites > 0) ({{ $chrome->pendingInvites }})@endif</a>
         </span>
         <span class="nxm-userbar__stats">
-            <a href="messages.php" class="nxm-stat" aria-label="{{ $chrome->lang['title_inbox'] ?? 'Inbox' }}">
-                <span class="nxm-stat__label">{{ $chrome->lang['text_messages'] ?? 'Messages' }}</span>
-                <span class="nxm-stat__value">{{ $chrome->inboxCount }}@if($chrome->unreadCount > 0) <b>({{ $chrome->unreadCount }} {{ $chrome->lang['text_message_new'] ?? 'new' }})</b>@endif</span>
+            <a href="messages.php" class="nxm-stat" aria-label="{{ __('legacy/functions.title_inbox') }}">
+                <span class="nxm-stat__label">{{ 'Messages' }}</span>
+                <span class="nxm-stat__value">{{ $chrome->inboxCount }}@if($chrome->unreadCount > 0) <b>({{ $chrome->unreadCount }} {{ __('legacy/functions.text_message_new') }})</b>@endif</span>
             </a>
-            <span class="nxm-stat"><span class="nxm-stat__label">{{ $chrome->lang['text_ratio'] ?? 'Ratio' }}</span> <span class="nxm-stat__value">{{ $chrome->ratio }}</span></span>
-            <span class="nxm-stat"><span class="nxm-stat__label">{{ $chrome->lang['text_uploaded'] ?? 'Uploaded' }}</span> <span class="nxm-stat__value">{{ $chrome->uploaded }}</span></span>
-            <span class="nxm-stat"><span class="nxm-stat__label">{{ $chrome->lang['text_downloaded'] ?? 'Downloaded' }}</span> <span class="nxm-stat__value">{{ $chrome->downloaded }}</span></span>
-            <span class="nxm-stat"><span class="nxm-stat__label">{{ $chrome->lang['text_active_torrents'] ?? 'Active' }}</span>
+            <span class="nxm-stat"><span class="nxm-stat__label">{{ __('legacy/functions.text_ratio') }}</span> <span class="nxm-stat__value">{{ $chrome->ratio }}</span></span>
+            <span class="nxm-stat"><span class="nxm-stat__label">{{ __('legacy/functions.text_uploaded') }}</span> <span class="nxm-stat__value">{{ $chrome->uploaded }}</span></span>
+            <span class="nxm-stat"><span class="nxm-stat__label">{{ __('legacy/functions.text_downloaded') }}</span> <span class="nxm-stat__value">{{ $chrome->downloaded }}</span></span>
+            <span class="nxm-stat"><span class="nxm-stat__label">{{ __('legacy/functions.text_active_torrents') }}</span>
                 <span class="nxm-stat__value">
-                    <span title="{{ $chrome->lang['title_torrents_seeding'] ?? 'Seeding' }}">&#x25B2;{{ $chrome->activeSeed }}</span>
-                    <span title="{{ $chrome->lang['title_torrents_leeching'] ?? 'Leeching' }}">&#x25BC;{{ $chrome->activeLeech }}</span>
+                    <span title="{{ __('legacy/functions.title_torrents_seeding') }}">&#x25B2;{{ $chrome->activeSeed }}</span>
+                    <span title="{{ __('legacy/functions.title_torrents_leeching') }}">&#x25BC;{{ $chrome->activeLeech }}</span>
                 </span>
             </span>
         </span>
     </div>
     @else
-    <nav class="nxm-nav" aria-label="{{ $chrome->lang['text_main_navigation'] ?? 'Main navigation' }}">
+    <nav class="nxm-nav" aria-label="{{ 'Main navigation' }}">
         <ul class="nxm-nav__list">
-            <li><a class="nxm-nav__link" href="login.php">{{ $chrome->lang['text_login'] ?? 'Login' }}</a></li>
-            <li><a class="nxm-nav__link" href="signup.php">{{ $chrome->lang['text_signup'] ?? 'Signup' }}</a></li>
+            <li><a class="nxm-nav__link" href="login.php">{{ __('legacy/functions.text_login') }}</a></li>
+            <li><a class="nxm-nav__link" href="signup.php">{{ __('legacy/functions.text_signup') }}</a></li>
         </ul>
     </nav>
     @endif

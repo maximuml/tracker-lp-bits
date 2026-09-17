@@ -27,13 +27,11 @@ final class OfferPageService
     public function build(Request $request): OfferPageViewModel
     {
         $curUser = (array) ($this->currentUser->get() ?? []);
-        $lang = (array) trans('legacy/offers');
         $userId = (int) ($curUser['id'] ?? 0);
 
         $action = $this->resolveAction($request);
 
         $data = [
-            'lang' => $lang,
             'curUser' => $curUser,
             'userId' => $userId,
             'action' => $action,
@@ -57,25 +55,24 @@ final class OfferPageService
         switch ($action) {
             case 'add_offer':
                 Permission::assertCan(PermissionEnum::ADD_OFFER);
-                $data['add_offer'] = $this->addBuilder->build($lang, $data['browsecatmode']);
+                $data['add_offer'] = $this->addBuilder->build($data['browsecatmode']);
                 break;
             case 'off_details':
-                $data['off_details'] = $this->detailsBuilder->build($lang, $curUser, $userId, $request);
+                $data['off_details'] = $this->detailsBuilder->build($curUser, $userId, $request);
                 break;
             case 'edit_offer':
-                $data['edit_offer'] = $this->editBuilder->build($lang, $curUser, $userId, $request, $data['browsecatmode']);
+                $data['edit_offer'] = $this->editBuilder->build($curUser, $userId, $request, $data['browsecatmode']);
                 break;
             case 'offer_vote':
-                $data['offer_vote'] = $this->voteListBuilder->build($lang, $request);
+                $data['offer_vote'] = $this->voteListBuilder->build($request);
                 break;
             default:
-                $data['list'] = $this->listBuilder->build($lang, $curUser, $userId, $request, $data);
+                $data['list'] = $this->listBuilder->build($curUser, $userId, $request, $data);
                 $data['action'] = 'list';
                 break;
         }
 
         return new OfferPageViewModel(
-            lang: $data['lang'],
             curUser: $data['curUser'],
             userId: $data['userId'],
             action: $data['action'],

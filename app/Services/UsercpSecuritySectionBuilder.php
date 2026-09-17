@@ -26,11 +26,10 @@ final class UsercpSecuritySectionBuilder
     ) {}
 
     /**
-     * @param  array<string, mixed>  $lang
      * @param  array<string, mixed>  $curUser
      * @return array<string, mixed>
      */
-    public function build(array $lang, array $curUser, string $type): array
+    public function build(array $curUser, string $type): array
     {
         $showEmailChange = (string) $this->globals->get('disableemailchange', '') !== 'no'
             && (string) $this->globals->get('smtptype', '') !== 'none';
@@ -52,9 +51,9 @@ final class UsercpSecuritySectionBuilder
         // Privacy radios
         $currentPrivacy = UserPrivacy::tryFrom((int) ($curUser['privacy'] ?? 1)) ?? UserPrivacy::NORMAL;
         $privacyRadios = [
-            'normal' => $this->privacyRadio('normal', $lang['radio_normal'] ?? 'normal', $currentPrivacy->stringValue()),
-            'low' => $this->privacyRadio('low', $lang['radio_low'] ?? 'low', $currentPrivacy->stringValue()),
-            'strong' => $this->privacyRadio('strong', $lang['radio_strong'] ?? 'strong', $currentPrivacy->stringValue()),
+            'normal' => $this->privacyRadio('normal', __('legacy/usercp.radio_normal'), $currentPrivacy->stringValue()),
+            'low' => $this->privacyRadio('low', __('legacy/usercp.radio_low'), $currentPrivacy->stringValue()),
+            'strong' => $this->privacyRadio('strong', __('legacy/usercp.radio_strong'), $currentPrivacy->stringValue()),
         ];
 
         // For the confirm step, capture the posted values to re-render as hidden fields
@@ -90,63 +89,63 @@ final class UsercpSecuritySectionBuilder
         } else {
             AssetAppender::js('js/auth-form.js', 'footer', true, 'auth-form');
 
-            $savedMessage = (string) ($lang['text_saved'] ?? '');
+            $savedMessage = (string) (__('legacy/usercp.text_saved'));
             if ($savedFlags['mail']) {
-                $savedMessage .= ' '.($lang['std_confirmation_email_sent'] ?? '');
+                $savedMessage .= ' '.(__('legacy/usercp.std_confirmation_email_sent'));
             }
             if ($savedFlags['passkey']) {
-                $savedMessage .= ' '.($lang['std_passkey_reset'] ?? '');
+                $savedMessage .= ' '.(__('legacy/usercp.std_passkey_reset'));
             }
             if ($savedFlags['password']) {
-                $savedMessage .= ' '.($lang['std_password_changed'] ?? '');
+                $savedMessage .= ' '.(__('legacy/usercp.std_password_changed'));
             }
             if ($savedFlags['privacy']) {
-                $savedMessage .= ' '.($lang['std_privacy_level_updated'] ?? '');
+                $savedMessage .= ' '.(__('legacy/usercp.std_privacy_level_updated'));
             }
 
             $rowsHtml .= (string) Html::frowSmall(
-                $lang['row_reset_passkey'] ?? 'Reset passkey',
-                '<input type=checkbox name=resetpasskey value=1 />'.htmlspecialchars($lang['checkbox_reset_my_passkey'] ?? '').'<br /><font class=small>'.($lang['text_reset_passkey_note'] ?? '').'</font>',
+                __('legacy/usercp.row_reset_passkey'),
+                '<input type=checkbox name=resetpasskey value=1 />'.htmlspecialchars(__('legacy/usercp.checkbox_reset_my_passkey')).'<br /><font class=small>'.(__('legacy/usercp.text_reset_passkey_note')).'</font>',
                 1,
                 '',
                 true
             );
 
             if ($twoStep['hasSecret']) {
-                $twoStepCell = '<input type=text name=two_step_code />'.htmlspecialchars($lang['text_two_step_secret_unbind_note'] ?? '');
+                $twoStepCell = '<input type=text name=two_step_code />'.htmlspecialchars(__('legacy/usercp.text_two_step_secret_unbind_note'));
             } else {
                 $cspNonce = (string) request()->attributes->get('csp_nonce', '');
                 $twoStepCell = sprintf('<style nonce="%s">.tfa-row{display:flex;align-items:center}.tfa-row>div+div{padding-left:20px}</style><div class="tfa-row">', htmlspecialchars($cspNonce));
                 $twoStepCell .= sprintf('<div><img src="%s" /></div>', htmlspecialchars($twoStep['qrCodeUrl']));
                 $twoStepCell .= sprintf(
                     '<div>%s<a href="%s" target="_blank">Link</a><br /><br />%s%s<br/><br/>%s<input type=hidden name=two_step_secret value="%s" /><input type=text name=two_step_code readonly /></div>',
-                    ($lang['text_two_step_secret_bind_by_qrdoe_note'] ?? ''),
+                    (__('legacy/usercp.text_two_step_secret_bind_by_qrdoe_note')),
                     htmlspecialchars($twoStep['qrCodeUrl']),
-                    htmlspecialchars($lang['text_two_step_secret_bind_manually_note'] ?? ''),
+                    htmlspecialchars(__('legacy/usercp.text_two_step_secret_bind_manually_note')),
                     htmlspecialchars($twoStep['secret']),
-                    htmlspecialchars($lang['text_two_step_secret_bind_complete_note'] ?? ''),
+                    htmlspecialchars(__('legacy/usercp.text_two_step_secret_bind_complete_note')),
                     htmlspecialchars($twoStep['secret'])
                 );
                 $twoStepCell .= sprintf('</div><script nonce="%s">document.addEventListener("focusin",function(e){if(e.target&&e.target.name==="two_step_code"){e.target.removeAttribute("readonly")}})</script>', htmlspecialchars($cspNonce));
             }
-            $rowsHtml .= (string) Html::frowSmall($lang['row_two_step_secret'] ?? 'Two-step secret', $twoStepCell, 1, '', true);
+            $rowsHtml .= (string) Html::frowSmall(__('legacy/usercp.row_two_step_secret'), $twoStepCell, 1, '', true);
 
             $passkeyListHtml = $this->capturePasskeyList((int) ($curUser['id'] ?? 0));
             $rowsHtml .= '<tr><td class="rowhead" valign="top" align="right">'.htmlspecialchars(Locale::trans('passkey.passkey', [], null)).'</td><td class="rowfollow" valign="top" align="left">'.$passkeyListHtml.'</td></tr>';
 
             if ($showEmailChange) {
                 $rowsHtml .= (string) Html::frowSmall(
-                    $lang['row_email_address'] ?? 'Email',
-                    '<input type="text" name="email" style="width: 200px" value="'.htmlspecialchars((string) ($curUser['email'] ?? '')).'" /> <br /><font class=small>'.($lang['text_email_address_note'] ?? '').'</font>',
+                    __('legacy/usercp.row_email_address'),
+                    '<input type="text" name="email" style="width: 200px" value="'.htmlspecialchars((string) ($curUser['email'] ?? '')).'" /> <br /><font class=small>'.(__('legacy/usercp.text_email_address_note')).'</font>',
                     1,
                     '',
                     true
                 );
             }
 
-            $rowsHtml .= (string) Html::frowSmall($lang['row_change_password'] ?? 'Change password', '<input type="password" class="password" style="width: 200px" />', 1, '', true);
-            $rowsHtml .= (string) Html::frowSmall($lang['row_type_password_again'] ?? 'Password again', '<input type="password" class="passagain" style="width: 200px" />', 1, '', true);
-            $rowsHtml .= (string) Html::frowSmall($lang['row_privacy_level'] ?? 'Privacy', $privacyRadios['normal'].' '.$privacyRadios['low'].' '.$privacyRadios['strong'], 1, '', true);
+            $rowsHtml .= (string) Html::frowSmall(__('legacy/usercp.row_change_password'), '<input type="password" class="password" style="width: 200px" />', 1, '', true);
+            $rowsHtml .= (string) Html::frowSmall(__('legacy/usercp.row_type_password_again'), '<input type="password" class="passagain" style="width: 200px" />', 1, '', true);
+            $rowsHtml .= (string) Html::frowSmall(__('legacy/usercp.row_privacy_level'), $privacyRadios['normal'].' '.$privacyRadios['low'].' '.$privacyRadios['strong'], 1, '', true);
         }
 
         return [

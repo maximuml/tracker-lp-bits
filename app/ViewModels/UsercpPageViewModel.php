@@ -14,7 +14,6 @@ use App\Models\User;
 final class UsercpPageViewModel extends ViewModel
 {
     /**
-     * @param  array<string, mixed>  $lang
      * @param  array<string, mixed>  $curUser
      * @param  array<string, mixed>|null  $personal
      * @param  array<string, mixed>|null  $tracker
@@ -23,7 +22,6 @@ final class UsercpPageViewModel extends ViewModel
      * @param  array<string, mixed>|null  $home
      */
     public function __construct(
-        public readonly array $lang,
         public readonly array $curUser,
         public readonly User $userInfo,
         public readonly string $siteName,
@@ -43,7 +41,6 @@ final class UsercpPageViewModel extends ViewModel
     public function toArray(): array
     {
         return [
-            'lang' => $this->lang,
             'curUser' => $this->curUser,
             'userInfo' => $this->userInfo,
             'siteName' => $this->siteName,

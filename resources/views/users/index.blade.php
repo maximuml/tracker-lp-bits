@@ -46,8 +46,8 @@
     <td align=left>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['username_html']))</td>
     <td>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['addedFormatted']))</td>
     <td>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['lastAccessFormatted']))</td>
-    <td align=left>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml((string) $row['class_name']))</td>
-    <td align=center>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml((string) $row['country']))</td>
+    <td align=left>{{ $row['class_name'] }}</td>
+    <td align=center>{{ $row['country'] }}</td>
 </tr>
 @endforeach
 </table>

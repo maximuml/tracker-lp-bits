@@ -98,10 +98,10 @@ class PageLayout
         if ($title == '') {
             $title = $context->siteName;
         } else {
-            $title = $context->siteName.' :: '.htmlspecialchars($title);
+            $title = $context->siteName.' :: '.$title;
         }
         if ($context->titleKeywordsTweak) {
-            $title .= ' '.htmlspecialchars($context->titleKeywordsTweak);
+            $title .= ' '.$context->titleKeywordsTweak;
         }
         $title .= ' - Powered by '.PROJECTNAME;
         if ($context->siteOnline == 'no') {

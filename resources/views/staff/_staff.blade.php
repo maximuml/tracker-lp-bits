@@ -1,5 +1,5 @@
 @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::open((__('legacy/staff.text_firstline_support')) . '<font class=small> - [<a class=altlink href=contactstaff.php><b>' . (__('legacy/staff.text_apply_for_it')) . '</b></a>]</font>', false, 10, '100%', 'left')))
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/staff.text_firstline_support_note')))
+{{ __('legacy/staff.text_firstline_support_note') }}
 <br /><br />
 <table data-nx="data" width=100% cellspacing=0 align=center>
     <tr>
@@ -25,7 +25,7 @@
 @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::CLOSE))
 
 @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::open((__('legacy/staff.text_movie_critics')) . '<font class=small> - [<a class=altlink href=contactstaff.php><b>' . (__('legacy/staff.text_apply_for_it')) . '</b></a>]</font>', false, 10, '100%', 'left')))
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/staff.text_movie_critics_note')))
+{{ __('legacy/staff.text_movie_critics_note') }}
 <br /><br />
 <table data-nx="data" width=100% cellspacing=0 align=center>
     <tr>
@@ -49,7 +49,7 @@
 @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::CLOSE))
 
 @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::open((__('legacy/staff.text_forum_moderators')) . '<font class=small> - [<a class=altlink href=contactstaff.php><b>' . (__('legacy/staff.text_apply_for_it')) . '</b></a>]</font>', false, 10, '100%', 'left')))
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/staff.text_forum_moderators_note')))
+{{ __('legacy/staff.text_forum_moderators_note') }}
 <br /><br />
 <table data-nx="data" width=100% cellspacing=0 align=center>
     <tr>
@@ -102,7 +102,7 @@
 @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::CLOSE))
 
 @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::open(__('legacy/staff.text_vip'), false, 10, '100%', 'left')))
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(sprintf(__('legacy/staff.text_vip_note'), $siteName)))
+{{ sprintf(__('legacy/staff.text_vip_note'), $siteName) }}
 <br /><br />
 <table data-nx="data" width=100% cellspacing=0 align=center>
     <tr>

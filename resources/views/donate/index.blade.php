@@ -28,7 +28,7 @@
                             <input type="hidden" name="item_name" value="Donation to {{ $SITENAME }}">
                             <p align="center">
                                 <br />
-                                @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/donate.text_select_donation_amount')))<br />
+                                {{ __('legacy/donate.text_select_donation_amount') }}<br />
                                 <select name="amount">
                                     <option value="" selected>{{ __('legacy/donate.select_choose_donation_amount') }}</option>
                                     @foreach ([0, 1, 5, 10, 15, 20, 30, 40, 50, 60, 100, 300] as $amount)
@@ -68,7 +68,7 @@
             </div>
         @endif
         <div class="nx-text">
-            @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/donate.text_after_donation_note_one')))
+            {{ __('legacy/donate.text_after_donation_note_one') }}
             <a href="sendmessage.php?receiver={{ $accountantId }}"><font class="striking"><b>{{ __('legacy/donate.text_send_us') }}</b></font></a>
             @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/donate.text_after_donation_note_two')))
         </div>

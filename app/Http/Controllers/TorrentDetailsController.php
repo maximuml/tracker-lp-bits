@@ -27,6 +27,7 @@ use App\Support\CustomField;
 use App\Support\Format;
 use App\Support\Globals;
 use App\Support\Html;
+use App\Support\Html\SafeHtml;
 use App\Support\LegacyYesNo;
 use App\Support\Locale;
 use App\Support\Logger;
@@ -395,14 +396,14 @@ JS, \json_encode($approvalTitle)), 'footer', false);
             Time::format((string) $row['last_action'])
         );
 
-        $peersHeadHtml = sprintf(
+        $peersHeadHtml = SafeHtml::fromTrustedHtml(sprintf(
             '<span id="seeders"></span><span id="leechers"></span>%s<br /><span id="showpeer"><a href="#" data-peerlist="%s" class="sublink">%s</a></span><span id="hidepeer" class="nx-hidden"><a href="#" data-peerlist="%s" data-peerlist-mode="hide" class="sublink">%s</a></span>',
             __('legacy/details.row_peers'),
             $row['id'],
             __('legacy/details.text_see_full_list'),
             $row['id'],
             __('legacy/details.text_hide_list')
-        );
+        ));
         $peersBodyHtml = sprintf(
             '<div id="peercount"><b>%s%s%s</b> | <b>%s%s%s</b></div><div id="peerlist"></div>',
             $row['seeders'],
@@ -436,11 +437,11 @@ ul.magic li:hover
 }
 CSS, 'header', false);
 
-        $descrHeadHtml = sprintf(
+        $descrHeadHtml = SafeHtml::fromTrustedHtml(sprintf(
             '<a href="#" data-klappe="descr"><span class="nowrap"><img class="minus" src="pic/trans.gif" alt="Show/Hide" id="picdescr" title="%s" /> %s</span></a>',
             __('legacy/details.title_show_or_hide'),
             __('legacy/details.row_description')
-        );
+        ));
         $showDescription = ! LegacyYesNo::isNo($currentUser['showdescription'] ?? null) && $descr !== '';
 
         $magicInfo = $this->torrentDetailRepository->getMagicInfo($id, (int) $currentUser['id']);

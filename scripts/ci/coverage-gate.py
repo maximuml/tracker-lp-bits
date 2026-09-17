@@ -22,8 +22,13 @@ for f in FILES:
     try:
         root = ET.parse(f).getroot()
         # Clover <metrics>: statements, coveredstatements.
-        # Prefer project-level metrics for aggregate counts.
-        metrics = root.find(".//project/metrics") or root.find(".//metrics")
+        # Prefer project-level metrics for aggregate counts. NB: an
+        # Element is falsy when it has no children, so `or` cannot be
+        # used here — <metrics> is a leaf and would always fall through
+        # to the first file-level <metrics> element.
+        metrics = root.find(".//project/metrics")
+        if metrics is None:
+            metrics = root.find(".//metrics")
         if metrics is None:
             print(f"::error::No <metrics> element in {f}")
             sys.exit(1)

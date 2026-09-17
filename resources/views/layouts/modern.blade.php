@@ -92,6 +92,11 @@
 
 <script type="text/javascript" src="js/ajax.js"></script>
 <script type="text/javascript" src="js/nexus.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/domLib.js"></script>
+<script type="text/javascript" src="js/domTT.js"></script>
+<script type="text/javascript" src="js/domTT_drag.js"></script>
+<script type="text/javascript" src="js/fadomatic.js"></script>
 <script type="text/javascript" src="js/medium-zoom.min.js"></script>
 <script type="text/javascript" src="js/goup.js"></script>
 @foreach (\App\Support\AssetAppender::getAppendFootersSafe() as $html)

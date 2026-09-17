@@ -31,7 +31,7 @@
 @endforeach
 </p>
 
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagertop ?? ''))
+{{ $pagertop ?? '' }}
 
 <table data-nx="data" border=1 cellspacing=0 cellpadding=5>
 <tr>
@@ -52,5 +52,5 @@
 @endforeach
 </table>
 
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagerbottom ?? ''))
+{{ $pagerbottom ?? '' }}
 @endsection

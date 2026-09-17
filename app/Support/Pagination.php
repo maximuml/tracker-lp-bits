@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Support\Html\SafeHtml;
+
 /**
  * Stateless pagination-HTML renderer extracted from
  * `include/functions.php` (Phase 5 of the legacy migration).
@@ -30,8 +32,8 @@ final class Pagination
      * Returns an indexed array with the same shape as the legacy
      * `pager()`:
      *
-     *   [0] => pagertop    (HTML string — prev/next + page links, top variant)
-     *   [1] => pagerbottom (HTML string — page links + prev/next, bottom variant)
+     *   [0] => pagertop    (SafeHtml — prev/next + page links, top variant)
+     *   [1] => pagerbottom (SafeHtml — page links + prev/next, bottom variant)
      *   [2] => limit clause ("limit N offset M")
      *   [3] => start offset (int)
      *   [4] => rows per page (int)
@@ -51,7 +53,7 @@ final class Pagination
      *                                         'shift_prev_title', 'shift_next_title'
      * @param  string  $pagename  Query-param name for the page number
      * @param  bool  $isPresto  Whether the user-agent is Opera/Presto
-     * @return array{0: string, 1: string, 2: string, 3: int, 4: int, 5: int}
+     * @return array{0: SafeHtml, 1: SafeHtml, 2: string, 3: int, 4: int, 5: int}
      */
     public static function render(
         int $rpp,
@@ -137,7 +139,14 @@ final class Pagination
 
         $startOffset = $page * $rpp;
 
-        return [$pagertop, $pagerbottom, "limit $rpp offset $startOffset", $startOffset, $rpp, $page];
+        return [
+            SafeHtml::fromTrustedHtml($pagertop),
+            SafeHtml::fromTrustedHtml($pagerbottom),
+            "limit $rpp offset $startOffset",
+            $startOffset,
+            $rpp,
+            $page,
+        ];
     }
 
     /**
@@ -163,7 +172,7 @@ final class Pagination
      */
     /**
      * @param  array<string, mixed>  $opts
-     * @return array{0: string, 1: string, 2: string, 3: int, 4: int, 5: int}
+     * @return array{0: SafeHtml, 1: SafeHtml, 2: string, 3: int, 4: int, 5: int}
      */
     public static function pager(int $rpp, int $count, string $href, array $opts = [], string $pagename = 'page'): array
     {

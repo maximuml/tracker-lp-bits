@@ -16,6 +16,7 @@ use App\Repositories\InviteRepository;
 use App\Support\AssetAppender;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
+use App\Support\Html\SafeHtml;
 use App\Support\Locale;
 use App\Support\Pagination;
 use App\Support\Ratio;
@@ -183,8 +184,8 @@ class InviteController extends LegacyController
         }
 
         $inviteRows = [];
-        $pagertop = '';
-        $pagerbottom = '';
+        $pagertop = SafeHtml::fromTrustedHtml('');
+        $pagerbottom = SafeHtml::fromTrustedHtml('');
         $haremAdditionFactor = SiteConfig::current()->bonus->haremAddition();
         $pendingCount = 0;
 
@@ -250,8 +251,8 @@ JS;
         $number = $this->inviteRepository->countInvites($id, $menuSelected);
         $pageSize = 50;
         $inviteRows = [];
-        $pagertop = '';
-        $pagerbottom = '';
+        $pagertop = SafeHtml::fromTrustedHtml('');
+        $pagerbottom = SafeHtml::fromTrustedHtml('');
 
         if ($number > 0) {
             [$pagertop, $pagerbottom, , $offset] = Pagination::pager($pageSize, $number, "?id=$id&menu=$menuSelected&");

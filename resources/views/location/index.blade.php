@@ -95,7 +95,7 @@
 </tr>
 @endforeach
 </table>
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagerbottom ?? ''))
+{{ $pagerbottom ?? '' }}
 @endif
 @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::CLOSE))
 @endsection

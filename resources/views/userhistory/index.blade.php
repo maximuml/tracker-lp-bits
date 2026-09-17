@@ -6,7 +6,7 @@
 @if ($action === 'viewposts')
     <h1>{{ __('legacy/userhistory.text_posts_history_for')}}@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($subject))</h1>
     @if (($postcount ?? 0) > ($perpage ?? 15))
-        @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagertop ?? ''))
+        {{ $pagertop ?? '' }}
     @endif
     @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::open('', false, 10, '100%', 'left')))
     @foreach ($items ?? [] as $item)
@@ -27,12 +27,12 @@
     @endforeach
     @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::CLOSE))
     @if (($postcount ?? 0) > ($perpage ?? 15))
-        @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagerbottom ?? ''))
+        {{ $pagerbottom ?? '' }}
     @endif
 @elseif ($action === 'viewcomments')
     <h1>{{ __('legacy/userhistory.text_comments_history_for')}}@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($subject))</h1>
     @if (($commentcount ?? 0) > ($perpage ?? 15))
-        @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagertop ?? ''))
+        {{ $pagertop ?? '' }}
     @endif
     @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::open('', false, 10, '100%', 'left')))
     @foreach ($items ?? [] as $item)
@@ -53,7 +53,7 @@
     @endforeach
     @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::CLOSE))
     @if (($commentcount ?? 0) > ($perpage ?? 15))
-        @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagerbottom ?? ''))
+        {{ $pagerbottom ?? '' }}
     @endif
 @endif
 @endsection

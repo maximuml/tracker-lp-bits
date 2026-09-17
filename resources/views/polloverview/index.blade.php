@@ -24,14 +24,14 @@
     @if ($count == 0)
         <p align="center">{{ __('legacy/polloverview.text_no_users_voted')}}</p>
     @else
-        @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagertop ?? ''))
+        {{ $pagertop ?? '' }}
         <table data-nx="data" width=737 border=1 cellspacing=0 cellpadding=5>
         <tr><td class=colhead align=center><nobr>{{ __('legacy/polloverview.col_username')}}</nobr></td><td class=colhead align=center><nobr>{{ __('legacy/polloverview.col_selection')}}<nobr></td></tr>
         @foreach ($answers as $answerRow)
             <tr><td>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($answerRow['usernameHtml'] ?? ''))</td><td>{{ $poll["option{$answerRow['selection']}"] ?? '' }}</td></tr>
         @endforeach
         </table>
-        @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagerbottom ?? ''))
+        {{ $pagerbottom ?? '' }}
     @endif
 
 @else

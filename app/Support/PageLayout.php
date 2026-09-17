@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Repositories\AttendanceRepository;
 use App\Repositories\HitAndRunRepository;
 use App\Repositories\StaffMessageRepository;
+use App\Support\Html\SafeHtml;
 use App\Utils\MsgAlert;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Response;
@@ -121,7 +122,6 @@ class PageLayout
         $locale = str_replace('_', '-', app()->getLocale());
         $fontCssUri = Style::fontCssUri($context->userFontSize());
         $forumPicFolder = Forum::picFolder($context->langDir);
-        $appendHeaders = AssetAppender::getAppendHeaders();
         $contentWidth = defined('CONTENT_WIDTH') ? (int) \constant('CONTENT_WIDTH') : 0;
         $headTableWidth = $context->user !== null ? $contentWidth + 28.66 : $contentWidth;
 
@@ -426,7 +426,7 @@ class PageLayout
             'csrfToken' => csrf_token(),
             'metaKeywords' => $context->metaKeywordsTweak,
             'metaDescription' => $context->metaDescriptionTweak,
-            'addiCode' => $addiCode,
+            'addiCode' => SafeHtml::fromTrustedHtml($addiCode),
             'cssUri' => $cssUri,
             'cssUpdateDate' => $cssUpdateDate,
             'fontCssUri' => $fontCssUri,
@@ -435,42 +435,42 @@ class PageLayout
             'slogan' => $context->slogan,
             'logoMain' => $context->logoMain,
             'enableDonation' => $context->enableDonation,
-            'appendHeaders' => $appendHeaders,
+            'appendHeaders' => AssetAppender::getAppendHeadersSafe(),
             'contentWidth' => $contentWidth,
             'headTableWidth' => $headTableWidth,
             'searchBoxIcons' => $searchBoxIcons,
             'user' => $user,
-            'menuHtml' => $menuHtml,
-            'username' => $username,
+            'menuHtml' => SafeHtml::fromTrustedHtml($menuHtml),
+            'username' => SafeHtml::fromTrustedHtml($username),
             'isModerator' => $isModerator,
             'isSysop' => $isSysop,
             'seedbonus' => $seedbonus,
-            'attendanceLink' => $attendanceLink,
+            'attendanceLink' => SafeHtml::fromTrustedHtml($attendanceLink),
             'medalLabel' => $medalLabel,
             'taskLabel' => $taskLabel,
             'userId' => $userId,
             'invites' => $invites,
             'pendingInviteCount' => $pendingInviteCount,
-            'managementSystemLink' => $managementSystemLink,
+            'managementSystemLink' => SafeHtml::fromTrustedHtml($managementSystemLink),
             'ratio' => $ratio,
             'uploaded' => $uploaded,
             'downloaded' => $downloaded,
             'activeseed' => $activeseed,
             'activeleech' => $activeleech,
-            'connectable' => $connectable,
-            'slotsDisplay' => $slotsDisplay,
+            'connectable' => SafeHtml::fromTrustedHtml($connectable),
+            'slotsDisplay' => SafeHtml::fromTrustedHtml($slotsDisplay),
             'hitAndRunEnabled' => $hitAndRunEnabled,
-            'hitAndRunStatus' => $hitAndRunStatus,
+            'hitAndRunStatus' => SafeHtml::fromTrustedHtml($hitAndRunStatus),
             'globalSearchEnabled' => $globalSearchEnabled,
             'searchFormTarget' => $searchFormTarget,
             'requestSearchEscaped' => $requestSearchEscaped,
             'searchKeywordPlaceholder' => $searchKeywordPlaceholder,
-            'searchBoxAreaSelect' => $searchBoxAreaSelect,
+            'searchBoxAreaSelect' => SafeHtml::fromTrustedHtml($searchBoxAreaSelect),
             'globalSearchLabel' => $globalSearchLabel,
-            'staffIcons' => $staffIcons,
-            'messageAlerts' => $messageAlerts,
+            'staffIcons' => SafeHtml::fromTrustedHtml($staffIcons),
+            'messageAlerts' => SafeHtml::fromTrustedHtml($messageAlerts),
             'offlineMsg' => $offlineMsg,
-            'offlineMsgHtml' => $offlineMsgHtml,
+            'offlineMsgHtml' => SafeHtml::fromTrustedHtml($offlineMsgHtml),
         ])->render();
     }
 
@@ -541,8 +541,6 @@ class PageLayout
             $analyticsCode = "\n".$analyticsCode."\n";
         }
 
-        $appendFooters = AssetAppender::getAppendFooters();
-
         $js = <<<'JS'
         <script type="application/javascript" src="js/ajax.js"></script>
         <script type="application/javascript" src="js/nexus.js"></script>
@@ -563,14 +561,14 @@ class PageLayout
         JS;
 
         echo view('layouts.legacy.footer', [
-            'copyrightHtml' => $copyrightHtml,
-            'pageStatsLine' => $pageStatsLine,
+            'copyrightHtml' => SafeHtml::fromTrustedHtml($copyrightHtml),
+            'pageStatsLine' => SafeHtml::fromTrustedHtml($pageStatsLine),
             'debugQuery' => $debugQuery,
-            'debugQueryHtml' => $debugQueryHtml,
-            'keyShortcut' => $keyShortcut,
-            'analyticsCode' => $analyticsCode,
-            'appendFooters' => $appendFooters,
-            'jsBlock' => $js,
+            'debugQueryHtml' => SafeHtml::fromTrustedHtml($debugQueryHtml),
+            'keyShortcut' => SafeHtml::fromTrustedHtml($keyShortcut),
+            'analyticsCode' => SafeHtml::fromTrustedHtml($analyticsCode),
+            'appendFooters' => AssetAppender::getAppendFootersSafe(),
+            'jsBlock' => SafeHtml::fromTrustedHtml($js),
         ])->render();
     }
 }

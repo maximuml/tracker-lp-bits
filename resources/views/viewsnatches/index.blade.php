@@ -12,7 +12,7 @@
 <tr @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['highlight']))><td class=rowfollow align=center>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['usernameHtml']))</td>@if ($canViewConfidential)<td class=rowfollow align=center><span class='nowrap'>{{ $row['ip'] }}</span></td>@endif<td class=rowfollow align=center>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['trafficHtml']))</td><td class=rowfollow align=center>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['ratioHtml']))</td><td class=rowfollow align=center>{{ $row['seedtime'] }}</td><td class=rowfollow align=center>{{ $row['leechtime'] }}</td><td class=rowfollow align=center>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['completedAtHtml']))</td><td class=rowfollow align=center>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['lastActionHtml']))</td><td class=rowfollow align=center style='padding: 0px'>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['reportHtml']))</td></tr>
 @endforeach
 </table>
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagerbottom ?? ''))
+{{ $pagerbottom ?? '' }}
 @else
 @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::stdMessage(__('legacy/viewsnatches.std_sorry'), __('legacy/viewsnatches.std_no_snatched_users'), false)))
 @endif

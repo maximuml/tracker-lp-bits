@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Support;
 
+use App\Support\Html\SafeHtml;
 use App\Support\Pagination;
 use PHPUnit\Framework\TestCase;
 use Tests\Attributes\TestCategory;
@@ -24,6 +25,13 @@ final class PaginationTest extends TestCase
     {
         $result = Pagination::render(10, 100, '/list.php?', 0, 10, self::LABELS);
         $this->assertCount(6, $result);
+    }
+
+    public function test_render_pagers_are_safe_html(): void
+    {
+        $result = Pagination::render(10, 100, '/list.php?', 0, 10, self::LABELS);
+        $this->assertInstanceOf(SafeHtml::class, $result[0]);
+        $this->assertInstanceOf(SafeHtml::class, $result[1]);
     }
 
     public function test_render_limit_clause_format(): void
@@ -60,7 +68,7 @@ final class PaginationTest extends TestCase
     {
         $result = Pagination::render(10, 0, '/list.php?', 0, 0, self::LABELS);
         $this->assertStringNotContainsString('&nbsp;-&nbsp;', $result[0]);
-        $this->assertSame($result[0], $result[1]);
+        $this->assertSame($result[0]->toHtml(), $result[1]->toHtml());
     }
 
     public function test_render_current_page_is_gray_font(): void

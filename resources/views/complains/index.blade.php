@@ -29,7 +29,7 @@
 
     <x-frame :caption="__('legacy/complains.complaints_processed')" :center="false">
         @if (! empty($processedRows))
-            @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagertop ?? ''))
+            {{ $pagertop ?? '' }}
             <table data-nx="data" width="100%">
             <tr>
                 <td class="colhead">{{ __('legacy/complains.th_complain_at') ?? 'Added' }}</td>
@@ -44,7 +44,7 @@
                 </tr>
             @endforeach
             </table>
-            @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagerbottom ?? ''))
+            {{ $pagerbottom ?? '' }}
         @else
             {{ __('legacy/complains.no_complaints_have_been_processed') ?? 'No complaints have been processed.' }}
         @endif

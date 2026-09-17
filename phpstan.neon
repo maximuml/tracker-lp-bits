@@ -33,10 +33,6 @@ parameters:
         analyse:
             - app/Services/Legacy/partials (?)
             - app/Services/Legacy/*_content.php
-            # Standalone legacy installer (IN_NEXUS=true, own NexusDB layer).
-            # Removed wholesale by the installer migration step — do not add
-            # per-file fixes here, delete the directory instead.
-            - app/Support/Install
 
     bootstrapFiles:
         - tests/phpstan/bootstrap.php

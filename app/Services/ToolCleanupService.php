@@ -29,7 +29,7 @@ class ToolCleanupService
                 ->havingRaw('count(*) > 1')
                 ->limit($size)
                 ->get();
-            if (empty($snatchRes)) {
+            if ($snatchRes->isEmpty()) {
                 break;
             }
             Logger::writeWithContext((string) ('[DELETE_DUPLICATED_SNATCH], count: '.count($snatchRes)), (string) 'info', (bool) false);
@@ -89,7 +89,7 @@ class ToolCleanupService
                 ->havingRaw('count(*) > 1')
                 ->limit($size)
                 ->get();
-            if (empty($results)) {
+            if ($results->isEmpty()) {
                 Logger::writeWithContext((string) '[DELETE_DUPLICATED_PEERS], no data', (string) 'info', (bool) false);
                 break;
             }

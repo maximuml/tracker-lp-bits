@@ -41,9 +41,6 @@ final class PhpStanCoverageTest extends TestCase
         // Шаблоны-фрагменты legacy-слоёв — не самостоятельные файлы.
         'app/Services/Legacy/*_content.php',
         'app/Services/Legacy/partials (?)',
-        // Standalone-инсталлятор со своим NexusDB-слоем; удаляется
-        // целиком шагом 1.4 плана — не чинить по файлам.
-        'app/Support/Install',
     ];
 
     public function test_every_first_level_app_directory_is_analysed(): void

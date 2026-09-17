@@ -79,7 +79,7 @@ final class ComposeSecretsTest extends TestCase
      */
     public function test_installer_has_insecure_default_warning(): void
     {
-        $source = file_get_contents(app_path('Support/Install/Install.php'));
+        $source = file_get_contents(app_path('Services/Installer/EnvFileWriter.php'));
         $this->assertStringContainsString('warnOnInsecureDefaults', $source, 'Installer must have a method to warn on insecure defaults');
         $this->assertStringContainsString('SECURITY WARNING', $source, 'Installer must log SECURITY WARNING for insecure defaults');
         $this->assertStringContainsString('ChangeMeToYourDBPassword', $source, 'Installer must detect the DB_PASSWORD placeholder');
@@ -90,7 +90,7 @@ final class ComposeSecretsTest extends TestCase
      */
     public function test_installer_sets_chmod_0640(): void
     {
-        $source = file_get_contents(app_path('Support/Install/Install.php'));
+        $source = file_get_contents(app_path('Services/Installer/EnvFileWriter.php'));
         $this->assertStringContainsString('0640', $source, 'Installer must set 0640 permissions on .env');
     }
 

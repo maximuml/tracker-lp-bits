@@ -22,7 +22,7 @@ PHP 8.4+, MySQL, Redis, MeiliSearch. Docker Compose stack for local development.
 - `app/Support/` — helper classes (Cache, Logger, Auth, HTML, etc.)
 - `app/Models/` — Eloquent models
 - `app/Filament/` — Filament admin resources
-- `app/Support/Install/` — legacy NexusPHP install/update scripts (standalone, `IN_NEXUS=true`)
+- `app/Services/Installer/` — install/upgrade services backing `app:install`/`app:upgrade`
 - `routes/legacy/` — legacy route mappings (PHP file routes)
 - `config/` — Laravel configuration
 - `database/migrations/` — migrations
@@ -85,7 +85,7 @@ docker compose exec -T php composer audit
 - **Pint:** Laravel preset — run `vendor/bin/pint --test` before pushing
 - **Return types:** all public methods should have return type declarations
 - **DI:** use constructor injection or `app()` — avoid `new Repository()` in services
-- **Facades:** `DB::`, `Cache::`, `Redis::`, `Auth::` — application code must not use `NexusDB::`. The class still exists under `app/Support/Install/` for the legacy installer only; its removal is tracked as a separate step
+- **Facades:** `DB::`, `Cache::`, `Redis::`, `Auth::` — `NexusDB` no longer exists (removed with the legacy installer); never reintroduce a parallel DB layer
 - **SupportContext:** only used in wrapper classes (CurrentUser, Globals, etc.) — not directly in controllers/services
 - **Blade escaping:** `SafeHtml::fromTrustedHtml()` performs NO sanitisation — `@safeHtml(SafeHtml::fromTrustedHtml($x))` is `{!! $x !!}` under another name. New `fromTrustedHtml` uses require justification in the PR; counts are ratcheted by `LegacyViewSurfaceTest` (plain text → `{{ }}`, attributes → context-specific escaping)
 - **Comments:** do not add/remove comments unless asked
@@ -95,7 +95,7 @@ docker compose exec -T php composer audit
 
 ## Architecture notes
 
-- **Legacy bridge:** `app/Support/Install/` contains install/update scripts (standalone, `IN_NEXUS=true`)
+- **Install/upgrade:** `php artisan app:install` (fresh) / `php artisan app:upgrade` (post-pull housekeeping) — both plain `DB::`/`Schema::`; the legacy web installer and its `NexusDB` layer were removed
 - **PageServices:** `IndexPageService`, `UsercpPageService`, `MessagePageService`, etc. — render legacy pages via Blade
 - **Events:** `Events::fire()` → `ModelEventEnum` → event classes (legacy event system, not Laravel's Event::dispatch)
 - **Settings:** `settings` table → `App\Support\Settings` / `Globals` singleton (cached in Redis)

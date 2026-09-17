@@ -14,7 +14,7 @@ use Tests\Attributes\TestCategory;
  * The test rescans app/ with the same patterns as CI —
  *   DB::(select|statement|unprepared)\s*\(
  *   DB::table\s*\(\s*DB::raw
- * excluding app/Support/Install/ — and keeps the JSON in sync both ways:
+ * — and keeps the JSON in sync both ways:
  * every live call site must be registered and every registry entry must
  * point at a live call site.
  *
@@ -166,7 +166,7 @@ final class RawQueriesRegistryTest extends TestCase
     /**
      * Rescan app/ with the same logic as the CI "Raw SQL ratchet" step:
      * lines matching DB::(select|statement|unprepared)\s*\( or
-     * DB::table\s*\(\s*DB::raw, excluding app/Support/Install/.
+     * DB::table\s*\(\s*DB::raw.
      *
      * @return list<array{file: string, line: int}>
      */
@@ -182,11 +182,7 @@ final class RawQueriesRegistryTest extends TestCase
                 continue;
             }
 
-            // Skip Install scripts (standalone, IN_NEXUS=true context)
             $relativePath = str_replace(self::APP_DIR.'/', '', $file->getPathname());
-            if (str_starts_with($relativePath, 'Support/Install/')) {
-                continue;
-            }
 
             $content = file_get_contents($file->getPathname());
             if ($content === false) {

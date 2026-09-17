@@ -114,7 +114,7 @@ jobs:
 
       - name: Check migration readiness (dry-run)
         run: |
-          ssh demo "cd $DEMO_WEB_ROOT && php artisan nexus:update --tag=dev"
+          ssh demo "cd $DEMO_WEB_ROOT && php artisan app:upgrade"
 
   # ── Job 2: Migrations (controlled, separate from deploy) ──────────────────
   migrations:
@@ -149,7 +149,7 @@ jobs:
           ssh demo "cd $DEMO_WEB_ROOT && git fetch origin && git checkout $DEPLOY_REF && git pull origin $DEPLOY_REF"
 
           echo "Running migrations..."
-          ssh demo "cd $DEMO_WEB_ROOT && php artisan nexus:update"
+          ssh demo "cd $DEMO_WEB_ROOT && php artisan app:upgrade"
 
       - name: Verify migrations completed
         run: |
@@ -337,7 +337,7 @@ jobs:
             exit 1
           fi
           echo "Rolling back to $PREVIOUS..."
-          ssh demo "cd $DEMO_WEB_ROOT && git checkout $PREVIOUS && php artisan nexus:update"
+          ssh demo "cd $DEMO_WEB_ROOT && git checkout $PREVIOUS && php artisan app:upgrade"
           ssh demo "cd $DEMO_WEB_ROOT && \
             php artisan config:cache && \
             php artisan route:cache && \

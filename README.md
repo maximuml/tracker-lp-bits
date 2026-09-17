@@ -21,7 +21,7 @@ This is a streamlined fork focused on the core tracker/forum/community experienc
 ## System Requirements
 
 - **PHP** 8.4 / 8.5 (both tested in CI)
-  - Required extensions: `bcmath`, `ctype`, `curl`, `fileinfo`, `json`, `mbstring`, `openssl`, `pdo_mysql`, `tokenizer`, `xml`, `mysqli`, `gd`, `redis`, `pcntl`, `sockets`, `posix`, `gmp`, `opcache`, `zip`, `intl`, `pdo_sqlite`, `sqlite3`, `pdo_pgsql`
+  - Required extensions: `bcmath`, `ctype`, `curl`, `fileinfo`, `json`, `mbstring`, `openssl`, `pdo_mysql`, `tokenizer`, `xml`, `gd`, `redis`, `pcntl`, `sockets`, `posix`, `gmp`, `opcache`, `zip`, `intl`, `pdo_sqlite`, `sqlite3`, `pdo_pgsql`
 - **Database** — MySQL 8.0+ (tested in CI on MySQL 8.0 and 9.0; Docker uses MySQL 9)
 - **Redis** — 7.0+ (tested in CI on Redis 7)
 - **MeiliSearch** — 1.6+ (torrent search index)
@@ -37,7 +37,14 @@ cp .env.example .env
 docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
 ```
 
-After the containers start, complete the web installer at `http://<your-domain>/install` (or run `php artisan migrate --seed` and create an admin user if you prefer the CLI). Then populate the MeiliSearch index:
+After the containers start, install via the CLI (the legacy web installer was removed — it relied on a parallel DB layer):
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml exec php php artisan app:install \
+  --username=sysop --email=admin@example.com --password='ChooseAStrongPassword'
+```
+
+`app:install` checks the environment, merges `.env`, runs migrations + seeders, saves settings, creates symlinks, initialises the tracker announce URL and creates the staff-leader account. Then populate the MeiliSearch index:
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.dev.yml exec php php artisan meilisearch:import

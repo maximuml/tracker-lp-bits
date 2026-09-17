@@ -158,6 +158,18 @@ This release ships the shoutbox modernization, MeiliSearch-by-default, setlist l
 
 ## Upgrade Notes
 
+- **Security deprecation — legacy `md5` password hashes (step 3.2, ADR 0015).**
+  The `ALGO_MD5` verification branch (`md5(secret+password+secret)`,
+  only reachable for accounts with empty `auth_key`) is scheduled for
+  removal. Deadline **2026-10-17**: before that date run
+  `php artisan users:legacy-hash-report` on production and record the
+  md5 count here. If md5 users are ≤1% of total or all inactive 6+
+  months, run `php artisan users:force-reset-legacy --apply` — flagged
+  accounts are forced through password change on next request
+  (`must_change_password` + `RequirePasswordChange`), and the md5
+  branch is removed in the following release. If the share is larger,
+  extend once by 30 days and re-measure; the branch is not kept
+  indefinitely.
 - Run `php artisan migrate` to apply the BiglyBT agent regex and shoutbox reaction collation migrations.
 - Run `php artisan meilisearch:import` to populate the `torrents` index if you are enabling MeiliSearch for the first time.
 - Ensure `APP_KEY` is set in `.env`; it is now used by the shoutbox CSRF helpers.

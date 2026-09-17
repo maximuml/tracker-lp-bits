@@ -1,4 +1,4 @@
-@extends('layouts.legacy_details')
+@extends('layouts.modern')
 
 @section('title', $headTitle)
 

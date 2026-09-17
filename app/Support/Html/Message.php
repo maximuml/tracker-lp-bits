@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Support\Html;
 
 use App\Support\Frame;
-use App\Support\Language;
 use App\Support\Smilies;
 
 /**
@@ -76,12 +75,11 @@ final class Message
      */
     public static function smiliesFrame(): void
     {
-        $lang = app(Language::class)->functions();
 
         echo Smilies::framedTable(
-            (string) ($lang['text_smilies'] ?? ''),
-            (string) ($lang['col_type_something'] ?? ''),
-            (string) ($lang['col_to_make_a'] ?? ''),
+            (string) (__('legacy/functions.text_smilies')),
+            (string) (__('legacy/functions.col_type_something')),
+            (string) (__('legacy/functions.col_to_make_a')),
         );
     }
 }

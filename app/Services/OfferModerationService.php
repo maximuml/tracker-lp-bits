@@ -34,13 +34,6 @@ final class OfferModerationService
         private readonly OfferVoteRepository $offerVoteRepository,
     ) {}
 
-    private function lang(string $key): string
-    {
-        $lang = (array) trans('legacy/offers');
-
-        return (string) ($lang[$key] ?? '');
-    }
-
     /**
      * @return array<string, mixed>
      */
@@ -72,21 +65,21 @@ final class OfferModerationService
     public function handleAllow(Request $request): RedirectResponse
     {
         if (! Permission::can(PermissionEnum::OFFER_MANAGE)) {
-            $this->abort($this->lang('std_access_denied'), $this->lang('std_mans_job'));
+            $this->abort(__('legacy/offers.std_access_denied'), __('legacy/offers.std_mans_job'));
         }
 
         if ((int) $request->input('allow_offer') !== 1) {
-            $this->abort($this->lang('std_error'), $this->lang('std_smell_rat'));
+            $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_smell_rat'));
         }
 
         $offid = (int) $request->input('offerid');
         if (! Validators::isId($offid)) {
-            $this->abort($this->lang('std_error'), $this->lang('std_smell_rat'));
+            $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_smell_rat'));
         }
 
         $offer = $this->offerRepository->findOfferWithUser($offid);
         if (! $offer) {
-            $this->abort($this->lang('std_error'), $this->lang('text_nothing_found'));
+            $this->abort(__('legacy/offers.std_error'), __('legacy/offers.text_nothing_found'));
         }
         if ($offer === null) {
             throw new LogicException('Expected non-null offer.');
@@ -127,21 +120,21 @@ final class OfferModerationService
     public function handleFinish(Request $request): RedirectResponse
     {
         if (! Permission::can(PermissionEnum::OFFER_MANAGE)) {
-            $this->abort($this->lang('std_access_denied'), $this->lang('std_have_no_permission'));
+            $this->abort(__('legacy/offers.std_access_denied'), __('legacy/offers.std_have_no_permission'));
         }
 
         if ((int) $request->input('finish_offer') !== 1) {
-            $this->abort($this->lang('std_error'), $this->lang('std_smell_rat'));
+            $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_smell_rat'));
         }
 
         $offid = (int) $request->input('finish');
         if (! Validators::isId($offid)) {
-            $this->abort($this->lang('std_error'), $this->lang('std_smell_rat'));
+            $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_smell_rat'));
         }
 
         $offer = $this->offerRepository->findOfferWithUser($offid);
         if (! $offer) {
-            $this->abort($this->lang('std_error'), $this->lang('text_nothing_found'));
+            $this->abort(__('legacy/offers.std_error'), __('legacy/offers.text_nothing_found'));
         }
         if ($offer === null) {
             throw new LogicException('Expected non-null offer.');
@@ -159,7 +152,7 @@ final class OfferModerationService
         $no = (int) $voteCounts['against'];
 
         if ($yes === 0 && $no === 0) {
-            $this->abort($this->lang('std_sorry'), $this->lang('std_no_votes_yet')."<a href=offers.php?id={$offid}&off_details=1>".$this->lang('std_back_to_offer_detail').'</a>', false);
+            $this->abort(__('legacy/offers.std_sorry'), __('legacy/offers.std_no_votes_yet')."<a href=offers.php?id={$offid}&off_details=1>".__('legacy/offers.std_back_to_offer_detail').'</a>', false);
         }
 
         $finishvotetime = date('Y-m-d H:i:s');

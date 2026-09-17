@@ -44,10 +44,10 @@ final class OfferVoteService
         }
 
         if ($vote === 'against' && ! Permission::can(PermissionEnum::AGAINST_OFFER)) {
-            $this->abort($this->lang('std_error'), $this->lang('std_smell_rat'));
+            $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_smell_rat'));
         }
         if ($vote !== 'yeah' && $vote !== 'against') {
-            $this->abort($this->lang('std_error'), $this->lang('std_smell_rat'));
+            $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_smell_rat'));
         }
 
         $offerid = (int) $request->query('id', 0);
@@ -55,15 +55,15 @@ final class OfferVoteService
         $userid = (int) ($curuser['id'] ?? 0);
 
         if ($this->offerRepository->getOfferOwner($offerid) === $userid) {
-            $this->abort($this->lang('std_error'), $this->lang('std_cannot_vote_youself'));
+            $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_cannot_vote_youself'));
         }
         if ($this->offerVoteRepository->userVoted($offerid, $userid)) {
-            $this->abort($this->lang('std_already_voted'), $this->lang('std_already_voted_note')."<a  href=offers.php?id={$offerid}&off_details=1>".$this->lang('std_back_to_offer_detail'), false);
+            $this->abort(__('legacy/offers.std_already_voted'), __('legacy/offers.std_already_voted_note')."<a  href=offers.php?id={$offerid}&off_details=1>".__('legacy/offers.std_back_to_offer_detail'), false);
         }
 
         $offer = $this->offerRepository->findOfferWithUser($offerid);
         if ($offer === null) {
-            $this->abort($this->lang('std_error'), $this->lang('text_nothing_found'));
+            $this->abort(__('legacy/offers.std_error'), __('legacy/offers.text_nothing_found'));
             throw new LogicException('Expected non-null offer.');
         }
 
@@ -115,17 +115,10 @@ final class OfferVoteService
         Bonus::updatePoints('+', $offervoteBonus, $userid);
 
         return response(
-            '<h1 align=center>'.$this->lang('std_vote_accepted').'</h1>'
-            .$this->lang('std_vote_accepted_note')
-            ."<a  href=offers.php?id={$offerid}&off_details=1>".$this->lang('std_back_to_offer_detail').'</a>'
+            '<h1 align=center>'.__('legacy/offers.std_vote_accepted').'</h1>'
+            .__('legacy/offers.std_vote_accepted_note')
+            ."<a  href=offers.php?id={$offerid}&off_details=1>".__('legacy/offers.std_back_to_offer_detail').'</a>'
         );
-    }
-
-    private function lang(string $key): string
-    {
-        $lang = (array) trans('legacy/offers');
-
-        return (string) ($lang[$key] ?? '');
     }
 
     /**

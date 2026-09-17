@@ -12,7 +12,6 @@ use App\Support\Category;
 use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Globals;
-use App\Support\Language;
 use App\Support\LegacyYesNo;
 use App\Support\Permissions;
 use App\Support\Promotion;
@@ -31,7 +30,6 @@ class TorrentAjaxController extends LegacyController
 {
     public function __construct(
         protected Globals $globals,
-        protected Language $language,
         protected CurrentUser $currentUser,
         protected TorrentAjaxRepositoryInterface $torrentAjaxRepository,
     ) {}
@@ -79,12 +77,10 @@ class TorrentAjaxController extends LegacyController
         ];
 
         $data = $this->torrentAjaxRepository->peerList($torrentId, $currentUser);
-        $langViewpeerlist = (array) trans('legacy/viewpeerlist');
-        $langFunctions = $this->language->functions();
         $curUserArr = $curUser;
 
-        $data['seederTableHtml'] = $this->peerTable((string) ($langViewpeerlist['text_seeders'] ?? ''), $data['seeders'], $data['torrent'], $data['privacyData'], $data['showLocationColumn'], $data['enablelocationTweak'], $data['peerIpInfo'], $data['usernameHtmlMap'], $langViewpeerlist, $langFunctions, $curUserArr);
-        $data['leecherTableHtml'] = $this->peerTable((string) ($langViewpeerlist['text_leechers'] ?? ''), $data['leechers'], $data['torrent'], $data['privacyData'], $data['showLocationColumn'], $data['enablelocationTweak'], $data['peerIpInfo'], $data['usernameHtmlMap'], $langViewpeerlist, $langFunctions, $curUserArr);
+        $data['seederTableHtml'] = $this->peerTable((string) (__('legacy/viewpeerlist.text_seeders')), $data['seeders'], $data['torrent'], $data['privacyData'], $data['showLocationColumn'], $data['enablelocationTweak'], $data['peerIpInfo'], $data['usernameHtmlMap'], $curUserArr);
+        $data['leecherTableHtml'] = $this->peerTable((string) (__('legacy/viewpeerlist.text_leechers')), $data['leechers'], $data['torrent'], $data['privacyData'], $data['showLocationColumn'], $data['enablelocationTweak'], $data['peerIpInfo'], $data['usernameHtmlMap'], $curUserArr);
 
         return response()->view('viewpeerlist.index', $data, 200, $headers);
     }
@@ -92,10 +88,8 @@ class TorrentAjaxController extends LegacyController
     /**
      * @param  array<string, mixed>  $e
      * @param  array<int, list<array<string, string>>>  $peerIpInfo
-     * @param  array<string, string>  $langFunctions
-     * @param  array<string, string>  $langViewpeerlist
      */
-    private function peerLocationColumn(array $e, bool $isStrongPrivacy, bool $canView, mixed $enablelocationTweak, array $peerIpInfo, array $langFunctions, array $langViewpeerlist): string
+    private function peerLocationColumn(array $e, bool $isStrongPrivacy, bool $canView, mixed $enablelocationTweak, array $peerIpInfo): string
     {
         $address = $ips = [];
         $info = $peerIpInfo[$e['id']] ?? [];
@@ -105,7 +99,7 @@ class TorrentAjaxController extends LegacyController
                 $address[] = $ipInfo['public'];
                 $ips[] = $ipInfo['ip'];
             }
-            $title = $canView ? sprintf('%s%s%s', $langFunctions['text_user_ip'], ':&nbsp;', implode(', ', $ips)) : '';
+            $title = $canView ? sprintf('%s%s%s', __('legacy/functions.text_user_ip'), ':&nbsp;', implode(', ', $ips)) : '';
             $addressStr = implode('<br/>', $address);
             $location = '<div style="margin-right: 6px" title="'.$title.'">'.$addressStr.'</div>';
         } else {
@@ -116,7 +110,7 @@ class TorrentAjaxController extends LegacyController
         }
 
         if ($isStrongPrivacy) {
-            $result = '<div><i>'.$langViewpeerlist['text_anonymous'].'</i></div>';
+            $result = '<div><i>'.__('legacy/viewpeerlist.text_anonymous').'</i></div>';
             if ($canView) {
                 $result = $location.$result;
             }
@@ -133,11 +127,9 @@ class TorrentAjaxController extends LegacyController
      * @param  array<int, string>  $privacyData
      * @param  array<int, list<array<string, string>>>  $peerIpInfo
      * @param  array<int, string>  $usernameHtmlMap
-     * @param  array<string, string>  $langViewpeerlist
-     * @param  array<string, string>  $langFunctions
      * @param  array<string, mixed>  $curUser
      */
-    private function peerTable(string $name, array $arr, array $torrent, array $privacyData, bool $showLocationColumn, mixed $enablelocationTweak, array $peerIpInfo, array $usernameHtmlMap, array $langViewpeerlist, array $langFunctions, array $curUser): string
+    private function peerTable(string $name, array $arr, array $torrent, array $privacyData, bool $showLocationColumn, mixed $enablelocationTweak, array $peerIpInfo, array $usernameHtmlMap, array $curUser): string
     {
         $s = '<b>'.count($arr).' '.$name."</b>\n";
         if (! count($arr)) {
@@ -146,18 +138,18 @@ class TorrentAjaxController extends LegacyController
 
         $s .= "\n";
         $s .= "<table width=100% class=main border=1 cellspacing=0 cellpadding=3>\n";
-        $s .= '<tr><td class=colhead align=center width=1%>'.$langViewpeerlist['col_user_ip'].'</td>'.
-            ($showLocationColumn ? '<td class=colhead align=center>'.$langViewpeerlist['col_location'].'</td>' : '').
-            '<td class=colhead align=center width=1%>'.$langViewpeerlist['col_connectable'].'</td>'.
-            '<td class=colhead align=center width=1%>'.$langViewpeerlist['col_uploaded'].'</td>'.
-            '<td class=colhead align=center width=1%>'.$langViewpeerlist['col_rate'].'</td>'.
-            '<td class=colhead align=center width=1%>'.$langViewpeerlist['col_downloaded'].'</td>'.
-            '<td class=colhead align=center width=1%>'.$langViewpeerlist['col_rate'].'</td>'.
-            '<td class=colhead align=center width=1%>'.$langViewpeerlist['col_ratio'].'</td>'.
-            '<td class=colhead align=center width=1%>'.$langViewpeerlist['col_complete'].'</td>'.
-            '<td class=colhead align=center width=1%>'.$langViewpeerlist['col_connected'].'</td>'.
-            '<td class=colhead align=center width=1%>'.$langViewpeerlist['col_idle'].'</td>'.
-            '<td class=colhead align=center width=1%>'.$langViewpeerlist['col_client'].'</td></tr>\n';
+        $s .= '<tr><td class=colhead align=center width=1%>'.__('legacy/viewpeerlist.col_user_ip').'</td>'.
+            ($showLocationColumn ? '<td class=colhead align=center>'.__('legacy/viewpeerlist.col_location').'</td>' : '').
+            '<td class=colhead align=center width=1%>'.__('legacy/viewpeerlist.col_connectable').'</td>'.
+            '<td class=colhead align=center width=1%>'.__('legacy/viewpeerlist.col_uploaded').'</td>'.
+            '<td class=colhead align=center width=1%>'.__('legacy/viewpeerlist.col_rate').'</td>'.
+            '<td class=colhead align=center width=1%>'.__('legacy/viewpeerlist.col_downloaded').'</td>'.
+            '<td class=colhead align=center width=1%>'.__('legacy/viewpeerlist.col_rate').'</td>'.
+            '<td class=colhead align=center width=1%>'.__('legacy/viewpeerlist.col_ratio').'</td>'.
+            '<td class=colhead align=center width=1%>'.__('legacy/viewpeerlist.col_complete').'</td>'.
+            '<td class=colhead align=center width=1%>'.__('legacy/viewpeerlist.col_connected').'</td>'.
+            '<td class=colhead align=center width=1%>'.__('legacy/viewpeerlist.col_idle').'</td>'.
+            '<td class=colhead align=center width=1%>'.__('legacy/viewpeerlist.col_client').'</td></tr>\n';
         $now = time();
 
         foreach ($arr as $e) {
@@ -170,12 +162,12 @@ class TorrentAjaxController extends LegacyController
             $isStrongPrivacy = $privacy == 'strong' || (LegacyYesNo::isYes($torrent['anonymous'] ?? null) && $e['userid'] == $torrent['owner']);
             $canView = Permissions::userCan('viewanonymous', false, $currentUserId) || $e['userid'] == $currentUserId;
             if ($showLocationColumn) {
-                $columnLocation = $this->peerLocationColumn($e, $isStrongPrivacy, $canView, $enablelocationTweak, $peerIpInfo, $langFunctions, $langViewpeerlist);
+                $columnLocation = $this->peerLocationColumn($e, $isStrongPrivacy, $canView, $enablelocationTweak, $peerIpInfo);
             }
 
             $usernameHtml = $usernameHtmlMap[$e['userid']] ?? '';
             if ($isStrongPrivacy) {
-                $columnUsername = '<td class=rowfollow align=left width=1%><i>'.$langViewpeerlist['text_anonymous'].'</i>';
+                $columnUsername = '<td class=rowfollow align=left width=1%><i>'.__('legacy/viewpeerlist.text_anonymous').'</i>';
                 if ($canView) {
                     $columnUsername .= '<br />('.$usernameHtml.')';
                 }
@@ -186,7 +178,7 @@ class TorrentAjaxController extends LegacyController
 
             $s .= $columnUsername.$columnLocation;
 
-            $s .= '<td class=rowfollow align=center width=1%><nobr>'.(LegacyYesNo::isYes($e['connectable'] ?? null) ? $langViewpeerlist['text_yes'] : '<font color=red>'.$langViewpeerlist['text_no'].'</font>')."</nobr></td>\n";
+            $s .= '<td class=rowfollow align=center width=1%><nobr>'.(LegacyYesNo::isYes($e['connectable'] ?? null) ? __('legacy/viewpeerlist.text_yes') : '<font color=red>'.__('legacy/viewpeerlist.text_no').'</font>')."</nobr></td>\n";
             $s .= '<td class=rowfollow align=center width=1%><nobr>'.Format::size((float) $e['uploaded'])."</nobr></td>\n";
             $s .= '<td class=rowfollow align=center width=1%><nobr>'.Format::size(($e['uploaded'] - $e['uploadoffset']) / $secs)."/s</nobr></td>\n";
             $s .= '<td class=rowfollow align=center width=1%><nobr>'.Format::size((float) $e['downloaded'])."</nobr></td>\n";
@@ -201,7 +193,7 @@ class TorrentAjaxController extends LegacyController
                 $ratio = floor(($e['uploaded'] / $e['downloaded']) * 1000) / 1000;
                 $s .= '<td class=rowfollow align="center" width=1%><font color='.Ratio::color($ratio).'><nobr>'.number_format($ratio, 3)."</nobr></font></td>\n";
             } elseif ($e['uploaded']) {
-                $s .= '<td class=rowfollow align=center width=1%>'.$langViewpeerlist['text_inf'].'</td>';
+                $s .= '<td class=rowfollow align=center width=1%>'.__('legacy/viewpeerlist.text_inf').'</td>';
             } else {
                 $s .= '<td class=rowfollow align=center width=1%>---</td>';
             }
@@ -243,7 +235,6 @@ class TorrentAjaxController extends LegacyController
      */
     private function decorateSnatchRows(iterable $snatchedRows, int $currentUserId): array
     {
-        $lang = (array) trans('legacy/viewsnatches');
         $rows = [];
         foreach ($snatchedRows as $snatchRow) {
             $arr = (array) $snatchRow;
@@ -251,7 +242,7 @@ class TorrentAjaxController extends LegacyController
                 $ratio = number_format($arr['uploaded'] / $arr['downloaded'], 3);
                 $ratio = '<font color='.Ratio::color($ratio).">$ratio</font>";
             } elseif ($arr['uploaded'] > 0) {
-                $ratio = (string) ($lang['text_inf'] ?? '');
+                $ratio = (string) (__('legacy/viewsnatches.text_inf'));
             } else {
                 $ratio = '---';
             }
@@ -267,14 +258,14 @@ class TorrentAjaxController extends LegacyController
             $userrow = UserDisplay::row($arr['userid']);
             $privacy = is_array($userrow) ? (string) ($userrow['privacy'] ?? '') : '';
             if ($privacy == 'strong') {
-                $username = (string) ($lang['text_anonymous'] ?? '');
+                $username = (string) (__('legacy/viewsnatches.text_anonymous'));
                 if (Permission::can(PermissionEnum::VIEW_ANONYMOUS) || $arr['id'] == $currentUserId) {
                     $username .= '<br />('.UserDisplay::username($arr['userid']).')';
                 }
             } else {
                 $username = UserDisplay::username($arr['userid']);
             }
-            $reportImage = '<img class="f_report" src="pic/trans.gif" alt="Report" title="'.e((string) ($lang['title_report'] ?? '')).'" />';
+            $reportImage = '<img class="f_report" src="pic/trans.gif" alt="Report" title="'.e((string) (__('legacy/viewsnatches.title_report'))).'" />';
             $reportHtml = $privacy != 'strong' || Permission::can(PermissionEnum::VIEW_ANONYMOUS)
                 ? '<a href=report.php?user='.(int) $arr['userid'].'>'.$reportImage.'</a>'
                 : $reportImage;
@@ -283,7 +274,7 @@ class TorrentAjaxController extends LegacyController
                 'highlight' => $currentUserId == $arr['userid'] ? ' bgcolor=#00A527' : '',
                 'usernameHtml' => $username,
                 'ip' => (string) ($arr['ip'] ?? ''),
-                'trafficHtml' => $uploaded.'@'.$uprate.($lang['text_per_second'] ?? '').'<br />'.$downloaded.'@'.$downrate.($lang['text_per_second'] ?? ''),
+                'trafficHtml' => $uploaded.'@'.$uprate.(__('legacy/viewsnatches.text_per_second')).'<br />'.$downloaded.'@'.$downrate.(__('legacy/viewsnatches.text_per_second')),
                 'ratioHtml' => $ratio,
                 'seedtime' => Format::prettyTimeWithLocale((float) $arr['seedtime']),
                 'leechtime' => Format::prettyTimeWithLocale((float) $arr['leechtime']),
@@ -323,28 +314,26 @@ class TorrentAjaxController extends LegacyController
         ];
 
         $data = $this->torrentAjaxRepository->userTorrentList($targetUserId, $type, $page, $currentUser);
-        $langAjax = (array) trans('legacy/getusertorrentlistajax');
-        $langFunctions = $this->language->functions();
         $curUserArr = $curUser;
 
         $torrentlist = '';
         if ($data['count'] > 0 && ! empty($data['rows'])) {
-            [$torrentlist] = $this->torrentListTable($data['rows'], $type, $targetUserId, $curUserArr, $data['seedTimeAndUploaded'], $data['torrentRep'], $langAjax, $langFunctions);
+            [$torrentlist] = $this->torrentListTable($data['rows'], $type, $targetUserId, $curUserArr, $data['seedTimeAndUploaded'], $data['torrentRep']);
         }
 
         $table = $data['pagertop'].$torrentlist.$data['pagerbottom'];
         $hasData = false;
-        $summary = sprintf('<b>%s</b>%s', $data['count'], ($langAjax['text_record'] ?? '').Strings::addS($data['count']));
+        $summary = sprintf('<b>%s</b>%s', $data['count'], (__('legacy/getusertorrentlistajax.text_record')).Strings::addS($data['count']));
         if ($data['total_size']) {
             $hasData = true;
-            $summary .= ($langAjax['text_total_size'] ?? '').Format::size((float) $data['total_size']);
+            $summary .= (__('legacy/getusertorrentlistajax.text_total_size')).Format::size((float) $data['total_size']);
         } elseif ($data['count']) {
             $hasData = true;
         }
 
         $data['bodyHtml'] = $hasData
             ? '<br/>'.sprintf('<div class="nx-flex-between"><div>%s</div><div></div></div>', $summary).$table
-            : (string) ($langAjax['text_no_record'] ?? '');
+            : (string) (__('legacy/getusertorrentlistajax.text_no_record'));
 
         return response()->view('getusertorrentlistajax.index', $data, 200, $headers);
     }
@@ -352,11 +341,9 @@ class TorrentAjaxController extends LegacyController
     /**
      * @param  iterable<int, mixed>  $rows
      * @param  array<string, mixed>  $currentUser
-     * @param  array<string, string>  $langAjax
-     * @param  array<string, string>  $langFunctions
      * @return array{string, float}
      */
-    private function torrentListTable(iterable $rows, string $mode, int $id, array $currentUser, mixed $seedTimeAndUploaded, mixed $torrentRep, array $langAjax, array $langFunctions): array
+    private function torrentListTable(iterable $rows, string $mode, int $id, array $currentUser, mixed $seedTimeAndUploaded, mixed $torrentRep): array
     {
         $showsize = $showsenum = $showlenum = $showuploaded = $showdownloaded = $showratio = $showsetime = $showletime = $showcotime = $showanonymous = $showtotalsize = false;
         $columncount = 7;
@@ -446,19 +433,19 @@ class TorrentAjaxController extends LegacyController
             $results[] = (array) $row;
         }
 
-        $ret = '<table border="1" cellspacing="0" cellpadding="5" width="100%"><tr><td class="colhead" style="padding: 0px">'.$langAjax['col_type'].'</td><td class="colhead" align="center">'.$langAjax['col_name'].'</td><td class="colhead" align="center">'.$langAjax['col_added'].'</td>'.
-            ($showsize ? '<td class="colhead" align="center"><img class="size" src="pic/trans.gif" alt="size" title="'.$langAjax['title_size'].'" /></td>' : '').
-            ($showsenum ? '<td class="colhead" align="center"><img class="seeders" src="pic/trans.gif" alt="seeders" title="'.$langAjax['title_seeders'].'" /></td>' : '').
-            ($showlenum ? '<td class="colhead" align="center"><img class="leechers" src="pic/trans.gif" alt="leechers" title="'.$langAjax['title_leechers'].'" /></td>' : '').
-            ($showuploaded ? '<td class="colhead" align="center">'.$langAjax['col_uploaded'].'</td>' : '').
-            ($showdownloaded ? '<td class="colhead" align="center">'.$langAjax['col_downloaded'].'</td>' : '').
-            ($showratio ? '<td class="colhead" align="center">'.$langAjax['col_ratio'].'</td>' : '').
-            ($showsetime ? '<td class="colhead" align="center">'.$langAjax['col_se_time'].'</td>' : '').
-            ($showletime ? '<td class="colhead" align="center">'.$langAjax['col_le_time'].'</td>' : '').
-            ($showcotime ? '<td class="colhead" align="center">'.$langAjax['col_time_completed'].'</td>' : '').
-            ($showanonymous ? '<td class="colhead" align="center">'.$langAjax['col_anonymous'].'</td>' : '');
+        $ret = '<table border="1" cellspacing="0" cellpadding="5" width="100%"><tr><td class="colhead" style="padding: 0px">'.__('legacy/getusertorrentlistajax.col_type').'</td><td class="colhead" align="center">'.__('legacy/getusertorrentlistajax.col_name').'</td><td class="colhead" align="center">'.__('legacy/getusertorrentlistajax.col_added').'</td>'.
+            ($showsize ? '<td class="colhead" align="center"><img class="size" src="pic/trans.gif" alt="size" title="'.__('legacy/getusertorrentlistajax.title_size').'" /></td>' : '').
+            ($showsenum ? '<td class="colhead" align="center"><img class="seeders" src="pic/trans.gif" alt="seeders" title="'.__('legacy/getusertorrentlistajax.title_seeders').'" /></td>' : '').
+            ($showlenum ? '<td class="colhead" align="center"><img class="leechers" src="pic/trans.gif" alt="leechers" title="'.__('legacy/getusertorrentlistajax.title_leechers').'" /></td>' : '').
+            ($showuploaded ? '<td class="colhead" align="center">'.__('legacy/getusertorrentlistajax.col_uploaded').'</td>' : '').
+            ($showdownloaded ? '<td class="colhead" align="center">'.__('legacy/getusertorrentlistajax.col_downloaded').'</td>' : '').
+            ($showratio ? '<td class="colhead" align="center">'.__('legacy/getusertorrentlistajax.col_ratio').'</td>' : '').
+            ($showsetime ? '<td class="colhead" align="center">'.__('legacy/getusertorrentlistajax.col_se_time').'</td>' : '').
+            ($showletime ? '<td class="colhead" align="center">'.__('legacy/getusertorrentlistajax.col_le_time').'</td>' : '').
+            ($showcotime ? '<td class="colhead" align="center">'.__('legacy/getusertorrentlistajax.col_time_completed').'</td>' : '').
+            ($showanonymous ? '<td class="colhead" align="center">'.__('legacy/getusertorrentlistajax.col_anonymous').'</td>' : '');
         if ($shouldShowClient) {
-            $ret .= sprintf('<td class="colhead" align="center">%s</td><td class="colhead" align="center">IP</td>', $langAjax['col_client']);
+            $ret .= sprintf('<td class="colhead" align="center">%s</td><td class="colhead" align="center">IP</td>', __('legacy/getusertorrentlistajax.col_client'));
         }
         $ret .= '</tr>';
 
@@ -471,7 +458,7 @@ class TorrentAjaxController extends LegacyController
             }
 
             $sphighlight = Promotion::backgroundStyleWithContext($arr['sp_state']);
-            $bannedTorrent = (LegacyYesNo::isYes($arr['banned'] ?? null) ? ' <b>(<font class="striking">'.$langFunctions['text_banned'].'</font>)</b>' : '');
+            $bannedTorrent = (LegacyYesNo::isYes($arr['banned'] ?? null) ? ' <b>(<font class="striking">'.__('legacy/functions.text_banned').'</font>)</b>' : '');
             $spTorrent = Promotion::appendWithContext($arr['sp_state'], '', false, '', 0, '', $arr['__ignore_global_sp_state'] ?? false);
             if ($showtotalsize) {
                 $totalSize += $arr['size'];

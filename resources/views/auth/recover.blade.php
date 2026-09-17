@@ -1,6 +1,6 @@
 @extends('layouts.auth')
 
-@section('title', ($lang['text_recover_user'] ?? 'Recover lost user name or password') . ' :: ' . $siteName)
+@section('title', (__('legacy/recover.text_recover_user')) . ' :: ' . $siteName)
 
 @section('content')
     @if ($error)
@@ -22,7 +22,7 @@
     <form method="get" action="/recover">
         <input type="hidden" name="secret" value="{{ $secret }}" />
         <div align="right">
-            <label for="sitelanguage">{{ $lang['text_select_lang'] ?? 'Select Site Language:' }}</label>
+            <label for="sitelanguage">{{ __('legacy/recover.text_select_lang')}}</label>
             <select id="sitelanguage" name="sitelanguage">
                 @foreach ($languages as $row)
                     <option value="{{ $row['id'] }}" @if (($row['site_lang_folder'] ?? '') === $langFolder) selected @endif>
@@ -33,17 +33,17 @@
         </div>
     </form>
 
-    <h1>{{ $lang['text_recover_user'] ?? 'Recover lost user name or password' }}</h1>
-    <p>{{ $lang['text_use_form_below'] ?? 'Use the form below to have your password reset and your account details mailed back to you.' }}</p>
-    <p>{{ $lang['text_reply_to_confirmation_email'] ?? '(You will have to reply to a confirmation email.)' }}</p>
-    <p><b>{{ $lang['text_note'] ?? 'Note:' }}</b> {{ $maxAttempts }} {{ $lang['text_ban_ip'] ?? ' failed attempts in a row will result in banning your ip!' }}</p>
-    <p>{{ $lang['text_you_have'] ?? 'You have' }} <b>{{ $remaining }}</b> {{ $lang['text_remaining_tries'] ?? ' remaining tries.' }}</p>
+    <h1>{{ __('legacy/recover.text_recover_user')}}</h1>
+    <p>{{ __('legacy/recover.text_use_form_below')}}</p>
+    <p>{{ __('legacy/recover.text_reply_to_confirmation_email')}}</p>
+    <p><b>{{ __('legacy/recover.text_note')}}</b> {{ $maxAttempts }} {{ __('legacy/recover.text_ban_ip')}}</p>
+    <p>{{ __('legacy/recover.text_you_have')}} <b>{{ $remaining }}</b> {{ __('legacy/recover.text_remaining_tries')}}</p>
 
     <form method="post" action="/recover">
         @csrf
         <input type="hidden" name="secret" value="{{ $secret }}" />
         <div class="nx-fgrid nx-fgrid--b">
-            <div class="nx-fhead"><label for="email">{{ $lang['row_registered_email'] ?? 'Registered email:' }}</label></div>
+            <div class="nx-fhead"><label for="email">{{ __('legacy/recover.row_registered_email')}}</label></div>
             <div class="nx-fcell"><input type="email" id="email" name="email" autocomplete="email" value="{{ old('email') }}" style="width: min(100%, 320px); min-width: 180px; border: 1px solid gray; box-sizing: border-box" /></div>
 
             @if ($captchaEnabled && $captchaMarkup !== '')
@@ -51,7 +51,7 @@
             @endif
 
             <div class="toolbox nx-ffull">
-                <input type="submit" value="{{ $lang['submit_recover_it'] ?? 'Recover It!' }}" class="btn" />
+                <input type="submit" value="{{ __('legacy/recover.submit_recover_it')}}" class="btn" />
             </div>
         </div>
     </form>

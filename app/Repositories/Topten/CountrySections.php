@@ -13,10 +13,9 @@ use Illuminate\Support\Facades\DB;
 final class CountrySections extends SectionQueries
 {
     /**
-     * @param  array<string, mixed>  $lang
      * @return list<array<string, mixed>>
      */
-    public function build(int $limit, ?string $subtype, array $lang): array
+    public function build(int $limit, ?string $subtype): array
     {
         $sections = [];
 
@@ -32,10 +31,10 @@ final class CountrySections extends SectionQueries
                         ->limit($limit)
                         ->get()
                 ),
-                'caption' => $this->caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_countries_users'] ?? 'Users'),
+                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_countries_users')),
                 'limits' => [25],
                 'subtype' => 'us',
-                'what' => $lang['col_users'] ?? 'Users',
+                'what' => __('legacy/topten.col_users'),
             ];
         }
 
@@ -52,10 +51,10 @@ final class CountrySections extends SectionQueries
                         ->limit($limit)
                         ->get()
                 ),
-                'caption' => $this->caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_countries_uploaded'] ?? 'Total Uploaded'),
+                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_countries_uploaded')),
                 'limits' => [25],
                 'subtype' => 'ul',
-                'what' => $lang['col_uploaded'] ?? 'Uploaded',
+                'what' => __('legacy/topten.col_uploaded'),
             ];
         }
 
@@ -73,10 +72,10 @@ final class CountrySections extends SectionQueries
                         ->limit($limit)
                         ->get()
                 ),
-                'caption' => $this->caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_countries_per_user'] ?? 'Average Total Uploaded Per User'),
+                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_countries_per_user')),
                 'limits' => [25],
                 'subtype' => 'avg',
-                'what' => $lang['col_average'] ?? 'Average',
+                'what' => __('legacy/topten.col_average'),
             ];
         }
 
@@ -94,10 +93,10 @@ final class CountrySections extends SectionQueries
                         ->limit($limit)
                         ->get()
                 ),
-                'caption' => $this->caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_countries_ratio'] ?? 'Ratio'),
+                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_countries_ratio')),
                 'limits' => [25],
                 'subtype' => 'r',
-                'what' => $lang['col_ratio'] ?? 'Ratio',
+                'what' => __('legacy/topten.col_ratio'),
             ];
         }
 

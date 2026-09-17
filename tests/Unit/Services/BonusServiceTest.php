@@ -48,7 +48,6 @@ final class BonusServiceTest extends TestCase
             $request,
             [],
             ['id' => 1, 'username' => 'test', 'seedbonus' => 1000],
-            [],
             'locked',
         );
 
@@ -63,7 +62,6 @@ final class BonusServiceTest extends TestCase
             $request,
             [],
             ['id' => 1, 'username' => 'test', 'seedbonus' => 1000],
-            [],
             'locked',
         );
 
@@ -78,7 +76,6 @@ final class BonusServiceTest extends TestCase
             $request,
             [],
             ['id' => 1, 'username' => 'test', 'seedbonus' => 1000],
-            [],
             'locked',
         );
 
@@ -103,7 +100,6 @@ final class BonusServiceTest extends TestCase
             $request,
             $allBonus,
             ['id' => 1, 'username' => 'test', 'seedbonus' => 100, 'ip' => '1.2.3.4'],
-            [],
             'locked',
         );
 
@@ -128,7 +124,6 @@ final class BonusServiceTest extends TestCase
             $request,
             $allBonus,
             ['id' => 1, 'username' => 'test', 'seedbonus' => 500, 'ip' => '1.2.3.4'],
-            [],
             'locked',
         );
 

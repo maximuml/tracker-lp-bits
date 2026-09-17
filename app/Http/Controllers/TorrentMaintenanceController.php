@@ -106,22 +106,20 @@ class TorrentMaintenanceController extends LegacyController
         $currentUserId = (int) ($currentUser['id'] ?? 0);
         $currentClass = (int) UserDisplay::currentClass();
 
-        $lang = (array) trans('legacy/takeflush');
-
         if ($currentClass >= UserClassEnum::MODERATOR->value || $currentUserId === $id) {
             $deadtime = Time::deadThreshold(SiteConfig::current()->main->anninterthree());
             $lastAction = date('Y-m-d H:i:s', $deadtime);
             $effected = Peer::query()->where('last_action', '<', $lastAction)->where('userid', $id)->delete();
 
             return $this->legacyAbortResponse(
-                $lang['std_success'] ?? 'Success',
-                $effected.' '.($lang['std_ghost_torrents_cleaned'] ?? 'ghost torrent(s) cleaned.')
+                __('legacy/takeflush.std_success'),
+                $effected.' '.(__('legacy/takeflush.std_ghost_torrents_cleaned'))
             );
         }
 
         return $this->legacyAbortResponse(
-            $lang['std_failed'] ?? 'Failed',
-            $lang['std_cannot_flush_others'] ?? 'You cannot flush other users.'
+            __('legacy/takeflush.std_failed'),
+            __('legacy/takeflush.std_cannot_flush_others')
         );
     }
 
@@ -136,9 +134,7 @@ class TorrentMaintenanceController extends LegacyController
 
         $currentUserId = (int) ($curUser['id'] ?? 0);
         if (! Permissions::userCan(PermissionEnum::ASK_RESEED->value, false, $currentUserId)) {
-            $lang = (array) trans('legacy/takereseed');
-
-            return $this->legacyAbortResponse($lang['std_error'] ?? 'Error', $lang['std_permission_denied'] ?? 'Permission denied.');
+            return $this->legacyAbortResponse(__('legacy/takereseed.std_error'), ('Permission denied.'));
         }
 
         $reseedid = (int) (request()->query('reseedid') ?? request()->query('id') ?? 0);
@@ -146,15 +142,13 @@ class TorrentMaintenanceController extends LegacyController
         $row = $torrent instanceof Torrent ? $torrent->toArray() : null;
 
         $seederCount = (int) Peer::query()->where('torrent', $reseedid)->count();
-        $lang = (array) trans('legacy/takereseed');
-
         if ($seederCount > 0) {
-            return $this->legacyAbortResponse($lang['std_error'] ?? 'Error', $lang['std_torrent_not_dead'] ?? 'Torrent is not dead.');
+            return $this->legacyAbortResponse(__('legacy/takereseed.std_error'), __('legacy/takereseed.std_torrent_not_dead'));
         }
 
         $timeNow = (int) $this->globals->get('TIMENOW', time());
         if ($row !== null && strtotime((string) ($row['last_reseed'] ?? '')) > ($timeNow - 900)) {
-            return $this->legacyAbortResponse($lang['std_error'] ?? 'Error', $lang['std_reseed_sent_recently'] ?? 'Reseed request sent recently.');
+            return $this->legacyAbortResponse(__('legacy/takereseed.std_error'), __('legacy/takereseed.std_reseed_sent_recently'));
         }
 
         $snatchedRows = DB::table('snatched')
@@ -191,7 +185,7 @@ class TorrentMaintenanceController extends LegacyController
         ]);
 
         return $this->legacyPage($request, 'takereseed', true, [
-            'message' => $lang['std_it_worked'] ?? 'Reseed request sent.',
+            'message' => __('legacy/takereseed.std_it_worked'),
         ]);
     }
 }

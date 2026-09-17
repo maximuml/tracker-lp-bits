@@ -1,20 +1,20 @@
 @extends('layouts.legacy')
 
-@section('title', $title ?? ($lang_functions['text_latest_comments'] ?? 'Latest Comments'))
+@section('title', $title ?? (__('legacy/functions.text_latest_comments')))
 
 @section('content')
 @if ($count == 0)
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::stdMessage($lang_functions['text_sorry'] ?? 'Sorry', $lang_functions['text_no_comments'] ?? 'No comments yet.', false)))
+    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::stdMessage(('Sorry'), __('legacy/functions.text_no_comments'), false)))
 @else
     @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagertop))
-    <h1 align="center">{{ $lang_functions['text_latest_comments'] ?? 'Latest Comments' }}</h1>
+    <h1 align="center">{{ __('legacy/functions.text_latest_comments')}}</h1>
     @foreach ($rows as $row)
         <div style="margin-top: 8pt; margin-bottom: 8pt;">
             <div id="cid{{ $row['id'] }}" class="nx-embedded">
                         #{{ $row['id'] }}&nbsp;&nbsp;
-                        <font color="gray">{{ $lang_functions['text_by'] ?? 'by' }}</font>
+                        <font color="gray">{{ __('legacy/functions.text_by')}}</font>
                         @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['usernameHtml'] ?? ''))
-                        &nbsp;&nbsp;<font color="gray">{{ $lang_functions['text_at'] ?? 'at' }}</font>
+                        &nbsp;&nbsp;<font color="gray">{{ __('legacy/functions.text_at')}}</font>
                         @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['timeHtml'] ?? ''))
                         @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['parentLinkHtml'] ?? ''))
             </div>

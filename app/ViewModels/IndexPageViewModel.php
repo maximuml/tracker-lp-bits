@@ -12,7 +12,6 @@ namespace App\ViewModels;
 final class IndexPageViewModel extends ViewModel
 {
     /**
-     * @param  array<string, mixed>  $lang
      * @param  array<string, mixed>  $curUser
      * @param  array<string, mixed>  $news
      * @param  array<string, mixed>  $shoutbox
@@ -26,7 +25,6 @@ final class IndexPageViewModel extends ViewModel
      * @param  array<string, mixed>  $browserNote
      */
     public function __construct(
-        public readonly array $lang,
         public readonly array $curUser,
         public readonly bool $canNewsManage,
         public readonly bool $canPollManage,
@@ -51,7 +49,6 @@ final class IndexPageViewModel extends ViewModel
     public function toArray(): array
     {
         return [
-            'lang' => $this->lang,
             'curUser' => $this->curUser,
             'canNewsManage' => $this->canNewsManage,
             'canPollManage' => $this->canPollManage,

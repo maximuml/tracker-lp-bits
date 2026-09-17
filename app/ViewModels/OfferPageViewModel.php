@@ -12,7 +12,6 @@ namespace App\ViewModels;
 final class OfferPageViewModel extends ViewModel
 {
     /**
-     * @param  array<string, mixed>  $lang
      * @param  array<string, mixed>  $curUser
      * @param  array<string, mixed>|null  $add_offer
      * @param  array<string, mixed>|null  $off_details
@@ -21,7 +20,6 @@ final class OfferPageViewModel extends ViewModel
      * @param  array<string, mixed>|null  $list
      */
     public function __construct(
-        public readonly array $lang,
         public readonly array $curUser,
         public readonly int $userId,
         public readonly string $action,
@@ -49,7 +47,6 @@ final class OfferPageViewModel extends ViewModel
     public function toArray(): array
     {
         return [
-            'lang' => $this->lang,
             'curUser' => $this->curUser,
             'userId' => $this->userId,
             'action' => $this->action,

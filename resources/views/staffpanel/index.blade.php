@@ -1,19 +1,19 @@
 @extends('layouts.legacy')
 
-@section('title', $lang_staffpanel['Administration'] ?? 'Administration')
+@section('title', ('Administration'))
 
 @section('content')
-<h1 align=center>{{ $lang_staffpanel['Administration'] ?? 'Administration' }}</h1>
+<h1 align=center>{{ ('Administration')}}</h1>
 
 @if (! empty($sysopPanels))
-<h1 align=center>..:: {{ $lang_staffpanel['For SysOp Only'] ?? 'For SysOp Only' }} ::..</h1>
+<h1 align=center>..:: {{ 'For SysOp Only' }} ::..</h1>
 <br /><br />
 <table data-nx="data" width=80% border=1 cellspacing=0 cellpadding=5 align=center>
-<tr><td class=colhead align=left>{{ $lang_staffpanel['Option Name'] ?? 'Option Name' }}</td><td class=colhead align=left>{{ $lang_staffpanel['Info'] ?? 'Info' }}</td></tr>
+<tr><td class=colhead align=left>{{ 'Option Name' }}</td><td class=colhead align=left>{{ ('Info')}}</td></tr>
 @foreach ($sysopPanels as $row)
 <tr>
-    <td class=rowfollow align=left><strong><a href="{{ $row['url'] }}">{{ $lang_staffpanel[$row['name']] ?? $row['name'] }}</a></strong></td>
-    <td class=rowfollow align=left>{{ $lang_staffpanel[$row['info']] ?? $row['info'] }}</td>
+    <td class=rowfollow align=left><strong><a href="{{ $row['url'] }}">{{ $row['name'] }}</a></strong></td>
+    <td class=rowfollow align=left>{{ $row['info'] }}</td>
 </tr>
 @endforeach
 </table>
@@ -21,14 +21,14 @@
 @endif
 
 @if (! empty($adminPanels))
-<h1 align=center>..:: {{ $lang_staffpanel['For Administrator Only'] ?? 'For Administrator Only' }} ::..</h1>
+<h1 align=center>..:: {{ 'For Administrator Only' }} ::..</h1>
 <br /><br />
 <table data-nx="data" width=80% border=1 cellspacing=0 cellpadding=5 align=center>
-<tr><td class=colhead align=left>{{ $lang_staffpanel['Option Name'] ?? 'Option Name' }}</td><td class=colhead align=left>{{ $lang_staffpanel['Info'] ?? 'Info' }}</td></tr>
+<tr><td class=colhead align=left>{{ 'Option Name' }}</td><td class=colhead align=left>{{ ('Info')}}</td></tr>
 @foreach ($adminPanels as $row)
 <tr>
-    <td class=rowfollow align=left><strong><a href="{{ $row['url'] }}">{{ $lang_staffpanel[$row['name']] ?? $row['name'] }}</a></strong></td>
-    <td class=rowfollow align=left>{{ $lang_staffpanel[$row['info']] ?? $row['info'] }}</td>
+    <td class=rowfollow align=left><strong><a href="{{ $row['url'] }}">{{ $row['name'] }}</a></strong></td>
+    <td class=rowfollow align=left>{{ $row['info'] }}</td>
 </tr>
 @endforeach
 </table>
@@ -36,14 +36,14 @@
 @endif
 
 @if (! empty($modPanels))
-<h1 align=center>..:: {{ $lang_staffpanel['For Moderator Only'] ?? 'For Moderator Only' }} ::..</h1>
+<h1 align=center>..:: {{ 'For Moderator Only' }} ::..</h1>
 <br /><br />
 <table data-nx="data" width=80% border=1 cellspacing=0 cellpadding=5 align=center>
-<tr><td class=colhead align=left>{{ $lang_staffpanel['Option Name'] ?? 'Option Name' }}</td><td class=colhead align=left>{{ $lang_staffpanel['Info'] ?? 'Info' }}</td></tr>
+<tr><td class=colhead align=left>{{ 'Option Name' }}</td><td class=colhead align=left>{{ ('Info')}}</td></tr>
 @foreach ($modPanels as $row)
 <tr>
-    <td class=rowfollow align=left><strong><a href="{{ $row['url'] }}">{{ $lang_staffpanel[$row['name']] ?? $row['name'] }}</a></strong></td>
-    <td class=rowfollow align=left>{{ $lang_staffpanel[$row['info']] ?? $row['info'] }}</td>
+    <td class=rowfollow align=left><strong><a href="{{ $row['url'] }}">{{ $row['name'] }}</a></strong></td>
+    <td class=rowfollow align=left>{{ $row['info'] }}</td>
 </tr>
 @endforeach
 </table>

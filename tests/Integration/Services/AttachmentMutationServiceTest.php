@@ -29,8 +29,6 @@ final class AttachmentMutationServiceTest extends TestCase
     use DatabaseTransactions;
 
     /** @var array<string, string> */
-    private array $lang;
-
     private string $tmpDir;
 
     private string $saveDir = '';
@@ -40,15 +38,6 @@ final class AttachmentMutationServiceTest extends TestCase
         parent::setUp();
         Redis::connection()->flushdb();
         DB::table('attachments')->delete();
-
-        $this->lang = [
-            'text_nothing_received' => 'Nothing received.',
-            'text_file_number_limit_reached' => 'File number limit reached.',
-            'text_file_size_too_big' => 'File size too big.',
-            'text_file_extension_not_allowed' => 'File extension not allowed.',
-            'text_invalid_image_file' => 'Invalid image file.',
-            'text_cannot_move_file' => 'Cannot move file.',
-        ];
 
         $this->tmpDir = sys_get_temp_dir().'/attachment_test_'.uniqid();
         if (! is_dir($this->tmpDir)) {
@@ -137,13 +126,12 @@ final class AttachmentMutationServiceTest extends TestCase
         $result = AttachmentMutationService::processUpload(
             $this->curUser(),
             $attach,
-            $this->lang,
             'no',
             '',
             null,
         );
 
-        $this->assertSame('Nothing received.', $result['warning']);
+        $this->assertSame('Failure! Nothing received!', $result['warning']);
         $this->assertSame('', $result['script']);
         $this->assertSame(10, $result['count_left']);
     }
@@ -157,13 +145,12 @@ final class AttachmentMutationServiceTest extends TestCase
         $result = AttachmentMutationService::processUpload(
             $this->curUser(),
             $attach,
-            $this->lang,
             'no',
             '',
             ['tmp_name' => '/tmp/foo'],
         );
 
-        $this->assertSame('Nothing received.', $result['warning']);
+        $this->assertSame('Failure! Nothing received!', $result['warning']);
         $this->assertSame(10, $result['count_left']);
     }
 
@@ -178,13 +165,12 @@ final class AttachmentMutationServiceTest extends TestCase
         $result = AttachmentMutationService::processUpload(
             $this->curUser(),
             $attach,
-            $this->lang,
             'no',
             '',
             $file,
         );
 
-        $this->assertSame('Nothing received.', $result['warning']);
+        $this->assertSame('Failure! Nothing received!', $result['warning']);
         $this->assertSame(0, DB::table('attachments')->count());
     }
 
@@ -199,13 +185,12 @@ final class AttachmentMutationServiceTest extends TestCase
         $result = AttachmentMutationService::processUpload(
             $this->curUser(),
             $attach,
-            $this->lang,
             'no',
             '',
             $file,
         );
 
-        $this->assertSame('Nothing received.', $result['warning']);
+        $this->assertSame('Failure! Nothing received!', $result['warning']);
         $this->assertSame(0, DB::table('attachments')->count());
     }
 
@@ -219,13 +204,12 @@ final class AttachmentMutationServiceTest extends TestCase
         $result = AttachmentMutationService::processUpload(
             $this->curUser(),
             $attach,
-            $this->lang,
             'no',
             '',
             $file,
         );
 
-        $this->assertSame('File number limit reached.', $result['warning']);
+        $this->assertSame('Failure! You cannot upload more files for the moment. Please wait some time.', $result['warning']);
         $this->assertSame(0, DB::table('attachments')->count());
     }
 
@@ -240,13 +224,12 @@ final class AttachmentMutationServiceTest extends TestCase
         $result = AttachmentMutationService::processUpload(
             $this->curUser(),
             $attach,
-            $this->lang,
             'no',
             '',
             $file,
         );
 
-        $this->assertSame('File size too big.', $result['warning']);
+        $this->assertSame('Failure! The file size is too big.', $result['warning']);
         $this->assertSame(0, DB::table('attachments')->count());
     }
 
@@ -261,13 +244,12 @@ final class AttachmentMutationServiceTest extends TestCase
         $result = AttachmentMutationService::processUpload(
             $this->curUser(),
             $attach,
-            $this->lang,
             'no',
             '',
             $file,
         );
 
-        $this->assertSame('File size too big.', $result['warning']);
+        $this->assertSame('Failure! The file size is too big.', $result['warning']);
     }
 
     // --- banned extension ---
@@ -280,13 +262,12 @@ final class AttachmentMutationServiceTest extends TestCase
         $result = AttachmentMutationService::processUpload(
             $this->curUser(),
             $attach,
-            $this->lang,
             'no',
             '',
             $file,
         );
 
-        $this->assertSame('File extension not allowed.', $result['warning']);
+        $this->assertSame('Failure! The file extension is not allowed.', $result['warning']);
         $this->assertSame(0, DB::table('attachments')->count());
     }
 
@@ -300,13 +281,12 @@ final class AttachmentMutationServiceTest extends TestCase
         $result = AttachmentMutationService::processUpload(
             $this->curUser(),
             $attach,
-            $this->lang,
             'no',
             '',
             $file,
         );
 
-        $this->assertSame('File extension not allowed.', $result['warning']);
+        $this->assertSame('Failure! The file extension is not allowed.', $result['warning']);
     }
 
     // --- dangerous MIME type (PHP content with allowed extension) ---
@@ -319,13 +299,12 @@ final class AttachmentMutationServiceTest extends TestCase
         $result = AttachmentMutationService::processUpload(
             $this->curUser(),
             $attach,
-            $this->lang,
             'no',
             '',
             $file,
         );
 
-        $this->assertSame('File extension not allowed.', $result['warning']);
+        $this->assertSame('Failure! The file extension is not allowed.', $result['warning']);
         $this->assertSame(0, DB::table('attachments')->count());
     }
 
@@ -339,14 +318,13 @@ final class AttachmentMutationServiceTest extends TestCase
         $result = AttachmentMutationService::processUpload(
             $this->curUser(),
             $attach,
-            $this->lang,
             'no',
             '',
             $file,
         );
 
         // move_uploaded_file fails in test context (not a real HTTP upload)
-        $this->assertSame('Cannot move file.', $result['warning']);
+        $this->assertSame('Failure! Cannot move uploaded file.', $result['warning']);
         $this->assertSame(0, DB::table('attachments')->count());
     }
 
@@ -360,14 +338,13 @@ final class AttachmentMutationServiceTest extends TestCase
         $result = AttachmentMutationService::processUpload(
             $this->curUser(),
             $attach,
-            $this->lang,
             'no',
             'preview_custom_field_image_1',
             $file,
         );
 
         // Move fails in test context, so no script is generated
-        $this->assertSame('Cannot move file.', $result['warning']);
+        $this->assertSame('Failure! Cannot move uploaded file.', $result['warning']);
         $this->assertSame('', $result['script']);
     }
 
@@ -380,31 +357,12 @@ final class AttachmentMutationServiceTest extends TestCase
         $result = AttachmentMutationService::processUpload(
             $this->curUser(),
             $attach,
-            $this->lang,
             'no',
             '',
             null,
         );
 
         $this->assertSame(5, $result['count_left']);
-    }
-
-    // --- empty lang array uses defaults ---
-
-    public function test_process_upload_with_empty_lang_uses_default_warning(): void
-    {
-        $attach = $this->mockAttachService();
-
-        $result = AttachmentMutationService::processUpload(
-            $this->curUser(),
-            $attach,
-            [],
-            'no',
-            '',
-            null,
-        );
-
-        $this->assertSame('Nothing received.', $result['warning']);
     }
 
     /**
@@ -492,7 +450,6 @@ final class AttachmentMutationServiceTest extends TestCase
         $result = AttachmentMutationService::processUpload(
             $this->curUser(),
             $attach,
-            $this->lang,
             'no',
             'preview_custom_field_image_42',
             $file,
@@ -534,7 +491,6 @@ final class AttachmentMutationServiceTest extends TestCase
         $result = AttachmentMutationService::processUpload(
             $this->curUser(),
             $attach,
-            $this->lang,
             'no',
             '',
             $file,
@@ -560,7 +516,6 @@ final class AttachmentMutationServiceTest extends TestCase
         $landscape = AttachmentMutationService::processUpload(
             $this->curUser(),
             $attach,
-            $this->lang,
             'yes',
             '',
             $this->makeImageFile(800, 400),
@@ -570,7 +525,6 @@ final class AttachmentMutationServiceTest extends TestCase
         $portrait = AttachmentMutationService::processUpload(
             $this->curUser(),
             $attach,
-            $this->lang,
             'yes',
             '',
             $this->makeImageFile(400, 800),
@@ -596,7 +550,6 @@ final class AttachmentMutationServiceTest extends TestCase
         $result = AttachmentMutationService::processUpload(
             $this->curUser(),
             $attach,
-            $this->lang,
             'no',
             '',
             $file,
@@ -618,7 +571,6 @@ final class AttachmentMutationServiceTest extends TestCase
         $result = AttachmentMutationService::processUpload(
             $this->curUser(),
             $attach,
-            $this->lang,
             'no',
             '',
             $file,
@@ -642,7 +594,6 @@ final class AttachmentMutationServiceTest extends TestCase
         $result = AttachmentMutationService::processUpload(
             $this->curUser(),
             $attach,
-            $this->lang,
             'no',
             '',
             $file,
@@ -664,13 +615,12 @@ final class AttachmentMutationServiceTest extends TestCase
         $result = AttachmentMutationService::processUpload(
             $this->curUser(),
             $attach,
-            $this->lang,
             'no',
             '',
             $file,
         );
 
-        $this->assertSame('Cannot move file.', $result['warning']);
+        $this->assertSame('Failure! Cannot move uploaded file.', $result['warning']);
     }
 
     public function test_process_upload_with_non_numeric_size_returns_nothing_received(): void
@@ -682,13 +632,12 @@ final class AttachmentMutationServiceTest extends TestCase
         $result = AttachmentMutationService::processUpload(
             $this->curUser(),
             $attach,
-            $this->lang,
             'no',
             '',
             $file,
         );
 
-        $this->assertSame('Nothing received.', $result['warning']);
+        $this->assertSame('Failure! Nothing received!', $result['warning']);
     }
 
     public function test_process_upload_with_uppercase_extension_is_allowed(): void
@@ -700,13 +649,12 @@ final class AttachmentMutationServiceTest extends TestCase
         $result = AttachmentMutationService::processUpload(
             $this->curUser(),
             $attach,
-            $this->lang,
             'no',
             '',
             $file,
         );
 
-        $this->assertSame('Cannot move file.', $result['warning']);
+        $this->assertSame('Failure! Cannot move uploaded file.', $result['warning']);
     }
 
     public function test_process_upload_with_banned_extension_rejected_even_when_whitelisted(): void
@@ -718,30 +666,27 @@ final class AttachmentMutationServiceTest extends TestCase
         $result = AttachmentMutationService::processUpload(
             $this->curUser(),
             $attach,
-            $this->lang,
             'no',
             '',
             $file,
         );
 
-        $this->assertSame('File extension not allowed.', $result['warning']);
+        $this->assertSame('Failure! The file extension is not allowed.', $result['warning']);
         $this->assertSame(0, DB::table('attachments')->count());
     }
 
     public function test_process_upload_uses_lang_warning_for_null_file(): void
     {
         $attach = $this->mockAttachService();
-        $lang = ['text_nothing_received' => 'Custom nothing received'];
 
         $result = AttachmentMutationService::processUpload(
             $this->curUser(),
             $attach,
-            $lang,
             'no',
             '',
             null,
         );
 
-        $this->assertSame('Custom nothing received', $result['warning']);
+        $this->assertSame('Failure! Nothing received!', $result['warning']);
     }
 }

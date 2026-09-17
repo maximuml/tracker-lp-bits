@@ -197,8 +197,6 @@ final class IndexPageServiceTest extends TestCase
     public function test_build_returns_expected_top_level_keys(): void
     {
         $result = $this->buildWithAllSectionsDisabled();
-
-        $this->assertArrayHasKey('lang', $result);
         $this->assertArrayHasKey('curUser', $result);
         $this->assertArrayHasKey('canNewsManage', $result);
         $this->assertArrayHasKey('canPollManage', $result);

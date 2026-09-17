@@ -25,16 +25,15 @@ final class ToptenRepository
         $type = in_array($type, [1, 2, 3, 5, 6], true) ? $type : 1;
         $limit = $limit < 1 || $limit > 250 ? 10 : $limit;
 
-        $lang = (array) trans('legacy/topten');
         $enabledDonation = ((string) Settings::get('main.donation', 'no')) === 'yes';
         $dateFounded = SiteConfig::current()->tweak->dateFounded();
 
         $sections = match ($type) {
-            1 => $this->userSections->build($limit, $subtype, $lang),
-            2 => $this->torrentSections->build($limit, $subtype, $lang),
-            3 => $this->countrySections->build($limit, $subtype, $lang),
-            5 => $this->communitySections->build($limit, $subtype, $lang),
-            6 => $this->otherSections->build($limit, $subtype, $lang, $enabledDonation),
+            1 => $this->userSections->build($limit, $subtype),
+            2 => $this->torrentSections->build($limit, $subtype),
+            3 => $this->countrySections->build($limit, $subtype),
+            5 => $this->communitySections->build($limit, $subtype),
+            6 => $this->otherSections->build($limit, $subtype, $enabledDonation),
         };
 
         return [
@@ -43,7 +42,6 @@ final class ToptenRepository
             'subtype' => $subtype,
             'enabledDonation' => $enabledDonation,
             'dateFounded' => $dateFounded,
-            'lang' => $lang,
             'sections' => $sections,
         ];
     }

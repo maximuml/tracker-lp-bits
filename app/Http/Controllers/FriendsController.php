@@ -30,29 +30,27 @@ class FriendsController extends LegacyController
     public function friends(Request $request): Response|RedirectResponse|View
     {
         $currentUser = (array) ($this->currentUser->get() ?? []);
-        $langFriends = (array) trans('legacy/friends');
-
         $userid = (int) ($request->input('id') ?? $currentUser['id'] ?? 0);
         if ($userid <= 0 || ! Validators::isId($userid)) {
-            return $this->legacyAbortResponse($langFriends['std_error'] ?? 'Error', ($langFriends['std_invalid_id'] ?? 'Invalid ID ').$userid.'.');
+            return $this->legacyAbortResponse(__('legacy/friends.std_error'), (__('legacy/friends.std_invalid_id')).$userid.'.');
         }
 
         $action = (string) ($request->input('action') ?? '');
 
         if ($action === 'add') {
             if (! $request->isMethod('post')) {
-                return $this->legacyAbortResponse($langFriends['std_error'] ?? 'Error', $langFriends['std_permission_denied'] ?? 'Permission denied.');
+                return $this->legacyAbortResponse(__('legacy/friends.std_error'), ('Permission denied.'));
             }
 
-            return $this->handleAdd($request, $userid, $langFriends);
+            return $this->handleAdd($request, $userid);
         }
 
         if ($action === 'delete') {
             if (! $request->isMethod('post')) {
-                return $this->legacyAbortResponse($langFriends['std_error'] ?? 'Error', $langFriends['std_permission_denied'] ?? 'Permission denied.');
+                return $this->legacyAbortResponse(__('legacy/friends.std_error'), ('Permission denied.'));
             }
 
-            return $this->handleDelete($request, $userid, $langFriends);
+            return $this->handleDelete($request, $userid);
         }
 
         $friendRows = $this->friendsRepository->getFriends($userid);
@@ -88,16 +86,16 @@ class FriendsController extends LegacyController
             $usernameHtml = $userDisplayMap[$friendId] ?? UserDisplay::username($friendId);
             $friend['avatarSrc'] = $avatar;
             $friend['body1Html'] = $usernameHtml.' ('.$titleHtml.')<br /><br />'
-                .($langFriends['text_last_seen_on'] ?? 'Last seen on ')
+                .(__('legacy/friends.text_last_seen_on'))
                 .(string) Time::format((string) ($friend['last_access'] ?? ''), true, false);
             $friend['body2Html'] = "<a href=friends.php?id=$userid&action=delete&type=friend&targetid=$friendId>"
-                .htmlspecialchars($langFriends['text_remove_from_friends'] ?? 'Remove from friends', ENT_QUOTES, 'UTF-8').'</a>'
+                .htmlspecialchars(__('legacy/friends.text_remove_from_friends'), ENT_QUOTES, 'UTF-8').'</a>'
                 ."<br /><br /><a href=sendmessage.php?receiver=$friendId>"
-                .htmlspecialchars($langFriends['text_send_pm'] ?? 'Send PM', ENT_QUOTES, 'UTF-8').'</a>';
+                .htmlspecialchars(__('legacy/friends.text_send_pm'), ENT_QUOTES, 'UTF-8').'</a>';
             $friendsList[] = $friend;
         }
 
-        $blocksHtml = $langFriends['text_blocklist_empty'] ?? 'No blocked users.';
+        $blocksHtml = __('legacy/friends.text_blocklist_empty');
         if ($blockRows !== []) {
             $blocksHtml = '<table width=100% cellspacing=0 cellpadding=0>';
             foreach (array_values($blockRows) as $i => $block) {
@@ -124,32 +122,29 @@ class FriendsController extends LegacyController
             'friendsList' => $friendsList,
             'blocksHtml' => $blocksHtml,
             'titleUsername' => $userDisplayMap[$userid] ?? UserDisplay::username($userid),
-            'title' => ($langFriends['head_personal_lists_for'] ?? 'Personal lists for ')
+            'title' => (__('legacy/friends.head_personal_lists_for'))
                 .(string) ($titleRow['username'] ?? $currentUser['username'] ?? ''),
             'canViewUserList' => Permission::can(PermissionEnum::VIEW_USER_LIST),
         ]);
     }
 
-    /**
-     * @param  array<string, mixed>  $langFriends
-     */
-    private function handleAdd(Request $request, int $userid, array $langFriends): RedirectResponse|Response
+    private function handleAdd(Request $request, int $userid): RedirectResponse|Response
     {
         $targetid = $request->input('targetid');
         $type = (string) ($request->input('type') ?? '');
 
         if (! Validators::isId($targetid)) {
-            return $this->legacyAbortResponse($langFriends['std_error'] ?? 'Error', ($langFriends['std_invalid_id'] ?? 'Invalid ID ').$targetid.'.');
+            return $this->legacyAbortResponse(__('legacy/friends.std_error'), (__('legacy/friends.std_invalid_id')).$targetid.'.');
         }
         $targetid = (int) $targetid;
 
         [$tableIs, $frag, $fieldIs] = $this->resolveType($type);
         if ($tableIs === '') {
-            return $this->legacyAbortResponse($langFriends['std_error'] ?? 'Error', ($langFriends['std_unknown_type'] ?? 'Unknown type ').$type);
+            return $this->legacyAbortResponse(__('legacy/friends.std_error'), (__('legacy/friends.std_unknown_type')).$type);
         }
 
         if ($this->friendsRepository->exists($userid, $type, $targetid)) {
-            return $this->legacyAbortResponse($langFriends['std_error'] ?? 'Error', ($langFriends['std_user_id'] ?? 'User ').$targetid.($langFriends['std_already_in'] ?? ' is already in ').$tableIs.($langFriends['std_list'] ?? ' list.'));
+            return $this->legacyAbortResponse(__('legacy/friends.std_error'), (__('legacy/friends.std_user_id')).$targetid.(__('legacy/friends.std_already_in')).$tableIs.(__('legacy/friends.std_list')));
         }
 
         $this->friendsRepository->add($userid, $type, $targetid);
@@ -158,10 +153,7 @@ class FriendsController extends LegacyController
         return redirect('/friends.php?id='.$userid.'#'.$frag);
     }
 
-    /**
-     * @param  array<string, mixed>  $langFriends
-     */
-    private function handleDelete(Request $request, int $userid, array $langFriends): RedirectResponse|Response
+    private function handleDelete(Request $request, int $userid): RedirectResponse|Response
     {
         $targetid = $request->input('targetid');
         $sure = (int) ($request->input('sure', 0));
@@ -169,28 +161,28 @@ class FriendsController extends LegacyController
 
         [$tableIs, $frag] = $this->resolveType($type);
         if ($tableIs === '') {
-            return $this->legacyAbortResponse($langFriends['std_error'] ?? 'Error', ($langFriends['std_unknown_type'] ?? 'Unknown type ').$type);
+            return $this->legacyAbortResponse(__('legacy/friends.std_error'), (__('legacy/friends.std_unknown_type')).$type);
         }
 
-        $typename = $type === 'friend' ? ($langFriends['text_friend'] ?? 'friend') : ($langFriends['text_block'] ?? 'block');
+        $typename = $type === 'friend' ? (__('legacy/friends.text_friend')) : (__('legacy/friends.text_block'));
 
         if (! Validators::isId($targetid)) {
-            return $this->legacyAbortResponse($langFriends['std_error'] ?? 'Error', ($langFriends['std_invalid_id'] ?? 'Invalid ID ').$userid.'.');
+            return $this->legacyAbortResponse(__('legacy/friends.std_error'), (__('legacy/friends.std_invalid_id')).$userid.'.');
         }
         $targetid = (int) $targetid;
 
         if (! $sure) {
-            $confirm = ($langFriends['std_delete_note'] ?? 'Delete note ').$typename.($langFriends['std_click'] ?? ' click ').
-                "<a href=\"?id=$userid&action=delete&type=$type&targetid=$targetid&sure=1\">".($langFriends['std_here_if_sure'] ?? 'here if sure').'</a>';
+            $confirm = (__('legacy/friends.std_delete_note')).$typename.(__('legacy/friends.std_click')).
+                "<a href=\"?id=$userid&action=delete&type=$type&targetid=$targetid&sure=1\">".(__('legacy/friends.std_here_if_sure')).'</a>';
 
-            return $this->legacyAbortResponse(($langFriends['std_delete'] ?? 'Delete ').$type, $confirm, false);
+            return $this->legacyAbortResponse((__('legacy/friends.std_delete')).$type, $confirm, false);
         }
 
         $deleted = $this->friendsRepository->delete($userid, $type, $targetid);
         if ($deleted === 0) {
             $notFoundKey = $type === 'friend' ? 'std_no_friend_found' : 'std_no_block_found';
 
-            return $this->legacyAbortResponse($langFriends['std_error'] ?? 'Error', ($langFriends[$notFoundKey] ?? 'Not found ').$targetid);
+            return $this->legacyAbortResponse(__('legacy/friends.std_error'), __('legacy/friends.'.$notFoundKey).$targetid);
         }
 
         $this->purgeNeighborsCache();

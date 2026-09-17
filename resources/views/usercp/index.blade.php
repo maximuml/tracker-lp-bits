@@ -1,7 +1,7 @@
 
 @extends('layouts.modern')
 
-@section('title', $title ?? ($lang_usercp['head_control_panel'] ?? 'Control Panel'))
+@section('title', $title ?? (__('legacy/usercp.head_control_panel')))
 
 @section('content')
 @if (($action ?? '') === 'personal')

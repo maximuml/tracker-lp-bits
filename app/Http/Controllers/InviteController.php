@@ -44,15 +44,14 @@ class InviteController extends LegacyController
         $currentUser = $this->currentUser->get() ?? [];
         $currentUserId = (int) ($currentUser['id'] ?? 0);
         $id = $request->input('id') !== null ? (int) $request->input('id') : $currentUserId;
-        $langInvite = (array) trans('legacy/invite');
 
         if (! Validators::isId($id) || ($currentUserId !== $id && ! Permission::can(PermissionEnum::VIEW_INVITE))) {
-            return $this->legacyAbortResponse($langInvite['std_sorry'] ?? 'Sorry', $langInvite['std_permission_denied'] ?? 'Permission denied.');
+            return $this->legacyAbortResponse(__('legacy/invite.std_sorry'), __('legacy/invite.std_permission_denied'));
         }
 
         $user = User::query()->find($id);
         if (! $user) {
-            return $this->legacyAbortResponse($langInvite['std_sorry'] ?? 'Sorry', 'Invalid id');
+            return $this->legacyAbortResponse(__('legacy/invite.std_sorry'), 'Invalid id');
         }
 
         $type = htmlspecialchars((string) ($request->input('type') ?? ''));
@@ -69,8 +68,6 @@ class InviteController extends LegacyController
             'menuSelected' => $menuSelected,
             'user' => $user->toArray(),
             'CURUSER' => $currentUser,
-            'lang_invite' => $langInvite,
-            'lang_functions' => (array) trans('legacy/functions'),
             'SITENAME' => $SITENAME,
             'invitesystem' => $invitesystem,
             '__server_REQUEST_URI' => $request->getRequestUri(),
@@ -82,7 +79,7 @@ class InviteController extends LegacyController
 
         if ($type === 'new') {
             if ($currentUserId !== $id) {
-                return $this->legacyAbortResponse($langInvite['std_sorry'] ?? 'Sorry', $langInvite['std_permission_denied'] ?? 'Permission denied.');
+                return $this->legacyAbortResponse(__('legacy/invite.std_sorry'), __('legacy/invite.std_permission_denied'));
             }
 
             try {
@@ -90,8 +87,8 @@ class InviteController extends LegacyController
                 $disabled = '';
             } catch (\Exception $exception) {
                 return $this->legacyAbortResponse(
-                    $langInvite['std_sorry'] ?? 'Sorry',
-                    $exception->getMessage().'  <a class=altlink href=invite.php?id='.htmlspecialchars((string) $currentUserId).'>'.$langInvite['here_to_go_back'].'</a>'
+                    __('legacy/invite.std_sorry'),
+                    $exception->getMessage().'  <a class=altlink href=invite.php?id='.htmlspecialchars((string) $currentUserId).'>'.__('legacy/invite.here_to_go_back').'</a>'
                 );
             }
 
@@ -104,18 +101,18 @@ class InviteController extends LegacyController
 
             $inviteSelectOptions = '';
             if ((int) ($inv['invites'] ?? 0) > 0) {
-                $inviteSelectOptions = '<option value="permanent">'.$langInvite['text_permanent'].'</option>';
+                $inviteSelectOptions = '<option value="permanent">'.__('legacy/invite.text_permanent').'</option>';
             }
             foreach ($temporaryInvites as $tmp) {
-                $inviteSelectOptions .= sprintf('<option value="%s">%s (%s: %s)</option>', e($tmp->hash), e($tmp->hash), $langInvite['text_expired_at'], $tmp->expired_at);
+                $inviteSelectOptions .= sprintf('<option value="%s">%s (%s: %s)</option>', e($tmp->hash), e($tmp->hash), __('legacy/invite.text_expired_at'), $tmp->expired_at);
             }
 
-            $invitation_body = sprintf($langInvite['text_invitation_body'], $SITENAME).$currentUser['username'];
+            $invitation_body = sprintf(__('legacy/invite.text_invitation_body'), $SITENAME).$currentUser['username'];
             $preUsernameTr = '';
             if (SiteConfig::current()->system->isInvitePreEmailAndUsername()) {
                 $preUsernameTr = '<div class="nx-fhead nx-nowrap">'.Locale::trans('invite.pre_register_username', [], null).'</div><div class="nx-fcell"><input type=text size=40 name=pre_register_username><br /><font align=left class=small>'.Locale::trans('invite.pre_register_username_help', [], null).'</font></div>';
             }
-            $_s = ((int) ($inv['invites'] ?? 0) !== 1) ? ($langInvite['text_s'] ?? 's') : '';
+            $_s = ((int) ($inv['invites'] ?? 0) !== 1) ? (__('legacy/invite.text_s')) : '';
 
             $data = array_merge($data, [
                 'inv' => $inv,
@@ -129,12 +126,12 @@ class InviteController extends LegacyController
             ]);
         } else {
             // invitee / sent / tmp modes — fetch data in the controller
-            $data = array_merge($data, $this->inviteMenuData($id, $menuSelected, $currentUserId, $langInvite));
+            $data = array_merge($data, $this->inviteMenuData($id, $menuSelected, $currentUserId));
 
             if ($menuSelected === 'invitee') {
-                $data = array_merge($data, $this->inviteeData($id, $enabled, $status, $currentUserId, $langInvite, $request->getRequestUri()));
+                $data = array_merge($data, $this->inviteeData($id, $enabled, $status, $currentUserId, $request->getRequestUri()));
             } elseif (in_array($menuSelected, ['sent', 'tmp'], true)) {
-                $data = array_merge($data, $this->sentTmpData($id, $menuSelected, $langInvite, $langFunctions = (array) trans('legacy/functions')));
+                $data = array_merge($data, $this->sentTmpData($id, $menuSelected));
             }
         }
 
@@ -144,10 +141,9 @@ class InviteController extends LegacyController
     /**
      * Build the invite menu button data (send button text / disabled state).
      *
-     * @param  array<string, mixed>  $langInvite
      * @return array<string, mixed>
      */
-    private function inviteMenuData(int $id, string $menuSelected, int $currentUserId, array $langInvite): array
+    private function inviteMenuData(int $id, string $menuSelected, int $currentUserId): array
     {
         $sendBtnText = '';
         $sendBtnDisabled = '';
@@ -169,10 +165,9 @@ class InviteController extends LegacyController
     /**
      * Fetch invitee list data for the "invitee" menu tab.
      *
-     * @param  array<string, mixed>  $langInvite
      * @return array<string, mixed>
      */
-    private function inviteeData(int $id, string $enabled, string $status, int $currentUserId, array $langInvite, string $requestUri): array
+    private function inviteeData(int $id, string $enabled, string $status, int $currentUserId, string $requestUri): array
     {
         $filters = ['status' => $status, 'enabled' => $enabled];
         $number = $this->inviteRepository->countInvitees($id, $filters);
@@ -183,7 +178,7 @@ class InviteController extends LegacyController
             $enabledOptions .= sprintf('<option value="%s"%s>%s</option>', $item, ($enabled !== '' && $enabled == $item) ? ' selected' : '', strtoupper($item));
         }
         $statusOptions = '';
-        foreach (['pending' => $langInvite['text_pending'] ?? 'Pending', 'confirmed' => $langInvite['text_confirmed'] ?? 'Confirmed'] as $name => $text) {
+        foreach (['pending' => __('legacy/invite.text_pending'), 'confirmed' => __('legacy/invite.text_confirmed')] as $name => $text) {
             $statusOptions .= sprintf('<option value="%s"%s>%s</option>', $name, ($status !== '' && $status == $name) ? ' selected' : '', $text);
         }
 
@@ -212,8 +207,8 @@ class InviteController extends LegacyController
                 $row['ratioHtml'] = $row['uploaded'] > 0 ? 'Inf.' : '---';
             }
             $row['statusHtml'] = $row['status'] === 'confirmed'
-                ? '<a href=userdetails.php?id='.(int) $row['id'].'><font color=#1f7309>'.e($langInvite['text_confirmed'] ?? '').'</font></a>'
-                : '<a href=checkuser.php?id='.(int) $row['id'].'><font color=#ca0226>'.e($langInvite['text_pending'] ?? '').'</font></a>';
+                ? '<a href=userdetails.php?id='.(int) $row['id'].'><font color=#1f7309>'.e(__('legacy/invite.text_confirmed')).'</font></a>'
+                : '<a href=checkuser.php?id='.(int) $row['id'].'><font color=#ca0226>'.e(__('legacy/invite.text_pending')).'</font></a>';
         }
         unset($row);
 
@@ -248,11 +243,9 @@ JS;
     /**
      * Fetch sent/tmp invite data.
      *
-     * @param  array<string, mixed>  $langInvite
-     * @param  array<string, mixed>  $langFunctions
      * @return array<string, mixed>
      */
-    private function sentTmpData(int $id, string $menuSelected, array $langInvite, array $langFunctions): array
+    private function sentTmpData(int $id, string $menuSelected): array
     {
         $number = $this->inviteRepository->countInvites($id, $menuSelected);
         $pageSize = 50;
@@ -268,7 +261,7 @@ JS;
         foreach ($inviteRows as &$row) {
             $isHashValid = (int) $row['valid'] === InviteValid::YES->value;
             $row['registerLink'] = $isHashValid
-                ? sprintf('&nbsp;<a href="signup.php?type=invite&invitenumber=%s" title="%s" target="_blank"><small>[%s]</small></a>', e($row['hash']), e($langInvite['signup_link_help'] ?? ''), e($langInvite['signup_link'] ?? ''))
+                ? sprintf('&nbsp;<a href="signup.php?type=invite&invitenumber=%s" title="%s" target="_blank"><small>[%s]</small></a>', e($row['hash']), e(__('legacy/invite.signup_link_help')), e(__('legacy/invite.signup_link')))
                 : '';
             $row['validText'] = Invite::$validInfo[$row['valid']]['text'] ?? '';
             $row['inviteeUserHtml'] = ! $isHashValid

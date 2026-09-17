@@ -204,20 +204,19 @@ final class Format
      */
     public static function getElapsedTime(int|string $ts, bool $shortunit = false): string
     {
-        $lang_functions = app(Language::class)->functions();
 
         return Time::elapsedSince((int) $ts, (int) TIMENOW, [
-            'year' => $lang_functions['text_year'] ?? '',
-            'year_short' => $lang_functions['text_short_year'] ?? '',
-            'month' => $lang_functions['text_month'] ?? '',
-            'month_short' => $lang_functions['text_short_month'] ?? '',
-            'day' => $lang_functions['text_day'] ?? '',
-            'day_short' => $lang_functions['text_short_day'] ?? '',
-            'hour' => $lang_functions['text_hour'] ?? '',
-            'hour_short' => $lang_functions['text_short_hour'] ?? '',
-            'min' => $lang_functions['text_min'] ?? '',
-            'min_short' => $lang_functions['text_short_min'] ?? '',
-            'plural_suffix' => $lang_functions['text_s'] ?? '',
+            'year' => __('legacy/functions.text_year'),
+            'year_short' => __('legacy/functions.text_short_year'),
+            'month' => __('legacy/functions.text_month'),
+            'month_short' => __('legacy/functions.text_short_month'),
+            'day' => __('legacy/functions.text_day'),
+            'day_short' => __('legacy/functions.text_short_day'),
+            'hour' => __('legacy/functions.text_hour'),
+            'hour_short' => __('legacy/functions.text_short_hour'),
+            'min' => __('legacy/functions.text_min'),
+            'min_short' => __('legacy/functions.text_short_min'),
+            'plural_suffix' => __('legacy/functions.text_s'),
         ], $shortunit);
     }
 
@@ -281,8 +280,7 @@ final class Format
      */
     public static function prettyTimeWithLocale(int|float $s): string
     {
-        $lang_functions = app(Language::class)->functions();
 
-        return self::prettyTime($s, (string) ($lang_functions['text_day'] ?? 'day(s)'));
+        return self::prettyTime($s, (string) (__('legacy/functions.text_day')));
     }
 }

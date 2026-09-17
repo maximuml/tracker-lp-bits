@@ -63,9 +63,8 @@ final class Strings
      */
     public static function addS(int|float $num, bool $es = false): string
     {
-        $lang = app(Language::class)->functions();
 
-        return self::pluralize($num, '', $es ? ($lang['text_es'] ?? '') : ($lang['text_s'] ?? ''));
+        return self::pluralize($num, '', $es ? (('')) : (__('legacy/functions.text_s')));
     }
 
     /**
@@ -73,9 +72,8 @@ final class Strings
      */
     public static function isOrAre(int|float $num): string
     {
-        $lang = app(Language::class)->functions();
 
-        return self::pluralize($num, $lang['text_is'] ?? '', $lang['text_are'] ?? '');
+        return self::pluralize($num, __('legacy/functions.text_is'), __('legacy/functions.text_are'));
     }
 
     /**

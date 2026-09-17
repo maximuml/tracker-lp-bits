@@ -83,12 +83,11 @@ final class Smilies
      */
     public static function framedTableWithContext(): void
     {
-        $lang = app(Language::class)->functions();
 
         echo self::framedTable(
-            $lang['text_smilies'] ?? '',
-            $lang['col_type_something'] ?? '',
-            $lang['col_to_make_a'] ?? ''
+            __('legacy/functions.text_smilies'),
+            __('legacy/functions.col_type_something'),
+            __('legacy/functions.col_to_make_a')
         );
     }
 

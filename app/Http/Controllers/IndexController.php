@@ -44,7 +44,7 @@ class IndexController extends Controller
         }
 
         $data = $this->indexPageService->build()->toArray();
-        $this->toastAssetBuilder->append($data['lang'], $data['curUser']);
+        $this->toastAssetBuilder->append($data['curUser']);
 
         return view('index.index', $data);
     }

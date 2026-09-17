@@ -21,23 +21,22 @@ final class OfferPageEditBuilder
     ) {}
 
     /**
-     * @param  array<string, mixed>  $lang
      * @param  array<string, mixed>  $curUser
      * @return array<string, mixed>
      */
-    public function build(array $lang, array $curUser, int $userId, Request $request, mixed $browsecatmode): array
+    public function build(array $curUser, int $userId, Request $request, mixed $browsecatmode): array
     {
         $id = (int) $request->query('id', 0);
         $offer = $this->offerRepository->findOffer($id);
         if (! $offer) {
-            Html::stdMessage((string) ($lang['std_error'] ?? ''), (string) ($lang['text_nothing_found'] ?? ''));
+            Html::stdMessage((string) (__('legacy/offers.std_error')), (string) (__('legacy/offers.text_nothing_found')));
 
             return [];
         }
         $num = $offer->toArray();
 
         if ($userId !== (int) ($num['userid'] ?? 0) && ! Permission::can(PermissionEnum::OFFER_MANAGE)) {
-            LegacyResponse::abort((string) ($lang['std_error'] ?? ''), (string) ($lang['std_cannot_edit_others_offer'] ?? ''));
+            LegacyResponse::abort((string) (__('legacy/offers.std_error')), (string) (__('legacy/offers.std_cannot_edit_others_offer')));
         }
 
         $body = htmlspecialchars(Input::unescape((string) ($num['descr'] ?? '')));

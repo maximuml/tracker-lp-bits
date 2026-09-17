@@ -4,15 +4,15 @@
 
 @section('content')
 <p><div class="nx-main nx-embedded">
-<h1 style='margin:0px'> {{ $lang_friends['text_personallist'] ?? 'Personal list for' }} @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($titleUsername))</h1></div></p>
+<h1 style='margin:0px'> {{ __('legacy/friends.text_personallist')}} @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($titleUsername))</h1></div></p>
 
 <div class="nx-main nx-embedded nx-box--737">
 <br />
-<h2 align=left><a name="friends">{{ $lang_friends['text_friendlist'] ?? 'Friend list' }}</a></h2>
+<h2 align=left><a name="friends">{{ __('legacy/friends.text_friendlist')}}</a></h2>
 <div class="nx-box nx-box--tight nx-box--737">
 
 @if (empty($friendsList))
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($lang_friends['text_friends_empty'] ?? 'No friends.'))
+    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/friends.text_friends_empty')))
 @else
     <div class="nx-fcards">
     @foreach ($friendsList as $friend)
@@ -36,7 +36,7 @@
 
 <br /><br />
 <div class="nx-main nx-embedded nx-box--737 nx-cell-5">
-<h2 align=left><a name="blocks">{{ $lang_friends['text_blocked_users'] ?? 'Blocked users' }}</a></h2>
+<h2 align=left><a name="blocks">{{ __('legacy/friends.text_blocked_users')}}</a></h2>
 <div style='padding: 10px;'>
 @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($blocksHtml))
 </div>
@@ -44,6 +44,6 @@
 
 </div>
 @if ($canViewUserList)
-    <p><a href=users.php><b>{{ $lang_friends['text_find_user'] ?? 'Find user' }}</b></a></p>
+    <p><a href=users.php><b>{{ __('legacy/friends.text_find_user')}}</b></a></p>
 @endif
 @endsection

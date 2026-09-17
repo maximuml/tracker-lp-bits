@@ -52,24 +52,22 @@ class InfoController extends LegacyController
         $perpage = 15;
         $phpSelf = Input::serverValue('PHP_SELF');
         $subject = UserDisplay::username($userid);
-        $lang = $this->langUserhistory();
 
         $data = [
             'action' => $action,
             'userid' => $userid,
             'subject' => $subject,
-            'lang_userhistory' => $lang,
             'title' => match ($action) {
-                'viewposts' => (string) ($lang['head_posts_history'] ?? 'Posts history'),
-                'viewcomments' => (string) ($lang['head_comments_history'] ?? 'Comments history'),
-                default => (string) ($lang['head_user_history'] ?? 'User history'),
+                'viewposts' => (string) (__('legacy/userhistory.head_posts_history')),
+                'viewcomments' => (string) (__('legacy/userhistory.head_comments_history')),
+                default => (string) (__('legacy/userhistory.head_user_history')),
             },
         ];
 
         if ($action === 'viewposts') {
             $result = $this->infoRepository->getUserHistoryPosts($userid, (int) ($curUser['class'] ?? 0), $perpage, $phpSelf);
             if (empty($result['posts'])) {
-                return $this->legacyAbortResponse((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_no_posts_found'] ?? 'No posts found'));
+                return $this->legacyAbortResponse((string) (__('legacy/userhistory.std_error')), (string) (__('legacy/userhistory.std_no_posts_found')));
             }
             $data = array_merge($data, $result);
             $data['items'] = $this->decorateHistoryPosts(
@@ -77,12 +75,11 @@ class InfoController extends LegacyController
                 (array) ($result['editorNames'] ?? []),
                 $viewerId,
                 $userid,
-                $lang,
             );
         } elseif ($action === 'viewcomments') {
             $result = $this->infoRepository->getUserHistoryComments($userid, $perpage, $phpSelf);
             if (empty($result['comments'])) {
-                return $this->legacyAbortResponse((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_no_comments_found'] ?? 'No comments found'));
+                return $this->legacyAbortResponse((string) (__('legacy/userhistory.std_error')), (string) (__('legacy/userhistory.std_no_comments_found')));
             }
             $data = array_merge($data, $result);
             $data['items'] = $this->decorateHistoryComments(
@@ -90,31 +87,20 @@ class InfoController extends LegacyController
                 (array) ($result['commentPageMap'] ?? []),
             );
         } elseif ($action === '') {
-            return $this->legacyAbortResponse((string) ($lang['std_history_error'] ?? 'Error'), (string) ($lang['std_unkown_action'] ?? 'Unknown action'), false);
+            return $this->legacyAbortResponse((string) (__('legacy/userhistory.std_history_error')), (string) (__('legacy/userhistory.std_unkown_action')), false);
         } else {
-            return $this->legacyAbortResponse((string) ($lang['std_history_error'] ?? 'Error'), (string) ($lang['std_unkown_action'] ?? 'Unknown action'));
+            return $this->legacyAbortResponse((string) (__('legacy/userhistory.std_history_error')), (string) (__('legacy/userhistory.std_unkown_action')));
         }
 
         return $this->legacyPage($request, 'userhistory', true, $data);
     }
 
     /**
-     * @return array<string, mixed>
-     */
-    private function langUserhistory(): array
-    {
-        $lang = trans('legacy/userhistory');
-
-        return is_array($lang) ? $lang : [];
-    }
-
-    /**
      * @param  array<int|string, mixed>  $posts
      * @param  array<int|string, string>  $editorNames
-     * @param  array<string, mixed>  $lang
      * @return list<array<string, mixed>>
      */
-    private function decorateHistoryPosts(array $posts, array $editorNames, int $viewerId, int $userid, array $lang): array
+    private function decorateHistoryPosts(array $posts, array $editorNames, int $viewerId, int $userid): array
     {
         $items = [];
         foreach ($posts as $arr) {
@@ -125,9 +111,9 @@ class InfoController extends LegacyController
             $editedBy = $arr['editedby'] ?? 0;
             if (Validators::isId($editedBy) && ! empty($editorNames[(int) $editedBy])) {
                 $body .= '<p><font size=1 class=small>'
-                    .(string) ($lang['text_last_edited'] ?? '')
+                    .(string) (__('legacy/userhistory.text_last_edited'))
                     .UserDisplay::username((int) $editedBy)
-                    .(string) ($lang['text_at'] ?? '')
+                    .(string) (__('legacy/userhistory.text_at'))
                     .(string) ($arr['editdate'] ?? '')
                     .'</font></p>\n';
             }

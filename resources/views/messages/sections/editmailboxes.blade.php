@@ -1,27 +1,27 @@
-<h1>{{ $lang['text_editing_mailboxes'] ?? 'Editing mailboxes' }}</h1>
+<h1>{{ __('legacy/messages.text_editing_mailboxes') }}</h1>
 <div>
-<div class="nx-colhead">{{ $lang['text_add_mailboxes'] ?? 'Add mailboxes' }}</div>
-<div>{{ $lang['text_extra_mailboxes_note'] ?? '' }}<br />
+<div class="nx-colhead">{{ __('legacy/messages.text_add_mailboxes') }}</div>
+<div>{{ __('legacy/messages.text_extra_mailboxes_note') }}<br />
 <form action="/messages" method="get">
 <input type="hidden" name="action" value="editmailboxes2">
 <input type="hidden" name="action2" value="add">
 <input type="text" name="new1" size="40" maxlength="14"><br />
 <input type="text" name="new2" size="40" maxlength="14"><br />
 <input type="text" name="new3" size="40" maxlength="14"><br />
-<input type="submit" value="{{ $lang['submit_add'] ?? 'Add' }}">
+<input type="submit" value="{{ __('legacy/messages.submit_add') }}">
 </form></div>
-<div class="nx-colhead">{{ $lang['text_edit_mailboxes'] ?? 'Edit mailboxes' }}</div>
-<div>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($lang['text_edit_mailboxes_note'] ?? ''))
+<div class="nx-colhead">{{ __('legacy/messages.text_edit_mailboxes') }}</div>
+<div>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/messages.text_edit_mailboxes_note')))
 <form action="/messages" method="get">
 <input type="hidden" name="action" value="editmailboxes2">
 <input type="hidden" name="action2" value="edit">
 @if (! $editmailboxes['hasBoxes'])
-<span align="center"><b>{{ $lang['text_no_mailboxes_to_edit'] ?? 'No mailboxes to edit' }}</b></span>
+<span align="center"><b>{{ __('legacy/messages.text_no_mailboxes_to_edit') }}</b></span>
 @else
 @foreach ($editmailboxes['boxes'] as $box)
 <input type="text" name="edit{{ $box['id'] }}" value="{{ $box['name'] }}" size="40" maxlength="14"><br />
 @endforeach
-<input type="submit" value={{ $lang['submit_edit'] ?? 'Edit' }}>
+<input type="submit" value={{ __('legacy/messages.submit_edit') }}>
 @endif
 </form></div>
 </div>

@@ -76,11 +76,10 @@ final class TorrentBookmark
     public static function stateMarkupWithContext(int|string $userId, int|string $torrentId, bool $text = false): string
     {
         $cache = app(LegacyRedisCache::class);
-        $lang = app(Language::class)->functions();
 
         return self::stateMarkup($cache, $userId, $torrentId, $text, [
-            'title_bookmark_torrent' => $lang['title_bookmark_torrent'] ?? '',
-            'title_delbookmark_torrent' => $lang['title_delbookmark_torrent'] ?? '',
+            'title_bookmark_torrent' => __('legacy/functions.title_bookmark_torrent'),
+            'title_delbookmark_torrent' => __('legacy/functions.title_delbookmark_torrent'),
         ]);
     }
 }

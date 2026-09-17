@@ -35,10 +35,9 @@ final class ForumComposeService
     /**
      * Build the compose-frame HTML for the requested type.
      *
-     * @param  array<string, mixed>  $lang
      * @return array{title: string, body: string}
      */
-    public function buildComposeFrame(int $id, string $type, array $lang): array
+    public function buildComposeFrame(int $id, string $type): array
     {
         $maxsubjectlength = (int) $this->globals->get('maxsubjectlength');
         $CURUSER = (array) ($this->currentUser->get() ?? []);
@@ -53,26 +52,26 @@ final class ForumComposeService
         switch ($type) {
             case 'new':
                 $forumname = $this->forumRepository->getForumName((int) $id) ?? '';
-                $title = ($lang['text_new_topic_in'] ?? '').' <a href="'.htmlspecialchars('?action=viewforum&forumid='.$id).'">'.htmlspecialchars($forumname).'</a> '.($lang['text_forum'] ?? '');
+                $title = (__('legacy/forums.text_new_topic_in')).' <a href="'.htmlspecialchars('?action=viewforum&forumid='.$id).'">'.htmlspecialchars($forumname).'</a> '.(__('legacy/forums.text_forum'));
                 $hassubject = true;
                 break;
 
             case 'reply':
                 $topicname = $this->topicRepository->getTopicSubject((int) $id) ?? '';
-                $title = ($lang['text_reply_to_topic'] ?? '').' <a href="'.htmlspecialchars('?action=viewtopic&topicid='.$id).'">'.htmlspecialchars($topicname).'</a> ';
+                $title = (__('legacy/forums.text_reply_to_topic')).' <a href="'.htmlspecialchars('?action=viewtopic&topicid='.$id).'">'.htmlspecialchars($topicname).'</a> ';
                 break;
 
             case 'quote':
                 $post = $this->postRepository->getPostForQuote((int) $id);
                 if (! $post) {
                     ob_get_clean();
-                    LegacyResponse::abort($lang['std_error'] ?? '', $lang['std_no_post_id'] ?? '');
+                    LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_no_post_id'));
 
                     return ['title' => '', 'body' => ''];
                 }
                 $topicid = $post['topicid'];
                 $topicname = $post['topic_subject'] ?? '';
-                $title = ($lang['text_reply_to_topic'] ?? '').' <a href="'.htmlspecialchars('?action=viewtopic&topicid='.$topicid).'">'.htmlspecialchars($topicname).'</a> ';
+                $title = (__('legacy/forums.text_reply_to_topic')).' <a href="'.htmlspecialchars('?action=viewtopic&topicid='.$topicid).'">'.htmlspecialchars($topicname).'</a> ';
                 $body = '[quote='.htmlspecialchars($post['username']).']'.htmlspecialchars(Input::unescape($post['body'])).'[/quote]';
                 echo '<input type="hidden" name="postid" value="'.$id.'" />';
                 $hiddenId = $topicid;
@@ -92,7 +91,7 @@ final class ForumComposeService
                     $hassubject = true;
                 }
                 $body = htmlspecialchars(Input::unescape($post['body']));
-                $title = $lang['text_edit_post'] ?? '';
+                $title = __('legacy/forums.text_edit_post');
                 break;
 
             default:
@@ -110,58 +109,54 @@ final class ForumComposeService
     }
 
     /**
-     * @param  array<string, mixed>  $lang
      * @return array{title: string, body: string}
      */
-    public function buildNewTopic(array $lang, Request $request): array
+    public function buildNewTopic(Request $request): array
     {
         $forumid = (int) (request()->query('forumid') ?? 0);
-        $this->checkWhetherExist($forumid, 'forum', $lang);
+        $this->checkWhetherExist($forumid, 'forum');
 
-        return $this->buildComposeFrame($forumid, 'new', $lang);
+        return $this->buildComposeFrame($forumid, 'new');
     }
 
     /**
-     * @param  array<string, mixed>  $lang
      * @param  array<string, mixed>  $curUser
      * @return array{title: string, body: string}
      */
-    public function buildQuotePost(array $lang, array $curUser, Request $request): array
+    public function buildQuotePost(array $curUser, Request $request): array
     {
         $postid = (int) (request()->query('postid') ?? 0);
-        $this->checkWhetherExist($postid, 'post', $lang);
+        $this->checkWhetherExist($postid, 'post');
         if (! Forum::canViewPost((int) ($curUser['id'] ?? 0), $postid)) {
             LegacyResponse::permissionDenied();
         }
 
-        return $this->buildComposeFrame($postid, 'quote', $lang);
+        return $this->buildComposeFrame($postid, 'quote');
     }
 
     /**
-     * @param  array<string, mixed>  $lang
      * @return array{title: string, body: string}
      */
-    public function buildReply(array $lang, Request $request): array
+    public function buildReply(Request $request): array
     {
         $topicid = (int) (request()->query('topicid') ?? 0);
-        $this->checkWhetherExist($topicid, 'topic', $lang);
+        $this->checkWhetherExist($topicid, 'topic');
 
-        return $this->buildComposeFrame($topicid, 'reply', $lang);
+        return $this->buildComposeFrame($topicid, 'reply');
     }
 
     /**
-     * @param  array<string, mixed>  $lang
      * @param  array<string, mixed>  $curUser
      * @return array{title: string, body: string}
      */
-    public function buildEditPost(array $lang, array $curUser, Request $request): array
+    public function buildEditPost(array $curUser, Request $request): array
     {
         $postid = (int) (request()->query('postid') ?? 0);
-        $this->checkWhetherExist($postid, 'post', $lang);
+        $this->checkWhetherExist($postid, 'post');
 
         $post = $this->postRepository->getPostWithTopic((int) $postid);
         if (! $post) {
-            LegacyResponse::abort($lang['std_error'] ?? '', $lang['std_no_post_id'] ?? '');
+            LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_no_post_id'));
 
             return ['title' => '', 'body' => ''];
         }
@@ -172,36 +167,33 @@ final class ForumComposeService
             LegacyResponse::permissionDenied();
         }
 
-        return $this->buildComposeFrame($postid, 'edit', $lang);
+        return $this->buildComposeFrame($postid, 'edit');
     }
 
-    /**
-     * @param  array<string, mixed>  $lang
-     */
-    public function checkWhetherExist(int $id, string $place, array $lang): void
+    public function checkWhetherExist(int $id, string $place): void
     {
         LegacyResponse::assertId($id, true);
         switch ($place) {
             case 'forum':
                 if (! $this->forumRepository->forumExists((int) $id)) {
-                    LegacyResponse::abort($lang['std_error'] ?? '', $lang['std_no_forum_id'] ?? '');
+                    LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_no_forum_id'));
                 }
                 break;
 
             case 'topic':
                 $forumid = $this->topicRepository->topicExists((int) $id);
                 if (! $forumid) {
-                    LegacyResponse::abort($lang['std_error'] ?? '', $lang['std_bad_topic_id'] ?? '');
+                    LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_bad_topic_id'));
                 }
-                $this->checkWhetherExist((int) $forumid, 'forum', $lang);
+                $this->checkWhetherExist((int) $forumid, 'forum');
                 break;
 
             case 'post':
                 $topicid = $this->postRepository->postExists((int) $id);
                 if (! $topicid) {
-                    LegacyResponse::abort($lang['std_error'] ?? '', $lang['std_no_post_id'] ?? '');
+                    LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_no_post_id'));
                 }
-                $this->checkWhetherExist((int) $topicid, 'topic', $lang);
+                $this->checkWhetherExist((int) $topicid, 'topic');
                 break;
         }
     }

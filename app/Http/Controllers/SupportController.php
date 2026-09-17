@@ -12,7 +12,6 @@ use App\Services\ComplainService;
 use App\Support\Captcha;
 use App\Support\CurrentUser;
 use App\Support\Html;
-use App\Support\Language;
 use App\Support\Network;
 use App\Support\Pagination;
 use App\Support\UserDisplay;
@@ -27,7 +26,6 @@ class SupportController extends LegacyController
     public function __construct(
         private readonly ComplainService $complainService,
         private readonly CurrentUser $currentUser,
-        private readonly Language $language,
     ) {}
 
     public function complains(Request $request): View|RedirectResponse|Response
@@ -35,18 +33,16 @@ class SupportController extends LegacyController
         $currentUser = (array) ($this->currentUser->get() ?? []);
         $uid = (int) ($currentUser['id'] ?? 0);
         $isAdmin = Permission::can(PermissionEnum::STAFF_MEMBER);
-        $langComplains = (array) trans('legacy/complains');
-        $langFunctions = $this->language->functions();
 
         if ($uid > 0 && ! $isAdmin) {
-            return $this->legacyAbortResponse($langComplains['std_error'] ?? 'Error', 'Permission denied.');
+            return $this->legacyAbortResponse(('Error'), 'Permission denied.');
         }
         if (! $isAdmin && ! Setting::getIsComplainEnabled()) {
-            return $this->legacyAbortResponse($langFunctions['std_error'] ?? 'Error', $langComplains['complain_not_enabled'] ?? 'Complains are not enabled.');
+            return $this->legacyAbortResponse(__('legacy/functions.std_error'), __('legacy/complains.complain_not_enabled'));
         }
 
         if ($request->isMethod('post')) {
-            return $this->handleComplainPost($request, $uid, $isAdmin, $langComplains, $langFunctions);
+            return $this->handleComplainPost($request, $uid, $isAdmin);
         }
 
         $action = filter_var((string) ($request->input('action') ?? ''), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
@@ -55,36 +51,28 @@ class SupportController extends LegacyController
         }
 
         return match ($action) {
-            'list' => $this->complainList($request, $isAdmin, $langComplains),
-            'view' => $this->complainView($request, $uid, $isAdmin, $langComplains, $langFunctions),
-            default => $this->complainCompose($request, $uid, $langComplains, $langFunctions),
+            'list' => $this->complainList($request, $isAdmin),
+            'view' => $this->complainView($request, $uid, $isAdmin),
+            default => $this->complainCompose($request, $uid),
         };
     }
 
-    /**
-     * @param  array<string, mixed>  $langComplains
-     * @param  array<string, mixed>  $langFunctions
-     */
-    private function handleComplainPost(Request $request, int $uid, bool $isAdmin, array $langComplains, array $langFunctions): RedirectResponse|Response
+    private function handleComplainPost(Request $request, int $uid, bool $isAdmin): RedirectResponse|Response
     {
         $action = filter_var((string) ($request->input('action') ?? ''), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 
         return match ($action) {
-            'new' => $this->complainNew($request, $langComplains, $langFunctions),
-            'reply' => $this->complainReply($request, $uid, $langComplains, $langFunctions),
-            'answered', 'unanswered' => $this->complainToggle($request, $isAdmin, $action, $langComplains),
-            default => $this->legacyAbortResponse($langFunctions['std_error'] ?? 'Error', 'Permission denied.'),
+            'new' => $this->complainNew($request),
+            'reply' => $this->complainReply($request, $uid),
+            'answered', 'unanswered' => $this->complainToggle($request, $isAdmin, $action),
+            default => $this->legacyAbortResponse(__('legacy/functions.std_error'), 'Permission denied.'),
         };
     }
 
-    /**
-     * @param  array<string, mixed>  $langComplains
-     * @param  array<string, mixed>  $langFunctions
-     */
-    private function complainNew(Request $request, array $langComplains, array $langFunctions): RedirectResponse|Response
+    private function complainNew(Request $request): RedirectResponse|Response
     {
         if ((int) ($this->currentUser->get()['id'] ?? 0) === 0) {
-            return $this->legacyAbortResponse($langFunctions['std_error'] ?? 'Error', 'Permission denied.');
+            return $this->legacyAbortResponse(__('legacy/functions.std_error'), 'Permission denied.');
         }
 
         if (! Captcha::checkCode(
@@ -94,55 +82,48 @@ class SupportController extends LegacyController
             false,
             true,
         )) {
-            return $this->legacyAbortResponse($langFunctions['std_error'] ?? 'Error', $langComplains['text_new_failure'] ?? 'Invalid captcha.');
+            return $this->legacyAbortResponse(__('legacy/functions.std_error'), __('legacy/complains.text_new_failure'));
         }
 
         $email = filter_var((string) ($request->input('email') ?? ''), FILTER_VALIDATE_EMAIL);
         $body = filter_var((string) ($request->input('body') ?? ''), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         if (empty($email) || empty($body)) {
-            return $this->legacyAbortResponse($langFunctions['std_error'] ?? 'Error', $langComplains['text_new_failure'] ?? 'Missing data.');
+            return $this->legacyAbortResponse(__('legacy/functions.std_error'), __('legacy/complains.text_new_failure'));
         }
 
         $uuid = $this->complainService->createComplain($email, $body, Network::clientIp());
         if ($uuid === null) {
-            return $this->legacyAbortResponse($langFunctions['std_error'] ?? 'Error', $langComplains['text_new_failure'] ?? 'Unable to process request.');
+            return $this->legacyAbortResponse(__('legacy/functions.std_error'), __('legacy/complains.text_new_failure'));
         }
 
         return redirect('/complains.php?action=view&id='.urlencode($uuid));
     }
 
-    /**
-     * @param  array<string, mixed>  $langComplains
-     * @param  array<string, mixed>  $langFunctions
-     */
-    private function complainReply(Request $request, int $uid, array $langComplains, array $langFunctions): RedirectResponse|Response
+    private function complainReply(Request $request, int $uid): RedirectResponse|Response
     {
         $id = (int) $request->input('id', 0);
         $body = filter_var((string) ($request->input('body') ?? ''), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         if ($id <= 0 || empty($body)) {
-            return $this->legacyAbortResponse($langFunctions['std_error'] ?? 'Error', $langComplains['text_new_failure'] ?? 'Missing data.');
+            return $this->legacyAbortResponse(__('legacy/functions.std_error'), __('legacy/complains.text_new_failure'));
         }
 
-        $ok = $this->complainService->replyToComplain($id, $uid, $body, Network::clientIp(), $langComplains);
+        $ok = $this->complainService->replyToComplain($id, $uid, $body, Network::clientIp());
         if (! $ok) {
-            return $this->legacyAbortResponse($langFunctions['std_error'] ?? 'Error', 'Complain not found.');
+            return $this->legacyAbortResponse(__('legacy/functions.std_error'), 'Complain not found.');
         }
 
         return redirect()->to($request->headers->get('referer') ?: '/complains.php');
     }
 
-    /**
-     * @param  array<string, mixed>  $langComplains
-     */
-    private function complainToggle(Request $request, bool $isAdmin, string $action, array $langComplains): RedirectResponse|Response
+    private function complainToggle(Request $request, bool $isAdmin, string $action): RedirectResponse|Response
     {
         if (! $isAdmin) {
-            return $this->legacyAbortResponse($langComplains['std_error'] ?? 'Error', 'Permission denied.');
+            return $this->legacyAbortResponse(('Error'), 'Permission denied.');
         }
 
         $id = (int) $request->input('id', 0);
         if ($id <= 0) {
-            return $this->legacyAbortResponse($langComplains['std_error'] ?? 'Error', 'Permission denied.');
+            return $this->legacyAbortResponse(('Error'), 'Permission denied.');
         }
 
         $this->complainService->toggleAnswered($id, $action === 'answered');
@@ -150,13 +131,10 @@ class SupportController extends LegacyController
         return redirect()->to($request->headers->get('referer') ?: '/complains.php');
     }
 
-    /**
-     * @param  array<string, mixed>  $langComplains
-     */
-    private function complainList(Request $request, bool $isAdmin, array $langComplains): View|RedirectResponse|Response
+    private function complainList(Request $request, bool $isAdmin): View|RedirectResponse|Response
     {
         if (! $isAdmin) {
-            return $this->legacyAbortResponse($langComplains['std_error'] ?? 'Error', 'Permission denied.');
+            return $this->legacyAbortResponse(('Error'), 'Permission denied.');
         }
 
         $pendingRows = [];
@@ -188,27 +166,22 @@ class SupportController extends LegacyController
             'pagertop' => $pagertop,
             'pagerbottom' => $pagerbottom,
             'page' => $request->input('page'),
-            'title' => $langComplains['text_complain'] ?? 'Complain',
-            'langComplains' => $langComplains,
+            'title' => __('legacy/complains.text_complain'),
             'isAdmin' => $isAdmin,
             'isLogin' => true,
         ]);
     }
 
-    /**
-     * @param  array<string, mixed>  $langComplains
-     * @param  array<string, mixed>  $langFunctions
-     */
-    private function complainView(Request $request, int $uid, bool $isAdmin, array $langComplains, array $langFunctions): View|RedirectResponse|Response
+    private function complainView(Request $request, int $uid, bool $isAdmin): View|RedirectResponse|Response
     {
         $uuid = filter_var((string) ($request->input('id') ?? ''), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         if (strlen($uuid) !== 36) {
-            return $this->legacyAbortResponse($langComplains['std_error'] ?? 'Error', 'Permission denied.');
+            return $this->legacyAbortResponse(('Error'), 'Permission denied.');
         }
 
         $complain = (array) DB::table('complains')->where('uuid', $uuid)->first();
         if (empty($complain)) {
-            return $this->legacyAbortResponse($langComplains['std_error'] ?? 'Error', 'Complain not found.');
+            return $this->legacyAbortResponse(('Error'), 'Complain not found.');
         }
 
         $user = User::query()->where('email', (string) ($complain['email'] ?? ''))->first(['id', 'username']);
@@ -227,7 +200,7 @@ class SupportController extends LegacyController
         }
 
         ob_start();
-        Html::quickReplyVoid('reply', 'body', $langComplains['text_reply'] ?? 'Reply');
+        Html::quickReplyVoid('reply', 'body', __('legacy/complains.text_reply'));
         $replyBoxHtml = (string) ob_get_clean();
 
         return $this->legacyPage($request, 'complains', false, [
@@ -238,20 +211,15 @@ class SupportController extends LegacyController
             'replyUserMap' => $replyUserMap,
             'isAdmin' => $isAdmin,
             'isLogin' => $uid > 0,
-            'title' => $langComplains['text_complain'] ?? 'Complain',
-            'langComplains' => $langComplains,
+            'title' => __('legacy/complains.text_complain'),
             'replyBoxHtml' => $replyBoxHtml,
         ]);
     }
 
-    /**
-     * @param  array<string, mixed>  $langComplains
-     * @param  array<string, mixed>  $langFunctions
-     */
-    private function complainCompose(Request $request, int $uid, array $langComplains, array $langFunctions): View|RedirectResponse|Response
+    private function complainCompose(Request $request, int $uid): View|RedirectResponse|Response
     {
         if ($uid <= 0) {
-            return $this->legacyAbortResponse($langFunctions['std_error'] ?? 'Error', 'Permission denied.');
+            return $this->legacyAbortResponse(__('legacy/functions.std_error'), 'Permission denied.');
         }
 
         ob_start();
@@ -260,8 +228,7 @@ class SupportController extends LegacyController
 
         return $this->legacyPage($request, 'complains', false, [
             'mode' => 'compose',
-            'title' => $langComplains['text_complain'] ?? 'Complain',
-            'langComplains' => $langComplains,
+            'title' => __('legacy/complains.text_complain'),
             'captchaHtml' => $captchaHtml,
         ]);
     }

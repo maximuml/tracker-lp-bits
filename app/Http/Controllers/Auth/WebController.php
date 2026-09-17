@@ -58,8 +58,6 @@ class WebController extends Controller
         $returnto = (string) $request->query('returnto', '');
         $nowarn = $request->has('nowarn');
 
-        $langFunctions = $this->langFunctions($langFolder);
-
         $captchaEnabled = $this->authService->isCaptchaEnabled();
         $captchaMarkup = '';
         if ($captchaEnabled) {
@@ -70,8 +68,8 @@ class WebController extends Controller
 
             $captchaMarkup = $driver->render([
                 'labels' => [
-                    'image' => $langFunctions[$imageLabelKey] ?? $langFunctions['row_security_image'] ?? 'Security Image',
-                    'code' => $langFunctions['row_security_code'] ?? 'Security Code',
+                    'image' => __('legacy/functions.'.$imageLabelKey),
+                    'code' => __('legacy/functions.row_security_code'),
                 ],
                 'secret' => $secret,
                 'layout' => 'grid',
@@ -79,8 +77,6 @@ class WebController extends Controller
         }
 
         return view('auth.login', [
-            'lang' => $this->langLogin($langFolder),
-            'langFunctions' => $langFunctions,
             'languages' => Locale::languageList('site_lang', true),
             'langFolder' => $langFolder,
             'secret' => $secret,
@@ -144,22 +140,6 @@ class WebController extends Controller
         }
 
         return Locale::folderFromCookie($folder);
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    private function langLogin(string $langFolder): array
-    {
-        return (array) trans('legacy/login');
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    private function langFunctions(string $langFolder): array
-    {
-        return (array) trans('legacy/functions');
     }
 
     private function renderPasskeyLogin(): string

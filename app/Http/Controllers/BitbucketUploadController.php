@@ -40,10 +40,8 @@ class BitbucketUploadController extends Controller
         $currentUser = $this->currentUser->get() ?? $user->toLegacyArray();
         $this->currentUser->set($currentUser);
 
-        $lang = $this->loadLang();
-
         if ($currentUser['parked']) {
-            LegacyResponse::abort($lang['std_sorry'] ?? '', $lang['std_unauthorized_to_upload'] ?? '', false);
+            LegacyResponse::abort((''), (''), false);
         }
 
         if ($this->globals->get('enablebitbucket_main', 'no') !== 'yes') {
@@ -51,8 +49,7 @@ class BitbucketUploadController extends Controller
         }
 
         return view('bitbucket.upload', [
-            'pageTitle' => $lang['head_avatar_upload'] ?? '',
-            'lang' => $lang,
+            'pageTitle' => __('legacy/bitbucketupload.head_avatar_upload'),
             'maxFileSize' => 256 * 1024,
             'scaleHeight' => 200,
             'scaleWidth' => 150,
@@ -73,10 +70,8 @@ class BitbucketUploadController extends Controller
         $currentUser = $this->currentUser->get() ?? $user->toLegacyArray();
         $this->currentUser->set($currentUser);
 
-        $lang = $this->loadLang();
-
         if ($currentUser['parked']) {
-            LegacyResponse::abort($lang['std_sorry'] ?? '', $lang['std_unauthorized_to_upload'] ?? '', false);
+            LegacyResponse::abort((''), (''), false);
         }
 
         if ($this->globals->get('enablebitbucket_main', 'no') !== 'yes') {
@@ -86,19 +81,19 @@ class BitbucketUploadController extends Controller
         /** @var UploadedFile|null $file */
         $file = $request->file('file');
         if (! $file instanceof UploadedFile || ! $file->isValid()) {
-            LegacyResponse::abort($lang['std_upload_failed'] ?? '', $lang['std_nothing_received'] ?? '', false);
+            LegacyResponse::abort(__('legacy/bitbucketupload.std_upload_failed'), __('legacy/bitbucketupload.std_nothing_received'), false);
         }
         if (! $file instanceof UploadedFile) {
             throw new LogicException('Expected uploaded file.');
         }
 
         if ($file->getSize() > 256 * 1024) {
-            LegacyResponse::abort($lang['std_upload_failed'] ?? '', $lang['std_file_too_large'] ?? '', false);
+            LegacyResponse::abort(__('legacy/bitbucketupload.std_upload_failed'), __('legacy/bitbucketupload.std_file_too_large'), false);
         }
 
         $allowedMimes = ['image/gif', 'image/jpeg', 'image/png'];
         if (! in_array($file->getMimeType(), $allowedMimes, true)) {
-            LegacyResponse::abort($lang['std_error'] ?? '', $lang['std_invalid_image_format'] ?? '', false);
+            LegacyResponse::abort(__('legacy/bitbucketupload.std_error'), __('legacy/bitbucketupload.std_invalid_image_format'), false);
         }
 
         $isPublic = $request->input('public') === 'yes';
@@ -109,23 +104,23 @@ class BitbucketUploadController extends Controller
             $message = $e->getMessage();
             // Map known errors back to lang strings where possible
             if (str_starts_with($message, 'Bad file name')) {
-                LegacyResponse::abort($lang['std_upload_failed'] ?? '', $lang['std_bad_file_name'] ?? '', false);
+                LegacyResponse::abort(__('legacy/bitbucketupload.std_upload_failed'), __('legacy/bitbucketupload.std_bad_file_name'), false);
             }
             if (str_starts_with($message, 'File already exists')) {
                 $filename = $file->getClientOriginalName();
                 LegacyResponse::abort(
-                    $lang['std_upload_failed'] ?? '',
-                    ($lang['std_file_already_exists'] ?? '').htmlspecialchars($filename).($lang['std_already_exists'] ?? ''),
+                    __('legacy/bitbucketupload.std_upload_failed'),
+                    (('')).htmlspecialchars($filename).(__('legacy/bitbucketupload.std_already_exists')),
                     false,
                 );
             }
             if (str_starts_with($message, 'Invalid image format')) {
-                LegacyResponse::abort($lang['std_error'] ?? '', $lang['std_invalid_image_format'] ?? '', false);
+                LegacyResponse::abort(__('legacy/bitbucketupload.std_error'), __('legacy/bitbucketupload.std_invalid_image_format'), false);
             }
             if (str_starts_with($message, 'Image processing failed') || str_starts_with($message, 'Thumbnail creation failed')) {
                 LegacyResponse::abort(
-                    $lang['std_image_processing_failed'] ?? '',
-                    ($lang['std_sorry_the_uploaded'] ?? '').($lang['std_failed_processing'] ?? ''),
+                    __('legacy/bitbucketupload.std_image_processing_failed'),
+                    (__('legacy/bitbucketupload.std_sorry_the_uploaded')).(__('legacy/bitbucketupload.std_failed_processing')),
                     false,
                 );
             }
@@ -139,16 +134,6 @@ class BitbucketUploadController extends Controller
             'height' => $result['height'],
             'newwidth' => $result['newwidth'],
             'newheight' => $result['newheight'],
-            'lang' => $lang,
         ]);
-    }
-
-    /** @return array<string, string> */
-    private function loadLang(): array
-    {
-        $lang = (array) trans('legacy/bitbucketupload');
-        $this->globals->set('lang_bitbucketupload', $lang);
-
-        return $lang;
     }
 }

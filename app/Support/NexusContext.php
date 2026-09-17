@@ -23,12 +23,6 @@ final class NexusContext
     /** @var array<string, mixed>|null */
     public ?array $user = null;
 
-    /** @var array<string, string> */
-    public array $langFunctions = [];
-
-    /** @var array<string, string> */
-    public array $langShoutbox = [];
-
     public ?LegacyRedisCache $cache = null;
 
     public string $bonusTweak = '';
@@ -155,32 +149,6 @@ final class NexusContext
     public function addUserUpdate(string $key, mixed $value): void
     {
         $this->userUpdateSet[$key] = $value;
-    }
-
-    /** @param array<string, string> $lang */
-    public function setLangFunctions(array $lang): void
-    {
-        $this->langFunctions = $lang;
-        $this->globals['lang_functions'] = $lang;
-    }
-
-    /** @return array<string, string> */
-    public function getLangFunctions(): array
-    {
-        return $this->langFunctions;
-    }
-
-    /** @param array<string, string> $lang */
-    public function setLangShoutbox(array $lang): void
-    {
-        $this->langShoutbox = $lang;
-        $this->globals['lang_shoutbox'] = $lang;
-    }
-
-    /** @return array<string, string> */
-    public function getLangShoutbox(): array
-    {
-        return $this->langShoutbox;
     }
 
     public function setCache(?LegacyRedisCache $cache): void

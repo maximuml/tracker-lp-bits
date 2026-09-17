@@ -177,7 +177,7 @@ final class UtilityControllerTest extends TestCase
         View::shouldReceive('make')->once()->with(
             'tags.index',
             Mockery::on(fn (array $data): bool => ($data['test'] ?? null) === 'abc'
-                && isset($data['tagItems'], $data['siteName'], $data['lang_tags'])),
+                && isset($data['tagItems'], $data['siteName'])),
         )->andReturn($this->fakeView());
 
         $controller = app(UtilityController::class);

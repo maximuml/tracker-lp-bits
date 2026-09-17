@@ -26,9 +26,9 @@
             @if ($row->coverSrc !== null)
             <div class="nx-embedded nxm-cover"><img src="pic/misc/spinner.svg" data-src="{{ $row->coverSrc }}" class="nexus-lazy-load nxm-cover__img" alt="" /></div>
             @endif
-            <div class="nx-embedded nxm-namecell">@for ($i = 0; $i < $row->stickyCount; $i++)<img class="sticky" src="pic/trans.gif" alt="Sticky" title="{{ $row->stickyTitle }}" />&nbsp;@endfor<a title="{{ $row->nameTitle }}" href="{{ $row->nameUrl }}"><b>{{ $row->displayName }}</b></a>@if ($row->isNew) <b>(<font class="new">{{ $listVm->lang['text_new_uppercase'] }}</font>)</b>@endif @if ($row->isBanned)<b>(<font class="striking">{{ $listVm->lang['text_banned'] }}</font>)</b>@endif{{ $row->badges }}@if ($row->tags->toHtml() !== '')<br />{{ $row->tags }}@endif{{ $row->progressBar }}</div>
+            <div class="nx-embedded nxm-namecell">@for ($i = 0; $i < $row->stickyCount; $i++)<img class="sticky" src="pic/trans.gif" alt="Sticky" title="{{ $row->stickyTitle }}" />&nbsp;@endfor<a title="{{ $row->nameTitle }}" href="{{ $row->nameUrl }}"><b>{{ $row->displayName }}</b></a>@if ($row->isNew) <b>(<font class="new">{{ __('legacy/functions.text_new_uppercase') }}</font>)</b>@endif @if ($row->isBanned)<b>(<font class="striking">{{ __('legacy/functions.text_banned') }}</font>)</b>@endif{{ $row->badges }}@if ($row->tags->toHtml() !== '')<br />{{ $row->tags }}@endif{{ $row->progressBar }}</div>
             <div class="nx-embedded nxm-rowactions">
-                @if ($row->showDownload)<a href="{{ $row->downloadUrl }}"><img class="download" src="pic/trans.gif" alt="download" title="{{ $listVm->lang['title_download_torrent'] }}" /></a>@endif
+                @if ($row->showDownload)<a href="{{ $row->downloadUrl }}"><img class="download" src="pic/trans.gif" alt="download" title="{{ __('legacy/functions.title_download_torrent') }}" /></a>@endif
                 @if ($row->showDownload && $row->showBookmark)<br />@endif
                 @if ($row->showBookmark)<a id="{{ $row->bookmarkElementId }}" href="#" data-bookmark-torrent="{{ $row->id }}" data-bookmark-counter="{{ $row->bookmarkCounter }}">{{ $row->bookmarkMarkup }}</a>@endif
             </div>
@@ -40,7 +40,7 @@
     @if ($listVm->showComments)
     <td class="rowfollow">
         @if ($row->comments === 0)
-            <a href="comment.php?action=add&amp;pid={{ $row->id }}&amp;type=torrent" title="{{ $listVm->lang['title_add_comments'] }}">0</a>
+            <a href="comment.php?action=add&amp;pid={{ $row->id }}&amp;type=torrent" title="{{ __('legacy/functions.title_add_comments') }}">0</a>
         @else
             <b><a href="{{ $row->commentsUrl }}"@if ($row->lastCommentTooltipId) data-domtt-src="{{ $row->lastCommentTooltipId }}"@endif>@if ($row->commentIsNew)<font class="new">@endif{{ $row->comments }}@if ($row->commentIsNew)</font>@endif</a></b>
         @endif
@@ -59,21 +59,21 @@
     <td class="rowfollow">@if ($row->snatchedUrl)<a href="{{ $row->snatchedUrl }}"><b>{{ number_format($row->snatched) }}</b></a>@else{{ number_format($row->snatched) }}@endif</td>
     <td class="rowfollow" align="center">
         @if ($row->uploaderAnonymous)
-            <i>{{ $listVm->lang['text_anonymous'] }}</i>@if ($row->uploaderShowOwner)<br />@if ($row->uploaderName)({{ $row->uploaderName }})@else(<i>{{ $listVm->lang['text_orphaned'] }}</i>)@endif @endif
+            <i>{{ __('legacy/functions.text_anonymous') }}</i>@if ($row->uploaderShowOwner)<br />@if ($row->uploaderName)({{ $row->uploaderName }})@else(<i>{{ __('legacy/functions.text_orphaned') }}</i>)@endif @endif
         @elseif ($row->uploaderName)
             {{ $row->uploaderName }}
         @else
-            <i>{{ $listVm->lang['text_orphaned'] }}</i>
+            <i>{{ __('legacy/functions.text_orphaned') }}</i>
         @endif
     </td>
     @if ($row->staffEditUrl !== null)
-    <td class="rowfollow">@if ($row->staffDeleteUrl !== null)<a href="{{ $row->staffDeleteUrl }}"><img class="staff_delete" src="pic/trans.gif" alt="D" title="{{ $listVm->lang['text_delete'] }}" /></a><br />@endif<a href="{{ $row->staffEditUrl }}"><img class="staff_edit" src="pic/trans.gif" alt="E" title="{{ $listVm->lang['text_edit'] }}" /></a></td>
+    <td class="rowfollow">@if ($row->staffDeleteUrl !== null)<a href="{{ $row->staffDeleteUrl }}"><img class="staff_delete" src="pic/trans.gif" alt="D" title="{{ __('legacy/functions.text_delete') }}" /></a><br />@endif<a href="{{ $row->staffEditUrl }}"><img class="staff_edit" src="pic/trans.gif" alt="E" title="{{ __('legacy/functions.text_edit') }}" /></a></td>
     @endif
 </tr>
 @endforeach
 </tbody>
 </table>
 @if ($listVm->showPromotionNote)
-<p class="nxm-note" align="center">{{ $listVm->lang['text_promoted_torrents_note'] }}</p>
+<p class="nxm-note" align="center">{{ __('legacy/functions.text_promoted_torrents_note') }}</p>
 @endif
 {{ $listVm->lastCommentTooltips }}

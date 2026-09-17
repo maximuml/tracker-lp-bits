@@ -1,6 +1,6 @@
 {{-- Modern torrents search panel (Variant A, ADR 0014). Replaces SearchBox::buildCategoryTable — data arrives in $panelVm. --}}
 <form method="get" name="searchbox" action="?" class="nxm-searchpanel">
-	<div class="nxm-searchpanel__toggle"><a href="#" data-klappe="searchboxmain"><img class="plus" src="pic/trans.gif" id="picsearchboxmain" alt="Show/Hide" />{{ $lang_torrents['text_search_box'] ?? '' }}</a></div>
+	<div class="nxm-searchpanel__toggle"><a href="#" data-klappe="searchboxmain"><img class="plus" src="pic/trans.gif" id="picsearchboxmain" alt="Show/Hide" />{{ __('legacy/torrents.text_search_box')}}</a></div>
 	<div id="ksearchboxmain" class="nx-hidden nxm-searchpanel__body">
 		<fieldset class="nxm-fieldset">
 			<legend>{{ $panelVm->categoryLabel }}</legend>
@@ -35,35 +35,35 @@
 
 		<div class="nxm-filters">
 			<div class="nxm-field">
-				<label for="f-incldead">{{ $lang_torrents['text_show_dead_active'] ?? '' }}</label>
+				<label for="f-incldead">{{ __('legacy/torrents.text_show_dead_active')}}</label>
 				<select class="med" id="f-incldead" name="incldead">
-					<option value="0">{{ $lang_torrents['select_including_dead'] ?? '' }}</option>
-					<option value="1"@if ($include_dead == 1) selected="selected"@endif>{{ $lang_torrents['select_active'] ?? '' }}</option>
-					<option value="2"@if ($include_dead == 2) selected="selected"@endif>{{ $lang_torrents['select_dead'] ?? '' }}</option>
+					<option value="0">{{ __('legacy/torrents.select_including_dead')}}</option>
+					<option value="1"@if ($include_dead == 1) selected="selected"@endif>{{ __('legacy/torrents.select_active')}}</option>
+					<option value="2"@if ($include_dead == 2) selected="selected"@endif>{{ __('legacy/torrents.select_dead')}}</option>
 				</select>
 			</div>
 			<div class="nxm-field">
-				<label for="f-spstate">{{ $lang_torrents['text_show_special_torrents'] ?? '' }}</label>
+				<label for="f-spstate">{{ __('legacy/torrents.text_show_special_torrents')}}</label>
 				<select class="med" id="f-spstate" name="spstate">
-					<option value="0">{{ $lang_torrents['select_all'] ?? '' }}</option>
+					<option value="0">{{ __('legacy/torrents.select_all')}}</option>
 					@foreach ($panelVm->promotionOptions as $pId => $pLabel)
 					<option value="{{ $pId }}"@if ((int) $special_state === $pId) selected="selected"@endif>{{ $pLabel }}</option>
 					@endforeach
 				</select>
 			</div>
 			<div class="nxm-field">
-				<label for="f-inclbookmarked">{{ $lang_torrents['text_show_bookmarked'] ?? '' }}</label>
+				<label for="f-inclbookmarked">{{ __('legacy/torrents.text_show_bookmarked')}}</label>
 				<select class="med" id="f-inclbookmarked" name="inclbookmarked">
-					<option value="0">{{ $lang_torrents['select_all'] ?? '' }}</option>
-					<option value="1"@if ($inclbookmarked == 1) selected="selected"@endif>{{ $lang_torrents['select_bookmarked'] ?? '' }}</option>
-					<option value="2"@if ($inclbookmarked == 2) selected="selected"@endif>{{ $lang_torrents['select_bookmarked_exclude'] ?? '' }}</option>
+					<option value="0">{{ __('legacy/torrents.select_all')}}</option>
+					<option value="1"@if ($inclbookmarked == 1) selected="selected"@endif>{{ __('legacy/torrents.select_bookmarked')}}</option>
+					<option value="2"@if ($inclbookmarked == 2) selected="selected"@endif>{{ __('legacy/torrents.select_bookmarked_exclude')}}</option>
 				</select>
 			</div>
 			@if ($showApprovalStatusFilter)
 			<div class="nxm-field">
-				<label for="f-approval">{{ $lang_torrents['text_approval_status'] ?? '' }}</label>
+				<label for="f-approval">{{ __('legacy/torrents.text_approval_status')}}</label>
 				<select class="med" id="f-approval" name="approval_status">
-					<option value="">{{ $lang_torrents['select_all'] ?? '' }}</option>
+					<option value="">{{ __('legacy/torrents.select_all')}}</option>
 					@foreach (\App\Models\Torrent::listApprovalStatus(true) as $key => $value)
 						<option value="{{ $key }}"@if (isset($approvalStatus) && (string) $approvalStatus === (string) $key) selected="selected"@endif>{{ $value }}</option>
 					@endforeach
@@ -71,44 +71,44 @@
 			</div>
 			@endif
 			<div class="nxm-field">
-				<label>{{ $lang_torrents['size_range'] ?? '' }}</label>
+				<label>{{ __('legacy/torrents.size_range')}}</label>
 				<span class="nxm-range"><input type="number" min="1" name="size_begin" style="width: {{ $filterInputWidth }}px" value="{{ $filterInput['size_begin'] ?? '' }}"/> ~ <input type="number" min="1" name="size_end" style="width: {{ $filterInputWidth }}px" value="{{ $filterInput['size_end'] ?? '' }}"/></span>
 			</div>
 			<div class="nxm-field">
-				<label>{{ $lang_torrents['seeders_range'] ?? '' }}</label>
+				<label>{{ __('legacy/torrents.seeders_range')}}</label>
 				<span class="nxm-range"><input type="number" min="1" name="seeders_begin" style="width: {{ $filterInputWidth }}px" value="{{ $filterInput['seeders_begin'] ?? '' }}"/> ~ <input type="number" min="1" name="seeders_end" style="width: {{ $filterInputWidth }}px" value="{{ $filterInput['seeders_end'] ?? '' }}"/></span>
 			</div>
 			<div class="nxm-field">
-				<label>{{ $lang_torrents['leechers_range'] ?? '' }}</label>
+				<label>{{ __('legacy/torrents.leechers_range')}}</label>
 				<span class="nxm-range"><input type="number" min="1" name="leechers_begin" style="width: {{ $filterInputWidth }}px" value="{{ $filterInput['leechers_begin'] ?? '' }}"/> ~ <input type="number" min="1" name="leechers_end" style="width: {{ $filterInputWidth }}px" value="{{ $filterInput['leechers_end'] ?? '' }}"/></span>
 			</div>
 			<div class="nxm-field">
-				<label>{{ $lang_torrents['times_completed_range'] ?? '' }}</label>
+				<label>{{ __('legacy/torrents.times_completed_range')}}</label>
 				<span class="nxm-range"><input type="number" min="1" name="times_completed_begin" style="width: {{ $filterInputWidth }}px" value="{{ $filterInput['times_completed_begin'] ?? '' }}"/> ~ <input type="number" min="1" name="times_completed_end" style="width: {{ $filterInputWidth }}px" value="{{ $filterInput['times_completed_end'] ?? '' }}"/></span>
 			</div>
 			<div class="nxm-field">
-				<label>{{ $lang_torrents['added_range'] ?? '' }}</label>
+				<label>{{ __('legacy/torrents.added_range')}}</label>
 				<span class="nxm-range"><x-datetime-input name="added_begin" :value="$filterInput['added_begin'] ?? ''" :style="'width: '.$filterInputWidth.'px'" /> ~ <x-datetime-input name="added_end" :value="$filterInput['added_end'] ?? ''" :style="'width: '.$filterInputWidth.'px'" /></span>
 			</div>
 		</div>
 
 		<div class="nxm-searchline">
-			<label for="searchinput">{{ $lang_torrents['text_search'] ?? '' }}</label>
+			<label for="searchinput">{{ __('legacy/torrents.text_search')}}</label>
 			<input id="searchinput" name="search" type="text" value="{{ $searchstr_ori }}" autocomplete="off" />
 			<script src="js/meili_autocomplete.js" type="text/javascript"></script>
-			<span>{{ $lang_torrents['text_in'] ?? '' }}</span>
+			<span>{{ __('legacy/torrents.text_in')}}</span>
 			<select name="search_area">
-				<option value="0">{{ $lang_torrents['select_title'] ?? '' }}</option>
-				<option value="1"@if (($filterInput['search_area'] ?? null) == 1) selected="selected"@endif>{{ $lang_torrents['select_description'] ?? '' }}</option>
-				<option value="3"@if (($filterInput['search_area'] ?? null) == 3) selected="selected"@endif>{{ $lang_torrents['select_uploader'] ?? '' }}</option>
+				<option value="0">{{ __('legacy/torrents.select_title')}}</option>
+				<option value="1"@if (($filterInput['search_area'] ?? null) == 1) selected="selected"@endif>{{ __('legacy/torrents.select_description')}}</option>
+				<option value="3"@if (($filterInput['search_area'] ?? null) == 3) selected="selected"@endif>{{ __('legacy/torrents.select_uploader')}}</option>
 			</select>
-			<span>{{ $lang_torrents['text_with'] ?? '' }}</span>
+			<span>{{ __('legacy/torrents.text_with')}}</span>
 			<select name="search_mode">
 				@foreach ($panelVm->searchModes as $mKey => $mLabel)
 				<option value="{{ $mKey }}"@if ((string) ($filterInput['search_mode'] ?? \App\Models\SearchBox::getDefaultSearchMode()) === (string) $mKey) selected="selected"@endif>{{ $mLabel }}</option>
 				@endforeach
 			</select>
-			<span>{{ $lang_torrents['text_mode'] ?? '' }}</span>
+			<span>{{ __('legacy/torrents.text_mode')}}</span>
 		</div>
 		@if ($panelVm->hotSearches !== [])
 		<div class="nxm-hotsearches">
@@ -124,6 +124,6 @@
 			@endforeach
 		</div>
 		@endif
-		<div class="nxm-searchpanel__submit"><input type="submit" class="btn" value="{{ $lang_torrents['submit_go'] ?? '' }}" /></div>
+		<div class="nxm-searchpanel__submit"><input type="submit" class="btn" value="{{ __('legacy/torrents.submit_go')}}" /></div>
 	</div>
 </form>

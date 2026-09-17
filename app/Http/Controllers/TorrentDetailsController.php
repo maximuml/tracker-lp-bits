@@ -122,13 +122,9 @@ class TorrentDetailsController extends Controller
         $currentUser = $this->currentUser->get() ?? $user->toLegacyArray();
         $this->currentUser->set($currentUser);
 
-        $this->globals->set('lang_functions', (array) trans('legacy/functions'));
-        $this->globals->set('lang_details', (array) trans('legacy/details'));
-
-        $langDetails = (array) trans('legacy/details');
         $headTitle = empty($request->input('cmtpage'))
-            ? ($langDetails['head_details_for_torrent'] ?? '').'"'.$row['name'].'"'
-            : ($langDetails['head_comments_for_torrent'] ?? '').'"'.$row['name'].'"';
+            ? (__('legacy/details.head_details_for_torrent')).'"'.$row['name'].'"'
+            : (__('legacy/details.head_comments_for_torrent')).'"'.$row['name'].'"';
 
         $denyLog = $row['approval_status'] == TorrentApprovalStatus::DENY->value
             ? $this->torrentDetailRepository->getLatestApprovalDenyLog($id)
@@ -183,16 +179,13 @@ class TorrentDetailsController extends Controller
      */
     private function buildDetailsViewData(int $id, array $row, array $currentUser, User $user, ?TorrentOperationLog $denyLog, bool $hasBuy, array $tagIds, array $requestFlags): array
     {
-        $langFunctions = (array) trans('legacy/functions');
-        $langDetails = (array) trans('legacy/details');
-
         $torrentRep = $this->torrentRepository;
         $searchBoxRep = $this->searchBoxSchemaBuilder;
         $tagRep = $this->tagRepository;
         $customField = new CustomField;
 
         $bannedTorrent = ($row['banned'] ?? 0) == 1
-            ? ' <b>(<font class="striking">'.($langFunctions['text_banned'] ?? '').'</font>)</b>'
+            ? ' <b>(<font class="striking">'.(__('legacy/functions.text_banned')).'</font>)</b>'
             : '';
 
         $spTorrent = Promotion::appendWithContext(
@@ -222,14 +215,14 @@ class TorrentDetailsController extends Controller
         $isOwner = (int) $currentUser['id'] === (int) ($row['owner'] ?? 0);
         if (($row['anonymous'] ?? 0) == 1) {
             if (! $canViewAnonymous && ! $isOwner) {
-                $uprow = '<i>'.($langDetails['text_anonymous'] ?? '').'</i>';
+                $uprow = '<i>'.(__('legacy/details.text_anonymous')).'</i>';
             } else {
-                $uprow = '<i>'.($langDetails['text_anonymous'] ?? '').'</i> ('.UserDisplay::username((int) ($row['owner'] ?? 0), false, true, true, false, false, true).')';
+                $uprow = '<i>'.(__('legacy/details.text_anonymous')).'</i> ('.UserDisplay::username((int) ($row['owner'] ?? 0), false, true, true, false, false, true).')';
             }
         } else {
             $uprow = isset($row['owner'])
                 ? UserDisplay::username((int) $row['owner'], false, true, true, false, false, true)
-                : '<i>'.($langDetails['text_unknown'] ?? '').'</i>';
+                : '<i>'.(('')).'</i>';
         }
 
         $bookmarkMarkup = TorrentBookmark::stateMarkupWithContext((int) $currentUser['id'], $id, false);
@@ -277,8 +270,8 @@ class TorrentDetailsController extends Controller
         $downloadAllowed = $isOwner || ! LegacyYesNo::isNo($currentUser['downloadpos'] ?? null);
 
         $uploadTime = ($currentUser['timetype'] ?? '') !== 'timealive'
-            ? ($langDetails['text_at'] ?? '').$row['added']
-            : ($langDetails['text_blank'] ?? '').Time::format((string) $row['added'], true, false);
+            ? (__('legacy/details.text_at')).$row['added']
+            : (__('legacy/details.text_blank')).Time::format((string) $row['added'], true, false);
 
         $denyBannerHtml = '';
         if (($row['approval_status'] ?? null) == TorrentApprovalStatus::DENY->value && $denyLog !== null) {
@@ -294,14 +287,14 @@ class TorrentDetailsController extends Controller
         if ($downloadAllowed) {
             if ($row['price'] > 0) {
                 $downloadBtn = $hasBuy
-                    ? $langDetails['text_download_bought_torrent']
-                    : sprintf($langDetails['text_download_paid_torrent'], number_format((float) $row['price']));
+                    ? __('legacy/details.text_download_bought_torrent')
+                    : sprintf(__('legacy/details.text_download_paid_torrent'), number_format((float) $row['price']));
             } else {
-                $downloadBtn = $langDetails['text_download_torrent'];
+                $downloadBtn = __('legacy/details.text_download_torrent');
             }
             $actions[] = sprintf(
                 '<a title="%s" href="download.php?id=%s"><img class="dt_download" src="pic/trans.gif" alt="download" />&nbsp;<b><font class="small">%s</font></b></a>',
-                $langDetails['title_download_torrent'],
+                __('legacy/details.title_download_torrent'),
                 $id,
                 $downloadBtn
             );
@@ -309,19 +302,19 @@ class TorrentDetailsController extends Controller
         if ($owned) {
             $actions[] = sprintf(
                 '<a title="%s" href="%s"><img class="dt_edit" src="pic/trans.gif" alt="edit" />&nbsp;<b><font class="small">%s</font></b></a>',
-                $langDetails['title_edit_torrent'],
+                __('legacy/details.title_edit_torrent'),
                 $editUrl,
                 Permission::can(PermissionEnum::TORRENT_MANAGE)
-                    ? $langDetails['text_edit_and_delete_torrent']
-                    : $langDetails['text_edit_torrent']
+                    ? __('legacy/details.text_edit_and_delete_torrent')
+                    : __('legacy/details.text_edit_torrent')
             );
         }
         if (Permission::can(PermissionEnum::ASK_RESEED) && (int) $row['seeders'] === 0) {
             $actions[] = sprintf(
                 '<a title="%s" href="takereseed.php?reseedid=%s"><img class="dt_reseed" src="pic/trans.gif" alt="reseed">&nbsp;<b><font class="small">%s</font></b></a>',
-                $langDetails['title_ask_for_reseed'],
+                __('legacy/details.title_ask_for_reseed'),
                 $id,
-                $langDetails['text_ask_for_reseed']
+                __('legacy/details.text_ask_for_reseed')
             );
         }
         if (
@@ -333,7 +326,7 @@ class TorrentDetailsController extends Controller
                 '<a href="#"><b><font id="approval" class="small approval" data-torrent_id="%s">%s&nbsp;%s</font></b></a>',
                 $row['id'],
                 $approvalIcon,
-                $langDetails['action_approval']
+                __('legacy/details.action_approval')
             );
             $approvalTitle = Locale::trans('torrent.approval.modal_title', [], null);
             AssetAppender::js(sprintf(<<<'JS'
@@ -350,9 +343,9 @@ JS, \json_encode($approvalTitle)), 'footer', false);
         }
         $actions[] = sprintf(
             '<a title="%s" href="report.php?torrent=%s"><img class="dt_report" src="pic/trans.gif" alt="report" />&nbsp;<b><font class="small">%s</font></b></a>',
-            $langDetails['title_report_torrent'],
+            __('legacy/details.title_report_torrent'),
             $id,
-            $langDetails['text_report_torrent']
+            __('legacy/details.text_report_torrent')
         );
         $actionsHtml = implode('&nbsp;|&nbsp;', $actions);
 
@@ -360,13 +353,13 @@ JS, \json_encode($approvalTitle)), 'footer', false);
         if (($row['type'] ?? '') === 'multi') {
             $filesInfo = sprintf(
                 '<b>%s</b>%s%s<br /><span id="showfl"><a href="#" data-filelist="%s">%s</a></span><span id="hidefl" class="nx-hidden"><a href="#" data-filelist="%s" data-filelist-mode="hide">%s</a></span>',
-                $langDetails['text_num_files'],
+                __('legacy/details.text_num_files'),
                 $row['numfiles'],
-                $langDetails['text_files'],
+                __('legacy/details.text_files'),
                 $id,
-                $langDetails['text_see_full_list'],
+                __('legacy/details.text_see_full_list'),
                 $id,
-                $langDetails['text_hide_list']
+                __('legacy/details.text_hide_list')
             );
         }
         $infoTds = [];
@@ -375,48 +368,48 @@ JS, \json_encode($approvalTitle)), 'footer', false);
         }
         $infoTds[] = sprintf(
             '<td class="no_border_wide"><b>%s:</b>&nbsp;%s</td>',
-            $langDetails['row_info_hash'],
+            __('legacy/details.row_info_hash'),
             bin2hex(Strings::padHash($row['info_hash']))
         );
         if (Permission::can(PermissionEnum::TORRENT_STRUCTURE)) {
             $infoTds[] = sprintf(
                 '<td class="no_border_wide"><b>%s</b><a href="torrent_info.php?id=%s">%s</a></td>',
-                $langDetails['text_torrent_structure'],
+                __('legacy/details.text_torrent_structure'),
                 $id,
-                $langDetails['text_torrent_info_note']
+                __('legacy/details.text_torrent_info_note')
             );
         }
         $torrentInfoRowHtml = '<table><tr>'.implode('', $infoTds).'</tr></table><span id=\'filelist\'></span>';
 
         $hotMeterHtml = sprintf(
             '<table><tr><td class="no_border_wide"><b>%s</b>%s</td><td class="no_border_wide"><b>%s</b>%s</td><td class="no_border_wide"><b>%s</b><a href="viewsnatches.php?id=%s"><b>%s%s</td><td class="no_border_wide"><b>%s</b>%s</td></tr></table>',
-            $langDetails['text_views'],
+            __('legacy/details.text_views'),
             $row['views'],
-            $langDetails['text_hits'],
+            __('legacy/details.text_hits'),
             $row['hits'],
-            $langDetails['text_snatched'],
+            __('legacy/details.text_snatched'),
             $id,
             $row['times_completed'],
-            $langDetails['text_view_snatches'],
-            $langDetails['row_last_seeder'],
+            __('legacy/details.text_view_snatches'),
+            __('legacy/details.row_last_seeder'),
             Time::format((string) $row['last_action'])
         );
 
         $peersHeadHtml = sprintf(
             '<span id="seeders"></span><span id="leechers"></span>%s<br /><span id="showpeer"><a href="#" data-peerlist="%s" class="sublink">%s</a></span><span id="hidepeer" class="nx-hidden"><a href="#" data-peerlist="%s" data-peerlist-mode="hide" class="sublink">%s</a></span>',
-            $langDetails['row_peers'],
+            __('legacy/details.row_peers'),
             $row['id'],
-            $langDetails['text_see_full_list'],
+            __('legacy/details.text_see_full_list'),
             $row['id'],
-            $langDetails['text_hide_list']
+            __('legacy/details.text_hide_list')
         );
         $peersBodyHtml = sprintf(
             '<div id="peercount"><b>%s%s%s</b> | <b>%s%s%s</b></div><div id="peerlist"></div>',
             $row['seeders'],
-            $langDetails['text_seeders'],
+            __('legacy/details.text_seeders'),
             Strings::addS((int) $row['seeders']),
             $row['leechers'],
-            $langDetails['text_leechers'],
+            __('legacy/details.text_leechers'),
             Strings::addS((int) $row['leechers'])
         );
 
@@ -445,8 +438,8 @@ CSS, 'header', false);
 
         $descrHeadHtml = sprintf(
             '<a href="#" data-klappe="descr"><span class="nowrap"><img class="minus" src="pic/trans.gif" alt="Show/Hide" id="picdescr" title="%s" /> %s</span></a>',
-            $langDetails['title_show_or_hide'] ?? '',
-            $langDetails['row_description']
+            __('legacy/details.title_show_or_hide'),
+            __('legacy/details.row_description')
         );
         $showDescription = ! LegacyYesNo::isNo($currentUser['showdescription'] ?? null) && $descr !== '';
 
@@ -477,7 +470,7 @@ CSS, 'header', false);
             if ((int) $bonusHas < (int) ($bonusOptions[0] ?? 0)) {
                 $magicButtonsInner = sprintf(
                     '<input class="btn" type="button" value="%s" disabled="disabled" />',
-                    $langDetails['magic_have_no_enough_bonus_value']
+                    __('legacy/details.magic_have_no_enough_bonus_value')
                 );
             } else {
                 foreach ($bonusOptions as $key => $eachTemp) {
@@ -495,7 +488,7 @@ CSS, 'header', false);
         }
         $magicSpan = sprintf(
             '<input class="btn nx-hidden" type="button" id="magic_add" value="%s" disabled="disabled" />&nbsp;',
-            $langDetails['span_description_have_given']
+            __('legacy/details.span_description_have_given')
         );
         $giveValue = [];
         foreach ($magicInfo['givers'] as $giver) {
@@ -507,7 +500,7 @@ CSS, 'header', false);
             if ((int) $magicInfo['whether_have_give_value'] === 0) {
                 $magicValueButton = '<ul id="listNumber" class="magic">'.$magicValueButton.'</ul>';
             } else {
-                $addValueText = str_replace('Number', (string) $magicInfo['add_value'], (string) $langDetails['magic_value_number']);
+                $addValueText = str_replace('Number', (string) $magicInfo['add_value'], (string) __('legacy/details.magic_value_number'));
                 $magicValueButton = sprintf('<input class="btn" type="button" value="%s" disabled="disabled" />', $addValueText);
             }
         }
@@ -519,12 +512,12 @@ CSS, 'header', false);
         $showListNewNumber = 6;
         if (count($giveValue) > 0) {
             $countUserSpan = '<span id="count_user_spa">'.$magicInfo['count_user_number'].'</span>';
-            $newestRecord = '<span id="magic_newest_record">'.$langDetails['magic_newest_record'].'</span>';
-            $showListDescription = str_replace('Number', $countUserSpan, '('.$newestRecord.$langDetails['magic_sum_user_give_number'].')');
+            $newestRecord = '<span id="magic_newest_record">'.__('legacy/details.magic_newest_record').'</span>';
+            $showListDescription = str_replace('Number', $countUserSpan, '('.$newestRecord.__('legacy/details.magic_sum_user_give_number').')');
             $showList = implode('', array_map(static fn ($v) => $v.'  ', array_slice($giveValue, 0, $showListNewNumber)));
             if (count($giveValue) > $showListNewNumber) {
                 $showList .= '<span id="ellipsis">&nbsp;......&nbsp;</span>';
-                $showAll = '<a href="#" id="magic_show_all" style="cursor:pointer">['.$langDetails['magic_show_all_description'].']</a>'.'<br/>';
+                $showAll = '<a href="#" id="magic_show_all" style="cursor:pointer">['.__('legacy/details.magic_show_all_description').']</a>'.'<br/>';
                 $otherUserSpan = '<span id="other_user_list" class="nx-hidden">'
                     .implode('', array_map(static fn ($v) => $v.'  ', array_slice($giveValue, $showListNewNumber)))
                     .'</span>';
@@ -534,7 +527,7 @@ CSS, 'header', false);
         $haveGotBonus = str_replace(
             'Number',
             '<span id="spanSumAll">'.$magicInfo['sum_value'].'</span>',
-            $langDetails['magic_haveGotBonus'].'&nbsp'
+            __('legacy/details.magic_haveGotBonus').'&nbsp'
         );
         $magicRowHtml = '<div style="height:25px">'.$magicValueButton.$magicSpan.$haveGotBonus.$showAll.'</div>'
             .'<div>'.$currentUserMagic.$showList.$otherUserSpan.$showListDescription.'</div>';
@@ -546,12 +539,12 @@ CSS, 'header', false);
             }
         }
         $thanksAll = count($thanksInfo['thanks']);
-        $noThanks = $thanksAll === 0 ? $langDetails['text_no_thanks_added'] : '';
+        $noThanks = $thanksAll === 0 ? __('legacy/details.text_no_thanks_added') : '';
         if ($thanksInfo['has_thanked']) {
-            $buttonValue = ' value="'.$langDetails['submit_you_said_thanks'].'" disabled="disabled"';
+            $buttonValue = ' value="'.__('legacy/details.submit_you_said_thanks').'" disabled="disabled"';
             $thanksBy = $currentUserHtml.' '.$thanksBy;
         } else {
-            $buttonValue = ' value="'.$langDetails['submit_say_thanks'].'"';
+            $buttonValue = ' value="'.__('legacy/details.submit_say_thanks').'"';
         }
         $thanksButton = '<input class="btn" type="button" id="saythanks" data-torrent-id="'.$id.'" '.$buttonValue.' />';
         $commentPagerTop = '';
@@ -574,13 +567,13 @@ CSS, 'header', false);
                 );
             }
         }
-        $quickReplyHtml = Html::quickReply('comment', 'body', (string) ($langDetails['submit_add_comment'] ?? ''));
+        $quickReplyHtml = Html::quickReply('comment', 'body', (string) (__('legacy/details.submit_add_comment')));
 
         $andMore = $thanksAll < $thanksInfo['count']
-            ? $langDetails['text_and_more'].$thanksInfo['count'].$langDetails['text_users_in_total']
+            ? __('legacy/details.text_and_more').$thanksInfo['count'].__('legacy/details.text_users_in_total')
             : '';
         $thanksRowHtml = '<span id="thanksadded" class="nx-hidden"><input class="btn" type="button" value="'
-            .$langDetails['text_thanks_added'].'" disabled="disabled" /></span><span id="curuser" class="nx-hidden">'
+            .__('legacy/details.text_thanks_added').'" disabled="disabled" /></span><span id="curuser" class="nx-hidden">'
             .$currentUserHtml.' </span><span id="thanksbutton">'.$thanksButton.'</span>&nbsp;&nbsp;<span id="nothanks">'
             .$noThanks.'</span><span id="addcuruser"></span>'.$thanksBy.$andMore;
 

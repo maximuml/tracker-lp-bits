@@ -178,14 +178,13 @@ final class Pagination
 
         $userAgent = Input::serverValue('HTTP_USER_AGENT');
         $isPresto = str_contains($userAgent, 'Presto');
-        $lang = app(Language::class)->functions();
         $labels = [
-            'prev' => (string) ($lang['text_prev'] ?? ''),
-            'next' => (string) ($lang['text_next'] ?? ''),
-            'alt_prev_title' => (string) ($lang['text_alt_pageup_shortcut'] ?? ''),
-            'alt_next_title' => (string) ($lang['text_alt_pagedown_shortcut'] ?? ''),
-            'shift_prev_title' => (string) ($lang['text_shift_pageup_shortcut'] ?? ''),
-            'shift_next_title' => (string) ($lang['text_shift_pagedown_shortcut'] ?? ''),
+            'prev' => (string) (__('legacy/functions.text_prev')),
+            'next' => (string) (__('legacy/functions.text_next')),
+            'alt_prev_title' => (string) (__('legacy/functions.text_alt_pageup_shortcut')),
+            'alt_next_title' => (string) (__('legacy/functions.text_alt_pagedown_shortcut')),
+            'shift_prev_title' => (string) (__('legacy/functions.text_shift_pageup_shortcut')),
+            'shift_next_title' => (string) (__('legacy/functions.text_shift_pagedown_shortcut')),
         ];
 
         $result = self::render($rpp, $count, $href, $page, $pages, $labels, $pagename, $isPresto);

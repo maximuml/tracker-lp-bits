@@ -8,7 +8,6 @@ use App\Models\User;
 use App\Repositories\MailboxRepository;
 use App\Repositories\MessageRepository;
 use App\Support\Cache;
-use App\Support\Language;
 use App\Support\LegacyResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -25,7 +24,6 @@ final class MessageMailboxService
     public function __construct(
         private readonly MessageRepository $messageRepository,
         private readonly MailboxRepository $mailboxRepository,
-        private readonly Language $language,
     ) {}
 
     public function handleMoveOrDel(Request $request): RedirectResponse
@@ -49,15 +47,13 @@ final class MessageMailboxService
                 $updated = $this->messageRepository->markAsRead($pmId, $userId);
             } else {
                 if ($pmMessages === []) {
-                    $lang = (array) $this->language->functions();
-                    LegacyResponse::abort('Error', (string) ($lang['select_at_least_one_record'] ?? 'Please select at least one record.'));
+                    LegacyResponse::abort('Error', __('legacy/functions.select_at_least_one_record'));
                 }
                 $updated = $this->messageRepository->markAsRead($pmMessages, $userId);
             }
             Cache::clearInboxCount($userId);
             if ($updated == 0) {
-                $lang = (array) trans('legacy/messages');
-                LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_cannot_mark_messages'] ?? 'Cannot mark messages.'));
+                LegacyResponse::abort(__('legacy/messages.std_error'), __('legacy/messages.std_cannot_mark_messages'));
             }
 
             return redirect("/messages.php?action=viewmailbox&box={$pmBox}");
@@ -70,8 +66,7 @@ final class MessageMailboxService
                 $updated = $this->messageRepository->moveMessages($pmMessages, $userId, $pmBox);
             }
             if ($updated == 0) {
-                $lang = (array) trans('legacy/messages');
-                LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_cannot_move_messages'] ?? 'Cannot move messages.'));
+                LegacyResponse::abort(__('legacy/messages.std_error'), __('legacy/messages.std_cannot_move_messages'));
             }
             Cache::clearInboxCount($userId);
             Cache::forgetWithLocales('user_'.$userId.'_outbox_count');
@@ -84,23 +79,19 @@ final class MessageMailboxService
                 $deletedCount = $this->messageRepository->deleteSingleMessage($pmId, $userId) ? 1 : 0;
             } else {
                 if ($pmMessages === []) {
-                    $lang = (array) trans('legacy/messages');
-                    LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_no_message_selected'] ?? 'No message selected.'));
+                    LegacyResponse::abort(__('legacy/messages.std_error'), __('legacy/messages.std_no_message_selected'));
                 }
                 $deletedCount = $this->messageRepository->deleteMultipleMessages($pmMessages, $userId);
             }
             Cache::clearInboxCount($userId);
             Cache::forgetWithLocales('user_'.$userId.'_outbox_count');
             if ($deletedCount == 0) {
-                $lang = (array) trans('legacy/messages');
-                LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_cannot_delete_messages'] ?? 'Cannot delete messages.'));
+                LegacyResponse::abort(__('legacy/messages.std_error'), __('legacy/messages.std_cannot_delete_messages'));
             }
 
             return redirect('/messages.php?action=viewmailbox');
         }
-
-        $lang = (array) trans('legacy/messages');
-        LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_no_action'] ?? 'No action.'));
+        LegacyResponse::abort(__('legacy/messages.std_error'), __('legacy/messages.std_no_action'));
 
         return redirect('/messages.php');
     }
@@ -117,7 +108,6 @@ final class MessageMailboxService
         $userId = (int) $user->id;
 
         $action2 = (string) $request->input('action2', '');
-        $lang = (array) trans('legacy/messages');
 
         if ($action2 === 'add') {
             $this->mailboxRepository->addMailboxes($userId, [
@@ -132,7 +122,7 @@ final class MessageMailboxService
         if ($action2 === 'edit') {
             $pmBoxes = $this->mailboxRepository->getUserMailboxes($userId);
             if ($pmBoxes->isEmpty()) {
-                LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['text_no_mailboxes_to_edit'] ?? 'No mailboxes to edit.'));
+                LegacyResponse::abort(__('legacy/messages.std_error'), __('legacy/messages.text_no_mailboxes_to_edit'));
             }
             foreach ($pmBoxes as $pmBox) {
                 $newValue = (string) ($request->input('edit'.$pmBox->id) ?? '');
@@ -146,7 +136,7 @@ final class MessageMailboxService
             return redirect('/messages.php?action=editmailboxes');
         }
 
-        LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_no_action'] ?? 'No action.'));
+        LegacyResponse::abort(__('legacy/messages.std_error'), __('legacy/messages.std_no_action'));
 
         return redirect('/messages.php');
     }
@@ -165,8 +155,7 @@ final class MessageMailboxService
         $pmId = (int) $request->input('id', 0);
         $message = $this->messageRepository->deleteSingleMessage($pmId, $userId);
         if (! $message) {
-            $lang = (array) trans('legacy/messages');
-            LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_no_message_id'] ?? 'No message ID.'));
+            LegacyResponse::abort(__('legacy/messages.std_error'), __('legacy/messages.std_no_message_id'));
         }
         if ($message === null) {
             throw new LogicException('Expected non-null message.');

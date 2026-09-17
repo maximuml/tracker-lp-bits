@@ -23,12 +23,10 @@ final class UsercpTokenSectionBuilder
     ) {}
 
     /**
-     * @param  array<string, mixed>  $lang
      * @return array<string, mixed>
      */
-    public function build(array $lang, User $userInfo): array
+    public function build(User $userInfo): array
     {
-        $langFunctions = (array) trans('legacy/functions');
 
         $permissions = $this->tokenRepository->listUserTokenPermissionAllowed();
         $permissionOptions = [];
@@ -44,8 +42,8 @@ final class UsercpTokenSectionBuilder
         $columnCreatedAt = Locale::trans('label.created_at', [], null);
         $actionLabel = Locale::trans('label.action', [], null);
         $actionCreate = Locale::trans('label.create', [], null);
-        $deleteLabel = $langFunctions['text_delete'] ?? 'Delete';
-        $confirmRemoveLabel = $langFunctions['std_confirm_remove'] ?? 'Confirm remove?';
+        $deleteLabel = __('legacy/functions.text_delete');
+        $confirmRemoveLabel = __('legacy/functions.std_confirm_remove');
 
         $tableHtml = '';
         if (! empty($tokens)) {

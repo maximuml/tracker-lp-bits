@@ -66,10 +66,8 @@ final class ComplainService
 
     /**
      * Reply to an existing complain.
-     *
-     * @param  array<string, mixed>  $langComplains
      */
-    public function replyToComplain(int $complainId, int $userId, string $body, string $clientIp, array $langComplains): bool
+    public function replyToComplain(int $complainId, int $userId, string $body, string $clientIp): bool
     {
         $complain = Complain::query()->find($complainId);
         if (! $complain) {
@@ -88,9 +86,9 @@ final class ComplainService
             try {
                 $this->toolRepository->sendMail(
                     $complain->email,
-                    $langComplains['reply_notify_subject'] ?? 'Reply to your complain',
+                    __('legacy/complains.reply_notify_subject'),
                     sprintf(
-                        $langComplains['reply_notify_body'] ?? '',
+                        __('legacy/complains.reply_notify_body'),
                         SiteConfig::current()->basic->siteName(),
                         Url::schemeAndHost(false).'/complains.php?action=view&id='.$complain->uuid
                     )

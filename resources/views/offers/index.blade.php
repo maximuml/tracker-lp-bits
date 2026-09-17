@@ -1,6 +1,6 @@
 @extends('layouts.legacy')
 
-@section('title', $title ?? ($lang_offers['head_offer'] ?? 'Offers'))
+@section('title', $title ?? (__('legacy/offers.head_offer')))
 
 @section('content')
 @if ($action === 'add_offer')

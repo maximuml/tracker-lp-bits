@@ -1,6 +1,6 @@
 @extends('layouts.modern')
 
-@section('title', $title ?? ($lang['head_forums'] ?? 'Forums'))
+@section('title', $title ?? __('legacy/forums.head_forums'))
 
 @section('content')
 @if ($action === 'newtopic' || $action === 'reply' || $action === 'quotepost' || $action === 'editpost')

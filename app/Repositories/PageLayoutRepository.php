@@ -10,7 +10,6 @@ use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
 use App\Support\Input;
-use App\Support\Language;
 use App\Support\Menu;
 use App\Support\RequestContext;
 use App\Support\UserUpdateBatch;
@@ -22,7 +21,6 @@ class PageLayoutRepository extends BaseRepository implements PageLayoutRepositor
         private readonly CurrentUser $currentUser,
         private readonly Globals $globals,
         private readonly IpLogRepository $ipLogRepository,
-        private readonly Language $language,
         private readonly ?LegacyRedisCache $legacyRedisCache,
         private readonly UserUpdateBatch $userUpdateBatch,
         private readonly Menu $menu = new Menu,
@@ -156,7 +154,6 @@ class PageLayoutRepository extends BaseRepository implements PageLayoutRepositor
 
         $menuResult = $this->menu->render(
             $script,
-            $this->language->functions(),
             (string) $this->globals->get('enableoffer', ''),
             null,
             $user,

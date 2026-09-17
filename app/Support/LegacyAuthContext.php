@@ -25,7 +25,6 @@ final class LegacyAuthContext
 
     /**
      * @param  array<string, mixed>|null  $user  Current user row.
-     * @param  array<string, string>  $lang  Loaded language strings.
      * @param  object|null  $cache  Legacy Redis cache wrapper.
      * @param  array<string, mixed>  $requestBody  POST data.
      * @param  array<string, mixed>  $queryParams  Query data.
@@ -36,7 +35,6 @@ final class LegacyAuthContext
      */
     public function __construct(
         public ?array $user,
-        public array $lang,
         public ?object $cache,
         public string $ip,
         public ?string $requestUri,
@@ -72,7 +70,6 @@ final class LegacyAuthContext
 
         return new self(
             user: app(CurrentUser::class)->get(),
-            lang: app(Language::class)->functions(),
             cache: app(LegacyRedisCache::class),
             ip: \function_exists('getip') ? Network::clientIp((bool) true) : Network::clientIp(),
             requestUri: Input::serverValue('REQUEST_URI'),

@@ -13,10 +13,9 @@ use Illuminate\Support\Facades\DB;
 final class CommunitySections extends SectionQueries
 {
     /**
-     * @param  array<string, mixed>  $lang
      * @return list<array<string, mixed>>
      */
-    public function build(int $limit, ?string $subtype, array $lang): array
+    public function build(int $limit, ?string $subtype): array
     {
         $sections = [];
 
@@ -30,7 +29,7 @@ final class CommunitySections extends SectionQueries
             $sections[] = [
                 'view' => 'posts',
                 'data' => $this->toArray((clone $postBase)->orderBy('usertopics', 'desc')->limit($limit)->get()),
-                'caption' => $this->caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_most_topic'] ?? ' Forum Topic Starters '),
+                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_most_topic')),
                 'limits' => [100, 250],
                 'subtype' => 'mtop',
             ];
@@ -40,7 +39,7 @@ final class CommunitySections extends SectionQueries
             $sections[] = [
                 'view' => 'posts',
                 'data' => $this->toArray((clone $postBase)->orderBy('userposts', 'desc')->limit($limit)->get()),
-                'caption' => $this->caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_most_post'] ?? ' Forum Posters '),
+                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_most_post')),
                 'limits' => [100, 250],
                 'subtype' => 'mpos',
             ];
@@ -58,10 +57,10 @@ final class CommunitySections extends SectionQueries
                         ->limit($limit)
                         ->get()
                 ),
-                'caption' => $this->caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_most_commenter'] ?? 'Torrent Commenter '),
+                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_most_commenter')),
                 'limits' => [100, 250],
                 'subtype' => 'mcmt',
-                'what' => $lang['col_comments'] ?? 'Comments',
+                'what' => __('legacy/topten.col_comments'),
             ];
         }
 
@@ -80,7 +79,7 @@ final class CommunitySections extends SectionQueries
                         ->limit($limit)
                         ->get()
                 ),
-                'caption' => $this->caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_biggest_topics'] ?? 'Biggest Topics'),
+                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_biggest_topics')),
                 'limits' => [100, 250],
                 'subtype' => 'btop',
             ];

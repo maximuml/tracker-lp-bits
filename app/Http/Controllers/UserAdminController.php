@@ -57,7 +57,6 @@ class UserAdminController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Permission denied.');
         }
 
-        $langUsers = (array) trans('legacy/users');
         $search = trim((string) (request()->query('search') ?? ''));
         $class = (string) (request()->query('class') ?? '-');
         $country = (int) (request()->query('country') ?? 0);
@@ -94,7 +93,7 @@ class UserAdminController extends LegacyController
             $classOptions[] = ['value' => $i, 'label' => $c, 'selected' => $class !== '-' && $class == $i];
         }
 
-        $countryOptions = [['value' => 0, 'label' => $langUsers['select_any_country'] ?? 'Any country', 'selected' => $country === 0]];
+        $countryOptions = [['value' => 0, 'label' => __('legacy/users.select_any_country'), 'selected' => $country === 0]];
         foreach ($this->userListingRepository->getCountries() as $ct) {
             $countryOptions[] = ['value' => (int) $ct['id'], 'label' => (string) $ct['name'], 'selected' => $country === (int) $ct['id']];
         }
@@ -130,7 +129,6 @@ class UserAdminController extends LegacyController
         }
 
         return $this->legacyPage($request, 'users', true, [
-            'lang_users' => $langUsers,
             'search' => $search,
             'class' => $class,
             'country' => $country,

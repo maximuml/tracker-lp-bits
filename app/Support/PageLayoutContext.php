@@ -31,7 +31,6 @@ final class PageLayoutContext
 
     /**
      * @param  array<string, mixed>|null  $user  Current user row.
-     * @param  array<string, string>  $lang  Loaded language strings.
      * @param  LegacyRedisCache|null  $cache  Legacy Redis cache wrapper.
      * @param  array<string, mixed>  $queryName  Legacy SQL debug query list.
      * @param  int  $defaultStylesheet  Default stylesheet id.
@@ -39,7 +38,6 @@ final class PageLayoutContext
      */
     public function __construct(
         public ?array $user,
-        public array $lang,
         public ?LegacyRedisCache $cache,
         public int $defaultStylesheet,
         public string $langDir,
@@ -106,7 +104,6 @@ final class PageLayoutContext
 
         return new self(
             user: app(CurrentUser::class)->get(),
-            lang: app(Language::class)->functions(),
             cache: app(LegacyRedisCache::class),
             defaultStylesheet: $main->defStylesheet(0),
             langDir: Locale::currentLangDir(),

@@ -109,7 +109,6 @@ final class Slots
     public static function displayWithContext(): string
     {
         $user = app(CurrentUser::class)->get() ?? [];
-        $lang = app(Language::class)->functions();
 
         return self::display(
             (float) ($user['uploaded'] ?? 0),
@@ -117,8 +116,8 @@ final class Slots
             SiteConfig::current()->main->maxDlSystem() ? 'yes' : 'no',
             (int) ($user['class'] ?? 0),
             (int) UserClassEnum::VIP->value,
-            (string) ($lang['text_slots'] ?? ''),
-            (string) ($lang['text_unlimited'] ?? '')
+            (string) (__('legacy/functions.text_slots')),
+            (string) (__('legacy/functions.text_unlimited'))
         );
     }
 }

@@ -12,13 +12,13 @@
             <input class="bbcode-btn bbcode-btn-b" type="button" name="b" value="B" data-bbcode-action="simpletag" data-bbcode-tag="b" />
             <input class="codebuttons bbcode-btn-i" type="button" name="i" value="I" data-bbcode-action="simpletag" data-bbcode-tag="i" />
             <input class="codebuttons bbcode-btn-u" type="button" name="u" value="U" data-bbcode-action="simpletag" data-bbcode-tag="u" />
-            <input class="codebuttons" type="button" name="url" value="URL" data-bbcode-action="tag_url" data-prompt1="{{ $langFunctions['js_prompt_enter_url'] ?? '' }}" data-prompt2="{{ $langFunctions['js_prompt_enter_title'] ?? '' }}" data-prompt3="{{ $langFunctions['js_prompt_error'] ?? '' }}" />
-            <input class="codebuttons" type="button" name="IMG" value="IMG" data-bbcode-action="tag_image" data-prompt1="{{ $langFunctions['js_prompt_enter_image_url'] ?? '' }}" data-prompt2="{{ $langFunctions['js_prompt_error'] ?? '' }}" />
-            <input type="button" name="list" value="List" data-bbcode-action="tag_list" data-prompt1="{{ $langFunctions['js_prompt_enter_item'] ?? '' }}" data-prompt2="{{ $langFunctions['js_prompt_error'] ?? '' }}" />
+            <input class="codebuttons" type="button" name="url" value="URL" data-bbcode-action="tag_url" data-prompt1="{{ __('legacy/functions.js_prompt_enter_url')}}" data-prompt2="{{ __('legacy/functions.js_prompt_enter_title')}}" data-prompt3="{{ __('legacy/functions.js_prompt_error')}}" />
+            <input class="codebuttons" type="button" name="IMG" value="IMG" data-bbcode-action="tag_image" data-prompt1="{{ __('legacy/functions.js_prompt_enter_image_url')}}" data-prompt2="{{ __('legacy/functions.js_prompt_error')}}" />
+            <input type="button" name="list" value="List" data-bbcode-action="tag_list" data-prompt1="{{ __('legacy/functions.js_prompt_enter_item')}}" data-prompt2="{{ __('legacy/functions.js_prompt_error')}}" />
             <input class="codebuttons" type="button" name="quote" value="QUOTE" data-bbcode-action="simpletag" data-bbcode-tag="quote" />
             <input type="button" name="tagcount" value="Close all tags" data-bbcode-action="closeall" />
             <select class="med codebuttons" name="color" data-bbcode-alterfont="color">
-                <option value="0">--- {{ $langFunctions['select_color'] ?? '' }} ---</option>
+                <option value="0">--- {{ __('legacy/functions.select_color')}} ---</option>
                 <option value="Black">Black</option>
                 <option value="Sienna">Sienna</option>
                 <option value="DarkOliveGreen">Dark Olive Green</option>
@@ -61,7 +61,7 @@
                 <option value="White">White</option>
             </select>
             <select class="med codebuttons" name="font" data-bbcode-alterfont="font">
-                <option value="0">--- {{ $langFunctions['select_font'] ?? '' }} ---</option>
+                <option value="0">--- {{ __('legacy/functions.select_font')}} ---</option>
                 <option value="Arial">Arial</option>
                 <option value="Arial Black">Arial Black</option>
                 <option value="Arial Narrow">Arial Narrow</option>
@@ -84,7 +84,7 @@
                 <option value="Verdana">Verdana</option>
             </select>
             <select class="med codebuttons" name="size" data-bbcode-alterfont="size">
-                <option value="0">--- {{ $langFunctions['select_size'] ?? '' }} ---</option>
+                <option value="0">--- {{ __('legacy/functions.select_size')}} ---</option>
                 <option value="1">1</option>
                 <option value="2">2</option>
                 <option value="3">3</option>
@@ -105,15 +105,15 @@
                         <span class="bbcode-smile">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Smilies::link($form, $text, (int) $smily)))</span>
                     @endforeach
                 </div>
-                <a href="#" data-bbcode-action="winop">{{ $langFunctions['text_more_smilies'] ?? '' }}</a>
+                <a href="#" data-bbcode-action="winop">{{ __('legacy/functions.text_more_smilies')}}</a>
             </div>
         </div>
     </div>
     @if ($withPreview)
         <div id="{{ $previewId }}" class="bbcode-preview"></div>
         <div class="bbcode-actions">
-            <input id="{{ $btnPreviewId }}" type="button" class="btn" value="{{ $langFunctions['submit_preview'] ?? '' }}" data-bbcode-action="preview" />
-            <input id="{{ $btnEditId }}" type="button" class="btn nx-hidden" value="{{ $langFunctions['submit_edit'] ?? '' }}" data-bbcode-action="edit" />
+            <input id="{{ $btnPreviewId }}" type="button" class="btn" value="{{ __('legacy/functions.submit_preview')}}" data-bbcode-action="preview" />
+            <input id="{{ $btnEditId }}" type="button" class="btn nx-hidden" value="{{ __('legacy/functions.submit_edit')}}" data-bbcode-action="edit" />
         </div>
     @endif
 </div>

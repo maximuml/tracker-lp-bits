@@ -29,11 +29,6 @@ final class SupportContextTest extends TestCase
         $this->assertSame(['id' => 7], SupportContext::getUser());
     }
 
-    public function test_get_lang_functions_falls_back_to_empty_array(): void
-    {
-        $this->assertSame([], SupportContext::getLangFunctions());
-    }
-
     public function test_from_request_populates_server_and_cookie(): void
     {
         $request = Request::create('/foo', 'GET', [], ['c_lang_folder' => 'zh'], [], ['HTTP_X_TEST' => 'bar']);

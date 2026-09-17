@@ -104,15 +104,14 @@ final class Shoutbox
     public static function toolbar(string $formName = 'shbox', string $fieldName = 'shbox_text'): string
     {
         $panelId = 'shoutbox-emoji-panel';
-        $lang = app(Language::class)->shoutbox();
 
-        $b = $lang['toolbar_bold'] ?? 'B';
-        $i = $lang['toolbar_italic'] ?? 'I';
-        $spoiler = $lang['toolbar_spoiler'] ?? 'spoiler';
-        $code = $lang['toolbar_code'] ?? 'code';
-        $quote = $lang['toolbar_quote'] ?? 'quote';
-        $link = $lang['toolbar_link'] ?? 'link';
-        $emoji = $lang['toolbar_emoji'] ?? 'emoji';
+        $b = __('legacy/shoutbox.toolbar_bold');
+        $i = __('legacy/shoutbox.toolbar_italic');
+        $spoiler = __('legacy/shoutbox.toolbar_spoiler');
+        $code = __('legacy/shoutbox.toolbar_code');
+        $quote = __('legacy/shoutbox.toolbar_quote');
+        $link = __('legacy/shoutbox.toolbar_link');
+        $emoji = __('legacy/shoutbox.toolbar_emoji');
 
         $html = '<div class="shoutbox-toolbar">';
         $html .= '<button type="button" class="btn shoutbox-tool" data-shout-tool="wrap" data-tag="b" data-form="'.$formName.'" data-field="'.$fieldName.'" title="[b]"><b>'.$b.'</b></button>';
@@ -211,15 +210,14 @@ final class Shoutbox
             return '';
         }
 
-        $lang = app(Language::class)->shoutbox();
-        $editLabel = $lang['text_edit'] ?? 'edit';
-        $delLabel = $lang['text_del'] ?? 'del';
+        $editLabel = __('legacy/shoutbox.text_edit');
+        $delLabel = __('legacy/shoutbox.text_del');
         $html = '<span class="shout-actions">';
         if ($canEdit) {
-            $html .= ' <a href="#" class="shout-action-edit" data-shout-edit="'.$msgId.'" title="'.htmlspecialchars((string) ($lang['title_edit_shout'] ?? 'Edit'), ENT_QUOTES).'">['.htmlspecialchars($editLabel).']</a>';
+            $html .= ' <a href="#" class="shout-action-edit" data-shout-edit="'.$msgId.'" title="'.htmlspecialchars((string) (__('legacy/shoutbox.title_edit_shout')), ENT_QUOTES).'">['.htmlspecialchars($editLabel).']</a>';
         }
         if ($canDelete) {
-            $html .= ' <a href="#" class="shout-action-del" data-shout-del="'.$msgId.'" title="'.htmlspecialchars((string) ($lang['title_delete_shout'] ?? 'Delete'), ENT_QUOTES).'">['.htmlspecialchars($delLabel).']</a>';
+            $html .= ' <a href="#" class="shout-action-del" data-shout-del="'.$msgId.'" title="'.htmlspecialchars((string) (__('legacy/shoutbox.title_delete_shout')), ENT_QUOTES).'">['.htmlspecialchars($delLabel).']</a>';
         }
         $html .= '</span>';
 
@@ -268,10 +266,9 @@ final class Shoutbox
             $reactors = [];
         }
 
-        $lang = app(Language::class)->shoutbox();
-        $titleReact = (string) ($lang['title_react'] ?? 'React');
-        $titleAdd = (string) ($lang['title_add_reaction'] ?? 'Add reaction');
-        $titleReacted = (string) ($lang['title_reacted_by'] ?? 'Reacted by');
+        $titleReact = (string) (__('legacy/shoutbox.title_react'));
+        $titleAdd = (string) (__('legacy/shoutbox.title_add_reaction'));
+        $titleReacted = (string) (__('legacy/shoutbox.title_reacted_by'));
 
         $html = '<span class="shout-reactions">';
         foreach (self::REACTIONS as $emoji) {
@@ -312,10 +309,10 @@ final class Shoutbox
             $text .= ($text === '' ? '' : ', ').'+'.$remaining.' more';
         }
         if ($text === '') {
-            return (string) (app(Language::class)->shoutbox()['title_react'] ?? 'React');
+            return (string) __('legacy/shoutbox.title_react');
         }
 
-        return ((string) (app(Language::class)->shoutbox()['title_reacted_by'] ?? 'Reacted by')).': '.$text;
+        return ((string) __('legacy/shoutbox.title_reacted_by')).': '.$text;
     }
 
     /**
@@ -360,9 +357,9 @@ final class Shoutbox
                 $cls = $isMe ? 'shout-mention shout-mention-me' : 'shout-mention';
                 $name = $cache[$key]['name'];
                 $title = '';
-                $shoutboxLang = app(Language::class)->shoutbox();
-                if (isset($shoutboxLang['tooltip_nick_reply'])) {
-                    $title = ' title="'.htmlspecialchars((string) $shoutboxLang['tooltip_nick_reply'], ENT_QUOTES).'"';
+                $tooltip = __('legacy/shoutbox.tooltip_nick_reply');
+                if ($tooltip !== 'legacy/shoutbox.tooltip_nick_reply') {
+                    $title = ' title="'.htmlspecialchars((string) $tooltip, ENT_QUOTES).'"';
                 }
                 if ($currentUserId > 0) {
                     return '<a class="'.$cls.' shout-nick-reply" href="userdetails.php?id='.$cache[$key]['id'].'" data-nick="'.htmlspecialchars($name, ENT_QUOTES).'"'.$title.'>@'.htmlspecialchars($name).'</a>';

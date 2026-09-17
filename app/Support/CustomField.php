@@ -103,23 +103,22 @@ class CustomField
     /** @param  array<int|string, mixed>  $row */
     public function buildFieldForm(array $row = []): string
     {
-        $lang_functions = app(Language::class)->functions();
-        $lang_fields = (array) trans('legacy/fields');
-        $lang_catmanage = (array) trans('legacy/catmanage');
-        $trName = Html::tr($lang_fields['col_name'].'<font color="red">*</font>', '<input type="text" name="name" value="'.($row['name'] ?? '').'" style="width: 300px" />&nbsp;&nbsp;'.$lang_fields['col_name_help'], 1, '', true);
-        $trLabel = Html::tr($lang_fields['col_label'].'<font color="red">*</font>', '<input type="text" name="label" value="'.($row['label'] ?? '').'"  style="width: 300px" />', 1, '', true);
-        $trType = Html::tr($lang_fields['col_type'].'<font color="red">*</font>', $this->radio('type', $this->getTypeRadioOptions(), $row['type'] ?? null), 1, '', true);
-        $trRequired = Html::tr($lang_fields['col_required'].'<font color="red">*</font>', $this->radio('required', ['0' => $lang_functions['text_no'], '1' => $lang_functions['text_yes']], $row['required'] ?? null), 1, '', true);
-        $trHelp = Html::tr($lang_fields['col_help'], '<textarea name="help" rows="4" cols="80">'.($row['help'] ?? '').'</textarea>', 1, '', true);
-        $trOptions = Html::tr($lang_fields['col_options'], '<textarea name="options" rows="6" cols="80">'.($row['options'] ?? '').'</textarea><br/>'.$lang_fields['col_options_help'], 1, '', true);
-        $trIsSingleRow = Html::tr($lang_fields['col_is_single_row'].'<font color="red">*</font>', $this->radio('is_single_row', ['0' => $lang_functions['text_no'], '1' => $lang_functions['text_yes']], $row['is_single_row'] ?? null), 1, '', true);
+        $trName = Html::tr(__('legacy/fields.col_name').'<font color="red">*</font>', '<input type="text" name="name" value="'.($row['name'] ?? '').'" style="width: 300px" />&nbsp;&nbsp;'.__('legacy/fields.col_name_help'), 1, '', true);
+        $trLabel = Html::tr(__('legacy/fields.col_label').'<font color="red">*</font>', '<input type="text" name="label" value="'.($row['label'] ?? '').'"  style="width: 300px" />', 1, '', true);
+        $trType = Html::tr(__('legacy/fields.col_type').'<font color="red">*</font>', $this->radio('type', $this->getTypeRadioOptions(), $row['type'] ?? null), 1, '', true);
+        $trRequired = Html::tr(__('legacy/fields.col_required').'<font color="red">*</font>', $this->radio('required', ['0' => __('legacy/functions.text_no'), '1' => __('legacy/functions.text_yes')], $row['required'] ?? null), 1, '', true);
+        $trHelp = Html::tr(__('legacy/fields.col_help'), '<textarea name="help" rows="4" cols="80">'.($row['help'] ?? '').'</textarea>', 1, '', true);
+        $trOptions = Html::tr(__('legacy/fields.col_options'), '<textarea name="options" rows="6" cols="80">'.($row['options'] ?? '').'</textarea><br/>'.__('legacy/fields.col_options_help'), 1, '', true);
+        $trIsSingleRow = Html::tr(__('legacy/fields.col_is_single_row').'<font color="red">*</font>', $this->radio('is_single_row', ['0' => __('legacy/functions.text_no'), '1' => __('legacy/functions.text_yes')], $row['is_single_row'] ?? null), 1, '', true);
         $trPriority = Html::tr(Locale::trans('label.priority', [], null).'<font color="red">*</font>', '<input type="number" name="priority" value="'.($row['priority'] ?? '0').'" style="width: 300px" />', 1, '', true);
-        $trDisplay = Html::tr($lang_fields['col_display'], '<textarea name="display" rows="4" cols="80">'.($row['display'] ?? '').'</textarea><br/>'.$lang_catmanage['row_custom_field_display_help'], 1, '', true);
+        $trDisplay = Html::tr(__('legacy/fields.col_display'), '<textarea name="display" rows="4" cols="80">'.($row['display'] ?? '').'</textarea><br/>'.__('legacy/catmanage.row_custom_field_display_help'), 1, '', true);
 
         $id = $row['id'] ?? 0;
+        $textField = __('legacy/fields.text_field');
+        $submitSubmit = __('legacy/fields.submit_submit');
         $form = <<<HTML
 <div>
-<h1 align="center"><a class="faqlink" href="?action=view">{$lang_fields['text_field']}</a></h1>
+<h1 align="center"><a class="faqlink" href="?action=view">{$textField}</a></h1>
 <form method="post" action="fields.php?action=submit">
 <div>
     <table border="1" cellspacing="0" cellpadding="10" width="100%">
@@ -136,7 +135,7 @@ class CustomField
     </table>
 </div>
 <div style="text-align: center; margin-top: 10px;">
-    <input type="submit" value="{$lang_fields['submit_submit']}" />
+    <input type="submit" value="{$submitSubmit}" />
 </div>
 </form>
 </div>
@@ -147,8 +146,6 @@ HTML;
 
     public function buildFieldTable(): string
     {
-        $lang_functions = app(Language::class)->functions();
-        $lang_fields = (array) trans('legacy/fields');
         $perPage = 10;
         $total = DB::table('torrents_custom_fields')->count();
         [$paginationTop, $paginationBottom, , $offset, $rpp] = Pagination::pager($perPage, $total, '?');
@@ -158,32 +155,34 @@ HTML;
             ->limit($rpp)
             ->get();
         $header = [
-            'id' => $lang_fields['col_id'],
-            'name' => $lang_fields['col_name'],
-            'label' => $lang_fields['col_label'],
-            'type_text' => $lang_fields['col_type'],
-            'required_text' => $lang_fields['col_required'],
-            'is_single_row_text' => $lang_fields['col_is_single_row'],
+            'id' => __('legacy/fields.col_id'),
+            'name' => __('legacy/fields.col_name'),
+            'label' => __('legacy/fields.col_label'),
+            'type_text' => __('legacy/fields.col_type'),
+            'required_text' => __('legacy/fields.col_required'),
+            'is_single_row_text' => __('legacy/fields.col_is_single_row'),
             'priority' => Locale::trans('label.priority', [], null),
-            'action' => $lang_fields['col_action'],
+            'action' => __('legacy/fields.col_action'),
         ];
         $rows = [];
         foreach ($res as $row) {
             $row = (array) $row;
-            $row['required_text'] = $row['required'] ? $lang_functions['text_yes'] : $lang_functions['text_no'];
-            $row['is_single_row_text'] = $row['is_single_row'] ? $lang_functions['text_yes'] : $lang_functions['text_no'];
+            $row['required_text'] = $row['required'] ? __('legacy/functions.text_yes') : __('legacy/functions.text_no');
+            $row['is_single_row_text'] = $row['is_single_row'] ? __('legacy/functions.text_yes') : __('legacy/functions.text_no');
             $row['type_text'] = sprintf('%s(%s)', $this->getTypeHuman((int) $row['type']), $row['type']);
             $row['action'] = sprintf(
                 '<a href="#" data-confirm-del="%s" data-confirm-note="%s">%s</a> | <a href="?action=edit&id=%s">%s</a>',
-                $row['id'], htmlspecialchars((string) $lang_fields['js_sure_to_delete_this'], ENT_QUOTES), $lang_fields['text_delete'], $row['id'], $lang_fields['text_edit']
+                $row['id'], htmlspecialchars((string) __('legacy/fields.js_sure_to_delete_this'), ENT_QUOTES), __('legacy/fields.text_delete'), $row['id'], __('legacy/fields.text_edit')
             );
             $rows[] = $row;
         }
+        $fieldManagement = __('legacy/fields.field_management');
+        $textAdd = __('legacy/fields.text_add');
         $head = <<<HEAD
-<h1 align="center">{$lang_fields['field_management']}</h1>
+<h1 align="center">{$fieldManagement}</h1>
 <div style="margin-bottom: 8px;">
     <span id="add">
-        <a href="?action=add" class="big"><b>{$lang_fields['text_add']}</b></a>
+        <a href="?action=add" class="big"><b>{$textAdd}</b></a>
     </span>
 </div>
 HEAD;
@@ -195,43 +194,41 @@ HEAD;
     /** @param  array<string, mixed>  $data */
     public function save(array $data): int|string
     {
-        $lang_functions = app(Language::class)->functions();
-        $lang_fields = (array) trans('legacy/fields');
         $attributes = [];
         if (empty($data['name'])) {
-            throw new \InvalidArgumentException("{$lang_fields['col_name']} {$lang_functions['text_required']}");
+            throw new \InvalidArgumentException(__('legacy/fields.col_name').' '.__('legacy/functions.text_required'));
         }
         if (! preg_match('/^\w+$/', $data['name'])) {
-            throw new \InvalidArgumentException("{$lang_fields['col_name']} {$lang_functions['text_invalid']}");
+            throw new \InvalidArgumentException(__('legacy/fields.col_name').' '.__('legacy/functions.text_invalid'));
         }
         $attributes['name'] = $data['name'];
 
         if (empty($data['label'])) {
-            throw new \InvalidArgumentException("{$lang_fields['col_label']} {$lang_functions['text_required']}");
+            throw new \InvalidArgumentException(__('legacy/fields.col_label').' '.__('legacy/functions.text_required'));
         }
         $attributes['label'] = $data['label'];
 
         if (empty($data['type'])) {
-            throw new \InvalidArgumentException("{$lang_fields['col_type']} {$lang_functions['text_required']}");
+            throw new \InvalidArgumentException(__('legacy/fields.col_type').' '.__('legacy/functions.text_required'));
         }
         if (! isset(self::$types[$data['type']])) {
-            throw new \InvalidArgumentException("{$lang_fields['col_type']} {$lang_functions['text_invalid']}");
+            throw new \InvalidArgumentException(__('legacy/fields.col_type').' '.__('legacy/functions.text_invalid'));
         }
         $attributes['type'] = $data['type'];
 
         if (! isset($data['required'])) {
-            throw new \InvalidArgumentException("{$lang_fields['col_required']} {$lang_functions['text_required']}");
+            throw new \InvalidArgumentException(__('legacy/fields.col_required').' '.__('legacy/functions.text_required'));
         }
         if (! in_array($data['required'], ['0', '1'], true)) {
-            throw new \InvalidArgumentException("{$lang_fields['col_name']} {$lang_functions['text_invalid']}");
+            throw new \InvalidArgumentException(__('legacy/fields.col_name').' '.__('legacy/functions.text_invalid'));
         }
         $attributes['required'] = $data['required'];
 
         if (! isset($data['is_single_row'])) {
-            throw new \InvalidArgumentException("{$lang_fields['col_is_single_row']} {$lang_functions['text_required']}");
+            throw new \InvalidArgumentException(__('legacy/fields.col_is_single_row').' '.__('legacy/functions.text_required'));
         }
         if (! in_array($data['is_single_row'], ['0', '1'], true)) {
-            throw new \InvalidArgumentException("{$lang_fields['col_is_single_row']} {$lang_functions['text_invalid']}");
+            throw new \InvalidArgumentException(__('legacy/fields.col_is_single_row').' '.__('legacy/functions.text_invalid'));
         }
         $attributes['is_single_row'] = $data['is_single_row'];
 

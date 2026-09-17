@@ -16,8 +16,12 @@ use Tests\Attributes\TestCategory;
  * ($lang_x['key'] in PHP / views) until each section is converted to
  * __('legacy/x.key'). This test keeps the remaining count from growing.
  *
- * Baselines captured on 2026-09-17 (post-conversion):
- *   - $lang*[ reads in app/ + resources/views : 3205
+ * Baselines captured on 2026-09-17 (post-conversion): 3205
+ * Lowered on 2026-09-17 after forums + messages sections: 2883
+ * Lowered after the bulk section migration (controllers, services,
+ * builders, views): 11 — all remaining matches are docblock prose and
+ * locale-folder `$lang` variables in Locale/LanguageRepository, not
+ * legacy language-array reads.
  *
  * Hard rules (not baselines):
  *   - lang/ directory must not come back
@@ -34,7 +38,7 @@ final class LegacyLangRatchetTest extends TestCase
     private const BASE_DIR = __DIR__.'/../..';
 
     /** Baseline: `$lang…[` reads across app/ and resources/views. */
-    private const BASELINE_LANG_ARRAY_REFS = 3205;
+    private const BASELINE_LANG_ARRAY_REFS = 11;
 
     public function test_lang_array_reads_do_not_exceed_baseline(): void
     {

@@ -112,7 +112,6 @@ final class Promotion
      * Mirrors `get_torrent_promotion_append()`.
      */
     /**
-     * @param  array<string, string>  $labels
      * @param  array<string, int>  $expires
      */
     public static function append(
@@ -124,10 +123,9 @@ final class Promotion
         ?string $promotionUntil,
         bool $ignoreGlobal,
         string $appendPromotion,
-        array $labels,
         array $expires,
     ): string {
-        return self::render($promotion, $forceMode, $showTimeLeft, $added, $promotionTimeType, $promotionUntil, $ignoreGlobal, $appendPromotion, $labels, $expires, false);
+        return self::render($promotion, $forceMode, $showTimeLeft, $added, $promotionTimeType, $promotionUntil, $ignoreGlobal, $appendPromotion, $expires, false);
     }
 
     /**
@@ -136,7 +134,6 @@ final class Promotion
      * Mirrors `get_torrent_promotion_append_sub()`.
      */
     /**
-     * @param  array<string, string>  $labels
      * @param  array<string, int>  $expires
      */
     public static function appendSub(
@@ -148,14 +145,12 @@ final class Promotion
         ?string $promotionUntil,
         bool $ignoreGlobal,
         string $appendPromotion,
-        array $labels,
         array $expires,
     ): string {
-        return self::render($promotion, $forceMode, $showTimeLeft, $added, $promotionTimeType, $promotionUntil, $ignoreGlobal, $appendPromotion, $labels, $expires, true);
+        return self::render($promotion, $forceMode, $showTimeLeft, $added, $promotionTimeType, $promotionUntil, $ignoreGlobal, $appendPromotion, $expires, true);
     }
 
     /**
-     * @param  array<string, string>  $labels
      * @param  array<string, int>  $expires
      */
     private static function render(
@@ -167,7 +162,6 @@ final class Promotion
         ?string $promotionUntil,
         bool $ignoreGlobal,
         string $appendPromotion,
-        array $labels,
         array $expires,
         bool $sub,
     ): string {
@@ -200,14 +194,14 @@ final class Promotion
                 }
                 $timeout = Time::format(date('Y-m-d H:i:s', $futureTime), false, false, true, false, true);
                 if ($timeout) {
-                    $text = $labels[$config['text']] ?? '';
+                    $text = __('legacy/functions.'.$config['text']);
                     if ($sub) {
                         $color = $config['subColor'];
                         $onmouseover = $color
-                            ? " <font color=\"$color\">".($labels['text_will_end_in'] ?? '').$timeout.'</font>'
-                            : ' '.($labels['text_will_end_in'] ?? '').$timeout;
+                            ? " <font color=\"$color\">".((string) __('legacy/functions.text_will_end_in')).$timeout.'</font>'
+                            : ' '.((string) __('legacy/functions.text_will_end_in')).$timeout;
                     } else {
-                        $onmouseover = ' data-domtt-promo="'.htmlspecialchars("<b><font class=\"{$config['class']}\">$text</font></b>".($labels['text_will_end_in'] ?? '')."<b>$timeout</b>").'"';
+                        $onmouseover = ' data-domtt-promo="'.htmlspecialchars("<b><font class=\"{$config['class']}\">$text</font></b>".((string) __('legacy/functions.text_will_end_in'))."<b>$timeout</b>").'"';
                     }
                 } else {
                     $promotion = 1;
@@ -221,7 +215,7 @@ final class Promotion
         if (($mode === 'word' || $mode === 'icon') && isset(self::PROMOTION_CONFIG[$effectiveCode])) {
             $config = self::PROMOTION_CONFIG[$effectiveCode];
             $log .= ", promotion or global_sp_state = $effectiveCode";
-            $text = $labels[$config['text']] ?? '';
+            $text = __('legacy/functions.'.$config['text']);
             if ($sub) {
                 $spTorrent = $onmouseover;
             } elseif ($mode === 'word') {
@@ -262,7 +256,6 @@ final class Promotion
             $promotionUntil,
             $ignoreGlobal,
             UserAppendPromotion::tryFrom((int) ($user['appendpromotion'] ?? 2))?->stringValue() ?? 'icon',
-            app(Language::class)->functions(),
             $expires,
         );
     }
@@ -292,7 +285,6 @@ final class Promotion
             $promotionUntil,
             $ignoreGlobal,
             UserAppendPromotion::tryFrom((int) ($user['appendpromotion'] ?? 2))?->stringValue() ?? 'icon',
-            app(Language::class)->functions(),
             $expires,
         );
     }

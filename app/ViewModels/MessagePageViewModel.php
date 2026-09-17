@@ -12,7 +12,6 @@ namespace App\ViewModels;
 final class MessagePageViewModel extends ViewModel
 {
     /**
-     * @param  array<string, mixed>  $lang
      * @param  array<string, mixed>  $curUser
      * @param  array<string, mixed>|null  $viewmessage
      * @param  array<string, mixed>|null  $forward
@@ -21,7 +20,6 @@ final class MessagePageViewModel extends ViewModel
      * @param  iterable<int, mixed>  $mailboxes
      */
     public function __construct(
-        public readonly array $lang,
         public readonly array $curUser,
         public readonly int $userId,
         public readonly string $action,
@@ -40,7 +38,6 @@ final class MessagePageViewModel extends ViewModel
     public function toArray(): array
     {
         return [
-            'lang' => $this->lang,
             'curUser' => $this->curUser,
             'userId' => $this->userId,
             'action' => $this->action,

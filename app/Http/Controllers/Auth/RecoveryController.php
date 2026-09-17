@@ -46,12 +46,9 @@ class RecoveryController extends Controller
             }
         }
 
-        $langRecover = $this->langRecover($langFolder);
-        $langFunctions = $this->langFunctions($langFolder);
-
         if ($request->isMethod('post')) {
             try {
-                $this->recoveryService->requestReset($request->validated(), Network::clientIp(), $langRecover, $langFunctions);
+                $this->recoveryService->requestReset($request->validated(), Network::clientIp());
             } catch (AuthenticationException $exception) {
                 return $this->backWithError($request, $exception->getMessage());
             }
@@ -64,7 +61,7 @@ class RecoveryController extends Controller
 
         if ($id > 0 && $secret !== '') {
             try {
-                $this->recoveryService->resetPassword($id, $secret, $langRecover);
+                $this->recoveryService->resetPassword($id, $secret);
             } catch (AuthenticationException $exception) {
                 return $this->backWithError($request, $exception->getMessage());
             }
@@ -78,13 +75,11 @@ class RecoveryController extends Controller
 
         if ($captchaEnabled) {
             ob_start();
-            Captcha::render('yes', $langFunctions, $secret, 'grid');
+            Captcha::render('yes', $secret, 'grid');
             $captchaMarkup = (string) ob_get_clean();
         }
 
         return view('auth.recover', [
-            'lang' => $langRecover,
-            'langFunctions' => $langFunctions,
             'langFolder' => $langFolder,
             'languages' => Locale::languageList('site_lang', true),
             'captchaEnabled' => $captchaEnabled,
@@ -106,18 +101,6 @@ class RecoveryController extends Controller
         }
 
         return Locale::folderFromCookie($folder);
-    }
-
-    /** @return array<string, string> */
-    private function langRecover(string $langFolder): array
-    {
-        return (array) trans('legacy/recover');
-    }
-
-    /** @return array<string, string> */
-    private function langFunctions(string $langFolder): array
-    {
-        return (array) trans('legacy/functions');
     }
 
     private function backWithError(Request $request, string $message): RedirectResponse

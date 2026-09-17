@@ -18,11 +18,11 @@
 <input type="hidden" name="privacy" value="{{ $security['confirmHidden']['privacy'] ?? '' }}">
 <input type="hidden" name="two_step_secret" value="{{ $security['confirmHidden']['two_step_secret'] ?? '' }}">
 <input type="hidden" name="two_step_code" value="{{ $security['confirmHidden']['two_step_code'] ?? '' }}">
-<div class="nx-fhead nx-nowrap">{{ $lang['row_security_check'] ?? 'Check' }}</div><div class="nx-fcell"><input type=password class=oldpassword style="width: 200px"><br /><font class=small>{{ $lang['text_security_check_note'] ?? '' }}</font></div>
+<div class="nx-fhead nx-nowrap">{{ __('legacy/usercp.row_security_check')}}</div><div class="nx-fcell"><input type=password class=oldpassword style="width: 200px"><br /><font class=small>{{ __('legacy/usercp.text_security_check_note')}}</font></div>
 <input type=hidden name=username value="{{ (string) ($curUser['username'] ?? '') }}">
 <input type=hidden name=response>
 @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($security['confirmHtml'] ?? ''))
-<div class="nx-fhead">{{ $lang['row_save_settings'] ?? 'Save' }}</div><div class="nx-fcell"><input type=button value="{{ $lang['submit_save_settings'] ?? 'Save' }}"></div>
+<div class="nx-fhead">{{ __('legacy/usercp.row_save_settings')}}</div><div class="nx-fcell"><input type=button value="{{ __('legacy/usercp.submit_save_settings')}}"></div>
 </div></form>
 @else
 @if ($type === 'saved')
@@ -30,6 +30,6 @@
 @endif
 @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($security['rowsHtml'] ?? ''))
 <input type="hidden" name="chpassword" />
-<div class="nx-fhead">{{ $lang['row_save_settings'] ?? 'Save' }}</div><div class="nx-fcell"><input type=button value="{{ $lang['submit_save_settings'] ?? 'Save' }}"></div>
+<div class="nx-fhead">{{ __('legacy/usercp.row_save_settings')}}</div><div class="nx-fcell"><input type=button value="{{ __('legacy/usercp.submit_save_settings')}}"></div>
 </div></form>
 @endif

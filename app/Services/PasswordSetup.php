@@ -8,6 +8,7 @@ use App\Exceptions\AuthenticationException;
 use App\Support\PasswordHasher;
 use App\Support\Security\PasskeyGenerator;
 use App\Support\Token;
+use Illuminate\Support\Facades\Lang;
 
 /**
  * Handles password hashing and validation during registration and confirmation.
@@ -22,25 +23,22 @@ class PasswordSetup
         private readonly PasskeyGenerator $passkeyGenerator,
     ) {}
 
-    /**
-     * @param  array<string, string>  $lang
-     */
-    public function validate(string $password, string $passAgain, string $username, array $lang): void
+    public function validate(string $password, string $passAgain, string $username, string $langGroup): void
     {
         if ($password !== $passAgain) {
-            throw new AuthenticationException($this->msg($lang, 'std_passwords_unmatched', 'The passwords didn\'t match!'));
+            throw new AuthenticationException($this->msg($langGroup, 'std_passwords_unmatched', 'The passwords didn\'t match!'));
         }
 
         if (strlen($password) < self::MIN_PASSWORD_LENGTH) {
-            throw new AuthenticationException($this->msg($lang, 'std_password_too_short', 'Sorry, password is too short (min is 6 chars).'));
+            throw new AuthenticationException($this->msg($langGroup, 'std_password_too_short', 'Sorry, password is too short (min is 6 chars).'));
         }
 
         if (strlen($password) > self::MAX_PASSWORD_LENGTH) {
-            throw new AuthenticationException($this->msg($lang, 'std_password_too_long', 'Sorry, password is too long (max is 40 chars).'));
+            throw new AuthenticationException($this->msg($langGroup, 'std_password_too_long', 'Sorry, password is too long (max is 40 chars).'));
         }
 
         if ($password === $username) {
-            throw new AuthenticationException($this->msg($lang, 'std_password_equals_username', 'Sorry, password cannot be same as user name.'));
+            throw new AuthenticationException($this->msg($langGroup, 'std_password_equals_username', 'Sorry, password cannot be same as user name.'));
         }
     }
 
@@ -78,11 +76,10 @@ class PasswordSetup
         ];
     }
 
-    /**
-     * @param  array<string, string>  $lang
-     */
-    private function msg(array $lang, string $key, string $fallback): string
+    private function msg(string $langGroup, string $key, string $fallback): string
     {
-        return (string) ($lang[$key] ?? $fallback);
+        $full = 'legacy/'.$langGroup.'.'.$key;
+
+        return Lang::has($full) ? (string) __($full) : $fallback;
     }
 }

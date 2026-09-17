@@ -9,7 +9,7 @@
     @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\TorrentTable::render($rows ?? [])))
     @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagerbottom ?? ''))
 @elseif (($search ?? '') !== '')
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::stdMessage(($lang_torrents['std_search_results_for'] ?? '').($searchstr_ori ?? '').'"', $lang_torrents['std_try_again'] ?? '', false)))
+    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::stdMessage((__('legacy/torrents.std_search_results_for')).($searchstr_ori ?? '').'"', __('legacy/torrents.std_try_again'), false)))
 @endif
 </div>
 @endsection

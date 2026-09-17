@@ -151,10 +151,9 @@ class UtilityController extends LegacyController
                 ];
             }
 
-            $lang_attachment = (array) trans('legacy/attachment');
             $altsize = (string) $request->input('altsize', '');
             $callbackFunc = (string) $request->input('callback_func', '');
-            $result = AttachmentMutationService::processUpload($currentUser, $Attach, $lang_attachment, $altsize, $callbackFunc, $file);
+            $result = AttachmentMutationService::processUpload($currentUser, $Attach, $altsize, $callbackFunc, $file);
             $warning = (string) ($result['warning'] ?? '');
             $script = (string) ($result['script'] ?? '');
             $countLeft = isset($result['count_left']) ? (int) $result['count_left'] : null;
@@ -180,7 +179,6 @@ class UtilityController extends LegacyController
 
         $content = view('attachment.index', [
             'CURUSER' => $currentUser,
-            'lang_attachment' => (array) trans('legacy/attachment'),
             'Attach' => $Attach,
             'enableAttachment' => $Attach->enable_attachment(),
             'count_limit' => (int) $Attach->get_count_limit(),
@@ -313,26 +311,23 @@ class UtilityController extends LegacyController
 
     public function tags(Request $request): View|RedirectResponse
     {
-        $lang = (array) trans('legacy/tags');
         $siteName = Setting::getSiteName();
         $username = (string) (($this->currentUser->get() ?? [])['username'] ?? '');
 
         return $this->legacyPage($request, 'tags', false, [
             'test' => (string) $request->post('test', ''),
-            'lang_tags' => $lang,
             'siteName' => $siteName,
-            'tagItems' => $this->tagItems($lang, $siteName, $username),
+            'tagItems' => $this->tagItems($siteName, $username),
         ]);
     }
 
     /**
-     * @param  array<string, mixed>  $lang
      * @return list<array<string, string>>
      */
-    private function tagItems(array $lang, string $siteName, string $username): array
+    private function tagItems(string $siteName, string $username): array
     {
         $schemeHost = Url::schemeAndHost(false);
-        $t = fn (string $key): string => (string) ($lang[$key] ?? '');
+        $t = fn (string $key): string => (string) __('legacy/tags.'.$key);
         $tag = function (string $name, string $description, string $syntax, string $example, string $remarks = ''): array {
             return [
                 'name' => $name,
@@ -434,13 +429,12 @@ class UtilityController extends LegacyController
 
     public function smilies(Request $request): View|RedirectResponse
     {
-        $lang = (array) trans('legacy/functions');
 
         return $this->legacyPage($request, 'smilies', true, [
             'smiliesFrame' => Smilies::framedTable(
-                (string) ($lang['text_smilies'] ?? ''),
-                (string) ($lang['col_type_something'] ?? ''),
-                (string) ($lang['col_to_make_a'] ?? ''),
+                (string) (__('legacy/functions.text_smilies')),
+                (string) (__('legacy/functions.col_type_something')),
+                (string) (__('legacy/functions.col_to_make_a')),
             ),
         ]);
     }
@@ -561,13 +555,11 @@ XML;
             $email = (string) $request->input('email', '');
         }
 
-        /** @var array<string, string> $langOk */
-        $langOk = (array) trans('legacy/ok');
         $title = match ($type) {
-            'adminactivate', 'inviter', 'signup' => $langOk['head_user_signup'] ?? '',
-            'sysop' => $langOk['head_sysop_activation'] ?? '',
-            'confirmed' => $langOk['head_already_confirmed'] ?? '',
-            'confirm' => $langOk['head_signup_confirmation'] ?? '',
+            'adminactivate', 'inviter', 'signup' => __('legacy/ok.head_user_signup'),
+            'sysop' => __('legacy/ok.head_sysop_activation'),
+            'confirmed' => __('legacy/ok.head_already_confirmed'),
+            'confirm' => __('legacy/ok.head_signup_confirmation'),
             default => '',
         };
 

@@ -290,7 +290,6 @@ final class ForumTopicViewServiceTest extends TestCase
         $threw = false;
         try {
             $this->callWithSuppressedErrors(fn () => $this->service->buildViewTopic(
-                ['std_forum_error' => 'Error', 'std_topic_not_found' => 'Not found'],
                 ['id' => 1, 'username' => 'test', 'class' => 10],
                 1,
                 Request::create('/forums.php', 'GET', ['topicid' => 0]),
@@ -316,7 +315,6 @@ final class ForumTopicViewServiceTest extends TestCase
         $threw = false;
         try {
             $this->callWithSuppressedErrors(fn () => $this->service->buildViewTopic(
-                ['std_forum_error' => 'Error', 'std_topic_not_found' => 'Not found'],
                 ['id' => 1, 'username' => 'test', 'class' => 10],
                 1,
                 Request::create('/forums.php', 'GET', ['topicid' => 999]),
@@ -355,7 +353,6 @@ final class ForumTopicViewServiceTest extends TestCase
         $threw = false;
         try {
             $this->callWithSuppressedErrors(fn () => $this->service->buildViewTopic(
-                ['std_error' => 'Error', 'std_unpermitted_viewing_topic' => 'No permission'],
                 ['id' => 1, 'username' => 'test', 'class' => 0],
                 1,
                 Request::create('/forums.php', 'GET', ['topicid' => 1]),
@@ -399,26 +396,6 @@ final class ForumTopicViewServiceTest extends TestCase
         $this->topicRepo->shouldReceive('getTopicById')->andReturn($topic);
 
         $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewTopic(
-            ['text_forums' => 'Forums', 'text_prev' => 'Prev', 'text_next' => 'Next',
-                'there_is' => 'There is ', 'hits_on_this_topic' => ' views',
-                'text_locked' => 'Locked', 'title_reply_directly' => 'Reply',
-                'text_by' => 'by', 'text_at' => 'at', 'text_number' => '#',
-                'text_lou' => '', 'text_back_to_top' => 'Top',
-                'text_view_all_posts' => 'All', 'text_view_this_author_only' => 'Author',
-                'text_posts' => 'Posts', 'text_ul' => 'UL', 'text_dl' => 'DL',
-                'text_ratio' => 'Ratio', 'title_online' => 'Online',
-                'title_offline' => 'Offline', 'title_send_message_to' => 'PM',
-                'title_report_this_post' => 'Report', 'title_reply_with_quote' => 'Quote',
-                'title_delete_post' => 'Delete', 'title_edit_post' => 'Edit',
-                'submit_sticky' => 'Sticky', 'submit_unsticky' => 'Unsticky',
-                'submit_lock' => 'Lock', 'submit_unlock' => 'Unlock',
-                'submit_delete_topic' => 'Delete Topic', 'text_move_thread_to' => 'Move to',
-                'submit_move' => 'Move', 'text_highlight_topic' => 'Highlight',
-                'select_color' => 'Color', 'submit_change' => 'Change',
-                'text_quick_reply' => 'Quick Reply', 'submit_add_reply' => 'Add Reply',
-                'text_add_reply' => 'Reply', 'text_unpermitted_posting_here' => 'No post',
-                'std_forum_error' => 'Error', 'std_topic_not_found' => 'Not found',
-                'std_error' => 'Error', 'std_unpermitted_viewing_topic' => 'No permission'],
             ['id' => 999, 'username' => 'test', 'class' => 10, 'forumpost' => 'yes',
                 'clicktopic' => 0, 'avatars' => 'yes', 'signatures' => 'yes',
                 'last_catchup' => 0],
@@ -493,26 +470,6 @@ final class ForumTopicViewServiceTest extends TestCase
         $this->topicRepo->shouldReceive('getTopicById')->with(1)->andReturn($topic);
 
         $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewTopic(
-            ['text_forums' => 'Forums', 'text_prev' => 'Prev', 'text_next' => 'Next',
-                'there_is' => 'There is ', 'hits_on_this_topic' => ' views',
-                'text_locked' => 'Locked', 'title_reply_directly' => 'Reply',
-                'text_by' => 'by', 'text_at' => 'at', 'text_number' => '#',
-                'text_lou' => '', 'text_back_to_top' => 'Top',
-                'text_view_all_posts' => 'All', 'text_view_this_author_only' => 'Author',
-                'text_posts' => 'Posts', 'text_ul' => 'UL', 'text_dl' => 'DL',
-                'text_ratio' => 'Ratio', 'title_online' => 'Online',
-                'title_offline' => 'Offline', 'title_send_message_to' => 'PM',
-                'title_report_this_post' => 'Report', 'title_reply_with_quote' => 'Quote',
-                'title_delete_post' => 'Delete', 'title_edit_post' => 'Edit',
-                'submit_sticky' => 'Sticky', 'submit_unsticky' => 'Unsticky',
-                'submit_lock' => 'Lock', 'submit_unlock' => 'Unlock',
-                'submit_delete_topic' => 'Delete Topic', 'text_move_thread_to' => 'Move to',
-                'submit_move' => 'Move', 'text_highlight_topic' => 'Highlight',
-                'select_color' => 'Color', 'submit_change' => 'Change',
-                'text_quick_reply' => 'Quick Reply', 'submit_add_reply' => 'Add Reply',
-                'text_add_reply' => 'Reply', 'text_unpermitted_posting_here' => 'No post',
-                'std_forum_error' => 'Error', 'std_topic_not_found' => 'Not found',
-                'std_error' => 'Error', 'std_unpermitted_viewing_topic' => 'No permission'],
             ['id' => $userId, 'username' => 'test', 'class' => 10, 'forumpost' => 'yes',
                 'clicktopic' => 0, 'avatars' => 'yes', 'signatures' => 'yes',
                 'last_catchup' => 0],
@@ -560,27 +517,6 @@ final class ForumTopicViewServiceTest extends TestCase
         $this->topicRepo->shouldReceive('getTopicById')->andReturn($topic);
 
         $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewTopic(
-            ['text_forums' => 'Forums', 'text_prev' => 'Prev', 'text_next' => 'Next',
-                'there_is' => 'There is ', 'hits_on_this_topic' => ' views',
-                'text_locked' => 'LOCKED', 'title_reply_directly' => 'Reply',
-                'text_by' => 'by', 'text_at' => 'at', 'text_number' => '#',
-                'text_lou' => '', 'text_back_to_top' => 'Top',
-                'text_view_all_posts' => 'All', 'text_view_this_author_only' => 'Author',
-                'text_posts' => 'Posts', 'text_ul' => 'UL', 'text_dl' => 'DL',
-                'text_ratio' => 'Ratio', 'title_online' => 'Online',
-                'title_offline' => 'Offline', 'title_send_message_to' => 'PM',
-                'title_report_this_post' => 'Report', 'title_reply_with_quote' => 'Quote',
-                'title_delete_post' => 'Delete', 'title_edit_post' => 'Edit',
-                'submit_sticky' => 'Sticky', 'submit_unsticky' => 'Unsticky',
-                'submit_lock' => 'Lock', 'submit_unlock' => 'Unlock',
-                'submit_delete_topic' => 'Delete Topic', 'text_move_thread_to' => 'Move to',
-                'submit_move' => 'Move', 'text_highlight_topic' => 'Highlight',
-                'select_color' => 'Color', 'submit_change' => 'Change',
-                'text_quick_reply' => 'Quick Reply', 'submit_add_reply' => 'Add Reply',
-                'text_add_reply' => 'Reply', 'text_topic_locked_new_denied' => 'Topic is locked',
-                'text_unpermitted_posting_here' => 'No post',
-                'std_forum_error' => 'Error', 'std_topic_not_found' => 'Not found',
-                'std_error' => 'Error', 'std_unpermitted_viewing_topic' => 'No permission'],
             ['id' => 999, 'username' => 'test', 'class' => 10, 'forumpost' => 'yes',
                 'clicktopic' => 0, 'avatars' => 'yes', 'signatures' => 'yes',
                 'last_catchup' => 0],
@@ -589,7 +525,7 @@ final class ForumTopicViewServiceTest extends TestCase
             10,
         ));
 
-        $this->assertStringContainsString('LOCKED', $result['html']);
+        $this->assertStringContainsString('Locked', $result['html']);
         $this->assertStringContainsString('Locked Topic', $result['html']);
     }
 }

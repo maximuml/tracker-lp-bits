@@ -52,7 +52,6 @@ class MyController extends Controller
             $request,
             $data['allBonus'],
             $data['curUser'],
-            $data['lang'],
             $data['lockText']
         );
         if ($actionRedirect instanceof RedirectResponse) {
@@ -76,7 +75,6 @@ class MyController extends Controller
             $request,
             $data['allBonus'],
             $data['curUser'],
-            $data['lang'],
             $data['lockText']
         );
         if ($actionRedirect instanceof RedirectResponse) {
@@ -125,7 +123,6 @@ class MyController extends Controller
         }
 
         $q = htmlspecialchars((string) (request()->query('q') ?? ''));
-        $lang_myhr = (array) trans('legacy/myhr');
 
         $baseQuery = HitAndRun::query()->where('uid', $userid)->where('status', $status);
         $rescount = (int) (clone $baseQuery)->count();
@@ -190,7 +187,6 @@ JS;
             'queryString' => $queryString,
             'q' => $q,
             'requestUri' => Input::serverValue('REQUEST_URI'),
-            'lang_myhr' => $lang_myhr,
             'rescount' => $rescount,
             'pagertop' => $pagertop,
             'pagerbottom' => $pagerbottom,

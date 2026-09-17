@@ -12,7 +12,6 @@ namespace App\ViewModels;
 final class ForumPageViewModel extends ViewModel
 {
     /**
-     * @param  array<string, mixed>  $lang
      * @param  array<string, mixed>  $curUser
      * @param  array<string, mixed>|null  $compose
      * @param  array<string, mixed>|null  $viewtopic
@@ -22,7 +21,6 @@ final class ForumPageViewModel extends ViewModel
      * @param  array<string, mixed>|null  $forums
      */
     public function __construct(
-        public readonly array $lang,
         public readonly array $curUser,
         public readonly int $userId,
         public readonly string $action,
@@ -44,7 +42,6 @@ final class ForumPageViewModel extends ViewModel
     public function toArray(): array
     {
         return [
-            'lang' => $this->lang,
             'curUser' => $this->curUser,
             'userId' => $this->userId,
             'action' => $this->action,

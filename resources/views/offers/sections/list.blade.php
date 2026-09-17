@@ -1,4 +1,4 @@
-<h2 align="left">{{ $lang['text_offers_section'] ?? 'Offers' }}</h2>
+<h2 align="left">{{ __('legacy/offers.text_offers_section')}}</h2>
 <div class="nx-box">
 @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($list['rules'] ?? ''))
 @if (! empty($list['addOfferLink']))

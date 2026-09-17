@@ -13,7 +13,6 @@ class LegacyAuthContextTest extends TestCase
     {
         $context = new LegacyAuthContext(
             user: ['id' => 42, 'class' => 4],
-            lang: ['std_login_failed' => 'Login failed'],
             cache: null,
             ip: '127.0.0.1',
             requestUri: '/foo.php',
@@ -41,7 +40,6 @@ class LegacyAuthContextTest extends TestCase
     {
         $context = new LegacyAuthContext(
             user: null,
-            lang: [],
             cache: null,
             ip: '127.0.0.1',
             requestUri: null,
@@ -65,7 +63,6 @@ class LegacyAuthContextTest extends TestCase
     {
         $context = new LegacyAuthContext(
             user: ['id' => 1, 'class' => 3],
-            lang: [],
             cache: null,
             ip: '127.0.0.1',
             requestUri: null,
@@ -89,7 +86,6 @@ class LegacyAuthContextTest extends TestCase
     {
         $context = new LegacyAuthContext(
             user: null,
-            lang: [],
             cache: null,
             ip: '127.0.0.1',
             requestUri: null,

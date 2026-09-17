@@ -31,25 +31,24 @@ final class MessageReaderPageBuilder
     /**
      * Build the single message view section.
      *
-     * @param  array<string, mixed>  $lang
      * @param  array<string, mixed>  $curUser
      * @return array<string, mixed>
      */
-    public function buildViewMessage(array $lang, array $curUser, int $userId, Request $request): array
+    public function buildViewMessage(array $curUser, int $userId, Request $request): array
     {
         $pmId = (int) $request->input('id', 0);
         if ($pmId <= 0) {
             LegacyResponse::abort(
-                (string) ($lang['std_error'] ?? 'Error'),
-                (string) ($lang['std_no_permission'] ?? 'No permission.')
+                __('legacy/messages.std_error'),
+                __('legacy/messages.std_no_permission')
             );
         }
 
         $messageModel = $this->messageRepository->getMessageForUser($pmId, $userId);
         if (! $messageModel) {
             LegacyResponse::abort(
-                (string) ($lang['std_error'] ?? 'Error'),
-                (string) ($lang['std_no_permission'] ?? 'No permission.')
+                __('legacy/messages.std_error'),
+                __('legacy/messages.std_no_permission')
             );
 
             return [];
@@ -62,15 +61,15 @@ final class MessageReaderPageBuilder
         if ($isSender) {
             $sender = UserDisplay::username((int) $message['receiver']);
             $reply = '';
-            $from = (string) ($lang['text_to'] ?? 'To');
+            $from = __('legacy/messages.text_to');
         } else {
-            $from = (string) ($lang['text_from'] ?? 'From');
+            $from = __('legacy/messages.text_from');
             if ((int) $message['sender'] === 0) {
-                $sender = (string) ($lang['text_system'] ?? 'System');
+                $sender = __('legacy/messages.text_system');
                 $reply = '';
             } else {
                 $sender = UserDisplay::username((int) $message['sender']);
-                $reply = ' [ <a href="sendmessage.php?receiver='.(int) $message['sender'].'&replyto='.$pmId.'">'.htmlspecialchars((string) ($lang['text_reply'] ?? 'Reply')).'</a> ]';
+                $reply = ' [ <a href="sendmessage.php?receiver='.(int) $message['sender'].'&replyto='.$pmId.'">'.htmlspecialchars(__('legacy/messages.text_reply')).'</a> ]';
             }
         }
 
@@ -80,13 +79,13 @@ final class MessageReaderPageBuilder
         $unread = '';
         if ($isSender) {
             $unread = (bool) ($message['unread'] ?? false)
-                ? '<span style="color: #FF0000;"><b>'.htmlspecialchars((string) ($lang['text_new'] ?? 'New')).'</b></a>'
+                ? '<span style="color: #FF0000;"><b>'.htmlspecialchars(__('legacy/messages.text_new')).'</b></a>'
                 : '';
         }
 
         $subject = (string) $message['subject'];
         if (strlen($subject) <= 0) {
-            $subject = (string) ($lang['text_no_subject'] ?? 'No subject');
+            $subject = __('legacy/messages.text_no_subject');
         }
 
         // Mark message as read
@@ -124,18 +123,17 @@ final class MessageReaderPageBuilder
     /**
      * Build the forward-a-PM form section.
      *
-     * @param  array<string, mixed>  $lang
      * @return array<string, mixed>
      */
-    public function buildForward(array $lang, int $userId, Request $request): array
+    public function buildForward(int $userId, Request $request): array
     {
         $pmId = (int) $request->input('id', 0);
 
         $messageModel = $this->messageRepository->getMessageForForward($pmId, $userId);
         if (! $messageModel) {
             LegacyResponse::abort(
-                (string) ($lang['std_error'] ?? 'Error'),
-                (string) ($lang['std_no_permission_forwarding'] ?? 'No permission to forward.')
+                __('legacy/messages.std_error'),
+                __('legacy/messages.std_no_permission_forwarding')
             );
 
             return [];
@@ -149,8 +147,8 @@ final class MessageReaderPageBuilder
 
         $fromName = UserDisplay::username($from);
         if ($orig === 0) {
-            $origName = (string) ($lang['text_system'] ?? 'System');
-            $origName2 = (string) ($lang['text_system'] ?? 'System');
+            $origName = __('legacy/messages.text_system');
+            $origName2 = __('legacy/messages.text_system');
         } else {
             $origName = UserDisplay::username($orig);
             $origName2 = $this->messageRepository->getUsername($orig) ?? '';

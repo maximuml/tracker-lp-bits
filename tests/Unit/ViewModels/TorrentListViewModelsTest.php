@@ -85,7 +85,6 @@ final class TorrentListViewModelsTest extends TestCase
             canManage: false,
             showPromotionNote: true,
             lastCommentTooltips: SafeHtml::fromTrustedHtml(''),
-            lang: ['col_name' => 'Name'],
         );
 
         $this->assertCount(1, $vm->columns);
@@ -93,7 +92,6 @@ final class TorrentListViewModelsTest extends TestCase
         $this->assertTrue($vm->showComments);
         $this->assertFalse($vm->canManage);
         $this->assertTrue($vm->showPromotionNote);
-        $this->assertSame('Name', $vm->lang['col_name']);
     }
 
     public function test_search_panel_view_model_carries_structured_sections(): void

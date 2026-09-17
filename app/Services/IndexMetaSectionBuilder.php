@@ -23,10 +23,9 @@ final class IndexMetaSectionBuilder
     ) {}
 
     /**
-     * @param  array<string, mixed>  $lang
      * @return array<string, mixed>
      */
-    public function buildTopUploaders(array $lang): array
+    public function buildTopUploaders(): array
     {
         if (! SiteConfig::current()->main->showTopUploader()) {
             return ['show' => false];
@@ -77,42 +76,40 @@ JS;
 
         return [
             'show' => true,
-            'title' => $lang['top_uploader_title'] ?? 'Top uploaders',
-            'toggleHint' => $lang['top_uploader_toggle_time_range_tab'] ?? '',
-            'recentlyLabel' => $lang['top_uploader_toggle_time_range_recently'] ?? 'Recently',
-            'allLabel' => $lang['top_uploader_toggle_time_range_all'] ?? 'All time',
-            'colAuthor' => $lang['col_author'] ?? 'Author',
-            'colCounts' => $lang['col_counts'] ?? 'Count',
-            'colRanking' => $lang['col_ranking'] ?? 'Rank',
+            'title' => __('legacy/index.top_uploader_title'),
+            'toggleHint' => __('legacy/index.top_uploader_toggle_time_range_tab'),
+            'recentlyLabel' => __('legacy/index.top_uploader_toggle_time_range_recently'),
+            'allLabel' => __('legacy/index.top_uploader_toggle_time_range_all'),
+            'colAuthor' => __('legacy/index.col_author'),
+            'colCounts' => __('legacy/index.col_counts'),
+            'colRanking' => __('legacy/index.col_ranking'),
             'allRows' => $buildRows($allUploaders),
             'recentRows' => $buildRows($recentUploaders),
         ];
     }
 
     /**
-     * @param  array<string, mixed>  $lang
      * @return array<string, mixed>
      */
-    public function buildDisclaimer(array $lang): array
+    public function buildDisclaimer(): array
     {
         $siteName = Setting::getSiteName();
 
         return [
             'show' => true,
-            'title' => $lang['text_disclaimer'] ?? 'Disclaimer',
-            'content' => sprintf($lang['text_disclaimer_content'] ?? '', $siteName, $siteName),
+            'title' => __('legacy/index.text_disclaimer'),
+            'content' => sprintf(__('legacy/index.text_disclaimer_content'), $siteName, $siteName),
         ];
     }
 
     /**
-     * @param  array<string, mixed>  $lang
      * @return array<string, mixed>
      */
-    public function buildBrowserNote(array $lang): array
+    public function buildBrowserNote(): array
     {
         return [
             'show' => true,
-            'note' => new HtmlString((string) ($lang['text_browser_note'] ?? '')),
+            'note' => new HtmlString((string) (__('legacy/index.text_browser_note'))),
         ];
     }
 }

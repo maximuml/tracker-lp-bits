@@ -21,15 +21,13 @@ class InviteValidator
     ) {}
 
     /**
-     * @param  array<string, string>  $langSignup
-     *
      * @throws AuthenticationException
      */
-    public function validate(string $code, int $inviter, array $langSignup, string $langFolder): Invite
+    public function validate(string $code, int $inviter, string $langFolder): Invite
     {
         if ($code === '') {
             throw new AuthenticationException(
-                $this->msg($langSignup, 'std_error', 'Error').': '.$this->msg($langSignup, 'std_uninvited', 'Require invitation number.')
+                __('legacy/signup.std_error').': '.__('legacy/signup.std_uninvited')
             );
         }
 
@@ -39,7 +37,7 @@ class InviteValidator
             ->first();
 
         if (! $invite) {
-            throw new AuthenticationException($this->msg($langSignup, 'std_uninvited', 'Incorrect invitation code.'));
+            throw new AuthenticationException(__('legacy/signup.std_uninvited'));
         }
 
         if ((int) $invite->inviter !== $inviter) {
@@ -86,13 +84,5 @@ class InviteValidator
         ]);
 
         Cache::clearUser($inviter, '');
-    }
-
-    /**
-     * @param  array<string, string>  $lang
-     */
-    private function msg(array $lang, string $key, string $fallback): string
-    {
-        return (string) ($lang[$key] ?? $fallback);
     }
 }

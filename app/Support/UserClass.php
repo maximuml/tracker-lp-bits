@@ -192,29 +192,18 @@ final class UserClass
             return User::getClassName($class, $compact, $b_colored, $I18N);
         }
 
-        static $enLangFunctions = null;
-        static $currentLangFunctions = null;
         static $settingAccount = null;
-
-        if ($enLangFunctions === null) {
-            $enLangFunctions = (array) trans('legacy/functions', [], 'en');
-        }
 
         if ($settingAccount === null) {
             $settingAccount = SiteConfig::current()->account->toArray();
         }
 
-        if ($I18N) {
-            if ($currentLangFunctions === null) {
-                $currentLangFunctions = (array) trans('legacy/functions');
-            }
-            $thisLangFunctions = $currentLangFunctions;
-        } else {
-            $thisLangFunctions = $enLangFunctions;
-        }
-
         $langKey = self::langKey((int) $class);
-        $className = $langKey !== null ? (string) ($thisLangFunctions[$langKey] ?? '') : '';
+        $className = $langKey !== null ? (string) __(
+            'legacy/functions.'.$langKey,
+            [],
+            $I18N ? null : 'en'
+        ) : '';
 
         if (isset($options['with_alias']) && $options['with_alias'] && (int) $class < self::VIP && isset($settingAccount["{$class}_alias"])) {
             $alias = trim($settingAccount["{$class}_alias"]);
@@ -223,7 +212,7 @@ final class UserClass
             }
         }
 
-        $classNameColor = $langKey !== null ? (string) ($enLangFunctions[$langKey] ?? '') : '';
+        $classNameColor = $langKey !== null ? (string) __('legacy/functions.'.$langKey, [], 'en') : '';
         $className = $compact ? str_replace(' ', '', $className) : $className;
 
         if (isset($options['uid'], $options['with_role'])) {
@@ -288,7 +277,6 @@ final class UserClass
         bool $includeNoClass = false,
         bool $disabled = false,
     ): string {
-        $lang = app(Language::class)->functions();
 
         return self::classSelect(
             $selectName,
@@ -297,7 +285,7 @@ final class UserClass
             $minClass,
             $includeNoClass,
             $disabled,
-            ['select_an_user_class' => $lang['select_an_user_class'] ?? '---'],
+            ['select_an_user_class' => __('legacy/functions.select_an_user_class')],
         );
     }
 }

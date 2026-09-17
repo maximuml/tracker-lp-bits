@@ -88,12 +88,10 @@ class ShoutboxController extends LegacyController
             }
         }
 
-        $langShoutbox = $this->langShoutbox();
         $isStaff = $actor->can(PermissionEnum::SB_MANAGE);
-        $items = $this->decorateShoutRows($rows, $currentUser, $currentUserId, $isStaff, $reactionData, $langShoutbox);
+        $items = $this->decorateShoutRows($rows, $currentUser, $currentUserId, $isStaff, $reactionData);
 
         $content = view('shoutbox.index', [
-            'lang_shoutbox' => $langShoutbox,
             'isAjax' => $isAjax,
             'where' => $where,
             'refresh' => $refresh,
@@ -109,19 +107,18 @@ class ShoutboxController extends LegacyController
      * @param  iterable<int, mixed>  $rows
      * @param  array<string, mixed>  $currentUser
      * @param  array<string, mixed>  $reactionData
-     * @param  array<string, mixed>  $langShoutbox
      * @return list<array<string, string>>
      */
-    private function decorateShoutRows(iterable $rows, array $currentUser, int $currentUserId, bool $isStaff, array $reactionData, array $langShoutbox): array
+    private function decorateShoutRows(iterable $rows, array $currentUser, int $currentUserId, bool $isStaff, array $reactionData): array
     {
         $reactionCounts = (array) ($reactionData['counts'] ?? []);
         $reactionMine = (array) ($reactionData['mine'] ?? []);
         $reactionUsers = (array) ($reactionData['users'] ?? []);
         $showAvatars = LegacyYesNo::isYes($currentUser['avatars'] ?? null);
-        $tooltipAvatar = (string) ($langShoutbox['tooltip_avatar'] ?? 'Open profile');
-        $tooltipReply = (string) ($langShoutbox['tooltip_nick_reply'] ?? 'Reply via @');
-        $labelMore = (string) ($langShoutbox['shout_show_more'] ?? 'more');
-        $labelLess = (string) ($langShoutbox['shout_show_less'] ?? 'less');
+        $tooltipAvatar = (string) (__('legacy/shoutbox.tooltip_avatar'));
+        $tooltipReply = (string) (__('legacy/shoutbox.tooltip_nick_reply'));
+        $labelMore = (string) (__('legacy/shoutbox.shout_show_more'));
+        $labelLess = (string) (__('legacy/shoutbox.shout_show_less'));
         $groupWindowSec = 120;
 
         $items = [];
@@ -140,7 +137,7 @@ class ShoutboxController extends LegacyController
             $editedNote = '';
             if (! empty($arr['edited_at']) && (int) $arr['edited_at'] > 0) {
                 $editedNote = ' <span class="shout-edited-note">('
-                    .htmlspecialchars((string) ($langShoutbox['text_edited'] ?? 'edited')).' '
+                    .htmlspecialchars((string) (__('legacy/shoutbox.text_edited'))).' '
                     .Shoutbox::formatTime((int) $arr['edited_at'], true).')</span>';
             }
 
@@ -167,7 +164,7 @@ class ShoutboxController extends LegacyController
                     );
                 }
             } else {
-                $username = (string) ($langShoutbox['text_guest'] ?? '');
+                $username = (string) (__('legacy/shoutbox.text_guest'));
                 $classBadge = '';
             }
 
@@ -249,11 +246,8 @@ class ShoutboxController extends LegacyController
             ? 'shoutbox_history.php?'.http_build_query(array_filter($filters, fn ($v) => $v !== '')).'&page='
             : '';
 
-        $lang = $this->langShoutbox();
-
         return $this->legacyPage($request, 'shoutbox_history', true, [
-            'lang_shoutbox' => $lang,
-            'items' => $this->decorateHistoryRows($rows, $currentUserId, $isStaff, $reactionData, $userDisplayMap, $lang),
+            'items' => $this->decorateHistoryRows($rows, $currentUserId, $isStaff, $reactionData, $userDisplayMap),
             'page' => (int) ($result['page'] ?? 1),
             'totalPages' => $totalPages,
             'paginationBase' => $paginationBase,
@@ -263,23 +257,12 @@ class ShoutboxController extends LegacyController
     }
 
     /**
-     * @return array<string, mixed>
-     */
-    private function langShoutbox(): array
-    {
-        $lang = trans('legacy/shoutbox');
-
-        return is_array($lang) ? $lang : [];
-    }
-
-    /**
      * @param  array<int|string, mixed>  $rows
      * @param  array<string, mixed>  $reactionData
      * @param  array<int, string>  $userDisplayMap
-     * @param  array<string, mixed>  $lang
      * @return list<array<string, mixed>>
      */
-    private function decorateHistoryRows(array $rows, int $currentUserId, bool $isStaff, array $reactionData, array $userDisplayMap, array $lang): array
+    private function decorateHistoryRows(array $rows, int $currentUserId, bool $isStaff, array $reactionData, array $userDisplayMap): array
     {
         $reactionCounts = (array) ($reactionData['counts'] ?? []);
         $reactionMine = (array) ($reactionData['mine'] ?? []);
@@ -294,13 +277,13 @@ class ShoutboxController extends LegacyController
             $uid = (int) ($arr['userid'] ?? 0);
             $username = $uid > 0
                 ? (string) ($userDisplayMap[$uid] ?? '')
-                : (string) ($lang['text_guest'] ?? '<b>Guest</b>');
+                : (string) (__('legacy/shoutbox.text_guest'));
             $mentionsMe = false;
             $message = Shoutbox::formatMessage((string) ($arr['text'] ?? ''), $currentUserId, $mentionsMe);
             $editedNote = '';
             if (! empty($arr['edited_at']) && (int) $arr['edited_at'] > 0) {
                 $editedNote = ' <span class="shout-edited-note">('
-                    .htmlspecialchars((string) ($lang['text_edited'] ?? 'edited')).' '
+                    .htmlspecialchars((string) (__('legacy/shoutbox.text_edited'))).' '
                     .Shoutbox::formatTime((int) $arr['edited_at'], true).')</span>';
             }
             $items[] = [

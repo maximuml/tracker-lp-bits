@@ -1,6 +1,6 @@
 @extends('layouts.modern')
 
-@section('title', $title ?? $lang_index['head_home'] ?? 'Home')
+@section('title', $title ?? __('legacy/index.head_home'))
 
 @section('content')
 @include('index.sections.news')

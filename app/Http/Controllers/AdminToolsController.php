@@ -293,8 +293,6 @@ class AdminToolsController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Permission denied');
         }
 
-        $langTestip = (array) trans('legacy/testip');
-
         if ($request->isMethod('post')) {
             $ip = (string) request()->post('ip');
         } else {
@@ -335,7 +333,6 @@ class AdminToolsController extends LegacyController
             'message' => $message,
             'banstable' => $banstable,
             'hasResult' => $hasResult,
-            'lang_testip' => $langTestip,
         ]);
 
     }

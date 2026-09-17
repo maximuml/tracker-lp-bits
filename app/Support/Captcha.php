@@ -63,10 +63,8 @@ final class Captcha
      *
      * Mirrors `show_image_code()`. The `$secret` value is passed by the
      * caller instead of being read from `$_GET` inside the helper.
-     *
-     * @param  array<string, string>  $labels
      */
-    public static function render(string $enabledFlag, array $labels = [], ?string $secret = null, string $layout = 'tr'): void
+    public static function render(string $enabledFlag, ?string $secret = null, string $layout = 'tr'): void
     {
         if ($enabledFlag !== 'yes') {
             return;
@@ -85,8 +83,8 @@ final class Captcha
 
         $markup = $driver->render([
             'labels' => [
-                'image' => $labels[$labelKey] ?? $labels['row_security_image'] ?? '',
-                'code' => $labels['row_security_code'] ?? '',
+                'image' => __('legacy/functions.'.$labelKey),
+                'code' => __('legacy/functions.row_security_code'),
             ],
             'secret' => $secret ?? '',
             'layout' => $layout,
@@ -115,13 +113,8 @@ final class Captcha
      */
     public static function showImageCode(string $layout = 'tr'): void
     {
-        $lang_functions = app(Language::class)->functions();
         $iv = SiteConfig::current()->security->captchaRequired() ? 'yes' : 'no';
 
-        self::render($iv, [
-            'row_security_image' => $lang_functions['row_security_image'] ?? '',
-            'row_security_challenge' => $lang_functions['row_security_challenge'] ?? '',
-            'row_security_code' => $lang_functions['row_security_code'] ?? '',
-        ], (string) request()->query('secret', ''), $layout);
+        self::render($iv, (string) request()->query('secret', ''), $layout);
     }
 }

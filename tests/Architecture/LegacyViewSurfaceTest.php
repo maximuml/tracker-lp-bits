@@ -83,13 +83,13 @@ final class LegacyViewSurfaceTest extends TestCase
      * Baseline: SafeHtml::fromTrustedHtml() calls in views.
      * Unverified raw output — byte-identical to {!! !!}.
      */
-    private const BASELINE_TRUSTED_HTML = 550;
+    private const BASELINE_TRUSTED_HTML = 520;
 
     /**
      * Baseline: fromTrustedHtml() over $lang[...] arrays.
      * Language strings are plain text and must use {{ }} instead.
      */
-    private const BASELINE_TRUSTED_HTML_LANG = 110;
+    private const BASELINE_TRUSTED_HTML_LANG = 0;
 
     /**
      * Baseline: @safeHtml output inside HTML attribute values.

@@ -50,9 +50,8 @@ final class BonusService
     /**
      * @param  array<int, array<string, mixed>>  $allBonus
      * @param  array<string, mixed>  $curUser
-     * @param  array<string, mixed>  $lang
      */
-    public function handleExchangeActionPublic(Request $request, array $allBonus, array $curUser, array $lang, string $lockText): ?RedirectResponse
+    public function handleExchangeActionPublic(Request $request, array $allBonus, array $curUser, string $lockText): ?RedirectResponse
     {
         $action = htmlspecialchars((string) $request->query('action', ''));
         if ($action !== 'exchange') {
@@ -63,15 +62,14 @@ final class BonusService
             return redirect('/mybonus.php');
         }
 
-        return $this->handleExchange($request, $allBonus, $curUser, $lang, $lockText);
+        return $this->handleExchange($request, $allBonus, $curUser, $lockText);
     }
 
     /**
      * @param  array<int, array<string, mixed>>  $allBonus
      * @param  array<string, mixed>  $curUser
-     * @param  array<string, mixed>  $lang
      */
-    private function handleExchange(Request $request, array $allBonus, array $curUser, array $lang, string $lockText): ?RedirectResponse
+    private function handleExchange(Request $request, array $allBonus, array $curUser, string $lockText): ?RedirectResponse
     {
         $baseUrl = (string) $this->globals->get('BASEURL', '');
         $bonusgiftBonus = (string) $this->globals->get('bonusgift_bonus', 'yes');
@@ -91,7 +89,7 @@ final class BonusService
             || ! isset($allBonus[(int) $request->post('option', 0)])
         ) {
             Log::writeWithContext('User '.($curUser['username'] ?? '').','.($curUser['ip'] ?? '').' is trying to cheat at bonus system', 'mod');
-            LegacyResponse::abort((string) ($lang['text_error'] ?? ''), (string) ($lang['text_cheat_alert'] ?? ''), true, false);
+            LegacyResponse::abort((string) (__('legacy/mybonus.text_error')), (string) (__('legacy/mybonus.text_cheat_alert')), true, false);
         }
 
         $option = (int) $request->post('option', 0);
@@ -114,28 +112,28 @@ final class BonusService
 
         // trade for upload
         if ($art === 'traffic') {
-            return $this->exchangeTraffic($curUser, $bonusarray, $points, $ratiolimitBonus, $dlamountlimitBonus, $lang);
+            return $this->exchangeTraffic($curUser, $bonusarray, $points, $ratiolimitBonus, $dlamountlimitBonus);
         }
         if ($art === 'traffic_downloaded') {
             return $this->exchangeTrafficDownloaded($curUser, $bonusarray, $points, $baseUrl);
         }
         if ($art === 'class') {
-            return $this->exchangeClass($curUser, $points, $baseUrl, $lang);
+            return $this->exchangeClass($curUser, $points, $baseUrl);
         }
         if ($art === 'invite') {
-            return $this->exchangeInvite($curUser, $bonusarray, $points, $baseUrl, $lang, $buyinviteClass);
+            return $this->exchangeInvite($curUser, $bonusarray, $points, $baseUrl, $buyinviteClass);
         }
         if ($art === 'tmp_invite') {
-            return $this->exchangeTmpInvite($curUser, $points, $baseUrl, $lang, $buyinviteClass);
+            return $this->exchangeTmpInvite($curUser, $points, $baseUrl, $buyinviteClass);
         }
         if ($art === 'title') {
-            return $this->exchangeTitle($request, $curUser, $points, $baseUrl, $lang);
+            return $this->exchangeTitle($request, $curUser, $points, $baseUrl);
         }
         if ($art === 'gift_2') {
-            return $this->exchangeCharity($request, $curUser, $points, $baseUrl, $lang);
+            return $this->exchangeCharity($request, $curUser, $points, $baseUrl);
         }
         if ($art === 'gift_1' && $bonusgiftBonus === 'yes') {
-            return $this->exchangeGift($request, $curUser, $bonusarray, $points, $baseUrl, $lang, $taxpercentageBonus, $basictaxBonus);
+            return $this->exchangeGift($request, $curUser, $bonusarray, $points, $baseUrl, $taxpercentageBonus, $basictaxBonus);
         }
         if ($art === 'cancel_hr') {
             return $this->exchangeCancelHr($request, $userid, $baseUrl);
@@ -167,9 +165,8 @@ final class BonusService
     /**
      * @param  array<string, mixed>  $curUser
      * @param  array<string, mixed>  $bonusarray
-     * @param  array<string, mixed>  $lang
      */
-    private function exchangeTraffic(array $curUser, array $bonusarray, float $points, float $ratiolimitBonus, int $dlamountlimitBonus, array $lang): RedirectResponse
+    private function exchangeTraffic(array $curUser, array $bonusarray, float $points, float $ratiolimitBonus, int $dlamountlimitBonus): RedirectResponse
     {
         $baseUrl = (string) $this->globals->get('BASEURL', '');
         if (($curUser['uploaded'] ?? 0) > $dlamountlimitBonus * 1073741824) {
@@ -180,7 +177,7 @@ final class BonusService
             $ratio = 0;
         }
         if ($ratiolimitBonus > 0 && $ratio > $ratiolimitBonus) {
-            LegacyResponse::abort((string) ($lang['text_error'] ?? ''), (string) ($lang['text_cheat_alert'] ?? ''), true, false);
+            LegacyResponse::abort((string) (__('legacy/mybonus.text_error')), (string) (__('legacy/mybonus.text_cheat_alert')), true, false);
         }
         $up = (int) ($curUser['uploaded'] ?? 0) + (int) $bonusarray['menge'];
         Logger::writeWithContext(sprintf('user: %s going to use %s bonus to exchange uploaded from %s to %s', $curUser['id'] ?? 0, $points, $curUser['uploaded'] ?? 0, $up), 'info', false);
@@ -204,12 +201,11 @@ final class BonusService
 
     /**
      * @param  array<string, mixed>  $curUser
-     * @param  array<string, mixed>  $lang
      */
-    private function exchangeClass(array $curUser, float $points, string $baseUrl, array $lang): ?RedirectResponse
+    private function exchangeClass(array $curUser, float $points, string $baseUrl): ?RedirectResponse
     {
         if (UserDisplay::currentClass() >= UC_VIP) {
-            Html::stdMessage((string) ($lang['std_no_permission'] ?? ''), (string) ($lang['std_class_above_vip'] ?? ''), false);
+            Html::stdMessage((string) (__('legacy/mybonus.std_no_permission')), (string) (__('legacy/mybonus.std_class_above_vip')), false);
 
             return null;
         }
@@ -222,12 +218,11 @@ final class BonusService
     /**
      * @param  array<string, mixed>  $curUser
      * @param  array<string, mixed>  $bonusarray
-     * @param  array<string, mixed>  $lang
      */
-    private function exchangeInvite(array $curUser, array $bonusarray, float $points, string $baseUrl, array $lang, int $buyinviteClass): RedirectResponse
+    private function exchangeInvite(array $curUser, array $bonusarray, float $points, string $baseUrl, int $buyinviteClass): RedirectResponse
     {
         if (! Permission::can(PermissionEnum::BUY_INVITE)) {
-            LegacyResponse::abort((string) ($lang['std_sorry'] ?? ''), UserClass::name($buyinviteClass, false, false, true).($lang['text_plus_only'] ?? ''), false, false);
+            LegacyResponse::abort((string) (__('legacy/mybonus.std_sorry')), UserClass::name($buyinviteClass, false, false, true).(__('legacy/mybonus.text_plus_only')), false, false);
         }
         $inv = (int) ($curUser['invites'] ?? 0) + (int) $bonusarray['menge'];
         $this->bonusRep->consumeUserBonus((int) $curUser['id'], $points, BusinessType::EXCHANGE_INVITE->value, $points.' Points for invites.', ['invites' => $inv]);
@@ -237,12 +232,11 @@ final class BonusService
 
     /**
      * @param  array<string, mixed>  $curUser
-     * @param  array<string, mixed>  $lang
      */
-    private function exchangeTmpInvite(array $curUser, float $points, string $baseUrl, array $lang, int $buyinviteClass): RedirectResponse
+    private function exchangeTmpInvite(array $curUser, float $points, string $baseUrl, int $buyinviteClass): RedirectResponse
     {
         if (! Permission::can(PermissionEnum::BUY_INVITE)) {
-            LegacyResponse::abort((string) ($lang['std_sorry'] ?? ''), UserClass::name($buyinviteClass, false, false, true).($lang['text_plus_only'] ?? ''), false, false);
+            LegacyResponse::abort((string) (__('legacy/mybonus.std_sorry')), UserClass::name($buyinviteClass, false, false, true).(__('legacy/mybonus.text_plus_only')), false, false);
         }
         $this->bonusRep->consumeToBuyTemporaryInvite((int) $curUser['id']);
 
@@ -251,13 +245,12 @@ final class BonusService
 
     /**
      * @param  array<string, mixed>  $curUser
-     * @param  array<string, mixed>  $lang
      */
-    private function exchangeTitle(Request $request, array $curUser, float $points, string $baseUrl, array $lang): RedirectResponse
+    private function exchangeTitle(Request $request, array $curUser, float $points, string $baseUrl): RedirectResponse
     {
         $title = (string) $request->post('title', '');
         $words = ['fuck', 'shit', 'pussy', 'cunt', 'nigger', 'Staff Leader', 'SysOp', 'Administrator', 'Moderator', 'Uploader', 'Retiree', 'VIP', 'Nexus Master', 'Ultimate User', 'Extreme User', 'Veteran User', 'Insane User', 'Crazy User', 'Elite User', 'Power User', 'User', 'Peasant', 'Champion'];
-        $title = str_replace($words, (string) ($lang['text_wasted_karma'] ?? ''), $title);
+        $title = str_replace($words, (string) (__('legacy/mybonus.text_wasted_karma')), $title);
         $this->bonusRep->consumeUserBonus((int) $curUser['id'], $points, BusinessType::CUSTOM_TITLE->value, $points.' Points for custom title. Old title is '.htmlspecialchars(trim((string) ($curUser['title'] ?? '')))." and new title is {$title}.", ['title' => $title]);
 
         return $this->redirect($baseUrl, 'title');
@@ -265,19 +258,18 @@ final class BonusService
 
     /**
      * @param  array<string, mixed>  $curUser
-     * @param  array<string, mixed>  $lang
      */
-    private function exchangeCharity(Request $request, array $curUser, float $points, string $baseUrl, array $lang): ?RedirectResponse
+    private function exchangeCharity(Request $request, array $curUser, float $points, string $baseUrl): ?RedirectResponse
     {
         $points = (int) $request->post('bonuscharity', 0);
         if ($points < 1000 || $points > 50000) {
-            Html::stdMessage((string) ($lang['text_error'] ?? ''), (string) ($lang['bonus_amount_not_allowed_two'] ?? ''), false);
+            Html::stdMessage((string) (__('legacy/mybonus.text_error')), (string) (__('legacy/mybonus.bonus_amount_not_allowed_two')), false);
 
             return null;
         }
         $ratiocharity = (float) $request->post('ratiocharity', 0);
         if ($ratiocharity < 0.1 || $ratiocharity > 0.8) {
-            Html::stdMessage((string) ($lang['text_error'] ?? ''), (string) ($lang['bonus_ratio_not_allowed'] ?? ''));
+            Html::stdMessage((string) (__('legacy/mybonus.text_error')), (string) (__('legacy/mybonus.bonus_ratio_not_allowed')));
 
             return null;
         }
@@ -286,7 +278,7 @@ final class BonusService
         }
         $charityReceiverCount = $this->bonusCalculationRepository->getCharityReceiverCount($ratiocharity);
         if (! $charityReceiverCount) {
-            Html::stdMessage((string) ($lang['std_sorry'] ?? ''), (string) ($lang['std_no_users_need_charity'] ?? ''));
+            Html::stdMessage((string) (__('legacy/mybonus.std_sorry')), (string) (__('legacy/mybonus.std_no_users_need_charity')));
 
             return null;
         }
@@ -303,23 +295,22 @@ final class BonusService
     /**
      * @param  array<string, mixed>  $curUser
      * @param  array<string, mixed>  $bonusarray
-     * @param  array<string, mixed>  $lang
      */
-    private function exchangeGift(Request $request, array $curUser, array $bonusarray, float $points, string $baseUrl, array $lang, float $taxpercentageBonus, float $basictaxBonus): ?RedirectResponse
+    private function exchangeGift(Request $request, array $curUser, array $bonusarray, float $points, string $baseUrl, float $taxpercentageBonus, float $basictaxBonus): ?RedirectResponse
     {
         $points = (float) $request->post('bonusgift', 0);
         $message = (string) $request->post('message', '');
         $usernamegift = trim((string) $request->post('username', ''));
         $arr = $this->bonusCalculationRepository->findGiftReceiver($usernamegift);
         if (empty($arr)) {
-            Html::stdMessage((string) ($lang['text_error'] ?? ''), (string) ($lang['text_receiver_not_exists'] ?? ''), false);
+            Html::stdMessage((string) (__('legacy/mybonus.text_error')), (string) (__('legacy/mybonus.text_receiver_not_exists')), false);
 
             return null;
         }
         $useridgift = (int) $arr['id'];
         $userseedbonus = (float) $arr['seedbonus'];
         if ($points < (float) $bonusarray['points']) {
-            Html::stdMessage((string) ($lang['text_error'] ?? ''), (string) ($lang['bonus_amount_not_allowed'] ?? ''));
+            Html::stdMessage((string) (__('legacy/mybonus.text_error')), (string) (__('legacy/mybonus.bonus_amount_not_allowed')));
 
             return null;
         }
@@ -334,7 +325,7 @@ final class BonusService
             $aftertaxpoint -= $basictaxBonus;
         }
         if ((int) $curUser['id'] === $useridgift) {
-            Html::stdMessage((string) ($lang['text_huh'] ?? ''), (string) ($lang['text_karma_self_giving_warning'] ?? ''), false);
+            Html::stdMessage((string) (__('legacy/mybonus.text_huh')), (string) (__('legacy/mybonus.text_karma_self_giving_warning')), false);
 
             return null;
         }

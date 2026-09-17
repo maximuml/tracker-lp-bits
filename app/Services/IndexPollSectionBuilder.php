@@ -21,11 +21,10 @@ final class IndexPollSectionBuilder
     ) {}
 
     /**
-     * @param  array<string, mixed>  $lang
      * @param  array<string, mixed>  $curUser
      * @return array<string, mixed>
      */
-    public function buildPolls(array $lang, array $curUser, bool $canManage, bool $canLog, LegacyRedisCache $cache): array
+    public function buildPolls(array $curUser, bool $canManage, bool $canLog, LegacyRedisCache $cache): array
     {
         $show = ! empty($curUser) && $this->globals->get('showpolls_main', '') === 'yes';
 
@@ -45,12 +44,12 @@ final class IndexPollSectionBuilder
 
         $result = [
             'show' => true,
-            'title' => $lang['text_polls'] ?? 'Polls',
+            'title' => __('legacy/index.text_polls'),
             'canManage' => $canManage,
-            'newLabel' => $lang['text_new'] ?? 'New',
-            'editLabel' => $lang['text_edit'] ?? 'Edit',
-            'deleteLabel' => $lang['text_delete'] ?? 'Delete',
-            'detailLabel' => $lang['text_detail'] ?? 'Detail',
+            'newLabel' => __('legacy/index.text_new'),
+            'editLabel' => __('legacy/index.text_edit'),
+            'deleteLabel' => __('legacy/index.text_delete'),
+            'detailLabel' => __('legacy/index.text_detail'),
             'exists' => $pollExists,
         ];
 
@@ -70,11 +69,11 @@ final class IndexPollSectionBuilder
             $result['question'] = $question;
             $result['options'] = $options;
             $result['hasVoted'] = $uservote !== null;
-            $result['blankVoteLabel'] = $lang['radio_blank_vote'] ?? 'Blank vote';
-            $result['submitVoteLabel'] = $lang['submit_vote'] ?? 'Vote';
+            $result['blankVoteLabel'] = __('legacy/index.radio_blank_vote');
+            $result['submitVoteLabel'] = __('legacy/index.submit_vote');
             $result['canLog'] = $canLog;
-            $result['previousPollsLabel'] = $lang['text_previous_polls'] ?? 'Previous polls';
-            $result['votesLabel'] = $lang['text_votes'] ?? 'Votes';
+            $result['previousPollsLabel'] = __('legacy/index.text_previous_polls');
+            $result['votesLabel'] = __('legacy/index.text_votes');
 
             if ($uservote !== null) {
                 $results = $cache->get_value('current_poll_result');

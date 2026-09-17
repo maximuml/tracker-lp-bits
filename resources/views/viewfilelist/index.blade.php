@@ -16,7 +16,7 @@
 .fileicon.fi-other    { background:#95a5a6; }
 </style>
 <table data-nx="data" class="main" border="1" cellspacing=0 cellpadding="5">
-<tr><td class=colhead>{{ $lang_viewfilelist['col_path'] }}</td><td class=colhead align=center><img class="size" src="pic/trans.gif" alt="size" /></td></tr>
+<tr><td class=colhead>{{ __('legacy/viewfilelist.col_path') }}</td><td class=colhead align=center><img class="size" src="pic/trans.gif" alt="size" /></td></tr>
 @foreach ($files as $file)
 <tr><td class=rowfollow>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($file['badgeHtml'])){{ $file['filename'] }}</td><td class=rowfollow align="right">{{ $file['size'] }}</td></tr>
 @endforeach

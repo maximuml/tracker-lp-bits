@@ -40,7 +40,6 @@ final class ForumPageService
     public function build(Request $request): ForumPageViewModel
     {
         $curUser = (array) ($this->currentUser->get() ?? []);
-        $lang = (array) trans('legacy/forums');
         $userId = (int) ($curUser['id'] ?? 0);
 
         // Global variables previously set by the procedural partial.
@@ -78,48 +77,47 @@ final class ForumPageService
 
         switch ($action) {
             case 'newtopic':
-                $compose = $this->composeService->buildNewTopic($lang, $request);
+                $compose = $this->composeService->buildNewTopic($request);
                 $action = 'newtopic';
                 break;
             case 'quotepost':
-                $compose = $this->composeService->buildQuotePost($lang, $curUser, $request);
+                $compose = $this->composeService->buildQuotePost($curUser, $request);
                 $action = 'quotepost';
                 break;
             case 'reply':
-                $compose = $this->composeService->buildReply($lang, $request);
+                $compose = $this->composeService->buildReply($request);
                 $action = 'reply';
                 break;
             case 'editpost':
-                $compose = $this->composeService->buildEditPost($lang, $curUser, $request);
+                $compose = $this->composeService->buildEditPost($curUser, $request);
                 $action = 'editpost';
                 break;
             case 'viewtopic':
-                $viewtopic = $this->topicViewService->buildViewTopic($lang, $curUser, $userId, $request, $postsperpage);
+                $viewtopic = $this->topicViewService->buildViewTopic($curUser, $userId, $request, $postsperpage);
                 $action = 'viewtopic';
                 break;
             case 'viewforum':
-                $viewforum = $this->listingService->buildViewForum($lang, $curUser, $request, $topicsperpage, $postsperpage);
+                $viewforum = $this->listingService->buildViewForum($curUser, $request, $topicsperpage, $postsperpage);
                 $action = 'viewforum';
                 break;
             case 'viewunread':
-                $viewunread = $this->listingService->buildViewUnread($lang, $curUser);
+                $viewunread = $this->listingService->buildViewUnread($curUser);
                 $action = 'viewunread';
                 break;
             case 'search':
-                $search = $this->listingService->buildSearch($lang, $topicsperpage);
+                $search = $this->listingService->buildSearch($topicsperpage);
                 $action = 'search';
                 break;
             default:
                 if ($action !== '') {
-                    LegacyResponse::abort($lang['std_forum_error'] ?? '', $lang['std_unknown_action'] ?? '');
+                    LegacyResponse::abort(__('legacy/forums.std_forum_error'), __('legacy/forums.std_unknown_action'));
                 }
-                $forums = $this->indexService->buildForumsIndex($lang, $curUser, $userId);
+                $forums = $this->indexService->buildForumsIndex($curUser, $userId);
                 $action = 'forums';
                 break;
         }
 
         return new ForumPageViewModel(
-            lang: $lang,
             curUser: $curUser,
             userId: $userId,
             action: $action,

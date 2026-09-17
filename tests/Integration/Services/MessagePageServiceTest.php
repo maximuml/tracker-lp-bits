@@ -499,7 +499,6 @@ final class MessagePageServiceTest extends TestCase
 
         $data = $this->callBuild($request);
 
-        $this->assertArrayHasKey('lang', $data);
         $this->assertArrayHasKey('curUser', $data);
         $this->assertArrayHasKey('userId', $data);
         $this->assertArrayHasKey('action', $data);

@@ -72,23 +72,22 @@ class MessageController extends LegacyController
 
     public function sendmessage(Request $request): Response|RedirectResponse|View
     {
-        $langSendmessage = (array) trans('legacy/sendmessage');
         $currentUser = (array) ($this->currentUser->get() ?? []);
 
         $receiver = (int) $request->input('receiver', 0);
         if ($receiver <= 0) {
-            return $this->legacyAbortResponse($langSendmessage['std_error'] ?? 'Error', $langSendmessage['std_permission_denied'] ?? 'Permission denied.');
+            return $this->legacyAbortResponse(__('legacy/sendmessage.std_error'), __('legacy/sendmessage.std_permission_denied'));
         }
 
         $replyto = $request->input('replyto');
         if ($replyto !== null && $replyto !== '' && ! Validators::isId($replyto)) {
-            return $this->legacyAbortResponse($langSendmessage['std_error'] ?? 'Error', $langSendmessage['std_permission_denied'] ?? 'Permission denied.');
+            return $this->legacyAbortResponse(__('legacy/sendmessage.std_error'), __('legacy/sendmessage.std_permission_denied'));
         }
         $replyto = $replyto !== null && $replyto !== '' ? (int) $replyto : 0;
 
         $user = User::query()->find($receiver);
         if (! $user) {
-            return $this->legacyAbortResponse($langSendmessage['std_error'] ?? 'Error', $langSendmessage['std_no_user_id'] ?? 'No user with that ID.');
+            return $this->legacyAbortResponse(__('legacy/sendmessage.std_error'), __('legacy/sendmessage.std_no_user_id'));
         }
 
         $subject = '';
@@ -96,11 +95,11 @@ class MessageController extends LegacyController
         if ($replyto > 0) {
             $msg = Message::query()->find($replyto);
             if (! $msg) {
-                return $this->legacyAbortResponse($langSendmessage['std_error'] ?? 'Error', $langSendmessage['std_permission_denied'] ?? 'Permission denied.');
+                return $this->legacyAbortResponse(__('legacy/sendmessage.std_error'), __('legacy/sendmessage.std_permission_denied'));
             }
             $msga = $msg->toArray();
             if ((int) ($msga['receiver'] ?? 0) !== (int) ($currentUser['id'] ?? 0)) {
-                return $this->legacyAbortResponse($langSendmessage['std_error'] ?? 'Error', $langSendmessage['std_permission_denied'] ?? 'Permission denied.');
+                return $this->legacyAbortResponse(__('legacy/sendmessage.std_error'), __('legacy/sendmessage.std_permission_denied'));
             }
             $body .= $msga['msg']."\n\n-------- [url=userdetails.php?id=".$currentUser['id'].']'.$currentUser['username'].'[/url][i] Wrote at '.date('Y-m-d H:i:s').":[/i] --------\n";
             $subject = (string) $msga['subject'];
@@ -123,7 +122,7 @@ class MessageController extends LegacyController
             $returnto = htmlspecialchars((string) $request->headers->get('referer'));
         }
 
-        $messageTo = (string) ($langSendmessage['text_message_to'] ?? 'Message to ');
+        $messageTo = __('legacy/sendmessage.text_message_to');
         $title = $messageTo.$user->username;
         $frameTitle = new HtmlString($messageTo.UserDisplay::username($receiver));
 

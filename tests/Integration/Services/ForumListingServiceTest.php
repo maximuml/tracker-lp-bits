@@ -210,7 +210,7 @@ final class ForumListingServiceTest extends TestCase
 
         $this->topicRepo->shouldReceive('getUnreadTopics')->andReturn(new Collection);
 
-        $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewUnread(['text_nothing_found' => 'Nothing found', 'text_forums' => 'Forums'], ['id' => 1, 'username' => 'test', 'class' => 10]));
+        $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewUnread(['id' => 1, 'username' => 'test', 'class' => 10]));
 
         $this->assertArrayHasKey('html', $result);
         $this->assertStringContainsString('Nothing found', $result['html']);
@@ -226,7 +226,7 @@ final class ForumListingServiceTest extends TestCase
         $this->topicRepo->shouldReceive('getUnreadTopics')->andReturn(new Collection);
         $repo->shouldReceive('getForumsList')->andReturn([]);
 
-        $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewUnread(['text_forums' => 'Forums', 'text_nothing_found' => 'Nothing'], ['id' => 1, 'username' => 'test', 'class' => 10]));
+        $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewUnread(['id' => 1, 'username' => 'test', 'class' => 10]));
 
         $this->assertArrayHasKey('html', $result);
         $this->assertStringContainsString('<h1', $result['html']);
@@ -241,11 +241,11 @@ final class ForumListingServiceTest extends TestCase
         $this->setUser();
         $this->setRequest();
 
-        $result = $this->callWithSuppressedErrors(fn () => $this->service->buildSearch(['text_search_on_forum' => 'Search', 'text_by_keyword' => 'Keyword'], 20));
+        $result = $this->callWithSuppressedErrors(fn () => $this->service->buildSearch(20));
 
         $this->assertArrayHasKey('html', $result);
         $this->assertStringContainsString('search_form', $result['html']);
-        $this->assertStringContainsString('Keyword', $result['html']);
+        $this->assertStringContainsString('by keyword', $result['html']);
     }
 
     public function test_build_search_with_keywords_no_hits_returns_form_with_error(): void
@@ -257,7 +257,7 @@ final class ForumListingServiceTest extends TestCase
 
         $this->postRepo->shouldReceive('searchForumPosts')->andReturn(['hits' => 0, 'rows' => new Collection]);
 
-        $result = $this->callWithSuppressedErrors(fn () => $this->service->buildSearch(['text_search_on_forum' => 'Search', 'text_nothing_found' => 'Nothing found', 'text_by_keyword' => 'Keyword'], 20));
+        $result = $this->callWithSuppressedErrors(fn () => $this->service->buildSearch(20));
 
         $this->assertArrayHasKey('html', $result);
         $this->assertStringContainsString('Nothing found', $result['html']);
@@ -272,7 +272,7 @@ final class ForumListingServiceTest extends TestCase
 
         $this->postRepo->shouldReceive('searchForumPosts')->andReturn(['hits' => 1, 'rows' => new Collection]);
 
-        $result = $this->callWithSuppressedErrors(fn () => $this->service->buildSearch(['text_search_on_forum' => 'Search', 'text_found' => 'Found ', 'text_num_posts' => ' posts', 'text_by_keyword' => 'Keyword'], 20));
+        $result = $this->callWithSuppressedErrors(fn () => $this->service->buildSearch(20));
 
         $this->assertArrayHasKey('html', $result);
         $this->assertStringContainsString('Found', $result['html']);
@@ -289,7 +289,7 @@ final class ForumListingServiceTest extends TestCase
 
         $threw = false;
         try {
-            $this->callWithSuppressedErrors(fn () => $this->service->buildViewForum(['std_forum_error' => 'Error'], ['id' => 1, 'username' => 'test', 'class' => 10], Request::create('/forums.php', 'GET', ['forumid' => 0]), 20, 10));
+            $this->callWithSuppressedErrors(fn () => $this->service->buildViewForum(['id' => 1, 'username' => 'test', 'class' => 10], Request::create('/forums.php', 'GET', ['forumid' => 0]), 20, 10));
         } catch (\Throwable) {
             $threw = true;
         }
@@ -307,7 +307,7 @@ final class ForumListingServiceTest extends TestCase
 
         $threw = false;
         try {
-            $this->callWithSuppressedErrors(fn () => $this->service->buildViewForum(['std_forum_error' => 'Error', 'std_forum_not_found' => 'Not found'], ['id' => 1, 'username' => 'test', 'class' => 10, 'ip' => '127.0.0.1'], Request::create('/forums.php', 'GET', ['forumid' => 999]), 20, 10));
+            $this->callWithSuppressedErrors(fn () => $this->service->buildViewForum(['id' => 1, 'username' => 'test', 'class' => 10, 'ip' => '127.0.0.1'], Request::create('/forums.php', 'GET', ['forumid' => 999]), 20, 10));
         } catch (\Throwable) {
             $threw = true;
         }
@@ -327,7 +327,6 @@ final class ForumListingServiceTest extends TestCase
         $this->topicRepo->shouldReceive('getTopicsByForum')->andReturn(['count' => 0, 'rows' => new Collection]);
 
         $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewForum(
-            ['text_forums' => 'Forums', 'text_no_topics_found' => 'No topics found', 'col_topic' => 'Topic', 'col_author' => 'Author', 'col_replies' => 'Replies', 'col_views' => 'Views', 'col_last_post' => 'Last Post', 'text_fast_search' => 'Search', 'text_go' => 'Go', 'text_order' => 'Order'],
             ['id' => 1, 'username' => 'test', 'class' => 10, 'forumpost' => 'yes'],
             Request::create('/forums.php', 'GET', ['forumid' => 1]),
             20,

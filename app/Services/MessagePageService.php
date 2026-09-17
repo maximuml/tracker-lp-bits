@@ -62,7 +62,6 @@ class MessagePageService
     public function build(Request $request): MessagePageViewModel
     {
         $curUser = (array) ($this->currentUser->get() ?? []);
-        $lang = (array) trans('legacy/messages');
         $userId = (int) ($curUser['id'] ?? 0);
 
         $action = (string) $request->input('action', '');
@@ -71,7 +70,6 @@ class MessagePageService
         }
 
         $data = [
-            'lang' => $lang,
             'curUser' => $curUser,
             'userId' => $userId,
             'action' => $action,
@@ -81,22 +79,21 @@ class MessagePageService
 
         switch ($action) {
             case 'viewmessage':
-                $data['viewmessage'] = $this->reader->buildViewMessage($lang, $curUser, $userId, $request);
+                $data['viewmessage'] = $this->reader->buildViewMessage($curUser, $userId, $request);
                 break;
             case 'forward':
-                $data['forward'] = $this->reader->buildForward($lang, $userId, $request);
+                $data['forward'] = $this->reader->buildForward($userId, $request);
                 break;
             case 'editmailboxes':
-                $data['editmailboxes'] = $this->buildEditMailboxes($lang, $userId);
+                $data['editmailboxes'] = $this->buildEditMailboxes($userId);
                 break;
             default:
-                $data['viewmailbox'] = $this->buildViewMailbox($lang, $curUser, $userId, $request);
+                $data['viewmailbox'] = $this->buildViewMailbox($curUser, $userId, $request);
                 $data['action'] = 'viewmailbox';
                 break;
         }
 
         return new MessagePageViewModel(
-            lang: $data['lang'],
             curUser: $data['curUser'],
             userId: $data['userId'],
             action: $data['action'],
@@ -113,11 +110,10 @@ class MessagePageService
     /**
      * Build the mailbox listing section.
      *
-     * @param  array<string, mixed>  $lang
      * @param  array<string, mixed>  $curUser
      * @return array<string, mixed>
      */
-    private function buildViewMailbox(array $lang, array $curUser, int $userId, Request $request): array
+    private function buildViewMailbox(array $curUser, int $userId, Request $request): array
     {
         $mailbox = (int) ($request->input('box', 0) ?: self::PM_INBOX);
         if ($mailbox === 0) {
@@ -129,20 +125,20 @@ class MessagePageService
             $pmBoxName = $this->mailboxRepository->getMailboxName($userId, $mailbox);
             if (! $pmBoxName) {
                 LegacyResponse::abort(
-                    (string) ($lang['std_error'] ?? 'Error'),
-                    (string) ($lang['std_invalid_mailbox'] ?? 'Invalid mailbox.')
+                    __('legacy/messages.std_error'),
+                    __('legacy/messages.std_invalid_mailbox')
                 );
             }
             $mailboxName = htmlspecialchars((string) $pmBoxName);
         } elseif ($mailbox === self::PM_INBOX) {
-            $mailboxName = (string) ($lang['text_inbox'] ?? 'Inbox');
+            $mailboxName = __('legacy/messages.text_inbox');
         } else {
-            $mailboxName = (string) ($lang['text_sentbox'] ?? 'Sentbox');
+            $mailboxName = __('legacy/messages.text_sentbox');
         }
 
         $senderReceiver = $mailbox !== self::PM_SENT_BOX
-            ? (string) ($lang['text_sender'] ?? 'Sender')
-            : (string) ($lang['text_receiver'] ?? 'Receiver');
+            ? __('legacy/messages.text_sender')
+            : __('legacy/messages.text_receiver');
 
         // Search params
         $keyword = trim((string) $request->input('keyword', ''));
@@ -181,12 +177,12 @@ class MessagePageService
                     $username = UserDisplay::username((int) $row['receiver']);
                 }
             } else {
-                $username = (string) ($lang['text_system'] ?? 'System');
+                $username = __('legacy/messages.text_system');
             }
 
             $subject = (string) $row['subject'];
             if (strlen($subject) <= 0) {
-                $subject = (string) ($lang['text_no_subject'] ?? 'No subject');
+                $subject = __('legacy/messages.text_no_subject');
             }
 
             $rows[] = [
@@ -230,10 +226,9 @@ class MessagePageService
     /**
      * Build the edit-mailboxes section.
      *
-     * @param  array<string, mixed>  $lang
      * @return array<string, mixed>
      */
-    private function buildEditMailboxes(array $lang, int $userId): array
+    private function buildEditMailboxes(int $userId): array
     {
         $pmBoxes = $this->mailboxRepository->getUserMailboxes($userId);
 
@@ -259,9 +254,8 @@ class MessagePageService
      */
     private function buildJumpToBoxes(Collection $pmBoxes, int $selected): string
     {
-        $lang = (array) trans('legacy/messages');
-        $html = '<option value="1" '.($selected === self::PM_INBOX ? ' selected' : '').'>'.htmlspecialchars((string) ($lang['select_inbox'] ?? 'Inbox'))."</option>\n";
-        $html .= '<option value="-1" '.($selected === self::PM_SENT_BOX ? ' selected' : '').'>'.htmlspecialchars((string) ($lang['select_sentbox'] ?? 'Sentbox'))."</option>\n";
+        $html = '<option value="1" '.($selected === self::PM_INBOX ? ' selected' : '').'>'.htmlspecialchars(__('legacy/messages.select_inbox'))."</option>\n";
+        $html .= '<option value="-1" '.($selected === self::PM_SENT_BOX ? ' selected' : '').'>'.htmlspecialchars(__('legacy/messages.select_sentbox'))."</option>\n";
         foreach ($pmBoxes as $row) {
             $rowArr = (array) $row;
             $sel = (int) $rowArr['boxnumber'] === $selected ? ' selected' : '';

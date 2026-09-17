@@ -12,7 +12,6 @@ use App\Repositories\MessageRepository;
 use App\Services\MessageMailboxService;
 use App\Services\MessageService;
 use App\Support\Globals;
-use App\Support\Language;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -58,7 +57,6 @@ final class MessageServiceTest extends TestCase
         $this->globals = new Globals;
         $this->app->instance(Globals::class, $this->globals);
         $this->service = new MessageService(
-            app(Language::class),
             app(MessagePolicy::class),
             app(MessageMailboxService::class),
         );
@@ -131,12 +129,10 @@ final class MessageServiceTest extends TestCase
         $repo->shouldIgnoreMissing();
         $this->app->instance(MessageRepository::class, $repo);
         $this->service = new MessageService(
-            app(Language::class),
             app(MessagePolicy::class),
             new MessageMailboxService(
                 $repo,
                 app(MailboxRepository::class),
-                app(Language::class),
             ),
         );
 
@@ -180,7 +176,6 @@ final class MessageServiceTest extends TestCase
     public function test_can_instantiate_service(): void
     {
         $service = new MessageService(
-            app(Language::class),
             app(MessagePolicy::class),
             app(MessageMailboxService::class),
         );

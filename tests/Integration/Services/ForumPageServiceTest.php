@@ -215,7 +215,6 @@ final class ForumPageServiceTest extends TestCase
 
         $result = $this->callWithSuppressedErrors(fn () => $this->service()->build(Request::create('/forums.php', 'GET'))->toArray());
 
-        $this->assertArrayHasKey('lang', $result);
         $this->assertArrayHasKey('curUser', $result);
         $this->assertArrayHasKey('userId', $result);
         $this->assertArrayHasKey('action', $result);

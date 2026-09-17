@@ -37,11 +37,10 @@ final class ForumListingService
     /**
      * Build the view-forum section.
      *
-     * @param  array<string, mixed>  $lang
      * @param  array<string, mixed>  $curUser
      * @return array<string, mixed>
      */
-    public function buildViewForum(array $lang, array $curUser, Request $request, int $topicsperpage, int $postsperpage): array
+    public function buildViewForum(array $curUser, Request $request, int $topicsperpage, int $postsperpage): array
     {
         $forumid = (int) (request()->query('forumid') ?? 0);
         LegacyResponse::assertId($forumid, true);
@@ -50,7 +49,7 @@ final class ForumListingService
         $row = $this->index->getForumRow($forumid);
         if (! $row) {
             Log::writeWithContext('User '.($curUser['username'] ?? '').','.($curUser['ip'] ?? '')." is trying to visit forum that doesn't exist", 'mod');
-            LegacyResponse::abort($lang['std_forum_error'] ?? '', $lang['std_forum_not_found'] ?? '');
+            LegacyResponse::abort(__('legacy/forums.std_forum_error'), __('legacy/forums.std_forum_not_found'));
         }
         if (UserDisplay::currentClass() < (int) ($row['minclassread'] ?? 0)) {
             LegacyResponse::permissionDenied();
@@ -100,20 +99,20 @@ final class ForumListingService
         $enabletooltipTweak = (string) $this->globals->get('enabletooltip_tweak', '');
 
         ob_start();
-        echo '<h1 align="center"><a class="faqlink" href="forums.php">'.$SITENAME.'&nbsp;'.($lang['text_forums'] ?? '').'</a>--><a class="faqlink" href="'.htmlspecialchars('forums.php?action=viewforum&forumid='.$forumid).'">'.$forumname."</a></h1>\n";
+        echo '<h1 align="center"><a class="faqlink" href="forums.php">'.$SITENAME.'&nbsp;'.(__('legacy/forums.text_forums')).'</a>--><a class="faqlink" href="'.htmlspecialchars('forums.php?action=viewforum&forumid='.$forumid).'">'.$forumname."</a></h1>\n";
         echo '<br />';
         $maypost = UserDisplay::currentClass() >= (int) ($row['minclasswrite'] ?? 0) && UserDisplay::currentClass() >= (int) ($row['minclasscreate'] ?? 0) && LegacyYesNo::isYes($curUser['forumpost'] ?? null);
 
         if (! $maypost) {
-            echo '<p><i>'.($lang['text_unpermitted_starting_new_topics'] ?? '')."</i></p>\n";
+            echo '<p><i>'.(__('legacy/forums.text_unpermitted_starting_new_topics'))."</i></p>\n";
         }
 
         echo "<table border=\"0\" class=\"main\" cellspacing=\"0\" cellpadding=\"5\" width=\"97%\"><tr>\n";
         echo '<td class="embedded" width="90%">';
-        echo $forummoderators ? '&nbsp;&nbsp;<img class="forum_mod" src="pic/trans.gif" alt="Moderator" title="'.($lang['col_moderator'] ?? '').'">&nbsp;'.$forummoderators : '';
+        echo $forummoderators ? '&nbsp;&nbsp;<img class="forum_mod" src="pic/trans.gif" alt="Moderator" title="'.(__('legacy/forums.col_moderator')).'">&nbsp;'.$forummoderators : '';
         echo '</td><td class="embedded nowrap" width="1%">';
         if ($maypost) {
-            echo '<a href="'.htmlspecialchars('?action=newtopic&forumid='.$forumid).'"><img class="f_new" src="pic/trans.gif" alt="New Topic" title="'.($lang['title_new_topic'] ?? '').'" /></a>&nbsp;&nbsp;';
+            echo '<a href="'.htmlspecialchars('?action=newtopic&forumid='.$forumid).'"><img class="f_new" src="pic/trans.gif" alt="New Topic" title="'.(__('legacy/forums.title_new_topic')).'" /></a>&nbsp;&nbsp;';
         }
         echo '</td>';
         echo "</tr></table>\n";
@@ -121,11 +120,11 @@ final class ForumListingService
             echo '<table border="1" cellspacing="0" cellpadding="5" width="97%">';
 
             $sortToggleFirst = (((request()->query('sort') !== null)) && request()->query('sort') == 'firstpostdesc') ? 'firstpostasc' : 'firstpostdesc';
-            $sortToggleFirstTitle = (((request()->query('sort') !== null)) && request()->query('sort') == 'firstpostdesc') ? ($lang['title_order_topic_asc'] ?? '') : ($lang['title_order_topic_desc'] ?? '');
+            $sortToggleFirstTitle = (((request()->query('sort') !== null)) && request()->query('sort') == 'firstpostdesc') ? (__('legacy/forums.title_order_topic_asc')) : (__('legacy/forums.title_order_topic_desc'));
             $sortToggleLast = (((request()->query('sort') !== null)) && request()->query('sort') == 'lastpostasc') ? 'lastpostdesc' : 'lastpostasc';
-            $sortToggleLastTitle = (((request()->query('sort') !== null)) && request()->query('sort') == 'lastpostasc') ? ($lang['title_order_post_desc'] ?? '') : ($lang['title_order_post_asc'] ?? '');
+            $sortToggleLastTitle = (((request()->query('sort') !== null)) && request()->query('sort') == 'lastpostasc') ? (__('legacy/forums.title_order_post_desc')) : (__('legacy/forums.title_order_post_asc'));
 
-            echo '<tr><td class="colhead" align="center" width="99%">'.($lang['col_topic'] ?? '').'</td><td class="colhead" align="center"><a href="'.htmlspecialchars('?action=viewforum&forumid='.$forumid.$addparam.'&sort='.$sortToggleFirst).'" title="'.$sortToggleFirstTitle.'">'.($lang['col_author'] ?? '').'</a></td><td class="colhead" align="center">'.($lang['col_replies'] ?? '').'/'.($lang['col_views'] ?? '').'</td><td class="colhead" align="center"><a href="'.htmlspecialchars('?action=viewforum&forumid='.$forumid.$addparam.'&sort='.$sortToggleLast).'" title="'.$sortToggleLastTitle.'">'.($lang['col_last_post'] ?? '')."</a></td>\n";
+            echo '<tr><td class="colhead" align="center" width="99%">'.(__('legacy/forums.col_topic')).'</td><td class="colhead" align="center"><a href="'.htmlspecialchars('?action=viewforum&forumid='.$forumid.$addparam.'&sort='.$sortToggleFirst).'" title="'.$sortToggleFirstTitle.'">'.(__('legacy/forums.col_author')).'</a></td><td class="colhead" align="center">'.(__('legacy/forums.col_replies')).'/'.(__('legacy/forums.col_views')).'</td><td class="colhead" align="center"><a href="'.htmlspecialchars('?action=viewforum&forumid='.$forumid.$addparam.'&sort='.$sortToggleLast).'" title="'.$sortToggleLastTitle.'">'.(__('legacy/forums.col_last_post'))."</a></td>\n";
 
             echo "</tr>\n";
             $counter = 0;
@@ -182,13 +181,13 @@ final class ForumListingService
                 $lastpost_tooltip = [];
                 if ($enabletooltipTweak == 'yes' && ! LegacyYesNo::isNo($curUser['showlastpost'] ?? null)) {
                     if (($curUser['timetype'] ?? 1) != UserTimeType::TIMEALIVE->value) {
-                        $lastposttime = ($lang['text_at_time'] ?? '').($arr['added'] ?? '');
+                        $lastposttime = (__('legacy/forums.text_at_time')).($arr['added'] ?? '');
                     } else {
-                        $lastposttime = ($lang['text_blank'] ?? '').Time::format($arr['added'] ?? '', true, false, true);
+                        $lastposttime = (__('legacy/forums.text_blank')).Time::format($arr['added'] ?? '', true, false, true);
                     }
                     $lptext = Format::formatComment(mb_substr((string) ($arr['body'] ?? ''), 0, 100, 'UTF-8').(mb_strlen((string) ($arr['body'] ?? ''), 'UTF-8') > 100 ? ' ......' : ''), true, false, false, true, 600, false, false);
                     $lastpost_tooltip[$counter]['id'] = 'lastpost_'.$counter;
-                    $lastpost_tooltip[$counter]['content'] = ($lang['text_last_posted_by'] ?? '').$lpusername.$lastposttime.'<br />'.$lptext;
+                    $lastpost_tooltip[$counter]['content'] = (__('legacy/forums.text_last_posted_by')).$lpusername.$lastposttime.'<br />'.$lptext;
                     $onmouseover = ' data-domtt-src="'.$lastpost_tooltip[$counter]['id'].'"';
                 }
 
@@ -196,15 +195,15 @@ final class ForumListingService
                 $fpuserid = (int) ($arr['userid'] ?? 0);
                 $fpauthor = UserDisplay::username((int) ($arr['userid'] ?? 0));
 
-                $subject = ($sticky ? '<img class="sticky" src="pic/trans.gif" alt="Sticky" title="'.($lang['title_sticky'] ?? '').'" />&nbsp;&nbsp;' : '').'<a href="'.htmlspecialchars('?action=viewtopic&forumid='.$forumid.'&topicid='.$topicid).'" '.$onmouseover.'>'.$this->index->highlightTopic(Format::highlight($search, htmlspecialchars((string) $topicarr['subject'])), $hlcolor).'</a>'.$topicpages;
+                $subject = ($sticky ? '<img class="sticky" src="pic/trans.gif" alt="Sticky" title="'.(__('legacy/forums.title_sticky')).'" />&nbsp;&nbsp;' : '').'<a href="'.htmlspecialchars('?action=viewtopic&forumid='.$forumid.'&topicid='.$topicid).'" '.$onmouseover.'>'.$this->index->highlightTopic(Format::highlight($search, htmlspecialchars((string) $topicarr['subject'])), $hlcolor).'</a>'.$topicpages;
                 $lastpostread = $this->index->getLastReadPostId($topicid, $curUser);
 
                 if ($lastpostread >= $lppostid) {
-                    $img = $this->index->getTopicImage($locked ? 'locked' : 'read', $lang);
+                    $img = $this->index->getTopicImage($locked ? 'locked' : 'read');
                 } else {
-                    $img = $this->index->getTopicImage($locked ? 'lockednew' : 'unread', $lang);
+                    $img = $this->index->getTopicImage($locked ? 'lockednew' : 'unread');
                     if ($lastpostread != (int) ($curUser['last_catchup'] ?? 0)) {
-                        $subject .= '&nbsp;&nbsp;<a href="'.htmlspecialchars('?action=viewtopic&forumid='.$forumid.'&topicid='.$topicid.'&page=p'.$lastpostread.'#pid'.$lastpostread).'" title="'.($lang['title_jump_to_unread'] ?? '').'"><font class="small new"><b>'.($lang['text_new'] ?? '').'</b></font></a>';
+                        $subject .= '&nbsp;&nbsp;<a href="'.htmlspecialchars('?action=viewtopic&forumid='.$forumid.'&topicid='.$topicid.'&page=p'.$lastpostread.'#pid'.$lastpostread).'" title="'.(__('legacy/forums.title_jump_to_unread')).'"><font class="small new"><b>'.(__('legacy/forums.text_new')).'</b></font></a>';
                     }
                 }
 
@@ -226,16 +225,16 @@ final class ForumListingService
             }
 
             echo "<tr><td align=\"left\">\n";
-            echo '<form method="get" action="forums.php"><b>'.($lang['text_fast_search'] ?? '').'</b><input type="hidden" name="action" value="viewforum" /><input type="hidden" name="forumid" value="'.$forumid.'" /><input type="text" style="width: 180px" name="search" />&nbsp;<input type="submit" value="'.($lang['text_go'] ?? '').'" /></form>';
+            echo '<form method="get" action="forums.php"><b>'.(__('legacy/forums.text_fast_search')).'</b><input type="hidden" name="action" value="viewforum" /><input type="hidden" name="forumid" value="'.$forumid.'" /><input type="text" style="width: 180px" name="search" />&nbsp;<input type="submit" value="'.(__('legacy/forums.text_go')).'" /></form>';
             echo '</td>';
             ?>
 <td align="left" colspan="3">
-<span id="order" style="cursor:pointer"><span style="cursor: pointer;"><b><?php echo $lang['text_order'] ?? '' ?></b></span>
+<span id="order" style="cursor:pointer"><span style="cursor: pointer;"><b><?php echo __('legacy/forums.text_order') ?></b></span>
 <span id="orderlist" class="dropmenu nx-hidden"><ul>
-<li><a href="?action=viewforum&amp;forumid=<?php echo $forumid.$addparam ?>&amp;sort=firstpostdesc"><?php echo $lang['text_topic_desc'] ?? '' ?></a></li>
-<li><a href="?action=viewforum&amp;forumid=<?php echo $forumid.$addparam ?>&amp;sort=firstpostasc"><?php echo $lang['text_topic_asc'] ?? '' ?></a></li>
-<li><a href="?action=viewforum&amp;forumid=<?php echo $forumid.$addparam ?>&amp;sort=lastpostdesc"><?php echo $lang['text_post_desc'] ?? '' ?></a></li>
-<li><a href="?action=viewforum&amp;forumid=<?php echo $forumid.$addparam ?>&amp;sort=lastpostasc"><?php echo $lang['text_post_asc'] ?? '' ?></a></li>
+<li><a href="?action=viewforum&amp;forumid=<?php echo $forumid.$addparam ?>&amp;sort=firstpostdesc"><?php echo __('legacy/forums.text_topic_desc') ?></a></li>
+<li><a href="?action=viewforum&amp;forumid=<?php echo $forumid.$addparam ?>&amp;sort=firstpostasc"><?php echo __('legacy/forums.text_topic_asc') ?></a></li>
+<li><a href="?action=viewforum&amp;forumid=<?php echo $forumid.$addparam ?>&amp;sort=lastpostdesc"><?php echo __('legacy/forums.text_post_desc') ?></a></li>
+<li><a href="?action=viewforum&amp;forumid=<?php echo $forumid.$addparam ?>&amp;sort=lastpostasc"><?php echo __('legacy/forums.text_post_asc') ?></a></li>
 </ul>
 </span>
 </span>
@@ -246,7 +245,7 @@ final class ForumListingService
                 echo Html::tooltipContainer($lastpost_tooltip, 400);
             }
         } else {
-            echo '<p>'.($lang['text_no_topics_found'] ?? '').'</p>';
+            echo '<p>'.(__('legacy/forums.text_no_topics_found')).'</p>';
         }
 
         return [
@@ -259,11 +258,10 @@ final class ForumListingService
     /**
      * Build the view-unread-posts section.
      *
-     * @param  array<string, mixed>  $lang
      * @param  array<string, mixed>  $curUser
      * @return array<string, mixed>
      */
-    public function buildViewUnread(array $lang, array $curUser): array
+    public function buildViewUnread(array $curUser): array
     {
         $userid = (int) ($curUser['id'] ?? 0);
         $beforepostid = (int) (request()->query('beforepostid') ?? 0);
@@ -274,7 +272,7 @@ final class ForumListingService
         $SITENAME = (string) $this->globals->get('SITENAME', '');
 
         ob_start();
-        echo '<h1 align="center"><a class="faqlink" href="forums.php">'.$SITENAME.'&nbsp;'.($lang['text_forums'] ?? '').'</a>-->'.($lang['text_topics_with_unread_posts'] ?? '').'</h1>';
+        echo '<h1 align="center"><a class="faqlink" href="forums.php">'.$SITENAME.'&nbsp;'.(__('legacy/forums.text_forums')).'</a>-->'.(__('legacy/forums.text_topics_with_unread_posts')).'</h1>';
 
         $n = 0;
         $uc = UserDisplay::currentClass();
@@ -304,22 +302,22 @@ final class ForumListingService
             $forumname = (string) ($a['name'] ?? '');
             if ($n == 1) {
                 echo "<table border=\"1\" cellspacing=\"0\" cellpadding=\"5\">\n";
-                echo '<tr><td class="colhead" align="left">'.($lang['col_topic'] ?? '').'</td><td class="colhead" align="left">'.($lang['col_forum'] ?? '')."</td></tr>\n";
+                echo '<tr><td class="colhead" align="left">'.(__('legacy/forums.col_topic')).'</td><td class="colhead" align="left">'.(__('legacy/forums.col_forum'))."</td></tr>\n";
             }
             echo "<tr><td class=\"rowfollow\" align=\"left\"><table border=\"0\" cellspacing=\"0\" cellpadding=\"0\"><tr><td class=\"embedded\" style='padding-right: 10px'>".
-            $this->index->getTopicImage('unread', $lang).'</td><td class="embedded">'.
+            $this->index->getTopicImage('unread').'</td><td class="embedded">'.
             '<a href="'.htmlspecialchars('?action=viewtopic&topicid='.$topicid.($lastpostread > 0 && $lastpostread != (int) ($curUser['last_catchup'] ?? 0) ? '&page=p'.$lastpostread.'#pid'.$lastpostread : '')).'">'.$this->index->highlightTopic(htmlspecialchars((string) $arr['subject']), (int) $arr['hlcolor']).
             '</a></td></tr></table></td><td class="rowfollow" align="left"><a href="'.htmlspecialchars('?action=viewforum&forumid='.$forumid).'"><b>'.$forumname."</b></a></td></tr>\n";
         }
         if ($n > 0) {
             echo "</table>\n";
-            echo '<table border="0" class="main" cellspacing="0" cellpadding="5" width="1%"><tr><td class="embedded"><form method="get" action="?"><input type="hidden" name="catchup" value="1" /><input type="submit" value="'.($lang['text_catch_up'] ?? '').'" class="btn" /></form></td>';
+            echo '<table border="0" class="main" cellspacing="0" cellpadding="5" width="1%"><tr><td class="embedded"><form method="get" action="?"><input type="hidden" name="catchup" value="1" /><input type="submit" value="'.(__('legacy/forums.text_catch_up')).'" class="btn" /></form></td>';
             if ($n > $maxresults) {
-                echo '<td class="embedded"><form method="get" action="?"><input type="hidden" name="action" value="viewunread" /><input type="hidden" name="beforepostid" value="'.$topiclastpost.'" /><input type="submit" value="'.($lang['submit_show_more'] ?? '').'" class="btn" /></form></td>';
+                echo '<td class="embedded"><form method="get" action="?"><input type="hidden" name="action" value="viewunread" /><input type="hidden" name="beforepostid" value="'.$topiclastpost.'" /><input type="submit" value="'.(__('legacy/forums.submit_show_more')).'" class="btn" /></form></td>';
             }
             echo '</tr></table>';
         } else {
-            echo '<p>'.($lang['text_nothing_found'] ?? '').'</p>';
+            echo '<p>'.(__('legacy/forums.text_nothing_found')).'</p>';
         }
 
         return ['html' => (string) ob_get_clean()];
@@ -328,10 +326,9 @@ final class ForumListingService
     /**
      * Build the forum search section.
      *
-     * @param  array<string, mixed>  $lang
      * @return array<string, mixed>
      */
-    public function buildSearch(array $lang, int $topicsperpage): array
+    public function buildSearch(int $topicsperpage): array
     {
         $error = true;
         $found = '';
@@ -341,21 +338,21 @@ final class ForumListingService
             $hits = (int) $searchResult['hits'];
             if ($hits) {
                 $error = false;
-                $found = '[<b><font class="striking"> '.($lang['text_found'] ?? '').$hits.($lang['text_num_posts'] ?? '').' </font></b>]';
+                $found = '[<b><font class="striking"> '.(__('legacy/forums.text_found')).$hits.(__('legacy/forums.text_num_posts')).' </font></b>]';
             }
         }
 
         ob_start();
         ?>
 <div class="search">
-	<div class="search_title"><?php echo $lang['text_search_on_forum'] ?? '' ?> <?php echo $error && $keywords != '' ? '[<b><font color=striking> '.($lang['text_nothing_found'] ?? '').'</font></b> ]' : $found ?></div>
+	<div class="search_title"><?php echo __('legacy/forums.text_search_on_forum') ?> <?php echo $error && $keywords != '' ? '[<b><font color=striking> '.(__('legacy/forums.text_nothing_found')).'</font></b> ]' : $found ?></div>
 	<div style="margin-left: 53px; margin-top: 13px;">
 		<form method="get" action="forums.php" id="search_form" style="margin: 0pt; padding: 0pt; font-family: Tahoma,Arial,Helvetica,sans-serif; font-size: 11px;">
 		<input type="hidden" name="action" value="search" />
 		<table border="0" cellpadding="0" cellspacing="0" width="512" class="search_table">
 		<tbody>
 		<tr>
-		<td style="padding-bottom: 3px; border: 0;" valign="top"><?php echo $lang['text_by_keyword'] ?? '' ?></td>
+		<td style="padding-bottom: 3px; border: 0;" valign="top"><?php echo __('legacy/forums.text_by_keyword') ?></td>
 		</tr>
 		<tr>
 		<td style="padding-bottom: 3px; border: 0;" valign="top">
@@ -376,7 +373,7 @@ final class ForumListingService
 
             echo $pagertop;
             echo "<table border=\"1\" cellspacing=\"0\" cellpadding=\"5\" width=\"97%\">\n";
-            echo '<tr><td class="colhead" align="center">'.($lang['col_post'] ?? '').'</td><td class="colhead" align="center" width="70%">'.($lang['col_topic'] ?? '').'</td><td class="colhead" align="left">'.($lang['col_forum'] ?? '').'</td><td class="colhead" align="left">'.($lang['col_posted_by'] ?? '')."</td></tr>\n";
+            echo '<tr><td class="colhead" align="center">'.(__('legacy/forums.col_post')).'</td><td class="colhead" align="center" width="70%">'.(__('legacy/forums.col_topic')).'</td><td class="colhead" align="left">'.(__('legacy/forums.col_forum')).'</td><td class="colhead" align="left">'.(__('legacy/forums.col_posted_by'))."</td></tr>\n";
 
             foreach ($posts as $post) {
                 $post = (array) $post;

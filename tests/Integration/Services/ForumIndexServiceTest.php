@@ -129,7 +129,7 @@ final class ForumIndexServiceTest extends TestCase
 
     public function test_get_topic_image_read_returns_img_tag(): void
     {
-        $result = $this->service->getTopicImage('read', ['title_read' => 'Read']);
+        $result = $this->service->getTopicImage('read');
 
         $this->assertStringContainsString('<img', $result);
         $this->assertStringContainsString('alt="read"', $result);
@@ -138,7 +138,7 @@ final class ForumIndexServiceTest extends TestCase
 
     public function test_get_topic_image_unread_returns_img_tag(): void
     {
-        $result = $this->service->getTopicImage('unread', ['title_unread' => 'Unread']);
+        $result = $this->service->getTopicImage('unread');
 
         $this->assertStringContainsString('<img', $result);
         $this->assertStringContainsString('alt="unread"', $result);
@@ -146,7 +146,7 @@ final class ForumIndexServiceTest extends TestCase
 
     public function test_get_topic_image_locked_returns_img_tag(): void
     {
-        $result = $this->service->getTopicImage('locked', ['title_locked' => 'Locked']);
+        $result = $this->service->getTopicImage('locked');
 
         $this->assertStringContainsString('<img', $result);
         $this->assertStringContainsString('alt="locked"', $result);
@@ -154,7 +154,7 @@ final class ForumIndexServiceTest extends TestCase
 
     public function test_get_topic_image_lockednew_returns_img_tag(): void
     {
-        $result = $this->service->getTopicImage('lockednew', ['title_locked_new' => 'Locked New']);
+        $result = $this->service->getTopicImage('lockednew');
 
         $this->assertStringContainsString('<img', $result);
         $this->assertStringContainsString('alt="lockednew"', $result);
@@ -162,7 +162,7 @@ final class ForumIndexServiceTest extends TestCase
 
     public function test_get_topic_image_unknown_status_returns_empty(): void
     {
-        $this->assertSame('', $this->service->getTopicImage('unknown', []));
+        $this->assertSame('', $this->service->getTopicImage('unknown'));
     }
 
     // --- highlightTopic ---
@@ -355,7 +355,7 @@ final class ForumIndexServiceTest extends TestCase
         $this->topicRepo->shouldReceive('getTotalTopicsCount')->andReturn(50);
         $this->postRepo->shouldReceive('getTodayPostsCount')->andReturn(10);
 
-        $result = $this->service->forumStats(['text_stats' => 'Stats', 'text_our_members_have' => 'Members'], date('Y-m-d'));
+        $result = $this->service->forumStats(date('Y-m-d'));
 
         $this->assertStringContainsString('100', $result);
         $this->assertStringContainsString('50', $result);
@@ -372,9 +372,9 @@ final class ForumIndexServiceTest extends TestCase
         $this->topicRepo->shouldReceive('getTotalTopicsCount')->andReturn(0);
         $this->postRepo->shouldReceive('getTodayPostsCount')->andReturn(0);
 
-        $result = $this->service->forumStats(['text_no_active_users' => 'No active users'], date('Y-m-d'));
+        $result = $this->service->forumStats(date('Y-m-d'));
 
-        $this->assertStringContainsString('No active users', $result);
+        $this->assertStringContainsString('no active user', $result);
     }
 
     // --- buildForumsIndex ---
@@ -389,7 +389,7 @@ final class ForumIndexServiceTest extends TestCase
         $repo->shouldReceive('getOverforumsList')->andReturn([]);
         $repo->shouldReceive('getForumsList')->andReturn([]);
 
-        $result = $this->service->buildForumsIndex(['text_forums' => 'Forums'], ['id' => 1, 'username' => 'test'], 1);
+        $result = $this->service->buildForumsIndex(['id' => 1, 'username' => 'test'], 1);
 
         $this->assertArrayHasKey('html', $result);
         $this->assertStringContainsString('<table', $result['html']);

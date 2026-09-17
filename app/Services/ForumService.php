@@ -91,14 +91,6 @@ final class ForumService
         return (array) ($this->currentUser->get() ?? []);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
-    private function lang(): array
-    {
-        return (array) trans('legacy/forums');
-    }
-
     private function cacheDelete(string $key): void
     {
         $this->cache->delete_value($key);
@@ -121,10 +113,9 @@ final class ForumService
     private function handlePost(Request $request): RedirectResponse
     {
         $user = $this->user();
-        $lang = $this->lang();
 
         if (! ($user['forumpost'] ?? true)) {
-            LegacyResponse::abort($lang['std_sorry'] ?? 'Sorry', $lang['std_unauthorized_to_post'] ?? 'Unauthorized.', false);
+            LegacyResponse::abort(__('legacy/forums.std_sorry'), __('legacy/forums.std_unauthorized_to_post'), false);
         }
 
         $id = (int) $request->input('id');
@@ -140,7 +131,7 @@ final class ForumService
         switch ($type) {
             case 'new':
                 if (! $this->repository->forumExists($id)) {
-                    LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_no_forum_id'] ?? 'Forum not found.');
+                    LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_no_forum_id'));
                 }
                 $forumid = $id;
                 $hassubject = true;
@@ -149,7 +140,7 @@ final class ForumService
             case 'reply':
                 $forumid = $this->topicRepository->topicExists($id);
                 if ($forumid === null) {
-                    LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_bad_topic_id'] ?? 'Topic not found.');
+                    LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_bad_topic_id'));
                 }
                 $topicid = $id;
                 break;
@@ -172,11 +163,11 @@ final class ForumService
         if ($hassubject) {
             $subject = trim($subject);
             if ($subject === '') {
-                LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_must_enter_subject'] ?? 'Enter subject.');
+                LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_must_enter_subject'));
             }
             $maxsubjectlength = (int) ($this->globals->get('maxsubjectlength') ?? 100);
             if (strlen($subject) > $maxsubjectlength) {
-                LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_subject_limited'] ?? 'Subject too long.');
+                LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_subject_limited'));
             }
         }
 
@@ -195,7 +186,7 @@ final class ForumService
         }
 
         if ($body === '') {
-            LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_no_body_text'] ?? 'Enter body.');
+            LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_no_body_text'));
         }
 
         $userid = (int) ($user['id'] ?? 0);
@@ -210,7 +201,7 @@ final class ForumService
             // W1-04: Use TopicPolicy for locked-topic reply authorization
             $authUser = Auth::user();
             if ($topicModel->locked && (! $authUser instanceof User || ! $this->topicPolicy->reply($authUser, $topicModel))) {
-                LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_topic_locked'] ?? 'Topic locked.');
+                LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_topic_locked'));
                 throw new LogicException('Expected authenticated user.');
             }
         }
@@ -266,7 +257,7 @@ final class ForumService
             $timenow = defined('TIMENOW') ? (int) constant('TIMENOW') : time();
             if (strtotime($lastPost) > ($timenow - 10)) {
                 $secs = 10 - ($timenow - strtotime($lastPost));
-                LegacyResponse::abort($lang['std_error'] ?? 'Error', ($lang['std_post_flooding'] ?? '').$secs.($lang['std_seconds_before_making'] ?? ''), false);
+                LegacyResponse::abort(__('legacy/forums.std_error'), (__('legacy/forums.std_post_flooding')).$secs.(__('legacy/forums.std_seconds_before_making')), false);
             }
         }
 
@@ -278,7 +269,7 @@ final class ForumService
 
             $topicid = $this->topicRepository->createTopic($userid, $forumid, $subject);
             if ($topicid <= 0) {
-                LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_no_topic_id_returned'] ?? 'Topic creation failed.');
+                LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_no_topic_id_returned'));
             }
             $this->repository->incrementForumTopicCount($forumid);
             $this->repository->incrementForumPostCount($forumid);

@@ -14,7 +14,6 @@ use App\Support\Cache;
 use App\Support\Config\SiteConfig;
 use App\Support\Http;
 use App\Support\Http\SafeReturnUrl;
-use App\Support\Language;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Mail;
@@ -35,7 +34,6 @@ use LogicException;
 class MessageService
 {
     public function __construct(
-        private readonly Language $language,
         private readonly MessagePolicy $policy,
         private readonly MessageMailboxService $mailbox,
     ) {}
@@ -43,20 +41,16 @@ class MessageService
     public function takeMessage(Request $request): RedirectResponse
     {
         if (! $request->isMethod('POST')) {
-            $lang = $this->lang('takemessage');
-            LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_permission_denied'] ?? 'Permission denied.');
+            LegacyResponse::abort(__('legacy/takemessage.std_error'), __('legacy/takemessage.std_permission_denied'));
         }
 
         $sender = Auth::user();
         if (! $sender instanceof User) {
-            $lang = $this->lang('takemessage');
-            LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_permission_denied'] ?? 'Permission denied.');
+            LegacyResponse::abort(__('legacy/takemessage.std_error'), __('legacy/takemessage.std_permission_denied'));
         }
         if (! $sender instanceof User) {
             throw new LogicException('Expected authenticated user.');
         }
-
-        $lang = $this->lang('takemessage');
 
         $origmsg = (int) $request->input('origmsg', 0);
         $body = trim((string) $request->input('body', ''));
@@ -68,7 +62,7 @@ class MessageService
 
         if ($isForward) {
             if ($origmsg <= 0) {
-                LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_invalid_id'] ?? 'Invalid ID.');
+                LegacyResponse::abort(__('legacy/takemessage.std_error'), __('legacy/takemessage.std_invalid_id'));
             }
 
             $origmsgRecord = Message::query()
@@ -79,7 +73,7 @@ class MessageService
                 ->first();
 
             if (! $origmsgRecord) {
-                LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_no_permission_forwarding'] ?? 'No permission to forward.');
+                LegacyResponse::abort(__('legacy/takemessage.std_error'), __('legacy/takemessage.std_no_permission_forwarding'));
             }
             if ($origmsgRecord === null) {
                 throw new LogicException('Expected non-null original message record.');
@@ -87,12 +81,12 @@ class MessageService
 
             $to = trim((string) $request->input('to', ''));
             if ($to === '') {
-                LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_must_enter_username'] ?? 'You must enter a username.');
+                LegacyResponse::abort(__('legacy/takemessage.std_error'), __('legacy/takemessage.std_must_enter_username'));
             }
 
             $receiver = UserDisplay::userIdFromName($to);
             if ($receiver <= 0) {
-                LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_user_not_exist'] ?? 'No user with that name.');
+                LegacyResponse::abort(__('legacy/takemessage.std_error'), __('legacy/takemessage.std_user_not_exist'));
             }
 
             $locale = Locale::userLocale($receiver);
@@ -106,11 +100,11 @@ class MessageService
         } else {
             $receiver = (int) $request->input('receiver', 0);
             if ($receiver <= 0 || ($origmsg > 0 && ! Validators::isId($origmsg))) {
-                LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_invalid_id'] ?? 'Invalid ID.');
+                LegacyResponse::abort(__('legacy/takemessage.std_error'), __('legacy/takemessage.std_invalid_id'));
             }
 
             if ($body === '') {
-                LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_please_enter_something'] ?? 'Please enter something.');
+                LegacyResponse::abort(__('legacy/takemessage.std_error'), __('legacy/takemessage.std_please_enter_something'));
             }
         }
 
@@ -119,13 +113,13 @@ class MessageService
             $lastPmTs = $lastPm ? strtotime($lastPm) : false;
             if ($lastPmTs !== false && $lastPmTs > (time() - 10)) {
                 $secs = 60 - (time() - $lastPmTs);
-                LegacyResponse::abort($lang['std_error'] ?? 'Error', ($lang['std_message_flooding_denied'] ?? 'Message flooding not allowed. Please wait ').$secs.($lang['std_before_sending_pm'] ?? ' second(s) before sending PM.'));
+                LegacyResponse::abort(__('legacy/takemessage.std_error'), __('legacy/takemessage.std_message_flooding_denied').$secs.__('legacy/takemessage.std_before_sending_pm'));
             }
         }
 
         $recipient = User::query()->find($receiver);
         if (! $recipient) {
-            LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_user_not_exist'] ?? 'No user with that ID.');
+            LegacyResponse::abort(__('legacy/takemessage.std_error'), __('legacy/takemessage.std_user_not_exist'));
         }
         if (! $recipient instanceof User) {
             throw new LogicException('Expected recipient to be a User instance.');
@@ -134,18 +128,18 @@ class MessageService
         // W1-03: Use MessagePolicy for authorization checks
         if (! $this->policy->sendTo($sender, $recipient)) {
             if ($recipient->parked) {
-                LegacyResponse::abort($lang['std_refused'] ?? 'Refused', $lang['std_account_parked'] ?? 'Account is parked.');
+                LegacyResponse::abort(__('legacy/takemessage.std_refused'), __('legacy/takemessage.std_account_parked'));
             }
 
             if ($recipient->acceptpms === UserAcceptPms::YES) {
-                LegacyResponse::abort($lang['std_refused'] ?? 'Refused', $lang['std_user_blocks_your_pms'] ?? 'User blocks your PMs.');
+                LegacyResponse::abort(__('legacy/takemessage.std_refused'), __('legacy/takemessage.std_user_blocks_your_pms'));
             } elseif ($recipient->acceptpms === UserAcceptPms::FRIENDS) {
-                LegacyResponse::abort($lang['std_refused'] ?? 'Refused', $lang['std_user_accepts_friends_pms'] ?? 'User accepts PMs from friends only.');
+                LegacyResponse::abort(__('legacy/takemessage.std_refused'), __('legacy/takemessage.std_user_accepts_friends_pms'));
             } elseif ($recipient->acceptpms === UserAcceptPms::NO) {
-                LegacyResponse::abort($lang['std_refused'] ?? 'Refused', $lang['std_user_blocks_all_pms'] ?? 'User blocks all PMs.');
+                LegacyResponse::abort(__('legacy/takemessage.std_refused'), __('legacy/takemessage.std_user_blocks_all_pms'));
             }
 
-            LegacyResponse::abort($lang['std_refused'] ?? 'Refused', $lang['std_permission_denied'] ?? 'Permission denied.');
+            LegacyResponse::abort(__('legacy/takemessage.std_refused'), __('legacy/takemessage.std_permission_denied'));
         }
 
         $message = Message::add([
@@ -190,18 +184,15 @@ class MessageService
     {
         $sender = Auth::user();
         if (! $sender instanceof User) {
-            $lang = $this->lang('deletemessage');
-            LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_bad_message_id'] ?? 'Bad message ID.');
+            LegacyResponse::abort(__('legacy/functions.std_error'), __('legacy/deletemessage.std_bad_message_id'));
         }
         if (! $sender instanceof User) {
             throw new LogicException('Expected authenticated user.');
         }
 
-        $lang = $this->lang('deletemessage');
-
         $id = (int) $request->input('id', 0);
         if ($id <= 0) {
-            LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_bad_message_id'] ?? 'Bad message ID.');
+            LegacyResponse::abort(__('legacy/functions.std_error'), __('legacy/deletemessage.std_bad_message_id'));
         }
 
         $type = (string) $request->input('type', '');
@@ -209,14 +200,14 @@ class MessageService
         if ($type === 'in') {
             $msg = Message::query()->where('id', $id)->first(['id', 'receiver', 'sender', 'location', 'saved', 'unread']);
             if (! $msg || ! $this->policy->deleteInbox($sender, $msg)) {
-                LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_not_suggested'] ?? 'Not suggested.');
+                LegacyResponse::abort(__('legacy/functions.std_error'), __('legacy/deletemessage.std_not_suggested'));
             }
             if ($msg === null) {
                 throw new LogicException('Expected non-null message.');
             }
 
             if ((int) $msg->location === 0) {
-                LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_not_in_inbox'] ?? 'Not in inbox.');
+                LegacyResponse::abort(__('legacy/functions.std_error'), __('legacy/deletemessage.std_not_in_inbox'));
             }
 
             if ($msg->saved === 'yes') {
@@ -229,14 +220,14 @@ class MessageService
         } elseif ($type === 'out') {
             $msg = Message::query()->where('id', $id)->first(['id', 'receiver', 'sender', 'location', 'saved', 'unread']);
             if (! $msg || ! $this->policy->deleteSentbox($sender, $msg)) {
-                LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_not_suggested'] ?? 'Not suggested.');
+                LegacyResponse::abort(__('legacy/functions.std_error'), __('legacy/deletemessage.std_not_suggested'));
             }
             if ($msg === null) {
                 throw new LogicException('Expected non-null message.');
             }
 
             if ((int) $msg->location === 0 && $msg->saved === 'no') {
-                LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_not_in_sentbox'] ?? 'Not in sentbox.');
+                LegacyResponse::abort(__('legacy/functions.std_error'), __('legacy/deletemessage.std_not_in_sentbox'));
             }
 
             if ((int) $msg->location === 0) {
@@ -247,23 +238,12 @@ class MessageService
 
             Cache::forgetWithLocales('user_'.$sender->id.'_outbox_count');
         } else {
-            LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_unknown_pm_type'] ?? 'Unknown PM type.');
+            LegacyResponse::abort(__('legacy/functions.std_error'), __('legacy/deletemessage.std_unknown_pm_type'));
         }
 
         $redirect = $type === 'out' ? 'messages.php?out=1' : 'messages.php';
 
         return redirect($redirect);
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    private function lang(string $name): array
-    {
-        return array_merge(
-            (array) $this->language->functions(),
-            (array) trans('legacy/'.$name)
-        );
     }
 
     private function sendPmNotification(User $recipient, User $sender, string $subject, int $messageId): void

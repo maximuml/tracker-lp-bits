@@ -288,7 +288,7 @@ final class ForumComposeServiceTest extends TestCase
 
         $threw = false;
         try {
-            $this->callWithSuppressedErrors(fn () => $this->service()->checkWhetherExist(999, 'forum', ['std_error' => 'Error', 'std_no_forum_id' => 'No forum']));
+            $this->callWithSuppressedErrors(fn () => $this->service()->checkWhetherExist(999, 'forum'));
         } catch (\Throwable) {
             $threw = true;
         }
@@ -304,7 +304,7 @@ final class ForumComposeServiceTest extends TestCase
 
         $threw = false;
         try {
-            $this->callWithSuppressedErrors(fn () => $this->service()->checkWhetherExist(999, 'topic', ['std_error' => 'Error', 'std_bad_topic_id' => 'Bad topic']));
+            $this->callWithSuppressedErrors(fn () => $this->service()->checkWhetherExist(999, 'topic'));
         } catch (\Throwable) {
             $threw = true;
         }
@@ -320,7 +320,7 @@ final class ForumComposeServiceTest extends TestCase
 
         $threw = false;
         try {
-            $this->callWithSuppressedErrors(fn () => $this->service()->checkWhetherExist(999, 'post', ['std_error' => 'Error', 'std_no_post_id' => 'No post']));
+            $this->callWithSuppressedErrors(fn () => $this->service()->checkWhetherExist(999, 'post'));
         } catch (\Throwable) {
             $threw = true;
         }
@@ -334,7 +334,7 @@ final class ForumComposeServiceTest extends TestCase
 
         $threw = false;
         try {
-            $this->callWithSuppressedErrors(fn () => $this->service()->checkWhetherExist(0, 'forum', ['std_error' => 'Error']));
+            $this->callWithSuppressedErrors(fn () => $this->service()->checkWhetherExist(0, 'forum'));
         } catch (\Throwable) {
             $threw = true;
         }
@@ -348,7 +348,7 @@ final class ForumComposeServiceTest extends TestCase
 
         $repo->shouldReceive('forumExists')->with(1)->andReturn(true);
 
-        $this->callWithSuppressedErrors(fn () => $this->service()->checkWhetherExist(1, 'forum', []));
+        $this->callWithSuppressedErrors(fn () => $this->service()->checkWhetherExist(1, 'forum'));
 
         $this->expectNotToPerformAssertions();
     }
@@ -364,7 +364,7 @@ final class ForumComposeServiceTest extends TestCase
         $repo->shouldReceive('forumExists')->with(1)->andReturn(true);
         $repo->shouldReceive('getForumName')->with(1)->andReturn('Test Forum');
 
-        $result = $this->callWithSuppressedErrors(fn () => $this->service()->buildNewTopic(['text_new_topic_in' => 'New topic in', 'text_forum' => 'Forum'], Request::create('/forums.php', 'GET', ['forumid' => 1])));
+        $result = $this->callWithSuppressedErrors(fn () => $this->service()->buildNewTopic(Request::create('/forums.php', 'GET', ['forumid' => 1])));
 
         $this->assertIsArray($result);
         $this->assertStringContainsString('Test Forum', $result['title']);
@@ -382,7 +382,7 @@ final class ForumComposeServiceTest extends TestCase
         $repo->shouldReceive('forumExists')->with(1)->andReturn(true);
         $this->mockTopicRepo()->shouldReceive('getTopicSubject')->with(1)->andReturn('Test Topic');
 
-        $result = $this->callWithSuppressedErrors(fn () => $this->service()->buildReply(['text_reply_to_topic' => 'Reply to'], Request::create('/forums.php', 'GET', ['topicid' => 1])));
+        $result = $this->callWithSuppressedErrors(fn () => $this->service()->buildReply(Request::create('/forums.php', 'GET', ['topicid' => 1])));
 
         $this->assertIsArray($result);
         $this->assertStringContainsString('Test Topic', $result['title']);

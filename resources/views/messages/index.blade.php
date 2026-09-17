@@ -1,6 +1,6 @@
 @extends('layouts.legacy')
 
-@section('title', $title ?? ($lang['head_private_messages'] ?? 'Private messages'))
+@section('title', $title ?? 'Private messages')
 
 @section('content')
 @if ($action === 'viewmessage')

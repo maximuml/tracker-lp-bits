@@ -45,14 +45,6 @@ final class ForumModerationService
         private readonly PostLookupRepository $postLookupRepository,
     ) {}
 
-    /**
-     * @return array<string, mixed>
-     */
-    private function lang(): array
-    {
-        return (array) trans('legacy/forums');
-    }
-
     private function cacheDelete(string $key): void
     {
         $this->cache->delete_value($key);
@@ -74,13 +66,12 @@ final class ForumModerationService
 
     public function moveTopic(Request $request): RedirectResponse
     {
-        $lang = $this->lang();
         $forumid = (int) $request->input('forumid');
         $topicid = (int) $request->query('topicid');
 
         $topic = Topic::query()->whereKey($topicid)->first();
         if ($topic === null) {
-            LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_topic_not_found'] ?? 'Topic not found.');
+            LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_topic_not_found'));
             throw new LogicException('Expected non-null topic.');
         }
 
@@ -93,7 +84,7 @@ final class ForumModerationService
 
         $minclasswrite = $this->repository->getForumMinclasswrite($forumid);
         if ($minclasswrite === null) {
-            LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_forum_not_found'] ?? 'Forum not found.');
+            LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_forum_not_found'));
         }
 
         if (UserDisplay::currentClass() < $minclasswrite) {
@@ -102,7 +93,7 @@ final class ForumModerationService
 
         $oldForumid = $this->topicRepository->getTopicForumId($topicid);
         if ($oldForumid === null) {
-            LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_topic_not_found'] ?? 'Topic not found.');
+            LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_topic_not_found'));
         }
 
         $postCount = $this->postRepository->countTopicPosts($topicid);
@@ -121,7 +112,6 @@ final class ForumModerationService
 
     public function deleteTopic(Request $request): RedirectResponse
     {
-        $lang = $this->lang();
         $topicid = (int) $request->query('topicid');
         $topic = Topic::query()->whereKey($topicid)->first();
 
@@ -141,7 +131,7 @@ final class ForumModerationService
 
         $sure = (int) $request->query('sure', 0);
         if ($sure !== 1) {
-            LegacyResponse::abort($lang['std_delete_topic'] ?? 'Delete topic', ($lang['std_delete_topic_note'] ?? '')."<a class=altlink href=?action=deletetopic&topicid={$topicid}&sure=1>".($lang['std_here_if_sure'] ?? ''), false);
+            LegacyResponse::abort(__('legacy/forums.std_delete_topic'), (__('legacy/forums.std_delete_topic_note'))."<a class=altlink href=?action=deletetopic&topicid={$topicid}&sure=1>".(__('legacy/forums.std_here_if_sure')), false);
         }
 
         $postCount = $this->postRepository->countTopicPosts($topicid);
@@ -164,13 +154,12 @@ final class ForumModerationService
 
     public function deletePost(Request $request): RedirectResponse
     {
-        $lang = $this->lang();
         $postid = (int) $request->query('postid');
         $sure = (int) $request->query('sure', 0);
 
         $post = Post::query()->whereKey($postid)->first();
         if ($post === null) {
-            LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_post_not_found'] ?? 'Post not found.');
+            LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_post_not_found'));
             throw new LogicException('Expected non-null post.');
         }
 
@@ -186,11 +175,11 @@ final class ForumModerationService
         $prevPostId = $this->postLookupRepository->getPreviousPostId($topicid, $postid);
 
         if ($prevPostId === null || $prevPostId === 0) {
-            LegacyResponse::abort($lang['std_error'] ?? 'Error', ($lang['std_cannot_delete_post'] ?? '')."<a class=altlink href=?action=deletetopic&topicid={$topicid}&sure=1>".($lang['std_delete_topic_instead'] ?? ''), false);
+            LegacyResponse::abort(__('legacy/forums.std_error'), (__('legacy/forums.std_cannot_delete_post'))."<a class=altlink href=?action=deletetopic&topicid={$topicid}&sure=1>".(__('legacy/forums.std_delete_topic_instead')), false);
         }
 
         if ($sure !== 1) {
-            LegacyResponse::abort($lang['std_delete_post'] ?? 'Delete post', ($lang['std_delete_post_note'] ?? '')."<a class=altlink href=?action=deletepost&postid={$postid}&sure=1>".($lang['std_here_if_sure'] ?? ''), false);
+            LegacyResponse::abort(__('legacy/forums.std_delete_post'), (__('legacy/forums.std_delete_post_note'))."<a class=altlink href=?action=deletepost&postid={$postid}&sure=1>".(__('legacy/forums.std_here_if_sure')), false);
         }
 
         $redirtopost = '&page=p'.$prevPostId.'#pid'.$prevPostId;

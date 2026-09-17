@@ -4,7 +4,7 @@
 
 @section('content')
 @if (! empty($rows ?? []))
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::open('', false, 10, '100%', 'left')))
+    {{ \App\Support\Frame::open('', false, 10, '100%', 'left') }}
     <table data-nx="data" width="100%" border="1" cellspacing="0" cellpadding="5">
         @if ($status ?? '')
             <tr>
@@ -37,6 +37,6 @@
             </tr>
         @endforeach
     </table>
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::CLOSE))
+    {{ \App\Support\Frame::close() }}
 @endif
 @endsection

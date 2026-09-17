@@ -7,4 +7,4 @@
 @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($list['searchBox'] ?? ''))
 </div>
 <br /><br />
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($list['tableHtml'] ?? ''))
+{{ $list['tableHtml'] ?? '' }}

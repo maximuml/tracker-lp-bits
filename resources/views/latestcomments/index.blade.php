@@ -4,7 +4,7 @@
 
 @section('content')
 @if ($count == 0)
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::stdMessage(('Sorry'), __('legacy/functions.text_no_comments'), false)))
+    {{ \App\Support\Frame::stdMessage(('Sorry'), __('legacy/functions.text_no_comments'), false) }}
 @else
     {{ $pagertop }}
     <h1 align="center">{{ __('legacy/functions.text_latest_comments')}}</h1>

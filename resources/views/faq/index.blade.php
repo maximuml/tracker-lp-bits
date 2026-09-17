@@ -4,12 +4,12 @@
 
 @section('content')
 @if (! empty($faqCategories))
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::open(__('legacy/faq.text_welcome_to').$SITENAME." - ".$SLOGAN, false, 10, '100%', 'left')))
+    {{ \App\Support\Frame::open(__('legacy/faq.text_welcome_to').$SITENAME." - ".$SLOGAN, false, 10, '100%', 'left') }}
     @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/faq.text_welcome_content_one')))
     @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(sprintf(__('legacy/faq.text_welcome_content_two'), $SITENAME, $SITENAME)))
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::CLOSE))
+    {{ \App\Support\Frame::close() }}
 
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::open("<span id=\"top\">".(__('legacy/faq.text_contents'))."</span>", false, 10, '100%', 'left')))
+    {{ \App\Support\Frame::open("<span id=\"top\">".(__('legacy/faq.text_contents'))."</span>", false, 10, '100%', 'left') }}
     <ul>
     @foreach ($faqCategories as $id => $temp)
         @if ($faqCategories[$id]['flag'] == "1")
@@ -31,11 +31,11 @@
     @endforeach
     </ul>
     <br />
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::CLOSE))
+    {{ \App\Support\Frame::close() }}
 
     @foreach ($faqCategories as $id => $temp)
         @if ($faqCategories[$id]['flag'] == "1")
-            @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::open($faqCategories[$id]['title'] ." - <a href=\"#top\"><img class=\"top\" src=\"pic/trans.gif\" alt=\"Top\" title=\"Top\" /></a>", false, 10, '100%', 'left')))
+            {{ \App\Support\Frame::open($faqCategories[$id]['title'] ." - <a href=\"#top\"><img class=\"top\" src=\"pic/trans.gif\" alt=\"Top\" title=\"Top\" /></a>", false, 10, '100%', 'left') }}
             <span id="id{{ $faqCategories[$id]['link_id'] }}"></span>
             @if (isset($faqCategories[$id]['items']))
                 @foreach ($faqCategories[$id]['items'] as $id2 => $tempItem)
@@ -45,7 +45,7 @@
                     @endif
                 @endforeach
             @endif
-            @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::CLOSE))
+            {{ \App\Support\Frame::close() }}
         @endif
     @endforeach
 @endif

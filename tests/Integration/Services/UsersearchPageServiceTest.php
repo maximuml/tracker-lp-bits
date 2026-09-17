@@ -200,8 +200,8 @@ final class UsersearchPageServiceTest extends TestCase
         $data = $this->callBuild($request);
 
         $this->assertFalse($data['hasResults']);
-        $this->assertSame('', $data['resultsHtml']);
-        $this->assertSame('', $data['resultsError']);
+        $this->assertNull($data['resultsHtml']);
+        $this->assertNull($data['resultsError']);
         $this->assertArrayHasKey('form', $data);
     }
 
@@ -233,8 +233,8 @@ final class UsersearchPageServiceTest extends TestCase
         $data = $this->callBuild($request);
 
         $this->assertTrue($data['hasResults']);
-        $this->assertStringContainsString('No user was found', $data['resultsHtml']);
-        $this->assertSame('', $data['resultsError']);
+        $this->assertStringContainsString('No user was found', (string) $data['resultsHtml']);
+        $this->assertNull($data['resultsError']);
     }
 
     // --- search with results ---
@@ -250,8 +250,8 @@ final class UsersearchPageServiceTest extends TestCase
         $data = $this->callBuild($request);
 
         $this->assertTrue($data['hasResults']);
-        $this->assertStringContainsString('<table', $data['resultsHtml']);
-        $this->assertSame('', $data['resultsError']);
+        $this->assertStringContainsString('<table', (string) $data['resultsHtml']);
+        $this->assertNull($data['resultsError']);
     }
 
     // --- search with wildcard ---
@@ -268,7 +268,7 @@ final class UsersearchPageServiceTest extends TestCase
         $data = $this->callBuild($request);
 
         $this->assertTrue($data['hasResults']);
-        $this->assertStringContainsString('<table', $data['resultsHtml']);
+        $this->assertStringContainsString('<table', (string) $data['resultsHtml']);
     }
 
     // --- invalid email error ---
@@ -283,8 +283,8 @@ final class UsersearchPageServiceTest extends TestCase
         $data = $this->callBuild($request);
 
         $this->assertTrue($data['hasResults']);
-        $this->assertStringContainsString('Bad email', $data['resultsError']);
-        $this->assertSame('', $data['resultsHtml']);
+        $this->assertStringContainsString('Bad email', (string) $data['resultsError']);
+        $this->assertNull($data['resultsHtml']);
     }
 
     // --- invalid IP error ---
@@ -299,7 +299,7 @@ final class UsersearchPageServiceTest extends TestCase
         $data = $this->callBuild($request);
 
         $this->assertTrue($data['hasResults']);
-        $this->assertStringContainsString('Bad IP', $data['resultsError']);
+        $this->assertStringContainsString('Bad IP', (string) $data['resultsError']);
     }
 
     // --- form fields structure ---

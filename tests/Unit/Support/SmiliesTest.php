@@ -78,11 +78,11 @@ final class SmiliesTest extends TestCase
     public function test_framed_table_opens_with_centered_frame_and_table(): void
     {
         $result = Smilies::framedTable('Smilies', 'Type', 'Insert');
-        // Frame::open(title, center=true, padding=10, width=100%, caption=left)
+        // (string) Frame::open(title, center=true, padding=10, width=100%, caption=left)
         $this->assertStringContainsString('<h2 align="left">Smilies</h2>', $result);
         $this->assertStringContainsString('<table width="100%" border="1" cellspacing="0" cellpadding="10">', $result);
         $this->assertStringContainsString("<tr><td class=\"text\"  align=\"center\">\n", $result);
-        // Frame::tableOpen(false, 5)
+        // (string) Frame::tableOpen(false, 5)
         $this->assertStringContainsString('<table class="main" border="1" cellspacing="0" cellpadding="5">', $result);
     }
 

@@ -4,7 +4,7 @@
 
 @section('content')
 <form id="compose" method="post" name="compose" action="/takecontact">
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::composeBegin(__('legacy/contactstaff.text_message_to_staff'), 'new', '', true, '', 100)))
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::composeEnd()))
+    {{ \App\Support\Frame::composeBegin(__('legacy/contactstaff.text_message_to_staff'), 'new', '', true, '', 100) }}
+    {{ \App\Support\Frame::composeEnd() }}
 </form>
 @endsection

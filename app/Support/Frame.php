@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Support\Html\SafeHtml;
 use App\View\Components\BbcodeEditor;
 use Illuminate\Contracts\Support\Htmlable;
 
@@ -21,12 +22,22 @@ final class Frame
 
     public const TABLE_CLOSE = "</table>\n";
 
+    public static function close(): SafeHtml
+    {
+        return SafeHtml::fromTrustedHtml(self::CLOSE);
+    }
+
+    public static function tableClose(): SafeHtml
+    {
+        return SafeHtml::fromTrustedHtml(self::TABLE_CLOSE);
+    }
+
     public static function mainOpen(
         string $caption,
         bool $center,
         int|string $width,
         int $contentWidth,
-    ): string {
+    ): SafeHtml {
         $tdextra = $center ? ' align="center"' : '';
         $widthString = (string) $width;
         if (! str_ends_with($widthString, '%')) {
@@ -37,9 +48,9 @@ final class Frame
         // Legacy quirks preserved: when $center is false the <td> ends
         // up as `class="embedded" >` (trailing space); when true it
         // becomes `class="embedded"  align="center">` (two spaces).
-        return $heading
+        return SafeHtml::fromTrustedHtml($heading
             .'<table class="main" width="'.$widthString.'" border="0" cellspacing="0" cellpadding="0">'
-            .'<tr><td class="embedded" '.$tdextra.'>';
+            .'<tr><td class="embedded" '.$tdextra.'>');
     }
 
     public static function open(
@@ -48,18 +59,18 @@ final class Frame
         int $padding,
         string $width,
         string $captionAlign,
-    ): string {
+    ): SafeHtml {
         $tdextra = $center ? ' align="center"' : '';
         $heading = $caption !== ''
             ? '<h2 align="'.$captionAlign.'">'.$caption.'</h2>'
             : '';
 
-        return $heading
+        return SafeHtml::fromTrustedHtml($heading
             .'<table width="'.$width.'" border="1" cellspacing="0" cellpadding="'.$padding.'">'
-            .'<tr><td class="text" '.$tdextra.">\n";
+            .'<tr><td class="text" '.$tdextra.">\n");
     }
 
-    public static function tableOpen(bool $fullwidth, int $padding): string
+    public static function tableOpen(bool $fullwidth, int $padding): SafeHtml
     {
         // Legacy bug preserved: when $fullwidth is true the ` width=50%`
         // fragment lands INSIDE the class attribute (`class="main width=50%"`),
@@ -68,10 +79,10 @@ final class Frame
         // markup for years; we keep it bit-for-bit.
         $widthFragment = $fullwidth ? ' width=50%' : '';
 
-        return '<table class="main'.$widthFragment.'" border="1" cellspacing="0" cellpadding="'.$padding.'">';
+        return SafeHtml::fromTrustedHtml('<table class="main'.$widthFragment.'" border="1" cellspacing="0" cellpadding="'.$padding.'">');
     }
 
-    public static function stdMessage(string $heading, string $text, bool $htmlstrip): string
+    public static function stdMessage(string $heading, string $text, bool $htmlstrip): SafeHtml
     {
         if ($htmlstrip) {
             $heading = htmlspecialchars(trim($heading));
@@ -85,10 +96,10 @@ final class Frame
             ? '<h2>'.$heading."</h2>\n"
             : '';
 
-        return '<table align="center" class="main" width="500" border="0" cellpadding="0" cellspacing="0"><tr><td class="embedded">'."\n"
+        return SafeHtml::fromTrustedHtml('<table align="center" class="main" width="500" border="0" cellpadding="0" cellspacing="0"><tr><td class="embedded">'."\n"
             .$headingHtml
             .'<table width="100%" border="1" cellspacing="0" cellpadding="10"><tr><td class="text">'
-            .$text."</td></tr></table></td></tr></table>\n";
+            .$text."</td></tr></table></td></tr></table>\n");
     }
 
     /**
@@ -104,7 +115,7 @@ final class Frame
         bool $hassubject,
         string $subject,
         int $maxsubjectlength,
-    ): string {
+    ): SafeHtml {
         $html = '';
         if ($title instanceof Htmlable) {
             $titleHtml = $title->toHtml();
@@ -133,7 +144,7 @@ final class Frame
 
         $html .= '<tr><td class="rowhead" valign="top">'.(__('legacy/functions.row_body')).'</td><td class="rowfollow" align="left"><span class="nx-hidden" id="previewouter"></span><div id="editorouter">';
 
-        return $html;
+        return SafeHtml::fromTrustedHtml($html);
     }
 
     /**
@@ -143,9 +154,9 @@ final class Frame
      * buttons, closes the inner table and the outer frame, and appends
      * the tags/smilies links.
      */
-    public static function composeClose(): string
+    public static function composeClose(): SafeHtml
     {
-        return '</div></td></tr>'."\n"
+        return SafeHtml::fromTrustedHtml('</div></td></tr>'."\n"
             .'<tr><td colspan="2" align="center"><table><tr><td class="embedded"><input id="qr" type="submit" class="btn" value="'.(__('legacy/functions.submit_submit')).'" /></td><td class="embedded">'
             .'<input type="button" class="btn2" name="previewbutton" id="previewbutton" value="'.(__('legacy/functions.submit_preview')).'" data-preview-toggle="preview" />'
             .'<input type="button" class="btn2 nx-hidden" name="unpreviewbutton" id="unpreviewbutton" value="'.(__('legacy/functions.submit_edit')).'" data-preview-toggle="unpreview" />'
@@ -153,7 +164,7 @@ final class Frame
             .'</td></tr>'
             .'</table>'."\n"
             .self::CLOSE
-            .'<p align="center"><a href="tags.php" target="_blank">'.(__('legacy/functions.text_tags')).'</a> | <a href="smilies.php" target="_blank">'.(__('legacy/functions.text_smilies')).'</a></p>'."\n";
+            .'<p align="center"><a href="tags.php" target="_blank">'.(__('legacy/functions.text_tags')).'</a> | <a href="smilies.php" target="_blank">'.(__('legacy/functions.text_smilies')).'</a></p>'."\n");
     }
 
     /**
@@ -168,10 +179,10 @@ final class Frame
         bool $hasSubject,
         string $subject,
         int $maxSubjectLength,
-    ): string {
+    ): SafeHtml {
 
-        return self::composeOpen($title, $type, $hasSubject, $subject, $maxSubjectLength)
-            .BbcodeEditor::html(['form' => 'compose', 'text' => 'body', 'content' => $body]);
+        return SafeHtml::fromTrustedHtml((string) self::composeOpen($title, $type, $hasSubject, $subject, $maxSubjectLength)
+            .BbcodeEditor::html(['form' => 'compose', 'text' => 'body', 'content' => $body]));
     }
 
     /**
@@ -179,12 +190,12 @@ final class Frame
      *
      * Backs the legacy `end_compose()` helper.
      */
-    public static function composeEnd(): string
+    public static function composeEnd(): SafeHtml
     {
         return self::composeClose();
     }
 
-    public static function sqlError(string $error, string $file, string $line): string
+    public static function sqlError(string $error, string $file, string $line): SafeHtml
     {
         // Legacy quirk preserved: original used `$file != '' && $line != ''`,
         // a loose comparison that treats `'0'` and integer `0` as empty.
@@ -193,9 +204,9 @@ final class Frame
             ? '<p>in '.$file.', line '.$line.'</p>'
             : '';
 
-        return '<table border="0" bgcolor="blue" align="left" cellspacing="0" cellpadding="10" style="background: blue;">'
+        return SafeHtml::fromTrustedHtml('<table border="0" bgcolor="blue" align="left" cellspacing="0" cellpadding="10" style="background: blue;">'
             .'<tr><td class="embedded"><font color="white"><h1>SQL Error</h1>'."\n"
-            .'<b>'.$error.$location.'</b></font></td></tr></table>';
+            .'<b>'.$error.$location.'</b></font></td></tr></table>');
     }
 
     /**

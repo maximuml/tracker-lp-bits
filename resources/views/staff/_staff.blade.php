@@ -1,4 +1,4 @@
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::open((__('legacy/staff.text_firstline_support')) . '<font class=small> - [<a class=altlink href=contactstaff.php><b>' . (__('legacy/staff.text_apply_for_it')) . '</b></a>]</font>', false, 10, '100%', 'left')))
+{{ \App\Support\Frame::open((__('legacy/staff.text_firstline_support')) . '<font class=small> - [<a class=altlink href=contactstaff.php><b>' . (__('legacy/staff.text_apply_for_it')) . '</b></a>]</font>', false, 10, '100%', 'left') }}
 {{ __('legacy/staff.text_firstline_support_note') }}
 <br /><br />
 <table data-nx="data" width=100% cellspacing=0 align=center>
@@ -22,9 +22,9 @@
     </tr>
     @endforeach
 </table>
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::CLOSE))
+{{ \App\Support\Frame::close() }}
 
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::open((__('legacy/staff.text_movie_critics')) . '<font class=small> - [<a class=altlink href=contactstaff.php><b>' . (__('legacy/staff.text_apply_for_it')) . '</b></a>]</font>', false, 10, '100%', 'left')))
+{{ \App\Support\Frame::open((__('legacy/staff.text_movie_critics')) . '<font class=small> - [<a class=altlink href=contactstaff.php><b>' . (__('legacy/staff.text_apply_for_it')) . '</b></a>]</font>', false, 10, '100%', 'left') }}
 {{ __('legacy/staff.text_movie_critics_note') }}
 <br /><br />
 <table data-nx="data" width=100% cellspacing=0 align=center>
@@ -46,9 +46,9 @@
     </tr>
     @endforeach
 </table>
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::CLOSE))
+{{ \App\Support\Frame::close() }}
 
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::open((__('legacy/staff.text_forum_moderators')) . '<font class=small> - [<a class=altlink href=contactstaff.php><b>' . (__('legacy/staff.text_apply_for_it')) . '</b></a>]</font>', false, 10, '100%', 'left')))
+{{ \App\Support\Frame::open((__('legacy/staff.text_forum_moderators')) . '<font class=small> - [<a class=altlink href=contactstaff.php><b>' . (__('legacy/staff.text_apply_for_it')) . '</b></a>]</font>', false, 10, '100%', 'left') }}
 {{ __('legacy/staff.text_forum_moderators_note') }}
 <br /><br />
 <table data-nx="data" width=100% cellspacing=0 align=center>
@@ -70,9 +70,9 @@
     </tr>
     @endforeach
 </table>
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::CLOSE))
+{{ \App\Support\Frame::close() }}
 
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::open((__('legacy/staff.text_general_staff')) . '<font class=small> - [<a class=altlink href=contactstaff.php><b>' . (__('legacy/staff.text_apply_for_it')) . '</b></a>]</font>', false, 10, '100%', 'left')))
+{{ \App\Support\Frame::open((__('legacy/staff.text_general_staff')) . '<font class=small> - [<a class=altlink href=contactstaff.php><b>' . (__('legacy/staff.text_apply_for_it')) . '</b></a>]</font>', false, 10, '100%', 'left') }}
 @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/staff.text_general_staff_note')))
 <br /><br />
 <table data-nx="data" width=100% cellspacing=0 align=center>
@@ -99,9 +99,9 @@
         @endif
     @endforeach
 </table>
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::CLOSE))
+{{ \App\Support\Frame::close() }}
 
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::open(__('legacy/staff.text_vip'), false, 10, '100%', 'left')))
+{{ \App\Support\Frame::open(__('legacy/staff.text_vip'), false, 10, '100%', 'left') }}
 {{ sprintf(__('legacy/staff.text_vip_note'), $siteName) }}
 <br /><br />
 <table data-nx="data" width=100% cellspacing=0 align=center>
@@ -123,4 +123,4 @@
     </tr>
     @endforeach
 </table>
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::CLOSE))
+{{ \App\Support\Frame::close() }}

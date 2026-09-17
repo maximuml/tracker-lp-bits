@@ -4,11 +4,11 @@
 
 @section('content')
 @if ($thanks)
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::stdMessage(__('legacy/donate.std_success'), $successMessage, false)))
+    {{ \App\Support\Frame::stdMessage(__('legacy/donate.std_success'), $successMessage, false) }}
 @elseif (! $enabled)
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::stdMessage(__('legacy/donate.std_sorry'), __('legacy/donate.std_do_not_accept_donation'), true)))
+    {{ \App\Support\Frame::stdMessage(__('legacy/donate.std_sorry'), __('legacy/donate.std_do_not_accept_donation'), true) }}
 @elseif (! $showAny)
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::stdMessage(__('legacy/donate.std_error'), __('legacy/donate.std_no_donation_account_available'), false)))
+    {{ \App\Support\Frame::stdMessage(__('legacy/donate.std_error'), __('legacy/donate.std_no_donation_account_available'), false) }}
 @else
     <h2>{{ __('legacy/donate.text_donate') }}</h2>
     <div>

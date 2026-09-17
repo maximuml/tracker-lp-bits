@@ -14,6 +14,6 @@
 </table>
 {{ $pagerbottom ?? '' }}
 @else
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::stdMessage(__('legacy/viewsnatches.std_sorry'), __('legacy/viewsnatches.std_no_snatched_users'), false)))
+{{ \App\Support\Frame::stdMessage(__('legacy/viewsnatches.std_sorry'), __('legacy/viewsnatches.std_no_snatched_users'), false) }}
 @endif
 @endsection

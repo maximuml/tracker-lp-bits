@@ -275,3 +275,18 @@ input[type="reset"] {
   .nxm-filters { flex-direction: column; }
   .nxm-searchline input[type="text"] { width: 100%; flex: 1 1 100%; }
 }
+
+/* domTT tooltips (loaded by modern chrome for data-domtt-* handlers) */
+div.niceTitle {
+  background-color: var(--nxm-surface, #f6f7f9);
+  color: var(--nxm-text, #1b1f24);
+  border: 1px solid var(--nxm-border, #d8dbe0);
+  font-size: 13px;
+  padding: 4px 8px;
+  position: absolute;
+  text-align: left;
+  z-index: 20;
+  border-radius: 0 8px 8px 8px;
+  opacity: .95;
+  max-width: 320px;
+}

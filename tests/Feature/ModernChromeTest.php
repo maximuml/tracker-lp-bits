@@ -80,8 +80,9 @@ final class ModernChromeTest extends TestCase
 
         // The legacy shell wrapped content in Frame::mainOpen tables and
         // the themed stylesheet; the modern shell must not emit them.
+        // domTT.js itself is intentionally loaded — the delegated
+        // data-domtt-* tooltip handlers live in common.js.
         $this->assertStringNotContainsString('class="embedded"', $html);
         $this->assertStringNotContainsString('DomTT.css', $html);
-        $this->assertStringNotContainsString('domTT.js', $html);
     }
 }

@@ -15,9 +15,12 @@ fail() { echo "PIN_CHECK_FAIL: $*" >&2; FAILURES=$((FAILURES + 1)); }
 FAILURES=0
 
 # --- 1. GitHub Actions must be SHA-pinned -----------------------------------
+# Local `uses: ./...` paths are exempt: they resolve inside the same
+# checkout and are pinned to the commit by construction.
 while IFS= read -r line; do
     fail "unpinned action: $line"
-done < <(grep -rhnE 'uses: *[^ ]+' .github/workflows/ \
+done < <(grep -rhnE 'uses: *[^ ]+' .github/workflows/ .github/actions/ \
+         | grep -vE 'uses: *\./' \
          | grep -vE '@[0-9a-f]{40}' || true)
 
 # --- 2. Dockerfile FROM must be digest-pinned -------------------------------

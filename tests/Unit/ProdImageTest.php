@@ -157,8 +157,12 @@ final class ProdImageTest extends TestCase
      */
     public function test_ci_uses_dev_compose_overrides(): void
     {
+        // Env preparation lives in scripts/ci/env-compose-dev.sh — the
+        // workflow delegates to it.
         $ci = file_get_contents(base_path('.github/workflows/ci.yml'));
-        $this->assertStringContainsString('COMPOSE_FILE=docker-compose.yml:docker-compose.dev.yml', $ci, 'CI must set COMPOSE_FILE for dev overrides');
+        $env = file_get_contents(base_path('scripts/ci/env-compose-dev.sh'));
+        $this->assertStringContainsString('env-compose-dev.sh', $ci, 'CI must delegate dev env prep to scripts/ci/env-compose-dev.sh');
+        $this->assertStringContainsString('COMPOSE_FILE=docker-compose.yml:docker-compose.dev.yml', $env, 'CI must set COMPOSE_FILE for dev overrides');
     }
 
     /**

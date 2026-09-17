@@ -82,10 +82,10 @@ docker compose exec -T php composer audit
 ## Coding conventions
 
 - **PHPStan:** level 8 must pass — all code is strictly typed
-- **Pint:** Laravel preset, 1338 files checked
+- **Pint:** Laravel preset — run `vendor/bin/pint --test` before pushing
 - **Return types:** all public methods should have return type declarations
 - **DI:** use constructor injection or `app()` — avoid `new Repository()` in services
-- **Facades:** `DB::`, `Cache::`, `Redis::`, `Auth::` — not `NexusDB::` (drained in Sprint 17)
+- **Facades:** `DB::`, `Cache::`, `Redis::`, `Auth::` — application code must not use `NexusDB::`. The class still exists under `app/Support/Install/` for the legacy installer only; its removal is tracked as a separate step
 - **SupportContext:** only used in wrapper classes (CurrentUser, Globals, etc.) — not directly in controllers/services
 - **Blade escaping:** `SafeHtml::fromTrustedHtml()` performs NO sanitisation — `@safeHtml(SafeHtml::fromTrustedHtml($x))` is `{!! $x !!}` under another name. New `fromTrustedHtml` uses require justification in the PR; counts are ratcheted by `LegacyViewSurfaceTest` (plain text → `{{ }}`, attributes → context-specific escaping)
 - **Comments:** do not add/remove comments unless asked

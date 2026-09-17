@@ -27,40 +27,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@b604ade2a87db23f8871b7182e69ec5e75effb45 # v2
-        with:
-          php-version: '8.5'
-          extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, pdo_mysql, redis, sqlite3, xml, zip
-          coverage: none
-
-      - name: Cache Composer dependencies
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
-        with:
-          path: ~/.composer/cache
-          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
-
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction --no-scripts
-
-      - name: Dump autoload
-        run: composer dump-autoload --no-interaction --no-scripts
+      - name: Setup PHP stack
+        uses: ./.github/actions/setup-php-stack
 
       - name: Prepare environment
-        run: |
-          cp .env.example .env
-          sed -i 's/^CACHE_DRIVER=.*/CACHE_DRIVER=array/' .env
-          sed -i 's/^QUEUE_CONNECTION=.*/QUEUE_CONNECTION=sync/' .env
-          sed -i 's/^SESSION_DRIVER=.*/SESSION_DRIVER=array/' .env
-          sed -i 's/^CHANNEL_NAME_SETTING=.*/CHANNEL_NAME_SETTING=/' .env
-          sed -i 's/^CHANNEL_NAME_MODEL_EVENT=.*/CHANNEL_NAME_MODEL_EVENT=/' .env
-          echo "SCOUT_DRIVER=null" >> .env
-          # DB_HOST в никуда: соединение отваливается сразу (Connection refused),
-          # а не висит на getaddrinfo. Любой тест, которому нужна БД, упадёт.
-          sed -i 's/^DB_HOST=.*/DB_HOST=127.0.0.1/' .env
-          sed -i 's/^REDIS_HOST=.*/REDIS_HOST=127.0.0.1/' .env
-          sed -i 's/^MEILISEARCH_HOST=.*/MEILISEARCH_HOST=127.0.0.1/' .env
+        run: bash scripts/ci/env-unit-fast.sh
 
       - name: Run PHPUnit unit tests (no DB, no Redis, no MeiliSearch)
         run: DB_DATABASE=nexusphp_unit_testing vendor/bin/phpunit --testsuite Unit --no-coverage
@@ -75,19 +46,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@b604ade2a87db23f8871b7182e69ec5e75effb45 # v2
-        with:
-          php-version: '8.5'
-          extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, pdo_mysql, redis, sqlite3, xml, zip
-          coverage: none
-
-      - name: Cache Composer dependencies
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
-        with:
-          path: ~/.composer/cache
-          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
+      - name: Setup PHP stack
+        uses: ./.github/actions/setup-php-stack
 
       - name: Validate composer.json and composer.lock
         run: composer validate
@@ -95,22 +55,7 @@ jobs:
       # Invalid workflow files surface as 0-job failed runs on every push
       # (see the `cancel-progress` bug fixed in W8-05) — lint them like code.
       - name: Lint GitHub Actions workflows
-        run: |
-          AL_VER=1.7.12
-          AL_SHA256=8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8
-          curl -sSfL "https://github.com/rhysd/actionlint/releases/download/v${AL_VER}/actionlint_${AL_VER}_linux_amd64.tar.gz" -o /tmp/actionlint.tgz
-          echo "${AL_SHA256}  /tmp/actionlint.tgz" | sha256sum -c -
-          tar xzf /tmp/actionlint.tgz -C /tmp actionlint
-          # -shellcheck= disables the embedded shellcheck pass: the repo does
-          # not enforce shellcheck style; this gate exists for schema errors
-          # (invalid keys, bad contexts) that produce phantom 0-job failures.
-          /tmp/actionlint -shellcheck= .github/workflows/*.yml
-
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction --no-scripts
-
-      - name: Dump autoload
-        run: composer dump-autoload --no-interaction --no-scripts
+        run: bash scripts/ci/run-actionlint.sh
 
       - name: Audit composer dependencies
         run: composer audit
@@ -119,14 +64,7 @@ jobs:
         run: composer check-platform-reqs
 
       - name: Run PHP syntax lint
-        run: |
-          find . -type f -name '*.php' \
-            -not -path './vendor/*' \
-            -not -path './node_modules/*' \
-            -not -path './.docker/*' \
-            -not -path './public/vendor/*' \
-            -not -path './storage/*' \
-            -print0 | xargs -0 -n1 -P4 php -l
+        run: bash scripts/ci/php-lint.sh
 
       - name: Run Laravel Pint
         run: vendor/bin/pint --test
@@ -139,38 +77,8 @@ jobs:
       - name: Run PHPStan level 8
         run: vendor/bin/phpstan analyse --no-progress --memory-limit=2G
 
-  raw-sql-ratchet:
-    name: Raw SQL ratchet
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-
-      - name: Check raw SQL query count
-        run: |
-          BASELINE_COUNT=$(php -r 'echo count(json_decode(file_get_contents("raw-queries.json"), true)["queries"] ?? []);')
-          CURRENT=$(grep -rn 'DB::\(select\|statement\|unprepared\)\s*(' app/ --include="*.php" \
-            | grep -v 'Support/Install' \
-            | wc -l)
-          CURRENT_SUBQUERY=$(grep -rn 'DB::table\s*(\s*DB::raw' app/ --include="*.php" \
-            | grep -v 'Support/Install' \
-            | wc -l)
-          TOTAL=$((CURRENT + CURRENT_SUBQUERY))
-          echo "Baseline: $BASELINE_COUNT"
-          echo "Current raw queries: $CURRENT"
-          echo "Current raw subqueries: $CURRENT_SUBQUERY"
-          echo "Total: $TOTAL"
-          if [ "$TOTAL" -gt "$BASELINE_COUNT" ]; then
-            echo "::error::Raw SQL query count increased from $BASELINE_COUNT to $TOTAL. \
-          See raw-queries.json for the registry of allowed call sites. \
-          Use query builder instead of DB::select/statement/unprepared."
-            exit 1
-          fi
-          echo "OK: raw SQL query count ($TOTAL) <= baseline ($BASELINE_COUNT)"
-
-  supply-chain-pins:
-    name: Supply-chain pin ratchet
+  ratchets:
+    name: Repo ratchets (raw SQL + supply chain)
     runs-on: ubuntu-latest
     # W8-05: new third-party material must not enter unpinned — actions by
     # SHA, base images by digest, tool packages by version, no runtime
@@ -179,6 +87,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Check raw SQL query count
+        run: bash scripts/ci/raw-sql-ratchet.sh
 
       - name: Check supply-chain pins
         run: bash scripts/ci/check-supply-chain-pins.sh
@@ -216,45 +127,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@b604ade2a87db23f8871b7182e69ec5e75effb45 # v2
-        with:
-          php-version: '8.5'
-          extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, pdo_mysql, redis, sqlite3, xml, zip
-          coverage: none
-
-      - name: Cache Composer dependencies
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
-        with:
-          path: ~/.composer/cache
-          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
-
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction --no-scripts
-
-      - name: Dump autoload
-        run: composer dump-autoload --no-interaction --no-scripts
+      - name: Setup PHP stack
+        uses: ./.github/actions/setup-php-stack
 
       - name: Prepare environment
-        run: |
-          cp .env.example .env
-          sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=nexusphp/' .env
-          sed -i 's/^CACHE_DRIVER=.*/CACHE_DRIVER=array/' .env
-          sed -i 's/^QUEUE_CONNECTION=.*/QUEUE_CONNECTION=sync/' .env
-          sed -i 's/^CHANNEL_NAME_SETTING=.*/CHANNEL_NAME_SETTING=/' .env
-          sed -i 's/^CHANNEL_NAME_MODEL_EVENT=.*/CHANNEL_NAME_MODEL_EVENT=/' .env
-          sed -i 's/^REDIS_PASSWORD=.*/REDIS_PASSWORD=/' .env
-          sed -i 's/^REDIS_DB=.*/REDIS_DB=15/' .env
-          echo "SCOUT_DRIVER=null" >> .env
+        run: bash scripts/ci/env-ci-services.sh
 
       - name: Wait for MySQL
-        run: |
-          for i in $(seq 1 60); do
-            nc -z 127.0.0.1 3306 && break
-            sleep 1
-          done
-          nc -z 127.0.0.1 3306 || { echo "MySQL did not become ready in time"; exit 1; }
+        run: bash scripts/ci/wait-mysql.sh
 
       - name: Load previous-release schema snapshot
         run: |
@@ -302,106 +182,16 @@ jobs:
           fi
 
   unit-tests:
-    name: PHPUnit Unit (PHP ${{ matrix.php }}, MySQL ${{ matrix.mysql }})
-    runs-on: ubuntu-latest
     needs: [unit-tests-matrix]
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.unit-tests-matrix.outputs.matrix) }}
-
-    services:
-      mysql:
-        image: mysql:${{ matrix.mysql }}
-        env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: nexusphp
-          MYSQL_USER: nexusphp
-          MYSQL_PASSWORD: nexusphp
-        ports:
-          - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
-      redis:
-        image: redis:7-alpine
-        ports:
-          - 6379:6379
-        options: --health-cmd="redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=3
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@b604ade2a87db23f8871b7182e69ec5e75effb45 # v2
-        with:
-          php-version: ${{ matrix.php }}
-          extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, pdo_mysql, redis, sqlite3, xml, zip
-          coverage: none
-
-      - name: Cache Composer dependencies
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
-        with:
-          path: ~/.composer/cache
-          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
-
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction --no-scripts
-
-      - name: Dump autoload
-        run: composer dump-autoload --no-interaction --no-scripts
-
-      - name: Prepare environment
-        run: |
-          cp .env.example .env
-          sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=nexusphp/' .env
-          sed -i 's/^CACHE_DRIVER=.*/CACHE_DRIVER=array/' .env
-          sed -i 's/^QUEUE_CONNECTION=.*/QUEUE_CONNECTION=sync/' .env
-          sed -i 's/^CHANNEL_NAME_SETTING=.*/CHANNEL_NAME_SETTING=/' .env
-          sed -i 's/^CHANNEL_NAME_MODEL_EVENT=.*/CHANNEL_NAME_MODEL_EVENT=/' .env
-          sed -i 's/^REDIS_PASSWORD=.*/REDIS_PASSWORD=/' .env
-          # Redis isolation: use DB index 15 for tests to avoid clobbering
-          sed -i 's/^REDIS_DB=.*/REDIS_DB=15/' .env
-          # MeiliSearch isolation: disable Scout for unit/coverage tests
-          echo "SCOUT_DRIVER=null" >> .env
-
-      - name: Cache Laravel bootstrap files
-        run: |
-          php artisan storage:link --force
-          php artisan route:cache
-          php artisan view:cache
-          php artisan icons:cache
-          php artisan filament:cache-components
-
-      - name: Wait for MySQL and migrate
-        run: |
-          for i in $(seq 1 60); do
-            nc -z 127.0.0.1 3306 && break
-            sleep 1
-          done
-          nc -z 127.0.0.1 3306 || { echo "MySQL did not become ready in time"; exit 1; }
-          php artisan migrate:fresh --seed --force
-          # Create isolated unit test database to prevent tests from
-          # truncating tables in the seed database. The name carries the
-          # "testing" marker required by DestructiveEnvironmentGuard.
-          mysql -h 127.0.0.1 -u root -proot -e "CREATE DATABASE IF NOT EXISTS nexusphp_unit_testing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; GRANT ALL PRIVILEGES ON nexusphp_unit_testing.* TO 'nexusphp'@'%'; FLUSH PRIVILEGES;"
-          # Copy schema + seed data for tables tests depend on:
-          # settings/users — config + auth, categories/forums — FK and
-          # inner joins, searchbox/searchbox_fields — browse mode.
-          mysqldump -h 127.0.0.1 -u root -proot --no-data --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp | mysql -h 127.0.0.1 -u root -proot nexusphp_unit_testing
-          mysqldump -h 127.0.0.1 -u root -proot --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users categories forums searchbox searchbox_fields agent_allowed_family agent_allowed_exception | mysql -h 127.0.0.1 -u root -proot nexusphp_unit_testing
-
-      - name: Run PHPUnit unit tests
-        run: DB_DATABASE=nexusphp_unit_testing vendor/bin/phpunit --testsuite Unit --no-coverage
-
-      - name: Run PHPUnit integration tests
-        run: DB_DATABASE=nexusphp_unit_testing vendor/bin/phpunit --testsuite Integration --no-coverage
-
-      - name: Run PHPUnit performance tests
-        run: DB_DATABASE=nexusphp_unit_testing vendor/bin/phpunit --testsuite Performance --no-coverage
-
-      - name: Run architecture ratchet tests
-        if: matrix.php == '8.5' && matrix.mysql == '9.0'
-        run: DB_DATABASE=nexusphp_unit_testing vendor/bin/phpunit --testsuite Architecture --no-coverage
+    # Per-cell check names come from the callee job
+    # ("PHPUnit Unit (PHP X, MySQL Y)").
+    uses: ./.github/workflows/test-stack.yml
+    with:
+      php-version: ${{ matrix.php }}
+      mysql-version: ${{ matrix.mysql }}
 
   coverage:
     name: Code coverage
@@ -428,72 +218,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@b604ade2a87db23f8871b7182e69ec5e75effb45 # v2
+      - name: Setup PHP stack
+        uses: ./.github/actions/setup-php-stack
         with:
-          php-version: '8.5'
-          extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, pdo_mysql, redis, sqlite3, xml, zip
           coverage: xdebug
 
-      - name: Cache Composer dependencies
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
-        with:
-          path: ~/.composer/cache
-          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
-
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction --no-scripts
-
-      - name: Dump autoload
-        run: composer dump-autoload --no-interaction --no-scripts
-
       - name: Prepare environment
-        run: |
-          cp .env.example .env
-          sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=nexusphp/' .env
-          sed -i 's/^CACHE_DRIVER=.*/CACHE_DRIVER=array/' .env
-          sed -i 's/^QUEUE_CONNECTION=.*/QUEUE_CONNECTION=sync/' .env
-          sed -i 's/^CHANNEL_NAME_SETTING=.*/CHANNEL_NAME_SETTING=/' .env
-          sed -i 's/^CHANNEL_NAME_MODEL_EVENT=.*/CHANNEL_NAME_MODEL_EVENT=/' .env
-          sed -i 's/^REDIS_PASSWORD=.*/REDIS_PASSWORD=/' .env
-          # Redis isolation: use DB index 15 for tests to avoid clobbering
-          sed -i 's/^REDIS_DB=.*/REDIS_DB=15/' .env
-          # MeiliSearch isolation: disable Scout for unit/coverage tests
-          echo "SCOUT_DRIVER=null" >> .env
+        run: bash scripts/ci/env-ci-services.sh
 
-      - name: Wait for MySQL and migrate
-        run: |
-          for i in $(seq 1 60); do
-            nc -z 127.0.0.1 3306 && break
-            sleep 1
-          done
-          nc -z 127.0.0.1 3306 || { echo "MySQL did not become ready in time"; exit 1; }
-          php artisan migrate:fresh --seed --force
-          # Create isolated test databases for Unit and Feature suites.
-          # Separate databases allow the two suites to run with independent
-          # fixtures and prevent any risk of cross-suite data interference.
-          # Both names carry the "testing" marker required by
-          # DestructiveEnvironmentGuard.
-          mysql -h 127.0.0.1 -u root -proot -e "
-            CREATE DATABASE IF NOT EXISTS nexusphp_unit_testing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-            CREATE DATABASE IF NOT EXISTS nexusphp_feature_testing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-            GRANT ALL PRIVILEGES ON nexusphp_unit_testing.* TO 'nexusphp'@'%';
-            GRANT ALL PRIVILEGES ON nexusphp_feature_testing.* TO 'nexusphp'@'%';
-            FLUSH PRIVILEGES;
-          "
-          # Copy schema to both test databases
-          for db in nexusphp_unit_testing nexusphp_feature_testing; do
-            mysqldump -h 127.0.0.1 -u root -proot --no-data --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp | mysql -h 127.0.0.1 -u root -proot "$db"
-          done
-          # Unit tests need: settings/users — config + auth,
-          # categories/forums — FK targets and inner joins,
-          # searchbox/searchbox_fields — browse mode,
-          # agent_allowed_* — announce client check
-          mysqldump -h 127.0.0.1 -u root -proot --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users categories forums searchbox searchbox_fields agent_allowed_family agent_allowed_exception | mysql -h 127.0.0.1 -u root -proot nexusphp_unit_testing
-          # Feature tests need: settings/users — config + auth, searchbox/searchbox_fields — browse mode,
-          # categories — torrent listing, agent_allowed_family/agent_allowed_exception — announce client check
-          mysqldump -h 127.0.0.1 -u root -proot --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users searchbox searchbox_fields categories agent_allowed_family agent_allowed_exception | mysql -h 127.0.0.1 -u root -proot nexusphp_feature_testing
+      - name: Wait for MySQL and prepare test databases
+        # Create isolated test databases for Unit and Feature suites.
+        # Separate databases allow the two suites to run with independent
+        # fixtures and prevent any risk of cross-suite data interference.
+        # Both names carry the "testing" marker required by
+        # DestructiveEnvironmentGuard.
+        run: bash scripts/ci/prepare-test-db.sh nexusphp_unit_testing nexusphp_feature_testing
 
       - name: Run PHPUnit Unit + Integration with coverage
         # Оба сюита в одном clover-файле: до разделения tests/Unit они были
@@ -527,58 +266,7 @@ jobs:
         # Only Unit coverage is gated — Feature coverage is informational
         # since feature tests require full infrastructure and naturally
         # have lower coverage.
-        run: |
-          set -euo pipefail
-          python3 - <<'PYEOF'
-          import sys
-          import xml.etree.ElementTree as ET
-          from pathlib import Path
-
-          UNIT_THRESHOLD = 35.0
-          files = ["coverage-unit.xml", "coverage-feature.xml"]
-          per_file = {}
-
-          for f in files:
-              p = Path(f)
-              if not p.exists():
-                  print(f"::error::Coverage file not found: {f}")
-                  sys.exit(1)
-              try:
-                  tree = ET.parse(f)
-                  root = tree.getroot()
-                  # Clover <metrics> attributes: statements, coveredstatements
-                  # Use project-level metrics for aggregate counts
-                  metrics = root.find(".//project/metrics")
-                  if metrics is None:
-                      metrics = root.find(".//metrics")
-                  if metrics is None:
-                      print(f"::error::No <metrics> element in {f}")
-                      sys.exit(1)
-                  stmts = int(metrics.get("statements", "0"))
-                  covered = int(metrics.get("coveredstatements", "0"))
-              except ET.ParseError as e:
-                  print(f"::error::Failed to parse {f}: {e}")
-                  sys.exit(1)
-              except (TypeError, ValueError) as e:
-                  print(f"::error::Invalid metrics in {f}: {e}")
-                  sys.exit(1)
-              per_file[f] = (stmts, covered)
-
-          print(f"## Coverage gate" )
-          print(f"| Suite | Statements | Covered | % |")
-          print(f"|---|---:|---:|---:|")
-          for f, (s, c) in per_file.items():
-              fp = (c / s * 100) if s > 0 else 0.0
-              print(f"| {f} | {s} | {c} | {fp:.2f}% |")
-
-          unit_stmts, unit_covered = per_file["coverage-unit.xml"]
-          unit_pct = (unit_covered / unit_stmts * 100) if unit_stmts > 0 else 0.0
-          print(f"\nUnit threshold: {UNIT_THRESHOLD:.0f}%  Unit coverage: {unit_pct:.2f}%")
-          if unit_pct < UNIT_THRESHOLD:
-              print(f"::error::Unit coverage {unit_pct:.2f}% is below threshold {UNIT_THRESHOLD:.0f}%")
-              sys.exit(1)
-          print("Coverage gate passed.")
-          PYEOF
+        run: python3 scripts/ci/coverage-gate.py
 
       - name: Per-module coverage ratchet (W3-06)
         # W3-06: Enforce per-module coverage thresholds.
@@ -632,46 +320,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@b604ade2a87db23f8871b7182e69ec5e75effb45 # v2
-        with:
-          php-version: '8.5'
-          extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, pdo_mysql, redis, sqlite3, xml, zip
-          coverage: none
+      - name: Setup PHP stack
+        uses: ./.github/actions/setup-php-stack
 
       - name: Prepare environment
-        run: |
-          cp .env.example .env
-          sed -i 's|DB_HOST=127.0.0.1|DB_HOST=mysql|g' .env
-          sed -i 's|REDIS_HOST=127.0.0.1|REDIS_HOST=redis|g' .env
-          sed -i 's|LOG_FILE=.*|LOG_FILE=php://stdout|g' .env
-          # .env.example uses a placeholder DB_PASSWORD — set the real value
-          # to match the MySQL service container.
-          sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=nexusphp/' .env
-          # .env.example leaves MEILISEARCH_MASTER_KEY empty so users must set
-          # their own. For the smoke-test stack, restore the compose default.
-          sed -i 's|^MEILISEARCH_MASTER_KEY=.*|MEILISEARCH_MASTER_KEY=nexusphp_default_key|' .env
-          # Use an isolated E2E testing database so Feature tests (including
-          # CriticalPathTest) never mutate the dev/production database.
-          # The MySQL container creates this DB automatically via
-          # MYSQL_DATABASE in docker-compose.yml. The name carries the
-          # "testing" marker required by DestructiveEnvironmentGuard.
-          sed -i 's/^DB_DATABASE=.*/DB_DATABASE=nexusphp_e2e_testing/' .env
-          # Use dev overrides (bind-mounts, openresty config mounts)
-          echo "COMPOSE_FILE=docker-compose.yml:docker-compose.dev.yml" >> "$GITHUB_ENV"
-
-      - name: Cache Composer dependencies
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
-        with:
-          path: ~/.composer/cache
-          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
-
-      - name: Install PHP dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction --no-scripts
-
-      - name: Dump autoload
-        run: composer dump-autoload --no-interaction --no-scripts
+        run: bash scripts/ci/env-compose-dev.sh
 
       - name: Build Docker images
         run: docker compose build
@@ -694,12 +347,7 @@ jobs:
           docker compose exec -T php php artisan filament:cache-components
 
       - name: Smoke test public pages
-        run: |
-          set -e
-          for page in /index /login /signup /torrents /topten; do
-            echo "Testing $page"
-            curl -sfL --max-time 10 "http://localhost$page" -o /dev/null
-          done
+        run: bash scripts/ci/smoke-pages.sh /index /login /signup /torrents /topten
 
       - name: Clear any stale Laravel config cache
         run: docker compose exec -T php php artisan config:clear
@@ -805,66 +453,8 @@ jobs:
       - name: Install Semgrep
         run: pip install semgrep==1.89.0
 
-      - name: Run informational Semgrep rules
-        id: semgrep-info
-        run: |
-          set -euo pipefail
-          semgrep scan --config .semgrep.informational.yml --sarif --output semgrep-info-results.sarif --json > semgrep-info.json 2>/dev/null || true
-          if [ ! -s semgrep-info.json ]; then
-            echo '{"results":[]}' > semgrep-info.json
-          fi
-          if [ ! -f semgrep-info-results.sarif ]; then
-            echo '{"version":"2.1.0","runs":[{"tool":{"driver":{"name":"Semgrep","informationUri":"https://semgrep.dev","rules":[]}},"results":[]}]}' > semgrep-info-results.sarif
-          fi
-          TOTAL=$(python3 -c "import json; print(json.load(open('semgrep-info.json'))['results'].__len__())")
-          echo "total=$TOTAL" >> "$GITHUB_OUTPUT"
-          {
-            echo "## Semgrep informational results"
-            echo "Total findings: **$TOTAL**"
-            echo ""
-            echo "| Rule | Count |"
-            echo "|---|---:|"
-            python3 -c "
-          import json
-          from collections import Counter
-          d = json.load(open('semgrep-info.json'))
-          c = Counter(r['check_id'] for r in d['results'])
-          for k, v in sorted(c.items()):
-              print(f'| {k} | {v} |')
-          "
-          } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Compare with baseline
-        run: |
-          set -euo pipefail
-          # Per-rule comparison: the aggregate total hid rule growth (a rule
-          # whose baseline shrank left headroom for others). Fail if ANY rule
-          # exceeds its own baseline; 'total' stays informational.
-          python3 - <<'PY'
-          import json
-          import sys
-          from collections import Counter
-
-          results = json.load(open('semgrep-info.json'))['results']
-          # check_id may carry a config prefix; rule ids never contain dots.
-          current = Counter(r['check_id'].rsplit('.', 1)[-1] for r in results)
-          baseline_doc = json.load(open('.semgrep-baseline.json'))
-          baseline = baseline_doc['by_rule']
-
-          print(f"Total findings: {sum(current.values())} (baseline {baseline_doc['total']})")
-
-          failed = False
-          for rule in sorted(set(current) | set(baseline)):
-              cur, base = current.get(rule, 0), baseline.get(rule, 0)
-              if cur > base:
-                  failed = True
-                  print(f"::error::Semgrep rule '{rule}': {cur} findings > baseline {base}. "
-                        "Fix the new findings or lower the baseline with justification.")
-              else:
-                  print(f"  {rule}: {cur} <= {base}")
-
-          sys.exit(1 if failed else 0)
-          PY
+      - name: Run informational rules + baseline compare
+        run: bash scripts/ci/semgrep-informational.sh
 
       - name: Upload informational results to GitHub Security
         uses: github/codeql-action/upload-sarif@6f5948dfacef28e207b48d0905cf90c03365536d # v3
@@ -906,58 +496,13 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Prepare environment
-        run: |
-          cp .env.example .env
-          sed -i 's|DB_HOST=127.0.0.1|DB_HOST=mysql|g' .env
-          sed -i 's|REDIS_HOST=127.0.0.1|REDIS_HOST=redis|g' .env
-          sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=nexusphp/' .env
-          sed -i 's|^MEILISEARCH_MASTER_KEY=.*|MEILISEARCH_MASTER_KEY=nexusphp_default_key|' .env
-          echo "COMPOSE_FILE=docker-compose.yml:docker-compose.dev.yml" >> "$GITHUB_ENV"
+        run: bash scripts/ci/env-compose-dev.sh
 
       - name: Build Docker images
         run: docker compose build php openresty
 
       - name: Validate .trivyignore entries
-        run: |
-          set -euo pipefail
-          if [ ! -f .trivyignore ]; then
-            echo "No .trivyignore file — nothing to validate."
-            exit 0
-          fi
-          TODAY=$(date -u +%Y-%m-%d)
-          ERRORS=0
-          CVE=""
-          while IFS= read -r line; do
-            # Skip empty lines and full-line comments
-            case "$line" in
-              ""|"#"*) continue ;;
-            esac
-            if echo "$line" | grep -qE '^CVE-[0-9]'; then
-              CVE="$line"
-            elif echo "$line" | grep -qE '^# expires:'; then
-              if [ -z "$CVE" ]; then
-                echo "::error::Expiry comment without preceding CVE ID: $line"
-                ERRORS=$((ERRORS + 1))
-                continue
-              fi
-              EXPIRY=$(echo "$line" | sed -nE 's/^# expires: ([0-9]{4}-[0-9]{2}-[0-9]{2}).*/\1/p')
-              if [ -z "$EXPIRY" ]; then
-                echo "::error::Missing expiry date for $CVE: $line"
-                ERRORS=$((ERRORS + 1))
-              elif [ "$EXPIRY" \< "$TODAY" ]; then
-                echo "::error::Expired .trivyignore entry: $CVE (expired $EXPIRY). Remove or update."
-                ERRORS=$((ERRORS + 1))
-              else
-                echo "OK: $CVE expires $EXPIRY"
-              fi
-              CVE=""
-            fi
-          done < .trivyignore
-          if [ "$ERRORS" -gt 0 ]; then
-            echo "::error::$ERRORS invalid or expired .trivyignore entries found."
-            exit 1
-          fi
-          echo "All .trivyignore entries are valid and not expired."
+        run: bash scripts/ci/trivy-validate-ignore.sh
 
       - name: Run Trivy on PHP image
         uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
@@ -984,48 +529,7 @@ jobs:
           version: v0.74.0
 
       - name: Check Trivy results for actionable vulnerabilities
-        run: |
-          set -euo pipefail
-          # Trivy exit-code is 0 because rejected CVEs (e.g. CVE-2026-80256)
-          # cause Trivy to crash with "no vulnerability details" even when
-          # listed in .trivyignore. Instead, we parse the SARIF output and
-          # fail only if there are CRITICAL/HIGH results not in .trivyignore.
-          IGNORED=$(grep -E '^CVE-[0-9]' .trivyignore | sort -u || true)
-          echo "Ignored CVEs: $IGNORED"
-          for sarif in trivy-php-results.sarif trivy-openresty-results.sarif; do
-            if [ ! -f "$sarif" ]; then
-              echo "WARN: $sarif not found, skipping"
-              continue
-            fi
-            RESULTS=$(python3 -c "
-          import json, sys
-          with open('$sarif') as f:
-            data = json.load(f)
-          for run in data.get('runs', []):
-            for result in run.get('results', []):
-              rule_id = result.get('ruleId', '')
-              level = result.get('level', '')
-              if level in ('error', 'warning'):
-                print(f'{rule_id}|{level}')
-          " || true)
-            if [ -z "$RESULTS" ]; then
-              echo "OK: no actionable vulnerabilities in $sarif"
-              continue
-            fi
-            FAILED=0
-            while IFS='|' read -r cve level; do
-              if echo "$IGNORED" | grep -q "^${cve}$"; then
-                echo "SKIP: $cve is in .trivyignore"
-              else
-                echo "::error::Unignored vulnerability: $cve ($level) in $sarif"
-                FAILED=$((FAILED + 1))
-              fi
-            done <<< "$RESULTS"
-            if [ "$FAILED" -gt 0 ]; then
-              exit 1
-            fi
-          done
-          echo "All Trivy results within policy."
+        run: bash scripts/ci/trivy-check-results.sh
 
       - name: Upload Trivy PHP scan results to GitHub Security
         uses: github/codeql-action/upload-sarif@6f5948dfacef28e207b48d0905cf90c03365536d # v3
@@ -1044,22 +548,16 @@ jobs:
   sbom:
     name: SBOM generation
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
 
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@b604ade2a87db23f8871b7182e69ec5e75effb45 # v2
+      - name: Setup PHP stack
+        uses: ./.github/actions/setup-php-stack
         with:
-          php-version: '8.5'
-          extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, pdo_mysql, redis, sqlite3, xml, zip
-          coverage: none
-
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction --no-scripts
+          composer-cache: 'false'
+          dump-autoload: 'false'
 
       - name: Generate Composer SBOM (CycloneDX)
         run: |
@@ -1080,111 +578,17 @@ jobs:
   infection:
     name: Mutation testing (Infection)
     runs-on: ubuntu-latest
-    needs: [coverage]
     # T-16: Mutation testing for critical paths: Auth, Token, Bonus, Tracker,
     # Outbox, Policies, Torrent/Thanks mutations.
-    # Runs only on push to php8 (not PRs) to keep PR CI fast.
-    if: github.event_name == 'push' && github.ref == 'refs/heads/php8'
-
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: nexusphp
-          MYSQL_USER: nexusphp
-          MYSQL_PASSWORD: nexusphp
-        ports:
-          - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
-      redis:
-        image: redis:7-alpine
-        ports:
-          - 6379:6379
-        options: --health-cmd="redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=3
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@b604ade2a87db23f8871b7182e69ec5e75effb45 # v2
-        with:
-          php-version: '8.5'
-          extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, pdo_mysql, redis, sqlite3, xml, zip
-          coverage: xdebug
-          # sendmail_path=/bin/true: legacy Mail::sent() calls @mail() which
-          # spawns /usr/sbin/sendmail — absent on CI runners, its "not found"
-          # stderr makes Infection stop the initial test run (exit 143).
-          ini-values: memory_limit=2G, sendmail_path=/bin/true
-
-      - name: Install Composer dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction --no-scripts
-
-      - name: Prepare environment
-        run: |
-          cp .env.example .env
-          sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=nexusphp/' .env
-          sed -i 's/^CACHE_DRIVER=.*/CACHE_DRIVER=array/' .env
-          sed -i 's/^QUEUE_CONNECTION=.*/QUEUE_CONNECTION=sync/' .env
-          sed -i 's/^REDIS_PASSWORD=.*/REDIS_PASSWORD=/' .env
-          sed -i 's/^REDIS_DB=.*/REDIS_DB=15/' .env
-          echo "SCOUT_DRIVER=null" >> .env
-          php artisan key:generate
-          composer run-script post-autoload-dump
-
-      - name: Wait for MySQL and migrate
-        run: |
-          for i in $(seq 1 60); do
-            nc -z 127.0.0.1 3306 && break
-            sleep 1
-          done
-          nc -z 127.0.0.1 3306 || { echo "MySQL did not become ready in time"; exit 1; }
-          php artisan migrate:fresh --seed --force
-          mysql -h 127.0.0.1 -u root -proot -e "
-            CREATE DATABASE IF NOT EXISTS nexusphp_unit_testing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-            GRANT ALL PRIVILEGES ON nexusphp_unit_testing.* TO 'nexusphp'@'%';
-            FLUSH PRIVILEGES;
-          "
-          mysqldump -h 127.0.0.1 -u root -proot --no-data --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp | mysql -h 127.0.0.1 -u root -proot nexusphp_unit_testing
-          mysqldump -h 127.0.0.1 -u root -proot --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users categories forums searchbox searchbox_fields agent_allowed_family agent_allowed_exception | mysql -h 127.0.0.1 -u root -proot nexusphp_unit_testing
-
-      - name: Run Infection (full scope)
-        run: |
-          # --testsuite=Unit,Integration: оба сюита работают на дампе
-          # nexusphp_unit_testing (до разделения это был один набор Unit).
-          # Feature/Architecture идут на nexusphp_feature_testing/e2e в других
-          # job'ах и на этом дампе невалидны.
-          DB_DATABASE=nexusphp_unit_testing vendor/bin/infection \
-            --configuration=infection.json5 \
-            --threads=4 \
-            --min-msi=40 \
-            --min-covered-msi=50 \
-            --no-progress \
-            --logger-github \
-            --test-framework-extra-args="--testsuite=Unit,Integration"
-
-      - name: Upload Infection logs
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        if: always()
-        with:
-          name: infection-logs
-          path: |
-            infection.log
-            infection-summary.log
-          retention-days: 14
-
-  infection-pr:
-    name: Mutation testing (PR scope)
-    runs-on: ubuntu-latest
-    # Generates its own coverage via --map-source-class-to-test; no need
-    # to wait for the coverage job to finish first.
-    # W3-04: Run Infection only on changed critical files in PRs.
-    # Full-scope mutation testing runs on push to php8 (see infection job).
-    # PR scope enforces covered-MSI ≥ 50 on the filtered file set; the
-    # global minMSI stays 0 because a small file set would otherwise
-    # require overall-project MSI on a PR branch.
-    if: github.event_name == 'pull_request'
+    # Full scope on push to php8 (min-msi=40 / min-covered-msi=50).
+    # W3-04: on PRs, only changed critical files are mutated
+    # (min-covered-msi=50 on the filtered set; global min-msi=0 because a
+    # small file set cannot carry a project-wide MSI).
+    # No `needs:` — both runs generate their own coverage via
+    # --map-source-class-to-test / the initial test run.
+    if: >-
+      (github.event_name == 'push' && github.ref == 'refs/heads/php8')
+      || github.event_name == 'pull_request'
 
     services:
       mysql:
@@ -1209,86 +613,49 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@b604ade2a87db23f8871b7182e69ec5e75effb45 # v2
+      - name: Setup PHP stack
+        uses: ./.github/actions/setup-php-stack
         with:
-          php-version: '8.5'
-          extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, pdo_mysql, redis, sqlite3, xml, zip
           coverage: xdebug
+          composer-cache: 'false'
+          dump-autoload: 'false'
           # sendmail_path=/bin/true: legacy Mail::sent() calls @mail() which
           # spawns /usr/sbin/sendmail — absent on CI runners, its "not found"
           # stderr makes Infection stop the initial test run (exit 143).
           ini-values: memory_limit=2G, sendmail_path=/bin/true
 
-      - name: Install Composer dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction --no-scripts
-
       - name: Prepare environment
-        run: |
-          cp .env.example .env
-          sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=nexusphp/' .env
-          sed -i 's/^CACHE_DRIVER=.*/CACHE_DRIVER=array/' .env
-          sed -i 's/^QUEUE_CONNECTION=.*/QUEUE_CONNECTION=sync/' .env
-          sed -i 's/^REDIS_PASSWORD=.*/REDIS_PASSWORD=/' .env
-          sed -i 's/^REDIS_DB=.*/REDIS_DB=15/' .env
-          echo "SCOUT_DRIVER=null" >> .env
-          php artisan key:generate
-          composer run-script post-autoload-dump
+        run: bash scripts/ci/env-ci-services.sh --with-key
 
-      - name: Wait for MySQL and migrate
-        run: |
-          for i in $(seq 1 60); do
-            nc -z 127.0.0.1 3306 && break
-            sleep 1
-          done
-          nc -z 127.0.0.1 3306 || { echo "MySQL did not become ready in time"; exit 1; }
-          php artisan migrate:fresh --seed --force
-          mysql -h 127.0.0.1 -u root -proot -e "
-            CREATE DATABASE IF NOT EXISTS nexusphp_unit_testing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-            GRANT ALL PRIVILEGES ON nexusphp_unit_testing.* TO 'nexusphp'@'%';
-            FLUSH PRIVILEGES;
-          "
-          mysqldump -h 127.0.0.1 -u root -proot --no-data --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp | mysql -h 127.0.0.1 -u root -proot nexusphp_unit_testing
-          mysqldump -h 127.0.0.1 -u root -proot --no-create-info --skip-comments --set-gtid-purged=OFF --single-transaction nexusphp settings users categories forums searchbox searchbox_fields agent_allowed_family agent_allowed_exception | mysql -h 127.0.0.1 -u root -proot nexusphp_unit_testing
+      - name: Wait for MySQL and prepare test database
+        run: bash scripts/ci/prepare-test-db.sh nexusphp_unit_testing
 
-      - name: Detect changed critical files
+      - name: Detect changed critical files (PR)
+        if: github.event_name == 'pull_request'
         id: changed
-        run: |
-          # Get changed files in app/ that are in the Infection source scope
-          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- \
-            'app/Http/Controllers/AuthenticateController.php' \
-            'app/Http/Controllers/TokenController.php' \
-            'app/Services/Announce/*.php' \
-            'app/Services/AttachmentMutationService.php' \
-            'app/Services/OutboxService.php' \
-            'app/Services/OutboxDispatcher.php' \
-            'app/Services/ThankService.php' \
-            'app/Services/TorrentBookmarkService.php' \
-            'app/Policies/TorrentPolicy.php' \
-            'app/Policies/UserPolicy.php' \
-            'app/Policies/UsercpPolicy.php' \
-            'app/Policies/TopicPolicy.php' \
-            'app/Policies/PostPolicy.php' \
-            'app/Policies/MessagePolicy.php' \
-            | grep -v '^$' || true)
+        run: bash scripts/ci/infection-changed-files.sh "${{ github.base_ref }}"
 
-          if [ -z "$CHANGED_FILES" ]; then
-            echo "skip=true" >> $GITHUB_OUTPUT
-            echo "No critical files changed — skipping mutation testing."
-          else
-            echo "skip=false" >> $GITHUB_OUTPUT
-            echo "Changed critical files:"
-            echo "$CHANGED_FILES"
-            # Build --filter argument for Infection
-            FILTER=$(echo "$CHANGED_FILES" | sed 's|^app/||' | tr '\n' ',' | sed 's/,$//')
-            echo "filter=$FILTER" >> $GITHUB_OUTPUT
-          fi
+      - name: Run Infection (full scope)
+        if: github.event_name == 'push'
+        run: |
+          # --testsuite=Unit,Integration: оба сюита работают на дампе
+          # nexusphp_unit_testing (до разделения это был один набор Unit).
+          # Feature/Architecture идут на nexusphp_feature_testing/e2e в других
+          # job'ах и на этом дампе невалидны.
+          DB_DATABASE=nexusphp_unit_testing vendor/bin/infection \
+            --configuration=infection.json5 \
+            --threads=4 \
+            --min-msi=40 \
+            --min-covered-msi=50 \
+            --no-progress \
+            --logger-github \
+            --test-framework-extra-args="--testsuite=Unit,Integration"
 
       - name: Run Infection (changed files only)
-        if: steps.changed.outputs.skip != 'true'
         # W3-04 follow-up: PR-scoped mutation is now fail-closed for the
         # set of critical files. Full-scope mutation on php8 still enforces
         # the global 40/50 thresholds after merge.
+        if: github.event_name == 'pull_request' && steps.changed.outputs.skip != 'true'
         run: |
           DB_DATABASE=nexusphp_unit_testing vendor/bin/infection \
             --configuration=infection.json5 \
@@ -1301,11 +668,11 @@ jobs:
             --map-source-class-to-test \
             --test-framework-extra-args="--testsuite=Unit,Integration"
 
-      - name: Upload Infection PR logs
+      - name: Upload Infection logs
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        if: always() && steps.changed.outputs.skip != 'true'
+        if: always() && (github.event_name == 'push' || steps.changed.outputs.skip != 'true')
         with:
-          name: infection-pr-logs
+          name: infection-logs-${{ github.event_name }}
           path: |
             infection.log
             infection-summary.log
@@ -1315,38 +682,18 @@ jobs:
     name: Production Compose smoke test
     runs-on: ubuntu-latest
     needs: [smoke-test]
-    # W8-01: Build the production image and verify the full prod stack
-    # starts cleanly from scratch with named volumes, read-only rootfs,
-    # non-root UID, and all required services.
-    # Push-only: the prod image build is the slowest smoke and rarely
-    # catches app-code regressions that PR checks miss.
+    # W8-01: builds the hardened prod image (Dockerfile.prod) and verifies
+    # the production compose stack end-to-end. Push-only: the bring-up is
+    # heavy and app-code PRs rarely change the prod image.
     if: github.event_name == 'push'
-    timeout-minutes: 20
+    timeout-minutes: 25
 
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Prepare environment
-        run: |
-          cp .env.example .env
-          sed -i 's|DB_HOST=127.0.0.1|DB_HOST=mysql|g' .env
-          sed -i 's|REDIS_HOST=127.0.0.1|REDIS_HOST=redis|g' .env
-          sed -i 's|LOG_FILE=.*|LOG_FILE=php://stdout|g' .env
-          # Use a non-default password — validate-production rejects defaults
-          sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=prod_test_strong_pass_2026/' .env
-          sed -i 's|^MEILISEARCH_MASTER_KEY=.*|MEILISEARCH_MASTER_KEY=nexusphp_default_key|' .env
-          # Use an isolated testing database (DestructiveEnvironmentGuard requires "test")
-          sed -i 's/^DB_DATABASE=.*/DB_DATABASE=nexusphp_e2e_testing/' .env
-          # Production environment settings required by validate-production
-          sed -i 's/^APP_ENV=.*/APP_ENV=production/' .env
-          sed -i 's/^APP_DEBUG=.*/APP_DEBUG=false/' .env
-          sed -i 's/^SESSION_SECURE_COOKIE=.*/SESSION_SECURE_COOKIE=true/' .env
-          # Generate APP_KEY — required by validate-production
-          # (can't use artisan key:generate without composer install on host)
-          echo "APP_KEY=base64:$(openssl rand -base64 32)" >> .env
-          # Use production overrides (read-only rootfs, named volumes, prod image)
-          echo "COMPOSE_FILE=docker-compose.yml:docker-compose.prod.yml" >> "$GITHUB_ENV"
+        run: bash scripts/ci/env-compose-prod.sh
 
       - name: Build production Docker image
         run: docker compose build php
@@ -1378,156 +725,8 @@ jobs:
             docker compose logs --tail=50 $svc 2>&1 || true
           done
 
-      - name: Verify PHP health
-        run: |
-          # PHP-FPM must respond to a basic artisan command
-          docker compose exec -T php php artisan about --no-interaction
-
-      - name: Verify non-root UID
-        run: |
-          uid=$(docker compose exec -T php id -u)
-          if [ "$uid" = "0" ]; then
-            echo "FAIL: PHP container running as root (uid=0)"
-            exit 1
-          fi
-          echo "OK: PHP container running as uid=$uid"
-
-      - name: Verify read-only rootfs
-        run: |
-          # Writing to rootfs (outside writable volumes) must fail
-          if docker compose exec -T php sh -c 'echo test > /var/www/html/test_write 2>/dev/null'; then
-            echo "FAIL: rootfs is writable"
-            exit 1
-          fi
-          echo "OK: rootfs is read-only"
-
-      - name: Verify writable storage volume
-        run: |
-          docker compose exec -T php sh -c 'echo test > /var/www/html/storage/framework/cache/test_write && rm /var/www/html/storage/framework/cache/test_write'
-          echo "OK: storage volume is writable"
-
-      - name: Verify writable attachments volume
-        run: |
-          docker compose exec -T php sh -c 'echo test > /var/www/html/attachments/test_write && rm /var/www/html/attachments/test_write'
-          echo "OK: attachments volume is writable"
-
-      - name: Verify writable torrents volume
-        run: |
-          docker compose exec -T php sh -c 'echo test > /var/www/html/torrents/test_write && rm /var/www/html/torrents/test_write'
-          echo "OK: torrents volume is writable"
-
-      - name: Verify Vite assets and manifest exist
-        run: |
-          docker compose exec -T php sh -c 'test -f /var/www/html/public/build/manifest.json || test -f /var/www/html/public/build/.vite/manifest.json'
-          echo "OK: Vite manifest exists in public/build"
-
-      - name: Verify static files in public/build
-        run: |
-          # At least one CSS or JS asset should exist
-          docker compose exec -T php sh -c 'ls /var/www/html/public/build/assets/ | head -1 | grep -q .'
-          echo "OK: static assets exist in public/build/assets/"
-
-      - name: Verify public-data volume init ran
-        run: |
-          # assets-init must have completed before php/openresty mounted it.
-          # -a is required: `compose ps` hides exited one-shot containers.
-          docker compose ps -a assets-init --format '{{.State}} {{.ExitCode}}' | grep -qi "exited 0"
-          docker compose logs assets-init | grep -q "public-data volume synced"
-          echo "OK: public-data volume synced from image"
-
-      - name: Verify route/config/view caches
-        run: |
-          # Laravel 13 uses routes-v7.php (new route caching format)
-          docker compose exec -T php sh -c 'test -f /var/www/html/bootstrap/cache/routes-v7.php'
-          docker compose exec -T php sh -c 'test -f /var/www/html/bootstrap/cache/config.php'
-          # view:cache compiles templates to storage/framework/views/, not a single file
-          docker compose exec -T php sh -c 'test -d /var/www/html/storage/framework/views && [ "$(ls -A /var/www/html/storage/framework/views/)" ]'
-          echo "OK: route/config/view caches exist"
-
-      - name: Verify DB connectivity
-        run: |
-          # tinker is dev-only; use migrate:status which always works
-          docker compose exec -T php php artisan migrate:status --no-interaction >/dev/null 2>&1
-          echo "OK: DB connectivity verified"
-
-      - name: Verify Redis connectivity
-        run: |
-          # Redis container health is verified by --wait (healthcheck uses
-          # redis-cli with auth). Verify the container is healthy.
-          docker compose ps redis --format '{{.Status}}' | grep -qi "healthy\|up"
-          echo "OK: Redis connectivity verified"
-
-      - name: Verify MeiliSearch connectivity
-        run: |
-          # Use curl to check MeiliSearch health endpoint
-          docker compose exec -T php sh -c 'curl -sf http://${MEILISEARCH_HOST:-meilisearch}:7700/health 2>/dev/null'
-          echo ""
-          echo "OK: MeiliSearch connectivity verified"
-
-      - name: Verify queue worker is running
-        run: |
-          # Queue container should be up and horizon should report active
-          status=$(docker compose exec -T queue php artisan horizon:status 2>&1)
-          echo "Horizon status: $status"
-          echo "$status" | grep -q "running\|active" || \
-            (echo "FAIL: horizon not running"; exit 1)
-          echo "OK: queue worker (horizon) is running"
-
-      - name: Verify scheduler heartbeat
-        run: |
-          # Scheduler container should be running and cycling
-          docker compose ps scheduler --format '{{.Status}}' | grep -q "Up\|running"
-          echo "OK: scheduler container is up"
-
-      - name: Verify scheduler heartbeat lands in Redis
-        run: |
-          # The heartbeat job writes scheduler:heartbeat every minute (TTL 120s).
-          REDIS_PASSWORD=$(grep '^REDIS_PASSWORD=' .env | cut -d= -f2-)
-          for i in $(seq 1 90); do
-            hb=$(docker compose exec -T redis redis-cli -a "$REDIS_PASSWORD" --no-auth-warning GET scheduler:heartbeat 2>/dev/null | tr -d '[:space:]')
-            if [ -n "$hb" ]; then
-              echo "OK: scheduler heartbeat in Redis ($hb) after ${i} polls"
-              exit 0
-            fi
-            sleep 2
-          done
-          echo "FAIL: no scheduler:heartbeat key in Redis after 180s"
-          docker compose logs --tail=40 scheduler || true
-          exit 1
-
-      - name: Verify /metrics requires bearer token in production
-        run: |
-          # W6-04: production must not expose metrics without METRICS_TOKEN.
-          # APP_ENV=production + no token configured => endpoint fails closed.
-          status=$(curl -s --max-time 10 -o /dev/null -w "%{http_code}" "http://localhost/metrics")
-          echo "GET /metrics without token: $status"
-          if [ "$status" != "403" ]; then
-            echo "FAIL: expected 403, got $status"
-            exit 1
-          fi
-          echo "OK: /metrics closed without bearer token in production"
-
-      - name: Verify OpenResty config is valid
-        run: |
-          docker compose exec -T openresty openresty -t 2>&1 | grep -q "syntax is ok\|test is successful"
-          echo "OK: OpenResty config is valid"
-
-      - name: Smoke test public pages via OpenResty
-        run: |
-          set -e
-          for page in / /login /signup; do
-            echo "Testing $page"
-            status=$(curl -sL --max-time 10 -o /dev/null -w "%{http_code}" "http://localhost${page}")
-            echo "  Status: $status"
-            # Accept 200-399 (200 OK, 302 redirect to login, etc.)
-            if [ "$status" -ge 200 ] && [ "$status" -lt 400 ]; then
-              echo "  OK"
-            else
-              echo "  FAIL: unexpected status $status"
-              exit 1
-            fi
-          done
-          echo "OK: public pages respond via OpenResty"
+      - name: Verify production stack
+        run: bash scripts/ci/verify-prod-compose.sh
 
       - name: Cleanup
         if: always()
@@ -1552,36 +751,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@b604ade2a87db23f8871b7182e69ec5e75effb45 # v2
-        with:
-          php-version: '8.5'
-          extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, pdo_mysql, redis, sqlite3, xml, zip
-          coverage: none
+      - name: Setup PHP stack
+        uses: ./.github/actions/setup-php-stack
 
       - name: Prepare environment
-        run: |
-          cp .env.example .env
-          sed -i 's|DB_HOST=127.0.0.1|DB_HOST=mysql|g' .env
-          sed -i 's|REDIS_HOST=127.0.0.1|REDIS_HOST=redis|g' .env
-          sed -i 's|LOG_FILE=.*|LOG_FILE=php://stdout|g' .env
-          sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=nexusphp/' .env
-          sed -i 's|^MEILISEARCH_MASTER_KEY=.*|MEILISEARCH_MASTER_KEY=nexusphp_default_key|' .env
-          sed -i 's/^DB_DATABASE=.*/DB_DATABASE=nexusphp_e2e_testing/' .env
-          echo "COMPOSE_FILE=docker-compose.yml:docker-compose.dev.yml" >> "$GITHUB_ENV"
-
-      - name: Cache Composer dependencies
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
-        with:
-          path: ~/.composer/cache
-          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
-
-      - name: Install PHP dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction --no-scripts
-
-      - name: Dump autoload
-        run: composer dump-autoload --no-interaction --no-scripts
+        run: bash scripts/ci/env-compose-dev.sh
 
       - name: Build Docker images
         run: docker compose build
@@ -1630,19 +804,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Prepare environment
-        run: |
-          cp .env.example .env
-          sed -i 's|DB_HOST=127.0.0.1|DB_HOST=mysql|g' .env
-          sed -i 's|REDIS_HOST=127.0.0.1|REDIS_HOST=redis|g' .env
-          sed -i 's|LOG_FILE=.*|LOG_FILE=php://stdout|g' .env
-          sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=prod_test_strong_pass_2026/' .env
-          sed -i 's|^MEILISEARCH_MASTER_KEY=.*|MEILISEARCH_MASTER_KEY=nexusphp_default_key|' .env
-          sed -i 's/^DB_DATABASE=.*/DB_DATABASE=nexusphp_e2e_testing/' .env
-          sed -i 's/^APP_ENV=.*/APP_ENV=production/' .env
-          sed -i 's/^APP_DEBUG=.*/APP_DEBUG=false/' .env
-          sed -i 's/^SESSION_SECURE_COOKIE=.*/SESSION_SECURE_COOKIE=true/' .env
-          echo "APP_KEY=base64:$(openssl rand -base64 32)" >> .env
-          echo "COMPOSE_FILE=docker-compose.yml:docker-compose.prod.yml" >> "$GITHUB_ENV"
+        run: bash scripts/ci/env-compose-prod.sh
 
       - name: Build production Docker image
         run: docker compose build php
@@ -1706,36 +868,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build + push production images
-        run: |
-          set -euo pipefail
-          NS=$(echo "$IMAGE_NS" | tr '[:upper:]' '[:lower:]')
-          SHORT=${GITHUB_SHA::7}
-          OCI_LABELS="--label org.opencontainers.image.source=https://github.com/${GITHUB_REPOSITORY} \
-                      --label org.opencontainers.image.revision=${GITHUB_SHA}"
-
-          docker build -f .docker/php/Dockerfile.prod \
-            --build-arg NEXUSPHP_ENV=prod \
-            $OCI_LABELS \
-            -t "${NS}/php:sha-${SHORT}" -t "${NS}/php:latest" .
-
-          docker build -f .docker/openresty/Dockerfile \
-            $OCI_LABELS \
-            -t "${NS}/openresty:sha-${SHORT}" -t "${NS}/openresty:latest" .
-
-          docker push "${NS}/php:sha-${SHORT}"
-          docker push "${NS}/php:latest"
-          docker push "${NS}/openresty:sha-${SHORT}"
-          docker push "${NS}/openresty:latest"
-
-          # RepoDigests on the local image is populated by `docker push`.
-          PHP_DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "${NS}/php:sha-${SHORT}" | cut -d@ -f2)
-          OPENRESTY_DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "${NS}/openresty:sha-${SHORT}" | cut -d@ -f2)
-          [ -n "$PHP_DIGEST" ] && [ -n "$OPENRESTY_DIGEST" ] || { echo "digest resolution failed"; exit 1; }
-          echo "php-digest=${PHP_DIGEST}" >> "$GITHUB_OUTPUT"
-          echo "openresty-digest=${OPENRESTY_DIGEST}" >> "$GITHUB_OUTPUT"
-          echo "image-ns=${NS}" >> "$GITHUB_OUTPUT"
-          echo "PHP_IMAGE_REF=${NS}/php@${PHP_DIGEST}" >> "$GITHUB_ENV"
-          echo "OPENRESTY_IMAGE_REF=${NS}/openresty@${OPENRESTY_DIGEST}" >> "$GITHUB_ENV"
+        run: bash scripts/ci/publish-images.sh
         id: build
 
       - name: Sign image digests (keyless)

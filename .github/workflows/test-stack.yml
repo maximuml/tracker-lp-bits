@@ -1,0 +1,75 @@
+name: PHPUnit stack (reusable)
+
+# Shared matrix leg for ci.yml:unit-tests — one MySQL+Redis services
+# job per PHP/MySQL combination, running the Unit/Integration/
+# Performance suites plus the Architecture ratchets on the newest edge.
+on:
+  workflow_call:
+    inputs:
+      php-version:
+        type: string
+        required: true
+      mysql-version:
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    name: PHPUnit Unit (PHP ${{ inputs.php-version }}, MySQL ${{ inputs.mysql-version }})
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:${{ inputs.mysql-version }}
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: nexusphp
+          MYSQL_USER: nexusphp
+          MYSQL_PASSWORD: nexusphp
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: --health-cmd="redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Setup PHP stack
+        uses: ./.github/actions/setup-php-stack
+        with:
+          php-version: ${{ inputs.php-version }}
+
+      - name: Prepare environment
+        run: bash scripts/ci/env-ci-services.sh
+
+      - name: Cache Laravel bootstrap files
+        run: |
+          php artisan storage:link --force
+          php artisan route:cache
+          php artisan view:cache
+          php artisan icons:cache
+          php artisan filament:cache-components
+
+      - name: Wait for MySQL and prepare test database
+        run: bash scripts/ci/prepare-test-db.sh nexusphp_unit_testing
+
+      - name: Run PHPUnit unit tests
+        run: DB_DATABASE=nexusphp_unit_testing vendor/bin/phpunit --testsuite Unit --no-coverage
+
+      - name: Run PHPUnit integration tests
+        run: DB_DATABASE=nexusphp_unit_testing vendor/bin/phpunit --testsuite Integration --no-coverage
+
+      - name: Run PHPUnit performance tests
+        run: DB_DATABASE=nexusphp_unit_testing vendor/bin/phpunit --testsuite Performance --no-coverage
+
+      - name: Run architecture ratchet tests
+        if: inputs.php-version == '8.5' && inputs.mysql-version == '9.0'
+        run: DB_DATABASE=nexusphp_unit_testing vendor/bin/phpunit --testsuite Architecture --no-coverage

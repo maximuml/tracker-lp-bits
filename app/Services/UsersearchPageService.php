@@ -10,6 +10,7 @@ use App\Repositories\UserSearchRepository;
 use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Frame;
+use App\Support\Html\SafeHtml;
 use App\Support\Input;
 use App\Support\LegacyResponse;
 use App\Support\Pagination;
@@ -56,8 +57,8 @@ final class UsersearchPageService
         $form = $this->buildFormFields($highlight);
 
         // Build results (only when query params present and not help view)
-        $resultsHtml = '';
-        $resultsError = '';
+        $resultsHtml = null;
+        $resultsError = null;
         $hasResults = false;
         if (count(request()->query()) > 0 && empty(request()->query('h'))) {
             $hasResults = true;
@@ -181,7 +182,7 @@ final class UsersearchPageService
      *
      * @param  array<string, mixed>  $curUser
      */
-    private function buildResults(array $curUser, bool $hasModcomment, string $requestUri): string
+    private function buildResults(array $curUser, bool $hasModcomment, string $requestUri): SafeHtml
     {
         $searchResult = $this->userSearchRepository->administrativeSearch((array) request()->query(), $hasModcomment, 30);
         $count = (int) $searchResult['count'];
@@ -264,7 +265,7 @@ final class UsersearchPageService
             echo "$pagerbottom";
         }
 
-        return (string) ob_get_clean();
+        return SafeHtml::fromTrustedHtml((string) ob_get_clean());
     }
 
     /**

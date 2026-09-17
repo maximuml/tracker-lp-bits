@@ -8,7 +8,7 @@
     @if (($postcount ?? 0) > ($perpage ?? 15))
         {{ $pagertop ?? '' }}
     @endif
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::open('', false, 10, '100%', 'left')))
+    {{ \App\Support\Frame::open('', false, 10, '100%', 'left') }}
     @foreach ($items ?? [] as $item)
         <p class=sub>
         @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['added']))&nbsp;--&nbsp;@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/userhistory.text_forum')))
@@ -25,7 +25,7 @@
         </table>
         <br />
     @endforeach
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::CLOSE))
+    {{ \App\Support\Frame::close() }}
     @if (($postcount ?? 0) > ($perpage ?? 15))
         {{ $pagerbottom ?? '' }}
     @endif
@@ -34,7 +34,7 @@
     @if (($commentcount ?? 0) > ($perpage ?? 15))
         {{ $pagertop ?? '' }}
     @endif
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::open('', false, 10, '100%', 'left')))
+    {{ \App\Support\Frame::open('', false, 10, '100%', 'left') }}
     @foreach ($items ?? [] as $item)
         <p class=sub>
         @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['added']))&nbsp;---&nbsp;@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/userhistory.text_torrent')))
@@ -51,7 +51,7 @@
         </table>
         <br />
     @endforeach
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::CLOSE))
+    {{ \App\Support\Frame::close() }}
     @if (($commentcount ?? 0) > ($perpage ?? 15))
         {{ $pagerbottom ?? '' }}
     @endif

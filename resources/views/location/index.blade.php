@@ -3,7 +3,7 @@
 @section('title', 'Manage Locations')
 
 @section('content')
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::open('Manage Locations', true, 10, '100%', 'center')))
+{{ \App\Support\Frame::open('Manage Locations', true, 10, '100%', 'center') }}
 @if ($error ?? '')
     <p><strong>{{ $error }}</strong></p>
 @endif
@@ -97,5 +97,5 @@
 </table>
 {{ $pagerbottom ?? '' }}
 @endif
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::CLOSE))
+{{ \App\Support\Frame::close() }}
 @endsection

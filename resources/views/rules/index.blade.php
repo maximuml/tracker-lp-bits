@@ -5,9 +5,9 @@
 @section('content')
 @if (! empty($rules))
     @foreach ($rules as $rule)
-        @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::open((string) $rule['title'], false, 10, '100%', 'left')))
+        {{ \App\Support\Frame::open((string) $rule['title'], false, 10, '100%', 'left') }}
         @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Format::formatComment($rule['text'])))
-        @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::CLOSE))
+        {{ \App\Support\Frame::close() }}
     @endforeach
 @endif
 @endsection

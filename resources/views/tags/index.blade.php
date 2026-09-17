@@ -3,7 +3,7 @@
 @section('title', __('legacy/tags.head_tags'))
 
 @section('content')
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::open((string) (__('legacy/tags.text_tags')), false, 10, '100%', 'left')))
+{{ \App\Support\Frame::open((string) (__('legacy/tags.text_tags')), false, 10, '100%', 'left') }}
 <p>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(sprintf((string) (__('legacy/tags.text_bb_tags_note')), $siteName)))</p>
 
 <form method=post action=?>
@@ -27,5 +27,5 @@
     @endif
     </table>
 @endforeach
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::CLOSE))
+{{ \App\Support\Frame::close() }}
 @endsection

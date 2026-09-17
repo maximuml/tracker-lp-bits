@@ -3,7 +3,7 @@
 @section('title', $heading)
 
 @section('content')
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::stdMessage($heading, $message, false)))
+{{ \App\Support\Frame::stdMessage($heading, $message, false) }}
 <form method="post" action="{{ $formAction }}">
     @csrf
     <input type="hidden" name="type" value="{{ $type ?? '' }}">

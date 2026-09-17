@@ -113,9 +113,9 @@
 </form>
 
 @if ($resultsError)
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($resultsError))
+{{ $resultsError }}
 @elseif ($hasResults)
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($resultsHtml))
+{{ $resultsHtml }}
 @endif
 
 <p>{{ $pagemenu }}<br />{{ $browsemenu }}</p>

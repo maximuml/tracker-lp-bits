@@ -19,7 +19,7 @@ final class FrameTest extends TestCase
         // is `class="embedded" >` (trailing space) — preserved verbatim.
         $expected = '<table class="main" width="1200" border="0" cellspacing="0" cellpadding="0">'
             .'<tr><td class="embedded" >';
-        $this->assertSame($expected, Frame::mainOpen('', false, 100, self::CONTENT_WIDTH));
+        $this->assertSame($expected, (string) Frame::mainOpen('', false, 100, self::CONTENT_WIDTH));
     }
 
     public function test_main_open_with_caption_prepends_h2(): void
@@ -27,7 +27,7 @@ final class FrameTest extends TestCase
         $expected = '<h2>Title</h2>'
             .'<table class="main" width="1200" border="0" cellspacing="0" cellpadding="0">'
             .'<tr><td class="embedded" >';
-        $this->assertSame($expected, Frame::mainOpen('Title', false, 100, self::CONTENT_WIDTH));
+        $this->assertSame($expected, (string) Frame::mainOpen('Title', false, 100, self::CONTENT_WIDTH));
     }
 
     public function test_main_open_centered_emits_double_space_quirk(): void
@@ -38,14 +38,14 @@ final class FrameTest extends TestCase
         // leading space inside `$tdextra`).
         $expected = '<table class="main" width="1200" border="0" cellspacing="0" cellpadding="0">'
             .'<tr><td class="embedded"  align="center">';
-        $this->assertSame($expected, Frame::mainOpen('', true, 100, self::CONTENT_WIDTH));
+        $this->assertSame($expected, (string) Frame::mainOpen('', true, 100, self::CONTENT_WIDTH));
     }
 
     public function test_main_open_percentage_string_used_verbatim(): void
     {
         $expected = '<table class="main" width="50%" border="0" cellspacing="0" cellpadding="0">'
             .'<tr><td class="embedded" >';
-        $this->assertSame($expected, Frame::mainOpen('', false, '50%', self::CONTENT_WIDTH));
+        $this->assertSame($expected, (string) Frame::mainOpen('', false, '50%', self::CONTENT_WIDTH));
     }
 
     public function test_main_open_numeric_width_scales_to_content_width(): void
@@ -53,14 +53,14 @@ final class FrameTest extends TestCase
         // 50 % of CONTENT_WIDTH (1200) = 600 px.
         $expected = '<table class="main" width="600" border="0" cellspacing="0" cellpadding="0">'
             .'<tr><td class="embedded" >';
-        $this->assertSame($expected, Frame::mainOpen('', false, 50, self::CONTENT_WIDTH));
+        $this->assertSame($expected, (string) Frame::mainOpen('', false, 50, self::CONTENT_WIDTH));
     }
 
     public function test_main_open_numeric_string_width_also_scales(): void
     {
         $expected = '<table class="main" width="240" border="0" cellspacing="0" cellpadding="0">'
             .'<tr><td class="embedded" >';
-        $this->assertSame($expected, Frame::mainOpen('', false, '20', self::CONTENT_WIDTH));
+        $this->assertSame($expected, (string) Frame::mainOpen('', false, '20', self::CONTENT_WIDTH));
     }
 
     public function test_main_open_caption_and_center_combined(): void
@@ -68,7 +68,7 @@ final class FrameTest extends TestCase
         $expected = '<h2>Hi</h2>'
             .'<table class="main" width="1200" border="0" cellspacing="0" cellpadding="0">'
             .'<tr><td class="embedded"  align="center">';
-        $this->assertSame($expected, Frame::mainOpen('Hi', true, 100, self::CONTENT_WIDTH));
+        $this->assertSame($expected, (string) Frame::mainOpen('Hi', true, 100, self::CONTENT_WIDTH));
     }
 
     // ---------- open / close ----------
@@ -78,7 +78,7 @@ final class FrameTest extends TestCase
         $expected = '<h2 align="left">Foo</h2>'
             .'<table width="100%" border="1" cellspacing="0" cellpadding="10">'
             ."<tr><td class=\"text\" >\n";
-        $this->assertSame($expected, Frame::open('Foo', false, 10, '100%', 'left'));
+        $this->assertSame($expected, (string) Frame::open('Foo', false, 10, '100%', 'left'));
     }
 
     public function test_open_centered_emits_double_space_quirk(): void
@@ -89,14 +89,14 @@ final class FrameTest extends TestCase
         $expected = '<h2 align="center">Foo</h2>'
             .'<table width="100%" border="1" cellspacing="0" cellpadding="10">'
             ."<tr><td class=\"text\"  align=\"center\">\n";
-        $this->assertSame($expected, Frame::open('Foo', true, 10, '100%', 'center'));
+        $this->assertSame($expected, (string) Frame::open('Foo', true, 10, '100%', 'center'));
     }
 
     public function test_open_without_caption_omits_h2(): void
     {
         $expected = '<table width="80%" border="1" cellspacing="0" cellpadding="5">'
             ."<tr><td class=\"text\" >\n";
-        $this->assertSame($expected, Frame::open('', false, 5, '80%', 'left'));
+        $this->assertSame($expected, (string) Frame::open('', false, 5, '80%', 'left'));
     }
 
     public function test_close_constant_is_legacy_payload(): void
@@ -110,7 +110,7 @@ final class FrameTest extends TestCase
     public function test_table_open_defaults_no_extra_width(): void
     {
         $expected = '<table class="main" border="1" cellspacing="0" cellpadding="5">';
-        $this->assertSame($expected, Frame::tableOpen(false, 5));
+        $this->assertSame($expected, (string) Frame::tableOpen(false, 5));
     }
 
     public function test_table_open_fullwidth_emits_legacy_bug_inside_class(): void
@@ -121,13 +121,13 @@ final class FrameTest extends TestCase
         // class name, not an attribute. Existing call sites have rendered
         // this invalid markup for years; we keep it bit-for-bit.
         $expected = '<table class="main width=50%" border="1" cellspacing="0" cellpadding="5">';
-        $this->assertSame($expected, Frame::tableOpen(true, 5));
+        $this->assertSame($expected, (string) Frame::tableOpen(true, 5));
     }
 
     public function test_table_open_padding_passes_through(): void
     {
         $expected = '<table class="main" border="1" cellspacing="0" cellpadding="20">';
-        $this->assertSame($expected, Frame::tableOpen(false, 20));
+        $this->assertSame($expected, (string) Frame::tableOpen(false, 20));
     }
 
     public function test_table_close_constant_is_legacy_payload(): void
@@ -144,7 +144,7 @@ final class FrameTest extends TestCase
             ."<h2>Heading</h2>\n"
             .'<table width="100%" border="1" cellspacing="0" cellpadding="10"><tr><td class="text">'
             ."Body</td></tr></table></td></tr></table>\n";
-        $this->assertSame($expected, Frame::stdMessage('Heading', 'Body', false));
+        $this->assertSame($expected, (string) Frame::stdMessage('Heading', 'Body', false));
     }
 
     public function test_std_message_empty_heading_omits_h2(): void
@@ -153,7 +153,7 @@ final class FrameTest extends TestCase
             ."<tr><td class=\"embedded\">\n"
             .'<table width="100%" border="1" cellspacing="0" cellpadding="10"><tr><td class="text">'
             ."Body</td></tr></table></td></tr></table>\n";
-        $this->assertSame($expected, Frame::stdMessage('', 'Body', false));
+        $this->assertSame($expected, (string) Frame::stdMessage('', 'Body', false));
     }
 
     public function test_std_message_zero_heading_is_treated_as_empty_legacy_quirk(): void
@@ -165,7 +165,7 @@ final class FrameTest extends TestCase
             ."<tr><td class=\"embedded\">\n"
             .'<table width="100%" border="1" cellspacing="0" cellpadding="10"><tr><td class="text">'
             ."Body</td></tr></table></td></tr></table>\n";
-        $this->assertSame($expected, Frame::stdMessage('0', 'Body', false));
+        $this->assertSame($expected, (string) Frame::stdMessage('0', 'Body', false));
     }
 
     public function test_std_message_htmlstrip_trims_and_escapes_both_fields(): void
@@ -178,7 +178,7 @@ final class FrameTest extends TestCase
             ."Tom &amp; Jerry &quot;evil&quot;</td></tr></table></td></tr></table>\n";
         $this->assertSame(
             $expected,
-            Frame::stdMessage('  <b>Hi</b>  ', "\nTom & Jerry \"evil\"\t", true)
+            (string) Frame::stdMessage('  <b>Hi</b>  ', "\nTom & Jerry \"evil\"\t", true)
         );
     }
 
@@ -191,7 +191,7 @@ final class FrameTest extends TestCase
             .'<p>raw</p></td></tr></table></td></tr></table>'."\n";
         $this->assertSame(
             $expected,
-            Frame::stdMessage('<b>Hi</b>', '<p>raw</p>', false)
+            (string) Frame::stdMessage('<b>Hi</b>', '<p>raw</p>', false)
         );
     }
 
@@ -202,7 +202,7 @@ final class FrameTest extends TestCase
         $expected = '<table border="0" bgcolor="blue" align="left" cellspacing="0" cellpadding="10" style="background: blue;">'
             ."<tr><td class=\"embedded\"><font color=\"white\"><h1>SQL Error</h1>\n"
             .'<b>Boom!<p>in /tmp/x.php, line 42</p></b></font></td></tr></table>';
-        $this->assertSame($expected, Frame::sqlError('Boom!', '/tmp/x.php', '42'));
+        $this->assertSame($expected, (string) Frame::sqlError('Boom!', '/tmp/x.php', '42'));
     }
 
     public function test_sql_error_without_file_omits_location(): void
@@ -210,7 +210,7 @@ final class FrameTest extends TestCase
         $expected = '<table border="0" bgcolor="blue" align="left" cellspacing="0" cellpadding="10" style="background: blue;">'
             ."<tr><td class=\"embedded\"><font color=\"white\"><h1>SQL Error</h1>\n"
             .'<b>Boom!</b></font></td></tr></table>';
-        $this->assertSame($expected, Frame::sqlError('Boom!', '', ''));
+        $this->assertSame($expected, (string) Frame::sqlError('Boom!', '', ''));
     }
 
     public function test_sql_error_zero_file_treated_as_empty_legacy_quirk(): void
@@ -221,8 +221,8 @@ final class FrameTest extends TestCase
         $expected = '<table border="0" bgcolor="blue" align="left" cellspacing="0" cellpadding="10" style="background: blue;">'
             ."<tr><td class=\"embedded\"><font color=\"white\"><h1>SQL Error</h1>\n"
             .'<b>Boom!</b></font></td></tr></table>';
-        $this->assertSame($expected, Frame::sqlError('Boom!', '0', '42'));
-        $this->assertSame($expected, Frame::sqlError('Boom!', '/tmp/x.php', '0'));
+        $this->assertSame($expected, (string) Frame::sqlError('Boom!', '0', '42'));
+        $this->assertSame($expected, (string) Frame::sqlError('Boom!', '/tmp/x.php', '0'));
     }
 
     public function test_sql_error_does_not_escape_the_error_message(): void
@@ -232,6 +232,6 @@ final class FrameTest extends TestCase
         $expected = '<table border="0" bgcolor="blue" align="left" cellspacing="0" cellpadding="10" style="background: blue;">'
             ."<tr><td class=\"embedded\"><font color=\"white\"><h1>SQL Error</h1>\n"
             .'<b>"<script>"</b></font></td></tr></table>';
-        $this->assertSame($expected, Frame::sqlError('"<script>"', '', ''));
+        $this->assertSame($expected, (string) Frame::sqlError('"<script>"', '', ''));
     }
 }

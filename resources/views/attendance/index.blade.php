@@ -4,9 +4,9 @@
 
 @section('content')
 @if ($hasAttendedToday)
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::open((string) (__('legacy/attendance.success')), false, 10, '100%', 'left')))
+    {{ \App\Support\Frame::open((string) (__('legacy/attendance.success')), false, 10, '100%', 'left') }}
     <p>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($headerLeft ?? ''))<span style="float:right">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($headerRight ?? ''))</span></p>
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::CLOSE))
+    {{ \App\Support\Frame::close() }}
     <div class="nx-flex-center" style="padding: 20px 0"><div id="calendar" style="width: 60%"></div></div>
     <ul>
         @foreach ($bonusLines['lines'] ?? [] as $line)
@@ -19,7 +19,7 @@
         </ol></li>
     </ul>
 @else
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::open((string) (__('legacy/attendance.title')), false, 10, '100%', 'left')))
+    {{ \App\Support\Frame::open((string) (__('legacy/attendance.title')), false, 10, '100%', 'left') }}
     <div class="nx-box">
     <div style="margin-top: 20px; text-align: center;">
     <form method="post" action="attendance.php" class="nx-inline-block">
@@ -30,6 +30,6 @@
     </form>
     </div>
     </div>
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::CLOSE))
+    {{ \App\Support\Frame::close() }}
 @endif
 @endsection

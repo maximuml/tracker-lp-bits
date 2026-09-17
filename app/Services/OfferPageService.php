@@ -21,6 +21,7 @@ use App\Support\Format;
 use App\Support\Frame;
 use App\Support\Globals;
 use App\Support\Html;
+use App\Support\Html\SafeHtml;
 use App\Support\Input;
 use App\Support\LegacyResponse;
 use App\Support\LegacyYesNo;
@@ -423,7 +424,7 @@ final class OfferPageService
 
         // Build the table rows
         $last_offer = strtotime((string) ($curUser['last_offer'] ?? 'now'));
-        $tableHtml = '';
+        $tableHtml = SafeHtml::fromTrustedHtml('');
         $tooltipContainer = '';
         if (! $num) {
             $tableHtml = Frame::stdMessage((string) (__('legacy/offers.text_nothing_found')), (string) (__('legacy/offers.text_nothing_found')), false);
@@ -529,7 +530,7 @@ final class OfferPageService
             if (($curUser['showlastcom'] ?? true)) {
                 echo Html::tooltipContainer($lastcom_tooltip, 400);
             }
-            $tableHtml = (string) ob_get_clean();
+            $tableHtml = SafeHtml::fromTrustedHtml((string) ob_get_clean());
         }
 
         // Update last_offer timestamp

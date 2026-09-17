@@ -4,11 +4,11 @@
     $stdheadScript ?? '',
     $stdheadPlace ?? ''
 )))
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::mainOpen('', false, 100, (int) \constant('CONTENT_WIDTH'))))
+{{ \App\Support\Frame::mainOpen('', false, 100, (int) \constant('CONTENT_WIDTH')) }}
 
 <div id="main-content" tabindex="-1">
 @yield('content')
 </div>
 
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::CLOSE))
+{{ \App\Support\Frame::close() }}
 @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\PageLayout::footerHtml()))

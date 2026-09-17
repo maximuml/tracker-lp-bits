@@ -27,14 +27,13 @@ use Tests\Attributes\TestCategory;
  *   - lines starting HTML literals   : 1226
  *
  * Exclusions:
- *   - app/Support/Install — standalone legacy installer (own removal step)
  *   - app/Support/Metrics — Prometheus exposition lines, not HTML
  *
  * To check current counts without running the test:
- *   grep -rniE '["\x27]<table' app/ --include='*.php' | grep -v 'Install/\|Metrics/' | wc -l
- *   grep -rnE '\bob_start\s*\(' app/ --include='*.php' | grep -v 'Install/\|Metrics/' | wc -l
+ *   grep -rniE '["\x27]<table' app/ --include='*.php' | grep -v 'Metrics/' | wc -l
+ *   grep -rnE '\bob_start\s*\(' app/ --include='*.php' | grep -v 'Metrics/' | wc -l
  *   grep -rnE '\becho\b' app/Services app/Http/Controllers --include='*.php' | wc -l
- *   grep -rnE '["\x27]<[a-zA-Z!/]' app/ --include='*.php' | grep -v 'Install/\|Metrics/' | wc -l
+ *   grep -rnE '["\x27]<[a-zA-Z!/]' app/ --include='*.php' | grep -v 'Metrics/' | wc -l
  */
 #[TestCategory(TestCategory::ARCHITECTURE)]
 final class HtmlInPhpRatchetTest extends TestCase
@@ -47,7 +46,6 @@ final class HtmlInPhpRatchetTest extends TestCase
      * @var list<string>
      */
     private const EXCLUDED_SUBPATHS = [
-        'Support/Install/',
         'Support/Metrics/',
     ];
 

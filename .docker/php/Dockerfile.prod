@@ -27,7 +27,6 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp
 RUN docker-php-ext-install -j$(nproc) \
     bcmath \
     pdo_mysql \
-    mysqli \
     gd \
     pcntl \
     sockets \
@@ -63,7 +62,6 @@ RUN composer install \
     --ignore-platform-req=ext-gd \
     --ignore-platform-req=ext-gmp \
     --ignore-platform-req=ext-intl \
-    --ignore-platform-req=ext-mysqli \
     --ignore-platform-req=ext-pcntl \
     --ignore-platform-req=ext-redis \
     --ignore-platform-req=ext-pdo_mysql \

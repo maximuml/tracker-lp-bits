@@ -52,7 +52,8 @@ final class ConsoleCommandsTest extends TestCase
             'user:delete_expired_token' => ['user:delete_expired_token'],
             'meilisearch:import' => ['meilisearch:import'],
             'meilisearch:stats' => ['meilisearch:stats'],
-            'nexus:update' => ['nexus:update'],
+            'app:install' => ['app:install'],
+            'app:upgrade' => ['app:upgrade'],
             'queue:probe' => ['queue:probe'],
         ];
     }

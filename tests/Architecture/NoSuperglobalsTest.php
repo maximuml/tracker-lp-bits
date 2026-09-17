@@ -69,11 +69,7 @@ final class NoSuperglobalsTest extends TestCase
                 continue;
             }
 
-            // Skip Install scripts (standalone, IN_NEXUS=true context)
             $relativePath = str_replace(self::APP_DIR.'/', '', $file->getPathname());
-            if (str_starts_with($relativePath, 'Support/Install/')) {
-                continue;
-            }
 
             $content = file_get_contents($file->getPathname());
             if ($content === false) {

@@ -24,9 +24,11 @@
   (contract) once all supported upgrade paths have passed it. Data-writing
   migrations must be idempotent and must make columns nullable *before*
   writing `NULL` into them.
-- **Upgrade command:** `php artisan nexus:update` (used by `demo.yml`)
-  runs `migrate` against the existing database — the CI `migrations` job
-  mirrors exactly this path.
+- **Upgrade command:** `php artisan app:upgrade` (used by `demo.yml`)
+  merges new `.env` keys, runs the conditional legacy fixups, then
+  `migrate` against the existing database — the CI `migrations` job
+  mirrors exactly this path. It replaces `nexus:update` (removed with
+  the legacy `app/Support/Install` self-updater).
 
 ## Backup & restore
 

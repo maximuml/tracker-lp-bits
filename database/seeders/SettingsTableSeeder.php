@@ -10,7 +10,7 @@ class SettingsTableSeeder extends Seeder
 {
     public function run()
     {
-        $settings = require __DIR__.'/../../app/Support/Install/settings.default.php';
+        $settings = require __DIR__.'/../settings.default.php';
 
         foreach ($settings as $prefix => $group) {
             foreach ($group as $key => $value) {

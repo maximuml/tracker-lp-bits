@@ -2,8 +2,6 @@
 
 namespace Tests\Unit;
 
-use App\Support\Env;
-use App\Support\Install\Install;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
@@ -60,7 +58,7 @@ final class AppKeyTest extends TestCase
      */
     public function test_installer_source_contains_csprng_generation(): void
     {
-        $source = file_get_contents(app_path('Support/Install/Install.php'));
+        $source = file_get_contents(app_path('Services/Installer/EnvFileWriter.php'));
         $this->assertStringContainsString('random_bytes(32)', $source, 'Installer must use CSPRNG (random_bytes) for APP_KEY generation');
         $this->assertStringContainsString('base64:', $source, 'Installer must produce base64: prefixed key');
         $this->assertStringContainsString('ChangeMeToYourGeneratedAppKeyNow', $source, 'Installer must detect and replace the placeholder');
@@ -71,7 +69,7 @@ final class AppKeyTest extends TestCase
      */
     public function test_installer_sets_chmod_0640(): void
     {
-        $source = file_get_contents(app_path('Support/Install/Install.php'));
+        $source = file_get_contents(app_path('Services/Installer/EnvFileWriter.php'));
         $this->assertStringContainsString('chmod', $source, 'Installer must set file permissions on .env');
         $this->assertStringContainsString('0640', $source, 'Installer must use 0640 permissions for .env');
     }

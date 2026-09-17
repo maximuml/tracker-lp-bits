@@ -20,7 +20,6 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp
 RUN docker-php-ext-install -j$(nproc) \
     bcmath \
     pdo_mysql \
-    mysqli \
     gd \
     pcntl \
     sockets \

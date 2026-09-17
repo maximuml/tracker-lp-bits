@@ -99,7 +99,7 @@
 
             <div class="toolbox nx-ffull">
                 <font color="#a00"><b>{{ $lang['text_all_fields_required'] ?? 'All Fields are required!' }}</b></font><p></p>
-                <input id="submit-btn" type="button" value="@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($lang['submit_sign_up'] ?? 'Sign up!'))" style="height: 25px" />
+                <input id="submit-btn" type="button" value="{{ $lang['submit_sign_up'] ?? 'Sign up!' }}" style="height: 25px" />
             </div>
         </div>
         <input type="hidden" name="wantpassword" />

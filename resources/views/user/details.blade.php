@@ -28,7 +28,7 @@
 @if ((int) $user['invites'] <= 0 && $temporaryInviteCount <= 0)
 <x-settings-row-small :label="$lang['row_invitation'] ?? ''">{{ $lang['text_no_invitation'] ?? '' }}</x-settings-row-small>
 @else
-<x-settings-row-small :label="$lang['row_invitation'] ?? ''"><a href="invite.php?id={{ $user['id'] }}" title="@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($lang['link_send_invitation'] ?? ''))">{{ $user['invites'] }}({{ $temporaryInviteCount }})</a></x-settings-row-small>
+<x-settings-row-small :label="$lang['row_invitation'] ?? ''"><a href="invite.php?id={{ $user['id'] }}" title="{{ $lang['link_send_invitation'] ?? '' }}">{{ $user['invites'] }}({{ $temporaryInviteCount }})</a></x-settings-row-small>
 @endif
 @else
 @if ((int) $user['invites'] <= 0)
@@ -66,12 +66,12 @@
 @if (! empty($user['avatar']))
 <x-settings-row-small :label="$lang['row_avatar'] ?? ''">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($avatarHtml))</x-settings-row-small>
 @endif
-<x-settings-row-small :label="$lang['row_class'] ?? ''"><img alt="@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\UserClass::name($user['class'], false, false, true)))" title="@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\UserClass::name($user['class'], false, false, true)))" src="{{ \App\Support\UserClass::imagePath($user['class']) }}" />@if (($user['title'] ?? '') !== '')&nbsp;{{ trim($user['title']) }}@endif @if ((int) $user['class'] === UC_VIP && ! empty($user['vip_until']) && strtotime((string) $user['vip_until'])){{ $lang['row_vip_until'] ?? '' }}: {{ $user['vip_until'] }}@endif</x-settings-row-small>
+<x-settings-row-small :label="$lang['row_class'] ?? ''"><img alt="{{ \App\Support\UserClass::name($user['class'], false, false, true) }}" title="{{ \App\Support\UserClass::name($user['class'], false, false, true) }}" src="{{ \App\Support\UserClass::imagePath($user['class']) }}" />@if (($user['title'] ?? '') !== '')&nbsp;{{ trim($user['title']) }}@endif @if ((int) $user['class'] === UC_VIP && ! empty($user['vip_until']) && strtotime((string) $user['vip_until'])){{ $lang['row_vip_until'] ?? '' }}: {{ $user['vip_until'] }}@endif</x-settings-row-small>
 @if ($userPropsHtml !== '')
 <x-settings-row-small :label="$lang['row_user_props'] ?? ''">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($userPropsHtml))</x-settings-row-small>
 @endif
-<x-settings-row-small :label="$lang['row_torrent_comment'] ?? ''">@if ($torrentcomments && ($isOwner || $canViewHistory))<a href="userhistory.php?action=viewcomments&amp;id={{ $id }}" title="@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($lang['link_view_comments'] ?? ''))">{{ $torrentcomments }}</a>@else{{ $torrentcomments }}@endif</x-settings-row-small>
-<x-settings-row-small :label="$lang['row_forum_posts'] ?? ''">@if ($forumposts && ($isOwner || $canViewHistory))<a href="userhistory.php?action=viewposts&amp;id={{ $id }}" title="@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($lang['link_view_posts'] ?? ''))">{{ $forumposts }}</a>@else{{ $forumposts }}@endif</x-settings-row-small>
+<x-settings-row-small :label="$lang['row_torrent_comment'] ?? ''">@if ($torrentcomments && ($isOwner || $canViewHistory))<a href="userhistory.php?action=viewcomments&amp;id={{ $id }}" title="{{ $lang['link_view_comments'] ?? '' }}">{{ $torrentcomments }}</a>@else{{ $torrentcomments }}@endif</x-settings-row-small>
+<x-settings-row-small :label="$lang['row_forum_posts'] ?? ''">@if ($forumposts && ($isOwner || $canViewHistory))<a href="userhistory.php?action=viewposts&amp;id={{ $id }}" title="{{ $lang['link_view_posts'] ?? '' }}">{{ $forumposts }}</a>@else{{ $forumposts }}@endif</x-settings-row-small>
 @if ($isOwner || $canViewHistory)
 @if ($hrStatusHtml !== '')
 <x-settings-row-small label="H&R"><a href="myhr.php?userid={{ $user['id'] }}" target="_blank">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($hrStatusHtml))</a></x-settings-row-small>
@@ -96,7 +96,7 @@
 <tr><td align="left" colspan="2" class="text"><font color="blue">{{ $lang['text_public_access_denied'] ?? '' }}{{ $user['username'] }}{{ $lang['text_user_wants_privacy'] ?? '' }}</font></td></tr>
 @endif
 @if (! $isOwner)
-<tr><td colspan="2" align="center">@if ($showPmButton)<a href="sendmessage.php?receiver={{ $user['id'] }}"><img class="f_pm" src="pic/trans.gif" alt="PM" title="@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($lang['title_send_pm'] ?? ''))" /></a>@endif<a href="report.php?user={{ $user['id'] }}"><img class="f_report" src="pic/trans.gif" alt="Report" title="@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($lang['title_report_user'] ?? ''))" /></a></td></tr>
+<tr><td colspan="2" align="center">@if ($showPmButton)<a href="sendmessage.php?receiver={{ $user['id'] }}"><img class="f_pm" src="pic/trans.gif" alt="PM" title="{{ $lang['title_send_pm'] ?? '' }}" /></a>@endif<a href="report.php?user={{ $user['id'] }}"><img class="f_report" src="pic/trans.gif" alt="Report" title="{{ $lang['title_report_user'] ?? '' }}" /></a></td></tr>
 @endif
 </table>
 
@@ -183,7 +183,7 @@
 <x-settings-row :label="$lang['row_invites'] ?? ''"><input disabled type="text" size="60" name="invites" value="{{ $user['invites'] }}" />@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($migratedHelp))</x-settings-row>
 @endif
 <x-settings-row :label="$lang['row_passkey'] ?? ''"><input name="resetkey" value="yes" type="checkbox" />{{ $lang['checkbox_reset_passkey'] ?? '' }}</x-settings-row>
-<tr><td class="toolbox" colspan="2" align="center"><input type="submit" class="class="btn" value="@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($lang['submit_okay'] ?? ''))"" /></td></tr>
+<tr><td class="toolbox" colspan="2" align="center"><input type="submit" class="class="btn" value="{{ $lang['submit_okay'] ?? '' }}"" /></td></tr>
 </table>
 </form>
 </x-frame>
@@ -191,7 +191,7 @@
 <x-frame :caption="$lang['text_delete_user'] ?? ''">
 <form method="post" action="delacctadmin.php" name="deluser">
 <input name="userid" size="10" type="hidden" value="{{ $user['id'] }}" />
-<input name="delenable" type="checkbox" data-del-msg="@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($lang['js_delete_user_note'] ?? ''))" /><input name="submit" type="type="submit" value="@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($lang['submit_delete'] ?? ''))"" disabled="disabled" /></form>
+<input name="delenable" type="checkbox" data-del-msg="{{ $lang['js_delete_user_note'] ?? '' }}" /><input name="submit" type="type="submit" value="{{ $lang['submit_delete'] ?? '' }}"" disabled="disabled" /></form>
 </x-frame>
 @endif
 @endif

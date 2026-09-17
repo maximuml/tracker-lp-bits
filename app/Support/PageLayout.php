@@ -247,7 +247,8 @@ class PageLayout
 
             $globalSearchEnabled = Settings::get('main.enable_global_search') == 'yes';
             $searchFormTarget = RequestContext::instance()->getScript() == 'search' ? '_self' : '_blank';
-            $requestSearchEscaped = Html::escapeAttr((string) ($context->requestSearch ?? ''));
+            // Raw value — Blade {{ }} escapes for the attribute context.
+            $requestSearchEscaped = (string) ($context->requestSearch ?? '');
             $searchKeywordPlaceholder = Locale::trans('search.search_keyword');
             $searchBoxAreaSelect = SearchBox::areaSelect($context->requestSearchArea ?? '', ['style' => 'width: 88px']);
             $globalSearchLabel = Locale::trans('search.global_search');

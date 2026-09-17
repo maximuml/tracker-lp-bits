@@ -36,7 +36,7 @@
 @endif
 <x-settings-row :label="$lang_details['row_basic_info'] ?? ''"><b>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($lang_details['text_size'] ?? ''))</b>{{ \App\Support\Format::size((float) $torrentRow['size']) }}&nbsp;&nbsp;&nbsp;<b>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($lang_details['row_type'] ?? '')):</b>&nbsp;{{ $torrentRow['cat_name'] }}@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($taxonomyRendered))</x-settings-row>
 <x-settings-row :label="$lang_details['row_action'] ?? ''">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($actionsHtml))</x-settings-row>
-<x-settings-row :label="$lang_details['torrent_dl_url'] ?? ''"><a title="@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($lang_details['torrent_dl_url_notice'] ?? ''))" href="{{ $downloadUrl }}">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($lang_details['torrent_dl_url_text'] ?? ''))</a></x-settings-row>
+<x-settings-row :label="$lang_details['torrent_dl_url'] ?? ''"><a title="{{ $lang_details['torrent_dl_url_notice'] ?? '' }}" href="{{ $downloadUrl }}">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($lang_details['torrent_dl_url_text'] ?? ''))</a></x-settings-row>
 @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($customFieldsHtml))
 @if (! empty($technicalInfoResult))
 <x-settings-row :label="$lang_functions['text_technical_info'] ?? ''">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($technicalInfoResult))</x-settings-row>

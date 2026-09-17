@@ -95,7 +95,7 @@ final class LegacyViewSurfaceTest extends TestCase
      * Baseline: @safeHtml output inside HTML attribute values.
      * Attribute context requires context-specific escaping.
      */
-    private const BASELINE_TRUSTED_HTML_ATTR = 21;
+    private const BASELINE_TRUSTED_HTML_ATTR = 0;
 
     /**
      * Views whose <table> tags are exempt from the layout-table ratchet:

@@ -53,7 +53,7 @@ final class MessagePageServiceTest extends TestCase
             $this->app->make(MailboxRepository::class),
             $this->app->make(CurrentUser::class),
             $this->app->make(Globals::class),
-            $this->app->make(\App\Support\Cache\LegacyRedisCache::class),
+            $this->app->make(LegacyRedisCache::class),
         );
     }
 

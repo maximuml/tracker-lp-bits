@@ -56,8 +56,13 @@ final class UpgradeService
      */
     public function runLegacyFixups(?callable $log = null): void
     {
-        // @since 1.10, must run first
-        $this->install->migrate('database/migrations/2025_10_05_030400_create_activity_log_table.php');
+        // @since 1.10, must run first — guard on the table itself: a
+        // drifted DB may have activity_log without a migrations row
+        // (schema-cloned or legacy-installed), and migrate --path would
+        // re-issue CREATE TABLE and crash.
+        if (! Schema::hasTable('activity_log')) {
+            $this->install->migrate('database/migrations/2025_10_05_030400_create_activity_log_table.php');
+        }
 
         $redis = Redis::connection()->client();
 

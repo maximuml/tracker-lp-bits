@@ -99,7 +99,11 @@ final class ComposeSecretsTest extends TestCase
      */
     public function test_ci_sets_db_password_explicitly(): void
     {
-        $ci = file_get_contents(base_path('.github/workflows/ci.yml'));
-        $this->assertStringContainsString('s/^DB_PASSWORD=.*/DB_PASSWORD=nexusphp/', $ci, 'CI must set DB_PASSWORD explicitly via sed');
+        // Env preparation lives in scripts/ci/env-*.sh — assert the scripts
+        // set DB_PASSWORD explicitly rather than relying on .env.example.
+        $dev = file_get_contents(base_path('scripts/ci/env-compose-dev.sh'));
+        $svc = file_get_contents(base_path('scripts/ci/env-ci-services.sh'));
+        $this->assertStringContainsString('s/^DB_PASSWORD=.*/DB_PASSWORD=nexusphp/', $dev, 'dev env script must set DB_PASSWORD explicitly via sed');
+        $this->assertStringContainsString('s/^DB_PASSWORD=.*/DB_PASSWORD=nexusphp/', $svc, 'services env script must set DB_PASSWORD explicitly via sed');
     }
 }

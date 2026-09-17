@@ -1,0 +1,54 @@
+name: Setup PHP stack
+description: >-
+  Shared CI preamble: shivammathur/setup-php + composer cache +
+  composer install + dump-autoload. Pin SHAs live here only.
+inputs:
+  php-version:
+    description: PHP version for setup-php (e.g. '8.5' or matrix value)
+    required: false
+    default: '8.5'
+  coverage:
+    description: setup-php coverage driver ('none', 'xdebug', 'pcov')
+    required: false
+    default: 'none'
+  ini-values:
+    description: >-
+      Optional ini-values string for setup-php (e.g. Infection jobs pass
+      memory_limit/sendmail_path).
+    required: false
+    default: ''
+  composer-cache:
+    description: Whether to restore the ~/.composer cache (sbom/infection skip it)
+    required: false
+    default: 'true'
+  dump-autoload:
+    description: Whether to run composer dump-autoload after install
+    required: false
+    default: 'true'
+runs:
+  using: composite
+  steps:
+    - name: Setup PHP
+      uses: shivammathur/setup-php@b604ade2a87db23f8871b7182e69ec5e75effb45 # v2
+      with:
+        php-version: ${{ inputs.php-version }}
+        extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, pdo_mysql, redis, sqlite3, xml, zip
+        coverage: ${{ inputs.coverage }}
+        ini-values: ${{ inputs.ini-values }}
+
+    - name: Cache Composer dependencies
+      if: inputs.composer-cache == 'true'
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+      with:
+        path: ~/.composer/cache
+        key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+        restore-keys: ${{ runner.os }}-composer-
+
+    - name: Install dependencies
+      shell: bash
+      run: composer install --prefer-dist --no-progress --no-interaction --no-scripts
+
+    - name: Dump autoload
+      if: inputs.dump-autoload == 'true'
+      shell: bash
+      run: composer dump-autoload --no-interaction --no-scripts

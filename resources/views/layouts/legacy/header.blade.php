@@ -12,7 +12,7 @@
 @endif
 <meta name="generator" content="{{ $projectName }}" />
 <meta name="csrf-token" content="{{ $csrfToken }}" />
-@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($addiCode))
+{{ $addiCode }}
 <title>{{ $title }}</title>
 <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
 <link rel="search" type="application/opensearchdescription+xml" title="{{ $siteName }} Torrents" href="opensearch.php" />
@@ -36,7 +36,7 @@
 <script type="text/javascript" src="js/domTT_drag.js{{ $cssUpdateDate }}"></script>
 <script type="text/javascript" src="js/fadomatic.js{{ $cssUpdateDate }}"></script>
 @foreach($appendHeaders as $value)
-@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($value))
+{{ $value }}
 @endforeach
 <script type="text/javascript" nonce="{{ $cspNonce }}">
     window.nexusLayerOptions = {
@@ -70,31 +70,31 @@
 @if(!$user)
 			<a href="login.php"><font class="big"><b>{{ __('legacy/functions.text_login') }}</b></font></a> / <a href="signup.php"><font class="big"><b>{{ __('legacy/functions.text_signup') }}</b></font></a>
 @else
-@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($menuHtml))
+{{ $menuHtml }}
 
 <div id="info_block">
 	<div class="nx-row">
 		<div class="nx-grow">
             <span class="medium">
-                {{ __('legacy/functions.text_welcome_back') }}, @safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($username))
+                {{ __('legacy/functions.text_welcome_back') }}, {{ $username }}
                 [<form method="post" action="logout.php" class="nx-inline">@csrf<button type="submit" class="nx-btn-link">{{ __('legacy/functions.text_logout') }}</button></form>]
                 [<a href="usercp.php">{{ __('legacy/functions.text_user_cp') }}</a>]
                 @if($isModerator) [<a href="staffpanel.php">{{ __('legacy/functions.text_staff_panel') }}</a>] @endif
                 @if($isSysop) [<a href="settings.php">{{ __('legacy/functions.text_site_settings') }}</a>]@endif
                 [<a href="torrents.php?inclbookmarked=1&amp;allsec=1&amp;incldead=0">{{ __('legacy/functions.text_bookmarks') }}</a>]
                 <font class = 'color_bonus'>{{ __('legacy/functions.text_bonus') }}</font>[<a href="mybonus.php">{{ __('legacy/functions.text_use') }}</a>]: {{ $seedbonus }}
-                @safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($attendanceLink))
+                {{ $attendanceLink }}
                 <a href="medal.php">[{{ $medalLabel }}]</a>
                 <a href="task.php">[{{ $taskLabel }}]</a>
                 <font class = 'color_invite'>{{ __('legacy/functions.text_invite') }}</font>[<a href="invite.php?id={{ $userId }}">{{ __('legacy/functions.text_send') }}</a>]: {{ $invites }}({{ $pendingInviteCount }})
-                @safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($managementSystemLink))
+                {{ $managementSystemLink }}
                 <br />
 	            <font class="color_ratio">{{ __('legacy/functions.text_ratio') }}</font> {{ $ratio }}
                 <font class='color_uploaded'>{{ __('legacy/functions.text_uploaded') }}</font> {{ $uploaded }}
                 <font class='color_downloaded'> {{ __('legacy/functions.text_downloaded') }}</font> {{ $downloaded }}
                 <font class='color_active'>{{ __('legacy/functions.text_active_torrents') }}</font> <img class="arrowup" alt="Torrents seeding" title="{{ __('legacy/functions.title_torrents_seeding')}}" src="pic/trans.gif" />{{ $activeseed }}  <img class="arrowdown" alt="Torrents leeching" title="{{ __('legacy/functions.title_torrents_leeching')}}" src="pic/trans.gif" />{{ $activeleech }}&nbsp;&nbsp;
-                <font class='color_connectable'>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/functions.text_connectable')))</font>@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($connectable)) @safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($slotsDisplay))
-                @if($hitAndRunEnabled)<font class='color_bonus'>H&R: </font> @safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($hitAndRunStatus)) @endif
+                <font class='color_connectable'>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/functions.text_connectable')))</font>{{ $connectable }} {{ $slotsDisplay }}
+                @if($hitAndRunEnabled)<font class='color_bonus'>H&R: </font> {{ $hitAndRunStatus }} @endif
             </span>
         </div>
                 @if($globalSearchEnabled)
@@ -106,7 +106,7 @@
                             <span><input type="text" name="search" style="width: 80px;height: 12px" value="{{ $requestSearchEscaped }}" placeholder="{{ $searchKeywordPlaceholder }}"/></span>
                         </div>
                         <div>
-                            <span>@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($searchBoxAreaSelect))</span>
+                            <span>{{ $searchBoxAreaSelect }}</span>
                         </div>
                     </div>
                     <div><input type="submit" value="{{ $globalSearchLabel }}" style="width: 39px;white-space: break-spaces;padding: 0" /></div>
@@ -115,7 +115,7 @@
         </div>
                 @endif
 	<div><span class="medium">
-@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($staffIcons))
+{{ $staffIcons }}
 	</span></div>
 	</div>
 </div>
@@ -123,8 +123,8 @@
 </div>
 
 <div id="outer" class="outer nx-center" style="padding-top: 20px; padding-bottom: 20px">
-@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($messageAlerts))
+{{ $messageAlerts }}
 @if($offlineMsg)
-@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($offlineMsgHtml))
+{{ $offlineMsgHtml }}
 @endif
 @endif

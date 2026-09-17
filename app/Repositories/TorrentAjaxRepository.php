@@ -12,6 +12,7 @@ use App\Models\Torrent;
 use App\Models\User;
 use App\Support\Database;
 use App\Support\Globals;
+use App\Support\Html\SafeHtml;
 use App\Support\Input;
 use App\Support\Logger;
 use App\Support\Network;
@@ -79,8 +80,8 @@ final class TorrentAjaxRepository implements TorrentAjaxRepositoryInterface
             'id' => $torrentId,
             'torrentName' => $torrentName,
             'count' => $count,
-            'pagertop' => (string) $pager[0],
-            'pagerbottom' => (string) $pager[1],
+            'pagertop' => $pager[0],
+            'pagerbottom' => $pager[1],
             'snatchedRows' => $snatchedRows,
         ];
     }
@@ -248,8 +249,8 @@ final class TorrentAjaxRepository implements TorrentAjaxRepositoryInterface
                 'rows' => [],
                 'count' => 0,
                 'total_size' => 0,
-                'pagertop' => '',
-                'pagerbottom' => '',
+                'pagertop' => SafeHtml::fromTrustedHtml(''),
+                'pagerbottom' => SafeHtml::fromTrustedHtml(''),
                 'torrentlist' => '',
                 'seedTimeAndUploaded' => collect(),
             ];
@@ -285,8 +286,8 @@ final class TorrentAjaxRepository implements TorrentAjaxRepositoryInterface
             'rows' => $rows,
             'count' => $count,
             'total_size' => $totalSize,
-            'pagertop' => (string) $pager[0],
-            'pagerbottom' => (string) $pager[1],
+            'pagertop' => $pager[0],
+            'pagerbottom' => $pager[1],
             'torrentRep' => $this->torrentModerationRepository,
             'seedTimeAndUploaded' => $seedTimeAndUploaded,
         ];

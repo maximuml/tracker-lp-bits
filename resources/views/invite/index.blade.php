@@ -115,7 +115,7 @@
             </form>
         @endif
         </table>
-        </div>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($inviteePagertop))
+        </div>{{ $inviteePagertop }}
 
     @elseif (in_array($menuSelected, ['sent', 'tmp'], true))
         <table data-nx="data" border=1 width=100% cellspacing=0 cellpadding=5>
@@ -149,7 +149,7 @@
             @endforeach
         @endif
         </table>
-        </div>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($sentTmpPagertop))
+        </div>{{ $sentTmpPagertop }}
     @endif
 
 @endif

@@ -16,6 +16,7 @@ use App\Repositories\BonusRepository;
 use App\Repositories\UserListingRepository;
 use App\Support\AssetAppender;
 use App\Support\CurrentUser;
+use App\Support\Html\SafeHtml;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Log;
@@ -112,8 +113,8 @@ class UserAdminController extends LegacyController
                 'username_html' => UserDisplay::username((int) $arr['id']),
                 'addedFormatted' => (string) Time::format($arr['added'], true, false),
                 'lastAccessFormatted' => (string) Time::format($arr['last_access'], true, false),
-                'class_name' => UserClass::name((int) $arr['class'], false, true, true),
-                'country' => $arr['country'],
+                'class_name' => SafeHtml::fromTrustedHtml(UserClass::name((int) $arr['class'], false, true, true)),
+                'country' => SafeHtml::fromTrustedHtml((string) $arr['country']),
             ];
         }
 

@@ -5,7 +5,7 @@
 @section('content')
 <h1>BitBucket Log</h1>
 Total Images Stored: {{ $count ?? 0 }}
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagertop ?? ''))
+{{ $pagertop ?? '' }}
 
 @if (empty($items ?? []))
     <b>BitBucket Log is empty</b>
@@ -24,5 +24,5 @@ Total Images Stored: {{ $count ?? 0 }}
     @endforeach
     </table>
 @endif
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagerbottom ?? ''))
+{{ $pagerbottom ?? '' }}
 @endsection

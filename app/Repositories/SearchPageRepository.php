@@ -11,6 +11,7 @@ use App\Models\SearchBox;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Support\Config\SiteConfig;
+use App\Support\Html\SafeHtml;
 use App\Support\Logger;
 use App\Support\Pagination;
 use App\Support\Permissions;
@@ -189,7 +190,7 @@ class SearchPageRepository
      * @param  array<int, array<string, mixed>>  $rows
      * @return array<string, mixed>
      */
-    private function formatResult(string $searchRaw, int $searchArea, int $count, array $rows, string $pagertop, string $pagerbottom, int $torrentsperpage): array
+    private function formatResult(string $searchRaw, int $searchArea, int $count, array $rows, SafeHtml $pagertop, SafeHtml $pagerbottom, int $torrentsperpage): array
     {
         return [
             'search' => $searchRaw,

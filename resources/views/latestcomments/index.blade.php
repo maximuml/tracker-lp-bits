@@ -6,7 +6,7 @@
 @if ($count == 0)
     @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Frame::stdMessage(('Sorry'), __('legacy/functions.text_no_comments'), false)))
 @else
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagertop))
+    {{ $pagertop }}
     <h1 align="center">{{ __('legacy/functions.text_latest_comments')}}</h1>
     @foreach ($rows as $row)
         <div style="margin-top: 8pt; margin-bottom: 8pt;">
@@ -29,6 +29,6 @@
             </div>
         </div>
     @endforeach
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagerbottom))
+    {{ $pagerbottom }}
 @endif
 @endsection

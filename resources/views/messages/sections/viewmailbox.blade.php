@@ -8,7 +8,7 @@
 @if (! $viewmailbox['hasMessages'])
 <p align="center">{{ __('legacy/messages.text_no_messages') }}</p>
 @else
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($viewmailbox['pagertop'] ?? ''))
+{{ $viewmailbox['pagertop'] ?? '' }}
 <form action="/messages" method="post">
 @csrf
 <input type="hidden" name="action" value="moveordel">

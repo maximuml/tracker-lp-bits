@@ -43,7 +43,7 @@
             </tr>
         @endforeach
         </table>
-        @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagerbottom ?? ''))
+        {{ $pagerbottom ?? '' }}
     @endif
     @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/log.time_zone_note')))
 
@@ -81,7 +81,7 @@
             <tr><td class=rowfollow align=center><nobr>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($arr['dateHtml'] ?? ''))</nobr></td><td class=rowfollow align=left>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($arr['bodyHtml'] ?? ''))</td>@if ($canManage)<td align=center nowrap><b><a href="?action=chronicle&do=edit&id={{ (int) ($arr['id'] ?? 0) }}">{{ __('legacy/log.text_edit')}}</a>&nbsp;|&nbsp;<form method="post" action="?action=chronicle&do=del" class="nx-inline"><input type="hidden" name="id" value="{{ (int) ($arr['id'] ?? 0) }}"><button type="submit" class="nx-btn-link" style="color:red;font-weight:bold">{{ __('legacy/log.text_delete')}}</button></form></b></td>@endif</tr>
         @endforeach
         </table>
-        @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagerbottom ?? ''))
+        {{ $pagerbottom ?? '' }}
     @endif
     @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/log.time_zone_note')))
 
@@ -108,7 +108,7 @@
             <tr><td class=rowhead width='10%'>{{ __('legacy/log.col_title')}}</td><td class=rowfollow align=left>{{ $arr['title'] ?? '' }}</td></tr><tr><td class=rowhead width='10%'>{{ __('legacy/log.col_date')}}</td><td class=rowfollow align=left>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($arr['dateHtml'] ?? ''))</td></tr><tr><td class=rowhead width='10%'>{{ __('legacy/log.col_body')}}</td><td class=rowfollow align=left>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($arr['bodyHtml'] ?? ''))</td></tr>
             </table><br />
         @endforeach
-        @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagerbottom ?? ''))
+        {{ $pagerbottom ?? '' }}
     @endif
     @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/log.time_zone_note')))
 

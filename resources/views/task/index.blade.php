@@ -38,5 +38,5 @@
 </tbody>
 </table>
 
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pagerbottom ?? ''))
+{{ $pagerbottom ?? '' }}
 @endsection

@@ -13,6 +13,7 @@ use App\Repositories\IndexRepository;
 use App\Repositories\PollRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
+use App\Support\Html\SafeHtml;
 use App\Support\Pagination;
 use App\Support\Strings;
 use App\Support\Time;
@@ -131,8 +132,8 @@ class PollController extends LegacyController
 
             $count = $this->pollRepository->countAnswers($pollid);
             $answers = [];
-            $pagertop = '';
-            $pagerbottom = '';
+            $pagertop = SafeHtml::fromTrustedHtml('');
+            $pagerbottom = SafeHtml::fromTrustedHtml('');
 
             if ($count > 0) {
                 $perpage = 100;

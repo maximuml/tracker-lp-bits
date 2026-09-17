@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Support\Config\SiteConfig;
-use App\Support\Globals;
 use App\Support\Settings;
 
 final class ToptenRepository
@@ -16,7 +15,6 @@ final class ToptenRepository
         private readonly Topten\CountrySections $countrySections = new Topten\CountrySections,
         private readonly Topten\CommunitySections $communitySections = new Topten\CommunitySections,
         private readonly Topten\OtherSections $otherSections = new Topten\OtherSections,
-        private readonly Globals $globals = new Globals,
     ) {}
 
     /**
@@ -27,7 +25,7 @@ final class ToptenRepository
         $type = in_array($type, [1, 2, 3, 5, 6], true) ? $type : 1;
         $limit = $limit < 1 || $limit > 250 ? 10 : $limit;
 
-        $lang = (array) $this->globals->get('lang_topten', []);
+        $lang = (array) trans('legacy/topten');
         $enabledDonation = ((string) Settings::get('main.donation', 'no')) === 'yes';
         $dateFounded = SiteConfig::current()->tweak->dateFounded();
 

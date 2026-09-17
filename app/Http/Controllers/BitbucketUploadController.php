@@ -9,9 +9,7 @@ use App\Services\BitbucketService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
-use App\Support\Input;
 use App\Support\LegacyResponse;
-use App\Support\Locale;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -148,12 +146,9 @@ class BitbucketUploadController extends Controller
     /** @return array<string, string> */
     private function loadLang(): array
     {
-        if (empty($this->globals->get('lang_bitbucketupload'))) {
-            Input::setServerValue('SCRIPT_NAME', '/bitbucket-upload.php');
-            require base_path(Locale::scriptFilePath((string) '', (bool) false, (string) ''));
-            $this->globals->set('lang_bitbucketupload', $lang_bitbucketupload ?? []);
-        }
+        $lang = (array) trans('legacy/bitbucketupload');
+        $this->globals->set('lang_bitbucketupload', $lang);
 
-        return (array) $this->globals->get('lang_bitbucketupload', []);
+        return $lang;
     }
 }

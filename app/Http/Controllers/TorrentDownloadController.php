@@ -11,7 +11,6 @@ use App\Models\User;
 use App\Repositories\IpLogRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
-use App\Support\Globals;
 use App\Support\Http;
 use App\Support\Logger;
 use App\Support\Network;
@@ -33,7 +32,6 @@ class TorrentDownloadController extends LegacyController
 {
     public function __construct(
         private readonly CurrentUser $currentUser,
-        private readonly Globals $globals,
         private readonly IpLogRepository $ipLogRepository,
         private readonly PasskeyGenerator $passkeyGenerator,
     ) {}
@@ -153,7 +151,7 @@ class TorrentDownloadController extends LegacyController
 
         $torrentid = (int) $request->input('torrentid');
         $type = $request->input('type');
-        $lang = (array) ($this->globals->get('lang_downloadnotice') ?? []);
+        $lang = (array) trans('legacy/downloadnotice');
         $timenow = time();
 
         switch ($type) {

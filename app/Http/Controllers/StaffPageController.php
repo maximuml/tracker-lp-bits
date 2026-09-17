@@ -10,7 +10,6 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Support\Country;
 use App\Support\CurrentUser;
-use App\Support\Globals;
 use App\Support\Permissions;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
@@ -24,7 +23,6 @@ class StaffPageController extends LegacyController
 {
     public function __construct(
         private readonly CurrentUser $currentUser,
-        private readonly Globals $globals,
     ) {}
 
     public function staff(Request $request): View|RedirectResponse|Response
@@ -36,7 +34,7 @@ class StaffPageController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Permission denied.');
         }
 
-        $langStaff = (array) $this->globals->get('lang_staff', []);
+        $langStaff = (array) trans('legacy/staff');
         $secs = 900;
         $dt = time() - $secs;
 
@@ -156,7 +154,7 @@ class StaffPageController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Access denied!!!');
         }
 
-        $langStaffpanel = (array) $this->globals->get('lang_staffpanel', []);
+        $langStaffpanel = (array) trans('legacy/staffpanel');
 
         $sysopPanels = [];
         $adminPanels = [];

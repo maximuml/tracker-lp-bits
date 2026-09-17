@@ -8,7 +8,6 @@ use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
 use App\Repositories\FriendsRepository;
 use App\Support\CurrentUser;
-use App\Support\Globals;
 use App\Support\Input;
 use App\Support\LegacyYesNo;
 use App\Support\Locale;
@@ -26,13 +25,12 @@ class FriendsController extends LegacyController
     public function __construct(
         private readonly FriendsRepository $friendsRepository,
         private readonly CurrentUser $currentUser,
-        private readonly Globals $globals,
     ) {}
 
     public function friends(Request $request): Response|RedirectResponse|View
     {
         $currentUser = (array) ($this->currentUser->get() ?? []);
-        $langFriends = (array) ($this->globals->get('lang_friends') ?? []);
+        $langFriends = (array) trans('legacy/friends');
 
         $userid = (int) ($request->input('id') ?? $currentUser['id'] ?? 0);
         if ($userid <= 0 || ! Validators::isId($userid)) {

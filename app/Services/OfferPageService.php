@@ -27,7 +27,7 @@ final class OfferPageService
     public function build(Request $request): OfferPageViewModel
     {
         $curUser = (array) ($this->currentUser->get() ?? []);
-        $lang = (array) ($this->globals->get('lang_offers') ?? []);
+        $lang = (array) trans('legacy/offers');
         $userId = (int) ($curUser['id'] ?? 0);
 
         $action = $this->resolveAction($request);

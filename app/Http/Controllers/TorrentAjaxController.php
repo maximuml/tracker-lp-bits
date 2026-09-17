@@ -79,7 +79,7 @@ class TorrentAjaxController extends LegacyController
         ];
 
         $data = $this->torrentAjaxRepository->peerList($torrentId, $currentUser);
-        $langViewpeerlist = (array) ($this->globals->get('lang_viewpeerlist') ?? []);
+        $langViewpeerlist = (array) trans('legacy/viewpeerlist');
         $langFunctions = $this->language->functions();
         $curUserArr = $curUser;
 
@@ -243,7 +243,7 @@ class TorrentAjaxController extends LegacyController
      */
     private function decorateSnatchRows(iterable $snatchedRows, int $currentUserId): array
     {
-        $lang = (array) ($this->globals->get('lang_viewsnatches') ?? []);
+        $lang = (array) trans('legacy/viewsnatches');
         $rows = [];
         foreach ($snatchedRows as $snatchRow) {
             $arr = (array) $snatchRow;
@@ -323,7 +323,7 @@ class TorrentAjaxController extends LegacyController
         ];
 
         $data = $this->torrentAjaxRepository->userTorrentList($targetUserId, $type, $page, $currentUser);
-        $langAjax = (array) ($this->globals->get('lang_getusertorrentlistajax') ?? []);
+        $langAjax = (array) trans('legacy/getusertorrentlistajax');
         $langFunctions = $this->language->functions();
         $curUserArr = $curUser;
 

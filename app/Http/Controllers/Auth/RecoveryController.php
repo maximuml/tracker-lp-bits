@@ -111,26 +111,13 @@ class RecoveryController extends Controller
     /** @return array<string, string> */
     private function langRecover(string $langFolder): array
     {
-        return $this->loadLangFile($langFolder, 'recover.php', 'lang_recover');
+        return (array) trans('legacy/recover');
     }
 
     /** @return array<string, string> */
     private function langFunctions(string $langFolder): array
     {
-        return $this->loadLangFile($langFolder, 'functions.php', 'lang_functions');
-    }
-
-    /** @return array<string, string> */
-    private function loadLangFile(string $langFolder, string $scriptName, string $variableName): array
-    {
-        $path = base_path(Locale::filePath($langFolder, $scriptName));
-        if (! file_exists($path)) {
-            return [];
-        }
-
-        include $path;
-
-        return ${$variableName} ?? [];
+        return (array) trans('legacy/functions');
     }
 
     private function backWithError(Request $request, string $message): RedirectResponse

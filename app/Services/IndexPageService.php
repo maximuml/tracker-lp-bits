@@ -42,7 +42,7 @@ final class IndexPageService
     public function build(): IndexPageViewModel
     {
         $curUser = (array) ($this->currentUser->get() ?? []);
-        $lang = (array) ($this->globals->get('lang_index') ?? []);
+        $lang = (array) trans('legacy/index');
 
         $data = [
             'lang' => $lang,

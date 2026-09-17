@@ -46,7 +46,7 @@ class TorrentSearchRepository
     public function getListingData(array $query = []): array
     {
         $CURUSER = $this->currentUser->get() ?? [];
-        $lang_torrents = $this->globals->get('lang_torrents', []);
+        $lang_torrents = trans('legacy/torrents');
         $browsecatmode = (int) $this->globals->get('browsecatmode', 1);
         $torrentsperpage_main = (int) $this->globals->get('torrentsperpage_main', 0);
         $catimgurl = '';

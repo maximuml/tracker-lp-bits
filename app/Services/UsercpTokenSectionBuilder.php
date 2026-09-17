@@ -8,7 +8,6 @@ use App\Models\User;
 use App\Repositories\TokenRepository;
 use App\Repositories\UsercpRepository;
 use App\Support\AssetAppender;
-use App\Support\Globals;
 use App\Support\Locale;
 
 /**
@@ -19,7 +18,6 @@ use App\Support\Locale;
 final class UsercpTokenSectionBuilder
 {
     public function __construct(
-        private readonly Globals $globals,
         private readonly UsercpRepository $usercpRepository,
         private readonly TokenRepository $tokenRepository,
     ) {}
@@ -30,7 +28,7 @@ final class UsercpTokenSectionBuilder
      */
     public function build(array $lang, User $userInfo): array
     {
-        $langFunctions = (array) ($this->globals->get('lang_functions') ?? []);
+        $langFunctions = (array) trans('legacy/functions');
 
         $permissions = $this->tokenRepository->listUserTokenPermissionAllowed();
         $permissionOptions = [];

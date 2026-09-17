@@ -22,7 +22,6 @@ use App\Support\Format;
 use App\Support\Globals;
 use App\Support\Html;
 use App\Support\Html\SafeHtml;
-use App\Support\Input;
 use App\Support\LegacyYesNo;
 use App\Support\Locale;
 use App\View\Components\BbcodeEditor;
@@ -68,18 +67,13 @@ class TorrentEditController extends Controller
         $sectionmode = (int) ($row['search_box_id'] ?? 0);
         $row['cat_mode'] = $sectionmode;
 
-        if (empty($this->globals->get('lang_edit')) || empty($this->globals->get('lang_functions'))) {
-            Input::setServerValue('SCRIPT_NAME', '/edit.php');
-            require base_path(Locale::scriptFilePath((string) 'functions.php', (bool) false, (string) ''));
-            $this->globals->set('lang_functions', $lang_functions ?? []);
-            require base_path(Locale::scriptFilePath((string) '', (bool) false, (string) ''));
-            $this->globals->set('lang_edit', $lang_edit ?? []);
-        }
+        $this->globals->set('lang_functions', (array) trans('legacy/functions'));
+        $this->globals->set('lang_edit', (array) trans('legacy/edit'));
 
         $currentUser = $this->currentUser->get();
         $this->currentUser->set($currentUser);
 
-        $langEdit = $this->globals->get('lang_edit') ?? [];
+        $langEdit = (array) trans('legacy/edit');
         $headTitle = ($langEdit['head_edit_torrent'] ?? '').'"'.$row['name'].'"';
         $cats = Category::listByModeWithContext($sectionmode);
 

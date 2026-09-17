@@ -10,7 +10,6 @@ use App\Enums\Permission\PermissionEnum;
 use App\Repositories\ShoutboxRepository;
 use App\Services\ShoutboxService;
 use App\Support\CurrentUser;
-use App\Support\Globals;
 use App\Support\LegacyHeaderBag;
 use App\Support\LegacyYesNo;
 use App\Support\Lock;
@@ -31,7 +30,6 @@ class ShoutboxController extends LegacyController
     public function __construct(
         private readonly ShoutboxRepository $repository,
         private readonly ShoutboxService $shoutboxService,
-        private readonly Globals $globals,
         private readonly ActorContext $actorContext,
         private readonly CurrentUser $currentUser,
         private readonly LegacyHeaderBag $legacyHeaderBag,
@@ -269,7 +267,7 @@ class ShoutboxController extends LegacyController
      */
     private function langShoutbox(): array
     {
-        $lang = $this->globals->get('lang_shoutbox');
+        $lang = trans('legacy/shoutbox');
 
         return is_array($lang) ? $lang : [];
     }

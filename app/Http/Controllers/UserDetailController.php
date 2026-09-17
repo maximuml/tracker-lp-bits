@@ -80,7 +80,7 @@ class UserDetailController extends Controller
 
         $user = $this->userDetailRepository->getUser($id);
         /** @var array<string, string> $lang */
-        $lang = (array) $this->globals->get('lang_userdetails', []);
+        $lang = (array) trans('legacy/userdetails');
 
         if ($user === null) {
             LegacyResponse::abort(
@@ -192,8 +192,8 @@ class UserDetailController extends Controller
 
         $userManageSystemUrl = sprintf('%s/%s/user/users/%s', Url::schemeAndHost(false), Env::get('FILAMENT_PATH', 'nexusphp'), $user['id']);
 
-        $langDetails = (array) $this->globals->get('lang_userdetails', []);
-        $langFunctions = (array) $this->globals->get('lang_functions', []);
+        $langDetails = (array) trans('legacy/userdetails');
+        $langFunctions = (array) trans('legacy/functions');
         $userManageSystemText = sprintf(
             '<a href="%s" target="_blank" class="altlink">%s</a>',
             $userManageSystemUrl,

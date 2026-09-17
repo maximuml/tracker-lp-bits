@@ -62,7 +62,7 @@ class MessagePageService
     public function build(Request $request): MessagePageViewModel
     {
         $curUser = (array) ($this->currentUser->get() ?? []);
-        $lang = (array) ($this->globals->get('lang_messages') ?? []);
+        $lang = (array) trans('legacy/messages');
         $userId = (int) ($curUser['id'] ?? 0);
 
         $action = (string) $request->input('action', '');
@@ -259,7 +259,7 @@ class MessagePageService
      */
     private function buildJumpToBoxes(Collection $pmBoxes, int $selected): string
     {
-        $lang = (array) ($this->globals->get('lang_messages') ?? []);
+        $lang = (array) trans('legacy/messages');
         $html = '<option value="1" '.($selected === self::PM_INBOX ? ' selected' : '').'>'.htmlspecialchars((string) ($lang['select_inbox'] ?? 'Inbox'))."</option>\n";
         $html .= '<option value="-1" '.($selected === self::PM_SENT_BOX ? ' selected' : '').'>'.htmlspecialchars((string) ($lang['select_sentbox'] ?? 'Sentbox'))."</option>\n";
         foreach ($pmBoxes as $row) {

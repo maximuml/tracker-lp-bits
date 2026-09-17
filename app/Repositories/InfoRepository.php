@@ -10,7 +10,6 @@ use App\Models\Language;
 use App\Models\User;
 use App\Support\Cache;
 use App\Support\Email;
-use App\Support\Globals;
 use App\Support\Pagination;
 use App\Support\Settings;
 use App\Support\Url;
@@ -18,15 +17,13 @@ use Illuminate\Support\Facades\DB;
 
 final class InfoRepository
 {
-    public function __construct(private readonly Globals $globals) {}
-
     /**
      * @return array<string, mixed>
      */
     public function aboutNexus(): array
     {
         /** @var array<string, string> $lang */
-        $lang = $this->globals->get('lang_aboutnexus') ?? [];
+        $lang = (array) trans('legacy/aboutnexus');
         $siteName = (string) Settings::get('basic.SITENAME', '');
 
         return [
@@ -144,7 +141,7 @@ final class InfoRepository
         }
 
         $accountantId = (int) Settings::get('main.ACCOUNTANTID', 1);
-        $langDonate = (array) ($this->globals->get('lang_donate') ?? []);
+        $langDonate = (array) trans('legacy/donate');
         $successMessage = ($langDonate['std_donation_success_note_one'] ?? '')
             .'<a href="sendmessage.php?receiver='.$accountantId.'"><b>'.($langDonate['std_here'] ?? 'here').'</b></a>'
             .($langDonate['std_donation_success_note_two'] ?? '');

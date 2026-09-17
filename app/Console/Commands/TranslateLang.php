@@ -41,8 +41,6 @@ class TranslateLang extends Command
     /** @var mixed */
     protected $runEnv;
 
-    const RUN_ENV_NEXUS = 'nexus';
-
     const RUN_ENV_LARAVEL = 'laravel';
 
     /** @var array<int|string, mixed> */
@@ -51,7 +49,6 @@ class TranslateLang extends Command
     /** @var array<int|string, mixed> */
     /** @var array<int|string, mixed> */
     private static array $runEnvToLangPathMaps = [
-        self::RUN_ENV_NEXUS => ROOT_PATH.'lang',
         self::RUN_ENV_LARAVEL => ROOT_PATH.'resources/lang',
     ];
 
@@ -88,14 +85,10 @@ class TranslateLang extends Command
         $source = str_replace('-', '_', $source);
         $target = str_replace('-', '_', $target);
 
-        $realSourceDir = $source;
-        if ($runEnv == self::RUN_ENV_NEXUS) {
-            $realSourceDir = $this->langToDirName($source);
-        }
-        $sourceDir = "{$langPath}/".$realSourceDir;
+        $sourceDir = "{$langPath}/".$source;
         if ($filename) {
             // 👇 指定具体文件翻译
-            $this->translateSpecificFile($filename, $realSourceDir, $target);
+            $this->translateSpecificFile($filename, $source, $target);
         } else {
             // 👇 未指定时，用户确认是否翻译所有文件
             $answer = $this->ask("你没有指定文件名，是否翻译目录 $sourceDir 下所有语言文件到 $target ？请输入 yes 确认");
@@ -134,16 +127,7 @@ class TranslateLang extends Command
     {
         $relativePath = basename($sourceFile);
         $targetFile = $this->langPath."/{$targetLang}/{$relativePath}";
-        $var = '';
-        if ($this->runEnv == self::RUN_ENV_LARAVEL) {
-            $data = require $sourceFile;
-        } else {
-            require $sourceFile;
-            $definedVars = get_defined_vars();
-            $var = str_replace(['.php', 'lang_', '-'], '', $relativePath);
-            $var = "lang_$var";
-            $data = $definedVars[$var] ?? [];
-        }
+        $data = require $sourceFile;
         $translated = $this->translateArray($data);
 
         $export = var_export($translated, true);
@@ -153,11 +137,7 @@ class TranslateLang extends Command
             if (! file_exists(dirname($targetFile))) {
                 mkdir(dirname($targetFile), 0755, true);
             }
-            if ($this->runEnv == self::RUN_ENV_LARAVEL) {
-                $contents = "<?php\n\nreturn $export;\n";
-            } else {
-                $contents = sprintf("<?php\n\n$%s = %s;\n", $var, $export);
-            }
+            $contents = "<?php\n\nreturn $export;\n";
             file_put_contents($targetFile, $contents);
             $this->info("✅ Wrote translated file: $targetFile");
         }
@@ -320,17 +300,6 @@ class TranslateLang extends Command
         }, $json);
 
         return (string) $formatted;
-    }
-
-    /** @param  mixed  $lang */
-    private function langToDirName($lang): string
-    {
-        $map = [
-            'zh_CN' => 'chs',
-            'zh_TW' => 'cht',
-        ];
-
-        return $map[$lang] ?? $lang;
     }
 
     /** @param  mixed  $runEnv */

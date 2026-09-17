@@ -9,7 +9,6 @@ use App\Repositories\ModerationRepository;
 use App\Services\LocationService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
-use App\Support\Globals;
 use App\Support\Html;
 use App\Support\Input;
 use App\Support\Network;
@@ -28,7 +27,6 @@ class AdminToolsController extends LegacyController
         private readonly ModerationRepository $moderationRepository,
         private readonly LocationService $locationService,
         private readonly CurrentUser $currentUser,
-        private readonly Globals $globals,
         private readonly ?LegacyRedisCache $legacyRedisCache,
     ) {}
 
@@ -295,7 +293,7 @@ class AdminToolsController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Permission denied');
         }
 
-        $langTestip = (array) $this->globals->get('lang_testip', []);
+        $langTestip = (array) trans('legacy/testip');
 
         if ($request->isMethod('post')) {
             $ip = (string) request()->post('ip');

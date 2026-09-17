@@ -27,7 +27,6 @@ use App\Support\CustomField;
 use App\Support\Format;
 use App\Support\Globals;
 use App\Support\Html;
-use App\Support\Input;
 use App\Support\LegacyYesNo;
 use App\Support\Locale;
 use App\Support\Logger;
@@ -123,15 +122,10 @@ class TorrentDetailsController extends Controller
         $currentUser = $this->currentUser->get() ?? $user->toLegacyArray();
         $this->currentUser->set($currentUser);
 
-        if (empty($this->globals->get('lang_functions')) || empty($this->globals->get('lang_details'))) {
-            Input::setServerValue('SCRIPT_NAME', '/details.php');
-            require base_path(Locale::scriptFilePath((string) 'functions.php', (bool) false, (string) ''));
-            $this->globals->set('lang_functions', $lang_functions ?? []);
-            require base_path(Locale::scriptFilePath((string) '', (bool) false, (string) ''));
-            $this->globals->set('lang_details', $lang_details ?? []);
-        }
+        $this->globals->set('lang_functions', (array) trans('legacy/functions'));
+        $this->globals->set('lang_details', (array) trans('legacy/details'));
 
-        $langDetails = $this->globals->get('lang_details') ?? [];
+        $langDetails = (array) trans('legacy/details');
         $headTitle = empty($request->input('cmtpage'))
             ? ($langDetails['head_details_for_torrent'] ?? '').'"'.$row['name'].'"'
             : ($langDetails['head_comments_for_torrent'] ?? '').'"'.$row['name'].'"';
@@ -189,8 +183,8 @@ class TorrentDetailsController extends Controller
      */
     private function buildDetailsViewData(int $id, array $row, array $currentUser, User $user, ?TorrentOperationLog $denyLog, bool $hasBuy, array $tagIds, array $requestFlags): array
     {
-        $langFunctions = $this->globals->get('lang_functions') ?? [];
-        $langDetails = $this->globals->get('lang_details') ?? [];
+        $langFunctions = (array) trans('legacy/functions');
+        $langDetails = (array) trans('legacy/details');
 
         $torrentRep = $this->torrentRepository;
         $searchBoxRep = $this->searchBoxSchemaBuilder;

@@ -104,8 +104,8 @@ class CustomField
     public function buildFieldForm(array $row = []): string
     {
         $lang_functions = app(Language::class)->functions();
-        $lang_fields = (array) app(Globals::class)->get('lang_fields', []);
-        $lang_catmanage = (array) app(Globals::class)->get('lang_catmanage', []);
+        $lang_fields = (array) trans('legacy/fields');
+        $lang_catmanage = (array) trans('legacy/catmanage');
         $trName = Html::tr($lang_fields['col_name'].'<font color="red">*</font>', '<input type="text" name="name" value="'.($row['name'] ?? '').'" style="width: 300px" />&nbsp;&nbsp;'.$lang_fields['col_name_help'], 1, '', true);
         $trLabel = Html::tr($lang_fields['col_label'].'<font color="red">*</font>', '<input type="text" name="label" value="'.($row['label'] ?? '').'"  style="width: 300px" />', 1, '', true);
         $trType = Html::tr($lang_fields['col_type'].'<font color="red">*</font>', $this->radio('type', $this->getTypeRadioOptions(), $row['type'] ?? null), 1, '', true);
@@ -148,7 +148,7 @@ HTML;
     public function buildFieldTable(): string
     {
         $lang_functions = app(Language::class)->functions();
-        $lang_fields = (array) app(Globals::class)->get('lang_fields', []);
+        $lang_fields = (array) trans('legacy/fields');
         $perPage = 10;
         $total = DB::table('torrents_custom_fields')->count();
         [$paginationTop, $paginationBottom, , $offset, $rpp] = Pagination::pager($perPage, $total, '?');
@@ -196,7 +196,7 @@ HEAD;
     public function save(array $data): int|string
     {
         $lang_functions = app(Language::class)->functions();
-        $lang_fields = (array) app(Globals::class)->get('lang_fields', []);
+        $lang_fields = (array) trans('legacy/fields');
         $attributes = [];
         if (empty($data['name'])) {
             throw new \InvalidArgumentException("{$lang_fields['col_name']} {$lang_functions['text_required']}");

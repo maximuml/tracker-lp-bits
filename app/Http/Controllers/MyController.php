@@ -13,7 +13,6 @@ use App\Services\BonusService;
 use App\Support\AssetAppender;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
-use App\Support\Globals;
 use App\Support\Input;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
@@ -32,14 +31,11 @@ class MyController extends Controller
 
     private CurrentUser $currentUser;
 
-    private Globals $globals;
-
-    public function __construct(BonusPageService $bonusPageService, BonusService $bonusService, CurrentUser $currentUser, Globals $globals)
+    public function __construct(BonusPageService $bonusPageService, BonusService $bonusService, CurrentUser $currentUser)
     {
         $this->bonusPageService = $bonusPageService;
         $this->bonusService = $bonusService;
         $this->currentUser = $currentUser;
-        $this->globals = $globals;
     }
 
     public function bonus(Request $request): View|Response|RedirectResponse
@@ -129,7 +125,7 @@ class MyController extends Controller
         }
 
         $q = htmlspecialchars((string) (request()->query('q') ?? ''));
-        $lang_myhr = (array) $this->globals->get('lang_myhr', []);
+        $lang_myhr = (array) trans('legacy/myhr');
 
         $baseQuery = HitAndRun::query()->where('uid', $userid)->where('status', $status);
         $rescount = (int) (clone $baseQuery)->count();

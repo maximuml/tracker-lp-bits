@@ -20,7 +20,7 @@ final class Language
      */
     public function functions(): array
     {
-        $lang = app(Globals::class)->get('lang_functions');
+        $lang = trans('legacy/functions');
 
         return is_array($lang) ? $lang : [];
     }
@@ -32,7 +32,7 @@ final class Language
      */
     public function shoutbox(): array
     {
-        $lang = app(Globals::class)->get('lang_shoutbox');
+        $lang = trans('legacy/shoutbox');
 
         return is_array($lang) ? $lang : [];
     }

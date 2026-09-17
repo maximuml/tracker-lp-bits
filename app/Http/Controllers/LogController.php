@@ -41,7 +41,7 @@ class LogController extends LegacyController
 
     public function legacy(Request $request): View|RedirectResponse|Response
     {
-        $langLog = (array) ($this->globals->get('lang_log') ?? []);
+        $langLog = (array) trans('legacy/log');
 
         if (! Permission::can(PermissionEnum::LOG)) {
             $logClass = (int) $this->globals->get('log_class', 0);

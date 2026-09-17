@@ -44,7 +44,7 @@ final class InviteControllerTest extends TestCase
         $response = $controller->invite($request);
 
         $this->assertInstanceOf(Response::class, $response);
-        $this->assertStringContainsString('Permission denied', (string) $response->getContent());
+        $this->assertStringContainsString('Permission Denied', (string) $response->getContent());
     }
 
     public function test_invite_denies_access_when_guest_views_other_user(): void
@@ -62,7 +62,7 @@ final class InviteControllerTest extends TestCase
         $response = $controller->invite($request);
 
         $this->assertInstanceOf(Response::class, $response);
-        $this->assertStringContainsString('Permission denied', (string) $response->getContent());
+        $this->assertStringContainsString('Permission Denied', (string) $response->getContent());
     }
 
     public function test_invite_denies_new_type_for_guest(): void
@@ -80,7 +80,7 @@ final class InviteControllerTest extends TestCase
         $response = $controller->invite($request);
 
         $this->assertInstanceOf(Response::class, $response);
-        $this->assertStringContainsString('Permission denied', (string) $response->getContent());
+        $this->assertStringContainsString('Permission Denied', (string) $response->getContent());
     }
 
     /**

@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http;
 
-use App\Support\Config\SiteConfig;
 use App\Support\Globals;
 use App\Support\LegacyAuth;
-use App\Support\Locale;
 
 /**
  * Load per-script legacy language files and run the parked() guard.
@@ -58,24 +56,13 @@ final class LegacyScriptContext
             self::EXTRA_LANG_FILES[$script] ?? []
         ));
 
+        // lang/en/lang_<script>.php is gone — the same arrays now live in
+        // resources/lang/en/legacy/<var>.php and resolve via the translator.
+        // The variable name was the filename with dashes stripped.
         foreach ($scriptLangFiles as $scriptLangFile) {
-            $langPath = $rootpath.Locale::scriptFilePath((string) $scriptLangFile, (bool) false, (string) '');
-            if (! is_file($langPath)) {
-                continue;
-            }
-
-            $SITENAME = $this->globals->get('SITENAME');
-            $SITEEMAIL = SiteConfig::current()->main->siteEmail();
-            $REPORTMAIL = SiteConfig::current()->main->reportEmail();
-            $BASEURL = $this->globals->get('BASEURL');
-            $before = get_defined_vars();
-            require $langPath;
-            foreach (array_diff_key(get_defined_vars(), $before) as $langKey => $langValue) {
-                if (in_array($langKey, ['before', 'path', 'langPath', 'scriptLangFiles', 'rootpath', 'scriptLangFile'], true)) {
-                    continue;
-                }
-                $this->globals->set($langKey, $langValue);
-            }
+            $suffix = str_replace('-', '', basename($scriptLangFile, '.php'));
+            $lines = trans('legacy/'.$suffix);
+            $this->globals->set('lang_'.$suffix, is_array($lines) ? $lines : []);
         }
     }
 }

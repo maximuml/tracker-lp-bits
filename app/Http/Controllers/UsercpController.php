@@ -16,7 +16,6 @@ use App\Models\User;
 use App\Policies\UsercpPolicy;
 use App\Repositories\UsercpRepository;
 use App\Services\UsercpPageService;
-use App\Support\Globals;
 use App\Support\LegacyResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -34,7 +33,6 @@ class UsercpController extends LegacyController
         UsercpRepository $repository,
         UsercpPageService $pageService,
         private readonly UsercpPolicy $policy,
-        private readonly Globals $globals,
     ) {
         $this->repository = $repository;
         $this->pageService = $pageService;
@@ -93,7 +91,7 @@ class UsercpController extends LegacyController
 
         $allowedActions = ['personal', 'tracker', 'forum', 'security'];
         if ($action !== '' && ! in_array($action, $allowedActions, true)) {
-            $langUsercp = (array) ($this->globals->get('lang_usercp') ?? []);
+            $langUsercp = (array) trans('legacy/usercp');
             LegacyResponse::abort(
                 (string) ($langUsercp['std_error'] ?? 'Error'),
                 (string) ($langUsercp['std_invalid_action'] ?? 'Invalid action.')

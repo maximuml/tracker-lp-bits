@@ -13,7 +13,6 @@ use App\Models\User;
 use App\Repositories\IndexRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
-use App\Support\Globals;
 use App\Support\Html;
 use App\Support\Html\SafeHtml;
 use App\Support\Log;
@@ -32,15 +31,12 @@ class SettingsController extends LegacyController
 
     private CurrentUser $currentUser;
 
-    private Globals $globals;
-
     private IndexRepository $indexRepository;
 
-    public function __construct(TagRepositoryInterface $tagRepository, CurrentUser $currentUser, Globals $globals, IndexRepository $indexRepository)
+    public function __construct(TagRepositoryInterface $tagRepository, CurrentUser $currentUser, IndexRepository $indexRepository)
     {
         $this->tagRepository = $tagRepository;
         $this->currentUser = $currentUser;
-        $this->globals = $globals;
         $this->indexRepository = $indexRepository;
     }
 
@@ -129,7 +125,7 @@ class SettingsController extends LegacyController
         // escaped Blade output renders them verbatim, like {!! !!} did.
         $lang = array_map(
             fn (mixed $v): SafeHtml => SafeHtml::fromTrustedHtml(is_scalar($v) ? (string) $v : ''),
-            (array) ($this->globals->get('lang_settings') ?? []),
+            (array) trans('legacy/settings'),
         );
 
         $data = [

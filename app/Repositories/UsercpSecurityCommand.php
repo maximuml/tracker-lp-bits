@@ -12,7 +12,6 @@ use App\Services\WebAuthService;
 use App\Support\AuthCookie;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
-use App\Support\Globals;
 use App\Support\Http;
 use App\Support\LegacyResponse;
 use App\Support\Mail;
@@ -34,7 +33,6 @@ use Illuminate\Validation\ValidationException;
 final class UsercpSecurityCommand
 {
     public function __construct(
-        private readonly Globals $globals,
         private readonly PasskeyGenerator $passkeyGenerator,
         private readonly SecureTokenService $secureTokenService,
         private readonly TorrentDownloadRepository $torrentDownloadRepository,
@@ -74,7 +72,7 @@ final class UsercpSecurityCommand
         if (! $user instanceof User) {
             throw new \RuntimeException('Unauthenticated');
         }
-        $lang = (array) ($this->globals->get('lang_usercp') ?? []);
+        $lang = (array) trans('legacy/usercp');
 
         $response = (string) $request->input('response', '');
         $oldPassword = (string) $request->input('oldpassword', '');
@@ -258,7 +256,7 @@ final class UsercpSecurityCommand
         $siteEmail = $config->main->siteEmail();
         $baseUrl = $config->basic->baseUrl();
         $scheme = Http::protocolPrefix(Url::isSecure());
-        $lang = (array) ($this->globals->get('lang_usercp') ?? []);
+        $lang = (array) trans('legacy/usercp');
 
         if ($disableEmailChange !== 'no' && $smtpType !== 'none' && $email !== '' && $email !== $user->email) {
             if (! Validators::isEmail($email)) {

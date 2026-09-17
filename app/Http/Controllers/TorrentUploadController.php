@@ -23,7 +23,6 @@ use App\Support\CurrentUser;
 use App\Support\CustomField;
 use App\Support\Globals;
 use App\Support\Html\SafeHtml;
-use App\Support\Input;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Path;
@@ -55,18 +54,16 @@ class TorrentUploadController extends Controller
         $currentUser = $this->currentUser->get() ?? $user->toLegacyArray();
         $this->currentUser->set($currentUser);
 
-        if (empty($this->globals->get('lang_upload')) || empty($this->globals->get('lang_edit'))) {
-            Input::setServerValue('SCRIPT_NAME', '/upload.php');
-            require base_path(Locale::scriptFilePath((string) '', (bool) false, (string) ''));
-            $this->globals->set('lang_upload', $lang_upload ?? []);
-            require base_path(Locale::scriptFilePath((string) 'edit.php', (bool) false, (string) ''));
-            $this->globals->set('lang_edit', $lang_edit ?? []);
-        }
+        // Views still read $lang_upload/$lang_edit from Globals (View composer
+        // injects every global) — keep populating them until the per-key
+        // __('legacy/x.k') conversion lands.
+        $this->globals->set('lang_upload', (array) trans('legacy/upload'));
+        $this->globals->set('lang_edit', (array) trans('legacy/edit'));
 
         /** @var array<string, string> $lang_upload */
-        $lang_upload = $this->globals->get('lang_upload') ?? [];
+        $lang_upload = (array) trans('legacy/upload');
         /** @var array<string, string> $lang_edit */
-        $lang_edit = $this->globals->get('lang_edit') ?? [];
+        $lang_edit = (array) trans('legacy/edit');
 
         if ($currentUser['parked']) {
             LegacyResponse::abort($lang_upload['std_sorry'] ?? '', $lang_upload['std_unauthorized_to_upload'] ?? '', false);

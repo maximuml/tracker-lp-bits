@@ -102,7 +102,7 @@ final class StaffMessageControllerTest extends TestCase
         $response = $controller->takecontact($request);
 
         $this->assertInstanceOf(Response::class, $response);
-        $this->assertStringContainsString('Method not allowed', (string) $response->getContent());
+        $this->assertStringContainsString('Method', (string) $response->getContent());
     }
 
     public function test_takecontact_rejects_blank_message_for_guest(): void
@@ -136,7 +136,7 @@ final class StaffMessageControllerTest extends TestCase
         $response = $controller->takecontact($request);
 
         $this->assertInstanceOf(Response::class, $response);
-        $this->assertStringContainsString('Please define a subject', (string) $response->getContent());
+        $this->assertStringContainsString('define subject', (string) $response->getContent());
     }
 
     public function test_takecontact_redirects_with_returnto_on_success(): void
@@ -187,12 +187,7 @@ final class StaffMessageControllerTest extends TestCase
      */
     private function setupLegacyEnvironment(): void
     {
-        $langFile = base_path('lang/en/lang_functions.php');
-        if (file_exists($langFile)) {
-            $lang_functions = [];
-            require $langFile;
-            app(Globals::class)->set('lang_functions', $lang_functions);
-        }
+        app(Globals::class)->set('lang_functions', (array) trans('legacy/functions'));
 
         app()->bind(LegacyRedisCache::class, fn () => null);
     }

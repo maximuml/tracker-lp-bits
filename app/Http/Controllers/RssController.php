@@ -115,7 +115,7 @@ class RssController extends LegacyController
             return redirect('/getrss.php');
         }
 
-        $lang_getrss = (array) ($this->globals->get('lang_getrss') ?? []);
+        $lang_getrss = (array) trans('legacy/getrss');
         $browsecatmode = (int) ($this->globals->get('browsecatmode') ?? 1);
         $baseUrl = (string) $this->globals->get('BASEURL', '');
 

@@ -9,7 +9,7 @@
 <form method=post action="takestaffmess.php">
 @csrf
 @if ($showReturnto)
-    <input type=hidden name=returnto value="@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($returnto))">
+    <input type=hidden name=returnto value="{{ $returnto }}">
 @endif
 <div class="nx-fgrid nx-fgrid--flat">
 @if ($sent === 1)

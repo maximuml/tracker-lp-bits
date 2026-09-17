@@ -15,12 +15,12 @@
 @safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($addiCode))
 <title>@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($title))</title>
 <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
-<link rel="search" type="application/opensearchdescription+xml" title="@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($siteName)) Torrents" href="opensearch.php" />
-<link rel="stylesheet" href="@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($fontCssUri)){{ $cssUpdateDate }}" type="text/css" />
+<link rel="search" type="application/opensearchdescription+xml" title="{{ $siteName }} Torrents" href="opensearch.php" />
+<link rel="stylesheet" href="{{ $fontCssUri }}{{ $cssUpdateDate }}" type="text/css" />
 <link rel="stylesheet" href="styles/sprites.css{{ $cssUpdateDate }}" type="text/css" />
-<link rel="stylesheet" href="@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($forumPicFolder))/forumsprites.css{{ $cssUpdateDate }}" type="text/css" />
-<link rel="stylesheet" href="@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($cssUri))theme.css{{ $cssUpdateDate }}" type="text/css" />
-<link rel="stylesheet" href="@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($cssUri))DomTT.css{{ $cssUpdateDate }}" type="text/css" />
+<link rel="stylesheet" href="{{ $forumPicFolder }}/forumsprites.css{{ $cssUpdateDate }}" type="text/css" />
+<link rel="stylesheet" href="{{ $cssUri }}theme.css{{ $cssUpdateDate }}" type="text/css" />
+<link rel="stylesheet" href="{{ $cssUri }}DomTT.css{{ $cssUpdateDate }}" type="text/css" />
 <link rel="stylesheet" href="styles/nexus.css{{ $cssUpdateDate }}" type="text/css" />
 @if($searchBoxIcons)
 @foreach($searchBoxIcons as $cssfile)
@@ -38,7 +38,7 @@
 @foreach($appendHeaders as $value)
 @safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($value))
 @endforeach
-<script type="text/javascript" nonce="@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($cspNonce))">
+<script type="text/javascript" nonce="{{ $cspNonce }}">
     window.nexusLayerOptions = {
         confirm: {btnAlign: 'c', title: 'Confirm', btn: ['OK', 'Cancel']},
         alert: {btnAlign: 'c', title: 'Info', btn: ['OK', 'Cancel']}
@@ -55,12 +55,12 @@
 			<div class="logo">{{ $siteName }}</div>
 			<div class="slogan">{{ $slogan }}</div>
 @else
-			<div class="logo_img"><img src="@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($logoMain))" alt="{{ $siteName }}" title="{{ $siteName }} - {{ $slogan }}" /></div>
+			<div class="logo_img"><img src="{{ $logoMain }}" alt="{{ $siteName }}" title="{{ $siteName }} - {{ $slogan }}" /></div>
 @endif
 		</div>
 		<div class="nx-nowrap">
 @if($enableDonation === 'yes')
-			<a href="donate.php"><img src="@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($forumPicFolder))/donate.gif" alt="Make a donation" style="margin-left: 5px; margin-top: 50px;" /></a>
+			<a href="donate.php"><img src="{{ $forumPicFolder }}/donate.gif" alt="Make a donation" style="margin-left: 5px; margin-top: 50px;" /></a>
 @endif
 		</div>
 </div>
@@ -92,7 +92,7 @@
 	            <font class="color_ratio">@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($lang['text_ratio'] ?? ''))</font> {{ $ratio }}
                 <font class='color_uploaded'>@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($lang['text_uploaded'] ?? ''))</font> @safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($uploaded))
                 <font class='color_downloaded'> @safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($lang['text_downloaded'] ?? ''))</font> @safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($downloaded))
-                <font class='color_active'>@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($lang['text_active_torrents'] ?? ''))</font> <img class="arrowup" alt="Torrents seeding" title="@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($lang['title_torrents_seeding'] ?? ''))" src="pic/trans.gif" />{{ $activeseed }}  <img class="arrowdown" alt="Torrents leeching" title="@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($lang['title_torrents_leeching'] ?? ''))" src="pic/trans.gif" />{{ $activeleech }}&nbsp;&nbsp;
+                <font class='color_active'>@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($lang['text_active_torrents'] ?? ''))</font> <img class="arrowup" alt="Torrents seeding" title="{{ $lang['title_torrents_seeding'] ?? '' }}" src="pic/trans.gif" />{{ $activeseed }}  <img class="arrowdown" alt="Torrents leeching" title="{{ $lang['title_torrents_leeching'] ?? '' }}" src="pic/trans.gif" />{{ $activeleech }}&nbsp;&nbsp;
                 <font class='color_connectable'>@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($lang['text_connectable'] ?? ''))</font>@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($connectable)) @safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($slotsDisplay))
                 @if($hitAndRunEnabled)<font class='color_bonus'>H&R: </font> @safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($hitAndRunStatus)) @endif
             </span>
@@ -103,13 +103,13 @@
                 <div class="nx-flex" style="align-items: center">
                     <div class="nx-flex-col">
                         <div>
-                            <span><input type="text" name="search" style="width: 80px;height: 12px" value="@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($requestSearchEscaped))" placeholder="@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($searchKeywordPlaceholder))"/></span>
+                            <span><input type="text" name="search" style="width: 80px;height: 12px" value="{{ $requestSearchEscaped }}" placeholder="{{ $searchKeywordPlaceholder }}"/></span>
                         </div>
                         <div>
                             <span>@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($searchBoxAreaSelect))</span>
                         </div>
                     </div>
-                    <div><input type="submit" value="@safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($globalSearchLabel))" style="width: 39px;white-space: break-spaces;padding: 0" /></div>
+                    <div><input type="submit" value="{{ $globalSearchLabel }}" style="width: 39px;white-space: break-spaces;padding: 0" /></div>
                 </div>
             </form>
         </div>

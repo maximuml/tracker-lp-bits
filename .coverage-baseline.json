@@ -21,6 +21,6 @@
     "app/Support": 34.7,
     "app/Utils": 10.75,
     "app/ValueObjects": 96.15,
-    "app/View": 27.27,
-    "app/ViewModels": 100.0
+    "app/View": 25.0,
+    "app/ViewModels": 51.5
 }

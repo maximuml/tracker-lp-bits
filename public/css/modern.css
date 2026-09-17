@@ -1,0 +1,240 @@
+/* Modern chrome for Variant-A pages (ADR 0014).
+   Loaded after nexus.css; provides the semantic layout shell and a
+   neutral design layer that does not depend on the legacy theme CSS. */
+
+:root {
+    --nxm-bg: #f4f5f7;
+    --nxm-surface: #ffffff;
+    --nxm-border: #d8dce3;
+    --nxm-text: #1d2733;
+    --nxm-text-dim: #5b6b7c;
+    --nxm-accent: #1f6fd0;
+    --nxm-accent-dark: #1758a8;
+    --nxm-header-bg: #1d2733;
+    --nxm-header-text: #f4f5f7;
+    --nxm-nav-active: #2f80ed;
+    --nxm-radius: 6px;
+    --nxm-gap: 0.75rem;
+    --nxm-content-width: 1200px;
+}
+
+body {
+    margin: 0;
+    background: var(--nxm-bg);
+    color: var(--nxm-text);
+    font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+/* ---------- Header ---------- */
+
+.nxm-header {
+    background: var(--nxm-header-bg);
+    color: var(--nxm-header-text);
+    border-bottom: 3px solid var(--nxm-nav-active);
+}
+
+.nxm-header__brand {
+    display: flex;
+    align-items: baseline;
+    gap: var(--nxm-gap);
+    max-width: var(--nxm-content-width);
+    margin: 0 auto;
+    padding: 0.9rem 1rem 0.4rem;
+}
+
+.nxm-logo {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--nxm-header-text);
+    text-decoration: none;
+    letter-spacing: 0.02em;
+}
+.nxm-logo img { max-height: 64px; display: block; }
+
+.nxm-slogan {
+    color: #9fb2c4;
+    font-size: 0.85rem;
+}
+
+/* ---------- Main navigation ---------- */
+
+.nxm-nav {
+    max-width: var(--nxm-content-width);
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.nxm-nav__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.15rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.nxm-nav__list a {
+    display: block;
+    padding: 0.55rem 0.8rem;
+    color: var(--nxm-header-text);
+    text-decoration: none;
+    border-radius: var(--nxm-radius) var(--nxm-radius) 0 0;
+    font-weight: 500;
+}
+
+.nxm-nav__list a:hover,
+.nxm-nav__list a:focus-visible {
+    background: rgba(255, 255, 255, 0.12);
+    outline: none;
+}
+
+.nxm-nav__list a.nxm-nav__link--active,
+.nxm-nav__list a[aria-current="page"] {
+    background: var(--nxm-nav-active);
+    color: #fff;
+}
+
+/* ---------- User bar ---------- */
+
+.nxm-userbar {
+    max-width: var(--nxm-content-width);
+    margin: 0 auto;
+    padding: 0.55rem 1rem;
+    background: #27344a;
+    font-size: 0.85rem;
+    color: #cdd8e4;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 1rem;
+    align-items: center;
+}
+
+.nxm-userbar a { color: #9cc3f0; text-decoration: none; }
+.nxm-userbar a:hover { text-decoration: underline; }
+
+.nxm-userbar__greeting { color: #cdd8e4; }
+
+.nxm-userbar__links {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    align-items: center;
+}
+
+.nxm-userbar__stats {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.9rem;
+    margin-left: auto;
+}
+
+.nxm-stat { display: inline-flex; gap: 0.3rem; align-items: baseline; }
+.nxm-stat__label { color: #8fa3b8; }
+.nxm-stat__value { color: #e8eef5; font-variant-numeric: tabular-nums; }
+
+.nxm-linkbtn {
+    background: none;
+    border: none;
+    padding: 0;
+    color: #9cc3f0;
+    cursor: pointer;
+    font: inherit;
+}
+.nxm-linkbtn:hover { text-decoration: underline; }
+
+/* ---------- Content ---------- */
+
+.nxm-main {
+    max-width: var(--nxm-content-width);
+    margin: 1.25rem auto;
+    padding: 0 1rem;
+}
+
+.nxm-main > h2,
+.nxm-main h2 {
+    font-size: 1.05rem;
+    border-bottom: 1px solid var(--nxm-border);
+    padding-bottom: 0.3rem;
+    color: var(--nxm-text);
+}
+
+/* Legacy content blocks re-skinned: table cells keep working inside
+   modern chrome without the theme stylesheet. */
+.rowhead {
+    font-weight: 600;
+    color: var(--nxm-text-dim);
+    padding: 0.35rem 0.6rem;
+}
+.rowfollow { padding: 0.35rem 0.6rem; }
+
+table[data-nx="data"] {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--nxm-surface);
+    border: 1px solid var(--nxm-border);
+    border-radius: var(--nxm-radius);
+}
+table[data-nx="data"] td,
+table[data-nx="data"] th {
+    border-bottom: 1px solid var(--nxm-border);
+    padding: 0.45rem 0.6rem;
+}
+table[data-nx="data"] tr:last-child td { border-bottom: none; }
+
+a { color: var(--nxm-accent); }
+a:hover { color: var(--nxm-accent-dark); }
+
+.btn,
+input[type="submit"],
+input[type="button"],
+button.btn {
+    background: var(--nxm-accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--nxm-radius);
+    padding: 0.45rem 1rem;
+    cursor: pointer;
+    font: inherit;
+}
+.btn:hover,
+input[type="submit"]:hover { background: var(--nxm-accent-dark); }
+
+input[type="reset"] {
+    background: transparent;
+    color: var(--nxm-text-dim);
+    border: 1px solid var(--nxm-border);
+}
+
+/* ---------- Footer ---------- */
+
+.nxm-footer {
+    max-width: var(--nxm-content-width);
+    margin: 2rem auto 1rem;
+    padding: 1rem;
+    border-top: 1px solid var(--nxm-border);
+    color: var(--nxm-text-dim);
+    font-size: 0.85rem;
+    text-align: center;
+}
+.nxm-footer__sep { margin: 0 0.5rem; }
+
+/* ---------- Accessibility ---------- */
+
+:focus-visible {
+    outline: 2px solid var(--nxm-accent);
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        transition: none !important;
+        animation: none !important;
+    }
+}
+
+@media (max-width: 720px) {
+    .nxm-userbar { flex-direction: column; align-items: flex-start; }
+    .nxm-userbar__stats { margin-left: 0; }
+}

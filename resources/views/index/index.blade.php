@@ -1,4 +1,4 @@
-@extends('layouts.legacy')
+@extends('layouts.modern')
 
 @section('title', $title ?? $lang_index['head_home'] ?? 'Home')
 

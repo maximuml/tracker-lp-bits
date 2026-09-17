@@ -368,6 +368,43 @@ Decision → Consequences). Add new ADRs here as numbered subsections.
   ~200-line middleware with edge cases remains, but its behaviour is
   pinned by tests.
 
+### ADR 0014: Variant A — modernize key pages, freeze the rest (Accepted, step 2.1)
+
+- **Context:** The old W7 plan preserved legacy HTML byte-for-byte:
+  ~157 exact-markup assertions in ~28 test files pin even documented
+  rendering quirks (`Frame.php` trailing-space bugs), so the markup can
+  never actually change — while PRs kept paying to *move* that HTML
+  between layers. The project carried both costs and got neither
+  benefit.
+- **Decision:** Split the page surface in two.
+  - **Pages A (modernize for real):** `index`, `torrents`, `details`,
+    `forums`, `usercp`, `login`, `signup` — the ~10 pages that carry
+    ~90% of traffic. They migrate to `layouts/modern` (semantic HTML5
+    chrome: `role=banner/main/contentinfo`, skip link, `aria-current`)
+    + `public/css/modern.css`. Page bodies stop using `Frame::`,
+    `TorrentTable::` and `SearchBox::`; exact-HTML assertions for these
+    pages are replaced by structural ones (`assertSee`, `data-*`
+    markers, landmark roles). Intentional visual differences from the
+    legacy layout are accepted — that is the goal, not a regression.
+    `login`/`signup` already render through the standalone modern
+    `layouts/auth` shell and stay there.
+  - **Pages B (freeze):** all remaining legacy pages (`staff*`,
+    `mod*`, `faq*`, reports, logs, ~110 total) keep the legacy chrome
+    via `PageLayout`/`Frame::`; their markup is only touched when a
+    functional change requires it. Their ratchet baselines are not
+    lowered further — no PRs spent on moving their HTML between
+    layers. Long-term, some close via redirects to Filament (the
+    proven path — 29 of 152 legacy routes already do this).
+- **Consequences:** `SiteChromeViewModel` + `SiteChromeComposer`
+  supply chrome data without `app()` service location; trusted markup
+  is wrapped in `SafeHtml` on the PHP side so the
+  `fromTrustedHtml` baseline stays flat. `index` is the first migrated
+  page (`resources/views/index/index.blade.php`); `torrents`,
+  `details`, `forums`, `usercp` follow as separate PRs, each lowering
+  the relevant `LegacyViewSurfaceTest` baselines. Cost: two chrome
+  systems coexist until Pages A are done, and a11y/E2E playbooks need
+  updated expectations for the modern markup.
+
 ## Testing
 
 - **Unit tests:** `tests/Unit/` — pure unit only, no DB/Redis/MeiliSearch (enforced by `UnitSuiteIsolationTest` and the `unit-tests-fast` CI job, which runs the suite with no service containers)

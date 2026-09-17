@@ -60,7 +60,7 @@
             <div class="nx-fhead">{{ __('legacy/login.rowhead_two_step_code')}}</div>
             <div class="nx-fcell"><input type="text" name="two_step_code" aria-label="{{ __('legacy/login.rowhead_two_step_code')}}" inputmode="numeric" pattern="[0-9]*" placeholder="{{ __('legacy/login.two_step_code_tooltip')}}" /></div>
             @if ($captchaEnabled && $captchaMarkup !== '')
-                @safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($captchaMarkup))
+                {{ $captchaMarkup }}
             @endif
             <div class="toolbox nx-ffull">
                 {{ __('legacy/login.text_auto_logout')}}
@@ -72,7 +72,7 @@
             </div>
         </div>
 
-        @safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($passkeyLoginHtml))
+        {{ $passkeyLoginHtml }}
     </form>
 
     @if ($isComplainEnabled)

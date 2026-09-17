@@ -14,6 +14,7 @@ use App\Repositories\IndexRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Html;
+use App\Support\Html\SafeHtml;
 use App\Support\Log;
 use App\Support\Settings;
 use App\Support\UserDisplay;
@@ -174,7 +175,7 @@ class SettingsController extends LegacyController
                 ];
                 $data['promotionSelects'] = [];
                 foreach ($promotionDefs as $name => [$def, $hide]) {
-                    $data['promotionSelects'][$name] = Html::promotionSelection((int) ($data['config'][$name] ?? $def), $hide);
+                    $data['promotionSelects'][$name] = SafeHtml::fromTrustedHtml(Html::promotionSelection((int) ($data['config'][$name] ?? $def), $hide));
                 }
             }
 

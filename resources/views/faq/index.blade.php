@@ -41,7 +41,7 @@
                 @foreach ($faqCategories[$id]['items'] as $id2 => $tempItem)
                     @if ($faqCategories[$id]['items'][$id2]['flag'] != "0")
                         <br /><span id="id{{ $faqCategories[$id]['items'][$id2]['link_id'] }}"><b>{{ $faqCategories[$id]['items'][$id2]['question'] }}</b></span><br />
-                        <br />@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($faqCategories[$id]['items'][$id2]['answerHtml'] ?? ''))<br /><br />
+                        <br />{{ $faqCategories[$id]['items'][$id2]['answerHtml'] ?? '' }}<br /><br />
                     @endif
                 @endforeach
             @endif

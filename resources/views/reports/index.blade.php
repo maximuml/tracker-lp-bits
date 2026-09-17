@@ -17,12 +17,12 @@
 </tr>
 @foreach ($rows as $row)
     <tr>
-        <td class="rowfollow"><nobr>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['added_formatted']))</nobr></td>
-        <td class="rowfollow">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['reporterHtml']))</td>
-        <td class="rowfollow">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['reporting']))</td>
+        <td class="rowfollow"><nobr>{{ $row['added_formatted'] }}</nobr></td>
+        <td class="rowfollow">{{ $row['reporterHtml'] }}</td>
+        <td class="rowfollow">{{ $row['reporting'] }}</td>
         <td class="rowfollow"><nobr>{{ $row['type_label'] }}</nobr></td>
         <td class="rowfollow">{{ $row['reason'] }}</td>
-        <td class="rowfollow"><nobr>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['dealtwith_html']))</nobr></td>
+        <td class="rowfollow"><nobr>{{ $row['dealtwith_html'] }}</nobr></td>
         <td class="rowfollow"><input type="checkbox" name="delreport[]" value="{{ (int) $row['id'] }}" /></td>
     </tr>
 @endforeach

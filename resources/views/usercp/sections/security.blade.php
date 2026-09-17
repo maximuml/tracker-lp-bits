@@ -21,14 +21,14 @@
 <div class="nx-fhead nx-nowrap">{{ __('legacy/usercp.row_security_check')}}</div><div class="nx-fcell"><input type=password class=oldpassword style="width: 200px"><br /><font class=small>{{ __('legacy/usercp.text_security_check_note')}}</font></div>
 <input type=hidden name=username value="{{ (string) ($curUser['username'] ?? '') }}">
 <input type=hidden name=response>
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($security['confirmHtml'] ?? ''))
+{{ $security['confirmHtml'] ?? '' }}
 <div class="nx-fhead">{{ __('legacy/usercp.row_save_settings')}}</div><div class="nx-fcell"><input type=button value="{{ __('legacy/usercp.submit_save_settings')}}"></div>
 </div></form>
 @else
 @if ($type === 'saved')
 <div class="nx-ffull nx-center"><font color=red><b>{{ $security['savedMessage'] }}</b></font></div>
 @endif
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($security['rowsHtml'] ?? ''))
+{{ $security['rowsHtml'] ?? '' }}
 <input type="hidden" name="chpassword" />
 <div class="nx-fhead">{{ __('legacy/usercp.row_save_settings')}}</div><div class="nx-fcell"><input type=button value="{{ __('legacy/usercp.submit_save_settings')}}"></div>
 </div></form>

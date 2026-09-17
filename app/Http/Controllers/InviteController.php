@@ -120,9 +120,9 @@ class InviteController extends LegacyController
                 'sendBtnText' => $sendBtnText,
                 'disabled' => $disabled,
                 'temporaryInvites' => $temporaryInvites,
-                'inviteSelectOptions' => $inviteSelectOptions,
+                'inviteSelectOptions' => SafeHtml::fromTrustedHtml($inviteSelectOptions),
                 'invitation_body' => $invitation_body,
-                'preUsernameTr' => $preUsernameTr,
+                'preUsernameTr' => SafeHtml::fromTrustedHtml($preUsernameTr),
                 '_s' => $_s,
             ]);
         } else {
@@ -200,16 +200,16 @@ class InviteController extends LegacyController
         }
 
         foreach ($inviteRows as &$row) {
-            $row['usernameHtml'] = UserDisplay::username((int) $row['id']);
+            $row['usernameHtml'] = SafeHtml::fromTrustedHtml(UserDisplay::username((int) $row['id']));
             if ((float) $row['downloaded'] > 0) {
                 $ratio = number_format($row['uploaded'] / $row['downloaded'], 3);
-                $row['ratioHtml'] = '<font color='.Ratio::color($ratio).">$ratio</font>";
+                $row['ratioHtml'] = SafeHtml::fromTrustedHtml('<font color='.Ratio::color($ratio).">$ratio</font>");
             } else {
-                $row['ratioHtml'] = $row['uploaded'] > 0 ? 'Inf.' : '---';
+                $row['ratioHtml'] = SafeHtml::fromTrustedHtml($row['uploaded'] > 0 ? 'Inf.' : '---');
             }
-            $row['statusHtml'] = $row['status'] === 'confirmed'
+            $row['statusHtml'] = SafeHtml::fromTrustedHtml($row['status'] === 'confirmed'
                 ? '<a href=userdetails.php?id='.(int) $row['id'].'><font color=#1f7309>'.e(__('legacy/invite.text_confirmed')).'</font></a>'
-                : '<a href=checkuser.php?id='.(int) $row['id'].'><font color=#ca0226>'.e(__('legacy/invite.text_pending')).'</font></a>';
+                : '<a href=checkuser.php?id='.(int) $row['id'].'><font color=#ca0226>'.e(__('legacy/invite.text_pending')).'</font></a>');
         }
         unset($row);
 
@@ -229,8 +229,8 @@ JS;
             'inviteeRows' => $inviteRows,
             'inviteePagertop' => $pagertop,
             'inviteePagerbottom' => $pagerbottom,
-            'inviteeEnabledOptions' => $enabledOptions,
-            'inviteeStatusOptions' => $statusOptions,
+            'inviteeEnabledOptions' => SafeHtml::fromTrustedHtml($enabledOptions),
+            'inviteeStatusOptions' => SafeHtml::fromTrustedHtml($statusOptions),
             'haremAdditionFactor' => $haremAdditionFactor,
             'pendingCount' => $pendingCount,
             'canConfirm' => $canConfirm,

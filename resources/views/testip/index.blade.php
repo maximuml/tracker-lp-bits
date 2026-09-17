@@ -5,9 +5,9 @@
 @section('content')
 <h1>{{ ('Test IP address')}}</h1>
 @if (! empty($hasResult))
-<div class="nx-embedded">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($message ?? ''))</div>
+<div class="nx-embedded">{{ $message ?? '' }}</div>
     @if (($banstable ?? '') !== '')
-<p>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($banstable))</p>
+<p>{{ $banstable }}</p>
     @endif
 @endif
 <form method=post action=testip.php>

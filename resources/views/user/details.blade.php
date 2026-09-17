@@ -3,9 +3,9 @@
 @section('title', (__('legacy/userdetails.head_details_for')).$user['username'])
 
 @section('content')
-<h1 style="margin:0px">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($usernameHtml))@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($countryHtml))</h1>
+<h1 style="margin:0px">{{ $usernameHtml }}{{ $countryHtml }}</h1>
 @if ($medalImagesHtml !== '')
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($medalImagesHtml))
+{{ $medalImagesHtml }}
 @endif
 @if (! \App\Support\LegacyYesNo::isYes($user['enabled'] ?? null))
 <p><b>{{ __('legacy/userdetails.text_account_disabled_note') ?? '' }}</b></p>
@@ -38,7 +38,7 @@
 @endif
 @endif
 @if ((int) ($user['invited_by'] ?? 0) > 0)
-<x-settings-row-small :label="__('legacy/userdetails.row_invited_by')">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($invitedByHtml))</x-settings-row-small>
+<x-settings-row-small :label="__('legacy/userdetails.row_invited_by')">{{ $invitedByHtml }}</x-settings-row-small>
 @endif
 <x-settings-row-small :label="__('legacy/userdetails.row_join_date')">@if (($user['added'] ?? null) === null || $user['added'] === '0000-00-00 00:00:00'){{ __('legacy/userdetails.text_not_available') ?? '' }}@else{{ $user['added'] }} ({{ \App\Support\Time::format($user['added'], true, false, true) }}, {{ $joinWeeks }})@endif</x-settings-row-small>
 <x-settings-row-small :label="__('legacy/userdetails.row_last_seen')">@if (($user['last_access'] ?? null) === null || $user['last_access'] === '0000-00-00 00:00:00'){{ __('legacy/userdetails.text_not_available') ?? '' }}@else{{ $user['last_access'] }} ({{ \App\Support\Time::format($user['last_access'], true, false, true) }})@endif</x-settings-row-small>
@@ -55,7 +55,7 @@
 <x-settings-row-small :label="__('legacy/userdetails.row_ip_address')">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Strings::hidden((string) $user['ip'].$locationInfoHtml)))</x-settings-row-small>
 @endif
 @if ($clientSelectHtml !== '')
-<x-settings-row-small :label="__('legacy/userdetails.row_bt_client')">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($clientSelectHtml))</x-settings-row-small>
+<x-settings-row-small :label="__('legacy/userdetails.row_bt_client')">{{ $clientSelectHtml }}</x-settings-row-small>
 @endif
 <x-settings-row-small :label="__('legacy/userdetails.row_transfer')"><table data-nx="data" border="0" cellspacing="0" cellpadding="0">@if ($shareRatio !== null)<tr><td class="embedded"><strong>{{ __('legacy/userdetails.row_share_ratio') ?? '' }}</strong>:  <font color="{{ \App\Support\Ratio::color($shareRatio) }}">{{ number_format($shareRatio, 3) }}</font>（<strong>{{ __('legacy/userdetails.row_real_share_ratio') ?? '' }}</strong>：{{ number_format($trueRatio, 3) }}）</td><td class="embedded">&nbsp;&nbsp;@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Ratio::image($shareRatio)))</td></tr>@endif<tr><td class="embedded"><strong>{{ __('legacy/userdetails.row_uploaded') ?? '' }}</strong>:  {{ \App\Support\Format::size((float) $user['uploaded']) }}</td><td class="embedded">&nbsp;&nbsp;<strong>{{ __('legacy/userdetails.row_downloaded') ?? '' }}</strong>:  {{ \App\Support\Format::size((float) $user['downloaded']) }}</td></tr><tr><td class="embedded"><strong>{{ __('legacy/userdetails.row_real_uploaded') ?? '' }}</strong>:  {{ \App\Support\Format::size($trueUpload) }}</td><td class="embedded">&nbsp;&nbsp;<strong>{{ __('legacy/userdetails.row_real_downloaded') ?? '' }}</strong>:  {{ \App\Support\Format::size($trueDownload) }}</td><td class="embedded text-muted">&nbsp;&nbsp;{{ __('legacy/userdetails.row_real_ps') ?? '' }}</td></tr></table></x-settings-row-small>
 <x-settings-row-small :label="__('legacy/userdetails.row_sltime')"><table data-nx="data" border="0" cellspacing="0" cellpadding="0">@if ($seedLeechRatio !== null)<tr><td class="embedded"><strong>{{ __('legacy/userdetails.text_seeding_leeching_time_ratio') ?? '' }}</strong>:  <font color="{{ \App\Support\Ratio::color($seedLeechRatio) }}">{{ number_format($seedLeechRatio, 3) }}</font></td><td class="embedded">&nbsp;&nbsp;@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Ratio::image($seedLeechRatio)))</td></tr>@endif<tr><td class="embedded"><strong>{{ __('legacy/userdetails.text_seeding_time') ?? '' }}</strong>:  {{ \App\Support\Format::prettyTimeWithLocale((int) $user['seedtime']) }}</td><td class="embedded">&nbsp;&nbsp;<strong>{{ __('legacy/userdetails.text_leeching_time') ?? '' }}</strong>:  {{ \App\Support\Format::prettyTimeWithLocale((int) $user['leechtime']) }}</td><td class="embedded text-muted">&nbsp;&nbsp;({{ \App\Support\Locale::trans('label.updated_at', [], null) }}: {{ $user['seed_time_updated_at'] }})</td></tr></table></x-settings-row-small>
@@ -68,19 +68,19 @@
 @endif
 <x-settings-row-small :label="__('legacy/userdetails.row_class')"><img alt="{{ \App\Support\UserClass::name($user['class'], false, false, true) }}" title="{{ \App\Support\UserClass::name($user['class'], false, false, true) }}" src="{{ \App\Support\UserClass::imagePath($user['class']) }}" />@if (($user['title'] ?? '') !== '')&nbsp;{{ trim($user['title']) }}@endif @if ((int) $user['class'] === UC_VIP && ! empty($user['vip_until']) && strtotime((string) $user['vip_until'])){{ __('legacy/userdetails.row_vip_until') ?? '' }}: {{ $user['vip_until'] }}@endif</x-settings-row-small>
 @if ($userPropsHtml !== '')
-<x-settings-row-small :label="__('legacy/userdetails.row_user_props')">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($userPropsHtml))</x-settings-row-small>
+<x-settings-row-small :label="__('legacy/userdetails.row_user_props')">{{ $userPropsHtml }}</x-settings-row-small>
 @endif
 <x-settings-row-small :label="__('legacy/userdetails.row_torrent_comment')">@if ($torrentcomments && ($isOwner || $canViewHistory))<a href="userhistory.php?action=viewcomments&amp;id={{ $id }}" title="{{ __('legacy/userdetails.link_view_comments') ?? '' }}">{{ $torrentcomments }}</a>@else{{ $torrentcomments }}@endif</x-settings-row-small>
 <x-settings-row-small :label="__('legacy/userdetails.row_forum_posts')">@if ($forumposts && ($isOwner || $canViewHistory))<a href="userhistory.php?action=viewposts&amp;id={{ $id }}" title="{{ __('legacy/userdetails.link_view_posts') ?? '' }}">{{ $forumposts }}</a>@else{{ $forumposts }}@endif</x-settings-row-small>
 @if ($isOwner || $canViewHistory)
 @if ($hrStatusHtml !== '')
-<x-settings-row-small label="H&R"><a href="myhr.php?userid={{ $user['id'] }}" target="_blank">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($hrStatusHtml))</a></x-settings-row-small>
+<x-settings-row-small label="H&R"><a href="myhr.php?userid={{ $user['id'] }}" target="_blank">{{ $hrStatusHtml }}</a></x-settings-row-small>
 @endif
 <x-settings-row-small :label="__('legacy/userdetails.row_karma_points')">{{ number_format((float) $user['seedbonus'], 1) }}&nbsp;&nbsp;<a href="bonus-log.php?uid={{ $user['id'] }}" target="_blank" class="altlink">[{{ \App\Support\Locale::trans('bonus-log.view_detail', [], null) }}]</a></x-settings-row-small>
 <x-settings-row-small :label="__('legacy/functions.text_seed_points')">{{ number_format((float) $user['seed_points'], 1) }}&nbsp;&nbsp;<span class='text-muted'>({{ \App\Support\Locale::trans('label.updated_at', [], null) }}: {{ $user['seed_points_updated_at'] }})</span></x-settings-row-small>
 @endif
 @if ($canManageBasic && (int) $user['class'] < $currentClass && $bonusTableHtml !== '')
-<x-settings-row-small :label="__('legacy/userdetails.text_bonus_table')">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($bonusTableHtml))</x-settings-row-small>
+<x-settings-row-small :label="__('legacy/userdetails.text_bonus_table')">{{ $bonusTableHtml }}</x-settings-row-small>
 @endif
 @if (! empty($user['ip']) && ($canViewTorrentHistory || $isOwner))
 <x-user.details-toggle :label="__('legacy/userdetails.row_uploaded_torrents')" type="uploaded" block="ka" imgId="pica" klappe="a" :userId="$user['id']" :title="__('legacy/userdetails.title_show_or_hide')" :linkText="__('legacy/userdetails.text_show_or_hide')" />
@@ -117,10 +117,10 @@
 <x-settings-row :label="__('legacy/userdetails.row_donoruntil')"><input type="text" name="donoruntil" value="{{ $user['donoruntil'] }}" /> {{ __('legacy/userdetails.text_donoruntil_note') ?? '' }}</x-settings-row>
 @endif
 @if ($canChangeClass)
-<x-settings-row :label="__('legacy/userdetails.row_class')">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($classSelectHtml))@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($migratedHelp))</x-settings-row>
+<x-settings-row :label="__('legacy/userdetails.row_class')">{{ $classSelectHtml }}{{ $migratedHelp }}</x-settings-row>
 @endif
-<x-settings-row :label="__('legacy/userdetails.row_vip_by_bonus')"><x-user.radio-yesno name="vip_added" :yes="\App\Support\LegacyYesNo::isYes($user['vip_added'] ?? null)" :no="\App\Support\LegacyYesNo::isNo($user['vip_added'] ?? null)" :disabled="true" :yesLabel="__('legacy/userdetails.radio_yes')" :noLabel="__('legacy/userdetails.radio_no')" />@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($migratedHelp))</x-settings-row>
-<x-settings-row :label="__('legacy/userdetails.row_vip_until')"><input type="text" name="vip_until" value="{{ $user['vip_until'] }}" disabled='disabled' /> {{ __('legacy/userdetails.text_vip_until_note') ?? '' }}@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($migratedHelp))</x-settings-row>
+<x-settings-row :label="__('legacy/userdetails.row_vip_by_bonus')"><x-user.radio-yesno name="vip_added" :yes="\App\Support\LegacyYesNo::isYes($user['vip_added'] ?? null)" :no="\App\Support\LegacyYesNo::isNo($user['vip_added'] ?? null)" :disabled="true" :yesLabel="__('legacy/userdetails.radio_yes')" :noLabel="__('legacy/userdetails.radio_no')" />{{ $migratedHelp }}</x-settings-row>
+<x-settings-row :label="__('legacy/userdetails.row_vip_until')"><input type="text" name="vip_until" value="{{ $user['vip_until'] }}" disabled='disabled' /> {{ __('legacy/userdetails.text_vip_until_note') ?? '' }}{{ $migratedHelp }}</x-settings-row>
 <x-settings-row :label="__('legacy/userdetails.row_staff_duties')"><textarea cols="60" rows="6" name="staffduties">{{ $user['stafffor'] }}</textarea></x-settings-row>
 <x-settings-row :label="__('legacy/userdetails.row_support_language')"><input type="text" name="supportlang" value="{{ $user['supportlang'] }}" /></x-settings-row>
 <x-settings-row :label="__('legacy/userdetails.row_support')"><x-user.radio-yesno name="support" :yes="\App\Support\LegacyYesNo::isYes($user['support'] ?? null)" :no="\App\Support\LegacyYesNo::isNo($user['support'] ?? null)" :yesLabel="__('legacy/userdetails.radio_yes')" :noLabel="__('legacy/userdetails.radio_no')" /></x-settings-row>
@@ -157,7 +157,7 @@
 @if (($user['warnedby'] ?? '') === 'System')
 <tr><td class="rowfollow">{{ __('legacy/userdetails.text_last_warning') ?? '' }}</td><td align="left" class="rowfollow"> {{ $user['lastwarned'] }} .({{ __('legacy/userdetails.text_until') ?? '' }}{{ $elapsedLastWarn }})   <br />[{{ __('legacy/userdetails.text_by_system') ?? '' }}]</td></tr>
 @endif
-<tr><td class="rowfollow">{{ __('legacy/userdetails.text_last_warning') ?? '' }}</td><td align="left" class="rowfollow"> {{ $user['lastwarned'] }} ({{ $elapsedLastWarn }}{{ __('legacy/userdetails.text_ago') ?? '' }})   @if (($user['warnedby'] ?? '') !== 'System')@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($warnedByHtml))@else<br />[{{ __('legacy/userdetails.text_by_system') ?? '' }}]@endif</td></tr>
+<tr><td class="rowfollow">{{ __('legacy/userdetails.text_last_warning') ?? '' }}</td><td align="left" class="rowfollow"> {{ $user['lastwarned'] }} ({{ $elapsedLastWarn }}{{ __('legacy/userdetails.text_ago') ?? '' }})   @if (($user['warnedby'] ?? '') !== 'System'){{ $warnedByHtml }}@else<br />[{{ __('legacy/userdetails.text_by_system') ?? '' }}]@endif</td></tr>
 @endif
 <tr><td class="rowfollow">{{ __('legacy/userdetails.row_auto_warning') ?? '' }}<br /><i>({{ __('legacy/userdetails.text_low_ratio') ?? '' }})</i></td>
 @if ($leechwarn)
@@ -166,7 +166,7 @@
 <td class="rowfollow">{{ __('legacy/userdetails.text_not_warned') ?? '' }}</td></tr>
 @endif
 </table></td></tr>
-<x-settings-row :label="__('legacy/userdetails.row_enabled')">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($migratedHelp))</x-settings-row>
+<x-settings-row :label="__('legacy/userdetails.row_enabled')">{{ $migratedHelp }}</x-settings-row>
 <x-settings-row :label="__('legacy/userdetails.row_forum_post_possible')"><x-user.radio-yesno name="forumpost" :yes="\App\Support\LegacyYesNo::isYes($user['forumpost'] ?? null)" :no="\App\Support\LegacyYesNo::isNo($user['forumpost'] ?? null)" :yesLabel="__('legacy/userdetails.radio_yes')" :noLabel="__('legacy/userdetails.radio_no')" /></x-settings-row>
 <x-settings-row :label="__('legacy/userdetails.row_upload_possible')"><x-user.radio-yesno name="uploadpos" :yes="\App\Support\LegacyYesNo::isYes($user['uploadpos'] ?? null)" :no="\App\Support\LegacyYesNo::isNo($user['uploadpos'] ?? null)" :yesLabel="__('legacy/userdetails.radio_yes')" :noLabel="__('legacy/userdetails.radio_no')" /></x-settings-row>
 <x-settings-row :label="__('legacy/userdetails.row_download_possible')"><x-user.radio-yesno name="downloadpos" :yes="\App\Support\LegacyYesNo::isYes($user['downloadpos'] ?? null)" :no="\App\Support\LegacyYesNo::isNo($user['downloadpos'] ?? null)" :yesLabel="__('legacy/userdetails.radio_yes')" :noLabel="__('legacy/userdetails.radio_no')" /></x-settings-row>
@@ -174,13 +174,13 @@
 <x-settings-row :label="__('legacy/userdetails.row_change_username')"><input type="text" size="25" name="username" value="{{ $user['username'] }}" /></x-settings-row>
 <x-settings-row :label="__('legacy/userdetails.row_change_email')"><input type="text" size="80" name="email" value="{{ $user['email'] }}" /></x-settings-row>
 @endif
-<x-settings-row :label="__('legacy/userdetails.row_change_password')"><input disabled type="password" name="chpassword" size="50" />@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($migratedHelp))</x-settings-row>
-<x-settings-row :label="__('legacy/userdetails.row_repeat_password')"><input disabled type="password" name="passagain" size="50" />@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($migratedHelp))</x-settings-row>
+<x-settings-row :label="__('legacy/userdetails.row_change_password')"><input disabled type="password" name="chpassword" size="50" />{{ $migratedHelp }}</x-settings-row>
+<x-settings-row :label="__('legacy/userdetails.row_repeat_password')"><input disabled type="password" name="passagain" size="50" />{{ $migratedHelp }}</x-settings-row>
 @if ($canManageConfidential)
-<x-settings-row :label="__('legacy/userdetails.row_amount_uploaded')"><input disabled type="text" size="60" name="uploaded" value="{{ $user['uploaded'] }}" /><input type="hidden" name="ori_uploaded" value="{{ $user['uploaded'] }}" />@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($migratedHelp))</x-settings-row>
-<x-settings-row :label="__('legacy/userdetails.row_amount_downloaded')"><input disabled type="text" size="60" name="downloaded" value="{{ $user['downloaded'] }}" /><input type="hidden" name="ori_downloaded" value="{{ $user['downloaded'] }}" />@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($migratedHelp))</x-settings-row>
-<x-settings-row :label="__('legacy/userdetails.row_seeding_karma')"><input disabled type="text" size="60" name="bonus" value="{{ number_format((float) $user['seedbonus'], 1) }}" /><input type="hidden" name="ori_bonus" value="{{ number_format((float) $user['seedbonus'], 1) }}" />@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($migratedHelp))</x-settings-row>
-<x-settings-row :label="__('legacy/userdetails.row_invites')"><input disabled type="text" size="60" name="invites" value="{{ $user['invites'] }}" />@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($migratedHelp))</x-settings-row>
+<x-settings-row :label="__('legacy/userdetails.row_amount_uploaded')"><input disabled type="text" size="60" name="uploaded" value="{{ $user['uploaded'] }}" /><input type="hidden" name="ori_uploaded" value="{{ $user['uploaded'] }}" />{{ $migratedHelp }}</x-settings-row>
+<x-settings-row :label="__('legacy/userdetails.row_amount_downloaded')"><input disabled type="text" size="60" name="downloaded" value="{{ $user['downloaded'] }}" /><input type="hidden" name="ori_downloaded" value="{{ $user['downloaded'] }}" />{{ $migratedHelp }}</x-settings-row>
+<x-settings-row :label="__('legacy/userdetails.row_seeding_karma')"><input disabled type="text" size="60" name="bonus" value="{{ number_format((float) $user['seedbonus'], 1) }}" /><input type="hidden" name="ori_bonus" value="{{ number_format((float) $user['seedbonus'], 1) }}" />{{ $migratedHelp }}</x-settings-row>
+<x-settings-row :label="__('legacy/userdetails.row_invites')"><input disabled type="text" size="60" name="invites" value="{{ $user['invites'] }}" />{{ $migratedHelp }}</x-settings-row>
 @endif
 <x-settings-row :label="__('legacy/userdetails.row_passkey')"><input name="resetkey" value="yes" type="checkbox" />{{ __('legacy/userdetails.checkbox_reset_passkey') ?? '' }}</x-settings-row>
 <tr><td class="toolbox" colspan="2" align="center"><input type="submit" class="class="btn" value="{{ __('legacy/userdetails.submit_okay') ?? '' }}"" /></td></tr>

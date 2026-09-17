@@ -16,6 +16,7 @@ use App\Support\CoverThumb;
 use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Globals;
+use App\Support\Html\SafeHtml;
 use App\Support\Shoutbox;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
@@ -171,7 +172,7 @@ JS;
             'historyLabel' => __('legacy/index.text_shoutbox_history'),
             'canManage' => $canManage,
             'clearLabel' => __('legacy/index.clear_shout_box'),
-            'toolbar' => Shoutbox::toolbar('shbox', 'shbox_text'),
+            'toolbar' => SafeHtml::fromTrustedHtml(Shoutbox::toolbar('shbox', 'shbox_text')),
             'messageLabel' => __('legacy/index.text_message'),
             'submitLabel' => __('legacy/index.sumbit_shout'),
             'clearButtonLabel' => __('legacy/index.submit_clear'),
@@ -237,7 +238,7 @@ JS;
                         'detailsUrl' => $detailsUrl,
                         'thumbUrl' => $thumbUrl,
                         'typeLabel' => $typeLabel,
-                        'ownerHtml' => $ownerHtml,
+                        'ownerHtml' => SafeHtml::fromTrustedHtml($ownerHtml),
                         'name' => (string) $torrent->name,
                         'nameShort' => mb_substr((string) $torrent->name, 0, 60),
                         'seeders' => (int) $torrent->seeders,
@@ -258,7 +259,7 @@ JS;
             }
         }
 
-        return ['show' => true, 'html' => $html];
+        return ['show' => true, 'html' => SafeHtml::fromTrustedHtml($html)];
     }
 
     /**
@@ -304,7 +305,7 @@ JS;
             $rows = [];
             foreach ($uploaders as $ranking => $uploader) {
                 $rows[] = [
-                    'username' => UserDisplay::username($uploader->id),
+                    'username' => SafeHtml::fromTrustedHtml(UserDisplay::username($uploader->id)),
                     'count' => $uploader->count,
                     'rank' => $ranking + 1,
                 ];

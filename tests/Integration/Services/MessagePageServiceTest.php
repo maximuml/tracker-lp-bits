@@ -204,7 +204,7 @@ final class MessagePageServiceTest extends TestCase
         $data = $this->callBuild($request);
 
         $this->assertIsArray($data);
-        $this->assertSame('viewmailbox', $data['action']);
+        $this->assertSame('viewmailbox', (string) ($data['action']));
         $this->assertArrayHasKey('viewmailbox', $data);
         $this->assertSame($userId, $data['userId']);
     }
@@ -222,8 +222,8 @@ final class MessagePageServiceTest extends TestCase
         $this->assertArrayHasKey('viewmailbox', $data);
         $mailbox = $data['viewmailbox'];
         $this->assertSame(1, $mailbox['mailbox']);
-        $this->assertSame('Inbox', $mailbox['mailboxName']);
-        $this->assertSame('Sender', $mailbox['senderReceiver']);
+        $this->assertSame('Inbox', (string) ($mailbox['mailboxName']));
+        $this->assertSame('Sender', (string) ($mailbox['senderReceiver']));
         $this->assertFalse($mailbox['isSentBox']);
         $this->assertIsArray($mailbox['rows']);
         $this->assertFalse($mailbox['hasMessages']);
@@ -241,8 +241,8 @@ final class MessagePageServiceTest extends TestCase
 
         $mailbox = $data['viewmailbox'];
         $this->assertSame(-1, $mailbox['mailbox']);
-        $this->assertSame('Sentbox', $mailbox['mailboxName']);
-        $this->assertSame('Receiver', $mailbox['senderReceiver']);
+        $this->assertSame('Sentbox', (string) ($mailbox['mailboxName']));
+        $this->assertSame('Receiver', (string) ($mailbox['senderReceiver']));
         $this->assertTrue($mailbox['isSentBox']);
     }
 
@@ -268,7 +268,7 @@ final class MessagePageServiceTest extends TestCase
         $mailbox = $data['viewmailbox'];
         $this->assertTrue($mailbox['hasMessages']);
         $this->assertCount(1, $mailbox['rows']);
-        $this->assertSame('System', $mailbox['rows'][0]['username']);
+        $this->assertSame('System', (string) $mailbox['rows'][0]['username']);
         $this->assertSame('System message', $mailbox['rows'][0]['subject']);
     }
 
@@ -285,7 +285,7 @@ final class MessagePageServiceTest extends TestCase
 
         $mailbox = $data['viewmailbox'];
         $this->assertSame(2, $mailbox['mailbox']);
-        $this->assertSame('My Custom Box', $mailbox['mailboxName']);
+        $this->assertSame('My Custom Box', (string) ($mailbox['mailboxName']));
     }
 
     public function test_build_viewmailbox_invalid_custom_mailbox_throws(): void
@@ -327,8 +327,8 @@ final class MessagePageServiceTest extends TestCase
         $this->assertArrayHasKey('viewmessage', $data);
         $viewmessage = $data['viewmessage'];
         $this->assertSame($msgId, $viewmessage['pmId']);
-        $this->assertSame('Test PM', $viewmessage['subject']);
-        $this->assertSame('System', $viewmessage['sender']);
+        $this->assertSame('Test PM', (string) ($viewmessage['subject']));
+        $this->assertSame('System', (string) ($viewmessage['sender']));
         $this->assertFalse($viewmessage['isSender']);
     }
 
@@ -415,8 +415,8 @@ final class MessagePageServiceTest extends TestCase
         $this->assertArrayHasKey('forward', $data);
         $forward = $data['forward'];
         $this->assertSame($msgId, $forward['pmId']);
-        $this->assertStringContainsString('Fwd:', $forward['subject']);
-        $this->assertStringContainsString('Forward this message', $forward['body']);
+        $this->assertStringContainsString('Fwd:', (string) $forward['subject']);
+        $this->assertStringContainsString('Forward this message', (string) $forward['body']);
     }
 
     public function test_build_forward_with_nonexistent_message_throws(): void
@@ -482,7 +482,7 @@ final class MessagePageServiceTest extends TestCase
 
         $data = $this->callBuild($request);
 
-        $this->assertSame('viewmailbox', $data['action']);
+        $this->assertSame('viewmailbox', (string) ($data['action']));
         $this->assertArrayHasKey('viewmailbox', $data);
     }
 

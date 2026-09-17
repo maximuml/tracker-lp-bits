@@ -131,33 +131,33 @@ final class ForumIndexServiceTest extends TestCase
     {
         $result = $this->service->getTopicImage('read');
 
-        $this->assertStringContainsString('<img', $result);
-        $this->assertStringContainsString('alt="read"', $result);
-        $this->assertStringContainsString('title="Read"', $result);
+        $this->assertStringContainsString('<img', (string) $result);
+        $this->assertStringContainsString('alt="read"', (string) $result);
+        $this->assertStringContainsString('title="Read"', (string) $result);
     }
 
     public function test_get_topic_image_unread_returns_img_tag(): void
     {
         $result = $this->service->getTopicImage('unread');
 
-        $this->assertStringContainsString('<img', $result);
-        $this->assertStringContainsString('alt="unread"', $result);
+        $this->assertStringContainsString('<img', (string) $result);
+        $this->assertStringContainsString('alt="unread"', (string) $result);
     }
 
     public function test_get_topic_image_locked_returns_img_tag(): void
     {
         $result = $this->service->getTopicImage('locked');
 
-        $this->assertStringContainsString('<img', $result);
-        $this->assertStringContainsString('alt="locked"', $result);
+        $this->assertStringContainsString('<img', (string) $result);
+        $this->assertStringContainsString('alt="locked"', (string) $result);
     }
 
     public function test_get_topic_image_lockednew_returns_img_tag(): void
     {
         $result = $this->service->getTopicImage('lockednew');
 
-        $this->assertStringContainsString('<img', $result);
-        $this->assertStringContainsString('alt="lockednew"', $result);
+        $this->assertStringContainsString('<img', (string) $result);
+        $this->assertStringContainsString('alt="lockednew"', (string) $result);
     }
 
     public function test_get_topic_image_unknown_status_returns_empty(): void
@@ -171,23 +171,23 @@ final class ForumIndexServiceTest extends TestCase
     {
         $result = $this->service->highlightTopic('My Topic', 0);
 
-        $this->assertSame('My Topic', $result);
+        $this->assertSame('My Topic', (string) ($result));
     }
 
     public function test_highlight_topic_with_valid_color_wraps_subject(): void
     {
         $result = $this->service->highlightTopic('My Topic', 17);
 
-        $this->assertStringContainsString('<font', $result);
-        $this->assertStringContainsString('My Topic', $result);
-        $this->assertStringContainsString('Red', $result);
+        $this->assertStringContainsString('<font', (string) $result);
+        $this->assertStringContainsString('My Topic', (string) $result);
+        $this->assertStringContainsString('Red', (string) $result);
     }
 
     public function test_highlight_topic_with_invalid_color_returns_subject_unchanged(): void
     {
         $result = $this->service->highlightTopic('My Topic', 999);
 
-        $this->assertSame('My Topic', $result);
+        $this->assertSame('My Topic', (string) ($result));
     }
 
     // --- highlightColorOptions ---
@@ -196,8 +196,8 @@ final class ForumIndexServiceTest extends TestCase
     {
         $result = $this->service->highlightColorOptions('Select Color');
 
-        $this->assertStringContainsString('Select Color', $result);
-        $this->assertStringContainsString("<option value='0'>", $result);
+        $this->assertStringContainsString('Select Color', (string) $result);
+        $this->assertStringContainsString("<option value='0'>", (string) $result);
     }
 
     public function test_highlight_color_options_contains_all_40_colors(): void
@@ -212,8 +212,8 @@ final class ForumIndexServiceTest extends TestCase
     {
         $result = $this->service->highlightColorOptions('Select');
 
-        $this->assertStringContainsString('Black', $result);
-        $this->assertStringContainsString('White', $result);
+        $this->assertStringContainsString('Black', (string) $result);
+        $this->assertStringContainsString('White', (string) $result);
     }
 
     // --- getForumRow ---
@@ -242,7 +242,7 @@ final class ForumIndexServiceTest extends TestCase
         $result = $this->service->getForumRow(1);
 
         $this->assertNotNull($result);
-        $this->assertSame('Forum 1', $result['name']);
+        $this->assertSame('Forum 1', (string) ($result['name']));
     }
 
     public function test_get_forum_row_returns_null_for_missing_forum(): void
@@ -357,9 +357,9 @@ final class ForumIndexServiceTest extends TestCase
 
         $result = $this->service->forumStats(date('Y-m-d'));
 
-        $this->assertStringContainsString('100', $result);
-        $this->assertStringContainsString('50', $result);
-        $this->assertStringContainsString('10', $result);
+        $this->assertStringContainsString('100', (string) $result);
+        $this->assertStringContainsString('50', (string) $result);
+        $this->assertStringContainsString('10', (string) $result);
     }
 
     public function test_forum_stats_with_no_active_users_shows_no_users_message(): void
@@ -374,7 +374,7 @@ final class ForumIndexServiceTest extends TestCase
 
         $result = $this->service->forumStats(date('Y-m-d'));
 
-        $this->assertStringContainsString('no active user', $result);
+        $this->assertStringContainsString('no active user', (string) $result);
     }
 
     // --- buildForumsIndex ---
@@ -392,6 +392,6 @@ final class ForumIndexServiceTest extends TestCase
         $result = $this->service->buildForumsIndex(['id' => 1, 'username' => 'test'], 1);
 
         $this->assertArrayHasKey('html', $result);
-        $this->assertStringContainsString('<table', $result['html']);
+        $this->assertStringContainsString('<table', (string) $result['html']);
     }
 }

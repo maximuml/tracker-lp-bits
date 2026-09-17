@@ -138,8 +138,8 @@ final class ModerationControllerTest extends TestCase
         $this->assertInstanceOf(View::class, $response);
         $rows = $response->getData()['rows'];
         $this->assertSame('Torrent', $rows[0]['type_label']);
-        $this->assertStringContainsString('details.php?id='.$torrent->id, $rows[0]['reporting']);
-        $this->assertStringContainsString('EnumCheckTorrent', $rows[0]['reporting']);
+        $this->assertStringContainsString('details.php?id='.$torrent->id, (string) $rows[0]['reporting']);
+        $this->assertStringContainsString('EnumCheckTorrent', (string) $rows[0]['reporting']);
         $this->assertSame('test enum reason', $rows[0]['reason']);
     }
 
@@ -179,7 +179,7 @@ final class ModerationControllerTest extends TestCase
         $this->assertInstanceOf(View::class, $response);
         $rows = $response->getData()['rows'];
         $this->assertSame('User', $rows[0]['type_label']);
-        $this->assertStringContainsString((string) $reported->username, $rows[0]['reporting']);
+        $this->assertStringContainsString((string) $reported->username, (string) $rows[0]['reporting']);
         $this->assertSame('user report reason', $rows[0]['reason']);
     }
 

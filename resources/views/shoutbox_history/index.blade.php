@@ -19,8 +19,8 @@
 <table data-nx="data" border="0" cellspacing="0" cellpadding="2" width="100%">
 @foreach ($items ?? [] as $item)
     <tr><td class="shoutrow{{ $item['mentionsMe'] ? ' shoutrow-mentions-me' : '' }}">
-    <span class="date">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml('['.$item['time'].']'))</span> @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['actions'])) @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['username'])) @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['reactions']))
-    <div>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['messageHtml']))</div>
+    <span class="date">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml('['.$item['time'].']'))</span> {{ $item['actions'] }} {{ $item['username'] }} {{ $item['reactions'] }}
+    <div>{{ $item['messageHtml'] }}</div>
     </td></tr>
 @endforeach
 </table>

@@ -20,18 +20,18 @@
 					</x-settings-row>
 				@else
 					<x-settings-row layout="grid" :label="__('legacy/upload.row_torrent_name')">
-						@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($nameInputHtml ?? ''))
+						{{ $nameInputHtml ?? '' }}
 					</x-settings-row>
 				@endif
 
 				@if ($priceCellHtml !== '')
 					<x-settings-row layout="grid" :label="$priceLabel">
-						@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($priceCellHtml ?? ''))
+						{{ $priceCellHtml ?? '' }}
 					</x-settings-row>
 				@endif
 
 				<div class="nx-fhead">{{ __('legacy/upload.row_description') ?? '' }}<font color="red">*</font></div>
-				<div class="nx-fcell">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($descrEditorHtml ?? ''))</div>
+				<div class="nx-fcell">{{ $descrEditorHtml ?? '' }}</div>
 
 				@if ($enableTechnicalInfo)
 					<x-settings-row layout="grid" :label="__('legacy/functions.text_technical_info')">
@@ -50,12 +50,12 @@
 
 				<div class="nx-grouprow" id="browsecat_section" data-mode="{{ $browsecatmode }}">
 					<x-settings-row layout="grid" :label="__('legacy/upload.row_quality')" :relation="'mode_'.$browsecatmode">
-						@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($taxonomySelectHtml ?? ''))
+						{{ $taxonomySelectHtml ?? '' }}
 					</x-settings-row>
-					@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($customFieldsHtml ?? ''))
-					@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($hitAndRunHtml ?? ''))
+					{{ $customFieldsHtml ?? '' }}
+					{{ $hitAndRunHtml ?? '' }}
 					<x-settings-row layout="grid" :label="__('legacy/functions.text_tags')" :relation="'mode_'.$browsecatmode">
-						@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($tagsHtml ?? ''))
+						{{ $tagsHtml ?? '' }}
 					</x-settings-row>
 				</div>
 
@@ -72,7 +72,7 @@
 
 				@if ($pickCellHtml !== '')
 					<x-settings-row layout="grid" :label="__('legacy/edit.row_pick')">
-						@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pickCellHtml ?? ''))
+						{{ $pickCellHtml ?? '' }}
 					</x-settings-row>
 				@endif
 

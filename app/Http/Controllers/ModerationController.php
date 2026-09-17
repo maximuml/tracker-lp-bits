@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Repositories\ModerationRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
+use App\Support\Html\SafeHtml;
 use App\Support\Pagination;
 use App\Support\Permissions;
 use App\Support\Time;
@@ -200,9 +201,9 @@ class ModerationController extends LegacyController
             $row = (array) $reportRow;
 
             if ($row['dealtwith']) {
-                $row['dealtwith_html'] = '<font color=green>'.(__('legacy/reports.text_yes')).'</font> - '.UserDisplay::username($row['dealtby']);
+                $row['dealtwith_html'] = SafeHtml::fromTrustedHtml('<font color=green>'.(__('legacy/reports.text_yes')).'</font> - '.UserDisplay::username($row['dealtby']));
             } else {
-                $row['dealtwith_html'] = '<font color=red>'.(__('legacy/reports.text_no')).'</font>';
+                $row['dealtwith_html'] = SafeHtml::fromTrustedHtml('<font color=red>'.(__('legacy/reports.text_no')).'</font>');
             }
 
             $type = '';
@@ -274,9 +275,9 @@ class ModerationController extends LegacyController
             }
 
             $row['type_label'] = $type;
-            $row['reporting'] = $reporting;
-            $row['added_formatted'] = (string) Time::format($row['added']);
-            $row['reporterHtml'] = UserDisplay::username($row['addedby']);
+            $row['reporting'] = SafeHtml::fromTrustedHtml($reporting);
+            $row['added_formatted'] = SafeHtml::fromTrustedHtml((string) Time::format($row['added']));
+            $row['reporterHtml'] = SafeHtml::fromTrustedHtml(UserDisplay::username($row['addedby']));
             $rows[] = $row;
         }
 

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\ViewModels;
 
+use App\Support\Html\SafeHtml;
+
 /**
  * ViewModel for the bonus (karma) page.
  *
@@ -43,8 +45,8 @@ final class BonusPageViewModel extends ViewModel
             'bonus' => $this->bonus,
             'lockText' => $this->lockText,
             'allBonus' => $this->allBonus,
-            'shopHtml' => $this->shopHtml,
-            'infoHtml' => $this->infoHtml,
+            'shopHtml' => SafeHtml::fromTrustedHtml($this->shopHtml),
+            'infoHtml' => SafeHtml::fromTrustedHtml($this->infoHtml),
             'sitename' => $this->sitename,
         ];
     }

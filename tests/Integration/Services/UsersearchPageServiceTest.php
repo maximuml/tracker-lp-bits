@@ -360,8 +360,8 @@ final class UsersearchPageServiceTest extends TestCase
         $this->assertArrayHasKey('requestUri', $data);
         $this->assertArrayHasKey('pagemenu', $data);
         $this->assertArrayHasKey('browsemenu', $data);
-        $this->assertSame('', $data['pagemenu']);
-        $this->assertSame('', $data['browsemenu']);
+        $this->assertSame('', (string) ($data['pagemenu']));
+        $this->assertSame('', (string) ($data['browsemenu']));
     }
 
     // --- class options include (any) ---
@@ -375,6 +375,6 @@ final class UsersearchPageServiceTest extends TestCase
 
         $data = $this->callBuild($request);
 
-        $this->assertStringContainsString('(any)', $data['form']['c_options']);
+        $this->assertStringContainsString('(any)', (string) $data['form']['c_options']);
     }
 }

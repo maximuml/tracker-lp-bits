@@ -4,7 +4,7 @@
 
 @section('content')
 <x-frame :caption="$captions['version']" :center="false">
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($notes['version']))
+{{ $notes['version'] }}
 <table data-nx="data" class="main" border="1" cellspacing="0" cellpadding="5" align="center">
     <x-settings-row :label="__('legacy/aboutnexus.text_main_version')">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(PROJECTNAME))</x-settings-row>
     <x-settings-row :label="__('legacy/aboutnexus.text_sub_version')">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(VERSION_NUMBER))</x-settings-row>
@@ -14,17 +14,17 @@
 </x-frame>
 
 <x-frame :caption="$captions['nexus']" :center="false">
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($notes['nexus']))
+{{ $notes['nexus'] }}
 <br /><br />
 </x-frame>
 
 <x-frame :caption="$captions['authorization']" :center="false">
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($notes['authorization']))
+{{ $notes['authorization'] }}
 <br /><br />
 </x-frame>
 
 <x-frame :caption="$captions['translation']" :center="false">
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($notes['translation']))
+{{ $notes['translation'] }}
 <br /><br />
 <table data-nx="data" class="main" border="1" cellspacing="0" cellpadding="5" align="center">
     <tr>
@@ -44,7 +44,7 @@
 </x-frame>
 
 <x-frame :caption="$captions['stylesheet']" :center="false">
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($notes['stylesheet']))
+{{ $notes['stylesheet'] }}
 <br /><br />
 <table data-nx="data" class="main" border="1" cellspacing="0" cellpadding="5" align="center">
     <tr>
@@ -64,7 +64,7 @@
 </x-frame>
 
 <x-frame :caption="$captions['contact']" :center="false">
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($notes['contact']))
+{{ $notes['contact'] }}
 <br /><br />
 <table data-nx="data" class="main" border="1" cellspacing="0" cellpadding="5" align="center">
     <x-settings-row :label="__('legacy/aboutnexus.text_web_site')">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml('<a href="' . NEXUSPHPURL . '" target="_blank">' . NEXUSPHPURL . '</a>'))</x-settings-row>

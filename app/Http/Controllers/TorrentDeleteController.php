@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Support\Bonus;
 use App\Support\CurrentUser;
 use App\Support\Globals;
+use App\Support\Html\SafeHtml;
 use App\Support\Locale;
 use App\Support\Log;
 use App\Support\Permissions;
@@ -195,7 +196,7 @@ class TorrentDeleteController extends LegacyController
         }
 
         return $this->legacyPage($request, 'delete', true, [
-            'ret' => $ret,
+            'ret' => SafeHtml::fromTrustedHtml($ret),
             'message' => __('legacy/delete.text_torrent_deleted'),
         ]);
     }

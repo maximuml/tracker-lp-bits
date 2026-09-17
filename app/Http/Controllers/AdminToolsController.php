@@ -10,6 +10,7 @@ use App\Services\LocationService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Html;
+use App\Support\Html\SafeHtml;
 use App\Support\Input;
 use App\Support\Network;
 use App\Support\Pagination;
@@ -66,7 +67,7 @@ class AdminToolsController extends LegacyController
 
         return $this->legacyPage($request, 'user-ban-log', true, [
             'q' => $q,
-            'table' => $table,
+            'table' => SafeHtml::fromTrustedHtml($table),
             'paginationTop' => $paginationTop,
             'paginationBottom' => $paginationBottom,
             'serverRequestUri' => Input::serverValue('REQUEST_URI'),
@@ -274,7 +275,7 @@ class AdminToolsController extends LegacyController
             'mode' => $mode,
             'success' => $success,
             'error' => $error,
-            'message' => $message,
+            'message' => SafeHtml::fromTrustedHtml($message),
             'rangeStartIp' => $rangeStartIp,
             'rangeEndIp' => $rangeEndIp,
             'hasRangeFilter' => $hasRangeFilter,
@@ -330,8 +331,8 @@ class AdminToolsController extends LegacyController
 
         return $this->legacyPage($request, 'testip', true, [
             'ip' => $ip,
-            'message' => $message,
-            'banstable' => $banstable,
+            'message' => SafeHtml::fromTrustedHtml($message),
+            'banstable' => SafeHtml::fromTrustedHtml($banstable),
             'hasResult' => $hasResult,
         ]);
 

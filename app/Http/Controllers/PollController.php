@@ -113,7 +113,7 @@ class PollController extends LegacyController
             'poll' => $poll,
             'pollid' => $pollid,
             'returnto' => htmlspecialchars((string) ($request->input('returnto') ?? $request->headers->get('referer') ?? '')),
-            'ageWarning' => $ageWarning,
+            'ageWarning' => SafeHtml::fromTrustedHtml($ageWarning),
             'title' => $pollid > 0
                 ? (__('legacy/makepoll.head_edit_poll'))
                 : (__('legacy/makepoll.head_new_poll')),
@@ -145,7 +145,7 @@ class PollController extends LegacyController
             $answerRows = array_map(static function ($answerRow) use ($userDisplayMap) {
                 $row = (array) $answerRow;
                 $uid = (int) ($row['userid'] ?? 0);
-                $row['usernameHtml'] = (string) ($userDisplayMap[$uid] ?? UserDisplay::username($uid));
+                $row['usernameHtml'] = SafeHtml::fromTrustedHtml((string) ($userDisplayMap[$uid] ?? UserDisplay::username($uid)));
 
                 return $row;
             }, $answers);
@@ -161,7 +161,7 @@ class PollController extends LegacyController
             return $this->legacyPage($request, 'polloverview', true, [
                 'mode' => 'detail',
                 'poll' => $poll,
-                'pollAdded' => (string) Time::format($poll['added'] ?? ''),
+                'pollAdded' => SafeHtml::fromTrustedHtml((string) Time::format($poll['added'] ?? '')),
                 'pollOptions' => $pollOptions,
                 'count' => $count,
                 'answers' => $answerRows,
@@ -177,7 +177,7 @@ class PollController extends LegacyController
 
         $pollRows = array_map(static function ($pollRow) {
             $row = (array) $pollRow;
-            $row['addedHtml'] = (string) Time::format($row['added'] ?? '');
+            $row['addedHtml'] = SafeHtml::fromTrustedHtml((string) Time::format($row['added'] ?? ''));
 
             return $row;
         }, $polls);

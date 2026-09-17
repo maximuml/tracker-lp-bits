@@ -18,6 +18,7 @@ use App\Support\Captcha;
 use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Globals;
+use App\Support\Html\SafeHtml;
 use App\Support\Http;
 use App\Support\LegacyAuth;
 use App\Support\LegacyHeaderBag;
@@ -189,7 +190,7 @@ class UtilityController extends LegacyController
             'altsize' => (string) $request->input('altsize', ''),
             'callback_func' => (string) $request->input('callback_func', ''),
             'warning' => $warning,
-            'script' => $script,
+            'script' => SafeHtml::fromTrustedHtml($script),
         ])->render();
 
         return response($content, 200, ['Content-Type' => 'text/html; charset=utf-8']);
@@ -322,7 +323,7 @@ class UtilityController extends LegacyController
     }
 
     /**
-     * @return list<array<string, string>>
+     * @return list<array<string, string|SafeHtml>>
      */
     private function tagItems(string $siteName, string $username): array
     {
@@ -330,12 +331,12 @@ class UtilityController extends LegacyController
         $t = fn (string $key): string => (string) __('legacy/tags.'.$key);
         $tag = function (string $name, string $description, string $syntax, string $example, string $remarks = ''): array {
             return [
-                'name' => $name,
-                'description' => $description,
-                'syntax' => $syntax,
-                'example' => $example,
-                'result' => Format::formatComment($example),
-                'remarks' => $remarks,
+                'name' => SafeHtml::fromTrustedHtml($name),
+                'description' => SafeHtml::fromTrustedHtml($description),
+                'syntax' => SafeHtml::fromTrustedHtml($syntax),
+                'example' => SafeHtml::fromTrustedHtml($example),
+                'result' => SafeHtml::fromTrustedHtml(Format::formatComment($example)),
+                'remarks' => SafeHtml::fromTrustedHtml($remarks),
             ];
         };
 
@@ -431,11 +432,11 @@ class UtilityController extends LegacyController
     {
 
         return $this->legacyPage($request, 'smilies', true, [
-            'smiliesFrame' => Smilies::framedTable(
+            'smiliesFrame' => SafeHtml::fromTrustedHtml(Smilies::framedTable(
                 (string) (__('legacy/functions.text_smilies')),
                 (string) (__('legacy/functions.col_type_something')),
                 (string) (__('legacy/functions.col_to_make_a')),
-            ),
+            )),
         ]);
     }
 

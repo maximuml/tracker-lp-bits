@@ -3,5 +3,5 @@
 @section('title', (''))
 
 @section('content')
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($smiliesFrame ?? ''))
+    {{ $smiliesFrame ?? '' }}
 @endsection

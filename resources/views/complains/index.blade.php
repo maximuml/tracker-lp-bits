@@ -90,7 +90,7 @@
         <p align="center">{{ __('legacy/complains.text_closed') ?? 'This complain has been closed.' }}</p>
     @else
         <br /><br /><div class="nx-box nx-center"><b>{{ __('legacy/complains.text_reply') ?? 'Reply' }}</b><br /><br /><form id="reply" method="post" action=""><input type="hidden" name="action" value="reply" /><input type="hidden" name="id" value="{{ (int) ($complain['id'] ?? 0) }}" /><br />
-        @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($replyBoxHtml))
+        {{ $replyBoxHtml }}
         </form></div>
     @endif
 
@@ -105,7 +105,7 @@
         <div class="nx-fgrid nx-fgrid--flat">
             <div class="nx-fhead">{{ __('legacy/complains.text_new_email') ?? 'Email' }}</div><div class="nx-fcell"><input type="email" name="email" style="width: min(100%, 420px); min-width: 180px; border: 1px solid gray; box-sizing: border-box" autocomplete="email" /></div>
             <div class="nx-fhead">{{ __('legacy/complains.text_new_body') ?? 'Body' }}</div><div class="nx-fcell"><textarea name="body" style="width: min(100%, 420px); min-width: 180px; border: 1px solid gray; box-sizing: border-box; height: 250px; resize: vertical;" placeholder="{{ __('legacy/complains.text_new_body_placeholder') ?? '' }}"></textarea></div>
-            @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($captchaHtml))
+            {{ $captchaHtml }}
             <div class="nx-ffull nx-center"><input type="submit" value="{{ __('legacy/complains.text_new_submit') ?? 'Submit' }}" class="btn" /></div>
         </div>
     </form>

@@ -16,6 +16,7 @@ use App\Services\ForumPageService;
 use App\Services\ForumService;
 use App\Support\CurrentUser;
 use App\Support\Format;
+use App\Support\Html\SafeHtml;
 use App\Support\LegacyYesNo;
 use App\Support\Pagination;
 use App\Support\Time;
@@ -117,15 +118,15 @@ class ForumController extends LegacyController
             } elseif ($parentType === 'offer' && $parentId > 0) {
                 $parentUrl = "offers.php?id={$parentId}&off_details=1#cid{$commentId}";
             }
-            $row['parentLinkHtml'] = $parentUrl !== ''
+            $row['parentLinkHtml'] = SafeHtml::fromTrustedHtml($parentUrl !== ''
                 ? ' <font color="gray">on</font> <a href="'.$parentUrl.'">'.htmlspecialchars((string) ($row['parent_name'] ?? '')).'</a>'
-                : '';
+                : '');
             $avatar = $showAvatars ? htmlspecialchars(trim((string) ($row['avatar'] ?? ''))) : '';
-            $row['avatarHtml'] = UserDisplay::avatarImageWithContext($avatar !== '' ? $avatar : 'pic/default_avatar.png');
-            $row['usernameHtml'] = $userDisplayMap[(int) ($row['user'] ?? 0)]
-                ?? UserDisplay::username((int) ($row['user'] ?? 0), false, true, true, false, false, true);
-            $row['timeHtml'] = (string) Time::format((string) ($row['added'] ?? ''));
-            $row['commentHtml'] = Format::formatComment((string) ($row['text'] ?? ''));
+            $row['avatarHtml'] = SafeHtml::fromTrustedHtml(UserDisplay::avatarImageWithContext($avatar !== '' ? $avatar : 'pic/default_avatar.png'));
+            $row['usernameHtml'] = SafeHtml::fromTrustedHtml($userDisplayMap[(int) ($row['user'] ?? 0)]
+                ?? UserDisplay::username((int) ($row['user'] ?? 0), false, true, true, false, false, true));
+            $row['timeHtml'] = SafeHtml::fromTrustedHtml((string) Time::format((string) ($row['added'] ?? '')));
+            $row['commentHtml'] = SafeHtml::fromTrustedHtml(Format::formatComment((string) ($row['text'] ?? '')));
         }
         unset($row);
 

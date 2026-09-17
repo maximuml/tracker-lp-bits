@@ -8,6 +8,7 @@ use App\Models\Attachment;
 use App\Support\Attachment\AttachmentService;
 use App\Support\AttachmentStorage;
 use App\Support\Config\SiteConfig;
+use App\Support\Html\SafeHtml;
 use App\Support\Logger;
 use App\Support\Path;
 use Illuminate\Support\Facades\DB;
@@ -17,7 +18,7 @@ class AttachmentMutationService
     /**
      * @param  array<string, mixed>  $CURUSER
      * @param  array<string, mixed>|null  $file
-     * @return array{warning: string, script: string, count_left: int}
+     * @return array{warning: string, script: SafeHtml|string, count_left: int}
      */
     public static function processUpload(array $CURUSER, AttachmentService $Attach, string $altsize, string $callbackFunc, ?array $file): array
     {
@@ -28,7 +29,7 @@ class AttachmentMutationService
         $allowed_exts = $Attach->get_allowed_ext();
 
         if ($file === null || ! isset($file['tmp_name'], $file['size'], $file['type'], $file['name'])) {
-            return ['warning' => (string) __('legacy/attachment.text_nothing_received'), 'script' => '', 'count_left' => $count_left];
+            return ['warning' => (string) __('legacy/attachment.text_nothing_received'), 'script' => SafeHtml::fromTrustedHtml(''), 'count_left' => $count_left];
         }
 
         $config = SiteConfig::current()->attachment;

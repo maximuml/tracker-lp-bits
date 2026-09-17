@@ -24,8 +24,8 @@
 <tr>
 <td class=rowfollow align=center>@if ($row['unread'])<img class="unreadpm" src="pic/trans.gif" alt="Unread" title="{{ __('legacy/messages.title_unread') }}" />@else<img class="readpm" src="pic/trans.gif" alt="Read" title="{{ __('legacy/messages.title_read') }}" />@endif</td>
 <td class=rowfollow align=left><a href="messages.php?action=viewmessage&id={{ $row['id'] }}">{{ $row['subject'] }}</a></td>
-<td class=rowfollow align=left>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['username'] ?? ''))</td>
-<td class=rowfollow nowrap>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['added'] ?? ''))</td>
+<td class=rowfollow align=left>{{ $row['username'] ?? '' }}</td>
+<td class=rowfollow nowrap>{{ $row['added'] ?? '' }}</td>
 <td class=rowfollow><input class=checkbox type="checkbox" name="messages[]" value="{{ $row['id'] }}"></td>
 </tr>
 @endforeach
@@ -38,7 +38,7 @@
 @if (! $viewmailbox['isSentBox'])
 {{ __('legacy/messages.text_or') }}
 <input class=btn type="submit" name="move" value="{{ __('legacy/messages.submit_move_to') }}"> <select name="box"><option value="1">{{ __('legacy/messages.text_inbox') }}</option>
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($viewmailbox['moveBoxOptions'] ?? ''))
+{{ $viewmailbox['moveBoxOptions'] ?? '' }}
 @endif
 </select>
 </td>

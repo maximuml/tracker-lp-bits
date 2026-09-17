@@ -14,6 +14,7 @@ use App\Services\WebAuthService;
 use App\Support\AssetAppender;
 use App\Support\Captcha;
 use App\Support\Config\SiteConfig;
+use App\Support\Html\SafeHtml;
 use App\Support\Locale;
 use App\Support\Network;
 use Illuminate\Http\RedirectResponse;
@@ -82,13 +83,13 @@ class WebController extends Controller
             'secret' => $secret,
             'returnto' => $returnto,
             'captchaEnabled' => $captchaEnabled,
-            'captchaMarkup' => $captchaMarkup,
+            'captchaMarkup' => SafeHtml::fromTrustedHtml($captchaMarkup),
             'remaining' => $this->authService->remainingAttempts(Network::clientIp()),
             'maxAttempts' => $this->authService->maxLoginAttempts(),
             'nowarn' => $nowarn,
             'error' => $request->session()->get('error'),
             'isComplainEnabled' => Setting::getIsComplainEnabled(),
-            'passkeyLoginHtml' => $this->renderPasskeyLogin(),
+            'passkeyLoginHtml' => SafeHtml::fromTrustedHtml($this->renderPasskeyLogin()),
             'siteName' => Setting::getSiteName(),
             'showWarn' => $returnto !== '' && ! $nowarn,
             'isSmtpEnabled' => SiteConfig::current()->smtp->type() !== 'none',

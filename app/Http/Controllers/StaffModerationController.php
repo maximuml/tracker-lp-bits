@@ -18,6 +18,7 @@ use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Globals;
+use App\Support\Html\SafeHtml;
 use App\Support\Http;
 use App\Support\Locale;
 use App\Support\Log;
@@ -458,7 +459,7 @@ class StaffModerationController extends LegacyController
             ->get(['rules.*', 'language.lang_name'])
             ->map(function ($r): array {
                 $arr = (array) $r;
-                $arr['textHtml'] = Format::formatComment($arr['text']);
+                $arr['textHtml'] = SafeHtml::fromTrustedHtml(Format::formatComment($arr['text']));
 
                 return $arr;
             })

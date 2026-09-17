@@ -131,8 +131,8 @@ final class AttachmentMutationServiceTest extends TestCase
             null,
         );
 
-        $this->assertSame('Failure! Nothing received!', $result['warning']);
-        $this->assertSame('', $result['script']);
+        $this->assertSame('Failure! Nothing received!', (string) ($result['warning']));
+        $this->assertSame('', (string) ($result['script']));
         $this->assertSame(10, $result['count_left']);
     }
 
@@ -150,7 +150,7 @@ final class AttachmentMutationServiceTest extends TestCase
             ['tmp_name' => '/tmp/foo'],
         );
 
-        $this->assertSame('Failure! Nothing received!', $result['warning']);
+        $this->assertSame('Failure! Nothing received!', (string) ($result['warning']));
         $this->assertSame(10, $result['count_left']);
     }
 
@@ -170,7 +170,7 @@ final class AttachmentMutationServiceTest extends TestCase
             $file,
         );
 
-        $this->assertSame('Failure! Nothing received!', $result['warning']);
+        $this->assertSame('Failure! Nothing received!', (string) ($result['warning']));
         $this->assertSame(0, DB::table('attachments')->count());
     }
 
@@ -190,7 +190,7 @@ final class AttachmentMutationServiceTest extends TestCase
             $file,
         );
 
-        $this->assertSame('Failure! Nothing received!', $result['warning']);
+        $this->assertSame('Failure! Nothing received!', (string) ($result['warning']));
         $this->assertSame(0, DB::table('attachments')->count());
     }
 
@@ -209,7 +209,7 @@ final class AttachmentMutationServiceTest extends TestCase
             $file,
         );
 
-        $this->assertSame('Failure! You cannot upload more files for the moment. Please wait some time.', $result['warning']);
+        $this->assertSame('Failure! You cannot upload more files for the moment. Please wait some time.', (string) ($result['warning']));
         $this->assertSame(0, DB::table('attachments')->count());
     }
 
@@ -229,7 +229,7 @@ final class AttachmentMutationServiceTest extends TestCase
             $file,
         );
 
-        $this->assertSame('Failure! The file size is too big.', $result['warning']);
+        $this->assertSame('Failure! The file size is too big.', (string) ($result['warning']));
         $this->assertSame(0, DB::table('attachments')->count());
     }
 
@@ -249,7 +249,7 @@ final class AttachmentMutationServiceTest extends TestCase
             $file,
         );
 
-        $this->assertSame('Failure! The file size is too big.', $result['warning']);
+        $this->assertSame('Failure! The file size is too big.', (string) ($result['warning']));
     }
 
     // --- banned extension ---
@@ -267,7 +267,7 @@ final class AttachmentMutationServiceTest extends TestCase
             $file,
         );
 
-        $this->assertSame('Failure! The file extension is not allowed.', $result['warning']);
+        $this->assertSame('Failure! The file extension is not allowed.', (string) ($result['warning']));
         $this->assertSame(0, DB::table('attachments')->count());
     }
 
@@ -286,7 +286,7 @@ final class AttachmentMutationServiceTest extends TestCase
             $file,
         );
 
-        $this->assertSame('Failure! The file extension is not allowed.', $result['warning']);
+        $this->assertSame('Failure! The file extension is not allowed.', (string) ($result['warning']));
     }
 
     // --- dangerous MIME type (PHP content with allowed extension) ---
@@ -304,7 +304,7 @@ final class AttachmentMutationServiceTest extends TestCase
             $file,
         );
 
-        $this->assertSame('Failure! The file extension is not allowed.', $result['warning']);
+        $this->assertSame('Failure! The file extension is not allowed.', (string) ($result['warning']));
         $this->assertSame(0, DB::table('attachments')->count());
     }
 
@@ -324,7 +324,7 @@ final class AttachmentMutationServiceTest extends TestCase
         );
 
         // move_uploaded_file fails in test context (not a real HTTP upload)
-        $this->assertSame('Failure! Cannot move uploaded file.', $result['warning']);
+        $this->assertSame('Failure! Cannot move uploaded file.', (string) ($result['warning']));
         $this->assertSame(0, DB::table('attachments')->count());
     }
 
@@ -344,8 +344,8 @@ final class AttachmentMutationServiceTest extends TestCase
         );
 
         // Move fails in test context, so no script is generated
-        $this->assertSame('Failure! Cannot move uploaded file.', $result['warning']);
-        $this->assertSame('', $result['script']);
+        $this->assertSame('Failure! Cannot move uploaded file.', (string) ($result['warning']));
+        $this->assertSame('', (string) ($result['script']));
     }
 
     // --- count_left is returned in early-exit paths ---
@@ -455,7 +455,7 @@ final class AttachmentMutationServiceTest extends TestCase
             $file,
         );
 
-        $this->assertSame('', $result['warning']);
+        $this->assertSame('', (string) ($result['warning']));
         $this->assertSame(9, $result['count_left']);
 
         $row = DB::table('attachments')->first();
@@ -478,7 +478,7 @@ final class AttachmentMutationServiceTest extends TestCase
             'parent.preview_custom_field_image_42("'.$row->dlkey.'", "attachments/'.$row->location.'")',
             $result['script'],
         );
-        $this->assertStringContainsString('nonce="testnonce123"', $result['script']);
+        $this->assertStringContainsString('nonce="testnonce123"', (string) $result['script']);
     }
 
     public function test_process_upload_resizes_portrait_image(): void
@@ -496,7 +496,7 @@ final class AttachmentMutationServiceTest extends TestCase
             $file,
         );
 
-        $this->assertSame('', $result['warning']);
+        $this->assertSame('', (string) ($result['warning']));
         $row = DB::table('attachments')->first();
         $this->assertNotNull($row);
         $this->assertSame(100, (int) $row->width);
@@ -504,7 +504,7 @@ final class AttachmentMutationServiceTest extends TestCase
         $this->assertSame([100, 200], $this->imageDims($written));
 
         // Default callback emits the [attach]dlkey[/attach] tag_extimage call.
-        $this->assertStringContainsString("parent.tag_extimage('[attach]{$row->dlkey}[/attach]')", $result['script']);
+        $this->assertStringContainsString("parent.tag_extimage('[attach]{$row->dlkey}[/attach]')", (string) $result['script']);
     }
 
     public function test_process_upload_altsize_uses_alt_thumbnail_dimensions(): void
@@ -520,7 +520,7 @@ final class AttachmentMutationServiceTest extends TestCase
             '',
             $this->makeImageFile(800, 400),
         );
-        $this->assertSame('', $landscape['warning']);
+        $this->assertSame('', (string) ($landscape['warning']));
 
         $portrait = AttachmentMutationService::processUpload(
             $this->curUser(),
@@ -529,7 +529,7 @@ final class AttachmentMutationServiceTest extends TestCase
             '',
             $this->makeImageFile(400, 800),
         );
-        $this->assertSame('', $portrait['warning']);
+        $this->assertSame('', (string) ($portrait['warning']));
 
         $this->assertSame(2, DB::table('attachments')->count());
         $first = DB::table('attachments')->orderBy('id')->first();
@@ -555,7 +555,7 @@ final class AttachmentMutationServiceTest extends TestCase
             $file,
         );
 
-        $this->assertSame('', $result['warning']);
+        $this->assertSame('', (string) ($result['warning']));
         $row = DB::table('attachments')->first();
         $this->assertNotNull($row);
         $this->assertMatchesRegularExpression('#^20\d{6}/\d{14}[0-9a-f]{32}\.jpg$#', (string) $row->location);
@@ -576,7 +576,7 @@ final class AttachmentMutationServiceTest extends TestCase
             $file,
         );
 
-        $this->assertSame('', $result['warning']);
+        $this->assertSame('', (string) ($result['warning']));
         $row = DB::table('attachments')->first();
         $this->assertNotNull($row);
         $this->assertMatchesRegularExpression('#^\d{14}[0-9a-f]{32}\.jpg$#', (string) $row->location);
@@ -600,7 +600,7 @@ final class AttachmentMutationServiceTest extends TestCase
         );
 
         $this->assertNotSame('', $result['warning']);
-        $this->assertSame('', $result['script']);
+        $this->assertSame('', (string) ($result['script']));
         $this->assertSame(0, DB::table('attachments')->count());
     }
 
@@ -620,7 +620,7 @@ final class AttachmentMutationServiceTest extends TestCase
             $file,
         );
 
-        $this->assertSame('Failure! Cannot move uploaded file.', $result['warning']);
+        $this->assertSame('Failure! Cannot move uploaded file.', (string) ($result['warning']));
     }
 
     public function test_process_upload_with_non_numeric_size_returns_nothing_received(): void
@@ -637,7 +637,7 @@ final class AttachmentMutationServiceTest extends TestCase
             $file,
         );
 
-        $this->assertSame('Failure! Nothing received!', $result['warning']);
+        $this->assertSame('Failure! Nothing received!', (string) ($result['warning']));
     }
 
     public function test_process_upload_with_uppercase_extension_is_allowed(): void
@@ -654,7 +654,7 @@ final class AttachmentMutationServiceTest extends TestCase
             $file,
         );
 
-        $this->assertSame('Failure! Cannot move uploaded file.', $result['warning']);
+        $this->assertSame('Failure! Cannot move uploaded file.', (string) ($result['warning']));
     }
 
     public function test_process_upload_with_banned_extension_rejected_even_when_whitelisted(): void
@@ -671,7 +671,7 @@ final class AttachmentMutationServiceTest extends TestCase
             $file,
         );
 
-        $this->assertSame('Failure! The file extension is not allowed.', $result['warning']);
+        $this->assertSame('Failure! The file extension is not allowed.', (string) ($result['warning']));
         $this->assertSame(0, DB::table('attachments')->count());
     }
 
@@ -687,6 +687,6 @@ final class AttachmentMutationServiceTest extends TestCase
             null,
         );
 
-        $this->assertSame('Failure! Nothing received!', $result['warning']);
+        $this->assertSame('Failure! Nothing received!', (string) ($result['warning']));
     }
 }

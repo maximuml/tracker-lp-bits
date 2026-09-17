@@ -17,6 +17,7 @@ use App\Services\WebAuthService;
 use App\Support\AssetAppender;
 use App\Support\Captcha;
 use App\Support\Config\SiteConfig;
+use App\Support\Html\SafeHtml;
 use App\Support\Locale;
 use App\Support\Network;
 use Illuminate\Http\RedirectResponse;
@@ -103,7 +104,7 @@ class RegistrationController extends Controller
             'langFolder' => $langFolder,
             'languages' => Locale::languageList('site_lang', true),
             'captchaEnabled' => $captchaEnabled,
-            'captchaMarkup' => $captchaMarkup,
+            'captchaMarkup' => SafeHtml::fromTrustedHtml($captchaMarkup),
             'secret' => $secret,
             'type' => $type,
             'isInvite' => $isInvite,
@@ -117,8 +118,8 @@ class RegistrationController extends Controller
             'headTitle' => $isInvite
                 ? (__('legacy/signup.head_invite_signup'))
                 : (__('legacy/signup.head_signup')),
-            'usernameInput' => $usernameInput,
-            'emailInput' => $emailInput,
+            'usernameInput' => SafeHtml::fromTrustedHtml($usernameInput),
+            'emailInput' => SafeHtml::fromTrustedHtml($emailInput),
         ]);
     }
 
@@ -195,7 +196,7 @@ class RegistrationController extends Controller
             'langFolder' => $langFolder,
             'languages' => Locale::languageList('site_lang', true),
             'captchaEnabled' => $captchaEnabled,
-            'captchaMarkup' => $captchaMarkup,
+            'captchaMarkup' => SafeHtml::fromTrustedHtml($captchaMarkup),
             'secret' => $secret,
             'remaining' => $this->authService->remainingAttempts(Network::clientIp()),
             'maxAttempts' => $this->authService->maxLoginAttempts(),

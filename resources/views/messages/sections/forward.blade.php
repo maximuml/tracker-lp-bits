@@ -7,13 +7,13 @@
 <div class="nx-fhead">{{ __('legacy/messages.row_to') }}</div>
 <div class="nx-fcell"><input type="text" name="to" style="width: 200px"></div>
 <div class="nx-fhead">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/messages.row_original_receiver')))</div>
-<div class="nx-fcell">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($forward['fromName'] ?? ''))</div>
+<div class="nx-fcell">{{ $forward['fromName'] ?? '' }}</div>
 <div class="nx-fhead">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/messages.row_original_sender')))</div>
-<div class="nx-fcell">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($forward['origName'] ?? ''))</div>
+<div class="nx-fcell">{{ $forward['origName'] ?? '' }}</div>
 <div class="nx-fhead">{{ __('legacy/messages.row_subject') }}</div>
 <div class="nx-fcell"><input type="text" name="subject" value="{{ $forward['subject'] }}" style="width: 500px"></div>
 <div class="nx-fhead"><nobr>{{ __('legacy/messages.row_message') }}</nobr></div>
-<div class="nx-fcell"><textarea name="body" style="width: 500px" rows="8"></textarea><br />@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($forward['body'] ?? ''))</div>
+<div class="nx-fcell"><textarea name="body" style="width: 500px" rows="8"></textarea><br />{{ $forward['body'] ?? '' }}</div>
 <div class="nx-ffull nx-center"><input class=checkbox type="checkbox" name="save" value="yes"{{ \App\Support\LegacyYesNo::isYes($curUser['savepms'] ?? null) ? ' checked' : '' }}>{{ __('legacy/messages.checkbox_save_message') }}&nbsp;
 <input type="submit" class="btn" value={{ __('legacy/messages.submit_forward') }}></div>
 </div>

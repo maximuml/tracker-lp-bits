@@ -10,6 +10,7 @@ use App\Repositories\InfoRepository;
 use App\Services\BitbucketService;
 use App\Support\CurrentUser;
 use App\Support\Format;
+use App\Support\Html\SafeHtml;
 use App\Support\Input;
 use App\Support\LegacyResponse;
 use App\Support\Pagination;
@@ -56,7 +57,7 @@ class InfoController extends LegacyController
         $data = [
             'action' => $action,
             'userid' => $userid,
-            'subject' => $subject,
+            'subject' => SafeHtml::fromTrustedHtml($subject),
             'title' => match ($action) {
                 'viewposts' => (string) (__('legacy/userhistory.head_posts_history')),
                 'viewcomments' => (string) (__('legacy/userhistory.head_comments_history')),
@@ -118,14 +119,14 @@ class InfoController extends LegacyController
                     .'</font></p>\n';
             }
             $items[] = [
-                'added' => Time::format((string) ($arr['added'] ?? ''), true, false, false),
+                'added' => SafeHtml::fromTrustedHtml((string) Time::format((string) ($arr['added'] ?? ''), true, false, false)),
                 'forumid' => (int) ($arr['f_id'] ?? 0),
                 'forumname' => (string) ($arr['name'] ?? ''),
                 'topicid' => (int) ($arr['t_id'] ?? 0),
                 'topicname' => (string) ($arr['subject'] ?? ''),
                 'postid' => (int) ($arr['id'] ?? 0),
                 'isNew' => ((int) ($arr['lastpostread'] ?? 0) < (int) ($arr['lastpost'] ?? 0)) && $viewerId === $userid,
-                'bodyHtml' => $body,
+                'bodyHtml' => SafeHtml::fromTrustedHtml($body),
             ];
         }
 
@@ -151,12 +152,12 @@ class InfoController extends LegacyController
             }
             $commPage = (int) floor(($commentPageMap[$commentId] ?? 0) / 20);
             $items[] = [
-                'added' => Time::format((string) ($arr['added'] ?? ''), true, false, false),
+                'added' => SafeHtml::fromTrustedHtml((string) Time::format((string) ($arr['added'] ?? ''), true, false, false)),
                 'torrentid' => (int) ($arr['t_id'] ?? 0),
                 'torrentName' => $torrent,
                 'commentid' => $commentId,
                 'pageUrl' => $commPage > 0 ? '&page='.$commPage : '',
-                'bodyHtml' => Format::formatComment((string) ($arr['text'] ?? '')),
+                'bodyHtml' => SafeHtml::fromTrustedHtml(Format::formatComment((string) ($arr['text'] ?? ''))),
             ];
         }
 
@@ -277,7 +278,7 @@ class InfoController extends LegacyController
                 'time' => substr($added, (int) strpos($added, ' ') + 1),
                 'width' => $dim['width'],
                 'height' => $dim['height'],
-                'usernameHtml' => (string) ($userDisplayMap[$owner] ?? UserDisplay::username($owner)),
+                'usernameHtml' => SafeHtml::fromTrustedHtml((string) ($userDisplayMap[$owner] ?? UserDisplay::username($owner))),
             ];
         }
 

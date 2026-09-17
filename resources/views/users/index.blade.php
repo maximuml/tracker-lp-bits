@@ -43,9 +43,9 @@
 </tr>
 @foreach ($rows as $row)
 <tr>
-    <td align=left>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['username_html']))</td>
-    <td>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['addedFormatted']))</td>
-    <td>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($row['lastAccessFormatted']))</td>
+    <td align=left>{{ $row['username_html'] }}</td>
+    <td>{{ $row['addedFormatted'] }}</td>
+    <td>{{ $row['lastAccessFormatted'] }}</td>
     <td align=left>{{ $row['class_name'] }}</td>
     <td align=center>{{ $row['country'] }}</td>
 </tr>

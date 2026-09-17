@@ -20,6 +20,7 @@ use App\Support\Bonus;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Format;
+use App\Support\Html\SafeHtml;
 use App\Support\Locale;
 use App\Support\Pagination;
 use App\Support\Time;
@@ -138,8 +139,8 @@ JS;
             'textSelectOnePlease' => $textSelectOnePlease,
             'resetText' => $resetText,
             'submitText' => $submitText,
-            'categoryOptionsHtml' => $categoryOptionsHtml,
-            'businessTypeOptionsHtml' => $businessTypeOptionsHtml,
+            'categoryOptionsHtml' => SafeHtml::fromTrustedHtml($categoryOptionsHtml),
+            'businessTypeOptionsHtml' => SafeHtml::fromTrustedHtml($businessTypeOptionsHtml),
             'pagerParam' => $pagerParam,
             'pagertop' => $pagertop,
             'pagerbottom' => $pagerbottom,
@@ -257,12 +258,12 @@ JS;
 
         $naText = __('legacy/uploaders.text_not_available');
         foreach ($rows as &$row) {
-            $row['usernameHtml'] = (string) UserDisplay::username($row['userid'], false, true, true, false, false, true);
+            $row['usernameHtml'] = SafeHtml::fromTrustedHtml((string) UserDisplay::username($row['userid'], false, true, true, false, false, true));
             $row['sizeFormatted'] = $row['torrent_size'] ? Format::size($row['torrent_size']) : '0';
-            $row['lastAddedFormatted'] = $row['last_added'] ? (string) Time::format($row['last_added']) : $naText;
-            $row['lastTorrentHtml'] = $row['last_name'] !== ''
+            $row['lastAddedFormatted'] = SafeHtml::fromTrustedHtml($row['last_added'] ? (string) Time::format($row['last_added']) : $naText);
+            $row['lastTorrentHtml'] = SafeHtml::fromTrustedHtml($row['last_name'] !== ''
                 ? '<a href="details.php?id='.(int) $row['last_id'].'">'.e($row['last_name']).'</a>'
-                : e($naText);
+                : e($naText));
         }
         unset($row);
 
@@ -281,8 +282,8 @@ JS;
             'year' => $year,
             'month' => $month,
             'order' => $order,
-            'yearOptions' => $yearOptions,
-            'monthOptions' => $monthOptions,
+            'yearOptions' => SafeHtml::fromTrustedHtml($yearOptions),
+            'monthOptions' => SafeHtml::fromTrustedHtml($monthOptions),
             'datefounded' => $dateFounded,
             'timeStart' => $timeStart,
             'rows' => $rows,

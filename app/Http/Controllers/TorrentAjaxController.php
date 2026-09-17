@@ -12,6 +12,7 @@ use App\Support\Category;
 use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Globals;
+use App\Support\Html\SafeHtml;
 use App\Support\LegacyYesNo;
 use App\Support\Permissions;
 use App\Support\Promotion;
@@ -43,7 +44,7 @@ class TorrentAjaxController extends LegacyController
 
         $files = $this->torrentAjaxRepository->fileList($torrentId)
             ->map(fn ($fileRow): array => [
-                'badgeHtml' => $this->fileBadge((string) (((array) $fileRow)['filename'] ?? '')),
+                'badgeHtml' => SafeHtml::fromTrustedHtml($this->fileBadge((string) (((array) $fileRow)['filename'] ?? ''))),
                 'filename' => (string) (((array) $fileRow)['filename'] ?? ''),
                 'size' => Format::size((float) (((array) $fileRow)['size'] ?? 0)),
             ])
@@ -79,8 +80,8 @@ class TorrentAjaxController extends LegacyController
         $data = $this->torrentAjaxRepository->peerList($torrentId, $currentUser);
         $curUserArr = $curUser;
 
-        $data['seederTableHtml'] = $this->peerTable((string) (__('legacy/viewpeerlist.text_seeders')), $data['seeders'], $data['torrent'], $data['privacyData'], $data['showLocationColumn'], $data['enablelocationTweak'], $data['peerIpInfo'], $data['usernameHtmlMap'], $curUserArr);
-        $data['leecherTableHtml'] = $this->peerTable((string) (__('legacy/viewpeerlist.text_leechers')), $data['leechers'], $data['torrent'], $data['privacyData'], $data['showLocationColumn'], $data['enablelocationTweak'], $data['peerIpInfo'], $data['usernameHtmlMap'], $curUserArr);
+        $data['seederTableHtml'] = SafeHtml::fromTrustedHtml($this->peerTable((string) (__('legacy/viewpeerlist.text_seeders')), $data['seeders'], $data['torrent'], $data['privacyData'], $data['showLocationColumn'], $data['enablelocationTweak'], $data['peerIpInfo'], $data['usernameHtmlMap'], $curUserArr));
+        $data['leecherTableHtml'] = SafeHtml::fromTrustedHtml($this->peerTable((string) (__('legacy/viewpeerlist.text_leechers')), $data['leechers'], $data['torrent'], $data['privacyData'], $data['showLocationColumn'], $data['enablelocationTweak'], $data['peerIpInfo'], $data['usernameHtmlMap'], $curUserArr));
 
         return response()->view('viewpeerlist.index', $data, 200, $headers);
     }
@@ -231,7 +232,7 @@ class TorrentAjaxController extends LegacyController
 
     /**
      * @param  iterable<int, mixed>  $snatchedRows
-     * @return list<array<string, string>>
+     * @return list<array<string, string|SafeHtml>>
      */
     private function decorateSnatchRows(iterable $snatchedRows, int $currentUserId): array
     {
@@ -271,16 +272,16 @@ class TorrentAjaxController extends LegacyController
                 : $reportImage;
 
             $rows[] = [
-                'highlight' => $currentUserId == $arr['userid'] ? ' bgcolor=#00A527' : '',
-                'usernameHtml' => $username,
+                'highlight' => SafeHtml::fromTrustedHtml($currentUserId == $arr['userid'] ? ' bgcolor=#00A527' : ''),
+                'usernameHtml' => SafeHtml::fromTrustedHtml($username),
                 'ip' => (string) ($arr['ip'] ?? ''),
-                'trafficHtml' => $uploaded.'@'.$uprate.(__('legacy/viewsnatches.text_per_second')).'<br />'.$downloaded.'@'.$downrate.(__('legacy/viewsnatches.text_per_second')),
-                'ratioHtml' => $ratio,
+                'trafficHtml' => SafeHtml::fromTrustedHtml($uploaded.'@'.$uprate.(__('legacy/viewsnatches.text_per_second')).'<br />'.$downloaded.'@'.$downrate.(__('legacy/viewsnatches.text_per_second'))),
+                'ratioHtml' => SafeHtml::fromTrustedHtml($ratio),
                 'seedtime' => Format::prettyTimeWithLocale((float) $arr['seedtime']),
                 'leechtime' => Format::prettyTimeWithLocale((float) $arr['leechtime']),
-                'completedAtHtml' => (string) Time::format($arr['completedat'], true, false),
-                'lastActionHtml' => (string) Time::format($arr['last_action'], true, false),
-                'reportHtml' => $reportHtml,
+                'completedAtHtml' => SafeHtml::fromTrustedHtml((string) Time::format($arr['completedat'], true, false)),
+                'lastActionHtml' => SafeHtml::fromTrustedHtml((string) Time::format($arr['last_action'], true, false)),
+                'reportHtml' => SafeHtml::fromTrustedHtml($reportHtml),
             ];
         }
 
@@ -331,9 +332,9 @@ class TorrentAjaxController extends LegacyController
             $hasData = true;
         }
 
-        $data['bodyHtml'] = $hasData
+        $data['bodyHtml'] = SafeHtml::fromTrustedHtml($hasData
             ? '<br/>'.sprintf('<div class="nx-flex-between"><div>%s</div><div></div></div>', $summary).$table
-            : (string) (__('legacy/getusertorrentlistajax.text_no_record'));
+            : (string) (__('legacy/getusertorrentlistajax.text_no_record')));
 
         return response()->view('getusertorrentlistajax.index', $data, 200, $headers);
     }

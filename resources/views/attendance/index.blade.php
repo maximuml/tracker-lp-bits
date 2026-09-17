@@ -5,16 +5,16 @@
 @section('content')
 @if ($hasAttendedToday)
     {{ \App\Support\Frame::open((string) (__('legacy/attendance.success')), false, 10, '100%', 'left') }}
-    <p>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($headerLeft ?? ''))<span style="float:right">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($headerRight ?? ''))</span></p>
+    <p>{{ $headerLeft ?? '' }}<span style="float:right">{{ $headerRight ?? '' }}</span></p>
     {{ \App\Support\Frame::close() }}
     <div class="nx-flex-center" style="padding: 20px 0"><div id="calendar" style="width: 60%"></div></div>
     <ul>
         @foreach ($bonusLines['lines'] ?? [] as $line)
-            <li>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($line))</li>
+            <li>{{ $line }}</li>
         @endforeach
         <li><ol>
             @foreach ($bonusLines['continuous'] ?? [] as $line)
-                <li>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($line))</li>
+                <li>{{ $line }}</li>
             @endforeach
         </ol></li>
     </ul>
@@ -24,7 +24,7 @@
     <div style="margin-top: 20px; text-align: center;">
     <form method="post" action="attendance.php" class="nx-inline-block">
     <div class="nx-fgrid nx-fgrid--flat">
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($captchaHtml ?? ''))
+    {{ $captchaHtml ?? '' }}
     <div class="nx-ffull nx-center"><input type="submit" value="{{ __('legacy/attendance.attend_button')}}" class="btn" /></div>
     </div>
     </form>

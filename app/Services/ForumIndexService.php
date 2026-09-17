@@ -15,6 +15,7 @@ use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Forum;
 use App\Support\Globals;
+use App\Support\Html\SafeHtml;
 use App\Support\Palette;
 use App\Support\Strings;
 use App\Support\Time;
@@ -153,7 +154,7 @@ final class ForumIndexService
             echo $this->forumStats($todayDate);
         }
 
-        return ['html' => (string) ob_get_clean()];
+        return ['html' => SafeHtml::fromTrustedHtml((string) ob_get_clean())];
     }
 
     /**

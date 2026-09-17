@@ -10,6 +10,7 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Support\Country;
 use App\Support\CurrentUser;
+use App\Support\Html\SafeHtml;
 use App\Support\Permissions;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
@@ -47,10 +48,10 @@ class StaffPageController extends LegacyController
 
             return [
                 'id' => (int) $arr['id'],
-                'username_html' => UserDisplay::username((int) $arr['id']),
-                'flag_html' => '<img width=24 height=15 src="pic/flag/'.$countryrow['flagpic'].'" title="'.$countryrow['name'].'" style="padding-bottom:1px;">',
-                'online_html' => $isOnline ? $onlineImg : $offlineImg,
-                'pm_html' => '<a href=sendmessage.php?receiver='.(int) $arr['id'].' title="'.(__('legacy/staff.title_send_pm')).'">'.$sendPmImg.'</a>',
+                'username_html' => SafeHtml::fromTrustedHtml(UserDisplay::username((int) $arr['id'])),
+                'flag_html' => SafeHtml::fromTrustedHtml('<img width=24 height=15 src="pic/flag/'.$countryrow['flagpic'].'" title="'.$countryrow['name'].'" style="padding-bottom:1px;">'),
+                'online_html' => SafeHtml::fromTrustedHtml($isOnline ? $onlineImg : $offlineImg),
+                'pm_html' => SafeHtml::fromTrustedHtml('<a href=sendmessage.php?receiver='.(int) $arr['id'].' title="'.(__('legacy/staff.title_send_pm')).'">'.$sendPmImg.'</a>'),
                 'extra' => $extraKey ? ($arr[$extraKey] ?? '') : '',
             ];
         };
@@ -102,7 +103,7 @@ class StaffPageController extends LegacyController
                 $forums[] = '<a href=forums.php?action=viewforum&forumid='.(int) $forumRow->id.'>'.htmlspecialchars($forumRow->name).'</a>';
             }
             $base = $buildUserRow($arr, '');
-            $base['forums_html'] = implode(', ', $forums);
+            $base['forums_html'] = SafeHtml::fromTrustedHtml(implode(', ', $forums));
             $forumModRows[] = $base;
         }
 
@@ -121,7 +122,7 @@ class StaffPageController extends LegacyController
         foreach ($staffUsers as $arr) {
             if ($currentClass !== $arr['class']) {
                 $currentClass = $arr['class'];
-                $staffRows[] = ['header' => true, 'class_name' => UserClass::name((int) $arr['class'], false, true, true)];
+                $staffRows[] = ['header' => true, 'class_name' => SafeHtml::fromTrustedHtml(UserClass::name((int) $arr['class'], false, true, true))];
             }
             $staffRows[] = $buildUserRow($arr, 'stafffor');
         }

@@ -4,7 +4,7 @@
 
 @section('content')
 <p><div class="nx-main nx-embedded">
-<h1 style='margin:0px'> {{ __('legacy/friends.text_personallist')}} @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($titleUsername))</h1></div></p>
+<h1 style='margin:0px'> {{ __('legacy/friends.text_personallist')}} {{ $titleUsername }}</h1></div></p>
 
 <div class="nx-main nx-embedded nx-box--737">
 <br />
@@ -38,7 +38,7 @@
 <div class="nx-main nx-embedded nx-box--737 nx-cell-5">
 <h2 align=left><a name="blocks">{{ __('legacy/friends.text_blocked_users')}}</a></h2>
 <div style='padding: 10px;'>
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($blocksHtml))
+{{ $blocksHtml }}
 </div>
 </div>
 

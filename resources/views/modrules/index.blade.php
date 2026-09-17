@@ -45,7 +45,7 @@
 @foreach ($rows as $arr)
 <br /><table data-nx="data" width=940 border=1 cellspacing=0 cellpadding=5>
     <tr><td class=colhead>{{ $arr['title'] }} - {{ $arr['lang_name'] }}</td></tr>
-    <tr><td align=left>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($arr['textHtml']))</td></tr>
+    <tr><td align=left>{{ $arr['textHtml'] }}</td></tr>
     <tr><td align=left><a href="?act=edit&id={{ (int) $arr['id'] }}">Edit</a>&nbsp;&nbsp;<form method="post" class="nx-inline" action="modrules.php?act=del">@csrf<input type="hidden" name="id" value="{{ (int) $arr['id'] }}"><input type="hidden" name="sure" value="1"><button type="submit" class="nx-btn-link">Delete</button></form></td></tr>
 </table>
 @endforeach

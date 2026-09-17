@@ -14,7 +14,7 @@ Total Images Stored: {{ $count ?? 0 }}
     @foreach ($items as $item)
         <tr>
         <td><center><a href="{{ $item['url'] }}"><img src="{{ $item['url'] }}" border=0 class="bitbucket-shot"></a></center>
-        Uploaded by: @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($item['usernameHtml']))<br />
+        Uploaded by: {{ $item['usernameHtml'] }}<br />
         (#{{ $item['id'] }}) Filename: {{ $item['name'] }} ({{ $item['width'] }}&nbsp;x&nbsp;{{ $item['height'] }})
         @if ($isModerator ?? false)
             <b><a href="?delete={{ $item['id'] }}">[Delete]</a></b><br />

@@ -48,7 +48,7 @@
             <div class="nx-fcell"><input type="password" name="passagain" autocomplete="new-password" style="width: min(100%, 320px); min-width: 180px; border: 1px solid gray; box-sizing: border-box" /></div>
 
             @if ($captchaEnabled && $captchaMarkup !== '')
-                @safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($captchaMarkup))
+                {{ $captchaMarkup }}
             @endif
 
             <div class="toolbox nx-ffull">

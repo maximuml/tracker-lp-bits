@@ -47,7 +47,7 @@
             <div class="nx-fcell"><input type="email" id="email" name="email" autocomplete="email" value="{{ old('email') }}" style="width: min(100%, 320px); min-width: 180px; border: 1px solid gray; box-sizing: border-box" /></div>
 
             @if ($captchaEnabled && $captchaMarkup !== '')
-                @safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml($captchaMarkup))
+                {{ $captchaMarkup }}
             @endif
 
             <div class="toolbox nx-ffull">

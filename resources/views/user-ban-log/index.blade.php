@@ -12,6 +12,6 @@
     </form>
 </div>
 
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(($table ?? '')))
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(($paginationBottom ?? '')))
+{{ ($table ?? '') }}
+{{ ($paginationBottom ?? '') }}
 @endsection

@@ -213,7 +213,7 @@ final class ForumListingServiceTest extends TestCase
         $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewUnread(['id' => 1, 'username' => 'test', 'class' => 10]));
 
         $this->assertArrayHasKey('html', $result);
-        $this->assertStringContainsString('Nothing found', $result['html']);
+        $this->assertStringContainsString('Nothing found', (string) $result['html']);
     }
 
     public function test_build_view_unread_returns_html_structure(): void
@@ -229,7 +229,7 @@ final class ForumListingServiceTest extends TestCase
         $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewUnread(['id' => 1, 'username' => 'test', 'class' => 10]));
 
         $this->assertArrayHasKey('html', $result);
-        $this->assertStringContainsString('<h1', $result['html']);
+        $this->assertStringContainsString('<h1', (string) $result['html']);
     }
 
     // --- buildSearch ---
@@ -244,8 +244,8 @@ final class ForumListingServiceTest extends TestCase
         $result = $this->callWithSuppressedErrors(fn () => $this->service->buildSearch(20));
 
         $this->assertArrayHasKey('html', $result);
-        $this->assertStringContainsString('search_form', $result['html']);
-        $this->assertStringContainsString('by keyword', $result['html']);
+        $this->assertStringContainsString('search_form', (string) $result['html']);
+        $this->assertStringContainsString('by keyword', (string) $result['html']);
     }
 
     public function test_build_search_with_keywords_no_hits_returns_form_with_error(): void
@@ -260,7 +260,7 @@ final class ForumListingServiceTest extends TestCase
         $result = $this->callWithSuppressedErrors(fn () => $this->service->buildSearch(20));
 
         $this->assertArrayHasKey('html', $result);
-        $this->assertStringContainsString('Nothing found', $result['html']);
+        $this->assertStringContainsString('Nothing found', (string) $result['html']);
     }
 
     public function test_build_search_with_keywords_and_hits_returns_results(): void
@@ -275,7 +275,7 @@ final class ForumListingServiceTest extends TestCase
         $result = $this->callWithSuppressedErrors(fn () => $this->service->buildSearch(20));
 
         $this->assertArrayHasKey('html', $result);
-        $this->assertStringContainsString('Found', $result['html']);
+        $this->assertStringContainsString('Found', (string) $result['html']);
     }
 
     // --- buildViewForum ---
@@ -335,7 +335,7 @@ final class ForumListingServiceTest extends TestCase
 
         $this->assertArrayHasKey('html', $result);
         $this->assertSame(1, $result['forumid']);
-        $this->assertSame('Test Forum', $result['forumname']);
-        $this->assertStringContainsString('No topics found', $result['html']);
+        $this->assertSame('Test Forum', (string) ($result['forumname']));
+        $this->assertStringContainsString('No topics found', (string) $result['html']);
     }
 }

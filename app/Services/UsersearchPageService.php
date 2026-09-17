@@ -128,7 +128,7 @@ final class UsersearchPageService
             'ma_hl' => $q('ma') ? $highlight : '',
             'c' => $class,
             'c_hl' => ($q('c') && $q('c') != 1) ? $highlight : '',
-            'c_options' => $classOptions,
+            'c_options' => SafeHtml::fromTrustedHtml($classOptions),
             'd' => htmlspecialchars((string) ($q('d') ?? '')),
             'd2' => htmlspecialchars((string) ($q('d2') ?? '')),
             'dt' => (string) ($q('dt') ?? ''),
@@ -167,14 +167,14 @@ final class UsersearchPageService
      *
      * @param  array<int, string>  $options
      */
-    private function selectOptions(array $options, string $selected): string
+    private function selectOptions(array $options, string $selected): SafeHtml
     {
         $out = '';
         for ($i = 0; $i < count($options); $i++) {
             $out .= "<option value=$i ".($selected == "$i" ? 'selected' : '').'>'.$options[$i]."</option>\n";
         }
 
-        return $out;
+        return SafeHtml::fromTrustedHtml($out);
     }
 
     /**

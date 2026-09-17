@@ -16,22 +16,22 @@
 <div class="nx-ffull nx-colhead nx-center">{{ $torrentRow['name'] }}</div>
 <div class="nx-fhead nx-nowrap">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml((__('legacy/edit.row_torrent_name')).'<font color="red">*</font>'))</div><div class="nx-fcell"><input type="text" style="width: 99%;" name="name" value="{{ $torrentRow['name'] }}" /></div>
 @if ($priceRowHtml !== null)
-<x-settings-row layout="grid" :label="\App\Support\Locale::trans('label.torrent.price', [], null)">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($priceRowHtml))</x-settings-row>
+<x-settings-row layout="grid" :label="\App\Support\Locale::trans('label.torrent.price', [], null)">{{ $priceRowHtml }}</x-settings-row>
 @endif
-<div class="nx-fhead">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml((__('legacy/edit.row_description')).'<font color="red">*</font>'))</div><div class="nx-fcell">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($bbcodeEditorHtml))</div>
+<div class="nx-fhead">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml((__('legacy/edit.row_description')).'<font color="red">*</font>'))</div><div class="nx-fcell">{{ $bbcodeEditorHtml }}</div>
 @if ($technicalInfoEnabled)
 <x-settings-row layout="grid" :label="__('legacy/functions.text_technical_info')"><textarea name="technical_info" rows="8" style="width: 99%;">{{ $torrentRow['technical_info'] ?? '' }}</textarea><br/>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/functions.text_technical_info_help_text')))</x-settings-row>
 @endif
-<div class="nx-fhead nx-nowrap">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml((__('legacy/edit.row_type')).'<font color="red">*</font>'))</div><div class="nx-fcell">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($typeSelect))</div>
-<div class="nx-grouprow {{ $modeClass }}" relation="{{ $modeClass }}"><div class="nx-fhead nx-nowrap">{{ __('legacy/edit.row_quality') }}</div><div class="nx-fcell">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($taxonomySelect))</div></div>
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($customFieldsHtml))
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($hitAndRunHtml))
-<div class="nx-grouprow {{ $modeClass }}" relation="{{ $modeClass }}"><div class="nx-fhead nx-nowrap">{{ __('legacy/functions.text_tags') }}</div><div class="nx-fcell">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($tagCheckbox))</div></div>
+<div class="nx-fhead nx-nowrap">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml((__('legacy/edit.row_type')).'<font color="red">*</font>'))</div><div class="nx-fcell">{{ $typeSelect }}</div>
+<div class="nx-grouprow {{ $modeClass }}" relation="{{ $modeClass }}"><div class="nx-fhead nx-nowrap">{{ __('legacy/edit.row_quality') }}</div><div class="nx-fcell">{{ $taxonomySelect }}</div></div>
+{{ $customFieldsHtml }}
+{{ $hitAndRunHtml }}
+<div class="nx-grouprow {{ $modeClass }}" relation="{{ $modeClass }}"><div class="nx-fhead nx-nowrap">{{ __('legacy/functions.text_tags') }}</div><div class="nx-fcell">{{ $tagCheckbox }}</div></div>
 @if ($checkRowHtml !== '')
-<x-settings-row layout="grid" :label="__('legacy/edit.row_check')">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($checkRowHtml))</x-settings-row>
+<x-settings-row layout="grid" :label="__('legacy/edit.row_check')">{{ $checkRowHtml }}</x-settings-row>
 @endif
 @if ($pickContentHtml !== '')
-<x-settings-row layout="grid" :label="__('legacy/edit.row_pick')">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($pickContentHtml))</x-settings-row>
+<x-settings-row layout="grid" :label="__('legacy/edit.row_pick')">{{ $pickContentHtml }}</x-settings-row>
 @endif
 <div class="nx-ffull nx-center"><input id="qr" type="submit" value="{{ __('legacy/edit.submit_edit_it') ?? '' }}" /> <input type="reset" value="{{ __('legacy/edit.submit_revert_changes') ?? '' }}" /></div>
 </div>

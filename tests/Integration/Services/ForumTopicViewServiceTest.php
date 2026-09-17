@@ -407,7 +407,7 @@ final class ForumTopicViewServiceTest extends TestCase
         $this->assertArrayHasKey('html', $result);
         $this->assertSame(1, $result['topicid']);
         $this->assertSame(1, $result['forumid']);
-        $this->assertStringContainsString('Test Topic', $result['html']);
+        $this->assertStringContainsString('Test Topic', (string) $result['html']);
     }
 
     // --- buildViewTopic: valid topic with posts ---
@@ -481,8 +481,8 @@ final class ForumTopicViewServiceTest extends TestCase
         $this->assertArrayHasKey('html', $result);
         $this->assertSame(1, $result['topicid']);
         $this->assertSame(1, $result['forumid']);
-        $this->assertStringContainsString('Test Topic', $result['html']);
-        $this->assertStringContainsString('Hello world', $result['html']);
+        $this->assertStringContainsString('Test Topic', (string) $result['html']);
+        $this->assertStringContainsString('Hello world', (string) $result['html']);
     }
 
     // --- buildViewTopic: locked topic ---
@@ -525,7 +525,7 @@ final class ForumTopicViewServiceTest extends TestCase
             10,
         ));
 
-        $this->assertStringContainsString('Locked', $result['html']);
-        $this->assertStringContainsString('Locked Topic', $result['html']);
+        $this->assertStringContainsString('Locked', (string) $result['html']);
+        $this->assertStringContainsString('Locked Topic', (string) $result['html']);
     }
 }

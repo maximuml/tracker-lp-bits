@@ -8,42 +8,46 @@ use PHPUnit\Framework\TestCase;
 use Tests\Attributes\TestCategory;
 
 /**
- * W0-04 / W4-05: Ratchet on large files in app/Repositories and app/Services.
+ * W0-04 / W4-05 / step 1.3: Ratchet on class cohesion in app/Repositories
+ * and app/Services.
  *
- * God-object repositories are a recognised tech-debt hotspot. This test
- * establishes a baseline of files exceeding the line limit and fails if:
- *   - a new file exceeds MAX_LINES_NEW_FILE, or
- *   - an existing baseline file grows beyond its recorded size.
- *
- * W4-05 ratchets the new-file limit from 500 to 400 lines and adds:
- *   - a public-method count limit per class;
+ * God-object repositories are a recognised tech-debt hotspot. The original
+ * ratchet capped file length at MAX_LINES_NEW_FILE — a Goodhart metric:
+ * classes were split mechanically to stay under the line limit regardless
+ * of cohesion (9 of the 10 largest services sat in the 350-400 corridor).
+ * Step 1.3 replaced it with cohesion metrics and merged those
+ * counter-splits back:
+ *   - MAX_PUBLIC_METHODS per class (public API surface);
+ *   - MAX_CONSTRUCTOR_DEPS per class (dependency fan-out);
  *   - a ban on generic Manager/Helper/Utils class names.
  *
- * Baseline captured on 2026-09-09 (post-W4-04).
- *
- * To update after a legitimate split (e.g. extracting a service from a
- * repository), remove the entry from BASELINE_FILES and commit.
+ * Raw file length is no longer gated — a cohesive class may be long.
  */
 #[TestCategory(TestCategory::ARCHITECTURE)]
 final class RepositorySizeTest extends TestCase
 {
     private const APP_DIR = __DIR__.'/../../app';
 
-    /** Maximum lines for any new file in Repositories or Services. */
-    private const MAX_LINES_NEW_FILE = 400;
-
     /** Maximum public methods for any new file in Repositories or Services. */
     private const MAX_PUBLIC_METHODS_NEW_FILE = 20;
 
+    /** Maximum constructor dependencies for any new file. */
+    private const MAX_CONSTRUCTOR_DEPS = 8;
+
     /**
-     * Baseline: files that already exceed MAX_LINES_NEW_FILE at capture time.
-     * Map of relative path => line count.
+     * Baseline: files that exceed MAX_CONSTRUCTOR_DEPS at capture time.
+     * Map of relative path => constructor dependency count.
      *
      * @var array<string, int>
      */
-    private const BASELINE_FILES = [
-        // Repositories > 400 lines (0 files)
-        // Services > 400 lines (0 files)
+    private const BASELINE_CONSTRUCTOR_DEPS = [
+        'app/Repositories/TorrentSearchRepository.php' => 12,
+        'app/Services/AjaxService.php' => 13,
+        'app/Services/AnnounceService.php' => 13, // ADR 0004: pipeline deps, do not merge/split
+        'app/Services/Cleanup/Tasks.php' => 11,
+        'app/Services/ForumIndexService.php' => 9,
+        'app/Services/ForumModerationService.php' => 10,
+        'app/Services/ForumService.php' => 11,
     ];
 
     /**
@@ -53,116 +57,6 @@ final class RepositorySizeTest extends TestCase
      * @var array<string, int>
      */
     private const BASELINE_PUBLIC_METHODS = [];
-
-    public function test_no_new_oversized_files_in_repositories_or_services(): void
-    {
-        $dirs = ['app/Repositories', 'app/Services'];
-        $violations = [];
-
-        foreach ($dirs as $dir) {
-            $absDir = self::APP_DIR.'/'.basename($dir);
-            if (! is_dir($absDir)) {
-                continue;
-            }
-
-            $iterator = new \RecursiveIteratorIterator(
-                new \RecursiveDirectoryIterator($absDir, \RecursiveDirectoryIterator::SKIP_DOTS),
-            );
-
-            foreach ($iterator as $file) {
-                if (! $file->isFile() || $file->getExtension() !== 'php') {
-                    continue;
-                }
-
-                $relativePath = $dir.'/'.ltrim(str_replace($absDir, '', $file->getPathname()), '/');
-                $lineCount = $this->countLines($file->getPathname());
-
-                if ($lineCount <= self::MAX_LINES_NEW_FILE) {
-                    continue;
-                }
-
-                // Check if this file is in the baseline
-                if (array_key_exists($relativePath, self::BASELINE_FILES)) {
-                    // Baseline file — must not grow beyond its recorded size
-                    if ($lineCount > self::BASELINE_FILES[$relativePath]) {
-                        $violations[] = sprintf(
-                            '%s grew from baseline %d to %d lines. Split the class or update the baseline after reducing another file.',
-                            $relativePath,
-                            self::BASELINE_FILES[$relativePath],
-                            $lineCount,
-                        );
-                    }
-                } else {
-                    // New oversized file — not in baseline
-                    $violations[] = sprintf(
-                        '%s is %d lines (max %d for new files). Split into smaller classes.',
-                        $relativePath,
-                        $lineCount,
-                        self::MAX_LINES_NEW_FILE,
-                    );
-                }
-            }
-        }
-
-        $this->assertSame(
-            [],
-            $violations,
-            "Found oversized or growing files in app/Repositories or app/Services:\n".
-            implode("\n", $violations),
-        );
-    }
-
-    public function test_baseline_files_still_exist(): void
-    {
-        $missing = [];
-
-        foreach (array_keys(self::BASELINE_FILES) as $relativePath) {
-            $absPath = self::APP_DIR.'/'.substr($relativePath, 4); // strip 'app/'
-            if (! file_exists($absPath)) {
-                $missing[] = $relativePath;
-            }
-        }
-
-        $this->assertSame(
-            [],
-            $missing,
-            "Baseline files were removed but not removed from BASELINE_FILES:\n".
-            implode("\n", $missing)."\n\n".
-            'Update the BASELINE_FILES constant in this test to remove stale entries.',
-        );
-    }
-
-    public function test_no_stale_baseline_entries(): void
-    {
-        $stale = [];
-
-        foreach (self::BASELINE_FILES as $relativePath => $baselineLines) {
-            $absPath = self::APP_DIR.'/'.substr($relativePath, 4); // strip 'app/'
-            if (! file_exists($absPath)) {
-                continue; // handled by test_baseline_files_still_exist
-            }
-
-            $actualLines = $this->countLines($absPath);
-
-            // If a baseline file no longer exceeds the threshold, it's stale
-            if ($actualLines <= self::MAX_LINES_NEW_FILE) {
-                $stale[] = sprintf(
-                    '%s is %d lines (≤ %d threshold) — remove from BASELINE_FILES.',
-                    $relativePath,
-                    $actualLines,
-                    self::MAX_LINES_NEW_FILE,
-                );
-            }
-        }
-
-        $this->assertSame(
-            [],
-            $stale,
-            "Found stale baseline entries (files no longer exceed threshold):\n".
-            implode("\n", $stale)."\n\n".
-            'Remove these entries from BASELINE_FILES — the files are within limits now.',
-        );
-    }
 
     /**
      * Baseline: files with generic class names that predate the W4-05 ban.
@@ -228,6 +122,61 @@ final class RepositorySizeTest extends TestCase
         );
     }
 
+    public function test_no_new_files_with_too_many_constructor_deps(): void
+    {
+        $dirs = ['app/Repositories', 'app/Services'];
+        $violations = [];
+
+        foreach ($dirs as $dir) {
+            $absDir = self::APP_DIR.'/'.basename($dir);
+            if (! is_dir($absDir)) {
+                continue;
+            }
+
+            $iterator = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($absDir, \RecursiveDirectoryIterator::SKIP_DOTS),
+            );
+
+            foreach ($iterator as $file) {
+                if (! $file->isFile() || $file->getExtension() !== 'php') {
+                    continue;
+                }
+
+                $relativePath = $dir.'/'.ltrim(str_replace($absDir, '', $file->getPathname()), '/');
+                $depCount = $this->countConstructorDeps($file->getPathname());
+
+                if ($depCount <= self::MAX_CONSTRUCTOR_DEPS) {
+                    continue;
+                }
+
+                if (array_key_exists($relativePath, self::BASELINE_CONSTRUCTOR_DEPS)) {
+                    if ($depCount > self::BASELINE_CONSTRUCTOR_DEPS[$relativePath]) {
+                        $violations[] = sprintf(
+                            '%s grew from baseline %d to %d constructor dependencies. Inject a narrower collaborator or update the baseline after reducing another file.',
+                            $relativePath,
+                            self::BASELINE_CONSTRUCTOR_DEPS[$relativePath],
+                            $depCount,
+                        );
+                    }
+                } else {
+                    $violations[] = sprintf(
+                        '%s has %d constructor dependencies (max %d for new files). Inject a narrower collaborator or a facade for the extra concerns.',
+                        $relativePath,
+                        $depCount,
+                        self::MAX_CONSTRUCTOR_DEPS,
+                    );
+                }
+            }
+        }
+
+        $this->assertSame(
+            [],
+            $violations,
+            "Found files with too many constructor dependencies:\n".
+            implode("\n", $violations),
+        );
+    }
+
     public function test_no_generic_manager_helper_utils_class_names(): void
     {
         $dirs = ['app/Repositories', 'app/Services'];
@@ -275,22 +224,6 @@ final class RepositorySizeTest extends TestCase
         );
     }
 
-    private function countLines(string $path): int
-    {
-        $content = file_get_contents($path);
-        if ($content === false) {
-            return 0;
-        }
-
-        // Count newline characters — matches `wc -l` behaviour.
-        // Files ending with a newline have N newlines for N lines.
-        // Files not ending with a newline have N-1 newlines for N lines,
-        // but we add 1 to account for the last line without a newline.
-        $newlines = substr_count($content, "\n");
-
-        return str_ends_with($content, "\n") ? $newlines : $newlines + 1;
-    }
-
     private function countPublicMethods(string $path): int
     {
         $content = file_get_contents($path);
@@ -300,5 +233,26 @@ final class RepositorySizeTest extends TestCase
 
         // __construct is DI wiring, not public API surface — exclude it.
         return preg_match_all('/^\s*public\s+(?:static\s+)?function\s+(?!__construct\b)/m', $content) ?: 0;
+    }
+
+    private function countConstructorDeps(string $path): int
+    {
+        $content = file_get_contents($path);
+        if ($content === false) {
+            return 0;
+        }
+
+        if (! preg_match('/function __construct\s*\((.*?)\)\s*[:{]/s', $content, $m)) {
+            return 0;
+        }
+
+        // Count promoted or assigned parameters — each comma-separated
+        // parameter is one injected dependency.
+        $params = trim($m[1]);
+        if ($params === '') {
+            return 0;
+        }
+
+        return substr_count($params, ',') + 1;
     }
 }

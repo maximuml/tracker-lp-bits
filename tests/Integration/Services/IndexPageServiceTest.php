@@ -6,10 +6,7 @@ namespace Tests\Integration\Services;
 
 use App\Models\User;
 use App\Repositories\IndexRepository;
-use App\Services\IndexMetaSectionBuilder;
 use App\Services\IndexPageService;
-use App\Services\IndexPollSectionBuilder;
-use App\Services\IndexStatsSectionBuilder;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
@@ -69,9 +66,6 @@ final class IndexPageServiceTest extends TestCase
             $this->globals,
             $this->cache,
             $this->indexRepository,
-            new IndexStatsSectionBuilder($this->globals, $this->indexRepository),
-            new IndexPollSectionBuilder($this->globals, $this->indexRepository),
-            new IndexMetaSectionBuilder($this->indexRepository),
         );
     }
 
@@ -184,9 +178,6 @@ final class IndexPageServiceTest extends TestCase
             $this->globals,
             $this->cache,
             $this->indexRepository,
-            new IndexStatsSectionBuilder($this->globals, $this->indexRepository),
-            new IndexPollSectionBuilder($this->globals, $this->indexRepository),
-            new IndexMetaSectionBuilder($this->indexRepository),
         );
 
         $this->assertInstanceOf(IndexPageService::class, $service);

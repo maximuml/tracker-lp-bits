@@ -16,7 +16,7 @@ use Tests\Attributes\TestCategory;
  * (Variant A, ADR 0014). The factories are exercised by the Feature
  * suite; the DTOs are covered here.
  */
-#[TestCategory(TestCategory::UNIT)]
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class TorrentListViewModelsTest extends TestCase
 {
     public function test_list_row_exposes_prepared_fields(): void

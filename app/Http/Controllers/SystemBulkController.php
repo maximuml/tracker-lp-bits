@@ -151,7 +151,7 @@ class SystemBulkController extends LegacyController
             try {
                 $sendText = $userRep->getInviteBtnText($currentUserId);
             } catch (\Exception $exception) {
-                $lang = (array) $this->globals->get('lang_takeinvite', []);
+                $lang = (array) trans('legacy/takeinvite');
 
                 return $this->legacyAbortResponse($lang['std_error'] ?? 'Error', $exception->getMessage());
             }
@@ -160,7 +160,7 @@ class SystemBulkController extends LegacyController
             $email = Email::sanitizeForDisplay($email);
             $preRegisterUsername = (string) request()->post('pre_register_username');
             $isPreRegisterEmailAndUsername = SiteConfig::current()->system->isInvitePreEmailAndUsername();
-            $lang = (array) $this->globals->get('lang_takeinvite', []);
+            $lang = (array) trans('legacy/takeinvite');
 
             if (strlen($preRegisterUsername) > 12) {
                 return $this->legacyAbortResponse($lang['head_invitation_failed'] ?? 'Error', $lang['std_username_too_long'] ?? 'Username too long.');
@@ -307,7 +307,7 @@ class SystemBulkController extends LegacyController
 
         $delreport = (array) request()->post('delreport');
         if (empty($delreport)) {
-            $langFunctions = (array) $this->globals->get('lang_functions', []);
+            $langFunctions = (array) trans('legacy/functions');
 
             return $this->legacyAbortResponse('Error', $langFunctions['select_at_least_one_record'] ?? 'Select at least one record.');
         }
@@ -345,7 +345,7 @@ class SystemBulkController extends LegacyController
             return $this->legacyAbortResponse('Sorry', 'Access denied.');
         }
 
-        $langIncrementbulk = (array) ($this->globals->get('lang_incrementbulk') ?? []);
+        $langIncrementbulk = (array) trans('legacy/incrementbulk');
         $validTypeMap = (array) ($langIncrementbulk['types'] ?? []);
         $type = (string) $request->input('type', '');
         $classes = array_chunk(User::listClass(), 4, true);
@@ -408,7 +408,7 @@ class SystemBulkController extends LegacyController
             return $this->legacyAbortResponse('Sorry', 'Permission denied.');
         }
 
-        $lang = (array) ($this->globals->get('lang_incrementbulk') ?? []);
+        $lang = (array) trans('legacy/incrementbulk');
         $validTypeMap = (array) ($lang['types'] ?? []);
 
         $currentUser = $this->currentUser->get() ?? [];

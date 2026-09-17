@@ -16,7 +16,6 @@ use App\Repositories\BonusRepository;
 use App\Repositories\UserListingRepository;
 use App\Support\AssetAppender;
 use App\Support\CurrentUser;
-use App\Support\Globals;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Log;
@@ -46,7 +45,6 @@ class UserAdminController extends LegacyController
         BonusRepository $bonusRepository,
         private readonly UserListingRepository $userListingRepository,
         private readonly CurrentUser $currentUser,
-        private readonly Globals $globals,
     ) {
         $this->userRepository = $userRepository;
         $this->userModerationRepository = $userModerationRepository;
@@ -59,7 +57,7 @@ class UserAdminController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Permission denied.');
         }
 
-        $langUsers = (array) $this->globals->get('lang_users', []);
+        $langUsers = (array) trans('legacy/users');
         $search = trim((string) (request()->query('search') ?? ''));
         $class = (string) (request()->query('class') ?? '-');
         $country = (int) (request()->query('country') ?? 0);

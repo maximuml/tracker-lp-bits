@@ -18,7 +18,6 @@ use App\Repositories\MessageRepository;
 use App\Services\MessagePageService;
 use App\Services\MessageService;
 use App\Support\CurrentUser;
-use App\Support\Globals;
 use App\Support\LegacyYesNo;
 use App\Support\UserDisplay;
 use App\Support\Validators;
@@ -43,7 +42,6 @@ class MessageController extends LegacyController
         MessageService $legacyService,
         MessagePageService $pageService,
         private readonly CurrentUser $currentUser,
-        private readonly Globals $globals,
     ) {
         $this->repository = $repository;
         $this->legacyService = $legacyService;
@@ -74,7 +72,7 @@ class MessageController extends LegacyController
 
     public function sendmessage(Request $request): Response|RedirectResponse|View
     {
-        $langSendmessage = (array) ($this->globals->get('lang_sendmessage') ?? []);
+        $langSendmessage = (array) trans('legacy/sendmessage');
         $currentUser = (array) ($this->currentUser->get() ?? []);
 
         $receiver = (int) $request->input('receiver', 0);

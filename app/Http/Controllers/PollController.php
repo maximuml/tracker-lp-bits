@@ -13,7 +13,6 @@ use App\Repositories\IndexRepository;
 use App\Repositories\PollRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
-use App\Support\Globals;
 use App\Support\Pagination;
 use App\Support\Strings;
 use App\Support\Time;
@@ -31,21 +30,17 @@ class PollController extends LegacyController
 
     private CurrentUser $currentUser;
 
-    private Globals $globals;
-
     private ?LegacyRedisCache $legacyRedisCache;
 
     public function __construct(
         PollRepository $pollRepository,
         IndexRepository $indexRepository,
         CurrentUser $currentUser,
-        Globals $globals,
         ?LegacyRedisCache $legacyRedisCache,
     ) {
         $this->pollRepository = $pollRepository;
         $this->indexRepository = $indexRepository;
         $this->currentUser = $currentUser;
-        $this->globals = $globals;
         $this->legacyRedisCache = $legacyRedisCache;
     }
 
@@ -97,7 +92,7 @@ class PollController extends LegacyController
         }
 
         $ageWarning = '';
-        $lang = (array) ($this->globals->get('lang_makepoll') ?? []);
+        $lang = (array) trans('legacy/makepoll');
         if ($pollid <= 0) {
             $lastPoll = $this->pollRepository->lastPoll();
             if (! empty($lastPoll)) {
@@ -128,7 +123,7 @@ class PollController extends LegacyController
     public function polloverview(Request $request): View|RedirectResponse|Response
     {
         $pollid = (int) $request->input('id', 0);
-        $lang = (array) ($this->globals->get('lang_polloverview') ?? []);
+        $lang = (array) trans('legacy/polloverview');
 
         if ($pollid > 0) {
             $poll = $this->pollRepository->findWithOptions($pollid);

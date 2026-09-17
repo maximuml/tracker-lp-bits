@@ -40,7 +40,7 @@ final class ForumPageService
     public function build(Request $request): ForumPageViewModel
     {
         $curUser = (array) ($this->currentUser->get() ?? []);
-        $lang = (array) ($this->globals->get('lang_forums') ?? []);
+        $lang = (array) trans('legacy/forums');
         $userId = (int) ($curUser['id'] ?? 0);
 
         // Global variables previously set by the procedural partial.

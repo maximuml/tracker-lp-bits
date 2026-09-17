@@ -53,7 +53,7 @@ final class UsercpPageService
     public function build(string $action, string $type): UsercpPageViewModel
     {
         $curUser = (array) ($this->currentUser->get() ?? []);
-        $lang = (array) ($this->globals->get('lang_usercp') ?? []);
+        $lang = (array) trans('legacy/usercp');
         $cache = $this->cache;
         $userInfo = $this->usercpRepository->getUserById((int) ($curUser['id'] ?? 0));
         $siteName = Setting::getSiteName();

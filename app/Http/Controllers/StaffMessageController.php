@@ -103,7 +103,7 @@ class StaffMessageController extends LegacyController
     public function contactstaff(Request $request): View|RedirectResponse|Response
     {
         return $this->legacyPage($request, 'contactstaff', true, [
-            'lang_contactstaff' => (array) $this->globals->get('lang_contactstaff', []),
+            'lang_contactstaff' => (array) trans('legacy/contactstaff'),
         ]);
 
     }
@@ -111,7 +111,7 @@ class StaffMessageController extends LegacyController
     public function takecontact(Request $request): View|RedirectResponse|Response
     {
         $curUser = $this->currentUser->get() ?? [];
-        $langTakecontact = (array) $this->globals->get('lang_takecontact', []);
+        $langTakecontact = (array) trans('legacy/takecontact');
 
         if (! $request->isMethod('post')) {
             return $this->legacyAbortResponse($langTakecontact['std_error'] ?? 'Error', $langTakecontact['std_method'] ?? 'Method not allowed.');

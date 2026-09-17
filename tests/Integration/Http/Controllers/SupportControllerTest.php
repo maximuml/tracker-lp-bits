@@ -90,7 +90,7 @@ final class SupportControllerTest extends TestCase
         $response = $controller->complains($request);
 
         $this->assertInstanceOf(Response::class, $response);
-        $this->assertStringContainsString('Missing data', (string) $response->getContent());
+        $this->assertStringContainsString('empty complain', (string) $response->getContent());
     }
 
     public function test_complains_denies_access_for_guest_on_post_toggle(): void
@@ -212,7 +212,7 @@ final class SupportControllerTest extends TestCase
         $response = $controller->complains($request);
 
         $this->assertInstanceOf(Response::class, $response);
-        $this->assertStringContainsString('Missing data', (string) $response->getContent());
+        $this->assertStringContainsString('empty complain', (string) $response->getContent());
     }
 
     public function test_complains_reply_rejects_missing_body(): void
@@ -233,7 +233,7 @@ final class SupportControllerTest extends TestCase
         $response = $controller->complains($request);
 
         $this->assertInstanceOf(Response::class, $response);
-        $this->assertStringContainsString('Missing data', (string) $response->getContent());
+        $this->assertStringContainsString('empty complain', (string) $response->getContent());
     }
 
     private function insertComplain(string $email = 'test@test.com', string $uuid = 'test-uuid-123'): int
@@ -255,12 +255,7 @@ final class SupportControllerTest extends TestCase
      */
     private function setupLegacyEnvironment(): void
     {
-        $langFile = base_path('lang/en/lang_functions.php');
-        if (file_exists($langFile)) {
-            $lang_functions = [];
-            require $langFile;
-            app(Globals::class)->set('lang_functions', $lang_functions);
-        }
+        app(Globals::class)->set('lang_functions', (array) trans('legacy/functions'));
 
         app()->bind(LegacyRedisCache::class, fn () => null);
 

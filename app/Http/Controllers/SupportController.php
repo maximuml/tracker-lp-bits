@@ -11,7 +11,6 @@ use App\Models\User;
 use App\Services\ComplainService;
 use App\Support\Captcha;
 use App\Support\CurrentUser;
-use App\Support\Globals;
 use App\Support\Html;
 use App\Support\Language;
 use App\Support\Network;
@@ -28,7 +27,6 @@ class SupportController extends LegacyController
     public function __construct(
         private readonly ComplainService $complainService,
         private readonly CurrentUser $currentUser,
-        private readonly Globals $globals,
         private readonly Language $language,
     ) {}
 
@@ -37,7 +35,7 @@ class SupportController extends LegacyController
         $currentUser = (array) ($this->currentUser->get() ?? []);
         $uid = (int) ($currentUser['id'] ?? 0);
         $isAdmin = Permission::can(PermissionEnum::STAFF_MEMBER);
-        $langComplains = (array) ($this->globals->get('lang_complains') ?? []);
+        $langComplains = (array) trans('legacy/complains');
         $langFunctions = $this->language->functions();
 
         if ($uid > 0 && ! $isAdmin) {

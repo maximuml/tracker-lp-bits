@@ -15,7 +15,6 @@ use App\Repositories\IndexRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
-use App\Support\Globals;
 use App\Support\Http\SafeReturnUrl;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -26,14 +25,13 @@ class NewsController extends LegacyController
 {
     public function __construct(
         private readonly CurrentUser $currentUser,
-        private readonly Globals $globals,
         private readonly ?LegacyRedisCache $legacyRedisCache,
         private readonly IndexRepository $indexRepository,
     ) {}
 
     public function news(Request $request): Response|RedirectResponse|View
     {
-        $langNews = (array) ($this->globals->get('lang_news') ?? []);
+        $langNews = (array) trans('legacy/news');
         $baseUrl = SiteConfig::current()->basic->baseUrl();
 
         $action = (string) ($request->input('action') ?? '');

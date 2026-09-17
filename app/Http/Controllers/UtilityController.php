@@ -151,7 +151,7 @@ class UtilityController extends LegacyController
                 ];
             }
 
-            $lang_attachment = (array) ($this->globals->get('lang_attachment') ?? []);
+            $lang_attachment = (array) trans('legacy/attachment');
             $altsize = (string) $request->input('altsize', '');
             $callbackFunc = (string) $request->input('callback_func', '');
             $result = AttachmentMutationService::processUpload($currentUser, $Attach, $lang_attachment, $altsize, $callbackFunc, $file);
@@ -180,7 +180,7 @@ class UtilityController extends LegacyController
 
         $content = view('attachment.index', [
             'CURUSER' => $currentUser,
-            'lang_attachment' => (array) ($this->globals->get('lang_attachment') ?? []),
+            'lang_attachment' => (array) trans('legacy/attachment'),
             'Attach' => $Attach,
             'enableAttachment' => $Attach->enable_attachment(),
             'count_limit' => (int) $Attach->get_count_limit(),
@@ -313,7 +313,7 @@ class UtilityController extends LegacyController
 
     public function tags(Request $request): View|RedirectResponse
     {
-        $lang = (array) ($this->globals->get('lang_tags') ?? []);
+        $lang = (array) trans('legacy/tags');
         $siteName = Setting::getSiteName();
         $username = (string) (($this->currentUser->get() ?? [])['username'] ?? '');
 
@@ -434,7 +434,7 @@ class UtilityController extends LegacyController
 
     public function smilies(Request $request): View|RedirectResponse
     {
-        $lang = (array) ($this->globals->get('lang_functions') ?? []);
+        $lang = (array) trans('legacy/functions');
 
         return $this->legacyPage($request, 'smilies', true, [
             'smiliesFrame' => Smilies::framedTable(
@@ -562,7 +562,7 @@ XML;
         }
 
         /** @var array<string, string> $langOk */
-        $langOk = (array) $this->globals->get('lang_ok', []);
+        $langOk = (array) trans('legacy/ok');
         $title = match ($type) {
             'adminactivate', 'inviter', 'signup' => $langOk['head_user_signup'] ?? '',
             'sysop' => $langOk['head_sysop_activation'] ?? '',

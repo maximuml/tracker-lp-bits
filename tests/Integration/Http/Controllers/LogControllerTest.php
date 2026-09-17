@@ -304,19 +304,9 @@ final class LogControllerTest extends TestCase
      */
     private function setupLegacyEnvironment(): void
     {
-        $langFile = base_path('lang/en/lang_functions.php');
-        if (file_exists($langFile)) {
-            $lang_functions = [];
-            require $langFile;
-            app(Globals::class)->set('lang_functions', $lang_functions);
-        }
+        app(Globals::class)->set('lang_functions', (array) trans('legacy/functions'));
 
-        $langLogFile = base_path('lang/en/lang_log.php');
-        if (file_exists($langLogFile)) {
-            $lang_log = [];
-            require $langLogFile;
-            app(Globals::class)->set('lang_log', $lang_log);
-        }
+        app(Globals::class)->set('lang_log', (array) trans('legacy/log'));
 
         app()->bind(LegacyRedisCache::class, fn () => null);
     }

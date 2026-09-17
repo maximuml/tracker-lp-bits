@@ -86,7 +86,7 @@ final class RssControllerTest extends TestCase
         $response = $controller->getrss($request);
 
         $this->assertInstanceOf(Response::class, $response);
-        $this->assertStringContainsString('No row', (string) $response->getContent());
+        $this->assertStringContainsString('must select rows', (string) $response->getContent());
     }
 
     /**
@@ -200,12 +200,7 @@ final class RssControllerTest extends TestCase
      */
     private function setupLegacyEnvironment(): void
     {
-        $langFile = base_path('lang/en/lang_functions.php');
-        if (file_exists($langFile)) {
-            $lang_functions = [];
-            require $langFile;
-            app(Globals::class)->set('lang_functions', $lang_functions);
-        }
+        app(Globals::class)->set('lang_functions', (array) trans('legacy/functions'));
 
         app()->bind(LegacyRedisCache::class, fn () => null);
     }

@@ -14,7 +14,6 @@ use App\Repositories\CommentRepository;
 use App\Support\Bonus;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
-use App\Support\Globals;
 use App\Support\Http;
 use App\Support\Locale;
 use App\Support\Permissions;
@@ -29,12 +28,9 @@ class WebCommentController extends Controller
 {
     private CommentRepository $commentRepository;
 
-    private Globals $globals;
-
-    public function __construct(CommentRepository $commentRepository, Globals $globals)
+    public function __construct(CommentRepository $commentRepository)
     {
         $this->commentRepository = $commentRepository;
-        $this->globals = $globals;
     }
 
     public function create(Request $request): View
@@ -375,7 +371,7 @@ class WebCommentController extends Controller
     /** @return array<string, string> */
     private function langComment(): array
     {
-        return (array) $this->globals->get('lang_comment', []);
+        return (array) trans('legacy/comment');
     }
 
     private function lang(string $key): string

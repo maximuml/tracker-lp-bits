@@ -69,7 +69,7 @@ final class TorrentMaintenanceControllerTest extends TestCase
         $response = $controller->takeFlush($request);
 
         $this->assertInstanceOf(Response::class, $response);
-        $this->assertStringContainsString('cannot flush other users', (string) $response->getContent());
+        $this->assertStringContainsString('only clean your own ghost torrents', (string) $response->getContent());
     }
 
     public function test_take_reseed_redirects_guest_to_takereseed_php(): void

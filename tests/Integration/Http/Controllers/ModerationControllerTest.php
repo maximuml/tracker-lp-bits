@@ -71,7 +71,7 @@ final class ModerationControllerTest extends TestCase
         $response = $controller->report($request);
 
         $this->assertInstanceOf(Response::class, $response);
-        $this->assertStringContainsString('Missing reason', (string) $response->getContent());
+        $this->assertStringContainsString('Missing Reason', (string) $response->getContent());
     }
 
     public function test_report_returns_invalid_action_for_guest_with_invalid_params(): void

@@ -34,7 +34,7 @@ class AttendanceController extends LegacyController
 
         $uid = (int) ($curUser['id'] ?? 0);
         $captchaEnabled = SiteConfig::current()->captcha->attendanceEnabled((bool) config('captcha.attendance.enabled', true));
-        $langAttendance = (array) ($this->globals->get('lang_attendance') ?? []);
+        $langAttendance = (array) trans('legacy/attendance');
 
         if ($request->isMethod('post')) {
             if ($captchaEnabled && SiteConfig::current()->security->captchaRequired()) {

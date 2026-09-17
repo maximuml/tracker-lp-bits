@@ -20,7 +20,6 @@ use App\Support\Bonus;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Format;
-use App\Support\Globals;
 use App\Support\Locale;
 use App\Support\Pagination;
 use App\Support\Time;
@@ -40,7 +39,6 @@ class BonusHistoryController extends LegacyController
     public function __construct(
         BonusCalculationRepository $bonusCalculationRepository,
         private readonly CurrentUser $currentUser,
-        private readonly Globals $globals,
     ) {
         $this->bonusCalculationRepository = $bonusCalculationRepository;
     }
@@ -164,7 +162,7 @@ JS;
             return $this->legacyAbortResponse('Error', 'Permission denied.');
         }
 
-        $langUploaders = (array) $this->globals->get('lang_uploaders', []);
+        $langUploaders = (array) trans('legacy/uploaders');
 
         $year = (int) (request()->query('year') ?? 0);
         if (! $year || $year < 2000) {

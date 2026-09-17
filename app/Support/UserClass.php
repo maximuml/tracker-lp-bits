@@ -195,11 +195,9 @@ final class UserClass
         static $enLangFunctions = null;
         static $currentLangFunctions = null;
         static $settingAccount = null;
-        $lang_functions = [];
 
         if ($enLangFunctions === null) {
-            require Locale::scriptFilePath((string) 'functions.php', (bool) false, (string) 'en');
-            $enLangFunctions = $lang_functions;
+            $enLangFunctions = (array) trans('legacy/functions', [], 'en');
         }
 
         if ($settingAccount === null) {
@@ -208,8 +206,7 @@ final class UserClass
 
         if ($I18N) {
             if ($currentLangFunctions === null) {
-                require Locale::scriptFilePath((string) 'functions.php', (bool) false, (string) '');
-                $currentLangFunctions = $lang_functions;
+                $currentLangFunctions = (array) trans('legacy/functions');
             }
             $thisLangFunctions = $currentLangFunctions;
         } else {

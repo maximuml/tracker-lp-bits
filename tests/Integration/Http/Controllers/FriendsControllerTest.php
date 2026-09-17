@@ -240,7 +240,7 @@ final class FriendsControllerTest extends TestCase
         $response = $controller->friends($request);
 
         $this->assertInstanceOf(Response::class, $response);
-        $this->assertStringContainsString('Not found', (string) $response->getContent());
+        $this->assertStringContainsString('No friend found with ID', (string) $response->getContent());
     }
 
     public function test_friends_delete_shows_confirmation_when_not_sure(): void
@@ -260,7 +260,7 @@ final class FriendsControllerTest extends TestCase
         $response = $controller->friends($request);
 
         $this->assertInstanceOf(Response::class, $response);
-        $this->assertStringContainsString('here if sure', (string) $response->getContent());
+        $this->assertStringContainsString('if you are sure', (string) $response->getContent());
     }
 
     /**
@@ -270,12 +270,7 @@ final class FriendsControllerTest extends TestCase
      */
     private function setupLegacyEnvironment(): void
     {
-        $langFile = base_path('lang/en/lang_functions.php');
-        if (file_exists($langFile)) {
-            $lang_functions = [];
-            require $langFile;
-            app(Globals::class)->set('lang_functions', $lang_functions);
-        }
+        app(Globals::class)->set('lang_functions', (array) trans('legacy/functions'));
 
         app()->bind(LegacyRedisCache::class, fn () => null);
     }

@@ -50,7 +50,7 @@ final class ForumModerationService
      */
     private function lang(): array
     {
-        return (array) ($this->globals->get('lang_forums') ?? []);
+        return (array) trans('legacy/forums');
     }
 
     private function cacheDelete(string $key): void

@@ -256,38 +256,25 @@ class RegistrationController extends Controller
     /** @return array<string, string> */
     private function langSignup(string $langFolder): array
     {
-        return $this->loadLangFile($langFolder, 'signup.php', 'lang_signup');
+        return (array) trans('legacy/signup');
     }
 
     /** @return array<string, string> */
     private function langTakesignup(string $langFolder): array
     {
-        return $this->loadLangFile($langFolder, 'takesignup.php', 'lang_takesignup');
+        return (array) trans('legacy/takesignup');
     }
 
     /** @return array<string, string> */
     private function langConfirmResend(string $langFolder): array
     {
-        return $this->loadLangFile($langFolder, 'confirm_resend.php', 'lang_confirm_resend');
+        return (array) trans('legacy/confirm_resend');
     }
 
     /** @return array<string, string> */
     private function langFunctions(string $langFolder): array
     {
-        return $this->loadLangFile($langFolder, 'functions.php', 'lang_functions');
-    }
-
-    /** @return array<string, string> */
-    private function loadLangFile(string $langFolder, string $scriptName, string $variableName): array
-    {
-        $path = base_path(Locale::filePath($langFolder, $scriptName));
-        if (! file_exists($path)) {
-            return [];
-        }
-
-        include $path;
-
-        return ${$variableName} ?? [];
+        return (array) trans('legacy/functions');
     }
 
     private function backWithError(Request $request, string $message): RedirectResponse

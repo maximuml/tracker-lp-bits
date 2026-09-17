@@ -64,7 +64,6 @@ final class OfferServiceTest extends TestCase
         $this->globals = new Globals;
         $this->service = new OfferService(
             $this->currentUser,
-            $this->globals,
             new OfferRepository,
             new OfferVoteRepository,
             new OfferCommentRepository,

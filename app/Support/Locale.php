@@ -97,38 +97,6 @@ final class Locale
     }
 
     /**
-     * Build the relative language file path.
-     *
-     * Mirrors `get_langfile_path()`. Also mutates the legacy `$CURLANGDIR`
-     * global because callers rely on it being set as a side effect.
-     */
-    public static function scriptFilePath(string $scriptName = '', bool $target = false, string $langFolder = ''): string
-    {
-        $CURLANGDIR = self::folderFromCookie(Input::cookieValue('c_lang_folder'));
-        app(Globals::class)->set('CURLANGDIR', $CURLANGDIR);
-        if ($langFolder === '') {
-            $langFolder = $CURLANGDIR;
-        }
-
-        return self::filePath($langFolder, $scriptName, Input::serverValue('SCRIPT_NAME', ''), $target);
-    }
-
-    /**
-     * Build the relative language file path.
-     *
-     * Mirrors `get_langfile_path()` without mutating `$CURLANGDIR`.
-     */
-    public static function filePath(string $langFolder, string $scriptName = '', string $serverScriptName = '', bool $target = false): string
-    {
-        $folder = $target ? '_target' : $langFolder;
-        if ($scriptName === '') {
-            $scriptName = substr((string) strrchr($serverScriptName, '/'), 1) ?: '';
-        }
-
-        return 'lang/'.$folder.'/lang_'.$scriptName;
-    }
-
-    /**
      * Set the `c_lang_folder` cookie.
      *
      * Mirrors `set_langfolder_cookie()`.

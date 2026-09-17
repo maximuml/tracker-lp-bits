@@ -12,7 +12,6 @@ use App\Models\User;
 use App\Policies\MessagePolicy;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
-use App\Support\Globals;
 use App\Support\Http;
 use App\Support\Http\SafeReturnUrl;
 use App\Support\Language;
@@ -36,7 +35,6 @@ use LogicException;
 class MessageService
 {
     public function __construct(
-        private readonly Globals $globals,
         private readonly Language $language,
         private readonly MessagePolicy $policy,
         private readonly MessageMailboxService $mailbox,
@@ -264,7 +262,7 @@ class MessageService
     {
         return array_merge(
             (array) $this->language->functions(),
-            (array) ($this->globals->get('lang_'.$name) ?? [])
+            (array) trans('legacy/'.$name)
         );
     }
 

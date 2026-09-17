@@ -54,7 +54,7 @@ class SystemMaintenanceController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Permission denied.');
         }
 
-        $langMailtest = (array) ($this->globals->get('lang_mailtest') ?? []);
+        $langMailtest = (array) trans('legacy/mailtest');
         $langFunctions = $this->language->functions();
 
         if ($request->post('action') === 'sendmail') {

@@ -16,7 +16,6 @@ use App\Repositories\InviteRepository;
 use App\Support\AssetAppender;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
-use App\Support\Globals;
 use App\Support\Locale;
 use App\Support\Pagination;
 use App\Support\Ratio;
@@ -32,7 +31,6 @@ class InviteController extends LegacyController
     public function __construct(
         private readonly UserModerationRepositoryInterface $userModerationRepository,
         private readonly CurrentUser $currentUser,
-        private readonly Globals $globals,
         private readonly InviteRepository $inviteRepository,
     ) {}
 
@@ -46,7 +44,7 @@ class InviteController extends LegacyController
         $currentUser = $this->currentUser->get() ?? [];
         $currentUserId = (int) ($currentUser['id'] ?? 0);
         $id = $request->input('id') !== null ? (int) $request->input('id') : $currentUserId;
-        $langInvite = (array) ($this->globals->get('lang_invite') ?? []);
+        $langInvite = (array) trans('legacy/invite');
 
         if (! Validators::isId($id) || ($currentUserId !== $id && ! Permission::can(PermissionEnum::VIEW_INVITE))) {
             return $this->legacyAbortResponse($langInvite['std_sorry'] ?? 'Sorry', $langInvite['std_permission_denied'] ?? 'Permission denied.');
@@ -72,7 +70,7 @@ class InviteController extends LegacyController
             'user' => $user->toArray(),
             'CURUSER' => $currentUser,
             'lang_invite' => $langInvite,
-            'lang_functions' => (array) ($this->globals->get('lang_functions') ?? []),
+            'lang_functions' => (array) trans('legacy/functions'),
             'SITENAME' => $SITENAME,
             'invitesystem' => $invitesystem,
             '__server_REQUEST_URI' => $request->getRequestUri(),
@@ -136,7 +134,7 @@ class InviteController extends LegacyController
             if ($menuSelected === 'invitee') {
                 $data = array_merge($data, $this->inviteeData($id, $enabled, $status, $currentUserId, $langInvite, $request->getRequestUri()));
             } elseif (in_array($menuSelected, ['sent', 'tmp'], true)) {
-                $data = array_merge($data, $this->sentTmpData($id, $menuSelected, $langInvite, $langFunctions = (array) ($this->globals->get('lang_functions') ?? [])));
+                $data = array_merge($data, $this->sentTmpData($id, $menuSelected, $langInvite, $langFunctions = (array) trans('legacy/functions')));
             }
         }
 

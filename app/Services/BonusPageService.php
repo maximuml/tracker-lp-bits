@@ -36,7 +36,7 @@ final class BonusPageService
     public function build(Request $request): BonusPageViewModel
     {
         $curUser = (array) ($this->currentUser->get() ?? []);
-        $lang = (array) ($this->globals->get('lang_mybonus') ?? []);
+        $lang = (array) trans('legacy/mybonus');
         $userId = (int) ($curUser['id'] ?? 0);
 
         $bonusTweak = (string) $this->globals->get('bonus_tweak', '');

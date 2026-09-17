@@ -40,14 +40,14 @@ class TorrentDeleteController extends LegacyController
 
         $id = (int) request()->input('id');
         if ($id <= 0) {
-            $lang = (array) $this->globals->get('lang_fastdelete', []);
+            $lang = (array) trans('legacy/fastdelete');
 
             return $this->legacyAbortResponse($lang['std_delete_failed'] ?? 'Error', $lang['std_missing_form_data'] ?? 'Invalid id.');
         }
 
         if (! Permissions::userCan(PermissionEnum::TORRENT_MANAGE->value, false, $currentUserId)
             || ! Permissions::userCan(PermissionEnum::TORRENT_DELETE->value, false, $currentUserId)) {
-            $lang = (array) $this->globals->get('lang_fastdelete', []);
+            $lang = (array) trans('legacy/fastdelete');
 
             return $this->legacyAbortResponse($lang['std_delete_failed'] ?? 'Error', $lang['text_no_permission'] ?? 'No permission.');
         }
@@ -60,7 +60,7 @@ class TorrentDeleteController extends LegacyController
 
         $sure = request()->query('sure');
         if (empty($sure)) {
-            $lang = (array) $this->globals->get('lang_fastdelete', []);
+            $lang = (array) trans('legacy/fastdelete');
 
             return $this->legacyAbortResponse(
                 $lang['std_delete_torrent'] ?? 'Delete torrent',
@@ -115,7 +115,7 @@ class TorrentDeleteController extends LegacyController
         }
 
         $id = request()->post('id');
-        $lang = (array) $this->globals->get('lang_delete', []);
+        $lang = (array) trans('legacy/delete');
 
         if ($id === null) {
             return $this->legacyAbortResponse($lang['std_delete_failed'] ?? 'Error', $lang['std_missing_form_date'] ?? 'Missing form data');

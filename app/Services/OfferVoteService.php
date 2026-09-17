@@ -123,7 +123,7 @@ final class OfferVoteService
 
     private function lang(string $key): string
     {
-        $lang = (array) ($this->globals->get('lang_offers') ?? []);
+        $lang = (array) trans('legacy/offers');
 
         return (string) ($lang[$key] ?? '');
     }

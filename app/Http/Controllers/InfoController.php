@@ -10,7 +10,6 @@ use App\Repositories\InfoRepository;
 use App\Services\BitbucketService;
 use App\Support\CurrentUser;
 use App\Support\Format;
-use App\Support\Globals;
 use App\Support\Input;
 use App\Support\LegacyResponse;
 use App\Support\Pagination;
@@ -28,7 +27,6 @@ class InfoController extends LegacyController
 {
     public function __construct(
         private readonly BitbucketService $bitbucketService,
-        private readonly Globals $globals,
         private readonly CurrentUser $currentUser,
         private readonly InfoRepository $infoRepository,
     ) {}
@@ -105,7 +103,7 @@ class InfoController extends LegacyController
      */
     private function langUserhistory(): array
     {
-        $lang = $this->globals->get('lang_userhistory');
+        $lang = trans('legacy/userhistory');
 
         return is_array($lang) ? $lang : [];
     }

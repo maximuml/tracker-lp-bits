@@ -31,7 +31,12 @@ def parse_global_vars(text: str) -> set[str]:
     return out
 
 def parse_lang_vars(text: str) -> set[str]:
-    """Extract language variable names like `$lang_index = ...`."""
+    """Extract language variable names like `$lang_index = ...`.
+
+    Legacy variable arrays were converted to Laravel return-files under
+    resources/lang/en/legacy/ — the file stem is the variable suffix
+    (legacy/<suffix>.php is exposed as $lang_<suffix> in Globals).
+    """
     return set(re.findall(r'^\$lang_([A-Za-z0-9_]+)\s*=', text, re.MULTILINE))
 
 def parse_configurations(text: str) -> set[str]:
@@ -55,7 +60,6 @@ def infer_type(name: str) -> str:
 def main() -> None:
     include_dir = BASE / 'include'
     public_dir = BASE / 'public'
-    lang_dir = BASE / 'lang' / 'en'
 
     vars = set()
     # Read global declarations from include/ and public/
@@ -70,12 +74,11 @@ def main() -> None:
                 text = (Path(root) / f).read_text(errors='ignore')
                 vars.update(parse_global_vars(text))
 
-    # Language variables from lang/en/*.php
-    if lang_dir.exists():
-        for f in lang_dir.glob('lang_*.php'):
-            text = f.read_text(errors='ignore')
-            for v in parse_lang_vars(text):
-                vars.add(f'lang_{v}')
+    # Language variables: legacy/<suffix>.php -> $lang_<suffix> global
+    legacy_lang_dir = BASE / 'resources' / 'lang' / 'en' / 'legacy'
+    if legacy_lang_dir.exists():
+        for f in legacy_lang_dir.glob('*.php'):
+            vars.add(f'lang_{f.stem}')
 
     # Config sections loaded dynamically into $GLOBALS
     config_file = include_dir / 'config.php'
@@ -85,7 +88,7 @@ def main() -> None:
     # Always include these well-known globals even if not found by the heuristics
     vars.update(['Cache', 'CURUSER', 'BASEURL', 'rootpath', 'CURLANGDIR', 'deflang', 'defcss', 'iv', 'lang_functions'])
 
-    lines = ['<?php', '/**', ' * Bootstrap stub declaring legacy globals for PHPStan.']
+    lines = ['<?php', '', '/**', ' * Bootstrap stub declaring legacy globals for PHPStan.']
     lines.append(' *')
     lines.append(' * This file is intentionally a no-op at runtime; it only helps PHPStan')
     lines.append(' * understand variables populated by bittorrent.php, language files and DB config.')

@@ -13,7 +13,6 @@ use App\Models\User;
 use App\Repositories\ModerationRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
-use App\Support\Globals;
 use App\Support\Pagination;
 use App\Support\Permissions;
 use App\Support\Time;
@@ -29,7 +28,6 @@ class ModerationController extends LegacyController
 {
     public function __construct(
         private readonly CurrentUser $currentUser,
-        private readonly Globals $globals,
         private readonly ?LegacyRedisCache $legacyRedisCache,
         private readonly ModerationRepository $moderationRepository,
     ) {}
@@ -45,7 +43,7 @@ class ModerationController extends LegacyController
         $currentUserId = (int) ($curUser['id'] ?? 0);
         $staffmemClass = defined('UC_STAFFMEM') ? \constant('UC_STAFFMEM') : (defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0);
 
-        $langReport = (array) $this->globals->get('lang_report', []);
+        $langReport = (array) trans('legacy/report');
         $cache = $this->legacyRedisCache;
 
         $reportofferid = (int) (request()->query('reportofferid') ?? 0);
@@ -187,7 +185,7 @@ class ModerationController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Permission denied.');
         }
 
-        $langReports = (array) $this->globals->get('lang_reports', []);
+        $langReports = (array) trans('legacy/reports');
 
         $repo = $this->moderationRepository;
         $count = $repo->countReports();

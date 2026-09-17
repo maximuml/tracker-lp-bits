@@ -108,15 +108,12 @@ final class LegacyBootstrap
             return;
         }
 
-        $langFile = $rootpath.Locale::scriptFilePath((string) 'functions.php', (bool) false, (string) '');
-        $langFunctions = [];
-        if (is_file($langFile)) {
-            require $langFile;
-            if (isset($lang_functions) && is_array($lang_functions)) {
-                $langFunctions = $lang_functions;
-            }
-        }
-        app(Globals::class)->set('lang_functions', $langFunctions);
+        // Legacy per-page language arrays now resolve through Laravel's
+        // translator (resources/lang/en/legacy/*.php); Globals still carries
+        // them so views reading $lang_functions keep working until the
+        // per-key __('legacy/x.k') conversion lands.
+        app(Globals::class)->set('CURLANGDIR', Locale::folderFromCookie(Input::cookieValue('c_lang_folder')));
+        app(Globals::class)->set('lang_functions', (array) trans('legacy/functions'));
     }
 
     private static function bootUser(?Request $request): void

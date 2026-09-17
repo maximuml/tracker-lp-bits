@@ -97,6 +97,7 @@ docker compose exec -T php composer audit
 
 - **Install/upgrade:** `php artisan app:install` (fresh) / `php artisan app:upgrade` (post-pull housekeeping) — both plain `DB::`/`Schema::`; the legacy web installer and its `NexusDB` layer were removed
 - **PageServices:** `IndexPageService`, `UsercpPageService`, `MessagePageService`, etc. — render legacy pages via Blade
+- **Legacy i18n:** the old `lang/en/lang_*.php` files are gone — the same arrays live in `resources/lang/en/legacy/<group>.php` and resolve via `trans('legacy/<group>[.key]')`/`__()`; `Globals` still carries `lang_*` arrays for legacy views until call sites migrate to `__('legacy/x.k')`
 - **Events:** `Events::fire()` → `ModelEventEnum` → event classes (legacy event system, not Laravel's Event::dispatch)
 - **Settings:** `settings` table → `App\Support\Settings` / `Globals` singleton (cached in Redis)
 - **Auth:** custom `NexusWebGuard` + challenge-response authentication + HMAC passkey login

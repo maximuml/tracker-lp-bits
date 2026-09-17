@@ -151,14 +151,7 @@ class WebController extends Controller
      */
     private function langLogin(string $langFolder): array
     {
-        $path = base_path(Locale::filePath($langFolder, 'login.php'));
-        if (! file_exists($path)) {
-            return [];
-        }
-
-        include $path;
-
-        return $lang_login ?? [];
+        return (array) trans('legacy/login');
     }
 
     /**
@@ -166,14 +159,7 @@ class WebController extends Controller
      */
     private function langFunctions(string $langFolder): array
     {
-        $path = base_path(Locale::filePath($langFolder, 'functions.php'));
-        if (! file_exists($path)) {
-            return [];
-        }
-
-        include $path;
-
-        return $lang_functions ?? [];
+        return (array) trans('legacy/functions');
     }
 
     private function renderPasskeyLogin(): string

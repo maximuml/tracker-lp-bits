@@ -13,7 +13,6 @@ use App\Repositories\OfferRepository;
 use App\Repositories\OfferVoteRepository;
 use App\Support\Cache;
 use App\Support\CurrentUser;
-use App\Support\Globals;
 use App\Support\Input;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
@@ -32,7 +31,6 @@ final class OfferService
 {
     public function __construct(
         private readonly CurrentUser $currentUser,
-        private readonly Globals $globals,
         private readonly OfferRepository $offerRepository,
         private readonly OfferVoteRepository $offerVoteRepository,
         private readonly OfferCommentRepository $offerCommentRepository,
@@ -83,7 +81,7 @@ final class OfferService
 
     private function lang(string $key): string
     {
-        $lang = (array) ($this->globals->get('lang_offers') ?? []);
+        $lang = (array) trans('legacy/offers');
 
         return (string) ($lang[$key] ?? '');
     }

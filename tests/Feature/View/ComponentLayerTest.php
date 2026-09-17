@@ -270,7 +270,7 @@ final class ComponentLayerTest extends TestCase
     {
         $html = $this->render(
             '<x-settings-row :label="$l"><input name="x"></x-settings-row>',
-            ['l' => \App\Support\Html\SafeHtml::fromTrustedHtml('Row&nbsp;<b>x</b>')],
+            ['l' => SafeHtml::fromTrustedHtml('Row&nbsp;<b>x</b>')],
         );
 
         $this->assertStringContainsString('Row&nbsp;<b>x</b>', $html);

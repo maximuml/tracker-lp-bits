@@ -1,4 +1,4 @@
-@extends('layouts.legacy')
+@extends('layouts.modern')
 
 @section('title', $title ?? ($lang['head_forums'] ?? 'Forums'))
 

@@ -45,6 +45,7 @@ final class UpgradeService
         private readonly AttendanceRepository $attendance,
         private readonly TokenRepository $tokens,
         private readonly ToolRepository $tools,
+        private readonly LegacySchemaChecks $schema,
     ) {}
 
     /**
@@ -62,7 +63,7 @@ final class UpgradeService
 
         // @since 1.7.13
         foreach (['adminpanel', 'modpanel', 'sysoppanel'] as $table) {
-            $columnInfo = $this->columnInfo($table, 'id');
+            $columnInfo = $this->schema->columnInfo($table, 'id');
             if ($columnInfo !== null && ($columnInfo['type_name'] === 'tinyint' || ! ($columnInfo['auto_increment'] ?? false))) {
                 DB::statement("alter table $table modify id int(11) unsigned not null AUTO_INCREMENT");
             }
@@ -96,7 +97,7 @@ final class UpgradeService
         }
 
         // torrent support sticky second level
-        $columnInfo = $this->columnInfo('torrents', 'pos_state');
+        $columnInfo = $this->schema->columnInfo('torrents', 'pos_state');
         $this->log($log, '[TORRENT POS_STATE], column info: '.json_encode($columnInfo));
         if ($columnInfo !== null && $columnInfo['type_name'] === 'enum') {
             $sql = "alter table torrents modify `pos_state` varchar(32) NOT NULL DEFAULT 'normal'";
@@ -173,7 +174,7 @@ final class UpgradeService
             $shouldMigrateSearchBox = true;
             $searchBoxLog = 'no section_name field';
         } else {
-            $columnInfo = $this->columnInfo('searchbox', 'section_name');
+            $columnInfo = $this->schema->columnInfo('searchbox', 'section_name');
             $searchBoxLog = 'has section_name, searchbox.section DATA_TYPE: '.($columnInfo['type_name'] ?? '?');
             if (($columnInfo['type_name'] ?? null) !== 'json') {
                 $searchBoxLog .= ', not json';
@@ -201,13 +202,13 @@ final class UpgradeService
             }
         }
 
-        if (! $this->isSnatchedTableTorrentUserUnique()) {
+        if (! $this->schema->isSnatchedTableTorrentUserUnique()) {
             $this->tools->removeDuplicateSnatch();
             $this->install->migrate('database/migrations/2023_03_29_021950_handle_snatched_user_torrent_unique.php');
             $this->log($log, 'removeDuplicateSnatch and migrate 2023_03_29_021950_handle_snatched_user_torrent_unique');
         }
 
-        if (! $this->peersHasUniqueTorrentPeerUser()) {
+        if (! $this->schema->peersHasUniqueTorrentPeerUser()) {
             $this->tools->removeDuplicatePeer();
             $this->install->migrate('database/migrations/2023_04_01_005409_add_unique_torrent_peer_user_to_peers_table.php');
             $this->log($log, 'removeDuplicatePeer and migrate 2023_04_01_005409_add_unique_torrent_peer_user_to_peers_table');
@@ -343,54 +344,6 @@ final class UpgradeService
             ['name' => $name],
             ['value' => $value, 'created_at' => $now, 'updated_at' => $now]
         );
-    }
-
-    private function isSnatchedTableTorrentUserUnique(): bool
-    {
-        foreach (Schema::getIndexes('snatched') as $index) {
-            if (! empty($index['unique'])
-                && in_array('torrentid', $index['columns'], true)
-                && in_array('userid', $index['columns'], true)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * The unique (torrent, peer_id, userid) index the 2023_04_01 migration
-     * adds. Checked by columns, not name: Laravel auto-names it
-     * `peers_torrent_peer_id_userid_unique`, so the legacy name check
-     * (`unique_torrent_peer_user`) never matched and re-ran the dedupe on
-     * every upgrade.
-     */
-    private function peersHasUniqueTorrentPeerUser(): bool
-    {
-        foreach (Schema::getIndexes('peers') as $index) {
-            if (! empty($index['unique'])
-                && in_array('torrent', $index['columns'], true)
-                && in_array('peer_id', $index['columns'], true)
-                && in_array('userid', $index['columns'], true)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * @return array<string, mixed>|null column metadata (Schema::getColumns entry)
-     */
-    private function columnInfo(string $table, string $column): ?array
-    {
-        foreach (Schema::getColumns($table) as $col) {
-            if ($col['name'] === $column) {
-                return $col;
-            }
-        }
-
-        return null;
     }
 
     /**

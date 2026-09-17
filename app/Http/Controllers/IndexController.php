@@ -7,7 +7,6 @@ namespace App\Http\Controllers;
 use App\Models\Poll;
 use App\Repositories\IndexRepository;
 use App\Services\IndexPageService;
-use App\Services\IndexToastAssetBuilder;
 use App\Support\Bonus;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
@@ -25,7 +24,6 @@ class IndexController extends Controller
         private readonly Globals $globals,
         private readonly IndexRepository $indexRepository,
         private readonly ?LegacyRedisCache $legacyRedisCache,
-        private readonly IndexToastAssetBuilder $toastAssetBuilder,
     ) {}
 
     public function legacy(Request $request): View|Response|RedirectResponse
@@ -44,7 +42,7 @@ class IndexController extends Controller
         }
 
         $data = $this->indexPageService->build()->toArray();
-        $this->toastAssetBuilder->append($data['curUser']);
+        $this->indexPageService->appendAssets($data['curUser']);
 
         return view('index.index', $data);
     }

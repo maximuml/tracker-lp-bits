@@ -9,12 +9,7 @@ use App\Repositories\TokenRepository;
 use App\Repositories\UsercpLookupRepository;
 use App\Repositories\UsercpRepository;
 use App\Repositories\UserPasskeyRepository;
-use App\Services\UsercpForumSectionBuilder;
 use App\Services\UsercpPageService;
-use App\Services\UsercpPersonalSectionBuilder;
-use App\Services\UsercpSecuritySectionBuilder;
-use App\Services\UsercpTokenSectionBuilder;
-use App\Services\UsercpTrackerSectionBuilder;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
@@ -76,11 +71,8 @@ final class UsercpPageServiceTest extends TestCase
             new LegacyRedisCache,
             app(UsercpRepository::class),
             app(UsercpLookupRepository::class),
-            new UsercpTokenSectionBuilder(app(UsercpRepository::class), $this->tokenRepository),
-            new UsercpSecuritySectionBuilder($this->globals, $this->passkeyRepository),
-            new UsercpTrackerSectionBuilder($this->globals, app(UsercpLookupRepository::class)),
-            new UsercpPersonalSectionBuilder($this->globals, app(UsercpLookupRepository::class)),
-            new UsercpForumSectionBuilder($this->globals),
+            $this->passkeyRepository,
+            $this->tokenRepository,
         );
     }
 
@@ -184,11 +176,8 @@ final class UsercpPageServiceTest extends TestCase
             new LegacyRedisCache,
             app(UsercpRepository::class),
             app(UsercpLookupRepository::class),
-            new UsercpTokenSectionBuilder(app(UsercpRepository::class), Mockery::mock(TokenRepository::class)),
-            new UsercpSecuritySectionBuilder(new Globals, Mockery::mock(UserPasskeyRepository::class)),
-            new UsercpTrackerSectionBuilder(new Globals, app(UsercpLookupRepository::class)),
-            new UsercpPersonalSectionBuilder(new Globals, app(UsercpLookupRepository::class)),
-            new UsercpForumSectionBuilder(new Globals),
+            Mockery::mock(UserPasskeyRepository::class),
+            Mockery::mock(TokenRepository::class),
         );
 
         $this->assertInstanceOf(UsercpPageService::class, $service);

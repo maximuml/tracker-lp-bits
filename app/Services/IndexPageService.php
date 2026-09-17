@@ -6,16 +6,21 @@ namespace App\Services;
 
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
+use App\Models\Poll;
+use App\Models\Setting;
 use App\Repositories\IndexRepository;
 use App\Support\AssetAppender;
 use App\Support\Cache\LegacyRedisCache;
+use App\Support\Config\SiteConfig;
 use App\Support\CoverThumb;
 use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Globals;
 use App\Support\Shoutbox;
+use App\Support\UserClass;
 use App\Support\UserDisplay;
 use App\ViewModels\IndexPageViewModel;
+use Illuminate\Support\HtmlString;
 
 /**
  * Prepares section data for the index page, replacing the legacy
@@ -31,9 +36,6 @@ final class IndexPageService
         private readonly Globals $globals,
         private readonly LegacyRedisCache $cache,
         private readonly IndexRepository $indexRepository,
-        private readonly IndexStatsSectionBuilder $stats,
-        private readonly IndexPollSectionBuilder $polls,
-        private readonly IndexMetaSectionBuilder $meta,
         ?CoverThumb $coverThumb = null,
     ) {
         $this->coverThumb = $coverThumb ?? new CoverThumb($this->cache);
@@ -66,22 +68,22 @@ final class IndexPageService
         $data['latestTorrents'] = $this->buildLatestTorrents($this->cache);
 
         // Top uploaders
-        $data['topUploaders'] = $this->meta->buildTopUploaders();
+        $data['topUploaders'] = $this->buildTopUploaders();
 
         // Polls
-        $data['polls'] = $this->polls->buildPolls($curUser, $data['canPollManage'], $data['canLog'], $this->cache);
+        $data['polls'] = $this->buildPolls($curUser, $data['canPollManage'], $data['canLog'], $this->cache);
 
         // Stats
-        $data['stats'] = $this->stats->buildStats($this->cache);
+        $data['stats'] = $this->buildStats($this->cache);
 
         // Tracker load
-        $data['trackerLoad'] = $this->stats->buildTrackerLoad();
+        $data['trackerLoad'] = $this->buildTrackerLoad();
 
         // Disclaimer
-        $data['disclaimer'] = $this->meta->buildDisclaimer();
+        $data['disclaimer'] = $this->buildDisclaimer();
 
         // Browser note
-        $data['browserNote'] = $this->meta->buildBrowserNote();
+        $data['browserNote'] = $this->buildBrowserNote();
 
         // Reset unread news count
         if (! empty($curUser['id'])) {
@@ -257,5 +259,303 @@ JS;
         }
 
         return ['show' => true, 'html' => $html];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function buildTopUploaders(): array
+    {
+        if (! SiteConfig::current()->main->showTopUploader()) {
+            return ['show' => false];
+        }
+
+        $allUploaders = $this->indexRepository->getTopUploaders(10);
+        if ($allUploaders->isEmpty()) {
+            return ['show' => false];
+        }
+
+        AssetAppender::css('.tr-top-uploader-tab>[data-table] {cursor: pointer}', 'footer', false);
+        $toggleJs = <<<'JS'
+document.querySelector(".tr-top-uploader-tab").addEventListener("click", function (e) {
+    var td = e.target.closest("[data-table]");
+    if (!td || td.classList.contains("nx-colhead")) return;
+    var siblings = td.parentNode.children;
+    for (var i = 0; i < siblings.length; i++) {
+        siblings[i].classList.remove("nx-colhead");
+    }
+    td.classList.add("nx-colhead");
+    var tables = document.querySelectorAll(".top-uploader");
+    tables.forEach(function (t) { t.classList.add('nx-hidden'); });
+    var target = document.querySelectorAll("." + td.getAttribute("data-table"));
+    target.forEach(function (t) {
+        t.classList.remove('nx-hidden');
+        t.style.opacity = '0';
+        t.style.transition = 'opacity 0.2s';
+        requestAnimationFrame(function () { t.style.opacity = '1'; });
+    });
+})
+JS;
+        AssetAppender::js($toggleJs, 'footer', false);
+
+        $recentUploaders = $this->indexRepository->getTopUploaders(10, 30);
+
+        $buildRows = function ($uploaders): array {
+            $rows = [];
+            foreach ($uploaders as $ranking => $uploader) {
+                $rows[] = [
+                    'username' => UserDisplay::username($uploader->id),
+                    'count' => $uploader->count,
+                    'rank' => $ranking + 1,
+                ];
+            }
+
+            return $rows;
+        };
+
+        return [
+            'show' => true,
+            'title' => __('legacy/index.top_uploader_title'),
+            'toggleHint' => __('legacy/index.top_uploader_toggle_time_range_tab'),
+            'recentlyLabel' => __('legacy/index.top_uploader_toggle_time_range_recently'),
+            'allLabel' => __('legacy/index.top_uploader_toggle_time_range_all'),
+            'colAuthor' => __('legacy/index.col_author'),
+            'colCounts' => __('legacy/index.col_counts'),
+            'colRanking' => __('legacy/index.col_ranking'),
+            'allRows' => $buildRows($allUploaders),
+            'recentRows' => $buildRows($recentUploaders),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function buildDisclaimer(): array
+    {
+        $siteName = Setting::getSiteName();
+
+        return [
+            'show' => true,
+            'title' => __('legacy/index.text_disclaimer'),
+            'content' => sprintf(__('legacy/index.text_disclaimer_content'), $siteName, $siteName),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function buildBrowserNote(): array
+    {
+        return [
+            'show' => true,
+            'note' => new HtmlString((string) (__('legacy/index.text_browser_note'))),
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $curUser
+     * @return array<string, mixed>
+     */
+    private function buildPolls(array $curUser, bool $canManage, bool $canLog, LegacyRedisCache $cache): array
+    {
+        $show = ! empty($curUser) && $this->globals->get('showpolls_main', '') === 'yes';
+
+        if (! $show) {
+            return ['show' => false];
+        }
+
+        $pollArr = $cache->get_value('current_poll_content');
+        if ($pollArr === false || $pollArr === null) {
+            $pollArr = $this->indexRepository->getCurrentPoll();
+            if ($pollArr) {
+                $cache->cache_value('current_poll_content', $pollArr, 7226);
+            }
+        }
+
+        $pollExists = ! empty($pollArr);
+
+        $result = [
+            'show' => true,
+            'title' => __('legacy/index.text_polls'),
+            'canManage' => $canManage,
+            'newLabel' => __('legacy/index.text_new'),
+            'editLabel' => __('legacy/index.text_edit'),
+            'deleteLabel' => __('legacy/index.text_delete'),
+            'detailLabel' => __('legacy/index.text_detail'),
+            'exists' => $pollExists,
+        ];
+
+        if ($pollExists) {
+            $pollid = (int) ($pollArr['id'] ?? 0);
+            $question = (string) ($pollArr['question'] ?? '');
+            $options = [];
+            for ($i = 0; $i <= Poll::MAX_OPTION_INDEX; $i++) {
+                $opt = (string) ($pollArr["option{$i}"] ?? '');
+                if ($opt !== '') {
+                    $options[$i] = $opt;
+                }
+            }
+
+            $uservote = $this->indexRepository->getUserVote($pollid, (int) ($curUser['id'] ?? 0));
+            $result['pollId'] = $pollid;
+            $result['question'] = $question;
+            $result['options'] = $options;
+            $result['hasVoted'] = $uservote !== null;
+            $result['blankVoteLabel'] = __('legacy/index.radio_blank_vote');
+            $result['submitVoteLabel'] = __('legacy/index.submit_vote');
+            $result['canLog'] = $canLog;
+            $result['previousPollsLabel'] = __('legacy/index.text_previous_polls');
+            $result['votesLabel'] = __('legacy/index.text_votes');
+
+            if ($uservote !== null) {
+                $results = $cache->get_value('current_poll_result');
+                if ($results === false || $results === null) {
+                    $results = $this->indexRepository->getPollResults($pollid);
+                    $cache->cache_value('current_poll_result', $results, 3652);
+                }
+                $tvotes = array_sum(array_column($results, 'count'));
+                $bars = [];
+                foreach ($results as $item) {
+                    $p = $tvotes == 0 ? 0 : (int) round($item['count'] / $tvotes * 100);
+                    $bars[] = [
+                        'option' => $item['option'],
+                        'percent' => $p,
+                        'width' => $p * 3,
+                        'selected' => $item['index'] == $uservote,
+                    ];
+                }
+                $result['bars'] = $bars;
+                $result['totalVotes'] = number_format($tvotes);
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function buildStats(LegacyRedisCache $cache): array
+    {
+        $show = $this->globals->get('showstats_main', '') === 'yes';
+
+        if (! $show) {
+            return ['show' => false];
+        }
+
+        $userStats = $this->indexRepository->getUserStats();
+        $torrentStats = $this->indexRepository->getTorrentStats();
+        $classStats = $this->indexRepository->getClassStats();
+        $maxusers = (int) $this->globals->get('maxusers', 0);
+
+        return [
+            'show' => true,
+            'title' => __('legacy/index.text_tracker_statistics'),
+            'userStats' => [
+                'activeToday' => number_format($userStats['totalonlinetoday']),
+                'activeThisWeek' => number_format($userStats['totalonlineweek']),
+                'registered' => number_format($userStats['registered']).' / '.number_format($maxusers),
+                'unconfirmed' => number_format($userStats['unverified']),
+                'vip' => number_format($userStats['vip']),
+                'vipLabel' => UserClass::name(UC_VIP, false, false, true),
+                'donors' => number_format($userStats['donated']),
+                'donorsLabel' => __('legacy/index.row_donors'),
+                'warned' => number_format($userStats['warned']),
+                'warnedLabel' => __('legacy/index.row_warned_users'),
+                'banned' => number_format($userStats['disabled']),
+                'bannedLabel' => __('legacy/index.row_banned_users'),
+                'male' => number_format($userStats['registered_male']),
+                'maleLabel' => __('legacy/index.row_male_users'),
+                'female' => number_format($userStats['registered_female']),
+                'femaleLabel' => __('legacy/index.row_female_users'),
+            ],
+            'torrentStats' => [
+                'torrents' => number_format($torrentStats['torrents']),
+                'dead' => number_format($torrentStats['dead']),
+                'seeders' => number_format($torrentStats['seeders']),
+                'leechers' => number_format($torrentStats['leechers']),
+                'peers' => number_format($torrentStats['peers']),
+                'ratio' => $torrentStats['ratio'].'%',
+                'activeBrowsing' => number_format($torrentStats['activewebusernow']),
+                'trackerActive' => number_format($torrentStats['activetrackerusernow']),
+                'totalSize' => Format::size($torrentStats['totaltorrentssize']),
+                'totalUploaded' => Format::size($torrentStats['totaluploaded']),
+                'totalDownloaded' => Format::size($torrentStats['totaldownloaded']),
+                'totalData' => Format::size($torrentStats['totaldata']),
+            ],
+            'classStats' => [
+                ['label' => UserClass::name(UC_PEASANT, false, false, true), 'value' => number_format($classStats[UC_PEASANT]), 'icon' => 'leechwarned'],
+                ['label' => UserClass::name(UC_USER, false, false, true), 'value' => number_format($classStats[UC_USER])],
+                ['label' => UserClass::name(UC_POWER_USER, false, false, true), 'value' => number_format($classStats[UC_POWER_USER])],
+                ['label' => UserClass::name(UC_ELITE_USER, false, false, true), 'value' => number_format($classStats[UC_ELITE_USER])],
+                ['label' => UserClass::name(UC_CRAZY_USER, false, false, true), 'value' => number_format($classStats[UC_CRAZY_USER])],
+                ['label' => UserClass::name(UC_INSANE_USER, false, false, true), 'value' => number_format($classStats[UC_INSANE_USER])],
+                ['label' => UserClass::name(UC_VETERAN_USER, false, false, true), 'value' => number_format($classStats[UC_VETERAN_USER])],
+                ['label' => UserClass::name(UC_EXTREME_USER, false, false, true), 'value' => number_format($classStats[UC_EXTREME_USER])],
+                ['label' => UserClass::name(UC_ULTIMATE_USER, false, false, true), 'value' => number_format($classStats[UC_ULTIMATE_USER])],
+                ['label' => UserClass::name(UC_NEXUS_MASTER, false, false, true), 'value' => number_format($classStats[UC_NEXUS_MASTER])],
+            ],
+            'labels' => [
+                'rowUsersActiveToday' => __('legacy/index.row_users_active_today'),
+                'rowUsersActiveThisWeek' => __('legacy/index.row_users_active_this_week'),
+                'rowRegisteredUsers' => __('legacy/index.row_registered_users'),
+                'rowUnconfirmedUsers' => __('legacy/index.row_unconfirmed_users'),
+                'rowTorrents' => __('legacy/index.row_torrents'),
+                'rowDeadTorrents' => __('legacy/index.row_dead_torrents'),
+                'rowSeeders' => __('legacy/index.row_seeders'),
+                'rowLeechers' => __('legacy/index.row_leechers'),
+                'rowPeers' => __('legacy/index.row_peers'),
+                'rowSeederLeecherRatio' => __('legacy/index.row_seeder_leecher_ratio'),
+                'rowActiveBrowsingUsers' => __('legacy/index.row_active_browsing_users'),
+                'rowTrackerActiveUsers' => __('legacy/index.row_tracker_active_users'),
+                'rowTotalSizeOfTorrents' => __('legacy/index.row_total_size_of_torrents'),
+                'rowTotalUploaded' => __('legacy/index.row_total_uploaded'),
+                'rowTotalDownloaded' => __('legacy/index.row_total_downloaded'),
+                'rowTotalData' => __('legacy/index.row_total_data'),
+            ],
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function buildTrackerLoad(): array
+    {
+        $show = $this->globals->get('showtrackerload', '') === 'yes';
+
+        if (! $show) {
+            return ['show' => false];
+        }
+
+        $loadAvg = sys_getloadavg();
+        if ($loadAvg === false) {
+            $loadAvg = [0.0, 0.0, 0.0];
+        }
+        $load = sprintf('load average: %.2f, %.2f, %.2f', $loadAvg[0], $loadAvg[1], $loadAvg[2]);
+
+        return [
+            'show' => $load !== '',
+            'title' => __('legacy/index.text_tracker_load'),
+            'load' => trim($load),
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $curUser
+     */
+    public function appendAssets(array $curUser): void
+    {
+        $toastLang = json_encode([
+            'newMessage' => __('legacy/index.toast_new_message'),
+            'shoutboxMention' => __('legacy/index.toast_shoutbox_mention'),
+            'from' => __('legacy/index.toast_from'),
+            'close' => __('legacy/index.toast_close'),
+            'userId' => (int) ($curUser['id'] ?? 0),
+        ], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT);
+        AssetAppender::css('styles/shoutbox.css', 'header', true);
+        AssetAppender::js('js/shoutbox.js', 'footer', true);
+        AssetAppender::js("window.TOAST_LANG = $toastLang;", 'footer', false, 'toast-lang');
+        AssetAppender::css('styles/toast.css', 'header', true);
+        AssetAppender::js('js/toast.js', 'footer', true);
     }
 }

@@ -84,6 +84,7 @@ docker compose exec -T php composer audit
 - **PHPStan:** level 8 must pass — all code is strictly typed
 - **Pint:** Laravel preset — run `vendor/bin/pint --test` before pushing
 - **Return types:** all public methods should have return type declarations
+- **Class cohesion:** `RepositorySizeTest` gates `app/Repositories` and `app/Services` by `MAX_PUBLIC_METHODS = 20` and `MAX_CONSTRUCTOR_DEPS = 8` — file length is intentionally not gated (a cohesive class may be long); don't split classes just to satisfy a line counter
 - **DI:** use constructor injection or `app()` — avoid `new Repository()` in services
 - **Facades:** `DB::`, `Cache::`, `Redis::`, `Auth::` — `NexusDB` no longer exists (removed with the legacy installer); never reintroduce a parallel DB layer
 - **SupportContext:** only used in wrapper classes (CurrentUser, Globals, etc.) — not directly in controllers/services

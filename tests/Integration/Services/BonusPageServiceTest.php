@@ -6,7 +6,6 @@ namespace Tests\Integration\Services;
 
 use App\Repositories\BonusCalculationRepository;
 use App\Services\BonusPageService;
-use App\Services\BonusShopSectionBuilder;
 use App\Support\CurrentUser;
 use App\Support\Globals;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -61,7 +60,7 @@ final class BonusPageServiceTest extends TestCase
         $this->globals = new Globals;
         $this->app->instance(Globals::class, $this->globals);
 
-        $this->service = new BonusPageService($this->currentUser, $this->globals, new BonusShopSectionBuilder($rep, $this->globals));
+        $this->service = new BonusPageService($this->currentUser, $this->globals, $rep);
     }
 
     protected function tearDown(): void
@@ -101,7 +100,7 @@ final class BonusPageServiceTest extends TestCase
 
     public function test_can_instantiate_service(): void
     {
-        $service = new BonusPageService($this->currentUser, $this->globals, new BonusShopSectionBuilder($this->bonusCalcRep, $this->globals));
+        $service = new BonusPageService($this->currentUser, $this->globals, $this->bonusCalcRep);
 
         $this->assertInstanceOf(BonusPageService::class, $service);
     }

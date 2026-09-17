@@ -405,6 +405,32 @@ Decision → Consequences). Add new ADRs here as numbered subsections.
   systems coexist until Pages A are done, and a11y/E2E playbooks need
   updated expectations for the modern markup.
 
+### ADR 0015: ALGO_MD5 retirement schedule (Accepted, step 3.2)
+
+- **Context:** `PasswordHasher::ALGO_MD5` (`md5(secret+password+secret)`)
+  is still a live verification branch in `WebAuthService::validatePassword`
+  for very old accounts (`passhash_algo='md5'` AND empty `auth_key`).
+  Successful md5 logins already upgrade to argon2id and flag
+  `must_change_password`; `users:legacy-hash-report` measures the
+  remaining population and `users:force-reset-legacy` flags stragglers.
+- **Decision:** Retire by schedule, not by guess — production numbers
+  decide the cut. Deadline **2026-10-17** (30 days):
+  1. Ops runs `php artisan users:legacy-hash-report` on production and
+     records the md5 count in `release-notes.md`.
+  2. If md5 users are ≤1% of total **or** none logged in for 6+ months:
+     `php artisan users:force-reset-legacy --apply` (flagged users must
+     set a new password via `RequirePasswordChange`), then the md5
+     branch in `WebAuthService`/`PasswordHasher::verifyMd5` is removed
+     in the following release.
+  3. If the share is larger, extend once by 30 days and re-measure —
+     the branch is not kept indefinitely.
+  After removal, md5-only accounts authenticate exclusively through the
+  password-reset flow. Semgrep `md5-for-security` floor drops to 13.
+- **Consequences:** md5 verification can never be re-enabled silently —
+  removing the branch is a one-way door guarded by the dated deadline.
+  Local/dev databases are fixture-seeded (≈98% md5) and are not a
+  decision source; only the production report counts.
+
 ## Testing
 
 - **Unit tests:** `tests/Unit/` — pure unit only, no DB/Redis/MeiliSearch (enforced by `UnitSuiteIsolationTest` and the `unit-tests-fast` CI job, which runs the suite with no service containers)

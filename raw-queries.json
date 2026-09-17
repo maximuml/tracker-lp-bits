@@ -116,7 +116,7 @@
     },
     {
       "file": "app/Services/Installer/UpgradeService.php",
-      "line": 68,
+      "line": 73,
       "method": "runLegacyFixups",
       "pattern": "DB::statement",
       "purpose": "Upgrade fixup (since 1.7.13): widen adminpanel/modpanel/sysoppanel.id to int unsigned AUTO_INCREMENT",
@@ -126,7 +126,7 @@
     },
     {
       "file": "app/Services/Installer/UpgradeService.php",
-      "line": 105,
+      "line": 110,
       "method": "runLegacyFixups",
       "pattern": "DB::statement",
       "purpose": "Upgrade fixup: convert torrents.pos_state from enum to varchar(32)",
@@ -136,7 +136,7 @@
     },
     {
       "file": "app/Services/Installer/UpgradeService.php",
-      "line": 201,
+      "line": 206,
       "method": "runLegacyFixups",
       "pattern": "DB::statement",
       "purpose": "Upgrade fixup (since 1.8.x): append missing notification option markers to users.notifs via UPDATE concat/instr",
@@ -146,7 +146,7 @@
     },
     {
       "file": "app/Services/Installer/UpgradeService.php",
-      "line": 283,
+      "line": 288,
       "method": "runExtraMigrate",
       "pattern": "DB::statement",
       "purpose": "Drop legacy torrents.tags column after the tag-pivot migration",

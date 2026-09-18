@@ -47,6 +47,9 @@ docker compose exec -T php php artisan tinker \
 # headless Chromium cannot solve; disable it like PerformanceTestDatasetSeeder
 docker compose exec -T php php artisan tinker \
   --execute="DB::table('settings')->where('name','security.iv')->update(['value'=>'no']);"
+# base seeders ship reference data only — the suite needs at least one
+# torrent (details.php) and one forum topic (forum navigation)
+docker compose exec -T php php artisan db:seed --class=BrowserSmokeSeeder
 docker compose exec -T redis redis-cli -a "$REDIS_PASSWORD" FLUSHALL
 ```
 

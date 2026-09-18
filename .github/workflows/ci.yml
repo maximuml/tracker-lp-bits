@@ -417,6 +417,10 @@ jobs:
           # 'yes' (image captcha on login/signup) — headless tests cannot
           # solve it, so it is disabled like PerformanceTestDatasetSeeder does.
           docker compose exec -T php php artisan tinker --execute="DB::table('settings')->where('name','security.maxip')->update(['value'=>100]); DB::table('settings')->where('name','basic.baseUrl')->update(['value'=>'http://127.0.0.1']); DB::table('settings')->where('name','security.iv')->update(['value'=>'no']);"
+          # Base seeders ship reference data only — no torrents/topics —
+          # so details.php and the forum-navigation spec need fixtures.
+          # On a fresh DB the first torrent lands on id=1 (BROWSER_TID).
+          docker compose exec -T php php artisan db:seed --class=BrowserSmokeSeeder --force
           source .env 2>/dev/null
           docker compose exec -T redis sh -c "redis-cli -a \"\${REDIS_PASSWORD:-}\" FLUSHALL" 2>/dev/null || true
 

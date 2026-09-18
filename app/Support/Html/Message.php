@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Support\Html;
 
 use App\Support\Frame;
-use App\Support\Smilies;
 
 /**
  * Message and alert helpers extracted from the legacy Html facade.
@@ -52,18 +51,5 @@ final class Message
     public static function stdMessage(string $heading, string $text, bool $htmlstrip = false): void
     {
         echo Frame::stdMessage($heading, $text, $htmlstrip);
-    }
-
-    /**
-     * Emit the framed smilies table. Backs the legacy `insert_smilies_frame()` helper.
-     */
-    public static function smiliesFrame(): void
-    {
-
-        echo Smilies::framedTable(
-            (string) (__('legacy/functions.text_smilies')),
-            (string) (__('legacy/functions.col_type_something')),
-            (string) (__('legacy/functions.col_to_make_a')),
-        );
     }
 }

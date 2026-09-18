@@ -223,11 +223,6 @@ final class Html
         Message::stdMessage($heading, $text, $htmlstrip);
     }
 
-    public static function smiliesFrame(): void
-    {
-        Message::smiliesFrame();
-    }
-
     // ── Layout (delegates to PageLayout/Frame) ──────────────────────
 
     /**
@@ -246,38 +241,6 @@ final class Html
     public static function stdfoot(): void
     {
         PageLayout::footer();
-    }
-
-    /**
-     * Open a framed content block. Backs the legacy `begin_frame()` helper.
-     */
-    public static function beginFrame(string $caption = '', bool $center = false, int $padding = 10, string $width = '100%', string $caption_center = 'left'): void
-    {
-        echo Frame::open($caption, $center, $padding, $width, $caption_center);
-    }
-
-    /**
-     * Close a framed content block. Backs the legacy `end_frame()` helper.
-     */
-    public static function endFrame(): void
-    {
-        echo Frame::CLOSE;
-    }
-
-    /**
-     * Open a data table. Backs the legacy `begin_table()` helper.
-     */
-    public static function beginTable(bool $fullwidth = false, int $padding = 5): void
-    {
-        echo Frame::tableOpen($fullwidth, $padding);
-    }
-
-    /**
-     * Close a data table. Backs the legacy `end_table()` helper.
-     */
-    public static function endTable(): void
-    {
-        echo Frame::TABLE_CLOSE;
     }
 
     /**
@@ -326,13 +289,5 @@ final class Html
         bool $return = false,
     ): ?string {
         return self::emitSettingsFrowSmall((string) $x, (string) $y, ! (bool) $noesc, $relation, $return);
-    }
-
-    /**
-     * Emit two bare table cells. Backs the legacy `twotd()` helper.
-     */
-    public static function twoTd(string $head, string $follow): void
-    {
-        echo self::settingsCells($head, $follow);
     }
 }

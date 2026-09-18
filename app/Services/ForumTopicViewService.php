@@ -15,6 +15,7 @@ use App\Repositories\TopicRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Format;
 use App\Support\Forum;
+use App\Support\Frame;
 use App\Support\Globals;
 use App\Support\Html;
 use App\Support\Html\SafeHtml;
@@ -194,8 +195,7 @@ final class ForumTopicViewService
             echo '<a href="'.htmlspecialchars('?action=reply&topicid='.$topicid).'"><img class="f_reply" src="pic/trans.gif" alt="Add Reply" title="'.(__('legacy/forums.title_reply_directly')).'" /></a>&nbsp;&nbsp;';
         }
         echo '</td>';
-        echo "</tr></table>\n";
-        Html::beginFrame();
+        echo "</tr></table>\n".Frame::open('', false, 10, '100%', 'left');
 
         $neededColumns = ['id', 'class', 'enabled', 'privacy', 'avatar', 'signature', 'uploaded', 'downloaded', 'last_access', 'username', 'donor', 'leechwarn', 'warned', 'title'];
         $userInfoArr = $this->forumRepository->getUsersByIds($uidArr, $neededColumns);
@@ -336,9 +336,7 @@ final class ForumTopicViewService
             echo "</table>\n";
         }
 
-        Html::endFrame();
-
-        echo $pagerbottom;
+        echo Frame::CLOSE.$pagerbottom;
         if ($maypost) {
             echo "<br /><table style='border:1px solid #000000;'><tr>".
 '<td class="text" align="center"><b>'.(__('legacy/forums.text_quick_reply')).'</b><br /><br />'.

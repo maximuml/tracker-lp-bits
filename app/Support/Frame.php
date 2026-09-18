@@ -208,24 +208,4 @@ final class Frame
             .'<tr><td class="embedded"><font color="white"><h1>SQL Error</h1>'."\n"
             .'<b>'.$error.$location.'</b></font></td></tr></table>');
     }
-
-    /**
-     * Emit the main-frame opener. Backs the legacy `begin_main_frame()` helper.
-     */
-    public static function mainFrameOpen(
-        string $caption = '',
-        bool $center = false,
-        int|string $width = 100,
-    ): void {
-        $contentWidth = defined('CONTENT_WIDTH') ? (int) \constant('CONTENT_WIDTH') : 0;
-        echo self::mainOpen($caption, $center, $width, $contentWidth);
-    }
-
-    /**
-     * Close a main frame. Backs the legacy `end_main_frame()` helper.
-     */
-    public static function mainFrameClose(): void
-    {
-        echo self::CLOSE;
-    }
 }

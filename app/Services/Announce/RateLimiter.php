@@ -48,7 +48,7 @@ final class RateLimiter
         }
 
         $lockParams = ['info_hash' => $infoHashBinary, 'passkey' => $passkey];
-        $reAnnounceKey = 'isReAnnounce:'.md5(http_build_query($lockParams));
+        $reAnnounceKey = 'isReAnnounce:'.hash('xxh128', http_build_query($lockParams));
         $isReAnnounce = ! RedisGuard::attempt(static fn () => $redis->set($reAnnounceKey, TIMENOW, ['nx', 'ex' => self::RE_ANNOUNCE_INTERVAL]));
 
         if (RedisGuard::attempt(static fn () => $redis->get("torrent_not_exists:{$infoHashBinary}"))) {

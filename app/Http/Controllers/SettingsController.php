@@ -286,7 +286,7 @@ class SettingsController extends LegacyController
                 $minute = (int) ($request->post('login_secret_lifetime') ?? 0);
                 $timestamp = strtotime("+ {$minute} minutes");
                 $data['login_secret_deadline'] = $timestamp !== false ? date('Y-m-d H:i:s', $timestamp) : date('Y-m-d H:i:s');
-                $data['login_secret'] = md5((string) microtime(true));
+                $data['login_secret'] = bin2hex(random_bytes(16));
             }
         }
 

@@ -80,7 +80,7 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
     public function issue(): string
     {
         $random = Strings::randomCode((int) 6);
-        $imagehash = md5($random);
+        $imagehash = hash('xxh128', $random);
         $dateline = time();
         RegImage::query()->insert([
             'imagehash' => $imagehash,

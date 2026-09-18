@@ -151,6 +151,7 @@ This release ships the shoutbox modernization, MeiliSearch-by-default, setlist l
   - Removed 95 confirmed-dead English legacy translation keys (dynamic `__('legacy/x.'.$var)` accesses accounted for) and the dead `vendor/jquery-loading/jquery.loading.min.js` registration.
   - Forums whose `forid` references a missing or hidden overforum now render in a fallback "Forums" group instead of being silently dropped; `minclassread` visibility still applies.
   - Regression coverage: `AuthPagesRenderAssetsTest`, `NoLeakedMarkupTest`, `LegacyLangMarkupTest` (ratchet), extended `TimeTest`, new `TimeLegacyFormatTest` and orphan-forum tests.
+  - `EscapedHtmlHelpersTest` (architecture ratchet): any `App\Support::*` call inside `{{ }}` must return `Htmlable`, a markup-free scalar, or be explicitly allowlisted as plain text — a signature regression (`SafeHtml` → `string`) or a new raw-string HTML helper now fails CI. `{{ e()/htmlspecialchars() }}` double-escaping is forbidden too.
 
 - **Feature tests run under the production legacy context**
   - `tests/bootstrap.php` defines `IN_NEXUS=true` when `NEXUS_LEGACY_CONTEXT=1`, so the Feature suite exercises the same constant-gated branches as `public/index.php`; Unit/Integration keep `IN_NEXUS=false` (they define the constant themselves where a legacy branch is under test).

@@ -119,7 +119,7 @@ class ScrapeService
      */
     private function cacheKey(array $infoHashes): string
     {
-        return 'scrape:'.md5(http_build_query(array_map(
+        return 'scrape:'.hash('xxh128', http_build_query(array_map(
             static fn (InfoHash $h) => $h->toBinary(),
             $infoHashes
         )));

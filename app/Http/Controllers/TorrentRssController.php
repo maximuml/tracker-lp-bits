@@ -69,7 +69,7 @@ class TorrentRssController extends LegacyController
             }
         }
 
-        $cacheKey = 'nexus_rss:'.$passkey.':'.md5(http_build_query($filteredQuery));
+        $cacheKey = 'nexus_rss:'.$passkey.':'.hash('xxh128', http_build_query($filteredQuery));
         $cacheData = Cache::get($cacheKey);
         if ($cacheData && config('app.env') !== 'local') {
             Log::writeWithContext('rss get from cache');
@@ -194,7 +194,7 @@ class TorrentRssController extends LegacyController
                 $normalQuery->where('torrents.pos_state', TorrentPosState::NONE->value);
             }
             $normalSql = $normalQuery->toSql();
-            $normalCacheKey = sprintf('nexus_rss:normal:%s', md5($normalSql.':'.$showrows));
+            $normalCacheKey = sprintf('nexus_rss:normal:%s', hash('xxh128', $normalSql.':'.$showrows));
             $normalRows = Cache::remember($normalCacheKey, 300, function () use ($normalQuery, $showrows) {
                 return $normalQuery->orderBy('torrents.id', 'desc')->limit($showrows)->get()->map(fn ($row) => (array) $row)->all();
             });
@@ -206,7 +206,7 @@ class TorrentRssController extends LegacyController
             $prependQuery = clone $baseQuery;
             $prependQuery->whereIn('torrents.id', $prependIds);
             $placeholders = implode(',', array_fill(0, count($prependIds), '?'));
-            $prependCacheKey = sprintf('nexus_rss:prepend:%s', md5($prependQuery->toSql().':'.$prependIdStr));
+            $prependCacheKey = sprintf('nexus_rss:prepend:%s', hash('xxh128', $prependQuery->toSql().':'.$prependIdStr));
             $prependRows = Cache::remember($prependCacheKey, 300, function () use ($prependQuery, $placeholders, $prependIds) {
                 return $prependQuery->orderByRaw("FIELD(torrents.id, {$placeholders})", $prependIds)->get()->map(fn ($row) => (array) $row)->all();
             });

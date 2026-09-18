@@ -343,9 +343,9 @@ final class ForumTopicViewService
             echo "<br /><table style='border:1px solid #000000;'><tr>".
 '<td class="text" align="center"><b>'.(__('legacy/forums.text_quick_reply')).'</b><br /><br />'.
 '<form id="compose" name="compose" method="post" action="?action=post" >'.
-'<input type="hidden" name="id" value="'.$topicid.'" /><input type="hidden" name="type" value="reply" /><br />';
-            Html::quickReplyVoid('compose', 'body', (string) (__('legacy/forums.submit_add_reply')));
-            echo '</form></td></tr></table>';
+'<input type="hidden" name="id" value="'.$topicid.'" /><input type="hidden" name="type" value="reply" /><br />'.
+Html::quickReply('compose', 'body', (string) (__('legacy/forums.submit_add_reply'))).
+'</form></td></tr></table>';
             echo '<p align="center"><a class="index" href="'.htmlspecialchars('?action=reply&topicid='.$topicid).'">'.(__('legacy/forums.text_add_reply'))."</a></p>\n";
         } elseif ($locked) {
             echo __('legacy/forums.text_topic_locked_new_denied');

@@ -53,13 +53,13 @@ final class HtmlInPhpRatchetTest extends TestCase
     private const BASELINE_TABLE_LITERALS = 44;
 
     /** Baseline: ob_start() calls (output buffering = inline page rendering). */
-    private const BASELINE_OB_START = 37;
+    private const BASELINE_OB_START = 34;
 
     /** Baseline: lines with `echo` inside app/Services + app/Http/Controllers. */
-    private const BASELINE_ECHO_IN_SERVICES = 204;
+    private const BASELINE_ECHO_IN_SERVICES = 199;
 
     /** Baseline: lines where a quoted string starts an HTML tag ('<div', "</td", '<!--'). */
-    private const BASELINE_HTML_LITERAL_LINES = 1226;
+    private const BASELINE_HTML_LITERAL_LINES = 1219;
 
     public function test_table_literal_count_does_not_exceed_baseline(): void
     {

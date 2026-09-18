@@ -218,19 +218,9 @@ final class Html
         return Message::messageAlert($url, $text, $bgcolor);
     }
 
-    public static function messageAlertVoid(string $url, string $text, string $bgcolor = 'red'): void
-    {
-        Message::messageAlertVoid($url, $text, $bgcolor);
-    }
-
     public static function stdMessage(string $heading, string $text, bool $htmlstrip = false): void
     {
         Message::stdMessage($heading, $text, $htmlstrip);
-    }
-
-    public static function quickReplyVoid(string $formName, string $textareaName, string $submitLabel): void
-    {
-        Message::quickReplyVoid($formName, $textareaName, $submitLabel);
     }
 
     public static function smiliesFrame(): void

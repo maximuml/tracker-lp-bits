@@ -228,26 +228,4 @@ final class Frame
     {
         echo self::CLOSE;
     }
-
-    /**
-     * Emit a full compose-form opener. Backs the legacy `begin_compose()` helper.
-     */
-    public static function composeBeginVoid(
-        string|Htmlable $title = '',
-        string $type = 'new',
-        string $body = '',
-        bool $hasSubject = true,
-        string $subject = '',
-        int $maxSubjectLength = 100,
-    ): void {
-        echo self::composeBegin($title, $type, $body, $hasSubject, $subject, $maxSubjectLength);
-    }
-
-    /**
-     * Emit a compose-form closer. Backs the legacy `end_compose()` helper.
-     */
-    public static function composeEndVoid(): void
-    {
-        echo self::composeEnd();
-    }
 }

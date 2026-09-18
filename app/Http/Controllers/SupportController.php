@@ -200,9 +200,7 @@ class SupportController extends LegacyController
             $replyUserMap[(int) $rUid] = UserDisplay::plainUsername((int) $rUid);
         }
 
-        ob_start();
-        Html::quickReplyVoid('reply', 'body', __('legacy/complains.text_reply'));
-        $replyBoxHtml = (string) ob_get_clean();
+        $replyBoxHtml = Html::quickReply('reply', 'body', __('legacy/complains.text_reply'));
 
         return $this->legacyPage($request, 'complains', false, [
             'mode' => 'view',

@@ -47,27 +47,11 @@ final class Message
     }
 
     /**
-     * Emit a banner-style site alert. Backs the legacy `msgalert()` helper.
-     */
-    public static function messageAlertVoid(string $url, string $text, string $bgcolor = 'red'): void
-    {
-        echo self::messageAlert($url, $text, $bgcolor);
-    }
-
-    /**
      * Emit a standard message box. Backs the legacy `stdmsg()` helper.
      */
     public static function stdMessage(string $heading, string $text, bool $htmlstrip = false): void
     {
         echo Frame::stdMessage($heading, $text, $htmlstrip);
-    }
-
-    /**
-     * Emit a quick-reply form block. Backs the legacy `quickreply()` helper.
-     */
-    public static function quickReplyVoid(string $formName, string $textareaName, string $submitLabel): void
-    {
-        echo Tag::quickReply($formName, $textareaName, $submitLabel);
     }
 
     /**

@@ -101,7 +101,7 @@ class SeedBonusJob implements ShouldQueue
 
             return;
         }
-        $idArr = array_filter(array_map('intval', explode(',', $idStr)));
+        $idArr = array_filter(array_map('intval', explode(',', $idStr)), static fn (int $id) => $id > 0);
         $results = DB::table('users')
             ->whereIn('id', $idArr)
             ->select(User::$commonFields)

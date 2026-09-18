@@ -87,7 +87,7 @@ class UpdateTorrentSeedersEtc implements ShouldQueue
 
             return;
         }
-        $torrentIdArr = array_filter(array_map('intval', explode(',', $idStr)));
+        $torrentIdArr = array_filter(array_map('intval', explode(',', $idStr)), static fn (int $id) => $id > 0);
         if (empty($torrentIdArr)) {
             Logger::writeWithContext((string) "{$logPrefix}, empty idStr", (string) 'error', (bool) false);
 

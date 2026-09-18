@@ -1,0 +1,13 @@
+{
+  "name": "tracker-lp-bits-browser-tests",
+  "private": true,
+  "description": "Playwright browser smoke suite — CI gate for markup-leak, CSP, a11y and mobile regressions",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@playwright/test": "1.63.0",
+    "@types/node": "24.10.1"
+  }
+}

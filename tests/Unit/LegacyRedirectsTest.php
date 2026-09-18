@@ -93,16 +93,18 @@ final class LegacyRedirectsTest extends TestCase
     }
 
     /**
-     * A11y CI uses canonical URLs.
+     * The browser-smoke CI job runs the Playwright suite that replaced
+     * a11y.yml — its specs scan the pages the axe CLI used to cover.
      */
-    public function test_a11y_ci_uses_canonical_urls(): void
+    public function test_browser_smoke_ci_runs_playwright(): void
     {
-        $a11y = file_get_contents(base_path('.github/workflows/a11y.yml'));
-        $this->assertStringContainsString('/index', $a11y, 'A11y must use /index');
-        $this->assertStringContainsString('/faq', $a11y, 'A11y must use /faq');
-        $this->assertStringContainsString('/rules', $a11y, 'A11y must use /rules');
-        $this->assertStringNotContainsString('/index.php', $a11y, 'A11y must not use /index.php');
-        $this->assertStringNotContainsString('/faq.php', $a11y, 'A11y must not use /faq.php');
+        $ci = file_get_contents(base_path('.github/workflows/ci.yml'));
+        $this->assertStringContainsString('browser-smoke', $ci, 'CI must have the browser-smoke job');
+        $this->assertStringContainsString('npx playwright test', $ci, 'browser-smoke must run playwright');
+        $this->assertFileExists(
+            base_path('tests/browser/specs/a11y.spec.ts'),
+            'a11y coverage must live in tests/browser',
+        );
     }
 
     /**

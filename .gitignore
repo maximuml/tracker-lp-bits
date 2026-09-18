@@ -51,3 +51,9 @@ perf-results/
 
 # Локальные рабочие документы (аудиты, черновики планов)
 *.local.md
+
+# Browser smoke suite (tests/browser) — Node is test-only, no build step
+tests/browser/node_modules/
+tests/browser/.auth/
+tests/browser/test-results/
+tests/browser/playwright-report/

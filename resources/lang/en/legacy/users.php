@@ -2,7 +2,7 @@
 
 return [
     'head_users' => 'Users',
-    'text_users' => '<h1>Users</h1>',
+    'text_users' => 'Users',
     'text_search' => 'Search:',
     'select_any_class' => '(any class)',
     'submit_okay' => 'Okay',

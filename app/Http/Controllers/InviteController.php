@@ -261,13 +261,13 @@ JS;
 
         foreach ($inviteRows as &$row) {
             $isHashValid = (int) $row['valid'] === InviteValid::YES->value;
-            $row['registerLink'] = $isHashValid
+            $row['registerLink'] = SafeHtml::fromTrustedHtml($isHashValid
                 ? sprintf('&nbsp;<a href="signup.php?type=invite&invitenumber=%s" title="%s" target="_blank"><small>[%s]</small></a>', e($row['hash']), e(__('legacy/invite.signup_link_help')), e(__('legacy/invite.signup_link')))
-                : '';
+                : '');
             $row['validText'] = Invite::$validInfo[$row['valid']]['text'] ?? '';
-            $row['inviteeUserHtml'] = ! $isHashValid
+            $row['inviteeUserHtml'] = SafeHtml::fromTrustedHtml(! $isHashValid
                 ? '<a href=userdetails.php?id='.(int) $row['invitee_register_uid'].'><font color=#1f7309>'.e($row['invitee_register_username']).'</font></a>'
-                : '';
+                : '');
         }
         unset($row);
 

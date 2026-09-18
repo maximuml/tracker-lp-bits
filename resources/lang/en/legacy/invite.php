@@ -6,7 +6,7 @@ return [
     'head_invites' => 'Invites',
     'std_no_invites_left' => 'You have no invites left. :( <br /><br />Please click ',
     'here_to_go_back' => 'here</a> to go back.',
-    'text_invite_code_sent' => 'The invite code has been sent!<br />',
+    'text_invite_code_sent' => 'The invite code has been sent!',
     'text_invite_someone' => 'Invite someone to join ',
     'text_s' => 's',
     'text_invitation' => ' invitation',

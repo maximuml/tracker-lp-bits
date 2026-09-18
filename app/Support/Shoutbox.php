@@ -157,7 +157,7 @@ final class Shoutbox
      * Build a small role badge for staff/VIP-tier classes.
      * Returns empty string for regular users.
      */
-    public static function classBadge(int $class): string
+    public static function classBadge(int $class): SafeHtml
     {
         static $map = null;
         if ($map === null) {
@@ -173,7 +173,7 @@ final class Shoutbox
         }
         $class = (int) $class;
         if (! isset($map[$class])) {
-            return '';
+            return SafeHtml::fromTrustedHtml('');
         }
         $label = $map[$class][0];
         $color = $map[$class][1];
@@ -182,7 +182,7 @@ final class Shoutbox
             $tooltip = (string) UserClass::name($class, false, false, true);
         }
 
-        return '<span class="shout-class-badge" style="background:'.$color.'" title="'.htmlspecialchars($tooltip, ENT_QUOTES).'">'.$label.'</span>';
+        return SafeHtml::fromTrustedHtml('<span class="shout-class-badge" style="background:'.$color.'" title="'.htmlspecialchars($tooltip, ENT_QUOTES).'">'.$label.'</span>');
     }
 
     /**

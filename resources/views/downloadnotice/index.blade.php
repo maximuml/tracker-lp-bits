@@ -10,17 +10,17 @@
 @if (! empty($showrationotice))
 <div class="nx-text nx-grow">
 <h3>{{ __('legacy/downloadnotice.text_this_is_private_tracker')}}</h3>
-<p>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/downloadnotice.text_private_tracker_note_one')))<i>({{ __('legacy/downloadnotice.text_learn_more')}}<a class="faqlink" href="{{ NEXUSWIKIURL ?? '' }}/Private Tracker" target="_blank">{{ __('legacy/downloadnotice.text_nexuswiki')}}</a>)</i></p>
-<p>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/downloadnotice.text_private_tracker_note_two')))<i>({{ __('legacy/downloadnotice.text_see_ratio')}}<a class="faqlink" href="faq.php#id23" target="_blank">{{ __('legacy/downloadnotice.text_faq')}}</a>)</i></p>
+<p>{{ __('legacy/downloadnotice.text_private_tracker_note_one') }} <b>{{ __('legacy/downloadnotice.text_exclusive') }}</b> {{ __('legacy/downloadnotice.text_private_tracker_note_one_end') }}<i>({{ __('legacy/downloadnotice.text_learn_more')}}<a class="faqlink" href="{{ NEXUSWIKIURL ?? '' }}/Private Tracker" target="_blank">{{ __('legacy/downloadnotice.text_nexuswiki')}}</a>)</i></p>
+<p>{{ __('legacy/downloadnotice.text_private_tracker_note_two') }} <b>{{ __('legacy/downloadnotice.text_must') }}</b> {{ __('legacy/downloadnotice.text_private_tracker_note_two_two') }} <b>{{ __('legacy/downloadnotice.text_ratio') }}</b>{{ __('legacy/downloadnotice.text_private_tracker_note_two_three') }} <span class='striking'>{{ __('legacy/downloadnotice.text_lose_membership') }}</span> {{ __('legacy/downloadnotice.text_private_tracker_note_two_end') }}<i>({{ __('legacy/downloadnotice.text_see_ratio')}}<a class="faqlink" href="faq.php#id23" target="_blank">{{ __('legacy/downloadnotice.text_faq')}}</a>)</i></p>
 <p>{{ __('legacy/downloadnotice.text_private_tracker_note_three')}}</p>
 <img src="pic/ratio.png" alt="ratio" />
-<p>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/downloadnotice.text_private_tracker_note_four')))</p>
+<p><b>{{ __('legacy/downloadnotice.text_private_tracker_note_four') }}</b><br /> {{ __('legacy/downloadnotice.text_private_tracker_note_four_two') }} <b>{{ __('legacy/downloadnotice.text_keep_seeding') }}</b> {{ __('legacy/downloadnotice.text_private_tracker_note_four_end') }}</p>
 </div>
 @endif
 @if (! empty($showclientnotice))
 <div class="nx-text nx-grow">
 <h3>{{ __('legacy/downloadnotice.text_use_allowed_clients')}}</h3>
-<p>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/downloadnotice.text_allowed_clients_note_one')))</p>
+<p>{{ __('legacy/downloadnotice.text_allowed_clients_note_one') }} <b>{{ __('legacy/downloadnotice.text_only') }}</b> {{ __('legacy/downloadnotice.text_allowed_clients_note_one_two') }} <span class='striking'>{{ __('legacy/downloadnotice.text_banned') }}</span> {{ __('legacy/downloadnotice.text_allowed_clients_note_one_end') }}</p>
 <p>{{ __('legacy/downloadnotice.text_allowed_clients_note_two')}}<a class='faqlink' href='faq.php#id29' target='_blank'>{{ __('legacy/downloadnotice.text_faq')}}</a>{{ __('legacy/downloadnotice.text_allowed_clients_note_three')}}</p>
 <div class="nx-row">
 <div class="nx-grow nx-center">

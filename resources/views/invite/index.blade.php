@@ -7,7 +7,7 @@
 
 <h1 align=center><a href="invite.php?id={{ $id }}">{{ $user['username'] ?? '' }}{{ __('legacy/invite.text_invite_system')}}</a></h1>
 @if ($sent == 1)
-    <p align=center><font color=red>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/invite.text_invite_code_sent')))</font></p>
+    <p align=center><font color=red>{{ __('legacy/invite.text_invite_code_sent') }}<br /></font></p>
 @endif
 
 @if ($type == 'new')
@@ -135,12 +135,12 @@
             @foreach ($sentTmpRows as $arr1)
                 <tr>
                 <td class=rowfollow>{{ $arr1['invitee'] }}</td>
-                <td class="rowfollow">{{ $arr1['hash'] }}@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($arr1['registerLink'] ?? ''))</td>
+                <td class="rowfollow">{{ $arr1['hash'] }}{{ $arr1['registerLink'] ?? '' }}</td>
                 <td class=rowfollow>{{ $arr1['time_invited'] }}</td>
                 @if ($menuSelected == 'sent')
                     <td class=rowfollow>{{ $arr1['validText'] ?? '' }}</td>
                 @endif
-                <td class=rowfollow>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($arr1['inviteeUserHtml'] ?? ''))</td>
+                <td class=rowfollow>{{ $arr1['inviteeUserHtml'] ?? '' }}</td>
                 @if ($menuSelected == 'tmp')
                     <td class=rowfollow>{{ $arr1['expired_at'] }}</td>
                     <td class=rowfollow>{{ $arr1['created_at'] }}</td>

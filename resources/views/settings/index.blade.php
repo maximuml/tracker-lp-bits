@@ -36,7 +36,7 @@
         <input type="text" style="width: 300px" name="SITENAME" value="{{ (string)($config['SITENAME'] ?? 'Nexus') }}"> {{ __('legacy/settings.text_site_name_note') ?? '' }}
     </x-settings-row>
     <x-settings-row layout="grid" :label="__('legacy/settings.row_base_url')">
-        <input type="text" style="width: 300px" name="BASEURL" value="{{ (string)($config['BASEURL'] ?? '') }}"> @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/settings.text_base_url_note')))
+        <input type="text" style="width: 300px" name="BASEURL" value="{{ (string)($config['BASEURL'] ?? '') }}"> . <b><u>{{ __('legacy/settings.text_base_url_note') }}</u> {{ __('legacy/settings.text_base_url_note_end') }}</b>
     </x-settings-row>
     <x-settings-save layout="grid" :label="__('legacy/settings.row_save_settings')" :text="__('legacy/settings.submit_save_settings')" />
     </form>
@@ -111,7 +111,7 @@
                 <li>{{ __('legacy/settings.'."text_priority_{$pri}") }}<input type="text" style="width: 100px" name="{{ $field }}" value="{{ (string)($config[$field] ?? '') }}"> {{ __('legacy/settings.'."text_priority_{$pri}_note") }}</li>
             @endforeach
         </ul>
-        @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/settings.text_cleanup_interval_note_two')))
+        <b>{{ __('legacy/settings.text_cleanup_interval_note_two') }}</b>: {{ __('legacy/settings.text_cleanup_interval_note_do') }} <b>{{ __('legacy/settings.text_cleanup_interval_note_not') }}</b> {{ __('legacy/settings.text_cleanup_interval_note_two_end') }}
     </x-settings-row>
     <x-settings-text layout="grid" :label="__('legacy/settings.row_signup_timeout')" name="signup_timeout" :value="$config['signup_timeout'] ?? 259200" :note="__('legacy/settings.text_signup_timeout_note')" width="100px" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_min_offer_votes')" name="minoffervotes" :value="$config['minoffervotes'] ?? 15" :note="__('legacy/settings.text_min_offer_votes_note')" width="100px" />
@@ -162,7 +162,7 @@
         :options="['' => 'none', 'tls' => 'tls', 'ssl' => 'ssl']"
         :selected="(string)($config['encryption'] ?? '')" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_smtp_account_name')" name="accountname" :value="$config['accountname'] ?? ''" :note="__('legacy/settings.text_smtp_account_name_note')" width="300px" />
-    <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_smtp_account_password') ?? 'Password' }}</div><div class="nx-fcell"><input type=password name=accountpassword style="width: 300px" value="{{ (string)($config['accountpassword'] ?? '') }}"> @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/settings.text_smtp_account_password_note')))</div>
+    <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_smtp_account_password') ?? 'Password' }}</div><div class="nx-fcell"><input type=password name=accountpassword style="width: 300px" value="{{ (string)($config['accountpassword'] ?? '') }}"> <b>{{ __('legacy/settings.text_smtp_account_password_note') }}</b> {{ __('legacy/settings.text_smtp_account_password_note_end') }}</div>
     </tbody>
     <x-settings-save layout="grid" :label="__('legacy/settings.row_save_settings')" :text="__('legacy/settings.submit_save_settings')" />
     </form>
@@ -277,7 +277,7 @@
         ['user-delete', null, \App\Enums\UserClass::ADMINISTRATOR, null],
         ['user-change-class', null, \App\Enums\UserClass::ADMINISTRATOR, null],
     ] as [$perm, $rowKey, $defaultClass, $noteKey])
-    <x-settings-row layout="grid" :label="\App\Support\Html\SafeHtml::fromTrustedHtml((string) ($rowKey !== null ? (__('legacy/settings.'.$rowKey)) : \App\Support\Locale::trans('permission.'.$perm.'.text', [], null)))">
+    <x-settings-row layout="grid" :label="(string) ($rowKey !== null ? (__('legacy/settings.'.$rowKey)) : \App\Support\Locale::trans('permission.'.$perm.'.text', [], null))">
         {{ __('legacy/settings.text_minimum_class') ?? 'Min class: ' }}{{ \App\Support\UserClass::classSelectWithContext($perm, \App\Enums\UserClass::SYSOP->value, $config[$perm] ?? 0, 0, true) }}{{ __('legacy/settings.text_default') ?? ' Default: ' }}{{ \App\Support\UserClass::name($defaultClass->value, false, true, true) }}{{ $noteKey !== null ? (__('legacy/settings.'.$noteKey)) : \App\Support\Locale::trans('permission.'.$perm.'.desc', [], null) }}
     </x-settings-row>
     @endforeach
@@ -298,7 +298,7 @@
     <x-settings-text layout="grid" :label="__('legacy/settings.row_title_keywords')" name="titlekeywords" :value="$config['titlekeywords'] ?? ''" :note="__('legacy/settings.text_title_keywords_note')" width="300px" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_meta_keywords')" name="metakeywords" :value="$config['metakeywords'] ?? ''" :note="__('legacy/settings.text_meta_keywords_note')" width="300px" />
     <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_meta_description') ?? 'Meta description' }}</div><div class="nx-fcell"><textarea cols="100" style="width: 450px;" rows="5" name='metadescription'>{{ (string)($config['metadescription'] ?? '') }}</textarea><br>{{ __('legacy/settings.text_meta_description_note') ?? '' }}</div>
-    <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_web_analytics_code') ?? 'Analytics code' }}</div><div class="nx-fcell"><textarea cols="100" style="width: 450px;" rows="5" name='analyticscode'>{{ (string)($config['analyticscode'] ?? '') }}</textarea><br>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/settings.text_web_analytics_code_note')))</div>
+    <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_web_analytics_code') ?? 'Analytics code' }}</div><div class="nx-fcell"><textarea cols="100" style="width: 450px;" rows="5" name='analyticscode'>{{ (string)($config['analyticscode'] ?? '') }}</textarea><br>{{ __('legacy/settings.text_web_analytics_code_note') }} <br /><b>{{ __('legacy/settings.text_note') }}</b>: {{ __('legacy/settings.text_web_analytics_code_note_end') }}</div>
     <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_see_sql_debug') ?? 'SQL debug' }}</div><div class="nx-fcell"><input type='checkbox' name='enablesqldebug' value='yes'@if (($config['enablesqldebug'] ?? 'no') === 'yes') checked @endif>{{ __('legacy/settings.text_allow') ?? 'Allow' }}{{ \App\Support\UserClass::classSelectWithContext('sqldebug', \App\Enums\UserClass::STAFFLEADER->value, $config['sqldebug'] ?? \App\Enums\UserClass::MODERATOR->value) }}{{ __('legacy/settings.text_see_sql_list') ?? '' }}{{ \App\Support\UserClass::name(\App\Enums\UserClass::SYSOP->value, false, true, true) }}</div>
     <x-settings-text layout="grid" :label="__('legacy/settings.row_tracker_founded_date')" name="datefounded" :value="$config['datefounded'] ?? '2007-12-24'" :note="__('legacy/settings.text_tracker_founded_date_note')" width="300px" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_css_date')" name="cssdate" :value="$config['cssdate'] ?? ''" :note="__('legacy/settings.text_css_date')" width="300px" />
@@ -516,7 +516,7 @@
 
 @elseif ($action === 'miscsettings')
     <form method="post" action="{{ $scriptName }}"><input type="hidden" name="action" value="savesettings_misc">@csrf
-    <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_misc_donation_custom') ?? 'Donation custom' }}</div><div class="nx-fcell"><textarea cols="100" rows="10" name='donation_custom'>{{ (string)($config['donation_custom'] ?? '') }}</textarea><br>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/settings.text_donation_custom_note')))</div>
+    <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_misc_donation_custom') ?? 'Donation custom' }}</div><div class="nx-fcell"><textarea cols="100" rows="10" name='donation_custom'>{{ (string)($config['donation_custom'] ?? '') }}</textarea><br>{{ __('legacy/settings.text_donation_custom_note') }}&nbsp;<b><a href="tags.php" target="_blank">{{ __('legacy/settings.text_bbcode_tag') }}</a></b></div>
     <x-settings-text layout="grid" :label="__('legacy/settings.row_protected_forum')" name="protected_forum" :value="$config['protected_forum'] ?? ''" :note="__('legacy/settings.text_protected_forum')" width="100px" />
     <x-settings-save layout="grid" :label="__('legacy/settings.row_save_settings')" :text="__('legacy/settings.submit_save_settings')" />
     </form>

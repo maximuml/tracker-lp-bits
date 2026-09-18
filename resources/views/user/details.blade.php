@@ -64,7 +64,7 @@
 <x-settings-row-small :label="__('legacy/userdetails.row_donated')">${{ $user['donated'] }}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ $user['donated_cny'] }}</x-settings-row-small>
 @endif
 @if (! empty($user['avatar']))
-<x-settings-row-small :label="__('legacy/userdetails.row_avatar')">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($avatarHtml))</x-settings-row-small>
+<x-settings-row-small :label="__('legacy/userdetails.row_avatar')">{{ $avatarHtml }}</x-settings-row-small>
 @endif
 <x-settings-row-small :label="__('legacy/userdetails.row_class')"><img alt="{{ \App\Support\UserClass::name($user['class'], false, false, true) }}" title="{{ \App\Support\UserClass::name($user['class'], false, false, true) }}" src="{{ \App\Support\UserClass::imagePath($user['class']) }}" />@if (($user['title'] ?? '') !== '')&nbsp;{{ trim($user['title']) }}@endif @if ((int) $user['class'] === UC_VIP && ! empty($user['vip_until']) && strtotime((string) $user['vip_until'])){{ __('legacy/userdetails.row_vip_until') ?? '' }}: {{ $user['vip_until'] }}@endif</x-settings-row-small>
 @if ($userPropsHtml !== '')
@@ -131,7 +131,7 @@
 <x-settings-row :label="__('legacy/userdetails.row_comment')"><textarea cols="60" rows="6" name="modcomment">{{ $modcomment }}</textarea></x-settings-row>
 <x-settings-row :label="__('legacy/userdetails.row_seeding_karma')"><textarea cols="60" rows="6" name="bonuscomment" readonly="readonly">{{ $bonuscomment }}</textarea></x-settings-row>
 @endif
-<tr><td class="rowhead">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/userdetails.row_warning_system')))</td><td class="rowfollow" align="left" ><table data-nx="data" class="main" cellspacing="0" cellpadding="5"><tr><td class="rowfollow">@if ($warned)<input name="warned" value="yes" type="radio" checked="checked" />{{ __('legacy/userdetails.radio_yes') ?? '' }}<input name="warned" value="no" type="radio" />{{ __('legacy/userdetails.radio_no') ?? '' }}@else{{ __('legacy/userdetails.text_not_warned') ?? '' }}@endif</td>
+<tr><td class="rowhead">{{ __('legacy/userdetails.row_warning_system') }}<br /><br />{{ __('legacy/userdetails.row_warning_system_note') }}</td><td class="rowfollow" align="left" ><table data-nx="data" class="main" cellspacing="0" cellpadding="5"><tr><td class="rowfollow">@if ($warned)<input name="warned" value="yes" type="radio" checked="checked" />{{ __('legacy/userdetails.radio_yes') ?? '' }}<input name="warned" value="no" type="radio" />{{ __('legacy/userdetails.radio_no') ?? '' }}@else{{ __('legacy/userdetails.text_not_warned') ?? '' }}@endif</td>
 @if ($warned)
 @if ($warnedUntilPretty === null)
 <td align="center" class="rowfollow">{{ __('legacy/userdetails.text_arbitrary_duration') ?? '' }}</td>

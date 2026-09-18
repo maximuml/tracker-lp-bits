@@ -9,5 +9,5 @@
 <tr><td class=rowfollow>{{ $row['username'] ?? '' }}</td><td class=rowfollow align=left>{{ $row['vote'] ?? '' }}</td></tr>
 @endforeach
 </table>
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($offer_vote['pagerBottom'] ?? ''))
+{{ $offer_vote['pagerBottom'] ?? '' }}
 @endif

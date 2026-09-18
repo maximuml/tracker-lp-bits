@@ -6,6 +6,7 @@ namespace Tests\Unit;
 
 use App\Support\Html\HtmlSanitizer;
 use App\Support\Html\SafeHtml;
+use Illuminate\Support\Facades\Blade;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
@@ -216,6 +217,25 @@ final class SafeHtmlTest extends TestCase
         $blade = app('blade.compiler');
         $directives = $blade->getCustomDirectives();
         $this->assertArrayHasKey('safeHtml', $directives, '@safeHtml directive must be registered');
+    }
+
+    /**
+     * The @safeHtml directive callback compiles and renders both branches:
+     * SafeHtml passes through as-is, plain strings are escaped.
+     */
+    public function test_blade_safehtml_directive_renders_safehtml_and_escapes_strings(): void
+    {
+        $safe = Blade::render(
+            '@safeHtml($value)',
+            ['value' => SafeHtml::fromTrustedHtml('<b>safe</b>')]
+        );
+        $this->assertSame('<b>safe</b>', $safe);
+
+        $escaped = Blade::render(
+            '@safeHtml($value)',
+            ['value' => '<i>raw</i>']
+        );
+        $this->assertSame('&lt;i&gt;raw&lt;/i&gt;', $escaped);
     }
 
     /**

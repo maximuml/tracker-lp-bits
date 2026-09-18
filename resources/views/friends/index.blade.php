@@ -12,7 +12,7 @@
 <div class="nx-box nx-box--tight nx-box--737">
 
 @if (empty($friendsList))
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/friends.text_friends_empty')))
+    <em>{{ __('legacy/friends.text_friends_empty') }}</em>
 @else
     <div class="nx-fcards">
     @foreach ($friendsList as $friend)
@@ -22,8 +22,8 @@
         <div style='width:75px;height:75px;overflow: hidden'><img width=75px src="{{ $friend['avatarSrc'] }}"></div>
         </div><div class="nx-grow">
         <div class="nx-row nx-main">
-        <div class="nx-embedded nx-w-80" style='padding: 5px'>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($friend['body1Html'] ?? ''))</div>
-        <div class="nx-embedded nx-w-20" style='padding: 5px'>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml($friend['body2Html'] ?? ''))</div>
+        <div class="nx-embedded nx-w-80" style='padding: 5px'>{{ $friend['body1Html'] ?? '' }}</div>
+        <div class="nx-embedded nx-w-20" style='padding: 5px'>{{ $friend['body2Html'] ?? '' }}</div>
         </div>
         </div>
         </div>

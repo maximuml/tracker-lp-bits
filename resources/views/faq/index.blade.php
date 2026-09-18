@@ -5,8 +5,8 @@
 @section('content')
 @if (! empty($faqCategories))
     {{ \App\Support\Frame::open(__('legacy/faq.text_welcome_to').$SITENAME." - ".$SLOGAN, false, 10, '100%', 'left') }}
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/faq.text_welcome_content_one')))
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(sprintf(__('legacy/faq.text_welcome_content_two'), $SITENAME, $SITENAME)))
+    {{ __('legacy/faq.text_welcome_content_one') }} <a class="faqlink" href="contactstaff.php">{{ __('legacy/faq.text_contact') }}</a> {{ __('legacy/faq.text_welcome_content_one_end') }}<br /><br />{{ __('legacy/faq.text_welcome_content_one_two') }}
+    {{ sprintf(__('legacy/faq.text_welcome_content_two'), $SITENAME) }} <a class="faqlink" href="rules.php">{{ __('legacy/faq.text_rules') }}</a>{{ __('legacy/faq.text_welcome_content_two_two') }}<br /><br />{{ sprintf(__('legacy/faq.text_welcome_content_two_three'), $SITENAME) }} <a class="faqlink" href="useragreement.php">{{ __('legacy/faq.text_user_agreement') }}</a>.
     {{ \App\Support\Frame::close() }}
 
     {{ \App\Support\Frame::open("<span id=\"top\">".(__('legacy/faq.text_contents'))."</span>", false, 10, '100%', 'left') }}

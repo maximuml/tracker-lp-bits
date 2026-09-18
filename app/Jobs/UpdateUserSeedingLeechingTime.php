@@ -87,7 +87,7 @@ class UpdateUserSeedingLeechingTime implements ShouldQueue
 
             return;
         }
-        $userIdArr = array_filter(array_map('intval', explode(',', $idStr)));
+        $userIdArr = array_filter(array_map('intval', explode(',', $idStr)), static fn (int $id) => $id > 0);
         if (empty($userIdArr)) {
             Logger::writeWithContext((string) "{$logPrefix}, empty idStr", (string) 'error', (bool) false);
 

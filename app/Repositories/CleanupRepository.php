@@ -127,7 +127,7 @@ class CleanupRepository extends BaseRepository
             $newBatch = $batchKey.':'.$this->getHashKeySuffix();
             $lifeTime = $this->getCacheKeyLifeTime();
             $redis->set($batchKey, $newBatch, ['ex' => $lifeTime]);
-            $redis->hSetNx($newBatch, -1, 1);
+            $redis->hSetNx($newBatch, '-1', 1);
             $redis->expire($newBatch, $lifeTime);
         }
 
@@ -142,6 +142,11 @@ class CleanupRepository extends BaseRepository
             $delay = $this->getDelay($batchKeyInfo['task_index'], $length, $page);
             $toRemoveFields = $validFields = [];
             foreach ($arr_keys as $field => $value) {
+                if ((int) $field === -1) {
+                    $toRemoveFields[] = $field;
+
+                    continue;
+                }
                 if ($batchKey == self::USER_SEED_BONUS_BATCH_KEY && $value < $userSeedBonusDeadline) {
                     // dead, should remove
                     $toRemoveFields[] = $field;

@@ -100,11 +100,11 @@ final class ForumComposeService
 
                 return ['title' => '', 'body' => SafeHtml::fromTrustedHtml('')];
         }
-        echo '<input type="hidden" name="id" value="'.$hiddenId.'" />';
-        echo '<input type="hidden" name="type" value="'.$hiddenType.'" />';
-        Frame::composeBeginVoid(new HtmlString((string) $title), $hiddenType, $body, $hassubject, $subject);
-        Frame::composeEndVoid();
-        echo '</form>';
+        echo '<input type="hidden" name="id" value="'.$hiddenId.'" />'.
+            '<input type="hidden" name="type" value="'.$hiddenType.'" />'.
+            Frame::composeBegin(new HtmlString((string) $title), $hiddenType, $body, $hassubject, $subject, 100).
+            Frame::composeEnd().
+            '</form>';
 
         return ['title' => (string) $title, 'body' => SafeHtml::fromTrustedHtml((string) ob_get_clean())];
     }

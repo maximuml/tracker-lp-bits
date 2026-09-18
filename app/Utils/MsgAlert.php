@@ -72,7 +72,7 @@ final class MsgAlert
         $nowTimestamp = time();
         foreach (self::$alerts as $item) {
             if ($item['deadline'] > $nowTimestamp) {
-                Html::messageAlertVoid($item['url'] ?: '', $item['text'], $item['color'] ?: 'red');
+                echo Html::messageAlert($item['url'] ?: '', $item['text'], $item['color'] ?: 'red');
             }
         }
     }

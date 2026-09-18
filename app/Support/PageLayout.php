@@ -296,7 +296,7 @@ class PageLayout
                     if (! empty($currentPromotion['remark'])) {
                         $msg .= '<br/>'.sprintf($remarkTpl, $currentPromotion['remark']);
                     }
-                    Html::messageAlertVoid('torrents.php', $msg, 'green');
+                    echo Html::messageAlert('torrents.php', $msg, 'green');
                 }
                 if ($upcomingPromotion) {
                     $promotionText = TorrentPromotion::fromIntSafe((int) ($upcomingPromotion['global_sp_state'] ?? TorrentPromotion::NORMAL->value))->label();
@@ -308,12 +308,12 @@ class PageLayout
                     if (! empty($upcomingPromotion['remark'])) {
                         $msg .= '<br/>'.sprintf($remarkTpl, $upcomingPromotion['remark']);
                     }
-                    Html::messageAlertVoid('torrents.php', $msg, 'blue');
+                    echo Html::messageAlert('torrents.php', $msg, 'blue');
                 }
                 if ($context->user['leechwarn']) {
                     $kicktimeout = Time::format($context->user['leechwarnuntil'], false, false, true);
                     $text = __('legacy/functions.text_please_improve_ratio_within').$kicktimeout.__('legacy/functions.text_or_you_will_be_banned');
-                    Html::messageAlertVoid('faq.php#id17', $text, 'orange');
+                    echo Html::messageAlert('faq.php#id17', $text, 'orange');
                 }
                 if ($context->deleteNotTransferTwoAccount) {
                     if ($context->user['downloaded'] == 0 && ($context->user['uploaded'] == 0 || $context->user['uploaded'] == $context->iniUploadMain)) {
@@ -324,18 +324,18 @@ class PageLayout
                             if ($addedtime + $secs / 3 < TIMENOW) {
                                 $kicktimeout = Time::format(date('Y-m-d H:i:s', $addedtime + $secs), false, false, true);
                                 $text = __('legacy/functions.text_please_download_something_within').$kicktimeout.__('legacy/functions.text_inactive_account_be_deleted');
-                                Html::messageAlertVoid('rules.php', $text, 'gray');
+                                echo Html::messageAlert('rules.php', $text, 'gray');
                             }
                         }
                     }
                 }
                 if ($context->user['showclienterror']) {
                     $text = __('legacy/functions.text_banned_client_warning');
-                    Html::messageAlertVoid('faq.php#id29', $text, 'black');
+                    echo Html::messageAlert('faq.php#id29', $text, 'black');
                 }
                 if ($unread) {
                     $text = __('legacy/functions.text_you_have').$unread.__('legacy/functions.text_new_message').Strings::addS((int) $unread).__('legacy/functions.text_click_here_to_read');
-                    Html::messageAlertVoid('messages.php', $text, 'red');
+                    echo Html::messageAlert('messages.php', $text, 'red');
                 }
                 MsgAlert::getInstance()->render();
                 $settings_script_name = $context->scriptFileName;
@@ -349,7 +349,7 @@ class PageLayout
                     $new_news = (int) $new_news;
                     if ($new_news > 0) {
                         $text = __('legacy/functions.text_there_is').Strings::isOrAre($new_news).$new_news.__('legacy/functions.text_new_news');
-                        Html::messageAlertVoid('index.php', $text, 'green');
+                        echo Html::messageAlert('index.php', $text, 'green');
                     }
                 }
                 $nummessages = app(StaffMessageRepository::class)->getStaffMessageCountCache($context->user['id'], 'new');
@@ -360,7 +360,7 @@ class PageLayout
                 $nummessages = (int) $nummessages;
                 if ($nummessages > 0) {
                     $text = __('legacy/functions.text_there_is').Strings::isOrAre($nummessages).$nummessages.__('legacy/functions.text_new_staff_message').Strings::addS($nummessages);
-                    Html::messageAlertVoid('staffbox.php', $text, 'blue');
+                    echo Html::messageAlert('staffbox.php', $text, 'blue');
                 }
                 if (Permissions::userCan('torrent-approval', false, (int) ($context->user['id'] ?? 0)) && Settings::get('torrent.approval_status_none_visible') == 'no') {
                     $cacheKey = 'TORRENT_APPROVAL_NONE';
@@ -371,7 +371,7 @@ class PageLayout
                     }
                     $toApprovalCounts = (int) $toApprovalCounts;
                     if ($toApprovalCounts) {
-                        Html::messageAlertVoid('torrents.php?approval_status=0&incldead=0', sprintf(__('legacy/functions.text_torrent_to_approval'), Strings::isOrAre($toApprovalCounts), $toApprovalCounts, Strings::addS($toApprovalCounts)), 'darkred');
+                        echo Html::messageAlert('torrents.php?approval_status=0&incldead=0', sprintf(__('legacy/functions.text_torrent_to_approval'), Strings::isOrAre($toApprovalCounts), $toApprovalCounts, Strings::addS($toApprovalCounts)), 'darkred');
                     }
                 }
                 if (Permissions::userCan('staffmem', false, (int) ($context->user['id'] ?? 0))) {
@@ -381,7 +381,7 @@ class PageLayout
                     }
                     $complaints = (int) $complaints;
                     if ($complaints) {
-                        Html::messageAlertVoid('complains.php?action=list', sprintf(__('legacy/functions.text_complains'), Strings::isOrAre($complaints), $complaints, Strings::addS($complaints)), 'darkred');
+                        echo Html::messageAlert('complains.php?action=list', sprintf(__('legacy/functions.text_complains'), Strings::isOrAre($complaints), $complaints, Strings::addS($complaints)), 'darkred');
                     }
                     $numreports = $context->cache?->get_value('staff_new_report_count');
                     if ($numreports == '') {
@@ -391,7 +391,7 @@ class PageLayout
                     $numreports = (int) $numreports;
                     if ($numreports) {
                         $text = __('legacy/functions.text_there_is').Strings::isOrAre($numreports).$numreports.__('legacy/functions.text_new_report').Strings::addS($numreports);
-                        Html::messageAlertVoid('reports.php', $text, 'blue');
+                        echo Html::messageAlert('reports.php', $text, 'blue');
                     }
                     $numcheaters = $context->cache?->get_value('staff_new_cheater_count');
                     if ($numcheaters == '') {
@@ -401,13 +401,13 @@ class PageLayout
                     $numcheaters = (int) $numcheaters;
                     if ($numcheaters) {
                         $text = __('legacy/functions.text_there_is').Strings::isOrAre($numcheaters).$numcheaters.__('legacy/functions.text_new_suspected_cheater').Strings::addS($numcheaters);
-                        Html::messageAlertVoid('cheaterbox.php', $text, 'blue');
+                        echo Html::messageAlert('cheaterbox.php', $text, 'blue');
                     }
                 }
                 $exam = new Exam;
                 $currentExam = $exam->getCurrent($context->user['id']);
                 if (! empty($currentExam['html']) && $currentExam['exam'] !== null) {
-                    Html::messageAlertVoid($currentExam['exam']->type == ExamType::TASK->value ? 'task.php' : 'messages.php', $currentExam['html'], $currentExam['exam']->background_color ?? 'blue');
+                    echo Html::messageAlert($currentExam['exam']->type == ExamType::TASK->value ? 'task.php' : 'messages.php', $currentExam['html'], $currentExam['exam']->background_color ?? 'blue');
                 }
             }
             if ($context->offlineMsg) {

@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace App\Support\Html;
 
-use App\Support\Frame;
-use App\Support\Smilies;
-
 /**
  * Message and alert helpers extracted from the legacy Html facade.
  *
@@ -44,42 +41,5 @@ final class Message
             : 'msg-alert-red';
 
         return '<table border="0" cellspacing="0" cellpadding="10" class="msg-alert"><tr><td class="'.$colorClass.'">'."\n".$inner.'</td></tr></table><br />';
-    }
-
-    /**
-     * Emit a banner-style site alert. Backs the legacy `msgalert()` helper.
-     */
-    public static function messageAlertVoid(string $url, string $text, string $bgcolor = 'red'): void
-    {
-        echo self::messageAlert($url, $text, $bgcolor);
-    }
-
-    /**
-     * Emit a standard message box. Backs the legacy `stdmsg()` helper.
-     */
-    public static function stdMessage(string $heading, string $text, bool $htmlstrip = false): void
-    {
-        echo Frame::stdMessage($heading, $text, $htmlstrip);
-    }
-
-    /**
-     * Emit a quick-reply form block. Backs the legacy `quickreply()` helper.
-     */
-    public static function quickReplyVoid(string $formName, string $textareaName, string $submitLabel): void
-    {
-        echo Tag::quickReply($formName, $textareaName, $submitLabel);
-    }
-
-    /**
-     * Emit the framed smilies table. Backs the legacy `insert_smilies_frame()` helper.
-     */
-    public static function smiliesFrame(): void
-    {
-
-        echo Smilies::framedTable(
-            (string) (__('legacy/functions.text_smilies')),
-            (string) (__('legacy/functions.col_type_something')),
-            (string) (__('legacy/functions.col_to_make_a')),
-        );
     }
 }

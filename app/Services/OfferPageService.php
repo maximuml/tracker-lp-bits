@@ -232,20 +232,14 @@ final class OfferPageService
             foreach ($commentRows as $commentObj) {
                 $allrows[] = $commentObj->toArray();
             }
-            ob_start();
-            echo $pagerTop;
-            Comment::tableVoid($allrows, 'offer', $id);
-            echo $pagerBottom;
-            $commentsHtml = (string) ob_get_clean();
+            $commentsHtml = $pagerTop.Comment::table($allrows, 'offer', $id).$pagerBottom;
         }
 
         $quickComment = '<table style=\'border:1px solid #000000;\'><tr>'.
             '<td class="text" align="center"><b>'.htmlspecialchars((string) (__('legacy/offers.text_quick_comment'))).'</b><br /><br />'.
             '<form id="compose" name="comment" method="post" action="comment.php?action=add&amp;type=offer" >'.
             '<input type="hidden" name="pid" value="'.$id.'" /><br />';
-        ob_start();
-        Html::quickReplyVoid('comment', 'body', (string) (__('legacy/offers.submit_add_comment')));
-        $quickComment .= (string) ob_get_clean();
+        $quickComment .= Html::quickReply('comment', 'body', (string) (__('legacy/offers.submit_add_comment')));
         $quickComment .= '</form></td></tr></table>';
 
         return [

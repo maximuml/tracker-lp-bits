@@ -134,7 +134,7 @@ final class Cache
                 $cacheMtime = filemtime($cachefile);
                 $cacheMtime = $cacheMtime === false ? null : $cacheMtime;
                 echo '<p align="center"><font class="small">'.(__('legacy/functions.text_page_last_updated')).date('Y-m-d H:i:s', $cacheMtime).'</font></p>';
-                Frame::mainFrameClose();
+                echo Frame::CLOSE;
                 Html::stdfoot();
                 exit;
             }

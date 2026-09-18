@@ -335,7 +335,7 @@ class UtilityController extends LegacyController
                 'description' => SafeHtml::fromTrustedHtml($description),
                 'syntax' => SafeHtml::fromTrustedHtml($syntax),
                 'example' => SafeHtml::fromTrustedHtml($example),
-                'result' => SafeHtml::fromTrustedHtml(Format::formatComment($example)),
+                'result' => Format::formatComment($example),
                 'remarks' => SafeHtml::fromTrustedHtml($remarks),
             ];
         };

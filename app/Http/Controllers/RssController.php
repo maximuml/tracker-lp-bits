@@ -207,7 +207,7 @@ class RssController extends LegacyController
         $msg = (__('legacy/getrss.std_use_following_url'))."\n".$link."\n\n"
             .(__('legacy/getrss.std_utorrent_feed_url'))."\n".$link.'&linktype=dl'.$addinclbm;
 
-        return $this->getrssMessageResponse(__('legacy/getrss.std_done'), Format::formatComment($msg), __('legacy/getrss.head_rss_feeds'));
+        return $this->getrssMessageResponse(__('legacy/getrss.std_done'), (string) Format::formatComment($msg), __('legacy/getrss.head_rss_feeds'));
     }
 
     private function getrssMessageResponse(string $heading, string $text, string $title = ''): Response

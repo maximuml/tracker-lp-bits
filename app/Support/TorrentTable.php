@@ -14,6 +14,7 @@ use App\Repositories\TorrentModerationRepository;
 use App\Services\TorrentStatsService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
+use App\Support\Html\SafeHtml;
 use App\Support\Torrent\TorrentStatus;
 
 final class TorrentTable
@@ -21,7 +22,7 @@ final class TorrentTable
     /**
      * @param  array<int, array<string, mixed>>  $rows
      */
-    public static function render(array $rows, string $variant = 'torrent', int $searchBoxId = 0): string
+    public static function render(array $rows, string $variant = 'torrent', int $searchBoxId = 0): SafeHtml
     {
         ob_start();
 
@@ -342,6 +343,6 @@ if (Permission::canManageTorrent()) { ?>
         }
         echo Html::tooltipContainer($torrent_tooltip, 500);
 
-        return (string) ob_get_clean();
+        return SafeHtml::fromTrustedHtml((string) ob_get_clean());
     }
 }

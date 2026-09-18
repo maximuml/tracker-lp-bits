@@ -12,7 +12,7 @@
 </form>
 
 @if (($test ?? '') !== '')
-    <p><hr>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Format::formatComment($test)))</hr></p>
+    <p><hr>{{ \App\Support\Format::formatComment($test) }}</hr></p>
 @endif
 
 @foreach ($tagItems ?? [] as $item)

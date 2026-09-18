@@ -305,7 +305,7 @@ JS;
             $rows = [];
             foreach ($uploaders as $ranking => $uploader) {
                 $rows[] = [
-                    'username' => SafeHtml::fromTrustedHtml(UserDisplay::username($uploader->id)),
+                    'username' => UserDisplay::username($uploader->id),
                     'count' => $uploader->count,
                     'rank' => $ranking + 1,
                 ];

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Support\Html\SafeHtml;
+
 /**
  * Stateless formatters extracted from `include/functions.php`.
  *
@@ -242,7 +244,7 @@ final class Format
         bool $enableflash = true,
         int $imagenum = -1,
         int $imageMaxHeight = 0,
-    ): string {
+    ): SafeHtml {
         return Comment::format(
             $text,
             $stripHtml,

@@ -8,6 +8,7 @@ use App\Enums\UserClass as UserClassEnum;
 use App\Models\Setting;
 use App\Models\User;
 use App\Support\Config\SiteConfig;
+use App\Support\Html\SafeHtml;
 
 /**
  * Stateless mapping helpers for the legacy user-class ladder.
@@ -142,7 +143,7 @@ final class UserClass
         }
 
         if (is_int($class) || ctype_digit($class)) {
-            $className = self::name((int) $class, false, false, false);
+            $className = (string) self::name((int) $class, false, false, false);
         } else {
             $className = $class;
         }
@@ -187,9 +188,9 @@ final class UserClass
         bool $b_colored = false,
         bool $I18N = false,
         array $options = [],
-    ): string {
+    ): SafeHtml {
         if (! (defined('IN_NEXUS') && IN_NEXUS)) {
-            return User::getClassName($class, $compact, $b_colored, $I18N);
+            return SafeHtml::fromTrustedHtml(User::getClassName($class, $compact, $b_colored, $I18N));
         }
 
         static $settingAccount = null;
@@ -223,7 +224,7 @@ final class UserClass
             $className = "<b class='".str_replace(' ', '', $classNameColor)."_Name'>".$className.'</b>';
         }
 
-        return $className;
+        return SafeHtml::fromTrustedHtml($className);
     }
 
     /**
@@ -242,7 +243,7 @@ final class UserClass
         bool $includeNoClass = false,
         bool $disabled = false,
         array $labels = [],
-    ): string {
+    ): SafeHtml {
         $disabledText = $disabled ? ' disabled = "disabled"' : '';
         $list = '<select name="'.$selectName.'"'.$disabledText.'>';
 
@@ -261,7 +262,7 @@ final class UserClass
 
         $list .= '</select>';
 
-        return $list;
+        return SafeHtml::fromTrustedHtml($list);
     }
 
     /**
@@ -276,7 +277,7 @@ final class UserClass
         int $minClass = 0,
         bool $includeNoClass = false,
         bool $disabled = false,
-    ): string {
+    ): SafeHtml {
 
         return self::classSelect(
             $selectName,

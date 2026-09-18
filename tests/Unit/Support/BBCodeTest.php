@@ -306,7 +306,7 @@ class BBCodeTest extends TestCase
     public function test_hidden_wraps_content_in_hidden_text_span(): void
     {
         // Delegates to Strings::hidden(); pin the visible output.
-        $this->assertSame('<span class="hidden-text">secret</span>', BBCode::hidden('secret'));
+        $this->assertSame('<span class="hidden-text">secret</span>', (string) BBCode::hidden('secret'));
     }
 
     // ---------- textAlign ----------

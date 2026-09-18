@@ -57,7 +57,7 @@ class HitAndRunResource extends Resource
                 TextColumn::make('user.username')
                     ->searchable()
                     ->label(__('label.username'))
-                    ->formatStateUsing(fn ($record) => new HtmlString(UserDisplay::username($record->uid, false, true, true, true))),
+                    ->formatStateUsing(fn ($record) => new HtmlString((string) UserDisplay::username($record->uid, false, true, true, true))),
 
                 TextColumn::make('torrent.name')->limit(30)->label(__('label.torrent.label')),
                 TextColumn::make('snatch.uploadText')->label(__('label.uploaded')),

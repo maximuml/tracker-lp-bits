@@ -6,6 +6,7 @@ namespace Tests\Integration\Repositories;
 
 use App\Models\User;
 use App\Repositories\PollRepository;
+use App\Support\Html\SafeHtml;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Tests\Attributes\TestCategory;
@@ -236,7 +237,7 @@ final class PollRepositoryTest extends TestCase
 
         $this->assertArrayHasKey($user1->id, $result);
         $this->assertArrayHasKey($user2->id, $result);
-        $this->assertIsString($result[$user1->id]);
+        $this->assertInstanceOf(SafeHtml::class, $result[$user1->id]);
     }
 
     public function test_user_display_map_deduplicates_user_ids(): void

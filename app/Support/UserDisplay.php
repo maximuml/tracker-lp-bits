@@ -9,6 +9,7 @@ use App\Enums\UserMedalStatus;
 use App\Models\UserMedal;
 use App\Models\UserMeta;
 use App\Support\Config\SiteConfig;
+use App\Support\Html\SafeHtml;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\HtmlString;
 
@@ -320,7 +321,7 @@ final class UserDisplay
             return new HtmlString('');
         }
 
-        return new HtmlString(UserDisplay::username($id, false, true, true, true));
+        return new HtmlString((string) UserDisplay::username($id, false, true, true, true));
     }
 
     /**
@@ -338,11 +339,11 @@ final class UserDisplay
         bool $withtitle = false,
         string $link_ext = '',
         bool $underline = false,
-    ): string {
+    ): SafeHtml {
         $id = (int) $id;
 
         if (func_num_args() === 1 && isset(self::$usernameCache[$id])) {
-            return self::$usernameCache[$id];
+            return SafeHtml::fromTrustedHtml(self::$usernameCache[$id]);
         }
 
         $arr = UserDisplay::row($id);
@@ -434,6 +435,6 @@ final class UserDisplay
             self::$usernameCache[$id] = $username;
         }
 
-        return $username;
+        return SafeHtml::fromTrustedHtml($username);
     }
 }

@@ -160,7 +160,7 @@ class ShoutboxController extends LegacyController
                     $username = (string) preg_replace(
                         '#href="[^"]*userdetails\.php\?id=\d+"#',
                         'href="#" class="shout-nick-reply" data-nick="'.htmlspecialchars($nickReplyName, ENT_QUOTES).'" title="'.htmlspecialchars($tooltipReply, ENT_QUOTES).'"',
-                        $username,
+                        (string) $username,
                         1
                     );
                 }
@@ -176,7 +176,7 @@ class ShoutboxController extends LegacyController
 
             $mentionsMe = false;
             $message = Shoutbox::formatMessage((string) ($arr['text'] ?? ''), $currentUserId, $mentionsMe);
-            $isLong = mb_strlen(strip_tags($message)) > 280;
+            $isLong = mb_strlen(strip_tags((string) $message)) > 280;
             $messageHtml = '<span id="shout-msg-'.$shoutId.'" class="'.($isLong ? 'shout-msg shout-msg-clamped' : 'shout-msg').'" data-raw="'
                 .htmlspecialchars((string) ($arr['text'] ?? ''), ENT_QUOTES).'">'.$message.'</span>';
             if ($isLong) {
@@ -260,7 +260,7 @@ class ShoutboxController extends LegacyController
     /**
      * @param  array<int|string, mixed>  $rows
      * @param  array<string, mixed>  $reactionData
-     * @param  array<int, string>  $userDisplayMap
+     * @param  array<int, SafeHtml>  $userDisplayMap
      * @return list<array<string, mixed>>
      */
     private function decorateHistoryRows(array $rows, int $currentUserId, bool $isStaff, array $reactionData, array $userDisplayMap): array

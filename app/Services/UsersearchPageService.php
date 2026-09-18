@@ -100,7 +100,7 @@ final class UsersearchPageService
         $classKeys = array_map('intval', array_keys(User::$classes));
         $maxClass = $classKeys !== [] ? max($classKeys) : 0;
         for ($i = 2; $i - 2 <= $maxClass; $i++) {
-            if ($c = UserClass::name($i - 2, false, true, true)) {
+            if (! ($c = UserClass::name($i - 2, false, true, true))->isEmpty()) {
                 $classOptions .= '<option value='.$i.($class && $class == $i ? ' selected' : '').">$c</option>\n";
             } else {
                 break;

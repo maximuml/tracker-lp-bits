@@ -23,7 +23,7 @@ final class SmiliesTest extends TestCase
             .' data-smile-text="myta"'
             .' data-domtt-content="'.$escaped.'">'
             .'<img style="max-width: 25px;" src="pic/smilies/4.gif" alt="" /></a>';
-        $this->assertSame($expected, Smilies::link('myform', 'myta', 4));
+        $this->assertSame($expected, (string) Smilies::link('myform', 'myta', 4));
     }
 
     public function test_link_escapes_formname_and_taname(): void

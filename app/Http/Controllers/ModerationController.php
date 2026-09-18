@@ -215,7 +215,7 @@ class ModerationController extends LegacyController
                     $type = __('legacy/reports.text_torrent');
                     $torrent = Torrent::query()->where('id', $row['reportid'])->first(['id', 'name']);
                     if (! $torrent) {
-                        $reporting = __('legacy/reports.text_torrent_does_not_exist');
+                        $reporting = (string) (__('legacy/reports.text_torrent_does_not_exist'));
                     } else {
                         $arr = $torrent->toArray();
                         $reporting = '<a href=details.php?id='.$arr['id'].'>'.htmlspecialchars($arr['name']).'</a>';
@@ -225,7 +225,7 @@ class ModerationController extends LegacyController
                     $type = __('legacy/reports.text_user');
                     $userId = User::query()->where('id', $row['reportid'])->value('id');
                     if (! $userId) {
-                        $reporting = __('legacy/reports.text_user_does_not_exist');
+                        $reporting = (string) (__('legacy/reports.text_user_does_not_exist'));
                     } else {
                         $reporting = UserDisplay::username($userId);
                     }
@@ -234,7 +234,7 @@ class ModerationController extends LegacyController
                     $type = __('legacy/reports.text_offer');
                     $offer = Offer::query()->where('id', $row['reportid'])->first(['id', 'name']);
                     if (! $offer) {
-                        $reporting = __('legacy/reports.text_offer_does_not_exist');
+                        $reporting = (string) (__('legacy/reports.text_offer_does_not_exist'));
                     } else {
                         $arr = $offer->toArray();
                         $reporting = '<a href="offers.php?id='.$arr['id'].'&off_details=1">'.htmlspecialchars($arr['name']).'</a>';
@@ -244,16 +244,16 @@ class ModerationController extends LegacyController
                     $type = __('legacy/reports.text_forum_post');
                     $arr = $this->moderationRepository->getForumPost((int) $row['reportid']);
                     if ($arr === null) {
-                        $reporting = __('legacy/reports.text_post_does_not_exist');
+                        $reporting = (string) (__('legacy/reports.text_post_does_not_exist'));
                     } else {
-                        $reporting = (__('legacy/reports.text_post_id')).$row['reportid'].(__('legacy/reports.text_of_topic')).'<b><a href="forums.php?action=viewtopic&topicid='.$arr['topicid'].'&page=p'.htmlspecialchars((string) $row['reportid']).'#pid'.htmlspecialchars((string) $row['reportid']).'">'.htmlspecialchars($arr['subject']).'</a></b>'.(__('legacy/reports.text_by')).UserDisplay::username($arr['postuserid']);
+                        $reporting = (string) (__('legacy/reports.text_post_id')).$row['reportid'].(__('legacy/reports.text_of_topic')).'<b><a href="forums.php?action=viewtopic&topicid='.$arr['topicid'].'&page=p'.htmlspecialchars((string) $row['reportid']).'#pid'.htmlspecialchars((string) $row['reportid']).'">'.htmlspecialchars($arr['subject']).'</a></b>'.(__('legacy/reports.text_by')).UserDisplay::username($arr['postuserid']);
                     }
                     break;
                 case 'comment':
                     $type = __('legacy/reports.text_comment');
                     $comment = Comment::query()->where('id', $row['reportid'])->first(['id', 'user', 'torrent', 'offer']);
                     if (! $comment) {
-                        $reporting = __('legacy/reports.text_comment_does_not_exist');
+                        $reporting = (string) (__('legacy/reports.text_comment_does_not_exist'));
                     } else {
                         $arr = $comment->toArray();
                         if ($arr['torrent']) {
@@ -269,7 +269,7 @@ class ModerationController extends LegacyController
                             $url = '';
                             $of = 'unknown';
                         }
-                        $reporting = (__('legacy/reports.text_comment_id')).$row['reportid'].$of.'<b><a href="'.$url.'">'.htmlspecialchars((string) $name).'</a></b>'.(__('legacy/reports.text_by')).UserDisplay::username($arr['user']);
+                        $reporting = (string) (__('legacy/reports.text_comment_id')).$row['reportid'].$of.'<b><a href="'.$url.'">'.htmlspecialchars((string) $name).'</a></b>'.(__('legacy/reports.text_by')).UserDisplay::username($arr['user']);
                     }
                     break;
             }
@@ -277,7 +277,7 @@ class ModerationController extends LegacyController
             $row['type_label'] = $type;
             $row['reporting'] = SafeHtml::fromTrustedHtml($reporting);
             $row['added_formatted'] = SafeHtml::fromTrustedHtml((string) Time::format($row['added']));
-            $row['reporterHtml'] = SafeHtml::fromTrustedHtml(UserDisplay::username($row['addedby']));
+            $row['reporterHtml'] = UserDisplay::username($row['addedby']);
             $rows[] = $row;
         }
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Support\Html\SafeHtml;
 use Illuminate\Support\Str;
 
 /**
@@ -106,9 +107,9 @@ final class Strings
      * Does NOT escape the input — every existing call site already
      * passes an escaped value (e.g. an IP address). Pinned by test.
      */
-    public static function hidden(string $text): string
+    public static function hidden(string $text): SafeHtml
     {
-        return '<span class="hidden-text">'.$text.'</span>';
+        return SafeHtml::fromTrustedHtml('<span class="hidden-text">'.$text.'</span>');
     }
 
     /**

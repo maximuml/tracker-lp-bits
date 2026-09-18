@@ -109,7 +109,7 @@ class UserResource extends Resource
             ->columns([
                 TextColumn::make('id')->sortable()->searchable(),
                 TextColumn::make('username')->searchable()->label(__('label.user.username'))
-                    ->formatStateUsing(fn ($record) => new HtmlString(UserDisplay::username($record->id, false, true, true, true))),
+                    ->formatStateUsing(fn ($record) => new HtmlString((string) UserDisplay::username($record->id, false, true, true, true))),
                 TextColumn::make('email')->searchable()->label(__('label.email')),
                 TextColumn::make('class')->label('Class')
                     ->formatStateUsing(fn (Column $column) => ($record = $column->getRecord()) instanceof User ? $record->classText : '')

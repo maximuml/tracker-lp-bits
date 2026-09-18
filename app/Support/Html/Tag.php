@@ -583,7 +583,7 @@ final class Tag
      */
     public static function formatHidden(string $content): string
     {
-        return Comment::addTempCode(BBCode::hidden($content));
+        return Comment::addTempCode((string) BBCode::hidden($content));
     }
 
     /**

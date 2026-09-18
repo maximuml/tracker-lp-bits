@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Support\Html\SafeHtml;
+
 /**
  * Stateless HTML builders for BBCode tags, extracted from
  * `include/functions.php`.
@@ -315,7 +317,7 @@ final class BBCode
      * Thin delegation to {@see Strings::hidden} — kept on the
      * BBCode surface for symmetry with the other `[…]` tag helpers.
      */
-    public static function hidden(string $content): string
+    public static function hidden(string $content): SafeHtml
     {
         return Strings::hidden($content);
     }

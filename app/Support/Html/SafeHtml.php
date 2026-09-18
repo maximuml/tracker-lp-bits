@@ -32,11 +32,13 @@ final class SafeHtml implements Htmlable
      *
      * Use this when the HTML has been produced by a trusted source
      * (e.g. BBCode renderer, framework-generated markup, or a
-     * hardcoded template).
+     * hardcoded template). Idempotent: a SafeHtml input is returned
+     * unchanged, so mixed string|SafeHtml view-data can be wrapped
+     * at the boundary without instanceof checks.
      */
-    public static function fromTrustedHtml(string $html): self
+    public static function fromTrustedHtml(string|self $html): self
     {
-        return new self($html);
+        return $html instanceof self ? $html : new self($html);
     }
 
     /**

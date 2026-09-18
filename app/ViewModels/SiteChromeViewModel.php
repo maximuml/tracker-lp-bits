@@ -78,7 +78,7 @@ final class SiteChromeViewModel
 
         if ($user !== null && ! empty($user['id'])) {
             $userId = (int) $user['id'];
-            $usernameHtml = SafeHtml::fromTrustedHtml(UserDisplay::username($userId));
+            $usernameHtml = UserDisplay::username($userId);
             $ratio = (string) Ratio::forUserId($userId);
             $uploaded = Format::size((int) ($user['uploaded'] ?? 0));
             $downloaded = Format::size((int) ($user['downloaded'] ?? 0));

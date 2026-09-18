@@ -9,6 +9,7 @@ use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\User;
 use App\Support\Config\SiteConfig;
+use App\Support\Html\SafeHtml;
 
 /**
  * Legacy BBCode formatter extracted from `include/functions.php`.
@@ -62,9 +63,9 @@ final class Comment
         bool $enableflash = true,
         int $imagenum = -1,
         int $imageMaxHeight = 0,
-    ): string {
+    ): SafeHtml {
         if ($text === '') {
-            return '';
+            return SafeHtml::fromTrustedHtml('');
         }
 
         self::resetTempCode();
@@ -252,7 +253,7 @@ final class Comment
 
         $s = self::resolveTempCodes($s);
 
-        return str_replace("\x08", '', $s);
+        return SafeHtml::fromTrustedHtml(str_replace("\x08", '', $s));
     }
 
     private static function resolveTempCodes(string $s): string

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Support\Html\SafeHtml;
+
 /**
  * Stateless helpers for computing and rendering share / seed-leech
  * ratios.
@@ -170,7 +172,7 @@ final class Ratio
      * monotonic order in the source images — pinning them here so
      * a renumber doesn't silently flip every legacy user-card).
      */
-    public static function image(mixed $ratio): string
+    public static function image(mixed $ratio): SafeHtml
     {
         if ($ratio >= 16) {
             $s = '163';
@@ -190,7 +192,7 @@ final class Ratio
             $s = '52';
         }
 
-        return '<img src="pic/smilies/'.$s.'.gif" alt="" />';
+        return SafeHtml::fromTrustedHtml('<img src="pic/smilies/'.$s.'.gif" alt="" />');
     }
 
     /**
@@ -253,7 +255,7 @@ final class Ratio
      * value in the colour from {@see color()}, and caps very large
      * ratios at the literal `Inf.`.
      */
-    public static function hr(int|float $uped, int|float $downed): string
+    public static function hr(int|float $uped, int|float $downed): SafeHtml
     {
         if ($downed > 0) {
             $ratio = $uped / $downed;
@@ -268,7 +270,7 @@ final class Ratio
             $ratio = '---';
         }
 
-        return $ratio;
+        return SafeHtml::fromTrustedHtml($ratio);
     }
 
     /**
@@ -278,16 +280,16 @@ final class Ratio
      * `<font color="">` for healthy ratios). Caller renders the
      * `$infinite` label when `$down <= 0` (views stay free of division).
      */
-    public static function leaderboard(int|float $up, int|float $down, int $decimals = 2, bool $alwaysWrap = false): string
+    public static function leaderboard(int|float $up, int|float $down, int $decimals = 2, bool $alwaysWrap = false): SafeHtml
     {
         $ratio = $up / $down;
         $color = self::color($ratio);
         $formatted = number_format($ratio, $decimals);
         if ($color !== '' || $alwaysWrap) {
-            return '<font color="'.$color.'">'.$formatted.'</font>';
+            return SafeHtml::fromTrustedHtml('<font color="'.$color.'">'.$formatted.'</font>');
         }
 
-        return $formatted;
+        return SafeHtml::fromTrustedHtml($formatted);
     }
 
     /**

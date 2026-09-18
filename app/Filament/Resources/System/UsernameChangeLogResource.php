@@ -58,7 +58,7 @@ class UsernameChangeLogResource extends Resource
                 TextColumn::make('username_new')
                     ->searchable()
                     ->label(__('username-change-log.labels.username_new'))
-                    ->formatStateUsing(fn ($record) => new HtmlString(UserDisplay::username($record->uid, false, true, true, true))),
+                    ->formatStateUsing(fn ($record) => new HtmlString((string) UserDisplay::username($record->uid, false, true, true, true))),
                 TextColumn::make('operator')
                     ->searchable()
                     ->label(__('label.operator')),

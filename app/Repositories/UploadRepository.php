@@ -119,7 +119,7 @@ class UploadRepository extends BaseRepository
                 $subject = Locale::trans('upload.email_notification_subject', ['site_name' => SiteConfig::current()->basic->siteName()], $locale);
                 $uploadByUsername = $torrentUploader instanceof User ? $torrentUploader->username : '';
                 $description = $torrent->extra !== null ? ($torrent->extra->descr ?? '') : '';
-                $body = Locale::trans('upload.email_notification_body', ['site_name' => SiteConfig::current()->basic->siteName(), 'name' => $torrent->name, 'size' => Format::size($torrent->size), 'category' => $categoryName, 'upload_by' => $this->handleAnonymous($uploadByUsername, $torrentUploader, $user, $torrent), 'description' => Str::limit(strip_tags(Format::formatComment($description)), 500), 'torrent_url' => sprintf('%s/details.php?id=%s&hit=1', Url::baseUrl(), $torrent->id)], $locale);
+                $body = Locale::trans('upload.email_notification_body', ['site_name' => SiteConfig::current()->basic->siteName(), 'name' => $torrent->name, 'size' => Format::size($torrent->size), 'category' => $categoryName, 'upload_by' => $this->handleAnonymous($uploadByUsername, $torrentUploader, $user, $torrent), 'description' => Str::limit(strip_tags((string) Format::formatComment($description)), 500), 'torrent_url' => sprintf('%s/details.php?id=%s&hit=1', Url::baseUrl(), $torrent->id)], $locale);
                 $sendResult = $toolRep->sendMail($user->email, $subject, $body);
                 Logger::writeWithContext((string) sprintf('%s, send result: %s', $logUser, $sendResult), (string) 'info', (bool) false);
                 if ($sendResult) {

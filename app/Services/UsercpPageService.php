@@ -238,7 +238,7 @@ final class UsercpPageService
             'readTopics' => $readTopics,
             'showAvatar' => ! empty($curUser['avatar']),
             'avatarUrl' => (string) ($curUser['avatar'] ?? ''),
-            'passkey' => SafeHtml::fromTrustedHtml(Strings::hidden((string) ($curUser['passkey'] ?? ''))),
+            'passkey' => Strings::hidden((string) ($curUser['passkey'] ?? '')),
             'email' => (string) ($curUser['email'] ?? ''),
             'invites' => (int) ($curUser['invites'] ?? 0),
             'seedbonus' => (string) ($curUser['seedbonus'] ?? '0'),
@@ -290,10 +290,10 @@ final class UsercpPageService
                 'userid' => (int) $topicArr['userid'],
                 'views' => $views,
                 'replies' => $replies,
-                'author' => SafeHtml::fromTrustedHtml(UserDisplay::username((int) $topicArr['userid'])),
+                'author' => UserDisplay::username((int) $topicArr['userid']),
                 'lastPostId' => $postid,
                 'lastPostUserId' => $userid,
-                'lastPostUsername' => SafeHtml::fromTrustedHtml(UserDisplay::username($userid)),
+                'lastPostUsername' => UserDisplay::username($userid),
                 'lastPostAdded' => SafeHtml::fromTrustedHtml($added),
             ];
         }

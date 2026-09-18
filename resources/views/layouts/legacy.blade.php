@@ -1,9 +1,9 @@
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\PageLayout::headerHtml(
+{{ \App\Support\PageLayout::headerHtml(
     $title ?? $__env->yieldContent('title'),
     $stdheadMsgalert ?? true,
     $stdheadScript ?? '',
     $stdheadPlace ?? ''
-)))
+) }}
 {{ \App\Support\Frame::mainOpen('', false, 100, (int) \constant('CONTENT_WIDTH')) }}
 
 <div id="main-content" tabindex="-1">
@@ -11,4 +11,4 @@
 </div>
 
 {{ \App\Support\Frame::close() }}
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\PageLayout::footerHtml()))
+{{ \App\Support\PageLayout::footerHtml() }}

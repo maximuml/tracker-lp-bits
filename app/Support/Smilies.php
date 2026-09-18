@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Support\Html\SafeHtml;
+
 /**
  * Smiley markup helpers extracted from `include/functions.php`
  * (Phase 5 of the legacy migration).
@@ -31,18 +33,18 @@ final class Smilies
         42, 122, 52, 28, 29, 30, 176,
     ];
 
-    public static function link(string $formname, string $taname, int $smilyNumber): string
+    public static function link(string $formname, string $taname, int $smilyNumber): SafeHtml
     {
         $tooltipBody = htmlspecialchars(
             "<table><tr><td><img src='pic/smilies/$smilyNumber.gif' alt='' /></td></tr></table>",
             ENT_QUOTES
         );
 
-        return '<a href="#" data-smile="[em'.$smilyNumber.']"'
+        return SafeHtml::fromTrustedHtml('<a href="#" data-smile="[em'.$smilyNumber.']"'
             .' data-smile-form="'.htmlspecialchars($formname, ENT_QUOTES).'"'
             .' data-smile-text="'.htmlspecialchars($taname, ENT_QUOTES).'"'
             .' data-domtt-content="'.$tooltipBody.'">'
-            .'<img style="max-width: 25px;" src="pic/smilies/'.$smilyNumber.'.gif" alt="" /></a>';
+            .'<img style="max-width: 25px;" src="pic/smilies/'.$smilyNumber.'.gif" alt="" /></a>');
     }
 
     public static function quickRow(string $formname, string $taname): string

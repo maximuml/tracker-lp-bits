@@ -126,7 +126,7 @@ class ForumController extends LegacyController
             $row['usernameHtml'] = SafeHtml::fromTrustedHtml($userDisplayMap[(int) ($row['user'] ?? 0)]
                 ?? UserDisplay::username((int) ($row['user'] ?? 0), false, true, true, false, false, true));
             $row['timeHtml'] = SafeHtml::fromTrustedHtml((string) Time::format((string) ($row['added'] ?? '')));
-            $row['commentHtml'] = SafeHtml::fromTrustedHtml(Format::formatComment((string) ($row['text'] ?? '')));
+            $row['commentHtml'] = Format::formatComment((string) ($row['text'] ?? ''));
         }
         unset($row);
 

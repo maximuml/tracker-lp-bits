@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Support\Html\SafeHtml;
+
 /**
  * User/permission helpers extracted from `include/functions.php`.
  *
@@ -15,7 +17,7 @@ final class User
     /**
      * @param  array<string, mixed>  $options
      */
-    public static function getUserClassName(int|string $class, bool $compact = false, bool $b_colored = false, bool $I18N = false, array $options = []): string
+    public static function getUserClassName(int|string $class, bool $compact = false, bool $b_colored = false, bool $I18N = false, array $options = []): SafeHtml
     {
         return UserClass::name($class, $compact, $b_colored, $I18N, $options);
     }

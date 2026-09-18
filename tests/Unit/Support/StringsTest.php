@@ -90,8 +90,8 @@ class StringsTest extends TestCase
 
     public function test_hidden_wraps_in_span(): void
     {
-        $this->assertSame('<span class="hidden-text">1.2.3.4</span>', Strings::hidden('1.2.3.4'));
-        $this->assertSame('<span class="hidden-text"></span>', Strings::hidden(''));
+        $this->assertSame('<span class="hidden-text">1.2.3.4</span>', (string) Strings::hidden('1.2.3.4'));
+        $this->assertSame('<span class="hidden-text"></span>', (string) Strings::hidden(''));
     }
 
     public function test_hidden_does_not_escape_input(): void
@@ -103,7 +103,7 @@ class StringsTest extends TestCase
         // every existing call site.
         $this->assertSame(
             '<span class="hidden-text"><b>raw</b></span>',
-            Strings::hidden('<b>raw</b>'),
+            (string) Strings::hidden('<b>raw</b>'),
         );
     }
 

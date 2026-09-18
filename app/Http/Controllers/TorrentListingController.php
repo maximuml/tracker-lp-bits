@@ -45,9 +45,7 @@ class TorrentListingController extends Controller
         foreach (['pagertop', 'pagerbottom'] as $pagerKey) {
             $data[$pagerKey] = SafeHtml::fromTrustedHtml((string) ($data[$pagerKey] ?? ''));
         }
-        $data['bookmarkedUsername'] = SafeHtml::fromTrustedHtml(
-            UserDisplay::username((int) ($currentUser['id'] ?? 0))
-        );
+        $data['bookmarkedUsername'] = UserDisplay::username((int) ($currentUser['id'] ?? 0));
         $data['listVm'] = $this->torrentListFactory->create(
             $data['rows'] ?? [],
             (int) ($data['sectiontype'] ?? 0),

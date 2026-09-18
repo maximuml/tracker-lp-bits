@@ -413,8 +413,10 @@ jobs:
           # security.maxip caps signups per IP; the e2e gateway IP must not
           # trip it. basic.baseUrl must match the origin the browser uses —
           # confirm.php redirects to it and CSP form-action 'self' blocks
-          # cross-origin redirects after POST /signup.
-          docker compose exec -T php php artisan tinker --execute="DB::table('settings')->where('name','security.maxip')->update(['value'=>100]); DB::table('settings')->where('name','basic.baseUrl')->update(['value'=>'http://127.0.0.1']);"
+          # cross-origin redirects after POST /signup. security.iv seeds to
+          # 'yes' (image captcha on login/signup) — headless tests cannot
+          # solve it, so it is disabled like PerformanceTestDatasetSeeder does.
+          docker compose exec -T php php artisan tinker --execute="DB::table('settings')->where('name','security.maxip')->update(['value'=>100]); DB::table('settings')->where('name','basic.baseUrl')->update(['value'=>'http://127.0.0.1']); DB::table('settings')->where('name','security.iv')->update(['value'=>'no']);"
           source .env 2>/dev/null
           docker compose exec -T redis sh -c "redis-cli -a \"\${REDIS_PASSWORD:-}\" FLUSHALL" 2>/dev/null || true
 

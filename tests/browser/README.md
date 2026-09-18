@@ -32,7 +32,7 @@ Environment overrides: `BROWSER_BASE_URL` (default
 `http://127.0.0.1:80`), `BROWSER_USER`/`BROWSER_PASS` (sysop/TestPass2026),
 `BROWSER_TID` (a seeded torrent id, default 1).
 
-Two settings must match the test environment or the suite fails for
+Three settings must match the test environment or the suite fails for
 environmental reasons:
 
 ```bash
@@ -43,6 +43,10 @@ docker compose exec -T php php artisan tinker \
 # there and Chromium applies form-action 'self' to the redirect
 docker compose exec -T php php artisan tinker \
   --execute="DB::table('settings')->where('name','basic.baseUrl')->update(['value'=>'http://127.0.0.1']);"
+# security.iv seeds to 'yes' — image captcha on login/signup, which
+# headless Chromium cannot solve; disable it like PerformanceTestDatasetSeeder
+docker compose exec -T php php artisan tinker \
+  --execute="DB::table('settings')->where('name','security.iv')->update(['value'=>'no']);"
 docker compose exec -T redis redis-cli -a "$REDIS_PASSWORD" FLUSHALL
 ```
 

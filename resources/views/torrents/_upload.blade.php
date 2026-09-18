@@ -1,5 +1,5 @@
 	<form id="compose" enctype="multipart/form-data" action="/takeupload" method="post" name="upload">
-			<p align="center">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/upload.text_red_star_required')))</p>
+			<p align="center">{{ __('legacy/upload.text_red_star_required') }}<font color="red">*</font>{{ __('legacy/upload.text_red_star_required_end') }}</p>
 			<div class="nx-fgrid">
 					<div class="nx-ffull nx-colhead nx-center">
 						{{ __('legacy/upload.text_tracker_url') ?? '' }}: &nbsp;&nbsp;&nbsp;&nbsp;<b>{{ $trackerUrl }}</b>
@@ -35,7 +35,7 @@
 
 				@if ($enableTechnicalInfo)
 					<x-settings-row layout="grid" :label="__('legacy/functions.text_technical_info')">
-						<textarea name="technical_info" rows="8" style="width: 99%;"></textarea><br/>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/functions.text_technical_info_help_text')))
+						<textarea name="technical_info" rows="8" style="width: 99%;"></textarea><br/><b>&middot;</b> {{ __('legacy/functions.text_technical_info_help_text') }} <b><a href="https://mediaarea.net/en/MediaInfo" target='_blank'>{{ __('legacy/functions.text_technical_info_help_link_mediainfo') }}</a></b>{{ __('legacy/functions.text_technical_info_help_text_one_end') }}<br /><b>&middot;</b> {{ __('legacy/functions.text_technical_info_help_text_two') }} <b><a href="https://github.com/UniqProject/BDInfo" target='_blank'>{{ __('legacy/functions.text_technical_info_help_link_bdinfo') }}</a></b>{{ __('legacy/functions.text_technical_info_help_text_two_end') }}
 					</x-settings-row>
 				@endif
 
@@ -66,7 +66,7 @@
 							@foreach ($offerRows as $offerrow)
 								<option value="{{ (int) $offerrow['id'] }}">{{ $offerrow['name'] }}</option>
 							@endforeach
-						</select>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/upload.text_please_select_offer')))
+						</select>&nbsp;&nbsp;{{ __('legacy/upload.text_please_select_offer') }}
 					</x-settings-row>
 				@endif
 

@@ -6,9 +6,9 @@
 <div class="nx-fgrid nx-fgrid--flat">
 <div class="nx-fhead">{{ __('legacy/messages.row_to') }}</div>
 <div class="nx-fcell"><input type="text" name="to" style="width: 200px"></div>
-<div class="nx-fhead">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/messages.row_original_receiver')))</div>
+<div class="nx-fhead">{{ __('legacy/messages.row_original_receiver') }}</div>
 <div class="nx-fcell">{{ $forward['fromName'] ?? '' }}</div>
-<div class="nx-fhead">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/messages.row_original_sender')))</div>
+<div class="nx-fhead">{{ __('legacy/messages.row_original_sender') }}</div>
 <div class="nx-fcell">{{ $forward['origName'] ?? '' }}</div>
 <div class="nx-fhead">{{ __('legacy/messages.row_subject') }}</div>
 <div class="nx-fcell"><input type="text" name="subject" value="{{ $forward['subject'] }}" style="width: 500px"></div>

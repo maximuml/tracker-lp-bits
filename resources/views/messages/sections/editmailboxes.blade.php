@@ -11,7 +11,7 @@
 <input type="submit" value="{{ __('legacy/messages.submit_add') }}">
 </form></div>
 <div class="nx-colhead">{{ __('legacy/messages.text_edit_mailboxes') }}</div>
-<div>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/messages.text_edit_mailboxes_note')))
+<div>{{ __('legacy/messages.text_edit_mailboxes_note') }}<br />{{ __('legacy/messages.text_edit_mailboxes_note_two') }}
 <form action="/messages" method="get">
 <input type="hidden" name="action" value="editmailboxes2">
 <input type="hidden" name="action2" value="edit">

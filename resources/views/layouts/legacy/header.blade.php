@@ -93,7 +93,7 @@
                 <font class='color_uploaded'>{{ __('legacy/functions.text_uploaded') }}</font> {{ $uploaded }}
                 <font class='color_downloaded'> {{ __('legacy/functions.text_downloaded') }}</font> {{ $downloaded }}
                 <font class='color_active'>{{ __('legacy/functions.text_active_torrents') }}</font> <img class="arrowup" alt="Torrents seeding" title="{{ __('legacy/functions.title_torrents_seeding')}}" src="pic/trans.gif" />{{ $activeseed }}  <img class="arrowdown" alt="Torrents leeching" title="{{ __('legacy/functions.title_torrents_leeching')}}" src="pic/trans.gif" />{{ $activeleech }}&nbsp;&nbsp;
-                <font class='color_connectable'>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/functions.text_connectable')))</font>{{ $connectable }} {{ $slotsDisplay }}
+                <font class='color_connectable'>{{ __('legacy/functions.text_connectable') }}&nbsp;</font>{{ $connectable }} {{ $slotsDisplay }}
                 @if($hitAndRunEnabled)<font class='color_bonus'>H&R: </font> {{ $hitAndRunStatus }} @endif
             </span>
         </div>

@@ -10,6 +10,7 @@ use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Globals;
 use App\Support\Html;
+use App\Support\Html\SafeHtml;
 use App\Support\Http;
 use App\Support\Locale;
 use App\Support\SearchBox;
@@ -96,7 +97,7 @@ class RssController extends LegacyController
             }
         }
 
-        $data['categories'] = SearchBox::buildCategoryTableWithContext($browsecatmode, 'yes', 'torrents.php?allsec=1&', '', 3, '', ['section_name' => true]);
+        $data['categories'] = SafeHtml::fromTrustedHtml(SearchBox::buildCategoryTableWithContext($browsecatmode, 'yes', 'torrents.php?allsec=1&', '', 3, '', ['section_name' => true]));
         $data['paidTorrentEnabled'] = SiteConfig::current()->torrent->paidTorrentEnabled();
         $data['allowed_showrows'] = ['10', '50'];
         $data['stickyTypes'] = [

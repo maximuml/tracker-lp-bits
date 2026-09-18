@@ -3,7 +3,7 @@
 @section('title', __('legacy/users.text_users'))
 
 @section('content')
-@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/users.text_users')))
+<h1>{{ __('legacy/users.text_users') }}</h1>
 
 <form method=get action=?>
 {{ __('legacy/users.text_search')}} <input type=text style="width:100px" name=search value="{{ $search }}">

@@ -29,7 +29,7 @@
         </div>
     </form>
 
-    @safeHtml(App\Support\Html\SafeHtml::fromTrustedHtml(sprintf(__('legacy/confirm_resend.text_resend_confirmation_mail_note'), $maxAttempts)))
+    <h1>{{ __('legacy/confirm_resend.text_resend_confirmation_mail_note') }} </h1><p>{{ __('legacy/confirm_resend.text_resend_confirmation_mail_note_two') }}</p><p>{{ __('legacy/confirm_resend.text_resend_confirmation_mail_note_three') }}<br />{{ __('legacy/confirm_resend.text_resend_confirmation_mail_note_four') }}</p><p><b>{{ __('legacy/confirm_resend.text_note') }}</b> {{ sprintf(__('legacy/confirm_resend.text_resend_confirmation_mail_attempts'), $maxAttempts) }}</p>
 
     <p>{{ __('legacy/confirm_resend.text_you_have')}} <b>{{ $remaining }}</b> {{ __('legacy/confirm_resend.text_remaining_tries')}}</p>
 

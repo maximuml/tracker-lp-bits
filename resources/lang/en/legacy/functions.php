@@ -86,7 +86,7 @@ return [
     'text_active_torrents' => 'Active:',
     'title_torrents_seeding' => 'Torrents&nbsp;Seeding',
     'title_torrents_leeching' => 'Torrents&nbsp;Leeching',
-    'text_connectable' => 'Connectable:&nbsp;',
+    'text_connectable' => 'Connectable:',
     'text_the_time_is_now' => 'Time: ',
     'text_message_new' => ' New',
     'title_sentbox' => 'sentbox',
@@ -308,10 +308,12 @@ return [
     'text_required' => 'Required',
     'text_invalid' => 'Invalid',
     'text_technical_info' => 'MediaInfo/BDInfo',
-    'text_technical_info_help_text' => '<b>&middot;</b> MediaInfo comes from software <b><a href="https://mediaarea.net/en/MediaInfo" target=\'_blank\'>MediaInfo</a></b>，open file, language select english, click the view menu > text > right click in the box > select all > copy > past into this box.
-	<br>
-	<b>&middot;</b> BDInfo comes from software <b><a href="https://github.com/UniqProject/BDInfo" target=\'_blank\'>BDInfo</a></b>，open the file with this software, click Scan Bitrates to view the report, right-click in the box > select all, right-click > copy, and paste it here.
-	',
+    'text_technical_info_help_text' => 'MediaInfo comes from software',
+    'text_technical_info_help_link_mediainfo' => 'MediaInfo',
+    'text_technical_info_help_text_one_end' => '，open file, language select english, click the view menu > text > right click in the box > select all > copy > past into this box.',
+    'text_technical_info_help_text_two' => 'BDInfo comes from software',
+    'text_technical_info_help_link_bdinfo' => 'BDInfo',
+    'text_technical_info_help_text_two_end' => '，open the file with this software, click Scan Bitrates to view the report, right-click in the box > select all, right-click > copy, and paste it here.',
     'text_management_system' => 'Management',
     'text_seed_points' => 'Seed points',
     'spoiler_expand_collapse' => 'Click to expand/collapse',

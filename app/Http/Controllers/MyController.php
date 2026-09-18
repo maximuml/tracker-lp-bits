@@ -13,6 +13,7 @@ use App\Services\BonusService;
 use App\Support\AssetAppender;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
+use App\Support\Html\SafeHtml;
 use App\Support\Input;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
@@ -183,7 +184,7 @@ JS;
             'userid' => $userid,
             'status' => $status,
             'allStatus' => $allStatus,
-            'headerFilters' => $headerFilters,
+            'headerFilters' => SafeHtml::fromTrustedHtml(implode(' | ', $headerFilters)),
             'queryString' => $queryString,
             'q' => $q,
             'requestUri' => Input::serverValue('REQUEST_URI'),

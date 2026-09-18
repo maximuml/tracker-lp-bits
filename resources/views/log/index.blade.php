@@ -27,7 +27,7 @@
         </td></tr>
     </table><br />
     @if (empty($logRows))
-        @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/log.text_log_empty')))
+        <b>{{ __('legacy/log.text_log_empty') }}</b><br />
     @else
         <table data-nx="data" width=940 border=1 cellspacing=0 cellpadding=5>
         <tr><td class=colhead align=center><img class="time" src="pic/trans.gif" alt="time" title="{{ __('legacy/log.title_time_added')}}" /></td><td class=colhead align=left>{{ __('legacy/log.col_event')}}
@@ -45,7 +45,7 @@
         </table>
         {{ $pagerbottom ?? '' }}
     @endif
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/log.time_zone_note')))
+    <p>{{ __('legacy/log.time_zone_note') }}</p>
 
 @elseif ($mode === 'chronicle')
     <table data-nx="data" border=1 cellspacing=0 width=940 cellpadding=5>
@@ -73,7 +73,7 @@
         </table><br />
     @endif
     @if (empty($chronicleRows))
-        @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/log.text_chronicle_empty')))
+        <b>{{ __('legacy/log.text_chronicle_empty') }}</b><br />
     @else
         <table data-nx="data" width=940 border=1 cellspacing=0 cellpadding=5>
         <tr><td class=colhead align=center>{{ __('legacy/log.col_date')}}</td><td class=colhead align=left>{{ __('legacy/log.col_event')}}</td>@if ($canManage)<td class=colhead align=center>{{ __('legacy/log.col_modify')}}</td>@endif</tr>
@@ -83,7 +83,7 @@
         </table>
         {{ $pagerbottom ?? '' }}
     @endif
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/log.time_zone_note')))
+    <p>{{ __('legacy/log.time_zone_note') }}</p>
 
 @elseif ($mode === 'news')
     <table data-nx="data" border=1 cellspacing=0 width=940 cellpadding=5>
@@ -101,7 +101,7 @@
         </td></tr>
     </table><br />
     @if (empty($newsRows))
-        @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/log.text_news_empty')))
+        <b>{{ __('legacy/log.text_news_empty') }}</b><br />
     @else
         @foreach ($newsRows as $arr)
             <table data-nx="data" width=940 border=1 cellspacing=0 cellpadding=5>
@@ -110,7 +110,7 @@
         @endforeach
         {{ $pagerbottom ?? '' }}
     @endif
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/log.time_zone_note')))
+    <p>{{ __('legacy/log.time_zone_note') }}</p>
 
 @elseif ($mode === 'poll')
     <table data-nx="data" border=1 cellspacing=0 width=940 cellpadding=5>
@@ -135,6 +135,6 @@
         </td></tr>
     @endforeach
     </table>
-    @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(__('legacy/log.time_zone_note')))
+    <p>{{ __('legacy/log.time_zone_note') }}</p>
 @endif
 @endsection

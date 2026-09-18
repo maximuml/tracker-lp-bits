@@ -142,6 +142,16 @@ This release ships the shoutbox modernization, MeiliSearch-by-default, setlist l
 
 ## Fixes & Hardening
 
+- **Markup/escaping regressions (hotfix)**
+  - `layouts/auth.blade.php` renders appended assets via `AssetAppender::getAppendHeadersSafe()`/`getAppendFootersSafe()` — previously appended `<script>` tags were escaped and printed as visible text, which broke signup (`auth-form.js` never loaded) and passkey login. The unsafe `getAppendHeaders()`/`getAppendFooters()` accessors were removed.
+  - The passkey login inline script no longer calls `layer.*` (layer.js is not loaded on the auth layout — it threw `layer is not defined` once `passkey.js` loaded again); alerts use native `alert()` and the button disables while the WebAuthn prompt is open.
+  - `Time` output is split into `Time::timeParts()` (data for a semantic `<time datetime="…" title="…">` element rendered by the new `<x-time>` Blade component) and `Time::formatText()` (plain text), so time markup no longer leaks as visible `&lt;span&gt;` text on topten, index forum posts, userdetails and complains pages.
+  - Markup-bearing legacy translation values render through `SafeHtml::fromUntrustedHtml()` at their call sites (sanitising boundary) instead of being escaped to visible entities; `<font class="…">` in the promotion legend became `<span class="…">` so the sanitizer keeps the class colours.
+  - Plain-text legacy translation values had `&nbsp;` entities normalised to spaces, fixing `alt="Time&amp;nbsp;Alive"`-style attribute leaks.
+  - Removed 95 confirmed-dead English legacy translation keys (dynamic `__('legacy/x.'.$var)` accesses accounted for) and the dead `vendor/jquery-loading/jquery.loading.min.js` registration.
+  - Forums whose `forid` references a missing or hidden overforum now render in a fallback "Forums" group instead of being silently dropped; `minclassread` visibility still applies.
+  - Regression coverage: `AuthPagesRenderAssetsTest`, `NoLeakedMarkupTest`, `LegacyLangMarkupTest` (ratchet), extended `TimeTest`, new `TimeLegacyFormatTest` and orphan-forum tests.
+
 - **PHP 8.4 runtime cleanup**
   - Raised PHP requirement to `>=8.4 <8.6`.
   - Replaced deprecated `strftime()` in `public/mysql_stats.php` with a `DateTime`-based locale formatter.

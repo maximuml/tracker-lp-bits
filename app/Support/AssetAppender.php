@@ -74,18 +74,6 @@ final class AssetAppender
         }
     }
 
-    /** @return array<string, string> */
-    public static function getAppendHeaders(): array
-    {
-        return self::$appendHeaders;
-    }
-
-    /** @return array<string, string> */
-    public static function getAppendFooters(): array
-    {
-        return self::$appendFooters;
-    }
-
     /**
      * Appended head assets as SafeHtml objects so templates can render
      * them via `{{ }}` without calling `SafeHtml::fromTrustedHtml` inline

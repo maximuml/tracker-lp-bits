@@ -4,7 +4,6 @@ return [
     'std_error' => 'Error!',
     'std_sorry' => 'Sorry...',
     'std_permission_denied_only' => 'Permission denied. Only ',
-    'std_or_above_can_view' => ' or above could view Top 10. <br /><br /> Please see the '.'<a class="faqlink" href="faq.php#id22"><b>FAQ</b></a> for more information on different user classes and what they can do.<br /><br /><b></p>The %s Staff</b>',
     'col_rank' => 'Rank',
     'col_user' => 'User',
     'col_donated' => 'Donated',
@@ -55,8 +54,6 @@ return [
     'col_donated_usd' => 'Donated(＄)',
     'col_donated_cny' => 'Donated(￥)',
 
-    'text_most_supplied' => ' Biggest Resource Supplier<font class="small">(Do not include deleted torrents)</font>',
-    'text_most_snatched' => ' Biggest Resource Snatcher<font class="small">(Do not include deleted torrents)</font>',
     'col_torrent_uploaded' => '# Upped',
     'col_torrent_downloaded' => '# Snatched',
 
@@ -76,7 +73,6 @@ return [
     'text_most_commenter' => 'Torrent Commenter <font class="small">(Do not include deleted comments)</font>',
 
     'col_reviews' => 'Reviews',
-    'text_most_reviewer' => 'Film Reviewer <font class="small">(Do not include deleted reviews)</font>',
 
     'col_location' => 'Location',
     'text_most_locations' => 'Peer Locations',

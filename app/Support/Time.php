@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Enums\UserTimeType;
+use App\Support\Html\SafeHtml;
 use Carbon\Carbon;
 
 /**
@@ -187,6 +188,26 @@ final class Time
         string $textSpace,
         string $textAgo,
     ): string {
+        return self::spanTitle($time, self::formatElapsedInner($elapsed, $withago, $twoline, $oneunit, $textSpace, $textAgo));
+    }
+
+    private static function spanTitle(string $title, string $inner): string
+    {
+        return '<span title="'.$title.'">'.$inner.'</span>';
+    }
+
+    /**
+     * Inner text of {@see formatElapsedTime()} without the `<span>`
+     * wrapper — shared with the semantic `<time>` variant.
+     */
+    private static function formatElapsedInner(
+        string $elapsed,
+        bool $withago,
+        bool $twoline,
+        bool $oneunit,
+        string $textSpace,
+        string $textAgo,
+    ): string {
         $newtime = $elapsed.($withago ? $textAgo : '');
 
         if ($twoline) {
@@ -205,7 +226,79 @@ final class Time
             $newtime = str_replace('&nbsp;', $textSpace, $newtime);
         }
 
-        return '<span title="'.$time.'">'.$newtime.'</span>';
+        return $newtime;
+    }
+
+    /** @return array<string, string> */
+    private static function elapsedLabels(): array
+    {
+        return [
+            'year' => (string) (__('legacy/functions.text_year')),
+            'year_short' => (string) (__('legacy/functions.text_short_year')),
+            'month' => (string) (__('legacy/functions.text_month')),
+            'month_short' => (string) (__('legacy/functions.text_short_month')),
+            'day' => (string) (__('legacy/functions.text_day')),
+            'day_short' => (string) (__('legacy/functions.text_short_day')),
+            'hour' => (string) (__('legacy/functions.text_hour')),
+            'hour_short' => (string) (__('legacy/functions.text_short_hour')),
+            'min' => (string) (__('legacy/functions.text_min')),
+            'min_short' => (string) (__('legacy/functions.text_short_min')),
+            'plural_suffix' => (string) (__('legacy/functions.text_s')),
+        ];
+    }
+
+    /**
+     * Elapsed/absolute display parts for the legacy (`IN_NEXUS`) branch
+     * of {@see format()}, shared with {@see timeParts()}.
+     *
+     * `mode` distinguishes the two legacy renderings: `absolute` is the
+     * raw timestamp text (format()'s historical unwrapped return),
+     * `elapsed` is the "N units ago" text that format() wraps in
+     * `<span title>`.
+     *
+     * @return array{mode: 'absolute'|'elapsed', inner: string, title: string}|false|null
+     */
+    private static function legacyParts(
+        mixed $time,
+        bool $withago,
+        bool $twoline,
+        bool $forceago,
+        bool $oneunit,
+        bool $isfuturetime,
+    ): array|false|null {
+        $CURUSER = app(CurrentUser::class)->get();
+        $TIMENOW = defined('TIMENOW') ? (int) TIMENOW : time();
+        $timeStr = $time instanceof Carbon ? $time->toDateTimeString() : (string) $time;
+
+        if (isset($CURUSER) && ($CURUSER['timetype'] ?? 1) != UserTimeType::TIMEALIVE->value && ! $forceago) {
+            return [
+                'mode' => 'absolute',
+                'inner' => self::formatAbsoluteTime($timeStr, $twoline),
+                'title' => $timeStr,
+            ];
+        }
+
+        $timestamp = strtotime($timeStr);
+        if ($timestamp === false) {
+            return null;
+        }
+
+        if ($isfuturetime && $timestamp < $TIMENOW) {
+            return false;
+        }
+
+        return [
+            'mode' => 'elapsed',
+            'inner' => self::formatElapsedInner(
+                self::elapsedSince((int) $timestamp, $TIMENOW, self::elapsedLabels(), (bool) $oneunit),
+                $withago,
+                $twoline,
+                $oneunit,
+                (string) (__('legacy/functions.text_space')),
+                (string) (__('legacy/functions.text_ago')),
+            ),
+            'title' => $timeStr,
+        ];
     }
 
     /**
@@ -217,6 +310,11 @@ final class Time
      * locale-aware elapsed/absolute time in legacy context) and the
      * `isset($CURUSER)` / `TIMENOW` globals. It will be split into
      * context-appropriate helpers once the legacy bootstrap is gone.
+     *
+     * The legacy branch returns HTML (`<span title>` for elapsed text,
+     * `<br />`-joined absolute text) — only safe inside PHP-built markup,
+     * never via `{{ }}`. Views should use {@see timeParts()} (through
+     * the `x-time` component) or {@see formatText()}.
      *
      * @return string|false|null
      */
@@ -244,47 +342,89 @@ final class Time
             }
         }
 
-        $CURUSER = app(CurrentUser::class)->get();
-        $TIMENOW = defined('TIMENOW') ? (int) TIMENOW : time();
-
-        if (isset($CURUSER) && ($CURUSER['timetype'] ?? 1) != UserTimeType::TIMEALIVE->value && ! $forceago) {
-            return self::formatAbsoluteTime($time instanceof Carbon ? $time->toDateTimeString() : (string) $time, (bool) $twoline);
+        $parts = self::legacyParts($time, $withago, $twoline, $forceago, $oneunit, $isfuturetime);
+        if ($parts === null || $parts === false) {
+            return $parts;
+        }
+        if ($parts['mode'] === 'absolute') {
+            return $parts['inner'];
         }
 
-        $timestamp = strtotime($time instanceof Carbon ? $time->toDateTimeString() : (string) $time);
-        if ($timestamp === false) {
+        return self::spanTitle($parts['title'], $parts['inner']);
+    }
+
+    /**
+     * Display parts of {@see format()} for the semantic `<time>` element
+     * rendered by the `x-time` component — the element markup lives in
+     * Blade, this only supplies the escaped-attribute-safe raw values.
+     *
+     * `inner` is already-safe HTML (elapsed text may contain `<br />`
+     * line splits); `datetime`/`title` are raw strings for `{{ }}`
+     * attribute escaping.
+     *
+     * @return array{datetime: string, title: string, inner: SafeHtml}|null
+     */
+    public static function timeParts(
+        mixed $time,
+        bool $withago = true,
+        bool $twoline = false,
+        bool $forceago = false,
+        bool $oneunit = false,
+        bool $isfuturetime = false,
+    ): ?array {
+        if (empty($time)) {
             return null;
         }
 
-        if ($isfuturetime && $timestamp < $TIMENOW) {
-            return false;
+        if (! (defined('IN_NEXUS') && IN_NEXUS)) {
+            $attr = $time instanceof Carbon ? $time->toDateTimeString() : (string) $time;
+            try {
+                $inner = SafeHtml::fromPlainText(Carbon::parse($time)->diffForHumans());
+            } catch (\Exception $e) {
+                if (\function_exists('do_log')) {
+                    Logger::writeWithContext($e->getMessage().$e->getTraceAsString(), 'error');
+                }
+
+                $inner = SafeHtml::fromPlainText($attr);
+            }
+
+            return ['datetime' => $attr, 'title' => $attr, 'inner' => $inner];
         }
 
-        return self::formatElapsedTime(
-            self::elapsedSince(
-                (int) $timestamp,
-                $TIMENOW,
-                [
-                    'year' => (string) (__('legacy/functions.text_year')),
-                    'year_short' => (string) (__('legacy/functions.text_short_year')),
-                    'month' => (string) (__('legacy/functions.text_month')),
-                    'month_short' => (string) (__('legacy/functions.text_short_month')),
-                    'day' => (string) (__('legacy/functions.text_day')),
-                    'day_short' => (string) (__('legacy/functions.text_short_day')),
-                    'hour' => (string) (__('legacy/functions.text_hour')),
-                    'hour_short' => (string) (__('legacy/functions.text_short_hour')),
-                    'min' => (string) (__('legacy/functions.text_min')),
-                    'min_short' => (string) (__('legacy/functions.text_short_min')),
-                    'plural_suffix' => (string) (__('legacy/functions.text_s')),
-                ],
-                (bool) $oneunit,
-            ),
-            (string) $time,
-            (bool) $withago,
-            (bool) $twoline,
-            (bool) $oneunit,
-            (string) (__('legacy/functions.text_space')),
-            (string) (__('legacy/functions.text_ago')),
+        $parts = self::legacyParts($time, $withago, $twoline, $forceago, $oneunit, $isfuturetime);
+        if ($parts === null || $parts === false) {
+            return null;
+        }
+
+        $inner = $parts['mode'] === 'absolute'
+            ? self::formatAbsoluteTime(htmlspecialchars($parts['title'], ENT_NOQUOTES | ENT_SUBSTITUTE, 'UTF-8'), $twoline)
+            : $parts['inner'];
+
+        return ['datetime' => $parts['title'], 'title' => $parts['title'], 'inner' => SafeHtml::fromTrustedHtml($inner)];
+    }
+
+    /**
+     * Plain-text variant of {@see format()} for `{{ }}` output and
+     * non-HTML data — same display text without the `<span>`/`<br />`
+     * markup or `&nbsp;` entities.
+     */
+    public static function formatText(
+        mixed $time,
+        bool $withago = true,
+        bool $twoline = false,
+        bool $forceago = false,
+        bool $oneunit = false,
+        bool $isfuturetime = false,
+    ): ?string {
+        $html = self::format($time, $withago, $twoline, $forceago, $oneunit, $isfuturetime);
+        if (! is_string($html)) {
+            return null;
+        }
+
+        return str_replace(
+            "\xc2\xa0",
+            ' ',
+            html_entity_decode(strip_tags((string) preg_replace('#<br\s*/?>#i', ' ', $html)), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
         );
     }
 

@@ -40,8 +40,8 @@
 @if ((int) ($user['invited_by'] ?? 0) > 0)
 <x-settings-row-small :label="__('legacy/userdetails.row_invited_by')">{{ $invitedByHtml }}</x-settings-row-small>
 @endif
-<x-settings-row-small :label="__('legacy/userdetails.row_join_date')">@if (($user['added'] ?? null) === null || $user['added'] === '0000-00-00 00:00:00'){{ __('legacy/userdetails.text_not_available') ?? '' }}@else{{ $user['added'] }} ({{ \App\Support\Time::format($user['added'], true, false, true) }}, {{ $joinWeeks }})@endif</x-settings-row-small>
-<x-settings-row-small :label="__('legacy/userdetails.row_last_seen')">@if (($user['last_access'] ?? null) === null || $user['last_access'] === '0000-00-00 00:00:00'){{ __('legacy/userdetails.text_not_available') ?? '' }}@else{{ $user['last_access'] }} ({{ \App\Support\Time::format($user['last_access'], true, false, true) }})@endif</x-settings-row-small>
+<x-settings-row-small :label="__('legacy/userdetails.row_join_date')">@if (($user['added'] ?? null) === null || $user['added'] === '0000-00-00 00:00:00'){{ __('legacy/userdetails.text_not_available') ?? '' }}@else{{ $user['added'] }} (<x-time :value="$user['added']" :force="true" />, {{ $joinWeeks }})@endif</x-settings-row-small>
+<x-settings-row-small :label="__('legacy/userdetails.row_last_seen')">@if (($user['last_access'] ?? null) === null || $user['last_access'] === '0000-00-00 00:00:00'){{ __('legacy/userdetails.text_not_available') ?? '' }}@else{{ $user['last_access'] }} (<x-time :value="$user['last_access']" :force="true" />)@endif</x-settings-row-small>
 @if (($where_tweak ?? '') === 'yes')
 <x-settings-row-small :label="__('legacy/userdetails.row_last_seen_location')">{{ $user['page'] }}</x-settings-row-small>
 @endif

@@ -243,16 +243,18 @@ class UserPasskeyRepository extends BaseRepository
                 }
                 document.getElementById('passkey_login').addEventListener('click', () => {
                     if (!Passkey.supported()) {
-                        layer.alert('<?php echo Locale::trans('passkey.passkey_not_supported', [], null); ?>');
+                        alert('<?php echo Locale::trans('passkey.passkey_not_supported', [], null); ?>');
                     } else {
                         startPasskeyLogin(false);
                     }
                 })
             });
             const startPasskeyLogin = (conditional) => {
-                Passkey.checkRegistration(conditional, () => {
-                    layer.load(2, {shade: 0.3});
-                }).then(() => {
+                // layer.js is not loaded on the auth layout — disable the
+                // button while the WebAuthn prompt is open instead.
+                const btn = document.getElementById('passkey_login');
+                if (btn) btn.disabled = true;
+                Passkey.checkRegistration(conditional, () => {}).then(() => {
                     if (location.search) {
                         const searchParams = new URLSearchParams(location.search);
                         location.href = searchParams.get('returnto') || '/index.php';
@@ -263,9 +265,9 @@ class UserPasskeyRepository extends BaseRepository
                     if (conditional || e.name === 'NotAllowedError' || e.name === 'AbortError' || e.name === 'NotSupportedError') {
                         return;
                     }
-                    layer.alert(e.message);
+                    alert(e.message);
                 }).finally(() => {
-                    layer.closeAll('loading');
+                    if (btn) btn.disabled = false;
                 });
             }
         </script>

@@ -4,7 +4,6 @@ return [
     'std_oho' => 'Oho!',
     'std_no_suspect_detected' => 'No suspect detected yet.',
     'head_cheaterbox' => 'Cheaterbox',
-    'text_cheaterbox' => 'Cheaterbox <font class=striking>BETA</font>',
     'col_added' => 'Added',
     'col_suspect' => 'Suspect',
     'col_hit' => 'Hit',

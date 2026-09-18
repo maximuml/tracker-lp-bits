@@ -220,7 +220,7 @@ final class Html
 
     public static function stdMessage(string $heading, string $text, bool $htmlstrip = false): void
     {
-        Message::stdMessage($heading, $text, $htmlstrip);
+        echo Frame::stdMessage($heading, $text, $htmlstrip);
     }
 
     // ── Layout (delegates to PageLayout/Frame) ──────────────────────

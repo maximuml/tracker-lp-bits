@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Support\Html;
 
-use App\Support\Frame;
-
 /**
  * Message and alert helpers extracted from the legacy Html facade.
  *
@@ -43,13 +41,5 @@ final class Message
             : 'msg-alert-red';
 
         return '<table border="0" cellspacing="0" cellpadding="10" class="msg-alert"><tr><td class="'.$colorClass.'">'."\n".$inner.'</td></tr></table><br />';
-    }
-
-    /**
-     * Emit a standard message box. Backs the legacy `stdmsg()` helper.
-     */
-    public static function stdMessage(string $heading, string $text, bool $htmlstrip = false): void
-    {
-        echo Frame::stdMessage($heading, $text, $htmlstrip);
     }
 }

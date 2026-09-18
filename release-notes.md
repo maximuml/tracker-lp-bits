@@ -151,6 +151,7 @@ This release ships the shoutbox modernization, MeiliSearch-by-default, setlist l
   - Removed 95 confirmed-dead English legacy translation keys (dynamic `__('legacy/x.'.$var)` accesses accounted for) and the dead `vendor/jquery-loading/jquery.loading.min.js` registration.
   - Forums whose `forid` references a missing or hidden overforum now render in a fallback "Forums" group instead of being silently dropped; `minclassread` visibility still applies.
   - Regression coverage: `AuthPagesRenderAssetsTest`, `NoLeakedMarkupTest`, `LegacyLangMarkupTest` (ratchet), extended `TimeTest`, new `TimeLegacyFormatTest` and orphan-forum tests.
+  - `EscapedHtmlHelpersTest` (architecture ratchet): any `App\Support::*` call inside `{{ }}` must return `Htmlable`, a markup-free scalar, or be explicitly allowlisted as plain text — a signature regression (`SafeHtml` → `string`) or a new raw-string HTML helper now fails CI. `{{ e()/htmlspecialchars() }}` double-escaping is forbidden too.
 
 - **PHP 8.4 runtime cleanup**
   - Raised PHP requirement to `>=8.4 <8.6`.

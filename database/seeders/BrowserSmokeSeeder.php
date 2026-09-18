@@ -24,10 +24,15 @@ class BrowserSmokeSeeder extends Seeder
             ?? User::factory()->create();
 
         if (Torrent::query()->count() === 0) {
-            Torrent::factory()->owner($owner)->create([
-                'name' => 'Browser Smoke Fixture Torrent',
-                'category' => 1,
-            ]);
+            // MeiliSearch may not be running when this seeder runs (CI
+            // seeds before the search container is up) — the browser
+            // suite does not need the index, so skip Scout syncing.
+            Torrent::withoutSyncingToSearch(
+                fn () => Torrent::factory()->owner($owner)->create([
+                    'name' => 'Browser Smoke Fixture Torrent',
+                    'category' => 1,
+                ]),
+            );
         }
 
         if (Topic::query()->count() > 0) {

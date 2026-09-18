@@ -10,7 +10,7 @@ Use this skill when asked to end-to-end test the migrated legacy action pages on
 ## Environment prerequisites
 
 1. Docker Compose stack must be running (`docker compose up -d`).
-2. Authenticate as a sysop test user (`id=10211`, class 15) using the smoke `c_secure_pass` cookie or `/login.php`.
+2. Authenticate as a sysop test user (`id=10211`, class 15) using the smoke `c_secure_pass` cookie or `POST /login` (plain `username`/`password` + `_token`; never POST `/login.php` — the wrapper drops the body → 419).
 3. Ensure the user has `uploadpos = 'yes'` and at least one invite if testing `/takeinvite.php`.
 4. For `/takeinvite.php` to persist an invite row locally:
    - Set `main.invitesystem = yes`.

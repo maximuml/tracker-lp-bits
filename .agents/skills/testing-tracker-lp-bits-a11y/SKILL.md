@@ -11,6 +11,26 @@ None for the local Docker stack.
 
 Use when testing PRs that touch `resources/views/layouts/nexus.blade.php`, `resources/views/layouts/nexus_legacy.blade.php`, `x-nexus.*` components, `public/styles/nexus-legacy-compat.css`, or `resources/css/app.css` accessibility/theme changes.
 
+## Automated axe gate (run first)
+
+The standalone `a11y.yml` workflow was removed — axe coverage now lives in
+the blocking Playwright suite: `tests/browser/specs/a11y.spec.ts` scans 4
+public + 7 authenticated pages with `@axe-core/playwright` (WCAG 2.x tags)
+against `tests/browser/a11y-baseline.json`. Baselines are ratchets: new
+rule-ids fail, fixed rules drop out on regeneration:
+
+```bash
+cd tests/browser && npm ci && npx playwright install chromium
+npx playwright test a11y                          # check against baseline
+A11Y_UPDATE_BASELINE=1 npx playwright test a11y   # regenerate after fixes
+```
+
+See `tests/browser/README.md` for the required settings (`security.iv=no`,
+`basic.baseUrl`, `security.maxip`) and `BrowserSmokeSeeder` fixtures. The
+manual snippets below remain useful for diagnosing what a baseline entry
+actually looks like on screen (focus rings, skip-link targets, themes) —
+things axe cannot fully judge.
+
 ## Setup
 
 1. Ensure the Docker Compose stack is up:

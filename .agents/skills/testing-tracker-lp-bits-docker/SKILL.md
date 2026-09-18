@@ -57,32 +57,50 @@ docker exec nexusphp-redis redis-cli DEL nexus_settings_in_nexus nexus_settings_
 If `security.iv` is `yes`, `check_code()` rejects login attempts that do not
 include the correct `imagehash` / `imagestring`.
 
-## Logging in
+## Browser smoke suite (primary verification)
 
-The legacy login form uses **challenge-response authentication** when
-`use_challenge_response_authentication` is `yes`. The browser will compute the
-`response` value with JS and submit normally. If you need to log in via `curl`,
-compute it manually:
+`tests/browser/` is the blocking Playwright gate (ADR 0016) — run it before
+hand-probing pages: real login/signup forms, authenticated page smoke,
+forum navigation, escaped-markup detection, CSP + axe baselines, mobile
+overflow. `tests/browser/README.md` documents the settings prerequisites
+(`security.iv=no`, `security.maxip`, `basic.baseUrl` matching the browser
+origin) and `BrowserSmokeSeeder` fixtures.
 
-```python
-import json, subprocess, os
-resp = subprocess.run([
-    'curl', '-s', '-X', 'POST', 'http://localhost/api/challenge',
-    '-H', 'Content-Type: application/json',
-    '-d', '{"username":"sysop"}'
-], capture_output=True, text=True)
-data = json.loads(resp.stdout)['data']
-challenge, secret = data['challenge'], data['secret']
-php = "echo hash_hmac('sha256', hash('sha256', getenv('SECRET') . hash('sha256', getenv('PASSWORD'))), getenv('CHALLENGE'));"
-r = subprocess.run([
-    'docker', 'exec', '-e', 'CHALLENGE='+challenge, '-e', 'SECRET='+secret,
-    '-e', 'PASSWORD=TestPass2026', 'nexusphp-php', 'php', '-r', php
-], capture_output=True, text=True)
-response = r.stdout.strip()
-# Then POST to /takelogin.php with username, password, and response.
+```bash
+cd tests/browser && npm ci && npx playwright test
 ```
 
-If you hit the failed-login ban, truncate `loginattempts`:
+## Logging in
+
+The main login form is a plain `POST /login` with `_token`, `username`,
+`password` (plaintext), optional `two_step_code`, and — when `security.iv`
+is enabled — `imagehash`/`imagestring`. Success returns `302` to
+`index.php`/`/index` and sets the `c_secure_pass` cookie. There is no
+challenge-response on this form: `data-auth-form="challenge"` (HMAC over
+`/api/challenge`) exists only for the usercp security-confirmation form,
+and `data-auth-form="hash"` only for `/signup` — see
+`public/js/auth-form.js`.
+
+```bash
+# curl: shared cookie jar for the CSRF token + session
+curl -sc /tmp/jar -b /tmp/jar http://localhost/login -o /tmp/login.html
+TOKEN=$(grep -oP 'name="_token" value="\K[^"]+' /tmp/login.html | head -1)
+curl -s -b /tmp/jar -c /tmp/jar -o /dev/null -w '%{http_code} %{redirect_url}' \
+  -X POST http://localhost/login \
+  --data-urlencode "_token=$TOKEN" \
+  --data-urlencode "username=sysop" \
+  --data-urlencode "password=TestPass2026"
+# expect: 302 http://localhost/index.php ; jar now holds c_secure_pass
+```
+
+Do **not** POST to `/login.php` — the legacy wrapper builds the Laravel
+request without the POST body and the form returns `419`. Do not POST to
+`/takelogin.php` either; it maps to `/login` but direct `/login` is the
+canonical route.
+
+`/login` is throttled (`throttle:login`, 10 req/min per IP) — repeated
+logins in automation 429 quickly; log in once and reuse the cookie. If you
+hit the failed-login ban, truncate `loginattempts`:
 
 ```bash
 docker exec -t nexusphp-mysql mysql -unexusphp -pnexusphp \
@@ -118,12 +136,23 @@ get client with url: http://meilisearch:7700, master key:
    `nexus_settings_in_nexus` and `nexus_settings_in_laravel`. After manually
    editing the `settings` table, delete those keys or restart the `php`
    container.
-2. **Login button is JS-driven.** The `#submit-btn` on `/login.php` is
-   `type=button` and computes the challenge response. If a synthetic click does
-   not fire, use the browser console to set the username/password and call
-   `document.querySelector('#submit-btn').click()`.
+2. **Signup button is JS-driven.** `#submit-btn` on `/signup` is
+   `type=button`; `auth-form.js` (`data-auth-form="hash"`) fills the hidden
+   `wantusername`/`wantpassword` fields on click. A plain form POST without
+   those fields fails validation — click the real button. A `gender` radio
+   is required even though the request marks it nullable.
 3. **Search form submit.** The search keyword input is `name="search"` inside
    `form[name="searchbox"]`. Pressing `Enter` while the input is focused
    submits the form.
 4. **`meilisearch:import` is idempotent.** It swaps a new `torrents_YYYYMMDD_HHMMSS`
    index into `torrents` when an existing `torrents` index is present.
+5. **`basic.baseUrl` must match the browser origin.** `confirm.php`
+   redirects to `basic.baseUrl` after `POST /signup`; Chromium applies CSP
+   `form-action 'self'` to the redirect, so `baseUrl=localhost` while
+   browsing via `127.0.0.1` silently aborts the confirmation navigation.
+6. **`security.maxip` caps signups per IP** (seeded `2`). Docker-gateway
+   test accounts trip it — raise it before exercising signup.
+7. **Seeded data is reference-only.** `migrate:fresh --seed` creates no
+   torrents and no forum topics; `php artisan db:seed
+   --class=BrowserSmokeSeeder` adds the minimal fixtures the browser
+   suite needs (idempotent).

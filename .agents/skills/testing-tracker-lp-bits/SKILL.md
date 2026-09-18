@@ -17,6 +17,28 @@ Use this skill when asked to test the tracker-lp-bits app in the local Docker Co
    App\Support\AuthCookie::buildToken($user->id, $user->auth_key, time() + 86400);
    ```
 
+## Browser smoke suite (primary verification)
+
+`tests/browser/` is the blocking Playwright gate (ADR 0016, CI job
+`browser-smoke`). Prefer it over hand-written probes for page-level
+regressions — it already covers real login and signup forms, 10
+authenticated pages, forums → viewforum → viewtopic navigation,
+escaped-markup leaks, failed resources/`pageerror`, CSP violation
+baselines, axe baselines, and mobile horizontal overflow.
+
+```bash
+cd tests/browser && npm ci && npx playwright test
+```
+
+Prerequisites on a fresh `migrate:fresh --seed` database (documented in
+`tests/browser/README.md`): `security.iv=no` (image captcha),
+`security.maxip` raised above the seeded `2`, `basic.baseUrl` equal to
+the browser origin (`http://127.0.0.1`), and
+`php artisan db:seed --class=BrowserSmokeSeeder` for the torrent/topic
+fixtures — the base seeders ship reference data only. `globalSetup`
+performs one real `POST /login` and replays `storageState`; `/login` is
+throttled 10 req/min, so do not log in per page.
+
 ## Common environment gotchas
 
 - `basic.BASEURL` may be empty in `settings`, producing `http:///announce.php` and breaking `/announce.php`. Set it to `localhost` (or the real host) and clear Redis settings cache.

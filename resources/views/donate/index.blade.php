@@ -14,7 +14,7 @@
     <div>
         <div class="nx-text">{{ __('legacy/donate.text_donation_note') }}</div>
         @if ($showCustom)
-            <div class="nx-text">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Format::formatComment($custom)))</div>
+            <div class="nx-text">{{ \App\Support\Format::formatComment($custom) }}</div>
         @endif
         @if ($showPaypal || $showAlipay)
             <div class="nx-row">

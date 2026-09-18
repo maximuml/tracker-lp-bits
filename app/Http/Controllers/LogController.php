@@ -198,7 +198,7 @@ class LogController extends LegacyController
 
         foreach ($chronicleRows as &$row) {
             $row['dateHtml'] = SafeHtml::fromTrustedHtml((string) (Time::format((string) ($row['added'] ?? ''), true, false) ?? ''));
-            $row['bodyHtml'] = SafeHtml::fromTrustedHtml(Format::formatComment((string) ($row['txt'] ?? ''), true, false, true));
+            $row['bodyHtml'] = Format::formatComment((string) ($row['txt'] ?? ''), true, false, true);
         }
         unset($row);
 
@@ -231,7 +231,7 @@ class LogController extends LegacyController
 
         foreach ($newsRows as &$row) {
             $row['dateHtml'] = SafeHtml::fromTrustedHtml((string) (Time::format((string) ($row['added'] ?? ''), true, false) ?? ''));
-            $row['bodyHtml'] = SafeHtml::fromTrustedHtml(Format::formatComment((string) ($row['body'] ?? ''), false, false, true));
+            $row['bodyHtml'] = Format::formatComment((string) ($row['body'] ?? ''), false, false, true);
         }
         unset($row);
 

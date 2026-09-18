@@ -61,19 +61,19 @@ class PageLayout
      * Buffered variant of stdhead(): sets the context from SupportContext
      * and returns the header markup instead of echoing it.
      */
-    public static function headerHtml(string $title = '', bool $msgalert = true, string $script = '', string $place = ''): string
+    public static function headerHtml(string $title = '', bool $msgalert = true, string $script = '', string $place = ''): SafeHtml
     {
         self::setContext(PageLayoutContext::fromSupportContext());
 
-        return self::buffered(fn () => self::header($title, $msgalert, $script, $place));
+        return SafeHtml::fromTrustedHtml(self::buffered(fn () => self::header($title, $msgalert, $script, $place)));
     }
 
     /**
      * Buffered variant of stdfoot(): returns the footer markup.
      */
-    public static function footerHtml(): string
+    public static function footerHtml(): SafeHtml
     {
-        return self::buffered(fn () => self::footer());
+        return SafeHtml::fromTrustedHtml(self::buffered(fn () => self::footer()));
     }
 
     /**

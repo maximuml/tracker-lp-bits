@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Support\Cache\LegacyRedisCache;
+use App\Support\Html\SafeHtml;
 use App\Support\UserDisplay;
 use Illuminate\Support\Facades\DB;
 
@@ -112,7 +113,7 @@ class PollRepository
 
     /**
      * @param  array<int, array<string, mixed>>  $answers
-     * @return array<int, string>
+     * @return array<int, SafeHtml>
      */
     public function userDisplayMap(array $answers): array
     {

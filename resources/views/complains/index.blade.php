@@ -68,7 +68,7 @@
             @endif
             <br />IP: {{ $complain['ip'] ?? '' }}
         @endif
-        <hr />@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Format::formatComment($complain['body'] ?? '')))
+        <hr />{{ \App\Support\Format::formatComment($complain['body'] ?? '') }}
     </x-frame>
 
     <x-frame :caption="__('legacy/complains.text_replies')" :center="false">
@@ -79,7 +79,7 @@
                     ({{ $row['ip'] ?? '' }})
                 @endif
                 : </b>
-                @safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Format::formatComment($row['body'] ?? '')))<hr />
+                {{ \App\Support\Format::formatComment($row['body'] ?? '') }}<hr />
             @endforeach
         @else
             <p align="center">{{ __('legacy/complains.text_no_replies') ?? 'No replies.' }}</p>

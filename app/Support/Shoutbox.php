@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Repositories\ShoutboxRepository;
+use App\Support\Html\SafeHtml;
 use Illuminate\Database\Query\Builder;
 
 /**
@@ -139,17 +140,17 @@ final class Shoutbox
      * @param  int  $currentUserId  Id of the viewing user
      * @param  bool  $mentionsMe  Set to true when the message mentions the viewer
      */
-    public static function formatMessage(string $text, int $currentUserId, bool &$mentionsMe = false): string
+    public static function formatMessage(string $text, int $currentUserId, bool &$mentionsMe = false): SafeHtml
     {
         if ($text === '') {
-            return '';
+            return SafeHtml::fromTrustedHtml('');
         }
 
-        $html = Comment::format($text, true, false, true, true, 600, true, false);
+        $html = (string) Comment::format($text, true, false, true, true, 600, true, false);
         $html = self::renderMentions($html, $currentUserId, $mentionsMe);
         $html = self::renderTorrents($html);
 
-        return $html;
+        return SafeHtml::fromTrustedHtml($html);
     }
 
     /**

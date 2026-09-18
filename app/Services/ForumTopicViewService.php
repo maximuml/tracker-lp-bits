@@ -267,7 +267,7 @@ final class ForumTopicViewService
                 $canViewProtected = true;
             }
             if ($highlight) {
-                $bodyContent = Format::highlight($highlight, $bodyContent);
+                $bodyContent = Format::highlight($highlight, (string) $bodyContent);
             }
 
             if (Validators::isId($arr['editedby'])) {

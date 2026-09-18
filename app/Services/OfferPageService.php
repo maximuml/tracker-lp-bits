@@ -251,7 +251,7 @@ final class OfferPageService
         return [
             'id' => $id,
             'name' => SafeHtml::fromTrustedHtml(htmlspecialchars((string) ($num['name'] ?? ''))),
-            'offeredBy' => SafeHtml::fromTrustedHtml(UserDisplay::username((int) ($num['userid'] ?? 0))),
+            'offeredBy' => UserDisplay::username((int) ($num['userid'] ?? 0)),
             'offerTime' => SafeHtml::fromTrustedHtml($offertime),
             'status' => SafeHtml::fromTrustedHtml($status),
             'allowRow' => SafeHtml::fromTrustedHtml($allowRow),
@@ -573,7 +573,7 @@ final class OfferPageService
                 default => 'unknown',
             };
             $rows[] = [
-                'username' => SafeHtml::fromTrustedHtml(UserDisplay::username((int) ($arrArr['userid'] ?? 0))),
+                'username' => UserDisplay::username((int) ($arrArr['userid'] ?? 0)),
                 'vote' => SafeHtml::fromTrustedHtml($vote),
             ];
         }

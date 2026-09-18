@@ -157,7 +157,7 @@ class InfoController extends LegacyController
                 'torrentName' => $torrent,
                 'commentid' => $commentId,
                 'pageUrl' => $commPage > 0 ? '&page='.$commPage : '',
-                'bodyHtml' => SafeHtml::fromTrustedHtml(Format::formatComment((string) ($arr['text'] ?? ''))),
+                'bodyHtml' => Format::formatComment((string) ($arr['text'] ?? '')),
             ];
         }
 

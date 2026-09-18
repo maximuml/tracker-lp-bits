@@ -88,10 +88,10 @@ class UserAdminController extends LegacyController
         $classOptions = [];
         for ($i = 0; ; $i++) {
             $c = UserClass::name($i, false, true, true);
-            if (! $c) {
+            if ($c->isEmpty()) {
                 break;
             }
-            $classOptions[] = ['value' => $i, 'label' => SafeHtml::fromTrustedHtml($c), 'selected' => $class !== '-' && $class == $i];
+            $classOptions[] = ['value' => $i, 'label' => $c, 'selected' => $class !== '-' && $class == $i];
         }
 
         $countryOptions = [['value' => 0, 'label' => __('legacy/users.select_any_country'), 'selected' => $country === 0]];
@@ -110,10 +110,10 @@ class UserAdminController extends LegacyController
         foreach ($userRows as $arr) {
             $rows[] = [
                 'id' => (int) $arr['id'],
-                'username_html' => SafeHtml::fromTrustedHtml(UserDisplay::username((int) $arr['id'])),
+                'username_html' => UserDisplay::username((int) $arr['id']),
                 'addedFormatted' => SafeHtml::fromTrustedHtml((string) Time::format($arr['added'], true, false)),
                 'lastAccessFormatted' => SafeHtml::fromTrustedHtml((string) Time::format($arr['last_access'], true, false)),
-                'class_name' => SafeHtml::fromTrustedHtml(UserClass::name((int) $arr['class'], false, true, true)),
+                'class_name' => UserClass::name((int) $arr['class'], false, true, true),
                 'country' => SafeHtml::fromTrustedHtml((string) $arr['country']),
             ];
         }

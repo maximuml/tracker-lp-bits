@@ -48,7 +48,7 @@ class StaffPageController extends LegacyController
 
             return [
                 'id' => (int) $arr['id'],
-                'username_html' => SafeHtml::fromTrustedHtml(UserDisplay::username((int) $arr['id'])),
+                'username_html' => UserDisplay::username((int) $arr['id']),
                 'flag_html' => SafeHtml::fromTrustedHtml('<img width=24 height=15 src="pic/flag/'.$countryrow['flagpic'].'" title="'.$countryrow['name'].'" style="padding-bottom:1px;">'),
                 'online_html' => SafeHtml::fromTrustedHtml($isOnline ? $onlineImg : $offlineImg),
                 'pm_html' => SafeHtml::fromTrustedHtml('<a href=sendmessage.php?receiver='.(int) $arr['id'].' title="'.(__('legacy/staff.title_send_pm')).'">'.$sendPmImg.'</a>'),
@@ -122,7 +122,7 @@ class StaffPageController extends LegacyController
         foreach ($staffUsers as $arr) {
             if ($currentClass !== $arr['class']) {
                 $currentClass = $arr['class'];
-                $staffRows[] = ['header' => true, 'class_name' => SafeHtml::fromTrustedHtml(UserClass::name((int) $arr['class'], false, true, true))];
+                $staffRows[] = ['header' => true, 'class_name' => UserClass::name((int) $arr['class'], false, true, true)];
             }
             $staffRows[] = $buildUserRow($arr, 'stafffor');
         }

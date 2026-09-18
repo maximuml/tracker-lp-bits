@@ -7,6 +7,7 @@ namespace App\Support;
 use App\Repositories\StyleRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
+use App\Support\Html\SafeHtml;
 
 /**
  * Legacy stylesheet helpers extracted from `include/functions.php`.
@@ -153,12 +154,12 @@ final class Style
      * Convenience wrapper that reads the current user / default stylesheet
      * from the support context and returns the extra CSS (`addicode`).
      */
-    public static function addiCodeWithContext(): string
+    public static function addiCodeWithContext(): SafeHtml
     {
         $user = app(CurrentUser::class)->get() ?? [];
         $defaultId = self::defaultStylesheetId();
 
-        return self::addiCode(app(LegacyRedisCache::class), $user ? $user['stylesheet'] : $defaultId, $defaultId);
+        return SafeHtml::fromTrustedHtml(self::addiCode(app(LegacyRedisCache::class), $user ? $user['stylesheet'] : $defaultId, $defaultId));
     }
 
     /**

@@ -180,12 +180,12 @@ class MessagePageService
                     $username = UserDisplay::username((int) $row['receiver']);
                 }
             } else {
-                $username = __('legacy/messages.text_system');
+                $username = (string) (__('legacy/messages.text_system'));
             }
 
             $subject = (string) $row['subject'];
             if (strlen($subject) <= 0) {
-                $subject = __('legacy/messages.text_no_subject');
+                $subject = (string) (__('legacy/messages.text_no_subject'));
             }
 
             $rows[] = [
@@ -305,7 +305,7 @@ class MessagePageService
         } else {
             $from = __('legacy/messages.text_from');
             if ((int) $message['sender'] === 0) {
-                $sender = __('legacy/messages.text_system');
+                $sender = (string) (__('legacy/messages.text_system'));
                 $reply = '';
             } else {
                 $sender = UserDisplay::username((int) $message['sender']);
@@ -325,7 +325,7 @@ class MessagePageService
 
         $subject = (string) $message['subject'];
         if (strlen($subject) <= 0) {
-            $subject = __('legacy/messages.text_no_subject');
+            $subject = (string) (__('legacy/messages.text_no_subject'));
         }
 
         // Mark message as read
@@ -387,7 +387,7 @@ class MessagePageService
 
         $fromName = UserDisplay::username($from);
         if ($orig === 0) {
-            $origName = __('legacy/messages.text_system');
+            $origName = (string) (__('legacy/messages.text_system'));
             $origName2 = __('legacy/messages.text_system');
         } else {
             $origName = UserDisplay::username($orig);

@@ -102,7 +102,7 @@
             <div class="bbcode-smilies-wrap">
                 <div class="bbcode-smilies">
                     @foreach ($quickSmilies as $smily)
-                        <span class="bbcode-smile">@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(\App\Support\Smilies::link($form, $text, (int) $smily)))</span>
+                        <span class="bbcode-smile">{{ \App\Support\Smilies::link($form, $text, (int) $smily) }}</span>
                     @endforeach
                 </div>
                 <a href="#" data-bbcode-action="winop">{{ __('legacy/functions.text_more_smilies')}}</a>

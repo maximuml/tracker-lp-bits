@@ -222,7 +222,7 @@ final class TorrentListViewFactory
             $uploaderShowOwner = $uploaderAnonymous
                 && ($canViewAnonymous || (isset($row['owner']) && $row['owner'] == $user['id']));
             $uploaderName = isset($row['owner'])
-                ? SafeHtml::fromTrustedHtml(UserDisplay::username($row['owner']))
+                ? UserDisplay::username($row['owner'])
                 : null;
 
             $staffDeleteUrl = ($canManage && $canDelete) ? 'fastdelete.php?id='.$id : null;

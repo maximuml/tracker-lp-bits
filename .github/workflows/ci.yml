@@ -241,7 +241,9 @@ jobs:
         run: DB_DATABASE=nexusphp_unit_testing vendor/bin/phpunit --testsuite Unit,Integration --coverage-clover=coverage-unit.xml
 
       - name: Run PHPUnit Feature with coverage
-        run: DB_DATABASE=nexusphp_feature_testing vendor/bin/phpunit --testsuite Feature --coverage-clover=coverage-feature.xml --coverage-html=coverage-html
+        # NEXUS_LEGACY_CONTEXT=1 → tests/bootstrap.php defines IN_NEXUS=true so
+        # Feature tests exercise the same code paths as the production front controller.
+        run: NEXUS_LEGACY_CONTEXT=1 DB_DATABASE=nexusphp_feature_testing vendor/bin/phpunit --testsuite Feature --coverage-clover=coverage-feature.xml --coverage-html=coverage-html
 
       - name: Run PHPUnit Performance
         run: DB_DATABASE=nexusphp_feature_testing vendor/bin/phpunit --testsuite Performance --no-coverage
@@ -367,6 +369,7 @@ jobs:
             -e CRITICAL_PATH_BASE_URL=http://openresty \
             -e DB_DATABASE=nexusphp_e2e_testing \
             -e E2E_DB_DATABASE=nexusphp_e2e_testing \
+            -e NEXUS_LEGACY_CONTEXT=1 \
             php vendor/bin/phpunit --testsuite Feature --no-coverage
 
   codeql:

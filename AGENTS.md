@@ -52,10 +52,10 @@ docker compose exec php php artisan user:reset_id_auto_increment \
 ```bash
 # One-command test runner (W0-06): uses docker-compose.test.yml overlay
 # with isolated DB_DATABASE=nexusphp_testing and REDIS_PREFIX=test_
-make test              # all suites (migrate:fresh + phpunit --parallel)
+make test              # all suites (migrate:fresh + phpunit; Feature runs last under NEXUS_LEGACY_CONTEXT=1)
 make test-unit         # unit only (no DB/Redis needed, fast)
 make test-integration  # service/repository layer on a live test DB
-make test-feature      # feature only
+make test-feature      # feature only (IN_NEXUS=true via NEXUS_LEGACY_CONTEXT=1)
 make test-architecture # architecture ratchets only
 make test-performance  # EXPLAIN/query-plan regression tests
 make test-lint         # Pint + PHPStan

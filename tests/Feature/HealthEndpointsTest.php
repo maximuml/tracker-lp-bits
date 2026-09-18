@@ -30,17 +30,18 @@ final class HealthEndpointsTest extends TestCase
     public function test_diag_denies_regular_users(): void
     {
         $user = User::factory()->create(['class' => 1]);
-        $this->actingAs($user, 'nexus-web');
 
-        $this->get('/health/diag')->assertForbidden();
+        $this->withNexusCookie($user)
+            ->get('/health/diag')
+            ->assertForbidden();
     }
 
     public function test_diag_returns_infrastructure_payload_for_sysop(): void
     {
         $sysop = User::factory()->create(['class' => 15]);
-        $this->actingAs($sysop, 'nexus-web');
 
-        $this->get('/health/diag')
+        $this->withNexusCookie($sysop)
+            ->get('/health/diag')
             ->assertOk()
             ->assertJsonStructure([
                 'status',

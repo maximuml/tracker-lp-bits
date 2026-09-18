@@ -29,9 +29,4 @@ return [
     'mail_here' => 'HERE',
     'mail_title' => ' User Registration Confirmation',
     'mail_one' => 'Hi ',
-    'mail_two' => ',<br /><br />You have requested a new user account on %s and you have <br />specified this address ',
-    'mail_three' => ' as user contact.<br /><br />If you did not do this, please ignore this email. The person who entered your <br />email address had the IP address ',
-    'mail_four' => '. Please do not reply.<br /><br />To confirm your user registration, you have to follow ',
-    'mail_four_1' => '<br /><br />If the Link above is broken or expired, try to send a new confirmation email again from ',
-    'mail_five' => '<br /><br />After you do this, you will be able to use your new account. If you fail to <br />do this, your account will be deleted within 24 hours. We urge you to read <br />the RULES and FAQ before you start using %s.<br /><br />Please Note: If you did not register for %s, please report this email to %s<br /><br />------<br />Yours,<br />The %s Team.',
 ];

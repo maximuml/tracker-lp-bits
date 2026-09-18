@@ -67,7 +67,6 @@ return [
     'text_karma_self_giving_warning' => 'Not so fast there Mr. fancy pants...<br />You can not spread the karma to yourself...<br />If you want to spread the love, pick another user! <br /><br /> click to go back to your <a class=altlink href=mybonus.php>Karma Bonus Point</a> page.',
     'text_receiver_not_exists' => 'Sorry...<br /> No User with that username <br /><br /> click to go back to your <a class=altlink href=mybonus.php>Karma Bonus Point</a> page.',
     'text_oups' => 'OUPS!',
-    'text_not_enough_karma' => "<b>Sorry</b>, you don't have enough Karma points! <br /> go back to your <a class=altlink href=mybonus.php>Karma Bonus Point</a> page.",
     'text_cheat_alert' => 'Fuck off! We know you are trying to cheat!',
     'text_not_enough_bonus' => 'Sorry, you do not have enough bonus. BTW, how dou you get here?',
     'text_uploaded_one' => '1.0 GB Uploaded',

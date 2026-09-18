@@ -19,7 +19,6 @@ return [
     'text_personallist' => 'PERSONALLIST',
     'text_friendlist' => 'FRIENDLIST',
     'text_friends_empty' => 'No friends yet',
-    'text_neighbors_empty' => '<em>No Neighbors yet</em>',
     'text_last_seen_on' => 'Last seen on ',
     'text_ago' => ' ago',
     'text_remove_from_friends' => 'Remove from Friends',

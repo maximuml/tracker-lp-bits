@@ -15,7 +15,7 @@
                 </tr>
                 @foreach ($pendingRows as $row)
                     <tr>
-                        <td class="rowfollow">{{ \App\Support\Time::format($row['added'] ?? '') }}</td>
+                        <td class="rowfollow"><x-time :value="$row['added'] ?? ''" /></td>
                         <td class="rowfollow">{{ $row['email'] ?? '' }}</td>
                         <td class="rowfollow"><a href="?action=view&id={{ $row['uuid'] ?? '' }}" class="faqlink">{{ __('legacy/complains.th_action_view') ?? 'View' }}</a></td>
                     </tr>
@@ -38,7 +38,7 @@
             </tr>
             @foreach ($processedRows as $row)
                 <tr>
-                    <td class="rowfollow">{{ \App\Support\Time::format($row['added'] ?? '') }}</td>
+                    <td class="rowfollow"><x-time :value="$row['added'] ?? ''" /></td>
                     <td class="rowfollow">{{ $row['email'] ?? '' }}</td>
                     <td class="rowfollow"><a href="?action=view&id={{ $row['uuid'] ?? '' }}" class="faqlink">{{ __('legacy/complains.th_action_view') ?? 'View' }}</a></td>
                 </tr>
@@ -58,7 +58,7 @@
     @endif
 
     <x-frame :caption="__('legacy/complains.text_new_body')" :center="false">
-        {{ __('legacy/complains.text_added') ?? 'Added' }}：{{ \App\Support\Time::format($complain['added'] ?? '') }}<br />{{ __('legacy/complains.text_new_email') ?? 'Email' }} {{ $complain['email'] ?? '' }}
+        {{ __('legacy/complains.text_added') ?? 'Added' }}：<x-time :value="$complain['added'] ?? ''" /><br />{{ __('legacy/complains.text_new_email') ?? 'Email' }} {{ $complain['email'] ?? '' }}
         @if ($isAdmin)
             @if (! empty($user))
                 [<a href="userdetails.php?id={{ (int) ($user['id'] ?? 0) }}" class="faqlink" target="_blank">{{ $user['username'] ?? '' }}</a>]
@@ -74,7 +74,7 @@
     <x-frame :caption="__('legacy/complains.text_replies')" :center="false">
         @if (! empty($replyRows))
             @foreach ($replyRows as $row)
-                <b>{{ (int) ($row['userid'] ?? 0) !== 0 ? ($replyUserMap[(int) $row['userid']] ?? \App\Support\UserDisplay::plainUsername((int) $row['userid'])) : (__('legacy/complains.text_complainer')) }} @ {{ \App\Support\Time::format($row['added'] ?? '') }}
+                <b>{{ (int) ($row['userid'] ?? 0) !== 0 ? ($replyUserMap[(int) $row['userid']] ?? \App\Support\UserDisplay::plainUsername((int) $row['userid'])) : (__('legacy/complains.text_complainer')) }} @ <x-time :value="$row['added'] ?? ''" />
                 @if ($isAdmin)
                     ({{ $row['ip'] ?? '' }})
                 @endif

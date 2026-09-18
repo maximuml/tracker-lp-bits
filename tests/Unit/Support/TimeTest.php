@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Support;
 
+use App\Support\Html\SafeHtml;
 use App\Support\Time;
 use Carbon\Carbon;
 use PHPUnit\Framework\TestCase;
@@ -423,6 +424,81 @@ class TimeTest extends TestCase
     public function test_format_returns_original_string_for_unparseable_time(): void
     {
         $this->assertSame('not-a-date', Time::format('not-a-date'));
+    }
+
+    // ---------- timeParts() ----------
+
+    public function test_time_parts_returns_null_for_empty_time(): void
+    {
+        $this->assertNull(Time::timeParts(''));
+        $this->assertNull(Time::timeParts(0));
+        $this->assertNull(Time::timeParts(null));
+    }
+
+    public function test_time_parts_returns_semantic_time_data_in_laravel_context(): void
+    {
+        $original = Carbon::getTestNow();
+        try {
+            Carbon::setTestNow('2026-07-22 10:00:00');
+            $parts = Time::timeParts('2026-07-22 09:00:00');
+        } finally {
+            Carbon::setTestNow($original);
+        }
+
+        $this->assertSame('2026-07-22 09:00:00', $parts['datetime']);
+        $this->assertSame('2026-07-22 09:00:00', $parts['title']);
+        $this->assertSame('1 hour ago', (string) $parts['inner']);
+    }
+
+    public function test_time_parts_inner_is_safe_html_renderable_via_blade_echo(): void
+    {
+        $parts = Time::timeParts('2026-07-22 09:00:00');
+
+        $this->assertInstanceOf(SafeHtml::class, $parts['inner']);
+        // {{ $inner }} must emit the markup, not an escaped copy of it.
+        $this->assertStringNotContainsString('&lt;', (string) e($parts['inner']));
+    }
+
+    public function test_time_parts_escapes_unparseable_input_as_plain_text(): void
+    {
+        $parts = Time::timeParts('"><script>alert(1)</script>');
+
+        $this->assertNotNull($parts);
+        $this->assertStringNotContainsString('<script>', (string) $parts['inner']);
+        $this->assertStringContainsString('&lt;script&gt;', (string) $parts['inner']);
+        // datetime/title are raw — attribute safety comes from Blade's {{ }}.
+        $this->assertSame('"><script>alert(1)</script>', $parts['datetime']);
+    }
+
+    // ---------- formatText() ----------
+
+    public function test_format_text_returns_plain_text_in_laravel_context(): void
+    {
+        $original = Carbon::getTestNow();
+        try {
+            Carbon::setTestNow('2026-07-22 10:00:00');
+            $this->assertSame('1 hour ago', Time::formatText('2026-07-22 09:00:00'));
+        } finally {
+            Carbon::setTestNow($original);
+        }
+    }
+
+    public function test_format_text_returns_null_for_empty_time(): void
+    {
+        $this->assertNull(Time::formatText(''));
+        $this->assertNull(Time::formatText(0));
+        $this->assertNull(Time::formatText(null));
+    }
+
+    public function test_format_text_strips_markup_and_nbsp(): void
+    {
+        // Synthetic HTML like the legacy branch produces — formatText()
+        // must return display text only.
+        $text = Time::formatText('2026-07-22 09:00:00');
+
+        $this->assertIsString($text);
+        $this->assertStringNotContainsString('<', $text);
+        $this->assertStringNotContainsString("\xc2\xa0", $text);
     }
 
     // ---------- formatDateTime() / millis() / micro() ----------

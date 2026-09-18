@@ -74,6 +74,6 @@
 </tbody>
 </table>
 @if ($listVm->showPromotionNote)
-<p class="nxm-note" align="center">{{ __('legacy/functions.text_promoted_torrents_note') }}</p>
+<p class="nxm-note" align="center">{{ \App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/functions.text_promoted_torrents_note')) }}</p>
 @endif
 {{ $listVm->lastCommentTooltips }}

@@ -43,7 +43,7 @@
 
 @elseif ($action === 'mainsettings')
     <form method="post" action="{{ $scriptName }}"><input type="hidden" name="action" value="savesettings_main">@csrf
-    <x-settings-yesno layout="grid" :label="__('legacy/settings.row_site_online')" name="site_online" :value="$config['site_online'] ?? 'yes'" :note="__('legacy/settings.text_site_online_note')" :yes-label="__('legacy/settings.text_yes')" :no-label="__('legacy/settings.text_no')" />
+    <x-settings-yesno layout="grid" :label="__('legacy/settings.row_site_online')" name="site_online" :value="$config['site_online'] ?? 'yes'" :note="\App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/settings.text_site_online_note'))" :yes-label="__('legacy/settings.text_yes')" :no-label="__('legacy/settings.text_no')" />
     <x-settings-yesno layout="grid" :label="__('legacy/settings.row_enable_invite_system')" name="invitesystem" :value="$config['invitesystem'] ?? 'yes'" :note="__('legacy/settings.text_invite_system_note')" :yes-label="__('legacy/settings.text_yes')" :no-label="__('legacy/settings.text_no')" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_initial_uploading_amount')" name="iniupload" :value="$config['iniupload'] ?? 0" :note="__('legacy/settings.text_initial_uploading_amount_note')" width="100px" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_initial_invites')" name="invite_count" :value="$config['invite_count'] ?? 0" :note="__('legacy/settings.text_initial_invites_note')" width="50px" />
@@ -56,8 +56,8 @@
         :options="['email' => __('legacy/settings.text_email'), 'admin' => __('legacy/settings.text_admin'), 'automatic' => __('legacy/settings.text_automatically')]"
         :selected="$config['verification'] ?? 'email'"
         :note="__('legacy/settings.text_verification_type_note')" />
-    <x-settings-yesno layout="grid" :label="__('legacy/settings.row_enable_wait_system')" name="waitsystem" :value="$config['waitsystem'] ?? 'no'" :note="__('legacy/settings.text_wait_system_note')" :yes-label="__('legacy/settings.text_yes')" :no-label="__('legacy/settings.text_no')" />
-    <x-settings-yesno layout="grid" :label="__('legacy/settings.row_enable_max_slots_system')" name="maxdlsystem" :value="$config['maxdlsystem'] ?? 'no'" :note="__('legacy/settings.text_max_slots_system_note')" :yes-label="__('legacy/settings.text_yes')" :no-label="__('legacy/settings.text_no')" />
+    <x-settings-yesno layout="grid" :label="__('legacy/settings.row_enable_wait_system')" name="waitsystem" :value="$config['waitsystem'] ?? 'no'" :note="\App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/settings.text_wait_system_note'))" :yes-label="__('legacy/settings.text_yes')" :no-label="__('legacy/settings.text_no')" />
+    <x-settings-yesno layout="grid" :label="__('legacy/settings.row_enable_max_slots_system')" name="maxdlsystem" :value="$config['maxdlsystem'] ?? 'no'" :note="\App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/settings.text_max_slots_system_note'))" :yes-label="__('legacy/settings.text_yes')" :no-label="__('legacy/settings.text_no')" />
     <x-settings-yesno layout="grid" :label="__('legacy/settings.row_show_polls')" name="showpolls" :value="$config['showpolls'] ?? 'yes'" :note="__('legacy/settings.text_show_polls_note')" :yes-label="__('legacy/settings.text_yes')" :no-label="__('legacy/settings.text_no')" />
     <x-settings-yesno layout="grid" :label="__('legacy/settings.row_show_stats')" name="showstats" :value="$config['showstats'] ?? 'yes'" :note="__('legacy/settings.text_show_stats_note')" :yes-label="__('legacy/settings.text_yes')" :no-label="__('legacy/settings.text_no')" />
     <x-settings-yesno layout="grid" :label="__('legacy/settings.row_show_last_posts')" name="showlastxforumposts" :value="$config['showlastxforumposts'] ?? 'yes'" :note="__('legacy/settings.text_show_last_posts_note')" :yes-label="__('legacy/settings.text_yes')" :no-label="__('legacy/settings.text_no')" />
@@ -73,7 +73,7 @@
     <x-settings-yesno layout="grid" :label="__('legacy/settings.row_show_donation')" name="donation" :value="$config['donation'] ?? 'no'" :note="__('legacy/settings.text_show_donation_note')" :yes-label="__('legacy/settings.text_yes')" :no-label="__('legacy/settings.text_no')" />
     <x-settings-yesno layout="grid" :label="__('legacy/settings.row_weekend_free_uploading')" name="sptime" :value="$config['sptime'] ?? 'no'" :note="__('legacy/settings.text_weekend_free_uploading_note')" :yes-label="__('legacy/settings.text_yes')" :no-label="__('legacy/settings.text_no')" />
     <x-settings-yesno layout="grid" :label="__('legacy/settings.row_enable_bitbucket')" name="enablebitbucket" :value="$config['enablebitbucket'] ?? 'no'" :note="__('legacy/settings.text_bitbucket_note')" :yes-label="__('legacy/settings.text_yes')" :no-label="__('legacy/settings.text_no')" />
-    <x-settings-yesno layout="grid" :label="__('legacy/settings.row_ptshow_naming_style')" name="altname" :value="$config['altname'] ?? 'no'" :note="__('legacy/settings.text_ptshow_naming_style_note')" :yes-label="__('legacy/settings.text_yes')" :no-label="__('legacy/settings.text_no')" />
+    <x-settings-yesno layout="grid" :label="__('legacy/settings.row_ptshow_naming_style')" name="altname" :value="$config['altname'] ?? 'no'" :note="\App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/settings.text_ptshow_naming_style_note'))" :yes-label="__('legacy/settings.text_yes')" :no-label="__('legacy/settings.text_no')" />
     <x-settings-radios layout="grid"         :label="__('legacy/settings.row_torrents_category_mode')"
         name="browsecat"
         :options="collect($searchboxes ?? [])->mapWithKeys(fn ($sb) => [(string)((array)$sb)['id'] => ((array)$sb)['name']])->all()"
@@ -96,13 +96,13 @@
     <x-settings-text layout="grid" :label="__('legacy/settings.row_site_logo')" name="logo" :value="$config['logo'] ?? ''" :note="__('legacy/settings.text_site_logo_note')" width="100px" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_max_torrent_size')" name="max_torrent_size" :value="$config['max_torrent_size'] ?? 1048576" :note="__('legacy/settings.text_max_torrent_size_note')" width="100px" />
     <x-settings-row layout="grid" :label="__('legacy/settings.row_announce_interval')">
-        {{ __('legacy/settings.text_announce_interval_note_one') ?? '' }}<br>
+        {{ \App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/settings.text_announce_interval_note_one')) ?? '' }}<br>
         <ul>
             <li>{{ __('legacy/settings.text_announce_default') ?? '' }}<input type="text" style="width: 100px" name="announce_interval" value="{{ (string)($config['announce_interval'] ?? 1800) }}"> {{ __('legacy/settings.text_announce_default_default') ?? '' }}</li>
             <li>{{ __('legacy/settings.text_for_torrents_older_than') ?? '' }}<input type="text" style="width: 100px" name="annintertwoage" value="{{ (string)($config['annintertwoage'] ?? 7) }}">{{ __('legacy/settings.text_days') ?? 'days' }}<input type="text" style="width: 100px" name="annintertwo" value="{{ (string)($config['annintertwo'] ?? 2700) }}"> {{ __('legacy/settings.text_announce_two_default') ?? '' }}</li>
             <li>{{ __('legacy/settings.text_for_torrents_older_than') ?? '' }}<input type="text" style="width: 100px" name="anninterthreeage" value="{{ (string)($config['anninterthreeage'] ?? 30) }}">{{ __('legacy/settings.text_days') ?? 'days' }}<input type="text" style="width: 100px" name="anninterthree" value="{{ (string)($config['anninterthree'] ?? 3600) }}"> {{ __('legacy/settings.text_announce_three_default') ?? '' }}</li>
         </ul>
-        {{ __('legacy/settings.text_announce_interval_note_two') ?? '' }}
+        {{ \App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/settings.text_announce_interval_note_two')) ?? '' }}
     </x-settings-row>
     <x-settings-row layout="grid" :label="__('legacy/settings.row_cleanup_interval')">
         {{ __('legacy/settings.text_cleanup_interval_note_one') ?? '' }}<br>
@@ -120,9 +120,9 @@
     <x-settings-text layout="grid" :label="__('legacy/settings.row_offer_skip_approved_count')" name="offer_skip_approved_count" :value="$config['offer_skip_approved_count'] ?? ''" :note="__('legacy/settings.text_offer_skip_approved_count_note')" width="100px" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_upload_deny_approval_deny_count')" name="upload_deny_approval_deny_count" :value="$config['upload_deny_approval_deny_count'] ?? ''" :note="__('legacy/settings.text_upload_deny_approval_deny_count_note')" width="100px" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_max_subtitle_size')" name="maxsubsize" :value="$config['maxsubsize'] ?? 3145728" :note="__('legacy/settings.text_max_subtitle_size_note')" width="100px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_posts_per_page')" name="postsperpage" :value="$config['postsperpage'] ?? 10" :note="__('legacy/settings.text_posts_per_page_note')" width="100px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_topics_per_page')" name="topicsperpage" :value="$config['topicsperpage'] ?? 20" :note="__('legacy/settings.text_topics_per_page_note')" width="100px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_torrents_per_page')" name="torrentsperpage" :value="$config['torrentsperpage'] ?? 50" :note="__('legacy/settings.text_torrents_per_page_note')" width="100px" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_posts_per_page')" name="postsperpage" :value="$config['postsperpage'] ?? 10" :note="\App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/settings.text_posts_per_page_note'))" width="100px" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_topics_per_page')" name="topicsperpage" :value="$config['topicsperpage'] ?? 20" :note="\App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/settings.text_topics_per_page_note'))" width="100px" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_torrents_per_page')" name="torrentsperpage" :value="$config['torrentsperpage'] ?? 50" :note="\App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/settings.text_torrents_per_page_note'))" width="100px" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_number_of_news')" name="maxnewsnum" :value="$config['maxnewsnum'] ?? 3" :note="__('legacy/settings.text_number_of_news_note')" width="100px" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_torrent_dead_time')" name="max_dead_torrent_time" :value="$config['max_dead_torrent_time'] ?? 21600" :note="__('legacy/settings.text_torrent_dead_time_note')" width="100px" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_max_users')" name="maxusers" :value="$config['maxusers'] ?? 2500" :note="__('legacy/settings.text_max_users')" width="100px" />
@@ -133,9 +133,9 @@
     <x-settings-text layout="grid" :label="__('legacy/settings.row_report_email')" name="reportemail" :value="$config['reportemail'] ?? ''" :note="__('legacy/settings.text_report_email_note')" width="200px" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_site_slogan')" name="SLOGAN" :value="$config['SLOGAN'] ?? ''" :note="__('legacy/settings.text_site_slogan_note')" width="300px" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_icp_license')" name="icplicense" :value="$config['icplicense'] ?? ''" :note="__('legacy/settings.text_icp_license_note')" width="300px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_torrent_directory')" name="torrent_dir" :value="$config['torrent_dir'] ?? 'torrents'" :note="__('legacy/settings.text_torrent_directory')" width="100px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_bitbucket_directory')" name="bitbucket" :value="$config['bitbucket'] ?? 'bitbucket'" :note="__('legacy/settings.text_bitbucket_directory_note')" width="100px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_torrent_name_prefix')" name="torrentnameprefix" :value="$config['torrentnameprefix'] ?? '[Nexus]'" :note="__('legacy/settings.text_torrent_name_prefix_note')" width="100px" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_torrent_directory')" name="torrent_dir" :value="$config['torrent_dir'] ?? 'torrents'" :note="\App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/settings.text_torrent_directory'))" width="100px" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_bitbucket_directory')" name="bitbucket" :value="$config['bitbucket'] ?? 'bitbucket'" :note="\App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/settings.text_bitbucket_directory_note'))" width="100px" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_torrent_name_prefix')" name="torrentnameprefix" :value="$config['torrentnameprefix'] ?? '[Nexus]'" :note="\App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/settings.text_torrent_name_prefix_note'))" width="100px" />
     <x-settings-save layout="grid" :label="__('legacy/settings.row_save_settings')" :text="__('legacy/settings.submit_save_settings')" />
     </form>
 
@@ -293,7 +293,7 @@
         @endforeach
         <br>{{ __('legacy/settings.text_kps_note') ?? '' }}
     </x-settings-row>
-    <x-settings-yesno layout="grid" :label="__('legacy/settings.row_enable_location')" name="enablelocation" :value="$config['enablelocation'] ?? 'no'" :note="__('legacy/settings.text_enable_location_note')" :yes-label="__('legacy/settings.text_yes')" :no-label="__('legacy/settings.text_no')" />
+    <x-settings-yesno layout="grid" :label="__('legacy/settings.row_enable_location')" name="enablelocation" :value="$config['enablelocation'] ?? 'no'" :note="\App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/settings.text_enable_location_note'))" :yes-label="__('legacy/settings.text_yes')" :no-label="__('legacy/settings.text_no')" />
     <x-settings-yesno layout="grid" :label="__('legacy/settings.row_enable_tooltip')" name="enabletooltip" :value="$config['enabletooltip'] ?? 'no'" :note="__('legacy/settings.text_enable_tooltip_note')" :yes-label="__('legacy/settings.text_yes')" :no-label="__('legacy/settings.text_no')" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_title_keywords')" name="titlekeywords" :value="$config['titlekeywords'] ?? ''" :note="__('legacy/settings.text_title_keywords_note')" width="300px" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_meta_keywords')" name="metakeywords" :value="$config['metakeywords'] ?? ''" :note="__('legacy/settings.text_meta_keywords_note')" width="300px" />
@@ -353,7 +353,7 @@
     @endforeach
     <x-settings-yesno layout="grid" :label="__('legacy/settings.row_allow_giving_bonus_gift')" name="bonusgift" :value="$config['bonusgift'] ?? 'no'" :note="__('legacy/settings.text_giving_bonus_gift_note')" :yes-label="__('legacy/settings.text_yes')" :no-label="__('legacy/settings.text_no')" />
     <x-settings-row layout="grid" :label="__('legacy/settings.row_bonus_gift_tax')">
-        {{ __('legacy/settings.text_system_charges') ?? '' }}<input type="text" style="width: 50px" name="basictax" value="{{ (string)($config['basictax'] ?? 5) }}">{{ __('legacy/settings.text_bonus_points_plus') ?? '' }}<input type="text" style="width: 50px" name="taxpercentage" value="{{ (string)($config['taxpercentage'] ?? 10) }}">{{ __('legacy/settings.text_bonus_gift_tax_note') ?? '' }}
+        {{ __('legacy/settings.text_system_charges') ?? '' }}<input type="text" style="width: 50px" name="basictax" value="{{ (string)($config['basictax'] ?? 5) }}">{{ __('legacy/settings.text_bonus_points_plus') ?? '' }}<input type="text" style="width: 50px" name="taxpercentage" value="{{ (string)($config['taxpercentage'] ?? 10) }}">{{ \App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/settings.text_bonus_gift_tax_note')) ?? '' }}
     </x-settings-row>
     <div class="nx-ffull nx-center"><b>{{ __('legacy/settings.text_attendance_get_bonus') ?? 'Attendance bonus' }}</b></div>
     <x-settings-text layout="grid" :label="__('legacy/settings.text_attendance_initial_reward')" name="attendance_initial" :value="$config['attendance_initial'] ?? 0" width="30px" />
@@ -485,8 +485,8 @@
             @endforeach
         </ul>
     </x-settings-row>
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_save_directory')" name="savedirectory" :value="$config['savedirectory'] ?? './attachments'" :note="__('legacy/settings.text_save_directory_note')" width="300px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_http_directory')" name="httpdirectory" :value="$config['httpdirectory'] ?? 'attachments'" :note="__('legacy/settings.text_http_directory_note')" width="300px" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_save_directory')" name="savedirectory" :value="$config['savedirectory'] ?? './attachments'" :note="\App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/settings.text_save_directory_note'))" width="300px" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_http_directory')" name="httpdirectory" :value="$config['httpdirectory'] ?? 'attachments'" :note="\App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/settings.text_http_directory_note'))" width="300px" />
     <x-settings-radios layout="grid"         :label="__('legacy/settings.row_save_directory_type')"
         name="savedirectorytype"
         :options="['onedir' => __('legacy/settings.text_one_directory'), 'monthdir' => __('legacy/settings.text_directories_by_monthes'), 'daydir' => __('legacy/settings.text_directories_by_days')]"
@@ -500,7 +500,7 @@
         :note="__('legacy/settings.text_image_thumbnail_note')"
         :break="true" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_thumbnail_quality')" name="thumbquality" :value="$config['thumbquality'] ?? 80" :note="__('legacy/settings.text_thumbnail_quality_note')" width="100px" />
-    <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_thumbnail_size') ?? 'Thumb size' }}</div><div class="nx-fcell"><input type='text' style="width: 100px" name="thumbwidth" value="{{ (string)($config['thumbwidth'] ?? 500) }}"> * <input type='text' style="width: 100px" name="thumbheight" value="{{ (string)($config['thumbheight'] ?? 500) }}"> {{ __('legacy/settings.text_thumbnail_size_note') ?? '' }}</div>
+    <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_thumbnail_size') ?? 'Thumb size' }}</div><div class="nx-fcell"><input type='text' style="width: 100px" name="thumbwidth" value="{{ (string)($config['thumbwidth'] ?? 500) }}"> * <input type='text' style="width: 100px" name="thumbheight" value="{{ (string)($config['thumbheight'] ?? 500) }}"> {{ \App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/settings.text_thumbnail_size_note')) ?? '' }}</div>
     <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_alternative_thumbnail_size') ?? 'Alt thumb size' }}</div><div class="nx-fcell"><input type='text' style="width: 100px" name="altthumbwidth" value="{{ (string)($config['altthumbwidth'] ?? 180) }}"> * <input type='text' style="width: 100px" name="altthumbheight" value="{{ (string)($config['altthumbheight'] ?? 135) }}"> {{ __('legacy/settings.text_alternative_thumbnail_size_note') ?? '' }}</div>
     <x-settings-save layout="grid" :label="__('legacy/settings.row_save_settings')" :text="__('legacy/settings.submit_save_settings')" />
     </form>

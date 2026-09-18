@@ -33,8 +33,8 @@
     <script type="text/javascript" src="js/csrf.js"></script>
     <script type="text/javascript" src="js/auth.js"></script>
     <script type="text/javascript" src="vendor/jquery-3.7.1.min.js"></script>
-    @foreach (\App\Support\AssetAppender::getAppendHeaders() as $html)
-        {{ ($html ?? '') }}
+    @foreach (\App\Support\AssetAppender::getAppendHeadersSafe() as $html)
+        {{ $html }}
     @endforeach
 </head>
 <body>
@@ -42,8 +42,8 @@
     <div class="container" id="main-content" tabindex="-1">
         @yield('content')
     </div>
-    @foreach (\App\Support\AssetAppender::getAppendFooters() as $html)
-        {{ ($html ?? '') }}
+    @foreach (\App\Support\AssetAppender::getAppendFootersSafe() as $html)
+        {{ $html }}
     @endforeach
 </body>
 </html>

@@ -18,7 +18,7 @@
 <input type="hidden" name="privacy" value="{{ $security['confirmHidden']['privacy'] ?? '' }}">
 <input type="hidden" name="two_step_secret" value="{{ $security['confirmHidden']['two_step_secret'] ?? '' }}">
 <input type="hidden" name="two_step_code" value="{{ $security['confirmHidden']['two_step_code'] ?? '' }}">
-<div class="nx-fhead nx-nowrap">{{ __('legacy/usercp.row_security_check')}}</div><div class="nx-fcell"><input type=password class=oldpassword style="width: 200px"><br /><font class=small>{{ __('legacy/usercp.text_security_check_note')}}</font></div>
+<div class="nx-fhead nx-nowrap">{{ __('legacy/usercp.row_security_check')}}</div><div class="nx-fcell"><input type=password class=oldpassword style="width: 200px"><br /><font class=small>{{ \App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/usercp.text_security_check_note')) }}</font></div>
 <input type=hidden name=username value="{{ (string) ($curUser['username'] ?? '') }}">
 <input type=hidden name=response>
 {{ $security['confirmHtml'] ?? '' }}

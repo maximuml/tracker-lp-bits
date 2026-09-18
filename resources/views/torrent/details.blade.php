@@ -6,7 +6,7 @@
 @if (empty($requestFlags['cmtpage']))
 @if (! empty($requestFlags['uploaded']))
 <h1 align="center">{{ __('legacy/details.text_successfully_uploaded') ?? '' }}</h1>
-<p>{{ __('legacy/details.text_redownload_torrent_note') ?? '' }}</p>
+<p>{{ \App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/details.text_redownload_torrent_note')) }}</p>
 @elseif (! empty($requestFlags['edited']))
 <h1 align="center">{{ __('legacy/details.text_successfully_edited') ?? '' }}</h1>
 @if (! empty($requestFlags['returnto']))

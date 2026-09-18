@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Services;
 
+use App\Enums\UserClass;
+use App\Models\User;
 use App\Repositories\ForumRepository;
 use App\Repositories\OverforumRepository;
 use App\Repositories\PostRepository;
@@ -14,6 +16,7 @@ use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Mockery;
 use Mockery\MockInterface;
@@ -393,5 +396,50 @@ final class ForumIndexServiceTest extends TestCase
 
         $this->assertArrayHasKey('html', $result);
         $this->assertStringContainsString('<table', (string) $result['html']);
+    }
+
+    public function test_build_forums_index_renders_orphan_forums_in_their_own_group(): void
+    {
+        $repo = $this->mockForumRepo();
+        $this->setUser();
+        $user = new User;
+        $user->id = 1;
+        $user->class = UserClass::USER->value;
+        auth()->login($user);
+
+        $overforumId = (int) DB::table('overforums')->min('id');
+
+        $repo->shouldReceive('updateUserForumAccess')->andReturn(true);
+        $repo->shouldReceive('getForumsList')->andReturn([
+            5 => ['id' => 5, 'name' => 'Grouped Forum', 'description' => 'belongs to an overforum', 'forid' => $overforumId, 'minclassread' => 0, 'topiccount' => 2, 'postcount' => 4],
+            7 => ['id' => 7, 'name' => 'Orphan Forum', 'description' => 'no matching overforum', 'forid' => 999, 'minclassread' => 0, 'topiccount' => 3, 'postcount' => 9],
+        ]);
+
+        $result = $this->service->buildForumsIndex(['id' => 1, 'username' => 'test'], 1);
+        $html = (string) $result['html'];
+
+        $this->assertStringContainsString('Grouped Forum', $html);
+        $this->assertStringContainsString('Orphan Forum', $html);
+        $this->assertStringContainsString('forumid=7', $html);
+    }
+
+    public function test_build_forums_index_hides_orphan_forums_below_minclassread(): void
+    {
+        $repo = $this->mockForumRepo();
+        $this->setUser(['class' => 1]);
+        $user = new User;
+        $user->id = 1;
+        $user->class = UserClass::USER->value;
+        auth()->login($user);
+
+        $repo->shouldReceive('updateUserForumAccess')->andReturn(true);
+        $repo->shouldReceive('getForumsList')->andReturn([
+            7 => ['id' => 7, 'name' => 'Staff Orphan Forum', 'description' => '', 'forid' => 999, 'minclassread' => 10, 'topiccount' => 0, 'postcount' => 0],
+        ]);
+
+        $result = $this->service->buildForumsIndex(['id' => 1, 'username' => 'test'], 1);
+        $html = (string) $result['html'];
+
+        $this->assertStringNotContainsString('Staff Orphan Forum', $html);
     }
 }

@@ -152,6 +152,12 @@ This release ships the shoutbox modernization, MeiliSearch-by-default, setlist l
   - Forums whose `forid` references a missing or hidden overforum now render in a fallback "Forums" group instead of being silently dropped; `minclassread` visibility still applies.
   - Regression coverage: `AuthPagesRenderAssetsTest`, `NoLeakedMarkupTest`, `LegacyLangMarkupTest` (ratchet), extended `TimeTest`, new `TimeLegacyFormatTest` and orphan-forum tests.
 
+- **Feature tests run under the production legacy context**
+  - `tests/bootstrap.php` defines `IN_NEXUS=true` when `NEXUS_LEGACY_CONTEXT=1`, so the Feature suite exercises the same constant-gated branches as `public/index.php`; Unit/Integration keep `IN_NEXUS=false` (they define the constant themselves where a legacy branch is under test).
+  - `composer test`/`make test` run Feature separately after the other suites because the constant is process-global; `composer test` no longer passes `--parallel`, which required the uninstalled `brianium/paratest` package and failed at runtime.
+  - `HealthEndpointsTest` now authenticates via `withNexusCookie()` (the real `c_secure_pass` path that populates `CurrentUser`) instead of `actingAs`, which only set the guard and returned 403 under `IN_NEXUS=true`.
+  - CI Feature runs (coverage and E2E) set `NEXUS_LEGACY_CONTEXT=1`.
+
 - **PHP 8.4 runtime cleanup**
   - Raised PHP requirement to `>=8.4 <8.6`.
   - Replaced deprecated `strftime()` in `public/mysql_stats.php` with a `DateTime`-based locale formatter.

@@ -628,6 +628,46 @@ Decision → Consequences). Add new ADRs here as numbered subsections.
   their form-field names/classes so `auth-form.js`, `passkey.js` and
   the browser specs are unchanged in behaviour.
 
+### ADR 0021: Forum index view model + components (Accepted, stage 3.1)
+
+- **Context:** `ForumIndexService::buildForumsIndex()` rendered the
+  forums index into `ob_start()`/`echo` (`<table border="1">` layout,
+  nested embedded tables, `<font>` tags, an inline `style=`
+  that CSP already blocked) and returned `array{html: SafeHtml}` — the
+  `resources/views/forum/sections/forums.blade.php` section was just
+  `{{ $forums['html'] }}`. Same pattern across the other forum
+  sections (viewforum/viewunread/search/viewtopic/compose).
+- **Decision:** Forum pages get typed view models under
+  `App\ViewModels\Forum\`: `ForumIndexViewModel` (site name, manage
+  flag, sections, stats), `OverforumGroup`, `ForumRow`, `LastPostRef`
+  and `ForumStatsViewModel` — data only, no markup. Rendering moves to
+  `resources/views/components/forum/{index-table,forum-row,last-post,stats}.blade.php`
+  and the section template. The service keeps the caching behaviour
+  (overforums/forums lists, last-topic and today-count cache keys,
+  `updateUserForumAccess` side effect) and returns
+  `ForumIndexViewModel`; `ForumPageViewModel::$forums` is typed
+  accordingly. The only `SafeHtml` fields are `LastPostRef::$poster`
+  and `ForumRow::$moderators` — both are `UserDisplay::username()`
+  output (icons, medals, class colours), the same justification as the
+  post body in the plan. Topic highlight colours move from
+  `<font color>` to `.nx-hl-1`…`.nx-hl-40` classes generated from
+  `Palette::HIGHLIGHT_PALETTE`, with `color-mix` lifts under the dark
+  scheme. Lang strings that embed `&nbsp;` were switched to literal
+  NBSP characters so `{{ }}` escaping stays correct (raw NBSP renders
+  identically through the remaining PHP `echo` sites). `getTopicImage`,
+  `highlightTopic`, `highlightColorOptions`, `getForumRow`,
+  `getLastReadPostId` stay public until the listing/topic/compose PRs
+  migrate their callers; `forumStats()` is now `loadStats()` returning
+  the stats VM.
+- **Consequences:** The index loses its echo/`ob_start`/table-literal
+  weight: ratchet baselines `echo` 199→189, `ob_start` 33→31,
+  `<table` literals 44→43, HTML literal lines 1194→1179. Integration
+  tests assert VM data, not markup; rendering is covered by the
+  browser suite (forums index + forum navigation specs) and one
+  component render assertion. `HtmlInPhpRatchetTest` must not go back
+  up when the remaining forum services migrate — the same pattern
+  applies.
+
 ## Testing
 
 - **Unit tests:** `tests/Unit/` — pure unit only, no DB/Redis/MeiliSearch (enforced by `UnitSuiteIsolationTest` and the `unit-tests-fast` CI job, which runs the suite with no service containers)

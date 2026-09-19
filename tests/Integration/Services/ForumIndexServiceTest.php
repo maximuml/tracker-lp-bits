@@ -342,43 +342,59 @@ final class ForumIndexServiceTest extends TestCase
         $this->addToAssertionCount(1);
     }
 
-    // --- forumStats ---
+    // --- stats (via buildForumsIndex, ADR 0021) ---
 
-    public function test_forum_stats_returns_html_with_stats(): void
+    public function test_forum_stats_returns_view_model_with_counts(): void
     {
         $repo = $this->mockForumRepo();
         $this->mockCache();
+        $this->setUser();
+        $this->globals->set('showforumstats_main', 'yes');
 
+        $repo->shouldReceive('updateUserForumAccess')->andReturn(true);
+        $repo->shouldReceive('getOverforumsList')->andReturn([]);
+        $repo->shouldReceive('getForumsList')->andReturn([]);
         $repo->shouldReceive('getActiveForumUserCount')->andReturn(5);
         $this->postRepo->shouldReceive('getTotalPostsCount')->andReturn(100);
         $this->topicRepo->shouldReceive('getTotalTopicsCount')->andReturn(50);
         $this->postRepo->shouldReceive('getTodayPostsCount')->andReturn(10);
 
-        $result = $this->service->forumStats(date('Y-m-d'));
+        $result = $this->service->buildForumsIndex(['id' => 1, 'username' => 'test'], 1);
 
-        $this->assertStringContainsString('100', (string) $result);
-        $this->assertStringContainsString('50', (string) $result);
-        $this->assertStringContainsString('10', (string) $result);
+        $this->assertNotNull($result->stats);
+        $this->assertSame(100, $result->stats->posts);
+        $this->assertSame(50, $result->stats->topics);
+        $this->assertSame(10, $result->stats->todayPosts);
+        $this->assertSame(5, $result->stats->activeUsers);
     }
 
-    public function test_forum_stats_with_no_active_users_shows_no_users_message(): void
+    public function test_forum_stats_with_no_active_users_reports_zero(): void
     {
         $repo = $this->mockForumRepo();
         $this->mockCache();
+        $this->setUser();
+        $this->globals->set('showforumstats_main', 'yes');
 
+        $repo->shouldReceive('updateUserForumAccess')->andReturn(true);
+        $repo->shouldReceive('getOverforumsList')->andReturn([]);
+        $repo->shouldReceive('getForumsList')->andReturn([]);
         $repo->shouldReceive('getActiveForumUserCount')->andReturn(0);
         $this->postRepo->shouldReceive('getTotalPostsCount')->andReturn(0);
         $this->topicRepo->shouldReceive('getTotalTopicsCount')->andReturn(0);
         $this->postRepo->shouldReceive('getTodayPostsCount')->andReturn(0);
 
-        $result = $this->service->forumStats(date('Y-m-d'));
+        $result = $this->service->buildForumsIndex(['id' => 1, 'username' => 'test'], 1);
 
-        $this->assertStringContainsString('no active user', (string) $result);
+        $this->assertNotNull($result->stats);
+        $this->assertSame(0, $result->stats->activeUsers);
+
+        $html = view('components.forum.stats', ['stats' => $result->stats])->render();
+        $this->assertStringContainsString('no active user', $html);
     }
 
     // --- buildForumsIndex ---
 
-    public function test_build_forums_index_with_empty_data_returns_html(): void
+    public function test_build_forums_index_with_empty_data_returns_view_model(): void
     {
         $repo = $this->mockForumRepo();
         $this->mockCache();
@@ -390,8 +406,8 @@ final class ForumIndexServiceTest extends TestCase
 
         $result = $this->service->buildForumsIndex(['id' => 1, 'username' => 'test'], 1);
 
-        $this->assertArrayHasKey('html', $result);
-        $this->assertStringContainsString('<table', (string) $result['html']);
+        $this->assertSame([], $result->sections);
+        $this->assertFalse($result->canManageForums);
     }
 
     public function test_build_forums_index_renders_orphan_forums_in_their_own_group(): void
@@ -412,11 +428,16 @@ final class ForumIndexServiceTest extends TestCase
         ]);
 
         $result = $this->service->buildForumsIndex(['id' => 1, 'username' => 'test'], 1);
-        $html = (string) $result['html'];
 
-        $this->assertStringContainsString('Grouped Forum', $html);
-        $this->assertStringContainsString('Orphan Forum', $html);
-        $this->assertStringContainsString('forumid=7', $html);
+        $sectionByForumId = [];
+        foreach ($result->sections as $i => $section) {
+            foreach ($section->forums as $row) {
+                $sectionByForumId[$row->id] = $i;
+            }
+        }
+
+        $this->assertArrayHasKey(5, $sectionByForumId);
+        $this->assertArrayHasKey(7, $sectionByForumId);
     }
 
     public function test_build_forums_index_hides_orphan_forums_below_minclassread(): void
@@ -434,8 +455,14 @@ final class ForumIndexServiceTest extends TestCase
         ]);
 
         $result = $this->service->buildForumsIndex(['id' => 1, 'username' => 'test'], 1);
-        $html = (string) $result['html'];
 
-        $this->assertStringNotContainsString('Staff Orphan Forum', $html);
+        $names = [];
+        foreach ($result->sections as $section) {
+            foreach ($section->forums as $row) {
+                $names[] = $row->name;
+            }
+        }
+
+        $this->assertNotContains('Staff Orphan Forum', $names);
     }
 }

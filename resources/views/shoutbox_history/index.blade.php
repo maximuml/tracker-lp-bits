@@ -20,7 +20,7 @@
 @foreach ($items ?? [] as $item)
     <tr><td class="shoutrow{{ $item['mentionsMe'] ? ' shoutrow-mentions-me' : '' }}">
     <span class="date">{{ '['.$item['time'].']' }}</span> {{ $item['actions'] }} {{ $item['username'] }} {{ $item['reactions'] }}
-    <div>{{ $item['messageHtml'] }}</div>
+    <div>@include('shoutbox._message', ['id' => $item['msgId'], 'isLong' => $item['msgLong'], 'raw' => $item['msgRaw'], 'formatted' => $item['msgFormatted'], 'editedTime' => $item['editedTime'], 'labelMore' => '', 'labelLess' => ''])</div>
     </td></tr>
 @endforeach
 </table>

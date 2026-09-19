@@ -95,7 +95,7 @@ function shoutAttachToggleHandler() {
     @endif
     <table data-nx="data" border='0' cellspacing='0' cellpadding='2' width='100%' align='left'>
     @foreach ($items as $item)
-        <tr><td class="{{ $item['rowClass'] }}"><span class='date'>[{{ $item['time'] }}]</span> {{ $item['actions'] }} {{ $item['avatarHtml'] }} {{ $item['classBadge'] }}{{ $item['username'] }} {{ $item['reactions'] }} {{ $item['messageHtml'] }}
+        <tr><td class="{{ $item['rowClass'] }}"><span class='date'>[{{ $item['time'] }}]</span> {{ $item['actions'] }} @include('shoutbox._avatar', ['url' => $item['avatarUrl'], 'userId' => $item['avatarUserId'], 'tooltip' => $item['avatarTooltip'], 'spacer' => $item['avatarSpacer']]) {{ $item['classBadge'] }}{{ $item['username'] }} {{ $item['reactions'] }} @include('shoutbox._message', ['id' => $item['msgId'], 'isLong' => $item['msgLong'], 'raw' => $item['msgRaw'], 'formatted' => $item['msgFormatted'], 'editedTime' => $item['editedTime'], 'labelMore' => $item['labelMore'], 'labelLess' => $item['labelLess']])
 </td></tr>
     @endforeach
     </table>

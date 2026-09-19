@@ -1,0 +1,1 @@
+<p id="passkey_box"><button type="button" id="passkey_login" data-passkey-not-supported="{{ __('passkey.passkey_not_supported') }}"><img width="32" height="32" src="{{ \App\Repositories\UserPasskeyRepository::DEFAULT_ICON }}" alt="{{ __('passkey.passkey') }}"><br>{{ __('passkey.passkey') }}</button></p>

@@ -68,7 +68,7 @@
             <x-button type="reset">{{ __('legacy/login.button_reset')}}</x-button>
         </div>
 
-        {{ $passkeyLoginHtml }}
+        <x-passkey-login />
     </form>
 
     @if ($isComplainEnabled)

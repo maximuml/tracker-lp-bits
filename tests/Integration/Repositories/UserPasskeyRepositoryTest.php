@@ -19,7 +19,7 @@ use Tests\TestCase;
  * methods that do not require the WebAuthn library or external HTTP calls.
  *
  * The WebAuthn-dependent methods (getCreateArgs, processCreate, getGetArgs,
- * processGet) and renderLogin() are excluded because they require the
+ * processGet) are excluded because they require the
  * lbuchs/WebAuthn library and browser interaction.
  *
  * Passkey records are inserted via DB::table() because the Passkey model's

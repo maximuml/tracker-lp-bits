@@ -154,3 +154,42 @@ const Passkey = (() => {
         isCMA: isCMA,
     }
 })();
+
+// layer.js is not loaded on the auth layout — disable the button while
+// the WebAuthn prompt is open instead.
+const startPasskeyLogin = (conditional) => {
+    const btn = document.getElementById('passkey_login');
+    if (btn) btn.disabled = true;
+    Passkey.checkRegistration(conditional, () => {}).then(() => {
+        if (location.search) {
+            const searchParams = new URLSearchParams(location.search);
+            location.href = searchParams.get('returnto') || '/index.php';
+        } else {
+            location.href = '/index.php';
+        }
+    }).catch((e) => {
+        if (conditional || e.name === 'NotAllowedError' || e.name === 'AbortError' || e.name === 'NotSupportedError') {
+            return;
+        }
+        alert(e.message);
+    }).finally(() => {
+        if (btn) btn.disabled = false;
+    });
+};
+
+document.addEventListener('DOMContentLoaded', function () {
+    const btn = document.getElementById('passkey_login');
+    if (!btn) return;
+    if (Passkey.conditionalSupported()) {
+        Passkey.isCMA().then(async (isCMA) => {
+            if (isCMA) startPasskeyLogin(true);
+        });
+    }
+    btn.addEventListener('click', () => {
+        if (!Passkey.supported()) {
+            alert(btn.dataset.passkeyNotSupported || 'Passkey not supported');
+        } else {
+            startPasskeyLogin(false);
+        }
+    });
+});

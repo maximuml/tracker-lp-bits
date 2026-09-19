@@ -221,9 +221,7 @@ class SupportController extends LegacyController
             return $this->legacyAbortResponse(__('legacy/functions.std_error'), 'Permission denied.');
         }
 
-        ob_start();
-        Captcha::showImageCode('grid');
-        $captchaHtml = (string) ob_get_clean();
+        $captchaHtml = Captcha::renderHtml(layout: 'grid');
 
         return $this->legacyPage($request, 'complains', false, [
             'mode' => 'compose',

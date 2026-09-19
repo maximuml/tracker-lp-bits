@@ -91,6 +91,18 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
         return $imagehash;
     }
 
+    /**
+     * Render the captcha PNG and return its bytes — for controllers that
+     * wrap the binary in a Response instead of echoing it.
+     */
+    public function imageBytes(string $imagehash): string
+    {
+        ob_start();
+        $this->outputImage($imagehash);
+
+        return (string) ob_get_clean();
+    }
+
     public function outputImage(string $imagehash): void
     {
         $imagestring = (string) (RegImage::query()

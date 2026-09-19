@@ -101,9 +101,6 @@ abstract class LegacyController extends Controller
 
     protected function legacyAbortResponse(string $heading, string $text, bool $htmlstrip = true): Response
     {
-        ob_start();
-        LegacyResponse::abort($heading, $text, $htmlstrip, true, true, false);
-
-        return response((string) ob_get_clean());
+        return response(LegacyResponse::captureAbort($heading, $text, $htmlstrip));
     }
 }

@@ -111,6 +111,30 @@ final class LegacyResponse
     }
 
     /**
+     * Render the same error frame `abort()` produces (stdhead + stdMessage
+     * + stdfoot) and return it instead of echoing — for controllers that
+     * need a Response object rather than an HttpResponseException.
+     */
+    public static function captureAbort(string $heading, string $text, bool $htmlstrip = true, string $title = ''): string
+    {
+        $level = ob_get_level();
+        ob_start();
+        try {
+            Html::stdhead($title);
+            echo Frame::stdMessage($heading, $text, $htmlstrip);
+            Html::stdfoot();
+
+            return (string) ob_get_clean();
+        } catch (\Throwable $e) {
+            while (ob_get_level() > $level) {
+                ob_end_clean();
+            }
+
+            throw $e;
+        }
+    }
+
+    /**
      * Render the legacy permission-denied page.
      */
     public static function permissionDenied(?int $allowMinimumClass = null): void

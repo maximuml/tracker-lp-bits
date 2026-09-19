@@ -29,6 +29,7 @@ use App\Support\Logger;
 use App\Support\Smilies;
 use App\Support\Style;
 use App\Support\Url;
+use App\Support\View as LegacyView;
 use App\ViewModels\TorrentListViewFactory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -274,13 +275,11 @@ class UtilityController extends LegacyController
 
         $driver = Captcha::manager()->driver('image');
 
-        if (! method_exists($driver, 'outputImage')) {
+        if (! method_exists($driver, 'imageBytes')) {
             return response('Captcha driver does not support image rendering', 404);
         }
 
-        ob_start();
-        $driver->outputImage($imagehash);
-        $content = ob_get_clean() ?: '';
+        $content = $driver->imageBytes($imagehash);
 
         // T-11: Read from the per-request LegacyHeaderBag instead of SAPI
         // globals that leak state across Octane worker requests.
@@ -306,10 +305,7 @@ class UtilityController extends LegacyController
                 $viewFile .= '.php';
             }
             if (file_exists($viewFile)) {
-                ob_start();
-                require $viewFile;
-
-                return response(ob_get_clean() ?: '');
+                return response((string) LegacyView::render($viewFile, [], true, ROOT_PATH));
             }
             $msg = "viewFile: $viewFile not exists, _REQUEST: ".json_encode($request->all());
             Logger::writeWithContext($msg, 'error', false);

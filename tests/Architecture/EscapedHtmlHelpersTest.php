@@ -53,6 +53,7 @@ final class EscapedHtmlHelpersTest extends TestCase
         'Time::formatDateTime' => true,
         'Ratio::color' => true,
         'Ratio::colorClass' => true,
+        'Ratio::seedLeechColorClass' => true,
         'UserClass::imagePath' => true,
         'UserDisplay::plainUsername' => true,
         'Style::cssUriWithContext' => true,

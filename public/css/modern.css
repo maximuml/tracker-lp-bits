@@ -885,3 +885,10 @@ html[data-theme="dark"] .nx-hl-40 { color: color-mix(in srgb, white 80%, var(--n
 /* mybonus: seeding loadbar (replaces td.loadbarbg layout cell) */
 .nx-loadbar { width: 400px; margin: 0 auto; }
 .nx-loadbar__bg { display: block; height: 15px; background: url(../styles/bar.gif) repeat-x 0 0; }
+/* details: inline cell groups (replace inner layout <table> of td.no_border_wide) */
+.nxm-detail-cells { display: flex; flex-wrap: wrap; }
+.nxm-detail-cells > div { padding-right: 16px; }
+/* details: magic-award options (moved from a per-request AssetAppender block) */
+ul.magic { cursor: pointer; list-style-type: none; padding-left: 0; }
+ul.magic li { margin: 0 15px 0 0; text-align: center; float: left; width: 40px; height: 21px; padding: 0 5px; line-height: 20px; background: url("../styles/huise.png") no-repeat; }
+ul.magic li:hover { background: url("../styles/boli.png") no-repeat; }

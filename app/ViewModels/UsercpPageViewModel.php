@@ -6,6 +6,7 @@ namespace App\ViewModels;
 
 use App\Models\User;
 use App\ViewModels\Usercp\UsercpForumSection;
+use App\ViewModels\Usercp\UsercpHomeSection;
 use App\ViewModels\Usercp\UsercpPersonalSection;
 use App\ViewModels\Usercp\UsercpSecuritySection;
 use App\ViewModels\Usercp\UsercpTrackerSection;
@@ -19,7 +20,6 @@ final class UsercpPageViewModel extends ViewModel
 {
     /**
      * @param  array<string, mixed>  $curUser
-     * @param  array<string, mixed>|null  $home
      */
     public function __construct(
         public readonly array $curUser,
@@ -32,7 +32,7 @@ final class UsercpPageViewModel extends ViewModel
         public readonly ?UsercpTrackerSection $tracker = null,
         public readonly ?UsercpForumSection $forum = null,
         public readonly ?UsercpSecuritySection $security = null,
-        public readonly ?array $home = null,
+        public readonly ?UsercpHomeSection $home = null,
     ) {}
 
     /**

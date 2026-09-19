@@ -28,15 +28,19 @@ use App\Support\Locale;
 use App\Support\Network;
 use App\Support\SearchBox;
 use App\Support\Strings;
-use App\Support\Time;
 use App\Support\TwoFactorAuthHelper;
 use App\Support\Url;
 use App\Support\UserDisplay;
 use App\ViewModels\Usercp\PasskeyItem;
+use App\ViewModels\Usercp\PasskeyLoginForm;
+use App\ViewModels\Usercp\ReadTopicItem;
 use App\ViewModels\Usercp\TwoStepState;
 use App\ViewModels\Usercp\UsercpForumSection;
+use App\ViewModels\Usercp\UsercpHomeSection;
 use App\ViewModels\Usercp\UsercpPersonalSection;
+use App\ViewModels\Usercp\UsercpPostStats;
 use App\ViewModels\Usercp\UsercpSecuritySection;
+use App\ViewModels\Usercp\UsercpTokenSection;
 use App\ViewModels\Usercp\UsercpTrackerSection;
 use App\ViewModels\UsercpPageViewModel;
 
@@ -119,22 +123,16 @@ final class UsercpPageService
      * Build the home dashboard section.
      *
      * @param  array<string, mixed>  $curUser
-     * @return array<string, mixed>
      */
-    private function buildHome(array $curUser, ?LegacyRedisCache $cache, User $userInfo): array
+    private function buildHome(array $curUser, ?LegacyRedisCache $cache, User $userInfo): UsercpHomeSection
     {
         $userId = (int) ($curUser['id'] ?? 0);
 
         // Comment count
         $commentCount = $this->usercpLookupRepository->getCommentCount($userId);
 
-        // Join date
+        // Join date (raw — the view renders it through <x-time>)
         $added = (string) ($curUser['added'] ?? '');
-        if ($added === '0000-00-00 00:00:00' || $added === '') {
-            $joinDate = 'N/A';
-        } else {
-            $joinDate = $added.' ('.Time::format($added, true, false, true).')';
-        }
 
         // Forum posts + percentage
         $forumPosts = 0;
@@ -186,11 +184,11 @@ final class UsercpPageService
             $ipLocation = Strings::hidden((string) ($curUser['ip'] ?? ''));
         }
 
-        // Passkey login form (if passkey login enabled and deadline in future)
-        // The form embeds a server-generated HMAC signature (passkey + timestamp,
-        // signed with login_secret) so the passkeyLogin controller can verify
-        // authenticity without exposing the secret to the client.
-        $passkeyLoginForm = '';
+        // Passkey login form data (if passkey login enabled and deadline in
+        // future). The form embeds a server-generated HMAC signature (passkey +
+        // timestamp, signed with login_secret) so the passkeyLogin controller
+        // can verify authenticity without exposing the secret to the client.
+        $passkeyLoginForm = null;
         $siteConfig = SiteConfig::current();
         $loginSecretDeadline = $siteConfig->security->loginSecretDeadline();
         if ($siteConfig->security->loginType() === 'passkey'
@@ -200,14 +198,11 @@ final class UsercpPageService
             $passkey = (string) ($curUser['passkey'] ?? '');
             $timestamp = time();
             $signature = hash_hmac('sha256', $passkey.$timestamp, $siteConfig->security->loginSecret());
-            $passkeyLoginForm = sprintf(
-                '<form method="POST" action="%s/%s"><input type="hidden" name="passkey" value="%s"><input type="hidden" name="timestamp" value="%d"><input type="hidden" name="signature" value="%s"><button type="submit" class="btn">%s</button></form>',
-                Url::schemeAndHost(false),
-                $siteConfig->security->loginSecret(),
-                htmlspecialchars($passkey, ENT_QUOTES),
-                $timestamp,
-                htmlspecialchars($signature, ENT_QUOTES),
-                ('Login')
+            $passkeyLoginForm = new PasskeyLoginForm(
+                action: Url::schemeAndHost(false).'/'.$siteConfig->security->loginSecret(),
+                passkey: $passkey,
+                timestamp: $timestamp,
+                signature: $signature,
             );
         }
 
@@ -217,48 +212,38 @@ final class UsercpPageService
         // Recently read topics
         $readTopics = $this->buildReadTopics($userId, $cache);
 
-        $avatarHtml = '';
-        if (! empty($curUser['avatar'])) {
-            $avatarHtml = '<img src="'.htmlspecialchars((string) $curUser['avatar']).'" border=0>';
-        }
+        $passkeyLogin = $passkeyLoginForm;
 
-        $invitesHtml = ((int) ($curUser['invites'] ?? 0)).' [<a href="invite.php?id='.$userId.'" title="'.(__('legacy/usercp.link_send_invitation')).'">'.htmlspecialchars(__('legacy/usercp.text_send')).'</a>]';
-        $karmaHtml = ((string) ($curUser['seedbonus'] ?? '0')).' [<a href="mybonus.php" title="'.(__('legacy/usercp.link_use_karma_points')).'">'.htmlspecialchars(__('legacy/usercp.text_use')).'</a>]';
-        $commentsHtml = $commentCount.' [<a href="userhistory.php?action=viewcomments&id='.$userId.'" title="'.(__('legacy/usercp.link_view_comments')).'">'.htmlspecialchars(__('legacy/usercp.text_view')).'</a>]';
-
-        $forumPostsHtml = null;
-        if ($forumPosts > 0) {
-            $forumPostsHtml = $forumPosts.' [<a href="userhistory.php?action=viewposts&id='.$userId.'" title="'.(__('legacy/usercp.link_view_posts')).'">'.htmlspecialchars(__('legacy/usercp.text_view')).'</a>] ('.$dayPosts.htmlspecialchars(__('legacy/usercp.text_posts_per_day')).'; '.$percentages.htmlspecialchars(__('legacy/usercp.text_of_total_posts')).')';
-        }
-
-        return [
-            'commentCount' => $commentCount,
-            'joinDate' => SafeHtml::fromTrustedHtml($joinDate),
-            'forumPosts' => $forumPosts,
-            'dayPosts' => $dayPosts,
-            'percentages' => $percentages,
-            'ipLocation' => SafeHtml::fromTrustedHtml($ipLocation),
-            'passkeyLoginForm' => SafeHtml::fromTrustedHtml($passkeyLoginForm),
-            'tokens' => $tokens,
-            'readTopics' => $readTopics,
-            'showAvatar' => ! empty($curUser['avatar']),
-            'avatarUrl' => (string) ($curUser['avatar'] ?? ''),
-            'passkey' => Strings::hidden((string) ($curUser['passkey'] ?? '')),
-            'email' => (string) ($curUser['email'] ?? ''),
-            'invites' => (int) ($curUser['invites'] ?? 0),
-            'seedbonus' => (string) ($curUser['seedbonus'] ?? '0'),
-            'avatarHtml' => SafeHtml::fromTrustedHtml($avatarHtml),
-            'invitesHtml' => SafeHtml::fromTrustedHtml($invitesHtml),
-            'karmaHtml' => SafeHtml::fromTrustedHtml($karmaHtml),
-            'commentsHtml' => SafeHtml::fromTrustedHtml($commentsHtml),
-            'forumPostsHtml' => SafeHtml::fromTrustedHtml((string) ($forumPostsHtml ?? '')),
-        ];
+        return new UsercpHomeSection(
+            joinDate: ($added === '0000-00-00 00:00:00' || $added === '') ? null : $added,
+            email: (string) ($curUser['email'] ?? ''),
+            ipLocation: SafeHtml::fromTrustedHtml($ipLocation),
+            showAvatar: ! empty($curUser['avatar']),
+            avatarUrl: (string) ($curUser['avatar'] ?? ''),
+            passkey: Strings::hidden((string) ($curUser['passkey'] ?? '')),
+            passkeyLogin: $passkeyLogin,
+            invites: (int) ($curUser['invites'] ?? 0),
+            seedbonus: (string) ($curUser['seedbonus'] ?? '0'),
+            commentCount: $commentCount,
+            forumPosts: $forumPosts > 0
+                ? new UsercpPostStats(posts: $forumPosts, dayPosts: $dayPosts, percentages: $percentages)
+                : null,
+            tokens: $tokens,
+            readTopics: $readTopics,
+            userId: $userId,
+            // Link titles: decode `&nbsp;`-style entities so the view can
+            // put them in `title` attributes through plain `{{ }}`.
+            invitesLinkTitle: html_entity_decode((string) __('legacy/usercp.link_send_invitation'), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+            karmaLinkTitle: html_entity_decode((string) __('legacy/usercp.link_use_karma_points'), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+            commentsLinkTitle: html_entity_decode((string) __('legacy/usercp.link_view_comments'), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+            postsLinkTitle: html_entity_decode((string) __('legacy/usercp.link_view_posts'), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+        );
     }
 
     /**
      * Build recently read topics section data.
      *
-     * @return array<string, mixed>
+     * @return list<ReadTopicItem>
      */
     private function buildReadTopics(int $userId, ?LegacyRedisCache $cache): array
     {
@@ -267,7 +252,6 @@ final class UsercpPageService
         foreach ($topicRows as $topicArr) {
             $topicId = (int) $topicArr['id'];
             $topicViews = (int) $topicArr['views'];
-            $views = number_format($topicViews);
 
             $posts = 0;
             if ($cache !== null) {
@@ -282,36 +266,22 @@ final class UsercpPageService
                     $cache->cache_value('topic_'.$topicId.'_post_count', $posts, 3600);
                 }
             }
-            $replies = max(0, $posts - 1);
 
             $arr = Forum::postRowWithContext((int) $topicArr['lastpost']);
-            $postid = (int) ($arr['id'] ?? 0);
             $userid = (int) ($arr['userid'] ?? 0);
-            $added = (string) (Time::format((string) ($arr['added'] ?? ''), true, false) ?? '');
 
-            $items[] = [
-                'id' => $topicId,
-                'subject' => (string) $topicArr['subject'],
-                'userid' => (int) $topicArr['userid'],
-                'views' => $views,
-                'replies' => $replies,
-                'author' => UserDisplay::username((int) $topicArr['userid']),
-                'lastPostId' => $postid,
-                'lastPostUserId' => $userid,
-                'lastPostUsername' => UserDisplay::username($userid),
-                'lastPostAdded' => SafeHtml::fromTrustedHtml($added),
-            ];
+            $items[] = new ReadTopicItem(
+                id: $topicId,
+                subject: (string) $topicArr['subject'],
+                views: number_format($topicViews),
+                replies: max(0, $posts - 1),
+                author: UserDisplay::username((int) $topicArr['userid']),
+                lastPostAdded: ($added = (string) ($arr['added'] ?? '')) !== '' ? $added : null,
+                lastPostUsername: UserDisplay::username($userid),
+            );
         }
 
-        return [
-            'items' => $items,
-            'colTopicTitle' => __('legacy/usercp.col_topic_title'),
-            'colReplies' => __('legacy/usercp.col_replies'),
-            'colViews' => __('legacy/usercp.col_views'),
-            'colTopicStarter' => __('legacy/usercp.col_topic_starter'),
-            'colLastPost' => __('legacy/usercp.col_last_post'),
-            'title' => __('legacy/usercp.text_recently_read_topics'),
-        ];
+        return $items;
     }
 
     /**
@@ -497,19 +467,22 @@ final class UsercpPageService
         return $items;
     }
 
-    /**
-     * @return array<string, mixed>
-     */
-    private function buildTokenSection(User $userInfo): array
+    private function buildTokenSection(User $userInfo): UsercpTokenSection
     {
-
-        $permissions = $this->tokenRepository->listUserTokenPermissionAllowed();
-        $permissionOptions = [];
-        foreach ($permissions as $name => $permLabel) {
-            $permissionOptions[] = sprintf('<label><input type="checkbox" name="permissions[]" value="%s">%s</label>', $name, $permLabel);
+        $permissions = [];
+        foreach ($this->tokenRepository->listUserTokenPermissionAllowed() as $name => $permLabel) {
+            $permissions[] = ['value' => (string) $name, 'label' => (string) $permLabel];
         }
 
-        $tokens = $this->usercpRepository->getUserTokens($userInfo);
+        $items = [];
+        foreach ($this->usercpRepository->getUserTokens($userInfo) as $tokenRecord) {
+            $items[] = [
+                'id' => (int) $tokenRecord['id'],
+                'name' => (string) $tokenRecord['name'],
+                'abilities' => (string) $tokenRecord['abilitiesText'],
+                'createdAt' => (string) $tokenRecord['created_at'],
+            ];
+        }
 
         $label = Locale::trans('token.label', [], null);
         $columnName = Locale::trans('label.name', [], null);
@@ -520,38 +493,6 @@ final class UsercpPageService
         $deleteLabel = __('legacy/functions.text_delete');
         $confirmRemoveLabel = __('legacy/functions.std_confirm_remove');
 
-        $tableHtml = '';
-        if (! empty($tokens)) {
-            $tableHtml .= "<table border='1' cellspacing='0' cellpadding='5' id='token-table'><tr><td class='colhead'>ID</td><td class='colhead'>{$columnName}</td><td class='colhead'>{$columnPermission}</td><td class='colhead'>{$columnCreatedAt}</td><td class='colhead'>{$actionLabel}</td></tr>";
-            foreach ($tokens as $tokenRecord) {
-                $tableHtml .= '<tr>';
-                $tableHtml .= sprintf('<td>%s</td>', (int) $tokenRecord['id']);
-                $tableHtml .= sprintf('<td>%s</td>', htmlspecialchars((string) $tokenRecord['name']));
-                $tableHtml .= sprintf('<td>%s</td>', htmlspecialchars((string) $tokenRecord['abilitiesText']));
-                $tableHtml .= sprintf('<td>%s</td>', htmlspecialchars((string) $tokenRecord['created_at']));
-                $tableHtml .= sprintf('<td><img class="staff_delete token-del" src="pic/trans.gif" alt="D" title="%s" data-id="%s"></td>', htmlspecialchars($deleteLabel), (int) $tokenRecord['id']);
-                $tableHtml .= '</tr>';
-            }
-            $tableHtml .= '</table>';
-        }
-        $tableHtml .= sprintf('<div><input type="button" id="add-token-box-btn" value="%s"/></div>', htmlspecialchars($actionCreate));
-
-        $permissionCheckbox = implode('', $permissionOptions);
-        $tokenForm = <<<FORM
-<div class="form-box">
-<form id="token-box-form">
-    <div class="form-control-row">
-        <div class="label">{$columnName}</div>
-        <div class="field"><input type="text" name="name"></div>
-    </div>
-    <div class="form-control-row">
-        <div class="label">{$columnPermission}</div>
-        <div class="field">{$permissionCheckbox}</div>
-    </div>
-</form>
-</div>
-FORM;
-
         $tokLabel = addslashes($label);
         $tokCreate = addslashes($actionCreate);
         $tokConfirmRemove = addslashes($confirmRemoveLabel);
@@ -560,7 +501,7 @@ document.getElementById('add-token-box-btn').addEventListener('click', function 
     layer.open({
         type: 1,
         title: "{$tokLabel} {$tokCreate}",
-        content: `{$tokenForm}`,
+        content: document.getElementById('token-form-template').innerHTML,
         btn: ['OK'],
         btnAlign: 'c',
         yes: function (index) {
@@ -602,19 +543,18 @@ if (tokenTableEl) {
 JS;
         AssetAppender::js($tokenJs, 'footer', false);
 
-        return [
-            'label' => $label,
-            'columnName' => $columnName,
-            'columnPermission' => $columnPermission,
-            'columnCreatedAt' => $columnCreatedAt,
-            'actionLabel' => $actionLabel,
-            'actionCreate' => $actionCreate,
-            'permissionCheckbox' => $permissionCheckbox,
-            'tokens' => $tokens,
-            'deleteLabel' => $deleteLabel,
-            'confirmRemoveLabel' => $confirmRemoveLabel,
-            'tableHtml' => SafeHtml::fromTrustedHtml($tableHtml),
-        ];
+        return new UsercpTokenSection(
+            label: $label,
+            columnName: $columnName,
+            columnPermission: $columnPermission,
+            columnCreatedAt: $columnCreatedAt,
+            actionLabel: $actionLabel,
+            actionCreate: $actionCreate,
+            permissions: $permissions,
+            items: $items,
+            deleteLabel: (string) $deleteLabel,
+            confirmRemoveLabel: (string) $confirmRemoveLabel,
+        );
     }
 
     /**

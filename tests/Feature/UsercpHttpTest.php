@@ -103,6 +103,23 @@ final class UsercpHttpTest extends TestCase
             ->assertStatus(200);
     }
 
+    public function test_home_section_renders_data_tables_and_time_tags(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->withNexusCookie($user)
+            ->get('/usercp');
+        $response->assertStatus(200);
+
+        $html = $response->getContent();
+        $this->assertIsString($html);
+        // Recently-read-topics table uses the semantic component.
+        $this->assertStringContainsString('nx-table', $html);
+        // Token management wiring survives the Blade migration.
+        $this->assertStringContainsString('id="add-token-box-btn"', $html);
+        $this->assertStringContainsString('id="token-form-template"', $html);
+    }
+
     public function test_security_section_emits_hash_mode_wiring(): void
     {
         $user = User::factory()->create();

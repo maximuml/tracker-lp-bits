@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace App\Support\Torrent;
 
 use App\Support\Format;
+use App\Support\Html\SafeHtml;
 use App\Support\Locale;
+use App\ViewModels\Torrent\AudioTrackViewModel;
+use App\ViewModels\Torrent\TechnicalInfoViewModel;
 
 class TechnicalInformation
 {
@@ -195,84 +198,103 @@ class TechnicalInformation
         if (empty($this->mediaInfo)) {
             return '';
         }
+
+        // .nti-* styles live in public/styles/nexus.css — an inline <style>
+        // block here is blocked by CSP style-src (no nonce available).
+        return view('torrent._technical_info', ['vm' => $this->detailsViewModel()])->render();
+    }
+
+    private function detailsViewModel(): TechnicalInfoViewModel
+    {
+        $rawMediaInfo = sprintf('[spoiler=%s][raw]<pre>%s</pre>[/raw][/spoiler]', Locale::trans('torrent.show_hide_media_info', [], null), $this->mediaInfo);
+        $rawSpoiler = SafeHtml::fromTrustedHtml(Format::formatComment($rawMediaInfo, false));
+
         $general = $this->getGeneralInfo();
         $videos = $this->getVideoInfoDetailed();
         $audios = $this->getAudioTracks();
         if (empty($general) && empty($videos) && empty($audios)) {
             // Parser couldn't pull anything structured — fall back to raw spoiler only.
-            $rawmediaInfo = sprintf('[spoiler=%s][raw]<pre>%s</pre>[/raw][/spoiler]', Locale::trans('torrent.show_hide_media_info', [], null), $this->mediaInfo);
-
-            return sprintf('<div class="nexus-media-info-raw"><pre>%s</pre></div>', Format::formatComment($rawmediaInfo, false));
+            return new TechnicalInfoViewModel(rawOnly: true, rawSpoiler: $rawSpoiler);
         }
 
-        // .nti-* styles live in public/styles/nexus.css — an inline <style>
-        // block here is blocked by CSP style-src (no nonce available).
-        $html = '<div class="nti-wrap">';
-        $html .= '<div class="nti-grid">';
-
-        // General column
-        if (! empty($general)) {
-            $html .= '<div class="nti-col">';
-            $html .= '<h4>'.htmlspecialchars(Locale::trans('torrent.technicalinfo_section_general', [], null)).'</h4>';
-            $html .= $this->renderKvList($general['main'] ?? []);
-            if (! empty($general['extra'])) {
-                $html .= $this->renderColumnSpoiler(Locale::trans('torrent.technicalinfo_more_general', [], null), $general['extra']);
-            }
-            $html .= '</div>';
-        } else {
-            $html .= '<div class="nti-col"></div>';
+        $generalExtraSpoiler = null;
+        if (! empty($general) && ! empty($general['extra'])) {
+            $generalExtraSpoiler = $this->columnSpoiler(Locale::trans('torrent.technicalinfo_more_general', [], null), $general['extra']);
         }
 
-        // Video column
-        if (! empty($videos)) {
-            $html .= '<div class="nti-col">';
-            $html .= '<h4>'.htmlspecialchars(Locale::trans('torrent.technicalinfo_section_video', [], null)).'</h4>';
-            $html .= $this->renderKvList(is_array($videos['main'] ?? null) ? $videos['main'] : []);
-            if (! empty($videos['encoding_settings']) && is_string($videos['encoding_settings'])) {
-                $html .= $this->renderColumnSpoiler(Locale::trans('torrent.technicalinfo_encoding_settings', [], null), [
-                    Locale::trans('torrent.technicalinfo_encoding_settings', [], null) => $videos['encoding_settings'],
-                ]);
-            }
-            $html .= '</div>';
-        } else {
-            $html .= '<div class="nti-col"></div>';
+        $encodingSpoiler = null;
+        if (! empty($videos) && ! empty($videos['encoding_settings']) && is_string($videos['encoding_settings'])) {
+            $label = Locale::trans('torrent.technicalinfo_encoding_settings', [], null);
+            $encodingSpoiler = $this->columnSpoiler($label, [$label => $videos['encoding_settings']]);
         }
 
-        // Audio column
-        if (! empty($audios)) {
-            $html .= '<div class="nti-col">';
-            $html .= '<h4>'.htmlspecialchars(Locale::trans('torrent.technicalinfo_section_audio', [], null)).'</h4>';
-            $maxVisible = 3;
-            $visible = array_slice($audios, 0, $maxVisible);
-            $hidden = array_slice($audios, $maxVisible);
-            foreach ($visible as $track) {
-                $html .= $this->renderAudioTrack($track);
-            }
-            if (! empty($hidden)) {
-                $hiddenHtml = '';
-                foreach ($hidden as $track) {
-                    $hiddenHtml .= $this->renderAudioTrack($track);
-                }
-                $title = Locale::trans('torrent.collapse_show_more_audio', [], null);
-                $html .= sprintf(
-                    '<div class="nti-more">%s</div>',
-                    Format::formatComment(sprintf('[spoiler=%s][raw]%s[/raw][/spoiler]', $title, $hiddenHtml), false)
-                );
-            }
-            $html .= '</div>';
-        } else {
-            $html .= '<div class="nti-col"></div>';
+        $visibleTracks = [];
+        $hiddenTracksHtml = '';
+        foreach (array_slice($audios, 0, 3) as $track) {
+            $visibleTracks[] = $this->audioTrackVm($track);
+        }
+        foreach (array_slice($audios, 3) as $track) {
+            $hiddenTracksHtml .= view('torrent._nti_track', ['track' => $this->audioTrackVm($track)])->render();
+        }
+        $hiddenAudioSpoiler = $hiddenTracksHtml !== ''
+            ? SafeHtml::fromTrustedHtml(sprintf(
+                '<div class="nti-more">%s</div>',
+                Format::formatComment(sprintf('[spoiler=%s][raw]%s[/raw][/spoiler]', Locale::trans('torrent.collapse_show_more_audio', [], null), $hiddenTracksHtml), false)
+            ))
+            : null;
+
+        return new TechnicalInfoViewModel(
+            rawOnly: false,
+            rawSpoiler: $rawSpoiler,
+            generalTitle: Locale::trans('torrent.technicalinfo_section_general', [], null),
+            hasGeneral: ! empty($general),
+            generalMain: $general['main'] ?? [],
+            generalExtraSpoiler: $generalExtraSpoiler,
+            videoTitle: Locale::trans('torrent.technicalinfo_section_video', [], null),
+            hasVideo: ! empty($videos),
+            videosMain: is_array($videos['main'] ?? null) ? $videos['main'] : [],
+            encodingSpoiler: $encodingSpoiler,
+            audioTitle: Locale::trans('torrent.technicalinfo_section_audio', [], null),
+            hasAudio: ! empty($audios),
+            audioTracks: $visibleTracks,
+            hiddenAudioSpoiler: $hiddenAudioSpoiler,
+        );
+    }
+
+    /**
+     * @param  array<string, string>  $items
+     */
+    private function columnSpoiler(string $title, array $items): SafeHtml
+    {
+        $body = view('torrent._nti_spoiler_kv', ['items' => $items])->render();
+        $bbcode = sprintf('[spoiler=%s][raw]%s[/raw][/spoiler]', $title, $body);
+
+        return SafeHtml::fromTrustedHtml(sprintf('<div class="nti-more">%s</div>', Format::formatComment($bbcode, false)));
+    }
+
+    /** @param  array<string, mixed>  $track */
+    private function audioTrackVm(array $track): AudioTrackViewModel
+    {
+        $head = '#'.(int) $track['index'];
+        $headParts = [];
+        if (! empty($track['language'])) {
+            $headParts[] = $track['language'];
+        }
+        if (! empty($track['title']) && $track['title'] !== ($track['language'] ?? '')) {
+            $headParts[] = $track['title'];
+        }
+        if (! empty($headParts)) {
+            $head .= ' · '.implode(' · ', $headParts);
+        }
+        $badges = [];
+        if (! empty($track['badges']['Default'])) {
+            $badges[] = Locale::trans('torrent.technicalinfo_default', [], null);
+        }
+        if (! empty($track['badges']['Forced'])) {
+            $badges[] = Locale::trans('torrent.technicalinfo_forced', [], null);
         }
 
-        $html .= '</div>'; // .nti-grid
-
-        // Raw spoiler at the bottom
-        $rawMediaInfo = sprintf('[spoiler=%s][raw]<pre>%s</pre>[/raw][/spoiler]', Locale::trans('torrent.show_hide_media_info', [], null), $this->mediaInfo);
-        $html .= sprintf('<div class="nti-raw nexus-media-info-raw">%s</div>', Format::formatComment($rawMediaInfo, false));
-
-        $html .= '</div>'; // .nti-wrap
-
-        return $html;
+        return new AudioTrackViewModel(head: $head, badges: $badges, rows: $track['rows']);
     }
 
     /**
@@ -431,65 +453,6 @@ class TechnicalInformation
         return implode($glue, $parts);
     }
 
-    /** @param  array<string, string>  $items */
-    private function renderKvList(array $items): string
-    {
-        if (empty($items)) {
-            return '';
-        }
-        $html = '<div class="nti-kv">';
-        foreach ($items as $k => $v) {
-            $html .= '<div class="nti-row"><span class="nti-k">'.htmlspecialchars((string) $k).'</span><span class="nti-v">'.htmlspecialchars((string) $v).'</span></div>';
-        }
-        $html .= '</div>';
-
-        return $html;
-    }
-
-    /** @param  array<string, mixed>  $track */
-    private function renderAudioTrack(array $track): string
-    {
-        $head = '#'.(int) $track['index'];
-        $headParts = [];
-        if (! empty($track['language'])) {
-            $headParts[] = $track['language'];
-        }
-        if (! empty($track['title']) && $track['title'] !== ($track['language'] ?? '')) {
-            $headParts[] = $track['title'];
-        }
-        if (! empty($headParts)) {
-            $head .= ' · '.implode(' · ', $headParts);
-        }
-        $badges = '';
-        if (! empty($track['badges']['Default'])) {
-            $badges .= '<span class="nti-badge">'.htmlspecialchars(Locale::trans('torrent.technicalinfo_default', [], null)).'</span>';
-        }
-        if (! empty($track['badges']['Forced'])) {
-            $badges .= '<span class="nti-badge">'.htmlspecialchars(Locale::trans('torrent.technicalinfo_forced', [], null)).'</span>';
-        }
-        $html = '<div class="nti-track">';
-        $html .= '<div class="nti-track-head">'.htmlspecialchars($head).$badges.'</div>';
-        $html .= $this->renderKvList($track['rows']);
-        $html .= '</div>';
-
-        return $html;
-    }
-
-    /** @param  array<string, string>  $items */
-    private function renderColumnSpoiler(string $title, array $items): string
-    {
-        if (empty($items)) {
-            return '';
-        }
-        $body = '';
-        foreach ($items as $k => $v) {
-            $body .= '<b>'.htmlspecialchars((string) $k).': </b>'.htmlspecialchars((string) $v).'<br>';
-        }
-        $bbcode = sprintf('[spoiler=%s][raw]%s[/raw][/spoiler]', $title, $body);
-
-        return sprintf('<div class="nti-more">%s</div>', Format::formatComment($bbcode, false));
-    }
-
     /** @return array<string, array<string, string>|null> */
     public function getSummaryInfo(): array
     {
@@ -509,80 +472,5 @@ class TechnicalInformation
         $subtitles = $this->getSubtitles() ?: null;
 
         return compact('videos', 'audios', 'subtitles');
-    }
-
-    /**
-     * @param  array<string, string>  $parts
-     *
-     * @phpstan-ignore method.unused
-     */
-    private function buildTdTable(array $parts): string
-    {
-        $table = '<table><tbody>';
-
-        // 检查是否为音频或字幕数据
-        $isAudioOrSubtitle = false;
-        $audioOrSubtitleCount = 0;
-        $audioPrefix = Locale::trans('torrent.technicalinfo_audio', [], null);
-        $subtitlePrefix = Locale::trans('torrent.technicalinfo_subtitles', [], null);
-        foreach ($parts as $key => $value) {
-            if (str_starts_with($key, $audioPrefix) || str_starts_with($key, $subtitlePrefix)) {
-                $isAudioOrSubtitle = true;
-                $audioOrSubtitleCount++;
-            }
-        }
-
-        $displayCount = 0;
-        $hiddenParts = [];
-
-        foreach ($parts as $key => $value) {
-            $displayCount++;
-
-            // 如果是音频或字幕，且超过3条，则隐藏多余的
-            if ($isAudioOrSubtitle && $audioOrSubtitleCount > 3) {
-                if ($displayCount <= 3) {
-                    // 显示前3条
-                    $table .= '<tr>';
-                    $table .= sprintf('<td><b>%s: </b>%s</td>', $key, $value);
-                    $table .= '</tr>';
-                } else {
-                    // 收集隐藏的部分
-                    $hiddenParts[$key] = $value;
-                }
-            } else {
-                // 非音频/字幕数据，或数量不超过3条，正常显示
-                $table .= '<tr>';
-                $table .= sprintf('<td><b>%s: </b>%s</td>', $key, $value);
-                $table .= '</tr>';
-            }
-        }
-
-        // 如果有隐藏的部分，添加spoiler
-        if (! empty($hiddenParts)) {
-            $hiddenContent = '';
-            foreach ($hiddenParts as $key => $value) {
-                $hiddenContent .= sprintf('<b>%s: </b>%s<br>', $key, $value);
-            }
-            $hiddenContent = rtrim($hiddenContent, '<br>');
-
-            $spoilerTitle = $isAudioOrSubtitle && str_starts_with(array_keys($parts)[0], $audioPrefix)
-                ? Locale::trans('torrent.collapse_show_more_audio', [], null)
-                : Locale::trans('torrent.collapse_show_more_subtitles', [], null);
-
-            $spoiler = sprintf('[spoiler=%s]%s[/spoiler]', $spoilerTitle, $hiddenContent);
-            $table .= '<tr>';
-            // 检查format_comment函数是否存在
-            if (function_exists('format_comment')) {
-                $table .= sprintf('<td>%s</td>', Format::formatComment($spoiler, false));
-            } else {
-                $table .= sprintf('<td>%s</td>', $spoiler);
-            }
-            $table .= '</tr>';
-        }
-
-        $table .= '</tbody>';
-        $table .= '</table>';
-
-        return sprintf('<td>%s</td>', $table);
     }
 }

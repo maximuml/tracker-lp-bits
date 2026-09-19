@@ -9,6 +9,7 @@ use App\Models\Forum;
 use App\Models\Post;
 use App\Models\Topic;
 use App\Models\User;
+use App\Support\Cache\LegacyRedisCache;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
@@ -188,5 +189,75 @@ final class ForumHttpTest extends TestCase
         $this->withNexusCookie($user)
             ->get('/forums')
             ->assertStatus(200);
+    }
+
+    // ─── Section components (ADR 0021, stage 3.1b) ─────────────────────
+
+    public function test_viewforum_section_renders_topic_table_component(): void
+    {
+        $user = User::factory()->create();
+        $forum = Forum::factory()->create();
+        $topic = Topic::factory()->forum($forum)->author($user)->create([
+            'subject' => 'Component render topic',
+        ]);
+        $post = Post::factory()->topic($topic)->author($user)->create();
+        $topic->update(['firstpost' => $post->id, 'lastpost' => $post->id]);
+        // forums_list is cached for a day in LegacyRedisCache's own
+        // connection (nexus.redis.database), not the Laravel Redis DB.
+        app(LegacyRedisCache::class)->redis?->flushDB();
+
+        $response = $this->withNexusCookie($user)
+            ->get('/forums?action=viewforum&forumid='.$forum->id);
+
+        $response->assertOk();
+        $html = (string) $response->getContent();
+        $this->assertStringContainsString('nx-forum-table', $html);
+        $this->assertStringContainsString('data-nx="data"', $html);
+        $this->assertStringContainsString('Component render topic', $html);
+        $this->assertStringContainsString('action=viewtopic', $html);
+    }
+
+    public function test_viewunread_section_renders_unread_topic_row(): void
+    {
+        $user = User::factory()->create();
+        $forum = Forum::factory()->create();
+        $topic = Topic::factory()->forum($forum)->author($user)->create([
+            'subject' => 'Unread component topic',
+        ]);
+        $post = Post::factory()->topic($topic)->author($user)->create();
+        $topic->update(['firstpost' => $post->id, 'lastpost' => $post->id]);
+        app(LegacyRedisCache::class)->redis?->flushDB();
+
+        $response = $this->withNexusCookie($user)
+            ->get('/forums?action=viewunread');
+
+        $response->assertOk();
+        $html = (string) $response->getContent();
+        $this->assertStringContainsString('nx-forum-table', $html);
+        $this->assertStringContainsString('Unread component topic', $html);
+        $this->assertStringContainsString('name="catchup"', $html);
+    }
+
+    public function test_search_section_renders_form_and_results(): void
+    {
+        $user = User::factory()->create();
+        $forum = Forum::factory()->create();
+        $topic = Topic::factory()->forum($forum)->author($user)->create();
+        Post::factory()->topic($topic)->author($user)->create([
+            'body' => 'Unique keyword zqxwvb in this post body',
+        ]);
+
+        $form = $this->withNexusCookie($user)->get('/forums?action=search');
+        $form->assertOk();
+        $this->assertStringContainsString('id="search_form"', (string) $form->getContent());
+
+        $response = $this->withNexusCookie($user)
+            ->get('/forums?action=search&keywords=zqxwvb');
+
+        $response->assertOk();
+        $html = (string) $response->getContent();
+        $this->assertStringContainsString('nx-forum-table', $html);
+        $this->assertStringContainsString('page=p', $html);
+        $this->assertStringContainsString('#pid', $html);
     }
 }

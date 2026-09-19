@@ -25,7 +25,7 @@ final class LegacyFontTagTest extends TestCase
     private const BASE_DIR = __DIR__.'/../..';
 
     /** Baseline: app/ PHP files containing a '<font' literal. */
-    private const BASELINE_APP_FILES = 33;
+    private const BASELINE_APP_FILES = 32;
 
     /** Baseline: Blade views containing a '<font' literal. */
     private const BASELINE_VIEW_FILES = 35;

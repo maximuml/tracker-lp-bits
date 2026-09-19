@@ -692,6 +692,20 @@ select.nx-field__input {
 .nx-forum-stats__title { text-align: left; }
 .nx-forum-stats { margin-top: 0.5rem; }
 
+/* viewforum toolbar (moderators left, new-topic action right) + listing
+   utilities (ADR 0021, stage 3.1b). */
+.nx-forum-toolbar { display: flex; justify-content: space-between; align-items: center; padding: 0.3rem 0.4rem; }
+.nx-forum-toolbar__actions { white-space: nowrap; }
+.nx-forum-unread-actions { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+.nx-fast-search { display: flex; align-items: center; gap: 0.4rem; }
+.nx-fast-search__input { width: 11.25rem; }
+.nx-search-form { margin-left: 3.3rem; margin-top: 0.8rem; }
+.nx-search-form__row { display: flex; gap: 0.4rem; align-items: center; margin-top: 0.25rem; }
+.nx-search-form__input { width: 25rem; max-width: 100%; }
+.nx-search-form__submit { vertical-align: middle; }
+#order { cursor: pointer; }
+.nx-dim { color: var(--nxm-text-dim); }
+
 /* Topic highlight palette (legacy get_hl_color indices 1–40). Class-based
    replacement for <font color="…"> — CSP has no unsafe-inline for styles. */
 .nx-hl-1 { color: black; }

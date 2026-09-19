@@ -93,12 +93,12 @@ class LogController extends LegacyController
 
         foreach ($logRows as &$row) {
             $txt = (string) ($row['txt'] ?? '');
-            $row['color'] = match (true) {
-                str_contains($txt, 'settings updated by') => 'darkred',
-                str_contains($txt, 'was edited by') => 'blue',
-                str_contains($txt, 'was added to the Request section') => 'purple',
-                str_contains($txt, 'was deleted by') => 'red',
-                str_contains($txt, 'was uploaded by') => 'green',
+            $row['colorClass'] = match (true) {
+                str_contains($txt, 'settings updated by') => 'nx-color-darkred',
+                str_contains($txt, 'was edited by') => 'nx-color-blue',
+                str_contains($txt, 'was added to the Request section') => 'nx-color-purple',
+                str_contains($txt, 'was deleted by') => 'nx-color-red',
+                str_contains($txt, 'was uploaded by') => 'nx-color-green',
                 default => '',
             };
             $row['dateHtml'] = SafeHtml::fromTrustedHtml((string) (Time::format((string) ($row['added'] ?? ''), true, false) ?? ''));

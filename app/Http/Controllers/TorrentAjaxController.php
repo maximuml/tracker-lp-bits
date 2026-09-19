@@ -179,7 +179,7 @@ class TorrentAjaxController extends LegacyController
 
             $s .= $columnUsername.$columnLocation;
 
-            $s .= '<td class=rowfollow align=center width=1%><nobr>'.(LegacyYesNo::isYes($e['connectable'] ?? null) ? __('legacy/viewpeerlist.text_yes') : '<font color=red>'.__('legacy/viewpeerlist.text_no').'</font>')."</nobr></td>\n";
+            $s .= '<td class=rowfollow align=center width=1%><nobr>'.(LegacyYesNo::isYes($e['connectable'] ?? null) ? __('legacy/viewpeerlist.text_yes') : '<span class="nx-color-red">'.__('legacy/viewpeerlist.text_no').'</span>')."</nobr></td>\n";
             $s .= '<td class=rowfollow align=center width=1%><nobr>'.Format::size((float) $e['uploaded'])."</nobr></td>\n";
             $s .= '<td class=rowfollow align=center width=1%><nobr>'.Format::size(($e['uploaded'] - $e['uploadoffset']) / $secs)."/s</nobr></td>\n";
             $s .= '<td class=rowfollow align=center width=1%><nobr>'.Format::size((float) $e['downloaded'])."</nobr></td>\n";
@@ -192,7 +192,7 @@ class TorrentAjaxController extends LegacyController
 
             if ($e['downloaded']) {
                 $ratio = floor(($e['uploaded'] / $e['downloaded']) * 1000) / 1000;
-                $s .= '<td class=rowfollow align="center" width=1%><font color='.Ratio::color($ratio).'><nobr>'.number_format($ratio, 3)."</nobr></font></td>\n";
+                $s .= '<td class=rowfollow align="center" width=1%><span class="'.Ratio::colorClass($ratio).'"><nobr>'.number_format($ratio, 3)."</nobr></span></td>\n";
             } elseif ($e['uploaded']) {
                 $s .= '<td class=rowfollow align=center width=1%>'.__('legacy/viewpeerlist.text_inf').'</td>';
             } else {
@@ -241,7 +241,7 @@ class TorrentAjaxController extends LegacyController
             $arr = (array) $snatchRow;
             if ($arr['downloaded'] > 0) {
                 $ratio = number_format($arr['uploaded'] / $arr['downloaded'], 3);
-                $ratio = '<font color='.Ratio::color($ratio).">$ratio</font>";
+                $ratio = '<span class="'.Ratio::colorClass($ratio).">$ratio</span>";
             } elseif ($arr['uploaded'] > 0) {
                 $ratio = (string) (__('legacy/viewsnatches.text_inf'));
             } else {
@@ -459,7 +459,7 @@ class TorrentAjaxController extends LegacyController
             }
 
             $sphighlight = Promotion::backgroundStyleWithContext($arr['sp_state']);
-            $bannedTorrent = (LegacyYesNo::isYes($arr['banned'] ?? null) ? ' <b>(<font class="striking">'.__('legacy/functions.text_banned').'</font>)</b>' : '');
+            $bannedTorrent = (LegacyYesNo::isYes($arr['banned'] ?? null) ? ' <b>(<span class="striking">'.__('legacy/functions.text_banned').'</span>)</b>' : '');
             $spTorrent = Promotion::appendWithContext($arr['sp_state'], '', false, '', 0, '', $arr['__ignore_global_sp_state'] ?? false);
             if ($showtotalsize) {
                 $totalSize += $arr['size'];
@@ -502,7 +502,7 @@ class TorrentAjaxController extends LegacyController
             if ($showratio) {
                 if ($arr['downloaded'] > 0) {
                     $ratio = number_format($arr['uploaded'] / $arr['downloaded'], 3);
-                    $ratio = '<font color="'.Ratio::color($ratio).'">'.$ratio.'</font>';
+                    $ratio = '<span class="'.Ratio::colorClass($ratio).'">'.$ratio.'</span>';
                 } elseif ($arr['uploaded'] > 0) {
                     $ratio = 'Inf.';
                 } else {

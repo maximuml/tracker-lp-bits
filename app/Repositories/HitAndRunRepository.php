@@ -185,7 +185,7 @@ class HitAndRunRepository extends BaseRepository
             $out = [];
             foreach (SearchBox::listSections() as $key => $info) {
                 $out[] = sprintf(
-                    '%s: %s/<font color="red">%s</font>/%s',
+                    '%s: %s/<span class="nx-color-red">%s</span>/%s',
                     $info['text'],
                     $grouped[$info['mode']][HitAndRunStatus::INSPECTING->value] ?? 0,
                     $grouped[$info['mode']][HitAndRunStatus::UNREACHED->value] ?? 0,
@@ -202,7 +202,7 @@ class HitAndRunRepository extends BaseRepository
             foreach (SearchBox::listSections() as $key => $info) {
                 if ($key == SearchBox::SECTION_BROWSE) {
                     return sprintf(
-                        '%s/<font color="red">%s</font>/%s',
+                        '%s/<span class="nx-color-red">%s</span>/%s',
                         $grouped[HitAndRunStatus::INSPECTING->value] ?? 0,
                         $grouped[HitAndRunStatus::UNREACHED->value] ?? 0,
                         HitAndRun::getConfig('ban_user_when_counts_reach', $info['mode'])

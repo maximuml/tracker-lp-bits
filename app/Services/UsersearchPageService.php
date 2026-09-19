@@ -232,7 +232,7 @@ final class UsersearchPageService
             if ($user['ip']) {
                 $ipstr = $user['ip'];
                 if (filter_var($user['ip'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) && isset($bannedIps[$user['ip']])) {
-                    $ipstr = "<a href='testip.php?ip=".$user['ip']."'><font color='#FF0000'><b>".$user['ip'].'</b></font></a>';
+                    $ipstr = "<a href='testip.php?ip=".$user['ip']."'><span class='nx-color-red'><b>".$user['ip'].'</b></span></a>';
                 }
             } else {
                 $ipstr = '---';
@@ -276,7 +276,7 @@ final class UsersearchPageService
         if ($down > 0) {
             $r = number_format($up / $down, 2);
             if ($color) {
-                $r = '<font color='.Ratio::color($r).">$r</font>";
+                $r = '<span class="'.Ratio::colorClass($r).">$r</span>";
             }
         } elseif ($up > 0) {
             $r = 'Inf.';

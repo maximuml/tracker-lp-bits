@@ -492,7 +492,7 @@ final class HtmlTest extends TestCase
     {
         $this->assertSame(
             '<table border="0" cellspacing="0" cellpadding="10" class="msg-alert"><tr><td class="msg-alert-red">'."\n"
-            .'<b><a href="https://example.com/notice" target=\'_blank\'><font color="white">Important notice</font></a></b></td></tr></table><br />',
+            .'<b><a href="https://example.com/notice" target=\'_blank\'><span class="nx-color-white">Important notice</span></a></b></td></tr></table><br />',
             Html::messageAlert('https://example.com/notice', 'Important notice'),
         );
     }
@@ -501,7 +501,7 @@ final class HtmlTest extends TestCase
     {
         $this->assertSame(
             '<table border="0" cellspacing="0" cellpadding="10" class="msg-alert"><tr><td class="msg-alert-red">'."\n"
-            .'<b><font color="white">Plain alert</font></b></td></tr></table><br />',
+            .'<b><span class="nx-color-white">Plain alert</span></b></td></tr></table><br />',
             Html::messageAlert('', 'Plain alert'),
         );
     }
@@ -534,7 +534,7 @@ final class HtmlTest extends TestCase
         );
 
         $this->assertStringContainsString('href="https://example.com/?a=1&amp;b=2"', $output);
-        $this->assertStringContainsString('<font color="white">Read <b>this</b> & that</font>', $output);
+        $this->assertStringContainsString('<span class="nx-color-white">Read <b>this</b> & that</span>', $output);
     }
 
     public function test_message_alert_uses_target_blank_with_single_quotes(): void

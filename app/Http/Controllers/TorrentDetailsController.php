@@ -186,7 +186,7 @@ class TorrentDetailsController extends Controller
         $customField = new CustomField;
 
         $bannedTorrent = ($row['banned'] ?? 0) == 1
-            ? ' <b>(<font class="striking">'.(__('legacy/functions.text_banned')).'</font>)</b>'
+            ? ' <b>(<span class="striking">'.(__('legacy/functions.text_banned')).'</span>)</b>'
             : '';
 
         $spTorrent = Promotion::appendWithContext(
@@ -294,7 +294,7 @@ class TorrentDetailsController extends Controller
                 $downloadBtn = __('legacy/details.text_download_torrent');
             }
             $actions[] = sprintf(
-                '<a title="%s" href="download.php?id=%s"><img class="dt_download" src="pic/trans.gif" alt="download" />&nbsp;<b><font class="small">%s</font></b></a>',
+                '<a title="%s" href="download.php?id=%s"><img class="dt_download" src="pic/trans.gif" alt="download" />&nbsp;<b><span class="small">%s</span></b></a>',
                 __('legacy/details.title_download_torrent'),
                 $id,
                 $downloadBtn
@@ -302,7 +302,7 @@ class TorrentDetailsController extends Controller
         }
         if ($owned) {
             $actions[] = sprintf(
-                '<a title="%s" href="%s"><img class="dt_edit" src="pic/trans.gif" alt="edit" />&nbsp;<b><font class="small">%s</font></b></a>',
+                '<a title="%s" href="%s"><img class="dt_edit" src="pic/trans.gif" alt="edit" />&nbsp;<b><span class="small">%s</span></b></a>',
                 __('legacy/details.title_edit_torrent'),
                 $editUrl,
                 Permission::can(PermissionEnum::TORRENT_MANAGE)
@@ -312,7 +312,7 @@ class TorrentDetailsController extends Controller
         }
         if (Permission::can(PermissionEnum::ASK_RESEED) && (int) $row['seeders'] === 0) {
             $actions[] = sprintf(
-                '<a title="%s" href="takereseed.php?reseedid=%s"><img class="dt_reseed" src="pic/trans.gif" alt="reseed">&nbsp;<b><font class="small">%s</font></b></a>',
+                '<a title="%s" href="takereseed.php?reseedid=%s"><img class="dt_reseed" src="pic/trans.gif" alt="reseed">&nbsp;<b><span class="small">%s</span></b></a>',
                 __('legacy/details.title_ask_for_reseed'),
                 $id,
                 __('legacy/details.text_ask_for_reseed')
@@ -324,7 +324,7 @@ class TorrentDetailsController extends Controller
         ) {
             $approvalIcon = '<svg t="1655224943277" class="icon" viewBox="0 0 1397 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="45530" width="16" height="16"><path d="M1396.363636 121.018182c0 0-223.418182 74.472727-484.072727 372.363636-242.036364 269.963636-297.890909 381.672727-390.981818 530.618182C512 1014.690909 372.363636 744.727273 0 549.236364l195.490909-186.181818c0 0 176.872727 121.018182 297.890909 344.436364 0 0 307.2-474.763636 902.981818-707.490909L1396.363636 121.018182 1396.363636 121.018182zM1396.363636 121.018182" p-id="45531" fill="#e78d0f"></path></svg>';
             $actions[] = sprintf(
-                '<a href="#"><b><font id="approval" class="small approval" data-torrent_id="%s">%s&nbsp;%s</font></b></a>',
+                '<a href="#"><b><span class="small approval" id="approval" id="%s">%s&nbsp;%s</span></b></a>',
                 $row['id'],
                 $approvalIcon,
                 __('legacy/details.action_approval')
@@ -343,7 +343,7 @@ document.getElementById('approval').addEventListener("click", function () {
 JS, \json_encode($approvalTitle)), 'footer', false);
         }
         $actions[] = sprintf(
-            '<a title="%s" href="report.php?torrent=%s"><img class="dt_report" src="pic/trans.gif" alt="report" />&nbsp;<b><font class="small">%s</font></b></a>',
+            '<a title="%s" href="report.php?torrent=%s"><img class="dt_report" src="pic/trans.gif" alt="report" />&nbsp;<b><span class="small">%s</span></b></a>',
             __('legacy/details.title_report_torrent'),
             $id,
             __('legacy/details.text_report_torrent')
@@ -478,7 +478,7 @@ CSS, 'header', false);
                     $eachTemp = (int) $eachTemp;
                     if ($eachTemp > 0 && $eachTemp <= $bonusHas) {
                         $magicButtonsInner .= sprintf(
-                            '<li data-torrent-id="%s" data-magic-value="%s"><font>%s</font></li>',
+                            '<li data-torrent-id="%s" data-magic-value="%s"><span>%s</span></li>',
                             $id,
                             $eachTemp,
                             '+'.$eachTemp

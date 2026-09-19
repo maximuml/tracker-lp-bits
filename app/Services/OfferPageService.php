@@ -171,9 +171,9 @@ final class OfferPageService
             : (string) (__('legacy/offers.text_blank')).$timeFormat;
 
         $status = match ((int) ($num['allowed'] ?? 1)) {
-            OfferAllowed::PENDING->value => '<font color="red">'.htmlspecialchars((string) (__('legacy/offers.text_pending'))).'</font>',
-            OfferAllowed::ALLOWED->value => '<font color="green">'.htmlspecialchars((string) (__('legacy/offers.text_allowed'))).'</font>',
-            default => '<font color="red">'.htmlspecialchars((string) (__('legacy/offers.text_denied'))).'</font>',
+            OfferAllowed::PENDING->value => '<span class="nx-color-red">'.htmlspecialchars((string) (__('legacy/offers.text_pending'))).'</span>',
+            OfferAllowed::ALLOWED->value => '<span class="nx-color-green">'.htmlspecialchars((string) (__('legacy/offers.text_allowed'))).'</span>',
+            default => '<span class="nx-color-red">'.htmlspecialchars((string) (__('legacy/offers.text_denied'))).'</span>',
         };
 
         $voteCounts = $this->offerVoteRepository->getVoteCounts($id);
@@ -190,8 +190,8 @@ final class OfferPageService
         $voteRow = '';
         $voteResultsRow = '';
         if ((int) ($num['allowed'] ?? 1) === OfferAllowed::PENDING->value) {
-            $voteRow = '<b><a href="?id='.$id.'&amp;vote=yeah"><font color="green">'.htmlspecialchars((string) (__('legacy/offers.text_for'))).'</font></a></b>'.
-                (Permission::can(PermissionEnum::AGAINST_OFFER) ? ' - <b><a href="?id='.$id.'&amp;vote=against"><font color="red">'.htmlspecialchars((string) (__('legacy/offers.text_against'))).'</font></a></b>' : '');
+            $voteRow = '<b><a href="?id='.$id.'&amp;vote=yeah"><span class="nx-color-green">'.htmlspecialchars((string) (__('legacy/offers.text_for'))).'</span></a></b>'.
+                (Permission::can(PermissionEnum::AGAINST_OFFER) ? ' - <b><a href="?id='.$id.'&amp;vote=against"><span class="nx-color-red">'.htmlspecialchars((string) (__('legacy/offers.text_against'))).'</span></a></b>' : '');
             $voteResultsRow = '<b>'.htmlspecialchars((string) (__('legacy/offers.text_for'))).":</b> {$yeah}  <b>".htmlspecialchars((string) (__('legacy/offers.text_against')))."</b> {$against} &nbsp; &nbsp; <a href=\"?id=".$id.'&amp;offer_vote=1"><i>'.htmlspecialchars((string) (__('legacy/offers.text_see_vote_detail'))).'</i></a>';
         }
 
@@ -206,10 +206,10 @@ final class OfferPageService
         $edit = '';
         $delete = '';
         if ($userId === (int) ($num['userid'] ?? 0) || Permission::can(PermissionEnum::OFFER_MANAGE)) {
-            $edit = '<a href="?id='.$id.'&amp;edit_offer=1"><img class="dt_edit" src="pic/trans.gif" alt="edit" />&nbsp;<b><font class="small">'.htmlspecialchars((string) (__('legacy/offers.text_edit_offer'))).'</font></b></a>&nbsp;|&nbsp;';
-            $delete = '<a href="?id='.$id.'&amp;del_offer=1&amp;sure=0"><img class="dt_delete" src="pic/trans.gif" alt="delete" />&nbsp;<b><font class="small">'.htmlspecialchars((string) (__('legacy/offers.text_delete_offer'))).'</font></b></a>&nbsp;|&nbsp;';
+            $edit = '<a href="?id='.$id.'&amp;edit_offer=1"><img class="dt_edit" src="pic/trans.gif" alt="edit" />&nbsp;<b><span class="small">'.htmlspecialchars((string) (__('legacy/offers.text_edit_offer'))).'</span></b></a>&nbsp;|&nbsp;';
+            $delete = '<a href="?id='.$id.'&amp;del_offer=1&amp;sure=0"><img class="dt_delete" src="pic/trans.gif" alt="delete" />&nbsp;<b><span class="small">'.htmlspecialchars((string) (__('legacy/offers.text_delete_offer'))).'</span></b></a>&nbsp;|&nbsp;';
         }
-        $report = '<a href="report.php?reportofferid='.$id.'"><img class="dt_report" src="pic/trans.gif" alt="report" />&nbsp;<b><font class="small">'.htmlspecialchars((string) (__('legacy/offers.report_offer'))).'</font></b></a>';
+        $report = '<a href="report.php?reportofferid='.$id.'"><img class="dt_report" src="pic/trans.gif" alt="report" />&nbsp;<b><span class="small">'.htmlspecialchars((string) (__('legacy/offers.report_offer'))).'</span></b></a>';
 
         $description = '';
         if (! empty($num['descr'])) {
@@ -381,7 +381,7 @@ final class OfferPageService
 
         // Rules section
         $rules = '';
-        $rules .= '<p align="left"><b><font size="5">'.htmlspecialchars((string) (__('legacy/offers.text_rules'))).'</font></b></p>'."\n";
+        $rules .= '<p align="left"><b><span class="nx-size-5">'.htmlspecialchars((string) (__('legacy/offers.text_rules'))).'</span></b></p>'."\n";
         $rules .= '<div align="left"><ul>';
         $rules .= '<li>'.htmlspecialchars((string) (__('legacy/offers.text_rule_one_one'))).
             UserClass::name((int) $globalData['uploadClass'], false, true, true).
@@ -464,7 +464,7 @@ final class OfferPageService
                             }
                             $counter = $i;
                             $lastcom_tooltip[$counter]['id'] = 'lastcom_'.$counter;
-                            $lastcom_tooltip[$counter]['content'] = ($hasnewcom ? "<b>(<font class='new'>".htmlspecialchars((string) (__('legacy/offers.text_new'))).'</font>)</b> ' : '').htmlspecialchars((string) (__('legacy/offers.text_last_commented_by'))).UserDisplay::username((int) ($lastcom['user'] ?? 0)).$lastcomtime.'<br />'.Format::formatComment(mb_substr((string) ($lastcom['text'] ?? ''), 0, 100, 'UTF-8').(mb_strlen((string) ($lastcom['text'] ?? ''), 'UTF-8') > 100 ? ' ......' : ''), true, false, false, true, 600, false, false);
+                            $lastcom_tooltip[$counter]['content'] = ($hasnewcom ? "<b>(<span class='new'>".htmlspecialchars((string) (__('legacy/offers.text_new'))).'</span>)</b> ' : '').htmlspecialchars((string) (__('legacy/offers.text_last_commented_by'))).UserDisplay::username((int) ($lastcom['user'] ?? 0)).$lastcomtime.'<br />'.Format::formatComment(mb_substr((string) ($lastcom['text'] ?? ''), 0, 100, 'UTF-8').(mb_strlen((string) ($lastcom['text'] ?? ''), 'UTF-8') > 100 ? ' ......' : ''), true, false, false, true, 600, false, false);
                             $onmouseover = ' data-domtt-src="'.$lastcom_tooltip[$counter]['id'].'"';
                         } else {
                             $onmouseover = '';
@@ -473,13 +473,13 @@ final class OfferPageService
                         $title = ' title="'.($hasnewcom ? htmlspecialchars((string) (__('legacy/offers.title_has_new_comment'))) : htmlspecialchars((string) (__('legacy/offers.title_no_new_comment')))).'"';
                         $onmouseover = '';
                     }
-                    $comment = '<b><a'.$title.' href="?id='.(int) $arr['id'].'&amp;off_details=1#startcomments" '.$onmouseover.'>'.($hasnewcom ? "<font class='new'>" : '').$comms.($hasnewcom ? '</font>' : '').'</a></b>';
+                    $comment = '<b><a'.$title.' href="?id='.(int) $arr['id'].'&amp;off_details=1#startcomments" '.$onmouseover.'>'.($hasnewcom ? "<span class='new'>" : '').$comms.($hasnewcom ? '</span>' : '').'</a></b>';
                 }
 
                 $allowed = match ((int) ($arr['allowed'] ?? 1)) {
-                    OfferAllowed::ALLOWED->value => '&nbsp;<b>[<font color="green">'.htmlspecialchars((string) (__('legacy/offers.text_allowed'))).'</font>]</b>',
-                    OfferAllowed::DENIED->value => '&nbsp;<b>[<font color="red">'.htmlspecialchars((string) (__('legacy/offers.text_denied'))).'</font>]</b>',
-                    default => '&nbsp;<b>[<font color="orange">'.htmlspecialchars((string) (__('legacy/offers.text_pending'))).'</font>]</b>',
+                    OfferAllowed::ALLOWED->value => '&nbsp;<b>[<span class="nx-color-green">'.htmlspecialchars((string) (__('legacy/offers.text_allowed'))).'</span>]</b>',
+                    OfferAllowed::DENIED->value => '&nbsp;<b>[<span class="nx-color-red">'.htmlspecialchars((string) (__('legacy/offers.text_denied'))).'</span>]</b>',
+                    default => '&nbsp;<b>[<span class="nx-color-orange">'.htmlspecialchars((string) (__('legacy/offers.text_pending'))).'</span>]</b>',
                 };
 
                 $zvote = ((int) ($arr['yeah'] ?? 0)) === 0 ? (string) ((int) ($arr['yeah'] ?? 0)) : '<b><a href="?id='.(int) $arr['id'].'&amp;offer_vote=1">'.(int) ($arr['yeah'] ?? 0).'</a></b>';
@@ -488,7 +488,7 @@ final class OfferPageService
                 if ((int) ($arr['yeah'] ?? 0) === 0 && (int) ($arr['against'] ?? 0) === 0) {
                     $v_res = '0';
                 } else {
-                    $v_res = '<b><a href="?id='.(int) $arr['id'].'&amp;offer_vote=1" title="'.htmlspecialchars((string) (__('legacy/offers.title_show_vote_details'))).'"><font color="green">'.(int) ($arr['yeah'] ?? 0).'</font> - <font color="red">'.(int) ($arr['against'] ?? 0).'</font> = '.((int) ($arr['yeah'] ?? 0) - (int) ($arr['against'] ?? 0)).'</a></b>';
+                    $v_res = '<b><a href="?id='.(int) $arr['id'].'&amp;offer_vote=1" title="'.htmlspecialchars((string) (__('legacy/offers.title_show_vote_details'))).'"><span class="nx-color-green">'.(int) ($arr['yeah'] ?? 0).'</span> - <span class="nx-color-red">'.(int) ($arr['against'] ?? 0).'</span> = '.((int) ($arr['yeah'] ?? 0) - (int) ($arr['against'] ?? 0)).'</a></b>';
                 }
 
                 $addtime = Time::format((string) ($arr['added'] ?? 'now'), false, true);
@@ -499,7 +499,7 @@ final class OfferPageService
                     $dispname = mb_substr($dispname, 0, $maxLength - 2, 'UTF-8').'..';
                 }
 
-                echo '<tr><td class="rowfollow"><a href="?category='.(int) ($arr['cat_id'] ?? 0).'">'.Category::imageTagWithContext((int) ($arr['cat_id'] ?? 0), '').'</a></td><td><a href="?id='.(int) $arr['id'].'&amp;off_details=1" title="'.htmlspecialchars((string) ($arr['name'] ?? '')).'"><b>'.htmlspecialchars($dispname).'</b></a>'.(! LegacyYesNo::isNo($curUser['appendnew'] ?? null) && strtotime((string) ($arr['added'] ?? 'now')) >= $last_offer ? "<b> (<font class='new'>".htmlspecialchars((string) (__('legacy/offers.text_new'))).'</font>)</b>' : '').$allowed.'</td><td class="rowfollow nowrap" align="center">'.$v_res.'</td><td class="rowfollow nowrap" '.(! Permission::can(PermissionEnum::AGAINST_OFFER) ? ' colspan="2" ' : '').'><a href="?id='.(int) $arr['id'].'&amp;vote=yeah" title="'.htmlspecialchars((string) (__('legacy/offers.title_i_want_this'))).'"><font color="green"><b>'.htmlspecialchars((string) (__('legacy/offers.text_yep'))).'</b></font></a></td>'.(UserDisplay::currentClass() >= $globalData['againstofferClass'] ? '<td class="rowfollow nowrap" align="center"><a href="?id='.(int) $arr['id'].'&amp;vote=against" title="'.htmlspecialchars((string) (__('legacy/offers.title_do_not_want_it'))).'"><font color="red"><b>'.htmlspecialchars((string) (__('legacy/offers.text_nah'))).'</b></font></a></td>' : '');
+                echo '<tr><td class="rowfollow"><a href="?category='.(int) ($arr['cat_id'] ?? 0).'">'.Category::imageTagWithContext((int) ($arr['cat_id'] ?? 0), '').'</a></td><td><a href="?id='.(int) $arr['id'].'&amp;off_details=1" title="'.htmlspecialchars((string) ($arr['name'] ?? '')).'"><b>'.htmlspecialchars($dispname).'</b></a>'.(! LegacyYesNo::isNo($curUser['appendnew'] ?? null) && strtotime((string) ($arr['added'] ?? 'now')) >= $last_offer ? "<b> (<span class='new'>".htmlspecialchars((string) (__('legacy/offers.text_new'))).'</span>)</b>' : '').$allowed.'</td><td class="rowfollow nowrap" align="center">'.$v_res.'</td><td class="rowfollow nowrap" '.(! Permission::can(PermissionEnum::AGAINST_OFFER) ? ' colspan="2" ' : '').'><a href="?id='.(int) $arr['id'].'&amp;vote=yeah" title="'.htmlspecialchars((string) (__('legacy/offers.title_i_want_this'))).'"><span class="nx-color-green"><b>'.htmlspecialchars((string) (__('legacy/offers.text_yep'))).'</b></span></a></td>'.(UserDisplay::currentClass() >= $globalData['againstofferClass'] ? '<td class="rowfollow nowrap" align="center"><a href="?id='.(int) $arr['id'].'&amp;vote=against" title="'.htmlspecialchars((string) (__('legacy/offers.title_do_not_want_it'))).'"><span class="nx-color-red"><b>'.htmlspecialchars((string) (__('legacy/offers.text_nah'))).'</b></span></a></td>' : '');
 
                 echo '<td class="rowfollow">'.$comment.'</td><td class="rowfollow nowrap">'.$addtime.'</td>';
                 if ($globalData['offervotetimeoutMain'] > 0 && $globalData['offeruptimeoutMain'] > 0) {
@@ -562,8 +562,8 @@ final class OfferPageService
         foreach ($voteRows as $arr) {
             $arrArr = (array) $arr;
             $vote = match ($arrArr['vote'] ?? '') {
-                'yeah' => '<b><font color=green>'.htmlspecialchars((string) (__('legacy/offers.text_for'))).'</font></b>',
-                'against' => '<b><font color=red>'.htmlspecialchars((string) (__('legacy/offers.text_against'))).'</font></b>',
+                'yeah' => '<b><span class="nx-color-green">'.htmlspecialchars((string) (__('legacy/offers.text_for'))).'</span></b>',
+                'against' => '<b><span class="nx-color-red">'.htmlspecialchars((string) (__('legacy/offers.text_against'))).'</span></b>',
                 default => 'unknown',
             };
             $rows[] = [

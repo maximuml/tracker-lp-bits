@@ -69,7 +69,7 @@
         @endif
         <div class="nx-text">
             {{ __('legacy/donate.text_after_donation_note_one') }}
-            <a href="sendmessage.php?receiver={{ $accountantId }}"><font class="striking"><b>{{ __('legacy/donate.text_send_us') }}</b></font></a>
+            <a href="sendmessage.php?receiver={{ $accountantId }}"><span class="striking"><b>{{ __('legacy/donate.text_send_us') }}</b></span></a>
             {{ __('legacy/donate.text_after_donation_note_two') }} <b>{{ __('legacy/donate.text_transaction_information') }}</b>{{ __('legacy/donate.text_after_donation_note_two_end') }}
         </div>
     </div>

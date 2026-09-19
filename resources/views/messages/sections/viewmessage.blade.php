@@ -21,6 +21,6 @@
 {{ $viewmessage['moveBoxOptions'] ?? '' }}
 </select></form>
 @endif
-</td><td align="right" ><font color=white>[ <form action="/messages" method="post" class="nx-inline">@csrf<input type="hidden" name="action" value="deletemessage"><input type="hidden" name="id" value="{{ $viewmessage['pmId'] }}"><input type="submit" value="{{ __('legacy/messages.text_delete') }}"></form> ]{{ $viewmessage['reply'] ?? '' }} [ <a href="messages.php?action=forward&id={{ $viewmessage['pmId'] }}">{{ __('legacy/messages.text_forward_pm') }}</a> ]</font></td>
+</td><td align="right" ><span class="nx-color-white">[ <form action="/messages" method="post" class="nx-inline">@csrf<input type="hidden" name="action" value="deletemessage"><input type="hidden" name="id" value="{{ $viewmessage['pmId'] }}"><input type="submit" value="{{ __('legacy/messages.text_delete') }}"></form> ]{{ $viewmessage['reply'] ?? '' }} [ <a href="messages.php?action=forward&id={{ $viewmessage['pmId'] }}">{{ __('legacy/messages.text_forward_pm') }}</a> ]</span></td>
 </tr>
 </table>

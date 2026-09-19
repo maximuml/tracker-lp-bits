@@ -8,6 +8,6 @@
 {{ \App\Support\Comment::format((string) $arr['ori_text']) }}
 </div>
 @if ($returnto)
-<p><font size="small">(<a href="{{ $returnto }}">{{ __('legacy/comment.text_back')}}</a>)</font></p>
+<p><span>(<a href="{{ $returnto }}">{{ __('legacy/comment.text_back')}}</a>)</span></p>
 @endif
 @endsection

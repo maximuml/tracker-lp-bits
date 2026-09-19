@@ -12,9 +12,9 @@
         <div>
             <div id="cid{{ $row['id'] }}" class="nx-embedded">
                         #{{ $row['id'] }}&nbsp;&nbsp;
-                        <font color="gray">{{ __('legacy/functions.text_by')}}</font>
+                        <span class="nx-color-gray">{{ __('legacy/functions.text_by')}}</span>
                         {{ $row['usernameHtml'] ?? '' }}
-                        &nbsp;&nbsp;<font color="gray">{{ __('legacy/functions.text_at')}}</font>
+                        &nbsp;&nbsp;<span class="nx-color-gray">{{ __('legacy/functions.text_at')}}</span>
                         {{ $row['timeHtml'] ?? '' }}
                         {{ $row['parentLinkHtml'] ?? '' }}
             </div>

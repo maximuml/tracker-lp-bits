@@ -17,7 +17,7 @@
         <a href=forums.php?action=viewtopic&topicid={{ $item['topicid'] }}>{{ $item['topicname'] }}</a>
         &nbsp;--&nbsp;<b>{{ __('legacy/userhistory.text_post') }}&nbsp;</b>
         <a href=forums.php?action=viewtopic&topicid={{ $item['topicid'] }}&page=p{{ $item['postid'] }}#pid{{ $item['postid'] }}>#{{ $item['postid'] }}</a>
-        @if ($item['isNew']) &nbsp;<b>(<font class=new>{{ __('legacy/userhistory.text_new')}}</font>)</b>@endif
+        @if ($item['isNew']) &nbsp;<b>(<span class="new">{{ __('legacy/userhistory.text_new')}}</span>)</b>@endif
         </p>
         <br />
         <table data-nx="data" class=main width=100% border=1 cellspacing=0 cellpadding=5>

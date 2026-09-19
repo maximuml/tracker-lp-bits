@@ -668,6 +668,39 @@ Decision → Consequences). Add new ADRs here as numbered subsections.
   up when the remaining forum services migrate — the same pattern
   applies.
 
+### ADR 0022: Forum listing sections view models (Accepted, stage 3.1b)
+
+- **Context:** `ForumListingService` rendered viewforum / viewunread /
+  search into `ob_start()`/`echo` (~45 echo, 3 `ob_start`) — nested
+  embedded tables, `<font>` markup, inline `style=`, and a raw PHP/HTML
+  block for the search form — returning `array{html: SafeHtml}`; the
+  section templates were `{{ $viewforum['html'] }}` pass-throughs.
+- **Decision:** The three sections return typed view models under
+  `App\ViewModels\Forum\`: `TopicListViewModel` + `TopicRow`
+  (viewforum), `UnreadTopicsViewModel` + `UnreadTopicRow` (viewunread),
+  `ForumSearchViewModel` + `SearchResultRow` (search). Rendering moves
+  to `components/forum/{topic-table,topic-row,unread-table,search-box,pager}.blade.php`.
+  All permissions, sort modes, fast-search, caching
+  (`topic_N_post_count`), multipage quick links, tooltip content and
+  the catch-up/show-more forms are preserved. `x-forum.pager` renders
+  the semantic `nx-pagination` markup but keeps the **0-based**
+  `page=` query semantics — unlike `x-pagination` (1-based) — so
+  existing bookmarks and `viewtopic` paging stay consistent; the
+  display window comes from `Pagination::window()` via the VM.
+  Trusted HTML is limited to `UserDisplay::username()` names,
+  `Format::highlight()` needles and `formatComment()` tooltip
+  previews — documented SafeHtml fields on the row DTOs. Search
+  keywords are stored raw on the VM (the service escapes once for the
+  repo call, matching legacy behaviour; the legacy pager's
+  progressively double-escaped `keywords=` URL was not replicated).
+- **Consequences:** Ratchet baselines drop again: `echo` 189→144,
+  `ob_start` 31→28, `<table` literals 43→38, HTML literal lines
+  1179→1135, `<font>` app files 33→32. Integration tests assert VM
+  data (`ForumListingServiceTest`); `ForumHttpTest` gained three
+  section render tests asserting `nx-forum-table`/`data-nx="data"`
+  markers; browser navigation coverage stays in `pages.spec.ts`.
+  `viewtopic` + `compose` remain on the old echo pattern until 3.1c/d.
+
 ## Testing
 
 - **Unit tests:** `tests/Unit/` — pure unit only, no DB/Redis/MeiliSearch (enforced by `UnitSuiteIsolationTest` and the `unit-tests-fast` CI job, which runs the suite with no service containers)

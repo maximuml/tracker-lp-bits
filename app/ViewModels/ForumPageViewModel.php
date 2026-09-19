@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\ViewModels;
 
+use App\ViewModels\Forum\ForumIndexViewModel;
+
 /**
  * ViewModel for the forum page.
  *
@@ -18,7 +20,6 @@ final class ForumPageViewModel extends ViewModel
      * @param  array<string, mixed>|null  $viewforum
      * @param  array<string, mixed>|null  $viewunread
      * @param  array<string, mixed>|null  $search
-     * @param  array<string, mixed>|null  $forums
      */
     public function __construct(
         public readonly array $curUser,
@@ -33,7 +34,7 @@ final class ForumPageViewModel extends ViewModel
         public readonly ?array $viewforum = null,
         public readonly ?array $viewunread = null,
         public readonly ?array $search = null,
-        public readonly ?array $forums = null,
+        public readonly ?ForumIndexViewModel $forums = null,
     ) {}
 
     /**

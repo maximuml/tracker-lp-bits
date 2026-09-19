@@ -171,16 +171,6 @@ final class Html
         return Tag::formatImg($src, $enableResizer, $maxWidth, $maxHeight, $imgId);
     }
 
-    public static function formatFlash(string $src, int|string $width, int|string $height): string
-    {
-        return Tag::formatFlash($src, $width, $height);
-    }
-
-    public static function formatFlv(string $src, int|string $width, int|string $height): string
-    {
-        return Tag::formatFlv($src, $width, $height);
-    }
-
     public static function formatYoutube(string $src, int|string $width = '', int|string $height = ''): string
     {
         return Tag::formatYoutube($src, $width, $height);

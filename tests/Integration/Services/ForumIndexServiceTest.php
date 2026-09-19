@@ -61,10 +61,6 @@ final class ForumIndexServiceTest extends TestCase
     {
         parent::setUp();
         Redis::connection()->flushdb();
-        if (! defined('IN_NEXUS')) {
-            define('IN_NEXUS', true);
-        }
-
         $this->currentUser = new CurrentUser;
         $this->globals = new Globals;
 

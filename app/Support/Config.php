@@ -19,7 +19,7 @@ final class Config
 
     public static function get(string $key, mixed $default = null): mixed
     {
-        if (! (defined('IN_NEXUS') && IN_NEXUS)) {
+        if (! app(LegacyRuntime::class)->isLegacy()) {
             return config($key, $default);
         }
 

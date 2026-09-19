@@ -50,9 +50,6 @@ final class UsercpPageServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        if (! defined('IN_NEXUS')) {
-            define('IN_NEXUS', true);
-        }
         Redis::connection()->flushdb();
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
         DB::table('users')->truncate();

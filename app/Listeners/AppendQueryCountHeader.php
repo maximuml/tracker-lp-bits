@@ -12,8 +12,8 @@ use Illuminate\Support\Facades\DB;
  * Append an X-Queries-Count header to every HTTP response.
  *
  * Uses the connection behind `NexusDB` so the count is correct whether the
- * request is handled by Laravel's DB facade (IN_NEXUS=false) or the legacy
- * Capsule connection (IN_NEXUS=true).
+ * request is handled by Laravel's DB facade or the legacy Capsule
+ * connection.
  */
 final class AppendQueryCountHeader
 {

@@ -50,9 +50,6 @@ final class ForumPageServiceTest extends TestCase
     {
         parent::setUp();
         Redis::connection()->flushdb();
-        if (! defined('IN_NEXUS')) {
-            define('IN_NEXUS', true);
-        }
         $this->initialObLevel = ob_get_level();
         Settings::saveBatch('basic', ['SITENAME' => 'TestSite']);
         Settings::saveBatch('main', ['postsperpage' => 10, 'topicsperpage' => 20]);

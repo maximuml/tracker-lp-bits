@@ -2,6 +2,7 @@
 
 use App\Exceptions\Handler;
 use App\Http\Kernel;
+use App\Support\LegacyRuntime;
 use App\Support\RequestContext;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Foundation\Application;
@@ -30,6 +31,16 @@ defined('TIMENOW') || define('TIMENOW', time());
 $app = new Application(
     $_ENV['APP_BASE_PATH'] ?? dirname(__DIR__)
 );
+
+// Seed the request-scoped legacy/tracker runtime from the deprecated
+// entry-point constants (ADR 0017). Bound here — before providers register —
+// so the instance is shared for the whole process; per-request mutations
+// happen in LegacyRequestMiddleware / TrackerThrottle and are flushed by
+// ResetNexus on Octane lifecycle events.
+$app->instance(LegacyRuntime::class, new LegacyRuntime(
+    defined('IN_NEXUS') && IN_NEXUS,
+    defined('IN_TRACKER') && IN_TRACKER,
+));
 
 /*
 |--------------------------------------------------------------------------

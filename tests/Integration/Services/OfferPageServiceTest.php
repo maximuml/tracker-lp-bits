@@ -44,10 +44,6 @@ final class OfferPageServiceTest extends TestCase
         $this->initialObLevel = ob_get_level();
         Redis::connection()->flushdb();
 
-        if (! defined('IN_NEXUS')) {
-            define('IN_NEXUS', true);
-        }
-
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
         DB::table('offers')->truncate();
         DB::table('offervotes')->truncate();

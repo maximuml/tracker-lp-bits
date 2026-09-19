@@ -57,9 +57,6 @@ final class ForumTopicViewServiceTest extends TestCase
     {
         parent::setUp();
         Redis::connection()->flushdb();
-        if (! defined('IN_NEXUS')) {
-            define('IN_NEXUS', true);
-        }
         $this->initialObLevel = ob_get_level();
         app(Globals::class)->set('SITENAME', 'TestSite');
         app(Globals::class)->set('CURLANGDIR', 'en');

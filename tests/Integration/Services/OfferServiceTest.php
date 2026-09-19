@@ -46,10 +46,6 @@ final class OfferServiceTest extends TestCase
     {
         parent::setUp();
         $this->initialObLevel = ob_get_level();
-        if (! defined('IN_NEXUS')) {
-            define('IN_NEXUS', true);
-        }
-
         Redis::connection()->flushdb();
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
         DB::table('offers')->truncate();

@@ -4,7 +4,12 @@ declare(strict_types=1);
 
 namespace Tests\Unit\ViewModels;
 
+use App\Models\Tag;
 use App\Support\Html\SafeHtml;
+use App\ViewModels\Torrent\CategoryIcon;
+use App\ViewModels\Torrent\PromotionBadge;
+use App\ViewModels\Torrent\TorrentBadgeSet;
+use App\ViewModels\Torrent\TorrentProgress;
 use App\ViewModels\TorrentListRow;
 use App\ViewModels\TorrentListViewModel;
 use App\ViewModels\TorrentSearchPanelViewModel;
@@ -23,8 +28,9 @@ final class TorrentListViewModelsTest extends TestCase
     {
         $row = new TorrentListRow(
             id: 42,
-            rowAttrs: SafeHtml::fromTrustedHtml(' class="free"'),
-            categoryCell: SafeHtml::fromTrustedHtml('<img />'),
+            rowClass: 'free_bg',
+            categoryIcon: new CategoryIcon('cat_movies', 'Movies', '?cat=101'),
+            secondIcon: new CategoryIcon('cat_src', 'BluRay'),
             coverSrc: 'cover.jpg',
             stickyCount: 2,
             stickyTitle: 'Sticky level 1',
@@ -33,23 +39,28 @@ final class TorrentListViewModelsTest extends TestCase
             nameTitle: 'Full name',
             isNew: true,
             isBanned: false,
-            badges: SafeHtml::fromTrustedHtml('<img class="pro_free" />'),
-            tags: SafeHtml::fromTrustedHtml(''),
-            progressBar: SafeHtml::fromTrustedHtml(''),
+            badges: new TorrentBadgeSet(
+                paid: true,
+                promotion: new PromotionBadge('icon', 'free', 'pro_free', 'Free', 'Free', null, null, null),
+                hitAndRun: true,
+                approval: null,
+            ),
+            tags: [new Tag],
+            progress: new TorrentProgress('seeding', 75.0),
             showDownload: true,
             downloadUrl: 'download.php?id=42',
             showBookmark: true,
             bookmarkElementId: 'bookmark0',
             bookmarkCounter: 0,
-            bookmarkMarkup: SafeHtml::fromTrustedHtml('<img />'),
+            bookmarked: true,
             waitText: '5h',
             waitClass: 'nx-wait-10',
             commentsUrl: 'details.php?id=42&cmtpage=1',
             comments: 7,
             commentIsNew: true,
             lastCommentTooltipId: 'lastcom_0',
-            time: SafeHtml::fromTrustedHtml('<span>1h</span>'),
-            size: SafeHtml::fromTrustedHtml('4.00<br />GB'),
+            added: '2024-01-01 12:00:00',
+            size: ['value' => '4.00', 'unit' => 'GB'],
             seedersUrl: 'details.php?id=42&dllist=1#seeders',
             seeders: 12,
             seedersClass: 'nx-sl-1',
@@ -66,14 +77,30 @@ final class TorrentListViewModelsTest extends TestCase
         );
 
         $this->assertSame(42, $row->id);
+        $this->assertSame('free_bg', $row->rowClass);
+        $this->assertSame('Movies', $row->categoryIcon->name);
         $this->assertSame(2, $row->stickyCount);
         $this->assertTrue($row->isNew);
         $this->assertFalse($row->isBanned);
+        $this->assertTrue($row->badges->paid);
+        $this->assertSame('pro_free', $row->badges->promotion->iconClass);
+        $this->assertTrue($row->badges->hitAndRun);
+        $this->assertTrue($row->badges->approval === null);
+        $this->assertFalse($row->badges->isEmpty());
+        $this->assertSame(75.0, $row->progress->percent);
+        $this->assertTrue($row->bookmarked);
         $this->assertSame('5h', $row->waitText);
         $this->assertSame('nx-wait-10', $row->waitClass);
         $this->assertSame('fastdelete.php?id=42', $row->staffDeleteUrl);
         $this->assertSame('edit.php?id=42', $row->staffEditUrl);
-        $this->assertStringContainsString('4.00', $row->size->toHtml());
+        $this->assertSame('4.00', $row->size['value']);
+        $this->assertSame('GB', $row->size['unit']);
+    }
+
+    public function test_badge_set_reports_empty_when_nothing_applies(): void
+    {
+        $this->assertTrue((new TorrentBadgeSet)->isEmpty());
+        $this->assertFalse((new TorrentBadgeSet(hitAndRun: true))->isEmpty());
     }
 
     public function test_list_view_model_carries_columns_rows_and_flags(): void
@@ -84,7 +111,7 @@ final class TorrentListViewModelsTest extends TestCase
             showComments: true,
             canManage: false,
             showPromotionNote: true,
-            lastCommentTooltips: SafeHtml::fromTrustedHtml(''),
+            lastCommentTooltips: [['id' => 'lastcom_0', 'content' => SafeHtml::fromTrustedHtml('<b>x</b>')]],
         );
 
         $this->assertCount(1, $vm->columns);

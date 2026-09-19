@@ -11,12 +11,15 @@ use App\Support\Html\SafeHtml;
  * for `TorrentTable::render()` (Variant A, ADR 0014).
  *
  * @phpstan-type Column array{key: string, label: string, iconClass: string, iconTitle: string, sortUrl: ?string}
+ * @phpstan-type Tooltip array{id: string, content: SafeHtml}
  */
 final class TorrentListViewModel
 {
     /**
-     * @param  list<array{key: string, label: string, iconClass: string, iconTitle: string, sortUrl: ?string}>  $columns
+     * @param  list<Column>  $columns
      * @param  list<TorrentListRow>  $rows
+     * @param  list<Tooltip>  $lastCommentTooltips  domTT tooltip bodies,
+     *                                              rendered inside a hidden container by the template.
      */
     public function __construct(
         public readonly array $columns,
@@ -24,6 +27,6 @@ final class TorrentListViewModel
         public readonly bool $showComments,
         public readonly bool $canManage,
         public readonly bool $showPromotionNote,
-        public readonly SafeHtml $lastCommentTooltips,
+        public readonly array $lastCommentTooltips,
     ) {}
 }

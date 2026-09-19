@@ -52,11 +52,7 @@ final class TorrentBookmark
      */
     public static function stateMarkup(mixed $cache, int|string $userId, int|string $torrentId, bool $text = false, array $labels = []): string
     {
-        $userId = (int) $userId;
-        $torrentId = (int) $torrentId;
-        $bookmarks = self::bookmarkArray($cache, $userId);
-
-        $bookmarked = in_array($torrentId, $bookmarks, false);
+        $bookmarked = self::isBookmarked($cache, $userId, $torrentId);
 
         if (! $bookmarked) {
             return $text
@@ -67,6 +63,15 @@ final class TorrentBookmark
         return $text
             ? ($labels['title_delbookmark_torrent'] ?? '')
             : '<img class="bookmark" src="pic/trans.gif" alt="Bookmarked" title="'.($labels['title_delbookmark_torrent'] ?? '').'" />';
+    }
+
+    /**
+     * Whether the torrent is in the user's bookmark list — typed
+     * counterpart of {@see stateMarkup()} for view-model assembly.
+     */
+    public static function isBookmarked(mixed $cache, int|string $userId, int|string $torrentId): bool
+    {
+        return in_array((int) $torrentId, self::bookmarkArray($cache, (int) $userId), false);
     }
 
     /**

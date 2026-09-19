@@ -177,20 +177,34 @@ final class Format
      */
     private static function bytesWithSeparator(int|float $bytes, string $separator): string
     {
+        $parts = self::sizeParts($bytes);
+
+        return $parts['value'].$separator.$parts['unit'];
+    }
+
+    /**
+     * Format a byte count as `[number, unit]` parts so views can choose
+     * their own separator markup (e.g. `<br />`) instead of consuming a
+     * pre-joined HTML string.
+     *
+     * @return array{value: string, unit: string}
+     */
+    public static function sizeParts(int|float $bytes): array
+    {
         if ($bytes < 1000 * 1024) {
-            return number_format($bytes / 1024, 2).$separator.'KB';
+            return ['value' => number_format($bytes / 1024, 2), 'unit' => 'KB'];
         }
         if ($bytes < 1000 * 1048576) {
-            return number_format($bytes / 1048576, 2).$separator.'MB';
+            return ['value' => number_format($bytes / 1048576, 2), 'unit' => 'MB'];
         }
         if ($bytes < 1000 * 1073741824) {
-            return number_format($bytes / 1073741824, 2).$separator.'GB';
+            return ['value' => number_format($bytes / 1073741824, 2), 'unit' => 'GB'];
         }
         if ($bytes < 1000 * 1099511627776) {
-            return number_format($bytes / 1099511627776, 3).$separator.'TB';
+            return ['value' => number_format($bytes / 1099511627776, 3), 'unit' => 'TB'];
         }
 
-        return number_format($bytes / 1125899906842624, 3).$separator.'PB';
+        return ['value' => number_format($bytes / 1125899906842624, 3), 'unit' => 'PB'];
     }
 
     /**

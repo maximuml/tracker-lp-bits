@@ -4,22 +4,30 @@ declare(strict_types=1);
 
 namespace App\ViewModels;
 
+use App\Models\Tag;
 use App\Support\Html\SafeHtml;
+use App\ViewModels\Torrent\CategoryIcon;
+use App\ViewModels\Torrent\TorrentBadgeSet;
+use App\ViewModels\Torrent\TorrentProgress;
 
 /**
  * One prepared row of the modern torrents table (Variant A, ADR 0014).
  *
- * Scalar cells are plain values rendered with {{ }} in the Blade table;
- * compound fragments produced by shared helpers (category icons,
- * promotion badges, tag spans, progress bar, usernames) arrive as
- * SafeHtml so the template never calls fromTrustedHtml() itself.
+ * Cells are plain values rendered with {{ }} in the Blade table; the
+ * only SafeHtml left is `uploaderName` — `UserDisplay::username()` is
+ * inherently styled markup and stays behind the trusted boundary.
  */
 final class TorrentListRow
 {
+    /**
+     * @param  list<Tag>  $tags
+     * @param  array{value: string, unit: string}  $size
+     */
     public function __construct(
         public readonly int $id,
-        public readonly SafeHtml $rowAttrs,
-        public readonly SafeHtml $categoryCell,
+        public readonly ?string $rowClass,
+        public readonly ?CategoryIcon $categoryIcon,
+        public readonly ?CategoryIcon $secondIcon,
         public readonly ?string $coverSrc,
         public readonly int $stickyCount,
         public readonly string $stickyTitle,
@@ -28,23 +36,23 @@ final class TorrentListRow
         public readonly string $nameTitle,
         public readonly bool $isNew,
         public readonly bool $isBanned,
-        public readonly SafeHtml $badges,
-        public readonly SafeHtml $tags,
-        public readonly SafeHtml $progressBar,
+        public readonly TorrentBadgeSet $badges,
+        public readonly array $tags,
+        public readonly ?TorrentProgress $progress,
         public readonly bool $showDownload,
         public readonly string $downloadUrl,
         public readonly bool $showBookmark,
         public readonly string $bookmarkElementId,
         public readonly int $bookmarkCounter,
-        public readonly SafeHtml $bookmarkMarkup,
+        public readonly bool $bookmarked,
         public readonly ?string $waitText,
         public readonly ?string $waitClass,
         public readonly string $commentsUrl,
         public readonly int $comments,
         public readonly bool $commentIsNew,
         public readonly ?string $lastCommentTooltipId,
-        public readonly SafeHtml $time,
-        public readonly SafeHtml $size,
+        public readonly int|string|\DateTimeInterface|null $added,
+        public readonly array $size,
         public readonly ?string $seedersUrl,
         public readonly int $seeders,
         public readonly ?string $seedersClass,

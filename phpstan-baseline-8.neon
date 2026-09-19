@@ -479,12 +479,6 @@ parameters:
 			path: app/Contracts/Repositories/TagRepositoryInterface.php
 
 		-
-			message: '#^Method App\\Contracts\\Repositories\\TagRepositoryInterface\:\:listAll\(\) return type with generic class Illuminate\\Database\\Eloquent\\Collection does not specify its types\: TKey, TModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Contracts/Repositories/TagRepositoryInterface.php
-
-		-
 			message: '#^Method App\\Contracts\\Repositories\\TagRepositoryInterface\:\:migrateTorrentTag\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1

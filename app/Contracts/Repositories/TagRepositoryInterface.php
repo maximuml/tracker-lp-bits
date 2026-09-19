@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Contracts\Repositories;
 
+use App\Models\Tag;
 use Illuminate\Database\Eloquent\Collection;
 
 interface TagRepositoryInterface
@@ -30,6 +31,7 @@ interface TagRepositoryInterface
 
     public function syncTorrentTags(string|int $torrentId, array $tagIdArr, bool $sync = false);
 
+    /** @return Collection<int, Tag> */
     public function listAll(int $searchBoxId = 0): Collection;
 
     public function buildSelect(int $searchBoxId, $name, $value): string;

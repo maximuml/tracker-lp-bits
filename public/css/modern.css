@@ -583,6 +583,9 @@ input[type="reset"] {
 .nxm-namecell { flex: 1 1 auto; min-width: 0; padding-left: 5px; }
 .nxm-rowactions { flex: 0 0 auto; text-align: right; padding-right: 5px; }
 .nxm-note { color: var(--nxm-muted, #666); }
+.nx-progress { width: 44px; height: 8px; vertical-align: middle; accent-color: var(--nxm-muted, #aaa); }
+.nx-progress--seeding { accent-color: #2e8b57; }
+.nx-progress--leeching { accent-color: #3478d2; }
 .nxm-empty { margin: 24px auto; max-width: 560px; text-align: center; padding: 20px; border: 1px solid var(--nxm-border, #d8dbe0); border-radius: 6px; background: var(--nxm-surface, #f6f7f9); }
 .nxm-empty__title { font-weight: 600; margin: 0 0 6px; }
 .nxm-empty__body { margin: 0; color: var(--nxm-muted, #666); }

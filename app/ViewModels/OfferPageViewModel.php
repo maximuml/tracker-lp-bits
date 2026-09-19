@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\ViewModels;
 
+use App\ViewModels\Offer\OfferDetailsViewModel;
 use App\ViewModels\Offer\OfferListViewModel;
 
 /**
@@ -16,7 +17,6 @@ final class OfferPageViewModel extends ViewModel
     /**
      * @param  array<string, mixed>  $curUser
      * @param  array<string, mixed>|null  $add_offer
-     * @param  array<string, mixed>|null  $off_details
      * @param  array<string, mixed>|null  $edit_offer
      * @param  array<string, mixed>|null  $offer_vote
      */
@@ -36,7 +36,7 @@ final class OfferPageViewModel extends ViewModel
         public readonly int $addofferClass,
         public readonly int $againstofferClass,
         public readonly ?array $add_offer = null,
-        public readonly ?array $off_details = null,
+        public readonly ?OfferDetailsViewModel $off_details = null,
         public readonly ?array $edit_offer = null,
         public readonly ?array $offer_vote = null,
         public readonly ?OfferListViewModel $list = null,

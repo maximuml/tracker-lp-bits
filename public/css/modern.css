@@ -574,6 +574,7 @@ input[type="reset"] {
 .nxm-hotsearches { padding: 4px 8px; display: flex; flex-wrap: wrap; gap: 10px; }
 .nxm-tags { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0; }
 .nxm-searchpanel__submit { text-align: center; margin-top: 8px; }
+.nxm-offer-actions { display: flex; gap: 8px; }
 .nxm-table { border-collapse: collapse; }
 .nxm-table th { text-align: left; white-space: nowrap; }
 .nxm-td-icon { padding: 0; }

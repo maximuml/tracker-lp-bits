@@ -475,7 +475,7 @@ class TorrentAjaxController extends LegacyController
                 $dispname = mb_substr($dispname, 0, $maxLenghtOfTorrentName, 'UTF-8').'..';
             }
 
-            $ret .= '<tr'.$sphighlight."><td class=\"rowfollow nowrap\" valign=\"middle\">".
+            $ret .= '<tr'.$sphighlight.'><td class="rowfollow nowrap" valign="middle">'.
                 Category::imageTagWithContext($arr['category'], 'torrents.php?allsec=1&amp;').
                 "</td>\n".
                 '<td class="rowfollow" width="100%" align="left"><a href="'.

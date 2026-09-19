@@ -152,7 +152,7 @@ if (Permission::canManageTorrent()) { ?>
             $sphighlight = Promotion::backgroundStyleWithContext($row['sp_state'], $row['pos_state'], $row);
             echo '<tr'.$sphighlight.">\n";
 
-            echo "<td class=\"rowfollow nowrap\" valign=\"middle\">";
+            echo '<td class="rowfollow nowrap" valign="middle">';
             if (isset($row['category'])) {
                 echo Category::imageTagWithContext($row['category'], '?');
                 if ($has_secondicon) {
@@ -192,7 +192,7 @@ if (Permission::canManageTorrent()) { ?>
                 $tdCover = sprintf('<td class="embedded"><img src="pic/misc/spinner.svg" data-src="%s" class="nexus-lazy-load" /></td>', $coverSrc);
             }
 
-            echo "<td class=\"rowfollow\" width=\"100%\" align=\"left\"><table class=\"torrentname\" width=\"100%\"><tr".$sphighlight.">$tdCover<td class=\"embedded\">".$stickyicon."<a $short_torrent_name_alt $mouseovertorrent href=\"details.php?id=".$id.'&amp;hit=1"><b>'.htmlspecialchars($dispname).'</b></a>';
+            echo '<td class="rowfollow" width="100%" align="left"><table class="torrentname" width="100%"><tr'.$sphighlight.">$tdCover<td class=\"embedded\">".$stickyicon."<a $short_torrent_name_alt $mouseovertorrent href=\"details.php?id=".$id.'&amp;hit=1"><b>'.htmlspecialchars($dispname).'</b></a>';
             if ($user['appendnew'] && strtotime($row['added']) >= $last_browse) {
                 echo "<b> (<font class='new'>".__('legacy/functions.text_new_uppercase').'</font>)</b>';
             }
@@ -222,7 +222,7 @@ if (Permission::canManageTorrent()) { ?>
 
             $act = '';
             if ($user['dlicon'] && $user['downloadpos']) {
-                $act .= '<a href="download.php?id='.$id."\"><img class=\"download\" src=\"pic/trans.gif\" alt=\"download\" title=\"".__('legacy/functions.title_download_torrent').'" /></a>';
+                $act .= '<a href="download.php?id='.$id.'"><img class="download" src="pic/trans.gif" alt="download" title="'.__('legacy/functions.title_download_torrent').'" /></a>';
             }
             if ($user['bmicon']) {
                 $bookmark = ' href="#" data-bookmark-torrent="'.$id.'" data-bookmark-counter="'.$counter.'"';

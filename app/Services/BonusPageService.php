@@ -391,7 +391,7 @@ final class BonusPageService
         $bonusTableResult = Bonus::buildBonusTableForUser($curUser, $seedBonusResult, ['table_style' => 'width: 50%']);
 
         $percent = $seedBonusResult['seed_bonus'] * 100 / ($bzeroBonus + $perseedingBonus * $maxseedingBonus);
-        echo '<div align="center">'.(__('legacy/mybonus.text_you_are_currently_getting')).round($seedBonusResult['seed_bonus'], 3).(__('legacy/mybonus.text_point')).Strings::addS($seedBonusResult['seed_bonus']).(__('legacy/mybonus.text_per_hour')).' (A = '.round($A, 1).")</div><table align=\"center\" border=\"0\" width=\"400\"><tr><td class=\"loadbarbg\">";
+        echo '<div align="center">'.(__('legacy/mybonus.text_you_are_currently_getting')).round($seedBonusResult['seed_bonus'], 3).(__('legacy/mybonus.text_point')).Strings::addS($seedBonusResult['seed_bonus']).(__('legacy/mybonus.text_per_hour')).' (A = '.round($A, 1).')</div><table align="center" border="0" width="400"><tr><td class="loadbarbg">';
 
         if ($percent <= 30) {
             $loadpic = 'loadbarred';

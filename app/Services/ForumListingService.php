@@ -216,7 +216,7 @@ final class ForumListingService
                 }
 
                 echo '<tr><td class="rowfollow" align="left"><table border="0" cellspacing="0" cellpadding="0"><tr>'.
-                "<td class=\"embedded\">".$img.
+                '<td class="embedded">'.$img.
                 "</td><td class=\"embedded\" align=\"left\">\n".
                 $subject.'</td></tr></table></td><td class="rowfollow" align="center">'.UserDisplay::username($fpuserid).'<br />'.$topictime.'</td><td class="rowfollow" align="center">'.$replies.' / <font color="gray">'.$views."</font></td>\n".
                 '<td class="rowfollow nowrap" align="center">'.$lpadded.'<br />'.$lpusername."</td>\n";
@@ -305,7 +305,7 @@ final class ForumListingService
                 echo "<table border=\"1\" cellspacing=\"0\" cellpadding=\"5\">\n";
                 echo '<tr><td class="colhead" align="left">'.(__('legacy/forums.col_topic')).'</td><td class="colhead" align="left">'.(__('legacy/forums.col_forum'))."</td></tr>\n";
             }
-            echo "<tr><td class=\"rowfollow\" align=\"left\"><table border=\"0\" cellspacing=\"0\" cellpadding=\"0\"><tr><td class=\"embedded\">".
+            echo '<tr><td class="rowfollow" align="left"><table border="0" cellspacing="0" cellpadding="0"><tr><td class="embedded">'.
             $this->index->getTopicImage('unread').'</td><td class="embedded">'.
             '<a href="'.htmlspecialchars('?action=viewtopic&topicid='.$topicid.($lastpostread > 0 && $lastpostread != (int) ($curUser['last_catchup'] ?? 0) ? '&page=p'.$lastpostread.'#pid'.$lastpostread : '')).'">'.$this->index->highlightTopic(htmlspecialchars((string) $arr['subject']), (int) $arr['hlcolor']).
             '</a></td></tr></table></td><td class="rowfollow" align="left"><a href="'.htmlspecialchars('?action=viewforum&forumid='.$forumid).'"><b>'.$forumname."</b></a></td></tr>\n";

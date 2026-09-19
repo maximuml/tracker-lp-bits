@@ -276,11 +276,11 @@ final class ForumTopicViewService
             }
             $body .= $bodyContent.'</div>';
             if ($signature) {
-                $body .= "<p><br />____________________<br />".Format::formatComment($signature, false, false, false, true, 500, true, false, 1, 200).'</p>';
+                $body .= '<p><br />____________________<br />'.Format::formatComment($signature, false, false, false, true, 500, true, false, 1, 200).'</p>';
             }
 
             $stats = '<br />'.'&nbsp;&nbsp;'.(__('legacy/forums.text_posts'))."$forumposts<br />".'&nbsp;&nbsp;'.(__('legacy/forums.text_ul'))."$uploaded <br />".'&nbsp;&nbsp;'.(__('legacy/forums.text_dl'))."$downloaded<br />".'&nbsp;&nbsp;'.(__('legacy/forums.text_ratio'))."$ratio";
-            echo "<tr><td class=\"rowfollow\" width=\"150\" valign=\"top\" align=\"left\">".
+            echo '<tr><td class="rowfollow" width="150" valign="top" align="left">'.
             UserDisplay::avatarImageWithContext($avatar).'<br /><br /><br />&nbsp;&nbsp;<img alt="'.UserClass::name((int) ($arr2['class'] ?? 0), false, false, true).'" title="'.UserClass::name((int) ($arr2['class'] ?? 0), false, false, true).'" src="'.$uclass.'" />'.$stats.'</td><td class="rowfollow" valign="top"><br />'.$body."</td></tr>\n";
             $secs = 900;
             $dt = date('Y-m-d H:i:s', (int) (defined('TIMENOW') ? constant('TIMENOW') : time()) - $secs);
@@ -338,7 +338,7 @@ final class ForumTopicViewService
 
         echo Frame::CLOSE.$pagerbottom;
         if ($maypost) {
-            echo "<br /><table><tr>".
+            echo '<br /><table><tr>'.
 '<td class="text" align="center"><b>'.(__('legacy/forums.text_quick_reply')).'</b><br /><br />'.
 '<form id="compose" name="compose" method="post" action="?action=post" >'.
 '<input type="hidden" name="id" value="'.$topicid.'" /><input type="hidden" name="type" value="reply" /><br />'.

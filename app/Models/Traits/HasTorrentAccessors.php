@@ -157,8 +157,8 @@ trait HasTorrentAccessors
         $html = [];
         foreach ($this->tags as $tag) {
             $html[] = sprintf(
-                '<span class="nx-tag">%s</span>',
-                $tag->name
+                '<span style="color: %s;background-color: %s;border-radius: %s;font-size: %s;padding: %s;margin: %s">%s</span>',
+                $tag->font_color, $tag->color, $tag->border_radius, $tag->font_size, $tag->padding, $tag->margin, $tag->name
             );
         }
 

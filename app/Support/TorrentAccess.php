@@ -53,7 +53,7 @@ final class TorrentAccess
             $tags = sprintf('&nbsp;<div>%s</div>', $torrent->tagsFormatted);
         }
 
-        return new HtmlString('<div>'.$name.$tags.'</div>');
+        return new HtmlString('<div style="display:flex">'.$name.$tags.'</div>');
     }
 
     /**

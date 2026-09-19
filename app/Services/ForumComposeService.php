@@ -9,19 +9,17 @@ use App\Contracts\Repositories\ForumRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Repositories\PostLookupRepository;
 use App\Repositories\TopicRepository;
-use App\Support\CurrentUser;
 use App\Support\Forum;
-use App\Support\Frame;
 use App\Support\Globals;
 use App\Support\Html\SafeHtml;
 use App\Support\Input;
 use App\Support\LegacyResponse;
+use App\ViewModels\Forum\ForumComposeViewModel;
 use Illuminate\Http\Request;
-use Illuminate\Support\HtmlString;
 
 /**
- * Builds the compose-frame sections (new topic, reply, quote, edit)
- * for the forums page.
+ * Builds the compose-frame view model (new topic, reply, quote, edit)
+ * for the forums page. Rendered by the `x-forum.compose` component.
  */
 final class ForumComposeService
 {
@@ -29,27 +27,24 @@ final class ForumComposeService
         private readonly ForumRepositoryInterface $forumRepository,
         private readonly TopicRepository $topicRepository,
         private readonly PostLookupRepository $postRepository,
-        private readonly CurrentUser $currentUser,
         private readonly Globals $globals,
     ) {}
 
     /**
-     * Build the compose-frame HTML for the requested type.
-     *
-     * @return array{title: string, body: SafeHtml}
+     * Build the compose-frame view model for the requested type.
+     * Returns null for unknown types and for edit targets that no
+     * longer exist (callers render an empty section).
      */
-    public function buildComposeFrame(int $id, string $type): array
+    public function buildComposeFrame(int $id, string $type): ?ForumComposeViewModel
     {
         $maxsubjectlength = (int) $this->globals->get('maxsubjectlength');
-        $CURUSER = (array) ($this->currentUser->get() ?? []);
         $hassubject = false;
         $subject = '';
         $body = '';
+        $postid = null;
         $hiddenId = $id;
         $hiddenType = $type;
 
-        ob_start();
-        echo "<form id=\"compose\" method=\"post\" name=\"compose\" action=\"?action=post\">\n";
         switch ($type) {
             case 'new':
                 $forumname = $this->forumRepository->getForumName((int) $id) ?? '';
@@ -65,16 +60,15 @@ final class ForumComposeService
             case 'quote':
                 $post = $this->postRepository->getPostForQuote((int) $id);
                 if (! $post) {
-                    ob_get_clean();
                     LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_no_post_id'));
 
-                    return ['title' => '', 'body' => SafeHtml::fromTrustedHtml('')];
+                    return null;
                 }
                 $topicid = $post['topicid'];
                 $topicname = $post['topic_subject'] ?? '';
                 $title = (__('legacy/forums.text_reply_to_topic')).' <a href="'.htmlspecialchars('?action=viewtopic&topicid='.$topicid).'">'.htmlspecialchars($topicname).'</a> ';
-                $body = '[quote='.htmlspecialchars($post['username']).']'.htmlspecialchars(Input::unescape($post['body'])).'[/quote]';
-                echo '<input type="hidden" name="postid" value="'.$id.'" />';
+                $body = '[quote='.Input::unescape((string) $post['username']).']'.Input::unescape((string) $post['body']).'[/quote]';
+                $postid = $id;
                 $hiddenId = $topicid;
                 $hiddenType = 'reply';
                 break;
@@ -82,37 +76,33 @@ final class ForumComposeService
             case 'edit':
                 $post = $this->postRepository->getPostForEdit((int) $id);
                 if (! $post) {
-                    ob_get_clean();
-
-                    return ['title' => '', 'body' => SafeHtml::fromTrustedHtml('')];
+                    return null;
                 }
-                $topicid = $post['topicid'];
                 if ($post['is_first_post']) {
-                    $subject = $post['topic_subject'] ?? '';
+                    $subject = (string) ($post['topic_subject'] ?? '');
                     $hassubject = true;
                 }
-                $body = htmlspecialchars(Input::unescape($post['body']));
+                $body = Input::unescape((string) $post['body']);
                 $title = __('legacy/forums.text_edit_post');
                 break;
 
             default:
-                ob_get_clean();
-
-                return ['title' => '', 'body' => SafeHtml::fromTrustedHtml('')];
+                return null;
         }
-        echo '<input type="hidden" name="id" value="'.$hiddenId.'" />'.
-            '<input type="hidden" name="type" value="'.$hiddenType.'" />'.
-            Frame::composeBegin(new HtmlString((string) $title), $hiddenType, $body, $hassubject, $subject, 100).
-            Frame::composeEnd().
-            '</form>';
 
-        return ['title' => (string) $title, 'body' => SafeHtml::fromTrustedHtml((string) ob_get_clean())];
+        return new ForumComposeViewModel(
+            titleHtml: SafeHtml::fromTrustedHtml((string) $title),
+            hiddenId: (int) $hiddenId,
+            hiddenType: $hiddenType,
+            postid: $postid,
+            hasSubject: $hassubject,
+            subject: $subject,
+            body: $body,
+            maxSubjectLength: $maxsubjectlength,
+        );
     }
 
-    /**
-     * @return array{title: string, body: SafeHtml}
-     */
-    public function buildNewTopic(Request $request): array
+    public function buildNewTopic(Request $request): ?ForumComposeViewModel
     {
         $forumid = (int) (request()->query('forumid') ?? 0);
         $this->checkWhetherExist($forumid, 'forum');
@@ -122,9 +112,8 @@ final class ForumComposeService
 
     /**
      * @param  array<string, mixed>  $curUser
-     * @return array{title: string, body: SafeHtml}
      */
-    public function buildQuotePost(array $curUser, Request $request): array
+    public function buildQuotePost(array $curUser, Request $request): ?ForumComposeViewModel
     {
         $postid = (int) (request()->query('postid') ?? 0);
         $this->checkWhetherExist($postid, 'post');
@@ -135,10 +124,7 @@ final class ForumComposeService
         return $this->buildComposeFrame($postid, 'quote');
     }
 
-    /**
-     * @return array{title: string, body: SafeHtml}
-     */
-    public function buildReply(Request $request): array
+    public function buildReply(Request $request): ?ForumComposeViewModel
     {
         $topicid = (int) (request()->query('topicid') ?? 0);
         $this->checkWhetherExist($topicid, 'topic');
@@ -148,9 +134,8 @@ final class ForumComposeService
 
     /**
      * @param  array<string, mixed>  $curUser
-     * @return array{title: string, body: SafeHtml}
      */
-    public function buildEditPost(array $curUser, Request $request): array
+    public function buildEditPost(array $curUser, Request $request): ?ForumComposeViewModel
     {
         $postid = (int) (request()->query('postid') ?? 0);
         $this->checkWhetherExist($postid, 'post');
@@ -159,7 +144,7 @@ final class ForumComposeService
         if (! $post) {
             LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_no_post_id'));
 
-            return ['title' => '', 'body' => SafeHtml::fromTrustedHtml('')];
+            return null;
         }
 
         $locked = (bool) $post['locked'];

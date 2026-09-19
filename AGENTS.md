@@ -818,3 +818,34 @@ by final repository classes or static methods — see W2-01/W2-02).
   swap. `ForumTopicViewServiceTest` asserts VM shape; the per-post
   toolbox flags (`canQuote/canDelete/canEdit`) are computed in the
   service so the view carries no permission logic.
+
+### ADR 0024: forum compose on a view model + `x-forum.compose` (Accepted, stage 3.1d)
+
+- **Context:** `ForumComposeService::buildComposeFrame()` emitted the
+  compose form through `ob_start()`/`echo` — `<form id="compose">`,
+  hidden `postid`/`id`/`type` inputs, then `Frame::composeBegin()`
+  (composeOpen + `BbcodeEditor::html`) and `Frame::composeEnd()` which
+  add the layout `<table class="main">` rows and submit/preview row.
+- **Decision:** The service returns `?ForumComposeViewModel`
+  (`App\ViewModels\Forum\`) — `null` for unknown types / missing edit
+  targets (previously an empty `['title' => '', 'body' => '']`). The
+  `x-forum.compose` component renders the form: `x-frame` provides the
+  bordered frame (same `Frame::open(caption, true, 10, '100%', 'left')`
+  params), `nx-fgrid`/`nx-fhead`/`nx-fcell`/`nx-ffull` replace the
+  layout table rows, and `x-bbcode-editor` renders the editor. All
+  legacy JS hooks are preserved verbatim: `#compose`/`name="compose"`,
+  hidden `postid` (quote only), `id`, `type` inputs,
+  `#previewouter`/`#editorouter`, `#qr`, `#previewbutton`/
+  `#unpreviewbutton` with `data-preview-toggle`. The frame caption
+  derives from `hiddenType` via `frameCaption()` — quote posts become
+  `type=reply` with `postid` + topic `id`, as before.
+- **Consequences:** Ratchets drop: `echo` 88→85, `ob_start` 27→26,
+  HTML literal lines 1068→1063 (table literals unchanged at 35 — the
+  `Frame` compose chrome stays for sendmessage/comments/news/
+  contactstaff callers). Behaviour fix: `body`/`subject` are now raw
+  strings escaped once by `{{ }}` — the old path ran
+  `htmlspecialchars()` before `BbcodeEditor::html()`, whose template
+  escapes again, so edit/quote of posts containing `& < > "` showed
+  entity garbage (`&amp;amp;`) in the textarea; covered by
+  `ForumHttpTest::test_editpost_section_prefills_body_and_subject`.
+  The unused `CurrentUser` dependency was dropped from the service.

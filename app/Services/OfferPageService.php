@@ -30,7 +30,17 @@ use App\Support\Time;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
 use App\View\Components\BbcodeEditor;
+use App\ViewModels\Offer\OfferAllowedBadge;
+use App\ViewModels\Offer\OfferCategoryOption;
+use App\ViewModels\Offer\OfferCommentCell;
+use App\ViewModels\Offer\OfferListViewModel;
+use App\ViewModels\Offer\OfferRow;
+use App\ViewModels\Offer\OfferRulesViewModel;
+use App\ViewModels\Offer\OfferTableViewModel;
+use App\ViewModels\Offer\OfferTooltip;
+use App\ViewModels\Offer\OfferVoteResults;
 use App\ViewModels\OfferPageViewModel;
+use App\ViewModels\Torrent\CategoryIcon;
 use Illuminate\Http\Request;
 
 final class OfferPageService
@@ -306,9 +316,8 @@ final class OfferPageService
     /**
      * @param  array<string, mixed>  $curUser
      * @param  array<string, mixed>  $globalData
-     * @return array<string, mixed>
      */
-    private function buildOfferList(array $curUser, int $userId, Request $request, array $globalData): array
+    private function buildOfferList(array $curUser, int $userId, Request $request, array $globalData): OfferListViewModel
     {
         // Validate sort
         $sort = '';
@@ -380,151 +389,156 @@ final class OfferPageService
         $num = $offerRows->count();
 
         // Rules section
-        $rules = '';
-        $rules .= '<p align="left"><b><span class="nx-size-5">'.htmlspecialchars((string) (__('legacy/offers.text_rules'))).'</span></b></p>'."\n";
-        $rules .= '<div align="left"><ul>';
-        $rules .= '<li>'.htmlspecialchars((string) (__('legacy/offers.text_rule_one_one'))).
-            UserClass::name((int) $globalData['uploadClass'], false, true, true).
-            htmlspecialchars((string) (__('legacy/offers.text_rule_one_two'))).
-            UserClass::name((int) $globalData['addofferClass'], false, true, true).
-            htmlspecialchars((string) (__('legacy/offers.text_rule_one_three'))).'</li>'."\n";
-        $offerSkipApprovedCount = SiteConfig::current()->main->offerSkipApprovedCount();
-        if ($offerSkipApprovedCount > 0) {
-            $rules .= '<li>'.sprintf((string) (__('legacy/offers.text_rule_skip_offer')), $offerSkipApprovedCount).'</li>'."\n";
-        }
-        $rules .= '<li>'.htmlspecialchars((string) (__('legacy/offers.text_rule_two_one'))).'<b>'.(int) $globalData['minoffervotes'].'</b>'.htmlspecialchars((string) (__('legacy/offers.text_rule_two_two'))).'</li>'."\n";
-        if ($globalData['offervotetimeoutMain'] > 0) {
-            $rules .= '<li>'.htmlspecialchars((string) (__('legacy/offers.text_rule_three_one'))).'<b>'.((int) ($globalData['offervotetimeoutMain'] / 3600)).'</b>'.htmlspecialchars((string) (__('legacy/offers.text_rule_three_two'))).'</li>'."\n";
-        }
-        if ($globalData['offeruptimeoutMain'] > 0) {
-            $rules .= '<li>'.htmlspecialchars((string) (__('legacy/offers.text_rule_four_one'))).'<b>'.((int) ($globalData['offeruptimeoutMain'] / 3600)).'</b>'.htmlspecialchars((string) (__('legacy/offers.text_rule_four_two'))).'</li>'."\n";
-        }
-        $rules .= '</ul></div>';
+        $rules = new OfferRulesViewModel(
+            uploadClassName: UserClass::name((int) $globalData['uploadClass'], false, true, true),
+            addofferClassName: UserClass::name((int) $globalData['addofferClass'], false, true, true),
+            skipApprovedText: ($c = SiteConfig::current()->main->offerSkipApprovedCount()) > 0
+                ? SafeHtml::fromUntrustedHtml(sprintf((string) (__('legacy/offers.text_rule_skip_offer')), $c))
+                : null,
+            minVotes: (int) $globalData['minoffervotes'],
+            showVoteTimeout: $globalData['offervotetimeoutMain'] > 0,
+            voteTimeoutHours: (int) ($globalData['offervotetimeoutMain'] / 3600),
+            showUpTimeout: $globalData['offeruptimeoutMain'] > 0,
+            upTimeoutHours: (int) ($globalData['offeruptimeoutMain'] / 3600),
+        );
 
-        $addOfferLink = '';
-        if (Permission::can(PermissionEnum::ADD_OFFER)) {
-            $addOfferLink = '<div align="center"><a href="?add_offer=1"><b>'.htmlspecialchars((string) (__('legacy/offers.text_add_offer'))).'</b></a></div>';
-        }
-
-        // Search box
-        $catdropdown = '';
+        $categories = [];
         foreach (Category::listByModeWithContext($globalData['browsecatmode']) as $cat) {
             $catArr = (array) $cat;
-            $catdropdown .= '<option value="'.(int) $catArr['id'].'"';
-            $catdropdown .= '>'.htmlspecialchars((string) $catArr['name'])."</option>\n";
+            $categories[] = new OfferCategoryOption((int) $catArr['id'], (string) $catArr['name']);
         }
-        $searchBox = '<div align="center"><form method="get" action="?">'.htmlspecialchars((string) (__('legacy/offers.text_search_offers'))).'&nbsp;&nbsp;<input type="text" id="specialboxg" name="search" />&nbsp;&nbsp;';
-        $searchBox .= '<select name="category"><option value="0">'.htmlspecialchars((string) (__('legacy/offers.select_show_all'))).'</option>'.$catdropdown.'</select>&nbsp;&nbsp;<input type="submit" class="btn" value="'.htmlspecialchars((string) (__('legacy/offers.submit_search'))).'" /></form></div>';
 
         // Build the table rows
         $last_offer = strtotime((string) ($curUser['last_offer'] ?? 'now'));
-        $tableHtml = SafeHtml::fromTrustedHtml('');
-        $tooltipContainer = '';
+        $table = null;
+        $emptyState = SafeHtml::fromTrustedHtml('');
         if (! $num) {
-            $tableHtml = Frame::stdMessage((string) (__('legacy/offers.text_nothing_found')), (string) (__('legacy/offers.text_nothing_found')), false);
+            $emptyState = Frame::stdMessage((string) (__('legacy/offers.text_nothing_found')), (string) (__('legacy/offers.text_nothing_found')), false);
         } else {
             $catid = (string) $request->query('category', '');
-            ob_start();
-            echo '<table class="torrents" cellspacing="0" cellpadding="5" width="100%">';
-            echo '<tr><td class="colhead"><a href="?category='.htmlspecialchars($catid).'&amp;sort=cat&amp;type='.$catOrderType.'">'.htmlspecialchars((string) (__('legacy/offers.col_type'))).'</a></td>'.
-                '<td class="colhead" width="100%"><a href="?category='.htmlspecialchars($catid).'&amp;sort=name&amp;type='.$nameOrderType.'">'.htmlspecialchars((string) (__('legacy/offers.col_title'))).'</a></td>'.
-                '<td colspan="3" class="colhead"><a href="?category='.htmlspecialchars($catid).'&amp;sort=v_res&amp;type='.$vResOrderType.'">'.htmlspecialchars((string) (__('legacy/offers.col_vote_results'))).'</a></td>'.
-                '<td class="colhead"><a href="?category='.htmlspecialchars($catid).'&amp;sort=comments&amp;type='.$commentsOrderType.'"><img class="comments" src="pic/trans.gif" alt="comments" title="'.htmlspecialchars((string) (__('legacy/offers.title_comment'))).'" />'.htmlspecialchars((string) ((''))).'</a></td>'.
-                '<td class="colhead"><a href="?category='.htmlspecialchars($catid).'&amp;sort=added&amp;type='.$addedOrderType.'"><img class="time" src="pic/trans.gif" alt="time" title="'.htmlspecialchars((string) (__('legacy/offers.title_time_added'))).'" /></a></td>';
-            if ($globalData['offervotetimeoutMain'] > 0 && $globalData['offeruptimeoutMain'] > 0) {
-                echo '<td class="colhead">'.htmlspecialchars((string) (__('legacy/offers.col_timeout'))).'</td>';
-            }
-            echo '<td class="colhead">'.htmlspecialchars((string) (__('legacy/offers.col_offered_by'))).'</td>'.
-                (Permission::can(PermissionEnum::OFFER_MANAGE) ? '<td class="colhead">'.htmlspecialchars((string) (__('legacy/offers.col_act'))).'</td>' : '')."</tr>\n";
+            $sortUrl = static fn (string $column, string $type): string => '?category='.$catid.'&sort='.$column.'&type='.$type;
+
+            $showTimeout = $globalData['offervotetimeoutMain'] > 0 && $globalData['offeruptimeoutMain'] > 0;
+            $canManage = Permission::can(PermissionEnum::OFFER_MANAGE);
+            $showAgainstCell = UserDisplay::currentClass() >= $globalData['againstofferClass'];
+            $canAgainst = Permission::can(PermissionEnum::AGAINST_OFFER);
+            $showlastcom = (bool) ($curUser['showlastcom'] ?? true);
 
             $i = 0;
-            $lastcom_tooltip = [];
+            $rows = [];
+            $tooltips = [];
             foreach ($offerRows as $row) {
                 $arr = (array) $row;
-                $addedby = UserDisplay::username((int) ($arr['userid'] ?? 0));
+                $offerId = (int) $arr['id'];
                 $comms = (int) ($arr['comments'] ?? 0);
                 if ($comms === 0) {
-                    $comment = '<a href="comment.php?action=add&amp;pid='.(int) $arr['id'].'&amp;type=offer" title="'.htmlspecialchars((string) (__('legacy/offers.title_add_comments'))).'">0</a>';
+                    $comment = new OfferCommentCell(
+                        count: 0,
+                        href: 'comment.php?action=add&pid='.$offerId.'&type=offer',
+                        hasNew: false,
+                        title: (string) (__('legacy/offers.title_add_comments')),
+                        tooltipId: null,
+                    );
                 } else {
-                    $lastcom = $this->cache->get_value('offer_'.(int) $arr['id'].'_last_comment_content');
+                    $lastcom = $this->cache->get_value('offer_'.$offerId.'_last_comment_content');
                     if (! $lastcom) {
-                        $lastcom = $this->offerCommentRepository->getLastComment((int) $arr['id']);
-                        $this->cache->cache_value('offer_'.(int) $arr['id'].'_last_comment_content', $lastcom, 1855);
+                        $lastcom = $this->offerCommentRepository->getLastComment($offerId);
+                        $this->cache->cache_value('offer_'.$offerId.'_last_comment_content', $lastcom, 1855);
                     }
                     $lastcom = (array) $lastcom;
                     $timestamp = strtotime((string) ($lastcom['added'] ?? 'now'));
                     $hasnewcom = (($lastcom['user'] ?? 0) !== $userId && $timestamp >= $last_offer);
-                    if (($curUser['showlastcom'] ?? true)) {
-                        $title = '';
+                    $title = null;
+                    $tooltipId = null;
+                    if ($showlastcom) {
                         if (! empty($lastcom)) {
                             if (($curUser['timetype'] ?? 1) !== UserTimeType::TIMEALIVE->value) {
                                 $lastcomtime = (string) (__('legacy/offers.text_at_time')).($lastcom['added'] ?? '');
                             } else {
                                 $lastcomtime = (string) (__('legacy/offers.text_blank')).Time::format((string) ($lastcom['added'] ?? 'now'), true, false, true);
                             }
-                            $counter = $i;
-                            $lastcom_tooltip[$counter]['id'] = 'lastcom_'.$counter;
-                            $lastcom_tooltip[$counter]['content'] = ($hasnewcom ? "<b>(<span class='new'>".htmlspecialchars((string) (__('legacy/offers.text_new'))).'</span>)</b> ' : '').htmlspecialchars((string) (__('legacy/offers.text_last_commented_by'))).UserDisplay::username((int) ($lastcom['user'] ?? 0)).$lastcomtime.'<br />'.Format::formatComment(mb_substr((string) ($lastcom['text'] ?? ''), 0, 100, 'UTF-8').(mb_strlen((string) ($lastcom['text'] ?? ''), 'UTF-8') > 100 ? ' ......' : ''), true, false, false, true, 600, false, false);
-                            $onmouseover = ' data-domtt-src="'.$lastcom_tooltip[$counter]['id'].'"';
-                        } else {
-                            $onmouseover = '';
+                            $tooltipId = 'lastcom_'.$i;
+                            $tooltips[] = new OfferTooltip(
+                                id: $tooltipId,
+                                content: SafeHtml::fromTrustedHtml(
+                                    ($hasnewcom ? "<b>(<span class='new'>".htmlspecialchars((string) (__('legacy/offers.text_new'))).'</span>)</b> ' : '').htmlspecialchars((string) (__('legacy/offers.text_last_commented_by'))).UserDisplay::username((int) ($lastcom['user'] ?? 0)).$lastcomtime.'<br />'.Format::formatComment(mb_substr((string) ($lastcom['text'] ?? ''), 0, 100, 'UTF-8').(mb_strlen((string) ($lastcom['text'] ?? ''), 'UTF-8') > 100 ? ' ......' : ''), true, false, false, true, 600, false, false)
+                                ),
+                            );
                         }
                     } else {
-                        $title = ' title="'.($hasnewcom ? htmlspecialchars((string) (__('legacy/offers.title_has_new_comment'))) : htmlspecialchars((string) (__('legacy/offers.title_no_new_comment')))).'"';
-                        $onmouseover = '';
+                        $title = (string) ($hasnewcom ? (__('legacy/offers.title_has_new_comment')) : (__('legacy/offers.title_no_new_comment')));
                     }
-                    $comment = '<b><a'.$title.' href="?id='.(int) $arr['id'].'&amp;off_details=1#startcomments" '.$onmouseover.'>'.($hasnewcom ? "<span class='new'>" : '').$comms.($hasnewcom ? '</span>' : '').'</a></b>';
+                    $comment = new OfferCommentCell(
+                        count: $comms,
+                        href: '?id='.$offerId.'&off_details=1#startcomments',
+                        hasNew: $hasnewcom,
+                        title: $title,
+                        tooltipId: $tooltipId,
+                    );
                 }
 
                 $allowed = match ((int) ($arr['allowed'] ?? 1)) {
-                    OfferAllowed::ALLOWED->value => '&nbsp;<b>[<span class="nx-color-green">'.htmlspecialchars((string) (__('legacy/offers.text_allowed'))).'</span>]</b>',
-                    OfferAllowed::DENIED->value => '&nbsp;<b>[<span class="nx-color-red">'.htmlspecialchars((string) (__('legacy/offers.text_denied'))).'</span>]</b>',
-                    default => '&nbsp;<b>[<span class="nx-color-orange">'.htmlspecialchars((string) (__('legacy/offers.text_pending'))).'</span>]</b>',
+                    OfferAllowed::ALLOWED->value => new OfferAllowedBadge((string) (__('legacy/offers.text_allowed')), 'nx-color-green'),
+                    OfferAllowed::DENIED->value => new OfferAllowedBadge((string) (__('legacy/offers.text_denied')), 'nx-color-red'),
+                    default => new OfferAllowedBadge((string) (__('legacy/offers.text_pending')), 'nx-color-orange'),
                 };
 
-                $zvote = ((int) ($arr['yeah'] ?? 0)) === 0 ? (string) ((int) ($arr['yeah'] ?? 0)) : '<b><a href="?id='.(int) $arr['id'].'&amp;offer_vote=1">'.(int) ($arr['yeah'] ?? 0).'</a></b>';
-                $pvote = ((int) ($arr['against'] ?? 0)) === 0 ? (string) ((int) ($arr['against'] ?? 0)) : '<b><a href="?id='.(int) $arr['id'].'&amp;offer_vote=1">'.(int) ($arr['against'] ?? 0).'</a></b>';
+                $yeah = (int) ($arr['yeah'] ?? 0);
+                $against = (int) ($arr['against'] ?? 0);
+                $voteResults = ($yeah === 0 && $against === 0)
+                    ? null
+                    : new OfferVoteResults($yeah, $against, '?id='.$offerId.'&offer_vote=1');
 
-                if ((int) ($arr['yeah'] ?? 0) === 0 && (int) ($arr['against'] ?? 0) === 0) {
-                    $v_res = '0';
-                } else {
-                    $v_res = '<b><a href="?id='.(int) $arr['id'].'&amp;offer_vote=1" title="'.htmlspecialchars((string) (__('legacy/offers.title_show_vote_details'))).'"><span class="nx-color-green">'.(int) ($arr['yeah'] ?? 0).'</span> - <span class="nx-color-red">'.(int) ($arr['against'] ?? 0).'</span> = '.((int) ($arr['yeah'] ?? 0) - (int) ($arr['against'] ?? 0)).'</a></b>';
-                }
-
-                $addtime = Time::format((string) ($arr['added'] ?? 'now'), false, true);
+                $addtime = SafeHtml::fromTrustedHtml((string) Time::format((string) ($arr['added'] ?? 'now'), false, true));
                 $dispname = (string) ($arr['name'] ?? '');
-                $countDispname = mb_strlen($dispname, 'UTF-8');
-                $maxLength = 70;
-                if ($countDispname > $maxLength) {
-                    $dispname = mb_substr($dispname, 0, $maxLength - 2, 'UTF-8').'..';
+                if (mb_strlen($dispname, 'UTF-8') > 70) {
+                    $dispname = mb_substr($dispname, 0, 68, 'UTF-8').'..';
                 }
 
-                echo '<tr><td class="rowfollow"><a href="?category='.(int) ($arr['cat_id'] ?? 0).'">'.Category::imageTagWithContext((int) ($arr['cat_id'] ?? 0), '').'</a></td><td><a href="?id='.(int) $arr['id'].'&amp;off_details=1" title="'.htmlspecialchars((string) ($arr['name'] ?? '')).'"><b>'.htmlspecialchars($dispname).'</b></a>'.(! LegacyYesNo::isNo($curUser['appendnew'] ?? null) && strtotime((string) ($arr['added'] ?? 'now')) >= $last_offer ? "<b> (<span class='new'>".htmlspecialchars((string) (__('legacy/offers.text_new'))).'</span>)</b>' : '').$allowed.'</td><td class="rowfollow nowrap" align="center">'.$v_res.'</td><td class="rowfollow nowrap" '.(! Permission::can(PermissionEnum::AGAINST_OFFER) ? ' colspan="2" ' : '').'><a href="?id='.(int) $arr['id'].'&amp;vote=yeah" title="'.htmlspecialchars((string) (__('legacy/offers.title_i_want_this'))).'"><span class="nx-color-green"><b>'.htmlspecialchars((string) (__('legacy/offers.text_yep'))).'</b></span></a></td>'.(UserDisplay::currentClass() >= $globalData['againstofferClass'] ? '<td class="rowfollow nowrap" align="center"><a href="?id='.(int) $arr['id'].'&amp;vote=against" title="'.htmlspecialchars((string) (__('legacy/offers.title_do_not_want_it'))).'"><span class="nx-color-red"><b>'.htmlspecialchars((string) (__('legacy/offers.text_nah'))).'</b></span></a></td>' : '');
-
-                echo '<td class="rowfollow">'.$comment.'</td><td class="rowfollow nowrap">'.$addtime.'</td>';
-                if ($globalData['offervotetimeoutMain'] > 0 && $globalData['offeruptimeoutMain'] > 0) {
-                    $timeout = '';
+                $timeout = SafeHtml::fromTrustedHtml('N/A');
+                if ($showTimeout) {
+                    $timeoutStr = '';
                     if ((int) ($arr['allowed'] ?? 1) === OfferAllowed::ALLOWED->value) {
                         $futuretime = strtotime((string) ($arr['allowedtime'] ?? 'now')) + $globalData['offeruptimeoutMain'];
-                        $timeout = Time::format(date('Y-m-d H:i:s', $futuretime), false, true, true, false, true);
+                        $timeoutStr = (string) Time::format(date('Y-m-d H:i:s', $futuretime), false, true, true, false, true);
                     } elseif ((int) ($arr['allowed'] ?? 1) === OfferAllowed::PENDING->value) {
                         $futuretime = strtotime((string) ($arr['added'] ?? 'now')) + $globalData['offervotetimeoutMain'];
-                        $timeout = Time::format(date('Y-m-d H:i:s', $futuretime), false, true, true, false, true);
+                        $timeoutStr = (string) Time::format(date('Y-m-d H:i:s', $futuretime), false, true, true, false, true);
                     }
-                    if (! $timeout) {
-                        $timeout = 'N/A';
-                    }
-                    echo '<td class="rowfollow nowrap">'.$timeout.'</td>';
+                    $timeout = SafeHtml::fromTrustedHtml($timeoutStr !== '' ? $timeoutStr : 'N/A');
                 }
-                echo '<td class="rowfollow">'.$addedby.'</td>'.(Permission::can(PermissionEnum::OFFER_MANAGE) ? '<td class="rowfollow"><a href="?id='.(int) $arr['id'].'&amp;del_offer=1"><img class="staff_delete" src="pic/trans.gif" alt="D" title="'.htmlspecialchars((string) (__('legacy/offers.title_delete'))).'" /></a><br /><a href="?id='.(int) $arr['id'].'&amp;edit_offer=1"><img class="staff_edit" src="pic/trans.gif" alt="E" title="'.htmlspecialchars((string) (__('legacy/offers.title_edit'))).'" /></a></td>' : '').'</tr>';
+
+                $catIconData = Category::iconData((int) ($arr['cat_id'] ?? 0));
+                $rows[] = new OfferRow(
+                    id: $offerId,
+                    categoryIcon: new CategoryIcon($catIconData['iconClass'], $catIconData['name'], '?category='.(int) ($arr['cat_id'] ?? 0)),
+                    displayName: $dispname,
+                    fullName: (string) ($arr['name'] ?? ''),
+                    isNew: ! LegacyYesNo::isNo($curUser['appendnew'] ?? null) && strtotime((string) ($arr['added'] ?? 'now')) >= $last_offer,
+                    allowed: $allowed,
+                    voteResults: $voteResults,
+                    comment: $comment,
+                    addedTime: $addtime,
+                    timeout: $timeout,
+                    offeredBy: UserDisplay::username((int) ($arr['userid'] ?? 0)),
+                );
                 $i++;
             }
-            echo "</table>\n";
-            echo $pagerBottom;
-            if (($curUser['showlastcom'] ?? true)) {
-                echo Html::tooltipContainer($lastcom_tooltip, 400);
-            }
-            $tableHtml = SafeHtml::fromTrustedHtml((string) ob_get_clean());
+
+            $table = new OfferTableViewModel(
+                sortCatUrl: $sortUrl('cat', $catOrderType),
+                sortNameUrl: $sortUrl('name', $nameOrderType),
+                sortVResUrl: $sortUrl('v_res', $vResOrderType),
+                sortCommentsUrl: $sortUrl('comments', $commentsOrderType),
+                sortAddedUrl: $sortUrl('added', $addedOrderType),
+                showTimeout: $showTimeout,
+                canManage: $canManage,
+                canAgainst: $canAgainst,
+                showAgainstCell: $showAgainstCell,
+                rows: $rows,
+                tooltips: $showlastcom ? $tooltips : [],
+                pagerBottom: SafeHtml::fromTrustedHtml($pagerBottom),
+            );
         }
 
         // Update last_offer timestamp
@@ -532,16 +546,14 @@ final class OfferPageService
             $this->usercpRepository->updateLastOffer($userId);
         }
 
-        return [
-            'rules' => SafeHtml::fromTrustedHtml($rules),
-            'addOfferLink' => SafeHtml::fromTrustedHtml($addOfferLink),
-            'searchBox' => SafeHtml::fromTrustedHtml($searchBox),
-            'hasRows' => $num > 0,
-            'tableHtml' => $tableHtml,
-            'pagerTop' => $pagerTop,
-            'pagerBottom' => $pagerBottom,
-            'count' => $count,
-        ];
+        return new OfferListViewModel(
+            rules: $rules,
+            canAddOffer: Permission::can(PermissionEnum::ADD_OFFER),
+            categories: $categories,
+            table: $table,
+            emptyState: $emptyState,
+            count: $count,
+        );
     }
 
     /**

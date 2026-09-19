@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\ViewModels;
 
-use App\Support\Html\SafeHtml;
+use App\ViewModels\Bonus\BonusInfoViewModel;
+use App\ViewModels\Bonus\BonusShopViewModel;
 
 /**
  * ViewModel for the bonus (karma) page.
@@ -26,8 +27,8 @@ final class BonusPageViewModel extends ViewModel
         public readonly string $bonus,
         public readonly string $lockText,
         public readonly array $allBonus,
-        public readonly string $shopHtml,
-        public readonly string $infoHtml,
+        public readonly ?BonusShopViewModel $shop,
+        public readonly ?BonusInfoViewModel $info,
         public readonly string $sitename,
     ) {}
 
@@ -45,8 +46,8 @@ final class BonusPageViewModel extends ViewModel
             'bonus' => $this->bonus,
             'lockText' => $this->lockText,
             'allBonus' => $this->allBonus,
-            'shopHtml' => SafeHtml::fromTrustedHtml($this->shopHtml),
-            'infoHtml' => SafeHtml::fromTrustedHtml($this->infoHtml),
+            'shop' => $this->shop,
+            'info' => $this->info,
             'sitename' => $this->sitename,
         ];
     }

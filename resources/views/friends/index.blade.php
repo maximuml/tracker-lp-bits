@@ -22,8 +22,8 @@
         <div><img width=75px src="{{ $friend['avatarSrc'] }}"></div>
         </div><div class="nx-grow">
         <div class="nx-row nx-main">
-        <div class="nx-embedded nx-w-80">{{ $friend['body1Html'] ?? '' }}</div>
-        <div class="nx-embedded nx-w-20">{{ $friend['body2Html'] ?? '' }}</div>
+        <div class="nx-embedded nx-w-80">{{ $friend['usernameHtml'] }} ({{ $friend['titleHtml'] }})<br /><br />{{ __('legacy/friends.text_last_seen_on') }}<x-time :value="$friend['lastSeen']" /></div>
+        <div class="nx-embedded nx-w-20"><a href="friends.php?id={{ $userid }}&action=delete&type=friend&targetid={{ $friend['id'] }}">{{ __('legacy/friends.text_remove_from_friends') }}</a><br /><br /><a href="sendmessage.php?receiver={{ $friend['id'] }}">{{ __('legacy/friends.text_send_pm') }}</a></div>
         </div>
         </div>
         </div>
@@ -38,7 +38,11 @@
 <div class="nx-main nx-embedded nx-box--737 nx-cell-5">
 <h2 align=left><a name="blocks">{{ __('legacy/friends.text_blocked_users')}}</a></h2>
 <div>
-{{ $blocksHtml }}
+@if ($blocks === [])
+{{ \App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/friends.text_blocklist_empty')) }}
+@else
+<div class="nxm-grid-6">@foreach ($blocks as $block)<div>[<span class='small'><a href="friends.php?id={{ $userid }}&action=delete&type=block&targetid={{ $block['id'] }}">D</a></span>] {{ $block['usernameHtml'] }}</div>@endforeach</div>
+@endif
 </div>
 </div>
 

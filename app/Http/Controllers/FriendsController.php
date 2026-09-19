@@ -12,7 +12,6 @@ use App\Support\Html\SafeHtml;
 use App\Support\Input;
 use App\Support\LegacyYesNo;
 use App\Support\Locale;
-use App\Support\Time;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
 use App\Support\Validators;
@@ -76,7 +75,7 @@ class FriendsController extends LegacyController
             $title = (string) ($friend['title'] ?? '');
             $titleHtml = $title === ''
                 ? UserClass::name((int) ($friend['class'] ?? 0), false, true, true)
-                : htmlspecialchars($title, ENT_QUOTES, 'UTF-8');
+                : SafeHtml::fromTrustedHtml(htmlspecialchars($title, ENT_QUOTES, 'UTF-8'));
             $avatar = '';
             if (LegacyYesNo::isYes($currentUser['avatars'] ?? null)) {
                 $avatar = htmlspecialchars((string) ($friend['avatar'] ?? ''), ENT_QUOTES, 'UTF-8');
@@ -84,33 +83,20 @@ class FriendsController extends LegacyController
             if ($avatar === '') {
                 $avatar = 'pic/default_avatar.png';
             }
-            $usernameHtml = $userDisplayMap[$friendId] ?? UserDisplay::username($friendId);
             $friend['avatarSrc'] = $avatar;
-            $friend['body1Html'] = SafeHtml::fromTrustedHtml($usernameHtml.' ('.$titleHtml.')<br /><br />'
-                .(__('legacy/friends.text_last_seen_on'))
-                .(string) Time::format((string) ($friend['last_access'] ?? ''), true, false));
-            $friend['body2Html'] = SafeHtml::fromTrustedHtml("<a href=friends.php?id=$userid&action=delete&type=friend&targetid=$friendId>"
-                .htmlspecialchars(__('legacy/friends.text_remove_from_friends'), ENT_QUOTES, 'UTF-8').'</a>'
-                ."<br /><br /><a href=sendmessage.php?receiver=$friendId>"
-                .htmlspecialchars(__('legacy/friends.text_send_pm'), ENT_QUOTES, 'UTF-8').'</a>');
+            $friend['usernameHtml'] = $userDisplayMap[$friendId] ?? UserDisplay::username($friendId);
+            $friend['titleHtml'] = $titleHtml;
+            $friend['lastSeen'] = (string) ($friend['last_access'] ?? '');
             $friendsList[] = $friend;
         }
 
-        $blocksHtml = __('legacy/friends.text_blocklist_empty');
-        if ($blockRows !== []) {
-            $blocksHtml = '<table width=100% cellspacing=0 cellpadding=0>';
-            foreach (array_values($blockRows) as $i => $block) {
-                $blockId = (int) ($block['id'] ?? 0);
-                if ($i % 6 === 0) {
-                    $blocksHtml .= '<tr>';
-                }
-                $blocksHtml .= "<td>[<span class='small'><a href=friends.php?id=$userid&action=delete&type=block&targetid=$blockId>D</a></span>] "
-                    .($userDisplayMap[$blockId] ?? UserDisplay::username($blockId)).'</td>';
-                if ($i % 6 === 5) {
-                    $blocksHtml .= '</tr>';
-                }
-            }
-            $blocksHtml .= "</table>\n";
+        $blocks = [];
+        foreach ($blockRows as $block) {
+            $blockId = (int) ($block['id'] ?? 0);
+            $blocks[] = [
+                'id' => $blockId,
+                'usernameHtml' => $userDisplayMap[$blockId] ?? UserDisplay::username($blockId),
+            ];
         }
 
         $titleRow = UserDisplay::row($userid);
@@ -121,7 +107,7 @@ class FriendsController extends LegacyController
         return $this->legacyPageRaw($request, 'friends', true, [
             'userid' => $userid,
             'friendsList' => $friendsList,
-            'blocksHtml' => SafeHtml::fromTrustedHtml($blocksHtml),
+            'blocks' => $blocks,
             'titleUsername' => SafeHtml::fromTrustedHtml($userDisplayMap[$userid] ?? UserDisplay::username($userid)),
             'title' => (__('legacy/friends.head_personal_lists_for'))
                 .(string) ($titleRow['username'] ?? $currentUser['username'] ?? ''),
@@ -173,8 +159,20 @@ class FriendsController extends LegacyController
         $targetid = (int) $targetid;
 
         if (! $sure) {
+            $sureText = (string) __('legacy/friends.std_here_if_sure');
+            if (preg_match('/^<b>(.*?)<\/b><\/a>(.*)$/', $sureText, $m) === 1) {
+                [$sureLinkText, $sureSuffix] = [$m[1], $m[2]];
+            } else {
+                [$sureLinkText, $sureSuffix] = [$sureText, ''];
+            }
             $confirm = (__('legacy/friends.std_delete_note')).$typename.(__('legacy/friends.std_click')).
-                "<a href=\"?id=$userid&action=delete&type=$type&targetid=$targetid&sure=1\">".(__('legacy/friends.std_here_if_sure')).'</a>';
+                view('friends._confirm_delete', [
+                    'userid' => $userid,
+                    'type' => $type,
+                    'targetid' => $targetid,
+                    'sureLinkText' => $sureLinkText,
+                    'sureSuffix' => $sureSuffix,
+                ])->render();
 
             return $this->legacyAbortResponse((__('legacy/friends.std_delete')).$type, $confirm, false);
         }

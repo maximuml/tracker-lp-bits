@@ -892,3 +892,5 @@ html[data-theme="dark"] .nx-hl-40 { color: color-mix(in srgb, white 80%, var(--n
 ul.magic { cursor: pointer; list-style-type: none; padding-left: 0; }
 ul.magic li { margin: 0 15px 0 0; text-align: center; float: left; width: 40px; height: 21px; padding: 0 5px; line-height: 20px; background: url("../styles/huise.png") no-repeat; }
 ul.magic li:hover { background: url("../styles/boli.png") no-repeat; }
+/* friends: blocked-users grid (replaces layout <table width=100%> cells) */
+.nxm-grid-6 { display: grid; grid-template-columns: repeat(6, 1fr); }

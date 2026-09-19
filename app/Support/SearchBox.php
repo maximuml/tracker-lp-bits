@@ -83,7 +83,7 @@ final class SearchBox
      */
     public static function areaSelect(int|string $searchArea, array $options = []): string
     {
-        $result = sprintf('<select name="search_area">', $options['style'] ?? '');
+        $result = '<select name="search_area">';
         foreach ([0, 1, 3] as $item) {
             $result .= sprintf(
                 '<option value="%s"%s>%s</option>',

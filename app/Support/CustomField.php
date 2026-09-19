@@ -318,9 +318,9 @@ HEAD;
             $trLabel = $row['label'].$requireText;
             $trRelation = "mode_$searchBoxId";
             if ($row['type'] == self::TYPE_TEXT) {
-                $html .= Html::frow($trLabel, sprintf('<input type="text" name="%s" value="%s"/>', $name, $currentValue, '99%'), 1, $trRelation);
+                $html .= Html::frow($trLabel, sprintf('<input type="text" name="%s" value="%s"/>', $name, $currentValue), 1, $trRelation);
             } elseif ($row['type'] == self::TYPE_TEXTAREA) {
-                $html .= Html::frow($trLabel, sprintf('<textarea name="%s" rows="4">%s</textarea>', $name, '99%', $currentValue), 1, $trRelation);
+                $html .= Html::frow($trLabel, sprintf('<textarea name="%s" rows="4">%s</textarea>', $name, $currentValue), 1, $trRelation);
             } elseif ($row['type'] == self::TYPE_RADIO || $row['type'] == self::TYPE_CHECKBOX) {
                 if ($row['type'] == self::TYPE_CHECKBOX) {
                     $name .= '[]';
@@ -373,7 +373,7 @@ HEAD;
                 $imgId = 'attach'.$row['id'];
                 $previewBoxId = "preview_$callbackFunc";
                 $y = '<iframe id="'.$iframeId.'" src="'.Url::schemeAndHost(false).'/attachment.php?callback_func='.$callbackFunc.'" width="100%" height="24" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe>';
-                $y .= sprintf('<input id="%s" type="text" name="%s" value="%s">', $inputId, $name, $currentValue, '99%');
+                $y .= sprintf('<input id="%s" type="text" name="%s" value="%s">', $inputId, $name, $currentValue);
                 $y .= '<div id="'.$previewBoxId.'">';
                 if (! empty($currentValue)) {
                     if (substr((string) $currentValue, 0, 4) == 'http') {

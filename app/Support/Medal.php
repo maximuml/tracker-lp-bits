@@ -26,15 +26,12 @@ final class Medal
         $medalImages = [];
         $wrapBefore = '<form><div>';
         $wrapAfter = '</div></form>';
-        $maxHeight = (int) $maxHeight;
 
         foreach ($medals as $medal) {
             $html = sprintf(
                 '<div><div><img src="%s" title="%s" class="preview"/></div>',
                 $medal->image_large,
-                $medal->name,
-                $maxHeight,
-                $maxHeight
+                $medal->name
             );
 
             if ($withActions) {

@@ -124,7 +124,7 @@ class TagRepository extends BaseRepository implements TagRepositoryInterface
                 $tagId = $value->id;
                 $item = sprintf(
                     '<span class="nx-tag" title="%s">%s</span>',
-                    $value->color, $value->font_color, $value->border_radius, $value->font_size, $value->margin, $value->padding, $value->description, $value->name
+                    $value->description, $value->name
                 );
                 if ($withFilterLink) {
                     $html .= sprintf('<a href="?tag_id=%s">%s</a>', $tagId, $item);

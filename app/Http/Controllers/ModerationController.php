@@ -114,7 +114,15 @@ class ModerationController extends LegacyController
                 return $this->legacyAbortResponse(__('legacy/report.std_sorry'), $msg);
             }
 
-            $form = (__('legacy/report.text_are_you_sure_user')).UserDisplay::username($user).(__('legacy/report.text_to_staff')).'<br />'.(__('legacy/report.text_not_for_leechers')).'<br />'.(__('legacy/report.text_reason_note')).'<br /><form method=post action=report.php><input type=hidden name=takeuser value="'.htmlspecialchars((string) $user).'">'.(__('legacy/report.text_reason_is')).'<input type=text name=reason><input type=submit value="'.(__('legacy/report.submit_confirm')).'"></form>';
+            $form = view('moderation._confirm', [
+                'pre' => (string) __('legacy/report.text_are_you_sure_user'),
+                'kind' => 'user',
+                'userHtml' => UserDisplay::username($user),
+                'mid' => (string) __('legacy/report.text_to_staff'),
+                'extraNote' => SafeHtml::fromUntrustedHtml((string) __('legacy/report.text_not_for_leechers')),
+                'field' => 'takeuser',
+                'id' => $user,
+            ])->render();
 
             return $this->legacyAbortResponse(__('legacy/report.std_are_you_sure'), $form, false);
         }
@@ -124,7 +132,15 @@ class ModerationController extends LegacyController
             if (! $name) {
                 return $this->legacyAbortResponse(__('legacy/report.std_error'), __('legacy/report.std_invalid_torrent_id'));
             }
-            $form = (__('legacy/report.text_are_you_sure_torrent')).'<a href=details.php?id='.htmlspecialchars((string) $torrent).'><b>'.htmlspecialchars((string) $name).'</b></a>'.(__('legacy/report.text_to_staff')).'<br />'.(__('legacy/report.text_reason_note')).'<br /><form method=post action=report.php><input type=hidden name=taketorrent value="'.htmlspecialchars((string) $torrent).'">'.(__('legacy/report.text_reason_is')).'<input type=text name=reason><input type=submit value="'.(__('legacy/report.submit_confirm')).'"></form>';
+            $form = view('moderation._confirm', [
+                'pre' => (string) __('legacy/report.text_are_you_sure_torrent'),
+                'kind' => 'torrent',
+                'id' => $torrent,
+                'name' => (string) $name,
+                'mid' => (string) __('legacy/report.text_to_staff'),
+                'extraNote' => null,
+                'field' => 'taketorrent',
+            ])->render();
 
             return $this->legacyAbortResponse(__('legacy/report.std_are_you_sure'), $form, false);
         }
@@ -134,7 +150,17 @@ class ModerationController extends LegacyController
             if ($arr === null) {
                 return $this->legacyAbortResponse(__('legacy/report.std_error'), __('legacy/report.std_invalid_post_id'));
             }
-            $form = (__('legacy/report.text_are_you_sure_post')).$forumpost.(__('legacy/report.text_of_topic')).'<b><a href="forums.php?action=viewtopic&topicid='.$arr['topicid'].'&page=p'.htmlspecialchars((string) $forumpost).'#'.htmlspecialchars((string) $forumpost).'">'.htmlspecialchars($arr['subject']).'</a></b>'.(__('legacy/report.text_by')).UserDisplay::username($arr['postuserid']).(__('legacy/report.text_to_staff')).'<br />'.(__('legacy/report.text_reason_note')).'<br /><form method=post action=report.php><input type=hidden name=takeforumpost value="'.htmlspecialchars((string) $forumpost).'">'.(__('legacy/report.text_reason_is')).'<input type=text name=reason><input type=submit value="'.(__('legacy/report.submit_confirm')).'"></form>';
+            $form = view('moderation._confirm', [
+                'pre' => (string) __('legacy/report.text_are_you_sure_post'),
+                'kind' => 'post',
+                'id' => $forumpost,
+                'topicid' => $arr['topicid'],
+                'subject' => (string) $arr['subject'],
+                'userHtml' => UserDisplay::username($arr['postuserid']),
+                'mid' => (string) __('legacy/report.text_to_staff'),
+                'extraNote' => null,
+                'field' => 'takeforumpost',
+            ])->render();
 
             return $this->legacyAbortResponse(__('legacy/report.std_are_you_sure'), $form, false);
         }
@@ -156,7 +182,18 @@ class ModerationController extends LegacyController
             } else {
                 return $this->legacyAbortResponse(__('legacy/report.std_error'), __('legacy/report.std_orphaned_comment'));
             }
-            $form = (__('legacy/report.text_are_you_sure_comment')).$commentid.$of.'<b><a href="'.$url.'">'.htmlspecialchars((string) $name).'</a></b>'.(__('legacy/report.text_by')).UserDisplay::username($arr['user']).(__('legacy/report.text_to_staff')).'<br />'.(__('legacy/report.text_reason_note')).'<br /><form method=post action=report.php><input type=hidden name=takecommentid value="'.htmlspecialchars((string) $commentid).'">'.(__('legacy/report.text_reason_is')).'<input type=text name=reason><input type=submit value="'.(__('legacy/report.submit_confirm')).'"></form>';
+            $form = view('moderation._confirm', [
+                'pre' => (string) __('legacy/report.text_are_you_sure_comment'),
+                'kind' => 'comment',
+                'id' => $commentid,
+                'of' => (string) $of,
+                'url' => $url,
+                'name' => (string) $name,
+                'userHtml' => UserDisplay::username($arr['user']),
+                'mid' => (string) __('legacy/report.text_to_staff'),
+                'extraNote' => null,
+                'field' => 'takecommentid',
+            ])->render();
 
             return $this->legacyAbortResponse(__('legacy/report.std_are_you_sure'), $form, false);
         }
@@ -167,7 +204,15 @@ class ModerationController extends LegacyController
                 return $this->legacyAbortResponse(__('legacy/report.std_error'), __('legacy/report.std_invalid_offer_id'));
             }
             $arr = $offer->toArray();
-            $form = (__('legacy/report.text_are_you_sure_offer')).'<a href="offers.php?id='.$arr['id'].'&off_details=1"><b>'.htmlspecialchars($arr['name']).'</b></a>'.(__('legacy/report.text_to_staff')).'<br />'.(__('legacy/report.text_reason_note')).'<br /><form method=post action=report.php><input type=hidden name=takereportofferid value="'.htmlspecialchars((string) $reportofferid).'">'.(__('legacy/report.text_reason_is')).'<input type=text name=reason><input type=submit value="'.(__('legacy/report.submit_confirm')).'"></form>';
+            $form = view('moderation._confirm', [
+                'pre' => (string) __('legacy/report.text_are_you_sure_offer'),
+                'kind' => 'offer',
+                'id' => $arr['id'],
+                'name' => (string) $arr['name'],
+                'mid' => (string) __('legacy/report.text_to_staff'),
+                'extraNote' => null,
+                'field' => 'takereportofferid',
+            ])->render();
 
             return $this->legacyAbortResponse(__('legacy/report.std_are_you_sure'), $form, false);
         }
@@ -200,10 +245,9 @@ class ModerationController extends LegacyController
         foreach ($reportRows as $reportRow) {
             $row = (array) $reportRow;
 
+            $row['dealtwith'] = (bool) $row['dealtwith'];
             if ($row['dealtwith']) {
-                $row['dealtwith_html'] = SafeHtml::fromTrustedHtml('<span class="nx-color-green">'.(__('legacy/reports.text_yes')).'</span> - '.UserDisplay::username($row['dealtby']));
-            } else {
-                $row['dealtwith_html'] = SafeHtml::fromTrustedHtml('<span class="nx-color-red">'.(__('legacy/reports.text_no')).'</span>');
+                $row['dealtbyHtml'] = UserDisplay::username($row['dealtby']);
             }
 
             $type = '';
@@ -218,7 +262,11 @@ class ModerationController extends LegacyController
                         $reporting = (string) (__('legacy/reports.text_torrent_does_not_exist'));
                     } else {
                         $arr = $torrent->toArray();
-                        $reporting = '<a href=details.php?id='.$arr['id'].'>'.htmlspecialchars($arr['name']).'</a>';
+                        $reporting = view('moderation._reporting_cell', [
+                            'kind' => 'torrent',
+                            'id' => $arr['id'],
+                            'name' => (string) $arr['name'],
+                        ])->render();
                     }
                     break;
                 case 'user':
@@ -227,7 +275,10 @@ class ModerationController extends LegacyController
                     if (! $userId) {
                         $reporting = (string) (__('legacy/reports.text_user_does_not_exist'));
                     } else {
-                        $reporting = UserDisplay::username($userId);
+                        $reporting = view('moderation._reporting_cell', [
+                            'kind' => 'user',
+                            'userHtml' => UserDisplay::username($userId),
+                        ])->render();
                     }
                     break;
                 case 'offer':
@@ -237,7 +288,11 @@ class ModerationController extends LegacyController
                         $reporting = (string) (__('legacy/reports.text_offer_does_not_exist'));
                     } else {
                         $arr = $offer->toArray();
-                        $reporting = '<a href="offers.php?id='.$arr['id'].'&off_details=1">'.htmlspecialchars($arr['name']).'</a>';
+                        $reporting = view('moderation._reporting_cell', [
+                            'kind' => 'offer',
+                            'id' => $arr['id'],
+                            'name' => (string) $arr['name'],
+                        ])->render();
                     }
                     break;
                 case 'post':
@@ -246,7 +301,13 @@ class ModerationController extends LegacyController
                     if ($arr === null) {
                         $reporting = (string) (__('legacy/reports.text_post_does_not_exist'));
                     } else {
-                        $reporting = (string) (__('legacy/reports.text_post_id')).$row['reportid'].(__('legacy/reports.text_of_topic')).'<b><a href="forums.php?action=viewtopic&topicid='.$arr['topicid'].'&page=p'.htmlspecialchars((string) $row['reportid']).'#pid'.htmlspecialchars((string) $row['reportid']).'">'.htmlspecialchars($arr['subject']).'</a></b>'.(__('legacy/reports.text_by')).UserDisplay::username($arr['postuserid']);
+                        $reporting = view('moderation._reporting_cell', [
+                            'kind' => 'post',
+                            'id' => $row['reportid'],
+                            'topicid' => $arr['topicid'],
+                            'subject' => (string) $arr['subject'],
+                            'userHtml' => UserDisplay::username($arr['postuserid']),
+                        ])->render();
                     }
                     break;
                 case 'comment':
@@ -269,7 +330,14 @@ class ModerationController extends LegacyController
                             $url = '';
                             $of = 'unknown';
                         }
-                        $reporting = (string) (__('legacy/reports.text_comment_id')).$row['reportid'].$of.'<b><a href="'.$url.'">'.htmlspecialchars((string) $name).'</a></b>'.(__('legacy/reports.text_by')).UserDisplay::username($arr['user']);
+                        $reporting = view('moderation._reporting_cell', [
+                            'kind' => 'comment',
+                            'id' => $row['reportid'],
+                            'of' => (string) $of,
+                            'url' => $url,
+                            'name' => (string) $name,
+                            'userHtml' => UserDisplay::username($arr['user']),
+                        ])->render();
                     }
                     break;
             }

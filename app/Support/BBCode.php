@@ -17,8 +17,6 @@ use App\Support\Html\SafeHtml;
  *   - `formatAdUrl()`      (ad-redirect URL — delegates to `url()`)
  *   - `formatCode()`       (`[code]` block with `<pre><code>` body)
  *   - `formatImg()`        (`<img>` with optional resizer onload hook)
- *   - `formatFlash()`      (`<object>`/`<embed>` Shockwave-Flash)
- *   - `formatFlv()`        (`<object>`/`<embed>` flvplayer.swf)
  *   - `formatYoutube()`    (`<iframe>` YouTube embed)
  *   - `formatVideo()`      (HTML5 `<video>` element)
  *   - `formatAudio()`      (HTML5 `<audio>` element)
@@ -199,49 +197,6 @@ final class BBCode
             : '';
 
         return "<img style=\"max-width: 100%\" id=\"$imgId\" alt=\"image\" src=\"$escapedSrc\"".$resizerAttrs." data-img-fallback=\"$escapedSrc\" />";
-    }
-
-    /**
-     * Render a Shockwave-Flash `<object>` embed. Defaults to
-     * 500×300 if the caller omits dimensions.
-     *
-     * Yes, Flash is dead — this is preserved for backward
-     * compatibility with existing posts. Remove the BBCode tag
-     * from the parser in a separate PR if you want to retire it.
-     */
-    public static function flash(string $src, int|string $width = 0, int|string $height = 0): string
-    {
-        if (empty($src)) {
-            return '';
-        }
-        if (! $width) {
-            $width = 500;
-        }
-        if (! $height) {
-            $height = 300;
-        }
-
-        return "<object width=\"$width\" height=\"$height\"><param name=\"movie\" value=\"$src\" /><embed src=\"$src\" width=\"$width\" height=\"$height\" type=\"application/x-shockwave-flash\"></embed></object>";
-    }
-
-    /**
-     * Render an FLV-player `<object>` embed via `flvplayer.swf`.
-     * Defaults to 320×240. Same Flash-is-dead disclaimer as
-     * {@see flash}.
-     */
-    public static function flv(string $src, int|string $width = 0, int|string $height = 0): string
-    {
-        if (empty($src)) {
-            return '';
-        }
-        if (! $width) {
-            $width = 320;
-        }
-        if (! $height) {
-            $height = 240;
-        }
-
-        return "<object width=\"$width\" height=\"$height\"><param name=\"movie\" value=\"flvplayer.swf?file=$src\" /><param name=\"allowFullScreen\" value=\"true\" /><embed src=\"flvplayer.swf?file=$src\" type=\"application/x-shockwave-flash\" allowfullscreen=\"true\" width=\"$width\" height=\"$height\"></embed></object>";
     }
 
     /**

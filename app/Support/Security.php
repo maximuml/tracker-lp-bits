@@ -25,7 +25,7 @@ final class Security
         $currentHost = parse_url(Url::schemeAndHost(), PHP_URL_HOST);
         if (! empty($host) && $host != $currentHost) {
             // External URL — validate scheme before allowing.
-            // Reject javascript:, data:, vbscript:, etc. for [img]/[flash].
+            // Reject javascript:, data:, vbscript:, etc. for [img].
             $scheme = parse_url($src, PHP_URL_SCHEME);
             if (is_string($scheme) && ! in_array(strtolower($scheme), ['http', 'https'], true)) {
                 return '';

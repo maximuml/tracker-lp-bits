@@ -46,7 +46,7 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
 
         return implode("\n", [
             sprintf($tpl, htmlspecialchars($imageLabel, ENT_QUOTES, 'UTF-8'), sprintf('<img src="%s" border="0" alt="CAPTCHA" />', $imageUrl)),
-            sprintf($tpl, htmlspecialchars($codeLabel, ENT_QUOTES, 'UTF-8'), sprintf('<input type="text" autocomplete="off" aria-label="%s" style="width: 100%%; min-width: 180px; border: 1px solid gray; box-sizing: border-box" name="imagestring" value="" /><input type="hidden" name="imagehash" value="%s" />', htmlspecialchars($codeLabel, ENT_QUOTES, 'UTF-8'), htmlspecialchars($imagehash, ENT_QUOTES, 'UTF-8'))),
+            sprintf($tpl, htmlspecialchars($codeLabel, ENT_QUOTES, 'UTF-8'), sprintf('<input type="text" autocomplete="off" aria-label="%s" class="nx-field__input" name="imagestring" value="" /><input type="hidden" name="imagehash" value="%s" />', htmlspecialchars($codeLabel, ENT_QUOTES, 'UTF-8'), htmlspecialchars($imagehash, ENT_QUOTES, 'UTF-8'))),
         ]);
     }
 

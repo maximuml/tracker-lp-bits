@@ -32,7 +32,8 @@ final class SiteChromeComposer
         }
 
         $title = trim($view->getFactory()->yieldContent('title'));
-        $view->with('chrome', SiteChromeViewModel::load($title, $this->layouts));
+        $variant = $view->name() === 'layouts.auth' ? 'auth' : 'modern';
+        $view->with('chrome', SiteChromeViewModel::load($title, $this->layouts, variant: $variant));
         $view->with('locale', str_replace('_', '-', App::getLocale()));
     }
 }

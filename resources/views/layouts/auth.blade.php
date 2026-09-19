@@ -1,49 +1,11 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="csrf-token" content="{{ csrf_token() }}" />
-    <title>@yield('title', $siteName ?? config('app.name'))</title>
-    <style nonce="{{ $cspNonce ?? '' }}">
-        body { font-family: Arial, Helvetica, sans-serif; background: #f5f5f5; margin: 0; padding: 0; }
-        .container { max-width: 600px; margin: 2em auto; background: #fff; border: 1px solid #ccc; padding: 1em; }
-        h1 { text-align: center; font-size: 1.4em; }
-        .error { color: #d00; margin: 1em 0; text-align: center; }
-        .success { color: #080; margin: 1em 0; text-align: center; }
-        table { width: 100%; border-collapse: collapse; }
-        .rowhead { width: 30%; padding: 0.5em; background: #eee; font-weight: bold; text-align: right; }
-        .rowfollow { padding: 0.5em; }
-        input[type="text"], input[type="password"], input[type="email"], select { width: 100%; box-sizing: border-box; padding: 0.3em; }
-        .btn { padding: 0.4em 1em; margin: 0.2em; }
-        .toolbox { padding: 0.5em; text-align: center; background: #f0f0f0; }
-        .nx-fgrid { display: grid; grid-template-columns: 30% 1fr; width: 100%; }
-        .nx-fhead { padding: 5px; background: #eee; font-weight: bold; text-align: right; }
-        .nx-fcell { padding: 5px; }
-        .nx-ffull { grid-column: 1 / -1; padding: 5px; }
-        .nx-fgrid--b { border: 1px solid #999; }
-        .nx-fgrid--b > .nx-fhead, .nx-fgrid--b > .nx-fcell, .nx-fgrid--b > .nx-ffull { padding: 10px; border-bottom: 1px solid #ccc; }
-        .nx-fgrid--b > :last-child { border-bottom: none; }
-        .small { font-size: 0.85em; }
-        p { margin: 0.5em 0; }
-        a { color: #06c; }
-        .skip-link { position: absolute; left: -9999px; top: auto; width: 1px; height: 1px; overflow: hidden; }
-        .skip-link:focus { left: 0; width: auto; height: auto; z-index: 1000; }
-    </style>
-    <script type="text/javascript" src="js/csrf.js"></script>
-    <script type="text/javascript" src="js/auth.js"></script>
-    <script type="text/javascript" src="vendor/jquery-3.7.1.min.js"></script>
-    @foreach (\App\Support\AssetAppender::getAppendHeadersSafe() as $html)
-        {{ $html }}
-    @endforeach
-</head>
-<body>
-    <a href="#main-content" class="skip-link">Skip to main content</a>
-    <div class="container" id="main-content" tabindex="-1">
-        @yield('content')
-    </div>
-    @foreach (\App\Support\AssetAppender::getAppendFootersSafe() as $html)
-        {{ $html }}
-    @endforeach
-</body>
-</html>
+{{-- Standalone auth pages (login/signup/recover/confirm_resend) share the
+     site chrome via the ADR 0018 partials — variant 'auth' is selected by
+     SiteChromeComposer based on this view's name (ADR 0020). The .nx-auth
+     card styles live in public/css/modern.css; no inline <style>, so the
+     nonce-strict CSP applies unchanged. --}}
+@include('layouts.partials.head-assets')
+@include('layouts.partials.header')
+<div class="nx-auth">
+    @yield('content')
+</div>
+@include('layouts.partials.footer')

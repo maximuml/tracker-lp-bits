@@ -21,7 +21,7 @@ test('login rejects a wrong password', async ({ page }) => {
   await page.goto('/login', { waitUntil: 'networkidle' });
   await page.fill('#login-form input[name="username"]', BROWSER_USER);
   await page.fill('#login-form input[name="password"]', 'definitely-wrong-password');
-  await page.click('#login-form input[type="submit"]');
+  await page.click('#login-form [type="submit"]');
   await page.waitForLoadState('networkidle');
 
   const cookies = await page.context().cookies();

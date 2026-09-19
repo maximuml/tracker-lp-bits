@@ -28,7 +28,7 @@ final class LegacyFontTagTest extends TestCase
     private const BASELINE_APP_FILES = 33;
 
     /** Baseline: Blade views containing a '<font' literal. */
-    private const BASELINE_VIEW_FILES = 37;
+    private const BASELINE_VIEW_FILES = 35;
 
     public function test_app_files_with_font_tag_do_not_exceed_baseline(): void
     {

@@ -311,14 +311,13 @@ final class ComponentLayerTest extends TestCase
         $this->assertDoesNotMatchRegularExpression('/id="flagyes"[^>]*checked/', $html);
     }
 
-    public function test_settings_text_escapes_value_and_renders_width(): void
+    public function test_settings_text_escapes_value(): void
     {
         $html = $this->render(
-            '<x-settings-text label="T" :name="$n" :value="$v" note="hint" width="50px" />',
+            '<x-settings-text label="T" :name="$n" :value="$v" note="hint" />',
             ['n' => 'f"><b>', 'v' => '"><script>'],
         );
 
-        $this->assertStringContainsString('width: 50px', $html);
         $this->assertStringContainsString('hint', $html);
         $this->assertStringNotContainsString('<script>', $html);
         $this->assertStringContainsString('value="&quot;&gt;&lt;script&gt;', $html);

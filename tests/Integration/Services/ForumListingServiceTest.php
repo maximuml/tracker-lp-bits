@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Services;
 
+use App\Models\Topic;
 use App\Models\User;
 use App\Repositories\ForumRepository;
 use App\Repositories\OverforumRepository;
@@ -25,11 +26,13 @@ use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
- * Unit tests for ForumListingService.
+ * Integration tests for ForumListingService.
  *
- * Covers buildViewUnread (no topics, with topics), buildSearch
- * (no keywords, no hits, with hits), and buildViewForum
- * (invalid ID, nonexistent forum, valid forum with no topics).
+ * ADR 0021 (stage 3.1b): the service returns typed view models —
+ * assertions check the view-model data, not generated markup.
+ * Covers buildViewUnread (empty / with rows / truncation),
+ * buildSearch (no keywords / no hits / hits + pagination) and
+ * buildViewForum (invalid id / missing forum / empty / with rows).
  */
 #[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class ForumListingServiceTest extends TestCase
@@ -37,8 +40,6 @@ final class ForumListingServiceTest extends TestCase
     use DatabaseTransactions;
 
     private ForumListingService $service;
-
-    private int $initialObLevel;
 
     /** @var TopicRepository&MockInterface */
     private TopicRepository $topicRepo;
@@ -50,7 +51,6 @@ final class ForumListingServiceTest extends TestCase
     {
         parent::setUp();
         Redis::connection()->flushdb();
-        $this->initialObLevel = ob_get_level();
         app(Globals::class)->set('SITENAME', 'TestSite');
         app(Globals::class)->set('lang_functions', [
             'text_prev' => 'Prev', 'text_next' => 'Next',
@@ -84,9 +84,6 @@ final class ForumListingServiceTest extends TestCase
 
     protected function tearDown(): void
     {
-        while (ob_get_level() > $this->initialObLevel) {
-            ob_end_clean();
-        }
         Mockery::close();
         parent::tearDown();
     }
@@ -184,6 +181,28 @@ final class ForumListingServiceTest extends TestCase
         $this->app->instance('request', $request);
     }
 
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
+    private function fakeTopic(array $attributes): Topic
+    {
+        $topic = new Topic;
+        $topic->setRawAttributes(array_merge([
+            'id' => 1,
+            'forumid' => 1,
+            'userid' => 1,
+            'subject' => 'Test topic',
+            'views' => 5,
+            'locked' => 0,
+            'sticky' => 0,
+            'hlcolor' => 0,
+            'firstpost' => 0,
+            'lastpost' => 0,
+        ], $attributes));
+
+        return $topic;
+    }
+
     private function callWithSuppressedErrors(callable $fn): mixed
     {
         set_error_handler(function (int $severity): bool {
@@ -199,81 +218,158 @@ final class ForumListingServiceTest extends TestCase
 
     // --- buildViewUnread ---
 
-    public function test_build_view_unread_with_no_topics_returns_nothing_found(): void
-    {
-        $repo = $this->mockForumRepo();
-        $this->mockCache();
-        $this->setUser();
-        $this->setRequest();
-
-        $this->topicRepo->shouldReceive('getUnreadTopics')->andReturn(new Collection);
-
-        $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewUnread(['id' => 1, 'username' => 'test', 'class' => 10]));
-
-        $this->assertArrayHasKey('html', $result);
-        $this->assertStringContainsString('Nothing found', (string) $result['html']);
-    }
-
-    public function test_build_view_unread_returns_html_structure(): void
-    {
-        $repo = $this->mockForumRepo();
-        $this->mockCache();
-        $this->setUser();
-        $this->setRequest();
-
-        $this->topicRepo->shouldReceive('getUnreadTopics')->andReturn(new Collection);
-        $repo->shouldReceive('getForumsList')->andReturn([]);
-
-        $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewUnread(['id' => 1, 'username' => 'test', 'class' => 10]));
-
-        $this->assertArrayHasKey('html', $result);
-        $this->assertStringContainsString('<h1', (string) $result['html']);
-    }
-
-    // --- buildSearch ---
-
-    public function test_build_search_with_no_keywords_returns_form(): void
+    public function test_build_view_unread_with_no_topics_returns_empty_list(): void
     {
         $this->mockForumRepo();
         $this->mockCache();
         $this->setUser();
         $this->setRequest();
 
-        $result = $this->callWithSuppressedErrors(fn () => $this->service->buildSearch(20));
+        $this->topicRepo->shouldReceive('getUnreadTopics')->andReturn(new Collection);
 
-        $this->assertArrayHasKey('html', $result);
-        $this->assertStringContainsString('search_form', (string) $result['html']);
-        $this->assertStringContainsString('by keyword', (string) $result['html']);
+        $vm = $this->service->buildViewUnread(['id' => 1, 'username' => 'test', 'class' => 10]);
+
+        $this->assertSame('TestSite', $vm->siteName);
+        $this->assertSame([], $vm->topics);
+        $this->assertNull($vm->moreBeforePostId);
     }
 
-    public function test_build_search_with_keywords_no_hits_returns_form_with_error(): void
+    public function test_build_view_unread_lists_unread_topic_with_forum(): void
     {
         $repo = $this->mockForumRepo();
+        $this->mockCache();
+        $this->setUser();
+        $this->setRequest();
+
+        $this->topicRepo->shouldReceive('getUnreadTopics')->andReturn(new Collection([
+            $this->fakeTopic(['id' => 7, 'forumid' => 1, 'subject' => 'Unread <b>topic</b>', 'lastpost' => 100, 'hlcolor' => 5]),
+        ]));
+        $repo->shouldReceive('getForumsList')->andReturn([
+            1 => ['id' => 1, 'name' => 'Test Forum', 'forid' => 1, 'minclassread' => 0],
+        ]);
+
+        $vm = $this->service->buildViewUnread(['id' => 1, 'username' => 'test', 'class' => 10]);
+
+        $this->assertCount(1, $vm->topics);
+        $row = $vm->topics[0];
+        $this->assertSame(7, $row->topicId);
+        $this->assertSame(1, $row->forumId);
+        $this->assertSame('Test Forum', $row->forumName);
+        $this->assertSame(5, $row->hlcolor);
+        // Subject arrives pre-escaped (SafeHtml marks escaping already done).
+        $this->assertSame('Unread &lt;b&gt;topic&lt;/b&gt;', (string) $row->subject);
+        $this->assertNull($vm->moreBeforePostId);
+    }
+
+    public function test_build_view_unread_skips_topics_below_minclassread(): void
+    {
+        $repo = $this->mockForumRepo();
+        $this->mockCache();
+        $this->setUser();
+        $this->setRequest();
+
+        $this->topicRepo->shouldReceive('getUnreadTopics')->andReturn(new Collection([
+            $this->fakeTopic(['id' => 7, 'forumid' => 1, 'lastpost' => 100]),
+        ]));
+        $repo->shouldReceive('getForumsList')->andReturn([
+            1 => ['id' => 1, 'name' => 'Staff Forum', 'forid' => 1, 'minclassread' => 90],
+        ]);
+
+        $vm = $this->service->buildViewUnread(['id' => 1, 'username' => 'test', 'class' => 10]);
+
+        $this->assertSame([], $vm->topics);
+    }
+
+    public function test_build_view_unread_sets_more_before_post_id_when_truncated(): void
+    {
+        $repo = $this->mockForumRepo();
+        $this->mockCache();
+        $this->setUser();
+        $this->setRequest();
+
+        // 26 visible topics → the 26th exceeds the 25-result cap and its
+        // lastpost becomes the beforepostid continuation cursor.
+        $topics = [];
+        for ($i = 1; $i <= 26; $i++) {
+            $topics[] = $this->fakeTopic(['id' => $i, 'forumid' => 1, 'lastpost' => 1000 + $i]);
+        }
+        $this->topicRepo->shouldReceive('getUnreadTopics')->andReturn(new Collection($topics));
+        $repo->shouldReceive('getForumsList')->andReturn([
+            1 => ['id' => 1, 'name' => 'Test Forum', 'forid' => 1, 'minclassread' => 0],
+        ]);
+
+        $vm = $this->service->buildViewUnread(['id' => 1, 'username' => 'test', 'class' => 10]);
+
+        $this->assertCount(25, $vm->topics);
+        $this->assertSame(1026, $vm->moreBeforePostId);
+    }
+
+    // --- buildSearch ---
+
+    public function test_build_search_with_no_keywords_is_not_searched(): void
+    {
+        $this->mockForumRepo();
+        $this->mockCache();
+        $this->setUser();
+        $this->setRequest();
+
+        $vm = $this->service->buildSearch(20);
+
+        $this->assertFalse($vm->searched);
+        $this->assertSame('', $vm->keywords);
+        $this->assertSame(0, $vm->hits);
+        $this->assertSame([], $vm->results);
+        $this->assertStringContainsString('search_button.gif', $vm->imageUrl);
+    }
+
+    public function test_build_search_with_keywords_no_hits(): void
+    {
+        $this->mockForumRepo();
         $this->mockCache();
         $this->setUser();
         $this->setRequest(['keywords' => 'notfound']);
 
-        $this->postRepo->shouldReceive('searchForumPosts')->andReturn(['hits' => 0, 'rows' => new Collection]);
+        $this->postRepo->shouldReceive('searchForumPosts')->once()->andReturn(['hits' => 0, 'rows' => new Collection]);
 
-        $result = $this->callWithSuppressedErrors(fn () => $this->service->buildSearch(20));
+        $vm = $this->service->buildSearch(20);
 
-        $this->assertArrayHasKey('html', $result);
-        $this->assertStringContainsString('Nothing found', (string) $result['html']);
+        $this->assertTrue($vm->searched);
+        $this->assertSame('notfound', $vm->keywords);
+        $this->assertSame(0, $vm->hits);
+        $this->assertSame([], $vm->results);
     }
 
-    public function test_build_search_with_keywords_and_hits_returns_results(): void
+    public function test_build_search_with_hits_returns_rows_and_pagination(): void
     {
-        $repo = $this->mockForumRepo();
+        $this->mockForumRepo();
         $this->mockCache();
         $this->setUser();
         $this->setRequest(['keywords' => 'test']);
 
-        $this->postRepo->shouldReceive('searchForumPosts')->andReturn(['hits' => 1, 'rows' => new Collection]);
+        $this->postRepo->shouldReceive('searchForumPosts')->andReturn([
+            'hits' => 25,
+            'rows' => new Collection([
+                (object) [
+                    'id' => 50, 'topicid' => 7, 'subject' => 'A test topic',
+                    'hlcolor' => 0, 'forumid' => 3, 'forumname' => 'Forum Three',
+                    'added' => '2026-09-01 12:00:00', 'userid' => 1,
+                ],
+            ]),
+        ]);
 
-        $result = $this->callWithSuppressedErrors(fn () => $this->service->buildSearch(20));
+        $vm = $this->service->buildSearch(20);
 
-        $this->assertArrayHasKey('html', $result);
-        $this->assertStringContainsString('Found', (string) $result['html']);
+        $this->assertTrue($vm->searched);
+        $this->assertSame(25, $vm->hits);
+        $this->assertSame(2, $vm->pages); // 25 hits / 20 per page
+        $this->assertCount(1, $vm->results);
+        $row = $vm->results[0];
+        $this->assertSame(50, $row->postId);
+        $this->assertSame(7, $row->topicId);
+        $this->assertSame(3, $row->forumId);
+        $this->assertSame('Forum Three', $row->forumName);
+        $this->assertSame('2026-09-01 12:00:00', $row->added);
+        $this->assertStringContainsString('keywords=test', $vm->pagerHref());
     }
 
     // --- buildViewForum ---
@@ -312,7 +408,7 @@ final class ForumListingServiceTest extends TestCase
         $this->assertTrue($threw, 'Expected abort when forum does not exist');
     }
 
-    public function test_build_view_forum_with_valid_forum_no_topics_returns_no_topics(): void
+    public function test_build_view_forum_with_valid_forum_no_topics(): void
     {
         $repo = $this->mockForumRepo();
         $this->mockCache();
@@ -324,16 +420,114 @@ final class ForumListingServiceTest extends TestCase
         ]);
         $this->topicRepo->shouldReceive('getTopicsByForum')->andReturn(['count' => 0, 'rows' => new Collection]);
 
-        $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewForum(
+        $vm = $this->service->buildViewForum(
             ['id' => 1, 'username' => 'test', 'class' => 10, 'forumpost' => 'yes'],
             Request::create('/forums.php', 'GET', ['forumid' => 1]),
             20,
             10,
-        ));
+        );
 
-        $this->assertArrayHasKey('html', $result);
-        $this->assertSame(1, $result['forumid']);
-        $this->assertSame('Test Forum', (string) ($result['forumname']));
-        $this->assertStringContainsString('No topics found', (string) $result['html']);
+        $this->assertSame(1, $vm->forumId);
+        $this->assertSame('Test Forum', $vm->forumName);
+        $this->assertSame('TestSite', $vm->siteName);
+        $this->assertTrue($vm->mayPost);
+        $this->assertSame([], $vm->topics);
+        $this->assertSame(1, $vm->pages);
+    }
+
+    public function test_build_view_forum_maps_topic_rows(): void
+    {
+        $repo = $this->mockForumRepo();
+        $this->mockCache();
+        $this->setUser();
+        $this->setRequest(['forumid' => 1]);
+
+        $repo->shouldReceive('getForumsList')->andReturn([
+            1 => ['id' => 1, 'name' => 'Test Forum', 'forid' => 1, 'minclassread' => 0, 'minclasswrite' => 0, 'minclasscreate' => 0],
+        ]);
+        $this->topicRepo->shouldReceive('getTopicsByForum')->andReturn([
+            'count' => 1,
+            'rows' => new Collection([
+                $this->fakeTopic(['id' => 7, 'subject' => 'Pinned <i>topic</i>', 'sticky' => 1, 'hlcolor' => 9, 'views' => 1234]),
+            ]),
+        ]);
+        $this->postRepo->shouldReceive('countTopicPosts')->andReturn(3);
+
+        $vm = $this->service->buildViewForum(
+            ['id' => 1, 'username' => 'test', 'class' => 10, 'forumpost' => 'yes'],
+            Request::create('/forums.php', 'GET', ['forumid' => 1]),
+            20,
+            10,
+        );
+
+        $this->assertCount(1, $vm->topics);
+        $row = $vm->topics[0];
+        $this->assertSame(7, $row->id);
+        $this->assertSame(1, $row->forumId);
+        $this->assertTrue($row->sticky);
+        $this->assertSame(9, $row->hlcolor);
+        $this->assertSame('read', $row->state); // no posts → lastpostread(0) >= lppostid(0)
+        $this->assertSame(2, $row->replies); // posts-1
+        $this->assertSame(1234, $row->views);
+        $this->assertSame([], $row->visiblePages); // 3 posts / 10 per page → single page
+        $this->assertNull($row->jumpToPostId);
+        $this->assertNull($row->tooltipId); // tooltips off by default
+        $this->assertSame('Pinned &lt;i&gt;topic&lt;/i&gt;', (string) $row->subject);
+        $this->assertSame([], $vm->tooltips);
+    }
+
+    public function test_build_view_forum_multipage_topic_lists_visible_pages(): void
+    {
+        $repo = $this->mockForumRepo();
+        $this->mockCache();
+        $this->setUser();
+        $this->setRequest(['forumid' => 1]);
+
+        $repo->shouldReceive('getForumsList')->andReturn([
+            1 => ['id' => 1, 'name' => 'Test Forum', 'forid' => 1, 'minclassread' => 0],
+        ]);
+        $this->topicRepo->shouldReceive('getTopicsByForum')->andReturn([
+            'count' => 1,
+            'rows' => new Collection([$this->fakeTopic(['id' => 7])]),
+        ]);
+        $this->postRepo->shouldReceive('countTopicPosts')->andReturn(95); // 10 pages at 10/page
+
+        $vm = $this->service->buildViewForum(
+            ['id' => 1, 'username' => 'test', 'class' => 10, 'forumpost' => 'yes'],
+            Request::create('/forums.php', 'GET', ['forumid' => 1]),
+            20,
+            10,
+        );
+
+        // dotspace=4 → pages 1-4, gap, 7-10 shown (10 pages total)
+        $this->assertSame([1, 2, 3, 4, '…', 7, 8, 9, 10], $vm->topics[0]->visiblePages);
+    }
+
+    public function test_build_view_forum_passes_sort_and_search_to_repository(): void
+    {
+        $repo = $this->mockForumRepo();
+        $this->mockCache();
+        $this->setUser();
+        $this->setRequest(['forumid' => 1, 'sort' => 'firstpostasc', 'search' => 'abc']);
+
+        $repo->shouldReceive('getForumsList')->andReturn([
+            1 => ['id' => 1, 'name' => 'Test Forum', 'forid' => 1, 'minclassread' => 0],
+        ]);
+        $this->topicRepo->shouldReceive('getTopicsByForum')
+            ->twice()
+            ->with(1, 'abc', 'firstpost', 'asc', Mockery::type('int'), Mockery::type('int'))
+            ->andReturn(['count' => 0, 'rows' => new Collection]);
+
+        $vm = $this->service->buildViewForum(
+            ['id' => 1, 'username' => 'test', 'class' => 10, 'forumpost' => 'yes'],
+            Request::create('/forums.php', 'GET', ['forumid' => 1]),
+            20,
+            10,
+        );
+
+        $this->assertSame('abc', $vm->search);
+        $this->assertSame('firstpostasc', $vm->sort);
+        $this->assertSame('&search=abc', $vm->addParam());
+        $this->assertStringContainsString('search=abc', $vm->pagerHref());
     }
 }

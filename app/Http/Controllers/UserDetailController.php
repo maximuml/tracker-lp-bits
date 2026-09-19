@@ -150,7 +150,6 @@ class UserDetailController extends Controller
         }
 
         $countryRow = Country::rowWithContext($user['country']);
-        $countryHtml = '<img src="pic/flag/'.htmlspecialchars((string) ($countryRow['flagpic'] ?? '')).'" alt="'.htmlspecialchars((string) ($countryRow['name'] ?? '')).'" />';
 
         $locationInfo = [null, null];
         $locationInfoHtml = '';
@@ -158,47 +157,47 @@ class UserDetailController extends Controller
             if (! empty($user['ip'])) {
                 $locationInfo = Network::ipLocationWithContext($user['ip']);
             }
-            $locationInfoHtml = '<span title="'.htmlspecialchars((string) $locationInfo[1]).'">['
-                .htmlspecialchars((string) $locationInfo[0]).']</span>';
+            $locationInfoHtml = view('userdetails._location_info', ['locationInfo' => $locationInfo])->render();
         }
 
         $peerRows = $this->userDetailRepository->getPeers($id);
-        $clientSelectHtml = '';
-        if (! empty($peerRows)) {
-            $clientSelectHtml .= "<table border='1' cellspacing='0' cellpadding='5'><tr><td class='colhead'>Agent</td><td class='colhead'>IPV4</td><td class='colhead'>IPV6</td><td class='colhead'>Port</td></tr>";
-            foreach ($peerRows as $arr) {
-                $clientSelectHtml .= '<tr>';
-                $clientSelectHtml .= sprintf('<td>%s</td>', Strings::userAgentClient($arr['agent']));
-                if ($canViewConfidential || $isOwner) {
-                    $v4 = $isOwner ? Strings::hidden($arr['ipv4']) : $arr['ipv4'];
-                    $v6 = $isOwner ? Strings::hidden($arr['ipv6']) : $arr['ipv6'];
-                    $clientSelectHtml .= sprintf(
-                        '<td>%s</td><td>%s</td><td>%s</td>',
-                        $v4,
-                        $v6,
-                        $arr['port']
-                    );
-                } else {
-                    $clientSelectHtml .= sprintf('<td>%s</td><td>%s</td><td>%s</td>', '---', '---', '---');
-                }
-                $clientSelectHtml .= '</tr>';
+        $clientRows = [];
+        foreach ($peerRows as $arr) {
+            if ($canViewConfidential || $isOwner) {
+                $clientRows[] = [
+                    'agent' => Strings::userAgentClient($arr['agent']),
+                    'ipv4' => $isOwner ? Strings::hidden($arr['ipv4']) : $arr['ipv4'],
+                    'ipv6' => $isOwner ? Strings::hidden($arr['ipv6']) : $arr['ipv6'],
+                    'port' => $arr['port'],
+                ];
+            } else {
+                $clientRows[] = [
+                    'agent' => Strings::userAgentClient($arr['agent']),
+                    'ipv4' => '---',
+                    'ipv6' => '---',
+                    'port' => '---',
+                ];
             }
-            $clientSelectHtml .= '</table>';
         }
+        $clientSelectHtml = $clientRows === []
+            ? ''
+            : view('userdetails._clients', ['rows' => $clientRows])->render();
 
         $trueTraffic = $this->userDetailRepository->getTrueTraffic($id);
 
         $userManageSystemUrl = sprintf('%s/%s/user/users/%s', Url::schemeAndHost(false), Env::get('FILAMENT_PATH', 'nexusphp'), $user['id']);
 
-        $userManageSystemText = sprintf(
-            '<a href="%s" target="_blank" class="altlink">%s</a>',
-            $userManageSystemUrl,
-            __('legacy/functions.text_management_system')
+        [$migratedHelpPre, $migratedHelpPost] = array_pad(
+            explode('%s', (string) __('legacy/userdetails.change_field_value_migrated'), 2),
+            2,
+            ''
         );
-        $migratedHelp = '&nbsp;&nbsp;'.sprintf(
-            __('legacy/userdetails.change_field_value_migrated'),
-            $userManageSystemText
-        );
+        $migratedHelp = view('userdetails._migrated_help', [
+            'pre' => $migratedHelpPre,
+            'post' => $migratedHelpPost,
+            'url' => $userManageSystemUrl,
+            'linkLabel' => (string) __('legacy/functions.text_management_system'),
+        ])->render();
 
         $usernameHtml = UserDisplay::username($user['id'], true, false);
         $invitedByHtml = $user['invited_by'] > 0 ? UserDisplay::username($user['invited_by']) : '';
@@ -288,7 +287,9 @@ JS, \json_encode(__('legacy/userdetails.sure_to_remove_leech_warn'))), 'footer',
         if (($user['timeswarned'] ?? 0) > 0 && $user['warnedby'] !== 'System') {
             $arr = $this->userDetailRepository->getWarnedBy((int) $user['warnedby']);
             if ($arr !== null) {
-                $warnedByHtml = '<br />['.__('legacy/userdetails.text_by').'<u>'.UserDisplay::username($arr['id']).'</u></a>]';
+                $warnedByHtml = view('userdetails._warned_by', [
+                    'userHtml' => UserDisplay::username($arr['id']),
+                ])->render();
             }
         }
 
@@ -339,37 +340,26 @@ $claimJs
 JS, 'footer', false);
 
         $metas = $this->userRepository->listMetas($id);
-        $userPropsHtml = '';
+        $userProps = [];
         $consumeChangeUsernameForm = '';
         $triggerId = '';
-        $props = [];
 
         $metaKey = UserMeta::META_KEY_CHANGE_USERNAME;
         if ($metas->has($metaKey)) {
             $triggerId = "consume-$metaKey";
             $changeUsernameCards = $metas->get($metaKey);
             $cardName = $changeUsernameCards->first()->meta_key_text;
-            $useInput = '';
+            $userProps[] = SafeHtml::fromTrustedHtml(view('userdetails._prop', [
+                'name' => $cardName,
+                'detail' => $changeUsernameCards->count(),
+                'consumeLabel' => (string) __('legacy/userdetails.consume'),
+                'triggerId' => $isOwner ? $triggerId : '',
+            ])->render());
             if ($isOwner) {
-                $useInput = sprintf('<input type="button" value="%s" id="%s">', __('legacy/userdetails.consume'), $triggerId);
-            }
-            $props = [sprintf(
-                '<div><strong>[%s]</strong>(%s)</div>%s',
-                $cardName, $changeUsernameCards->count(), $useInput
-            )];
-            if ($isOwner) {
-                $metaKeyLabel = __('legacy/userdetails.meta_key_change_username_username');
-                $consumeChangeUsernameForm = <<<HTML
-<div class="layer-form">
-<form id="layer-form-$metaKey">
-    <input type="hidden" name="params[meta_key]" value="$metaKey">
-    <div class="form-control-row">
-        <div class="label">{$metaKeyLabel}</div>
-        <div class="field"><input type="text" name="params[username]"></div>
-    </div>
-</form>
-</div>
-HTML;
+                $consumeChangeUsernameForm = view('userdetails._consume_username_form', [
+                    'metaKey' => $metaKey,
+                    'metaKeyLabel' => (string) __('legacy/userdetails.meta_key_change_username_username'),
+                ])->render();
                 $consumeLabel = __('legacy/userdetails.consume');
                 AssetAppender::js(<<<JS
 document.getElementById('{$triggerId}').addEventListener("click", function () {
@@ -402,15 +392,13 @@ JS, 'footer', false);
         if ($metas->has($metaKey)) {
             $rainbowID = $metas->get($metaKey)->first();
             if ($rainbowID->isValid()) {
-                $props[] = sprintf(
-                    '<div><strong>[%s]</strong>(%s)</div>',
-                    $rainbowID->metaKeyText, $rainbowID->getDeadlineText()
-                );
+                $userProps[] = SafeHtml::fromTrustedHtml(view('userdetails._prop', [
+                    'name' => $rainbowID->metaKeyText,
+                    'detail' => $rainbowID->getDeadlineText(),
+                    'consumeLabel' => '',
+                    'triggerId' => '',
+                ])->render());
             }
-        }
-
-        if (! empty($props)) {
-            $userPropsHtml = sprintf('<div>%s</div>', implode('&nbsp;|&nbsp;', $props));
         }
 
         return [
@@ -430,7 +418,8 @@ JS, 'footer', false);
             'targetBlockedMe' => $targetBlockedMe,
             'currentUserIsFriendOfTarget' => $currentUserIsFriendOfTarget,
             'showPmButton' => $showPmButton,
-            'countryHtml' => SafeHtml::fromTrustedHtml($countryHtml),
+            'countryFlagPic' => (string) ($countryRow['flagpic'] ?? ''),
+            'countryName' => (string) ($countryRow['name'] ?? ''),
             'locationInfo' => $locationInfo,
             'locationInfoHtml' => $locationInfoHtml,
             'clientSelectHtml' => SafeHtml::fromTrustedHtml($clientSelectHtml),
@@ -457,7 +446,7 @@ JS, 'footer', false);
             'bonusTableHtml' => SafeHtml::fromTrustedHtml($bonusTableHtml),
             'hrStatusHtml' => SafeHtml::fromTrustedHtml($hrStatusHtml),
             'ipHistoryCount' => $ipHistoryCount,
-            'userPropsHtml' => SafeHtml::fromTrustedHtml($userPropsHtml),
+            'userProps' => $userProps,
             'consumeChangeUsernameForm' => $consumeChangeUsernameForm,
             'triggerId' => $triggerId,
         ];

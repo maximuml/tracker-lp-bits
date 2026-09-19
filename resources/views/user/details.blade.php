@@ -3,7 +3,7 @@
 @section('title', (__('legacy/userdetails.head_details_for')).$user['username'])
 
 @section('content')
-<h1>{{ $usernameHtml }}{{ $countryHtml }}</h1>
+<h1>{{ $usernameHtml }}<img src="pic/flag/{{ $countryFlagPic }}" alt="{{ $countryName }}" /></h1>
 @if ($medalImagesHtml !== '')
 {{ $medalImagesHtml }}
 @endif
@@ -67,8 +67,8 @@
 <x-settings-row-small :label="__('legacy/userdetails.row_avatar')">{{ $avatarHtml }}</x-settings-row-small>
 @endif
 <x-settings-row-small :label="__('legacy/userdetails.row_class')"><img alt="{{ \App\Support\UserClass::name($user['class'], false, false, true) }}" title="{{ \App\Support\UserClass::name($user['class'], false, false, true) }}" src="{{ \App\Support\UserClass::imagePath($user['class']) }}" />@if (($user['title'] ?? '') !== '')&nbsp;{{ trim($user['title']) }}@endif @if ((int) $user['class'] === UC_VIP && ! empty($user['vip_until']) && strtotime((string) $user['vip_until'])){{ __('legacy/userdetails.row_vip_until') ?? '' }}: {{ $user['vip_until'] }}@endif</x-settings-row-small>
-@if ($userPropsHtml !== '')
-<x-settings-row-small :label="__('legacy/userdetails.row_user_props')">{{ $userPropsHtml }}</x-settings-row-small>
+@if ($userProps !== [])
+<x-settings-row-small :label="__('legacy/userdetails.row_user_props')"><div>@foreach ($userProps as $prop){{ $prop }}@unless ($loop->last)&nbsp;|&nbsp;@endunless @endforeach</div></x-settings-row-small>
 @endif
 <x-settings-row-small :label="__('legacy/userdetails.row_torrent_comment')">@if ($torrentcomments && ($isOwner || $canViewHistory))<a href="userhistory.php?action=viewcomments&amp;id={{ $id }}" title="{{ __('legacy/userdetails.link_view_comments') ?? '' }}">{{ $torrentcomments }}</a>@else{{ $torrentcomments }}@endif</x-settings-row-small>
 <x-settings-row-small :label="__('legacy/userdetails.row_forum_posts')">@if ($forumposts && ($isOwner || $canViewHistory))<a href="userhistory.php?action=viewposts&amp;id={{ $id }}" title="{{ __('legacy/userdetails.link_view_posts') ?? '' }}">{{ $forumposts }}</a>@else{{ $forumposts }}@endif</x-settings-row-small>

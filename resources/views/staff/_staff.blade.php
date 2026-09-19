@@ -1,4 +1,4 @@
-{{ \App\Support\Frame::open((__('legacy/staff.text_firstline_support')) . '<font class=small> - [<a class=altlink href=contactstaff.php><b>' . (__('legacy/staff.text_apply_for_it')) . '</b></a>]</font>', false, 10, '100%', 'left') }}
+{{ \App\Support\Frame::open((__('legacy/staff.text_firstline_support')) . '<span class="small"> - [<a class=altlink href=contactstaff.php><b>' . (__('legacy/staff.text_apply_for_it')) . '</b></a>]</span>', false, 10, '100%', 'left') }}
 {{ __('legacy/staff.text_firstline_support_note') }}
 <br /><br />
 <table data-nx="data" width=100% cellspacing=0 align=center>
@@ -24,7 +24,7 @@
 </table>
 {{ \App\Support\Frame::close() }}
 
-{{ \App\Support\Frame::open((__('legacy/staff.text_movie_critics')) . '<font class=small> - [<a class=altlink href=contactstaff.php><b>' . (__('legacy/staff.text_apply_for_it')) . '</b></a>]</font>', false, 10, '100%', 'left') }}
+{{ \App\Support\Frame::open((__('legacy/staff.text_movie_critics')) . '<span class="small"> - [<a class=altlink href=contactstaff.php><b>' . (__('legacy/staff.text_apply_for_it')) . '</b></a>]</span>', false, 10, '100%', 'left') }}
 {{ __('legacy/staff.text_movie_critics_note') }}
 <br /><br />
 <table data-nx="data" width=100% cellspacing=0 align=center>
@@ -48,7 +48,7 @@
 </table>
 {{ \App\Support\Frame::close() }}
 
-{{ \App\Support\Frame::open((__('legacy/staff.text_forum_moderators')) . '<font class=small> - [<a class=altlink href=contactstaff.php><b>' . (__('legacy/staff.text_apply_for_it')) . '</b></a>]</font>', false, 10, '100%', 'left') }}
+{{ \App\Support\Frame::open((__('legacy/staff.text_forum_moderators')) . '<span class="small"> - [<a class=altlink href=contactstaff.php><b>' . (__('legacy/staff.text_apply_for_it')) . '</b></a>]</span>', false, 10, '100%', 'left') }}
 {{ __('legacy/staff.text_forum_moderators_note') }}
 <br /><br />
 <table data-nx="data" width=100% cellspacing=0 align=center>
@@ -72,7 +72,7 @@
 </table>
 {{ \App\Support\Frame::close() }}
 
-{{ \App\Support\Frame::open((__('legacy/staff.text_general_staff')) . '<font class=small> - [<a class=altlink href=contactstaff.php><b>' . (__('legacy/staff.text_apply_for_it')) . '</b></a>]</font>', false, 10, '100%', 'left') }}
+{{ \App\Support\Frame::open((__('legacy/staff.text_general_staff')) . '<span class="small"> - [<a class=altlink href=contactstaff.php><b>' . (__('legacy/staff.text_apply_for_it')) . '</b></a>]</span>', false, 10, '100%', 'left') }}
 {{ __('legacy/staff.text_general_staff_note') }} <a href=faq.php><b>{{ __('legacy/staff.text_faq') }}</b></a> {{ __('legacy/staff.text_general_staff_note_two') }}<br /><br />{{ __('legacy/staff.text_general_staff_note_three') }} <a href=contactstaff.php><b>{{ __('legacy/staff.text_here') }}</b></a>
 <br /><br />
 <table data-nx="data" width=100% cellspacing=0 align=center>

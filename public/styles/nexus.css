@@ -268,6 +268,20 @@ table.msg-alert td.msg-alert-gray { background: gray; }
 .nx-tag { display: inline-block; padding: 0 .4em; border-radius: var(--nxm-radius, 4px); background: var(--nxm-accent); color: var(--nxm-on-accent, #fff); }
 img[data-img-fallback] { max-width: 100%; }
 img.nx-smiley { max-width: 25px; }
+/* <font> replacements: static colors/sizes go through utility classes;
+   dynamic palette colors go through data-color + the applier in common.js. */
+.gray { color: #aca899; text-decoration: underline; }
+.nx-color-red { color: #ff0000; }
+.nx-color-green { color: #008000; }
+.nx-color-blue { color: #0000ff; }
+.nx-color-gray { color: gray; }
+.nx-color-white { color: #fff; }
+.nx-color-orange { color: orange; }
+.nx-color-1f7309 { color: #1f7309; }
+.nx-color-ca0226 { color: #ca0226; }
+.nx-size-1 { font-size: 10px; }
+.nx-size-2 { font-size: 13px; }
+.nx-size-5 { font-size: 18px; }
 .nx-inline-block { display: inline-block; }
 .nx-flex { display: flex; }
 .nx-flex-col { display: flex; flex-direction: column; }

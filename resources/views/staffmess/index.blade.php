@@ -13,7 +13,7 @@
 @endif
 <div class="nx-fgrid nx-fgrid--flat">
 @if ($sent === 1)
-<div class="nx-ffull"><font color=red><b>The message has ben sent.</b></font></div>
+<div class="nx-ffull"><span class="nx-color-red"><b>The message has ben sent.</b></span></div>
 @endif
     <div class="nx-fcell"><b>Send to class:</b></div>
     <div class="nx-fcell">

@@ -198,10 +198,10 @@ final class Promotion
                     if ($sub) {
                         $color = $config['subColor'];
                         $onmouseover = $color
-                            ? " <font color=\"$color\">".((string) __('legacy/functions.text_will_end_in')).$timeout.'</font>'
+                            ? " <span data-color=\"$color\">".((string) __('legacy/functions.text_will_end_in')).$timeout.'</span>'
                             : ' '.((string) __('legacy/functions.text_will_end_in')).$timeout;
                     } else {
-                        $onmouseover = ' data-domtt-promo="'.htmlspecialchars("<b><font class=\"{$config['class']}\">$text</font></b>".((string) __('legacy/functions.text_will_end_in'))."<b>$timeout</b>").'"';
+                        $onmouseover = ' data-domtt-promo="'.htmlspecialchars("<b><span class=\"{$config['class']}\">$text</span></b>".((string) __('legacy/functions.text_will_end_in'))."<b>$timeout</b>").'"';
                     }
                 } else {
                     $promotion = 1;
@@ -219,7 +219,7 @@ final class Promotion
             if ($sub) {
                 $spTorrent = $onmouseover;
             } elseif ($mode === 'word') {
-                $spTorrent = " <b>[<font class='{$config['class']}' $onmouseover>$text</font>]</b>";
+                $spTorrent = " <b>[<span class='{$config['class']}' $onmouseover>$text</span>]</b>";
             } else {
                 $attr = $onmouseover ?: 'title="'.$text.'"';
                 $spTorrent = " <img class=\"{$config['icon']}\" src=\"pic/trans.gif\" alt=\"{$config['alt']}\" $attr />";

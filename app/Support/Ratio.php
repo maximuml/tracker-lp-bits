@@ -219,7 +219,7 @@ final class Ratio
      *  - `number_format(ratio, 3)` rounds to three decimals (not the
      *    truncation used by {@see share()}).
      *  - When `color()` returns the empty string (healthy ratio
-     *    ≥ 1.0) we skip the `<font color>` wrap entirely.
+     *    ≥ 1.0) we skip the colored wrap entirely.
      *  - The `$tooltip` parameter is accepted for API compatibility with
      *    callers but is not emitted; the legacy code never produced a
      *    tooltip wrapper.
@@ -235,7 +235,7 @@ final class Ratio
             $color = self::color($ratio);
             $formatted = number_format($ratio, 3);
             if ($color !== '') {
-                $formatted = '<font color="'.$color.'">'.$formatted.'</font>';
+                $formatted = '<span data-color="'.$color.'">'.$formatted.'</span>';
             }
 
             return $formatted;
@@ -262,7 +262,7 @@ final class Ratio
             $color = self::color($ratio);
             $ratio = $ratio > 10000 ? 'Inf.' : number_format($ratio, 3);
             if ($color) {
-                $ratio = '<font color="'.$color.'">'.$ratio.'</font>';
+                $ratio = '<span data-color="'.$color.'">'.$ratio.'</span>';
             }
         } elseif ($uped > 0) {
             $ratio = 'Inf.';
@@ -275,9 +275,9 @@ final class Ratio
 
     /**
      * Leaderboard ratio cell: `number_format($up/$down, $decimals)` wrapped
-     * in `<font color>` when {@see color()} flags the ratio — or always
+     * in `<span data-color>` when {@see color()} flags the ratio — or always
      * wrapped when `$alwaysWrap` (torrent-table legacy quirk emits
-     * `<font color="">` for healthy ratios). Caller renders the
+     * `<span data-color="">` for healthy ratios). Caller renders the
      * `$infinite` label when `$down <= 0` (views stay free of division).
      */
     public static function leaderboard(int|float $up, int|float $down, int $decimals = 2, bool $alwaysWrap = false): SafeHtml
@@ -286,7 +286,7 @@ final class Ratio
         $color = self::color($ratio);
         $formatted = number_format($ratio, $decimals);
         if ($color !== '' || $alwaysWrap) {
-            return SafeHtml::fromTrustedHtml('<font color="'.$color.'">'.$formatted.'</font>');
+            return SafeHtml::fromTrustedHtml('<span data-color="'.$color.'">'.$formatted.'</span>');
         }
 
         return SafeHtml::fromTrustedHtml($formatted);

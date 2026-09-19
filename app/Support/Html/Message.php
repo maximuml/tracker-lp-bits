@@ -19,7 +19,7 @@ final class Message
      *
      * Legacy quirks preserved bit-for-bit:
      *  - Non-empty `$url` ⇒ the message wraps in an `<a target="_blank">`
-     *    link. Empty `$url` ⇒ just `<b>` + `<font color="white">` text.
+     *    link. Empty `$url` ⇒ just `<b>` + `<span class="nx-color-white">` text.
      *  - `$url`, `$text`, and `$bgcolor` are NOT escaped — call sites
      *    pass pre-built markup or trusted lang strings.
      *  - The outer `<table>` uses inline-style `margin: 0 auto;` so the
@@ -33,8 +33,8 @@ final class Message
     {
         $safeUrl = htmlspecialchars($url, ENT_QUOTES);
         $inner = $url !== ''
-            ? '<b><a href="'.$safeUrl.'" target=\'_blank\'><font color="white">'.$text.'</font></a></b>'
-            : '<b><font color="white">'.$text.'</font></b>';
+            ? '<b><a href="'.$safeUrl.'" target=\'_blank\'><span class="nx-color-white">'.$text.'</span></a></b>'
+            : '<b><span class="nx-color-white">'.$text.'</span></b>';
 
         $colorClass = in_array($bgcolor, ['red', 'green', 'black', 'blue', 'orange', 'gray'], true)
             ? 'msg-alert-'.$bgcolor

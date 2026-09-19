@@ -26,7 +26,7 @@
             @if ($row->coverSrc !== null)
             <div class="nx-embedded nxm-cover"><img src="pic/misc/spinner.svg" data-src="{{ $row->coverSrc }}" class="nexus-lazy-load nxm-cover__img" alt="" /></div>
             @endif
-            <div class="nx-embedded nxm-namecell">@for ($i = 0; $i < $row->stickyCount; $i++)<img class="sticky" src="pic/trans.gif" alt="Sticky" title="{{ $row->stickyTitle }}" />&nbsp;@endfor<a title="{{ $row->nameTitle }}" href="{{ $row->nameUrl }}"><b>{{ $row->displayName }}</b></a>@if ($row->isNew) <b>(<font class="new">{{ __('legacy/functions.text_new_uppercase') }}</font>)</b>@endif @if ($row->isBanned)<b>(<font class="striking">{{ __('legacy/functions.text_banned') }}</font>)</b>@endif{{ $row->badges }}@if ($row->tags->toHtml() !== '')<br />{{ $row->tags }}@endif{{ $row->progressBar }}</div>
+            <div class="nx-embedded nxm-namecell">@for ($i = 0; $i < $row->stickyCount; $i++)<img class="sticky" src="pic/trans.gif" alt="Sticky" title="{{ $row->stickyTitle }}" />&nbsp;@endfor<a title="{{ $row->nameTitle }}" href="{{ $row->nameUrl }}"><b>{{ $row->displayName }}</b></a>@if ($row->isNew) <b>(<span class="new">{{ __('legacy/functions.text_new_uppercase') }}</span>)</b>@endif @if ($row->isBanned)<b>(<span class="striking">{{ __('legacy/functions.text_banned') }}</span>)</b>@endif{{ $row->badges }}@if ($row->tags->toHtml() !== '')<br />{{ $row->tags }}@endif{{ $row->progressBar }}</div>
             <div class="nx-embedded nxm-rowactions">
                 @if ($row->showDownload)<a href="{{ $row->downloadUrl }}"><img class="download" src="pic/trans.gif" alt="download" title="{{ __('legacy/functions.title_download_torrent') }}" /></a>@endif
                 @if ($row->showDownload && $row->showBookmark)<br />@endif
@@ -35,14 +35,14 @@
         </div>
     </td>
     @if ($row->waitText !== null)
-    <td class="rowfollow nowrap">@if ($row->waitColor !== null)<a href="faq.php#id46"><font color="{{ $row->waitColor }}">{{ $row->waitText }}</font></a>@else{{ $row->waitText }}@endif</td>
+    <td class="rowfollow nowrap">@if ($row->waitColor !== null)<a href="faq.php#id46"><span data-color="{{ $row->waitColor }}">{{ $row->waitText }}</span></a>@else{{ $row->waitText }}@endif</td>
     @endif
     @if ($listVm->showComments)
     <td class="rowfollow">
         @if ($row->comments === 0)
             <a href="comment.php?action=add&amp;pid={{ $row->id }}&amp;type=torrent" title="{{ __('legacy/functions.title_add_comments') }}">0</a>
         @else
-            <b><a href="{{ $row->commentsUrl }}"@if ($row->lastCommentTooltipId) data-domtt-src="{{ $row->lastCommentTooltipId }}"@endif>@if ($row->commentIsNew)<font class="new">@endif{{ $row->comments }}@if ($row->commentIsNew)</font>@endif</a></b>
+            <b><a href="{{ $row->commentsUrl }}"@if ($row->lastCommentTooltipId) data-domtt-src="{{ $row->lastCommentTooltipId }}"@endif>@if ($row->commentIsNew)<span class="new">@endif{{ $row->comments }}@if ($row->commentIsNew)</span>@endif</a></b>
         @endif
     </td>
     @endif
@@ -50,7 +50,7 @@
     <td class="rowfollow">{{ $row->size }}</td>
     <td class="rowfollow" align="center">
         @if ($row->seedersUrl)
-            <b><a href="{{ $row->seedersUrl }}">@if ($row->seedersColor)<font color="{{ $row->seedersColor }}">{{ number_format($row->seeders) }}</font>@else{{ number_format($row->seeders) }}@endif</a></b>
+            <b><a href="{{ $row->seedersUrl }}">@if ($row->seedersColor)<span data-color="{{ $row->seedersColor }}">{{ number_format($row->seeders) }}</span>@else{{ number_format($row->seeders) }}@endif</a></b>
         @else
             <span class="{{ $row->seedersZeroClass }}">{{ number_format($row->seeders) }}</span>
         @endif

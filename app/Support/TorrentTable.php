@@ -194,10 +194,10 @@ if (Permission::canManageTorrent()) { ?>
 
             echo '<td class="rowfollow" width="100%" align="left"><table class="torrentname" width="100%"><tr'.$sphighlight.">$tdCover<td class=\"embedded\">".$stickyicon."<a $short_torrent_name_alt $mouseovertorrent href=\"details.php?id=".$id.'&amp;hit=1"><b>'.htmlspecialchars($dispname).'</b></a>';
             if ($user['appendnew'] && strtotime($row['added']) >= $last_browse) {
-                echo "<b> (<font class='new'>".__('legacy/functions.text_new_uppercase').'</font>)</b>';
+                echo "<b> (<span class='new'>".__('legacy/functions.text_new_uppercase').'</span>)</b>';
             }
 
-            $banned_torrent = ($row['banned'] == 1 ? ' <b>(<font class="striking">'.__('legacy/functions.text_banned').'</font>)</b>' : '');
+            $banned_torrent = ($row['banned'] == 1 ? ' <b>(<span class="striking">'.__('legacy/functions.text_banned').'</span>)</b>' : '');
             $sp_torrent_sub = Promotion::appendSubWithContext($row['sp_state'], '', true, $row['added'], $row['promotion_time_type'], $row['promotion_until'], $row['__ignore_global_sp_state'] ?? false);
             $approvalStatusIcon = $moderationRep->renderApprovalStatus($row['approval_status']);
             $paidIcon = $torrentRep->getPaidIcon($row);
@@ -236,7 +236,7 @@ if (Permission::canManageTorrent()) { ?>
                 $elapsed = floor((TIMENOW - strtotime($row['added'])) / 3600);
                 if ($elapsed < $wait) {
                     $color = dechex((int) (floor(127 * ($wait - $elapsed) / 48 + 128) * 65536));
-                    echo '<td class="rowfollow nowrap"><a href="faq.php#id46"><font color="'.$color.'">'.number_format($wait - $elapsed).__('legacy/functions.text_h')."</font></a></td>\n";
+                    echo '<td class="rowfollow nowrap"><a href="faq.php#id46"><span data-color="'.$color.'">'.number_format($wait - $elapsed).__('legacy/functions.text_h')."</span></a></td>\n";
                 } else {
                     echo '<td class="rowfollow nowrap">'.__('legacy/functions.text_none')."</td>\n";
                 }
@@ -268,14 +268,14 @@ if (Permission::canManageTorrent()) { ?>
                                 $lastcomtime = __('legacy/functions.text_blank').Time::format($lastcom['added'], true, false, true);
                             }
                             $lastcom_tooltip[$counter]['id'] = 'lastcom_'.$counter;
-                            $lastcom_tooltip[$counter]['content'] = ($hasnewcom ? "<b>(<font class='new'>".__('legacy/functions.text_new_uppercase').'</font>)</b> ' : '').__('legacy/functions.text_last_commented_by').UserDisplay::username($lastcom['user']).$lastcomtime.'<br />'.Format::formatComment(mb_substr($lastcom['text'], 0, 100, 'UTF-8').(mb_strlen($lastcom['text'], 'UTF-8') > 100 ? ' ......' : ''), true, false, false, true, 600, false, false);
+                            $lastcom_tooltip[$counter]['content'] = ($hasnewcom ? "<b>(<span class='new'>".__('legacy/functions.text_new_uppercase').'</span>)</b> ' : '').__('legacy/functions.text_last_commented_by').UserDisplay::username($lastcom['user']).$lastcomtime.'<br />'.Format::formatComment(mb_substr($lastcom['text'], 0, 100, 'UTF-8').(mb_strlen($lastcom['text'], 'UTF-8') > 100 ? ' ......' : ''), true, false, false, true, 600, false, false);
                             $onmouseover = ' data-domtt-src="'.$lastcom_tooltip[$counter]['id'].'"';
                         }
                     } else {
                         $hasnewcom = false;
                         $onmouseover = '';
                     }
-                    echo '<b><a href="details.php?id='.$id.'&amp;hit=1&amp;cmtpage=1#startcomments" '.$onmouseover.'>'.($hasnewcom ? "<font class='new'>" : '').$row['comments'].($hasnewcom ? '</font>' : '').'</a></b>';
+                    echo '<b><a href="details.php?id='.$id.'&amp;hit=1&amp;cmtpage=1#startcomments" '.$onmouseover.'>'.($hasnewcom ? "<span class='new'>" : '').$row['comments'].($hasnewcom ? '</span>' : '').'</a></b>';
                 }
 
                 echo '</td>';
@@ -291,8 +291,8 @@ if (Permission::canManageTorrent()) { ?>
             if ($row['seeders']) {
                 $ratio = ($row['leechers'] ? ($row['seeders'] / $row['leechers']) : 1);
                 $ratiocolor = Ratio::seedLeechColor($ratio);
-                echo '<td class="rowfollow" align="center"><b><a href="details.php?id='.$id.'&amp;hit=1&amp;dllist=1#seeders">'.($ratiocolor ? '<font color="'.
-                $ratiocolor.'">'.number_format($row['seeders']).'</font>' : number_format($row['seeders']))."</a></b></td>\n";
+                echo '<td class="rowfollow" align="center"><b><a href="details.php?id='.$id.'&amp;hit=1&amp;dllist=1#seeders">'.($ratiocolor ? '<span data-color="'.
+                $ratiocolor.'">'.number_format($row['seeders']).'</span>' : number_format($row['seeders']))."</a></b></td>\n";
             } else {
                 $seederCount = (int) ($row['seeders'] ?? 0);
                 echo '<td class="rowfollow"><span class="'.Palette::seederLink($seederCount).'">'.number_format($seederCount)."</span></td>\n";

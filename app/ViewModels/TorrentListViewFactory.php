@@ -197,7 +197,7 @@ final class TorrentListViewFactory
                     $tooltipId = 'lastcom_'.$counter;
                     $lastcomTooltip[] = [
                         'id' => $tooltipId,
-                        'content' => ($commentIsNew ? "<b>(<font class='new'>".__('legacy/functions.text_new_uppercase').'</font>)</b> ' : '')
+                        'content' => ($commentIsNew ? "<b>(<span class='new'>".__('legacy/functions.text_new_uppercase').'</span>)</b> ' : '')
                             .__('legacy/functions.text_last_commented_by').UserDisplay::username($lastcom['user']).$lastcomtime.'<br />'
                             .Format::formatComment(mb_substr($lastcom['text'], 0, 100, 'UTF-8').(mb_strlen($lastcom['text'], 'UTF-8') > 100 ? ' ......' : ''), true, false, false, true, 600, false, false),
                     ];

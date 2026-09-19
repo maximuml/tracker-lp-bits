@@ -144,16 +144,16 @@ class RatioTest extends TestCase
     {
         // 500/1000 = 0.5 → color() falls into `< 0.6` bucket → #aa0000.
         $this->assertSame(
-            '<font color="#aa0000">0.500</font>',
+            '<span data-color="#aa0000">0.500</span>',
             Ratio::userRatioHtml(500, 1000, 'tip', 'Infinity'),
         );
     }
 
     public function test_user_ratio_html_three_decimals_no_color_when_healthy(): void
     {
-        // 1500/1000 = 1.5 → color() returns '' → no <font> wrap, bare
+        // 1500/1000 = 1.5 → color() returns '' → no color wrap, bare
         // number. Pinned because the legacy branch explicitly skips
-        // the `<font>` element when color is empty.
+        // the wrapping element when color is empty.
         $this->assertSame('1.500', Ratio::userRatioHtml(1500, 1000, 'tip', 'Infinity'));
         // Exactly 1.0 falls into the healthy bucket too.
         $this->assertSame('1.000', Ratio::userRatioHtml(1000, 1000, 'tip', 'Infinity'));
@@ -166,7 +166,7 @@ class RatioTest extends TestCase
         // but not rendered.
         $this->assertSame('---', Ratio::userRatioHtml(0, 0, "it's \"quoted\"", 'Inf'));
         $this->assertSame('Inf', Ratio::userRatioHtml(1024, 0, "it's \"quoted\"", 'Inf'));
-        $this->assertSame('<font color="#aa0000">0.500</font>', Ratio::userRatioHtml(500, 1000, "it's \"quoted\"", 'Inf'));
+        $this->assertSame('<span data-color="#aa0000">0.500</span>', Ratio::userRatioHtml(500, 1000, "it's \"quoted\"", 'Inf'));
     }
 
     public function test_user_ratio_html_uses_provided_infinity_label(): void
@@ -185,8 +185,8 @@ class RatioTest extends TestCase
         // uses floor-truncation. Color buckets: 0.333 falls into
         // `< 0.4` (#cc0000), 0.667 falls into `< 0.7` (#990000).
         $result = Ratio::userRatioHtml(1, 3, 'tip', 'Inf');
-        $this->assertSame('<font color="#cc0000">0.333</font>', $result);
+        $this->assertSame('<span data-color="#cc0000">0.333</span>', $result);
         $result = Ratio::userRatioHtml(2, 3, 'tip', 'Inf');
-        $this->assertSame('<font color="#990000">0.667</font>', $result);
+        $this->assertSame('<span data-color="#990000">0.667</span>', $result);
     }
 }

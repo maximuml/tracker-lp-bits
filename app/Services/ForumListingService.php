@@ -204,21 +204,21 @@ final class ForumListingService
                 } else {
                     $img = $this->index->getTopicImage($locked ? 'lockednew' : 'unread');
                     if ($lastpostread != (int) ($curUser['last_catchup'] ?? 0)) {
-                        $subject .= '&nbsp;&nbsp;<a href="'.htmlspecialchars('?action=viewtopic&forumid='.$forumid.'&topicid='.$topicid.'&page=p'.$lastpostread.'#pid'.$lastpostread).'" title="'.(__('legacy/forums.title_jump_to_unread')).'"><font class="small new"><b>'.(__('legacy/forums.text_new')).'</b></font></a>';
+                        $subject .= '&nbsp;&nbsp;<a href="'.htmlspecialchars('?action=viewtopic&forumid='.$forumid.'&topicid='.$topicid.'&page=p'.$lastpostread.'#pid'.$lastpostread).'" title="'.(__('legacy/forums.title_jump_to_unread')).'"><span class="small new"><b>'.(__('legacy/forums.text_new')).'</b></span></a>';
                     }
                 }
 
                 $topictime = substr((string) ($arr['added'] ?? ''), 0, 10);
                 if (strtotime((string) ($arr['added'] ?? '')) + 86400 > (int) (defined('TIMENOW') ? constant('TIMENOW') : time())) {
-                    $topictime = '<font class="new small">'.$topictime.'</font>';
+                    $topictime = '<span class="new small">'.$topictime.'</span>';
                 } else {
-                    $topictime = '<font color="gray" class="small">'.$topictime.'</font>';
+                    $topictime = '<span class="small nx-color-gray">'.$topictime.'</span>';
                 }
 
                 echo '<tr><td class="rowfollow" align="left"><table border="0" cellspacing="0" cellpadding="0"><tr>'.
                 '<td class="embedded">'.$img.
                 "</td><td class=\"embedded\" align=\"left\">\n".
-                $subject.'</td></tr></table></td><td class="rowfollow" align="center">'.UserDisplay::username($fpuserid).'<br />'.$topictime.'</td><td class="rowfollow" align="center">'.$replies.' / <font color="gray">'.$views."</font></td>\n".
+                $subject.'</td></tr></table></td><td class="rowfollow" align="center">'.UserDisplay::username($fpuserid).'<br />'.$topictime.'</td><td class="rowfollow" align="center">'.$replies.' / <span class="nx-color-gray">'.$views."</span></td>\n".
                 '<td class="rowfollow nowrap" align="center">'.$lpadded.'<br />'.$lpusername."</td>\n";
 
                 echo "</tr>\n";
@@ -339,14 +339,14 @@ final class ForumListingService
             $hits = (int) $searchResult['hits'];
             if ($hits) {
                 $error = false;
-                $found = '[<b><font class="striking"> '.(__('legacy/forums.text_found')).$hits.(__('legacy/forums.text_num_posts')).' </font></b>]';
+                $found = '[<b><span class="striking"> '.(__('legacy/forums.text_found')).$hits.(__('legacy/forums.text_num_posts')).' </span></b>]';
             }
         }
 
         ob_start();
         ?>
 <div class="search">
-	<div class="search_title"><?php echo __('legacy/forums.text_search_on_forum') ?> <?php echo $error && $keywords != '' ? '[<b><font color=striking> '.(__('legacy/forums.text_nothing_found')).'</font></b> ]' : $found ?></div>
+	<div class="search_title"><?php echo __('legacy/forums.text_search_on_forum') ?> <?php echo $error && $keywords != '' ? '[<b><span class="striking"> '.(__('legacy/forums.text_nothing_found')).'</span></b> ]' : $found ?></div>
 	<div>
 		<form method="get" action="forums.php" id="search_form">
 		<input type="hidden" name="action" value="search" />

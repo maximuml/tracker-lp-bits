@@ -170,12 +170,12 @@ final class ForumIndexService
             $Cache->cache_value('forum_'.$forumid.'_post_'.$todayDate.'_count', $posttodaycount, 1800);
         }
         if ($posttodaycount > 0) {
-            $posttoday = '&nbsp;&nbsp;('.(__('legacy/forums.text_today')).'<b><font class="new">'.$posttodaycount.'</font></b>)';
+            $posttoday = '&nbsp;&nbsp;('.(__('legacy/forums.text_today')).'<b><span class="new">'.$posttodaycount.'</span></b>)';
         } else {
             $posttoday = '';
         }
 
-        return '<tr><td class="rowfollow" align="left"><table border="0" cellspacing="0" cellpadding="0"><tr><td class="embedded">'.$img.'</td><td class="embedded"><a href="'.htmlspecialchars('?action=viewforum&forumid='.$forumid).'"><font class="big"><b>'.$forumname.'</b></font></a>'.$posttoday.
+        return '<tr><td class="rowfollow" align="left"><table border="0" cellspacing="0" cellpadding="0"><tr><td class="embedded">'.$img.'</td><td class="embedded"><a href="'.htmlspecialchars('?action=viewforum&forumid='.$forumid).'"><span class="big"><b>'.$forumname.'</b></span></a>'.$posttoday.
         '<br />'.$forumdescription.'</td></tr></table></td><td class="rowfollow" align="center" width="1%">'.$topiccount.'</td><td class="rowfollow" align="center" width="1%">'.$postcount.'</td>'.
         '<td class="rowfollow nowrap" align="left">'.$lastpost.'</td><td class="rowfollow" align="left">'.$forummoderators."</td></tr>\n";
     }
@@ -214,7 +214,7 @@ final class ForumIndexService
             $todaypostcount = $this->postRepository->getTodayPostsCount($todayDate);
             $Cache->cache_value('today_'.$todayDate.'_posts_count', $todaypostcount, 700);
         }
-        echo __('legacy/forums.text_our_members_have').'<b>'.$postcount.'</b>'.(__('legacy/forums.text_posts_in_topics')).'<b>'.$topiccount.'</b>'.(__('legacy/forums.text_in_topics')).'<b><font class="new">'.$todaypostcount.'</font></b>'.(__('legacy/forums.text_new_post')).Strings::addS((int) $todaypostcount).(__('legacy/forums.text_posts_today')).'<br /><br />';
+        echo __('legacy/forums.text_our_members_have').'<b>'.$postcount.'</b>'.(__('legacy/forums.text_posts_in_topics')).'<b>'.$topiccount.'</b>'.(__('legacy/forums.text_in_topics')).'<b><span class="new">'.$todaypostcount.'</span></b>'.(__('legacy/forums.text_new_post')).Strings::addS((int) $todaypostcount).(__('legacy/forums.text_posts_today')).'<br /><br />';
         echo $forumusers;
         ?>
 </td></tr></table>
@@ -304,7 +304,7 @@ final class ForumIndexService
     {
         $colorname = Palette::forumHighlight($hlcolor);
         if ($colorname) {
-            $subject = '<b><font color="'.$colorname.'">'.$subject.'</font></b>';
+            $subject = '<b><span data-color="'.$colorname.'">'.$subject.'</span></b>';
         }
 
         return $subject;

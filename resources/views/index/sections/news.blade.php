@@ -1,7 +1,7 @@
 @if($news['show'])
 <h2>{{ $news['title'] }}
     @if($news['canManage'])
-        - <font class="small">[<a class="altlink" href="news.php"><b>{{ $news['manageLink'] }}</b></a>]</font>
+        - <span class="small">[<a class="altlink" href="news.php"><b>{{ $news['manageLink'] }}</b></a>]</span>
     @endif
 </h2>
 @if(count($news['items']) > 0)

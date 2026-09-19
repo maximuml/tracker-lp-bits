@@ -177,7 +177,7 @@ final class ForumIndexServiceTest extends TestCase
     {
         $result = $this->service->highlightTopic('My Topic', 17);
 
-        $this->assertStringContainsString('<font', (string) $result);
+        $this->assertStringContainsString('data-color=', (string) $result);
         $this->assertStringContainsString('My Topic', (string) $result);
         $this->assertStringContainsString('Red', (string) $result);
     }

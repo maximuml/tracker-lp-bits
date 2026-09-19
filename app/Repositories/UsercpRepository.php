@@ -280,6 +280,10 @@ final class UsercpRepository extends BaseRepository
             $data['stylesheet'] = $dto->stylesheet;
         }
 
+        if ($dto->theme !== null) {
+            $data['theme'] = $dto->theme;
+        }
+
         if ($dto->sitelanguage !== null) {
             $langFolder = Locale::folderForIdWithContext($dto->sitelanguage);
             $currentFolder = Locale::folderFromCookie($dto->currentLangFolder, false);

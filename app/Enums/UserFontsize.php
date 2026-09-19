@@ -42,4 +42,16 @@ enum UserFontsize: int
             default => self::MEDIUM,
         };
     }
+
+    public static function fromMixed(mixed $value): self
+    {
+        if ($value instanceof self) {
+            return $value;
+        }
+        if (is_int($value) || (is_string($value) && ctype_digit($value))) {
+            return self::tryFrom((int) $value) ?? self::MEDIUM;
+        }
+
+        return self::fromStringSafe(is_string($value) ? $value : null);
+    }
 }

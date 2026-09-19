@@ -55,7 +55,6 @@ final class EscapedHtmlHelpersTest extends TestCase
         'UserClass::imagePath' => true,
         'UserDisplay::plainUsername' => true,
         'Style::cssUriWithContext' => true,
-        'Style::fontCssUriWithContext' => true,
         'Url::schemeAndHost' => true,
         'Http::protocolPrefix' => true,
         'Strings::addS' => true,

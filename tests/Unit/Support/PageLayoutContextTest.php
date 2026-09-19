@@ -67,6 +67,14 @@ class PageLayoutContextTest extends TestCase
         $this->assertSame(5, $context->userStylesheet());
     }
 
+    public function test_user_theme_defaults_to_auto_and_validates(): void
+    {
+        $this->assertSame('auto', $this->context([])->userTheme());
+        $this->assertSame('auto', $this->context(['id' => 1])->userTheme());
+        $this->assertSame('dark', $this->context(['id' => 1, 'theme' => 'dark'])->userTheme());
+        $this->assertSame('auto', $this->context(['id' => 1, 'theme' => 'neon'])->userTheme());
+    }
+
     public function test_defaults_for_missing_user_values(): void
     {
         $context = $this->context([]);

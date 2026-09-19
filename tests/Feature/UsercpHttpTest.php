@@ -252,6 +252,53 @@ final class UsercpHttpTest extends TestCase
             ->assertRedirect('/usercp.php?action=tracker&type=saved');
     }
 
+    public function test_tracker_save_accepts_theme(): void
+    {
+        $user = User::factory()->create();
+
+        $this->withNexusCookie($user)
+            ->post('/usercp', [
+                'action' => 'tracker',
+                'type' => 'save',
+                'theme' => 'dark',
+                'timetype' => 0,
+                'appendpromotion' => 1,
+            ])
+            ->assertRedirect('/usercp.php?action=tracker&type=saved');
+
+        $this->assertSame('dark', $user->fresh()->theme);
+    }
+
+    // ─── Theme toggle endpoint (ADR 0019) ───────────────────────────
+
+    public function test_theme_endpoint_persists_choice(): void
+    {
+        $user = User::factory()->create();
+
+        $this->withNexusCookie($user)
+            ->withCredentials()
+            ->postJson('/web/usercp/theme', ['theme' => 'dark'])
+            ->assertNoContent();
+
+        $this->assertSame('dark', $user->fresh()->theme);
+    }
+
+    public function test_theme_endpoint_rejects_invalid_value(): void
+    {
+        $user = User::factory()->create();
+
+        $this->withNexusCookie($user)
+            ->withCredentials()
+            ->postJson('/web/usercp/theme', ['theme' => 'neon'])
+            ->assertUnprocessable();
+    }
+
+    public function test_theme_endpoint_requires_auth(): void
+    {
+        $this->postJson('/web/usercp/theme', ['theme' => 'dark'])
+            ->assertUnauthorized();
+    }
+
     // ─── HTTP method boundaries ─────────────────────────────────────
 
     public function test_usercp_get_does_not_accept_post_only_action(): void

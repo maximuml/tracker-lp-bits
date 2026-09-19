@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Enums\UserFontsize;
+use App\Enums\UserTheme;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 
@@ -158,6 +159,16 @@ final class PageLayoutContext
     public function userStylesheet(): int
     {
         return (int) ($this->user['stylesheet'] ?? $this->defaultStylesheet);
+    }
+
+    public function userTheme(): string
+    {
+        $value = $this->user['theme'] ?? null;
+        if ($value instanceof UserTheme) {
+            return $value->value;
+        }
+
+        return UserTheme::fromStringSafe(is_string($value) ? $value : null)->value;
     }
 
     public function userFontSize(): ?string

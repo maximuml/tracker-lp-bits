@@ -71,15 +71,4 @@ final class UsercpLookupRepository extends BaseRepository
             ->get()
             ->all();
     }
-
-    /**
-     * @return array<string, int>
-     */
-    public function getStylesheetOptions(): array
-    {
-        return DB::table('stylesheets')
-            ->orderBy('name')
-            ->pluck('id', 'name')
-            ->all();
-    }
 }

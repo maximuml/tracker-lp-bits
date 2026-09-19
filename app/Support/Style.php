@@ -65,22 +65,6 @@ final class Style
     }
 
     /**
-     * Return the URI for the per-user font css file.
-     *
-     * Mirrors `get_font_css_uri()`.
-     */
-    public static function fontCssUri(?string $fontSize): string
-    {
-        $file = match ($fontSize) {
-            'large' => 'largefont.css',
-            'small' => 'smallfont.css',
-            default => 'mediumfont.css',
-        };
-
-        return 'styles/'.$file;
-    }
-
-    /**
      * Return the extra CSS (`addicode`) for the current stylesheet row.
      *
      * Mirrors `get_style_addicode()`.
@@ -135,19 +119,6 @@ final class Style
         $defaultId = self::defaultStylesheetId();
 
         return self::cssUri(app(LegacyRedisCache::class), $user ? $user['stylesheet'] : $defaultId, $defaultId, $file);
-    }
-
-    /**
-     * Convenience wrapper that reads the current user's font size from
-     * the support context and returns the font CSS URI.
-     */
-    public static function fontCssUriWithContext(): string
-    {
-        $user = app(CurrentUser::class)->get() ?? [];
-
-        $fontSize = $user['fontsize'] ?? null;
-
-        return self::fontCssUri(is_string($fontSize) ? $fontSize : null);
     }
 
     /**

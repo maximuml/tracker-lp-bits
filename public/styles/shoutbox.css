@@ -96,8 +96,16 @@ td.shoutrow .shout-class-badge {
     margin-right: 3px;
     text-transform: uppercase;
     vertical-align: middle;
-    color: #fff !important;
+    color: #fff;
 }
+
+td.shoutrow .shout-class-badge--vip { background: #9c27b0; }
+td.shoutrow .shout-class-badge--retiree { background: #546b78; }
+td.shoutrow .shout-class-badge--uploader { background: #1976d2; }
+td.shoutrow .shout-class-badge--moderator { background: #2e7d32; }
+td.shoutrow .shout-class-badge--administrator { background: #d32f2f; }
+td.shoutrow .shout-class-badge--sysop { background: #b71c1c; }
+td.shoutrow .shout-class-badge--staffleader { background: #bf360c; }
 
 .shout-actions {
     font-size: 11px;

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Enums\UserPrivacy;
+use App\Enums\UserTheme;
 use App\Models\Setting;
 use App\Models\TrackerUrl;
 use App\Models\User;
@@ -712,12 +713,11 @@ JS;
 
         $categories = SearchBox::buildCategoryTableWithContext($browsecatmode, 'yes', 'torrents.php?allsec=1', '', 3, $notifs, ['section_name' => true]);
 
-        $ssSa = $this->usercpLookupRepository->getStylesheetOptions();
-        ksort($ssSa);
-        $stylesheetOptions = '';
-        foreach ($ssSa as $ssName => $ssId) {
-            $selected = ((int) $ssId === (int) ($curUser['stylesheet'] ?? 0)) ? ' selected' : '';
-            $stylesheetOptions .= "<option value={$ssId}{$selected}>{$ssName}</option>\n";
+        $currentTheme = UserTheme::fromStringSafe(is_string($curUser['theme'] ?? null) ? $curUser['theme'] : null)->value;
+        $themeOptions = '';
+        foreach (UserTheme::cases() as $theme) {
+            $selected = $theme->value === $currentTheme ? ' selected' : '';
+            $themeOptions .= '<option value="'.$theme->value.'"'.$selected.'>'.htmlspecialchars(__('legacy/usercp.select_theme_'.$theme->value))."</option>\n";
         }
 
         $siteLangs = Locale::languageList('site_lang', true);
@@ -745,7 +745,7 @@ JS;
             ."<table><caption><font class='big'>".htmlspecialchars(__('legacy/usercp.text_additional_selection')).'</font></caption><tr><td class=bottom><b>'.htmlspecialchars(__('legacy/usercp.text_show_dead_active')).'</b><br /><select name="incldead"><option value="0" '.(str_contains($notifs, '[incldead=0]') ? ' selected' : '').'>'.htmlspecialchars(__('legacy/usercp.select_including_dead')).'</option><option value="1" '.(str_contains($notifs, '[incldead=1]') || ! str_contains($notifs, 'incldead') ? ' selected' : '').'>'.htmlspecialchars(__('legacy/usercp.select_active')).'</option><option value="2" '.(str_contains($notifs, '[incldead=2]') ? ' selected' : '').'>'.htmlspecialchars(__('legacy/usercp.select_dead')).'</option></select></td><td class=bottom align=left><b>'.htmlspecialchars(__('legacy/usercp.text_show_special_torrents')).'</b><br /><select name="spstate"><option value="0" '.($specialState === 0 ? ' selected' : '').'>'.htmlspecialchars(__('legacy/usercp.select_all')).'</option>'.Html::promotionSelection($specialState).'</select></td><td class=bottom><b>'.htmlspecialchars(__('legacy/usercp.text_show_bookmarked')).'</b><br /><select name="inclbookmarked"><option value="0" '.(str_contains($notifs, '[inclbookmarked=0]') ? ' selected' : '').'>'.htmlspecialchars(__('legacy/usercp.select_all')).'</option><option value="1" '.(str_contains($notifs, '[inclbookmarked=1]') ? ' selected' : '').' >'.htmlspecialchars(__('legacy/usercp.select_bookmarked')).'</option><option value="2" '.(str_contains($notifs, '[inclbookmarked=2]') ? ' selected' : '').'>'.htmlspecialchars(__('legacy/usercp.select_bookmarked_exclude')).'</option></select></td></tr></table>';
         $rowsHtml .= (string) Html::frowSmall(__('legacy/usercp.row_browse_default_categories'), $categoriesCell, 1, '', true);
 
-        $rowsHtml .= (string) Html::frowSmall(__('legacy/usercp.row_stylesheet'), "<select name=stylesheet>\n".$stylesheetOptions."\n</select>&nbsp;&nbsp;<font class=small>".htmlspecialchars(__('legacy/usercp.text_stylesheet_note')).'<a href="aboutnexus.php#stylesheet" ><b>'.htmlspecialchars(__('legacy/usercp.text_stylesheet_link')).'</b></a></font>.', 1, '', true);
+        $rowsHtml .= (string) Html::frowSmall(__('legacy/usercp.row_theme'), "<select name=theme>\n".$themeOptions."\n</select>", 1, '', true);
 
         $rowsHtml .= (string) Html::frowSmall(__('legacy/usercp.row_font_size'), '<select name=fontsize><option value=small '.(($curUser['fontsize'] ?? '') === 'small' ? ' selected' : '').'>'.htmlspecialchars(__('legacy/usercp.select_small')).'</option><option value=medium '.(($curUser['fontsize'] ?? '') === 'medium' ? ' selected' : '').'>'.htmlspecialchars(__('legacy/usercp.select_medium')).'</option><option value=large '.(($curUser['fontsize'] ?? '') === 'large' ? ' selected' : '').'>'.htmlspecialchars(__('legacy/usercp.select_large')).'</option></select>', 1, '', true);
 

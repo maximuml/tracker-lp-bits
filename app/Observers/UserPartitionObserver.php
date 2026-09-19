@@ -22,7 +22,7 @@ class UserPartitionObserver
     /** @var array<string, list<string>> */
     private const PREFERENCE_COLUMNS = [
         'user_preferences' => [
-            'stylesheet', 'caticon', 'fontsize', 'torrentsperpage', 'topicsperpage',
+            'stylesheet', 'theme', 'caticon', 'fontsize', 'torrentsperpage', 'topicsperpage',
             'postsperpage', 'clicktopic', 'tooltip', 'timetype', 'appendpromotion',
             'appendnew', 'appendpicked', 'appendsticky', 'avatars', 'bmicon',
             'commentpm', 'deletepms', 'dlicon', 'forumpost', 'savepms',

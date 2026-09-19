@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ $chrome->locale }}">
+<html lang="{{ $chrome->locale }}" data-theme="{{ $chrome->theme }}" data-fontsize="{{ $chrome->fontSize }}">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />

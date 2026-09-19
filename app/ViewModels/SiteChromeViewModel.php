@@ -89,6 +89,8 @@ final class SiteChromeViewModel
         public readonly string $yearFounded,
         public readonly string $variant,
         public readonly string $locale,
+        public readonly string $theme,
+        public readonly string $fontSize,
         public readonly string $cspNonce,
         public readonly string $metaKeywords,
         public readonly string $metaDescription,
@@ -311,6 +313,8 @@ final class SiteChromeViewModel
             yearFounded: substr($context->dateFounded, 0, 4) ?: '2007',
             variant: $variant,
             locale: str_replace('_', '-', app()->getLocale()),
+            theme: $context->userTheme(),
+            fontSize: $context->userFontSize() ?? 'medium',
             cspNonce: $cspNonce,
             metaKeywords: $context->metaKeywordsTweak,
             metaDescription: $context->metaDescriptionTweak,
@@ -387,7 +391,6 @@ final class SiteChromeViewModel
         $cssUri = Style::cssUri($context->cache, $context->userStylesheet(), $context->defaultStylesheet);
 
         $headStyles = [
-            Style::fontCssUri($context->userFontSize()).$cssUpdateDate,
             'styles/sprites.css'.$cssUpdateDate,
             $picFolder.'/forumsprites.css'.$cssUpdateDate,
             $cssUri.'theme.css'.$cssUpdateDate,
@@ -715,6 +718,7 @@ final class SiteChromeViewModel
         }
         $scripts[] = 'js/medium-zoom.min.js';
         $scripts[] = 'js/goup.js';
+        $scripts[] = 'js/theme-toggle.js';
 
         return $scripts;
     }

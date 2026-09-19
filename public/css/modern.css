@@ -682,3 +682,140 @@ select.nx-field__input {
 /* Captcha 'grid' row pairs inside the stacked auth forms (ADR 0020). */
 .nx-auth .nx-fhead { display: block; margin-bottom: 0.25rem; font-weight: 600; text-align: left; }
 .nx-auth .nx-fcell { display: block; margin-bottom: 0.75rem; }
+/* ---------- Forum index (ADR 0021) ---------- */
+.nx-forum-table { width: 100%; border-collapse: collapse; }
+.nx-forum-table > tbody > tr > td,
+.nx-forum-table > tbody > tr > th { padding: 0.35rem 0.5rem; }
+.nx-forum-table__name { width: 99%; text-align: left; }
+.nx-forum-row { display: flex; gap: 0.5rem; align-items: flex-start; }
+.nx-forum-row__today { margin-left: 0.4rem; }
+.nx-forum-stats__title { text-align: left; }
+.nx-forum-stats { margin-top: 0.5rem; }
+
+/* Topic highlight palette (legacy get_hl_color indices 1–40). Class-based
+   replacement for <font color="…"> — CSP has no unsafe-inline for styles. */
+.nx-hl-1 { color: black; }
+.nx-hl-2 { color: sienna; }
+.nx-hl-3 { color: darkolivegreen; }
+.nx-hl-4 { color: darkgreen; }
+.nx-hl-5 { color: darkslateblue; }
+.nx-hl-6 { color: navy; }
+.nx-hl-7 { color: indigo; }
+.nx-hl-8 { color: darkslategray; }
+.nx-hl-9 { color: darkred; }
+.nx-hl-10 { color: darkorange; }
+.nx-hl-11 { color: olive; }
+.nx-hl-12 { color: green; }
+.nx-hl-13 { color: teal; }
+.nx-hl-14 { color: blue; }
+.nx-hl-15 { color: slategray; }
+.nx-hl-16 { color: dimgray; }
+.nx-hl-17 { color: red; }
+.nx-hl-18 { color: sandybrown; }
+.nx-hl-19 { color: yellowgreen; }
+.nx-hl-20 { color: seagreen; }
+.nx-hl-21 { color: mediumturquoise; }
+.nx-hl-22 { color: royalblue; }
+.nx-hl-23 { color: purple; }
+.nx-hl-24 { color: gray; }
+.nx-hl-25 { color: magenta; }
+.nx-hl-26 { color: orange; }
+.nx-hl-27 { color: yellow; }
+.nx-hl-28 { color: lime; }
+.nx-hl-29 { color: cyan; }
+.nx-hl-30 { color: deepskyblue; }
+.nx-hl-31 { color: darkorchid; }
+.nx-hl-32 { color: silver; }
+.nx-hl-33 { color: pink; }
+.nx-hl-34 { color: wheat; }
+.nx-hl-35 { color: lemonchiffon; }
+.nx-hl-36 { color: palegreen; }
+.nx-hl-37 { color: paleturquoise; }
+.nx-hl-38 { color: lightblue; }
+.nx-hl-39 { color: plum; }
+.nx-hl-40 { color: white; }
+
+/* Dark scheme: lift the moderator highlight colours toward the text colour
+   so they stay readable (palette was chosen for a light background). */
+@media (prefers-color-scheme: dark) {
+    html:not([data-theme="light"]) .nx-hl-1 { color: color-mix(in srgb, black 35%, var(--nxm-text)); }
+    html:not([data-theme="light"]) .nx-hl-2 { color: color-mix(in srgb, sienna 55%, var(--nxm-text)); }
+    html:not([data-theme="light"]) .nx-hl-3 { color: color-mix(in srgb, darkolivegreen 60%, var(--nxm-text)); }
+    html:not([data-theme="light"]) .nx-hl-4 { color: color-mix(in srgb, darkgreen 55%, var(--nxm-text)); }
+    html:not([data-theme="light"]) .nx-hl-5 { color: color-mix(in srgb, darkslateblue 60%, var(--nxm-text)); }
+    html:not([data-theme="light"]) .nx-hl-6 { color: color-mix(in srgb, navy 55%, var(--nxm-text)); }
+    html:not([data-theme="light"]) .nx-hl-7 { color: color-mix(in srgb, indigo 60%, var(--nxm-text)); }
+    html:not([data-theme="light"]) .nx-hl-8 { color: color-mix(in srgb, darkslategray 55%, var(--nxm-text)); }
+    html:not([data-theme="light"]) .nx-hl-9 { color: color-mix(in srgb, darkred 60%, var(--nxm-text)); }
+    html:not([data-theme="light"]) .nx-hl-10 { color: color-mix(in srgb, darkorange 70%, var(--nxm-text)); }
+    html:not([data-theme="light"]) .nx-hl-11 { color: color-mix(in srgb, olive 65%, var(--nxm-text)); }
+    html:not([data-theme="light"]) .nx-hl-12 { color: color-mix(in srgb, green 60%, var(--nxm-text)); }
+    html:not([data-theme="light"]) .nx-hl-13 { color: color-mix(in srgb, teal 60%, var(--nxm-text)); }
+    html:not([data-theme="light"]) .nx-hl-14 { color: color-mix(in srgb, blue 60%, var(--nxm-text)); }
+    html:not([data-theme="light"]) .nx-hl-15 { color: color-mix(in srgb, slategray 60%, var(--nxm-text)); }
+    html:not([data-theme="light"]) .nx-hl-16 { color: color-mix(in srgb, dimgray 55%, var(--nxm-text)); }
+    html:not([data-theme="light"]) .nx-hl-17 { color: color-mix(in srgb, red 70%, var(--nxm-text)); }
+    html:not([data-theme="light"]) .nx-hl-18 { color: color-mix(in srgb, sandybrown 80%, var(--nxm-text)); }
+    html:not([data-theme="light"]) .nx-hl-19 { color: color-mix(in srgb, yellowgreen 75%, var(--nxm-text)); }
+    html:not([data-theme="light"]) .nx-hl-20 { color: color-mix(in srgb, seagreen 65%, var(--nxm-text)); }
+    html:not([data-theme="light"]) .nx-hl-21 { color: color-mix(in srgb, mediumturquoise 75%, var(--nxm-text)); }
+    html:not([data-theme="light"]) .nx-hl-22 { color: color-mix(in srgb, royalblue 65%, var(--nxm-text)); }
+    html:not([data-theme="light"]) .nx-hl-23 { color: color-mix(in srgb, purple 65%, var(--nxm-text)); }
+    html:not([data-theme="light"]) .nx-hl-24 { color: color-mix(in srgb, gray 65%, var(--nxm-text)); }
+    html:not([data-theme="light"]) .nx-hl-25 { color: color-mix(in srgb, magenta 70%, var(--nxm-text)); }
+    html:not([data-theme="light"]) .nx-hl-26 { color: color-mix(in srgb, orange 75%, var(--nxm-text)); }
+    html:not([data-theme="light"]) .nx-hl-27 { color: color-mix(in srgb, yellow 80%, var(--nxm-text)); }
+    html:not([data-theme="light"]) .nx-hl-28 { color: color-mix(in srgb, lime 75%, var(--nxm-text)); }
+    html:not([data-theme="light"]) .nx-hl-29 { color: color-mix(in srgb, cyan 75%, var(--nxm-text)); }
+    html:not([data-theme="light"]) .nx-hl-30 { color: color-mix(in srgb, deepskyblue 75%, var(--nxm-text)); }
+    html:not([data-theme="light"]) .nx-hl-31 { color: color-mix(in srgb, darkorchid 70%, var(--nxm-text)); }
+    html:not([data-theme="light"]) .nx-hl-32 { color: color-mix(in srgb, silver 80%, var(--nxm-text)); }
+    html:not([data-theme="light"]) .nx-hl-33 { color: color-mix(in srgb, pink 80%, var(--nxm-text)); }
+    html:not([data-theme="light"]) .nx-hl-34 { color: color-mix(in srgb, wheat 80%, var(--nxm-text)); }
+    html:not([data-theme="light"]) .nx-hl-35 { color: color-mix(in srgb, lemonchiffon 80%, var(--nxm-text)); }
+    html:not([data-theme="light"]) .nx-hl-36 { color: color-mix(in srgb, palegreen 80%, var(--nxm-text)); }
+    html:not([data-theme="light"]) .nx-hl-37 { color: color-mix(in srgb, paleturquoise 80%, var(--nxm-text)); }
+    html:not([data-theme="light"]) .nx-hl-38 { color: color-mix(in srgb, lightblue 75%, var(--nxm-text)); }
+    html:not([data-theme="light"]) .nx-hl-39 { color: color-mix(in srgb, plum 75%, var(--nxm-text)); }
+    html:not([data-theme="light"]) .nx-hl-40 { color: color-mix(in srgb, white 80%, var(--nxm-text)); }
+}
+html[data-theme="dark"] .nx-hl-1 { color: color-mix(in srgb, black 35%, var(--nxm-text)); }
+html[data-theme="dark"] .nx-hl-2 { color: color-mix(in srgb, sienna 55%, var(--nxm-text)); }
+html[data-theme="dark"] .nx-hl-3 { color: color-mix(in srgb, darkolivegreen 60%, var(--nxm-text)); }
+html[data-theme="dark"] .nx-hl-4 { color: color-mix(in srgb, darkgreen 55%, var(--nxm-text)); }
+html[data-theme="dark"] .nx-hl-5 { color: color-mix(in srgb, darkslateblue 60%, var(--nxm-text)); }
+html[data-theme="dark"] .nx-hl-6 { color: color-mix(in srgb, navy 55%, var(--nxm-text)); }
+html[data-theme="dark"] .nx-hl-7 { color: color-mix(in srgb, indigo 60%, var(--nxm-text)); }
+html[data-theme="dark"] .nx-hl-8 { color: color-mix(in srgb, darkslategray 55%, var(--nxm-text)); }
+html[data-theme="dark"] .nx-hl-9 { color: color-mix(in srgb, darkred 60%, var(--nxm-text)); }
+html[data-theme="dark"] .nx-hl-10 { color: color-mix(in srgb, darkorange 70%, var(--nxm-text)); }
+html[data-theme="dark"] .nx-hl-11 { color: color-mix(in srgb, olive 65%, var(--nxm-text)); }
+html[data-theme="dark"] .nx-hl-12 { color: color-mix(in srgb, green 60%, var(--nxm-text)); }
+html[data-theme="dark"] .nx-hl-13 { color: color-mix(in srgb, teal 60%, var(--nxm-text)); }
+html[data-theme="dark"] .nx-hl-14 { color: color-mix(in srgb, blue 60%, var(--nxm-text)); }
+html[data-theme="dark"] .nx-hl-15 { color: color-mix(in srgb, slategray 60%, var(--nxm-text)); }
+html[data-theme="dark"] .nx-hl-16 { color: color-mix(in srgb, dimgray 55%, var(--nxm-text)); }
+html[data-theme="dark"] .nx-hl-17 { color: color-mix(in srgb, red 70%, var(--nxm-text)); }
+html[data-theme="dark"] .nx-hl-18 { color: color-mix(in srgb, sandybrown 80%, var(--nxm-text)); }
+html[data-theme="dark"] .nx-hl-19 { color: color-mix(in srgb, yellowgreen 75%, var(--nxm-text)); }
+html[data-theme="dark"] .nx-hl-20 { color: color-mix(in srgb, seagreen 65%, var(--nxm-text)); }
+html[data-theme="dark"] .nx-hl-21 { color: color-mix(in srgb, mediumturquoise 75%, var(--nxm-text)); }
+html[data-theme="dark"] .nx-hl-22 { color: color-mix(in srgb, royalblue 65%, var(--nxm-text)); }
+html[data-theme="dark"] .nx-hl-23 { color: color-mix(in srgb, purple 65%, var(--nxm-text)); }
+html[data-theme="dark"] .nx-hl-24 { color: color-mix(in srgb, gray 65%, var(--nxm-text)); }
+html[data-theme="dark"] .nx-hl-25 { color: color-mix(in srgb, magenta 70%, var(--nxm-text)); }
+html[data-theme="dark"] .nx-hl-26 { color: color-mix(in srgb, orange 75%, var(--nxm-text)); }
+html[data-theme="dark"] .nx-hl-27 { color: color-mix(in srgb, yellow 80%, var(--nxm-text)); }
+html[data-theme="dark"] .nx-hl-28 { color: color-mix(in srgb, lime 75%, var(--nxm-text)); }
+html[data-theme="dark"] .nx-hl-29 { color: color-mix(in srgb, cyan 75%, var(--nxm-text)); }
+html[data-theme="dark"] .nx-hl-30 { color: color-mix(in srgb, deepskyblue 75%, var(--nxm-text)); }
+html[data-theme="dark"] .nx-hl-31 { color: color-mix(in srgb, darkorchid 70%, var(--nxm-text)); }
+html[data-theme="dark"] .nx-hl-32 { color: color-mix(in srgb, silver 80%, var(--nxm-text)); }
+html[data-theme="dark"] .nx-hl-33 { color: color-mix(in srgb, pink 80%, var(--nxm-text)); }
+html[data-theme="dark"] .nx-hl-34 { color: color-mix(in srgb, wheat 80%, var(--nxm-text)); }
+html[data-theme="dark"] .nx-hl-35 { color: color-mix(in srgb, lemonchiffon 80%, var(--nxm-text)); }
+html[data-theme="dark"] .nx-hl-36 { color: color-mix(in srgb, palegreen 80%, var(--nxm-text)); }
+html[data-theme="dark"] .nx-hl-37 { color: color-mix(in srgb, paleturquoise 80%, var(--nxm-text)); }
+html[data-theme="dark"] .nx-hl-38 { color: color-mix(in srgb, lightblue 75%, var(--nxm-text)); }
+html[data-theme="dark"] .nx-hl-39 { color: color-mix(in srgb, plum 75%, var(--nxm-text)); }
+html[data-theme="dark"] .nx-hl-40 { color: color-mix(in srgb, white 80%, var(--nxm-text)); }

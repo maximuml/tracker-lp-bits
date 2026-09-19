@@ -17,9 +17,12 @@ use App\Support\Forum;
 use App\Support\Globals;
 use App\Support\Html\SafeHtml;
 use App\Support\Palette;
-use App\Support\Strings;
-use App\Support\Time;
 use App\Support\UserDisplay;
+use App\ViewModels\Forum\ForumIndexViewModel;
+use App\ViewModels\Forum\ForumRow;
+use App\ViewModels\Forum\ForumStatsViewModel;
+use App\ViewModels\Forum\LastPostRef;
+use App\ViewModels\Forum\OverforumGroup;
 
 /**
  * Builds the default forums index (overforums + forums list + stats)
@@ -45,9 +48,8 @@ final class ForumIndexService
      * Build the default forums index (overforums + forums list + stats).
      *
      * @param  array<string, mixed>  $curUser
-     * @return array<string, mixed>
      */
-    public function buildForumsIndex(array $curUser, int $userId): array
+    public function buildForumsIndex(array $curUser, int $userId): ForumIndexViewModel
     {
         $Cache = $this->cache;
         $todayDate = date('Y-m-d');
@@ -59,11 +61,6 @@ final class ForumIndexService
         $SITENAME = (string) $this->globals->get('SITENAME', '');
         $showforumstatsMain = (string) $this->globals->get('showforumstats_main', '');
 
-        ob_start();
-        echo '<h1 align="center">'.$SITENAME.'&nbsp;'.(__('legacy/forums.text_forums')).'</h1>';
-        echo '<p align="center"><a href="?action=search"><b>'.(__('legacy/forums.text_search')).'</b></a> | <a href="?action=viewunread"><b>'.(__('legacy/forums.text_view_unread')).'</b></a> | <a href="?catchup=1"><b>'.(__('legacy/forums.text_catch_up')).'</b></a> '.(Permission::can(PermissionEnum::FORUM_MANAGE) ? '| <a href="forummanage.php"><b>'.(__('legacy/forums.text_forum_manager')).'</b></a>' : '').'</p>';
-        echo "<table border=\"1\" cellspacing=\"0\" cellpadding=\"5\" width=\"100%\">\n";
-
         if (! $overforums = $Cache->get_value('overforums_list')) {
             $overforums = $this->overforumRepository->getOverforumsList();
             $Cache->cache_value('overforums_list', $overforums, 86400);
@@ -71,119 +68,105 @@ final class ForumIndexService
         $forums = $this->getForumRow(0) ?? [];
         $overforumIds = array_map(static fn (array $a): int => (int) ($a['id'] ?? 0), $overforums);
         $readable = static fn (array $f): bool => UserDisplay::currentClass() >= (int) ($f['minclassread'] ?? 0);
+        $currentClass = UserDisplay::currentClass();
 
         $sections = [];
         foreach ($overforums as $a) {
-            if (UserDisplay::currentClass() < (int) ($a['minclassview'] ?? 0)) {
+            if ($currentClass < (int) ($a['minclassview'] ?? 0)) {
                 continue;
             }
             $forid = (int) $a['id'];
-            $sections[] = [
-                (string) ($a['name'] ?? ''),
-                array_filter($forums, static fn (array $f): bool => (int) ($f['forid'] ?? 0) === $forid && $readable($f)),
-            ];
+            $rows = [];
+            foreach ($forums as $f) {
+                if ((int) ($f['forid'] ?? 0) === $forid && $readable($f)) {
+                    $rows[] = $this->forumRow($f, $curUser, $todayDate);
+                }
+            }
+            $sections[] = new OverforumGroup((string) ($a['name'] ?? ''), $rows);
         }
 
-        $orphans = array_filter(
-            $forums,
-            static fn (array $f): bool => ! in_array((int) ($f['forid'] ?? 0), $overforumIds, true) && $readable($f),
-        );
-        if ($orphans !== []) {
-            $sections[] = [(string) __('legacy/forums.col_forums'), $orphans];
-        }
-
-        foreach ($sections as [$sectionName, $sectionForums]) {
-            echo '<tr><td align="left" class="colhead" width="99%">'.htmlspecialchars($sectionName).'</td><td align="center" class="colhead">'.(__('legacy/forums.col_topics')).'</td>'.
-            '<td align="center" class="colhead">'.(__('legacy/forums.col_posts')).'</td>'.
-            '<td align="left" class="colhead">'.(__('legacy/forums.col_last_post')).'</td><td class="colhead" align="left">'.(__('legacy/forums.col_moderator'))."</td></tr>\n";
-
-            foreach ($sectionForums as $forums_arr) {
-                echo $this->forumRowHtml($forums_arr, $curUser, $todayDate);
+        $orphans = [];
+        foreach ($forums as $f) {
+            if (! in_array((int) ($f['forid'] ?? 0), $overforumIds, true) && $readable($f)) {
+                $orphans[] = $this->forumRow($f, $curUser, $todayDate);
             }
         }
-        echo '</table>';
-        if ($showforumstatsMain == 'yes') {
-            echo $this->forumStats($todayDate);
+        if ($orphans !== []) {
+            $sections[] = new OverforumGroup((string) __('legacy/forums.col_forums'), $orphans);
         }
 
-        return ['html' => SafeHtml::fromTrustedHtml((string) ob_get_clean())];
+        return new ForumIndexViewModel(
+            siteName: $SITENAME,
+            canManageForums: Permission::can(PermissionEnum::FORUM_MANAGE),
+            sections: $sections,
+            stats: $showforumstatsMain === 'yes' ? $this->loadStats($todayDate) : null,
+        );
     }
 
     /**
-     * Render one forum row (name, counts, last post, moderators).
+     * Build one forum row (name, counts, last post, moderators).
      *
      * @param  array<string, mixed>  $forums_arr
      * @param  array<string, mixed>  $curUser
      */
-    private function forumRowHtml(array $forums_arr, array $curUser, string $todayDate): string
+    private function forumRow(array $forums_arr, array $curUser, string $todayDate): ForumRow
     {
         $Cache = $this->cache;
         $forumid = (int) $forums_arr['id'];
-        $forumname = htmlspecialchars((string) ($forums_arr['name'] ?? ''));
-        $forumdescription = htmlspecialchars((string) ($forums_arr['description'] ?? ''));
 
         $forummoderators = Forum::moderatorsWithContext($forumid, false);
-        if (! $forummoderators) {
-            $forummoderators = '<a href="contactstaff.php"><i>'.(__('legacy/forums.text_apply_now')).'</i></a>';
-        }
-
-        $topiccount = number_format((int) $forums_arr['topiccount']);
-        $postcount = number_format((int) $forums_arr['postcount']);
 
         if (! $arr = $Cache->get_value('forum_'.$forumid.'_last_replied_topic_content')) {
-            $lastTopic = $this->topicRepository->getLastTopicByForum((int) $forumid);
+            $lastTopic = $this->topicRepository->getLastTopicByForum($forumid);
             $arr = $lastTopic ? $lastTopic->toArray() : false;
             $Cache->cache_value('forum_'.$forumid.'_last_replied_topic_content', $arr, 900);
         }
 
+        $lastPost = null;
+        $hasUnread = false;
         if ($arr) {
             $lastpostid = (int) $arr['lastpost'];
-            $post_arr = Forum::postRowWithContext($lastpostid);
-            $lastposterid = (int) ($post_arr['userid'] ?? 0);
-            $lastpostdate = Time::format($post_arr['added'] ?? '', true, false);
+            $post_arr = Forum::postRowWithContext($lastpostid) ?? [];
             $lasttopicid = (int) $arr['id'];
-            $hlcolor = (int) $arr['hlcolor'];
-            $lasttopicdissubject = $lasttopicsubject = (string) ($arr['subject'] ?? '');
-            $max_length_of_topic_subject = 35;
-            $count_dispname = mb_strlen($lasttopicdissubject, 'UTF-8');
-            if ($count_dispname > $max_length_of_topic_subject) {
-                $lasttopicdissubject = mb_substr($lasttopicdissubject, 0, $max_length_of_topic_subject - 2, 'UTF-8').'..';
+            $fullSubject = (string) ($arr['subject'] ?? '');
+            $displaySubject = $fullSubject;
+            if (mb_strlen($displaySubject, 'UTF-8') > 35) {
+                $displaySubject = mb_substr($displaySubject, 0, 33, 'UTF-8').'..';
             }
-            $lasttopic = $this->highlightTopic(htmlspecialchars($lasttopicdissubject), $hlcolor);
-
-            $lastpost = '<a href="'.htmlspecialchars('?action=viewtopic&topicid='.$lasttopicid.'&page=last#last').'" title="'.htmlspecialchars($lasttopicsubject).'">'.$lasttopic.'</a><br />'.$lastpostdate.'&nbsp;|&nbsp;'.UserDisplay::username($lastposterid);
-
-            $lastreadpost = $this->getLastReadPostId($lasttopicid, $curUser);
-
-            if ($lastreadpost >= $lastpostid) {
-                $img = $this->getTopicImage('read');
-            } else {
-                $img = $this->getTopicImage('unread');
-            }
-        } else {
-            $lastpost = 'N/A';
-            $img = $this->getTopicImage('read');
+            $lastPost = new LastPostRef(
+                topicId: $lasttopicid,
+                subject: $displaySubject,
+                fullSubject: $fullSubject,
+                hlcolor: (int) $arr['hlcolor'],
+                date: (string) ($post_arr['added'] ?? ''),
+                poster: UserDisplay::username((int) ($post_arr['userid'] ?? 0)),
+            );
+            $hasUnread = $this->getLastReadPostId($lasttopicid, $curUser) < $lastpostid;
         }
+
         $posttodaycount = $Cache->get_value('forum_'.$forumid.'_post_'.$todayDate.'_count');
         if ($posttodaycount == '') {
-            $posttodaycount = $this->postRepository->getForumTodayPostCount((int) $forumid, date('Y-m-d'));
+            $posttodaycount = $this->postRepository->getForumTodayPostCount($forumid, date('Y-m-d'));
             $Cache->cache_value('forum_'.$forumid.'_post_'.$todayDate.'_count', $posttodaycount, 1800);
         }
-        if ($posttodaycount > 0) {
-            $posttoday = '&nbsp;&nbsp;('.(__('legacy/forums.text_today')).'<b><font class="new">'.$posttodaycount.'</font></b>)';
-        } else {
-            $posttoday = '';
-        }
 
-        return "<tr><td class=\"rowfollow\" align=\"left\"><table border=\"0\" cellspacing=\"0\" cellpadding=\"0\"><tr><td class=\"embedded\" style='padding-right: 10px'>".$img.'</td><td class="embedded"><a href="'.htmlspecialchars('?action=viewforum&forumid='.$forumid).'"><font class="big"><b>'.$forumname.'</b></font></a>'.$posttoday.
-        '<br />'.$forumdescription.'</td></tr></table></td><td class="rowfollow" align="center" width="1%">'.$topiccount.'</td><td class="rowfollow" align="center" width="1%">'.$postcount.'</td>'.
-        '<td class="rowfollow nowrap" align="left">'.$lastpost.'</td><td class="rowfollow" align="left">'.$forummoderators."</td></tr>\n";
+        return new ForumRow(
+            id: $forumid,
+            name: (string) ($forums_arr['name'] ?? ''),
+            description: (string) ($forums_arr['description'] ?? ''),
+            topicCount: (int) $forums_arr['topiccount'],
+            postCount: (int) $forums_arr['postcount'],
+            postsToday: (int) $posttodaycount,
+            hasUnread: $hasUnread,
+            lastPost: $lastPost,
+            moderators: $forummoderators !== '' ? SafeHtml::fromTrustedHtml($forummoderators) : null,
+        );
     }
 
     /**
-     * Render the forum stats block.
+     * Load the forum stats counters.
      */
-    public function forumStats(string $todayDate): string
+    private function loadStats(string $todayDate): ForumStatsViewModel
     {
         $Cache = $this->cache;
 
@@ -191,17 +174,6 @@ final class ForumIndexService
             $activeforumuser_num = $this->forumRepository->getActiveForumUserCount();
             $Cache->cache_value('active_forum_user_count', $activeforumuser_num, 300);
         }
-        if ($activeforumuser_num) {
-            $forumusers = (__('legacy/forums.text_there')).Strings::isOrAre((int) $activeforumuser_num).'<b>'.$activeforumuser_num.'</b>'.(__('legacy/forums.text_online_user')).Strings::addS((int) $activeforumuser_num).(__('legacy/forums.text_in_forum_now'));
-        } else {
-            $forumusers = (__('legacy/forums.text_no_active_users'));
-        }
-
-        ob_start();
-        ?>
-<h2 align="left"><?php echo __('legacy/forums.text_stats') ?></h2>
-<table width="100%"><tr><td class="text">
-<?php
         if (! $postcount = $Cache->get_value('total_posts_count')) {
             $postcount = $this->postRepository->getTotalPostsCount();
             $Cache->cache_value('total_posts_count', $postcount, 96400);
@@ -214,12 +186,13 @@ final class ForumIndexService
             $todaypostcount = $this->postRepository->getTodayPostsCount($todayDate);
             $Cache->cache_value('today_'.$todayDate.'_posts_count', $todaypostcount, 700);
         }
-        echo __('legacy/forums.text_our_members_have').'<b>'.$postcount.'</b>'.(__('legacy/forums.text_posts_in_topics')).'<b>'.$topiccount.'</b>'.(__('legacy/forums.text_in_topics')).'<b><font class="new">'.$todaypostcount.'</font></b>'.(__('legacy/forums.text_new_post')).Strings::addS((int) $todaypostcount).(__('legacy/forums.text_posts_today')).'<br /><br />';
-        echo $forumusers;
-        ?>
-</td></tr></table>
-<?php
-        return (string) ob_get_clean();
+
+        return new ForumStatsViewModel(
+            posts: (int) $postcount,
+            topics: (int) $topiccount,
+            todayPosts: (int) $todaypostcount,
+            activeUsers: (int) $activeforumuser_num,
+        );
     }
 
     /**

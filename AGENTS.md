@@ -784,3 +784,68 @@ match the connection used by HTTP requests through OpenResty.
 
 Key remaining work: expand unit-test coverage for controllers (many blocked
 by final repository classes or static methods — see W2-01/W2-02).
+
+### ADR 0023: viewtopic on view models + post components (Accepted, stage 3.1c)
+
+- **Context:** `ForumTopicViewService::buildViewTopic()` rendered the
+  whole topic page through `ob_start()`/`echo` — ~56 echo lines:
+  breadcrumb, two pagers, per-post tables (avatar/class/stats + body +
+  contact/toolbox rows), the moderator toolbox (sticky/lock/delete/
+  move/highlight forms), quick reply and the key-shortcut script.
+- **Decision:** The service now returns `ViewTopicViewModel` +
+  `PostViewModel` list (`App\ViewModels\Forum\`). Rendering moves to
+  `resources/views/components/forum/viewtopic.blade.php` (breadcrumb,
+  postbar, frame, mod toolbox, quick reply, denied notice) and
+  `resources/views/components/forum/post.blade.php`
+  (per-post card: meta head, user grid cell, body,
+  signature, edited note, contact + toolbox foot). Post times render
+  via `<x-time>` from raw timestamps — same rule as ADR 0021/0022.
+  The pager reuses `x-forum.pager` (`Pagination::window`, 0-based
+  `page=` kept). `Frame::open()/close()` and
+  `highlightColorOptions()` stay behind SafeHtml fields, as do
+  `UserDisplay::username()`, `formatComment()`, `Ratio::forUserId()`
+  and `quickReply`/`keyShortcutScript`. The mark-last-read side effect
+  stays in the service loop; the section template only emits
+  `<span id="last">`. Two markup-bearing notice strings
+  (`text_topic_locked_new_denied`, `text_unpermitted_posting_here`)
+  are wrapped `SafeHtml::fromUntrustedHtml` on the VM per
+  `LegacyLangMarkupTest`.
+- **Consequences:** Ratchets drop: `echo` 144→88, `ob_start` 28→27,
+  `<table` literals 38→35, HTML literal lines 1135→1068. Legacy
+  visual quirks kept: `public/pic/trans.gif` sprite classes (`f_reply`,
+  `f_pm`, …), `#pidN`/`#top`/`#last` anchors, `page=p<postid>`
+  deep-link resolution, author-filter toggle, protected-post body
+  swap. `ForumTopicViewServiceTest` asserts VM shape; the per-post
+  toolbox flags (`canQuote/canDelete/canEdit`) are computed in the
+  service so the view carries no permission logic.
+
+### ADR 0024: forum compose on a view model + `x-forum.compose` (Accepted, stage 3.1d)
+
+- **Context:** `ForumComposeService::buildComposeFrame()` emitted the
+  compose form through `ob_start()`/`echo` — `<form id="compose">`,
+  hidden `postid`/`id`/`type` inputs, then `Frame::composeBegin()`
+  (composeOpen + `BbcodeEditor::html`) and `Frame::composeEnd()` which
+  add the layout `<table class="main">` rows and submit/preview row.
+- **Decision:** The service returns `?ForumComposeViewModel`
+  (`App\ViewModels\Forum\`) — `null` for unknown types / missing edit
+  targets (previously an empty `['title' => '', 'body' => '']`). The
+  `x-forum.compose` component renders the form: `x-frame` provides the
+  bordered frame (same `Frame::open(caption, true, 10, '100%', 'left')`
+  params), `nx-fgrid`/`nx-fhead`/`nx-fcell`/`nx-ffull` replace the
+  layout table rows, and `x-bbcode-editor` renders the editor. All
+  legacy JS hooks are preserved verbatim: `#compose`/`name="compose"`,
+  hidden `postid` (quote only), `id`, `type` inputs,
+  `#previewouter`/`#editorouter`, `#qr`, `#previewbutton`/
+  `#unpreviewbutton` with `data-preview-toggle`. The frame caption
+  derives from `hiddenType` via `frameCaption()` — quote posts become
+  `type=reply` with `postid` + topic `id`, as before.
+- **Consequences:** Ratchets drop: `echo` 88→85, `ob_start` 27→26,
+  HTML literal lines 1068→1063 (table literals unchanged at 35 — the
+  `Frame` compose chrome stays for sendmessage/comments/news/
+  contactstaff callers). Behaviour fix: `body`/`subject` are now raw
+  strings escaped once by `{{ }}` — the old path ran
+  `htmlspecialchars()` before `BbcodeEditor::html()`, whose template
+  escapes again, so edit/quote of posts containing `& < > "` showed
+  entity garbage (`&amp;amp;`) in the textarea; covered by
+  `ForumHttpTest::test_editpost_section_prefills_body_and_subject`.
+  The unused `CurrentUser` dependency was dropped from the service.

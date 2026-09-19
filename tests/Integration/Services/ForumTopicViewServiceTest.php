@@ -18,6 +18,7 @@ use App\Services\ForumTopicViewService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
+use App\ViewModels\Forum\ViewTopicViewModel;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -401,10 +402,11 @@ final class ForumTopicViewServiceTest extends TestCase
             10,
         ));
 
-        $this->assertArrayHasKey('html', $result);
-        $this->assertSame(1, $result['topicid']);
-        $this->assertSame(1, $result['forumid']);
-        $this->assertStringContainsString('Test Topic', (string) $result['html']);
+        $this->assertInstanceOf(ViewTopicViewModel::class, $result);
+        $this->assertSame(1, $result->topicid);
+        $this->assertSame(1, $result->forumid);
+        $this->assertStringContainsString('Test Topic', (string) $result->subject);
+        $this->assertSame([], $result->posts);
     }
 
     // --- buildViewTopic: valid topic with posts ---
@@ -475,11 +477,14 @@ final class ForumTopicViewServiceTest extends TestCase
             10,
         ));
 
-        $this->assertArrayHasKey('html', $result);
-        $this->assertSame(1, $result['topicid']);
-        $this->assertSame(1, $result['forumid']);
-        $this->assertStringContainsString('Test Topic', (string) $result['html']);
-        $this->assertStringContainsString('Hello world', (string) $result['html']);
+        $this->assertInstanceOf(ViewTopicViewModel::class, $result);
+        $this->assertSame(1, $result->topicid);
+        $this->assertSame(1, $result->forumid);
+        $this->assertStringContainsString('Test Topic', (string) $result->subject);
+        $this->assertCount(1, $result->posts);
+        $this->assertStringContainsString('Hello world', (string) $result->posts[0]->body);
+        $this->assertSame(1, $result->posts[0]->number);
+        $this->assertTrue($result->posts[0]->isLast);
     }
 
     // --- buildViewTopic: locked topic ---
@@ -522,7 +527,8 @@ final class ForumTopicViewServiceTest extends TestCase
             10,
         ));
 
-        $this->assertStringContainsString('Locked', (string) $result['html']);
-        $this->assertStringContainsString('Locked Topic', (string) $result['html']);
+        $this->assertInstanceOf(ViewTopicViewModel::class, $result);
+        $this->assertTrue($result->locked);
+        $this->assertStringContainsString('Locked Topic', (string) $result->subject);
     }
 }

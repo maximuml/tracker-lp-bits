@@ -1,0 +1,1 @@
+<table data-nx="data" cellpadding="5"><tr>@foreach ($headers as $header)<td class="colhead">{{ $header }}</td>@endforeach</tr><tr>@foreach ($baseRow as $cell)<td>{{ $cell }}</td>@endforeach<td rowspan="{{ $rowSpan }}">{{ $total }}</td></tr>@foreach ($extraRows as $extraRow)<tr>@foreach ($extraRow as $cell)<td>{{ $cell }}</td>@endforeach</tr>@endforeach</table>

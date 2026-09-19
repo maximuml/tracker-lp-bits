@@ -233,20 +233,17 @@ class Bonus
             $totalBonus += $bonusResult['medal_bonus'] * $bonusResult['medal_additional_factor'];
         }
 
-        $table = '<table cellpadding="5">';
-        $table .= '<tr>';
-        $table .= sprintf('<td class="colhead">%s</td>', Locale::trans('bonus.table_thead.reward_type', [], null));
-        $table .= sprintf('<td class="colhead">%s</td>', Locale::trans('bonus.table_thead.count', [], null));
-        $table .= sprintf('<td class="colhead">%s</td>', Locale::trans('bonus.table_thead.size', [], null));
-        $table .= sprintf('<td class="colhead">%s</td>', Locale::trans('bonus.table_thead.a_value', [], null));
-        $table .= sprintf('<td class="colhead">%s</td>', Locale::trans('bonus.table_thead.bonus_base', [], null));
-        $table .= sprintf('<td class="colhead">%s</td>', Locale::trans('bonus.table_thead.factor', [], null));
-        $table .= sprintf('<td class="colhead">%s</td>', Locale::trans('bonus.table_thead.got_bonus', [], null));
-        $table .= sprintf('<td class="colhead">%s</td>', Locale::trans('bonus.table_thead.total', [], null));
-        $table .= '</tr>';
-
-        $table .= sprintf(
-            '<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td rowspan="%s">%s</td></tr>',
+        $headers = [
+            Locale::trans('bonus.table_thead.reward_type', [], null),
+            Locale::trans('bonus.table_thead.count', [], null),
+            Locale::trans('bonus.table_thead.size', [], null),
+            Locale::trans('bonus.table_thead.a_value', [], null),
+            Locale::trans('bonus.table_thead.bonus_base', [], null),
+            Locale::trans('bonus.table_thead.factor', [], null),
+            Locale::trans('bonus.table_thead.got_bonus', [], null),
+            Locale::trans('bonus.table_thead.total', [], null),
+        ];
+        $baseRow = [
             Locale::trans('bonus.reward_types.basic', [], null),
             $bonusResult['torrent_peer_count'],
             Format::size((float) $bonusResult['size']),
@@ -254,49 +251,49 @@ class Bonus
             number_format($bonusResult['seed_bonus'], 3),
             $baseBonusFactor,
             number_format($baseBonus, 3),
-            $rowSpan,
-            number_format($totalBonus, 3)
-        );
+        ];
+        $extraRows = [];
         if ($hasMedalAddition) {
-            $table .= sprintf(
-                '<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>',
+            $extraRows[] = [
                 Locale::trans('bonus.reward_types.medal_addition', [], null),
                 $bonusResult['torrent_peer_count'],
                 Format::size((float) $bonusResult['size']),
                 number_format($bonusResult['A'], 3),
                 number_format($bonusResult['medal_bonus'], 3),
                 number_format($bonusResult['medal_additional_factor'], 3),
-                number_format($bonusResult['medal_bonus'] * $bonusResult['medal_additional_factor'], 3)
-            );
+                number_format($bonusResult['medal_bonus'] * $bonusResult['medal_additional_factor'], 3),
+            ];
         }
-
         if ($hasOfficialAddition) {
-            $table .= sprintf(
-                '<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>',
+            $extraRows[] = [
                 Locale::trans('bonus.reward_types.official_addition', [], null),
                 $bonusResult['official_torrent_peer_count'],
                 Format::size((float) $bonusResult['official_size']),
                 number_format($bonusResult['official_a'], 3),
                 number_format($bonusResult['official_bonus'], 3),
                 number_format($officialAdditionalFactor, 3),
-                number_format($bonusResult['official_bonus'] * $officialAdditionalFactor, 3)
-            );
+                number_format($bonusResult['official_bonus'] * $officialAdditionalFactor, 3),
+            ];
         }
-
         if ($hasHaremAddition) {
-            $table .= sprintf(
-                '<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>',
+            $extraRows[] = [
                 Locale::trans('bonus.reward_types.harem_addition', [], null),
                 '--',
                 '--',
                 '--',
                 number_format($haremAddition, 3),
                 number_format($haremFactor, 3),
-                number_format($haremAddition * $haremFactor, 3)
-            );
+                number_format($haremAddition * $haremFactor, 3),
+            ];
         }
 
-        $table .= '</table>';
+        $table = view('bonus._table', [
+            'headers' => $headers,
+            'baseRow' => $baseRow,
+            'extraRows' => $extraRows,
+            'rowSpan' => $rowSpan,
+            'total' => number_format($totalBonus, 3),
+        ])->render();
 
         return [
             'table' => $table,

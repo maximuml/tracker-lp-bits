@@ -51,7 +51,7 @@ final class ForumPageServiceTest extends TestCase
     {
         parent::setUp();
         Redis::connection()->flushdb();
-        app(LegacyRuntime::class)->markLegacy();
+        app(LegacyRuntime::class)->bootEntry(true);
         $this->initialObLevel = ob_get_level();
         Settings::saveBatch('basic', ['SITENAME' => 'TestSite']);
         Settings::saveBatch('main', ['postsperpage' => 10, 'topicsperpage' => 20]);

@@ -45,7 +45,7 @@ final class TimeLegacyFormatTest extends TestCase
             define('TIMENOW', self::TIMENOW_TS);
         }
         parent::setUp();
-        app(LegacyRuntime::class)->markLegacy();
+        app(LegacyRuntime::class)->bootEntry(true);
     }
 
     private function legacyTime(): string

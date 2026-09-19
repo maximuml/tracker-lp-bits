@@ -62,7 +62,7 @@ final class ForumIndexServiceTest extends TestCase
     {
         parent::setUp();
         Redis::connection()->flushdb();
-        app(LegacyRuntime::class)->markLegacy();
+        app(LegacyRuntime::class)->bootEntry(true);
 
         $this->currentUser = new CurrentUser;
         $this->globals = new Globals;

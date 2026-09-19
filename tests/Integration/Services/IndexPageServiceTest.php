@@ -46,7 +46,7 @@ final class IndexPageServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        app(LegacyRuntime::class)->markLegacy();
+        app(LegacyRuntime::class)->bootEntry(true);
         Redis::connection()->flushdb();
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
         DB::table('users')->truncate();

@@ -52,9 +52,11 @@ final class ForumServiceTest extends TestCase
     {
         parent::setUp();
         $this->initialObLevel = ob_get_level();
-        // Mark the legacy runtime so UserDisplay::currentClass() uses
-        // CurrentUser (which we control) instead of Laravel's Auth facade.
-        app(LegacyRuntime::class)->markLegacy();
+        // Run in the legacy entry context so UserDisplay::currentClass()
+        // uses CurrentUser (which we control) instead of Laravel's Auth
+        // facade. bootEntry() survives mid-test reset() from job/request
+        // lifecycle listeners — a plain mark would be wiped.
+        app(LegacyRuntime::class)->bootEntry(true);
     }
 
     protected function tearDown(): void

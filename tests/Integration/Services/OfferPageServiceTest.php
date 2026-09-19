@@ -45,7 +45,7 @@ final class OfferPageServiceTest extends TestCase
         $this->initialObLevel = ob_get_level();
         Redis::connection()->flushdb();
 
-        app(LegacyRuntime::class)->markLegacy();
+        app(LegacyRuntime::class)->bootEntry(true);
 
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
         DB::table('offers')->truncate();

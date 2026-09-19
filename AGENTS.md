@@ -485,9 +485,11 @@ Decision → Consequences). Add new ADRs here as numbered subsections.
   restoring entry defaults between worker requests. All `app/` reads
   migrated to the runtime (`grep IN_NEXUS app/` → 0); repositories take
   it via constructor injection per the `AppCallByNamespaceRatchetTest`
-  baseline. Tests mark the flag per test (`markLegacy()` in setUp;
-  `NEXUS_LEGACY_CONTEXT=1` → `TestCase::setUp()` calls `bootEntry(true)`
-  so the flag survives `reset()` mid-test).
+  baseline. Tests run the suite in the legacy *entry* context
+  (`bootEntry(true)` in setUp — `markLegacy()` alone would be wiped by
+  `reset()` when a test fires `JobProcessing`/Octane events, e.g. a
+  factory-created user dispatching the outbox job);
+  `NEXUS_LEGACY_CONTEXT=1` → `TestCase::setUp()` calls `bootEntry(true)`.
 - **Consequences:** Request-scoped legacy/tracker state is
   Octane-safe; tests no longer need process isolation for the flag
   (`TIMENOW` still forces `TimeLegacyFormatTest` into separate

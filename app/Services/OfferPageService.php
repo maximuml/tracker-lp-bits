@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Auth\Permission;
 use App\Enums\OfferAllowed;
+use App\Enums\OfferVote;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserTimeType;
 use App\Repositories\OfferCommentRepository;
@@ -144,15 +145,14 @@ final class OfferPageService
      */
     private function buildAddOffer(mixed $browsecatmode): array
     {
-        $typeOptions = '<select name=type>'."\n".'<option value=0>'.(string) (__('legacy/offers.select_type_select'))."</option>\n";
+        $typeOptions = [];
         foreach (Category::listByModeWithContext($browsecatmode) as $row) {
             $rowArr = (array) $row;
-            $typeOptions .= '<option value='.(int) $rowArr['id'].'>'.htmlspecialchars((string) $rowArr['name'])."</option>\n";
+            $typeOptions[] = new OfferCategoryOption((int) $rowArr['id'], (string) $rowArr['name']);
         }
-        $typeOptions .= "</select>\n";
 
         return [
-            'typeOptions' => SafeHtml::fromTrustedHtml($typeOptions),
+            'typeOptions' => $typeOptions,
             'bbcodeEditor' => SafeHtml::fromTrustedHtml(BbcodeEditor::html(['form' => 'compose', 'text' => 'body', 'withPreview' => true])),
         ];
     }
@@ -264,18 +264,17 @@ final class OfferPageService
         $body = htmlspecialchars(Input::unescape((string) ($num['descr'] ?? '')));
         $id2 = (int) ($num['category'] ?? 0);
 
-        $catSelect = "<select name=\"category\">\n";
+        $catOptions = [];
         foreach (Category::listByModeWithContext($browsecatmode) as $row) {
             $rowArr = (array) $row;
-            $selected = (int) $rowArr['id'] === $id2 ? ' selected="selected"' : '';
-            $catSelect .= '<option value="'.(int) $rowArr['id'].'"'.$selected.'>'.htmlspecialchars((string) $rowArr['name'])."</option>\n";
+            $catOptions[] = new OfferCategoryOption((int) $rowArr['id'], (string) $rowArr['name']);
         }
-        $catSelect .= "</select>\n";
 
         return [
             'id' => $id,
             'title' => htmlspecialchars(trim((string) ($num['name'] ?? ''))),
-            'catSelect' => SafeHtml::fromTrustedHtml($catSelect),
+            'catId' => $id2,
+            'catOptions' => $catOptions,
             'bbcodeEditor' => SafeHtml::fromTrustedHtml(BbcodeEditor::html(['form' => 'compose', 'text' => 'body', 'content' => $body, 'withPreview' => true])),
         ];
     }
@@ -428,7 +427,12 @@ final class OfferPageService
                             $tooltips[] = new OfferTooltip(
                                 id: $tooltipId,
                                 content: SafeHtml::fromTrustedHtml(
-                                    ($hasnewcom ? "<b>(<span class='new'>".htmlspecialchars((string) (__('legacy/offers.text_new'))).'</span>)</b> ' : '').htmlspecialchars((string) (__('legacy/offers.text_last_commented_by'))).UserDisplay::username((int) ($lastcom['user'] ?? 0)).$lastcomtime.'<br />'.Format::formatComment(mb_substr((string) ($lastcom['text'] ?? ''), 0, 100, 'UTF-8').(mb_strlen((string) ($lastcom['text'] ?? ''), 'UTF-8') > 100 ? ' ......' : ''), true, false, false, true, 600, false, false)
+                                    view('offers._lastcom_tooltip', [
+                                        'hasNew' => $hasnewcom,
+                                        'username' => UserDisplay::username((int) ($lastcom['user'] ?? 0)),
+                                        'time' => SafeHtml::fromTrustedHtml($lastcomtime),
+                                        'comment' => Format::formatComment(mb_substr((string) ($lastcom['text'] ?? ''), 0, 100, 'UTF-8').(mb_strlen((string) ($lastcom['text'] ?? ''), 'UTF-8') > 100 ? ' ......' : ''), true, false, false, true, 600, false, false),
+                                    ])->render()
                                 ),
                             );
                         }
@@ -540,14 +544,9 @@ final class OfferPageService
         $rows = [];
         foreach ($voteRows as $arr) {
             $arrArr = (array) $arr;
-            $vote = match ($arrArr['vote'] ?? '') {
-                'yeah' => '<b><span class="nx-color-green">'.htmlspecialchars((string) (__('legacy/offers.text_for'))).'</span></b>',
-                'against' => '<b><span class="nx-color-red">'.htmlspecialchars((string) (__('legacy/offers.text_against'))).'</span></b>',
-                default => 'unknown',
-            };
             $rows[] = [
                 'username' => UserDisplay::username((int) ($arrArr['userid'] ?? 0)),
-                'vote' => SafeHtml::fromTrustedHtml($vote),
+                'vote' => OfferVote::tryFrom((int) ($arrArr['vote'] ?? -1))?->stringValue() ?? 'unknown',
             ];
         }
 

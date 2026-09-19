@@ -6,7 +6,7 @@
 <table data-nx="data" border=1 cellspacing=0 cellpadding=5>
 <tr><td class=colhead>{{ __('legacy/offers.col_user')}}</td><td class=colhead align=left>{{ __('legacy/offers.col_vote')}}</td></tr>
 @foreach ($offer_vote['rows'] as $row)
-<tr><td class=rowfollow>{{ $row['username'] ?? '' }}</td><td class=rowfollow align=left>{{ $row['vote'] ?? '' }}</td></tr>
+<tr><td class=rowfollow>{{ $row['username'] ?? '' }}</td><td class=rowfollow align=left>@if (($row['vote'] ?? '') === 'yeah')<b><span class="nx-color-green">{{ __('legacy/offers.text_for') }}</span></b>@elseif (($row['vote'] ?? '') === 'against')<b><span class="nx-color-red">{{ __('legacy/offers.text_against') }}</span></b>@else{{ 'unknown' }}@endif</td></tr>
 @endforeach
 </table>
 {{ $offer_vote['pagerBottom'] ?? '' }}

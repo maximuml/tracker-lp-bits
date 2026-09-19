@@ -10,6 +10,7 @@ use App\Services\OfferPageService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
+use App\ViewModels\Offer\OfferListViewModel;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -222,10 +223,9 @@ final class OfferPageServiceTest extends TestCase
         $this->assertIsArray($data);
         $this->assertSame('list', $data['action']);
         $this->assertArrayHasKey('list', $data);
-        $this->assertArrayHasKey('rules', $data['list']);
-        $this->assertArrayHasKey('searchBox', $data['list']);
-        $this->assertFalse($data['list']['hasRows']);
-        $this->assertSame(0, $data['list']['count']);
+        $this->assertInstanceOf(OfferListViewModel::class, $data['list']);
+        $this->assertNull($data['list']->table);
+        $this->assertSame(0, $data['list']->count);
     }
 
     // --- list action with an offer present ---
@@ -245,8 +245,9 @@ final class OfferPageServiceTest extends TestCase
         $data = $this->callService($request);
 
         $this->assertSame('list', $data['action']);
-        $this->assertTrue($data['list']['hasRows']);
-        $this->assertSame(1, $data['list']['count']);
+        $this->assertNotNull($data['list']->table);
+        $this->assertCount(1, $data['list']->table->rows);
+        $this->assertSame(1, $data['list']->count);
     }
 
     // --- list action resolves by default ---

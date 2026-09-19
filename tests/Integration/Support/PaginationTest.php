@@ -1,13 +1,13 @@
 <?php
 
-namespace Tests\Unit\Support;
+namespace Tests\Integration\Support;
 
 use App\Support\Html\SafeHtml;
 use App\Support\Pagination;
-use PHPUnit\Framework\TestCase;
 use Tests\Attributes\TestCategory;
+use Tests\TestCase;
 
-#[TestCategory(TestCategory::PURE_UNIT)]
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class PaginationTest extends TestCase
 {
     private const LABELS = [

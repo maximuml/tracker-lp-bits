@@ -260,4 +260,70 @@ final class ForumHttpTest extends TestCase
         $this->assertStringContainsString('page=p', $html);
         $this->assertStringContainsString('#pid', $html);
     }
+
+    // ─── Compose section (ADR 0024, stage 3.1d) ────────────────────────
+
+    public function test_newtopic_section_renders_compose_component(): void
+    {
+        $user = User::factory()->create();
+        $forum = Forum::factory()->create(['name' => 'Compose Target Forum']);
+
+        $response = $this->withNexusCookie($user)
+            ->get('/forums?action=newtopic&forumid='.$forum->id);
+
+        $response->assertOk();
+        $html = (string) $response->getContent();
+        $this->assertStringContainsString('id="compose"', $html);
+        $this->assertStringContainsString('name="subject"', $html);
+        $this->assertStringContainsString('name="type" value="new"', $html);
+        $this->assertStringContainsString('name="id" value="'.$forum->id.'"', $html);
+        $this->assertStringContainsString('Compose Target Forum', $html);
+        $this->assertStringContainsString('bbcode-editor', $html);
+    }
+
+    public function test_reply_section_renders_compose_without_subject(): void
+    {
+        $user = User::factory()->create();
+        $forum = Forum::factory()->create();
+        $topic = Topic::factory()->forum($forum)->author($user)->create([
+            'subject' => 'Reply target topic',
+        ]);
+        $post = Post::factory()->topic($topic)->author($user)->create();
+        $topic->update(['firstpost' => $post->id, 'lastpost' => $post->id]);
+
+        $response = $this->withNexusCookie($user)
+            ->get('/forums?action=reply&topicid='.$topic->id);
+
+        $response->assertOk();
+        $html = (string) $response->getContent();
+        $this->assertStringContainsString('id="compose"', $html);
+        $this->assertStringContainsString('name="type" value="reply"', $html);
+        $this->assertStringContainsString('Reply target topic', $html);
+        $this->assertStringNotContainsString('name="subject"', $html);
+    }
+
+    public function test_editpost_section_prefills_body_and_subject(): void
+    {
+        $user = User::factory()->create();
+        $forum = Forum::factory()->create();
+        $topic = Topic::factory()->forum($forum)->author($user)->create([
+            'subject' => 'Editable subject',
+        ]);
+        $post = Post::factory()->topic($topic)->author($user)->create([
+            'body' => 'Body with & ampersand',
+        ]);
+        $topic->update(['firstpost' => $post->id, 'lastpost' => $post->id]);
+
+        $response = $this->withNexusCookie($user)
+            ->get('/forums?action=editpost&postid='.$post->id);
+
+        $response->assertOk();
+        $html = (string) $response->getContent();
+        $this->assertStringContainsString('id="compose"', $html);
+        $this->assertStringContainsString('name="type" value="edit"', $html);
+        $this->assertStringContainsString('name="id" value="'.$post->id.'"', $html);
+        // Single escaping: textarea shows the entity once, not double-escaped.
+        $this->assertStringContainsString('Body with &amp; ampersand', $html);
+        $this->assertStringNotContainsString('&amp;amp;', $html);
+    }
 }

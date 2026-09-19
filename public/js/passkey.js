@@ -162,10 +162,12 @@ const startPasskeyLogin = (conditional) => {
     if (btn) btn.disabled = true;
     Passkey.checkRegistration(conditional, () => {}).then(() => {
         const returnto = new URLSearchParams(location.search).get('returnto') || '';
-        const isLocal = returnto !== ''
-            && !/^(?:https?:)?\/\//i.test(returnto)
-            && !/^(?:javascript|data|vbscript):/i.test(returnto);
-        location.href = isLocal ? returnto : '/index.php';
+        let target = '/index.php';
+        try {
+            const url = new URL(returnto, location.origin);
+            if (url.origin === location.origin) target = url.href;
+        } catch (e) { /* invalid URL — keep default target */ }
+        location.href = target;
     }).catch((e) => {
         if (conditional || e.name === 'NotAllowedError' || e.name === 'AbortError' || e.name === 'NotSupportedError') {
             return;

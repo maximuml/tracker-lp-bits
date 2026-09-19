@@ -195,7 +195,7 @@ final class UsercpPageService
             $timestamp = time();
             $signature = hash_hmac('sha256', $passkey.$timestamp, $siteConfig->security->loginSecret());
             $passkeyLoginForm = sprintf(
-                '<form method="POST" action="%s/%s" style="display:inline"><input type="hidden" name="passkey" value="%s"><input type="hidden" name="timestamp" value="%d"><input type="hidden" name="signature" value="%s"><button type="submit" class="btn" style="font-size:inherit;padding:0 4px">%s</button></form>',
+                '<form method="POST" action="%s/%s"><input type="hidden" name="passkey" value="%s"><input type="hidden" name="timestamp" value="%d"><input type="hidden" name="signature" value="%s"><button type="submit" class="btn">%s</button></form>',
                 Url::schemeAndHost(false),
                 $siteConfig->security->loginSecret(),
                 htmlspecialchars($passkey, ENT_QUOTES),
@@ -325,7 +325,7 @@ final class UsercpPageService
             $rowsHtml .= (string) Html::frow(__('legacy/usercp.row_tooltip_last_post'), '<input type=checkbox name=ttlastpost'.(LegacyYesNo::isYes($curUser['showlastpost'] ?? null) ? ' checked' : '').'>'.htmlspecialchars(__('legacy/usercp.checkbox_last_post_note')), 1, '', true);
         }
         $rowsHtml .= (string) Html::frowSmall(__('legacy/usercp.row_click_on_topic'), '<input type=radio name=clicktopic'.(($curUser['clicktopic'] ?? '') === 'firstpage' ? ' checked' : '').' value="firstpage">'.htmlspecialchars(__('legacy/usercp.text_go_to_first_page')).'<input type=radio name=clicktopic'.(($curUser['clicktopic'] ?? '') === 'lastpage' ? ' checked' : '').' value="lastpage">'.htmlspecialchars(__('legacy/usercp.text_go_to_last_page')), 1, '', true);
-        $rowsHtml .= (string) Html::frowSmall(__('legacy/usercp.row_forum_signature'), '<textarea name=signature style="width:700px" rows=10>'.htmlspecialchars((string) ($curUser['signature'] ?? '')).'</textarea><br />'.(__('legacy/usercp.text_signature_note')), 1, '', true);
+        $rowsHtml .= (string) Html::frowSmall(__('legacy/usercp.row_forum_signature'), '<textarea name=signature rows=10>'.htmlspecialchars((string) ($curUser['signature'] ?? '')).'</textarea><br />'.(__('legacy/usercp.text_signature_note')), 1, '', true);
 
         return [
             'formId' => 'form'.Strings::randomCode(6),
@@ -393,11 +393,11 @@ final class UsercpPageService
   <option value='".htmlspecialchars((string) ($curUser['avatar'] ?? ''))."'>".htmlspecialchars($selectChooseAvatar)."</option>
   <option value='".htmlspecialchars($defaultAvatarUrl)."'>".htmlspecialchars($selectNothing).'</option>
   '.$bitbucketOptions.'
-  </select><input type=text name=avatar style="width: 400px" value="'.htmlspecialchars((string) ($curUser['avatar'] ?? '')).
+  </select><input type=text name=avatar value="'.htmlspecialchars((string) ($curUser['avatar'] ?? '')).
   "\"><br />\n".htmlspecialchars(__('legacy/usercp.text_avatar_note')).($enableBitbucket ? (__('legacy/usercp.text_bitbucket_note')) : '');
         $rowsHtml .= (string) Html::frowSmall(__('legacy/usercp.row_avatar_url'), $avatarCell, 1, '', true);
 
-        $rowsHtml .= (string) Html::frow(__('legacy/usercp.row_info'), '<textarea name="info" style="width:700px" rows="10" >'.htmlspecialchars((string) ($curUser['info'] ?? '')).'</textarea><br />'.(__('legacy/usercp.text_info_note')), 1, '', true);
+        $rowsHtml .= (string) Html::frow(__('legacy/usercp.row_info'), '<textarea name="info" rows="10" >'.htmlspecialchars((string) ($curUser['info'] ?? '')).'</textarea><br />'.(__('legacy/usercp.text_info_note')), 1, '', true);
 
         return [
             'formId' => 'form'.Strings::randomCode(6),
@@ -517,15 +517,15 @@ final class UsercpPageService
             if ($showEmailChange) {
                 $rowsHtml .= (string) Html::frowSmall(
                     __('legacy/usercp.row_email_address'),
-                    '<input type="text" name="email" style="width: 200px" value="'.htmlspecialchars((string) ($curUser['email'] ?? '')).'" /> <br /><font class=small>'.(__('legacy/usercp.text_email_address_note')).'</font>',
+                    '<input type="text" name="email" value="'.htmlspecialchars((string) ($curUser['email'] ?? '')).'" /> <br /><font class=small>'.(__('legacy/usercp.text_email_address_note')).'</font>',
                     1,
                     '',
                     true
                 );
             }
 
-            $rowsHtml .= (string) Html::frowSmall(__('legacy/usercp.row_change_password'), '<input type="password" class="password" style="width: 200px" />', 1, '', true);
-            $rowsHtml .= (string) Html::frowSmall(__('legacy/usercp.row_type_password_again'), '<input type="password" class="passagain" style="width: 200px" />', 1, '', true);
+            $rowsHtml .= (string) Html::frowSmall(__('legacy/usercp.row_change_password'), '<input type="password" class="password" />', 1, '', true);
+            $rowsHtml .= (string) Html::frowSmall(__('legacy/usercp.row_type_password_again'), '<input type="password" class="passagain" />', 1, '', true);
             $rowsHtml .= (string) Html::frowSmall(__('legacy/usercp.row_privacy_level'), $privacyRadios['normal'].' '.$privacyRadios['low'].' '.$privacyRadios['strong'], 1, '', true);
         }
 
@@ -605,7 +605,7 @@ final class UsercpPageService
                 $tableHtml .= sprintf('<td>%s</td>', htmlspecialchars((string) $tokenRecord['name']));
                 $tableHtml .= sprintf('<td>%s</td>', htmlspecialchars((string) $tokenRecord['abilitiesText']));
                 $tableHtml .= sprintf('<td>%s</td>', htmlspecialchars((string) $tokenRecord['created_at']));
-                $tableHtml .= sprintf('<td><img style="cursor: pointer" class="staff_delete token-del" src="pic/trans.gif" alt="D" title="%s" data-id="%s"></td>', htmlspecialchars($deleteLabel), (int) $tokenRecord['id']);
+                $tableHtml .= sprintf('<td><img class="staff_delete token-del" src="pic/trans.gif" alt="D" title="%s" data-id="%s"></td>', htmlspecialchars($deleteLabel), (int) $tokenRecord['id']);
                 $tableHtml .= '</tr>';
             }
             $tableHtml .= '</table>';
@@ -741,7 +741,7 @@ JS;
             );
         }
 
-        $categoriesCell = $categories.'<div style="height: 1px;background-color: #eee;margin: 10px 0"></div>'
+        $categoriesCell = $categories.'<div></div>'
             ."<table><caption><font class='big'>".htmlspecialchars(__('legacy/usercp.text_additional_selection')).'</font></caption><tr><td class=bottom><b>'.htmlspecialchars(__('legacy/usercp.text_show_dead_active')).'</b><br /><select name="incldead"><option value="0" '.(str_contains($notifs, '[incldead=0]') ? ' selected' : '').'>'.htmlspecialchars(__('legacy/usercp.select_including_dead')).'</option><option value="1" '.(str_contains($notifs, '[incldead=1]') || ! str_contains($notifs, 'incldead') ? ' selected' : '').'>'.htmlspecialchars(__('legacy/usercp.select_active')).'</option><option value="2" '.(str_contains($notifs, '[incldead=2]') ? ' selected' : '').'>'.htmlspecialchars(__('legacy/usercp.select_dead')).'</option></select></td><td class=bottom align=left><b>'.htmlspecialchars(__('legacy/usercp.text_show_special_torrents')).'</b><br /><select name="spstate"><option value="0" '.($specialState === 0 ? ' selected' : '').'>'.htmlspecialchars(__('legacy/usercp.select_all')).'</option>'.Html::promotionSelection($specialState).'</select></td><td class=bottom><b>'.htmlspecialchars(__('legacy/usercp.text_show_bookmarked')).'</b><br /><select name="inclbookmarked"><option value="0" '.(str_contains($notifs, '[inclbookmarked=0]') ? ' selected' : '').'>'.htmlspecialchars(__('legacy/usercp.select_all')).'</option><option value="1" '.(str_contains($notifs, '[inclbookmarked=1]') ? ' selected' : '').' >'.htmlspecialchars(__('legacy/usercp.select_bookmarked')).'</option><option value="2" '.(str_contains($notifs, '[inclbookmarked=2]') ? ' selected' : '').'>'.htmlspecialchars(__('legacy/usercp.select_bookmarked_exclude')).'</option></select></td></tr></table>';
         $rowsHtml .= (string) Html::frowSmall(__('legacy/usercp.row_browse_default_categories'), $categoriesCell, 1, '', true);
 
@@ -766,7 +766,7 @@ JS;
 ($showTooltipSetting ? '<b>'.htmlspecialchars(__('legacy/usercp.text_tooltip_type')).'</b>: <br /><input type=radio name=tooltip '.(($curUser['tooltip'] ?? '') === 'off' ? ' checked' : '').' value=off>'.htmlspecialchars(__('legacy/usercp.text_off')).'<br />' : '').
 '<b>'.htmlspecialchars(__('legacy/usercp.text_append_words_to_torrents')).': </b><br /><input type=checkbox name=appendsticky '.(LegacyYesNo::isYes($curUser['appendsticky'] ?? null) ? ' checked' : '').' value=yes>'.(string) SafeHtml::fromUntrustedHtml(__('legacy/usercp.text_append_sticky')).'<br /><input type=checkbox name=appendnew '.(LegacyYesNo::isYes($curUser['appendnew'] ?? null) ? ' checked' : '').' value=yes>'.htmlspecialchars(__('legacy/usercp.text_append_new')).'<br />'.htmlspecialchars(__('legacy/usercp.text_torrents_on_promotion')).'<input type=radio name=appendpromotion '.(($curUser['appendpromotion'] ?? '') === 'highlight' ? ' checked' : '')." value='highlight'>".htmlspecialchars(__('legacy/usercp.text_highlight')).'<input type=radio name=appendpromotion '.(($curUser['appendpromotion'] ?? '') === 'word' ? ' checked' : '')." value='word'>".htmlspecialchars(__('legacy/usercp.text_append_words')).'<input type=radio name=appendpromotion '.(($curUser['appendpromotion'] ?? '') === 'icon' ? ' checked' : '')." value='icon'>".(string) SafeHtml::fromUntrustedHtml(__('legacy/usercp.text_append_icon')).'<input type=radio name=appendpromotion '.(($curUser['appendpromotion'] ?? '') === 'off' ? ' checked' : '')." value='off'>".htmlspecialchars(__('legacy/usercp.text_no_mark')).'<br /><input type=checkbox name=appendpicked '.(LegacyYesNo::isYes($curUser['appendpicked'] ?? null) ? ' checked' : '').' value=yes>'.htmlspecialchars(__('legacy/usercp.text_append_picked')).'<br />
 <b>'.htmlspecialchars(__('legacy/usercp.text_show_action_icons')).': </b><br />'.'<input type=checkbox name=dlicon '.(LegacyYesNo::isYes($curUser['dlicon'] ?? null) ? ' checked' : '').' value=yes>'.htmlspecialchars(__('legacy/usercp.text_show_download_icon')).' <img class="download" src="pic/trans.gif"  alt="Download" /><br /><input type=checkbox name=bmicon '.(LegacyYesNo::isYes($curUser['bmicon'] ?? null) ? ' checked' : '').' value=yes>'.htmlspecialchars(__('legacy/usercp.text_show_bookmark_icon')).' <img class="bookmark" src="pic/trans.gif" alt="Bookmark" /><br />
-<b>'.htmlspecialchars(__('legacy/usercp.text_comments_reviews')).': </b><br /><input type=checkbox name=showcomnum '.(LegacyYesNo::isYes($curUser['showcomnum'] ?? null) ? ' checked' : '').' value=yes>'.(__('legacy/usercp.text_show_comment_number')).($showTooltipSetting ? '<select name="showlastcom" style="width: 70px;"><option value="yes" '.(! LegacyYesNo::isNo($curUser['showlastcom'] ?? null) ? ' selected' : '').'>'.htmlspecialchars(__('legacy/usercp.select_with')).'</option><option value="no" '.(LegacyYesNo::isNo($curUser['showlastcom'] ?? null) ? ' selected' : '').'>'.htmlspecialchars(__('legacy/usercp.select_without')).'</option></select>'.(__('legacy/usercp.text_last_comment_on_tooltip')) : '');
+<b>'.htmlspecialchars(__('legacy/usercp.text_comments_reviews')).': </b><br /><input type=checkbox name=showcomnum '.(LegacyYesNo::isYes($curUser['showcomnum'] ?? null) ? ' checked' : '').' value=yes>'.(__('legacy/usercp.text_show_comment_number')).($showTooltipSetting ? '<select name="showlastcom"><option value="yes" '.(! LegacyYesNo::isNo($curUser['showlastcom'] ?? null) ? ' selected' : '').'>'.htmlspecialchars(__('legacy/usercp.select_with')).'</option><option value="no" '.(LegacyYesNo::isNo($curUser['showlastcom'] ?? null) ? ' selected' : '').'>'.htmlspecialchars(__('legacy/usercp.select_without')).'</option></select>'.(__('legacy/usercp.text_last_comment_on_tooltip')) : '');
         $rowsHtml .= (string) Html::frowSmall(__('legacy/usercp.row_browse_page'), $browseCell, 1, '', true);
 
         return [

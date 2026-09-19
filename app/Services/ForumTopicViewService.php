@@ -242,7 +242,7 @@ final class ForumTopicViewService
                 }
             }
 
-            echo '<div style="margin-top: 8pt; margin-bottom: 8pt;"><table id="pid'.$postid.'" border="0" cellspacing="0" cellpadding="0" width="100%"><tr><td class="embedded" width="99%"><a href="'.htmlspecialchars('forums.php?action=viewtopic&topicid='.$topicid.'&page=p'.$postid.'#pid'.$postid).'">#'.$postid.'</a>&nbsp;&nbsp;<font color="gray">'.(__('legacy/forums.text_by')).'</font>'.$by.'&nbsp;&nbsp;<font color="gray">'.(__('legacy/forums.text_at')).'</font>'.$added;
+            echo '<div><table id="pid'.$postid.'" border="0" cellspacing="0" cellpadding="0" width="100%"><tr><td class="embedded" width="99%"><a href="'.htmlspecialchars('forums.php?action=viewtopic&topicid='.$topicid.'&page=p'.$postid.'#pid'.$postid).'">#'.$postid.'</a>&nbsp;&nbsp;<font color="gray">'.(__('legacy/forums.text_by')).'</font>'.$by.'&nbsp;&nbsp;<font color="gray">'.(__('legacy/forums.text_at')).'</font>'.$added;
             if (Validators::isId($arr['editedby'])) {
                 echo '';
             }
@@ -258,7 +258,7 @@ final class ForumTopicViewService
 
             echo "<table class=\"main\" width=\"100%\" border=\"1\" cellspacing=\"0\" cellpadding=\"5\">\n";
 
-            $body = '<div id="pid'.$postid.'body" style="word-break: break-all;">';
+            $body = '<div id="pid'.$postid.'body">';
             if ($pn + $offset > 1 && ! Forum::canViewPost($userId, $arr)) {
                 $bodyContent = Format::formatComment((string) (__('legacy/forums.text_post_protected')));
                 $canViewProtected = false;
@@ -276,11 +276,11 @@ final class ForumTopicViewService
             }
             $body .= $bodyContent.'</div>';
             if ($signature) {
-                $body .= "<p style='vertical-align:bottom'><br />____________________<br />".Format::formatComment($signature, false, false, false, true, 500, true, false, 1, 200).'</p>';
+                $body .= '<p><br />____________________<br />'.Format::formatComment($signature, false, false, false, true, 500, true, false, 1, 200).'</p>';
             }
 
             $stats = '<br />'.'&nbsp;&nbsp;'.(__('legacy/forums.text_posts'))."$forumposts<br />".'&nbsp;&nbsp;'.(__('legacy/forums.text_ul'))."$uploaded <br />".'&nbsp;&nbsp;'.(__('legacy/forums.text_dl'))."$downloaded<br />".'&nbsp;&nbsp;'.(__('legacy/forums.text_ratio'))."$ratio";
-            echo "<tr><td class=\"rowfollow\" width=\"150\" valign=\"top\" align=\"left\" style='padding: 0px'>".
+            echo '<tr><td class="rowfollow" width="150" valign="top" align="left">'.
             UserDisplay::avatarImageWithContext($avatar).'<br /><br /><br />&nbsp;&nbsp;<img alt="'.UserClass::name((int) ($arr2['class'] ?? 0), false, false, true).'" title="'.UserClass::name((int) ($arr2['class'] ?? 0), false, false, true).'" src="'.$uclass.'" />'.$stats.'</td><td class="rowfollow" valign="top"><br />'.$body."</td></tr>\n";
             $secs = 900;
             $dt = date('Y-m-d H:i:s', (int) (defined('TIMENOW') ? constant('TIMENOW') : time()) - $secs);
@@ -338,7 +338,7 @@ final class ForumTopicViewService
 
         echo Frame::CLOSE.$pagerbottom;
         if ($maypost) {
-            echo "<br /><table style='border:1px solid #000000;'><tr>".
+            echo '<br /><table><tr>'.
 '<td class="text" align="center"><b>'.(__('legacy/forums.text_quick_reply')).'</b><br /><br />'.
 '<form id="compose" name="compose" method="post" action="?action=post" >'.
 '<input type="hidden" name="id" value="'.$topicid.'" /><input type="hidden" name="type" value="reply" /><br />'.

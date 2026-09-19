@@ -114,7 +114,7 @@ class ModerationController extends LegacyController
                 return $this->legacyAbortResponse(__('legacy/report.std_sorry'), $msg);
             }
 
-            $form = (__('legacy/report.text_are_you_sure_user')).UserDisplay::username($user).(__('legacy/report.text_to_staff')).'<br />'.(__('legacy/report.text_not_for_leechers')).'<br />'.(__('legacy/report.text_reason_note')).'<br /><form method=post action=report.php><input type=hidden name=takeuser value="'.htmlspecialchars((string) $user).'">'.(__('legacy/report.text_reason_is')).'<input type=text style="width: 200px" name=reason><input type=submit value="'.(__('legacy/report.submit_confirm')).'"></form>';
+            $form = (__('legacy/report.text_are_you_sure_user')).UserDisplay::username($user).(__('legacy/report.text_to_staff')).'<br />'.(__('legacy/report.text_not_for_leechers')).'<br />'.(__('legacy/report.text_reason_note')).'<br /><form method=post action=report.php><input type=hidden name=takeuser value="'.htmlspecialchars((string) $user).'">'.(__('legacy/report.text_reason_is')).'<input type=text name=reason><input type=submit value="'.(__('legacy/report.submit_confirm')).'"></form>';
 
             return $this->legacyAbortResponse(__('legacy/report.std_are_you_sure'), $form, false);
         }
@@ -124,7 +124,7 @@ class ModerationController extends LegacyController
             if (! $name) {
                 return $this->legacyAbortResponse(__('legacy/report.std_error'), __('legacy/report.std_invalid_torrent_id'));
             }
-            $form = (__('legacy/report.text_are_you_sure_torrent')).'<a href=details.php?id='.htmlspecialchars((string) $torrent).'><b>'.htmlspecialchars((string) $name).'</b></a>'.(__('legacy/report.text_to_staff')).'<br />'.(__('legacy/report.text_reason_note')).'<br /><form method=post action=report.php><input type=hidden name=taketorrent value="'.htmlspecialchars((string) $torrent).'">'.(__('legacy/report.text_reason_is')).'<input type=text style="width: 200px" name=reason><input type=submit value="'.(__('legacy/report.submit_confirm')).'"></form>';
+            $form = (__('legacy/report.text_are_you_sure_torrent')).'<a href=details.php?id='.htmlspecialchars((string) $torrent).'><b>'.htmlspecialchars((string) $name).'</b></a>'.(__('legacy/report.text_to_staff')).'<br />'.(__('legacy/report.text_reason_note')).'<br /><form method=post action=report.php><input type=hidden name=taketorrent value="'.htmlspecialchars((string) $torrent).'">'.(__('legacy/report.text_reason_is')).'<input type=text name=reason><input type=submit value="'.(__('legacy/report.submit_confirm')).'"></form>';
 
             return $this->legacyAbortResponse(__('legacy/report.std_are_you_sure'), $form, false);
         }
@@ -134,7 +134,7 @@ class ModerationController extends LegacyController
             if ($arr === null) {
                 return $this->legacyAbortResponse(__('legacy/report.std_error'), __('legacy/report.std_invalid_post_id'));
             }
-            $form = (__('legacy/report.text_are_you_sure_post')).$forumpost.(__('legacy/report.text_of_topic')).'<b><a href="forums.php?action=viewtopic&topicid='.$arr['topicid'].'&page=p'.htmlspecialchars((string) $forumpost).'#'.htmlspecialchars((string) $forumpost).'">'.htmlspecialchars($arr['subject']).'</a></b>'.(__('legacy/report.text_by')).UserDisplay::username($arr['postuserid']).(__('legacy/report.text_to_staff')).'<br />'.(__('legacy/report.text_reason_note')).'<br /><form method=post action=report.php><input type=hidden name=takeforumpost value="'.htmlspecialchars((string) $forumpost).'">'.(__('legacy/report.text_reason_is')).'<input type=text style="width: 200px" name=reason><input type=submit value="'.(__('legacy/report.submit_confirm')).'"></form>';
+            $form = (__('legacy/report.text_are_you_sure_post')).$forumpost.(__('legacy/report.text_of_topic')).'<b><a href="forums.php?action=viewtopic&topicid='.$arr['topicid'].'&page=p'.htmlspecialchars((string) $forumpost).'#'.htmlspecialchars((string) $forumpost).'">'.htmlspecialchars($arr['subject']).'</a></b>'.(__('legacy/report.text_by')).UserDisplay::username($arr['postuserid']).(__('legacy/report.text_to_staff')).'<br />'.(__('legacy/report.text_reason_note')).'<br /><form method=post action=report.php><input type=hidden name=takeforumpost value="'.htmlspecialchars((string) $forumpost).'">'.(__('legacy/report.text_reason_is')).'<input type=text name=reason><input type=submit value="'.(__('legacy/report.submit_confirm')).'"></form>';
 
             return $this->legacyAbortResponse(__('legacy/report.std_are_you_sure'), $form, false);
         }
@@ -156,7 +156,7 @@ class ModerationController extends LegacyController
             } else {
                 return $this->legacyAbortResponse(__('legacy/report.std_error'), __('legacy/report.std_orphaned_comment'));
             }
-            $form = (__('legacy/report.text_are_you_sure_comment')).$commentid.$of.'<b><a href="'.$url.'">'.htmlspecialchars((string) $name).'</a></b>'.(__('legacy/report.text_by')).UserDisplay::username($arr['user']).(__('legacy/report.text_to_staff')).'<br />'.(__('legacy/report.text_reason_note')).'<br /><form method=post action=report.php><input type=hidden name=takecommentid value="'.htmlspecialchars((string) $commentid).'">'.(__('legacy/report.text_reason_is')).'<input type=text style="width: 200px" name=reason><input type=submit value="'.(__('legacy/report.submit_confirm')).'"></form>';
+            $form = (__('legacy/report.text_are_you_sure_comment')).$commentid.$of.'<b><a href="'.$url.'">'.htmlspecialchars((string) $name).'</a></b>'.(__('legacy/report.text_by')).UserDisplay::username($arr['user']).(__('legacy/report.text_to_staff')).'<br />'.(__('legacy/report.text_reason_note')).'<br /><form method=post action=report.php><input type=hidden name=takecommentid value="'.htmlspecialchars((string) $commentid).'">'.(__('legacy/report.text_reason_is')).'<input type=text name=reason><input type=submit value="'.(__('legacy/report.submit_confirm')).'"></form>';
 
             return $this->legacyAbortResponse(__('legacy/report.std_are_you_sure'), $form, false);
         }
@@ -167,7 +167,7 @@ class ModerationController extends LegacyController
                 return $this->legacyAbortResponse(__('legacy/report.std_error'), __('legacy/report.std_invalid_offer_id'));
             }
             $arr = $offer->toArray();
-            $form = (__('legacy/report.text_are_you_sure_offer')).'<a href="offers.php?id='.$arr['id'].'&off_details=1"><b>'.htmlspecialchars($arr['name']).'</b></a>'.(__('legacy/report.text_to_staff')).'<br />'.(__('legacy/report.text_reason_note')).'<br /><form method=post action=report.php><input type=hidden name=takereportofferid value="'.htmlspecialchars((string) $reportofferid).'">'.(__('legacy/report.text_reason_is')).'<input type=text style="width: 200px" name=reason><input type=submit value="'.(__('legacy/report.submit_confirm')).'"></form>';
+            $form = (__('legacy/report.text_are_you_sure_offer')).'<a href="offers.php?id='.$arr['id'].'&off_details=1"><b>'.htmlspecialchars($arr['name']).'</b></a>'.(__('legacy/report.text_to_staff')).'<br />'.(__('legacy/report.text_reason_note')).'<br /><form method=post action=report.php><input type=hidden name=takereportofferid value="'.htmlspecialchars((string) $reportofferid).'">'.(__('legacy/report.text_reason_is')).'<input type=text name=reason><input type=submit value="'.(__('legacy/report.submit_confirm')).'"></form>';
 
             return $this->legacyAbortResponse(__('legacy/report.std_are_you_sure'), $form, false);
         }

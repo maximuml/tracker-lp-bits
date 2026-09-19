@@ -319,7 +319,7 @@ class MessagePageService
         $unread = '';
         if ($isSender) {
             $unread = (bool) ($message['unread'] ?? false)
-                ? '<span style="color: #FF0000;"><b>'.htmlspecialchars(__('legacy/messages.text_new')).'</b></a>'
+                ? '<span><b>'.htmlspecialchars(__('legacy/messages.text_new')).'</b></a>'
                 : '';
         }
 

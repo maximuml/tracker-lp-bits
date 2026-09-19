@@ -3,7 +3,7 @@
 @section('title', $title)
 
 @section('content')
-<h1 style="text-align: center">{{ $title }}</h1>
+<h1>{{ $title }}</h1>
 
 <table data-nx="data" border="1" cellspacing="0" cellpadding="5" width="100%">
 <thead>

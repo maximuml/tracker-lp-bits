@@ -158,7 +158,7 @@ final class BonusPageService
 
         // Cancel hit and run
         $cancelHrDesc = '<p>
-            <span style="">'.(__('legacy/mybonus.text_cancel_hr_label')).'</span>
+            <span>'.(__('legacy/mybonus.text_cancel_hr_label')).'</span>
             <input type="number" name="hr_id" />
         </p>';
         $results[] = $this->bonusItem(BonusLogs::getBonusForCancelHitAndRun(), 'cancel_hr', 0, (string) (__('legacy/mybonus.text_cancel_hr_title')), $cancelHrDesc);
@@ -223,7 +223,7 @@ final class BonusPageService
             echo '<tr><td align="center" colspan="4"><font class="striking"><b>'.$msg.'</b></font></td></tr>';
         }
         echo '<tr><td class="text" align="center" colspan="4">'.(__('legacy/mybonus.text_exchange_your_karma')).$bonus.(__('legacy/mybonus.text_for_goodies'));
-        echo '<br /><b>'.(__('legacy/mybonus.text_no_buttons_note')).'</b><br /><small style="color: orangered">('.$lockText.')</small></td></tr>';
+        echo '<br /><b>'.(__('legacy/mybonus.text_no_buttons_note')).'</b><br /><small>('.$lockText.')</small></td></tr>';
 
         echo '<tr><td class="colhead" align="center">'.(__('legacy/mybonus.col_option')).'</td>'.
             '<td class="colhead" align="left">'.(__('legacy/mybonus.col_description')).'</td>'.
@@ -245,10 +245,10 @@ final class BonusPageService
             echo '<td class="rowhead_center"><input type="hidden" name="option" value="'.$i.'" /><b>'.($i + 1).'</b></td>';
 
             if ($bonusarray['art'] === 'title') {
-                $otheroption_title = '<input type="text" name="title" style="width: 200px" maxlength="30" />';
+                $otheroption_title = '<input type="text" name="title" maxlength="30" />';
                 echo "<td class=\"rowfollow\" align='left'><h1>".$bonusarray['name'].'</h1>'.$bonusarray['description'].'<br /><br />'.(__('legacy/mybonus.text_enter_titile')).$otheroption_title.(__('legacy/mybonus.text_click_exchange'))."</td><td class=\"rowfollow\" align='center'>".number_format($bonusarray['points']).'</td>';
             } elseif ($bonusarray['art'] === 'gift_1') {
-                $otheroption = '<table width="100%"><tr><td class="embedded"><b>'.(__('legacy/mybonus.text_username')).'</b><input type="text" name="username" style="width: 200px" maxlength="24" /></td><td class="embedded"><b>'.(__('legacy/mybonus.text_to_be_given'))."</b><input type=\"number\" name=\"bonusgift\" id=\"giftcustom\" style='width: 80px' min='100' />".(__('legacy/mybonus.text_karma_points')).'</td></tr><tr><td class="embedded" colspan="2"><b>'.(__('legacy/mybonus.text_message')).'</b><input type="text" name="message" style="width: 400px" maxlength="100" /></td></tr></table>';
+                $otheroption = '<table width="100%"><tr><td class="embedded"><b>'.(__('legacy/mybonus.text_username')).'</b><input type="text" name="username" maxlength="24" /></td><td class="embedded"><b>'.(__('legacy/mybonus.text_to_be_given'))."</b><input type=\"number\" name=\"bonusgift\" id=\"giftcustom\" min='100' />".(__('legacy/mybonus.text_karma_points')).'</td></tr><tr><td class="embedded" colspan="2"><b>'.(__('legacy/mybonus.text_message')).'</b><input type="text" name="message" maxlength="100" /></td></tr></table>';
                 echo "<td class=\"rowfollow\" align='left'><h1>".$bonusarray['name'].'</h1>'.$bonusarray['description'].'<br /><br />'.(__('legacy/mybonus.text_enter_receiver_name'))."<br />$otheroption</td><td class=\"rowfollow nowrap\" align='center'>".(__('legacy/mybonus.text_min')).'100</td>';
             } elseif ($bonusarray['art'] === 'gift_2') {
                 $otheroption = '<table width="100%"><tr><td class="embedded">'.(__('legacy/mybonus.text_ratio_below')).'<select name="ratiocharity"> <option value="0.1"> 0.1</option><option value="0.2"> 0.2</option><option value="0.3" selected="selected"> 0.3</option> <option value="0.4"> 0.4</option> <option value="0.5"> 0.5</option><option value="0.6"> 0.6</option><option value="0.7"> 0.7</option><option value="0.8"> 0.8</option></select>'.(__('legacy/mybonus.text_and_downloaded_above')).' 10 GB</td><td class="embedded"><b>'.(__('legacy/mybonus.text_to_be_given')).'</b><select name="bonuscharity" id="charityselect" > <option value="1000"> 1,000</option><option value="2000"> 2,000</option><option value="3000" selected="selected"> 3000</option> <option value="5000"> 5,000</option> <option value="8000"> 8,000</option><option value="10000"> 10,000</option><option value="20000"> 20,000</option><option value="50000"> 50,000</option></select>'.(__('legacy/mybonus.text_karma_points')).'</td></tr></table>';
@@ -391,7 +391,7 @@ final class BonusPageService
         $bonusTableResult = Bonus::buildBonusTableForUser($curUser, $seedBonusResult, ['table_style' => 'width: 50%']);
 
         $percent = $seedBonusResult['seed_bonus'] * 100 / ($bzeroBonus + $perseedingBonus * $maxseedingBonus);
-        echo '<div align="center">'.(__('legacy/mybonus.text_you_are_currently_getting')).round($seedBonusResult['seed_bonus'], 3).(__('legacy/mybonus.text_point')).Strings::addS($seedBonusResult['seed_bonus']).(__('legacy/mybonus.text_per_hour')).' (A = '.round($A, 1).")</div><table align=\"center\" border=\"0\" width=\"400\"><tr><td class=\"loadbarbg\" style='border: none; padding: 0px;'>";
+        echo '<div align="center">'.(__('legacy/mybonus.text_you_are_currently_getting')).round($seedBonusResult['seed_bonus'], 3).(__('legacy/mybonus.text_point')).Strings::addS($seedBonusResult['seed_bonus']).(__('legacy/mybonus.text_per_hour')).' (A = '.round($A, 1).')</div><table align="center" border="0" width="400"><tr><td class="loadbarbg">';
 
         if ($percent <= 30) {
             $loadpic = 'loadbarred';
@@ -401,7 +401,7 @@ final class BonusPageService
             $loadpic = 'loadbargreen';
         }
         $width = $percent * 4;
-        echo '<img class="'.$loadpic.'" src="pic/trans.gif" style="width: '.$width.'px;" alt="'.$percent.'%" /></td></tr></table>';
+        echo '<img class="'.$loadpic.'" src="pic/trans.gif" alt="'.$percent.'%" /></td></tr></table>';
 
         if ($bonusTableResult['has_medal_addition']) {
             echo '<h1>'.(__('legacy/mybonus.text_get_by_medal')).'</h1>';
@@ -428,7 +428,7 @@ final class BonusPageService
         }
 
         echo '<h1>'.(__('legacy/mybonus.text_bonus_summary')).'</h1>';
-        echo '<div style="display: flex;justify-content: center;margin-top: 20px;">'.$bonusTableResult['table'].'</div>';
+        echo '<div>'.$bonusTableResult['table'].'</div>';
 
         echo '<h1>'.(__('legacy/mybonus.text_other_things_get_bonus')).'</h1>';
         echo '<ul>';

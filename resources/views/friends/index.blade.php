@@ -4,7 +4,7 @@
 
 @section('content')
 <p><div class="nx-main nx-embedded">
-<h1 style='margin:0px'> {{ __('legacy/friends.text_personallist')}} {{ $titleUsername }}</h1></div></p>
+<h1> {{ __('legacy/friends.text_personallist')}} {{ $titleUsername }}</h1></div></p>
 
 <div class="nx-main nx-embedded nx-box--737">
 <br />
@@ -18,12 +18,12 @@
     @foreach ($friendsList as $friend)
         <div>
         <div class="nx-fcard nx-main">
-        <div class="nx-center" style='padding: 0px;width:75px'>
-        <div style='width:75px;height:75px;overflow: hidden'><img width=75px src="{{ $friend['avatarSrc'] }}"></div>
+        <div class="nx-center">
+        <div><img width=75px src="{{ $friend['avatarSrc'] }}"></div>
         </div><div class="nx-grow">
         <div class="nx-row nx-main">
-        <div class="nx-embedded nx-w-80" style='padding: 5px'>{{ $friend['body1Html'] ?? '' }}</div>
-        <div class="nx-embedded nx-w-20" style='padding: 5px'>{{ $friend['body2Html'] ?? '' }}</div>
+        <div class="nx-embedded nx-w-80">{{ $friend['body1Html'] ?? '' }}</div>
+        <div class="nx-embedded nx-w-20">{{ $friend['body2Html'] ?? '' }}</div>
         </div>
         </div>
         </div>
@@ -37,7 +37,7 @@
 <br /><br />
 <div class="nx-main nx-embedded nx-box--737 nx-cell-5">
 <h2 align=left><a name="blocks">{{ __('legacy/friends.text_blocked_users')}}</a></h2>
-<div style='padding: 10px;'>
+<div>
 {{ $blocksHtml }}
 </div>
 </div>

@@ -8,9 +8,9 @@
 			<div class="nxm-catrow">
 				@foreach ($cells as $cell)
 					@if ($cell['selectAll'])
-					<span class="nxm-catcell" style="padding-left: {{ $panelVm->catPadding }}px"><input name="{{ $cell['checkPrefix'] }}_check" value="{{ $panelVm->selectAllLabel }}" class="btn medium" type="button" data-setchecked="{{ $cell['checkPrefix'] }}" data-setchecked-ctrl="{{ $cell['checkPrefix'] }}_check" data-checkall="{{ $panelVm->selectAllLabel }}" data-uncheckall="{{ $panelVm->unselectAllLabel }}"></span>
+					<span class="nxm-catcell"><input name="{{ $cell['checkPrefix'] }}_check" value="{{ $panelVm->selectAllLabel }}" class="btn medium" type="button" data-setchecked="{{ $cell['checkPrefix'] }}" data-setchecked-ctrl="{{ $cell['checkPrefix'] }}_check" data-checkall="{{ $panelVm->selectAllLabel }}" data-uncheckall="{{ $panelVm->unselectAllLabel }}"></span>
 					@else
-					<span class="nxm-catcell" style="padding-left: {{ $panelVm->catPadding }}px"><input type="checkbox" id="{{ $cell['checkboxName'] }}" name="{{ $cell['checkboxName'] }}" value="1"@if ($cell['checked']) checked @endif /><a href="{{ $cell['href'] }}"><img src="pic/cattrans.gif" class="{{ $cell['iconClass'] }}" alt="{{ $cell['name'] }}" title="{{ $cell['name'] }}"@if ($cell['iconStyle'] !== '') style="{{ $cell['iconStyle'] }}"@endif /></a></span>
+					<span class="nxm-catcell"><input type="checkbox" id="{{ $cell['checkboxName'] }}" name="{{ $cell['checkboxName'] }}" value="1"@if ($cell['checked']) checked @endif /><a href="{{ $cell['href'] }}"><img src="pic/cattrans.gif" class="{{ $cell['iconClass'] }}" alt="{{ $cell['name'] }}" title="{{ $cell['name'] }}"@if ($cell['iconStyle'] !== '')@endif /></a></span>
 					@endif
 				@endforeach
 			</div>
@@ -23,9 +23,9 @@
 			<div class="nxm-catrow">
 				@foreach ($cells as $cell)
 					@if ($cell['selectAll'])
-					<span class="nxm-catcell" style="padding-left: {{ $panelVm->catPadding }}px"><input name="{{ $cell['checkPrefix'] }}_check" value="{{ $panelVm->selectAllLabel }}" class="btn medium" type="button" data-setchecked="{{ $cell['checkPrefix'] }}" data-setchecked-ctrl="{{ $cell['checkPrefix'] }}_check" data-checkall="{{ $panelVm->selectAllLabel }}" data-uncheckall="{{ $panelVm->unselectAllLabel }}"></span>
+					<span class="nxm-catcell"><input name="{{ $cell['checkPrefix'] }}_check" value="{{ $panelVm->selectAllLabel }}" class="btn medium" type="button" data-setchecked="{{ $cell['checkPrefix'] }}" data-setchecked-ctrl="{{ $cell['checkPrefix'] }}_check" data-checkall="{{ $panelVm->selectAllLabel }}" data-uncheckall="{{ $panelVm->unselectAllLabel }}"></span>
 					@else
-					<span class="nxm-catcell" style="padding-left: {{ $panelVm->catPadding }}px"><label><input type="checkbox" id="{{ $cell['checkboxName'] }}" name="{{ $cell['checkboxName'] }}" value="1"@if ($cell['checked']) checked @endif /><a href="{{ $cell['href'] }}">{{ $cell['name'] }}</a></label></span>
+					<span class="nxm-catcell"><label><input type="checkbox" id="{{ $cell['checkboxName'] }}" name="{{ $cell['checkboxName'] }}" value="1"@if ($cell['checked']) checked @endif /><a href="{{ $cell['href'] }}">{{ $cell['name'] }}</a></label></span>
 					@endif
 				@endforeach
 			</div>
@@ -72,23 +72,23 @@
 			@endif
 			<div class="nxm-field">
 				<label>{{ __('legacy/torrents.size_range')}}</label>
-				<span class="nxm-range"><input type="number" min="1" name="size_begin" style="width: {{ $filterInputWidth }}px" value="{{ $filterInput['size_begin'] ?? '' }}"/> ~ <input type="number" min="1" name="size_end" style="width: {{ $filterInputWidth }}px" value="{{ $filterInput['size_end'] ?? '' }}"/></span>
+				<span class="nxm-range"><input type="number" min="1" name="size_begin" value="{{ $filterInput['size_begin'] ?? '' }}"/> ~ <input type="number" min="1" name="size_end" value="{{ $filterInput['size_end'] ?? '' }}"/></span>
 			</div>
 			<div class="nxm-field">
 				<label>{{ __('legacy/torrents.seeders_range')}}</label>
-				<span class="nxm-range"><input type="number" min="1" name="seeders_begin" style="width: {{ $filterInputWidth }}px" value="{{ $filterInput['seeders_begin'] ?? '' }}"/> ~ <input type="number" min="1" name="seeders_end" style="width: {{ $filterInputWidth }}px" value="{{ $filterInput['seeders_end'] ?? '' }}"/></span>
+				<span class="nxm-range"><input type="number" min="1" name="seeders_begin" value="{{ $filterInput['seeders_begin'] ?? '' }}"/> ~ <input type="number" min="1" name="seeders_end" value="{{ $filterInput['seeders_end'] ?? '' }}"/></span>
 			</div>
 			<div class="nxm-field">
 				<label>{{ __('legacy/torrents.leechers_range')}}</label>
-				<span class="nxm-range"><input type="number" min="1" name="leechers_begin" style="width: {{ $filterInputWidth }}px" value="{{ $filterInput['leechers_begin'] ?? '' }}"/> ~ <input type="number" min="1" name="leechers_end" style="width: {{ $filterInputWidth }}px" value="{{ $filterInput['leechers_end'] ?? '' }}"/></span>
+				<span class="nxm-range"><input type="number" min="1" name="leechers_begin" value="{{ $filterInput['leechers_begin'] ?? '' }}"/> ~ <input type="number" min="1" name="leechers_end" value="{{ $filterInput['leechers_end'] ?? '' }}"/></span>
 			</div>
 			<div class="nxm-field">
 				<label>{{ __('legacy/torrents.times_completed_range')}}</label>
-				<span class="nxm-range"><input type="number" min="1" name="times_completed_begin" style="width: {{ $filterInputWidth }}px" value="{{ $filterInput['times_completed_begin'] ?? '' }}"/> ~ <input type="number" min="1" name="times_completed_end" style="width: {{ $filterInputWidth }}px" value="{{ $filterInput['times_completed_end'] ?? '' }}"/></span>
+				<span class="nxm-range"><input type="number" min="1" name="times_completed_begin" value="{{ $filterInput['times_completed_begin'] ?? '' }}"/> ~ <input type="number" min="1" name="times_completed_end" value="{{ $filterInput['times_completed_end'] ?? '' }}"/></span>
 			</div>
 			<div class="nxm-field">
 				<label>{{ __('legacy/torrents.added_range')}}</label>
-				<span class="nxm-range"><x-datetime-input name="added_begin" :value="$filterInput['added_begin'] ?? ''" :style="'width: '.$filterInputWidth.'px'" /> ~ <x-datetime-input name="added_end" :value="$filterInput['added_end'] ?? ''" :style="'width: '.$filterInputWidth.'px'" /></span>
+				<span class="nxm-range"><x-datetime-input name="added_begin" :value="$filterInput['added_begin'] ?? ''" /> ~ <x-datetime-input name="added_end" :value="$filterInput['added_end'] ?? ''" /></span>
 			</div>
 		</div>
 
@@ -120,7 +120,7 @@
 		@if ($allTags->isNotEmpty())
 		<div class="nxm-tags">
 			@foreach ($allTags as $tag)
-			<a href="?tag_id={{ $tag->id }}"><span class="nx-tag" style="background-color:{{ $tag->color }};color:{{ $tag->font_color }};border-radius:{{ $tag->border_radius }};font-size:{{ $tag->font_size }};margin:{{ $tag->margin }};padding:{{ $tag->padding }}" title="{{ $tag->description }}">{{ $tag->name }}</span></a>
+			<a href="?tag_id={{ $tag->id }}"><span class="nx-tag" title="{{ $tag->description }}">{{ $tag->name }}</span></a>
 			@endforeach
 		</div>
 		@endif

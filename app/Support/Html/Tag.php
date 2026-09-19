@@ -387,7 +387,7 @@ final class Tag
      *    would corrupt it. Pre-`<div>`-extracted IDs are trusted
      *    integer-derived strings (`lastpost-12345` style). Same
      *    contract as the legacy.
-     *  - Outer wrapper is always `<div style="display: none">` —
+     *  - Outer wrapper is always `<div class="nx-hidden">` —
      *    visibility is toggled per-child by tipsy at hover time.
      *
      * @param  iterable<array{id?: mixed, content?: mixed}>  $items
@@ -456,7 +456,7 @@ final class Tag
      */
     public static function quickReply(string $formName, string $textareaName, string $submitLabel): string
     {
-        $html = "<textarea name='".htmlspecialchars($textareaName, ENT_QUOTES)."' cols=\"100\" rows=\"8\" style=\"width: 450px\" data-ctrlenter=\"compose:qr\"></textarea>";
+        $html = "<textarea name='".htmlspecialchars($textareaName, ENT_QUOTES)."' cols=\"100\" rows=\"8\" data-ctrlenter=\"compose:qr\"></textarea>";
         $html .= Smilies::quickRow($formName, $textareaName);
         $html .= '<br />';
         $html .= '<input type="submit" id="qr" class="btn" value="'.htmlspecialchars($submitLabel, ENT_QUOTES).'" />';

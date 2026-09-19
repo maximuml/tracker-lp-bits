@@ -150,7 +150,7 @@ class UserDetailController extends Controller
         }
 
         $countryRow = Country::rowWithContext($user['country']);
-        $countryHtml = '<img src="pic/flag/'.htmlspecialchars((string) ($countryRow['flagpic'] ?? '')).'" alt="'.htmlspecialchars((string) ($countryRow['name'] ?? '')).'" style="margin-left: 8pt" />';
+        $countryHtml = '<img src="pic/flag/'.htmlspecialchars((string) ($countryRow['flagpic'] ?? '')).'" alt="'.htmlspecialchars((string) ($countryRow['name'] ?? '')).'" />';
 
         $locationInfo = [null, null];
         $locationInfoHtml = '';
@@ -410,7 +410,7 @@ JS, 'footer', false);
         }
 
         if (! empty($props)) {
-            $userPropsHtml = sprintf('<div style="display: flex;align-items: center">%s</div>', implode('&nbsp;|&nbsp;', $props));
+            $userPropsHtml = sprintf('<div>%s</div>', implode('&nbsp;|&nbsp;', $props));
         }
 
         return [

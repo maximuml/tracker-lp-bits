@@ -136,10 +136,10 @@ final class Category
         }
 
         if ($sirow === 'not allowed') {
-            return '<img src="pic/cattrans.gif" style="background-image: url(pic/'.$catFolder.'/additional/notallowed.png);" title="Not Allowed" alt="Not Allowed" />';
+            return '<img src="pic/cattrans.gif" title="Not Allowed" alt="Not Allowed" />';
         }
 
-        return '<img'.($sirow['class_name'] ? ' class="'.$sirow['class_name'].'"' : '').' src="pic/cattrans.gif" style="background-image: url(pic/'.$catFolder.'/additional/'.$sirow['image'].');" alt="'.$sirow['name'].'" title="'.$sirow['name'].'" />';
+        return '<img'.($sirow['class_name'] ? ' class="'.$sirow['class_name'].'"' : '').' src="pic/cattrans.gif" alt="'.$sirow['name'].'" title="'.$sirow['name'].'" />';
     }
 
     /**
@@ -207,7 +207,7 @@ final class Category
             $className = (string) ($categoryRow['class_name'] ?? '');
             $name = (string) ($categoryRow['name'] ?? '');
             $image = (string) ($categoryRow['image'] ?? '');
-            $cache[$categoryId] = '<img'.($className ? ' class="'.$className.'"' : '').' src="pic/cattrans.gif" alt="'.$name.'" title="'.$name.'" style="background-image: url(pic/'.$catImgUrl.'/'.$image.');" />';
+            $cache[$categoryId] = '<img'.($className ? ' class="'.$className.'"' : '').' src="pic/cattrans.gif" alt="'.$name.'" title="'.$name.'" />';
         }
 
         $catImg = $cache[$categoryId];

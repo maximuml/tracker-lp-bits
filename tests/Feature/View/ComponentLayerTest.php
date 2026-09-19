@@ -311,14 +311,13 @@ final class ComponentLayerTest extends TestCase
         $this->assertDoesNotMatchRegularExpression('/id="flagyes"[^>]*checked/', $html);
     }
 
-    public function test_settings_text_escapes_value_and_renders_width(): void
+    public function test_settings_text_escapes_value(): void
     {
         $html = $this->render(
-            '<x-settings-text label="T" :name="$n" :value="$v" note="hint" width="50px" />',
+            '<x-settings-text label="T" :name="$n" :value="$v" note="hint" />',
             ['n' => 'f"><b>', 'v' => '"><script>'],
         );
 
-        $this->assertStringContainsString('width: 50px', $html);
         $this->assertStringContainsString('hint', $html);
         $this->assertStringNotContainsString('<script>', $html);
         $this->assertStringContainsString('value="&quot;&gt;&lt;script&gt;', $html);
@@ -509,15 +508,14 @@ final class ComponentLayerTest extends TestCase
     public function test_datetime_input_renders_native_input(): void
     {
         $html = $this->render(
-            '<x-datetime-input name="added_begin" :value="$v" :style="$s" />',
-            ['v' => '2025-03-04 10:00', 's' => 'width: 150px'],
+            '<x-datetime-input name="added_begin" :value="$v" />',
+            ['v' => '2025-03-04 10:00'],
         );
 
         $this->assertStringContainsString('type="datetime-local"', $html);
         $this->assertStringContainsString('id="datetime-picker-added_begin"', $html);
         $this->assertStringContainsString('name="added_begin"', $html);
         $this->assertStringContainsString('value="2025-03-04 10:00"', $html);
-        $this->assertStringContainsString('style="width: 150px"', $html);
         $this->assertStringContainsString('autocomplete="off"', $html);
     }
 

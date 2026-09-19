@@ -53,20 +53,18 @@ class TorrentApprovalRepository extends BaseRepository
         }
         $id = 'torrent-approval';
         $rows = [];
-        $rowStyle = 'display: flex; padding: 10px; align-items: center';
-        $labelStyle = 'width: 80px';
         $formId = "$id-form";
         $rows[] = sprintf(
-            '<div class="%s-row" style="%s"><div style="%s">%s: </div><div>%s</div></div>',
-            $id, $rowStyle, $labelStyle, Locale::trans('torrent.approval.status_label', [], null), implode('', $radios)
+            '<div class="%s-row"><div>%s: </div><div>%s</div></div>',
+            $id, Locale::trans('torrent.approval.status_label', [], null), implode('', $radios)
         );
         $rows[] = sprintf(
-            '<div class="%s-row" style="%s"><div style="%s">%s: </div><div><textarea name="params[comment]" rows="4" cols="40"></textarea></div></div>',
-            $id, $rowStyle, $labelStyle, Locale::trans('torrent.approval.comment_label', [], null)
+            '<div class="%s-row"><div>%s: </div><div><textarea name="params[comment]" rows="4" cols="40"></textarea></div></div>',
+            $id, Locale::trans('torrent.approval.comment_label', [], null)
         );
         $rows[] = sprintf('<input type="hidden" name="params[torrent_id]" value="%s" />', $torrent->id);
 
-        $html = sprintf('<div id="%s-box" style="padding: 15px 30px"><form id="%s">%s</form></div>', $id, $formId, implode('', $rows));
+        $html = sprintf('<div id="%s-box"><form id="%s">%s</form></div>', $id, $formId, implode('', $rows));
 
         return [
             'id' => $id,
@@ -181,7 +179,7 @@ class TorrentApprovalRepository extends BaseRepository
         }
         if ($show) {
             return sprintf(
-                '<span style="margin-left: 6px" title="%s">%s</span>',
+                '<span title="%s">%s</span>',
                 Locale::trans("torrent.approval.status_text.{$approvalStatus}", [], null),
                 Torrent::$approvalStatus[$approvalStatus]['icon']
             );

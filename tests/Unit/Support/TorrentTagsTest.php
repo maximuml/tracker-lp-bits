@@ -91,16 +91,17 @@ final class TorrentTagsTest extends TestCase
         // Only bit 1 (First Release) set
         $this->assertSame(1, substr_count($html, '<span'));
         $this->assertStringContainsString('First Release', $html);
-        $this->assertStringContainsString('#8F77B5', $html);
+        $this->assertStringContainsString('class="nx-tag"', $html);
     }
 
-    public function test_render_span_includes_color_style(): void
+    public function test_render_span_uses_themed_chip_class(): void
     {
+        // Per-tag inline colours were silently dropped by CSP
+        // (style-src has no unsafe-inline) — chips now render via the
+        // themed .nx-tag utility class.
         $html = TorrentTags::render(1, 'span', $this->labels());
 
-        $this->assertStringContainsString('background-color:#ff0000', $html);
-        $this->assertStringContainsString('color:white', $html);
-        $this->assertStringContainsString('border-radius:15%', $html);
+        $this->assertStringContainsString('class="nx-tag"', $html);
     }
 
     public function test_render_checkbox_uses_value_powers_of_two(): void
@@ -141,12 +142,12 @@ final class TorrentTagsTest extends TestCase
         $this->assertStringContainsString('type="checkbox"', $html);
     }
 
-    public function test_render_span_with_hdr_tag_has_correct_color(): void
+    public function test_render_span_with_hdr_tag(): void
     {
         // Bit 6 = HDR, value = 64
         $html = TorrentTags::render(64, 'span', $this->labels());
 
-        $this->assertStringContainsString('#38b03f', $html);
         $this->assertStringContainsString('HDR', $html);
+        $this->assertStringContainsString('class="nx-tag"', $html);
     }
 }

@@ -261,10 +261,10 @@ class BBCodeTest extends TestCase
 
     // ---------- textAlign ----------
 
-    public function test_text_align_wraps_text_in_styled_div(): void
+    public function test_text_align_wraps_text_in_classed_div(): void
     {
         $this->assertSame(
-            '<div style="text-align: center">hello</div>',
+            '<div class="nx-align-center">hello</div>',
             BBCode::textAlign('hello', 'center'),
         );
     }
@@ -275,9 +275,10 @@ class BBCodeTest extends TestCase
         // alignment value. The BBCode parser only ever calls it
         // with `left`, `center`, `right`, `justify` — but if a
         // future caller passes garbage, it lands directly in the
-        // `style` attribute.
+        // `class` attribute (inert: class values cannot carry
+        // declarations, unlike the previous inline `style` output).
         $html = BBCode::textAlign('x', 'right; color: red');
-        $this->assertStringContainsString('style="text-align: right; color: red"', $html);
+        $this->assertStringContainsString('class="nx-align-right; color: red"', $html);
     }
 
     // ---------- quotes ----------

@@ -115,7 +115,7 @@ final class TorrentTable
             }
         }
         ?>
-<td class="colhead" style="padding: 0px"><?php echo __('legacy/functions.col_type') ?></td>
+<td class="colhead"><?php echo __('legacy/functions.col_type') ?></td>
 <td class="colhead"><a href="?<?php echo $oldlink?>sort=1&amp;type=<?php echo $link[1]?>"><?php echo __('legacy/functions.col_name') ?></a></td>
 <?php
 
@@ -152,7 +152,7 @@ if (Permission::canManageTorrent()) { ?>
             $sphighlight = Promotion::backgroundStyleWithContext($row['sp_state'], $row['pos_state'], $row);
             echo '<tr'.$sphighlight.">\n";
 
-            echo "<td class=\"rowfollow nowrap\" valign=\"middle\" style='padding: 0px'>";
+            echo '<td class="rowfollow nowrap" valign="middle">';
             if (isset($row['category'])) {
                 echo Category::imageTagWithContext($row['category'], '?');
                 if ($has_secondicon) {
@@ -189,10 +189,10 @@ if (Permission::canManageTorrent()) { ?>
                 if (! empty($row['cover'])) {
                     $coverSrc = $row['cover'];
                 }
-                $tdCover = sprintf('<td class="embedded" style="text-align: center;width: 46px;height: 46px"><img src="pic/misc/spinner.svg" data-src="%s" class="nexus-lazy-load" style="max-height: 46px;max-width: 46px" /></td>', $coverSrc);
+                $tdCover = sprintf('<td class="embedded"><img src="pic/misc/spinner.svg" data-src="%s" class="nexus-lazy-load" /></td>', $coverSrc);
             }
 
-            echo "<td class=\"rowfollow\" width=\"100%\" align=\"left\" style='padding: 0px'><table class=\"torrentname\" width=\"100%\"><tr".$sphighlight.">$tdCover<td class=\"embedded\" style='padding-left: 5px'>".$stickyicon."<a $short_torrent_name_alt $mouseovertorrent href=\"details.php?id=".$id.'&amp;hit=1"><b>'.htmlspecialchars($dispname).'</b></a>';
+            echo '<td class="rowfollow" width="100%" align="left"><table class="torrentname" width="100%"><tr'.$sphighlight.">$tdCover<td class=\"embedded\">".$stickyicon."<a $short_torrent_name_alt $mouseovertorrent href=\"details.php?id=".$id.'&amp;hit=1"><b>'.htmlspecialchars($dispname).'</b></a>';
             if ($user['appendnew'] && strtotime($row['added']) >= $last_browse) {
                 echo "<b> (<font class='new'>".__('legacy/functions.text_new_uppercase').'</font>)</b>';
             }
@@ -222,14 +222,14 @@ if (Permission::canManageTorrent()) { ?>
 
             $act = '';
             if ($user['dlicon'] && $user['downloadpos']) {
-                $act .= '<a href="download.php?id='.$id."\"><img class=\"download\" src=\"pic/trans.gif\" style='padding-bottom: 2px;' alt=\"download\" title=\"".__('legacy/functions.title_download_torrent').'" /></a>';
+                $act .= '<a href="download.php?id='.$id.'"><img class="download" src="pic/trans.gif" alt="download" title="'.__('legacy/functions.title_download_torrent').'" /></a>';
             }
             if ($user['bmicon']) {
                 $bookmark = ' href="#" data-bookmark-torrent="'.$id.'" data-bookmark-counter="'.$counter.'"';
                 $act .= ($act ? '<br />' : '').'<a id="bookmark'.$counter.'" '.$bookmark.' >'.TorrentBookmark::stateMarkupWithContext($user['id'], $id).'</a>';
             }
 
-            echo '<td width="20" class="embedded" style="text-align: right;padding-right: 5px" valign="middle">'.$act."</td>\n";
+            echo '<td width="20" class="embedded" valign="middle">'.$act."</td>\n";
 
             echo '</tr></table></td>';
             if ($wait) {

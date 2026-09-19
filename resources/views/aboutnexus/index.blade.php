@@ -34,7 +34,7 @@
     </tr>
     @foreach ($languages as $row)
         <tr>
-            <td class="rowfollow"><img width="24" height="15" src="pic/flag/{{ $row['flagpic'] }}" alt="{{ $row['lang_name'] }}" title="{{ $row['lang_name'] }}" style="padding-bottom:1px;" /></td>
+            <td class="rowfollow"><img width="24" height="15" src="pic/flag/{{ $row['flagpic'] }}" alt="{{ $row['lang_name'] }}" title="{{ $row['lang_name'] }}" /></td>
             <td class="rowfollow">{{ $row['lang_name'] }}</td>
             <td class="rowfollow">{{ $row['trans_state'] }}</td>
         </tr>

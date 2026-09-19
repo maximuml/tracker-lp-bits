@@ -14,7 +14,7 @@
         <tr><td class=colhead align=left>{{ __('legacy/log.text_search_log')}}</td></tr>
         <tr><td class=toolbox align=left>
             <form method="get" action="">
-                <input type="text" name="query" style="width:500px" value="{{ $q }}">
+                <input type="text" name="query" value="{{ $q }}">
                 @if ($canConfidentialLog)
                     {{ __('legacy/log.text_in')}}<select name="search">
                     @foreach (['all' => (__('legacy/log.text_all')), 'normal' => (__('legacy/log.text_normal')), 'mod' => (__('legacy/log.text_mod'))] as $value => $text)
@@ -52,7 +52,7 @@
         <tr><td class=colhead align=left>{{ __('legacy/log.text_search_chronicle')}}</td></tr>
         <tr><td class=toolbox align=left>
             <form method="get" action="">
-                <input type="text" name="query" style="width:500px" value="{{ $q }}">
+                <input type="text" name="query" value="{{ $q }}">
                 <input type="hidden" name="action" value="chronicle">
                 &nbsp;&nbsp;<input type=submit value="{{ __('legacy/log.submit_search')}}"></form>
         </td></tr>
@@ -62,7 +62,7 @@
             <tr><td class=colhead align=left>{{ ! empty($editItem) ? (__('legacy/log.text_edit_chronicle')) : (__('legacy/log.text_add_chronicle')) }}</td></tr>
             <tr><td class=toolbox align=left>
                 <form method="post" action="">
-                    <textarea name="txt" style="width:500px" rows="3">{{ ! empty($editItem) ? ($editItem['txt'] ?? '') : (__('legacy/log.text_add_chronicle')) }}</textarea>
+                    <textarea name="txt" rows="3">{{ ! empty($editItem) ? ($editItem['txt'] ?? '') : (__('legacy/log.text_add_chronicle')) }}</textarea>
                     <input type="hidden" name="action" value="chronicle">
                     <input type="hidden" name="do" value="{{ ! empty($editItem) ? 'update' : 'add' }}">
                     @if (! empty($editItem))
@@ -78,7 +78,7 @@
         <table data-nx="data" width=940 border=1 cellspacing=0 cellpadding=5>
         <tr><td class=colhead align=center>{{ __('legacy/log.col_date')}}</td><td class=colhead align=left>{{ __('legacy/log.col_event')}}</td>@if ($canManage)<td class=colhead align=center>{{ __('legacy/log.col_modify')}}</td>@endif</tr>
         @foreach ($chronicleRows as $arr)
-            <tr><td class=rowfollow align=center><nobr>{{ $arr['dateHtml'] ?? '' }}</nobr></td><td class=rowfollow align=left>{{ $arr['bodyHtml'] ?? '' }}</td>@if ($canManage)<td align=center nowrap><b><a href="?action=chronicle&do=edit&id={{ (int) ($arr['id'] ?? 0) }}">{{ __('legacy/log.text_edit')}}</a>&nbsp;|&nbsp;<form method="post" action="?action=chronicle&do=del" class="nx-inline"><input type="hidden" name="id" value="{{ (int) ($arr['id'] ?? 0) }}"><button type="submit" class="nx-btn-link" style="color:red;font-weight:bold">{{ __('legacy/log.text_delete')}}</button></form></b></td>@endif</tr>
+            <tr><td class=rowfollow align=center><nobr>{{ $arr['dateHtml'] ?? '' }}</nobr></td><td class=rowfollow align=left>{{ $arr['bodyHtml'] ?? '' }}</td>@if ($canManage)<td align=center nowrap><b><a href="?action=chronicle&do=edit&id={{ (int) ($arr['id'] ?? 0) }}">{{ __('legacy/log.text_edit')}}</a>&nbsp;|&nbsp;<form method="post" action="?action=chronicle&do=del" class="nx-inline"><input type="hidden" name="id" value="{{ (int) ($arr['id'] ?? 0) }}"><button type="submit" class="nx-btn-link">{{ __('legacy/log.text_delete')}}</button></form></b></td>@endif</tr>
         @endforeach
         </table>
         {{ $pagerbottom ?? '' }}
@@ -90,7 +90,7 @@
         <tr><td class=colhead align=left>{{ __('legacy/log.text_search_news')}}</td></tr>
         <tr><td class=toolbox align=left>
             <form method="get" action="">
-                <input type="text" name="query" style="width:500px" value="{{ $q }}">
+                <input type="text" name="query" value="{{ $q }}">
                 {{ __('legacy/log.text_in')}}<select name="search">
                 @foreach (['title' => (__('legacy/log.text_title')), 'body' => (__('legacy/log.text_body')), 'both' => (__('legacy/log.text_both'))] as $value => $text)
                     <option value='{{ $value }}'{{ $value === $search ? ' selected' : '' }}>{{ $text }}</option>
@@ -127,7 +127,7 @@
         <p align=center><b>{{ $item['poll']['question'] ?? '' }}</b></p>
         <div class="nx-main">
         @foreach ($item['options'] ?? [] as $opt)
-            <div class="nx-row"><div class="nx-embedded">{{ $opt['text'] ?? '' }}&nbsp;&nbsp;</div><div class="nx-embedded nx-nowrap nx-grow"><img class="bar_end" src="pic/trans.gif" alt="" /><img class="unsltbar" src="pic/trans.gif" style="width: {{ (int) ($opt['percent'] ?? 0) * 3 }}px" /><img class="bar_end" src="pic/trans.gif" alt="" /> {{ (int) ($opt['percent'] ?? 0) }}%</div></div>
+            <div class="nx-row"><div class="nx-embedded">{{ $opt['text'] ?? '' }}&nbsp;&nbsp;</div><div class="nx-embedded nx-nowrap nx-grow"><img class="bar_end" src="pic/trans.gif" alt="" /><img class="unsltbar" src="pic/trans.gif" /><img class="bar_end" src="pic/trans.gif" alt="" /> {{ (int) ($opt['percent'] ?? 0) }}%</div></div>
         @endforeach
         </div>
         <p align=center>{{ __('legacy/log.text_votes')}}{{ $item['totalVotes'] ?? '0' }}</p>

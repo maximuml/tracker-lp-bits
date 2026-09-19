@@ -9,7 +9,7 @@
     {{ $pagertop }}
     <h1 align="center">{{ __('legacy/functions.text_latest_comments')}}</h1>
     @foreach ($rows as $row)
-        <div style="margin-top: 8pt; margin-bottom: 8pt;">
+        <div>
             <div id="cid{{ $row['id'] }}" class="nx-embedded">
                         #{{ $row['id'] }}&nbsp;&nbsp;
                         <font color="gray">{{ __('legacy/functions.text_by')}}</font>

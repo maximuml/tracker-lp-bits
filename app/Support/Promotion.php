@@ -70,9 +70,9 @@ final class Promotion
         if ($sphighlight === null) {
             $torrentSettings = SiteConfig::current()->torrent->toArray();
             if ($posState === TorrentPosState::STICKY_FIRST->value && ! empty($torrentSettings['sticky_first_level_background_color'])) {
-                $sphighlight = sprintf(' style="background-color: %s"', $torrentSettings['sticky_first_level_background_color']);
+                $sphighlight = '';
             } elseif ($posState === TorrentPosState::STICKY_SECOND->value && ! empty($torrentSettings['sticky_second_level_background_color'])) {
-                $sphighlight = sprintf(' style="background-color: %s"', $torrentSettings['sticky_second_level_background_color']);
+                $sphighlight = '';
             }
         }
 

@@ -83,7 +83,7 @@ final class SearchBox
      */
     public static function areaSelect(int|string $searchArea, array $options = []): string
     {
-        $result = sprintf('<select name="search_area" style="%s">', $options['style'] ?? '');
+        $result = '<select name="search_area">';
         foreach ([0, 1, 3] as $item) {
             $result .= sprintf(
                 '<option value="%s"%s>%s</option>',
@@ -181,19 +181,17 @@ final class SearchBox
                         $langAndFile = sprintf('%s%s', $icon->multilang ? "$lang/" : '', $item->image);
                         $fullDir = Path::resolve("pic/category/$iconFolder/$langAndFile", ROOT_PATH);
                         if (file_exists($fullDir)) {
-                            $backgroundImagePath = "pic/category/$iconFolder/$langAndFile";
+                            $iconImagePath = "pic/category/$iconFolder/$langAndFile";
                         } else {
-                            $backgroundImagePath = "pic/category/{$searchBox->name}/$iconFolder/$langAndFile";
+                            $iconImagePath = "pic/category/{$searchBox->name}/$iconFolder/$langAndFile";
                         }
-                        $styleAttr = "background-image: url({$backgroundImagePath})";
                     } else {
-                        $styleAttr = '';
+                        $iconImagePath = 'pic/cattrans.gif';
                     }
-                    $style = $styleAttr ? " style=\"{$styleAttr}\"" : '';
 
                     $tdContent = <<<TDCONTENT
 <input type="checkbox" id="cat{$item->id}" name="cat{$item->id}" value="{$checkboxValue}"{$checked} />
-<a href="{$categoryHrefPrefix}cat={$item->id}"><img src="pic/cattrans.gif" class="{$item->class_name}" alt="{$item->name}" title="{$item->name}"{$style} /></a>
+<a href="{$categoryHrefPrefix}cat={$item->id}"><img src="{$iconImagePath}" class="{$item->class_name}" alt="{$item->name}" title="{$item->name}" /></a>
 TDCONTENT;
                 } else {
                     $tdContent = sprintf(
@@ -208,7 +206,7 @@ TDCONTENT;
                 }
 
                 $td = <<<TD
-<td align="left" class="bottom" style="padding-bottom: 4px;padding-left: {$searchBox->catpadding}px">
+<td align="left" class="bottom">
     $tdContent
 </td>
 TD;
@@ -275,7 +273,7 @@ TDCONTENT;
                     }
 
                     $td = <<<TD
-<td align="left" class="bottom" style="padding-bottom: 4px;padding-left: {$searchBox->catpadding}px">
+<td align="left" class="bottom">
     $tdContent
 </td>
 TD;

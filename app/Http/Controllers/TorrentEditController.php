@@ -115,9 +115,9 @@ class TorrentEditController extends Controller
         ) {
             if (Permission::can(PermissionEnum::TORRENT_ON_PROMOTION)) {
                 $pickContentHtml .= '<b>'.(__('legacy/edit.row_special_torrent')).'&nbsp;</b>'
-                    .'<select name="sel_spstate" style="width: 100px;">'.Html::promotionSelection((int) $row['sp_state'], 0).'</select>&nbsp;&nbsp;&nbsp;'
+                    .'<select name="sel_spstate">'.Html::promotionSelection((int) $row['sp_state'], 0).'</select>&nbsp;&nbsp;&nbsp;'
                     .'<select name="promotion_time_type"><option value="0"'.($row['promotion_time_type'] == 0 ? ' selected="selected"' : '').'>'.(__('legacy/edit.select_use_global_setting')).'</option><option value="1"'.($row['promotion_time_type'] == 1 ? ' selected="selected"' : '').'>'.(__('legacy/edit.select_forever')).'</option><option value="2"'.($row['promotion_time_type'] == 2 ? ' selected="selected"' : '').'>'.(__('legacy/edit.select_until')).'</option></select><span id="promotion_until_note"'.($row['promotion_time_type'] == 2 ? '' : ' class="nx-hidden"').'>';
-                $pickContentHtml .= '<input type="text" id="promotionuntiltime" name="promotionuntil" style="width: 120px;" value="'.($row['promotion_until'] > $row['added'] ? $row['promotion_until'] : '').'" />';
+                $pickContentHtml .= '<input type="text" id="promotionuntiltime" name="promotionuntil" value="'.($row['promotion_until'] > $row['added'] ? $row['promotion_until'] : '').'" />';
                 $pickContentHtml .= '&nbsp;('.(__('legacy/edit.text_ie_for')).'<select name="promotionaddedtime"><option value="'.($row['promotion_until'] > $row['added'] ? $row['promotion_until'] : '').'">'.(__('legacy/edit.text_keep_current')).'</option>';
                 $addedTimeStamp = strtotime((string) $row['added']);
                 foreach ([900, 1800, 3600, 5400, 7200, 14400, 21600, 28800, 43200, 64800, 86400, 129600, 259200, 604800, 1296000, 2592000, 7776000, 15552000, 31104000] as $seconds) {
@@ -134,7 +134,7 @@ class TorrentEditController extends Controller
                     $options[] = '<option'.($row['pos_state'] == $key ? ' selected="selected"' : '').' value="'.$key.'">'.$value['text'].'</option>';
                 }
                 $pickContentHtml .= '<b>'.(__('legacy/edit.row_torrent_position')).'&nbsp;</b>'
-                    .'<select name="pos_state" style="width: 100px;">'.implode('', $options).'</select>&nbsp;&nbsp;&nbsp;';
+                    .'<select name="pos_state">'.implode('', $options).'</select>&nbsp;&nbsp;&nbsp;';
                 $pickContentHtml .= view('components.datetime-input', ['label' => SafeHtml::fromTrustedHtml(Locale::trans('label.deadline', [], null).'&nbsp;'), 'name' => 'pos_state_until', 'value' => (string) $row['pos_state_until']])->render();
             }
         }

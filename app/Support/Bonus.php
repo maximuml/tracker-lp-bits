@@ -233,7 +233,7 @@ class Bonus
             $totalBonus += $bonusResult['medal_bonus'] * $bonusResult['medal_additional_factor'];
         }
 
-        $table = sprintf('<table cellpadding="5" style="%s">', $options['table_style'] ?? '');
+        $table = '<table cellpadding="5">';
         $table .= '<tr>';
         $table .= sprintf('<td class="colhead">%s</td>', Locale::trans('bonus.table_thead.reward_type', [], null));
         $table .= sprintf('<td class="colhead">%s</td>', Locale::trans('bonus.table_thead.count', [], null));

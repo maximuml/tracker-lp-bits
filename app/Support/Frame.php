@@ -139,7 +139,7 @@ final class Frame
 
         if ($hassubject) {
             $html .= '<tr><td class="rowhead">'.(__('legacy/functions.row_subject')).'</td>'
-                .'<td class="rowfollow" align="left"><input type="text" style="width: 99%;" name="subject" maxlength="'.(int) $maxsubjectlength.'" value="'.htmlspecialchars($subject).'" /></td></tr>'."\n";
+                .'<td class="rowfollow" align="left"><input type="text" name="subject" maxlength="'.(int) $maxsubjectlength.'" value="'.htmlspecialchars($subject).'" /></td></tr>'."\n";
         }
 
         $html .= '<tr><td class="rowhead" valign="top">'.(__('legacy/functions.row_body')).'</td><td class="rowfollow" align="left"><span class="nx-hidden" id="previewouter"></span><div id="editorouter">';
@@ -204,7 +204,7 @@ final class Frame
             ? '<p>in '.$file.', line '.$line.'</p>'
             : '';
 
-        return SafeHtml::fromTrustedHtml('<table border="0" bgcolor="blue" align="left" cellspacing="0" cellpadding="10" style="background: blue;">'
+        return SafeHtml::fromTrustedHtml('<table border="0" bgcolor="blue" align="left" cellspacing="0" cellpadding="10">'
             .'<tr><td class="embedded"><font color="white"><h1>SQL Error</h1>'."\n"
             .'<b>'.$error.$location.'</b></font></td></tr></table>');
     }

@@ -297,21 +297,9 @@ final class ForumIndexService
             33 => 'Pink', 34 => 'Wheat', 35 => 'Lemon Chiffon', 36 => 'Pale Green',
             37 => 'Pale Turquoise', 38 => 'Light Blue', 39 => 'Plum', 40 => 'White',
         ];
-        $cssNames = [
-            1 => 'black', 2 => 'sienna', 3 => 'darkolivegreen', 4 => 'darkgreen',
-            5 => 'darkslateblue', 6 => 'navy', 7 => 'indigo', 8 => 'darkslategray',
-            9 => 'darkred', 10 => 'darkorange', 11 => 'olive', 12 => 'green',
-            13 => 'teal', 14 => 'blue', 15 => 'slategray', 16 => 'dimgray',
-            17 => 'red', 18 => 'sandybrown', 19 => 'yellowgreen', 20 => 'seagreen',
-            21 => 'mediumturquoise', 22 => 'royalblue', 23 => 'purple', 24 => 'gray',
-            25 => 'magenta', 26 => 'orange', 27 => 'yellow', 28 => 'lime',
-            29 => 'cyan', 30 => 'deepskyblue', 31 => 'darkorchid', 32 => 'silver',
-            33 => 'pink', 34 => 'wheat', 35 => 'lemonchiffon', 36 => 'palegreen',
-            37 => 'paleturquoise', 38 => 'lightblue', 39 => 'plum', 40 => 'white',
-        ];
         $out = "<option value='0'>".$selectColorLabel."</option>\n";
         foreach ($colors as $value => $name) {
-            $out .= "<option style='background-color: ".$cssNames[$value]."' value=\"".$value.'">'.$name."</option>\n";
+            $out .= '<option value="'.$value.'">'.$name."</option>\n";
         }
 
         return $out;

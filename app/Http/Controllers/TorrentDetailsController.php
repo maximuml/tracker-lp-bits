@@ -278,7 +278,7 @@ class TorrentDetailsController extends Controller
         if (($row['approval_status'] ?? null) == TorrentApprovalStatus::DENY->value && $denyLog !== null) {
             $dangerIcon = '<svg t="1655242121471" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="46590" width="16" height="16"><path d="M963.555556 856.888889a55.978667 55.978667 0 0 1-55.978667 56.007111c-0.284444 0-0.540444-0.085333-0.824889-0.085333l-0.056889 0.085333H110.734222l-0.654222-1.137778A55.409778 55.409778 0 0 1 56.888889 856.462222c0-9.756444 2.730667-18.773333 7.139555-26.737778l-3.726222-6.599111L453.461333 156.302222A59.335111 59.335111 0 0 1 510.236444 113.777778c26.936889 0 49.436444 18.005333 56.803556 42.552889l389.973333 661.447111-3.669333 6.997333c6.4 9.102222 10.211556 20.138667 10.211556 32.113778z m-497.777778-541.326222l16.014222 312.888889h56.888889l16.014222-312.888889h-88.917333z m44.458666 398.222222a56.888889 56.888889 0 1 0-0.028444 113.749333 56.888889 56.888889 0 0 0 0.028444-113.749333z" p-id="46591" fill="#d81e06" data-spm-anchor-id="a313x.7781069.0.i61" class="selected"></path></svg>';
             $denyBannerHtml = sprintf(
-                '<div class="nx-flex-center" style="margin-bottom: 10px"><div style="background-color: black; color: white;font-weight: bold; padding: 10px 100px">%s&nbsp;%s</div></div>',
+                '<div class="nx-flex-center"><div>%s&nbsp;%s</div></div>',
                 $dangerIcon,
                 Locale::trans('torrent.approval.deny_comment_show', ['reason' => $denyLog->comment], null)
             );
@@ -478,7 +478,7 @@ CSS, 'header', false);
                     $eachTemp = (int) $eachTemp;
                     if ($eachTemp > 0 && $eachTemp <= $bonusHas) {
                         $magicButtonsInner .= sprintf(
-                            '<li data-torrent-id="%s" data-magic-value="%s" style="cursor:pointer"><font style="font-size:8pt;padding-right:5px;">%s</font></li>',
+                            '<li data-torrent-id="%s" data-magic-value="%s"><font>%s</font></li>',
                             $id,
                             $eachTemp,
                             '+'.$eachTemp
@@ -518,7 +518,7 @@ CSS, 'header', false);
             $showList = implode('', array_map(static fn ($v) => $v.'  ', array_slice($giveValue, 0, $showListNewNumber)));
             if (count($giveValue) > $showListNewNumber) {
                 $showList .= '<span id="ellipsis">&nbsp;......&nbsp;</span>';
-                $showAll = '<a href="#" id="magic_show_all" style="cursor:pointer">['.__('legacy/details.magic_show_all_description').']</a>'.'<br/>';
+                $showAll = '<a href="#" id="magic_show_all">['.__('legacy/details.magic_show_all_description').']</a>'.'<br/>';
                 $otherUserSpan = '<span id="other_user_list" class="nx-hidden">'
                     .implode('', array_map(static fn ($v) => $v.'  ', array_slice($giveValue, $showListNewNumber)))
                     .'</span>';
@@ -530,7 +530,7 @@ CSS, 'header', false);
             '<span id="spanSumAll">'.$magicInfo['sum_value'].'</span>',
             __('legacy/details.magic_haveGotBonus').'&nbsp'
         );
-        $magicRowHtml = '<div style="height:25px">'.$magicValueButton.$magicSpan.$haveGotBonus.$showAll.'</div>'
+        $magicRowHtml = '<div>'.$magicValueButton.$magicSpan.$haveGotBonus.$showAll.'</div>'
             .'<div>'.$currentUserMagic.$showList.$otherUserSpan.$showListDescription.'</div>';
 
         $thanksBy = '';

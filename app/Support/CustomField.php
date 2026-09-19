@@ -92,7 +92,7 @@ class CustomField
         $arr = [];
         foreach ($options as $value => $label) {
             $arr[] = sprintf(
-                '<label style="margin-right: 4px;"><input type="radio" name="%s" value="%s"%s />%s</label>',
+                '<label><input type="radio" name="%s" value="%s"%s />%s</label>',
                 $name, $value, (string) $current === (string) $value ? ' checked' : '', $label
             );
         }
@@ -103,14 +103,14 @@ class CustomField
     /** @param  array<int|string, mixed>  $row */
     public function buildFieldForm(array $row = []): string
     {
-        $trName = Html::tr(__('legacy/fields.col_name').'<font color="red">*</font>', '<input type="text" name="name" value="'.($row['name'] ?? '').'" style="width: 300px" />&nbsp;&nbsp;'.__('legacy/fields.col_name_help'), 1, '', true);
-        $trLabel = Html::tr(__('legacy/fields.col_label').'<font color="red">*</font>', '<input type="text" name="label" value="'.($row['label'] ?? '').'"  style="width: 300px" />', 1, '', true);
+        $trName = Html::tr(__('legacy/fields.col_name').'<font color="red">*</font>', '<input type="text" name="name" value="'.($row['name'] ?? '').'" />&nbsp;&nbsp;'.__('legacy/fields.col_name_help'), 1, '', true);
+        $trLabel = Html::tr(__('legacy/fields.col_label').'<font color="red">*</font>', '<input type="text" name="label" value="'.($row['label'] ?? '').'" />', 1, '', true);
         $trType = Html::tr(__('legacy/fields.col_type').'<font color="red">*</font>', $this->radio('type', $this->getTypeRadioOptions(), $row['type'] ?? null), 1, '', true);
         $trRequired = Html::tr(__('legacy/fields.col_required').'<font color="red">*</font>', $this->radio('required', ['0' => __('legacy/functions.text_no'), '1' => __('legacy/functions.text_yes')], $row['required'] ?? null), 1, '', true);
         $trHelp = Html::tr(__('legacy/fields.col_help'), '<textarea name="help" rows="4" cols="80">'.($row['help'] ?? '').'</textarea>', 1, '', true);
         $trOptions = Html::tr(__('legacy/fields.col_options'), '<textarea name="options" rows="6" cols="80">'.($row['options'] ?? '').'</textarea><br/>'.__('legacy/fields.col_options_help'), 1, '', true);
         $trIsSingleRow = Html::tr(__('legacy/fields.col_is_single_row').'<font color="red">*</font>', $this->radio('is_single_row', ['0' => __('legacy/functions.text_no'), '1' => __('legacy/functions.text_yes')], $row['is_single_row'] ?? null), 1, '', true);
-        $trPriority = Html::tr(Locale::trans('label.priority', [], null).'<font color="red">*</font>', '<input type="number" name="priority" value="'.($row['priority'] ?? '0').'" style="width: 300px" />', 1, '', true);
+        $trPriority = Html::tr(Locale::trans('label.priority', [], null).'<font color="red">*</font>', '<input type="number" name="priority" value="'.($row['priority'] ?? '0').'" />', 1, '', true);
         $trDisplay = Html::tr(__('legacy/fields.col_display'), '<textarea name="display" rows="4" cols="80">'.($row['display'] ?? '').'</textarea><br/>'.__('legacy/catmanage.row_custom_field_display_help'), 1, '', true);
 
         $id = $row['id'] ?? 0;
@@ -134,7 +134,7 @@ class CustomField
             {$trDisplay}
     </table>
 </div>
-<div style="text-align: center; margin-top: 10px;">
+<div>
     <input type="submit" value="{$submitSubmit}" />
 </div>
 </form>
@@ -180,7 +180,7 @@ HTML;
         $textAdd = __('legacy/fields.text_add');
         $head = <<<HEAD
 <h1 align="center">{$fieldManagement}</h1>
-<div style="margin-bottom: 8px;">
+<div>
     <span id="add">
         <a href="?action=add" class="big"><b>{$textAdd}</b></a>
     </span>
@@ -283,7 +283,7 @@ HEAD;
         foreach ($res as $row) {
             $row = (array) $row;
             $checkbox .= sprintf(
-                '<label style="margin-right: 4px;"><input type="checkbox" name="%s" value="%s"%s>%s</label>',
+                '<label><input type="checkbox" name="%s" value="%s"%s>%s</label>',
                 $name, $row['id'], in_array($row['id'], $current) ? ' checked' : '', "{$row['name']}[{$row['label']}]"
             );
         }
@@ -318,9 +318,9 @@ HEAD;
             $trLabel = $row['label'].$requireText;
             $trRelation = "mode_$searchBoxId";
             if ($row['type'] == self::TYPE_TEXT) {
-                $html .= Html::frow($trLabel, sprintf('<input type="text" name="%s" value="%s" style="width: %s"/>', $name, $currentValue, '99%'), 1, $trRelation);
+                $html .= Html::frow($trLabel, sprintf('<input type="text" name="%s" value="%s"/>', $name, $currentValue), 1, $trRelation);
             } elseif ($row['type'] == self::TYPE_TEXTAREA) {
-                $html .= Html::frow($trLabel, sprintf('<textarea name="%s" rows="4" style="width: %s">%s</textarea>', $name, '99%', $currentValue), 1, $trRelation);
+                $html .= Html::frow($trLabel, sprintf('<textarea name="%s" rows="4">%s</textarea>', $name, $currentValue), 1, $trRelation);
             } elseif ($row['type'] == self::TYPE_RADIO || $row['type'] == self::TYPE_CHECKBOX) {
                 if ($row['type'] == self::TYPE_CHECKBOX) {
                     $name .= '[]';
@@ -341,7 +341,7 @@ HEAD;
                         $checked = ' checked';
                     }
                     $part .= sprintf(
-                        '<label style="margin-right: 4px"><input type="%s" name="%s" value="%s"%s />%s</label>',
+                        '<label><input type="%s" name="%s" value="%s"%s />%s</label>',
                         $row['type'], $name, $value, $checked, $label
                     );
                 }
@@ -373,7 +373,7 @@ HEAD;
                 $imgId = 'attach'.$row['id'];
                 $previewBoxId = "preview_$callbackFunc";
                 $y = '<iframe id="'.$iframeId.'" src="'.Url::schemeAndHost(false).'/attachment.php?callback_func='.$callbackFunc.'" width="100%" height="24" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe>';
-                $y .= sprintf('<input id="%s" type="text" name="%s" value="%s" style="width: %s;margin: 10px 0">', $inputId, $name, $currentValue, '99%');
+                $y .= sprintf('<input id="%s" type="text" name="%s" value="%s">', $inputId, $name, $currentValue);
                 $y .= '<div id="'.$previewBoxId.'">';
                 if (! empty($currentValue)) {
                     if (substr((string) $currentValue, 0, 4) == 'http') {

@@ -34,7 +34,7 @@
         <td class='rowfollow nowrap' align='center'>{{ $row->seedTimeRequired }}</td>
         <td class='rowfollow nowrap' align='center'>{{ \App\Support\Time::formatDateTime($row->snatch->completedat) }}</td>
         <td class='rowfollow nowrap' align='center'>{{ $row->inspectTimeLeft }}</td>
-        <td class='rowfollow nowrap' align='left' style='padding-left: 10px'>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(nl2br(e(trim((string) $row->comment)))))</td>
+        <td class='rowfollow nowrap' align='left'>@safeHtml(\App\Support\Html\SafeHtml::fromTrustedHtml(nl2br(e(trim((string) $row->comment)))))</td>
         <td class="rowfollow nowrap" align="center">
             @if ($row->uid == ($CURUSER['id'] ?? 0) && in_array($row->status, \App\Models\HitAndRun::CAN_PARDON_STATUS))
                 <input class="remove-hr" type="button" value="{{ __('legacy/myhr.action_remove')}}" data-id="{{ $row->id }}">

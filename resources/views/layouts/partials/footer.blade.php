@@ -5,7 +5,7 @@
         {{ $chrome->icpLicense !== '' ? $chrome->icpLicense.' ' : '' }}{{ $chrome->yearFounded != date('Y') ? $chrome->yearFounded.'-' : '' }}{{ date('Y') }} {{ $chrome->versionHtml }}</span>
     <div class="nxm-footer__stats">[page created in <b>{{ $chrome->statsTime }}</b> sec with <b>{{ $chrome->statsDbQueries }}</b> db queries, <b>{{ $chrome->statsCacheReads }}</b> reads and <b>{{ $chrome->statsCacheWrites }}</b> writes of Redis and <b>{{ $chrome->statsRam }}</b> ram]</div>
     @if($chrome->debugEnabled)
-    <div id="sql_debug" style="text-align: left;">SQL query list: <ul>
+    <div id="sql_debug">SQL query list: <ul>
         @foreach($chrome->debugQueries as $query)
         <li>{{ $query['query'] }} [{{ $query['time'] }}]</li>
         @endforeach

@@ -29,7 +29,7 @@
 <td class=colhead align=center width=20%>{{ $home['readTopics']['colLastPost'] }}</td>
 </tr>
 @foreach ($home['readTopics']['items'] as $topic)
-<tr class=tableb><td style='padding-left: 10px' align=left class=rowfollow><a href=forums.php?action=viewtopic&topicid={{ (int) $topic['id'] }}><b>{{ $topic['subject'] }}</b></a></td>
+<tr class=tableb><td align=left class=rowfollow><a href=forums.php?action=viewtopic&topicid={{ (int) $topic['id'] }}><b>{{ $topic['subject'] }}</b></a></td>
 <td align=center class=rowfollow>{{ $topic['replies'] }}/{{ $topic['views'] }}</td>
 <td align=center class=rowfollow>{{ $topic['author'] }}</td>
 <td align=center class=rowfollow><nobr>{{ $topic['lastPostAdded'] }} | {{ $topic['lastPostUsername'] }}</nobr></td></tr>

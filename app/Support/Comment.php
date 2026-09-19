@@ -117,8 +117,8 @@ final class Comment
         ];
         $replaceXhtmlTagArray = [
             '<font face="\\1">',
-            '<span style="color: \\1;word-break: break-word">',
-            '<span style="color: \\1;word-break: break-word">',
+            '<span>',
+            '<span>',
             '<font size="\\1">',
         ];
         $s = (string) preg_replace($originalBbTagArray, $replaceXhtmlTagArray, $s);
@@ -297,7 +297,7 @@ final class Comment
             $userInfo = $userInfoArr->get($row['user'], User::defaultUser());
             $userRow = $userInfo->toArray();
 
-            $html .= '<div style="margin-top: 8pt; margin-bottom: 8pt;"><table id="cid'.$row['id'].'" border="0" cellspacing="0" cellpadding="0" width="100%"><tr><td class="embedded" width="99%">#'.$row['id'].'&nbsp;&nbsp;<font color="gray">'.(__('legacy/functions.text_by')).'</font>';
+            $html .= '<div><table id="cid'.$row['id'].'" border="0" cellspacing="0" cellpadding="0" width="100%"><tr><td class="embedded" width="99%">#'.$row['id'].'&nbsp;&nbsp;<font color="gray">'.(__('legacy/functions.text_by')).'</font>';
             $html .= UserDisplay::username($row['user'], false, true, true, false, false, true);
             $html .= '&nbsp;&nbsp;<font color="gray">'.(__('legacy/functions.text_at')).'</font>'.Time::format($row['added'])
                 .($row['editedby'] && Permission::can(PermissionEnum::COM_MANAGE) ? ' - [<a href="comment.php?action=vieworiginal&amp;cid='.$row['id'].'&amp;type='.$type.'">'.(__('legacy/functions.text_view_original')).'</a>]' : '')
@@ -318,7 +318,7 @@ final class Comment
             $secs = 900;
             $dt = date('Y-m-d H:i:s', TIMENOW - $secs);
             $html .= '<tr>'."\n";
-            $html .= '<td class="rowfollow" width="150" valign="top" style="padding: 0px;">'.UserDisplay::avatarImageWithContext($avatar).'</td>'."\n";
+            $html .= '<td class="rowfollow" width="150" valign="top">'.UserDisplay::avatarImageWithContext($avatar).'</td>'."\n";
             $html .= '<td class="rowfollow word-break-all" valign="top"><br />'.$text.$textEditby.'</td>'."\n";
             $html .= '</tr>'."\n";
 

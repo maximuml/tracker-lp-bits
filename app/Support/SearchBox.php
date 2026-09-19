@@ -146,7 +146,7 @@ final class SearchBox
 
         $html = '<table>';
         if (! empty($options['section_name'])) {
-            $html .= sprintf('<caption><font class="big">%s</font></caption>', $searchBox->section_name[$lang] ?? '');
+            $html .= sprintf('<caption><span class="big">%s</span></caption>', $searchBox->section_name[$lang] ?? '');
         }
 
         $html .= sprintf('<tr><td class="embedded" align="left">%s</td></tr>', Locale::trans('label.search_box.category', [], null));

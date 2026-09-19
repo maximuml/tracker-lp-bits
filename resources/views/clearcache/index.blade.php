@@ -5,10 +5,10 @@
 @section('content')
 <h1>Clear cache</h1>
 @if ($done ?? false)
-    <p align="center"><font class="striking">Cache cleared</font></p>
+    <p align="center"><span class="striking">Cache cleared</span></p>
 @endif
 @if (($error ?? '') !== '')
-    <p align="center"><font class="striking">{{ $error }}</font></p>
+    <p align="center"><span class="striking">{{ $error }}</span></p>
 @endif
 
 <form method="post" action="clearcache.php">

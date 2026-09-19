@@ -148,18 +148,18 @@ final class ForumTopicViewService
             if ($i != $page) {
                 $pagerarr[] = '<a href="'.htmlspecialchars('?'.$addparam.'&page='.$i).'"><b>'.($i + 1)."</b></a>\n";
             } else {
-                $pagerarr[] = '<font class="gray"><b>'.($i + 1)."</b></font>\n";
+                $pagerarr[] = '<span class="gray"><b>'.($i + 1)."</b></span>\n";
             }
         }
         if ($page == 0) {
-            $pager = '<font class="gray"><b>&lt;&lt;'.(__('legacy/forums.text_prev')).'</b></font>';
+            $pager = '<span class="gray"><b>&lt;&lt;'.(__('legacy/forums.text_prev')).'</b></span>';
         } else {
             $pager = '<a href="'.htmlspecialchars('?'.$addparam.'&page='.($page - 1)).
             '"><b>&lt;&lt;'.(__('legacy/forums.text_prev')).'</b></a>';
         }
         $pager .= '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
         if ($page == $pages - 1) {
-            $pager .= '<font class="gray"><b>'.(__('legacy/forums.text_next'))." &gt;&gt;</b></font>\n";
+            $pager .= '<span class="gray"><b>'.(__('legacy/forums.text_next'))." &gt;&gt;</b></span>\n";
         } else {
             $pager .= '<a href="'.htmlspecialchars('?'.$addparam.'&page='.($page + 1)).
             '"><b>'.(__('legacy/forums.text_next'))." &gt;&gt;</b></a>\n";
@@ -184,7 +184,7 @@ final class ForumTopicViewService
         $SITENAME = (string) $this->globals->get('SITENAME', '');
 
         ob_start();
-        echo '<h1 align="center"><a class="faqlink" href="forums.php">'.$SITENAME.'&nbsp;'.(__('legacy/forums.text_forums')).'</a>--><a class="faqlink" href="'.htmlspecialchars('?action=viewforum&forumid='.$forumid).'">'.$forumname.'</a><b>--></b><span id="top">'.$subject.($locked ? '&nbsp;&nbsp;<b>[<font class="striking">'.(__('legacy/forums.text_locked')).'</font>]</b>' : '')."</span></h1>\n";
+        echo '<h1 align="center"><a class="faqlink" href="forums.php">'.$SITENAME.'&nbsp;'.(__('legacy/forums.text_forums')).'</a>--><a class="faqlink" href="'.htmlspecialchars('?action=viewforum&forumid='.$forumid).'">'.$forumname.'</a><b>--></b><span id="top">'.$subject.($locked ? '&nbsp;&nbsp;<b>[<span class="striking">'.(__('legacy/forums.text_locked')).'</span>]</b>' : '')."</span></h1>\n";
         echo $pagertop;
 
         echo "<table border=\"0\" class=\"main\" cellspacing=\"0\" cellpadding=\"5\" width=\"97%\"><tr>\n";
@@ -242,17 +242,17 @@ final class ForumTopicViewService
                 }
             }
 
-            echo '<div><table id="pid'.$postid.'" border="0" cellspacing="0" cellpadding="0" width="100%"><tr><td class="embedded" width="99%"><a href="'.htmlspecialchars('forums.php?action=viewtopic&topicid='.$topicid.'&page=p'.$postid.'#pid'.$postid).'">#'.$postid.'</a>&nbsp;&nbsp;<font color="gray">'.(__('legacy/forums.text_by')).'</font>'.$by.'&nbsp;&nbsp;<font color="gray">'.(__('legacy/forums.text_at')).'</font>'.$added;
+            echo '<div><table id="pid'.$postid.'" border="0" cellspacing="0" cellpadding="0" width="100%"><tr><td class="embedded" width="99%"><a href="'.htmlspecialchars('forums.php?action=viewtopic&topicid='.$topicid.'&page=p'.$postid.'#pid'.$postid).'">#'.$postid.'</a>&nbsp;&nbsp;<span class="nx-color-gray">'.(__('legacy/forums.text_by')).'</span>'.$by.'&nbsp;&nbsp;<span class="nx-color-gray">'.(__('legacy/forums.text_at')).'</span>'.$added;
             if (Validators::isId($arr['editedby'])) {
                 echo '';
             }
-            echo '&nbsp;&nbsp;<font color="gray">|</font>&nbsp;&nbsp;';
+            echo '&nbsp;&nbsp;<span class="nx-color-gray">|</span>&nbsp;&nbsp;';
             if ($authorid) {
                 echo '<a href="?action=viewtopic&topicid='.$topicid.'">'.(__('legacy/forums.text_view_all_posts')).'</a>';
             } else {
                 echo '<a href="'.htmlspecialchars('?action=viewtopic&topicid='.$topicid.'&authorid='.$posterid).'">'.(__('legacy/forums.text_view_this_author_only')).'</a>';
             }
-            echo '</td><td class="embedded nowrap" width="1%"><font class="big">'.(__('legacy/forums.text_number')).'<b>'.($pn + $offset).'</b>'.(__('legacy/forums.text_lou')).'&nbsp;&nbsp;</font><a href="#top"><img class="top" src="pic/trans.gif" alt="Top" title="'.(__('legacy/forums.text_back_to_top')).'" /></a>&nbsp;&nbsp;</td></tr>';
+            echo '</td><td class="embedded nowrap" width="1%"><span class="big">'.(__('legacy/forums.text_number')).'<b>'.($pn + $offset).'</b>'.(__('legacy/forums.text_lou')).'&nbsp;&nbsp;</span><a href="#top"><img class="top" src="pic/trans.gif" alt="Top" title="'.(__('legacy/forums.text_back_to_top')).'" /></a>&nbsp;&nbsp;</td></tr>';
 
             echo "</table></div>\n";
 
@@ -272,7 +272,7 @@ final class ForumTopicViewService
 
             if (Validators::isId($arr['editedby'])) {
                 $lastedittime = Time::format($arr['editdate'], true, false);
-                $bodyContent .= '<br /><p><font class="small">'.(__('legacy/forums.text_last_edited_by')).UserDisplay::username((int) $arr['editedby']).(__('legacy/forums.text_last_edit_at')).$lastedittime."</font></p>\n";
+                $bodyContent .= '<br /><p><span class="small">'.(__('legacy/forums.text_last_edited_by')).UserDisplay::username((int) $arr['editedby']).(__('legacy/forums.text_last_edit_at')).$lastedittime."</span></p>\n";
             }
             $body .= $bodyContent.'</div>';
             if ($signature) {

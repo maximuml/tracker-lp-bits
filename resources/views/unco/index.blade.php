@@ -8,7 +8,7 @@
     <table data-nx="data" width="100%" border="1" cellspacing="0" cellpadding="5">
         @if ($status ?? '')
             <tr>
-                <td class="rowhead" colspan="5"><font color="red" size="1">The User account has been updated!</font></td>
+                <td class="rowhead" colspan="5"><span class="nx-color-red nx-size-1">The User account has been updated!</span></td>
             </tr>
         @endif
         <tr>

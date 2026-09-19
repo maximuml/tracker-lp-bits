@@ -123,8 +123,8 @@ final class Strings
     public static function highlight(
         string $needle,
         string $haystack,
-        string $open = '<b><font class="striking">',
-        string $close = '</font></b>',
+        string $open = '<b><span class="striking">',
+        string $close = '</span></b>',
     ): string {
         $needleLength = strlen($needle);
         if ($needleLength === 0) {

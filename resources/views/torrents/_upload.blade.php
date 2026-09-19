@@ -1,5 +1,5 @@
 	<form id="compose" enctype="multipart/form-data" action="/takeupload" method="post" name="upload">
-			<p align="center">{{ __('legacy/upload.text_red_star_required') }}<font color="red">*</font>{{ __('legacy/upload.text_red_star_required_end') }}</p>
+			<p align="center">{{ __('legacy/upload.text_red_star_required') }}<span class="nx-color-red">*</span>{{ __('legacy/upload.text_red_star_required_end') }}</p>
 			<div class="nx-fgrid">
 					<div class="nx-ffull nx-colhead nx-center">
 						{{ __('legacy/upload.text_tracker_url') ?? '' }}: &nbsp;&nbsp;&nbsp;&nbsp;<b>{{ $trackerUrl }}</b>
@@ -10,13 +10,13 @@
 							<br /><br /><b>ATTENTION</b>: Max. Torrent Size not set. Please contact the administrator about this problem!
 						@endif
 					</div>
-				<x-settings-row layout="grid" :label="\App\Support\Html\SafeHtml::fromTrustedHtml((__('legacy/upload.row_torrent_file')).'<font color=red>*</font>')">
+				<x-settings-row layout="grid" :label="\App\Support\Html\SafeHtml::fromTrustedHtml((__('legacy/upload.row_torrent_file')).'<span class=nx-color-red>*</span>')">
 					<input type="file" class="file" id="torrent" name="file" />
 				</x-settings-row>
 				@if (($altname_main ?? '') === 'yes')
 					<x-settings-row layout="grid" :label="__('legacy/upload.row_torrent_name')">
 						<b>{{ __('legacy/upload.text_english_title') ?? '' }}</b>&nbsp;<input type="text" name="name" />&nbsp;&nbsp;&nbsp;
-<b>{{ __('legacy/upload.text_chinese_title') ?? '' }}</b>&nbsp;<input type="text" name="cnname"><br /><font class="medium">{{ __('legacy/upload.text_titles_note') ?? '' }}</font>
+<b>{{ __('legacy/upload.text_chinese_title') ?? '' }}</b>&nbsp;<input type="text" name="cnname"><br /><span class="medium">{{ __('legacy/upload.text_titles_note') ?? '' }}</span>
 					</x-settings-row>
 				@else
 					<x-settings-row layout="grid" :label="__('legacy/upload.row_torrent_name')">
@@ -30,7 +30,7 @@
 					</x-settings-row>
 				@endif
 
-				<div class="nx-fhead">{{ __('legacy/upload.row_description') ?? '' }}<font color="red">*</font></div>
+				<div class="nx-fhead">{{ __('legacy/upload.row_description') ?? '' }}<span class="nx-color-red">*</span></div>
 				<div class="nx-fcell">{{ $descrEditorHtml ?? '' }}</div>
 
 				@if ($enableTechnicalInfo)
@@ -39,7 +39,7 @@
 					</x-settings-row>
 				@endif
 
-				<x-settings-row layout="grid" :label="\App\Support\Html\SafeHtml::fromTrustedHtml((__('legacy/upload.row_type')).'<font color=red>*</font>')">
+				<x-settings-row layout="grid" :label="\App\Support\Html\SafeHtml::fromTrustedHtml((__('legacy/upload.row_type')).'<span class=nx-color-red>*</span>')">
 					<select name="type" id="browsecat" data-mode="{{ $browsecatmode }}">
 						<option value="0">{{ __('legacy/upload.select_choose_one') ?? '' }}</option>
 						@foreach ($cats as $row)
@@ -60,7 +60,7 @@
 				</div>
 
 				@if (! empty($offerRows))
-					<x-settings-row layout="grid" :label="\App\Support\Html\SafeHtml::fromTrustedHtml((__('legacy/upload.row_your_offer')).(!$uploadFreely ? '<font color=red>*</font>' : ''))">
+					<x-settings-row layout="grid" :label="\App\Support\Html\SafeHtml::fromTrustedHtml((__('legacy/upload.row_your_offer')).(!$uploadFreely ? '<span class=nx-color-red>*</span>' : ''))">
 						<select name="offer">
 							<option value="0">{{ __('legacy/upload.select_choose_one') ?? '' }}</option>
 							@foreach ($offerRows as $offerrow)

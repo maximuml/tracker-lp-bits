@@ -205,7 +205,7 @@ final class Frame
             : '';
 
         return SafeHtml::fromTrustedHtml('<table border="0" bgcolor="blue" align="left" cellspacing="0" cellpadding="10">'
-            .'<tr><td class="embedded"><font color="white"><h1>SQL Error</h1>'."\n"
-            .'<b>'.$error.$location.'</b></font></td></tr></table>');
+            .'<tr><td class="embedded"><span class="nx-color-white"><h1>SQL Error</h1>'."\n"
+            .'<b>'.$error.$location.'</b></span></td></tr></table>');
     }
 }

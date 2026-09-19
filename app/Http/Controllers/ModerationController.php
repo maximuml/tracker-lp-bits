@@ -201,9 +201,9 @@ class ModerationController extends LegacyController
             $row = (array) $reportRow;
 
             if ($row['dealtwith']) {
-                $row['dealtwith_html'] = SafeHtml::fromTrustedHtml('<font color=green>'.(__('legacy/reports.text_yes')).'</font> - '.UserDisplay::username($row['dealtby']));
+                $row['dealtwith_html'] = SafeHtml::fromTrustedHtml('<span class="nx-color-green">'.(__('legacy/reports.text_yes')).'</span> - '.UserDisplay::username($row['dealtby']));
             } else {
-                $row['dealtwith_html'] = SafeHtml::fromTrustedHtml('<font color=red>'.(__('legacy/reports.text_no')).'</font>');
+                $row['dealtwith_html'] = SafeHtml::fromTrustedHtml('<span class="nx-color-red">'.(__('legacy/reports.text_no')).'</span>');
             }
 
             $type = '';

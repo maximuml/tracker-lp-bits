@@ -1,10 +1,10 @@
 @if($shoutbox['show'])
 <h2>
-    {{ $shoutbox['title'] }} - <font class="small">{{ $shoutbox['autoRefreshLabel'] }}</font>
-    <font class='striking' id="countdown"></font><font class="small">{{ $shoutbox['secondsLabel'] }}</font>
+    {{ $shoutbox['title'] }} - <span class="small">{{ $shoutbox['autoRefreshLabel'] }}</span>
+    <span class="striking" id="countdown"></span><span class="small">{{ $shoutbox['secondsLabel'] }}</span>
     - <a href="shoutbox_history.php" class="small">{{ $shoutbox['historyLabel'] }}</a>
     @if($shoutbox['canManage'])
-        - <font class="small" id="clear-shout-box">[<a class="altlink" href="#"><b>{{ $shoutbox['clearLabel'] }}</b></a>]</font>
+        - <span class="small" id="clear-shout-box">[<a class="altlink" href="#"><b>{{ $shoutbox['clearLabel'] }}</b></a>]</span>
     @endif
 </h2>
 <div class="nx-text">

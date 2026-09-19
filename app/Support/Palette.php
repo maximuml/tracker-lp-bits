@@ -79,6 +79,31 @@ final class Palette
     }
 
     /**
+     * CSS utility class (`nx-hl-1`..`nx-hl-40`, declared in
+     * `public/css/modern.css`) for the same palette — the CSP-safe
+     * way to colour a forum-topic highlight; '' when no highlight.
+     */
+    public static function forumHighlightClass(int $color = 0): string
+    {
+        return isset(self::HIGHLIGHT_PALETTE[$color]) ? 'nx-hl-'.$color : '';
+    }
+
+    /**
+     * Torrent "wait" countdown colour class. Legacy mapped the
+     * remaining wait (in hours) onto a continuous red ramp
+     * `dechex(floor(127 * remaining / 48 + 128) * 65536)`; we quantize
+     * the same ramp into ten `nx-wait-1`..`nx-wait-10` classes
+     * (declared in `public/styles/nexus.css`) — 1 = nearly over,
+     * 10 = longest wait.
+     */
+    public static function waitRampClass(int $remainingHours): string
+    {
+        $step = (int) min(10, max(1, (int) ceil($remainingHours * 10 / 48)));
+
+        return 'nx-wait-'.$step;
+    }
+
+    /**
      * Seeder-link CSS colour. Legacy `linkcolor($num)` returns `"red"`
      * for any falsy input (0, "", "0", null) and `"green"` for every
      * non-falsy value. Pinned by test.

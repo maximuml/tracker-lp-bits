@@ -370,7 +370,7 @@ final class UsercpPageService
         $defaultAvatarUrl = Http::protocolPrefix(Url::isSecure()).$baseUrl.'/pic/default_avatar.png';
 
         $rowsHtml = '';
-        $rowsHtml .= (string) Html::frowSmall(__('legacy/usercp.row_account_parked'), '<input type=checkbox name=parked'.(LegacyYesNo::isYes($curUser['parked'] ?? null) ? ' checked' : '').' value=yes>'.htmlspecialchars(__('legacy/usercp.checkbox_pack_my_account')).'<br /><font class=small size=1>'.(__('legacy/usercp.text_account_pack_note')).'</font>', 1, '', true);
+        $rowsHtml .= (string) Html::frowSmall(__('legacy/usercp.row_account_parked'), '<input type=checkbox name=parked'.(LegacyYesNo::isYes($curUser['parked'] ?? null) ? ' checked' : '').' value=yes>'.htmlspecialchars(__('legacy/usercp.checkbox_pack_my_account')).'<br /><span class="small nx-size-1">'.(__('legacy/usercp.text_account_pack_note')).'</span>', 1, '', true);
 
         $pmY = (__('legacy/usercp.text_accept_pms')).'<input type=radio name=acceptpms'.(($curUser['acceptpms'] ?? '') === 'yes' ? ' checked' : '').' value=yes>'.htmlspecialchars(__('legacy/usercp.radio_all_except_blocks')).'<input type=radio name=acceptpms'.(($curUser['acceptpms'] ?? '') === 'friends' ? ' checked' : '').' value=friends>'.htmlspecialchars(__('legacy/usercp.radio_friends_only')).'<input type=radio name=acceptpms'.(($curUser['acceptpms'] ?? '') === 'no' ? ' checked' : '').' value=no>'.htmlspecialchars(__('legacy/usercp.radio_staff_only'))
             .'<br /><input type=checkbox name=deletepms'.(LegacyYesNo::isYes($curUser['deletepms'] ?? null) ? ' checked' : '').'> '.(__('legacy/usercp.checkbox_delete_pms'))
@@ -385,7 +385,7 @@ final class UsercpPageService
         $rowsHtml .= (string) Html::frowSmall(__('legacy/usercp.row_gender'), '<input type=radio name=gender'.(($curUser['gender'] ?? '') === 'N/A' ? ' checked' : '').' value=N/A>'.htmlspecialchars(__('legacy/usercp.radio_not_available')).'
 <input type=radio name=gender'.(($curUser['gender'] ?? '') === 'Male' ? ' checked' : '').' value=Male>'.htmlspecialchars(__('legacy/usercp.radio_male')).'<input type=radio name=gender'.(($curUser['gender'] ?? '') === 'Female' ? ' checked' : '').' value=Female>'.htmlspecialchars(__('legacy/usercp.radio_female')), 1, '', true);
 
-        $rowsHtml .= (string) Html::frowSmall(__('legacy/usercp.row_tracker_url'), "<select name=tracker_url_id>\n".$trackerUrlOptions."\n</select>".'<br /><font class=small size=1>'.(__('legacy/usercp.row_tracker_url_help')).'</font>', 1, '', true);
+        $rowsHtml .= (string) Html::frowSmall(__('legacy/usercp.row_tracker_url'), "<select name=tracker_url_id>\n".$trackerUrlOptions."\n</select>".'<br /><span class="small nx-size-1">'.(__('legacy/usercp.row_tracker_url_help')).'</span>', 1, '', true);
         $rowsHtml .= (string) Html::frowSmall(__('legacy/usercp.row_country'), "<select name=country>\n".'<option value=0>---- '.htmlspecialchars($selectNoneLabel)." ----</option>\n".$countryOptions."\n</select>", 1, '', true);
 
         $avatarCell = '<img src='.($curUser['avatar'] ?? '' ? "'".htmlspecialchars((string) $curUser['avatar'])."'" : "'".htmlspecialchars($defaultAvatarUrl)."'")." name='avatarimg'><br />
@@ -486,7 +486,7 @@ final class UsercpPageService
 
             $rowsHtml .= (string) Html::frowSmall(
                 __('legacy/usercp.row_reset_passkey'),
-                '<input type=checkbox name=resetpasskey value=1 />'.htmlspecialchars(__('legacy/usercp.checkbox_reset_my_passkey')).'<br /><font class=small>'.(__('legacy/usercp.text_reset_passkey_note')).'</font>',
+                '<input type=checkbox name=resetpasskey value=1 />'.htmlspecialchars(__('legacy/usercp.checkbox_reset_my_passkey')).'<br /><span class="small">'.(__('legacy/usercp.text_reset_passkey_note')).'</span>',
                 1,
                 '',
                 true
@@ -517,7 +517,7 @@ final class UsercpPageService
             if ($showEmailChange) {
                 $rowsHtml .= (string) Html::frowSmall(
                     __('legacy/usercp.row_email_address'),
-                    '<input type="text" name="email" value="'.htmlspecialchars((string) ($curUser['email'] ?? '')).'" /> <br /><font class=small>'.(__('legacy/usercp.text_email_address_note')).'</font>',
+                    '<input type="text" name="email" value="'.htmlspecialchars((string) ($curUser['email'] ?? '')).'" /> <br /><span class="small">'.(__('legacy/usercp.text_email_address_note')).'</span>',
                     1,
                     '',
                     true
@@ -742,14 +742,14 @@ JS;
         }
 
         $categoriesCell = $categories.'<div></div>'
-            ."<table><caption><font class='big'>".htmlspecialchars(__('legacy/usercp.text_additional_selection')).'</font></caption><tr><td class=bottom><b>'.htmlspecialchars(__('legacy/usercp.text_show_dead_active')).'</b><br /><select name="incldead"><option value="0" '.(str_contains($notifs, '[incldead=0]') ? ' selected' : '').'>'.htmlspecialchars(__('legacy/usercp.select_including_dead')).'</option><option value="1" '.(str_contains($notifs, '[incldead=1]') || ! str_contains($notifs, 'incldead') ? ' selected' : '').'>'.htmlspecialchars(__('legacy/usercp.select_active')).'</option><option value="2" '.(str_contains($notifs, '[incldead=2]') ? ' selected' : '').'>'.htmlspecialchars(__('legacy/usercp.select_dead')).'</option></select></td><td class=bottom align=left><b>'.htmlspecialchars(__('legacy/usercp.text_show_special_torrents')).'</b><br /><select name="spstate"><option value="0" '.($specialState === 0 ? ' selected' : '').'>'.htmlspecialchars(__('legacy/usercp.select_all')).'</option>'.Html::promotionSelection($specialState).'</select></td><td class=bottom><b>'.htmlspecialchars(__('legacy/usercp.text_show_bookmarked')).'</b><br /><select name="inclbookmarked"><option value="0" '.(str_contains($notifs, '[inclbookmarked=0]') ? ' selected' : '').'>'.htmlspecialchars(__('legacy/usercp.select_all')).'</option><option value="1" '.(str_contains($notifs, '[inclbookmarked=1]') ? ' selected' : '').' >'.htmlspecialchars(__('legacy/usercp.select_bookmarked')).'</option><option value="2" '.(str_contains($notifs, '[inclbookmarked=2]') ? ' selected' : '').'>'.htmlspecialchars(__('legacy/usercp.select_bookmarked_exclude')).'</option></select></td></tr></table>';
+            ."<table><caption><span class='big'>".htmlspecialchars(__('legacy/usercp.text_additional_selection')).'</span></caption><tr><td class=bottom><b>'.htmlspecialchars(__('legacy/usercp.text_show_dead_active')).'</b><br /><select name="incldead"><option value="0" '.(str_contains($notifs, '[incldead=0]') ? ' selected' : '').'>'.htmlspecialchars(__('legacy/usercp.select_including_dead')).'</option><option value="1" '.(str_contains($notifs, '[incldead=1]') || ! str_contains($notifs, 'incldead') ? ' selected' : '').'>'.htmlspecialchars(__('legacy/usercp.select_active')).'</option><option value="2" '.(str_contains($notifs, '[incldead=2]') ? ' selected' : '').'>'.htmlspecialchars(__('legacy/usercp.select_dead')).'</option></select></td><td class=bottom align=left><b>'.htmlspecialchars(__('legacy/usercp.text_show_special_torrents')).'</b><br /><select name="spstate"><option value="0" '.($specialState === 0 ? ' selected' : '').'>'.htmlspecialchars(__('legacy/usercp.select_all')).'</option>'.Html::promotionSelection($specialState).'</select></td><td class=bottom><b>'.htmlspecialchars(__('legacy/usercp.text_show_bookmarked')).'</b><br /><select name="inclbookmarked"><option value="0" '.(str_contains($notifs, '[inclbookmarked=0]') ? ' selected' : '').'>'.htmlspecialchars(__('legacy/usercp.select_all')).'</option><option value="1" '.(str_contains($notifs, '[inclbookmarked=1]') ? ' selected' : '').' >'.htmlspecialchars(__('legacy/usercp.select_bookmarked')).'</option><option value="2" '.(str_contains($notifs, '[inclbookmarked=2]') ? ' selected' : '').'>'.htmlspecialchars(__('legacy/usercp.select_bookmarked_exclude')).'</option></select></td></tr></table>';
         $rowsHtml .= (string) Html::frowSmall(__('legacy/usercp.row_browse_default_categories'), $categoriesCell, 1, '', true);
 
         $rowsHtml .= (string) Html::frowSmall(__('legacy/usercp.row_theme'), "<select name=theme>\n".$themeOptions."\n</select>", 1, '', true);
 
         $rowsHtml .= (string) Html::frowSmall(__('legacy/usercp.row_font_size'), '<select name=fontsize><option value=small '.(($curUser['fontsize'] ?? '') === 'small' ? ' selected' : '').'>'.htmlspecialchars(__('legacy/usercp.select_small')).'</option><option value=medium '.(($curUser['fontsize'] ?? '') === 'medium' ? ' selected' : '').'>'.htmlspecialchars(__('legacy/usercp.select_medium')).'</option><option value=large '.(($curUser['fontsize'] ?? '') === 'large' ? ' selected' : '').'>'.htmlspecialchars(__('legacy/usercp.select_large')).'</option></select>', 1, '', true);
 
-        $rowsHtml .= (string) Html::frowSmall(__('legacy/usercp.row_site_language'), "<select name=\"sitelanguage\">\n".$langOptions."\n</select>&nbsp;&nbsp;<font class=small>".htmlspecialchars(__('legacy/usercp.text_translation_note')).'<a href="aboutnexus.php#translation"><b>'.htmlspecialchars(__('legacy/usercp.text_translation_link')).'</b></a></font>.', 1, '', true);
+        $rowsHtml .= (string) Html::frowSmall(__('legacy/usercp.row_site_language'), "<select name=\"sitelanguage\">\n".$langOptions."\n</select>&nbsp;&nbsp;<span class='small'>".htmlspecialchars(__('legacy/usercp.text_translation_note')).'<a href="aboutnexus.php#translation"><b>'.htmlspecialchars(__('legacy/usercp.text_translation_link')).'</b></a></span>.', 1, '', true);
 
         $rowsHtml .= (string) Html::frowSmall(__('legacy/usercp.row_pm_boxes'), htmlspecialchars(__('legacy/usercp.text_show')).'<input type=text name=pmnum size=5 value='.(int) ($curUser['pmnum'] ?? 0).' >'.htmlspecialchars(__('legacy/usercp.text_pms_per_page')), 1, '', true);
 

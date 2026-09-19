@@ -36,7 +36,7 @@
         @endif
         </td></tr>
         @foreach ($logRows as $arr)
-            <tr><td class="rowfollow nowrap" align=center>{{ $arr['dateHtml'] ?? '' }}</td><td class=rowfollow align=left><font color='{{ $arr['color'] ?? '' }}'>{{ $arr['txt'] ?? '' }}</font></td>
+            <tr><td class="rowfollow nowrap" align=center>{{ $arr['dateHtml'] ?? '' }}</td><td class=rowfollow align=left><span class="{{ $arr['colorClass'] ?? '' }}">{{ $arr['txt'] ?? '' }}</span></td>
             @if ($canConfidentialLog)
                 <td class=rowfollow align=left>{{ $arr['usernameHtml'] ?? '' }}</td>
             @endif

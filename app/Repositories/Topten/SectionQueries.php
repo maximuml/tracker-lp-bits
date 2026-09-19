@@ -16,7 +16,7 @@ abstract class SectionQueries
         $html = $topPrefix.$limit.' '.$label;
 
         if ($note !== null && $note !== '') {
-            $html .= '<font class="small">'.$note.'</font>';
+            $html .= '<span class="small">'.$note.'</span>';
         }
 
         return $html;

@@ -270,7 +270,7 @@ final class Format
     /**
      * Highlight occurrences of a needle in a subject. Backs the legacy `highlight()` helper.
      */
-    public static function highlight(string $search, string $subject, string $hlstart = '<b><font class="striking">', string $hlend = '</font></b>'): string
+    public static function highlight(string $search, string $subject, string $hlstart = '<b><span class="striking">', string $hlend = '</span></b>'): string
     {
         return Strings::highlight($search, $subject, $hlstart, $hlend);
     }

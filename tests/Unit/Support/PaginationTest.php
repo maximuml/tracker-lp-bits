@@ -46,13 +46,13 @@ final class PaginationTest extends TestCase
     public function test_render_first_page_prev_is_gray(): void
     {
         $result = Pagination::render(10, 50, '/list.php?', 0, 5, self::LABELS);
-        $this->assertStringContainsString('<font class="gray"><b title="Alt+PageUp">', $result[0]);
+        $this->assertStringContainsString('<span class="gray"><b title="Alt+PageUp">', $result[0]);
     }
 
     public function test_render_last_page_next_is_gray(): void
     {
         $result = Pagination::render(10, 50, '/list.php?', 4, 5, self::LABELS);
-        $this->assertStringContainsString('<font class="gray"><b title="Alt+PageDown">', $result[0]);
+        $this->assertStringContainsString('<span class="gray"><b title="Alt+PageDown">', $result[0]);
     }
 
     public function test_render_mid_page_has_both_links(): void
@@ -71,11 +71,11 @@ final class PaginationTest extends TestCase
         $this->assertSame($result[0]->toHtml(), $result[1]->toHtml());
     }
 
-    public function test_render_current_page_is_gray_font(): void
+    public function test_render_current_page_is_gray_span(): void
     {
         $result = Pagination::render(10, 30, '/list.php?', 1, 3, self::LABELS);
         // Page 1 (0-indexed) shows items "11 - 20" in gray
-        $this->assertStringContainsString('<font class="gray"><b>11&nbsp;-&nbsp;20</b></font>', $result[0]);
+        $this->assertStringContainsString('<span class="gray"><b>11&nbsp;-&nbsp;20</b></span>', $result[0]);
     }
 
     public function test_render_pagertop_has_nexus_pagination_class(): void

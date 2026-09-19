@@ -32,10 +32,17 @@ return new class extends Migration
         }
 
         $classic = DB::table('stylesheets')->where('uri', 'styles/Classic/')->value('id');
-        if ($classic !== null) {
-            DB::table('stylesheets')->where('id', '!=', $classic)->delete();
-            DB::table('settings')->where('name', 'main.defstylesheet')->update(['value' => (string) $classic]);
+        if ($classic === null) {
+            $classic = DB::table('stylesheets')->insertGetId([
+                'uri' => 'styles/Classic/',
+                'name' => 'Classic',
+                'addicode' => '',
+                'designer' => 'Zantetsu',
+                'comment' => 'TBSource original mod',
+            ]);
         }
+        DB::table('stylesheets')->where('id', '!=', $classic)->delete();
+        DB::table('settings')->where('name', 'main.defstylesheet')->update(['value' => (string) $classic]);
     }
 
     public function down(): void

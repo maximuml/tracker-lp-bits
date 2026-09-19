@@ -60,8 +60,12 @@ final class Style
     {
         $row = self::cssRow($cache, $cssId, $defaultId);
         $uri = $row['uri'] ?? app(StyleRepository::class)->uri($defaultId);
+        // ADR 0019: Classic is the hard fallback — a stale defstylesheet or
+        // user.stylesheet pointing at a pruned row must never emit a bare
+        // 'theme.css' that 404s at the site root.
+        $uri = (string) ($uri ?: 'styles/Classic/');
 
-        return $file === '' ? (string) $uri : (string) $uri.$file;
+        return $file === '' ? $uri : $uri.$file;
     }
 
     /**

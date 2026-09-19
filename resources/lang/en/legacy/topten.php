@@ -57,20 +57,20 @@ return [
     'col_torrent_uploaded' => '# Upped',
     'col_torrent_downloaded' => '# Snatched',
 
-    'text_most_topic' => ' Forum Topic Starters <font class="small">(Do not include deleted topics)</font>',
-    'text_most_post' => ' Forum Posters <font class="small">(Do not include deleted posts)</font>',
+    'text_most_topic' => ' Forum Topic Starters <span class="small">(Do not include deleted topics)</span>',
+    'text_most_post' => ' Forum Posters <span class="small">(Do not include deleted posts)</span>',
     'col_topics' => 'Topics',
     'col_posts' => 'Posts',
 
-    'text_biggest_topics' => 'Biggest Topics <font class="small">(Topics in Privileged Forums are not calculated)</font>',
+    'text_biggest_topics' => 'Biggest Topics <span class="small">(Topics in Privileged Forums are not calculated)</span>',
     'col_subject' => 'Subject',
 
     'col_number' => 'Number',
     'text_most_browser' => 'Browsers',
-    'text_most_client' => 'Torrent Clients <font class="small">(Last one that accessed the tracker)</font>',
+    'text_most_client' => 'Torrent Clients <span class="small">(Last one that accessed the tracker)</span>',
 
     'col_comments' => 'Comments',
-    'text_most_commenter' => 'Torrent Commenter <font class="small">(Do not include deleted comments)</font>',
+    'text_most_commenter' => 'Torrent Commenter <span class="small">(Do not include deleted comments)</span>',
 
     'col_reviews' => 'Reviews',
 
@@ -91,9 +91,9 @@ return [
     'col_users' => 'Users',
     'text_countries_uploaded' => 'Total Uploaded',
     'col_uploaded' => 'Uploaded',
-    'text_countries_per_user' => 'Average Total Uploaded Per User<font class="small"> (with minimum 1TB uploaded and 100 users)</font>',
+    'text_countries_per_user' => 'Average Total Uploaded Per User<span class="small"> (with minimum 1TB uploaded and 100 users)</span>',
     'col_average' => 'Average',
-    'text_countries_ratio' => 'Ratio<font class="small"> (with minimum 1TB uploaded, 1TB downloaded and 100 users)</font>',
+    'text_countries_ratio' => 'Ratio<span class="small"> (with minimum 1TB uploaded, 1TB downloaded and 100 users)</span>',
     'text_ago' => ' ago',
     'text_inf' => 'Inf.',
     'head_top_ten' => 'Top 10',

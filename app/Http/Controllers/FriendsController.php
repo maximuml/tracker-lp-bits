@@ -104,7 +104,7 @@ class FriendsController extends LegacyController
                 if ($i % 6 === 0) {
                     $blocksHtml .= '<tr>';
                 }
-                $blocksHtml .= "<td>[<font class=small><a href=friends.php?id=$userid&action=delete&type=block&targetid=$blockId>D</a></font>] "
+                $blocksHtml .= "<td>[<span class='small'><a href=friends.php?id=$userid&action=delete&type=block&targetid=$blockId>D</a></span>] "
                     .($userDisplayMap[$blockId] ?? UserDisplay::username($blockId)).'</td>';
                 if ($i % 6 === 5) {
                     $blocksHtml .= '</tr>';

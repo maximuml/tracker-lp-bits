@@ -160,7 +160,7 @@ return [
     'text_show_reviews' => 'Show reviews',
     'text_show_comments' => 'Show comments',
     'row_browse_page' => 'Torrents Page',
-    'text_browse_setting_warning' => "<font class='striking'><b>WARNING: </b></font>Turning on lots of features may slow down your browsing speed.",
+    'text_browse_setting_warning' => "<span class='striking'><b>WARNING: </b></span>Turning on lots of features may slow down your browsing speed.",
     'text_torrents_per_page' => ' torrents per page ',
     'text_tooltip_type' => 'Tooltip type on torrent name',
     'text_last_review' => 'Last review',

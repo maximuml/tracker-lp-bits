@@ -12,7 +12,7 @@
                         @endif
                         <div class="nx-fgrid nx-fgrid--flat">
                             @if ($sent !== null && $sent == 1)
-                            <div class="nx-ffull nx-text nx-center"><font color=red><b> {{ $validTypeMap[$type] ?? '' }}{{ __('legacy/incrementbulk.sent_success') }}</font></b></div>
+                            <div class="nx-ffull nx-text nx-center"><span class="nx-color-red"><b> {{ $validTypeMap[$type] ?? '' }}{{ __('legacy/incrementbulk.sent_success') }}</span></b></div>
                             @endif
                                 <div class="nx-fhead">{{ __('legacy/incrementbulk.labels')['type'] }}</div>
                                 <div class="nx-fcell">

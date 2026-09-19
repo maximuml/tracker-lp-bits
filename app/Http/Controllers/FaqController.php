@@ -43,7 +43,7 @@ class FaqController extends LegacyController
                 foreach (($category['items'] ?? []) as &$item) {
                     $item['answerHtml'] = SafeHtml::fromTrustedHtml(Html::cleanListChildren(strip_tags(
                         (string) ($item['answer'] ?? ''),
-                        '<a><b><i><u><s><br><p><div><span><ul><ol><li><img><font><pre><code><hr><table><tr><td><th><strong><em><h1><h2><h3><h4><h5><h6><blockquote>',
+                        '<a><b><i><u><s><br><p><div><span><ul><ol><li><img><span><pre><code><hr><table><tr><td><th><strong><em><h1><h2><h3><h4><h5><h6><blockquote>',
                     )));
                 }
             }

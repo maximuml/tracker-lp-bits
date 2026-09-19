@@ -103,14 +103,14 @@ class CustomField
     /** @param  array<int|string, mixed>  $row */
     public function buildFieldForm(array $row = []): string
     {
-        $trName = Html::tr(__('legacy/fields.col_name').'<font color="red">*</font>', '<input type="text" name="name" value="'.($row['name'] ?? '').'" />&nbsp;&nbsp;'.__('legacy/fields.col_name_help'), 1, '', true);
-        $trLabel = Html::tr(__('legacy/fields.col_label').'<font color="red">*</font>', '<input type="text" name="label" value="'.($row['label'] ?? '').'" />', 1, '', true);
-        $trType = Html::tr(__('legacy/fields.col_type').'<font color="red">*</font>', $this->radio('type', $this->getTypeRadioOptions(), $row['type'] ?? null), 1, '', true);
-        $trRequired = Html::tr(__('legacy/fields.col_required').'<font color="red">*</font>', $this->radio('required', ['0' => __('legacy/functions.text_no'), '1' => __('legacy/functions.text_yes')], $row['required'] ?? null), 1, '', true);
+        $trName = Html::tr(__('legacy/fields.col_name').'<span class="nx-color-red">*</span>', '<input type="text" name="name" value="'.($row['name'] ?? '').'" />&nbsp;&nbsp;'.__('legacy/fields.col_name_help'), 1, '', true);
+        $trLabel = Html::tr(__('legacy/fields.col_label').'<span class="nx-color-red">*</span>', '<input type="text" name="label" value="'.($row['label'] ?? '').'" />', 1, '', true);
+        $trType = Html::tr(__('legacy/fields.col_type').'<span class="nx-color-red">*</span>', $this->radio('type', $this->getTypeRadioOptions(), $row['type'] ?? null), 1, '', true);
+        $trRequired = Html::tr(__('legacy/fields.col_required').'<span class="nx-color-red">*</span>', $this->radio('required', ['0' => __('legacy/functions.text_no'), '1' => __('legacy/functions.text_yes')], $row['required'] ?? null), 1, '', true);
         $trHelp = Html::tr(__('legacy/fields.col_help'), '<textarea name="help" rows="4" cols="80">'.($row['help'] ?? '').'</textarea>', 1, '', true);
         $trOptions = Html::tr(__('legacy/fields.col_options'), '<textarea name="options" rows="6" cols="80">'.($row['options'] ?? '').'</textarea><br/>'.__('legacy/fields.col_options_help'), 1, '', true);
-        $trIsSingleRow = Html::tr(__('legacy/fields.col_is_single_row').'<font color="red">*</font>', $this->radio('is_single_row', ['0' => __('legacy/functions.text_no'), '1' => __('legacy/functions.text_yes')], $row['is_single_row'] ?? null), 1, '', true);
-        $trPriority = Html::tr(Locale::trans('label.priority', [], null).'<font color="red">*</font>', '<input type="number" name="priority" value="'.($row['priority'] ?? '0').'" />', 1, '', true);
+        $trIsSingleRow = Html::tr(__('legacy/fields.col_is_single_row').'<span class="nx-color-red">*</span>', $this->radio('is_single_row', ['0' => __('legacy/functions.text_no'), '1' => __('legacy/functions.text_yes')], $row['is_single_row'] ?? null), 1, '', true);
+        $trPriority = Html::tr(Locale::trans('label.priority', [], null).'<span class="nx-color-red">*</span>', '<input type="number" name="priority" value="'.($row['priority'] ?? '0').'" />', 1, '', true);
         $trDisplay = Html::tr(__('legacy/fields.col_display'), '<textarea name="display" rows="4" cols="80">'.($row['display'] ?? '').'</textarea><br/>'.__('legacy/catmanage.row_custom_field_display_help'), 1, '', true);
 
         $id = $row['id'] ?? 0;
@@ -313,7 +313,7 @@ HEAD;
             $currentValue = $customValues[$row['id']]['custom_field_value'] ?? '';
             $requireText = '';
             if ($row['required']) {
-                $requireText = '<font color="red">*</font>';
+                $requireText = '<span class="nx-color-red">*</span>';
             }
             $trLabel = $row['label'].$requireText;
             $trRelation = "mode_$searchBoxId";

@@ -43,7 +43,7 @@ final class TorrentListViewModelsTest extends TestCase
             bookmarkCounter: 0,
             bookmarkMarkup: SafeHtml::fromTrustedHtml('<img />'),
             waitText: '5h',
-            waitColor: 'ff0000',
+            waitClass: 'nx-wait-10',
             commentsUrl: 'details.php?id=42&cmtpage=1',
             comments: 7,
             commentIsNew: true,
@@ -52,7 +52,7 @@ final class TorrentListViewModelsTest extends TestCase
             size: SafeHtml::fromTrustedHtml('4.00<br />GB'),
             seedersUrl: 'details.php?id=42&dllist=1#seeders',
             seeders: 12,
-            seedersColor: '#00ff00',
+            seedersClass: 'nx-sl-1',
             seedersZeroClass: '',
             leechersUrl: 'details.php?id=42&dllist=1#leechers',
             leechers: 3,
@@ -70,7 +70,7 @@ final class TorrentListViewModelsTest extends TestCase
         $this->assertTrue($row->isNew);
         $this->assertFalse($row->isBanned);
         $this->assertSame('5h', $row->waitText);
-        $this->assertSame('ff0000', $row->waitColor);
+        $this->assertSame('nx-wait-10', $row->waitClass);
         $this->assertSame('fastdelete.php?id=42', $row->staffDeleteUrl);
         $this->assertSame('edit.php?id=42', $row->staffEditUrl);
         $this->assertStringContainsString('4.00', $row->size->toHtml());

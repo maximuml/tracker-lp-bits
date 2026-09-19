@@ -24,7 +24,7 @@
 <p>
 @foreach ($letterItems as $item)
 @if ($item['href'] === null)
-<font class=gray><b>{{ $item['label'] }}</b></font>
+<span class="gray"><b>{{ $item['label'] }}</b></span>
 @else
 <a href="{{ $item['href'] }}"><b>{{ $item['label'] }}</b></a>
 @endif

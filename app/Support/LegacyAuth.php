@@ -266,8 +266,8 @@ final class LegacyAuth
         $remaining = $maxAttempts - $total;
 
         return $remaining <= 2
-            ? '<font color="red" size="2">['.$remaining.']</font>'
-            : '<font color="green" size="2">['.$remaining.']</font>';
+            ? '<span class="nx-color-red nx-size-2">['.$remaining.']</span>'
+            : '<span class="nx-color-green nx-size-2">['.$remaining.']</span>';
     }
 
     /**

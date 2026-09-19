@@ -111,7 +111,7 @@ class InviteController extends LegacyController
             $invitation_body = sprintf(__('legacy/invite.text_invitation_body'), $SITENAME).$currentUser['username'];
             $preUsernameTr = '';
             if (SiteConfig::current()->system->isInvitePreEmailAndUsername()) {
-                $preUsernameTr = '<div class="nx-fhead nx-nowrap">'.Locale::trans('invite.pre_register_username', [], null).'</div><div class="nx-fcell"><input type=text size=40 name=pre_register_username><br /><font align=left class=small>'.Locale::trans('invite.pre_register_username_help', [], null).'</font></div>';
+                $preUsernameTr = '<div class="nx-fhead nx-nowrap">'.Locale::trans('invite.pre_register_username', [], null).'</div><div class="nx-fcell"><input type=text size=40 name=pre_register_username><br /><span class="small">'.Locale::trans('invite.pre_register_username_help', [], null).'</span></div>';
             }
             $_s = ((int) ($inv['invites'] ?? 0) !== 1) ? (__('legacy/invite.text_s')) : '';
 
@@ -203,13 +203,13 @@ class InviteController extends LegacyController
             $row['usernameHtml'] = UserDisplay::username((int) $row['id']);
             if ((float) $row['downloaded'] > 0) {
                 $ratio = number_format($row['uploaded'] / $row['downloaded'], 3);
-                $row['ratioHtml'] = SafeHtml::fromTrustedHtml('<font color='.Ratio::color($ratio).">$ratio</font>");
+                $row['ratioHtml'] = SafeHtml::fromTrustedHtml('<span class="'.Ratio::colorClass($ratio).">$ratio</span>");
             } else {
                 $row['ratioHtml'] = SafeHtml::fromTrustedHtml($row['uploaded'] > 0 ? 'Inf.' : '---');
             }
             $row['statusHtml'] = SafeHtml::fromTrustedHtml($row['status'] === 'confirmed'
-                ? '<a href=userdetails.php?id='.(int) $row['id'].'><font color=#1f7309>'.e(__('legacy/invite.text_confirmed')).'</font></a>'
-                : '<a href=checkuser.php?id='.(int) $row['id'].'><font color=#ca0226>'.e(__('legacy/invite.text_pending')).'</font></a>');
+                ? '<a href=userdetails.php?id='.(int) $row['id'].'><span class="nx-color-1f7309">'.e(__('legacy/invite.text_confirmed')).'</span></a>'
+                : '<a href=checkuser.php?id='.(int) $row['id'].'><span class="nx-color-ca0226">'.e(__('legacy/invite.text_pending')).'</span></a>');
         }
         unset($row);
 
@@ -266,7 +266,7 @@ JS;
                 : '');
             $row['validText'] = Invite::$validInfo[$row['valid']]['text'] ?? '';
             $row['inviteeUserHtml'] = SafeHtml::fromTrustedHtml(! $isHashValid
-                ? '<a href=userdetails.php?id='.(int) $row['invitee_register_uid'].'><font color=#1f7309>'.e($row['invitee_register_username']).'</font></a>'
+                ? '<a href=userdetails.php?id='.(int) $row['invitee_register_uid'].'><span class="nx-color-1f7309">'.e($row['invitee_register_username']).'</span></a>'
                 : '');
         }
         unset($row);

@@ -76,7 +76,7 @@ final class Attachment
         $filenameHtml = htmlspecialchars($filename);
         $tooltip = htmlspecialchars("<strong>$downloadsLabel</strong>: $downloadCount<br />$timeText");
 
-        return '<div class="attach">'.$icon.'&nbsp;&nbsp;<a href="'.$href.'" target="_blank" id="attach'.$id.'" onmouseover="domTT_activate(this, event, \'content\', \''.$tooltip.'\', \'styleClass\', \'attach\', \'x\', findPosition(this)[0], \'y\', findPosition(this)[1]-58);">'.$filenameHtml.'</a>&nbsp;&nbsp;<font class="size">('.$sizeText.')</font></div>';
+        return '<div class="attach">'.$icon.'&nbsp;&nbsp;<a href="'.$href.'" target="_blank" id="attach'.$id.'" onmouseover="domTT_activate(this, event, \'content\', \''.$tooltip.'\', \'styleClass\', \'attach\', \'x\', findPosition(this)[0], \'y\', findPosition(this)[1]-58);">'.$filenameHtml.'</a>&nbsp;&nbsp;<span class="size">('.$sizeText.')</span></div>';
     }
 
     /**

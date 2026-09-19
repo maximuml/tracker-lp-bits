@@ -218,9 +218,9 @@ final class BonusPageService
 
         ob_start();
         echo "<table align=\"center\" width=\"97%\" border=\"1\" cellspacing=\"0\" cellpadding=\"3\">\n";
-        echo '<tr><td class="colhead" colspan="4" align="center"><font class="big">'.$SITENAME.(__('legacy/mybonus.text_karma_system'))."</font></td></tr>\n";
+        echo '<tr><td class="colhead" colspan="4" align="center"><span class="big">'.$SITENAME.(__('legacy/mybonus.text_karma_system'))."</span></td></tr>\n";
         if ($msg) {
-            echo '<tr><td align="center" colspan="4"><font class="striking"><b>'.$msg.'</b></font></td></tr>';
+            echo '<tr><td align="center" colspan="4"><span class="striking"><b>'.$msg.'</b></span></td></tr>';
         }
         echo '<tr><td class="text" align="center" colspan="4">'.(__('legacy/mybonus.text_exchange_your_karma')).$bonus.(__('legacy/mybonus.text_for_goodies'));
         echo '<br /><b>'.(__('legacy/mybonus.text_no_buttons_note')).'</b><br /><small>('.$lockText.')</small></td></tr>';
@@ -367,7 +367,7 @@ final class BonusPageService
 
         ob_start();
         echo '<table width="97%" cellpadding="3">';
-        echo '<tr><td class="colhead" align="center"><font class="big">'.(__('legacy/mybonus.text_what_is_karma')).'</font></td></tr>';
+        echo '<tr><td class="colhead" align="center"><span class="big">'.(__('legacy/mybonus.text_what_is_karma')).'</span></td></tr>';
         echo '<tr><td class="text" align="left">';
 
         echo '<h1>'.(__('legacy/mybonus.text_get_by_seeding')).'</h1>';

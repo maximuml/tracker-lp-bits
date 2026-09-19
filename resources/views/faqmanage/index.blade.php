@@ -15,14 +15,14 @@
     @for ($n = 1; $n <= count($temp2); $n++)
         <option value="{{ $n }}"@if ($n == ($temp['order'] ?? 0)) selected="selected"@endif>{{ $n }}</option>
     @endfor
-    </select></td><td align="center" width="40px">&nbsp;</td><td><b>{{ $temp['title'] ?? '' }}</b></td><td align="center" width="60px">{{ $temp['lang_name'] ?? '' }}</td><td align="center" width="60px">@if (($temp['flag'] ?? '') == "0")<font color="red">Hidden</font>@else Normal @endif</td><td align="center" width="60px"><a href="faqactions.php?action=edit&id={{ (int) ($temp['id'] ?? 0) }}">Edit</a> <a href="faqactions.php?action=delete&id={{ (int) ($temp['id'] ?? 0) }}">Delete</a></td></tr>
+    </select></td><td align="center" width="40px">&nbsp;</td><td><b>{{ $temp['title'] ?? '' }}</b></td><td align="center" width="60px">{{ $temp['lang_name'] ?? '' }}</td><td align="center" width="60px">@if (($temp['flag'] ?? '') == "0")<span class="nx-color-red">Hidden</span>@else Normal @endif</td><td align="center" width="60px"><a href="faqactions.php?action=edit&id={{ (int) ($temp['id'] ?? 0) }}">Edit</a> <a href="faqactions.php?action=delete&id={{ (int) ($temp['id'] ?? 0) }}">Delete</a></td></tr>
     @if (isset($temp['items']) && is_array($temp['items']))
         @foreach ($temp['items'] as $id2 => $tempItem)
 <tr><td align="center" width="40px">&nbsp;</td><td align="center" width="40px"><select name="order[{{ (int) $id2 }}]">
             @for ($n = 1; $n <= count($temp['items']); $n++)
                 <option value="{{ $n }}"@if ($n == ($tempItem['order'] ?? 0)) selected="selected"@endif>{{ $n }}</option>
             @endfor
-            </select></td><td>{{ $tempItem['question'] ?? '' }}</td><td align="center"></td><td align="center" width="60px">@if (($tempItem['flag'] ?? '') == "0")<font color="#FF0000">Hidden</font>@elseif (($tempItem['flag'] ?? '') == "2")<font color="#0000FF"><img src="pic/updated.png" alt="Updated" width="46" height="11" align="absbottom"></font>@elseif (($tempItem['flag'] ?? '') == "3")<font color="#008000"><img src="pic/new.png" alt="New" width="27" height="11" align="absbottom"></font>@else Normal @endif</td><td align="center" width="60px"><a href="faqactions.php?action=edit&id={{ (int) $id2 }}">Edit</a> <a href="faqactions.php?action=delete&id={{ (int) $id2 }}">Delete</a></td></tr>
+            </select></td><td>{{ $tempItem['question'] ?? '' }}</td><td align="center"></td><td align="center" width="60px">@if (($tempItem['flag'] ?? '') == "0")<span class="nx-color-red">Hidden</span>@elseif (($tempItem['flag'] ?? '') == "2")<span class="nx-color-blue"><img src="pic/updated.png" alt="Updated" width="46" height="11" align="absbottom"></span>@elseif (($tempItem['flag'] ?? '') == "3")<span class="nx-color-green"><img src="pic/new.png" alt="New" width="27" height="11" align="absbottom"></span>@else Normal @endif</td><td align="center" width="60px"><a href="faqactions.php?action=edit&id={{ (int) $id2 }}">Edit</a> <a href="faqactions.php?action=delete&id={{ (int) $id2 }}">Delete</a></td></tr>
         @endforeach
     @endif
 <tr><td colspan="6" align="center"><a href="faqactions.php?action=additem&inid={{ (int) $id }}&langid={{ (int) $lang }}">Add new item</a></td></tr>
@@ -36,7 +36,7 @@
 <tr><td class="colhead" align="left">Item Title</td><td class="colhead" align="center">Status</td><td class="colhead" align="center">Actions</td></tr>
     @foreach ($faqOrphaned as $lang => $temp2)
         @foreach ($temp2 as $id => $temp)
-<tr><td>{{ $temp['question'] ?? '' }}</td><td align="center" width="60px">@if (($temp['flag'] ?? '') == "0")<font color="#FF0000">Hidden</font>@elseif (($temp['flag'] ?? '') == "2")<font color="#0000FF">Updated</font>@elseif (($temp['flag'] ?? '') == "3")<font color="#008000">New</font>@else Normal @endif</td><td align="center" width="60px"><a href="faqactions.php?action=edit&id={{ (int) $id }}">edit</a> <a href="faqactions.php?action=delete&id={{ (int) $id }}">delete</a></td></tr>
+<tr><td>{{ $temp['question'] ?? '' }}</td><td align="center" width="60px">@if (($temp['flag'] ?? '') == "0")<span class="nx-color-red">Hidden</span>@elseif (($temp['flag'] ?? '') == "2")<span class="nx-color-blue">Updated</span>@elseif (($temp['flag'] ?? '') == "3")<span class="nx-color-green">New</span>@else Normal @endif</td><td align="center" width="60px"><a href="faqactions.php?action=edit&id={{ (int) $id }}">edit</a> <a href="faqactions.php?action=delete&id={{ (int) $id }}">delete</a></td></tr>
         @endforeach
     @endforeach
 </table>

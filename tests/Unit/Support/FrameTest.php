@@ -200,16 +200,16 @@ final class FrameTest extends TestCase
     public function test_sql_error_with_file_and_line_emits_location(): void
     {
         $expected = '<table border="0" bgcolor="blue" align="left" cellspacing="0" cellpadding="10">'
-            ."<tr><td class=\"embedded\"><font color=\"white\"><h1>SQL Error</h1>\n"
-            .'<b>Boom!<p>in /tmp/x.php, line 42</p></b></font></td></tr></table>';
+            ."<tr><td class=\"embedded\"><span class=\"nx-color-white\"><h1>SQL Error</h1>\n"
+            .'<b>Boom!<p>in /tmp/x.php, line 42</p></b></span></td></tr></table>';
         $this->assertSame($expected, (string) Frame::sqlError('Boom!', '/tmp/x.php', '42'));
     }
 
     public function test_sql_error_without_file_omits_location(): void
     {
         $expected = '<table border="0" bgcolor="blue" align="left" cellspacing="0" cellpadding="10">'
-            ."<tr><td class=\"embedded\"><font color=\"white\"><h1>SQL Error</h1>\n"
-            .'<b>Boom!</b></font></td></tr></table>';
+            ."<tr><td class=\"embedded\"><span class=\"nx-color-white\"><h1>SQL Error</h1>\n"
+            .'<b>Boom!</b></span></td></tr></table>';
         $this->assertSame($expected, (string) Frame::sqlError('Boom!', '', ''));
     }
 
@@ -219,8 +219,8 @@ final class FrameTest extends TestCase
         // string `'0'` collapses to empty. Bool-check after string
         // cast reproduces that exactly.
         $expected = '<table border="0" bgcolor="blue" align="left" cellspacing="0" cellpadding="10">'
-            ."<tr><td class=\"embedded\"><font color=\"white\"><h1>SQL Error</h1>\n"
-            .'<b>Boom!</b></font></td></tr></table>';
+            ."<tr><td class=\"embedded\"><span class=\"nx-color-white\"><h1>SQL Error</h1>\n"
+            .'<b>Boom!</b></span></td></tr></table>';
         $this->assertSame($expected, (string) Frame::sqlError('Boom!', '0', '42'));
         $this->assertSame($expected, (string) Frame::sqlError('Boom!', '/tmp/x.php', '0'));
     }
@@ -230,8 +230,8 @@ final class FrameTest extends TestCase
         // The legacy proxy passes the raw SQL error through; downstream
         // pages have been rendering HTML-bearing strings as-is for years.
         $expected = '<table border="0" bgcolor="blue" align="left" cellspacing="0" cellpadding="10">'
-            ."<tr><td class=\"embedded\"><font color=\"white\"><h1>SQL Error</h1>\n"
-            .'<b>"<script>"</b></font></td></tr></table>';
+            ."<tr><td class=\"embedded\"><span class=\"nx-color-white\"><h1>SQL Error</h1>\n"
+            .'<b>"<script>"</b></span></td></tr></table>';
         $this->assertSame($expected, (string) Frame::sqlError('"<script>"', '', ''));
     }
 }

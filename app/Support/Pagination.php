@@ -84,7 +84,7 @@ final class Pagination
             $pager .= $prevLabel;
             $pager .= '</a>';
         } else {
-            $pager .= '<font class="gray">'.$prevLabel.'</font>';
+            $pager .= '<span class="gray">'.$prevLabel.'</span>';
         }
 
         $pager .= '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
@@ -95,7 +95,7 @@ final class Pagination
             $pager .= $nextLabel;
             $pager .= '</a>';
         } else {
-            $pager .= '<font class="gray">'.$nextLabel.'</font>';
+            $pager .= '<span class="gray">'.$nextLabel.'</span>';
         }
 
         // Build page-number links
@@ -126,7 +126,7 @@ final class Pagination
                 if ($i != $page) {
                     $pagerarr[] = '<a href="'.htmlspecialchars($href.$pagename.'='.$i).'"><b>'.$text.'</b></a>';
                 } else {
-                    $pagerarr[] = '<font class="gray"><b>'.$text.'</b></font>';
+                    $pagerarr[] = '<span class="gray"><b>'.$text.'</b></span>';
                 }
             }
             $pagerstr = implode(' | ', $pagerarr);

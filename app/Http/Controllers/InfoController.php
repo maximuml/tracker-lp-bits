@@ -111,12 +111,12 @@ class InfoController extends LegacyController
             $body = Format::formatComment((string) ($arr['body'] ?? ''));
             $editedBy = $arr['editedby'] ?? 0;
             if (Validators::isId($editedBy) && ! empty($editorNames[(int) $editedBy])) {
-                $body .= '<p><font size=1 class=small>'
+                $body .= '<p><span class="small nx-size-1">'
                     .(string) (__('legacy/userhistory.text_last_edited'))
                     .UserDisplay::username((int) $editedBy)
                     .(string) (__('legacy/userhistory.text_at'))
                     .(string) ($arr['editdate'] ?? '')
-                    .'</font></p>\n';
+                    .'</span></p>\n';
             }
             $items[] = [
                 'added' => SafeHtml::fromTrustedHtml((string) Time::format((string) ($arr['added'] ?? ''), true, false, false)),

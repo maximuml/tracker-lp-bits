@@ -23,10 +23,11 @@ use App\Support\Input;
 use App\Support\LegacyResponse;
 use App\Support\LegacyYesNo;
 use App\Support\Ratio;
-use App\Support\Time;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
 use App\Support\Validators;
+use App\ViewModels\Forum\PostViewModel;
+use App\ViewModels\Forum\ViewTopicViewModel;
 use Illuminate\Http\Request;
 
 /**
@@ -49,73 +50,62 @@ final class ForumTopicViewService
      * Build the view-topic section.
      *
      * @param  array<string, mixed>  $curUser
-     * @return array<string, mixed>
      */
-    public function buildViewTopic(array $curUser, int $userId, Request $request, int $postsperpage): array
+    public function buildViewTopic(array $curUser, int $userId, Request $request, int $postsperpage): ?ViewTopicViewModel
     {
-        $highlight = htmlspecialchars(trim((string) (request()->query('highlight') ?? '')));
-        $topicid = (int) (request()->query('topicid') ?? 0);
+        $highlight = trim((string) ($request->query('highlight') ?? ''));
+        $topicid = (int) ($request->query('topicid') ?? 0);
         LegacyResponse::assertId($topicid, true);
-        $page = is_string($val = request()->query('page')) ? $val : 0;
-        $authorid = (int) (request()->query('authorid') ?? 0);
-        if ($authorid) {
-            $addparam = 'action=viewtopic&topicid='.$topicid.'&authorid='.$authorid;
-        } else {
-            $addparam = 'action=viewtopic&topicid='.$topicid;
-        }
+        $page = is_string($val = $request->query('page')) ? $val : 0;
+        $authorid = (int) ($request->query('authorid') ?? 0);
 
-        $topic = $this->topicRepository->getTopic((int) $topicid);
+        $topic = $this->topicRepository->getTopic($topicid);
         if (! $topic) {
             LegacyResponse::abort(__('legacy/forums.std_forum_error'), __('legacy/forums.std_topic_not_found'));
 
-            return [];
+            return null;
         }
         $arr = $topic->toArray();
 
         $forumid = (int) $arr['forumid'];
         $locked = (bool) $arr['locked'];
         $orgsubject = (string) $arr['subject'];
-        $subject = htmlspecialchars((string) $arr['subject']);
-        if ($highlight) {
-            $subject = Format::highlight($highlight, $orgsubject);
-        }
+        $subject = SafeHtml::fromTrustedHtml(
+            $highlight !== ''
+                ? Format::highlight(htmlspecialchars($highlight), $orgsubject)
+                : htmlspecialchars($orgsubject),
+        );
         $sticky = $arr['sticky'] == 1;
-        $hlcolor = (int) $arr['hlcolor'];
         $views = (int) $arr['views'];
-        $basePosterid = (int) $arr['userid'];
 
         $row = $this->index->getForumRow($forumid);
         $forumname = (string) ($row['name'] ?? '');
         $isForummod = Forum::isModerator($forumid, 'forum');
+        $isMod = Permission::can(PermissionEnum::POST_MANAGE) || $isForummod;
 
         if (UserDisplay::currentClass() < (int) ($row['minclassread'] ?? 0)) {
             LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_unpermitted_viewing_topic'));
         }
-        if (((UserDisplay::currentClass() >= (int) ($row['minclasswrite'] ?? 0) && ! $locked) || Permission::can(PermissionEnum::POST_MANAGE) || $isForummod) && LegacyYesNo::isYes($curUser['forumpost'] ?? null)) {
-            $maypost = true;
-        } else {
-            $maypost = false;
-        }
+        $maypost = ((UserDisplay::currentClass() >= (int) ($row['minclasswrite'] ?? 0) && ! $locked) || $isMod) && LegacyYesNo::isYes($curUser['forumpost'] ?? null);
 
-        $this->topicRepository->incrementTopicViews((int) $topicid);
+        $this->topicRepository->incrementTopicViews($topicid);
 
-        $postcount = $this->postRepository->countTopicPosts((int) $topicid, $authorid ?: null);
+        $postcount = $this->postRepository->countTopicPosts($topicid, $authorid ?: null);
         if (! $authorid) {
             $this->legacyRedisCache?->cache_value('topic_'.$topicid.'_post_count', $postcount, 3600);
         }
 
-        $pagerarr = [];
         $perpage = $postsperpage;
         $pages = (int) ceil($postcount / max(1, $perpage));
 
         if ((isset($page[0])) && $page[0] == 'p') {
             $findpost = substr($page, 1);
-            $postIds = $this->postRepository->getTopicPostIds((int) $topicid, $authorid ?: null);
+            $postIds = $this->postRepository->getTopicPostIds($topicid, $authorid ?: null);
             $i = array_search($findpost, $postIds);
             if ($i === false) {
                 $i = 0;
             }
-            $page = floor((int) $i / $perpage);
+            $page = (int) floor((int) $i / $perpage);
         }
         if ($page === 'last') {
             $page = $pages - 1;
@@ -128,236 +118,143 @@ final class ForumTopicViewService
         } else {
             $page = $pages - 1;
         }
+        $page = (int) $page;
 
         $offset = $page * $perpage;
-        $dotted = 0;
-        $dotspace = 3;
-        $dotend = $pages - $dotspace;
-        $curdotend = $page - $dotspace;
-        $curdotstart = $page + $dotspace;
-        for ($i = 0; $i < $pages; $i++) {
-            if (($i >= $dotspace && $i <= $curdotend) || ($i >= $curdotstart && $i < $dotend)) {
-                if (! $dotted) {
-                    $pagerarr[] = '...';
-                }
-                $dotted = 1;
 
-                continue;
-            }
-            $dotted = 0;
-            if ($i != $page) {
-                $pagerarr[] = '<a href="'.htmlspecialchars('?'.$addparam.'&page='.$i).'"><b>'.($i + 1)."</b></a>\n";
-            } else {
-                $pagerarr[] = '<span class="gray"><b>'.($i + 1)."</b></span>\n";
-            }
-        }
-        if ($page == 0) {
-            $pager = '<span class="gray"><b>&lt;&lt;'.(__('legacy/forums.text_prev')).'</b></span>';
-        } else {
-            $pager = '<a href="'.htmlspecialchars('?'.$addparam.'&page='.($page - 1)).
-            '"><b>&lt;&lt;'.(__('legacy/forums.text_prev')).'</b></a>';
-        }
-        $pager .= '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
-        if ($page == $pages - 1) {
-            $pager .= '<span class="gray"><b>'.(__('legacy/forums.text_next'))." &gt;&gt;</b></span>\n";
-        } else {
-            $pager .= '<a href="'.htmlspecialchars('?'.$addparam.'&page='.($page + 1)).
-            '"><b>'.(__('legacy/forums.text_next'))." &gt;&gt;</b></a>\n";
-        }
-
-        $pagerstr = implode(' | ', $pagerarr);
-        $pagertop = '<p align="center">'.$pager.'<br />'.$pagerstr."</p>\n";
-        $pagerbottom = '<p align="center">'.$pagerstr.'<br />'.$pager."</p>\n";
-
-        $postRows = $this->postRepository->getTopicPosts((int) $topicid, $authorid ?: null, (int) $offset, (int) $perpage);
+        $postRows = $this->postRepository->getTopicPosts($topicid, $authorid ?: null, $offset, $perpage);
         $pc = $postRows->count();
         $allPosts = [];
         $uidArr = [];
         foreach ($postRows as $postObj) {
-            $arr = $postObj->toArray();
-            $allPosts[] = $arr;
-            $uidArr[$arr['userid']] = 1;
+            $postArr = $postObj->toArray();
+            $allPosts[] = $postArr;
+            $uidArr[$postArr['userid']] = 1;
         }
         $uidArr = array_keys($uidArr);
-        unset($arr);
-
-        $SITENAME = (string) $this->globals->get('SITENAME', '');
-
-        ob_start();
-        echo '<h1 align="center"><a class="faqlink" href="forums.php">'.$SITENAME.'&nbsp;'.(__('legacy/forums.text_forums')).'</a>--><a class="faqlink" href="'.htmlspecialchars('?action=viewforum&forumid='.$forumid).'">'.$forumname.'</a><b>--></b><span id="top">'.$subject.($locked ? '&nbsp;&nbsp;<b>[<span class="striking">'.(__('legacy/forums.text_locked')).'</span>]</b>' : '')."</span></h1>\n";
-        echo $pagertop;
-
-        echo "<table border=\"0\" class=\"main\" cellspacing=\"0\" cellpadding=\"5\" width=\"97%\"><tr>\n";
-        echo '<td class="embedded" width="99%">&nbsp;&nbsp;'.(__('legacy/forums.there_is')).'<b>'.$views.'</b>'.(__('legacy/forums.hits_on_this_topic'));
-        echo "</td>\n";
-        echo '<td class="embedded nowrap" width="1%" align="right">';
-        if ($maypost) {
-            echo '<a href="'.htmlspecialchars('?action=reply&topicid='.$topicid).'"><img class="f_reply" src="pic/trans.gif" alt="Add Reply" title="'.(__('legacy/forums.title_reply_directly')).'" /></a>&nbsp;&nbsp;';
-        }
-        echo '</td>';
-        echo "</tr></table>\n".Frame::open('', false, 10, '100%', 'left');
 
         $neededColumns = ['id', 'class', 'enabled', 'privacy', 'avatar', 'signature', 'uploaded', 'downloaded', 'last_access', 'username', 'donor', 'leechwarn', 'warned', 'title'];
         $userInfoArr = $this->forumRepository->getUsersByIds($uidArr, $neededColumns);
-        $pn = 0;
         $lpr = $this->index->getLastReadPostId($topicid, $curUser);
 
-        $__server_REQUEST_URI = Input::serverValue('REQUEST_URI');
-
+        $posts = [];
+        $pn = 0;
         foreach ($allPosts as $arr) {
             $pn++;
-
             $postid = (int) $arr['id'];
             $posterid = (int) $arr['userid'];
-
-            $added = Time::format($arr['added'], true, false);
 
             $userInfo = $userInfoArr->get($posterid) ?: User::defaultUser();
             $arr2 = $userInfo->toArray();
 
-            $uploaded = Format::size($arr2['uploaded']);
-            $downloaded = Format::size($arr2['downloaded']);
-            $ratio = Ratio::forUserId((int) $arr2['id']);
-
             if (! $forumposts = $this->legacyRedisCache?->get_value('user_'.$posterid.'_post_count')) {
-                $forumposts = $this->postRepository->countUserPosts((int) $posterid);
+                $forumposts = $this->postRepository->countUserPosts($posterid);
                 $this->legacyRedisCache?->cache_value('user_'.$posterid.'_post_count', $forumposts, 3600);
             }
 
-            $signature = (LegacyYesNo::isYes($curUser['signatures'] ?? null) ? ($arr2['signature'] ?? '') : '');
-            $avatar = (LegacyYesNo::isYes($curUser['avatars'] ?? null) ? htmlspecialchars((string) ($arr2['avatar'] ?? '')) : '');
-
-            $uclass = UserClass::imagePath((int) ($arr2['class'] ?? 0));
-            $by = UserDisplay::username($posterid, false, true, true, false, false, true);
-
-            if (! $avatar) {
+            $signature = LegacyYesNo::isYes($curUser['signatures'] ?? null) ? (string) ($arr2['signature'] ?? '') : '';
+            $avatar = LegacyYesNo::isYes($curUser['avatars'] ?? null) ? (string) ($arr2['avatar'] ?? '') : '';
+            if ($avatar === '') {
                 $avatar = 'pic/default_avatar.png';
             }
 
-            if ($pn == $pc) {
-                echo "<span id=\"last\"></span>\n";
-                if ($postid > $lpr) {
-                    $this->readStateRepository->markPostRead((int) $userId, (int) $topicid, (int) $postid, (int) ($curUser['last_catchup'] ?? 0));
-                    $this->legacyRedisCache?->delete_value('user_'.($curUser['id'] ?? 0).'_last_read_post_list');
+            $isLast = $pn === $pc;
+            if ($isLast && $postid > $lpr) {
+                $this->readStateRepository->markPostRead($userId, $topicid, $postid, (int) ($curUser['last_catchup'] ?? 0));
+                $this->legacyRedisCache?->delete_value('user_'.($curUser['id'] ?? 0).'_last_read_post_list');
+            }
+
+            $canViewProtected = $pn + $offset <= 1 || Forum::canViewPost($userId, $arr);
+            $bodyContent = $canViewProtected
+                ? Format::formatComment((string) $arr['body'])
+                : Format::formatComment((string) (__('legacy/forums.text_post_protected')));
+            if ($highlight !== '') {
+                $bodyContent = SafeHtml::fromTrustedHtml(Format::highlight(htmlspecialchars($highlight), (string) $bodyContent));
+            }
+
+            $editedBy = null;
+            $editedAtRaw = null;
+            if (Validators::isId($arr['editedby'])) {
+                $editedBy = SafeHtml::fromTrustedHtml(UserDisplay::username((int) $arr['editedby']));
+                $editedAtRaw = $arr['editdate'];
+            }
+
+            $dt = date('Y-m-d H:i:s', (int) (defined('TIMENOW') ? constant('TIMENOW') : time()) - 900);
+            $className = strip_tags((string) UserClass::name((int) ($arr2['class'] ?? 0), false, false, true));
+
+            $posts[] = new PostViewModel(
+                id: $postid,
+                number: $pn + $offset,
+                isLast: $isLast,
+                anchorUrl: 'forums.php?action=viewtopic&topicid='.$topicid.'&page=p'.$postid.'#pid'.$postid,
+                addedRaw: $arr['added'],
+                by: SafeHtml::fromTrustedHtml(UserDisplay::username($posterid, false, true, true, false, false, true)),
+                authorToggleUrl: $authorid
+                    ? '?action=viewtopic&topicid='.$topicid
+                    : '?action=viewtopic&topicid='.$topicid.'&authorid='.$posterid,
+                authorToggleLabel: (string) ($authorid
+                    ? __('legacy/forums.text_view_all_posts')
+                    : __('legacy/forums.text_view_this_author_only')),
+                avatarImage: SafeHtml::fromTrustedHtml(UserDisplay::avatarImageWithContext(htmlspecialchars($avatar))),
+                classImage: UserClass::imagePath((int) ($arr2['class'] ?? 0)),
+                className: $className,
+                postCount: (int) $forumposts,
+                uploaded: Format::size($arr2['uploaded']),
+                downloaded: Format::size($arr2['downloaded']),
+                ratio: SafeHtml::fromTrustedHtml((string) Ratio::forUserId((int) $arr2['id'])),
+                body: $bodyContent,
+                signature: $signature !== ''
+                    ? SafeHtml::fromTrustedHtml((string) Format::formatComment($signature, false, false, false, true, 500, true, false, 1, 200))
+                    : null,
+                editedBy: $editedBy,
+                editedAtRaw: $editedAtRaw,
+                online: ($arr2['last_access'] ?? '') > $dt,
+                posterId: (int) ($arr2['id'] ?? 0),
+                posterName: (string) ($arr2['username'] ?? ''),
+                canQuote: $maypost && $canViewProtected,
+                canDelete: $isMod,
+                canEdit: ($curUser['id'] == $posterid && ! $locked) || $isMod,
+            );
+        }
+
+        $moveForums = [];
+        if ($isMod) {
+            foreach ($this->index->getForumRow(0) ?? [] as $forumRow) {
+                if ($forumRow['id'] != $forumid && UserDisplay::currentClass() >= (int) $forumRow['minclasswrite']) {
+                    $moveForums[] = ['id' => (int) $forumRow['id'], 'name' => (string) $forumRow['name']];
                 }
             }
-
-            echo '<div><table id="pid'.$postid.'" border="0" cellspacing="0" cellpadding="0" width="100%"><tr><td class="embedded" width="99%"><a href="'.htmlspecialchars('forums.php?action=viewtopic&topicid='.$topicid.'&page=p'.$postid.'#pid'.$postid).'">#'.$postid.'</a>&nbsp;&nbsp;<span class="nx-color-gray">'.(__('legacy/forums.text_by')).'</span>'.$by.'&nbsp;&nbsp;<span class="nx-color-gray">'.(__('legacy/forums.text_at')).'</span>'.$added;
-            if (Validators::isId($arr['editedby'])) {
-                echo '';
-            }
-            echo '&nbsp;&nbsp;<span class="nx-color-gray">|</span>&nbsp;&nbsp;';
-            if ($authorid) {
-                echo '<a href="?action=viewtopic&topicid='.$topicid.'">'.(__('legacy/forums.text_view_all_posts')).'</a>';
-            } else {
-                echo '<a href="'.htmlspecialchars('?action=viewtopic&topicid='.$topicid.'&authorid='.$posterid).'">'.(__('legacy/forums.text_view_this_author_only')).'</a>';
-            }
-            echo '</td><td class="embedded nowrap" width="1%"><span class="big">'.(__('legacy/forums.text_number')).'<b>'.($pn + $offset).'</b>'.(__('legacy/forums.text_lou')).'&nbsp;&nbsp;</span><a href="#top"><img class="top" src="pic/trans.gif" alt="Top" title="'.(__('legacy/forums.text_back_to_top')).'" /></a>&nbsp;&nbsp;</td></tr>';
-
-            echo "</table></div>\n";
-
-            echo "<table class=\"main\" width=\"100%\" border=\"1\" cellspacing=\"0\" cellpadding=\"5\">\n";
-
-            $body = '<div id="pid'.$postid.'body">';
-            if ($pn + $offset > 1 && ! Forum::canViewPost($userId, $arr)) {
-                $bodyContent = Format::formatComment((string) (__('legacy/forums.text_post_protected')));
-                $canViewProtected = false;
-            } else {
-                $bodyContent = Format::formatComment((string) $arr['body']);
-                $canViewProtected = true;
-            }
-            if ($highlight) {
-                $bodyContent = Format::highlight($highlight, (string) $bodyContent);
-            }
-
-            if (Validators::isId($arr['editedby'])) {
-                $lastedittime = Time::format($arr['editdate'], true, false);
-                $bodyContent .= '<br /><p><span class="small">'.(__('legacy/forums.text_last_edited_by')).UserDisplay::username((int) $arr['editedby']).(__('legacy/forums.text_last_edit_at')).$lastedittime."</span></p>\n";
-            }
-            $body .= $bodyContent.'</div>';
-            if ($signature) {
-                $body .= '<p><br />____________________<br />'.Format::formatComment($signature, false, false, false, true, 500, true, false, 1, 200).'</p>';
-            }
-
-            $stats = '<br />'.'&nbsp;&nbsp;'.(__('legacy/forums.text_posts'))."$forumposts<br />".'&nbsp;&nbsp;'.(__('legacy/forums.text_ul'))."$uploaded <br />".'&nbsp;&nbsp;'.(__('legacy/forums.text_dl'))."$downloaded<br />".'&nbsp;&nbsp;'.(__('legacy/forums.text_ratio'))."$ratio";
-            echo '<tr><td class="rowfollow" width="150" valign="top" align="left">'.
-            UserDisplay::avatarImageWithContext($avatar).'<br /><br /><br />&nbsp;&nbsp;<img alt="'.UserClass::name((int) ($arr2['class'] ?? 0), false, false, true).'" title="'.UserClass::name((int) ($arr2['class'] ?? 0), false, false, true).'" src="'.$uclass.'" />'.$stats.'</td><td class="rowfollow" valign="top"><br />'.$body."</td></tr>\n";
-            $secs = 900;
-            $dt = date('Y-m-d H:i:s', (int) (defined('TIMENOW') ? constant('TIMENOW') : time()) - $secs);
-            $online = ($arr2['last_access'] ?? '') > $dt;
-            echo '<tr><td class="rowfollow" align="center" valign="middle">'.($online ? '<img class="f_online" src="pic/trans.gif" alt="Online" title="'.(__('legacy/forums.title_online')).'" />' : '<img class="f_offline" src="pic/trans.gif" alt="Offline" title="'.(__('legacy/forums.title_offline')).'" />').'<a href="sendmessage.php?receiver='.htmlspecialchars(trim((string) ($arr2['id'] ?? ''))).'"><img class="f_pm" src="pic/trans.gif" alt="PM" title="'.(__('legacy/forums.title_send_message_to')).htmlspecialchars((string) ($arr2['username'] ?? ''))."\" /></a><a href=\"report.php?forumpost=$postid\"><img class=\"f_report\" src=\"pic/trans.gif\" alt=\"Report\" title=\"".(__('legacy/forums.title_report_this_post')).'" /></a></td>';
-            echo '<td class="toolbox" align="right">';
-
-            if ($maypost && $canViewProtected) {
-                echo '<a href="'.htmlspecialchars('?action=quotepost&postid='.$postid).'"><img class="f_quote" src="pic/trans.gif" alt="Quote" title="'.(__('legacy/forums.title_reply_with_quote')).'" /></a>';
-            }
-
-            if (Permission::can(PermissionEnum::POST_MANAGE) || $isForummod) {
-                echo '<a href="'.htmlspecialchars('?action=deletepost&postid='.$postid).'"><img class="f_delete" src="pic/trans.gif" alt="Delete" title="'.(__('legacy/forums.title_delete_post')).'" /></a>';
-            }
-
-            if (($curUser['id'] == $posterid && ! $locked) || Permission::can(PermissionEnum::POST_MANAGE) || $isForummod) {
-                echo '<a href="'.htmlspecialchars('?action=editpost&postid='.$postid).'"><img class="f_edit" src="pic/trans.gif" alt="Edit" title="'.(__('legacy/forums.title_edit_post')).'" /></a>';
-            }
-            echo '</td></tr></table>';
         }
 
-        // ------ Mod options
-        if (Permission::can(PermissionEnum::POST_MANAGE) || $isForummod) {
-            echo "</td></tr><tr><td class=\"toolbox\" align=\"center\">\n";
-            echo "<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\" align=\"left\">\n";
-            echo "<tr><td class=\"embedded\"><form method=\"post\" action=\"?action=setsticky\">\n";
-            echo '<input type="hidden" name="topicid" value="'.$topicid."\" />\n";
-            echo '<input type="hidden" name="returnto" value="'.htmlspecialchars((string) $__server_REQUEST_URI)."\" />\n";
-            echo '<input type="hidden" name="sticky" value="'.($sticky ? 'no' : 'yes').'" /><input type="submit" class="medium" value="'.($sticky ? (__('legacy/forums.submit_unsticky')) : (__('legacy/forums.submit_sticky')))."\" /></form></td>\n";
-            echo "<td class=\"embedded\"><form method=\"post\" action=\"?action=setlocked\">\n";
-            echo '<input type="hidden" name="topicid" value="'.$topicid."\" />\n";
-            echo '<input type="hidden" name="returnto" value="'.htmlspecialchars((string) $__server_REQUEST_URI)."\" />\n";
-            echo '<input type="hidden" name="locked" value="'.($locked ? 0 : 1).'" /><input type="submit" class="medium" value="'.($locked ? (__('legacy/forums.submit_unlock')) : (__('legacy/forums.submit_lock')))."\" /></form></td>\n";
-            echo "<td class=\"embedded\"><form method=\"get\" action=\"?\">\n";
-            echo "<input type=\"hidden\" name=\"action\" value=\"deletetopic\" />\n";
-            echo '<input type="hidden" name="topicid" value="'.$topicid."\" />\n";
-            echo '<input type="hidden" name="forumid" value="'.$forumid."\" />\n";
-            echo '<input type="submit" class="medium" value="'.(__('legacy/forums.submit_delete_topic'))."\" /></form></td>\n";
-            echo '<td class="embedded"><form method="post" action="'.htmlspecialchars('?action=movetopic&topicid='.$topicid)."\">\n".'&nbsp;'.(__('legacy/forums.text_move_thread_to')).'&nbsp;<select class="med" name="forumid">';
-            $forums = $this->index->getForumRow(0);
-            foreach ($forums ?? [] as $arr) {
-                if ($arr['id'] != $forumid && UserDisplay::currentClass() >= (int) $arr['minclasswrite']) {
-                    echo '<option value="'.$arr['id'].'">'.htmlspecialchars((string) $arr['name'])."</option>\n";
-                }
-            }
-            echo '</select> <input type="submit" class="medium" value="'.(__('legacy/forums.submit_move')).'" /></form></td>';
-            echo '<td class="embedded"><form method="post" action="'.htmlspecialchars('?action=hltopic&topicid='.$topicid)."\">\n".'&nbsp;'.(__('legacy/forums.text_highlight_topic')).'&nbsp;<select class="med" name="color">';
-            echo $this->index->highlightColorOptions((string) (__('legacy/forums.select_color')));
-            echo '</select>';
-            echo '<input type="hidden" name="returnto" value="'.htmlspecialchars((string) $__server_REQUEST_URI)."\" />\n";
-            echo '<input type="submit" class="medium" value="'.(__('legacy/forums.submit_change')).'" /></form></td>';
-            echo "</tr>\n";
-            echo "</table>\n";
-        }
-
-        echo Frame::CLOSE.$pagerbottom;
-        if ($maypost) {
-            echo '<br /><table><tr>'.
-'<td class="text" align="center"><b>'.(__('legacy/forums.text_quick_reply')).'</b><br /><br />'.
-'<form id="compose" name="compose" method="post" action="?action=post" >'.
-'<input type="hidden" name="id" value="'.$topicid.'" /><input type="hidden" name="type" value="reply" /><br />'.
-Html::quickReply('compose', 'body', (string) (__('legacy/forums.submit_add_reply'))).
-'</form></td></tr></table>';
-            echo '<p align="center"><a class="index" href="'.htmlspecialchars('?action=reply&topicid='.$topicid).'">'.(__('legacy/forums.text_add_reply'))."</a></p>\n";
-        } elseif ($locked) {
-            echo __('legacy/forums.text_topic_locked_new_denied');
-        } else {
-            echo __('legacy/forums.text_unpermitted_posting_here');
-        }
-
-        echo Html::keyShortcutScript((int) $page, max(0, $pages - 1), (string) request()->attributes->get('csp_nonce', ''));
-
-        return [
-            'html' => SafeHtml::fromTrustedHtml((string) ob_get_clean()),
-            'topicid' => $topicid,
-            'forumid' => $forumid,
-            'subject' => $subject,
-        ];
+        return new ViewTopicViewModel(
+            topicid: $topicid,
+            forumid: $forumid,
+            forumname: $forumname,
+            sitename: (string) $this->globals->get('SITENAME', ''),
+            subject: $subject,
+            locked: $locked,
+            sticky: $sticky,
+            views: $views,
+            mayPost: $maypost,
+            isMod: $isMod,
+            authorid: $authorid,
+            requestUri: (string) Input::serverValue('REQUEST_URI'),
+            page: $page,
+            pages: $pages,
+            posts: $posts,
+            moveForums: $moveForums,
+            highlightColorOptions: SafeHtml::fromTrustedHtml($this->index->highlightColorOptions((string) (__('legacy/forums.select_color')))),
+            quickReply: $maypost
+                ? SafeHtml::fromTrustedHtml(Html::quickReply('compose', 'body', (string) (__('legacy/forums.submit_add_reply'))))
+                : null,
+            deniedNotice: ! $maypost
+                ? SafeHtml::fromUntrustedHtml((string) __(
+                    $locked ? 'legacy/forums.text_topic_locked_new_denied' : 'legacy/forums.text_unpermitted_posting_here',
+                ))
+                : null,
+            keyScript: SafeHtml::fromTrustedHtml(Html::keyShortcutScript($page, max(0, $pages - 1), (string) $request->attributes->get('csp_nonce', ''))),
+            frameOpen: Frame::open('', false, 10, '100%', 'left'),
+            frameClose: Frame::close(),
+        );
     }
 }

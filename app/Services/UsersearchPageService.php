@@ -18,6 +18,9 @@ use App\Support\Ratio;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
 use App\Support\Validators;
+use App\ViewModels\Usersearch\UserRatioCell;
+use App\ViewModels\Usersearch\UsersearchResultsViewModel;
+use App\ViewModels\Usersearch\UsersearchRow;
 use App\ViewModels\UsersearchPageViewModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
@@ -57,13 +60,13 @@ final class UsersearchPageService
         $form = $this->buildFormFields($highlight);
 
         // Build results (only when query params present and not help view)
-        $resultsHtml = null;
+        $results = null;
         $resultsError = null;
         $hasResults = false;
         if (count(request()->query()) > 0 && empty(request()->query('h'))) {
             $hasResults = true;
             try {
-                $resultsHtml = $this->buildResults($curUser, $hasModcomment, $requestUri);
+                $results = $this->buildResults($curUser, $hasModcomment, $requestUri);
             } catch (\InvalidArgumentException $e) {
                 $resultsError = Frame::stdMessage('Error', $e->getMessage(), false);
             }
@@ -74,7 +77,7 @@ final class UsersearchPageService
             showHelp: $showHelp,
             form: $form,
             hasResults: $hasResults,
-            resultsHtml: $resultsHtml,
+            results: $results,
             resultsError: $resultsError,
             pagemenu: '',
             browsemenu: '',
@@ -178,11 +181,11 @@ final class UsersearchPageService
     }
 
     /**
-     * Build the results table HTML.
+     * Build the results table view model.
      *
      * @param  array<string, mixed>  $curUser
      */
-    private function buildResults(array $curUser, bool $hasModcomment, string $requestUri): SafeHtml
+    private function buildResults(array $curUser, bool $hasModcomment, string $requestUri): UsersearchResultsViewModel
     {
         $searchResult = $this->userSearchRepository->administrativeSearch((array) request()->query(), $hasModcomment, 30);
         $count = (int) $searchResult['count'];
@@ -200,90 +203,69 @@ final class UsersearchPageService
         $bannedIps = $extraStats['bannedIps'];
 
         if (count($res) == 0) {
-            return Frame::stdMessage('Warning', 'No user was found.', false);
+            return new UsersearchResultsViewModel([], false, SafeHtml::fromTrustedHtml(''), SafeHtml::fromTrustedHtml(''), Frame::stdMessage('Warning', 'No user was found.', false));
         }
 
-        ob_start();
-        if ($count > $perpage) {
-            echo $pagertop;
-        }
-        echo "<table border=1 cellspacing=0 cellpadding=5>\n";
-        echo '<tr><td class=colhead align=left>Name</td>
-    		<td class=colhead align=left>Ratio</td>
-        <td class=colhead align=left>IP</td>
-        <td class=colhead align=left>Email</td>'.
-            '<td class=colhead align=left>Joined:</td>'.
-            '<td class=colhead align=left>Last seen:</td>'.
-            '<td class=colhead align=left>Status</td>'.
-            '<td class=colhead align=left>Enabled</td>'.
-            '<td class=colhead>pR</td>'.
-            '<td class=colhead>pUL</td>'.
-            '<td class=colhead>pDL</td>'.
-            '<td class=colhead>History</td></tr>';
+        $rows = [];
         foreach ($res as $user) {
             $user = (array) $user;
-            if ($user['added'] == '0000-00-00 00:00:00' || $user['added'] == null) {
-                $user['added'] = '---';
+            $added = (string) ($user['added'] ?? '');
+            if ($added === '0000-00-00 00:00:00' || $added === '') {
+                $added = '---';
             }
-            if ($user['last_access'] == '0000-00-00 00:00:00' || $user['last_access'] == null) {
-                $user['last_access'] = '---';
+            $lastAccess = (string) ($user['last_access'] ?? '');
+            if ($lastAccess === '0000-00-00 00:00:00' || $lastAccess === '') {
+                $lastAccess = '---';
             }
 
-            if ($user['ip']) {
-                $ipstr = $user['ip'];
-                if (filter_var($user['ip'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) && isset($bannedIps[$user['ip']])) {
-                    $ipstr = "<a href='testip.php?ip=".$user['ip']."'><span class='nx-color-red'><b>".$user['ip'].'</b></span></a>';
-                }
-            } else {
-                $ipstr = '---';
-            }
+            $ip = (string) ($user['ip'] ?? '');
+            $ipBanned = $ip !== ''
+                && filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)
+                && isset($bannedIps[$ip]);
 
             $peerTotal = $peerTotals[(int) $user['id']] ?? ['pul' => 0, 'pdl' => 0];
             $pul = (float) ($peerTotal['pul'] ?? 0);
             $pdl = (float) ($peerTotal['pdl'] ?? 0);
 
-            $n_posts = (int) ($postCounts[(int) $user['id']] ?? 0);
-            $n_comments = (int) ($commentCounts[(int) $user['id']] ?? 0);
-
-            echo '<tr><td>'.
-                  UserDisplay::username((int) $user['id']).'</td>'.
-              '<td>'.$this->ratios((float) $user['uploaded'], (float) $user['downloaded']).'</td>
-          <td>'.$ipstr.'</td><td>'.(string) $user['email'].'</td>
-          <td><div align=center>'.(string) $user['added'].'</div></td>
-          <td><div align=center>'.(string) $user['last_access'].'</div></td>
-          <td><div align=center>'.(string) $user['status'].'</div></td>
-          <td><div align=center>'.(string) $user['enabled'].'</div></td>
-          <td><div align=center>'.$this->ratios($pul, $pdl).'</div></td>'.
-              '<td><div align=right>'.Format::size($pul).'</div></td>
-          <td><div align=right>'.Format::size($pdl).'</div></td>
-          <td><div align=center>'.($n_posts ? '<a href=userhistory.php?action=viewposts&id='.(int) $user['id'].">$n_posts</a>" : $n_posts).
-              '|'.($n_comments ? '<a href=userhistory.php?action=viewcomments&id='.(int) $user['id'].">$n_comments</a>" : $n_comments).
-              "</div></td></tr>\n";
-        }
-        echo '</table>';
-        if ($count > $perpage) {
-            echo "$pagerbottom";
+            $rows[] = new UsersearchRow(
+                id: (int) $user['id'],
+                username: UserDisplay::username((int) $user['id']),
+                ratio: $this->ratioCell((float) $user['uploaded'], (float) $user['downloaded']),
+                ip: $ip !== '' ? $ip : '---',
+                ipBanned: $ipBanned,
+                email: (string) $user['email'],
+                added: $added,
+                lastAccess: $lastAccess,
+                status: (string) $user['status'],
+                enabled: (string) $user['enabled'],
+                peerRatio: $this->ratioCell($pul, $pdl),
+                peerUploaded: Format::size($pul),
+                peerDownloaded: Format::size($pdl),
+                postCount: (int) ($postCounts[(int) $user['id']] ?? 0),
+                commentCount: (int) ($commentCounts[(int) $user['id']] ?? 0),
+            );
         }
 
-        return SafeHtml::fromTrustedHtml((string) ob_get_clean());
+        return new UsersearchResultsViewModel(
+            rows: $rows,
+            showPager: $count > $perpage,
+            pagerTop: SafeHtml::fromTrustedHtml((string) $pagertop),
+            pagerBottom: SafeHtml::fromTrustedHtml((string) $pagerbottom),
+            emptyMessage: null,
+        );
     }
 
     /**
-     * Format a ratio string with optional color.
+     * Format a ratio cell with optional color.
      */
-    private function ratios(float $up, float $down, bool $color = true): string
+    private function ratioCell(float $up, float $down, bool $color = true): UserRatioCell
     {
         if ($down > 0) {
             $r = number_format($up / $down, 2);
-            if ($color) {
-                $r = '<span class="'.Ratio::colorClass($r).">$r</span>";
-            }
-        } elseif ($up > 0) {
-            $r = 'Inf.';
-        } else {
-            $r = '---';
+
+            return new UserRatioCell($r, $color ? Ratio::colorClass($r) : null);
         }
 
-        return $r;
+        return new UserRatioCell($up > 0 ? 'Inf.' : '---');
     }
 }

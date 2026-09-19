@@ -229,16 +229,11 @@ JS;
                     $rawCover = trim((string) ($torrent->cover ?? ''));
                     $thumbUrl = $rawCover !== '' ? $this->coverThumb->urlWithContext((string) $rawCover, (int) 240, (int) 360, (int) 82) : '';
                     $typeLabel = trim((string) ($torrent->basic_category->name ?? ''));
-                    if ($torrent->anonymous) {
-                        $ownerHtml = '<i>Anonymous</i>';
-                    } else {
-                        $ownerHtml = UserDisplay::username((int) $torrent->owner);
-                    }
                     $items[] = [
                         'detailsUrl' => $detailsUrl,
                         'thumbUrl' => $thumbUrl,
                         'typeLabel' => $typeLabel,
-                        'ownerHtml' => SafeHtml::fromTrustedHtml($ownerHtml),
+                        'owner' => $torrent->anonymous ? null : UserDisplay::username((int) $torrent->owner),
                         'name' => (string) $torrent->name,
                         'nameShort' => mb_substr((string) $torrent->name, 0, 60),
                         'seeders' => (int) $torrent->seeders,

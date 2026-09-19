@@ -114,8 +114,12 @@
 
 @if ($resultsError)
 {{ $resultsError }}
-@elseif ($hasResults)
-{{ $resultsHtml }}
+@elseif ($hasResults && $results !== null)
+@if ($results->emptyMessage !== null)
+{{ $results->emptyMessage }}
+@else
+@include('usersearch._results')
+@endif
 @endif
 
 <p>{{ $pagemenu }}<br />{{ $browsemenu }}</p>

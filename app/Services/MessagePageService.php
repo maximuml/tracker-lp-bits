@@ -15,6 +15,7 @@ use App\Support\LegacyResponse;
 use App\Support\Pagination;
 use App\Support\Time;
 use App\Support\UserDisplay;
+use App\ViewModels\Message\MessageBoxOption;
 use App\ViewModels\MessagePageViewModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -199,14 +200,14 @@ class MessagePageService
 
         // User mailboxes for the "move to" select
         $pmBoxes = $this->mailboxRepository->getUserMailboxes($userId);
-        $moveBoxOptions = '';
+        $moveBoxes = [];
         foreach ($pmBoxes as $box) {
             $boxArr = (array) $box;
-            $moveBoxOptions .= '<option value="'.(int) $boxArr['boxnumber'].'">'.htmlspecialchars((string) $boxArr['name'])."</option>\n";
+            $moveBoxes[] = new MessageBoxOption((int) $boxArr['boxnumber'], (string) $boxArr['name']);
         }
 
         // Jump-to boxes for the search form
-        $jumpToBoxes = $this->buildJumpToBoxes($pmBoxes, $mailbox);
+        $jumpToBoxes = $this->buildJumpToBoxOptions($pmBoxes, $mailbox);
 
         return [
             'mailbox' => $mailbox,
@@ -220,8 +221,8 @@ class MessagePageService
             'pagerbottom' => $pagerbottom,
             'rows' => $rows,
             'hasMessages' => $messages->isNotEmpty(),
-            'moveBoxOptions' => SafeHtml::fromTrustedHtml($moveBoxOptions),
-            'jumpToBoxes' => SafeHtml::fromTrustedHtml($jumpToBoxes),
+            'moveBoxes' => $moveBoxes,
+            'jumpToBoxes' => $jumpToBoxes,
             'jumpToSelected' => $mailbox,
         ];
     }
@@ -251,21 +252,24 @@ class MessagePageService
     }
 
     /**
-     * Build the jump-to box options HTML for the search form.
+     * Build the jump-to box options for the search form.
      *
      * @param  Collection<int, \stdClass>  $pmBoxes
+     * @return list<MessageBoxOption>
      */
-    private function buildJumpToBoxes(Collection $pmBoxes, int $selected): string
+    private function buildJumpToBoxOptions(Collection $pmBoxes, int $selected): array
     {
-        $html = '<option value="1" '.($selected === self::PM_INBOX ? ' selected' : '').'>'.htmlspecialchars(__('legacy/messages.select_inbox'))."</option>\n";
-        $html .= '<option value="-1" '.($selected === self::PM_SENT_BOX ? ' selected' : '').'>'.htmlspecialchars(__('legacy/messages.select_sentbox'))."</option>\n";
+        $options = [
+            new MessageBoxOption(self::PM_INBOX, (string) (__('legacy/messages.select_inbox')), $selected === self::PM_INBOX),
+            new MessageBoxOption(self::PM_SENT_BOX, (string) (__('legacy/messages.select_sentbox')), $selected === self::PM_SENT_BOX),
+        ];
         foreach ($pmBoxes as $row) {
             $rowArr = (array) $row;
-            $sel = (int) $rowArr['boxnumber'] === $selected ? ' selected' : '';
-            $html .= '<option value="'.(int) $rowArr['boxnumber'].$sel.'">'.htmlspecialchars((string) $rowArr['name'])."</option>\n";
+            $boxnumber = (int) $rowArr['boxnumber'];
+            $options[] = new MessageBoxOption($boxnumber, (string) $rowArr['name'], $boxnumber === $selected);
         }
 
-        return $html;
+        return $options;
     }
 
     /**
@@ -297,31 +301,25 @@ class MessagePageService
         $message = $messageModel->toArray();
 
         $isSender = (int) $message['sender'] === $userId;
+        $replyHref = null;
 
         if ($isSender) {
             $sender = UserDisplay::username((int) $message['receiver']);
-            $reply = '';
             $from = __('legacy/messages.text_to');
         } else {
             $from = __('legacy/messages.text_from');
             if ((int) $message['sender'] === 0) {
                 $sender = (string) (__('legacy/messages.text_system'));
-                $reply = '';
             } else {
                 $sender = UserDisplay::username((int) $message['sender']);
-                $reply = ' [ <a href="sendmessage.php?receiver='.(int) $message['sender'].'&replyto='.$pmId.'">'.htmlspecialchars(__('legacy/messages.text_reply')).'</a> ]';
+                $replyHref = 'sendmessage.php?receiver='.(int) $message['sender'].'&replyto='.$pmId;
             }
         }
 
         $body = Format::formatComment((string) $message['msg'], true);
         $added = (string) $message['added'];
 
-        $unread = '';
-        if ($isSender) {
-            $unread = (bool) ($message['unread'] ?? false)
-                ? '<span><b>'.htmlspecialchars(__('legacy/messages.text_new')).'</b></a>'
-                : '';
-        }
+        $showUnread = $isSender && (bool) ($message['unread'] ?? false);
 
         $subject = (string) $message['subject'];
         if (strlen($subject) <= 0) {
@@ -339,10 +337,10 @@ class MessagePageService
 
         // Move-to boxes
         $pmBoxes = $this->mailboxRepository->getUserMailboxes($userId);
-        $moveBoxOptions = '';
+        $moveBoxes = [];
         foreach ($pmBoxes as $box) {
             $boxArr = (array) $box;
-            $moveBoxOptions .= '<option value="'.(int) $boxArr['boxnumber'].'">'.htmlspecialchars((string) $boxArr['name'])."</option>\n";
+            $moveBoxes[] = new MessageBoxOption((int) $boxArr['boxnumber'], (string) $boxArr['name']);
         }
 
         return [
@@ -351,12 +349,12 @@ class MessagePageService
             'from' => $from,
             'sender' => SafeHtml::fromTrustedHtml($sender),
             'added' => SafeHtml::fromTrustedHtml((string) Time::format($added, true, false)),
-            'unread' => SafeHtml::fromTrustedHtml($unread),
+            'showUnread' => $showUnread,
             'body' => SafeHtml::fromTrustedHtml($body),
-            'reply' => SafeHtml::fromTrustedHtml($reply),
+            'replyHref' => $replyHref,
             'isSender' => $isSender,
             'mailbox' => $mailbox,
-            'moveBoxOptions' => SafeHtml::fromTrustedHtml($moveBoxOptions),
+            'moveBoxes' => $moveBoxes,
         ];
     }
 

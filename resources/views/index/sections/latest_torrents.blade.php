@@ -18,7 +18,7 @@
             <span class="lt-seed" title="{{ $colSeeder }}">&#x25B2; {{ $item['seeders'] }}</span>
             <span class="lt-leech" title="{{ $colLeecher }}">&#x25BC; {{ $item['leechers'] }}</span>
             <span>{{ $item['size'] }}</span>
-            <span>{{ ($item['ownerHtml'] ?? '') }}</span>
+            <span>@if ($item['owner'] === null)<i>Anonymous</i>@else{{ $item['owner'] }}@endif</span>
         </div>
     </div>
 @endforeach

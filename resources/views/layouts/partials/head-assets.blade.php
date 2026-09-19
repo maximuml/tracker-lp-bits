@@ -23,6 +23,10 @@
 @foreach($chrome->headScripts as $src)
 <script type="text/javascript" src="{{ $src }}"></script>
 @endforeach
+<script type="text/javascript" src="vendor/jquery-3.7.1.min.js"></script>
+@if($chrome->variant !== 'auth')
+{{-- layer.js + its options are the legacy dialog toolkit; the auth pages
+     deliberately do not ship it (auth-form.js uses plain alert()). --}}
 @if($chrome->cspNonce !== '')
 <script type="text/javascript" nonce="{{ $chrome->cspNonce }}">
 @else
@@ -33,8 +37,8 @@
         alert: {btnAlign: 'c', title: 'Info', btn: ['OK', 'Cancel']}
     }
 </script>
-<script type="text/javascript" src="vendor/jquery-3.7.1.min.js"></script>
 <script type="text/javascript" src="vendor/layer-v3.5.1/layer/layer.js"></script>
+@endif
 @foreach (\App\Support\AssetAppender::getAppendHeadersSafe() as $html)
 {{ $html }}
 @endforeach

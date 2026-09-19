@@ -86,14 +86,15 @@ class RegistrationController extends Controller
             ? (string) $invite->pre_register_email
             : '';
 
-        $inputStyle = 'style="width: min(100%, 320px); min-width: 180px; border: 1px solid gray; box-sizing: border-box"';
+        // Inline style= is CSP-blocked (style-src has no unsafe-inline) —
+        // sizing comes from the nx-field__input class in modern.css.
         $oldUsername = old('wantusername');
         $oldEmail = old('email');
-        $usernameInput = '<input type="text" '.$inputStyle.' name="wantusername" aria-label="'
+        $usernameInput = '<input type="text" class="nx-field__input" id="wantusername" name="wantusername" aria-label="'
             .e(__('legacy/signup.row_desired_username')).'" value="'
             .e($preUsername !== '' ? $preUsername : (is_string($oldUsername) ? $oldUsername : '')).'"'
             .($preUsername !== '' ? ' readonly' : '').' autocomplete="username" />';
-        $emailInput = '<input type="email" '.$inputStyle.' name="email" aria-label="'
+        $emailInput = '<input type="email" class="nx-field__input" id="email" name="email" aria-label="'
             .e(__('legacy/signup.row_email_address')).'" value="'
             .e($preEmail !== '' ? $preEmail : (is_string($oldEmail) ? $oldEmail : '')).'"'
             .($preEmail !== '' ? ' readonly' : '').' autocomplete="email" />';

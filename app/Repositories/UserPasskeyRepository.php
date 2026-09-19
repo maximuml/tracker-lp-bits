@@ -229,7 +229,7 @@ class UserPasskeyRepository extends BaseRepository
     /** @return  void */
     public function renderLogin()
     {
-        printf('<p id="passkey_box"><button type="button" id="passkey_login"><img style="width:32px" src="%s" alt="%s"><br>%s</button></p>', self::$passkeyvg, Locale::trans('passkey.passkey', [], null), Locale::trans('passkey.passkey', [], null));
+        printf('<p id="passkey_box"><button type="button" id="passkey_login"><img width="32" height="32" src="%s" alt="%s"><br>%s</button></p>', self::$passkeyvg, Locale::trans('passkey.passkey', [], null), Locale::trans('passkey.passkey', [], null));
         $nonceAttr = ($cspNonce = (string) request()->attributes->get('csp_nonce', '')) !== ''
             ? ' nonce="'.htmlspecialchars($cspNonce, ENT_QUOTES).'"'
             : '';

@@ -605,3 +605,80 @@ div.niceTitle {
   opacity: .95;
   max-width: 320px;
 }
+
+/* ---------- Auth pages (layouts/auth, ADR 0020) ---------- */
+/* Standalone auth card — login/signup/recover/confirm_resend. */
+.nx-auth {
+    max-width: 32rem;
+    margin: 2rem auto;
+    padding: 1.25rem 1.5rem;
+    background: var(--nxm-surface);
+    border: 1px solid var(--nxm-border);
+    border-radius: var(--nxm-radius);
+    box-shadow: var(--nxm-shadow);
+}
+.nx-auth h1 { margin: 0.25rem 0 0.75rem; font-size: 1.3rem; text-align: center; }
+.nx-auth p { margin: 0.5rem 0; }
+.nx-auth a { color: var(--nxm-accent); }
+.nx-auth__lang { text-align: right; margin-bottom: 0.75rem; font-size: 0.85rem; }
+.nx-auth__lang select { width: auto; min-width: 8rem; }
+.nx-auth__error,
+.nx-auth__success {
+    margin: 0.75rem 0;
+    padding: 0.5rem 0.75rem;
+    text-align: center;
+    border-radius: var(--nxm-radius);
+}
+.nx-auth__error { color: var(--nxm-danger); border: 1px solid var(--nxm-danger); }
+.nx-auth__success { color: var(--nxm-success); border: 1px solid var(--nxm-success); }
+.nx-auth__note { text-align: center; color: var(--nxm-text-dim); }
+.nx-auth__required { color: var(--nxm-danger); font-weight: 600; text-align: center; }
+.nx-auth__checkline { display: block; margin: 0.25rem 0; }
+.nx-auth__actions { display: flex; gap: 0.5rem; justify-content: center; margin-top: 1rem; }
+
+/* Form components (components/form-field, components/button). Tokenised
+   here so they follow the active colour scheme; nexus.css still carries
+   the light-only originals for hosts that do not load modern.css. */
+.nx-field { margin-bottom: 0.75rem; }
+.nx-field__label { display: block; margin-bottom: 0.25rem; font-weight: 600; }
+.nx-field__required { color: var(--nxm-danger); }
+.nx-field__input,
+select.nx-field__input {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 0.4rem 0.5rem;
+    border: 1px solid var(--nxm-border);
+    border-radius: var(--nxm-radius);
+    background: var(--nxm-surface);
+    color: var(--nxm-text);
+    font: inherit;
+}
+.nx-field__input[aria-invalid="true"] { border-color: var(--nxm-danger); }
+.nx-field__input:focus-visible { outline: 2px solid var(--nxm-accent); outline-offset: 1px; }
+.nx-field__error { margin: 0.25rem 0 0; color: var(--nxm-danger); font-size: 0.85rem; }
+.nx-field__help { margin: 0.25rem 0 0; color: var(--nxm-text-dim); font-size: 0.85rem; }
+
+.nx-btn {
+    display: inline-block;
+    padding: 0.45rem 1rem;
+    border: 1px solid var(--nxm-border);
+    border-radius: var(--nxm-radius);
+    background: var(--nxm-surface-alt);
+    color: var(--nxm-text);
+    cursor: pointer;
+    text-decoration: none;
+    font: inherit;
+    font-size: 0.9rem;
+}
+.nx-btn:hover { background: var(--nxm-surface); }
+.nx-btn--primary { border-color: var(--nxm-accent); background: var(--nxm-accent); color: var(--nxm-on-accent); }
+.nx-btn--primary:hover { background: var(--nxm-accent-hover); }
+.nx-btn--danger { border-color: var(--nxm-danger); background: var(--nxm-danger); color: var(--nxm-on-accent); }
+.nx-btn:focus-visible { outline: 2px solid var(--nxm-accent); outline-offset: 2px; }
+
+/* Shared footer preview image (was an inline style — CSP-blocked). */
+#nexus-preview { position: absolute; }
+
+/* Captcha 'grid' row pairs inside the stacked auth forms (ADR 0020). */
+.nx-auth .nx-fhead { display: block; margin-bottom: 0.25rem; font-weight: 600; text-align: left; }
+.nx-auth .nx-fcell { display: block; margin-bottom: 0.75rem; }

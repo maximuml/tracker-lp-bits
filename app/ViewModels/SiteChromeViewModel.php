@@ -706,6 +706,13 @@ final class SiteChromeViewModel
      */
     private static function footScripts(string $variant): array
     {
+        if ($variant === 'auth') {
+            // Standalone auth pages (ADR 0020): CSRF, the delegated auth
+            // bindings and the footer helpers — the legacy UI toolkit
+            // (common.js/domTT/fadomatic/…) is not used there.
+            return ['js/csrf.js', 'js/auth.js', 'js/medium-zoom.min.js', 'js/theme-toggle.js'];
+        }
+
         $scripts = ['js/ajax.js', 'js/nexus.js', 'js/csrf.js'];
         if ($variant !== 'legacy') {
             $scripts = array_merge($scripts, [

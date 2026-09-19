@@ -1,14 +1,14 @@
 @extends('layouts.auth')
 
-@section('title', (__('legacy/recover.text_recover_user')) . ' :: ' . $siteName)
+@section('title', __('legacy/recover.text_recover_user'))
 
 @section('content')
     @if ($error)
-        <div class="error">{{ $error }}</div>
+        <div class="nx-auth__error">{{ $error }}</div>
     @endif
 
     @if ($errors->any())
-        <div class="error">
+        <div class="nx-auth__error">
             @foreach ($errors->all() as $message)
                 <div>{{ $message }}</div>
             @endforeach
@@ -16,21 +16,19 @@
     @endif
 
     @if ($status === 'requested')
-        <div class="success">If an account with that email exists, a reset link has been sent.</div>
+        <div class="nx-auth__success">If an account with that email exists, a reset link has been sent.</div>
     @endif
 
-    <form method="get" action="/recover">
+    <form method="get" action="/recover" class="nx-auth__lang">
         <input type="hidden" name="secret" value="{{ $secret }}" />
-        <div align="right">
-            <label for="sitelanguage">{{ __('legacy/recover.text_select_lang')}}</label>
-            <select id="sitelanguage" name="sitelanguage">
-                @foreach ($languages as $row)
-                    <option value="{{ $row['id'] }}" @if (($row['site_lang_folder'] ?? '') === $langFolder) selected @endif>
-                        {{ $row['lang_name'] }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
+        <label for="sitelanguage">{{ __('legacy/recover.text_select_lang')}}</label>
+        <select id="sitelanguage" name="sitelanguage">
+            @foreach ($languages as $row)
+                <option value="{{ $row['id'] }}" @if (($row['site_lang_folder'] ?? '') === $langFolder) selected @endif>
+                    {{ $row['lang_name'] }}
+                </option>
+            @endforeach
+        </select>
     </form>
 
     <h1>{{ __('legacy/recover.text_recover_user')}}</h1>
@@ -42,17 +40,14 @@
     <form method="post" action="/recover">
         @csrf
         <input type="hidden" name="secret" value="{{ $secret }}" />
-        <div class="nx-fgrid nx-fgrid--b">
-            <div class="nx-fhead"><label for="email">{{ __('legacy/recover.row_registered_email')}}</label></div>
-            <div class="nx-fcell"><input type="email" id="email" name="email" autocomplete="email" value="{{ old('email') }}" style="width: min(100%, 320px); min-width: 180px; border: 1px solid gray; box-sizing: border-box" /></div>
+        <x-form-field :label="__('legacy/recover.row_registered_email')" name="email" type="email" :value="old('email')" autocomplete="email" />
 
-            @if ($captchaEnabled && $captchaMarkup !== '')
-                {{ $captchaMarkup }}
-            @endif
+        @if ($captchaEnabled && $captchaMarkup !== '')
+            {{ $captchaMarkup }}
+        @endif
 
-            <div class="toolbox nx-ffull">
-                <input type="submit" value="{{ __('legacy/recover.submit_recover_it')}}" class="btn" />
-            </div>
+        <div class="nx-auth__actions">
+            <x-button type="submit" variant="primary">{{ __('legacy/recover.submit_recover_it')}}</x-button>
         </div>
     </form>
 @endsection

@@ -1,39 +1,36 @@
 @extends('layouts.auth')
 
-@section('title', $headTitle . ' :: ' . $siteName)
+@section('title', $headTitle)
 
 @section('content')
     @if ($error)
-        <div class="error">{{ $error }}</div>
+        <div class="nx-auth__error">{{ $error }}</div>
     @endif
 
     @if ($errors->any())
-        <div class="error">
+        <div class="nx-auth__error">
             @foreach ($errors->all() as $message)
                 <div>{{ $message }}</div>
             @endforeach
         </div>
     @endif
 
-    <form method="get" action="/signup">
+    <form method="get" action="/signup" class="nx-auth__lang">
         @if ($isInvite)
             <input type="hidden" name="type" value="invite" />
             <input type="hidden" name="invitenumber" value="{{ $code }}" />
         @endif
         <input type="hidden" name="secret" value="{{ $secret }}" />
-        <div align="right">
-            {{ __('legacy/signup.text_select_lang')}}
-            <select name="sitelanguage" aria-label="{{ __('legacy/signup.text_select_lang')}}">
-                @foreach ($languages as $row)
-                    <option value="{{ $row['id'] }}" @if (($row['site_lang_folder'] ?? '') === $langFolder) selected @endif>
-                        {{ $row['lang_name'] }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
+        <label for="sitelanguage">{{ __('legacy/signup.text_select_lang')}}</label>
+        <select id="sitelanguage" name="sitelanguage">
+            @foreach ($languages as $row)
+                <option value="{{ $row['id'] }}" @if (($row['site_lang_folder'] ?? '') === $langFolder) selected @endif>
+                    {{ $row['lang_name'] }}
+                </option>
+            @endforeach
+        </select>
     </form>
 
-    <p>
     <form method="post" action="/signup" id="signup-form"
           data-auth-form="hash" data-username-name="wantusername"
           data-password-class="wantpassword" data-password-hash-name="wantpassword"
@@ -49,58 +46,64 @@
             <input type="hidden" name="hash" value="{{ $code }}" />
         @endif
 
-        <div class="nx-fgrid nx-fgrid--b">
-            <div class="toolbox nx-ffull"><b>{{ __('legacy/signup.text_note') }}</b>: {{ __('legacy/signup.text_cookies_note') }}</div>
+        <p class="nx-auth__note"><b>{{ __('legacy/signup.text_note') }}</b>: {{ __('legacy/signup.text_cookies_note') }}</p>
 
-            <div class="nx-fhead">{{ __('legacy/signup.row_desired_username')}}</div>
-            <div class="nx-fcell">
-                {{ $usernameInput }}<br />
-                <font class="small">{{ __('legacy/signup.text_allowed_characters')}}</font>
-            </div>
-            <div class="nx-fhead">{{ __('legacy/signup.row_pick_a_password') }}</div>
-            <div class="nx-fcell">
-                <input type="password" style="width: min(100%, 320px); min-width: 180px; border: 1px solid gray; box-sizing: border-box" class="wantpassword" aria-label="{{ __('legacy/signup.row_pick_a_password')}}" autocomplete="new-password" /><br />
-                <font class="small">{{ __('legacy/signup.text_minimum_six_characters')}}</font>
-            </div>
-            <div class="nx-fhead">{{ __('legacy/signup.row_enter_password_again')}}</div>
-            <div class="nx-fcell">
-                <input type="password" style="width: min(100%, 320px); min-width: 180px; border: 1px solid gray; box-sizing: border-box" class="passagain" aria-label="{{ __('legacy/signup.row_enter_password_again')}}" autocomplete="new-password" />
-            </div>
+        <div class="nx-field">
+            <label class="nx-field__label" for="wantusername">{{ __('legacy/signup.row_desired_username')}}</label>
+            {{ $usernameInput }}
+            <p class="nx-field__help">{{ __('legacy/signup.text_allowed_characters')}}</p>
+        </div>
+        <div class="nx-field">
+            <label class="nx-field__label" for="signup-password">{{ __('legacy/signup.row_pick_a_password') }}</label>
+            <input type="password" id="signup-password" class="nx-field__input wantpassword" autocomplete="new-password" />
+            <p class="nx-field__help">{{ __('legacy/signup.text_minimum_six_characters')}}</p>
+        </div>
+        <div class="nx-field">
+            <label class="nx-field__label" for="signup-passagain">{{ __('legacy/signup.row_enter_password_again')}}</label>
+            <input type="password" id="signup-passagain" class="nx-field__input passagain" autocomplete="new-password" />
+        </div>
 
-            @if ($captchaEnabled && $captchaMarkup !== '')
-                {{ $captchaMarkup }}
-            @endif
+        @if ($captchaEnabled && $captchaMarkup !== '')
+            {{ $captchaMarkup }}
+        @endif
 
-            <div class="nx-fhead">{{ __('legacy/signup.row_email_address')}}</div>
-            <div class="nx-fcell">{{ $emailInput }}</div>
+        <div class="nx-field">
+            <label class="nx-field__label" for="email">{{ __('legacy/signup.row_email_address')}}</label>
+            {{ $emailInput }}
+        </div>
 
-            <div class="nx-fhead">{{ __('legacy/signup.row_country')}}</div>
-            <div class="nx-fcell">
-                <select name="country" aria-label="{{ __('legacy/signup.row_country')}}" style="width: min(100%, 320px);">
-                    <option value="8">---- {{ __('legacy/signup.select_none_selected')}} ----</option>
-                    @foreach ($countries as $country)
-                        <option value="{{ $country->id }}" @if ((int) old('country', 8) === (int) $country->id) selected @endif>{{ $country->name }}</option>
-                    @endforeach
-                </select>
-            </div>
+        <div class="nx-field">
+            <label class="nx-field__label" for="country">{{ __('legacy/signup.row_country')}}</label>
+            <select id="country" name="country" class="nx-field__input">
+                <option value="8">---- {{ __('legacy/signup.select_none_selected')}} ----</option>
+                @foreach ($countries as $country)
+                    <option value="{{ $country->id }}" @if ((int) old('country', 8) === (int) $country->id) selected @endif>{{ $country->name }}</option>
+                @endforeach
+            </select>
+        </div>
 
-            <div class="nx-fhead">{{ __('legacy/signup.row_gender')}}</div>
-            <div class="nx-fcell">
-                <input type="radio" name="gender" value="Male" aria-label="{{ __('legacy/signup.radio_male')}}" @if (old('gender') === 'Male') checked @endif />{{ __('legacy/signup.radio_male')}}
-                <input type="radio" name="gender" value="Female" aria-label="{{ __('legacy/signup.radio_female')}}" @if (old('gender') === 'Female') checked @endif />{{ __('legacy/signup.radio_female')}}
-            </div>
+        <div class="nx-field">
+            <span class="nx-field__label">{{ __('legacy/signup.row_gender')}}</span>
+            <label class="nx-auth__checkline"><input type="radio" name="gender" value="Male" @checked(old('gender') === 'Male') />{{ __('legacy/signup.radio_male')}}</label>
+            <label class="nx-auth__checkline"><input type="radio" name="gender" value="Female" @checked(old('gender') === 'Female') />{{ __('legacy/signup.radio_female')}}</label>
+        </div>
 
-            <div class="nx-fhead">{{ __('legacy/signup.row_verification')}}</div>
-            <div class="nx-fcell">
-                <input type="checkbox" name="rulesverify" value="yes" aria-label="{{ ('I have read the site rules page')}}" @if (old('rulesverify') === 'yes') checked @endif />{{ __('legacy/signup.checkbox_read_rules') }} <a href=rules.php><u>{{ __('legacy/signup.text_rules') }}</u></a> {{ __('legacy/signup.checkbox_read_rules_end') }}<br />
-                <input type="checkbox" name="faqverify" value="yes" aria-label="{{ ('I agree to read the FAQ before asking questions')}}" @if (old('faqverify') === 'yes') checked @endif />{{ __('legacy/signup.checkbox_read_faq') }} <a href=faq.php><u>{{ __('legacy/signup.text_faq') }}</u></a> {{ __('legacy/signup.checkbox_read_faq_end') }}<br />
-                <input type="checkbox" name="ageverify" value="yes" aria-label="{{ __('legacy/signup.checkbox_age')}}" @if (old('ageverify') === 'yes') checked @endif />{{ __('legacy/signup.checkbox_age') }}
-            </div>
+        <div class="nx-field">
+            <span class="nx-field__label">{{ __('legacy/signup.row_verification')}}</span>
+            <span class="nx-auth__checkline">
+                <label><input type="checkbox" name="rulesverify" value="yes" @checked(old('rulesverify') === 'yes') />{{ __('legacy/signup.checkbox_read_rules') }}</label>
+                <a href="rules.php">{{ __('legacy/signup.text_rules') }}</a> {{ __('legacy/signup.checkbox_read_rules_end') }}
+            </span>
+            <span class="nx-auth__checkline">
+                <label><input type="checkbox" name="faqverify" value="yes" @checked(old('faqverify') === 'yes') />{{ __('legacy/signup.checkbox_read_faq') }}</label>
+                <a href="faq.php">{{ __('legacy/signup.text_faq') }}</a> {{ __('legacy/signup.checkbox_read_faq_end') }}
+            </span>
+            <label class="nx-auth__checkline"><input type="checkbox" name="ageverify" value="yes" @checked(old('ageverify') === 'yes') />{{ __('legacy/signup.checkbox_age') }}</label>
+        </div>
 
-            <div class="toolbox nx-ffull">
-                <font color="#a00"><b>{{ __('legacy/signup.text_all_fields_required')}}</b></font><p></p>
-                <input id="submit-btn" type="button" value="{{ __('legacy/signup.submit_sign_up')}}" style="height: 25px" />
-            </div>
+        <p class="nx-auth__required">{{ __('legacy/signup.text_all_fields_required')}}</p>
+        <div class="nx-auth__actions">
+            <x-button type="button" id="submit-btn" variant="primary">{{ __('legacy/signup.submit_sign_up')}}</x-button>
         </div>
         <input type="hidden" name="wantpassword" />
         <input type="hidden" name="passagain" />

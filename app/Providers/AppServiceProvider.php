@@ -238,6 +238,7 @@ class AppServiceProvider extends ServiceProvider
         // service location inside the view model.
         View::composer([
             'layouts.modern',
+            'layouts.auth',
             'layouts.partials.head-assets',
             'layouts.partials.header',
             'layouts.partials.footer',

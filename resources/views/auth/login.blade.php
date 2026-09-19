@@ -1,39 +1,37 @@
 @extends('layouts.auth')
 
-@section('title', (__('legacy/login.head_login')) . ' :: ' . $siteName)
+@section('title', __('legacy/login.head_login'))
 
 @section('content')
     @if (request()->query('status') === 'reset')
-        <div class="success">Your password has been reset. Please check your email for the new password.</div>
+        <div class="nx-auth__success">Your password has been reset. Please check your email for the new password.</div>
     @endif
 
     @if ($error)
-        <div class="error">{{ $error }}</div>
+        <div class="nx-auth__error">{{ $error }}</div>
     @endif
 
     @if ($errors->any())
-        <div class="error">
+        <div class="nx-auth__error">
             @foreach ($errors->all() as $message)
                 <div>{{ $message }}</div>
             @endforeach
         </div>
     @endif
 
-    <form method="get" action="/login">
+    <form method="get" action="/login" class="nx-auth__lang">
         <input type="hidden" name="secret" value="{{ $secret }}" />
         @if ($returnto !== '')
             <input type="hidden" name="returnto" value="{{ $returnto }}" />
         @endif
-        <div align="right">
-            {{ __('legacy/login.text_select_lang')}}
-            <select name="sitelanguage" aria-label="{{ __('legacy/login.text_select_lang')}}">
-                @foreach ($languages as $row)
-                    <option value="{{ $row['id'] }}" @if (($row['site_lang_folder'] ?? '') === $langFolder) selected @endif>
-                        {{ $row['lang_name'] }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
+        <label for="sitelanguage">{{ __('legacy/login.text_select_lang')}}</label>
+        <select id="sitelanguage" name="sitelanguage">
+            @foreach ($languages as $row)
+                <option value="{{ $row['id'] }}" @if (($row['site_lang_folder'] ?? '') === $langFolder) selected @endif>
+                    {{ $row['lang_name'] }}
+                </option>
+            @endforeach
+        </select>
     </form>
 
     @if ($showWarn)
@@ -52,24 +50,22 @@
         </p>
         <p>{{ __('legacy/login.p_you_have')}} <b>{{ $remaining }}</b> {{ __('legacy/login.p_remaining_tries')}}</p>
 
-        <div class="nx-fgrid">
-            <div class="nx-fhead">{{ __('legacy/login.rowhead_username')}}</div>
-            <div class="nx-fcell"><input type="text" name="username" aria-label="{{ __('legacy/login.rowhead_username')}}" autocomplete="username" value="{{ old('username') }}" /></div>
-            <div class="nx-fhead">{{ __('legacy/login.rowhead_password')}}</div>
-            <div class="nx-fcell"><input type="password" name="password" aria-label="{{ __('legacy/login.rowhead_password')}}" autocomplete="current-password" /></div>
-            <div class="nx-fhead">{{ __('legacy/login.rowhead_two_step_code')}}</div>
-            <div class="nx-fcell"><input type="text" name="two_step_code" aria-label="{{ __('legacy/login.rowhead_two_step_code')}}" inputmode="numeric" pattern="[0-9]*" placeholder="{{ __('legacy/login.two_step_code_tooltip')}}" /></div>
-            @if ($captchaEnabled && $captchaMarkup !== '')
-                {{ $captchaMarkup }}
-            @endif
-            <div class="toolbox nx-ffull">
-                {{ __('legacy/login.text_auto_logout')}}
-                <input type="checkbox" name="logout" value="yes" aria-label="{{ __('legacy/login.checkbox_auto_logout')}}" /> {{ __('legacy/login.checkbox_auto_logout')}}
-            </div>
-            <div class="toolbox nx-ffull">
-                <input type="submit" value="{{ __('legacy/login.button_login')}}" class="btn" />
-                <input type="reset" value="{{ __('legacy/login.button_reset')}}" class="btn" />
-            </div>
+        <x-form-field :label="__('legacy/login.rowhead_username')" name="username" :value="old('username')" autocomplete="username" />
+        <x-form-field :label="__('legacy/login.rowhead_password')" name="password" type="password" autocomplete="current-password" />
+        <x-form-field :label="__('legacy/login.rowhead_two_step_code')" name="two_step_code" inputmode="numeric" pattern="[0-9]*" :placeholder="__('legacy/login.two_step_code_tooltip')" />
+
+        @if ($captchaEnabled && $captchaMarkup !== '')
+            {{ $captchaMarkup }}
+        @endif
+
+        <label class="nx-auth__checkline">
+            {{ __('legacy/login.text_auto_logout')}}
+            <input type="checkbox" name="logout" value="yes" /> {{ __('legacy/login.checkbox_auto_logout')}}
+        </label>
+
+        <div class="nx-auth__actions">
+            <x-button type="submit" variant="primary">{{ __('legacy/login.button_login')}}</x-button>
+            <x-button type="reset">{{ __('legacy/login.button_reset')}}</x-button>
         </div>
 
         {{ $passkeyLoginHtml }}

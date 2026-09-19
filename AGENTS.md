@@ -599,6 +599,35 @@ Decision → Consequences). Add new ADRs here as numbered subsections.
   `tests/browser/specs/theme.spec.ts`. The `stylesheet` user column is
   vestigial (always resolves to Classic) and is removed in stage 3.
 
+### ADR 0020: Auth pages on the shared chrome (Accepted, stage 2.3)
+
+- **Context:** `layouts/auth` (login/signup/recover/confirm_resend) was
+  a standalone shell: its own XHTML doctype, a nonce'd inline `<style>`
+  block duplicating `.nx-fgrid`/form rules, hardcoded light colours, no
+  site header/footer, and field `style="…"` attributes that the
+  nonce-strict `style-src` CSP silently blocked.
+- **Decision:** `layouts/auth` is now a thin wrapper over the ADR 0018
+  partials (`head-assets`/`header`/`footer`) with the content in a
+  `.nx-auth` card. `SiteChromeComposer` is registered on `layouts.auth`
+  and selects `variant = 'auth'` by view name, so the view model is
+  built once and inherited by the partials. The variant keeps
+  `sprites.css`/`nexus.css`/`modern.css` but ships a minimal script set
+  (`csrf.js`, `auth.js`, `medium-zoom`, `theme-toggle`) — layer.js and
+  `window.nexusLayerOptions` are skipped (auth-form.js uses plain
+  `alert()`; `LegacySmokeTest` pins this). Forms use the
+  `x-form-field`/`x-button` components; their `.nx-field`/`.nx-btn`
+  rules are tokenised in `modern.css` (nexus.css keeps the light-only
+  originals for hosts without it). The captcha `'grid'` row template
+  (`nx-fhead`/`nx-fcell` pairs) is re-skinned into stacked fields via
+  `.nx-auth` CSS, and all captcha/passkey/signup inline `style=`
+  attributes were replaced by classes or HTML attributes.
+- **Consequences:** Auth pages get the site header (logo, login/signup
+  links, theme toggle), footer, `data-theme`/`data-fontsize`, dark
+  scheme support and the shared CSP/a11y surface for free; no inline
+  styles or styles remain on these pages. The four auth views keep
+  their form-field names/classes so `auth-form.js`, `passkey.js` and
+  the browser specs are unchanged in behaviour.
+
 ## Testing
 
 - **Unit tests:** `tests/Unit/` — pure unit only, no DB/Redis/MeiliSearch (enforced by `UnitSuiteIsolationTest` and the `unit-tests-fast` CI job, which runs the suite with no service containers)

@@ -49,7 +49,8 @@ final class Captcha
 
     /**
      * Row template for captcha markup: legacy `<tr>` for table hosts or
-     * `nx-fhead`/`nx-fcell` divs for `.nx-fgrid` hosts.
+     * `nx-fhead`/`nx-fcell` divs for `.nx-fgrid` hosts (the `.nx-auth`
+     * forms re-skin the same pair via CSS, ADR 0020).
      */
     public static function rowTemplate(string $layout): string
     {

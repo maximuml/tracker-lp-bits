@@ -64,7 +64,7 @@ export async function login(
   await page.fill('#login-form input[name="password"]', password);
   await Promise.all([
     page.waitForURL(/\/index(\.php)?$/, { timeout: 20_000 }),
-    page.click('#login-form input[type="submit"]'),
+    page.click('#login-form [type="submit"]'),
   ]);
   await expect
     .poll(async () =>

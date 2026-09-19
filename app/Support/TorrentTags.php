@@ -57,7 +57,7 @@ final class TorrentTags
                     $value['text']
                 );
             } elseif ($type === 'span' && ($currentValue & $tags)) {
-                $html .= "<span style=\"background-color:{$value['color']};color:white;border-radius:15%\">{$value['text']}</span> ";
+                $html .= "<span class=\"nx-tag\">{$value['text']}</span> ";
             }
         }
 

@@ -24,7 +24,7 @@ use App\Support\Html\SafeHtml;
  *   - `formatAudio()`      (HTML5 `<audio>` element)
  *   - `formatSpoiler()`    (`<details>`/`<summary>` collapsible)
  *   - `formatHidden()`     (`<span class="hidden-text">` wrapper)
- *   - `formatTextAlign()`  (`<div style="text-align: …">`)
+ *   - `formatTextAlign()`  (`<div class="nx-align-…">`)
  *
  * all collapse into the static methods below. Each returns **bare**
  * HTML — the legacy proxies in `include/functions.php` are
@@ -198,7 +198,7 @@ final class BBCode
             ? " data-scale=\"{$maxWidth}x{$maxHeight}\" data-zoomable "
             : '';
 
-        return "<img style=\"max-width: 100%\" id=\"$imgId\" alt=\"image\" src=\"$escapedSrc\"".$resizerAttrs." data-img-fallback=\"$escapedSrc\" />";
+        return "<img id=\"$imgId\" alt=\"image\" src=\"$escapedSrc\"".$resizerAttrs." data-img-fallback=\"$escapedSrc\" />";
     }
 
     /**
@@ -347,7 +347,7 @@ final class BBCode
     }
 
     /**
-     * Render a `<div style="text-align: …">…</div>`. The `$align`
+     * Render a `<div class="nx-align-…">…</div>`. The `$align`
      * value (`left`, `center`, `right`, `justify`) is interpolated
      * verbatim — the legacy proxy is called only from the BBCode
      * parser with a hard-coded set of values, so no validation is
@@ -355,7 +355,7 @@ final class BBCode
      */
     public static function textAlign(string $text, string $align): string
     {
-        return sprintf('<div style="text-align: %s">%s</div>', $align, $text);
+        return sprintf('<div class="nx-align-%s">%s</div>', $align, $text);
     }
 
     /**

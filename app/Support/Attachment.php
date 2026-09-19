@@ -55,7 +55,7 @@ final class Attachment
         $onclick = $imageResizer ? ' data-zoomable data-zoom-src="'.htmlspecialchars($url).'"' : '';
         $tooltip = htmlspecialchars("<strong>$sizeLabel</strong>: $sizeText<br />$timeText");
 
-        return '<img id="attach'.$id.'" style="max-width: 700px" alt="'.htmlspecialchars($filename).'" src="'.htmlspecialchars($url).'"'.$onclick.' data-domtt-promo="'.$tooltip.'" />';
+        return '<img id="attach'.$id.'" alt="'.htmlspecialchars($filename).'" src="'.htmlspecialchars($url).'"'.$onclick.' data-domtt-promo="'.$tooltip.'" />';
     }
 
     /**
@@ -125,7 +125,7 @@ final class Attachment
         [$row, $url] = self::rowAndUrlByKey($dlkey);
 
         if (empty($row)) {
-            return '<div style="text-decoration: line-through; font-size: 7pt">'.Locale::trans('attachment.text_key').$dlkey.Locale::trans('attachment.not_found').'</div>';
+            return '<div>'.Locale::trans('attachment.text_key').$dlkey.Locale::trans('attachment.not_found').'</div>';
         }
 
         return self::render(

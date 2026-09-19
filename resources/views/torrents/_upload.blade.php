@@ -15,8 +15,8 @@
 				</x-settings-row>
 				@if (($altname_main ?? '') === 'yes')
 					<x-settings-row layout="grid" :label="__('legacy/upload.row_torrent_name')">
-						<b>{{ __('legacy/upload.text_english_title') ?? '' }}</b>&nbsp;<input type="text" style="width: 250px;" name="name" />&nbsp;&nbsp;&nbsp;
-<b>{{ __('legacy/upload.text_chinese_title') ?? '' }}</b>&nbsp;<input type="text" style="width: 250px" name="cnname"><br /><font class="medium">{{ __('legacy/upload.text_titles_note') ?? '' }}</font>
+						<b>{{ __('legacy/upload.text_english_title') ?? '' }}</b>&nbsp;<input type="text" name="name" />&nbsp;&nbsp;&nbsp;
+<b>{{ __('legacy/upload.text_chinese_title') ?? '' }}</b>&nbsp;<input type="text" name="cnname"><br /><font class="medium">{{ __('legacy/upload.text_titles_note') ?? '' }}</font>
 					</x-settings-row>
 				@else
 					<x-settings-row layout="grid" :label="__('legacy/upload.row_torrent_name')">
@@ -35,7 +35,7 @@
 
 				@if ($enableTechnicalInfo)
 					<x-settings-row layout="grid" :label="__('legacy/functions.text_technical_info')">
-						<textarea name="technical_info" rows="8" style="width: 99%;"></textarea><br/><b>&middot;</b> {{ __('legacy/functions.text_technical_info_help_text') }} <b><a href="https://mediaarea.net/en/MediaInfo" target='_blank'>{{ __('legacy/functions.text_technical_info_help_link_mediainfo') }}</a></b>{{ __('legacy/functions.text_technical_info_help_text_one_end') }}<br /><b>&middot;</b> {{ __('legacy/functions.text_technical_info_help_text_two') }} <b><a href="https://github.com/UniqProject/BDInfo" target='_blank'>{{ __('legacy/functions.text_technical_info_help_link_bdinfo') }}</a></b>{{ __('legacy/functions.text_technical_info_help_text_two_end') }}
+						<textarea name="technical_info" rows="8"></textarea><br/><b>&middot;</b> {{ __('legacy/functions.text_technical_info_help_text') }} <b><a href="https://mediaarea.net/en/MediaInfo" target='_blank'>{{ __('legacy/functions.text_technical_info_help_link_mediainfo') }}</a></b>{{ __('legacy/functions.text_technical_info_help_text_one_end') }}<br /><b>&middot;</b> {{ __('legacy/functions.text_technical_info_help_text_two') }} <b><a href="https://github.com/UniqProject/BDInfo" target='_blank'>{{ __('legacy/functions.text_technical_info_help_link_bdinfo') }}</a></b>{{ __('legacy/functions.text_technical_info_help_text_two_end') }}
 					</x-settings-row>
 				@endif
 

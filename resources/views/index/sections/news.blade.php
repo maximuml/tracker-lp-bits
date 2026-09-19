@@ -5,7 +5,7 @@
     @endif
 </h2>
 @if(count($news['items']) > 0)
-<div class="nx-text"><div style="margin-left: 16pt;">
+<div class="nx-text"><div>
 @foreach($news['items'] as $newsItem)
     @if($loop->first)
         <a href="#" data-klappe="a{{ $newsItem['id'] }}"><img class="minus" src="pic/trans.gif" id="pica{{ $newsItem['id'] }}" alt="Show/Hide" title="{{ $news['showHideTitle'] }}" />&nbsp;{{ date('Y.m.d', strtotime($newsItem['added'])) }} - <b>{{ $newsItem['title'] }}</b></a>

@@ -53,7 +53,7 @@
 @elseif ($mode === 'view')
     @if (! $isLogin)
         <x-frame :caption="__('legacy/complains.text_created_title')" :center="false">
-            <p style="font-weight: bold; color: red">{{ __('legacy/complains.text_created_note') ?? '' }}</p>
+            <p>{{ __('legacy/complains.text_created_note') ?? '' }}</p>
         </x-frame>
     @endif
 
@@ -95,7 +95,7 @@
     @endif
 
     @if ($isAdmin)
-        <form action="" method="post" style="text-align: center; margin-top: 2em"><input type="hidden" name="action" value="{{ ! empty($complain['answered']) ? 'unanswered' : 'answered' }}" /><input type="hidden" name="id" value="{{ (int) ($complain['id'] ?? 0) }}" /><button>{{ ! empty($complain['answered']) ? (__('legacy/complains.text_unanswer_it')) : (__('legacy/complains.text_answer_it')) }}</button></form>
+        <form action="" method="post"><input type="hidden" name="action" value="{{ ! empty($complain['answered']) ? 'unanswered' : 'answered' }}" /><input type="hidden" name="id" value="{{ (int) ($complain['id'] ?? 0) }}" /><button>{{ ! empty($complain['answered']) ? (__('legacy/complains.text_unanswer_it')) : (__('legacy/complains.text_answer_it')) }}</button></form>
     @endif
 
 @else
@@ -103,8 +103,8 @@
     <form action="" method="post">
         <input type="hidden" name="action" value="new" />
         <div class="nx-fgrid nx-fgrid--flat">
-            <div class="nx-fhead">{{ __('legacy/complains.text_new_email') ?? 'Email' }}</div><div class="nx-fcell"><input type="email" name="email" style="width: min(100%, 420px); min-width: 180px; border: 1px solid gray; box-sizing: border-box" autocomplete="email" /></div>
-            <div class="nx-fhead">{{ __('legacy/complains.text_new_body') ?? 'Body' }}</div><div class="nx-fcell"><textarea name="body" style="width: min(100%, 420px); min-width: 180px; border: 1px solid gray; box-sizing: border-box; height: 250px; resize: vertical;" placeholder="{{ __('legacy/complains.text_new_body_placeholder') ?? '' }}"></textarea></div>
+            <div class="nx-fhead">{{ __('legacy/complains.text_new_email') ?? 'Email' }}</div><div class="nx-fcell"><input type="email" name="email" autocomplete="email" /></div>
+            <div class="nx-fhead">{{ __('legacy/complains.text_new_body') ?? 'Body' }}</div><div class="nx-fcell"><textarea name="body" placeholder="{{ __('legacy/complains.text_new_body_placeholder') ?? '' }}"></textarea></div>
             {{ $captchaHtml }}
             <div class="nx-ffull nx-center"><input type="submit" value="{{ __('legacy/complains.text_new_submit') ?? 'Submit' }}" class="btn" /></div>
         </div>

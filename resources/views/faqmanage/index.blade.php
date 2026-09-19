@@ -32,7 +32,7 @@
 @if (! empty($faqOrphaned))
 <br />
 <table data-nx="data" border="1" cellspacing="0" cellpadding="5" align="center" width="95%">
-<tr><td align="center" colspan="3"><b style="color: #FF0000">Orphaned Items</b></td></tr>
+<tr><td align="center" colspan="3"><b>Orphaned Items</b></td></tr>
 <tr><td class="colhead" align="left">Item Title</td><td class="colhead" align="center">Status</td><td class="colhead" align="center">Actions</td></tr>
     @foreach ($faqOrphaned as $lang => $temp2)
         @foreach ($temp2 as $id => $temp)

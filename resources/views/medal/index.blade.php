@@ -3,7 +3,7 @@
 @section('title', $title)
 
 @section('content')
-<h1 style="text-align: center">{{ $title }}</h1>
+<h1>{{ $title }}</h1>
 
 <div>
     <form id="filterForm" action="" method="get">
@@ -19,7 +19,7 @@
     <td class="colhead">ID</td>
     <td class="colhead">{{ $columnImageLargeLabel }}</td>
     <td class="colhead">{{ $columnDescriptionLabel }}</td>
-    <td class="colhead" style="width: 115px">{{ $columnSaleBeginEndTimeLabel }}</td>
+    <td class="colhead">{{ $columnSaleBeginEndTimeLabel }}</td>
     <td class="colhead">{{ $columnDurationLabel }}</td>
     <td class="colhead">{{ $columnBonusAdditionLabel }}</td>
     <td class="colhead">{{ $columnPriceLabel }}</td>
@@ -32,7 +32,7 @@
 @foreach ($rows as $row)
 <tr>
     <td>{{ (int) $row['id'] }}</td>
-    <td><img src="{{ $row['image_large'] }}" style="max-width: 60px;max-height: 60px;" class="preview" /></td>
+    <td><img src="{{ $row['image_large'] }}" class="preview" /></td>
     <td><h1>{{ $row['name'] }}</h1>{{ $row['description'] }}</td>
     <td>{{ $row['sale_begin_time'] }} ~<br>{{ $row['sale_end_time'] }}</td>
     <td>{{ $row['durationText'] }}</td>

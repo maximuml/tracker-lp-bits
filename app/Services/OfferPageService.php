@@ -235,7 +235,7 @@ final class OfferPageService
             $commentsHtml = $pagerTop.Comment::table($allrows, 'offer', $id).$pagerBottom;
         }
 
-        $quickComment = '<table style=\'border:1px solid #000000;\'><tr>'.
+        $quickComment = '<table><tr>'.
             '<td class="text" align="center"><b>'.htmlspecialchars((string) (__('legacy/offers.text_quick_comment'))).'</b><br /><br />'.
             '<form id="compose" name="comment" method="post" action="comment.php?action=add&amp;type=offer" >'.
             '<input type="hidden" name="pid" value="'.$id.'" /><br />';
@@ -403,7 +403,7 @@ final class OfferPageService
 
         $addOfferLink = '';
         if (Permission::can(PermissionEnum::ADD_OFFER)) {
-            $addOfferLink = '<div align="center" style="margin-bottom: 8px;"><a href="?add_offer=1"><b>'.htmlspecialchars((string) (__('legacy/offers.text_add_offer'))).'</b></a></div>';
+            $addOfferLink = '<div align="center"><a href="?add_offer=1"><b>'.htmlspecialchars((string) (__('legacy/offers.text_add_offer'))).'</b></a></div>';
         }
 
         // Search box
@@ -426,7 +426,7 @@ final class OfferPageService
             $catid = (string) $request->query('category', '');
             ob_start();
             echo '<table class="torrents" cellspacing="0" cellpadding="5" width="100%">';
-            echo '<tr><td class="colhead" style="padding: 0px"><a href="?category='.htmlspecialchars($catid).'&amp;sort=cat&amp;type='.$catOrderType.'">'.htmlspecialchars((string) (__('legacy/offers.col_type'))).'</a></td>'.
+            echo '<tr><td class="colhead"><a href="?category='.htmlspecialchars($catid).'&amp;sort=cat&amp;type='.$catOrderType.'">'.htmlspecialchars((string) (__('legacy/offers.col_type'))).'</a></td>'.
                 '<td class="colhead" width="100%"><a href="?category='.htmlspecialchars($catid).'&amp;sort=name&amp;type='.$nameOrderType.'">'.htmlspecialchars((string) (__('legacy/offers.col_title'))).'</a></td>'.
                 '<td colspan="3" class="colhead"><a href="?category='.htmlspecialchars($catid).'&amp;sort=v_res&amp;type='.$vResOrderType.'">'.htmlspecialchars((string) (__('legacy/offers.col_vote_results'))).'</a></td>'.
                 '<td class="colhead"><a href="?category='.htmlspecialchars($catid).'&amp;sort=comments&amp;type='.$commentsOrderType.'"><img class="comments" src="pic/trans.gif" alt="comments" title="'.htmlspecialchars((string) (__('legacy/offers.title_comment'))).'" />'.htmlspecialchars((string) ((''))).'</a></td>'.
@@ -499,7 +499,7 @@ final class OfferPageService
                     $dispname = mb_substr($dispname, 0, $maxLength - 2, 'UTF-8').'..';
                 }
 
-                echo '<tr><td class="rowfollow" style="padding: 0px"><a href="?category='.(int) ($arr['cat_id'] ?? 0).'">'.Category::imageTagWithContext((int) ($arr['cat_id'] ?? 0), '')."</a></td><td style='text-align: left'><a href=\"?id=".(int) $arr['id'].'&amp;off_details=1" title="'.htmlspecialchars((string) ($arr['name'] ?? '')).'"><b>'.htmlspecialchars($dispname).'</b></a>'.(! LegacyYesNo::isNo($curUser['appendnew'] ?? null) && strtotime((string) ($arr['added'] ?? 'now')) >= $last_offer ? "<b> (<font class='new'>".htmlspecialchars((string) (__('legacy/offers.text_new'))).'</font>)</b>' : '').$allowed."</td><td class=\"rowfollow nowrap\" style='padding: 5px' align=\"center\">".$v_res.'</td><td class="rowfollow nowrap" '.(! Permission::can(PermissionEnum::AGAINST_OFFER) ? ' colspan="2" ' : '')." style='padding: 5px'><a href=\"?id=".(int) $arr['id'].'&amp;vote=yeah" title="'.htmlspecialchars((string) (__('legacy/offers.title_i_want_this'))).'"><font color="green"><b>'.htmlspecialchars((string) (__('legacy/offers.text_yep'))).'</b></font></a></td>'.(UserDisplay::currentClass() >= $globalData['againstofferClass'] ? '<td class="rowfollow nowrap" align="center"><a href="?id='.(int) $arr['id'].'&amp;vote=against" title="'.htmlspecialchars((string) (__('legacy/offers.title_do_not_want_it'))).'"><font color="red"><b>'.htmlspecialchars((string) (__('legacy/offers.text_nah'))).'</b></font></a></td>' : '');
+                echo '<tr><td class="rowfollow"><a href="?category='.(int) ($arr['cat_id'] ?? 0).'">'.Category::imageTagWithContext((int) ($arr['cat_id'] ?? 0), '')."</a></td><td><a href=\"?id=".(int) $arr['id'].'&amp;off_details=1" title="'.htmlspecialchars((string) ($arr['name'] ?? '')).'"><b>'.htmlspecialchars($dispname).'</b></a>'.(! LegacyYesNo::isNo($curUser['appendnew'] ?? null) && strtotime((string) ($arr['added'] ?? 'now')) >= $last_offer ? "<b> (<font class='new'>".htmlspecialchars((string) (__('legacy/offers.text_new'))).'</font>)</b>' : '').$allowed."</td><td class=\"rowfollow nowrap\" align=\"center\">".$v_res.'</td><td class="rowfollow nowrap" '.(! Permission::can(PermissionEnum::AGAINST_OFFER) ? ' colspan="2" ' : '')."><a href=\"?id=".(int) $arr['id'].'&amp;vote=yeah" title="'.htmlspecialchars((string) (__('legacy/offers.title_i_want_this'))).'"><font color="green"><b>'.htmlspecialchars((string) (__('legacy/offers.text_yep'))).'</b></font></a></td>'.(UserDisplay::currentClass() >= $globalData['againstofferClass'] ? '<td class="rowfollow nowrap" align="center"><a href="?id='.(int) $arr['id'].'&amp;vote=against" title="'.htmlspecialchars((string) (__('legacy/offers.title_do_not_want_it'))).'"><font color="red"><b>'.htmlspecialchars((string) (__('legacy/offers.text_nah'))).'</b></font></a></td>' : '');
 
                 echo '<td class="rowfollow">'.$comment.'</td><td class="rowfollow nowrap">'.$addtime.'</td>';
                 if ($globalData['offervotetimeoutMain'] > 0 && $globalData['offeruptimeoutMain'] > 0) {

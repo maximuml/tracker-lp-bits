@@ -71,7 +71,7 @@ class TorrentStatus
         }
         $progress = ($progress * 100).'%';
         $result = sprintf(
-            '<div style="padding: 1px;margin-top: 2px;border: 1px solid #838383" title="%s"><div style="width: %s;background-color: %s;height: 2px"></div></div>',
+            '<div title="%s"><div></div></div>',
             $activeStatus." $progress", $progress, $color
         );
 

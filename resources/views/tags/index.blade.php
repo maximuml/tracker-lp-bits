@@ -8,7 +8,7 @@
 
 <form method=post action=?>
 <textarea name=test cols=60 rows=3>{{ $test ?? '' }}</textarea>
-<input type=submit style='height: 23px; margin-left: 5px' value="{{ __('legacy/tags.submit_test_this_code')}}">
+<input type=submit value="{{ __('legacy/tags.submit_test_this_code')}}">
 </form>
 
 @if (($test ?? '') !== '')

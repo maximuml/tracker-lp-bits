@@ -3,7 +3,7 @@
 <thead>
 <tr>
     @foreach ($listVm->columns as $col)
-    <th class="colhead" @if ($col['key'] === 'type') style="padding: 0px"@endif scope="col">
+    <th class="colhead" @if ($col['key'] === 'type')@endif scope="col">
         @if ($col['sortUrl'])
             <a href="{{ $col['sortUrl'] }}">
                 @if ($col['iconClass'])<img class="{{ $col['iconClass'] }}" src="pic/trans.gif" alt="{{ $col['iconTitle'] }}" title="{{ $col['iconTitle'] }}" />@else{{ $col['label'] }}@endif

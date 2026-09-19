@@ -14,7 +14,7 @@ final class ProgressTest extends TestCase
         $html = Progress::percentImage(0);
 
         $this->assertStringContainsString('progbarrest', $html);
-        $this->assertStringContainsString('style="width: 45px;"', $html);
+        $this->assertStringContainsString('width="45"', $html);
         $this->assertStringNotContainsString('progbargreen', $html);
         $this->assertStringNotContainsString('progbarred', $html);
     }
@@ -24,7 +24,7 @@ final class ProgressTest extends TestCase
         $html = Progress::percentImage(100);
 
         $this->assertStringContainsString('progbargreen', $html);
-        $this->assertStringContainsString('style="width: 45px;"', $html);
+        $this->assertStringContainsString('width="45"', $html);
         $this->assertStringNotContainsString('progbarrest', $html);
     }
 
@@ -33,9 +33,9 @@ final class ProgressTest extends TestCase
         $html = Progress::percentImage(25);
 
         $this->assertStringContainsString('progbarred', $html);
-        $this->assertStringContainsString('style="width: 11.25px;"', $html);
+        $this->assertStringContainsString('width="11"', $html);
         $this->assertStringContainsString('progbarrest', $html);
-        $this->assertStringContainsString('style="width: 33.75px;"', $html);
+        $this->assertStringContainsString('width="34"', $html);
     }
 
     public function test_mid_percent_uses_yellow_bar(): void
@@ -43,7 +43,7 @@ final class ProgressTest extends TestCase
         $html = Progress::percentImage(50);
 
         $this->assertStringContainsString('progbaryellow', $html);
-        $this->assertStringContainsString('style="width: 22.5px;"', $html);
+        $this->assertStringContainsString('width="23"', $html);
     }
 
     public function test_high_percent_uses_green_bar(): void
@@ -51,8 +51,8 @@ final class ProgressTest extends TestCase
         $html = Progress::percentImage(80);
 
         $this->assertStringContainsString('progbargreen', $html);
-        $this->assertStringContainsString('style="width: 36px;"', $html);
-        $this->assertStringContainsString('style="width: 9px;"', $html);
+        $this->assertStringContainsString('width="36"', $html);
+        $this->assertStringContainsString('width="9"', $html);
     }
 
     public function test_accepts_numeric_string(): void

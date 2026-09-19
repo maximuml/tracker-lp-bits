@@ -22,7 +22,7 @@ input.mp { width: 450px; }
 @for ($i = 0; $i <= 19; $i++)
 <div class="nx-fhead">{{ (__('legacy/makepoll.text_option')).($i + 1) }}@if ($i < 2) <font color=red>*</font>@endif</div><div class="nx-fcell"><input name=option{{ $i }} class=mp maxlength=40 value="{{ (string) ($poll["option{$i}"] ?? '') }}"><br /></div>
 @endfor
-<div class="nx-ffull nx-center"><input type=submit value="{{ $pollid ? (__('legacy/makepoll.submit_edit_poll')) : (__('legacy/makepoll.submit_create_poll')) }}" style='height: 20pt'></div>
+<div class="nx-ffull nx-center"><input type=submit value="{{ $pollid ? (__('legacy/makepoll.submit_edit_poll')) : (__('legacy/makepoll.submit_create_poll')) }}"></div>
 </div>
 <p><font color=red>*</font>{{ __('legacy/makepoll.text_required')}}</p>
 @if ($pollid > 0)

@@ -261,6 +261,13 @@ table.msg-alert td.msg-alert-gray { background: gray; }
    el.style (CSSOM is not governed by style-src). */
 .nx-hidden { display: none; }
 .nx-inline { display: inline; }
+.nx-align-left { text-align: left; }
+.nx-align-center { text-align: center; }
+.nx-align-right { text-align: right; }
+.nx-align-justify { text-align: justify; }
+.nx-tag { display: inline-block; padding: 0 .4em; border-radius: var(--nxm-radius, 4px); background: var(--nxm-accent); color: var(--nxm-on-accent, #fff); }
+img[data-img-fallback] { max-width: 100%; }
+img.nx-smiley { max-width: 25px; }
 .nx-inline-block { display: inline-block; }
 .nx-flex { display: flex; }
 .nx-flex-col { display: flex; flex-direction: column; }

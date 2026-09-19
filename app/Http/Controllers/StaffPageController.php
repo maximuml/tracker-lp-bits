@@ -49,7 +49,7 @@ class StaffPageController extends LegacyController
             return [
                 'id' => (int) $arr['id'],
                 'username_html' => UserDisplay::username((int) $arr['id']),
-                'flag_html' => SafeHtml::fromTrustedHtml('<img width=24 height=15 src="pic/flag/'.$countryrow['flagpic'].'" title="'.$countryrow['name'].'" style="padding-bottom:1px;">'),
+                'flag_html' => SafeHtml::fromTrustedHtml('<img width=24 height=15 src="pic/flag/'.$countryrow['flagpic'].'" title="'.$countryrow['name'].'">'),
                 'online_html' => SafeHtml::fromTrustedHtml($isOnline ? $onlineImg : $offlineImg),
                 'pm_html' => SafeHtml::fromTrustedHtml('<a href=sendmessage.php?receiver='.(int) $arr['id'].' title="'.(__('legacy/staff.title_send_pm')).'">'.$sendPmImg.'</a>'),
                 'extra' => $extraKey ? ($arr[$extraKey] ?? '') : '',

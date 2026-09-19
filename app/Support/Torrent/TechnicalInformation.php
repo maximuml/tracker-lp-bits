@@ -518,7 +518,7 @@ class TechnicalInformation
      */
     private function buildTdTable(array $parts): string
     {
-        $table = '<table style="border: none;"><tbody>';
+        $table = '<table><tbody>';
 
         // 检查是否为音频或字幕数据
         $isAudioOrSubtitle = false;
@@ -543,7 +543,7 @@ class TechnicalInformation
                 if ($displayCount <= 3) {
                     // 显示前3条
                     $table .= '<tr>';
-                    $table .= sprintf('<td style="border: none; padding-right: 5px;padding-bottom: 5px;"><b>%s: </b>%s</td>', $key, $value);
+                    $table .= sprintf('<td><b>%s: </b>%s</td>', $key, $value);
                     $table .= '</tr>';
                 } else {
                     // 收集隐藏的部分
@@ -552,7 +552,7 @@ class TechnicalInformation
             } else {
                 // 非音频/字幕数据，或数量不超过3条，正常显示
                 $table .= '<tr>';
-                $table .= sprintf('<td style="border: none; padding-right: 5px;padding-bottom: 5px;"><b>%s: </b>%s</td>', $key, $value);
+                $table .= sprintf('<td><b>%s: </b>%s</td>', $key, $value);
                 $table .= '</tr>';
             }
         }
@@ -573,9 +573,9 @@ class TechnicalInformation
             $table .= '<tr>';
             // 检查format_comment函数是否存在
             if (function_exists('format_comment')) {
-                $table .= sprintf('<td style="border: none; padding-right: 5px;padding-bottom: 5px;">%s</td>', Format::formatComment($spoiler, false));
+                $table .= sprintf('<td>%s</td>', Format::formatComment($spoiler, false));
             } else {
-                $table .= sprintf('<td style="border: none; padding-right: 5px;padding-bottom: 5px;">%s</td>', $spoiler);
+                $table .= sprintf('<td>%s</td>', $spoiler);
             }
             $table .= '</tr>';
         }
@@ -583,6 +583,6 @@ class TechnicalInformation
         $table .= '</tbody>';
         $table .= '</table>';
 
-        return sprintf('<td style="border: none; padding-right: 5px;padding-bottom: 5px">%s</td>', $table);
+        return sprintf('<td>%s</td>', $table);
     }
 }

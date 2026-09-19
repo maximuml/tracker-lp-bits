@@ -4,7 +4,7 @@
 
 @section('content')
 <div>
-    <h1 style="text-align: center">User ban log</h1>
+    <h1>User ban log</h1>
     <form id="filterForm" action="{{ $serverRequestUri }}" method="get">
         <input id="q" type="text" name="q" value="{{ $q }}" placeholder="username">
         <input type="submit">

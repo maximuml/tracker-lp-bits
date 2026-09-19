@@ -193,7 +193,7 @@ final class OfferService
         }
 
         if ($sure === 0) {
-            $this->abort(__('legacy/offers.std_delete_offer'), __('legacy/offers.std_delete_offer_note')."<br /><form method=post action=offers.php?id={$offerId}&del_offer=1&sure=1>".__('legacy/offers.text_reason_is').'<input type=text style="width: 200px" name=reason><input type=submit value="'.__('legacy/offers.submit_confirm').'"></form>', false);
+            $this->abort(__('legacy/offers.std_delete_offer'), __('legacy/offers.std_delete_offer_note')."<br /><form method=post action=offers.php?id={$offerId}&del_offer=1&sure=1>".__('legacy/offers.text_reason_is').'<input type=text name=reason><input type=submit value="'.__('legacy/offers.submit_confirm').'"></form>', false);
         }
 
         $reason = (string) $request->input('reason');

@@ -963,10 +963,10 @@ class BdInfoExtra
             // 添加DISC标题（如果有多个DISC）
             if (count($allDiscs) > 1) {
                 $discTitle = $disc['disc_info']['title'] ?? '';
-                $result .= '<h4 style="margin: 10px 0 5px 0; color: #333;">Disc #'.($discIndex + 1).' : '.htmlspecialchars($discTitle).'</h4>';
+                $result .= '<h4>Disc #'.($discIndex + 1).' : '.htmlspecialchars($discTitle).'</h4>';
             }
 
-            $result .= '<table style="border: none;width: 100%"><tbody><tr>';
+            $result .= '<table><tbody><tr>';
             $cols = 0;
             if (! empty($videos)) {
                 $cols++;
@@ -989,16 +989,16 @@ class BdInfoExtra
 
             // 在DISC之间添加分隔线（除了最后一个）
             if ($discIndex < count($allDiscs) - 1) {
-                $result .= '<hr style="margin: 15px 0; border: none; border-top: 1px solid #ddd;">';
+                $result .= '<hr>';
             }
         }
 
         // 添加原始BDINFO
         $rawBdInfo = sprintf('[spoiler=%s][raw]<pre>%s</pre>[/raw][/spoiler]', Locale::trans('torrent.show_hide_bd_info', [], null), $this->bdInfo);
         if (function_exists('format_comment')) {
-            $result .= sprintf('<div class="nexus-media-info-raw" style="margin-top: 15px;">%s</div>', Format::formatComment($rawBdInfo, false));
+            $result .= sprintf('<div class="nexus-media-info-raw">%s</div>', Format::formatComment($rawBdInfo, false));
         } else {
-            $result .= sprintf('<div class="nexus-media-info-raw" style="margin-top: 15px;">%s</div>', $rawBdInfo);
+            $result .= sprintf('<div class="nexus-media-info-raw">%s</div>', $rawBdInfo);
         }
 
         return $result;
@@ -1011,7 +1011,7 @@ class BdInfoExtra
      */
     private function buildTdTable(array $parts): string
     {
-        $table = '<table style="border: none;"><tbody>';
+        $table = '<table><tbody>';
 
         // 检查是否为音频或字幕数据
         $isAudioOrSubtitle = false;
@@ -1036,7 +1036,7 @@ class BdInfoExtra
                 if ($displayCount <= 3) {
                     // 显示前3条
                     $table .= '<tr>';
-                    $table .= sprintf('<td style="border: none; padding-right: 5px;padding-bottom: 5px;"><b>%s: </b>%s</td>', $key, $value);
+                    $table .= sprintf('<td><b>%s: </b>%s</td>', $key, $value);
                     $table .= '</tr>';
                 } else {
                     // 收集隐藏的部分
@@ -1045,7 +1045,7 @@ class BdInfoExtra
             } else {
                 // 非音频/字幕数据，或数量不超过3条，正常显示
                 $table .= '<tr>';
-                $table .= sprintf('<td style="border: none; padding-right: 5px;padding-bottom: 5px;"><b>%s: </b>%s</td>', $key, $value);
+                $table .= sprintf('<td><b>%s: </b>%s</td>', $key, $value);
                 $table .= '</tr>';
             }
         }
@@ -1066,9 +1066,9 @@ class BdInfoExtra
             $table .= '<tr>';
             // 检查format_comment函数是否存在
             if (function_exists('format_comment')) {
-                $table .= sprintf('<td style="border: none; padding-right: 5px;padding-bottom: 5px;">%s</td>', Format::formatComment($spoiler, false));
+                $table .= sprintf('<td>%s</td>', Format::formatComment($spoiler, false));
             } else {
-                $table .= sprintf('<td style="border: none; padding-right: 5px;padding-bottom: 5px;">%s</td>', $spoiler);
+                $table .= sprintf('<td>%s</td>', $spoiler);
             }
             $table .= '</tr>';
         }
@@ -1076,7 +1076,7 @@ class BdInfoExtra
         $table .= '</tbody>';
         $table .= '</table>';
 
-        return sprintf('<td style="border: none; padding-right: 5px;padding-bottom: 5px">%s</td>', $table);
+        return sprintf('<td>%s</td>', $table);
     }
 
     /**

@@ -53,7 +53,7 @@ class NewsController extends LegacyController
 
             if ((int) $request->input('sure', 0) !== 1) {
                 $confirm = (__('legacy/news.std_are_you_sure'))
-                    .'<form method="post" action="'.htmlspecialchars((string) url('/news')).'" style="display:inline">'
+                    .'<form method="post" action="'.htmlspecialchars((string) url('/news')).'">'
                     .csrf_field()
                     .'<input type="hidden" name="action" value="delete" />'
                     .'<input type="hidden" name="newsid" value="'.$newsid.'" />'

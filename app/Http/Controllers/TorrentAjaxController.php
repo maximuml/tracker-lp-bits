@@ -102,12 +102,12 @@ class TorrentAjaxController extends LegacyController
             }
             $title = $canView ? sprintf('%s%s%s', __('legacy/functions.text_user_ip'), ':&nbsp;', implode(', ', $ips)) : '';
             $addressStr = implode('<br/>', $address);
-            $location = '<div style="margin-right: 6px" title="'.$title.'">'.$addressStr.'</div>';
+            $location = '<div title="'.$title.'">'.$addressStr.'</div>';
         } else {
             foreach ($info as $ipInfo) {
                 $ips[] = $ipInfo['ip'];
             }
-            $location = '<div style="margin-right: 6px">'.implode('<br/>', $ips).'</div>';
+            $location = '<div>'.implode('<br/>', $ips).'</div>';
         }
 
         if ($isStrongPrivacy) {
@@ -119,7 +119,7 @@ class TorrentAjaxController extends LegacyController
             $result = $location;
         }
 
-        return "<td class=rowfollow align=left width=1%><div class='nx-flex' style='white-space: nowrap;align-items: center'>".$result.'</div></td>';
+        return "<td class=rowfollow align=left width=1%><div class='nx-flex'>".$result.'</div></td>';
     }
 
     /**
@@ -434,7 +434,7 @@ class TorrentAjaxController extends LegacyController
             $results[] = (array) $row;
         }
 
-        $ret = '<table border="1" cellspacing="0" cellpadding="5" width="100%"><tr><td class="colhead" style="padding: 0px">'.__('legacy/getusertorrentlistajax.col_type').'</td><td class="colhead" align="center">'.__('legacy/getusertorrentlistajax.col_name').'</td><td class="colhead" align="center">'.__('legacy/getusertorrentlistajax.col_added').'</td>'.
+        $ret = '<table border="1" cellspacing="0" cellpadding="5" width="100%"><tr><td class="colhead">'.__('legacy/getusertorrentlistajax.col_type').'</td><td class="colhead" align="center">'.__('legacy/getusertorrentlistajax.col_name').'</td><td class="colhead" align="center">'.__('legacy/getusertorrentlistajax.col_added').'</td>'.
             ($showsize ? '<td class="colhead" align="center"><img class="size" src="pic/trans.gif" alt="size" title="'.__('legacy/getusertorrentlistajax.title_size').'" /></td>' : '').
             ($showsenum ? '<td class="colhead" align="center"><img class="seeders" src="pic/trans.gif" alt="seeders" title="'.__('legacy/getusertorrentlistajax.title_seeders').'" /></td>' : '').
             ($showlenum ? '<td class="colhead" align="center"><img class="leechers" src="pic/trans.gif" alt="leechers" title="'.__('legacy/getusertorrentlistajax.title_leechers').'" /></td>' : '').
@@ -475,7 +475,7 @@ class TorrentAjaxController extends LegacyController
                 $dispname = mb_substr($dispname, 0, $maxLenghtOfTorrentName, 'UTF-8').'..';
             }
 
-            $ret .= '<tr'.$sphighlight."><td class=\"rowfollow nowrap\" valign=\"middle\" style='padding: 0px'>".
+            $ret .= '<tr'.$sphighlight."><td class=\"rowfollow nowrap\" valign=\"middle\">".
                 Category::imageTagWithContext($arr['category'], 'torrents.php?allsec=1&amp;').
                 "</td>\n".
                 '<td class="rowfollow" width="100%" align="left"><a href="'.

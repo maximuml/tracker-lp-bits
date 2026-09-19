@@ -3,7 +3,7 @@
 @section('title', __('legacy/uploaders.text_uploaders'))
 
 @section('content')
-<div style="width: 940px">
+<div>
 <h1 align="center">{{ __('legacy/uploaders.text_uploaders')}} - {{ date('Y-m', $timeStart) }}</h1>
 
 <div>
@@ -22,7 +22,7 @@
 @if (empty($rows))
 <p align="center">{{ __('legacy/uploaders.text_no_uploaders_yet')}}</p>
 @else
-<div style="margin-top: 8px">
+<div>
 <table data-nx="data" border="1" cellspacing="0" cellpadding="5" align="center" width="97%">
 <tr>
     <td class="colhead">{{ __('legacy/uploaders.col_username')}}</td>
@@ -42,8 +42,8 @@
 @endforeach
 </table>
 </div>
-<div style="margin-top: 8px; margin-bottom: 8px;">
-<span id="order" style="cursor:pointer"><span style="cursor: pointer;" class="big"><b>{{ __('legacy/uploaders.text_order_by')}}</b></span>
+<div>
+<span id="order"><span class="big"><b>{{ __('legacy/uploaders.text_order_by')}}</b></span>
 <span id="orderlist" class="dropmenu nx-hidden"><ul>
 <li><a href="?year={{ (int) $year }}&amp;month={{ (int) $month }}&amp;order=username">{{ __('legacy/uploaders.text_username')}}</a></li>
 <li><a href="?year={{ (int) $year }}&amp;month={{ (int) $month }}&amp;order=torrent_size">{{ __('legacy/uploaders.text_torrent_size')}}</a></li>

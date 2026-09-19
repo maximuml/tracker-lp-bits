@@ -109,7 +109,7 @@ class TorrentUploadController extends Controller
                 $options .= '<option value="'.$key.'">'.$value['text'].'</option>';
             }
             $pickCellHtml = '<b>'.__('legacy/edit.row_torrent_position').':&nbsp;</b>'
-                .'<select name="pos_state" style="width: 100px;">'.$options.'</select>&nbsp;&nbsp;&nbsp;'
+                .'<select name="pos_state">'.$options.'</select>&nbsp;&nbsp;&nbsp;'
                 .view('components.datetime-input', ['label' => SafeHtml::fromTrustedHtml(Locale::trans('label.deadline', [], null).':&nbsp;'), 'name' => 'pos_state_until', 'value' => ''])->render();
         }
 

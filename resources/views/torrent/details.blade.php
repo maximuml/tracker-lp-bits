@@ -13,7 +13,7 @@
 <p><b>{{ __('legacy/details.text_go_back') ?? '' }}<a href="{{ $requestFlags['returnto'] }}">{{ __('legacy/details.text_whence_you_came') ?? '' }}</a></b></p>
 @endif
 @elseif (! empty($requestFlags['existed']))
-<h1 align="center" style='color: red'>{{ __('legacy/details.torrent_existed') ?? '' }}</h1>
+<h1 align="center">{{ __('legacy/details.torrent_existed') ?? '' }}</h1>
 @if (! empty($requestFlags['returnto']))
 <p><b>{{ __('legacy/details.text_go_back') ?? '' }}<a href="{{ $requestFlags['returnto'] }}">{{ __('legacy/details.text_whence_you_came') ?? '' }}</a></b></p>
 @endif

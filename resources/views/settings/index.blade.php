@@ -33,10 +33,10 @@
 @elseif ($action === 'basicsettings')
     <form method="post" action="{{ $scriptName }}"><input type="hidden" name="action" value="savesettings_basic">@csrf
     <x-settings-row layout="grid" :label="__('legacy/settings.row_site_name')">
-        <input type="text" style="width: 300px" name="SITENAME" value="{{ (string)($config['SITENAME'] ?? 'Nexus') }}"> {{ __('legacy/settings.text_site_name_note') ?? '' }}
+        <input type="text" name="SITENAME" value="{{ (string)($config['SITENAME'] ?? 'Nexus') }}"> {{ __('legacy/settings.text_site_name_note') ?? '' }}
     </x-settings-row>
     <x-settings-row layout="grid" :label="__('legacy/settings.row_base_url')">
-        <input type="text" style="width: 300px" name="BASEURL" value="{{ (string)($config['BASEURL'] ?? '') }}"> . <b><u>{{ __('legacy/settings.text_base_url_note') }}</u> {{ __('legacy/settings.text_base_url_note_end') }}</b>
+        <input type="text" name="BASEURL" value="{{ (string)($config['BASEURL'] ?? '') }}"> . <b><u>{{ __('legacy/settings.text_base_url_note') }}</u> {{ __('legacy/settings.text_base_url_note_end') }}</b>
     </x-settings-row>
     <x-settings-save layout="grid" :label="__('legacy/settings.row_save_settings')" :text="__('legacy/settings.submit_save_settings')" />
     </form>
@@ -45,10 +45,10 @@
     <form method="post" action="{{ $scriptName }}"><input type="hidden" name="action" value="savesettings_main">@csrf
     <x-settings-yesno layout="grid" :label="__('legacy/settings.row_site_online')" name="site_online" :value="$config['site_online'] ?? 'yes'" :note="\App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/settings.text_site_online_note'))" :yes-label="__('legacy/settings.text_yes')" :no-label="__('legacy/settings.text_no')" />
     <x-settings-yesno layout="grid" :label="__('legacy/settings.row_enable_invite_system')" name="invitesystem" :value="$config['invitesystem'] ?? 'yes'" :note="__('legacy/settings.text_invite_system_note')" :yes-label="__('legacy/settings.text_yes')" :no-label="__('legacy/settings.text_no')" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_initial_uploading_amount')" name="iniupload" :value="$config['iniupload'] ?? 0" :note="__('legacy/settings.text_initial_uploading_amount_note')" width="100px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_initial_invites')" name="invite_count" :value="$config['invite_count'] ?? 0" :note="__('legacy/settings.text_initial_invites_note')" width="50px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_initial_tmp_invites')" name="tmp_invite_count" :value="$config['tmp_invite_count'] ?? 0" :note="__('legacy/settings.text_initial_tmp_invites_note')" width="50px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_invite_timeout')" name="invite_timeout" :value="$config['invite_timeout'] ?? 0" :note="__('legacy/settings.text_invite_timeout_note')" width="50px" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_initial_uploading_amount')" name="iniupload" :value="$config['iniupload'] ?? 0" :note="__('legacy/settings.text_initial_uploading_amount_note')" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_initial_invites')" name="invite_count" :value="$config['invite_count'] ?? 0" :note="__('legacy/settings.text_initial_invites_note')" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_initial_tmp_invites')" name="tmp_invite_count" :value="$config['tmp_invite_count'] ?? 0" :note="__('legacy/settings.text_initial_tmp_invites_note')" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_invite_timeout')" name="invite_timeout" :value="$config['invite_timeout'] ?? 0" :note="__('legacy/settings.text_invite_timeout_note')" />
     <x-settings-yesno layout="grid" :label="__('legacy/settings.row_complain_enabled')" name="complain_enabled" :value="$config['complain_enabled'] ?? 'no'" :note="__('legacy/settings.row_complain_enabled_note')" :yes-label="__('legacy/settings.text_yes')" :no-label="__('legacy/settings.text_no')" />
     <x-settings-yesno layout="grid" :label="__('legacy/settings.row_enable_registration_system')" name="registration" :value="$config['registration'] ?? 'yes'" :note="__('legacy/settings.row_allow_registrations')" :yes-label="__('legacy/settings.text_yes')" :no-label="__('legacy/settings.text_no')" />
     <x-settings-radios layout="grid"         :label="__('legacy/settings.row_verification_type')"
@@ -93,14 +93,14 @@
         :options="collect($stylesheets ?? [])->mapWithKeys(fn ($ss) => [(string)((array)$ss)['id'] => ((array)$ss)['name']])->all()"
         :selected="(string)($config['defstylesheet'] ?? 0)"
         :note="__('legacy/settings.text_default_stylesheet_note')" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_site_logo')" name="logo" :value="$config['logo'] ?? ''" :note="__('legacy/settings.text_site_logo_note')" width="100px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_max_torrent_size')" name="max_torrent_size" :value="$config['max_torrent_size'] ?? 1048576" :note="__('legacy/settings.text_max_torrent_size_note')" width="100px" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_site_logo')" name="logo" :value="$config['logo'] ?? ''" :note="__('legacy/settings.text_site_logo_note')" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_max_torrent_size')" name="max_torrent_size" :value="$config['max_torrent_size'] ?? 1048576" :note="__('legacy/settings.text_max_torrent_size_note')" />
     <x-settings-row layout="grid" :label="__('legacy/settings.row_announce_interval')">
         {{ \App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/settings.text_announce_interval_note_one')) ?? '' }}<br>
         <ul>
-            <li>{{ __('legacy/settings.text_announce_default') ?? '' }}<input type="text" style="width: 100px" name="announce_interval" value="{{ (string)($config['announce_interval'] ?? 1800) }}"> {{ __('legacy/settings.text_announce_default_default') ?? '' }}</li>
-            <li>{{ __('legacy/settings.text_for_torrents_older_than') ?? '' }}<input type="text" style="width: 100px" name="annintertwoage" value="{{ (string)($config['annintertwoage'] ?? 7) }}">{{ __('legacy/settings.text_days') ?? 'days' }}<input type="text" style="width: 100px" name="annintertwo" value="{{ (string)($config['annintertwo'] ?? 2700) }}"> {{ __('legacy/settings.text_announce_two_default') ?? '' }}</li>
-            <li>{{ __('legacy/settings.text_for_torrents_older_than') ?? '' }}<input type="text" style="width: 100px" name="anninterthreeage" value="{{ (string)($config['anninterthreeage'] ?? 30) }}">{{ __('legacy/settings.text_days') ?? 'days' }}<input type="text" style="width: 100px" name="anninterthree" value="{{ (string)($config['anninterthree'] ?? 3600) }}"> {{ __('legacy/settings.text_announce_three_default') ?? '' }}</li>
+            <li>{{ __('legacy/settings.text_announce_default') ?? '' }}<input type="text" name="announce_interval" value="{{ (string)($config['announce_interval'] ?? 1800) }}"> {{ __('legacy/settings.text_announce_default_default') ?? '' }}</li>
+            <li>{{ __('legacy/settings.text_for_torrents_older_than') ?? '' }}<input type="text" name="annintertwoage" value="{{ (string)($config['annintertwoage'] ?? 7) }}">{{ __('legacy/settings.text_days') ?? 'days' }}<input type="text" name="annintertwo" value="{{ (string)($config['annintertwo'] ?? 2700) }}"> {{ __('legacy/settings.text_announce_two_default') ?? '' }}</li>
+            <li>{{ __('legacy/settings.text_for_torrents_older_than') ?? '' }}<input type="text" name="anninterthreeage" value="{{ (string)($config['anninterthreeage'] ?? 30) }}">{{ __('legacy/settings.text_days') ?? 'days' }}<input type="text" name="anninterthree" value="{{ (string)($config['anninterthree'] ?? 3600) }}"> {{ __('legacy/settings.text_announce_three_default') ?? '' }}</li>
         </ul>
         {{ \App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/settings.text_announce_interval_note_two')) ?? '' }}
     </x-settings-row>
@@ -108,34 +108,34 @@
         {{ __('legacy/settings.text_cleanup_interval_note_one') ?? '' }}<br>
         <ul>
             @foreach (['one' => 'autoclean_interval_one', 'two' => 'autoclean_interval_two', 'three' => 'autoclean_interval_three', 'four' => 'autoclean_interval_four', 'five' => 'autoclean_interval_five'] as $pri => $field)
-                <li>{{ __('legacy/settings.'."text_priority_{$pri}") }}<input type="text" style="width: 100px" name="{{ $field }}" value="{{ (string)($config[$field] ?? '') }}"> {{ __('legacy/settings.'."text_priority_{$pri}_note") }}</li>
+                <li>{{ __('legacy/settings.'."text_priority_{$pri}") }}<input type="text" name="{{ $field }}" value="{{ (string)($config[$field] ?? '') }}"> {{ __('legacy/settings.'."text_priority_{$pri}_note") }}</li>
             @endforeach
         </ul>
         <b>{{ __('legacy/settings.text_cleanup_interval_note_two') }}</b>: {{ __('legacy/settings.text_cleanup_interval_note_do') }} <b>{{ __('legacy/settings.text_cleanup_interval_note_not') }}</b> {{ __('legacy/settings.text_cleanup_interval_note_two_end') }}
     </x-settings-row>
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_signup_timeout')" name="signup_timeout" :value="$config['signup_timeout'] ?? 259200" :note="__('legacy/settings.text_signup_timeout_note')" width="100px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_min_offer_votes')" name="minoffervotes" :value="$config['minoffervotes'] ?? 15" :note="__('legacy/settings.text_min_offer_votes_note')" width="100px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_offer_vote_timeout')" name="offervotetimeout" :value="$config['offervotetimeout'] ?? 259200" :note="__('legacy/settings.text_offer_vote_timeout_note')" width="100px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_offer_upload_timeout')" name="offeruptimeout" :value="$config['offeruptimeout'] ?? 86400" :note="__('legacy/settings.text_offer_upload_timeout_note')" width="100px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_offer_skip_approved_count')" name="offer_skip_approved_count" :value="$config['offer_skip_approved_count'] ?? ''" :note="__('legacy/settings.text_offer_skip_approved_count_note')" width="100px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_upload_deny_approval_deny_count')" name="upload_deny_approval_deny_count" :value="$config['upload_deny_approval_deny_count'] ?? ''" :note="__('legacy/settings.text_upload_deny_approval_deny_count_note')" width="100px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_max_subtitle_size')" name="maxsubsize" :value="$config['maxsubsize'] ?? 3145728" :note="__('legacy/settings.text_max_subtitle_size_note')" width="100px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_posts_per_page')" name="postsperpage" :value="$config['postsperpage'] ?? 10" :note="\App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/settings.text_posts_per_page_note'))" width="100px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_topics_per_page')" name="topicsperpage" :value="$config['topicsperpage'] ?? 20" :note="\App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/settings.text_topics_per_page_note'))" width="100px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_torrents_per_page')" name="torrentsperpage" :value="$config['torrentsperpage'] ?? 50" :note="\App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/settings.text_torrents_per_page_note'))" width="100px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_number_of_news')" name="maxnewsnum" :value="$config['maxnewsnum'] ?? 3" :note="__('legacy/settings.text_number_of_news_note')" width="100px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_torrent_dead_time')" name="max_dead_torrent_time" :value="$config['max_dead_torrent_time'] ?? 21600" :note="__('legacy/settings.text_torrent_dead_time_note')" width="100px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_max_users')" name="maxusers" :value="$config['maxusers'] ?? 2500" :note="__('legacy/settings.text_max_users')" width="100px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_site_accountant_userid')" name="ACCOUNTANTID" :value="$config['ACCOUNTANTID'] ?? ''" :note="__('legacy/settings.text_site_accountant_userid_note')" width="200px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_alipay_account')" name="ALIPAYACCOUNT" :value="$config['ALIPAYACCOUNT'] ?? ''" :note="__('legacy/settings.text_alipal_account_note')" width="200px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_paypal_account')" name="PAYPALACCOUNT" :value="$config['PAYPALACCOUNT'] ?? ''" :note="__('legacy/settings.text_paypal_account_note')" width="200px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_site_email')" name="SITEEMAIL" :value="$config['SITEEMAIL'] ?? ''" :note="__('legacy/settings.text_site_email_note')" width="200px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_report_email')" name="reportemail" :value="$config['reportemail'] ?? ''" :note="__('legacy/settings.text_report_email_note')" width="200px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_site_slogan')" name="SLOGAN" :value="$config['SLOGAN'] ?? ''" :note="__('legacy/settings.text_site_slogan_note')" width="300px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_icp_license')" name="icplicense" :value="$config['icplicense'] ?? ''" :note="__('legacy/settings.text_icp_license_note')" width="300px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_torrent_directory')" name="torrent_dir" :value="$config['torrent_dir'] ?? 'torrents'" :note="\App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/settings.text_torrent_directory'))" width="100px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_bitbucket_directory')" name="bitbucket" :value="$config['bitbucket'] ?? 'bitbucket'" :note="\App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/settings.text_bitbucket_directory_note'))" width="100px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_torrent_name_prefix')" name="torrentnameprefix" :value="$config['torrentnameprefix'] ?? '[Nexus]'" :note="\App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/settings.text_torrent_name_prefix_note'))" width="100px" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_signup_timeout')" name="signup_timeout" :value="$config['signup_timeout'] ?? 259200" :note="__('legacy/settings.text_signup_timeout_note')" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_min_offer_votes')" name="minoffervotes" :value="$config['minoffervotes'] ?? 15" :note="__('legacy/settings.text_min_offer_votes_note')" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_offer_vote_timeout')" name="offervotetimeout" :value="$config['offervotetimeout'] ?? 259200" :note="__('legacy/settings.text_offer_vote_timeout_note')" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_offer_upload_timeout')" name="offeruptimeout" :value="$config['offeruptimeout'] ?? 86400" :note="__('legacy/settings.text_offer_upload_timeout_note')" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_offer_skip_approved_count')" name="offer_skip_approved_count" :value="$config['offer_skip_approved_count'] ?? ''" :note="__('legacy/settings.text_offer_skip_approved_count_note')" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_upload_deny_approval_deny_count')" name="upload_deny_approval_deny_count" :value="$config['upload_deny_approval_deny_count'] ?? ''" :note="__('legacy/settings.text_upload_deny_approval_deny_count_note')" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_max_subtitle_size')" name="maxsubsize" :value="$config['maxsubsize'] ?? 3145728" :note="__('legacy/settings.text_max_subtitle_size_note')" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_posts_per_page')" name="postsperpage" :value="$config['postsperpage'] ?? 10" :note="\App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/settings.text_posts_per_page_note'))" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_topics_per_page')" name="topicsperpage" :value="$config['topicsperpage'] ?? 20" :note="\App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/settings.text_topics_per_page_note'))" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_torrents_per_page')" name="torrentsperpage" :value="$config['torrentsperpage'] ?? 50" :note="\App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/settings.text_torrents_per_page_note'))" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_number_of_news')" name="maxnewsnum" :value="$config['maxnewsnum'] ?? 3" :note="__('legacy/settings.text_number_of_news_note')" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_torrent_dead_time')" name="max_dead_torrent_time" :value="$config['max_dead_torrent_time'] ?? 21600" :note="__('legacy/settings.text_torrent_dead_time_note')" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_max_users')" name="maxusers" :value="$config['maxusers'] ?? 2500" :note="__('legacy/settings.text_max_users')" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_site_accountant_userid')" name="ACCOUNTANTID" :value="$config['ACCOUNTANTID'] ?? ''" :note="__('legacy/settings.text_site_accountant_userid_note')" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_alipay_account')" name="ALIPAYACCOUNT" :value="$config['ALIPAYACCOUNT'] ?? ''" :note="__('legacy/settings.text_alipal_account_note')" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_paypal_account')" name="PAYPALACCOUNT" :value="$config['PAYPALACCOUNT'] ?? ''" :note="__('legacy/settings.text_paypal_account_note')" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_site_email')" name="SITEEMAIL" :value="$config['SITEEMAIL'] ?? ''" :note="__('legacy/settings.text_site_email_note')" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_report_email')" name="reportemail" :value="$config['reportemail'] ?? ''" :note="__('legacy/settings.text_report_email_note')" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_site_slogan')" name="SLOGAN" :value="$config['SLOGAN'] ?? ''" :note="__('legacy/settings.text_site_slogan_note')" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_icp_license')" name="icplicense" :value="$config['icplicense'] ?? ''" :note="__('legacy/settings.text_icp_license_note')" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_torrent_directory')" name="torrent_dir" :value="$config['torrent_dir'] ?? 'torrents'" :note="\App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/settings.text_torrent_directory'))" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_bitbucket_directory')" name="bitbucket" :value="$config['bitbucket'] ?? 'bitbucket'" :note="\App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/settings.text_bitbucket_directory_note'))" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_torrent_name_prefix')" name="torrentnameprefix" :value="$config['torrentnameprefix'] ?? '[Nexus]'" :note="\App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/settings.text_torrent_name_prefix_note'))" />
     <x-settings-save layout="grid" :label="__('legacy/settings.row_save_settings')" :text="__('legacy/settings.submit_save_settings')" />
     </form>
 
@@ -149,20 +149,20 @@
         :break="true" />
     <tbody id="smtp_advanced"@if(($config['smtptype'] ?? 'default') !== 'advanced') class="nx-hidden"@endif>
     <div class="nx-ffull nx-center"><b>{{ __('legacy/settings.text_setting_for_advanced_type') ?? 'Advanced' }}</b></div>
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_smtp_host')" name="smtp_host" :value="$config['smtp_host'] ?? 'localhost'" :note="__('legacy/settings.text_smtp_host_note')" width="300px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_smtp_port')" name="smtp_port" :value="$config['smtp_port'] ?? 25" :note="__('legacy/settings.text_smtp_port_note')" width="300px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_smtp_sendmail_from')" name="smtp_from" :value="$config['smtp_from'] ?? ''" :note="__('legacy/settings.text_smtp_sendmail_from_note')" width="300px" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_smtp_host')" name="smtp_host" :value="$config['smtp_host'] ?? 'localhost'" :note="__('legacy/settings.text_smtp_host_note')" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_smtp_port')" name="smtp_port" :value="$config['smtp_port'] ?? 25" :note="__('legacy/settings.text_smtp_port_note')" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_smtp_sendmail_from')" name="smtp_from" :value="$config['smtp_from'] ?? ''" :note="__('legacy/settings.text_smtp_sendmail_from_note')" />
     </tbody>
     <tbody id="smtp_external"@if(($config['smtptype'] ?? 'default') !== 'external') class="nx-hidden"@endif>
     <div class="nx-ffull nx-center"><b>{{ __('legacy/settings.text_setting_for_external_type') ?? 'External' }}</b></div>
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_outgoing_mail_address')" name="smtpaddress" :value="$config['smtpaddress'] ?? ''" :note="__('legacy/settings.text_outgoing_mail_address_note')" width="300px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_outgoing_mail_port')" name="smtpport" :value="$config['smtpport'] ?? ''" :note="__('legacy/settings.text_outgoing_mail_port_note')" width="300px" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_outgoing_mail_address')" name="smtpaddress" :value="$config['smtpaddress'] ?? ''" :note="__('legacy/settings.text_outgoing_mail_address_note')" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_outgoing_mail_port')" name="smtpport" :value="$config['smtpport'] ?? ''" :note="__('legacy/settings.text_outgoing_mail_port_note')" />
     <x-settings-radios layout="grid"         :label="__('legacy/settings.row_outgoing_mail_encryption')"
         name="encryption"
         :options="['' => 'none', 'tls' => 'tls', 'ssl' => 'ssl']"
         :selected="(string)($config['encryption'] ?? '')" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_smtp_account_name')" name="accountname" :value="$config['accountname'] ?? ''" :note="__('legacy/settings.text_smtp_account_name_note')" width="300px" />
-    <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_smtp_account_password') ?? 'Password' }}</div><div class="nx-fcell"><input type=password name=accountpassword style="width: 300px" value="{{ (string)($config['accountpassword'] ?? '') }}"> <b>{{ __('legacy/settings.text_smtp_account_password_note') }}</b> {{ __('legacy/settings.text_smtp_account_password_note_end') }}</div>
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_smtp_account_name')" name="accountname" :value="$config['accountname'] ?? ''" :note="__('legacy/settings.text_smtp_account_name_note')" />
+    <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_smtp_account_password') ?? 'Password' }}</div><div class="nx-fcell"><input type=password name=accountpassword value="{{ (string)($config['accountpassword'] ?? '') }}"> <b>{{ __('legacy/settings.text_smtp_account_password_note') }}</b> {{ __('legacy/settings.text_smtp_account_password_note_end') }}</div>
     </tbody>
     <x-settings-save layout="grid" :label="__('legacy/settings.row_save_settings')" :text="__('legacy/settings.submit_save_settings')" />
     </form>
@@ -184,8 +184,8 @@
         </select> {{ __('legacy/settings.text_cheater_detection_level_note') ?? '' }}<br>
         {{ __('legacy/settings.text_never_suspect') ?? '' }}{{ \App\Support\UserClass::classSelectWithContext('nodetect', (int)($authority['staffmem'] ?? 0), $config['nodetect'] ?? 0) }}{{ __('legacy/settings.text_or_above') ?? '' }}
     </x-settings-row>
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_max_ips')" name="maxip" :value="$config['maxip'] ?? 1" :note="__('legacy/settings.text_max_ips_note')" width="300px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_max_login_attemps')" name="maxloginattempts" :value="$config['maxloginattempts'] ?? 7" :note="__('legacy/settings.text_max_login_attemps_note')" width="300px" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_max_ips')" name="maxip" :value="$config['maxip'] ?? 1" :note="__('legacy/settings.text_max_ips_note')" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_max_login_attemps')" name="maxloginattempts" :value="$config['maxloginattempts'] ?? 7" :note="__('legacy/settings.text_max_login_attemps_note')" />
     <x-settings-yesno layout="grid" :label="__('legacy/settings.row_use_challenge_response_authentication')" name="use_challenge_response_authentication" :value="$config['use_challenge_response_authentication'] ?? 'no'" :note="__('legacy/settings.text_use_challenge_response_authentication_note')" :yes-label="__('legacy/settings.text_yes')" :no-label="__('legacy/settings.text_no')" />
     <x-settings-radios layout="grid"         :label="__('legacy/settings.row_guest_visit_type')"
         name="guest_visit_type"
@@ -203,13 +203,13 @@
     <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_guest_visit_value_custom_content') ?? 'Custom content' }}</div><div class="nx-fcell"><x-bbcode-editor form="securitysettings_form" text="guest_visit_value_custom_content" :content="$config['guest_visit_value_custom_content'] ?? ''" /></div>
     </tbody>
     <tbody id="tbody_redirect"@if(($config['guest_visit_type'] ?? '') !== 'redirect') class="nx-hidden"@endif>
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_guest_visit_value_redirect')" name="guest_visit_value_redirect" :value="$config['guest_visit_value_redirect'] ?? ''" width="300px" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_guest_visit_value_redirect')" name="guest_visit_value_redirect" :value="$config['guest_visit_value_redirect'] ?? ''" />
     </tbody>
     <x-settings-row layout="grid" :label="__('legacy/settings.row_login_type')">
         @foreach (['normal' => 'text_login_type_normal', 'secret' => 'text_login_type_secret', 'passkey' => 'text_login_type_passkey'] as $val => $labelKey)
             <label><input type="radio" name="login_type" value="{{ $val }}"@if (($config['login_type'] ?? 'normal') === $val) checked @endif>{{ __('legacy/settings.'.$labelKey) }}</label>
         @endforeach
-        <b style="color: #DC143C; margin-left: 20px">{{ __('legacy/settings.text_login_type_warning') ?? '' }}</b>
+        <b>{{ __('legacy/settings.text_login_type_warning') ?? '' }}</b>
     </x-settings-row>
     <tbody id="tbody_login_secret"@if(!in_array($config['login_type'] ?? '', ['secret', 'passkey'])) class="nx-hidden"@endif>
     <x-settings-row layout="grid" :label="__('legacy/settings.row_login_secret')">
@@ -295,23 +295,23 @@
     </x-settings-row>
     <x-settings-yesno layout="grid" :label="__('legacy/settings.row_enable_location')" name="enablelocation" :value="$config['enablelocation'] ?? 'no'" :note="\App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/settings.text_enable_location_note'))" :yes-label="__('legacy/settings.text_yes')" :no-label="__('legacy/settings.text_no')" />
     <x-settings-yesno layout="grid" :label="__('legacy/settings.row_enable_tooltip')" name="enabletooltip" :value="$config['enabletooltip'] ?? 'no'" :note="__('legacy/settings.text_enable_tooltip_note')" :yes-label="__('legacy/settings.text_yes')" :no-label="__('legacy/settings.text_no')" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_title_keywords')" name="titlekeywords" :value="$config['titlekeywords'] ?? ''" :note="__('legacy/settings.text_title_keywords_note')" width="300px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_meta_keywords')" name="metakeywords" :value="$config['metakeywords'] ?? ''" :note="__('legacy/settings.text_meta_keywords_note')" width="300px" />
-    <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_meta_description') ?? 'Meta description' }}</div><div class="nx-fcell"><textarea cols="100" style="width: 450px;" rows="5" name='metadescription'>{{ (string)($config['metadescription'] ?? '') }}</textarea><br>{{ __('legacy/settings.text_meta_description_note') ?? '' }}</div>
-    <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_web_analytics_code') ?? 'Analytics code' }}</div><div class="nx-fcell"><textarea cols="100" style="width: 450px;" rows="5" name='analyticscode'>{{ (string)($config['analyticscode'] ?? '') }}</textarea><br>{{ __('legacy/settings.text_web_analytics_code_note') }} <br /><b>{{ __('legacy/settings.text_note') }}</b>: {{ __('legacy/settings.text_web_analytics_code_note_end') }}</div>
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_title_keywords')" name="titlekeywords" :value="$config['titlekeywords'] ?? ''" :note="__('legacy/settings.text_title_keywords_note')" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_meta_keywords')" name="metakeywords" :value="$config['metakeywords'] ?? ''" :note="__('legacy/settings.text_meta_keywords_note')" />
+    <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_meta_description') ?? 'Meta description' }}</div><div class="nx-fcell"><textarea cols="100" rows="5" name='metadescription'>{{ (string)($config['metadescription'] ?? '') }}</textarea><br>{{ __('legacy/settings.text_meta_description_note') ?? '' }}</div>
+    <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_web_analytics_code') ?? 'Analytics code' }}</div><div class="nx-fcell"><textarea cols="100" rows="5" name='analyticscode'>{{ (string)($config['analyticscode'] ?? '') }}</textarea><br>{{ __('legacy/settings.text_web_analytics_code_note') }} <br /><b>{{ __('legacy/settings.text_note') }}</b>: {{ __('legacy/settings.text_web_analytics_code_note_end') }}</div>
     <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_see_sql_debug') ?? 'SQL debug' }}</div><div class="nx-fcell"><input type='checkbox' name='enablesqldebug' value='yes'@if (($config['enablesqldebug'] ?? 'no') === 'yes') checked @endif>{{ __('legacy/settings.text_allow') ?? 'Allow' }}{{ \App\Support\UserClass::classSelectWithContext('sqldebug', \App\Enums\UserClass::STAFFLEADER->value, $config['sqldebug'] ?? \App\Enums\UserClass::MODERATOR->value) }}{{ __('legacy/settings.text_see_sql_list') ?? '' }}{{ \App\Support\UserClass::name(\App\Enums\UserClass::SYSOP->value, false, true, true) }}</div>
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_tracker_founded_date')" name="datefounded" :value="$config['datefounded'] ?? '2007-12-24'" :note="__('legacy/settings.text_tracker_founded_date_note')" width="300px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_css_date')" name="cssdate" :value="$config['cssdate'] ?? ''" :note="__('legacy/settings.text_css_date')" width="300px" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_tracker_founded_date')" name="datefounded" :value="$config['datefounded'] ?? '2007-12-24'" :note="__('legacy/settings.text_tracker_founded_date_note')" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_css_date')" name="cssdate" :value="$config['cssdate'] ?? ''" :note="__('legacy/settings.text_css_date')" />
     <x-settings-save layout="grid" :label="__('legacy/settings.row_save_settings')" :text="__('legacy/settings.submit_save_settings')" />
     </form>
 
 @elseif ($action === 'bonussettings')
     <form method="post" action="{{ $scriptName }}"><input type="hidden" name="action" value="savesettings_bonus">@csrf
     <div class="nx-ffull nx-center"><b>{{ __('legacy/settings.text_bonus_by_seeding') ?? 'Bonus by seeding' }}</b></div>
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_min_size')" name="min_size" :value="$config['min_size'] ?? 0" :note="__('legacy/settings.text_bonus_mini_size').' '.(__('legacy/settings.text_bonus_mini_size_help'))" width="100px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_donor_gets_double')" name="donortimes" :value="$config['donortimes'] ?? 2" :note="__('legacy/settings.text_donor_gets').' '.(__('legacy/settings.text_times_as_many'))" width="50px" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_min_size')" name="min_size" :value="$config['min_size'] ?? 0" :note="__('legacy/settings.text_bonus_mini_size').' '.(__('legacy/settings.text_bonus_mini_size_help'))" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_donor_gets_double')" name="donortimes" :value="$config['donortimes'] ?? 2" :note="__('legacy/settings.text_donor_gets').' '.(__('legacy/settings.text_times_as_many'))" />
     <x-settings-row layout="grid" :label="__('legacy/settings.row_basic_seeding_bonus')">
-        {{ __('legacy/settings.text_user_would_get') ?? '' }}<input type="text" style="width: 50px" name="perseeding" value="{{ (string)($config['perseeding'] ?? 1) }}">{{ __('legacy/settings.text_bonus_points') ?? '' }}<input type="text" style="width: 50px" name="maxseeding" value="{{ (string)($config['maxseeding'] ?? 7) }}">{{ __('legacy/settings.text_torrents_default') ?? '' }}
+        {{ __('legacy/settings.text_user_would_get') ?? '' }}<input type="text" name="perseeding" value="{{ (string)($config['perseeding'] ?? 1) }}">{{ __('legacy/settings.text_bonus_points') ?? '' }}<input type="text" name="maxseeding" value="{{ (string)($config['maxseeding'] ?? 7) }}">{{ __('legacy/settings.text_torrents_default') ?? '' }}
     </x-settings-row>
     <div class="nx-ffull nx-center"><b>{{ __('legacy/settings.text_misc_ways_get_bonus') ?? 'Misc bonus' }}</b></div>
     @foreach ([
@@ -323,11 +323,11 @@
         ['offervote', 'row_voting_on_offer', 1, 'text_voting_on_offer_note'],
     ] as [$field, $rowKey, $default, $noteKey])
     <x-settings-row layout="grid" :label="__('legacy/settings.'.$rowKey)">
-        {{ __('legacy/settings.text_user_would_get') ?? '' }}<input type="text" style="width: 50px" name="{{ $field }}" value="{{ (string)($config[$field] ?? $default) }}">{{ __('legacy/settings.'.$noteKey) }}
+        {{ __('legacy/settings.text_user_would_get') ?? '' }}<input type="text" name="{{ $field }}" value="{{ (string)($config[$field] ?? $default) }}">{{ __('legacy/settings.'.$noteKey) }}
     </x-settings-row>
     @endforeach
     <x-settings-row layout="grid" :label="__('legacy/settings.row_saying_thanks')">
-        {{ __('legacy/settings.text_giver_and_receiver_get') ?? '' }}<input type="text" style="width: 50px" name="saythanks" value="{{ (string)($config['saythanks'] ?? 0.5) }}">{{ __('legacy/settings.text_saying_thanks_and') ?? '' }}<input type="text" style="width: 50px" name="receivethanks" value="{{ (string)($config['receivethanks'] ?? 0) }}">{{ __('legacy/settings.text_saying_thanks_default') ?? '' }}
+        {{ __('legacy/settings.text_giver_and_receiver_get') ?? '' }}<input type="text" name="saythanks" value="{{ (string)($config['saythanks'] ?? 0.5) }}">{{ __('legacy/settings.text_saying_thanks_and') ?? '' }}<input type="text" name="receivethanks" value="{{ (string)($config['receivethanks'] ?? 0) }}">{{ __('legacy/settings.text_saying_thanks_default') ?? '' }}
     </x-settings-row>
     <div class="nx-ffull nx-center"><b>{{ __('legacy/settings.text_things_cost_bonus') ?? 'Things that cost bonus' }}</b></div>
     @foreach ([
@@ -348,25 +348,25 @@
         ['self_enable', 'row_self_enable', \App\Models\BonusLogs::DEFAULT_BONUS_SELF_ENABLE, 'text_self_enable_note'],
     ] as [$field, $rowKey, $default, $noteKey])
     <x-settings-row layout="grid" :label="__('legacy/settings.'.$rowKey)">
-        {{ __('legacy/settings.text_it_costs_user') ?? '' }}<input type="text" style="width: 50px" name="{{ $field }}" value="{{ (string)($config[$field] ?? $default) }}">{{ __('legacy/settings.'.$noteKey) }}
+        {{ __('legacy/settings.text_it_costs_user') ?? '' }}<input type="text" name="{{ $field }}" value="{{ (string)($config[$field] ?? $default) }}">{{ __('legacy/settings.'.$noteKey) }}
     </x-settings-row>
     @endforeach
     <x-settings-yesno layout="grid" :label="__('legacy/settings.row_allow_giving_bonus_gift')" name="bonusgift" :value="$config['bonusgift'] ?? 'no'" :note="__('legacy/settings.text_giving_bonus_gift_note')" :yes-label="__('legacy/settings.text_yes')" :no-label="__('legacy/settings.text_no')" />
     <x-settings-row layout="grid" :label="__('legacy/settings.row_bonus_gift_tax')">
-        {{ __('legacy/settings.text_system_charges') ?? '' }}<input type="text" style="width: 50px" name="basictax" value="{{ (string)($config['basictax'] ?? 5) }}">{{ __('legacy/settings.text_bonus_points_plus') ?? '' }}<input type="text" style="width: 50px" name="taxpercentage" value="{{ (string)($config['taxpercentage'] ?? 10) }}">{{ \App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/settings.text_bonus_gift_tax_note')) ?? '' }}
+        {{ __('legacy/settings.text_system_charges') ?? '' }}<input type="text" name="basictax" value="{{ (string)($config['basictax'] ?? 5) }}">{{ __('legacy/settings.text_bonus_points_plus') ?? '' }}<input type="text" name="taxpercentage" value="{{ (string)($config['taxpercentage'] ?? 10) }}">{{ \App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/settings.text_bonus_gift_tax_note')) ?? '' }}
     </x-settings-row>
     <div class="nx-ffull nx-center"><b>{{ __('legacy/settings.text_attendance_get_bonus') ?? 'Attendance bonus' }}</b></div>
-    <x-settings-text layout="grid" :label="__('legacy/settings.text_attendance_initial_reward')" name="attendance_initial" :value="$config['attendance_initial'] ?? 0" width="30px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.text_attendance_continuous_increment')" name="attendance_step" :value="$config['attendance_step'] ?? 0" width="30px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.text_attendance_reward_limit')" name="attendance_max" :value="$config['attendance_max'] ?? 0" width="50px" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.text_attendance_initial_reward')" name="attendance_initial" :value="$config['attendance_initial'] ?? 0" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.text_attendance_continuous_increment')" name="attendance_step" :value="$config['attendance_step'] ?? 0" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.text_attendance_reward_limit')" name="attendance_max" :value="$config['attendance_max'] ?? 0" />
     <x-settings-row layout="grid" :label="__('legacy/settings.text_attendance_continuous')">
         <table data-nx="data">
             <tr><td class="colhead">{{ __('legacy/settings.text_attendance_continuous_days') ?? 'Days' }}</td><td class="colhead">{{ __('legacy/settings.text_attendance_continuous_days_additional_reward') ?? 'Reward' }}</td><td class="colhead">{{ __('legacy/settings.text_attendance_continuous_days_action') ?? 'Action' }}</td></tr>
             @foreach (($attendance_continuous ?? []) as $days => $value)
-            <tr><td><input type="number" min="0" style="width: 40px" name="attendance_continuous_day[]" value="{{ $days }}"> {{ __('legacy/settings.text_attendance_continuous_unit') ?? 'days' }}</td><td><input type="number" min="0" style="width: 50px;" name="attendance_continuous_value[]" value="{{ $value }}"> {{ __('legacy/settings.text_attendance_input_suffix') ?? '' }}</td><td><a href="#" class="js-delrow">{{ __('legacy/settings.text_attendance_continuous_item_action_remove') ?? 'Remove' }}</a></td></tr>
+            <tr><td><input type="number" min="0" name="attendance_continuous_day[]" value="{{ $days }}"> {{ __('legacy/settings.text_attendance_continuous_unit') ?? 'days' }}</td><td><input type="number" min="0" name="attendance_continuous_value[]" value="{{ $value }}"> {{ __('legacy/settings.text_attendance_input_suffix') ?? '' }}</td><td><a href="#" class="js-delrow">{{ __('legacy/settings.text_attendance_continuous_item_action_remove') ?? 'Remove' }}</a></td></tr>
             @endforeach
             <tr><td colspan="3">{{ __('legacy/settings.text_attendance_continuous_add_rules') ?? '' }}</td></tr>
-            <tr><td><input type="number" min="0" style="width: 40px" name="attendance_continuous_day[]" value=""> {{ __('legacy/settings.text_attendance_continuous_unit') ?? 'days' }}</td><td><input type="number" min="0" style="width: 50px;" name="attendance_continuous_value[]" value=""> {{ __('legacy/settings.text_attendance_input_suffix') ?? '' }}</td><td><a href="#" class="js-newrow">{{ __('legacy/settings.text_attendance_continuous_item_action_add') ?? 'Add' }}</a></td></tr>
+            <tr><td><input type="number" min="0" name="attendance_continuous_day[]" value=""> {{ __('legacy/settings.text_attendance_continuous_unit') ?? 'days' }}</td><td><input type="number" min="0" name="attendance_continuous_value[]" value=""> {{ __('legacy/settings.text_attendance_input_suffix') ?? '' }}</td><td><a href="#" class="js-newrow">{{ __('legacy/settings.text_attendance_continuous_item_action_add') ?? 'Add' }}</a></td></tr>
         </table>
     </x-settings-row>
     <x-settings-save layout="grid" :label="__('legacy/settings.row_save_settings')" :text="__('legacy/settings.submit_save_settings')" />
@@ -381,10 +381,10 @@
     <x-settings-row layout="grid" :label="__('legacy/settings.row_never_delete_if_packed')">
         {{ \App\Support\UserClass::classSelectWithContext('neverdeletepacked', \App\Enums\UserClass::VIP->value, $config['neverdeletepacked'] ?? 0) }}{{ __('legacy/settings.text_never_delete_if_packed') ?? '' }}{{ \App\Support\UserClass::name(\App\Enums\UserClass::ELITE_USER->value, false, true, true) }}
     </x-settings-row>
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_delete_packed')" name="deletepacked" :value="$config['deletepacked'] ?? 400" :note="__('legacy/settings.text_delete_packed_note_two')" width="50px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_delete_unpacked')" name="deleteunpacked" :value="$config['deleteunpacked'] ?? 150" :note="__('legacy/settings.text_delete_unpacked_note_two')" width="50px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_delete_no_transfer')" name="deletenotransfer" :value="$config['deletenotransfer'] ?? 60" :note="__('legacy/settings.text_delete_transfer_note_two')" width="50px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_destroy_disabled')" name="destroy_disabled" :value="$config['destroy_disabled'] ?? 500" :note="__('legacy/settings.text_destroy_disabled_note_two')" width="50px" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_delete_packed')" name="deletepacked" :value="$config['deletepacked'] ?? 400" :note="__('legacy/settings.text_delete_packed_note_two')" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_delete_unpacked')" name="deleteunpacked" :value="$config['deleteunpacked'] ?? 150" :note="__('legacy/settings.text_delete_unpacked_note_two')" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_delete_no_transfer')" name="deletenotransfer" :value="$config['deletenotransfer'] ?? 60" :note="__('legacy/settings.text_delete_transfer_note_two')" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_destroy_disabled')" name="destroy_disabled" :value="$config['destroy_disabled'] ?? 500" :note="__('legacy/settings.text_destroy_disabled_note_two')" />
     <div class="nx-ffull nx-center"><b>{{ __('legacy/settings.text_user_promotion_demotion') ?? 'Promotion/Demotion' }}</b></div>
     @foreach ([
         [\App\Enums\UserClass::POWER_USER->value, 'pu', 4, 50, 1.05, 0.95, 1],
@@ -397,13 +397,13 @@
         [\App\Enums\UserClass::NEXUS_MASTER->value, 'nm', 100, 3072, 4.55, 4.45, 10],
     ] as [$class, $prefix, $time, $dl, $prratio, $deratio, $invites])
     <x-settings-row layout="grid" :label="\App\Support\Html\SafeHtml::fromTrustedHtml((__('legacy/settings.row_promote_to_one')).\App\Support\UserClass::name($class, false, false, true).(__('legacy/settings.row_promote_to_two')))">
-        {{ __('legacy/settings.text_alias') ?? 'Alias: ' }}<input type="text" style="width: 60px" name="{{ $class }}_alias" value="{{ (string)($config[$class.'_alias'] ?? '') }}"><br>
-        {{ __('legacy/settings.text_member_longer_than') ?? 'Member for ' }}<input type="text" style="width: 50px" name="{{ $prefix }}time" value="{{ (string)($config[$prefix.'time'] ?? $time) }}">
-        {{ __('legacy/settings.text_seed_points_more_than') ?? ' Seed points: ' }}<input type="text" style="width: 60px" name="{{ $class }}_min_seed_points" value="{{ (string)($config[$class.'_min_seed_points'] ?? 0) }}">
-        {{ __('legacy/settings.text_downloaded_more_than') ?? ' Downloaded: ' }}<input type="text" style="width: 50px" name="{{ $prefix }}dl" value="{{ (string)($config[$prefix.'dl'] ?? $dl) }}">
-        {{ __('legacy/settings.text_with_ratio_above') ?? ' Ratio: ' }}<input type="text" style="width: 50px" name="{{ $prefix }}prratio" value="{{ (string)($config[$prefix.'prratio'] ?? $prratio) }}">
-        {{ __('legacy/settings.text_demote_with_ratio_below') ?? ' Demote below: ' }}<input type="text" style="width: 50px" name="{{ $prefix }}deratio" value="{{ (string)($config[$prefix.'deratio'] ?? $deratio) }}">
-        {{ __('legacy/settings.text_users_get') ?? ' Invites: ' }}<input type="text" style="width: 50px" name="getInvitesByPromotion[{{ $class }}]" value="{{ (string)($config['getInvitesByPromotion'][$class] ?? $invites) }}">
+        {{ __('legacy/settings.text_alias') ?? 'Alias: ' }}<input type="text" name="{{ $class }}_alias" value="{{ (string)($config[$class.'_alias'] ?? '') }}"><br>
+        {{ __('legacy/settings.text_member_longer_than') ?? 'Member for ' }}<input type="text" name="{{ $prefix }}time" value="{{ (string)($config[$prefix.'time'] ?? $time) }}">
+        {{ __('legacy/settings.text_seed_points_more_than') ?? ' Seed points: ' }}<input type="text" name="{{ $class }}_min_seed_points" value="{{ (string)($config[$class.'_min_seed_points'] ?? 0) }}">
+        {{ __('legacy/settings.text_downloaded_more_than') ?? ' Downloaded: ' }}<input type="text" name="{{ $prefix }}dl" value="{{ (string)($config[$prefix.'dl'] ?? $dl) }}">
+        {{ __('legacy/settings.text_with_ratio_above') ?? ' Ratio: ' }}<input type="text" name="{{ $prefix }}prratio" value="{{ (string)($config[$prefix.'prratio'] ?? $prratio) }}">
+        {{ __('legacy/settings.text_demote_with_ratio_below') ?? ' Demote below: ' }}<input type="text" name="{{ $prefix }}deratio" value="{{ (string)($config[$prefix.'deratio'] ?? $deratio) }}">
+        {{ __('legacy/settings.text_users_get') ?? ' Invites: ' }}<input type="text" name="getInvitesByPromotion[{{ $class }}]" value="{{ (string)($config['getInvitesByPromotion'][$class] ?? $invites) }}">
     </x-settings-row>
     @endforeach
     <x-settings-save layout="grid" :label="__('legacy/settings.row_save_settings')" :text="__('legacy/settings.submit_save_settings')" />
@@ -411,8 +411,8 @@
 
 @elseif ($action === 'torrentsettings')
     <form method="post" action="{{ $scriptName }}"><input type="hidden" name="action" value="savesettings_torrent">@csrf
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_sticky_first_level_background_color')" name="sticky_first_level_background_color" :value="$config['sticky_first_level_background_color'] ?? ''" :note="__('legacy/settings.text_sticky_first_level_background_color_note')" width="100px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_sticky_second_level_background_color')" name="sticky_second_level_background_color" :value="$config['sticky_second_level_background_color'] ?? ''" :note="__('legacy/settings.text_sticky_second_level_background_color_note')" width="100px" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_sticky_first_level_background_color')" name="sticky_first_level_background_color" :value="$config['sticky_first_level_background_color'] ?? ''" :note="__('legacy/settings.text_sticky_first_level_background_color_note')" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_sticky_second_level_background_color')" name="sticky_second_level_background_color" :value="$config['sticky_second_level_background_color'] ?? ''" :note="__('legacy/settings.text_sticky_second_level_background_color_note')" />
     <x-settings-yesno layout="grid" :label="__('legacy/settings.row_download_support_passkey')" name="download_support_passkey" :value="$config['download_support_passkey'] ?? 'yes'" :note="__('legacy/settings.text_download_support_passkey_note')" :yes-label="__('legacy/settings.text_yes')" :no-label="__('legacy/settings.text_no')" />
     <x-settings-yesno layout="grid" :label="__('legacy/settings.row_approval_status_icon_enabled')" name="approval_status_icon_enabled" :value="$config['approval_status_icon_enabled'] ?? 'no'" :note="__('legacy/settings.text_approval_status_icon_enabled_note')" :yes-label="__('legacy/settings.text_yes')" :no-label="__('legacy/settings.text_no')" />
     <x-settings-yesno layout="grid" :label="__('legacy/settings.row_approval_status_none_visible')" name="approval_status_none_visible" :value="$config['approval_status_none_visible'] ?? 'no'" :note="__('legacy/settings.text_approval_status_none_visible_note')" :yes-label="__('legacy/settings.text_yes')" :no-label="__('legacy/settings.text_no')" />
@@ -421,10 +421,10 @@
         :options="collect($nfoViewStyles ?? [])->mapWithKeys(fn ($info, $style) => [(string)$style => $info['text'] ?? $style])->all()"
         :selected="(string)($config['nfo_view_style_default'] ?? 0)" />
     <x-settings-yesno layout="grid" :label="__('legacy/settings.row_paid_torrent_enabled')" name="paid_torrent_enabled" :value="$config['paid_torrent_enabled'] ?? 'no'" :note="__('legacy/settings.text_paid_torrent_enabled_note')" :yes-label="__('legacy/settings.text_yes')" :no-label="__('legacy/settings.text_no')" />
-    <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_tax_factor') ?? 'Tax factor' }}</div><div class="nx-fcell"><input type='number' name=tax_factor style="width: 100px" value="{{ (string)($config['tax_factor'] ?? 0) }}"> {{ __('legacy/settings.text_tax_factor_note') ?? '' }}</div>
-    <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_max_price') ?? 'Max price' }}</div><div class="nx-fcell"><input type='number' name=max_price style="width: 100px" value="{{ (string)($config['max_price'] ?? 0) }}"> {{ __('legacy/settings.text_max_price_note') ?? '' }}</div>
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_reward_bonus_options')" name="reward_bonus_options" :value="$config['reward_bonus_options'] ?? ''" :note="__('legacy/settings.text_reward_bonus_options_note')" width="200px" />
-    <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_reward_times_limit') ?? 'Reward limit' }}</div><div class="nx-fcell"><input type='number' name=reward_times_limit style="width: 100px" value="{{ (string)($config['reward_times_limit'] ?? 0) }}"> {{ __('legacy/settings.text_reward_times_limit_note') ?? '' }}</div>
+    <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_tax_factor') ?? 'Tax factor' }}</div><div class="nx-fcell"><input type='number' name=tax_factor value="{{ (string)($config['tax_factor'] ?? 0) }}"> {{ __('legacy/settings.text_tax_factor_note') ?? '' }}</div>
+    <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_max_price') ?? 'Max price' }}</div><div class="nx-fcell"><input type='number' name=max_price value="{{ (string)($config['max_price'] ?? 0) }}"> {{ __('legacy/settings.text_max_price_note') ?? '' }}</div>
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_reward_bonus_options')" name="reward_bonus_options" :value="$config['reward_bonus_options'] ?? ''" :note="__('legacy/settings.text_reward_bonus_options_note')" />
+    <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_reward_times_limit') ?? 'Reward limit' }}</div><div class="nx-fcell"><input type='number' name=reward_times_limit value="{{ (string)($config['reward_times_limit'] ?? 0) }}"> {{ __('legacy/settings.text_reward_times_limit_note') ?? '' }}</div>
     <x-settings-row layout="grid" :label="__('legacy/settings.row_random_promotion')">
         {{ __('legacy/settings.text_random_promotion_note_one') ?? '' }}
         <ul>
@@ -436,13 +436,13 @@
                 ['randomtwouphalfdown', 0, 'text_twouphalfleech_chance_becoming'],
                 ['randomthirtypercentdown', 0, 'text_thirtypercentleech_chance_becoming'],
             ] as [$field, $default, $noteKey])
-                <li><input type="text" style="width: 50px" name="{{ $field }}" value="{{ (string)($config[$field] ?? $default) }}">{{ __('legacy/settings.'.$noteKey) }}</li>
+                <li><input type="text" name="{{ $field }}" value="{{ (string)($config[$field] ?? $default) }}">{{ __('legacy/settings.'.$noteKey) }}</li>
             @endforeach
         </ul>
         {{ __('legacy/settings.text_random_promotion_note_two') ?? '' }}
     </x-settings-row>
     <x-settings-row layout="grid" :label="__('legacy/settings.row_large_torrent_promotion')">
-        {{ __('legacy/settings.text_torrent_larger_than') ?? '' }}<input type="text" style="width: 50px" name="largesize" value="{{ (string)($config['largesize'] ?? 20) }}">{{ __('legacy/settings.text_gb_promoted_to') ?? '' }}<select name="largepro">{{ $promotionSelects['largepro'] ?? '' }}</select>{{ __('legacy/settings.text_by_system_upon_uploading') ?? '' }}<br>{{ __('legacy/settings.text_large_torrent_promotion_note') ?? '' }}
+        {{ __('legacy/settings.text_torrent_larger_than') ?? '' }}<input type="text" name="largesize" value="{{ (string)($config['largesize'] ?? 20) }}">{{ __('legacy/settings.text_gb_promoted_to') ?? '' }}<select name="largepro">{{ $promotionSelects['largepro'] ?? '' }}</select>{{ __('legacy/settings.text_by_system_upon_uploading') ?? '' }}<br>{{ __('legacy/settings.text_large_torrent_promotion_note') ?? '' }}
     </x-settings-row>
     <x-settings-row layout="grid" :label="__('legacy/settings.row_promotion_timeout')">
         {{ __('legacy/settings.text_promotion_timeout_note_one') ?? '' }}
@@ -456,15 +456,15 @@
                 ['thirtypercentleechbecome', 'expirethirtypercentleech', 1, 7, 'text_thirtypercentleech_will_become', 'text_thirtypercentleech_timeout_default', 30],
                 ['normalbecome', 'expirenormal', 1, 0, 'text_normal_will_become', 'text_normal_timeout_default', 0],
             ] as [$become, $expire, $defBecome, $hide, $willKey, $defKey, $defExpire])
-                <li>{{ __('legacy/settings.'.$willKey) }}<select name="{{ $become }}">{{ $promotionSelects[$become] ?? '' }}</select>{{ __('legacy/settings.text_after') ?? ' after ' }}<input type="text" style="width: 50px" name="{{ $expire }}" value="{{ (string)($config[$expire] ?? $defExpire) }}">{{ __('legacy/settings.'.$defKey) }}</li>
+                <li>{{ __('legacy/settings.'.$willKey) }}<select name="{{ $become }}">{{ $promotionSelects[$become] ?? '' }}</select>{{ __('legacy/settings.text_after') ?? ' after ' }}<input type="text" name="{{ $expire }}" value="{{ (string)($config[$expire] ?? $defExpire) }}">{{ __('legacy/settings.'.$defKey) }}</li>
             @endforeach
         </ul>
         {{ __('legacy/settings.text_promotion_timeout_note_two') ?? '' }}
     </x-settings-row>
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_auto_pick_hot')" name="hotdays" :value="$config['hotdays'] ?? 7" :note="__('legacy/settings.text_days_with_more_than')" width="50px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_auto_pick_hot')" name="hotseeder" :value="$config['hotseeder'] ?? 10" :note="__('legacy/settings.text_be_picked_as_hot')" width="50px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_uploader_get_double')" name="uploaderdouble" :value="$config['uploaderdouble'] ?? 1" :note="__('legacy/settings.text_times_uploading_credit')" width="50px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_delete_dead_torrents')" name="deldeadtorrent" :value="$config['deldeadtorrent'] ?? 0" :note="__('legacy/settings.text_days_be_deleted')" width="50px" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_auto_pick_hot')" name="hotdays" :value="$config['hotdays'] ?? 7" :note="__('legacy/settings.text_days_with_more_than')" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_auto_pick_hot')" name="hotseeder" :value="$config['hotseeder'] ?? 10" :note="__('legacy/settings.text_be_picked_as_hot')" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_uploader_get_double')" name="uploaderdouble" :value="$config['uploaderdouble'] ?? 1" :note="__('legacy/settings.text_times_uploading_credit')" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_delete_dead_torrents')" name="deldeadtorrent" :value="$config['deldeadtorrent'] ?? 0" :note="__('legacy/settings.text_days_be_deleted')" />
     <x-settings-save layout="grid" :label="__('legacy/settings.row_save_settings')" :text="__('legacy/settings.submit_save_settings')" />
     </form>
 
@@ -480,13 +480,13 @@
                 ['four', \App\Enums\UserClass::EXTREME_USER, '', ''],
             ] as [$num, $defaultClass, $defOne, $defTwo])
                 <li>
-                    {{ \App\Support\UserClass::classSelectWithContext('class'.$num, \App\Enums\UserClass::STAFFLEADER->value, $config['class'.$num] ?? 0) }}{{ __('legacy/settings.text_can_upload_at_most') ?? '' }}<input type="text" style="width: 50px" name="count{{ $num }}" value="{{ (string)($config['count'.$num] ?? '') }}"> {{ __('legacy/settings.text_file_size_below') ?? '' }}<input type="text" style="width: 50px" name="size{{ $num }}" value="{{ (string)($config['size'.$num] ?? '') }}">{{ __('legacy/settings.text_with_extension_name') ?? '' }}<input type="text" style="width: 200px" name="ext{{ $num }}" value="{{ (string)($config['ext'.$num] ?? '') }}">{{ __('legacy/settings.'.$defOne) }}{{ \App\Support\UserClass::name($defaultClass->value, false, true, true) }}{{ __('legacy/settings.'.$defTwo) }}
+                    {{ \App\Support\UserClass::classSelectWithContext('class'.$num, \App\Enums\UserClass::STAFFLEADER->value, $config['class'.$num] ?? 0) }}{{ __('legacy/settings.text_can_upload_at_most') ?? '' }}<input type="text" name="count{{ $num }}" value="{{ (string)($config['count'.$num] ?? '') }}"> {{ __('legacy/settings.text_file_size_below') ?? '' }}<input type="text" name="size{{ $num }}" value="{{ (string)($config['size'.$num] ?? '') }}">{{ __('legacy/settings.text_with_extension_name') ?? '' }}<input type="text" name="ext{{ $num }}" value="{{ (string)($config['ext'.$num] ?? '') }}">{{ __('legacy/settings.'.$defOne) }}{{ \App\Support\UserClass::name($defaultClass->value, false, true, true) }}{{ __('legacy/settings.'.$defTwo) }}
                 </li>
             @endforeach
         </ul>
     </x-settings-row>
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_save_directory')" name="savedirectory" :value="$config['savedirectory'] ?? './attachments'" :note="\App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/settings.text_save_directory_note'))" width="300px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_http_directory')" name="httpdirectory" :value="$config['httpdirectory'] ?? 'attachments'" :note="\App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/settings.text_http_directory_note'))" width="300px" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_save_directory')" name="savedirectory" :value="$config['savedirectory'] ?? './attachments'" :note="\App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/settings.text_save_directory_note'))" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_http_directory')" name="httpdirectory" :value="$config['httpdirectory'] ?? 'attachments'" :note="\App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/settings.text_http_directory_note'))" />
     <x-settings-radios layout="grid"         :label="__('legacy/settings.row_save_directory_type')"
         name="savedirectorytype"
         :options="['onedir' => __('legacy/settings.text_one_directory'), 'monthdir' => __('legacy/settings.text_directories_by_monthes'), 'daydir' => __('legacy/settings.text_directories_by_days')]"
@@ -499,25 +499,25 @@
         :selected="$config['thumbnailtype'] ?? 'no'"
         :note="__('legacy/settings.text_image_thumbnail_note')"
         :break="true" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_thumbnail_quality')" name="thumbquality" :value="$config['thumbquality'] ?? 80" :note="__('legacy/settings.text_thumbnail_quality_note')" width="100px" />
-    <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_thumbnail_size') ?? 'Thumb size' }}</div><div class="nx-fcell"><input type='text' style="width: 100px" name="thumbwidth" value="{{ (string)($config['thumbwidth'] ?? 500) }}"> * <input type='text' style="width: 100px" name="thumbheight" value="{{ (string)($config['thumbheight'] ?? 500) }}"> {{ \App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/settings.text_thumbnail_size_note')) ?? '' }}</div>
-    <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_alternative_thumbnail_size') ?? 'Alt thumb size' }}</div><div class="nx-fcell"><input type='text' style="width: 100px" name="altthumbwidth" value="{{ (string)($config['altthumbwidth'] ?? 180) }}"> * <input type='text' style="width: 100px" name="altthumbheight" value="{{ (string)($config['altthumbheight'] ?? 135) }}"> {{ __('legacy/settings.text_alternative_thumbnail_size_note') ?? '' }}</div>
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_thumbnail_quality')" name="thumbquality" :value="$config['thumbquality'] ?? 80" :note="__('legacy/settings.text_thumbnail_quality_note')" />
+    <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_thumbnail_size') ?? 'Thumb size' }}</div><div class="nx-fcell"><input type='text' name="thumbwidth" value="{{ (string)($config['thumbwidth'] ?? 500) }}"> * <input type='text' name="thumbheight" value="{{ (string)($config['thumbheight'] ?? 500) }}"> {{ \App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/settings.text_thumbnail_size_note')) ?? '' }}</div>
+    <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_alternative_thumbnail_size') ?? 'Alt thumb size' }}</div><div class="nx-fcell"><input type='text' name="altthumbwidth" value="{{ (string)($config['altthumbwidth'] ?? 180) }}"> * <input type='text' name="altthumbheight" value="{{ (string)($config['altthumbheight'] ?? 135) }}"> {{ __('legacy/settings.text_alternative_thumbnail_size_note') ?? '' }}</div>
     <x-settings-save layout="grid" :label="__('legacy/settings.row_save_settings')" :text="__('legacy/settings.submit_save_settings')" />
     </form>
 
 @elseif ($action === 'codesettings')
     <form method="post" action="{{ $scriptName }}"><input type="hidden" name="action" value="savesettings_code">@csrf
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_main_version')" name="mainversion" :value="$config['mainversion'] ?? 'NexusPHP'" :note="__('legacy/settings.text_main_version_note')" width="300px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_sub_version')" name="subversion" :value="$config['subversion'] ?? '1.0'" :note="__('legacy/settings.text_sub_version_note')" width="300px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_release_date')" name="releasedate" :value="$config['releasedate'] ?? '2008-12-10'" :note="__('legacy/settings.text_release_date_note')" width="300px" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_web_site')" name="website" :value="$config['website'] ?? ''" :note="__('legacy/settings.text_web_site_note_two')" width="300px" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_main_version')" name="mainversion" :value="$config['mainversion'] ?? 'NexusPHP'" :note="__('legacy/settings.text_main_version_note')" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_sub_version')" name="subversion" :value="$config['subversion'] ?? '1.0'" :note="__('legacy/settings.text_sub_version_note')" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_release_date')" name="releasedate" :value="$config['releasedate'] ?? '2008-12-10'" :note="__('legacy/settings.text_release_date_note')" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_web_site')" name="website" :value="$config['website'] ?? ''" :note="__('legacy/settings.text_web_site_note_two')" />
     <x-settings-save layout="grid" :label="__('legacy/settings.row_save_settings')" :text="__('legacy/settings.submit_save_settings')" />
     </form>
 
 @elseif ($action === 'miscsettings')
     <form method="post" action="{{ $scriptName }}"><input type="hidden" name="action" value="savesettings_misc">@csrf
     <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_misc_donation_custom') ?? 'Donation custom' }}</div><div class="nx-fcell"><textarea cols="100" rows="10" name='donation_custom'>{{ (string)($config['donation_custom'] ?? '') }}</textarea><br>{{ __('legacy/settings.text_donation_custom_note') }}&nbsp;<b><a href="tags.php" target="_blank">{{ __('legacy/settings.text_bbcode_tag') }}</a></b></div>
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_protected_forum')" name="protected_forum" :value="$config['protected_forum'] ?? ''" :note="__('legacy/settings.text_protected_forum')" width="100px" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_protected_forum')" name="protected_forum" :value="$config['protected_forum'] ?? ''" :note="__('legacy/settings.text_protected_forum')" />
     <x-settings-save layout="grid" :label="__('legacy/settings.row_save_settings')" :text="__('legacy/settings.submit_save_settings')" />
     </form>
 

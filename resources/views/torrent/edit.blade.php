@@ -14,13 +14,13 @@
 @endif
 <div class="nx-fgrid">
 <div class="nx-ffull nx-colhead nx-center">{{ $torrentRow['name'] }}</div>
-<div class="nx-fhead nx-nowrap">{{ __('legacy/edit.row_torrent_name') }}<font color="red">*</font></div><div class="nx-fcell"><input type="text" style="width: 99%;" name="name" value="{{ $torrentRow['name'] }}" /></div>
+<div class="nx-fhead nx-nowrap">{{ __('legacy/edit.row_torrent_name') }}<font color="red">*</font></div><div class="nx-fcell"><input type="text" name="name" value="{{ $torrentRow['name'] }}" /></div>
 @if ($priceRowHtml !== null)
 <x-settings-row layout="grid" :label="\App\Support\Locale::trans('label.torrent.price', [], null)">{{ $priceRowHtml }}</x-settings-row>
 @endif
 <div class="nx-fhead">{{ __('legacy/edit.row_description') }}<font color="red">*</font></div><div class="nx-fcell">{{ $bbcodeEditorHtml }}</div>
 @if ($technicalInfoEnabled)
-<x-settings-row layout="grid" :label="__('legacy/functions.text_technical_info')"><textarea name="technical_info" rows="8" style="width: 99%;">{{ $torrentRow['technical_info'] ?? '' }}</textarea><br/><b>&middot;</b> {{ __('legacy/functions.text_technical_info_help_text') }} <b><a href="https://mediaarea.net/en/MediaInfo" target='_blank'>{{ __('legacy/functions.text_technical_info_help_link_mediainfo') }}</a></b>{{ __('legacy/functions.text_technical_info_help_text_one_end') }}<br /><b>&middot;</b> {{ __('legacy/functions.text_technical_info_help_text_two') }} <b><a href="https://github.com/UniqProject/BDInfo" target='_blank'>{{ __('legacy/functions.text_technical_info_help_link_bdinfo') }}</a></b>{{ __('legacy/functions.text_technical_info_help_text_two_end') }}</x-settings-row>
+<x-settings-row layout="grid" :label="__('legacy/functions.text_technical_info')"><textarea name="technical_info" rows="8">{{ $torrentRow['technical_info'] ?? '' }}</textarea><br/><b>&middot;</b> {{ __('legacy/functions.text_technical_info_help_text') }} <b><a href="https://mediaarea.net/en/MediaInfo" target='_blank'>{{ __('legacy/functions.text_technical_info_help_link_mediainfo') }}</a></b>{{ __('legacy/functions.text_technical_info_help_text_one_end') }}<br /><b>&middot;</b> {{ __('legacy/functions.text_technical_info_help_text_two') }} <b><a href="https://github.com/UniqProject/BDInfo" target='_blank'>{{ __('legacy/functions.text_technical_info_help_link_bdinfo') }}</a></b>{{ __('legacy/functions.text_technical_info_help_text_two_end') }}</x-settings-row>
 @endif
 <div class="nx-fhead nx-nowrap">{{ __('legacy/edit.row_type') }}<font color="red">*</font></div><div class="nx-fcell">{{ $typeSelect }}</div>
 <div class="nx-grouprow {{ $modeClass }}" relation="{{ $modeClass }}"><div class="nx-fhead nx-nowrap">{{ __('legacy/edit.row_quality') }}</div><div class="nx-fcell">{{ $taxonomySelect }}</div></div>
@@ -46,11 +46,11 @@
 <div class="nx-fgrid">
 <div class="nx-ffull nx-colhead"><b>{{ __('legacy/edit.text_delete_torrent') }}</b> {{ __('legacy/edit.text_reason') }}</div>
 <div class="nx-fhead nx-nowrap"><input name="reasontype" type="radio" value="1" />&nbsp;{{ __('legacy/edit.radio_dead') }}</div><div class="nx-fcell">{{ __('legacy/edit.text_dead_note') }}</div>
-<div class="nx-fhead nx-nowrap"><input name="reasontype" type="radio" value="2" />&nbsp;{{ __('legacy/edit.radio_dupe') }}</div><div class="nx-fcell"><input type="text" style="width: 200px" name="reason[]" /></div>
-<div class="nx-fhead nx-nowrap"><input name="reasontype" type="radio" value="3" />&nbsp;{{ __('legacy/edit.radio_nuked') }}</div><div class="nx-fcell"><input type="text" style="width: 200px" name="reason[]" /></div>
-<div class="nx-fhead nx-nowrap"><input name="reasontype" type="radio" value="4" />&nbsp;{{ __('legacy/edit.radio_rules') }}</div><div class="nx-fcell"><input type="text" style="width: 200px" name="reason[]" />{{ __('legacy/edit.text_req') }}</div>
-<div class="nx-fhead nx-nowrap"><input name="reasontype" type="radio" value="5" checked="checked" />&nbsp;{{ __('legacy/edit.radio_other') }}</div><div class="nx-fcell"><input type="text" style="width: 200px" name="reason[]" />{{ __('legacy/edit.text_req') }}</div>
-<div class="nx-ffull nx-center"><input type="submit" style='height: 25px' value="{{ __('legacy/edit.submit_delete_it') ?? '' }}" /></div>
+<div class="nx-fhead nx-nowrap"><input name="reasontype" type="radio" value="2" />&nbsp;{{ __('legacy/edit.radio_dupe') }}</div><div class="nx-fcell"><input type="text" name="reason[]" /></div>
+<div class="nx-fhead nx-nowrap"><input name="reasontype" type="radio" value="3" />&nbsp;{{ __('legacy/edit.radio_nuked') }}</div><div class="nx-fcell"><input type="text" name="reason[]" /></div>
+<div class="nx-fhead nx-nowrap"><input name="reasontype" type="radio" value="4" />&nbsp;{{ __('legacy/edit.radio_rules') }}</div><div class="nx-fcell"><input type="text" name="reason[]" />{{ __('legacy/edit.text_req') }}</div>
+<div class="nx-fhead nx-nowrap"><input name="reasontype" type="radio" value="5" checked="checked" />&nbsp;{{ __('legacy/edit.radio_other') }}</div><div class="nx-fcell"><input type="text" name="reason[]" />{{ __('legacy/edit.text_req') }}</div>
+<div class="nx-ffull nx-center"><input type="submit" value="{{ __('legacy/edit.submit_delete_it') ?? '' }}" /></div>
 </div>
 </form>
 @endif

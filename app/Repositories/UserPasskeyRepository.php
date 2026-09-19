@@ -293,16 +293,16 @@ class UserPasskeyRepository extends BaseRepository
                     ?>
                     <tr>
                         <td>
-                            <div style="display:flex;align-items:center;padding:4px">
+                            <div>
                                 <?php
                                 $meta = $AAGUIDS[$passkey->getAaguidFormatted()];
                     if (isset($meta)) {
-                        printf('<img style="width: 32px" src="%s" alt="%s" /><div style="margin-right:4px"><b>%s</b> (%s)', $meta['icon_dark'], $meta['name'], $meta['name'], $passkey->credential_id);
+                        printf('<img src="%s" alt="%s" /><div><b>%s</b> (%s)', $meta['icon_dark'], $meta['name'], $meta['name'], $passkey->credential_id);
                     } else {
-                        printf('<img style="width: 32px" src="%s" alt="%s" /><div style="margin-right:4px"><b>%s</b>', self::$passkeyvg, $passkey->credential_id, $passkey->credential_id);
+                        printf('<img src="%s" alt="%s" /><div><b>%s</b>', self::$passkeyvg, $passkey->credential_id, $passkey->credential_id);
                     }
                     printf('<br><b>%s</b>%s</div>', Locale::trans('passkey.passkey_created_at', [], null), Time::format($passkey->created_at));
-                    printf('<button type="button" style="margin-left:auto" data-passkey-id="%s">%s</button>', $passkey->credential_id, Locale::trans('passkey.passkey_delete', [], null))
+                    printf('<button type="button" data-passkey-id="%s">%s</button>', $passkey->credential_id, Locale::trans('passkey.passkey_delete', [], null))
                     ?>
                             </div>
                         </td>

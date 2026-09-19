@@ -24,13 +24,13 @@ final class Medal
     public static function buildImages(Collection $medals, int|string $maxHeight = 200, bool $withActions = false): string
     {
         $medalImages = [];
-        $wrapBefore = '<form><div style="display: flex;flex-wrap: wrap;justify-content: center;margin-top: 10px;">';
+        $wrapBefore = '<form><div>';
         $wrapAfter = '</div></form>';
         $maxHeight = (int) $maxHeight;
 
         foreach ($medals as $medal) {
             $html = sprintf(
-                '<div style="display: flex;flex-direction: column;justify-content: space-between;margin-right: 10px"><div><img src="%s" title="%s" class="preview" style="max-height: %spx;max-width: %spx"/></div>',
+                '<div><div><img src="%s" title="%s" class="preview"/></div>',
                 $medal->image_large,
                 $medal->name,
                 $maxHeight,
@@ -39,7 +39,7 @@ final class Medal
 
             if ($withActions) {
                 $html .= sprintf(
-                    '<div style="display: flex;flex-direction: column;align-items:flex-start"><span>%s: %s</span><span>%s: %s</span><span>%s: %s</span><label>%s: <input type="number" name="priority_%s" value="%s" style="width: 50px" placeholder="%s"></label>',
+                    '<div><span>%s: %s</span><span>%s: %s</span><span>%s: %s</span><label>%s: <input type="number" name="priority_%s" value="%s" placeholder="%s"></label>',
                     Locale::trans('label.expire_at'),
                     $medal->pivot->expire_at ? Time::formatDateTime($medal->pivot->expire_at) : Locale::trans('label.permanent'),
                     Locale::trans('medal.fields.bonus_addition_factor'),
@@ -65,7 +65,7 @@ final class Medal
         }
 
         if ($withActions) {
-            $medalImages[] = sprintf('<div style="display: flex;flex-direction: column;justify-content: space-between;margin-right: 10px"><div></div><div><input type="button" id="save-user-medal-btn" value="%s"/></div></div>', Locale::trans('label.save', [], null));
+            $medalImages[] = sprintf('<div><div></div><div><input type="button" id="save-user-medal-btn" value="%s"/></div></div>', Locale::trans('label.save', [], null));
         }
 
         return $wrapBefore.implode('', $medalImages).$wrapAfter;

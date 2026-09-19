@@ -8,8 +8,8 @@
 <form method="post" class="nx-inline" action="modrules.php?act=addsect">
     @csrf
     <div class="nx-fgrid nx-fgrid--auto">
-        <div class="nx-fcell">Title:</div><div class="nx-fcell"><input style="width: 400px;" type="text" name="title"/></div>
-        <div class="nx-fcell" style="vertical-align: top;">Rules:</div><div class="nx-fcell"><textarea cols=90 rows=20 name="text"></textarea></div>
+        <div class="nx-fcell">Title:</div><div class="nx-fcell"><input type="text" name="title"/></div>
+        <div class="nx-fcell">Rules:</div><div class="nx-fcell"><textarea cols=90 rows=20 name="text"></textarea></div>
             <div class="nx-fcell">Language:</div>
             <div class="nx-fcell nx-center">
                 <select name=language>
@@ -18,7 +18,7 @@
                     @endforeach
                 </select>
             </div>
-        <div class="nx-ffull nx-center"><input type="submit" value="Add" style="width: 60px;"></div>
+        <div class="nx-ffull nx-center"><input type="submit" value="Add"></div>
     </div>
 </form>
 @elseif ($mode === 'edit')
@@ -26,8 +26,8 @@
 <form method="post" class="nx-inline" action="modrules.php?act=edited">
     @csrf
     <div class="nx-fgrid nx-fgrid--auto">
-        <div class="nx-fcell">Title:</div><div class="nx-fcell"><input style="width: 400px;" type="text" name="title" value="{{ $rule['title'] ?? '' }}" /></div>
-        <div class="nx-fcell" style="vertical-align: top;">Rules:</div><div class="nx-fcell"><textarea cols=90 rows=20 name="text">{{ $rule['text'] ?? '' }}</textarea></div>
+        <div class="nx-fcell">Title:</div><div class="nx-fcell"><input type="text" name="title" value="{{ $rule['title'] ?? '' }}" /></div>
+        <div class="nx-fcell">Rules:</div><div class="nx-fcell"><textarea cols=90 rows=20 name="text">{{ $rule['text'] ?? '' }}</textarea></div>
             <div class="nx-fcell">Language:</div>
             <div class="nx-fcell nx-center">
                 <select name=language>
@@ -36,7 +36,7 @@
                     @endforeach
                 </select>
             </div>
-        <div class="nx-ffull nx-center"><input type=hidden value="{{ (int) ($rule['id'] ?? 0) }}" name=id><input type="submit" value="Save" style="width: 60px;"></div>
+        <div class="nx-ffull nx-center"><input type=hidden value="{{ (int) ($rule['id'] ?? 0) }}" name=id><input type="submit" value="Save"></div>
     </div>
 </form>
 @else

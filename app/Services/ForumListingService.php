@@ -216,7 +216,7 @@ final class ForumListingService
                 }
 
                 echo '<tr><td class="rowfollow" align="left"><table border="0" cellspacing="0" cellpadding="0"><tr>'.
-                "<td class=\"embedded\" style='padding-right: 10px'>".$img.
+                "<td class=\"embedded\">".$img.
                 "</td><td class=\"embedded\" align=\"left\">\n".
                 $subject.'</td></tr></table></td><td class="rowfollow" align="center">'.UserDisplay::username($fpuserid).'<br />'.$topictime.'</td><td class="rowfollow" align="center">'.$replies.' / <font color="gray">'.$views."</font></td>\n".
                 '<td class="rowfollow nowrap" align="center">'.$lpadded.'<br />'.$lpusername."</td>\n";
@@ -226,11 +226,11 @@ final class ForumListingService
             }
 
             echo "<tr><td align=\"left\">\n";
-            echo '<form method="get" action="forums.php"><b>'.(__('legacy/forums.text_fast_search')).'</b><input type="hidden" name="action" value="viewforum" /><input type="hidden" name="forumid" value="'.$forumid.'" /><input type="text" style="width: 180px" name="search" />&nbsp;<input type="submit" value="'.(__('legacy/forums.text_go')).'" /></form>';
+            echo '<form method="get" action="forums.php"><b>'.(__('legacy/forums.text_fast_search')).'</b><input type="hidden" name="action" value="viewforum" /><input type="hidden" name="forumid" value="'.$forumid.'" /><input type="text" name="search" />&nbsp;<input type="submit" value="'.(__('legacy/forums.text_go')).'" /></form>';
             echo '</td>';
             ?>
 <td align="left" colspan="3">
-<span id="order" style="cursor:pointer"><span style="cursor: pointer;"><b><?php echo __('legacy/forums.text_order') ?></b></span>
+<span id="order"><span><b><?php echo __('legacy/forums.text_order') ?></b></span>
 <span id="orderlist" class="dropmenu nx-hidden"><ul>
 <li><a href="?action=viewforum&amp;forumid=<?php echo $forumid.$addparam ?>&amp;sort=firstpostdesc"><?php echo __('legacy/forums.text_topic_desc') ?></a></li>
 <li><a href="?action=viewforum&amp;forumid=<?php echo $forumid.$addparam ?>&amp;sort=firstpostasc"><?php echo __('legacy/forums.text_topic_asc') ?></a></li>
@@ -305,7 +305,7 @@ final class ForumListingService
                 echo "<table border=\"1\" cellspacing=\"0\" cellpadding=\"5\">\n";
                 echo '<tr><td class="colhead" align="left">'.(__('legacy/forums.col_topic')).'</td><td class="colhead" align="left">'.(__('legacy/forums.col_forum'))."</td></tr>\n";
             }
-            echo "<tr><td class=\"rowfollow\" align=\"left\"><table border=\"0\" cellspacing=\"0\" cellpadding=\"0\"><tr><td class=\"embedded\" style='padding-right: 10px'>".
+            echo "<tr><td class=\"rowfollow\" align=\"left\"><table border=\"0\" cellspacing=\"0\" cellpadding=\"0\"><tr><td class=\"embedded\">".
             $this->index->getTopicImage('unread').'</td><td class="embedded">'.
             '<a href="'.htmlspecialchars('?action=viewtopic&topicid='.$topicid.($lastpostread > 0 && $lastpostread != (int) ($curUser['last_catchup'] ?? 0) ? '&page=p'.$lastpostread.'#pid'.$lastpostread : '')).'">'.$this->index->highlightTopic(htmlspecialchars((string) $arr['subject']), (int) $arr['hlcolor']).
             '</a></td></tr></table></td><td class="rowfollow" align="left"><a href="'.htmlspecialchars('?action=viewforum&forumid='.$forumid).'"><b>'.$forumname."</b></a></td></tr>\n";
@@ -347,18 +347,18 @@ final class ForumListingService
         ?>
 <div class="search">
 	<div class="search_title"><?php echo __('legacy/forums.text_search_on_forum') ?> <?php echo $error && $keywords != '' ? '[<b><font color=striking> '.(__('legacy/forums.text_nothing_found')).'</font></b> ]' : $found ?></div>
-	<div style="margin-left: 53px; margin-top: 13px;">
-		<form method="get" action="forums.php" id="search_form" style="margin: 0pt; padding: 0pt; font-family: Tahoma,Arial,Helvetica,sans-serif; font-size: 11px;">
+	<div>
+		<form method="get" action="forums.php" id="search_form">
 		<input type="hidden" name="action" value="search" />
 		<table border="0" cellpadding="0" cellspacing="0" width="512" class="search_table">
 		<tbody>
 		<tr>
-		<td style="padding-bottom: 3px; border: 0;" valign="top"><?php echo __('legacy/forums.text_by_keyword') ?></td>
+		<td valign="top"><?php echo __('legacy/forums.text_by_keyword') ?></td>
 		</tr>
 		<tr>
-		<td style="padding-bottom: 3px; border: 0;" valign="top">
-			<input name="keywords" type="text" value="<?php echo $keywords ?>" style="width: 400px;" /></td>
-			<td style="padding-bottom: 3px; border: 0;" valign="top"><input name="image" type="image" style="vertical-align: middle; padding-bottom: 0px; margin-left: 0px;" src="<?php echo Forum::picFolderWithContext() ?>/search_button.gif" alt="Search" /></td>
+		<td valign="top">
+			<input name="keywords" type="text" value="<?php echo $keywords ?>" /></td>
+			<td valign="top"><input name="image" type="image" src="<?php echo Forum::picFolderWithContext() ?>/search_button.gif" alt="Search" /></td>
 		</tr>
 		</tbody>
 		</table>

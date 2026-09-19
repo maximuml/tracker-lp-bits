@@ -32,7 +32,7 @@
                             <option value="confirmed">confirmed</option>
                         </select>
                     </td>
-                    <td align="center"><input type="submit" value="-Go-" style="height: 20px; width: 40px"></td>
+                    <td align="center"><input type="submit" value="-Go-"></td>
                 </form>
             </tr>
         @endforeach

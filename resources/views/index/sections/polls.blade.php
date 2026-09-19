@@ -17,7 +17,7 @@
 @if($polls['hasVoted'])
     <div class="nx-main">
     @foreach($polls['bars'] as $bar)
-        <div class="nx-row"><div class="nx-embedded nx-nowrap">{{ $bar['option'] }}&nbsp;&nbsp;</div><div class="nx-embedded nx-nowrap nx-grow"><img class="bar_end" src="pic/trans.gif" alt="" /><img class="{{ $bar['selected'] ? 'sltbar' : 'unsltbar' }}" src="pic/trans.gif" style="width: {{ $bar['width'] }}px;" alt="" /><img class="bar_end" src="pic/trans.gif" alt="" /> {{ $bar['percent'] }}%</div></div>
+        <div class="nx-row"><div class="nx-embedded nx-nowrap">{{ $bar['option'] }}&nbsp;&nbsp;</div><div class="nx-embedded nx-nowrap nx-grow"><img class="bar_end" src="pic/trans.gif" alt="" /><img class="{{ $bar['selected'] ? 'sltbar' : 'unsltbar' }}" src="pic/trans.gif" alt="" /><img class="bar_end" src="pic/trans.gif" alt="" /> {{ $bar['percent'] }}%</div></div>
     @endforeach
     </div>
     <p align="center">{{ $polls['votesLabel'] }} {{ $polls['totalVotes'] }}</p>

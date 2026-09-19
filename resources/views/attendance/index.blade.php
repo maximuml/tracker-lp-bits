@@ -5,9 +5,9 @@
 @section('content')
 @if ($hasAttendedToday)
     {{ \App\Support\Frame::open((string) (__('legacy/attendance.success')), false, 10, '100%', 'left') }}
-    <p>{{ $headerLeft ?? '' }}<span style="float:right">{{ $headerRight ?? '' }}</span></p>
+    <p>{{ $headerLeft ?? '' }}<span>{{ $headerRight ?? '' }}</span></p>
     {{ \App\Support\Frame::close() }}
-    <div class="nx-flex-center" style="padding: 20px 0"><div id="calendar" style="width: 60%"></div></div>
+    <div class="nx-flex-center"><div id="calendar"></div></div>
     <ul>
         @foreach ($bonusLines['lines'] ?? [] as $line)
             <li>{{ $line }}</li>
@@ -21,7 +21,7 @@
 @else
     {{ \App\Support\Frame::open((string) (__('legacy/attendance.title')), false, 10, '100%', 'left') }}
     <div class="nx-box">
-    <div style="margin-top: 20px; text-align: center;">
+    <div>
     <form method="post" action="attendance.php" class="nx-inline-block">
     <div class="nx-fgrid nx-fgrid--flat">
     {{ $captchaHtml ?? '' }}

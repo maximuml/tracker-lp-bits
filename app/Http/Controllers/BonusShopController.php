@@ -96,7 +96,7 @@ class BonusShopController extends LegacyController
                 'price' => $row->price,
                 'inventory' => $row->inventory ?? Locale::trans('label.infinite', [], null),
                 'buy_action' => SafeHtml::fromTrustedHtml(sprintf('<input type="button" class="%s" data-id="%s" value="%s"%s>', $buyClass, $row->id, htmlspecialchars($buyBtnText), $buyDisabled)),
-                'gift_action' => SafeHtml::fromTrustedHtml(sprintf('<input type="number" class="uid" %s style="width: 60px" placeholder="UID"><input type="button" class="%s" data-id="%s" value="%s"%s><span class="nowrap">%s: %s</span>', $giftDisabled, $giftClass, $row->id, htmlspecialchars($giftBtnText), $giftDisabled, Locale::trans('medal.fields.gift_fee', [], null), (($row->gift_fee_factor ?? 0) * 100).'%')),
+                'gift_action' => SafeHtml::fromTrustedHtml(sprintf('<input type="number" class="uid" %s placeholder="UID"><input type="button" class="%s" data-id="%s" value="%s"%s><span class="nowrap">%s: %s</span>', $giftDisabled, $giftClass, $row->id, htmlspecialchars($giftBtnText), $giftDisabled, Locale::trans('medal.fields.gift_fee', [], null), (($row->gift_fee_factor ?? 0) * 100).'%')),
             ];
         }
 

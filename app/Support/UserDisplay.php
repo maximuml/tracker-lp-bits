@@ -353,31 +353,25 @@ final class UserDisplay
                 $leechwarnpic = 'leechwarnedbig';
                 $warnedpic = 'warnedbig';
                 $disabledpic = 'disabledbig';
-                $marginLeft = '4pt';
-                $medalSize = '16px';
                 $medalClass = 'nexus-username-medal-big';
-                $style = "style='margin-left: $marginLeft'";
             } else {
                 $donorpic = 'star';
                 $leechwarnpic = 'leechwarned';
                 $warnedpic = 'warned';
                 $disabledpic = 'disabled';
-                $marginLeft = '2pt';
-                $medalSize = '11px';
                 $medalClass = 'nexus-username-medal';
-                $style = "style='margin-left: $marginLeft'";
             }
 
             $now = date('Y-m-d H:i:s');
             $donorUntil = $arr['donoruntil'] ?? null;
             $isDonor = $arr['donor'] && ($donorUntil === null || $donorUntil < '1970' || $donorUntil >= $now);
-            $pics = $isDonor ? '<img class="'.$donorpic.'" src="/pic/trans.gif" alt="Donor" '.$style.' />' : '';
+            $pics = $isDonor ? '<img class="'.$donorpic.'" src="/pic/trans.gif" alt="Donor" />' : '';
 
             if ($arr['enabled']) {
-                $pics .= ($arr['leechwarn'] ? '<img class="'.$leechwarnpic.'" src="/pic/trans.gif" alt="Leechwarned" '.$style.' />' : '')
-                    .($arr['warned'] ? '<img class="'.$warnedpic.'" src="/pic/trans.gif" alt="Warned" '.$style.' />' : '');
+                $pics .= ($arr['leechwarn'] ? '<img class="'.$leechwarnpic.'" src="/pic/trans.gif" alt="Leechwarned" />' : '')
+                    .($arr['warned'] ? '<img class="'.$warnedpic.'" src="/pic/trans.gif" alt="Warned" />' : '');
             } else {
-                $pics .= '<img class="'.$disabledpic.'" src="/pic/trans.gif" alt="Disabled" '.$style." />\n";
+                $pics .= '<img class="'.$disabledpic.'" src="/pic/trans.gif" alt="Disabled" />'."\n";
             }
 
             $username = htmlspecialchars((string) $arr['username']);
@@ -402,13 +396,10 @@ final class UserDisplay
             $medalHtml = '';
             foreach ($arr['wearing_medals'] ?? [] as $medal) {
                 $medalHtml .= sprintf(
-                    '<img src="%s" title="%s" class="%s preview" style="max-height: %s;max-width: %s;margin-left: %s"/>',
+                    '<img src="%s" title="%s" class="%s preview"/>',
                     $medal['image_large'],
                     $medal['name'],
                     $medalClass,
-                    $medalSize,
-                    $medalSize,
-                    $marginLeft
                 );
             }
 

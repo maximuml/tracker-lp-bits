@@ -6,7 +6,7 @@
 <h1>{{ __('legacy/users.text_users') }}</h1>
 
 <form method=get action=?>
-{{ __('legacy/users.text_search')}} <input type=text style="width:100px" name=search value="{{ $search }}">
+{{ __('legacy/users.text_search')}} <input type=text name=search value="{{ $search }}">
 <select name=class>
 <option value='-'>{{ __('legacy/users.select_any_class')}}</option>
 @foreach ($classOptions as $opt)

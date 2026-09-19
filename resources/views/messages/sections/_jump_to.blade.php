@@ -1,5 +1,5 @@
 <form action="/messages" method="get">
-<input type="hidden" name="action" value="viewmailbox">{{ __('legacy/messages.text_search') }}&nbsp;&nbsp;<input id="searchinput" name="keyword" type="text" value="{{ $viewmailbox['keyword'] }}" style="width: 200px"/>
+<input type="hidden" name="action" value="viewmailbox">{{ __('legacy/messages.text_search') }}&nbsp;&nbsp;<input id="searchinput" name="keyword" type="text" value="{{ $viewmailbox['keyword'] }}"/>
 {{ __('legacy/messages.text_in') }}&nbsp;<select name="place">
 <option value="both" {{ $viewmailbox['place'] === 'both' ? ' selected' : '' }}>{{ __('legacy/messages.select_both') }}</option>
 <option value="title" {{ $viewmailbox['place'] === 'title' ? ' selected' : '' }}>{{ __('legacy/messages.select_title') }}</option>

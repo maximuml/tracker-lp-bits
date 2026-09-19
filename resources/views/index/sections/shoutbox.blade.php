@@ -12,7 +12,7 @@
 <form action='shoutbox.php' method='get' target='sbox' name='shbox'>
 {{ ($shoutbox['toolbar'] ?? '') }}
 <div class="nx-flex">
-<label for='shbox_text'>{{ $shoutbox['messageLabel'] }}</label><input type='text' name='shbox_text' id='shbox_text' size='100' style='border: 1px solid gray;' class="nx-grow" />  <input type='submit' id='hbsubmit' class='btn' name='shout' value="{{ $shoutbox['submitLabel'] }}" />
+<label for='shbox_text'>{{ $shoutbox['messageLabel'] }}</label><input type='text' name='shbox_text' id='shbox_text' size='100' class="nx-grow" />  <input type='submit' id='hbsubmit' class='btn' name='shout' value="{{ $shoutbox['submitLabel'] }}" />
 <input type='reset' class='btn' value="{{ $shoutbox['clearButtonLabel'] }}" /> <input type='hidden' name='sent' value='yes' /><input type='hidden' name='type' value='shoutbox' />
 </div>
 </form></div>

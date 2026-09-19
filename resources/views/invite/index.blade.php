@@ -17,18 +17,18 @@
     <div class="nx-fhead nx-nowrap">{{ __('legacy/invite.text_email_address')}}</div><div class="nx-fcell"><input type=text size=40 name=email><br /><font align=left class=small>{{ __('legacy/invite.text_email_address_note') }}</font></div>
     {{ $preUsernameTr }}
     <div class="nx-fhead nx-nowrap">{{ __('legacy/invite.text_consume_invite')}}</div><div class="nx-fcell"><select name='hash'>{{ $inviteSelectOptions }}</select></div>
-    <div class="nx-fhead nx-nowrap">{{ __('legacy/invite.text_message')}}</div><div class="nx-fcell"><textarea name=body rows=10 style='width: 100%'>{{ $invitation_body }}</textarea></div>
+    <div class="nx-fhead nx-nowrap">{{ __('legacy/invite.text_message')}}</div><div class="nx-fcell"><textarea name=body rows=10>{{ $invitation_body }}</textarea></div>
     <div class="nx-ffull nx-center"><input type=submit value='{{ __('legacy/invite.submit_invite')}}'></div>
     </form></div></div>
 
 @else
     {{-- Invite menu nav --}}
-    <div id="invitenav" style='position: relative'><ul id="invitemenu" class="menu">
+    <div id="invitenav"><ul id="invitemenu" class="menu">
     <li{{ $menuSelected == 'invitee' ? ' class=selected' : '' }}><a href="?id={{ $id }}&menu=invitee">{{ __('legacy/invite.text_invite_status')}}</a></li>
     <li{{ $menuSelected == 'sent' ? ' class=selected' : '' }}><a href="?id={{ $id }}&menu=sent">{{ __('legacy/invite.text_sent_invites_status')}}</a></li>
     <li{{ $menuSelected == 'tmp' ? ' class=selected' : '' }}><a href="?id={{ $id }}&menu=tmp">{{ __('legacy/invite.text_tmp_status')}}</a></li>
     @if (($CURUSER['id'] ?? 0) == $id)
-        </ul><form style='position: absolute;top:0;right:0' method=post action=invite.php?id={{ (string) $id }}&type=new><input type=submit{{ $sendBtnDisabled }} value='{{ $sendBtnText }}'></form></div>
+        </ul><form method=post action=invite.php?id={{ (string) $id }}&type=new><input type=submit{{ $sendBtnDisabled }} value='{{ $sendBtnText }}'></form></div>
     @else
         </ul></div>
     @endif
@@ -110,7 +110,7 @@
 
         @if ($canConfirm)
             @if ($pendingCount)
-                <tr><td colspan={{ $inviteeColSpan }} align=right><input type=submit style='height: 20px' value='{{ __('legacy/invite.submit_confirm_users')}}'></td></tr>
+                <tr><td colspan={{ $inviteeColSpan }} align=right><input type=submit value='{{ __('legacy/invite.submit_confirm_users')}}'></td></tr>
             @endif
             </form>
         @endif

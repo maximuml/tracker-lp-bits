@@ -509,15 +509,14 @@ final class ComponentLayerTest extends TestCase
     public function test_datetime_input_renders_native_input(): void
     {
         $html = $this->render(
-            '<x-datetime-input name="added_begin" :value="$v" :style="$s" />',
-            ['v' => '2025-03-04 10:00', 's' => 'width: 150px'],
+            '<x-datetime-input name="added_begin" :value="$v" />',
+            ['v' => '2025-03-04 10:00'],
         );
 
         $this->assertStringContainsString('type="datetime-local"', $html);
         $this->assertStringContainsString('id="datetime-picker-added_begin"', $html);
         $this->assertStringContainsString('name="added_begin"', $html);
         $this->assertStringContainsString('value="2025-03-04 10:00"', $html);
-        $this->assertStringContainsString('style="width: 150px"', $html);
         $this->assertStringContainsString('autocomplete="off"', $html);
     }
 

@@ -175,7 +175,7 @@ final class ForumIndexService
             $posttoday = '';
         }
 
-        return "<tr><td class=\"rowfollow\" align=\"left\"><table border=\"0\" cellspacing=\"0\" cellpadding=\"0\"><tr><td class=\"embedded\" style='padding-right: 10px'>".$img.'</td><td class="embedded"><a href="'.htmlspecialchars('?action=viewforum&forumid='.$forumid).'"><font class="big"><b>'.$forumname.'</b></font></a>'.$posttoday.
+        return "<tr><td class=\"rowfollow\" align=\"left\"><table border=\"0\" cellspacing=\"0\" cellpadding=\"0\"><tr><td class=\"embedded\">".$img.'</td><td class="embedded"><a href="'.htmlspecialchars('?action=viewforum&forumid='.$forumid).'"><font class="big"><b>'.$forumname.'</b></font></a>'.$posttoday.
         '<br />'.$forumdescription.'</td></tr></table></td><td class="rowfollow" align="center" width="1%">'.$topiccount.'</td><td class="rowfollow" align="center" width="1%">'.$postcount.'</td>'.
         '<td class="rowfollow nowrap" align="left">'.$lastpost.'</td><td class="rowfollow" align="left">'.$forummoderators."</td></tr>\n";
     }
@@ -338,7 +338,7 @@ final class ForumIndexService
         ];
         $out = "<option value='0'>".$selectColorLabel."</option>\n";
         foreach ($colors as $value => $name) {
-            $out .= "<option style='background-color: ".$cssNames[$value]."' value=\"".$value.'">'.$name."</option>\n";
+            $out .= "<option value=\"".$value.'">'.$name."</option>\n";
         }
 
         return $out;

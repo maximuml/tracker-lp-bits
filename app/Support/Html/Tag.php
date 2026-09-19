@@ -490,36 +490,6 @@ final class Tag
     }
 
     /**
-     * Filter and render a `[flash]` tag with a temp-code placeholder.
-     *
-     * Backs the legacy `formatFlash()` helper.
-     */
-    public static function formatFlash(string $src, int|string $width, int|string $height): string
-    {
-        $src = Security::filterSrc($src);
-        if (empty($src)) {
-            return '';
-        }
-
-        return Comment::addTempCode(BBCode::flash($src, $width, $height));
-    }
-
-    /**
-     * Filter and render a `[flv]` tag with a temp-code placeholder.
-     *
-     * Backs the legacy `formatFlv()` helper.
-     */
-    public static function formatFlv(string $src, int|string $width, int|string $height): string
-    {
-        $src = Security::filterSrc($src);
-        if (empty($src)) {
-            return '';
-        }
-
-        return Comment::addTempCode(BBCode::flv($src, $width, $height));
-    }
-
-    /**
      * Filter and render a `[youtube]` tag with a temp-code placeholder.
      *
      * Backs the legacy `formatYoutube()` helper.

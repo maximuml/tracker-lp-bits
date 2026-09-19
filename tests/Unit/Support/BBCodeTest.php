@@ -148,56 +148,6 @@ class BBCodeTest extends TestCase
         $this->assertStringContainsString('id=""', BBCode::img('pic.png', false, 1, 1));
     }
 
-    // ---------- flash ----------
-
-    public function test_flash_default_dimensions_are_500_by_300(): void
-    {
-        $html = BBCode::flash('f.swf');
-        $this->assertStringContainsString('width="500"', $html);
-        $this->assertStringContainsString('height="300"', $html);
-        $this->assertStringContainsString('value="f.swf"', $html);
-        $this->assertStringContainsString('src="f.swf"', $html);
-        $this->assertStringContainsString('application/x-shockwave-flash', $html);
-    }
-
-    public function test_flash_explicit_dimensions_are_honoured(): void
-    {
-        $html = BBCode::flash('f.swf', 100, 200);
-        $this->assertStringContainsString('width="100"', $html);
-        $this->assertStringContainsString('height="200"', $html);
-    }
-
-    public function test_flash_empty_src_returns_empty_string(): void
-    {
-        $this->assertSame('', BBCode::flash(''));
-    }
-
-    public function test_flash_zero_dimension_falls_back_to_default(): void
-    {
-        // Pinned legacy quirk: `if (!$width)` is loose, so 0,
-        // '0', '', null all fall through to the default. We
-        // accept int|string and rely on that contract.
-        $html = BBCode::flash('f.swf', 0, '0');
-        $this->assertStringContainsString('width="500"', $html);
-        $this->assertStringContainsString('height="300"', $html);
-    }
-
-    // ---------- flv ----------
-
-    public function test_flv_default_dimensions_are_320_by_240(): void
-    {
-        $html = BBCode::flv('v.flv');
-        $this->assertStringContainsString('width="320"', $html);
-        $this->assertStringContainsString('height="240"', $html);
-        $this->assertStringContainsString('flvplayer.swf?file=v.flv', $html);
-        $this->assertStringContainsString('allowfullscreen="true"', $html);
-    }
-
-    public function test_flv_empty_src_returns_empty_string(): void
-    {
-        $this->assertSame('', BBCode::flv(''));
-    }
-
     // ---------- youtube ----------
 
     public function test_youtube_default_dimensions_are_560_by_315(): void

@@ -433,13 +433,46 @@ Decision → Consequences). Add new ADRs here as numbered subsections.
   Local/dev databases are fixture-seeded (≈98% md5) and are not a
   decision source; only the production report counts.
 
+### ADR 0016: Playwright browser smoke suite (Accepted, stage 1.4)
+
+- **Context:** The Stage-0 escaping bugs (`&lt;script` shown to users,
+  double-encoded entities) and CSP/a11y/mobile regressions are invisible
+  to PHPUnit: no test rendered a real page. `a11y.yml` ran the axe CLI
+  on seven unauthenticated pages only. There is deliberately no Node
+  build step, so browser tooling must stay test-only.
+- **Decision:** `tests/browser/` — Playwright + axe-core, pinned in
+  `package-lock.json`, running against the seeded docker stack in the
+  blocking `browser-smoke` CI job. One real login in `globalSetup`
+  persists `c_secure_pass` via `storageState` (`/login` is throttled
+  10 req/min — per-test logins would 429). Specs: `login` (real form
+  submit + wrong-password), `signup` (form → confirm.php auto-login →
+  logout → re-login), `pages` (10 authenticated routes + forum
+  navigation: status <400, no `pageerror`, no failed resources, no
+  escaped-markup in `innerText`), `csp` (per-page violation-directive
+  baseline — new directive types fail), `a11y` (axe rule-id baseline per
+  page in `a11y-baseline.json`, public + authenticated), `mobile`
+  (390×844, no horizontal scroll on modern-layout pages). Node is used
+  for tests only — no Node/Vite build step is reintroduced.
+- **Consequences:** `a11y.yml` is removed — `a11y.spec` covers its seven
+  public pages plus authenticated ones. Baselines are ratchets: they may
+  only shrink (same rule as `LegacyViewSurfaceTest`). Test env needs
+  `security.maxip` raised and `basic.baseUrl` matching the test origin —
+  `confirm.php` redirects to baseUrl and Chromium applies `form-action`
+  to post-submit redirects, so a mismatched baseUrl silently blocks
+  signup confirmation in Chrome-family browsers.
+
 ## Testing
 
 - **Unit tests:** `tests/Unit/` — pure unit only, no DB/Redis/MeiliSearch (enforced by `UnitSuiteIsolationTest` and the `unit-tests-fast` CI job, which runs the suite with no service containers)
 - **Integration tests:** `tests/Integration/` — services/repositories on a live test DB and Redis
 - **Feature tests:** `tests/Feature/` — CriticalPathTest, LegacySmokeTest, SecurityHeadersTest
 - **E2E:** Docker stack + curl smoke tests (see skills in `.agents/skills/`)
-- **Login for E2E:** CSRF token from `/login.php` → POST to `/takelogin.php` with `_token`, `username`, `password`
+- **Browser tests:** `tests/browser/` — Playwright smoke suite (login/signup,
+  authenticated pages, CSP/a11y/mobile ratchets, ADR 0016); run
+  `npx playwright test` there against the docker stack
+- **Login for E2E:** CSRF token from `/login` → POST `/login` with
+  `_token`, `username`, `password` (the login form posts plain password;
+  challenge-response is only the usercp security-confirm flow)
 - **Captcha:** disable with `UPDATE settings SET value='no' WHERE name='security.iv'` + flush Redis settings cache
 
 ### Database isolation (T-05)
@@ -451,7 +484,7 @@ databases are used:
 |---|---|---|
 | `nexusphp_unit_testing` | Unit + Integration | `unit-tests`, `coverage`, `octane` |
 | `nexusphp_feature_testing` | Feature (no OpenResty) | `coverage` |
-| `nexusphp_e2e_testing` | Feature + OpenResty (CriticalPathTest) | `smoke-test`, `a11y`, `perf-budget` |
+| `nexusphp_e2e_testing` | Feature + OpenResty (CriticalPathTest) | `smoke-test`, `browser-smoke`, `perf-budget` |
 
 `DestructiveEnvironmentGuard` (`app/Support/DestructiveEnvironmentGuard.php`)
 is invoked from `Tests\TestCase::setUp()` and from a `CommandStarting` listener

@@ -1,0 +1,35 @@
+{
+  "public": {
+    "/index.php": [],
+    "/torrents.php": [],
+    "/forums.php": [],
+    "/login": []
+  },
+  "authenticated": {
+    "/index.php": [
+      "color-contrast",
+      "frame-title"
+    ],
+    "/torrents.php": [
+      "color-contrast",
+      "link-name"
+    ],
+    "/details.php?id=1": [
+      "label",
+      "link-name"
+    ],
+    "/forums.php": [
+      "color-contrast"
+    ],
+    "/usercp.php": [],
+    "/topten.php": [
+      "color-contrast",
+      "select-name"
+    ],
+    "/messages.php": [
+      "color-contrast",
+      "label",
+      "select-name"
+    ]
+  }
+}

@@ -15,8 +15,10 @@
     <div class="nx-fgrid">
     <div class="nx-ffull nx-center"><b>{{ __('legacy/invite.text_invite_someone')}}{{ $SITENAME }} ({{ $inv['invites'] ?? 0 }}{{ __('legacy/invite.text_invitation')}}{{ $_s }}{{ __('legacy/invite.text_left')}} + {{ sprintf(__('legacy/invite.text_temporary_left'), count($temporaryInvites)) }})</b></div>
     <div class="nx-fhead nx-nowrap">{{ __('legacy/invite.text_email_address')}}</div><div class="nx-fcell"><input type=text size=40 name=email><br /><span class="small">{{ __('legacy/invite.text_email_address_note') }}</span></div>
-    {{ $preUsernameTr }}
-    <div class="nx-fhead nx-nowrap">{{ __('legacy/invite.text_consume_invite')}}</div><div class="nx-fcell"><select name='hash'>{{ $inviteSelectOptions }}</select></div>
+    @if ($showPreUsername)
+    <div class="nx-fhead nx-nowrap">{{ $preUsernameLabel }}</div><div class="nx-fcell"><input type=text size=40 name=pre_register_username><br /><span class="small">{{ $preUsernameHelp }}</span></div>
+    @endif
+    <div class="nx-fhead nx-nowrap">{{ __('legacy/invite.text_consume_invite')}}</div><div class="nx-fcell"><select name='hash'>@foreach ($inviteOptions as $opt)<option value="{{ $opt['value'] }}">{{ $opt['text'] }}</option>@endforeach</select></div>
     <div class="nx-fhead nx-nowrap">{{ __('legacy/invite.text_message')}}</div><div class="nx-fcell"><textarea name=body rows=10>{{ $invitation_body }}</textarea></div>
     <div class="nx-ffull nx-center"><input type=submit value='{{ __('legacy/invite.submit_invite')}}'></div>
     </form></div></div>
@@ -41,13 +43,13 @@
                 <span>{{ __('legacy/invite.text_enabled')}}:</span>
                 <select name="enabled">
                     <option value="">-{{ $textSelectOnePlease }}-</option>
-                    {{ $inviteeEnabledOptions }}
+                    @foreach ($inviteeEnabledOptions as $opt)<option value="{{ $opt['value'] }}"{{ $opt['selected'] ? ' selected' : '' }}>{{ $opt['text'] }}</option>@endforeach
                 </select>
                 &nbsp;&nbsp;
                 <span>{{ __('legacy/invite.text_status')}}:</span>
                 <select name="status">
                     <option value="">-{{ $textSelectOnePlease }}-</option>
-                    {{ $inviteeStatusOptions }}
+                    @foreach ($inviteeStatusOptions as $opt)<option value="{{ $opt['value'] }}"{{ $opt['selected'] ? ' selected' : '' }}>{{ $opt['text'] }}</option>@endforeach
                 </select>
                 &nbsp;&nbsp;
                 <input type="submit" value="{{ $submitText }}">
@@ -88,7 +90,7 @@
                     <td class=rowfollow>{{ $arr['torrent_count'] }}</td>
                     <td class=rowfollow>{{ \App\Support\Format::size($arr['uploaded']) }}</td>
                     <td class=rowfollow>{{ \App\Support\Format::size($arr['downloaded']) }}</td>
-                    <td class=rowfollow>{{ $arr['ratioHtml'] ?? '' }}</td>
+                    <td class=rowfollow>@if (($arr['ratioClass'] ?? '') !== '')<span class="{{ $arr['ratioClass'] }}">{{ $arr['ratioText'] }}</span>@else{{ $arr['ratioText'] ?? '' }}@endif</td>
                     <td class=rowfollow>{{ number_format($arr['seeding_torrent_count']) }}</td>
                     <td class=rowfollow>{{ \App\Support\Format::size($arr['seeding_torrent_size']) }}</td>
                     <td class=rowfollow>{{ number_format($arr['seed_points_per_hour'], 3) }}</td>
@@ -96,7 +98,7 @@
                     <td class=rowfollow>{{ number_format(floatval($arr['seed_points_per_hour']) * $haremAdditionFactor, 3) }}</td>
                 @endif
                     <td class=rowfollow>{{ $arr['last_announce_at'] }}</td>
-                    <td class=rowfollow>{{ $arr['statusHtml'] ?? '' }}</td>
+                    <td class=rowfollow>@if (($arr['status'] ?? '') === 'confirmed')<a href=userdetails.php?id={{ (int) $arr['id'] }}><span class="nx-color-1f7309">{{ __('legacy/invite.text_confirmed') }}</span></a>@else<a href=checkuser.php?id={{ (int) $arr['id'] }}><span class="nx-color-ca0226">{{ __('legacy/invite.text_pending') }}</span></a>@endif</td>
                     @if ($canConfirm)
                         <td class=rowfollow>
                         @if ($arr['status'] == 'pending')
@@ -135,12 +137,12 @@
             @foreach ($sentTmpRows as $arr1)
                 <tr>
                 <td class=rowfollow>{{ $arr1['invitee'] }}</td>
-                <td class="rowfollow">{{ $arr1['hash'] }}{{ $arr1['registerLink'] ?? '' }}</td>
+                <td class="rowfollow">{{ $arr1['hash'] }}@if ($arr1['hashValid'] ?? false)&nbsp;<a href="signup.php?type=invite&invitenumber={{ $arr1['hash'] }}" title="{{ __('legacy/invite.signup_link_help') }}" target="_blank"><small>[{{ __('legacy/invite.signup_link') }}]</small></a>@endif</td>
                 <td class=rowfollow>{{ $arr1['time_invited'] }}</td>
                 @if ($menuSelected == 'sent')
                     <td class=rowfollow>{{ $arr1['validText'] ?? '' }}</td>
                 @endif
-                <td class=rowfollow>{{ $arr1['inviteeUserHtml'] ?? '' }}</td>
+                <td class=rowfollow>@if (! ($arr1['hashValid'] ?? false))<a href=userdetails.php?id={{ (int) $arr1['invitee_register_uid'] }}><span class="nx-color-1f7309">{{ $arr1['invitee_register_username'] }}</span></a>@endif</td>
                 @if ($menuSelected == 'tmp')
                     <td class=rowfollow>{{ $arr1['expired_at'] }}</td>
                     <td class=rowfollow>{{ $arr1['created_at'] }}</td>

@@ -865,6 +865,12 @@ html[data-theme="dark"] .nx-hl-40 { color: color-mix(in srgb, white 80%, var(--n
 /* usercp: "additional selection" triple-select row (replaces layout table) */
 .nx-cat-extra { display: flex; flex-wrap: wrap; gap: 8px 24px; margin-top: 6px; }
 .nx-cat-extra > .big { flex-basis: 100%; }
+/* search-box category/taxonomy checkbox grid (replaces <table> of SearchBox::buildCategoryTable) */
+.nx-catgrid { display: flex; flex-direction: column; gap: 2px; }
+.nx-catgrid__section { text-align: center; }
+.nx-catgrid__label { font-weight: bold; padding: 2px 0; }
+.nx-catgrid__row { display: flex; flex-wrap: wrap; gap: 2px 18px; }
+.nx-catgrid__cell { display: flex; align-items: center; gap: 4px; }
 /* usercp: two-step bind row (replaces inline <style> block) */
 .nx-tfa-row { display: flex; align-items: center; }
 .nx-tfa-row > div + div { padding-left: 20px; }

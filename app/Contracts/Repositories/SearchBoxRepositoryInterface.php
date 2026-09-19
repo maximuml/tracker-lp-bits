@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Contracts\Repositories;
 
+use App\Models\Category;
 use App\Models\SearchBox;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
@@ -36,5 +37,8 @@ interface SearchBoxRepositoryInterface
 
     public function findForCategoryTable(string|int $mode): SearchBox;
 
+    /**
+     * @return Collection<int, Category>
+     */
     public function getCategoriesForTable(SearchBox $searchBox, bool $selectUnselect = false): Collection;
 }

@@ -907,3 +907,35 @@ by final repository classes or static methods — see W2-01/W2-02).
   Behaviour caveat: the token form's `#token-box-form` id is now inert
   inside `<template>` until layer clones it — the JS `getElementById`
   resolves the live copy.
+
+### ADR 0027: torrent list + search category grid on typed view models (Accepted, stage 3.3)
+
+- **Context:** `TorrentListRow` carried SafeHtml fragments (`badges`,
+  `tags`, `progressBar`, category/bookmark cells), `App\Support\TorrentTable`
+  (348 lines, `ob_start`) generated the whole listing table for
+  `torrents`/`search`, `TorrentAjaxController` heredoc'd the user-history
+  table, and `SearchBox::buildCategoryTable()` sprintf'd the category/
+  taxonomy checkbox `<table>` used by usercp tracker settings and
+  `getrss`. `SearchBox::areaSelect()` was already dead.
+- **Decision:** Row data is now typed: `TorrentListRow` exposes
+  `CategoryIcon`/`TorrentBadgeSet`/`TorrentProgress`/`Tag` list/`bool
+  bookmarked` and the table partial renders `x-torrent.badges`,
+  `x-torrent.tags`, `x-torrent.progress`, `x-torrent.category-icon`,
+  `x-torrent.promotion`, `x-torrent.paid-icon` plus `<x-time>`;
+  `Promotion::badgeWithContext()` and `Category::iconData()` return the
+  typed objects while the legacy string renderers stay for other callers.
+  `TorrentTable` was deleted; `search/index` reuses
+  `torrents/_table` via `TorrentListViewFactory`, and
+  `getusertorrentlistajax` renders `UserTorrentListViewModel` through its
+  own `data-nx="data"` partial. The category checkbox grid is
+  `SearchCategoryTableViewModel` (`SearchCategoryTableFactory` +
+  `x-search-category-table` flex grid) consumed by
+  `UsercpPageService::buildTrackerSection()` and `RssController::getrss()`;
+  `buildCategoryTable*`/`areaSelect` are removed from `SearchBox`.
+- **Consequences:** Ratchets dropped to `<table` literals 31, `ob_start`
+  24, HTML literal lines 888, echo 85. Behaviour preserved: legacy
+  `(int) $checkboxValue` cast ('yes' → `value="0"`), notifs/checkedValues
+  parse order, `substr($torrentField, 0, 3)` notifs keys, `data-setchecked`
+  select-all wiring, domTT promo tooltips. Fixed a latent bug: the usercp
+  category link prefix `torrents.php?allsec=1` lacked `&` and produced
+  `allsec=1cat=N` links; the factory now receives `allsec=1&`.

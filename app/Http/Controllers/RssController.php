@@ -10,11 +10,11 @@ use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Globals;
 use App\Support\Html;
-use App\Support\Html\SafeHtml;
 use App\Support\Http;
 use App\Support\Locale;
 use App\Support\SearchBox;
 use App\Support\Url;
+use App\ViewModels\Search\SearchCategoryTableFactory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -25,6 +25,7 @@ class RssController extends LegacyController
     public function __construct(
         private readonly CurrentUser $currentUser,
         private readonly Globals $globals,
+        private readonly SearchCategoryTableFactory $searchCategoryTableFactory,
     ) {}
 
     public function getrss(Request $request): View|RedirectResponse|Response
@@ -97,7 +98,7 @@ class RssController extends LegacyController
             }
         }
 
-        $data['categories'] = SafeHtml::fromTrustedHtml(SearchBox::buildCategoryTableWithContext($browsecatmode, 'yes', 'torrents.php?allsec=1&', '', 3, '', ['section_name' => true]));
+        $data['categoriesTable'] = $this->searchCategoryTableFactory->create($browsecatmode, 'yes', 'torrents.php?allsec=1&', '', 3, '', ['section_name' => true]);
         $data['paidTorrentEnabled'] = SiteConfig::current()->torrent->paidTorrentEnabled();
         $data['allowed_showrows'] = ['10', '50'];
         $data['stickyTypes'] = [

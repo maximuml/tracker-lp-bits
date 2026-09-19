@@ -10,7 +10,7 @@
 <div class="nx-fhead">{{ __('legacy/getrss.row_categories_to_retrieve') }}
 </div>
 <div class="nx-fcell">
-{{ $categories ?? '' }}
+<x-search-category-table :vm="$categoriesTable" />
 </div>
 <div class="nx-fhead">{{ __('legacy/getrss.row_show_bookmarked') }}
 </div>

@@ -249,7 +249,7 @@ final class BonusPageServiceTest extends TestCase
 
     // ─── build ────────────────────────────────────────────────────────
 
-    public function test_build_with_action_set_returns_empty_shop_and_info_html(): void
+    public function test_build_with_action_set_returns_null_shop_and_info(): void
     {
         $this->mockGlobals([
             'bonus_tweak' => '',
@@ -261,8 +261,8 @@ final class BonusPageServiceTest extends TestCase
 
         $result = $this->service->build($request)->toArray();
 
-        $this->assertSame('', (string) ($result['shopHtml']));
-        $this->assertSame('', (string) ($result['infoHtml']));
+        $this->assertNull($result['shop']);
+        $this->assertNull($result['info']);
         $this->assertSame('exchange', (string) ($result['action']));
     }
 
@@ -285,8 +285,8 @@ final class BonusPageServiceTest extends TestCase
         $this->assertArrayHasKey('bonus', $result);
         $this->assertArrayHasKey('lockText', $result);
         $this->assertArrayHasKey('allBonus', $result);
-        $this->assertArrayHasKey('shopHtml', $result);
-        $this->assertArrayHasKey('infoHtml', $result);
+        $this->assertArrayHasKey('shop', $result);
+        $this->assertArrayHasKey('info', $result);
     }
 
     public function test_build_resolves_do_message_for_upload(): void

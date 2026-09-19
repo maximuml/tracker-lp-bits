@@ -874,3 +874,13 @@ html[data-theme="dark"] .nx-hl-40 { color: color-mix(in srgb, white 80%, var(--n
 /* usercp: two-step bind row (replaces inline <style> block) */
 .nx-tfa-row { display: flex; align-items: center; }
 .nx-tfa-row > div + div { padding-left: 20px; }
+/* mybonus: gift field rows (replaces embedded <table> in shop cells) */
+.nx-giftfields { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 4px; }
+.nx-giftfields > span { display: inline-flex; align-items: center; gap: 4px; }
+/* mybonus: karma info panel (replaces layout <table>) */
+.nx-panel { width: 97%; margin: 0 auto; }
+.nx-panel__head { text-align: center; padding: 3px; }
+.nx-panel__body { padding: 3px; }
+/* mybonus: seeding loadbar (replaces td.loadbarbg layout cell) */
+.nx-loadbar { width: 400px; margin: 0 auto; }
+.nx-loadbar__bg { display: block; height: 15px; background: url(../styles/bar.gif) repeat-x 0 0; }

@@ -939,3 +939,25 @@ by final repository classes or static methods — see W2-01/W2-02).
   select-all wiring, domTT promo tooltips. Fixed a latent bug: the usercp
   category link prefix `torrents.php?allsec=1` lacked `&` and produced
   `allsec=1cat=N` links; the factory now receives `allsec=1&`.
+
+### ADR 0028: mybonus page on typed view models (Accepted, stage 3.4)
+
+- **Context:** `BonusPageService` rendered the karma shop and the bonus
+  information block through `ob_start`/`echo`/string concatenation —
+  ~280 lines of generated markup including a layout `<table>` wrapper,
+  inline `nowrap` attributes, and translation strings that carry markup
+  (`<li>`, `<b>`, `<img>`) or HTML entities (`&nbsp;`) inside labels.
+- **Decision:** `BonusPageService::build()` now returns a
+  `BonusPageViewModel` holding `BonusShopViewModel` (typed
+  `BonusShopItem` rows with `BonusTradeButton`) and
+  `BonusInfoViewModel`; markup lives in `my/sections/bonus_shop` and
+  `my/sections/bonus_info` partials (flex/panel markup instead of the
+  layout table). Markup-bearing translations are wrapped in
+  `SafeHtml::fromUntrustedHtml()` at the construction site; entity-bearing
+  button labels are `html_entity_decode()`d before entering the escaped
+  Blade layer so `value="more points needed"` renders identically to the
+  old raw `echo`.
+- **Consequences:** `ob_start`/`echo` removed from the service
+  (468 → 391 lines); ratchets dropped to `<table` literals 27,
+  `ob_start` 22, HTML literal lines 807. Same rule as ADR 0025 applies:
+  `fromUntrustedHtml` is reserved for known-trusted language strings.

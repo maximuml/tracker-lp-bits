@@ -13,7 +13,6 @@ use App\Services\UsercpPageService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
-use App\Support\LegacyRuntime;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
@@ -51,7 +50,6 @@ final class UsercpPageServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        app(LegacyRuntime::class)->bootEntry(true);
         Redis::connection()->flushdb();
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
         DB::table('users')->truncate();

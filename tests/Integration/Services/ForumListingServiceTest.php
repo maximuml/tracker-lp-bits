@@ -15,7 +15,6 @@ use App\Services\ForumListingService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
-use App\Support\LegacyRuntime;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -51,7 +50,6 @@ final class ForumListingServiceTest extends TestCase
     {
         parent::setUp();
         Redis::connection()->flushdb();
-        app(LegacyRuntime::class)->bootEntry(true);
         $this->initialObLevel = ob_get_level();
         app(Globals::class)->set('SITENAME', 'TestSite');
         app(Globals::class)->set('lang_functions', [

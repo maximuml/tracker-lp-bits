@@ -17,7 +17,6 @@ use App\Services\ForumService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
-use App\Support\LegacyRuntime;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -52,11 +51,6 @@ final class ForumServiceTest extends TestCase
     {
         parent::setUp();
         $this->initialObLevel = ob_get_level();
-        // Run in the legacy entry context so UserDisplay::currentClass()
-        // uses CurrentUser (which we control) instead of Laravel's Auth
-        // facade. bootEntry() survives mid-test reset() from job/request
-        // lifecycle listeners — a plain mark would be wiped.
-        app(LegacyRuntime::class)->bootEntry(true);
     }
 
     protected function tearDown(): void

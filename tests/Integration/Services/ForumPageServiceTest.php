@@ -13,7 +13,6 @@ use App\Services\ForumPageService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
-use App\Support\LegacyRuntime;
 use App\Support\Settings;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
@@ -51,7 +50,6 @@ final class ForumPageServiceTest extends TestCase
     {
         parent::setUp();
         Redis::connection()->flushdb();
-        app(LegacyRuntime::class)->bootEntry(true);
         $this->initialObLevel = ob_get_level();
         Settings::saveBatch('basic', ['SITENAME' => 'TestSite']);
         Settings::saveBatch('main', ['postsperpage' => 10, 'topicsperpage' => 20]);

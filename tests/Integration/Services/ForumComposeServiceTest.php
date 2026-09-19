@@ -11,7 +11,6 @@ use App\Services\ForumComposeService;
 use App\Support\CurrentUser;
 use App\Support\Globals;
 use App\Support\Html\SafeHtml;
-use App\Support\LegacyRuntime;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redis;
@@ -58,7 +57,6 @@ final class ForumComposeServiceTest extends TestCase
     {
         parent::setUp();
         Redis::connection()->flushdb();
-        app(LegacyRuntime::class)->bootEntry(true);
         $this->initialObLevel = ob_get_level();
         app(Globals::class)->set('maxsubjectlength', 100);
         app(Globals::class)->set('lang_functions', self::LANG_FUNCTIONS);

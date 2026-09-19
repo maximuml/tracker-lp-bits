@@ -485,11 +485,14 @@ Decision → Consequences). Add new ADRs here as numbered subsections.
   restoring entry defaults between worker requests. All `app/` reads
   migrated to the runtime (`grep IN_NEXUS app/` → 0); repositories take
   it via constructor injection per the `AppCallByNamespaceRatchetTest`
-  baseline. Tests run the suite in the legacy *entry* context
-  (`bootEntry(true)` in setUp — `markLegacy()` alone would be wiped by
-  `reset()` when a test fires `JobProcessing`/Octane events, e.g. a
-  factory-created user dispatching the outbox job);
-  `NEXUS_LEGACY_CONTEXT=1` → `TestCase::setUp()` calls `bootEntry(true)`.
+  baseline. `NEXUS_LEGACY_CONTEXT=1` → `TestCase::setUp()` calls
+  `bootEntry(true)` — entry defaults so `reset()` keeps the flag when a
+  test fires `JobProcessing`/Octane events (a factory-created user
+  dispatches the outbox job). The Integration files that carried dead
+  `define('IN_NEXUS', true)` calls — never executed on CI because
+  `bootstrap/app.php` defines the constant on the first `createApplication`
+  — simply dropped them; they test the non-legacy paths. Only suites
+  written for the legacy branch opt in (`TimeLegacyFormatTest`).
 - **Consequences:** Request-scoped legacy/tracker state is
   Octane-safe; tests no longer need process isolation for the flag
   (`TIMENOW` still forces `TimeLegacyFormatTest` into separate

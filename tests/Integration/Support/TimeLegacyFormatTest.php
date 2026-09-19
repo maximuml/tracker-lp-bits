@@ -19,7 +19,7 @@ use Tests\TestCase;
  *
  * `LegacyRuntime::isLegacy()` is false in the test environment, so the
  * legacy branch — the code that runs in production via public/index.php —
- * would be invisible to the suite without an explicit `markLegacy()`.
+ * would be invisible to the suite without an explicit `bootEntry(true)`.
  * That is exactly how the `{{ Time::format() }}` escaped-markup
  * regression shipped unnoticed: nothing ever executed the `<span title>`
  * path.

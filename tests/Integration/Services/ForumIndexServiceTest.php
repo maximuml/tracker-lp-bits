@@ -15,7 +15,6 @@ use App\Services\ForumIndexService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
-use App\Support\LegacyRuntime;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
@@ -62,8 +61,6 @@ final class ForumIndexServiceTest extends TestCase
     {
         parent::setUp();
         Redis::connection()->flushdb();
-        app(LegacyRuntime::class)->bootEntry(true);
-
         $this->currentUser = new CurrentUser;
         $this->globals = new Globals;
 

@@ -8,7 +8,6 @@ use App\Models\User;
 use App\Repositories\UserListingRepository;
 use App\Services\UsersearchPageService;
 use App\Support\CurrentUser;
-use App\Support\LegacyRuntime;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -41,8 +40,6 @@ final class UsersearchPageServiceTest extends TestCase
         parent::setUp();
         $this->initialObLevel = ob_get_level();
         Redis::connection()->flushdb();
-
-        app(LegacyRuntime::class)->bootEntry(true);
 
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
         DB::table('users')->truncate();

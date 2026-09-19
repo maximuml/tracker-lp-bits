@@ -61,7 +61,7 @@ Use when verifying PRs that migrate `usercp.php`, auth pages, bitbucket/attachme
 - `/usercp.php?action=personal&type=save` with `_token` redirects to `?action=personal&type=saved` and shows `Saved!`.
 - `/bitbucket-upload.php` GET and POST (valid image) render the upload form and result in the `nexus_legacy` layout.
 - `/attachment.php` POST returns a `<script>parent.tag_extimage('[attach]...')</script>` snippet.
-- `/login.php` GET/POST, `/logout.php`, `/signup.php`, `/recover.php`, `/confirm_resend.php` render inside `nexus_legacy` with Nexus card/form/table components.
+- `/login.php` GET (the POST route is `/login` — posting to `/login.php` drops the body and returns 419), `/logout.php`, `/signup.php`, `/recover.php`, `/confirm_resend.php` render inside `nexus_legacy` with Nexus card/form/table components.
 - Smoke gates: `php artisan test --no-coverage`, `phpstan` default, `phpstan.level6.neon`, `view:cache`, `route:cache`, `openresty -t`.
 
 ## Common gotchas

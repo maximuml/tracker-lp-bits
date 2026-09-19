@@ -81,7 +81,7 @@ All should return HTTP 200 and contain no `Fatal error`, `Whoops`, `Page Expired
 - Use `context.addCookies` with `domain: 'openresty'` and `path: '/'`.
 - The `usercp` personal form uses radio inputs (`gender`), not a `<select>`.
 - The `attachment` form is inside an invalid `<table><form>` structure; `document.forms[0]` may be the wrong form. Select the form by `name="attachment"` or `action*="attachment.php"`.
-- The `login` form in `login.blade.php` has `action="takelogin.php"`, which returns 419 under `POST` from curl. For Playwright, override the action to `/login` and submit dynamically with the CSRF token and captcha string.
+- The `login` form in `login.blade.php` posts to `/login` directly (plain `username`/`password` + `_token`); a normal Playwright `fill`+`click` on the submit input works — no JS hashing on this form. Do not POST to `/login.php` (wrapper drops the body → 419) or `/takelogin.php`. The `tests/browser` suite logs in this way in `globalSetup`.
 - The `messages.php` page may cause Playwright screenshot timeouts with `networkidle`; prefer `domcontentloaded` and disable animations.
 
 ## Factory admin user

@@ -1,10 +1,18 @@
 @include('usercp.sections._menu', ['selected' => 'forum'])
 
-<form method=post action=usercp.php id="{{ $forum['formId'] ?? '' }}"><input type=hidden name=action value=forum><input type=hidden name=type value=save>
+<form method=post action=usercp.php id="{{ $forum->formId }}"><input type=hidden name=action value=forum><input type=hidden name=type value=save>
 <div class="nx-fgrid nx-fgrid--flat">
 @if ($type === 'saved')
 <div class="nx-ffull nx-center"><span class="nx-color-red"><b>{{ __('legacy/usercp.text_saved')}}</b></span></div>
 @endif
-{{ $forum['rowsHtml'] ?? '' }}
+<x-settings-text layout="grid" :label="\App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/usercp.row_topics_per_page'))" name="topicsperpage" :value="$forum->topicsPerPage" :size="10" :note="__('legacy/usercp.text_zero_equals_default')" />
+<x-settings-text layout="grid" :label="\App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/usercp.row_posts_per_page'))" name="postsperpage" :value="$forum->postsPerPage" :size="10" :note="__('legacy/usercp.text_zero_equals_default')" />
+<x-settings-row-small layout="grid" :label="\App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/usercp.row_view_avatars'))"><input type="checkbox" name="avatars"@if ($forum->avatars) checked @endif>{{ __('legacy/usercp.checkbox_low_bandwidth_note') }}</x-settings-row-small>
+<x-settings-row-small layout="grid" :label="\App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/usercp.row_view_signatures'))"><input type="checkbox" name="signatures"@if ($forum->signatures) checked @endif>{{ __('legacy/usercp.checkbox_low_bandwidth_note') }}</x-settings-row-small>
+@if ($forum->showTooltipSetting)
+<x-settings-row-small layout="grid" :label="__('legacy/usercp.row_tooltip_last_post')"><input type="checkbox" name="ttlastpost"@if ($forum->showLastPost) checked @endif>{{ __('legacy/usercp.checkbox_last_post_note') }}</x-settings-row-small>
+@endif
+<x-settings-radios layout="grid" :label="__('legacy/usercp.row_click_on_topic')" name="clicktopic" :options="['firstpage' => __('legacy/usercp.text_go_to_first_page'), 'lastpage' => __('legacy/usercp.text_go_to_last_page')]" :selected="$forum->clicktopic" />
+<x-settings-row-small layout="grid" :label="__('legacy/usercp.row_forum_signature')"><textarea name="signature" rows="10">{{ $forum->signature }}</textarea><br />{{ \App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/usercp.text_signature_note')) }}</x-settings-row-small>
 <div class="nx-fhead">{{ __('legacy/usercp.row_save_settings')}}</div><div class="nx-fcell"><input type=submit value="{{ __('legacy/usercp.submit_save_settings')}}"></div>
 </div></form>

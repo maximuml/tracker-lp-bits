@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace App\ViewModels;
 
 use App\Models\User;
+use App\ViewModels\Usercp\UsercpForumSection;
+use App\ViewModels\Usercp\UsercpPersonalSection;
+use App\ViewModels\Usercp\UsercpSecuritySection;
+use App\ViewModels\Usercp\UsercpTrackerSection;
 
 /**
  * ViewModel for the user control panel page.
@@ -15,10 +19,6 @@ final class UsercpPageViewModel extends ViewModel
 {
     /**
      * @param  array<string, mixed>  $curUser
-     * @param  array<string, mixed>|null  $personal
-     * @param  array<string, mixed>|null  $tracker
-     * @param  array<string, mixed>|null  $forum
-     * @param  array<string, mixed>|null  $security
      * @param  array<string, mixed>|null  $home
      */
     public function __construct(
@@ -28,10 +28,10 @@ final class UsercpPageViewModel extends ViewModel
         public readonly string $action,
         public readonly string $type,
         public readonly string $contentWidth,
-        public readonly ?array $personal = null,
-        public readonly ?array $tracker = null,
-        public readonly ?array $forum = null,
-        public readonly ?array $security = null,
+        public readonly ?UsercpPersonalSection $personal = null,
+        public readonly ?UsercpTrackerSection $tracker = null,
+        public readonly ?UsercpForumSection $forum = null,
+        public readonly ?UsercpSecuritySection $security = null,
         public readonly ?array $home = null,
     ) {}
 

@@ -14,6 +14,7 @@ use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
 use App\Support\Settings;
+use App\ViewModels\Forum\ForumIndexViewModel;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redis;
@@ -198,7 +199,7 @@ final class ForumPageServiceTest extends TestCase
         $this->assertSame(10, $result['postsperpage']);
         $this->assertSame(20, $result['topicsperpage']);
         $this->assertArrayHasKey('forums', $result);
-        $this->assertArrayHasKey('html', $result['forums']);
+        $this->assertInstanceOf(ForumIndexViewModel::class, $result['forums']);
     }
 
     // --- build: data structure ---

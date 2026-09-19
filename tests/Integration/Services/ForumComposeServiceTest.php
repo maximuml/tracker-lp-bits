@@ -10,7 +10,7 @@ use App\Repositories\TopicRepository;
 use App\Services\ForumComposeService;
 use App\Support\CurrentUser;
 use App\Support\Globals;
-use App\Support\Html\SafeHtml;
+use App\ViewModels\Forum\ForumComposeViewModel;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redis;
@@ -157,10 +157,9 @@ final class ForumComposeServiceTest extends TestCase
         $this->mockForumRepo();
         $this->setUser();
 
-        $result = $this->service()->buildComposeFrame(1, 'invalid_type', []);
+        $result = $this->service()->buildComposeFrame(1, 'invalid_type');
 
-        $this->assertSame('', $result['title']);
-        $this->assertTrue($result['body'] instanceof SafeHtml ? $result['body']->isEmpty() : $result['body'] === '');
+        $this->assertNull($result);
     }
 
     // --- buildComposeFrame: quote with post not found ---
@@ -174,7 +173,7 @@ final class ForumComposeServiceTest extends TestCase
 
         $threw = false;
         try {
-            $this->callWithSuppressedErrors(fn () => $this->service()->buildComposeFrame(999, 'quote', ['std_error' => 'Error', 'std_no_post_id' => 'No post']));
+            $this->callWithSuppressedErrors(fn () => $this->service()->buildComposeFrame(999, 'quote'));
         } catch (\Throwable) {
             $threw = true;
         }
@@ -190,10 +189,9 @@ final class ForumComposeServiceTest extends TestCase
 
         $this->mockPostRepo()->shouldReceive('getPostForEdit')->with(999)->andReturn(null);
 
-        $result = $this->service()->buildComposeFrame(999, 'edit', []);
+        $result = $this->service()->buildComposeFrame(999, 'edit');
 
-        $this->assertSame('', $result['title']);
-        $this->assertTrue($result['body'] instanceof SafeHtml ? $result['body']->isEmpty() : $result['body'] === '');
+        $this->assertNull($result);
     }
 
     // --- buildComposeFrame: new topic (golden path) ---
@@ -205,13 +203,14 @@ final class ForumComposeServiceTest extends TestCase
 
         $repo->shouldReceive('getForumName')->with(1)->andReturn('Test Forum');
 
-        $result = $this->callWithSuppressedErrors(fn () => $this->service()->buildComposeFrame(1, 'new', ['text_new_topic_in' => 'New topic in', 'text_forum' => 'Forum']));
+        $result = $this->callWithSuppressedErrors(fn () => $this->service()->buildComposeFrame(1, 'new'));
 
-        $this->assertIsArray($result);
-        $this->assertArrayHasKey('title', $result);
-        $this->assertArrayHasKey('body', $result);
-        $this->assertStringContainsString('Test Forum', (string) $result['title']);
-        $this->assertStringContainsString('<form', (string) $result['body']);
+        $this->assertInstanceOf(ForumComposeViewModel::class, $result);
+        $this->assertStringContainsString('Test Forum', (string) $result->titleHtml);
+        $this->assertTrue($result->hasSubject);
+        $this->assertSame('new', $result->hiddenType);
+        $this->assertSame(1, $result->hiddenId);
+        $this->assertNull($result->postid);
     }
 
     // --- buildComposeFrame: reply (golden path) ---
@@ -223,13 +222,12 @@ final class ForumComposeServiceTest extends TestCase
 
         $this->mockTopicRepo()->shouldReceive('getTopicSubject')->with(1)->andReturn('Test Topic');
 
-        $result = $this->callWithSuppressedErrors(fn () => $this->service()->buildComposeFrame(1, 'reply', ['text_reply_to_topic' => 'Reply to']));
+        $result = $this->callWithSuppressedErrors(fn () => $this->service()->buildComposeFrame(1, 'reply'));
 
-        $this->assertIsArray($result);
-        $this->assertArrayHasKey('title', $result);
-        $this->assertArrayHasKey('body', $result);
-        $this->assertStringContainsString('Test Topic', (string) $result['title']);
-        $this->assertStringContainsString('<form', (string) $result['body']);
+        $this->assertInstanceOf(ForumComposeViewModel::class, $result);
+        $this->assertStringContainsString('Test Topic', (string) $result->titleHtml);
+        $this->assertFalse($result->hasSubject);
+        $this->assertSame('reply', $result->hiddenType);
     }
 
     // --- buildComposeFrame: quote (golden path) ---
@@ -246,13 +244,15 @@ final class ForumComposeServiceTest extends TestCase
             'body' => 'Quoted text',
         ]);
 
-        $result = $this->callWithSuppressedErrors(fn () => $this->service()->buildComposeFrame(1, 'quote', ['text_reply_to_topic' => 'Reply to']));
+        $result = $this->callWithSuppressedErrors(fn () => $this->service()->buildComposeFrame(1, 'quote'));
 
-        $this->assertIsArray($result);
-        $this->assertArrayHasKey('title', $result);
-        $this->assertArrayHasKey('body', $result);
-        $this->assertStringContainsString('Quoted Topic', (string) $result['title']);
-        $this->assertStringContainsString('[quote=', (string) $result['body']);
+        $this->assertInstanceOf(ForumComposeViewModel::class, $result);
+        $this->assertStringContainsString('Quoted Topic', (string) $result->titleHtml);
+        $this->assertStringContainsString('[quote=poster]', $result->body);
+        $this->assertStringContainsString('Quoted text', $result->body);
+        $this->assertSame(1, $result->postid);
+        $this->assertSame(5, $result->hiddenId);
+        $this->assertSame('reply', $result->hiddenType);
     }
 
     // --- buildComposeFrame: edit (golden path) ---
@@ -269,12 +269,13 @@ final class ForumComposeServiceTest extends TestCase
             'is_first_post' => true,
         ]);
 
-        $result = $this->callWithSuppressedErrors(fn () => $this->service()->buildComposeFrame(1, 'edit', ['text_edit_post' => 'Edit Post']));
+        $result = $this->callWithSuppressedErrors(fn () => $this->service()->buildComposeFrame(1, 'edit'));
 
-        $this->assertIsArray($result);
-        $this->assertArrayHasKey('title', $result);
-        $this->assertArrayHasKey('body', $result);
-        $this->assertStringContainsString('Edit Post', (string) $result['title']);
+        $this->assertInstanceOf(ForumComposeViewModel::class, $result);
+        $this->assertStringContainsString('Edit Post', (string) $result->titleHtml);
+        $this->assertSame('Edit text', $result->body);
+        $this->assertTrue($result->hasSubject);
+        $this->assertSame('Edit Topic', $result->subject);
     }
 
     // --- checkWhetherExist ---
@@ -366,8 +367,8 @@ final class ForumComposeServiceTest extends TestCase
 
         $result = $this->callWithSuppressedErrors(fn () => $this->service()->buildNewTopic(Request::create('/forums.php', 'GET', ['forumid' => 1])));
 
-        $this->assertIsArray($result);
-        $this->assertStringContainsString('Test Forum', (string) $result['title']);
+        $this->assertInstanceOf(ForumComposeViewModel::class, $result);
+        $this->assertStringContainsString('Test Forum', (string) $result->titleHtml);
     }
 
     // --- buildReply ---
@@ -384,7 +385,7 @@ final class ForumComposeServiceTest extends TestCase
 
         $result = $this->callWithSuppressedErrors(fn () => $this->service()->buildReply(Request::create('/forums.php', 'GET', ['topicid' => 1])));
 
-        $this->assertIsArray($result);
-        $this->assertStringContainsString('Test Topic', (string) $result['title']);
+        $this->assertInstanceOf(ForumComposeViewModel::class, $result);
+        $this->assertStringContainsString('Test Topic', (string) $result->titleHtml);
     }
 }

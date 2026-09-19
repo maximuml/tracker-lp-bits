@@ -51,11 +51,6 @@ final class ForumServiceTest extends TestCase
     {
         parent::setUp();
         $this->initialObLevel = ob_get_level();
-        // Define IN_NEXUS so UserDisplay::currentClass() uses CurrentUser
-        // (which we control) instead of Laravel's Auth facade.
-        if (! defined('IN_NEXUS')) {
-            define('IN_NEXUS', true);
-        }
     }
 
     protected function tearDown(): void
@@ -183,8 +178,8 @@ final class ForumServiceTest extends TestCase
 
     /**
      * Authenticate via Laravel's Auth guard so UserDisplay::currentClass()
-     * returns a valid class (needed when IN_NEXUS is false, which is the
-     * case in the test bootstrap).
+     * returns a valid class (needed when the legacy runtime flag is false,
+     * which is the case in the test bootstrap).
      *
      * @param  array<string, mixed>  $userData
      */

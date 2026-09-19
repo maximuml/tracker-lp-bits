@@ -10,6 +10,7 @@ use App\Http\LegacyUrlRewriter;
 use App\Support\Bootstrap;
 use App\Support\CurrentUser;
 use App\Support\LegacyBootstrap;
+use App\Support\LegacyRuntime;
 use Closure;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
@@ -37,7 +38,15 @@ final class LegacyRequestMiddleware
 
     public function handle(Request $request, Closure $next): Response
     {
-        defined('IN_NEXUS') || define('IN_NEXUS', false);
+        // ADR 0017: every request through the HTTP kernel is a legacy-context
+        // request (public/index.php semantics); tracker endpoints are marked
+        // per request so the flag stays correct under Octane workers.
+        $runtime = $this->app->make(LegacyRuntime::class);
+        $runtime->markLegacy();
+        $requestUri = (string) $request->server->get('REQUEST_URI', '');
+        if (preg_match('#^/(?:announce|scrape)(?:\.php)?(?:/|$|\?)#', $requestUri) === 1) {
+            $runtime->markTracker();
+        }
 
         $request = $this->urlRewriter->rewrite($request);
 

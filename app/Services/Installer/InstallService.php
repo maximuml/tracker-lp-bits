@@ -24,7 +24,7 @@ use Illuminate\Support\Str;
  *
  * Ports the DB/settings/symlink/admin work of the legacy web installer
  * (`app/Support/Install/Install.php`) onto plain `DB::`/`Schema::` —
- * no session wizard, no NexusDB, no `IN_NEXUS` bootstrap.
+ * no session wizard, no NexusDB, no legacy bootstrap.
  */
 final class InstallService
 {

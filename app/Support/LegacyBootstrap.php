@@ -20,8 +20,6 @@ final class LegacyBootstrap
 {
     public static function boot(?Request $request = null, string $rootpath = ''): void
     {
-        defined('IN_NEXUS') || define('IN_NEXUS', false);
-
         self::resetAndCapture($request);
 
         ini_set('error_reporting', E_ALL);
@@ -38,8 +36,6 @@ final class LegacyBootstrap
 
     public static function bootConsole(string $rootpath = ''): void
     {
-        defined('IN_NEXUS') || define('IN_NEXUS', false);
-
         self::resetAndCapture(null);
 
         ini_set('error_reporting', E_ALL);

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Integration\Support;
 
 use App\Support\Html\SafeHtml;
+use App\Support\LegacyRuntime;
 use App\Support\Time;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
@@ -13,19 +14,20 @@ use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
- * Legacy (`IN_NEXUS`) branch of {@see Time::format()},
+ * Legacy-runtime branch of {@see Time::format()},
  * {@see Time::timeParts()} and {@see Time::formatText()}.
  *
- * The constant is defined in bootstrap/app.php as `false` for every
- * test, so the legacy branch — the code that runs in production via
- * public/index.php — is invisible to the whole suite. That is exactly
- * how the `{{ Time::format() }}` escaped-markup regression shipped
- * unnoticed: nothing ever executed the `<span title>` path.
+ * `LegacyRuntime::isLegacy()` is false in the test environment, so the
+ * legacy branch — the code that runs in production via public/index.php —
+ * would be invisible to the suite without an explicit `bootEntry(true)`.
+ * That is exactly how the `{{ Time::format() }}` escaped-markup
+ * regression shipped unnoticed: nothing ever executed the `<span title>`
+ * path.
  *
- * Each test here runs in a separate process with `IN_NEXUS`/`TIMENOW`
- * defined *before* the application boots, so the legacy branch is
- * exercised for real. `PreserveGlobalState(false)` keeps the parent
- * process's `IN_NEXUS=false` constant from leaking in.
+ * Each test here runs in a separate process with `TIMENOW` defined
+ * *before* the application boots, so the legacy branch is exercised for
+ * real. `PreserveGlobalState(false)` keeps the parent process's
+ * `TIMENOW` constant from leaking in.
  */
 #[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 #[RunTestsInSeparateProcesses]
@@ -39,13 +41,11 @@ final class TimeLegacyFormatTest extends TestCase
 
     protected function setUp(): void
     {
-        if (! defined('IN_NEXUS')) {
-            define('IN_NEXUS', true);
-        }
         if (! defined('TIMENOW')) {
             define('TIMENOW', self::TIMENOW_TS);
         }
         parent::setUp();
+        app(LegacyRuntime::class)->bootEntry(true);
     }
 
     private function legacyTime(): string

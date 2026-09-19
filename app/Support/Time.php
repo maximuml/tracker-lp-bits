@@ -248,7 +248,7 @@ final class Time
     }
 
     /**
-     * Elapsed/absolute display parts for the legacy (`IN_NEXUS`) branch
+     * Elapsed/absolute display parts for the legacy (LegacyRuntime) branch
      * of {@see format()}, shared with {@see timeParts()}.
      *
      * `mode` distinguishes the two legacy renderings: `absolute` is the
@@ -306,7 +306,7 @@ final class Time
      *
      * This is a temporary Phase 5 migration shim: it mirrors the
      * `\App\Support\Time::format()` proxy from `include/functions.php`, including the
-     * `IN_NEXUS` branch (Carbon diff-for-humans in Laravel context,
+     * legacy-runtime branch (Carbon diff-for-humans in Laravel context,
      * locale-aware elapsed/absolute time in legacy context) and the
      * `isset($CURUSER)` / `TIMENOW` globals. It will be split into
      * context-appropriate helpers once the legacy bootstrap is gone.
@@ -330,7 +330,7 @@ final class Time
             return null;
         }
 
-        if (! (defined('IN_NEXUS') && IN_NEXUS)) {
+        if (! app(LegacyRuntime::class)->isLegacy()) {
             try {
                 return Carbon::parse($time)->diffForHumans();
             } catch (\Exception $e) {
@@ -376,7 +376,7 @@ final class Time
             return null;
         }
 
-        if (! (defined('IN_NEXUS') && IN_NEXUS)) {
+        if (! app(LegacyRuntime::class)->isLegacy()) {
             $attr = $time instanceof Carbon ? $time->toDateTimeString() : (string) $time;
             try {
                 $inner = SafeHtml::fromPlainText(Carbon::parse($time)->diffForHumans());

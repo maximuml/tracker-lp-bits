@@ -461,6 +461,47 @@ Decision → Consequences). Add new ADRs here as numbered subsections.
   to post-submit redirects, so a mismatched baseUrl silently blocks
   signup confirmation in Chrome-family browsers.
 
+### ADR 0017: LegacyRuntime replaces entry-point constants (Accepted, stage 1.2)
+
+- **Context:** `IN_NEXUS` / `IN_TRACKER` are process-global PHP constants
+  defined in `public/index.php` (web entry) and `bootstrap/app.php` /
+  `config/nexus_constants.php` (console/test defaults). Under Octane the
+  worker defines them once at boot: `IN_NEXUS` can never be true for a
+  web request and `IN_TRACKER` can never differ between announce and
+  page requests — request-scoped semantics a constant cannot express.
+  ~15 call sites branched on `defined(...) && CONST`, and tests could
+  only flip the flag by defining the constant once per process (hence
+  `@runInSeparateProcess` suites and the `NEXUS_LEGACY_CONTEXT` bootstrap
+  define).
+- **Decision:** `App\Support\LegacyRuntime` — a small mutable object
+  holding `isLegacy()` / `isTracker()`. `bootstrap/app.php` binds the
+  entry-seeded `instance()` before providers register (seeding from the
+  deprecated constants is the last allowed read; `AppServiceProvider`
+  only registers a `bound()`-guarded fallback). Per request,
+  `LegacyRequestMiddleware` calls `markLegacy()` and `markTracker()`
+  (announce/scrape URI match, same regex as `public/index.php`);
+  `TrackerThrottle` marks tracker again on its route group.
+  `ResetNexus::handle()` calls `reset()` on Octane lifecycle events,
+  restoring entry defaults between worker requests. All `app/` reads
+  migrated to the runtime (`grep IN_NEXUS app/` → 0); repositories take
+  it via constructor injection per the `AppCallByNamespaceRatchetTest`
+  baseline. `NEXUS_LEGACY_CONTEXT=1` → `TestCase::setUp()` calls
+  `bootEntry(true)` — entry defaults so `reset()` keeps the flag when a
+  test fires `JobProcessing`/Octane events (a factory-created user
+  dispatches the outbox job). The Integration files that carried dead
+  `define('IN_NEXUS', true)` calls — never executed on CI because
+  `bootstrap/app.php` defines the constant on the first `createApplication`
+  — simply dropped them; they test the non-legacy paths. Only suites
+  written for the legacy branch opt in (`TimeLegacyFormatTest`).
+- **Consequences:** Request-scoped legacy/tracker state is
+  Octane-safe; tests no longer need process isolation for the flag
+  (`TIMENOW` still forces `TimeLegacyFormatTest` into separate
+  processes). `markLegacy()` in global middleware also gives Octane
+  parity with FPM (`IN_NEXUS=true` for every web request). The constants
+  remain as deprecated aliases in the three entry/compat files for one
+  release — they will be removed together with `dynamicConstantNames`
+  in `phpstan.neon` once downstream reads are confirmed gone.
+
 ## Testing
 
 - **Unit tests:** `tests/Unit/` — pure unit only, no DB/Redis/MeiliSearch (enforced by `UnitSuiteIsolationTest` and the `unit-tests-fast` CI job, which runs the suite with no service containers)

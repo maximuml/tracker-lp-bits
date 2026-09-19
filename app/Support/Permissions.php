@@ -100,7 +100,8 @@ final class Permissions
     private static function permissionFail(string $log, string $permission = ''): bool
     {
         Logger::writeWithContext("$log, [FAIL]");
-        if (defined('IN_NEXUS') && IN_NEXUS && ! (defined('IN_TRACKER') && IN_TRACKER)) {
+        $runtime = app(LegacyRuntime::class);
+        if ($runtime->isLegacy() && ! $runtime->isTracker()) {
             $requireClass = SiteConfig::current()->authority->permission($permission);
             if ($requireClass !== null && isset(User::$classes[$requireClass])) {
                 LegacyResponse::abort(__('legacy/functions.std_sorry'), __('legacy/functions.std_permission_denied_only').UserClass::name($requireClass, false, true, true).sprintf(__('legacy/functions.std_or_above_can_view'), SiteConfig::current()->basic->siteName()), false);

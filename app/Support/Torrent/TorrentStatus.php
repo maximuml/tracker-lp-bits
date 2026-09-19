@@ -60,21 +60,4 @@ class TorrentStatus
 
         return $snatchedList;
     }
-
-    public function renderProgressBar(string $activeStatus, float $progress): string
-    {
-        $color = '#aaa';
-        if ($activeStatus == 'seeding') {
-            $color = 'green';
-        } elseif ($activeStatus == 'leeching') {
-            $color = 'blue';
-        }
-        $progress = ($progress * 100).'%';
-        $result = sprintf(
-            '<div title="%s"><div></div></div>',
-            $activeStatus." $progress"
-        );
-
-        return $result;
-    }
 }

@@ -66,17 +66,24 @@ final class TorrentAccess
      */
     public static function hrImage(array $torrent, int|string $searchBoxId): string
     {
+        return self::requiresHrIcon($torrent, $searchBoxId)
+            ? '<img class="hitandrun" src="pic/trans.gif" alt="H&R" title="H&R" />'
+            : '';
+    }
+
+    /**
+     * Whether the H&R marker applies to this torrent — typed counterpart
+     * of {@see hrImage()} for view-model assembly.
+     *
+     * @param  array<int|string, mixed>  $torrent
+     */
+    public static function requiresHrIcon(array $torrent, int|string $searchBoxId): bool
+    {
         $mode = HitAndRunMode::fromStringSafe(
             is_string($value = HitAndRun::getConfig('mode', $searchBoxId)) ? $value : null
         );
 
-        if (
-            $mode === HitAndRunMode::GLOBAL
-            || ($mode === HitAndRunMode::MANUAL && isset($torrent['hr']) && $torrent['hr'] == TorrentHr::YES->value)
-        ) {
-            return '<img class="hitandrun" src="pic/trans.gif" alt="H&R" title="H&R" />';
-        }
-
-        return '';
+        return $mode === HitAndRunMode::GLOBAL
+            || ($mode === HitAndRunMode::MANUAL && isset($torrent['hr']) && $torrent['hr'] == TorrentHr::YES->value);
     }
 }

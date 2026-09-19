@@ -13,6 +13,7 @@ use App\Services\UsercpPageService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
+use App\ViewModels\Search\SearchCategoryTableFactory;
 use App\ViewModels\Usercp\TwoStepState;
 use App\ViewModels\Usercp\UsercpHomeSection;
 use App\ViewModels\Usercp\UsercpTokenSection;
@@ -78,6 +79,7 @@ final class UsercpPageServiceTest extends TestCase
             app(UsercpLookupRepository::class),
             $this->passkeyRepository,
             $this->tokenRepository,
+            app(SearchCategoryTableFactory::class),
         );
     }
 
@@ -183,6 +185,7 @@ final class UsercpPageServiceTest extends TestCase
             app(UsercpLookupRepository::class),
             Mockery::mock(UserPasskeyRepository::class),
             Mockery::mock(TokenRepository::class),
+            app(SearchCategoryTableFactory::class),
         );
 
         $this->assertInstanceOf(UsercpPageService::class, $service);

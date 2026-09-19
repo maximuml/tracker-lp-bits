@@ -6,7 +6,6 @@ namespace App\ViewModels;
 
 use App\Auth\Permission;
 use App\Contracts\Repositories\TagRepositoryInterface;
-use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Enums\UserAppendPromotion;
 use App\Enums\UserTimeType;
 use App\Models\Torrent;
@@ -18,8 +17,8 @@ use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
-use App\Support\Html\Tag;
 use App\Support\Input;
+use App\Support\Locale;
 use App\Support\Palette;
 use App\Support\Promotion;
 use App\Support\Ratio;
@@ -29,6 +28,10 @@ use App\Support\Torrent\TorrentStatus;
 use App\Support\TorrentAccess;
 use App\Support\TorrentBookmark;
 use App\Support\UserDisplay;
+use App\ViewModels\Torrent\ApprovalBadge;
+use App\ViewModels\Torrent\CategoryIcon;
+use App\ViewModels\Torrent\TorrentBadgeSet;
+use App\ViewModels\Torrent\TorrentProgress;
 
 /**
  * Builds TorrentListViewModel for the modern torrents table.
@@ -43,9 +46,8 @@ final class TorrentListViewFactory
     private const MAX_NAME_LENGTH = 200;
 
     public function __construct(
-        private readonly LegacyRedisCache $cache,
+        private readonly ?LegacyRedisCache $cache,
         private readonly CurrentUser $currentUser,
-        private readonly TorrentRepositoryInterface $torrentRep,
         private readonly TorrentModerationRepository $moderationRep,
         private readonly TorrentStatsService $statsService,
         private readonly TagRepositoryInterface $tagRep,
@@ -57,6 +59,9 @@ final class TorrentListViewFactory
     public function create(array $rows, int $searchBoxId): TorrentListViewModel
     {
         $cache = $this->cache;
+        if ($cache === null) {
+            throw new \RuntimeException('Cache not initialized');
+        }
         $user = $this->currentUser->get() ?? [];
         $config = SiteConfig::current();
         $waitsystem = $config->main->waitSystem(false) ? 'yes' : 'no';
@@ -119,18 +124,25 @@ final class TorrentListViewFactory
         $canDelete = Permission::canDeleteTorrent();
         $returnTo = rawurlencode(Input::serverValue('REQUEST_URI', ''));
 
+        $bookmarkIds = ($user['bmicon'] ?? false)
+            ? TorrentBookmark::bookmarkArray($cache, $user['id'])
+            : [];
+
         $outRows = [];
         $lastcomTooltip = [];
         $counter = 0;
         foreach ($rows as $row) {
             $id = (int) $row['id'];
-            $highlight = Promotion::backgroundStyleWithContext((int) $row['sp_state'], (string) $row['pos_state'], $row);
+            $rowClass = Promotion::rowClassWithContext((int) $row['sp_state'], (string) $row['pos_state'], $row);
 
-            $categoryCell = '-';
+            $categoryIcon = null;
+            $secondIcon = null;
             if (isset($row['category'])) {
-                $categoryCell = Category::imageTagWithContext($row['category'], '?');
+                $catData = Category::iconData($row['category']);
+                $categoryIcon = new CategoryIcon($catData['iconClass'], $catData['name'], '?cat='.$row['category']);
                 if ($hasSecondIcon) {
-                    $categoryCell .= Category::secondIconWithContext($row);
+                    $siData = Category::secondIconData($row);
+                    $secondIcon = new CategoryIcon($siData['iconClass'], $siData['name']);
                 }
             }
 
@@ -148,26 +160,43 @@ final class TorrentListViewFactory
                 $stickyTitle = (string) $posState['text'];
             }
 
-            $badges = $this->torrentRep->getPaidIcon($row)
-                .Promotion::appendWithContext($row['sp_state'], '', true, $row['added'], $row['promotion_time_type'], $row['promotion_until'], $row['__ignore_global_sp_state'] ?? false)
-                .Promotion::appendSubWithContext($row['sp_state'], '', true, $row['added'], $row['promotion_time_type'], $row['promotion_until'], $row['__ignore_global_sp_state'] ?? false)
-                .TorrentAccess::hrImage($row, $row['search_box_id'])
-                .$this->moderationRep->renderApprovalStatus($row['approval_status']);
+            $badges = new TorrentBadgeSet(
+                paid: isset($row['price']) && $row['price'] > 0,
+                promotion: Promotion::badgeWithContext(
+                    $row['sp_state'], '', true, $row['added'],
+                    $row['promotion_time_type'], $row['promotion_until'],
+                    $row['__ignore_global_sp_state'] ?? false,
+                ),
+                hitAndRun: TorrentAccess::requiresHrIcon($row, $row['search_box_id']),
+                approval: $this->moderationRep->shouldShowApprovalStatusIcon($row['approval_status'])
+                    ? new ApprovalBadge(
+                        title: (string) Locale::trans("torrent.approval.status_text.{$row['approval_status']}", [], null),
+                        icon: SafeHtml::fromTrustedHtml((string) (Torrent::$approvalStatus[$row['approval_status']]['icon'] ?? '')),
+                    )
+                    : null,
+            );
 
+            $tags = [];
             $tagOwns = $tagResult->get($id);
-            $tags = $tagOwns
-                ? $this->tagRep->renderSpan($row['search_box_id'], $tagOwns->pluck('tag_id')->toArray())
-                : '';
+            if ($tagOwns) {
+                $ownedTagIds = $tagOwns->pluck('tag_id')->toArray();
+                foreach ($this->tagRep->listAll((int) $row['search_box_id']) as $tag) {
+                    if (in_array($tag->id, $ownedTagIds)) {
+                        $tags[] = $tag;
+                    }
+                }
+            }
 
-            $progressBar = isset($seedingStatus[$id])
-                ? $torrent->renderProgressBar($seedingStatus[$id]['active_status'], $seedingStatus[$id]['progress'])
-                : '';
+            $progress = isset($seedingStatus[$id])
+                ? new TorrentProgress(
+                    (string) $seedingStatus[$id]['active_status'],
+                    min(100.0, max(0.0, (float) $seedingStatus[$id]['progress'] * 100)),
+                )
+                : null;
 
             $showDownload = (bool) ($user['dlicon'] ?? false) && (bool) ($user['downloadpos'] ?? true);
             $showBookmark = (bool) ($user['bmicon'] ?? false);
-            $bookmarkMarkup = $showBookmark
-                ? TorrentBookmark::stateMarkupWithContext($user['id'], $id)
-                : '';
+            $bookmarked = $showBookmark && in_array($id, $bookmarkIds, false);
 
             $waitText = null;
             $waitClass = null;
@@ -197,9 +226,11 @@ final class TorrentListViewFactory
                     $tooltipId = 'lastcom_'.$counter;
                     $lastcomTooltip[] = [
                         'id' => $tooltipId,
-                        'content' => ($commentIsNew ? "<b>(<span class='new'>".__('legacy/functions.text_new_uppercase').'</span>)</b> ' : '')
+                        'content' => SafeHtml::fromTrustedHtml(
+                            ($commentIsNew ? "<b>(<span class='new'>".__('legacy/functions.text_new_uppercase').'</span>)</b> ' : '')
                             .__('legacy/functions.text_last_commented_by').UserDisplay::username($lastcom['user']).$lastcomtime.'<br />'
-                            .Format::formatComment(mb_substr($lastcom['text'], 0, 100, 'UTF-8').(mb_strlen($lastcom['text'], 'UTF-8') > 100 ? ' ......' : ''), true, false, false, true, 600, false, false),
+                            .Format::formatComment(mb_substr($lastcom['text'], 0, 100, 'UTF-8').(mb_strlen($lastcom['text'], 'UTF-8') > 100 ? ' ......' : ''), true, false, false, true, 600, false, false)
+                        ),
                     ];
                 }
             }
@@ -230,8 +261,9 @@ final class TorrentListViewFactory
 
             $outRows[] = new TorrentListRow(
                 id: $id,
-                rowAttrs: SafeHtml::fromTrustedHtml($highlight),
-                categoryCell: SafeHtml::fromTrustedHtml($categoryCell),
+                rowClass: $rowClass,
+                categoryIcon: $categoryIcon,
+                secondIcon: $secondIcon,
                 coverSrc: $showCover ? (string) ($row['cover'] ?? '') : null,
                 stickyCount: $stickyCount,
                 stickyTitle: $stickyTitle,
@@ -240,23 +272,23 @@ final class TorrentListViewFactory
                 nameTitle: $nameTitle,
                 isNew: $appendNew && strtotime((string) $row['added']) >= $lastBrowse,
                 isBanned: $row['banned'] == 1,
-                badges: SafeHtml::fromTrustedHtml($badges),
-                tags: SafeHtml::fromTrustedHtml($tags),
-                progressBar: SafeHtml::fromTrustedHtml($progressBar),
+                badges: $badges,
+                tags: $tags,
+                progress: $progress,
                 showDownload: $showDownload,
                 downloadUrl: 'download.php?id='.$id,
                 showBookmark: $showBookmark,
                 bookmarkElementId: 'bookmark'.$counter,
                 bookmarkCounter: $counter,
-                bookmarkMarkup: SafeHtml::fromTrustedHtml($bookmarkMarkup),
+                bookmarked: $bookmarked,
                 waitText: $waitText,
                 waitClass: $waitClass,
                 commentsUrl: 'details.php?id='.$id.'&hit=1&cmtpage=1#startcomments',
                 comments: (int) $row['comments'],
                 commentIsNew: $commentIsNew,
                 lastCommentTooltipId: $tooltipId,
-                time: SafeHtml::fromTrustedHtml((string) Time::format((string) $row['added'], false, true)),
-                size: SafeHtml::fromTrustedHtml(Format::sizeCompact((float) $row['size'])),
+                added: is_int($row['added']) || is_string($row['added']) || $row['added'] instanceof \DateTimeInterface ? $row['added'] : null,
+                size: Format::sizeParts((float) $row['size']),
                 seedersUrl: $seedersUrl,
                 seeders: (int) $row['seeders'],
                 seedersClass: $seedersColor,
@@ -274,10 +306,6 @@ final class TorrentListViewFactory
             $counter++;
         }
 
-        $lastcomTooltips = ($enableTooltip && (empty($user) || ($user['showlastcom'] ?? false)))
-            ? Tag::tooltipContainer($lastcomTooltip, 400)
-            : '';
-
         // The legacy renderer also emitted a second (always empty) tooltip
         // container — dropped here; $torrent_tooltip was never populated.
         return new TorrentListViewModel(
@@ -286,7 +314,9 @@ final class TorrentListViewFactory
             showComments: $showComments,
             canManage: $canManage,
             showPromotionNote: $promotionNote,
-            lastCommentTooltips: SafeHtml::fromTrustedHtml($lastcomTooltips),
+            lastCommentTooltips: ($enableTooltip && (empty($user) || ($user['showlastcom'] ?? false)))
+                ? $lastcomTooltip
+                : [],
         );
     }
 

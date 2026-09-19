@@ -26,11 +26,11 @@ use App\Support\Input;
 use App\Support\LegacyYesNo;
 use App\Support\Locale;
 use App\Support\Network;
-use App\Support\SearchBox;
 use App\Support\Strings;
 use App\Support\TwoFactorAuthHelper;
 use App\Support\Url;
 use App\Support\UserDisplay;
+use App\ViewModels\Search\SearchCategoryTableFactory;
 use App\ViewModels\Usercp\PasskeyItem;
 use App\ViewModels\Usercp\PasskeyLoginForm;
 use App\ViewModels\Usercp\ReadTopicItem;
@@ -65,6 +65,7 @@ final class UsercpPageService
         private readonly UsercpLookupRepository $usercpLookupRepository,
         private readonly UserPasskeyRepository $passkeyRepository,
         private readonly TokenRepository $tokenRepository,
+        private readonly SearchCategoryTableFactory $searchCategoryTableFactory
     ) {}
 
     /**
@@ -574,7 +575,7 @@ JS;
             }
         }
 
-        $categories = SearchBox::buildCategoryTableWithContext($browsecatmode, 'yes', 'torrents.php?allsec=1', '', 3, $notifs, ['section_name' => true]);
+        $categoriesTable = $this->searchCategoryTableFactory->create($browsecatmode, 'yes', 'torrents.php?allsec=1&', '', 3, $notifs, ['section_name' => true]);
 
         $currentTheme = UserTheme::fromStringSafe(is_string($curUser['theme'] ?? null) ? $curUser['theme'] : null)->value;
         $themeOptions = [];
@@ -607,7 +608,7 @@ JS;
                 && (string) $this->globals->get('smtptype', '') !== 'none',
             pmnotif: str_contains($notifs, '[pm]'),
             emailnotif: str_contains($notifs, '[email]'),
-            categoriesHtml: SafeHtml::fromTrustedHtml($categories),
+            categoriesTable: $categoriesTable,
             incldead: $incldead,
             specialState: $specialState,
             inclbookmarked: $inclbookmarked,

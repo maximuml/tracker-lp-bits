@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace App\ViewModels\Usercp;
 
 use App\Support\Html\SafeHtml;
+use App\ViewModels\Search\SearchCategoryTableViewModel;
 
 /**
  * Tracker/browse settings section of the user control panel.
  *
- * `categoriesHtml` and `promotionOptionsHtml` stay trusted HTML:
- * the category checkbox grid comes from the shared `SearchBox`
- * category-table builder and the promotion `<option>`s from
- * `Tag::promotionSelection` — both are trusted internal helpers.
+ * `promotionOptionsHtml` stays trusted HTML: the promotion `<option>`s
+ * come from the trusted `Tag::promotionSelection` helper. The category
+ * checkbox grid is a typed `SearchCategoryTableViewModel` rendered by
+ * `x-search-category-table`.
  */
 final readonly class UsercpTrackerSection
 {
@@ -25,7 +26,7 @@ final readonly class UsercpTrackerSection
         public bool $showEmailNotify,
         public bool $pmnotif,
         public bool $emailnotif,
-        public SafeHtml $categoriesHtml,
+        public SearchCategoryTableViewModel $categoriesTable,
         public int $incldead,
         public int $specialState,
         public int $inclbookmarked,

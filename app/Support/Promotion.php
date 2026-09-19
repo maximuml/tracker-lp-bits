@@ -10,6 +10,8 @@ use App\Enums\UserAppendPromotion;
 use App\Models\Torrent;
 use App\Models\TorrentState;
 use App\Support\Config\SiteConfig;
+use App\Support\Html\SafeHtml;
+use App\ViewModels\Torrent\PromotionBadge;
 
 /**
  * Pure promotion (special-state) presentation helpers, drained out of
@@ -34,62 +36,85 @@ final class Promotion
      */
     public static function backgroundClass(int $code): ?string
     {
+        $token = self::backgroundToken($code);
+
+        return $token === null || $token === '' ? $token : " class='$token'";
+    }
+
+    /**
+     * Bare `*_bg` class token for a promotion code ('' for code 1,
+     * null for unhandled codes) — the typed counterpart of
+     * {@see backgroundClass()}.
+     */
+    private static function backgroundToken(int $code): ?string
+    {
         return match ($code) {
             1 => '',
-            2 => " class='free_bg'",
-            3 => " class='twoup_bg'",
-            4 => " class='twoupfree_bg'",
-            5 => " class='halfdown_bg'",
-            6 => " class='twouphalfdown_bg'",
-            7 => " class='thirtypercentdown_bg'",
+            2 => 'free_bg',
+            3 => 'twoup_bg',
+            4 => 'twoupfree_bg',
+            5 => 'halfdown_bg',
+            6 => 'twouphalfdown_bg',
+            7 => 'thirtypercentdown_bg',
             default => null,
         };
     }
 
     /**
-     * Build the row background style for a torrent list row.
+     * Bare row CSS class (`free_bg`, …) for a torrent list row, or null
+     * when the row gets no class attribute. Typed counterpart of
+     * {@see backgroundStyle()}.
      *
-     * Mirrors `get_torrent_bg_color()`.
-     */
-    /**
      * @param  array<string, mixed>  $torrent
      */
-    public static function backgroundStyle(
+    public static function rowClass(
         int $promotion,
         string $posState,
         array $torrent,
         string $appendPromotion,
-    ): string {
-        $sphighlight = null;
-        if ($appendPromotion === 'highlight') {
-            $globalPromotionState = self::globalSpecialState();
-            $code = ($globalPromotionState == 1) ? $promotion : $globalPromotionState;
-            $sphighlight = self::backgroundClass((int) $code);
-        }
+    ): ?string {
+        $token = self::resolveRowToken($promotion, $posState, $torrent, $appendPromotion);
 
-        if ($sphighlight === null) {
-            $torrentSettings = SiteConfig::current()->torrent->toArray();
-            if ($posState === TorrentPosState::STICKY_FIRST->value && ! empty($torrentSettings['sticky_first_level_background_color'])) {
-                $sphighlight = '';
-            } elseif ($posState === TorrentPosState::STICKY_SECOND->value && ! empty($torrentSettings['sticky_second_level_background_color'])) {
-                $sphighlight = '';
-            }
-        }
-
-        return (string) $sphighlight;
+        return $token === '' ? null : $token;
     }
 
     /**
-     * Locale/context-aware wrapper for {@see backgroundStyle()}.
-     * Mirrors the legacy `get_torrent_bg_color()` helper.
-     *
      * @param  array<string, mixed>  $torrent
      */
-    public static function backgroundStyleWithContext(int $promotion, ?string $posState = '', ?array $torrent = []): string
+    private static function resolveRowToken(
+        int $promotion,
+        string $posState,
+        array $torrent,
+        string $appendPromotion,
+    ): ?string {
+        $token = null;
+        if ($appendPromotion === 'highlight') {
+            $globalPromotionState = self::globalSpecialState();
+            $token = self::backgroundToken((int) ($globalPromotionState == 1 ? $promotion : $globalPromotionState));
+        }
+
+        if ($token === null) {
+            $torrentSettings = SiteConfig::current()->torrent->toArray();
+            if ($posState === TorrentPosState::STICKY_FIRST->value && ! empty($torrentSettings['sticky_first_level_background_color'])) {
+                $token = '';
+            } elseif ($posState === TorrentPosState::STICKY_SECOND->value && ! empty($torrentSettings['sticky_second_level_background_color'])) {
+                $token = '';
+            }
+        }
+
+        return $token;
+    }
+
+    /**
+     * Context-aware wrapper for {@see rowClass()}.
+     *
+     * @param  array<string, mixed>|null  $torrent
+     */
+    public static function rowClassWithContext(int $promotion, ?string $posState = '', ?array $torrent = []): ?string
     {
         $user = app(CurrentUser::class)->get() ?? [];
 
-        return self::backgroundStyle(
+        return self::rowClass(
             $promotion,
             (string) ($posState ?? ''),
             $torrent ?? [],
@@ -151,9 +176,13 @@ final class Promotion
     }
 
     /**
+     * Resolve the promotion badge for a torrent row as typed data.
+     * Both the badge (word/icon) and its "will end in" suffix derive
+     * from the single returned object.
+     *
      * @param  array<string, int>  $expires
      */
-    private static function render(
+    public static function badge(
         int $promotion,
         string $forceMode,
         bool $showTimeLeft,
@@ -163,13 +192,10 @@ final class Promotion
         bool $ignoreGlobal,
         string $appendPromotion,
         array $expires,
-        bool $sub,
-    ): string {
+    ): ?PromotionBadge {
         $added = (string) ($added ?? '');
         $promotionUntil = (string) ($promotionUntil ?? '');
         $globalSpState = self::globalSpecialState();
-        $spTorrent = '';
-        $onmouseover = '';
         $log = "[GET_PROMOTION], promotion: $promotion, forcemode: $forceMode, showtimeleft: $showTimeLeft, added: $added, promotionTimeType: $promotionTimeType, promotionUntil: $promotionUntil";
         if ($ignoreGlobal) {
             $globalSpState = 1;
@@ -178,6 +204,9 @@ final class Promotion
         $log .= ', globalSpState == '.$globalSpState;
 
         $mode = $forceMode !== '' ? $forceMode : $appendPromotion;
+        $timeout = null;
+        $subColor = null;
+        $domttHtml = null;
 
         if ($globalSpState == 1 && isset(self::PROMOTION_CONFIG[$promotion])) {
             $config = self::PROMOTION_CONFIG[$promotion];
@@ -192,17 +221,12 @@ final class Promotion
                     $baseTime = strtotime($added);
                     $futureTime = ($baseTime === false ? 0 : $baseTime) + $expire * 86400;
                 }
-                $timeout = Time::format(date('Y-m-d H:i:s', $futureTime), false, false, true, false, true);
-                if ($timeout) {
-                    $text = __('legacy/functions.'.$config['text']);
-                    if ($sub) {
-                        $color = $config['subColor'];
-                        $onmouseover = $color
-                            ? " <span class=\"$color\">".((string) __('legacy/functions.text_will_end_in')).$timeout.'</span>'
-                            : ' '.((string) __('legacy/functions.text_will_end_in')).$timeout;
-                    } else {
-                        $onmouseover = ' data-domtt-promo="'.htmlspecialchars("<b><span class=\"{$config['class']}\">$text</span></b>".((string) __('legacy/functions.text_will_end_in'))."<b>$timeout</b>").'"';
-                    }
+                $timeoutStr = Time::format(date('Y-m-d H:i:s', $futureTime), false, false, true, false, true);
+                if ($timeoutStr) {
+                    $text = (string) __('legacy/functions.'.$config['text']);
+                    $timeout = SafeHtml::fromTrustedHtml((string) $timeoutStr);
+                    $subColor = $config['subColor'];
+                    $domttHtml = "<b><span class=\"{$config['class']}\">$text</span></b>".((string) __('legacy/functions.text_will_end_in'))."<b>$timeoutStr</b>";
                 } else {
                     $promotion = 1;
                 }
@@ -212,23 +236,97 @@ final class Promotion
         $effectiveCode = $globalSpState == 1 ? $promotion : $globalSpState;
         $log .= ", user appendpromotion = $mode";
 
+        $badge = null;
         if (($mode === 'word' || $mode === 'icon') && isset(self::PROMOTION_CONFIG[$effectiveCode])) {
             $config = self::PROMOTION_CONFIG[$effectiveCode];
             $log .= ", promotion or global_sp_state = $effectiveCode";
-            $text = __('legacy/functions.'.$config['text']);
-            if ($sub) {
-                $spTorrent = $onmouseover;
-            } elseif ($mode === 'word') {
-                $spTorrent = " <b>[<span class='{$config['class']}' $onmouseover>$text</span>]</b>";
-            } else {
-                $attr = $onmouseover ?: 'title="'.$text.'"';
-                $spTorrent = " <img class=\"{$config['icon']}\" src=\"pic/trans.gif\" alt=\"{$config['alt']}\" $attr />";
-            }
+            $badge = new PromotionBadge(
+                mode: $mode,
+                cssClass: (string) $config['class'],
+                iconClass: (string) $config['icon'],
+                alt: (string) $config['alt'],
+                text: (string) __('legacy/functions.'.$config['text']),
+                timeout: $timeout,
+                subColor: $subColor,
+                domttHtml: $domttHtml,
+            );
         }
 
-        Logger::writeWithContext("$log, sp_torrent: $spTorrent");
+        Logger::writeWithContext("$log, badge: ".($badge === null ? '' : "{$badge->mode}:{$badge->cssClass}"));
 
-        return $spTorrent;
+        return $badge;
+    }
+
+    /**
+     * Context-aware wrapper for {@see badge()}.
+     */
+    public static function badgeWithContext(
+        int $promotion,
+        string $forceMode,
+        bool $showTimeLeft,
+        ?string $added,
+        int $promotionTimeType,
+        ?string $promotionUntil,
+        bool $ignoreGlobal,
+    ): ?PromotionBadge {
+        $user = app(CurrentUser::class)->get() ?? [];
+
+        return self::badge(
+            $promotion,
+            $forceMode,
+            $showTimeLeft,
+            $added,
+            $promotionTimeType,
+            $promotionUntil,
+            $ignoreGlobal,
+            UserAppendPromotion::tryFrom((int) ($user['appendpromotion'] ?? 2))?->stringValue() ?? 'icon',
+            self::expireTorrentGlobals(),
+        );
+    }
+
+    /**
+     * @param  array<string, int>  $expires
+     */
+    private static function render(
+        int $promotion,
+        string $forceMode,
+        bool $showTimeLeft,
+        ?string $added,
+        int $promotionTimeType,
+        ?string $promotionUntil,
+        bool $ignoreGlobal,
+        string $appendPromotion,
+        array $expires,
+        bool $sub,
+    ): string {
+        $badge = self::badge(
+            $promotion, $forceMode, $showTimeLeft, $added,
+            $promotionTimeType, $promotionUntil, $ignoreGlobal,
+            $appendPromotion, $expires,
+        );
+        if ($badge === null) {
+            return '';
+        }
+        if ($sub) {
+            if ($badge->timeout === null) {
+                return '';
+            }
+            $endIn = (string) __('legacy/functions.text_will_end_in');
+
+            return $badge->subColor !== null
+                ? ' <span class="'.$badge->subColor.'">'.$endIn.$badge->timeout->toHtml().'</span>'
+                : ' '.$endIn.$badge->timeout->toHtml();
+        }
+        if ($badge->mode === 'word') {
+            $onmouseover = $badge->domttHtml !== null ? ' data-domtt-promo="'.htmlspecialchars($badge->domttHtml).'"' : '';
+
+            return " <b>[<span class='{$badge->cssClass}'$onmouseover>{$badge->text}</span>]</b>";
+        }
+        $attr = $badge->domttHtml !== null
+            ? ' data-domtt-promo="'.htmlspecialchars($badge->domttHtml).'"'
+            : ' title="'.$badge->text.'"';
+
+        return " <img class=\"{$badge->iconClass}\" src=\"pic/trans.gif\" alt=\"{$badge->alt}\"$attr />";
     }
 
     /**

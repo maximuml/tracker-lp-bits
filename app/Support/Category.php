@@ -107,56 +107,6 @@ final class Category
     }
 
     /**
-     * Build the additional second-icon `<img>` tag for a torrent row.
-     *
-     * Mirrors `get_second_icon()`.
-     */
-    /**
-     * @param  array<string, mixed>  $row
-     */
-    public static function secondIcon(?LegacyRedisCache $cache, array $row, string $catFolder): string
-    {
-        $source = $row['source'] ?? '';
-        $medium = $row['medium'] ?? '';
-        $codec = $row['codec'] ?? '';
-        $standard = $row['standard'] ?? '';
-        $processing = $row['processing'] ?? '';
-        $audiocodec = $row['audiocodec'] ?? '';
-        $mode = $row['search_box_id'] ?? 0;
-
-        $cacheKey = 'secondicon_'.$source.'_'.$medium.'_'.$codec.'_'.$standard.'_'.$processing.'_'.$audiocodec.'_content';
-        $sirow = $cache !== null ? $cache->get_value($cacheKey) : false;
-
-        if ($sirow === false) {
-            $sirowData = app(CategoryRepository::class)->findSecondIcon($row);
-            $sirow = $sirowData ?? 'not allowed';
-            if ($cache !== null) {
-                $cache->cache_value($cacheKey, $sirow, 600);
-            }
-        }
-
-        if ($sirow === 'not allowed') {
-            return '<img src="pic/cattrans.gif" title="Not Allowed" alt="Not Allowed" />';
-        }
-
-        return '<img'.($sirow['class_name'] ? ' class="'.$sirow['class_name'].'"' : '').' src="pic/cattrans.gif" alt="'.$sirow['name'].'" title="'.$sirow['name'].'" />';
-    }
-
-    /**
-     * Context-aware wrapper for {@see secondIcon()}.
-     * Mirrors the legacy `get_second_icon()` helper.
-     *
-     * @param  array<string, mixed>  $row
-     */
-    public static function secondIconWithContext(array $row): string
-    {
-        $cache = app(LegacyRedisCache::class);
-        $catFolder = Path::categoryFolderForIdWithContext($row['category'] ?? '');
-
-        return self::secondIcon($cache, $row, $catFolder);
-    }
-
-    /**
      * Return the category list for a search mode.
      *
      * Mirrors `genrelist()`.
@@ -199,23 +149,77 @@ final class Category
 
     public static function imageTag(int|string $categoryId, string $link = ''): string
     {
-        static $cache = [];
-
-        if (! isset($cache[$categoryId])) {
-            $categoryRow = self::rowWithContext($categoryId);
-            $catImgUrl = Path::categoryFolderForIdWithContext($categoryId);
-            $className = (string) ($categoryRow['class_name'] ?? '');
-            $name = (string) ($categoryRow['name'] ?? '');
-            $image = (string) ($categoryRow['image'] ?? '');
-            $cache[$categoryId] = '<img'.($className ? ' class="'.$className.'"' : '').' src="pic/cattrans.gif" alt="'.$name.'" title="'.$name.'" />';
-        }
-
-        $catImg = $cache[$categoryId];
+        $catImg = self::iconImg($categoryId);
 
         if ($link !== '') {
             $catImg = '<a href="'.$link.'cat='.$categoryId.'">'.$catImg.'</a>';
         }
 
         return $catImg;
+    }
+
+    /**
+     * Typed category-icon data for view-model assembly — the data
+     * counterpart of {@see imageTag()}.
+     *
+     * @return array{iconClass: string, name: string}
+     */
+    public static function iconData(int|string $categoryId): array
+    {
+        static $cache = [];
+
+        if (! isset($cache[$categoryId])) {
+            $categoryRow = self::rowWithContext($categoryId);
+            $cache[$categoryId] = [
+                'iconClass' => (string) ($categoryRow['class_name'] ?? ''),
+                'name' => (string) ($categoryRow['name'] ?? ''),
+            ];
+        }
+
+        return $cache[$categoryId];
+    }
+
+    /**
+     * Typed second-icon data for view-model assembly — the data
+     * counterpart of {@see secondIcon()}. The "not allowed" sentinel
+     * maps to `{iconClass: '', name: 'Not Allowed'}`.
+     *
+     * @param  array<string, mixed>  $row
+     * @return array{iconClass: string, name: string}
+     */
+    public static function secondIconData(array $row): array
+    {
+        $cache = app(LegacyRedisCache::class);
+        $source = $row['source'] ?? '';
+        $medium = $row['medium'] ?? '';
+        $codec = $row['codec'] ?? '';
+        $standard = $row['standard'] ?? '';
+        $processing = $row['processing'] ?? '';
+        $audiocodec = $row['audiocodec'] ?? '';
+        $mode = $row['search_box_id'] ?? 0;
+
+        $cacheKey = 'secondicon_'.$source.'_'.$medium.'_'.$codec.'_'.$standard.'_'.$processing.'_'.$audiocodec.'_content';
+        $sirow = $cache !== null ? $cache->get_value($cacheKey) : false;
+
+        if ($sirow === false) {
+            $sirowData = app(CategoryRepository::class)->findSecondIcon($row);
+            $sirow = $sirowData ?? 'not allowed';
+            if ($cache !== null) {
+                $cache->cache_value($cacheKey, $sirow, 600);
+            }
+        }
+
+        if ($sirow === 'not allowed') {
+            return ['iconClass' => '', 'name' => 'Not Allowed'];
+        }
+
+        return ['iconClass' => (string) ($sirow['class_name'] ?? ''), 'name' => (string) ($sirow['name'] ?? '')];
+    }
+
+    private static function iconImg(int|string $categoryId): string
+    {
+        $data = self::iconData($categoryId);
+
+        return '<img'.($data['iconClass'] !== '' ? ' class="'.$data['iconClass'].'"' : '').' src="pic/cattrans.gif" alt="'.$data['name'].'" title="'.$data['name'].'" />';
     }
 }

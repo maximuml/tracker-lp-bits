@@ -3,7 +3,7 @@
 <thead>
 <tr>
     @foreach ($listVm->columns as $col)
-    <th class="colhead" @if ($col['key'] === 'type')@endif scope="col">
+    <th class="colhead" scope="col">
         @if ($col['sortUrl'])
             <a href="{{ $col['sortUrl'] }}">
                 @if ($col['iconClass'])<img class="{{ $col['iconClass'] }}" src="pic/trans.gif" alt="{{ $col['iconTitle'] }}" title="{{ $col['iconTitle'] }}" />@else{{ $col['label'] }}@endif
@@ -19,18 +19,18 @@
 </thead>
 <tbody>
 @foreach ($listVm->rows as $row)
-<tr{{ $row->rowAttrs }}>
-    <td class="rowfollow nowrap nxm-td-icon" valign="middle">{{ $row->categoryCell }}</td>
+<tr @if ($row->rowClass !== null) class="{{ $row->rowClass }}" @endif>
+    <td class="rowfollow nowrap nxm-td-icon" valign="middle"><x-torrent.category-icon :icon="$row->categoryIcon" :second="$row->secondIcon" /></td>
     <td class="rowfollow" width="100%" align="left">
         <div class="torrentname nxm-nameblock">
             @if ($row->coverSrc !== null)
             <div class="nx-embedded nxm-cover"><img src="pic/misc/spinner.svg" data-src="{{ $row->coverSrc }}" class="nexus-lazy-load nxm-cover__img" alt="" /></div>
             @endif
-            <div class="nx-embedded nxm-namecell">@for ($i = 0; $i < $row->stickyCount; $i++)<img class="sticky" src="pic/trans.gif" alt="Sticky" title="{{ $row->stickyTitle }}" />&nbsp;@endfor<a title="{{ $row->nameTitle }}" href="{{ $row->nameUrl }}"><b>{{ $row->displayName }}</b></a>@if ($row->isNew) <b>(<span class="new">{{ __('legacy/functions.text_new_uppercase') }}</span>)</b>@endif @if ($row->isBanned)<b>(<span class="striking">{{ __('legacy/functions.text_banned') }}</span>)</b>@endif{{ $row->badges }}@if ($row->tags->toHtml() !== '')<br />{{ $row->tags }}@endif{{ $row->progressBar }}</div>
+            <div class="nx-embedded nxm-namecell">@for ($i = 0; $i < $row->stickyCount; $i++)<img class="sticky" src="pic/trans.gif" alt="Sticky" title="{{ $row->stickyTitle }}" />&nbsp;@endfor<a title="{{ $row->nameTitle }}" href="{{ $row->nameUrl }}"><b>{{ $row->displayName }}</b></a>@if ($row->isNew) <b>(<span class="new">{{ __('legacy/functions.text_new_uppercase') }}</span>)</b>@endif @if ($row->isBanned) <b>(<span class="striking">{{ __('legacy/functions.text_banned') }}</span>)</b>@endif<x-torrent.badges :set="$row->badges" />@if ($row->tags !== [])<br /><x-torrent.tags :tags="$row->tags" />@endif<x-torrent.progress :progress="$row->progress" /></div>
             <div class="nx-embedded nxm-rowactions">
                 @if ($row->showDownload)<a href="{{ $row->downloadUrl }}"><img class="download" src="pic/trans.gif" alt="download" title="{{ __('legacy/functions.title_download_torrent') }}" /></a>@endif
                 @if ($row->showDownload && $row->showBookmark)<br />@endif
-                @if ($row->showBookmark)<a id="{{ $row->bookmarkElementId }}" href="#" data-bookmark-torrent="{{ $row->id }}" data-bookmark-counter="{{ $row->bookmarkCounter }}">{{ $row->bookmarkMarkup }}</a>@endif
+                @if ($row->showBookmark)<a id="{{ $row->bookmarkElementId }}" href="#" data-bookmark-torrent="{{ $row->id }}" data-bookmark-counter="{{ $row->bookmarkCounter }}"><img class="{{ $row->bookmarked ? 'bookmark' : 'delbookmark' }}" src="pic/trans.gif" alt="{{ $row->bookmarked ? 'Bookmarked' : 'Unbookmarked' }}" title="{{ $row->bookmarked ? __('legacy/functions.title_delbookmark_torrent') : __('legacy/functions.title_bookmark_torrent') }}" /></a>@endif
             </div>
         </div>
     </td>
@@ -46,8 +46,8 @@
         @endif
     </td>
     @endif
-    <td class="rowfollow nowrap">{{ $row->time }}</td>
-    <td class="rowfollow">{{ $row->size }}</td>
+    <td class="rowfollow nowrap"><x-time :value="$row->added" :ago="false" :two-line="true" /></td>
+    <td class="rowfollow">{{ $row->size['value'] }}<br />{{ $row->size['unit'] }}</td>
     <td class="rowfollow" align="center">
         @if ($row->seedersUrl)
             <b><a href="{{ $row->seedersUrl }}">@if ($row->seedersClass)<span class="{{ $row->seedersClass }}">{{ number_format($row->seeders) }}</span>@else{{ number_format($row->seeders) }}@endif</a></b>
@@ -76,4 +76,8 @@
 @if ($listVm->showPromotionNote)
 <p class="nxm-note" align="center">{{ \App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/functions.text_promoted_torrents_note')) }}</p>
 @endif
-{{ $listVm->lastCommentTooltips }}
+@if ($listVm->lastCommentTooltips !== [])
+<div class="nx-hidden">
+    @foreach ($listVm->lastCommentTooltips as $tip)<div id="{{ $tip['id'] }}">{{ $tip['content'] }}</div>@endforeach
+</div>
+@endif

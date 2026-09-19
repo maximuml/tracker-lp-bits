@@ -6,6 +6,7 @@ namespace App\DTOs\Usercp;
 
 use App\Enums\UserAppendPromotion;
 use App\Enums\UserFontsize;
+use App\Enums\UserTheme;
 use App\Enums\UserTimeType;
 use App\Enums\UserTooltip;
 use App\Support\Validators;
@@ -30,6 +31,7 @@ final readonly class TrackerSettingsDto
         public ?string $inclbookmarked,
         public array $notifPreferences,
         public ?int $stylesheet,
+        public ?string $theme,
         public ?int $sitelanguage,
         public ?string $currentLangFolder,
         public int $torrentsperpage,
@@ -65,6 +67,7 @@ final readonly class TrackerSettingsDto
             self::stringOrNull($request->input('inclbookmarked')),
             self::collectNotifPreferences($request),
             self::intId($request->input('stylesheet', 0)),
+            $request->has('theme') ? UserTheme::fromStringSafe(self::stringOrNull($request->input('theme')))->value : null,
             self::intId($request->input('sitelanguage', 0)),
             self::stringOrEmpty($request->cookie('c_lang_folder', '')),
             max(0, min(100, self::intInput($request->input('torrentsperpage', 0)))),

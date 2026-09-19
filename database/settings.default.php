@@ -64,7 +64,7 @@ return [
         'smalldescription' => 'yes',
         'altname' => '',
         'defaultlang' => 'en',
-        'defstylesheet' => '3',
+        'defstylesheet' => '4',
         'donation' => 'yes',
         'browsecat' => '4',
         'waitsystem' => 'no',

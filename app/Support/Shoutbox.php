@@ -162,27 +162,26 @@ final class Shoutbox
         static $map = null;
         if ($map === null) {
             $map = [
-                UC_VIP => ['VIP', '#9c27b0'],
-                UC_RETIREE => ['RET', '#607d8b'],
-                UC_UPLOADER => ['UPL', '#1976d2'],
-                UC_MODERATOR => ['MOD', '#388e3c'],
-                UC_ADMINISTRATOR => ['ADM', '#d32f2f'],
-                UC_SYSOP => ['SYS', '#b71c1c'],
-                UC_STAFFLEADER => ['CHIEF', '#e65100'],
+                UC_VIP => ['VIP', 'vip'],
+                UC_RETIREE => ['RET', 'retiree'],
+                UC_UPLOADER => ['UPL', 'uploader'],
+                UC_MODERATOR => ['MOD', 'moderator'],
+                UC_ADMINISTRATOR => ['ADM', 'administrator'],
+                UC_SYSOP => ['SYS', 'sysop'],
+                UC_STAFFLEADER => ['CHIEF', 'staffleader'],
             ];
         }
         $class = (int) $class;
         if (! isset($map[$class])) {
             return SafeHtml::fromTrustedHtml('');
         }
-        $label = $map[$class][0];
-        $color = $map[$class][1];
+        [$label, $modifier] = $map[$class];
         $tooltip = '';
         if (function_exists('get_user_class_name')) {
             $tooltip = (string) UserClass::name($class, false, false, true);
         }
 
-        return SafeHtml::fromTrustedHtml('<span class="shout-class-badge" style="background:'.$color.'" title="'.htmlspecialchars($tooltip, ENT_QUOTES).'">'.$label.'</span>');
+        return SafeHtml::fromTrustedHtml('<span class="shout-class-badge shout-class-badge--'.$modifier.'" title="'.htmlspecialchars($tooltip, ENT_QUOTES).'">'.$label.'</span>');
     }
 
     /**

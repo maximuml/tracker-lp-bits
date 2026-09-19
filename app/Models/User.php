@@ -59,6 +59,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string|null $editsecret
  * @property int|null $privacy
  * @property int|null $stylesheet
+ * @property string $theme
  * @property int|null $caticon
  * @property int|null $fontsize
  * @property string|null $info
@@ -221,6 +222,7 @@ class User extends Authenticatable implements FilamentUser, HasName
     public static array $partitionedColumns = [
         // user_preferences
         'stylesheet' => 'user_preferences',
+        'theme' => 'user_preferences',
         'caticon' => 'user_preferences',
         'fontsize' => 'user_preferences',
         'torrentsperpage' => 'user_preferences',
@@ -323,7 +325,7 @@ class User extends Authenticatable implements FilamentUser, HasName
      * @var list<string>
      */
     protected $fillable = [
-        'username', 'email', 'passhash', 'passhash_algo', 'secret', 'stylesheet', 'editsecret', 'added', 'enabled', 'status',
+        'username', 'email', 'passhash', 'passhash_algo', 'secret', 'stylesheet', 'theme', 'editsecret', 'added', 'enabled', 'status',
         'leechwarn', 'leechwarnuntil', 'page', 'class', 'uploaded', 'downloaded', 'clientselect', 'showclienterror', 'last_home',
         'seedbonus', 'downloadpos', 'vip_added', 'vip_until', 'title', 'invites', 'attendance_card',
         'seed_points_per_hour', 'passkey', 'auth_key', 'last_login', 'lang', 'last_pm',

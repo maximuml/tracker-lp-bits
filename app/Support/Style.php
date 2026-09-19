@@ -60,24 +60,12 @@ final class Style
     {
         $row = self::cssRow($cache, $cssId, $defaultId);
         $uri = $row['uri'] ?? app(StyleRepository::class)->uri($defaultId);
+        // ADR 0019: Classic is the hard fallback — a stale defstylesheet or
+        // user.stylesheet pointing at a pruned row must never emit a bare
+        // 'theme.css' that 404s at the site root.
+        $uri = (string) ($uri ?: 'styles/Classic/');
 
-        return $file === '' ? (string) $uri : (string) $uri.$file;
-    }
-
-    /**
-     * Return the URI for the per-user font css file.
-     *
-     * Mirrors `get_font_css_uri()`.
-     */
-    public static function fontCssUri(?string $fontSize): string
-    {
-        $file = match ($fontSize) {
-            'large' => 'largefont.css',
-            'small' => 'smallfont.css',
-            default => 'mediumfont.css',
-        };
-
-        return 'styles/'.$file;
+        return $file === '' ? $uri : $uri.$file;
     }
 
     /**
@@ -135,19 +123,6 @@ final class Style
         $defaultId = self::defaultStylesheetId();
 
         return self::cssUri(app(LegacyRedisCache::class), $user ? $user['stylesheet'] : $defaultId, $defaultId, $file);
-    }
-
-    /**
-     * Convenience wrapper that reads the current user's font size from
-     * the support context and returns the font CSS URI.
-     */
-    public static function fontCssUriWithContext(): string
-    {
-        $user = app(CurrentUser::class)->get() ?? [];
-
-        $fontSize = $user['fontsize'] ?? null;
-
-        return self::fontCssUri(is_string($fontSize) ? $fontSize : null);
     }
 
     /**

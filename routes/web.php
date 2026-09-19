@@ -104,6 +104,8 @@ Route::post('/usercp', [UsercpController::class, 'legacyAction'])
     ->middleware(['auth.nexus:nexus-web', 'throttle:legacy', 'reject.get.mutations']);
 
 Route::group(['prefix' => 'web', 'middleware' => ['auth.nexus:nexus-web', 'throttle:legacy']], function () {
+    Route::post('usercp/theme', [UsercpController::class, 'saveTheme'])
+        ->name('usercp.theme');
     Route::get('torrent-approval-page', [TorrentController::class, 'approvalPage']);
     Route::get('torrent-approval-logs', [TorrentController::class, 'approvalLogs']);
     Route::post('torrent-approval', [TorrentController::class, 'approval']);

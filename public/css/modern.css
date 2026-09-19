@@ -2,28 +2,179 @@
    Loaded after nexus.css; provides the semantic layout shell and a
    neutral design layer that does not depend on the legacy theme CSS. */
 
+/* Design tokens (ADR 0019). Two colour schemes share one semantic set:
+   :root carries light values; dark overrides apply via
+   html[data-theme="dark"] or, for auto/unset, prefers-color-scheme. */
 :root {
+    /* semantic */
     --nxm-bg: #f4f5f7;
     --nxm-surface: #ffffff;
-    --nxm-border: #d8dce3;
+    --nxm-surface-alt: #eef1f5;
     --nxm-text: #1d2733;
     --nxm-text-dim: #5b6b7c;
+    --nxm-muted: #5b6b7c;
+    --nxm-border: #d8dce3;
     --nxm-accent: #1f6fd0;
-    --nxm-accent-dark: #1758a8;
+    --nxm-accent-hover: #1758a8;
+    --nxm-on-accent: #ffffff;
+    --nxm-success: #1e7a1e;
+    --nxm-danger: #c0392b;
+    --nxm-warning: #b95c00;
+
+    /* chrome */
     --nxm-header-bg: #1d2733;
     --nxm-header-text: #f4f5f7;
-    --nxm-nav-active: #2f80ed;
+    --nxm-header-dim: #9fb2c4;
+    --nxm-nav-active: #2568c2;
+    --nxm-userbar-bg: #27344a;
+    --nxm-userbar-text: #cdd8e4;
+    --nxm-userbar-dim: #8fa3b8;
+    --nxm-userbar-link: #9cc3f0;
+    --nxm-userbar-stat: #e8eef5;
+    --nxm-userbar-ok: #6fc76f;
+    --nxm-userbar-bad: #f08080;
+
+    /* rank name colours (Classic palette) */
+    --nxm-name-administrator: #4b0082;
+    --nxm-name-crazyuser: #007faa;
+    --nxm-name-eliteuser: #007575;
+    --nxm-name-extremeuser: #b26100;
+    --nxm-name-forummoderator: #12828c;
+    --nxm-name-insaneuser: #8b008b;
+    --nxm-name-moderator: #4e75bb;
+    --nxm-name-nexusmaster: #287dac;
+    --nxm-name-peasant: #5a6a7a;
+    --nxm-name-poweruser: #947015;
+    --nxm-name-retiree: #12828c;
+    --nxm-name-staffleader: #8b0000;
+    --nxm-name-sysop: #a0522d;
+    --nxm-name-ultimateuser: #006400;
+    --nxm-name-uploader: #dc143c;
+    --nxm-name-user: #000000;
+    --nxm-name-vip: #008a00;
+    --nxm-name-veteranuser: #483d8b;
+
+    /* metrics */
     --nxm-radius: 6px;
     --nxm-gap: 0.75rem;
     --nxm-content-width: 1200px;
+    --nxm-shadow: 0 1px 3px rgba(20, 25, 33, 0.12);
+    --nxm-font-size: 14px;
 }
+
+@media (prefers-color-scheme: dark) {
+    html:not([data-theme]),
+    html[data-theme="auto"] {
+        --nxm-bg: #151a20;
+        --nxm-surface: #1d232c;
+        --nxm-surface-alt: #262e39;
+        --nxm-text: #dbe2ec;
+        --nxm-text-dim: #93a2b4;
+        --nxm-muted: #93a2b4;
+        --nxm-border: #37414f;
+        --nxm-accent: #6ea8e8;
+        --nxm-accent-hover: #93c1f2;
+        --nxm-on-accent: #10151b;
+        --nxm-success: #5ec07a;
+        --nxm-danger: #e07b6d;
+        --nxm-warning: #e0a05c;
+
+        --nxm-header-bg: #10151c;
+        --nxm-header-text: #e6ecf3;
+        --nxm-header-dim: #8a99ac;
+        --nxm-nav-active: #6ea8e8;
+        --nxm-userbar-bg: #1a222e;
+        --nxm-userbar-text: #c4d0dd;
+        --nxm-userbar-dim: #7e92a8;
+        --nxm-userbar-link: #9cc3f0;
+        --nxm-userbar-stat: #dde6f0;
+        --nxm-userbar-ok: #7fd488;
+        --nxm-userbar-bad: #f0948c;
+
+        --nxm-name-administrator: #c79af0;
+        --nxm-name-crazyuser: #5cc4ea;
+        --nxm-name-eliteuser: #56c8c8;
+        --nxm-name-extremeuser: #eda55e;
+        --nxm-name-forummoderator: #5cc6d0;
+        --nxm-name-insaneuser: #e082e0;
+        --nxm-name-moderator: #96b2ea;
+        --nxm-name-nexusmaster: #74baea;
+        --nxm-name-peasant: #aab8c6;
+        --nxm-name-poweruser: #dcb052;
+        --nxm-name-retiree: #5cc6d0;
+        --nxm-name-staffleader: #f08080;
+        --nxm-name-sysop: #de9a76;
+        --nxm-name-ultimateuser: #6fd06f;
+        --nxm-name-uploader: #f46e88;
+        --nxm-name-user: #dbe2ec;
+        --nxm-name-vip: #72d272;
+        --nxm-name-veteranuser: #ac9ee4;
+
+        --nxm-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+        color-scheme: dark;
+    }
+}
+
+html[data-theme="dark"] {
+    --nxm-bg: #151a20;
+    --nxm-surface: #1d232c;
+    --nxm-surface-alt: #262e39;
+    --nxm-text: #dbe2ec;
+    --nxm-text-dim: #93a2b4;
+    --nxm-muted: #93a2b4;
+    --nxm-border: #37414f;
+    --nxm-accent: #6ea8e8;
+    --nxm-accent-hover: #93c1f2;
+    --nxm-on-accent: #10151b;
+    --nxm-success: #5ec07a;
+    --nxm-danger: #e07b6d;
+    --nxm-warning: #e0a05c;
+
+    --nxm-header-bg: #10151c;
+    --nxm-header-text: #e6ecf3;
+    --nxm-header-dim: #8a99ac;
+    --nxm-nav-active: #6ea8e8;
+    --nxm-userbar-bg: #1a222e;
+    --nxm-userbar-text: #c4d0dd;
+    --nxm-userbar-dim: #7e92a8;
+    --nxm-userbar-link: #9cc3f0;
+    --nxm-userbar-stat: #dde6f0;
+    --nxm-userbar-ok: #7fd488;
+    --nxm-userbar-bad: #f0948c;
+
+    --nxm-name-administrator: #c79af0;
+    --nxm-name-crazyuser: #5cc4ea;
+    --nxm-name-eliteuser: #56c8c8;
+    --nxm-name-extremeuser: #eda55e;
+    --nxm-name-forummoderator: #5cc6d0;
+    --nxm-name-insaneuser: #e082e0;
+    --nxm-name-moderator: #96b2ea;
+    --nxm-name-nexusmaster: #74baea;
+    --nxm-name-peasant: #aab8c6;
+    --nxm-name-poweruser: #dcb052;
+    --nxm-name-retiree: #5cc6d0;
+    --nxm-name-staffleader: #f08080;
+    --nxm-name-sysop: #de9a76;
+    --nxm-name-ultimateuser: #6fd06f;
+    --nxm-name-uploader: #f46e88;
+    --nxm-name-user: #dbe2ec;
+    --nxm-name-vip: #72d272;
+    --nxm-name-veteranuser: #ac9ee4;
+
+    --nxm-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    color-scheme: dark;
+}
+
+/* Per-user font size (replaces styles/{small,medium,large}font.css) */
+html[data-fontsize="small"] { --nxm-font-size: 13px; }
+html[data-fontsize="large"] { --nxm-font-size: 16px; }
 
 body {
     margin: 0;
     background: var(--nxm-bg);
     color: var(--nxm-text);
     font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    font-size: 14px;
+    font-size: var(--nxm-font-size);
     line-height: 1.45;
 }
 
@@ -54,7 +205,7 @@ body {
 .nxm-logo img { max-height: 64px; display: block; }
 
 .nxm-slogan {
-    color: #9fb2c4;
+    color: var(--nxm-header-dim);
     font-size: 0.85rem;
 }
 
@@ -93,7 +244,7 @@ body {
 .nxm-nav__list a.nxm-nav__link--active,
 .nxm-nav__list a[aria-current="page"] {
     background: var(--nxm-nav-active);
-    color: #fff;
+    color: var(--nxm-on-accent);
 }
 
 /* ---------- User bar ---------- */
@@ -102,19 +253,19 @@ body {
     max-width: var(--nxm-content-width);
     margin: 0 auto;
     padding: 0.55rem 1rem;
-    background: #27344a;
+    background: var(--nxm-userbar-bg);
     font-size: 0.85rem;
-    color: #cdd8e4;
+    color: var(--nxm-userbar-text);
     display: flex;
     flex-wrap: wrap;
     gap: 0.35rem 1rem;
     align-items: center;
 }
 
-.nxm-userbar a { color: #9cc3f0; text-decoration: none; }
+.nxm-userbar a { color: var(--nxm-userbar-link); text-decoration: none; }
 .nxm-userbar a:hover { text-decoration: underline; }
 
-.nxm-userbar__greeting { color: #cdd8e4; }
+.nxm-userbar__greeting { color: var(--nxm-userbar-text); }
 
 .nxm-userbar__links {
     display: inline-flex;
@@ -147,7 +298,7 @@ body {
     flex-wrap: wrap;
     gap: 0.4rem;
     align-items: center;
-    color: #e8eef5;
+    color: var(--nxm-userbar-stat);
 }
 
 .nxm-userbar__icons img {
@@ -185,8 +336,8 @@ body {
     margin-top: 0.4rem;
 }
 
-.nxm-ok { color: #6fc76f; }
-.nxm-bad { color: #f08080; }
+.nxm-ok { color: var(--nxm-userbar-ok); }
+.nxm-bad { color: var(--nxm-userbar-bad); }
 
 .nxm-alert {
     max-width: var(--nxm-content-width);
@@ -219,14 +370,14 @@ body {
 .nxm-alert-offline a { color: #fff; text-decoration: underline; }
 
 .nxm-stat { display: inline-flex; gap: 0.3rem; align-items: baseline; }
-.nxm-stat__label { color: #8fa3b8; }
-.nxm-stat__value { color: #e8eef5; font-variant-numeric: tabular-nums; }
+.nxm-stat__label { color: var(--nxm-userbar-dim); }
+.nxm-stat__value { color: var(--nxm-userbar-stat); font-variant-numeric: tabular-nums; }
 
 .nxm-linkbtn {
     background: none;
     border: none;
     padding: 0;
-    color: #9cc3f0;
+    color: var(--nxm-userbar-link);
     cursor: pointer;
     font: inherit;
 }
@@ -257,6 +408,76 @@ body {
 }
 .rowfollow { padding: 0.35rem 0.6rem; }
 
+/* Legacy theme classes remapped to tokens (ADR 0019). modern.css loads
+   after Classic/theme.css, so these win by source order and follow the
+   active colour scheme. */
+table { background-color: var(--nxm-surface); color: var(--nxm-text); }
+table.main, .nx-main, table.mainouter, .nx-mainouter { background-color: var(--nxm-surface); color: var(--nxm-text); }
+td.embedded, .nx-embedded { background-color: var(--nxm-surface); color: var(--nxm-text); }
+td.colhead, .nx-colhead { color: var(--nxm-on-accent); background-color: var(--nxm-accent); }
+td.rowhead, td.rowhead_left, td.rowhead_center { color: var(--nxm-text-dim); }
+td.rowfollow, td.colfollow, td.text, td.comment { color: var(--nxm-text); }
+td.navigation { color: var(--nxm-text-dim); }
+body.inframe { background: var(--nxm-bg); color: var(--nxm-text); }
+td.shoutrow { background-color: var(--nxm-surface-alt); color: var(--nxm-text); }
+a.altlink:link, a.altlink:visited,
+a.altlink_blue:link, a.altlink_blue:visited,
+a.altlink_green:link, a.altlink_green:visited { text-decoration: underline; }
+.striking, .new { color: var(--nxm-danger); }
+.hot { color: var(--nxm-warning); }
+.classic { color: var(--nxm-success); }
+.recommended { color: var(--nxm-accent); }
+
+/* Latest-torrents cards (nexus.css) follow the active scheme too. */
+.lt-grid .lt-seed { color: var(--nxm-success); }
+.lt-grid .lt-leech { color: var(--nxm-danger); }
+.lt-grid .lt-cover .lt-cover-fallback { color: var(--nxm-text); }
+.lt-grid .lt-card { background: var(--nxm-surface); border-color: var(--nxm-border); }
+.lt-grid .lt-meta { border-top-color: var(--nxm-border); }
+
+/* The header/userbar chrome keeps a dark surface in both schemes, so
+   rank names inside it always use the bright tints. */
+.nxm-header, .nxm-userbar {
+    --nxm-name-administrator: #c79af0;
+    --nxm-name-crazyuser: #5cc4ea;
+    --nxm-name-eliteuser: #56c8c8;
+    --nxm-name-extremeuser: #eda55e;
+    --nxm-name-forummoderator: #5cc6d0;
+    --nxm-name-insaneuser: #e082e0;
+    --nxm-name-moderator: #96b2ea;
+    --nxm-name-nexusmaster: #74baea;
+    --nxm-name-peasant: #aab8c6;
+    --nxm-name-poweruser: #dcb052;
+    --nxm-name-retiree: #5cc6d0;
+    --nxm-name-staffleader: #f08080;
+    --nxm-name-sysop: #de9a76;
+    --nxm-name-ultimateuser: #6fd06f;
+    --nxm-name-uploader: #f46e88;
+    --nxm-name-user: #dbe2ec;
+    --nxm-name-vip: #72d272;
+    --nxm-name-veteranuser: #ac9ee4;
+}
+
+/* Rank name colours: Classic values in light, brightened tints in dark. */
+.Administrator_Name, A.Administrator_Name:link, A.Administrator_Name:visited { color: var(--nxm-name-administrator); }
+.CrazyUser_Name, A.CrazyUser_Name:link, A.CrazyUser_Name:visited { color: var(--nxm-name-crazyuser); }
+.EliteUser_Name, A.EliteUser_Name:link, A.EliteUser_Name:visited { color: var(--nxm-name-eliteuser); }
+.ExtremeUser_Name, A.ExtremeUser_Name:link, A.ExtremeUser_Name:visited { color: var(--nxm-name-extremeuser); }
+.ForumModerator_Name, A.ForumModerator_Name:link, A.ForumModerator_Name:visited { color: var(--nxm-name-forummoderator); }
+.InsaneUser_Name, A.InsaneUser_Name:link, A.InsaneUser_Name:visited { color: var(--nxm-name-insaneuser); }
+.Moderator_Name, A.Moderator_Name:link, A.Moderator_Name:visited { color: var(--nxm-name-moderator); }
+.NexusMaster_Name, A.NexusMaster_Name:link, A.NexusMaster_Name:visited { color: var(--nxm-name-nexusmaster); }
+.Peasant_Name, A.Peasant_Name:link, A.Peasant_Name:visited { color: var(--nxm-name-peasant); }
+.PowerUser_Name, A.PowerUser_Name:link, A.PowerUser_Name:visited { color: var(--nxm-name-poweruser); }
+.Retiree_Name, A.Retiree_Name:link, A.Retiree_Name:visited { color: var(--nxm-name-retiree); }
+.StaffLeader_Name, A.StaffLeader_Name:link, A.StaffLeader_Name:visited { color: var(--nxm-name-staffleader); }
+.SysOp_Name, A.SysOp_Name:link, A.SysOp_Name:visited { color: var(--nxm-name-sysop); }
+.UltimateUser_Name, A.UltimateUser_Name:link, A.UltimateUser_Name:visited { color: var(--nxm-name-ultimateuser); }
+.Uploader_Name, A.Uploader_Name:link, A.Uploader_Name:visited { color: var(--nxm-name-uploader); }
+.User_Name, A.User_Name:link, A.User_Name:visited { color: var(--nxm-name-user); }
+.VIP_Name, A.VIP_Name:link, A.VIP_Name:visited { color: var(--nxm-name-vip); }
+.VeteranUser_Name, A.VeteranUser_Name:link, A.VeteranUser_Name:visited { color: var(--nxm-name-veteranuser); }
+
 table[data-nx="data"] {
     width: 100%;
     border-collapse: collapse;
@@ -272,14 +493,14 @@ table[data-nx="data"] th {
 table[data-nx="data"] tr:last-child td { border-bottom: none; }
 
 a { color: var(--nxm-accent); }
-a:hover { color: var(--nxm-accent-dark); }
+a:hover { color: var(--nxm-accent-hover); }
 
 .btn,
 input[type="submit"],
 input[type="button"],
 button.btn {
     background: var(--nxm-accent);
-    color: #fff;
+    color: var(--nxm-on-accent);
     border: none;
     border-radius: var(--nxm-radius);
     padding: 0.45rem 1rem;
@@ -287,7 +508,7 @@ button.btn {
     font: inherit;
 }
 .btn:hover,
-input[type="submit"]:hover { background: var(--nxm-accent-dark); }
+input[type="submit"]:hover { background: var(--nxm-accent-hover); }
 
 input[type="reset"] {
     background: transparent;

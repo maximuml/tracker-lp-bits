@@ -551,6 +551,54 @@ Decision → Consequences). Add new ADRs here as numbered subsections.
   chrome until their TTL expires. The static `PageLayout::$context`
   stays per-request state set by `headerHtml()`/`Html::stdhead()`.
 
+### ADR 0019: Design tokens, dark theme, retirement of five legacy themes (Accepted, stage 2.2)
+
+- **Context:** The site shipped five full clone themes under
+  `public/styles/` (BlueGene, BlasphemyOrange, BambooGreen,
+  DarkPassion, Classic) selected by `users.stylesheet`, plus three
+  global font-size stylesheets (smallfont/mediumfont/largefont.css)
+  selected by `users.fontsize`. Each theme re-skinned the same legacy
+  class set (`.colhead`, `.rowhead`, `.embedded`, `.main`, `.text`,
+  `.striking`, `.new`, …) with hardcoded colours, so the chrome and
+  every legacy body diverged visually, dark mode did not exist, and
+  contrast was unverifiable.
+- **Decision:** `public/css/modern.css` now owns a semantic token
+  layer — `--nxm-bg`, `--nxm-surface`, `--nxm-surface-alt`,
+  `--nxm-text`, `--nxm-text-dim`, `--nxm-accent`, `--nxm-accent-hover`,
+  `--nxm-on-accent`, `--nxm-success`, `--nxm-danger`, `--nxm-warning`,
+  plus spacing/radius/shadow tokens — with a light default on `:root`,
+  a dark override under `@media (prefers-color-scheme: dark)` for
+  `html:not([data-theme])`/`html[data-theme="auto"]`, and the same
+  override for explicit `html[data-theme="dark"]`. Font size moved to
+  `html[data-fontsize="small|medium|large"]` + `--nxm-font-size`; the
+  three global font stylesheets are deleted. The legacy content
+  classes are re-skinned in `modern.css` via the tokens, so legacy
+  bodies follow the scheme before their stage-3 Blade migration.
+  `users.theme` (`auto`|`light`|`dark`, default `auto`, dual-written
+  to `user_preferences` by `UserPartitionObserver`) replaces the
+  stylesheet picker: the usercp tracker form renders a theme select,
+  `TrackerSettingsDto`/`UpdateTrackerSettingsRequest` validate it, and
+  the migration deletes the four removed theme rows, repoints
+  `main.defstylesheet` at Classic and defaults every account to
+  `auto`. A `.nxm-theme-toggle` button in the userbar (and in the
+  anonymous nav) cycles auto → light → dark without reload via
+  `public/js/theme-toggle.js` (vanilla JS, no new dependencies):
+  `localStorage["nxm-theme"]` stores the choice for anonymous pages,
+  and authenticated clicks POST to `/web/usercp/theme` (a
+  `LARAVEL_ONLY_PREFIXES` path so `LegacyUrlRewriter` does not
+  collapse it into `/usercp`). `PageLayoutContext::userTheme()` and
+  `userFontSize()` feed `data-theme`/`data-fontsize` on `<html>` in
+  `resources/views/layouts/partials/head-assets.blade.php`.
+- **Consequences:** One light/dark pair replaces five themes; the
+  Classic row stays in `stylesheets` and `public/styles/Classic/` keeps
+  serving legacy bodies as a fallback until stage 3 removes it.
+  `stylesheets` is now a single-row fallback table —
+  `UsercpLookupRepository::getStylesheetOptions()` and
+  `Style::fontCssUri*()` were removed with their only callers. Axe
+  `color-contrast` is verified clean in both schemes by
+  `tests/browser/specs/theme.spec.ts`. The `stylesheet` user column is
+  vestigial (always resolves to Classic) and is removed in stage 3.
+
 ## Testing
 
 - **Unit tests:** `tests/Unit/` — pure unit only, no DB/Redis/MeiliSearch (enforced by `UnitSuiteIsolationTest` and the `unit-tests-fast` CI job, which runs the suite with no service containers)

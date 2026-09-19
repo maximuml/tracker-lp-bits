@@ -1,12 +1,11 @@
 @if (! $isAjax)
-<html><head>
+<html data-theme="{{ $theme }}" data-fontsize="{{ $fontSize }}"><head>
 <base href="{{ url('/') }}/" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<link rel="stylesheet" href="{{ \App\Support\Style::fontCssUriWithContext() }}" type="text/css">
 <link rel="stylesheet" href="{{ \App\Support\Style::cssUriWithContext().'theme.css' }}" type="text/css">
 <link rel="stylesheet" href="styles/curtain_imageresizer.css" type="text/css">
 <link rel="stylesheet" href="styles/nexus.css" type="text/css">
-<script src="js/curtain_imageresizer.js" type="text/javascript"></script><script nonce="{{ $cspNonce ?? '' }}">var SHOUT_CSRF = '{{ $shoutCsrf }}';</script><script src="js/shoutbox.js" type="text/javascript"></script><link rel="stylesheet" href="styles/shoutbox.css" type="text/css">
+<script src="js/curtain_imageresizer.js" type="text/javascript"></script><script nonce="{{ $cspNonce ?? '' }}">var SHOUT_CSRF = '{{ $shoutCsrf }}';</script><script src="js/shoutbox.js" type="text/javascript"></script><link rel="stylesheet" href="styles/shoutbox.css" type="text/css"><link rel="stylesheet" href="css/modern.css" type="text/css">
 {{ \App\Support\Style::addiCodeWithContext() }}
 <script type="text/javascript" nonce="{{ $cspNonce ?? '' }}">
 //<![CDATA[

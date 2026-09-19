@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Enums\UserFontsize;
+use App\Enums\UserTheme;
 use App\Models\Setting;
 use App\Models\User;
 use App\Repositories\SearchPageRepository;
@@ -191,6 +193,8 @@ class UtilityController extends LegacyController
             'callback_func' => (string) $request->input('callback_func', ''),
             'warning' => $warning,
             'script' => SafeHtml::fromTrustedHtml($script),
+            'theme' => UserTheme::fromStringSafe(is_string($currentUser['theme'] ?? null) ? $currentUser['theme'] : null)->value,
+            'fontSize' => UserFontsize::fromMixed($currentUser['fontsize'] ?? null)->stringValue(),
         ])->render();
 
         return response($content, 200, ['Content-Type' => 'text/html; charset=utf-8']);

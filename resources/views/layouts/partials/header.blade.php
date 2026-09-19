@@ -43,6 +43,7 @@
                 <a href="task.php">[{{ $chrome->taskLabel }}]</a>
                 <a href="invite.php?id={{ (int) $chrome->user['id'] }}">{{ __('legacy/functions.text_invite') }}: {{ $chrome->invites }}@if($chrome->pendingInvites > 0) ({{ $chrome->pendingInvites }})@endif</a>
                 @if($chrome->managementHref !== '')<a href="{{ $chrome->managementHref }}" target="_blank" rel="noopener">[{{ __('legacy/functions.text_management_system') }}]</a>@endif
+                <button type="button" class="nxm-linkbtn nxm-theme-toggle" data-persist-url="{{ url('/web/usercp/theme') }}" title="{{ 'Theme' }}: {{ ucfirst($chrome->theme) }}">[{{ 'Theme' }}: {{ ucfirst($chrome->theme) }}]</button>
             </span>
         </div>
         <div class="nxm-userbar__row">
@@ -110,6 +111,7 @@
         <ul class="nxm-nav__list">
             <li><a class="nxm-nav__link" href="login.php">{{ __('legacy/functions.text_login') }}</a></li>
             <li><a class="nxm-nav__link" href="signup.php">{{ __('legacy/functions.text_signup') }}</a></li>
+            <li><button type="button" class="nxm-linkbtn nxm-theme-toggle" title="{{ 'Theme' }}">[{{ 'Theme' }}]</button></li>
         </ul>
     </nav>
     @endif

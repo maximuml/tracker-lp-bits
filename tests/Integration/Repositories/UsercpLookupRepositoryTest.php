@@ -17,7 +17,7 @@ use Tests\TestCase;
  * Unit tests for UsercpLookupRepository.
  *
  * Covers getCommentCount(), getForumPostCount(), getTotalPostCount(),
- * getTopicPostCount(), getStylesheetOptions(), getCountryOptions().
+ * getTopicPostCount(), getCountryOptions().
  */
 #[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class UsercpLookupRepositoryTest extends TestCase
@@ -131,20 +131,6 @@ final class UsercpLookupRepositoryTest extends TestCase
         $count = $this->repository->getTopicPostCount($topicId);
 
         $this->assertSame(2, $count);
-    }
-
-    public function test_get_stylesheet_options_returns_array(): void
-    {
-        DB::table('stylesheets')->insert([
-            'name' => 'TestTheme',
-            'uri' => 'TestTheme',
-        ]);
-
-        $options = $this->repository->getStylesheetOptions();
-
-        $this->assertIsArray($options);
-        $this->assertNotEmpty($options);
-        $this->assertArrayHasKey('TestTheme', $options);
     }
 
     public function test_get_country_options_returns_array(): void

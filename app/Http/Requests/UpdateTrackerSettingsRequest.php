@@ -28,6 +28,7 @@ class UpdateTrackerSettingsRequest extends FormRequest
             'spstate' => 'sometimes|nullable|string|max:50',
             'inclbookmarked' => 'sometimes|nullable|string|max:50',
             'stylesheet' => 'sometimes|integer|min:0',
+            'theme' => 'sometimes|in:auto,light,dark',
             'sitelanguage' => 'sometimes|integer|min:0',
             'torrentsperpage' => 'sometimes|integer|min:0|max:100',
             'timetype' => 'sometimes|in:timeadded,timealive,0,1',

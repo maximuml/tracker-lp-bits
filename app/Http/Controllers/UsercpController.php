@@ -16,6 +16,7 @@ use App\Models\User;
 use App\Policies\UsercpPolicy;
 use App\Repositories\UsercpRepository;
 use App\Services\UsercpPageService;
+use App\Support\Cache;
 use App\Support\LegacyResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -100,6 +101,24 @@ class UsercpController extends LegacyController
         $data = $this->pageService->build($action, $type)->toArray();
 
         return $this->legacyPage($request, 'usercp', true, $data);
+    }
+
+    /**
+     * Persist the colour-scheme toggle from the chrome userbar.
+     * Separate from legacyAction because the full tracker form would
+     * clobber unrelated fields on a partial POST.
+     */
+    public function saveTheme(Request $request): Response
+    {
+        $theme = $request->validate(['theme' => 'required|in:auto,light,dark'])['theme'];
+
+        /** @var User $user */
+        $user = Auth::user();
+        $user->theme = $theme;
+        $user->save();
+        Cache::clearUser($user->id, (string) $user->passkey);
+
+        return response()->noContent();
     }
 
     public function legacyAction(Request $request): RedirectResponse

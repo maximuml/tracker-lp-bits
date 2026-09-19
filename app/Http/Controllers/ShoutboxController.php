@@ -7,6 +7,8 @@ namespace App\Http\Controllers;
 use App\Auth\Permission;
 use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
+use App\Enums\UserFontsize;
+use App\Enums\UserTheme;
 use App\Repositories\ShoutboxRepository;
 use App\Services\ShoutboxService;
 use App\Support\CurrentUser;
@@ -99,6 +101,8 @@ class ShoutboxController extends LegacyController
             'lastId' => $lastId,
             'items' => $items,
             'shoutCsrf' => Shoutbox::csrfToken($currentUserId),
+            'theme' => UserTheme::fromStringSafe(is_string($currentUser['theme'] ?? null) ? $currentUser['theme'] : null)->value,
+            'fontSize' => UserFontsize::fromMixed($currentUser['fontsize'] ?? null)->stringValue(),
         ])->render();
 
         return response($content, 200, ['Content-Type' => 'text/html; charset=utf-8']);

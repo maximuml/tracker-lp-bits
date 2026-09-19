@@ -13,6 +13,7 @@ use App\Support\Globals;
 use App\ViewModels\Forum\ForumComposeViewModel;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Redis;
 use Mockery;
 use Mockery\MockInterface;
@@ -30,8 +31,6 @@ use Tests\TestCase;
 final class ForumComposeServiceTest extends TestCase
 {
     use DatabaseTransactions;
-
-    private ForumComposeService $service;
 
     private int $initialObLevel;
 
@@ -387,5 +386,31 @@ final class ForumComposeServiceTest extends TestCase
 
         $this->assertInstanceOf(ForumComposeViewModel::class, $result);
         $this->assertStringContainsString('Test Topic', (string) $result->titleHtml);
+    }
+
+    // --- component render ---
+
+    public function test_compose_component_renders_form_and_editor(): void
+    {
+        $repo = $this->mockForumRepo();
+        $this->setUser();
+        $repo->shouldReceive('getForumName')->with(1)->andReturn('Test Forum');
+
+        $vm = $this->callWithSuppressedErrors(fn () => $this->service()->buildComposeFrame(1, 'new'));
+        $this->assertInstanceOf(ForumComposeViewModel::class, $vm);
+
+        $html = $this->callWithSuppressedErrors(
+            fn () => Blade::render(
+                '<x-forum.compose :vm="$vm" />',
+                ['vm' => $vm],
+            )
+        );
+
+        $this->assertStringContainsString('id="compose"', $html);
+        $this->assertStringContainsString('name="type" value="new"', $html);
+        $this->assertStringContainsString('name="subject"', $html);
+        $this->assertStringContainsString('bbcode-editor', $html);
+        $this->assertStringContainsString('id="previewbutton"', $html);
+        $this->assertStringContainsString('Test Forum', $html);
     }
 }

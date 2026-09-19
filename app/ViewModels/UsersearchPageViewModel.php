@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\ViewModels;
 
 use App\Support\Html\SafeHtml;
+use App\ViewModels\Usersearch\UsersearchResultsViewModel;
 
 /**
  * ViewModel for the user search page.
@@ -21,7 +22,7 @@ final class UsersearchPageViewModel extends ViewModel
         public readonly bool $showHelp,
         public readonly array $form,
         public readonly bool $hasResults,
-        public readonly ?SafeHtml $resultsHtml,
+        public readonly ?UsersearchResultsViewModel $results,
         public readonly ?SafeHtml $resultsError,
         public readonly string $pagemenu,
         public readonly string $browsemenu,
@@ -37,7 +38,7 @@ final class UsersearchPageViewModel extends ViewModel
             'showHelp' => $this->showHelp,
             'form' => $this->form,
             'hasResults' => $this->hasResults,
-            'resultsHtml' => $this->resultsHtml,
+            'results' => $this->results,
             'resultsError' => $this->resultsError,
             'pagemenu' => $this->pagemenu,
             'browsemenu' => $this->browsemenu,

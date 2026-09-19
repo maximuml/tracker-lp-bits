@@ -33,6 +33,7 @@ use App\View\Components\BbcodeEditor;
 use App\ViewModels\Offer\OfferAllowedBadge;
 use App\ViewModels\Offer\OfferCategoryOption;
 use App\ViewModels\Offer\OfferCommentCell;
+use App\ViewModels\Offer\OfferDetailsViewModel;
 use App\ViewModels\Offer\OfferListViewModel;
 use App\ViewModels\Offer\OfferRow;
 use App\ViewModels\Offer\OfferRulesViewModel;
@@ -158,9 +159,8 @@ final class OfferPageService
 
     /**
      * @param  array<string, mixed>  $curUser
-     * @return array<string, mixed>
      */
-    private function buildOfferDetails(array $curUser, int $userId, Request $request): array
+    private function buildOfferDetails(array $curUser, int $userId, Request $request): ?OfferDetailsViewModel
     {
         $id = (int) $request->query('id', 0);
         if (! $id) {
@@ -171,7 +171,7 @@ final class OfferPageService
         if (! $offer) {
             Html::stdMessage((string) (__('legacy/offers.std_error')), (string) (__('legacy/offers.text_nothing_found')));
 
-            return [];
+            return null;
         }
         $num = $offer->toArray();
 
@@ -181,45 +181,25 @@ final class OfferPageService
             : (string) (__('legacy/offers.text_blank')).$timeFormat;
 
         $status = match ((int) ($num['allowed'] ?? 1)) {
-            OfferAllowed::PENDING->value => '<span class="nx-color-red">'.htmlspecialchars((string) (__('legacy/offers.text_pending'))).'</span>',
-            OfferAllowed::ALLOWED->value => '<span class="nx-color-green">'.htmlspecialchars((string) (__('legacy/offers.text_allowed'))).'</span>',
-            default => '<span class="nx-color-red">'.htmlspecialchars((string) (__('legacy/offers.text_denied'))).'</span>',
+            OfferAllowed::PENDING->value => new OfferAllowedBadge((string) (__('legacy/offers.text_pending')), 'nx-color-red'),
+            OfferAllowed::ALLOWED->value => new OfferAllowedBadge((string) (__('legacy/offers.text_allowed')), 'nx-color-green'),
+            default => new OfferAllowedBadge((string) (__('legacy/offers.text_denied')), 'nx-color-red'),
         };
 
         $voteCounts = $this->offerVoteRepository->getVoteCounts($id);
         $yeah = (int) $voteCounts['yeah'];
         $against = (int) $voteCounts['against'];
 
-        $allowRow = '';
-        if (Permission::can(PermissionEnum::OFFER_MANAGE) && (int) ($num['allowed'] ?? 1) === OfferAllowed::PENDING->value) {
-            $allowRow = '<table><tr><td class="embedded"><form method="post" action="?allow_offer=1"><input type="hidden" value="'.$id.'" name="offerid" />'.
-                '<input class="btn" type="submit" value="'.htmlspecialchars((string) (__('legacy/offers.submit_allow'))).'" />&nbsp;&nbsp;</form></td><td class="embedded"><form method="post" action="?id='.$id.'&amp;finish_offer=1">'.
-                '<input type="hidden" value="'.$id.'" name="finish" /><input class="btn" type="submit" value="'.htmlspecialchars((string) (__('legacy/offers.submit_let_votes_decide'))).'" /></form></td></tr></table>';
-        }
-
-        $voteRow = '';
-        $voteResultsRow = '';
-        if ((int) ($num['allowed'] ?? 1) === OfferAllowed::PENDING->value) {
-            $voteRow = '<b><a href="?id='.$id.'&amp;vote=yeah"><span class="nx-color-green">'.htmlspecialchars((string) (__('legacy/offers.text_for'))).'</span></a></b>'.
-                (Permission::can(PermissionEnum::AGAINST_OFFER) ? ' - <b><a href="?id='.$id.'&amp;vote=against"><span class="nx-color-red">'.htmlspecialchars((string) (__('legacy/offers.text_against'))).'</span></a></b>' : '');
-            $voteResultsRow = '<b>'.htmlspecialchars((string) (__('legacy/offers.text_for'))).":</b> {$yeah}  <b>".htmlspecialchars((string) (__('legacy/offers.text_against')))."</b> {$against} &nbsp; &nbsp; <a href=\"?id=".$id.'&amp;offer_vote=1"><i>'.htmlspecialchars((string) (__('legacy/offers.text_see_vote_detail'))).'</i></a>';
-        }
+        $isPending = (int) ($num['allowed'] ?? 1) === OfferAllowed::PENDING->value;
+        $allowed = (int) ($num['allowed'] ?? 1) === OfferAllowed::ALLOWED->value;
 
         $allowedNote = '';
-        if ((int) ($num['allowed'] ?? 1) === OfferAllowed::ALLOWED->value && $userId !== (int) ($num['userid'] ?? 0)) {
+        if ($allowed && $userId !== (int) ($num['userid'] ?? 0)) {
             $allowedNote = (string) (__('legacy/offers.text_voter_receives_pm_note'));
         }
-        if ((int) ($num['allowed'] ?? 1) === OfferAllowed::ALLOWED->value && $userId === (int) ($num['userid'] ?? 0)) {
+        if ($allowed && $userId === (int) ($num['userid'] ?? 0)) {
             $allowedNote = (string) (__('legacy/offers.text_urge_upload_offer_note'));
         }
-
-        $edit = '';
-        $delete = '';
-        if ($userId === (int) ($num['userid'] ?? 0) || Permission::can(PermissionEnum::OFFER_MANAGE)) {
-            $edit = '<a href="?id='.$id.'&amp;edit_offer=1"><img class="dt_edit" src="pic/trans.gif" alt="edit" />&nbsp;<b><span class="small">'.htmlspecialchars((string) (__('legacy/offers.text_edit_offer'))).'</span></b></a>&nbsp;|&nbsp;';
-            $delete = '<a href="?id='.$id.'&amp;del_offer=1&amp;sure=0"><img class="dt_delete" src="pic/trans.gif" alt="delete" />&nbsp;<b><span class="small">'.htmlspecialchars((string) (__('legacy/offers.text_delete_offer'))).'</span></b></a>&nbsp;|&nbsp;';
-        }
-        $report = '<a href="report.php?reportofferid='.$id.'"><img class="dt_report" src="pic/trans.gif" alt="report" />&nbsp;<b><span class="small">'.htmlspecialchars((string) (__('legacy/offers.report_offer'))).'</span></b></a>';
 
         $description = '';
         if (! empty($num['descr'])) {
@@ -228,14 +208,11 @@ final class OfferPageService
 
         // Comments section
         $commentCount = $this->offerCommentRepository->countComments($id);
-        $commentbar = '<p align="center"><a class="index" href="comment.php?action=add&amp;pid='.$id.'&amp;type=offer">'.htmlspecialchars((string) (__('legacy/offers.text_add_comment'))).'</a></p>'."\n";
 
         $commentsHtml = '';
         $pagerTop = '';
         $pagerBottom = '';
-        if (! $commentCount) {
-            $commentsHtml = '<h1 id="startcomments" align="center">'.htmlspecialchars((string) (__('legacy/offers.text_no_comments'))).'</h1>'."\n";
-        } else {
+        if ($commentCount) {
             [$pagerTop, $pagerBottom, , $offset, $perpage] = Pagination::pager(10, $commentCount, "offers.php?id={$id}&off_details=1&", ['lastpagedefault' => 1]);
             $commentRows = $this->offerCommentRepository->getComments($id, (int) $offset, (int) $perpage);
             $allrows = [];
@@ -245,34 +222,24 @@ final class OfferPageService
             $commentsHtml = $pagerTop.Comment::table($allrows, 'offer', $id).$pagerBottom;
         }
 
-        $quickComment = '<table><tr>'.
-            '<td class="text" align="center"><b>'.htmlspecialchars((string) (__('legacy/offers.text_quick_comment'))).'</b><br /><br />'.
-            '<form id="compose" name="comment" method="post" action="comment.php?action=add&amp;type=offer" >'.
-            '<input type="hidden" name="pid" value="'.$id.'" /><br />';
-        $quickComment .= Html::quickReply('comment', 'body', (string) (__('legacy/offers.submit_add_comment')));
-        $quickComment .= '</form></td></tr></table>';
-
-        return [
-            'id' => $id,
-            'name' => SafeHtml::fromTrustedHtml(htmlspecialchars((string) ($num['name'] ?? ''))),
-            'offeredBy' => UserDisplay::username((int) ($num['userid'] ?? 0)),
-            'offerTime' => SafeHtml::fromTrustedHtml($offertime),
-            'status' => SafeHtml::fromTrustedHtml($status),
-            'allowRow' => SafeHtml::fromTrustedHtml($allowRow),
-            'voteRow' => SafeHtml::fromTrustedHtml($voteRow),
-            'voteResultsRow' => SafeHtml::fromTrustedHtml($voteResultsRow),
-            'allowedNote' => $allowedNote,
-            'editLink' => SafeHtml::fromTrustedHtml($edit),
-            'deleteLink' => SafeHtml::fromTrustedHtml($delete),
-            'reportLink' => SafeHtml::fromTrustedHtml($report),
-            'description' => SafeHtml::fromTrustedHtml($description),
-            'commentCount' => $commentCount,
-            'commentbar' => SafeHtml::fromTrustedHtml($commentbar),
-            'commentsHtml' => SafeHtml::fromTrustedHtml($commentsHtml),
-            'pagerTop' => $pagerTop,
-            'pagerBottom' => $pagerBottom,
-            'quickComment' => SafeHtml::fromTrustedHtml($quickComment),
-        ];
+        return new OfferDetailsViewModel(
+            id: $id,
+            name: (string) ($num['name'] ?? ''),
+            offeredBy: UserDisplay::username((int) ($num['userid'] ?? 0)),
+            offerTime: SafeHtml::fromTrustedHtml($offertime),
+            status: $status,
+            showAllowRow: Permission::can(PermissionEnum::OFFER_MANAGE) && $isPending,
+            isPending: $isPending,
+            canAgainst: Permission::can(PermissionEnum::AGAINST_OFFER),
+            yeah: $yeah,
+            against: $against,
+            allowedNote: $allowedNote,
+            showEditDelete: $userId === (int) ($num['userid'] ?? 0) || Permission::can(PermissionEnum::OFFER_MANAGE),
+            description: SafeHtml::fromTrustedHtml($description),
+            commentCount: $commentCount,
+            commentsHtml: SafeHtml::fromTrustedHtml($commentsHtml),
+            quickReply: SafeHtml::fromTrustedHtml(Html::quickReply('comment', 'body', (string) (__('legacy/offers.submit_add_comment')))),
+        );
     }
 
     /**

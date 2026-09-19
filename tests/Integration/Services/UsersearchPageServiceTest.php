@@ -196,7 +196,7 @@ final class UsersearchPageServiceTest extends TestCase
         $data = $this->callBuild($request);
 
         $this->assertFalse($data['hasResults']);
-        $this->assertNull($data['resultsHtml']);
+        $this->assertNull($data['results']);
         $this->assertNull($data['resultsError']);
         $this->assertArrayHasKey('form', $data);
     }
@@ -229,7 +229,8 @@ final class UsersearchPageServiceTest extends TestCase
         $data = $this->callBuild($request);
 
         $this->assertTrue($data['hasResults']);
-        $this->assertStringContainsString('No user was found', (string) $data['resultsHtml']);
+        $this->assertNotNull($data['results']);
+        $this->assertStringContainsString('No user was found', (string) $data['results']->emptyMessage);
         $this->assertNull($data['resultsError']);
     }
 
@@ -246,7 +247,9 @@ final class UsersearchPageServiceTest extends TestCase
         $data = $this->callBuild($request);
 
         $this->assertTrue($data['hasResults']);
-        $this->assertStringContainsString('<table', (string) $data['resultsHtml']);
+        $this->assertNotNull($data['results']);
+        $this->assertNull($data['results']->emptyMessage);
+        $this->assertNotEmpty($data['results']->rows);
         $this->assertNull($data['resultsError']);
     }
 
@@ -264,7 +267,8 @@ final class UsersearchPageServiceTest extends TestCase
         $data = $this->callBuild($request);
 
         $this->assertTrue($data['hasResults']);
-        $this->assertStringContainsString('<table', (string) $data['resultsHtml']);
+        $this->assertNotNull($data['results']);
+        $this->assertCount(2, $data['results']->rows);
     }
 
     // --- invalid email error ---
@@ -280,7 +284,7 @@ final class UsersearchPageServiceTest extends TestCase
 
         $this->assertTrue($data['hasResults']);
         $this->assertStringContainsString('Bad email', (string) $data['resultsError']);
-        $this->assertNull($data['resultsHtml']);
+        $this->assertNull($data['results']);
     }
 
     // --- invalid IP error ---

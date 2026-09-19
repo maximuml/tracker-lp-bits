@@ -38,7 +38,9 @@
 @if (! $viewmailbox['isSentBox'])
 {{ __('legacy/messages.text_or') }}
 <input class=btn type="submit" name="move" value="{{ __('legacy/messages.submit_move_to') }}"> <select name="box"><option value="1">{{ __('legacy/messages.text_inbox') }}</option>
-{{ $viewmailbox['moveBoxOptions'] ?? '' }}
+@foreach ($viewmailbox['moveBoxes'] as $opt)
+<option value="{{ $opt->value }}">{{ $opt->label }}</option>
+@endforeach
 @endif
 </select>
 </td>

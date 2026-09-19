@@ -6,5 +6,7 @@
 <option value="body" {{ $viewmailbox['place'] === 'body' ? ' selected' : '' }}>{{ __('legacy/messages.select_body') }}</option>
 </select>
 {{ __('legacy/messages.text_jump_to') }}<select name="box">
-{{ $viewmailbox['jumpToBoxes'] ?? '' }}
+@foreach ($viewmailbox['jumpToBoxes'] as $opt)
+<option value="{{ $opt->value }}"{{ $opt->selected ? ' selected' : '' }}>{{ $opt->label }}</option>
+@endforeach
 </select> <input class=btn type="submit" value={{ __('legacy/messages.submit_go') }}></form>

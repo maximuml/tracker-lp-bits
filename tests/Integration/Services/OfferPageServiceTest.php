@@ -310,7 +310,7 @@ final class OfferPageServiceTest extends TestCase
         ob_end_clean();
 
         $this->assertSame('off_details', $data['action']);
-        $this->assertSame([], $data['off_details']);
+        $this->assertNull($data['off_details']);
     }
 
     // --- edit_offer with nonexistent offer ---

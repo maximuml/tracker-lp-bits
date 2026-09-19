@@ -69,12 +69,34 @@ final class MsgAlert
 
     public static function render(): void
     {
+        foreach (self::pendingAlerts() as $item) {
+            echo Html::messageAlert($item['url'], $item['text'], $item['color']);
+        }
+    }
+
+    /**
+     * Queued alerts still inside their deadline, as plain data so callers
+     * can render them through the shared chrome view model.
+     *
+     * @return list<array{url: string, text: string, color: string}>
+     */
+    public static function pendingAlerts(): array
+    {
+        self::getInstance();
+
         $nowTimestamp = time();
+        $alerts = [];
         foreach (self::$alerts as $item) {
             if ($item['deadline'] > $nowTimestamp) {
-                echo Html::messageAlert($item['url'] ?: '', $item['text'], $item['color'] ?: 'red');
+                $alerts[] = [
+                    'url' => $item['url'] ?: '',
+                    'text' => $item['text'],
+                    'color' => $item['color'] ?: 'red',
+                ];
             }
         }
+
+        return $alerts;
     }
 
     public function remove(string $name): void

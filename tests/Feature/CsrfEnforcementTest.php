@@ -67,18 +67,18 @@ final class CsrfEnforcementTest extends TestCase
 
     public function test_csrf_meta_tag_in_page_layout_header(): void
     {
-        // PageLayout::header() renders the Blade layout which includes the
-        // csrf-token meta tag for all legacy pages.
-        $source = file_get_contents(resource_path('views/layouts/legacy/header.blade.php'));
-        $this->assertStringContainsString('csrf-token', $source, 'PageLayout header Blade must include csrf-token meta tag');
+        // PageLayout::header() renders the shared chrome partial which
+        // includes the csrf-token meta tag for all pages.
+        $source = file_get_contents(resource_path('views/layouts/partials/head-assets.blade.php'));
+        $this->assertStringContainsString('csrf-token', $source, 'PageLayout head-assets partial must include csrf-token meta tag');
     }
 
     public function test_csrf_js_included_in_page_layout_footer(): void
     {
-        // PageLayout::footer() pre-computes the JS block (including csrf.js)
-        // and passes it to the Blade layout for all legacy pages.
-        $source = file_get_contents(app_path('Support/PageLayout.php'));
-        $this->assertStringContainsString('csrf.js', $source, 'PageLayout must include csrf.js in footer');
+        // The shared chrome view model carries the footer script list
+        // (including csrf.js) for all pages.
+        $source = file_get_contents(app_path('ViewModels/SiteChromeViewModel.php'));
+        $this->assertStringContainsString('csrf.js', $source, 'SiteChromeViewModel must include csrf.js in footScripts');
     }
 
     public function test_post_without_csrf_token_to_protected_route_returns_419(): void

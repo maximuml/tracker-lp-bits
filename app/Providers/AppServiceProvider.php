@@ -232,10 +232,16 @@ class AppServiceProvider extends ServiceProvider
             $view->with('context', $context);
         });
 
-        // Variant A (ADR 0014): inject the semantic chrome view model into
-        // the modern layout. Class-based so dependencies resolve via the
-        // container rather than service location inside the view model.
-        View::composer('layouts.modern', SiteChromeComposer::class);
+        // Variant A (ADR 0014) / ADR 0018: inject the semantic chrome view
+        // model into the modern layout and the shared chrome partials.
+        // Class-based so dependencies resolve via the container rather than
+        // service location inside the view model.
+        View::composer([
+            'layouts.modern',
+            'layouts.partials.head-assets',
+            'layouts.partials.header',
+            'layouts.partials.footer',
+        ], SiteChromeComposer::class);
 
         // SafeHtml Blade directive: @safeHtml($var) renders a SafeHtml
         // value object's sanitized HTML. This replaces {!! !!} for

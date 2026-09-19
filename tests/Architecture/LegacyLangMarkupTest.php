@@ -40,7 +40,7 @@ final class LegacyLangMarkupTest extends TestCase
     private const LANG_DIR = self::BASE_DIR.'/resources/lang/en/legacy';
 
     /** Baseline: markup-bearing values across resources/lang/en/legacy. */
-    private const BASELINE_MARKUP_VALUES = 222;
+    private const BASELINE_MARKUP_VALUES = 217;
 
     private const MARKUP_PATTERN = '/<[a-zA-Z\/][^>]*>|&(?:nbsp|lt|gt|amp|quot);/';
 

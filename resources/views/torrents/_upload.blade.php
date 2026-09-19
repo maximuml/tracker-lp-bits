@@ -10,7 +10,7 @@
 							<br /><br /><b>ATTENTION</b>: Max. Torrent Size not set. Please contact the administrator about this problem!
 						@endif
 					</div>
-				<x-settings-row layout="grid" :label="\App\Support\Html\SafeHtml::fromTrustedHtml((__('legacy/upload.row_torrent_file')).'<span class="nx-color-red">*</span>')">
+				<x-settings-row layout="grid" :label="\App\Support\Html\SafeHtml::fromTrustedHtml((__('legacy/upload.row_torrent_file')).'<span class=nx-color-red>*</span>')">
 					<input type="file" class="file" id="torrent" name="file" />
 				</x-settings-row>
 				@if (($altname_main ?? '') === 'yes')
@@ -39,7 +39,7 @@
 					</x-settings-row>
 				@endif
 
-				<x-settings-row layout="grid" :label="\App\Support\Html\SafeHtml::fromTrustedHtml((__('legacy/upload.row_type')).'<span class="nx-color-red">*</span>')">
+				<x-settings-row layout="grid" :label="\App\Support\Html\SafeHtml::fromTrustedHtml((__('legacy/upload.row_type')).'<span class=nx-color-red>*</span>')">
 					<select name="type" id="browsecat" data-mode="{{ $browsecatmode }}">
 						<option value="0">{{ __('legacy/upload.select_choose_one') ?? '' }}</option>
 						@foreach ($cats as $row)
@@ -60,7 +60,7 @@
 				</div>
 
 				@if (! empty($offerRows))
-					<x-settings-row layout="grid" :label="\App\Support\Html\SafeHtml::fromTrustedHtml((__('legacy/upload.row_your_offer')).(!$uploadFreely ? '<span class="nx-color-red">*</span>' : ''))">
+					<x-settings-row layout="grid" :label="\App\Support\Html\SafeHtml::fromTrustedHtml((__('legacy/upload.row_your_offer')).(!$uploadFreely ? '<span class=nx-color-red>*</span>' : ''))">
 						<select name="offer">
 							<option value="0">{{ __('legacy/upload.select_choose_one') ?? '' }}</option>
 							@foreach ($offerRows as $offerrow)

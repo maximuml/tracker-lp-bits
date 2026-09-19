@@ -50,7 +50,7 @@ final class UserDisplay
     public static function currentClass(): string|int
     {
         $user = app(CurrentUser::class)->get();
-        if (defined('IN_NEXUS') && IN_NEXUS) {
+        if (app(LegacyRuntime::class)->isLegacy()) {
             return $user['class'] ?? '';
         }
 
@@ -79,7 +79,7 @@ final class UserDisplay
     public static function currentId(): int
     {
         $user = app(CurrentUser::class)->get();
-        if (defined('IN_NEXUS') && IN_NEXUS) {
+        if (app(LegacyRuntime::class)->isLegacy()) {
             return (int) ($user['id'] ?? 0);
         }
 
@@ -98,7 +98,7 @@ final class UserDisplay
     public static function currentPasskey(): string
     {
         $user = app(CurrentUser::class)->get();
-        if (defined('IN_NEXUS') && IN_NEXUS) {
+        if (app(LegacyRuntime::class)->isLegacy()) {
             return $user['passkey'] ?? '';
         }
 
@@ -117,7 +117,7 @@ final class UserDisplay
     public static function currentUsername(): string
     {
         $user = app(CurrentUser::class)->get();
-        if (defined('IN_NEXUS') && IN_NEXUS) {
+        if (app(LegacyRuntime::class)->isLegacy()) {
             return $user['username'] ?? '';
         }
 

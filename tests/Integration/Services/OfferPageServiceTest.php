@@ -10,6 +10,7 @@ use App\Services\OfferPageService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
+use App\Support\LegacyRuntime;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -44,9 +45,7 @@ final class OfferPageServiceTest extends TestCase
         $this->initialObLevel = ob_get_level();
         Redis::connection()->flushdb();
 
-        if (! defined('IN_NEXUS')) {
-            define('IN_NEXUS', true);
-        }
+        app(LegacyRuntime::class)->markLegacy();
 
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
         DB::table('offers')->truncate();

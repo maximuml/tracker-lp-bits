@@ -15,6 +15,7 @@ use App\Services\ForumListingService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
+use App\Support\LegacyRuntime;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -50,9 +51,7 @@ final class ForumListingServiceTest extends TestCase
     {
         parent::setUp();
         Redis::connection()->flushdb();
-        if (! defined('IN_NEXUS')) {
-            define('IN_NEXUS', true);
-        }
+        app(LegacyRuntime::class)->markLegacy();
         $this->initialObLevel = ob_get_level();
         app(Globals::class)->set('SITENAME', 'TestSite');
         app(Globals::class)->set('lang_functions', [
@@ -168,8 +167,9 @@ final class ForumListingServiceTest extends TestCase
         $currentUser->set($merged);
         $this->app->instance(CurrentUser::class, $currentUser);
 
-        // IN_NEXUS is false in the test environment, so UserDisplay::currentClass()
-        // uses auth()->user()->class — log in a User model with the right class.
+        // The legacy runtime flag is false in the test environment, so
+        // UserDisplay::currentClass() uses auth()->user()->class — log in a
+        // User model with the right class.
         $user = new User;
         $user->id = $merged['id'];
         $user->class = $merged['class'];

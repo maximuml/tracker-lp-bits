@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Repositories\UserListingRepository;
 use App\Services\UsersearchPageService;
 use App\Support\CurrentUser;
+use App\Support\LegacyRuntime;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -41,9 +42,7 @@ final class UsersearchPageServiceTest extends TestCase
         $this->initialObLevel = ob_get_level();
         Redis::connection()->flushdb();
 
-        if (! defined('IN_NEXUS')) {
-            define('IN_NEXUS', true);
-        }
+        app(LegacyRuntime::class)->markLegacy();
 
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
         DB::table('users')->truncate();
@@ -91,8 +90,8 @@ final class UsersearchPageServiceTest extends TestCase
     /**
      * Authenticate via both CurrentUser and Laravel's Auth guard.
      *
-     * IN_NEXUS is defined as false by bootstrap/app.php before setUp()
-     * runs, so UserDisplay::currentClass() uses auth()->user()->class
+     * The legacy runtime flag is false before setUp() runs, so
+     * UserDisplay::currentClass() uses auth()->user()->class
      * rather than CurrentUser. We must log in via Auth for the
      * permission check to see the correct class.
      *

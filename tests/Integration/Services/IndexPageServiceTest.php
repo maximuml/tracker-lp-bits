@@ -10,6 +10,7 @@ use App\Services\IndexPageService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
+use App\Support\LegacyRuntime;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
@@ -45,9 +46,7 @@ final class IndexPageServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        if (! defined('IN_NEXUS')) {
-            define('IN_NEXUS', true);
-        }
+        app(LegacyRuntime::class)->markLegacy();
         Redis::connection()->flushdb();
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
         DB::table('users')->truncate();

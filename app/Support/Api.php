@@ -72,7 +72,7 @@ final class Api
             $results['recordsFiltered'] = $count;
         }
 
-        if (! (defined('IN_NEXUS') && IN_NEXUS) && Config::get('app.debug')) {
+        if (! app(LegacyRuntime::class)->isLegacy() && Config::get('app.debug')) {
             $results['queries'] = LegacyDb::lastQuery(true);
         }
 

@@ -44,6 +44,7 @@ use App\Support\Environment;
 use App\Support\Globals;
 use App\Support\Html\SafeHtml;
 use App\Support\LegacyHeaderBag;
+use App\Support\LegacyRuntime;
 use App\Support\Locale;
 use App\Support\Metrics\Collectors;
 use App\Support\Metrics\MetricsRegistry;
@@ -95,6 +96,12 @@ class AppServiceProvider extends ServiceProvider
         // SAPI globals headers_list()/http_response_code()/header_remove()
         // that leak state across Octane worker requests.
         $this->app->singleton(LegacyHeaderBag::class);
+        // ADR 0017: request-scoped legacy/tracker flags. bootstrap/app.php
+        // binds the entry-seeded instance before providers register; this is
+        // only a safety net for contexts that boot the container differently.
+        if (! $this->app->bound(LegacyRuntime::class)) {
+            $this->app->singleton(LegacyRuntime::class);
+        }
 
         // W3-07: Repository contracts for the 10 most-used repositories.
         $this->app->bind(AuthRepositoryInterface::class, AuthRepository::class);

@@ -31,7 +31,7 @@ final class Events
             throw new \InvalidArgumentException("Event $name is not a valid event enumeration");
         }
 
-        if (defined('IN_NEXUS') && IN_NEXUS) {
+        if (app(LegacyRuntime::class)->isLegacy()) {
             $prefix = 'fire_event:';
             $idKey = $prefix.Str::random();
             $idKeyOld = '';

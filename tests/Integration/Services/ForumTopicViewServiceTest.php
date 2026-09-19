@@ -18,6 +18,7 @@ use App\Services\ForumTopicViewService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
+use App\Support\LegacyRuntime;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -57,9 +58,7 @@ final class ForumTopicViewServiceTest extends TestCase
     {
         parent::setUp();
         Redis::connection()->flushdb();
-        if (! defined('IN_NEXUS')) {
-            define('IN_NEXUS', true);
-        }
+        app(LegacyRuntime::class)->markLegacy();
         $this->initialObLevel = ob_get_level();
         app(Globals::class)->set('SITENAME', 'TestSite');
         app(Globals::class)->set('CURLANGDIR', 'en');

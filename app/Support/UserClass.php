@@ -189,7 +189,7 @@ final class UserClass
         bool $I18N = false,
         array $options = [],
     ): SafeHtml {
-        if (! (defined('IN_NEXUS') && IN_NEXUS)) {
+        if (! app(LegacyRuntime::class)->isLegacy()) {
             return SafeHtml::fromTrustedHtml(User::getClassName($class, $compact, $b_colored, $I18N));
         }
 

@@ -8,6 +8,7 @@ use App\DTOs\Auth\ActorContext;
 use App\Support\AssetAppender;
 use App\Support\CurrentUser;
 use App\Support\LegacyHeaderBag;
+use App\Support\LegacyRuntime;
 use App\Support\PageLayout;
 use App\Support\Permissions;
 use App\Support\RequestContext;
@@ -48,6 +49,9 @@ class ResetNexus
         // T-11: Flush the per-request legacy header bag so headers/status
         // set by one request do not leak into the next under Octane.
         $this->legacyHeaderBag->flush();
+        // ADR 0017: restore entry-point legacy/tracker flags — per-request
+        // code may mutate them under Octane.
+        $this->app->make(LegacyRuntime::class)->reset();
 
         // T-10: Reset auth guard cached user to prevent cross-request user
         // leakage under Octane. NexusWebGuard caches $this->user on the guard

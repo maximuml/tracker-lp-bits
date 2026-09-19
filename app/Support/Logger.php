@@ -93,7 +93,7 @@ final class Logger
         $user = null;
         $passkey = '';
 
-        if (defined('IN_NEXUS') && IN_NEXUS) {
+        if (app(LegacyRuntime::class)->isLegacy()) {
             $curUser = app(CurrentUser::class)->get();
             if (is_array($curUser) && ! empty($curUser)) {
                 $user = $curUser;

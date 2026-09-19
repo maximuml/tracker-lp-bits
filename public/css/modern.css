@@ -123,12 +123,100 @@ body {
     align-items: center;
 }
 
+.nxm-userbar__row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 1rem;
+    align-items: center;
+    width: 100%;
+}
+
+.nxm-userbar__row--tools {
+    justify-content: space-between;
+}
+
 .nxm-userbar__stats {
     display: inline-flex;
     flex-wrap: wrap;
     gap: 0.9rem;
     margin-left: auto;
 }
+
+.nxm-userbar__icons {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: center;
+    color: #e8eef5;
+}
+
+.nxm-userbar__icons img {
+    vertical-align: middle;
+    margin-right: 0.15rem;
+}
+
+.nxm-search {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    align-items: center;
+}
+
+.nxm-search input[type="text"] {
+    width: 9rem;
+    padding: 0.2rem 0.4rem;
+    border: 1px solid var(--nxm-border);
+    border-radius: var(--nxm-radius);
+    font: inherit;
+}
+
+.nxm-search select {
+    font: inherit;
+    padding: 0.15rem;
+}
+
+.nxm-search input[type="submit"] {
+    padding: 0.2rem 0.6rem;
+    font-size: inherit;
+}
+
+.nxm-donate img {
+    display: block;
+    margin-top: 0.4rem;
+}
+
+.nxm-ok { color: #6fc76f; }
+.nxm-bad { color: #f08080; }
+
+.nxm-alert {
+    max-width: var(--nxm-content-width);
+    margin: 0.75rem auto;
+    padding: 0.6rem 0.8rem;
+    border-radius: var(--nxm-radius);
+    color: #fff;
+    text-align: center;
+}
+
+.nxm-alert a { color: #fff; }
+
+.nxm-alert--red { background: #c0392b; }
+.nxm-alert--green { background: #1e7a1e; }
+.nxm-alert--black { background: #222; }
+.nxm-alert--blue { background: #1a5f9e; }
+.nxm-alert--orange { background: #b95c00; }
+.nxm-alert--gray { background: #555; }
+
+.nxm-alert-offline {
+    max-width: var(--nxm-content-width);
+    margin: 0.8rem auto;
+    padding: 0.6rem 0.8rem;
+    background: #c0392b;
+    color: #fff;
+    text-align: center;
+    border-radius: var(--nxm-radius);
+}
+
+.nxm-alert-offline a { color: #fff; text-decoration: underline; }
 
 .nxm-stat { display: inline-flex; gap: 0.3rem; align-items: baseline; }
 .nxm-stat__label { color: #8fa3b8; }
@@ -219,6 +307,12 @@ input[type="reset"] {
     text-align: center;
 }
 .nxm-footer__sep { margin: 0 0.5rem; }
+
+.nxm-footer__stats {
+    margin-top: 0.4rem;
+    color: var(--nxm-text-dim);
+    font-size: 0.8rem;
+}
 
 /* ---------- Accessibility ---------- */
 

@@ -502,6 +502,55 @@ Decision → Consequences). Add new ADRs here as numbered subsections.
   release — they will be removed together with `dynamicConstantNames`
   in `phpstan.neon` once downstream reads are confirmed gone.
 
+### ADR 0018: Unified modern chrome for legacy pages (Accepted, stage 2.1)
+
+- **Context:** Variant A (ADR 0014) gave migrated pages a semantic HTML5
+  shell (`layouts.modern`), but the ~73 views on `layouts.legacy*` still
+  rendered the XHTML-era header: `<base href>`, `xmlns`, `http-equiv`,
+  `<font>` tags and a table-built menu — plus a parallel implementation
+  in `PageLayout::renderHeader()` that duplicated user-bar, search,
+  staff-icon, alert and footer logic as HTML strings passed to the
+  legacy header view (removed with this change). The modern shell also
+  lacked the functional blocks legacy users rely on (global search with
+  area select, staff icons, attendance/medal/task/management links, H&R
+  status, connectable/slots, message alerts, offline banner, donation,
+  footer page stats).
+- **Decision:** One set of chrome partials —
+  `resources/views/layouts/partials/head-assets.blade.php`,
+  `resources/views/layouts/partials/header.blade.php`,
+  `resources/views/layouts/partials/footer.blade.php` — shared by
+  `layouts.modern` (a thin
+  `@include`/`@yield` wrapper) and by `PageLayout::headerHtml()` /
+  `footerHtml()`, which stays the compatibility adapter for
+  `stdhead()`/`stdfoot()` callers and `layouts.legacy*` views.
+  `SiteChromeViewModel::load()` gathers every chrome field as data
+  (`variant` = `modern`|`legacy`; `skipUserData` for the cheap footer
+  re-load that keeps page stats accurate), including the formerly
+  HTML-built blocks — `alerts` render as `.nxm-alert-*` divs instead of
+  `Html::messageAlert` tables, the search area select is a labelled
+  `<select>`, staff icons/H&R/slots/attendance are plain fields.
+  `SiteChromeComposer` covers `layouts.modern` and all three partials
+  but skips injection when `chrome` is already in view data (no double
+  load when `PageLayout` passes its legacy-variant model). The XHTML
+  doctype, `xmlns`, `<base href>`, `http-equiv` meta and `<font>` tags
+  are gone from the chrome; `public/css/modern.css` loads on every page;
+  `<main id="main-content">` wraps the body and `Frame::mainOpen()`
+  keeps the legacy table frame inside it until stage 3. The legacy
+  variant keeps its theme stylesheets (font/forumsprites/theme/DomTT/
+  nexus) and head-loaded scripts (legacy bodies may reference them
+  during parse); the modern variant keeps deferred footer scripts.
+  `LegacyFontTagTest` ratchets remaining `<font` files in `app/` and
+  `resources/views/`.
+- **Consequences:** `/index.php`, `/topten.php`, `/staffpanel.php`,
+  `/upload.php` render the same header. Legacy page bodies are
+  unchanged inside the new shell (theme.css still styles them).
+  `a11y.spec` stays green — the alert banner and labelled select fix
+  would have been new `color-contrast`/`select-name` violations.
+  `Html::messageAlert` remains for alert markup emitted inside page
+  bodies. Page-HTML caches (`topten`, `faq`, `rules`) may serve the old
+  chrome until their TTL expires. The static `PageLayout::$context`
+  stays per-request state set by `headerHtml()`/`Html::stdhead()`.
+
 ## Testing
 
 - **Unit tests:** `tests/Unit/` — pure unit only, no DB/Redis/MeiliSearch (enforced by `UnitSuiteIsolationTest` and the `unit-tests-fast` CI job, which runs the suite with no service containers)

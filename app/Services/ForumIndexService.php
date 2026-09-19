@@ -17,7 +17,6 @@ use App\Support\Forum;
 use App\Support\Globals;
 use App\Support\Html\SafeHtml;
 use App\Support\Palette;
-use App\Support\Time;
 use App\Support\UserDisplay;
 use App\ViewModels\Forum\ForumIndexViewModel;
 use App\ViewModels\Forum\ForumRow;
@@ -139,7 +138,7 @@ final class ForumIndexService
                 subject: $displaySubject,
                 fullSubject: $fullSubject,
                 hlcolor: (int) $arr['hlcolor'],
-                date: (string) (Time::format($post_arr['added'] ?? '', true, false) ?: ''),
+                date: (string) ($post_arr['added'] ?? ''),
                 poster: UserDisplay::username((int) ($post_arr['userid'] ?? 0)),
             );
             $hasUnread = $this->getLastReadPostId($lasttopicid, $curUser) < $lastpostid;

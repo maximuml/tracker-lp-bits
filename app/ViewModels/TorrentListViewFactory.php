@@ -46,7 +46,7 @@ final class TorrentListViewFactory
     private const MAX_NAME_LENGTH = 200;
 
     public function __construct(
-        private readonly LegacyRedisCache $cache,
+        private readonly ?LegacyRedisCache $cache,
         private readonly CurrentUser $currentUser,
         private readonly TorrentModerationRepository $moderationRep,
         private readonly TorrentStatsService $statsService,
@@ -59,6 +59,9 @@ final class TorrentListViewFactory
     public function create(array $rows, int $searchBoxId): TorrentListViewModel
     {
         $cache = $this->cache;
+        if ($cache === null) {
+            throw new \RuntimeException('Cache not initialized');
+        }
         $user = $this->currentUser->get() ?? [];
         $config = SiteConfig::current();
         $waitsystem = $config->main->waitSystem(false) ? 'yes' : 'no';

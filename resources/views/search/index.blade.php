@@ -6,7 +6,7 @@
 <div class="nx-main nx-embedded nx-w-97">
 @if (! empty($hasResults))
     {{ $pagertop ?? '' }}
-    {{ \App\Support\TorrentTable::render($rows ?? []) }}
+    @include('torrents._table')
     {{ $pagerbottom ?? '' }}
 @elseif (($search ?? '') !== '')
     {{ \App\Support\Frame::stdMessage((__('legacy/torrents.std_search_results_for')).($searchstr_ori ?? '').'"', __('legacy/torrents.std_try_again'), false) }}

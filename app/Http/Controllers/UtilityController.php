@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\UserFontsize;
 use App\Enums\UserTheme;
+use App\Models\SearchBox;
 use App\Models\Setting;
 use App\Models\User;
 use App\Repositories\SearchPageRepository;
@@ -28,6 +29,7 @@ use App\Support\Logger;
 use App\Support\Smilies;
 use App\Support\Style;
 use App\Support\Url;
+use App\ViewModels\TorrentListViewFactory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -60,6 +62,7 @@ class UtilityController extends LegacyController
         ?LegacyRedisCache $legacyRedisCache,
         LegacyHeaderBag $legacyHeaderBag,
         private readonly SecureTokenService $secureTokenService,
+        private readonly TorrentListViewFactory $torrentListFactory,
     ) {
         $this->usersearchPageService = $usersearchPageService;
         $this->searchPageRepository = $searchPageRepository;
@@ -80,6 +83,10 @@ class UtilityController extends LegacyController
         }
 
         $data = $this->searchPageRepository->dataForSearch($request, $currentUser);
+        $data['listVm'] = $this->torrentListFactory->create(
+            $data['rows'] ?? [],
+            (int) SearchBox::getBrowseMode(),
+        );
 
         return $this->legacyPage($request, 'search', true, $data);
     }

@@ -7,13 +7,16 @@ namespace App\Http\Controllers;
 use App\Auth\Permission;
 use App\Contracts\Repositories\TorrentAjaxRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
+use App\Models\Torrent;
 use App\Models\User;
+use App\Repositories\TorrentModerationRepository;
 use App\Support\Category;
 use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Globals;
 use App\Support\Html\SafeHtml;
 use App\Support\LegacyYesNo;
+use App\Support\Locale;
 use App\Support\Permissions;
 use App\Support\Promotion;
 use App\Support\Ratio;
@@ -21,6 +24,11 @@ use App\Support\Strings;
 use App\Support\Time;
 use App\Support\TorrentAccess;
 use App\Support\UserDisplay;
+use App\ViewModels\Torrent\ApprovalBadge;
+use App\ViewModels\Torrent\CategoryIcon;
+use App\ViewModels\Torrent\TorrentBadgeSet;
+use App\ViewModels\Torrent\UserTorrentListViewModel;
+use App\ViewModels\Torrent\UserTorrentRow;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -315,14 +323,11 @@ class TorrentAjaxController extends LegacyController
         ];
 
         $data = $this->torrentAjaxRepository->userTorrentList($targetUserId, $type, $page, $currentUser);
-        $curUserArr = $curUser;
 
-        $torrentlist = '';
-        if ($data['count'] > 0 && ! empty($data['rows'])) {
-            [$torrentlist] = $this->torrentListTable($data['rows'], $type, $targetUserId, $curUserArr, $data['seedTimeAndUploaded'], $data['torrentRep']);
-        }
+        $data['userTorrentListVm'] = ($data['count'] > 0 && ! empty($data['rows']))
+            ? $this->userTorrentListVm($data['rows'], $type, $targetUserId, $curUser, $data['seedTimeAndUploaded'], $data['torrentRep'])
+            : null;
 
-        $table = $data['pagertop'].$torrentlist.$data['pagerbottom'];
         $hasData = false;
         $summary = sprintf('<b>%s</b>%s', $data['count'], (__('legacy/getusertorrentlistajax.text_record')).Strings::addS($data['count']));
         if ($data['total_size']) {
@@ -332,9 +337,8 @@ class TorrentAjaxController extends LegacyController
             $hasData = true;
         }
 
-        $data['bodyHtml'] = SafeHtml::fromTrustedHtml($hasData
-            ? '<br/>'.sprintf('<div class="nx-flex-between"><div>%s</div><div></div></div>', $summary).$table
-            : (string) (__('legacy/getusertorrentlistajax.text_no_record')));
+        $data['hasData'] = $hasData;
+        $data['summaryHtml'] = SafeHtml::fromTrustedHtml($summary);
 
         return response()->view('getusertorrentlistajax.index', $data, 200, $headers);
     }
@@ -342,203 +346,121 @@ class TorrentAjaxController extends LegacyController
     /**
      * @param  iterable<int, mixed>  $rows
      * @param  array<string, mixed>  $currentUser
-     * @return array{string, float}
      */
-    private function torrentListTable(iterable $rows, string $mode, int $id, array $currentUser, mixed $seedTimeAndUploaded, mixed $torrentRep): array
+    private function userTorrentListVm(iterable $rows, string $mode, int $id, array $currentUser, mixed $seedTimeAndUploaded, TorrentModerationRepository $torrentRep): UserTorrentListViewModel
     {
-        $showsize = $showsenum = $showlenum = $showuploaded = $showdownloaded = $showratio = $showsetime = $showletime = $showcotime = $showanonymous = $showtotalsize = false;
-        $columncount = 7;
+        $showsize = $showsenum = $showlenum = $showuploaded = $showdownloaded = $showratio = $showsetime = $showletime = $showcotime = $showanonymous = false;
         $showClient = false;
         switch ($mode) {
             case 'uploaded':
-                $showsize = true;
-                $showsenum = true;
-                $showlenum = true;
-                $showuploaded = true;
-                $showdownloaded = false;
-                $showratio = false;
-                $showsetime = true;
-                $showletime = false;
-                $showcotime = false;
-                $showanonymous = true;
-                $showtotalsize = true;
-                $columncount = 8;
+                $showsize = $showsenum = $showlenum = $showuploaded = $showsetime = $showanonymous = true;
                 break;
             case 'seeding':
-                $showsize = true;
-                $showsenum = true;
-                $showlenum = true;
-                $showuploaded = true;
-                $showdownloaded = true;
-                $showratio = true;
-                $showsetime = true;
-                $showletime = false;
-                $showcotime = false;
-                $showanonymous = false;
-                $showtotalsize = true;
-                $columncount = 8;
+                $showsize = $showsenum = $showlenum = $showuploaded = $showdownloaded = $showratio = $showsetime = true;
                 $showClient = true;
                 break;
             case 'leeching':
-                $showsize = true;
-                $showsenum = true;
-                $showlenum = true;
-                $showuploaded = true;
-                $showdownloaded = true;
-                $showratio = true;
-                $showsetime = false;
-                $showletime = false;
-                $showcotime = false;
-                $showanonymous = false;
-                $showtotalsize = true;
-                $columncount = 8;
+                $showsize = $showsenum = $showlenum = $showuploaded = $showdownloaded = $showratio = true;
                 $showClient = true;
                 break;
             case 'completed':
-                $showsize = true;
-                $showsenum = false;
-                $showlenum = false;
-                $showuploaded = true;
-                $showdownloaded = false;
-                $showratio = false;
-                $showsetime = true;
-                $showletime = true;
-                $showcotime = true;
-                $showanonymous = false;
-                $showtotalsize = false;
+                $showsize = $showuploaded = $showsetime = $showletime = $showcotime = true;
                 break;
             case 'incomplete':
-                $showsize = true;
-                $showsenum = false;
-                $showlenum = false;
-                $showuploaded = true;
-                $showdownloaded = true;
-                $showratio = true;
-                $showsetime = false;
-                $showletime = true;
-                $showcotime = false;
-                $showanonymous = false;
-                $showtotalsize = false;
-                $columncount = 7;
+                $showsize = $showuploaded = $showdownloaded = $showratio = $showletime = true;
                 break;
         }
 
-        $shouldShowClient = false;
         $currentUserId = (int) ($currentUser['id'] ?? 0);
-        if ($showClient && (Permissions::userCan(PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO->value, false, $currentUserId) || $currentUserId == $id)) {
-            $shouldShowClient = true;
-        }
+        $shouldShowClient = $showClient
+            && (Permissions::userCan(PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO->value, false, $currentUserId) || $currentUserId == $id);
+        $maxNameLength = ($currentUser['fontsize'] ?? null) == 'large' ? 70 : 80;
 
-        $results = [];
+        $vmRows = [];
         foreach ($rows as $row) {
-            $results[] = (array) $row;
-        }
-
-        $ret = '<table border="1" cellspacing="0" cellpadding="5" width="100%"><tr><td class="colhead">'.__('legacy/getusertorrentlistajax.col_type').'</td><td class="colhead" align="center">'.__('legacy/getusertorrentlistajax.col_name').'</td><td class="colhead" align="center">'.__('legacy/getusertorrentlistajax.col_added').'</td>'.
-            ($showsize ? '<td class="colhead" align="center"><img class="size" src="pic/trans.gif" alt="size" title="'.__('legacy/getusertorrentlistajax.title_size').'" /></td>' : '').
-            ($showsenum ? '<td class="colhead" align="center"><img class="seeders" src="pic/trans.gif" alt="seeders" title="'.__('legacy/getusertorrentlistajax.title_seeders').'" /></td>' : '').
-            ($showlenum ? '<td class="colhead" align="center"><img class="leechers" src="pic/trans.gif" alt="leechers" title="'.__('legacy/getusertorrentlistajax.title_leechers').'" /></td>' : '').
-            ($showuploaded ? '<td class="colhead" align="center">'.__('legacy/getusertorrentlistajax.col_uploaded').'</td>' : '').
-            ($showdownloaded ? '<td class="colhead" align="center">'.__('legacy/getusertorrentlistajax.col_downloaded').'</td>' : '').
-            ($showratio ? '<td class="colhead" align="center">'.__('legacy/getusertorrentlistajax.col_ratio').'</td>' : '').
-            ($showsetime ? '<td class="colhead" align="center">'.__('legacy/getusertorrentlistajax.col_se_time').'</td>' : '').
-            ($showletime ? '<td class="colhead" align="center">'.__('legacy/getusertorrentlistajax.col_le_time').'</td>' : '').
-            ($showcotime ? '<td class="colhead" align="center">'.__('legacy/getusertorrentlistajax.col_time_completed').'</td>' : '').
-            ($showanonymous ? '<td class="colhead" align="center">'.__('legacy/getusertorrentlistajax.col_anonymous').'</td>' : '');
-        if ($shouldShowClient) {
-            $ret .= sprintf('<td class="colhead" align="center">%s</td><td class="colhead" align="center">IP</td>', __('legacy/getusertorrentlistajax.col_client'));
-        }
-        $ret .= '</tr>';
-
-        $totalSize = 0;
-        foreach ($results as $arr) {
-            if ($mode == 'uploaded') {
+            $arr = (array) $row;
+            if ($mode === 'uploaded') {
                 $seedTimeAndUploadedData = $seedTimeAndUploaded->get($arr['torrent']);
                 $arr['seedtime'] = $seedTimeAndUploadedData ? $seedTimeAndUploadedData->seedtime : 0;
                 $arr['uploaded'] = $seedTimeAndUploadedData ? $seedTimeAndUploadedData->uploaded : 0;
             }
 
-            $sphighlight = Promotion::backgroundStyleWithContext($arr['sp_state']);
-            $bannedTorrent = (LegacyYesNo::isYes($arr['banned'] ?? null) ? ' <b>(<span class="striking">'.__('legacy/functions.text_banned').'</span>)</b>' : '');
-            $spTorrent = Promotion::appendWithContext($arr['sp_state'], '', false, '', 0, '', $arr['__ignore_global_sp_state'] ?? false);
-            if ($showtotalsize) {
-                $totalSize += $arr['size'];
+            $nameTitle = trim((string) $arr['torrentname']);
+            $displayName = $nameTitle;
+            if (mb_strlen($displayName, 'UTF-8') > $maxNameLength) {
+                $displayName = mb_substr($displayName, 0, $maxNameLength, 'UTF-8').'..';
             }
 
-            $hrImg = TorrentAccess::hrImage($arr, $arr['search_box_id']);
-            $approvalStatusIcon = $torrentRep->renderApprovalStatus($arr['approval_status']);
-
-            $dispname = $nametitle = e($arr['torrentname']);
-            $countDispname = mb_strlen($dispname, 'UTF-8');
-            $maxLenghtOfTorrentName = ($currentUser['fontsize'] == 'large' ? 70 : 80);
-            if ($countDispname > $maxLenghtOfTorrentName) {
-                $dispname = mb_substr($dispname, 0, $maxLenghtOfTorrentName, 'UTF-8').'..';
+            $uploadedBytes = (float) ($arr['uploaded'] ?? 0);
+            $downloadedBytes = (float) ($arr['downloaded'] ?? 0);
+            if ($downloadedBytes > 0) {
+                $ratioText = number_format($uploadedBytes / $downloadedBytes, 3);
+                $ratioClass = Ratio::colorClass($ratioText) ?: null;
+            } elseif ($uploadedBytes > 0) {
+                $ratioText = 'Inf.';
+                $ratioClass = null;
+            } else {
+                $ratioText = '---';
+                $ratioClass = null;
             }
 
-            $ret .= '<tr'.$sphighlight.'><td class="rowfollow nowrap" valign="middle">'.
-                Category::imageTagWithContext($arr['category'], 'torrents.php?allsec=1&amp;').
-                "</td>\n".
-                '<td class="rowfollow" width="100%" align="left"><a href="'.
-                e('details.php?id='.$arr['torrent'].'&hit=1').
-                '" title="'.$nametitle.'"><b>'.$dispname.'</b></a>'.
-                $bannedTorrent.$spTorrent.$hrImg.$approvalStatusIcon.'</td>';
-            $ret .= sprintf('<td class="rowfollow nowrap" align="center">%s<br/>%s</td>', substr($arr['added'], 0, 10), substr($arr['added'], 11));
+            $added = (string) ($arr['added'] ?? '');
+            $categoryIcon = null;
+            if (isset($arr['category'])) {
+                $catData = Category::iconData($arr['category']);
+                $categoryIcon = new CategoryIcon($catData['iconClass'], $catData['name'], 'torrents.php?allsec=1&cat='.$arr['category']);
+            }
 
-            if ($showsize) {
-                $ret .= '<td class="rowfollow" align="center">'.Format::sizeCompact($arr['size']).'</td>';
-            }
-            if ($showsenum) {
-                $ret .= '<td class="rowfollow" align="center">'.$arr['seeders'].'</td>';
-            }
-            if ($showlenum) {
-                $ret .= '<td class="rowfollow" align="center">'.$arr['leechers'].'</td>';
-            }
-            if ($showuploaded) {
-                $ret .= '<td class="rowfollow" align="center">'.Format::sizeCompact($arr['uploaded']).'</td>';
-            }
-            if ($showdownloaded) {
-                $ret .= '<td class="rowfollow" align="center">'.Format::sizeCompact($arr['downloaded']).'</td>';
-            }
-            if ($showratio) {
-                if ($arr['downloaded'] > 0) {
-                    $ratio = number_format($arr['uploaded'] / $arr['downloaded'], 3);
-                    $ratio = '<span class="'.Ratio::colorClass($ratio).'">'.$ratio.'</span>';
-                } elseif ($arr['uploaded'] > 0) {
-                    $ratio = 'Inf.';
-                } else {
-                    $ratio = '---';
-                }
-                $ret .= '<td class="rowfollow" align="center">'.$ratio.'</td>';
-            }
-            if ($showsetime) {
-                $ret .= '<td class="rowfollow" align="center">'.Format::prettyTimeWithLocale($arr['seedtime']).'</td>';
-            }
-            if ($showletime) {
-                $ret .= '<td class="rowfollow" align="center">'.Format::prettyTimeWithLocale($arr['leechtime']).'</td>';
-            }
-            if ($showcotime) {
-                $ret .= '<td class="rowfollow" align="center">'.''.str_replace('&nbsp;', '<br />', (string) Time::format($arr['completedat'], false)).'</td>';
-            }
-            if ($showanonymous) {
-                $ret .= '<td class="rowfollow" align="center">'.$arr['anonymous'].'</td>';
-            }
-            if ($shouldShowClient) {
-                $ipArr = array_filter([$arr['ipv4'], $arr['ipv6']]);
-                foreach ($ipArr as &$_ip) {
-                    $_ip = sprintf('<span class="nowrap">%s</span>', $_ip);
-                }
-                $ret .= sprintf(
-                    '<td class="rowfollow" align="center">%s<br/>%s</td><td class="rowfollow" align="center">%s</td>',
-                    Strings::userAgentClient($arr['agent']), $arr['port'],
-                    implode('<br/>', $ipArr)
-                );
-            }
-            $ret .= "</tr>\n";
+            $vmRows[] = new UserTorrentRow(
+                rowClass: Promotion::rowClassWithContext((int) $arr['sp_state'], '', $arr),
+                categoryIcon: $categoryIcon,
+                nameUrl: 'details.php?id='.$arr['torrent'].'&hit=1',
+                nameTitle: $nameTitle,
+                displayName: $displayName,
+                isBanned: LegacyYesNo::isYes($arr['banned'] ?? null),
+                badges: new TorrentBadgeSet(
+                    promotion: Promotion::badgeWithContext((int) $arr['sp_state'], '', false, '', 0, '', $arr['__ignore_global_sp_state'] ?? false),
+                    hitAndRun: TorrentAccess::requiresHrIcon($arr, $arr['search_box_id'] ?? 0),
+                    approval: $torrentRep->shouldShowApprovalStatusIcon($arr['approval_status'])
+                        ? new ApprovalBadge(
+                            title: (string) Locale::trans("torrent.approval.status_text.{$arr['approval_status']}", [], null),
+                            icon: SafeHtml::fromTrustedHtml((string) (Torrent::$approvalStatus[$arr['approval_status']]['icon'] ?? '')),
+                        )
+                        : null,
+                ),
+                addedDate: substr($added, 0, 10),
+                addedTime: substr($added, 11),
+                size: Format::sizeParts((float) ($arr['size'] ?? 0)),
+                seeders: (int) ($arr['seeders'] ?? 0),
+                leechers: (int) ($arr['leechers'] ?? 0),
+                uploaded: Format::sizeParts($uploadedBytes),
+                downloaded: Format::sizeParts($downloadedBytes),
+                ratioText: $ratioText,
+                ratioClass: $ratioClass,
+                seedTime: Format::prettyTimeWithLocale((float) ($arr['seedtime'] ?? 0)),
+                leechTime: Format::prettyTimeWithLocale((float) ($arr['leechtime'] ?? 0)),
+                completedAt: $arr['completedat'] ?? null,
+                anonymous: (string) ($arr['anonymous'] ?? ''),
+                clientAgent: Strings::userAgentClient((string) ($arr['agent'] ?? '')),
+                clientPort: (string) ($arr['port'] ?? ''),
+                clientIps: array_values(array_filter([(string) ($arr['ipv4'] ?? ''), (string) ($arr['ipv6'] ?? '')])),
+            );
         }
 
-        $ret .= "</table>\n";
-
-        return [$ret, $totalSize];
+        return new UserTorrentListViewModel(
+            rows: $vmRows,
+            showSize: $showsize,
+            showSeeders: $showsenum,
+            showLeechers: $showlenum,
+            showUploaded: $showuploaded,
+            showDownloaded: $showdownloaded,
+            showRatio: $showratio,
+            showSeedTime: $showsetime,
+            showLeechTime: $showletime,
+            showCompletedAt: $showcotime,
+            showAnonymous: $showanonymous,
+            showClient: $shouldShowClient,
+        );
     }
 
     /**

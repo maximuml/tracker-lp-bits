@@ -122,43 +122,6 @@ final class Promotion
         );
     }
 
-    /**
-     * Build the row background style for a torrent list row.
-     *
-     * Mirrors `get_torrent_bg_color()`.
-     */
-    /**
-     * @param  array<string, mixed>  $torrent
-     */
-    public static function backgroundStyle(
-        int $promotion,
-        string $posState,
-        array $torrent,
-        string $appendPromotion,
-    ): string {
-        $token = self::resolveRowToken($promotion, $posState, $torrent, $appendPromotion);
-
-        return $token === null || $token === '' ? '' : " class='$token'";
-    }
-
-    /**
-     * Locale/context-aware wrapper for {@see backgroundStyle()}.
-     * Mirrors the legacy `get_torrent_bg_color()` helper.
-     *
-     * @param  array<string, mixed>  $torrent
-     */
-    public static function backgroundStyleWithContext(int $promotion, ?string $posState = '', ?array $torrent = []): string
-    {
-        $user = app(CurrentUser::class)->get() ?? [];
-
-        return self::backgroundStyle(
-            $promotion,
-            (string) ($posState ?? ''),
-            $torrent ?? [],
-            UserAppendPromotion::tryFrom((int) ($user['appendpromotion'] ?? 2))?->stringValue() ?? 'icon',
-        );
-    }
-
     private const PROMOTION_CONFIG = [
         2 => ['class' => 'free', 'text' => 'text_free', 'icon' => 'pro_free', 'alt' => 'Free', 'subColor' => 'nx-color-blue', 'expire' => 'expirefree_torrent'],
         3 => ['class' => 'twoup', 'text' => 'text_two_times_up', 'icon' => 'pro_2up', 'alt' => '2X', 'subColor' => null, 'expire' => 'expiretwoup_torrent'],

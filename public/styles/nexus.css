@@ -461,10 +461,10 @@ button.nx-btn-link {
 .nx-pagination__item--gap{padding:3px 6px;color:#666}
 .nx-pagination__link:focus-visible{outline:2px solid #0062AE;outline-offset:1px}
 
-.nx-tabs__list{display:flex;flex-wrap:wrap;gap:2px;list-style:none;margin:0;padding:0;border-bottom:1px solid #bbb}
-.nx-tabs__link{display:inline-block;padding:5px 12px;text-decoration:none;color:#0062AE;border:1px solid transparent;border-bottom:none}
-.nx-tabs__link--active{border-color:#bbb;background:#fff;font-weight:bold;color:#222}
-.nx-tabs__link:focus-visible{outline:2px solid #0062AE;outline-offset:1px}
+.nx-tabs__list{display:flex;flex-wrap:wrap;gap:2px;list-style:none;margin:0;padding:0;border-bottom:1px solid var(--nxm-border, #bbb)}
+.nx-tabs__link{display:inline-block;padding:5px 12px;text-decoration:none;color:var(--nxm-accent, #0062AE);border:1px solid transparent;border-bottom:none}
+.nx-tabs__link--active{border-color:var(--nxm-border, #bbb);background:var(--nxm-surface, #fff);font-weight:bold;color:var(--nxm-text, #222)}
+.nx-tabs__link:focus-visible{outline:2px solid var(--nxm-accent, #0062AE);outline-offset:1px}
 
 .nx-modal{position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.4)}
 .nx-modal__box{position:relative;max-width:520px;margin:10vh auto;background:#fff;border-radius:4px;padding:16px}

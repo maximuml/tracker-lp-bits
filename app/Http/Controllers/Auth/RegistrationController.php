@@ -71,9 +71,7 @@ class RegistrationController extends Controller
         $captchaMarkup = '';
 
         if ($captchaEnabled) {
-            ob_start();
-            Captcha::render('yes', $secret, 'grid');
-            $captchaMarkup = (string) ob_get_clean();
+            $captchaMarkup = Captcha::renderHtml('yes', $secret, 'grid');
         }
 
         $countries = DB::table('countries')->orderBy('name')->get(['id', 'name']);
@@ -188,9 +186,7 @@ class RegistrationController extends Controller
         $captchaMarkup = '';
 
         if ($captchaEnabled) {
-            ob_start();
-            Captcha::render('yes', $secret, 'grid');
-            $captchaMarkup = (string) ob_get_clean();
+            $captchaMarkup = Captcha::renderHtml('yes', $secret, 'grid');
         }
 
         return view('auth.confirm_resend', [

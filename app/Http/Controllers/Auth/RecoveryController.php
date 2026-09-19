@@ -75,9 +75,7 @@ class RecoveryController extends Controller
         $captchaMarkup = '';
 
         if ($captchaEnabled) {
-            ob_start();
-            Captcha::render('yes', $secret, 'grid');
-            $captchaMarkup = (string) ob_get_clean();
+            $captchaMarkup = Captcha::renderHtml('yes', $secret, 'grid');
         }
 
         return view('auth.recover', [

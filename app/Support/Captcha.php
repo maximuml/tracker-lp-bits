@@ -71,29 +71,48 @@ final class Captcha
             return;
         }
 
-        $manager = self::manager();
-        $driver = $manager->driver();
+        $markup = self::markup($secret ?? '', $layout);
+
+        if ($markup !== '') {
+            echo $markup;
+        }
+    }
+
+    /**
+     * Return the active captcha markup instead of echoing it — for callers
+     * that pass markup into a view rather than printing inline.
+     * Defaults mirror `showImageCode()` (iv flag + secret from the query).
+     */
+    public static function renderHtml(?string $enabledFlag = null, ?string $secret = null, string $layout = 'tr'): string
+    {
+        $enabledFlag ??= SiteConfig::current()->security->captchaRequired() ? 'yes' : 'no';
+        if ($enabledFlag !== 'yes') {
+            return '';
+        }
+
+        return self::markup($secret ?? (string) request()->query('secret', ''), $layout);
+    }
+
+    private static function markup(string $secret, string $layout): string
+    {
+        $driver = self::manager()->driver();
 
         if (! $driver->isEnabled()) {
-            return;
+            return '';
         }
 
         $labelKey = $driver instanceof ImageCaptchaDriver
             ? 'row_security_image'
             : 'row_security_challenge';
 
-        $markup = $driver->render([
+        return $driver->render([
             'labels' => [
                 'image' => __('legacy/functions.'.$labelKey),
                 'code' => __('legacy/functions.row_security_code'),
             ],
-            'secret' => $secret ?? '',
+            'secret' => $secret,
             'layout' => $layout,
         ]);
-
-        if ($markup !== '') {
-            echo $markup;
-        }
     }
 
     /**

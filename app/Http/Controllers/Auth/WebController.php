@@ -8,7 +8,6 @@ use App\Exceptions\AuthenticationException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Models\Setting;
-use App\Repositories\UserPasskeyRepository;
 use App\Services\Captcha\Drivers\ImageCaptchaDriver;
 use App\Services\WebAuthService;
 use App\Support\AssetAppender;
@@ -29,7 +28,6 @@ class WebController extends Controller
 
     public function __construct(
         WebAuthService $authService,
-        private readonly UserPasskeyRepository $userPasskeyRepository,
     ) {
         $this->authService = $authService;
     }
@@ -77,7 +75,7 @@ class WebController extends Controller
             ]);
         }
 
-        return view('auth.login', [
+        $view = view('auth.login', [
             'languages' => Locale::languageList('site_lang', true),
             'langFolder' => $langFolder,
             'secret' => $secret,
@@ -89,11 +87,14 @@ class WebController extends Controller
             'nowarn' => $nowarn,
             'error' => $request->session()->get('error'),
             'isComplainEnabled' => Setting::getIsComplainEnabled(),
-            'passkeyLoginHtml' => SafeHtml::fromTrustedHtml($this->renderPasskeyLogin()),
             'siteName' => Setting::getSiteName(),
             'showWarn' => $returnto !== '' && ! $nowarn,
             'isSmtpEnabled' => SiteConfig::current()->smtp->type() !== 'none',
         ]);
+
+        AssetAppender::js('js/passkey.js', 'footer', true);
+
+        return $view;
     }
 
     public function login(LoginRequest $request): RedirectResponse
@@ -141,15 +142,6 @@ class WebController extends Controller
         }
 
         return Locale::folderFromCookie($folder);
-    }
-
-    private function renderPasskeyLogin(): string
-    {
-        ob_start();
-        $this->userPasskeyRepository->renderLogin();
-        AssetAppender::js('js/passkey.js', 'footer', true);
-
-        return (string) ob_get_clean();
     }
 
     private function backWithError(Request $request, string $message): RedirectResponse

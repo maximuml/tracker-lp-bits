@@ -4,12 +4,9 @@ declare(strict_types=1);
 
 namespace App\Support;
 
-use App\Auth\Permission;
-use App\Contracts\Repositories\UserRepositoryInterface;
-use App\Enums\Permission\PermissionEnum;
-use App\Models\User;
 use App\Support\Config\SiteConfig;
 use App\Support\Html\SafeHtml;
+use App\ViewModels\Comment\CommentTableFactory;
 
 /**
  * Legacy BBCode formatter extracted from `include/functions.php`.
@@ -275,69 +272,16 @@ final class Comment
     /**
      * Render the legacy comment table HTML for a list of comment rows.
      *
-     * Mirrors `commenttable()` from `include/functions.php`.
+     * Mirrors `commenttable()` from `include/functions.php`; markup lives
+     * in `resources/views/comments/table.blade.php`.
      */
     /**
      * @param  array<int, array<string, mixed>>  $rows
      */
     public static function table(array $rows, string $type, int|string $parentId, bool $review = false): string
     {
-        $CURUSER = app(CurrentUser::class)->get();
-        $commanage_class = (int) SiteConfig::current()->authority->permission('commanage', 0);
+        $vm = app(CommentTableFactory::class)->build($rows, $type, $parentId);
 
-        $contentWidth = \defined('CONTENT_WIDTH') ? (int) CONTENT_WIDTH : 100;
-        $html = Frame::mainOpen('', false, 100, $contentWidth)
-            .Frame::open('', false, 10, '100%', 'left');
-
-        $uidArr = array_values(array_filter(array_map('intval', array_column($rows, 'user'))));
-        $neededColumns = ['id', 'class', 'enabled', 'privacy', 'avatar', 'signature', 'uploaded', 'downloaded', 'last_access', 'username', 'donor', 'leechwarn', 'warned', 'title'];
-        $userInfoArr = app(UserRepositoryInterface::class)->getByIds($uidArr, $neededColumns);
-
-        foreach ($rows as $row) {
-            $userInfo = $userInfoArr->get($row['user'], User::defaultUser());
-            $userRow = $userInfo->toArray();
-
-            $html .= '<div><table id="cid'.$row['id'].'" border="0" cellspacing="0" cellpadding="0" width="100%"><tr><td class="embedded" width="99%">#'.$row['id'].'&nbsp;&nbsp;<span class="nx-color-gray">'.(__('legacy/functions.text_by')).'</span>';
-            $html .= UserDisplay::username($row['user'], false, true, true, false, false, true);
-            $html .= '&nbsp;&nbsp;<span class="nx-color-gray">'.(__('legacy/functions.text_at')).'</span>'.Time::format($row['added'])
-                .($row['editedby'] && Permission::can(PermissionEnum::COM_MANAGE) ? ' - [<a href="comment.php?action=vieworiginal&amp;cid='.$row['id'].'&amp;type='.$type.'">'.(__('legacy/functions.text_view_original')).'</a>]' : '')
-                .'</td><td class="embedded nowrap" width="1%"><a href="#top"><img class="top" src="pic/trans.gif" alt="Top" title="Top" /></a>&nbsp;&nbsp;</td></tr></table></div>';
-
-            $avatar = ($CURUSER['avatars'] ?? false) ? \htmlspecialchars(trim($userRow['avatar'])) : '';
-            if (! $avatar) {
-                $avatar = 'pic/default_avatar.png';
-            }
-            $text = Format::formatComment($row['text']);
-            $textEditby = '';
-            if ($row['editedby']) {
-                $lastedittime = Time::format($row['editdate'], true, false);
-                $textEditby = '<br /><p><span class="small">'.(__('legacy/functions.text_last_edited_by')).UserDisplay::username($row['editedby']).(__('legacy/functions.text_edited_at')).$lastedittime."</span></p>\n";
-            }
-
-            $html .= '<table class="main" width="100%" border="0" cellspacing="0" cellpadding="5">'."\n";
-            $secs = 900;
-            $dt = date('Y-m-d H:i:s', TIMENOW - $secs);
-            $html .= '<tr>'."\n";
-            $html .= '<td class="rowfollow" width="150" valign="top">'.UserDisplay::avatarImageWithContext($avatar).'</td>'."\n";
-            $html .= '<td class="rowfollow word-break-all" valign="top"><br />'.$text.$textEditby.'</td>'."\n";
-            $html .= '</tr>'."\n";
-
-            $actionbar = '<a href="comment.php?action=add&amp;sub=quote&amp;cid='.$row['id'].'&amp;pid='.$parentId.'&amp;type='.$type.'"><img class="f_quote" src="pic/trans.gif" alt="Quote" title="'.(__('legacy/functions.title_reply_with_quote')).'" /></a>'
-                .'<a href="comment.php?action=add&amp;pid='.$parentId.'&amp;type='.$type.'"><img class="f_reply" src="pic/trans.gif" alt="Add Reply" title="'.(__('legacy/functions.title_add_reply')).'" /></a>'
-                .(Permission::can(PermissionEnum::COM_MANAGE) ? '<a href="comment.php?action=delete&amp;cid='.$row['id'].'&amp;type='.$type.'"><img class="f_delete" src="pic/trans.gif" alt="Delete" title="'.(__('legacy/functions.title_delete')).'" /></a>' : '')
-                .(((is_array($CURUSER) && $row['user'] == ($CURUSER['id'] ?? 0)) || UserDisplay::currentClass() >= $commanage_class) ? '<a href="comment.php?action=edit&amp;cid='.$row['id'].'&amp;type='.$type.'"><img class="f_edit" src="pic/trans.gif" alt="Edit" title="'.(__('legacy/functions.title_edit')).'" /></a>' : '');
-
-            $onlineIcon = (($userRow['last_access'] ?? '') > $dt)
-                ? '<img class="f_online" src="pic/trans.gif" alt="Online" title="'.(__('legacy/functions.title_online')).'" />'
-                : '<img class="f_offline" src="pic/trans.gif" alt="Offline" title="'.(__('legacy/functions.title_offline')).'" />';
-
-            $html .= '<tr><td class="toolbox"> '.$onlineIcon.'<a href="sendmessage.php?receiver='.\htmlspecialchars(trim((string) $row['user'])).'"><img class="f_pm" src="pic/trans.gif" alt="PM" title="'.(__('legacy/functions.title_send_message_to')).\htmlspecialchars($userRow['username']).'" /></a><a href="report.php?commentid='.\htmlspecialchars(trim((string) $row['id'])).'"><img class="f_report" src="pic/trans.gif" alt="Report" title="'.(__('legacy/functions.title_report_this_comment')).'" /></a></td><td class="toolbox" align="right">'.$actionbar.'</td>';
-
-            $html .= '</tr></table>'."\n";
-        }
-
-        $html .= Frame::CLOSE.Frame::CLOSE;
-
-        return $html;
+        return view('comments.table', ['vm' => $vm])->render();
     }
 }

@@ -50,16 +50,19 @@ final class HtmlInPhpRatchetTest extends TestCase
     ];
 
     /** Baseline: lines with a quoted '<table literal (layout markup in PHP). */
-    private const BASELINE_TABLE_LITERALS = 23;
+    private const BASELINE_TABLE_LITERALS = 22;
 
     /** Baseline: ob_start() calls (output buffering = inline page rendering). */
-    private const BASELINE_OB_START = 20;
+    private const BASELINE_OB_START = 12;
 
     /** Baseline: lines with `echo` inside app/Services + app/Http/Controllers. */
     private const BASELINE_ECHO_IN_SERVICES = 6;
 
     /** Baseline: lines where a quoted string starts an HTML tag ('<div', "</td", '<!--'). */
-    private const BASELINE_HTML_LITERAL_LINES = 717;
+    private const BASELINE_HTML_LITERAL_LINES = 698;
+
+    /** Baseline: HTML literal lines inside app/Repositories (target: 0). */
+    private const BASELINE_REPO_HTML_LITERALS = 37;
 
     public function test_table_literal_count_does_not_exceed_baseline(): void
     {
@@ -119,6 +122,24 @@ final class HtmlInPhpRatchetTest extends TestCase
             $this->failureMessage(
                 'HTML literal lines',
                 self::BASELINE_HTML_LITERAL_LINES,
+                $offenders,
+            ),
+        );
+    }
+
+    public function test_repository_html_literals_do_not_exceed_baseline(): void
+    {
+        $offenders = $this->matchingLines(
+            '/["\x27]<[a-zA-Z!\/]/',
+            [self::APP_DIR.'/Repositories'],
+        );
+
+        $this->assertLessThanOrEqual(
+            self::BASELINE_REPO_HTML_LITERALS,
+            count($offenders),
+            $this->failureMessage(
+                'HTML literal lines in app/Repositories',
+                self::BASELINE_REPO_HTML_LITERALS,
                 $offenders,
             ),
         );

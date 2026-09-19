@@ -45,11 +45,22 @@ function check_avatar(image, langfolder){
 	}
 }
 
+function showPreviewImage(src) {
+	var link = document.createElement('a');
+	link.onclick = function () { Return(); return false; };
+	var img = document.createElement('img');
+	img.src = src;
+	link.appendChild(img);
+	var box = $('lightbox');
+	box.innerHTML = "";
+	box.appendChild(link);
+	$('curtain').style.display = "block";
+	box.style.display = "block";
+}
+
 function Preview(image) {
 	if (!is_ie || is_ie >= 7){
-	$('lightbox').innerHTML = "<a onclick=\"Return();\"><img src=\"" + image.src + "\" /></a>";
-	$('curtain').style.display = "block";
-	$('lightbox').style.display = "block";
+	showPreviewImage(image.src);
 	}
 	else{
 	window.open(image.src);
@@ -58,9 +69,7 @@ function Preview(image) {
 
 function Previewurl(url) {
 	if (!is_ie || is_ie >= 7){
-	$('lightbox').innerHTML = "<a onclick=\"Return();\"><img src=\"" + url + "\" /></a>";
-	$('curtain').style.display = "block";
-	$('lightbox').style.display = "block";
+	showPreviewImage(url);
 	}
 	else{
 	window.open(url);

@@ -14,7 +14,10 @@ use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
 use App\ViewModels\Usercp\TwoStepState;
+use App\ViewModels\Usercp\UsercpHomeSection;
+use App\ViewModels\Usercp\UsercpTokenSection;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Mockery;
@@ -52,6 +55,10 @@ final class UsercpPageServiceTest extends TestCase
     {
         parent::setUp();
         Redis::connection()->flushdb();
+        // LegacyRedisCache lives in the nexus.redis connection (DB 0),
+        // not the Laravel default — stale user_*_post_count keys would
+        // otherwise leak between dev and test runs.
+        (new LegacyRedisCache)->redis?->flushDB();
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
         DB::table('users')->truncate();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
@@ -246,11 +253,8 @@ final class UsercpPageServiceTest extends TestCase
         $result = $this->service->build('unknown', '')->toArray();
 
         $this->assertArrayHasKey('home', $result);
-        $this->assertArrayHasKey('commentCount', $result['home']);
-        $this->assertArrayHasKey('joinDate', $result['home']);
-        $this->assertArrayHasKey('forumPosts', $result['home']);
-        $this->assertArrayHasKey('tokens', $result['home']);
-        $this->assertArrayHasKey('readTopics', $result['home']);
+        $this->assertInstanceOf(UsercpHomeSection::class, $result['home']);
+        $this->assertInstanceOf(UsercpTokenSection::class, $result['home']->tokens);
     }
 
     public function test_build_home_returns_zero_comment_count_for_new_user(): void
@@ -259,7 +263,7 @@ final class UsercpPageServiceTest extends TestCase
 
         $result = $this->service->build('home', '')->toArray();
 
-        $this->assertSame(0, $result['home']['commentCount']);
+        $this->assertSame(0, $result['home']->commentCount);
     }
 
     public function test_build_home_returns_zero_forum_posts_for_new_user(): void
@@ -268,7 +272,7 @@ final class UsercpPageServiceTest extends TestCase
 
         $result = $this->service->build('home', '')->toArray();
 
-        $this->assertSame(0, $result['home']['forumPosts']);
+        $this->assertNull($result['home']->forumPosts);
     }
 
     public function test_build_home_returns_empty_read_topics_for_new_user(): void
@@ -277,8 +281,7 @@ final class UsercpPageServiceTest extends TestCase
 
         $result = $this->service->build('home', '')->toArray();
 
-        $this->assertArrayHasKey('items', $result['home']['readTopics']);
-        $this->assertSame([], $result['home']['readTopics']['items']);
+        $this->assertSame([], $result['home']->readTopics);
     }
 
     public function test_build_home_returns_email_and_invites(): void
@@ -287,8 +290,8 @@ final class UsercpPageServiceTest extends TestCase
 
         $result = $this->service->build('home', '')->toArray();
 
-        $this->assertSame('testuser@test.com', $result['home']['email']);
-        $this->assertSame(5, $result['home']['invites']);
+        $this->assertSame('testuser@test.com', $result['home']->email);
+        $this->assertSame(5, $result['home']->invites);
     }
 
     public function test_build_home_show_avatar_false_when_no_avatar(): void
@@ -297,7 +300,33 @@ final class UsercpPageServiceTest extends TestCase
 
         $result = $this->service->build('home', '')->toArray();
 
-        $this->assertFalse($result['home']['showAvatar']);
+        $this->assertFalse($result['home']->showAvatar);
+    }
+
+    public function test_home_section_view_renders_semantic_markup(): void
+    {
+        $this->setupCommon();
+
+        $vm = $this->service->build('home', '');
+
+        $html = Blade::render(
+            '@include("usercp.sections.home")',
+            ['home' => $vm->home, 'contentWidth' => '100%'],
+        );
+
+        // Join date renders through <x-time> (the old path wrapped
+        // Time::format() markup in SafeHtml inside a {{ }} string).
+        $this->assertStringContainsString('<time datetime=', $html);
+        // Invitations/karma/comments rows render link markup in Blade.
+        $this->assertStringContainsString('invite.php?id='.$this->userId, $html);
+        $this->assertStringContainsString('mybonus.php', $html);
+        $this->assertStringContainsString('userhistory.php?action=viewcomments', $html);
+        // Token create form lives in a <template>; the JS reads innerHTML.
+        $this->assertStringContainsString('id="token-form-template"', $html);
+        $this->assertStringContainsString('id="add-token-box-btn"', $html);
+        // No leaked escaped entities/markup in labels or titles.
+        $this->assertStringNotContainsString('&amp;nbsp;', $html);
+        $this->assertStringNotContainsString('&lt;', $html);
     }
 
     // ─── build() personal section ─────────────────────────────────────

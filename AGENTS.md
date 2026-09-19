@@ -879,3 +879,31 @@ by final repository classes or static methods — see W2-01/W2-02).
   HTML fields (`avatarHtml`, `passkeyLoginForm`, `invitesHtml`,
   `karmaHtml`, `commentsHtml`, `tokens.tableHtml`, `forumPostsHtml`,
   `readTopics`) — migrated to `x-data-table`/`x-time` in stage 3.2b.
+
+### ADR 0026: usercp home section on a view model (Accepted, stage 3.2b)
+
+- **Context:** The usercp home dashboard still carried generated HTML:
+  `avatarHtml`, `passkeyLoginForm`, `invitesHtml`, `karmaHtml`,
+  `commentsHtml`, `forumPostsHtml`, `joinDate`/`lastPostAdded` wrapped
+  in `SafeHtml::fromTrustedHtml(Time::format(...))`, and a token table +
+  create form + wiring JS built by sprintf/heredoc inside
+  `buildTokenSection()`.
+- **Decision:** `buildHome()` returns `UsercpHomeSection` with plain
+  fields and small sub-VMs (`PasskeyLoginForm`, `UsercpPostStats`,
+  `UsercpTokenSection`, `ReadTopicItem`). `home.blade.php` renders
+  `x-settings-row*` rows, `<x-time>` for join date and topic timestamps,
+  `x-data-table` for tokens and read topics, and a `<template
+  id="token-form-template">` for the token create form — the layer.open
+  JS reads `innerHTML` of the template instead of carrying HTML inside
+  the JS string. Link `title` attributes get entity-decoded plain-text
+  fields on the VM (`&nbsp;` in lang values would otherwise print
+  literally inside `title="{{ }}"`). `x-data-table`'s thead cells are
+  `{{ }}`-escaped `<th>` — markup-bearing column labels would need
+  SafeHtml headers (none of the current ones carry markup).
+- **Consequences:** HTML literal lines 1003→986, `<table` literals
+  34→33. All usercp sections are now typed VMs; the only generated
+  markup left in `UsercpPageService` is the `Strings::hidden()` spans
+  (by design) and the token JS string (AssetAppender, CSP-nonced).
+  Behaviour caveat: the token form's `#token-box-form` id is now inert
+  inside `<template>` until layer clones it — the JS `getElementById`
+  resolves the live copy.

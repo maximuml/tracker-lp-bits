@@ -192,7 +192,7 @@ class TorrentAjaxController extends LegacyController
 
             if ($e['downloaded']) {
                 $ratio = floor(($e['uploaded'] / $e['downloaded']) * 1000) / 1000;
-                $s .= '<td class=rowfollow align="center" width=1%><span data-color="'.Ratio::color($ratio).'><nobr>'.number_format($ratio, 3)."</nobr></span></td>\n";
+                $s .= '<td class=rowfollow align="center" width=1%><span class="'.Ratio::colorClass($ratio).'"><nobr>'.number_format($ratio, 3)."</nobr></span></td>\n";
             } elseif ($e['uploaded']) {
                 $s .= '<td class=rowfollow align=center width=1%>'.__('legacy/viewpeerlist.text_inf').'</td>';
             } else {
@@ -241,7 +241,7 @@ class TorrentAjaxController extends LegacyController
             $arr = (array) $snatchRow;
             if ($arr['downloaded'] > 0) {
                 $ratio = number_format($arr['uploaded'] / $arr['downloaded'], 3);
-                $ratio = '<span data-color="'.Ratio::color($ratio).">$ratio</span>";
+                $ratio = '<span class="'.Ratio::colorClass($ratio).">$ratio</span>";
             } elseif ($arr['uploaded'] > 0) {
                 $ratio = (string) (__('legacy/viewsnatches.text_inf'));
             } else {
@@ -502,7 +502,7 @@ class TorrentAjaxController extends LegacyController
             if ($showratio) {
                 if ($arr['downloaded'] > 0) {
                     $ratio = number_format($arr['uploaded'] / $arr['downloaded'], 3);
-                    $ratio = '<span data-color="'.Ratio::color($ratio).'">'.$ratio.'</span>';
+                    $ratio = '<span class="'.Ratio::colorClass($ratio).'">'.$ratio.'</span>';
                 } elseif ($arr['uploaded'] > 0) {
                     $ratio = 'Inf.';
                 } else {

@@ -1,17 +1,3 @@
-// Applies [data-color] to el.style.color — CSSOM assignment is not governed
-// by style-src, so this replaces <font color="..."> for dynamic palette colors.
-function nxApplyDataColors(root){
-if (root.nodeType===1 && root.hasAttribute && root.hasAttribute('data-color')) { root.style.color = root.getAttribute('data-color'); }
-var nodes = root.querySelectorAll ? root.querySelectorAll('[data-color]') : [];
-for (var i=0;i<nodes.length;i++){ nodes[i].style.color = nodes[i].getAttribute('data-color'); }
-}
-nxApplyDataColors(document);
-if (window.MutationObserver) {
-new MutationObserver(function(muts){
-for (var i=0;i<muts.length;i++){ var added=muts[i].addedNodes; for (var j=0;j<added.length;j++){ nxApplyDataColors(added[j]); } }
-}).observe(document.documentElement,{childList:true,subtree:true});
-}
-
 function postvalid(form){
 	$('qr').disabled = true;
 	return true;

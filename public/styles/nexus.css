@@ -279,9 +279,53 @@ img.nx-smiley { max-width: 25px; }
 .nx-color-orange { color: orange; }
 .nx-color-1f7309 { color: #1f7309; }
 .nx-color-ca0226 { color: #ca0226; }
+.nx-color-darkred { color: darkred; }
+.nx-color-purple { color: purple; }
+.nx-color-00cc66 { color: #00cc66; }
 .nx-size-1 { font-size: 10px; }
 .nx-size-2 { font-size: 13px; }
 .nx-size-5 { font-size: 18px; }
+
+/* Ratio::color() ramp — nx-ratio-1 = worst (<0.1), nx-ratio-10 = <1.0 */
+.nx-ratio-1 { color: #ff0000; }
+.nx-ratio-2 { color: #ee0000; }
+.nx-ratio-3 { color: #dd0000; }
+.nx-ratio-4 { color: #cc0000; }
+.nx-ratio-5 { color: #bb0000; }
+.nx-ratio-6 { color: #aa0000; }
+.nx-ratio-7 { color: #990000; }
+.nx-ratio-8 { color: #880000; }
+.nx-ratio-9 { color: #770000; }
+.nx-ratio-10 { color: #660000; }
+
+/* Ratio::seedLeechColor() ramp — nx-sl-1 = worst, nx-sl-15 = <0.375 */
+.nx-sl-1 { color: #ff0000; }
+.nx-sl-2 { color: #ee0000; }
+.nx-sl-3 { color: #dd0000; }
+.nx-sl-4 { color: #cc0000; }
+.nx-sl-5 { color: #bb0000; }
+.nx-sl-6 { color: #aa0000; }
+.nx-sl-7 { color: #990000; }
+.nx-sl-8 { color: #880000; }
+.nx-sl-9 { color: #770000; }
+.nx-sl-10 { color: #660000; }
+.nx-sl-11 { color: #550000; }
+.nx-sl-12 { color: #440000; }
+.nx-sl-13 { color: #330000; }
+.nx-sl-14 { color: #220000; }
+.nx-sl-15 { color: #110000; }
+
+/* Palette::waitRampClass() — quantized legacy wait ramp, 1 = nearly over, 10 = longest */
+.nx-wait-1 { color: #8c0000; }
+.nx-wait-2 { color: #990000; }
+.nx-wait-3 { color: #a60000; }
+.nx-wait-4 { color: #b20000; }
+.nx-wait-5 { color: #bf0000; }
+.nx-wait-6 { color: #cc0000; }
+.nx-wait-7 { color: #d80000; }
+.nx-wait-8 { color: #e50000; }
+.nx-wait-9 { color: #f20000; }
+.nx-wait-10 { color: #ff0000; }
 .nx-inline-block { display: inline-block; }
 .nx-flex { display: flex; }
 .nx-flex-col { display: flex; flex-direction: column; }

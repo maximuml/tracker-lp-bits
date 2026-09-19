@@ -275,9 +275,9 @@ final class ForumIndexService
 
     public function highlightTopic(string $subject, int $hlcolor): string
     {
-        $colorname = Palette::forumHighlight($hlcolor);
-        if ($colorname) {
-            $subject = '<b><span data-color="'.$colorname.'">'.$subject.'</span></b>';
+        $colorclass = Palette::forumHighlightClass($hlcolor);
+        if ($colorclass !== '') {
+            $subject = '<b><span class="'.$colorclass.'">'.$subject.'</span></b>';
         }
 
         return $subject;

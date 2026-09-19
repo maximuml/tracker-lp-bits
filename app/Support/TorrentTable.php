@@ -235,8 +235,8 @@ if (Permission::canManageTorrent()) { ?>
             if ($wait) {
                 $elapsed = floor((TIMENOW - strtotime($row['added'])) / 3600);
                 if ($elapsed < $wait) {
-                    $color = dechex((int) (floor(127 * ($wait - $elapsed) / 48 + 128) * 65536));
-                    echo '<td class="rowfollow nowrap"><a href="faq.php#id46"><span data-color="'.$color.'">'.number_format($wait - $elapsed).__('legacy/functions.text_h')."</span></a></td>\n";
+                    $waitclass = Palette::waitRampClass((int) ($wait - $elapsed));
+                    echo '<td class="rowfollow nowrap"><a href="faq.php#id46"><span class="'.$waitclass.'">'.number_format($wait - $elapsed).__('legacy/functions.text_h')."</span></a></td>\n";
                 } else {
                     echo '<td class="rowfollow nowrap">'.__('legacy/functions.text_none')."</td>\n";
                 }
@@ -290,9 +290,9 @@ if (Permission::canManageTorrent()) { ?>
 
             if ($row['seeders']) {
                 $ratio = ($row['leechers'] ? ($row['seeders'] / $row['leechers']) : 1);
-                $ratiocolor = Ratio::seedLeechColor($ratio);
-                echo '<td class="rowfollow" align="center"><b><a href="details.php?id='.$id.'&amp;hit=1&amp;dllist=1#seeders">'.($ratiocolor ? '<span data-color="'.
-                $ratiocolor.'">'.number_format($row['seeders']).'</span>' : number_format($row['seeders']))."</a></b></td>\n";
+                $ratioclass = Ratio::seedLeechColorClass($ratio);
+                echo '<td class="rowfollow" align="center"><b><a href="details.php?id='.$id.'&amp;hit=1&amp;dllist=1#seeders">'.($ratioclass !== '' ? '<span class="'.
+                $ratioclass.'">'.number_format($row['seeders']).'</span>' : number_format($row['seeders']))."</a></b></td>\n";
             } else {
                 $seederCount = (int) ($row['seeders'] ?? 0);
                 echo '<td class="rowfollow"><span class="'.Palette::seederLink($seederCount).'">'.number_format($seederCount)."</span></td>\n";

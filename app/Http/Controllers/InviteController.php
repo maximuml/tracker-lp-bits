@@ -203,7 +203,7 @@ class InviteController extends LegacyController
             $row['usernameHtml'] = UserDisplay::username((int) $row['id']);
             if ((float) $row['downloaded'] > 0) {
                 $ratio = number_format($row['uploaded'] / $row['downloaded'], 3);
-                $row['ratioHtml'] = SafeHtml::fromTrustedHtml('<span data-color="'.Ratio::color($ratio).">$ratio</span>");
+                $row['ratioHtml'] = SafeHtml::fromTrustedHtml('<span class="'.Ratio::colorClass($ratio).">$ratio</span>");
             } else {
                 $row['ratioHtml'] = SafeHtml::fromTrustedHtml($row['uploaded'] > 0 ? 'Inf.' : '---');
             }

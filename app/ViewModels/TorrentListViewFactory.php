@@ -170,11 +170,11 @@ final class TorrentListViewFactory
                 : '';
 
             $waitText = null;
-            $waitColor = null;
+            $waitClass = null;
             if ($wait) {
                 $elapsed = floor((TIMENOW - strtotime((string) $row['added'])) / 3600);
                 if ($elapsed < $wait) {
-                    $waitColor = dechex((int) (floor(127 * ($wait - $elapsed) / 48 + 128) * 65536));
+                    $waitClass = Palette::waitRampClass((int) ($wait - $elapsed));
                     $waitText = number_format($wait - $elapsed).__('legacy/functions.text_h');
                 } else {
                     $waitText = (string) __('legacy/functions.text_none');
@@ -206,7 +206,7 @@ final class TorrentListViewFactory
 
             if ($row['seeders']) {
                 $seedRatio = $row['leechers'] ? $row['seeders'] / $row['leechers'] : 1;
-                $seedersColor = Ratio::seedLeechColor($seedRatio) ?: null;
+                $seedersColor = Ratio::seedLeechColorClass($seedRatio) ?: null;
                 $seedersUrl = 'details.php?id='.$id.'&hit=1&dllist=1#seeders';
                 $seedersZeroClass = '';
             } else {
@@ -250,7 +250,7 @@ final class TorrentListViewFactory
                 bookmarkCounter: $counter,
                 bookmarkMarkup: SafeHtml::fromTrustedHtml($bookmarkMarkup),
                 waitText: $waitText,
-                waitColor: $waitColor,
+                waitClass: $waitClass,
                 commentsUrl: 'details.php?id='.$id.'&hit=1&cmtpage=1#startcomments',
                 comments: (int) $row['comments'],
                 commentIsNew: $commentIsNew,
@@ -259,7 +259,7 @@ final class TorrentListViewFactory
                 size: SafeHtml::fromTrustedHtml(Format::sizeCompact((float) $row['size'])),
                 seedersUrl: $seedersUrl,
                 seeders: (int) $row['seeders'],
-                seedersColor: $seedersColor,
+                seedersClass: $seedersColor,
                 seedersZeroClass: $seedersZeroClass,
                 leechersUrl: $leechersUrl,
                 leechers: (int) $row['leechers'],

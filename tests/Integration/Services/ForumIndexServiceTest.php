@@ -177,9 +177,8 @@ final class ForumIndexServiceTest extends TestCase
     {
         $result = $this->service->highlightTopic('My Topic', 17);
 
-        $this->assertStringContainsString('data-color=', (string) $result);
+        $this->assertStringContainsString('class="nx-hl-17"', (string) $result);
         $this->assertStringContainsString('My Topic', (string) $result);
-        $this->assertStringContainsString('Red', (string) $result);
     }
 
     public function test_highlight_topic_with_invalid_color_returns_subject_unchanged(): void

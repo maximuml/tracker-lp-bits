@@ -144,7 +144,7 @@ class RatioTest extends TestCase
     {
         // 500/1000 = 0.5 → color() falls into `< 0.6` bucket → #aa0000.
         $this->assertSame(
-            '<span data-color="#aa0000">0.500</span>',
+            '<span class="nx-ratio-6">0.500</span>',
             Ratio::userRatioHtml(500, 1000, 'tip', 'Infinity'),
         );
     }
@@ -166,7 +166,7 @@ class RatioTest extends TestCase
         // but not rendered.
         $this->assertSame('---', Ratio::userRatioHtml(0, 0, "it's \"quoted\"", 'Inf'));
         $this->assertSame('Inf', Ratio::userRatioHtml(1024, 0, "it's \"quoted\"", 'Inf'));
-        $this->assertSame('<span data-color="#aa0000">0.500</span>', Ratio::userRatioHtml(500, 1000, "it's \"quoted\"", 'Inf'));
+        $this->assertSame('<span class="nx-ratio-6">0.500</span>', Ratio::userRatioHtml(500, 1000, "it's \"quoted\"", 'Inf'));
     }
 
     public function test_user_ratio_html_uses_provided_infinity_label(): void
@@ -185,8 +185,23 @@ class RatioTest extends TestCase
         // uses floor-truncation. Color buckets: 0.333 falls into
         // `< 0.4` (#cc0000), 0.667 falls into `< 0.7` (#990000).
         $result = Ratio::userRatioHtml(1, 3, 'tip', 'Inf');
-        $this->assertSame('<span data-color="#cc0000">0.333</span>', $result);
+        $this->assertSame('<span class="nx-ratio-4">0.333</span>', $result);
         $result = Ratio::userRatioHtml(2, 3, 'tip', 'Inf');
-        $this->assertSame('<span data-color="#990000">0.667</span>', $result);
+        $this->assertSame('<span class="nx-ratio-7">0.667</span>', $result);
+    }
+
+    public function test_color_class_maps_each_bucket_and_empty_when_healthy(): void
+    {
+        $this->assertSame('nx-ratio-1', Ratio::colorClass(0.05));
+        $this->assertSame('nx-ratio-6', Ratio::colorClass(0.55));
+        $this->assertSame('nx-ratio-10', Ratio::colorClass(0.99));
+        $this->assertSame('', Ratio::colorClass(1.0));
+    }
+
+    public function test_seed_leech_color_class_maps_each_bucket_and_empty_when_healthy(): void
+    {
+        $this->assertSame('nx-sl-1', Ratio::seedLeechColorClass(0.01));
+        $this->assertSame('nx-sl-15', Ratio::seedLeechColorClass(0.37));
+        $this->assertSame('', Ratio::seedLeechColorClass(0.5));
     }
 }

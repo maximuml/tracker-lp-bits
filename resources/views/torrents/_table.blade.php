@@ -35,7 +35,7 @@
         </div>
     </td>
     @if ($row->waitText !== null)
-    <td class="rowfollow nowrap">@if ($row->waitColor !== null)<a href="faq.php#id46"><span data-color="{{ $row->waitColor }}">{{ $row->waitText }}</span></a>@else{{ $row->waitText }}@endif</td>
+    <td class="rowfollow nowrap">@if ($row->waitClass !== null)<a href="faq.php#id46"><span class="{{ $row->waitClass }}">{{ $row->waitText }}</span></a>@else{{ $row->waitText }}@endif</td>
     @endif
     @if ($listVm->showComments)
     <td class="rowfollow">
@@ -50,7 +50,7 @@
     <td class="rowfollow">{{ $row->size }}</td>
     <td class="rowfollow" align="center">
         @if ($row->seedersUrl)
-            <b><a href="{{ $row->seedersUrl }}">@if ($row->seedersColor)<span data-color="{{ $row->seedersColor }}">{{ number_format($row->seeders) }}</span>@else{{ number_format($row->seeders) }}@endif</a></b>
+            <b><a href="{{ $row->seedersUrl }}">@if ($row->seedersClass)<span class="{{ $row->seedersClass }}">{{ number_format($row->seeders) }}</span>@else{{ number_format($row->seeders) }}@endif</a></b>
         @else
             <span class="{{ $row->seedersZeroClass }}">{{ number_format($row->seeders) }}</span>
         @endif

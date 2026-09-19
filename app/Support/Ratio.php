@@ -103,6 +103,42 @@ final class Ratio
         return '';
     }
 
+    /** Ordered hex ramp of {@see color()} — index+1 = `nx-ratio-*` suffix. */
+    private const COLOR_STEPS = [
+        '#ff0000', '#ee0000', '#dd0000', '#cc0000', '#bb0000',
+        '#aa0000', '#990000', '#880000', '#770000', '#660000',
+    ];
+
+    /** Ordered hex ramp of {@see seedLeechColor()} — index+1 = `nx-sl-*` suffix. */
+    private const SEED_LEECH_STEPS = [
+        '#ff0000', '#ee0000', '#dd0000', '#cc0000', '#bb0000',
+        '#aa0000', '#990000', '#880000', '#770000', '#660000',
+        '#550000', '#440000', '#330000', '#220000', '#110000',
+    ];
+
+    /**
+     * CSS utility class (`nx-ratio-1`..`nx-ratio-10`, declared in
+     * `public/styles/nexus.css`) matching the {@see color()} bucket —
+     * the CSP-safe way to colour a ratio; returns '' when healthy.
+     */
+    public static function colorClass(mixed $ratio): string
+    {
+        $index = array_search(self::color($ratio), self::COLOR_STEPS, true);
+
+        return $index === false ? '' : 'nx-ratio-'.($index + 1);
+    }
+
+    /**
+     * Same as {@see colorClass()} for {@see seedLeechColor()} —
+     * emits `nx-sl-1`..`nx-sl-15` or '' when healthy.
+     */
+    public static function seedLeechColorClass(mixed $ratio): string
+    {
+        $index = array_search(self::seedLeechColor($ratio), self::SEED_LEECH_STEPS, true);
+
+        return $index === false ? '' : 'nx-sl-'.($index + 1);
+    }
+
     /**
      * Hex colour for a seed-leech-time ratio. Same shape as
      * {@see color()} but the buckets are 10× narrower because the
@@ -235,7 +271,7 @@ final class Ratio
             $color = self::color($ratio);
             $formatted = number_format($ratio, 3);
             if ($color !== '') {
-                $formatted = '<span data-color="'.$color.'">'.$formatted.'</span>';
+                $formatted = '<span class="'.self::colorClass($ratio).'">'.$formatted.'</span>';
             }
 
             return $formatted;
@@ -262,7 +298,7 @@ final class Ratio
             $color = self::color($ratio);
             $ratio = $ratio > 10000 ? 'Inf.' : number_format($ratio, 3);
             if ($color) {
-                $ratio = '<span data-color="'.$color.'">'.$ratio.'</span>';
+                $ratio = '<span class="'.self::colorClass($ratio).'">'.$ratio.'</span>';
             }
         } elseif ($uped > 0) {
             $ratio = 'Inf.';
@@ -275,9 +311,9 @@ final class Ratio
 
     /**
      * Leaderboard ratio cell: `number_format($up/$down, $decimals)` wrapped
-     * in `<span data-color>` when {@see color()} flags the ratio — or always
-     * wrapped when `$alwaysWrap` (torrent-table legacy quirk emits
-     * `<span data-color="">` for healthy ratios). Caller renders the
+     * in `<span class="nx-ratio-*">` when {@see color()} flags the ratio — or
+     * always wrapped when `$alwaysWrap` (torrent-table legacy quirk emits
+     * `<span class="">` for healthy ratios). Caller renders the
      * `$infinite` label when `$down <= 0` (views stay free of division).
      */
     public static function leaderboard(int|float $up, int|float $down, int $decimals = 2, bool $alwaysWrap = false): SafeHtml
@@ -286,7 +322,7 @@ final class Ratio
         $color = self::color($ratio);
         $formatted = number_format($ratio, $decimals);
         if ($color !== '' || $alwaysWrap) {
-            return SafeHtml::fromTrustedHtml('<span data-color="'.$color.'">'.$formatted.'</span>');
+            return SafeHtml::fromTrustedHtml('<span class="'.self::colorClass($ratio).'">'.$formatted.'</span>');
         }
 
         return SafeHtml::fromTrustedHtml($formatted);

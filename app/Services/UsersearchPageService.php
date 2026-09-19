@@ -276,7 +276,7 @@ final class UsersearchPageService
         if ($down > 0) {
             $r = number_format($up / $down, 2);
             if ($color) {
-                $r = '<span data-color="'.Ratio::color($r).">$r</span>";
+                $r = '<span class="'.Ratio::colorClass($r).">$r</span>";
             }
         } elseif ($up > 0) {
             $r = 'Inf.';

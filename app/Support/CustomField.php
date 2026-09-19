@@ -7,6 +7,7 @@ namespace App\Support;
 use App\Models\SearchBox;
 use App\Models\TorrentCustomField;
 use App\Models\TorrentCustomFieldValue;
+use App\Support\Html\SafeHtml;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -86,213 +87,6 @@ class CustomField
         return $out;
     }
 
-    /** @param  array<int|string, string>  $options */
-    public function radio(string $name, array $options, mixed $current = null): string
-    {
-        $arr = [];
-        foreach ($options as $value => $label) {
-            $arr[] = sprintf(
-                '<label><input type="radio" name="%s" value="%s"%s />%s</label>',
-                $name, $value, (string) $current === (string) $value ? ' checked' : '', $label
-            );
-        }
-
-        return implode('', $arr);
-    }
-
-    /** @param  array<int|string, mixed>  $row */
-    public function buildFieldForm(array $row = []): string
-    {
-        $trName = Html::tr(__('legacy/fields.col_name').'<span class="nx-color-red">*</span>', '<input type="text" name="name" value="'.($row['name'] ?? '').'" />&nbsp;&nbsp;'.__('legacy/fields.col_name_help'), 1, '', true);
-        $trLabel = Html::tr(__('legacy/fields.col_label').'<span class="nx-color-red">*</span>', '<input type="text" name="label" value="'.($row['label'] ?? '').'" />', 1, '', true);
-        $trType = Html::tr(__('legacy/fields.col_type').'<span class="nx-color-red">*</span>', $this->radio('type', $this->getTypeRadioOptions(), $row['type'] ?? null), 1, '', true);
-        $trRequired = Html::tr(__('legacy/fields.col_required').'<span class="nx-color-red">*</span>', $this->radio('required', ['0' => __('legacy/functions.text_no'), '1' => __('legacy/functions.text_yes')], $row['required'] ?? null), 1, '', true);
-        $trHelp = Html::tr(__('legacy/fields.col_help'), '<textarea name="help" rows="4" cols="80">'.($row['help'] ?? '').'</textarea>', 1, '', true);
-        $trOptions = Html::tr(__('legacy/fields.col_options'), '<textarea name="options" rows="6" cols="80">'.($row['options'] ?? '').'</textarea><br/>'.__('legacy/fields.col_options_help'), 1, '', true);
-        $trIsSingleRow = Html::tr(__('legacy/fields.col_is_single_row').'<span class="nx-color-red">*</span>', $this->radio('is_single_row', ['0' => __('legacy/functions.text_no'), '1' => __('legacy/functions.text_yes')], $row['is_single_row'] ?? null), 1, '', true);
-        $trPriority = Html::tr(Locale::trans('label.priority', [], null).'<span class="nx-color-red">*</span>', '<input type="number" name="priority" value="'.($row['priority'] ?? '0').'" />', 1, '', true);
-        $trDisplay = Html::tr(__('legacy/fields.col_display'), '<textarea name="display" rows="4" cols="80">'.($row['display'] ?? '').'</textarea><br/>'.__('legacy/catmanage.row_custom_field_display_help'), 1, '', true);
-
-        $id = $row['id'] ?? 0;
-        $textField = __('legacy/fields.text_field');
-        $submitSubmit = __('legacy/fields.submit_submit');
-        $form = <<<HTML
-<div>
-<h1 align="center"><a class="faqlink" href="?action=view">{$textField}</a></h1>
-<form method="post" action="fields.php?action=submit">
-<div>
-    <table border="1" cellspacing="0" cellpadding="10" width="100%">
-            <input type="hidden" name="id" value="{$id}"/>
-            {$trName}
-            {$trLabel}
-            {$trType}
-            {$trRequired}
-            {$trHelp}
-            {$trOptions}
-            {$trIsSingleRow}
-            {$trPriority}
-            {$trDisplay}
-    </table>
-</div>
-<div>
-    <input type="submit" value="{$submitSubmit}" />
-</div>
-</form>
-</div>
-HTML;
-
-        return $form;
-    }
-
-    public function buildFieldTable(): string
-    {
-        $perPage = 10;
-        $total = DB::table('torrents_custom_fields')->count();
-        [$paginationTop, $paginationBottom, , $offset, $rpp] = Pagination::pager($perPage, $total, '?');
-        $res = DB::table('torrents_custom_fields')
-            ->orderBy('priority', 'desc')
-            ->offset($offset)
-            ->limit($rpp)
-            ->get();
-        $header = [
-            'id' => __('legacy/fields.col_id'),
-            'name' => __('legacy/fields.col_name'),
-            'label' => __('legacy/fields.col_label'),
-            'type_text' => __('legacy/fields.col_type'),
-            'required_text' => __('legacy/fields.col_required'),
-            'is_single_row_text' => __('legacy/fields.col_is_single_row'),
-            'priority' => Locale::trans('label.priority', [], null),
-            'action' => __('legacy/fields.col_action'),
-        ];
-        $rows = [];
-        foreach ($res as $row) {
-            $row = (array) $row;
-            $row['required_text'] = $row['required'] ? __('legacy/functions.text_yes') : __('legacy/functions.text_no');
-            $row['is_single_row_text'] = $row['is_single_row'] ? __('legacy/functions.text_yes') : __('legacy/functions.text_no');
-            $row['type_text'] = sprintf('%s(%s)', $this->getTypeHuman((int) $row['type']), $row['type']);
-            $row['action'] = sprintf(
-                '<a href="#" data-confirm-del="%s" data-confirm-note="%s">%s</a> | <a href="?action=edit&id=%s">%s</a>',
-                $row['id'], htmlspecialchars((string) __('legacy/fields.js_sure_to_delete_this'), ENT_QUOTES), __('legacy/fields.text_delete'), $row['id'], __('legacy/fields.text_edit')
-            );
-            $rows[] = $row;
-        }
-        $fieldManagement = __('legacy/fields.field_management');
-        $textAdd = __('legacy/fields.text_add');
-        $head = <<<HEAD
-<h1 align="center">{$fieldManagement}</h1>
-<div>
-    <span id="add">
-        <a href="?action=add" class="big"><b>{$textAdd}</b></a>
-    </span>
-</div>
-HEAD;
-        $table = $this->buildTable($header, $rows);
-
-        return $head.$table.$paginationBottom;
-    }
-
-    /** @param  array<string, mixed>  $data */
-    public function save(array $data): int|string
-    {
-        $attributes = [];
-        if (empty($data['name'])) {
-            throw new \InvalidArgumentException(__('legacy/fields.col_name').' '.__('legacy/functions.text_required'));
-        }
-        if (! preg_match('/^\w+$/', $data['name'])) {
-            throw new \InvalidArgumentException(__('legacy/fields.col_name').' '.__('legacy/functions.text_invalid'));
-        }
-        $attributes['name'] = $data['name'];
-
-        if (empty($data['label'])) {
-            throw new \InvalidArgumentException(__('legacy/fields.col_label').' '.__('legacy/functions.text_required'));
-        }
-        $attributes['label'] = $data['label'];
-
-        if (empty($data['type'])) {
-            throw new \InvalidArgumentException(__('legacy/fields.col_type').' '.__('legacy/functions.text_required'));
-        }
-        if (! isset(self::$types[$data['type']])) {
-            throw new \InvalidArgumentException(__('legacy/fields.col_type').' '.__('legacy/functions.text_invalid'));
-        }
-        $attributes['type'] = $data['type'];
-
-        if (! isset($data['required'])) {
-            throw new \InvalidArgumentException(__('legacy/fields.col_required').' '.__('legacy/functions.text_required'));
-        }
-        if (! in_array($data['required'], ['0', '1'], true)) {
-            throw new \InvalidArgumentException(__('legacy/fields.col_name').' '.__('legacy/functions.text_invalid'));
-        }
-        $attributes['required'] = $data['required'];
-
-        if (! isset($data['is_single_row'])) {
-            throw new \InvalidArgumentException(__('legacy/fields.col_is_single_row').' '.__('legacy/functions.text_required'));
-        }
-        if (! in_array($data['is_single_row'], ['0', '1'], true)) {
-            throw new \InvalidArgumentException(__('legacy/fields.col_is_single_row').' '.__('legacy/functions.text_invalid'));
-        }
-        $attributes['is_single_row'] = $data['is_single_row'];
-
-        $attributes['help'] = $data['help'] ?? '';
-        $attributes['options'] = trim($data['options'] ?? '');
-        $attributes['display'] = trim($data['display'] ?? '');
-        $attributes['priority'] = trim($data['priority'] ?? '0');
-        $now = date('Y-m-d H:i:s');
-        $attributes['updated_at'] = $now;
-        $table = 'torrents_custom_fields';
-        if (! empty($data['id'])) {
-            $result = DB::table($table)->where('id', (int) $data['id'])->update($attributes);
-        } else {
-            $attributes['created_at'] = $now;
-            $result = DB::table($table)->insertGetId($attributes);
-        }
-
-        return $result;
-    }
-
-    /**
-     * @param  array<string, string>  $header
-     * @param  array<int, array<int|string, mixed>>  $rows
-     */
-    protected function buildTable(array $header, array $rows): string
-    {
-        $table = '<table border="1" cellspacing="0" cellpadding="5" width="100%"><thead><tr>';
-        foreach ($header as $key => $value) {
-            $table .= sprintf('<td class="colhead">%s</td>', $value);
-        }
-        $table .= '</tr></thead><tbody>';
-        foreach ($rows as $row) {
-            $table .= '<tr>';
-            foreach ($header as $headerKey => $headerValue) {
-                $table .= sprintf('<td class="colfollow">%s</td>', $row[$headerKey] ?? '');
-            }
-            $table .= '</tr>';
-        }
-        $table .= '</tbody></table>';
-
-        return $table;
-    }
-
-    /** @param  array<int|string, mixed>|string  $current */
-    public function buildFieldCheckbox(string $name, array|string $current = []): string
-    {
-        $res = DB::table('torrents_custom_fields')->orderBy('priority', 'desc')->get();
-        if (! is_array($current)) {
-            $current = explode(',', $current);
-        }
-        $checkbox = '';
-        foreach ($res as $row) {
-            $row = (array) $row;
-            $checkbox .= sprintf(
-                '<label><input type="checkbox" name="%s" value="%s"%s>%s</label>',
-                $name, $row['id'], in_array($row['id'], $current) ? ' checked' : '', "{$row['name']}[{$row['label']}]"
-            );
-        }
-        $checkbox .= '';
-
-        return $checkbox;
-
-    }
-
     public function renderOnUploadPage(int $torrentId, int $searchBoxId): string
     {
         $searchBox = SearchBox::query()->find($searchBoxId);
@@ -306,109 +100,66 @@ HEAD;
             ->whereIn('id', $customFieldIds)
             ->orderBy('priority', 'desc')
             ->get();
+        $cspNonce = (string) request()->attributes->get('csp_nonce', '');
+        $baseUrl = Url::schemeAndHost(false);
         $html = '';
         foreach ($res as $row) {
             $row = (array) $row;
+            $type = (int) $row['type'];
             $name = "custom_fields[$searchBoxId][{$row['id']}]";
             $currentValue = $customValues[$row['id']]['custom_field_value'] ?? '';
-            $requireText = '';
-            if ($row['required']) {
-                $requireText = '<span class="nx-color-red">*</span>';
+            if ($type === self::TYPE_CHECKBOX) {
+                $name .= '[]';
             }
-            $trLabel = $row['label'].$requireText;
-            $trRelation = "mode_$searchBoxId";
-            if ($row['type'] == self::TYPE_TEXT) {
-                $html .= Html::frow($trLabel, sprintf('<input type="text" name="%s" value="%s"/>', $name, $currentValue), 1, $trRelation);
-            } elseif ($row['type'] == self::TYPE_TEXTAREA) {
-                $html .= Html::frow($trLabel, sprintf('<textarea name="%s" rows="4">%s</textarea>', $name, $currentValue), 1, $trRelation);
-            } elseif ($row['type'] == self::TYPE_RADIO || $row['type'] == self::TYPE_CHECKBOX) {
-                if ($row['type'] == self::TYPE_CHECKBOX) {
-                    $name .= '[]';
-                }
-                $part = '';
-                $options = preg_split('/[\r\n]+/', trim((string) $row['options'])) ?: [];
-                foreach ($options as $option) {
+
+            $options = [];
+            if ($type === self::TYPE_RADIO || $type === self::TYPE_CHECKBOX || $type === self::TYPE_SELECT) {
+                foreach (preg_split('/[\r\n]+/', trim((string) $row['options'])) ?: [] as $option) {
                     if (empty($option) || ($pos = strpos($option, '|')) === false) {
                         continue;
                     }
                     $value = substr($option, 0, $pos);
-                    $label = substr($option, $pos + 1);
-                    $checked = '';
-                    if ($row['type'] == self::TYPE_RADIO && (string) $currentValue === (string) $value) {
-                        $checked = ' checked';
-                    }
-                    if ($row['type'] == self::TYPE_CHECKBOX && in_array($value, (array) $currentValue)) {
-                        $checked = ' checked';
-                    }
-                    $part .= sprintf(
-                        '<label><input type="%s" name="%s" value="%s"%s />%s</label>',
-                        $row['type'], $name, $value, $checked, $label
-                    );
+                    $options[] = [
+                        'value' => $value,
+                        'label' => substr($option, $pos + 1),
+                        'checked' => $type === self::TYPE_RADIO
+                            ? (string) $currentValue === $value
+                            : in_array($value, (array) $currentValue),
+                    ];
                 }
-                $html .= Html::frow($trLabel, $part, 1, $trRelation);
-            } elseif ($row['type'] == self::TYPE_SELECT) {
-                $part = '<select name="'.$name.'">';
-                $options = preg_split('/[\r\n]+/', trim((string) $row['options'])) ?: [];
-                foreach ($options as $option) {
-                    if (empty($option) || ($pos = strpos($option, '|')) === false) {
-                        continue;
-                    }
-                    $value = substr($option, 0, $pos);
-                    $label = substr($option, $pos + 1);
-                    $selected = '';
-                    if (in_array($value, (array) $currentValue)) {
-                        $selected = ' selected';
-                    }
-                    $part .= sprintf(
-                        '<option value="%s"%s>%s</option>',
-                        $value, $selected, $label
-                    );
-                }
-                $part .= '</select>';
-                $html .= Html::frow($trLabel, $part, 1, $trRelation);
-            } elseif ($row['type'] == self::TYPE_IMAGE) {
+            }
+
+            $params = [
+                'relation' => "mode_$searchBoxId",
+                'label' => (string) $row['label'],
+                'required' => (bool) $row['required'],
+                'type' => $type,
+                'name' => $name,
+                'value' => $currentValue,
+                'options' => $options,
+            ];
+
+            if ($type === self::TYPE_IMAGE) {
                 $callbackFunc = 'preview_custom_field_image_'.$row['id'];
-                $iframeId = "iframe_$callbackFunc";
-                $inputId = "input_$callbackFunc";
-                $imgId = 'attach'.$row['id'];
-                $previewBoxId = "preview_$callbackFunc";
-                $y = '<iframe id="'.$iframeId.'" src="'.Url::schemeAndHost(false).'/attachment.php?callback_func='.$callbackFunc.'" width="100%" height="24" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe>';
-                $y .= sprintf('<input id="%s" type="text" name="%s" value="%s">', $inputId, $name, $currentValue);
-                $y .= '<div id="'.$previewBoxId.'">';
+                $previewHtml = '';
                 if (! empty($currentValue)) {
-                    if (substr((string) $currentValue, 0, 4) == 'http') {
-                        $y .= Html::formatImg((string) $currentValue, true, 700, 0, $imgId);
-                    } else {
-                        $y .= Format::formatComment((string) $currentValue);
-                    }
+                    $previewHtml = substr((string) $currentValue, 0, 4) === 'http'
+                        ? Html::formatImg((string) $currentValue, true, 700, 0, 'attach'.$row['id'])
+                        : (string) Format::formatComment((string) $currentValue);
                 }
-                $y .= '</div>';
-                $nonceAttr = ($cspNonce = (string) request()->attributes->get('csp_nonce', '')) !== ''
-                    ? ' nonce="'.htmlspecialchars($cspNonce, ENT_QUOTES).'"'
-                    : '';
-                $y .= <<<JS
-<script{$nonceAttr}>
-    function {$callbackFunc}(delkey, url)
-    {
-        var previewBox = $('$previewBoxId')
-        var existsImg = $('$imgId')
-        var input = $('$inputId')
-        if (existsImg) {
-            previewBox.removeChild(existsImg)
-            input.value = ''
-        }
-        var img = document.createElement('img')
-        img.src=url
-        img.setAttribute('data-scale', '700x0')
-        img.classList.add('js-previewable')
-        input.value = '[attach]' + delkey + '[/attach]'
-        img.id='$imgId'
-        previewBox.appendChild(img)
-    }
-</script>
-JS;
-                $html .= Html::frow($trLabel, $y, 1, $trRelation, true);
+                $params += [
+                    'callbackFunc' => $callbackFunc,
+                    'iframeId' => "iframe_$callbackFunc",
+                    'inputId' => "input_$callbackFunc",
+                    'imgId' => 'attach'.$row['id'],
+                    'previewBoxId' => "preview_$callbackFunc",
+                    'previewHtml' => SafeHtml::fromTrustedHtml($previewHtml),
+                    'baseUrl' => $baseUrl,
+                    'cspNonce' => $cspNonce,
+                ];
             }
+
+            $html .= view('fields._upload_field', $params)->render();
         }
 
         return $html;

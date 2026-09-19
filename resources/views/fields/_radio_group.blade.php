@@ -1,0 +1,1 @@
+@foreach ($options as $o)<label><input type="{{ $type }}" name="{{ $name }}" value="{{ $o['value'] }}"{{ $o['checked'] ? ' checked' : '' }}{{ $selfClose ? ' /' : '' }}>{{ $o['label'] }}</label>@endforeach

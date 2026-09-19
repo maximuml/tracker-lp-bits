@@ -1,0 +1,1 @@
+<div class="nx-grouprow {{ $relation }}" relation="{{ $relation }}"><div class="nx-fhead nx-nowrap">{{ $label }}@if ($required)<span class="nx-color-red">*</span>@endif</div><div class="nx-fcell">@include('fields._upload_control')</div></div>

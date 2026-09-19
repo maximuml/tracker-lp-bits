@@ -13,6 +13,7 @@ use App\Services\UsercpPageService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
+use App\ViewModels\Usercp\TwoStepState;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
@@ -141,7 +142,7 @@ final class UsercpPageServiceTest extends TestCase
 
     private function mockPasskeyRepo(): void
     {
-        $this->passkeyRepository->shouldReceive('renderList')->andReturn(null);
+        $this->passkeyRepository->shouldReceive('getList')->andReturn(collect());
     }
 
     /** @param  array<string, mixed>  $globalsOverrides */
@@ -224,7 +225,7 @@ final class UsercpPageServiceTest extends TestCase
         $result = $this->service->build('forum', '')->toArray();
 
         $this->assertArrayHasKey('forum', $result);
-        $this->assertTrue($result['forum']['showTooltipSetting']);
+        $this->assertTrue($result['forum']->showTooltipSetting);
     }
 
     public function test_build_forum_section_show_tooltip_false_when_disabled(): void
@@ -233,7 +234,7 @@ final class UsercpPageServiceTest extends TestCase
 
         $result = $this->service->build('forum', '')->toArray();
 
-        $this->assertFalse($result['forum']['showTooltipSetting']);
+        $this->assertFalse($result['forum']->showTooltipSetting);
     }
 
     // ─── build() home section (default) ───────────────────────────────
@@ -308,9 +309,8 @@ final class UsercpPageServiceTest extends TestCase
         $result = $this->service->build('personal', '')->toArray();
 
         $this->assertArrayHasKey('personal', $result);
-        $this->assertArrayHasKey('rowsHtml', $result['personal']);
-        $this->assertArrayHasKey('formId', $result['personal']);
-        $this->assertArrayHasKey('enableBitbucket', $result['personal']);
+        $this->assertNotSame('', $result['personal']->formId);
+        $this->assertArrayHasKey('0', $result['personal']->countryOptions);
     }
 
     public function test_build_personal_section_enable_bitbucket_reflects_globals(): void
@@ -319,7 +319,7 @@ final class UsercpPageServiceTest extends TestCase
 
         $result = $this->service->build('personal', '')->toArray();
 
-        $this->assertTrue($result['personal']['enableBitbucket']);
+        $this->assertTrue($result['personal']->enableBitbucket);
     }
 
     // ─── build() security section ─────────────────────────────────────
@@ -332,10 +332,10 @@ final class UsercpPageServiceTest extends TestCase
         $result = $this->service->build('security', '')->toArray();
 
         $this->assertArrayHasKey('security', $result);
-        $this->assertArrayHasKey('showEmailChange', $result['security']);
-        $this->assertArrayHasKey('twoStep', $result['security']);
-        $this->assertArrayHasKey('privacyRadios', $result['security']);
-        $this->assertArrayHasKey('passkeyListHtml', $result['security']);
+        $this->assertFalse($result['security']->showEmailChange);
+        $this->assertInstanceOf(TwoStepState::class, $result['security']->twoStep);
+        $this->assertSame('normal', $result['security']->privacy);
+        $this->assertSame([], $result['security']->passkeys);
     }
 
     public function test_build_security_section_generates_two_step_secret_when_absent(): void
@@ -345,9 +345,9 @@ final class UsercpPageServiceTest extends TestCase
 
         $result = $this->service->build('security', '')->toArray();
 
-        $this->assertFalse($result['security']['twoStep']['hasSecret']);
-        $this->assertNotEmpty($result['security']['twoStep']['secret']);
-        $this->assertNotEmpty($result['security']['twoStep']['qrCodeUrl']);
+        $this->assertFalse($result['security']->twoStep->hasSecret);
+        $this->assertNotEmpty($result['security']->twoStep->secret);
+        $this->assertNotEmpty($result['security']->twoStep->qrCodeUrl);
     }
 
     public function test_build_security_section_skips_secret_when_already_set(): void
@@ -358,9 +358,9 @@ final class UsercpPageServiceTest extends TestCase
 
         $result = $this->service->build('security', '')->toArray();
 
-        $this->assertTrue($result['security']['twoStep']['hasSecret']);
-        $this->assertSame('', $result['security']['twoStep']['secret']);
-        $this->assertSame('', $result['security']['twoStep']['qrCodeUrl']);
+        $this->assertTrue($result['security']->twoStep->hasSecret);
+        $this->assertSame('', $result['security']->twoStep->secret);
+        $this->assertSame('', $result['security']->twoStep->qrCodeUrl);
     }
 
     public function test_build_security_confirm_step_captures_posted_values(): void
@@ -370,10 +370,9 @@ final class UsercpPageServiceTest extends TestCase
 
         $result = $this->service->build('security', 'save')->toArray();
 
-        $this->assertTrue($result['security']['isConfirm']);
-        $this->assertArrayHasKey('confirmHidden', $result['security']);
-        $this->assertArrayHasKey('email', $result['security']['confirmHidden']);
-        $this->assertArrayHasKey('privacy', $result['security']['confirmHidden']);
+        $this->assertTrue($result['security']->isConfirm);
+        $this->assertArrayHasKey('email', $result['security']->confirmHidden);
+        $this->assertArrayHasKey('privacy', $result['security']->confirmHidden);
     }
 
     public function test_build_security_non_confirm_step_has_empty_confirm_hidden(): void
@@ -383,6 +382,6 @@ final class UsercpPageServiceTest extends TestCase
 
         $result = $this->service->build('security', '')->toArray();
 
-        $this->assertFalse($result['security']['isConfirm']);
+        $this->assertFalse($result['security']->isConfirm);
     }
 }

@@ -849,3 +849,33 @@ by final repository classes or static methods — see W2-01/W2-02).
   entity garbage (`&amp;amp;`) in the textarea; covered by
   `ForumHttpTest::test_editpost_section_prefills_body_and_subject`.
   The unused `CurrentUser` dependency was dropped from the service.
+### ADR 0025: usercp settings sections on view models + `x-settings-*` (Accepted, stage 3.2a)
+
+- **Context:** `UsercpPageService` built the personal/tracker/forum/
+  security sections as `rowsHtml` strings through `Html::frow()`/
+  `frowSmall()` with inline `<input>`/`<select>`/`<option>` markup,
+  and captured `UserPasskeyRepository::renderList()` via `ob_start()`
+  — a repository that `printf()`ed a table and an inline script and
+  appended `public/js/passkey.js` as a side effect.
+- **Decision:** Each section builder returns a typed view model
+  (`App\ViewModels\Usercp\UsercpPersonalSection`, `UsercpTrackerSection`,
+  `UsercpForumSection`, `UsercpSecuritySection` with `TwoStepState` and
+  `PasskeyItem`); `UsercpPageViewModel` exposes them as typed nullable
+  properties. The section Blade views compose `x-settings-row`/
+  `row-small`/`text`/`yesno`/`select`/`radios`/`checkboxes`/`save` in
+  `layout="grid"` mode (nx-fgrid cells, no layout tables); composite
+  rows use the components' default slot. Passkey rendering moved to
+  `resources/views/usercp/sections/_passkeys.blade.php` fed by `getList()`/`getAaguids()`
+  data — `renderList()` was deleted and `renderLogin()` kept for the
+  home login box. `x-settings-text` gained an optional `size` prop.
+  Markup-bearing legacy lang values (`&nbsp;`, `<br />`, `<a>`) are
+  wrapped in `SafeHtml::fromUntrustedHtml()` — sanitised, not raw —
+  including inside `:label` props, which `LegacyLangMarkupTest` does
+  not scan (it only inspects `{{ }}` blocks).
+- **Consequences:** `ob_start` in the service is gone (baseline
+  26→25), `<table` literals 35→34, HTML literal lines 1063→1003. The
+  passkey table is a semantic `data-nx="data"` table and both inline
+  scripts carry the CSP nonce. The home section still carries legacy
+  HTML fields (`avatarHtml`, `passkeyLoginForm`, `invitesHtml`,
+  `karmaHtml`, `commentsHtml`, `tokens.tableHtml`, `forumPostsHtml`,
+  `readTopics`) — migrated to `x-data-table`/`x-time` in stage 3.2b.

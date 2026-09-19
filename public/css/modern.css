@@ -858,3 +858,10 @@ html[data-theme="dark"] .nx-hl-40 { color: color-mix(in srgb, white 80%, var(--n
     .nx-post__grid { grid-template-columns: 1fr; }
     .nx-post__user { border-right: 0; border-bottom: 1px solid var(--nxm-border); }
 }
+
+/* usercp: "additional selection" triple-select row (replaces layout table) */
+.nx-cat-extra { display: flex; flex-wrap: wrap; gap: 8px 24px; margin-top: 6px; }
+.nx-cat-extra > .big { flex-basis: 100%; }
+/* usercp: two-step bind row (replaces inline <style> block) */
+.nx-tfa-row { display: flex; align-items: center; }
+.nx-tfa-row > div + div { padding-left: 20px; }

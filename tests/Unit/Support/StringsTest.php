@@ -112,7 +112,7 @@ class StringsTest extends TestCase
     public function test_highlight_wraps_single_match(): void
     {
         $this->assertSame(
-            'before <b><font class="striking">match</font></b> after',
+            'before <b><span class="striking">match</span></b> after',
             Strings::highlight('match', 'before match after'),
         );
     }
@@ -120,7 +120,7 @@ class StringsTest extends TestCase
     public function test_highlight_is_case_insensitive_but_preserves_matched_case(): void
     {
         $this->assertSame(
-            'a <b><font class="striking">Foo</font></b> b <b><font class="striking">FOO</font></b> c',
+            'a <b><span class="striking">Foo</span></b> b <b><span class="striking">FOO</span></b> c',
             Strings::highlight('foo', 'a Foo b FOO c'),
         );
     }
@@ -152,8 +152,8 @@ class StringsTest extends TestCase
         // each match wrapped only once, but call sites have been
         // rendering this nested HTML for years and we keep it.
         $this->assertSame(
-            'a<b><font class="striking"><b><font class="striking">x</font></b></font></b>'
-                .'b<b><font class="striking"><b><font class="striking">x</font></b></font></b>c',
+            'a<b><span class="striking"><b><span class="striking">x</span></b></span></b>'
+                .'b<b><span class="striking"><b><span class="striking">x</span></b></span></b>c',
             Strings::highlight('x', 'axbxc'),
         );
     }
@@ -163,7 +163,7 @@ class StringsTest extends TestCase
         // Legacy contract: needle is a literal substring. A regex
         // metacharacter survives intact.
         $this->assertSame(
-            'before <b><font class="striking">a.b</font></b> after',
+            'before <b><span class="striking">a.b</span></b> after',
             Strings::highlight('a.b', 'before a.b after'),
         );
     }

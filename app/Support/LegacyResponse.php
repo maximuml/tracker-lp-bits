@@ -57,15 +57,15 @@ final class LegacyResponse
         bool $foot = true,
         bool $die = true,
     ): void {
+        $renderer = app(PageRenderer::class);
+
         if (! $die) {
             if ($head) {
                 Html::stdhead();
-            } elseif ($foot && app(PageRenderer::class)->hasContext() === false) {
+            } elseif ($foot && ! $renderer->hasContext()) {
                 // Ensure a page-layout context exists for stdfoot() even when the
                 // caller requested no header (e.g. permission denied before stdhead).
-                ob_start();
-                Html::stdhead();
-                ob_end_clean();
+                $renderer->headerHtml();
             }
             echo view('partials.std-message', [
                 'heading' => $heading,
@@ -80,43 +80,33 @@ final class LegacyResponse
             return;
         }
 
-        $level = ob_get_level();
-        ob_start();
         try {
             if ($head) {
-                Html::stdhead();
-            } elseif ($foot && app(PageRenderer::class)->hasContext() === false) {
-                // Ensure a page-layout context exists for stdfoot() even when the
-                // caller requested no header (e.g. permission denied before stdhead).
-                ob_start();
-                Html::stdhead();
-                ob_end_clean();
+                $html = (string) $renderer->headerHtml();
+            } else {
+                $html = '';
+                if ($foot && ! $renderer->hasContext()) {
+                    // Context side effect only — the header markup is discarded,
+                    // matching the old buffered stdhead() call.
+                    $renderer->headerHtml();
+                }
             }
-            echo view('partials.std-message', [
+            $html .= view('partials.std-message', [
                 'heading' => $heading,
                 'text' => $text,
                 'htmlstrip' => $htmlstrip,
                 'body' => null,
             ])->render();
             if ($foot) {
-                Html::stdfoot();
+                $html .= (string) $renderer->footerHtml();
             }
-            $html = (string) ob_get_clean();
         } catch (HttpResponseException $e) {
-            while (ob_get_level() > $level) {
-                ob_end_clean();
-            }
             throw $e;
         } catch (\Throwable) {
             // If rendering fails partway through (e.g. missing user data in
-            // the test environment), capture whatever was rendered and throw
-            // HttpResponseException with the partial content — mirroring the
-            // old inline PHP which echoed partial HTML before throwing.
-            $html = '';
-            while (ob_get_level() > $level) {
-                $html = (string) ob_get_clean().$html;
-            }
-            if ($html === '') {
+            // the test environment), fall back to a minimal shell — mirroring
+            // the old inline PHP which emitted partial HTML before throwing.
+            if (($html ?? '') === '') {
                 $html = '<!DOCTYPE html><html><head><title>Error</title></head><body>';
             }
         }
@@ -131,26 +121,16 @@ final class LegacyResponse
      */
     public static function captureAbort(string $heading, string $text, bool $htmlstrip = true, string $title = ''): string
     {
-        $level = ob_get_level();
-        ob_start();
-        try {
-            Html::stdhead($title);
-            echo view('partials.std-message', [
+        $renderer = app(PageRenderer::class);
+
+        return (string) $renderer->headerHtml($title)
+            .view('partials.std-message', [
                 'heading' => $heading,
                 'text' => $text,
                 'htmlstrip' => $htmlstrip,
                 'body' => null,
-            ])->render();
-            Html::stdfoot();
-
-            return (string) ob_get_clean();
-        } catch (\Throwable $e) {
-            while (ob_get_level() > $level) {
-                ob_end_clean();
-            }
-
-            throw $e;
-        }
+            ])->render()
+            .(string) $renderer->footerHtml();
     }
 
     /**
@@ -230,23 +210,10 @@ final class LegacyResponse
         ])->render();
 
         if ($die) {
-            $level = ob_get_level();
-            ob_start();
-            try {
-                if ($stdfoot) {
-                    Html::stdhead();
-                }
-                echo $errorHtml;
-                if ($stdfoot) {
-                    Html::stdfoot();
-                }
-                $html = (string) ob_get_clean();
-            } catch (HttpResponseException $e) {
-                while (ob_get_level() > $level) {
-                    ob_end_clean();
-                }
-                throw $e;
-            }
+            $renderer = app(PageRenderer::class);
+            $html = ($stdfoot ? (string) $renderer->headerHtml() : '')
+                .$errorHtml
+                .($stdfoot ? (string) $renderer->footerHtml() : '');
 
             throw new HttpResponseException(new Response($html));
         }
@@ -309,20 +276,11 @@ final class LegacyResponse
      */
     public static function bark(string $title, string $message): void
     {
-        $level = ob_get_level();
-        ob_start();
-        try {
-            Html::stdhead($title);
-            echo '<h1>'.\htmlspecialchars($title)."</h1>\n";
-            echo '<p>'.\htmlspecialchars($message)."</p>\n";
-            Html::stdfoot();
-            $html = (string) ob_get_clean();
-        } catch (HttpResponseException $e) {
-            while (ob_get_level() > $level) {
-                ob_end_clean();
-            }
-            throw $e;
-        }
+        $renderer = app(PageRenderer::class);
+
+        $html = (string) $renderer->headerHtml($title)
+            .view('partials.bark', ['title' => $title, 'message' => $message])->render()
+            .(string) $renderer->footerHtml();
 
         throw new HttpResponseException(new Response($html));
     }

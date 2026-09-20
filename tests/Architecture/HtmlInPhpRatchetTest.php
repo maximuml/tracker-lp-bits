@@ -53,7 +53,7 @@ final class HtmlInPhpRatchetTest extends TestCase
     private const BASELINE_TABLE_LITERALS = 3;
 
     /** Baseline: ob_start() calls (output buffering = inline page rendering). */
-    private const BASELINE_OB_START = 11;
+    private const BASELINE_OB_START = 5;
 
     /** Baseline: lines with `echo` inside app/Services + app/Http/Controllers. */
     private const BASELINE_ECHO_IN_SERVICES = 6;

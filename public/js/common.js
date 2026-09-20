@@ -720,21 +720,30 @@ function check_avatar(image, langfolder) {
     var tempwidth = tempimage.width;
     var tempheight = tempimage.height;
     if (tempwidth > 250 || tempheight > 250 || displayheight > 250) {
-        image.src = 'pic/forum_pic/' + langfolder + '/avatartoobig.png';
+        var folder = /^[a-z_]+$/i.test(langfolder) ? langfolder : 'en';
+        image.src = 'pic/forum_pic/' + folder + '/avatartoobig.png';
     }
 }
 
 function handleImageError(img, currentSrc) {
-    if (!currentSrc.includes('doubanio.com')) {
+    var url;
+    try {
+        url = new URL(currentSrc);
+    } catch (e) {
         return;
     }
+    var host = url.hostname;
+    if (url.protocol !== 'https:' || (host !== 'doubanio.com' && !host.endsWith('.doubanio.com'))) {
+        return;
+    }
+    var path = url.pathname + url.search;
     var domainList = ['img1.doubanio.com', 'img2.doubanio.com', 'img3.doubanio.com', 'img9.doubanio.com'];
     var index = 0;
     function tryNextDomain() {
         if (index >= domainList.length) {
             return;
         }
-        img.src = currentSrc.replace(/https:\/\/[a-zA-Z0-9.-]+\.doubanio\.com/, 'https://' + domainList[index]);
+        img.src = 'https://' + domainList[index] + path;
         img.onload = function () { img.onload = img.onerror = null; };
         img.onerror = tryNextDomain;
         index++;

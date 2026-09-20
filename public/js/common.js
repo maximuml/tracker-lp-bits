@@ -747,7 +747,7 @@ function handleImageError(img, currentSrc) {
         if (!/^https:\/\/[a-z0-9-]+\.doubanio\.com\//i.test(next)) {
             return;
         }
-        img.src = next;
+        img.src = encodeURI(next);
         img.onload = function () { img.onload = img.onerror = null; };
         img.onerror = tryNextDomain;
         index++;

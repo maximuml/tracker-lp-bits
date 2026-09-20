@@ -156,7 +156,7 @@ final class UsercpHttpTest extends TestCase
             // Confirm-challenge page: re-asks for the current password.
             $this->assertStringContainsString('data-auth-form="challenge"', $html);
             $this->assertStringContainsString('data-password-class="oldpassword"', $html);
-            $this->assertStringContainsString('js/crypto-js.js', $html);
+            $this->assertStringContainsString('js/nx-crypto.js', $html);
             $this->assertStringContainsString('js/auth-form.js', $html);
         } else {
             // Some configs skip the confirm step and save directly.

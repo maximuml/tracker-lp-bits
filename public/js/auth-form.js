@@ -7,8 +7,8 @@
 //   hash      — signup/security forms: validate + copy password into the
 //               hidden hash-name field, then submit.
 //   challenge — usercp security confirm: challenge-response via
-//               /api/challenge (CryptoJS), argon2id users fall back to
-//               plaintext submit over HTTPS.
+//               /api/challenge (nxCrypto = WebCrypto + pure-JS fallback),
+//               argon2id users fall back to plaintext submit over HTTPS.
 //
 // Lookups go through theForm.elements rather than querySelector: legacy
 // rowsHtml emits stray table markup that makes the HTML parser foster-
@@ -116,11 +116,11 @@
                 return;
             }
 
-            const clientHashedPassword = CryptoJS.SHA256(password).toString();
+            const clientHashedPassword = await nxCrypto.sha256(password);
 
-            const serverSideHash = CryptoJS.SHA256(challengeData.data.secret + clientHashedPassword).toString();
+            const serverSideHash = await nxCrypto.sha256(challengeData.data.secret + clientHashedPassword);
 
-            const clientResponse = CryptoJS.HmacSHA256(serverSideHash, challengeData.data.challenge).toString();
+            const clientResponse = await nxCrypto.hmacSha256(serverSideHash, challengeData.data.challenge);
             byName(theForm, 'response').value = clientResponse;
             theForm.submit();
         } catch (error) {

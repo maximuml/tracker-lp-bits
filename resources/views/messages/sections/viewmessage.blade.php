@@ -3,8 +3,8 @@
 
 <table data-nx="data" width={{ $contentWidth }} border="0" cellpadding="4" cellspacing="0">
 <tr>
-<td width="50%" class="colhead" align="left">{{ $viewmessage['from'] }}</td>
-<td width="50%" class="colhead" align="left">{{ __('legacy/messages.col_date') }}</td>
+<th width="50%" class="colhead" align="left" scope="col">{{ $viewmessage['from'] }}</th>
+<th width="50%" class="colhead" align="left" scope="col">{{ __('legacy/messages.col_date') }}</th>
 </tr>
 <tr>
 <td class="rowfollow" align="left">{{ $viewmessage['sender'] ?? '' }}</td>

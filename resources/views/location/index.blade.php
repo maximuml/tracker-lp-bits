@@ -63,19 +63,19 @@
 @endif
 <table data-nx="data" class='main' cellspacing=0 cellpadding=5>
 <tr>
-<td class=colhead align=center><b>ID</b></td>
-<td class=colhead align=left><b>Name</b></td>
-<td class=colhead align=center><b>Pic</b></td>
-<td class=colhead align=center><b><nobr>Main Location</nobr></b></td>
-<td class=colhead align=center><b><nobr>Sub Location</nobr></b></td>
-<td class=colhead align=center><b>Start IP</b></td>
-<td class=colhead align=center><b>End IP</b></td>
-<td class=colhead align=center><b>T.U</b></td>
-<td class=colhead align=center><b>P.U</b></td>
-<td class=colhead align=center><b>T.D</b></td>
-<td class=colhead align=center><b>P.D</b></td>
-<td class=colhead align=center><b>Edit</b></td>
-<td class=colhead align=center><b>Delete</b></td>
+<th class="colhead" align=center scope="col"><b>ID</b></th>
+<th class="colhead" align=left scope="col"><b>Name</b></th>
+<th class="colhead" align=center scope="col"><b>Pic</b></th>
+<th class="colhead" align=center scope="col"><b><nobr>Main Location</nobr></b></th>
+<th class="colhead" align=center scope="col"><b><nobr>Sub Location</nobr></b></th>
+<th class="colhead" align=center scope="col"><b>Start IP</b></th>
+<th class="colhead" align=center scope="col"><b>End IP</b></th>
+<th class="colhead" align=center scope="col"><b>T.U</b></th>
+<th class="colhead" align=center scope="col"><b>P.U</b></th>
+<th class="colhead" align=center scope="col"><b>T.D</b></th>
+<th class="colhead" align=center scope="col"><b>P.D</b></th>
+<th class="colhead" align=center scope="col"><b>Edit</b></th>
+<th class="colhead" align=center scope="col"><b>Delete</b></th>
 </tr>
 @foreach ($rows ?? [] as $row)
 <tr>

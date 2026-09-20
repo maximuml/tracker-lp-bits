@@ -2,18 +2,18 @@
 {{ $results->pagerTop }}
 @endif
 <table border="1" cellspacing="0" cellpadding="5" data-nx="data">
-<tr><td class="colhead" align="left">Name</td>
-    <td class="colhead" align="left">Ratio</td>
-    <td class="colhead" align="left">IP</td>
-    <td class="colhead" align="left">Email</td>
-    <td class="colhead" align="left">Joined:</td>
-    <td class="colhead" align="left">Last seen:</td>
-    <td class="colhead" align="left">Status</td>
-    <td class="colhead" align="left">Enabled</td>
-    <td class="colhead">pR</td>
-    <td class="colhead">pUL</td>
-    <td class="colhead">pDL</td>
-    <td class="colhead">History</td></tr>
+<tr><th class="colhead" align="left" scope="col">Name</th>
+    <th class="colhead" align="left" scope="col">Ratio</th>
+    <th class="colhead" align="left" scope="col">IP</th>
+    <th class="colhead" align="left" scope="col">Email</th>
+    <th class="colhead" align="left" scope="col">Joined:</th>
+    <th class="colhead" align="left" scope="col">Last seen:</th>
+    <th class="colhead" align="left" scope="col">Status</th>
+    <th class="colhead" align="left" scope="col">Enabled</th>
+    <th class="colhead" scope="col">pR</th>
+    <th class="colhead" scope="col">pUL</th>
+    <th class="colhead" scope="col">pDL</th>
+    <th class="colhead" scope="col">History</th></tr>
 @foreach ($results->rows as $row)
 <tr><td>{{ $row->username }}</td>
     <td>@if ($row->ratio->colorClass !== null)<span class="{{ $row->ratio->colorClass }}">{{ $row->ratio->text }}</span>@else{{ $row->ratio->text }}@endif</td>

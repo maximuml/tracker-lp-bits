@@ -25,11 +25,11 @@
 <div>
 <table data-nx="data" border="1" cellspacing="0" cellpadding="5" align="center" width="97%">
 <tr>
-    <td class="colhead">{{ __('legacy/uploaders.col_username')}}</td>
-    <td class="colhead">{{ __('legacy/uploaders.col_torrents_size')}}</td>
-    <td class="colhead">{{ __('legacy/uploaders.col_torrents_num')}}</td>
-    <td class="colhead">{{ __('legacy/uploaders.col_last_upload_time')}}</td>
-    <td class="colhead">{{ __('legacy/uploaders.col_last_upload')}}</td>
+    <th class="colhead" scope="col">{{ __('legacy/uploaders.col_username')}}</th>
+    <th class="colhead" scope="col">{{ __('legacy/uploaders.col_torrents_size')}}</th>
+    <th class="colhead" scope="col">{{ __('legacy/uploaders.col_torrents_num')}}</th>
+    <th class="colhead" scope="col">{{ __('legacy/uploaders.col_last_upload_time')}}</th>
+    <th class="colhead" scope="col">{{ __('legacy/uploaders.col_last_upload')}}</th>
 </tr>
 @foreach ($rows as $row)
 <tr>

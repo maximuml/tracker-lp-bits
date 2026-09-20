@@ -10,7 +10,7 @@
     @foreach ($temp2 as $id => $temp)
 <br />
 <table data-nx="data" border="1" cellspacing="0" cellpadding="5" align="center" width="95%">
-<tr><td class="colhead" align="center" colspan="2">Position</td><td class="colhead" align="left">Section/Item Title</td><td class="colhead" align="center">Language</td><td class="colhead" align="center">Status</td><td class="colhead" align="center">Actions</td></tr>
+<tr><th class="colhead" align="center" colspan="2" scope="colgroup">Position</th><th class="colhead" align="left" scope="col">Section/Item Title</th><th class="colhead" align="center" scope="col">Language</th><th class="colhead" align="center" scope="col">Status</th><th class="colhead" align="center" scope="col">Actions</th></tr>
 <tr><td align="center" width="40px"><select name="order[{{ (int) $id }}]">
     @for ($n = 1; $n <= count($temp2); $n++)
         <option value="{{ $n }}"@if ($n == ($temp['order'] ?? 0)) selected="selected"@endif>{{ $n }}</option>
@@ -33,7 +33,7 @@
 <br />
 <table data-nx="data" border="1" cellspacing="0" cellpadding="5" align="center" width="95%">
 <tr><td align="center" colspan="3"><b>Orphaned Items</b></td></tr>
-<tr><td class="colhead" align="left">Item Title</td><td class="colhead" align="center">Status</td><td class="colhead" align="center">Actions</td></tr>
+<tr><th class="colhead" align="left" scope="col">Item Title</th><th class="colhead" align="center" scope="col">Status</th><th class="colhead" align="center" scope="col">Actions</th></tr>
     @foreach ($faqOrphaned as $lang => $temp2)
         @foreach ($temp2 as $id => $temp)
 <tr><td>{{ $temp['question'] ?? '' }}</td><td align="center" width="60px">@if (($temp['flag'] ?? '') == "0")<span class="nx-color-red">Hidden</span>@elseif (($temp['flag'] ?? '') == "2")<span class="nx-color-blue">Updated</span>@elseif (($temp['flag'] ?? '') == "3")<span class="nx-color-green">New</span>@else Normal @endif</td><td align="center" width="60px"><a href="faqactions.php?action=edit&id={{ (int) $id }}">edit</a> <a href="faqactions.php?action=delete&id={{ (int) $id }}">delete</a></td></tr>

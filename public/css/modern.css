@@ -558,7 +558,7 @@ body {
 table { background-color: var(--nxm-surface); color: var(--nxm-text); }
 table.main, .nx-main, table.mainouter, .nx-mainouter { background-color: var(--nxm-surface); color: var(--nxm-text); }
 td.embedded, .nx-embedded { background-color: var(--nxm-surface); color: var(--nxm-text); }
-td.colhead, .nx-colhead { color: var(--nxm-on-accent); background-color: var(--nxm-accent); }
+.colhead, .nx-colhead { color: var(--nxm-on-accent); background-color: var(--nxm-accent); }
 td.rowhead, td.rowhead_left, td.rowhead_center { color: var(--nxm-text-dim); }
 td.rowfollow, td.colfollow, td.text, td.comment { color: var(--nxm-text); }
 td.navigation { color: var(--nxm-text-dim); }

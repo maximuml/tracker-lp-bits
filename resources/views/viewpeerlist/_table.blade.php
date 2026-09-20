@@ -2,20 +2,20 @@
 @if ($table->count > 0)
 <table data-nx="data" width="100%" class="main" border="1" cellspacing="0" cellpadding="3">
 <tr>
-    <td class="colhead" align="center" width="1%">{{ __('legacy/viewpeerlist.col_user_ip') }}</td>
+    <th class="colhead" align="center" width="1%" scope="col">{{ __('legacy/viewpeerlist.col_user_ip') }}</th>
     @if ($table->showLocationColumn)
-        <td class="colhead" align="center">{{ __('legacy/viewpeerlist.col_location') }}</td>
+        <th class="colhead" align="center" scope="col">{{ __('legacy/viewpeerlist.col_location') }}</th>
     @endif
-    <td class="colhead" align="center" width="1%">{{ __('legacy/viewpeerlist.col_connectable') }}</td>
-    <td class="colhead" align="center" width="1%">{{ __('legacy/viewpeerlist.col_uploaded') }}</td>
-    <td class="colhead" align="center" width="1%">{{ __('legacy/viewpeerlist.col_rate') }}</td>
-    <td class="colhead" align="center" width="1%">{{ __('legacy/viewpeerlist.col_downloaded') }}</td>
-    <td class="colhead" align="center" width="1%">{{ __('legacy/viewpeerlist.col_rate') }}</td>
-    <td class="colhead" align="center" width="1%">{{ __('legacy/viewpeerlist.col_ratio') }}</td>
-    <td class="colhead" align="center" width="1%">{{ __('legacy/viewpeerlist.col_complete') }}</td>
-    <td class="colhead" align="center" width="1%">{{ __('legacy/viewpeerlist.col_connected') }}</td>
-    <td class="colhead" align="center" width="1%">{{ __('legacy/viewpeerlist.col_idle') }}</td>
-    <td class="colhead" align="center" width="1%">{{ __('legacy/viewpeerlist.col_client') }}</td>
+    <th class="colhead" align="center" width="1%" scope="col">{{ __('legacy/viewpeerlist.col_connectable') }}</th>
+    <th class="colhead" align="center" width="1%" scope="col">{{ __('legacy/viewpeerlist.col_uploaded') }}</th>
+    <th class="colhead" align="center" width="1%" scope="col">{{ __('legacy/viewpeerlist.col_rate') }}</th>
+    <th class="colhead" align="center" width="1%" scope="col">{{ __('legacy/viewpeerlist.col_downloaded') }}</th>
+    <th class="colhead" align="center" width="1%" scope="col">{{ __('legacy/viewpeerlist.col_rate') }}</th>
+    <th class="colhead" align="center" width="1%" scope="col">{{ __('legacy/viewpeerlist.col_ratio') }}</th>
+    <th class="colhead" align="center" width="1%" scope="col">{{ __('legacy/viewpeerlist.col_complete') }}</th>
+    <th class="colhead" align="center" width="1%" scope="col">{{ __('legacy/viewpeerlist.col_connected') }}</th>
+    <th class="colhead" align="center" width="1%" scope="col">{{ __('legacy/viewpeerlist.col_idle') }}</th>
+    <th class="colhead" align="center" width="1%" scope="col">{{ __('legacy/viewpeerlist.col_client') }}</th>
 </tr>
 @foreach ($table->rows as $row)
 <tr @if ($row->highlighted) bgcolor="#BBAF9B" @endif>

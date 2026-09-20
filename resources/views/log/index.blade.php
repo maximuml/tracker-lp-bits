@@ -11,7 +11,7 @@
 
 @if ($mode === 'dailylog')
     <table data-nx="data" border=1 cellspacing=0 width=940 cellpadding=5>
-        <tr><td class=colhead align=left>{{ __('legacy/log.text_search_log')}}</td></tr>
+        <tr><th class="colhead" align=left scope="col">{{ __('legacy/log.text_search_log')}}</th></tr>
         <tr><td class=toolbox align=left>
             <form method="get" action="">
                 <input type="text" name="query" value="{{ $q }}">
@@ -30,11 +30,11 @@
         <b>{{ __('legacy/log.text_log_empty') }}</b><br />
     @else
         <table data-nx="data" width=940 border=1 cellspacing=0 cellpadding=5>
-        <tr><td class=colhead align=center><img class="time" src="pic/trans.gif" alt="time" title="{{ __('legacy/log.title_time_added')}}" /></td><td class=colhead align=left>{{ __('legacy/log.col_event')}}
+        <tr><th class="colhead" align=center scope="col"><img class="time" src="pic/trans.gif" alt="time" title="{{ __('legacy/log.title_time_added')}}" /></th><th class="colhead" align=left scope="col">{{ __('legacy/log.col_event')}}</th>
         @if ($canConfidentialLog)
-            <td class=colhead align=left>{{ __('legacy/log.col_user')}}</td>
+            <th class="colhead" align=left scope="col">{{ __('legacy/log.col_user')}}</th>
         @endif
-        </td></tr>
+        </tr>
         @foreach ($logRows as $arr)
             <tr><td class="rowfollow nowrap" align=center>{{ $arr['dateHtml'] ?? '' }}</td><td class=rowfollow align=left><span class="{{ $arr['colorClass'] ?? '' }}">{{ $arr['txt'] ?? '' }}</span></td>
             @if ($canConfidentialLog)
@@ -49,7 +49,7 @@
 
 @elseif ($mode === 'chronicle')
     <table data-nx="data" border=1 cellspacing=0 width=940 cellpadding=5>
-        <tr><td class=colhead align=left>{{ __('legacy/log.text_search_chronicle')}}</td></tr>
+        <tr><th class="colhead" align=left scope="col">{{ __('legacy/log.text_search_chronicle')}}</th></tr>
         <tr><td class=toolbox align=left>
             <form method="get" action="">
                 <input type="text" name="query" value="{{ $q }}">
@@ -59,7 +59,7 @@
     </table><br />
     @if ($canManage)
         <table data-nx="data" border=1 cellspacing=0 width=940 cellpadding=5>
-            <tr><td class=colhead align=left>{{ ! empty($editItem) ? (__('legacy/log.text_edit_chronicle')) : (__('legacy/log.text_add_chronicle')) }}</td></tr>
+            <tr><th class="colhead" align=left scope="col">{{ ! empty($editItem) ? (__('legacy/log.text_edit_chronicle')) : (__('legacy/log.text_add_chronicle')) }}</th></tr>
             <tr><td class=toolbox align=left>
                 <form method="post" action="">
                     <textarea name="txt" rows="3">{{ ! empty($editItem) ? ($editItem['txt'] ?? '') : (__('legacy/log.text_add_chronicle')) }}</textarea>
@@ -76,7 +76,7 @@
         <b>{{ __('legacy/log.text_chronicle_empty') }}</b><br />
     @else
         <table data-nx="data" width=940 border=1 cellspacing=0 cellpadding=5>
-        <tr><td class=colhead align=center>{{ __('legacy/log.col_date')}}</td><td class=colhead align=left>{{ __('legacy/log.col_event')}}</td>@if ($canManage)<td class=colhead align=center>{{ __('legacy/log.col_modify')}}</td>@endif</tr>
+        <tr><th class="colhead" align=center scope="col">{{ __('legacy/log.col_date')}}</th><th class="colhead" align=left scope="col">{{ __('legacy/log.col_event')}}</th>@if ($canManage)<th class="colhead" align=center scope="col">{{ __('legacy/log.col_modify')}}</th>@endif</tr>
         @foreach ($chronicleRows as $arr)
             <tr><td class=rowfollow align=center><nobr>{{ $arr['dateHtml'] ?? '' }}</nobr></td><td class=rowfollow align=left>{{ $arr['bodyHtml'] ?? '' }}</td>@if ($canManage)<td align=center nowrap><b><a href="?action=chronicle&do=edit&id={{ (int) ($arr['id'] ?? 0) }}">{{ __('legacy/log.text_edit')}}</a>&nbsp;|&nbsp;<form method="post" action="?action=chronicle&do=del" class="nx-inline"><input type="hidden" name="id" value="{{ (int) ($arr['id'] ?? 0) }}"><button type="submit" class="nx-btn-link">{{ __('legacy/log.text_delete')}}</button></form></b></td>@endif</tr>
         @endforeach
@@ -87,7 +87,7 @@
 
 @elseif ($mode === 'news')
     <table data-nx="data" border=1 cellspacing=0 width=940 cellpadding=5>
-        <tr><td class=colhead align=left>{{ __('legacy/log.text_search_news')}}</td></tr>
+        <tr><th class="colhead" align=left scope="col">{{ __('legacy/log.text_search_news')}}</th></tr>
         <tr><td class=toolbox align=left>
             <form method="get" action="">
                 <input type="text" name="query" value="{{ $q }}">
@@ -114,7 +114,7 @@
 
 @elseif ($mode === 'poll')
     <table data-nx="data" border=1 cellspacing=0 width=940 cellpadding=5>
-        <tr><td class=colhead align=center>{{ __('legacy/log.text_previous_polls')}}</td></tr>
+        <tr><th class="colhead" align=center scope="col">{{ __('legacy/log.text_previous_polls')}}</th></tr>
     @foreach ($pollData as $item)
         <tr><td align=center>
         <p class=sub>{{ $item['added'] ?? '' }}

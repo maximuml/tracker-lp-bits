@@ -420,10 +420,7 @@ final class SiteChromeViewModel
 
         return [
             $headStyles,
-            [
-                'js/ajaxbasic.js'.$cssUpdateDate,
-                'js/common.js'.$cssUpdateDate,
-            ],
+            [],
             SafeHtml::fromTrustedHtml($addiCode),
             $picFolder,
         ];
@@ -704,25 +701,17 @@ final class SiteChromeViewModel
     private static function footScripts(string $variant): array
     {
         if ($variant === 'auth') {
-            // Standalone auth pages (ADR 0020): CSRF, the delegated auth
-            // bindings and the footer helpers — the legacy UI toolkit
-            // (common.js, the delegated bindings, …) is not used there.
-            return ['js/csrf.js', 'js/auth.js', 'js/nx-zoom.js', 'js/theme-toggle.js'];
+            // Standalone auth pages (ADR 0020): CSRF wiring, the
+            // consolidated toolkit bundle, and the auth bindings.
+            return ['js/csrf.js', 'js/site.js', 'js/auth.js'];
         }
 
-        $scripts = ['js/ajax.js', 'js/nexus.js', 'js/csrf.js', 'js/nx-tooltip.js'];
-        if ($variant !== 'legacy') {
-            $scripts = array_merge($scripts, [
-                'js/ajaxbasic.js',
-                'js/common.js',
-            ]);
-        }
-        $scripts[] = 'js/nx-zoom.js';
-        $scripts[] = 'js/goup.js';
-        $scripts[] = 'js/theme-toggle.js';
-        $scripts[] = 'js/nx-chrome.js';
-
-        return $scripts;
+        // site.js is the consolidated always-on toolkit (ajax, ajaxbasic,
+        // nx-tooltip, nx-zoom, common, goup, theme-toggle, nx-chrome,
+        // nexus) — one footer request instead of nine. csrf.js stays
+        // standalone (layui admin pages load it alone), nx-layer.js stays
+        // head-loaded, and toast.js stays opt-in via AssetAppender.
+        return ['js/csrf.js', 'js/site.js'];
     }
 
     private static function cachedCount(?LegacyRedisCache $cache, string $key, callable $producer, int $ttl): mixed

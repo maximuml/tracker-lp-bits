@@ -300,9 +300,9 @@ class AdminToolsController extends LegacyController
             $ip = (string) (request()->query('ip') ?? '');
         }
 
-        $message = '';
-        $banstable = '';
         $hasResult = false;
+        $isBanned = false;
+        $banRows = [];
 
         if ($ip !== '') {
             $nip = ip2long($ip);
@@ -310,29 +310,22 @@ class AdminToolsController extends LegacyController
                 return $this->legacyAbortResponse('Error', 'Bad IP.');
             }
             $rows = $this->moderationRepository->findMatchingBans((int) $nip);
-            if (empty($rows)) {
-                $message = 'The IP address <b>'.htmlspecialchars($ip).'</b> is not banned.';
-                $hasResult = true;
-            } else {
-                $hasResult = true;
-                $message = 'The IP address <b>'.$ip.'</b> is banned:';
-                $banstable = "<table class=main border=0 cellspacing=0 cellpadding=5>\n".
-                    "<tr><td class=colhead>First</td><td class=colhead>Last</td><td class=colhead>Comment</td></tr>\n";
-                foreach ($rows as $row) {
-                    $arr = (array) $row;
-                    $first = long2ip($arr['first']);
-                    $last = long2ip($arr['last']);
-                    $comment = htmlspecialchars((string) $arr['comment']);
-                    $banstable .= "<tr><td>$first</td><td>$last</td><td>$comment</td></tr>\n";
-                }
-                $banstable .= '</table>\n';
+            $hasResult = true;
+            $isBanned = ! empty($rows);
+            foreach ($rows as $row) {
+                $arr = (array) $row;
+                $banRows[] = [
+                    'first' => long2ip($arr['first']),
+                    'last' => long2ip($arr['last']),
+                    'comment' => (string) $arr['comment'],
+                ];
             }
         }
 
         return $this->legacyPage($request, 'testip', true, [
             'ip' => $ip,
-            'message' => SafeHtml::fromTrustedHtml($message),
-            'banstable' => SafeHtml::fromTrustedHtml($banstable),
+            'isBanned' => $isBanned,
+            'banRows' => $banRows,
             'hasResult' => $hasResult,
         ]);
 

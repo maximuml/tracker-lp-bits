@@ -581,8 +581,9 @@ Decision → Consequences). Add new ADRs here as numbered subsections.
   the migration deletes the four removed theme rows, repoints
   `main.defstylesheet` at Classic and defaults every account to
   `auto`. A `.nxm-theme-toggle` button in the userbar (and in the
-  anonymous nav) cycles auto → light → dark without reload via
-  `public/js/theme-toggle.js` (vanilla JS, no new dependencies):
+  anonymous nav) cycles auto → light → dark without reload via the
+  theme-toggle section of `public/js/site.js` (vanilla JS, no new
+  dependencies):
   `localStorage["nxm-theme"]` stores the choice for anonymous pages,
   and authenticated clicks POST to `/web/usercp/theme` (a
   `LARAVEL_ONLY_PREFIXES` path so `LegacyUrlRewriter` does not

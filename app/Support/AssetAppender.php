@@ -38,6 +38,15 @@ final class AssetAppender
     }
 
     /**
+     * Append raw markup (e.g. a `<template>` consumed by nx-layer) to a
+     * position — unlike js()/css() the string is emitted verbatim.
+     */
+    public static function html(string $html, string $position, ?string $key = null): void
+    {
+        self::appendJsCss($html, $position, $key);
+    }
+
+    /**
      * Get the CSP nonce from the current request, or empty string if unavailable.
      */
     private static function cspNonce(): string

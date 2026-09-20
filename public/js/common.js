@@ -743,7 +743,11 @@ function handleImageError(img, currentSrc) {
         if (index >= domainList.length) {
             return;
         }
-        img.src = 'https://' + domainList[index] + path;
+        var next = 'https://' + domainList[index] + path;
+        if (!/^https:\/\/[a-z0-9-]+\.doubanio\.com\//i.test(next)) {
+            return;
+        }
+        img.src = next;
         img.onload = function () { img.onload = img.onerror = null; };
         img.onerror = tryNextDomain;
         index++;

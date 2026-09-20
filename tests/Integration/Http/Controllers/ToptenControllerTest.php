@@ -59,7 +59,7 @@ final class ToptenControllerTest extends TestCase
         $this->actingAs($user);
 
         $langFolder = (string) app(Globals::class)->get('CURLANGDIR', 'en');
-        Cache::put("topten_1_10__{$langFolder}", [
+        Cache::put("topten_data_1_10__{$langFolder}", [
             'type' => 1,
             'limit' => 10,
             'subtype' => null,

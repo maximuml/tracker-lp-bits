@@ -40,7 +40,7 @@
 @foreach($chrome->headScripts as $src)
 <script type="text/javascript" src="{{ $src }}"></script>
 @endforeach
-<script type="text/javascript" src="vendor/jquery-3.7.1.min.js"></script>
+
 @if($chrome->variant !== 'auth')
 {{-- nx-layer.js is a <dialog>-based window.layer shim; the auth pages
      deliberately do not ship it (auth-form.js uses plain alert()). --}}

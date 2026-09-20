@@ -1,4 +1,4 @@
-{{ \App\Support\PageLayout::headerHtml(
+{{ app(\App\Support\PageRenderer::class)->headerHtml(
     $title ?? $__env->yieldContent('title'),
     $stdheadMsgalert ?? true,
     $stdheadScript ?? '',
@@ -9,4 +9,4 @@
 @yield('content')
 
 </td></tr></table>
-{{ \App\Support\PageLayout::footerHtml() }}
+{{ app(\App\Support\PageRenderer::class)->footerHtml() }}

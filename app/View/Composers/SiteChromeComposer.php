@@ -16,7 +16,7 @@ use Illuminate\View\View;
  * Class-based composer so the repository arrives via container injection
  * instead of service location inside the view model. The page title is read
  * from the already-rendered child's `title` section. Views that already
- * carry a `chrome` variable — `PageLayout` passes the legacy variant
+ * carry a `chrome` variable — `PageRenderer` passes the legacy variant
  * explicitly — are left untouched.
  */
 final class SiteChromeComposer

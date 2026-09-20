@@ -28,6 +28,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\HtmlString;
 
 class TorrentRssController extends LegacyController
 {
@@ -238,29 +239,7 @@ class TorrentRssController extends LegacyController
             return sprintf('%02x', ord($matches[0]));
         };
 
-        $xml = '<?xml version="1.0" encoding="utf-8"?>';
-        $xml .= '<rss version="2.0">';
-        $xml .= '<channel>
-        <title>'.addslashes($siteName.' Torrents').'</title>
-        <link><![CDATA['.$baseUrl.']]></link>
-        <description><![CDATA['.addslashes('Latest torrents from '.$siteName.' - '.htmlspecialchars($slogan)).']]></description>
-        <language>zh-cn</language>
-        <copyright>'.$copyright.'</copyright>
-        <managingEditor>'.$siteEmail.' ('.$siteName.' Admin)</managingEditor>
-        <webMaster>'.$siteEmail.' ('.$siteName.' Webmaster)</webMaster>
-        <pubDate>'.date('r').'</pubDate>
-        <generator>'.$projectName.' RSS Generator</generator>
-        <docs><![CDATA[http://www.rssboard.org/rss-specification]]></docs>
-        <ttl>60</ttl>
-        <image>
-            <url><![CDATA['.$baseUrl.'/pic/rss_logo.jpg]]></url>
-            <title>'.addslashes($siteName.' Torrents').'</title>
-            <link><![CDATA['.$baseUrl.']]></link>
-            <width>100</width>
-            <height>100</height>
-            <description>'.addslashes($siteName.' Torrents').'</description>
-        </image>';
-
+        $items = [];
         foreach ($list as $row) {
             $ownerInfo = UserDisplay::row((int) ($row['owner'] ?? 0));
             $author = 'anonymous';
@@ -291,24 +270,34 @@ class TorrentRssController extends LegacyController
                 $title .= '['.$author.']';
             }
 
-            $content = Format::formatComment((string) ($row['descr'] ?? ''), true, false, false, false);
-
-            $xml .= '<item>
-            <title><![CDATA['.$title.']]></title>
-            <link>'.$itemurl.'</link>
-            <description><![CDATA['.$content.']]></description>
-            <author>'.$author.'@'.$httpHost.' ('.$author.')</author>
-            <category domain="'.$baseUrl.'/torrents.php?cat='.(int) ($row['category'] ?? 0).'">'.($row['category_name'] ?? '').'</category>
-            <comments><![CDATA['.$baseUrl.'/details.php?id='.(int) ($row['id'] ?? 0).'&cmtpage=0#startcomments]]></comments>
-            <enclosure url="'.$itemdlurl.'" length="'.(int) ($row['size'] ?? 0).'" type="application/x-bittorrent" />
-            <guid isPermaLink="false">'.preg_replace_callback('/./s', $hexEsc, Strings::padHash((string) ($row['info_hash'] ?? ''))).'</guid>
-            <pubDate>'.date('r', strtotime((string) ($row['added'] ?? 'now')) ?: time()).'</pubDate>
-        </item>
-';
+            $items[] = [
+                'title' => new HtmlString($title),
+                'url' => $itemurl,
+                'content' => new HtmlString((string) Format::formatComment((string) ($row['descr'] ?? ''), true, false, false, false)),
+                'author' => $author,
+                'categoryId' => (int) ($row['category'] ?? 0),
+                'categoryName' => (string) ($row['category_name'] ?? ''),
+                'commentsUrl' => new HtmlString($baseUrl.'/details.php?id='.(int) ($row['id'] ?? 0).'&cmtpage=0#startcomments'),
+                'downloadUrl' => $itemdlurl,
+                'size' => (int) ($row['size'] ?? 0),
+                'guid' => preg_replace_callback('/./s', $hexEsc, Strings::padHash((string) ($row['info_hash'] ?? ''))),
+                'pubDate' => date('r', strtotime((string) ($row['added'] ?? 'now')) ?: time()),
+            ];
         }
 
-        $xml .= '</channel>
-</rss>';
+        $xml = '<?xml version="1.0" encoding="utf-8"?>'
+            .view('rss.torrents', [
+                'channelTitle' => $siteName.' Torrents',
+                'baseUrl' => new HtmlString($baseUrl),
+                'description' => new HtmlString('Latest torrents from '.$siteName.' - '.htmlspecialchars($slogan)),
+                'copyright' => $copyright,
+                'siteEmail' => $siteEmail,
+                'siteName' => $siteName,
+                'pubDate' => date('r'),
+                'projectName' => $projectName,
+                'httpHost' => $httpHost,
+                'items' => $items,
+            ])->render();
 
         Log::writeWithContext('rss cache generated');
         Cache::put($cacheKey, $xml, 300);

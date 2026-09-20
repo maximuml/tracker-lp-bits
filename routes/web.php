@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\RecoveryController;
 use App\Http\Controllers\Auth\RegistrationController;
 use App\Http\Controllers\Auth\WebController as AuthWebController;
 use App\Http\Controllers\AuthenticateController;
+use App\Http\Controllers\CspReportController;
 use App\Http\Controllers\ForumController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\MetricsController;
@@ -45,6 +46,10 @@ Route::get('/health', [HealthController::class, 'live'])->name('health');
 
 // Prometheus-compatible metrics endpoint (T-23: access-controlled)
 Route::get('/metrics', [MetricsController::class, 'index'])->middleware(['metrics.access', 'throttle:metrics'])->name('metrics');
+
+// CSP violation reports (no CSRF — browser beacon; no auth — may fire
+// before session cookies attach). Throttled to keep flood noise down.
+Route::post('/csp-report', [CspReportController::class, 'store'])->middleware('throttle:60,1')->name('csp-report');
 
 Route::get('/login', [AuthWebController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthWebController::class, 'login'])->middleware('throttle:login');

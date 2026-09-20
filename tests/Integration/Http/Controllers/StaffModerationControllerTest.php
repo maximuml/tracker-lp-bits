@@ -247,7 +247,7 @@ final class StaffModerationControllerTest extends TestCase
 
     /**
      * Bind a partial mock of CurrentUser with a full user array containing
-     * properly typed fields needed by PageLayout::header().
+     * properly typed fields needed by PageRenderer::header().
      */
     private function mockCurrentUserWithDefaults(int $userId, int $class): void
     {

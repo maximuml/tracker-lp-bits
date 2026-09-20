@@ -49,7 +49,11 @@ final class SecurityHeaders
             ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com"
             : "script-src 'self' 'nonce-{$nonce}' https://challenges.cloudflare.com";
 
-        $response->headers->set('Content-Security-Policy', "default-src 'self'; {$scriptSrc}; {$styleSrc}; img-src 'self' data: blob: https:; connect-src 'self' https://challenges.cloudflare.com; font-src 'self' data:; frame-ancestors 'self'; form-action 'self' https://www.paypal.com https://www.alipay.com; base-uri 'self'; object-src 'none';");
+        // Violation reporting: report-uri covers Firefox/legacy agents,
+        // report-to + Reporting-Endpoints covers the Reporting API (Chrome).
+        $reportUri = '/csp-report';
+        $response->headers->set('Reporting-Endpoints', 'csp-endpoint="'.$reportUri.'"');
+        $response->headers->set('Content-Security-Policy', "default-src 'self'; {$scriptSrc}; {$styleSrc}; img-src 'self' data: blob: https:; connect-src 'self' https://challenges.cloudflare.com; font-src 'self' data:; frame-ancestors 'self'; form-action 'self' https://www.paypal.com https://www.alipay.com; base-uri 'self'; object-src 'none'; report-uri {$reportUri}; report-to csp-endpoint;");
 
         if ($request->isSecure()) {
             $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');

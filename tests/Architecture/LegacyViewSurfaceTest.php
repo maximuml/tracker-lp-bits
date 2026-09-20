@@ -98,6 +98,23 @@ final class LegacyViewSurfaceTest extends TestCase
     private const BASELINE_TRUSTED_HTML_ATTR = 0;
 
     /**
+     * Baseline: style="..." attributes in views.
+     * Legacy routes run nonce-strict style-src, so style attributes are
+     * blocked by the browser — use semantic classes in modern.css.
+     * Filament views are exempt: the admin panel policy allows
+     * 'unsafe-inline' for style-src.
+     */
+    private const BASELINE_INLINE_STYLE_ATTR = 0;
+
+    /**
+     * View subdirectories exempt from the style-attribute ratchet.
+     * Paths are relative to resources/views.
+     */
+    private const STYLE_ATTR_EXEMPT_DIRS = [
+        'filament/',
+    ];
+
+    /**
      * Views whose <table> tags are exempt from the layout-table ratchet:
      * semantic data tables (the x-data-table component and similar).
      * Paths are relative to resources/views.
@@ -279,12 +296,35 @@ final class LegacyViewSurfaceTest extends TestCase
         );
     }
 
+    public function test_inline_style_attr_count_does_not_exceed_baseline(): void
+    {
+        $count = $this->countPatternInViews(
+            '/\sstyle\s*=/i',
+            [],
+            self::STYLE_ATTR_EXEMPT_DIRS,
+        );
+
+        $this->assertLessThanOrEqual(
+            self::BASELINE_INLINE_STYLE_ATTR,
+            $count,
+            sprintf(
+                'style="..." attribute count in views increased from baseline %d to %d. '
+               .'Legacy routes run nonce-strict style-src — browsers block inline style '
+               .'attributes there. Use semantic classes in modern.css or nonce\'d <style> '
+               .'blocks instead.',
+                self::BASELINE_INLINE_STYLE_ATTR,
+                $count,
+            ),
+        );
+    }
+
     /**
      * Count lines matching a pattern across all Blade templates.
      *
      * @param  list<string>  $exemptFiles  paths relative to resources/views to skip
+     * @param  list<string>  $exemptDirs  directory prefixes (relative to resources/views) to skip
      */
-    private function countPatternInViews(string $pattern, array $exemptFiles = []): int
+    private function countPatternInViews(string $pattern, array $exemptFiles = [], array $exemptDirs = []): int
     {
         $count = 0;
         $exempt = array_fill_keys($exemptFiles, true);
@@ -300,6 +340,11 @@ final class LegacyViewSurfaceTest extends TestCase
             $relative = substr($file->getPathname(), strlen(self::VIEWS_DIR) + 1);
             if (isset($exempt[$relative])) {
                 continue;
+            }
+            foreach ($exemptDirs as $dir) {
+                if (str_starts_with($relative, $dir)) {
+                    continue 2;
+                }
             }
 
             $content = file_get_contents($file->getPathname());

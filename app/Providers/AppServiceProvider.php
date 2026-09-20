@@ -49,6 +49,7 @@ use App\Support\Locale;
 use App\Support\Metrics\Collectors;
 use App\Support\Metrics\MetricsRegistry;
 use App\Support\Metrics\PrometheusFormatter;
+use App\Support\PageRenderer;
 use App\Support\RequestContext;
 use App\Support\UserUpdateBatch;
 use App\View\Composers\SiteChromeComposer;
@@ -96,6 +97,9 @@ class AppServiceProvider extends ServiceProvider
         // SAPI globals headers_list()/http_response_code()/header_remove()
         // that leak state across Octane worker requests.
         $this->app->singleton(LegacyHeaderBag::class);
+        // Per-request page chrome renderer — carries the layout context
+        // between stdhead()/stdfoot(); flushed by ResetNexus.
+        $this->app->singleton(PageRenderer::class);
         // ADR 0017: request-scoped legacy/tracker flags. bootstrap/app.php
         // binds the entry-seeded instance before providers register; this is
         // only a safety net for contexts that boot the container differently.

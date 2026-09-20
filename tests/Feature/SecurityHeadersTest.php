@@ -44,6 +44,31 @@ final class SecurityHeadersTest extends TestCase
         $this->assertStringNotContainsString('https://fonts.googleapis.com', $csp);
         $this->assertStringNotContainsString('https://cdnjs.cloudflare.com', $csp);
         $this->assertStringContainsString('https://www.paypal.com', $csp);
+        $this->assertStringContainsString('report-uri /csp-report', $csp);
+        $this->assertStringContainsString('report-to csp-endpoint', $csp);
+        $this->assertSame('csp-endpoint="/csp-report"', $response->headers->get('Reporting-Endpoints'));
+    }
+
+    public function test_csp_report_endpoint_accepts_legacy_and_reporting_api_payloads(): void
+    {
+        // Legacy report-uri format — no CSRF token required (browser beacon).
+        $this->postJson('/csp-report', [
+            'csp-report' => [
+                'document-uri' => 'https://example.test/index',
+                'violated-directive' => 'style-src-elem',
+                'blocked-uri' => 'inline',
+            ],
+        ])->assertStatus(204);
+
+        // Reporting API list format (Chrome report-to).
+        $this->postJson('/csp-report', [[
+            'type' => 'csp-violation',
+            'body' => ['blockedURL' => 'inline', 'effectiveDirective' => 'style-src-attr'],
+        ]])->assertStatus(204);
+
+        // Malformed payload is accepted silently — reporting must never error.
+        $this->call('POST', '/csp-report', [], [], [], ['CONTENT_TYPE' => 'application/csp-report'], 'not json')
+            ->assertStatus(204);
     }
 
     /**

@@ -46,6 +46,9 @@ final class HttpContractTest extends TestCase
         'faq.php', 'rules.php', 'staffmessages.php', 'contactstaff.php',
         'news.php', 'topten.php',
         'confirmemail',
+        // CSP violation reports — browser beacon, fires without session
+        // context; CSRF-exempt and throttled, writes only to the log
+        'csp-report',
         // Passkey-auth routes — use passkey, not session/token guard
         'api/pieces-hash',
         // ajax.php — per-action guard inside UtilityController::ajax()

@@ -26,6 +26,7 @@ class VerifyCsrfToken extends Middleware
         self::TG_WEBHOOK_PREFIX.'/*',
         'getusertorrentlistajax',
         'setlist_lookup',
+        'csp-report',
     ];
 
     /**

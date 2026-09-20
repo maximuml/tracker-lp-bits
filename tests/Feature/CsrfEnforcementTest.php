@@ -67,10 +67,10 @@ final class CsrfEnforcementTest extends TestCase
 
     public function test_csrf_meta_tag_in_page_layout_header(): void
     {
-        // PageLayout::header() renders the shared chrome partial which
+        // PageRenderer::header() renders the shared chrome partial which
         // includes the csrf-token meta tag for all pages.
         $source = file_get_contents(resource_path('views/layouts/partials/head-assets.blade.php'));
-        $this->assertStringContainsString('csrf-token', $source, 'PageLayout head-assets partial must include csrf-token meta tag');
+        $this->assertStringContainsString('csrf-token', $source, 'PageRenderer head-assets partial must include csrf-token meta tag');
     }
 
     public function test_csrf_js_included_in_page_layout_footer(): void

@@ -250,10 +250,7 @@ class UtilityController extends LegacyController
                 return;
             }
 
-            while (! feof($f)) {
-                echo fread($f, 4096);
-            }
-
+            fpassthru($f);
             fclose($f);
         }, 200, [
             'Content-Type' => 'application/octet-stream',

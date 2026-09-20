@@ -66,7 +66,7 @@ final class ForumServiceTest extends TestCase
 
     /**
      * Call the service while suppressing E_NOTICE/E_WARNING from the
-     * legacy rendering system (PageLayout, Html::stdhead) that is
+     * legacy rendering system (PageRenderer, Html::stdhead) that is
      * triggered by LegacyResponse::abort()/permissionDenied().
      */
     private function callService(Request $request): mixed
@@ -86,7 +86,7 @@ final class ForumServiceTest extends TestCase
      * Assert that calling the service with $request triggers an abort/guard.
      *
      * LegacyResponse::abort()/permissionDenied() throws HttpResponseException,
-     * but the legacy rendering (Html::stdhead → PageLayout) may also throw
+     * but the legacy rendering (Html::stdhead → PageRenderer) may also throw
      * TypeError or ErrorException when language/user data is incomplete in
      * the test environment. Any Throwable from the guard path indicates the
      * abort was triggered — which is what we're verifying.

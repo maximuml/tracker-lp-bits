@@ -173,7 +173,7 @@ final class Time
     public static function formatAbsoluteTime(string $time, bool $twoline): string
     {
         if ($twoline) {
-            return str_replace(' ', '<br />', $time);
+            return str_replace(' ', '<br /> ', $time);
         }
 
         return $time;
@@ -211,7 +211,7 @@ final class Time
         $newtime = $elapsed.($withago ? $textAgo : '');
 
         if ($twoline) {
-            $newtime = str_replace('&nbsp;', '<br />', $newtime);
+            $newtime = str_replace('&nbsp;', '<br /> ', $newtime);
         } elseif ($oneunit) {
             // Legacy quirk preserved: original used `if ($length = strpos(...))`
             // which is falsy when the separator is at offset 0 OR absent.

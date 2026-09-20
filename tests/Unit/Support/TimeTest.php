@@ -259,8 +259,8 @@ class TimeTest extends TestCase
     {
         // Legacy `str_replace(" ", "<br />", ...)` is global — every
         // space is replaced, not just the date/time separator.
-        $this->assertSame('2026-05-18<br />04:00:00', Time::formatAbsoluteTime('2026-05-18 04:00:00', true));
-        $this->assertSame('a<br />b<br />c', Time::formatAbsoluteTime('a b c', true));
+        $this->assertSame('2026-05-18<br /> 04:00:00', Time::formatAbsoluteTime('2026-05-18 04:00:00', true));
+        $this->assertSame('a<br /> b<br /> c', Time::formatAbsoluteTime('a b c', true));
     }
 
     public function test_format_absolute_time_empty_string_round_trips(): void
@@ -312,7 +312,7 @@ class TimeTest extends TestCase
             textSpace: ' ',
             textAgo: ' ago',
         );
-        $this->assertSame('<span title="T">2hour<br />30min ago</span>', $result);
+        $this->assertSame('<span title="T">2hour<br /> 30min ago</span>', $result);
     }
 
     public function test_format_elapsed_oneunit_truncates_at_first_nbsp(): void
@@ -364,7 +364,7 @@ class TimeTest extends TestCase
             textSpace: ' ',
             textAgo: ' ago',
         );
-        $this->assertSame('<span title="T">2hour<br />30min</span>', $result);
+        $this->assertSame('<span title="T">2hour<br /> 30min</span>', $result);
     }
 
     public function test_format_elapsed_uses_text_space_substitution(): void

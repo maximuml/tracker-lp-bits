@@ -79,6 +79,20 @@ test.describe('mobile viewport', () => {
     expect(height, `collapsed header ${height}px`).toBeLessThanOrEqual(844 * 0.25);
   });
 
+  test('torrents listing renders as cards at 390px', async ({ page }) => {
+    await page.goto('/torrents.php', { waitUntil: 'networkidle' });
+    const row = page.locator('table.nx-torrents tbody tr').first();
+    if (await row.count() === 0) {
+      test.skip(true, 'no torrents seeded');
+    }
+    const display = await row.evaluate((el) => getComputedStyle(el).display);
+    expect(display).toBe('flex');
+    // Card stays inside the viewport and meta labels are rendered.
+    const width = await row.evaluate((el) => el.getBoundingClientRect().width);
+    expect(width).toBeLessThanOrEqual(390);
+    await expect(row.locator('.nxm-td-name a').first()).toBeVisible();
+  });
+
   test('burger hidden on desktop viewport', async ({ browser }) => {
     const ctx = await browser.newContext({
       viewport: { width: 1280, height: 900 },

@@ -2,9 +2,9 @@ import { expect, test } from '@playwright/test';
 import { AUTH_STATE, BROWSER_TID } from '../fixtures/auth';
 
 /**
- * 390×844 viewport — modern-layout pages must not scroll horizontally.
- * Legacy-layout pages are exempt: their fixed-width tables are
- * stage-4 mobile work, tracked separately.
+ * 390×844 viewport — pages must not scroll horizontally. Covers both the
+ * modern chrome and representative legacy-layout pages (swept clean in
+ * stage 4.2; data-nx tables become scrollers/cards via modern.css).
  */
 const MODERN_PAGES = [
   '/index.php',
@@ -14,13 +14,22 @@ const MODERN_PAGES = [
   '/usercp.php',
 ];
 
+const LEGACY_PAGES = [
+  '/messages.php',
+  '/mybonus.php',
+  '/topten.php',
+  '/staffpanel.php',
+  '/settings.php',
+  '/userdetails.php?id=1',
+];
+
 test.describe('mobile viewport', () => {
   test.use({
     viewport: { width: 390, height: 844 },
     storageState: AUTH_STATE,
   });
 
-  for (const path of MODERN_PAGES) {
+  for (const path of [...MODERN_PAGES, ...LEGACY_PAGES]) {
     test(`${path} has no horizontal scroll`, async ({ page }) => {
       await page.goto(path, { waitUntil: 'networkidle' });
       const overflow = await page.evaluate(

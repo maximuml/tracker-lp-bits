@@ -52,10 +52,11 @@ final class CsrfEnforcementTest extends TestCase
         $this->assertStringContainsString('X-CSRF-TOKEN', $content);
     }
 
-    public function test_ajaxbasic_js_sends_csrf_header_on_post(): void
+    public function test_site_bundle_sends_csrf_header_on_post(): void
     {
-        $content = file_get_contents(public_path('js/ajaxbasic.js'));
-        $this->assertStringContainsString('X-CSRF-TOKEN', $content, 'ajaxbasic.js must send X-CSRF-TOKEN header on POST requests');
+        // ajaxbasic.js was merged into the consolidated site.js bundle.
+        $content = file_get_contents(public_path('js/site.js'));
+        $this->assertStringContainsString('X-CSRF-TOKEN', $content, 'site.js (ajaxbasic section) must send X-CSRF-TOKEN header on POST requests');
     }
 
     public function test_shoutbox_js_sends_csrf_header_on_xhr_fallback(): void

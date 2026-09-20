@@ -664,6 +664,9 @@ html[data-theme="dark"] .nxm-main :is(.colhead, .nx-colhead, .nx-pagination__lin
 html[data-theme="dark"] .nxm-footer :is(.colhead, .nx-colhead, .nx-pagination__link--current) :is(a:link, a:visited) { color: var(--nxm-on-accent); }
 /* Alert banners keep white links on their coloured backgrounds. */
 html[data-theme="dark"] .nxm-alert :is(a:link, a:visited) { color: #fff; }
+/* Footer links sit inside muted text — accent vs dim text is only ~1:1,
+   so underline is the distinguishing affordance (WCAG link-in-text-block). */
+html[data-theme="dark"] .nxm-footer :is(a:link, a:visited) { text-decoration: underline; }
 @media (prefers-color-scheme: dark) {
     html:not([data-theme]) .nxm-main :is(a:link, a:visited),
     html:not([data-theme]) .nxm-footer :is(a:link, a:visited),
@@ -675,6 +678,8 @@ html[data-theme="dark"] .nxm-alert :is(a:link, a:visited) { color: #fff; }
     html[data-theme="auto"] .nxm-footer :is(.colhead, .nx-colhead, .nx-pagination__link--current) :is(a:link, a:visited) { color: var(--nxm-on-accent); }
     html:not([data-theme]) .nxm-alert :is(a:link, a:visited),
     html[data-theme="auto"] .nxm-alert :is(a:link, a:visited) { color: #fff; }
+    html:not([data-theme]) .nxm-footer :is(a:link, a:visited),
+    html[data-theme="auto"] .nxm-footer :is(a:link, a:visited) { text-decoration: underline; }
 }
 a.altlink:link, a.altlink:visited,
 a.altlink_blue:link, a.altlink_blue:visited,

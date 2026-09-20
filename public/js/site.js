@@ -1,3 +1,318 @@
+/* site.js — consolidated always-on toolkit (no build step).
+   Sections in dependency order: ajax, ajaxbasic, nx-tooltip, nx-zoom,
+   common, goup, theme-toggle, nx-chrome, nexus.
+   nx-layer.js stays standalone (head-loaded for non-auth chrome);
+   csrf.js and toast.js stay standalone too: layui admin pages load
+   csrf.js alone and toast.js is appended only where TOAST_LANG is set. */
+
+/* ===== ajax.js ===== */
+/**
+ * Native AJAX helper functions (replaces jQuery.ajax / jQuery.post).
+ *
+ * Provides a simple promise-based API for POST requests that
+ * automatically includes the CSRF token.
+ */
+window.nativePost = function (url, data, callback) {
+    var formData = new FormData();
+    for (var key in data) {
+        if (data.hasOwnProperty(key)) {
+            if (typeof data[key] === 'object' && data[key] !== null) {
+                for (var subKey in data[key]) {
+                    if (data[key].hasOwnProperty(subKey)) {
+                        formData.append(key + '[' + subKey + ']', data[key][subKey]);
+                    }
+                }
+            } else {
+                formData.append(key, data[key]);
+            }
+        }
+    }
+    fetch(url, {
+        method: 'POST',
+        body: formData,
+        credentials: 'same-origin',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    }).then(function (res) { return res.json(); }).then(function (response) {
+        if (callback) callback(response);
+    }).catch(function () {
+        if (callback) callback({ ret: 1, msg: 'Request failed' });
+    });
+};
+
+/**
+ * Serialize a form element's data into a plain object.
+ * (replaces jQuery(form).serialize())
+ */
+window.serializeForm = function (form) {
+    var data = {};
+    var elements = form.querySelectorAll('input, select, textarea');
+    for (var i = 0; i < elements.length; i++) {
+        var el = elements[i];
+        if (!el.name) continue;
+        if (el.type === 'checkbox' && !el.checked) continue;
+        if (el.type === 'radio' && !el.checked) continue;
+        data[el.name] = el.value;
+    }
+    return data;
+};
+
+/* ===== ajaxbasic.js ===== */
+function $(e){if(typeof e=='string')e=document.getElementById(e);return e};
+function collect(a,f){var n=[];for(var i=0;i<a.length;i++){var v=f(a[i]);if(v!=null)n.push(v)}return n};
+
+ajax={};
+ajax.csrfToken=function(){var m=document.querySelector('meta[name="csrf-token"]');return m?m.getAttribute('content'):''};
+ajax.x=function(){try{return new ActiveXObject('Msxml2.XMLHTTP')}catch(e){try{return new ActiveXObject('Microsoft.XMLHTTP')}catch(e){return new XMLHttpRequest()}}};
+ajax.serialize=function(f){var g=function(n){return f.getElementsByTagName(n)};var nv=function(e){if(e.name)return encodeURIComponent(e.name)+'='+encodeURIComponent(e.value);else return ''};var i=collect(g('input'),function(i){if((i.type!='radio'&&i.type!='checkbox')||i.checked)return nv(i)});var s=collect(g('select'),nv);var t=collect(g('textarea'),nv);return i.concat(s).concat(t).join('&');};
+ajax.send=function(u,f,m,a){var x=ajax.x();x.open(m,u,true);x.onreadystatechange=function(){if(x.readyState==4)f(x.responseText)};if(m=='POST'){x.setRequestHeader('Content-type','application/x-www-form-urlencoded');var t=ajax.csrfToken();if(t)x.setRequestHeader('X-CSRF-TOKEN',t)}x.send(a)};
+ajax.get=function(url,func){ajax.send(url,func,'GET')};
+ajax.gets=function(url){var x=ajax.x();x.open('GET',url,false);x.send(null);return x.responseText};
+ajax.post=function(url,func,args){ajax.send(url,func,'POST',args)};
+ajax.posts=function(url,args){var x=ajax.x(); x.open('POST',url,false); x.setRequestHeader('Content-type','application/x-www-form-urlencoded');var t=ajax.csrfToken();if(t)x.setRequestHeader('X-CSRF-TOKEN',t); x.send(args); return x.responseText};
+ajax.update=function(url,elm){var e=$(elm);var f=function(r){e.innerHTML=r};ajax.get(url,f)};
+ajax.submit=function(url,elm,frm){var e=$(elm);var f=function(r){e.innerHTML=r};ajax.post(url,f,ajax.serialize(frm))};
+
+/* ===== nx-tooltip.js ===== */
+/**
+ * Delegated hover tooltips for data-domtt-* markup — replaces
+ * domTT/domLib/domTT_drag/fadomatic (~57 KB of 2005-era code) with a
+ * single positioned div. All content arrives as DOM nodes cloned into
+ * the popup — no HTML strings are ever re-parsed:
+ *   data-domtt-content  bare flag; body is a <template class="nx-tt">
+ *                       child or next-sibling (smiley pickers)
+ *   data-domtt-src="id" clone of an on-page hidden preview container
+ *   data-domtt-promo    bare flag, inline <template>, delayed + auto-hide
+ */
+(function () {
+    var tip = null, timer = null, hideTimer = null, current = null;
+
+    function hide() {
+        if (timer) { clearTimeout(timer); timer = null; }
+        if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
+        if (tip) { tip.remove(); tip = null; }
+        current = null;
+    }
+
+    function place(el) {
+        var r = el.getBoundingClientRect();
+        var x = r.left + window.scrollX;
+        var y = r.bottom + window.scrollY + 6;
+        var maxX = window.scrollX + document.documentElement.clientWidth - tip.offsetWidth - 4;
+        tip.style.left = Math.max(window.scrollX + 4, Math.min(x, maxX)) + 'px';
+        tip.style.top = y + 'px';
+    }
+
+    function inlineContent(el) {
+        var t = el.querySelector(':scope > template.nx-tt');
+        if (!t) {
+            var next = el.nextElementSibling;
+            t = next && next.tagName === 'TEMPLATE' ? next : null;
+        }
+        return t ? t.content : null;
+    }
+
+    function show(el, content, maxWidth, delay, lifetime) {
+        if (el === current || !content) { return; }
+        hide();
+        current = el;
+        timer = setTimeout(function () {
+            tip = document.createElement('div');
+            tip.className = 'nx-tt-pop';
+            tip.style.maxWidth = maxWidth + 'px';
+            tip.appendChild(content.cloneNode(true));
+            document.body.appendChild(tip);
+            place(el);
+            if (lifetime > 0) {
+                hideTimer = setTimeout(hide, lifetime);
+            }
+        }, delay);
+    }
+
+    var SELECTOR = '[data-domtt-content],[data-domtt-src],[data-domtt-promo]';
+
+    document.addEventListener('mouseover', function (e) {
+        var el = e.target && e.target.closest ? e.target.closest(SELECTOR) : null;
+        if (!el) { return; }
+        if (el.hasAttribute('data-domtt-src')) {
+            var src = document.getElementById(el.getAttribute('data-domtt-src'));
+            if (src) { show(el, src, 400, 500, 3000); }
+            return;
+        }
+        if (el.hasAttribute('data-domtt-promo')) {
+            show(el, inlineContent(el), 300, 500, 3000);
+            return;
+        }
+        show(el, inlineContent(el), 400, 0, 10000);
+    });
+
+    document.addEventListener('mouseout', function (e) {
+        if (!current || !e.target || !e.target.closest) { return; }
+        if (e.target.closest(SELECTOR) !== current) { return; }
+        var into = e.relatedTarget;
+        if (into && (current.contains(into) || (tip && tip.contains(into)))) { return; }
+        hide();
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') { hide(); }
+    });
+})();
+
+/* ===== nx-zoom.js ===== */
+/**
+ * CSP-safe image lightbox — replacement for vendored medium-zoom.
+ *
+ * medium-zoom cannot run under the nonce-strict `style-src` policy: it
+ * injects a <style> block at load and writes `el.style.*`/`cssText` at
+ * runtime, all of which are blocked. This implementation uses class
+ * toggles for static styling and the Web Animations API for the zoom
+ * transform — neither is governed by style-src.
+ *
+ * Usage: any <img data-zoomable> (optionally with data-zoom-src for a
+ * full-size variant) zooms on click; overlay click, image click, Escape
+ * or scroll closes it.
+ */
+(function () {
+    'use strict';
+
+    var MARGIN = 24;
+    var DURATION = 280;
+    var EASING = 'cubic-bezier(.2,0,.2,1)';
+
+    var overlay = null;
+    var activeImg = null;
+    var clone = null;
+    var animation = null;
+
+    function isOpen() {
+        return overlay !== null;
+    }
+
+    function open(img) {
+        if (isOpen()) {
+            close();
+            return;
+        }
+        var rect = img.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) {
+            return;
+        }
+
+        var vw = window.innerWidth;
+        var vh = window.innerHeight;
+        var scale = Math.min((vw - MARGIN * 2) / rect.width, (vh - MARGIN * 2) / rect.height);
+        var targetLeft = (vw - rect.width * scale) / 2;
+        var targetTop = (vh - rect.height * scale) / 2;
+
+        overlay = document.createElement('div');
+        overlay.className = 'nxz-overlay';
+        document.body.appendChild(overlay);
+        overlay.addEventListener('click', close);
+
+        activeImg = img;
+        var zoomSrc = img.getAttribute('data-zoom-src');
+        var fromTransform;
+        var toTransform;
+        var mover = img;
+        var zoomUrl = null;
+        if (zoomSrc) {
+            try {
+                var parsed = new URL(zoomSrc, window.location.href);
+                if (parsed.protocol === 'https:' || parsed.protocol === 'http:') {
+                    zoomUrl = parsed.href;
+                }
+            } catch (e) {
+                zoomUrl = null;
+            }
+        }
+        if (zoomUrl !== null && zoomUrl !== img.src) {
+            clone = img.cloneNode(false);
+            clone.removeAttribute('id');
+            clone.removeAttribute('data-zoomable');
+            clone.className = 'nxz-clone';
+            clone.src = zoomUrl;
+            clone.width = Math.round(rect.width);
+            clone.height = Math.round(rect.height);
+            img.classList.add('nxz-source-hidden');
+            document.body.appendChild(clone);
+            clone.addEventListener('click', close);
+            // The clone is fixed at (0,0) — animate it from the thumb's
+            // rect to the centered target rect.
+            mover = clone;
+            fromTransform = 'translate(' + rect.left + 'px, ' + rect.top + 'px) scale(1)';
+            toTransform = 'translate(' + targetLeft + 'px, ' + targetTop + 'px) scale(' + scale + ')';
+        } else {
+            var dx = targetLeft - rect.left;
+            var dy = targetTop - rect.top;
+            fromTransform = 'translate(0px, 0px) scale(1)';
+            toTransform = 'translate(' + dx + 'px, ' + dy + 'px) scale(' + scale + ')';
+        }
+        img.classList.add('nxz-zoomed');
+
+        animation = mover.animate(
+            [{ transform: fromTransform }, { transform: toTransform }],
+            { duration: DURATION, easing: EASING, fill: 'forwards' },
+        );
+
+        requestAnimationFrame(function () {
+            overlay.classList.add('nxz-overlay--open');
+        });
+        document.addEventListener('keydown', onKeydown, true);
+        window.addEventListener('scroll', close, { once: true, capture: true });
+    }
+
+    function close() {
+        if (!isOpen()) {
+            return;
+        }
+        document.removeEventListener('keydown', onKeydown, true);
+        var done = function () {
+            if (overlay !== null) {
+                overlay.remove();
+                overlay = null;
+            }
+            if (activeImg !== null) {
+                activeImg.classList.remove('nxz-zoomed', 'nxz-source-hidden');
+                activeImg = null;
+            }
+            if (clone !== null) {
+                clone.remove();
+                clone = null;
+            }
+            animation = null;
+        };
+        overlay.classList.remove('nxz-overlay--open');
+        if (animation !== null) {
+            animation.reverse();
+            animation.onfinish = done;
+            return;
+        }
+        setTimeout(done, DURATION);
+    }
+
+    function onKeydown(e) {
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            close();
+        }
+    }
+
+    document.addEventListener('click', function (e) {
+        var img = e.target.closest('img[data-zoomable]');
+        if (img === null) {
+            return;
+        }
+        e.preventDefault();
+        e.stopPropagation();
+        if (img === activeImg) {
+            close();
+        } else {
+            open(img);
+        }
+    }, true);
+})();
+
+/* ===== common.js ===== */
 function postvalid(form){
 	$('qr').disabled = true;
 	return true;
@@ -781,3 +1096,356 @@ document.addEventListener('error', function (e) {
         }
     }
 }, true);
+
+/* ===== goup.js ===== */
+/**
+ * Native scroll-to-top button (replaces jquery-goup plugin).
+ *
+ * Shows a floating button when the user scrolls down, clicking it
+ * smoothly scrolls back to the top of the page.
+ */
+(function () {
+    'use strict';
+
+    var button = document.createElement('div');
+    button.id = 'goup-btn';
+    button.setAttribute('role', 'button');
+    button.setAttribute('aria-label', 'Scroll to top');
+    button.setAttribute('tabindex', '0');
+    Object.assign(button.style, {
+        position: 'fixed',
+        bottom: '20px',
+        right: '20px',
+        width: '40px',
+        height: '40px',
+        borderRadius: '50%',
+        background: 'rgba(0, 0, 0, 0.5)',
+        color: '#fff',
+        cursor: 'pointer',
+        display: 'none',
+        zIndex: '9999',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '20px',
+        lineHeight: '40px',
+        textAlign: 'center',
+        transition: 'opacity 0.3s'
+    });
+    button.innerHTML = '&uarr;';
+    document.body.appendChild(button);
+
+    function toggleVisibility() {
+        if (window.pageYOffset > 200) {
+            button.style.display = 'flex';
+        } else {
+            button.style.display = 'none';
+        }
+    }
+
+    window.addEventListener('scroll', toggleVisibility, { passive: true });
+    toggleVisibility();
+
+    button.addEventListener('click', function () {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    button.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    });
+})();
+
+/* ===== theme-toggle.js ===== */
+/**
+ * Theme toggle (ADR 0019): cycles auto → light → dark on the
+ * .nxm-theme-toggle button. Logged-in users persist via POST
+ * /web/usercp/theme; anonymous users persist via localStorage only.
+ */
+(function () {
+    var ORDER = ['auto', 'light', 'dark'];
+    var LABELS = {auto: 'Auto', light: 'Light', dark: 'Dark'};
+    var KEY = 'nxm-theme';
+    var root = document.documentElement;
+
+    function currentTheme() {
+        var t = root.getAttribute('data-theme') || 'auto';
+        return ORDER.indexOf(t) >= 0 ? t : 'auto';
+    }
+
+    function applyTheme(theme) {
+        root.setAttribute('data-theme', theme);
+    }
+
+    function storedTheme() {
+        try {
+            return localStorage.getItem(KEY);
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function storeTheme(theme) {
+        try {
+            localStorage.setItem(KEY, theme);
+        } catch (e) {
+            /* storage unavailable — ignore */
+        }
+    }
+
+    var buttons = document.querySelectorAll('.nxm-theme-toggle');
+    var persistUrl = '';
+    for (var i = 0; i < buttons.length; i++) {
+        var u = buttons[i].getAttribute('data-persist-url');
+        if (u) {
+            persistUrl = u;
+            break;
+        }
+    }
+
+    // Anonymous pages render data-theme="auto" server-side; honour a
+    // previously stored choice there. Logged-in pages already render the
+    // user's saved theme — server value wins.
+    if (!persistUrl) {
+        var saved = storedTheme();
+        if (saved && ORDER.indexOf(saved) >= 0) {
+            applyTheme(saved);
+        }
+    }
+
+    function paint(button) {
+        var label = 'Theme: ' + LABELS[currentTheme()];
+        if (button.hasAttribute('data-persist-url') || !persistUrl) {
+            button.textContent = '[' + label + ']';
+        } else {
+            button.textContent = '[Theme]';
+        }
+        button.setAttribute('title', label);
+    }
+
+    function paintAll() {
+        for (var i = 0; i < buttons.length; i++) {
+            paint(buttons[i]);
+        }
+    }
+
+    for (var j = 0; j < buttons.length; j++) {
+        buttons[j].addEventListener('click', function () {
+            var next = ORDER[(ORDER.indexOf(currentTheme()) + 1) % ORDER.length];
+            applyTheme(next);
+            storeTheme(next);
+            paintAll();
+            if (persistUrl) {
+                var meta = document.querySelector('meta[name="csrf-token"]');
+                fetch(persistUrl, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRF-TOKEN': meta ? meta.content : '',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    },
+                    body: 'theme=' + encodeURIComponent(next)
+                });
+            }
+        });
+    }
+
+    paintAll();
+})();
+
+/* ===== nx-chrome.js ===== */
+/**
+ * Mobile chrome toggle (Stage 4.2): the burger button shows/hides the
+ * combined nav+userbar container at narrow widths. Progressive
+ * enhancement — without JS the container never receives the
+ * nxm-collapse--ready class, so the menu stays fully expanded.
+ */
+(function () {
+    var btn = document.querySelector('.nxm-burger');
+    var panel = btn && document.getElementById(btn.getAttribute('aria-controls'));
+    if (!btn || !panel) {
+        return;
+    }
+
+    panel.classList.add('nxm-collapse--ready');
+
+    function setOpen(open) {
+        panel.classList.toggle('nxm-open', open);
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+
+    btn.addEventListener('click', function () {
+        setOpen(!panel.classList.contains('nxm-open'));
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && panel.classList.contains('nxm-open')) {
+            setOpen(false);
+            btn.focus();
+        }
+    });
+})();
+
+/* ===== nexus.js ===== */
+/**
+ * Image preview + lazy-load (native JS, no jQuery).
+ */
+document.addEventListener('DOMContentLoaded', function () {
+    function getImgPosition(e, imgEle) {
+        let imgWidth = imgEle.naturalWidth;
+        let imgHeight = imgEle.naturalHeight;
+        let ratio = imgWidth / imgHeight;
+        let offsetX = 10;
+        let offsetY = 10;
+        let width = window.innerWidth - e.clientX;
+        let height = window.innerHeight - e.clientY;
+        let changeOffsetY = 0;
+        let changeOffsetX = false;
+        if (e.clientX > window.innerWidth / 2 && e.clientX + imgWidth > window.innerWidth) {
+            changeOffsetX = true;
+            width = e.clientX;
+        }
+        if (e.clientY > window.innerHeight / 2) {
+            if (e.clientY + imgHeight / 2 > window.innerHeight) {
+                changeOffsetY = 1;
+                height = e.clientY;
+            } else if (e.clientY + imgHeight > window.innerHeight) {
+                changeOffsetY = 2;
+                height = e.clientY;
+            }
+        }
+        if (imgWidth > width) {
+            imgWidth = width;
+            imgHeight = imgWidth / ratio;
+        }
+        if (imgHeight > height) {
+            imgHeight = height;
+            imgWidth = imgHeight * ratio;
+        }
+        if (changeOffsetX) {
+            offsetX = -(e.clientX - width + 10);
+        }
+        if (changeOffsetY === 1) {
+            offsetY = -(imgHeight - (window.innerHeight - e.clientY));
+        } else if (changeOffsetY === 2) {
+            offsetY = -imgHeight / 2;
+        }
+        return { imgWidth, imgHeight, offsetX, offsetY };
+    }
+
+    function getPosition(e, position) {
+        if (!position) {
+            return {};
+        }
+        return {
+            left: e.pageX + position.offsetX,
+            top: e.pageY + position.offsetY,
+            width: position.imgWidth,
+            height: position.imgHeight
+        };
+    }
+
+    let previewEle = document.getElementById('nexus-preview');
+    let imgEle = null;
+    let imgPosition = null;
+    let selector = 'img.preview';
+
+    document.body.addEventListener('mouseover', function (e) {
+        let target = e.target;
+        if (!target || !target.matches || !target.matches(selector)) return;
+        imgEle = target;
+        imgPosition = getImgPosition(e, imgEle);
+        let position = getPosition(e, imgPosition);
+        let src = imgEle.getAttribute('src');
+        if (src && previewEle) {
+            previewEle.setAttribute('src', src);
+            Object.assign(previewEle.style, {
+                display: 'block',
+                left: position.left + 'px',
+                top: position.top + 'px',
+                width: position.width + 'px',
+                height: position.height + 'px'
+            });
+            previewEle.style.opacity = '1';
+        }
+    });
+
+    document.body.addEventListener('mouseout', function (e) {
+        let target = e.target;
+        if (!target || !target.matches || !target.matches(selector)) return;
+        if (previewEle) {
+            previewEle.style.display = 'none';
+        }
+    });
+
+    document.body.addEventListener('mousemove', function (e) {
+        let target = e.target;
+        if (!target || !target.matches || !target.matches(selector)) return;
+        if (previewEle && imgPosition) {
+            let position = getPosition(e, imgPosition);
+            Object.assign(previewEle.style, {
+                left: position.left + 'px',
+                top: position.top + 'px'
+            });
+        }
+    });
+
+    // lazy load
+    if ("IntersectionObserver" in window) {
+        const fallbackImage = 'pic/misc/spinner.svg';
+        const domainList = ['img1.doubanio.com', 'img2.doubanio.com', 'img3.doubanio.com', 'img9.doubanio.com'];
+        const imgList = [...document.querySelectorAll('.nexus-lazy-load')];
+        const loadedImages = {};
+        const io = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                const el = entry.target;
+                const intersectionRatio = entry.intersectionRatio;
+                if (intersectionRatio > 0 && intersectionRatio <= 1 && !el.classList.contains('preview')) {
+                    let src = el.dataset.src;
+                    if (src) {
+                        try {
+                            const u = new URL(src, location.href);
+                            if ((u.hostname === 'doubanio.com' || u.hostname.endsWith('.doubanio.com')) && u.pathname.includes('l_ratio_poster')) {
+                                u.pathname = u.pathname.replace('l_ratio_poster', 's_ratio_poster');
+                                src = u.href;
+                                el.dataset.src = src;
+                            }
+                        } catch (e) { /* keep src as-is */ }
+                    }
+                    el.src = src;
+                    el.classList.add('preview');
+                    loadedImages[src] = true;
+                    el.onload = el.onerror = () => io.unobserve(el);
+                    el.onerror = () => handleImageError(el, src);
+                }
+            });
+        });
+        imgList.forEach(img => io.observe(img));
+        function handleImageError(img, currentSrc) {
+            let url = null;
+            try { url = new URL(currentSrc); } catch (e) { /* not a URL */ }
+            if (!url || url.protocol !== 'https:' || !(url.hostname === 'doubanio.com' || url.hostname.endsWith('.doubanio.com'))) {
+                img.src = fallbackImage;
+            } else {
+                tryNextDomain(img, url, 0);
+            }
+        }
+        function tryNextDomain(img, url, index = 0) {
+            if (index >= domainList.length) {
+                img.src = fallbackImage;
+                return;
+            }
+            const next = `https://${domainList[index]}${url.pathname}${url.search}`;
+            if (!/^https:\/\/[a-z0-9-]+\.doubanio\.com\//i.test(next)) {
+                img.src = fallbackImage;
+                return;
+            }
+            img.src = encodeURI(next);
+            img.onerror = () => tryNextDomain(img, url, index + 1);
+        }
+    }
+});
+

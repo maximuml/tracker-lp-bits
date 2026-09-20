@@ -291,8 +291,8 @@ final class FriendsControllerTest extends TestCase
     /**
      * Create a real user in the DB and bind a partial mock of CurrentUser
      * with a full user array containing properly typed fields needed by
-     * PageLayout::header(). The real DB user is needed because
-     * PageLayout::header() queries MessageRepository which does
+     * PageRenderer::header(). The real DB user is needed because
+     * PageRenderer::header() queries MessageRepository which does
      * User::findOrFail($userId). Returns the created user's id.
      */
     private function mockCurrentUserWithDefaults(int $class = 1): int

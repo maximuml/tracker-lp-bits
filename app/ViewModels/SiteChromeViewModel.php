@@ -40,7 +40,7 @@ use App\Utils\MsgAlert;
  *
  * Variant A (ADR 0014) gave `layouts/modern` a semantic HTML5 shell; ADR 0018
  * reuses the same partials for legacy pages rendered through
- * `PageLayout::headerHtml()`/`footerHtml()`. This view model gathers every
+ * `PageRenderer::headerHtml()`/`footerHtml()`. This view model gathers every
  * field both variants need — user bar, nav, global search, staff icons,
  * message alerts, offline banner and footer stats — as plain data;
  * markup lives in the partials. `variant` selects the chrome flavour
@@ -434,7 +434,7 @@ final class SiteChromeViewModel
      * Header message alerts as plain records; the partial renders each
      * one as an `.nxm-alert` banner for both chrome variants. Mirrors the
      * promotion/warning/staff alert block that used to live in
-     * PageLayout::renderHeader().
+     * PageRenderer::renderHeader().
      *
      * @return list<array{url: string, text: SafeHtml, color: string}>
      */

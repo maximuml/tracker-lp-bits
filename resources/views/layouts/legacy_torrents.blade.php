@@ -1,3 +1,3 @@
-{{ \App\Support\PageLayout::headerHtml($__env->yieldContent('title')) }}
+{{ app(\App\Support\PageRenderer::class)->headerHtml($__env->yieldContent('title')) }}
 @yield('content')
-{{ \App\Support\PageLayout::footerHtml() }}
+{{ app(\App\Support\PageRenderer::class)->footerHtml() }}

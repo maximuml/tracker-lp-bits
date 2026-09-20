@@ -17,7 +17,7 @@ use Tests\Attributes\TestCategory;
  * bug class). Helpers returning `SafeHtml`/`HtmlString` are exempt by
  * design: `e()` calls `toHtml()` on Htmlable instead of escaping, which
  * is exactly why `UserDisplay::username()`,
- * `Format::formatComment()`, `Comment::format()`, `PageLayout::*Html()`,
+ * `Format::formatComment()`, `Comment::format()`, `PageRenderer::*Html()`,
  * `Ratio::*`, `UserClass::*` and
  * `Smilies::link()` are legitimate inside `{{ }}` today.
  *

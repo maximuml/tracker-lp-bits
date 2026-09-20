@@ -60,8 +60,8 @@ final class LegacyResponse
         if (! $die) {
             if ($head) {
                 Html::stdhead();
-            } elseif ($foot && PageLayout::getContext() === null) {
-                // Ensure a PageLayout context exists for stdfoot() even when the
+            } elseif ($foot && app(PageRenderer::class)->hasContext() === false) {
+                // Ensure a page-layout context exists for stdfoot() even when the
                 // caller requested no header (e.g. permission denied before stdhead).
                 ob_start();
                 Html::stdhead();
@@ -85,8 +85,8 @@ final class LegacyResponse
         try {
             if ($head) {
                 Html::stdhead();
-            } elseif ($foot && PageLayout::getContext() === null) {
-                // Ensure a PageLayout context exists for stdfoot() even when the
+            } elseif ($foot && app(PageRenderer::class)->hasContext() === false) {
+                // Ensure a page-layout context exists for stdfoot() even when the
                 // caller requested no header (e.g. permission denied before stdhead).
                 ob_start();
                 Html::stdhead();

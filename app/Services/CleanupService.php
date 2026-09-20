@@ -15,6 +15,7 @@ use App\Support\Time;
 use App\Support\UserDisplay;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\HtmlString;
 
 /**
  * Cleanup orchestrator. Replaces the monolithic `docleanup()` with discrete,
@@ -94,18 +95,11 @@ final class CleanupService
 
         $tend = Time::microtimeFloat();
 
-        $html = '<html><head><title>Do Clean-up</title></head><body>';
-        $html .= '<p>clean-up in progress...please wait<br />';
-        if (! $forceAll) {
-            $html .= 'If you need to force a complete cleaning, click <a href="docleanup.php?forceall=1">here</a><br />';
-        }
-        $html .= '</p>';
-        $html .= nl2br(htmlspecialchars((string) $progress, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'), false);
-        $html .= sprintf('<p>Time consumed：%f sec<br /></p>', $tend - $tstart);
-        $html .= 'Done<br />';
-        $html .= '</body></html>';
-
-        return $html;
+        return view('system.cleanup-progress', [
+            'forceAll' => $forceAll,
+            'progress' => new HtmlString(nl2br(htmlspecialchars((string) $progress, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'), false)),
+            'elapsed' => sprintf('%f', $tend - $tstart),
+        ])->render();
     }
 
     /**

@@ -218,16 +218,16 @@ final class Html
         ])->render();
     }
 
-    // ── Layout (delegates to PageLayout) ────────────────────────────
+    // ── Layout (delegates to PageRenderer) ──────────────────────────
 
     /**
      * Render the page header. Backs the legacy `stdhead()` helper.
      */
     public static function stdhead(string $title = '', bool $msgalert = true, string $script = '', string $place = ''): void
     {
-        $context = PageLayoutContext::fromSupportContext();
-        PageLayout::setContext($context);
-        PageLayout::header($title, $msgalert, $script, $place);
+        $renderer = app(PageRenderer::class);
+        $renderer->setContext(PageLayoutContext::fromSupportContext());
+        $renderer->header($title, $msgalert, $script, $place);
     }
 
     /**
@@ -235,7 +235,7 @@ final class Html
      */
     public static function stdfoot(): void
     {
-        PageLayout::footer();
+        app(PageRenderer::class)->footer();
     }
 
     /**

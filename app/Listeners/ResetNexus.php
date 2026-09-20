@@ -9,7 +9,7 @@ use App\Support\AssetAppender;
 use App\Support\CurrentUser;
 use App\Support\LegacyHeaderBag;
 use App\Support\LegacyRuntime;
-use App\Support\PageLayout;
+use App\Support\PageRenderer;
 use App\Support\Permissions;
 use App\Support\RequestContext;
 use App\Support\Settings;
@@ -42,7 +42,7 @@ class ResetNexus
         $this->app->forgetInstance(ActorContext::class);
         RequestContext::flush();
         AssetAppender::flush();
-        PageLayout::resetState();
+        $this->app->forgetInstance(PageRenderer::class);
         Permissions::resetState();
         MsgAlert::resetState();
         UserDisplay::resetState();

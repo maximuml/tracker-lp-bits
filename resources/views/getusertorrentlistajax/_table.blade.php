@@ -1,16 +1,16 @@
 {{-- Per-user torrent history table (getusertorrentlistajax). Replaces the
      concatenated markup of TorrentAjaxController::torrentListTable(). --}}
-<table data-nx="data" border="1" cellspacing="0" cellpadding="5" width="100%"><tr><td class="colhead">{{ __('legacy/getusertorrentlistajax.col_type') }}</td><td class="colhead" align="center">{{ __('legacy/getusertorrentlistajax.col_name') }}</td><td class="colhead" align="center">{{ __('legacy/getusertorrentlistajax.col_added') }}</td>@if ($userTorrentListVm->showSize)<td class="colhead" align="center"><img class="size" src="pic/trans.gif" alt="size" title="{{ __('legacy/getusertorrentlistajax.title_size') }}" /></td>@endif
-@if ($userTorrentListVm->showSeeders)<td class="colhead" align="center"><img class="seeders" src="pic/trans.gif" alt="seeders" title="{{ __('legacy/getusertorrentlistajax.title_seeders') }}" /></td>@endif
-@if ($userTorrentListVm->showLeechers)<td class="colhead" align="center"><img class="leechers" src="pic/trans.gif" alt="leechers" title="{{ __('legacy/getusertorrentlistajax.title_leechers') }}" /></td>@endif
-@if ($userTorrentListVm->showUploaded)<td class="colhead" align="center">{{ __('legacy/getusertorrentlistajax.col_uploaded') }}</td>@endif
-@if ($userTorrentListVm->showDownloaded)<td class="colhead" align="center">{{ __('legacy/getusertorrentlistajax.col_downloaded') }}</td>@endif
-@if ($userTorrentListVm->showRatio)<td class="colhead" align="center">{{ __('legacy/getusertorrentlistajax.col_ratio') }}</td>@endif
-@if ($userTorrentListVm->showSeedTime)<td class="colhead" align="center">{{ __('legacy/getusertorrentlistajax.col_se_time') }}</td>@endif
-@if ($userTorrentListVm->showLeechTime)<td class="colhead" align="center">{{ __('legacy/getusertorrentlistajax.col_le_time') }}</td>@endif
-@if ($userTorrentListVm->showCompletedAt)<td class="colhead" align="center">{{ __('legacy/getusertorrentlistajax.col_time_completed') }}</td>@endif
-@if ($userTorrentListVm->showAnonymous)<td class="colhead" align="center">{{ __('legacy/getusertorrentlistajax.col_anonymous') }}</td>@endif
-@if ($userTorrentListVm->showClient)<td class="colhead" align="center">{{ __('legacy/getusertorrentlistajax.col_client') }}</td><td class="colhead" align="center">IP</td>@endif
+<table data-nx="data" border="1" cellspacing="0" cellpadding="5" width="100%"><tr><th class="colhead" scope="col">{{ __('legacy/getusertorrentlistajax.col_type') }}</th><th class="colhead" align="center" scope="col">{{ __('legacy/getusertorrentlistajax.col_name') }}</th><th class="colhead" align="center" scope="col">{{ __('legacy/getusertorrentlistajax.col_added') }}</th>@if ($userTorrentListVm->showSize)<th class="colhead" align="center" scope="col"><img class="size" src="pic/trans.gif" alt="size" title="{{ __('legacy/getusertorrentlistajax.title_size') }}" /></th>@endif
+@if ($userTorrentListVm->showSeeders)<th class="colhead" align="center" scope="col"><img class="seeders" src="pic/trans.gif" alt="seeders" title="{{ __('legacy/getusertorrentlistajax.title_seeders') }}" /></th>@endif
+@if ($userTorrentListVm->showLeechers)<th class="colhead" align="center" scope="col"><img class="leechers" src="pic/trans.gif" alt="leechers" title="{{ __('legacy/getusertorrentlistajax.title_leechers') }}" /></th>@endif
+@if ($userTorrentListVm->showUploaded)<th class="colhead" align="center" scope="col">{{ __('legacy/getusertorrentlistajax.col_uploaded') }}</th>@endif
+@if ($userTorrentListVm->showDownloaded)<th class="colhead" align="center" scope="col">{{ __('legacy/getusertorrentlistajax.col_downloaded') }}</th>@endif
+@if ($userTorrentListVm->showRatio)<th class="colhead" align="center" scope="col">{{ __('legacy/getusertorrentlistajax.col_ratio') }}</th>@endif
+@if ($userTorrentListVm->showSeedTime)<th class="colhead" align="center" scope="col">{{ __('legacy/getusertorrentlistajax.col_se_time') }}</th>@endif
+@if ($userTorrentListVm->showLeechTime)<th class="colhead" align="center" scope="col">{{ __('legacy/getusertorrentlistajax.col_le_time') }}</th>@endif
+@if ($userTorrentListVm->showCompletedAt)<th class="colhead" align="center" scope="col">{{ __('legacy/getusertorrentlistajax.col_time_completed') }}</th>@endif
+@if ($userTorrentListVm->showAnonymous)<th class="colhead" align="center" scope="col">{{ __('legacy/getusertorrentlistajax.col_anonymous') }}</th>@endif
+@if ($userTorrentListVm->showClient)<th class="colhead" align="center" scope="col">{{ __('legacy/getusertorrentlistajax.col_client') }}</th><th class="colhead" align="center" scope="col">IP</th>@endif
 </tr>
 @foreach ($userTorrentListVm->rows as $row)
 <tr @if ($row->rowClass !== null) class="{{ $row->rowClass }}" @endif><td class="rowfollow nowrap" valign="middle"><x-torrent.category-icon :icon="$row->categoryIcon" /></td>

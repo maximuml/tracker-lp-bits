@@ -180,7 +180,7 @@ td.comment
 	padding-top: 10pt;
 	text-align: left
 }
-td.colhead, .nx-colhead
+.colhead, .nx-colhead
 {
 	white-space:nowrap;
 	font-weight: bold;
@@ -212,7 +212,7 @@ td.colfollow
 {
 text-align: center;
 }
-table.torrents td.colhead
+table.torrents .colhead
 {
 text-align: center;
 }

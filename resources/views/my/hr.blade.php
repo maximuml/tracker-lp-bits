@@ -12,16 +12,16 @@
 </form>
 <table data-nx="data" width='100%' id='hr-table'>
 <tr>
-    <td class='colhead' align='center'>{{ __('legacy/myhr.th_hr_id')}}</td>
-    <td class='colhead' align='center'>{{ __('legacy/myhr.th_torrent_name')}}</td>
-    <td class='colhead' align='center'>{{ __('legacy/myhr.th_uploaded')}}</td>
-    <td class='colhead' align='center'>{{ __('legacy/myhr.th_downloaded')}}</td>
-    <td class='colhead' align='center'>{{ __('legacy/myhr.th_share_ratio')}}</td>
-    <td class='colhead' align='center'>{{ __('legacy/myhr.th_seed_time_required')}}</td>
-    <td class='colhead' align='center'>{{ __('legacy/myhr.th_completed_at')}}</td>
-    <td class='colhead' align='center'>{{ __('legacy/myhr.th_ttl')}}</td>
-    <td class='colhead' align='center'>{{ __('legacy/myhr.th_comment')}}</td>
-    <td class='colhead' align='center'>{{ __('legacy/functions.std_action')}}</td>
+    <th class="colhead" align="center" scope="col">{{ __('legacy/myhr.th_hr_id')}}</th>
+    <th class="colhead" align="center" scope="col">{{ __('legacy/myhr.th_torrent_name')}}</th>
+    <th class="colhead" align="center" scope="col">{{ __('legacy/myhr.th_uploaded')}}</th>
+    <th class="colhead" align="center" scope="col">{{ __('legacy/myhr.th_downloaded')}}</th>
+    <th class="colhead" align="center" scope="col">{{ __('legacy/myhr.th_share_ratio')}}</th>
+    <th class="colhead" align="center" scope="col">{{ __('legacy/myhr.th_seed_time_required')}}</th>
+    <th class="colhead" align="center" scope="col">{{ __('legacy/myhr.th_completed_at')}}</th>
+    <th class="colhead" align="center" scope="col">{{ __('legacy/myhr.th_ttl')}}</th>
+    <th class="colhead" align="center" scope="col">{{ __('legacy/myhr.th_comment')}}</th>
+    <th class="colhead" align="center" scope="col">{{ __('legacy/functions.std_action')}}</th>
 </tr>
 @if (! empty($rescount))
     @foreach ($list as $row)

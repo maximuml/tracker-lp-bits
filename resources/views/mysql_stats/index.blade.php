@@ -18,8 +18,8 @@
         <div class="nx-row">
                     <table data-nx="data" id="torrenttable" border="0">
                         <tr>
-                            <th colspan="2" bgcolor="lightgrey">&nbsp;Traffic&nbsp;</th>
-                            <th bgcolor="lightgrey">&nbsp;&nbsp;Per Hour&nbsp;</th>
+                            <th colspan="2" bgcolor="lightgrey" scope="colgroup">&nbsp;Traffic&nbsp;</th>
+                            <th bgcolor="lightgrey" scope="col">&nbsp;&nbsp;Per Hour&nbsp;</th>
                         </tr>
                         <tr>
                             <td bgcolor="#EFF3FF">&nbsp;Received&nbsp;</td>
@@ -39,9 +39,9 @@
                     </table>
                     <table data-nx="data" id="torrenttable" border="0">
                         <tr>
-                            <th colspan="2" bgcolor="lightgrey">&nbsp;Connections&nbsp;</th>
-                            <th bgcolor="lightgrey">&nbsp;&oslash;&nbsp;Per Hour&nbsp;</th>
-                            <th bgcolor="lightgrey">&nbsp;%&nbsp;</th>
+                            <th colspan="2" bgcolor="lightgrey" scope="colgroup">&nbsp;Connections&nbsp;</th>
+                            <th bgcolor="lightgrey" scope="col">&nbsp;&oslash;&nbsp;Per Hour&nbsp;</th>
+                            <th bgcolor="lightgrey" scope="col">&nbsp;%&nbsp;</th>
                         </tr>
                         <tr>
                             <td bgcolor="#EFF3FF">&nbsp;Failed Attempts&nbsp;</td>
@@ -71,10 +71,10 @@
                     <br />
                     <table data-nx="data" id="torrenttable" border="0" align="right">
                         <tr>
-                            <th bgcolor="lightgrey">&nbsp;Total&nbsp;</th>
-                            <th bgcolor="lightgrey">&nbsp;&oslash;&nbsp;Per&nbsp;Hour&nbsp;</th>
-                            <th bgcolor="lightgrey">&nbsp;&oslash;&nbsp;Per&nbsp;Minute&nbsp;</th>
-                            <th bgcolor="lightgrey">&nbsp;&oslash;&nbsp;Per&nbsp;Second&nbsp;</th>
+                            <th bgcolor="lightgrey" scope="col">&nbsp;Total&nbsp;</th>
+                            <th bgcolor="lightgrey" scope="col">&nbsp;&oslash;&nbsp;Per&nbsp;Hour&nbsp;</th>
+                            <th bgcolor="lightgrey" scope="col">&nbsp;&oslash;&nbsp;Per&nbsp;Minute&nbsp;</th>
+                            <th bgcolor="lightgrey" scope="col">&nbsp;&oslash;&nbsp;Per&nbsp;Second&nbsp;</th>
                         </tr>
                         <tr>
                             <td bgcolor="#EFF3FF" align="right">&nbsp;{{ $questionsTotal }}&nbsp;</td>
@@ -87,9 +87,9 @@
 @foreach ($queryStatColumns as $column)
                     <table data-nx="data" id="torrenttable" border="0">
                         <tr>
-                            <th colspan="2" bgcolor="lightgrey">&nbsp;Query&nbsp;Type&nbsp;</th>
-                            <th bgcolor="lightgrey">&nbsp;&oslash;&nbsp;Per&nbsp;Hour&nbsp;</th>
-                            <th bgcolor="lightgrey">&nbsp;%&nbsp;</th>
+                            <th colspan="2" bgcolor="lightgrey" scope="colgroup">&nbsp;Query&nbsp;Type&nbsp;</th>
+                            <th bgcolor="lightgrey" scope="col">&nbsp;&oslash;&nbsp;Per&nbsp;Hour&nbsp;</th>
+                            <th bgcolor="lightgrey" scope="col">&nbsp;%&nbsp;</th>
                         </tr>
 @foreach ($column as $row)
                         <tr>
@@ -112,8 +112,8 @@
 @foreach ($statusColumns as $column)
                     <table data-nx="data" id="torrenttable" border="0">
                         <tr>
-                            <th bgcolor="lightgrey">&nbsp;Variable&nbsp;</th>
-                            <th bgcolor="lightgrey">&nbsp;Value&nbsp;</th>
+                            <th bgcolor="lightgrey" scope="col">&nbsp;Variable&nbsp;</th>
+                            <th bgcolor="lightgrey" scope="col">&nbsp;Value&nbsp;</th>
                         </tr>
 @foreach ($column as $row)
                         <tr>

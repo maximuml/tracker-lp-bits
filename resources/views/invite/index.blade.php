@@ -63,23 +63,23 @@
             <tr><td colspan=7 align=center>{{ __('legacy/invite.text_no_invites')}}</tr>
         @else
             <tr>
-            <td class=colhead><b>{{ __('legacy/invite.text_username')}}</b></td>
-            <td class=colhead><b>{{ __('legacy/invite.text_email')}}</b></td>
-            <td class=colhead><b>{{ __('legacy/invite.text_enabled')}}</b></td>
-            <td class=colhead><b>{{ __('legacy/invite.text_uploaded_count')}}</b></td>
-            <td class=colhead><b>{{ __('legacy/invite.text_uploaded')}}</b></td>
-            <td class=colhead><b>{{ __('legacy/invite.text_downloaded')}}</b></td>
-            <td class=colhead><b>{{ __('legacy/invite.text_ratio')}}</b></td>
-            <td class=colhead><b>{{ __('legacy/invite.text_seed_torrent_count')}}</b></td>
-            <td class=colhead><b>{{ __('legacy/invite.text_seed_torrent_size')}}</b></td>
-            <td class=colhead title="{{ __('legacy/invite.text_seed_torrent_bonus_per_hour_help')}}"><b>{{ __('legacy/invite.text_seed_torrent_bonus_per_hour')}}</b></td>
+            <th class="colhead" scope="col"><b>{{ __('legacy/invite.text_username')}}</b></th>
+            <th class="colhead" scope="col"><b>{{ __('legacy/invite.text_email')}}</b></th>
+            <th class="colhead" scope="col"><b>{{ __('legacy/invite.text_enabled')}}</b></th>
+            <th class="colhead" scope="col"><b>{{ __('legacy/invite.text_uploaded_count')}}</b></th>
+            <th class="colhead" scope="col"><b>{{ __('legacy/invite.text_uploaded')}}</b></th>
+            <th class="colhead" scope="col"><b>{{ __('legacy/invite.text_downloaded')}}</b></th>
+            <th class="colhead" scope="col"><b>{{ __('legacy/invite.text_ratio')}}</b></th>
+            <th class="colhead" scope="col"><b>{{ __('legacy/invite.text_seed_torrent_count')}}</b></th>
+            <th class="colhead" scope="col"><b>{{ __('legacy/invite.text_seed_torrent_size')}}</b></th>
+            <th class="colhead" title="{{ __('legacy/invite.text_seed_torrent_bonus_per_hour_help')}}" scope="col"><b>{{ __('legacy/invite.text_seed_torrent_bonus_per_hour')}}</b></th>
             @if ($haremAdditionFactor > 0)
-                <td class="colhead">{{ __('legacy/invite.harem_addition')}}</td>
+                <th class="colhead" scope="col">{{ __('legacy/invite.harem_addition')}}</th>
             @endif
-            <td class=colhead><b>{{ __('legacy/invite.text_seed_torrent_last_announce_at')}}</b></td>
-            <td class=colhead><b>{{ __('legacy/invite.text_status')}}</b></td>
+            <th class="colhead" scope="col"><b>{{ __('legacy/invite.text_seed_torrent_last_announce_at')}}</b></th>
+            <th class="colhead" scope="col"><b>{{ __('legacy/invite.text_status')}}</b></th>
             @if ($canConfirm)
-                <td class=colhead><b>{{ __('legacy/invite.text_confirm')}}</b></td>
+                <th class="colhead" scope="col"><b>{{ __('legacy/invite.text_confirm')}}</b></th>
             @endif
             </tr>
             @foreach ($inviteeRows as $arr)
@@ -124,14 +124,14 @@
         @if (! $sentTmpCount)
             <tr align=center><td colspan=6>{{ __('legacy/functions.text_none')}}</tr>
         @else
-            <tr><td class=colhead>{{ __('legacy/invite.text_email')}}</td><td class=colhead>{{ __('legacy/invite.text_hash')}}</td><td class=colhead>{{ __('legacy/invite.text_send_date')}}</td>
+            <tr><th class="colhead" scope="col">{{ __('legacy/invite.text_email')}}</th><th class="colhead" scope="col">{{ __('legacy/invite.text_hash')}}</th><th class="colhead" scope="col">{{ __('legacy/invite.text_send_date')}}</th>
             @if ($menuSelected == 'sent')
-                <td class='colhead'>{{ __('legacy/invite.text_hash_status')}}</td>
+                <th class="colhead" scope="col">{{ __('legacy/invite.text_hash_status')}}</th>
             @endif
-            <td class='colhead'>{{ __('legacy/invite.text_invitee_user')}}</td>
+            <th class="colhead" scope="col">{{ __('legacy/invite.text_invitee_user')}}</th>
             @if ($menuSelected == 'tmp')
-                <td class='colhead'>{{ __('legacy/invite.text_expired_at')}}</td>
-                <td class='colhead'>{{ \App\Support\Locale::trans('label.created_at', [], null) }}</td>
+                <th class="colhead" scope="col">{{ __('legacy/invite.text_expired_at')}}</th>
+                <th class="colhead" scope="col">{{ \App\Support\Locale::trans('label.created_at', [], null) }}</th>
             @endif
             </tr>
             @foreach ($sentTmpRows as $arr1)

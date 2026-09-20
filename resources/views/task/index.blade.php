@@ -8,16 +8,16 @@
 <table data-nx="data" border="1" cellspacing="0" cellpadding="5" width="100%">
 <thead>
 <tr>
-    <td class="colhead">{{ $columnNameLabel }}</td>
-    <td class="colhead">{{ $columnIndexLabel }}</td>
-    <td class="colhead">{{ $columnBeginTimeLabel }}</td>
-    <td class="colhead">{{ $columnEndTimeLabel }}</td>
-    <td class="colhead">{{ $columnTargetUserLabel }}</td>
-    <td class="colhead">{{ $columnSuccessRewardLabel }}</td>
-    <td class="colhead">{{ $columnFailDeductLabel }}</td>
-    <td class="colhead">{{ $columnClaimedUserCountLabel }}</td>
-    <td class="colhead">{{ $columnDescLabel }}</td>
-    <td class="colhead">{{ $columnClaimLabel }}</td>
+    <th class="colhead" scope="col">{{ $columnNameLabel }}</th>
+    <th class="colhead" scope="col">{{ $columnIndexLabel }}</th>
+    <th class="colhead" scope="col">{{ $columnBeginTimeLabel }}</th>
+    <th class="colhead" scope="col">{{ $columnEndTimeLabel }}</th>
+    <th class="colhead" scope="col">{{ $columnTargetUserLabel }}</th>
+    <th class="colhead" scope="col">{{ $columnSuccessRewardLabel }}</th>
+    <th class="colhead" scope="col">{{ $columnFailDeductLabel }}</th>
+    <th class="colhead" scope="col">{{ $columnClaimedUserCountLabel }}</th>
+    <th class="colhead" scope="col">{{ $columnDescLabel }}</th>
+    <th class="colhead" scope="col">{{ $columnClaimLabel }}</th>
 </tr>
 </thead>
 <tbody>

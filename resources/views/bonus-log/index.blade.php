@@ -30,12 +30,12 @@
 
 <table data-nx="data" id='bonus-log-table' width='100%' cellpadding='5'>
 <tr>
-    <td class='colhead' align='left'>{{ $columnBusinessTypeLabel }}</td>
-    <td class='colhead' align='left'>{{ $columnOldTotalLabel }}</td>
-    <td class='colhead' align='left'>{{ $columnValueLabel }}</td>
-    <td class='colhead' align='left'>{{ $columnNewTotalLabel }}</td>
-    <td class='colhead' align='left'>{{ $columnCommentLabel }}</td>
-    <td class='colhead' align='left'>{{ $columnCreatedAtLabel }}</td>
+    <th class="colhead" align='left' scope="col">{{ $columnBusinessTypeLabel }}</th>
+    <th class="colhead" align='left' scope="col">{{ $columnOldTotalLabel }}</th>
+    <th class="colhead" align='left' scope="col">{{ $columnValueLabel }}</th>
+    <th class="colhead" align='left' scope="col">{{ $columnNewTotalLabel }}</th>
+    <th class="colhead" align='left' scope="col">{{ $columnCommentLabel }}</th>
+    <th class="colhead" align='left' scope="col">{{ $columnCreatedAtLabel }}</th>
 </tr>
 @foreach ($rows as $row)
 <tr>

@@ -9,9 +9,9 @@
             @if (! empty($pendingRows))
                 <table data-nx="data" width="100%">
                 <tr>
-                    <td class="colhead">{{ __('legacy/complains.th_complain_at') ?? 'Added' }}</td>
-                    <td class="colhead">{{ __('legacy/complains.th_complain_account') ?? 'Account' }}</td>
-                    <td class="colhead">{{ __('legacy/complains.th_action_view') ?? 'View' }}</td>
+                    <th class="colhead" scope="col">{{ __('legacy/complains.th_complain_at') ?? 'Added' }}</th>
+                    <th class="colhead" scope="col">{{ __('legacy/complains.th_complain_account') ?? 'Account' }}</th>
+                    <th class="colhead" scope="col">{{ __('legacy/complains.th_action_view') ?? 'View' }}</th>
                 </tr>
                 @foreach ($pendingRows as $row)
                     <tr>
@@ -32,9 +32,9 @@
             {{ $pagertop ?? '' }}
             <table data-nx="data" width="100%">
             <tr>
-                <td class="colhead">{{ __('legacy/complains.th_complain_at') ?? 'Added' }}</td>
-                <td class="colhead">{{ __('legacy/complains.th_complain_account') ?? 'Account' }}</td>
-                <td class="colhead">{{ __('legacy/complains.th_action_view') ?? 'View' }}</td>
+                <th class="colhead" scope="col">{{ __('legacy/complains.th_complain_at') ?? 'Added' }}</th>
+                <th class="colhead" scope="col">{{ __('legacy/complains.th_complain_account') ?? 'Account' }}</th>
+                <th class="colhead" scope="col">{{ __('legacy/complains.th_action_view') ?? 'View' }}</th>
             </tr>
             @foreach ($processedRows as $row)
                 <tr>

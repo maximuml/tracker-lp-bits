@@ -16,16 +16,16 @@
 <table data-nx="data" border="1" cellspacing="0" cellpadding="5" width="100%">
 <thead>
 <tr>
-    <td class="colhead">ID</td>
-    <td class="colhead">{{ $columnImageLargeLabel }}</td>
-    <td class="colhead">{{ $columnDescriptionLabel }}</td>
-    <td class="colhead">{{ $columnSaleBeginEndTimeLabel }}</td>
-    <td class="colhead">{{ $columnDurationLabel }}</td>
-    <td class="colhead">{{ $columnBonusAdditionLabel }}</td>
-    <td class="colhead">{{ $columnPriceLabel }}</td>
-    <td class="colhead">{{ $columnInventoryLabel }}</td>
-    <td class="colhead">{{ $columnBuyLabel }}</td>
-    <td class="colhead">{{ $columnGiftLabel }}</td>
+    <th class="colhead" scope="col">ID</th>
+    <th class="colhead" scope="col">{{ $columnImageLargeLabel }}</th>
+    <th class="colhead" scope="col">{{ $columnDescriptionLabel }}</th>
+    <th class="colhead" scope="col">{{ $columnSaleBeginEndTimeLabel }}</th>
+    <th class="colhead" scope="col">{{ $columnDurationLabel }}</th>
+    <th class="colhead" scope="col">{{ $columnBonusAdditionLabel }}</th>
+    <th class="colhead" scope="col">{{ $columnPriceLabel }}</th>
+    <th class="colhead" scope="col">{{ $columnInventoryLabel }}</th>
+    <th class="colhead" scope="col">{{ $columnBuyLabel }}</th>
+    <th class="colhead" scope="col">{{ $columnGiftLabel }}</th>
 </tr>
 </thead>
 <tbody>

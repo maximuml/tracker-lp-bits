@@ -17,10 +17,10 @@
 @else
     <h3>{{ $t['latestBanInfo'] ?? '' }}</h3>
     <table data-nx="data" id="ban-info" border="1" cellpadding="5" cellspacing="0"><tbody>
-    <tr><th>UID：</th><td>{{ $latestBanLog->uid }}</td></tr>
-    <tr><th>Username：</th><td>{{ $latestBanLog->username }}</td></tr>
-    <tr><th>Reason：</th><td>{{ $latestBanLog->reason }}</td></tr>
-    <tr><th>CreatedAt：</th><td>{{ $latestBanLog->created_at }}</td></tr>
+    <tr><th scope="row">UID：</th><td>{{ $latestBanLog->uid }}</td></tr>
+    <tr><th scope="row">Username：</th><td>{{ $latestBanLog->username }}</td></tr>
+    <tr><th scope="row">Reason：</th><td>{{ $latestBanLog->reason }}</td></tr>
+    <tr><th scope="row">CreatedAt：</th><td>{{ $latestBanLog->created_at }}</td></tr>
     </tbody></table>
     <p>{{ $t['deductPerDay'] ?? '' }}</p>
     <p>{{ $t['deductTotal'] ?? '' }}</p>

@@ -32,9 +32,9 @@
 <br /><br />
 <table data-nx="data" class="main" border="1" cellspacing="0" cellpadding="5" align="center">
     <tr>
-        <td class="colhead">{{ __('legacy/aboutnexus.text_flag')}}</td>
-        <td class="colhead">{{ __('legacy/aboutnexus.text_language')}}</td>
-        <td class="colhead">{{ __('legacy/aboutnexus.text_state')}}</td>
+        <th class="colhead" scope="col">{{ __('legacy/aboutnexus.text_flag')}}</th>
+        <th class="colhead" scope="col">{{ __('legacy/aboutnexus.text_language')}}</th>
+        <th class="colhead" scope="col">{{ __('legacy/aboutnexus.text_state')}}</th>
     </tr>
     @foreach ($languages as $row)
         <tr>
@@ -53,9 +53,9 @@
 <br /><br />
 <table data-nx="data" class="main" border="1" cellspacing="0" cellpadding="5" align="center">
     <tr>
-        <td class="colhead">{{ __('legacy/aboutnexus.text_name')}}</td>
-        <td class="colhead">{{ __('legacy/aboutnexus.text_designer')}}</td>
-        <td class="colhead">{{ __('legacy/aboutnexus.text_comment')}}</td>
+        <th class="colhead" scope="col">{{ __('legacy/aboutnexus.text_name')}}</th>
+        <th class="colhead" scope="col">{{ __('legacy/aboutnexus.text_designer')}}</th>
+        <th class="colhead" scope="col">{{ __('legacy/aboutnexus.text_comment')}}</th>
     </tr>
     @foreach ($stylesheets as $row)
         <tr>

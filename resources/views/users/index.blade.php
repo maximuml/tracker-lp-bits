@@ -35,11 +35,11 @@
 
 <table data-nx="data" border=1 cellspacing=0 cellpadding=5>
 <tr>
-    <td class=colhead align=left>{{ __('legacy/users.col_user_name')}}</td>
-    <td class=colhead>{{ __('legacy/users.col_registered')}}</td>
-    <td class=colhead>{{ __('legacy/users.col_last_access')}}</td>
-    <td class=colhead align=left>{{ __('legacy/users.col_class')}}</td>
-    <td class=colhead>{{ __('legacy/users.col_country')}}</td>
+    <th class="colhead" align=left scope="col">{{ __('legacy/users.col_user_name')}}</th>
+    <th class="colhead" scope="col">{{ __('legacy/users.col_registered')}}</th>
+    <th class="colhead" scope="col">{{ __('legacy/users.col_last_access')}}</th>
+    <th class="colhead" align=left scope="col">{{ __('legacy/users.col_class')}}</th>
+    <th class="colhead" scope="col">{{ __('legacy/users.col_country')}}</th>
 </tr>
 @foreach ($rows as $row)
 <tr>

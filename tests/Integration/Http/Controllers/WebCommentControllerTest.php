@@ -170,6 +170,10 @@ final class WebCommentControllerTest extends TestCase
 
         /** @var CommentRepository&Mockery\MockInterface $repository */
         $repository = Mockery::mock(CommentRepository::class);
+        $repository->shouldReceive('getForDelete')->once()->with(10, 'torrent')->andReturn([
+            'pid' => 5,
+            'user' => $user->id,
+        ]);
         app()->instance(CommentRepository::class, $repository);
 
         $controller = app(WebCommentController::class);
@@ -180,6 +184,7 @@ final class WebCommentControllerTest extends TestCase
 
         $this->assertInstanceOf(View::class, $response);
         $this->assertSame('comments.delete', $response->name());
+        $this->assertSame('comment.php?action=delete&type=torrent&cid=10', $response->getData()['formAction']);
     }
 
     public function test_destroy_deletes_comment_and_redirects(): void

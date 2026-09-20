@@ -121,7 +121,7 @@ class UsercpController extends LegacyController
         return response()->noContent();
     }
 
-    public function legacyAction(Request $request): RedirectResponse
+    public function legacyAction(Request $request): View|Response|RedirectResponse
     {
         $user = Auth::user();
         if (! $user instanceof User) {
@@ -183,6 +183,10 @@ class UsercpController extends LegacyController
             $to = $this->repository->updateSecurityFromLegacyRequest($request);
 
             return redirect($to);
+        }
+
+        if ($type === 'save' && $action === 'security') {
+            return $this->legacy($request);
         }
 
         return redirect('/usercp.php');

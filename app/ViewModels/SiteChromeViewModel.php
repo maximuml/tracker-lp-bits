@@ -716,6 +716,7 @@ final class SiteChromeViewModel
         $scripts = ['js/ajax.js', 'js/nexus.js', 'js/csrf.js'];
         if ($variant !== 'legacy') {
             $scripts = array_merge($scripts, [
+                'js/ajaxbasic.js',
                 'js/common.js',
                 'js/domLib.js',
                 'js/domTT.js',

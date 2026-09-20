@@ -59,7 +59,15 @@ final class ToptenControllerTest extends TestCase
         $this->actingAs($user);
 
         $langFolder = (string) app(Globals::class)->get('CURLANGDIR', 'en');
-        Cache::put("topten_1_10__{$langFolder}", '<html>Top Ten Page</html>', 3600);
+        Cache::put("topten_1_10__{$langFolder}", [
+            'type' => 1,
+            'limit' => 10,
+            'subtype' => null,
+            'enabledDonation' => false,
+            'dateFounded' => '2007-01-01',
+            'generatedAt' => '2026-01-01 00:00:00',
+            'sections' => [],
+        ], 3600);
 
         $controller = app(ToptenController::class);
         $request = Request::create('/topten', 'GET');
@@ -68,6 +76,7 @@ final class ToptenControllerTest extends TestCase
         $response = $controller->legacy($request);
 
         $this->assertSame(200, $response->getStatusCode());
-        $this->assertStringContainsString('Top Ten Page', $response->getContent());
+        $this->assertStringContainsString('2026-01-01 00:00:00', $response->getContent());
+        $this->assertStringContainsString($user->username, $response->getContent());
     }
 }

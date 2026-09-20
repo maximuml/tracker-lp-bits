@@ -53,12 +53,23 @@
         var fromTransform;
         var toTransform;
         var mover = img;
-        if (zoomSrc && zoomSrc !== img.getAttribute('src')) {
+        var zoomUrl = null;
+        if (zoomSrc) {
+            try {
+                var parsed = new URL(zoomSrc, window.location.href);
+                if (parsed.protocol === 'https:' || parsed.protocol === 'http:') {
+                    zoomUrl = parsed.href;
+                }
+            } catch (e) {
+                zoomUrl = null;
+            }
+        }
+        if (zoomUrl !== null && zoomUrl !== img.src) {
             clone = img.cloneNode(false);
             clone.removeAttribute('id');
             clone.removeAttribute('data-zoomable');
             clone.className = 'nxz-clone';
-            clone.src = zoomSrc;
+            clone.src = zoomUrl;
             clone.width = Math.round(rect.width);
             clone.height = Math.round(rect.height);
             img.classList.add('nxz-source-hidden');

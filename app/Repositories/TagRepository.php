@@ -96,20 +96,21 @@ class TagRepository extends BaseRepository implements TagRepositoryInterface
      */
     public function renderCheckbox(int $searchBoxId, array $checked = [], $ignorePermission = false): string
     {
-        $html = '';
         $results = $this->listAll($searchBoxId);
         if (! $ignorePermission && ! Permission::canSetTorrentSpecialTag()) {
             $specialTags = Tag::listSpecial();
             $results = $results->filter(fn ($item) => ! in_array($item->id, $specialTags));
         }
+        $tags = [];
         foreach ($results as $value) {
-            $html .= sprintf(
-                '<label><input type="checkbox" name="tags[%s][]" value="%s"%s />%s</label>',
-                $searchBoxId, $value->id, in_array($value->id, $checked) ? ' checked' : '', $value->name
-            );
+            $tags[] = [
+                'id' => $value->id,
+                'name' => (string) $value->name,
+                'checked' => in_array($value->id, $checked),
+            ];
         }
 
-        return $html;
+        return view('tags._checkboxes', ['searchBoxId' => $searchBoxId, 'tags' => $tags])->render();
     }
 
     /**
@@ -118,23 +119,18 @@ class TagRepository extends BaseRepository implements TagRepositoryInterface
      */
     public function renderSpan(int $searchBoxId, array $renderIdArr = [], $withFilterLink = false): string
     {
-        $html = '';
+        $tags = [];
         foreach ($this->listAll($searchBoxId) as $value) {
             if (in_array($value->id, $renderIdArr) || (isset($renderIdArr[0]) && $renderIdArr[0] == '*')) {
-                $tagId = $value->id;
-                $item = sprintf(
-                    '<span class="nx-tag" title="%s">%s</span>',
-                    $value->description, $value->name
-                );
-                if ($withFilterLink) {
-                    $html .= sprintf('<a href="?tag_id=%s">%s</a>', $tagId, $item);
-                } else {
-                    $html .= $item;
-                }
+                $tags[] = [
+                    'id' => $value->id,
+                    'name' => (string) $value->name,
+                    'description' => (string) $value->description,
+                ];
             }
         }
 
-        return $html;
+        return view('tags._spans', ['tags' => $tags, 'withLink' => (bool) $withFilterLink])->render();
     }
 
     /** @return  mixed */
@@ -275,17 +271,19 @@ class TagRepository extends BaseRepository implements TagRepositoryInterface
      */
     public function buildSelect(int $searchBoxId, $name, $value): string
     {
-        $list = $this->listAll($searchBoxId);
-        $select = sprintf('<select name="%s"><option value="">%s</option>', $name, Locale::trans('nexus.select_one_please', [], null));
-        foreach ($list as $item) {
-            $selected = '';
-            if ($item->id == $value) {
-                $selected = ' selected';
-            }
-            $select .= sprintf('<option value="%s"%s>%s</option>', $item->id, $selected, $item->name);
+        $options = [];
+        foreach ($this->listAll($searchBoxId) as $item) {
+            $options[] = [
+                'value' => $item->id,
+                'label' => (string) $item->name,
+                'selected' => $item->id == $value,
+            ];
         }
-        $select .= '</select>';
 
-        return $select;
+        return view('tags._select', [
+            'name' => $name,
+            'placeholder' => Locale::trans('nexus.select_one_please', [], null),
+            'options' => $options,
+        ])->render();
     }
 }

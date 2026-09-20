@@ -27,7 +27,7 @@ use Tests\TestCase;
 /**
  * Unit tests for TorrentModerationRepository.
  *
- * Covers renderApprovalStatus(), shouldShowApprovalStatusIcon(),
+ * Covers shouldShowApprovalStatusIcon(),
  * getApprovalDenyCount(), syncTags(), setPosState(), setHr(),
  * setSpState(), and approval().
  *
@@ -67,21 +67,6 @@ final class TorrentModerationRepositoryTest extends TestCase
     {
         Mockery::close();
         parent::tearDown();
-    }
-
-    public function test_render_approval_status_returns_empty_when_not_shown(): void
-    {
-        $result = $this->repository->renderApprovalStatus(TorrentApprovalStatus::ALLOW->value, false);
-
-        $this->assertSame('', $result);
-    }
-
-    public function test_render_approval_status_returns_html_when_shown(): void
-    {
-        $result = $this->repository->renderApprovalStatus(TorrentApprovalStatus::DENY->value, true);
-
-        $this->assertStringContainsString('<span', $result);
-        $this->assertStringContainsString('title=', $result);
     }
 
     public function test_should_show_approval_status_icon_returns_true_for_non_allow_when_not_visible(): void

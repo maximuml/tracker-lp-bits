@@ -41,36 +41,27 @@ class TorrentApprovalRepository extends BaseRepository
         $torrent = Torrent::query()->findOrFail($torrentId, ['id', 'approval_status', 'banned']);
         $radios = [];
         foreach (Torrent::$approvalStatus as $key => $value) {
-            if ($torrent->approval_status == $key) {
-                $checked = ' checked';
-            } else {
-                $checked = '';
-            }
-            $radios[] = sprintf(
-                '<label><input type="radio" name="params[approval_status]" value="%s"%s>%s</label>',
-                $key, $checked, Locale::trans("torrent.approval.status_text.{$key}", [], null)
-            );
+            $radios[] = [
+                'value' => $key,
+                'label' => Locale::trans("torrent.approval.status_text.{$key}", [], null),
+                'checked' => $torrent->approval_status == $key,
+            ];
         }
         $id = 'torrent-approval';
-        $rows = [];
         $formId = "$id-form";
-        $rows[] = sprintf(
-            '<div class="%s-row"><div>%s: </div><div>%s</div></div>',
-            $id, Locale::trans('torrent.approval.status_label', [], null), implode('', $radios)
-        );
-        $rows[] = sprintf(
-            '<div class="%s-row"><div>%s: </div><div><textarea name="params[comment]" rows="4" cols="40"></textarea></div></div>',
-            $id, Locale::trans('torrent.approval.comment_label', [], null)
-        );
-        $rows[] = sprintf('<input type="hidden" name="params[torrent_id]" value="%s" />', $torrent->id);
-
-        $html = sprintf('<div id="%s-box"><form id="%s">%s</form></div>', $id, $formId, implode('', $rows));
 
         return [
             'id' => $id,
             'form_id' => $formId,
             'title' => Locale::trans('torrent.approval.modal_title', [], null),
-            'content' => $html,
+            'content' => view('torrents._approval_modal', [
+                'boxId' => $id,
+                'formId' => $formId,
+                'statusLabel' => Locale::trans('torrent.approval.status_label', [], null),
+                'commentLabel' => Locale::trans('torrent.approval.comment_label', [], null),
+                'radios' => $radios,
+                'torrentId' => $torrent->id,
+            ])->render(),
         ];
 
     }
@@ -166,26 +157,6 @@ class TorrentApprovalRepository extends BaseRepository
 
         return $params;
 
-    }
-
-    /**
-     * @param  mixed  $approvalStatus
-     * @param  mixed  $show
-     */
-    public function renderApprovalStatus($approvalStatus, $show = null): string
-    {
-        if ($show === null) {
-            $show = $this->shouldShowApprovalStatusIcon($approvalStatus);
-        }
-        if ($show) {
-            return sprintf(
-                '<span title="%s">%s</span>',
-                Locale::trans("torrent.approval.status_text.{$approvalStatus}", [], null),
-                Torrent::$approvalStatus[$approvalStatus]['icon']
-            );
-        }
-
-        return '';
     }
 
     /** @param  mixed  $approvalStatus */

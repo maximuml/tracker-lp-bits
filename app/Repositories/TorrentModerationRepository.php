@@ -64,15 +64,6 @@ class TorrentModerationRepository extends BaseRepository
         return $this->approvalRepository->approval($user, $params);
     }
 
-    /**
-     * @param  mixed  $approvalStatus
-     * @param  mixed  $show
-     */
-    public function renderApprovalStatus($approvalStatus, $show = null): string
-    {
-        return $this->approvalRepository->renderApprovalStatus($approvalStatus, $show);
-    }
-
     /** @param  mixed  $approvalStatus */
     public function shouldShowApprovalStatusIcon($approvalStatus): bool
     {

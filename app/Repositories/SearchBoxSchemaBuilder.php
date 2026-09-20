@@ -131,22 +131,28 @@ class SearchBoxSchemaBuilder
         $searchBoxField = 'show'.$torrentField;
         if ($searchBox->showsubcat && $searchBox->{$searchBoxField}) {
             $table = SearchBox::$taxonomies[$torrentField]['table'];
-            $select = sprintf('<b>%s: </b>', $searchBox->getTaxonomyLabel($torrentField));
-            $select .= sprintf('<select name="%s_sel[%s]" data-mode="%s_%s">', $torrentField, $searchBoxId, $torrentField, $searchBoxId);
-            $select .= sprintf('<option value="%s">%s</option>', 0, Locale::trans('nexus.select_one_please', [], null));
             $list = DB::table($table)->where(function (Builder $query) use ($searchBox) {
                 return $query->where('mode', $searchBox->id)->orWhere('mode', 0);
             })->orderBy('sort_index', 'desc')->get();
+            $options = [[
+                'value' => 0,
+                'label' => Locale::trans('nexus.select_one_please', [], null),
+                'selected' => false,
+            ]];
             foreach ($list as $item) {
-                $selected = '';
-                if (isset($torrentInfo[$torrentField]) && $torrentInfo[$torrentField] == $item->id) {
-                    $selected = ' selected';
-                }
-                $select .= sprintf('<option value="%s"%s>%s</option>', $item->id, $selected, $item->name);
+                $options[] = [
+                    'value' => $item->id,
+                    'label' => (string) $item->name,
+                    'selected' => isset($torrentInfo[$torrentField]) && $torrentInfo[$torrentField] == $item->id,
+                ];
             }
-            $select .= '</select>';
 
-            return $select;
+            return view('upload._taxonomy_select', [
+                'label' => $searchBox->getTaxonomyLabel($torrentField),
+                'field' => $torrentField,
+                'searchBoxId' => $searchBoxId,
+                'options' => $options,
+            ])->render();
         }
     }
 

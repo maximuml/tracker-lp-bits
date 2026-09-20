@@ -37,7 +37,8 @@ final readonly class ViewTopicViewModel
         public int $pages,
         public array $posts,
         public array $moveForums,
-        public SafeHtml $highlightColorOptions,
+        /** @var list<array{value: int, label: string}> */
+        public array $highlightColorOptions,
         public ?SafeHtml $quickReply,
         public ?SafeHtml $deniedNotice,
         public SafeHtml $keyScript,

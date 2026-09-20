@@ -23,48 +23,33 @@ final class Medal
      */
     public static function buildImages(Collection $medals, int|string $maxHeight = 200, bool $withActions = false): string
     {
-        $medalImages = [];
-        $wrapBefore = '<form><div>';
-        $wrapAfter = '</div></form>';
-
+        $permanent = Locale::trans('label.permanent');
+        $rows = [];
         foreach ($medals as $medal) {
-            $html = sprintf(
-                '<div><div><img src="%s" title="%s" class="preview"/></div>',
-                $medal->image_large,
-                $medal->name
-            );
-
-            if ($withActions) {
-                $html .= sprintf(
-                    '<div><span>%s: %s</span><span>%s: %s</span><span>%s: %s</span><label>%s: <input type="number" name="priority_%s" value="%s" placeholder="%s"></label>',
-                    Locale::trans('label.expire_at'),
-                    $medal->pivot->expire_at ? Time::formatDateTime($medal->pivot->expire_at) : Locale::trans('label.permanent'),
-                    Locale::trans('medal.fields.bonus_addition_factor'),
-                    $medal->bonus_addition_factor ?? 0,
-                    Locale::trans('medal.bonus_addition_expire_at'),
-                    $medal->pivot->bonus_addition_expire_at ? Time::formatDateTime($medal->pivot->bonus_addition_expire_at) : Locale::trans('label.permanent'),
-                    Locale::trans('label.priority'),
-                    $medal->pivot->id,
-                    $medal->pivot->priority ?? 0,
-                    Locale::trans('label.priority_help')
-                );
-
-                $checked = '';
-                if ($medal->pivot->status == UserMedalStatus::WEARING->value) {
-                    $checked = ' checked';
-                }
-                $html .= sprintf('<label>%s<input type="checkbox" name="status_%s" value="1"%s></label>', Locale::trans('medal.action_wearing'), $medal->pivot->id, $checked);
-                $html .= '</div>';
-            }
-
-            $html .= '</div>';
-            $medalImages[] = $html;
+            $rows[] = [
+                'image' => (string) $medal->image_large,
+                'name' => (string) $medal->name,
+                'expireText' => $medal->pivot->expire_at ? Time::formatDateTime($medal->pivot->expire_at) : $permanent,
+                'factor' => $medal->bonus_addition_factor ?? 0,
+                'bonusExpireText' => $medal->pivot->bonus_addition_expire_at ? Time::formatDateTime($medal->pivot->bonus_addition_expire_at) : $permanent,
+                'pivotId' => $medal->pivot->id,
+                'priority' => $medal->pivot->priority ?? 0,
+                'wearing' => $medal->pivot->status == UserMedalStatus::WEARING->value,
+            ];
         }
 
-        if ($withActions) {
-            $medalImages[] = sprintf('<div><div></div><div><input type="button" id="save-user-medal-btn" value="%s"/></div></div>', Locale::trans('label.save', [], null));
-        }
-
-        return $wrapBefore.implode('', $medalImages).$wrapAfter;
+        return view('userdetails._medals', [
+            'medals' => $rows,
+            'withActions' => $withActions,
+            'labels' => [
+                'expire_at' => Locale::trans('label.expire_at'),
+                'bonus_addition_factor' => Locale::trans('medal.fields.bonus_addition_factor'),
+                'bonus_addition_expire_at' => Locale::trans('medal.bonus_addition_expire_at'),
+                'priority' => Locale::trans('label.priority'),
+                'priority_help' => Locale::trans('label.priority_help'),
+                'action_wearing' => Locale::trans('medal.action_wearing'),
+                'save' => Locale::trans('label.save', [], null),
+            ],
+        ])->render();
     }
 }

@@ -45,7 +45,8 @@
         </form>
         <form method="post" action="?action=hltopic&amp;topicid={{ $topic->topicid }}">
             {{ __('legacy/forums.text_highlight_topic') }}
-            <select class="med" name="color">{{ $topic->highlightColorOptions }}</select>
+            <select class="med" name="color">@foreach ($topic->highlightColorOptions as $opt)<option value="{{ $opt['value'] }}">{{ $opt['label'] }}</option>
+@endforeach</select>
             <input type="hidden" name="returnto" value="{{ $topic->requestUri }}" />
             <input type="submit" class="medium" value="{{ __('legacy/forums.submit_change') }}" />
         </form>

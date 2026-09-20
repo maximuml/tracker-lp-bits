@@ -20,6 +20,23 @@
 <link rel="stylesheet" href="{{ $href }}" type="text/css" />
 @endforeach
 <link rel="stylesheet" href="css/modern.css" type="text/css" />
+@if($chrome->cspNonce !== '')
+{{-- CSP nonce bridge: vendored libs (medium-zoom, curtain_imageresizer,
+     domTT) inject <style> elements at runtime; stamp the request nonce on
+     them so nonce-strict style-src-elem does not block legitimate styles.
+     Must run before the external scripts below. --}}
+<script type="text/javascript" nonce="{{ $chrome->cspNonce }}">
+    (function () {
+        var nonce = document.currentScript && document.currentScript.nonce;
+        if (!nonce) { return; }
+        var stamp = function (n) { if (n && n.nodeName === 'STYLE' && !n.nonce) { n.nonce = nonce; } };
+        var ac = Node.prototype.appendChild;
+        var ib = Node.prototype.insertBefore;
+        Node.prototype.appendChild = function (n) { stamp(n); return ac.call(this, n); };
+        Node.prototype.insertBefore = function (n, r) { stamp(n); return ib.call(this, n, r); };
+    })();
+</script>
+@endif
 @foreach($chrome->headScripts as $src)
 <script type="text/javascript" src="{{ $src }}"></script>
 @endforeach

@@ -2,22 +2,23 @@ import { expect, test } from '@playwright/test';
 import { AUTH_STATE, BROWSER_TID } from '../fixtures/auth';
 
 /**
- * CSP ratchet. Every page currently violates `style-src` (legacy inline
- * styles); several also violate `script-src` (blocked inline scripts).
- * The baseline records which directives each page violates — a NEW
- * directive type on a page fails. Removing violations needs no test
- * change; shrink a baseline entry in the cleanup PR (stage 4).
+ * CSP ratchet — all covered pages must be violation-free.
+ * Legacy routes run nonce-strict script-src + style-src-elem with
+ * style-src-attr 'unsafe-inline' (element.style/CSSOM is allowed —
+ * legacy show/hide toggles depend on it); vendored JS that injects
+ * <style> gets the request nonce stamped by the bridge in
+ * head-assets. Any violation of ANY directive on a page fails.
  */
 const CSP_BASELINE: Record<string, string[]> = {
-  '/index.php': ['style-src'],
-  '/torrents.php': ['style-src'],
-  '/details.php': ['style-src'],
-  '/forums.php': ['style-src'],
-  '/usercp.php': ['style-src'],
-  '/topten.php': ['script-src', 'style-src'],
-  '/messages.php': ['script-src', 'style-src'],
-  '/staffpanel.php': ['script-src', 'style-src'],
-  '/nexusphp': ['script-src', 'style-src'],
+  '/index.php': [],
+  '/torrents.php': [],
+  '/details.php': [],
+  '/forums.php': [],
+  '/usercp.php': [],
+  '/topten.php': [],
+  '/messages.php': [],
+  '/staffpanel.php': [],
+  '/nexusphp': [],
 };
 
 const DIRECTIVE_RE = /directive '([^']+)'/;

@@ -1405,9 +1405,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 const intersectionRatio = entry.intersectionRatio;
                 if (intersectionRatio > 0 && intersectionRatio <= 1 && !el.classList.contains('preview')) {
                     let src = el.dataset.src;
-                    if (src && src.includes('doubanio.com') && src.includes('l_ratio_poster')) {
-                        src = src.replace('l_ratio_poster', 's_ratio_poster');
-                        el.dataset.src = src;
+                    if (src) {
+                        try {
+                            const u = new URL(src, location.href);
+                            if ((u.hostname === 'doubanio.com' || u.hostname.endsWith('.doubanio.com')) && u.pathname.includes('l_ratio_poster')) {
+                                u.pathname = u.pathname.replace('l_ratio_poster', 's_ratio_poster');
+                                src = u.href;
+                                el.dataset.src = src;
+                            }
+                        } catch (e) { /* keep src as-is */ }
                     }
                     el.src = src;
                     el.classList.add('preview');
@@ -1419,19 +1425,26 @@ document.addEventListener('DOMContentLoaded', function () {
         });
         imgList.forEach(img => io.observe(img));
         function handleImageError(img, currentSrc) {
-            if (!currentSrc.includes('doubanio.com')) {
+            let url = null;
+            try { url = new URL(currentSrc); } catch (e) { /* not a URL */ }
+            if (!url || url.protocol !== 'https:' || !(url.hostname === 'doubanio.com' || url.hostname.endsWith('.doubanio.com'))) {
                 img.src = fallbackImage;
             } else {
-                tryNextDomain(img, currentSrc, 0);
+                tryNextDomain(img, url, 0);
             }
         }
-        function tryNextDomain(img, currentSrc, index = 0) {
+        function tryNextDomain(img, url, index = 0) {
             if (index >= domainList.length) {
                 img.src = fallbackImage;
                 return;
             }
-            img.src = currentSrc.replace(/https:\/\/[a-zA-Z0-9.-]+\.doubanio\.com/, `https://${domainList[index]}`);
-            img.onerror = () => tryNextDomain(img, currentSrc, index + 1);
+            const next = `https://${domainList[index]}${url.pathname}${url.search}`;
+            if (!/^https:\/\/[a-z0-9-]+\.doubanio\.com\//i.test(next)) {
+                img.src = fallbackImage;
+                return;
+            }
+            img.src = encodeURI(next);
+            img.onerror = () => tryNextDomain(img, url, index + 1);
         }
     }
 });

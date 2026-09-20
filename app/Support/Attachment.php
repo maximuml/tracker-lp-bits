@@ -55,8 +55,7 @@ final class Attachment
         $onclick = $imageResizer ? ' data-zoomable data-zoom-src="'.htmlspecialchars($url).'"' : '';
         $tooltip = "<strong>$sizeLabel</strong>: $sizeText<br />$timeText";
 
-        return '<img id="attach'.$id.'" alt="'.htmlspecialchars($filename).'" src="'.htmlspecialchars($url).'"'.$onclick.' data-domtt-promo />'
-            .'<template class="nx-tt">'.$tooltip.'</template>';
+        return '<img id="attach'.$id.'" alt="'.htmlspecialchars($filename).'" src="'.htmlspecialchars($url).'"'.$onclick.' data-domtt-promo /><template class="nx-tt">'.$tooltip.'</template>';
     }
 
     /**

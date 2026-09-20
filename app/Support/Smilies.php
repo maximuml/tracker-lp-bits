@@ -34,8 +34,7 @@ final class Smilies
             .' data-smile-form="'.htmlspecialchars($formname, ENT_QUOTES).'"'
             .' data-smile-text="'.htmlspecialchars($taname, ENT_QUOTES).'"'
             .' data-domtt-content>'
-            .'<img class="nx-smiley" src="pic/smilies/'.$smilyNumber.'.gif" alt="[em'.$smilyNumber.']" />'
-            .'<template class="nx-tt"><img src="pic/smilies/'.$smilyNumber.'.gif" alt="" /></template></a>');
+            .'<img class="nx-smiley" src="pic/smilies/'.$smilyNumber.'.gif" alt="[em'.$smilyNumber.']" /><template class="nx-tt"><img src="pic/smilies/'.$smilyNumber.'.gif" alt="" /></template></a>');
     }
 
     public static function quickRow(string $formname, string $taname): string

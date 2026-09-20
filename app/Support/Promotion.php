@@ -318,18 +318,13 @@ final class Promotion
                 : ' '.$endIn.$badge->timeout->toHtml();
         }
         if ($badge->mode === 'word') {
-            $tip = $badge->domttHtml !== null
-                ? ' data-domtt-promo'
-                : '';
-            $tpl = $badge->domttHtml !== null
-                ? '<template class="nx-tt">'.$badge->domttHtml->toHtml().'</template>'
-                : '';
+            $tip = $badge->domttHtml !== null ? ' data-domtt-promo' : '';
 
-            return " <b>[<span class='{$badge->cssClass}'$tip>{$badge->text}</span>$tpl]</b>";
+            return " <b>[<span class='{$badge->cssClass}'$tip>{$badge->text}</span>"
+                .($badge->domttHtml !== null ? '<template class="nx-tt">'.$badge->domttHtml->toHtml().'</template>' : '').'</b>';
         }
         if ($badge->domttHtml !== null) {
-            return " <img class=\"{$badge->iconClass}\" src=\"pic/trans.gif\" alt=\"{$badge->alt}\" data-domtt-promo />"
-                .'<template class="nx-tt">'.$badge->domttHtml->toHtml().'</template>';
+            return " <img class=\"{$badge->iconClass}\" src=\"pic/trans.gif\" alt=\"{$badge->alt}\" data-domtt-promo /><template class=\"nx-tt\">".$badge->domttHtml->toHtml().'</template>';
         }
 
         return " <img class=\"{$badge->iconClass}\" src=\"pic/trans.gif\" alt=\"{$badge->alt}\" title=\"{$badge->text}\" />";

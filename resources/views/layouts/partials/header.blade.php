@@ -12,9 +12,13 @@
         @if($chrome->enableDonation)
             <a class="nxm-donate" href="donate.php"><img src="{{ $chrome->picFolder }}/donate.gif" alt="{{ 'Make a donation' }}" /></a>
         @endif
+        @if($chrome->user)
+        <button type="button" class="nxm-burger" aria-expanded="false" aria-controls="nxm-collapse" aria-label="{{ 'Toggle navigation' }}">&#x2630;</button>
+        @endif
     </div>
 
     @if($chrome->user)
+    <div class="nxm-collapse" id="nxm-collapse">
     <nav class="nxm-nav" aria-label="{{ 'Main navigation' }}">
         <ul class="nxm-nav__list">
             @foreach($chrome->navItems as $item)
@@ -105,6 +109,7 @@
                 <a href="messages.php?action=viewmailbox&amp;box=-1"><img class="sentbox" alt="sentbox" title="{{ __('legacy/functions.title_sentbox') }}" src="pic/trans.gif" /></a>{{ $chrome->outboxCount }}
             </div>
         </div>
+    </div>
     </div>
     @else
     <nav class="nxm-nav" aria-label="{{ 'Main navigation' }}">

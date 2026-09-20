@@ -725,6 +725,7 @@ final class SiteChromeViewModel
         $scripts[] = 'js/medium-zoom.min.js';
         $scripts[] = 'js/goup.js';
         $scripts[] = 'js/theme-toggle.js';
+        $scripts[] = 'js/nx-chrome.js';
 
         return $scripts;
     }

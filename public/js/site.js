@@ -323,14 +323,6 @@ var list = document.getElementById(obj.id + 'list');
 if (list) { list.classList.toggle('nx-hidden'); }
 }
 
-function confirm_delete(id, note, addon)
-{
-   if(confirm(note))
-   {
-      self.location.href='?action=del'+(addon ? '&'+addon : '')+'&id='+id;
-   }
-}
-
 //viewfilelist.js
 
 function viewfilelist(torrentid)
@@ -427,14 +419,8 @@ function saveMagicValue(torrentid,value)
     })
 }
 
-// java_klappe.js
-
-function klappe(id)
-{
-var klappText = document.getElementById('k' + id);
-if (!klappText) { return; }
-klappText.classList.toggle('nx-hidden');
-}
+// java_klappe.js — only klappe_news survives: delegated data-klappe
+// emitters all render the plus/minus icon variant.
 
 function klappe_news(id)
 {
@@ -442,16 +428,6 @@ var klappText = document.getElementById('k' + id);
 var klappBild = document.getElementById('pic' + id);
 if (!klappText) { return; }
 var hidden = klappText.classList.toggle('nx-hidden');
-if (klappBild) { klappBild.className = hidden ? 'plus' : 'minus'; }
-}
-function klappe_ext(id)
-{
-var klappText = document.getElementById('k' + id);
-var klappBild = document.getElementById('pic' + id);
-var klappPoster = document.getElementById('poster' + id);
-if (!klappText) { return; }
-var hidden = klappText.classList.toggle('nx-hidden');
-if (klappPoster) { klappPoster.classList.toggle('nx-hidden', hidden); }
 if (klappBild) { klappBild.className = hidden ? 'plus' : 'minus'; }
 }
 
@@ -623,16 +599,6 @@ document.getElementById(blockid).innerHTML=infoblock;
 return true;
 }
 
-// in functions.php
-function get_ext_info_ajax(blockid,url,cache,type)
-{
-if (document.getElementById(blockid).innerHTML==""){
-var infoblock=ajax.gets('getextinfoajax.php?url='+url+'&cache='+cache+'&type='+type);
-document.getElementById(blockid).innerHTML=infoblock;
-}
-return true;
-}
-
 // in userdetails.php
 function enabledel(msg){
 document.deluser.submit.disabled=document.deluser.submit.checked;
@@ -643,14 +609,6 @@ function disabledel(){
 document.deluser.submit.disabled=!document.deluser.submit.checked;
 }
 
-// in mybonus.php
-function customgift()
-{
-if (document.getElementById("giftselect").value == '0'){
-document.getElementById("giftselect").disabled = true;
-document.getElementById("giftcustom").disabled = false;
-}
-}
 // settings.php
 function NewRow(anchor,up){
 	var thisRow = anchor.parentNode.parentNode;
@@ -790,13 +748,6 @@ document.addEventListener('click', function (e) {
     var setChecked = target.closest('input[data-setchecked]');
     if (setChecked && typeof SetChecked === 'function') {
         SetChecked(setChecked.getAttribute('data-setchecked'), setChecked.getAttribute('data-setchecked-ctrl'), setChecked.getAttribute('data-checkall'), setChecked.getAttribute('data-uncheckall'), -1, 10);
-        return;
-    }
-
-    var confirmDel = target.closest('a[data-confirm-del]');
-    if (confirmDel && typeof confirm_delete === 'function') {
-        confirm_delete(confirmDel.getAttribute('data-confirm-del'), confirmDel.getAttribute('data-confirm-note') || '', confirmDel.getAttribute('data-confirm-addon') || '');
-        e.preventDefault();
         return;
     }
 

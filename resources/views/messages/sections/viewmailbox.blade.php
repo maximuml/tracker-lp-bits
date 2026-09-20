@@ -26,7 +26,7 @@
 <td class=rowfollow align=left><a href="messages.php?action=viewmessage&id={{ $row['id'] }}">{{ $row['subject'] }}</a></td>
 <td class=rowfollow align=left>{{ $row['username'] ?? '' }}</td>
 <td class=rowfollow nowrap>{{ $row['added'] ?? '' }}</td>
-<td class=rowfollow><input class=checkbox type="checkbox" name="messages[]" value="{{ $row['id'] }}"></td>
+<td class=rowfollow><input class=checkbox type="checkbox" name="messages[]" value="{{ $row['id'] }}" aria-label="{{ __('legacy/messages.col_subject') }}: {{ $row['subject'] }}"></td>
 </tr>
 @endforeach
 <tr class="colhead">
@@ -37,7 +37,7 @@
 <input class=btn type="submit" name="delete" value="{{ __('legacy/messages.submit_delete') }}">
 @if (! $viewmailbox['isSentBox'])
 {{ __('legacy/messages.text_or') }}
-<input class=btn type="submit" name="move" value="{{ __('legacy/messages.submit_move_to') }}"> <select name="box"><option value="1">{{ __('legacy/messages.text_inbox') }}</option>
+<input class=btn type="submit" name="move" value="{{ __('legacy/messages.submit_move_to') }}"> <select name="box" aria-label="{{ __('legacy/messages.submit_move_to') }}"><option value="1">{{ __('legacy/messages.text_inbox') }}</option>
 @foreach ($viewmailbox['moveBoxes'] as $opt)
 <option value="{{ $opt->value }}">{{ $opt->label }}</option>
 @endforeach

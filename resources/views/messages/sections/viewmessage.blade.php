@@ -17,7 +17,7 @@
 <td align=left>
 @if (! $viewmessage['isSender'])
 <form action="/messages" method="post">@csrf<input type="hidden" name="action" value="moveordel"><input type="hidden" name="id" value={{ $viewmessage['pmId'] }}>
-<input type="submit" name="move" value={{ __('legacy/messages.submit_move_to') }}><select name="box"><option value="1">{{ __('legacy/messages.text_inbox') }}</option>
+<input type="submit" name="move" value={{ __('legacy/messages.submit_move_to') }}><select name="box" aria-label="{{ __('legacy/messages.submit_move_to') }}"><option value="1">{{ __('legacy/messages.text_inbox') }}</option>
 @foreach ($viewmessage['moveBoxes'] ?? [] as $opt)
 <option value="{{ $opt->value }}">{{ $opt->label }}</option>
 @endforeach

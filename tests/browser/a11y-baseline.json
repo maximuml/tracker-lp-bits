@@ -6,30 +6,12 @@
     "/login": []
   },
   "authenticated": {
-    "/index.php": [
-      "color-contrast",
-      "frame-title"
-    ],
-    "/torrents.php": [
-      "color-contrast",
-      "link-name"
-    ],
-    "/details.php?id=1": [
-      "label",
-      "link-name"
-    ],
-    "/forums.php": [
-      "color-contrast"
-    ],
+    "/index.php": [],
+    "/torrents.php": [],
+    "/details.php?id=1": [],
+    "/forums.php": [],
     "/usercp.php": [],
-    "/topten.php": [
-      "color-contrast",
-      "select-name"
-    ],
-    "/messages.php": [
-      "color-contrast",
-      "label",
-      "select-name"
-    ]
+    "/topten.php": [],
+    "/messages.php": []
   }
 }

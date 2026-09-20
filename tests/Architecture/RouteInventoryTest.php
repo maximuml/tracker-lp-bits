@@ -49,6 +49,9 @@ final class RouteInventoryTest extends TestCase
         'scrape.php' => true,
         // Cron — uses token middleware
         'cron' => true,
+        // CSP violation reports — browser beacon, fires without session
+        // context; CSRF-exempt and throttled, writes only to the log
+        'csp-report' => true,
     ];
 
     /**

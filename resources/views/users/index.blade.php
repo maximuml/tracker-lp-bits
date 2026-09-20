@@ -47,7 +47,7 @@
     <td>{{ $row['addedFormatted'] }}</td>
     <td>{{ $row['lastAccessFormatted'] }}</td>
     <td align=left>{{ $row['class_name'] }}</td>
-    <td align=center>{{ $row['country'] }}</td>
+    <td align=center>@if ($row['country'] > 0)<img src="pic/flag/{{ $row['country_flagpic'] }}" alt="{{ $row['country_name'] }}">@else---@endif</td>
 </tr>
 @endforeach
 </table>

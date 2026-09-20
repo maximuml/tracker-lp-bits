@@ -1,0 +1,1 @@
+<b>{{ $label }}: </b><select name="{{ $field }}_sel[{{ $searchBoxId }}]" data-mode="{{ $field }}_{{ $searchBoxId }}">@foreach ($options as $opt)<option value="{{ $opt['value'] }}"{{ $opt['selected'] ? ' selected' : '' }}>{{ $opt['label'] }}</option>@endforeach</select>

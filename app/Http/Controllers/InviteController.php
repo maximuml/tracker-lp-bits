@@ -87,9 +87,17 @@ class InviteController extends LegacyController
                 $sendBtnText = $this->userModerationRepository->getInviteBtnText($currentUserId);
                 $disabled = '';
             } catch (\Exception $exception) {
+                [$backText, $backSuffix] = explode('</a>', (string) __('legacy/invite.here_to_go_back'), 2) + [1 => ''];
+
                 return $this->legacyAbortResponse(
                     __('legacy/invite.std_sorry'),
-                    $exception->getMessage().'  <a class=altlink href=invite.php?id='.htmlspecialchars((string) $currentUserId).'>'.__('legacy/invite.here_to_go_back').'</a>'
+                    view('invite._back_message', [
+                        'message' => $exception->getMessage(),
+                        'backUrl' => 'invite.php?id='.(string) $currentUserId,
+                        'backText' => $backText,
+                        'backSuffix' => $backSuffix,
+                    ])->render(),
+                    false
                 );
             }
 
@@ -100,19 +108,19 @@ class InviteController extends LegacyController
                 ->orderBy('expired_at', 'asc')
                 ->get();
 
-            $inviteSelectOptions = '';
+            $inviteOptions = [];
             if ((int) ($inv['invites'] ?? 0) > 0) {
-                $inviteSelectOptions = '<option value="permanent">'.__('legacy/invite.text_permanent').'</option>';
+                $inviteOptions[] = ['value' => 'permanent', 'text' => (string) __('legacy/invite.text_permanent')];
             }
             foreach ($temporaryInvites as $tmp) {
-                $inviteSelectOptions .= sprintf('<option value="%s">%s (%s: %s)</option>', e($tmp->hash), e($tmp->hash), __('legacy/invite.text_expired_at'), $tmp->expired_at);
+                $inviteOptions[] = [
+                    'value' => (string) $tmp->hash,
+                    'text' => sprintf('%s (%s: %s)', $tmp->hash, __('legacy/invite.text_expired_at'), $tmp->expired_at),
+                ];
             }
 
             $invitation_body = sprintf(__('legacy/invite.text_invitation_body'), $SITENAME).$currentUser['username'];
-            $preUsernameTr = '';
-            if (SiteConfig::current()->system->isInvitePreEmailAndUsername()) {
-                $preUsernameTr = '<div class="nx-fhead nx-nowrap">'.Locale::trans('invite.pre_register_username', [], null).'</div><div class="nx-fcell"><input type=text size=40 name=pre_register_username><br /><span class="small">'.Locale::trans('invite.pre_register_username_help', [], null).'</span></div>';
-            }
+            $showPreUsername = SiteConfig::current()->system->isInvitePreEmailAndUsername();
             $_s = ((int) ($inv['invites'] ?? 0) !== 1) ? (__('legacy/invite.text_s')) : '';
 
             $data = array_merge($data, [
@@ -120,9 +128,11 @@ class InviteController extends LegacyController
                 'sendBtnText' => $sendBtnText,
                 'disabled' => $disabled,
                 'temporaryInvites' => $temporaryInvites,
-                'inviteSelectOptions' => SafeHtml::fromTrustedHtml($inviteSelectOptions),
+                'inviteOptions' => $inviteOptions,
                 'invitation_body' => $invitation_body,
-                'preUsernameTr' => SafeHtml::fromTrustedHtml($preUsernameTr),
+                'showPreUsername' => $showPreUsername,
+                'preUsernameLabel' => $showPreUsername ? Locale::trans('invite.pre_register_username', [], null) : '',
+                'preUsernameHelp' => $showPreUsername ? Locale::trans('invite.pre_register_username_help', [], null) : '',
                 '_s' => $_s,
             ]);
         } else {
@@ -174,13 +184,13 @@ class InviteController extends LegacyController
         $number = $this->inviteRepository->countInvitees($id, $filters);
         $pageSize = 50;
 
-        $enabledOptions = '';
+        $enabledOptions = [];
         foreach (['yes', 'no'] as $item) {
-            $enabledOptions .= sprintf('<option value="%s"%s>%s</option>', $item, ($enabled !== '' && $enabled == $item) ? ' selected' : '', strtoupper($item));
+            $enabledOptions[] = ['value' => $item, 'text' => strtoupper($item), 'selected' => $enabled !== '' && $enabled == $item];
         }
-        $statusOptions = '';
+        $statusOptions = [];
         foreach (['pending' => __('legacy/invite.text_pending'), 'confirmed' => __('legacy/invite.text_confirmed')] as $name => $text) {
-            $statusOptions .= sprintf('<option value="%s"%s>%s</option>', $name, ($status !== '' && $status == $name) ? ' selected' : '', $text);
+            $statusOptions[] = ['value' => $name, 'text' => (string) $text, 'selected' => $status !== '' && $status == $name];
         }
 
         $inviteRows = [];
@@ -203,13 +213,12 @@ class InviteController extends LegacyController
             $row['usernameHtml'] = UserDisplay::username((int) $row['id']);
             if ((float) $row['downloaded'] > 0) {
                 $ratio = number_format($row['uploaded'] / $row['downloaded'], 3);
-                $row['ratioHtml'] = SafeHtml::fromTrustedHtml('<span class="'.Ratio::colorClass($ratio).">$ratio</span>");
+                $row['ratioText'] = $ratio;
+                $row['ratioClass'] = Ratio::colorClass($ratio);
             } else {
-                $row['ratioHtml'] = SafeHtml::fromTrustedHtml($row['uploaded'] > 0 ? 'Inf.' : '---');
+                $row['ratioText'] = $row['uploaded'] > 0 ? 'Inf.' : '---';
+                $row['ratioClass'] = '';
             }
-            $row['statusHtml'] = SafeHtml::fromTrustedHtml($row['status'] === 'confirmed'
-                ? '<a href=userdetails.php?id='.(int) $row['id'].'><span class="nx-color-1f7309">'.e(__('legacy/invite.text_confirmed')).'</span></a>'
-                : '<a href=checkuser.php?id='.(int) $row['id'].'><span class="nx-color-ca0226">'.e(__('legacy/invite.text_pending')).'</span></a>');
         }
         unset($row);
 
@@ -229,8 +238,8 @@ JS;
             'inviteeRows' => $inviteRows,
             'inviteePagertop' => $pagertop,
             'inviteePagerbottom' => $pagerbottom,
-            'inviteeEnabledOptions' => SafeHtml::fromTrustedHtml($enabledOptions),
-            'inviteeStatusOptions' => SafeHtml::fromTrustedHtml($statusOptions),
+            'inviteeEnabledOptions' => $enabledOptions,
+            'inviteeStatusOptions' => $statusOptions,
             'haremAdditionFactor' => $haremAdditionFactor,
             'pendingCount' => $pendingCount,
             'canConfirm' => $canConfirm,
@@ -260,14 +269,8 @@ JS;
         }
 
         foreach ($inviteRows as &$row) {
-            $isHashValid = (int) $row['valid'] === InviteValid::YES->value;
-            $row['registerLink'] = SafeHtml::fromTrustedHtml($isHashValid
-                ? sprintf('&nbsp;<a href="signup.php?type=invite&invitenumber=%s" title="%s" target="_blank"><small>[%s]</small></a>', e($row['hash']), e(__('legacy/invite.signup_link_help')), e(__('legacy/invite.signup_link')))
-                : '');
+            $row['hashValid'] = (int) $row['valid'] === InviteValid::YES->value;
             $row['validText'] = Invite::$validInfo[$row['valid']]['text'] ?? '';
-            $row['inviteeUserHtml'] = SafeHtml::fromTrustedHtml(! $isHashValid
-                ? '<a href=userdetails.php?id='.(int) $row['invitee_register_uid'].'><span class="nx-color-1f7309">'.e($row['invitee_register_username']).'</span></a>'
-                : '');
         }
         unset($row);
 

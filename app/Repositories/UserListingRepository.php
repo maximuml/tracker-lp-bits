@@ -35,8 +35,8 @@ class UserListingRepository
     {
         $query = $this->buildUserQuery($filters)
             ->leftJoin('countries as c', 'u.country', '=', 'c.id')
-            ->select('u.id', 'u.class', 'u.added', 'u.last_access')
-            ->selectRaw("CASE WHEN u.country > 0 THEN CONCAT('<img src=\"pic/flag/', c.flagpic, '\" alt=\"', c.name, '\">') ELSE '---' END as country")
+            ->select('u.id', 'u.class', 'u.added', 'u.last_access', 'u.country')
+            ->addSelect(['c.flagpic as country_flagpic', 'c.name as country_name'])
             ->orderBy('u.username')
             ->offset($offset)
             ->limit($perPage);

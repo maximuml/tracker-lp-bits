@@ -104,6 +104,14 @@ final class LegacyViewSurfaceTest extends TestCase
      */
     private const TABLE_EXEMPT_FILES = [
         'components/data-table.blade.php',
+        // Legacy frame chrome — byte-parity port of Frame::open/mainOpen/
+        // stdMessage/compose markup; these layout tables are the migration
+        // boundary itself, not data tables.
+        'components/frame.blade.php',
+        'components/topten/frame.blade.php',
+        'components/std-message.blade.php',
+        'components/compose.blade.php',
+        'layouts/legacy.blade.php',
     ];
 
     public function test_raw_output_count_does_not_exceed_baseline(): void

@@ -104,31 +104,11 @@ final class Shoutbox
      */
     public static function toolbar(string $formName = 'shbox', string $fieldName = 'shbox_text'): string
     {
-        $panelId = 'shoutbox-emoji-panel';
-
-        $b = __('legacy/shoutbox.toolbar_bold');
-        $i = __('legacy/shoutbox.toolbar_italic');
-        $spoiler = __('legacy/shoutbox.toolbar_spoiler');
-        $code = __('legacy/shoutbox.toolbar_code');
-        $quote = __('legacy/shoutbox.toolbar_quote');
-        $link = __('legacy/shoutbox.toolbar_link');
-        $emoji = __('legacy/shoutbox.toolbar_emoji');
-
-        $html = '<div class="shoutbox-toolbar">';
-        $html .= '<button type="button" class="btn shoutbox-tool" data-shout-tool="wrap" data-tag="b" data-form="'.$formName.'" data-field="'.$fieldName.'" title="[b]"><b>'.$b.'</b></button>';
-        $html .= '<button type="button" class="btn shoutbox-tool" data-shout-tool="wrap" data-tag="i" data-form="'.$formName.'" data-field="'.$fieldName.'" title="[i]"><i>'.$i.'</i></button>';
-        $html .= '<button type="button" class="btn shoutbox-tool" data-shout-tool="spoiler" data-form="'.$formName.'" data-field="'.$fieldName.'" title="[spoiler]">'.$spoiler.'</button>';
-        $html .= '<button type="button" class="btn shoutbox-tool" data-shout-tool="wrap" data-tag="code" data-form="'.$formName.'" data-field="'.$fieldName.'" title="[code]">'.$code.'</button>';
-        $html .= '<button type="button" class="btn shoutbox-tool" data-shout-tool="quote" data-form="'.$formName.'" data-field="'.$fieldName.'" title="[quote]">'.$quote.'</button>';
-        $html .= '<button type="button" class="btn shoutbox-tool" data-shout-tool="link" data-form="'.$formName.'" data-field="'.$fieldName.'" title="[url]">'.$link.'</button>';
-        $html .= '<button type="button" class="btn shoutbox-tool" data-shout-tool="emoji" data-form="'.$formName.'" data-field="'.$fieldName.'" title="Emoji">'.$emoji.'</button>';
-        $html .= '</div>';
-
-        $html .= '<div id="'.$panelId.'" class="shoutbox-emoji-panel nx-hidden">';
-        $html .= Smilies::quickRow($formName, $fieldName);
-        $html .= '</div>';
-
-        return $html;
+        return view('shoutbox._toolbar', [
+            'formName' => $formName,
+            'fieldName' => $fieldName,
+            'smiliesHtml' => SafeHtml::fromTrustedHtml(Smilies::quickRow($formName, $fieldName)),
+        ])->render();
     }
 
     /**
@@ -181,7 +161,11 @@ final class Shoutbox
             $tooltip = (string) UserClass::name($class, false, false, true);
         }
 
-        return SafeHtml::fromTrustedHtml('<span class="shout-class-badge shout-class-badge--'.$modifier.'" title="'.htmlspecialchars($tooltip, ENT_QUOTES).'">'.$label.'</span>');
+        return SafeHtml::fromTrustedHtml(view('shoutbox._class_badge', [
+            'label' => $label,
+            'modifier' => $modifier,
+            'tooltip' => $tooltip,
+        ])->render());
     }
 
     /**
@@ -210,18 +194,11 @@ final class Shoutbox
             return '';
         }
 
-        $editLabel = __('legacy/shoutbox.text_edit');
-        $delLabel = __('legacy/shoutbox.text_del');
-        $html = '<span class="shout-actions">';
-        if ($canEdit) {
-            $html .= ' <a href="#" class="shout-action-edit" data-shout-edit="'.$msgId.'" title="'.htmlspecialchars((string) (__('legacy/shoutbox.title_edit_shout')), ENT_QUOTES).'">['.htmlspecialchars($editLabel).']</a>';
-        }
-        if ($canDelete) {
-            $html .= ' <a href="#" class="shout-action-del" data-shout-del="'.$msgId.'" title="'.htmlspecialchars((string) (__('legacy/shoutbox.title_delete_shout')), ENT_QUOTES).'">['.htmlspecialchars($delLabel).']</a>';
-        }
-        $html .= '</span>';
-
-        return $html;
+        return view('shoutbox._actions', [
+            'msgId' => $msgId,
+            'canEdit' => $canEdit,
+            'canDelete' => $canDelete,
+        ])->render();
     }
 
     /**
@@ -266,33 +243,26 @@ final class Shoutbox
             $reactors = [];
         }
 
-        $titleReact = (string) (__('legacy/shoutbox.title_react'));
-        $titleAdd = (string) (__('legacy/shoutbox.title_add_reaction'));
-        $titleReacted = (string) (__('legacy/shoutbox.title_reacted_by'));
-
-        $html = '<span class="shout-reactions">';
+        $reactionRows = [];
         foreach (self::REACTIONS as $emoji) {
             $cnt = (int) ($counts[$emoji] ?? 0);
             if ($cnt <= 0) {
                 continue;
             }
-            $active = in_array($emoji, $myReactions, true) ? ' active' : '';
-            $encoded = (string) json_encode($emoji, JSON_UNESCAPED_UNICODE);
-            $title = self::buildReactorTooltip($cnt, $reactors[$emoji] ?? []);
-            $html .= '<button type="button" class="shout-reaction'.$active.'" data-shout-react="'.$shoutId.'" data-emoji="'.htmlspecialchars($emoji, ENT_QUOTES, 'UTF-8').'" title="'.htmlspecialchars($title, ENT_QUOTES, 'UTF-8').'">'.$emoji.' '.$cnt.'</button>';
+            $reactionRows[] = [
+                'emoji' => $emoji,
+                'count' => $cnt,
+                'active' => in_array($emoji, $myReactions, true),
+                'title' => self::buildReactorTooltip($cnt, $reactors[$emoji] ?? []),
+            ];
         }
 
-        if ($currentUserId > 0) {
-            $html .= '<button type="button" class="shout-reaction shout-reaction-add" data-shout-picker="'.$shoutId.'" title="'.htmlspecialchars($titleAdd, ENT_QUOTES, 'UTF-8').'">+</button>';
-            $html .= '<span class="shout-reaction-picker nx-hidden" id="shout-reaction-picker-'.$shoutId.'">';
-            foreach (self::REACTIONS as $emoji) {
-                $html .= '<button type="button" class="shout-reaction" data-shout-react="'.$shoutId.'" data-emoji="'.htmlspecialchars($emoji, ENT_QUOTES, 'UTF-8').'" data-close-picker="'.$shoutId.'" title="'.htmlspecialchars($titleReact, ENT_QUOTES, 'UTF-8').'">'.$emoji.'</button>';
-            }
-            $html .= '</span>';
-        }
-        $html .= '</span>';
-
-        return $html;
+        return view('shoutbox._reactions', [
+            'shoutId' => $shoutId,
+            'reactions' => $reactionRows,
+            'showPicker' => $currentUserId > 0,
+            'pickerEmojis' => self::REACTIONS,
+        ])->render();
     }
 
     /**

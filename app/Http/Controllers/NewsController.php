@@ -52,16 +52,11 @@ class NewsController extends LegacyController
                 : (string) $request->headers->get('referer', '');
 
             if ((int) $request->input('sure', 0) !== 1) {
-                $confirm = (__('legacy/news.std_are_you_sure'))
-                    .'<form method="post" action="'.htmlspecialchars((string) url('/news')).'">'
-                    .csrf_field()
-                    .'<input type="hidden" name="action" value="delete" />'
-                    .'<input type="hidden" name="newsid" value="'.$newsid.'" />'
-                    .'<input type="hidden" name="returnto" value="'.htmlspecialchars($returnto).'" />'
-                    .'<input type="hidden" name="sure" value="1" />'
-                    .'<button type="submit" class="altlink">'.(__('legacy/news.std_here')).'</button>'
-                    .'</form>'
-                    .(__('legacy/news.std_if_sure'));
+                $confirm = view('news._delete_confirm', [
+                    'actionUrl' => (string) url('/news'),
+                    'newsid' => $newsid,
+                    'returnto' => $returnto,
+                ])->render();
 
                 return $this->legacyAbortResponse(__('legacy/news.std_delete_news_item'), $confirm, false);
             }

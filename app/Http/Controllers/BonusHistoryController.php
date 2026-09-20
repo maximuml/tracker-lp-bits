@@ -23,7 +23,6 @@ use App\Support\Format;
 use App\Support\Html\SafeHtml;
 use App\Support\Locale;
 use App\Support\Pagination;
-use App\Support\Time;
 use App\Support\UserDisplay;
 use App\Support\Validators;
 use Illuminate\Http\JsonResponse;
@@ -86,16 +85,22 @@ class BonusHistoryController extends LegacyController
         $categoryText = Locale::trans('bonus-log.category', [], null);
         $businessTypeText = Locale::trans('bonus-log.fields.business_type', [], null);
 
-        $categoryOptionsHtml = '';
+        $categoryOptionList = [];
         foreach ($categoryOptions as $name => $text) {
-            $selected = (request()->input('category') ?? '') == $name ? ' selected' : '';
-            $categoryOptionsHtml .= sprintf('<option value="%s"%s>%s</option>', htmlspecialchars((string) $name), $selected, htmlspecialchars($text));
+            $categoryOptionList[] = [
+                'value' => (string) $name,
+                'label' => $text,
+                'selected' => (request()->input('category') ?? '') == $name,
+            ];
         }
 
-        $businessTypeOptionsHtml = '';
+        $businessTypeOptionList = [];
         foreach ($businessTypeOptions as $name => $text) {
-            $selected = (request()->input('business_type') ?? '') == $name ? ' selected' : '';
-            $businessTypeOptionsHtml .= sprintf('<option value="%s"%s>%s</option>', htmlspecialchars((string) $name), $selected, htmlspecialchars($text));
+            $businessTypeOptionList[] = [
+                'value' => (string) $name,
+                'label' => $text,
+                'selected' => (request()->input('business_type') ?? '') == $name,
+            ];
         }
 
         $rep = $this->bonusCalculationRepository;
@@ -139,8 +144,8 @@ JS;
             'textSelectOnePlease' => $textSelectOnePlease,
             'resetText' => $resetText,
             'submitText' => $submitText,
-            'categoryOptionsHtml' => SafeHtml::fromTrustedHtml($categoryOptionsHtml),
-            'businessTypeOptionsHtml' => SafeHtml::fromTrustedHtml($businessTypeOptionsHtml),
+            'categoryOptionList' => $categoryOptionList,
+            'businessTypeOptionList' => $businessTypeOptionList,
             'pagerParam' => $pagerParam,
             'pagertop' => $pagertop,
             'pagerbottom' => $pagerbottom,
@@ -260,32 +265,27 @@ JS;
         foreach ($rows as &$row) {
             $row['usernameHtml'] = SafeHtml::fromTrustedHtml((string) UserDisplay::username($row['userid'], false, true, true, false, false, true));
             $row['sizeFormatted'] = $row['torrent_size'] ? Format::size($row['torrent_size']) : '0';
-            $row['lastAddedFormatted'] = SafeHtml::fromTrustedHtml($row['last_added'] ? (string) Time::format($row['last_added']) : $naText);
-            $row['lastTorrentHtml'] = SafeHtml::fromTrustedHtml($row['last_name'] !== ''
-                ? '<a href="details.php?id='.(int) $row['last_id'].'">'.e($row['last_name']).'</a>'
-                : e($naText));
         }
         unset($row);
 
-        $yearOptions = '';
+        $yearOptionList = [];
         for ($i = $yearFounded; $i <= $yearNow; $i++) {
-            $selected = $i == $year ? ' selected="selected"' : '';
-            $yearOptions .= '<option value="'.$i.'"'.$selected.'>'.$i.'</option>';
+            $yearOptionList[] = ['value' => $i, 'selected' => $i == $year];
         }
-        $monthOptions = '';
+        $monthOptionList = [];
         for ($i = 1; $i <= 12; $i++) {
-            $selected = $i == $month ? ' selected="selected"' : '';
-            $monthOptions .= '<option value="'.$i.'"'.$selected.'>'.$i.'</option>';
+            $monthOptionList[] = ['value' => $i, 'selected' => $i == $month];
         }
 
         return $this->legacyPage($request, 'uploaders', true, [
             'year' => $year,
             'month' => $month,
             'order' => $order,
-            'yearOptions' => SafeHtml::fromTrustedHtml($yearOptions),
-            'monthOptions' => SafeHtml::fromTrustedHtml($monthOptions),
+            'yearOptions' => $yearOptionList,
+            'monthOptions' => $monthOptionList,
             'datefounded' => $dateFounded,
             'timeStart' => $timeStart,
+            'naText' => $naText,
             'rows' => $rows,
         ]);
 

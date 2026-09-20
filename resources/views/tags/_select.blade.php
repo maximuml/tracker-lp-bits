@@ -1,0 +1,1 @@
+<select name="{{ $name }}"><option value="">{{ $placeholder }}</option>@foreach ($options as $opt)<option value="{{ $opt['value'] }}"{{ $opt['selected'] ? ' selected' : '' }}>{{ $opt['label'] }}</option>@endforeach</select>

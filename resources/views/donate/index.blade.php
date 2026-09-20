@@ -4,11 +4,11 @@
 
 @section('content')
 @if ($thanks)
-    {{ \App\Support\Frame::stdMessage(__('legacy/donate.std_success'), $successMessage, false) }}
+    <x-std-message :heading="__('legacy/donate.std_success')" :htmlstrip="false">{{ __('legacy/donate.std_donation_success_note_one') }}<a href="sendmessage.php?receiver={{ $accountantId }}"><b>{{ __('legacy/donate.std_here') }}</b></a>{{ __('legacy/donate.std_donation_success_note_two') }}</x-std-message>
 @elseif (! $enabled)
-    {{ \App\Support\Frame::stdMessage(__('legacy/donate.std_sorry'), __('legacy/donate.std_do_not_accept_donation'), true) }}
+    <x-std-message :heading="__('legacy/donate.std_sorry')" :text="__('legacy/donate.std_do_not_accept_donation')" />
 @elseif (! $showAny)
-    {{ \App\Support\Frame::stdMessage(__('legacy/donate.std_error'), __('legacy/donate.std_no_donation_account_available'), false) }}
+    <x-std-message :heading="__('legacy/donate.std_error')" :text="__('legacy/donate.std_no_donation_account_available')" :htmlstrip="false" />
 @else
     <h2>{{ __('legacy/donate.text_donate') }}</h2>
     <div>

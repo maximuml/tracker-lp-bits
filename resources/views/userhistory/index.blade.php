@@ -8,7 +8,7 @@
     @if (($postcount ?? 0) > ($perpage ?? 15))
         {{ $pagertop ?? '' }}
     @endif
-    {{ \App\Support\Frame::open('', false, 10, '100%', 'left') }}
+    <x-frame :center="false">
     @foreach ($items ?? [] as $item)
         <p class=sub>
         {{ $item['added'] }}&nbsp;--&nbsp;<b>{{ __('legacy/userhistory.text_forum') }}&nbsp;</b>
@@ -25,7 +25,7 @@
         </table>
         <br />
     @endforeach
-    {{ \App\Support\Frame::close() }}
+    </x-frame>
     @if (($postcount ?? 0) > ($perpage ?? 15))
         {{ $pagerbottom ?? '' }}
     @endif
@@ -34,7 +34,7 @@
     @if (($commentcount ?? 0) > ($perpage ?? 15))
         {{ $pagertop ?? '' }}
     @endif
-    {{ \App\Support\Frame::open('', false, 10, '100%', 'left') }}
+    <x-frame :center="false">
     @foreach ($items ?? [] as $item)
         <p class=sub>
         {{ $item['added'] }}&nbsp;---&nbsp;<b>{{ __('legacy/userhistory.text_torrent') }}&nbsp;</b>
@@ -51,7 +51,7 @@
         </table>
         <br />
     @endforeach
-    {{ \App\Support\Frame::close() }}
+    </x-frame>
     @if (($commentcount ?? 0) > ($perpage ?? 15))
         {{ $pagerbottom ?? '' }}
     @endif

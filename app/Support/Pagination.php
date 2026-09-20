@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Support\Html\SafeHtml;
+use App\ViewModels\PagerLinkViewModel;
+use App\ViewModels\PagerViewModel;
 
 /**
  * Stateless pagination-HTML renderer extracted from
@@ -74,33 +76,8 @@ final class Pagination
             ? ($labels['shift_next_title'] ?? '')
             : ($labels['alt_next_title'] ?? '');
 
-        $prevLabel = '<b title="'.htmlspecialchars($prevTitle).'">&lt;&lt;&nbsp;'.($labels['prev'] ?? '').'</b>';
-        $nextLabel = '<b title="'.htmlspecialchars($nextTitle).'">'.($labels['next'] ?? '').'&nbsp;&gt;&gt;</b>';
-
-        // Build prev link
-        $pager = '';
-        if ($page >= 1) {
-            $pager .= '<a href="'.htmlspecialchars($href.$pagename.'='.($page - 1)).'">';
-            $pager .= $prevLabel;
-            $pager .= '</a>';
-        } else {
-            $pager .= '<span class="gray">'.$prevLabel.'</span>';
-        }
-
-        $pager .= '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
-
-        // Build next link
-        if ($page < $mp && $mp >= 0) {
-            $pager .= '<a href="'.htmlspecialchars($href.$pagename.'='.($page + 1)).'">';
-            $pager .= $nextLabel;
-            $pager .= '</a>';
-        } else {
-            $pager .= '<span class="gray">'.$nextLabel.'</span>';
-        }
-
-        // Build page-number links
+        $links = [];
         if ($count) {
-            $pagerarr = [];
             $dotted = 0;
             $dotspace = 3;
             $dotend = $pages - $dotspace;
@@ -110,7 +87,7 @@ final class Pagination
             for ($i = 0; $i < $pages; $i++) {
                 if (($i >= $dotspace && $i <= $curdotend) || ($i >= $curdotstart && $i < $dotend)) {
                     if (! $dotted) {
-                        $pagerarr[] = '...';
+                        $links[] = new PagerLinkViewModel(dots: true, start: '', end: '', url: null);
                     }
                     $dotted = 1;
 
@@ -118,24 +95,28 @@ final class Pagination
                 }
                 $dotted = 0;
                 $start = $i * $rpp + 1;
-                $end = $start + $rpp - 1;
-                if ($end > $count) {
-                    $end = $count;
-                }
-                $text = $start.'&nbsp;-&nbsp;'.$end;
-                if ($i != $page) {
-                    $pagerarr[] = '<a href="'.htmlspecialchars($href.$pagename.'='.$i).'"><b>'.$text.'</b></a>';
-                } else {
-                    $pagerarr[] = '<span class="gray"><b>'.$text.'</b></span>';
-                }
+                $end = min($start + $rpp - 1, $count);
+                $links[] = new PagerLinkViewModel(
+                    dots: false,
+                    start: (string) $start,
+                    end: (string) $end,
+                    url: $i != $page ? $href.$pagename.'='.$i : null,
+                );
             }
-            $pagerstr = implode(' | ', $pagerarr);
-            $pagertop = "<p align=\"center\" class='nexus-pagination'>".$pager.'<br />'.$pagerstr."</p>\n";
-            $pagerbottom = "<p align=\"center\" class='nexus-pagination'>".$pagerstr.'<br />'.$pager."</p>\n";
-        } else {
-            $pagertop = "<p align=\"center\" class='nexus-pagination'>".$pager."</p>\n";
-            $pagerbottom = $pagertop;
         }
+
+        $vm = new PagerViewModel(
+            prevTitle: $prevTitle,
+            prevLabel: $labels['prev'] ?? '',
+            prevUrl: $page >= 1 ? $href.$pagename.'='.($page - 1) : null,
+            nextTitle: $nextTitle,
+            nextLabel: $labels['next'] ?? '',
+            nextUrl: $page < $mp && $mp >= 0 ? $href.$pagename.'='.($page + 1) : null,
+            links: $links,
+        );
+
+        $pagertop = view('pagination.pager', ['vm' => $vm, 'top' => true])->render();
+        $pagerbottom = view('pagination.pager', ['vm' => $vm, 'top' => false])->render();
 
         $startOffset = $page * $rpp;
 

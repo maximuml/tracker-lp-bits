@@ -7,7 +7,7 @@
 </p>
 
 @foreach ($sections as $section)
-<x-dynamic-component :component="'topten.'.$section['view']" :rows="$section['data']" :caption="$section['caption'].view('components.topten.limit-links', ['type' => $type, 'subtype' => $section['subtype'] ?? '', 'limits' => $section['limits'] ?? []])->render()" :what="$section['what'] ?? ''" />
+<x-dynamic-component :component="'topten.'.$section['view']" :rows="$section['data']" :caption="\App\Support\Html\SafeHtml::fromUntrustedHtml($section['caption'].view('components.topten.limit-links', ['type' => $type, 'subtype' => $section['subtype'] ?? '', 'limits' => $section['limits'] ?? []])->render())" :what="$section['what'] ?? ''" />
 @endforeach
 
 <p><span class="small">{{ __('legacy/topten.text_this_page_last_updated')}}{{ date('Y-m-d H:i:s') }}, {{ __('legacy/topten.text_started_recording_date')}}{{ $dateFounded }}{{ __('legacy/topten.text_update_interval')}}</span></p>

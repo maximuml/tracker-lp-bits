@@ -458,27 +458,25 @@ final class SiteChromeViewModel
         $remarkTpl = (string) (__('legacy/functions.full_site_promotion_remark'));
         if ($currentPromotion) {
             $promotionText = TorrentPromotion::fromIntSafe((int) ($currentPromotion['global_sp_state'] ?? TorrentPromotion::NORMAL->value))->label();
-            $msg = sprintf((string) (__('legacy/functions.full_site_promotion_in_effect')), $promotionText);
+            $lines = [sprintf((string) (__('legacy/functions.full_site_promotion_in_effect')), $promotionText)];
             if (! empty($currentPromotion['begin']) || ! empty($currentPromotion['deadline'])) {
-                $timeRange = sprintf((string) (__('legacy/functions.full_site_promotion_time_range')), $currentPromotion['begin'] ?? '-∞', $currentPromotion['deadline'] ?? '∞');
-                $msg .= '<br/>'.$timeRange;
+                $lines[] = sprintf((string) (__('legacy/functions.full_site_promotion_time_range')), $currentPromotion['begin'] ?? '-∞', $currentPromotion['deadline'] ?? '∞');
             }
             if (! empty($currentPromotion['remark'])) {
-                $msg .= '<br/>'.sprintf($remarkTpl, $currentPromotion['remark']);
+                $lines[] = sprintf($remarkTpl, $currentPromotion['remark']);
             }
-            $alerts[] = ['url' => 'torrents.php', 'text' => $msg, 'color' => 'green'];
+            $alerts[] = ['url' => 'torrents.php', 'text' => implode('<br/>', $lines), 'color' => 'green'];
         }
         if ($upcomingPromotion) {
             $promotionText = TorrentPromotion::fromIntSafe((int) ($upcomingPromotion['global_sp_state'] ?? TorrentPromotion::NORMAL->value))->label();
-            $msg = sprintf((string) (__('legacy/functions.full_site_promotion_upcoming')), $promotionText);
+            $lines = [sprintf((string) (__('legacy/functions.full_site_promotion_upcoming')), $promotionText)];
             if (! empty($upcomingPromotion['begin']) || ! empty($upcomingPromotion['deadline'])) {
-                $timeRange = sprintf((string) (__('legacy/functions.full_site_promotion_time_range')), $upcomingPromotion['begin'] ?? '-∞', $upcomingPromotion['deadline'] ?? '∞');
-                $msg .= '<br/>'.$timeRange;
+                $lines[] = sprintf((string) (__('legacy/functions.full_site_promotion_time_range')), $upcomingPromotion['begin'] ?? '-∞', $upcomingPromotion['deadline'] ?? '∞');
             }
             if (! empty($upcomingPromotion['remark'])) {
-                $msg .= '<br/>'.sprintf($remarkTpl, $upcomingPromotion['remark']);
+                $lines[] = sprintf($remarkTpl, $upcomingPromotion['remark']);
             }
-            $alerts[] = ['url' => 'torrents.php', 'text' => $msg, 'color' => 'blue'];
+            $alerts[] = ['url' => 'torrents.php', 'text' => implode('<br/>', $lines), 'color' => 'blue'];
         }
         if ($user['leechwarn'] ?? false) {
             $kicktimeout = Time::format($user['leechwarnuntil'], false, false, true);

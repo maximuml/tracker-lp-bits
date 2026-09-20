@@ -243,7 +243,7 @@ final class ForumTopicViewService
             pages: $pages,
             posts: $posts,
             moveForums: $moveForums,
-            highlightColorOptions: SafeHtml::fromTrustedHtml($this->index->highlightColorOptions((string) (__('legacy/forums.select_color')))),
+            highlightColorOptions: $this->index->highlightColorOptions((string) (__('legacy/forums.select_color'))),
             quickReply: $maypost
                 ? SafeHtml::fromTrustedHtml(Html::quickReply('compose', 'body', (string) (__('legacy/forums.submit_add_reply'))))
                 : null,

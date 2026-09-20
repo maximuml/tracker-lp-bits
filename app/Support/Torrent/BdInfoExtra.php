@@ -5,7 +5,11 @@ declare(strict_types=1);
 namespace App\Support\Torrent;
 
 use App\Support\Format;
+use App\Support\Html\SafeHtml;
 use App\Support\Locale;
+use App\ViewModels\Torrent\BdInfoColumnViewModel;
+use App\ViewModels\Torrent\BdInfoDiscViewModel;
+use App\ViewModels\Torrent\BdInfoViewModel;
 
 class BdInfoExtra
 {
@@ -920,163 +924,99 @@ class BdInfoExtra
      */
     public function renderOnDetailsPage(): string
     {
+        return view('torrent._bdinfo', ['vm' => $this->detailsViewModel()])->render();
+    }
 
-        // 获取所有DISC
+    private function detailsViewModel(): BdInfoViewModel
+    {
+        $rawBdInfo = sprintf('[spoiler=%s][raw]<pre>%s</pre>[/raw][/spoiler]', Locale::trans('torrent.show_hide_bd_info', [], null), $this->bdInfo);
+        $rawSpoiler = SafeHtml::fromTrustedHtml(Format::formatComment($rawBdInfo, false));
+
         $allDiscs = $this->getAllDiscs();
-
-        // 检查是否有有效的媒体数据（至少包含VIDEO或AUDIO）
         $hasValidData = false;
-        if (! empty($allDiscs)) {
-            foreach ($allDiscs as $disc) {
-                if ((isset($disc['video']) && ! empty($disc['video'])) ||
-                    (isset($disc['audio']) && ! empty($disc['audio']))) {
-                    $hasValidData = true;
-                    break;
-                }
+        foreach ($allDiscs as $disc) {
+            if (! empty($disc['video']) || ! empty($disc['audio'])) {
+                $hasValidData = true;
+                break;
             }
         }
 
-        // 如果没有有效数据，隐藏显示原始BDINFO
         if (! $hasValidData) {
-            $rawBdInfo = sprintf('[spoiler=%s][raw]<pre>%s</pre>[/raw][/spoiler]', Locale::trans('torrent.show_hide_bd_info', [], null), $this->bdInfo);
-
-            return sprintf('<div class="nexus-media-info-raw">%s</div>', Format::formatComment($rawBdInfo, false));
+            return new BdInfoViewModel(rawOnly: true, rawSpoiler: $rawSpoiler);
         }
 
-        $result = '';
-
-        // 为每个DISC生成表格
+        $discs = [];
+        $multiDisc = count($allDiscs) > 1;
         foreach ($allDiscs as $discIndex => $disc) {
-            // 临时设置当前DISC数据
             $originalBdInfoArr = $this->bdInfoArr;
             $this->bdInfoArr = $disc;
 
             $summaryInfo = $this->getSummaryInfo();
+            $this->bdInfoArr = $originalBdInfoArr;
+
             $videos = $summaryInfo['videos'] ?: [];
             $audios = $summaryInfo['audios'] ?: [];
             $subtitles = $summaryInfo['subtitles'] ?: [];
-
             if (empty($videos) && empty($audios) && empty($subtitles)) {
                 continue;
             }
 
-            // 添加DISC标题（如果有多个DISC）
-            if (count($allDiscs) > 1) {
-                $discTitle = $disc['disc_info']['title'] ?? '';
-                $result .= '<h4>Disc #'.($discIndex + 1).' : '.htmlspecialchars($discTitle).'</h4>';
-            }
-
-            $result .= '<table><tbody><tr>';
-            $cols = 0;
-            if (! empty($videos)) {
-                $cols++;
-                $result .= $this->buildTdTable($videos);
-            }
-            if (! empty($audios)) {
-                $cols++;
-                $result .= $this->buildTdTable($audios);
-            }
-            if (! empty($subtitles)) {
-                $cols++;
-                $result .= $this->buildTdTable($subtitles);
-            }
-            $result .= '</tr>';
-
-            // 恢复原始数据
-            $this->bdInfoArr = $originalBdInfoArr;
-
-            $result .= '</tbody></table>';
-
-            // 在DISC之间添加分隔线（除了最后一个）
-            if ($discIndex < count($allDiscs) - 1) {
-                $result .= '<hr>';
-            }
+            $discs[] = new BdInfoDiscViewModel(
+                heading: $multiDisc ? 'Disc #'.($discIndex + 1).' : '.($disc['disc_info']['title'] ?? '') : null,
+                videos: $videos !== [] ? $this->bdInfoColumn($videos) : null,
+                audios: $audios !== [] ? $this->bdInfoColumn($audios) : null,
+                subtitles: $subtitles !== [] ? $this->bdInfoColumn($subtitles) : null,
+                trailingHr: $discIndex < count($allDiscs) - 1,
+            );
         }
 
-        // 添加原始BDINFO
-        $rawBdInfo = sprintf('[spoiler=%s][raw]<pre>%s</pre>[/raw][/spoiler]', Locale::trans('torrent.show_hide_bd_info', [], null), $this->bdInfo);
-        if (function_exists('format_comment')) {
-            $result .= sprintf('<div class="nexus-media-info-raw">%s</div>', Format::formatComment($rawBdInfo, false));
-        } else {
-            $result .= sprintf('<div class="nexus-media-info-raw">%s</div>', $rawBdInfo);
-        }
-
-        return $result;
+        return new BdInfoViewModel(rawOnly: false, rawSpoiler: $rawSpoiler, discs: $discs);
     }
 
     /**
-     * 构建表格单元格
-     *
      * @param  array<string, string>  $parts
      */
-    private function buildTdTable(array $parts): string
+    private function bdInfoColumn(array $parts): BdInfoColumnViewModel
     {
-        $table = '<table><tbody>';
-
-        // 检查是否为音频或字幕数据
-        $isAudioOrSubtitle = false;
-        $audioOrSubtitleCount = 0;
         $audioPrefix = Locale::trans('torrent.technicalinfo_audio', [], null);
         $subtitlePrefix = Locale::trans('torrent.technicalinfo_subtitles', [], null);
+        $audioOrSubtitleCount = 0;
         foreach ($parts as $key => $value) {
             if (str_starts_with($key, $audioPrefix) || str_starts_with($key, $subtitlePrefix)) {
-                $isAudioOrSubtitle = true;
                 $audioOrSubtitleCount++;
             }
         }
+        $collapse = $audioOrSubtitleCount > 3;
 
-        $displayCount = 0;
+        $visibleRows = [];
         $hiddenParts = [];
-
+        $displayCount = 0;
         foreach ($parts as $key => $value) {
             $displayCount++;
-
-            // 如果是音频或字幕，且超过3条，则隐藏多余的
-            if ($isAudioOrSubtitle && $audioOrSubtitleCount > 3) {
-                if ($displayCount <= 3) {
-                    // 显示前3条
-                    $table .= '<tr>';
-                    $table .= sprintf('<td><b>%s: </b>%s</td>', $key, $value);
-                    $table .= '</tr>';
-                } else {
-                    // 收集隐藏的部分
-                    $hiddenParts[$key] = $value;
-                }
+            if ($collapse && $displayCount > 3) {
+                $hiddenParts[$key] = $value;
             } else {
-                // 非音频/字幕数据，或数量不超过3条，正常显示
-                $table .= '<tr>';
-                $table .= sprintf('<td><b>%s: </b>%s</td>', $key, $value);
-                $table .= '</tr>';
+                $visibleRows[$key] = $value;
             }
         }
 
-        // 如果有隐藏的部分，添加spoiler
-        if (! empty($hiddenParts)) {
+        $hiddenSpoiler = null;
+        if ($hiddenParts !== []) {
             $hiddenContent = '';
             foreach ($hiddenParts as $key => $value) {
                 $hiddenContent .= sprintf('<b>%s: </b>%s<br>', $key, $value);
             }
             $hiddenContent = rtrim($hiddenContent, '<br>');
 
-            $spoilerTitle = $isAudioOrSubtitle && str_starts_with(array_keys($parts)[0], $audioPrefix)
+            $spoilerTitle = str_starts_with(array_keys($parts)[0], $audioPrefix)
                 ? Locale::trans('torrent.collapse_show_more_audio', [], null)
                 : Locale::trans('torrent.collapse_show_more_subtitles', [], null);
 
             $spoiler = sprintf('[spoiler=%s]%s[/spoiler]', $spoilerTitle, $hiddenContent);
-            $table .= '<tr>';
-            // 检查format_comment函数是否存在
-            if (function_exists('format_comment')) {
-                $table .= sprintf('<td>%s</td>', Format::formatComment($spoiler, false));
-            } else {
-                $table .= sprintf('<td>%s</td>', $spoiler);
-            }
-            $table .= '</tr>';
+            $hiddenSpoiler = SafeHtml::fromTrustedHtml(Format::formatComment($spoiler, false));
         }
 
-        $table .= '</tbody>';
-        $table .= '</table>';
-
-        return sprintf('<td>%s</td>', $table);
+        return new BdInfoColumnViewModel(visibleRows: $visibleRows, hiddenSpoiler: $hiddenSpoiler);
     }
 
     /**

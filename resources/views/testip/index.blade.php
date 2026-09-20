@@ -5,9 +5,15 @@
 @section('content')
 <h1>{{ ('Test IP address')}}</h1>
 @if (! empty($hasResult))
-<div class="nx-embedded">{{ $message ?? '' }}</div>
-    @if (($banstable ?? '') !== '')
-<p>{{ $banstable }}</p>
+<div class="nx-embedded">The IP address <b>{{ $ip }}</b> is {{ $isBanned ? '' : 'not ' }}banned{{ $isBanned ? ':' : '.' }}</div>
+    @if ($isBanned)
+<p><table data-nx="data" class=main border=0 cellspacing=0 cellpadding=5>
+<tr><td class=colhead>First</td><td class=colhead>Last</td><td class=colhead>Comment</td></tr>
+@foreach ($banRows as $row)
+<tr><td>{{ $row['first'] }}</td><td>{{ $row['last'] }}</td><td>{{ $row['comment'] }}</td></tr>
+@endforeach
+</table>
+</p>
     @endif
 @endif
 <form method=post action=testip.php>

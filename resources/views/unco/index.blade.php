@@ -4,7 +4,7 @@
 
 @section('content')
 @if (! empty($rows ?? []))
-    {{ \App\Support\Frame::open('', false, 10, '100%', 'left') }}
+    <x-frame :center="false">
     <table data-nx="data" width="100%" border="1" cellspacing="0" cellpadding="5">
         @if ($status ?? '')
             <tr>
@@ -37,6 +37,6 @@
             </tr>
         @endforeach
     </table>
-    {{ \App\Support\Frame::close() }}
+    </x-frame>
 @endif
 @endsection

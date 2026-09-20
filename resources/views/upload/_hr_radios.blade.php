@@ -1,0 +1,1 @@
+<label><input type="radio" name="hr[{{ $searchBoxId }}]" value="0"{{ $value == 0 ? ' checked' : '' }} />NO</label><label><input type="radio" name="hr[{{ $searchBoxId }}]" value="1"{{ $value == 1 ? ' checked' : '' }} />YES</label>

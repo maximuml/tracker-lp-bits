@@ -26,8 +26,7 @@ use Tests\TestCase;
 /**
  * Unit tests for ForumIndexService.
  *
- * Covers getTopicImage (all statuses), highlightTopic (with/without
- * colour), highlightColorOptions, getForumRow (all/specific/missing),
+ * Covers highlightColorOptions, getForumRow (all/specific/missing),
  * getLastReadPostId, catchUp (no-user/user), forumStats, and
  * buildForumsIndex (empty data, with overforums).
  */
@@ -124,94 +123,30 @@ final class ForumIndexServiceTest extends TestCase
         $this->currentUser->set(array_merge(['id' => 1, 'username' => 'testuser', 'class' => 1], $data));
     }
 
-    // --- getTopicImage ---
-
-    public function test_get_topic_image_read_returns_img_tag(): void
-    {
-        $result = $this->service->getTopicImage('read');
-
-        $this->assertStringContainsString('<img', (string) $result);
-        $this->assertStringContainsString('alt="read"', (string) $result);
-        $this->assertStringContainsString('title="Read"', (string) $result);
-    }
-
-    public function test_get_topic_image_unread_returns_img_tag(): void
-    {
-        $result = $this->service->getTopicImage('unread');
-
-        $this->assertStringContainsString('<img', (string) $result);
-        $this->assertStringContainsString('alt="unread"', (string) $result);
-    }
-
-    public function test_get_topic_image_locked_returns_img_tag(): void
-    {
-        $result = $this->service->getTopicImage('locked');
-
-        $this->assertStringContainsString('<img', (string) $result);
-        $this->assertStringContainsString('alt="locked"', (string) $result);
-    }
-
-    public function test_get_topic_image_lockednew_returns_img_tag(): void
-    {
-        $result = $this->service->getTopicImage('lockednew');
-
-        $this->assertStringContainsString('<img', (string) $result);
-        $this->assertStringContainsString('alt="lockednew"', (string) $result);
-    }
-
-    public function test_get_topic_image_unknown_status_returns_empty(): void
-    {
-        $this->assertSame('', $this->service->getTopicImage('unknown'));
-    }
-
-    // --- highlightTopic ---
-
-    public function test_highlight_topic_with_zero_color_returns_subject_unchanged(): void
-    {
-        $result = $this->service->highlightTopic('My Topic', 0);
-
-        $this->assertSame('My Topic', (string) ($result));
-    }
-
-    public function test_highlight_topic_with_valid_color_wraps_subject(): void
-    {
-        $result = $this->service->highlightTopic('My Topic', 17);
-
-        $this->assertStringContainsString('class="nx-hl-17"', (string) $result);
-        $this->assertStringContainsString('My Topic', (string) $result);
-    }
-
-    public function test_highlight_topic_with_invalid_color_returns_subject_unchanged(): void
-    {
-        $result = $this->service->highlightTopic('My Topic', 999);
-
-        $this->assertSame('My Topic', (string) ($result));
-    }
-
     // --- highlightColorOptions ---
 
-    public function test_highlight_color_options_returns_html_with_default(): void
+    public function test_highlight_color_options_returns_default_first(): void
     {
         $result = $this->service->highlightColorOptions('Select Color');
 
-        $this->assertStringContainsString('Select Color', (string) $result);
-        $this->assertStringContainsString("<option value='0'>", (string) $result);
+        $this->assertSame(['value' => 0, 'label' => 'Select Color'], $result[0]);
     }
 
     public function test_highlight_color_options_contains_all_40_colors(): void
     {
         $result = $this->service->highlightColorOptions('Select');
 
-        // 40 colour options + 1 default = 41 <option> tags
-        $this->assertSame(41, substr_count($result, '<option'));
+        // 40 colour options + 1 default
+        $this->assertCount(41, $result);
     }
 
     public function test_highlight_color_options_includes_black_and_white(): void
     {
         $result = $this->service->highlightColorOptions('Select');
 
-        $this->assertStringContainsString('Black', (string) $result);
-        $this->assertStringContainsString('White', (string) $result);
+        $labels = array_column($result, 'label');
+        $this->assertContains('Black', $labels);
+        $this->assertContains('White', $labels);
     }
 
     // --- getForumRow ---

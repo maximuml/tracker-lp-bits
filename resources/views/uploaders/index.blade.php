@@ -10,9 +10,9 @@
 <form method="get" action="?">
 <span>
 {{ __('legacy/uploaders.text_select_month')}}
-<select name="year">{{ $yearOptions }}</select>
+<select name="year">@foreach ($yearOptions as $o)<option value="{{ $o['value'] }}" @if ($o['selected']) selected="selected" @endif>{{ $o['value'] }}</option>@endforeach</select>
 &nbsp;&nbsp;
-<select name="month">{{ $monthOptions }}</select>
+<select name="month">@foreach ($monthOptions as $o)<option value="{{ $o['value'] }}" @if ($o['selected']) selected="selected" @endif>{{ $o['value'] }}</option>@endforeach</select>
 &nbsp;&nbsp;
 <input type="submit" value="{{ __('legacy/uploaders.submit_go')}}" />
 </span>
@@ -36,8 +36,8 @@
     <td class="colfollow">{{ $row['usernameHtml'] }}</td>
     <td class="colfollow">{{ $row['sizeFormatted'] }}</td>
     <td class="colfollow">{{ $row['torrent_count'] }}</td>
-    <td class="colfollow">{{ $row['lastAddedFormatted'] }}</td>
-    <td class="colfollow">{{ $row['lastTorrentHtml'] }}</td>
+    <td class="colfollow">@if ($row['last_added'])<x-time :value="$row['last_added']" />@else{{ $naText }}@endif</td>
+    <td class="colfollow">@if ($row['last_name'] !== '')<a href="details.php?id={{ (int) $row['last_id'] }}">{{ $row['last_name'] }}</a>@else{{ $naText }}@endif</td>
 </tr>
 @endforeach
 </table>

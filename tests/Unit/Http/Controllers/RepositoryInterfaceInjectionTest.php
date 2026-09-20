@@ -18,10 +18,10 @@ use App\Http\Controllers\TagController;
 use App\Http\Controllers\ToolController;
 use App\Http\Controllers\TopicController;
 use App\Http\Controllers\TorrentController;
-use App\Http\Controllers\TorrentDetailsController;
 use App\Http\Controllers\UserAdminController;
 use App\Http\Controllers\UserController;
 use App\Repositories\SearchBoxSchemaBuilder;
+use App\ViewModels\Torrent\TorrentDetailsViewFactory;
 use Mockery;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\Attributes\TestCategory;
@@ -54,8 +54,7 @@ final class RepositoryInterfaceInjectionTest extends TestCase
         yield 'TagController + TagRepositoryInterface' => [TagController::class, TagRepositoryInterface::class];
         yield 'TorrentController + TorrentRepositoryInterface' => [TorrentController::class, TorrentRepositoryInterface::class];
         yield 'TorrentController + TorrentDownloadRepositoryInterface' => [TorrentController::class, TorrentDownloadRepositoryInterface::class];
-        yield 'TorrentDetailsController + TorrentRepositoryInterface' => [TorrentDetailsController::class, TorrentRepositoryInterface::class];
-        yield 'TorrentDetailsController + SearchBoxSchemaBuilder' => [TorrentDetailsController::class, SearchBoxSchemaBuilder::class];
+        yield 'TorrentDetailsViewFactory + SearchBoxSchemaBuilder' => [TorrentDetailsViewFactory::class, SearchBoxSchemaBuilder::class];
         yield 'TopicController + ForumRepositoryInterface' => [TopicController::class, ForumRepositoryInterface::class];
         yield 'TopicController + PostRepositoryInterface' => [TopicController::class, PostRepositoryInterface::class];
     }

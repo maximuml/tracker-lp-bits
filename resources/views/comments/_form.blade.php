@@ -6,6 +6,5 @@
 	@if (! empty($returnto))
 		<input type="hidden" name="returnto" value="{{ $returnto }}" />
 	@endif
-	{{ \App\Support\Frame::composeBegin(new \Illuminate\Support\HtmlString($pageTitle), $composeType, e($body ?? ''), false, '', 100) }}
-	{{ \App\Support\Frame::composeEnd() }}
+	<x-compose :title="new \Illuminate\Support\HtmlString($pageTitle)" :type="$composeType" :body="$body ?? ''" :has-subject="false" />
 </form>

@@ -161,7 +161,9 @@ final class UserListingRepositoryTest extends TestCase
         $result = $this->repository->listUsers([], 0, 25);
 
         $this->assertCount(1, $result);
-        $this->assertStringContainsString('flag.gif', (string) $result[0]['country']);
+        $this->assertSame($countryId, (int) $result[0]['country']);
+        $this->assertSame('flag.gif', $result[0]['country_flagpic']);
+        $this->assertSame('FlagLand', $result[0]['country_name']);
     }
 
     public function test_list_users_shows_dashes_when_country_zero(): void
@@ -171,7 +173,8 @@ final class UserListingRepositoryTest extends TestCase
         $result = $this->repository->listUsers([], 0, 25);
 
         $this->assertCount(1, $result);
-        $this->assertSame('---', $result[0]['country']);
+        $this->assertSame(0, (int) $result[0]['country']);
+        $this->assertNull($result[0]['country_flagpic']);
     }
 
     public function test_get_search_extra_stats_returns_empty_when_no_user_ids(): void

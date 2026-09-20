@@ -10,7 +10,6 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Support\Country;
 use App\Support\CurrentUser;
-use App\Support\Html\SafeHtml;
 use App\Support\Permissions;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
@@ -38,21 +37,16 @@ class StaffPageController extends LegacyController
         $secs = 900;
         $dt = time() - $secs;
 
-        $onlineImg = '<img class="button_online" src="pic/trans.gif" alt="online" title="'.(__('legacy/staff.title_online')).'" />';
-        $offlineImg = '<img class="button_offline" src="pic/trans.gif" alt="offline" title="'.(__('legacy/staff.title_offline')).'" />';
-        $sendPmImg = '<img class="button_pm" src="pic/trans.gif" alt="pm" />';
-
-        $buildUserRow = function (array $arr, string $extraKey = '') use ($dt, $onlineImg, $offlineImg, $sendPmImg): array {
+        $buildUserRow = function (array $arr, string ...$extraKeys) use ($dt): array {
             $countryrow = Country::rowWithContext($arr['country'] ?? 0) ?? ['flagpic' => '', 'name' => ''];
-            $isOnline = strtotime((string) $arr['last_access']) > $dt;
 
             return [
                 'id' => (int) $arr['id'],
                 'username_html' => UserDisplay::username((int) $arr['id']),
-                'flag_html' => SafeHtml::fromTrustedHtml('<img width=24 height=15 src="pic/flag/'.$countryrow['flagpic'].'" title="'.$countryrow['name'].'">'),
-                'online_html' => SafeHtml::fromTrustedHtml($isOnline ? $onlineImg : $offlineImg),
-                'pm_html' => SafeHtml::fromTrustedHtml('<a href=sendmessage.php?receiver='.(int) $arr['id'].' title="'.(__('legacy/staff.title_send_pm')).'">'.$sendPmImg.'</a>'),
-                'extra' => $extraKey ? ($arr[$extraKey] ?? '') : '',
+                'flag_pic' => (string) $countryrow['flagpic'],
+                'flag_name' => (string) $countryrow['name'],
+                'is_online' => strtotime((string) $arr['last_access']) > $dt,
+                'extras' => array_map(fn (string $k): string => (string) ($arr[$k] ?? ''), $extraKeys),
             ];
         };
 
@@ -87,7 +81,7 @@ class StaffPageController extends LegacyController
             ->all();
         UserDisplay::preload($allUserIds);
 
-        $supportRows = $supportRows->map(fn ($r) => $buildUserRow((array) $r->getAttributes(), 'supportfor'))->all();
+        $supportRows = $supportRows->map(fn ($r) => $buildUserRow((array) $r->getAttributes(), 'supportlang', 'supportfor'))->all();
         $pickerRows = $pickerRows->map(fn ($r) => $buildUserRow((array) $r->getAttributes(), 'pickfor'))->all();
 
         $forumModRows = [];
@@ -100,10 +94,10 @@ class StaffPageController extends LegacyController
                 ->where('fm.userid', $userId)
                 ->get(['f.id', 'f.name']);
             foreach ($forumRows as $forumRow) {
-                $forums[] = '<a href=forums.php?action=viewforum&forumid='.(int) $forumRow->id.'>'.htmlspecialchars($forumRow->name).'</a>';
+                $forums[] = ['id' => (int) $forumRow->id, 'name' => (string) $forumRow->name];
             }
-            $base = $buildUserRow($arr, '');
-            $base['forums_html'] = SafeHtml::fromTrustedHtml(implode(', ', $forums));
+            $base = $buildUserRow($arr);
+            $base['forums'] = $forums;
             $forumModRows[] = $base;
         }
 

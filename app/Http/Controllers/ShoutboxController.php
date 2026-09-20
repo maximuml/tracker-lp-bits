@@ -112,7 +112,7 @@ class ShoutboxController extends LegacyController
      * @param  iterable<int, mixed>  $rows
      * @param  array<string, mixed>  $currentUser
      * @param  array<string, mixed>  $reactionData
-     * @return list<array<string, string|SafeHtml>>
+     * @return list<array<string, mixed>>
      */
     private function decorateShoutRows(iterable $rows, array $currentUser, int $currentUserId, bool $isStaff, array $reactionData): array
     {
@@ -139,11 +139,9 @@ class ShoutboxController extends LegacyController
                 && $prevDate > 0
                 && abs($prevDate - $currDate) <= $groupWindowSec;
 
-            $editedNote = '';
+            $editedTime = '';
             if (! empty($arr['edited_at']) && (int) $arr['edited_at'] > 0) {
-                $editedNote = ' <span class="shout-edited-note">('
-                    .htmlspecialchars((string) (__('legacy/shoutbox.text_edited'))).' '
-                    .Shoutbox::formatTime((int) $arr['edited_at'], true).')</span>';
+                $editedTime = SafeHtml::fromTrustedHtml(Shoutbox::formatTime((int) $arr['edited_at'], true));
             }
 
             $avatarUrl = 'pic/default_avatar.png';
@@ -173,21 +171,9 @@ class ShoutboxController extends LegacyController
                 $classBadge = '';
             }
 
-            $avatarImg = '<img class="shout-avatar" src="'.htmlspecialchars($avatarUrl).'" alt="" data-fallback="pic/default_avatar.png" />';
-            $avatarHtml = $currUserId > 0
-                ? '<a class="shout-avatar-link" href="userdetails.php?id='.$currUserId.'" target="_blank" title="'.htmlspecialchars($tooltipAvatar, ENT_QUOTES).'">'.$avatarImg.'</a>'
-                : $avatarImg;
-
             $mentionsMe = false;
             $message = Shoutbox::formatMessage((string) ($arr['text'] ?? ''), $currentUserId, $mentionsMe);
             $isLong = mb_strlen(strip_tags((string) $message)) > 280;
-            $messageHtml = '<span id="shout-msg-'.$shoutId.'" class="'.($isLong ? 'shout-msg shout-msg-clamped' : 'shout-msg').'" data-raw="'
-                .htmlspecialchars((string) ($arr['text'] ?? ''), ENT_QUOTES).'">'.$message.'</span>';
-            if ($isLong) {
-                $messageHtml .= '<a class="shout-msg-toggle" href="#" data-on="'.htmlspecialchars($labelLess, ENT_QUOTES)
-                    .'" data-off="'.htmlspecialchars($labelMore, ENT_QUOTES).'">'.htmlspecialchars($labelMore).'</a>';
-            }
-            $messageHtml .= $editedNote;
 
             $rowClasses = ['shoutrow'];
             if ($mentionsMe) {
@@ -195,7 +181,6 @@ class ShoutboxController extends LegacyController
             }
             if ($isContinuation) {
                 $rowClasses[] = 'shout-row-grouped';
-                $avatarHtml = '<span class="shout-avatar-spacer" aria-hidden="true"></span>';
                 $username = '';
                 $classBadge = '';
             }
@@ -204,7 +189,10 @@ class ShoutboxController extends LegacyController
                 'rowClass' => implode(' ', $rowClasses),
                 'time' => SafeHtml::fromTrustedHtml(Shoutbox::formatTime($currDate, true)),
                 'actions' => SafeHtml::fromTrustedHtml(Shoutbox::renderActions($arr, $currentUserId, $isStaff)),
-                'avatarHtml' => SafeHtml::fromTrustedHtml($avatarHtml),
+                'avatarUrl' => $avatarUrl,
+                'avatarUserId' => $currUserId,
+                'avatarTooltip' => $tooltipAvatar,
+                'avatarSpacer' => $isContinuation,
                 'classBadge' => SafeHtml::fromTrustedHtml($classBadge),
                 'username' => SafeHtml::fromTrustedHtml($username),
                 'reactions' => SafeHtml::fromTrustedHtml(Shoutbox::renderReactions(
@@ -214,7 +202,13 @@ class ShoutboxController extends LegacyController
                     is_array($reactionMine[$shoutId] ?? null) ? array_values($reactionMine[$shoutId]) : [],
                     is_array($reactionUsers[$shoutId] ?? null) ? $reactionUsers[$shoutId] : []
                 )),
-                'messageHtml' => SafeHtml::fromTrustedHtml($messageHtml),
+                'msgId' => $shoutId,
+                'msgLong' => $isLong,
+                'msgRaw' => (string) ($arr['text'] ?? ''),
+                'msgFormatted' => SafeHtml::fromTrustedHtml($message),
+                'editedTime' => $editedTime,
+                'labelMore' => $labelMore,
+                'labelLess' => $labelLess,
             ];
 
             $prevUserId = $currUserId;
@@ -285,11 +279,9 @@ class ShoutboxController extends LegacyController
                 : (string) (__('legacy/shoutbox.text_guest'));
             $mentionsMe = false;
             $message = Shoutbox::formatMessage((string) ($arr['text'] ?? ''), $currentUserId, $mentionsMe);
-            $editedNote = '';
+            $editedTime = '';
             if (! empty($arr['edited_at']) && (int) $arr['edited_at'] > 0) {
-                $editedNote = ' <span class="shout-edited-note">('
-                    .htmlspecialchars((string) (__('legacy/shoutbox.text_edited'))).' '
-                    .Shoutbox::formatTime((int) $arr['edited_at'], true).')</span>';
+                $editedTime = SafeHtml::fromTrustedHtml(Shoutbox::formatTime((int) $arr['edited_at'], true));
             }
             $items[] = [
                 'time' => SafeHtml::fromTrustedHtml(Shoutbox::formatTime((int) ($arr['date'] ?? 0), true)),
@@ -303,8 +295,11 @@ class ShoutboxController extends LegacyController
                     is_array($reactionUsers[$shoutId] ?? null) ? $reactionUsers[$shoutId] : []
                 )),
                 'mentionsMe' => $mentionsMe,
-                'messageHtml' => SafeHtml::fromTrustedHtml('<span id="shout-msg-'.$shoutId.'" class="shout-msg" data-raw="'
-                    .htmlspecialchars((string) ($arr['text'] ?? ''), ENT_QUOTES).'">'.$message.'</span>'.$editedNote),
+                'msgId' => $shoutId,
+                'msgLong' => false,
+                'msgRaw' => (string) ($arr['text'] ?? ''),
+                'msgFormatted' => SafeHtml::fromTrustedHtml($message),
+                'editedTime' => $editedTime,
             ];
         }
 

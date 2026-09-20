@@ -16,7 +16,6 @@ use App\Support\CurrentUser;
 use App\Support\Forum;
 use App\Support\Globals;
 use App\Support\Html\SafeHtml;
-use App\Support\Palette;
 use App\Support\UserDisplay;
 use App\ViewModels\Forum\ForumIndexViewModel;
 use App\ViewModels\Forum\ForumRow;
@@ -257,33 +256,10 @@ final class ForumIndexService
         return 0;
     }
 
-    public function getTopicImage(string $status): string
-    {
-        switch ($status) {
-            case 'read':
-                return '<img class="unlocked" src="pic/trans.gif" alt="read" title="'.(__('legacy/forums.title_read')).'" />';
-            case 'unread':
-                return '<img class="unlockednew" src="pic/trans.gif" alt="unread" title="'.(__('legacy/forums.title_unread')).'" />';
-            case 'locked':
-                return '<img class="locked" src="pic/trans.gif" alt="locked" title="'.(__('legacy/forums.title_locked')).'" />';
-            case 'lockednew':
-                return '<img class="lockednew" src="pic/trans.gif" alt="lockednew" title="'.(__('legacy/forums.title_locked_new')).'" />';
-        }
-
-        return '';
-    }
-
-    public function highlightTopic(string $subject, int $hlcolor): string
-    {
-        $colorclass = Palette::forumHighlightClass($hlcolor);
-        if ($colorclass !== '') {
-            $subject = '<b><span class="'.$colorclass.'">'.$subject.'</span></b>';
-        }
-
-        return $subject;
-    }
-
-    public function highlightColorOptions(string $selectColorLabel): string
+    /**
+     * @return list<array{value: int, label: string}>
+     */
+    public function highlightColorOptions(string $selectColorLabel): array
     {
         $colors = [
             1 => 'Black', 2 => 'Sienna', 3 => 'Dark Olive Green', 4 => 'Dark Green',
@@ -297,11 +273,11 @@ final class ForumIndexService
             33 => 'Pink', 34 => 'Wheat', 35 => 'Lemon Chiffon', 36 => 'Pale Green',
             37 => 'Pale Turquoise', 38 => 'Light Blue', 39 => 'Plum', 40 => 'White',
         ];
-        $out = "<option value='0'>".$selectColorLabel."</option>\n";
+        $options = [['value' => 0, 'label' => $selectColorLabel]];
         foreach ($colors as $value => $name) {
-            $out .= '<option value="'.$value.'">'.$name."</option>\n";
+            $options[] = ['value' => $value, 'label' => $name];
         }
 
-        return $out;
+        return $options;
     }
 }

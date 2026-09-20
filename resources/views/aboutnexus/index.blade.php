@@ -3,7 +3,8 @@
 @section('title', PROJECTNAME)
 
 @section('content')
-<x-frame :caption="$captions['version']" :center="false">
+<x-frame :center="false">
+<x-slot:caption><span id="version">{{ $captions['version'] }}</span></x-slot>
 {{ $notes['version'] }}
 <table data-nx="data" class="main" border="1" cellspacing="0" cellpadding="5" align="center">
     <x-settings-row :label="__('legacy/aboutnexus.text_main_version')">{{ PROJECTNAME }}</x-settings-row>
@@ -13,17 +14,20 @@
 <br /><br />
 </x-frame>
 
-<x-frame :caption="$captions['nexus']" :center="false">
+<x-frame :center="false">
+<x-slot:caption><span id="nexus">{{ $captions['nexus'] }}</span></x-slot>
 {{ $notes['nexus'] }}
 <br /><br />
 </x-frame>
 
-<x-frame :caption="$captions['authorization']" :center="false">
+<x-frame :center="false">
+<x-slot:caption><span id="authorization">{{ $captions['authorization'] }}</span></x-slot>
 {{ $notes['authorization'] }}
 <br /><br />
 </x-frame>
 
-<x-frame :caption="$captions['translation']" :center="false">
+<x-frame :center="false">
+<x-slot:caption><span id="translation">{{ $captions['translation'] }}</span></x-slot>
 {{ $notes['translation'] }}
 <br /><br />
 <table data-nx="data" class="main" border="1" cellspacing="0" cellpadding="5" align="center">
@@ -43,7 +47,8 @@
 <br /><br />
 </x-frame>
 
-<x-frame :caption="$captions['stylesheet']" :center="false">
+<x-frame :center="false">
+<x-slot:caption><span id="stylesheet">{{ $captions['stylesheet'] }}</span></x-slot>
 {{ $notes['stylesheet'] }}
 <br /><br />
 <table data-nx="data" class="main" border="1" cellspacing="0" cellpadding="5" align="center">
@@ -63,7 +68,8 @@
 <br /><br />
 </x-frame>
 
-<x-frame :caption="$captions['contact']" :center="false">
+<x-frame :center="false">
+<x-slot:caption><span id="contact">{{ $captions['contact'] }}</span></x-slot>
 {{ $notes['contact'] }}
 <br /><br />
 <table data-nx="data" class="main" border="1" cellspacing="0" cellpadding="5" align="center">

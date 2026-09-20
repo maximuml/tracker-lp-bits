@@ -22,7 +22,7 @@
         <td class="rowfollow">{{ $row['reporting'] }}</td>
         <td class="rowfollow"><nobr>{{ $row['type_label'] }}</nobr></td>
         <td class="rowfollow">{{ $row['reason'] }}</td>
-        <td class="rowfollow"><nobr>{{ $row['dealtwith_html'] }}</nobr></td>
+        <td class="rowfollow"><nobr>@if ($row['dealtwith'])<span class="nx-color-green">{{ __('legacy/reports.text_yes') }}</span> - {{ $row['dealtbyHtml'] }}@else<span class="nx-color-red">{{ __('legacy/reports.text_no') }}</span>@endif</nobr></td>
         <td class="rowfollow"><input type="checkbox" name="delreport[]" value="{{ (int) $row['id'] }}" /></td>
     </tr>
 @endforeach

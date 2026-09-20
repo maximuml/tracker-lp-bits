@@ -9,7 +9,7 @@
 @if ($returnto !== '')
     <input type="hidden" name="returnto" value="{{ $returnto }}">
 @endif
-{{ \App\Support\Frame::composeBegin($frameTitle ?? $title, $replyto ? 'reply' : 'new', $body, true, $subject, 100) }}
+<x-compose :title="$frameTitle ?? $title" :type="$replyto ? 'reply' : 'new'" :body="$body" :has-subject="true" :subject="$subject">
 <tr><td class="toolbox" colspan="2" align="center">
 @if ($replyto)
     <input type="checkbox" name="delete" value="yes"{{ $deleteChecked }}> {{ __('legacy/sendmessage.checkbox_delete_message_replying_to')}}
@@ -17,6 +17,6 @@
 @endif
     <input type="checkbox" name="save" value="yes"{{ $saveChecked }}> {{ __('legacy/sendmessage.checkbox_save_message_to_sendbox')}}
 </td></tr>
-{{ \App\Support\Frame::composeEnd() }}
+</x-compose>
 </form>
 @endsection

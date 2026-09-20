@@ -1,4 +1,5 @@
-{{ \App\Support\Frame::open((__('legacy/staff.text_firstline_support')) . '<span class="small"> - [<a class=altlink href=contactstaff.php><b>' . (__('legacy/staff.text_apply_for_it')) . '</b></a>]</span>', false, 10, '100%', 'left') }}
+<x-frame :center="false">
+<x-slot:caption>{{ __('legacy/staff.text_firstline_support') }}<span class="small"> - [<a class=altlink href=contactstaff.php><b>{{ __('legacy/staff.text_apply_for_it') }}</b></a>]</span></x-slot>
 {{ __('legacy/staff.text_firstline_support_note') }}
 <br /><br />
 <table data-nx="data" width=100% cellspacing=0 align=center>
@@ -13,18 +14,15 @@
     <tr><td class=embedded colspan=6><hr color="#4040c0"></td></tr>
     @foreach ($supportRows as $row)
     <tr>
-        <td class=embedded>{{ $row['username_html'] ?? '' }}</td>
-        <td class=embedded>{{ $row['flag_html'] ?? '' }}</td>
-        <td class=embedded>{{ $row['online_html'] ?? '' }}</td>
-        <td class=embedded>{{ $row['pm_html'] ?? '' }}</td>
-        <td class=embedded>{{ $row['extra'] ?? '' }}</td>
-        <td class=embedded>{{ $row['extra'] ?? '' }}</td>
+@include('staff._cells')
+        @foreach ($row['extras'] ?? [] as $e)<td class=embedded>{{ $e }}</td>@endforeach
     </tr>
     @endforeach
 </table>
-{{ \App\Support\Frame::close() }}
+</x-frame>
 
-{{ \App\Support\Frame::open((__('legacy/staff.text_movie_critics')) . '<span class="small"> - [<a class=altlink href=contactstaff.php><b>' . (__('legacy/staff.text_apply_for_it')) . '</b></a>]</span>', false, 10, '100%', 'left') }}
+<x-frame :center="false">
+<x-slot:caption>{{ __('legacy/staff.text_movie_critics') }}<span class="small"> - [<a class=altlink href=contactstaff.php><b>{{ __('legacy/staff.text_apply_for_it') }}</b></a>]</span></x-slot>
 {{ __('legacy/staff.text_movie_critics_note') }}
 <br /><br />
 <table data-nx="data" width=100% cellspacing=0 align=center>
@@ -38,17 +36,15 @@
     <tr><td class=embedded colspan=5><hr color="#4040c0"></td></tr>
     @foreach ($pickerRows as $row)
     <tr>
-        <td class=embedded>{{ $row['username_html'] ?? '' }}</td>
-        <td class=embedded>{{ $row['flag_html'] ?? '' }}</td>
-        <td class=embedded>{{ $row['online_html'] ?? '' }}</td>
-        <td class=embedded>{{ $row['pm_html'] ?? '' }}</td>
-        <td class=embedded>{{ $row['extra'] ?? '' }}</td>
+@include('staff._cells')
+        @foreach ($row['extras'] ?? [] as $e)<td class=embedded>{{ $e }}</td>@endforeach
     </tr>
     @endforeach
 </table>
-{{ \App\Support\Frame::close() }}
+</x-frame>
 
-{{ \App\Support\Frame::open((__('legacy/staff.text_forum_moderators')) . '<span class="small"> - [<a class=altlink href=contactstaff.php><b>' . (__('legacy/staff.text_apply_for_it')) . '</b></a>]</span>', false, 10, '100%', 'left') }}
+<x-frame :center="false">
+<x-slot:caption>{{ __('legacy/staff.text_forum_moderators') }}<span class="small"> - [<a class=altlink href=contactstaff.php><b>{{ __('legacy/staff.text_apply_for_it') }}</b></a>]</span></x-slot>
 {{ __('legacy/staff.text_forum_moderators_note') }}
 <br /><br />
 <table data-nx="data" width=100% cellspacing=0 align=center>
@@ -62,17 +58,15 @@
     <tr><td class=embedded colspan=5><hr color="#4040c0"></td></tr>
     @foreach ($forumModRows as $row)
     <tr>
-        <td class=embedded>{{ $row['username_html'] ?? '' }}</td>
-        <td class=embedded>{{ $row['flag_html'] ?? '' }}</td>
-        <td class=embedded>{{ $row['online_html'] ?? '' }}</td>
-        <td class=embedded>{{ $row['pm_html'] ?? '' }}</td>
-        <td class=embedded>{{ $row['forums_html'] ?? '' }}</td>
+@include('staff._cells')
+        <td class=embedded>@foreach (($row['forums'] ?? []) as $f)<a href=forums.php?action=viewforum&forumid={{ $f['id'] }}>{{ $f['name'] }}</a>{{ $loop->last ? '' : ', ' }}@endforeach</td>
     </tr>
     @endforeach
 </table>
-{{ \App\Support\Frame::close() }}
+</x-frame>
 
-{{ \App\Support\Frame::open((__('legacy/staff.text_general_staff')) . '<span class="small"> - [<a class=altlink href=contactstaff.php><b>' . (__('legacy/staff.text_apply_for_it')) . '</b></a>]</span>', false, 10, '100%', 'left') }}
+<x-frame :center="false">
+<x-slot:caption>{{ __('legacy/staff.text_general_staff') }}<span class="small"> - [<a class=altlink href=contactstaff.php><b>{{ __('legacy/staff.text_apply_for_it') }}</b></a>]</span></x-slot>
 {{ __('legacy/staff.text_general_staff_note') }} <a href=faq.php><b>{{ __('legacy/staff.text_faq') }}</b></a> {{ __('legacy/staff.text_general_staff_note_two') }}<br /><br />{{ __('legacy/staff.text_general_staff_note_three') }} <a href=contactstaff.php><b>{{ __('legacy/staff.text_here') }}</b></a>
 <br /><br />
 <table data-nx="data" width=100% cellspacing=0 align=center>
@@ -90,18 +84,16 @@
             <tr height=15><td class=embedded colspan=5><hr color="#4040c0"></td></tr>
         @else
             <tr>
-                <td class=embedded>{{ $row['username_html'] ?? '' }}</td>
-                <td class=embedded>{{ $row['flag_html'] ?? '' }}</td>
-                <td class=embedded>{{ $row['online_html'] ?? '' }}</td>
-                <td class=embedded>{{ $row['pm_html'] ?? '' }}</td>
-                <td class=embedded>{{ $row['extra'] ?? '' }}</td>
+@include('staff._cells')
+                @foreach ($row['extras'] ?? [] as $e)<td class=embedded>{{ $e }}</td>@endforeach
             </tr>
         @endif
     @endforeach
 </table>
-{{ \App\Support\Frame::close() }}
+</x-frame>
 
-{{ \App\Support\Frame::open(__('legacy/staff.text_vip'), false, 10, '100%', 'left') }}
+<x-frame :center="false">
+<x-slot:caption>{{ __('legacy/staff.text_vip') }}</x-slot>
 {{ sprintf(__('legacy/staff.text_vip_note'), $siteName) }}
 <br /><br />
 <table data-nx="data" width=100% cellspacing=0 align=center>
@@ -115,12 +107,9 @@
     <tr><td class=embedded colspan=5><hr color="#4040c0"></td></tr>
     @foreach ($vipRows as $row)
     <tr>
-        <td class=embedded>{{ $row['username_html'] ?? '' }}</td>
-        <td class=embedded>{{ $row['flag_html'] ?? '' }}</td>
-        <td class=embedded>{{ $row['online_html'] ?? '' }}</td>
-        <td class=embedded>{{ $row['pm_html'] ?? '' }}</td>
-        <td class=embedded>{{ $row['extra'] ?? '' }}</td>
+@include('staff._cells')
+        @foreach ($row['extras'] ?? [] as $e)<td class=embedded>{{ $e }}</td>@endforeach
     </tr>
     @endforeach
 </table>
-{{ \App\Support\Frame::close() }}
+</x-frame>

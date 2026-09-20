@@ -56,7 +56,10 @@ final class BonusPageService
         if ($bonusTweak === 'disable' || $bonusTweak === 'disablesave') {
             LegacyResponse::abort(
                 (string) (__('legacy/mybonus.std_sorry')),
-                (string) (__('legacy/mybonus.std_karma_system_disabled')).($bonusTweak === 'disablesave' ? '<b>'.(__('legacy/mybonus.std_points_active')).'</b>' : ''),
+                view('my.sections._bonus_disabled', [
+                    'disabled' => (string) (__('legacy/mybonus.std_karma_system_disabled')),
+                    'pointsActive' => $bonusTweak === 'disablesave' ? (string) (__('legacy/mybonus.std_points_active')) : null,
+                ])->render(),
                 false
             );
         }
@@ -142,12 +145,18 @@ final class BonusPageService
         $results[] = $this->bonusItem($vipstatusBonus, 'class', 0, (string) (__('legacy/mybonus.text_vip_status')), (string) (__('legacy/mybonus.text_vip_status_note')));
 
         // Bonus Gift
-        $giftDesc = (string) (__('legacy/mybonus.text_bonus_gift_note'));
+        $giftTax = null;
         if ($basictaxBonus || $taxpercentageBonus) {
             $onehundredaftertax = 100 - $taxpercentageBonus - $basictaxBonus;
-            $giftDesc .= '<br /><br />'.(__('legacy/mybonus.text_system_charges_receiver')).'<b>'.($basictaxBonus ? $basictaxBonus.(__('legacy/mybonus.text_tax_bonus_point')).Strings::addS($basictaxBonus).($taxpercentageBonus ? (__('legacy/mybonus.text_tax_plus')) : '') : '').($taxpercentageBonus ? $taxpercentageBonus.(__('legacy/mybonus.text_percent_of_transfered_amount')) : '').'</b>'.(__('legacy/mybonus.text_as_tax')).$onehundredaftertax.(__('legacy/mybonus.text_tax_example_note'));
+            $giftTax = [
+                'charges' => SafeHtml::fromUntrustedHtml(__('legacy/mybonus.text_system_charges_receiver')),
+                'amounts' => ($basictaxBonus ? $basictaxBonus.(__('legacy/mybonus.text_tax_bonus_point')).Strings::addS($basictaxBonus).($taxpercentageBonus ? (__('legacy/mybonus.text_tax_plus')) : '') : '').($taxpercentageBonus ? $taxpercentageBonus.(__('legacy/mybonus.text_percent_of_transfered_amount')) : ''),
+                'rest' => (__('legacy/mybonus.text_as_tax')).$onehundredaftertax.(__('legacy/mybonus.text_tax_example_note')),
+            ];
         }
-        $results[] = $this->bonusItem(100, 'gift_1', 0, (string) (__('legacy/mybonus.text_bonus_gift')), $giftDesc);
+        $gift = $this->bonusItem(100, 'gift_1', 0, (string) (__('legacy/mybonus.text_bonus_gift')), (string) (__('legacy/mybonus.text_bonus_gift_note')));
+        $gift['giftTax'] = $giftTax;
+        $results[] = $gift;
 
         // Attendance card
         $results[] = $this->bonusItem(BonusLogs::getBonusForBuyAttendanceCard(), 'attendance_card', 0, (string) (__('legacy/mybonus.text_attendance_card')), (string) (__('legacy/mybonus.text_attendance_card_note')));
@@ -162,11 +171,7 @@ final class BonusPageService
         $results[] = $this->bonusItem(1000, 'gift_2', 0, (string) (__('legacy/mybonus.text_charity_giving')), (string) (__('legacy/mybonus.text_charity_giving_note')));
 
         // Cancel hit and run
-        $cancelHrDesc = '<p>
-            <span>'.(__('legacy/mybonus.text_cancel_hr_label')).'</span>
-            <input type="number" name="hr_id" />
-        </p>';
-        $results[] = $this->bonusItem(BonusLogs::getBonusForCancelHitAndRun(), 'cancel_hr', 0, (string) (__('legacy/mybonus.text_cancel_hr_title')), $cancelHrDesc);
+        $results[] = $this->bonusItem(BonusLogs::getBonusForCancelHitAndRun(), 'cancel_hr', 0, (string) (__('legacy/mybonus.text_cancel_hr_title')), '');
 
         return $results;
     }
@@ -195,7 +200,11 @@ final class BonusPageService
             'download' => (string) (__('legacy/mybonus.text_success_download')),
             'invite' => (string) (__('legacy/mybonus.text_success_invites')),
             'tmp_invite' => (string) (__('legacy/mybonus.text_success_tmp_invites')),
-            'vip' => (string) (__('legacy/mybonus.text_success_vip')).'<b>'.UserClass::name(UC_VIP, false, false, true).'</b>'.(__('legacy/mybonus.text_success_vip_two')),
+            'vip' => view('my.sections._vip_msg', [
+                'pre' => (string) (__('legacy/mybonus.text_success_vip')),
+                'name' => UserClass::name(UC_VIP, false, false, true),
+                'post' => (string) (__('legacy/mybonus.text_success_vip_two')),
+            ])->render(),
             'vipfalse' => (string) (__('legacy/mybonus.text_no_permission')),
             'title' => sprintf((string) (__('legacy/mybonus.text_success_custom_title')), (string) ($curUser['title'] ?? '')),
             'transfer' => (string) (__('legacy/mybonus.text_success_gift')),
@@ -231,9 +240,10 @@ final class BonusPageService
             }
 
             $art = (string) $bonusarray['art'];
+            $pointsLabel2 = $art === 'gift_2' ? (__('legacy/mybonus.text_max')).'50,000' : null;
             $pointsLabel = match ($art) {
                 'gift_1' => SafeHtml::fromUntrustedHtml(__('legacy/mybonus.text_min').'100'),
-                'gift_2' => SafeHtml::fromUntrustedHtml(__('legacy/mybonus.text_min').'1,000<br />'.(__('legacy/mybonus.text_max')).'50,000'),
+                'gift_2' => SafeHtml::fromUntrustedHtml(__('legacy/mybonus.text_min').'1,000'),
                 default => SafeHtml::fromUntrustedHtml(number_format((float) $bonusarray['points'])),
             };
 
@@ -249,6 +259,8 @@ final class BonusPageService
                 description: SafeHtml::fromUntrustedHtml((string) $bonusarray['description']),
                 pointsLabel: $pointsLabel,
                 trade: $trade,
+                pointsLabel2: $pointsLabel2,
+                giftTax: $bonusarray['giftTax'] ?? null,
             );
         }
 

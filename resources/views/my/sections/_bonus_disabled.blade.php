@@ -1,0 +1,1 @@
+{{ $disabled }}@if ($pointsActive !== null)<b>{{ $pointsActive }}</b>@endif

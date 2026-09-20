@@ -1,0 +1,1 @@
+<table data-nx="data" border='1' cellspacing='0' cellpadding='5'><tr><td class='colhead'>Agent</td><td class='colhead'>IPV4</td><td class='colhead'>IPV6</td><td class='colhead'>Port</td></tr>@foreach ($rows as $row)<tr><td>{{ $row['agent'] }}</td><td>{{ $row['ipv4'] }}</td><td>{{ $row['ipv6'] }}</td><td>{{ $row['port'] }}</td></tr>@endforeach</table>

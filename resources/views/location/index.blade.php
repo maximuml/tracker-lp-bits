@@ -3,7 +3,7 @@
 @section('title', 'Manage Locations')
 
 @section('content')
-{{ \App\Support\Frame::open('Manage Locations', true, 10, '100%', 'center') }}
+<x-frame caption="Manage Locations" caption-align="center">
 @if ($error ?? '')
     <p><strong>{{ $error }}</strong></p>
 @endif
@@ -97,5 +97,5 @@
 </table>
 {{ $pagerbottom ?? '' }}
 @endif
-{{ \App\Support\Frame::close() }}
+</x-frame>
 @endsection

@@ -114,7 +114,9 @@ class UserAdminController extends LegacyController
                 'addedFormatted' => SafeHtml::fromTrustedHtml((string) Time::format($arr['added'], true, false)),
                 'lastAccessFormatted' => SafeHtml::fromTrustedHtml((string) Time::format($arr['last_access'], true, false)),
                 'class_name' => UserClass::name((int) $arr['class'], false, true, true),
-                'country' => SafeHtml::fromTrustedHtml((string) $arr['country']),
+                'country' => (int) $arr['country'],
+                'country_flagpic' => (string) ($arr['country_flagpic'] ?? ''),
+                'country_name' => (string) ($arr['country_name'] ?? ''),
             ];
         }
 

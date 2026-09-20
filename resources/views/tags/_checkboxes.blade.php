@@ -1,0 +1,1 @@
+@foreach ($tags as $tag)<label><input type="checkbox" name="tags[{{ $searchBoxId }}][]" value="{{ $tag['id'] }}"{{ $tag['checked'] ? ' checked' : '' }} />{{ $tag['name'] }}</label>@endforeach

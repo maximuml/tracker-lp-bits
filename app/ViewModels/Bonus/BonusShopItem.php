@@ -23,5 +23,8 @@ final readonly class BonusShopItem
         public SafeHtml $description,
         public SafeHtml $pointsLabel,
         public BonusTradeButton $trade,
+        public ?string $pointsLabel2 = null,
+        /** @var array{charges: SafeHtml, amounts: string, rest: string}|null */
+        public ?array $giftTax = null,
     ) {}
 }

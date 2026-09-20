@@ -5,9 +5,9 @@
 @section('content')
 @if (! empty($rules))
     @foreach ($rules as $rule)
-        {{ \App\Support\Frame::open((string) $rule['title'], false, 10, '100%', 'left') }}
+        <x-frame :caption="$rule['title']" :center="false">
         {{ \App\Support\Format::formatComment($rule['text']) }}
-        {{ \App\Support\Frame::close() }}
+        </x-frame>
     @endforeach
 @endif
 @endsection

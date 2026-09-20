@@ -13,7 +13,6 @@ use App\Repositories\TorrentModerationRepository;
 use App\Support\Category;
 use App\Support\CurrentUser;
 use App\Support\Format;
-use App\Support\Globals;
 use App\Support\Html\SafeHtml;
 use App\Support\LegacyYesNo;
 use App\Support\Locale;
@@ -26,6 +25,7 @@ use App\Support\TorrentAccess;
 use App\Support\UserDisplay;
 use App\ViewModels\Torrent\ApprovalBadge;
 use App\ViewModels\Torrent\CategoryIcon;
+use App\ViewModels\Torrent\PeerTableFactory;
 use App\ViewModels\Torrent\TorrentBadgeSet;
 use App\ViewModels\Torrent\UserTorrentListViewModel;
 use App\ViewModels\Torrent\UserTorrentRow;
@@ -38,9 +38,9 @@ use Illuminate\View\View;
 class TorrentAjaxController extends LegacyController
 {
     public function __construct(
-        protected Globals $globals,
         protected CurrentUser $currentUser,
         protected TorrentAjaxRepositoryInterface $torrentAjaxRepository,
+        protected PeerTableFactory $peerTableFactory,
     ) {}
 
     public function viewFileList(Request $request): Response|RedirectResponse
@@ -52,7 +52,7 @@ class TorrentAjaxController extends LegacyController
 
         $files = $this->torrentAjaxRepository->fileList($torrentId)
             ->map(fn ($fileRow): array => [
-                'badgeHtml' => SafeHtml::fromTrustedHtml($this->fileBadge((string) (((array) $fileRow)['filename'] ?? ''))),
+                'badge' => $this->fileBadge((string) (((array) $fileRow)['filename'] ?? '')),
                 'filename' => (string) (((array) $fileRow)['filename'] ?? ''),
                 'size' => Format::size((float) (((array) $fileRow)['size'] ?? 0)),
             ])
@@ -88,135 +88,10 @@ class TorrentAjaxController extends LegacyController
         $data = $this->torrentAjaxRepository->peerList($torrentId, $currentUser);
         $curUserArr = $curUser;
 
-        $data['seederTableHtml'] = SafeHtml::fromTrustedHtml($this->peerTable((string) (__('legacy/viewpeerlist.text_seeders')), $data['seeders'], $data['torrent'], $data['privacyData'], $data['showLocationColumn'], $data['enablelocationTweak'], $data['peerIpInfo'], $data['usernameHtmlMap'], $curUserArr));
-        $data['leecherTableHtml'] = SafeHtml::fromTrustedHtml($this->peerTable((string) (__('legacy/viewpeerlist.text_leechers')), $data['leechers'], $data['torrent'], $data['privacyData'], $data['showLocationColumn'], $data['enablelocationTweak'], $data['peerIpInfo'], $data['usernameHtmlMap'], $curUserArr));
+        $data['seederTable'] = $this->peerTableFactory->buildTable((string) (__('legacy/viewpeerlist.text_seeders')), $data['seeders'], $data['torrent'], $data['privacyData'], $data['showLocationColumn'], $data['enablelocationTweak'], $data['peerIpInfo'], $data['usernameHtmlMap'], $curUserArr);
+        $data['leecherTable'] = $this->peerTableFactory->buildTable((string) (__('legacy/viewpeerlist.text_leechers')), $data['leechers'], $data['torrent'], $data['privacyData'], $data['showLocationColumn'], $data['enablelocationTweak'], $data['peerIpInfo'], $data['usernameHtmlMap'], $curUserArr);
 
         return response()->view('viewpeerlist.index', $data, 200, $headers);
-    }
-
-    /**
-     * @param  array<string, mixed>  $e
-     * @param  array<int, list<array<string, string>>>  $peerIpInfo
-     */
-    private function peerLocationColumn(array $e, bool $isStrongPrivacy, bool $canView, mixed $enablelocationTweak, array $peerIpInfo): string
-    {
-        $address = $ips = [];
-        $info = $peerIpInfo[$e['id']] ?? [];
-
-        if ($enablelocationTweak === 'yes') {
-            foreach ($info as $ipInfo) {
-                $address[] = $ipInfo['public'];
-                $ips[] = $ipInfo['ip'];
-            }
-            $title = $canView ? sprintf('%s%s%s', __('legacy/functions.text_user_ip'), ':&nbsp;', implode(', ', $ips)) : '';
-            $addressStr = implode('<br/>', $address);
-            $location = '<div title="'.$title.'">'.$addressStr.'</div>';
-        } else {
-            foreach ($info as $ipInfo) {
-                $ips[] = $ipInfo['ip'];
-            }
-            $location = '<div>'.implode('<br/>', $ips).'</div>';
-        }
-
-        if ($isStrongPrivacy) {
-            $result = '<div><i>'.__('legacy/viewpeerlist.text_anonymous').'</i></div>';
-            if ($canView) {
-                $result = $location.$result;
-            }
-        } else {
-            $result = $location;
-        }
-
-        return "<td class=rowfollow align=left width=1%><div class='nx-flex'>".$result.'</div></td>';
-    }
-
-    /**
-     * @param  array<array<string, mixed>>  $arr
-     * @param  array<string, mixed>  $torrent
-     * @param  array<int, string>  $privacyData
-     * @param  array<int, list<array<string, string>>>  $peerIpInfo
-     * @param  array<int, string>  $usernameHtmlMap
-     * @param  array<string, mixed>  $curUser
-     */
-    private function peerTable(string $name, array $arr, array $torrent, array $privacyData, bool $showLocationColumn, mixed $enablelocationTweak, array $peerIpInfo, array $usernameHtmlMap, array $curUser): string
-    {
-        $s = '<b>'.count($arr).' '.$name."</b>\n";
-        if (! count($arr)) {
-            return $s;
-        }
-
-        $s .= "\n";
-        $s .= "<table width=100% class=main border=1 cellspacing=0 cellpadding=3>\n";
-        $s .= '<tr><td class=colhead align=center width=1%>'.__('legacy/viewpeerlist.col_user_ip').'</td>'.
-            ($showLocationColumn ? '<td class=colhead align=center>'.__('legacy/viewpeerlist.col_location').'</td>' : '').
-            '<td class=colhead align=center width=1%>'.__('legacy/viewpeerlist.col_connectable').'</td>'.
-            '<td class=colhead align=center width=1%>'.__('legacy/viewpeerlist.col_uploaded').'</td>'.
-            '<td class=colhead align=center width=1%>'.__('legacy/viewpeerlist.col_rate').'</td>'.
-            '<td class=colhead align=center width=1%>'.__('legacy/viewpeerlist.col_downloaded').'</td>'.
-            '<td class=colhead align=center width=1%>'.__('legacy/viewpeerlist.col_rate').'</td>'.
-            '<td class=colhead align=center width=1%>'.__('legacy/viewpeerlist.col_ratio').'</td>'.
-            '<td class=colhead align=center width=1%>'.__('legacy/viewpeerlist.col_complete').'</td>'.
-            '<td class=colhead align=center width=1%>'.__('legacy/viewpeerlist.col_connected').'</td>'.
-            '<td class=colhead align=center width=1%>'.__('legacy/viewpeerlist.col_idle').'</td>'.
-            '<td class=colhead align=center width=1%>'.__('legacy/viewpeerlist.col_client').'</td></tr>\n';
-        $now = time();
-
-        foreach ($arr as $e) {
-            $privacy = $privacyData[$e['userid']] ?? '';
-            $highlight = ($curUser['id'] ?? null) == $e['userid'] ? ' bgcolor=#BBAF9B' : '';
-            $s .= "<tr$highlight>\n";
-            $secs = max(1, ($e['la'] - $e['st']));
-            $columnLocation = '';
-            $currentUserId = (int) ($curUser['id'] ?? 0);
-            $isStrongPrivacy = $privacy == 'strong' || (LegacyYesNo::isYes($torrent['anonymous'] ?? null) && $e['userid'] == $torrent['owner']);
-            $canView = Permissions::userCan('viewanonymous', false, $currentUserId) || $e['userid'] == $currentUserId;
-            if ($showLocationColumn) {
-                $columnLocation = $this->peerLocationColumn($e, $isStrongPrivacy, $canView, $enablelocationTweak, $peerIpInfo);
-            }
-
-            $usernameHtml = $usernameHtmlMap[$e['userid']] ?? '';
-            if ($isStrongPrivacy) {
-                $columnUsername = '<td class=rowfollow align=left width=1%><i>'.__('legacy/viewpeerlist.text_anonymous').'</i>';
-                if ($canView) {
-                    $columnUsername .= '<br />('.$usernameHtml.')';
-                }
-                $columnUsername .= '</td>';
-            } else {
-                $columnUsername = '<td class=rowfollow align=left width=1%>'.$usernameHtml.'</td>';
-            }
-
-            $s .= $columnUsername.$columnLocation;
-
-            $s .= '<td class=rowfollow align=center width=1%><nobr>'.(LegacyYesNo::isYes($e['connectable'] ?? null) ? __('legacy/viewpeerlist.text_yes') : '<span class="nx-color-red">'.__('legacy/viewpeerlist.text_no').'</span>')."</nobr></td>\n";
-            $s .= '<td class=rowfollow align=center width=1%><nobr>'.Format::size((float) $e['uploaded'])."</nobr></td>\n";
-            $s .= '<td class=rowfollow align=center width=1%><nobr>'.Format::size(($e['uploaded'] - $e['uploadoffset']) / $secs)."/s</nobr></td>\n";
-            $s .= '<td class=rowfollow align=center width=1%><nobr>'.Format::size((float) $e['downloaded'])."</nobr></td>\n";
-
-            if (LegacyYesNo::isNo($e['seeder'] ?? null)) {
-                $s .= '<td class=rowfollow align=center width=1%><nobr>'.Format::size(($e['downloaded'] - $e['downloadoffset']) / $secs)."/s</nobr></td>\n";
-            } else {
-                $s .= '<td class=rowfollow align=center width=1%><nobr>'.Format::size(($e['downloaded'] - $e['downloadoffset']) / max(1, $e['finishedat'] - $e['st']))."/s</nobr></td>\n";
-            }
-
-            if ($e['downloaded']) {
-                $ratio = floor(($e['uploaded'] / $e['downloaded']) * 1000) / 1000;
-                $s .= '<td class=rowfollow align="center" width=1%><span class="'.Ratio::colorClass($ratio).'"><nobr>'.number_format($ratio, 3)."</nobr></span></td>\n";
-            } elseif ($e['uploaded']) {
-                $s .= '<td class=rowfollow align=center width=1%>'.__('legacy/viewpeerlist.text_inf').'</td>';
-            } else {
-                $s .= '<td class=rowfollow align=center width=1%>---</td>';
-            }
-
-            $s .= '<td class=rowfollow align=center width=1%><nobr>'.sprintf('%.2f%%', 100 * (1 - ($e['to_go'] / max(1, $torrent['size']))))."</nobr></td>\n";
-            $s .= '<td class=rowfollow align=center width=1%><nobr>'.Format::prettyTimeWithLocale($now - $e['st'])."</nobr></td>\n";
-            $s .= '<td class=rowfollow align=center width=1%><nobr>'.Format::prettyTimeWithLocale($now - $e['la'])."</nobr></td>\n";
-            $s .= '<td class=rowfollow align=center width=1%><nobr>'.e(Strings::userAgentClient($e['agent']))."</nobr></td>\n";
-            $s .= "</tr>\n";
-        }
-
-        $s .= "</table>\n";
-
-        return $s;
     }
 
     public function viewSnatches(Request $request): View|RedirectResponse|Response
@@ -240,23 +115,22 @@ class TorrentAjaxController extends LegacyController
 
     /**
      * @param  iterable<int, mixed>  $snatchedRows
-     * @return list<array<string, string|SafeHtml>>
+     * @return list<array<string, mixed>>
      */
     private function decorateSnatchRows(iterable $snatchedRows, int $currentUserId): array
     {
+        $perSecond = (string) (__('legacy/viewsnatches.text_per_second'));
         $rows = [];
         foreach ($snatchedRows as $snatchRow) {
             $arr = (array) $snatchRow;
+            $ratioText = '---';
+            $ratioClass = null;
             if ($arr['downloaded'] > 0) {
-                $ratio = number_format($arr['uploaded'] / $arr['downloaded'], 3);
-                $ratio = '<span class="'.Ratio::colorClass($ratio).">$ratio</span>";
+                $ratioText = number_format($arr['uploaded'] / $arr['downloaded'], 3);
+                $ratioClass = Ratio::colorClass($ratioText);
             } elseif ($arr['uploaded'] > 0) {
-                $ratio = (string) (__('legacy/viewsnatches.text_inf'));
-            } else {
-                $ratio = '---';
+                $ratioText = (string) (__('legacy/viewsnatches.text_inf'));
             }
-            $uploaded = Format::size((float) $arr['uploaded']);
-            $downloaded = Format::size((float) $arr['downloaded']);
             $uprate = $arr['seedtime'] > 0
                 ? Format::size($arr['uploaded'] / ($arr['seedtime'] + $arr['leechtime']))
                 : Format::size(0);
@@ -266,30 +140,26 @@ class TorrentAjaxController extends LegacyController
 
             $userrow = UserDisplay::row($arr['userid']);
             $privacy = is_array($userrow) ? (string) ($userrow['privacy'] ?? '') : '';
-            if ($privacy == 'strong') {
-                $username = (string) (__('legacy/viewsnatches.text_anonymous'));
-                if (Permission::can(PermissionEnum::VIEW_ANONYMOUS) || $arr['id'] == $currentUserId) {
-                    $username .= '<br />('.UserDisplay::username($arr['userid']).')';
-                }
-            } else {
-                $username = UserDisplay::username($arr['userid']);
-            }
-            $reportImage = '<img class="f_report" src="pic/trans.gif" alt="Report" title="'.e((string) (__('legacy/viewsnatches.title_report'))).'" />';
-            $reportHtml = $privacy != 'strong' || Permission::can(PermissionEnum::VIEW_ANONYMOUS)
-                ? '<a href=report.php?user='.(int) $arr['userid'].'>'.$reportImage.'</a>'
-                : $reportImage;
+            $anonymous = $privacy == 'strong';
+            $revealName = $anonymous
+                && (Permission::can(PermissionEnum::VIEW_ANONYMOUS) || $arr['id'] == $currentUserId);
 
             $rows[] = [
-                'highlight' => SafeHtml::fromTrustedHtml($currentUserId == $arr['userid'] ? ' bgcolor=#00A527' : ''),
-                'usernameHtml' => SafeHtml::fromTrustedHtml($username),
+                'highlight' => $currentUserId == $arr['userid'],
+                'anonymous' => $anonymous,
+                'revealName' => $revealName,
+                'name' => UserDisplay::username($arr['userid']),
                 'ip' => (string) ($arr['ip'] ?? ''),
-                'trafficHtml' => SafeHtml::fromTrustedHtml($uploaded.'@'.$uprate.(__('legacy/viewsnatches.text_per_second')).'<br />'.$downloaded.'@'.$downrate.(__('legacy/viewsnatches.text_per_second'))),
-                'ratioHtml' => SafeHtml::fromTrustedHtml($ratio),
+                'trafficUp' => Format::size((float) $arr['uploaded']).'@'.$uprate.$perSecond,
+                'trafficDown' => Format::size((float) $arr['downloaded']).'@'.$downrate.$perSecond,
+                'ratioText' => $ratioText,
+                'ratioClass' => $ratioClass,
                 'seedtime' => Format::prettyTimeWithLocale((float) $arr['seedtime']),
                 'leechtime' => Format::prettyTimeWithLocale((float) $arr['leechtime']),
-                'completedAtHtml' => SafeHtml::fromTrustedHtml((string) Time::format($arr['completedat'], true, false)),
-                'lastActionHtml' => SafeHtml::fromTrustedHtml((string) Time::format($arr['last_action'], true, false)),
-                'reportHtml' => SafeHtml::fromTrustedHtml($reportHtml),
+                'completedAt' => Time::format($arr['completedat'], true, false),
+                'lastAction' => Time::format($arr['last_action'], true, false),
+                'reportUserId' => (int) $arr['userid'],
+                'reportLinked' => $privacy != 'strong' || Permission::can(PermissionEnum::VIEW_ANONYMOUS),
             ];
         }
 
@@ -328,17 +198,15 @@ class TorrentAjaxController extends LegacyController
             ? $this->userTorrentListVm($data['rows'], $type, $targetUserId, $curUser, $data['seedTimeAndUploaded'], $data['torrentRep'])
             : null;
 
-        $hasData = false;
-        $summary = sprintf('<b>%s</b>%s', $data['count'], (__('legacy/getusertorrentlistajax.text_record')).Strings::addS($data['count']));
+        $hasData = (bool) ($data['total_size'] || $data['count']);
+        $summaryText = (__('legacy/getusertorrentlistajax.text_record')).Strings::addS($data['count']);
         if ($data['total_size']) {
-            $hasData = true;
-            $summary .= (__('legacy/getusertorrentlistajax.text_total_size')).Format::size((float) $data['total_size']);
-        } elseif ($data['count']) {
-            $hasData = true;
+            $summaryText .= (__('legacy/getusertorrentlistajax.text_total_size')).Format::size((float) $data['total_size']);
         }
 
         $data['hasData'] = $hasData;
-        $data['summaryHtml'] = SafeHtml::fromTrustedHtml($summary);
+        $data['summaryCount'] = (int) $data['count'];
+        $data['summaryText'] = $summaryText;
 
         return response()->view('getusertorrentlistajax.index', $data, 200, $headers);
     }
@@ -492,21 +360,19 @@ class TorrentAjaxController extends LegacyController
     }
 
     /**
-     * Renders a small colored extension badge for a filename.
+     * Returns badge data for a small colored extension badge for a filename.
+     *
+     * @return array{cat: string, label: string}
      */
-    private function fileBadge(string $filename): string
+    private function fileBadge(string $filename): array
     {
         $dot = strrpos($filename, '.');
         $ext = $dot !== false ? strtolower(substr($filename, $dot + 1)) : '';
         if ($ext === '' || strlen($ext) > 5 || ! ctype_alnum($ext)) {
-            $cat = 'other';
-            $label = '?';
-        } else {
-            $cat = $this->fileExtCategory($ext);
-            $label = strtoupper($ext);
+            return ['cat' => 'other', 'label' => '?'];
         }
 
-        return '<span class="fileicon fi-'.e($cat).'" title="'.e($cat).'">'.e($label).'</span>';
+        return ['cat' => $this->fileExtCategory($ext), 'label' => strtoupper($ext)];
     }
 
     public function searchSuggest(Request $request): Response|RedirectResponse

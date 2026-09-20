@@ -4,11 +4,11 @@
 
 @section('content')
 @if ($type == 'adminactivate')
-    {{ \App\Support\Frame::stdMessage(__('legacy/ok.std_account_activated'), __('legacy/ok.account_activated_note'), false) }}
+    <x-std-message :heading="__('legacy/ok.std_account_activated')" :text="__('legacy/ok.account_activated_note')" :htmlstrip="false" />
 @elseif ($type == 'inviter')
-    {{ \App\Support\Frame::stdMessage(__('legacy/ok.std_account_activated'), __('legacy/ok.account_activated_note_two'), false) }}
+    <x-std-message :heading="__('legacy/ok.std_account_activated')" :text="__('legacy/ok.account_activated_note_two')" :htmlstrip="false" />
 @elseif ($type == 'signup')
-    {{ \App\Support\Frame::stdMessage(__('legacy/ok.std_signup_successful'), (__('legacy/ok.std_confirmation_email_note')) . htmlspecialchars($email ?? '') . (__('legacy/ok.std_confirmation_email_note_end')), false) }}
+    <x-std-message :heading="__('legacy/ok.std_signup_successful')" :htmlstrip="false">{{ __('legacy/ok.std_confirmation_email_note') }}{{ $email ?? '' }}{{ __('legacy/ok.std_confirmation_email_note_end') }}</x-std-message>
 @elseif ($type == 'sysop')
     <p><h1>{{ __('legacy/ok.std_sysop_activation_note') }}</h1></p>
     @if (! empty($CURUSER))

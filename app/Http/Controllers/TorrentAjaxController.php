@@ -52,7 +52,7 @@ class TorrentAjaxController extends LegacyController
 
         $files = $this->torrentAjaxRepository->fileList($torrentId)
             ->map(fn ($fileRow): array => [
-                'badgeHtml' => SafeHtml::fromTrustedHtml($this->fileBadge((string) (((array) $fileRow)['filename'] ?? ''))),
+                'badge' => $this->fileBadge((string) (((array) $fileRow)['filename'] ?? '')),
                 'filename' => (string) (((array) $fileRow)['filename'] ?? ''),
                 'size' => Format::size((float) (((array) $fileRow)['size'] ?? 0)),
             ])
@@ -115,23 +115,22 @@ class TorrentAjaxController extends LegacyController
 
     /**
      * @param  iterable<int, mixed>  $snatchedRows
-     * @return list<array<string, string|SafeHtml>>
+     * @return list<array<string, mixed>>
      */
     private function decorateSnatchRows(iterable $snatchedRows, int $currentUserId): array
     {
+        $perSecond = (string) (__('legacy/viewsnatches.text_per_second'));
         $rows = [];
         foreach ($snatchedRows as $snatchRow) {
             $arr = (array) $snatchRow;
+            $ratioText = '---';
+            $ratioClass = null;
             if ($arr['downloaded'] > 0) {
-                $ratio = number_format($arr['uploaded'] / $arr['downloaded'], 3);
-                $ratio = '<span class="'.Ratio::colorClass($ratio).">$ratio</span>";
+                $ratioText = number_format($arr['uploaded'] / $arr['downloaded'], 3);
+                $ratioClass = Ratio::colorClass($ratioText);
             } elseif ($arr['uploaded'] > 0) {
-                $ratio = (string) (__('legacy/viewsnatches.text_inf'));
-            } else {
-                $ratio = '---';
+                $ratioText = (string) (__('legacy/viewsnatches.text_inf'));
             }
-            $uploaded = Format::size((float) $arr['uploaded']);
-            $downloaded = Format::size((float) $arr['downloaded']);
             $uprate = $arr['seedtime'] > 0
                 ? Format::size($arr['uploaded'] / ($arr['seedtime'] + $arr['leechtime']))
                 : Format::size(0);
@@ -141,30 +140,26 @@ class TorrentAjaxController extends LegacyController
 
             $userrow = UserDisplay::row($arr['userid']);
             $privacy = is_array($userrow) ? (string) ($userrow['privacy'] ?? '') : '';
-            if ($privacy == 'strong') {
-                $username = (string) (__('legacy/viewsnatches.text_anonymous'));
-                if (Permission::can(PermissionEnum::VIEW_ANONYMOUS) || $arr['id'] == $currentUserId) {
-                    $username .= '<br />('.UserDisplay::username($arr['userid']).')';
-                }
-            } else {
-                $username = UserDisplay::username($arr['userid']);
-            }
-            $reportImage = '<img class="f_report" src="pic/trans.gif" alt="Report" title="'.e((string) (__('legacy/viewsnatches.title_report'))).'" />';
-            $reportHtml = $privacy != 'strong' || Permission::can(PermissionEnum::VIEW_ANONYMOUS)
-                ? '<a href=report.php?user='.(int) $arr['userid'].'>'.$reportImage.'</a>'
-                : $reportImage;
+            $anonymous = $privacy == 'strong';
+            $revealName = $anonymous
+                && (Permission::can(PermissionEnum::VIEW_ANONYMOUS) || $arr['id'] == $currentUserId);
 
             $rows[] = [
-                'highlight' => SafeHtml::fromTrustedHtml($currentUserId == $arr['userid'] ? ' bgcolor=#00A527' : ''),
-                'usernameHtml' => SafeHtml::fromTrustedHtml($username),
+                'highlight' => $currentUserId == $arr['userid'],
+                'anonymous' => $anonymous,
+                'revealName' => $revealName,
+                'name' => UserDisplay::username($arr['userid']),
                 'ip' => (string) ($arr['ip'] ?? ''),
-                'trafficHtml' => SafeHtml::fromTrustedHtml($uploaded.'@'.$uprate.(__('legacy/viewsnatches.text_per_second')).'<br />'.$downloaded.'@'.$downrate.(__('legacy/viewsnatches.text_per_second'))),
-                'ratioHtml' => SafeHtml::fromTrustedHtml($ratio),
+                'trafficUp' => Format::size((float) $arr['uploaded']).'@'.$uprate.$perSecond,
+                'trafficDown' => Format::size((float) $arr['downloaded']).'@'.$downrate.$perSecond,
+                'ratioText' => $ratioText,
+                'ratioClass' => $ratioClass,
                 'seedtime' => Format::prettyTimeWithLocale((float) $arr['seedtime']),
                 'leechtime' => Format::prettyTimeWithLocale((float) $arr['leechtime']),
-                'completedAtHtml' => SafeHtml::fromTrustedHtml((string) Time::format($arr['completedat'], true, false)),
-                'lastActionHtml' => SafeHtml::fromTrustedHtml((string) Time::format($arr['last_action'], true, false)),
-                'reportHtml' => SafeHtml::fromTrustedHtml($reportHtml),
+                'completedAt' => Time::format($arr['completedat'], true, false),
+                'lastAction' => Time::format($arr['last_action'], true, false),
+                'reportUserId' => (int) $arr['userid'],
+                'reportLinked' => $privacy != 'strong' || Permission::can(PermissionEnum::VIEW_ANONYMOUS),
             ];
         }
 
@@ -203,17 +198,15 @@ class TorrentAjaxController extends LegacyController
             ? $this->userTorrentListVm($data['rows'], $type, $targetUserId, $curUser, $data['seedTimeAndUploaded'], $data['torrentRep'])
             : null;
 
-        $hasData = false;
-        $summary = sprintf('<b>%s</b>%s', $data['count'], (__('legacy/getusertorrentlistajax.text_record')).Strings::addS($data['count']));
+        $hasData = (bool) ($data['total_size'] || $data['count']);
+        $summaryText = (__('legacy/getusertorrentlistajax.text_record')).Strings::addS($data['count']);
         if ($data['total_size']) {
-            $hasData = true;
-            $summary .= (__('legacy/getusertorrentlistajax.text_total_size')).Format::size((float) $data['total_size']);
-        } elseif ($data['count']) {
-            $hasData = true;
+            $summaryText .= (__('legacy/getusertorrentlistajax.text_total_size')).Format::size((float) $data['total_size']);
         }
 
         $data['hasData'] = $hasData;
-        $data['summaryHtml'] = SafeHtml::fromTrustedHtml($summary);
+        $data['summaryCount'] = (int) $data['count'];
+        $data['summaryText'] = $summaryText;
 
         return response()->view('getusertorrentlistajax.index', $data, 200, $headers);
     }
@@ -367,21 +360,19 @@ class TorrentAjaxController extends LegacyController
     }
 
     /**
-     * Renders a small colored extension badge for a filename.
+     * Returns badge data for a small colored extension badge for a filename.
+     *
+     * @return array{cat: string, label: string}
      */
-    private function fileBadge(string $filename): string
+    private function fileBadge(string $filename): array
     {
         $dot = strrpos($filename, '.');
         $ext = $dot !== false ? strtolower(substr($filename, $dot + 1)) : '';
         if ($ext === '' || strlen($ext) > 5 || ! ctype_alnum($ext)) {
-            $cat = 'other';
-            $label = '?';
-        } else {
-            $cat = $this->fileExtCategory($ext);
-            $label = strtoupper($ext);
+            return ['cat' => 'other', 'label' => '?'];
         }
 
-        return '<span class="fileicon fi-'.e($cat).'" title="'.e($cat).'">'.e($label).'</span>';
+        return ['cat' => $this->fileExtCategory($ext), 'label' => strtoupper($ext)];
     }
 
     public function searchSuggest(Request $request): Response|RedirectResponse

@@ -159,17 +159,18 @@ class WebCommentController extends Controller
             abort(403, __('legacy/comment.std_permission_denied'));
         }
 
-        $referer = (string) ($request->headers->get('referer') ?? '');
-        $query = ['type' => $type];
-        if ($referer !== '') {
-            $query['returnto'] = $referer;
+        $arr = $this->commentRepository->getForDelete($commentId, $type);
+        if (! $arr) {
+            abort(404, __('legacy/comment.std_invalid_id'));
         }
-        $formAction = $this->legacyAction('delete', ['type' => $type]);
+
+        $referer = (string) ($request->headers->get('referer') ?? '');
+        $formAction = $this->legacyAction('delete', ['type' => $type, 'cid' => $commentId]);
         $heading = __('legacy/comment.std_delete_comment');
         $message = __('legacy/comment.std_delete_comment_note');
         $confirmLabel = ltrim(strip_tags(__('legacy/comment.std_here_if_sure')), '>');
-        $cancelLabel = $this->lang('text_cancel');
-        $cancelUrl = $referer !== '' ? $referer : $this->buildScript($type, 0);
+        $cancelLabel = $this->lang('text_back');
+        $cancelUrl = $referer !== '' ? $referer : $this->buildScript($type, (int) $arr['pid']);
         $returnto = $referer;
 
         return view('comments.delete', compact('heading', 'message', 'formAction', 'commentId', 'confirmLabel', 'cancelLabel', 'cancelUrl', 'type', 'returnto'));

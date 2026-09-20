@@ -39,14 +39,15 @@ class ToptenController extends Controller
         $subtype = is_string($subtype) ? $subtype : null;
 
         $langFolder = Locale::currentLangDir('en');
-        $cacheKey = "topten_{$type}_{$limit}_{$subtype}_{$langFolder}";
+        $cacheKey = "topten_data_{$type}_{$limit}_{$subtype}_{$langFolder}";
 
-        $html = Cache::remember($cacheKey, 3600, function () use ($type, $limit, $subtype) {
+        $page = Cache::remember($cacheKey, 3600, function () use ($type, $limit, $subtype) {
             $page = $this->toptenRepository->page($type, $limit, $subtype);
+            $page['generatedAt'] = date('Y-m-d H:i:s');
 
-            return view('topten.index', $page)->render();
+            return $page;
         });
 
-        return response($html);
+        return response(view('topten.index', $page)->render());
     }
 }

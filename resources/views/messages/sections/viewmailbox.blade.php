@@ -6,13 +6,13 @@
 </div>
 
 @if (! $viewmailbox['hasMessages'])
-<p align="center">{{ __('legacy/messages.text_no_messages') }}</p>
+<x-empty-state :title="__('legacy/messages.text_no_messages')" />
 @else
 {{ $viewmailbox['pagertop'] ?? '' }}
 <form action="/messages" method="post">
 @csrf
 <input type="hidden" name="action" value="moveordel">
-<table data-nx="data" border="0" cellpadding="4" cellspacing="0" width={{ $contentWidth }} align="center">
+<table data-nx="data" border="0" cellpadding="4" cellspacing="0" width={{ $contentWidth }} align="center"><caption class="nx-sr-only">{{ $title ?? 'Private messages' }}</caption>
 <tr>
 <th width="1%" class="colhead" align="center" scope="col">{{ __('legacy/messages.col_status') }}</th>
 <th class="colhead" align="left" scope="col">{{ __('legacy/messages.col_subject') }} </th>

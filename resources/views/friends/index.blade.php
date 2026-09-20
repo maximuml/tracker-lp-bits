@@ -12,7 +12,7 @@
 <div class="nx-box nx-box--tight nx-box--737">
 
 @if (empty($friendsList))
-    <em>{{ __('legacy/friends.text_friends_empty') }}</em>
+    <x-empty-state :title="__('legacy/friends.text_friends_empty')" />
 @else
     <div class="nx-fcards">
     @foreach ($friendsList as $friend)
@@ -39,7 +39,7 @@
 <h2 align=left><a name="blocks">{{ __('legacy/friends.text_blocked_users')}}</a></h2>
 <div>
 @if ($blocks === [])
-{{ \App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/friends.text_blocklist_empty')) }}
+<x-empty-state :title="__('legacy/friends.text_blocklist_empty')" />
 @else
 <div class="nxm-grid-6">@foreach ($blocks as $block)<div>[<span class='small'><a href="friends.php?id={{ $userid }}&action=delete&type=block&targetid={{ $block['id'] }}">D</a></span>] {{ $block['usernameHtml'] }}</div>@endforeach</div>
 @endif

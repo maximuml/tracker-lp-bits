@@ -407,6 +407,15 @@ a.nxm-logo:link, a.nxm-logo:visited {
     border: 0;
 }
 
+.nx-empty {
+    padding: 2rem 1rem;
+    text-align: center;
+    color: var(--nxm-text-dim);
+}
+.nx-empty__title { margin: 0; font-weight: 600; }
+.nx-empty__desc { margin: 0.4rem 0 0; }
+.nx-empty__actions { margin-top: 0.8rem; }
+
 @media (max-width: 720px) {
     table[data-nx="data"] {
         display: block;

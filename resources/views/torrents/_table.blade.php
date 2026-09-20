@@ -1,5 +1,5 @@
 {{-- Modern torrents listing table (Variant A, ADR 0014). Replaces TorrentTable::render — data arrives prepared in $listVm. --}}
-<table class="nx-torrents nxm-table" data-nx="data" cellspacing="0" cellpadding="5" width="100%">
+<table class="nx-torrents nxm-table" data-nx="data" cellspacing="0" cellpadding="5" width="100%"><caption class="nx-sr-only">{{ __('legacy/torrents.head_torrents') }}</caption>
 <thead>
 <tr>
     @foreach ($listVm->columns as $col)

@@ -94,7 +94,7 @@ function unpreview(obj){
 
 function saveMagicValue(torrentid,value)
 {
-    jQuery.post("magic.php", {"value": value, "id": torrentid}, function(res) {
+    nativePost("magic.php", {"value": value, "id": torrentid}, function(res) {
         if (res.ret !== 0) {
             alert(res.msg)
             return
@@ -109,7 +109,7 @@ function saveMagicValue(torrentid,value)
             var userAll = document.getElementById("count_user_spa").innerHTML;
             document.getElementById("count_user_spa").innerHTML = userAll*1 + 1;
         }
-    }, "json")
+    })
 }
 
 // java_klappe.js
@@ -692,6 +692,56 @@ document.addEventListener('error', function (e) {
     }
 }, true);
 
+// Image helpers formerly in curtain_imageresizer.js: Scale() shrinks
+// oversized BBCode images, check_avatar() swaps oversized avatars for the
+// placeholder, handleImageError() retries doubanio covers on mirror
+// domains. The curtain lightbox (Preview/showPreviewImage/Previewurl) was
+// dead code — no #curtain/#lightbox elements exist — js-previewable now
+// uses data-zoomable (nx-zoom).
+function Scale(image, max_width, max_height) {
+    var tempimage = new Image();
+    tempimage.src = image.src;
+    var tempwidth = tempimage.width;
+    var tempheight = tempimage.height;
+    if (tempwidth > max_width) {
+        image.height = tempheight = Math.round((max_width / tempwidth) * tempheight);
+        image.width = tempwidth = max_width;
+    }
+    if (max_height !== 0 && tempheight > max_height) {
+        image.width = Math.round((max_height / tempheight) * tempwidth);
+        image.height = max_height;
+    }
+}
+
+function check_avatar(image, langfolder) {
+    var tempimage = new Image();
+    tempimage.src = image.src;
+    var displayheight = image.height;
+    var tempwidth = tempimage.width;
+    var tempheight = tempimage.height;
+    if (tempwidth > 250 || tempheight > 250 || displayheight > 250) {
+        image.src = 'pic/forum_pic/' + langfolder + '/avatartoobig.png';
+    }
+}
+
+function handleImageError(img, currentSrc) {
+    if (!currentSrc.includes('doubanio.com')) {
+        return;
+    }
+    var domainList = ['img1.doubanio.com', 'img2.doubanio.com', 'img3.doubanio.com', 'img9.doubanio.com'];
+    var index = 0;
+    function tryNextDomain() {
+        if (index >= domainList.length) {
+            return;
+        }
+        img.src = currentSrc.replace(/https:\/\/[a-zA-Z0-9.-]+\.doubanio\.com/, 'https://' + domainList[index]);
+        img.onload = function () { img.onload = img.onerror = null; };
+        img.onerror = tryNextDomain;
+        index++;
+    }
+    tryNextDomain();
+}
+
 // img load handlers (capture phase — load does not bubble):
 // data-scale="WxH" resizes large BBCode images, data-avatar-check swaps
 // oversized avatars for the placeholder.
@@ -699,12 +749,12 @@ document.addEventListener('load', function (e) {
     var img = e.target;
     if (!img || img.tagName !== 'IMG') { return; }
     var scale = img.getAttribute('data-scale');
-    if (scale && typeof Scale === 'function') {
+    if (scale) {
         var parts = scale.split('x');
         Scale(img, parseInt(parts[0], 10), parseInt(parts[1], 10));
     }
     var avatarCheck = img.getAttribute('data-avatar-check');
-    if (avatarCheck !== null && typeof check_avatar === 'function') {
+    if (avatarCheck !== null) {
         check_avatar(img, avatarCheck);
     }
 }, true);
@@ -713,16 +763,8 @@ document.addEventListener('error', function (e) {
     var img = e.target;
     if (img && img.tagName === 'IMG') {
         var fb = img.getAttribute('data-img-fallback');
-        if (fb && typeof handleImageError === 'function') {
+        if (fb) {
             handleImageError(img, fb);
         }
     }
 }, true);
-
-// Attachment/custom-field preview images open in the lightbox.
-document.addEventListener('click', function (e) {
-    var img = e.target && e.target.closest ? e.target.closest('img.js-previewable') : null;
-    if (img && typeof Preview === 'function') {
-        Preview(img);
-    }
-});

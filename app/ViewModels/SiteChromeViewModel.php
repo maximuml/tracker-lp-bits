@@ -421,7 +421,6 @@ final class SiteChromeViewModel
         return [
             $headStyles,
             [
-                'js/curtain_imageresizer.js'.$cssUpdateDate,
                 'js/ajaxbasic.js'.$cssUpdateDate,
                 'js/common.js'.$cssUpdateDate,
             ],

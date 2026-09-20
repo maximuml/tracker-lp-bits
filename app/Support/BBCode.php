@@ -178,11 +178,10 @@ final class BBCode
      * Empty `$src` short-circuits to an empty string (the legacy
      * `formatImg()` does the same after `filter_src()`).
      *
-     * When `$enableResizer` is true the legacy `Scale()` JS hook is
-     * attached via `onload`, and the resulting element is tagged
-     * with `data-zoomable` for the lightbox script. The error
-     * fallback (`onerror="handleImageError(this, ...);"`) is always
-     * emitted regardless of resizer flag.
+     * When `$enableResizer` is true the image gets `data-scale` (delegated
+     * load handler in common.js calls `Scale()`) plus `data-zoomable` for
+     * the nx-zoom lightbox. The error fallback (`data-img-fallback`) is
+     * always emitted regardless of resizer flag.
      */
     public static function img(string $src, bool $enableResizer, int $maxWidth, int $maxHeight, string $imgId = ''): string
     {

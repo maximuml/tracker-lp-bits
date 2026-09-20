@@ -416,6 +416,25 @@ a.nxm-logo:link, a.nxm-logo:visited {
 .nx-empty__desc { margin: 0.4rem 0 0; }
 .nx-empty__actions { margin-top: 0.8rem; }
 
+/* nx-tooltip.js popup — replaces domTT 'smilies'/'niceTitle'/'attach' classes */
+.nx-tt-pop {
+    position: absolute;
+    z-index: 400;
+    padding: 6px 8px;
+    background: var(--nxm-surface);
+    color: var(--nxm-text);
+    border: 1px solid var(--nxm-border);
+    border-radius: 4px;
+    box-shadow: var(--nxm-shadow);
+    font-size: 12px;
+    font-weight: normal;
+    text-align: left;
+    line-height: 1.4;
+    white-space: normal;
+}
+.nx-tt-pop table { border-collapse: collapse; }
+.nx-tt-pop a:link, .nx-tt-pop a:visited { color: var(--nxm-accent); }
+
 @media (max-width: 720px) {
     table[data-nx="data"] {
         display: block;

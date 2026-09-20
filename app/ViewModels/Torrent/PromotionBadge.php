@@ -13,7 +13,7 @@ use App\Support\Html\SafeHtml;
  * `mode` is the user's `appendpromotion` rendering choice: 'word' prints
  * `[FREE]`-style text, 'icon' prints the `pro_*` sprite image. `timeout`
  * carries the formatted "time left" markup shown after the badge and
- * inside the domTT tooltip; `domttHtml` is the raw tooltip markup that
+ * inside the tooltip; `domttHtml` is the raw tooltip markup that
  * lands in the `data-domtt-promo` attribute (escaped by Blade).
  */
 final class PromotionBadge

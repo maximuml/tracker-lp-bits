@@ -21,10 +21,10 @@
 @endforeach
 <link rel="stylesheet" href="css/modern.css" type="text/css" />
 @if($chrome->cspNonce !== '')
-{{-- CSP nonce bridge: vendored libs (medium-zoom, curtain_imageresizer,
-     domTT) inject <style> elements at runtime; stamp the request nonce on
-     them so nonce-strict style-src-elem does not block legitimate styles.
-     Must run before the external scripts below. --}}
+{{-- CSP nonce bridge: vendored libs (nx-zoom) inject <style> elements at
+     runtime; stamp the request nonce on them so nonce-strict
+     style-src-elem does not block legitimate styles. Must run before
+     the external scripts below. --}}
 <script type="text/javascript" nonce="{{ $chrome->cspNonce }}">
     (function () {
         var nonce = document.currentScript && document.currentScript.nonce;

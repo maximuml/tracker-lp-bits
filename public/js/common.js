@@ -478,13 +478,7 @@ document.addEventListener('keydown', function (e) {
     }
 });
 
-document.addEventListener('mouseover', function (e) {
-    var el = e.target && e.target.closest ? e.target.closest('[data-domtt-content]') : null;
-    if (el && typeof domTT_activate === 'function') {
-        domTT_activate(el, e, 'content', el.getAttribute('data-domtt-content'),
-            'trail', false, 'delay', 0, 'lifetime', 10000, 'styleClass', 'smilies', 'maxWidth', 400);
-    }
-});
+// data-domtt-* hover tooltips are handled by js/nx-tooltip.js.
 
 // CSP-safe delegated bindings for legacy interactive controls.
 // Inline on*= handlers and javascript: URLs are blocked by the
@@ -721,24 +715,6 @@ document.addEventListener('error', function (e) {
         img.classList.add('lt-broken');
     }
 }, true);
-
-// domTT tooltips whose content is another element on the page
-// (torrent last-comment / last-post previews) or a literal string
-// (promotion expiry hints). Replaces inline onmouseover= attributes.
-document.addEventListener('mouseover', function (e) {
-    var el = e.target && e.target.closest ? e.target.closest('[data-domtt-src]') : null;
-    if (el && typeof domTT_activate === 'function') {
-        var src = document.getElementById(el.getAttribute('data-domtt-src'));
-        if (src) {
-            domTT_activate(el, e, 'content', src, 'trail', false, 'delay', 500, 'lifetime', 3000, 'fade', 'both', 'styleClass', 'niceTitle', 'fadeMax', 87, 'maxWidth', 400);
-        }
-        return;
-    }
-    var promo = e.target && e.target.closest ? e.target.closest('[data-domtt-promo]') : null;
-    if (promo && typeof domTT_activate === 'function') {
-        domTT_activate(promo, e, 'content', promo.getAttribute('data-domtt-promo'), 'trail', false, 'delay', 500, 'lifetime', 3000, 'fade', 'both', 'styleClass', 'niceTitle', 'fadeMax', 87, 'maxWidth', 300);
-    }
-});
 
 // img load handlers (capture phase — load does not bubble):
 // data-scale="WxH" resizes large BBCode images, data-avatar-check swaps

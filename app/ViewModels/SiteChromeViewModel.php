@@ -410,7 +410,6 @@ final class SiteChromeViewModel
             'styles/sprites.css'.$cssUpdateDate,
             $picFolder.'/forumsprites.css'.$cssUpdateDate,
             $cssUri.'theme.css'.$cssUpdateDate,
-            $cssUri.'DomTT.css'.$cssUpdateDate,
             'styles/nexus.css'.$cssUpdateDate,
         ], $iconStyles);
 
@@ -425,10 +424,6 @@ final class SiteChromeViewModel
                 'js/curtain_imageresizer.js'.$cssUpdateDate,
                 'js/ajaxbasic.js'.$cssUpdateDate,
                 'js/common.js'.$cssUpdateDate,
-                'js/domLib.js'.$cssUpdateDate,
-                'js/domTT.js'.$cssUpdateDate,
-                'js/domTT_drag.js'.$cssUpdateDate,
-                'js/fadomatic.js'.$cssUpdateDate,
             ],
             SafeHtml::fromTrustedHtml($addiCode),
             $picFolder,
@@ -712,19 +707,15 @@ final class SiteChromeViewModel
         if ($variant === 'auth') {
             // Standalone auth pages (ADR 0020): CSRF, the delegated auth
             // bindings and the footer helpers — the legacy UI toolkit
-            // (common.js/domTT/fadomatic/…) is not used there.
+            // (common.js, the delegated bindings, …) is not used there.
             return ['js/csrf.js', 'js/auth.js', 'js/nx-zoom.js', 'js/theme-toggle.js'];
         }
 
-        $scripts = ['js/ajax.js', 'js/nexus.js', 'js/csrf.js'];
+        $scripts = ['js/ajax.js', 'js/nexus.js', 'js/csrf.js', 'js/nx-tooltip.js'];
         if ($variant !== 'legacy') {
             $scripts = array_merge($scripts, [
                 'js/ajaxbasic.js',
                 'js/common.js',
-                'js/domLib.js',
-                'js/domTT.js',
-                'js/domTT_drag.js',
-                'js/fadomatic.js',
             ]);
         }
         $scripts[] = 'js/nx-zoom.js';

@@ -15,8 +15,8 @@ final class SmiliesTest extends TestCase
     {
         // Inline javascript: URLs and on*= handlers are blocked by the
         // nonce-strict CSP — the link carries data-* attributes that the
-        // delegated listeners in public/js/common.js dispatch to SmileIT()
-        // and domTT_activate().
+        // delegated listeners in public/js/common.js dispatch to SmileIT();
+        // the tooltip renders via js/nx-tooltip.js.
         $escaped = '&lt;table&gt;&lt;tr&gt;&lt;td&gt;&lt;img src=&#039;pic/smilies/4.gif&#039; alt=&#039;&#039; /&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;';
         $expected = '<a href="#" data-smile="[em4]"'
             .' data-smile-form="myform"'

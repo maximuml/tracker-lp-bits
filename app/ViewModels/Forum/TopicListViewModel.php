@@ -13,7 +13,7 @@ use App\View\Components\Pagination;
  *
  * `page` is the 0-based legacy `page=` query value — `x-forum.pager`
  * renders the 1-based display while keeping the legacy URL semantics.
- * `tooltips` are the hidden domTT containers for last-post previews;
+ * `tooltips` are the hidden tooltip containers for last-post previews;
  * `content` is `Format::formatComment()` output (BBCode-rendered, the
  * same justification as the post body).
  */

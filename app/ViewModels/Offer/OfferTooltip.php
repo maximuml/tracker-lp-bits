@@ -7,7 +7,7 @@ namespace App\ViewModels\Offer;
 use App\Support\Html\SafeHtml;
 
 /**
- * One hidden domTT tooltip div — the data counterpart of a
+ * One hidden tooltip div — the data counterpart of a
  * `Tag::tooltipContainer()` item.
  */
 final class OfferTooltip

@@ -33,7 +33,7 @@ document.addEventListener('click', function (e) {
 
 <div class="smilegrid">
 @for ($i = 1; $i < 192; $i++)
-    <div><a href="#" data-smile="[em{{ $i }}]" data-smile-form="{{ $form ?? '' }}" data-smile-text="{{ $text ?? '' }}"><img src="pic/smilies/{{ $i }}.gif" alt="" ></a></div>
+    <div><a href="#" data-smile="[em{{ $i }}]" data-smile-form="{{ $form ?? '' }}" data-smile-text="{{ $text ?? '' }}"><img src="pic/smilies/{{ $i }}.gif" alt="[em{{ $i }}]" ></a></div>
 @endfor
 </div>
 <div align="center">

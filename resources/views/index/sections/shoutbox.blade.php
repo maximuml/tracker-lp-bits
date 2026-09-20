@@ -8,7 +8,7 @@
     @endif
 </h2>
 <div class="nx-text">
-<iframe id='iframe-shout-box' src='shoutbox.php?type=shoutbox' width='100%' height='180' frameborder='0' name='sbox' marginwidth='0' marginheight='0'></iframe><br /><br />
+<iframe id='iframe-shout-box' title="Shoutbox" src='shoutbox.php?type=shoutbox' width='100%' height='180' frameborder='0' name='sbox' marginwidth='0' marginheight='0'></iframe><br /><br />
 <form action='shoutbox.php' method='get' target='sbox' name='shbox'>
 {{ ($shoutbox['toolbar'] ?? '') }}
 <div class="nx-flex">

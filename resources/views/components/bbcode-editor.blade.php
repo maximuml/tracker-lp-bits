@@ -95,7 +95,7 @@
             </select>
         </div>
         @if ($enableAttach)
-            <iframe src="{{ $attachUrl }}" class="bbcode-attach" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe>
+            <iframe src="{{ $attachUrl }}" class="bbcode-attach" title="{{ 'Attachments' }}" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe>
         @endif
         <div class="bbcode-body">
             <textarea class="bbcode" cols="100" name="{{ $text }}" id="{{ $text }}" rows="20" data-ctrlenter="compose:qr">{{ $content }}</textarea>

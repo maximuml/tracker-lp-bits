@@ -456,7 +456,9 @@ final class Tag
      */
     public static function quickReply(string $formName, string $textareaName, string $submitLabel): string
     {
-        $html = "<textarea name='".htmlspecialchars($textareaName, ENT_QUOTES)."' cols=\"100\" rows=\"8\" data-ctrlenter=\"compose:qr\"></textarea>";
+        $name = htmlspecialchars($textareaName, ENT_QUOTES);
+        $html = "<label class=\"nx-sr-only\" for=\"{$name}\">".htmlspecialchars((string) (__('legacy/functions.row_body'))).'</label>'
+            ."<textarea id='{$name}' name='{$name}' cols=\"100\" rows=\"8\" data-ctrlenter=\"compose:qr\"></textarea>";
         $html .= Smilies::quickRow($formName, $textareaName);
         $html .= '<br />';
         $html .= '<input type="submit" id="qr" class="btn" value="'.htmlspecialchars($submitLabel, ENT_QUOTES).'" />';

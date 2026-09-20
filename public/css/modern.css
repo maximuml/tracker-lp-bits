@@ -198,12 +198,15 @@ body {
     padding: 0.9rem 1rem 0.4rem;
 }
 
-.nxm-logo {
+a.nxm-logo {
     font-size: 1.35rem;
     font-weight: 700;
     color: var(--nxm-header-text);
     text-decoration: none;
     letter-spacing: 0.02em;
+}
+a.nxm-logo:link, a.nxm-logo:visited {
+    color: var(--nxm-header-text);
 }
 .nxm-logo img { max-height: 64px; display: block; }
 
@@ -562,7 +565,22 @@ td.embedded, .nx-embedded { background-color: var(--nxm-surface); color: var(--n
 td.rowhead, td.rowhead_left, td.rowhead_center { color: var(--nxm-text-dim); }
 td.rowfollow, td.colfollow, td.text, td.comment { color: var(--nxm-text); }
 td.navigation { color: var(--nxm-text-dim); }
+/* legacy .gray/#aca899 fails WCAG AA on light surfaces — remap to token */
+.gray, font.gray { color: var(--nxm-text-dim); text-decoration: underline; }
 body.inframe { background: var(--nxm-bg); color: var(--nxm-text); }
+/* Classic a:link{#000} beats `a{}` on specificity — dark-on-dark inside
+   the iframe; .shout-actions opacity .7 dims links below AA on dark */
+html[data-theme="dark"] body.inframe a:link,
+html[data-theme="dark"] body.inframe a:visited { color: var(--nxm-accent); }
+html[data-theme="dark"] body.inframe .shout-actions { opacity: 1; }
+@media (prefers-color-scheme: dark) {
+    html:not([data-theme]) body.inframe a:link,
+    html:not([data-theme]) body.inframe a:visited,
+    html[data-theme="auto"] body.inframe a:link,
+    html[data-theme="auto"] body.inframe a:visited { color: var(--nxm-accent); }
+    html:not([data-theme]) body.inframe .shout-actions,
+    html[data-theme="auto"] body.inframe .shout-actions { opacity: 1; }
+}
 td.shoutrow { background-color: var(--nxm-surface-alt); color: var(--nxm-text); }
 a.altlink:link, a.altlink:visited,
 a.altlink_blue:link, a.altlink_blue:visited,

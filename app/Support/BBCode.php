@@ -64,7 +64,7 @@ final class BBCode
             // Dangerous scheme — render as plain text, no link.
             $displayText = $text !== '' ? $text : $url;
 
-            return htmlspecialchars($displayText, ENT_QUOTES, 'UTF-8');
+            return htmlspecialchars($displayText, ENT_QUOTES, 'UTF-8', false);
         }
 
         if (! $text) {
@@ -73,7 +73,7 @@ final class BBCode
 
         // Escape for HTML attribute and text context.
         $escapedUrl = htmlspecialchars($safeUrl, ENT_QUOTES, 'UTF-8');
-        $escapedText = htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
+        $escapedText = htmlspecialchars($text, ENT_QUOTES, 'UTF-8', false);
         $classAttr = $linkClass !== '' ? ' class="'.htmlspecialchars($linkClass, ENT_QUOTES, 'UTF-8').'"' : '';
         // rel="noopener noreferrer" prevents tabnabbing when target="_blank".
         $targetAttr = $newWindow ? ' target="_blank" rel="noopener noreferrer"' : '';

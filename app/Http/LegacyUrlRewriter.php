@@ -155,6 +155,8 @@ final class LegacyUrlRewriter
             } elseif ($commentAction === 'add' && $method === 'GET') {
                 unset($query['action']);
                 $routePath = '/comment/add';
+            } elseif ($commentAction === '' && $pathInfo !== '') {
+                $routePath = '/comment'.$pathInfo;
             } else {
                 unset($query['action']);
                 $routePath = '/comment';

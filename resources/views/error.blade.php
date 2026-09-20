@@ -162,6 +162,38 @@
                 width: 100%;
             }
         }
+
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: linear-gradient(135deg, #12121f 0%, #1a1a2e 100%);
+            }
+
+            .container {
+                background: rgba(30, 30, 46, 0.9);
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            }
+
+            .error-icon {
+                color: #8b9ce8;
+            }
+
+            .error-message {
+                color: #ccc;
+            }
+
+            .btn-secondary {
+                color: #ccc;
+                border-color: rgba(255, 255, 255, 0.25);
+            }
+
+            .btn-secondary:hover {
+                background: rgba(255, 255, 255, 0.08);
+            }
+
+            .footer {
+                color: #999;
+            }
+        }
     </style>
 </head>
 <body>

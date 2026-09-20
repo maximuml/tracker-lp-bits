@@ -156,8 +156,8 @@ class TorrentAjaxController extends LegacyController
                 'ratioClass' => $ratioClass,
                 'seedtime' => Format::prettyTimeWithLocale((float) $arr['seedtime']),
                 'leechtime' => Format::prettyTimeWithLocale((float) $arr['leechtime']),
-                'completedAt' => Time::format($arr['completedat'], true, false),
-                'lastAction' => Time::format($arr['last_action'], true, false),
+                'completedAt' => SafeHtml::fromTrustedHtml((string) Time::format($arr['completedat'], true, false)),
+                'lastAction' => SafeHtml::fromTrustedHtml((string) Time::format($arr['last_action'], true, false)),
                 'reportUserId' => (int) $arr['userid'],
                 'reportLinked' => $privacy != 'strong' || Permission::can(PermissionEnum::VIEW_ANONYMOUS),
             ];

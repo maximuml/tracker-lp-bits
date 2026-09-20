@@ -17,6 +17,9 @@ return [
         'gender_female' => 'Female',
         'gender_Female' => 'Female',
         'gender_N/A' => 'Gender unknown',
+        'gender_0' => 'Male',
+        'gender_1' => 'Female',
+        'gender_2' => 'Gender unknown',
     ],
     'torrent' => [
         'page_title' => 'Torrent statistics',

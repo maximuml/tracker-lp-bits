@@ -61,12 +61,14 @@ class PasswordRecoveryService
 
         if (empty($user)) {
             $this->authService->recordFailedAttempt($ip);
-            throw new AuthenticationException(__('legacy/recover.std_email_not_in_database'));
+
+            return;
         }
 
         if (($user['status'] ?? null) === UserStatus::PENDING->value) {
             $this->authService->recordFailedAttempt($ip);
-            throw new AuthenticationException(__('legacy/recover.std_user_account_unconfirmed'));
+
+            return;
         }
 
         $sec = Token::randomHex();

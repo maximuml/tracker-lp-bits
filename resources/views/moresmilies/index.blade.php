@@ -1,9 +1,10 @@
 <html><head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="color-scheme" content="light dark">
 <title>{{ __('legacy/moresmilies.head_more_smilies') }}</title>
 <style type="text/css" nonce="{{ $cspNonce ?? '' }}">
 img {border: none;}
-body {color: #000000; background-color: #ffffff}
+body {color: CanvasText; background-color: Canvas}
 .smilegrid {display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px}
 .smilegrid > div {text-align: center; padding: 1px}
 </style>

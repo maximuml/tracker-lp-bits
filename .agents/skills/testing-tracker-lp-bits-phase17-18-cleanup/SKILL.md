@@ -40,3 +40,14 @@ This covers the legacy pages migrated into `ForumService`, `OfferService`, `Mess
 - `set -u` in bash smoke scripts can mask uninitialized variables; ensure dynamic fixture IDs are captured from the DB.
 - Legacy forms often use `input[name="subject"]` and `textarea[name="body"]`. The BBCode editor is just a `textarea` named `body`.
 - The `/nexusphp` Filament dashboard and resource pages (`/nexusphp/user/users`, `/nexusphp/torrent/torrents`) should render without the `404 Not Found` card.
+
+## Post-migration regression patterns (seen on php8 merge, W1/W2 era)
+
+- **Validation/value mismatch**: `Update*Request` rules using `in:yes` silently reject real form values — valueless checkboxes submit `on` (forum `avatars`/`signatures`/`ttlastpost`), and `<select>` options like `showlastcom=no` fail `in:yes`. Failed validation redirects to `?action=X` with **no error shown** — test saves by checking for `type=saved`, not just a 302.
+- **GET→POST hardening orphans links**: `friends.php?action=add` is POST-only but `user/details.blade.php` still emits GET links → "Permission denied." Same class: `/preview.php` is GET-only but `bbcode-editor.js` POSTs to it → 405 injected into preview pane. Grep views for `action=<x>` links vs route methods after any method split.
+- **CSP kills JS-injected `<style>`**: `style-src 'self' 'nonce-…'` (no `unsafe-inline`) blocks medium-zoom's runtime stylesheet → zoom overlay renders 0-height and can never close. Verify lightbox/zoom close, not just open.
+- **SafeHtml vs `{{ }}`**: `Ratio::forUserId($id)` returns HTML (`<span class="nx-ratio">`); rendering it via `{{ }}` in `header.blade.php` leaks literal markup into every page's userbar. Check userbar text for `</span>` artifacts.
+- **Blade `@{{ }}` leaks into non-HTML views**: `rss/torrents.blade.php` uses `@{{ $httpHost }}` → literal braces in feed output. Validate RSS author field text, not just XML well-formedness.
+- **`getattachment`**: needs `location` relative to `attachment.httpdirectory` (default `attachments/` under base_path); rows with bare filenames 404 "File not found" even though the file exists elsewhere.
+- **`logout.php`/`/comment/*` canonical GETs → 405**: rewriter maps them to POST-only routes; only UI POST forms work. Distinguish from real breakage by checking the form method in the page source.
+- **Two-Chrome quirk**: if `read_dom`/CDP tools show a different browser's NTP, drive the test window via `javascript:void(document.title=expr)` URLs to read DOM state, and remember `elementFromPoint` uses real-viewport px (display may be scaled vs tool coords — mismatch causes phantom "unclickable element" diagnoses; verify with `.click()` before filing a bug).

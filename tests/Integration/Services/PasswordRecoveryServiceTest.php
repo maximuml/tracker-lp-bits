@@ -104,25 +104,33 @@ final class PasswordRecoveryServiceTest extends TestCase
 
     // --- requestReset: email not in database ---
 
-    public function test_request_reset_throws_for_unknown_email(): void
+    public function test_request_reset_succeeds_silently_for_unknown_email(): void
     {
-        $this->expectException(AuthenticationException::class);
+        // Silently succeed so the endpoint cannot be used to enumerate registered emails.
+        $this->authService->shouldReceive('recordFailedAttempt')->with('127.0.0.1')->once();
 
         $this->service->requestReset(['email' => 'nobody@test.com'], '127.0.0.1', [], []);
+
+        $this->assertSame(0, DB::table('password_recovery_tokens')->count());
     }
 
     // --- requestReset: pending account ---
 
-    public function test_request_reset_throws_for_pending_account(): void
+    public function test_request_reset_succeeds_silently_for_pending_account(): void
     {
-        $this->createUser([
+        $userId = $this->createUser([
             'email' => 'pending@test.com',
             'status' => 0,
         ]);
 
-        $this->expectException(AuthenticationException::class);
+        $this->authService->shouldReceive('recordFailedAttempt')->with('127.0.0.1')->once();
 
         $this->service->requestReset(['email' => 'pending@test.com'], '127.0.0.1', [], []);
+
+        $this->assertSame(
+            0,
+            DB::table('password_recovery_tokens')->where('user_id', $userId)->count()
+        );
     }
 
     // --- requestReset: records failed attempt on failures ---

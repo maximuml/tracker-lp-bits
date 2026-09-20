@@ -54,6 +54,7 @@ Route::post('/csp-report', [CspReportController::class, 'store'])->middleware('t
 Route::get('/login', [AuthWebController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthWebController::class, 'login'])->middleware('throttle:login');
 Route::post('/logout', [AuthWebController::class, 'logout'])->name('logout');
+Route::get('/logout', [AuthWebController::class, 'logout']);
 
 Route::get('/signup', [RegistrationController::class, 'showSignup'])->name('signup');
 Route::post('/signup', [RegistrationController::class, 'signup'])->middleware('throttle:login');

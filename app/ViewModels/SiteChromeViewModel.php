@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Repositories\AttendanceRepository;
 use App\Repositories\HitAndRunRepository;
 use App\Repositories\StaffMessageRepository;
+use App\Support\AssetAppender;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Env;
 use App\Support\Exam;
@@ -241,6 +242,8 @@ final class SiteChromeViewModel
             $staffMessageTotal = (int) $staffMessageTotal;
 
             $alerts = self::loadAlerts($context, $userId, (int) $unreadCount, $repo, $msgalert);
+
+            self::appendToastAssets($userId);
         }
 
         $fullTitle = $title === '' ? $context->siteName : $context->siteName.' :: '.$title;
@@ -688,6 +691,20 @@ final class SiteChromeViewModel
             fn (array $item): array => $item + ['selected' => $item['key'] === $selected, 'attrs' => ''],
             $items,
         ));
+    }
+
+    private static function appendToastAssets(int $userId): void
+    {
+        $toastLang = json_encode([
+            'newMessage' => __('legacy/index.toast_new_message'),
+            'shoutboxMention' => __('legacy/index.toast_shoutbox_mention'),
+            'from' => __('legacy/index.toast_from'),
+            'close' => __('legacy/index.toast_close'),
+            'userId' => $userId,
+        ], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT);
+        AssetAppender::js("window.TOAST_LANG = $toastLang;", 'footer', false, 'toast-lang');
+        AssetAppender::css('styles/toast.css', 'header', true);
+        AssetAppender::js('js/toast.js', 'footer', true);
     }
 
     /**

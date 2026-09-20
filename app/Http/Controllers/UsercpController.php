@@ -145,7 +145,7 @@ class UsercpController extends LegacyController
             // This keeps the dynamic rule selection while avoiding $request->all().
             $validator = validator($request->only(array_keys($rules)), $rules);
             if ($validator->fails()) {
-                return redirect('/usercp.php?action='.$action);
+                return redirect('/usercp.php?action='.$action)->withErrors($validator)->withInput();
             }
         }
 

@@ -435,6 +435,51 @@ a.nxm-logo:link, a.nxm-logo:visited {
 .nx-tt-pop table { border-collapse: collapse; }
 .nx-tt-pop a:link, .nx-tt-pop a:visited { color: var(--nxm-accent); }
 
+/* nx-layer.js dialogs (window.layer shim) and the x-modal component share
+   the .nx-modal shell. */
+dialog.nx-modal {
+    border: 1px solid var(--nxm-border);
+    border-radius: 6px;
+    padding: 0;
+    background: var(--nxm-surface);
+    color: var(--nxm-text);
+    max-width: min(92vw, 560px);
+}
+dialog.nx-modal::backdrop { background: rgba(0, 0, 0, .45); }
+.nx-modal__box { display: flex; flex-direction: column; min-width: 260px; }
+.nx-modal__header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .55rem .9rem; border-bottom: 1px solid var(--nxm-border);
+}
+.nx-modal__title { margin: 0; font-size: 1rem; }
+.nx-modal__close {
+    border: 0; background: none; color: var(--nxm-text-dim);
+    font-size: 1.25rem; line-height: 1; cursor: pointer; padding: .15rem .35rem;
+}
+.nx-modal__close:hover { color: var(--nxm-text); }
+.nx-modal__body { padding: .9rem; }
+.nx-modal__frame { width: 100%; height: 100%; border: 0; flex: 1 1 auto; }
+.nx-modal__btns { display: flex; gap: .5rem; padding: 0 .9rem .8rem; }
+.nx-modal__btns:empty { display: none; }
+.nx-modal__btns--center { justify-content: center; }
+.nx-modal__btns--right { justify-content: flex-end; }
+.nx-modal__btn {
+    padding: .35rem 1rem; border: 1px solid var(--nxm-border);
+    border-radius: 4px; background: var(--nxm-surface-alt);
+    color: var(--nxm-text); cursor: pointer;
+}
+.nx-modal__btn:first-child { background: var(--nxm-accent); border-color: var(--nxm-accent); color: var(--nxm-on-accent); }
+dialog.nx-modal--loading { border: 0; background: transparent; }
+dialog.nx-modal--loading .nx-modal__spinner {
+    width: 42px; height: 42px; border-radius: 50%;
+    border: 4px solid var(--nxm-border); border-top-color: var(--nxm-accent);
+    animation: nx-spin 1s linear infinite;
+}
+@keyframes nx-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+    dialog.nx-modal--loading .nx-modal__spinner { animation-duration: 2.5s; }
+}
+
 @media (max-width: 720px) {
     table[data-nx="data"] {
         display: block;

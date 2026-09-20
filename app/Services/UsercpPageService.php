@@ -502,7 +502,7 @@ document.getElementById('add-token-box-btn').addEventListener('click', function 
     layer.open({
         type: 1,
         title: "{$tokLabel} {$tokCreate}",
-        content: document.getElementById('token-form-template').innerHTML,
+        content: document.getElementById('token-form-template').content,
         btn: ['OK'],
         btnAlign: 'c',
         yes: function (index) {

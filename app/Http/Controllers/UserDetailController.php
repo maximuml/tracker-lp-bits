@@ -341,7 +341,6 @@ JS, 'footer', false);
 
         $metas = $this->userRepository->listMetas($id);
         $userProps = [];
-        $consumeChangeUsernameForm = '';
         $triggerId = '';
 
         $metaKey = UserMeta::META_KEY_CHANGE_USERNAME;
@@ -356,17 +355,20 @@ JS, 'footer', false);
                 'triggerId' => $isOwner ? $triggerId : '',
             ])->render());
             if ($isOwner) {
-                $consumeChangeUsernameForm = view('userdetails._consume_username_form', [
-                    'metaKey' => $metaKey,
-                    'metaKeyLabel' => (string) __('legacy/userdetails.meta_key_change_username_username'),
-                ])->render();
                 $consumeLabel = __('legacy/userdetails.consume');
+                AssetAppender::html(
+                    view('userdetails._consume_template', [
+                        'metaKey' => $metaKey,
+                        'metaKeyLabel' => (string) __('legacy/userdetails.meta_key_change_username_username'),
+                    ])->render(),
+                    'footer',
+                );
                 AssetAppender::js(<<<JS
 document.getElementById('{$triggerId}').addEventListener("click", function () {
     layer.open({
         type: 1,
         title: "{$consumeLabel} {$cardName}",
-        content: `$consumeChangeUsernameForm`,
+        content: document.getElementById('nx-layer-src-{$metaKey}').content,
         btn: ['OK'],
         btnAlign: 'c',
         yes: function () {
@@ -447,7 +449,6 @@ JS, 'footer', false);
             'hrStatusHtml' => SafeHtml::fromTrustedHtml($hrStatusHtml),
             'ipHistoryCount' => $ipHistoryCount,
             'userProps' => $userProps,
-            'consumeChangeUsernameForm' => $consumeChangeUsernameForm,
             'triggerId' => $triggerId,
         ];
     }

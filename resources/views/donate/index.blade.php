@@ -4,7 +4,7 @@
 
 @section('content')
 @if ($thanks)
-    {{ \App\Support\Frame::stdMessage(__('legacy/donate.std_success'), $successMessage, false) }}
+    {{ \App\Support\Frame::stdMessage(__('legacy/donate.std_success'), __('legacy/donate.std_donation_success_note_one').'<a href="sendmessage.php?receiver='.$accountantId.'"><b>'.__('legacy/donate.std_here').'</b></a>'.__('legacy/donate.std_donation_success_note_two'), false) }}
 @elseif (! $enabled)
     {{ \App\Support\Frame::stdMessage(__('legacy/donate.std_sorry'), __('legacy/donate.std_do_not_accept_donation'), true) }}
 @elseif (! $showAny)

@@ -37,12 +37,12 @@ final class InfoRepository
                 ->all(),
             'siteName' => $siteName,
             'captions' => [
-                'version' => SafeHtml::fromTrustedHtml('<span id="version">'.(__('legacy/aboutnexus.text_version')).'</span>'),
-                'nexus' => SafeHtml::fromTrustedHtml('<span id="nexus">'.(__('legacy/aboutnexus.text_nexus')).PROJECTNAME.'</span>'),
-                'authorization' => SafeHtml::fromTrustedHtml('<span id="authorization">'.(__('legacy/aboutnexus.text_authorization')).'</span>'),
-                'translation' => SafeHtml::fromTrustedHtml('<span id="translation">'.(__('legacy/aboutnexus.text_translation')).'</span>'),
-                'stylesheet' => SafeHtml::fromTrustedHtml('<span id="stylesheet">'.(__('legacy/aboutnexus.text_stylesheet')).PROJECTNAME.'</span>'),
-                'contact' => SafeHtml::fromTrustedHtml('<span id="contact">'.(__('legacy/aboutnexus.text_contact')).PROJECTNAME.'</span>'),
+                'version' => (string) (__('legacy/aboutnexus.text_version')),
+                'nexus' => (__('legacy/aboutnexus.text_nexus')).PROJECTNAME,
+                'authorization' => (string) (__('legacy/aboutnexus.text_authorization')),
+                'translation' => (string) (__('legacy/aboutnexus.text_translation')),
+                'stylesheet' => (__('legacy/aboutnexus.text_stylesheet')).PROJECTNAME,
+                'contact' => (__('legacy/aboutnexus.text_contact')).PROJECTNAME,
             ],
             'notes' => [
                 'version' => SafeHtml::fromTrustedHtml(sprintf(__('legacy/aboutnexus.text_version_note'), $siteName, PROJECTNAME)),
@@ -132,17 +132,7 @@ final class InfoRepository
         $showPaypal = $paypal !== '' && Email::isWellFormed($paypal);
         $showAlipay = $alipay !== '' && Email::isWellFormed($alipay);
 
-        $tdAttr = '';
-        if ($showPaypal && $showAlipay) {
-            $tdAttr = 'width="50%"';
-        } elseif ($showPaypal || $showAlipay) {
-            $tdAttr = 'colspan="2" width="100%"';
-        }
-
         $accountantId = (int) Settings::get('main.ACCOUNTANTID', 1);
-        $successMessage = (__('legacy/donate.std_donation_success_note_one'))
-            .'<a href="sendmessage.php?receiver='.$accountantId.'"><b>'.(__('legacy/donate.std_here')).'</b></a>'
-            .(__('legacy/donate.std_donation_success_note_two'));
 
         return [
             'enabled' => $enabled,
@@ -153,10 +143,8 @@ final class InfoRepository
             'showAlipay' => $showAlipay,
             'showCustom' => $custom !== '',
             'showAny' => $showPaypal || $showAlipay || $custom !== '',
-            'tdAttr' => $tdAttr,
             'accountantId' => $accountantId,
             'baseUrl' => Url::schemeAndHost(false),
-            'successMessage' => $successMessage,
         ];
     }
 

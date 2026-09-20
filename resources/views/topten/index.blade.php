@@ -3,6 +3,7 @@
 @section('title', __('legacy/topten.head_top_ten'))
 
 @section('content')
+<h1 class="nx-sr-only">{{ __('legacy/topten.head_top_ten') }}</h1>
 <p align="center">@foreach ([1 => 'text_users', 2 => 'text_torrents', 3 => 'text_countries', 5 => 'text_community', 6 => 'text_other'] as $navType => $navKey)@if ($type === $navType && $limit === 10 && $subtype === null)<b>{{ __('legacy/topten.'.$navKey) }}</b>@else<a href="topten.php?type={{ $navType }}">{{ __('legacy/topten.'.$navKey) }}</a>@endif@if (! $loop->last) | @endif@endforeach
 </p>
 

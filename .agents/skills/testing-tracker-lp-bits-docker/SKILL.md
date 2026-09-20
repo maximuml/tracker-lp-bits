@@ -156,3 +156,13 @@ get client with url: http://meilisearch:7700, master key:
    torrents and no forum topics; `php artisan db:seed
    --class=BrowserSmokeSeeder` adds the minimal fixtures the browser
    suite needs (idempotent).
+8. **Toast notifications.** `toast.js` polls `ajax.php action=getToastNotifications`
+   every 30s keyed on `localStorage.toast_last_pm_id_<uid>`. To capture a toast
+   visually, send a PM from a second account and catch the ~6s window before
+   auto-dismiss (a MutationObserver clone can pin it for screenshots).
+9. **Chromeless pages follow `prefers-color-scheme`, not the theme toggle.**
+   moresmilies.php and framework error pages have no site chrome — emulate dark
+   via Playwright `colorScheme: 'dark'` to verify their dark rendering.
+10. **Login form reliability.** GUI login-field coordinates drift between runs;
+    Tab/Enter navigation from the focused field is more reliable than
+    coordinate clicks.

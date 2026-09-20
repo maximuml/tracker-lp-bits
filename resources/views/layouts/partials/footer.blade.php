@@ -33,15 +33,6 @@
 @foreach($chrome->footScripts as $src)
 <script type="text/javascript" src="{{ $src }}"></script>
 @endforeach
-@if($chrome->cspNonce !== '')
-<script type="text/javascript" nonce="{{ $chrome->cspNonce }}">
-@else
-<script type="text/javascript">
-@endif
-document.addEventListener('DOMContentLoaded', function(){
-    mediumZoom('[data-zoomable]')
-});
-</script>
 @foreach (\App\Support\AssetAppender::getAppendFootersSafe() as $html)
 {{ $html }}
 @endforeach

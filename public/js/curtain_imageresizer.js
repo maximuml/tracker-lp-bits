@@ -1,6 +1,5 @@
-if (navigator.appName=="Netscape") {
-	document.write("<style type='text/css'>body {overflow-y:scroll;}<\/style>");
-}
+/* body{overflow-y:scroll} moved to public/css/modern.css — the
+   document.write('<style>…') here violated nonce-strict style-src. */
 var userAgent = navigator.userAgent.toLowerCase();
 var is_ie = (userAgent.indexOf('msie') != -1) && userAgent.substr(userAgent.indexOf('msie') + 5, 3);
 

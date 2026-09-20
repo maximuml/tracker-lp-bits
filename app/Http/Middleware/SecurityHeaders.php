@@ -42,9 +42,14 @@ final class SecurityHeaders
         // a nonce-strict script-src leaves the whole panel dead (login button
         // does nothing). Filament routes get the pragmatic admin policy.
         $isFilament = $this->isFilamentRoute($request);
+        // Legacy pages keep <style> elements nonce-locked (style-src-elem),
+        // but allow style attributes + CSSOM writes (style-src-attr
+        // 'unsafe-inline'): legacy JS toggles visibility via element.style,
+        // and a strict policy silently breaks show/hide controls. Style
+        // attributes cannot execute script — script-src stays nonce-strict.
         $styleSrc = $isFilament
             ? "style-src 'self' 'unsafe-inline'"
-            : "style-src 'self' 'nonce-{$nonce}'";
+            : "style-src 'self' 'nonce-{$nonce}'; style-src-elem 'self' 'nonce-{$nonce}'; style-src-attr 'unsafe-inline'";
         $scriptSrc = $isFilament
             ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com"
             : "script-src 'self' 'nonce-{$nonce}' https://challenges.cloudflare.com";

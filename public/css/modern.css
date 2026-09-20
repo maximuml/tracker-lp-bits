@@ -171,6 +171,9 @@ html[data-fontsize="large"] { --nxm-font-size: 16px; }
 
 body {
     margin: 0;
+    /* permanent scrollbar: prevents layout shift when the lightbox
+       opens (was document.write'd by curtain_imageresizer.js) */
+    overflow-y: scroll;
     background: var(--nxm-bg);
     color: var(--nxm-text);
     font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;

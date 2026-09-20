@@ -72,48 +72,4 @@ final class SmiliesTest extends TestCase
         // 17 links × 1 data attribute pair each.
         $this->assertSame(17, substr_count($result, 'data-smile-form="formX" data-smile-text="taX"'));
     }
-
-    // ---------- framedTable ----------
-
-    public function test_framed_table_opens_with_centered_frame_and_table(): void
-    {
-        $result = Smilies::framedTable('Smilies', 'Type', 'Insert');
-        // (string) Frame::open(title, center=true, padding=10, width=100%, caption=left)
-        $this->assertStringContainsString('<h2 align="left">Smilies</h2>', $result);
-        $this->assertStringContainsString('<table width="100%" border="1" cellspacing="0" cellpadding="10">', $result);
-        $this->assertStringContainsString("<tr><td class=\"text\"  align=\"center\">\n", $result);
-        // (string) Frame::tableOpen(false, 5)
-        $this->assertStringContainsString('<table class="main" border="1" cellspacing="0" cellpadding="5">', $result);
-    }
-
-    public function test_framed_table_emits_header_row_with_provided_labels(): void
-    {
-        $result = Smilies::framedTable('S', 'Foo', 'Bar');
-        $this->assertStringContainsString(
-            '<tr><td class="colhead">Foo</td><td class="colhead">Bar</td></tr>'."\n",
-            $result
-        );
-    }
-
-    public function test_framed_table_emits_191_smiley_rows(): void
-    {
-        $result = Smilies::framedTable('S', 'A', 'B');
-        // Loop runs `for ($i = 1; $i < 192; $i++)` → 191 rows.
-        for ($i = 1; $i < 192; $i++) {
-            $this->assertStringContainsString(
-                '<tr><td>[em'.$i.']</td><td><img src="pic/smilies/'.$i.'.gif" alt="[em'.$i.']" /></td></tr>'."\n",
-                $result,
-                "Expected smiley row $i in framedTable output"
-            );
-        }
-        // Sanity check: no [em192] row.
-        $this->assertStringNotContainsString('[em192]', $result);
-    }
-
-    public function test_framed_table_closes_table_then_frame(): void
-    {
-        $result = Smilies::framedTable('S', 'A', 'B');
-        // Frame::TABLE_CLOSE (</table>\n) then Frame::CLOSE (</td></tr></table>\n).
-        $this->assertStringEndsWith("</table>\n</td></tr></table>\n", $result);
-    }
 }

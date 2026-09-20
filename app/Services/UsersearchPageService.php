@@ -9,7 +9,6 @@ use App\Repositories\UserListingRepository;
 use App\Repositories\UserSearchRepository;
 use App\Support\CurrentUser;
 use App\Support\Format;
-use App\Support\Frame;
 use App\Support\Html\SafeHtml;
 use App\Support\Input;
 use App\Support\LegacyResponse;
@@ -68,7 +67,12 @@ final class UsersearchPageService
             try {
                 $results = $this->buildResults($curUser, $hasModcomment, $requestUri);
             } catch (\InvalidArgumentException $e) {
-                $resultsError = Frame::stdMessage('Error', $e->getMessage(), false);
+                $resultsError = SafeHtml::fromTrustedHtml(view('partials.std-message', [
+                    'heading' => 'Error',
+                    'text' => $e->getMessage(),
+                    'htmlstrip' => false,
+                    'body' => null,
+                ])->render());
             }
         }
 
@@ -204,7 +208,12 @@ final class UsersearchPageService
         $bannedIps = $extraStats['bannedIps'];
 
         if (count($res) == 0) {
-            return new UsersearchResultsViewModel([], false, SafeHtml::fromTrustedHtml(''), SafeHtml::fromTrustedHtml(''), Frame::stdMessage('Warning', 'No user was found.', false));
+            return new UsersearchResultsViewModel([], false, SafeHtml::fromTrustedHtml(''), SafeHtml::fromTrustedHtml(''), SafeHtml::fromTrustedHtml(view('partials.std-message', [
+                'heading' => 'Warning',
+                'text' => 'No user was found.',
+                'htmlstrip' => false,
+                'body' => null,
+            ])->render()));
         }
 
         $rows = [];

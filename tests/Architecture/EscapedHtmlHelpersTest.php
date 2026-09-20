@@ -16,9 +16,9 @@ use Tests\Attributes\TestCategory;
  * `string` silently turns into visible `&lt;tag&gt;` text (the Stage-0
  * bug class). Helpers returning `SafeHtml`/`HtmlString` are exempt by
  * design: `e()` calls `toHtml()` on Htmlable instead of escaping, which
- * is exactly why `Frame::*`, `UserDisplay::username()`,
+ * is exactly why `UserDisplay::username()`,
  * `Format::formatComment()`, `Comment::format()`, `PageLayout::*Html()`,
- * `TorrentTable::render()`, `Ratio::*`, `UserClass::*` and
+ * `Ratio::*`, `UserClass::*` and
  * `Smilies::link()` are legitimate inside `{{ }}` today.
  *
  * The check is reflection-driven, so a signature regression

@@ -251,7 +251,7 @@ final class UtilityControllerTest extends TestCase
         $this->mockCurrentUser(['id' => 1]);
         View::shouldReceive('make')->once()->with(
             'smilies.index',
-            Mockery::on(fn (array $data): bool => isset($data['smiliesFrame'])),
+            Mockery::on(fn (array $data): bool => $data === []),
         )->andReturn($this->fakeView());
 
         $controller = app(UtilityController::class);

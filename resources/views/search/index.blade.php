@@ -9,7 +9,7 @@
     @include('torrents._table')
     {{ $pagerbottom ?? '' }}
 @elseif (($search ?? '') !== '')
-    {{ \App\Support\Frame::stdMessage((__('legacy/torrents.std_search_results_for')).($searchstr_ori ?? '').'"', __('legacy/torrents.std_try_again'), false) }}
+    <x-std-message :text="__('legacy/torrents.std_try_again')" :htmlstrip="false"><x-slot:heading>{{ __('legacy/torrents.std_search_results_for') }}{{ \App\Support\Html\SafeHtml::fromUntrustedHtml($searchstr_ori ?? '') }}"</x-slot></x-std-message>
 @endif
 </div>
 @endsection

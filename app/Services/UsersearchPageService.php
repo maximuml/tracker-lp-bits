@@ -99,12 +99,12 @@ final class UsersearchPageService
         }
 
         // Build class select options
-        $classOptions = "<option value='1'>(any)</option>\n";
+        $classOptions = [['value' => 1, 'label' => '(any)', 'selected' => false]];
         $classKeys = array_map('intval', array_keys(User::$classes));
         $maxClass = $classKeys !== [] ? max($classKeys) : 0;
         for ($i = 2; $i - 2 <= $maxClass; $i++) {
             if (! ($c = UserClass::name($i - 2, false, true, true))->isEmpty()) {
-                $classOptions .= '<option value='.$i.($class && $class == $i ? ' selected' : '').">$c</option>\n";
+                $classOptions[] = ['value' => $i, 'label' => $c, 'selected' => (bool) $class && $class == $i];
             } else {
                 break;
             }
@@ -131,7 +131,7 @@ final class UsersearchPageService
             'ma_hl' => $q('ma') ? $highlight : '',
             'c' => $class,
             'c_hl' => ($q('c') && $q('c') != 1) ? $highlight : '',
-            'c_options' => SafeHtml::fromTrustedHtml($classOptions),
+            'c_options' => $classOptions,
             'd' => htmlspecialchars((string) ($q('d') ?? '')),
             'd2' => htmlspecialchars((string) ($q('d2') ?? '')),
             'dt' => (string) ($q('dt') ?? ''),
@@ -166,18 +166,19 @@ final class UsersearchPageService
     }
 
     /**
-     * Build <option> tags for a select, marking the selected value.
+     * Build option data for a select, marking the selected value.
      *
      * @param  array<int, string>  $options
+     * @return list<array{value: int, label: string, selected: bool}>
      */
-    private function selectOptions(array $options, string $selected): SafeHtml
+    private function selectOptions(array $options, string $selected): array
     {
-        $out = '';
+        $out = [];
         for ($i = 0; $i < count($options); $i++) {
-            $out .= "<option value=$i ".($selected == "$i" ? 'selected' : '').'>'.$options[$i]."</option>\n";
+            $out[] = ['value' => $i, 'label' => $options[$i], 'selected' => $selected === (string) $i];
         }
 
-        return SafeHtml::fromTrustedHtml($out);
+        return $out;
     }
 
     /**

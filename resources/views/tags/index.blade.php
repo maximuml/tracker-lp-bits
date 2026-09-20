@@ -3,7 +3,7 @@
 @section('title', __('legacy/tags.head_tags'))
 
 @section('content')
-{{ \App\Support\Frame::open((string) (__('legacy/tags.text_tags')), false, 10, '100%', 'left') }}
+<x-frame :caption="__('legacy/tags.text_tags')" :center="false">
 <p>{{ __('legacy/tags.text_bb_tags_note') }} <b>{{ $siteName }}</b> {{ __('legacy/tags.text_bb_tags_note_two') }} <i>{{ __('legacy/tags.text_bb_tags') }}</i> {{ __('legacy/tags.text_bb_tags_note_end') }}</p>
 
 <form method=post action=?>
@@ -27,5 +27,5 @@
     @endif
     </table>
 @endforeach
-{{ \App\Support\Frame::close() }}
+</x-frame>
 @endsection

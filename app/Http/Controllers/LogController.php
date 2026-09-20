@@ -264,13 +264,11 @@ class LogController extends LegacyController
             // (e.g. <img src="/log.php?action=poll&do=delete&pollid=1&sure=1">).
             // GET with sure=0 shows a confirmation form with a POST button.
             if (! $request->isMethod('post')) {
-                $token = csrf_token();
-                $confirm = (__('legacy/log.std_delete_poll_confirmation'))
-                    ."<form method=\"post\" action=\"/log.php?action=poll&do=delete&pollid=$pollid&returnto=$returnto\">"
-                    ."<input type=\"hidden\" name=\"_token\" value=\"$token\" />"
-                    .'<input type="hidden" name="sure" value="1" />'
-                    .'<button type="submit">'.(__('legacy/log.std_here_if_sure')).'</button>'
-                    .'</form>';
+                $confirm = view('log._delete_poll_confirm', [
+                    'pollid' => $pollid,
+                    'returnto' => $returnto,
+                    'token' => csrf_token(),
+                ])->render();
 
                 return $this->legacyAbortResponse(__('legacy/log.std_delete_poll'), $confirm, false);
             }

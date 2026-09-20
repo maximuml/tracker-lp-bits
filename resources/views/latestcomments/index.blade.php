@@ -4,7 +4,7 @@
 
 @section('content')
 @if ($count == 0)
-    {{ \App\Support\Frame::stdMessage(('Sorry'), __('legacy/functions.text_no_comments'), false) }}
+    <x-std-message heading="Sorry" :text="__('legacy/functions.text_no_comments')" :htmlstrip="false" />
 @else
     {{ $pagertop }}
     <h1 align="center">{{ __('legacy/functions.text_latest_comments')}}</h1>

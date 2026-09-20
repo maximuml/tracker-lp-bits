@@ -3,7 +3,7 @@
 @section('title', $title)
 
 @section('content')
-{{ \App\Support\Frame::open((string) $title, true, 10, '100%', 'center') }}
+<x-frame :caption="$title" caption-align="center">
 @if ($unit <= 0)
     <h3>{{ $t['featureDisabled'] ?? '' }}</h3>
 @elseif ($enabled)
@@ -12,7 +12,7 @@
     <h3>{{ $t['noBanInfo'] ?? '' }}</h3>
 @elseif ($showError ?? false)
     @if (! $isUserBonusEnough)
-        {{ \App\Support\Frame::stdMessage('Error', (string) $insufficientMessage, false) }}
+        <x-std-message heading="Error" :text="\App\Support\Html\SafeHtml::fromUntrustedHtml($insufficientMessage)" :htmlstrip="false" />
     @endif
 @else
     <h3>{{ $t['latestBanInfo'] ?? '' }}</h3>
@@ -31,5 +31,5 @@
         <p>{{ $insufficientMessage }}</p>
     @endif
 @endif
-{{ \App\Support\Frame::close() }}
+</x-frame>
 @endsection

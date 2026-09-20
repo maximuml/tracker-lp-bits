@@ -4,9 +4,9 @@
     $stdheadScript ?? '',
     $stdheadPlace ?? ''
 ) }}
-{{ \App\Support\Frame::mainOpen('', false, 100, (int) \constant('CONTENT_WIDTH')) }}
+<table class="main" width="{{ CONTENT_WIDTH }}" border="0" cellspacing="0" cellpadding="0"><tr><td class="embedded" >
 
 @yield('content')
 
-{{ \App\Support\Frame::close() }}
+</td></tr></table>
 {{ \App\Support\PageLayout::footerHtml() }}

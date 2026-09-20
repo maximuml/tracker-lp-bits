@@ -15,6 +15,6 @@
 </table>
 {{ $pagerbottom ?? '' }}
 @else
-{{ \App\Support\Frame::stdMessage(__('legacy/viewsnatches.std_sorry'), __('legacy/viewsnatches.std_no_snatched_users'), false) }}
+<x-std-message :heading="__('legacy/viewsnatches.std_sorry')" :text="__('legacy/viewsnatches.std_no_snatched_users')" :htmlstrip="false" />
 @endif
 @endsection

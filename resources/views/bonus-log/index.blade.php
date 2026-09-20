@@ -10,13 +10,17 @@
         <input type="hidden" name="uid" value="{{ (int) $uid }}" />
         <span>{{ $categoryText }}:</span>
         <select name="category">
-            {{ $categoryOptionsHtml }}
+            @foreach ($categoryOptionList as $o)
+                <option value="{{ $o['value'] }}" @if ($o['selected']) selected @endif>{{ $o['label'] }}</option>
+            @endforeach
         </select>
         &nbsp;&nbsp;
         <span>{{ $businessTypeText }}:</span>
         <select name="business_type">
             <option value="0">-{{ $textSelectOnePlease }}-</option>
-            {{ $businessTypeOptionsHtml }}
+            @foreach ($businessTypeOptionList as $o)
+                <option value="{{ $o['value'] }}" @if ($o['selected']) selected @endif>{{ $o['label'] }}</option>
+            @endforeach
         </select>
         &nbsp;&nbsp;
         <input type="submit" value="{{ $submitText }}">

@@ -4,7 +4,6 @@
 
 @section('content')
 <form id="compose" method="post" name="compose" action="/takecontact">
-    {{ \App\Support\Frame::composeBegin(__('legacy/contactstaff.text_message_to_staff'), 'new', '', true, '', 100) }}
-    {{ \App\Support\Frame::composeEnd() }}
+    <x-compose :title="__('legacy/contactstaff.text_message_to_staff')" type="new" :has-subject="true" />
 </form>
 @endsection

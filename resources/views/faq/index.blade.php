@@ -4,12 +4,12 @@
 
 @section('content')
 @if (! empty($faqCategories))
-    {{ \App\Support\Frame::open(__('legacy/faq.text_welcome_to').$SITENAME." - ".$SLOGAN, false, 10, '100%', 'left') }}
+    <x-frame :caption="__('legacy/faq.text_welcome_to').$SITENAME.' - '.$SLOGAN" :center="false">
     {{ __('legacy/faq.text_welcome_content_one') }} <a class="faqlink" href="contactstaff.php">{{ __('legacy/faq.text_contact') }}</a> {{ __('legacy/faq.text_welcome_content_one_end') }}<br /><br />{{ __('legacy/faq.text_welcome_content_one_two') }}
     {{ sprintf(__('legacy/faq.text_welcome_content_two'), $SITENAME) }} <a class="faqlink" href="rules.php">{{ __('legacy/faq.text_rules') }}</a>{{ __('legacy/faq.text_welcome_content_two_two') }}<br /><br />{{ sprintf(__('legacy/faq.text_welcome_content_two_three'), $SITENAME) }} <a class="faqlink" href="useragreement.php">{{ __('legacy/faq.text_user_agreement') }}</a>.
-    {{ \App\Support\Frame::close() }}
+    </x-frame>
 
-    {{ \App\Support\Frame::open("<span id=\"top\">".(__('legacy/faq.text_contents'))."</span>", false, 10, '100%', 'left') }}
+    <x-frame :center="false"><x-slot:caption><span id="top">{{ __('legacy/faq.text_contents') }}</span></x-slot>
     <ul>
     @foreach ($faqCategories as $id => $temp)
         @if ($faqCategories[$id]['flag'] == "1")
@@ -31,11 +31,11 @@
     @endforeach
     </ul>
     <br />
-    {{ \App\Support\Frame::close() }}
+    </x-frame>
 
     @foreach ($faqCategories as $id => $temp)
         @if ($faqCategories[$id]['flag'] == "1")
-            {{ \App\Support\Frame::open($faqCategories[$id]['title'] ." - <a href=\"#top\"><img class=\"top\" src=\"pic/trans.gif\" alt=\"Top\" title=\"Top\" /></a>", false, 10, '100%', 'left') }}
+            <x-frame :center="false"><x-slot:caption>{{ $faqCategories[$id]['title'] }} - <a href="#top"><img class="top" src="pic/trans.gif" alt="Top" title="Top" /></a></x-slot>
             <span id="id{{ $faqCategories[$id]['link_id'] }}"></span>
             @if (isset($faqCategories[$id]['items']))
                 @foreach ($faqCategories[$id]['items'] as $id2 => $tempItem)
@@ -45,7 +45,7 @@
                     @endif
                 @endforeach
             @endif
-            {{ \App\Support\Frame::close() }}
+            </x-frame>
         @endif
     @endforeach
 @endif

@@ -375,6 +375,9 @@ final class UsersearchPageServiceTest extends TestCase
 
         $data = $this->callBuild($request);
 
-        $this->assertStringContainsString('(any)', (string) $data['form']['c_options']);
+        $options = $data['form']['c_options'];
+        $this->assertIsArray($options);
+        $this->assertSame('(any)', $options[0]['label']);
+        $this->assertSame(1, $options[0]['value']);
     }
 }

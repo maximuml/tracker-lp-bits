@@ -71,7 +71,7 @@ final class SiteChromeViewModel
         public readonly ?array $user,
         public readonly array $navItems,
         public readonly SafeHtml $usernameHtml,
-        public readonly string $ratio,
+        public readonly SafeHtml $ratio,
         public readonly string $uploaded,
         public readonly string $downloaded,
         public readonly string $seedbonus,
@@ -152,7 +152,7 @@ final class SiteChromeViewModel
 
         $navItems = self::navItems($context);
         $usernameHtml = SafeHtml::fromTrustedHtml('');
-        $ratio = '';
+        $ratio = SafeHtml::fromTrustedHtml('');
         $uploaded = '';
         $downloaded = '';
         $seedbonus = '';
@@ -184,7 +184,7 @@ final class SiteChromeViewModel
         if ($user !== null && ! empty($user['id']) && ! $skipUserData) {
             $userId = (int) $user['id'];
             $usernameHtml = UserDisplay::username($userId);
-            $ratio = (string) Ratio::forUserId($userId);
+            $ratio = SafeHtml::fromTrustedHtml((string) Ratio::forUserId($userId));
             $uploaded = Format::size((int) ($user['uploaded'] ?? 0));
             $downloaded = Format::size((int) ($user['downloaded'] ?? 0));
             $seedbonus = number_format((float) ($user['seedbonus'] ?? 0), 1);
@@ -378,36 +378,41 @@ final class SiteChromeViewModel
     private static function headAssets(PageLayoutContext $context, string $variant, string $cspNonce): array
     {
         $picFolder = Forum::picFolder($context->langDir);
-        if ($variant !== 'legacy') {
-            return [
-                ['styles/sprites.css', 'styles/nexus.css'],
-                [],
-                SafeHtml::fromTrustedHtml(''),
-                $picFolder,
-            ];
-        }
-
         $cssUpdateDate = $context->cssDateTweak !== '' ? '?'.$context->cssDateTweak : '';
-        $cssUri = Style::cssUri($context->cache, $context->userStylesheet(), $context->defaultStylesheet);
 
-        $headStyles = [
-            'styles/sprites.css'.$cssUpdateDate,
-            $picFolder.'/forumsprites.css'.$cssUpdateDate,
-            $cssUri.'theme.css'.$cssUpdateDate,
-            $cssUri.'DomTT.css'.$cssUpdateDate,
-            'styles/nexus.css'.$cssUpdateDate,
-        ];
+        // Icon-pack stylesheets (category sprites) apply to both chrome
+        // variants — sprite classes are used by category grids everywhere.
+        $iconStyles = [];
         if ($context->user !== null) {
             $requireSearchBoxIds = SearchBox::requiredIds();
             if ($requireSearchBoxIds !== []) {
                 foreach (app(SearchBoxRepositoryInterface::class)->listIcon($requireSearchBoxIds) as $icon) {
                     $cssfile = trim((string) ($icon['cssfile'] ?? ''), '/');
                     if ($cssfile !== '') {
-                        $headStyles[] = $cssfile.$cssUpdateDate;
+                        $iconStyles[] = $cssfile.$cssUpdateDate;
                     }
                 }
             }
         }
+
+        if ($variant !== 'legacy') {
+            return [
+                array_merge(['styles/sprites.css', 'styles/nexus.css'], $iconStyles),
+                [],
+                SafeHtml::fromTrustedHtml(''),
+                $picFolder,
+            ];
+        }
+
+        $cssUri = Style::cssUri($context->cache, $context->userStylesheet(), $context->defaultStylesheet);
+
+        $headStyles = array_merge([
+            'styles/sprites.css'.$cssUpdateDate,
+            $picFolder.'/forumsprites.css'.$cssUpdateDate,
+            $cssUri.'theme.css'.$cssUpdateDate,
+            $cssUri.'DomTT.css'.$cssUpdateDate,
+            'styles/nexus.css'.$cssUpdateDate,
+        ], $iconStyles);
 
         $addiCode = Style::addiCode($context->cache, $context->userStylesheet(), $context->defaultStylesheet);
         if ($cspNonce !== '' && $addiCode !== '') {
@@ -708,7 +713,7 @@ final class SiteChromeViewModel
             // Standalone auth pages (ADR 0020): CSRF, the delegated auth
             // bindings and the footer helpers — the legacy UI toolkit
             // (common.js/domTT/fadomatic/…) is not used there.
-            return ['js/csrf.js', 'js/auth.js', 'js/medium-zoom.min.js', 'js/theme-toggle.js'];
+            return ['js/csrf.js', 'js/auth.js', 'js/nx-zoom.js', 'js/theme-toggle.js'];
         }
 
         $scripts = ['js/ajax.js', 'js/nexus.js', 'js/csrf.js'];
@@ -722,7 +727,7 @@ final class SiteChromeViewModel
                 'js/fadomatic.js',
             ]);
         }
-        $scripts[] = 'js/medium-zoom.min.js';
+        $scripts[] = 'js/nx-zoom.js';
         $scripts[] = 'js/goup.js';
         $scripts[] = 'js/theme-toggle.js';
 

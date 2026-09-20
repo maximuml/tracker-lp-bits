@@ -46,7 +46,7 @@ class UpdateTrackerSettingsRequest extends FormRequest
             'sbnum' => 'sometimes|integer|min:10|max:500',
             'sbrefresh' => 'sometimes|integer|min:10|max:3600',
             'tooltip' => 'sometimes|in:minorimdb,medianimdb,off,0,1,2',
-            'showlastcom' => 'sometimes|in:yes',
+            'showlastcom' => 'sometimes|in:yes,no',
             'fontsize' => 'sometimes|in:small,medium,large,0,1,2',
         ];
     }

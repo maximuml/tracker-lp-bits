@@ -201,6 +201,7 @@ Route::post('/docleanup', [SystemMaintenanceController::class, 'docleanup'])->mi
 Route::get('/location', [AdminToolsController::class, 'location'])->name('location.legacy');
 Route::post('/location', [AdminToolsController::class, 'location']);
 Route::get('/preview', [UtilityController::class, 'preview'])->name('preview.legacy');
+Route::post('/preview', [UtilityController::class, 'previewSubmit']);
 Route::get('/moresmilies', [UtilityController::class, 'moresmilies'])->name('moresmilies.legacy');
 Route::get('/smilies', [UtilityController::class, 'smilies'])->name('smilies.legacy');
 Route::get('/mailtest', [SystemMaintenanceController::class, 'mailtest'])->name('mailtest.legacy');

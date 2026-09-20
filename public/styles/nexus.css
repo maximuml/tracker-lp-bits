@@ -565,3 +565,13 @@ textarea.bbcode{width:100%;box-sizing:border-box}
 /* Black notice banner (settings page): restores the background the
    CSP-blocked inline style used to provide. */
 .nx-fbanner{background:#000;color:#fff;text-align:center;padding:10px}
+
+/* CSP-safe image zoom (js/nx-zoom.js): overlay + zoom transforms are
+   driven by class toggles and the Web Animations API — no inline styles,
+   so this works under nonce-strict style-src. */
+img[data-zoomable]{cursor:zoom-in}
+.nxz-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);opacity:0;transition:opacity .28s;z-index:9990;cursor:zoom-out}
+.nxz-overlay--open{opacity:1}
+.nxz-zoomed{position:relative;z-index:9991;cursor:zoom-out;transform-origin:0 0}
+.nxz-clone{position:fixed;top:0;left:0;z-index:9991;cursor:zoom-out;transform-origin:0 0}
+.nxz-source-hidden{visibility:hidden}

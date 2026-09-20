@@ -418,6 +418,16 @@ class UtilityController extends LegacyController
 
     public function preview(Request $request): View|RedirectResponse
     {
+        return $this->renderPreview($request);
+    }
+
+    public function previewSubmit(Request $request): View|RedirectResponse
+    {
+        return $this->renderPreview($request);
+    }
+
+    private function renderPreview(Request $request): View|RedirectResponse
+    {
         return $this->legacyPage($request, 'preview', true, [
             'body' => (string) $request->post('body', ''),
         ]);

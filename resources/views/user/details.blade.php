@@ -11,11 +11,11 @@
 <p><b>{{ __('legacy/userdetails.text_account_disabled_note') ?? '' }}</b></p>
 @elseif (! $isOwner)
 @if ($isFriend)
-<p>(<a href="friends.php?action=delete&amp;type=friend&amp;targetid={{ $id }}">{{ __('legacy/userdetails.text_remove_from_friends') ?? '' }}</a>)</p>
+<p>(<form method="post" action="friends.php" class="nx-inline">@csrf<input type="hidden" name="action" value="delete" /><input type="hidden" name="type" value="friend" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('legacy/userdetails.text_remove_from_friends') ?? '' }}</button></form>)</p>
 @elseif ($currentUserBlockedTarget)
-<p>(<a href="friends.php?action=delete&amp;type=block&amp;targetid={{ $id }}">{{ __('legacy/userdetails.text_remove_from_blocks') ?? '' }}</a>)</p>
+<p>(<form method="post" action="friends.php" class="nx-inline">@csrf<input type="hidden" name="action" value="delete" /><input type="hidden" name="type" value="block" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('legacy/userdetails.text_remove_from_blocks') ?? '' }}</button></form>)</p>
 @else
-<p>(<a href="friends.php?action=add&amp;type=friend&amp;targetid={{ $id }}">{{ __('legacy/userdetails.text_add_to_friends') ?? '' }}</a>) - (<a href="friends.php?action=add&amp;type=block&amp;targetid={{ $id }}">{{ __('legacy/userdetails.text_add_to_blocks') ?? '' }}</a>)</p>
+<p>(<form method="post" action="friends.php" class="nx-inline">@csrf<input type="hidden" name="action" value="add" /><input type="hidden" name="type" value="friend" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('legacy/userdetails.text_add_to_friends') ?? '' }}</button></form>) - (<form method="post" action="friends.php" class="nx-inline">@csrf<input type="hidden" name="action" value="add" /><input type="hidden" name="type" value="block" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('legacy/userdetails.text_add_to_blocks') ?? '' }}</button></form>)</p>
 @endif
 @endif
 @if ($isOwner || $canManageConfidential)

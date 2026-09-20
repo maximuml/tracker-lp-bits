@@ -226,7 +226,7 @@ final class Promotion
                     $text = (string) __('legacy/functions.'.$config['text']);
                     $timeout = SafeHtml::fromTrustedHtml((string) $timeoutStr);
                     $subColor = $config['subColor'];
-                    $domttHtml = "<b><span class=\"{$config['class']}\">$text</span></b>".((string) __('legacy/functions.text_will_end_in'))."<b>$timeoutStr</b>";
+                    $domttHtml = SafeHtml::fromTrustedHtml("<b><span class=\"{$config['class']}\">$text</span></b>".((string) __('legacy/functions.text_will_end_in'))."<b>$timeoutStr</b>");
                 } else {
                     $promotion = 1;
                 }
@@ -318,15 +318,21 @@ final class Promotion
                 : ' '.$endIn.$badge->timeout->toHtml();
         }
         if ($badge->mode === 'word') {
-            $onmouseover = $badge->domttHtml !== null ? ' data-domtt-promo="'.htmlspecialchars($badge->domttHtml).'"' : '';
+            $tip = $badge->domttHtml !== null
+                ? ' data-domtt-promo'
+                : '';
+            $tpl = $badge->domttHtml !== null
+                ? '<template class="nx-tt">'.$badge->domttHtml->toHtml().'</template>'
+                : '';
 
-            return " <b>[<span class='{$badge->cssClass}'$onmouseover>{$badge->text}</span>]</b>";
+            return " <b>[<span class='{$badge->cssClass}'$tip>{$badge->text}</span>$tpl]</b>";
         }
-        $attr = $badge->domttHtml !== null
-            ? ' data-domtt-promo="'.htmlspecialchars($badge->domttHtml).'"'
-            : ' title="'.$badge->text.'"';
+        if ($badge->domttHtml !== null) {
+            return " <img class=\"{$badge->iconClass}\" src=\"pic/trans.gif\" alt=\"{$badge->alt}\" data-domtt-promo />"
+                .'<template class="nx-tt">'.$badge->domttHtml->toHtml().'</template>';
+        }
 
-        return " <img class=\"{$badge->iconClass}\" src=\"pic/trans.gif\" alt=\"{$badge->alt}\"$attr />";
+        return " <img class=\"{$badge->iconClass}\" src=\"pic/trans.gif\" alt=\"{$badge->alt}\" title=\"{$badge->text}\" />";
     }
 
     /**

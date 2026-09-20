@@ -16,13 +16,14 @@ final class SmiliesTest extends TestCase
         // Inline javascript: URLs and on*= handlers are blocked by the
         // nonce-strict CSP — the link carries data-* attributes that the
         // delegated listeners in public/js/common.js dispatch to SmileIT();
-        // the tooltip renders via js/nx-tooltip.js.
-        $escaped = '&lt;table&gt;&lt;tr&gt;&lt;td&gt;&lt;img src=&#039;pic/smilies/4.gif&#039; alt=&#039;&#039; /&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;';
+        // the tooltip renders via js/nx-tooltip.js from the inline
+        // <template> (no HTML strings cross an attribute boundary).
         $expected = '<a href="#" data-smile="[em4]"'
             .' data-smile-form="myform"'
             .' data-smile-text="myta"'
-            .' data-domtt-content="'.$escaped.'">'
-            .'<img class="nx-smiley" src="pic/smilies/4.gif" alt="[em4]" /></a>';
+            .' data-domtt-content>'
+            .'<img class="nx-smiley" src="pic/smilies/4.gif" alt="[em4]" />'
+            .'<template class="nx-tt"><img src="pic/smilies/4.gif" alt="" /></template></a>';
         $this->assertSame($expected, (string) Smilies::link('myform', 'myta', 4));
     }
 

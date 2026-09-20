@@ -30,16 +30,12 @@ final class Smilies
 
     public static function link(string $formname, string $taname, int $smilyNumber): SafeHtml
     {
-        $tooltipBody = htmlspecialchars(
-            "<table><tr><td><img src='pic/smilies/$smilyNumber.gif' alt='' /></td></tr></table>",
-            ENT_QUOTES
-        );
-
         return SafeHtml::fromTrustedHtml('<a href="#" data-smile="[em'.$smilyNumber.']"'
             .' data-smile-form="'.htmlspecialchars($formname, ENT_QUOTES).'"'
             .' data-smile-text="'.htmlspecialchars($taname, ENT_QUOTES).'"'
-            .' data-domtt-content="'.$tooltipBody.'">'
-            .'<img class="nx-smiley" src="pic/smilies/'.$smilyNumber.'.gif" alt="[em'.$smilyNumber.']" /></a>');
+            .' data-domtt-content>'
+            .'<img class="nx-smiley" src="pic/smilies/'.$smilyNumber.'.gif" alt="[em'.$smilyNumber.']" />'
+            .'<template class="nx-tt"><img src="pic/smilies/'.$smilyNumber.'.gif" alt="" /></template></a>');
     }
 
     public static function quickRow(string $formname, string $taname): string

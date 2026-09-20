@@ -1,10 +1,12 @@
 /**
  * Delegated hover tooltips for data-domtt-* markup — replaces
  * domTT/domLib/domTT_drag/fadomatic (~57 KB of 2005-era code) with a
- * single positioned div. Markup is unchanged:
- *   data-domtt-content="…html…"  literal tooltip body (smiley pickers)
- *   data-domtt-src="element-id"  clone of an on-page hidden preview
- *   data-domtt-promo="…html…"    literal body, delayed + auto-hidden
+ * single positioned div. All content arrives as DOM nodes cloned into
+ * the popup — no HTML strings are ever re-parsed:
+ *   data-domtt-content  bare flag; body is a <template class="nx-tt">
+ *                       child or next-sibling (smiley pickers)
+ *   data-domtt-src="id" clone of an on-page hidden preview container
+ *   data-domtt-promo    bare flag, inline <template>, delayed + auto-hide
  */
 (function () {
     var tip = null, timer = null, hideTimer = null, current = null;
@@ -25,19 +27,24 @@
         tip.style.top = y + 'px';
     }
 
+    function inlineContent(el) {
+        var t = el.querySelector(':scope > template.nx-tt');
+        if (!t) {
+            var next = el.nextElementSibling;
+            t = next && next.tagName === 'TEMPLATE' ? next : null;
+        }
+        return t ? t.content : null;
+    }
+
     function show(el, content, maxWidth, delay, lifetime) {
-        if (el === current) { return; }
+        if (el === current || !content) { return; }
         hide();
         current = el;
         timer = setTimeout(function () {
             tip = document.createElement('div');
             tip.className = 'nx-tt-pop';
             tip.style.maxWidth = maxWidth + 'px';
-            if (typeof content === 'string') {
-                tip.innerHTML = content;
-            } else {
-                tip.appendChild(content.cloneNode(true));
-            }
+            tip.appendChild(content.cloneNode(true));
             document.body.appendChild(tip);
             place(el);
             if (lifetime > 0) {
@@ -57,10 +64,10 @@
             return;
         }
         if (el.hasAttribute('data-domtt-promo')) {
-            show(el, el.getAttribute('data-domtt-promo'), 300, 500, 3000);
+            show(el, inlineContent(el), 300, 500, 3000);
             return;
         }
-        show(el, el.getAttribute('data-domtt-content'), 400, 0, 10000);
+        show(el, inlineContent(el), 400, 0, 10000);
     });
 
     document.addEventListener('mouseout', function (e) {

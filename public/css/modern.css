@@ -610,9 +610,39 @@ html[data-theme="dark"] body.inframe .shout-actions { opacity: 1; }
     html[data-theme="auto"] body.inframe .shout-actions { opacity: 1; }
 }
 td.shoutrow { background-color: var(--nxm-surface-alt); color: var(--nxm-text); }
+/* Classic a:link{#000} is unreadable on dark surfaces — recolour links
+   inside the content area and footer; the header/userbar chrome and
+   links on accent backgrounds keep their own colours. */
+html[data-theme="dark"] .nxm-main :is(a:link, a:visited),
+html[data-theme="dark"] .nxm-footer :is(a:link, a:visited) { color: var(--nxm-accent); }
+html[data-theme="dark"] .nxm-main :is(.colhead, .nx-colhead, .nx-pagination__link--current) :is(a:link, a:visited),
+html[data-theme="dark"] .nxm-footer :is(.colhead, .nx-colhead, .nx-pagination__link--current) :is(a:link, a:visited) { color: var(--nxm-on-accent); }
+@media (prefers-color-scheme: dark) {
+    html:not([data-theme]) .nxm-main :is(a:link, a:visited),
+    html:not([data-theme]) .nxm-footer :is(a:link, a:visited),
+    html[data-theme="auto"] .nxm-main :is(a:link, a:visited),
+    html[data-theme="auto"] .nxm-footer :is(a:link, a:visited) { color: var(--nxm-accent); }
+    html:not([data-theme]) .nxm-main :is(.colhead, .nx-colhead, .nx-pagination__link--current) :is(a:link, a:visited),
+    html:not([data-theme]) .nxm-footer :is(.colhead, .nx-colhead, .nx-pagination__link--current) :is(a:link, a:visited),
+    html[data-theme="auto"] .nxm-main :is(.colhead, .nx-colhead, .nx-pagination__link--current) :is(a:link, a:visited),
+    html[data-theme="auto"] .nxm-footer :is(.colhead, .nx-colhead, .nx-pagination__link--current) :is(a:link, a:visited) { color: var(--nxm-on-accent); }
+}
 a.altlink:link, a.altlink:visited,
 a.altlink_blue:link, a.altlink_blue:visited,
 a.altlink_green:link, a.altlink_green:visited { text-decoration: underline; }
+/* altlink palette is chosen for light backgrounds — lift toward the
+   text colour in the dark scheme (same recipe as .nx-hl-*). */
+@media (prefers-color-scheme: dark) {
+    html:not([data-theme="light"]) a.altlink:link,
+    html:not([data-theme="light"]) a.altlink:visited { color: color-mix(in srgb, #a83838 40%, var(--nxm-text)); }
+    html:not([data-theme="light"]) a.altlink_blue:link,
+    html:not([data-theme="light"]) a.altlink_blue:visited { color: color-mix(in srgb, #004e98 40%, var(--nxm-text)); }
+    html:not([data-theme="light"]) a.altlink_green:link,
+    html:not([data-theme="light"]) a.altlink_green:visited { color: color-mix(in srgb, #007800 40%, var(--nxm-text)); }
+}
+html[data-theme="dark"] a.altlink:link, html[data-theme="dark"] a.altlink:visited { color: color-mix(in srgb, #a83838 40%, var(--nxm-text)); }
+html[data-theme="dark"] a.altlink_blue:link, html[data-theme="dark"] a.altlink_blue:visited { color: color-mix(in srgb, #004e98 40%, var(--nxm-text)); }
+html[data-theme="dark"] a.altlink_green:link, html[data-theme="dark"] a.altlink_green:visited { color: color-mix(in srgb, #007800 40%, var(--nxm-text)); }
 .striking, .new { color: var(--nxm-danger); }
 .hot { color: var(--nxm-warning); }
 .classic { color: var(--nxm-success); }

@@ -1,4 +1,4 @@
-@extends('layouts.legacy_details')
+@extends('layouts.legacy_bare')
 
 @section('title', __('legacy/bitbucketupload.head_avatar_upload'))
 

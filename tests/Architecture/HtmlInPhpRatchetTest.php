@@ -56,7 +56,7 @@ final class HtmlInPhpRatchetTest extends TestCase
     private const BASELINE_OB_START = 5;
 
     /** Baseline: lines with `echo` inside app/Services + app/Http/Controllers. */
-    private const BASELINE_ECHO_IN_SERVICES = 6;
+    private const BASELINE_ECHO_IN_SERVICES = 5;
 
     /** Baseline: lines where a quoted string starts an HTML tag ('<div', "</td", '<!--'). */
     private const BASELINE_HTML_LITERAL_LINES = 249;

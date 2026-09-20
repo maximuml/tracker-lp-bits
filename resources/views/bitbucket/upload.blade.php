@@ -1,4 +1,4 @@
-@extends('layouts.legacy_details')
+@extends('layouts.legacy_bare')
 
 @section('title', $pageTitle)
 

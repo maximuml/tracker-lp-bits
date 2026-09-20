@@ -7,7 +7,7 @@
         <a href="?action=reply&amp;topicid={{ $topic->topicid }}"><img class="f_reply" src="pic/trans.gif" alt="Add Reply" title="{{ __('legacy/forums.title_reply_directly') }}" /></a>
     @endif
 </div>
-{{ $topic->frameOpen }}
+<x-frame :center="false">
 @foreach ($topic->posts as $post)
     <x-forum.post :post="$post" />
     @if ($post->isLast)
@@ -51,7 +51,7 @@
             <input type="submit" class="medium" value="{{ __('legacy/forums.submit_change') }}" />
         </form>
 @endif
-{{ $topic->frameClose }}
+</x-frame>
 <x-forum.pager :page="$topic->page" :pages="$topic->pages" :href="$topic->pagerHref()" :items="$topic->pagerItems()" />
 @if ($topic->mayPost)
     <div class="nx-quickreply">

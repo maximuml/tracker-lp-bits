@@ -19,7 +19,6 @@ use App\Support\Comment;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Format;
-use App\Support\Frame;
 use App\Support\Globals;
 use App\Support\Html;
 use App\Support\Html\SafeHtml;
@@ -379,7 +378,12 @@ final class OfferPageService
         $table = null;
         $emptyState = SafeHtml::fromTrustedHtml('');
         if (! $num) {
-            $emptyState = Frame::stdMessage((string) (__('legacy/offers.text_nothing_found')), (string) (__('legacy/offers.text_nothing_found')), false);
+            $emptyState = SafeHtml::fromTrustedHtml(view('partials.std-message', [
+                'heading' => (string) (__('legacy/offers.text_nothing_found')),
+                'text' => (string) (__('legacy/offers.text_nothing_found')),
+                'htmlstrip' => false,
+                'body' => null,
+            ])->render());
         } else {
             $catid = (string) $request->query('category', '');
             $sortUrl = static fn (string $column, string $type): string => '?category='.$catid.'&sort='.$column.'&type='.$type;

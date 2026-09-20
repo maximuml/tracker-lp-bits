@@ -43,46 +43,30 @@ class PageLayout
             throw new \RuntimeException('PageLayout context not set');
         }
 
-        self::renderHeader($context, $title, $msgalert, $script, $place);
+        echo self::renderHeader($context, $title, $msgalert, $script, $place);
     }
 
     /**
-     * Buffered variant of stdhead(): sets the context from SupportContext
+     * Rendered variant of stdhead(): sets the context from SupportContext
      * and returns the header markup instead of echoing it.
      */
     public static function headerHtml(string $title = '', bool $msgalert = true, string $script = '', string $place = ''): SafeHtml
     {
-        self::setContext(PageLayoutContext::fromSupportContext());
+        $context = PageLayoutContext::fromSupportContext();
+        self::setContext($context);
 
-        return SafeHtml::fromTrustedHtml(self::buffered(fn () => self::header($title, $msgalert, $script, $place)));
+        return SafeHtml::fromTrustedHtml(self::renderHeader($context, $title, $msgalert, $script, $place));
     }
 
     /**
-     * Buffered variant of stdfoot(): returns the footer markup.
+     * Rendered variant of stdfoot(): returns the footer markup.
      */
     public static function footerHtml(): SafeHtml
     {
-        return SafeHtml::fromTrustedHtml(self::buffered(fn () => self::footer()));
+        return SafeHtml::fromTrustedHtml(self::renderFooter());
     }
 
-    /**
-     * @param  callable(): void  $fn
-     */
-    private static function buffered(callable $fn): string
-    {
-        ob_start();
-        try {
-            $fn();
-
-            return (string) ob_get_clean();
-        } catch (\Throwable $e) {
-            ob_end_clean();
-
-            throw $e;
-        }
-    }
-
-    private static function renderHeader(PageLayoutContext $context, string $title, bool $msgalert, string $script, string $place): void
+    private static function renderHeader(PageLayoutContext $context, string $title, bool $msgalert, string $script, string $place): string
     {
         $context->cache?->setLanguage($context->langDir);
         if ($context->siteOnline == 'no') {
@@ -95,11 +79,16 @@ class PageLayout
 
         $chrome = SiteChromeViewModel::load($title, app(PageLayoutRepositoryInterface::class), $context, 'legacy', $msgalert);
 
-        echo view('layouts.partials.head-assets', ['chrome' => $chrome])->render();
-        echo view('layouts.partials.header', ['chrome' => $chrome])->render();
+        return view('layouts.partials.head-assets', ['chrome' => $chrome])->render()
+            .view('layouts.partials.header', ['chrome' => $chrome])->render();
     }
 
     public static function footer(): void
+    {
+        echo self::renderFooter();
+    }
+
+    private static function renderFooter(): string
     {
         $context = self::getContext();
         if ($context === null) {
@@ -108,6 +97,6 @@ class PageLayout
 
         $chrome = SiteChromeViewModel::load('', app(PageLayoutRepositoryInterface::class), $context, 'legacy', false, true);
 
-        echo view('layouts.partials.footer', ['chrome' => $chrome])->render();
+        return view('layouts.partials.footer', ['chrome' => $chrome])->render();
     }
 }

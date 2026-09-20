@@ -15,7 +15,6 @@ use App\Repositories\TopicRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Format;
 use App\Support\Forum;
-use App\Support\Frame;
 use App\Support\Globals;
 use App\Support\Html;
 use App\Support\Html\SafeHtml;
@@ -253,8 +252,6 @@ final class ForumTopicViewService
                 ))
                 : null,
             keyScript: SafeHtml::fromTrustedHtml(Html::keyShortcutScript($page, max(0, $pages - 1), (string) $request->attributes->get('csp_nonce', ''))),
-            frameOpen: Frame::open('', false, 10, '100%', 'left'),
-            frameClose: Frame::close(),
         );
     }
 }

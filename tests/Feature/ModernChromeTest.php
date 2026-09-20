@@ -78,7 +78,7 @@ final class ModernChromeTest extends TestCase
         $response = $this->withNexusCookie($user)->get('/index');
         $html = (string) $response->getContent();
 
-        // The legacy shell wrapped content in Frame::mainOpen tables and
+        // The legacy shell wrapped content in main-frame layout tables and
         // the themed stylesheet; the modern shell must not emit them.
         // domTT.js itself is intentionally loaded — the delegated
         // data-domtt-* tooltip handlers live in common.js.

@@ -10,16 +10,11 @@ use App\Support\Html\SafeHtml;
  * Smiley markup helpers extracted from `include/functions.php`
  * (Phase 5 of the legacy migration).
  *
- * Backs `getSmileIt` / `smile_row` / `insert_smilies_frame`. Every
- * method returns a string; the legacy proxies for the first two
- * forwarded the return value already, and `insert_smilies_frame`
- * now `print()`s the framed table in one go.
+ * Backs `getSmileIt` / `smile_row`. Every method returns a string;
+ * the legacy proxies forwarded the return value already.
  *
  * Lives under `App\Support` because all methods are pure — no DI,
- * no DB, no globals. `framedTable()` composes `Frame::*` helpers
- * to keep the same HTML byte sequence as the old procedural call
- * chain (`begin_frame` → `begin_table` → rows → `end_table` →
- * `end_frame`).
+ * no DB, no globals.
  */
 final class Smilies
 {
@@ -56,41 +51,6 @@ final class Smilies
         $row .= '</div>';
 
         return $row;
-    }
-
-    public static function framedTable(string $title, string $colTypeSomething, string $colToMakeA): string
-    {
-        // Mirrors the legacy chain: begin_frame($title, true) + begin_table(false, 5)
-        // + header row + 191 smiley rows + end_table() + end_frame().
-        $html = Frame::open($title, true, 10, '100%', 'left');
-        $html .= Frame::tableOpen(false, 5);
-        $html .= '<tr><td class="colhead">'.$colTypeSomething.'</td>'
-            .'<td class="colhead">'.$colToMakeA."</td></tr>\n";
-
-        for ($i = 1; $i < 192; $i++) {
-            $html .= '<tr><td>[em'.$i.']</td>'
-                .'<td><img src="pic/smilies/'.$i.'.gif" alt="[em'.$i.']" /></td></tr>'."\n";
-        }
-
-        $html .= Frame::TABLE_CLOSE;
-        $html .= Frame::CLOSE;
-
-        return $html;
-    }
-
-    /**
-     * Emit the framed smiley table using language strings from the request context.
-     *
-     * Backs the legacy `insert_smilies_frame()` helper.
-     */
-    public static function framedTableWithContext(): void
-    {
-
-        echo self::framedTable(
-            __('legacy/functions.text_smilies'),
-            __('legacy/functions.col_type_something'),
-            __('legacy/functions.col_to_make_a')
-        );
     }
 
     /**

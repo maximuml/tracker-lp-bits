@@ -74,17 +74,6 @@ final class XssProtectionTest extends TestCase
     }
 
     /**
-     * Frame::composeOpen title must be htmlspecialchars'd.
-     */
-    public function test_compose_open_escapes_title(): void
-    {
-        $evilTitle = '<script>alert(1)</script>';
-        $escaped = htmlspecialchars($evilTitle, ENT_QUOTES, 'UTF-8');
-
-        $this->assertStringNotContainsString('<script>', $escaped);
-    }
-
-    /**
      * Html::buildTable cell values must be htmlspecialchars'd.
      */
     public function test_build_table_escapes_cell_values(): void

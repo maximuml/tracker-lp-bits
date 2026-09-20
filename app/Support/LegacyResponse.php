@@ -42,7 +42,11 @@ final class LegacyResponse
      */
     public static function sqlError(string $file, string $line): void
     {
-        throw new HttpResponseException(new Response(Frame::sqlError(LegacyDb::error(), $file, $line), 500));
+        throw new HttpResponseException(new Response(view('partials.sql-error', [
+            'error' => LegacyDb::error(),
+            'file' => $file,
+            'line' => $line,
+        ])->render(), 500));
     }
 
     public static function abort(
@@ -63,7 +67,12 @@ final class LegacyResponse
                 Html::stdhead();
                 ob_end_clean();
             }
-            echo Frame::stdMessage($heading, $text, $htmlstrip);
+            echo view('partials.std-message', [
+                'heading' => $heading,
+                'text' => $text,
+                'htmlstrip' => $htmlstrip,
+                'body' => null,
+            ])->render();
             if ($foot) {
                 Html::stdfoot();
             }
@@ -83,7 +92,12 @@ final class LegacyResponse
                 Html::stdhead();
                 ob_end_clean();
             }
-            echo Frame::stdMessage($heading, $text, $htmlstrip);
+            echo view('partials.std-message', [
+                'heading' => $heading,
+                'text' => $text,
+                'htmlstrip' => $htmlstrip,
+                'body' => null,
+            ])->render();
             if ($foot) {
                 Html::stdfoot();
             }
@@ -121,7 +135,12 @@ final class LegacyResponse
         ob_start();
         try {
             Html::stdhead($title);
-            echo Frame::stdMessage($heading, $text, $htmlstrip);
+            echo view('partials.std-message', [
+                'heading' => $heading,
+                'text' => $text,
+                'htmlstrip' => $htmlstrip,
+                'body' => null,
+            ])->render();
             Html::stdfoot();
 
             return (string) ob_get_clean();
@@ -205,10 +224,10 @@ final class LegacyResponse
             return true;
         }
 
-        $errorHtml = '<h2>'.\htmlspecialchars((string) (__('legacy/functions.std_error'))).'</h2>'
-            .'<table width="100%" border="1" cellspacing="0" cellpadding="10"><tr><td class="text">'
-            .\htmlspecialchars((string) (__('legacy/functions.std_invalid_id')))
-            .'</td></tr></table>';
+        $errorHtml = view('partials.int-error', [
+            'heading' => (string) (__('legacy/functions.std_error')),
+            'text' => (string) (__('legacy/functions.std_invalid_id')),
+        ])->render();
 
         if ($die) {
             $level = ob_get_level();

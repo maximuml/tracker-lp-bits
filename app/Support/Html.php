@@ -210,10 +210,15 @@ final class Html
 
     public static function stdMessage(string $heading, string $text, bool $htmlstrip = false): void
     {
-        echo Frame::stdMessage($heading, $text, $htmlstrip);
+        echo view('partials.std-message', [
+            'heading' => $heading,
+            'text' => $text,
+            'htmlstrip' => $htmlstrip,
+            'body' => null,
+        ])->render();
     }
 
-    // ── Layout (delegates to PageLayout/Frame) ──────────────────────
+    // ── Layout (delegates to PageLayout) ────────────────────────────
 
     /**
      * Render the page header. Backs the legacy `stdhead()` helper.

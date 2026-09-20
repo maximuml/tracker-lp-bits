@@ -42,8 +42,6 @@ final readonly class ViewTopicViewModel
         public ?SafeHtml $quickReply,
         public ?SafeHtml $deniedNotice,
         public SafeHtml $keyScript,
-        public SafeHtml $frameOpen,
-        public SafeHtml $frameClose,
     ) {}
 
     public function pagerHref(): string

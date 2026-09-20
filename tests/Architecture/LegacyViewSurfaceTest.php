@@ -111,6 +111,9 @@ final class LegacyViewSurfaceTest extends TestCase
         'components/topten/frame.blade.php',
         'components/std-message.blade.php',
         'components/compose.blade.php',
+        'partials/std-message.blade.php',
+        'partials/sql-error.blade.php',
+        'partials/int-error.blade.php',
         'layouts/legacy.blade.php',
     ];
 

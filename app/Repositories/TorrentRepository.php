@@ -328,7 +328,7 @@ class TorrentRepository extends BaseRepository implements TorrentRepositoryInter
         return view('upload._field_input', [
             'name' => $name,
             'value' => $value,
-            'noteText' => (string) $noteText,
+            'noteText' => $noteText,
             'btnText' => (string) $btnText,
             'btnId' => (string) $btnId,
         ])->render();

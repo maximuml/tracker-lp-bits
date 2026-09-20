@@ -89,7 +89,7 @@ class TorrentUploadController extends Controller
         $torrentConfig = SiteConfig::current()->torrent;
 
         $nameInputHtml = $this->torrentRepository->buildUploadFieldInput(
-            'name', '', __('legacy/upload.text_torrent_name_note'), __('legacy/upload.fill_setlist'), 'setlistLookupBtn',
+            'name', '', SafeHtml::fromUntrustedHtml(__('legacy/upload.text_torrent_name_note')), __('legacy/upload.fill_setlist'), 'setlistLookupBtn',
         );
 
         $priceCellHtml = '';

@@ -403,7 +403,7 @@ final class UsercpPageService
         $savedMessage = '';
 
         if ($isConfirm) {
-            AssetAppender::js('js/crypto-js.js', 'footer', true, 'crypto-js');
+            AssetAppender::js('js/nx-crypto.js', 'footer', true, 'nx-crypto');
             AssetAppender::js('js/auth-form.js', 'footer', true, 'auth-form');
         } else {
             AssetAppender::js('js/auth-form.js', 'footer', true, 'auth-form');

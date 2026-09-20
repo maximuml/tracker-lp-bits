@@ -28,10 +28,10 @@
     <form method="post" action="/index">
     <input type="hidden" name="_token" value="{{ csrf_token() }}" />
     @foreach($polls['options'] as $i => $option)
-        <input type="radio" name="choice" value="{{ $i }}">{{ $option }}<br />
+        <label><input type="radio" name="choice" value="{{ $i }}">{{ $option }}</label><br />
     @endforeach
     <br />
-    <input type="radio" name="choice" value="255">{{ $polls['blankVoteLabel'] }}<br />
+    <label><input type="radio" name="choice" value="255">{{ $polls['blankVoteLabel'] }}</label><br />
     <p align="center"><input type="submit" class="btn" value="{{ $polls['submitVoteLabel'] }}" /></p>
     </form>
 @endif

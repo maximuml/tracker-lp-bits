@@ -53,9 +53,9 @@ final class Attachment
         string $sizeLabel,
     ): string {
         $onclick = $imageResizer ? ' data-zoomable data-zoom-src="'.htmlspecialchars($url).'"' : '';
-        $tooltip = htmlspecialchars("<strong>$sizeLabel</strong>: $sizeText<br />$timeText");
+        $tooltip = "<strong>$sizeLabel</strong>: $sizeText<br />$timeText";
 
-        return '<img id="attach'.$id.'" alt="'.htmlspecialchars($filename).'" src="'.htmlspecialchars($url).'"'.$onclick.' data-domtt-promo="'.$tooltip.'" />';
+        return '<img id="attach'.$id.'" alt="'.htmlspecialchars($filename).'" src="'.htmlspecialchars($url).'"'.$onclick.' data-domtt-promo /><template class="nx-tt">'.$tooltip.'</template>';
     }
 
     /**
@@ -74,9 +74,9 @@ final class Attachment
         $downloadCount = number_format((int) ($row['downloads'] ?? 0));
         $href = htmlspecialchars("getattachment.php?id=$id&dlkey=$dlkey");
         $filenameHtml = htmlspecialchars($filename);
-        $tooltip = htmlspecialchars("<strong>$downloadsLabel</strong>: $downloadCount<br />$timeText");
+        $tooltip = "<strong>$downloadsLabel</strong>: $downloadCount<br />$timeText";
 
-        return '<div class="attach">'.$icon.'&nbsp;&nbsp;<a href="'.$href.'" target="_blank" id="attach'.$id.'" onmouseover="domTT_activate(this, event, \'content\', \''.$tooltip.'\', \'styleClass\', \'attach\', \'x\', findPosition(this)[0], \'y\', findPosition(this)[1]-58);">'.$filenameHtml.'</a>&nbsp;&nbsp;<span class="size">('.$sizeText.')</span></div>';
+        return '<div class="attach">'.$icon.'&nbsp;&nbsp;<a href="'.$href.'" target="_blank" id="attach'.$id.'" data-domtt-promo>'.$filenameHtml.'</a><template class="nx-tt">'.$tooltip.'</template>&nbsp;&nbsp;<span class="size">('.$sizeText.')</span></div>';
     }
 
     /**

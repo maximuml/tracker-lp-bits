@@ -18,7 +18,7 @@ final class TorrentListViewModel
     /**
      * @param  list<Column>  $columns
      * @param  list<TorrentListRow>  $rows
-     * @param  list<Tooltip>  $lastCommentTooltips  domTT tooltip bodies,
+     * @param  list<Tooltip>  $lastCommentTooltips  tooltip bodies,
      *                                              rendered inside a hidden container by the template.
      */
     public function __construct(

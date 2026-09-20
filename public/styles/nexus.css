@@ -451,8 +451,8 @@ button.nx-btn-link {
 .nx-table-wrap{overflow-x:auto}
 .nx-table{border-collapse:collapse;width:100%}
 .nx-table__caption{text-align:left;font-weight:bold;padding:4px 0}
-.nx-table th,.nx-table td{padding:5px 8px;border:1px solid #d0d0d0;text-align:left}
-.nx-table thead th{background:#efefef}
+.nx-table th,.nx-table td{padding:5px 8px;border:1px solid var(--nxm-border,#d0d0d0);text-align:left}
+.nx-table thead th{background:var(--nxm-surface-alt,#efefef);color:var(--nxm-text)}
 
 .nx-pagination{margin:10px 0}
 .nx-pagination__list{display:flex;flex-wrap:wrap;gap:2px;list-style:none;margin:0;padding:0}

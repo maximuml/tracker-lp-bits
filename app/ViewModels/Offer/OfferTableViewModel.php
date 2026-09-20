@@ -8,7 +8,7 @@ use App\Support\Html\SafeHtml;
 
 /**
  * The offers listing table — sort-link header urls, typed rows, hidden
- * domTT tooltips and the bottom pager.
+ * hover tooltips and the bottom pager.
  */
 final class OfferTableViewModel
 {

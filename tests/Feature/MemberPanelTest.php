@@ -10,11 +10,13 @@ use App\Models\User;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Livewire;
+use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
  * Stage 6.1 prototype: /my member panel (Filament) access + data scoping.
  */
+#[TestCategory(TestCategory::HTTP_FEATURE)]
 final class MemberPanelTest extends TestCase
 {
     public function test_guest_is_redirected_to_login(): void

@@ -17,7 +17,7 @@ use Illuminate\Http\Request;
 final class LegacyUrlRewriter
 {
     /** Paths that are routed directly by Laravel/Filament/Livewire and must not be rewritten to legacy /script.php. */
-    private const LARAVEL_ONLY_PREFIXES = ['api', 'livewire', 'filament', 'nexusphp', 'horizon', 'web', 'my'];
+    private const LARAVEL_ONLY_PREFIXES = ['api', 'livewire', 'filament', 'nexusphp', 'horizon', 'web'];
 
     /**
      * Laravel-native multi-segment paths that still boot the legacy context.
@@ -189,8 +189,8 @@ final class LegacyUrlRewriter
 
     private function isLaravelOnlyPath(string $requestPath): bool
     {
-        // Segment-exact match: a prefix like /my must not swallow legacy
-        // pages such as /mybonus or /myhr that merely start with it.
+        // Segment-exact match: a bare prefix must not swallow pages that
+        // merely start with it (e.g. /apiary, /webmail).
         foreach (self::LARAVEL_ONLY_PREFIXES as $prefix) {
             if ($requestPath === '/'.$prefix || str_starts_with($requestPath, '/'.$prefix.'/')) {
                 return true;

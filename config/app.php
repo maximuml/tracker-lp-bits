@@ -3,7 +3,6 @@
 use App\Providers\AppServiceProvider;
 use App\Providers\EventServiceProvider;
 use App\Providers\Filament\AppPanelProvider;
-use App\Providers\Filament\MemberPanelProvider;
 use App\Providers\NexusHorizonServiceProvider;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Auth\AuthServiceProvider;
@@ -256,7 +255,6 @@ return [
         EventServiceProvider::class,
         NexusHorizonServiceProvider::class,
         AppPanelProvider::class,
-        MemberPanelProvider::class,
         RouteServiceProvider::class,
 
     ],

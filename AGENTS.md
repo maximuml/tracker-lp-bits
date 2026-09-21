@@ -1001,8 +1001,8 @@ by final repository classes or static methods — see W2-01/W2-02).
   RoadRunner (`config/octane.php` default `OCTANE_SERVER=roadrunner`,
   dev-deps `spiral/roadrunner-cli` + `spiral/roadrunner-http`, CI job
   `octane.yml` runs `rr get-binary` + `octane:start --server=roadrunner`)
-  and FrankenPHP (a stray `public/frankenphp-worker.php` stub — never
-  committed, untracked leftover of an `octane:install` experiment). All
+  and FrankenPHP (a stray `frankenphp-worker.php` stub under `public/` —
+  never committed, untracked leftover of an `octane:install` experiment). All
   Octane hardening work (ADR 0004 announce statelessness, ADR 0002
   rewriter worker-script mapping, `OctaneCrossRequestIsolationTest`)
   was verified against RoadRunner only; FrankenPHP had no CI coverage,

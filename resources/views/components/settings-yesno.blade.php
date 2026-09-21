@@ -4,7 +4,7 @@
 <div class="nx-fcell">
 @else
 <tr>
-    <td class="rowhead nowrap" valign="top" align="right">{{ $label }}</td>
+    <td class="rowhead nowrap nx-va-top nx-align-right">{{ $label }}</td>
     <td>
 @endif
         <input type="radio" id="{{ $name }}yes" name="{{ $name }}"@if ($value === 'yes') checked @endif value="yes"> <label for="{{ $name }}yes">{{ $yesLabel }}</label>

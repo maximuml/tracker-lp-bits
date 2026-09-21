@@ -1,6 +1,6 @@
 {{-- Passkey list for the security section. Data: $security->passkeys, $security->cspNonce. --}}
 <button type="button" id="passkey_create">{{ \App\Support\Locale::trans('passkey.passkey_create', [], null) }}</button><br>{{ \App\Support\Locale::trans('passkey.passkey_desc', [], null) }}
-<table data-nx="data">
+<table data-nx="data"><caption class="nx-sr-only">{{ \App\Support\Locale::trans('passkey.passkey', [], null) }}</caption>
 @if (empty($security->passkeys))
 <tr><td>{{ \App\Support\Locale::trans('passkey.passkey_empty', [], null) }}</td></tr>
 @else

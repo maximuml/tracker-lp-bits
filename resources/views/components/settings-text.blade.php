@@ -4,7 +4,7 @@
 <div class="nx-fcell">
 @else
 <tr>
-    <td class="rowhead nowrap" valign="top" align="right">{{ $label }}</td>
+    <td class="rowhead nowrap nx-va-top nx-align-right">{{ $label }}</td>
     <td>
 @endif
         <input type="text" name="{{ $name }}" value="{{ (string) $value }}"@if ($size !== null) size="{{ $size }}"@endif>

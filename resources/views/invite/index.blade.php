@@ -5,9 +5,9 @@
 @section('content')
 <div class="nx-main nx-embedded">
 
-<h1 align=center><a href="invite.php?id={{ $id }}">{{ $user['username'] ?? '' }}{{ __('legacy/invite.text_invite_system')}}</a></h1>
+<h1 class="nx-center"><a href="invite.php?id={{ $id }}">{{ $user['username'] ?? '' }}{{ __('legacy/invite.text_invite_system')}}</a></h1>
 @if ($sent == 1)
-    <p align=center><span class="nx-color-red">{{ __('legacy/invite.text_invite_code_sent') }}<br /></span></p>
+    <p class="nx-center"><span class="nx-color-red">{{ __('legacy/invite.text_invite_code_sent') }}<br /></span></p>
 @endif
 
 @if ($type == 'new')
@@ -56,11 +56,11 @@
                 <input type="button" id="reset" value="{{ $resetText }}">
             </form>
         </div>
-        <table data-nx="data" border=1 width=100% cellspacing=0 cellpadding=5>
+        <table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/invite.text_invite_status') }}</caption>
         <form method=post action=takeconfirm.php?id={{ (string) $id }}>
 
         @if (! $inviteeCount)
-            <tr><td colspan=7 align=center>{{ __('legacy/invite.text_no_invites')}}</tr>
+            <tr><td colspan=7 class="nx-center">{{ __('legacy/invite.text_no_invites')}}</tr>
         @else
             <tr>
             <th class="colhead" scope="col"><b>{{ __('legacy/invite.text_username')}}</b></th>
@@ -112,7 +112,7 @@
 
         @if ($canConfirm)
             @if ($pendingCount)
-                <tr><td colspan={{ $inviteeColSpan }} align=right><input type=submit value='{{ __('legacy/invite.submit_confirm_users')}}'></td></tr>
+                <tr><td colspan={{ $inviteeColSpan }} class="nx-align-right"><input type=submit value='{{ __('legacy/invite.submit_confirm_users')}}'></td></tr>
             @endif
             </form>
         @endif
@@ -120,9 +120,9 @@
         </div>{{ $inviteePagertop }}
 
     @elseif (in_array($menuSelected, ['sent', 'tmp'], true))
-        <table data-nx="data" border=1 width=100% cellspacing=0 cellpadding=5>
+        <table data-nx="data"><caption class="nx-sr-only">{{ $menuSelected == 'sent' ? __('legacy/invite.text_sent_invites_status') : __('legacy/invite.text_tmp_status') }}</caption>
         @if (! $sentTmpCount)
-            <tr align=center><td colspan=6>{{ __('legacy/functions.text_none')}}</tr>
+            <tr class="nx-center"><td colspan=6>{{ __('legacy/functions.text_none')}}</tr>
         @else
             <tr><th class="colhead" scope="col">{{ __('legacy/invite.text_email')}}</th><th class="colhead" scope="col">{{ __('legacy/invite.text_hash')}}</th><th class="colhead" scope="col">{{ __('legacy/invite.text_send_date')}}</th>
             @if ($menuSelected == 'sent')

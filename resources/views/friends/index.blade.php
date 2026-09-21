@@ -8,7 +8,7 @@
 
 <div class="nx-main nx-embedded nx-box--737">
 <br />
-<h2 align=left><a name="friends">{{ __('legacy/friends.text_friendlist')}}</a></h2>
+<h2><a name="friends">{{ __('legacy/friends.text_friendlist')}}</a></h2>
 <div class="nx-box nx-box--tight nx-box--737">
 
 @if (empty($friendsList))
@@ -19,7 +19,7 @@
         <div>
         <div class="nx-fcard nx-main">
         <div class="nx-center">
-        <div><img width=75px src="{{ $friend['avatarSrc'] }}"></div>
+        <div><img width="75" src="{{ $friend['avatarSrc'] }}"></div>
         </div><div class="nx-grow">
         <div class="nx-row nx-main">
         <div class="nx-embedded nx-w-80">{{ $friend['usernameHtml'] }} ({{ $friend['titleHtml'] }})<br /><br />{{ __('legacy/friends.text_last_seen_on') }}<x-time :value="$friend['lastSeen']" /></div>
@@ -36,7 +36,7 @@
 
 <br /><br />
 <div class="nx-main nx-embedded nx-box--737 nx-cell-5">
-<h2 align=left><a name="blocks">{{ __('legacy/friends.text_blocked_users')}}</a></h2>
+<h2><a name="blocks">{{ __('legacy/friends.text_blocked_users')}}</a></h2>
 <div>
 @if ($blocks === [])
 <x-empty-state :title="__('legacy/friends.text_blocklist_empty')" />

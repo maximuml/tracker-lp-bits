@@ -16,7 +16,7 @@
 <input type="hidden" name="action" value="editmailboxes2">
 <input type="hidden" name="action2" value="edit">
 @if (! $editmailboxes['hasBoxes'])
-<span align="center"><b>{{ __('legacy/messages.text_no_mailboxes_to_edit') }}</b></span>
+<span><b>{{ __('legacy/messages.text_no_mailboxes_to_edit') }}</b></span>
 @else
 @foreach ($editmailboxes['boxes'] as $box)
 <input type="text" name="edit{{ $box['id'] }}" value="{{ $box['name'] }}" size="40" maxlength="14"><br />

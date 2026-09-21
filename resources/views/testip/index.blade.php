@@ -7,7 +7,7 @@
 @if (! empty($hasResult))
 <div class="nx-embedded">The IP address <b>{{ $ip }}</b> is {{ $isBanned ? '' : 'not ' }}banned{{ $isBanned ? ':' : '.' }}</div>
     @if ($isBanned)
-<p><table data-nx="data" class="main">
+<p><table data-nx="data" class="main"><caption class="nx-sr-only">Test IP address</caption>
 <tr><th class="colhead" scope="col">First</th><th class="colhead" scope="col">Last</th><th class="colhead" scope="col">Comment</th></tr>
 @foreach ($banRows as $row)
 <tr><td>{{ $row['first'] }}</td><td>{{ $row['last'] }}</td><td>{{ $row['comment'] }}</td></tr>

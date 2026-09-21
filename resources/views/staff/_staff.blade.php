@@ -2,7 +2,7 @@
 <x-slot:caption>{{ __('legacy/staff.text_firstline_support') }}<span class="small"> - [<a class=altlink href=contactstaff.php><b>{{ __('legacy/staff.text_apply_for_it') }}</b></a>]</span></x-slot>
 {{ __('legacy/staff.text_firstline_support_note') }}
 <br /><br />
-<table data-nx="data">
+<table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/staff.text_firstline_support') }}</caption>
     <tr>
         <td class="embedded"><b>{{ __('legacy/staff.text_username')}}</b></td>
         <td class="embedded nx-center"><b>{{ __('legacy/staff.text_country')}}</b></td>
@@ -25,7 +25,7 @@
 <x-slot:caption>{{ __('legacy/staff.text_movie_critics') }}<span class="small"> - [<a class=altlink href=contactstaff.php><b>{{ __('legacy/staff.text_apply_for_it') }}</b></a>]</span></x-slot>
 {{ __('legacy/staff.text_movie_critics_note') }}
 <br /><br />
-<table data-nx="data">
+<table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/staff.text_movie_critics') }}</caption>
     <tr>
         <td class="embedded"><b>{{ __('legacy/staff.text_username')}}</b></td>
         <td class="embedded nx-center"><b>{{ __('legacy/staff.text_country')}}</b></td>
@@ -47,7 +47,7 @@
 <x-slot:caption>{{ __('legacy/staff.text_forum_moderators') }}<span class="small"> - [<a class=altlink href=contactstaff.php><b>{{ __('legacy/staff.text_apply_for_it') }}</b></a>]</span></x-slot>
 {{ __('legacy/staff.text_forum_moderators_note') }}
 <br /><br />
-<table data-nx="data">
+<table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/staff.text_forum_moderators') }}</caption>
     <tr>
         <td class="embedded"><b>{{ __('legacy/staff.text_username')}}</b></td>
         <td class="embedded nx-center"><b>{{ __('legacy/staff.text_country')}}</b></td>
@@ -69,7 +69,7 @@
 <x-slot:caption>{{ __('legacy/staff.text_general_staff') }}<span class="small"> - [<a class=altlink href=contactstaff.php><b>{{ __('legacy/staff.text_apply_for_it') }}</b></a>]</span></x-slot>
 {{ __('legacy/staff.text_general_staff_note') }} <a href=faq.php><b>{{ __('legacy/staff.text_faq') }}</b></a> {{ __('legacy/staff.text_general_staff_note_two') }}<br /><br />{{ __('legacy/staff.text_general_staff_note_three') }} <a href=contactstaff.php><b>{{ __('legacy/staff.text_here') }}</b></a>
 <br /><br />
-<table data-nx="data">
+<table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/staff.text_general_staff') }}</caption>
     @foreach ($staffRows as $row)
         @if (isset($row['header']))
             @if (! $loop->first)<tr height=15><td class="embedded nx-align-right" colspan=5>&nbsp;</td></tr>@endif
@@ -96,7 +96,7 @@
 <x-slot:caption>{{ __('legacy/staff.text_vip') }}</x-slot>
 {{ sprintf(__('legacy/staff.text_vip_note'), $siteName) }}
 <br /><br />
-<table data-nx="data">
+<table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/staff.text_vip') }}</caption>
     <tr>
         <td class="embedded"><b>{{ __('legacy/staff.text_username')}}</b></td>
         <td class="embedded nx-center"><b>{{ __('legacy/staff.text_country')}}</b></td>

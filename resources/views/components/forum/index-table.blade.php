@@ -1,5 +1,5 @@
 @props(['sections'])
-<table data-nx="data" class="nx-forum-table">
+<table data-nx="data" class="nx-forum-table"><caption class="nx-sr-only">{{ trim(__('legacy/forums.text_forums')) }}</caption>
     <tbody>
     @foreach ($sections as $section)
         <tr>

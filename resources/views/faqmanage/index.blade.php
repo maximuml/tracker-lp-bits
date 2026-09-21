@@ -9,7 +9,7 @@
 @foreach (($faqCateg ?? []) as $lang => $temp2)
     @foreach ($temp2 as $id => $temp)
 <br />
-<table data-nx="data">
+<table data-nx="data"><caption class="nx-sr-only">{{ $temp['title'] ?? 'FAQ section' }}</caption>
 <tr><th class="colhead" colspan="2" scope="colgroup">Position</th><th class="colhead nx-align-left" scope="col">Section/Item Title</th><th class="colhead" scope="col">Language</th><th class="colhead" scope="col">Status</th><th class="colhead" scope="col">Actions</th></tr>
 <tr><td class="nx-center nx-w-40"><select name="order[{{ (int) $id }}]">
     @for ($n = 1; $n <= count($temp2); $n++)
@@ -31,7 +31,7 @@
 @endforeach
 @if (! empty($faqOrphaned))
 <br />
-<table data-nx="data">
+<table data-nx="data"><caption class="nx-sr-only">Orphaned Items</caption>
 <tr><td class="nx-center" colspan="3"><b>Orphaned Items</b></td></tr>
 <tr><th class="colhead nx-align-left" scope="col">Item Title</th><th class="colhead" scope="col">Status</th><th class="colhead" scope="col">Actions</th></tr>
     @foreach ($faqOrphaned as $lang => $temp2)

@@ -9,7 +9,6 @@ use App\Repositories\ModerationRepository;
 use App\Services\LocationService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
-use App\Support\Html;
 use App\Support\Html\SafeHtml;
 use App\Support\Input;
 use App\Support\Network;
@@ -63,11 +62,11 @@ class AdminToolsController extends LegacyController
             'reason' => 'Reason',
             'created_at' => 'Created at',
         ];
-        $table = Html::buildTable($header, $rows);
 
         return $this->legacyPage($request, 'user-ban-log', true, [
             'q' => $q,
-            'table' => SafeHtml::fromTrustedHtml($table),
+            'header' => $header,
+            'rows' => $rows,
             'paginationTop' => $paginationTop,
             'paginationBottom' => $paginationBottom,
             'serverRequestUri' => Input::serverValue('REQUEST_URI'),

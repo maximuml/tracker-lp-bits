@@ -61,7 +61,7 @@
 @else
     <p><strong>{{ ($success ?? false) ? '(Updated!)' : '' }}Existing Locations:</strong></p>
 @endif
-<table data-nx="data">
+<table data-nx="data"><caption class="nx-sr-only">Manage Locations</caption>
 <tr>
 <th class="colhead" scope="col"><b>ID</b></th>
 <th class="colhead nx-align-left" scope="col"><b>Name</b></th>

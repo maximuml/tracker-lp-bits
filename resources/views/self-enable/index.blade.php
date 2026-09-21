@@ -16,7 +16,7 @@
     @endif
 @else
     <h3>{{ $t['latestBanInfo'] ?? '' }}</h3>
-    <table data-nx="data" id="ban-info"><tbody>
+    <table data-nx="data" id="ban-info"><tbody><caption class="nx-sr-only">{{ $title }}</caption>
     <tr><th scope="row">UID：</th><td>{{ $latestBanLog->uid }}</td></tr>
     <tr><th scope="row">Username：</th><td>{{ $latestBanLog->username }}</td></tr>
     <tr><th scope="row">Reason：</th><td>{{ $latestBanLog->reason }}</td></tr>

@@ -28,7 +28,7 @@
     </form>
 </div>
 
-<table data-nx="data" id='bonus-log-table'>
+<table data-nx="data" id='bonus-log-table'><caption class="nx-sr-only">{{ $title }}</caption>
 <tr>
     <th class="colhead nx-align-left" scope="col">{{ $columnBusinessTypeLabel }}</th>
     <th class="colhead nx-align-left" scope="col">{{ $columnOldTotalLabel }}</th>

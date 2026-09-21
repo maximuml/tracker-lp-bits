@@ -12,6 +12,22 @@
     </form>
 </div>
 
-{{ ($table ?? '') }}
+<table data-nx="data">
+    <caption class="nx-sr-only">User ban log</caption>
+    <thead><tr>
+        @foreach ($header as $label)
+            <th class="colhead" scope="col">{{ $label }}</th>
+        @endforeach
+    </tr></thead>
+    <tbody>
+        @foreach ($rows as $row)
+            <tr>
+                @foreach ($header as $key => $label)
+                    <td class="">{{ $row[$key] ?? '' }}</td>
+                @endforeach
+            </tr>
+        @endforeach
+    </tbody>
+</table>
 {{ ($paginationBottom ?? '') }}
 @endsection

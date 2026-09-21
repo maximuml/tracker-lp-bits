@@ -10,7 +10,7 @@ Total Images Stored: {{ $count ?? 0 }}
 @if (empty($items ?? []))
     <b>BitBucket Log is empty</b>
 @else
-    <table data-nx="data">
+    <table data-nx="data"><caption class="nx-sr-only">BitBucket Log</caption>
     @foreach ($items as $item)
         <tr>
         <td><div class="nx-center"><a href="{{ $item['url'] }}"><img src="{{ $item['url'] }}" class="bitbucket-shot"></a></div>

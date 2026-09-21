@@ -12,7 +12,7 @@
         </div>
         <!-- Table Section -->
         <div class="fi-ta-content-ctn fi-fixed-positioning-context">
-            <table data-nx="data" class="fi-ta-table">
+            <table data-nx="data" class="fi-ta-table"><caption class="nx-sr-only">{{ $header }}</caption>
                 <tbody>
                 @foreach(array_chunk($data, 2) as $chunk)
                     <tr>

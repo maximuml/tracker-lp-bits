@@ -6,7 +6,7 @@
 <x-frame :center="false">
 <x-slot:caption><span id="version">{{ $captions['version'] }}</span></x-slot>
 {{ $notes['version'] }}
-<table data-nx="data" class="main">
+<table data-nx="data" class="main"><caption class="nx-sr-only">{{ $captions['version'] }}</caption>
     <x-settings-row :label="__('legacy/aboutnexus.text_main_version')">{{ PROJECTNAME }}</x-settings-row>
     <x-settings-row :label="__('legacy/aboutnexus.text_sub_version')">{{ VERSION_NUMBER }}</x-settings-row>
     <x-settings-row :label="__('legacy/aboutnexus.text_release_date')">{{ RELEASE_DATE }}</x-settings-row>
@@ -30,7 +30,7 @@
 <x-slot:caption><span id="translation">{{ $captions['translation'] }}</span></x-slot>
 {{ $notes['translation'] }}
 <br /><br />
-<table data-nx="data" class="main">
+<table data-nx="data" class="main"><caption class="nx-sr-only">{{ $captions['translation'] }}</caption>
     <tr>
         <th class="colhead" scope="col">{{ __('legacy/aboutnexus.text_flag')}}</th>
         <th class="colhead" scope="col">{{ __('legacy/aboutnexus.text_language')}}</th>
@@ -51,7 +51,7 @@
 <x-slot:caption><span id="stylesheet">{{ $captions['stylesheet'] }}</span></x-slot>
 {{ $notes['stylesheet'] }}
 <br /><br />
-<table data-nx="data" class="main">
+<table data-nx="data" class="main"><caption class="nx-sr-only">{{ $captions['stylesheet'] }}</caption>
     <tr>
         <th class="colhead" scope="col">{{ __('legacy/aboutnexus.text_name')}}</th>
         <th class="colhead" scope="col">{{ __('legacy/aboutnexus.text_designer')}}</th>
@@ -72,7 +72,7 @@
 <x-slot:caption><span id="contact">{{ $captions['contact'] }}</span></x-slot>
 {{ $notes['contact'] }}
 <br /><br />
-<table data-nx="data" class="main">
+<table data-nx="data" class="main"><caption class="nx-sr-only">{{ $captions['contact'] }}</caption>
     <x-settings-row :label="__('legacy/aboutnexus.text_web_site')"><a href="{{ NEXUSPHPURL }}" target="_blank">{{ NEXUSPHPURL }}</a></x-settings-row>
 </table>
 <br /><br />

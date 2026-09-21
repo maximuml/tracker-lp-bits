@@ -1,7 +1,7 @@
 @if ($results->showPager)
 {{ $results->pagerTop }}
 @endif
-<table data-nx="data">
+<table data-nx="data"><caption class="nx-sr-only">Search results</caption>
 <tr><th class="colhead nx-align-left" scope="col">Name</th>
     <th class="colhead nx-align-left" scope="col">Ratio</th>
     <th class="colhead nx-align-left" scope="col">IP</th>

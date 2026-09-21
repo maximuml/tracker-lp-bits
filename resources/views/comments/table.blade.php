@@ -1,9 +1,9 @@
 {{-- Legacy commenttable() frame: two nested layout tables preserved as-is --}}
-<table data-nx="data" class="main"><tr><td class="embedded" >
-<table data-nx="data"><tr><td class="text" >
+<table data-nx="data" role="presentation" class="main"><tr><td class="embedded" >
+<table data-nx="data" role="presentation"><tr><td class="text" >
 @foreach ($vm->rows as $row)
-<div><table data-nx="data" id="cid{{ $row->id }}"><tr><td class="embedded nx-w-99p">#{{ $row->id }}&nbsp;&nbsp;<span class="nx-color-gray">{{ __('legacy/functions.text_by') }}</span>{{ $row->author }}&nbsp;&nbsp;<span class="nx-color-gray">{{ __('legacy/functions.text_at') }}</span>{{ $row->addedTime }}@if ($row->showViewOriginal) - [<a href="comment.php?action=vieworiginal&amp;cid={{ $row->id }}&amp;type={{ $vm->type }}">{{ __('legacy/functions.text_view_original') }}</a>]@endif</td><td class="embedded nowrap nx-w-1p"><a href="#top"><img class="top" src="pic/trans.gif" alt="Top" title="Top" /></a>&nbsp;&nbsp;</td></tr></table></div>
-<table data-nx="data" class="main">
+<div><table data-nx="data" role="presentation" id="cid{{ $row->id }}"><tr><td class="embedded nx-w-99p">#{{ $row->id }}&nbsp;&nbsp;<span class="nx-color-gray">{{ __('legacy/functions.text_by') }}</span>{{ $row->author }}&nbsp;&nbsp;<span class="nx-color-gray">{{ __('legacy/functions.text_at') }}</span>{{ $row->addedTime }}@if ($row->showViewOriginal) - [<a href="comment.php?action=vieworiginal&amp;cid={{ $row->id }}&amp;type={{ $vm->type }}">{{ __('legacy/functions.text_view_original') }}</a>]@endif</td><td class="embedded nowrap nx-w-1p"><a href="#top"><img class="top" src="pic/trans.gif" alt="Top" title="Top" /></a>&nbsp;&nbsp;</td></tr></table></div>
+<table data-nx="data" role="presentation" class="main">
 <tr>
 <td class="rowfollow nx-va-top nx-w-150px">{{ $row->avatar }}</td>
 <td class="rowfollow word-break-all nx-va-top"><br />{{ $row->text }}@if ($row->editedBy)<br /><p><span class="small">{{ __('legacy/functions.text_last_edited_by') }}{{ $row->editedBy }}{{ __('legacy/functions.text_edited_at') }}{{ $row->editedAt }}</span></p>

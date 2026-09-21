@@ -23,7 +23,7 @@
 <p class="nx-center">{{ __('legacy/uploaders.text_no_uploaders_yet')}}</p>
 @else
 <div>
-<table data-nx="data" class="nx-w-97 nx-mx-auto">
+<table data-nx="data" class="nx-w-97 nx-mx-auto"><caption class="nx-sr-only">{{ __('legacy/uploaders.text_uploaders')}}</caption>
 <tr>
     <th class="colhead" scope="col">{{ __('legacy/uploaders.col_username')}}</th>
     <th class="colhead" scope="col">{{ __('legacy/uploaders.col_torrents_size')}}</th>

@@ -16,7 +16,7 @@
         <b>Server traffic:</b> These tables show the network traffic statistics of this MySQL server since its startup
         <br />
         <div class="nx-row">
-                    <table data-nx="data" id="torrenttable">
+                    <table data-nx="data" id="torrenttable"><caption class="nx-sr-only">Traffic</caption>
                         <tr>
                             <th colspan="2" bgcolor="lightgrey" scope="colgroup">&nbsp;Traffic&nbsp;</th>
                             <th bgcolor="lightgrey" scope="col">&nbsp;&nbsp;Per Hour&nbsp;</th>
@@ -37,7 +37,7 @@
                             <td bgcolor="lightgrey" class="nx-align-right">&nbsp;{{ $totalBytesPerHour }}&nbsp;</td>
                         </tr>
                     </table>
-                    <table data-nx="data" id="torrenttable">
+                    <table data-nx="data" id="torrenttable"><caption class="nx-sr-only">Connections</caption>
                         <tr>
                             <th colspan="2" bgcolor="lightgrey" scope="colgroup">&nbsp;Connections&nbsp;</th>
                             <th bgcolor="lightgrey" scope="col">&nbsp;&oslash;&nbsp;Per Hour&nbsp;</th>
@@ -69,7 +69,7 @@
         <b>Query Statistics:</b> Since it's start up, {{ $questionsTotal }} queries have been sent to the server.
         <div>
                     <br />
-                    <table data-nx="data" id="torrenttable">
+                    <table data-nx="data" id="torrenttable"><caption class="nx-sr-only">Query Statistics</caption>
                         <tr>
                             <th bgcolor="lightgrey" scope="col">&nbsp;Total&nbsp;</th>
                             <th bgcolor="lightgrey" scope="col">&nbsp;&oslash;&nbsp;Per&nbsp;Hour&nbsp;</th>
@@ -85,7 +85,7 @@
                     </table>
             <div class="nx-row">
 @foreach ($queryStatColumns as $column)
-                    <table data-nx="data" id="torrenttable">
+                    <table data-nx="data" id="torrenttable"><caption class="nx-sr-only">Query Type</caption>
                         <tr>
                             <th colspan="2" bgcolor="lightgrey" scope="colgroup">&nbsp;Query&nbsp;Type&nbsp;</th>
                             <th bgcolor="lightgrey" scope="col">&nbsp;&oslash;&nbsp;Per&nbsp;Hour&nbsp;</th>
@@ -110,7 +110,7 @@
         <b>More status variables</b><br />
         <div class="nx-row">
 @foreach ($statusColumns as $column)
-                    <table data-nx="data" id="torrenttable">
+                    <table data-nx="data" id="torrenttable"><caption class="nx-sr-only">More status variables</caption>
                         <tr>
                             <th bgcolor="lightgrey" scope="col">&nbsp;Variable&nbsp;</th>
                             <th bgcolor="lightgrey" scope="col">&nbsp;Value&nbsp;</th>

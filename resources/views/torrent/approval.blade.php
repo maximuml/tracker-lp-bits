@@ -61,7 +61,7 @@
         </div>
     </div>
     <div>{{ __('torrent.approval.logs_label') }}</div>
-    <table data-nx="data" id="table"></table>
+    <table data-nx="data" id="table"></table><caption class="nx-sr-only">{{ __('torrent.approval.logs_label') }}</caption>
     <script nonce="{{ $cspNonce ?? '' }}">
         layui.use('table', function(){
             var table = layui.table;

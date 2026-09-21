@@ -994,3 +994,24 @@ by final repository classes or static methods — see W2-01/W2-02).
   staff check for all panels. If the member-area question resurfaces,
   the prototype findings above document the integration cost
   (CSP + rewriter entries per prefix, JS bridges, Livewire hydration).
+
+### ADR 0030: RoadRunner as the single Octane server (Accepted, stage 7.9)
+
+- **Context:** The repo carried scaffolding for two Octane servers:
+  RoadRunner (`config/octane.php` default `OCTANE_SERVER=roadrunner`,
+  dev-deps `spiral/roadrunner-cli` + `spiral/roadrunner-http`, CI job
+  `octane.yml` runs `rr get-binary` + `octane:start --server=roadrunner`)
+  and FrankenPHP (a stray `public/frankenphp-worker.php` stub — never
+  committed, untracked leftover of an `octane:install` experiment). All
+  Octane hardening work (ADR 0004 announce statelessness, ADR 0002
+  rewriter worker-script mapping, `OctaneCrossRequestIsolationTest`)
+  was verified against RoadRunner only; FrankenPHP had no CI coverage,
+  no Caddyfile, no Dockerfile.
+- **Decision:** RoadRunner is the single supported Octane server.
+  FrankenPHP scaffolding removed (worker stub deleted, `frankenphp-worker`
+  dropped from the rewriter's worker-script map). `swoole-worker` stays
+  in the map as a zero-cost generic fallback — Swoole needs no committed
+  artifacts, only the PHP extension.
+- **Consequences:** One tested worker path; contributors must not add
+  FrankenPHP/Swoole scaffolding without CI coverage. If Swoole is ever
+  adopted it needs the same smoke+isolation CI treatment RoadRunner has.

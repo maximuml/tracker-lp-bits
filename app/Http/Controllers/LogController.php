@@ -94,6 +94,7 @@ class LogController extends LegacyController
         foreach ($logRows as &$row) {
             $txt = (string) ($row['txt'] ?? '');
             $row['colorClass'] = match (true) {
+                str_starts_with($txt, 'STAFF ') => 'nx-color-darkred',
                 str_contains($txt, 'settings updated by') => 'nx-color-darkred',
                 str_contains($txt, 'was edited by') => 'nx-color-blue',
                 str_contains($txt, 'was added to the Request section') => 'nx-color-purple',

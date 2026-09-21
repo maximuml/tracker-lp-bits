@@ -202,6 +202,7 @@ final class AjaxService
             'shout' => (int) ($params['last_shout_id'] ?? 0),
             'comment' => (int) ($params['last_comment_id'] ?? 0),
             'topic_reply' => (int) ($params['last_reply_id'] ?? 0),
+            'staff' => (int) ($params['last_staff_id'] ?? 0),
         ];
         $init = ! empty($params['init']);
 

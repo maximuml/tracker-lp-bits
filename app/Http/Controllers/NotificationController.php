@@ -32,6 +32,8 @@ class NotificationController extends LegacyController
             return response()->json(['ret' => 403, 'msg' => 'Unauthorized'], 403);
         }
 
-        return response()->json(['ret' => 0, 'data' => ['counts' => $this->feed->markAllRead((int) $user['id'])]]);
+        $cursors = $this->feed->markAllRead((int) $user['id']);
+
+        return response()->json(['ret' => 0, 'data' => ['cursors' => $cursors]]);
     }
 }

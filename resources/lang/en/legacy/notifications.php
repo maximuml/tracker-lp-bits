@@ -6,6 +6,7 @@ return [
     'title_bell' => 'Notifications',
     'title_comment' => 'Comment on your torrent',
     'title_topic_reply' => 'Reply in your topic',
+    'title_staff' => 'Staff message',
     'mark_all_read' => 'Mark all read',
     'empty' => 'No new notifications',
     'in_context' => 'in',

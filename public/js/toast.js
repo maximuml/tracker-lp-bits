@@ -50,7 +50,8 @@
                 + '&last_pm_id=' + encodeURIComponent(getCursor('pm'))
                 + '&last_shout_id=' + encodeURIComponent(getCursor('shout'))
                 + '&last_comment_id=' + encodeURIComponent(getCursor('comment'))
-                + '&last_reply_id=' + encodeURIComponent(getCursor('topic_reply'));
+                + '&last_reply_id=' + encodeURIComponent(getCursor('topic_reply'))
+                + '&last_staff_id=' + encodeURIComponent(getCursor('staff'));
             eventSource = new EventSource(url);
             eventSource.addEventListener('notifications', function (e) {
                 try {
@@ -83,7 +84,8 @@
             last_pm_id: getCursor('pm'),
             last_shout_id: getCursor('shout'),
             last_comment_id: getCursor('comment'),
-            last_reply_id: getCursor('topic_reply')
+            last_reply_id: getCursor('topic_reply'),
+            last_staff_id: getCursor('staff')
         };
         if (init) {
             params.init = 1;
@@ -118,17 +120,16 @@
             setCursor('shout', data.cursors.shout);
             setCursor('comment', data.cursors.comment);
             setCursor('topic_reply', data.cursors.topic_reply);
+            setCursor('staff', data.cursors.staff);
         }
         if (init) {
             return;
         }
         var notifications = data.notifications || [];
-        var delta = 0;
         notifications.forEach(function (n) {
             showToast(n);
-            if (n.type !== 'pm') { delta++; }
         });
-        bumpBadge(delta);
+        bumpBadge(notifications.length);
     }
 
     // ---- header bell ----
@@ -186,7 +187,7 @@
                 return;
             }
             renderPanel(panel, response.data);
-            setBadge(Math.max(0, (response.data.counts.total || 0) - (response.data.counts.pm || 0)));
+            setBadge(response.data.counts.total || 0);
         }).catch(function () {
             renderError(panel);
         });
@@ -286,6 +287,12 @@
             credentials: 'same-origin'
         }).then(function (res) { return res.json(); }).then(function (response) {
             if (response && response.ret === 0) {
+                var cursors = (response.data && response.data.cursors) || null;
+                if (cursors) {
+                    ['pm', 'shout', 'comment', 'topic_reply', 'staff'].forEach(function (ch) {
+                        setCursor(ch, cursors[ch]);
+                    });
+                }
                 setBadge(0);
                 renderPanel(panel, { items: [], counts: { total: 0 } });
             }
@@ -321,7 +328,7 @@
             credentials: 'same-origin'
         }).then(function (res) { return res.json(); }).then(function (response) {
             if (response && response.ret === 0 && response.data && response.data.counts) {
-                setBadge(Math.max(0, (response.data.counts.total || 0) - (response.data.counts.pm || 0)));
+                setBadge(response.data.counts.total || 0);
             }
         }).catch(function () {});
     }

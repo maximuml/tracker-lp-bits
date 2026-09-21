@@ -7,10 +7,12 @@ namespace App\Support;
 use App\Repositories\MessageRepository;
 use App\Repositories\NotificationFeedRepository;
 use App\Repositories\ShoutboxRepository;
+use App\Repositories\StaffMessageRepository;
 
 /**
  * Unified notification feed: unread PMs, shoutbox @mentions, comments on the
- * user's own torrents and replies in the user's own forum topics.
+ * user's own torrents, replies in the user's own forum topics and staff
+ * messages (staffbox).
  *
  * Two cursor semantics:
  * - since(): "already delivered" cursors supplied by the caller (client
@@ -39,6 +41,7 @@ final class NotificationFeed
     public function since(int $userId, array $cursors, bool $init = false): array
     {
         $maxes = $this->feedRepository->channelMaxes($userId);
+        $maxes['staff'] = $this->staffMax($userId);
 
         if ($init) {
             return ['cursors' => $maxes, 'notifications' => []];
@@ -46,6 +49,9 @@ final class NotificationFeed
 
         $notifications = $this->pmItems($userId, (int) ($cursors['pm'] ?? 0));
         foreach ($this->mentionItems($userId, (int) ($cursors['shout'] ?? 0)) as $item) {
+            $notifications[] = $item;
+        }
+        foreach ($this->staffItems($userId, (int) ($cursors['staff'] ?? 0)) as $item) {
             $notifications[] = $item;
         }
         foreach ($this->commentItems($userId, (int) ($cursors['comment'] ?? 0)) as $item) {
@@ -73,10 +79,15 @@ final class NotificationFeed
         $saved = $this->feedRepository->savedCursors($userId);
         if (array_sum($saved) === 0) {
             $saved = $this->feedRepository->channelMaxes($userId);
+            $saved['staff'] = $this->staffMax($userId);
             $this->feedRepository->saveCursors($userId, $saved);
         }
 
         $counts = $this->feedRepository->unreadCounts($userId, $saved);
+        $counts['staff'] = app(StaffMessageRepository::class)
+            ->buildStaffMessageQuery($userId)
+            ->where('id', '>', (int) ($saved['staff'] ?? 0))
+            ->count();
         $items = $this->pmItems($userId, (int) $saved['pm']);
         foreach ($this->mentionItems($userId, (int) $saved['shout']) as $item) {
             $items[] = $item;
@@ -88,6 +99,9 @@ final class NotificationFeed
             $items[] = $item;
         }
         foreach ($this->topicReplyItems($userId, (int) $saved['topic_reply'], self::LIMIT) as $item) {
+            $items[] = $item;
+        }
+        foreach ($this->staffItems($userId, (int) $saved['staff']) as $item) {
             $items[] = $item;
         }
         usort($items, static fn (array $a, array $b): int => ($b['timestamp'] ?? 0) <=> ($a['timestamp'] ?? 0));
@@ -105,9 +119,10 @@ final class NotificationFeed
     public function markAllRead(int $userId): array
     {
         $maxes = $this->feedRepository->channelMaxes($userId);
+        $maxes['staff'] = $this->staffMax($userId);
         $this->feedRepository->saveCursors($userId, $maxes);
 
-        return ['pm' => 0, 'comment' => 0, 'topic_reply' => 0, 'total' => 0, 'shout' => 0];
+        return $maxes;
     }
 
     /**
@@ -183,6 +198,47 @@ final class NotificationFeed
                 'url' => 'viewtopic.php?topicid='.(int) $row['topicid'].'&page=last',
                 'context' => (string) ($row['topic_subject'] ?? ''),
                 'timestamp' => (int) ($row['ts'] ?? 0),
+            ];
+        }
+
+        return $items;
+    }
+
+    private function staffMax(int $userId): int
+    {
+        return (int) app(StaffMessageRepository::class)->buildStaffMessageQuery($userId)->max('id');
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private function staffItems(int $userId, int $lastId): array
+    {
+        $items = [];
+        $rows = app(StaffMessageRepository::class)
+            ->buildStaffMessageQuery($userId)
+            ->where('staffmessages.id', '>', $lastId)
+            ->leftJoin('users', 'staffmessages.sender', '=', 'users.id')
+            ->orderBy('staffmessages.id')
+            ->limit(self::LIMIT)
+            ->get([
+                'staffmessages.id',
+                'staffmessages.sender',
+                'staffmessages.added',
+                'staffmessages.subject',
+                'staffmessages.msg',
+                'users.username as sender_username',
+            ]);
+
+        foreach ($rows as $row) {
+            $items[] = [
+                'id' => 'staff_'.$row->id,
+                'type' => 'staff',
+                'title' => (string) __('legacy/notifications.title_staff'),
+                'body' => $this->truncate((string) $row->msg),
+                'from' => (string) ($row->sender_username ?? 'System'),
+                'url' => 'staffbox.php?action=viewanswer&msgid='.(int) $row->id,
+                'timestamp' => $row->added instanceof \DateTimeInterface ? $row->added->getTimestamp() : (int) strtotime((string) $row->added),
             ];
         }
 

@@ -324,6 +324,7 @@ class ShoutboxController extends LegacyController
             'shout' => (int) $request->input('last_shout_id', 0),
             'comment' => (int) $request->input('last_comment_id', 0),
             'topic_reply' => (int) $request->input('last_reply_id', 0),
+            'staff' => (int) $request->input('last_staff_id', 0),
         ];
         $userId = (int) ($user['id'] ?? 0);
 

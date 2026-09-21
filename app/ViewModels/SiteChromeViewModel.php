@@ -505,14 +505,6 @@ final class SiteChromeViewModel
         if ($user['showclienterror'] ?? false) {
             $alerts[] = ['url' => 'faq.php#id29', 'text' => (string) (__('legacy/functions.text_banned_client_warning')), 'color' => 'black'];
         }
-        if ($unread) {
-            $alerts[] = [
-                'url' => 'messages.php',
-                'text' => (string) (__('legacy/functions.text_you_have')).$unread.(string) (__('legacy/functions.text_new_message')).Strings::addS($unread).(string) (__('legacy/functions.text_click_here_to_read')),
-                'color' => 'red',
-            ];
-        }
-
         foreach (MsgAlert::pendingAlerts() as $alert) {
             $alerts[] = $alert;
         }

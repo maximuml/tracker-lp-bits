@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
  */
 final class NotificationFeedRepository extends BaseRepository
 {
-    public const CHANNELS = ['pm', 'shout', 'comment', 'topic_reply'];
+    public const CHANNELS = ['pm', 'shout', 'comment', 'topic_reply', 'staff'];
 
     /**
      * @return array<string, int> channel => last read id (missing channels => 0)

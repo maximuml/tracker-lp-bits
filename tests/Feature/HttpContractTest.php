@@ -478,6 +478,11 @@ final class HttpContractTest extends TestCase
             if (str_contains($mw, 'auth.nexus') || str_contains($mw, 'auth:sanctum') || str_contains($mw, 'auth:') || $mw === 'auth') {
                 return true;
             }
+            // Filament panels authenticate via Authenticate subclasses
+            // (e.g. App\Http\Middleware\Filament on /my member routes).
+            if (is_a($mw, \Filament\Http\Middleware\Authenticate::class, true)) {
+                return true;
+            }
         }
 
         return false;

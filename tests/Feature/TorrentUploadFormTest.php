@@ -199,6 +199,44 @@ final class TorrentUploadFormTest extends TestCase
         $response->assertRedirect('details.php?id='.$torrent->id.'&uploaded=1');
     }
 
+    public function test_rerender_restores_every_control_kind(): void
+    {
+        // Admin has every permission, so price/position/anonymous/offer
+        // controls render and their old values must come back.
+        $user = User::factory()->admin()->create();
+        $category = $this->browseCategory();
+        $mode = (int) $category->mode;
+
+        $this->withNexusCookie($user)
+            ->withSession(['_token' => 'ux01-token'])
+            ->from('/upload')
+            ->post('/takeupload', [
+                '_token' => 'ux01-token',
+                'name' => 'Full Restore Title',
+                'type' => (string) $category->id,
+                "source_sel[{$mode}]" => '1',
+                "tags[{$mode}]" => ['5', '9'],
+                "hr[{$mode}]" => '0',
+                "custom_fields[{$mode}]" => ['7' => 'custom value'],
+                'offer' => '3',
+                'price' => '15',
+                'pos_state' => '1',
+                'pos_state_until' => '2030-01-01T00:00',
+                'uplver' => 'yes',
+                // descr missing -> redirect back with everything flashed
+            ])
+            ->assertRedirect('/upload');
+
+        $page = $this->withNexusCookie($user)->get('/upload');
+
+        $page->assertOk();
+        $page->assertSee('value="Full Restore Title"', false);
+        $page->assertSee('value="15"', false);
+        $page->assertSee('value="2030-01-01T00:00"', false);
+        $page->assertSee('checked', false);
+        $page->assertSee('nx-alert--error', false);
+    }
+
     public function test_upload_form_includes_csrf_token(): void
     {
         $user = User::factory()->admin()->create();

@@ -1,4 +1,4 @@
-@extends('layouts.legacy')
+@extends('layouts.app', ['chromeVariant' => 'legacy'])
 
 @section('title', __('legacy/getrss.head_rss_feeds'))
 

@@ -1,4 +1,4 @@
-@extends('layouts.modern')
+@extends('layouts.app')
 
 @section('title', $title ?? __('legacy/forums.head_forums'))
 

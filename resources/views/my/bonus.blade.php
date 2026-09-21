@@ -1,4 +1,4 @@
-@extends('layouts.legacy')
+@extends('layouts.app', ['chromeVariant' => 'legacy'])
 
 @section('title', $title ?? (($CURUSER['username'] ?? '') . (__('legacy/mybonus.head_karma_page'))))
 

@@ -1,4 +1,4 @@
-@extends('layouts.legacy_bare')
+@extends('layouts.app', ['chromeVariant' => 'legacy', 'shell' => 'bare'])
 
 @section('title', 'Delete account')
 

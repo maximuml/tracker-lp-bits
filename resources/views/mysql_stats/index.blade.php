@@ -3,7 +3,7 @@
 @section('title', 'Mysql Server Status')
 
 @section('content')
-<h1 align=center>
+<h1 class="nx-center">
     Mysql Server Status
 </h1>
 
@@ -16,28 +16,28 @@
         <b>Server traffic:</b> These tables show the network traffic statistics of this MySQL server since its startup
         <br />
         <div class="nx-row">
-                    <table data-nx="data" id="torrenttable" border="0">
+                    <table data-nx="data" id="torrenttable">
                         <tr>
                             <th colspan="2" bgcolor="lightgrey" scope="colgroup">&nbsp;Traffic&nbsp;</th>
                             <th bgcolor="lightgrey" scope="col">&nbsp;&nbsp;Per Hour&nbsp;</th>
                         </tr>
                         <tr>
                             <td bgcolor="#EFF3FF">&nbsp;Received&nbsp;</td>
-                            <td bgcolor="#EFF3FF" align="right">&nbsp;{{ $receivedTotal }}&nbsp;</td>
-                            <td bgcolor="#EFF3FF" align="right">&nbsp;{{ $receivedPerHour }}&nbsp;</td>
+                            <td bgcolor="#EFF3FF" class="nx-align-right">&nbsp;{{ $receivedTotal }}&nbsp;</td>
+                            <td bgcolor="#EFF3FF" class="nx-align-right">&nbsp;{{ $receivedPerHour }}&nbsp;</td>
                         </tr>
                         <tr>
                             <td bgcolor="#EFF3FF">&nbsp;Sent&nbsp;</td>
-                            <td bgcolor="#EFF3FF" align="right">&nbsp;{{ $sentTotal }}&nbsp;</td>
-                            <td bgcolor="#EFF3FF" align="right">&nbsp;{{ $sentPerHour }}&nbsp;</td>
+                            <td bgcolor="#EFF3FF" class="nx-align-right">&nbsp;{{ $sentTotal }}&nbsp;</td>
+                            <td bgcolor="#EFF3FF" class="nx-align-right">&nbsp;{{ $sentPerHour }}&nbsp;</td>
                         </tr>
                         <tr>
                             <td bgcolor="lightgrey">&nbsp;Total&nbsp;</td>
-                            <td bgcolor="lightgrey" align="right">&nbsp;{{ $totalBytesTotal }}&nbsp;</td>
-                            <td bgcolor="lightgrey" align="right">&nbsp;{{ $totalBytesPerHour }}&nbsp;</td>
+                            <td bgcolor="lightgrey" class="nx-align-right">&nbsp;{{ $totalBytesTotal }}&nbsp;</td>
+                            <td bgcolor="lightgrey" class="nx-align-right">&nbsp;{{ $totalBytesPerHour }}&nbsp;</td>
                         </tr>
                     </table>
-                    <table data-nx="data" id="torrenttable" border="0">
+                    <table data-nx="data" id="torrenttable">
                         <tr>
                             <th colspan="2" bgcolor="lightgrey" scope="colgroup">&nbsp;Connections&nbsp;</th>
                             <th bgcolor="lightgrey" scope="col">&nbsp;&oslash;&nbsp;Per Hour&nbsp;</th>
@@ -45,21 +45,21 @@
                         </tr>
                         <tr>
                             <td bgcolor="#EFF3FF">&nbsp;Failed Attempts&nbsp;</td>
-                            <td bgcolor="#EFF3FF" align="right">&nbsp;{{ $abortedConnects }}&nbsp;</td>
-                            <td bgcolor="#EFF3FF" align="right">&nbsp;{{ $abortedConnectsPerHour }}&nbsp;</td>
-                            <td bgcolor="#EFF3FF" align="right">&nbsp;{{ $abortedConnectsPct }}&nbsp;</td>
+                            <td bgcolor="#EFF3FF" class="nx-align-right">&nbsp;{{ $abortedConnects }}&nbsp;</td>
+                            <td bgcolor="#EFF3FF" class="nx-align-right">&nbsp;{{ $abortedConnectsPerHour }}&nbsp;</td>
+                            <td bgcolor="#EFF3FF" class="nx-align-right">&nbsp;{{ $abortedConnectsPct }}&nbsp;</td>
                         </tr>
                         <tr>
                             <td bgcolor="#EFF3FF">&nbsp;Aborted Clients&nbsp;</td>
-                            <td bgcolor="#EFF3FF" align="right">&nbsp;{{ $abortedClients }}&nbsp;</td>
-                            <td bgcolor="#EFF3FF" align="right">&nbsp;{{ $abortedClientsPerHour }}&nbsp;</td>
-                            <td bgcolor="#EFF3FF" align="right">&nbsp;{{ $abortedClientsPct }}&nbsp;</td>
+                            <td bgcolor="#EFF3FF" class="nx-align-right">&nbsp;{{ $abortedClients }}&nbsp;</td>
+                            <td bgcolor="#EFF3FF" class="nx-align-right">&nbsp;{{ $abortedClientsPerHour }}&nbsp;</td>
+                            <td bgcolor="#EFF3FF" class="nx-align-right">&nbsp;{{ $abortedClientsPct }}&nbsp;</td>
                         </tr>
                         <tr>
                             <td bgcolor="lightgrey">&nbsp;Total&nbsp;</td>
-                            <td bgcolor="lightgrey" align="right">&nbsp;{{ $connectionsTotal }}&nbsp;</td>
-                            <td bgcolor="lightgrey" align="right">&nbsp;{{ $connectionsPerHour }}&nbsp;</td>
-                            <td bgcolor="lightgrey" align="right">&nbsp;{{ number_format(100, 2, '.', ',') }}&nbsp;%&nbsp;</td>
+                            <td bgcolor="lightgrey" class="nx-align-right">&nbsp;{{ $connectionsTotal }}&nbsp;</td>
+                            <td bgcolor="lightgrey" class="nx-align-right">&nbsp;{{ $connectionsPerHour }}&nbsp;</td>
+                            <td bgcolor="lightgrey" class="nx-align-right">&nbsp;{{ number_format(100, 2, '.', ',') }}&nbsp;%&nbsp;</td>
                         </tr>
                     </table>
         </div>
@@ -69,7 +69,7 @@
         <b>Query Statistics:</b> Since it's start up, {{ $questionsTotal }} queries have been sent to the server.
         <div>
                     <br />
-                    <table data-nx="data" id="torrenttable" border="0" align="right">
+                    <table data-nx="data" id="torrenttable">
                         <tr>
                             <th bgcolor="lightgrey" scope="col">&nbsp;Total&nbsp;</th>
                             <th bgcolor="lightgrey" scope="col">&nbsp;&oslash;&nbsp;Per&nbsp;Hour&nbsp;</th>
@@ -77,15 +77,15 @@
                             <th bgcolor="lightgrey" scope="col">&nbsp;&oslash;&nbsp;Per&nbsp;Second&nbsp;</th>
                         </tr>
                         <tr>
-                            <td bgcolor="#EFF3FF" align="right">&nbsp;{{ $questionsTotal }}&nbsp;</td>
-                            <td bgcolor="#EFF3FF" align="right">&nbsp;{{ $questionsPerHour }}&nbsp;</td>
-                            <td bgcolor="#EFF3FF" align="right">&nbsp;{{ $questionsPerMinute }}&nbsp;</td>
-                            <td bgcolor="#EFF3FF" align="right">&nbsp;{{ $questionsPerSecond }}&nbsp;</td>
+                            <td bgcolor="#EFF3FF" class="nx-align-right">&nbsp;{{ $questionsTotal }}&nbsp;</td>
+                            <td bgcolor="#EFF3FF" class="nx-align-right">&nbsp;{{ $questionsPerHour }}&nbsp;</td>
+                            <td bgcolor="#EFF3FF" class="nx-align-right">&nbsp;{{ $questionsPerMinute }}&nbsp;</td>
+                            <td bgcolor="#EFF3FF" class="nx-align-right">&nbsp;{{ $questionsPerSecond }}&nbsp;</td>
                         </tr>
                     </table>
             <div class="nx-row">
 @foreach ($queryStatColumns as $column)
-                    <table data-nx="data" id="torrenttable" border="0">
+                    <table data-nx="data" id="torrenttable">
                         <tr>
                             <th colspan="2" bgcolor="lightgrey" scope="colgroup">&nbsp;Query&nbsp;Type&nbsp;</th>
                             <th bgcolor="lightgrey" scope="col">&nbsp;&oslash;&nbsp;Per&nbsp;Hour&nbsp;</th>
@@ -94,9 +94,9 @@
 @foreach ($column as $row)
                         <tr>
                             <td bgcolor="#EFF3FF">&nbsp;{{ $row['name'] }}&nbsp;</td>
-                            <td bgcolor="#EFF3FF" align="right">&nbsp;{{ $row['value'] }}&nbsp;</td>
-                            <td bgcolor="#EFF3FF" align="right">&nbsp;{{ $row['perHour'] }}&nbsp;</td>
-                            <td bgcolor="#EFF3FF" align="right">&nbsp;{{ $row['pct'] }}&nbsp;%&nbsp;</td>
+                            <td bgcolor="#EFF3FF" class="nx-align-right">&nbsp;{{ $row['value'] }}&nbsp;</td>
+                            <td bgcolor="#EFF3FF" class="nx-align-right">&nbsp;{{ $row['perHour'] }}&nbsp;</td>
+                            <td bgcolor="#EFF3FF" class="nx-align-right">&nbsp;{{ $row['pct'] }}&nbsp;%&nbsp;</td>
                         </tr>
 @endforeach
                     </table>
@@ -110,7 +110,7 @@
         <b>More status variables</b><br />
         <div class="nx-row">
 @foreach ($statusColumns as $column)
-                    <table data-nx="data" id="torrenttable" border="0">
+                    <table data-nx="data" id="torrenttable">
                         <tr>
                             <th bgcolor="lightgrey" scope="col">&nbsp;Variable&nbsp;</th>
                             <th bgcolor="lightgrey" scope="col">&nbsp;Value&nbsp;</th>
@@ -118,7 +118,7 @@
 @foreach ($column as $row)
                         <tr>
                             <td bgcolor="#EFF3FF">&nbsp;{{ $row['name'] }}&nbsp;</td>
-                            <td bgcolor="#EFF3FF" align="right">&nbsp;{{ $row['value'] }}&nbsp;</td>
+                            <td bgcolor="#EFF3FF" class="nx-align-right">&nbsp;{{ $row['value'] }}&nbsp;</td>
                         </tr>
 @endforeach
                     </table>

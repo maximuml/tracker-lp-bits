@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="nx-main nx-embedded nx-box--737">
-                <div align=center>
+                <div class="nx-center">
                     <h1>{{ __('legacy/incrementbulk.page_title') }}</a></h1>
                     <form method=post action=take-increment-bulk.php>
                         @if ($returnto || $httpReferer)
@@ -33,7 +33,7 @@
                                 </div>
                             <div class="nx-fhead">{{ __('legacy/incrementbulk.labels')['msg_subject'] }} </div><div class="nx-fcell"><input type=text name=subject size=82></div>
                             <div class="nx-fhead">{{ __('legacy/incrementbulk.labels')['msg_body'] }} </div><div class="nx-fcell"><textarea name=msg cols=80 rows=5>{{ $body }}</textarea></div>
-                                <div class="nx-ffull"><div align="center"><b>{{ __('legacy/incrementbulk.labels')['operator'] }}:&nbsp;&nbsp;</b>
+                                <div class="nx-ffull"><div class="nx-center"><b>{{ __('legacy/incrementbulk.labels')['operator'] }}:&nbsp;&nbsp;</b>
                                         <label><input name="sender" type="radio" value="self" checked>{{ $CURUSER['username'] ?? '' }}</label>
                                         &nbsp; <label><input name="sender" type="radio" value="system">System</label>
                                     </div></div>

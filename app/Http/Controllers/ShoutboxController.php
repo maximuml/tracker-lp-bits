@@ -17,6 +17,8 @@ use App\Support\LegacyHeaderBag;
 use App\Support\LegacyYesNo;
 use App\Support\Lock;
 use App\Support\Shoutbox;
+use App\Support\SseWriter;
+use App\Support\ToastNotifications;
 use App\Support\UserDisplay;
 use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;
@@ -36,6 +38,8 @@ class ShoutboxController extends LegacyController
         private readonly ActorContext $actorContext,
         private readonly CurrentUser $currentUser,
         private readonly LegacyHeaderBag $legacyHeaderBag,
+        private readonly ToastNotifications $toastNotifications,
+        private readonly SseWriter $sseWriter,
     ) {}
 
     /**
@@ -315,14 +319,17 @@ class ShoutboxController extends LegacyController
 
         $type = (string) $request->input('type', 'shoutbox');
         $lastId = (int) ($request->header('Last-Event-ID') ?: $request->input('last_id', 0));
+        $lastPmId = (int) $request->input('last_pm_id', 0);
+        $lastShoutId = (int) $request->input('last_shout_id', 0);
         $userId = (int) ($user['id'] ?? 0);
 
         $maxLoops = 30;
         $ttl = $maxLoops * 2 + 10;
         $maxStreams = 30;
         $globalKey = 'shoutbox_sse_global';
+        $isNotifications = $type === 'notifications';
 
-        $callback = function () use ($type, $lastId, $userId, $maxLoops, $ttl, $maxStreams, $globalKey) {
+        $callback = function () use ($type, $lastId, $lastPmId, $lastShoutId, $userId, $maxLoops, $ttl, $maxStreams, $globalKey, $isNotifications) {
             $redis = Redis::connection()->client();
 
             $active = (int) $redis->incr($globalKey);
@@ -341,7 +348,7 @@ class ShoutboxController extends LegacyController
                 return;
             }
 
-            $userLock = new Lock('shoutbox_sse:'.$userId, $ttl);
+            $userLock = new Lock('sse:'.$type.':'.$userId, $ttl);
             if (! $userLock->acquire()) {
                 try {
                     $redis->decr($globalKey);
@@ -363,6 +370,20 @@ class ShoutboxController extends LegacyController
                 }
             });
 
+            @ini_set('zlib.output_compression', 'Off');
+            while (ob_get_level()) {
+                ob_end_clean();
+            }
+            ob_implicit_flush(true);
+            set_time_limit(0);
+            ignore_user_abort(true);
+
+            if ($isNotifications) {
+                $this->runNotificationLoop($userId, $lastPmId, $lastShoutId, $maxLoops);
+
+                return;
+            }
+
             $buildQuery = function (string $type, int $lastId) {
                 $query = DB::table('shoutbox')
                     ->orderBy('id')
@@ -371,14 +392,6 @@ class ShoutboxController extends LegacyController
 
                 return $query;
             };
-
-            @ini_set('zlib.output_compression', 'Off');
-            while (ob_get_level()) {
-                ob_end_clean();
-            }
-            ob_implicit_flush(true);
-            set_time_limit(0);
-            ignore_user_abort(true);
 
             $query = $buildQuery($type, $lastId);
 
@@ -390,17 +403,12 @@ class ShoutboxController extends LegacyController
                 $rows = $query->get();
                 if (! $rows->isEmpty()) {
                     $maxId = (int) $rows->last()->id;
-                    echo 'id: '.$maxId."\n";
-                    echo "event: refresh\n";
-                    echo 'data: '.json_encode(['count' => $rows->count()])."\n\n";
-                    $this->flushSseOutput();
+                    $this->sseWriter->event('refresh', (string) json_encode(['count' => $rows->count()]), $maxId);
                     $lastId = $maxId;
                     $query = $buildQuery($type, $lastId);
                 }
 
-                echo "event: ping\n";
-                echo "data: {}\n\n";
-                $this->flushSseOutput();
+                $this->sseWriter->ping();
 
                 sleep(2);
             }
@@ -414,11 +422,24 @@ class ShoutboxController extends LegacyController
         ]);
     }
 
-    private function flushSseOutput(): void
+    private function runNotificationLoop(int $userId, int $lastPmId, int $lastShoutId, int $maxLoops): void
     {
-        if (ob_get_level()) {
-            ob_flush();
+        for ($i = 0; $i < $maxLoops; $i++) {
+            if (connection_aborted()) {
+                break;
+            }
+
+            $data = $this->toastNotifications->get($userId, $lastPmId, $lastShoutId);
+            $lastPmId = $data['cursors']['last_pm_id'];
+            $lastShoutId = $data['cursors']['last_shout_id'];
+
+            if ($data['notifications'] !== []) {
+                $this->sseWriter->event('notifications', (string) json_encode($data), $lastPmId);
+            } else {
+                $this->sseWriter->ping();
+            }
+
+            sleep(2);
         }
-        flush();
     }
 }

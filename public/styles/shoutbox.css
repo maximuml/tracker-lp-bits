@@ -159,6 +159,18 @@ td.shoutrow:hover .shout-actions {
     min-width: 24px;
     text-align: center;
     padding: 1px 4px;
+    opacity: 0;
+    transition: opacity .15s ease;
+}
+
+td.shoutrow:hover .shout-reaction-add,
+tr:hover .shout-reaction-add,
+.shout-reactions:focus-within .shout-reaction-add {
+    opacity: 1;
+}
+
+@media (hover: none) {
+    .shout-reaction-add { opacity: .55; }
 }
 
 .shout-reaction-picker {

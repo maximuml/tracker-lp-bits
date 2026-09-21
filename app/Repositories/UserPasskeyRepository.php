@@ -187,7 +187,7 @@ class UserPasskeyRepository extends BaseRepository
         $userRep = $this->userRepository;
         $userRep->saveLoginLog($user->id, $ip, 'Web', true);
 
-        AuthCookie::setLoginCookie((int) $user->id, (string) $user->auth_key, (int) 0);
+        AuthCookie::setLoginCookie((int) $user->id, null, (int) 0);
 
         return true;
     }

@@ -55,12 +55,18 @@ final class AuthCookie
      * @param  int  $userId  The user's `users.id`
      * @param  string|null  $authKey  Deprecated; no longer used, kept for call-site compatibility
      * @param  int  $expires  Unix timestamp when the cookie expires
+     * @param  int  $authVersion  The user's current `users.auth_version`
      */
-    public static function buildToken(int $userId, ?string $authKey, int $expires): string
+    public static function buildToken(int $userId, ?string $authKey, int $expires, int $authVersion): string
     {
+        if ($authVersion < 1) {
+            throw new \InvalidArgumentException('auth_version must be a positive integer');
+        }
+
         $tokenData = [
             'user_id' => $userId,
             'expires' => $expires,
+            'auth_version' => $authVersion,
         ];
 
         return self::encrypter()->encryptString((string) json_encode($tokenData));
@@ -75,18 +81,15 @@ final class AuthCookie
      *
      * @param  string  $token  The raw cookie value
      * @param  string|null  $authKey  The user's `users.auth_key` for legacy HMAC verification
-     * @return array{user_id: int, expires: int}|null
+     * @return array{user_id: int, expires: int, auth_version: int|null}|null
      */
     public static function verifyToken(string $token, ?string $authKey = null): ?array
     {
         try {
             $decrypted = self::encrypter()->decryptString($token);
             $data = json_decode($decrypted, true);
-            if (is_array($data) && isset($data['user_id'], $data['expires']) && (int) $data['expires'] >= time()) {
-                return [
-                    'user_id' => (int) $data['user_id'],
-                    'expires' => (int) $data['expires'],
-                ];
+            if (is_array($data)) {
+                return self::normalizePayload($data);
             }
         } catch (\RuntimeException $e) {
             // not an application-encrypted token, or APP_KEY is missing/invalid;
@@ -108,7 +111,11 @@ final class AuthCookie
         }
 
         $data = json_decode($legacy['token_json'], true);
-        if (! is_array($data) || ! isset($data['user_id'], $data['expires']) || (int) $data['expires'] < time()) {
+        if (! is_array($data)) {
+            return null;
+        }
+        $payload = self::normalizePayload($data);
+        if ($payload === null) {
             return null;
         }
 
@@ -116,14 +123,36 @@ final class AuthCookie
         // this fallback. Log each accepted legacy cookie so the ops team can
         // watch the rate drop to zero before flipping the flag off.
         Log::info('Legacy HMAC auth cookie accepted', [
-            'user_id' => (int) $data['user_id'],
+            'user_id' => $payload['user_id'],
             'ip' => request()->ip(),
         ]);
         self::incrementLegacyCookieCounter();
 
+        return $payload;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array{user_id: int, expires: int, auth_version: int|null}|null
+     */
+    private static function normalizePayload(array $data): ?array
+    {
+        if (! isset($data['user_id'], $data['expires']) || (int) $data['expires'] < time()) {
+            return null;
+        }
+
+        $authVersion = null;
+        if (array_key_exists('auth_version', $data)) {
+            if (! is_int($data['auth_version']) || $data['auth_version'] < 1) {
+                return null;
+            }
+            $authVersion = $data['auth_version'];
+        }
+
         return [
             'user_id' => (int) $data['user_id'],
             'expires' => (int) $data['expires'],
+            'auth_version' => $authVersion,
         ];
     }
 
@@ -192,7 +221,11 @@ final class AuthCookie
         }
 
         $expires = self::computeExpires($durationSeconds);
-        $token = self::buildToken($userId, null, $expires);
+        $authVersion = app(AuthRepositoryInterface::class)->getAuthVersion($userId);
+        if ($authVersion === null || $authVersion < 1) {
+            return;
+        }
+        $token = self::buildToken($userId, null, $expires, $authVersion);
 
         $secure = Url::isSecure();
         $options = [
@@ -410,8 +443,16 @@ final class AuthCookie
         if ($payload !== null) {
             $log .= ", uid = {$payload['user_id']} (app encrypted)";
             $row = self::fetchUser($payload['user_id'], $isArray, $log);
-            if ($row !== null && $isArray) {
-                unset($row['auth_key'], $row['passhash']);
+            if ($row === null) {
+                return null;
+            }
+            if (! self::payloadAuthVersionMatches($payload, $row)) {
+                Logger::writeWithContext("$log, stale auth_version");
+
+                return null;
+            }
+            if ($isArray) {
+                unset($row['auth_key'], $row['passhash'], $row['auth_version']);
             }
 
             return $row;
@@ -437,17 +478,40 @@ final class AuthCookie
         } else {
             $authKey = (string) $row->auth_key;
         }
-        if (self::verifyToken($token, $authKey) === null) {
+        $verifiedPayload = self::verifyToken($token, $authKey);
+        if ($verifiedPayload === null) {
             Logger::writeWithContext("$log, !hash_equals");
+
+            return null;
+        }
+        if (! self::payloadAuthVersionMatches($verifiedPayload, $row)) {
+            Logger::writeWithContext("$log, stale auth_version");
 
             return null;
         }
 
         if ($isArray) {
-            unset($row['auth_key'], $row['passhash']);
+            unset($row['auth_key'], $row['passhash'], $row['auth_version']);
         }
 
         return $row;
+    }
+
+    /**
+     * @param  array{user_id: int, expires: int, auth_version: int|null}  $payload
+     * @param  array<string, mixed>|User  $user
+     */
+    private static function payloadAuthVersionMatches(array $payload, array|User $user): bool
+    {
+        if ($payload['auth_version'] === null) {
+            return false;
+        }
+
+        $currentVersion = is_array($user)
+            ? ($user['auth_version'] ?? null)
+            : $user->auth_version;
+
+        return $currentVersion !== null && $payload['auth_version'] === (int) $currentVersion;
     }
 
     /**

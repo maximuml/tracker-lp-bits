@@ -9,7 +9,7 @@ description: End-to-end testing notes for the Phase 23 legacy service/type-widen
 - `basic.BASEURL` is set to `openresty`.
 - A sysop user exists (`id=10211`, username `devintest`) and a normal user (`id=10037`) exists.
 - `security.iv` may be temporarily set to `yes` during the captcha login test; reset to empty afterwards.
-- Generate `c_secure_pass` cookies inside the `nexusphp-php` container using `App\Support\AuthCookie::buildToken($userId, $authKey, time() + 86400)`.
+- Generate `c_secure_pass` cookies inside the `nexusphp-php` container using `App\Support\AuthCookie::buildToken($userId, $authKey, time() + 86400, $authVersion)`, where `$authVersion` is the current `users.auth_version`.
 
 ## Static gates
 
@@ -90,7 +90,7 @@ If the sysop password is not available, create a factory admin user for the logi
 
 ```php
 $user = App\Models\User::factory()->admin()->create(['class' => 15]);
-$token = App\Support\AuthCookie::buildToken($user->id, $user->auth_key, time() + 86400);
+$token = App\Support\AuthCookie::buildToken($user->id, $user->auth_key, time() + 86400, (int) $user->auth_version);
 ```
 
 Use the default factory password (typically `123456`) through `WebAuthService::validatePassword`.

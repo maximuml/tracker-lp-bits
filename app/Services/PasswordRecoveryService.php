@@ -17,19 +17,20 @@ use App\Support\PasswordHasher;
 use App\Support\Token;
 use App\Support\Url;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 /**
  * Handles the password reset flow via SecureTokenService (CSPRNG + SHA-256 digest).
  */
 class PasswordRecoveryService
 {
-    private const NEW_PASSWORD_LENGTH = 10;
-
     private const RECOVERY_TOKEN_TABLE = 'password_recovery_tokens';
 
     public function __construct(
         private WebAuthService $authService,
         private SecureTokenService $tokenService,
+        private readonly PasswordSetup $passwordSetup,
         private readonly OutboxService $outboxService = new OutboxService,
     ) {}
 
@@ -71,89 +72,108 @@ class PasswordRecoveryService
             return;
         }
 
-        $sec = Token::randomHex();
-
-        $affected = User::query()->where('id', (int) $user['id'])->update(['editsecret' => $sec]);
-
-        if (! $affected) {
-            throw new AuthenticationException(__('legacy/recover.std_database_error'));
-        }
-
-        Cache::clearUser((int) $user['id'], '');
-
-        // T-08/W1-04: Generate a CSPRNG recovery token and store its SHA-256 digest.
-        // Legacy md5(editsecret + email + passhash + editsecret) path removed in W1-04.
         $recoveryToken = $this->tokenService->generate();
-        $this->tokenService->store(self::RECOVERY_TOKEN_TABLE, $recoveryToken, [
-            'user_id' => (int) $user['id'],
-            'ip' => $ip,
-        ]);
+        DB::transaction(function () use ($user, $recoveryToken, $ip): void {
+            $this->revokeActiveTokens((int) $user['id']);
+            $this->tokenService->store(self::RECOVERY_TOKEN_TABLE, $recoveryToken, [
+                'user_id' => (int) $user['id'],
+                'ip' => $ip,
+            ]);
+        });
 
-        // Send the secure token in the reset URL
         $this->sendResetRequestEmail($email, (int) $user['id'], $recoveryToken, $ip);
     }
 
     /**
-     * Verify a password reset link and reset the user's password.
+     * Validate a reset link for display without consuming it.
+     *
+     * @return array<string, mixed>|null
      */
-    public function resetPassword(int $id, string $md5): string
+    public function validateResetToken(int $userId, string $token): ?array
     {
-        // W1-04: Legacy md5 token path removed. Only SecureTokenService is accepted.
-        $tokenRow = $this->tokenService->consume(self::RECOVERY_TOKEN_TABLE, $md5, [
-            'consumed_at' => now()->toDateTimeString(),
-        ]);
-
-        if ($tokenRow === null) {
-            throw new AuthenticationException(__('legacy/recover.std_unable_updating_user_data'));
+        if ($userId < 1 || $token === '') {
+            return null;
         }
 
-        // Verify user ID matches
-        if ((int) $tokenRow['user_id'] !== $id) {
-            throw new AuthenticationException(__('legacy/recover.std_unable_updating_user_data'));
+        $tokenRow = $this->tokenService->verify(self::RECOVERY_TOKEN_TABLE, $token);
+        if ($tokenRow === null || (int) $tokenRow['user_id'] !== $userId) {
+            return null;
         }
 
-        $user = User::query()->find($id, ['id', 'username', 'email', 'passhash', 'editsecret']);
-        if (! $user) {
-            throw new AuthenticationException(__('legacy/recover.std_unable_updating_user_data'));
-        }
+        $userExists = User::query()
+            ->where('id', $userId)
+            ->where('status', UserStatus::CONFIRMED->value)
+            ->exists();
 
-        return $this->completePasswordReset($user);
+        return $userExists ? $tokenRow : null;
     }
 
     /**
-     * Complete the password reset: generate new password, update user, send email.
+     * Consume a reset token and set the user-selected password.
      */
-    private function completePasswordReset(User $user): string
+    public function resetPassword(int $id, string $token, string $password, string $passwordConfirmation): void
     {
-        $id = (int) $user->id;
-        $newPassword = $this->generateRandomPassword();
-        $newSecret = Token::randomHex();
-        $newPasshash = PasswordHasher::hash($newPassword);
-        $authKey = Token::randomHex();
+        $user = DB::transaction(function () use ($id, $token, $password, $passwordConfirmation): User {
+            $tokenRow = $this->tokenService->consume(self::RECOVERY_TOKEN_TABLE, $token, [
+                'consumed_at' => now()->toDateTimeString(),
+            ]);
 
-        $affected = User::query()->where('id', $id)->where('editsecret', $user->editsecret)->update([
-            'secret' => $newSecret,
-            'editsecret' => '',
-            'passhash' => $newPasshash,
-            'passhash_algo' => PasswordHasher::ALGO_ARGON2ID,
-            'auth_key' => $authKey,
-        ]);
+            if ($tokenRow === null || (int) $tokenRow['user_id'] !== $id) {
+                throw new AuthenticationException(__('legacy/recover.std_invalid_reset_link'));
+            }
 
-        if (! $affected) {
-            throw new AuthenticationException(__('legacy/recover.std_unable_updating_user_data'));
+            $user = User::query()
+                ->where('id', $id)
+                ->where('status', UserStatus::CONFIRMED->value)
+                ->lockForUpdate()
+                ->first(['id', 'username', 'email', 'status']);
+            if (! $user instanceof User) {
+                throw new AuthenticationException(__('legacy/recover.std_unable_updating_user_data'));
+            }
+
+            $this->passwordSetup->validate($password, $passwordConfirmation, (string) $user->username, 'recover');
+
+            $affected = User::query()->where('id', $id)->update([
+                'secret' => Token::randomHex(),
+                'editsecret' => '',
+                'passhash' => PasswordHasher::hash($password),
+                'passhash_algo' => PasswordHasher::ALGO_ARGON2ID,
+                'auth_key' => Token::randomHex(),
+                'auth_version' => DB::raw('auth_version + 1'),
+            ]);
+
+            if (! $affected) {
+                throw new AuthenticationException(__('legacy/recover.std_unable_updating_user_data'));
+            }
+
+            $this->revokeActiveTokens($id);
+            $this->outboxService->recordPasswordReset(
+                userId: $id,
+                resetData: ['username' => $user->username],
+            );
+
+            return $user;
+        });
+
+        try {
+            Cache::clearUser($id, '');
+        } catch (Throwable $exception) {
+            Log::warning('User cache clear failed after password reset', [
+                'user_id' => $id,
+                'error' => $exception->getMessage(),
+            ]);
         }
 
-        Cache::clearUser($id, '');
+        $this->sendPasswordChangedEmail($user);
+    }
 
-        // T-24: Record password reset event in outbox
-        $this->outboxService->recordPasswordReset(
-            userId: $id,
-            resetData: ['username' => $user->username],
-        );
-
-        $this->sendNewPasswordEmail($user, $newPassword);
-
-        return $newPassword;
+    private function revokeActiveTokens(int $userId): void
+    {
+        DB::table(self::RECOVERY_TOKEN_TABLE)
+            ->where('user_id', $userId)
+            ->whereNull('consumed_at')
+            ->where('revoked', 0)
+            ->update(['revoked' => 1]);
     }
 
     private function sendResetRequestEmail(string $email, int $userId, string $hash, string $ip): void
@@ -182,21 +202,33 @@ class PasswordRecoveryService
             .$resetUrl
             .$mailFour;
 
-        Mail::sentLegacy(
-            $email,
-            $siteName,
-            SiteConfig::current()->main->siteEmail(''),
-            $siteName.__('legacy/recover.mail_title'),
-            $body,
-            'confirmation',
-            true,
-            false,
-            '',
-            'UTF-8',
-        );
+        try {
+            $sent = Mail::sentLegacy(
+                $email,
+                $siteName,
+                SiteConfig::current()->main->siteEmail(''),
+                $siteName.__('legacy/recover.mail_title'),
+                $body,
+                'confirmation',
+                true,
+                false,
+                '',
+                'UTF-8',
+            );
+            if (! $sent) {
+                Log::warning('Password reset request email was not sent', [
+                    'user_id' => $userId,
+                ]);
+            }
+        } catch (Throwable $exception) {
+            Log::warning('Password reset request email failed', [
+                'user_id' => $userId,
+                'error' => $exception->getMessage(),
+            ]);
+        }
     }
 
-    private function sendNewPasswordEmail(User $user, string $newPassword): void
+    private function sendPasswordChangedEmail(User $user): void
     {
         $baseUrl = SiteConfig::current()->basic->baseUrl();
         if (! str_contains($baseUrl, '://')) {
@@ -205,41 +237,36 @@ class PasswordRecoveryService
         $baseUrl = rtrim($baseUrl, '/');
         $siteName = SiteConfig::current()->basic->siteName();
 
-        $mailTwoFour = sprintf(__('legacy/recover.mail_two_four'), $siteName);
-
-        $body = (__('legacy/recover.mail_two_one'))
-            .(string) $user->username
-            .(__('legacy/recover.mail_two_two'))
-            .$newPassword
-            .(__('legacy/recover.mail_two_three'))
+        $body = (__('legacy/recover.mail_password_changed_one'))
+            .htmlspecialchars((string) $user->username)
+            .(__('legacy/recover.mail_password_changed_two'))
             .'<b><a href="'.$baseUrl.'/login.php">'.(__('legacy/recover.mail_here')).'</a></b>'
-            .$mailTwoFour;
+            .sprintf(__('legacy/recover.mail_password_changed_three'), $siteName);
 
-        Mail::sentLegacy(
-            (string) $user->email,
-            $siteName,
-            SiteConfig::current()->main->siteEmail(''),
-            $siteName.__('legacy/recover.mail_two_title'),
-            $body,
-            'details',
-            true,
-            false,
-            '',
-            'UTF-8',
-        );
-    }
-
-    private function generateRandomPassword(): string
-    {
-        $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        $password = '';
-        $maxIndex = strlen($chars) - 1;
-
-        for ($i = 0; $i < self::NEW_PASSWORD_LENGTH; $i++) {
-            $password .= $chars[random_int(0, $maxIndex)];
+        try {
+            $sent = Mail::sentLegacy(
+                (string) $user->email,
+                $siteName,
+                SiteConfig::current()->main->siteEmail(''),
+                $siteName.__('legacy/recover.mail_password_changed_title'),
+                $body,
+                'details',
+                true,
+                false,
+                '',
+                'UTF-8',
+            );
+            if (! $sent) {
+                Log::warning('Password changed notification was not sent', [
+                    'user_id' => (int) $user->id,
+                ]);
+            }
+        } catch (Throwable $exception) {
+            Log::warning('Password changed notification failed', [
+                'user_id' => (int) $user->id,
+                'error' => $exception->getMessage(),
+            ]);
         }
-
-        return $password;
     }
 
     /**
@@ -259,7 +286,7 @@ class PasswordRecoveryService
 
         try {
             $verified = Captcha::manager()->driver()->verify($payload, ['ip' => $ip]);
-        } catch (\Throwable $exception) {
+        } catch (Throwable $exception) {
             $verified = false;
         }
 

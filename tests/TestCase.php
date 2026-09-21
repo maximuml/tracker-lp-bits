@@ -54,7 +54,8 @@ abstract class TestCase extends BaseTestCase
      */
     protected function withNexusCookie(User $user): self
     {
-        $token = AuthCookie::buildToken($user->id, null, time() + 3600);
+        $authVersion = (int) User::query()->where('id', $user->id)->value('auth_version');
+        $token = AuthCookie::buildToken($user->id, null, time() + 3600, $authVersion);
 
         return $this->withUnencryptedCookie('c_secure_pass', $token);
     }

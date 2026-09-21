@@ -40,4 +40,10 @@
 <input type="hidden" name="chpassword" />
 <div class="nx-fhead">{{ __('legacy/usercp.row_save_settings')}}</div><div class="nx-fcell"><input type=button value="{{ __('legacy/usercp.submit_save_settings')}}"></div>
 </div></form>
+<form method="post" action="{{ route('usercp.logout-all') }}">
+@csrf
+<div class="nx-fgrid nx-fgrid--flat">
+<x-settings-row-small layout="grid" :label="__('legacy/usercp.row_sessions')"><button type="submit">{{ __('legacy/usercp.submit_logout_all_devices') }}</button><br /><span class="small">{{ __('legacy/usercp.text_logout_all_devices_note') }}</span></x-settings-row-small>
+</div>
+</form>
 @endif

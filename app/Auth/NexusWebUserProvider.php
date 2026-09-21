@@ -6,10 +6,12 @@ namespace App\Auth;
 
 use App\Models\User;
 use App\Support\AuthCookie;
+use App\Support\Cache;
 use App\Support\PasswordHasher;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\UserProvider;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
 class NexusWebUserProvider implements UserProvider
 {
@@ -86,7 +88,15 @@ class NexusWebUserProvider implements UserProvider
             (string) $user->auth_key,
         );
 
-        return $payload !== null && $payload['user_id'] === $user->id;
+        if ($payload === null || $payload['user_id'] !== $user->id) {
+            return false;
+        }
+
+        $currentVersion = User::query()->where('id', $user->id)->value('auth_version');
+
+        return $payload['auth_version'] !== null
+            && $currentVersion !== null
+            && $payload['auth_version'] === (int) $currentVersion;
     }
 
     /**
@@ -112,7 +122,9 @@ class NexusWebUserProvider implements UserProvider
                 'passhash' => PasswordHasher::hash($password),
                 'passhash_algo' => PasswordHasher::ALGO_ARGON2ID,
                 'must_change_password' => $algo !== PasswordHasher::ALGO_ARGON2ID,
+                'auth_version' => DB::raw('auth_version + 1'),
             ]);
+            Cache::clearUser((int) $user->id, '');
         }
     }
 }

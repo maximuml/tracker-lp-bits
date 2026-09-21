@@ -25,7 +25,14 @@ final class SecurityHeaders
 
         $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
         $response->headers->set('X-Content-Type-Options', 'nosniff');
-        $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
+        if ($this->isRecoveryLinkRequest($request)) {
+            $response->headers->set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+            $response->headers->set('Pragma', 'no-cache');
+            $response->headers->set('Referrer-Policy', 'no-referrer');
+            $response->headers->set('X-Robots-Tag', 'noindex, nofollow');
+        } elseif (! $response->headers->has('Referrer-Policy')) {
+            $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
+        }
         $response->headers->set('X-XSS-Protection', '1; mode=block');
 
         // Filament/Livewire admin panel injects inline styles dynamically via
@@ -65,6 +72,12 @@ final class SecurityHeaders
         }
 
         return $response;
+    }
+
+    private function isRecoveryLinkRequest(Request $request): bool
+    {
+        return $request->is('recover/reset')
+            || ($request->is('recover') && $request->query->has('secret'));
     }
 
     /**

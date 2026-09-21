@@ -52,7 +52,11 @@ final class UsercpSecurityCommand
      */
     public function updateSecurity(int $userId, array $data, bool $resetAuthKey): bool
     {
-        return (bool) DB::transaction(function () use ($userId, $data, $resetAuthKey) {
+        $revokeSessions = array_key_exists('passhash', $data) || array_key_exists('auth_key', $data);
+        $updated = (bool) DB::transaction(function () use ($userId, $data, $resetAuthKey, $revokeSessions) {
+            if ($revokeSessions) {
+                $data['auth_version'] = DB::raw('auth_version + 1');
+            }
             User::query()->where('id', $userId)->update($data);
             if ($resetAuthKey) {
                 $this->torrentDownloadRepository->resetTrackerReportAuthKeySecret($userId);
@@ -60,6 +64,12 @@ final class UsercpSecurityCommand
 
             return true;
         });
+
+        if ($updated && $revokeSessions) {
+            Cache::clearUser($userId, '');
+        }
+
+        return $updated;
     }
 
     /**
@@ -130,10 +140,7 @@ final class UsercpSecurityCommand
             $data['passhash'] = $passhash;
             $data['passhash_algo'] = PasswordHasher::ALGO_ARGON2ID;
             $data['must_change_password'] = 0;
-            $authKey = Token::randomHex(20);
-            $data['auth_key'] = $authKey;
-
-            AuthCookie::setLoginCookie((int) $user->id, $authKey, 0);
+            $data['auth_key'] = Token::randomHex(20);
             $passupdated = 1;
         }
 
@@ -197,6 +204,9 @@ final class UsercpSecurityCommand
         }
 
         $this->updateSecurity((int) $user->id, $data, $resetAuthKey);
+        if ($passupdated === 1) {
+            AuthCookie::setLoginCookie((int) $user->id, null, 0);
+        }
 
         $to = 'usercp.php?action=security&type=saved';
         if ($changedemail === 1) {

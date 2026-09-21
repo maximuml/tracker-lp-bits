@@ -28,6 +28,8 @@ interface AuthRepositoryInterface
 
     public function updateLogin(int $userId, array $update);
 
+    public function getAuthVersion(int $userId): ?int;
+
     public function getPasskeyByUserId(int $userId): ?string;
 
     public function findUserArrayForCookie(int $userId, bool $shouldIgnoreEnabled): ?array;

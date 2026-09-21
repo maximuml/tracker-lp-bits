@@ -11,7 +11,7 @@ This covers the legacy pages migrated into `ForumService`, `OfferService`, `Mess
 
 ## Test fixture caveats
 
-- The `c_secure_pass` cookie must be freshly generated with `App\Support\AuthCookie::buildToken($userId, $authKey, time() + 86400)`. Tokens are time-bound and will fail after expiry.
+- The `c_secure_pass` cookie must be freshly generated with `App\Support\AuthCookie::buildToken($userId, $authKey, time() + 86400, $authVersion)`, where `$authVersion` is the current `users.auth_version`. Tokens are time-bound and will fail after expiry.
 - A secondary user (e.g. `id=10037`, `class=1`) is required to exercise offer voting because the offer owner cannot vote on their own offer.
 - `catmanage.php?action=del&type=source` expects an `id` from the `sources` table. The `sources.name` column is limited (≤20 chars in the test stack), so generate short unique names like `pr356-<8 random chars>` and query the generated `id` instead of hardcoding `id=7`.
 - `users.clientselect` is `tinyint unsigned` (max 255). If the local `agent_allowed_family` table `AUTO_INCREMENT` exceeds 255, `TasksTest::test_cleanup_class_5_performs_all_housekeeping` may fail because test-created `clientselect` values wrap to 255. Reset `agent_allowed_family` auto-increment or truncate accumulated test rows before the PHPUnit gate.

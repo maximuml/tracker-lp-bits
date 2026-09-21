@@ -39,6 +39,9 @@ final class HttpContractTest extends TestCase
      */
     private const PRE_AUTH_URIS = [
         'login', 'logout', 'signup', 'takesignup', 'recover', 'confirm_resend',
+        // SEC-02: password reset POST — authenticates via the one-time
+        // recovery token in the request, not via a session guard
+        'recover/reset',
         'api/v1/login', 'api/challenge',
         'announce', 'announce.php', 'scrape', 'scrape.php',
         'cron', 'cron.php',

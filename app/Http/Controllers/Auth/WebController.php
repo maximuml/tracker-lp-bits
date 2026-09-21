@@ -8,6 +8,7 @@ use App\Exceptions\AuthenticationException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Models\Setting;
+use App\Models\User;
 use App\Services\Captcha\Drivers\ImageCaptchaDriver;
 use App\Services\WebAuthService;
 use App\Support\AssetAppender;
@@ -129,6 +130,19 @@ class WebController extends Controller
     {
         $this->authService->logout();
 
+        Auth::guard('web')->logout();
+
+        return Redirect::to('/login');
+    }
+
+    public function logoutAllDevices(Request $request): RedirectResponse
+    {
+        $user = Auth::guard('nexus-web')->user();
+        if (! $user instanceof User) {
+            return Redirect::to('/login');
+        }
+
+        $this->authService->logoutAllDevices($user);
         Auth::guard('web')->logout();
 
         return Redirect::to('/login');

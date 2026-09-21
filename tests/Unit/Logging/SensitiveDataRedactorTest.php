@@ -191,6 +191,22 @@ final class SensitiveDataRedactorTest extends TestCase
         $this->assertSame('login', $redacted->context['action']);
     }
 
+    public function test_message_string_redacts_colon_separated_secret_values(): void
+    {
+        $record = $this->makeRecord(
+            'mail body: Password: fake-mail-password secret: fake-reset-token',
+            [],
+        );
+        $redacted = $this->redactRecord($record);
+
+        $this->assertStringNotContainsString('fake-mail-password', $redacted->message);
+        $this->assertStringNotContainsString('fake-reset-token', $redacted->message);
+        $this->assertSame(
+            'mail body: Password=[REDACTED] secret=[REDACTED]',
+            $redacted->message,
+        );
+    }
+
     public function test_tap_callback_pushes_processor_to_monolog(): void
     {
         $monolog = new Logger('test', [new StreamHandler('php://memory')]);

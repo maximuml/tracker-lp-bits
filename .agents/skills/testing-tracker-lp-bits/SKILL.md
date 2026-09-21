@@ -14,7 +14,7 @@ Use this skill when asked to test the tracker-lp-bits app in the local Docker Co
 3. A sysop test user must exist. If not, create one and promote it to `UC_SYSOP` with `uploadpos = 'yes'` and `clear_user_cache(<id>)`.
 4. The `c_secure_pass` cookie can be generated for browser/curl use with:
    ```php
-   App\Support\AuthCookie::buildToken($user->id, $user->auth_key, time() + 86400);
+   App\Support\AuthCookie::buildToken($user->id, $user->auth_key, time() + 86400, (int) $user->auth_version);
    ```
 
 ## Browser smoke suite (primary verification)
@@ -468,7 +468,7 @@ Phase 17 migrates the remaining public/admin/listing Blade/PHP views into `resou
   ```bash
   APP_KEY='base64:WUbN2wa2kl3E1VDW4iKaH3RBHw3hKY7BK0hWEkBZmGg='
   docker compose -p tracker-lp-bits exec -T -e APP_KEY="$APP_KEY" php php -r \
-    'require "/var/www/html/vendor/autoload.php"; require "/var/www/html/bootstrap/app.php"; echo \App\Support\AuthCookie::buildToken(1, null, time()+3600);' \
+    'require "/var/www/html/vendor/autoload.php"; require "/var/www/html/bootstrap/app.php"; $u=\App\Models\User::query()->findOrFail(1); echo \App\Support\AuthCookie::buildToken(1, null, time()+3600, (int) $u->auth_version);' \
     > /home/ubuntu/phase17-cookie.txt
   ```
 - `basic.BASEURL` should match the test host. For host-side tests against `http://localhost`:
@@ -517,7 +517,7 @@ All active legacy PHP partials under `app/Services/Legacy/partials/` are now ren
 - Generate a `c_secure_pass` cookie for `id=1` (sysop) using the known `APP_KEY`:
   ```bash
   docker compose -p tracker-lp-bits exec -T -e APP_KEY='base64:WUbN2wa2kl3E1VDW4iKaH3RBHw3hKY7BK0hWEkBZmGg=' php php -r \
-    'require "/var/www/html/vendor/autoload.php"; require "/var/www/html/bootstrap/app.php"; echo \App\Support\AuthCookie::buildToken(1, null, time()+3600);' \
+    'require "/var/www/html/vendor/autoload.php"; require "/var/www/html/bootstrap/app.php"; $u=\App\Models\User::query()->findOrFail(1); echo \App\Support\AuthCookie::buildToken(1, null, time()+3600, (int) $u->auth_version);' \
     > /home/ubuntu/phase19-cookie.txt
   ```
 - Add a minimal forum fixture (`forums.id=179`, `topics.id=185`, `posts.id=139`) so `viewforum`/`viewtopic`/`newtopic` can be exercised.

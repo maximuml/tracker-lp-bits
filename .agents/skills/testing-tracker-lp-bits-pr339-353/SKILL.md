@@ -24,7 +24,7 @@ Use this skill when asked to run the integration E2E for PRs #339-#353 (or later
 - Generate a `c_secure_pass` cookie for user `id=1` (sysop) and save it, e.g.:
   ```bash
   docker compose -p tracker-lp-bits exec -T -e APP_KEY='<app-key>' php php -r \
-    'require "/var/www/html/vendor/autoload.php"; require "/var/www/html/bootstrap/app.php"; echo \App\Support\AuthCookie::buildToken(1, null, time()+3600);' \
+    'require "/var/www/html/vendor/autoload.php"; require "/var/www/html/bootstrap/app.php"; $u=\App\Models\User::query()->findOrFail(1); echo \App\Support\AuthCookie::buildToken(1, null, time()+3600, (int) $u->auth_version);' \
     > /home/ubuntu/phase19-cookie.txt
   ```
 - `/api/v1/*` routes are protected by `auth:sanctum` and the Sanctum stateful domain `openresty` is not in the default `SANCTUM_STATEFUL_DOMAINS`, so cookie-only API calls 302 to `login.php`. Generate a personal access token for the sysop and call API with `Authorization: Bearer <token>`.

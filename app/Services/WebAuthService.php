@@ -129,7 +129,9 @@ class WebAuthService
             'passhash' => $newHash,
             'passhash_algo' => PasswordHasher::ALGO_ARGON2ID,
             'must_change_password' => $forceChange,
+            'auth_version' => DB::raw('auth_version + 1'),
         ]);
+        Cache::clearUser($userId, '');
     }
 
     /**
@@ -192,6 +194,7 @@ class WebAuthService
         $update = [];
         if (empty($row['auth_key'])) {
             $update['auth_key'] = hash('sha256', Token::randomHex(32));
+            $update['auth_version'] = DB::raw('auth_version + 1');
         }
 
         if (! empty($update)) {
@@ -210,6 +213,13 @@ class WebAuthService
 
     public function logout(): void
     {
+        AuthCookie::clear();
+    }
+
+    public function logoutAllDevices(User $user): void
+    {
+        User::query()->where('id', $user->id)->increment('auth_version');
+        Cache::clearUser((int) $user->id, '');
         AuthCookie::clear();
     }
 

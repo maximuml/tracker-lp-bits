@@ -88,6 +88,13 @@ class AuthRepository extends BaseRepository implements AuthRepositoryInterface
         User::query()->where('id', $userId)->update($update);
     }
 
+    public function getAuthVersion(int $userId): ?int
+    {
+        $version = User::query()->where('id', $userId)->value('auth_version');
+
+        return $version === null ? null : (int) $version;
+    }
+
     public function getPasskeyByUserId(int $userId): ?string
     {
         $user = User::query()->where('id', $userId)->first(['id', 'passkey']);

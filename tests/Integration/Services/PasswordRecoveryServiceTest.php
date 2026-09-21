@@ -7,8 +7,10 @@ namespace Tests\Integration\Services;
 use App\Exceptions\AuthenticationException;
 use App\Models\User;
 use App\Services\PasswordRecoveryService;
+use App\Services\PasswordSetup;
 use App\Services\SecureTokenService;
 use App\Services\WebAuthService;
+use App\Support\PasswordHasher;
 use App\Support\Token;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
@@ -42,9 +44,9 @@ final class PasswordRecoveryServiceTest extends TestCase
         parent::setUp();
         Redis::connection()->flushdb();
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
-        DB::table('users')->truncate();
-        DB::table('loginattempts')->truncate();
-        DB::table('password_recovery_tokens')->truncate();
+        DB::table('users')->delete();
+        DB::table('loginattempts')->delete();
+        DB::table('password_recovery_tokens')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
         /** @var WebAuthService&MockInterface $authService */
@@ -54,7 +56,11 @@ final class PasswordRecoveryServiceTest extends TestCase
         $authService->shouldReceive('recordFailedAttempt')->byDefault();
         $this->authService = $authService;
 
-        $this->service = new PasswordRecoveryService($this->authService, app(SecureTokenService::class));
+        $this->service = new PasswordRecoveryService(
+            $this->authService,
+            app(SecureTokenService::class),
+            app(PasswordSetup::class),
+        );
     }
 
     protected function tearDown(): void
@@ -153,15 +159,17 @@ final class PasswordRecoveryServiceTest extends TestCase
 
     // --- requestReset: success ---
 
-    public function test_request_reset_succeeds_and_sets_editsecret(): void
+    public function test_request_reset_succeeds_without_touching_editsecret(): void
     {
-        $userId = $this->createUser(['email' => 'valid@test.com']);
+        $userId = $this->createUser([
+            'email' => 'valid@test.com',
+            'editsecret' => 'email-change-token',
+        ]);
 
         $this->service->requestReset(['email' => 'valid@test.com'], '127.0.0.1', [], []);
 
         $editsecret = DB::table('users')->where('id', $userId)->value('editsecret');
-        $this->assertNotNull($editsecret);
-        $this->assertNotSame('', (string) $editsecret);
+        $this->assertSame('email-change-token', $editsecret);
     }
 
     public function test_request_reset_stores_secure_token(): void
@@ -178,6 +186,26 @@ final class PasswordRecoveryServiceTest extends TestCase
         $this->assertNotNull($tokenRow, 'Expected a recovery token row');
         $this->assertSame((int) $userId, (int) $tokenRow->user_id);
         $this->assertNotEmpty($tokenRow->token_digest);
+    }
+
+    public function test_request_reset_revokes_previous_active_tokens(): void
+    {
+        $userId = $this->createUser(['email' => 'latest@test.com']);
+        $tokenService = app(SecureTokenService::class);
+        $oldToken = $tokenService->generate();
+        $tokenService->store('password_recovery_tokens', $oldToken, [
+            'user_id' => $userId,
+            'ip' => '127.0.0.1',
+        ]);
+
+        $this->service->requestReset(['email' => 'latest@test.com'], '127.0.0.1', [], []);
+
+        $oldRow = DB::table('password_recovery_tokens')
+            ->where('token_digest', $tokenService->digest($oldToken))
+            ->first();
+        $this->assertNotNull($oldRow);
+        $this->assertSame(1, (int) $oldRow->revoked);
+        $this->assertNull($this->service->validateResetToken($userId, $oldToken));
     }
 
     // --- requestReset: captcha enabled and fails ---
@@ -205,6 +233,29 @@ final class PasswordRecoveryServiceTest extends TestCase
         $this->service->requestReset(['email' => 'valid@test.com'], '127.0.0.1', [], []);
     }
 
+    // --- validateResetToken: form display must not consume ---
+
+    public function test_validate_reset_token_returns_row_without_consuming_it(): void
+    {
+        $userId = $this->createUser();
+        $tokenService = app(SecureTokenService::class);
+        $token = $tokenService->generate();
+        $tokenService->store('password_recovery_tokens', $token, [
+            'user_id' => $userId,
+            'ip' => '127.0.0.1',
+        ]);
+
+        $row = $this->service->validateResetToken($userId, $token);
+
+        $this->assertNotNull($row);
+        $stored = DB::table('password_recovery_tokens')
+            ->where('token_digest', $tokenService->digest($token))
+            ->first();
+        $this->assertNotNull($stored);
+        $this->assertNull($stored->consumed_at);
+        $this->assertSame(0, (int) $stored->revoked);
+    }
+
     // --- resetPassword: invalid token ---
 
     public function test_reset_password_throws_for_invalid_token(): void
@@ -213,7 +264,7 @@ final class PasswordRecoveryServiceTest extends TestCase
 
         $this->expectException(AuthenticationException::class);
 
-        $this->service->resetPassword($userId, 'invalid_token', []);
+        $this->service->resetPassword($userId, 'invalid_token', 'NewPass123', 'NewPass123');
     }
 
     // --- resetPassword: user ID mismatch ---
@@ -230,10 +281,18 @@ final class PasswordRecoveryServiceTest extends TestCase
             'ip' => '127.0.0.1',
         ]);
 
-        // Try to reset with a different user ID
-        $this->expectException(AuthenticationException::class);
-
-        $this->service->resetPassword(99999, $token, []);
+        // Try to reset with a different user ID; the token must remain unconsumed.
+        try {
+            $this->service->resetPassword(99999, $token, 'NewPass123', 'NewPass123');
+            $this->fail('Expected AuthenticationException');
+        } catch (AuthenticationException) {
+            $row = DB::table('password_recovery_tokens')
+                ->where('token_digest', $tokenService->digest($token))
+                ->first();
+            $this->assertNotNull($row);
+            $this->assertNull($row->consumed_at);
+            $this->assertSame(0, (int) $row->revoked);
+        }
     }
 
     // --- resetPassword: nonexistent user ---
@@ -255,17 +314,18 @@ final class PasswordRecoveryServiceTest extends TestCase
 
         $this->expectException(AuthenticationException::class);
 
-        $this->service->resetPassword($userId, $token, []);
+        $this->service->resetPassword($userId, $token, 'NewPass123', 'NewPass123');
     }
 
     // --- resetPassword: success ---
 
-    public function test_reset_password_succeeds_and_returns_new_password(): void
+    public function test_reset_password_uses_submitted_password(): void
     {
         $userId = $this->createUser();
-        $user = User::query()->find($userId, ['id', 'username', 'email', 'passhash', 'editsecret']);
+        $user = User::query()->find($userId, ['id', 'username', 'email', 'passhash', 'editsecret', 'auth_version']);
         $this->assertNotNull($user);
         $oldPasshash = $user->passhash;
+        $oldAuthVersion = (int) $user->auth_version;
 
         // Generate a valid token directly
         $tokenService = app(SecureTokenService::class);
@@ -275,15 +335,20 @@ final class PasswordRecoveryServiceTest extends TestCase
             'ip' => '127.0.0.1',
         ]);
 
-        $newPassword = $this->service->resetPassword($userId, $token, []);
-
-        $this->assertSame(10, strlen($newPassword));
+        $this->service->resetPassword($userId, $token, 'ChosenPass123', 'ChosenPass123');
 
         $updatedUser = DB::table('users')->where('id', $userId)->first();
         $this->assertNotNull($updatedUser);
         $this->assertNotSame($oldPasshash, $updatedUser->passhash);
         $this->assertSame('', (string) $updatedUser->editsecret);
         $this->assertSame('argon2id', $updatedUser->passhash_algo);
+        $this->assertSame($oldAuthVersion + 1, (int) $updatedUser->auth_version);
+        $this->assertTrue(PasswordHasher::verify(
+            'ChosenPass123',
+            (string) $updatedUser->passhash,
+            (string) $updatedUser->secret,
+            (string) $updatedUser->passhash_algo,
+        ));
     }
 
     public function test_reset_password_consumes_token_after_success(): void
@@ -299,13 +364,71 @@ final class PasswordRecoveryServiceTest extends TestCase
         ]);
 
         // Reset password
-        $this->service->resetPassword($userId, $token, []);
+        $this->service->resetPassword($userId, $token, 'NewPass123', 'NewPass123');
 
         // Token should be consumed (marked with consumed_at)
         $digest = $tokenService->digest($token);
         $consumedRow = DB::table('password_recovery_tokens')->where('token_digest', $digest)->first();
         $this->assertNotNull($consumedRow);
         $this->assertNotNull($consumedRow->consumed_at, 'Token should be marked as consumed');
+    }
+
+    public function test_reset_password_revokes_other_active_tokens_and_records_outbox(): void
+    {
+        $userId = $this->createUser();
+        $tokenService = app(SecureTokenService::class);
+        $token = $tokenService->generate();
+        $otherToken = $tokenService->generate();
+        $tokenService->store('password_recovery_tokens', $token, [
+            'user_id' => $userId,
+            'ip' => '127.0.0.1',
+        ]);
+        $tokenService->store('password_recovery_tokens', $otherToken, [
+            'user_id' => $userId,
+            'ip' => '127.0.0.1',
+        ]);
+        $outboxBefore = DB::table('outbox_events')
+            ->where('aggregate_type', 'user')
+            ->where('aggregate_id', $userId)
+            ->where('event_type', 'password.reset')
+            ->count();
+
+        $this->service->resetPassword($userId, $token, 'NewPass123', 'NewPass123');
+
+        $otherRow = DB::table('password_recovery_tokens')
+            ->where('token_digest', $tokenService->digest($otherToken))
+            ->first();
+        $this->assertNotNull($otherRow);
+        $this->assertSame(1, (int) $otherRow->revoked);
+        $this->assertSame($outboxBefore + 1, DB::table('outbox_events')
+            ->where('aggregate_type', 'user')
+            ->where('aggregate_id', $userId)
+            ->where('event_type', 'password.reset')
+            ->count());
+    }
+
+    public function test_reset_password_leaves_token_active_when_password_confirmation_differs(): void
+    {
+        $userId = $this->createUser();
+        $tokenService = app(SecureTokenService::class);
+        $token = $tokenService->generate();
+        $tokenService->store('password_recovery_tokens', $token, [
+            'user_id' => $userId,
+            'ip' => '127.0.0.1',
+        ]);
+
+        try {
+            $this->service->resetPassword($userId, $token, 'NewPass123', 'DifferentPass123');
+            $this->fail('Expected AuthenticationException');
+        } catch (AuthenticationException) {
+            $row = DB::table('password_recovery_tokens')
+                ->where('token_digest', $tokenService->digest($token))
+                ->first();
+            $this->assertNotNull($row);
+            $this->assertNull($row->consumed_at);
+            $this->assertSame(0, (int) $row->revoked);
+            $this->assertNotNull($this->service->validateResetToken($userId, $token));
+        }
     }
 
     // --- resetPassword: token already consumed (replay attack) ---
@@ -323,11 +446,11 @@ final class PasswordRecoveryServiceTest extends TestCase
         ]);
 
         // First reset succeeds
-        $this->service->resetPassword($userId, $token, []);
+        $this->service->resetPassword($userId, $token, 'NewPass123', 'NewPass123');
 
         // Second reset with same token should fail
         $this->expectException(AuthenticationException::class);
 
-        $this->service->resetPassword($userId, $token, []);
+        $this->service->resetPassword($userId, $token, 'NewPass123', 'NewPass123');
     }
 }

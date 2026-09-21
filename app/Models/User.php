@@ -41,6 +41,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string|null $passhash
  * @property string|null $secret
  * @property string|null $auth_key
+ * @property int|null $auth_version
  * @property string|null $email
  * @property int|null $status
  * @property string|null $added
@@ -337,7 +338,7 @@ class User extends Authenticatable implements FilamentUser, HasName
      * @var list<string>
      */
     protected $hidden = [
-        'secret', 'passhash', 'passkey', 'auth_key',
+        'secret', 'passhash', 'passkey', 'auth_key', 'auth_version',
     ];
 
     /**
@@ -347,6 +348,7 @@ class User extends Authenticatable implements FilamentUser, HasName
      */
     protected $casts = [
         'must_change_password' => 'boolean',
+        'auth_version' => 'integer',
         'added' => 'datetime',
         'last_login' => 'datetime',
         'last_access' => 'datetime',

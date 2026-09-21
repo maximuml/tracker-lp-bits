@@ -125,6 +125,7 @@ final class RecoveryControllerTest extends TestCase
         $guard = Mockery::mock();
         $guard->shouldReceive('check')->once()->andReturn(false);
         Auth::shouldReceive('guard')->with('nexus-web')->once()->andReturn($guard);
+        Auth::shouldReceive('check')->zeroOrMoreTimes()->andReturnFalse();
 
         $controller = new RecoveryController($recoveryService, $authService);
         $request = RecoverRequest::create('/recover', 'GET', ['id' => 1, 'secret' => $secret]);
@@ -152,6 +153,7 @@ final class RecoveryControllerTest extends TestCase
         $guard = Mockery::mock();
         $guard->shouldReceive('check')->once()->andReturn(false);
         Auth::shouldReceive('guard')->with('nexus-web')->once()->andReturn($guard);
+        Auth::shouldReceive('check')->zeroOrMoreTimes()->andReturnFalse();
 
         $controller = new RecoveryController($recoveryService, $authService);
         $request = RecoverRequest::create('/recover', 'GET', ['id' => 1, 'secret' => 'bad']);

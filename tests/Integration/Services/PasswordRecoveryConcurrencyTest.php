@@ -28,9 +28,10 @@ final class PasswordRecoveryConcurrencyTest extends TestCase
         ]);
 
         $scriptPath = $this->writeChildProcessScript();
+        $childPassword = 'child-'.bin2hex(random_bytes(6));
         $pipes = [];
         $process = proc_open(
-            [PHP_BINARY, $scriptPath, (string) $userId, $token, 'ChildReset123'],
+            [PHP_BINARY, $scriptPath, (string) $userId, $token, $childPassword],
             [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']],
             $pipes,
             base_path(),
@@ -75,8 +76,8 @@ final class PasswordRecoveryConcurrencyTest extends TestCase
 
             $freshUser = User::query()->find($userId);
             $this->assertNotNull($freshUser);
-            $winningPassword = $parentSucceeded ? 'ParentReset123' : 'ChildReset123';
-            $losingPassword = $parentSucceeded ? 'ChildReset123' : 'ParentReset123';
+            $winningPassword = $parentSucceeded ? 'ParentReset123' : $childPassword;
+            $losingPassword = $parentSucceeded ? $childPassword : 'ParentReset123';
             $this->assertTrue(PasswordHasher::verify(
                 $winningPassword,
                 (string) $freshUser->passhash,

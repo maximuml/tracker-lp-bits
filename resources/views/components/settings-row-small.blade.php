@@ -5,5 +5,5 @@
     <div class="nx-fcell">{{ $slot }}</div>
     @if ($relation !== '')</div>@endif
 @else
-<tr @if ($relation !== '') relation="{{ $relation }}" @endif><td width="1%" class="rowhead nowrap" valign="top" align="right">{{ $label }}</td><td width="99%" class="rowfollow" valign="top" align="left">{{ $slot }}</td></tr>
+<tr @if ($relation !== '') relation="{{ $relation }}" @endif><td class="rowhead nowrap nx-va-top nx-align-right nx-w-1p">{{ $label }}</td><td class="rowfollow nx-va-top nx-w-99p">{{ $slot }}</td></tr>
 @endif

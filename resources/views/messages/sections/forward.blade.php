@@ -1,4 +1,4 @@
-<h1 align="center">{{ __('legacy/messages.text_forward_pm') }}</h1>
+<h1 class="nx-center">{{ __('legacy/messages.text_forward_pm') }}</h1>
 <form action="/takemessage" method="post">
 @csrf
 <input type="hidden" name="forward" value="1">

@@ -153,7 +153,7 @@ final class Tag
             : '';
 
         return sprintf(
-            '<tr%s><td class="rowhead nowrap" valign="top" align="right">%s</td><td class="rowfollow" valign="top" align="left">%s</td></tr>',
+            '<tr%s><td class="rowhead nowrap nx-va-top nx-align-right">%s</td><td class="rowfollow nx-va-top">%s</td></tr>',
             $relationAttr,
             $head,
             $cell,
@@ -162,8 +162,8 @@ final class Tag
 
     /**
      * Narrow-label variant of {@see settingsRow()}. Backs legacy
-     * `tr_small()`. The two `<td>` cells carry `width="1%"` and
-     * `width="99%"` so the label hugs its content while the value
+     * `tr_small()`. The two `<td>` cells carry `nx-w-1p`/`nx-w-99p`
+     * so the label hugs its content while the value
      * stretches; otherwise the row shape is identical.
      *
      * Legacy quirks preserved bit-for-bit:
@@ -186,7 +186,7 @@ final class Tag
 
         $relationAttr = $relation !== '' ? ' relation = "'.$relation.'"' : '';
 
-        return '<tr'.$relationAttr.'><td width="1%" class="rowhead nowrap" valign="top" align="right">'.$head.'</td><td width="99%" class="rowfollow" valign="top" align="left">'.$cell.'</td></tr>';
+        return '<tr'.$relationAttr.'><td class="rowhead nowrap nx-va-top nx-align-right nx-w-1p">'.$head.'</td><td class="rowfollow nx-va-top nx-w-99p">'.$cell.'</td></tr>';
     }
 
     /**

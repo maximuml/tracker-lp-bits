@@ -5,7 +5,7 @@
 <x-settings-row-small layout="grid" :label="__('legacy/usercp.row_email_address')">{{ $home->email }}</x-settings-row-small>
 <x-settings-row-small layout="grid" :label="__('legacy/usercp.row_ip_location')">{{ $home->ipLocation }}</x-settings-row-small>
 @if ($home->showAvatar)
-<x-settings-row-small layout="grid" :label="__('legacy/usercp.row_avatar')"><img src="{{ $home->avatarUrl }}" border="0" alt=""></x-settings-row-small>
+<x-settings-row-small layout="grid" :label="__('legacy/usercp.row_avatar')"><img src="{{ $home->avatarUrl }}" alt=""></x-settings-row-small>
 @endif
 <x-settings-row-small layout="grid" :label="__('legacy/usercp.row_passkey')">{{ $home->passkey }}</x-settings-row-small>
 @if ($home->passkeyLogin !== null)

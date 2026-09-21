@@ -39,7 +39,7 @@ final class Smilies
 
     public static function quickRow(string $formname, string $taname): string
     {
-        $row = '<div align="center">';
+        $row = '<div class="nx-center">';
         foreach (self::QUICK_NUMBERS as $smilyNumber) {
             $row .= self::link($formname, $taname, $smilyNumber);
         }

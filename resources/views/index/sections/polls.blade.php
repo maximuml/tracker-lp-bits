@@ -13,16 +13,16 @@
 @if($polls['exists'])
 <div class="nx-text nx-center">
 <div class="nx-main nx-box nx-box--59">
-<p align="center"><b>{{ $polls['question'] }}</b></p>
+<p class="nx-center"><b>{{ $polls['question'] }}</b></p>
 @if($polls['hasVoted'])
     <div class="nx-main">
     @foreach($polls['bars'] as $bar)
         <div class="nx-row"><div class="nx-embedded nx-nowrap">{{ $bar['option'] }}&nbsp;&nbsp;</div><div class="nx-embedded nx-nowrap nx-grow"><img class="bar_end" src="pic/trans.gif" alt="" /><img class="{{ $bar['selected'] ? 'sltbar' : 'unsltbar' }}" src="pic/trans.gif" alt="" /><img class="bar_end" src="pic/trans.gif" alt="" /> {{ $bar['percent'] }}%</div></div>
     @endforeach
     </div>
-    <p align="center">{{ $polls['votesLabel'] }} {{ $polls['totalVotes'] }}</p>
+    <p class="nx-center">{{ $polls['votesLabel'] }} {{ $polls['totalVotes'] }}</p>
     @if($polls['canLog'])
-        <p align="center"><a href="log.php?action=poll">{{ $polls['previousPollsLabel'] }}</a></p>
+        <p class="nx-center"><a href="log.php?action=poll">{{ $polls['previousPollsLabel'] }}</a></p>
     @endif
 @else
     <form method="post" action="/index">
@@ -32,7 +32,7 @@
     @endforeach
     <br />
     <label><input type="radio" name="choice" value="255">{{ $polls['blankVoteLabel'] }}</label><br />
-    <p align="center"><input type="submit" class="btn" value="{{ $polls['submitVoteLabel'] }}" /></p>
+    <p class="nx-center"><input type="submit" class="btn" value="{{ $polls['submitVoteLabel'] }}" /></p>
     </form>
 @endif
 </div>

@@ -278,8 +278,8 @@ final class HtmlTest extends TestCase
     {
         // Legacy `tr()` default branch: htmlspecialchars + `\n` → `<br />\n`.
         $this->assertSame(
-            '<tr><td class="rowhead nowrap" valign="top" align="right">Label</td>'
-            .'<td class="rowfollow" valign="top" align="left">a &amp; b<br />'."\n".'c</td></tr>',
+            '<tr><td class="rowhead nowrap nx-va-top nx-align-right">Label</td>'
+            .'<td class="rowfollow nx-va-top">a &amp; b<br />'."\n".'c</td></tr>',
             Html::settingsRow('Label', "a & b\nc"),
         );
     }
@@ -290,8 +290,8 @@ final class HtmlTest extends TestCase
         // (radio buttons, `<input>` markup). Pass-through with no
         // escape and no `<br />` substitution.
         $this->assertSame(
-            '<tr><td class="rowhead nowrap" valign="top" align="right">L</td>'
-            .'<td class="rowfollow" valign="top" align="left"><input name="x" value="y"/></td></tr>',
+            '<tr><td class="rowhead nowrap nx-va-top nx-align-right">L</td>'
+            .'<td class="rowfollow nx-va-top"><input name="x" value="y"/></td></tr>',
             Html::settingsRow('L', '<input name="x" value="y"/>', escape: false),
         );
     }
@@ -302,8 +302,8 @@ final class HtmlTest extends TestCase
         // lang strings that may contain a literal `<font color>` or
         // `&nbsp;` — those must reach the browser unescaped.
         $this->assertSame(
-            '<tr><td class="rowhead nowrap" valign="top" align="right">Name<font color="red">*</font></td>'
-            .'<td class="rowfollow" valign="top" align="left">value</td></tr>',
+            '<tr><td class="rowhead nowrap nx-va-top nx-align-right">Name<font color="red">*</font></td>'
+            .'<td class="rowfollow nx-va-top">value</td></tr>',
             Html::settingsRow('Name<font color="red">*</font>', 'value', escape: false),
         );
     }
@@ -314,8 +314,8 @@ final class HtmlTest extends TestCase
         // `relation="X"` AND `class="X"` on the `<tr>`. The dual
         // attribute drives row-show/hide JS in `settings.php`.
         $this->assertSame(
-            '<tr relation="mode_1" class="mode_1"><td class="rowhead nowrap" valign="top" align="right">L</td>'
-            .'<td class="rowfollow" valign="top" align="left">v</td></tr>',
+            '<tr relation="mode_1" class="mode_1"><td class="rowhead nowrap nx-va-top nx-align-right">L</td>'
+            .'<td class="rowfollow nx-va-top">v</td></tr>',
             Html::settingsRow('L', 'v', relation: 'mode_1'),
         );
     }
@@ -356,17 +356,17 @@ final class HtmlTest extends TestCase
         // call sites pass pre-built `<select>` blocks where embedded
         // newlines are syntactic, not line breaks.
         $this->assertSame(
-            '<tr><td width="1%" class="rowhead nowrap" valign="top" align="right">L</td>'
-            .'<td width="99%" class="rowfollow" valign="top" align="left">a &amp; b'."\n".'c</td></tr>',
+            '<tr><td class="rowhead nowrap nx-va-top nx-align-right nx-w-1p">L</td>'
+            .'<td class="rowfollow nx-va-top nx-w-99p">a &amp; b'."\n".'c</td></tr>',
             Html::settingsRowSmall('L', "a & b\nc"),
         );
     }
 
-    public function test_settings_row_small_carries_width_attributes(): void
+    public function test_settings_row_small_carries_width_classes(): void
     {
         $row = Html::settingsRowSmall('L', 'v');
-        $this->assertStringContainsString('width="1%"', $row);
-        $this->assertStringContainsString('width="99%"', $row);
+        $this->assertStringContainsString('nx-w-1p', $row);
+        $this->assertStringContainsString('nx-w-99p', $row);
     }
 
     public function test_settings_row_small_relation_uses_single_attribute_with_spaces(): void

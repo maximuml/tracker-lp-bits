@@ -81,7 +81,7 @@ final class PaginationTest extends TestCase
     public function test_render_pagertop_has_nexus_pagination_class(): void
     {
         $result = Pagination::render(10, 30, '/list.php?', 0, 3, self::LABELS);
-        $this->assertStringContainsString("class='nexus-pagination'", $result[0]);
+        $this->assertStringContainsString('class="nexus-pagination nx-center"', $result[0]);
     }
 
     public function test_render_pagerbottom_has_reversed_order(): void

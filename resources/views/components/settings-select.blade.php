@@ -4,7 +4,7 @@
 <div class="nx-fcell">
 @else
 <tr>
-    <td class="rowhead nowrap" valign="top" align="right">{{ $label }}</td>
+    <td class="rowhead nowrap nx-va-top nx-align-right">{{ $label }}</td>
     <td>
 @endif
         <select name="{{ $name }}">

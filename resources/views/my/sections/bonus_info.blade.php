@@ -20,7 +20,7 @@
 <li>{{ __('legacy/mybonus.text_donors_always_get') }}{{ $info->donortimesBonus }}{{ __('legacy/mybonus.text_times_of_bonus') }}</li>
 @endif
 </ul>
-<div align="center">{{ __('legacy/mybonus.text_you_are_currently_getting') }}{{ $info->currentSeedBonus }}{{ __('legacy/mybonus.text_point') }}{{ \App\Support\Strings::addS((float) $info->currentSeedBonus) }}{{ __('legacy/mybonus.text_per_hour') }} (A = {{ $info->aFactor }})</div>
+<div class="nx-center">{{ __('legacy/mybonus.text_you_are_currently_getting') }}{{ $info->currentSeedBonus }}{{ __('legacy/mybonus.text_point') }}{{ \App\Support\Strings::addS((float) $info->currentSeedBonus) }}{{ __('legacy/mybonus.text_per_hour') }} (A = {{ $info->aFactor }})</div>
 <div class="nx-loadbar"><span class="nx-loadbar__bg"><img class="{{ $info->loadbarClass }}" src="pic/trans.gif" alt="{{ $info->percentLabel }}%" /></span></div>
 @if ($info->medalAdditionFactor !== null)
 <h1>{{ __('legacy/mybonus.text_get_by_medal') }}</h1>

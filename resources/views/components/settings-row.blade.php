@@ -6,7 +6,7 @@
     @if ($relation !== '')</div>@endif
 @else
 <tr @if ($relation !== '') relation="{{ $relation }}" class="{{ $relation }}" @endif>
-    <td class="rowhead nowrap" valign="top" align="right">{{ $label }}</td>
-    <td class="rowfollow" valign="top" align="left">{{ $slot }}</td>
+    <td class="rowhead nowrap nx-va-top nx-align-right">{{ $label }}</td>
+    <td class="rowfollow nx-va-top">{{ $slot }}</td>
 </tr>
 @endif

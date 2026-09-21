@@ -498,11 +498,16 @@ button.nx-btn-link {
 .nx-box--tight{padding:5px}
 .nx-box--737{width:737px;max-width:100%}
 .nx-box--750{width:750px;max-width:100%}
+.nx-box--500{width:500px;max-width:100%}
 .nx-box--59{width:59%;margin-left:auto;margin-right:auto}
 .nx-w-97{width:97%}
 .nx-w-940{width:940px}
 .nx-w-48{width:48%}
 .nx-w-50{width:50%}
+.nx-w-1p{width:1%}
+.nx-w-35p{width:35%}
+.nx-w-99p{width:99%}
+.nx-va-top{vertical-align:top}
 .nx-w-80{width:80%}
 .nx-w-20{width:20%}
 .nx-fcards{display:grid;grid-template-columns:1fr 1fr}

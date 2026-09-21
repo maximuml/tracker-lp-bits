@@ -260,8 +260,8 @@ final class ComponentLayerTest extends TestCase
     {
         $html = $this->render('<x-settings-row :label="$l"><input name="x"></x-settings-row>', ['l' => 'Row&nbsp;<b>x</b>']);
 
-        $this->assertStringContainsString('class="rowhead nowrap"', $html);
-        $this->assertStringContainsString('class="rowfollow"', $html);
+        $this->assertStringContainsString('class="rowhead nowrap nx-va-top nx-align-right"', $html);
+        $this->assertStringContainsString('class="rowfollow nx-va-top"', $html);
         $this->assertStringContainsString('Row&amp;nbsp;&lt;b&gt;x&lt;/b&gt;', $html);
         $this->assertStringContainsString('<input name="x">', $html);
     }

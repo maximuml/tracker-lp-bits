@@ -333,8 +333,9 @@ document.body.addEventListener("click", function (e) {
     var box = link.closest("[data-type]")
     var type = box.getAttribute("data-type");
     var url = link.getAttribute("href") + "&userid={$user['id']}&type=" + type;
-    var result = ajax.gets(url);
-    box.innerHTML = result
+    ajax.fetchText(url).then(function (result) {
+        box.innerHTML = result
+    })
 })
 $claimJs
 JS, 'footer', false);

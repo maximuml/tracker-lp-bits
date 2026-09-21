@@ -58,19 +58,15 @@ window.serializeForm = function (form) {
 
 /* ===== ajaxbasic.js ===== */
 function $(e){if(typeof e=='string')e=document.getElementById(e);return e};
-function collect(a,f){var n=[];for(var i=0;i<a.length;i++){var v=f(a[i]);if(v!=null)n.push(v)}return n};
 
 ajax={};
 ajax.csrfToken=function(){var m=document.querySelector('meta[name="csrf-token"]');return m?m.getAttribute('content'):''};
 ajax.x=function(){try{return new ActiveXObject('Msxml2.XMLHTTP')}catch(e){try{return new ActiveXObject('Microsoft.XMLHTTP')}catch(e){return new XMLHttpRequest()}}};
-ajax.serialize=function(f){var g=function(n){return f.getElementsByTagName(n)};var nv=function(e){if(e.name)return encodeURIComponent(e.name)+'='+encodeURIComponent(e.value);else return ''};var i=collect(g('input'),function(i){if((i.type!='radio'&&i.type!='checkbox')||i.checked)return nv(i)});var s=collect(g('select'),nv);var t=collect(g('textarea'),nv);return i.concat(s).concat(t).join('&');};
 ajax.send=function(u,f,m,a){var x=ajax.x();x.open(m,u,true);x.onreadystatechange=function(){if(x.readyState==4)f(x.responseText)};if(m=='POST'){x.setRequestHeader('Content-type','application/x-www-form-urlencoded');var t=ajax.csrfToken();if(t)x.setRequestHeader('X-CSRF-TOKEN',t)}x.send(a)};
 ajax.get=function(url,func){ajax.send(url,func,'GET')};
-ajax.gets=function(url){var x=ajax.x();x.open('GET',url,false);x.send(null);return x.responseText};
 ajax.post=function(url,func,args){ajax.send(url,func,'POST',args)};
-ajax.posts=function(url,args){var x=ajax.x(); x.open('POST',url,false); x.setRequestHeader('Content-type','application/x-www-form-urlencoded');var t=ajax.csrfToken();if(t)x.setRequestHeader('X-CSRF-TOKEN',t); x.send(args); return x.responseText};
-ajax.update=function(url,elm){var e=$(elm);var f=function(r){e.innerHTML=r};ajax.get(url,f)};
-ajax.submit=function(url,elm,frm){var e=$(elm);var f=function(r){e.innerHTML=r};ajax.post(url,f,ajax.serialize(frm))};
+ajax.fetchText=function(url){return fetch(url,{credentials:'same-origin',headers:{'X-Requested-With':'XMLHttpRequest'}}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.text()})};
+ajax.postText=function(url,body){return fetch(url,{method:'POST',credentials:'same-origin',headers:{'Content-type':'application/x-www-form-urlencoded','X-CSRF-TOKEN':ajax.csrfToken(),'X-Requested-With':'XMLHttpRequest'},body:body}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.text()})};
 
 /* ===== nx-tooltip.js ===== */
 /**
@@ -327,10 +323,18 @@ if (list) { list.classList.toggle('nx-hidden'); }
 
 function viewfilelist(torrentid)
 {
-var result=ajax.gets('viewfilelist.php?id='+torrentid);
+var filelist=document.getElementById("filelist");
+if (!filelist) { return; }
+filelist.innerHTML='<i>Loading...</i>';
 document.getElementById("showfl").style.display = 'none';
 document.getElementById("hidefl").style.display = 'block';
+ajax.fetchText('viewfilelist.php?id='+torrentid).then(function(result){
 showlist(result);
+}).catch(function(){
+filelist.innerHTML="";
+document.getElementById("hidefl").style.display = 'none';
+document.getElementById("showfl").style.display = 'block';
+});
 }
 
 function showlist(filelist)
@@ -349,11 +353,20 @@ document.getElementById("filelist").innerHTML="";
 
 function viewpeerlist(torrentid)
 {
-var list=ajax.gets('viewpeerlist.php?id='+torrentid);
+var peerlist=document.getElementById("peerlist");
+if (!peerlist) { return; }
+peerlist.innerHTML='<i>Loading...</i>';
 document.getElementById("showpeer").style.display = 'none';
 document.getElementById("hidepeer").style.display = 'block';
 document.getElementById("peercount").style.display = 'none';
-document.getElementById("peerlist").innerHTML=list;
+ajax.fetchText('viewpeerlist.php?id='+torrentid).then(function(list){
+peerlist.innerHTML=list;
+}).catch(function(){
+peerlist.innerHTML="";
+document.getElementById("hidepeer").style.display = 'none';
+document.getElementById("showpeer").style.display = 'block';
+document.getElementById("peercount").style.display = 'block';
+});
 }
 function hidepeerlist()
 {
@@ -374,22 +387,24 @@ function SmileIT(smile,form,text){
 
 function saythanks(torrentid)
 {
-var list=ajax.post('thanks.php','','id='+torrentid);
+ajax.post('thanks.php',function(){
 document.getElementById("thanksbutton").innerHTML = document.getElementById("thanksadded").innerHTML;
 document.getElementById("nothanks").innerHTML = "";
 document.getElementById("addcuruser").innerHTML = document.getElementById("curuser").innerHTML;
+},'id='+torrentid);
 }
 
 // preview.js
 
 function preview(obj) {
 	var poststr = encodeURIComponent( document.getElementById("body").value );
-	var result=ajax.posts('preview.php','body='+poststr);
+	ajax.postText('preview.php','body='+poststr).then(function(result){
 	document.getElementById("previewouter").innerHTML=result;
 	document.getElementById("previewouter").style.display = 'block';
 	document.getElementById("editorouter").style.display = 'none';
 	document.getElementById("unpreviewbutton").style.display = 'block';
 	document.getElementById("previewbutton").style.display = 'none';
+	});
 }
 
 function unpreview(obj){
@@ -497,8 +512,7 @@ window.attachEvent("onkeydown",changepage,false);
 // bookmark.js
 function bookmark(torrentid,counter)
 {
-var result=ajax.gets('bookmark.php?torrentid='+torrentid);
-bmicon(result,counter);
+ajax.fetchText('bookmark.php?torrentid='+torrentid).then(function(result){bmicon(result,counter)}).catch(function(){});
 }
 function bmicon(status,counter)
 {
@@ -592,9 +606,16 @@ document.getElementById("name").value=noext;
 // in userdetails.php
 function getusertorrentlistajax(userid, type, blockid)
 {
-if (document.getElementById(blockid).innerHTML==""){
-var infoblock=ajax.gets('getusertorrentlistajax.php?userid='+userid+'&type='+type);
-document.getElementById(blockid).innerHTML=infoblock;
+var block=document.getElementById(blockid);
+if (!block) { return true; }
+if (block.innerHTML=="" && !block.getAttribute('data-utl-loading')){
+block.setAttribute('data-utl-loading','1');
+ajax.fetchText('getusertorrentlistajax.php?userid='+userid+'&type='+type).then(function(infoblock){
+block.innerHTML=infoblock;
+block.removeAttribute('data-utl-loading');
+}).catch(function(){
+block.removeAttribute('data-utl-loading');
+});
 }
 return true;
 }
@@ -758,6 +779,18 @@ document.addEventListener('click', function (e) {
         return;
     }
 
+    var utlLink = target.closest('a[data-utl]');
+    if (utlLink) {
+        if (typeof getusertorrentlistajax === 'function') {
+            getusertorrentlistajax(utlLink.getAttribute('data-utl-user'), utlLink.getAttribute('data-utl'), utlLink.getAttribute('data-utl-block'));
+        }
+        if (utlLink.hasAttribute('data-klappe') && typeof klappe_news === 'function') {
+            klappe_news(utlLink.getAttribute('data-klappe'));
+        }
+        e.preventDefault();
+        return;
+    }
+
     var klappeLink = target.closest('a[data-klappe]');
     if (klappeLink) {
         if (typeof klappe_news === 'function') { klappe_news(klappeLink.getAttribute('data-klappe')); }
@@ -860,18 +893,6 @@ document.addEventListener('click', function (e) {
             hidepeerlist();
         } else if (typeof viewpeerlist === 'function') {
             viewpeerlist(pid);
-        }
-        e.preventDefault();
-        return;
-    }
-
-    var utlLink = target.closest('a[data-utl]');
-    if (utlLink) {
-        if (typeof getusertorrentlistajax === 'function') {
-            getusertorrentlistajax(utlLink.getAttribute('data-utl-user'), utlLink.getAttribute('data-utl'), utlLink.getAttribute('data-utl-block'));
-        }
-        if (utlLink.hasAttribute('data-klappe') && typeof klappe_news === 'function') {
-            klappe_news(utlLink.getAttribute('data-klappe'));
         }
         e.preventDefault();
         return;

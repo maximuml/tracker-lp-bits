@@ -8,6 +8,7 @@ use App\Repositories\MessageRepository;
 use App\Repositories\NotificationFeedRepository;
 use App\Repositories\ShoutboxRepository;
 use App\Repositories\StaffMessageRepository;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Unified notification feed: unread PMs, shoutbox @mentions, comments on the
@@ -228,6 +229,7 @@ final class NotificationFeed
                 'staffmessages.subject',
                 'staffmessages.msg',
                 'users.username as sender_username',
+                DB::raw('UNIX_TIMESTAMP(staffmessages.added) as ts'),
             ]);
 
         foreach ($rows as $row) {
@@ -238,7 +240,7 @@ final class NotificationFeed
                 'body' => $this->truncate((string) $row->msg),
                 'from' => (string) ($row->sender_username ?? 'System'),
                 'url' => 'staffbox.php?action=viewanswer&msgid='.(int) $row->id,
-                'timestamp' => $row->added instanceof \DateTimeInterface ? $row->added->getTimestamp() : (int) strtotime((string) $row->added),
+                'timestamp' => (int) $row->getAttribute('ts'),
             ];
         }
 

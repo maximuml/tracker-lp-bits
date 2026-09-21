@@ -16,6 +16,7 @@ use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ModerationController;
 use App\Http\Controllers\MyController;
 use App\Http\Controllers\NewsController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OfferController;
 use App\Http\Controllers\PollController;
 use App\Http\Controllers\RssController;
@@ -176,6 +177,8 @@ Route::get('/attachment', [UtilityController::class, 'attachment'])->middleware(
 Route::post('/attachment', [UtilityController::class, 'attachmentStore'])->middleware('throttle:attachment');
 Route::get('/getattachment', [UtilityController::class, 'getattachment'])->middleware('throttle:attachment')->name('getattachment.legacy');
 Route::get('/shoutbox_history', [ShoutboxController::class, 'shoutboxHistory'])->name('shoutbox_history.legacy');
+Route::get('/notifications', [NotificationController::class, 'index'])->middleware('throttle:ajax')->name('notifications.legacy');
+Route::post('/notifications', [NotificationController::class, 'markRead'])->middleware('throttle:ajax')->name('notifications.read.legacy');
 Route::get('/latestcomments', [ForumController::class, 'latestcomments'])->name('latestcomments.legacy');
 Route::get('/bonus-log', [BonusHistoryController::class, 'bonusLog'])->name('bonus-log.legacy');
 Route::get('/medal', [BonusShopController::class, 'medal'])->name('medal.legacy');

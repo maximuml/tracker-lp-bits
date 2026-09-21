@@ -700,6 +700,10 @@ final class SiteChromeViewModel
             'shoutboxMention' => __('legacy/index.toast_shoutbox_mention'),
             'from' => __('legacy/index.toast_from'),
             'close' => __('legacy/index.toast_close'),
+            'bell' => __('legacy/notifications.title_bell'),
+            'markAllRead' => __('legacy/notifications.mark_all_read'),
+            'empty' => __('legacy/notifications.empty'),
+            'loadError' => __('legacy/notifications.load_error'),
             'userId' => $userId,
         ], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT);
         AssetAppender::js("window.TOAST_LANG = $toastLang;", 'footer', false, 'toast-lang');

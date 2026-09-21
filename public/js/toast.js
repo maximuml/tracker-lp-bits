@@ -3,10 +3,20 @@
 
     var lang = window.TOAST_LANG || {};
     var USER_ID = lang.userId || 0;
-    var LS_PM = 'toast_last_pm_id_' + USER_ID;
-    var LS_SHOUT = 'toast_last_shout_id_' + USER_ID;
     var INTERVAL = 30000;
     var CONTAINER_ID = 'nexus-toast-container';
+
+    function lsKey(channel) {
+        return 'toast_last_' + channel + '_id_' + USER_ID;
+    }
+
+    function getCursor(channel) {
+        return parseInt(localStorage.getItem(lsKey(channel)) || '0', 10);
+    }
+
+    function setCursor(channel, id) {
+        localStorage.setItem(lsKey(channel), String(id));
+    }
 
     function t(key, fallback) {
         return lang[key] || fallback;
@@ -23,8 +33,11 @@
             document.body.appendChild(container);
         }
 
-        var firstFetch = fetchNotifications(localStorage.getItem(LS_PM) === null);
+        var firstFetch = fetchNotifications(localStorage.getItem(lsKey('pm')) === null);
         Promise.resolve(firstFetch).then(connectSse, connectSse);
+
+        refreshBadge();
+        initBell();
     }
 
     function connectSse() {
@@ -33,11 +46,11 @@
             return;
         }
         try {
-            var lastPmId = parseInt(localStorage.getItem(LS_PM) || '0', 10);
-            var lastShoutId = parseInt(localStorage.getItem(LS_SHOUT) || '0', 10);
             var url = 'shoutbox_sse.php?type=notifications'
-                + '&last_pm_id=' + encodeURIComponent(lastPmId)
-                + '&last_shout_id=' + encodeURIComponent(lastShoutId);
+                + '&last_pm_id=' + encodeURIComponent(getCursor('pm'))
+                + '&last_shout_id=' + encodeURIComponent(getCursor('shout'))
+                + '&last_comment_id=' + encodeURIComponent(getCursor('comment'))
+                + '&last_reply_id=' + encodeURIComponent(getCursor('topic_reply'));
             eventSource = new EventSource(url);
             eventSource.addEventListener('notifications', function (e) {
                 try {
@@ -66,9 +79,12 @@
     }
 
     function fetchNotifications(init) {
-        var lastPmId = parseInt(localStorage.getItem(LS_PM) || '0', 10);
-        var lastShoutId = parseInt(localStorage.getItem(LS_SHOUT) || '0', 10);
-        var params = { last_pm_id: lastPmId, last_shout_id: lastShoutId };
+        var params = {
+            last_pm_id: getCursor('pm'),
+            last_shout_id: getCursor('shout'),
+            last_comment_id: getCursor('comment'),
+            last_reply_id: getCursor('topic_reply')
+        };
         if (init) {
             params.init = 1;
         }
@@ -98,17 +114,227 @@
             return;
         }
         if (data.cursors) {
-            localStorage.setItem(LS_PM, data.cursors.last_pm_id);
-            localStorage.setItem(LS_SHOUT, data.cursors.last_shout_id);
+            setCursor('pm', data.cursors.pm);
+            setCursor('shout', data.cursors.shout);
+            setCursor('comment', data.cursors.comment);
+            setCursor('topic_reply', data.cursors.topic_reply);
         }
         if (init) {
             return;
         }
         var notifications = data.notifications || [];
+        var delta = 0;
         notifications.forEach(function (n) {
             showToast(n);
+            if (n.type !== 'pm') { delta++; }
+        });
+        bumpBadge(delta);
+    }
+
+    // ---- header bell ----
+
+    function bellElements() {
+        return {
+            bell: document.getElementById('nx-notif-bell'),
+            badge: document.getElementById('nx-notif-badge'),
+            panel: document.getElementById('nx-notif-panel')
+        };
+    }
+
+    function initBell() {
+        var els = bellElements();
+        if (!els.bell || !els.panel) { return; }
+
+        els.bell.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (els.panel.classList.contains('nx-hidden')) {
+                els.bell.setAttribute('aria-expanded', 'true');
+                openPanel(els.panel);
+            } else {
+                els.bell.setAttribute('aria-expanded', 'false');
+                closePanel(els.panel);
+            }
+        });
+
+        document.addEventListener('click', function (e) {
+            if (!els.panel.classList.contains('nx-hidden')
+                && !els.panel.contains(e.target)
+                && !els.bell.contains(e.target)) {
+                els.bell.setAttribute('aria-expanded', 'false');
+                closePanel(els.panel);
+            }
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                els.bell.setAttribute('aria-expanded', 'false');
+                closePanel(els.panel);
+            }
         });
     }
+
+    function openPanel(panel) {
+        panel.classList.remove('nx-hidden');
+        renderLoading(panel);
+        fetch('notifications', {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            credentials: 'same-origin'
+        }).then(function (res) { return res.json(); }).then(function (response) {
+            if (!response || response.ret !== 0 || !response.data) {
+                renderError(panel);
+                return;
+            }
+            renderPanel(panel, response.data);
+            setBadge(Math.max(0, (response.data.counts.total || 0) - (response.data.counts.pm || 0)));
+        }).catch(function () {
+            renderError(panel);
+        });
+    }
+
+    function closePanel(panel) {
+        panel.classList.add('nx-hidden');
+    }
+
+    function renderLoading(panel) {
+        panel.innerHTML = '';
+        var div = document.createElement('div');
+        div.className = 'nx-notif-empty';
+        div.textContent = '…';
+        panel.appendChild(div);
+    }
+
+    function renderError(panel) {
+        panel.innerHTML = '';
+        var div = document.createElement('div');
+        div.className = 'nx-notif-empty';
+        div.textContent = t('loadError', 'Failed to load');
+        panel.appendChild(div);
+    }
+
+    function renderPanel(panel, data) {
+        panel.innerHTML = '';
+
+        var head = document.createElement('div');
+        head.className = 'nx-notif-head';
+        var title = document.createElement('span');
+        title.className = 'nx-notif-title';
+        title.textContent = t('bell', 'Notifications');
+        var mark = document.createElement('button');
+        mark.type = 'button';
+        mark.className = 'nx-notif-mark';
+        mark.textContent = t('markAllRead', 'Mark all read');
+        mark.addEventListener('click', function (e) {
+            e.stopPropagation();
+            markAllRead(panel);
+        });
+        head.appendChild(title);
+        head.appendChild(mark);
+        panel.appendChild(head);
+
+        var list = document.createElement('div');
+        list.className = 'nx-notif-list';
+        var items = data.items || [];
+        if (items.length === 0) {
+            var empty = document.createElement('div');
+            empty.className = 'nx-notif-empty';
+            empty.textContent = t('empty', 'No new notifications');
+            list.appendChild(empty);
+        }
+        items.forEach(function (n) {
+            list.appendChild(renderItem(n));
+        });
+        panel.appendChild(list);
+    }
+
+    function renderItem(n) {
+        var a = document.createElement('a');
+        a.className = 'nx-notif-item nx-notif-' + (n.type || 'info');
+        a.href = n.url || '#';
+
+        var title = document.createElement('div');
+        title.className = 'nx-notif-item-title';
+        title.textContent = n.context ? n.context : (n.title || '');
+        a.appendChild(title);
+
+        var meta = document.createElement('div');
+        meta.className = 'nx-notif-item-meta';
+        var bits = [];
+        if (n.title) { bits.push(n.title); }
+        if (n.from) { bits.push(n.from); }
+        if (n.timestamp) { bits.push(relativeTime(n.timestamp)); }
+        meta.textContent = bits.join(' · ');
+        a.appendChild(meta);
+
+        if (n.body) {
+            var body = document.createElement('div');
+            body.className = 'nx-notif-item-body';
+            body.textContent = n.body;
+            a.appendChild(body);
+        }
+        return a;
+    }
+
+    function markAllRead(panel) {
+        var csrfMeta = document.querySelector('meta[name="csrf-token"]');
+        fetch('notifications', {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': csrfMeta ? csrfMeta.getAttribute('content') : ''
+            },
+            credentials: 'same-origin'
+        }).then(function (res) { return res.json(); }).then(function (response) {
+            if (response && response.ret === 0) {
+                setBadge(0);
+                renderPanel(panel, { items: [], counts: { total: 0 } });
+            }
+        }).catch(function () {});
+    }
+
+    function setBadge(count) {
+        var els = bellElements();
+        if (!els.badge) { return; }
+        if (count > 0) {
+            els.badge.textContent = count > 99 ? '99+' : String(count);
+            els.badge.classList.remove('nx-hidden');
+        } else {
+            els.badge.textContent = '0';
+            els.badge.classList.add('nx-hidden');
+        }
+    }
+
+    function bumpBadge(delta) {
+        if (delta <= 0) { return; }
+        var els = bellElements();
+        if (!els.badge) { return; }
+        var cur = parseInt(els.badge.textContent || '0', 10);
+        if (isNaN(cur)) { cur = 0; }
+        setBadge(cur + delta);
+    }
+
+    function refreshBadge() {
+        var els = bellElements();
+        if (!els.badge) { return; }
+        fetch('notifications', {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            credentials: 'same-origin'
+        }).then(function (res) { return res.json(); }).then(function (response) {
+            if (response && response.ret === 0 && response.data && response.data.counts) {
+                setBadge(Math.max(0, (response.data.counts.total || 0) - (response.data.counts.pm || 0)));
+            }
+        }).catch(function () {});
+    }
+
+    function relativeTime(ts) {
+        var diff = Math.max(0, Math.floor(Date.now() / 1000) - ts);
+        if (diff < 60) { return '<1m'; }
+        if (diff < 3600) { return Math.floor(diff / 60) + 'm'; }
+        if (diff < 86400) { return Math.floor(diff / 3600) + 'h'; }
+        return Math.floor(diff / 86400) + 'd';
+    }
+
+    // ---- toasts ----
 
     function showToast(n) {
         var container = document.getElementById(CONTAINER_ID);

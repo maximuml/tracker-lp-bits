@@ -1,5 +1,5 @@
 <p>{{ __('legacy/offers.text_red_star_required') }}<span class="nx-color-red">*</span>{{ __('legacy/offers.text_red_star_required_end') }}</p>
-<div align="center"><form id="compose" action="?new_offer=1" name="compose" method="post">
+<div class="nx-center"><form id="compose" action="?new_offer=1" name="compose" method="post">
 @csrf
 <div class="nx-fgrid nx-fgrid--flat">
 <div class="nx-ffull nx-colhead nx-center">{{ __('legacy/offers.text_offers_open_to_all')}}</div>

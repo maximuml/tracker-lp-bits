@@ -1,4 +1,4 @@
-@extends('layouts.legacy')
+@extends('layouts.app', ['chromeVariant' => 'legacy'])
 
 @section('title', \App\Support\Locale::trans('search.global_search', [], null))
 

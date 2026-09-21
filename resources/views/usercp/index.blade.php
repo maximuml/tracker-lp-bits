@@ -1,5 +1,5 @@
 
-@extends('layouts.modern')
+@extends('layouts.app')
 
 @section('title', $title ?? (__('legacy/usercp.head_control_panel')))
 

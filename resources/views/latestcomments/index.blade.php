@@ -1,4 +1,4 @@
-@extends('layouts.legacy')
+@extends('layouts.app', ['chromeVariant' => 'legacy'])
 
 @section('title', $title ?? (__('legacy/functions.text_latest_comments')))
 

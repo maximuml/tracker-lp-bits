@@ -10,14 +10,15 @@ use Illuminate\Support\Facades\App;
 use Illuminate\View\View;
 
 /**
- * Injects the shared page chrome into `layouts.modern` and the chrome
+ * Injects the shared page chrome into `layouts.app` and the chrome
  * partials (ADR 0018).
  *
  * Class-based composer so the repository arrives via container injection
  * instead of service location inside the view model. The page title is read
- * from the already-rendered child's `title` section. Views that already
- * carry a `chrome` variable — `PageRenderer` passes the legacy variant
- * explicitly — are left untouched.
+ * from the already-rendered child's `title` section. The chrome variant is
+ * read from the `chromeVariant` view data (`@extends('layouts.app', [...])`);
+ * `legacy` pages render their chrome through `PageRenderer` and views that
+ * already carry a `chrome` variable are left untouched.
  */
 final class SiteChromeComposer
 {
@@ -31,8 +32,20 @@ final class SiteChromeComposer
             return;
         }
 
+        $data = $view->getData();
+        $variant = (string) ($data['chromeVariant'] ?? 'modern');
+        $view->with('chromeVariant', $variant);
+        $view->with('shell', (string) ($data['shell'] ?? match ($variant) {
+            'legacy' => 'boxed',
+            'auth' => 'auth',
+            default => 'bare',
+        }));
+
+        if ($variant === 'legacy') {
+            return;
+        }
+
         $title = trim($view->getFactory()->yieldContent('title'));
-        $variant = $view->name() === 'layouts.auth' ? 'auth' : 'modern';
         $view->with('chrome', SiteChromeViewModel::load($title, $this->layouts, variant: $variant));
         $view->with('locale', str_replace('_', '-', App::getLocale()));
     }

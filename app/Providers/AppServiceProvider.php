@@ -237,12 +237,11 @@ class AppServiceProvider extends ServiceProvider
         });
 
         // Variant A (ADR 0014) / ADR 0018: inject the semantic chrome view
-        // model into the modern layout and the shared chrome partials.
+        // model into the app layout and the shared chrome partials.
         // Class-based so dependencies resolve via the container rather than
         // service location inside the view model.
         View::composer([
-            'layouts.modern',
-            'layouts.auth',
+            'layouts.app',
             'layouts.partials.head-assets',
             'layouts.partials.header',
             'layouts.partials.footer',

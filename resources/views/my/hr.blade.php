@@ -1,4 +1,4 @@
-@extends('layouts.legacy')
+@extends('layouts.app', ['chromeVariant' => 'legacy'])
 
 @section('title', ($userInfo->username ?? '') . ' - H&R')
 

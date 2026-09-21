@@ -1,4 +1,4 @@
-@extends('layouts.auth')
+@extends('layouts.app', ['chromeVariant' => 'auth'])
 
 @section('title', __('legacy/confirm_resend.resend_confirmation_email_failed'))
 

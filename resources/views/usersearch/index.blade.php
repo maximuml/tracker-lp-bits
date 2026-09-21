@@ -1,5 +1,5 @@
 
-@extends('layouts.legacy')
+@extends('layouts.app', ['chromeVariant' => 'legacy'])
 
 @section('title', $title ?? 'Administrative User Search')
 

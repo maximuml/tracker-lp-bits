@@ -1,4 +1,4 @@
-@extends('layouts.legacy')
+@extends('layouts.app', ['chromeVariant' => 'legacy'])
 
 @section('title', $title ?? (__('legacy/shoutbox.text_history_title')))
 

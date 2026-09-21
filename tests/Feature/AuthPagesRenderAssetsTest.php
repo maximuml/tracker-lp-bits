@@ -11,7 +11,7 @@ use Tests\TestCase;
 
 /**
  * Regression test for the Stage-0 auth-layout regression:
- * `layouts/auth` rendered `AssetAppender` output through `{{ }}`,
+ * `layouts/app` (auth variant) rendered `AssetAppender` output through `{{ }}`,
  * which escaped the appended `<script>`/`<link>` tags into visible
  * text — signup (`auth-form.js`) and passkey login (`passkey.js`)
  * silently broke while every test suite stayed green.

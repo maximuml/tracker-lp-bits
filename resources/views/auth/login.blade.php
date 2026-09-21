@@ -1,4 +1,4 @@
-@extends('layouts.auth')
+@extends('layouts.app', ['chromeVariant' => 'auth'])
 
 @section('title', __('legacy/login.head_login'))
 

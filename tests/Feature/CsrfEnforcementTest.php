@@ -32,7 +32,7 @@ final class CsrfEnforcementTest extends TestCase
 
     public function test_csrf_meta_tag_present_in_auth_layout(): void
     {
-        $view = view('layouts.auth')->render();
+        $view = view('layouts.app', ['chromeVariant' => 'auth'])->render();
         $this->assertStringContainsString('name="csrf-token"', $view);
     }
 

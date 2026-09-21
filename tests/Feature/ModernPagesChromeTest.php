@@ -13,7 +13,7 @@ use Tests\TestCase;
 /**
  * Structural assertions for the remaining Variant-A page chrome swaps
  * (ADR 0014): /details, /forums and /usercp keep their section markup
- * but render inside the semantic `layouts.modern` shell instead of the
+ * but render inside the semantic `layouts.app` shell instead of the
  * legacy `PageRenderer::headerHtml` chrome.
  */
 #[TestCategory(TestCategory::HTTP_FEATURE)]

@@ -35,6 +35,9 @@ final class RouteInventoryTest extends TestCase
         'signup' => true,
         'takesignup' => true,
         'recover' => true,
+        // SEC-02: password reset POST — authenticates via the one-time
+        // recovery token in the request, not via a session guard
+        'recover/reset' => true,
         'confirm_resend' => true,
         'api/v1/login' => true,
         'api/challenge' => true,

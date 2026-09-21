@@ -222,13 +222,14 @@
 
     window.textBBCodePreview = function () {
         var poststr = encodeURIComponent(document.getElementById(textareaId).value);
-        var result = ajax.posts('preview.php', 'body=' + poststr);
-        document.getElementById(editTbodyId).style.display = 'none';
-        var previewEl = document.getElementById(previewTbodyId);
-        previewEl.innerHTML = result;
-        previewEl.style.display = '';
-        document.getElementById(btnPreviewId).style.display = 'none';
-        document.getElementById(btnEditId).style.display = '';
+        ajax.postText('preview.php', 'body=' + poststr).then(function (result) {
+            document.getElementById(editTbodyId).style.display = 'none';
+            var previewEl = document.getElementById(previewTbodyId);
+            previewEl.innerHTML = result;
+            previewEl.style.display = '';
+            document.getElementById(btnPreviewId).style.display = 'none';
+            document.getElementById(btnEditId).style.display = '';
+        });
     };
 
     window.textBBCodeEdit = function () {

@@ -75,18 +75,24 @@ class PerformanceTestDatasetSeeder extends Seeder
     }
 
     /**
-     * Create 10 deterministic test users.
+     * Create 26 deterministic test users.
+     *
+     * 26 because the k6 many_peers_one_torrent scenario needs one distinct
+     * user per real announce (the tracker allows a single leeching peer per
+     * user+torrent): users 1-2 are reserved for steady_announce, leaving 24
+     * for the many-peers burst so its p95 rests on 24 real inserts instead
+     * of 8.
      */
     private function createTestUsers(): void
     {
         $existing = User::where('username', 'like', self::TEST_USER_PREFIX.'%')->count();
-        if ($existing >= 10) {
+        if ($existing >= 26) {
             return;
         }
 
         $class = DB::table('users')->where('username', 'sysop')->value('class') ?? 3;
 
-        for ($i = 1; $i <= 10; $i++) {
+        for ($i = 1; $i <= 26; $i++) {
             $username = self::TEST_USER_PREFIX.$i;
             if (User::where('username', $username)->exists()) {
                 continue;

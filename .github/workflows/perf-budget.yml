@@ -114,7 +114,7 @@ jobs:
           INFO_HASHES=$(docker compose exec -T php php artisan tinker --execute='echo App\Models\Torrent::where("name","like","perf-torrent-%")->orderBy("id")->limit(5)->pluck("info_hash")->implode(",");' 2>/dev/null | tr -d '[:space:]')
           # The tracker allows one leeching peer per (user, torrent) — multi-peer
           # scenarios need several distinct users.
-          PASSKEYS=$(docker compose exec -T php php artisan tinker --execute='echo App\Models\User::where("username","like","perf_user_%")->orderBy("id")->limit(10)->pluck("passkey")->implode(",");' 2>/dev/null | tr -d '[:space:]')
+          PASSKEYS=$(docker compose exec -T php php artisan tinker --execute='echo App\Models\User::where("username","like","perf_user_%")->orderBy("id")->limit(26)->pluck("passkey")->implode(",");' 2>/dev/null | tr -d '[:space:]')
           # Degradation runs after announce.js left peer rows — use a torrent
           # no other scenario touches.
           DEGRADED_HASH=$(docker compose exec -T php php artisan tinker --execute='echo App\Models\Torrent::where("name","perf-torrent-6")->value("info_hash") ?? "";' 2>/dev/null | tr -d '[:space:]')

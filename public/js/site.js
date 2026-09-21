@@ -1211,6 +1211,17 @@ document.addEventListener('error', function (e) {
             applyTheme(next);
             storeTheme(next);
             paintAll();
+            try {
+                var frames = document.querySelectorAll('iframe');
+                for (var k = 0; k < frames.length; k++) {
+                    var doc = frames[k].contentDocument;
+                    if (doc && doc.documentElement && doc.documentElement.hasAttribute('data-theme')) {
+                        doc.documentElement.setAttribute('data-theme', next);
+                    }
+                }
+            } catch (e) {
+                /* cross-origin frame — ignore */
+            }
             if (persistUrl) {
                 var meta = document.querySelector('meta[name="csrf-token"]');
                 fetch(persistUrl, {

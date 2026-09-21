@@ -30,6 +30,7 @@ use App\Utils\ApiQueryBuilder;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 /**
@@ -243,8 +244,10 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
             'passhash' => $passhash,
             'passhash_algo' => PasswordHasher::ALGO_ARGON2ID,
             'auth_key' => Token::randomHex((int) 20),
+            'auth_version' => DB::raw('auth_version + 1'),
         ];
-        $user->update($update);
+        User::query()->where('id', $user->id)->update($update);
+        Cache::clearUser((int) $user->id, '');
 
         return true;
     }

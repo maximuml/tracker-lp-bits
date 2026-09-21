@@ -133,6 +133,7 @@ class EmailConfirmation
             'passhash_algo' => $passwordData['passhash_algo'],
             'secret' => $passwordData['secret'],
             'editsecret' => $passwordData['secret'],
+            'auth_version' => DB::raw('auth_version + 1'),
         ]);
 
         if (! $affected) {

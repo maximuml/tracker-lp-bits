@@ -4,7 +4,7 @@
 
 @section('content')
     @if (request()->query('status') === 'reset')
-        <div class="nx-auth__success">Your password has been reset. Please check your email for the new password.</div>
+        <div class="nx-auth__success">{{ __('legacy/recover.text_password_reset_success') }}</div>
     @endif
 
     @if ($error)

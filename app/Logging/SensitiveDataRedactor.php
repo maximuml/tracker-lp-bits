@@ -109,7 +109,7 @@ final class SensitiveDataRedactor
      * when request parameters are stringified via ``Json::encode`` or
      * ``sprintf`` before being passed to the logger.
      */
-    private function redactString(string $value): string
+    public function redactString(string $value): string
     {
         foreach (self::SENSITIVE_KEYS as $key) {
             // JSON: "password":"secret123"
@@ -121,7 +121,7 @@ final class SensitiveDataRedactor
 
             // query-string / sprintf: password=secret123
             $value = preg_replace(
-                '/\b('.preg_quote($key, '/').')\s*=\s*[^&,\s\]"\']+/i',
+                '/\b('.preg_quote($key, '/').')\s*[:=]\s*[^&,\s\]"\']+/i',
                 '$1='.self::PLACEHOLDER,
                 $value,
             ) ?? $value;

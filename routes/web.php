@@ -70,6 +70,9 @@ Route::get('/recover', [RecoveryController::class, 'recover'])
     ->name('recover');
 Route::post('/recover', [RecoveryController::class, 'recover'])
     ->middleware('throttle:login');
+Route::post('/recover/reset', [RecoveryController::class, 'resetPassword'])
+    ->middleware('throttle:login')
+    ->name('recover.reset');
 
 Route::get('/error', [ToolController::class, 'error']);
 
@@ -112,6 +115,8 @@ Route::post('/usercp', [UsercpController::class, 'legacyAction'])
 Route::group(['prefix' => 'web', 'middleware' => ['auth.nexus:nexus-web', 'throttle:legacy']], function () {
     Route::post('usercp/theme', [UsercpController::class, 'saveTheme'])
         ->name('usercp.theme');
+    Route::post('usercp/logout-all', [AuthWebController::class, 'logoutAllDevices'])
+        ->name('usercp.logout-all');
     Route::get('torrent-approval-page', [TorrentController::class, 'approvalPage']);
     Route::get('torrent-approval-logs', [TorrentController::class, 'approvalLogs']);
     Route::post('torrent-approval', [TorrentController::class, 'approval']);

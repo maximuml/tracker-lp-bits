@@ -17,7 +17,7 @@ final class AuthCookieTest extends TestCase
 
     public function test_build_token_returns_encrypted_string(): void
     {
-        $token = AuthCookie::buildToken(42, null, 1700000000);
+        $token = AuthCookie::buildToken(42, null, 1700000000, 1);
 
         $this->assertNotEmpty($token);
         $this->assertIsString($token);
@@ -26,20 +26,39 @@ final class AuthCookieTest extends TestCase
     public function test_build_token_round_trips_through_verify_token(): void
     {
         $expires = time() + 3600;
-        $token = AuthCookie::buildToken(42, null, $expires);
+        $token = AuthCookie::buildToken(42, null, $expires, 7);
 
         $result = AuthCookie::verifyToken($token);
 
         $this->assertNotNull($result);
         $this->assertSame(42, $result['user_id']);
         $this->assertSame($expires, $result['expires']);
+        $this->assertSame(7, $result['auth_version']);
+    }
+
+    public function test_build_token_rejects_invalid_auth_version(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        AuthCookie::buildToken(42, null, time() + 3600, 0);
+    }
+
+    public function test_verify_token_rejects_invalid_auth_version(): void
+    {
+        $token = Crypt::encryptString((string) json_encode([
+            'user_id' => 42,
+            'expires' => time() + 3600,
+            'auth_version' => '7',
+        ]));
+
+        $this->assertNull(AuthCookie::verifyToken($token));
     }
 
     public function test_build_token_ignores_legacy_auth_key(): void
     {
         $expires = time() + 3600;
-        $a = AuthCookie::buildToken(1, 'key-a', $expires);
-        $b = AuthCookie::buildToken(1, 'key-b', $expires);
+        $a = AuthCookie::buildToken(1, 'key-a', $expires, 1);
+        $b = AuthCookie::buildToken(1, 'key-b', $expires, 1);
 
         // Both decrypt to the same payload; the per-user auth_key is no longer used.
         $this->assertSame(AuthCookie::verifyToken($a)['user_id'], AuthCookie::verifyToken($b)['user_id']);
@@ -57,7 +76,7 @@ final class AuthCookieTest extends TestCase
 
     public function test_verify_token_expired_returns_null(): void
     {
-        $token = AuthCookie::buildToken(99, null, time() - 100);
+        $token = AuthCookie::buildToken(99, null, time() - 100, 1);
 
         $this->assertNull(AuthCookie::verifyToken($token));
     }
@@ -137,7 +156,7 @@ final class AuthCookieTest extends TestCase
     {
         Cache::forget(AuthCookie::LEGACY_COOKIE_COUNTER_KEY);
 
-        $token = AuthCookie::buildToken(99, null, time() + 3600);
+        $token = AuthCookie::buildToken(99, null, time() + 3600, 1);
 
         AuthCookie::verifyToken($token);
 

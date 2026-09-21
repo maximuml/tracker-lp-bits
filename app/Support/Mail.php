@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Contracts\Repositories\ToolRepositoryInterface;
+use App\Logging\SensitiveDataRedactor;
 use App\Models\Setting;
 use App\Support\Config\SiteConfig;
 use Illuminate\Support\Facades\Request;
@@ -85,7 +86,8 @@ final class Mail
         string $hdrEncoding,
         array $mailConfig,
     ): bool {
-        Logger::writeWithContext("to: $to, fromname: $fromName, fromemail: $fromEmail, subject: $subject, body: $body. type: $type");
+        $logBody = SensitiveDataRedactor::instance()->redactString($body);
+        Logger::writeWithContext("to: $to, fromname: $fromName, fromemail: $fromEmail, subject: $subject, body: $logBody. type: $type");
 
         $siteName = $mailConfig['site_name'] ?? '';
         $siteEmail = $mailConfig['site_email'] ?? '';

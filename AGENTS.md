@@ -112,19 +112,24 @@ Decision → Consequences). Add new ADRs here as numbered subsections.
 ### ADR 0001: NexusWebGuard for cookie-based auth (Accepted, Sprint 0)
 
 - **Context:** NexusPHP authenticates via a signed `c_secure_pass` cookie
-  (user ID + expiry, encrypted with the app key, or HMAC-signed with the
-  per-user `auth_key` in the legacy format). The standard `session` guard
-  could not accept existing cookies without forcing re-login, and
-  BitTorrent clients authenticate via passkey, not sessions.
+  (user ID + expiry + `users.auth_version`, encrypted with the app key, or
+  HMAC-signed with the per-user `auth_key` in the legacy format). The
+  standard `session` guard could not accept existing cookies without
+  forcing re-login, and BitTorrent clients authenticate via passkey, not
+  sessions.
 - **Decision:** Custom `NexusWebGuard` (`StatefulGuard`) reads the cookie via
   `AuthCookie::verifyToken()`, falls back to legacy HMAC verification using
   `users.auth_key`, resolves the `User` via `NexusWebUserProvider`, and is
-  registered as the `nexus-web` guard in `config/auth.php`. A separate
-  `passkey` guard handles tracker clients; Sanctum handles the API.
+  registered as the `nexus-web` guard in `config/auth.php`. Cookie payloads
+  must carry the current `users.auth_version`; password changes, password
+  resets, auth-key rotation, hash upgrades, and logout-all increment it.
+  Cookies without a version are rejected. A separate `passkey` guard handles
+  tracker clients; Sanctum handles the API.
 - **Consequences:** Sessions survive the migration; clear web/API/tracker
-  separation. Cost: custom guard needs its own security review and manual
-  implementation of standard auth features. The legacy HMAC fallback should
-  be removed once all cookies have rotated to the encrypted format (W1-04).
+  separation, and password/reset flows revoke previously issued web cookies.
+  Cost: custom guard needs its own security review and manual implementation
+  of standard auth features. The legacy HMAC fallback should be removed once
+  all cookies have rotated to the encrypted format (W1-04).
 
 ### ADR 0002: LegacyRequestMiddleware for URL rewriting (Accepted, Sprint 17; Octane-safe since T-11)
 

@@ -26,7 +26,7 @@ final class LegacyUrlRewriter
      * the full path is preserved for routing (e.g. /health/diag must not
      * collapse to /health).
      */
-    private const LARAVEL_PATH_PREFIXES = ['health', 'metrics'];
+    private const LARAVEL_PATH_PREFIXES = ['health', 'metrics', 'recover'];
 
     public function rewrite(Request $request): Request
     {
@@ -93,7 +93,7 @@ final class LegacyUrlRewriter
                 $pathInfo = '';
             } elseif (preg_match('#^/([a-zA-Z0-9_-]+)(?:\.php)?(/.*)?$#', $requestPath, $matches)) {
                 if (in_array($matches[1], self::LARAVEL_PATH_PREFIXES, true)) {
-                    $routePath = $requestPath;
+                    $routePath = '/'.$matches[1].($matches[2] ?? '');
                     $pathInfo = '';
                 } else {
                     $routePath = '/'.$matches[1];

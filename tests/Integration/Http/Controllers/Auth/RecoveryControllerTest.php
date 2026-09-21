@@ -6,10 +6,12 @@ namespace Tests\Integration\Http\Controllers\Auth;
 
 use App\Exceptions\AuthenticationException;
 use App\Http\Controllers\Auth\RecoveryController;
+use App\Http\Requests\Auth\PasswordResetRequest;
 use App\Http\Requests\Auth\RecoverRequest;
 use App\Services\PasswordRecoveryService;
 use App\Services\WebAuthService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Mockery;
@@ -103,11 +105,74 @@ final class RecoveryControllerTest extends TestCase
         $this->assertSame('Email not found.', $response->getSession()->get('error'));
     }
 
-    public function test_recover_get_with_id_and_secret_resets_password(): void
+    public function test_recover_get_with_id_and_secret_shows_password_form(): void
+    {
+        $secret = str_repeat('a', 64);
+
+        /** @var PasswordRecoveryService&Mockery\MockInterface $recoveryService */
+        $recoveryService = Mockery::mock(PasswordRecoveryService::class);
+        $recoveryService->shouldReceive('validateResetToken')
+            ->once()
+            ->with(1, $secret)
+            ->andReturn(['id' => 10, 'user_id' => 1]);
+
+        /** @var WebAuthService&Mockery\MockInterface $authService */
+        $authService = Mockery::mock(WebAuthService::class);
+        $authService->shouldReceive('isCaptchaEnabled')->once()->andReturnFalse();
+        $authService->shouldReceive('remainingAttempts')->once()->andReturn(10);
+        $authService->shouldReceive('maxLoginAttempts')->once()->andReturn(10);
+
+        $guard = Mockery::mock();
+        $guard->shouldReceive('check')->once()->andReturn(false);
+        Auth::shouldReceive('guard')->with('nexus-web')->once()->andReturn($guard);
+
+        $controller = new RecoveryController($recoveryService, $authService);
+        $request = RecoverRequest::create('/recover', 'GET', ['id' => 1, 'secret' => $secret]);
+
+        $response = $controller->recover($request);
+
+        $this->assertInstanceOf(Response::class, $response);
+        $this->assertStringContainsString('name="password"', $response->getContent());
+        $this->assertStringContainsString('name="password_confirmation"', $response->getContent());
+        $this->assertSame('no-referrer', $response->headers->get('referrer-policy'));
+    }
+
+    public function test_recover_get_with_invalid_link_shows_request_form(): void
     {
         /** @var PasswordRecoveryService&Mockery\MockInterface $recoveryService */
         $recoveryService = Mockery::mock(PasswordRecoveryService::class);
-        $recoveryService->shouldReceive('resetPassword')->once();
+        $recoveryService->shouldReceive('validateResetToken')->once()->andReturn(null);
+
+        /** @var WebAuthService&Mockery\MockInterface $authService */
+        $authService = Mockery::mock(WebAuthService::class);
+        $authService->shouldReceive('isCaptchaEnabled')->once()->andReturnFalse();
+        $authService->shouldReceive('remainingAttempts')->once()->andReturn(10);
+        $authService->shouldReceive('maxLoginAttempts')->once()->andReturn(10);
+
+        $guard = Mockery::mock();
+        $guard->shouldReceive('check')->once()->andReturn(false);
+        Auth::shouldReceive('guard')->with('nexus-web')->once()->andReturn($guard);
+
+        $controller = new RecoveryController($recoveryService, $authService);
+        $request = RecoverRequest::create('/recover', 'GET', ['id' => 1, 'secret' => 'bad']);
+
+        $response = $controller->recover($request);
+
+        $this->assertInstanceOf(Response::class, $response);
+        $this->assertStringContainsString('invalid, expired, or already used', $response->getContent());
+        $this->assertStringContainsString('name="email"', $response->getContent());
+        $this->assertStringNotContainsString('name="password"', $response->getContent());
+    }
+
+    public function test_reset_password_posts_new_password_and_redirects(): void
+    {
+        $secret = str_repeat('b', 64);
+
+        /** @var PasswordRecoveryService&Mockery\MockInterface $recoveryService */
+        $recoveryService = Mockery::mock(PasswordRecoveryService::class);
+        $recoveryService->shouldReceive('resetPassword')
+            ->once()
+            ->with(1, $secret, 'NewPass123', 'NewPass123');
 
         /** @var WebAuthService&Mockery\MockInterface $authService */
         $authService = Mockery::mock(WebAuthService::class);
@@ -116,21 +181,27 @@ final class RecoveryControllerTest extends TestCase
         $guard->shouldReceive('check')->once()->andReturn(false);
         Auth::shouldReceive('guard')->with('nexus-web')->once()->andReturn($guard);
 
-        Redirect::shouldReceive('to')->with('/login?status=reset')->once()->andReturn(
-            new RedirectResponse('/login?status=reset')
-        );
-
         $controller = new RecoveryController($recoveryService, $authService);
-        $request = RecoverRequest::create('/recover', 'GET', ['id' => 1, 'secret' => 'abc123']);
+        $request = PasswordResetRequest::create('/recover/reset', 'POST', [
+            'id' => 1,
+            'secret' => $secret,
+            'password' => 'NewPass123',
+            'password_confirmation' => 'NewPass123',
+        ]);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
-        $response = $controller->recover($request);
+        $response = $controller->resetPassword($request);
 
         $this->assertTrue($response->isRedirect());
-        $this->assertStringContainsString('status=reset', $response->getTargetUrl());
+        $this->assertStringContainsString('/login?status=reset', $response->getTargetUrl());
     }
 
-    public function test_recover_get_with_id_and_secret_redirects_back_on_exception(): void
+    public function test_reset_password_redirects_back_to_link_on_exception(): void
     {
+        $secret = str_repeat('c', 64);
+
         /** @var PasswordRecoveryService&Mockery\MockInterface $recoveryService */
         $recoveryService = Mockery::mock(PasswordRecoveryService::class);
         $recoveryService->shouldReceive('resetPassword')
@@ -145,11 +216,20 @@ final class RecoveryControllerTest extends TestCase
         Auth::shouldReceive('guard')->with('nexus-web')->once()->andReturn($guard);
 
         $controller = new RecoveryController($recoveryService, $authService);
-        $request = RecoverRequest::create('/recover', 'GET', ['id' => 1, 'secret' => 'bad']);
+        $request = PasswordResetRequest::create('/recover/reset', 'POST', [
+            'id' => 1,
+            'secret' => $secret,
+            'password' => 'NewPass123',
+            'password_confirmation' => 'NewPass123',
+        ]);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
 
-        $response = $controller->recover($request);
+        $response = $controller->resetPassword($request);
 
         $this->assertTrue($response->isRedirect());
+        $this->assertStringContainsString('/recover?id=1&secret=', $response->getTargetUrl());
         $this->assertSame('Invalid reset link.', $response->getSession()->get('error'));
     }
 }

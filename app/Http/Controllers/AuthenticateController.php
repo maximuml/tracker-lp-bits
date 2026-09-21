@@ -117,7 +117,7 @@ class AuthenticateController extends Controller
             $user = User::query()->where('passkey', $passkey)->first(['id', 'passhash', 'secret', 'auth_key']);
             if ($user) {
                 $ip = Network::clientIp();
-                AuthCookie::setLoginCookie((int) $user->id, (string) $user->auth_key, (int) 0);
+                AuthCookie::setLoginCookie((int) $user->id, null, (int) 0);
                 $user->last_login = now();
                 $user->save();
                 $this->userRepository->saveLoginLog($user->id, $ip, 'Passkey', false);
@@ -160,7 +160,7 @@ class AuthenticateController extends Controller
             $user = User::query()->where('passkey', $passkey)->first(['id', 'passhash', 'secret', 'auth_key']);
             if ($user) {
                 $ip = Network::clientIp();
-                AuthCookie::setLoginCookie((int) $user->id, (string) $user->auth_key, (int) 0);
+                AuthCookie::setLoginCookie((int) $user->id, null, (int) 0);
                 $user->last_login = now();
                 $user->save();
                 $this->userRepository->saveLoginLog($user->id, $ip, 'Passkey', false);

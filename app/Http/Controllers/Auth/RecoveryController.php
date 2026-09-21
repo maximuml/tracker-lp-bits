@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Exceptions\AuthenticationException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\PasswordResetRequest;
 use App\Http\Requests\Auth\RecoverRequest;
 use App\Models\Setting;
 use App\Services\PasswordRecoveryService;
@@ -16,9 +17,10 @@ use App\Support\Locale;
 use App\Support\Network;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
-use Illuminate\View\View;
+use Illuminate\Support\ViewErrorBag;
 
 class RecoveryController extends Controller
 {
@@ -27,7 +29,7 @@ class RecoveryController extends Controller
         private WebAuthService $authService,
     ) {}
 
-    public function recover(RecoverRequest $request): View|RedirectResponse
+    public function recover(RecoverRequest $request): Response|RedirectResponse
     {
         if (Auth::guard('nexus-web')->check()) {
             return Redirect::to('index.php');
@@ -59,37 +61,89 @@ class RecoveryController extends Controller
 
         $id = (int) $request->query('id', 0);
         $secret = (string) $request->query('secret', '');
+        $hasResetLink = $request->query->has('id') || $request->query->has('secret');
+        $resetToken = $id > 0 && $secret !== ''
+            ? $this->recoveryService->validateResetToken($id, $secret)
+            : null;
 
-        if ($id > 0 && $secret !== '') {
-            try {
-                $this->recoveryService->resetPassword($id, $secret);
-            } catch (AuthenticationException $exception) {
-                return $this->backWithError($request, $exception->getMessage());
-            }
+        return $this->renderRecover(
+            $request,
+            $langFolder,
+            $id > 0 ? $id : null,
+            $resetToken !== null ? $secret : null,
+            $hasResetLink && $resetToken === null
+                ? (string) __('legacy/recover.std_invalid_reset_link')
+                : null,
+            $hasResetLink,
+        );
+    }
 
-            return Redirect::to('/login?status=reset');
+    public function resetPassword(PasswordResetRequest $request): RedirectResponse
+    {
+        if (Auth::guard('nexus-web')->check()) {
+            return Redirect::to('index.php');
         }
 
-        $secret = (string) $request->query('secret', '');
+        $validated = $request->validated();
+        $id = (int) $validated['id'];
+        $secret = (string) $validated['secret'];
+
+        try {
+            $this->recoveryService->resetPassword(
+                $id,
+                $secret,
+                (string) $validated['password'],
+                (string) $validated['password_confirmation'],
+            );
+        } catch (AuthenticationException $exception) {
+            return Redirect::to($this->recoverUrl($id, $secret))
+                ->with('error', $exception->getMessage());
+        }
+
+        return Redirect::to('/login?status=reset');
+    }
+
+    private function renderRecover(
+        Request $request,
+        string $langFolder,
+        ?int $resetUserId,
+        ?string $resetToken,
+        ?string $resetError,
+        bool $isResetLink,
+    ): Response {
         $captchaEnabled = $this->authService->isCaptchaEnabled();
         $captchaMarkup = '';
 
-        if ($captchaEnabled) {
-            $captchaMarkup = Captcha::renderHtml('yes', $secret, 'grid');
+        if ($captchaEnabled && $resetToken === null) {
+            $captchaMarkup = Captcha::renderHtml('yes', (string) $request->query('secret', ''), 'grid');
         }
 
-        return view('auth.recover', [
+        $response = response()->view('auth.recover', [
             'langFolder' => $langFolder,
             'languages' => Locale::languageList('site_lang', true),
             'captchaEnabled' => $captchaEnabled,
             'captchaMarkup' => SafeHtml::fromTrustedHtml($captchaMarkup),
-            'secret' => $secret,
+            'resetUserId' => $resetUserId,
+            'resetToken' => $resetToken,
+            'resetError' => $resetError,
             'status' => $request->query('status', ''),
             'remaining' => $this->authService->remainingAttempts(Network::clientIp()),
             'maxAttempts' => $this->authService->maxLoginAttempts(),
             'siteName' => Setting::getSiteName(),
-            'error' => $request->session()->get('error'),
+            'error' => $request->hasSession() ? $request->session()->get('error') : null,
+            'errors' => $request->hasSession()
+                ? $request->session()->get('errors', new ViewErrorBag)
+                : new ViewErrorBag,
         ]);
+
+        if ($isResetLink) {
+            $response->headers->set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+            $response->headers->set('Pragma', 'no-cache');
+            $response->headers->set('Referrer-Policy', 'no-referrer');
+            $response->headers->set('X-Robots-Tag', 'noindex, nofollow');
+        }
+
+        return $response;
     }
 
     private function resolveLangFolder(Request $request): string
@@ -102,10 +156,18 @@ class RecoveryController extends Controller
         return Locale::folderFromCookie($folder);
     }
 
+    private function recoverUrl(int $id, string $secret): string
+    {
+        return '/recover?'.http_build_query([
+            'id' => $id,
+            'secret' => $secret,
+        ]);
+    }
+
     private function backWithError(Request $request, string $message): RedirectResponse
     {
         return Redirect::back()
-            ->withInput($request->except('wantpassword', 'passagain'))
+            ->withInput($request->except('wantpassword', 'passagain', 'password', 'password_confirmation'))
             ->with('error', $message);
     }
 }

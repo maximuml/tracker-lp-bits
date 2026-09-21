@@ -429,9 +429,9 @@ final class Tag
      */
     public static function buildTable(array $header, iterable $rows, array $options = []): string
     {
-        $table = '<table border="1" cellspacing="0" cellpadding="5" width="100%"><thead><tr>';
+        $table = '<table data-nx="data"><thead><tr>';
         foreach ($header as $value) {
-            $table .= sprintf('<td class="colhead">%s</td>', htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8'));
+            $table .= sprintf('<th class="colhead" scope="col">%s</th>', htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8'));
         }
         $table .= '</tr></thead><tbody>';
 

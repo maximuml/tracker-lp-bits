@@ -4,8 +4,8 @@
 <div class="nx-fcell">
 @else
 <tr>
-    <td class="rowhead nowrap" valign="top" align="right">{{ $label }}</td>
-    <td class="rowfollow" valign="top" align="left">
+    <td class="rowhead nowrap nx-va-top nx-align-right">{{ $label }}</td>
+    <td class="rowfollow nx-va-top">
 @endif<input type="submit" name="save" value="{{ $text }}">@if ($layout === 'grid')
 </div>
 @else

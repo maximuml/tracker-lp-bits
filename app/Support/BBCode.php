@@ -227,7 +227,7 @@ final class BBCode
         $videoId = is_scalar($videoIdValue) ? (string) $videoIdValue : '';
 
         return sprintf(
-            '<iframe width="%s" height="%s" src="https://www.youtube.com/embed/%s" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>',
+            '<iframe width="%s" height="%s" src="https://www.youtube.com/embed/%s" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>',
             $width,
             $height,
             $videoId

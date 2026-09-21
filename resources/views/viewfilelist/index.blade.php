@@ -15,10 +15,10 @@
 .fileicon.fi-torrent  { background:#8e44ad; }
 .fileicon.fi-other    { background:#95a5a6; }
 </style>
-<table data-nx="data" class="main" border="1" cellspacing=0 cellpadding="5">
-<tr><th class="colhead" scope="col">{{ __('legacy/viewfilelist.col_path') }}</th><th class="colhead" align=center scope="col"><img class="size" src="pic/trans.gif" alt="size" /></th></tr>
+<table data-nx="data" class="main">
+<tr><th class="colhead" scope="col">{{ __('legacy/viewfilelist.col_path') }}</th><th class="colhead" scope="col"><img class="size" src="pic/trans.gif" alt="size" /></th></tr>
 @foreach ($files as $file)
-<tr><td class=rowfollow><span class="fileicon fi-{{ $file['badge']['cat'] }}" title="{{ $file['badge']['cat'] }}">{{ $file['badge']['label'] }}</span>{{ $file['filename'] }}</td><td class=rowfollow align="right">{{ $file['size'] }}</td></tr>
+<tr><td class="rowfollow"><span class="fileicon fi-{{ $file['badge']['cat'] }}" title="{{ $file['badge']['cat'] }}">{{ $file['badge']['label'] }}</span>{{ $file['filename'] }}</td><td class="rowfollow nx-align-right">{{ $file['size'] }}</td></tr>
 @endforeach
 </table>
 @endisset

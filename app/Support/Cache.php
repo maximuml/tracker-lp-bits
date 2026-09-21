@@ -133,7 +133,7 @@ final class Cache
             if ($endpage) {
                 $cacheMtime = filemtime($cachefile);
                 $cacheMtime = $cacheMtime === false ? null : $cacheMtime;
-                echo '<p align="center"><span class="small">'.(__('legacy/functions.text_page_last_updated')).date('Y-m-d H:i:s', $cacheMtime).'</span></p>';
+                echo '<p class="nx-center"><span class="small">'.(__('legacy/functions.text_page_last_updated')).date('Y-m-d H:i:s', $cacheMtime).'</span></p>';
                 echo "</td></tr></table>\n";
                 Html::stdfoot();
                 exit;

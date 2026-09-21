@@ -3,7 +3,7 @@
 @section('title', __('legacy/getrss.head_rss_feeds'))
 
 @section('content')
-<h1 align="center">{{ __('legacy/getrss.text_rss_feeds') }}</h1>
+<h1 class="nx-center">{{ __('legacy/getrss.text_rss_feeds') }}</h1>
 <form method="post" action="getrss.php">
 @csrf
 <div class="nx-fgrid nx-fgrid--flat nx-w-97">

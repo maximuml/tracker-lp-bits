@@ -33,21 +33,21 @@
 
 {{ $pagertop ?? '' }}
 
-<table data-nx="data" border=1 cellspacing=0 cellpadding=5>
+<table data-nx="data">
 <tr>
-    <th class="colhead" align=left scope="col">{{ __('legacy/users.col_user_name')}}</th>
+    <th class="colhead nx-align-left" scope="col">{{ __('legacy/users.col_user_name')}}</th>
     <th class="colhead" scope="col">{{ __('legacy/users.col_registered')}}</th>
     <th class="colhead" scope="col">{{ __('legacy/users.col_last_access')}}</th>
-    <th class="colhead" align=left scope="col">{{ __('legacy/users.col_class')}}</th>
+    <th class="colhead nx-align-left" scope="col">{{ __('legacy/users.col_class')}}</th>
     <th class="colhead" scope="col">{{ __('legacy/users.col_country')}}</th>
 </tr>
 @foreach ($rows as $row)
 <tr>
-    <td align=left>{{ $row['username_html'] }}</td>
+    <td>{{ $row['username_html'] }}</td>
     <td>{{ $row['addedFormatted'] }}</td>
     <td>{{ $row['lastAccessFormatted'] }}</td>
-    <td align=left>{{ $row['class_name'] }}</td>
-    <td align=center>@if ($row['country'] > 0)<img src="pic/flag/{{ $row['country_flagpic'] }}" alt="{{ $row['country_name'] }}">@else---@endif</td>
+    <td>{{ $row['class_name'] }}</td>
+    <td class="nx-center">@if ($row['country'] > 0)<img src="pic/flag/{{ $row['country_flagpic'] }}" alt="{{ $row['country_name'] }}">@else---@endif</td>
 </tr>
 @endforeach
 </table>

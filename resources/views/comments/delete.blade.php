@@ -10,7 +10,7 @@
     @if (! empty($returnto))
         <input type="hidden" name="returnto" value="{{ $returnto }}">
     @endif
-    <p align="center">
+    <p class="nx-center">
         <button type="submit">{{ $confirmLabel }}</button>
         @if (($cancelLabel ?? '') !== '')
             &nbsp;|&nbsp;

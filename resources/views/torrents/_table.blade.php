@@ -1,5 +1,5 @@
 {{-- Modern torrents listing table (Variant A, ADR 0014). Replaces TorrentTable::render — data arrives prepared in $listVm. --}}
-<table class="nx-torrents nxm-table" data-nx="data" cellspacing="0" cellpadding="5" width="100%"><caption class="nx-sr-only">{{ __('legacy/torrents.head_torrents') }}</caption>
+<table class="nx-torrents nxm-table" data-nx="data"><caption class="nx-sr-only">{{ __('legacy/torrents.head_torrents') }}</caption>
 <thead>
 <tr>
     @foreach ($listVm->columns as $col)
@@ -20,8 +20,8 @@
 <tbody>
 @foreach ($listVm->rows as $row)
 <tr @if ($row->rowClass !== null) class="{{ $row->rowClass }}" @endif>
-    <td class="rowfollow nowrap nxm-td-icon" valign="middle"><x-torrent.category-icon :icon="$row->categoryIcon" :second="$row->secondIcon" /></td>
-    <td class="rowfollow nxm-td-name" width="100%" align="left">
+    <td class="rowfollow nowrap nxm-td-icon"><x-torrent.category-icon :icon="$row->categoryIcon" :second="$row->secondIcon" /></td>
+    <td class="rowfollow nxm-td-name nx-w-99p">
         <div class="torrentname nxm-nameblock">
             @if ($row->coverSrc !== null)
             <div class="nx-embedded nxm-cover"><img src="pic/misc/spinner.svg" data-src="{{ $row->coverSrc }}" class="nexus-lazy-load nxm-cover__img" alt="" /></div>
@@ -48,7 +48,7 @@
     @endif
     <td class="rowfollow nowrap nxm-td-added"><x-time :value="$row->added" :ago="false" :two-line="true" /></td>
     <td class="rowfollow nxm-td-size">{{ $row->size['value'] }}<br /> {{ $row->size['unit'] }}</td>
-    <td class="rowfollow nxm-td-seeders" align="center" data-label="{{ 'S' }}">
+    <td class="rowfollow nxm-td-seeders nx-center" data-label="{{ 'S' }}">
         @if ($row->seedersUrl)
             <b><a href="{{ $row->seedersUrl }}">@if ($row->seedersClass)<span class="{{ $row->seedersClass }}">{{ number_format($row->seeders) }}</span>@else{{ number_format($row->seeders) }}@endif</a></b>
         @else
@@ -57,7 +57,7 @@
     </td>
     <td class="rowfollow nxm-td-leechers" data-label="{{ 'L' }}">@if ($row->leechersUrl)<b><a href="{{ $row->leechersUrl }}">{{ number_format($row->leechers) }}</a></b>@else{{ $row->leechers }}@endif</td>
     <td class="rowfollow nxm-td-snatched" data-label="{{ 'Sn' }}">@if ($row->snatchedUrl)<a href="{{ $row->snatchedUrl }}"><b>{{ number_format($row->snatched) }}</b></a>@else{{ number_format($row->snatched) }}@endif</td>
-    <td class="rowfollow nxm-td-uploader" align="center">
+    <td class="rowfollow nxm-td-uploader nx-center">
         @if ($row->uploaderAnonymous)
             <i>{{ __('legacy/functions.text_anonymous') }}</i>@if ($row->uploaderShowOwner)<br />@if ($row->uploaderName)({{ $row->uploaderName }})@else(<i>{{ __('legacy/functions.text_orphaned') }}</i>)@endif @endif
         @elseif ($row->uploaderName)
@@ -74,7 +74,7 @@
 </tbody>
 </table>
 @if ($listVm->showPromotionNote)
-<p class="nxm-note" align="center">{{ \App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/functions.text_promoted_torrents_note')) }}</p>
+<p class="nxm-note nx-center">{{ \App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/functions.text_promoted_torrents_note')) }}</p>
 @endif
 @if ($listVm->lastCommentTooltips !== [])
 <div class="nx-hidden">

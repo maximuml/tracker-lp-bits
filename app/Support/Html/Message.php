@@ -40,6 +40,6 @@ final class Message
             ? 'msg-alert-'.$bgcolor
             : 'msg-alert-red';
 
-        return '<table border="0" cellspacing="0" cellpadding="10" class="msg-alert"><tr><td class="'.$colorClass.'">'."\n".$inner.'</td></tr></table><br />';
+        return '<table class="msg-alert"><tr><td class="'.$colorClass.'">'."\n".$inner.'</td></tr></table><br />';
     }
 }

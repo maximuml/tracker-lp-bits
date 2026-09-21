@@ -10,7 +10,7 @@
     <input type="hidden" name="id" value="{{ $vm->hiddenId }}" />
     <input type="hidden" name="type" value="{{ $vm->hiddenType }}" />
     @if (! $vm->titleHtml->isEmpty())
-    <h1 align="center">{{ $vm->titleHtml }}</h1>
+    <h1 class="nx-center">{{ $vm->titleHtml }}</h1>
     @endif
     <x-frame :caption="$vm->frameCaption()" :center="true">
         <div class="nx-fgrid nx-fgrid--flat">
@@ -26,4 +26,4 @@
         </div>
     </x-frame>
 </form>
-<p align="center"><a href="tags.php" target="_blank">{{ __('legacy/functions.text_tags') }}</a> | <a href="smilies.php" target="_blank">{{ __('legacy/functions.text_smilies') }}</a></p>
+<p class="nx-center"><a href="tags.php" target="_blank">{{ __('legacy/functions.text_tags') }}</a> | <a href="smilies.php" target="_blank">{{ __('legacy/functions.text_smilies') }}</a></p>

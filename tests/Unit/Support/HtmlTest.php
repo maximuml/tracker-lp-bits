@@ -491,7 +491,7 @@ final class HtmlTest extends TestCase
     public function test_message_alert_with_url_wraps_text_in_anchor(): void
     {
         $this->assertSame(
-            '<table border="0" cellspacing="0" cellpadding="10" class="msg-alert"><tr><td class="msg-alert-red">'."\n"
+            '<table class="msg-alert"><tr><td class="msg-alert-red">'."\n"
             .'<b><a href="https://example.com/notice" target=\'_blank\'><span class="nx-color-white">Important notice</span></a></b></td></tr></table><br />',
             Html::messageAlert('https://example.com/notice', 'Important notice'),
         );
@@ -500,7 +500,7 @@ final class HtmlTest extends TestCase
     public function test_message_alert_with_empty_url_omits_anchor(): void
     {
         $this->assertSame(
-            '<table border="0" cellspacing="0" cellpadding="10" class="msg-alert"><tr><td class="msg-alert-red">'."\n"
+            '<table class="msg-alert"><tr><td class="msg-alert-red">'."\n"
             .'<b><span class="nx-color-white">Plain alert</span></b></td></tr></table><br />',
             Html::messageAlert('', 'Plain alert'),
         );
@@ -562,8 +562,8 @@ final class HtmlTest extends TestCase
         );
 
         $this->assertSame(
-            '<table border="1" cellspacing="0" cellpadding="5" width="100%">'
-            .'<thead><tr><td class="colhead">Name</td><td class="colhead">Age</td></tr></thead>'
+            '<table data-nx="data">'
+            .'<thead><tr><th class="colhead" scope="col">Name</th><th class="colhead" scope="col">Age</th></tr></thead>'
             .'<tbody>'
             .'<tr><td class="">Alice</td><td class="">30</td></tr>'
             .'<tr><td class="">Bob</td><td class="">25</td></tr>'
@@ -604,7 +604,7 @@ final class HtmlTest extends TestCase
 
         $this->assertStringContainsString('<td class="colfollow">v</td>', $output);
         // header cells stay colhead regardless of the option.
-        $this->assertStringContainsString('<td class="colhead">X</td>', $output);
+        $this->assertStringContainsString('<th class="colhead" scope="col">X</th>', $output);
     }
 
     public function test_build_table_escapes_markup_for_xss_safety(): void
@@ -616,7 +616,7 @@ final class HtmlTest extends TestCase
             [['c' => '<i>v</i>']],
         );
 
-        $this->assertStringContainsString('<td class="colhead">&lt;b&gt;H&lt;/b&gt;</td>', $output);
+        $this->assertStringContainsString('<th class="colhead" scope="col">&lt;b&gt;H&lt;/b&gt;</th>', $output);
         $this->assertStringContainsString('<td class="">&lt;i&gt;v&lt;/i&gt;</td>', $output);
     }
 

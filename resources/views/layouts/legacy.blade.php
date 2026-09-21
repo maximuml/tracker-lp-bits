@@ -4,7 +4,7 @@
     $stdheadScript ?? '',
     $stdheadPlace ?? ''
 ) }}
-<table class="main" width="{{ CONTENT_WIDTH }}" border="0" cellspacing="0" cellpadding="0"><tr><td class="embedded" >
+<table class="main nx-mx-auto" width="{{ CONTENT_WIDTH }}" cellspacing="0" cellpadding="0"><tr><td class="embedded" >
 
 @yield('content')
 

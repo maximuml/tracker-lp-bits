@@ -26,7 +26,7 @@
                             <input type="hidden" name="cmd" value="_xclick">
                             <input type="hidden" name="business" value="{{ $paypal }}">
                             <input type="hidden" name="item_name" value="Donation to {{ $SITENAME }}">
-                            <p align="center">
+                            <p class="nx-center">
                                 <br />
                                 {{ __('legacy/donate.text_select_donation_amount') }}<br />
                                 <select name="amount">
@@ -45,8 +45,8 @@
                             <input type="hidden" name="currency_code" value="USD">
                             <input type="hidden" name="return" value="{{ $baseUrl }}/donate.php?do=thanks">
                             <input type="hidden" name="cancel_return" value="{{ $baseUrl }}/donate.php">
-                            <p align="center">
-                                <input type="image" src="pic/paypalbutton.gif" border="0" name="I1" alt="Make payments with PayPal">
+                            <p class="nx-center">
+                                <input type="image" src="pic/paypalbutton.gif" name="I1" alt="Make payments with PayPal">
                                 <br /><br />
                             </p>
                         </form>
@@ -58,8 +58,8 @@
                         <form action="https://www.alipay.com/trade/fast_pay.htm" method="get">
                             {{ __('legacy/donate.text_donate_alipay_note_one') }} <br />{{ __('legacy/donate.text_donate_alipay_note_one_two') }} <br />{{ __('legacy/donate.text_donate_alipay_note_one_three') }}<b>{{ $alipay }}</b>{{ __('legacy/donate.text_donate_alipay_note_two') }} <br />{{ __('legacy/donate.text_donate_alipay_note_two_two') }}
                             <br /><br /><br /><br /><br />
-                            <p align="center">
-                                <input type="image" src="pic/alipaybutton.gif" border="0" name="I2" alt="Make payments with Alipay" />
+                            <p class="nx-center">
+                                <input type="image" src="pic/alipaybutton.gif" name="I2" alt="Make payments with Alipay" />
                                 <br /><br />
                             </p>
                         </form>

@@ -4,7 +4,7 @@
 @else
 {{ $offer_vote['pagerTop'] ?? '' }}
 <table data-nx="data">
-<tr><th class="colhead" scope="col">{{ __('legacy/offers.col_user')}}</th><th class="colhead" class="nx-align-left" scope="col">{{ __('legacy/offers.col_vote')}}</th></tr>
+<tr><th class="colhead" scope="col">{{ __('legacy/offers.col_user')}}</th><th class="colhead nx-align-left" scope="col">{{ __('legacy/offers.col_vote')}}</th></tr>
 @foreach ($offer_vote['rows'] as $row)
 <tr><td class=rowfollow>{{ $row['username'] ?? '' }}</td><td class="rowfollow">@if (($row['vote'] ?? '') === 'yeah')<b><span class="nx-color-green">{{ __('legacy/offers.text_for') }}</span></b>@elseif (($row['vote'] ?? '') === 'against')<b><span class="nx-color-red">{{ __('legacy/offers.text_against') }}</span></b>@else{{ 'unknown' }}@endif</td></tr>
 @endforeach

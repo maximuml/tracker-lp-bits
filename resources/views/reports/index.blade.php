@@ -3,8 +3,8 @@
 @section('title', __('legacy/reports.text_reports'))
 
 @section('content')
-<h1 align="center">{{ __('legacy/reports.text_reports')}}</h1>
-<table data-nx="data" border=1 cellspacing=0 cellpadding=5 align=center>
+<h1 class="nx-center">{{ __('legacy/reports.text_reports')}}</h1>
+<table data-nx="data" class="nx-mx-auto">
 <form method=post action=takeupdate.php>
 <tr>
     <th class="colhead" scope="col"><nobr>{{ __('legacy/reports.col_added')}}</nobr></th>
@@ -27,7 +27,7 @@
     </tr>
 @endforeach
 <tr>
-    <th class="colhead" colspan="7" align="right" scope="colgroup">
+    <th class="colhead nx-align-right" colspan="7" scope="colgroup">
         <input type="submit" name="setdealt" value="{{ __('legacy/reports.submit_set_dealt')}}" />
         <input type="submit" name="delete" value="{{ __('legacy/reports.submit_delete')}}" />
     </th>

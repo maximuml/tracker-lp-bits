@@ -61,37 +61,37 @@
 @else
     <p><strong>{{ ($success ?? false) ? '(Updated!)' : '' }}Existing Locations:</strong></p>
 @endif
-<table data-nx="data" class='main' cellspacing=0 cellpadding=5>
+<table data-nx="data">
 <tr>
-<th class="colhead" align=center scope="col"><b>ID</b></th>
-<th class="colhead" align=left scope="col"><b>Name</b></th>
-<th class="colhead" align=center scope="col"><b>Pic</b></th>
-<th class="colhead" align=center scope="col"><b><nobr>Main Location</nobr></b></th>
-<th class="colhead" align=center scope="col"><b><nobr>Sub Location</nobr></b></th>
-<th class="colhead" align=center scope="col"><b>Start IP</b></th>
-<th class="colhead" align=center scope="col"><b>End IP</b></th>
-<th class="colhead" align=center scope="col"><b>T.U</b></th>
-<th class="colhead" align=center scope="col"><b>P.U</b></th>
-<th class="colhead" align=center scope="col"><b>T.D</b></th>
-<th class="colhead" align=center scope="col"><b>P.D</b></th>
-<th class="colhead" align=center scope="col"><b>Edit</b></th>
-<th class="colhead" align=center scope="col"><b>Delete</b></th>
+<th class="colhead" scope="col"><b>ID</b></th>
+<th class="colhead nx-align-left" scope="col"><b>Name</b></th>
+<th class="colhead" scope="col"><b>Pic</b></th>
+<th class="colhead" scope="col"><b><nobr>Main Location</nobr></b></th>
+<th class="colhead" scope="col"><b><nobr>Sub Location</nobr></b></th>
+<th class="colhead" scope="col"><b>Start IP</b></th>
+<th class="colhead" scope="col"><b>End IP</b></th>
+<th class="colhead" scope="col"><b>T.U</b></th>
+<th class="colhead" scope="col"><b>P.U</b></th>
+<th class="colhead" scope="col"><b>T.D</b></th>
+<th class="colhead" scope="col"><b>P.D</b></th>
+<th class="colhead" scope="col"><b>Edit</b></th>
+<th class="colhead" scope="col"><b>Delete</b></th>
 </tr>
 @foreach ($rows ?? [] as $row)
 <tr>
-<td class=rowfollow align=center><strong>{{ (int) $row['id'] }}</strong></td>
-<td class=rowfollow align=left><strong>{{ $row['name'] }}</strong></td>
-<td class=rowfollow align=center>@if ($row['flagpic_url'] ?? '')<img src="{{ $row['flagpic_url'] }}" border="0" />@else-@endif</td>
-<td class=rowfollow align=left>{{ $row['location_main'] }}</td>
-<td class=rowfollow align=left>{{ $row['location_sub'] }}</td>
-<td class=rowfollow align=left>{{ $row['start_ip'] }}</td>
-<td class=rowfollow align=left>{{ $row['end_ip'] }}</td>
-<td class=rowfollow align=left>{{ $row['theory_upspeed'] }}</td>
-<td class=rowfollow align=left>{{ $row['practical_upspeed'] }}</td>
-<td class=rowfollow align=left>{{ $row['theory_downspeed'] }}</td>
-<td class=rowfollow align=left>{{ $row['practical_downspeed'] }}</td>
-<td class=rowfollow align=center><a href='{{ $actionUrl ?? '' }}?editid={{ (int) $row['id'] }}'>Edit</a></td>
-<td class=rowfollow align=center><a href='{{ $actionUrl ?? '' }}?delid={{ (int) $row['id'] }}'>Remove</a></td>
+<td class="rowfollow nx-center"><strong>{{ (int) $row['id'] }}</strong></td>
+<td class="rowfollow"><strong>{{ $row['name'] }}</strong></td>
+<td class="rowfollow nx-center">@if ($row['flagpic_url'] ?? '')<img src="{{ $row['flagpic_url'] }}" />@else-@endif</td>
+<td class="rowfollow">{{ $row['location_main'] }}</td>
+<td class="rowfollow">{{ $row['location_sub'] }}</td>
+<td class="rowfollow">{{ $row['start_ip'] }}</td>
+<td class="rowfollow">{{ $row['end_ip'] }}</td>
+<td class="rowfollow">{{ $row['theory_upspeed'] }}</td>
+<td class="rowfollow">{{ $row['practical_upspeed'] }}</td>
+<td class="rowfollow">{{ $row['theory_downspeed'] }}</td>
+<td class="rowfollow">{{ $row['practical_downspeed'] }}</td>
+<td class="rowfollow nx-center"><a href='{{ $actionUrl ?? '' }}?editid={{ (int) $row['id'] }}'>Edit</a></td>
+<td class="rowfollow nx-center"><a href='{{ $actionUrl ?? '' }}?delid={{ (int) $row['id'] }}'>Remove</a></td>
 </tr>
 @endforeach
 </table>

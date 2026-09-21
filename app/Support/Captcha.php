@@ -56,7 +56,7 @@ final class Captcha
     {
         return $layout === 'grid'
             ? '<div class="nx-fhead">%s</div><div class="nx-fcell">%s</div>'
-            : '<tr><td class="rowhead">%s</td><td align="left">%s</td></tr>';
+            : '<tr><td class="rowhead">%s</td><td>%s</td></tr>';
     }
 
     /**

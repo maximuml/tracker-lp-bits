@@ -508,8 +508,10 @@ button.nx-btn-link {
 .nx-w-10p{width:10%}
 .nx-w-35p{width:35%}
 .nx-w-99p{width:99%}
+.nx-w-25p{width:25%}
 .nx-w-40{width:40px}
 .nx-w-60{width:60px}
+.nx-w-150px{width:150px}
 .nx-va-top{vertical-align:top}
 .nx-va-bottom{vertical-align:bottom}
 .nx-w-80{width:80%}
@@ -520,6 +522,9 @@ button.nx-btn-link {
 .nx-mx-auto{margin-left:auto;margin-right:auto}
 .nx-smilegrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px}
 .nx-nowrap{white-space:nowrap}
+iframe{border:0}
+#iframe-shout-box{width:100%;height:180px}
+.nx-attach-preview{width:100%;height:24px;display:block}
 .nx-center{text-align:center}
 /* Legacy page shell (header/footer wrappers): .nx-head replaces
    table.head, .nx-mainouter replaces table.mainouter, #info_block's

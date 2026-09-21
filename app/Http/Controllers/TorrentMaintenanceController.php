@@ -84,12 +84,12 @@ class TorrentMaintenanceController extends LegacyController
             $value_length = strlen(Bencode::encode($value));
             if (is_iterable($value)) {
                 $type = $this->isIndexedArray(is_array($value) ? $value : iterator_to_array($value)) ? 'list' : 'dictionary';
-                $ret .= "<li><div align='left' class='".$type."'><a href='#' class='js-info-toggle'> + <span class=title>[".$item."]</span> <span class='icon'>(".ucfirst($type).')</span> <span class=length>['.$value_length.']</span></a></div>';
+                $ret .= "<li><div class='".$type."'><a href='#' class='js-info-toggle'> + <span class=title>[".$item."]</span> <span class='icon'>(".ucfirst($type).')</span> <span class=length>['.$value_length.']</span></a></div>';
                 $ret .= "<ul class='nx-hidden'>".$this->torrentStructureBuilder(is_array($value) ? $value : iterator_to_array($value), (string) $item).'</ul></li>';
             } else {
                 $type = is_int($value) ? 'integer' : 'string';
                 $value = ($parent === 'info' && $item === 'pieces') ? '0x'.bin2hex(substr((string) $value, 0, 25)).'...' : $value;
-                $ret .= '<li><div align=left class='.$type.'> - <span class=title>['.$item.']</span> <span class=icon>('.ucfirst($type).')</span> <span class=length>['.$value_length.']</span>: <span class=value>'.$value.'</span></div></li>';
+                $ret .= '<li><div class='.$type.'> - <span class=title>['.$item.']</span> <span class=icon>('.ucfirst($type).')</span> <span class=length>['.$value_length.']</span>: <span class=value>'.$value.'</span></div></li>';
             }
         }
 

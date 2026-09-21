@@ -1,5 +1,5 @@
 	<form id="compose" enctype="multipart/form-data" action="/takeupload" method="post" name="upload">
-			<p align="center">{{ __('legacy/upload.text_red_star_required') }}<span class="nx-color-red">*</span>{{ __('legacy/upload.text_red_star_required_end') }}</p>
+			<p class="nx-center">{{ __('legacy/upload.text_red_star_required') }}<span class="nx-color-red">*</span>{{ __('legacy/upload.text_red_star_required_end') }}</p>
 			<div class="nx-fgrid">
 					<div class="nx-ffull nx-colhead nx-center">
 						{{ __('legacy/upload.text_tracker_url') ?? '' }}: &nbsp;&nbsp;&nbsp;&nbsp;<b>{{ $trackerUrl }}</b>

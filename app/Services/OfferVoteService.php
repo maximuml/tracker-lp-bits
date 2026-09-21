@@ -115,7 +115,7 @@ final class OfferVoteService
         Bonus::updatePoints('+', $offervoteBonus, $userid);
 
         return response(
-            '<h1 align=center>'.__('legacy/offers.std_vote_accepted').'</h1>'
+            '<h1 class="nx-center">'.__('legacy/offers.std_vote_accepted').'</h1>'
             .__('legacy/offers.std_vote_accepted_note')
             ."<a  href=offers.php?id={$offerid}&off_details=1>".__('legacy/offers.std_back_to_offer_detail').'</a>'
         );

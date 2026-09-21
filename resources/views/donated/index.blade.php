@@ -5,7 +5,7 @@
 @section('content')
 <h1>Update Users Donated Amounts</h1>
 @if (($error ?? '') !== '')
-    <p align="center"><span class="striking">{{ $error }}</span></p>
+    <p class="nx-center"><span class="striking">{{ $error }}</span></p>
 @endif
 <form method="post" action="donated.php">
 @csrf

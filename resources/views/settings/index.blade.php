@@ -3,7 +3,7 @@
 @section('title', __('legacy/settings.head_website_settings'))
 
 @section('content')
-<h1 align="center"><a class="faqlink" href="{{ $scriptName }}">{{ __('legacy/settings.text_website_settings') ?? 'Website Settings' }}</a></h1>
+<h1 class="nx-center"><a class="faqlink" href="{{ $scriptName }}">{{ __('legacy/settings.text_website_settings') ?? 'Website Settings' }}</a></h1>
 <div class="nx-fgrid nx-fgrid--pad10">
 <div class="nx-ffull nx-fbanner">
 <span class="nx-color-white">{{ __('legacy/settings.text_configuration_file_saving_note') ?? 'Settings are stored in the database.' }}</span>

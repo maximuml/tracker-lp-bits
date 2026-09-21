@@ -4,7 +4,7 @@
 
 @section('content')
 @if (! $canEdit)
-<h1 align="center">{{ __('legacy/edit.text_cannot_edit_torrent') ?? '' }}</h1>
+<h1 class="nx-center">{{ __('legacy/edit.text_cannot_edit_torrent') ?? '' }}</h1>
 <p>{{ __('legacy/edit.text_cannot_edit_torrent_note') }} <a href="login.php?returnto={{ $requestUri }}&nowarn=1">{{ __('legacy/edit.text_logged_in') }}</a> {{ __('legacy/edit.text_cannot_edit_torrent_note_end') }}</p>
 @else
 <form method="post" id="compose" name="edittorrent" action="/takeedit" enctype="multipart/form-data">

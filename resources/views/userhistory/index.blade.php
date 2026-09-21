@@ -20,8 +20,8 @@
         @if ($item['isNew']) &nbsp;<b>(<span class="new">{{ __('legacy/userhistory.text_new')}}</span>)</b>@endif
         </p>
         <br />
-        <table data-nx="data" class=main width=100% border=1 cellspacing=0 cellpadding=5>
-        <tr valign=top><td class=comment>{{ $item['bodyHtml'] }}</td></tr>
+        <table data-nx="data" class="main">
+        <tr class="nx-va-top"><td class="comment">{{ $item['bodyHtml'] }}</td></tr>
         </table>
         <br />
     @endforeach
@@ -46,8 +46,8 @@
         &nbsp;---&nbsp;<b>{{ __('legacy/userhistory.text_comment') }}&nbsp;</b>#<a href=details.php?id={{ $item['torrentid'] }}&tocomm=1&hit=1{{ $item['pageUrl'] }}>{{ $item['commentid'] }}</a>
         </p>
         <br />
-        <table data-nx="data" class=main width=100% border=1 cellspacing=0 cellpadding=5>
-        <tr valign=top><td class=comment>{{ $item['bodyHtml'] }}</td></tr>
+        <table data-nx="data" class="main">
+        <tr class="nx-va-top"><td class="comment">{{ $item['bodyHtml'] }}</td></tr>
         </table>
         <br />
     @endforeach

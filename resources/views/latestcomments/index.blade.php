@@ -7,7 +7,7 @@
     <x-std-message heading="Sorry" :text="__('legacy/functions.text_no_comments')" :htmlstrip="false" />
 @else
     {{ $pagertop }}
-    <h1 align="center">{{ __('legacy/functions.text_latest_comments')}}</h1>
+    <h1 class="nx-center">{{ __('legacy/functions.text_latest_comments')}}</h1>
     @foreach ($rows as $row)
         <div>
             <div id="cid{{ $row['id'] }}" class="nx-embedded">

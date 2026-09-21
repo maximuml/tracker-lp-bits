@@ -4,7 +4,7 @@
 
 @section('content')
 <div>
-<h1 align="center">{{ __('legacy/uploaders.text_uploaders')}} - {{ date('Y-m', $timeStart) }}</h1>
+<h1 class="nx-center">{{ __('legacy/uploaders.text_uploaders')}} - {{ date('Y-m', $timeStart) }}</h1>
 
 <div>
 <form method="get" action="?">
@@ -20,10 +20,10 @@
 </div>
 
 @if (empty($rows))
-<p align="center">{{ __('legacy/uploaders.text_no_uploaders_yet')}}</p>
+<p class="nx-center">{{ __('legacy/uploaders.text_no_uploaders_yet')}}</p>
 @else
 <div>
-<table data-nx="data" border="1" cellspacing="0" cellpadding="5" align="center" width="97%">
+<table data-nx="data" class="nx-w-97 nx-mx-auto">
 <tr>
     <th class="colhead" scope="col">{{ __('legacy/uploaders.col_username')}}</th>
     <th class="colhead" scope="col">{{ __('legacy/uploaders.col_torrents_size')}}</th>

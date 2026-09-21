@@ -48,6 +48,8 @@ final class BbcodeEditor extends Component
         public readonly string $text = '',
         public readonly string $content = '',
         public readonly bool $withPreview = false,
+        public readonly bool $invalid = false,
+        public readonly string $describedBy = '',
     ) {
         $this->editId = "$form-$text-edit";
         $this->previewId = "$form-$text-preview";
@@ -69,7 +71,7 @@ final class BbcodeEditor extends Component
      * Render the editor to an HTML string for legacy call sites that
      * concatenate markup into view data.
      *
-     * @param  array{form: string, text: string, content?: string, withPreview?: bool}  $props
+     * @param  array{form: string, text: string, content?: string, withPreview?: bool, invalid?: bool, describedBy?: string}  $props
      */
     public static function html(array $props): string
     {

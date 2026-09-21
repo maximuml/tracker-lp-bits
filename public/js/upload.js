@@ -27,14 +27,36 @@ if (uploadOfferSelect) {
 
 var uploadComposeForm = document.getElementById("compose");
 if (uploadComposeForm) {
-    uploadComposeForm.addEventListener("change", function (e) {
-        if (!e.target || !e.target.matches("select[name=type]")) return;
-        var mode = e.target.getAttribute("data-mode");
-        var value = e.target.value;
+    var syncRelationRows = function () {
+        var typeSelect = uploadComposeForm.querySelector("select[name=type]");
+        var mode = typeSelect ? typeSelect.getAttribute("data-mode") : null;
+        var value = typeSelect ? typeSelect.value : '0';
         document.querySelectorAll("[relation]").forEach(function (el) { el.style.display = 'none'; });
-        if (value > 0) {
+        if (mode && parseInt(value, 10) > 0) {
             document.querySelectorAll('[relation="mode_' + mode + '"]').forEach(function (el) { el.style.display = ''; });
         }
+    };
+    uploadComposeForm.addEventListener("change", function (e) {
+        if (!e.target || !e.target.matches("select[name=type]")) return;
+        syncRelationRows();
     });
+    // After a failed POST the form is re-rendered with the chosen category
+    // still selected — the relation rows must be visible again on load.
+    syncRelationRows();
+
+    var uploadSubmitBtn = document.getElementById("qr");
+    uploadComposeForm.addEventListener("submit", function () {
+        if (uploadSubmitBtn) {
+            uploadSubmitBtn.disabled = true;
+            uploadSubmitBtn.setAttribute("aria-busy", "true");
+        }
+    });
+    window.addEventListener("pageshow", function (event) {
+        if (event.persisted && uploadSubmitBtn) {
+            uploadSubmitBtn.disabled = false;
+            uploadSubmitBtn.removeAttribute("aria-busy");
+        }
+    });
+} else {
+    document.querySelectorAll("[relation]").forEach(function (el) { el.style.display = 'none'; });
 }
-document.querySelectorAll("[relation]").forEach(function (el) { el.style.display = 'none'; });

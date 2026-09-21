@@ -87,7 +87,11 @@ class CustomField
         return $out;
     }
 
-    public function renderOnUploadPage(int $torrentId, int $searchBoxId): string
+    /**
+     * @param  array<int|string, mixed>  $overrideValues  field-id => submitted
+     *                                                    value, used to restore user input after a failed upload POST
+     */
+    public function renderOnUploadPage(int $torrentId, int $searchBoxId, array $overrideValues = []): string
     {
         $searchBox = SearchBox::query()->find($searchBoxId);
         if (empty($searchBox)) {
@@ -107,7 +111,10 @@ class CustomField
             $row = (array) $row;
             $type = (int) $row['type'];
             $name = "custom_fields[$searchBoxId][{$row['id']}]";
-            $currentValue = $customValues[$row['id']]['custom_field_value'] ?? '';
+            $currentValue = $overrideValues[$row['id']] ?? $customValues[$row['id']]['custom_field_value'] ?? '';
+            if (is_array($currentValue) && ! in_array($type, [self::TYPE_CHECKBOX, self::TYPE_SELECT], true)) {
+                $currentValue = '';
+            }
             if ($type === self::TYPE_CHECKBOX) {
                 $name .= '[]';
             }

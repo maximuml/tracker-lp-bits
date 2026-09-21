@@ -9,6 +9,7 @@ use App\Contracts\Repositories\SearchBoxRepositoryInterface;
 use App\Enums\TorrentApprovalStatus;
 use App\Enums\TorrentPosState;
 use App\Exceptions\NexusException;
+use App\Exceptions\UploadValidationException;
 use App\Http\Resources\SearchBoxResource;
 use App\Models\Category;
 use App\Models\SearchBox;
@@ -41,11 +42,11 @@ class UploadMetadataService
         $searchBoxRep = $this->searchBoxRepository;
         $sections = $searchBoxRep->listSections(SearchBox::listAllSectionId())->keyBy('id');
         if (! $sections->has($category->mode)) {
-            throw new NexusException(Locale::trans('upload.invalid_section', [], null));
+            throw new UploadValidationException(Locale::trans('upload.invalid_section', [], null), 'type');
         }
         $section = $sections->get($category->mode);
         if (! $section instanceof SearchBox) {
-            throw new NexusException(Locale::trans('upload.invalid_section', [], null));
+            throw new UploadValidationException(Locale::trans('upload.invalid_section', [], null), 'type');
         }
         if ($checkUploadPermission) {
             $this->canUploadToSection($request, $section);
@@ -56,7 +57,7 @@ class UploadMetadataService
         $sectionInfo = $sectionData['data'];
         $categories = array_column($sectionInfo['categories'], 'id');
         if (! in_array($category->id, $categories)) {
-            throw new NexusException(Locale::trans('upload.invalid_category', [], null));
+            throw new UploadValidationException(Locale::trans('upload.invalid_category', [], null), 'type');
         }
         $subCategoryInfo = array_column($sectionInfo['sub_categories'], null, 'field');
         $subCategories = [];
@@ -65,7 +66,7 @@ class UploadMetadataService
             if ($value > 0 && isset($subCategoryInfo[$name])) {
                 $subCategoryValues = array_column($subCategoryInfo[$name]['data'], 'name', 'id');
                 if (! isset($subCategoryValues[$value])) {
-                    throw new NexusException(Locale::trans('upload.invalid_sub_category_value', ['field' => $name, 'label' => $subCategoryInfo[$name]['label'], 'value' => $value], null));
+                    throw new UploadValidationException(Locale::trans('upload.invalid_sub_category_value', ['field' => $name, 'label' => $subCategoryInfo[$name]['label'], 'value' => $value], null), (string) $name.'_sel');
                 }
             }
             $subCategories[$name] = $value > 0 && isset($subCategoryInfo[$name]) ? $value : 0;
@@ -75,7 +76,7 @@ class UploadMetadataService
         $allTags = array_column($sectionInfo['tags'], 'name', 'id');
         foreach ($tags as $tag) {
             if (! isset($allTags[$tag])) {
-                throw new NexusException(Locale::trans('upload.invalid_tag', ['tag' => $tag], null));
+                throw new UploadValidationException(Locale::trans('upload.invalid_tag', ['tag' => $tag], null), 'tags');
             }
         }
 
@@ -97,19 +98,19 @@ class UploadMetadataService
     {
         $price = $request->price ?: 0;
         if (! is_numeric($price)) {
-            throw new NexusException(Locale::trans('upload.invalid_price', ['price' => $price], null));
+            throw new UploadValidationException(Locale::trans('upload.invalid_price', ['price' => $price], null), 'price');
         }
         if ($price > 0) {
             if (! Permission::canSetTorrentPrice()) {
-                throw new NexusException(Locale::trans('upload.no_permission_to_set_torrent_price', [], null));
+                throw new UploadValidationException(Locale::trans('upload.no_permission_to_set_torrent_price', [], null), 'price');
             }
             $siteConfig = SiteConfig::current();
             if (! $siteConfig->torrent->paidTorrentEnabled()) {
-                throw new NexusException(Locale::trans('upload.paid_torrent_not_enabled', [], null));
+                throw new UploadValidationException(Locale::trans('upload.paid_torrent_not_enabled', [], null), 'price');
             }
             $maxPrice = $siteConfig->torrent->maxPrice();
             if ($maxPrice > 0 && $price > $maxPrice) {
-                throw new NexusException(Locale::trans('upload.price_too_much', [], null));
+                throw new UploadValidationException(Locale::trans('upload.price_too_much', [], null), 'price');
             }
         }
 
@@ -124,10 +125,10 @@ class UploadMetadataService
         }
         $hr = (int) $hr;
         if ($hr > 0 && ! Permission::canSetTorrentHitAndRun()) {
-            throw new NexusException(Locale::trans('upload.no_permission_to_set_torrent_hr', [], null));
+            throw new UploadValidationException(Locale::trans('upload.no_permission_to_set_torrent_hr', [], null), 'hr');
         }
         if (! in_array($hr, [0, 1])) {
-            throw new NexusException(Locale::trans('upload.invalid_hr', [], null));
+            throw new UploadValidationException(Locale::trans('upload.invalid_hr', [], null), 'hr');
         }
 
         return intval($hr);
@@ -142,17 +143,17 @@ class UploadMetadataService
         $posStateUntil = $request->pos_state_until ?: null;
         if ($posState !== TorrentPosState::NONE->value) {
             if (! Permission::canSetTorrentPosState()) {
-                throw new NexusException('upload.no_permission_to_set_torrent_pos_state');
+                throw new UploadValidationException('upload.no_permission_to_set_torrent_pos_state', 'pos_state');
             }
             if (! isset(Torrent::$posStates[$posState])) {
-                throw new NexusException(Locale::trans('upload.invalid_pos_state', ['pos_state' => $posState], null));
+                throw new UploadValidationException(Locale::trans('upload.invalid_pos_state', ['pos_state' => $posState], null), 'pos_state');
             }
         }
         if ($posState == TorrentPosState::NONE->value) {
             $posStateUntil = null;
         }
         if ($posStateUntil && Carbon::parse($posStateUntil)->lt(Carbon::now())) {
-            throw new NexusException(Locale::trans('upload.invalid_pos_state_until', [], null));
+            throw new UploadValidationException(Locale::trans('upload.invalid_pos_state_until', [], null), 'pos_state_until');
         }
 
         return compact('posState', 'posStateUntil');
@@ -174,7 +175,7 @@ class UploadMetadataService
             throw new NexusException('Unauthenticated');
         }
         if (! $user->uploadpos) {
-            throw new NexusException(Locale::trans('upload.unauthorized_to_upload', [], null));
+            throw new UploadValidationException(Locale::trans('upload.unauthorized_to_upload', [], null));
         }
 
         $uploadDenyApprovalDenyCount = SiteConfig::current()->main->uploadDenyApprovalDenyCount();
@@ -182,7 +183,7 @@ class UploadMetadataService
             ->where('approval_status', TorrentApprovalStatus::DENY->value)
             ->count();
         if ($uploadDenyApprovalDenyCount > 0 && $approvalDenyCount >= $uploadDenyApprovalDenyCount) {
-            throw new NexusException(Locale::trans('upload.approval_deny_reach_upper_limit', [], null));
+            throw new UploadValidationException(Locale::trans('upload.approval_deny_reach_upper_limit', [], null));
         }
 
         if ($section->isSectionBrowse()) {
@@ -199,12 +200,12 @@ class UploadMetadataService
                 return true;
             }
             if (! Permission::canUploadToNormalSection()) {
-                throw new NexusException(Locale::trans('upload.unauthorized_upload_freely', [], null));
+                throw new UploadValidationException(Locale::trans('upload.unauthorized_upload_freely', [], null));
             }
 
             return true;
         }
-        throw new NexusException(Locale::trans('upload.invalid_section', [], null));
+        throw new UploadValidationException(Locale::trans('upload.invalid_section', [], null), 'type');
     }
 
     private function getSubCategoryValue(Request $request, string $name, int $mode): int

@@ -9,9 +9,13 @@ use App\Contracts\Repositories\TagRepositoryInterface;
 use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Enums\OfferAllowed;
 use App\Enums\Permission\PermissionEnum;
+use App\Enums\TorrentPosState;
+use App\Exceptions\NexusException;
 use App\Exceptions\TorrentAlreadyExistsException;
+use App\Exceptions\UploadValidationException;
 use App\Http\Requests\TorrentUploadRequest;
 use App\Models\Offer;
+use App\Models\SearchBox;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\HitAndRunRepository;
@@ -32,6 +36,8 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\ViewErrorBag;
+use Illuminate\Validation\ValidationException;
 
 class TorrentUploadController extends Controller
 {
@@ -88,8 +94,17 @@ class TorrentUploadController extends Controller
         $browsecatmode = SiteConfig::current()->main->browseCat(1);
         $torrentConfig = SiteConfig::current()->torrent;
 
+        $errorsBag = $request->hasSession() ? $request->session()->get('errors') : null;
+        $fieldHasError = $errorsBag instanceof ViewErrorBag
+            ? fn (string $field): bool => $errorsBag->has($field)
+            : fn (string $field): bool => false;
+
         $nameInputHtml = $this->torrentRepository->buildUploadFieldInput(
-            'name', '', SafeHtml::fromUntrustedHtml(__('legacy/upload.text_torrent_name_note')), __('legacy/upload.fill_setlist'), 'setlistLookupBtn',
+            'name',
+            $this->oldScalar($request, 'name'),
+            SafeHtml::fromUntrustedHtml(__('legacy/upload.text_torrent_name_note')),
+            __('legacy/upload.fill_setlist'),
+            'setlistLookupBtn',
         );
 
         $priceCellHtml = '';
@@ -98,21 +113,41 @@ class TorrentUploadController extends Controller
             $pricePlaceholder = $maxPrice > 0
                 ? Locale::trans('label.torrent.max_price_help', ['max_price' => $maxPrice], null)
                 : '';
-            $priceCellHtml = '<input type="number" min="0" name="price" placeholder="'.$pricePlaceholder.'" />&nbsp;&nbsp;'
+            $priceAria = $fieldHasError('price') ? ' aria-invalid="true" aria-describedby="price-error"' : '';
+            $priceCellHtml = '<input type="number" min="0" id="price" name="price" value="'.e($this->oldScalar($request, 'price')).'" placeholder="'.$pricePlaceholder.'"'.$priceAria.' />&nbsp;&nbsp;'
                 .Locale::trans('label.torrent.price_help', ['tax_factor' => $torrentConfig->taxFactor() * 100 .'%'], null);
         }
 
         $pickCellHtml = '';
         if (Permission::can(PermissionEnum::TORRENT_SET_STICKY)) {
+            $posStateOld = $this->oldScalar($request, 'pos_state', (string) TorrentPosState::NONE->value);
             $options = '';
             foreach (Torrent::listPosStates() as $key => $value) {
-                $options .= '<option value="'.$key.'">'.$value['text'].'</option>';
+                $options .= '<option value="'.$key.'"'.((string) $key === $posStateOld ? ' selected' : '').'>'.$value['text'].'</option>';
             }
+            $posStateAria = $fieldHasError('pos_state') ? ' aria-invalid="true" aria-describedby="pos_state-error"' : '';
             $pickCellHtml = '<b>'.__('legacy/edit.row_torrent_position').':&nbsp;</b>'
-                .'<select name="pos_state">'.$options.'</select>&nbsp;&nbsp;&nbsp;'
-                .view('components.datetime-input', ['label' => SafeHtml::fromTrustedHtml(Locale::trans('label.deadline', [], null).':&nbsp;'), 'name' => 'pos_state_until', 'value' => ''])->render();
+                .'<select name="pos_state" id="pos_state"'.$posStateAria.'>'.$options.'</select>&nbsp;&nbsp;&nbsp;'
+                .view('components.datetime-input', ['label' => SafeHtml::fromTrustedHtml(Locale::trans('label.deadline', [], null).':&nbsp;'), 'name' => 'pos_state_until', 'value' => $this->oldScalar($request, 'pos_state_until')])->render();
         }
 
+        $taxonomyValues = [];
+        foreach (SearchBox::$taxonomies as $field => $_taxonomy) {
+            $oldValue = $request->old("{$field}_sel.{$browsecatmode}", $request->old($field));
+            if (is_scalar($oldValue)) {
+                $taxonomyValues[$field] = $oldValue;
+            }
+        }
+
+        $oldTags = $request->old("tags.{$browsecatmode}", $request->old('tags', []));
+        if (is_string($oldTags)) {
+            $oldTags = explode(',', $oldTags);
+        }
+        $checkedTags = array_values(array_filter(array_map('intval', (array) $oldTags)));
+
+        $oldHr = $request->old("hr.{$browsecatmode}", $request->old('hr', ''));
+
+        $oldCustomFields = $request->old("custom_fields.{$browsecatmode}", []);
         $customField = new CustomField;
 
         return view('torrents.upload', [
@@ -126,12 +161,19 @@ class TorrentUploadController extends Controller
             'nameInputHtml' => SafeHtml::fromTrustedHtml($nameInputHtml),
             'priceLabel' => Locale::trans('label.torrent.price', [], null),
             'priceCellHtml' => SafeHtml::fromTrustedHtml($priceCellHtml),
-            'descrEditorHtml' => SafeHtml::fromTrustedHtml(BbcodeEditor::html(['form' => 'upload', 'text' => 'descr', 'withPreview' => true])),
+            'descrEditorHtml' => SafeHtml::fromTrustedHtml(BbcodeEditor::html([
+                'form' => 'upload',
+                'text' => 'descr',
+                'content' => $this->oldScalar($request, 'descr'),
+                'withPreview' => true,
+                'invalid' => $fieldHasError('descr'),
+                'describedBy' => 'descr-error',
+            ])),
             'enableTechnicalInfo' => SiteConfig::current()->main->enableTechnicalInfo(),
-            'taxonomySelectHtml' => SafeHtml::fromTrustedHtml($this->searchBoxSchemaBuilder->renderTaxonomySelect($browsecatmode)),
-            'customFieldsHtml' => SafeHtml::fromTrustedHtml($customField->renderOnUploadPage(0, $browsecatmode)),
-            'hitAndRunHtml' => SafeHtml::fromTrustedHtml($this->hitAndRunRepository->renderOnUploadPage('', $browsecatmode)),
-            'tagsHtml' => SafeHtml::fromTrustedHtml($this->tagRepository->renderCheckbox($browsecatmode)),
+            'taxonomySelectHtml' => SafeHtml::fromTrustedHtml($this->searchBoxSchemaBuilder->renderTaxonomySelect($browsecatmode, $taxonomyValues)),
+            'customFieldsHtml' => SafeHtml::fromTrustedHtml($customField->renderOnUploadPage(0, $browsecatmode, is_array($oldCustomFields) ? $oldCustomFields : [])),
+            'hitAndRunHtml' => SafeHtml::fromTrustedHtml($this->hitAndRunRepository->renderOnUploadPage(is_scalar($oldHr) ? $oldHr : '', $browsecatmode)),
+            'tagsHtml' => SafeHtml::fromTrustedHtml($this->tagRepository->renderCheckbox($browsecatmode, $checkedTags)),
             'pickCellHtml' => SafeHtml::fromTrustedHtml($pickCellHtml),
             'canBeAnonymous' => Permission::can(PermissionEnum::BE_ANONYMOUS),
         ]);
@@ -143,8 +185,27 @@ class TorrentUploadController extends Controller
             $torrent = $repository->upload($request);
         } catch (TorrentAlreadyExistsException $e) {
             return redirect('details.php?id='.$e->getTorrentId().'&existed=1');
+        } catch (UploadValidationException $e) {
+            throw ValidationException::withMessages([
+                $e->field() ?? 'upload' => $e->getMessage(),
+            ])->redirectTo('/upload');
+        } catch (NexusException $e) {
+            throw ValidationException::withMessages([
+                'upload' => $e->getMessage(),
+            ])->redirectTo('/upload');
         }
 
         return redirect('details.php?id='.$torrent->id.'&uploaded=1');
+    }
+
+    /**
+     * Flashed input can legitimately be an array (tags[4][], …); only scalar
+     * values may be restored into single-value text/select controls.
+     */
+    private function oldScalar(Request $request, string $key, string $default = ''): string
+    {
+        $value = $request->old($key, $default);
+
+        return is_scalar($value) ? (string) $value : $default;
     }
 }

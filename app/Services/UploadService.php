@@ -11,6 +11,7 @@ use App\Enums\TorrentType;
 use App\Events\TorrentCreated;
 use App\Exceptions\NexusException;
 use App\Exceptions\TorrentAlreadyExistsException;
+use App\Exceptions\UploadValidationException;
 use App\Models\BonusLogs;
 use App\Models\Category;
 use App\Models\File;
@@ -53,18 +54,15 @@ class UploadService
         if (! $user instanceof User) {
             throw new NexusException('Unauthenticated');
         }
-        if (empty($request->name)) {
-            throw new NexusException(Locale::trans('upload.require_name', [], null));
-        }
         if (empty($request->descr)) {
-            throw new NexusException(Locale::trans('upload.blank_description', [], null));
+            throw new UploadValidationException(Locale::trans('upload.blank_description', [], null), 'descr');
         }
         if (empty($request->type)) {
-            throw new NexusException(Locale::trans('upload.category_unselected', [], null));
+            throw new UploadValidationException(Locale::trans('upload.category_unselected', [], null), 'type');
         }
         $category = Category::query()->find((int) $request->type);
         if (! $category instanceof Category) {
-            throw new NexusException(Locale::trans('upload.invalid_category', [], null));
+            throw new UploadValidationException(Locale::trans('upload.invalid_category', [], null), 'type');
         }
         $torrentFile = $this->fileService->getTorrentFile($request);
         $filepath = $torrentFile->getRealPath();
@@ -72,17 +70,27 @@ class UploadService
             $dict = Bencode::load($filepath);
         } catch (ParseException $e) {
             Logger::writeWithContext((string) ('Bencode load error:'.$e->getMessage()), (string) 'error', (bool) false);
-            throw new NexusException('upload.not_bencoded_file');
+            throw new UploadValidationException('upload.not_bencoded_file', 'file');
         }
         $info = $this->fileService->checkTorrentDict($dict, 'info');
         if (isset($dict['piece layers']) || isset($info['files tree']) || (isset($info['meta version']) && $info['meta version'] == 2)) {
-            throw new NexusException('Torrent files created with Bittorrent Protocol v2, or hybrid torrents are not supported.');
+            throw new UploadValidationException('Torrent files created with Bittorrent Protocol v2, or hybrid torrents are not supported.', 'file');
         }
         $this->fileService->checkTorrentDict($info, 'piece length', 'integer');  // Only Check without use
         $dname = $this->fileService->checkTorrentDict($info, 'name', 'string');
         $pieces = $this->fileService->checkTorrentDict($info, 'pieces', 'string');
         if (strlen($pieces) % 20 != 0) {
-            throw new NexusException(Locale::trans('upload.invalid_pieces', [], null));
+            throw new UploadValidationException(Locale::trans('upload.invalid_pieces', [], null), 'file');
+        }
+        // The upload form documents the name as optional ("Taken from
+        // filename if not specified") — fall back to the torrent's own
+        // info.name so an empty field no longer fails the whole upload.
+        $name = trim((string) ($request->name ?? ''));
+        if ($name === '') {
+            $name = trim((string) $dname);
+        }
+        if ($name === '') {
+            throw new UploadValidationException(Locale::trans('upload.require_name', [], null), 'name');
         }
         $dict['info']['private'] = 1;
         $siteConfig = SiteConfig::current();
@@ -102,7 +110,7 @@ class UploadService
         $uploaderUsername = $user->username;
         if ($request->uplver == 'yes') {
             if (! Permission::canBeAnonymous()) {
-                throw new NexusException(Locale::trans('upload.no_permission_to_be_anonymous', [], null));
+                throw new UploadValidationException(Locale::trans('upload.no_permission_to_be_anonymous', [], null), 'uplver');
             }
             $anonymous = 1;
             $uploaderUsername = 'Anonymous';
@@ -114,7 +122,7 @@ class UploadService
             'owner' => $user->id,
             'visible' => 1,
             'anonymous' => $anonymous,
-            'name' => $request->name,
+            'name' => $name,
             'size' => $fileListInfo['totalLength'],
             'numfiles' => count($fileListInfo['fileList']),
             'type' => TorrentType::fromStringSafe($fileListInfo['type'])->value,
@@ -153,7 +161,7 @@ class UploadService
             $saveResult = Bencode::dump($torrentFilePath, $dict);
             if ($saveResult === false) {
                 Logger::writeWithContext((string) "save torrent failed: {$torrentFilePath}", (string) 'error', (bool) false);
-                throw new NexusException(Locale::trans('upload.save_torrent_file_failed', [], null));
+                throw new UploadValidationException(Locale::trans('upload.save_torrent_file_failed', [], null), 'file');
             }
             $extraInsert['torrent_id'] = $id;
             TorrentExtra::query()->insert($extraInsert);

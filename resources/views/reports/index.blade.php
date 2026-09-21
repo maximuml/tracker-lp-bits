@@ -4,7 +4,7 @@
 
 @section('content')
 <h1 class="nx-center">{{ __('legacy/reports.text_reports')}}</h1>
-<table data-nx="data" class="nx-mx-auto">
+<table data-nx="data" class="nx-mx-auto"><caption class="nx-sr-only">{{ __('legacy/reports.text_reports')}}</caption>
 <form method=post action=takeupdate.php>
 <tr>
     <th class="colhead" scope="col"><nobr>{{ __('legacy/reports.col_added')}}</nobr></th>

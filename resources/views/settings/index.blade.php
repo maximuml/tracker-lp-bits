@@ -360,7 +360,7 @@
     <x-settings-text layout="grid" :label="__('legacy/settings.text_attendance_continuous_increment')" name="attendance_step" :value="$config['attendance_step'] ?? 0" />
     <x-settings-text layout="grid" :label="__('legacy/settings.text_attendance_reward_limit')" name="attendance_max" :value="$config['attendance_max'] ?? 0" />
     <x-settings-row layout="grid" :label="__('legacy/settings.text_attendance_continuous')">
-        <table data-nx="data">
+        <table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/settings.text_website_settings') ?? 'Website Settings' }}</caption>
             <tr><th class="colhead" scope="col">{{ __('legacy/settings.text_attendance_continuous_days') ?? 'Days' }}</th><th class="colhead" scope="col">{{ __('legacy/settings.text_attendance_continuous_days_additional_reward') ?? 'Reward' }}</th><th class="colhead" scope="col">{{ __('legacy/settings.text_attendance_continuous_days_action') ?? 'Action' }}</th></tr>
             @foreach (($attendance_continuous ?? []) as $days => $value)
             <tr><td><input type="number" min="0" name="attendance_continuous_day[]" value="{{ $days }}"> {{ __('legacy/settings.text_attendance_continuous_unit') ?? 'days' }}</td><td><input type="number" min="0" name="attendance_continuous_value[]" value="{{ $value }}"> {{ __('legacy/settings.text_attendance_input_suffix') ?? '' }}</td><td><a href="#" class="js-delrow">{{ __('legacy/settings.text_attendance_continuous_item_action_remove') ?? 'Remove' }}</a></td></tr>

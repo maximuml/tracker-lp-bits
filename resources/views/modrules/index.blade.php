@@ -43,7 +43,7 @@
 <h1 class="nx-center">Rules Management</h1>
 <br /><div class="nx-center nx-cell-5 nx-w-940"><a href=modrules.php?act=newsect>Add Section</a></div>
 @foreach ($rows as $arr)
-<br /><table data-nx="data">
+<br /><table data-nx="data"><caption class="nx-sr-only">Rules Management</caption>
     <tr><th class="colhead" scope="col">{{ $arr['title'] }} - {{ $arr['lang_name'] }}</th></tr>
     <tr><td>{{ $arr['textHtml'] }}</td></tr>
     <tr><td><a href="?act=edit&id={{ (int) $arr['id'] }}">Edit</a>&nbsp;&nbsp;<form method="post" class="nx-inline" action="modrules.php?act=del">@csrf<input type="hidden" name="id" value="{{ (int) $arr['id'] }}"><input type="hidden" name="sure" value="1"><button type="submit" class="nx-btn-link">Delete</button></form></td></tr>

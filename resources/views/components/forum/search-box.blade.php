@@ -22,7 +22,7 @@
 </div>
 @if ($search->searched && $search->hits > 0)
     <x-forum.pager :page="$search->page" :pages="$search->pages" :href="$search->pagerHref()" :items="$search->pagerItems()" />
-    <table data-nx="data" class="nx-forum-table">
+    <table data-nx="data" class="nx-forum-table"><caption class="nx-sr-only">{{ __('legacy/forums.head_forum_search') }}</caption>
         <tbody>
         <tr>
             <th class="colhead nx-center" scope="col">{{ __('legacy/forums.col_post') }}</th>

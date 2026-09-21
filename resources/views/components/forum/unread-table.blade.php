@@ -1,7 +1,7 @@
 @props(['list'])
 <h1 class="nx-center"><a class="faqlink" href="forums.php">{{ $list->siteName }}&nbsp;{{ __('legacy/forums.text_forums') }}</a>--&gt;{{ __('legacy/forums.text_topics_with_unread_posts') }}</h1>
 @if ($list->topics !== [])
-    <table data-nx="data" class="nx-forum-table">
+    <table data-nx="data" class="nx-forum-table"><caption class="nx-sr-only">{{ __('legacy/forums.text_topics_with_unread_posts') }}</caption>
         <tbody>
         <tr>
             <th class="colhead nx-forum-table__name" scope="col">{{ __('legacy/forums.col_topic') }}</th>

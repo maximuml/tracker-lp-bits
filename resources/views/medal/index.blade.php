@@ -13,7 +13,7 @@
     </form>
 </div>
 
-<table data-nx="data">
+<table data-nx="data"><caption class="nx-sr-only">{{ $title }}</caption>
 <thead>
 <tr>
     <th class="colhead" scope="col">ID</th>

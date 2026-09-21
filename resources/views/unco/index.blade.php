@@ -5,7 +5,7 @@
 @section('content')
 @if (! empty($rows ?? []))
     <x-frame :center="false">
-    <table data-nx="data">
+    <table data-nx="data"><caption class="nx-sr-only">Unconfirmed Users</caption>
         @if ($status ?? '')
             <tr>
                 <td class="rowhead" colspan="5"><span class="nx-color-red nx-size-1">The User account has been updated!</span></td>

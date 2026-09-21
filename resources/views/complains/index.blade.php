@@ -7,7 +7,7 @@
     @if ($page === null)
         <x-frame :caption="__('legacy/complains.pending_complaints')" :center="false">
             @if (! empty($pendingRows))
-                <table data-nx="data">
+                <table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/complains.pending_complaints') }}</caption>
                 <tr>
                     <th class="colhead" scope="col">{{ __('legacy/complains.th_complain_at') ?? 'Added' }}</th>
                     <th class="colhead" scope="col">{{ __('legacy/complains.th_complain_account') ?? 'Account' }}</th>
@@ -30,7 +30,7 @@
     <x-frame :caption="__('legacy/complains.complaints_processed')" :center="false">
         @if (! empty($processedRows))
             {{ $pagertop ?? '' }}
-            <table data-nx="data">
+            <table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/complains.complaints_processed') }}</caption>
             <tr>
                 <th class="colhead" scope="col">{{ __('legacy/complains.th_complain_at') ?? 'Added' }}</th>
                 <th class="colhead" scope="col">{{ __('legacy/complains.th_complain_account') ?? 'Account' }}</th>

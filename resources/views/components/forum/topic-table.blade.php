@@ -17,7 +17,7 @@
     </div>
 </div>
 @if ($list->topics !== [])
-    <table data-nx="data" class="nx-forum-table">
+    <table data-nx="data" class="nx-forum-table"><caption class="nx-sr-only">{{ $list->forumName }}</caption>
         <tbody>
         <tr>
             <th class="colhead nx-forum-table__name" scope="col">{{ __('legacy/forums.col_topic') }}</th>

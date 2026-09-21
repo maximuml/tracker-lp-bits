@@ -1,4 +1,4 @@
-<table class="torrents" data-nx="data">
+<table class="torrents" data-nx="data"><caption class="nx-sr-only">{{ __('legacy/offers.head_offers') }}</caption>
 <tr>
     <th class="colhead" scope="col"><a href="{{ $table->sortCatUrl }}">{{ __('legacy/offers.col_type') }}</a></th>
     <th class="colhead" scope="col"><a href="{{ $table->sortNameUrl }}">{{ __('legacy/offers.col_title') }}</a></th>

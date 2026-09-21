@@ -8,7 +8,7 @@
 @if (! empty($sysopPanels))
 <h1 class="nx-center">..:: {{ 'For SysOp Only' }} ::..</h1>
 <br /><br />
-<table data-nx="data" class="nx-w-80 nx-mx-auto">
+<table data-nx="data" class="nx-w-80 nx-mx-auto"><caption class="nx-sr-only">For SysOp Only</caption>
 <tr><th class="colhead nx-align-left" scope="col">{{ 'Option Name' }}</th><th class="colhead nx-align-left" scope="col">{{ ('Info')}}</th></tr>
 @foreach ($sysopPanels as $row)
 <tr>
@@ -23,7 +23,7 @@
 @if (! empty($adminPanels))
 <h1 class="nx-center">..:: {{ 'For Administrator Only' }} ::..</h1>
 <br /><br />
-<table data-nx="data" class="nx-w-80 nx-mx-auto">
+<table data-nx="data" class="nx-w-80 nx-mx-auto"><caption class="nx-sr-only">For Administrator Only</caption>
 <tr><th class="colhead nx-align-left" scope="col">{{ 'Option Name' }}</th><th class="colhead nx-align-left" scope="col">{{ ('Info')}}</th></tr>
 @foreach ($adminPanels as $row)
 <tr>
@@ -38,7 +38,7 @@
 @if (! empty($modPanels))
 <h1 class="nx-center">..:: {{ 'For Moderator Only' }} ::..</h1>
 <br /><br />
-<table data-nx="data" class="nx-w-80 nx-mx-auto">
+<table data-nx="data" class="nx-w-80 nx-mx-auto"><caption class="nx-sr-only">For Moderator Only</caption>
 <tr><th class="colhead nx-align-left" scope="col">{{ 'Option Name' }}</th><th class="colhead nx-align-left" scope="col">{{ ('Info')}}</th></tr>
 @foreach ($modPanels as $row)
 <tr>

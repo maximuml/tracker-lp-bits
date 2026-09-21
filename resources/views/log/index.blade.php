@@ -10,7 +10,7 @@
 </ul></div>
 
 @if ($mode === 'dailylog')
-    <table data-nx="data">
+    <table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/log.text_search_log')}}</caption>
         <tr><th class="colhead nx-align-left" scope="col">{{ __('legacy/log.text_search_log')}}</th></tr>
         <tr><td class="toolbox">
             <form method="get" action="">
@@ -29,7 +29,7 @@
     @if (empty($logRows))
         <b>{{ __('legacy/log.text_log_empty') }}</b><br />
     @else
-        <table data-nx="data">
+        <table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/log.text_daily_log')}}</caption>
         <tr><th class="colhead" scope="col"><img class="time" src="pic/trans.gif" alt="time" title="{{ __('legacy/log.title_time_added')}}" /></th><th class="colhead nx-align-left" scope="col">{{ __('legacy/log.col_event')}}</th>
         @if ($canConfidentialLog)
             <th class="colhead nx-align-left" scope="col">{{ __('legacy/log.col_user')}}</th>
@@ -48,7 +48,7 @@
     <p>{{ __('legacy/log.time_zone_note') }}</p>
 
 @elseif ($mode === 'chronicle')
-    <table data-nx="data">
+    <table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/log.text_search_chronicle')}}</caption>
         <tr><th class="colhead nx-align-left" scope="col">{{ __('legacy/log.text_search_chronicle')}}</th></tr>
         <tr><td class="toolbox">
             <form method="get" action="">
@@ -58,7 +58,7 @@
         </td></tr>
     </table><br />
     @if ($canManage)
-        <table data-nx="data">
+        <table data-nx="data"><caption class="nx-sr-only">{{ ! empty($editItem) ? __('legacy/log.text_edit_chronicle') : __('legacy/log.text_add_chronicle') }}</caption>
             <tr><th class="colhead nx-align-left" scope="col">{{ ! empty($editItem) ? (__('legacy/log.text_edit_chronicle')) : (__('legacy/log.text_add_chronicle')) }}</th></tr>
             <tr><td class="toolbox">
                 <form method="post" action="">
@@ -75,7 +75,7 @@
     @if (empty($chronicleRows))
         <b>{{ __('legacy/log.text_chronicle_empty') }}</b><br />
     @else
-        <table data-nx="data">
+        <table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/log.text_chronicle')}}</caption>
         <tr><th class="colhead" scope="col">{{ __('legacy/log.col_date')}}</th><th class="colhead nx-align-left" scope="col">{{ __('legacy/log.col_event')}}</th>@if ($canManage)<th class="colhead" scope="col">{{ __('legacy/log.col_modify')}}</th>@endif</tr>
         @foreach ($chronicleRows as $arr)
             <tr><td class="rowfollow nx-center"><nobr>{{ $arr['dateHtml'] ?? '' }}</nobr></td><td class="rowfollow">{{ $arr['bodyHtml'] ?? '' }}</td>@if ($canManage)<td class="nx-center nx-nowrap"><b><a href="?action=chronicle&do=edit&id={{ (int) ($arr['id'] ?? 0) }}">{{ __('legacy/log.text_edit')}}</a>&nbsp;|&nbsp;<form method="post" action="?action=chronicle&do=del" class="nx-inline"><input type="hidden" name="id" value="{{ (int) ($arr['id'] ?? 0) }}"><button type="submit" class="nx-btn-link">{{ __('legacy/log.text_delete')}}</button></form></b></td>@endif</tr>
@@ -86,7 +86,7 @@
     <p>{{ __('legacy/log.time_zone_note') }}</p>
 
 @elseif ($mode === 'news')
-    <table data-nx="data">
+    <table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/log.text_search_news')}}</caption>
         <tr><th class="colhead nx-align-left" scope="col">{{ __('legacy/log.text_search_news')}}</th></tr>
         <tr><td class="toolbox">
             <form method="get" action="">
@@ -104,7 +104,7 @@
         <b>{{ __('legacy/log.text_news_empty') }}</b><br />
     @else
         @foreach ($newsRows as $arr)
-            <table data-nx="data">
+            <table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/log.text_news')}}</caption>
             <tr><td class="rowhead nx-w-10p">{{ __('legacy/log.col_title')}}</td><td class="rowfollow">{{ $arr['title'] ?? '' }}</td></tr><tr><td class="rowhead nx-w-10p">{{ __('legacy/log.col_date')}}</td><td class="rowfollow">{{ $arr['dateHtml'] ?? '' }}</td></tr><tr><td class="rowhead nx-w-10p">{{ __('legacy/log.col_body')}}</td><td class="rowfollow">{{ $arr['bodyHtml'] ?? '' }}</td></tr>
             </table><br />
         @endforeach
@@ -113,7 +113,7 @@
     <p>{{ __('legacy/log.time_zone_note') }}</p>
 
 @elseif ($mode === 'poll')
-    <table data-nx="data">
+    <table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/log.text_previous_polls')}}</caption>
         <tr><th class="colhead" scope="col">{{ __('legacy/log.text_previous_polls')}}</th></tr>
     @foreach ($pollData as $item)
         <tr><td class="nx-center">

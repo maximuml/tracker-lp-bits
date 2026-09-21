@@ -33,7 +33,7 @@
 
 {{ $pagertop ?? '' }}
 
-<table data-nx="data">
+<table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/users.text_users') }}</caption>
 <tr>
     <th class="colhead nx-align-left" scope="col">{{ __('legacy/users.col_user_name')}}</th>
     <th class="colhead" scope="col">{{ __('legacy/users.col_registered')}}</th>

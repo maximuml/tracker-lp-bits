@@ -16,7 +16,7 @@
 <div class="nx-cell-5"><input type="submit" class="btn" value="{{ __('legacy/shoutbox.text_filter')}}" /></div></div>
 </form>
 
-<table data-nx="data">
+<table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/shoutbox.text_history_title') }}</caption>
 @foreach ($items ?? [] as $item)
     <tr><td class="shoutrow{{ $item['mentionsMe'] ? ' shoutrow-mentions-me' : '' }}">
     <span class="date">[{{ $item['time'] }}]</span> {{ $item['actions'] }} {{ $item['username'] }} {{ $item['reactions'] }}

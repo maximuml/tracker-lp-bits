@@ -1,6 +1,6 @@
 @if ($off_details)
 <h1 class="nx-center" id="top">{{ $off_details->name }}</h1>
-<table data-nx="data" class="nx-w-97">
+<table data-nx="data" class="nx-w-97"><caption class="nx-sr-only">{{ $off_details->name }}</caption>
 <tr><td class="rowhead nx-align-right">{{ __('legacy/offers.row_info')}}</td><td class="rowfollow">{{ __('legacy/offers.text_offered_by')}}{{ $off_details->offeredBy }}{{ $off_details->offerTime }}</td></tr>
 <tr><td class="rowhead nx-align-right">{{ __('legacy/offers.row_status')}}</td><td class="rowfollow"><span class="{{ $off_details->status->cssClass }}">{{ $off_details->status->label }}</span></td></tr>
 @if ($off_details->showAllowRow)

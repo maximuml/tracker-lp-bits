@@ -6,7 +6,7 @@
 <h1 class="nx-center">{{ __('legacy/viewsnatches.text_snatch_detail_for') }}<a href=details.php?id={{ (int) $id }}><b>{{ $torrentName }}</b></a></h1>
 @if ($count)
 <p class="nx-center">{{ __('legacy/viewsnatches.text_users_top_finished_recently') }}</p>
-<table data-nx="data">
+<table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/viewsnatches.text_snatch_detail_for') }} {{ $torrentName }}</caption>
 <tr><th class="colhead" scope="col">{{ __('legacy/viewsnatches.col_username') }}</th>@if ($canViewConfidential)<th class="colhead" scope="col">{{ __('legacy/viewsnatches.col_ip') }}</th>@endif<th class="colhead" scope="col">{{ __('legacy/viewsnatches.col_uploaded') }}/{{ __('legacy/viewsnatches.col_downloaded') }}</th><th class="colhead" scope="col">{{ __('legacy/viewsnatches.col_ratio') }}</th><th class="colhead" scope="col">{{ __('legacy/viewsnatches.col_se_time') }}</th><th class="colhead" scope="col">{{ __('legacy/viewsnatches.col_le_time') }}</th><th class="colhead" scope="col">{{ __('legacy/viewsnatches.col_when_completed') }}</th><th class="colhead" scope="col">{{ __('legacy/viewsnatches.col_last_action') }}</th><th class="colhead" scope="col">{{ __('legacy/viewsnatches.col_report_user') }}</th></tr>
 @foreach ($rows as $row)
 <tr{{ $row['highlight'] ? ' bgcolor=#00A527' : '' }}><td class="rowfollow nx-center">@if ($row['anonymous']){{ __('legacy/viewsnatches.text_anonymous') }}@if ($row['revealName'])<br />({{ $row['name'] }})@endif

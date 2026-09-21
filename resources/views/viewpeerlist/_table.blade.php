@@ -1,6 +1,6 @@
 <b>{{ $table->count }} {{ $table->name }}</b>
 @if ($table->count > 0)
-<table data-nx="data" class="main">
+<table data-nx="data" class="main"><caption class="nx-sr-only">{{ $table->name }}</caption>
 <tr>
     <th class="colhead nx-w-1p" scope="col">{{ __('legacy/viewpeerlist.col_user_ip') }}</th>
     @if ($table->showLocationColumn)

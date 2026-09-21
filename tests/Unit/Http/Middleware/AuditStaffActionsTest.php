@@ -4,13 +4,37 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Http\Middleware;
 
+use App\Enums\UserClass;
 use App\Http\Middleware\AuditStaffActions;
-use PHPUnit\Framework\TestCase;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 use Tests\Attributes\TestCategory;
+use Tests\TestCase;
 
 #[TestCategory(TestCategory::PURE_UNIT)]
 final class AuditStaffActionsTest extends TestCase
 {
+    private function handle(Request $request, ?User $user): Response
+    {
+        if ($user !== null) {
+            Auth::guard('nexus-web')->setUser($user);
+        }
+
+        return (new AuditStaffActions)->handle($request, fn () => new Response('ok'));
+    }
+
+    private function userOfClass(int $class): User
+    {
+        $user = new User;
+        $user->id = 1;
+        $user->username = 'tester';
+        $user->class = $class;
+
+        return $user;
+    }
+
     public function test_staff_only_paths_are_audited(): void
     {
         foreach (['modtask', 'settings', 'makepoll', 'faqmanage', 'staffpanel',
@@ -54,5 +78,46 @@ final class AuditStaffActionsTest extends TestCase
         $this->assertTrue(AuditStaffActions::isAuditablePath('ajax', 'clearShoutBox'));
         $this->assertTrue(AuditStaffActions::isAuditablePath('ajax', 'shoutboxDelete'));
         $this->assertTrue(AuditStaffActions::isAuditablePath('ajax', 'approval'));
+    }
+
+    public function test_get_requests_never_audited(): void
+    {
+        $response = $this->handle(
+            Request::create('/modtask', 'GET'),
+            $this->userOfClass(UserClass::MODERATOR->value),
+        );
+        $this->assertSame(200, $response->getStatusCode());
+    }
+
+    public function test_guest_and_non_staff_posts_pass_through(): void
+    {
+        $staff = $this->userOfClass(UserClass::MODERATOR->value);
+        $user = $this->userOfClass(UserClass::USER->value);
+
+        $this->assertSame(200, $this->handle(Request::create('/modtask', 'POST'), null)->getStatusCode());
+        $this->assertSame(200, $this->handle(Request::create('/modtask', 'POST'), $user)->getStatusCode());
+        $this->assertSame(200, $this->handle(Request::create('/modtask', 'POST'), $staff)->getStatusCode());
+    }
+
+    public function test_summarize_params_redacts_secrets_and_truncates(): void
+    {
+        $request = Request::create('/settings', 'POST', [
+            'name' => 'value',
+            'password' => 'hunter2',
+            'passkey' => 'deadbeef',
+            '_token' => 'csrf',
+            'nested' => ['a' => 1],
+            'long' => str_repeat('x', 100),
+        ]);
+
+        $out = AuditStaffActions::summarizeParams($request);
+
+        $this->assertStringContainsString('name=value', $out);
+        $this->assertStringNotContainsString('hunter2', $out);
+        $this->assertStringNotContainsString('deadbeef', $out);
+        $this->assertStringNotContainsString('csrf', $out);
+        $this->assertStringContainsString('nested=[complex]', $out);
+        $this->assertStringContainsString('long='.str_repeat('x', 40), $out);
+        $this->assertStringNotContainsString(str_repeat('x', 41), $out);
     }
 }

@@ -63,10 +63,6 @@ final class AuditStaffActions
     {
         $response = $next($request);
 
-        if (Environment::isTesting()) {
-            return $response;
-        }
-
         if ($request->isMethod('GET') || $request->isMethod('HEAD') || $request->isMethod('OPTIONS')) {
             return $response;
         }
@@ -125,12 +121,16 @@ final class AuditStaffActions
             $user->username,
         );
 
-        $params = $this->safeParams($request);
+        $params = self::summarizeParams($request);
         if ($params !== '') {
             $detail .= ' {'.$params.'}';
         }
 
         $detail .= sprintf(' -> %s', $response->getStatusCode());
+
+        if (Environment::isTesting()) {
+            return;
+        }
 
         try {
             Log::write($detail, 'mod', (int) $user->id);
@@ -143,8 +143,9 @@ final class AuditStaffActions
     /**
      * Flatten request params to a compact "key=value" list with secrets
      * removed; shows which object/action was targeted without leaking data.
+     * Public so the redaction rules are unit-testable.
      */
-    private function safeParams(Request $request): string
+    public static function summarizeParams(Request $request): string
     {
         $params = [];
 

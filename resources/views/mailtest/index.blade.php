@@ -3,7 +3,7 @@
 @section('title', __('legacy/mailtest.head_mail_test'))
 
 @section('content')
-<h1 align="center">{{ __('legacy/mailtest.text_mail_test')}}</h1>
+<h1 class="nx-center">{{ __('legacy/mailtest.text_mail_test')}}</h1>
 <form method="post" action="mailtest.php">
         <input type="hidden" name="action" value="sendmail">
         <div class="nx-fgrid">

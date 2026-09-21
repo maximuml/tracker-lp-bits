@@ -7,7 +7,7 @@
     @if ($page === null)
         <x-frame :caption="__('legacy/complains.pending_complaints')" :center="false">
             @if (! empty($pendingRows))
-                <table data-nx="data" width="100%">
+                <table data-nx="data">
                 <tr>
                     <th class="colhead" scope="col">{{ __('legacy/complains.th_complain_at') ?? 'Added' }}</th>
                     <th class="colhead" scope="col">{{ __('legacy/complains.th_complain_account') ?? 'Account' }}</th>
@@ -30,7 +30,7 @@
     <x-frame :caption="__('legacy/complains.complaints_processed')" :center="false">
         @if (! empty($processedRows))
             {{ $pagertop ?? '' }}
-            <table data-nx="data" width="100%">
+            <table data-nx="data">
             <tr>
                 <th class="colhead" scope="col">{{ __('legacy/complains.th_complain_at') ?? 'Added' }}</th>
                 <th class="colhead" scope="col">{{ __('legacy/complains.th_complain_account') ?? 'Account' }}</th>
@@ -82,12 +82,12 @@
                 {{ \App\Support\Format::formatComment($row['body'] ?? '') }}<hr />
             @endforeach
         @else
-            <p align="center">{{ __('legacy/complains.text_no_replies') ?? 'No replies.' }}</p>
+            <p class="nx-center">{{ __('legacy/complains.text_no_replies') ?? 'No replies.' }}</p>
         @endif
     </x-frame>
 
     @if (! empty($complain['answered']) && (int) $complain['answered'] !== 0)
-        <p align="center">{{ __('legacy/complains.text_closed') ?? 'This complain has been closed.' }}</p>
+        <p class="nx-center">{{ __('legacy/complains.text_closed') ?? 'This complain has been closed.' }}</p>
     @else
         <br /><br /><div class="nx-box nx-center"><b>{{ __('legacy/complains.text_reply') ?? 'Reply' }}</b><br /><br /><form id="reply" method="post" action=""><input type="hidden" name="action" value="reply" /><input type="hidden" name="id" value="{{ (int) ($complain['id'] ?? 0) }}" /><br />
         {{ $replyBoxHtml }}

@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="nx-main nx-embedded nx-box--737">
-<div align=center>
+<div class="nx-center">
 <h1>Mass PM to all Staff members and users:</h1>
 <form method=post action="takestaffmess.php">
 @csrf
@@ -29,7 +29,7 @@
     <div class="nx-fcell"><input type=text name=subject size=75></div>
     <div class="nx-fhead">Message</div>
     <div class="nx-fcell"><textarea name=msg cols=80 rows=15>{{ $body }}</textarea></div>
-<div class="nx-ffull"><div align="center"><b>Sender:&nbsp;&nbsp;</b>
+<div class="nx-ffull"><div class="nx-center"><b>Sender:&nbsp;&nbsp;</b>
 {{ $username }}
 <input name="sender" type="radio" value="self" checked>
 &nbsp; System

@@ -10,16 +10,16 @@ Total Images Stored: {{ $count ?? 0 }}
 @if (empty($items ?? []))
     <b>BitBucket Log is empty</b>
 @else
-    <table data-nx="data" align='center' border='0' cellspacing='0' cellpadding='5'>
+    <table data-nx="data">
     @foreach ($items as $item)
         <tr>
-        <td><center><a href="{{ $item['url'] }}"><img src="{{ $item['url'] }}" border=0 class="bitbucket-shot"></a></center>
+        <td><div class="nx-center"><a href="{{ $item['url'] }}"><img src="{{ $item['url'] }}" class="bitbucket-shot"></a></div>
         Uploaded by: {{ $item['usernameHtml'] }}<br />
         (#{{ $item['id'] }}) Filename: {{ $item['name'] }} ({{ $item['width'] }}&nbsp;x&nbsp;{{ $item['height'] }})
         @if ($isModerator ?? false)
             <b><a href="?delete={{ $item['id'] }}">[Delete]</a></b><br />
         @endif
-        Added: {{ $item['date'] }} {{ $item['time'] }}
+        Added: {{ $item['date'] }} {{ $item['time'] }}</td>
         </tr>
     @endforeach
     </table>

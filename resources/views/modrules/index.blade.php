@@ -4,7 +4,7 @@
 
 @section('content')
 @if ($mode === 'newsect')
-<h1 align=center>Add Rules</h1>
+<h1 class="nx-center">Add Rules</h1>
 <form method="post" class="nx-inline" action="modrules.php?act=addsect">
     @csrf
     <div class="nx-fgrid nx-fgrid--auto">
@@ -22,7 +22,7 @@
     </div>
 </form>
 @elseif ($mode === 'edit')
-<h1 align=center>Edit Rules</h1>
+<h1 class="nx-center">Edit Rules</h1>
 <form method="post" class="nx-inline" action="modrules.php?act=edited">
     @csrf
     <div class="nx-fgrid nx-fgrid--auto">
@@ -40,13 +40,13 @@
     </div>
 </form>
 @else
-<h1 align=center>Rules Management</h1>
+<h1 class="nx-center">Rules Management</h1>
 <br /><div class="nx-center nx-cell-5 nx-w-940"><a href=modrules.php?act=newsect>Add Section</a></div>
 @foreach ($rows as $arr)
-<br /><table data-nx="data" width=940 border=1 cellspacing=0 cellpadding=5>
+<br /><table data-nx="data">
     <tr><th class="colhead" scope="col">{{ $arr['title'] }} - {{ $arr['lang_name'] }}</th></tr>
-    <tr><td align=left>{{ $arr['textHtml'] }}</td></tr>
-    <tr><td align=left><a href="?act=edit&id={{ (int) $arr['id'] }}">Edit</a>&nbsp;&nbsp;<form method="post" class="nx-inline" action="modrules.php?act=del">@csrf<input type="hidden" name="id" value="{{ (int) $arr['id'] }}"><input type="hidden" name="sure" value="1"><button type="submit" class="nx-btn-link">Delete</button></form></td></tr>
+    <tr><td>{{ $arr['textHtml'] }}</td></tr>
+    <tr><td><a href="?act=edit&id={{ (int) $arr['id'] }}">Edit</a>&nbsp;&nbsp;<form method="post" class="nx-inline" action="modrules.php?act=del">@csrf<input type="hidden" name="id" value="{{ (int) $arr['id'] }}"><input type="hidden" name="sure" value="1"><button type="submit" class="nx-btn-link">Delete</button></form></td></tr>
 </table>
 @endforeach
 @endif

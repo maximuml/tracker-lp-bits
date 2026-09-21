@@ -4,7 +4,7 @@
 
 @section('content')
 @if (($mode ?? '') === 'edit')
-    <h1 align="center">Edit Section or Item</h1>
+    <h1 class="nx-center">Edit Section or Item</h1>
     @if (empty($arr))
         <p>Invalid id</p>
     @elseif (($arr['type'] ?? '') === 'item')
@@ -50,12 +50,12 @@
         </form>
     @endif
 @elseif (($mode ?? '') === 'confirm_delete')
-    <h1 align="center">Confirmation required</h1>
+    <h1 class="nx-center">Confirmation required</h1>
     <div class="nx-box nx-w-97 nx-mx-auto nx-center">
     Please click <a href="faqactions.php?action=delete&id={{ (int) ($id ?? 0) }}&confirm=yes">here</a> to confirm.
     </div>
 @elseif (($mode ?? '') === 'additem')
-    <h1 align="center">Add Item</h1>
+    <h1 class="nx-center">Add Item</h1>
     <form method="post" action="faqactions.php?action=addnewitem">
         @csrf
         <div class="nx-fgrid nx-fgrid--auto nx-fgrid--pad10">
@@ -75,7 +75,7 @@
         </div>
     </form>
 @elseif (($mode ?? '') === 'addsection')
-    <h1 align="center">Add Section</h1>
+    <h1 class="nx-center">Add Section</h1>
     <form method="post" action="faqactions.php?action=addnewsect">
         @csrf
         <div class="nx-fgrid nx-fgrid--auto nx-fgrid--pad10">

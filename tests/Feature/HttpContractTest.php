@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use Filament\Http\Middleware\Authenticate;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\Route as RouteFacade;
@@ -476,6 +477,11 @@ final class HttpContractTest extends TestCase
     {
         foreach ($middleware as $mw) {
             if (str_contains($mw, 'auth.nexus') || str_contains($mw, 'auth:sanctum') || str_contains($mw, 'auth:') || $mw === 'auth') {
+                return true;
+            }
+            // Filament panels authenticate via Authenticate subclasses
+            // (e.g. App\Http\Middleware\Filament on /my member routes).
+            if (is_a($mw, Authenticate::class, true)) {
                 return true;
             }
         }

@@ -13,7 +13,7 @@ final class TorrentUploadRequestTest extends TestCase
 {
     public function test_rules_use_real_form_field_names(): void
     {
-        $request = new TorrentUploadRequest();
+        $request = new TorrentUploadRequest;
 
         $rules = $request->rules();
 
@@ -29,7 +29,7 @@ final class TorrentUploadRequestTest extends TestCase
 
     public function test_messages_are_localized(): void
     {
-        $messages = (new TorrentUploadRequest())->messages();
+        $messages = (new TorrentUploadRequest)->messages();
 
         $this->assertSame(
             ['descr.required', 'descr.min', 'type.required', 'type.min', 'type.integer', 'type.exists',

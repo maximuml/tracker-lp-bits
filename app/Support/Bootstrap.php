@@ -40,10 +40,18 @@ final class Bootstrap
     /**
      * Run the legacy periodic cleanup tasks.
      *
-     * Mirrors `autoclean($printProgress)`.
+     * Mirrors `autoclean($printProgress)`. Skipped under PHPUnit: the
+     * `lastcleantime*` gate timestamps live in `avps` rows that
+     * DatabaseTransactions rolls back, so autoclean would fire on every
+     * test request — nondeterministic query counts and fixture mutations.
+     * Cleanup itself stays covered by direct `runAll()` tests.
      */
     public static function autoClean(bool $printProgress = false): string|bool
     {
+        if (app()->runningUnitTests()) {
+            return false;
+        }
+
         return app(CleanupService::class)->runAll(false, $printProgress);
     }
 }

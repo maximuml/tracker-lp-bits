@@ -505,14 +505,6 @@ final class SiteChromeViewModel
         if ($user['showclienterror'] ?? false) {
             $alerts[] = ['url' => 'faq.php#id29', 'text' => (string) (__('legacy/functions.text_banned_client_warning')), 'color' => 'black'];
         }
-        if ($unread) {
-            $alerts[] = [
-                'url' => 'messages.php',
-                'text' => (string) (__('legacy/functions.text_you_have')).$unread.(string) (__('legacy/functions.text_new_message')).Strings::addS($unread).(string) (__('legacy/functions.text_click_here_to_read')),
-                'color' => 'red',
-            ];
-        }
-
         foreach (MsgAlert::pendingAlerts() as $alert) {
             $alerts[] = $alert;
         }
@@ -700,6 +692,10 @@ final class SiteChromeViewModel
             'shoutboxMention' => __('legacy/index.toast_shoutbox_mention'),
             'from' => __('legacy/index.toast_from'),
             'close' => __('legacy/index.toast_close'),
+            'bell' => __('legacy/notifications.title_bell'),
+            'markAllRead' => __('legacy/notifications.mark_all_read'),
+            'empty' => __('legacy/notifications.empty'),
+            'loadError' => __('legacy/notifications.load_error'),
             'userId' => $userId,
         ], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT);
         AssetAppender::js("window.TOAST_LANG = $toastLang;", 'footer', false, 'toast-lang');

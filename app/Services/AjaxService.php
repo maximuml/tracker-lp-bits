@@ -11,14 +11,12 @@ use App\Models\User;
 use App\Repositories\AttendanceRepository;
 use App\Repositories\BonusRepository;
 use App\Repositories\ExamUserRepository;
-use App\Repositories\MessageRepository;
-use App\Repositories\ShoutboxRepository;
 use App\Repositories\TorrentModerationRepository;
 use App\Services\Ajax\MedalActions;
 use App\Services\Ajax\PasskeyActions;
 use App\Services\Ajax\ShoutboxActions;
 use App\Support\CurrentUser;
-use App\Support\ToastNotifications;
+use App\Support\NotificationFeed;
 
 final class AjaxService
 {
@@ -76,7 +74,7 @@ final class AjaxService
         private readonly ShoutboxActions $shoutboxActions,
         private readonly PasskeyActions $passkeyActions,
         private readonly MedalActions $medalActions,
-        private readonly ToastNotifications $toastNotifications = new ToastNotifications(new MessageRepository, new ShoutboxRepository),
+        private readonly NotificationFeed $notificationFeed = new NotificationFeed,
     ) {}
 
     /** @param array<string, mixed> $params */
@@ -199,10 +197,15 @@ final class AjaxService
     private function getToastNotifications(array $params): mixed
     {
         $CURUSER = $this->currentUser->get() ?? [];
-        $lastPmId = (int) ($params['last_pm_id'] ?? 0);
-        $lastShoutId = (int) ($params['last_shout_id'] ?? 0);
+        $cursors = [
+            'pm' => (int) ($params['last_pm_id'] ?? 0),
+            'shout' => (int) ($params['last_shout_id'] ?? 0),
+            'comment' => (int) ($params['last_comment_id'] ?? 0),
+            'topic_reply' => (int) ($params['last_reply_id'] ?? 0),
+            'staff' => (int) ($params['last_staff_id'] ?? 0),
+        ];
         $init = ! empty($params['init']);
 
-        return $this->toastNotifications->get((int) $CURUSER['id'], $lastPmId, $lastShoutId, $init);
+        return $this->notificationFeed->since((int) $CURUSER['id'], $cursors, $init);
     }
 }

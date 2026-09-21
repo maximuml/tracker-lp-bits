@@ -50,11 +50,11 @@ final class LegacyUrlRewriter
             $executedScript = basename($scriptName);
         }
 
-        // Under Octane (RoadRunner / FrankenPHP / Swoole), SCRIPT_FILENAME points
-        // to the worker script (e.g. vendor/bin/roadrunner-worker), not index.php.
-        // Treat these as index.php so the request path is not rewritten to the
-        // worker script name.
-        if (in_array($executedScript, ['roadrunner-worker', 'frankenphp-worker', 'swoole-worker'], true)) {
+        // Under Octane (RoadRunner — ADR 0030 — or Swoole), SCRIPT_FILENAME
+        // points to the worker script (e.g. vendor/bin/roadrunner-worker),
+        // not index.php. Treat these as index.php so the request path is not
+        // rewritten to the worker script name.
+        if (in_array($executedScript, ['roadrunner-worker', 'swoole-worker'], true)) {
             $executedScript = 'index.php';
         }
 

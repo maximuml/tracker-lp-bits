@@ -326,7 +326,7 @@ JS;
             return response()->json(Api::failWithContext('You already reach times limit!', $validated));
         }
 
-        $torrentOwnerInfo = User::query()->find($torrentOwner, User::$commonFields);
+        $torrentOwnerInfo = User::query()->find((int) $torrentOwner, User::$commonFields);
         if (! $torrentOwnerInfo) {
             return response()->json(Api::failWithContext('Invalid torrent owner!', $validated));
         }

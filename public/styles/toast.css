@@ -233,3 +233,45 @@ html[data-theme="light"] .nx-notif-panel {
     text-align: center;
     color: var(--notif-fg-dim);
 }
+
+/* MeiliSearch autocomplete dropdown (torrents search box) */
+.nx-autocomplete {
+    border: 1px solid var(--nxm-border, #777);
+    background: var(--nxm-surface, #fff);
+    color: var(--nxm-text, #000);
+    border-radius: 4px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, .2);
+}
+
+.nx-autocomplete-item {
+    padding: 4px 6px;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nx-autocomplete-item--active {
+    background: var(--nxm-accent, #3366cc);
+    color: var(--nxm-on-accent, #fff);
+}
+
+/* Toast uses theme surface tokens on light pages */
+html[data-theme="light"] .nexus-toast {
+    background: var(--nxm-surface, #fff);
+    color: var(--nxm-text, #1a1d21);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, .22);
+}
+
+html[data-theme="light"] .nexus-toast-body {
+    color: var(--nxm-text-dim, #5b6b7c);
+}
+
+html[data-theme="light"] .nexus-toast-close {
+    color: #777;
+}
+
+html[data-theme="light"] .nexus-toast-close:hover,
+html[data-theme="light"] .nexus-toast-close:focus {
+    color: #1a1d21;
+}

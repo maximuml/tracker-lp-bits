@@ -171,7 +171,7 @@ final class Attachment
 
                 return $key;
             })(),
-            default => throw new \RuntimeException('不支持的云盘驱动'),
+            default => throw new \RuntimeException('Unsupported cloud drive driver'),
         };
     }
 

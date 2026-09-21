@@ -61,10 +61,6 @@ function $(e){if(typeof e=='string')e=document.getElementById(e);return e};
 
 ajax={};
 ajax.csrfToken=function(){var m=document.querySelector('meta[name="csrf-token"]');return m?m.getAttribute('content'):''};
-ajax.x=function(){try{return new ActiveXObject('Msxml2.XMLHTTP')}catch(e){try{return new ActiveXObject('Microsoft.XMLHTTP')}catch(e){return new XMLHttpRequest()}}};
-ajax.send=function(u,f,m,a){var x=ajax.x();x.open(m,u,true);x.onreadystatechange=function(){if(x.readyState==4)f(x.responseText)};if(m=='POST'){x.setRequestHeader('Content-type','application/x-www-form-urlencoded');var t=ajax.csrfToken();if(t)x.setRequestHeader('X-CSRF-TOKEN',t)}x.send(a)};
-ajax.get=function(url,func){ajax.send(url,func,'GET')};
-ajax.post=function(url,func,args){ajax.send(url,func,'POST',args)};
 ajax.fetchText=function(url){return fetch(url,{credentials:'same-origin',headers:{'X-Requested-With':'XMLHttpRequest'}}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.text()})};
 ajax.postText=function(url,body){return fetch(url,{method:'POST',credentials:'same-origin',headers:{'Content-type':'application/x-www-form-urlencoded','X-CSRF-TOKEN':ajax.csrfToken(),'X-Requested-With':'XMLHttpRequest'},body:body}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.text()})};
 
@@ -387,11 +383,11 @@ function SmileIT(smile,form,text){
 
 function saythanks(torrentid)
 {
-ajax.post('thanks.php',function(){
+ajax.postText('thanks.php','id='+torrentid).then(function(){
 document.getElementById("thanksbutton").innerHTML = document.getElementById("thanksadded").innerHTML;
 document.getElementById("nothanks").innerHTML = "";
 document.getElementById("addcuruser").innerHTML = document.getElementById("curuser").innerHTML;
-},'id='+torrentid);
+}).catch(function(){});
 }
 
 // preview.js
@@ -479,6 +475,7 @@ window.location.href=url+"page="+page;
 }
 }
 function changepage(event){
+if (typeof currentpage === 'undefined' || typeof maxpage === 'undefined') { return; }
 var gotopage;
 var keynum;
 var altkey;
@@ -659,7 +656,7 @@ function lookupSetlist() {
         btn.value = 'Loading...';
         btn.disabled = true;
     }
-    ajax.get('setlist_lookup.php?name=' + encodeURIComponent(name), function (response) {
+    ajax.fetchText('setlist_lookup.php?name=' + encodeURIComponent(name)).then(function (response) {
         if (btn) {
             btn.value = 'Fill setlist';
             btn.disabled = false;
@@ -677,6 +674,12 @@ function lookupSetlist() {
         } catch (e) {
             alert('Setlist lookup failed.');
         }
+    }).catch(function () {
+        if (btn) {
+            btn.value = 'Fill setlist';
+            btn.disabled = false;
+        }
+        alert('Setlist lookup failed.');
     });
 }
 

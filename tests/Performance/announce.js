@@ -34,7 +34,7 @@ const PASSKEY = __ENV.PASSKEY || '';
 const INFO_HASH = __ENV.INFO_HASH || '';
 // Comma-separated extra hashes for multi-hash scrape (perf-torrent-1..5)
 const INFO_HASHES = (__ENV.INFO_HASHES || INFO_HASH).split(',').filter((h) => h.length > 0);
-// Comma-separated passkeys (perf_user_1..10) — the tracker allows only ONE
+// Comma-separated passkeys (perf_user_1..26) — the tracker allows only ONE
 // leeching peer per (user, torrent), so multi-peer scenarios must spread
 // across users, not just peer_ids.
 const PASSKEYS = (__ENV.PASSKEYS || PASSKEY).split(',').filter((k) => k.length > 0);
@@ -90,23 +90,28 @@ export const options = {
     // passkey flood runs LAST because it deliberately exhausts the limit —
     // after it fires, every request from this IP is 429 for ~a minute.
     // Baseline announce path under modest steady load (~1.6 req/s total).
+    // 40s gives ~55 samples — p95 on fewer samples was too jittery on
+    // shared CI runners.
     steady_announce: {
       executor: 'constant-vus',
       vus: 2,
-      duration: '30s',
+      duration: '40s',
       exec: 'steadyAnnounce',
       startTime: '0s',
     },
-    // Many distinct peers joining one torrent — 8 concurrent VUs x 2
-    // iterations = 16 announces spread across users 2-9 (users 0-1 are
+    // Many distinct peers joining one torrent — 12 concurrent VUs x 4
+    // iterations = 48 announces spread across users 2-25 (users 0-1 are
     // taken by steady_announce; a second leecher per user+torrent fails).
+    // Each user's first announce is a real insert; the second lands inside
+    // the dedup window, so the p95 effectively reflects ~24 real announces —
+    // three times the previous 16-sample mix.
     many_peers_one_torrent: {
       executor: 'per-vu-iterations',
-      vus: 8,
-      iterations: 2,
+      vus: 12,
+      iterations: 4,
       maxDuration: '30s',
       exec: 'manyPeers',
-      startTime: '35s',
+      startTime: '45s',
     },
     // Same peer_id re-announcing inside the dedup/frequency window —
     // must be answered fast (warning response), not stalled.
@@ -115,7 +120,7 @@ export const options = {
       vus: 1,
       duration: '15s',
       exec: 'earlyAnnounce',
-      startTime: '42s',
+      startTime: '55s',
     },
     // Scrape aggregating several info_hash params per request.
     multi_hash_scrape: {
@@ -123,7 +128,7 @@ export const options = {
       vus: 2,
       duration: '20s',
       exec: 'multiHashScrape',
-      startTime: '62s',
+      startTime: '75s',
     },
     // Cheap rejection must stay cheap under a flood of bad passkeys.
     // Both bencoded 'failure reason' and HTTP 429 count as rejected —
@@ -136,7 +141,7 @@ export const options = {
       preAllocatedVUs: 5,
       maxVUs: 10,
       exec: 'invalidPasskeyFlood',
-      startTime: '90s',
+      startTime: '105s',
     },
   },
   thresholds: {
@@ -218,7 +223,7 @@ export function steadyAnnounce() {
 
 export function manyPeers() {
   group('many_peers_one_torrent', () => {
-    // Each iteration maps to one of users 2-9 (users 0-1 are taken by
+    // Each iteration maps to one of users 2-25 (users 0-1 are taken by
     // steady_announce) leeching the same torrent. The peer_id is stable
     // per user, so a user's second iteration is a legal re-announce.
     // iterationInTest is scenario-global — VU scheduling does not matter.

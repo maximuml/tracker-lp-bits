@@ -8,6 +8,7 @@ use App\DTOs\Message\StoreMessageDto;
 use App\Models\Message;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Message repository: PM reads, read state, deletion, and generic CRUD.
@@ -225,6 +226,8 @@ class MessageRepository extends BaseRepository
             ->where('unread', true)
             ->where('id', '>', $lastPmId)
             ->with('send_user')
+            ->select('messages.*')
+            ->addSelect(DB::raw('UNIX_TIMESTAMP(messages.added) as ts'))
             ->orderByDesc('id')
             ->limit($limit)
             ->get();
@@ -238,7 +241,7 @@ class MessageRepository extends BaseRepository
                 'body' => $row->subject,
                 'from' => (string) ($row->send_user->username ?? 'System'),
                 'url' => 'messages.php?action=viewmessage&id='.$row->id,
-                'timestamp' => (int) strtotime((string) $row->added),
+                'timestamp' => (int) $row->getAttribute('ts'),
             ];
         }
 

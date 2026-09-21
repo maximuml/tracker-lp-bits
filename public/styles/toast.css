@@ -123,20 +123,41 @@
 }
 
 .nx-notif-panel {
+    --notif-bg: #2b2f36;
+    --notif-fg: #f0f1f3;
+    --notif-fg-body: #d5d8dd;
+    --notif-fg-dim: #a8adb7;
+    --notif-accent: #8ab4f8;
+    --notif-border: rgba(168, 173, 183, .45);
+    --notif-divider: rgba(168, 173, 183, .22);
+    --notif-hover: rgba(255, 255, 255, .07);
+    --notif-shadow: 0 8px 28px rgba(0, 0, 0, .55);
     position: absolute;
     top: 22px;
     right: 0;
     z-index: 9000;
-    width: 320px;
+    width: min(320px, calc(100vw - 24px));
     max-height: 60vh;
     overflow-y: auto;
-    background: rgba(30, 32, 36, .97);
-    color: #eee;
-    border: 1px solid rgba(127, 127, 127, .4);
+    background: var(--notif-bg);
+    color: var(--notif-fg);
+    border: 1px solid var(--notif-border);
     border-radius: 8px;
-    box-shadow: 0 6px 24px rgba(0, 0, 0, .35);
+    box-shadow: var(--notif-shadow);
     text-align: left;
     font-size: 12px;
+}
+
+html[data-theme="light"] .nx-notif-panel {
+    --notif-bg: #ffffff;
+    --notif-fg: #1a1d21;
+    --notif-fg-body: #3a3d42;
+    --notif-fg-dim: #5a5f66;
+    --notif-accent: #1565c0;
+    --notif-border: rgba(0, 0, 0, .18);
+    --notif-divider: rgba(0, 0, 0, .1);
+    --notif-hover: rgba(0, 0, 0, .05);
+    --notif-shadow: 0 8px 24px rgba(0, 0, 0, .18);
 }
 
 .nx-notif-head {
@@ -144,21 +165,22 @@
     justify-content: space-between;
     align-items: center;
     padding: 8px 10px;
-    border-bottom: 1px solid rgba(127, 127, 127, .25);
+    border-bottom: 1px solid var(--notif-divider);
     position: sticky;
     top: 0;
-    background: inherit;
+    background: var(--notif-bg);
     border-radius: 8px 8px 0 0;
 }
 
 .nx-notif-title {
     font-weight: bold;
+    color: var(--notif-fg);
 }
 
 .nx-notif-mark {
     background: none;
     border: none;
-    color: #90caf9;
+    color: var(--notif-accent);
     cursor: pointer;
     font-size: 11px;
     padding: 2px 4px;
@@ -168,33 +190,38 @@
     text-decoration: underline;
 }
 
+.nx-notif-panel .nx-notif-item,
 .nx-notif-item {
     display: block;
+    min-height: 0;
     padding: 8px 10px;
-    border-bottom: 1px solid rgba(127, 127, 127, .15);
-    color: inherit;
+    border-bottom: 1px solid var(--notif-divider);
+    color: var(--notif-fg);
     text-decoration: none;
 }
 
 .nx-notif-item:hover {
-    background: rgba(255, 255, 255, .06);
+    background: var(--notif-hover);
 }
 
 .nx-notif-item-title {
+    display: block;
     font-weight: bold;
+    color: var(--notif-fg);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .nx-notif-item-meta {
-    opacity: .7;
+    display: block;
+    color: var(--notif-fg-dim);
     font-size: 11px;
     margin: 2px 0;
 }
 
 .nx-notif-item-body {
-    opacity: .9;
+    color: var(--notif-fg-body);
     overflow: hidden;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -204,18 +231,47 @@
 .nx-notif-empty {
     padding: 16px;
     text-align: center;
-    opacity: .7;
+    color: var(--notif-fg-dim);
 }
 
-html[data-theme="light"] .nx-notif-panel {
-    background: rgba(252, 252, 250, .98);
-    color: inherit;
+/* MeiliSearch autocomplete dropdown (torrents search box) */
+.nx-autocomplete {
+    border: 1px solid var(--nxm-border, #777);
+    background: var(--nxm-surface, #fff);
+    color: var(--nxm-text, #000);
+    border-radius: 4px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, .2);
 }
 
-html[data-theme="light"] .nx-notif-mark {
-    color: #1565c0;
+.nx-autocomplete-item {
+    padding: 4px 6px;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-html[data-theme="light"] .nx-notif-item:hover {
-    background: rgba(0, 0, 0, .05);
+.nx-autocomplete-item--active {
+    background: var(--nxm-accent, #3366cc);
+    color: var(--nxm-on-accent, #fff);
+}
+
+/* Toast uses theme surface tokens on light pages */
+html[data-theme="light"] .nexus-toast {
+    background: var(--nxm-surface, #fff);
+    color: var(--nxm-text, #1a1d21);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, .22);
+}
+
+html[data-theme="light"] .nexus-toast-body {
+    color: var(--nxm-text-dim, #5b6b7c);
+}
+
+html[data-theme="light"] .nexus-toast-close {
+    color: #777;
+}
+
+html[data-theme="light"] .nexus-toast-close:hover,
+html[data-theme="light"] .nexus-toast-close:focus {
+    color: #1a1d21;
 }

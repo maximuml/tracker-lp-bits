@@ -23,13 +23,11 @@ function meiliAutoInit()
 
     meiliAutoContainer = document.createElement('div');
     meiliAutoContainer.id = 'meili-autocomplete-container';
+    meiliAutoContainer.className = 'nx-autocomplete';
     meiliAutoContainer.style.display = 'none';
     meiliAutoContainer.style.position = 'absolute';
     meiliAutoContainer.style.zIndex = '1000';
     meiliAutoContainer.style.width = meiliAutoInput.offsetWidth + 'px';
-    meiliAutoContainer.style.border = '1px solid rgb(119, 119, 119)';
-    meiliAutoContainer.style.backgroundColor = 'rgb(255, 255, 255)';
-    meiliAutoContainer.style.color = 'rgb(0, 0, 0)';
 
     meiliAutoList = document.createElement('div');
     meiliAutoContainer.appendChild(meiliAutoList);
@@ -135,11 +133,7 @@ function meiliAutoRender(torrents)
     meiliAutoList.innerHTML = '';
     for (var i = 0; i < torrents.length; i++) {
         var item = document.createElement('div');
-        item.style.padding = '4px 6px';
-        item.style.cursor = 'pointer';
-        item.style.whiteSpace = 'nowrap';
-        item.style.overflow = 'hidden';
-        item.style.textOverflow = 'ellipsis';
+        item.className = 'nx-autocomplete-item';
         item.innerText = torrents[i].name;
         item.setAttribute('data-index', i);
         item.onmousedown = function (e) {
@@ -179,13 +173,7 @@ function meiliAutoUpdateHighlight()
 {
     var items = meiliAutoList.children;
     for (var i = 0; i < items.length; i++) {
-        if (i === meiliAutoSelected) {
-            items[i].style.backgroundColor = '#3366cc';
-            items[i].style.color = '#ffffff';
-        } else {
-            items[i].style.backgroundColor = '#ffffff';
-            items[i].style.color = '#000000';
-        }
+        items[i].classList.toggle('nx-autocomplete-item--active', i === meiliAutoSelected);
     }
 }
 

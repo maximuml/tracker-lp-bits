@@ -3,7 +3,7 @@
 @section('title', $title)
 
 @section('content')
-<h1 align=center>{{ $title }}<a href="userdetails.php?id={{ (int) $uid }}"><b>&nbsp;{{ $username }}</b></a></h1>
+<h1 class="nx-center">{{ $title }}<a href="userdetails.php?id={{ (int) $uid }}"><b>&nbsp;{{ $username }}</b></a></h1>
 
 <div>
     <form id="filterForm" action="{{ $requestUri }}" method="get">
@@ -28,23 +28,23 @@
     </form>
 </div>
 
-<table data-nx="data" id='bonus-log-table' width='100%' cellpadding='5'>
+<table data-nx="data" id='bonus-log-table'>
 <tr>
-    <th class="colhead" align='left' scope="col">{{ $columnBusinessTypeLabel }}</th>
-    <th class="colhead" align='left' scope="col">{{ $columnOldTotalLabel }}</th>
-    <th class="colhead" align='left' scope="col">{{ $columnValueLabel }}</th>
-    <th class="colhead" align='left' scope="col">{{ $columnNewTotalLabel }}</th>
-    <th class="colhead" align='left' scope="col">{{ $columnCommentLabel }}</th>
-    <th class="colhead" align='left' scope="col">{{ $columnCreatedAtLabel }}</th>
+    <th class="colhead nx-align-left" scope="col">{{ $columnBusinessTypeLabel }}</th>
+    <th class="colhead nx-align-left" scope="col">{{ $columnOldTotalLabel }}</th>
+    <th class="colhead nx-align-left" scope="col">{{ $columnValueLabel }}</th>
+    <th class="colhead nx-align-left" scope="col">{{ $columnNewTotalLabel }}</th>
+    <th class="colhead nx-align-left" scope="col">{{ $columnCommentLabel }}</th>
+    <th class="colhead nx-align-left" scope="col">{{ $columnCreatedAtLabel }}</th>
 </tr>
 @foreach ($rows as $row)
 <tr>
-    <td class='rowfollow nowrap' align='left'>{{ $row['businessTypeText'] }}</td>
-    <td class='rowfollow nowrap' align='left'>{{ $row['old_formatted'] }}</td>
-    <td class='rowfollow nowrap' align='left'>{{ $row['value_formatted'] }}</td>
-    <td class='rowfollow nowrap' align='left'>{{ $row['new_formatted'] }}</td>
-    <td class='rowfollow nowrap' align='left'>{{ $row['comment'] }}</td>
-    <td class='rowfollow nowrap' align='left'>{{ $row['created_at'] }}</td>
+    <td class='rowfollow nowrap'>{{ $row['businessTypeText'] }}</td>
+    <td class='rowfollow nowrap'>{{ $row['old_formatted'] }}</td>
+    <td class='rowfollow nowrap'>{{ $row['value_formatted'] }}</td>
+    <td class='rowfollow nowrap'>{{ $row['new_formatted'] }}</td>
+    <td class='rowfollow nowrap'>{{ $row['comment'] }}</td>
+    <td class='rowfollow nowrap'>{{ $row['created_at'] }}</td>
 </tr>
 @endforeach
 </table>

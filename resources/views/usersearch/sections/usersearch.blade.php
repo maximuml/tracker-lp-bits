@@ -1,7 +1,7 @@
 <h1>Administrative User Search</h1>
 
 @if ($showHelp)
-<div class="nx-panel nx-embedded"><div align=left>
+<div class="nx-panel nx-embedded"><div>
 	Fields left blank will be ignored;
 	Wildcards * and ? may be used in Name, Email and Comments, as well as multiple values
 	separated by spaces (e.g. 'wyz Max*' in Name will list both users named
@@ -22,7 +22,7 @@
 	respectively, as well as linking to the history page.
 	</div></div><br /><br />
 @else
-<p align=center>(<a href="{{ $requestUri }}?h=1">Instructions</a>)
+<p class="nx-center">(<a href="{{ $requestUri }}?h=1">Instructions</a>)
 &nbsp;-&nbsp;(<a href="{{ $requestUri }}">Reset</a>)</p>
 @endif
 

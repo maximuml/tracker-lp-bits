@@ -1,7 +1,7 @@
-<table class="torrents" cellspacing="0" cellpadding="5" width="100%" data-nx="data">
+<table class="torrents" data-nx="data">
 <tr>
     <th class="colhead" scope="col"><a href="{{ $table->sortCatUrl }}">{{ __('legacy/offers.col_type') }}</a></th>
-    <th class="colhead" width="100%" scope="col"><a href="{{ $table->sortNameUrl }}">{{ __('legacy/offers.col_title') }}</a></th>
+    <th class="colhead" scope="col"><a href="{{ $table->sortNameUrl }}">{{ __('legacy/offers.col_title') }}</a></th>
     <th colspan="3" class="colhead" scope="colgroup"><a href="{{ $table->sortVResUrl }}">{{ __('legacy/offers.col_vote_results') }}</a></th>
     <th class="colhead" scope="col"><a href="{{ $table->sortCommentsUrl }}"><img class="comments" src="pic/trans.gif" alt="comments" title="{{ __('legacy/offers.title_comment') }}" /></a></th>
     <th class="colhead" scope="col"><a href="{{ $table->sortAddedUrl }}"><img class="time" src="pic/trans.gif" alt="time" title="{{ __('legacy/offers.title_time_added') }}" /></a></th>
@@ -21,7 +21,7 @@
         <b> (<span class="new">{{ __('legacy/offers.text_new') }}</span>)</b>
         @endif
         &nbsp;<b>[<span class="{{ $row->allowed->cssClass }}">{{ $row->allowed->label }}</span>]</b></td>
-    <td class="rowfollow nowrap" align="center">
+    <td class="rowfollow nowrap nx-center">
         @if ($row->voteResults === null)
         0
         @else
@@ -30,7 +30,7 @@
     </td>
     <td class="rowfollow nowrap" @if (! $table->canAgainst) colspan="2" @endif><a href="?id={{ $row->id }}&amp;vote=yeah" title="{{ __('legacy/offers.title_i_want_this') }}"><span class="nx-color-green"><b>{{ __('legacy/offers.text_yep') }}</b></span></a></td>
     @if ($table->showAgainstCell)
-    <td class="rowfollow nowrap" align="center"><a href="?id={{ $row->id }}&amp;vote=against" title="{{ __('legacy/offers.title_do_not_want_it') }}"><span class="nx-color-red"><b>{{ __('legacy/offers.text_nah') }}</b></span></a></td>
+    <td class="rowfollow nowrap nx-center"><a href="?id={{ $row->id }}&amp;vote=against" title="{{ __('legacy/offers.title_do_not_want_it') }}"><span class="nx-color-red"><b>{{ __('legacy/offers.text_nah') }}</b></span></a></td>
     @endif
     <td class="rowfollow">
         @if ($row->comment->count === 0)

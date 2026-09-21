@@ -198,12 +198,12 @@ class User extends Authenticatable implements FilamentUser, HasName
 
     /** @var array<string, string> */
     public static array $cardTitles = [
-        'uploaded_human' => '上传量',
-        'downloaded_human' => '下载量',
-        'share_ratio' => '分享率',
-        'bonus' => '魔力值',
-        'seed_points' => '做种积分',
-        'invites' => '邀请',
+        'uploaded_human' => 'Uploaded',
+        'downloaded_human' => 'Downloaded',
+        'share_ratio' => 'Ratio',
+        'bonus' => 'Karma Bonus',
+        'seed_points' => 'Seed Points',
+        'invites' => 'Invites',
     ];
 
     /** @var list<string> */

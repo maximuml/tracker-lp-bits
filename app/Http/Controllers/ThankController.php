@@ -55,6 +55,6 @@ class ThankController extends Controller
         $result = $this->thankService->thankTorrent($user, $torrent);
         $resource = new ThankResource($result);
 
-        return $this->success($resource, '说谢谢成功！');
+        return $this->success($resource, __('legacy/details.text_thanks_added'));
     }
 }

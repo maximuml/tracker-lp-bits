@@ -52,6 +52,6 @@ class RewardController extends Controller
         $result = $this->repository->store($request->torrent_id, $request->value, $user);
         $resource = new RewardResource($result);
 
-        return $this->success($resource, '赠魔成功！');
+        return $this->success($resource, __('legacy/details.text_reward_sent'));
     }
 }

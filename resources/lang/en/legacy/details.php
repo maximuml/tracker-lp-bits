@@ -217,6 +217,7 @@ return [
     'magic_show_all_description' => 'View details of a single',
     'magic_haveGotBonus' => 'Publisher now has been got Number Bonus of award.',
     'magic_have_no_enough_bonus_value' => 'more points needed',
+    'text_reward_sent' => 'Bonus gift sent!',
     'action_approval' => 'Approval',
     'row_tags' => 'Tags',
     'torrent_existed' => 'Torrent already uploaded!',

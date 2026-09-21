@@ -58,12 +58,12 @@ class Snatch extends NexusModel
 
     /** @var array<int|string, mixed> */
     public static $cardTitles = [
-        'upload_text' => '上传',
-        'download_text' => '下载',
-        'share_ratio' => '分享率',
-        'seed_time' => '做种时间',
-        'leech_time' => '下载时间',
-        'completed_at_human' => '完成',
+        'upload_text' => 'Uploaded',
+        'download_text' => 'Downloaded',
+        'share_ratio' => 'Ratio',
+        'seed_time' => 'Seed Time',
+        'leech_time' => 'Leech Time',
+        'completed_at_human' => 'Completed',
     ];
 
     /**

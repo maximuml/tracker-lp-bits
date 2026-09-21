@@ -57,18 +57,18 @@ class Peer extends NexusModel
 
     /** @var array<int|string, mixed> */
     public static $connectableText = [
-        PeerConnectable::YES->value => '是',
-        PeerConnectable::NO->value => '否',
+        PeerConnectable::YES->value => 'Yes',
+        PeerConnectable::NO->value => 'No',
     ];
 
     /** @var array<int|string, mixed> */
     public static $cardTitles = [
-        'upload_text' => '上传',
-        'download_text' => '下载',
-        'share_ratio' => '分享率',
-        'agent_human' => '客户端',
-        'connect_time_total' => '连接时间',
-        'download_progress' => '完成进度',
+        'upload_text' => 'Uploaded',
+        'download_text' => 'Downloaded',
+        'share_ratio' => 'Ratio',
+        'agent_human' => 'Client',
+        'connect_time_total' => 'Connected',
+        'download_progress' => 'Progress',
 
     ];
 

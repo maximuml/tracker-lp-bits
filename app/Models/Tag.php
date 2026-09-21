@@ -54,17 +54,17 @@ class Tag extends NexusModel
     const DEFAULTS = [
         [
             'id' => 1,
-            'name' => '禁转',
+            'name' => 'No Repost',
             'color' => '#ff0000',
         ],
         [
             'id' => 2,
-            'name' => '首发',
+            'name' => 'First Release',
             'color' => '#8F77B5',
         ],
         [
             'id' => 3,
-            'name' => '官方',
+            'name' => 'Official',
             'color' => '#0000ff',
         ],
         [
@@ -74,12 +74,12 @@ class Tag extends NexusModel
         ],
         [
             'id' => 5,
-            'name' => '国语',
+            'name' => 'Mandarin Audio',
             'color' => '#6a3906',
         ],
         [
             'id' => 6,
-            'name' => '中字',
+            'name' => 'Chinese Subtitles',
             'color' => '#006400',
         ],
         [

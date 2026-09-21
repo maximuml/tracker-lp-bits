@@ -68,11 +68,11 @@
             var util = layui.util;
             table.render({
                 elem: '#table'
-                ,size: 'sm' //小尺寸的表格
+                ,size: 'sm' // compact table size
                 // ,height: 312
-                ,url: '/web/torrent-approval-logs?__format=layui-table&torrent_id={{ $torrent->id }}' //数据接口
-                ,page: true //开启分页
-                ,cols: [[ //表头
+                ,url: '/web/torrent-approval-logs?__format=layui-table&torrent_id={{ $torrent->id }}' // data endpoint
+                ,page: true // enable pagination
+                ,cols: [[ // table headers
                     {field: 'id', title: 'ID', }
                     ,{field: 'username', title: '{{ __('label.username') }}', }
                     ,{field: 'action_type_text', title: '{{ __('label.action') }}', }
@@ -84,7 +84,7 @@
         layui.use('form', function(){
             var form = layui.form;
 
-            //监听提交
+            // watch for submit
             form.on('submit(formDemo)', function(data){
                 console.log(data)
                 var formData = new FormData();

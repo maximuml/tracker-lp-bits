@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use Filament\Http\Middleware\Authenticate;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\Route as RouteFacade;
@@ -480,7 +481,7 @@ final class HttpContractTest extends TestCase
             }
             // Filament panels authenticate via Authenticate subclasses
             // (e.g. App\Http\Middleware\Filament on /my member routes).
-            if (is_a($mw, \Filament\Http\Middleware\Authenticate::class, true)) {
+            if (is_a($mw, Authenticate::class, true)) {
                 return true;
             }
         }

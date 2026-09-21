@@ -963,45 +963,34 @@ by final repository classes or static methods — see W2-01/W2-02).
   `ob_start` 22, HTML literal lines 807. Same rule as ADR 0025 applies:
   `fromUntrustedHtml` is reserved for known-trusted language strings.
 
-### ADR 0029: Filament member panel `/my` for CRUD-shaped account pages (Accepted, stage 6.1 prototype)
+### ADR 0029: Filament member panel `/my` (Rejected, stage 6.1 prototype)
 
 - **Context:** Member-facing pages are being migrated one by one to
   Blade view models under the site chrome (stage 3.x: usercp sections,
   mybonus), while the admin already runs a Filament panel at `/nexusphp`.
   Stage 6 asked whether the account area should instead become a second
-  Filament panel `/my` — one prototype page (Passkeys) was built to
-  compare code volume, look, and integration friction against the Blade
-  path before committing.
-- **Decision:** `MemberPanelProvider` (id `member`, path `/my`,
-  guard `nexus-web`, same middleware stack as the admin panel) plus a
-  `Dashboard` landing page and a `MyPasskeys` page — a Filament table
-  scoped by `Passkey::where('user_id', Auth::id())` with a
-  `DeleteAction`, and a "Create" button that reuses the unchanged
-  `passkey.js` WebAuthn ceremony (`location.reload()` after success).
-  Supporting changes: `User::canAccessPanel()` returns true for the
-  `member` panel (staff check stays for `admin`); `'my'` was added to
-  `LARAVEL_ONLY_PREFIXES` in `LegacyUrlRewriter` and the prefix match
-  was made segment-exact (`/mybonus`, `/myhr` are legacy pages that
-  must not be swallowed); `SecurityHeaders::isFilamentRoute()` grants
-  `/my` and `/my/*` the relaxed Livewire CSP (`unsafe-inline` +
-  `unsafe-eval`), same as `/nexusphp`.
-- **Comparison (Passkeys vs Blade path):** ~90 lines of PHP page class
-  + ~20 lines of Blade vs the ~50-line `_passkeys` section plus
-  service/ViewModel wiring — roughly equal for this tiny feature, but
-  the Filament table supplies pagination, sorting, empty states,
-  confirmation modals and notifications that the Blade version builds
-  by hand, and the gap widens sharply for form/table-heavy pages
-  (invites, bonus history). Real costs found by the prototype: the
-  panel needs its CSP prefix whitelisted and a `LARAVEL_ONLY_PREFIXES`
-  entry (two one-line changes per future prefix); browser-API flows
-  (WebAuthn) do not fit the CRUD model and need a small JS bridge;
-  tables hydrate through Livewire, so feature tests must drive
-  `Livewire::test`, not `assertSee` on the first render.
-- **Consequences:** Go — Filament `/my` for CRUD-shaped account pages
-  (passkeys, invites, bonus/access-token lists, message lists); keep
-  Blade for pages embedded in site chrome (index, torrent details,
-  forum) and JS-heavy flows where Filament adds no leverage. Legacy
-  routes get 302-redirected to `/my` pages after parity, per the
-  established `routes/legacy/auth.php` redirect pattern. The member
-  panel currently shares the admin's amber palette; token sync with
-  stage-2.2 design tokens is a follow-up.
+  Filament panel `/my`. A prototype (PR #895: `MemberPanelProvider`,
+  `Dashboard`, `MyPasskeys`) was built to compare code volume, look,
+  and integration friction against the Blade path before committing.
+- **Findings from the prototype:** for the small Passkeys feature the
+  two paths were roughly equal in volume (~90 lines of page class + ~20
+  of Blade vs a ~50-line section + ViewModel wiring); the Filament
+  table supplies pagination/sorting/empty states/modals that Blade
+  builds by hand, so the gap widens on form/table-heavy pages. The real
+  costs: each panel prefix needs a CSP entry and a
+  `LARAVEL_ONLY_PREFIXES` entry; browser-API flows (WebAuthn) need a JS
+  bridge; tables hydrate through Livewire (`Livewire::test` in feature
+  tests); and `/my` introduces a third visual surface that does not
+  follow the site theme.
+- **Decision:** Rejected — the maintainer decided a Filament member
+  panel is not wanted; the prototype was removed. Member-facing pages
+  continue on the established Blade view-model path (stage 3.x) under
+  the unified site chrome. Kept from the PR because they are
+  orthogonal correctness fixes: the segment-exact prefix match in
+  `LegacyUrlRewriter::isLaravelOnlyPath()` (a loose `str_starts_with`
+  could swallow same-prefix legacy pages) and Filament `Authenticate`
+  recognition in `HttpContractTest`.
+- **Consequences:** No `/my` panel; `User::canAccessPanel()` keeps the
+  staff check for all panels. If the member-area question resurfaces,
+  the prototype findings above document the integration cost
+  (CSP + rewriter entries per prefix, JS bridges, Livewire hydration).

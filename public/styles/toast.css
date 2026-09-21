@@ -208,8 +208,9 @@
 }
 
 html[data-theme="light"] .nx-notif-panel {
-    background: rgba(252, 252, 250, .98);
-    color: inherit;
+    background: #fcfcfa;
+    color: #1a1d21;
+    border-color: rgba(0, 0, 0, .18);
 }
 
 html[data-theme="light"] .nx-notif-mark {
@@ -217,14 +218,20 @@ html[data-theme="light"] .nx-notif-mark {
 }
 
 html[data-theme="light"] .nx-notif-item-meta,
-html[data-theme="light"] .nx-notif-item-body,
 html[data-theme="light"] .nx-notif-empty {
-    color: inherit;
-    opacity: .75;
+    color: #5a5f66;
 }
 
 html[data-theme="light"] .nx-notif-item-body {
-    opacity: .9;
+    color: #3a3d42;
+}
+
+html[data-theme="light"] .nx-notif-item {
+    border-bottom-color: rgba(0, 0, 0, .1);
+}
+
+html[data-theme="light"] .nx-notif-head {
+    border-bottom-color: rgba(0, 0, 0, .14);
 }
 
 html[data-theme="light"] .nx-notif-item:hover {

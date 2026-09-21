@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http;
 
+use App\Http\Middleware\AuditStaffActions;
 use App\Http\Middleware\Authenticate;
 use App\Http\Middleware\CheckSiteStatus;
 use App\Http\Middleware\CheckUserStatus;
@@ -67,6 +68,7 @@ class Kernel extends HttpKernel
         ResponseTimeHeader::class,
         RecordHttpMetrics::class,
         RequirePasswordChange::class,
+        AuditStaffActions::class,
     ];
 
     /**

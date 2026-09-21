@@ -1,22 +1,3 @@
-	@php
-		$errorAnchors = [
-			'file' => '#torrent',
-			'name' => '#name',
-			'cnname' => '#cnname',
-			'descr' => '#descr',
-			'type' => '#browsecat',
-			'technical_info' => '#technical_info',
-			'price' => '#price',
-			'offer' => '#offer',
-			'uplver' => '#uplver',
-			'pos_state' => '#pos_state',
-			'pos_state_until' => '#datetime-picker-pos_state_until',
-			'hr' => '#browsecat_section',
-			'tags' => '#browsecat_section',
-			'custom_fields' => '#browsecat_section',
-		];
-		$anchorFor = static fn (string $key): ?string => $errorAnchors[$key] ?? (str_ends_with($key, '_sel') ? '#browsecat_section' : null);
-	@endphp
 	<form id="compose" enctype="multipart/form-data" action="/takeupload" method="post" name="upload">
 			@csrf
 			<p class="nx-center">{{ __('legacy/upload.text_red_star_required') }}<span class="nx-color-red">*</span>{{ __('legacy/upload.text_red_star_required_end') }}</p>
@@ -30,16 +11,12 @@
 							<br /><br /><b>ATTENTION</b>: Max. Torrent Size not set. Please contact the administrator about this problem!
 						@endif
 					</div>
-				@if ($errors->any())
+				@if (count($uploadErrorList) > 0)
 					<div class="nx-ffull">
 						<x-alert type="error" :title="__('legacy/upload.error_summary')">
 							<ul>
-								@foreach ($errors->keys() as $errorKey)
-									@foreach ($errors->get($errorKey) as $errorMessage)
-										<li>@php $anchor = $anchorFor((string) $errorKey); @endphp
-											@if ($anchor !== null)<a href="{{ $anchor }}">{{ $errorMessage }}</a>@else{{ $errorMessage }}@endif
-										</li>
-									@endforeach
+								@foreach ($uploadErrorList as $uploadError)
+									<li>@if ($uploadError['anchor'] !== null)<a href="{{ $uploadError['anchor'] }}">{{ $uploadError['message'] }}</a>@else{{ $uploadError['message'] }}@endif</li>
 								@endforeach
 							</ul>
 						</x-alert>

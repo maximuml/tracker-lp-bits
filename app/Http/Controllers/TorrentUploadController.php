@@ -99,6 +99,35 @@ class TorrentUploadController extends Controller
             ? fn (string $field): bool => $errorsBag->has($field)
             : fn (string $field): bool => false;
 
+        // Flatten the error bag into key+message+anchor rows so the template
+        // only renders — ratchet tests forbid @php blocks in views.
+        $errorAnchors = [
+            'file' => '#torrent',
+            'name' => '#name',
+            'cnname' => '#cnname',
+            'descr' => '#descr',
+            'type' => '#browsecat',
+            'technical_info' => '#technical_info',
+            'price' => '#price',
+            'offer' => '#offer',
+            'uplver' => '#uplver',
+            'pos_state' => '#pos_state',
+            'pos_state_until' => '#datetime-picker-pos_state_until',
+            'hr' => '#browsecat_section',
+            'tags' => '#browsecat_section',
+            'custom_fields' => '#browsecat_section',
+        ];
+        $uploadErrorList = [];
+        if ($errorsBag instanceof ViewErrorBag) {
+            $defaultBag = $errorsBag->getBag('default');
+            foreach ($defaultBag->keys() as $errorKey) {
+                $anchor = $errorAnchors[$errorKey] ?? (str_ends_with((string) $errorKey, '_sel') ? '#browsecat_section' : null);
+                foreach ($defaultBag->get($errorKey) as $errorMessage) {
+                    $uploadErrorList[] = ['message' => $errorMessage, 'anchor' => $anchor];
+                }
+            }
+        }
+
         $nameInputHtml = $this->torrentRepository->buildUploadFieldInput(
             'name',
             $this->oldScalar($request, 'name'),
@@ -151,6 +180,7 @@ class TorrentUploadController extends Controller
         $customField = new CustomField;
 
         return view('torrents.upload', [
+            'uploadErrorList' => $uploadErrorList,
             'uploadFreely' => $uploadFreely,
             'allowtorrents' => $allowtorrents,
             'offerRows' => $offerRows,

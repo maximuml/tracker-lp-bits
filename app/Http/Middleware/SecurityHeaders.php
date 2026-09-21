@@ -76,8 +76,13 @@ final class SecurityHeaders
     {
         $path = $request->path();
 
-        // Filament panel routes
+        // Filament panel routes (admin: nexusphp, member: /my/*)
         if (str_starts_with($path, 'nexusphp') || str_starts_with($path, 'livewire')) {
+            return true;
+        }
+        // Exact-segment match: legacy pages like /mybonus, /myhr must not
+        // inherit the relaxed Filament policy.
+        if ($path === 'my' || str_starts_with($path, 'my/')) {
             return true;
         }
 

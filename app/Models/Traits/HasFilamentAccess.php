@@ -14,6 +14,12 @@ trait HasFilamentAccess
 {
     public function canAccessPanel(Panel $panel): bool
     {
+        // The member panel (/my) is open to every authenticated user;
+        // per-page authorization lives on the pages themselves.
+        if ($panel->getId() === 'member') {
+            return true;
+        }
+
         return $this->canAccessAdmin();
     }
 

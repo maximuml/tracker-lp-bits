@@ -12,7 +12,6 @@ use App\Support\LegacyResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use LogicException;
 
 /**
  * Mailbox mutation handlers (moveordel bulk actions, editmailboxes2,
@@ -31,9 +30,6 @@ final class MessageMailboxService
         $user = Auth::user();
         if (! $user instanceof User) {
             LegacyResponse::abort('Error', 'Permission denied.');
-        }
-        if (! $user instanceof User) {
-            throw new LogicException('Expected authenticated user.');
         }
         $userId = (int) $user->id;
 
@@ -92,8 +88,6 @@ final class MessageMailboxService
             return redirect('/messages.php?action=viewmailbox');
         }
         LegacyResponse::abort(__('legacy/messages.std_error'), __('legacy/messages.std_no_action'));
-
-        return redirect('/messages.php');
     }
 
     public function handleEditMailboxes(Request $request): RedirectResponse
@@ -101,9 +95,6 @@ final class MessageMailboxService
         $user = Auth::user();
         if (! $user instanceof User) {
             LegacyResponse::abort('Error', 'Permission denied.');
-        }
-        if (! $user instanceof User) {
-            throw new LogicException('Expected authenticated user.');
         }
         $userId = (int) $user->id;
 
@@ -137,8 +128,6 @@ final class MessageMailboxService
         }
 
         LegacyResponse::abort(__('legacy/messages.std_error'), __('legacy/messages.std_no_action'));
-
-        return redirect('/messages.php');
     }
 
     public function handleDeleteMessage(Request $request): RedirectResponse
@@ -147,9 +136,6 @@ final class MessageMailboxService
         if (! $user instanceof User) {
             LegacyResponse::abort('Error', 'Permission denied.');
         }
-        if (! $user instanceof User) {
-            throw new LogicException('Expected authenticated user.');
-        }
         $userId = (int) $user->id;
 
         $pmId = (int) $request->input('id', 0);
@@ -157,10 +143,6 @@ final class MessageMailboxService
         if (! $message) {
             LegacyResponse::abort(__('legacy/messages.std_error'), __('legacy/messages.std_no_message_id'));
         }
-        if ($message === null) {
-            throw new LogicException('Expected non-null message.');
-        }
-
         Cache::clearInboxCount($userId);
         Cache::forgetWithLocales('user_'.$userId.'_outbox_count');
 

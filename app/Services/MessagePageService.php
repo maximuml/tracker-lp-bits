@@ -294,8 +294,6 @@ class MessagePageService
                 __('legacy/messages.std_error'),
                 __('legacy/messages.std_no_permission')
             );
-
-            return [];
         }
 
         $message = $messageModel->toArray();
@@ -373,8 +371,6 @@ class MessagePageService
                 __('legacy/messages.std_error'),
                 __('legacy/messages.std_no_permission_forwarding')
             );
-
-            return [];
         }
 
         $message = $messageModel->toArray();

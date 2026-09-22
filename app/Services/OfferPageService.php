@@ -159,7 +159,7 @@ final class OfferPageService
     /**
      * @param  array<string, mixed>  $curUser
      */
-    private function buildOfferDetails(array $curUser, int $userId, Request $request): ?OfferDetailsViewModel
+    private function buildOfferDetails(array $curUser, int $userId, Request $request): OfferDetailsViewModel
     {
         $id = (int) $request->query('id', 0);
         if (! $id) {
@@ -168,9 +168,7 @@ final class OfferPageService
 
         $offer = $this->offerRepository->findOffer($id);
         if (! $offer) {
-            Html::stdMessage((string) (__('legacy/offers.std_error')), (string) (__('legacy/offers.text_nothing_found')));
-
-            return null;
+            LegacyResponse::abort((string) (__('legacy/offers.std_error')), (string) (__('legacy/offers.text_nothing_found')));
         }
         $num = $offer->toArray();
 
@@ -250,9 +248,7 @@ final class OfferPageService
         $id = (int) $request->query('id', 0);
         $offer = $this->offerRepository->findOffer($id);
         if (! $offer) {
-            Html::stdMessage((string) (__('legacy/offers.std_error')), (string) (__('legacy/offers.text_nothing_found')));
-
-            return [];
+            LegacyResponse::abort((string) (__('legacy/offers.std_error')), (string) (__('legacy/offers.text_nothing_found')));
         }
         $num = $offer->toArray();
 
@@ -346,7 +342,7 @@ final class OfferPageService
         [$pagerTop, $pagerBottom, , $offset, $perpage] = Pagination::pager(
             $perpage,
             $count,
-            $self.'?'.'category='.((string) $request->query('category', '')).'&sort='.((string) $request->query('sort', '')).'&'
+            $self.'?'.'category='.((is_string($cat = $request->query('category', '')) ? $cat : '')).'&sort='.((is_string($sortQ = $request->query('sort', '')) ? $sortQ : '')).'&'
         );
 
         $offerResult = $this->offerRepository->getLegacyList($categ, $offerorid, $search, $sortColumn, $direction, (int) $offset, (int) $perpage);
@@ -385,7 +381,7 @@ final class OfferPageService
                 'body' => null,
             ])->render());
         } else {
-            $catid = (string) $request->query('category', '');
+            $catid = is_string($catq = $request->query('category', '')) ? $catq : '';
             $sortUrl = static fn (string $column, string $type): string => '?category='.$catid.'&sort='.$column.'&type='.$type;
 
             $showTimeout = $globalData['offervotetimeoutMain'] > 0 && $globalData['offeruptimeoutMain'] > 0;

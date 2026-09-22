@@ -55,30 +55,8 @@ final class LegacyResponse
         bool $htmlstrip = true,
         bool $head = true,
         bool $foot = true,
-        bool $die = true,
-    ): void {
+    ): never {
         $renderer = app(PageRenderer::class);
-
-        if (! $die) {
-            if ($head) {
-                Html::stdhead();
-            } elseif ($foot && ! $renderer->hasContext()) {
-                // Ensure a page-layout context exists for stdfoot() even when the
-                // caller requested no header (e.g. permission denied before stdhead).
-                $renderer->headerHtml();
-            }
-            echo view('partials.std-message', [
-                'heading' => $heading,
-                'text' => $text,
-                'htmlstrip' => $htmlstrip,
-                'body' => null,
-            ])->render();
-            if ($foot) {
-                Html::stdfoot();
-            }
-
-            return;
-        }
 
         try {
             if ($head) {
@@ -136,7 +114,7 @@ final class LegacyResponse
     /**
      * Render the legacy permission-denied page.
      */
-    public static function permissionDenied(?int $allowMinimumClass = null): void
+    public static function permissionDenied(?int $allowMinimumClass = null): never
     {
 
         if ($allowMinimumClass === null) {
@@ -144,8 +122,6 @@ final class LegacyResponse
                 (string) (__('legacy/functions.std_error')),
                 (string) (__('legacy/functions.std_permission_denied')),
             );
-
-            return;
         }
 
         self::abort(
@@ -167,12 +143,11 @@ final class LegacyResponse
         mixed $value,
         bool $stdhead = false,
         bool $stdfoot = true,
-        bool $die = true,
         bool $log = true,
     ): bool {
         if (is_array($value)) {
             foreach ($value as $val) {
-                self::assertId($val, $stdhead, $stdfoot, $die, $log);
+                self::assertId($val, $stdhead, $stdfoot, $log);
             }
 
             return true;
@@ -200,8 +175,6 @@ final class LegacyResponse
                 (string) (__('legacy/functions.std_error')),
                 (string) (__('legacy/functions.std_invalid_id')),
             );
-
-            return true;
         }
 
         $errorHtml = view('partials.int-error', [
@@ -209,22 +182,12 @@ final class LegacyResponse
             'text' => (string) (__('legacy/functions.std_invalid_id')),
         ])->render();
 
-        if ($die) {
-            $renderer = app(PageRenderer::class);
-            $html = ($stdfoot ? (string) $renderer->headerHtml() : '')
-                .$errorHtml
-                .($stdfoot ? (string) $renderer->footerHtml() : '');
+        $renderer = app(PageRenderer::class);
+        $html = ($stdfoot ? (string) $renderer->headerHtml() : '')
+            .$errorHtml
+            .($stdfoot ? (string) $renderer->footerHtml() : '');
 
-            throw new HttpResponseException(new Response($html));
-        }
-
-        if ($stdfoot && \function_exists('stdfoot')) {
-            Html::stdfoot();
-        }
-
-        echo $errorHtml;
-
-        return true;
+        throw new HttpResponseException(new Response($html));
     }
 
     /**

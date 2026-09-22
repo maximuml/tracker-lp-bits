@@ -12,7 +12,6 @@ use App\Models\Message;
 use App\Repositories\BonusCalculationRepository;
 use App\Repositories\BonusRepository;
 use App\Support\Globals;
-use App\Support\Html;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Lock;
@@ -201,12 +200,10 @@ final class BonusService
     /**
      * @param  array<string, mixed>  $curUser
      */
-    private function exchangeClass(array $curUser, float $points, string $baseUrl): ?RedirectResponse
+    private function exchangeClass(array $curUser, float $points, string $baseUrl): RedirectResponse
     {
         if (UserDisplay::currentClass() >= UC_VIP) {
-            Html::stdMessage((string) (__('legacy/mybonus.std_no_permission')), (string) (__('legacy/mybonus.std_class_above_vip')), false);
-
-            return null;
+            LegacyResponse::abort((string) (__('legacy/mybonus.std_no_permission')), (string) (__('legacy/mybonus.std_class_above_vip')), false);
         }
         $vipUntil = date('Y-m-d H:i:s', (strtotime(date('Y-m-d H:i:s')) + 28 * 86400));
         $this->bonusRep->consumeUserBonus((int) $curUser['id'], $points, BusinessType::BUY_VIP->value, $points.' Points for 1 month VIP Status.', ['class' => UC_VIP, 'vip_added' => true, 'vip_until' => $vipUntil]);
@@ -262,24 +259,18 @@ final class BonusService
     {
         $points = (int) $request->post('bonuscharity', 0);
         if ($points < 1000 || $points > 50000) {
-            Html::stdMessage((string) (__('legacy/mybonus.text_error')), (string) (__('legacy/mybonus.bonus_amount_not_allowed_two')), false);
-
-            return null;
+            LegacyResponse::abort((string) (__('legacy/mybonus.text_error')), (string) (__('legacy/mybonus.bonus_amount_not_allowed_two')), false);
         }
         $ratiocharity = (float) $request->post('ratiocharity', 0);
         if ($ratiocharity < 0.1 || $ratiocharity > 0.8) {
-            Html::stdMessage((string) (__('legacy/mybonus.text_error')), (string) (__('legacy/mybonus.bonus_ratio_not_allowed')));
-
-            return null;
+            LegacyResponse::abort((string) (__('legacy/mybonus.text_error')), (string) (__('legacy/mybonus.bonus_ratio_not_allowed')), false);
         }
         if (($curUser['seedbonus'] ?? 0) < $points) {
             return null;
         }
         $charityReceiverCount = $this->bonusCalculationRepository->getCharityReceiverCount($ratiocharity);
         if (! $charityReceiverCount) {
-            Html::stdMessage((string) (__('legacy/mybonus.std_sorry')), (string) (__('legacy/mybonus.std_no_users_need_charity')));
-
-            return null;
+            LegacyResponse::abort((string) (__('legacy/mybonus.std_sorry')), (string) (__('legacy/mybonus.std_no_users_need_charity')), false);
         }
         $senderId = (int) $curUser['id'];
         $charityPerUser = $points / $charityReceiverCount;
@@ -302,16 +293,12 @@ final class BonusService
         $usernamegift = trim((string) $request->post('username', ''));
         $arr = $this->bonusCalculationRepository->findGiftReceiver($usernamegift);
         if (empty($arr)) {
-            Html::stdMessage((string) (__('legacy/mybonus.text_error')), (string) (__('legacy/mybonus.text_receiver_not_exists')), false);
-
-            return null;
+            LegacyResponse::abort((string) (__('legacy/mybonus.text_error')), (string) (__('legacy/mybonus.text_receiver_not_exists')), false);
         }
         $useridgift = (int) $arr['id'];
         $userseedbonus = (float) $arr['seedbonus'];
         if ($points < (float) $bonusarray['points']) {
-            Html::stdMessage((string) (__('legacy/mybonus.text_error')), (string) (__('legacy/mybonus.bonus_amount_not_allowed')));
-
-            return null;
+            LegacyResponse::abort((string) (__('legacy/mybonus.text_error')), (string) (__('legacy/mybonus.bonus_amount_not_allowed')), false);
         }
         if (($curUser['seedbonus'] ?? 0) < $points) {
             return null;
@@ -324,9 +311,7 @@ final class BonusService
             $aftertaxpoint -= $basictaxBonus;
         }
         if ((int) $curUser['id'] === $useridgift) {
-            Html::stdMessage((string) (__('legacy/mybonus.text_huh')), (string) (__('legacy/mybonus.text_karma_self_giving_warning')), false);
-
-            return null;
+            LegacyResponse::abort((string) (__('legacy/mybonus.text_huh')), (string) (__('legacy/mybonus.text_karma_self_giving_warning')), false);
         }
         $points2 = number_format($points, 1);
         $points2receiver = number_format($aftertaxpoint, 1);

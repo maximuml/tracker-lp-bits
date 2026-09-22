@@ -86,8 +86,6 @@ class UserDetailController extends Controller
                 __('legacy/userdetails.std_error'),
                 __('legacy/userdetails.std_no_such_user')
             );
-
-            return redirect('/userdetails.php');
         }
 
         if (($user['status'] ?? null) === UserStatus::PENDING->stringValue()) {

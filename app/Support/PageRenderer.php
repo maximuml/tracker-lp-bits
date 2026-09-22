@@ -40,20 +40,6 @@ final class PageRenderer
     }
 
     /**
-     * Echo-path used by the legacy `stdhead()` helper — the caller must
-     * have set the context first (see `Html::stdhead`).
-     */
-    public function header(string $title = '', bool $msgalert = true, string $script = '', string $place = ''): void
-    {
-        $context = $this->context;
-        if ($context === null) {
-            throw new \RuntimeException('PageRenderer context not set');
-        }
-
-        echo $this->renderHeader($context, $title, $msgalert, $script, $place);
-    }
-
-    /**
      * Rendered variant of stdhead(): sets the context from SupportContext
      * and returns the header markup instead of echoing it.
      */

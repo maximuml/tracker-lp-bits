@@ -20,9 +20,9 @@ use App\Support\Email;
 use App\Support\Environment;
 use App\Support\Format;
 use App\Support\Globals;
-use App\Support\Html;
 use App\Support\Input;
 use App\Support\LegacyAuth;
+use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Lock;
 use App\Support\Log;
@@ -73,11 +73,7 @@ class SystemBulkController extends LegacyController
 
         if ($request->isMethod('get')) {
             if (request()->query('sent') == '1') {
-                Html::stdhead('Add Upload');
-                Html::stdMessage('Success', 'Upload amount has been added successfully.');
-                Html::stdfoot();
-
-                return response('');
+                return response(LegacyResponse::captureAbort('Success', 'Upload amount has been added successfully.', true, 'Add Upload'));
             }
 
             return $this->legacyAbortResponse('Error', 'Permission denied!');

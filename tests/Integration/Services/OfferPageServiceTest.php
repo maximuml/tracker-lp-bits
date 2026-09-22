@@ -297,7 +297,7 @@ final class OfferPageServiceTest extends TestCase
 
     // --- off_details with nonexistent offer ---
 
-    public function test_build_off_details_returns_empty_for_nonexistent_offer(): void
+    public function test_build_off_details_aborts_for_nonexistent_offer(): void
     {
         $this->authenticatedUser();
         $this->mockGlobals();
@@ -305,17 +305,12 @@ final class OfferPageServiceTest extends TestCase
 
         $request = Request::create('/offers.php', 'GET', ['off_details' => '1', 'id' => '999']);
 
-        ob_start();
-        $data = $this->callService($request);
-        ob_end_clean();
-
-        $this->assertSame('off_details', $data['action']);
-        $this->assertNull($data['off_details']);
+        $this->assertServiceThrows($request);
     }
 
     // --- edit_offer with nonexistent offer ---
 
-    public function test_build_edit_offer_returns_empty_for_nonexistent_offer(): void
+    public function test_build_edit_offer_aborts_for_nonexistent_offer(): void
     {
         $this->authenticatedUser();
         $this->mockGlobals();
@@ -323,12 +318,7 @@ final class OfferPageServiceTest extends TestCase
 
         $request = Request::create('/offers.php', 'GET', ['edit_offer' => '1', 'id' => '999']);
 
-        ob_start();
-        $data = $this->callService($request);
-        ob_end_clean();
-
-        $this->assertSame('edit_offer', $data['action']);
-        $this->assertSame([], $data['edit_offer']);
+        $this->assertServiceThrows($request);
     }
 
     // --- offer_vote action ---

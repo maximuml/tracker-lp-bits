@@ -20,3 +20,5 @@
 3298376e4ec7024469ad8d6a499411a7115add20:tests/Unit/DTOs/AnnounceRequestDtoTest.php:generic-api-key:28
 # Dummy child-process password in PasswordRecoveryConcurrencyTest (replaced by a generated value in ea57ee18)
 937ef5d5f9f2061d5b5ac8ca0ee704e34aabb9a3:tests/Integration/Services/PasswordRecoveryConcurrencyTest.php:generic-api-key:33
+# Probe string in LegacyRedisCacheIsolationTest is a cache-key sentinel, not a secret
+60783ec0417c6bf30fc646947652550b264c6958:tests/Integration/Support/LegacyRedisCacheIsolationTest.php:generic-api-key:40

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
-use App\Http\Controllers\AuthenticateController;
 use App\Models\User;
 use App\Services\PasskeyLoginService;
 use App\Support\Settings;
@@ -47,6 +46,7 @@ final class PasskeyLoginV2Test extends TestCase
             'passkey_login_signing_key_id_current' => self::KEY_ID,
             'passkey_login_signing_key_previous' => self::PREVIOUS_KEY,
             'passkey_login_signing_key_id_previous' => self::PREVIOUS_KEY_ID,
+            'passkey_login_previous_key_deadline' => now()->addDay()->toDateTimeString(),
             'login_secret_deadline' => now()->addDays(30)->toDateTimeString(),
             'login_type' => 'passkey',
         ]);
@@ -61,33 +61,21 @@ final class PasskeyLoginV2Test extends TestCase
         ));
     }
 
-    /**
-     * Register the v2 route for this test case.
-     */
-    private function registerRoute(): void
-    {
-        $this->app['router']->post('passkeyloginv2', [
-            AuthenticateController::class, 'passkeyLoginV2',
-        ]);
-    }
-
     public function test_valid_payload_authenticates_user(): void
     {
-        $this->registerRoute();
         $user = User::factory()->create([
             'passkey' => str_repeat('a', 32),
             'status' => 1,
             'enabled' => true,
         ]);
 
-        $response = $this->post('passkeyloginv2', $this->buildPayload($user->passkey));
+        $response = $this->post('/auth/passkey', $this->buildPayload($user->passkey));
 
         $response->assertRedirect('index.php');
     }
 
     public function test_altered_passkey_rejected(): void
     {
-        $this->registerRoute();
         $user = User::factory()->create([
             'passkey' => str_repeat('b', 32),
             'status' => 1,
@@ -97,7 +85,7 @@ final class PasskeyLoginV2Test extends TestCase
         $payload = $this->buildPayload($user->passkey);
         $payload['passkey'] = str_repeat('c', 32);
 
-        $response = $this->post('passkeyloginv2', $payload);
+        $response = $this->post('/auth/passkey', $payload);
 
         $response->assertRedirect('index.php');
         $this->assertGuest();
@@ -105,7 +93,6 @@ final class PasskeyLoginV2Test extends TestCase
 
     public function test_altered_timestamp_rejected(): void
     {
-        $this->registerRoute();
         $user = User::factory()->create([
             'passkey' => str_repeat('d', 32),
             'status' => 1,
@@ -115,7 +102,7 @@ final class PasskeyLoginV2Test extends TestCase
         $payload = $this->buildPayload($user->passkey);
         $payload['timestamp'] = time() + 60;
 
-        $response = $this->post('passkeyloginv2', $payload);
+        $response = $this->post('/auth/passkey', $payload);
 
         $response->assertRedirect('index.php');
         $this->assertGuest();
@@ -123,7 +110,6 @@ final class PasskeyLoginV2Test extends TestCase
 
     public function test_reused_nonce_rejected(): void
     {
-        $this->registerRoute();
         $user = User::factory()->create([
             'passkey' => str_repeat('e', 32),
             'status' => 1,
@@ -134,16 +120,15 @@ final class PasskeyLoginV2Test extends TestCase
         $payload1 = $this->buildPayload($user->passkey, $nonce);
         $payload2 = $this->buildPayload($user->passkey, $nonce);
 
-        $response1 = $this->post('passkeyloginv2', $payload1);
+        $response1 = $this->post('/auth/passkey', $payload1);
         $response1->assertRedirect('index.php');
 
-        $response2 = $this->post('passkeyloginv2', $payload2);
+        $response2 = $this->post('/auth/passkey', $payload2);
         $response2->assertRedirect('index.php');
     }
 
     public function test_expired_timestamp_rejected(): void
     {
-        $this->registerRoute();
         $user = User::factory()->create([
             'passkey' => str_repeat('f', 32),
             'status' => 1,
@@ -153,7 +138,7 @@ final class PasskeyLoginV2Test extends TestCase
         $timestamp = time() - 600;
         $payload = $this->buildPayload($user->passkey, bin2hex(random_bytes(16)), $timestamp);
 
-        $response = $this->post('passkeyloginv2', $payload);
+        $response = $this->post('/auth/passkey', $payload);
 
         $response->assertRedirect('index.php');
         $this->assertGuest();
@@ -161,7 +146,6 @@ final class PasskeyLoginV2Test extends TestCase
 
     public function test_future_timestamp_rejected(): void
     {
-        $this->registerRoute();
         $user = User::factory()->create([
             'passkey' => str_repeat('1', 32),
             'status' => 1,
@@ -171,7 +155,7 @@ final class PasskeyLoginV2Test extends TestCase
         $timestamp = time() + 600;
         $payload = $this->buildPayload($user->passkey, bin2hex(random_bytes(16)), $timestamp);
 
-        $response = $this->post('passkeyloginv2', $payload);
+        $response = $this->post('/auth/passkey', $payload);
 
         $response->assertRedirect('index.php');
         $this->assertGuest();
@@ -179,8 +163,7 @@ final class PasskeyLoginV2Test extends TestCase
 
     public function test_invalid_passkey_format_rejected(): void
     {
-        $this->registerRoute();
-        $response = $this->post('passkeyloginv2', [
+        $response = $this->post('/auth/passkey', [
             'passkey' => 'not-hex-not-32-chars',
             'timestamp' => time(),
             'nonce' => bin2hex(random_bytes(16)),
@@ -193,8 +176,7 @@ final class PasskeyLoginV2Test extends TestCase
 
     public function test_invalid_signature_format_rejected(): void
     {
-        $this->registerRoute();
-        $response = $this->post('passkeyloginv2', [
+        $response = $this->post('/auth/passkey', [
             'passkey' => str_repeat('a', 32),
             'timestamp' => time(),
             'nonce' => bin2hex(random_bytes(16)),
@@ -207,8 +189,7 @@ final class PasskeyLoginV2Test extends TestCase
 
     public function test_invalid_nonce_format_rejected(): void
     {
-        $this->registerRoute();
-        $response = $this->post('passkeyloginv2', [
+        $response = $this->post('/auth/passkey', [
             'passkey' => str_repeat('a', 32),
             'timestamp' => time(),
             'nonce' => 'short',
@@ -221,8 +202,7 @@ final class PasskeyLoginV2Test extends TestCase
 
     public function test_missing_key_id_rejected(): void
     {
-        $this->registerRoute();
-        $response = $this->post('passkeyloginv2', [
+        $response = $this->post('/auth/passkey', [
             'passkey' => str_repeat('a', 32),
             'timestamp' => time(),
             'nonce' => bin2hex(random_bytes(16)),
@@ -234,7 +214,6 @@ final class PasskeyLoginV2Test extends TestCase
 
     public function test_unknown_key_id_rejected(): void
     {
-        $this->registerRoute();
         $user = User::factory()->create([
             'passkey' => str_repeat('2', 32),
             'status' => 1,
@@ -245,7 +224,7 @@ final class PasskeyLoginV2Test extends TestCase
         $payload['key_id'] = 'nonexistent-key';
         $payload['signature'] = hash_hmac('sha256', $this->canonicalJson($payload), 'unknown-key');
 
-        $response = $this->post('passkeyloginv2', $payload);
+        $response = $this->post('/auth/passkey', $payload);
 
         $response->assertRedirect('index.php');
         $this->assertGuest();
@@ -253,7 +232,6 @@ final class PasskeyLoginV2Test extends TestCase
 
     public function test_rotated_previous_key_still_accepted(): void
     {
-        $this->registerRoute();
         $user = User::factory()->create([
             'passkey' => str_repeat('3', 32),
             'status' => 1,
@@ -262,15 +240,14 @@ final class PasskeyLoginV2Test extends TestCase
 
         $payload = $this->buildPayload($user->passkey, bin2hex(random_bytes(16)), time(), self::PREVIOUS_KEY_ID, self::PREVIOUS_KEY);
 
-        $response = $this->post('passkeyloginv2', $payload);
+        $response = $this->post('/auth/passkey', $payload);
 
         $response->assertRedirect('index.php');
     }
 
     public function test_invalid_action_rejected_by_validation(): void
     {
-        $this->registerRoute();
-        $response = $this->post('passkeyloginv2', [
+        $response = $this->post('/auth/passkey', [
             'passkey' => str_repeat('a', 32),
             'timestamp' => time(),
             'nonce' => bin2hex(random_bytes(16)),
@@ -284,19 +261,17 @@ final class PasskeyLoginV2Test extends TestCase
 
     public function test_get_request_not_registered(): void
     {
-        $this->registerRoute();
-        $response = $this->get('passkeyloginv2');
+        $response = $this->get('/auth/passkey');
 
         $this->assertContains($response->status(), [404, 405]);
     }
 
     public function test_valid_payload_with_unknown_passkey_redirects_silently(): void
     {
-        $this->registerRoute();
         $fakePasskey = str_repeat('9', 32);
         $payload = $this->buildPayload($fakePasskey);
 
-        $response = $this->post('passkeyloginv2', $payload);
+        $response = $this->post('/auth/passkey', $payload);
 
         $response->assertRedirect('index.php');
         $this->assertGuest();
@@ -304,19 +279,14 @@ final class PasskeyLoginV2Test extends TestCase
 
     public function test_rate_limit_blocks_excessive_requests(): void
     {
-        // Register route WITH throttle middleware for this test
-        $this->app['router']->post('passkeyloginv2-throttled', [
-            AuthenticateController::class, 'passkeyLoginV2',
-        ])->middleware('throttle:passkey-login');
-
         $fakePasskey = str_repeat('a', 32);
 
         // Send 11 requests (limit is 10/min) — the 11th should be rate limited
         for ($i = 0; $i < 10; $i++) {
-            $this->post('passkeyloginv2-throttled', $this->buildPayload($fakePasskey, bin2hex(random_bytes(16))));
+            $this->post('/auth/passkey', $this->buildPayload($fakePasskey, bin2hex(random_bytes(16))));
         }
 
-        $response = $this->post('passkeyloginv2-throttled', $this->buildPayload($fakePasskey, bin2hex(random_bytes(16))));
+        $response = $this->post('/auth/passkey', $this->buildPayload($fakePasskey, bin2hex(random_bytes(16))));
         $this->assertSame(429, $response->status());
     }
 

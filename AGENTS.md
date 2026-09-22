@@ -1020,3 +1020,31 @@ by final repository classes or static methods — see W2-01/W2-02).
 - **Consequences:** One tested worker path; contributors must not add
   FrankenPHP/Swoole scaffolding without CI coverage. If Swoole is ever
   adopted it needs the same smoke+isolation CI treatment RoadRunner has.
+
+### ADR 0031: Runtime-dispatched passkey login routes (Accepted, SEC-03)
+
+- **Context:** Both passkey login endpoints were registered behind
+  `! Environment::isConsole()` plus DB-read settings (`login_secret` URI,
+  `passkey_login_v2_enabled` flag). `php artisan route:cache` runs in
+  console, so the cached route table never contained them — verified
+  empirically: `route:cache` in the dev container produced zero
+  `auth/passkey` matches. Independently, `LegacyUrlRewriter` collapsed
+  `/auth/passkey` to `/auth` (`auth` was not in
+  `LARAVEL_PATH_PREFIXES`), so the endpoint 404'd even without caching.
+- **Decision:** `POST /auth/passkey` is registered unconditionally; the
+  feature flag and enrollment deadline are enforced per request by the
+  `passkey.v2` middleware (404 when closed). The admin-configured
+  `login_secret` URI cannot be a static route, so a POST catch-all
+  `{legacyPasskeyPath} -> .*` is registered last inside
+  `RouteServiceProvider::routes()` and dispatches at runtime to
+  `AuthenticateController::legacyPasskeyFallback` (404 for anything
+  else). `Route::fallback()` could not be used — it is GET-only.
+  API/Filament/Livewire prefixes are excluded from the pattern so
+  wrong-method requests there keep 405 semantics. `auth` was added to
+  `LARAVEL_PATH_PREFIXES` so the rewriter preserves the full path.
+- **Consequences:** Passkey login works identically with and without
+  route cache; changing `login_secret` or the v2 flag needs no re-cache.
+  Unmatched POSTs return 404 (was 405 when a URI matched another
+  method); nonce markers for replay protection must outlive signature
+  validity — TTL is `ts + window - now + grace`, and a failing nonce
+  store rejects the login (fail closed).

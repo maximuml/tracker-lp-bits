@@ -55,6 +55,12 @@ final class HttpContractTest extends TestCase
         'csp-report',
         // Passkey-auth routes — use passkey, not session/token guard
         'api/pieces-hash',
+        // SEC-03: passkey login v2 — HMAC signature is the credential;
+        // feature flag + deadline enforced by passkey.v2 middleware
+        'auth/passkey',
+        // SEC-03: legacy passkey-login secret-URI dispatcher — authenticates
+        // via secret + HMAC, anything else gets a 404
+        '{legacyPasskeyPath}',
         // ajax.php — per-action guard inside UtilityController::ajax()
         // (passkey actions are guest-facing, the rest get a JSON 401 via
         // LegacyAuth::requireLoginFromContext)

@@ -17,6 +17,7 @@ use App\Support\Config\SiteConfig;
 use App\Support\Logger;
 use App\Support\Network;
 use App\Support\Token;
+use Illuminate\Contracts\Container\Container;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -31,6 +32,7 @@ class AuthenticateController extends Controller
     public function __construct(
         AuthenticateRepository $repository,
         UserRepositoryInterface $userRepository,
+        private readonly Container $container,
     ) {
         $this->repository = $repository;
         $this->userRepository = $userRepository;
@@ -75,8 +77,8 @@ class AuthenticateController extends Controller
      * - signature: hmac_sha256(passkey + timestamp, login_secret)
      *
      * The timestamp must be within ±5 minutes of server time.
-     * Each signature can only be used once — a Redis SET NX EX 300
-     * key prevents replay within the timestamp window.
+     * Each signature can only be used once — an atomic cache marker
+     * prevents replay for the signature's remaining validity window.
      */
     public function passkeyLogin(PasskeyLoginRequest $request): RedirectResponse
     {
@@ -103,10 +105,19 @@ class AuthenticateController extends Controller
             return redirect('index.php');
         }
 
-        // Replay protection: use Cache::add() which is atomic "set if not exists".
-        // If the key already exists, the signature has been used before — reject.
+        // Replay protection: atomic "set if not exists". The marker must
+        // outlive the signature's validity — TTL is the remaining
+        // signature lifetime, not a fixed 300 s from arrival. A failing
+        // store rejects the login (fail closed) rather than silently
+        // disabling replay protection.
         $replayKey = 'passkey_login_used:'.hash('sha256', $signature);
-        $stored = Cache::add($replayKey, '1', now()->addSeconds(300));
+        try {
+            $stored = Cache::add($replayKey, '1', now()->addSeconds(PasskeyLoginService::nonceTtlSeconds($timestamp, $now)));
+        } catch (\Throwable $e) {
+            Logger::writeWithContext((string) sprintf('passkeyLogin: replay marker store unavailable (%s) — rejecting login', $e->getMessage()), (string) 'error', (bool) false);
+
+            return redirect('index.php');
+        }
         if ($stored === false) {
             Logger::writeWithContext((string) 'passkeyLogin: replay detected — signature already used', (string) 'warning', (bool) false);
 
@@ -114,8 +125,8 @@ class AuthenticateController extends Controller
         }
 
         if ($deadline && $deadline > now()->toDateTimeString()) {
-            $user = User::query()->where('passkey', $passkey)->first(['id', 'passhash', 'secret', 'auth_key']);
-            if ($user) {
+            $user = User::query()->where('passkey', $passkey)->first(['id', 'username', 'passhash', 'secret', 'auth_key', 'status', 'enabled']);
+            if ($user && $this->userCanLogin($user, 'passkeyLogin')) {
                 $ip = Network::clientIp();
                 AuthCookie::setLoginCookie((int) $user->id, null, (int) 0);
                 $user->last_login = now();
@@ -157,8 +168,8 @@ class AuthenticateController extends Controller
 
         $deadline = SiteConfig::current()->security->loginSecretDeadline();
         if ($deadline && $deadline > now()->toDateTimeString()) {
-            $user = User::query()->where('passkey', $passkey)->first(['id', 'passhash', 'secret', 'auth_key']);
-            if ($user) {
+            $user = User::query()->where('passkey', $passkey)->first(['id', 'username', 'passhash', 'secret', 'auth_key', 'status', 'enabled']);
+            if ($user && $this->userCanLogin($user, 'passkeyLoginV2')) {
                 $ip = Network::clientIp();
                 AuthCookie::setLoginCookie((int) $user->id, null, (int) 0);
                 $user->last_login = now();
@@ -168,6 +179,57 @@ class AuthenticateController extends Controller
         }
 
         return redirect('index.php');
+    }
+
+    /**
+     * Dispatcher for the legacy passkey login secret URI.
+     *
+     * `login_secret` is admin-configured and can change without a deploy,
+     * so it cannot be a static route under `route:cache`. Reached through
+     * the last-registered POST catch-all: when a POST hits the configured
+     * secret (and passkey login is enabled and not past its deadline) the
+     * request is dispatched to the same controller action; every other
+     * unmatched path gets the standard 404.
+     */
+    public function legacyPasskeyFallback(Request $request): RedirectResponse
+    {
+        $security = SiteConfig::current()->security;
+        $secret = $security->loginSecret();
+        $deadline = $security->loginSecretDeadline();
+
+        if (
+            ! $request->isMethod('POST')
+            || $secret === ''
+            || $security->loginType() !== 'passkey'
+            || $deadline === null
+            || $deadline <= now()->toDateTimeString()
+            || $request->path() !== ltrim($secret, '/')
+        ) {
+            abort(404);
+        }
+
+        return $this->passkeyLogin($this->container->make(PasskeyLoginRequest::class));
+    }
+
+    /**
+     * Disabled or unconfirmed accounts must not authenticate via passkey
+     * either — same contract as the WebAuthn passkey flow and the web
+     * guard. checkIsNormal() throws NexusException; a rejection is logged
+     * and answered like any other failed attempt (silent redirect).
+     */
+    private function userCanLogin(User $user, string $context): bool
+    {
+        try {
+            return $user->checkIsNormal(['status', 'enabled']);
+        } catch (\Throwable $e) {
+            Logger::writeWithContext(
+                (string) sprintf('%s: user %d rejected (%s)', $context, (int) $user->id, $e->getMessage()),
+                (string) 'warning',
+                (bool) false,
+            );
+
+            return false;
+        }
     }
 
     /**

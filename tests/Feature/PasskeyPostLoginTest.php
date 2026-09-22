@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Http\Controllers\AuthenticateController;
 use App\Models\User;
 use App\Support\Config\SiteConfig;
 use App\Support\Settings;
@@ -38,7 +37,7 @@ final class PasskeyPostLoginTest extends TestCase
     {
         // The route is POST-only; a GET to the secret URI should 404
         // (the route is not registered for GET)
-        $response = $this->get('/secretlogin');
+        $response = $this->get('/test-secret-uri');
 
         // Could be 404 (route not found) or 405 (method not allowed)
         $this->assertContains($response->status(), [404, 405]);
@@ -46,10 +45,8 @@ final class PasskeyPostLoginTest extends TestCase
 
     public function test_post_passkey_login_without_passkey_returns_validation_error(): void
     {
-        // Register the route dynamically for testing
-        $this->app['router']->post('secretlogin', [AuthenticateController::class, 'passkeyLogin']);
 
-        $response = $this->post('secretlogin', []);
+        $response = $this->post('test-secret-uri', []);
 
         // Validation error — passkey is required
         $this->assertContains($response->status(), [302, 422]);
@@ -57,9 +54,8 @@ final class PasskeyPostLoginTest extends TestCase
 
     public function test_post_passkey_login_with_invalid_passkey_does_not_authenticate(): void
     {
-        $this->app['router']->post('secretlogin', [AuthenticateController::class, 'passkeyLogin']);
 
-        $response = $this->post('secretlogin', ['passkey' => 'invalidpasskeynot32chars']);
+        $response = $this->post('test-secret-uri', ['passkey' => str_repeat('z', 33)]);
 
         // Validation error — passkey must be 32 chars
         $this->assertContains($response->status(), [302, 422]);
@@ -67,14 +63,13 @@ final class PasskeyPostLoginTest extends TestCase
 
     public function test_post_passkey_login_with_valid_format_but_unknown_passkey_redirects(): void
     {
-        $this->app['router']->post('secretlogin', [AuthenticateController::class, 'passkeyLogin']);
 
         $fakePasskey = str_repeat('a', 32);
         $timestamp = time();
         $secret = SiteConfig::current()->security->loginSecret();
         $signature = hash_hmac('sha256', $fakePasskey.$timestamp, $secret);
 
-        $response = $this->post('secretlogin', [
+        $response = $this->post('test-secret-uri', [
             'passkey' => $fakePasskey,
             'timestamp' => $timestamp,
             'signature' => $signature,
@@ -103,24 +98,22 @@ final class PasskeyPostLoginTest extends TestCase
 
     public function test_post_passkey_login_without_signature_redirects_without_auth(): void
     {
-        $this->app['router']->post('secretlogin', [AuthenticateController::class, 'passkeyLogin']);
 
         $fakePasskey = str_repeat('b', 32);
 
         // Missing timestamp and signature — validation should fail
-        $response = $this->post('secretlogin', ['passkey' => $fakePasskey]);
+        $response = $this->post('test-secret-uri', ['passkey' => $fakePasskey]);
 
         $this->assertContains($response->status(), [302, 422]);
     }
 
     public function test_post_passkey_login_with_invalid_signature_redirects_without_auth(): void
     {
-        $this->app['router']->post('secretlogin', [AuthenticateController::class, 'passkeyLogin']);
 
         $fakePasskey = str_repeat('c', 32);
         $timestamp = time();
 
-        $response = $this->post('secretlogin', [
+        $response = $this->post('test-secret-uri', [
             'passkey' => $fakePasskey,
             'timestamp' => $timestamp,
             'signature' => str_repeat('0', 64),
@@ -132,7 +125,6 @@ final class PasskeyPostLoginTest extends TestCase
 
     public function test_post_passkey_login_with_expired_timestamp_redirects_without_auth(): void
     {
-        $this->app['router']->post('secretlogin', [AuthenticateController::class, 'passkeyLogin']);
 
         $fakePasskey = str_repeat('d', 32);
         // Timestamp 10 minutes ago — outside the ±5 minute window
@@ -140,7 +132,7 @@ final class PasskeyPostLoginTest extends TestCase
         $secret = SiteConfig::current()->security->loginSecret();
         $signature = hash_hmac('sha256', $fakePasskey.$timestamp, $secret);
 
-        $response = $this->post('secretlogin', [
+        $response = $this->post('test-secret-uri', [
             'passkey' => $fakePasskey,
             'timestamp' => $timestamp,
             'signature' => $signature,
@@ -152,7 +144,6 @@ final class PasskeyPostLoginTest extends TestCase
 
     public function test_post_passkey_login_with_valid_hmac_and_real_user_authenticates(): void
     {
-        $this->app['router']->post('secretlogin', [AuthenticateController::class, 'passkeyLogin']);
 
         $user = User::factory()->create([
             'passkey' => str_repeat('e', 32),
@@ -164,7 +155,7 @@ final class PasskeyPostLoginTest extends TestCase
         $secret = SiteConfig::current()->security->loginSecret();
         $signature = hash_hmac('sha256', $user->passkey.$timestamp, $secret);
 
-        $response = $this->post('secretlogin', [
+        $response = $this->post('test-secret-uri', [
             'passkey' => $user->passkey,
             'timestamp' => $timestamp,
             'signature' => $signature,

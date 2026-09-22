@@ -16,8 +16,6 @@ use App\Http\Controllers\TorrentEditController;
 use App\Http\Controllers\TorrentUploadController;
 use App\Http\Controllers\UsercpController;
 use App\Http\Controllers\UserDetailController;
-use App\Support\Config\SiteConfig;
-use App\Support\Environment;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -124,16 +122,16 @@ Route::group(['prefix' => 'web', 'middleware' => ['auth.nexus:nexus-web', 'throt
     Route::post('token/del', [TokenController::class, 'delToken']);
 });
 
-if (! Environment::isConsole()) {
-    $passkeyLoginUri = SiteConfig::current()->security->loginSecret();
-    if (! empty($passkeyLoginUri) && SiteConfig::current()->security->loginType() === 'passkey') {
-        Route::post($passkeyLoginUri, [AuthenticateController::class, 'passkeyLogin']);
-    }
+// Passkey login v2 — fixed route with HMAC-SHA256, nonce replay protection,
+// and key rotation. Registered unconditionally so `php artisan route:cache`
+// keeps it; the feature flag and the enrollment deadline are enforced
+// per-request by the `passkey.v2` middleware — settings live in the
+// database and may change after routes are cached.
+Route::post('/auth/passkey', [AuthenticateController::class, 'passkeyLoginV2'])
+    ->middleware(['passkey.v2', 'throttle:passkey-login']);
 
-    // Passkey login v2 — fixed route with HMAC-SHA256, nonce replay protection,
-    // and key rotation. Active when passkey_login_v2_enabled feature flag is set.
-    if (SiteConfig::current()->security->passkeyLoginV2Enabled()) {
-        Route::post('/auth/passkey', [AuthenticateController::class, 'passkeyLoginV2'])
-            ->middleware('throttle:passkey-login');
-    }
-}
+// Legacy passkey login uses an admin-configured secret URI (`login_secret`)
+// which cannot be baked into a static route — a secret changed after
+// `route:cache` would never match. A POST catch-all registered last in
+// RouteServiceProvider dispatches the configured secret at runtime to
+// AuthenticateController::legacyPasskeyFallback.

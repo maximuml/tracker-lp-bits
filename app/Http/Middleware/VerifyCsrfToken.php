@@ -27,6 +27,7 @@ class VerifyCsrfToken extends Middleware
         'getusertorrentlistajax',
         'setlist_lookup',
         'csp-report',
+        'auth/passkey',
     ];
 
     /**

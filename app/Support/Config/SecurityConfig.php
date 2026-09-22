@@ -133,4 +133,16 @@ final class SecurityConfig extends Config
     {
         return $this->string('passkey_login_signing_key_id_previous', $default);
     }
+
+    /**
+     * Deadline (Y-m-d H:i:s) until which the previous signing key is
+     * accepted for passkey login v2. Null means the previous key is not
+     * accepted at all — key rotation requires an explicit overlap end.
+     */
+    public function passkeyLoginPreviousKeyDeadline(?string $default = null): ?string
+    {
+        $value = $this->data['passkey_login_previous_key_deadline'] ?? $default;
+
+        return $value !== null ? (string) $value : null;
+    }
 }

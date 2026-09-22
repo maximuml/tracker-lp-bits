@@ -74,4 +74,19 @@ class LegacyUrlRewriterTest extends TestCase
         $this->assertSame('/details/5', $rewritten->server->get('REQUEST_URI'));
         $this->assertSame('/details.php', $rewritten->server->get('SCRIPT_NAME'));
     }
+
+    public function test_auth_passkey_subpath_is_preserved_for_laravel_routing(): void
+    {
+        // SEC-03: /auth/passkey collapsed to /auth before reaching the
+        // router, so the passkey-login v2 endpoint was unreachable.
+        $request = Request::create('http://localhost/auth/passkey', 'POST', server: [
+            'SCRIPT_NAME' => '/index.php',
+            'SCRIPT_FILENAME' => public_path('index.php'),
+        ]);
+
+        $rewritten = (new LegacyUrlRewriter)->rewrite($request);
+
+        $this->assertSame('/auth/passkey', $rewritten->server->get('REQUEST_URI'));
+        $this->assertSame('/auth.php', $rewritten->server->get('SCRIPT_NAME'));
+    }
 }

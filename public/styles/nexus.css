@@ -426,7 +426,8 @@ button.nx-btn-link {
 .nx-page-header__subtitle{margin:4px 0 0;color:#666}
 .nx-page-header__actions{margin-top:8px}
 
-.nx-alert{margin:8px 0;padding:8px 12px;border:1px solid #b8daff;border-radius:4px;background:#eef6fd}
+.nx-alert{margin:8px 0;padding:8px 12px;border:1px solid #b8daff;border-radius:4px;background:#eef6fd;color:#1a2430}
+.nx-alert a{color:#0d5aa7}
 .nx-alert--success{border-color:#b7e4c7;background:#effaf2}
 .nx-alert--warning{border-color:#ffe3a3;background:#fff8e5}
 .nx-alert--error{border-color:#f5c2c7;background:#fdf0f0}

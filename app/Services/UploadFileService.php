@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Enums\TorrentPromotion;
 use App\Enums\TorrentType;
 use App\Exceptions\NexusException;
+use App\Exceptions\UploadValidationException;
 use App\Support\Config\SiteConfig;
 use App\Support\Locale;
 use App\Support\Logger;
@@ -21,11 +22,11 @@ class UploadFileService
     {
         $file = $request->file('file');
         if (empty($file)) {
-            throw new NexusException(Locale::trans('upload.missing_torrent_file', [], null));
+            throw new UploadValidationException(Locale::trans('upload.missing_torrent_file', [], null), 'file');
         }
         if (! $file->isValid()) {
             Logger::writeWithContext((string) ('torrent file is invalid: '.$file->getClientOriginalName().' (error: '.$file->getError().')'), (string) 'error', (bool) false);
-            throw new NexusException('upload torrent file error');
+            throw new UploadValidationException('upload torrent file error', 'file');
         }
         $size = $file->getSize();
         $maxAllowSize = SiteConfig::current()->main->maxTorrentSize();
@@ -35,23 +36,23 @@ class UploadFileService
                 number_format($maxAllowSize),
                 Locale::trans('upload.remake_torrent_note', [], null)
             );
-            throw new NexusException($msg);
+            throw new UploadValidationException($msg, 'file');
         }
         if ($size == 0) {
-            throw new NexusException('upload.empty_file');
+            throw new UploadValidationException('upload.empty_file', 'file');
         }
         $filename = $file->getClientOriginalName();
         if (! Validators::isUploadFilename($filename)) {
-            throw new NexusException('upload.invalid_filename');
+            throw new UploadValidationException('upload.invalid_filename', 'file');
         }
         if (! preg_match('/^(.+)\.torrent$/si', $filename, $matches)) {
-            throw new NexusException('upload.filename_not_torrent');
+            throw new UploadValidationException('upload.filename_not_torrent', 'file');
         }
 
         $mime = $file->getMimeType();
         $allowedMimes = ['application/x-bittorrent', 'application/octet-stream', 'application/x-torrent'];
         if (! in_array($mime, $allowedMimes, true)) {
-            throw new NexusException('upload.not_bencoded_file');
+            throw new UploadValidationException('upload.not_bencoded_file', 'file');
         }
 
         return $file;
@@ -68,14 +69,14 @@ class UploadFileService
             return '';
         }
         if (! $file->isValid()) {
-            throw new NexusException(Locale::trans('upload.nfo_upload_failed', [], null));
+            throw new UploadValidationException(Locale::trans('upload.nfo_upload_failed', [], null), 'nfo');
         }
         $size = $file->getSize();
         if ($size == 0) {
-            throw new NexusException(Locale::trans('upload.zero_byte_nfo', [], null));
+            throw new UploadValidationException(Locale::trans('upload.zero_byte_nfo', [], null), 'nfo');
         }
         if ($size > 65535) {
-            throw new NexusException(Locale::trans('upload.nfo_too_big', [], null));
+            throw new UploadValidationException(Locale::trans('upload.nfo_too_big', [], null), 'nfo');
         }
 
         return str_replace("\x0d\x0d\x0a", "\x0d\x0a", $file->getContent());
@@ -90,16 +91,16 @@ class UploadFileService
     public function checkTorrentDict($dict, $key, $type = null)
     {
         if (! is_array($dict)) {
-            throw new NexusException(Locale::trans('upload.not_a_dictionary', [], null));
+            throw new UploadValidationException(Locale::trans('upload.not_a_dictionary', [], null), 'file');
         }
         if (! isset($dict[$key])) {
-            throw new NexusException(Locale::trans('upload.dictionary_is_missing_key', [], null));
+            throw new UploadValidationException(Locale::trans('upload.dictionary_is_missing_key', [], null), 'file');
         }
         $value = $dict[$key];
         if ($type !== null) {
             $isFunction = 'is_'.$type;
             if (function_exists($isFunction) && ! $isFunction($value)) {
-                throw new NexusException(Locale::trans('upload.invalid_entry_in_dictionary', [], null));
+                throw new UploadValidationException(Locale::trans('upload.invalid_entry_in_dictionary', [], null), 'file');
             }
         }
 

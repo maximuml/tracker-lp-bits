@@ -27,6 +27,8 @@ return [
     'checkbox_hide_uploader_note' => "Don't show my username in 'Uploaded By' field.",
     'text_read_rules' => 'I read the rules before this uploading.',
     'submit_upload' => 'Upload',
+    'error_summary' => 'The upload could not be completed. Please fix the following and submit again:',
+    'reselect_file_note' => 'The previously selected file was not kept — please choose the torrent file again.',
     'text_medium' => 'Medium:',
     'text_audio_codec' => 'Audio Codec:',
     'row_content' => 'Content',

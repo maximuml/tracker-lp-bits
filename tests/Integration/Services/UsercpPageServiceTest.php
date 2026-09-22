@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Integration\Services;
 
 use App\Models\User;
+use App\Repositories\StyleRepository;
 use App\Repositories\TokenRepository;
 use App\Repositories\UsercpLookupRepository;
 use App\Repositories\UsercpRepository;
@@ -80,6 +81,7 @@ final class UsercpPageServiceTest extends TestCase
             $this->passkeyRepository,
             $this->tokenRepository,
             app(SearchCategoryTableFactory::class),
+            app(StyleRepository::class),
         );
     }
 
@@ -186,6 +188,7 @@ final class UsercpPageServiceTest extends TestCase
             Mockery::mock(UserPasskeyRepository::class),
             Mockery::mock(TokenRepository::class),
             app(SearchCategoryTableFactory::class),
+            app(StyleRepository::class),
         );
 
         $this->assertInstanceOf(UsercpPageService::class, $service);

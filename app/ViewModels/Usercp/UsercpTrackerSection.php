@@ -18,6 +18,7 @@ use App\ViewModels\Search\SearchCategoryTableViewModel;
 final readonly class UsercpTrackerSection
 {
     /**
+     * @param  array<int, string>  $stylesheetOptions  stylesheet id => name
      * @param  array<string, string>  $themeOptions  value => label
      * @param  array<int, string>  $langOptions  language id => name
      */
@@ -31,6 +32,8 @@ final readonly class UsercpTrackerSection
         public int $specialState,
         public int $inclbookmarked,
         public SafeHtml $promotionOptionsHtml,
+        public array $stylesheetOptions,
+        public int $currentStylesheet,
         public array $themeOptions,
         public string $currentTheme,
         public string $fontsize,

@@ -20,6 +20,11 @@
 <link rel="stylesheet" href="{{ $href }}" type="text/css" />
 @endforeach
 <link rel="stylesheet" href="css/modern.css" type="text/css" />
+@if($chrome->head->packThemeUrl !== null)
+{{-- Non-Classic stylesheet pack (e.g. Unshatter): loaded after modern.css
+     so its palette overrides win the cascade. --}}
+<link rel="stylesheet" href="{{ $chrome->head->packThemeUrl }}" type="text/css" />
+@endif
 @if($chrome->head->cspNonce !== '')
 {{-- CSP nonce bridge: vendored libs (nx-zoom) inject <style> elements at
      runtime; stamp the request nonce on them so nonce-strict

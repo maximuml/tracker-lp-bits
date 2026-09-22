@@ -9,6 +9,7 @@ use App\Enums\UserTheme;
 use App\Models\Setting;
 use App\Models\TrackerUrl;
 use App\Models\User;
+use App\Repositories\StyleRepository;
 use App\Repositories\TokenRepository;
 use App\Repositories\UsercpLookupRepository;
 use App\Repositories\UsercpRepository;
@@ -64,7 +65,8 @@ final class UsercpPageService
         private readonly UsercpLookupRepository $usercpLookupRepository,
         private readonly UserPasskeyRepository $passkeyRepository,
         private readonly TokenRepository $tokenRepository,
-        private readonly SearchCategoryTableFactory $searchCategoryTableFactory
+        private readonly SearchCategoryTableFactory $searchCategoryTableFactory,
+        private readonly StyleRepository $styleRepository
     ) {}
 
     /**
@@ -582,6 +584,11 @@ JS;
             $themeOptions[$theme->value] = (string) __('legacy/usercp.select_theme_'.$theme->value);
         }
 
+        $stylesheetOptions = [];
+        foreach ($this->styleRepository->all() as $id => $row) {
+            $stylesheetOptions[$id] = (string) ($row['name'] ?? $id);
+        }
+
         $currentFolder = Locale::folderFromCookie((string) Input::cookieValue('c_lang_folder', ''), false);
         $siteLanguages = [];
         $currentLangId = 0;
@@ -612,6 +619,8 @@ JS;
             specialState: $specialState,
             inclbookmarked: $inclbookmarked,
             promotionOptionsHtml: SafeHtml::fromTrustedHtml(Html::promotionSelection($specialState)),
+            stylesheetOptions: $stylesheetOptions,
+            currentStylesheet: (int) ($curUser['stylesheet'] ?? 0),
             themeOptions: $themeOptions,
             currentTheme: $currentTheme,
             fontsize: (string) ($curUser['fontsize'] ?? ''),

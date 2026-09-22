@@ -6,7 +6,7 @@ namespace App\Services;
 
 use App\Support\Config\SiteConfig;
 use App\Support\Logger;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Contracts\Cache\Repository as CacheRepository;
 
 /**
  * Passkey login v2 — HMAC-SHA256 with canonical payload, nonce replay
@@ -25,10 +25,12 @@ use Illuminate\Support\Facades\Cache;
  * signature = HMAC-SHA256(canonical_json, signing_key)
  *
  * The timestamp must be within ±5 minutes of server time.
- * Each nonce can only be used once — Redis SET NX EX 300 prevents replay.
+ * Each nonce can only be used once — an atomic cache "add" prevents replay.
  *
  * Key rotation: two keys (current + previous) are accepted during the
- * overlap window. The key ID in the payload selects which key to use.
+ * overlap window. The key ID in the payload selects which key to use; the
+ * previous key additionally requires a future `previous_key_deadline`
+ * setting so the overlap cannot silently stay open forever.
  */
 final class PasskeyLoginService
 {
@@ -38,14 +40,19 @@ final class PasskeyLoginService
     /** Timestamp tolerance window in seconds (±5 minutes). */
     public const TIMESTAMP_WINDOW = 300;
 
-    /** Nonce cache TTL in seconds (matches timestamp window). */
-    public const NONCE_TTL = 300;
+    /**
+     * Extra seconds added to the nonce marker lifetime so it outlives the
+     * signature validity by a small margin (boundary/clock races).
+     */
+    public const NONCE_TTL_GRACE = 10;
 
     /** Default action scope. */
     public const ACTION_LOGIN = 'login';
 
     /** Redis key prefix for nonce replay protection. */
     private const NONCE_KEY_PREFIX = 'passkey_login_v2:nonce:';
+
+    public function __construct(private readonly CacheRepository $cache) {}
 
     /**
      * Verify a v2 passkey login payload and signature.
@@ -68,7 +75,19 @@ final class PasskeyLoginService
         string $keyId,
         string $action = self::ACTION_LOGIN,
     ): bool {
-        // 1. Validate timestamp window
+        // 1. Enforce the action scope — a payload signed for another action
+        // must not authenticate a login.
+        if ($action !== self::ACTION_LOGIN) {
+            Logger::writeWithContext(
+                (string) sprintf('passkeyLoginV2: unsupported action scope "%s"', $action),
+                (string) 'warning',
+                (bool) false,
+            );
+
+            return false;
+        }
+
+        // 2. Validate timestamp window
         $now = time();
         if (abs($now - $timestamp) > self::TIMESTAMP_WINDOW) {
             Logger::writeWithContext(
@@ -80,7 +99,7 @@ final class PasskeyLoginService
             return false;
         }
 
-        // 2. Resolve signing key by key ID
+        // 3. Resolve signing key by key ID
         $signingKey = $this->resolveSigningKey($keyId);
         if ($signingKey === null) {
             Logger::writeWithContext(
@@ -92,7 +111,7 @@ final class PasskeyLoginService
             return false;
         }
 
-        // 3. Build canonical payload and verify HMAC
+        // 4. Build canonical payload and verify HMAC
         $canonical = $this->canonicalPayload($passkey, $timestamp, $nonce, $keyId, $action);
         $expected = hash_hmac('sha256', $canonical, $signingKey);
 
@@ -106,11 +125,31 @@ final class PasskeyLoginService
             return false;
         }
 
-        // 4. Nonce replay protection — atomic "set if not exists" via Cache::add()
-        // Cache::add() returns true if the key was set (first use), false if it
-        // already existed (replay). TTL matches the timestamp window.
+        // 5. Nonce replay protection — atomic "set if not exists" via add().
+        // add() returns true if the key was set (first use), false if it
+        // already existed (replay). The marker must live at least as long
+        // as the signature remains acceptable: a payload signed at the far
+        // (future) edge of the timestamp window stays valid until
+        // ts + TIMESTAMP_WINDOW, so the TTL is the *remaining* signature
+        // lifetime, not a fixed 300 s from arrival — otherwise the marker
+        // would expire while the signature is still replayable.
+        // A failing store must reject the login (fail closed): silently
+        // proceeding would disable replay protection unnoticed.
         $nonceKey = self::NONCE_KEY_PREFIX.hash('sha256', $nonce.$keyId);
-        $stored = Cache::add($nonceKey, '1', now()->addSeconds(self::NONCE_TTL));
+        $ttl = self::nonceTtlSeconds($timestamp, $now);
+
+        try {
+            $stored = $this->cache->add($nonceKey, '1', now()->addSeconds($ttl));
+        } catch (\Throwable $e) {
+            Logger::writeWithContext(
+                (string) sprintf('passkeyLoginV2: nonce store unavailable (%s) — rejecting login', $e->getMessage()),
+                (string) 'error',
+                (bool) false,
+            );
+
+            return false;
+        }
+
         if ($stored === false) {
             Logger::writeWithContext(
                 (string) 'passkeyLoginV2: replay detected — nonce already used',
@@ -122,6 +161,18 @@ final class PasskeyLoginService
         }
 
         return true;
+    }
+
+    /**
+     * Seconds a nonce marker must live so it cannot expire while the
+     * signature it guards is still acceptable. The signature is valid
+     * until `timestamp + TIMESTAMP_WINDOW`, so the remaining lifetime is
+     * `timestamp + window - now`; a small grace covers boundary races.
+     * Always ≥ 1 so a marker at the exact window edge is still written.
+     */
+    public static function nonceTtlSeconds(int $timestamp, int $now): int
+    {
+        return max(1, ($timestamp + self::TIMESTAMP_WINDOW) - $now + self::NONCE_TTL_GRACE);
     }
 
     /**
@@ -153,7 +204,7 @@ final class PasskeyLoginService
      * Resolve the signing key by key ID.
      *
      * Supports key rotation: "current" key is preferred, "previous"
-     * key is accepted during the overlap window.
+     * key is accepted until `passkey_login_previous_key_deadline`.
      */
     private function resolveSigningKey(string $keyId): ?string
     {
@@ -167,7 +218,10 @@ final class PasskeyLoginService
      *
      * Reads from SiteConfig security settings:
      * - passkey_login_signing_key_current (with key_id_current)
-     * - passkey_login_signing_key_previous (with key_id_previous)
+     * - passkey_login_signing_key_previous (with key_id_previous) —
+     *   accepted only while passkey_login_previous_key_deadline is in the
+     *   future; a configured previous key without a deadline is rejected,
+     *   so the rotation overlap cannot silently stay open-ended.
      *
      * @return array<string, string>
      */
@@ -184,7 +238,13 @@ final class PasskeyLoginService
 
         $previousKey = $security->passkeyLoginSigningKeyPrevious();
         $previousKeyId = $security->passkeyLoginSigningKeyIdPrevious();
-        if ($previousKey !== '' && $previousKeyId !== '') {
+        $previousDeadline = $security->passkeyLoginPreviousKeyDeadline();
+        if (
+            $previousKey !== ''
+            && $previousKeyId !== ''
+            && $previousDeadline !== null
+            && $previousDeadline > now()->toDateTimeString()
+        ) {
             $keys[$previousKeyId] = $previousKey;
         }
 

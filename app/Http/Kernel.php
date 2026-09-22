@@ -16,6 +16,7 @@ use App\Http\Middleware\Locale;
 use App\Http\Middleware\LogUserIp;
 use App\Http\Middleware\MetricsAccess;
 use App\Http\Middleware\NexusAuth;
+use App\Http\Middleware\PasskeyV2Enabled;
 use App\Http\Middleware\PreventRequestsDuringMaintenance;
 use App\Http\Middleware\RecordHttpMetrics;
 use App\Http\Middleware\RedirectIfAuthenticated;
@@ -122,6 +123,7 @@ class Kernel extends HttpKernel
         'cron.token' => CronToken::class,
         'reject.get.mutations' => RejectGetMutations::class,
         'metrics.access' => MetricsAccess::class,
+        'passkey.v2' => PasskeyV2Enabled::class,
     ];
 
     /** @var array<string, string> */

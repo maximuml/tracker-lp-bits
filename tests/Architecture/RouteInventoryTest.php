@@ -55,6 +55,12 @@ final class RouteInventoryTest extends TestCase
         // CSP violation reports — browser beacon, fires without session
         // context; CSRF-exempt and throttled, writes only to the log
         'csp-report' => true,
+        // SEC-03: passkey login v2 — authenticates via HMAC signature in
+        // the request; feature flag + deadline enforced by passkey.v2
+        'auth/passkey' => true,
+        // SEC-03: legacy passkey-login secret-URI dispatcher — the catch-all
+        // itself authenticates via secret + HMAC, anything else gets a 404
+        '{legacyPasskeyPath}' => true,
     ];
 
     /**

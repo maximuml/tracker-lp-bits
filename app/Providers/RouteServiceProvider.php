@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Http\Controllers\AuthenticateController;
 use App\Http\LegacyScriptContext;
 use App\Http\LegacyUrlRewriter;
 use App\Support\Network;
@@ -58,6 +59,17 @@ class RouteServiceProvider extends ServiceProvider
             Route::middleware('throttle.tracker:tracker')
                 ->namespace($this->namespace)
                 ->group(base_path('routes/tracker.php'));
+
+            // Legacy passkey login dispatches through a runtime-checked
+            // secret URI — see AuthenticateController::legacyPasskeyFallback.
+            // Registered inside routes() so `route:cache` keeps it, and last
+            // overall so the catch-all only sees POSTs no route claimed.
+            // (Route::fallback() is GET-only and cannot serve this flow.)
+            // API/Filament/Livewire prefixes are excluded so wrong-method
+            // requests there keep their 405 semantics instead of a 404.
+            Route::post('{legacyPasskeyPath}', [AuthenticateController::class, 'legacyPasskeyFallback'])
+                ->where('legacyPasskeyPath', '^(?!(?:api|livewire|filament|nexusphp|horizon|web)(?:/|$)).*$')
+                ->middleware('throttle:passkey-login');
 
         });
     }

@@ -41,7 +41,7 @@ final class AuthenticateControllerTest extends TestCase
         /** @var UserRepository&Mockery\MockInterface $userRepository */
         $userRepository = Mockery::mock(UserRepository::class);
 
-        $controller = new AuthenticateController($repository, $userRepository);
+        $controller = new AuthenticateController($repository, $userRepository, $this->app);
         $request = LoginRequest::create('/api/v1/login', 'POST', [
             'username' => 'testuser',
             'password' => 'password',
@@ -66,7 +66,7 @@ final class AuthenticateControllerTest extends TestCase
 
         /** @var UserRepository&Mockery\MockInterface $userRepository */
         $userRepository = Mockery::mock(UserRepository::class);
-        $controller = new AuthenticateController($repository, $userRepository);
+        $controller = new AuthenticateController($repository, $userRepository, $this->app);
 
         $withInclude = LoginRequest::create('/api/v1/login', 'POST', [
             'username' => 'testuser',
@@ -103,7 +103,7 @@ final class AuthenticateControllerTest extends TestCase
         /** @var UserRepository&Mockery\MockInterface $userRepository */
         $userRepository = Mockery::mock(UserRepository::class);
 
-        $controller = new AuthenticateController($repository, $userRepository);
+        $controller = new AuthenticateController($repository, $userRepository, $this->app);
         $request = LoginRequest::create('/api/v1/login', 'POST', []);
         $request->setContainer(app());
         $request->setRedirector(app('redirect'));
@@ -126,7 +126,7 @@ final class AuthenticateControllerTest extends TestCase
 
         Auth::shouldReceive('id')->once()->andReturn(5);
 
-        $controller = new AuthenticateController($repository, $userRepository);
+        $controller = new AuthenticateController($repository, $userRepository, $this->app);
         $request = Request::create('/api/v1/logout', 'POST', []);
 
         $result = $controller->logout($request);
@@ -142,7 +142,7 @@ final class AuthenticateControllerTest extends TestCase
         /** @var UserRepository&Mockery\MockInterface $userRepository */
         $userRepository = Mockery::mock(UserRepository::class);
 
-        $controller = new AuthenticateController($repository, $userRepository);
+        $controller = new AuthenticateController($repository, $userRepository, $this->app);
         $request = ChallengeRequest::create('/api/v1/challenge', 'POST', ['username' => 'testuser']);
         $request->setContainer(app());
         $request->setRedirector(app('redirect'));
@@ -164,7 +164,7 @@ final class AuthenticateControllerTest extends TestCase
         /** @var UserRepository&Mockery\MockInterface $userRepository */
         $userRepository = Mockery::mock(UserRepository::class);
 
-        $controller = new AuthenticateController($repository, $userRepository);
+        $controller = new AuthenticateController($repository, $userRepository, $this->app);
         $request = ChallengeRequest::create('/api/v1/challenge', 'POST', ['username' => 'testuser']);
         $request->setContainer(app());
         $request->setRedirector(app('redirect'));
@@ -193,7 +193,7 @@ final class AuthenticateControllerTest extends TestCase
         /** @var UserRepository&Mockery\MockInterface $userRepository */
         $userRepository = Mockery::mock(UserRepository::class);
 
-        $controller = new AuthenticateController($repository, $userRepository);
+        $controller = new AuthenticateController($repository, $userRepository, $this->app);
         $request = ChallengeRequest::create('/api/v1/challenge', 'POST', ['username' => $user->username]);
         $request->setContainer(app());
         $request->setRedirector(app('redirect'));
@@ -213,7 +213,7 @@ final class AuthenticateControllerTest extends TestCase
         /** @var UserRepository&Mockery\MockInterface $userRepository */
         $userRepository = Mockery::mock(UserRepository::class);
 
-        $controller = new AuthenticateController($repository, $userRepository);
+        $controller = new AuthenticateController($repository, $userRepository, $this->app);
         $request = ChallengeRequest::create('/api/v1/challenge', 'POST', ['username' => 'no_such_user_xyz']);
         $request->setContainer(app());
         $request->setRedirector(app('redirect'));
@@ -235,7 +235,7 @@ final class AuthenticateControllerTest extends TestCase
         /** @var UserRepository&Mockery\MockInterface $userRepository */
         $userRepository = Mockery::mock(UserRepository::class);
 
-        $controller = new AuthenticateController($repository, $userRepository);
+        $controller = new AuthenticateController($repository, $userRepository, $this->app);
         $request = ChallengeRequest::create('/api/v1/challenge', 'POST', []);
         $request->setContainer(app());
         $request->setRedirector(app('redirect'));

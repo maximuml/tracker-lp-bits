@@ -87,6 +87,15 @@ class EditSetting extends Page implements HasForms
         }
         Arr::set($settings, 'captcha.attendance.enabled', $normalized);
 
+        // Legacy DBs may hold 'Yes'/'No'/'YES' while Radio/Select options are
+        // lowercase 'yes'/'no' — the implicit in-rule would otherwise block
+        // every save. Normalize case so existing installs keep working.
+        array_walk_recursive($settings, static function (mixed &$value): void {
+            if (is_string($value) && in_array(strtolower($value), ['yes', 'no'], true)) {
+                $value = strtolower($value);
+            }
+        });
+
         $this->contentSchema()->fill($settings);
     }
 
@@ -438,7 +447,7 @@ class EditSetting extends Page implements HasForms
         $field = 'base_url';
         $driverSchemas[] = TextInput::make("$driverId.$field")
             ->label(__("label.setting.$id.$field"))
-            ->rule(self::baseUrlRule());
+            ->rule(static fn (): \Closure => self::baseUrlRule());
 
         $driverSection = Section::make($driverName)->schema($driverSchemas);
         $schema[] = $driverSection;
@@ -456,7 +465,7 @@ class EditSetting extends Page implements HasForms
         $field = 'base_url';
         $driverSchemas[] = TextInput::make("$driverId.$field")
             ->label(__("label.setting.$id.$field"))
-            ->rule(self::baseUrlRule());
+            ->rule(static fn (): \Closure => self::baseUrlRule());
         $driverSection = Section::make($driverName)->schema($driverSchemas);
         $schema[] = $driverSection;
 

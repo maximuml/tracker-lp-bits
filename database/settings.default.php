@@ -391,7 +391,7 @@ return [
         'maximum_number_of_medals_can_be_worn' => 3,
         'cookie_valid_days' => 365,
         'maximum_upload_speed' => 8000,
-        'is_invite_pre_email_and_username' => 'No',
+        'is_invite_pre_email_and_username' => 'no',
         'access_admin_class_min' => UserClassEnum::ADMINISTRATOR->value,
     ],
     'permission' => [

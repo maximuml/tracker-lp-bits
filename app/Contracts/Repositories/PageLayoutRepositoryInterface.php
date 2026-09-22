@@ -12,9 +12,10 @@ interface PageLayoutRepositoryInterface
 
     public function getConnectable(int $userId): ?int;
 
-    public function getActiveSeedCount(int $userId): int;
-
-    public function getActiveLeechCount(int $userId): int;
+    /**
+     * @return array{seed: int, leech: int}
+     */
+    public function getActivePeerCounts(int $userId): array;
 
     public function getUnreadMessageCount(int $userId): int;
 

@@ -6,7 +6,6 @@ namespace Tests\Integration\Repositories;
 
 use App\Models\User;
 use App\Repositories\UsercpRepository;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
@@ -14,7 +13,7 @@ use Tests\TestCase;
 /**
  * Unit tests for UsercpRepository.
  *
- * Covers getUserById(), updateUser(), updateLastOffer(), emailExistsForOther().
+ * Covers updateUser(), updateLastOffer(), emailExistsForOther().
  *
  * Lookup/count methods are covered in UsercpLookupRepositoryTest.
  */
@@ -29,23 +28,6 @@ final class UsercpRepositoryTest extends TestCase
     {
         parent::setUp();
         $this->repository = app(UsercpRepository::class);
-    }
-
-    public function test_get_user_by_id_returns_user(): void
-    {
-        $user = User::factory()->create();
-
-        $found = $this->repository->getUserById($user->id);
-
-        $this->assertSame($user->id, $found->id);
-        $this->assertSame($user->username, $found->username);
-    }
-
-    public function test_get_user_by_id_throws_for_nonexistent(): void
-    {
-        $this->expectException(ModelNotFoundException::class);
-
-        $this->repository->getUserById(999999);
     }
 
     public function test_update_user_modifies_fields(): void

@@ -23,11 +23,6 @@ final class UsercpRepository extends BaseRepository
         private readonly UsercpSecurityCommand $security,
     ) {}
 
-    public function getUserById(int $userId): User
-    {
-        return User::query()->findOrFail($userId);
-    }
-
     /**
      * @return array<int, array<string, mixed>>
      */

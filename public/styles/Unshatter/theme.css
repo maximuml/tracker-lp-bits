@@ -265,3 +265,53 @@ html[data-theme]:root a.altlink_blue:visited {
 html[data-theme]:root a.altlink_blue:hover {
     color: var(--nxm-accent-hover);
 }
+
+/* Secondary/ghost buttons (Preview, clear, reset) — graphite card with the
+ * accent frame, matching the info-alert treatment. */
+html[data-theme]:root .btn2,
+html[data-theme]:root input[type="reset"] {
+    background: #17171b;
+    border: 1px solid var(--nxm-accent);
+    border-radius: 0;
+    color: var(--nxm-accent);
+    cursor: pointer;
+}
+
+html[data-theme]:root .btn2:hover,
+html[data-theme]:root input[type="reset"]:hover {
+    background: #1f1f24;
+    color: var(--nxm-accent-hover);
+    border-color: var(--nxm-accent-hover);
+}
+
+/* Shoutbox rows: harder alternation, yellow edge on hover. Alternation and
+ * hover mix from the per-variant surface vars so they work in dark and light
+ * alike; the border lives inside box-shadow so the row width stays put. */
+html[data-theme]:root tr:nth-child(odd) td.shoutrow {
+    background-color: var(--nxm-surface);
+}
+
+html[data-theme]:root tr:nth-child(even) td.shoutrow {
+    background-color: var(--nxm-surface-alt);
+}
+
+html[data-theme]:root tr:hover td.shoutrow {
+    box-shadow: inset 3px 0 0 0 var(--nxm-accent);
+    background-color: color-mix(in srgb, var(--nxm-surface-alt) 88%, var(--nxm-accent));
+}
+
+html[data-theme]:root td.shoutrow-mentions-me {
+    border-left: 1px solid var(--nxm-accent);
+}
+
+/* Promotion sprites are rectangular images; a thin accent outline makes them
+ * read as badges inside the theme. */
+html[data-theme]:root img[class*="pro_"] {
+    outline: 1px solid var(--nxm-accent);
+    border-radius: 0;
+}
+
+/* Footer rule mirrors the accent hairline under the header. */
+html[data-theme]:root .nxm-footer {
+    border-top: 1px solid var(--nxm-accent);
+}

@@ -17,6 +17,7 @@ use App\Support\Html;
 use App\Support\Html\SafeHtml;
 use App\Support\Log;
 use App\Support\Settings;
+use App\Support\Url;
 use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -300,6 +301,25 @@ class SettingsController extends LegacyController
                     }
                 }
             }
+        }
+
+        // Special: URL fields are stored in canonical
+        // scheme://host[:port][/path] form so every consumer agrees.
+        $urlFields = match ($section) {
+            'basic' => ['BASEURL', 'announce_url'],
+            'security' => ['https_announce_url'],
+            default => [],
+        };
+        foreach ($urlFields as $urlField) {
+            $value = $data[$urlField] ?? null;
+            if ($value === null || $value === '') {
+                continue;
+            }
+            $normalized = is_string($value) ? Url::normalize($value) : null;
+            if ($normalized === null) {
+                return $this->legacyAbortResponse('Error', "Invalid URL: {$urlField}");
+            }
+            $data[$urlField] = $normalized;
         }
 
         // Special: misc protected_forum validation

@@ -9,7 +9,6 @@ use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Globals;
-use App\Support\Http;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\SearchBox;
@@ -205,7 +204,7 @@ class RssController extends LegacyController
             $addinclbm = '&inclbookmarked='.$inclbookmarked;
         }
 
-        $link = Http::protocolPrefix(Url::isSecure()).$baseUrl.'/torrentrss.php?'.http_build_query($query).$addinclbm;
+        $link = Url::absolute($baseUrl).'/torrentrss.php?'.http_build_query($query).$addinclbm;
         $msg = (__('legacy/getrss.std_use_following_url'))."\n".$link."\n\n"
             .(__('legacy/getrss.std_utorrent_feed_url'))."\n".$link.'&linktype=dl'.$addinclbm;
 

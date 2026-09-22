@@ -18,7 +18,6 @@ use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Globals;
-use App\Support\Http;
 use App\Support\Locale;
 use App\Support\Log;
 use App\Support\Network;
@@ -69,7 +68,7 @@ class StaffModerationController extends LegacyController
             }
             $this->modtaskRepository->confirmUser($userId, $confirm);
 
-            return redirect(Http::protocolPrefix(Url::isSecure()).$baseUrl.'/unco.php?status=1');
+            return redirect(Url::absolute($baseUrl).'/unco.php?status=1');
         }
 
         if ($action !== 'edituser') {
@@ -370,9 +369,9 @@ class StaffModerationController extends LegacyController
         Cache::clearUser($userId, $arr['passhash']);
 
         $returnto = (string) request()->post('returnto');
-        $prefix = Http::protocolPrefix(Url::isSecure());
+        $prefix = Url::absolute($baseUrl);
 
-        return redirect($prefix.$baseUrl.'/'.($returnto !== '' ? $returnto : 'userdetails.php?id='.$userId));
+        return redirect($prefix.'/'.($returnto !== '' ? $returnto : 'userdetails.php?id='.$userId));
     }
 
     public function modrules(Request $request): View|RedirectResponse|Response

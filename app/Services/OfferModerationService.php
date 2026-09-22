@@ -11,10 +11,10 @@ use App\Repositories\OfferRepository;
 use App\Repositories\OfferVoteRepository;
 use App\Support\CurrentUser;
 use App\Support\Globals;
-use App\Support\Input;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Log;
+use App\Support\Url;
 use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -45,16 +45,6 @@ final class OfferModerationService
     private function baseUrl(): string
     {
         return (string) $this->globals->get('BASEURL', '');
-    }
-
-    private function isSecure(): bool
-    {
-        return (bool) Input::serverValue('HTTPS');
-    }
-
-    private function protocolPrefix(): string
-    {
-        return $this->isSecure() ? 'https://' : 'http://';
     }
 
     private function abort(string $heading, string $text, bool $htmlstrip = true): void
@@ -98,7 +88,7 @@ final class OfferModerationService
         }
 
         $curuser = $this->curUser();
-        $url = $this->protocolPrefix().$this->baseUrl()."/offers.php?id={$offid}&off_details=1";
+        $url = Url::absolute($this->baseUrl())."/offers.php?id={$offid}&off_details=1";
         $msg = ($curuser['username'] ?? '').Locale::trans('offer.msg_has_allowed', [], $locale)."[b][url={$url}]".$arr['name'].'[/url][/b]. '.Locale::trans('offer.msg_find_offer_option', [], $locale).$timeoutnote;
         $subject = Locale::trans('offer.msg_your_offer_allowed', [], $locale);
         $allowedtime = date('Y-m-d H:i:s');
@@ -156,7 +146,7 @@ final class OfferModerationService
         }
 
         $finishvotetime = date('Y-m-d H:i:s');
-        $url = $this->protocolPrefix().$this->baseUrl()."/offers.php?id={$offid}&off_details=1";
+        $url = Url::absolute($this->baseUrl())."/offers.php?id={$offid}&off_details=1";
 
         if (($yes - $no) >= $minoffervotes) {
             if ($offeruptimeout) {

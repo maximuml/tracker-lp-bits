@@ -24,6 +24,7 @@ return [
     'last_access' => 'Last access time',
     'priority' => 'Priority',
     'priority_help' => 'The higher the value, the higher the ranking',
+    'tracker_url_format_help' => 'Full announce URL, e.g. https://tracker.example.com/announce.php. Host-only values are accepted and stored with the site scheme.',
     'comment' => 'Comment',
     'duration' => 'Duration',
     'description' => 'Description',

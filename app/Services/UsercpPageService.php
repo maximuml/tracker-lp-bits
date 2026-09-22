@@ -21,7 +21,6 @@ use App\Support\Forum;
 use App\Support\Globals;
 use App\Support\Html;
 use App\Support\Html\SafeHtml;
-use App\Support\Http;
 use App\Support\Input;
 use App\Support\LegacyYesNo;
 use App\Support\Locale;
@@ -318,11 +317,11 @@ final class UsercpPageService
             $trackerUrlOptions[(string) $item->id] = (string) $item->url;
         }
 
-        $baseUrl = (string) $this->globals->get('BASEURL', '');
-        $defaultAvatarUrl = Http::protocolPrefix(Url::isSecure()).$baseUrl.'/pic/default_avatar.png';
+        $baseUrl = Url::absolute((string) $this->globals->get('BASEURL', ''));
+        $defaultAvatarUrl = $baseUrl.'/pic/default_avatar.png';
         $bitbucketOptions = [];
         foreach ($this->usercpLookupRepository->getBitbucketOptions() as $sor) {
-            $bitbucketOptions[Http::protocolPrefix(Url::isSecure()).$baseUrl.'/bitbucket/'.(string) $sor->name] = (string) $sor->name;
+            $bitbucketOptions[$baseUrl.'/bitbucket/'.(string) $sor->name] = (string) $sor->name;
         }
 
         $notifs = (string) ($curUser['notifs'] ?? '');

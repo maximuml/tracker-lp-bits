@@ -7,7 +7,6 @@ namespace App\Services;
 use App\Enums\BitbucketPublic;
 use App\Models\User;
 use App\Support\Config\SiteConfig;
-use App\Support\Http;
 use App\Support\Path;
 use App\Support\Url;
 use Illuminate\Http\UploadedFile;
@@ -93,7 +92,7 @@ final class BitbucketService
         };
 
         $baseUrl = SiteConfig::current()->basic->baseUrl();
-        $url = str_replace(' ', '%20', htmlspecialchars(Http::protocolPrefix(Url::isSecure())."{$baseUrl}/bitbucket/{$filename}"));
+        $url = str_replace(' ', '%20', htmlspecialchars(Url::absolute($baseUrl)."/bitbucket/{$filename}"));
         $public = $isPublic ? BitbucketPublic::YES->value : BitbucketPublic::NO->value;
 
         DB::table('bitbucket')->insert([

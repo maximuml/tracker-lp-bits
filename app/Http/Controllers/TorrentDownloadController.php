@@ -121,9 +121,7 @@ class TorrentDownloadController extends LegacyController
 
         $dict = TorrentFile::load($fn);
         $trackerHost = Tracker::schemaAndHost((int) $user->tracker_url_id, true);
-        if (is_array($trackerHost)) {
-            $trackerHost = ($trackerHost['scheme'] ?? '').'://'.($trackerHost['host'] ?? '');
-        }
+        $trackerHost = is_array($trackerHost) ? implode('', $trackerHost) : $trackerHost;
         $dict->cleanRootFields()
             ->setAnnounce($trackerHost.'?passkey='.(string) $user->passkey)
             ->setComment(Url::schemeAndHost(true).'/details.php?id='.$torrent->id)

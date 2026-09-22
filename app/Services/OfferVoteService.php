@@ -13,10 +13,10 @@ use App\Repositories\OfferVoteRepository;
 use App\Support\Bonus;
 use App\Support\CurrentUser;
 use App\Support\Globals;
-use App\Support\Input;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Log;
+use App\Support\Url;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use LogicException;
@@ -80,7 +80,7 @@ final class OfferVoteService
         $offeruptimeout = (int) ($this->globals->get('offeruptimeout_main') ?? 0);
         $offervoteBonus = (float) ($this->globals->get('offervote_bonus') ?? 0);
         $finishtime = date('Y-m-d H:i:s');
-        $url = $this->protocolPrefix().$this->baseUrl()."/offers.php?id={$offerid}&off_details=1";
+        $url = Url::absolute($this->baseUrl())."/offers.php?id={$offerid}&off_details=1";
 
         if (($yeah - $against) >= $minoffervotes && $offerVotes->allowed !== OfferAllowed::ALLOWED) {
             if ($offeruptimeout) {
@@ -132,16 +132,6 @@ final class OfferVoteService
     private function baseUrl(): string
     {
         return (string) $this->globals->get('BASEURL', '');
-    }
-
-    private function isSecure(): bool
-    {
-        return (bool) Input::serverValue('HTTPS');
-    }
-
-    private function protocolPrefix(): string
-    {
-        return $this->isSecure() ? 'https://' : 'http://';
     }
 
     private function abort(string $heading, string $text, bool $htmlstrip = true): void

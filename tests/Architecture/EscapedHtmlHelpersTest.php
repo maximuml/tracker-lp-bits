@@ -58,6 +58,8 @@ final class EscapedHtmlHelpersTest extends TestCase
         'UserDisplay::plainUsername' => true,
         'Style::cssUriWithContext' => true,
         'Url::schemeAndHost' => true,
+        'Url::absolute' => true,
+        'Url::siteBase' => true,
         'Http::protocolPrefix' => true,
         'Strings::addS' => true,
         'Locale::trans' => true,

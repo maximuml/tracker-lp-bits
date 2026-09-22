@@ -13,7 +13,6 @@ use App\Repositories\BonusCalculationRepository;
 use App\Repositories\BonusRepository;
 use App\Support\Globals;
 use App\Support\Html;
-use App\Support\Http;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Lock;
@@ -159,7 +158,7 @@ final class BonusService
 
     private function redirect(string $baseUrl, string $do): RedirectResponse
     {
-        return redirect(Http::protocolPrefix(Url::isSecure()).$baseUrl."/mybonus.php?do={$do}");
+        return redirect(Url::absolute($baseUrl)."/mybonus.php?do={$do}");
     }
 
     /**

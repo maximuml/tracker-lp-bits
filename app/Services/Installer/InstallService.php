@@ -180,9 +180,7 @@ final class InstallService
                 ?: (string) Env::get('APP_URL', 'localhost');
             $announceUrl = sprintf('%s/%s', trim((string) $host, '/'), trim(DEFAULT_TRACKER_URI, '/'));
         }
-        if (! str_starts_with($announceUrl, 'http')) {
-            $announceUrl = (Url::isSecure() ? 'https://' : 'http://').$announceUrl;
-        }
+        $announceUrl = Url::normalize($announceUrl) ?? $announceUrl;
         TrackerUrl::query()->create([
             'url' => $announceUrl,
             'enabled' => 1,

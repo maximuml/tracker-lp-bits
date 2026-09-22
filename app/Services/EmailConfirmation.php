@@ -13,7 +13,6 @@ use App\Support\Cache;
 use App\Support\Captcha;
 use App\Support\Config\SiteConfig;
 use App\Support\Email;
-use App\Support\Http;
 use App\Support\Mail;
 use App\Support\Url;
 use Illuminate\Support\Facades\Cache as CacheFacade;
@@ -226,11 +225,7 @@ class EmailConfirmation
         string $ip,
         string $langFolder,
     ): void {
-        $baseUrl = SiteConfig::current()->basic->baseUrl();
-        if (! str_contains($baseUrl, '://')) {
-            $baseUrl = Http::protocolPrefix(Url::isSecure()).$baseUrl;
-        }
-        $baseUrl = rtrim($baseUrl, '/');
+        $baseUrl = Url::siteBase();
         $confirmUrl = $baseUrl.'/confirm.php?id='.$userId.'&secret='.$confirmToken;
         $resendUrl = $baseUrl.'/confirm_resend.php';
         $siteName = SiteConfig::current()->basic->siteName();

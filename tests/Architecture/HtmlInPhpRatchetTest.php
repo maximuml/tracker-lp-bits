@@ -50,13 +50,13 @@ final class HtmlInPhpRatchetTest extends TestCase
     ];
 
     /** Baseline: lines with a quoted '<table literal (layout markup in PHP). */
-    private const BASELINE_TABLE_LITERALS = 3;
+    private const BASELINE_TABLE_LITERALS = 2;
 
     /** Baseline: ob_start() calls (output buffering = inline page rendering). */
     private const BASELINE_OB_START = 5;
 
     /** Baseline: lines with `echo` inside app/Services + app/Http/Controllers. */
-    private const BASELINE_ECHO_IN_SERVICES = 5;
+    private const BASELINE_ECHO_IN_SERVICES = 0;
 
     /** Baseline: lines where a quoted string starts an HTML tag ('<div', "</td", '<!--'). */
     private const BASELINE_HTML_LITERAL_LINES = 249;

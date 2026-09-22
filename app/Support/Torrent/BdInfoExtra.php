@@ -25,7 +25,7 @@ class BdInfoExtra
     }
 
     /**
-     * 解析BDINFO文本为结构化数组
+     * Parse BDINFO text into a structured array
      *
      * @return array<string, mixed>
      */
@@ -33,7 +33,7 @@ class BdInfoExtra
     {
         $lines = preg_split('/[\r\n]+/', $bdInfo) ?: [];
 
-        // 检测是否为Summary格式（无章节标题的格式）
+        // Detect the Summary format (no section headers)
         $isSummaryFormat = $this->isSummaryFormat($lines);
 
         if ($isSummaryFormat) {
@@ -52,7 +52,7 @@ class BdInfoExtra
     }
 
     /**
-     * 检测是否为Summary格式
+     * Detect the Summary format
      *
      * @param  array<int, string>  $lines
      */
@@ -73,7 +73,7 @@ class BdInfoExtra
     }
 
     /**
-     * 解析格式1（有章节标题的格式）
+     * Parse the sectioned format (lines grouped under headers)
      *
      * @param  array<int, string>  $lines
      * @return array<string, mixed>
@@ -92,14 +92,14 @@ class BdInfoExtra
                 continue;
             }
 
-            // 检测新的DISC
+            // Detect a new DISC
             if (str_contains($line, 'DISC INFO')) {
-                // 保存之前的DISC（如果存在）
+                // Save the previous DISC (if any)
                 if ($currentDisc !== null) {
                     $discs[] = $currentDisc;
                 }
 
-                // 创建新的DISC
+                // Create a new DISC
                 $currentDisc = [
                     'disc_info' => [],
                     'playlist_report' => [],
@@ -134,7 +134,7 @@ class BdInfoExtra
                 continue;
             }
 
-            // 解析各个章节的内容
+            // Parse each section's lines
             if ($currentDisc !== null && ! empty($currentSection)) {
                 switch ($currentSection) {
                     case 'disc_info':
@@ -156,12 +156,12 @@ class BdInfoExtra
             }
         }
 
-        // 保存最后一个DISC
+        // Save the last DISC
         if ($currentDisc !== null) {
             $discs[] = $currentDisc;
         }
 
-        // 如果没有找到任何DISC，返回空结构
+        // No DISC found — return the empty structure
         if (empty($discs)) {
             return [
                 'disc_info' => [],
@@ -172,12 +172,12 @@ class BdInfoExtra
             ];
         }
 
-        // 返回第一个DISC的数据（保持向后兼容）
+        // Return the first DISC's data (backward compatibility)
         return $discs[0];
     }
 
     /**
-     * 解析Summary格式（无章节标题的格式）
+     * Parse the Summary format (no section headers)
      *
      * @param  array<int, string>  $lines
      * @param  array<string, mixed>  $result
@@ -194,7 +194,7 @@ class BdInfoExtra
                 continue;
             }
 
-            // 解析光盘信息
+            // Parse disc info
             if (str_contains($line, 'Disc Label:')) {
                 $result['disc_info']['label'] = trim(substr($line, 11));
             } elseif (str_contains($line, 'Disc Size:')) {
@@ -222,13 +222,13 @@ class BdInfoExtra
     }
 
     /**
-     * 解析Summary格式的视频信息
+     * Parse a Summary-format video line
      *
      * @param  array<string, mixed>  $video
      */
     private function summaryFormatVideo(string $line, array &$video): void
     {
-        // 格式：Video: MPEG-4 AVC Video / 31943 kbps / 1080p / 23.976 fps / 16:9 / High Profile 4.1
+        // Format: Video: MPEG-4 AVC Video / 31943 kbps / 1080p / 23.976 fps / 16:9 / High Profile 4.1
         if (preg_match('/Video:\s*(.+?)\s*\/\s*(\d+)\s*kbps\s*\/(.+)/', $line, $matches)) {
             $video['codec'] = trim($matches[1]);
             $video['bitrate'] = trim($matches[2]).' kbps';
@@ -237,16 +237,16 @@ class BdInfoExtra
     }
 
     /**
-     * 解析Summary格式的音频信息
+     * Parse a Summary-format audio line
      *
      * @param  array<int, array<string, mixed>>  $audio
      */
     private function summaryFormatAudio(string $line, array &$audio, int &$audioIndex): void
     {
-        // 格式：Audio: Chinese / DTS-HD Master Audio / 2.0 / 48 kHz /   914 kbps / 16-bit (DTS Core: 2.0 / 48 kHz /   768 kbps / 16-bit)
+        // Format: Audio: Chinese / DTS-HD Master Audio / 2.0 / 48 kHz /   914 kbps / 16-bit (DTS Core: 2.0 / 48 kHz /   768 kbps / 16-bit)
         if (preg_match('/Audio:\s*([^*]+?)\s*\/\s*([^*]+?)\s*\/\s*([^*]+?)\s*\/\s*([^*]+?)\s*\/\s*([^*]+?)\s*\/\s*([^*]+?)(?:\s*\((.+)\))?/', $line, $matches)) {
             $bitrate = trim($matches[5]);
-            // 如果码率已经包含kbps，就不重复添加
+            // Don't append kbps twice when the bitrate already has it
             if (strpos($bitrate, 'kbps') === false) {
                 $bitrate .= ' kbps';
             }
@@ -265,13 +265,13 @@ class BdInfoExtra
     }
 
     /**
-     * 解析Summary格式的字幕信息
+     * Parse a Summary-format subtitle line
      *
      * @param  array<int, array<string, mixed>>  $subtitles
      */
     private function summaryFormatSubtitle(string $line, array &$subtitles, int &$subtitleIndex): void
     {
-        // 格式：Subtitle: English / 38.300 kbps
+        // Format: Subtitle: English / 38.300 kbps
         if (preg_match('/Subtitle:\s*([^*]+?)\s*\/\s*([^*]+?)\s*kbps/', $line, $matches)) {
             $subtitles[$subtitleIndex] = [
                 'language' => trim($matches[1]),
@@ -284,7 +284,7 @@ class BdInfoExtra
     }
 
     /**
-     * 解析光盘信息
+     * Parse disc info
      *
      * @param  array<string, mixed>  $discInfo
      */
@@ -304,7 +304,7 @@ class BdInfoExtra
     }
 
     /**
-     * 解析播放列表报告
+     * Parse playlist report
      *
      * @param  array<string, mixed>  $playlistReport
      */
@@ -322,24 +322,24 @@ class BdInfoExtra
     }
 
     /**
-     * 解析视频信息
+     * Parse a video line
      *
      * @param  array<int|string, mixed>  $video
      */
     private function parseVideo(string $line, array &$video): void
     {
-        // 跳过表头和分隔线
+        // Skip header and separator lines
         if (str_contains($line, 'Codec') || str_contains($line, '-----') || str_contains($line, 'Description')) {
             return;
         }
 
-        // 解析视频行 - 包括隐藏视频流（带*号的）
+        // Parse video lines, including hidden streams (marked with *)
         if (preg_match('/^(\*?\s*)(.+?)\s+([\d,]+)\s+kbps\s+(.+)$/', $line, $matches)) {
             $isHidden = str_contains($matches[1], '*');
 
             if (! $isHidden) {
-                // 主视频流 - 支持多个视频流
-                // 添加到数组末尾
+                // Primary video stream — multiple streams supported
+                // Append to the array
                 $video[] = [
                     'codec' => trim($matches[2]),
                     'bitrate' => trim($matches[3]).' kbps',
@@ -347,17 +347,17 @@ class BdInfoExtra
                 ];
                 $videoIndex = count($video) - 1;
 
-                // 提取分辨率信息（对每个视频流都提取）
+                // Extract the resolution from every stream
                 $description = trim($matches[4]);
                 if (preg_match('/(\d+)p/', $description, $resMatches)) {
                     $video['height'] = $resMatches[1];
                 }
-                // 只有当描述中包含aspect_ratio时才提取
+                // Extract the aspect ratio only when present in the description
                 if (preg_match('/(\d+:\d+)/', $description, $ratioMatches)) {
                     $video['aspect_ratio'] = $ratioMatches[1];
                 }
             } else {
-                // 隐藏视频流 - 也作为独立的视频流处理，但标记为隐藏
+                // Hidden video stream — treated as its own stream but flagged hidden
                 $video[] = [
                     'codec' => trim($matches[2]),
                     'bitrate' => trim($matches[3]).' kbps',
@@ -369,7 +369,7 @@ class BdInfoExtra
     }
 
     /**
-     * 提取字幕和音轨描述中的非英文内容
+     * Extract non-English content from subtitle/audio descriptions
      *
      * @return array<string, mixed>
      */
@@ -377,10 +377,10 @@ class BdInfoExtra
     {
         $result = ['text' => $text, 'non_english_content' => []];
 
-        // 提取所有非英文字符的内容
+        // Collect every non-ASCII run
         if (preg_match_all('/[^\x{0000}-\x{007F}]+/u', $text, $matches)) {
             foreach ($matches[0] as $match) {
-                // 去除制表符和括号
+                // Strip whitespace and brackets
                 $match = preg_replace('/[\s\t\n\r（）()【】\[\]]+/u', '', $match) ?? '';
                 $match = trim($match);
                 if (! empty($match)) {
@@ -388,7 +388,7 @@ class BdInfoExtra
                 }
             }
 
-            // 从原文本中移除非英文字符内容
+            // Remove the non-English parts from the original text
             $result['text'] = preg_replace('/[^\x{0000}-\x{007F}]+/u', '', $text) ?? '';
         }
 
@@ -398,23 +398,23 @@ class BdInfoExtra
     }
 
     /**
-     * 解析音频信息
+     * Parse an audio line
      *
      * @param  array<int, array<string, mixed>>  $audio
      */
     private function parseAudio(string $line, array &$audio, int &$audioIndex): void
     {
-        // 跳过表头和分隔线
+        // Skip header and separator lines
         if (str_contains($line, 'Codec') || str_contains($line, '-----') || str_contains($line, 'Language')) {
             return;
         }
 
-        // 解析音频行 - 格式：DTS-HD Master Audio             English         1564 kbps       2.0 / 48 kHz / 1564 kbps / 24-bit
-        // 也包含隐藏音频流（带*号的）
+        // Audio line format: DTS-HD Master Audio             English         1564 kbps       2.0 / 48 kHz / 1564 kbps / 24-bit
+        // Hidden audio streams (marked with *) are included too
         if (preg_match('/^(\*?\s*)(.+?)\s+([A-Za-z]+)\s+([\d,]+)\s+kbps\s+(.+)$/', $line, $matches)) {
             $description = trim($matches[5]);
 
-            // 提取括号内容
+            // Extract bracketed content
             $extracted = $this->extractNonEnglishContent($description);
             $nonEnglishContent = $extracted['non_english_content'];
             $cleanDescription = $extracted['text'];
@@ -431,38 +431,38 @@ class BdInfoExtra
     }
 
     /**
-     * 解析字幕信息
+     * Parse a subtitle line
      *
      * @param  array<int, array<string, mixed>>  $subtitles
      */
     private function parseSubtitles(string $line, array &$subtitles, int &$subtitleIndex): void
     {
-        // 跳过表头和分隔线
+        // Skip header and separator lines
         if (str_contains($line, 'Codec') || str_contains($line, '-----') || str_contains($line, 'Language')) {
             return;
         }
 
-        // 跳过FILES章节的内容
+        // Skip the FILES section rows
         if (str_contains($line, 'Name') || str_contains($line, 'Time In') || str_contains($line, 'Length') || str_contains($line, 'Size') || str_contains($line, 'Total Bitrate')) {
             return;
         }
 
-        // 跳过文件行（如：00003.M2TS      0:00:00.000     2:00:29.416）
+        // Skip file rows, e.g. 00003.M2TS      0:00:00.000     2:00:29.416
         if (preg_match('/^\w+\.M2TS\s+/', $line)) {
             return;
         }
 
-        // 解析字幕行 - 格式：Presentation Graphics           English         21.061 kbps
-        // 优先匹配"Presentation Graphics"开头的行
+        // Subtitle line format: Presentation Graphics           English         21.061 kbps
+        // Prefer lines starting with "Presentation Graphics"
         if (preg_match('/^(Presentation Graphics)\s+([^*]+?)\s+([^*]+?)\s+kbps\s*(.*)$/', $line, $matches)) {
             $codec = trim($matches[1]);
             $language = trim($matches[2]);
             $bitrate = trim($matches[3]).' kbps';
             $description = trim($matches[4]);
 
-            // 只有当语言不为空时才添加
+            // Only add when a language is present
             if (! empty($language)) {
-                // 提取括号内容
+                // Extract bracketed content
                 $extracted = $this->extractNonEnglishContent($description);
                 $nonEnglishContent = $extracted['non_english_content'];
                 $cleanDescription = $extracted['text'];
@@ -480,7 +480,7 @@ class BdInfoExtra
     }
 
     /**
-     * 获取时长
+     * Get the duration
      */
     public function getDuration(): string
     {
@@ -489,7 +489,7 @@ class BdInfoExtra
             return '';
         }
 
-        // 转换格式：1:55:22.123 -> 1h 55m 22s 123ms
+        // Convert 1:55:22.123 -> 1h 55m 22s 123ms
         if (preg_match('/(\d+):(\d+):(\d+)\.(\d+)/', $length, $matches)) {
             $hours = intval($matches[1]);
             $minutes = intval($matches[2]);
@@ -503,7 +503,7 @@ class BdInfoExtra
     }
 
     /**
-     * 获取总码率
+     * Get the total bitrate
      */
     public function getTotalBitrate(): string
     {
@@ -511,7 +511,7 @@ class BdInfoExtra
     }
 
     /**
-     * 获取帧率
+     * Get the frame rate
      */
     public function getFrameRate(): string
     {
@@ -524,13 +524,13 @@ class BdInfoExtra
     }
 
     /**
-     * 获取视频配置文件
+     * Get the video profile
      */
     public function getProfile(): string
     {
         $profiles = [];
 
-        // 检查所有视频流，跳过隐藏视频流
+        // Check all video streams, skipping hidden ones
         foreach ($this->bdInfoArr['video'] as $key => $video) {
             if (is_array($video) && isset($video['description']) && ! isset($video['hidden'])) {
                 $description = $video['description'];
@@ -540,7 +540,7 @@ class BdInfoExtra
             }
         }
 
-        // 如果没有找到profile，检查是否是summaryFormat格式（关联数组）
+        // No profile found — check the summaryFormat shape (associative array)
         if (empty($profiles) && isset($this->bdInfoArr['video']['description'])) {
             $description = $this->bdInfoArr['video']['description'];
             if (preg_match('/([^\/]*?(?:profile|high|level|main)[^\/]*?)(?:\s*\/|$)/i', $description, $matches)) {
@@ -555,19 +555,19 @@ class BdInfoExtra
     {
         $resolutions = [];
 
-        // 遍历所有视频流提取分辨率和宽高比
+        // Walk every video stream, extracting resolution and aspect ratio
         foreach ($this->bdInfoArr['video'] as $index => $video) {
-            // 处理数字索引的数组（多视频流格式）或关联数组（单视频流格式）
+            // Handle both indexed arrays (multi-stream) and associative (single-stream)
             if (is_array($video) && isset($video['description'])) {
                 $description = $video['description'];
                 $resolutionItem = '';
 
-                // 提取"xxxp"格式的分辨率
+                // Extract the "xxxp" resolution
                 if (preg_match('/(\d+p)/', $description, $matches)) {
                     $resolutionItem = $matches[1];
                 }
 
-                // 提取宽高比信息
+                // Extract the aspect ratio
                 if (preg_match('/(\d+:\d+)/', $description, $ratioMatches)) {
                     $resolutionItem .= '('.$ratioMatches[1].')';
                 }
@@ -578,17 +578,17 @@ class BdInfoExtra
             }
         }
 
-        // 如果没有找到分辨率，检查是否是summaryFormat格式（关联数组）
+        // No resolution found — check the summaryFormat shape (associative array)
         if (empty($resolutions) && isset($this->bdInfoArr['video']['description'])) {
             $description = $this->bdInfoArr['video']['description'];
             $resolutionItem = '';
 
-            // 提取"xxxp"格式的分辨率
+            // Extract the "xxxp" resolution
             if (preg_match('/(\d+p)/', $description, $matches)) {
                 $resolutionItem = $matches[1];
             }
 
-            // 提取宽高比信息
+            // Extract the aspect ratio
             if (preg_match('/(\d+:\d+)/', $description, $ratioMatches)) {
                 $resolutionItem .= '('.$ratioMatches[1].')';
             }
@@ -603,7 +603,7 @@ class BdInfoExtra
 
     public function getBitDepth(): string
     {
-        // 从第一个视频流获取位深度信息
+        // Read the bit depth from the first video stream
         $firstVideo = $this->bdInfoArr['video'][0] ?? null;
         if ($firstVideo && isset($firstVideo['description'])) {
             $description = $firstVideo['description'];
@@ -612,7 +612,7 @@ class BdInfoExtra
             }
         }
 
-        // 如果没有找到位深度，检查是否是summaryFormat格式（关联数组）
+        // No bit depth found — check the summaryFormat shape (associative array)
         if (isset($this->bdInfoArr['video']['description'])) {
             $description = $this->bdInfoArr['video']['description'];
             if (preg_match('/(\d+)\s+bits/', $description, $matches)) {
@@ -627,14 +627,14 @@ class BdInfoExtra
     {
         $formats = [];
 
-        // 检查所有视频流
+        // Check all video streams
         foreach ($this->bdInfoArr['video'] as $key => $video) {
             if (is_array($video) && isset($video['codec'])) {
                 $formats[] = $video['codec'];
             }
         }
 
-        // 如果没有找到格式，检查是否是summaryFormat格式（关联数组）
+        // No format found — check the summaryFormat shape (associative array)
         if (empty($formats) && isset($this->bdInfoArr['video']['codec'])) {
             $formats[] = $this->bdInfoArr['video']['codec'];
         }
@@ -643,7 +643,7 @@ class BdInfoExtra
     }
 
     /**
-     * 获取宽高比
+     * Get the aspect ratio
      */
     public function getAspectRatio(): string
     {
@@ -651,7 +651,7 @@ class BdInfoExtra
     }
 
     /**
-     * 获取Extras信息
+     * Get the Extras field
      */
     public function getExtras(): string
     {
@@ -659,11 +659,11 @@ class BdInfoExtra
     }
 
     /**
-     * 获取HDR格式
+     * Get the HDR format
      */
     public function getHDRFormat(): string
     {
-        // 从所有视频流获取HDR信息
+        // Collect HDR info from all video streams
         $hdrTypes = [];
         $bitDepths = [];
         $nits = [];
@@ -671,38 +671,38 @@ class BdInfoExtra
         foreach ($this->bdInfoArr['video'] as $video) {
             $description = $video['description'] ?? '';
 
-            // 从VIDEO描述中提取HDR格式
+            // Extract the HDR format from the VIDEO description
             if (preg_match('/\b(HDR10\+|HDR10|HDR|HLG|Dolby Vision)(?:\s|\/|$)/i', $description, $matches)) {
                 $hdrTypes[] = $matches[1];
             }
 
-            // 检查比特深度
+            // Check the bit depth
             if (preg_match('/(\d+)\s+bits/', $description, $matches)) {
                 $bitDepths[] = $matches[1].' bits';
             }
 
-            // 检查亮度
+            // Check the brightness
             if (preg_match('/(\d+)nits/', $description, $matches)) {
                 $nits[] = $matches[1].'nits';
             }
         }
 
-        // 去重并构建结果
+        // Deduplicate and build the result
         $result = [];
 
-        // HDR格式
+        // HDR formats
         $hdrTypes = array_unique($hdrTypes);
         if (! empty($hdrTypes)) {
             $result[] = implode(' / ', $hdrTypes);
         }
 
-        // 比特深度
+        // Bit depths
         $bitDepths = array_unique($bitDepths);
         if (! empty($bitDepths)) {
             $result[] = implode(' / ', $bitDepths);
         }
 
-        // 亮度
+        // Brightness
         $nits = array_unique($nits);
         if (! empty($nits)) {
             $result[] = implode(' / ', $nits);
@@ -712,7 +712,7 @@ class BdInfoExtra
     }
 
     /**
-     * 获取音频信息
+     * Get the audio info
      *
      * @return array<string, string>
      */
@@ -723,32 +723,32 @@ class BdInfoExtra
         foreach ($this->bdInfoArr['audio'] as $audio) {
             $audioInfo = [];
 
-            // 语言
+            // Language
             if (! empty($audio['language'])) {
                 $audioInfo[] = $audio['language'];
             }
 
-            // 编解码器
+            // Codec
             if (! empty($audio['codec'])) {
                 $audioInfo[] = $audio['codec'];
             }
 
-            // 声道信息
+            // Channel info
             if (! empty($audio['channels'])) {
                 $audioInfo[] = $audio['channels'];
             } elseif (! empty($audio['description'])) {
-                // 从描述中提取声道信息
+                // Extract channels from the description
                 if (preg_match('/(\d+\.\d+)/', $audio['description'], $matches)) {
                     $audioInfo[] = $matches[1];
                 }
             }
 
-            // 码率
+            // Bitrate
             if (! empty($audio['bitrate'])) {
                 $audioInfo[] = $audio['bitrate'];
             }
 
-            // 括号内容（添加到最后面）
+            // Bracketed content (appended last)
             if (! empty($audio['non_english_content'])) {
                 foreach ($audio['non_english_content'] as $nonEnglishItem) {
                     $audioInfo[] = $nonEnglishItem;
@@ -765,7 +765,7 @@ class BdInfoExtra
     }
 
     /**
-     * 获取字幕信息
+     * Get the subtitle info
      *
      * @return array<string, string>
      */
@@ -777,7 +777,7 @@ class BdInfoExtra
             if (! empty($subtitle['language'])) {
                 $subtitleInfo = [$subtitle['language']];
 
-                // 括号内容（添加到最后面）
+                // Bracketed content (appended last)
                 if (! empty($subtitle['non_english_content'])) {
                     foreach ($subtitle['non_english_content'] as $nonEnglishItem) {
                         $subtitleInfo[] = $nonEnglishItem;
@@ -793,7 +793,7 @@ class BdInfoExtra
     }
 
     /**
-     * 获取所有DISC的数据
+     * Get all DISC data
      *
      * @return array<int, array<string, mixed>>
      */
@@ -812,14 +812,14 @@ class BdInfoExtra
                 continue;
             }
 
-            // 检测新的DISC
+            // Detect a new DISC
             if (str_contains($line, 'DISC INFO')) {
-                // 保存之前的DISC（如果存在）
+                // Save the previous DISC (if any)
                 if ($currentDisc !== null) {
                     $discs[] = $currentDisc;
                 }
 
-                // 创建新的DISC
+                // Create a new DISC
                 $currentDisc = [
                     'disc_info' => [],
                     'playlist_report' => [],
@@ -854,7 +854,7 @@ class BdInfoExtra
                 continue;
             }
 
-            // 解析各个章节的内容
+            // Parse each section's lines
             if ($currentDisc !== null && ! empty($currentSection)) {
                 switch ($currentSection) {
                     case 'disc_info':
@@ -876,17 +876,17 @@ class BdInfoExtra
             }
         }
 
-        // 保存最后一个DISC
+        // Save the last DISC
         if ($currentDisc !== null) {
             $discs[] = $currentDisc;
         }
 
-        // 如果没有找到任何DISC（normalFormat格式），检查是否是summaryFormat格式
+        // No DISC found (normalFormat) — try the summaryFormat shape
         if (empty($discs)) {
-            // 检查bdInfoArr中是否有有效的媒体数据
+            // Check whether bdInfoArr carries usable media data
             if ((isset($this->bdInfoArr['video']) && ! empty($this->bdInfoArr['video'])) ||
                 (isset($this->bdInfoArr['audio']) && ! empty($this->bdInfoArr['audio']))) {
-                // 将bdInfoArr作为单个DISC返回
+                // Return bdInfoArr as a single DISC
                 $discs[] = $this->bdInfoArr;
             }
         }
@@ -895,7 +895,7 @@ class BdInfoExtra
     }
 
     /**
-     * 获取汇总信息
+     * Get the summary info
      *
      * @return array<string, mixed>
      */
@@ -920,7 +920,7 @@ class BdInfoExtra
     }
 
     /**
-     * 在详情页面渲染
+     * Render on the details page
      */
     public function renderOnDetailsPage(): string
     {
@@ -1020,7 +1020,7 @@ class BdInfoExtra
     }
 
     /**
-     * 清理字符串
+     * Clean up a string
      */
     private function trim(string $value): string
     {

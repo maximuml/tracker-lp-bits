@@ -37,10 +37,10 @@ final class LegacyRedisCacheIsolationTest extends TestCase
         $testDb = (int) Config::get('nexus.redis.database');
         $this->assertNotSame(0, $testDb, 'tests must not run against the dev Redis DB');
 
-        $key = 'ux03_isolation_probe';
-        $cache->cache_value($key, 'probe', 60);
+        $probe = 'ux03_isolation_probe';
+        $cache->cache_value($probe, 'probe', 60);
         try {
-            $this->assertSame('probe', $cache->get_value($key));
+            $this->assertSame('probe', $cache->get_value($probe));
 
             // Raw client on the dev keyspace (DB 0) must NOT see the test key.
             $devRedis = new \Redis;
@@ -50,10 +50,10 @@ final class LegacyRedisCacheIsolationTest extends TestCase
                 $devRedis->auth($password);
             }
             $devRedis->select(0);
-            $this->assertFalse($devRedis->get($key), 'test write leaked into dev Redis DB 0');
+            $this->assertFalse($devRedis->get($probe), 'test write leaked into dev Redis DB 0');
             $devRedis->close();
         } finally {
-            $cache->delete_value($key);
+            $cache->delete_value($probe);
         }
     }
 }

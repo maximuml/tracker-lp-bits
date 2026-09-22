@@ -35,9 +35,19 @@ interface PageLayoutRepositoryInterface
 
     public function getPendingInviteCount(int $userId): int;
 
+    /**
+     * @param  array<string, mixed>  $data
+     * @return void
+     */
     public function updateUser(int $userId, array $data);
 
+    /**
+     * @return void
+     */
     public function prepareAccess();
 
+    /**
+     * @return void
+     */
     public function flushAccess();
 }

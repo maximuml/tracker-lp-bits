@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Contracts\Repositories;
 
+use App\Models\Post;
 use Illuminate\Database\Eloquent\Collection;
 
 interface PostRepositoryInterface
@@ -22,8 +23,12 @@ interface PostRepositoryInterface
 
     public function countTopicPosts(int $topicid, ?int $authorId = null): int;
 
+    /**
+     * @return array<int>
+     */
     public function getTopicPostIds(int $topicid, ?int $authorId = null): array;
 
+    /** @return Collection<int, Post> */
     public function getTopicPosts(int $topicid, ?int $authorId, int $offset, int $perPage): Collection;
 
     public function countUserPosts(int $userId): int;
@@ -32,6 +37,9 @@ interface PostRepositoryInterface
 
     public function deletePost(int $postid, int $topicid, int $forumid): bool;
 
+    /**
+     * @return array{hits: int, rows: \Illuminate\Support\Collection<int, \stdClass>}
+     */
     public function searchForumPosts(string $keywords, int $minClass, int $offset, int $perPage): array;
 
     public function getForumTodayPostCount(int $forumid, string $todayDate): int;

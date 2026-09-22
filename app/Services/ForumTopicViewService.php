@@ -50,7 +50,7 @@ final class ForumTopicViewService
      *
      * @param  array<string, mixed>  $curUser
      */
-    public function buildViewTopic(array $curUser, int $userId, Request $request, int $postsperpage): ?ViewTopicViewModel
+    public function buildViewTopic(array $curUser, int $userId, Request $request, int $postsperpage): ViewTopicViewModel
     {
         $highlight = trim((string) ($request->query('highlight') ?? ''));
         $topicid = (int) ($request->query('topicid') ?? 0);
@@ -61,8 +61,6 @@ final class ForumTopicViewService
         $topic = $this->topicRepository->getTopic($topicid);
         if (! $topic) {
             LegacyResponse::abort(__('legacy/forums.std_forum_error'), __('legacy/forums.std_topic_not_found'));
-
-            return null;
         }
         $arr = $topic->toArray();
 

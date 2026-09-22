@@ -258,17 +258,17 @@ class CustomField
                     $customFieldDisplay = (string) $field['display'];
                     $customFieldDisplay = str_replace("<%{$field['name']}.label%>", $field['label'], $customFieldDisplay);
                     $customFieldDisplay = str_replace("<%{$field['name']}.value%>", $contentNotFormatted, $customFieldDisplay);
-                    $rowByRowHtml .= Html::tr($field['label'], Format::formatComment($customFieldDisplay), 1);
+                    $rowByRowHtml .= Html::tr($field['label'], Format::formatComment($customFieldDisplay), 1, '', true);
                 } else {
                     $contentFormatted = $this->formatCustomFieldValue($field, true);
-                    $rowByRowHtml .= Html::tr($field['label'], $contentFormatted, 1);
+                    $rowByRowHtml .= Html::tr($field['label'], $contentFormatted, 1, '', true);
                 }
             }
         }
 
         $result = $rowByRowHtml;
         if ($shouldRenderMixRow && $mixedRowContent) {
-            $result .= Html::tr($displayName, Format::formatComment((string) $mixedRowContent), 1);
+            $result .= Html::tr($displayName, Format::formatComment((string) $mixedRowContent), 1, '', true);
         }
 
         return $result;

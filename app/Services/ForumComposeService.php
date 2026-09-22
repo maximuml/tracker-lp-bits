@@ -61,8 +61,6 @@ final class ForumComposeService
                 $post = $this->postRepository->getPostForQuote((int) $id);
                 if (! $post) {
                     LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_no_post_id'));
-
-                    return null;
                 }
                 $topicid = $post['topicid'];
                 $topicname = $post['topic_subject'] ?? '';
@@ -143,8 +141,6 @@ final class ForumComposeService
         $post = $this->postRepository->getPostWithTopic((int) $postid);
         if (! $post) {
             LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_no_post_id'));
-
-            return null;
         }
 
         $locked = (bool) $post['locked'];

@@ -47,9 +47,6 @@ class MessageService
         if (! $sender instanceof User) {
             LegacyResponse::abort(__('legacy/takemessage.std_error'), __('legacy/takemessage.std_permission_denied'));
         }
-        if (! $sender instanceof User) {
-            throw new LogicException('Expected authenticated user.');
-        }
 
         $origmsg = (int) $request->input('origmsg', 0);
         $body = trim((string) $request->input('body', ''));
@@ -73,9 +70,6 @@ class MessageService
 
             if (! $origmsgRecord) {
                 LegacyResponse::abort(__('legacy/takemessage.std_error'), __('legacy/takemessage.std_no_permission_forwarding'));
-            }
-            if ($origmsgRecord === null) {
-                throw new LogicException('Expected non-null original message record.');
             }
 
             $to = trim((string) $request->input('to', ''));
@@ -185,9 +179,6 @@ class MessageService
         if (! $sender instanceof User) {
             LegacyResponse::abort(__('legacy/functions.std_error'), __('legacy/deletemessage.std_bad_message_id'));
         }
-        if (! $sender instanceof User) {
-            throw new LogicException('Expected authenticated user.');
-        }
 
         $id = (int) $request->input('id', 0);
         if ($id <= 0) {
@@ -200,9 +191,6 @@ class MessageService
             $msg = Message::query()->where('id', $id)->first(['id', 'receiver', 'sender', 'location', 'saved', 'unread']);
             if (! $msg || ! $this->policy->deleteInbox($sender, $msg)) {
                 LegacyResponse::abort(__('legacy/functions.std_error'), __('legacy/deletemessage.std_not_suggested'));
-            }
-            if ($msg === null) {
-                throw new LogicException('Expected non-null message.');
             }
 
             if ((int) $msg->location === 0) {
@@ -220,9 +208,6 @@ class MessageService
             $msg = Message::query()->where('id', $id)->first(['id', 'receiver', 'sender', 'location', 'saved', 'unread']);
             if (! $msg || ! $this->policy->deleteSentbox($sender, $msg)) {
                 LegacyResponse::abort(__('legacy/functions.std_error'), __('legacy/deletemessage.std_not_suggested'));
-            }
-            if ($msg === null) {
-                throw new LogicException('Expected non-null message.');
             }
 
             if ((int) $msg->location === 0 && $msg->saved === 'no') {

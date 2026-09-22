@@ -24,7 +24,6 @@ use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use LogicException;
 
 /**
  * Forum moderation mutation actions (move, delete, lock, sticky,
@@ -72,14 +71,12 @@ final class ForumModerationService
         $topic = Topic::query()->whereKey($topicid)->first();
         if ($topic === null) {
             LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_topic_not_found'));
-            throw new LogicException('Expected non-null topic.');
         }
 
         // W1-04: Use TopicPolicy for authorization
         $user = Auth::user();
         if (! $user instanceof User || ! $this->topicPolicy->move($user, $topic)) {
             LegacyResponse::permissionDenied();
-            throw new LogicException('Expected authenticated user.');
         }
 
         $minclasswrite = $this->repository->getForumMinclasswrite($forumid);
@@ -126,7 +123,6 @@ final class ForumModerationService
         $user = Auth::user();
         if (! $user instanceof User || ! $this->topicPolicy->delete($user, $topic)) {
             LegacyResponse::permissionDenied();
-            throw new LogicException('Expected authenticated user.');
         }
 
         $sure = (int) $request->query('sure', 0);
@@ -160,14 +156,12 @@ final class ForumModerationService
         $post = Post::query()->whereKey($postid)->first();
         if ($post === null) {
             LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_post_not_found'));
-            throw new LogicException('Expected non-null post.');
         }
 
         // W1-04: Use PostPolicy for authorization
         $user = Auth::user();
         if (! $user instanceof User || ! $this->postPolicy->delete($user, $post)) {
             LegacyResponse::permissionDenied();
-            throw new LogicException('Expected authenticated user.');
         }
 
         $topicid = (int) $post->topicid;
@@ -212,14 +206,12 @@ final class ForumModerationService
 
         if ($topic === null) {
             LegacyResponse::permissionDenied();
-            throw new LogicException('Expected non-null topic.');
         }
 
         // W1-04: Use TopicPolicy for authorization
         $user = Auth::user();
         if (! $user instanceof User || ! $this->topicPolicy->lock($user, $topic)) {
             LegacyResponse::permissionDenied();
-            throw new LogicException('Expected authenticated user.');
         }
 
         $locked = (bool) $request->input('locked');
@@ -235,14 +227,12 @@ final class ForumModerationService
 
         if ($topic === null) {
             LegacyResponse::permissionDenied();
-            throw new LogicException('Expected non-null topic.');
         }
 
         // W1-04: Use TopicPolicy for authorization
         $user = Auth::user();
         if (! $user instanceof User || ! $this->topicPolicy->highlight($user, $topic)) {
             LegacyResponse::permissionDenied();
-            throw new LogicException('Expected authenticated user.');
         }
 
         $color = (int) $request->input('color');
@@ -268,14 +258,12 @@ final class ForumModerationService
 
         if ($topic === null) {
             LegacyResponse::permissionDenied();
-            throw new LogicException('Expected non-null topic.');
         }
 
         // W1-04: Use TopicPolicy for authorization
         $user = Auth::user();
         if (! $user instanceof User || ! $this->topicPolicy->sticky($user, $topic)) {
             LegacyResponse::permissionDenied();
-            throw new LogicException('Expected authenticated user.');
         }
 
         $sticky = $request->input('sticky');

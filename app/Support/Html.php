@@ -208,27 +208,7 @@ final class Html
         return Message::messageAlert($url, $text, $bgcolor);
     }
 
-    public static function stdMessage(string $heading, string $text, bool $htmlstrip = false): void
-    {
-        echo view('partials.std-message', [
-            'heading' => $heading,
-            'text' => $text,
-            'htmlstrip' => $htmlstrip,
-            'body' => null,
-        ])->render();
-    }
-
     // ── Layout (delegates to PageRenderer) ──────────────────────────
-
-    /**
-     * Render the page header. Backs the legacy `stdhead()` helper.
-     */
-    public static function stdhead(string $title = '', bool $msgalert = true, string $script = '', string $place = ''): void
-    {
-        $renderer = app(PageRenderer::class);
-        $renderer->setContext(PageLayoutContext::fromSupportContext());
-        $renderer->header($title, $msgalert, $script, $place);
-    }
 
     /**
      * Render the page footer. Backs the legacy `stdfoot()` helper.

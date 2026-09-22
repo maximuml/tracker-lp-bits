@@ -27,7 +27,6 @@ use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use LogicException;
 
 /**
  * Handles forum post submission (new topic, reply, edit). Moderation
@@ -202,7 +201,6 @@ final class ForumService
             $authUser = Auth::user();
             if ($topicModel->locked && (! $authUser instanceof User || ! $this->topicPolicy->reply($authUser, $topicModel))) {
                 LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_topic_locked'));
-                throw new LogicException('Expected authenticated user.');
             }
         }
 
@@ -218,7 +216,6 @@ final class ForumService
             $authUser = Auth::user();
             if (! $authUser instanceof User || $postModel === null || ! $this->postPolicy->update($authUser, $postModel)) {
                 LegacyResponse::permissionDenied();
-                throw new LogicException('Expected authenticated user and non-null post.');
             }
 
             if ($hassubject) {

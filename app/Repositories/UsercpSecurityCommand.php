@@ -12,7 +12,6 @@ use App\Services\WebAuthService;
 use App\Support\AuthCookie;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
-use App\Support\Http;
 use App\Support\LegacyResponse;
 use App\Support\Mail;
 use App\Support\PasswordHasher;
@@ -166,8 +165,7 @@ final class UsercpSecurityCommand
 
         $siteName = $config->basic->siteName();
         $siteEmail = $config->main->siteEmail();
-        $baseUrl = $config->basic->baseUrl();
-        $scheme = Http::protocolPrefix(Url::isSecure());
+        $baseUrl = Url::absolute($config->basic->baseUrl());
 
         if ($changedemail === 1) {
             $hash = $this->secureTokenService->generate();
@@ -184,9 +182,9 @@ final class UsercpSecurityCommand
                 .(__('legacy/usercp.mail_change_email_four')).$request->ip()
                 .(__('legacy/usercp.mail_change_email_five'))."\n\n"
                 .(__('legacy/usercp.mail_change_email_six'))
-                .'<b><a href="javascript:void(null)" onclick="window.open(\''.$scheme.$baseUrl.'/confirmemail.php/'.$user->id.'/'.$hash.'/'.$obemail.'\')">'.(__('legacy/usercp.mail_here')).'</a></b>'
+                .'<b><a href="javascript:void(null)" onclick="window.open(\''.$baseUrl.'/confirmemail.php/'.$user->id.'/'.$hash.'/'.$obemail.'\')">'.(__('legacy/usercp.mail_here')).'</a></b>'
                 .(__('legacy/usercp.mail_change_email_six_1')).'<br />'."\n"
-                .$scheme.$baseUrl.'/confirmemail.php/'.$user->id.'/'.$hash.'/'.$obemail."\n\n"
+                .$baseUrl.'/confirmemail.php/'.$user->id.'/'.$hash.'/'.$obemail."\n\n"
                 .(__('legacy/usercp.mail_change_email_seven'))."\n\n"
                 .'------'.(__('legacy/usercp.mail_change_email_eight'))."\n"
                 .$changeEmailNine;
@@ -263,8 +261,7 @@ final class UsercpSecurityCommand
         $smtpType = $config->smtp->type('none');
         $siteName = $config->basic->siteName();
         $siteEmail = $config->main->siteEmail();
-        $baseUrl = $config->basic->baseUrl();
-        $scheme = Http::protocolPrefix(Url::isSecure());
+        $baseUrl = Url::absolute($config->basic->baseUrl());
 
         if ($disableEmailChange !== 'no' && $smtpType !== 'none' && $email !== '' && $email !== $user->email) {
             if (! Validators::isEmail($email)) {
@@ -287,9 +284,9 @@ final class UsercpSecurityCommand
                 .(__('legacy/usercp.mail_change_email_four')).$dto->ip
                 .(__('legacy/usercp.mail_change_email_five'))."\n\n"
                 .(__('legacy/usercp.mail_change_email_six'))
-                .'<b><a href="javascript:void(null)" onclick="window.open(\''.$scheme.$baseUrl.'/confirmemail.php/'.$user->id.'/'.$hash.'/'.$obemail.'\')">'.(__('legacy/usercp.mail_here')).'</a></b>'
+                .'<b><a href="javascript:void(null)" onclick="window.open(\''.$baseUrl.'/confirmemail.php/'.$user->id.'/'.$hash.'/'.$obemail.'\')">'.(__('legacy/usercp.mail_here')).'</a></b>'
                 .(__('legacy/usercp.mail_change_email_six_1')).'<br />'."\n"
-                .$scheme.$baseUrl.'/confirmemail.php/'.$user->id.'/'.$hash.'/'.$obemail."\n\n"
+                .$baseUrl.'/confirmemail.php/'.$user->id.'/'.$hash.'/'.$obemail."\n\n"
                 .(__('legacy/usercp.mail_change_email_seven'))."\n\n"
                 .'------'.(__('legacy/usercp.mail_change_email_eight'))."\n"
                 .(__('legacy/usercp.mail_change_email_nine'));

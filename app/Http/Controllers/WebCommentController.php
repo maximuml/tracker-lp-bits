@@ -14,7 +14,6 @@ use App\Repositories\CommentRepository;
 use App\Support\Bonus;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
-use App\Support\Http;
 use App\Support\Locale;
 use App\Support\Permissions;
 use App\Support\Url;
@@ -327,7 +326,7 @@ class WebCommentController extends Controller
         $subject = Locale::trans('comment.msg_new_comment', [], $locale);
         $messageKey = 'comment.msg_'.$type.'_receive_comment';
         $message = Locale::trans($messageKey, [], $locale)
-            .' [url='.Http::protocolPrefix(Url::isSecure()).rtrim((string) SiteConfig::current()->basic->baseUrl(), '/').'/'.$this->buildScript($type, $parentId).'] '.$name.'[/url].';
+            .' [url='.Url::siteBase().'/'.$this->buildScript($type, $parentId).'] '.$name.'[/url].';
 
         Message::add([
             'sender' => null,

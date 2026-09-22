@@ -22,7 +22,6 @@ use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Globals;
 use App\Support\Html\SafeHtml;
-use App\Support\Http;
 use App\Support\LegacyAuth;
 use App\Support\LegacyHeaderBag;
 use App\Support\Logger;
@@ -465,7 +464,7 @@ class UtilityController extends LegacyController
         $dateFounded = (string) ($this->globals->get('datefounded', '') ?? '');
         $projectName = (string) ($this->globals->get('PROJECTNAME', '') ?? '');
 
-        $url = Http::protocolPrefix(Url::isSecure()).$baseUrl;
+        $url = Url::absolute($baseUrl);
         $year = substr($dateFounded, 0, 4);
         $yearFounded = $year !== '' ? $year : '2007';
         $attribution = 'Copyright (c) '.$siteName.' '.(date('Y') != $yearFounded ? $yearFounded.'-' : '').date('Y').', all rights reserved';

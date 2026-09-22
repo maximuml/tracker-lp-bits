@@ -9,7 +9,6 @@ use App\Repositories\InfoRepository;
 use App\Support\Globals;
 use App\Support\Html;
 use App\Support\Html\SafeHtml;
-use App\Support\Http;
 use App\Support\Locale;
 use App\Support\Url;
 use App\Support\UserDisplay;
@@ -74,7 +73,7 @@ class FaqController extends LegacyController
         }
 
         $baseUrl = (string) $this->globals->get('BASEURL', '');
-        $redirectBase = Http::protocolPrefix(Url::isSecure()).$baseUrl;
+        $redirectBase = Url::absolute($baseUrl);
         $action = (string) (request()->query('action') ?? '');
 
         if ($action === 'reorder' && $request->isMethod('post')) {

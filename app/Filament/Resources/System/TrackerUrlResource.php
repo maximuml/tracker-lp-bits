@@ -7,6 +7,8 @@ namespace App\Filament\Resources\System;
 use App\Filament\OptionsTrait;
 use App\Filament\Resources\System\TrackerUrlResource\Pages\ManageTrackerUrls;
 use App\Models\TrackerUrl;
+use App\Support\Url;
+use Closure;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -46,7 +48,17 @@ class TrackerUrlResource extends Resource
     {
         return $schema
             ->components([
-                TextInput::make('url')->required(),
+                TextInput::make('url')
+                    ->required()
+                    ->rule(static function (): Closure {
+                        return static function (string $attribute, mixed $value, Closure $fail): void {
+                            if (! is_string($value) || Url::normalize($value) === null) {
+                                $fail(__('validation.url', ['attribute' => $attribute]));
+                            }
+                        };
+                    })
+                    ->dehydrateStateUsing(static fn (mixed $state): ?string => is_string($state) ? Url::normalize($state) : null)
+                    ->helperText(__('label.tracker_url_format_help')),
                 Radio::make('is_default')
                     ->label(__('label.is_default'))
                     ->options(self::getYesNoOptions())

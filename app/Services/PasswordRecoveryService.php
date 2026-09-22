@@ -11,7 +11,6 @@ use App\Support\Cache;
 use App\Support\Captcha;
 use App\Support\Config\SiteConfig;
 use App\Support\Email;
-use App\Support\Http;
 use App\Support\Mail;
 use App\Support\PasswordHasher;
 use App\Support\Token;
@@ -178,11 +177,7 @@ class PasswordRecoveryService
 
     private function sendResetRequestEmail(string $email, int $userId, string $hash, string $ip): void
     {
-        $baseUrl = SiteConfig::current()->basic->baseUrl();
-        if (! str_contains($baseUrl, '://')) {
-            $baseUrl = Http::protocolPrefix(Url::isSecure()).$baseUrl;
-        }
-        $baseUrl = rtrim($baseUrl, '/');
+        $baseUrl = Url::siteBase();
         $siteName = SiteConfig::current()->basic->siteName();
 
         $mailOne = __('legacy/recover.mail_one');
@@ -230,11 +225,7 @@ class PasswordRecoveryService
 
     private function sendPasswordChangedEmail(User $user): void
     {
-        $baseUrl = SiteConfig::current()->basic->baseUrl();
-        if (! str_contains($baseUrl, '://')) {
-            $baseUrl = Http::protocolPrefix(Url::isSecure()).$baseUrl;
-        }
-        $baseUrl = rtrim($baseUrl, '/');
+        $baseUrl = Url::siteBase();
         $siteName = SiteConfig::current()->basic->siteName();
 
         $body = (__('legacy/recover.mail_password_changed_one'))

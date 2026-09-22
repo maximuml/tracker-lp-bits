@@ -16,7 +16,6 @@ use App\Models\MessageTemplate;
 use App\Models\User;
 use App\Support\Config\SiteConfig;
 use App\Support\Email;
-use App\Support\Http;
 use App\Support\Locale;
 use App\Support\Network;
 use App\Support\Token;
@@ -255,11 +254,7 @@ class RegistrationService
 
     private function resolveSignupRedirect(int $userId, string $confirmToken, User $user, string $verification, string $email, string $langFolder): string
     {
-        $baseUrl = SiteConfig::current()->basic->baseUrl();
-        if (! str_contains($baseUrl, '://')) {
-            $baseUrl = Http::protocolPrefix(Url::isSecure()).$baseUrl;
-        }
-        $baseUrl = rtrim($baseUrl, '/');
+        $baseUrl = Url::siteBase();
         $type = $user->invited_by ? 'invite' : 'normal';
 
         if ($verification === 'admin') {

@@ -12,7 +12,6 @@ use App\Models\User;
 use App\Policies\MessagePolicy;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
-use App\Support\Http;
 use App\Support\Http\SafeReturnUrl;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
@@ -253,13 +252,9 @@ class MessageService
         $siteName = $siteConfig->basic->siteName();
         $siteEmail = $siteConfig->main->siteEmail();
 
-        $baseUrl = rtrim($siteConfig->basic->baseUrl(), '/');
+        $baseUrl = Url::absolute($siteConfig->basic->baseUrl());
         if ($baseUrl === '') {
             $baseUrl = Url::schemeAndHost();
-        } else {
-            // BASEURL config value is scheme-less — prepend the
-            // detected scheme so links work on HTTPS deployments.
-            $baseUrl = Http::protocolPrefix(Url::isSecure()).$baseUrl;
         }
         $messageUrl = $baseUrl.'/messages.php?action=viewmessage&id='.$messageId;
 

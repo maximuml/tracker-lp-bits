@@ -6,6 +6,7 @@ namespace App\Support;
 
 use Illuminate\Container\Container;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Exception\SuspiciousOperationException;
 
 final class RequestContext
 {
@@ -98,6 +99,14 @@ final class RequestContext
 
     public function getRequestSchema(): string
     {
+        $request = $this->requestOrNull();
+        if ($request !== null) {
+            // Trust-aware: X-Forwarded-Proto is honored only when the client
+            // is a configured trusted proxy, so an attacker cannot flip the
+            // scheme by sending the header directly.
+            return $request->getScheme();
+        }
+
         $schema = $this->retrieveFromServer(['HTTP_X_FORWARDED_PROTO', 'REQUEST_SCHEME', 'HTTP_SCHEME']);
         if (empty($schema)) {
             $https = $this->retrieveFromServer(['HTTPS']);
@@ -111,6 +120,17 @@ final class RequestContext
 
     public function getRequestHost(): string
     {
+        $request = $this->requestOrNull();
+        if ($request !== null) {
+            try {
+                // host[:port], honoring X-Forwarded-Host only for trusted
+                // proxies — a client-sent header alone no longer wins.
+                return $request->getHttpHost();
+            } catch (SuspiciousOperationException) {
+                return '';
+            }
+        }
+
         $host = $this->retrieveFromServer(['HTTP_X_FORWARDED_HOST', 'HTTP_HOST', 'host'], true);
 
         return $this->getFirst(strval($host));

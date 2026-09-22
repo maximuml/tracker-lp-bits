@@ -16,7 +16,6 @@ use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Globals;
-use App\Support\Http;
 use App\Support\Locale;
 use App\Support\Log;
 use App\Support\Permissions;
@@ -224,7 +223,7 @@ class TorrentRssController extends LegacyController
         }
 
         $torrentRep = $this->torrentRepository;
-        $baseUrl = Http::protocolPrefix(Url::isSecure()).(string) $this->globals->get('BASEURL', '');
+        $baseUrl = Url::absolute((string) $this->globals->get('BASEURL', ''));
         $siteName = (string) $this->globals->get('SITENAME', '');
         $slogan = SiteConfig::current()->main->slogan();
         $siteEmail = SiteConfig::current()->main->siteEmail();
@@ -233,7 +232,7 @@ class TorrentRssController extends LegacyController
         $year = substr($dateFounded, 0, 4);
         $yearFounded = $year !== '' ? $year : '2007';
         $copyright = 'Copyright (c) '.$siteName.' '.(date('Y') !== $yearFounded ? $yearFounded.'-' : '').date('Y').', all rights reserved';
-        $httpHost = (string) $request->server->get('HTTP_HOST', 'localhost');
+        $httpHost = (string) (parse_url(Url::siteBase(), PHP_URL_HOST) ?: 'localhost');
 
         $hexEsc = function ($matches) {
             return sprintf('%02x', ord($matches[0]));

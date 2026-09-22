@@ -17,6 +17,7 @@ use App\Support\Admin;
 use App\Support\Cache;
 use App\Support\Env;
 use App\Support\Settings;
+use App\Support\Url;
 use Filament\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Radio;
@@ -117,6 +118,11 @@ class EditSetting extends Page implements HasForms
                 }
                 if (is_array($value)) {
                     $value = json_encode($value);
+                }
+                // *.base_url fields (image hosting drivers) share the site
+                // URL contract — canonical scheme://host[:port][/path].
+                if ($name === 'base_url' && is_string($value) && $value !== '') {
+                    $value = Url::normalize($value) ?? $value;
                 }
                 $data[] = [
                     'name' => "$prefix.$name",
@@ -431,7 +437,8 @@ class EditSetting extends Page implements HasForms
             ->label(__("label.setting.$id.$field"));
         $field = 'base_url';
         $driverSchemas[] = TextInput::make("$driverId.$field")
-            ->label(__("label.setting.$id.$field"));
+            ->label(__("label.setting.$id.$field"))
+            ->rule(self::baseUrlRule());
 
         $driverSection = Section::make($driverName)->schema($driverSchemas);
         $schema[] = $driverSection;
@@ -448,11 +455,25 @@ class EditSetting extends Page implements HasForms
             ->label(__("label.setting.$id.$field"));
         $field = 'base_url';
         $driverSchemas[] = TextInput::make("$driverId.$field")
-            ->label(__("label.setting.$id.$field"));
+            ->label(__("label.setting.$id.$field"))
+            ->rule(self::baseUrlRule());
         $driverSection = Section::make($driverName)->schema($driverSchemas);
         $schema[] = $driverSection;
 
         return $schema;
+    }
+
+    /**
+     * Filament closure rule: image-hosting base URLs share the site URL
+     * contract — canonical scheme://host[:port][/path] or empty.
+     */
+    private static function baseUrlRule(): \Closure
+    {
+        return static function (string $attribute, mixed $value, \Closure $fail): void {
+            if (is_string($value) && $value !== '' && Url::normalize($value) === null) {
+                $fail(__('validation.url', ['attribute' => $attribute]));
+            }
+        };
     }
 
     /** @return array<Component> */

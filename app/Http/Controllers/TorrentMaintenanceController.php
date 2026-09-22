@@ -13,7 +13,6 @@ use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Globals;
 use App\Support\Html\SafeHtml;
-use App\Support\Http;
 use App\Support\Locale;
 use App\Support\Path;
 use App\Support\Permissions;
@@ -169,7 +168,7 @@ class TorrentMaintenanceController extends LegacyController
             $pnMsg = Locale::trans('torrent.msg_reseed_user', [], $locale)
                 .$curUser['username']
                 .Locale::trans('torrent.msg_ask_reseed', [], $locale)
-                .'[url='.Http::protocolPrefix(Url::isSecure()).$baseUrl.'/details.php?id='.$reseedid.']'.$snatchRow['torrent_name'].'[/url]'
+                .'[url='.Url::absolute($baseUrl).'/details.php?id='.$reseedid.']'.$snatchRow['torrent_name'].'[/url]'
                 .Locale::trans('torrent.msg_thank_you', [], $locale);
             Message::add([
                 'sender' => null,

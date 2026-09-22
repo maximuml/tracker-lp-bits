@@ -27,17 +27,24 @@ final class Tracker
         $log = "tracker_url_id: $trackerUrlId, combine: ".($combine ? 'true' : 'false');
         $url = TrackerUrl::getById($trackerUrlId);
 
-        if (empty($url)) {
+        // Stored tracker URLs may be canonical (scheme://host/path) or legacy
+        // host-only values; normalize() accepts both and never emits '://'.
+        $normalized = empty($url) ? null : Url::normalize((string) $url);
+
+        if ($normalized === null) {
             $ssl_torrent = Url::isSecure() ? 'https://' : 'http://';
+            // BASEURL itself can carry a scheme — strip it so the combined
+            // result never becomes scheme://scheme://host.
+            $baseUrl = Url::normalize(Setting::getBaseUrl(), false) ?? Setting::getBaseUrl();
             $base_announce_url = sprintf(
                 '%s/%s',
-                trim(Setting::getBaseUrl(), '/'),
+                trim((string) preg_replace('#^https?://#i', '', $baseUrl), '/'),
                 trim(DEFAULT_TRACKER_URI, '/'),
             );
             $log .= ', ById no value';
         } else {
-            $ssl_torrent = parse_url($url, PHP_URL_SCHEME).'://';
-            $base_announce_url = substr($url, strlen($ssl_torrent));
+            $ssl_torrent = parse_url($normalized, PHP_URL_SCHEME).'://';
+            $base_announce_url = substr($normalized, strlen($ssl_torrent));
             $log .= ', ById has value';
         }
 

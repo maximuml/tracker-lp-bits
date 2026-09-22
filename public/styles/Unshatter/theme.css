@@ -233,3 +233,35 @@ html[data-theme="light"]:root {
 .nx-header {
     border-bottom: 3px solid var(--nxm-accent) !important;
 }
+
+/* Info-level alert banner (staff messages, H&R reminders, unread news):
+ * Classic renders it solid blue; Unshatter turns it into a graphite card
+ * with the yellow accent frame. Selectors are :root-qualified to outrank
+ * modern.css's data-theme link rules when this file loads first (legacy
+ * chrome) as well as last (modern chrome). */
+html[data-theme]:root .nxm-alert--blue {
+    background: #17171b;
+    border: 1px solid var(--nxm-accent);
+    border-radius: 0;
+    color: var(--nxm-accent);
+}
+
+html[data-theme]:root .nxm-alert.nxm-alert--blue a:link,
+html[data-theme]:root .nxm-alert.nxm-alert--blue a:visited {
+    color: var(--nxm-accent);
+    text-decoration: underline;
+}
+
+html[data-theme]:root .nxm-alert.nxm-alert--blue a:hover {
+    color: var(--nxm-accent-hover);
+}
+
+/* Legacy "alt link" colour — blue on Classic, accent-yellow here. */
+html[data-theme]:root a.altlink_blue:link,
+html[data-theme]:root a.altlink_blue:visited {
+    color: var(--nxm-accent);
+}
+
+html[data-theme]:root a.altlink_blue:hover {
+    color: var(--nxm-accent-hover);
+}

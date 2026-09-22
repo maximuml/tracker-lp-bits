@@ -191,6 +191,7 @@ final class ChromeUserBar
             'close' => __('legacy/index.toast_close'),
             'bell' => __('legacy/notifications.title_bell'),
             'markAllRead' => __('legacy/notifications.mark_all_read'),
+            'showMore' => __('legacy/notifications.show_more'),
             'empty' => __('legacy/notifications.empty'),
             'loadError' => __('legacy/notifications.load_error'),
             'userId' => $userId,

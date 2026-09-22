@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Repositories\NotificationFeedRepository;
 use App\Support\CurrentUser;
 use App\Support\NotificationFeed;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class NotificationController extends LegacyController
 {
@@ -15,24 +17,39 @@ class NotificationController extends LegacyController
         private readonly CurrentUser $currentUser,
     ) {}
 
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         $user = $this->currentUser->get();
         if ($user === null) {
             return response()->json(['ret' => 403, 'msg' => 'Unauthorized'], 403);
         }
 
-        return response()->json(['ret' => 0, 'data' => $this->feed->unread((int) $user['id'])]);
+        $offset = max(0, (int) $request->query('offset', 0));
+
+        return response()->json(['ret' => 0, 'data' => $this->feed->unread((int) $user['id'], $offset)]);
     }
 
-    public function markRead(): JsonResponse
+    public function markRead(Request $request): JsonResponse
     {
         $user = $this->currentUser->get();
         if ($user === null) {
             return response()->json(['ret' => 403, 'msg' => 'Unauthorized'], 403);
         }
 
-        $cursors = $this->feed->markAllRead((int) $user['id']);
+        // Optional snapshot watermark from the unread() response — events
+        // that arrived after the panel was opened stay unread.
+        $watermark = null;
+        $raw = $request->input('watermark');
+        if (is_array($raw)) {
+            $watermark = [];
+            foreach (NotificationFeedRepository::CHANNELS as $channel) {
+                if (isset($raw[$channel]) && is_numeric($raw[$channel])) {
+                    $watermark[$channel] = (int) $raw[$channel];
+                }
+            }
+        }
+
+        $cursors = $this->feed->markAllRead((int) $user['id'], $watermark);
 
         return response()->json(['ret' => 0, 'data' => ['cursors' => $cursors]]);
     }

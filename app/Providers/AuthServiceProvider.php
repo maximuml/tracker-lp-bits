@@ -73,7 +73,13 @@ class AuthServiceProvider extends ServiceProvider
 
         Auth::extend('nexus-web', function ($app, $name, array $config) {
             // 返回 Illuminate\Contracts\Auth\Guard 的实例 ...
-            return new NexusWebGuard($app['request'], new NexusWebUserProvider, $app->make(WebAuthService::class), $app->make(CurrentUser::class));
+            $guard = new NexusWebGuard($app['request'], new NexusWebUserProvider, $app->make(WebAuthService::class), $app->make(CurrentUser::class));
+            // Built-in drivers get request rebinding from AuthManager;
+            // custom guards must register it themselves or they keep
+            // reading cookies from a stale request under Octane.
+            $app->refresh('request', $guard, 'setRequest');
+
+            return $guard;
         });
 
         Auth::viaRequest('passkey', function (Request $request) {

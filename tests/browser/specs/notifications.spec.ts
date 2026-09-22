@@ -19,18 +19,19 @@ const PM_COUNT = 25;
  */
 test.use({ storageState: AUTH_STATE });
 
+function tinker(php: string): string {
+  return execFileSync(
+    'docker',
+    ['compose', 'exec', '-T', 'php', 'php', 'artisan', 'tinker', `--execute=${php}`],
+    { cwd: REPO_ROOT, encoding: 'utf8', stdio: ['pipe', 'pipe', 'inherit'] },
+  );
+}
+
 function appDbName(): string {
   // The database the app actually uses — the mysql container's own
   // MYSQL_DATABASE env can be stale (frozen at `up` time), while CI
   // installs into nexusphp_e2e_testing rather than the .env default.
-  const out = execFileSync(
-    'docker',
-    [
-      'compose', 'exec', '-T', 'php', 'php', 'artisan', 'tinker',
-      '--execute=echo DB::connection()->getDatabaseName();',
-    ],
-    { cwd: REPO_ROOT, encoding: 'utf8', stdio: ['pipe', 'pipe', 'inherit'] },
-  );
+  const out = tinker('echo DB::connection()->getDatabaseName();');
   const name = (out.trim().split('\n').pop() ?? '').trim();
   if (!/^[A-Za-z0-9_]+$/.test(name)) {
     throw new Error(`could not resolve app database name: ${JSON.stringify(out)}`);
@@ -62,6 +63,7 @@ function mysqlId(sql: string): number {
 }
 
 let uid = 0;
+let senderId = 0;
 
 test.beforeAll(() => {
   mkdirSync(SHOTS, { recursive: true });
@@ -72,16 +74,35 @@ test.beforeAll(() => {
   uid = mysqlId(
     `SELECT id FROM users WHERE username='${BROWSER_USER}' LIMIT 1`,
   );
+  // messages.sender / comments.user / posts.userid have FKs into users —
+  // and the feed deliberately skips rows authored by the recipient — so
+  // a real second account is required. The factory keeps the insert
+  // schema-proof across environments.
+  senderId =
+    Number(
+      mysql(`SELECT id FROM users WHERE username='rel01_e2e_sender' LIMIT 1`).trim(),
+    ) ||
+    Number(
+      tinker(
+        "echo \\App\\Models\\User::factory()->create(['username' => 'rel01_e2e_sender'])->id;",
+      )
+        .trim()
+        .split('\n')
+        .pop() ?? 0,
+    );
+  if (!Number.isInteger(senderId) || senderId <= 0) {
+    throw new Error('could not create the notification sender user');
+  }
 
   // Re-run safe: drop rows from a previous spec run first, then pin
   // every channel cursor at its source maximum so only the fixtures
   // inserted below count as unread (auto-seed never kicks in because
   // the cursor rows exist).
   mysql(`
-    DELETE FROM messages WHERE sender=10005 AND receiver=${uid} AND subject LIKE 'REL-01 E2E%';
-    DELETE FROM comments WHERE user=10005 AND text LIKE 'rel01 e2e%';
-    DELETE FROM posts WHERE userid=10005 AND body LIKE 'rel01 e2e%';
-    DELETE FROM shoutbox WHERE userid=10005 AND text LIKE '%rel01 e2e%';
+    DELETE FROM messages WHERE sender=${senderId} AND receiver=${uid} AND subject LIKE 'REL-01 E2E%';
+    DELETE FROM comments WHERE user=${senderId} AND text LIKE 'rel01 e2e%';
+    DELETE FROM posts WHERE userid=${senderId} AND body LIKE 'rel01 e2e%';
+    DELETE FROM shoutbox WHERE userid=${senderId} AND text LIKE '%rel01 e2e%';
     UPDATE torrents SET visible=1, banned=0 WHERE owner=${uid};
     UPDATE forums f JOIN topics t ON t.forumid=f.id AND t.userid=${uid}
       SET f.minclassread=0;
@@ -96,16 +117,16 @@ test.beforeAll(() => {
 
   const pms = Array.from(
     { length: PM_COUNT },
-    (_, i) => `(10005,${uid},NOW(),'REL-01 E2E ${i + 1}','seeded by notifications.spec.ts',1,1)`,
+    (_, i) => `(${senderId},${uid},NOW(),'REL-01 E2E ${i + 1}','seeded by notifications.spec.ts',1,1)`,
   ).join(',');
   mysql(`
     INSERT INTO messages (sender,receiver,added,subject,msg,unread,location) VALUES ${pms};
     INSERT INTO comments (user,torrent,added,text)
-      SELECT 10005, id, NOW(), 'rel01 e2e comment' FROM torrents WHERE owner=${uid} LIMIT 1;
+      SELECT ${senderId}, id, NOW(), 'rel01 e2e comment' FROM torrents WHERE owner=${uid} LIMIT 1;
     INSERT INTO posts (topicid,userid,added,body)
-      SELECT id, 10005, NOW(), 'rel01 e2e reply' FROM topics WHERE userid=${uid} LIMIT 1;
+      SELECT id, ${senderId}, NOW(), 'rel01 e2e reply' FROM topics WHERE userid=${uid} LIMIT 1;
     INSERT INTO shoutbox (userid,date,text,type)
-      VALUES (10005, UNIX_TIMESTAMP(), '@${BROWSER_USER} rel01 e2e mention', 0);
+      VALUES (${senderId}, UNIX_TIMESTAMP(), '@${BROWSER_USER} rel01 e2e mention', 0);
   `);
 });
 
@@ -114,10 +135,11 @@ test.afterAll(() => {
   // renders mentions with a class whose contrast is tracked by axe, and
   // details.php shows seeded comments.
   mysql(`
-    DELETE FROM messages WHERE sender=10005 AND receiver=${uid} AND (subject LIKE 'REL-01 E2E%' OR subject='REL-01 late PM');
-    DELETE FROM comments WHERE user=10005 AND text LIKE 'rel01 e2e%';
-    DELETE FROM posts WHERE userid=10005 AND body LIKE 'rel01 e2e%';
-    DELETE FROM shoutbox WHERE userid=10005 AND text LIKE '%rel01 e2e%';
+    DELETE FROM messages WHERE sender=${senderId} AND receiver=${uid} AND (subject LIKE 'REL-01 E2E%' OR subject='REL-01 late PM');
+    DELETE FROM comments WHERE user=${senderId} AND text LIKE 'rel01 e2e%';
+    DELETE FROM posts WHERE userid=${senderId} AND body LIKE 'rel01 e2e%';
+    DELETE FROM shoutbox WHERE userid=${senderId} AND text LIKE '%rel01 e2e%';
+    DELETE FROM users WHERE id=${senderId} AND username='rel01_e2e_sender';
   `);
 });
 
@@ -184,7 +206,7 @@ test('badge, pagination, links and watermark-aware mark-all-read', async ({
   // A PM arriving after the panel snapshot must survive mark-all-read.
   mysql(
     `INSERT INTO messages (sender,receiver,added,subject,msg,unread,location)
-     VALUES (10005,${uid},NOW(),'REL-01 late PM','arrived while the panel was open',1,1)`,
+     VALUES (${senderId},${uid},NOW(),'REL-01 late PM','arrived while the panel was open',1,1)`,
   );
   await panel.getByRole('button', { name: /mark all read/i }).click();
   await expect(badge).toBeHidden();

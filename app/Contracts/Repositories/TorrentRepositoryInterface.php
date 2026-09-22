@@ -9,13 +9,35 @@ use Illuminate\Http\Request;
 
 interface TorrentRepositoryInterface
 {
+    /**
+     * @return mixed
+     */
     public function getList(Request $request, User $user, ?string $sectionName = null);
 
+    /**
+     * @return mixed
+     */
     public function getDetail(int $id, User $user);
 
+    /**
+     * @return mixed
+     */
     public function getSearchBox(?int $id = null);
 
+    /**
+     * @param  array<int|string, mixed>  $torrentInfo
+     * @param  mixed  $size
+     * @param  mixed  $verticalAlign
+     * @return mixed
+     */
     public function getPaidIcon(array $torrentInfo, $size = 16, $verticalAlign = 'sub');
 
+    /**
+     * @param  mixed  $name
+     * @param  mixed  $value
+     * @param  mixed  $noteText
+     * @param  mixed  $btnText
+     * @param  mixed  $btnId
+     */
     public function buildUploadFieldInput($name, $value, $noteText, $btnText, $btnId = ''): string;
 }

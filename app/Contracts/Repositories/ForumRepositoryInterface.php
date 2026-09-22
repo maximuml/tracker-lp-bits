@@ -4,28 +4,49 @@ declare(strict_types=1);
 
 namespace App\Contracts\Repositories;
 
+use App\Models\User;
 use Illuminate\Support\Collection;
 
 interface ForumRepositoryInterface
 {
+    /**
+     * @return void
+     */
     public function deleteForum(int $id);
 
+    /**
+     * @param  array<string, mixed>  $data
+     * @return void
+     */
     public function updateForum(int $id, array $data);
 
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public function createForum(array $data): int;
 
     public function getMaxForumSort(): int;
 
+    /** @return array<string, mixed>|null */
     public function getForumRow(int $id): ?array;
 
+    /**
+     * @return array<int, array<string, mixed>>
+     */
     public function getForumsWithOverforum(): array;
 
+    /**
+     * @return void
+     */
     public function clearForumCache();
 
     public function getActiveForumUserCount(): int;
 
     public function forumExists(int $id): bool;
 
+    /**
+     * @return array<int, array<string, mixed>>
+     */
     public function getForumsList(): array;
 
     public function getForumName(int $id): ?string;
@@ -38,5 +59,10 @@ interface ForumRepositoryInterface
 
     public function updateUserForumAccess(int $userId, string $date): bool;
 
+    /**
+     * @param  array<int>  $ids
+     * @param  list<string>  $columns
+     * @return Collection<int, User>
+     */
     public function getUsersByIds(array $ids, array $columns): Collection;
 }

@@ -153,6 +153,16 @@
       "bindings": false,
       "expected_index": "n/a",
       "reason": "Conditional DDL (drop column) guarded by Schema::hasColumn; one-off upgrade step"
+    },
+    {
+      "file": "app/Repositories/NotificationFeedRepository.php",
+      "line": 82,
+      "method": "saveCursors",
+      "pattern": "DB::statement",
+      "purpose": "Monotonic cursor upsert: INSERT ... ON DUPLICATE KEY UPDATE last_id = GREATEST(last_id, VALUES(last_id)) per channel",
+      "bindings": true,
+      "expected_index": "notification_cursors (user_id, channel) primary key upsert",
+      "reason": "GREATEST()-guarded upsert has no query-builder equivalent — updateOrInsert cannot express the monotonic 'never move last_id backwards' semantics in one atomic statement"
     }
   ]
 }

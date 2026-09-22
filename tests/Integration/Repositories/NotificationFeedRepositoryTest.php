@@ -32,6 +32,7 @@ final class NotificationFeedRepositoryTest extends TestCase
         DB::table('comments')->delete();
         DB::table('posts')->delete();
         DB::table('topics')->delete();
+        DB::table('forums')->delete();
         DB::table('torrents')->delete();
         DB::table('users')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
@@ -79,12 +80,22 @@ final class NotificationFeedRepositoryTest extends TestCase
         ]);
     }
 
-    private function createTopic(int $userId): int
+    private function createForum(int $minClassRead = 0): int
+    {
+        return (int) DB::table('forums')->insertGetId([
+            'name' => 'Feed Forum',
+            'minclassread' => $minClassRead,
+            'minclasswrite' => 0,
+            'minclasscreate' => 0,
+        ]);
+    }
+
+    private function createTopic(int $userId, ?int $forumId = null): int
     {
         return (int) DB::table('topics')->insertGetId([
             'userid' => $userId,
             'subject' => 'Feed topic',
-            'forumid' => 1,
+            'forumid' => $forumId ?? $this->createForum(),
         ]);
     }
 

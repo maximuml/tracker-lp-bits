@@ -33,6 +33,19 @@ final class NotificationFeedRepository extends BaseRepository
     }
 
     /**
+     * Whether the user has any cursor rows at all. This is the "not
+     * initialized yet" signal — a row with last_id = 0 is a real cursor
+     * (user had nothing to read), while a missing row means the feed has
+     * never been seeded for this user.
+     */
+    public function hasCursors(int $userId): bool
+    {
+        return DB::table('notification_cursors')
+            ->where('user_id', $userId)
+            ->exists();
+    }
+
+    /**
      * Current max source-row id per channel for this user.
      *
      * @return array<string, int>
@@ -54,6 +67,10 @@ final class NotificationFeedRepository extends BaseRepository
     }
 
     /**
+     * Monotonic cursor update: a concurrent stale request must never move
+     * last_id backwards, so the write is a single upsert guarded by
+     * GREATEST() rather than a plain updateOrInsert.
+     *
      * @param  array<string, int>  $maxes
      */
     public function saveCursors(int $userId, array $maxes): void
@@ -62,20 +79,24 @@ final class NotificationFeedRepository extends BaseRepository
             if (! in_array($channel, self::CHANNELS, true)) {
                 continue;
             }
-            DB::table('notification_cursors')->updateOrInsert(
-                ['user_id' => $userId, 'channel' => $channel],
-                ['last_id' => (int) $lastId]
+            DB::statement(
+                'INSERT INTO notification_cursors (user_id, channel, last_id) VALUES (?, ?, ?) '
+                .'ON DUPLICATE KEY UPDATE last_id = GREATEST(last_id, VALUES(last_id))',
+                [$userId, $channel, (int) $lastId]
             );
         }
     }
 
     /**
      * Unread counts per channel (rows newer than the given cursors).
+     * Comments count only on visible, non-banned torrents; topic replies
+     * only in forums the user can read — same contract as the item
+     * queries, so the badge and the list cannot diverge.
      *
      * @param  array<string, int>  $cursors
      * @return array<string, int>
      */
-    public function unreadCounts(int $userId, array $cursors): array
+    public function unreadCounts(int $userId, array $cursors, int $userClass = 0): array
     {
         $commentCursor = (int) ($cursors['comment'] ?? 0);
         $replyCursor = (int) ($cursors['topic_reply'] ?? 0);
@@ -89,32 +110,40 @@ final class NotificationFeedRepository extends BaseRepository
             'comment' => DB::table('comments')
                 ->join('torrents', 'comments.torrent', '=', 'torrents.id')
                 ->where('torrents.owner', $userId)
+                ->where('torrents.visible', 1)
+                ->where('torrents.banned', 0)
                 ->where('comments.user', '!=', $userId)
                 ->where('comments.id', '>', $commentCursor)
                 ->count(),
             'topic_reply' => DB::table('posts')
                 ->join('topics', 'posts.topicid', '=', 'topics.id')
+                ->join('forums', 'topics.forumid', '=', 'forums.id')
                 ->where('topics.userid', $userId)
                 ->where('posts.userid', '!=', $userId)
                 ->where('posts.id', '>', $replyCursor)
+                ->where('forums.minclassread', '<=', $userClass)
                 ->count(),
         ];
     }
 
     /**
      * Comments on the user's own torrents newer than the cursor.
+     * Hidden/banned torrents are excluded — the notification must not
+     * reveal an object the owner can no longer see.
      *
      * @return list<array<string, mixed>>
      */
-    public function newCommentsOnOwnTorrents(int $userId, int $lastId, int $limit = 20): array
+    public function newCommentsOnOwnTorrents(int $userId, int $lastId, int $limit = 20, bool $oldestFirst = true): array
     {
         return array_values(DB::table('comments')
             ->join('torrents', 'comments.torrent', '=', 'torrents.id')
             ->leftJoin('users', 'comments.user', '=', 'users.id')
             ->where('torrents.owner', $userId)
+            ->where('torrents.visible', 1)
+            ->where('torrents.banned', 0)
             ->where('comments.user', '!=', $userId)
             ->where('comments.id', '>', $lastId)
-            ->orderBy('comments.id')
+            ->orderBy('comments.id', $oldestFirst ? 'asc' : 'desc')
             ->limit($limit)
             ->get([
                 'comments.id',
@@ -129,19 +158,23 @@ final class NotificationFeedRepository extends BaseRepository
     }
 
     /**
-     * Posts in topics the user started, newer than the cursor.
+     * Posts in topics the user started, newer than the cursor. Only
+     * forums readable at the user's class are included — a notification
+     * must not leak activity in a forum the user lost access to.
      *
      * @return list<array<string, mixed>>
      */
-    public function newPostsInOwnTopics(int $userId, int $lastId, int $limit = 20): array
+    public function newPostsInOwnTopics(int $userId, int $lastId, int $limit = 20, bool $oldestFirst = true, int $userClass = 0): array
     {
         return array_values(DB::table('posts')
             ->join('topics', 'posts.topicid', '=', 'topics.id')
+            ->join('forums', 'topics.forumid', '=', 'forums.id')
             ->leftJoin('users', 'posts.userid', '=', 'users.id')
             ->where('topics.userid', $userId)
             ->where('posts.userid', '!=', $userId)
             ->where('posts.id', '>', $lastId)
-            ->orderBy('posts.id')
+            ->where('forums.minclassread', '<=', $userClass)
+            ->orderBy('posts.id', $oldestFirst ? 'asc' : 'desc')
             ->limit($limit)
             ->get([
                 'posts.id',

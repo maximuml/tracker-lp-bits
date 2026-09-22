@@ -173,46 +173,103 @@ final class ShoutboxRepository extends BaseRepository
     }
 
     /**
+     * Mentions of the user newer than the cursor. The SQL LIKE is only a
+     * prefilter — the real "is a mention" check is the PHP regex, so the
+     * candidate scan is keyset-paginated rather than a single LIMIT'd
+     * query: a page full of non-mention LIKE hits must not hide real
+     * mentions behind it (backlog correctness, REL-01).
+     *
      * @return array<int, array<string, mixed>>
      */
-    public function getMentions(int $userId, int $lastShoutId): array
+    public function getMentions(int $userId, int $lastShoutId, int $limit = 50, bool $oldestFirst = true): array
+    {
+        $result = [];
+        foreach ($this->mentionRows($userId, $lastShoutId, $oldestFirst) as $row) {
+            $result[] = $row;
+            if (count($result) >= $limit) {
+                break;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Exact unread-mention count — runs the same LIKE prefilter + PHP
+     * regex as getMentions so the badge count and the item list cannot
+     * diverge.
+     */
+    public function countMentions(int $userId, int $lastShoutId): int
+    {
+        $count = 0;
+        foreach ($this->mentionRows($userId, $lastShoutId, true) as $row) {
+            $count++;
+        }
+
+        return $count;
+    }
+
+    /**
+     * Lazily yields validated mention rows (id, date, text, author_name)
+     * in id order — ascending for delivery cursors, descending for the
+     * newest-first panel view.
+     *
+     * @return \Generator<int, array{id: int, date: int, text: string, author_name: string}>
+     */
+    private function mentionRows(int $userId, int $lastShoutId, bool $oldestFirst): \Generator
     {
         $user = User::query()->find($userId, ['username']);
         $username = $user?->username;
         if ($username === null || $username === '') {
-            return [];
+            return;
         }
 
         $like = '%@'.strtolower($username).'%';
         $pattern = '/(?<![\w\-\[\]\(\)])@'.preg_quote($username, '/').'(?![\w\-\[\]\(\)])/ui';
+        // Desc iteration walks down from the top of the range — seeding the
+        // boundary with $lastShoutId would yield the empty set (id > X AND
+        // id < X) whenever the cursor is non-zero.
+        $boundary = $oldestFirst ? $lastShoutId : PHP_INT_MAX;
 
-        $query = DB::table('shoutbox')
-            ->leftJoin('users', 'shoutbox.userid', '=', 'users.id')
-            ->where('shoutbox.id', '>', $lastShoutId)
-            ->where('shoutbox.userid', '!=', $userId)
-            ->whereRaw('LOWER(shoutbox.text) LIKE ?', [$like])
-            ->select('shoutbox.id', 'shoutbox.date', 'shoutbox.text', 'users.username as author_name')
-            ->orderBy('shoutbox.id')
-            ->limit(50);
-
-        $this->applyTypeFilter($query, 'shoutbox', null);
-        $rows = $query->get();
-
-        $result = [];
-        foreach ($rows as $row) {
-            $text = (string) ($row->text ?? '');
-            if (! preg_match($pattern, $text)) {
-                continue;
+        while (true) {
+            $query = DB::table('shoutbox')
+                ->leftJoin('users', 'shoutbox.userid', '=', 'users.id')
+                ->where('shoutbox.id', '>', $lastShoutId)
+                ->where('shoutbox.userid', '!=', $userId)
+                ->whereRaw('LOWER(shoutbox.text) LIKE ?', [$like])
+                ->select('shoutbox.id', 'shoutbox.date', 'shoutbox.text', 'users.username as author_name')
+                ->orderBy('shoutbox.id', $oldestFirst ? 'asc' : 'desc')
+                ->limit(200);
+            if ($oldestFirst) {
+                $query->where('shoutbox.id', '>', $boundary);
+            } else {
+                $query->where('shoutbox.id', '<', $boundary);
             }
-            $result[] = [
-                'id' => (int) $row->id,
-                'date' => (int) $row->date,
-                'text' => $text,
-                'author_name' => (string) ($row->author_name ?? 'System'),
-            ];
-        }
 
-        return $result;
+            $this->applyTypeFilter($query, 'shoutbox', null);
+            $rows = $query->get();
+            if ($rows->isEmpty()) {
+                return;
+            }
+
+            foreach ($rows as $row) {
+                $boundary = (int) $row->id;
+                $text = (string) ($row->text ?? '');
+                if (! preg_match($pattern, $text)) {
+                    continue;
+                }
+                yield [
+                    'id' => (int) $row->id,
+                    'date' => (int) $row->date,
+                    'text' => $text,
+                    'author_name' => (string) ($row->author_name ?? 'System'),
+                ];
+            }
+
+            if ($rows->count() < 200) {
+                return;
+            }
+        }
     }
 
     public function getLastShoutId(): int

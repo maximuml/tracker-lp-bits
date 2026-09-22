@@ -234,6 +234,13 @@ html[data-theme="light"] .nx-notif-panel {
     color: var(--notif-fg-dim);
 }
 
+.nx-notif-more {
+    display: flex;
+    justify-content: center;
+    padding: 6px 10px;
+    border-top: 1px solid var(--notif-divider);
+}
+
 /* MeiliSearch autocomplete dropdown (torrents search box) */
 .nx-autocomplete {
     border: 1px solid var(--nxm-border, #777);

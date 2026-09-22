@@ -219,7 +219,7 @@ class MessageRepository extends BaseRepository
     /**
      * @return list<array<string, mixed>>
      */
-    public function getUnreadPmNotifications(int $userId, int $lastPmId, int $limit): array
+    public function getUnreadPmNotifications(int $userId, int $lastPmId, int $limit, bool $oldestFirst = false): array
     {
         $rows = Message::query()
             ->where('receiver', $userId)
@@ -228,7 +228,7 @@ class MessageRepository extends BaseRepository
             ->with('send_user')
             ->select('messages.*')
             ->addSelect(DB::raw('UNIX_TIMESTAMP(messages.added) as ts'))
-            ->orderByDesc('id')
+            ->orderBy('id', $oldestFirst ? 'asc' : 'desc')
             ->limit($limit)
             ->get();
 
@@ -237,7 +237,7 @@ class MessageRepository extends BaseRepository
             $notifications[] = [
                 'id' => 'pm_'.$row->id,
                 'type' => 'pm',
-                'title' => 'New message',
+                'title' => (string) __('legacy/notifications.title_pm'),
                 'body' => $row->subject,
                 'from' => (string) ($row->send_user->username ?? 'System'),
                 'url' => 'messages.php?action=viewmessage&id='.$row->id,

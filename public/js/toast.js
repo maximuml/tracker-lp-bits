@@ -129,10 +129,19 @@
         notifications.forEach(function (n) {
             showToast(n);
         });
-        bumpBadge(notifications.length);
+        if (notifications.length > 0) {
+            refreshBadge();
+        }
     }
 
     // ---- header bell ----
+
+    // Snapshot returned by the last panel fetch — echoed back on
+    // "mark all read" so items that arrived after the panel opened stay
+    // unread instead of being silently swallowed.
+    var panelWatermark = null;
+    var panelFetched = 0;
+    var panelHasMore = false;
 
     function bellElements() {
         return {
@@ -186,11 +195,58 @@
                 renderError(panel);
                 return;
             }
+            panelWatermark = response.data.watermark || null;
+            panelFetched = (response.data.items || []).length;
+            panelHasMore = !!response.data.has_more;
             renderPanel(panel, response.data);
             setBadge(response.data.counts.total || 0);
         }).catch(function () {
             renderError(panel);
         });
+    }
+
+    function loadMore(panel, wrap) {
+        var btn = wrap.querySelector('button');
+        if (btn) { btn.disabled = true; }
+        fetch('notifications?offset=' + encodeURIComponent(panelFetched), {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            credentials: 'same-origin'
+        }).then(function (res) { return res.json(); }).then(function (response) {
+            if (!response || response.ret !== 0 || !response.data) {
+                if (btn) { btn.disabled = false; }
+                return;
+            }
+            var items = response.data.items || [];
+            panelFetched += items.length;
+            panelHasMore = !!response.data.has_more;
+            var list = panel.querySelector('.nx-notif-list');
+            if (list) {
+                items.forEach(function (n) {
+                    list.appendChild(renderItem(n));
+                });
+            }
+            wrap.remove();
+            if (panelHasMore && items.length > 0) {
+                appendShowMore(panel);
+            }
+        }).catch(function () {
+            if (btn) { btn.disabled = false; }
+        });
+    }
+
+    function appendShowMore(panel) {
+        var wrap = document.createElement('div');
+        wrap.className = 'nx-notif-more';
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'nx-notif-mark';
+        btn.textContent = t('showMore', 'Show more');
+        btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            loadMore(panel, wrap);
+        });
+        wrap.appendChild(btn);
+        panel.appendChild(wrap);
     }
 
     function closePanel(panel) {
@@ -246,6 +302,10 @@
             list.appendChild(renderItem(n));
         });
         panel.appendChild(list);
+
+        if (panelHasMore && items.length > 0) {
+            appendShowMore(panel);
+        }
     }
 
     function renderItem(n) {
@@ -282,17 +342,23 @@
             method: 'POST',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': csrfMeta ? csrfMeta.getAttribute('content') : ''
+                'X-CSRF-TOKEN': csrfMeta ? csrfMeta.getAttribute('content') : '',
+                'Content-Type': 'application/json'
             },
+            body: JSON.stringify({ watermark: panelWatermark }),
             credentials: 'same-origin'
         }).then(function (res) { return res.json(); }).then(function (response) {
             if (response && response.ret === 0) {
                 var cursors = (response.data && response.data.cursors) || null;
                 if (cursors) {
                     ['pm', 'shout', 'comment', 'topic_reply', 'staff'].forEach(function (ch) {
-                        setCursor(ch, cursors[ch]);
+                        if (isFinite(cursors[ch])) {
+                            setCursor(ch, cursors[ch]);
+                        }
                     });
                 }
+                panelFetched = 0;
+                panelHasMore = false;
                 setBadge(0);
                 renderPanel(panel, { items: [], counts: { total: 0 } });
             }
@@ -309,15 +375,6 @@
             els.badge.textContent = '0';
             els.badge.classList.add('nx-hidden');
         }
-    }
-
-    function bumpBadge(delta) {
-        if (delta <= 0) { return; }
-        var els = bellElements();
-        if (!els.badge) { return; }
-        var cur = parseInt(els.badge.textContent || '0', 10);
-        if (isNaN(cur)) { cur = 0; }
-        setBadge(cur + delta);
     }
 
     function refreshBadge() {

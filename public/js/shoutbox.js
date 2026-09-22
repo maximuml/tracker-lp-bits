@@ -206,31 +206,150 @@ function shoutboxRefresh() {
 }
 
 var shoutboxEventSource = null;
+var shoutSseFails = 0;
+var shoutReconnectTimer = null;
+var shoutLastId = 0;
+var shoutType = 'shoutbox';
+var shoutBus = null;
+var shoutIsLeader = false;
+var shoutHbTimer = null;
+var SHOUT_TAB_ID = 's' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+var SHOUT_LEADER_TTL = 12000;
+var SHOUT_SSE_MAX_FAILURES = 5;
 
-function shoutboxInitSSE(type, lastId) {
-    if (typeof EventSource === 'undefined' || !lastId) {
-        if (typeof schedulePoll === 'function') { schedulePoll(); }
-        return;
+function shoutLeaderKey() {
+    return 'nx_shout_leader_' + shoutType;
+}
+
+function shoutReadLeader() {
+    try {
+        return JSON.parse(localStorage.getItem(shoutLeaderKey()) || 'null');
+    } catch (e) {
+        return null;
     }
-    var url = 'shoutbox_sse.php?type=' + encodeURIComponent(type || 'shoutbox') + '&last_id=' + encodeURIComponent(lastId);
+}
+
+function shoutClaim() {
+    var now = Date.now();
+    var l = shoutReadLeader();
+    if (!l || (now - (l.ts || 0)) > SHOUT_LEADER_TTL || l.id === SHOUT_TAB_ID) {
+        try {
+            localStorage.setItem(shoutLeaderKey(), JSON.stringify({ id: SHOUT_TAB_ID, ts: now }));
+        } catch (e) {}
+        l = shoutReadLeader();
+    }
+    return !!(l && l.id === SHOUT_TAB_ID);
+}
+
+function shoutRelease() {
+    var l = shoutReadLeader();
+    if (l && l.id === SHOUT_TAB_ID) {
+        try { localStorage.removeItem(shoutLeaderKey()); } catch (e) {}
+    }
+}
+
+function shoutHeartbeat() {
+    var was = shoutIsLeader;
+    if (!shoutBus) {
+        shoutIsLeader = true;
+    } else if (document.hidden) {
+        shoutIsLeader = false;
+    } else {
+        shoutIsLeader = shoutClaim();
+    }
+    if (shoutIsLeader && !was) {
+        shoutSseFails = 0;
+        shoutConnect();
+    } else if (!shoutIsLeader && was) {
+        shoutClose();
+        if (shoutReconnectTimer) { clearTimeout(shoutReconnectTimer); shoutReconnectTimer = null; }
+    }
+}
+
+function shoutClose() {
+    if (shoutboxEventSource) {
+        try { shoutboxEventSource.close(); } catch (e) {}
+        shoutboxEventSource = null;
+    }
+}
+
+function shoutScheduleReconnect() {
+    if (shoutReconnectTimer || !shoutIsLeader || document.hidden) { return; }
+    var delay = Math.min(60000, 1000 * Math.pow(2, shoutSseFails));
+    delay = Math.floor(delay * (0.5 + Math.random()));
+    shoutReconnectTimer = setTimeout(function () {
+        shoutReconnectTimer = null;
+        shoutConnect();
+    }, delay);
+}
+
+function shoutConnect() {
+    if (!shoutIsLeader || document.hidden) { return; }
+    var url = 'shoutbox_sse.php?type=' + encodeURIComponent(shoutType) + '&last_id=' + encodeURIComponent(shoutLastId);
     try {
         shoutboxEventSource = new EventSource(url);
+        shoutboxEventSource.onopen = function () { shoutSseFails = 0; };
         shoutboxEventSource.addEventListener('refresh', function (e) {
+            // The event id is the newest delivered shout id — keep it as
+            // the resume cursor for manual reconnects.
+            if (e.lastEventId && /^\d+$/.test(e.lastEventId)) {
+                shoutLastId = parseInt(e.lastEventId, 10);
+            }
+            if (shoutBus) { try { shoutBus.postMessage('refresh'); } catch (err) {} }
             if (typeof shoutPoll === 'function') { shoutPoll(); }
             if (typeof startcountdown === 'function') { try { startcountdown(SHOUT_REFRESH); } catch (err) {} }
         });
         shoutboxEventSource.addEventListener('ping', function () {});
         shoutboxEventSource.onerror = function () {
-            if (!shoutboxEventSource) { return; }
-            if (shoutboxEventSource.readyState === EventSource.CLOSED) {
-                shoutboxEventSource.close();
-                shoutboxEventSource = null;
+            shoutClose();
+            shoutSseFails++;
+            if (shoutSseFails >= SHOUT_SSE_MAX_FAILURES) {
                 if (typeof schedulePoll === 'function') { schedulePoll(); }
+                return;
             }
+            shoutScheduleReconnect();
         };
     } catch (err) {
-        if (typeof schedulePoll === 'function') { schedulePoll(); }
+        shoutSseFails++;
+        if (shoutSseFails >= SHOUT_SSE_MAX_FAILURES) {
+            if (typeof schedulePoll === 'function') { schedulePoll(); }
+            return;
+        }
+        shoutScheduleReconnect();
     }
+}
+
+function shoutboxInitSSE(type, lastId) {
+    shoutType = type || 'shoutbox';
+    shoutLastId = lastId || 0;
+    if (typeof EventSource === 'undefined' || !shoutLastId) {
+        if (typeof schedulePoll === 'function') { schedulePoll(); }
+        return;
+    }
+    if (typeof BroadcastChannel !== 'undefined') {
+        try {
+            shoutBus = new BroadcastChannel('nx-shout-' + shoutType);
+            shoutBus.onmessage = function (e) {
+                if (e && e.data === 'refresh' && typeof shoutPoll === 'function') {
+                    shoutPoll();
+                }
+            };
+        } catch (err) {
+            shoutBus = null;
+        }
+    }
+    shoutHeartbeat();
+    shoutHbTimer = setInterval(shoutHeartbeat, 4000);
+    document.addEventListener('visibilitychange', function () {
+        if (document.hidden) {
+            shoutRelease();
+            shoutClose();
+            if (shoutReconnectTimer) { clearTimeout(shoutReconnectTimer); shoutReconnectTimer = null; }
+        } else {
+            shoutHeartbeat();
+        }
+    });
+    window.addEventListener('pagehide', shoutRelease);
 }
 
 // Init (replaces CSP-blocked <body onload>) + delegated handlers for

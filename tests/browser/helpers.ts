@@ -23,9 +23,14 @@ export function watchIssues(page: Page): PageIssues {
       issues.httpFailures.push(`${r.status()} ${r.url()}`);
     }
   });
-  page.on('requestfailed', (r) =>
-    issues.httpFailures.push(`requestfailed ${r.url()} ${r.failure()?.errorText ?? ''}`),
-  );
+  page.on('requestfailed', (r) => {
+    // Aborting an open SSE stream is the normal way the browser ends it
+    // (navigation, pagehide, EventSource.close()) — not a page defect.
+    if (r.url().includes('/shoutbox_sse')) {
+      return;
+    }
+    issues.httpFailures.push(`requestfailed ${r.url()} ${r.failure()?.errorText ?? ''}`);
+  });
   return issues;
 }
 

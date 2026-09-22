@@ -1,31 +1,31 @@
 <!DOCTYPE html>
-<html lang="{{ $chrome->locale }}" data-theme="{{ $chrome->theme }}" data-fontsize="{{ $chrome->fontSize }}">
+<html lang="{{ $chrome->head->locale }}" data-theme="{{ $chrome->head->theme }}" data-fontsize="{{ $chrome->head->fontSize }}">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="csrf-token" content="{{ csrf_token() }}" />
-{{ $chrome->inlineHeadHtml }}
-@if($chrome->metaKeywords !== '')
-<meta name="keywords" content="{{ $chrome->metaKeywords }}" />
+{{ $chrome->head->inlineHeadHtml }}
+@if($chrome->head->metaKeywords !== '')
+<meta name="keywords" content="{{ $chrome->head->metaKeywords }}" />
 @endif
-@if($chrome->metaDescription !== '')
-<meta name="description" content="{{ $chrome->metaDescription }}" />
+@if($chrome->head->metaDescription !== '')
+<meta name="description" content="{{ $chrome->head->metaDescription }}" />
 @endif
 <meta name="generator" content="{{ PROJECTNAME }}" />
-<title>{{ $chrome->title }}</title>
+<title>{{ $chrome->head->title }}</title>
 <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
 <link rel="search" type="application/opensearchdescription+xml" title="{{ $chrome->siteName }} Torrents" href="opensearch.php" />
 <link rel="alternate" type="application/rss+xml" title="Latest Torrents" href="torrentrss.php" />
-@foreach($chrome->headStyles as $href)
+@foreach($chrome->head->headStyles as $href)
 <link rel="stylesheet" href="{{ $href }}" type="text/css" />
 @endforeach
 <link rel="stylesheet" href="css/modern.css" type="text/css" />
-@if($chrome->cspNonce !== '')
+@if($chrome->head->cspNonce !== '')
 {{-- CSP nonce bridge: vendored libs (nx-zoom) inject <style> elements at
      runtime; stamp the request nonce on them so nonce-strict
      style-src-elem does not block legitimate styles. Must run before
      the external scripts below. --}}
-<script type="text/javascript" nonce="{{ $chrome->cspNonce }}">
+<script type="text/javascript" nonce="{{ $chrome->head->cspNonce }}">
     (function () {
         var nonce = document.currentScript && document.currentScript.nonce;
         if (!nonce) { return; }
@@ -37,15 +37,15 @@
     })();
 </script>
 @endif
-@foreach($chrome->headScripts as $src)
+@foreach($chrome->head->headScripts as $src)
 <script type="text/javascript" src="{{ $src }}"></script>
 @endforeach
 
 @if($chrome->variant !== 'auth')
 {{-- nx-layer.js is a <dialog>-based window.layer shim; the auth pages
      deliberately do not ship it (auth-form.js uses plain alert()). --}}
-@if($chrome->cspNonce !== '')
-<script type="text/javascript" nonce="{{ $chrome->cspNonce }}">
+@if($chrome->head->cspNonce !== '')
+<script type="text/javascript" nonce="{{ $chrome->head->cspNonce }}">
 @else
 <script type="text/javascript">
 @endif

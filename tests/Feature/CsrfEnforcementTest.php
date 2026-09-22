@@ -76,10 +76,10 @@ final class CsrfEnforcementTest extends TestCase
 
     public function test_csrf_js_included_in_page_layout_footer(): void
     {
-        // The shared chrome view model carries the footer script list
-        // (including csrf.js) for all pages.
-        $source = file_get_contents(app_path('ViewModels/SiteChromeViewModel.php'));
-        $this->assertStringContainsString('csrf.js', $source, 'SiteChromeViewModel must include csrf.js in footScripts');
+        // The shared chrome footer view model carries the footer script
+        // list (including csrf.js) for all pages.
+        $source = file_get_contents(app_path('ViewModels/Chrome/ChromeFooter.php'));
+        $this->assertStringContainsString('csrf.js', $source, 'ChromeFooter must include csrf.js in footScripts');
     }
 
     public function test_post_without_csrf_token_to_protected_route_returns_419(): void

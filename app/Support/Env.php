@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use Illuminate\Support\Env as LaravelEnv;
+
 /**
  * `.env` access helpers extracted from `include/globalfunctions.php`.
  *
@@ -18,6 +20,22 @@ final class Env
 
     public static function get(?string $key = null, mixed $default = null): mixed
     {
+        if ($key !== null) {
+            // Real environment wins over the .env file — LaravelEnv reads
+            // the same $_ENV/$_SERVER adapters as env(), so phpunit <server>
+            // overrides (e.g. REDIS_DB=15) and docker -e variables actually
+            // reach nexus.* config. Without this, LegacyRedisCache kept
+            // writing test data into the dev Redis keyspace. `has()` first:
+            // Env normalizes 'null' to real null, which must not fall through.
+            if (LaravelEnv::getRepository()->has($key)) {
+                return LaravelEnv::get($key);
+            }
+            $value = getenv($key);
+            if ($value !== false) {
+                return $value;
+            }
+        }
+
         if (self::$env === null) {
             self::$env = self::load(dirname(__DIR__, 2).'/.env');
         }
@@ -26,16 +44,7 @@ final class Env
             return self::$env;
         }
 
-        if (array_key_exists($key, self::$env)) {
-            return self::$env[$key];
-        }
-
-        $value = getenv($key);
-        if ($value !== false) {
-            return $value;
-        }
-
-        return $default;
+        return self::$env[$key] ?? $default;
     }
 
     /**

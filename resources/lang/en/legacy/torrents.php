@@ -61,4 +61,8 @@ return [
     'seeders_range' => 'Seeders range:',
     'times_completed_range' => 'Times completed range:',
     'added_range' => 'Added range:',
+    'range_from' => 'from',
+    'range_to' => 'to',
+    'label_search_area' => 'Search area',
+    'label_search_mode' => 'Search mode',
 ];

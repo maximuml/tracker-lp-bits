@@ -10,6 +10,9 @@ use App\Models\SearchBox;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\SearchBoxRepository;
+use App\Support\Cache;
+use App\Support\Cache\LegacyRedisCache;
+use App\Support\Category;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Auth;
@@ -401,5 +404,93 @@ final class SearchBoxRepositoryTest extends TestCase
         $this->expectException(InsufficientPermissionException::class);
 
         $this->repository->deleteCategory(1);
+    }
+
+    public function test_delete_category_clears_cached_category_rows(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->class(UserClass::SYSOP->value)->create();
+        Auth::login($user);
+
+        /** @var SearchBox $box */
+        $box = SearchBox::factory()->create();
+        $catId = (int) DB::table('categories')->insertGetId([
+            'name' => 'Cat A',
+            'mode' => $box->id,
+            'class_name' => 'cat_a',
+            'icon_id' => 0,
+            'sort_index' => 0,
+        ]);
+
+        $cache = app(LegacyRedisCache::class);
+        if (! $cache->getIsEnabled()) {
+            $this->markTestSkipped('Redis cache is disabled in this environment.');
+        }
+
+        // Drop any stale payload from earlier tests, then prime the caches
+        // exactly as the runtime does.
+        $cache->delete_value('category_content');
+        Category::resetState();
+        $this->assertNotNull(Category::row($cache, $catId));
+        $this->assertIsArray($cache->get_value('category_content'));
+
+        $this->repository->deleteCategory($catId);
+
+        // Both the raw Redis key and every locale variant are gone.
+        $this->assertFalse((bool) $cache->get_value('category_content'));
+
+        // After the per-request reset the deleted row is no longer served.
+        Category::resetState();
+        $this->assertNull(Category::row($cache, $catId));
+    }
+
+    public function test_delete_search_box_clears_section_and_category_cache(): void
+    {
+        /** @var SearchBox $box */
+        $box = SearchBox::factory()->create();
+
+        $cache = app(LegacyRedisCache::class);
+        if (! $cache->getIsEnabled()) {
+            $this->markTestSkipped('Redis cache is disabled in this environment.');
+        }
+
+        $cache->cache_value('search_box_content', ['box' => $box->id], 3600);
+        $cache->cache_value('category_list_mode_'.$box->id, ['cat'], 3600);
+        $this->assertNotFalse($cache->get_value('search_box_content'));
+
+        $this->repository->delete($box->id);
+
+        $this->assertFalse((bool) $cache->get_value('search_box_content'));
+        $this->assertFalse((bool) $cache->get_value('category_list_mode_'.$box->id));
+    }
+
+    public function test_category_row_memoization_resets_between_requests(): void
+    {
+        /** @var SearchBox $box */
+        $box = SearchBox::factory()->create();
+        $catId = (int) DB::table('categories')->insertGetId([
+            'name' => 'Before',
+            'mode' => $box->id,
+            'class_name' => 'cat_a',
+            'icon_id' => 0,
+            'sort_index' => 0,
+        ]);
+
+        $cache = app(LegacyRedisCache::class);
+        $cache->delete_value('category_content');
+        Category::resetState();
+        $this->assertSame('Before', Category::row($cache, $catId)['name']);
+
+        // An admin rename inside the same worker stays memoized…
+        DB::table('categories')->where('id', $catId)->update(['name' => 'After']);
+        $this->assertSame('Before', Category::row($cache, $catId)['name']);
+
+        // …the admin action drops the Redis payload (EditCategory path)…
+        Cache::clearCategory();
+
+        // …and the per-request reset drops the in-worker memoization —
+        // Octane/queue workers must see the rename.
+        Category::resetState();
+        $this->assertSame('After', Category::row($cache, $catId)['name']);
     }
 }

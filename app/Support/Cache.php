@@ -10,6 +10,7 @@ use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Events\UserUpdated;
 use App\Models\Setting;
 use App\Repositories\StaffMessageRepository;
+use App\Support\Cache\LegacyRedisCache;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache as CacheFacade;
 use Illuminate\Support\Facades\Redis;
@@ -307,6 +308,11 @@ final class Cache
         foreach (Locale::available() as $lf) {
             CacheFacade::forget($lf.'_'.$key);
         }
+        // Legacy payloads are written through LegacyRedisCache's own phpredis
+        // connection — delete there too so invalidation does not silently
+        // depend on CACHE_STORE pointing at the same backend. Nullable: tests
+        // bind it to null to simulate Redis being down.
+        app(LegacyRedisCache::class)?->delete_value($key, true);
     }
 
     /**

@@ -1,6 +1,6 @@
 {{-- Modern torrents search panel (Variant A, ADR 0014). Replaces SearchBox::buildCategoryTable — data arrives in $panelVm. --}}
 <form method="get" name="searchbox" action="?" class="nxm-searchpanel">
-	<div class="nxm-searchpanel__toggle"><a href="#" data-klappe="searchboxmain"><img class="plus" src="pic/trans.gif" id="picsearchboxmain" alt="Show/Hide" />{{ __('legacy/torrents.text_search_box')}}</a></div>
+	<div class="nxm-searchpanel__toggle"><button type="button" class="nxm-linklike" data-klappe="searchboxmain" aria-expanded="false" aria-controls="ksearchboxmain"><img class="plus" src="pic/trans.gif" id="picsearchboxmain" alt="" aria-hidden="true" />{{ __('legacy/torrents.text_search_box')}}</button></div>
 	<div id="ksearchboxmain" class="nx-hidden nxm-searchpanel__body">
 		<fieldset class="nxm-fieldset">
 			<legend>{{ $panelVm->categoryLabel }}</legend>
@@ -10,7 +10,7 @@
 					@if ($cell['selectAll'])
 					<span class="nxm-catcell"><input name="{{ $cell['checkPrefix'] }}_check" value="{{ $panelVm->selectAllLabel }}" class="btn medium" type="button" data-setchecked="{{ $cell['checkPrefix'] }}" data-setchecked-ctrl="{{ $cell['checkPrefix'] }}_check" data-checkall="{{ $panelVm->selectAllLabel }}" data-uncheckall="{{ $panelVm->unselectAllLabel }}"></span>
 					@else
-					<span class="nxm-catcell"><input type="checkbox" id="{{ $cell['checkboxName'] }}" name="{{ $cell['checkboxName'] }}" value="1"@if ($cell['checked']) checked @endif /><a href="{{ $cell['href'] }}"><img src="pic/cattrans.gif" class="{{ $cell['iconClass'] }}" alt="{{ $cell['name'] }}" title="{{ $cell['name'] }}"@if ($cell['iconStyle'] !== '')@endif /></a></span>
+					<span class="nxm-catcell"><input type="checkbox" id="{{ $cell['checkboxName'] }}" name="{{ $cell['checkboxName'] }}" value="1" aria-label="{{ $cell['name'] !== '' ? $cell['name'] : '#'.$cell['id'] }}"@if ($cell['checked']) checked @endif /><a href="{{ $cell['href'] }}" aria-label="{{ $cell['name'] !== '' ? $cell['name'] : '#'.$cell['id'] }}"><img src="pic/cattrans.gif" class="{{ $cell['iconClass'] }}" alt="" aria-hidden="true" title="{{ $cell['name'] }}"@if ($cell['iconStyle'] !== '')@endif /></a></span>
 					@endif
 				@endforeach
 			</div>
@@ -71,24 +71,24 @@
 			</div>
 			@endif
 			<div class="nxm-field">
-				<label>{{ __('legacy/torrents.size_range')}}</label>
-				<span class="nxm-range"><input type="number" min="1" name="size_begin" value="{{ $filterInput['size_begin'] ?? '' }}"/> ~ <input type="number" min="1" name="size_end" value="{{ $filterInput['size_end'] ?? '' }}"/></span>
+				<span class="nxm-field__label">{{ __('legacy/torrents.size_range')}}</span>
+				<span class="nxm-range"><input type="number" min="1" name="size_begin" aria-label="{{ __('legacy/torrents.size_range') }} — {{ __('legacy/torrents.range_from') }}" value="{{ $filterInput['size_begin'] ?? '' }}"/> ~ <input type="number" min="1" name="size_end" aria-label="{{ __('legacy/torrents.size_range') }} — {{ __('legacy/torrents.range_to') }}" value="{{ $filterInput['size_end'] ?? '' }}"/></span>
 			</div>
 			<div class="nxm-field">
-				<label>{{ __('legacy/torrents.seeders_range')}}</label>
-				<span class="nxm-range"><input type="number" min="1" name="seeders_begin" value="{{ $filterInput['seeders_begin'] ?? '' }}"/> ~ <input type="number" min="1" name="seeders_end" value="{{ $filterInput['seeders_end'] ?? '' }}"/></span>
+				<span class="nxm-field__label">{{ __('legacy/torrents.seeders_range')}}</span>
+				<span class="nxm-range"><input type="number" min="1" name="seeders_begin" aria-label="{{ __('legacy/torrents.seeders_range') }} — {{ __('legacy/torrents.range_from') }}" value="{{ $filterInput['seeders_begin'] ?? '' }}"/> ~ <input type="number" min="1" name="seeders_end" aria-label="{{ __('legacy/torrents.seeders_range') }} — {{ __('legacy/torrents.range_to') }}" value="{{ $filterInput['seeders_end'] ?? '' }}"/></span>
 			</div>
 			<div class="nxm-field">
-				<label>{{ __('legacy/torrents.leechers_range')}}</label>
-				<span class="nxm-range"><input type="number" min="1" name="leechers_begin" value="{{ $filterInput['leechers_begin'] ?? '' }}"/> ~ <input type="number" min="1" name="leechers_end" value="{{ $filterInput['leechers_end'] ?? '' }}"/></span>
+				<span class="nxm-field__label">{{ __('legacy/torrents.leechers_range')}}</span>
+				<span class="nxm-range"><input type="number" min="1" name="leechers_begin" aria-label="{{ __('legacy/torrents.leechers_range') }} — {{ __('legacy/torrents.range_from') }}" value="{{ $filterInput['leechers_begin'] ?? '' }}"/> ~ <input type="number" min="1" name="leechers_end" aria-label="{{ __('legacy/torrents.leechers_range') }} — {{ __('legacy/torrents.range_to') }}" value="{{ $filterInput['leechers_end'] ?? '' }}"/></span>
 			</div>
 			<div class="nxm-field">
-				<label>{{ __('legacy/torrents.times_completed_range')}}</label>
-				<span class="nxm-range"><input type="number" min="1" name="times_completed_begin" value="{{ $filterInput['times_completed_begin'] ?? '' }}"/> ~ <input type="number" min="1" name="times_completed_end" value="{{ $filterInput['times_completed_end'] ?? '' }}"/></span>
+				<span class="nxm-field__label">{{ __('legacy/torrents.times_completed_range')}}</span>
+				<span class="nxm-range"><input type="number" min="1" name="times_completed_begin" aria-label="{{ __('legacy/torrents.times_completed_range') }} — {{ __('legacy/torrents.range_from') }}" value="{{ $filterInput['times_completed_begin'] ?? '' }}"/> ~ <input type="number" min="1" name="times_completed_end" aria-label="{{ __('legacy/torrents.times_completed_range') }} — {{ __('legacy/torrents.range_to') }}" value="{{ $filterInput['times_completed_end'] ?? '' }}"/></span>
 			</div>
 			<div class="nxm-field">
-				<label>{{ __('legacy/torrents.added_range')}}</label>
-				<span class="nxm-range"><x-datetime-input name="added_begin" :value="$filterInput['added_begin'] ?? ''" /> ~ <x-datetime-input name="added_end" :value="$filterInput['added_end'] ?? ''" /></span>
+				<span class="nxm-field__label">{{ __('legacy/torrents.added_range')}}</span>
+				<span class="nxm-range"><x-datetime-input name="added_begin" :value="$filterInput['added_begin'] ?? ''" :aria-label="__('legacy/torrents.added_range').' — '.__('legacy/torrents.range_from')" /> ~ <x-datetime-input name="added_end" :value="$filterInput['added_end'] ?? ''" :aria-label="__('legacy/torrents.added_range').' — '.__('legacy/torrents.range_to')" /></span>
 			</div>
 		</div>
 
@@ -97,13 +97,13 @@
 			<input id="searchinput" name="search" type="text" value="{{ $searchstr_ori }}" autocomplete="off" />
 			<script src="js/meili_autocomplete.js" type="text/javascript"></script>
 			<span>{{ __('legacy/torrents.text_in')}}</span>
-			<select name="search_area">
+			<select name="search_area" aria-label="{{ __('legacy/torrents.label_search_area') }}">
 				<option value="0">{{ __('legacy/torrents.select_title')}}</option>
 				<option value="1"@if (($filterInput['search_area'] ?? null) == 1) selected="selected"@endif>{{ __('legacy/torrents.select_description')}}</option>
 				<option value="3"@if (($filterInput['search_area'] ?? null) == 3) selected="selected"@endif>{{ __('legacy/torrents.select_uploader')}}</option>
 			</select>
 			<span>{{ __('legacy/torrents.text_with')}}</span>
-			<select name="search_mode">
+			<select name="search_mode" aria-label="{{ __('legacy/torrents.label_search_mode') }}">
 				@foreach ($panelVm->searchModes as $mKey => $mLabel)
 				<option value="{{ $mKey }}"@if ((string) ($filterInput['search_mode'] ?? \App\Models\SearchBox::getDefaultSearchMode()) === (string) $mKey) selected="selected"@endif>{{ $mLabel }}</option>
 				@endforeach

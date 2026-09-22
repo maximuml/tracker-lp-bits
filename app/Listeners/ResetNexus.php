@@ -6,6 +6,7 @@ namespace App\Listeners;
 
 use App\DTOs\Auth\ActorContext;
 use App\Support\AssetAppender;
+use App\Support\Category;
 use App\Support\CurrentUser;
 use App\Support\LegacyHeaderBag;
 use App\Support\LegacyRuntime;
@@ -46,6 +47,7 @@ class ResetNexus
         Permissions::resetState();
         MsgAlert::resetState();
         UserDisplay::resetState();
+        Category::resetState();
         // T-11: Flush the per-request legacy header bag so headers/status
         // set by one request do not leak into the next under Octane.
         $this->legacyHeaderBag->flush();

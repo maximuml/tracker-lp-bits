@@ -82,3 +82,71 @@ test.describe('a11y violations do not grow', () => {
     }
   });
 });
+
+test.describe('expanded search panel', () => {
+  test.use({ storageState: AUTH_STATE });
+
+  test('expanded /torrents.php filters pass axe and expose keyboard path', async ({
+    page,
+  }) => {
+    await page.goto('/torrents.php', { waitUntil: 'networkidle' });
+
+    const toggle = page.locator('[data-klappe="searchboxmain"]');
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    await expect(toggle).toHaveAttribute('aria-controls', 'ksearchboxmain');
+
+    // Keyboard: focus the toggle, activate with Enter.
+    await toggle.focus();
+    await page.keyboard.press('Enter');
+    await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    const body = page.locator('#ksearchboxmain');
+    await expect(body).toBeVisible();
+
+    // Keyboard order: Tab from the toggle reaches a control inside the
+    // panel (first category checkbox or select-all button).
+    await page.keyboard.press('Tab');
+    const focused = await page.evaluate(() => {
+      const el = document.activeElement;
+      return el ? el.closest('#ksearchboxmain') !== null : false;
+    });
+    expect(focused, 'Tab from toggle should land inside the panel').toBe(true);
+
+    const results = await new AxeBuilder({ page })
+      .include('#ksearchboxmain')
+      .withTags(TAGS)
+      .analyze();
+    const ruleIds = [...new Set(results.violations.map((v) => v.id))].sort();
+    expect(
+      ruleIds,
+      `expanded search panel violations: ${ruleIds.join(', ')}`,
+    ).toEqual([]);
+  });
+
+  test('notification panel toggles with aria state and passes axe', async ({
+    page,
+  }) => {
+    await page.goto('/index.php', { waitUntil: 'networkidle' });
+
+    const bell = page.locator('#nx-notif-bell');
+    const panel = page.locator('#nx-notif-panel');
+    await expect(bell).toHaveAttribute('aria-expanded', 'false');
+
+    await bell.click();
+    await expect(bell).toHaveAttribute('aria-expanded', 'true');
+    await expect(panel).toBeVisible();
+
+    const results = await new AxeBuilder({ page })
+      .include('#nx-notif-panel')
+      .withTags(TAGS)
+      .analyze();
+    const ruleIds = [...new Set(results.violations.map((v) => v.id))].sort();
+    expect(
+      ruleIds,
+      `notification panel violations: ${ruleIds.join(', ')}`,
+    ).toEqual([]);
+
+    // Escape closes it again.
+    await page.keyboard.press('Escape');
+    await expect(bell).toHaveAttribute('aria-expanded', 'false');
+  });
+});

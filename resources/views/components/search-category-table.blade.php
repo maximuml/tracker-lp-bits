@@ -14,8 +14,8 @@
             @if ($cell->kind === 'selectAll')
             <input name="{{ $cell->checkPrefix }}_check" value="{{ __('nexus.select_all') }}" class="btn medium" type="button" data-setchecked="{{ $cell->checkPrefix }}" data-setchecked-ctrl="{{ $cell->checkPrefix }}_check" data-checkall="{{ __('nexus.select_all') }}" data-uncheckall="{{ __('nexus.unselect_all') }}">
             @elseif ($cell->kind === 'category')
-            <input type="checkbox" id="{{ $cell->inputName }}" name="{{ $cell->inputName }}" value="{{ $cell->value }}"{{ $cell->checked ? ' checked' : '' }} />
-            <a href="{{ $cell->href }}"><img src="{{ $cell->iconSrc }}" class="{{ $cell->iconClass }}" alt="{{ $cell->label }}" title="{{ $cell->label }}" /></a>
+            <input type="checkbox" id="{{ $cell->inputName }}" name="{{ $cell->inputName }}" value="{{ $cell->value }}" aria-label="{{ $cell->label !== '' ? $cell->label : $cell->inputName }}"{{ $cell->checked ? ' checked' : '' }} />
+            <a href="{{ $cell->href }}" aria-label="{{ $cell->label !== '' ? $cell->label : $cell->inputName }}"><img src="{{ $cell->iconSrc }}" class="{{ $cell->iconClass }}" alt="{{ $cell->label }}" title="{{ $cell->label }}" /></a>
             @else
             <label><input type="checkbox" id="{{ $cell->inputName }}" name="{{ $cell->inputName }}" value="{{ $cell->value }}"{{ $cell->checked ? ' checked' : '' }} />@if ($cell->href !== null)<a href="{{ $cell->href }}">{{ $cell->label }}</a>@else{{ $cell->label }}@endif</label>
             @endif

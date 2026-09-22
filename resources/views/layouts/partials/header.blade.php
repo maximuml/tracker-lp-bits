@@ -10,7 +10,7 @@
             <a class="nxm-logo" href="index.php"><img src="{{ $chrome->logoMain }}" alt="{{ $chrome->siteName }}" /></a>
         @endif
         @if($chrome->enableDonation)
-            <a class="nxm-donate" href="donate.php"><img src="{{ $chrome->picFolder }}/donate.gif" alt="{{ 'Make a donation' }}" /></a>
+            <a class="nxm-donate" href="donate.php"><img src="{{ $chrome->head->picFolder }}/donate.gif" alt="{{ 'Make a donation' }}" /></a>
         @endif
         @if($chrome->user)
         <button type="button" class="nxm-burger" aria-expanded="false" aria-controls="nxm-collapse" aria-label="{{ 'Toggle navigation' }}">&#x2630;</button>
@@ -30,83 +30,83 @@
     <div class="nxm-userbar" role="group" aria-label="{{ 'Account' }}">
         <div class="nxm-userbar__row">
             <span class="nxm-userbar__greeting">{{ __('legacy/functions.text_welcome_back') }},</span>
-            {{ $chrome->usernameHtml }}
+            {{ $chrome->userBar->usernameHtml }}
             <span class="nxm-userbar__links">
                 <form method="post" action="logout.php" class="nx-inline">@csrf<button type="submit" class="nxm-linkbtn">[{{ __('legacy/functions.text_logout') }}]</button></form>
                 <a href="usercp.php">[{{ __('legacy/functions.text_user_cp') }}]</a>
-                @if($chrome->isModerator)<a href="staffpanel.php">[{{ __('legacy/functions.text_staff_panel') }}]</a>@endif
-                @if($chrome->isSysop)<a href="settings.php">[{{ __('legacy/functions.text_site_settings') }}]</a>@endif
+                @if($chrome->userBar->isModerator)<a href="staffpanel.php">[{{ __('legacy/functions.text_staff_panel') }}]</a>@endif
+                @if($chrome->userBar->isSysop)<a href="settings.php">[{{ __('legacy/functions.text_site_settings') }}]</a>@endif
                 <a href="torrents.php?inclbookmarked=1&amp;allsec=1&amp;incldead=0">[{{ __('legacy/functions.text_bookmarks') }}]</a>
-                <a href="mybonus.php">{{ __('legacy/functions.text_bonus') }}: {{ $chrome->seedbonus }}</a>
-                @if($chrome->attendanceDone)
-                <a href="attendance.php">{{ sprintf((string) __('legacy/functions.text_attended'), $chrome->attendancePoints, $chrome->attendanceCard) }}</a>
+                <a href="mybonus.php">{{ __('legacy/functions.text_bonus') }}: {{ $chrome->userBar->seedbonus }}</a>
+                @if($chrome->userBar->attendanceDone)
+                <a href="attendance.php">{{ sprintf((string) __('legacy/functions.text_attended'), $chrome->userBar->attendancePoints, $chrome->userBar->attendanceCard) }}</a>
                 @else
                 <a href="attendance.php" class="faqlink">{{ __('legacy/functions.text_attendance') }}</a>
                 @endif
-                <a href="medal.php">[{{ $chrome->medalLabel }}]</a>
-                <a href="task.php">[{{ $chrome->taskLabel }}]</a>
-                <a href="invite.php?id={{ (int) $chrome->user['id'] }}">{{ __('legacy/functions.text_invite') }}: {{ $chrome->invites }}@if($chrome->pendingInvites > 0) ({{ $chrome->pendingInvites }})@endif</a>
-                @if($chrome->managementHref !== '')<a href="{{ $chrome->managementHref }}" target="_blank" rel="noopener">[{{ __('legacy/functions.text_management_system') }}]</a>@endif
-                <button type="button" class="nxm-linkbtn nxm-theme-toggle" data-persist-url="{{ url('/web/usercp/theme') }}" title="{{ 'Theme' }}: {{ ucfirst($chrome->theme) }}">[{{ 'Theme' }}: {{ ucfirst($chrome->theme) }}]</button>
+                <a href="medal.php">[{{ $chrome->userBar->medalLabel }}]</a>
+                <a href="task.php">[{{ $chrome->userBar->taskLabel }}]</a>
+                <a href="invite.php?id={{ (int) $chrome->user['id'] }}">{{ __('legacy/functions.text_invite') }}: {{ $chrome->userBar->invites }}@if($chrome->userBar->pendingInvites > 0) ({{ $chrome->userBar->pendingInvites }})@endif</a>
+                @if($chrome->userBar->managementHref !== '')<a href="{{ $chrome->userBar->managementHref }}" target="_blank" rel="noopener">[{{ __('legacy/functions.text_management_system') }}]</a>@endif
+                <button type="button" class="nxm-linkbtn nxm-theme-toggle" data-persist-url="{{ url('/web/usercp/theme') }}" title="{{ 'Theme' }}: {{ ucfirst($chrome->head->theme) }}">[{{ 'Theme' }}: {{ ucfirst($chrome->head->theme) }}]</button>
             </span>
         </div>
         <div class="nxm-userbar__row">
             <span class="nxm-userbar__stats">
                 <a href="messages.php" class="nxm-stat" aria-label="{{ __('legacy/functions.title_inbox') }}">
                     <span class="nxm-stat__label">{{ 'Messages' }}</span>
-                    <span class="nxm-stat__value">{{ $chrome->inboxCount }}@if($chrome->unreadCount > 0) <b>({{ $chrome->unreadCount }} {{ __('legacy/functions.text_message_new') }})</b>@endif</span>
+                    <span class="nxm-stat__value">{{ $chrome->userBar->inboxCount }}@if($chrome->userBar->unreadCount > 0) <b>({{ $chrome->userBar->unreadCount }} {{ __('legacy/functions.text_message_new') }})</b>@endif</span>
                 </a>
-                <span class="nxm-stat"><span class="nxm-stat__label">{{ __('legacy/functions.text_ratio') }}</span> <span class="nxm-stat__value">{{ $chrome->ratio }}</span></span>
-                <span class="nxm-stat"><span class="nxm-stat__label">{{ __('legacy/functions.text_uploaded') }}</span> <span class="nxm-stat__value">{{ $chrome->uploaded }}</span></span>
-                <span class="nxm-stat"><span class="nxm-stat__label">{{ __('legacy/functions.text_downloaded') }}</span> <span class="nxm-stat__value">{{ $chrome->downloaded }}</span></span>
+                <span class="nxm-stat"><span class="nxm-stat__label">{{ __('legacy/functions.text_ratio') }}</span> <span class="nxm-stat__value">{{ $chrome->userBar->ratio }}</span></span>
+                <span class="nxm-stat"><span class="nxm-stat__label">{{ __('legacy/functions.text_uploaded') }}</span> <span class="nxm-stat__value">{{ $chrome->userBar->uploaded }}</span></span>
+                <span class="nxm-stat"><span class="nxm-stat__label">{{ __('legacy/functions.text_downloaded') }}</span> <span class="nxm-stat__value">{{ $chrome->userBar->downloaded }}</span></span>
                 <span class="nxm-stat"><span class="nxm-stat__label">{{ __('legacy/functions.text_active_torrents') }}</span>
                     <span class="nxm-stat__value">
-                        <span title="{{ __('legacy/functions.title_torrents_seeding') }}">&#x25B2;{{ $chrome->activeSeed }}</span>
-                        <span title="{{ __('legacy/functions.title_torrents_leeching') }}">&#x25BC;{{ $chrome->activeLeech }}</span>
+                        <span title="{{ __('legacy/functions.title_torrents_seeding') }}">&#x25B2;{{ $chrome->userBar->activeSeed }}</span>
+                        <span title="{{ __('legacy/functions.title_torrents_leeching') }}">&#x25BC;{{ $chrome->userBar->activeLeech }}</span>
                     </span>
                 </span>
                 <span class="nxm-stat"><span class="nxm-stat__label">{{ __('legacy/functions.text_connectable') }}</span>
                     <span class="nxm-stat__value">
-                        @if($chrome->connectable === true)<b class="nxm-ok">{{ __('legacy/functions.text_yes') }}</b>
-                        @elseif($chrome->connectable === false)<a href="faq.php#id21"><b class="nxm-bad">{{ __('legacy/functions.text_no') }}</b></a>
+                        @if($chrome->userBar->connectable === true)<b class="nxm-ok">{{ __('legacy/functions.text_yes') }}</b>
+                        @elseif($chrome->userBar->connectable === false)<a href="faq.php#id21"><b class="nxm-bad">{{ __('legacy/functions.text_no') }}</b></a>
                         @else{{ __('legacy/functions.text_unknown') }}@endif
                     </span>
                 </span>
                 <span class="nxm-stat"><span class="nxm-stat__label">{{ __('legacy/functions.text_slots') }}</span>
                     <span class="nxm-stat__value">
-                        @if($chrome->maxSlots > 0)<a href="faq.php#id215">{{ $chrome->maxSlots }}</a>
+                        @if($chrome->userBar->maxSlots > 0)<a href="faq.php#id215">{{ $chrome->userBar->maxSlots }}</a>
                         @else{{ __('legacy/functions.text_unlimited') }}@endif
                     </span>
                 </span>
-                @if($chrome->hitAndRunEnabled)
-                <span class="nxm-stat"><span class="nxm-stat__label">H&amp;R</span> <span class="nxm-stat__value">[<a href="myhr.php">{{ $chrome->hitAndRunStatsHtml }}</a>]</span></span>
+                @if($chrome->userBar->hitAndRunEnabled)
+                <span class="nxm-stat"><span class="nxm-stat__label">H&amp;R</span> <span class="nxm-stat__value">[<a href="myhr.php">{{ $chrome->userBar->hitAndRunStatsHtml }}</a>]</span></span>
                 @endif
             </span>
         </div>
         <div class="nxm-userbar__row nxm-userbar__row--tools">
-            @if($chrome->globalSearchEnabled)
-            <form class="nxm-search" action="search.php" method="get" target="{{ $chrome->searchFormTarget }}">
-                <input type="text" name="search" value="{{ $chrome->requestSearch }}" placeholder="{{ $chrome->searchKeywordPlaceholder }}" />
+            @if($chrome->search->globalSearchEnabled)
+            <form class="nxm-search" action="search.php" method="get" target="{{ $chrome->search->searchFormTarget }}">
+                <input type="text" name="search" value="{{ $chrome->search->requestSearch }}" placeholder="{{ $chrome->search->searchKeywordPlaceholder }}" />
                 <select name="search_area" aria-label="{{ __('search.search_area') }}">
-                    @foreach($chrome->searchAreas as $area)
+                    @foreach($chrome->search->searchAreas as $area)
                     <option value="{{ $area['value'] }}"@if($area['selected']) selected @endif>{{ $area['label'] }}</option>
                     @endforeach
                 </select>
-                <input type="submit" value="{{ $chrome->globalSearchLabel }}" />
+                <input type="submit" value="{{ $chrome->search->globalSearchLabel }}" />
             </form>
             @endif
             <div class="nxm-userbar__icons">
-                @if($chrome->canStaffmem)
-                <a href="cheaterbox.php"><img class="cheaterbox" alt="cheaterbox" title="{{ __('legacy/functions.title_cheaterbox') }}" src="pic/trans.gif" /></a>{{ $chrome->cheaterCount }}
-                <a href="reports.php"><img class="reportbox" alt="reportbox" title="{{ __('legacy/functions.title_reportbox') }}" src="pic/trans.gif" /></a>{{ $chrome->reportCount }}
+                @if($chrome->userBar->canStaffmem)
+                <a href="cheaterbox.php"><img class="cheaterbox" alt="cheaterbox" title="{{ __('legacy/functions.title_cheaterbox') }}" src="pic/trans.gif" /></a>{{ $chrome->userBar->cheaterCount }}
+                <a href="reports.php"><img class="reportbox" alt="reportbox" title="{{ __('legacy/functions.title_reportbox') }}" src="pic/trans.gif" /></a>{{ $chrome->userBar->reportCount }}
                 @endif
                 <a href="friends.php"><img class="buddylist" alt="Buddylist" title="{{ __('legacy/functions.title_buddylist') }}" src="pic/trans.gif" /></a>
                 <a href="getrss.php"><img class="rss" alt="RSS" title="{{ __('legacy/functions.title_get_rss') }}" src="pic/trans.gif" /></a>
-                @if($chrome->staffMessageTotal > 0)
-                <a href="staffbox.php"><img class="staffbox" alt="staffbox" title="{{ __('legacy/functions.title_staffbox') }}" src="pic/trans.gif" /></a>{{ $chrome->staffMessageTotal }}
+                @if($chrome->userBar->staffMessageTotal > 0)
+                <a href="staffbox.php"><img class="staffbox" alt="staffbox" title="{{ __('legacy/functions.title_staffbox') }}" src="pic/trans.gif" /></a>{{ $chrome->userBar->staffMessageTotal }}
                 @endif
-                <a href="messages.php"><img class="{{ $chrome->unreadCount > 0 ? 'inboxnew' : 'inbox' }}" alt="inbox" title="{{ $chrome->unreadCount > 0 ? __('legacy/functions.title_inbox_new_messages') : __('legacy/functions.title_inbox_no_new_messages') }}" src="pic/trans.gif" /></a>{{ $chrome->inboxCount }}@if($chrome->unreadCount > 0) ({{ $chrome->unreadCount }}{{ __('legacy/functions.text_message_new') }})@endif
-                <a href="messages.php?action=viewmailbox&amp;box=-1"><img class="sentbox" alt="sentbox" title="{{ __('legacy/functions.title_sentbox') }}" src="pic/trans.gif" /></a>{{ $chrome->outboxCount }}
+                <a href="messages.php"><img class="{{ $chrome->userBar->unreadCount > 0 ? 'inboxnew' : 'inbox' }}" alt="inbox" title="{{ $chrome->userBar->unreadCount > 0 ? __('legacy/functions.title_inbox_new_messages') : __('legacy/functions.title_inbox_no_new_messages') }}" src="pic/trans.gif" /></a>{{ $chrome->userBar->inboxCount }}@if($chrome->userBar->unreadCount > 0) ({{ $chrome->userBar->unreadCount }}{{ __('legacy/functions.text_message_new') }})@endif
+                <a href="messages.php?action=viewmailbox&amp;box=-1"><img class="sentbox" alt="sentbox" title="{{ __('legacy/functions.title_sentbox') }}" src="pic/trans.gif" /></a>{{ $chrome->userBar->outboxCount }}
                 <span class="nx-notif">
                     <a href="#" id="nx-notif-bell" class="nx-notif-bell" role="button" aria-label="{{ __('legacy/notifications.title_bell') }}" aria-haspopup="true" aria-expanded="false" title="{{ __('legacy/notifications.title_bell') }}"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1a4.5 4.5 0 0 0-4.5 4.5v2.4c0 .4-.12.78-.34 1.11L2 10.5c-.4.64.05 1.5.83 1.5h10.34c.78 0 1.23-.86.83-1.5l-1.16-1.49a2.1 2.1 0 0 1-.34-1.11V5.5A4.5 4.5 0 0 0 8 1Zm0 13.5a2 2 0 0 0 1.86-1.25H6.14A2 2 0 0 0 8 14.5Z"/></svg><span id="nx-notif-badge" class="nx-notif-badge nx-hidden">0</span></a>
                     <div id="nx-notif-panel" class="nx-notif-panel nx-hidden" role="region" aria-label="{{ __('legacy/notifications.title_bell') }}"></div>

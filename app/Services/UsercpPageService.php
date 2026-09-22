@@ -65,8 +65,7 @@ final class UsercpPageService
         private readonly UsercpLookupRepository $usercpLookupRepository,
         private readonly UserPasskeyRepository $passkeyRepository,
         private readonly TokenRepository $tokenRepository,
-        private readonly SearchCategoryTableFactory $searchCategoryTableFactory,
-        private readonly StyleRepository $styleRepository
+        private readonly SearchCategoryTableFactory $searchCategoryTableFactory
     ) {}
 
     /**
@@ -585,7 +584,7 @@ JS;
         }
 
         $stylesheetOptions = [];
-        foreach ($this->styleRepository->all() as $id => $row) {
+        foreach (StyleRepository::all() as $id => $row) {
             $stylesheetOptions[$id] = (string) ($row['name'] ?? $id);
         }
 

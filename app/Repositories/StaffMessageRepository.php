@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
-use App\Auth\Permission;
 use App\Contracts\Repositories\ToolRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\StaffMessage;
-use App\Models\User;
 use App\Support\Cache;
+use App\Support\Permissions;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Redis;
 
@@ -46,7 +45,7 @@ class StaffMessageRepository extends BaseRepository
         if ($answered !== null) {
             $query->where('answered', $answered);
         }
-        if (! Permission::can(PermissionEnum::STAFF_MEMBER, User::findOrFail((int) $uid))) {
+        if (! Permissions::userCan(PermissionEnum::STAFF_MEMBER->value, false, (int) $uid)) {
             // Not staff member only can see authorized
             $permissions = $this->toolRepository->listUserAllPermissions($uid);
             $query->whereIn('permission', $permissions);

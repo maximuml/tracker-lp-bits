@@ -74,7 +74,7 @@ final class UsercpPageService
     {
         $curUser = (array) ($this->currentUser->get() ?? []);
         $cache = $this->cache;
-        $userInfo = $this->usercpRepository->getUserById((int) ($curUser['id'] ?? 0));
+        $userInfo = (new User)->newFromBuilder($curUser);
         $siteName = Setting::getSiteName();
 
         $data = [

@@ -18,7 +18,7 @@ use Tests\TestCase;
  * Unit tests for PageLayoutRepository.
  *
  * Covers the DB-backed count/query methods (getInboxCount, getOutboxCount,
- * getConnectable, getActiveSeedCount, getActiveLeechCount,
+ * getConnectable, getActivePeerCounts,
  * getUnreadMessageCount, getUnreadNewsCount, getTotalReports,
  * getTotalCheaters, getTorrentApprovalNoneCount, getOpenComplaintsCount,
  * getOpenReportsCount, getOpenCheatersCount, getPendingInviteCount,
@@ -107,12 +107,12 @@ final class PageLayoutRepositoryTest extends TestCase
         $this->assertSame(1, $this->repository->getConnectable(10));
     }
 
-    public function test_get_active_seed_count_returns_zero_when_none(): void
+    public function test_get_active_peer_counts_returns_zeros_when_none(): void
     {
-        $this->assertSame(0, $this->repository->getActiveSeedCount(1));
+        $this->assertSame(['seed' => 0, 'leech' => 0], $this->repository->getActivePeerCounts(1));
     }
 
-    public function test_get_active_seed_count_counts_seeders(): void
+    public function test_get_active_peer_counts_counts_seeders_and_leechers(): void
     {
         DB::table('peers')->insert([
             ['torrent' => 1, 'peer_id' => random_bytes(20), 'ip' => '1.1.1.1', 'userid' => 10, 'agent' => 'x', 'ipv4' => '1.1.1.1', 'ipv6' => '', 'port' => 1000, 'connectable' => 1, 'seeder' => 1, 'uploaded' => 0, 'downloaded' => 0, 'to_go' => 0, 'passkey' => str_repeat('a', 32), 'started' => now()->toDateTimeString(), 'last_action' => now()->toDateTimeString()],
@@ -120,17 +120,7 @@ final class PageLayoutRepositoryTest extends TestCase
             ['torrent' => 3, 'peer_id' => random_bytes(20), 'ip' => '1.1.1.1', 'userid' => 10, 'agent' => 'x', 'ipv4' => '1.1.1.1', 'ipv6' => '', 'port' => 1002, 'connectable' => 1, 'seeder' => 0, 'uploaded' => 0, 'downloaded' => 0, 'to_go' => 0, 'passkey' => str_repeat('c', 32), 'started' => now()->toDateTimeString(), 'last_action' => now()->toDateTimeString()],
         ]);
 
-        $this->assertSame(2, $this->repository->getActiveSeedCount(10));
-    }
-
-    public function test_get_active_leech_count_counts_leechers(): void
-    {
-        DB::table('peers')->insert([
-            ['torrent' => 1, 'peer_id' => random_bytes(20), 'ip' => '1.1.1.1', 'userid' => 10, 'agent' => 'x', 'ipv4' => '1.1.1.1', 'ipv6' => '', 'port' => 1000, 'connectable' => 1, 'seeder' => 0, 'uploaded' => 0, 'downloaded' => 0, 'to_go' => 0, 'passkey' => str_repeat('a', 32), 'started' => now()->toDateTimeString(), 'last_action' => now()->toDateTimeString()],
-            ['torrent' => 2, 'peer_id' => random_bytes(20), 'ip' => '1.1.1.1', 'userid' => 10, 'agent' => 'x', 'ipv4' => '1.1.1.1', 'ipv6' => '', 'port' => 1001, 'connectable' => 1, 'seeder' => 1, 'uploaded' => 0, 'downloaded' => 0, 'to_go' => 0, 'passkey' => str_repeat('b', 32), 'started' => now()->toDateTimeString(), 'last_action' => now()->toDateTimeString()],
-        ]);
-
-        $this->assertSame(1, $this->repository->getActiveLeechCount(10));
+        $this->assertSame(['seed' => 2, 'leech' => 1], $this->repository->getActivePeerCounts(10));
     }
 
     public function test_get_unread_message_count_returns_zero_when_none(): void

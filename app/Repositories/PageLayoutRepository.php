@@ -52,20 +52,21 @@ class PageLayoutRepository extends BaseRepository implements PageLayoutRepositor
         return $value === null ? null : (int) $value;
     }
 
-    public function getActiveSeedCount(int $userId): int
+    /**
+     * @return array{seed: int, leech: int}
+     */
+    public function getActivePeerCounts(int $userId): array
     {
-        return (int) DB::table('peers')
+        $rows = DB::table('peers')
             ->where('userid', $userId)
-            ->where('seeder', 1)
-            ->count();
-    }
+            ->select('seeder', DB::raw('count(*) as cnt'))
+            ->groupBy('seeder')
+            ->pluck('cnt', 'seeder');
 
-    public function getActiveLeechCount(int $userId): int
-    {
-        return (int) DB::table('peers')
-            ->where('userid', $userId)
-            ->where('seeder', 0)
-            ->count();
+        return [
+            'seed' => (int) ($rows[1] ?? 0),
+            'leech' => (int) ($rows[0] ?? 0),
+        ];
     }
 
     public function getUnreadMessageCount(int $userId): int

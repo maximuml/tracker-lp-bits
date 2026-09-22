@@ -74,6 +74,11 @@ final class ChromeUserBar
         $userId = (int) $user['id'];
         $cache = $context->cache;
 
+        $peerCounts = null;
+        $resolvePeerCounts = static function () use (&$peerCounts, $repo, $userId): array {
+            return $peerCounts ??= $repo->getActivePeerCounts($userId);
+        };
+
         $connect = self::cachedCount($cache, 'user_'.$userId.'_connect', fn () => $repo->getConnectable($userId), 900);
         $connectable = $connect === 1 ? true : ($connect === 0 ? false : null);
 
@@ -120,8 +125,8 @@ final class ChromeUserBar
             inboxCount: (int) self::cachedCount($cache, 'user_'.$userId.'_inbox_count', fn () => $repo->getInboxCount($userId), 900),
             outboxCount: (int) self::cachedCount($cache, 'user_'.$userId.'_outbox_count', fn () => $repo->getOutboxCount($userId), 900),
             unreadCount: (int) self::cachedCount($cache, 'user_'.$userId.'_unread_message_count', fn () => $repo->getUnreadMessageCount($userId), 60),
-            activeSeed: (int) self::cachedCount($cache, 'user_'.$userId.'_active_seed_count', fn () => $repo->getActiveSeedCount($userId), 60),
-            activeLeech: (int) self::cachedCount($cache, 'user_'.$userId.'_active_leech_count', fn () => $repo->getActiveLeechCount($userId), 60),
+            activeSeed: (int) self::cachedCount($cache, 'user_'.$userId.'_active_seed_count', fn () => $resolvePeerCounts()['seed'], 60),
+            activeLeech: (int) self::cachedCount($cache, 'user_'.$userId.'_active_leech_count', fn () => $resolvePeerCounts()['leech'], 60),
             invites: (string) ($user['invites'] ?? '0'),
             pendingInvites: (int) $repo->getPendingInviteCount($userId),
             isModerator: $context->userClass() >= $context->moderatorClass,

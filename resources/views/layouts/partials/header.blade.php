@@ -109,7 +109,7 @@
                 <a href="messages.php?action=viewmailbox&amp;box=-1"><img class="sentbox" alt="sentbox" title="{{ __('legacy/functions.title_sentbox') }}" src="pic/trans.gif" /></a>{{ $chrome->outboxCount }}
                 <span class="nx-notif">
                     <a href="#" id="nx-notif-bell" class="nx-notif-bell" role="button" aria-label="{{ __('legacy/notifications.title_bell') }}" aria-haspopup="true" aria-expanded="false" title="{{ __('legacy/notifications.title_bell') }}"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1a4.5 4.5 0 0 0-4.5 4.5v2.4c0 .4-.12.78-.34 1.11L2 10.5c-.4.64.05 1.5.83 1.5h10.34c.78 0 1.23-.86.83-1.5l-1.16-1.49a2.1 2.1 0 0 1-.34-1.11V5.5A4.5 4.5 0 0 0 8 1Zm0 13.5a2 2 0 0 0 1.86-1.25H6.14A2 2 0 0 0 8 14.5Z"/></svg><span id="nx-notif-badge" class="nx-notif-badge nx-hidden">0</span></a>
-                    <div id="nx-notif-panel" class="nx-notif-panel nx-hidden" role="menu"></div>
+                    <div id="nx-notif-panel" class="nx-notif-panel nx-hidden" role="region" aria-label="{{ __('legacy/notifications.title_bell') }}"></div>
                 </span>
             </div>
         </div>

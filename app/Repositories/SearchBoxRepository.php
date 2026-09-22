@@ -132,6 +132,15 @@ class SearchBoxRepository extends BaseRepository implements SearchBoxRepositoryI
     {
         $result = SearchBox::query()->findOrFail($id);
         $success = $result->delete();
+        if ($success) {
+            // search_box_content, category_list_mode_{id} and the cached
+            // category rows would otherwise outlive the deleted section.
+            // clearCategory() iterates live search-box ids, so the deleted
+            // mode's own list key has to be forgotten explicitly.
+            Cache::clearSearchBox();
+            Cache::forgetWithLocales("category_list_mode_{$id}");
+            Cache::clearCategory();
+        }
 
         return $success;
     }
@@ -200,7 +209,14 @@ class SearchBoxRepository extends BaseRepository implements SearchBoxRepositoryI
             throw new \RuntimeException('There are torrents that belong to this category and cannot be deleted!');
         }
 
-        return Category::query()->whereIn('id', $idArr)->delete();
+        $deleted = Category::query()->whereIn('id', $idArr)->delete();
+        if ($deleted) {
+            // category_content / category_list_mode_* otherwise keep serving
+            // the deleted row for up to ~35 h (TTL 126400 s).
+            Cache::clearCategory();
+        }
+
+        return $deleted;
     }
 
     /**

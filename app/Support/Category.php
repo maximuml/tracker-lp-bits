@@ -21,6 +21,21 @@ final class Category
     /** @var array<int, array<string, mixed>>|null */
     private static ?array $categoryRows = null;
 
+    /** @var array<int|string, array{iconClass: string, name: string}> */
+    private static array $iconDataCache = [];
+
+    /**
+     * Clear per-request memoized state so long-running workers (Octane,
+     * queue) re-read categories/icons instead of serving stale names
+     * cached before an admin edit or delete.
+     */
+    public static function resetState(): void
+    {
+        self::$iconRows = null;
+        self::$categoryRows = null;
+        self::$iconDataCache = [];
+    }
+
     /**
      * Return the category-icon row for `$typeId`.
      *
@@ -166,17 +181,18 @@ final class Category
      */
     public static function iconData(int|string $categoryId): array
     {
-        static $cache = [];
-
-        if (! isset($cache[$categoryId])) {
+        if (! isset(self::$iconDataCache[$categoryId])) {
             $categoryRow = self::rowWithContext($categoryId);
-            $cache[$categoryId] = [
+            $name = (string) ($categoryRow['name'] ?? '');
+            self::$iconDataCache[$categoryId] = [
                 'iconClass' => (string) ($categoryRow['class_name'] ?? ''),
-                'name' => (string) ($categoryRow['name'] ?? ''),
+                // Missing/stale cache row must not leave links nameless —
+                // an empty alt makes the ?cat= anchor a link-name violation.
+                'name' => $name !== '' ? $name : '#'.$categoryId,
             ];
         }
 
-        return $cache[$categoryId];
+        return self::$iconDataCache[$categoryId];
     }
 
     /**

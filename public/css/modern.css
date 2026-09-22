@@ -833,6 +833,7 @@ input[type="reset"] {
 .nxm-pagehead { text-align: center; }
 .nxm-searchpanel { margin: 8px 0; }
 .nxm-searchpanel__toggle { text-align: center; font-weight: 600; padding: 6px; background: var(--nxm-surface, #f6f7f9); border: 1px solid var(--nxm-border, #d8dbe0); border-radius: 6px 6px 0 0; }
+.nxm-linklike { background: none; border: 0; padding: 0; font: inherit; color: inherit; cursor: pointer; }
 .nxm-searchpanel__body { border: 1px solid var(--nxm-border, #d8dbe0); border-top: 0; border-radius: 0 0 6px 6px; padding: 10px; }
 .nxm-fieldset { border: 0; margin: 0 0 8px; padding: 0; }
 .nxm-fieldset legend { font-weight: 600; padding: 4px 0; }

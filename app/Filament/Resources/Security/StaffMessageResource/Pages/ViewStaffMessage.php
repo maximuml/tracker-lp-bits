@@ -38,7 +38,7 @@ class ViewStaffMessage extends ViewRecord
         if ($record->answered == 0 && $user instanceof User) {
             $actions[] = Action::make('reply')
                 ->label(__('label.staff_message.reply'))
-                ->icon('heroicon-o-reply')
+                ->icon('heroicon-o-arrow-uturn-left')
                 ->schema([
                     TextInput::make('subject')->default('Re: '.$record->subject)->required(),
                     Textarea::make('body')->label(__('label.staff_message.reply_body'))->rows(4)->required(),

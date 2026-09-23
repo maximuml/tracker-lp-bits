@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Contracts\Repositories;
 
+use App\Models\Torrent;
 use App\Models\User;
 use Meilisearch\Client;
 use Meilisearch\Endpoints\Indexes;
@@ -57,4 +58,22 @@ interface MeiliSearchRepositoryInterface
      * @return mixed
      */
     public function deleteDocuments($id);
+
+    /**
+     * Name of the temp index currently being rebuilt, or null outside
+     * a rebuild window. While set, live writes must be mirrored to it.
+     */
+    public function rebuildIndexName(): ?string;
+
+    /**
+     * Mirror one torrent document into the index currently being rebuilt.
+     */
+    public function mirrorToRebuildIndex(Torrent $torrent): void;
+
+    /**
+     * Mirror a delete into the index currently being rebuilt.
+     *
+     * @param  array<int|string, mixed>  $ids
+     */
+    public function mirrorDeleteToRebuildIndex(array $ids): void;
 }

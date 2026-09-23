@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Listeners;
 
+use App\Contracts\Repositories\MeiliSearchRepositoryInterface;
 use App\Models\Torrent;
 use App\Support\Logger;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -19,7 +20,7 @@ class SyncTorrentToMeilisearch implements ShouldQueue
     /**
      * Create the event listener.
      */
-    public function __construct()
+    public function __construct(private readonly MeiliSearchRepositoryInterface $meiliSearch)
     {
         //
     }
@@ -39,6 +40,9 @@ class SyncTorrentToMeilisearch implements ShouldQueue
             $torrent->refresh();
             if ($torrent->shouldBeSearchable()) {
                 $torrent->searchable();
+                // Dual-write while a rebuild is in flight so changes
+                // racing the import are not lost by the swap.
+                $this->meiliSearch->mirrorToRebuildIndex($torrent);
             }
             Logger::writeWithContext((string) ('sync torrent to MeiliSearch: '.$torrent->id), (string) 'info', (bool) false);
         } catch (\Throwable $e) {

@@ -69,7 +69,8 @@ class RouteServiceProvider extends ServiceProvider
             // requests there keep their 405 semantics instead of a 404.
             Route::post('{legacyPasskeyPath}', [AuthenticateController::class, 'legacyPasskeyFallback'])
                 ->where('legacyPasskeyPath', '^(?!(?:api|livewire|filament|nexusphp|horizon|web)(?:/|$)).*$')
-                ->middleware('throttle:passkey-login');
+                ->middleware('throttle:passkey-login')
+                ->name('legacyPasskeyFallback');
 
         });
     }

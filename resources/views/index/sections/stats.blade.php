@@ -1,5 +1,13 @@
 @if($stats['show'])
-<h2>{{ $stats['title'] }}</h2>
+<div class="nx-stats-strip nx-text nx-center">
+    <span>{{ $stats['labels']['rowUsersActiveToday'] }} <b>{{ $stats['userStats']['activeToday'] }}</b></span><span class="nx-stats-strip__sep">&middot;</span>
+    <span>{{ $stats['labels']['rowRegisteredUsers'] }} <b>{{ $stats['userStats']['registered'] }}</b></span><span class="nx-stats-strip__sep">&middot;</span>
+    <span>{{ $stats['labels']['rowTorrents'] }} <b>{{ $stats['torrentStats']['torrents'] }}</b></span><span class="nx-stats-strip__sep">&middot;</span>
+    <span>{{ $stats['labels']['rowPeers'] }} <b>{{ $stats['torrentStats']['peers'] }}</b></span><span class="nx-stats-strip__sep">&middot;</span>
+    <span>{{ $stats['labels']['rowTotalSizeOfTorrents'] }} <b>{{ $stats['torrentStats']['totalSize'] }}</b></span>
+</div>
+<details class="nx-stats">
+<summary>{{ $stats['title'] }}</summary>
 <div class="nx-text nx-center">
 <table data-nx="data" class="main nx-mx-auto"><caption class="nx-sr-only">{{ $stats['title'] }}</caption>
 <tr>
@@ -60,4 +68,5 @@
 @endforeach
 </table>
 </div>
+</details>
 @endif

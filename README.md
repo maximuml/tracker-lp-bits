@@ -72,6 +72,25 @@ Key differences from dev:
 - Laravel caches (`config:cache`, `route:cache`, `view:cache`) are built at image build time
 - OPcache configured for production (`validate_timestamps=0`)
 
+#### HTTPS
+
+OpenResty serves TLS on :443 when `/certs/fullchain.pem` + `/certs/private.key` exist
+and falls back to plain HTTP otherwise. Port :80 always answers ACME challenges
+(`/.well-known/acme-challenge/` from the `acme-data` volume) and redirects to HTTPS.
+
+To issue and auto-renew a Let's Encrypt certificate, set `NP_DOMAIN` + `CERTBOT_EMAIL`
+in `.env` and start the opt-in certbot sidecar:
+
+```bash
+docker compose --profile certbot -f docker-compose.yml -f docker-compose.prod.yml up -d
+```
+
+The certbot container requests the cert via HTTP-01 (needs inbound :80 reachable),
+copies it into the shared `certs-data` volume, and renews every 12h. A watcher inside
+the openresty container re-renders the vhost and reloads nginx whenever the cert
+material changes — the site upgrades HTTP→HTTPS without a restart. Use
+`CERTBOT_STAGING=yes` to test against the staging CA (untrusted cert, no rate limits).
+
 ## Local Development
 
 ```bash

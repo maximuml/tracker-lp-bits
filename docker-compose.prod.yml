@@ -111,11 +111,26 @@ services:
     restart: "no"
 
   openresty:
+    # Prod always publishes ACME/redirect :80 and TLS :443 — the base
+    # "${NP_PORT}:${NP_PORT}" mapping cannot express both listeners.
+    ports: !override
+      - "80:80"
+      - "443:443"
+    # :443 is TLS-only when certs exist — the healthcheck must hit plain :80,
+    # which always answers (acme/redirect listener or the HTTP fallback site).
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sfL http://127.0.0.1:80/health/live -o /dev/null"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
     volumes:
       - public-data:/var/www/html/public:ro
       - storage-data:/var/www/html/storage:ro
       - attachments-data:/var/www/html/attachments:ro
       - torrents-data:/var/www/html/torrents:ro
+      - acme-data:/var/www/acme:ro
+      - certs-data:/certs
     depends_on:
       assets-init:
         condition: service_completed_successfully
@@ -123,7 +138,45 @@ services:
     # public/ via a shared named volume (public-data), populated from the PHP
     # image on first mount. Site templates, lua, and nginx.conf are baked in.
 
+  # Let's Encrypt issuance + renewal. Opt-in: start with
+  # `docker compose --profile certbot ... up -d` and set NP_DOMAIN + CERTBOT_EMAIL.
+  # HTTP-01 challenges are served by openresty from the acme-data volume; issued
+  # certs land in certs-data where openresty reads them (/certs) and the
+  # cert-watcher reloads nginx on change. The domain's DNS must already point
+  # at this host (inbound :80 reachable) or issuance fails.
+  certbot:
+    image: certbot/certbot:v4.1.1@sha256:263fe7ee9dde6440bf8baa957c0a8eb0118fc05ef86cf743c4cc84ca84303a21
+    container_name: nexusphp-certbot
+    profiles:
+      - certbot
+    environment:
+      # Validation lives in .docker/certbot/entrypoint.sh — required-env
+      # interpolation would break `compose config` even without this profile.
+      NP_DOMAIN: ${NP_DOMAIN:-}
+      CERTBOT_EMAIL: ${CERTBOT_EMAIL:-}
+      CERTBOT_STAGING: ${CERTBOT_STAGING:-no}
+    volumes:
+      - letsencrypt-data:/etc/letsencrypt
+      - certs-data:/certs
+      - acme-data:/var/www/acme
+      - ./.docker/certbot:/usr/local/lib/certbot:ro
+    entrypoint: ["/bin/sh", "/usr/local/lib/certbot/entrypoint.sh"]
+    depends_on:
+      openresty:
+        condition: service_healthy
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1024m"
+        max-file: "3"
+    networks:
+      - appnet
+
 volumes:
+  acme-data:
+  certs-data:
+  letsencrypt-data:
   storage-data:
   bootstrap-cache:
   attachments-data:

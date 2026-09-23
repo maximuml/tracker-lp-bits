@@ -1,5 +1,6 @@
 server {
     listen 443 ssl;
+    listen 80; # acme
     http2 on;
     server_name ${NP_DOMAIN};
 
@@ -30,6 +31,12 @@ server {
         add_header Content-Type text/plain;
     }
 
+    # Let's Encrypt HTTP-01 challenges (certbot writes to /var/www/acme).
+    location ^~ /.well-known/acme-challenge/ {
+        root /var/www/acme;
+        default_type text/plain;
+    }
+
     # Filament
     location ^~ /filament {
         try_files $uri $uri/ /index.php$is_args$args;
@@ -39,6 +46,8 @@ server {
     # Avoid $uri/ so directories like public/torrents/ do not return 403 before
     # the Laravel route can be matched.
     location / {
+        # Redirect port-80 traffic to TLS (removed by entrypoint when no certs).
+        if ($scheme = http) { return 301 https://$host$request_uri; }
         try_files $uri /index.php?$query_string;
     }
 

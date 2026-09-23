@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
 use App\Repositories\FriendsRepository;
+use App\Support\Avatar;
 use App\Support\CurrentUser;
 use App\Support\Html\SafeHtml;
 use App\Support\Input;
@@ -80,10 +81,7 @@ class FriendsController extends LegacyController
             if (LegacyYesNo::isYes($currentUser['avatars'] ?? null)) {
                 $avatar = htmlspecialchars((string) ($friend['avatar'] ?? ''), ENT_QUOTES, 'UTF-8');
             }
-            if ($avatar === '') {
-                $avatar = 'pic/default_avatar.png';
-            }
-            $friend['avatarSrc'] = $avatar;
+            $friend['avatarSrc'] = Avatar::forUser($friendId, $avatar);
             $friend['usernameHtml'] = $userDisplayMap[$friendId] ?? UserDisplay::username($friendId);
             $friend['titleHtml'] = $titleHtml;
             $friend['lastSeen'] = (string) ($friend['last_access'] ?? '');

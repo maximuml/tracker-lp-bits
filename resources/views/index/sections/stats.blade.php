@@ -1,5 +1,11 @@
 @if($stats['show'])
-<h2>{{ $stats['title'] }}</h2>
+@if($stats['todayUsers']['count'] > 0)
+<h2>{{ $stats['labels']['rowUsersActiveToday'] }}: {{ number_format($stats['todayUsers']['count']) }}</h2>
+<table data-nx="data" class="nx-today-users"><tr><td><div class="nx-today-users__list">@foreach($stats['todayUsers']['cards'] as $uid => $c)<span class="nx-tip" tabindex="0">{{ \App\Support\UserDisplay::username($uid) }}<span class="nx-card"><span class="nx-card__ava">@if($c['avatar'] !== '')<img src="{{ $c['avatar'] }}" alt="" />@else{{ mb_substr($c['username'], 0, 1) }}@endif</span><span class="nx-card__body"><b>{{ $c['username'] }}</b><span class="nx-card__meta">{{ $c['classLabel'] }} · {{ __('legacy/functions.text_ratio') }} {{ $c['ratio'] }}</span><span class="nx-card__meta">↑{{ $c['uploaded'] }} · ↓{{ $c['downloaded'] }} · {{ $c['lastSeen'] }}</span><span class="nx-card__links"><a href="userdetails.php?id={{ $uid }}">Profile</a> · <a href="sendmessage.php?receiver={{ $uid }}">PM</a></span></span></span></span>@if(!$loop->last)<span class="nx-today-users__sep"> | </span>@endif@endforeach</div></td></tr></table>
+@endif
+<div class="nx-stats">
+<details class="nx-stats__details">
+<summary><img class="plus nx-stats__sign" src="pic/trans.gif" alt="" /><span class="nx-stats__title">{{ $stats['title'] }}</span></summary>
 <div class="nx-text nx-center">
 <table data-nx="data" class="main nx-mx-auto"><caption class="nx-sr-only">{{ $stats['title'] }}</caption>
 <tr>
@@ -58,6 +64,17 @@
 @endif
 </tr>
 @endforeach
+</table>
+</div>
+</details>
+<table data-nx="data" class="main nx-stats-strip">
+<tr>
+    <td><span class="nx-stats-strip__label">{{ $stats['labels']['rowUsersActiveToday'] }}</span><b>{{ $stats['userStats']['activeToday'] }}</b></td>
+    <td><span class="nx-stats-strip__label">{{ $stats['labels']['rowRegisteredUsers'] }}</span><b>{{ $stats['userStats']['registered'] }}</b></td>
+    <td><span class="nx-stats-strip__label">{{ $stats['labels']['rowTorrents'] }}</span><b>{{ $stats['torrentStats']['torrents'] }}</b></td>
+    <td><span class="nx-stats-strip__label">{{ $stats['labels']['rowPeers'] }}</span><b>{{ $stats['torrentStats']['peers'] }}</b></td>
+    <td><span class="nx-stats-strip__label">{{ $stats['labels']['rowTotalSizeOfTorrents'] }}</span><b>{{ $stats['torrentStats']['totalSize'] }}</b></td>
+</tr>
 </table>
 </div>
 @endif

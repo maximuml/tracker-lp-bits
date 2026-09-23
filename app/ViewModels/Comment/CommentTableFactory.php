@@ -8,6 +8,7 @@ use App\Auth\Permission;
 use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\User;
+use App\Support\Avatar;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Format;
@@ -47,9 +48,7 @@ final class CommentTableFactory
             $userRow = $userInfoArr->get($row['user'], User::defaultUser())->toArray();
 
             $avatar = ($curUser['avatars'] ?? false) ? \htmlspecialchars(trim((string) $userRow['avatar'])) : '';
-            if ($avatar === '') {
-                $avatar = 'pic/default_avatar.png';
-            }
+            $avatar = Avatar::forUser((int) $row['user'], $avatar);
 
             $viewRows[] = new CommentRow(
                 id: (int) $row['id'],

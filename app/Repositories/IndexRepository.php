@@ -7,6 +7,7 @@ namespace App\Repositories;
 use App\Enums\PeerSeeder;
 use App\Enums\TorrentVisible;
 use App\Enums\UserGender;
+use App\Enums\UserPrivacy;
 use App\Enums\UserStatus;
 use App\Models\News;
 use App\Models\Peer;
@@ -77,6 +78,33 @@ class IndexRepository
         });
     }
 
+    /**
+     * Users active in the last 24h for the index "Active users today" panel.
+     * Strong-privacy (anonymous) and disabled accounts are never listed.
+     *
+     * @return array{count: int, ids: array<int>}
+     */
+    public function getTodayActiveUsers(int $limit = 300): array
+    {
+        return Cache::remember($this->cacheKey('today_active_users', [(string) $limit]), 300, function () use ($limit) {
+            $cutoff = Carbon::now()->subDay();
+
+            $query = User::query()
+                ->where('last_access', '>=', $cutoff)
+                ->where('enabled', true)
+                ->where('privacy', '!=', UserPrivacy::STRONG->value);
+
+            $ids = (clone $query)
+                ->orderByDesc('class')
+                ->orderBy('username')
+                ->limit($limit)
+                ->pluck('id')
+                ->all();
+
+            return ['count' => (int) (clone $query)->count(), 'ids' => $ids];
+        });
+    }
+
     /** @return  array<int|string, mixed> */
     public function getUserStats(): array
     {
@@ -87,8 +115,8 @@ class IndexRepository
             return [
                 'registered' => User::count(),
                 'unverified' => User::where('status', UserStatus::PENDING->value)->where('enabled', true)->count(),
-                'totalonlinetoday' => User::where('last_access', '>=', $cutoffDay)->count(),
-                'totalonlineweek' => User::where('last_access', '>=', $cutoffWeek)->count(),
+                'totalonlinetoday' => User::where('last_access', '>=', $cutoffDay)->where('enabled', true)->where('privacy', '!=', UserPrivacy::STRONG->value)->count(),
+                'totalonlineweek' => User::where('last_access', '>=', $cutoffWeek)->where('enabled', true)->where('privacy', '!=', UserPrivacy::STRONG->value)->count(),
                 'vip' => User::where('class', UC_VIP)->count(),
                 'donated' => User::where('donor', true)->count(),
                 'warned' => User::where('warned', true)->count(),

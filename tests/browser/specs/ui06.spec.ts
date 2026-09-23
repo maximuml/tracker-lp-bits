@@ -1,50 +1,7 @@
 import { expect, test } from '@playwright/test';
-import { execFileSync } from 'node:child_process';
-import { join } from 'node:path';
-import { AUTH_STATE, BROWSER_USER } from '../fixtures/auth';
+import { AUTH_STATE } from '../fixtures/auth';
 
 test.use({ storageState: AUTH_STATE });
-
-const REPO_ROOT = join(__dirname, '..', '..', '..');
-
-function tinker(php: string): string {
-    return execFileSync(
-        'docker',
-        ['compose', 'exec', '-T', 'php', 'php', 'artisan', 'tinker', `--execute=${php}`],
-        { cwd: REPO_ROOT, encoding: 'utf8', stdio: ['pipe', 'pipe', 'inherit'] },
-    );
-}
-
-let db = '';
-
-function mysql(sql: string): string {
-    return execFileSync(
-        'docker',
-        [
-            'compose', 'exec', '-T', 'mysql', 'sh', '-c',
-            'mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" --batch --skip-column-names "$1"',
-            'sh', db,
-        ],
-        { cwd: REPO_ROOT, input: sql, encoding: 'utf8', stdio: ['pipe', 'pipe', 'inherit'] },
-    );
-}
-
-test.beforeAll(() => {
-    // The mysql container's own MYSQL_DATABASE env can be stale while CI
-    // installs into nexusphp_e2e_testing — resolve the live name (same
-    // pattern as notifications.spec.ts).
-    const out = tinker('echo DB::connection()->getDatabaseName();');
-    db = (out.trim().split('\n').pop() ?? '').trim();
-    if (!/^[A-Za-z0-9_]+$/.test(db)) {
-        throw new Error(`could not resolve app database name: ${JSON.stringify(out)}`);
-    }
-});
-
-test.afterAll(() => {
-    if (db) {
-        mysql(`DELETE FROM shoutbox WHERE text LIKE '%ui06 e2e%'`);
-    }
-});
 
 test.describe('UI-06 index page', () => {
     test('latest torrents title has no count claim', async ({ page }) => {
@@ -103,26 +60,32 @@ test.describe('UI-06 index page', () => {
         }
         await expect(panel).toBeVisible();
 
-        // Collapse first — the baseline is captured from the live iframe DOM.
+        // Collapse first — the mention baseline is captured from the live
+        // iframe DOM at this moment.
         await toggle.click();
         await expect(panel).toBeHidden();
         await expect(badge).toBeHidden();
 
-        // Insert the mention directly: posting via shoutbox.php hits the
-        // 60 s per-user post lock (429), and shout rows authored by the
-        // viewer are enough to produce a positive delta over the baseline.
-        mysql(
-            `INSERT INTO shoutbox (userid,date,text,type)
-             SELECT id, UNIX_TIMESTAMP(), '@${BROWSER_USER} ui06 e2e mention', 0
-             FROM users WHERE username='${BROWSER_USER}' LIMIT 1`,
-        );
-
-        // Reload the iframe to deliver the shout deterministically — in
-        // production the iframe's own SSE/poll refreshes its DOM, and the
-        // parent recounts mentions on each 'load' event (plus a 15 s
-        // fallback interval for in-place poll updates).
-        await page.locator('#iframe-shout-box').evaluate((el: HTMLIFrameElement) => el.contentWindow!.location.reload());
-        await expect(badge).toBeVisible({ timeout: 15000 });
+        // Deliver a mention row into the iframe DOM and fire 'load' — the
+        // exact signal the parent listens to. Live reloads are unsuitable
+        // here: shoutbox.php is throttled to 30 req/min per user, and the
+        // suite loads the iframe on every index visit, so in CI the iframe
+        // document is frequently a 429 page. The contract under test is
+        // "badge = new .shoutrow-mentions-me rows since collapse".
+        await page.locator('#iframe-shout-box').evaluate((el: HTMLIFrameElement) => {
+            const doc = el.contentDocument;
+            if (!doc) {
+                return;
+            }
+            const tr = doc.createElement('tr');
+            const td = doc.createElement('td');
+            td.className = 'shoutrow shoutrow-mentions-me';
+            td.textContent = 'ui06 e2e mention';
+            tr.appendChild(td);
+            (doc.querySelector('#shoutbox-content') || doc.body).appendChild(tr);
+            el.dispatchEvent(new Event('load'));
+        });
+        await expect(badge).toBeVisible({ timeout: 10000 });
         await expect(badge).toContainText('mention');
 
         // Clicking the badge expands the panel again.

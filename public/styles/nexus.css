@@ -212,6 +212,17 @@ table.msg-alert td.msg-alert-gray { background: gray; }
     text-align: center;
     word-break: break-word;
 }
+.lt-grid .lt-cover.lt-cover-empty {
+    aspect-ratio: auto;
+    max-height: none;
+    height: 56px;
+    background: rgba(127,127,127,.08);
+    border-bottom: 1px dashed rgba(127,127,127,.3);
+}
+.lt-grid .lt-cover.lt-cover-empty .lt-cover-fallback {
+    font-size: 11px;
+    padding: 4px 28px 4px 8px;
+}
 .lt-grid .lt-type {
     position: absolute;
     top: 6px;
@@ -573,7 +584,11 @@ button.nx-btn-link {
 iframe{border:0}
 .nx-sql-error{background:#00c;color:#fff}
 .nx-sql-error td{padding:10pt}
-#iframe-shout-box{width:100%;height:180px}
+#iframe-shout-box{display:block;width:100%;height:180px}
+#shoutbox-panel>form{margin-top:8px}
+button.nx-shoutbox-toggle{background:none;border:0;padding:0;font:inherit;cursor:pointer;text-decoration:underline;color:inherit}
+button.nx-shoutbox-toggle:hover{text-decoration:none}
+button.nx-shoutbox-mentions{border:1px solid var(--nxm-danger-border,#c0392b);background:var(--nxm-danger-bg,#fdf0f0);color:var(--nxm-danger,#c0392b);border-radius:10px;padding:0 8px;margin-left:4px;font-size:11px;font-weight:bold;line-height:1.6;cursor:pointer}
 .nx-attach-preview{width:100%;height:24px;display:block}
 .nx-center{text-align:center}
 /* Legacy page shell (header/footer wrappers): .nx-head replaces

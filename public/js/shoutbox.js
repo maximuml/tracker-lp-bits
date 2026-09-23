@@ -449,3 +449,85 @@ document.addEventListener('click', function (e) {
         return;
     }
 });
+
+// Index-page collapse toggle: hides the iframe panel while it keeps loading
+// in the background, and surfaces new @-mentions via a badge. State persists
+// in localStorage. Runs only in the parent page — the iframe document is
+// detected via window.self !== window.top.
+(function () {
+    if (window.self !== window.top) { return; }
+
+    var iframe = document.getElementById('iframe-shout-box');
+    var panel = document.getElementById('shoutbox-panel');
+    var toggle = document.getElementById('shoutbox-toggle');
+    var badge = document.getElementById('shoutbox-mentions');
+    if (!iframe || !panel || !toggle || !badge) { return; }
+
+    var STORAGE_KEY = 'nx.shoutbox.collapsed';
+    var collapsed = false;
+    var mentionBaseline = -1;
+
+    function shoutMentionCount() {
+        try {
+            var doc = iframe.contentDocument;
+            return doc ? doc.querySelectorAll('.shoutrow-mentions-me').length : 0;
+        } catch (e) {
+            return 0;
+        }
+    }
+
+    function shoutCollapseRender() {
+        panel.style.display = collapsed ? 'none' : '';
+        toggle.hidden = false;
+        toggle.textContent = '[' + shoutboxT(collapsed ? 'expand' : 'collapse', collapsed ? 'Expand' : 'Collapse') + ']';
+        toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+        if (!collapsed) { badge.hidden = true; }
+        try { localStorage.setItem(STORAGE_KEY, collapsed ? '1' : '0'); } catch (e) {}
+    }
+
+    function shoutCollapseScan() {
+        if (!collapsed) { return; }
+        if (mentionBaseline < 0) { mentionBaseline = shoutMentionCount(); return; }
+        var delta = shoutMentionCount() - mentionBaseline;
+        if (delta > 0) {
+            badge.hidden = false;
+            badge.textContent = shoutboxT('newMentions', '%d new mentions').replace('%d', String(delta));
+        } else {
+            badge.hidden = true;
+        }
+    }
+
+    toggle.addEventListener('click', function () {
+        collapsed = !collapsed;
+        mentionBaseline = collapsed ? shoutMentionCount() : -1;
+        shoutCollapseRender();
+        shoutCollapseScan();
+    });
+    badge.addEventListener('click', function () {
+        collapsed = false;
+        mentionBaseline = -1;
+        shoutCollapseRender();
+        toggle.focus();
+    });
+    iframe.addEventListener('load', shoutCollapseScan);
+
+    // New shouts arrive inside the iframe via shoutPoll() DOM updates — no
+    // iframe 'load' event fires. The iframe broadcasts 'refresh' on this
+    // channel when SSE delivers; scan shortly after (poll is async).
+    if (typeof BroadcastChannel !== 'undefined') {
+        try {
+            var bus = new BroadcastChannel('nx-shout-shoutbox');
+            bus.onmessage = function (e) {
+                if (e && e.data === 'refresh') {
+                    setTimeout(shoutCollapseScan, 500);
+                    setTimeout(shoutCollapseScan, 2500);
+                }
+            };
+        } catch (e) {}
+    }
+    setInterval(shoutCollapseScan, 15000);
+
+    try { collapsed = localStorage.getItem(STORAGE_KEY) === '1'; } catch (e) {}
+    shoutCollapseRender();
+    shoutCollapseScan();
+})();

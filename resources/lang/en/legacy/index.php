@@ -35,6 +35,7 @@ return [
     'text_in' => 'in ',
     'std_no_torrent_found' => 'No torrents found',
     'text_last_five_torrent' => 'Last 5 Torrent Uploads',
+    'text_latest_torrents' => 'Latest Torrents',
     'col_name' => 'Name',
     'col_seeder' => 'Seeder',
     'col_leecher' => 'Leecher',

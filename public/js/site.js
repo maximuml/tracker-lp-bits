@@ -981,6 +981,7 @@ document.addEventListener('error', function (e) {
     var img = e.target;
     if (img && img.tagName === 'IMG' && img.closest && img.closest('.lt-cover')) {
         img.classList.add('lt-broken');
+        img.closest('.lt-cover').classList.add('lt-cover-empty');
     }
 }, true);
 

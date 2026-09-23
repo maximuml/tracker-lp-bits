@@ -2,7 +2,7 @@
 <div class="lt-grid">
 @foreach($items as $item)
     <div class="lt-card">
-        <a class="lt-cover" href="{{ $item['detailsUrl'] }}" title="{{ $item['name'] }}">
+        <a class="lt-cover{{ $item['thumbUrl'] === '' ? ' lt-cover-empty' : '' }}" href="{{ $item['detailsUrl'] }}" title="{{ $item['name'] }}">
             <div class="lt-cover-fallback">{{ $item['nameShort'] }}</div>
             @if($item['thumbUrl'] !== '')
                 <img src="{{ $item['thumbUrl'] }}" alt="{{ $item['name'] }}" loading="lazy" />

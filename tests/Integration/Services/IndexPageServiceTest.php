@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Services;
 
+use App\Models\Category;
+use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\IndexRepository;
 use App\Services\IndexPageService;
@@ -288,6 +290,37 @@ final class IndexPageServiceTest extends TestCase
         ]);
 
         $this->assertTrue($result['latestTorrents']['show']);
+    }
+
+    public function test_latest_torrents_title_does_not_mismatch_card_count(): void
+    {
+        $torrent = (new Torrent)->forceFill([
+            'id' => 42,
+            'name' => 'Some Torrent Name',
+            'cover' => '',
+            'anonymous' => 'yes',
+            'owner' => 0,
+            'seeders' => 3,
+            'leechers' => 1,
+            'size' => 1024,
+        ]);
+        $torrent->setRelation('basic_category', (new Category)->forceFill(['name' => 'Movies']));
+
+        // Declared before mockIndexRepo() so it wins over the generic stub;
+        // a call with any other limit falls through and yields zero cards.
+        $this->indexRepository->shouldReceive('getLatestTorrents')
+            ->with(9)
+            ->andReturn(new Collection([$torrent]));
+
+        $result = $this->buildWithAllSectionsDisabled([
+            'showlastxtorrents_main' => 'yes',
+        ]);
+
+        $html = (string) $result['latestTorrents']['html'];
+        $this->assertStringContainsString('Latest Torrents', $html);
+        $this->assertStringNotContainsString('Last 5', $html);
+        $this->assertSame(1, substr_count($html, 'class="lt-card"'));
+        $this->assertStringContainsString('lt-cover-empty', $html);
     }
 
     public function test_polls_hidden_when_setting_is_no(): void

@@ -85,4 +85,11 @@ return [
 
     'trusted_proxies' => Env::get('TRUSTED_PROXIES', ''),
 
+    // NEXUS_RATE_LIMITING=false disables every `throttle:` middleware check
+    // (named limiters and inline throttle:N,M alike). E2E/browser stacks set
+    // this: the whole suite shares one IP, so per-IP buckets exhaust within a
+    // minute and flake unrelated tests with 429s. Tracker announce throttling
+    // (throttle.tracker) is a separate middleware and is unaffected.
+    'rate_limiting' => Env::get('NEXUS_RATE_LIMITING', true),
+
 ];

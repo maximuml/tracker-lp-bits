@@ -218,7 +218,7 @@ JS;
             return ['show' => false];
         }
 
-        $cacheKey = 'index_latest_torrents_grid_v2';
+        $cacheKey = 'index_latest_torrents_grid_v3';
         $cacheTtl = 120;
         $html = $cache->get_value($cacheKey);
 
@@ -245,7 +245,7 @@ JS;
                 }
                 $html = view('index.sections.latest_torrents', [
                     'items' => $items,
-                    'title' => __('legacy/index.text_last_five_torrent'),
+                    'title' => __('legacy/index.text_latest_torrents'),
                     'colSeeder' => __('legacy/index.col_seeder'),
                     'colLeecher' => __('legacy/index.col_leecher'),
                 ])->render();
@@ -574,6 +574,9 @@ JS;
             'url' => __('legacy/shoutbox.js_url'),
             'linkText' => __('legacy/shoutbox.js_link_text'),
             'confirmDelete' => __('legacy/shoutbox.js_confirm_delete'),
+            'collapse' => __('legacy/shoutbox.js_collapse'),
+            'expand' => __('legacy/shoutbox.js_expand'),
+            'newMentions' => __('legacy/shoutbox.js_new_mentions'),
         ], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT);
         AssetAppender::js("window.SHOUT_LANG = $shoutLang;", 'footer', false, 'shout-lang');
         AssetAppender::js('js/shoutbox.js', 'footer', true);

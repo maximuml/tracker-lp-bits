@@ -1,15 +1,7 @@
 @if($stats['show'])
-<details class="nx-stats">
-<summary>
-    <span class="nx-stats__title">{{ $stats['title'] }}</span>
-    <span class="nx-stats-strip">
-        <span>{{ $stats['labels']['rowUsersActiveToday'] }} <b>{{ $stats['userStats']['activeToday'] }}</b></span><span class="nx-stats-strip__sep">&middot;</span>
-        <span>{{ $stats['labels']['rowRegisteredUsers'] }} <b>{{ $stats['userStats']['registered'] }}</b></span><span class="nx-stats-strip__sep">&middot;</span>
-        <span>{{ $stats['labels']['rowTorrents'] }} <b>{{ $stats['torrentStats']['torrents'] }}</b></span><span class="nx-stats-strip__sep">&middot;</span>
-        <span>{{ $stats['labels']['rowPeers'] }} <b>{{ $stats['torrentStats']['peers'] }}</b></span><span class="nx-stats-strip__sep">&middot;</span>
-        <span>{{ $stats['labels']['rowTotalSizeOfTorrents'] }} <b>{{ $stats['torrentStats']['totalSize'] }}</b></span>
-    </span>
-</summary>
+<div class="nx-stats">
+<details class="nx-stats__details">
+<summary><span class="nx-stats__title">{{ $stats['title'] }}</span></summary>
 <div class="nx-text nx-center">
 <table data-nx="data" class="main nx-mx-auto"><caption class="nx-sr-only">{{ $stats['title'] }}</caption>
 <tr>
@@ -71,4 +63,14 @@
 </table>
 </div>
 </details>
+<table data-nx="data" class="main nx-stats-strip">
+<tr>
+    <td><span class="nx-stats-strip__label">{{ $stats['labels']['rowUsersActiveToday'] }}</span><b>{{ $stats['userStats']['activeToday'] }}</b></td>
+    <td><span class="nx-stats-strip__label">{{ $stats['labels']['rowRegisteredUsers'] }}</span><b>{{ $stats['userStats']['registered'] }}</b></td>
+    <td><span class="nx-stats-strip__label">{{ $stats['labels']['rowTorrents'] }}</span><b>{{ $stats['torrentStats']['torrents'] }}</b></td>
+    <td><span class="nx-stats-strip__label">{{ $stats['labels']['rowPeers'] }}</span><b>{{ $stats['torrentStats']['peers'] }}</b></td>
+    <td><span class="nx-stats-strip__label">{{ $stats['labels']['rowTotalSizeOfTorrents'] }}</span><b>{{ $stats['torrentStats']['totalSize'] }}</b></td>
+</tr>
+</table>
+</div>
 @endif

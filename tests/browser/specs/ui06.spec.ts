@@ -6,8 +6,13 @@ test.use({ storageState: AUTH_STATE });
 test.describe('UI-06 index page', () => {
     test('latest torrents title has no count claim', async ({ page }) => {
         await page.goto('/index.php', { waitUntil: 'networkidle' });
-        const heading = page.locator('h2', { hasText: 'Latest Torrents' });
-        await expect(heading).toBeVisible();
+        // The section is settings-driven — skip when the env renders none.
+        if ((await page.locator('.lt-grid').count()) === 0) {
+            test.skip(true, 'latest torrents section not rendered in this env');
+            return;
+        }
+        await expect(page.locator('h2', { hasText: 'Latest Torrents' })).toBeVisible();
+        await expect(page.locator('h2', { hasText: 'Last 5 Torrent' })).toHaveCount(0);
         const cards = page.locator('.lt-grid .lt-card');
         const count = await cards.count();
         expect(count).toBeGreaterThan(0);

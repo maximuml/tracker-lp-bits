@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\ValidationException;
+use Laravel\Sanctum\PersonalAccessToken;
 use Mockery;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
@@ -35,7 +36,7 @@ final class AuthenticateControllerTest extends TestCase
         $repository = Mockery::mock(AuthenticateRepository::class);
         $repository->shouldReceive('login')
             ->once()
-            ->with('testuser', 'password', '')
+            ->with('testuser', 'password', '', Mockery::any())
             ->andReturn($loginResult);
 
         /** @var UserRepository&Mockery\MockInterface $userRepository */
@@ -116,10 +117,34 @@ final class AuthenticateControllerTest extends TestCase
     {
         /** @var AuthenticateRepository&Mockery\MockInterface $repository */
         $repository = Mockery::mock(AuthenticateRepository::class);
+        $repository->shouldNotReceive('logout');
+
+        /** @var UserRepository&Mockery\MockInterface $userRepository */
+        $userRepository = Mockery::mock(UserRepository::class);
+
+        $token = Mockery::mock(PersonalAccessToken::class);
+        $token->shouldReceive('delete')->once();
+
+        $user = Mockery::mock(User::class)->makePartial();
+        $user->shouldReceive('currentAccessToken')->once()->andReturn($token);
+
+        $controller = new AuthenticateController($repository, $userRepository, $this->app);
+        $request = Request::create('/api/v1/logout', 'POST', []);
+        $request->setUserResolver(static fn (): User => $user);
+
+        $result = $controller->logout($request);
+
+        $this->assertSame(0, $result['ret']);
+    }
+
+    public function test_logout_all_revokes_every_token(): void
+    {
+        /** @var AuthenticateRepository&Mockery\MockInterface $repository */
+        $repository = Mockery::mock(AuthenticateRepository::class);
         $repository->shouldReceive('logout')
             ->once()
             ->with(5)
-            ->andReturn(true);
+            ->andReturn(2);
 
         /** @var UserRepository&Mockery\MockInterface $userRepository */
         $userRepository = Mockery::mock(UserRepository::class);
@@ -127,9 +152,9 @@ final class AuthenticateControllerTest extends TestCase
         Auth::shouldReceive('id')->once()->andReturn(5);
 
         $controller = new AuthenticateController($repository, $userRepository, $this->app);
-        $request = Request::create('/api/v1/logout', 'POST', []);
+        $request = Request::create('/api/v1/logout-all', 'POST', []);
 
-        $result = $controller->logout($request);
+        $result = $controller->logoutAll($request);
 
         $this->assertSame(0, $result['ret']);
     }

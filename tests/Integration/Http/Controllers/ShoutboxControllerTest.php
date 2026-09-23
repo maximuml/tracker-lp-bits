@@ -20,7 +20,7 @@ final class ShoutboxControllerTest extends TestCase
     {
         parent::setUp();
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
-        DB::table('shoutbox')->truncate();
+        DB::table('shoutbox')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
     }
 

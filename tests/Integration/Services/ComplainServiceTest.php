@@ -38,9 +38,9 @@ final class ComplainServiceTest extends TestCase
         parent::setUp();
         Redis::connection()->flushdb();
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
-        DB::table('complains')->truncate();
-        DB::table('complain_replies')->truncate();
-        DB::table('users')->truncate();
+        DB::table('complains')->delete();
+        DB::table('complain_replies')->delete();
+        DB::table('users')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
     }
 

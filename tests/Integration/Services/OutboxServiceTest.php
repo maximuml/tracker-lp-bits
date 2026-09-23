@@ -23,7 +23,7 @@ final class OutboxServiceTest extends TestCase
     {
         parent::setUp();
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
-        DB::table('outbox_events')->truncate();
+        DB::table('outbox_events')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
     }
 

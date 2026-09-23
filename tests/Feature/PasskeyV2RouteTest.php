@@ -312,9 +312,16 @@ final class PasskeyV2RouteTest extends TestCase
     {
         $response = $this->get('/test-secret-uri');
 
-        // 404 when nothing matches; 405 when the POST catch-all claims
-        // the URI but not the method — either way, no GET dispatch.
-        $this->assertContains($response->status(), [404, 405]);
+        // The GET catch-all answers unrouted GETs with 404 so the POST
+        // passkey catch-all no longer turns missing pages into 405s.
+        $response->assertNotFound();
+    }
+
+    public function test_get_to_missing_page_is_404_not_405(): void
+    {
+        $response = $this->get('/definitely-not-a-real-page-'.bin2hex(random_bytes(4)));
+
+        $response->assertNotFound();
     }
 
     public function test_get_to_auth_passkey_is_not_allowed(): void

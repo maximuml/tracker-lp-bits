@@ -20,7 +20,7 @@ final class OverForumControllerTest extends TestCase
     {
         parent::setUp();
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
-        DB::table('overforums')->truncate();
+        DB::table('overforums')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
     }
 

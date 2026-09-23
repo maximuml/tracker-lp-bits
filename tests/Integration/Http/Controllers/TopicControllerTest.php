@@ -36,8 +36,8 @@ final class TopicControllerTest extends TestCase
     {
         parent::setUp();
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
-        DB::table('topics')->truncate();
-        DB::table('forums')->truncate();
+        DB::table('topics')->delete();
+        DB::table('forums')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
     }
 

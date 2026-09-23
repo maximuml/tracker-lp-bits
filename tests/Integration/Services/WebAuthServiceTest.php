@@ -35,7 +35,7 @@ final class WebAuthServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        DB::table('loginattempts')->truncate();
+        DB::table('loginattempts')->delete();
     }
 
     private function service(): WebAuthService

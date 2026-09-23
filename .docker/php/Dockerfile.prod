@@ -95,11 +95,11 @@ RUN apk add --no-cache \
     gmp \
     oniguruma
 
-# Configure PHP-FPM: log to stderr, tune for production
+# Configure PHP-FPM: log PHP errors to storage/logs/php_errors.log, tune for production
 RUN sed -i \
     -e 's/;catch_workers_output = .*/catch_workers_output = yes/g' \
     -e 's/;php_admin_flag\[log_errors\] = .*/php_admin_flag\[log_errors\] = on/g' \
-    -e 's/;php_admin_value\[error_log\] = .*/php_admin_value\[error_log\] = \/dev\/stderr/g' \
+    -e 's/;php_admin_value\[error_log\] = .*/php_admin_value\[error_log\] = \/var\/www\/html\/storage\/logs\/php_errors.log/g' \
     -e 's/^pm = .*/pm = dynamic/g' \
     -e 's/^pm.max_children = .*/pm.max_children = 50/g' \
     -e 's/^pm.start_servers = .*/pm.start_servers = 5/g' \
@@ -108,7 +108,7 @@ RUN sed -i \
     -e 's/^pm.max_requests = .*/pm.max_requests = 1000/g' \
     /usr/local/etc/php-fpm.d/www.conf
 
-RUN echo "error_log = /dev/stderr" >> /usr/local/etc/php/conf.d/error-logging.ini
+RUN echo "error_log = /var/www/html/storage/logs/php_errors.log" >> /usr/local/etc/php/conf.d/error-logging.ini && echo "log_errors = On" >> /usr/local/etc/php/conf.d/error-logging.ini && echo "error_reporting = E_ALL" >> /usr/local/etc/php/conf.d/error-logging.ini
 RUN echo "upload_max_filesize = 10M" >> /usr/local/etc/php/conf.d/upload.ini
 RUN echo "post_max_size = 10M" >> /usr/local/etc/php/conf.d/upload.ini
 

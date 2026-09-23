@@ -79,11 +79,11 @@ final class AjaxServiceTest extends TestCase
         parent::setUp();
         Redis::connection()->flushdb();
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
-        DB::table('shoutbox')->truncate();
-        DB::table('shoutbox_reactions')->truncate();
-        DB::table('offers')->truncate();
-        DB::table('users')->truncate();
-        DB::table('personal_access_tokens')->truncate();
+        DB::table('shoutbox')->delete();
+        DB::table('shoutbox_reactions')->delete();
+        DB::table('offers')->delete();
+        DB::table('users')->delete();
+        DB::table('personal_access_tokens')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
         /** @var MedalRepository&MockInterface $medalRepo */

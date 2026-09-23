@@ -19,8 +19,8 @@ final class ForumControllerTest extends TestCase
         parent::setUp();
         config(['scout.driver' => 'null']);
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
-        DB::table('forums')->truncate();
-        DB::table('overforums')->truncate();
+        DB::table('forums')->delete();
+        DB::table('overforums')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
     }
 

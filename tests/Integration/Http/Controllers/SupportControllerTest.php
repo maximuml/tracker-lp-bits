@@ -33,8 +33,8 @@ final class SupportControllerTest extends TestCase
         $this->setupLegacyEnvironment();
         Permissions::resetState();
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
-        DB::table('complains')->truncate();
-        DB::table('complain_replies')->truncate();
+        DB::table('complains')->delete();
+        DB::table('complain_replies')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
     }
 

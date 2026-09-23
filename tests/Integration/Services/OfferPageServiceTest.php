@@ -46,10 +46,10 @@ final class OfferPageServiceTest extends TestCase
         Redis::connection()->flushdb();
 
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
-        DB::table('offers')->truncate();
-        DB::table('offervotes')->truncate();
-        DB::table('users')->truncate();
-        DB::table('categories')->truncate();
+        DB::table('offers')->delete();
+        DB::table('offervotes')->delete();
+        DB::table('users')->delete();
+        DB::table('categories')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
     }
 

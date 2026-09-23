@@ -27,7 +27,7 @@ final class LocationServiceTest extends TestCase
     {
         parent::setUp();
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
-        DB::table('locations')->truncate();
+        DB::table('locations')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
         $this->service = new LocationService;

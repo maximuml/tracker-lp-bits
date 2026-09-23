@@ -48,12 +48,12 @@ final class OfferServiceTest extends TestCase
         $this->initialObLevel = ob_get_level();
         Redis::connection()->flushdb();
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
-        DB::table('offers')->truncate();
-        DB::table('offervotes')->truncate();
-        DB::table('users')->truncate();
-        DB::table('messages')->truncate();
-        DB::table('staffmessages')->truncate();
-        DB::table('comments')->truncate();
+        DB::table('offers')->delete();
+        DB::table('offervotes')->delete();
+        DB::table('users')->delete();
+        DB::table('messages')->delete();
+        DB::table('staffmessages')->delete();
+        DB::table('comments')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
         $this->currentUser = new CurrentUser;

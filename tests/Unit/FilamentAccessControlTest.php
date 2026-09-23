@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit;
 
 use App\Enums\UserClass;
+use App\Filament\Pages\PhpErrorLog;
 use App\Filament\Pages\RefererSources;
 use App\Filament\Resources\Section\ForumResource;
 use App\Filament\Resources\Section\OverForumResource;
@@ -129,6 +130,20 @@ final class FilamentAccessControlTest extends TestCase
     public function test_overforum_resource_denied_for_regular_user(): void
     {
         $this->assertFalse($this->canAccessWithClass(OverForumResource::class, UserClass::USER));
+    }
+
+    /**
+     * PhpErrorLog page requires SYSOP (log contents leak code paths).
+     */
+    public function test_php_error_log_sysop_access(): void
+    {
+        $this->assertTrue($this->canAccessWithClass(PhpErrorLog::class, UserClass::SYSOP));
+    }
+
+    public function test_php_error_log_denied_below_sysop(): void
+    {
+        $this->assertFalse($this->canAccessWithClass(PhpErrorLog::class, UserClass::ADMINISTRATOR));
+        $this->assertFalse($this->canAccessWithClass(PhpErrorLog::class, UserClass::USER));
     }
 
     /**

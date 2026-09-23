@@ -26,7 +26,7 @@ final class ThankControllerTest extends TestCase
         parent::setUp();
         config(['scout.driver' => 'null']);
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
-        DB::table('thanks')->truncate();
+        DB::table('thanks')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
     }
 

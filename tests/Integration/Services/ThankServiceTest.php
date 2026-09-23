@@ -34,9 +34,9 @@ final class ThankServiceTest extends TestCase
         parent::setUp();
         Redis::connection()->flushdb();
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
-        DB::table('thanks')->truncate();
-        DB::table('torrents')->truncate();
-        DB::table('users')->truncate();
+        DB::table('thanks')->delete();
+        DB::table('torrents')->delete();
+        DB::table('users')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
         $this->service = new ThankService;

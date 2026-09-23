@@ -22,8 +22,11 @@ class TopicModerationRepository extends BaseRepository
         }
 
         Topic::query()->where('id', $topicid)->update(['forumid' => $newForumid]);
-        Forum::query()->where('id', $oldForumid)->decrement('topiccount');
-        Forum::query()->where('id', $oldForumid)->decrement('postcount', $postCount);
+        Forum::query()->where('id', $oldForumid)->update(['topiccount' => DB::raw('GREATEST(CAST(topiccount AS SIGNED) - 1, 0)')]);
+        DB::update(
+            'UPDATE `forums` SET `postcount` = GREATEST(CAST(`postcount` AS SIGNED) - ?, 0) WHERE `id` = ?',
+            [$postCount, $oldForumid]
+        );
         Forum::query()->where('id', $newForumid)->increment('topiccount');
         Forum::query()->where('id', $newForumid)->increment('postcount', $postCount);
 
@@ -35,8 +38,11 @@ class TopicModerationRepository extends BaseRepository
         Topic::query()->where('id', $topicid)->delete();
         Post::query()->where('topicid', $topicid)->delete();
         DB::table('readposts')->where('topicid', $topicid)->delete();
-        Forum::query()->where('id', $forumid)->decrement('topiccount');
-        Forum::query()->where('id', $forumid)->decrement('postcount', $postCount);
+        Forum::query()->where('id', $forumid)->update(['topiccount' => DB::raw('GREATEST(CAST(topiccount AS SIGNED) - 1, 0)')]);
+        DB::update(
+            'UPDATE `forums` SET `postcount` = GREATEST(CAST(`postcount` AS SIGNED) - ?, 0) WHERE `id` = ?',
+            [$postCount, $forumid]
+        );
 
         return true;
     }

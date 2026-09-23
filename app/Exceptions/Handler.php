@@ -15,10 +15,12 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\UnauthorizedException;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\ViewException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
@@ -51,6 +53,24 @@ class Handler extends ExceptionHandler
      */
     public function register()
     {
+        // The legacyPasskeyFallback POST catch-all claims every unclaimed
+        // path, so a GET to a missing page surfaces as a 405. When no real
+        // route matches the path for any method, answer 404 instead; a
+        // wrong-method hit on an existing route keeps its 405. Registered
+        // before the console early-return so tests exercise it too.
+        $this->renderable(function (MethodNotAllowedHttpException $e, Request $request) {
+            foreach (Route::getRoutes()->getRoutes() as $route) {
+                if ($route->getName() === 'legacyPasskeyFallback') {
+                    continue;
+                }
+                if ($route->matches($request, false)) {
+                    return null;
+                }
+            }
+
+            return $this->prepareResponse($request, new NotFoundHttpException('', $e));
+        });
+
         if ($this->container->runningInConsole()) {
             return;
         }

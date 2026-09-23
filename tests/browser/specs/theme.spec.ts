@@ -20,6 +20,7 @@ test.describe('theme toggle', () => {
     await expect(toggle).toBeVisible();
 
     const themeRequest = page.waitForRequest((r) => r.url().includes('/usercp/theme'));
+    const themeResponse = page.waitForResponse((r) => r.url().includes('/usercp/theme'));
     await toggle.click();
 
     const next = await html.getAttribute('data-theme');
@@ -28,6 +29,9 @@ test.describe('theme toggle', () => {
     const request = await themeRequest;
     expect(request.method()).toBe('POST');
     expect(request.postData()).toContain(`theme=${next}`);
+    // Persist must succeed — a 401/419 means the server-side save is
+    // silently broken while the UI toggles locally (root-relative URL).
+    expect((await themeResponse).status()).toBe(204);
   });
 
   test('dark scheme keeps axe color-contrast clean', async ({ page }) => {

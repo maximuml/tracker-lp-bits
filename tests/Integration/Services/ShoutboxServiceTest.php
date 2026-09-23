@@ -35,9 +35,9 @@ final class ShoutboxServiceTest extends TestCase
         // Flush Redis to clear any leftover locks from previous tests
         Redis::connection()->flushdb();
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
-        DB::table('shoutbox')->truncate();
-        DB::table('shoutbox_reactions')->truncate();
-        DB::table('users')->truncate();
+        DB::table('shoutbox')->delete();
+        DB::table('shoutbox_reactions')->delete();
+        DB::table('users')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
         $this->service = new ShoutboxService;

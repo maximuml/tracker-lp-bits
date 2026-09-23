@@ -28,10 +28,10 @@ final class TorrentBookmarkServiceTest extends TestCase
     {
         parent::setUp();
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
-        DB::table('bookmarks')->truncate();
-        DB::table('thanks')->truncate();
-        DB::table('torrents')->truncate();
-        DB::table('users')->truncate();
+        DB::table('bookmarks')->delete();
+        DB::table('thanks')->delete();
+        DB::table('torrents')->delete();
+        DB::table('users')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
         $this->service = new TorrentBookmarkService;

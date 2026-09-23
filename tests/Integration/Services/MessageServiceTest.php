@@ -47,11 +47,11 @@ final class MessageServiceTest extends TestCase
         $this->initialObLevel = ob_get_level();
         Redis::connection()->flushdb();
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
-        DB::table('messages')->truncate();
-        DB::table('pmboxes')->truncate();
-        DB::table('blocks')->truncate();
-        DB::table('friends')->truncate();
-        DB::table('users')->truncate();
+        DB::table('messages')->delete();
+        DB::table('pmboxes')->delete();
+        DB::table('blocks')->delete();
+        DB::table('friends')->delete();
+        DB::table('users')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
         $this->globals = new Globals;

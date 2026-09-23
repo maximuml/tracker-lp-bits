@@ -57,3 +57,4 @@ tests/browser/node_modules/
 tests/browser/.auth/
 tests/browser/test-results/
 tests/browser/playwright-report/
+tests/browser/screenshots/

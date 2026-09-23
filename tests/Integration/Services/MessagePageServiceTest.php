@@ -42,9 +42,9 @@ final class MessagePageServiceTest extends TestCase
 
         Redis::connection()->flushdb();
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
-        DB::table('messages')->truncate();
-        DB::table('pmboxes')->truncate();
-        DB::table('users')->truncate();
+        DB::table('messages')->delete();
+        DB::table('pmboxes')->delete();
+        DB::table('users')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
         $this->mockCache();

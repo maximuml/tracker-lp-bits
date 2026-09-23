@@ -264,11 +264,11 @@ class CommentRepository
 
         if ($deleted) {
             if ($type == 'torrent') {
-                Torrent::query()->where('id', $parentId)->decrement('comments');
+                Torrent::query()->where('id', $parentId)->update(['comments' => DB::raw('GREATEST(CAST(comments AS SIGNED) - 1, 0)')]);
             } elseif ($type == 'offer') {
-                Offer::query()->where('id', $parentId)->decrement('comments');
+                Offer::query()->where('id', $parentId)->update(['comments' => DB::raw('GREATEST(CAST(comments AS SIGNED) - 1, 0)')]);
             } else {
-                DB::table('requests')->where('id', $parentId)->decrement('comments');
+                DB::table('requests')->where('id', $parentId)->update(['comments' => DB::raw('GREATEST(CAST(comments AS SIGNED) - 1, 0)')]);
             }
         }
 

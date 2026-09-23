@@ -67,6 +67,31 @@ final class TopicModerationRepositoryTest extends TestCase
         $this->assertSame(8, (int) Forum::query()->where('id', $newForum->id)->value('postcount'));
     }
 
+    public function test_delete_topic_clamps_counters_at_zero(): void
+    {
+        $forum = Forum::factory()->create(['topiccount' => 0, 'postcount' => 0]);
+        $topic = Topic::factory()->create(['forumid' => $forum->id]);
+
+        $this->repository->deleteTopic($topic->id, $forum->id, 3);
+
+        $this->assertSame(0, (int) Forum::query()->where('id', $forum->id)->value('topiccount'));
+        $this->assertSame(0, (int) Forum::query()->where('id', $forum->id)->value('postcount'));
+    }
+
+    public function test_move_topic_clamps_counters_at_zero(): void
+    {
+        $oldForum = Forum::factory()->create(['topiccount' => 0, 'postcount' => 0]);
+        $newForum = Forum::factory()->create(['topiccount' => 0, 'postcount' => 0]);
+        $topic = Topic::factory()->create(['forumid' => $oldForum->id]);
+
+        $this->repository->moveTopic($topic->id, $newForum->id, 2, $oldForum->id);
+
+        $this->assertSame(0, (int) Forum::query()->where('id', $oldForum->id)->value('topiccount'));
+        $this->assertSame(0, (int) Forum::query()->where('id', $oldForum->id)->value('postcount'));
+        $this->assertSame(1, (int) Forum::query()->where('id', $newForum->id)->value('topiccount'));
+        $this->assertSame(2, (int) Forum::query()->where('id', $newForum->id)->value('postcount'));
+    }
+
     public function test_move_topic_returns_true_when_same_forum(): void
     {
         $forum = Forum::factory()->create();

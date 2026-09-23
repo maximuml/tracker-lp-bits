@@ -1,4 +1,8 @@
 @if($stats['show'])
+@if($stats['todayUsers']['count'] > 0)
+<h2>{{ $stats['labels']['rowUsersActiveToday'] }}: {{ number_format($stats['todayUsers']['count']) }}</h2>
+<table data-nx="data" class="nx-today-users"><tr><td><div class="nx-today-users__list">@foreach($stats['todayUsers']['ids'] as $uid){{ \App\Support\UserDisplay::username($uid) }}@if(!$loop->last)<span class="nx-today-users__sep"> | </span>@endif@endforeach</div></td></tr></table>
+@endif
 <div class="nx-stats">
 <details class="nx-stats__details">
 <summary><span class="nx-stats__title">{{ $stats['title'] }}</span></summary>

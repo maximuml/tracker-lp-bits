@@ -442,6 +442,8 @@ JS;
         $userStats = $this->indexRepository->getUserStats();
         $torrentStats = $this->indexRepository->getTorrentStats();
         $classStats = $this->indexRepository->getClassStats();
+        $todayUsers = $this->indexRepository->getTodayActiveUsers();
+        UserDisplay::preload($todayUsers['ids']);
         $maxusers = (int) $this->globals->get('maxusers', 0);
 
         return [
@@ -491,6 +493,7 @@ JS;
                 ['label' => UserClass::name(UC_ULTIMATE_USER, false, false, true), 'value' => number_format($classStats[UC_ULTIMATE_USER])],
                 ['label' => UserClass::name(UC_NEXUS_MASTER, false, false, true), 'value' => number_format($classStats[UC_NEXUS_MASTER])],
             ],
+            'todayUsers' => $todayUsers,
             'labels' => [
                 'rowUsersActiveToday' => __('legacy/index.row_users_active_today'),
                 'rowUsersActiveThisWeek' => __('legacy/index.row_users_active_this_week'),

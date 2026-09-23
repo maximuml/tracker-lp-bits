@@ -128,6 +128,10 @@ final class IndexPageServiceTest extends TestCase
             'totaldownloaded' => 0,
             'totaldata' => 0,
         ]);
+        $this->indexRepository->shouldReceive('getTodayActiveUsers')->andReturn([
+            'count' => 0,
+            'ids' => [],
+        ]);
         $this->indexRepository->shouldReceive('getClassStats')->andReturn([
             UC_PEASANT => 0,
             UC_USER => 0,

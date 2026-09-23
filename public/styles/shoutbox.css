@@ -39,8 +39,15 @@ td.shoutrow .shout-mention {
 
 td.shoutrow .shout-mention.shout-mention-me {
     background: rgba(255,196,0,.30);
-    color: inherit;
+    color: var(--nxm-text, #1d2733);
     box-shadow: 0 0 0 1px rgba(255,196,0,.55) inset;
+}
+
+/* body.inframe a:link (--nxm-accent) outranks the rule above on
+   specificity — keep the mention readable on its amber highlight. */
+td.shoutrow .shout-mention.shout-mention-me:link,
+td.shoutrow .shout-mention.shout-mention-me:visited {
+    color: var(--nxm-text, #1d2733);
 }
 
 td.shoutrow.shoutrow-mentions-me {

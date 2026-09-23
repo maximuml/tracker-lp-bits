@@ -40,4 +40,7 @@ return [
     'js_url' => 'URL:',
     'js_link_text' => 'Link text (optional):',
     'js_confirm_delete' => 'Delete this shout?',
+    'js_collapse' => 'Collapse',
+    'js_expand' => 'Expand',
+    'js_new_mentions' => '%d new mentions',
 ];

@@ -72,10 +72,6 @@ class SupportController extends LegacyController
 
     private function complainNew(Request $request): RedirectResponse|Response
     {
-        if ((int) ($this->currentUser->get()['id'] ?? 0) === 0) {
-            return $this->legacyAbortResponse(__('legacy/functions.std_error'), 'Permission denied.');
-        }
-
         if (! Captcha::checkCode(
             (string) ($request->input('imagehash') ?? ''),
             (string) ($request->input('imagestring') ?? ''),
@@ -106,6 +102,14 @@ class SupportController extends LegacyController
         $body = filter_var((string) ($request->input('body') ?? ''), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         if ($id <= 0 || empty($body)) {
             return $this->legacyAbortResponse(__('legacy/functions.std_error'), __('legacy/complains.text_new_failure'));
+        }
+
+        if ($uid <= 0) {
+            $uuid = filter_var((string) ($request->input('uuid') ?? ''), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+            $owns = DB::table('complains')->where('id', $id)->where('uuid', $uuid)->exists();
+            if (! $owns) {
+                return $this->legacyAbortResponse(('Error'), 'Permission denied.');
+            }
         }
 
         $ok = $this->complainService->replyToComplain($id, $uid, $body, Network::clientIp());
@@ -215,12 +219,8 @@ class SupportController extends LegacyController
         ]);
     }
 
-    private function complainCompose(Request $request, int $uid): View|RedirectResponse|Response
+    private function complainCompose(Request $request, int $uid): View|RedirectResponse
     {
-        if ($uid <= 0) {
-            return $this->legacyAbortResponse(__('legacy/functions.std_error'), 'Permission denied.');
-        }
-
         $captchaHtml = Captcha::renderHtml(layout: 'grid');
 
         return $this->legacyPage($request, 'complains', false, [

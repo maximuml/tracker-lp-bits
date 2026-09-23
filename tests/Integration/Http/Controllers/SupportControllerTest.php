@@ -11,6 +11,7 @@ use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
 use App\Support\Permissions;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -43,7 +44,7 @@ final class SupportControllerTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_complains_denies_access_for_guest_on_compose(): void
+    public function test_complains_allows_guest_on_compose(): void
     {
         $this->mockCurrentUser(null);
 
@@ -53,19 +54,51 @@ final class SupportControllerTest extends TestCase
 
         $response = $controller->complains($request);
 
-        $this->assertInstanceOf(Response::class, $response);
-        $this->assertStringContainsString('Permission denied', (string) $response->getContent());
+        $this->assertInstanceOf(View::class, $response);
+        $this->assertSame('compose', $response->getData()['mode']);
     }
 
-    public function test_complains_denies_access_for_guest_on_post_new(): void
+    public function test_complains_allows_guest_on_post_new(): void
     {
         $this->mockCurrentUser(null);
+
+        User::factory()->create([
+            'email' => 'test@example.com',
+            'enabled' => false,
+        ]);
+        DB::table('regimages')->insert([
+            'imagehash' => 'guestcaptcha',
+            'imagestring' => 'abc123',
+            'dateline' => time(),
+        ]);
 
         $controller = app(SupportController::class);
         $request = Request::create('/complains', 'POST', [
             'action' => 'new',
             'email' => 'test@example.com',
             'body' => 'Help',
+            'imagehash' => 'guestcaptcha',
+            'imagestring' => 'abc123',
+        ]);
+        app()->instance('request', $request);
+
+        $response = $controller->complains($request);
+
+        $this->assertInstanceOf(RedirectResponse::class, $response);
+        $this->assertStringContainsString('action=view', $response->getTargetUrl());
+    }
+
+    public function test_complains_guest_reply_requires_matching_uuid(): void
+    {
+        $complainId = $this->insertComplain(uuid: 'real-uuid-0000-0000-0000-00000000abc');
+        $this->mockCurrentUser(null);
+
+        $controller = app(SupportController::class);
+        $request = Request::create('/complains', 'POST', [
+            'action' => 'reply',
+            'id' => $complainId,
+            'uuid' => 'wrong-uuid',
+            'body' => 'Guest reply',
         ]);
         app()->instance('request', $request);
 
@@ -73,6 +106,28 @@ final class SupportControllerTest extends TestCase
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('Permission denied', (string) $response->getContent());
+    }
+
+    public function test_complains_guest_reply_redirects_with_matching_uuid(): void
+    {
+        $uuid = 'real-uuid-0000-0000-0000-00000000abc';
+        $complainId = $this->insertComplain(uuid: $uuid);
+        $this->mockCurrentUser(null);
+
+        $controller = app(SupportController::class);
+        $request = Request::create('/complains', 'POST', [
+            'action' => 'reply',
+            'id' => $complainId,
+            'uuid' => $uuid,
+            'body' => 'Guest reply',
+        ]);
+        $request->headers->set('referer', '/complains.php?action=view&id='.$uuid);
+        app()->instance('request', $request);
+
+        $response = $controller->complains($request);
+
+        $this->assertInstanceOf(RedirectResponse::class, $response);
+        $this->assertStringContainsString('/complains.php', $response->getTargetUrl());
     }
 
     public function test_complains_denies_access_for_guest_on_post_reply_with_missing_data(): void

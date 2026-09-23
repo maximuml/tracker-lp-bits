@@ -39,7 +39,7 @@ Route::get('/cron', [SystemMaintenanceController::class, 'cron'])->middleware('c
 Route::get('/ok', [UtilityController::class, 'ok'])->name('ok.legacy');
 
 Route::get('/complains', [SupportController::class, 'complains'])->name('complains.legacy');
-Route::post('/complains', [SupportController::class, 'complains'])->middleware('auth.nexus:nexus-web');
+Route::post('/complains', [SupportController::class, 'complains']);
 Route::get('/shoutbox', [ShoutboxController::class, 'shoutbox'])->middleware('throttle:shoutbox')->name('shoutbox.legacy');
 
 Route::get('/bookmark', [TorrentBookmarkController::class, 'bookmark'])->name('bookmark.legacy');

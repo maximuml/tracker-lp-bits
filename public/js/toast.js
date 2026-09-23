@@ -11,11 +11,26 @@
     }
 
     function getCursor(channel) {
-        return parseInt(localStorage.getItem(lsKey(channel)) || '0', 10);
+        try {
+            return parseInt(localStorage.getItem(lsKey(channel)) || '0', 10) || 0;
+        } catch (e) {
+            return 0;
+        }
     }
 
     function setCursor(channel, id) {
-        localStorage.setItem(lsKey(channel), String(id));
+        if (!isFinite(id)) { return; }
+        try {
+            localStorage.setItem(lsKey(channel), String(id));
+        } catch (e) {}
+    }
+
+    function hasCursor(channel) {
+        try {
+            return localStorage.getItem(lsKey(channel)) !== null;
+        } catch (e) {
+            return true;
+        }
     }
 
     function t(key, fallback) {
@@ -24,6 +39,97 @@
 
     var eventSource = null;
     var pollTimer = null;
+    var reconnectTimer = null;
+    var sseFailures = 0;
+    var sessionDead = false;
+    var SSE_MAX_FAILURES = 5;
+    var SSE_BACKOFF_MAX = 60000;
+
+    // ---- multi-tab leadership: one live stream per user ----
+    // The leader holds the SSE/polling transport and fans payloads out
+    // over BroadcastChannel; followers render from the bus and never
+    // open a stream (the server also enforces one stream per user).
+    var TAB_ID = 't' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+    var LEADER_TTL = 12000;
+    var heartbeatTimer = null;
+    var isLeader = false;
+    var bus = null;
+    var seenIds = {};
+    var seenCount = 0;
+
+    if (typeof BroadcastChannel !== 'undefined') {
+        try {
+            bus = new BroadcastChannel('nx-notif-' + USER_ID);
+            bus.onmessage = function (e) {
+                var msg = e && e.data;
+                if (!msg) { return; }
+                if (msg.kind === 'data') {
+                    handleData(msg.payload, false);
+                    refreshBadge();
+                } else if (msg.kind === 'read') {
+                    setBadge(0);
+                    var els = bellElements();
+                    if (els.panel && !els.panel.classList.contains('nx-hidden')) {
+                        panelFetched = 0;
+                        panelHasMore = false;
+                        renderPanel(els.panel, { items: [], counts: { total: 0 } });
+                    }
+                }
+            };
+        } catch (err) {
+            bus = null;
+        }
+    }
+
+    function leaderKey() {
+        return 'nx_notif_leader_' + USER_ID;
+    }
+
+    function readLeader() {
+        try {
+            return JSON.parse(localStorage.getItem(leaderKey()) || 'null');
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function claimLeadership() {
+        var now = Date.now();
+        var l = readLeader();
+        if (!l || (now - (l.ts || 0)) > LEADER_TTL || l.id === TAB_ID) {
+            try {
+                localStorage.setItem(leaderKey(), JSON.stringify({ id: TAB_ID, ts: now }));
+            } catch (e) {}
+            l = readLeader();
+        }
+        return !!(l && l.id === TAB_ID);
+    }
+
+    function releaseLeadership() {
+        var l = readLeader();
+        if (l && l.id === TAB_ID) {
+            try {
+                localStorage.removeItem(leaderKey());
+            } catch (e) {}
+        }
+    }
+
+    function heartbeat() {
+        var was = isLeader;
+        if (!bus) {
+            isLeader = true;
+        } else if (document.hidden) {
+            isLeader = false;
+        } else {
+            isLeader = claimLeadership();
+        }
+        if (isLeader && !was) {
+            sseFailures = 0;
+            startTransport();
+        } else if (!isLeader && was) {
+            stopTransport();
+        }
+    }
 
     function init() {
         var container = document.getElementById(CONTAINER_ID);
@@ -33,14 +139,74 @@
             document.body.appendChild(container);
         }
 
-        var firstFetch = fetchNotifications(localStorage.getItem(lsKey('pm')) === null);
-        Promise.resolve(firstFetch).then(connectSse, connectSse);
+        // The init fetch seeds cursors; only the leader then opens the
+        // stream. Every tab fetches once on load so a returning tab with
+        // a live leader still converges.
+        var firstFetch = fetchNotifications(!hasCursor('pm'));
+        Promise.resolve(firstFetch).then(function () {
+            heartbeat();
+            heartbeatTimer = setInterval(heartbeat, 4000);
+        }, function () {
+            heartbeat();
+            heartbeatTimer = setInterval(heartbeat, 4000);
+        });
+
+        document.addEventListener('visibilitychange', function () {
+            if (document.hidden) {
+                releaseLeadership();
+                stopTransport();
+            } else {
+                heartbeat();
+                refreshBadge();
+            }
+        });
+        window.addEventListener('pagehide', function () {
+            releaseLeadership();
+        });
 
         refreshBadge();
         initBell();
     }
 
+    function startTransport() {
+        if (sessionDead || document.hidden || !isLeader) {
+            return;
+        }
+        connectSse();
+    }
+
+    function stopTransport() {
+        closeSse();
+        stopPolling();
+        if (reconnectTimer) {
+            clearTimeout(reconnectTimer);
+            reconnectTimer = null;
+        }
+    }
+
+    function closeSse() {
+        if (eventSource) {
+            try { eventSource.close(); } catch (e) {}
+            eventSource = null;
+        }
+    }
+
+    function scheduleReconnect() {
+        if (reconnectTimer || !isLeader || sessionDead) {
+            return;
+        }
+        var delay = Math.min(SSE_BACKOFF_MAX, 1000 * Math.pow(2, sseFailures));
+        delay = Math.floor(delay * (0.5 + Math.random()));
+        reconnectTimer = setTimeout(function () {
+            reconnectTimer = null;
+            connectSse();
+        }, delay);
+    }
+
     function connectSse() {
+        if (!isLeader || sessionDead || document.hidden) {
+            return;
+        }
         if (typeof EventSource === 'undefined') {
             startPolling();
             return;
@@ -53,6 +219,9 @@
                 + '&last_reply_id=' + encodeURIComponent(getCursor('topic_reply'))
                 + '&last_staff_id=' + encodeURIComponent(getCursor('staff'));
             eventSource = new EventSource(url);
+            eventSource.onopen = function () {
+                sseFailures = 0;
+            };
             eventSource.addEventListener('notifications', function (e) {
                 try {
                     handleData(JSON.parse(e.data));
@@ -60,23 +229,39 @@
             });
             eventSource.addEventListener('ping', function () {});
             eventSource.onerror = function () {
-                if (!eventSource) { return; }
-                if (eventSource.readyState === EventSource.CLOSED) {
-                    eventSource.close();
-                    eventSource = null;
+                // Take over reconnect control from the browser: jittered
+                // backoff with a failure cap, then polling fallback.
+                closeSse();
+                sseFailures++;
+                if (sseFailures >= SSE_MAX_FAILURES) {
                     startPolling();
+                    return;
                 }
+                scheduleReconnect();
             };
         } catch (err) {
-            startPolling();
+            sseFailures++;
+            if (sseFailures >= SSE_MAX_FAILURES) {
+                startPolling();
+                return;
+            }
+            scheduleReconnect();
         }
     }
 
     function startPolling() {
         if (pollTimer) { return; }
         pollTimer = setInterval(function () {
+            if (!isLeader || sessionDead || document.hidden) { return; }
             fetchNotifications(false);
         }, INTERVAL);
+    }
+
+    function stopPolling() {
+        if (pollTimer) {
+            clearInterval(pollTimer);
+            pollTimer = null;
+        }
     }
 
     function fetchNotifications(init) {
@@ -103,12 +288,32 @@
             body: formData,
             headers: { 'X-Requested-With': 'XMLHttpRequest' },
             credentials: 'same-origin'
-        }).then(function (res) { return res.json(); }).then(function (response) {
+        }).then(function (res) {
+            if (res.status === 401 || res.status === 403) {
+                sessionDead = true;
+                stopTransport();
+                return null;
+            }
+            return res.json();
+        }).then(function (response) {
             if (!response || response.ret !== 0 || !response.data) {
                 return;
             }
             handleData(response.data, init);
         }).catch(function () {});
+    }
+
+    function alreadySeen(id) {
+        if (!id) { return false; }
+        if (seenIds[id]) { return true; }
+        seenIds[id] = true;
+        seenCount++;
+        if (seenCount > 500) {
+            seenIds = {};
+            seenIds[id] = true;
+            seenCount = 1;
+        }
+        return false;
     }
 
     function handleData(data, init) {
@@ -126,10 +331,19 @@
             return;
         }
         var notifications = data.notifications || [];
+        var fresh = 0;
         notifications.forEach(function (n) {
-            showToast(n);
+            if (!alreadySeen(n.id)) {
+                fresh++;
+                showToast(n);
+            }
         });
-        if (notifications.length > 0) {
+        if (isLeader && bus) {
+            try {
+                bus.postMessage({ kind: 'data', payload: data });
+            } catch (e) {}
+        }
+        if (fresh > 0) {
             refreshBadge();
         }
     }
@@ -361,6 +575,9 @@
                 panelHasMore = false;
                 setBadge(0);
                 renderPanel(panel, { items: [], counts: { total: 0 } });
+                if (bus) {
+                    try { bus.postMessage({ kind: 'read' }); } catch (e) {}
+                }
             }
         }).catch(function () {});
     }

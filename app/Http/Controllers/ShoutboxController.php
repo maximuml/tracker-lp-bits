@@ -13,11 +13,10 @@ use App\Repositories\ShoutboxRepository;
 use App\Services\ShoutboxService;
 use App\Support\CurrentUser;
 use App\Support\Html\SafeHtml;
-use App\Support\LegacyHeaderBag;
 use App\Support\LegacyYesNo;
-use App\Support\Lock;
 use App\Support\NotificationFeed;
 use App\Support\Shoutbox;
+use App\Support\SseEventId;
 use App\Support\SseWriter;
 use App\Support\UserDisplay;
 use App\Support\Validators;
@@ -26,6 +25,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -37,7 +37,6 @@ class ShoutboxController extends LegacyController
         private readonly ShoutboxService $shoutboxService,
         private readonly ActorContext $actorContext,
         private readonly CurrentUser $currentUser,
-        private readonly LegacyHeaderBag $legacyHeaderBag,
         private readonly NotificationFeed $notificationFeed,
         private readonly SseWriter $sseWriter,
     ) {}
@@ -318,25 +317,34 @@ class ShoutboxController extends LegacyController
         }
 
         $type = (string) $request->input('type', 'shoutbox');
+        $isNotifications = $type === 'notifications';
         $lastId = (int) ($request->header('Last-Event-ID') ?: $request->input('last_id', 0));
-        $feedCursors = [
-            'pm' => (int) $request->input('last_pm_id', 0),
-            'shout' => (int) $request->input('last_shout_id', 0),
-            'comment' => (int) $request->input('last_comment_id', 0),
-            'topic_reply' => (int) $request->input('last_reply_id', 0),
-            'staff' => (int) $request->input('last_staff_id', 0),
-        ];
+        $feedCursors = SseEventId::applyTo(
+            (string) ($request->header('Last-Event-ID') ?? ''),
+            [
+                'pm' => (int) $request->input('last_pm_id', 0),
+                'shout' => (int) $request->input('last_shout_id', 0),
+                'comment' => (int) $request->input('last_comment_id', 0),
+                'topic_reply' => (int) $request->input('last_reply_id', 0),
+                'staff' => (int) $request->input('last_staff_id', 0),
+            ]
+        );
         $userId = (int) ($user['id'] ?? 0);
 
-        $maxLoops = 30;
-        $ttl = $maxLoops * 2 + 10;
+        // Bounded stream lifetime: the client reconnects after the loop
+        // ends and resumes via Last-Event-ID/cursor params.
+        $maxLoops = max(1, min(30, (int) $request->input('loops', 30)));
+        $interval = max(0, min(2, (int) $request->input('interval', 2)));
+        $ttl = $maxLoops * ($interval + 1) + 10;
         $maxStreams = 30;
         $globalKey = 'shoutbox_sse_global';
-        $isNotifications = $type === 'notifications';
+        $lockKey = 'sse:'.$type.':'.$userId;
 
-        $callback = function () use ($type, $lastId, $feedCursors, $userId, $maxLoops, $ttl, $maxStreams, $globalKey, $isNotifications) {
+        // Admission control must run before StreamedResponse: once the
+        // callback starts the status line is committed and a refusal
+        // could no longer carry a real HTTP status.
+        try {
             $redis = Redis::connection()->client();
-
             $active = (int) $redis->incr($globalKey);
             if ($active === 1) {
                 $redis->expire($globalKey, $ttl + 60);
@@ -344,78 +352,86 @@ class ShoutboxController extends LegacyController
             if ($active > $maxStreams) {
                 try {
                     $redis->decr($globalKey);
-                } catch (\Throwable $e) {
+                } catch (\Throwable) {
                 }
-                // T-11: Use LegacyHeaderBag instead of SAPI http_response_code()
-                // to avoid cross-request status leakage under Octane.
-                $this->legacyHeaderBag->setStatusCode(503);
+                $this->sseCount('rejected', 'limit');
 
-                return;
+                return new SymfonyResponse('', 503);
             }
 
-            $userLock = new Lock('sse:'.$type.':'.$userId, $ttl);
-            if (! $userLock->acquire()) {
-                try {
-                    $redis->decr($globalKey);
-                } catch (\Throwable $e) {
-                }
-                $this->legacyHeaderBag->setStatusCode(429);
+            // Latest-wins slot: a fresh stream from the same user
+            // supersedes the previous one — otherwise a quick navigation
+            // would keep getting rejected until the displaced loop notices
+            // the client abort, which behind a proxy can take the whole
+            // bounded lifetime. The displaced stream sees its token
+            // overwritten, exits at the next iteration and its
+            // owner-checked release no-ops on the stolen key.
+            $streamToken = Str::random(32);
+            $redis->setex($lockKey, $ttl, $streamToken);
+        } catch (\Throwable) {
+            // Fail closed: without Redis there is no counter/slot, so
+            // allowing the stream would silently remove the bound.
+            return new SymfonyResponse('', 503);
+        }
+        $this->sseCount('connects', $isNotifications ? 'notifications' : 'shoutbox');
 
+        $owns = function () use ($redis, $lockKey, $streamToken): bool {
+            try {
+                return $redis->get($lockKey) === $streamToken;
+            } catch (\Throwable) {
+                // Transient Redis failure: keep streaming — the global
+                // bound was enforced at admission and the loop is bounded.
+                return true;
+            }
+        };
+
+        $released = false;
+        $release = function () use (&$released, $redis, $globalKey, $lockKey, $streamToken) {
+            if ($released) {
                 return;
             }
+            $released = true;
+            try {
+                // Owner-checked delete: a displaced stream must not
+                // remove the slot the newer stream now owns.
+                $redis->eval(
+                    'if redis.call("get", KEYS[1]) == ARGV[1] then return redis.call("del", KEYS[1]) else return 0 end',
+                    [$lockKey, $streamToken],
+                    1
+                );
+            } catch (\Throwable) {
+            }
+            try {
+                $redis->decr($globalKey);
+            } catch (\Throwable) {
+            }
+        };
+        // Safety net for hard fatals where finally{} never runs.
+        register_shutdown_function($release);
 
-            register_shutdown_function(function () use ($redis, $globalKey, $userLock) {
-                try {
-                    $userLock->release();
-                } catch (\Throwable $e) {
-                }
-                try {
-                    $redis->decr($globalKey);
-                } catch (\Throwable $e) {
-                }
-            });
-
+        $callback = function () use ($type, $lastId, $feedCursors, $userId, $maxLoops, $interval, $isNotifications, $release, $owns) {
             @ini_set('zlib.output_compression', 'Off');
-            while (ob_get_level()) {
-                ob_end_clean();
+            if (PHP_SAPI !== 'cli') {
+                // Drop pre-existing output buffers so frames flush in real
+                // time under php-fpm. CLI SAPI covers both PHPUnit
+                // (streamedContent() captures output in its own buffer —
+                // clearing it would break the capture) and Octane workers.
+                while (ob_get_level()) {
+                    ob_end_clean();
+                }
             }
             ob_implicit_flush(true);
             set_time_limit(0);
             ignore_user_abort(true);
 
-            if ($isNotifications) {
-                $this->runNotificationLoop($userId, $feedCursors, $maxLoops);
-
-                return;
-            }
-
-            $buildQuery = function (string $type, int $lastId) {
-                $query = DB::table('shoutbox')
-                    ->orderBy('id')
-                    ->where('id', '>', $lastId);
-                Shoutbox::applyTypeFilter($query, $type, $this->currentUser->get());
-
-                return $query;
-            };
-
-            $query = $buildQuery($type, $lastId);
-
-            for ($i = 0; $i < $maxLoops; $i++) {
-                if (connection_aborted()) {
-                    break;
+            try {
+                if ($isNotifications) {
+                    $this->runNotificationLoop($userId, $feedCursors, $maxLoops, $interval, $owns);
+                } else {
+                    $this->runShoutLoop($type, $lastId, $maxLoops, $interval, $owns);
                 }
-
-                $rows = $query->get();
-                if (! $rows->isEmpty()) {
-                    $maxId = (int) $rows->last()->id;
-                    $this->sseWriter->event('refresh', (string) json_encode(['count' => $rows->count()]), $maxId);
-                    $lastId = $maxId;
-                    $query = $buildQuery($type, $lastId);
-                }
-
-                $this->sseWriter->ping();
-
-                sleep(2);
+            } finally {
+                $release();
             }
         };
 
@@ -428,25 +444,106 @@ class ShoutboxController extends LegacyController
     }
 
     /**
-     * @param  array<string, int>  $cursors
+     * @param  callable(): bool  $owns
      */
-    private function runNotificationLoop(int $userId, array $cursors, int $maxLoops): void
+    private function runShoutLoop(string $type, int $lastId, int $maxLoops, int $interval, callable $owns): void
+    {
+        $buildQuery = function (string $type, int $lastId) {
+            $query = DB::table('shoutbox')
+                ->orderBy('id')
+                ->where('id', '>', $lastId);
+            Shoutbox::applyTypeFilter($query, $type, $this->currentUser->get());
+
+            return $query;
+        };
+
+        $query = $buildQuery($type, $lastId);
+
+        for ($i = 0; $i < $maxLoops; $i++) {
+            if (connection_aborted() || ! $owns()) {
+                break;
+            }
+
+            $rows = $query->get();
+            if (! $rows->isEmpty()) {
+                $maxId = (int) $rows->last()->id;
+                $this->sseWriter->event('refresh', (string) json_encode(['count' => $rows->count()]), $maxId);
+                $this->sseCount('events', 'shoutbox');
+                $lastId = $maxId;
+                $query = $buildQuery($type, $lastId);
+            }
+
+            $this->sseWriter->ping();
+
+            sleep($interval);
+        }
+    }
+
+    /**
+     * @param  array<string, int>  $cursors
+     * @param  callable(): bool  $owns
+     */
+    private function runNotificationLoop(int $userId, array $cursors, int $maxLoops, int $interval, callable $owns): void
     {
         for ($i = 0; $i < $maxLoops; $i++) {
-            if (connection_aborted()) {
+            if (connection_aborted() || ! $owns()) {
                 break;
+            }
+
+            // Idle ticks cost one primary-key probe; the full joined
+            // fetch only runs when a source actually moved.
+            if (! $this->notificationFeed->hasNewerThan($userId, $cursors)) {
+                $this->sseWriter->ping();
+                sleep($interval);
+
+                continue;
             }
 
             $data = $this->notificationFeed->since($userId, $cursors);
             $cursors = $data['cursors'];
 
             if ($data['notifications'] !== []) {
-                $this->sseWriter->event('notifications', (string) json_encode($data), $cursors['pm']);
+                $this->sseWriter->event(
+                    'notifications',
+                    (string) json_encode($data),
+                    SseEventId::encode($cursors)
+                );
+                $this->sseCount('events', 'notifications');
+                $this->sseLag('notifications', $data['notifications']);
             } else {
                 $this->sseWriter->ping();
             }
 
-            sleep(2);
+            sleep($interval);
+        }
+    }
+
+    private function sseCount(string $name, string $label): void
+    {
+        try {
+            Redis::connection()->client()->incr('metrics:sse_'.$name.':'.$label);
+        } catch (\Throwable) {
+        }
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $items
+     */
+    private function sseLag(string $type, array $items): void
+    {
+        $newest = 0;
+        foreach ($items as $item) {
+            $newest = max($newest, (int) ($item['timestamp'] ?? 0));
+        }
+        if ($newest === 0) {
+            return;
+        }
+        try {
+            Redis::connection()->client()->set(
+                'metrics:sse_lag_seconds:'.$type,
+                (string) max(0, time() - $newest)
+            );
+        } catch (\Throwable) {
         }
     }
 }

@@ -67,6 +67,37 @@ final class NotificationFeedRepository extends BaseRepository
     }
 
     /**
+     * Raw source maxima without the ownership/permission joins — the
+     * cheap "anything new?" probe for the SSE loop. Deliberately broader
+     * than channelMaxes(): a false positive only costs one regular
+     * since() pass, while a false negative would silently drop events.
+     * One round trip, five primary-key lookups.
+     *
+     * @return array<string, int>
+     */
+    public function sourceMaxima(int $userId): array
+    {
+        $rows = DB::select(
+            'SELECT '
+            .'(SELECT MAX(id) FROM messages WHERE receiver = ?) AS pm, '
+            .'(SELECT MAX(id) FROM shoutbox) AS shout, '
+            .'(SELECT MAX(id) FROM comments) AS comment, '
+            .'(SELECT MAX(id) FROM posts) AS topic_reply, '
+            .'(SELECT MAX(id) FROM staffmessages) AS staff',
+            [$userId]
+        );
+        $row = $rows[0] ?? null;
+
+        return [
+            'pm' => (int) ($row->pm ?? 0),
+            'shout' => (int) ($row->shout ?? 0),
+            'comment' => (int) ($row->comment ?? 0),
+            'topic_reply' => (int) ($row->topic_reply ?? 0),
+            'staff' => (int) ($row->staff ?? 0),
+        ];
+    }
+
+    /**
      * Monotonic cursor update: a concurrent stale request must never move
      * last_id backwards, so the write is a single upsert guarded by
      * GREATEST() rather than a plain updateOrInsert.

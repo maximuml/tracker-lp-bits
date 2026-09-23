@@ -19,7 +19,7 @@ final class MetricsRegistryTest extends TestCase
     {
         $registry = app(MetricsRegistry::class);
 
-        $this->assertCount(10, $registry->all());
+        $this->assertCount(11, $registry->all());
         foreach ($registry->all() as $collector) {
             $this->assertInstanceOf(MetricsCollector::class, $collector);
         }

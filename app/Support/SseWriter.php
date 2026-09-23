@@ -9,7 +9,7 @@ namespace App\Support;
  */
 final class SseWriter
 {
-    public function event(string $name, string $data, ?int $id = null): void
+    public function event(string $name, string $data, int|string|null $id = null): void
     {
         if ($id !== null) {
             echo 'id: '.$id."\n";

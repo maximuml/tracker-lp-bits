@@ -139,6 +139,7 @@ class AppServiceProvider extends ServiceProvider
                 ),
                 new Collectors\TrackerMetricsCollector($fmt),
                 new Collectors\SearchMetricsCollector($fmt),
+                new Collectors\SseMetricsCollector($fmt),
                 new Collectors\OutboxMetricsCollector($fmt),
                 new Collectors\AppInfoCollector($fmt),
             ]);

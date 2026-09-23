@@ -124,6 +124,26 @@ final class NotificationFeed
     }
 
     /**
+     * Cheap "anything deliverable?" probe for long-lived SSE loops: raw
+     * source maxima without item queries or permission joins. A false
+     * positive only costs one regular since() pass on the next tick; a
+     * false negative is impossible because every channel item comes from
+     * these source tables.
+     *
+     * @param  array<string, int>  $cursors
+     */
+    public function hasNewerThan(int $userId, array $cursors): bool
+    {
+        foreach ($this->feedRepository->sourceMaxima($userId) as $channel => $max) {
+            if ($max > (int) ($cursors[$channel] ?? 0)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Server-side unread feed for the bell panel (read-cursor semantics).
      *
      * First call for a user with no cursor rows seeds them to the current

@@ -512,4 +512,43 @@ final class NotificationFeedTest extends TestCase
         $comments = array_filter($data['items'], static fn (array $n): bool => $n['type'] === 'comment');
         $this->assertCount(1, $comments);
     }
+
+    // ---- REL-02: hasNewerThan idle probe ----
+
+    public function test_probe_is_false_when_no_source_moved(): void
+    {
+        $user = $this->createUser('probe_user');
+
+        $this->assertFalse($this->feed->hasNewerThan($user, [
+            'pm' => 0, 'shout' => 0, 'comment' => 0, 'topic_reply' => 0, 'staff' => 0,
+        ]));
+    }
+
+    public function test_probe_detects_new_source_row(): void
+    {
+        $user = $this->createUser('probe_user2');
+        $sender = $this->createUser('probe_sender2');
+        $pmId = $this->createPm($user, $sender);
+
+        $this->assertTrue($this->feed->hasNewerThan($user, [
+            'pm' => 0, 'shout' => 0, 'comment' => 0, 'topic_reply' => 0, 'staff' => 0,
+        ]));
+        // Cursor at the source max — nothing new to deliver.
+        $this->assertFalse($this->feed->hasNewerThan($user, [
+            'pm' => $pmId, 'shout' => 0, 'comment' => 0, 'topic_reply' => 0, 'staff' => 0,
+        ]));
+    }
+
+    public function test_probe_covers_every_channel(): void
+    {
+        $user = $this->createUser('probe_user3');
+        $other = $this->createUser('probe_other3');
+        $cursors = ['pm' => PHP_INT_MAX, 'shout' => 0, 'comment' => 0, 'topic_reply' => 0, 'staff' => 0];
+
+        // A new shout anywhere — even one that does not mention the
+        // user — trips the probe (false positives are cheap, false
+        // negatives lose events).
+        $this->createShout($other, 'unrelated text');
+        $this->assertTrue($this->feed->hasNewerThan($user, $cursors));
+    }
 }

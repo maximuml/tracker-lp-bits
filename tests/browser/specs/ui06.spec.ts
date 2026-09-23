@@ -67,11 +67,10 @@ test.describe('UI-06 index page', () => {
         await expect(badge).toBeHidden();
 
         // Deliver a mention row into the iframe DOM and fire 'load' — the
-        // exact signal the parent listens to. Live reloads are unsuitable
-        // here: shoutbox.php is throttled to 30 req/min per user, and the
-        // suite loads the iframe on every index visit, so in CI the iframe
-        // document is frequently a 429 page. The contract under test is
-        // "badge = new .shoutrow-mentions-me rows since collapse".
+        // exact signal the parent listens to. A live reload depends on the
+        // iframe's SSE/poll timing and is not deterministic; the contract
+        // under test is "badge = new .shoutrow-mentions-me rows since
+        // collapse".
         await page.locator('#iframe-shout-box').evaluate((el: HTMLIFrameElement) => {
             const doc = el.contentDocument;
             if (!doc) {

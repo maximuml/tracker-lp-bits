@@ -395,6 +395,13 @@ jobs:
       - name: Prepare environment
         run: bash scripts/ci/env-compose-dev.sh
 
+      - name: Disable HTTP rate limiting for the e2e stack
+        # The whole suite runs from 127.0.0.1 — per-IP throttle buckets
+        # (legacy 120/min, shoutbox 30/min, login 10/min) exhaust within a
+        # minute and flake unrelated specs with 429s. Tracker announce
+        # throttling is a separate middleware and stays enabled.
+        run: echo "NEXUS_RATE_LIMITING=false" >> .env
+
       - name: Build Docker images
         run: docker compose build
 

@@ -9,6 +9,7 @@ use App\View\Components\BbcodeEditor;
 use App\View\Components\FormField;
 use App\View\Components\Pagination;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\MessageBag;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
@@ -542,5 +543,82 @@ final class ComponentLayerTest extends TestCase
 
         $this->assertStringContainsString('Deadline:&nbsp;<input type="datetime-local"', $html);
         $this->assertStringContainsString('name="pos_state_until"', $html);
+    }
+
+    // --- x-error-summary -------------------------------------------------
+
+    public function test_error_summary_renders_alert_role_and_escapes_items(): void
+    {
+        $html = $this->render(
+            '<x-error-summary :errors="$errors" />',
+            ['errors' => ['Name is <b>required</b>', ['message' => 'Bad email', 'href' => '#email-field']]],
+        );
+
+        $this->assertStringContainsString('role="alert"', $html);
+        $this->assertStringContainsString('nx-error-summary__title', $html);
+        $this->assertStringContainsString('Name is &lt;b&gt;required&lt;/b&gt;', $html);
+        $this->assertStringContainsString('href="#email-field"', $html);
+    }
+
+    public function test_error_summary_renders_nothing_for_empty_errors(): void
+    {
+        $this->assertSame('', trim($this->render('<x-error-summary :errors="$e" />', ['e' => []])));
+    }
+
+    public function test_error_summary_accepts_message_bag(): void
+    {
+        $bag = new MessageBag(['field' => ['oops']]);
+        $html = $this->render('<x-error-summary :errors="$bag" />', ['bag' => $bag]);
+
+        $this->assertStringContainsString('oops', $html);
+    }
+
+    // --- x-loading-state --------------------------------------------------
+
+    public function test_loading_state_announces_politely_and_hides_spinner(): void
+    {
+        $html = $this->render('<x-loading-state />');
+
+        $this->assertStringContainsString('role="status"', $html);
+        $this->assertStringContainsString('aria-hidden="true"', $html);
+        $this->assertStringContainsString('nx-loading__spinner', $html);
+    }
+
+    public function test_loading_state_escapes_custom_label(): void
+    {
+        $html = $this->render('<x-loading-state :label="$l" />', ['l' => 'Saving <b>x</b>']);
+
+        $this->assertStringContainsString('Saving &lt;b&gt;x&lt;/b&gt;', $html);
+    }
+
+    // --- x-action-menu -----------------------------------------------------
+
+    public function test_action_menu_renders_details_with_menu_roles(): void
+    {
+        $html = $this->render(
+            '<x-action-menu label="Actions" :items="$items" />',
+            ['items' => [
+                ['label' => 'Edit', 'href' => '/edit'],
+                ['label' => 'Delete', 'href' => '/del', 'danger' => true],
+            ]],
+        );
+
+        $this->assertStringContainsString('<details', $html);
+        $this->assertStringContainsString('aria-haspopup="menu"', $html);
+        $this->assertStringContainsString('role="menu"', $html);
+        $this->assertStringContainsString('role="menuitem"', $html);
+        $this->assertStringContainsString('nx-action-menu__item--danger', $html);
+        $this->assertStringContainsString('aria-hidden="true"', $html); // caret is decorative
+    }
+
+    public function test_action_menu_escapes_labels(): void
+    {
+        $html = $this->render(
+            '<x-action-menu :label="$l" :items="$items" />',
+            ['l' => 'A<b>x</b>', 'items' => [['label' => 'E<s>x</s>', 'href' => '/e']]],
+        );
+
+        $this->assertStringContainsString('A&lt;b&gt;x&lt;/b&gt;', $html);
+        $this->assertStringContainsString('E&lt;s&gt;x&lt;/s&gt;', $html);
     }
 }

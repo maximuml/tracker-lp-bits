@@ -2,6 +2,12 @@
  * Shoutbox toolbar, edit/delete, reactions and SSE live-updates.
  */
 
+var SHOUT_LANG_DATA = window.SHOUT_LANG || {};
+
+function shoutboxT(key, fallback) {
+    return SHOUT_LANG_DATA[key] || fallback;
+}
+
 function shoutboxSerialize(obj, prefix) {
     var str = [];
     for (var p in obj) {
@@ -28,7 +34,7 @@ function shoutboxPost(action, params, onSuccess) {
             if (typeof onSuccess === 'function') { onSuccess(response); }
             else if (onSuccess === true) { shoutboxRefresh(); }
         } else {
-            alert(response && response.msg ? response.msg : 'Request failed');
+            alert(response && response.msg ? response.msg : shoutboxT('requestFailed', 'Request failed'));
         }
     };
 
@@ -46,10 +52,10 @@ function shoutboxPost(action, params, onSuccess) {
             try {
                 cb(JSON.parse(xhr.responseText));
             } catch (e) {
-                alert('Invalid response');
+                alert(shoutboxT('invalidResponse', 'Invalid response'));
             }
         } else {
-            alert('Request failed');
+            alert(shoutboxT('requestFailed', 'Request failed'));
         }
     };
     var data = { action: action, params: params || {} };
@@ -68,7 +74,7 @@ function shoutboxWrap(tag, form, field) {
 function shoutboxSpoiler(form, field) {
     var ta = document.forms[form].elements[field];
     if (!ta) { return; }
-    var title = prompt('Spoiler title (optional):');
+    var title = prompt(shoutboxT('spoilerTitle', 'Spoiler title (optional):'));
     var start = title ? '[spoiler=' + title + ']' : '[spoiler]';
     var end = '[/spoiler]';
     shoutboxInsertAt(ta, start, end);
@@ -78,7 +84,7 @@ function shoutboxSpoiler(form, field) {
 function shoutboxQuote(form, field) {
     var ta = document.forms[form].elements[field];
     if (!ta) { return; }
-    var author = prompt('Quote author (optional):');
+    var author = prompt(shoutboxT('quoteAuthor', 'Quote author (optional):'));
     var start = author ? '[quote=' + author + ']' : '[quote]';
     var end = '[/quote]';
     shoutboxInsertAt(ta, start, end);
@@ -88,9 +94,9 @@ function shoutboxQuote(form, field) {
 function shoutboxLink(form, field) {
     var ta = document.forms[form].elements[field];
     if (!ta) { return; }
-    var url = prompt('URL:');
+    var url = prompt(shoutboxT('url', 'URL:'));
     if (!url) { return; }
-    var text = prompt('Link text (optional):', '') || url;
+    var text = prompt(shoutboxT('linkText', 'Link text (optional):'), '') || url;
     var ins = '[url=' + url + ']' + text + '[/url]';
     if (typeof ta.selectionStart !== 'undefined') {
         var ss = ta.selectionStart;
@@ -172,7 +178,7 @@ function shoutboxSaveEdit(id) {
 }
 
 function shoutboxDelete(id) {
-    if (!confirm('Delete this shout?')) { return; }
+    if (!confirm(shoutboxT('confirmDelete', 'Delete this shout?'))) { return; }
     shoutboxPost('shoutboxDelete', { id: id }, true);
 }
 

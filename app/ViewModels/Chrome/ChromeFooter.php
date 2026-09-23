@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\ViewModels\Chrome;
 
+use App\Support\AssetAppender;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
 use App\Support\LegacyDb;
@@ -73,6 +74,13 @@ final class ChromeFooter
             }
             $analyticsCode = "\n".$analyticsCode."\n";
         }
+
+        // site.js reads this once at parse time (footer scripts run before
+        // AssetAppender footer entries), so the lang map lives in the head.
+        $siteLang = json_encode([
+            'scrollTop' => __('legacy/index.scroll_to_top'),
+        ], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT);
+        AssetAppender::js("window.NX_SITE_LANG = $siteLang;", 'header', false, 'site-lang');
 
         return new self(
             yearFounded: substr($context->dateFounded, 0, 4) ?: '2007',

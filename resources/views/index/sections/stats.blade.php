@@ -5,7 +5,7 @@
 @endif
 <div class="nx-stats">
 <details class="nx-stats__details">
-<summary><span class="nx-stats__title">{{ $stats['title'] }}</span></summary>
+<summary><img class="plus nx-stats__sign" src="pic/trans.gif" alt="" /><span class="nx-stats__title">{{ $stats['title'] }}</span></summary>
 <div class="nx-text nx-center">
 <table data-nx="data" class="main nx-mx-auto"><caption class="nx-sr-only">{{ $stats['title'] }}</caption>
 <tr>

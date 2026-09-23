@@ -445,8 +445,10 @@ button.nx-btn-link {
 @keyframes nx-spin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion: reduce){.nx-loading__spinner{animation-duration:2.5s}}
 
-.nx-stats__details>summary{width:auto;margin:0;padding:0 0 .3rem;line-height:1.4;font-weight:400;background:none;border-bottom:1px solid var(--nxm-border,#e0e4ea)}
-.nx-stats__details>summary::marker{color:var(--nxm-text-dim,#666)}
+.nx-stats__details>summary{width:auto;margin:0;padding:0 0 .3rem;line-height:1.4;font-weight:400;background:none;border-bottom:1px solid var(--nxm-border,#e0e4ea);list-style:none}
+.nx-stats__details>summary::-webkit-details-marker{display:none}
+.nx-stats__sign{vertical-align:baseline;margin-right:.35rem}
+.nx-stats__details[open]>summary .nx-stats__sign{background-position:-9px -139px}
 .nx-stats__title{font-size:1.05rem;font-weight:700;color:var(--nxm-text,#1a2430)}
 .nx-stats__details>summary:hover .nx-stats__title{color:var(--nxm-accent,#0062AE)}
 .nx-stats__details[open]~.nx-stats-strip{display:none}

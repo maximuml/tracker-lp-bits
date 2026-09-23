@@ -441,6 +441,8 @@ JS;
             return ['show' => false];
         }
 
+        AssetAppender::js('js/stats-details.js', 'footer', true);
+
         $userStats = $this->indexRepository->getUserStats();
         $torrentStats = $this->indexRepository->getTorrentStats();
         $classStats = $this->indexRepository->getClassStats();

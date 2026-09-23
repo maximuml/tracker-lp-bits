@@ -445,10 +445,11 @@ button.nx-btn-link {
 @keyframes nx-spin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion: reduce){.nx-loading__spinner{animation-duration:2.5s}}
 
-.nx-stats>summary{width:auto;margin:0;padding:0 0 .3rem;line-height:1.4;font-size:1.05rem;font-weight:700;color:var(--nxm-text,#1a2430);background:none;border-bottom:1px solid var(--nxm-border,#e0e4ea)}
-.nx-stats>summary:hover{color:var(--nxm-accent,#0062AE)}
+.nx-stats>summary{width:auto;margin:0;padding:0 0 .3rem;line-height:1.4;font-weight:400;background:none;border-bottom:1px solid var(--nxm-border,#e0e4ea)}
 .nx-stats>summary::marker{color:var(--nxm-text-dim,#666)}
-.nx-stats-strip{display:flex;flex-wrap:wrap;justify-content:center;gap:.15rem 1.1rem;margin:.4rem 0 .8rem;font-size:.95rem;color:var(--nxm-text-dim,#555)}
+.nx-stats__title{font-size:1.05rem;font-weight:700;color:var(--nxm-text,#1a2430)}
+.nx-stats>summary:hover .nx-stats__title{color:var(--nxm-accent,#0062AE)}
+.nx-stats-strip{display:flex;flex-wrap:wrap;gap:.15rem 1.1rem;margin:.35rem 0 .1rem;font-size:.85rem;color:var(--nxm-text-dim,#555)}
 .nx-stats-strip b{color:var(--nxm-text,#1a2430);font-weight:600}
 .nx-stats-strip__sep{color:var(--nxm-border,#bbb)}
 

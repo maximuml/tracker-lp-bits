@@ -17,10 +17,12 @@ use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Globals;
 use App\Support\Html\SafeHtml;
+use App\Support\Ratio;
 use App\Support\Shoutbox;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
 use App\ViewModels\IndexPageViewModel;
+use Carbon\Carbon;
 use Illuminate\Support\HtmlString;
 
 /**
@@ -444,6 +446,23 @@ JS;
         $classStats = $this->indexRepository->getClassStats();
         $todayUsers = $this->indexRepository->getTodayActiveUsers();
         UserDisplay::preload($todayUsers['ids']);
+        $todayUsers['cards'] = [];
+        foreach ($todayUsers['ids'] as $uid) {
+            $row = UserDisplay::row($uid);
+            if ($row === false) {
+                continue;
+            }
+            $ratio = Ratio::userRatioNumeric((float) $row['uploaded'], (float) $row['downloaded']);
+            $todayUsers['cards'][$uid] = [
+                'username' => (string) $row['username'],
+                'classLabel' => UserClass::name((int) $row['class'], false, false, true),
+                'ratio' => number_format((float) $ratio, 3),
+                'uploaded' => Format::size((float) $row['uploaded']),
+                'downloaded' => Format::size((float) $row['downloaded']),
+                'lastSeen' => Carbon::parse($row['last_access'])->format('H:i'),
+                'avatar' => (string) ($row['avatar'] ?? ''),
+            ];
+        }
         $maxusers = (int) $this->globals->get('maxusers', 0);
 
         return [

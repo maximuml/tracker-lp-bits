@@ -89,7 +89,7 @@
     @if (! empty($complain['answered']) && (int) $complain['answered'] !== 0)
         <p class="nx-center">{{ __('legacy/complains.text_closed') ?? 'This complain has been closed.' }}</p>
     @else
-        <br /><br /><div class="nx-box nx-center"><b>{{ __('legacy/complains.text_reply') ?? 'Reply' }}</b><br /><br /><form id="reply" method="post" action=""><input type="hidden" name="action" value="reply" /><input type="hidden" name="id" value="{{ (int) ($complain['id'] ?? 0) }}" /><br />
+        <br /><br /><div class="nx-box nx-center"><b>{{ __('legacy/complains.text_reply') ?? 'Reply' }}</b><br /><br /><form id="reply" method="post" action=""><input type="hidden" name="action" value="reply" /><input type="hidden" name="id" value="{{ (int) ($complain['id'] ?? 0) }}" /><input type="hidden" name="uuid" value="{{ $complain['uuid'] ?? '' }}" /><br />
         {{ $replyBoxHtml }}
         </form></div>
     @endif

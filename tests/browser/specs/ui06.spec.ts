@@ -1,7 +1,50 @@
 import { expect, test } from '@playwright/test';
-import { AUTH_STATE } from '../fixtures/auth';
+import { execFileSync } from 'node:child_process';
+import { join } from 'node:path';
+import { AUTH_STATE, BROWSER_USER } from '../fixtures/auth';
 
 test.use({ storageState: AUTH_STATE });
+
+const REPO_ROOT = join(__dirname, '..', '..', '..');
+
+function tinker(php: string): string {
+    return execFileSync(
+        'docker',
+        ['compose', 'exec', '-T', 'php', 'php', 'artisan', 'tinker', `--execute=${php}`],
+        { cwd: REPO_ROOT, encoding: 'utf8', stdio: ['pipe', 'pipe', 'inherit'] },
+    );
+}
+
+let db = '';
+
+function mysql(sql: string): string {
+    return execFileSync(
+        'docker',
+        [
+            'compose', 'exec', '-T', 'mysql', 'sh', '-c',
+            'mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" --batch --skip-column-names "$1"',
+            'sh', db,
+        ],
+        { cwd: REPO_ROOT, input: sql, encoding: 'utf8', stdio: ['pipe', 'pipe', 'inherit'] },
+    );
+}
+
+test.beforeAll(() => {
+    // The mysql container's own MYSQL_DATABASE env can be stale while CI
+    // installs into nexusphp_e2e_testing — resolve the live name (same
+    // pattern as notifications.spec.ts).
+    const out = tinker('echo DB::connection()->getDatabaseName();');
+    db = (out.trim().split('\n').pop() ?? '').trim();
+    if (!/^[A-Za-z0-9_]+$/.test(db)) {
+        throw new Error(`could not resolve app database name: ${JSON.stringify(out)}`);
+    }
+});
+
+test.afterAll(() => {
+    if (db) {
+        mysql(`DELETE FROM shoutbox WHERE text LIKE '%ui06 e2e%'`);
+    }
+});
 
 test.describe('UI-06 index page', () => {
     test('latest torrents title has no count claim', async ({ page }) => {
@@ -60,17 +103,19 @@ test.describe('UI-06 index page', () => {
         }
         await expect(panel).toBeVisible();
 
-        // Collapse first — the shoutbox has a 60 s per-user post lock, so a
-        // second scripted shout would be rejected with 429. One mention after
-        // collapse is enough to produce a positive delta over the baseline.
+        // Collapse first — the baseline is captured from the live iframe DOM.
         await toggle.click();
         await expect(panel).toBeHidden();
         await expect(badge).toBeHidden();
 
-        const post = await page.request.get('/shoutbox.php', {
-            params: { sent: 'yes', type: 'shoutbox', shbox_text: '@sysop ui06 new mention', shout: 'Shout!' },
-        });
-        expect(post.status(), 'shout post accepted').toBe(200);
+        // Insert the mention directly: posting via shoutbox.php hits the
+        // 60 s per-user post lock (429), and shout rows authored by the
+        // viewer are enough to produce a positive delta over the baseline.
+        mysql(
+            `INSERT INTO shoutbox (userid,date,text,type)
+             SELECT id, UNIX_TIMESTAMP(), '@${BROWSER_USER} ui06 e2e mention', 0
+             FROM users WHERE username='${BROWSER_USER}' LIMIT 1`,
+        );
 
         // Reload the iframe to deliver the shout deterministically — in
         // production the iframe's own SSE/poll refreshes its DOM, and the

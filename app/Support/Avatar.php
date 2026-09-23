@@ -12,7 +12,7 @@ namespace App\Support;
  */
 final class Avatar
 {
-    private const int VARIANTS = 8;
+    private const int VARIANTS = 20;
 
     private const string BUILTIN_DEFAULT = 'pic/default_avatar.png';
 

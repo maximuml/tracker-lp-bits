@@ -42,7 +42,7 @@ final class CleanupServiceTest extends TestCase
         parent::setUp();
         Redis::connection()->flushdb();
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
-        DB::table('avps')->truncate();
+        DB::table('avps')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
     }
 

@@ -46,7 +46,7 @@ final class BonusPageServiceTest extends TestCase
         $this->initialObLevel = ob_get_level();
         Redis::connection()->flushdb();
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
-        DB::table('users')->truncate();
+        DB::table('users')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
         /** @var BonusCalculationRepository&MockInterface $rep */

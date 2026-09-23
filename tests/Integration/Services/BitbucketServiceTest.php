@@ -37,8 +37,8 @@ final class BitbucketServiceTest extends TestCase
         parent::setUp();
         Redis::connection()->flushdb();
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
-        DB::table('bitbucket')->truncate();
-        DB::table('users')->truncate();
+        DB::table('bitbucket')->delete();
+        DB::table('users')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
         $this->service = new BitbucketService;

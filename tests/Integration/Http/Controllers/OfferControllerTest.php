@@ -23,7 +23,7 @@ final class OfferControllerTest extends TestCase
     {
         parent::setUp();
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
-        DB::table('offers')->truncate();
+        DB::table('offers')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
     }
 

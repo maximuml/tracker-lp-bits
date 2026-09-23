@@ -21,7 +21,7 @@ final class FileControllerTest extends TestCase
     {
         parent::setUp();
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
-        DB::table('files')->truncate();
+        DB::table('files')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
     }
 

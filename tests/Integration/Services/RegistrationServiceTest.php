@@ -40,9 +40,9 @@ final class RegistrationServiceTest extends TestCase
     {
         parent::setUp();
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
-        DB::table('users')->truncate();
-        DB::table('loginattempts')->truncate();
-        DB::table('email_confirmation_tokens')->truncate();
+        DB::table('users')->delete();
+        DB::table('loginattempts')->delete();
+        DB::table('email_confirmation_tokens')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
         // Reset Settings static cache so SiteConfig reads fresh DB values

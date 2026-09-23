@@ -61,7 +61,7 @@ final class UsercpPageServiceTest extends TestCase
         // otherwise leak between dev and test runs.
         (new LegacyRedisCache)->redis?->flushDB();
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
-        DB::table('users')->truncate();
+        DB::table('users')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
         $this->userId = $this->createUser();

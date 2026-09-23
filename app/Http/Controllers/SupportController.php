@@ -219,7 +219,7 @@ class SupportController extends LegacyController
         ]);
     }
 
-    private function complainCompose(Request $request, int $uid): View
+    private function complainCompose(Request $request, int $uid): View|RedirectResponse
     {
         $captchaHtml = Captcha::renderHtml(layout: 'grid');
 

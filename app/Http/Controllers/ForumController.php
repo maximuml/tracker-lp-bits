@@ -14,6 +14,7 @@ use App\Models\Forum;
 use App\Repositories\CommentRepository;
 use App\Services\ForumPageService;
 use App\Services\ForumService;
+use App\Support\Avatar;
 use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
@@ -122,7 +123,7 @@ class ForumController extends LegacyController
                 ? ' <span class="nx-color-gray">on</span> <a href="'.$parentUrl.'">'.htmlspecialchars((string) ($row['parent_name'] ?? '')).'</a>'
                 : '');
             $avatar = $showAvatars ? htmlspecialchars(trim((string) ($row['avatar'] ?? ''))) : '';
-            $row['avatarHtml'] = SafeHtml::fromTrustedHtml(UserDisplay::avatarImageWithContext($avatar !== '' ? $avatar : 'pic/default_avatar.png'));
+            $row['avatarHtml'] = SafeHtml::fromTrustedHtml(UserDisplay::avatarImageWithContext(Avatar::forUser((int) ($row['user'] ?? 0), $avatar)));
             $row['usernameHtml'] = SafeHtml::fromTrustedHtml($userDisplayMap[(int) ($row['user'] ?? 0)]
                 ?? UserDisplay::username((int) ($row['user'] ?? 0), false, true, true, false, false, true));
             $row['timeHtml'] = SafeHtml::fromTrustedHtml((string) Time::format((string) ($row['added'] ?? '')));

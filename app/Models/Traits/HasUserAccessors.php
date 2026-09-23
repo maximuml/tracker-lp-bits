@@ -6,6 +6,7 @@ namespace App\Models\Traits;
 
 use App\Enums\UserDonate;
 use App\Http\Middleware\Locale;
+use App\Support\Avatar;
 use App\Support\Format;
 use App\Support\Logger;
 use App\Support\Url;
@@ -106,7 +107,7 @@ trait HasUserAccessors
             }
         }
 
-        return Url::schemeAndHost(false).'/pic/default_avatar.png';
+        return Url::schemeAndHost(false).'/'.Avatar::forUser((int) $this->id, '');
 
     }
 }

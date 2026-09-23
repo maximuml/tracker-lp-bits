@@ -450,7 +450,9 @@ button.nx-btn-link {
 .nx-stats__title{font-size:1.05rem;font-weight:700;color:var(--nxm-text,#1a2430)}
 .nx-stats__details>summary:hover .nx-stats__title{color:var(--nxm-accent,#0062AE)}
 .nx-stats__details[open]~.nx-stats-strip{display:none}
-.nx-stats-strip{margin:.4rem 0 .8rem}
+.nx-stats-strip{display:block;margin:.4rem 0 .8rem}
+.nx-stats-strip tbody{display:block}
+.nx-stats-strip tr{display:grid;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr))}
 .nx-stats-strip td{text-align:center;padding:.55rem .6rem}
 .nx-stats-strip__label{display:block;font-size:.78rem;color:var(--nxm-text-dim,#555);margin-bottom:.2rem}
 .nx-stats-strip b{font-size:1.05rem;color:var(--nxm-text,#1a2430)}

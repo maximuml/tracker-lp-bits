@@ -115,8 +115,8 @@ class IndexRepository
             return [
                 'registered' => User::count(),
                 'unverified' => User::where('status', UserStatus::PENDING->value)->where('enabled', true)->count(),
-                'totalonlinetoday' => User::where('last_access', '>=', $cutoffDay)->count(),
-                'totalonlineweek' => User::where('last_access', '>=', $cutoffWeek)->count(),
+                'totalonlinetoday' => User::where('last_access', '>=', $cutoffDay)->where('enabled', true)->where('privacy', '!=', UserPrivacy::STRONG->value)->count(),
+                'totalonlineweek' => User::where('last_access', '>=', $cutoffWeek)->where('enabled', true)->where('privacy', '!=', UserPrivacy::STRONG->value)->count(),
                 'vip' => User::where('class', UC_VIP)->count(),
                 'donated' => User::where('donor', true)->count(),
                 'warned' => User::where('warned', true)->count(),

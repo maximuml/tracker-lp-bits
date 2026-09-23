@@ -59,7 +59,10 @@ test.describe('theme toggle', () => {
 
 test.describe('theme toggle — anonymous', () => {
   test('public page toggle persists via localStorage', async ({ page }) => {
-    await page.goto('/faq', { waitUntil: 'networkidle' });
+    // /login: a public page outside the throttle:legacy guest bucket —
+    // /faq's shared IP bucket can saturate under the full suite and
+    // flake this check with a 429.
+    await page.goto('/login', { waitUntil: 'networkidle' });
 
     const navToggle = page.locator('.nxm-theme-toggle').first();
     await expect(navToggle).toBeVisible();

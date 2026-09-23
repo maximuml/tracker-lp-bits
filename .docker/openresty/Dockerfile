@@ -6,7 +6,9 @@ RUN apk add --no-cache gettext~=0.24 bash~=5.3 curl~=8.22 openssl~=3.5 socat~=1.
 
 # 拷贝 entrypoint
 COPY .docker/openresty/entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
+COPY .docker/openresty/render-config.sh /usr/local/bin/render-config.sh
+COPY .docker/openresty/cert-watcher.sh /usr/local/bin/cert-watcher.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh /usr/local/bin/render-config.sh /usr/local/bin/cert-watcher.sh
 
 # Copy nginx config, site templates, and lua scripts into the image.
 # In dev, these are bind-mounted from .docker/openresty/. In production,

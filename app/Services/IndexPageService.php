@@ -542,6 +542,16 @@ JS;
     public function appendAssets(array $curUser): void
     {
         AssetAppender::css('styles/shoutbox.css', 'header', true);
+        $shoutLang = json_encode([
+            'requestFailed' => __('legacy/shoutbox.js_request_failed'),
+            'invalidResponse' => __('legacy/shoutbox.js_invalid_response'),
+            'spoilerTitle' => __('legacy/shoutbox.js_spoiler_title'),
+            'quoteAuthor' => __('legacy/shoutbox.js_quote_author'),
+            'url' => __('legacy/shoutbox.js_url'),
+            'linkText' => __('legacy/shoutbox.js_link_text'),
+            'confirmDelete' => __('legacy/shoutbox.js_confirm_delete'),
+        ], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT);
+        AssetAppender::js("window.SHOUT_LANG = $shoutLang;", 'footer', false, 'shout-lang');
         AssetAppender::js('js/shoutbox.js', 'footer', true);
     }
 }

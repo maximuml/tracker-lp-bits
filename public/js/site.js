@@ -1087,7 +1087,7 @@ document.addEventListener('error', function (e) {
     var button = document.createElement('div');
     button.id = 'goup-btn';
     button.setAttribute('role', 'button');
-    button.setAttribute('aria-label', 'Scroll to top');
+    button.setAttribute('aria-label', (window.NX_SITE_LANG && window.NX_SITE_LANG.scrollTop) || 'Scroll to top');
     button.setAttribute('tabindex', '0');
     Object.assign(button.style, {
         position: 'fixed',
@@ -1437,3 +1437,42 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
+/* ===== nx-action-menu.js ===== */
+/**
+ * <details>-based action menus (components/action-menu.blade.php).
+ * Delegated handlers: Esc closes and refocuses the toggle, click outside
+ * closes, ArrowUp/ArrowDown move focus between menu items.
+ */
+(function () {
+    'use strict';
+
+    document.addEventListener('keydown', function (e) {
+        var menu = e.target && e.target.closest ? e.target.closest('.nx-action-menu') : null;
+        if (!menu || !menu.open) { return; }
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            menu.open = false;
+            var toggle = menu.querySelector('.nx-action-menu__toggle');
+            if (toggle) { toggle.focus(); }
+            return;
+        }
+        if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') { return; }
+        var items = menu.querySelectorAll('.nx-action-menu__list a, .nx-action-menu__list button');
+        if (!items.length) { return; }
+        e.preventDefault();
+        var idx = Array.prototype.indexOf.call(items, document.activeElement);
+        if (e.key === 'ArrowDown') {
+            items[(idx + 1) % items.length].focus();
+        } else {
+            items[(idx <= 0 ? items.length : idx) - 1].focus();
+        }
+    });
+
+    document.addEventListener('click', function (e) {
+        document.querySelectorAll('.nx-action-menu[open]').forEach(function (menu) {
+            if (!menu.contains(e.target)) {
+                menu.open = false;
+            }
+        });
+    });
+})();

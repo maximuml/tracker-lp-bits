@@ -33,4 +33,11 @@ return [
     'text_to' => 'To',
     'text_search' => 'Search',
     'text_filter' => 'Filter',
+    'js_request_failed' => 'Request failed',
+    'js_invalid_response' => 'Invalid response',
+    'js_spoiler_title' => 'Spoiler title (optional):',
+    'js_quote_author' => 'Quote author (optional):',
+    'js_url' => 'URL:',
+    'js_link_text' => 'Link text (optional):',
+    'js_confirm_delete' => 'Delete this shout?',
 ];

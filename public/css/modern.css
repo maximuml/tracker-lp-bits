@@ -21,6 +21,17 @@
     --nxm-danger: #c0392b;
     --nxm-warning: #b95c00;
 
+    /* status tints (alert / error-summary / status surfaces) */
+    --nxm-info-bg: #eef6fd;
+    --nxm-info-border: #b8daff;
+    --nxm-success-bg: #effaf2;
+    --nxm-success-border: #b7e4c7;
+    --nxm-warning-bg: #fff8e5;
+    --nxm-warning-border: #ffe3a3;
+    --nxm-danger-bg: #fdf0f0;
+    --nxm-danger-border: #f5c2c7;
+    --nxm-overlay: rgba(20, 25, 33, 0.45);
+
     /* chrome */
     --nxm-header-bg: #1d2733;
     --nxm-header-text: #f4f5f7;
@@ -79,6 +90,16 @@
         --nxm-danger: #e07b6d;
         --nxm-warning: #e0a05c;
 
+        --nxm-info-bg: #16283a;
+        --nxm-info-border: #2c4a66;
+        --nxm-success-bg: #16301f;
+        --nxm-success-border: #2c5c3c;
+        --nxm-warning-bg: #332a16;
+        --nxm-warning-border: #665223;
+        --nxm-danger-bg: #35191c;
+        --nxm-danger-border: #6b3237;
+        --nxm-overlay: rgba(0, 0, 0, 0.55);
+
         --nxm-header-bg: #10151c;
         --nxm-header-text: #e6ecf3;
         --nxm-header-dim: #8a99ac;
@@ -129,6 +150,16 @@ html[data-theme="dark"] {
     --nxm-success: #5ec07a;
     --nxm-danger: #e07b6d;
     --nxm-warning: #e0a05c;
+
+    --nxm-info-bg: #16283a;
+    --nxm-info-border: #2c4a66;
+    --nxm-success-bg: #16301f;
+    --nxm-success-border: #2c5c3c;
+    --nxm-warning-bg: #332a16;
+    --nxm-warning-border: #665223;
+    --nxm-danger-bg: #35191c;
+    --nxm-danger-border: #6b3237;
+    --nxm-overlay: rgba(0, 0, 0, 0.55);
 
     --nxm-header-bg: #10151c;
     --nxm-header-text: #e6ecf3;

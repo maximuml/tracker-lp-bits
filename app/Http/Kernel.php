@@ -26,6 +26,7 @@ use App\Http\Middleware\ResponseTimeHeader;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\ThrottleRequests;
 use App\Http\Middleware\TrackerThrottle;
+use App\Http\Middleware\TrackReferer;
 use App\Http\Middleware\TrimStrings;
 use App\Http\Middleware\TrustProxies;
 use App\Http\Middleware\VerifyCsrfToken;
@@ -65,6 +66,7 @@ class Kernel extends HttpKernel
         LegacyRequestMiddleware::class,
         Locale::class,
         LogUserIp::class,
+        TrackReferer::class,
         SecurityHeaders::class,
         ResponseTimeHeader::class,
         RecordHttpMetrics::class,

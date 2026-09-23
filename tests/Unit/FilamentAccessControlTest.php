@@ -6,6 +6,7 @@ namespace Tests\Unit;
 
 use App\Enums\UserClass;
 use App\Filament\Pages\PhpErrorLog;
+use App\Filament\Pages\RefererSources;
 use App\Filament\Resources\Section\ForumResource;
 use App\Filament\Resources\Section\OverForumResource;
 use App\Filament\Resources\Security\BanResource;
@@ -166,6 +167,21 @@ final class FilamentAccessControlTest extends TestCase
         $this->assertFalse(BanResource::canAccess());
         $this->assertFalse(LoginAttemptResource::canAccess());
         $this->assertFalse(CheaterResource::canAccess());
+        $this->assertFalse(RefererSources::canAccess());
+    }
+
+    /**
+     * RefererSources page requires SYSOP.
+     */
+    public function test_referer_sources_sysop_access(): void
+    {
+        $this->assertTrue($this->canAccessWithClass(RefererSources::class, UserClass::SYSOP));
+    }
+
+    public function test_referer_sources_denied_below_sysop(): void
+    {
+        $this->assertFalse($this->canAccessWithClass(RefererSources::class, UserClass::ADMINISTRATOR));
+        $this->assertFalse($this->canAccessWithClass(RefererSources::class, UserClass::USER));
     }
 
     /**

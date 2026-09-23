@@ -69,11 +69,11 @@ RUN apk upgrade --no-cache curl libcurl
 RUN sed -i \
     -e 's/;catch_workers_output = .*/catch_workers_output = yes/g' \
     -e 's/;php_admin_flag\[log_errors\] = .*/php_admin_flag\[log_errors\] = on/g' \
-    -e 's/;php_admin_value\[error_log\] = .*/php_admin_value\[error_log\] = \/dev\/stderr/g' \
+    -e 's/;php_admin_value\[error_log\] = .*/php_admin_value\[error_log\] = \/var\/www\/html\/storage\/logs\/php_errors.log/g' \
     /usr/local/etc/php-fpm.d/www.conf
 
-# 配置 PHP 错误日志输出到 stderr
-RUN echo "error_log = /dev/stderr" >> /usr/local/etc/php/conf.d/error-logging.ini
+# PHP error log -> file readable by the /nexusphp panel (System > PHP Error Log)
+RUN echo "error_log = /var/www/html/storage/logs/php_errors.log" >> /usr/local/etc/php/conf.d/error-logging.ini && echo "log_errors = On" >> /usr/local/etc/php/conf.d/error-logging.ini && echo "error_reporting = E_ALL" >> /usr/local/etc/php/conf.d/error-logging.ini
 # 上传配置
 RUN echo "upload_max_filesize = 10M" >> /usr/local/etc/php/conf.d/upload.ini
 RUN echo "post_max_size = 10M" >> /usr/local/etc/php/conf.d/upload.ini

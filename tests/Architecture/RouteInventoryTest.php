@@ -146,12 +146,13 @@ final class RouteInventoryTest extends TestCase
     {
         $currentCount = $this->countAppMutationRoutes();
 
-        // Baseline captured on 2026-09-07
+        // Baseline captured on 2026-09-07; +1 for POST /api/v1/logout-all
+        // (SEC-04) — token revocation action with no request payload.
         $this->assertLessThanOrEqual(
-            155,
+            156,
             $currentCount,
             sprintf(
-                'App mutation route count increased from baseline 155 to %d. '.
+                'App mutation route count increased from baseline 156 to %d. '.
                 'Consider whether new mutation routes need FormRequest validation.',
                 $currentCount,
             ),

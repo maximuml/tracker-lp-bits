@@ -32,9 +32,12 @@ final class RequirePasswordChange
         'login*', 'takelogin*', 'signup*', 'takesignup*',
         'recover*', 'confirm*', 'verify*', 'error',
         'announce*', 'scrape*',              // tracker protocol
-        'api/*',                             // token-authenticated API
+        'api/*',                             // token-authenticated API (flagged users get a limited token at login)
         'health*', 'metrics', 'nexus',       // ops
-        'filament/*', 'nexusphp/*', 'livewire/*', 'horizon*',
+        // Filament panel (nexusphp/*) and its livewire/* calls are NOT
+        // exempt: a flagged staff account must change the password before
+        // it can operate the admin UI. horizon* is staff-only too.
+        'horizon*',
         'build/*', 'storage/*', 'vendor/*', 'assets/*', 'images/*', 'pic/*',
         'js/*', 'css/*', 'fonts/*', 'favicon.ico', 'robots.txt',
     ];

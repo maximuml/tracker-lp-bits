@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Contracts\Repositories\UserRepositoryInterface;
+use App\Exceptions\AuthenticationException;
+use App\Exceptions\NexusException;
 use App\Http\Requests\Auth\ChallengeRequest;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\PasskeyLoginRequest;
@@ -44,8 +46,13 @@ class AuthenticateController extends Controller
     public function login(LoginRequest $request): array
     {
         try {
-            $result = $this->repository->login($request->username, $request->password, (string) $request->input('two_step_code', ''));
-        } catch (\InvalidArgumentException $e) {
+            $result = $this->repository->login(
+                $request->username,
+                $request->password,
+                (string) $request->input('two_step_code', ''),
+                Network::clientIp(),
+            );
+        } catch (\InvalidArgumentException|AuthenticationException|NexusException $e) {
             abort(401, $e->getMessage());
         }
         $includes = explode(',', $request->get('include', ''));
@@ -59,9 +66,23 @@ class AuthenticateController extends Controller
     }
 
     /**
+     * Logout revokes the *current* access token only — ending every
+     * device session is a separate action (logoutAll).
+     *
      * @return array<string, mixed>
      */
     public function logout(Request $request): array
+    {
+        $token = $request->user()?->currentAccessToken();
+        $token?->delete();
+
+        return $this->success(['revoked' => 'current']);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function logoutAll(Request $request): array
     {
         $result = $this->repository->logout((int) Auth::id());
 

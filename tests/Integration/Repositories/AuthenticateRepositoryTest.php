@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Repositories;
 
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Models\User;
 use App\Repositories\AuthenticateRepository;
 use App\Services\WebAuthService;
@@ -35,7 +36,10 @@ final class AuthenticateRepositoryTest extends TestCase
         DB::table('users')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
-        $this->repository = new AuthenticateRepository(app(WebAuthService::class));
+        $this->repository = new AuthenticateRepository(
+            app(WebAuthService::class),
+            app(UserRepositoryInterface::class),
+        );
     }
 
     protected function tearDown(): void

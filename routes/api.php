@@ -54,6 +54,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
         Route::post('logout', [AuthenticateController::class, 'logout'])
             ->middleware(Permissions::abilityLabel(RoutePermissionEnum::AUTH_LOGOUT));
+        Route::post('logout-all', [AuthenticateController::class, 'logoutAll'])
+            ->middleware(Permissions::abilityLabel(RoutePermissionEnum::AUTH_LOGOUT));
 
         Route::get('user-me', [UserController::class, 'me'])
             ->middleware(Permissions::abilityLabel(RoutePermissionEnum::USER_ME));

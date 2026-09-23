@@ -31,7 +31,13 @@ class MeiliSearchImport extends Command
     public function handle(MeiliSearchRepositoryInterface $rep)
     {
         $this->info('going to import torrents...');
-        $total = $rep->import();
+        try {
+            $total = $rep->import();
+        } catch (\Throwable $e) {
+            $this->error('import failed: '.$e->getMessage());
+
+            return Command::FAILURE;
+        }
         $this->info("import $total torrents.");
 
         return Command::SUCCESS;

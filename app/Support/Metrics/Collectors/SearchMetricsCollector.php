@@ -24,6 +24,10 @@ final class SearchMetricsCollector implements MetricsCollector
         $lines = array_merge(
             $this->fmt->head('nexus_meili_up', 'MeiliSearch connectivity (1=up, 0=down)', 'gauge'),
             $this->fmt->head('nexus_meili_lag_seconds', 'MeiliSearch indexing lag in seconds', 'gauge'),
+            $this->fmt->head('nexus_meili_rebuild_duration_seconds', 'Duration of the last MeiliSearch rebuild', 'gauge'),
+            $this->fmt->head('nexus_meili_rebuild_documents', 'Documents imported by the last successful rebuild', 'gauge'),
+            $this->fmt->head('nexus_meili_rebuild_failed_total', 'Total failed rebuild attempts', 'counter'),
+            $this->fmt->head('nexus_meili_rebuild_last_success_timestamp', 'Unix time of the last successful rebuild', 'gauge'),
         );
 
         $lines[] = 'nexus_meili_up '.Cache::remember('metrics:meili_up', $this->cacheTtl(), $this->probe(...));
@@ -37,6 +41,19 @@ final class SearchMetricsCollector implements MetricsCollector
             $lines[] = "nexus_meili_lag_seconds {$lag}";
         } catch (\Throwable) {
             $lines[] = 'nexus_meili_lag_seconds -1';
+        }
+
+        try {
+            $redis = Redis::connection();
+            $lines[] = 'nexus_meili_rebuild_duration_seconds '.(float) ($redis->get('metrics:meili_rebuild_duration') ?? 0);
+            $lines[] = 'nexus_meili_rebuild_documents '.(int) ($redis->get('metrics:meili_rebuild_documents') ?? 0);
+            $lines[] = 'nexus_meili_rebuild_failed_total '.(int) ($redis->get('metrics:meili_rebuild_failed') ?? 0);
+            $lines[] = 'nexus_meili_rebuild_last_success_timestamp '.(int) ($redis->get('metrics:meili_rebuild_last_success') ?? 0);
+        } catch (\Throwable) {
+            $lines[] = 'nexus_meili_rebuild_duration_seconds 0';
+            $lines[] = 'nexus_meili_rebuild_documents 0';
+            $lines[] = 'nexus_meili_rebuild_failed_total 0';
+            $lines[] = 'nexus_meili_rebuild_last_success_timestamp 0';
         }
 
         return $lines;

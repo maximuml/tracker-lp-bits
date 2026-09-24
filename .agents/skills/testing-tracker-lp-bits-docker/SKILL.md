@@ -166,3 +166,20 @@ get client with url: http://meilisearch:7700, master key:
 10. **Login form reliability.** GUI login-field coordinates drift between runs;
     Tab/Enter navigation from the focused field is more reliable than
     coordinate clicks.
+11. **Announce testing must use the BASEURL-canonical host.** With
+    `basic.baseUrl=localhost`, announcing to `http://127.0.0.1/announce.php`
+    returns a 200 dict containing `"warning message: you should announce to: …"`
+    and registers NOTHING — `ResponseBuilder::warn()` throws
+    `TrackerWarningException`, so the pipeline aborts before peer insert (by
+    design). Always curl announce to the host that matches BASEURL.
+12. **Valid announce needs allowlisted client + matching UA.** A peer_id with a
+    banned/unknown prefix gets a "Banned Client" failure; use a real client
+    identity, e.g. peer_id `-TR4000-…` + `User-Agent: Transmission/4.0.0`.
+    Port 6881 is in the seeded blacklist — announce on another port.
+13. **Seed-bonus accrual runs via `php artisan cleanup:run`** (the batch job
+    precomputes Redis data first). `cleanup --action=seed_bonus` alone fails
+    with "no data from idStr". Probe one task: `php artisan cleanup:tasks
+    <task>` (e.g. `prune-peers`).
+14. **mybonus exchange via curl may 419 but still commit** — a stale `_token`
+    produces 419 after the mutation runs. Prefer the in-browser exchange path
+    for clean verification.

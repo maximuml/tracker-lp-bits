@@ -200,6 +200,12 @@ class SettingsController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Permission denied.');
         }
 
+        $action = (string) ($request->post('action') ?? '');
+        $sectionActions = ['basicsettings', 'mainsettings', 'smtpsettings', 'securitysettings', 'authoritysettings', 'tweaksettings', 'bonussettings', 'accountsettings', 'torrentsettings', 'attachmentsettings', 'codesettings', 'miscsettings'];
+        if (in_array($action, $sectionActions, true)) {
+            return redirect("/settings.php?action=$action");
+        }
+
         return $this->handleSave($request) ?? redirect('/settings.php');
     }
 

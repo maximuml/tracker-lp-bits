@@ -178,6 +178,7 @@ JS;
             'messageLabel' => __('legacy/index.text_message'),
             'submitLabel' => __('legacy/index.sumbit_shout'),
             'clearButtonLabel' => __('legacy/index.submit_clear'),
+            'showHideTitle' => __('legacy/index.title_show_or_hide'),
         ];
     }
 

@@ -450,22 +450,24 @@ document.addEventListener('click', function (e) {
     }
 });
 
-// Index-page collapse toggle: hides the iframe panel while it keeps loading
-// in the background, and surfaces new @-mentions via a badge. State persists
-// in localStorage. Runs only in the parent page — the iframe document is
-// detected via window.self !== window.top.
+// Index-page collapse runs on the shared klappe mechanism (same as news):
+// the plus/minus icon toggles .nx-hidden on #kshoutbox and stats-details.js
+// persists the state. This block only surfaces new @-mentions via a badge
+// while the panel is collapsed. Runs only in the parent page — the iframe
+// document is detected via window.self !== window.top.
 (function () {
     if (window.self !== window.top) { return; }
 
     var iframe = document.getElementById('iframe-shout-box');
-    var panel = document.getElementById('shoutbox-panel');
-    var toggle = document.getElementById('shoutbox-toggle');
+    var panel = document.getElementById('kshoutbox');
     var badge = document.getElementById('shoutbox-mentions');
-    if (!iframe || !panel || !toggle || !badge) { return; }
+    if (!iframe || !panel || !badge) { return; }
 
-    var STORAGE_KEY = 'nx.shoutbox.collapsed';
-    var collapsed = false;
     var mentionBaseline = -1;
+
+    function isCollapsed() {
+        return panel.classList.contains('nx-hidden');
+    }
 
     function shoutMentionCount() {
         try {
@@ -476,17 +478,12 @@ document.addEventListener('click', function (e) {
         }
     }
 
-    function shoutCollapseRender() {
-        panel.style.display = collapsed ? 'none' : '';
-        toggle.hidden = false;
-        toggle.textContent = '[' + shoutboxT(collapsed ? 'expand' : 'collapse', collapsed ? 'Expand' : 'Collapse') + ']';
-        toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
-        if (!collapsed) { badge.hidden = true; }
-        try { localStorage.setItem(STORAGE_KEY, collapsed ? '1' : '0'); } catch (e) {}
-    }
-
     function shoutCollapseScan() {
-        if (!collapsed) { return; }
+        if (!isCollapsed()) {
+            badge.hidden = true;
+            mentionBaseline = -1;
+            return;
+        }
         if (mentionBaseline < 0) { mentionBaseline = shoutMentionCount(); return; }
         var delta = shoutMentionCount() - mentionBaseline;
         if (delta > 0) {
@@ -497,18 +494,22 @@ document.addEventListener('click', function (e) {
         }
     }
 
-    toggle.addEventListener('click', function () {
-        collapsed = !collapsed;
-        mentionBaseline = collapsed ? shoutMentionCount() : -1;
-        shoutCollapseRender();
-        shoutCollapseScan();
-    });
     badge.addEventListener('click', function () {
-        collapsed = false;
-        mentionBaseline = -1;
-        shoutCollapseRender();
-        toggle.focus();
+        if (isCollapsed() && typeof klappe_news === 'function') {
+            klappe_news('shoutbox');
+        }
     });
+
+    // Capture the mention baseline at the moment the panel collapses — a
+    // scan-scheduled capture would let mentions arriving between collapse
+    // and the first scan slip into the baseline unseen.
+    if (typeof MutationObserver !== 'undefined') {
+        var observer = new MutationObserver(function () {
+            mentionBaseline = isCollapsed() ? shoutMentionCount() : -1;
+            badge.hidden = true;
+        });
+        observer.observe(panel, { attributes: true, attributeFilter: ['class'] });
+    }
     iframe.addEventListener('load', shoutCollapseScan);
 
     // New shouts arrive inside the iframe via shoutPoll() DOM updates — no
@@ -527,7 +528,5 @@ document.addEventListener('click', function (e) {
     }
     setInterval(shoutCollapseScan, 15000);
 
-    try { collapsed = localStorage.getItem(STORAGE_KEY) === '1'; } catch (e) {}
-    shoutCollapseRender();
     shoutCollapseScan();
 })();

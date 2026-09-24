@@ -1,6 +1,6 @@
 @if($shoutbox['show'])
 <h2>
-    <a href="#" data-klappe="shoutbox"><img class="minus" src="pic/trans.gif" id="picshoutbox" alt="Show/Hide" title="{{ $shoutbox['showHideTitle'] }}" /></a>
+    <a href="#" data-klappe="shoutbox" aria-expanded="true"><img class="minus" src="pic/trans.gif" id="picshoutbox" alt="Show/Hide" title="{{ $shoutbox['showHideTitle'] }}" /></a>
     {{ $shoutbox['title'] }} - <span class="small">{{ $shoutbox['autoRefreshLabel'] }}</span>
     <span class="striking" id="countdown"></span><span class="small">{{ $shoutbox['secondsLabel'] }}</span>
     - <a href="shoutbox_history.php" class="small">{{ $shoutbox['historyLabel'] }}</a>

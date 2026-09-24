@@ -499,6 +499,17 @@ document.addEventListener('click', function (e) {
             klappe_news('shoutbox');
         }
     });
+
+    // Capture the mention baseline at the moment the panel collapses — a
+    // scan-scheduled capture would let mentions arriving between collapse
+    // and the first scan slip into the baseline unseen.
+    if (typeof MutationObserver !== 'undefined') {
+        var observer = new MutationObserver(function () {
+            mentionBaseline = isCollapsed() ? shoutMentionCount() : -1;
+            badge.hidden = true;
+        });
+        observer.observe(panel, { attributes: true, attributeFilter: ['class'] });
+    }
     iframe.addEventListener('load', shoutCollapseScan);
 
     // New shouts arrive inside the iframe via shoutPoll() DOM updates — no

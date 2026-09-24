@@ -33,8 +33,8 @@ test.describe('UI-06 index page', () => {
 
     test('shoutbox collapses and persists across reload', async ({ page }) => {
         await page.goto('/index.php', { waitUntil: 'networkidle' });
-        const toggle = page.locator('#shoutbox-toggle');
-        const panel = page.locator('#shoutbox-panel');
+        const toggle = page.locator('[data-klappe="shoutbox"]');
+        const panel = page.locator('#kshoutbox');
         await expect(toggle).toBeVisible();
         await expect(toggle).toHaveAttribute('aria-expanded', 'true');
         await toggle.click();
@@ -43,17 +43,17 @@ test.describe('UI-06 index page', () => {
 
         await page.reload({ waitUntil: 'networkidle' });
         await expect(panel).toBeHidden();
-        await expect(page.locator('#shoutbox-toggle')).toHaveAttribute('aria-expanded', 'false');
+        await expect(toggle).toHaveAttribute('aria-expanded', 'false');
 
-        await page.locator('#shoutbox-toggle').click();
+        await toggle.click();
         await expect(panel).toBeVisible();
-        await expect(page.locator('#shoutbox-toggle')).toHaveAttribute('aria-expanded', 'true');
+        await expect(toggle).toHaveAttribute('aria-expanded', 'true');
     });
 
     test('mentions badge surfaces while collapsed', async ({ page }) => {
         await page.goto('/index.php', { waitUntil: 'networkidle' });
-        const panel = page.locator('#shoutbox-panel');
-        const toggle = page.locator('#shoutbox-toggle');
+        const panel = page.locator('#kshoutbox');
+        const toggle = page.locator('[data-klappe="shoutbox"]');
         const badge = page.locator('#shoutbox-mentions');
         if (await panel.isHidden()) {
             await toggle.click();

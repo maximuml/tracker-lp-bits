@@ -6,10 +6,10 @@
     @if($shoutbox['canManage'])
         - <span class="small" id="clear-shout-box">[<a class="altlink" href="#"><b>{{ $shoutbox['clearLabel'] }}</b></a>]</span>
     @endif
-    - <button type="button" class="nx-shoutbox-toggle small" id="shoutbox-toggle" aria-expanded="true" aria-controls="shoutbox-panel" hidden></button>
+    - <a href="#" data-klappe="shoutbox"><img class="minus" src="pic/trans.gif" id="picshoutbox" alt="Show/Hide" title="{{ $shoutbox['showHideTitle'] }}" /></a>
     <button type="button" class="nx-shoutbox-mentions" id="shoutbox-mentions" hidden></button>
 </h2>
-<div class="nx-text" id="shoutbox-panel">
+<div class="nx-text" id="kshoutbox">
 <iframe id='iframe-shout-box' title="Shoutbox" src='shoutbox.php?type=shoutbox' name='sbox'></iframe>
 <form action='shoutbox.php' method='get' target='sbox' name='shbox'>
 {{ ($shoutbox['toolbar'] ?? '') }}

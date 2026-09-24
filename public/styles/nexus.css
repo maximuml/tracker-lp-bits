@@ -171,6 +171,7 @@ table.msg-alert td.msg-alert-gray { background: gray; }
     grid-template-columns: repeat(3, 1fr);
     gap: 12px;
     margin: 8px 0 16px;
+    align-items: start;
 }
 .lt-grid .lt-card {
     border: 1px solid rgba(127,127,127,.35);

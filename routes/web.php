@@ -52,7 +52,11 @@ Route::post('/csp-report', [CspReportController::class, 'store'])->middleware('t
 Route::get('/login', [AuthWebController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthWebController::class, 'login'])->middleware('throttle:login');
 Route::post('/logout', [AuthWebController::class, 'logout'])->name('logout');
-Route::get('/logout', [AuthWebController::class, 'logout']);
+// GET /logout must not end the session (logout-CSRF via <img src=/logout>).
+// The UI logs out through the POST form; a bare GET just bounces to index.
+Route::get('/logout', function () {
+    return redirect('/');
+});
 
 Route::get('/signup', [RegistrationController::class, 'showSignup'])->name('signup');
 Route::post('/signup', [RegistrationController::class, 'signup'])->middleware('throttle:login');

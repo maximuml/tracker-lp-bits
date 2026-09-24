@@ -343,6 +343,7 @@ img.nx-smiley { max-width: 25px; }
 .nx-flex-col { display: flex; flex-direction: column; }
 .nx-flex-between { display: flex; justify-content: space-between; }
 .nx-flex-center { display: flex; justify-content: center; }
+.nx-calendar { width: 100%; max-width: 960px; }
 
 /* Skip link: visible only on keyboard focus (was onfocus/onblur — CSP
    blocked the handlers and the inline base styles). */

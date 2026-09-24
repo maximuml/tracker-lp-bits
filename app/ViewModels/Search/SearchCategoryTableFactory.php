@@ -84,7 +84,12 @@ final class SearchCategoryTableFactory
                     }
 
                     $icon = $item->icon;
-                    if ($icon) {
+                    if ($icon && (string) ($icon->cssfile ?? '') !== '') {
+                        // Sprite icon sets draw through the c_* CSS class on
+                        // a transparent pixel — pointing <img> at the sheet
+                        // itself shows the whole sprite scaled into the cell.
+                        $iconImagePath = 'pic/cattrans.gif';
+                    } elseif ($icon) {
                         $iconFolder = trim($icon->folder, '/');
                         $langAndFile = sprintf('%s%s', $icon->multilang ? "$lang/" : '', $item->image);
                         $fullDir = Path::resolve("pic/category/$iconFolder/$langAndFile", ROOT_PATH);
@@ -159,7 +164,7 @@ final class SearchCategoryTableFactory
         }
 
         return new SearchCategoryTableViewModel(
-            sectionName: ! empty($options['section_name']) ? (string) ($searchBox->section_name[$lang] ?? '') : null,
+            sectionName: ! empty($options['section_name']) ? (($searchBox->section_name[$lang] ?? '') ?: null) : null,
             groups: $groups,
         );
     }

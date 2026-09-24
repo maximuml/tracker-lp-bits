@@ -1,12 +1,12 @@
 @if($shoutbox['show'])
 <h2>
+    <a href="#" data-klappe="shoutbox"><img class="minus" src="pic/trans.gif" id="picshoutbox" alt="Show/Hide" title="{{ $shoutbox['showHideTitle'] }}" /></a>
     {{ $shoutbox['title'] }} - <span class="small">{{ $shoutbox['autoRefreshLabel'] }}</span>
     <span class="striking" id="countdown"></span><span class="small">{{ $shoutbox['secondsLabel'] }}</span>
     - <a href="shoutbox_history.php" class="small">{{ $shoutbox['historyLabel'] }}</a>
     @if($shoutbox['canManage'])
         - <span class="small" id="clear-shout-box">[<a class="altlink" href="#"><b>{{ $shoutbox['clearLabel'] }}</b></a>]</span>
     @endif
-    - <a href="#" data-klappe="shoutbox"><img class="minus" src="pic/trans.gif" id="picshoutbox" alt="Show/Hide" title="{{ $shoutbox['showHideTitle'] }}" /></a>
     <button type="button" class="nx-shoutbox-mentions" id="shoutbox-mentions" hidden></button>
 </h2>
 <div class="nx-text" id="kshoutbox">

@@ -270,7 +270,7 @@ class AttendanceRepository extends BaseRepository
                 ->where('uid', $uid)
                 ->where('date', '>=', $start->format('Y-m-d'))
                 ->get()
-                ->keyBy('date');
+                ->keyBy(fn (AttendanceLog $log): string => $log->date->format('Y-m-d'));
 
             $interval = new \DateInterval('P1D');
             $period = new \DatePeriod($start, $interval, $end);

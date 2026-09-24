@@ -4,6 +4,11 @@ FROM openresty/openresty:alpine@sha256:b3a6f1f432eabdbda4adcb6ec3e6461e621782eaa
 # 安装基础依赖
 RUN apk add --no-cache gettext~=0.24 bash~=5.3 curl~=8.22 openssl~=3.5 socat~=1.8
 
+# CVE-2026-93990: base image ships libexpat 2.8.4; apk add does not
+# upgrade packages already present in the base layer, so pull the fix
+# explicitly until the pinned digest is bumped past it.
+RUN apk add --no-cache 'expat>=2.8.5' 'libexpat>=2.8.5'
+
 # 拷贝 entrypoint
 COPY .docker/openresty/entrypoint.sh /usr/local/bin/entrypoint.sh
 COPY .docker/openresty/render-config.sh /usr/local/bin/render-config.sh

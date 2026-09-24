@@ -41,8 +41,6 @@ final class SharedGetPostActionTest extends TestCase
     private const BASELINE_URIS = [
         // Auth
         'recover' => true,
-        // GET kept for legacy logout.php links (openresty 308 preserves the method)
-        'logout' => true,
         // API
         'api/v1/usercp/settings' => true,
         // Info pages

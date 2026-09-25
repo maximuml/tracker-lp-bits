@@ -41,7 +41,7 @@ class StylesheetsTableSeeder extends Seeder
                 'name' => 'Papercut',
                 'addicode' => '',
                 'designer' => 'Devin',
-                'comment' => 'Neo-brutalist paper & ink: thick outlines, hard offset shadows, stamped headers, stamp-red accent. Own light and dark variants.',
+                'comment' => 'Neo-brutalist paper & ink: thick outlines, hard offset shadows, stamped headers, safety-orange accent. Own light and dark variants.',
             ],
         ]);
 

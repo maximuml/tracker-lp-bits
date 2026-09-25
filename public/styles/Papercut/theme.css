@@ -16,7 +16,7 @@
 
 :root,
 html[data-theme="light"]:root {
-    /* semantic — ink borders and stamp-red accent on paper */
+    /* semantic — ink borders and safety-orange accent on paper */
     --nxm-bg: #f2efe6;
     --nxm-surface: #fdfbf4;
     --nxm-surface-alt: #e7e2d2;
@@ -24,8 +24,8 @@ html[data-theme="light"]:root {
     --nxm-text-dim: #5f5b50;
     --nxm-muted: #5f5b50;
     --nxm-border: #1c1c1c;
-    --nxm-accent: #d92b2b;
-    --nxm-accent-hover: #a81e1e;
+    --nxm-accent: #e8590c;
+    --nxm-accent-hover: #b84300;
     --nxm-on-accent: #fdfbf4;
     --nxm-success: #2f7d32;
     --nxm-danger: #c62828;
@@ -46,7 +46,7 @@ html[data-theme="light"]:root {
     --nxm-header-bg: #1c1c1c;
     --nxm-header-text: #f2efe6;
     --nxm-header-dim: #a8a290;
-    --nxm-nav-active: #d92b2b;
+    --nxm-nav-active: #e8590c;
     --nxm-userbar-bg: #262626;
     --nxm-userbar-text: #e0dccb;
     --nxm-userbar-dim: #9b9582;
@@ -68,7 +68,7 @@ html[data-theme="light"]:root {
     --nxm-name-poweruser: #b45309;
     --nxm-name-retiree: #0f766e;
     --nxm-name-staffleader: #991b1b;
-    --nxm-name-sysop: #d92b2b;
+    --nxm-name-sysop: #e8590c;
     --nxm-name-ultimateuser: #166534;
     --nxm-name-uploader: #be123c;
     --nxm-name-user: #1c1c1c;
@@ -92,9 +92,9 @@ html[data-theme="dark"]:root {
     --nxm-text-dim: #a8a294;
     --nxm-muted: #a8a294;
     --nxm-border: #d5cfbd;
-    --nxm-accent: #ff4d5e;
-    --nxm-accent-hover: #ff7583;
-    --nxm-on-accent: #1c0d10;
+    --nxm-accent: #ff7a1a;
+    --nxm-accent-hover: #ffa15c;
+    --nxm-on-accent: #1a0f08;
     --nxm-success: #6fd47f;
     --nxm-danger: #ff8a80;
     --nxm-warning: #f5c44f;
@@ -112,7 +112,7 @@ html[data-theme="dark"]:root {
     --nxm-header-bg: #0c0c0b;
     --nxm-header-text: #ece7d9;
     --nxm-header-dim: #8b8577;
-    --nxm-nav-active: #ff4d5e;
+    --nxm-nav-active: #ff7a1a;
     --nxm-userbar-bg: #101010;
     --nxm-userbar-text: #d9d4c4;
     --nxm-userbar-dim: #7d7767;
@@ -133,7 +133,7 @@ html[data-theme="dark"]:root {
     --nxm-name-poweruser: #eda55e;
     --nxm-name-retiree: #5cc6d0;
     --nxm-name-staffleader: #f08080;
-    --nxm-name-sysop: #ff4d5e;
+    --nxm-name-sysop: #ff7a1a;
     --nxm-name-ultimateuser: #6fd06f;
     --nxm-name-uploader: #f46e88;
     --nxm-name-user: #ece7d9;
@@ -157,9 +157,9 @@ html[data-theme="dark"]:root {
         --nxm-text-dim: #a8a294;
         --nxm-muted: #a8a294;
         --nxm-border: #d5cfbd;
-        --nxm-accent: #ff4d5e;
-        --nxm-accent-hover: #ff7583;
-        --nxm-on-accent: #1c0d10;
+        --nxm-accent: #ff7a1a;
+        --nxm-accent-hover: #ffa15c;
+        --nxm-on-accent: #1a0f08;
         --nxm-success: #6fd47f;
         --nxm-danger: #ff8a80;
         --nxm-warning: #f5c44f;
@@ -175,7 +175,7 @@ html[data-theme="dark"]:root {
         --nxm-header-bg: #0c0c0b;
         --nxm-header-text: #ece7d9;
         --nxm-header-dim: #8b8577;
-        --nxm-nav-active: #ff4d5e;
+        --nxm-nav-active: #ff7a1a;
         --nxm-userbar-bg: #101010;
         --nxm-userbar-text: #d9d4c4;
         --nxm-userbar-dim: #7d7767;
@@ -198,8 +198,8 @@ html[data-theme="dark"]:root {
         --nxm-text-dim: #5f5b50;
         --nxm-muted: #5f5b50;
         --nxm-border: #1c1c1c;
-        --nxm-accent: #d92b2b;
-        --nxm-accent-hover: #a81e1e;
+        --nxm-accent: #e8590c;
+        --nxm-accent-hover: #b84300;
         --nxm-on-accent: #fdfbf4;
         --nxm-success: #2f7d32;
         --nxm-danger: #c62828;
@@ -216,7 +216,7 @@ html[data-theme="dark"]:root {
         --nxm-header-bg: #1c1c1c;
         --nxm-header-text: #f2efe6;
         --nxm-header-dim: #a8a290;
-        --nxm-nav-active: #d92b2b;
+        --nxm-nav-active: #e8590c;
         --nxm-userbar-bg: #262626;
         --nxm-userbar-text: #e0dccb;
         --nxm-userbar-dim: #9b9582;
@@ -383,7 +383,7 @@ html[data-theme]:root .nxm-alert.nxm-alert--blue a:visited {
     text-decoration: underline;
 }
 
-/* Legacy "alt link" colour — blue on Classic, stamp-red here. */
+/* Legacy "alt link" colour — blue on Classic, safety-orange here. */
 html[data-theme]:root a.altlink_blue:link,
 html[data-theme]:root a.altlink_blue:visited {
     color: var(--nxm-accent);

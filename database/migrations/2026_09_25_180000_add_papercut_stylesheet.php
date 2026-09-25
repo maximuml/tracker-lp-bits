@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 /**
  * Adds the Papercut stylesheet pack (neo-brutalist paper & ink:
  * 2px ink outlines, hard offset shadows, stamped uppercase headers,
- * stamp-red accent). It is registered alongside Classic and Unshatter —
+ * safety-orange accent). It is registered alongside Classic and Unshatter —
  * the pack carries its own light/dark variants keyed off users.theme,
  * so no theme or defstylesheet changes are required.
  */
@@ -24,7 +24,7 @@ return new class extends Migration
             'name' => 'Papercut',
             'addicode' => '',
             'designer' => 'Devin',
-            'comment' => 'Neo-brutalist paper & ink: thick outlines, hard offset shadows, stamped headers, stamp-red accent. Own light and dark variants.',
+            'comment' => 'Neo-brutalist paper & ink: thick outlines, hard offset shadows, stamped headers, safety-orange accent. Own light and dark variants.',
         ]);
 
         // Style::cssRow() serves the stylesheets table from a ~26h

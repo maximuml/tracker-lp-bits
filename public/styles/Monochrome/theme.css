@@ -38,18 +38,18 @@ html[data-theme="light"]:root {
     --nxm-info-bg: #e2e8f0;
     --nxm-info-border: #94a3b8;
 
-    /* chrome — solid black bar */
-    --nxm-header-bg: #0f172a;
-    --nxm-header-text: #f1f5f9;
-    --nxm-header-dim: #94a3b8;
-    --nxm-nav-active: #ffffff;
-    --nxm-userbar-bg: #1e293b;
-    --nxm-userbar-text: #e2e8f0;
-    --nxm-userbar-dim: #94a3b8;
-    --nxm-userbar-link: #ffffff;
-    --nxm-userbar-stat: #f1f5f9;
-    --nxm-userbar-ok: #cbd5e1;
-    --nxm-userbar-bad: #ffffff;
+    /* chrome — paper masthead: header/userbar transparent, ink text */
+    --nxm-header-bg: transparent;
+    --nxm-header-text: #0f172a;
+    --nxm-header-dim: #64748b;
+    --nxm-nav-active: #0f172a;
+    --nxm-userbar-bg: transparent;
+    --nxm-userbar-text: #0f172a;
+    --nxm-userbar-dim: #64748b;
+    --nxm-userbar-link: #0f172a;
+    --nxm-userbar-stat: #0f172a;
+    --nxm-userbar-ok: #475569;
+    --nxm-userbar-bad: #0f172a;
     --nxm-overlay: rgba(15, 23, 42, 0.55);
     --nxm-panel-bg: #ffffff;
 
@@ -105,14 +105,14 @@ html[data-theme="dark"]:root {
     --nxm-info-bg: #1e293b;
     --nxm-info-border: #475569;
 
-    --nxm-header-bg: #020617;
+    --nxm-header-bg: transparent;
     --nxm-header-text: #f1f5f9;
     --nxm-header-dim: #94a3b8;
     --nxm-nav-active: #ffffff;
-    --nxm-userbar-bg: #0f172a;
+    --nxm-userbar-bg: transparent;
     --nxm-userbar-text: #e2e8f0;
     --nxm-userbar-dim: #94a3b8;
-    --nxm-userbar-link: #ffffff;
+    --nxm-userbar-link: #f1f5f9;
     --nxm-userbar-stat: #f1f5f9;
     --nxm-userbar-ok: #cbd5e1;
     --nxm-userbar-bad: #ffffff;
@@ -169,14 +169,14 @@ html[data-theme="dark"]:root {
         --nxm-warning-border: #475569;
         --nxm-info-bg: #1e293b;
         --nxm-info-border: #475569;
-        --nxm-header-bg: #020617;
+        --nxm-header-bg: transparent;
         --nxm-header-text: #f1f5f9;
         --nxm-header-dim: #94a3b8;
         --nxm-nav-active: #ffffff;
-        --nxm-userbar-bg: #0f172a;
+        --nxm-userbar-bg: transparent;
         --nxm-userbar-text: #e2e8f0;
         --nxm-userbar-dim: #94a3b8;
-        --nxm-userbar-link: #ffffff;
+        --nxm-userbar-link: #f1f5f9;
         --nxm-userbar-stat: #f1f5f9;
         --nxm-userbar-ok: #cbd5e1;
         --nxm-userbar-bad: #ffffff;
@@ -211,17 +211,17 @@ html[data-theme="dark"]:root {
         --nxm-warning-border: #94a3b8;
         --nxm-info-bg: #e2e8f0;
         --nxm-info-border: #94a3b8;
-        --nxm-header-bg: #0f172a;
-        --nxm-header-text: #f1f5f9;
-        --nxm-header-dim: #94a3b8;
-        --nxm-nav-active: #ffffff;
-        --nxm-userbar-bg: #1e293b;
-        --nxm-userbar-text: #e2e8f0;
-        --nxm-userbar-dim: #94a3b8;
-        --nxm-userbar-link: #ffffff;
-        --nxm-userbar-stat: #f1f5f9;
-        --nxm-userbar-ok: #cbd5e1;
-        --nxm-userbar-bad: #ffffff;
+        --nxm-header-bg: transparent;
+        --nxm-header-text: #0f172a;
+        --nxm-header-dim: #64748b;
+        --nxm-nav-active: #0f172a;
+        --nxm-userbar-bg: transparent;
+        --nxm-userbar-text: #0f172a;
+        --nxm-userbar-dim: #64748b;
+        --nxm-userbar-link: #0f172a;
+        --nxm-userbar-stat: #0f172a;
+        --nxm-userbar-ok: #475569;
+        --nxm-userbar-bad: #0f172a;
         --nxm-overlay: rgba(15, 23, 42, 0.55);
         --nxm-panel-bg: #ffffff;
         --nxm-radius: 0px;
@@ -381,28 +381,28 @@ html[data-theme]:root td.shoutrow-mentions-me {
 }
 
 /* modern.css re-declares the rank-name tints on .nxm-header/.nxm-userbar
- * so they stay readable on the dark chrome — Monochrome re-scopes them
- * to two grey tiers: staff ranks white, user ranks dim grey. */
+ * — Monochrome re-scopes them to two ink tiers: staff ranks full text,
+ * user ranks dim. */
 html[data-theme]:root .nxm-header,
 html[data-theme]:root .nxm-userbar {
-    --nxm-name-administrator: #ffffff;
-    --nxm-name-crazyuser: #94a3b8;
-    --nxm-name-eliteuser: #94a3b8;
-    --nxm-name-extremeuser: #94a3b8;
-    --nxm-name-forummoderator: #ffffff;
-    --nxm-name-insaneuser: #94a3b8;
-    --nxm-name-moderator: #ffffff;
-    --nxm-name-nexusmaster: #94a3b8;
-    --nxm-name-peasant: #94a3b8;
-    --nxm-name-poweruser: #94a3b8;
-    --nxm-name-retiree: #94a3b8;
-    --nxm-name-staffleader: #ffffff;
-    --nxm-name-sysop: #ffffff;
-    --nxm-name-ultimateuser: #94a3b8;
-    --nxm-name-uploader: #94a3b8;
-    --nxm-name-user: #94a3b8;
-    --nxm-name-vip: #94a3b8;
-    --nxm-name-veteranuser: #94a3b8;
+    --nxm-name-administrator: var(--nxm-text);
+    --nxm-name-crazyuser: var(--nxm-text-dim);
+    --nxm-name-eliteuser: var(--nxm-text-dim);
+    --nxm-name-extremeuser: var(--nxm-text-dim);
+    --nxm-name-forummoderator: var(--nxm-text);
+    --nxm-name-insaneuser: var(--nxm-text-dim);
+    --nxm-name-moderator: var(--nxm-text);
+    --nxm-name-nexusmaster: var(--nxm-text-dim);
+    --nxm-name-peasant: var(--nxm-text-dim);
+    --nxm-name-poweruser: var(--nxm-text-dim);
+    --nxm-name-retiree: var(--nxm-text-dim);
+    --nxm-name-staffleader: var(--nxm-text);
+    --nxm-name-sysop: var(--nxm-text);
+    --nxm-name-ultimateuser: var(--nxm-text-dim);
+    --nxm-name-uploader: var(--nxm-text-dim);
+    --nxm-name-user: var(--nxm-text-dim);
+    --nxm-name-vip: var(--nxm-text-dim);
+    --nxm-name-veteranuser: var(--nxm-text-dim);
 }
 
 /* nexus.css ratio/seed-leech/wait ramps are red gradients; monochrome
@@ -472,4 +472,86 @@ html[data-theme]:root img[class*="pro_"] {
 /* Footer closes the page with the same double rule the headings use. */
 html[data-theme]:root .nxm-footer {
     border-top: 4px double var(--nxm-border);
+}
+
+/* ---------- Masthead ----------
+ * Newspaper masthead: centred brand above a double rule, nav as its own
+ * hairline strip of small caps, userbar a slim folio line. The pack file
+ * loads before modern.css so selectors carry the html[data-theme]
+ * qualifier to outrank the same-specificity base rules. */
+html[data-theme]:root .nxm-header {
+    background: transparent;
+    color: var(--nxm-text);
+    border-bottom: 0;
+    padding-top: 1.4rem;
+}
+
+html[data-theme]:root .nxm-header__brand {
+    justify-content: center;
+    padding: 0 1rem 1.1rem;
+    border-bottom: 4px double var(--nxm-border);
+}
+
+html[data-theme]:root a.nxm-logo,
+html[data-theme]:root a.nxm-logo:link,
+html[data-theme]:root a.nxm-logo:visited {
+    color: var(--nxm-text);
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+html[data-theme]:root .nxm-logo img {
+    max-height: 88px;
+}
+
+/* The wordmark svg is white-on-transparent, drawn for dark chrome; on
+ * the paper masthead it inverts to black ink (grayscale stays on). */
+html[data-theme="light"]:root .nxm-logo img {
+    filter: grayscale(100%) invert(1);
+}
+
+@media (prefers-color-scheme: light) {
+    html[data-theme="auto"]:root .nxm-logo img {
+        filter: grayscale(100%) invert(1);
+    }
+}
+
+html[data-theme]:root .nxm-nav {
+    border-bottom: 1px solid var(--nxm-border);
+}
+
+html[data-theme]:root .nxm-nav__list {
+    justify-content: center;
+    gap: 0;
+}
+
+html[data-theme]:root .nxm-nav__list a {
+    padding: 0.6rem 0.9rem;
+    color: var(--nxm-text-dim);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border-radius: 0;
+}
+
+html[data-theme]:root .nxm-nav__list a:hover,
+html[data-theme]:root .nxm-nav__list a:focus-visible {
+    background: transparent;
+    color: var(--nxm-text);
+    outline: none;
+}
+
+html[data-theme]:root .nxm-nav__list a.nxm-nav__link--active,
+html[data-theme]:root .nxm-nav__list a[aria-current="page"] {
+    background: var(--nxm-accent);
+    color: var(--nxm-on-accent);
+}
+
+html[data-theme]:root .nxm-userbar {
+    background: transparent;
+    border-bottom: 1px solid var(--nxm-border);
 }

@@ -34,6 +34,7 @@ final class ChromeHead
         public readonly array $headScripts,
         public readonly SafeHtml $inlineHeadHtml,
         public readonly string $picFolder,
+        public readonly ?string $packThemeUrl,
     ) {}
 
     public static function load(
@@ -48,7 +49,7 @@ final class ChromeHead
         }
         $fullTitle .= ' - Powered by '.PROJECTNAME;
 
-        [$headStyles, $headScripts, $inlineHeadHtml, $picFolder] = self::headAssets($context, $variant, $cspNonce);
+        [$headStyles, $headScripts, $inlineHeadHtml, $picFolder, $packThemeUrl] = self::headAssets($context, $variant, $cspNonce);
 
         return new self(
             title: $fullTitle,
@@ -62,6 +63,7 @@ final class ChromeHead
             headScripts: $headScripts,
             inlineHeadHtml: $inlineHeadHtml,
             picFolder: $picFolder,
+            packThemeUrl: $packThemeUrl,
         );
     }
 
@@ -70,7 +72,7 @@ final class ChromeHead
      * shared chrome assets: the user's theme, font size and forum sprites,
      * plus the `addicode` block keyed to the chosen stylesheet.
      *
-     * @return array{0: list<string>, 1: list<string>, 2: SafeHtml, 3: string}
+     * @return array{0: list<string>, 1: list<string>, 2: SafeHtml, 3: string, 4: ?string}
      */
     private static function headAssets(PageLayoutContext $context, string $variant, string $cspNonce): array
     {
@@ -92,16 +94,23 @@ final class ChromeHead
             }
         }
 
+        $cssUri = Style::cssUri($context->cache, $context->userStylesheet(), $context->defaultStylesheet);
+
         if ($variant !== 'legacy') {
+            // Modern chrome only loads Classic's pack files historically;
+            // a non-Classic pack still gets its theme.css — after
+            // css/modern.css in head-assets.blade.php so its variable
+            // overrides win the cascade outright.
+            $packThemeUrl = $cssUri === 'styles/Classic/' ? null : $cssUri.'theme.css'.$cssUpdateDate;
+
             return [
                 array_merge(['styles/sprites.css', 'styles/nexus.css'], $iconStyles),
                 [],
                 SafeHtml::fromTrustedHtml(''),
                 $picFolder,
+                $packThemeUrl,
             ];
         }
-
-        $cssUri = Style::cssUri($context->cache, $context->userStylesheet(), $context->defaultStylesheet);
 
         $headStyles = array_merge([
             'styles/sprites.css'.$cssUpdateDate,
@@ -120,6 +129,7 @@ final class ChromeHead
             [],
             SafeHtml::fromTrustedHtml($addiCode),
             $picFolder,
+            null,
         ];
     }
 }

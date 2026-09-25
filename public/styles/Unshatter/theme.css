@@ -1,0 +1,317 @@
+/*
+ * Unshatter — Linkin Park "From Zero" era palette: black + white + yellow.
+ * Sharp square geometry, yellow accent, jagged "shatter" divider accents.
+ *
+ * This stylesheet ships inside the Unshatter pack and is loaded before
+ * css/modern.css, so every --nxm-* override below is pinned behind a
+ * `:root`-qualified selector: html[data-theme="X"]:root has higher
+ * specificity than the plain html[data-theme="X"] rules in modern.css,
+ * which keeps the pack's palette authoritative. Light and dark variants
+ * are both defined; "auto" follows prefers-color-scheme between them.
+ */
+
+/* ---------- Dark variant (default / auto prefers-color-scheme dark) ---------- */
+
+:root,
+html[data-theme="dark"]:root {
+    /* semantic */
+    --nxm-bg: #0a0a0c;
+    --nxm-surface: #121215;
+    --nxm-surface-alt: #1a1a1f;
+    --nxm-text: #f2f2f4;
+    --nxm-text-dim: #9a9da7;
+    --nxm-muted: #9a9da7;
+    --nxm-border: #2a2a30;
+    --nxm-accent: #ffd400;
+    --nxm-accent-hover: #ffdf47;
+    --nxm-on-accent: #111114;
+    --nxm-success: #6fc76f;
+    --nxm-danger: #e8343f;
+    --nxm-warning: #ffd400;
+
+    /* chrome */
+    --nxm-header-bg: #0d0d10;
+    --nxm-header-text: #f2f2f4;
+    --nxm-header-dim: #8a8d97;
+    --nxm-nav-active: #ffd400;
+    --nxm-userbar-bg: #141417;
+    --nxm-userbar-text: #d9dae0;
+    --nxm-userbar-dim: #8a8d97;
+    --nxm-userbar-link: #ffd400;
+    --nxm-userbar-stat: #f2f2f4;
+    --nxm-userbar-ok: #7ee787;
+    --nxm-userbar-bad: #e8343f;
+
+    /* rank name colours — readable on near-black */
+    --nxm-name-administrator: #c79af0;
+    --nxm-name-crazyuser: #5cc4ea;
+    --nxm-name-eliteuser: #56c8c8;
+    --nxm-name-extremeuser: #eda55e;
+    --nxm-name-forummoderator: #5cc6d0;
+    --nxm-name-insaneuser: #e082e0;
+    --nxm-name-moderator: #96b2ea;
+    --nxm-name-nexusmaster: #74baea;
+    --nxm-name-peasant: #aab8c6;
+    --nxm-name-poweruser: #ffd400;
+    --nxm-name-retiree: #5cc6d0;
+    --nxm-name-staffleader: #f08080;
+    --nxm-name-sysop: #de9a76;
+    --nxm-name-ultimateuser: #6fd06f;
+    --nxm-name-uploader: #f46e88;
+    --nxm-name-user: #f2f2f4;
+    --nxm-name-vip: #72d272;
+    --nxm-name-veteranuser: #ac9ee4;
+
+    /* metrics — Unshatter is sharp: no rounded corners */
+    --nxm-radius: 0px;
+    --nxm-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
+
+    color-scheme: dark;
+}
+
+/* ---------- Light variant ---------- */
+
+html[data-theme="light"]:root {
+    --nxm-bg: #f4f3ee;
+    --nxm-surface: #ffffff;
+    --nxm-surface-alt: #ecebe4;
+    --nxm-text: #141417;
+    --nxm-text-dim: #5c5e66;
+    --nxm-muted: #5c5e66;
+    --nxm-border: #d9d7cc;
+    --nxm-accent: #c79500;
+    --nxm-accent-hover: #a87e00;
+    --nxm-on-accent: #111114;
+    --nxm-success: #1a7f37;
+    --nxm-danger: #c9232e;
+    --nxm-warning: #a87e00;
+
+    --nxm-header-bg: #0d0d10;
+    --nxm-header-text: #f2f2f4;
+    --nxm-header-dim: #8a8d97;
+    --nxm-nav-active: #ffd400;
+    --nxm-userbar-bg: #141417;
+    --nxm-userbar-text: #d9dae0;
+    --nxm-userbar-dim: #8a8d97;
+    --nxm-userbar-link: #ffd400;
+    --nxm-userbar-stat: #f2f2f4;
+    --nxm-userbar-ok: #3fae5b;
+    --nxm-userbar-bad: #d93440;
+
+    --nxm-name-administrator: #4b0082;
+    --nxm-name-crazyuser: #007faa;
+    --nxm-name-eliteuser: #007575;
+    --nxm-name-extremeuser: #b26100;
+    --nxm-name-forummoderator: #12828c;
+    --nxm-name-insaneuser: #8b008b;
+    --nxm-name-moderator: #4e75bb;
+    --nxm-name-nexusmaster: #287dac;
+    --nxm-name-peasant: #5a6a7a;
+    --nxm-name-poweruser: #a87e00;
+    --nxm-name-retiree: #12828c;
+    --nxm-name-staffleader: #8b0000;
+    --nxm-name-sysop: #a0522d;
+    --nxm-name-ultimateuser: #006400;
+    --nxm-name-uploader: #dc143c;
+    --nxm-name-user: #141417;
+    --nxm-name-vip: #008a00;
+    --nxm-name-veteranuser: #483d8b;
+
+    --nxm-radius: 0px;
+    --nxm-shadow: 0 1px 3px rgba(20, 20, 23, 0.14);
+
+    color-scheme: light;
+}
+
+/* ---------- Auto: follow OS between the two Unshatter variants ---------- */
+
+@media (prefers-color-scheme: dark) {
+    html[data-theme="auto"]:root {
+        --nxm-bg: #0a0a0c;
+        --nxm-surface: #121215;
+        --nxm-surface-alt: #1a1a1f;
+        --nxm-text: #f2f2f4;
+        --nxm-text-dim: #9a9da7;
+        --nxm-muted: #9a9da7;
+        --nxm-border: #2a2a30;
+        --nxm-accent: #ffd400;
+        --nxm-accent-hover: #ffdf47;
+        --nxm-on-accent: #111114;
+        --nxm-success: #6fc76f;
+        --nxm-danger: #e8343f;
+        --nxm-warning: #ffd400;
+        --nxm-header-bg: #0d0d10;
+        --nxm-header-text: #f2f2f4;
+        --nxm-header-dim: #8a8d97;
+        --nxm-nav-active: #ffd400;
+        --nxm-userbar-bg: #141417;
+        --nxm-userbar-text: #d9dae0;
+        --nxm-userbar-dim: #8a8d97;
+        --nxm-userbar-link: #ffd400;
+        --nxm-userbar-stat: #f2f2f4;
+        --nxm-userbar-ok: #7ee787;
+        --nxm-userbar-bad: #e8343f;
+        --nxm-radius: 0px;
+        --nxm-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
+        color-scheme: dark;
+    }
+}
+
+@media (prefers-color-scheme: light) {
+    html[data-theme="auto"]:root {
+        --nxm-bg: #f4f3ee;
+        --nxm-surface: #ffffff;
+        --nxm-surface-alt: #ecebe4;
+        --nxm-text: #141417;
+        --nxm-text-dim: #5c5e66;
+        --nxm-muted: #5c5e66;
+        --nxm-border: #d9d7cc;
+        --nxm-accent: #c79500;
+        --nxm-accent-hover: #a87e00;
+        --nxm-on-accent: #111114;
+        --nxm-success: #1a7f37;
+        --nxm-danger: #c9232e;
+        --nxm-warning: #a87e00;
+        --nxm-header-bg: #0d0d10;
+        --nxm-header-text: #f2f2f4;
+        --nxm-header-dim: #8a8d97;
+        --nxm-nav-active: #ffd400;
+        --nxm-userbar-bg: #141417;
+        --nxm-userbar-text: #d9dae0;
+        --nxm-userbar-dim: #8a8d97;
+        --nxm-userbar-link: #ffd400;
+        --nxm-userbar-stat: #f2f2f4;
+        --nxm-userbar-ok: #3fae5b;
+        --nxm-userbar-bad: #d93440;
+        --nxm-radius: 0px;
+        --nxm-shadow: 0 1px 3px rgba(20, 20, 23, 0.14);
+        color-scheme: light;
+    }
+}
+
+/* ---------- Signature details (shared across variants) ---------- */
+
+/* Yellow "shatter" zig-zag rule under page titles — the From Zero scratch
+ * motif rendered in pure CSS (no images, CSP-safe). */
+.nxm-main h1,
+.nxm-page-title {
+    padding-bottom: 0.4em;
+    margin-bottom: 0.7em;
+    background-image:
+        repeating-linear-gradient(
+            -4deg,
+            var(--nxm-accent) 0 10px,
+            transparent 10px 22px
+        );
+    background-position: 0 100%;
+    background-size: auto 3px;
+    background-repeat: repeat-x;
+    border-bottom: none;
+}
+
+/* Yellow square bullet on section/table headers — the From Zero glyph. */
+.nxm-main .colhead,
+.nxm-main .nx-colhead,
+.nxm-panel > .nxm-panel__header,
+.nxm-main > table > tbody > tr:first-child > .colhead {
+    position: relative;
+}
+
+.nxm-main .colhead::before,
+.nxm-main .nx-colhead::before,
+.nxm-panel > .nxm-panel__header::before {
+    content: "";
+    display: inline-block;
+    width: 0.55em;
+    height: 0.55em;
+    margin-right: 0.45em;
+    background: var(--nxm-accent);
+}
+
+/* Solid accent hairline under the site header. */
+.nxm-header,
+.nx-header {
+    border-bottom: 3px solid var(--nxm-accent) !important;
+}
+
+/* Info-level alert banner (staff messages, H&R reminders, unread news):
+ * Classic renders it solid blue; Unshatter turns it into a graphite card
+ * with the yellow accent frame. Selectors are :root-qualified to outrank
+ * modern.css's data-theme link rules when this file loads first (legacy
+ * chrome) as well as last (modern chrome). */
+html[data-theme]:root .nxm-alert--blue {
+    background: #17171b;
+    border: 1px solid var(--nxm-accent);
+    border-radius: 0;
+    color: var(--nxm-accent);
+}
+
+html[data-theme]:root .nxm-alert.nxm-alert--blue a:link,
+html[data-theme]:root .nxm-alert.nxm-alert--blue a:visited {
+    color: var(--nxm-accent);
+    text-decoration: underline;
+}
+
+html[data-theme]:root .nxm-alert.nxm-alert--blue a:hover {
+    color: var(--nxm-accent-hover);
+}
+
+/* Legacy "alt link" colour — blue on Classic, accent-yellow here. */
+html[data-theme]:root a.altlink_blue:link,
+html[data-theme]:root a.altlink_blue:visited {
+    color: var(--nxm-accent);
+}
+
+html[data-theme]:root a.altlink_blue:hover {
+    color: var(--nxm-accent-hover);
+}
+
+/* Secondary/ghost buttons (Preview, clear, reset) — graphite card with the
+ * accent frame, matching the info-alert treatment. */
+html[data-theme]:root .btn2,
+html[data-theme]:root input[type="reset"] {
+    background: #17171b;
+    border: 1px solid var(--nxm-accent);
+    border-radius: 0;
+    color: var(--nxm-accent);
+    cursor: pointer;
+}
+
+html[data-theme]:root .btn2:hover,
+html[data-theme]:root input[type="reset"]:hover {
+    background: #1f1f24;
+    color: var(--nxm-accent-hover);
+    border-color: var(--nxm-accent-hover);
+}
+
+/* Shoutbox rows: harder alternation, yellow edge on hover. Alternation and
+ * hover mix from the per-variant surface vars so they work in dark and light
+ * alike; the border lives inside box-shadow so the row width stays put. */
+html[data-theme]:root tr:nth-child(odd) td.shoutrow {
+    background-color: var(--nxm-surface);
+}
+
+html[data-theme]:root tr:nth-child(even) td.shoutrow {
+    background-color: var(--nxm-surface-alt);
+}
+
+html[data-theme]:root tr:hover td.shoutrow {
+    box-shadow: inset 3px 0 0 0 var(--nxm-accent);
+    background-color: color-mix(in srgb, var(--nxm-surface-alt) 88%, var(--nxm-accent));
+}
+
+html[data-theme]:root td.shoutrow-mentions-me {
+    border-left: 1px solid var(--nxm-accent);
+}
+
+/* Promotion sprites are rectangular images; a thin accent outline makes them
+ * read as badges inside the theme. */
+html[data-theme]:root img[class*="pro_"] {
+    outline: 1px solid var(--nxm-accent);
+    border-radius: 0;
+}
+
+/* Footer rule mirrors the accent hairline under the header. */
+html[data-theme]:root .nxm-footer {
+    border-top: 1px solid var(--nxm-accent);
+}

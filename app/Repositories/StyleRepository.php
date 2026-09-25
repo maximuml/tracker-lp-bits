@@ -14,7 +14,7 @@ final class StyleRepository
     /**
      * @return array<int, array<string, mixed>>
      */
-    public function all(): array
+    public static function all(): array
     {
         if (self::$rows === null) {
             $rows = [];

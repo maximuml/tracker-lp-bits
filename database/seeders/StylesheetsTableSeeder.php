@@ -27,6 +27,22 @@ class StylesheetsTableSeeder extends Seeder
                 'designer' => 'Zantetsu',
                 'comment' => 'TBSource original mod',
             ],
+            1 => [
+                'id' => 5,
+                'uri' => 'styles/Unshatter/',
+                'name' => 'Unshatter',
+                'addicode' => '',
+                'designer' => 'Devin',
+                'comment' => 'Linkin Park From Zero / Unshatter palette — black, white, yellow. Sharp corners, own light and dark variants.',
+            ],
+            2 => [
+                'id' => 6,
+                'uri' => 'styles/Papercut/',
+                'name' => 'Papercut',
+                'addicode' => '',
+                'designer' => 'Devin',
+                'comment' => 'Neo-brutalist paper & ink: thick outlines, hard offset shadows, stamped headers, stamp-red accent. Own light and dark variants.',
+            ],
         ]);
 
     }

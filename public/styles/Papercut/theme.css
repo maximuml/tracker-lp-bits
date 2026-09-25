@@ -1,0 +1,423 @@
+/*
+ * Papercut — neo-brutalist "paper & ink" pack named after the Hybrid
+ * Theory opener. Unlike the token-only packs (Unshatter, Thousand
+ * Suns) this one also restyles structure: 2px ink outlines on panels
+ * and tables, hard offset shadows, stamped uppercase headers, outlined
+ * nav pills and press-down buttons.
+ *
+ * Loaded before css/modern.css inside the pack, so every --nxm-*
+ * override is pinned behind a `:root`-qualified selector:
+ * html[data-theme="X"]:root outranks the plain html[data-theme="X"]
+ * rules in modern.css. Light is the default variant; "auto" follows
+ * prefers-color-scheme.
+ */
+
+/* ---------- Light variant (default / auto prefers-color-scheme light) ---------- */
+
+:root,
+html[data-theme="light"]:root {
+    /* semantic — ink borders and stamp-red accent on paper */
+    --nxm-bg: #f2efe6;
+    --nxm-surface: #fdfbf4;
+    --nxm-surface-alt: #e7e2d2;
+    --nxm-text: #1c1c1c;
+    --nxm-text-dim: #5f5b50;
+    --nxm-muted: #5f5b50;
+    --nxm-border: #1c1c1c;
+    --nxm-accent: #d92b2b;
+    --nxm-accent-hover: #a81e1e;
+    --nxm-on-accent: #fdfbf4;
+    --nxm-success: #2f7d32;
+    --nxm-danger: #c62828;
+    --nxm-warning: #9a6a00;
+
+    /* status tints — flat solids, bordered in ink */
+    --nxm-info-bg: #e3ecf5;
+    --nxm-info-border: #1c1c1c;
+    --nxm-success-bg: #e0eedd;
+    --nxm-success-border: #1c1c1c;
+    --nxm-warning-bg: #f7ecc8;
+    --nxm-warning-border: #1c1c1c;
+    --nxm-danger-bg: #f8dcdc;
+    --nxm-danger-border: #1c1c1c;
+    --nxm-overlay: rgba(20, 20, 18, 0.55);
+
+    /* chrome — solid ink bar */
+    --nxm-header-bg: #1c1c1c;
+    --nxm-header-text: #f2efe6;
+    --nxm-header-dim: #a8a290;
+    --nxm-nav-active: #d92b2b;
+    --nxm-userbar-bg: #262626;
+    --nxm-userbar-text: #e0dccb;
+    --nxm-userbar-dim: #9b9582;
+    --nxm-userbar-link: #ff8a80;
+    --nxm-userbar-stat: #f2efe6;
+    --nxm-userbar-ok: #7cd48a;
+    --nxm-userbar-bad: #ff8a80;
+
+    /* rank name colours — ink-paper friendly */
+    --nxm-name-administrator: #6d28d9;
+    --nxm-name-crazyuser: #0e7490;
+    --nxm-name-eliteuser: #0f766e;
+    --nxm-name-extremeuser: #b45309;
+    --nxm-name-forummoderator: #0f6e6e;
+    --nxm-name-insaneuser: #9d174d;
+    --nxm-name-moderator: #3d55b8;
+    --nxm-name-nexusmaster: #2470a0;
+    --nxm-name-peasant: #64748b;
+    --nxm-name-poweruser: #b45309;
+    --nxm-name-retiree: #0f766e;
+    --nxm-name-staffleader: #991b1b;
+    --nxm-name-sysop: #d92b2b;
+    --nxm-name-ultimateuser: #166534;
+    --nxm-name-uploader: #be123c;
+    --nxm-name-user: #1c1c1c;
+    --nxm-name-vip: #15803d;
+    --nxm-name-veteranuser: #5b21b6;
+
+    /* metrics — near-square corners, hard offset shadow */
+    --nxm-radius: 3px;
+    --nxm-shadow: 4px 4px 0 rgba(28, 28, 28, 0.9);
+
+    color-scheme: light;
+}
+
+/* ---------- Dark variant ---------- */
+
+html[data-theme="dark"]:root {
+    --nxm-bg: #141412;
+    --nxm-surface: #1f1f1a;
+    --nxm-surface-alt: #2b2b23;
+    --nxm-text: #ece7d9;
+    --nxm-text-dim: #a8a294;
+    --nxm-muted: #a8a294;
+    --nxm-border: #d5cfbd;
+    --nxm-accent: #ff4d5e;
+    --nxm-accent-hover: #ff7583;
+    --nxm-on-accent: #1c0d10;
+    --nxm-success: #6fd47f;
+    --nxm-danger: #ff8a80;
+    --nxm-warning: #f5c44f;
+
+    --nxm-info-bg: #18222e;
+    --nxm-info-border: #d5cfbd;
+    --nxm-success-bg: #14251a;
+    --nxm-success-border: #d5cfbd;
+    --nxm-warning-bg: #2a2210;
+    --nxm-warning-border: #d5cfbd;
+    --nxm-danger-bg: #2b1416;
+    --nxm-danger-border: #d5cfbd;
+    --nxm-overlay: rgba(0, 0, 0, 0.7);
+
+    --nxm-header-bg: #0c0c0b;
+    --nxm-header-text: #ece7d9;
+    --nxm-header-dim: #8b8577;
+    --nxm-nav-active: #ff4d5e;
+    --nxm-userbar-bg: #101010;
+    --nxm-userbar-text: #d9d4c4;
+    --nxm-userbar-dim: #7d7767;
+    --nxm-userbar-link: #ff8a80;
+    --nxm-userbar-stat: #ece7d9;
+    --nxm-userbar-ok: #7cd48a;
+    --nxm-userbar-bad: #ff8a80;
+
+    --nxm-name-administrator: #c4b5fd;
+    --nxm-name-crazyuser: #5cc4ea;
+    --nxm-name-eliteuser: #56c8c8;
+    --nxm-name-extremeuser: #eda55e;
+    --nxm-name-forummoderator: #5cc6d0;
+    --nxm-name-insaneuser: #e082e0;
+    --nxm-name-moderator: #96b2ea;
+    --nxm-name-nexusmaster: #74baea;
+    --nxm-name-peasant: #aab8c6;
+    --nxm-name-poweruser: #eda55e;
+    --nxm-name-retiree: #5cc6d0;
+    --nxm-name-staffleader: #f08080;
+    --nxm-name-sysop: #ff4d5e;
+    --nxm-name-ultimateuser: #6fd06f;
+    --nxm-name-uploader: #f46e88;
+    --nxm-name-user: #ece7d9;
+    --nxm-name-vip: #72d272;
+    --nxm-name-veteranuser: #ac9ee4;
+
+    --nxm-radius: 3px;
+    --nxm-shadow: 4px 4px 0 rgba(0, 0, 0, 0.85);
+
+    color-scheme: dark;
+}
+
+/* ---------- Auto: follow OS between the two variants ---------- */
+
+@media (prefers-color-scheme: dark) {
+    html[data-theme="auto"]:root {
+        --nxm-bg: #141412;
+        --nxm-surface: #1f1f1a;
+        --nxm-surface-alt: #2b2b23;
+        --nxm-text: #ece7d9;
+        --nxm-text-dim: #a8a294;
+        --nxm-muted: #a8a294;
+        --nxm-border: #d5cfbd;
+        --nxm-accent: #ff4d5e;
+        --nxm-accent-hover: #ff7583;
+        --nxm-on-accent: #1c0d10;
+        --nxm-success: #6fd47f;
+        --nxm-danger: #ff8a80;
+        --nxm-warning: #f5c44f;
+        --nxm-info-bg: #18222e;
+        --nxm-info-border: #d5cfbd;
+        --nxm-success-bg: #14251a;
+        --nxm-success-border: #d5cfbd;
+        --nxm-warning-bg: #2a2210;
+        --nxm-warning-border: #d5cfbd;
+        --nxm-danger-bg: #2b1416;
+        --nxm-danger-border: #d5cfbd;
+        --nxm-overlay: rgba(0, 0, 0, 0.7);
+        --nxm-header-bg: #0c0c0b;
+        --nxm-header-text: #ece7d9;
+        --nxm-header-dim: #8b8577;
+        --nxm-nav-active: #ff4d5e;
+        --nxm-userbar-bg: #101010;
+        --nxm-userbar-text: #d9d4c4;
+        --nxm-userbar-dim: #7d7767;
+        --nxm-userbar-link: #ff8a80;
+        --nxm-userbar-stat: #ece7d9;
+        --nxm-userbar-ok: #7cd48a;
+        --nxm-userbar-bad: #ff8a80;
+        --nxm-radius: 3px;
+        --nxm-shadow: 4px 4px 0 rgba(0, 0, 0, 0.85);
+        color-scheme: dark;
+    }
+}
+
+@media (prefers-color-scheme: light) {
+    html[data-theme="auto"]:root {
+        --nxm-bg: #f2efe6;
+        --nxm-surface: #fdfbf4;
+        --nxm-surface-alt: #e7e2d2;
+        --nxm-text: #1c1c1c;
+        --nxm-text-dim: #5f5b50;
+        --nxm-muted: #5f5b50;
+        --nxm-border: #1c1c1c;
+        --nxm-accent: #d92b2b;
+        --nxm-accent-hover: #a81e1e;
+        --nxm-on-accent: #fdfbf4;
+        --nxm-success: #2f7d32;
+        --nxm-danger: #c62828;
+        --nxm-warning: #9a6a00;
+        --nxm-info-bg: #e3ecf5;
+        --nxm-info-border: #1c1c1c;
+        --nxm-success-bg: #e0eedd;
+        --nxm-success-border: #1c1c1c;
+        --nxm-warning-bg: #f7ecc8;
+        --nxm-warning-border: #1c1c1c;
+        --nxm-danger-bg: #f8dcdc;
+        --nxm-danger-border: #1c1c1c;
+        --nxm-overlay: rgba(20, 20, 18, 0.55);
+        --nxm-header-bg: #1c1c1c;
+        --nxm-header-text: #f2efe6;
+        --nxm-header-dim: #a8a290;
+        --nxm-nav-active: #d92b2b;
+        --nxm-userbar-bg: #262626;
+        --nxm-userbar-text: #e0dccb;
+        --nxm-userbar-dim: #9b9582;
+        --nxm-userbar-link: #ff8a80;
+        --nxm-userbar-stat: #f2efe6;
+        --nxm-userbar-ok: #7cd48a;
+        --nxm-userbar-bad: #ff8a80;
+        --nxm-radius: 3px;
+        --nxm-shadow: 4px 4px 0 rgba(28, 28, 28, 0.9);
+        color-scheme: light;
+    }
+}
+
+/* ---------- Signature structure (shared across variants) ----------
+ * These rules move beyond recolouring: outlined boxes, stamped
+ * headers, pill nav, press-down buttons. All :root-qualified so they
+ * win regardless of whether the pack loads before or after modern.css.
+ */
+
+/* Every table in the main column and every panel/box becomes a
+ * hard-edged paper card with an ink outline and offset shadow. */
+html[data-theme]:root .nxm-main table,
+html[data-theme]:root .nxm-panel,
+html[data-theme]:root .nx-panel,
+html[data-theme]:root .nxm-card {
+    border: 2px solid var(--nxm-border);
+    border-radius: var(--nxm-radius);
+    box-shadow: var(--nxm-shadow);
+    background-color: var(--nxm-surface);
+}
+
+/* Alerts keep their per-severity backgrounds — only the frame and the
+ * stamp shadow change. */
+html[data-theme]:root .nxm-alert {
+    border: 2px solid var(--nxm-border);
+    border-radius: var(--nxm-radius);
+    box-shadow: var(--nxm-shadow);
+}
+
+html[data-theme]:root .nxm-main table table {
+    border-width: 1px;
+    box-shadow: none;
+}
+
+/* Page title as a rubber stamp: uppercase, wide tracking, thick ink
+ * rule, red registration notch on the left. */
+.nxm-main h1,
+.nxm-page-title {
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    font-size: 1.35em;
+    padding-bottom: 0.4em;
+    margin-bottom: 0.8em;
+    border-bottom: 3px solid var(--nxm-border);
+}
+
+.nxm-main h1::before,
+.nxm-page-title::before {
+    content: "";
+    display: inline-block;
+    width: 0.55em;
+    height: 0.55em;
+    margin-right: 0.45em;
+    background: var(--nxm-accent);
+}
+
+/* Section/table headers become solid ink bars with stamped white
+ * lettering and a red notch. */
+html[data-theme]:root .nxm-main .colhead,
+html[data-theme]:root .nxm-main .nx-colhead,
+html[data-theme]:root .nxm-panel > .nxm-panel__header {
+    background: var(--nxm-header-bg);
+    color: var(--nxm-header-text);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.85em;
+    font-weight: 700;
+}
+
+html[data-theme]:root .nxm-main .colhead::before,
+html[data-theme]:root .nxm-main .nx-colhead::before,
+html[data-theme]:root .nxm-panel > .nxm-panel__header::before {
+    content: "";
+    display: inline-block;
+    width: 0.28em;
+    height: 0.9em;
+    margin-right: 0.5em;
+    vertical-align: -0.1em;
+    background: var(--nxm-accent);
+}
+
+/* Links inside stamped headers keep the header text colour. */
+html[data-theme]:root .nxm-main .colhead a:link,
+html[data-theme]:root .nxm-main .colhead a:visited,
+html[data-theme]:root .nxm-main .nx-colhead a:link,
+html[data-theme]:root .nxm-main .nx-colhead a:visited {
+    color: var(--nxm-header-text);
+}
+
+/* Main nav becomes a row of outlined punch-tabs. */
+html[data-theme]:root .nxm-nav__list a {
+    border: 2px solid var(--nxm-header-text);
+    border-bottom: none;
+    border-radius: var(--nxm-radius) var(--nxm-radius) 0 0;
+    margin-right: 0.15rem;
+}
+
+html[data-theme]:root .nxm-nav__list a.nxm-nav__link--active,
+html[data-theme]:root .nxm-nav__list a[aria-current="page"] {
+    background: var(--nxm-nav-active);
+    color: var(--nxm-on-accent);
+    border-color: var(--nxm-nav-active);
+    font-weight: 700;
+}
+
+/* Buttons read as physical keys: ink outline, hard shadow, and a real
+ * press that sinks the key into the page. */
+html[data-theme]:root .btn,
+html[data-theme]:root input[type="submit"],
+html[data-theme]:root input[type="button"],
+html[data-theme]:root button.btn {
+    border: 2px solid var(--nxm-border);
+    box-shadow: 3px 3px 0 var(--nxm-border);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+html[data-theme]:root .btn:active,
+html[data-theme]:root input[type="submit"]:active,
+html[data-theme]:root input[type="button"]:active {
+    transform: translate(3px, 3px);
+    box-shadow: none;
+}
+
+/* Ghost buttons keep the key shape but on paper. */
+html[data-theme]:root .btn2,
+html[data-theme]:root input[type="reset"] {
+    background: var(--nxm-surface);
+    border: 2px solid var(--nxm-border);
+    border-radius: var(--nxm-radius);
+    box-shadow: 3px 3px 0 var(--nxm-border);
+    color: var(--nxm-text);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+html[data-theme]:root .btn2:active,
+html[data-theme]:root input[type="reset"]:active {
+    transform: translate(3px, 3px);
+    box-shadow: none;
+}
+
+/* Info-level alert banner — a ruled index card with a red spine. */
+html[data-theme]:root .nxm-alert--blue {
+    background: var(--nxm-warning-bg);
+    border-left: 8px solid var(--nxm-accent);
+    color: var(--nxm-text);
+}
+
+html[data-theme]:root .nxm-alert.nxm-alert--blue a:link,
+html[data-theme]:root .nxm-alert.nxm-alert--blue a:visited {
+    color: var(--nxm-accent);
+    text-decoration: underline;
+}
+
+/* Legacy "alt link" colour — blue on Classic, stamp-red here. */
+html[data-theme]:root a.altlink_blue:link,
+html[data-theme]:root a.altlink_blue:visited {
+    color: var(--nxm-accent);
+}
+
+html[data-theme]:root a.altlink_blue:hover {
+    color: var(--nxm-accent-hover);
+}
+
+/* Shoutbox rows: ruled paper alternation, red punch-line on hover and
+ * a thicker red spine on rows that mention me. */
+html[data-theme]:root tr:nth-child(odd) td.shoutrow {
+    background-color: var(--nxm-surface);
+}
+
+html[data-theme]:root tr:nth-child(even) td.shoutrow {
+    background-color: var(--nxm-surface-alt);
+}
+
+html[data-theme]:root tr:hover td.shoutrow {
+    box-shadow: inset 4px 0 0 0 var(--nxm-accent);
+}
+
+html[data-theme]:root td.shoutrow-mentions-me {
+    box-shadow: inset 4px 0 0 0 var(--nxm-accent);
+}
+
+/* Promotion sprites get an ink frame — printed badges. */
+html[data-theme]:root img[class*="pro_"] {
+    outline: 2px solid var(--nxm-border);
+    border-radius: 2px;
+}
+
+/* Footer: thick ink rule echoing the header bar. */
+html[data-theme]:root .nxm-footer {
+    border-top: 3px solid var(--nxm-border);
+}

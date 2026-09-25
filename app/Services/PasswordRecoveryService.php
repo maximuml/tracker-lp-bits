@@ -198,7 +198,7 @@ class PasswordRecoveryService
             .$mailFour;
 
         try {
-            $sent = Mail::sentLegacy(
+            $sent = Mail::queueLegacy(
                 $email,
                 $siteName,
                 SiteConfig::current()->main->siteEmail(''),
@@ -211,7 +211,7 @@ class PasswordRecoveryService
                 'UTF-8',
             );
             if (! $sent) {
-                Log::warning('Password reset request email was not sent', [
+                Log::warning('Password reset request email was not queued', [
                     'user_id' => $userId,
                 ]);
             }
@@ -235,7 +235,7 @@ class PasswordRecoveryService
             .sprintf(__('legacy/recover.mail_password_changed_three'), $siteName);
 
         try {
-            $sent = Mail::sentLegacy(
+            $sent = Mail::queueLegacy(
                 (string) $user->email,
                 $siteName,
                 SiteConfig::current()->main->siteEmail(''),
@@ -248,7 +248,7 @@ class PasswordRecoveryService
                 'UTF-8',
             );
             if (! $sent) {
-                Log::warning('Password changed notification was not sent', [
+                Log::warning('Password changed notification was not queued', [
                     'user_id' => (int) $user->id,
                 ]);
             }

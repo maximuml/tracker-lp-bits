@@ -377,7 +377,7 @@ class UserResource extends Resource
 
         $subject = $siteName.' - Account Confirmed';
 
-        Mail::sentLegacy(
+        Mail::queueLegacy(
             (string) $user->email,
             $siteName,
             $siteEmail,

@@ -258,7 +258,7 @@ class EmailConfirmation
             .'<br />'
             .$mailFive;
 
-        Mail::sentLegacy(
+        Mail::queueLegacy(
             $email,
             $siteName,
             SiteConfig::current()->main->siteEmail(''),

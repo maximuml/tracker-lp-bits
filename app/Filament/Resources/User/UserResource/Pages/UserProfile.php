@@ -319,7 +319,7 @@ class UserProfile extends ViewRecord implements HasActions
                         $baseUrl,
                     );
 
-                    Mail::sentLegacy(
+                    Mail::queueLegacy(
                         (string) $record->email,
                         $siteName,
                         $siteEmail,

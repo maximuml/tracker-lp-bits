@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Contracts\Repositories\ToolRepositoryInterface;
+use App\Jobs\SendLegacyMail;
 use App\Logging\SensitiveDataRedactor;
 use App\Models\Setting;
 use App\Support\Config\SiteConfig;
@@ -67,6 +68,49 @@ final class Mail
     }
 
     /**
+     * Queue a legacy mail on the 'mail' queue — same envelope as
+     * {@see sentLegacy()} but the SMTP round-trip happens in a Horizon
+     * worker instead of the request path. Returns whether the job was
+     * accepted by the queue, not whether the mail was delivered.
+     *
+     * @param  string|array<int, string>  $multipleMail
+     */
+    public static function queueLegacy(
+        string $to,
+        string $fromName,
+        string $fromEmail,
+        string $subject,
+        string $body,
+        string $type,
+        bool $showMsg,
+        bool $multiple,
+        array|string $multipleMail,
+        string $hdrEncoding,
+    ): bool {
+        if (is_array($multipleMail)) {
+            $multipleMail = implode(',', $multipleMail);
+        }
+
+        try {
+            SendLegacyMail::dispatch(
+                $to,
+                $fromName,
+                $fromEmail,
+                $subject,
+                $body,
+                $type,
+                $multiple,
+                $multipleMail,
+                $hdrEncoding,
+            );
+        } catch (\Throwable) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Send a legacy mail using the configured transport.
      *
      * Mirrors `sent_mail()`.
@@ -104,6 +148,13 @@ final class Mail
         };
         $windows = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
 
+        // Header-interpolated values must not carry CR/LF.
+        $to = self::stripHeaderBreaks($to);
+        $fromName = self::stripHeaderBreaks($fromName);
+        $fromEmail = self::stripHeaderBreaks($fromEmail);
+        $siteEmail = self::stripHeaderBreaks($siteEmail);
+        $smtpFrom = self::stripHeaderBreaks($smtpFrom);
+
         if ($smtpType === 'none' || $smtpType === '') {
             return false;
         }
@@ -120,7 +171,7 @@ final class Mail
 
         if ($smtpType === 'advanced') {
             $mid = md5(Network::clientIp().$fromName);
-            $name = (string) Request::server('SERVER_NAME', $siteName);
+            $name = self::stripHeaderBreaks((string) Request::server('SERVER_NAME', $siteName));
             $headers = '';
             $headers .= "From: $fromName <$fromEmail>".$eol;
             $headers .= "Reply-To: $fromName <$fromEmail>".$eol;
@@ -134,7 +185,7 @@ final class Mail
             if ($multiple) {
                 $bccMultipleMail = '';
                 foreach (explode(',', $multipleMail) as $toemail) {
-                    $toemail = trim($toemail);
+                    $toemail = self::stripHeaderBreaks(trim($toemail));
                     if ($toemail === '') {
                         continue;
                     }
@@ -174,5 +225,10 @@ final class Mail
         }
 
         return false;
+    }
+
+    private static function stripHeaderBreaks(string $value): string
+    {
+        return str_replace(["\r", "\n"], '', $value);
     }
 }

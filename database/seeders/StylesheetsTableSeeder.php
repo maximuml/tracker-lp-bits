@@ -27,6 +27,22 @@ class StylesheetsTableSeeder extends Seeder
                 'designer' => 'Zantetsu',
                 'comment' => 'TBSource original mod',
             ],
+            1 => [
+                'id' => 5,
+                'uri' => 'styles/Unshatter/',
+                'name' => 'Unshatter',
+                'addicode' => '',
+                'designer' => 'Devin',
+                'comment' => 'Linkin Park From Zero / Unshatter palette — black, white, yellow. Sharp corners, own light and dark variants.',
+            ],
+            2 => [
+                'id' => 6,
+                'uri' => 'styles/ThousandSuns/',
+                'name' => 'Thousand Suns',
+                'addicode' => '',
+                'designer' => 'Devin',
+                'comment' => 'Linkin Park A Thousand Suns palette — cold slate, indigo to cyan accent. Flat minimal look, own light and dark variants.',
+            ],
         ]);
 
     }

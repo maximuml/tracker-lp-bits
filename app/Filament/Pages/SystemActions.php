@@ -204,11 +204,11 @@ class SystemActions extends Page implements HasForms
                 "---------------------------------------------------------------------\n\n".
                 htmlspecialchars($messageBody)."\n\n".
                 "---------------------------------------------------------------------\n{$siteName}\n";
-            $sent = Mail::sentLegacy($to, $siteName, $siteEmail, $subject, $message, 'Mass Mail', false, false, '', 'UTF-8');
+            $sent = Mail::queueLegacy($to, $siteName, $siteEmail, $subject, $message, 'Mass Mail', false, false, '', 'UTF-8');
         }
 
         $sent
-            ? Notification::make()->title('Success')->body("Messages sent to {$users->count()} users.")->success()->send()
+            ? Notification::make()->title('Success')->body("Messages queued to {$users->count()} users.")->success()->send()
             : Notification::make()->title('Error')->body('Try again.')->danger()->send();
 
         $this->massmailForm->fill();

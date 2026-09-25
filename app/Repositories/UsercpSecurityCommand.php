@@ -189,7 +189,7 @@ final class UsercpSecurityCommand
                 .'------'.(__('legacy/usercp.mail_change_email_eight'))."\n"
                 .$changeEmailNine;
 
-            Mail::sentLegacy($email, $siteName, $siteEmail, $subject, str_replace('<br />', '<br />', nl2br($body)), 'profile change', false, false, '', 'UTF-8');
+            Mail::queueLegacy($email, $siteName, $siteEmail, $subject, str_replace('<br />', '<br />', nl2br($body)), 'profile change', false, false, '', 'UTF-8');
         }
 
         if (! in_array($privacy, ['normal', 'low', 'strong'], true)) {
@@ -291,7 +291,7 @@ final class UsercpSecurityCommand
                 .'------'.(__('legacy/usercp.mail_change_email_eight'))."\n"
                 .(__('legacy/usercp.mail_change_email_nine'));
 
-            Mail::sentLegacy($email, $siteName, $siteEmail, $subject, str_replace('<br />', '<br />', nl2br($body)), 'profile change', false, false, '', 'UTF-8');
+            Mail::queueLegacy($email, $siteName, $siteEmail, $subject, str_replace('<br />', '<br />', nl2br($body)), 'profile change', false, false, '', 'UTF-8');
         }
 
         if ($resetpasskey) {

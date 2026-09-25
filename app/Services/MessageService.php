@@ -257,7 +257,7 @@ class MessageService
             '------'.Locale::trans('message.mail_yours', [], $locale)."\n".
             sprintf(Locale::trans('message.mail_the_site_team', [], $locale), $siteName);
 
-        Mail::sentLegacy(
+        Mail::queueLegacy(
             (string) $recipient->email,
             $siteName,
             $siteEmail,

@@ -507,18 +507,6 @@ html[data-theme]:root .nxm-logo img {
     max-height: 88px;
 }
 
-/* The wordmark svg is white-on-transparent, drawn for dark chrome; on
- * the paper masthead it inverts to black ink (grayscale stays on). */
-html[data-theme="light"]:root .nxm-logo img {
-    filter: grayscale(100%) invert(1);
-}
-
-@media (prefers-color-scheme: light) {
-    html[data-theme="auto"]:root .nxm-logo img {
-        filter: grayscale(100%) invert(1);
-    }
-}
-
 html[data-theme]:root .nxm-nav {
     border-bottom: 1px solid var(--nxm-border);
 }

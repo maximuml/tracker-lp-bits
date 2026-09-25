@@ -27,6 +27,22 @@ class StylesheetsTableSeeder extends Seeder
                 'designer' => 'Zantetsu',
                 'comment' => 'TBSource original mod',
             ],
+            1 => [
+                'id' => 5,
+                'uri' => 'styles/Unshatter/',
+                'name' => 'Unshatter',
+                'addicode' => '',
+                'designer' => 'Devin',
+                'comment' => 'Linkin Park From Zero / Unshatter palette — black, white, yellow. Sharp corners, own light and dark variants.',
+            ],
+            2 => [
+                'id' => 6,
+                'uri' => 'styles/Meteora/',
+                'name' => 'Meteora',
+                'addicode' => '',
+                'designer' => 'Devin',
+                'comment' => 'Linkin Park Meteora palette — warm paper, charcoal, burnt-ember accent. Soft rounded corners, own light and dark variants.',
+            ],
         ]);
 
     }

@@ -65,6 +65,9 @@
     --nxm-name-vip: #008a00;
     --nxm-name-veteranuser: #483d8b;
 
+    /* legacy panel (mybonus "What is karma") */
+    --nxm-panel-bg: #f5f4ea;
+
     /* metrics */
     --nxm-radius: 6px;
     --nxm-gap: 0.75rem;
@@ -132,6 +135,7 @@
         --nxm-name-veteranuser: #ac9ee4;
 
         --nxm-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+        --nxm-panel-bg: var(--nxm-surface-alt);
         color-scheme: dark;
     }
 }
@@ -193,6 +197,7 @@ html[data-theme="dark"] {
     --nxm-name-veteranuser: #ac9ee4;
 
     --nxm-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    --nxm-panel-bg: var(--nxm-surface-alt);
     color-scheme: dark;
 }
 

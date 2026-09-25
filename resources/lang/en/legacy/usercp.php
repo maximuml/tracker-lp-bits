@@ -174,7 +174,7 @@ return [
     'text_time_added' => 'Time Added',
     'text_time_elapsed' => 'Time Elasped',
     'text_append_words_to_torrents' => 'Special torrents',
-    'text_append_sticky' => 'Add sticky icon <img class="sticky" src="pic/trans.gif" alt="sticky" /> to torrents sticked at top',
+    'text_append_sticky' => 'Add sticky icon <img class="sticky" src="pic/trans.gif" alt="sticky" /> to torrents stuck at top',
     'text_append_new' => "Append 'New' to new torrents",
     'text_append_picked' => "Append words, e.g. 'Classic', to torrents picked by critics",
     'text_show_action_icons' => 'Show action icons',

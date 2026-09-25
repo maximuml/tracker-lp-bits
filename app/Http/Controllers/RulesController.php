@@ -25,13 +25,13 @@ class RulesController extends LegacyController
         $langFolder = Locale::currentLangDir('en');
         $cacheKey = "{$langFolder}_rules";
 
-        $html = Cache::remember($cacheKey, 900, function () {
+        $rules = Cache::remember($cacheKey, 900, function () {
             $langId = $this->infoRepository->resolveRuleLangId(Locale::guestIdWithContext());
 
-            return view('rules.index', ['rules' => $this->infoRepository->rules($langId)])->render();
+            return $this->infoRepository->rules($langId);
         });
 
-        return response($html);
+        return response(view('rules.index', ['rules' => $rules])->render());
     }
 
     public function userAgreement(Request $request): View|RedirectResponse|Response

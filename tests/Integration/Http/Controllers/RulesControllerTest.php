@@ -25,10 +25,10 @@ final class RulesControllerTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_rules_returns_cached_html(): void
+    public function test_rules_renders_cached_rule_data(): void
     {
         $langFolder = (string) app(Globals::class)->get('CURLANGDIR', 'en');
-        Cache::put("{$langFolder}_rules", '<html>Rules Page</html>', 900);
+        Cache::put("{$langFolder}_rules", [['title' => 'Cached Rule', 'text' => 'Cached rule body']], 900);
 
         $controller = app(RulesController::class);
         $request = Request::create('/rules', 'GET');
@@ -37,7 +37,8 @@ final class RulesControllerTest extends TestCase
         $response = $controller->rules($request);
 
         $this->assertSame(200, $response->getStatusCode());
-        $this->assertStringContainsString('Rules Page', $response->getContent());
+        $this->assertStringContainsString('Cached Rule', $response->getContent());
+        $this->assertStringContainsString('Cached rule body', $response->getContent());
     }
 
     public function test_user_agreement_returns_view(): void

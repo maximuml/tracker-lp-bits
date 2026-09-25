@@ -77,7 +77,7 @@ return [
         'invite_timeout' => '7',
         'seeding_leeching_time_calc_start' => '',
         'startsubid' => null,
-        'logo' => '',
+        'logo' => 'pic/lpbits-logo.svg',
         'showlastxforumposts' => 'no',
         'enable_technical_info' => 'no',
         'site_language_enabled' => Language::DEFAULT_ENABLED,

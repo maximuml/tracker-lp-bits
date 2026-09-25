@@ -1,0 +1,473 @@
+/*
+ * Monochrome — pure grayscale editorial theme: no hue anywhere, only
+ * black, white and grey steps. Structure differs from Classic: hairline
+ * 1px rules instead of fills and shadows, serif all-caps headings,
+ * inverted table headers, and every content image desaturated so the
+ * page really is black & white.
+ *
+ * Loaded before css/modern.css, so every --nxm-* override is pinned
+ * behind a `:root`-qualified selector (higher specificity than the
+ * plain html[data-theme="X"] rules in modern.css). Light and dark
+ * variants are both defined; "auto" follows prefers-color-scheme.
+ */
+
+/* ---------- Light variant (default) ---------- */
+
+:root,
+html[data-theme="light"]:root {
+    /* semantic — paper whites to ink blacks */
+    --nxm-bg: #f7f7f5;
+    --nxm-surface: #ffffff;
+    --nxm-surface-alt: #eeeeec;
+    --nxm-text: #0a0a0a;
+    --nxm-text-dim: #4c4c4c;
+    --nxm-muted: #6b6b6b;
+    --nxm-border: #c9c9c7;
+    --nxm-accent: #0a0a0a;
+    --nxm-accent-hover: #3d3d3d;
+    --nxm-on-accent: #ffffff;
+    --nxm-success: #3d3d3d;
+    --nxm-success-bg: #e4e4e1;
+    --nxm-success-border: #9a9a96;
+    --nxm-danger: #0a0a0a;
+    --nxm-danger-bg: #0a0a0a;
+    --nxm-danger-border: #0a0a0a;
+    --nxm-warning: #3d3d3d;
+    --nxm-warning-bg: #e4e4e1;
+    --nxm-warning-border: #9a9a96;
+    --nxm-info-bg: #e4e4e1;
+    --nxm-info-border: #9a9a96;
+
+    /* chrome — solid black bar */
+    --nxm-header-bg: #0a0a0a;
+    --nxm-header-text: #f5f5f5;
+    --nxm-header-dim: #9a9a9a;
+    --nxm-nav-active: #ffffff;
+    --nxm-userbar-bg: #161616;
+    --nxm-userbar-text: #e3e3e3;
+    --nxm-userbar-dim: #9a9a9a;
+    --nxm-userbar-link: #ffffff;
+    --nxm-userbar-stat: #f5f5f5;
+    --nxm-userbar-ok: #c9c9c9;
+    --nxm-userbar-bad: #ffffff;
+    --nxm-overlay: rgba(10, 10, 10, 0.55);
+    --nxm-panel-bg: #ffffff;
+
+    /* rank names — distinguished by grey steps, not hue */
+    --nxm-name-administrator: #0a0a0a;
+    --nxm-name-crazyuser: #2e2e2e;
+    --nxm-name-eliteuser: #3d3d3d;
+    --nxm-name-extremeuser: #4c4c4c;
+    --nxm-name-forummoderator: #3d3d3d;
+    --nxm-name-insaneuser: #2e2e2e;
+    --nxm-name-moderator: #4c4c4c;
+    --nxm-name-nexusmaster: #2e2e2e;
+    --nxm-name-peasant: #6b6b6b;
+    --nxm-name-poweruser: #2e2e2e;
+    --nxm-name-retiree: #6b6b6b;
+    --nxm-name-staffleader: #0a0a0a;
+    --nxm-name-sysop: #0a0a0a;
+    --nxm-name-ultimateuser: #3d3d3d;
+    --nxm-name-uploader: #2e2e2e;
+    --nxm-name-user: #0a0a0a;
+    --nxm-name-vip: #2e2e2e;
+    --nxm-name-veteranuser: #4c4c4c;
+
+    /* metrics — square corners, no shadow: hairlines only */
+    --nxm-radius: 0px;
+    --nxm-shadow: none;
+
+    color-scheme: light;
+}
+
+/* ---------- Dark variant ---------- */
+
+html[data-theme="dark"]:root {
+    --nxm-bg: #0a0a0a;
+    --nxm-surface: #141414;
+    --nxm-surface-alt: #1e1e1e;
+    --nxm-text: #f5f5f5;
+    --nxm-text-dim: #b3b3b3;
+    --nxm-muted: #9a9a9a;
+    --nxm-border: #3a3a3a;
+    --nxm-accent: #ffffff;
+    --nxm-accent-hover: #c9c9c9;
+    --nxm-on-accent: #0a0a0a;
+    --nxm-success: #c9c9c9;
+    --nxm-success-bg: #262626;
+    --nxm-success-border: #4c4c4c;
+    --nxm-danger: #ffffff;
+    --nxm-danger-bg: #f5f5f5;
+    --nxm-danger-border: #f5f5f5;
+    --nxm-warning: #c9c9c9;
+    --nxm-warning-bg: #262626;
+    --nxm-warning-border: #4c4c4c;
+    --nxm-info-bg: #262626;
+    --nxm-info-border: #4c4c4c;
+
+    --nxm-header-bg: #000000;
+    --nxm-header-text: #f5f5f5;
+    --nxm-header-dim: #9a9a9a;
+    --nxm-nav-active: #ffffff;
+    --nxm-userbar-bg: #0f0f0f;
+    --nxm-userbar-text: #e3e3e3;
+    --nxm-userbar-dim: #9a9a9a;
+    --nxm-userbar-link: #ffffff;
+    --nxm-userbar-stat: #f5f5f5;
+    --nxm-userbar-ok: #c9c9c9;
+    --nxm-userbar-bad: #ffffff;
+    --nxm-overlay: rgba(0, 0, 0, 0.7);
+    --nxm-panel-bg: #141414;
+
+    --nxm-name-administrator: #f5f5f5;
+    --nxm-name-crazyuser: #d6d6d6;
+    --nxm-name-eliteuser: #c9c9c9;
+    --nxm-name-extremeuser: #b3b3b3;
+    --nxm-name-forummoderator: #c9c9c9;
+    --nxm-name-insaneuser: #d6d6d6;
+    --nxm-name-moderator: #b3b3b3;
+    --nxm-name-nexusmaster: #d6d6d6;
+    --nxm-name-peasant: #9a9a9a;
+    --nxm-name-poweruser: #d6d6d6;
+    --nxm-name-retiree: #9a9a9a;
+    --nxm-name-staffleader: #f5f5f5;
+    --nxm-name-sysop: #f5f5f5;
+    --nxm-name-ultimateuser: #c9c9c9;
+    --nxm-name-uploader: #d6d6d6;
+    --nxm-name-user: #f5f5f5;
+    --nxm-name-vip: #d6d6d6;
+    --nxm-name-veteranuser: #b3b3b3;
+
+    --nxm-radius: 0px;
+    --nxm-shadow: none;
+
+    color-scheme: dark;
+}
+
+/* ---------- Auto: follow OS between the two variants ---------- */
+
+@media (prefers-color-scheme: dark) {
+    html[data-theme="auto"]:root {
+        --nxm-bg: #0a0a0a;
+        --nxm-surface: #141414;
+        --nxm-surface-alt: #1e1e1e;
+        --nxm-text: #f5f5f5;
+        --nxm-text-dim: #b3b3b3;
+        --nxm-muted: #9a9a9a;
+        --nxm-border: #3a3a3a;
+        --nxm-accent: #ffffff;
+        --nxm-accent-hover: #c9c9c9;
+        --nxm-on-accent: #0a0a0a;
+        --nxm-success: #c9c9c9;
+        --nxm-success-bg: #262626;
+        --nxm-success-border: #4c4c4c;
+        --nxm-danger: #ffffff;
+        --nxm-danger-bg: #f5f5f5;
+        --nxm-danger-border: #f5f5f5;
+        --nxm-warning: #c9c9c9;
+        --nxm-warning-bg: #262626;
+        --nxm-warning-border: #4c4c4c;
+        --nxm-info-bg: #262626;
+        --nxm-info-border: #4c4c4c;
+        --nxm-header-bg: #000000;
+        --nxm-header-text: #f5f5f5;
+        --nxm-header-dim: #9a9a9a;
+        --nxm-nav-active: #ffffff;
+        --nxm-userbar-bg: #0f0f0f;
+        --nxm-userbar-text: #e3e3e3;
+        --nxm-userbar-dim: #9a9a9a;
+        --nxm-userbar-link: #ffffff;
+        --nxm-userbar-stat: #f5f5f5;
+        --nxm-userbar-ok: #c9c9c9;
+        --nxm-userbar-bad: #ffffff;
+        --nxm-overlay: rgba(0, 0, 0, 0.7);
+        --nxm-panel-bg: #141414;
+        --nxm-radius: 0px;
+        --nxm-shadow: none;
+        color-scheme: dark;
+    }
+}
+
+@media (prefers-color-scheme: light) {
+    html[data-theme="auto"]:root {
+        --nxm-bg: #f7f7f5;
+        --nxm-surface: #ffffff;
+        --nxm-surface-alt: #eeeeec;
+        --nxm-text: #0a0a0a;
+        --nxm-text-dim: #4c4c4c;
+        --nxm-muted: #6b6b6b;
+        --nxm-border: #c9c9c7;
+        --nxm-accent: #0a0a0a;
+        --nxm-accent-hover: #3d3d3d;
+        --nxm-on-accent: #ffffff;
+        --nxm-success: #3d3d3d;
+        --nxm-success-bg: #e4e4e1;
+        --nxm-success-border: #9a9a96;
+        --nxm-danger: #0a0a0a;
+        --nxm-danger-bg: #0a0a0a;
+        --nxm-danger-border: #0a0a0a;
+        --nxm-warning: #3d3d3d;
+        --nxm-warning-bg: #e4e4e1;
+        --nxm-warning-border: #9a9a96;
+        --nxm-info-bg: #e4e4e1;
+        --nxm-info-border: #9a9a96;
+        --nxm-header-bg: #0a0a0a;
+        --nxm-header-text: #f5f5f5;
+        --nxm-header-dim: #9a9a9a;
+        --nxm-nav-active: #ffffff;
+        --nxm-userbar-bg: #161616;
+        --nxm-userbar-text: #e3e3e3;
+        --nxm-userbar-dim: #9a9a9a;
+        --nxm-userbar-link: #ffffff;
+        --nxm-userbar-stat: #f5f5f5;
+        --nxm-userbar-ok: #c9c9c9;
+        --nxm-userbar-bad: #ffffff;
+        --nxm-overlay: rgba(10, 10, 10, 0.55);
+        --nxm-panel-bg: #ffffff;
+        --nxm-radius: 0px;
+        --nxm-shadow: none;
+        color-scheme: light;
+    }
+}
+
+/* ---------- Signature structure (shared across variants) ---------- */
+
+/* Editorial serif headings: all-caps, letter-spaced, double rule —
+ * a newspaper masthead instead of a UI header. */
+.nxm-main h1,
+.nxm-page-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding-bottom: 0.45em;
+    margin-bottom: 0.8em;
+    border-bottom: 4px double var(--nxm-text);
+}
+
+/* Table/section headers become solid inverted bars — black text on
+ * white in dark, white on black in light — with a thin serif-ish caps
+ * look instead of a tinted fill. */
+.nxm-main .colhead,
+.nxm-main .nx-colhead,
+.nxm-panel > .nxm-panel__header,
+.nxm-main > table > tbody > tr:first-child > .colhead {
+    background: var(--nxm-accent);
+    color: var(--nxm-on-accent);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: 0.85em;
+}
+
+.nxm-main .colhead a:link,
+.nxm-main .colhead a:visited,
+.nxm-main .nx-colhead a:link,
+.nxm-main .nx-colhead a:visited {
+    color: var(--nxm-on-accent);
+}
+
+/* Panels and tables: hairline outline, no shadow. */
+.nxm-main table,
+.nxm-panel,
+.nx-panel,
+.nxm-card {
+    border: 1px solid var(--nxm-border);
+    box-shadow: none;
+    background: var(--nxm-surface);
+}
+
+/* Nav: the active tab is an inverted block; others stay plain text. */
+html[data-theme]:root .nxm-nav__list a {
+    border-radius: 0;
+}
+
+html[data-theme]:root .nxm-nav__link--active {
+    background: var(--nxm-nav-active);
+    color: #0a0a0a;
+}
+
+/* Buttons: outlined rectangles that invert on hover — the only
+ * interaction cue is the black/white flip. */
+html[data-theme]:root .btn,
+html[data-theme]:root input[type="submit"],
+html[data-theme]:root input[type="reset"],
+html[data-theme]:root .btn2 {
+    border: 1px solid var(--nxm-accent);
+    border-radius: 0;
+    background: var(--nxm-surface);
+    color: var(--nxm-accent);
+    box-shadow: none;
+}
+
+html[data-theme]:root .btn:hover,
+html[data-theme]:root input[type="submit"]:hover,
+html[data-theme]:root input[type="reset"]:hover,
+html[data-theme]:root .btn2:hover {
+    background: var(--nxm-accent);
+    color: var(--nxm-on-accent);
+    border-color: var(--nxm-accent);
+}
+
+/* Alert severities: modern.css hardcodes one hue per class; Monochrome
+ * re-maps the whole scale to grey steps — importance is conveyed by
+ * tonal weight, not colour. Danger inverts with the theme's accent. */
+html[data-theme]:root .nxm-alert {
+    border: 1px solid var(--nxm-border);
+    border-radius: 0;
+    box-shadow: none;
+}
+
+html[data-theme]:root .nxm-alert--red {
+    background: var(--nxm-accent);
+    color: var(--nxm-on-accent);
+}
+
+html[data-theme]:root .nxm-alert--orange {
+    background: #555;
+    color: #fff;
+}
+
+html[data-theme]:root .nxm-alert--green {
+    background: #8a8a8a;
+    color: #fff;
+}
+
+html[data-theme]:root .nxm-alert--black {
+    background: #161616;
+    color: #f5f5f5;
+}
+
+html[data-theme]:root .nxm-alert--gray {
+    background: #777;
+    color: #fff;
+}
+
+html[data-theme]:root .nxm-alert--blue {
+    background: var(--nxm-info-bg);
+    border-left: 6px solid var(--nxm-accent);
+    color: var(--nxm-text);
+}
+
+html[data-theme]:root .nxm-alert a:link,
+html[data-theme]:root .nxm-alert a:visited {
+    color: inherit;
+    text-decoration: underline;
+}
+
+html[data-theme]:root .nxm-alert--blue a:link,
+html[data-theme]:root .nxm-alert--blue a:visited {
+    color: var(--nxm-accent);
+}
+
+/* Legacy "alt link" colour — blue on Classic, plain ink here. */
+html[data-theme]:root a.altlink_blue:link,
+html[data-theme]:root a.altlink_blue:visited {
+    color: var(--nxm-accent);
+}
+
+/* Shoutbox: paper alternation with an ink edge on hover/mention. */
+html[data-theme]:root tr:nth-child(odd) td.shoutrow {
+    background-color: var(--nxm-surface);
+}
+
+html[data-theme]:root tr:nth-child(even) td.shoutrow {
+    background-color: var(--nxm-surface-alt);
+}
+
+html[data-theme]:root tr:hover td.shoutrow,
+html[data-theme]:root td.shoutrow-mentions-me {
+    box-shadow: inset 4px 0 0 0 var(--nxm-accent);
+}
+
+/* modern.css re-declares the rank-name tints on .nxm-header/.nxm-userbar
+ * so they stay readable on the dark chrome — Monochrome re-scopes them
+ * to two grey tiers: staff ranks white, user ranks dim grey. */
+html[data-theme]:root .nxm-header,
+html[data-theme]:root .nxm-userbar {
+    --nxm-name-administrator: #ffffff;
+    --nxm-name-crazyuser: #b3b3b3;
+    --nxm-name-eliteuser: #b3b3b3;
+    --nxm-name-extremeuser: #b3b3b3;
+    --nxm-name-forummoderator: #ffffff;
+    --nxm-name-insaneuser: #b3b3b3;
+    --nxm-name-moderator: #ffffff;
+    --nxm-name-nexusmaster: #b3b3b3;
+    --nxm-name-peasant: #b3b3b3;
+    --nxm-name-poweruser: #b3b3b3;
+    --nxm-name-retiree: #b3b3b3;
+    --nxm-name-staffleader: #ffffff;
+    --nxm-name-sysop: #ffffff;
+    --nxm-name-ultimateuser: #b3b3b3;
+    --nxm-name-uploader: #b3b3b3;
+    --nxm-name-user: #b3b3b3;
+    --nxm-name-vip: #b3b3b3;
+    --nxm-name-veteranuser: #b3b3b3;
+}
+
+/* nexus.css ratio/seed-leech/wait ramps are red gradients; monochrome
+ * keeps them readable by mapping the whole ramp to the text colour and
+ * marking the worst quantile bold instead of red. */
+.nx-ratio-1, .nx-ratio-2, .nx-ratio-3, .nx-ratio-4, .nx-ratio-5,
+.nx-ratio-6, .nx-ratio-7, .nx-ratio-8, .nx-ratio-9, .nx-ratio-10,
+.nx-sl-1, .nx-sl-2, .nx-sl-3, .nx-sl-4, .nx-sl-5,
+.nx-sl-6, .nx-sl-7, .nx-sl-8, .nx-sl-9, .nx-sl-10,
+.nx-sl-11, .nx-sl-12, .nx-sl-13, .nx-sl-14, .nx-sl-15,
+.nx-wait-1, .nx-wait-2, .nx-wait-3, .nx-wait-4, .nx-wait-5,
+.nx-wait-6, .nx-wait-7, .nx-wait-8, .nx-wait-9, .nx-wait-10 {
+    color: var(--nxm-text);
+}
+
+.nxm-userbar .nx-ratio-1, .nxm-userbar .nx-ratio-2, .nxm-userbar .nx-ratio-3,
+.nxm-userbar .nx-ratio-4, .nxm-userbar .nx-ratio-5, .nxm-userbar .nx-ratio-6,
+.nxm-userbar .nx-ratio-7, .nxm-userbar .nx-ratio-8, .nxm-userbar .nx-ratio-9,
+.nxm-userbar .nx-ratio-10, .nxm-userbar .nx-sl-1, .nxm-userbar .nx-sl-2,
+.nxm-userbar .nx-sl-3, .nxm-userbar .nx-sl-4, .nxm-userbar .nx-sl-5,
+.nxm-userbar .nx-sl-6, .nxm-userbar .nx-sl-7, .nxm-userbar .nx-sl-8,
+.nxm-userbar .nx-sl-9, .nxm-userbar .nx-sl-10, .nxm-userbar .nx-sl-11,
+.nxm-userbar .nx-sl-12, .nxm-userbar .nx-sl-13, .nxm-userbar .nx-sl-14,
+.nxm-userbar .nx-sl-15, .nxm-userbar .nx-wait-1, .nxm-userbar .nx-wait-2,
+.nxm-userbar .nx-wait-3, .nxm-userbar .nx-wait-4, .nxm-userbar .nx-wait-5,
+.nxm-userbar .nx-wait-6, .nxm-userbar .nx-wait-7, .nxm-userbar .nx-wait-8,
+.nxm-userbar .nx-wait-9, .nxm-userbar .nx-wait-10 {
+    color: var(--nxm-userbar-stat);
+}
+
+.nx-ratio-1, .nx-ratio-2, .nx-ratio-3, .nx-sl-1, .nx-sl-2, .nx-sl-3 {
+    font-weight: 700;
+}
+
+/* nexus.css nx-color-* utility classes are hardcoded hues (promo expiry
+ * text, tag colors); monochrome flattens the whole set to text. */
+.nx-color-red, .nx-color-green, .nx-color-blue, .nx-color-gray,
+.nx-color-white, .nx-color-orange, .nx-color-1f7309, .nx-color-ca0226,
+.nx-color-darkred, .nx-color-purple, .nx-color-00cc66 {
+    color: var(--nxm-text);
+}
+
+/* True black & white: every bitmap is desaturated — category icons,
+ * promo badges, avatars, the LP badge in the header logo. The selector
+ * is global so it also reaches the shoutbox iframe document when the
+ * pack stylesheet loads there. */
+img {
+    filter: grayscale(100%);
+}
+
+/* Notification badge: red pill → inverted accent square. toast.css
+ * loads after this file, so the selector needs the :root qualifier. */
+html[data-theme]:root .nx-notif-badge {
+    background: var(--nxm-accent);
+    color: var(--nxm-on-accent);
+    border-radius: 0;
+}
+
+/* Promotion sprites read as outlined badges. */
+html[data-theme]:root img[class*="pro_"] {
+    outline: 1px solid var(--nxm-accent);
+    border-radius: 0;
+}
+
+/* Footer closes the page with the same double rule the headings use. */
+html[data-theme]:root .nxm-footer {
+    border-top: 4px double var(--nxm-border);
+}

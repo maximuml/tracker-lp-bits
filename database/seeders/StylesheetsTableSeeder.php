@@ -27,6 +27,22 @@ class StylesheetsTableSeeder extends Seeder
                 'designer' => 'Zantetsu',
                 'comment' => 'TBSource original mod',
             ],
+            1 => [
+                'id' => 5,
+                'uri' => 'styles/Unshatter/',
+                'name' => 'Unshatter',
+                'addicode' => '',
+                'designer' => 'Devin',
+                'comment' => 'Linkin Park From Zero / Unshatter palette — black, white, yellow. Sharp corners, own light and dark variants.',
+            ],
+            2 => [
+                'id' => 6,
+                'uri' => 'styles/Monochrome/',
+                'name' => 'Monochrome',
+                'addicode' => '',
+                'designer' => 'Devin',
+                'comment' => 'Pure grayscale editorial theme: hairline rules, serif uppercase headings, inverted table headers, all images desaturated. Own light and dark variants.',
+            ],
         ]);
 
     }

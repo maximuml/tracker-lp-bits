@@ -616,7 +616,7 @@ button.nx-shoutbox-mentions{border:1px solid var(--nxm-danger-border,#c0392b);ba
 .nx-fgrid--6{grid-template-columns:repeat(3,max-content 1fr);align-items:center}
 .nx-hl{background:#BBAF9B}
 .nx-grouprow{display:contents}
-.nx-panel{width:65%;margin-left:auto;margin-right:auto;background:#F5F4EA}
+.nx-panel{width:65%;margin-left:auto;margin-right:auto;background:var(--nxm-panel-bg,#F5F4EA)}
 .nx-fcell{padding:5px;vertical-align:top;text-align:left}
 .nx-fhead{padding:5px;font-weight:bold;text-align:right;vertical-align:top}
 .nx-ffull{grid-column:1/-1;padding:5px}

@@ -7,7 +7,7 @@
 
         <title>@yield('title')</title>
 
-        <style>
+        <style nonce="{{ $cspNonce ?? '' }}">
             html{font-family:system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,Noto Sans,sans-serif;line-height:1.5}body{margin:0;font-family:inherit}.flex{display:flex}.items-center{align-items:center}.justify-center{justify-content:center}.min-h-screen{min-height:100vh}.mx-auto{margin-left:auto;margin-right:auto}.max-w-xl{max-width:36rem}.border-r{border-right-width:1px}.px-4{padding-left:1rem;padding-right:1rem}.ml-4{margin-left:1rem}.pt-8{padding-top:2rem}.text-lg{font-size:1.125rem}.antialiased{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
             body{color:#1a202c;background-color:#f7fafc}.code{border-color:#cbd5e0}
             @media (prefers-color-scheme:dark){body{color:#e2e8f0;background-color:#1a202c}.code{border-color:#4a5568}}

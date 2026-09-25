@@ -86,13 +86,13 @@ class AttendanceController extends LegacyController
                 ['ranking' => $data['myRanking'], 'counts' => $data['todayCounts']],
                 null
             ));
-            AssetAppender::js($this->calendarScript($data), 'footer', false);
-            $data['bonusLines'] = $this->bonusLines();
         } else {
             if ($captchaEnabled && $data['iv'] === 'yes') {
                 $data['captchaHtml'] = SafeHtml::fromTrustedHtml(Captcha::renderHtml(layout: 'grid'));
             }
         }
+        AssetAppender::js($this->calendarScript($data), 'footer', false);
+        $data['bonusLines'] = $this->bonusLines();
 
         return $this->legacyPage($request, 'attendance', true, $data);
     }

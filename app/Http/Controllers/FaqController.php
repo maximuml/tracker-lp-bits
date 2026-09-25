@@ -35,22 +35,28 @@ class FaqController extends LegacyController
         $langFolder = (string) $this->globals->get('CURLANGDIR', 'en');
         $cacheKey = "{$langFolder}_faq";
 
-        $html = Cache::remember($cacheKey, 900, function () {
+        $categories = Cache::remember($cacheKey, 900, function () {
             $langId = $this->infoRepository->resolveRuleLangId(Locale::guestIdWithContext());
             $categories = $this->infoRepository->faqCategories($langId);
             foreach ($categories as &$category) {
                 foreach (($category['items'] ?? []) as &$item) {
-                    $item['answerHtml'] = SafeHtml::fromTrustedHtml(Html::cleanListChildren(strip_tags(
+                    $item['answerCleaned'] = Html::cleanListChildren(strip_tags(
                         (string) ($item['answer'] ?? ''),
                         '<a><b><i><u><s><br><p><div><span><ul><ol><li><img><span><pre><code><hr><table><tr><td><th><strong><em><h1><h2><h3><h4><h5><h6><blockquote>',
-                    )));
+                    ));
                 }
             }
 
-            return view('faq.index', ['faqCategories' => $categories])->render();
+            return $categories;
         });
 
-        return response($html);
+        foreach ($categories as &$category) {
+            foreach (($category['items'] ?? []) as &$item) {
+                $item['answerHtml'] = SafeHtml::fromTrustedHtml((string) ($item['answerCleaned'] ?? ''));
+            }
+        }
+
+        return response(view('faq.index', ['faqCategories' => $categories])->render());
     }
 
     public function faqManage(Request $request): View|RedirectResponse|Response

@@ -7,17 +7,6 @@
     <x-frame :caption="__('legacy/attendance.success')" :center="false">
     <p>{{ $headerLeft ?? '' }}<span>{{ $headerRight ?? '' }}</span></p>
     </x-frame>
-    <div class="nx-flex-center"><div id="calendar" class="nx-calendar"></div></div>
-    <ul>
-        @foreach ($bonusLines['lines'] ?? [] as $line)
-            <li>{{ $line }}</li>
-        @endforeach
-        <li><ol>
-            @foreach ($bonusLines['continuous'] ?? [] as $line)
-                <li>{{ $line }}</li>
-            @endforeach
-        </ol></li>
-    </ul>
 @else
     <x-frame :caption="__('legacy/attendance.title')" :center="false">
     <div class="nx-box">
@@ -32,4 +21,15 @@
     </div>
     </x-frame>
 @endif
+    <div class="nx-flex-center"><div id="calendar" class="nx-calendar"></div></div>
+    <ul>
+        @foreach ($bonusLines['lines'] ?? [] as $line)
+            <li>{{ $line }}</li>
+        @endforeach
+        <li><ol>
+            @foreach ($bonusLines['continuous'] ?? [] as $line)
+                <li>{{ $line }}</li>
+            @endforeach
+        </ol></li>
+    </ul>
 @endsection

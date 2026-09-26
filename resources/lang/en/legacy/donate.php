@@ -21,6 +21,8 @@ return [
     'select_other_donation_amount' => 'Other Donation Amount',
     'text_usd_mark' => '$',
     'text_donation' => ' Donation',
+    'text_donate_with_crypto' => 'Donate with Crypto',
+    'text_donate_crypto_note' => 'Send the amount to one of the addresses below. Include your username in a message to us afterwards so we can credit your account.',
     'text_after_donation_note_one' => 'After you have donated, make sure to ',
     'text_send_us' => 'Send Us',
     'text_after_donation_note_two' => ' the',

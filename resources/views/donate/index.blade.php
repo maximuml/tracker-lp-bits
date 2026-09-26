@@ -16,7 +16,7 @@
         @if ($showCustom)
             <div class="nx-text">{{ \App\Support\Format::formatComment($custom) }}</div>
         @endif
-        @if ($showPaypal)
+        @if ($showPaypal || $crypto !== [])
             <div class="nx-row">
                 @if ($showPaypal)
                     <div class="nx-text nx-grow">
@@ -50,6 +50,18 @@
                                 <br /><br />
                             </p>
                         </form>
+                    </div>
+                @endif
+                @if ($crypto !== [])
+                    <div class="nx-text nx-grow">
+                        <b>{{ __('legacy/donate.text_donate_with_crypto') }}</b><br /><br />
+                        {{ __('legacy/donate.text_donate_crypto_note') }}<br /><br />
+                        @foreach ($crypto as $wallet)
+                            <p>
+                                <img src="{{ $wallet['qr'] }}" width="160" height="160" alt="{{ $wallet['coin'] }}"><br />
+                                <b>{{ $wallet['coin'] }}:</b>&nbsp;<code>{{ $wallet['address'] }}</code>
+                            </p>
+                        @endforeach
                     </div>
                 @endif
             </div>

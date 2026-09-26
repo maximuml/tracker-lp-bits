@@ -179,6 +179,24 @@
                 "null"
             ]
         },
+        "BITCOINADDRESS": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "ETHEREUMADDRESS": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "USDTADDRESS": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
         "SLOGAN": {
             "type": [
                 "string",

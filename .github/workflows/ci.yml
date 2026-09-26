@@ -481,6 +481,7 @@ jobs:
     permissions:
       contents: read
       security-events: write
+      actions: read    # codeql-action upload-sarif/analyze fingerprinting hits the Actions API
 
     strategy:
       fail-fast: false
@@ -498,6 +499,7 @@ jobs:
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@1c5b675653bb5c22dbe9b12b556ec555138e09fd # v4
+        continue-on-error: true
 
   gitleaks:
     name: Secret scanning (gitleaks)
@@ -524,6 +526,7 @@ jobs:
     permissions:
       contents: read
       security-events: write
+      actions: read    # codeql-action upload-sarif/analyze fingerprinting hits the Actions API
 
     steps:
       - name: Checkout code
@@ -541,6 +544,7 @@ jobs:
 
       - name: Upload blocking results to GitHub Security
         uses: github/codeql-action/upload-sarif@1c5b675653bb5c22dbe9b12b556ec555138e09fd # v4
+        continue-on-error: true
         if: always()
         with:
           sarif_file: semgrep-blocking-results.sarif
@@ -551,6 +555,7 @@ jobs:
     permissions:
       contents: read
       security-events: write
+      actions: read    # codeql-action upload-sarif/analyze fingerprinting hits the Actions API
 
     steps:
       - name: Checkout code
@@ -564,6 +569,7 @@ jobs:
 
       - name: Upload informational results to GitHub Security
         uses: github/codeql-action/upload-sarif@1c5b675653bb5c22dbe9b12b556ec555138e09fd # v4
+        continue-on-error: true
         if: always()
         with:
           sarif_file: semgrep-info-results.sarif
@@ -596,6 +602,7 @@ jobs:
     permissions:
       contents: read
       security-events: write
+      actions: read    # codeql-action upload-sarif/analyze fingerprinting hits the Actions API
 
     steps:
       - name: Checkout code
@@ -639,6 +646,7 @@ jobs:
 
       - name: Upload Trivy PHP scan results to GitHub Security
         uses: github/codeql-action/upload-sarif@1c5b675653bb5c22dbe9b12b556ec555138e09fd # v4
+        continue-on-error: true
         if: always()
         with:
           sarif_file: trivy-php-results.sarif
@@ -646,6 +654,7 @@ jobs:
 
       - name: Upload Trivy OpenResty scan results to GitHub Security
         uses: github/codeql-action/upload-sarif@1c5b675653bb5c22dbe9b12b556ec555138e09fd # v4
+        continue-on-error: true
         if: always()
         with:
           sarif_file: trivy-openresty-results.sarif

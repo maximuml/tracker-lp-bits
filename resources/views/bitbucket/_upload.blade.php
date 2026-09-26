@@ -5,8 +5,8 @@
         <div class="nx-ffull">{{ __('legacy/bitbucketupload.text_upload_directory_unwritable') }}</div>
     @endif
     <div class="nx-ffull">{{ \App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/bitbucketupload.text_disclaimer')) }}{{ $scaleHeight }}{{ __('legacy/bitbucketupload.text_disclaimer_two') }}{{ $scaleWidth }} {{ __('legacy/bitbucketupload.text_disclaimer_three') }}<br />{{ __('legacy/bitbucketupload.text_max_file_size') }} {{ number_format($maxFileSize) }}{{ __('legacy/bitbucketupload.text_disclaimer_four') }}</div>
-        <div class="nx-fhead">{{ __('legacy/bitbucketupload.row_file') }}</div>
-        <div class="nx-fcell"><input type="file" name="file" size="60"></div>
+        <div class="nx-fhead">{{ __('legacy/bitbucketupload.row_files') }}</div>
+        <div class="nx-fcell"><input type="file" name="file[]" size="60" multiple><br>{{ __('legacy/bitbucketupload.text_select_multiple') }}</div>
         <div class="nx-ffull nx-toolbox">
             <input class="checkbox" type="checkbox" name="public" value="yes"> {{ __('legacy/bitbucketupload.checkbox_avatar_shared') }}
             <input type="submit" value="{{ __('legacy/bitbucketupload.submit_upload') }}">

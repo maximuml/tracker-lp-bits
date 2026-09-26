@@ -28,6 +28,10 @@ return [
     'text_max_file_size' => 'Maximum file size is',
     'text_disclaimer_four' => ' bytes.',
     'row_file' => 'File',
+    'row_files' => 'Files',
+    'text_select_multiple' => 'You can select multiple files at once.',
+    'std_bbcode_for_description' => 'BBCode for the description:',
+    'std_failed_files' => 'Failed files',
     'checkbox_avatar_shared' => "Other users can use my avatar (It's choosable in usercp).",
     'submit_upload' => 'Upload',
 ];

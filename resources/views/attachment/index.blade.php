@@ -12,7 +12,7 @@
     <form enctype="multipart/form-data" name="attachment" method="post" action="attachment.php?callback_func={{ $callback_func }}">
     @csrf
     <div class="nx-embedded">
-    <input type="file" name="file"@if (! $count_left) disabled="disabled"@endif />&nbsp;
+    <input type="file" name="file[]" multiple @if (! $count_left) disabled="disabled"@endif />&nbsp;
     <input type="checkbox" name="altsize" value="yes"@if ($altsize == 'yes') checked="checked"@endif />{{ __('legacy/attachment.text_small_thumbnail')}}&nbsp;
     <input type="submit" name="submit" value="{{ __('legacy/attachment.submit_upload')}}"@if (! $count_left) disabled="disabled"@endif />
     @if ($warning)

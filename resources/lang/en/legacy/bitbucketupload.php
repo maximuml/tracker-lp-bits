@@ -5,7 +5,7 @@ return [
     'std_nothing_received' => 'Nothing received!',
     'std_file_too_large' => 'Sorry, that file is too large for the bit-bucket.',
     'std_bad_file_name' => 'Bad file name.',
-    'std_already_exists' => '</b> already exists in the bit-bucket.',
+    'std_already_exists' => 'already exists in the bit-bucket.',
     'std_error' => 'Error',
     'std_invalid_image_format' => 'Invalid extension: <b>gif, jpg or png only!</b>',
     'std_image_processing_failed' => 'Image processing failed',

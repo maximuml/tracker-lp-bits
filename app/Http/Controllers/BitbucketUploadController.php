@@ -116,7 +116,7 @@ class BitbucketUploadController extends Controller
             try {
                 $results[] = $this->bitbucketService->uploadAvatar($file, $currentUser, $isPublic);
             } catch (LogicException $e) {
-                $errors[] = ['filename' => $originalName, 'message' => $this->describeUploadError($e, $originalName)];
+                $errors[] = ['filename' => $originalName, 'message' => $this->describeUploadError($e)];
             }
         }
 
@@ -126,14 +126,14 @@ class BitbucketUploadController extends Controller
         ]);
     }
 
-    private function describeUploadError(LogicException $e, string $filename): string
+    private function describeUploadError(LogicException $e): string
     {
         $message = $e->getMessage();
         if (str_starts_with($message, 'Bad file name')) {
             return __('legacy/bitbucketupload.std_bad_file_name');
         }
         if (str_starts_with($message, 'File already exists')) {
-            return '<b>'.htmlspecialchars($filename).__('legacy/bitbucketupload.std_already_exists');
+            return __('legacy/bitbucketupload.std_already_exists');
         }
         if (str_starts_with($message, 'Upload directory is not writable')) {
             return __('legacy/bitbucketupload.text_upload_directory_unwritable');

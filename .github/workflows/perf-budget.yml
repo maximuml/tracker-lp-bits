@@ -205,7 +205,7 @@ jobs:
           # last green run during a slow-runner streak. A run that genuinely
           # breached budgets produced no artifact and never joins the pool.
           SINCE=$(date -u -d '14 days ago' +%F)
-          RUN_IDS=$(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/perf-budget.yml/runs" \
+          RUN_IDS=$(gh api -X GET "repos/${GITHUB_REPOSITORY}/actions/workflows/perf-budget.yml/runs" \
             -f branch=php8 -f status=completed -f "created=$SINCE..$(date -u +%F)" -f per_page=10 \
             --jq '[.workflow_runs[] | select(.head_sha != "'"${GITHUB_SHA}"'")][0:5][].id // empty')
           if [ -z "$RUN_IDS" ]; then

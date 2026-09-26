@@ -481,6 +481,7 @@ jobs:
     permissions:
       contents: read
       security-events: write
+      actions: read    # codeql-action upload-sarif/analyze fingerprinting hits the Actions API
 
     strategy:
       fail-fast: false
@@ -524,6 +525,7 @@ jobs:
     permissions:
       contents: read
       security-events: write
+      actions: read    # codeql-action upload-sarif/analyze fingerprinting hits the Actions API
 
     steps:
       - name: Checkout code
@@ -551,6 +553,7 @@ jobs:
     permissions:
       contents: read
       security-events: write
+      actions: read    # codeql-action upload-sarif/analyze fingerprinting hits the Actions API
 
     steps:
       - name: Checkout code
@@ -596,6 +599,7 @@ jobs:
     permissions:
       contents: read
       security-events: write
+      actions: read    # codeql-action upload-sarif/analyze fingerprinting hits the Actions API
 
     steps:
       - name: Checkout code

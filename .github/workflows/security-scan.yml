@@ -9,6 +9,7 @@ on:
 permissions:
   contents: read
   security-events: write
+  actions: read    # codeql-action upload-sarif fingerprinting hits the Actions API
 
 jobs:
   trivy-full-scan:
@@ -74,6 +75,7 @@ jobs:
     permissions:
       contents: read
       security-events: write
+      actions: read    # codeql-action upload-sarif fingerprinting hits the Actions API
 
     steps:
       - name: Checkout code

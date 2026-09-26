@@ -68,7 +68,6 @@ final class SettingsSeed
         $globals->set('iniupload_main', $MAIN['iniupload']);
         $globals->set('SITEEMAIL', $MAIN['SITEEMAIL']);
         $globals->set('ACCOUNTANTID', (int) $MAIN['ACCOUNTANTID']);
-        $globals->set('ALIPAYACCOUNT', $MAIN['ALIPAYACCOUNT']);
         $globals->set('PAYPALACCOUNT', $MAIN['PAYPALACCOUNT']);
         $globals->set('SLOGAN', $MAIN['SLOGAN']);
         $globals->set('icplicense_main', $MAIN['icplicense']);

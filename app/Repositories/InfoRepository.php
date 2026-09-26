@@ -128,9 +128,7 @@ final class InfoRepository
         $enabled = Settings::get('main.donation', 'no') === 'yes';
         $custom = (string) Settings::fromDb('misc.donation_custom', '');
         $paypal = Email::sanitizeForDisplay((string) Settings::get('main.PAYPALACCOUNT', ''));
-        $alipay = Email::sanitizeForDisplay((string) Settings::get('main.ALIPAYACCOUNT', ''));
         $showPaypal = $paypal !== '' && Email::isWellFormed($paypal);
-        $showAlipay = $alipay !== '' && Email::isWellFormed($alipay);
 
         $accountantId = (int) Settings::get('main.ACCOUNTANTID', 1);
 
@@ -138,11 +136,9 @@ final class InfoRepository
             'enabled' => $enabled,
             'custom' => $custom,
             'paypal' => $paypal,
-            'alipay' => $alipay,
             'showPaypal' => $showPaypal,
-            'showAlipay' => $showAlipay,
             'showCustom' => $custom !== '',
-            'showAny' => $showPaypal || $showAlipay || $custom !== '',
+            'showAny' => $showPaypal || $custom !== '',
             'accountantId' => $accountantId,
             'baseUrl' => Url::schemeAndHost(false),
         ];

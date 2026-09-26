@@ -217,7 +217,6 @@ $MAIN = [
     'iniupload' => '0',
     'SITEEMAIL' => 'nobody@gmail.com',
     'ACCOUNTANTID' => '1',
-    'ALIPAYACCOUNT' => '',
     'PAYPALACCOUNT' => '',
     'SLOGAN' => 'The Ultimate File Sharing Experience',
     'icplicense' => '',

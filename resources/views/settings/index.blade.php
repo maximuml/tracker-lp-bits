@@ -127,7 +127,6 @@
     <x-settings-text layout="grid" :label="__('legacy/settings.row_torrent_dead_time')" name="max_dead_torrent_time" :value="$config['max_dead_torrent_time'] ?? 21600" :note="__('legacy/settings.text_torrent_dead_time_note')" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_max_users')" name="maxusers" :value="$config['maxusers'] ?? 2500" :note="__('legacy/settings.text_max_users')" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_site_accountant_userid')" name="ACCOUNTANTID" :value="$config['ACCOUNTANTID'] ?? ''" :note="__('legacy/settings.text_site_accountant_userid_note')" />
-    <x-settings-text layout="grid" :label="__('legacy/settings.row_alipay_account')" name="ALIPAYACCOUNT" :value="$config['ALIPAYACCOUNT'] ?? ''" :note="__('legacy/settings.text_alipal_account_note')" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_paypal_account')" name="PAYPALACCOUNT" :value="$config['PAYPALACCOUNT'] ?? ''" :note="__('legacy/settings.text_paypal_account_note')" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_site_email')" name="SITEEMAIL" :value="$config['SITEEMAIL'] ?? ''" :note="__('legacy/settings.text_site_email_note')" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_report_email')" name="reportemail" :value="$config['reportemail'] ?? ''" :note="__('legacy/settings.text_report_email_note')" />

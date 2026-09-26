@@ -104,7 +104,7 @@ final class ChromeHead
             $packThemeUrl = $cssUri === 'styles/Classic/' ? null : $cssUri.'theme.css'.$cssUpdateDate;
 
             return [
-                array_merge(['styles/sprites.css', 'styles/nexus.css'], $iconStyles),
+                array_merge(['styles/sprites.css', $picFolder.'/forumsprites.css'.$cssUpdateDate, 'styles/nexus.css'], $iconStyles),
                 [],
                 SafeHtml::fromTrustedHtml(''),
                 $picFolder,

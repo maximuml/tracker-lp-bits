@@ -43,7 +43,11 @@ final class BitbucketService
         }
 
         $bitbucket = SiteConfig::current()->main->bitbucket('bitbucket');
-        $tgtfile = Path::resolve("{$bitbucket}/{$filename}", \ROOT_PATH);
+        $bucketDir = Path::resolve($bitbucket, public_path());
+        if (! is_dir($bucketDir) && ! mkdir($bucketDir, 0775, true) && ! is_dir($bucketDir)) {
+            throw new LogicException('Upload directory is not writable.');
+        }
+        $tgtfile = $bucketDir.'/'.$filename;
         if (file_exists($tgtfile)) {
             throw new LogicException('File already exists: '.$filename);
         }
@@ -85,14 +89,17 @@ final class BitbucketService
         }
         imagecopyresampled($thumb, $orig, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
 
-        match ($it) {
+        $written = match ($it) {
             1 => imagegif($thumb, $tgtfile),
             2 => imagejpeg($thumb, $tgtfile),
             default => imagepng($thumb, $tgtfile),
         };
+        if (! $written || ! file_exists($tgtfile)) {
+            throw new LogicException('Image processing failed.');
+        }
 
         $baseUrl = SiteConfig::current()->basic->baseUrl();
-        $url = str_replace(' ', '%20', htmlspecialchars(Url::absolute($baseUrl)."/bitbucket/{$filename}"));
+        $url = str_replace(' ', '%20', htmlspecialchars(Url::absolute($baseUrl)."/{$bitbucket}/{$filename}"));
         $public = $isPublic ? BitbucketPublic::YES->value : BitbucketPublic::NO->value;
 
         DB::table('bitbucket')->insert([

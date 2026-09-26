@@ -58,7 +58,7 @@ final class TorrentSearchPanelFactory
                     $iconFolder = trim($item->icon->folder, '/');
                     $langAndFile = ($item->icon->multilang ? "$lang/" : '').$item->image;
                     $iconStyle = 'background-image: url('.(
-                        file_exists(Path::resolve("pic/category/$iconFolder/$langAndFile", ROOT_PATH))
+                        file_exists(Path::resolve("pic/category/$iconFolder/$langAndFile", public_path()))
                             ? "pic/category/$iconFolder/$langAndFile"
                             : "pic/category/{$searchBox->name}/$iconFolder/$langAndFile"
                     ).')';

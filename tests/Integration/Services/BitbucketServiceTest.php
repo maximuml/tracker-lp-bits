@@ -91,7 +91,7 @@ final class BitbucketServiceTest extends TestCase
     {
         $bitbucket = (string) app(Globals::class)->get('bitbucket', 'bitbucket');
 
-        return Path::resolve("{$bitbucket}/{$filename}", \ROOT_PATH);
+        return Path::resolve("{$bitbucket}/{$filename}", public_path());
     }
 
     // --- getBitbucketName ---
@@ -172,6 +172,9 @@ final class BitbucketServiceTest extends TestCase
     {
         $filename = 'duplicate_test_'.uniqid().'.png';
         $targetPath = $this->bitbucketPath($filename);
+        if (! is_dir(dirname($targetPath))) {
+            mkdir(dirname($targetPath), 0775, true);
+        }
         file_put_contents($targetPath, 'existing');
         $this->createdFiles[] = $targetPath;
 

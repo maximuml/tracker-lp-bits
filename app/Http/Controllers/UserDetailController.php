@@ -30,7 +30,6 @@ use App\Support\Network;
 use App\Support\Permissions;
 use App\Support\Strings;
 use App\Support\Url;
-use App\Support\UserClass;
 use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -126,7 +125,6 @@ class UserDetailController extends Controller
         $canManageConfidential = Permission::can(PermissionEnum::MANAGE_USER_CONFIDENTIAL_INFO);
         $canDeleteUser = Permission::can(PermissionEnum::USER_DELETE);
         $canViewTorrentHistory = Permission::can(PermissionEnum::TORRENT_HISTORY);
-        $canChangeClass = Permission::can(PermissionEnum::USER_CHANGE_CLASS);
         $canViewInvite = Permission::can(PermissionEnum::VIEW_INVITE);
         $staffMember = Permission::can(PermissionEnum::STAFF_MEMBER);
         $currentClass = (int) UserDisplay::currentClass();
@@ -276,11 +274,6 @@ document.getElementById('remove-leech-warn').addEventListener('click', function 
 JS, \json_encode(__('legacy/userdetails.sure_to_remove_leech_warn'))), 'footer', false);
         }
 
-        $classSelectHtml = '';
-        if ($canChangeClass) {
-            $classSelectHtml = UserClass::classSelectWithContext('class', $currentClass - 1, (int) $user['class'], 0, false, true);
-        }
-
         $warnedByHtml = '';
         if (($user['timeswarned'] ?? 0) > 0 && $user['warnedby'] !== 'System') {
             $arr = $this->userDetailRepository->getWarnedBy((int) $user['warnedby']);
@@ -411,7 +404,6 @@ JS, 'footer', false);
             'canManageConfidential' => $canManageConfidential,
             'canDeleteUser' => $canDeleteUser,
             'canViewTorrentHistory' => $canViewTorrentHistory,
-            'canChangeClass' => $canChangeClass,
             'canViewInvite' => $canViewInvite,
             'currentClass' => $currentClass,
             'isFriend' => $isFriend,
@@ -437,7 +429,6 @@ JS, 'footer', false);
             'elapsedLastWarn' => $elapsedLastWarn,
             'warnedUntilPretty' => $warnedUntilPretty,
             'leechwarnUntilPretty' => $leechwarnUntilPretty,
-            'classSelectHtml' => SafeHtml::fromTrustedHtml($classSelectHtml),
             'migratedHelp' => SafeHtml::fromTrustedHtml($migratedHelp),
             'userManageSystemUrl' => $userManageSystemUrl,
             'usernameHtml' => SafeHtml::fromTrustedHtml($usernameHtml),

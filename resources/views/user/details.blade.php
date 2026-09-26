@@ -101,7 +101,7 @@
 </table>
 
 @if ($canManageBasic && (int) $user['class'] < $currentClass)
-<x-frame :caption="__('legacy/userdetails.text_edit_user')">
+<x-frame :caption="__('legacy/userdetails.text_edit_user')" :center="false">
 <form method="post" action="modtask.php">
 <input type="hidden" name="action" value="edituser" />
 <input type="hidden" name="userid" value="{{ $id }}" />
@@ -116,11 +116,7 @@
 <x-settings-row :label="__('legacy/userdetails.row_donated')">USD: <input type="text" size="5" name="donated" value="{{ $user['donated'] }}" />&nbsp;&nbsp;&nbsp;&nbsp;CNY: <input type="text" size="5" name="donated_cny" value="{{ $user['donated_cny'] }}" />{{ __('legacy/userdetails.text_transaction_memo') ?? '' }}<input type="text" size="50" name="donation_memo" /></x-settings-row>
 <x-settings-row :label="__('legacy/userdetails.row_donoruntil')"><input type="text" name="donoruntil" value="{{ $user['donoruntil'] }}" /> {{ __('legacy/userdetails.text_donoruntil_note') ?? '' }}</x-settings-row>
 @endif
-@if ($canChangeClass)
-<x-settings-row :label="__('legacy/userdetails.row_class')">{{ $classSelectHtml }}{{ $migratedHelp }}</x-settings-row>
-@endif
-<x-settings-row :label="__('legacy/userdetails.row_vip_by_bonus')"><x-user.radio-yesno name="vip_added" :yes="\App\Support\LegacyYesNo::isYes($user['vip_added'] ?? null)" :no="\App\Support\LegacyYesNo::isNo($user['vip_added'] ?? null)" :disabled="true" :yesLabel="__('legacy/userdetails.radio_yes')" :noLabel="__('legacy/userdetails.radio_no')" />{{ $migratedHelp }}</x-settings-row>
-<x-settings-row :label="__('legacy/userdetails.row_vip_until')"><input type="text" name="vip_until" value="{{ $user['vip_until'] }}" disabled='disabled' /> {{ __('legacy/userdetails.text_vip_until_note') ?? '' }}{{ $migratedHelp }}</x-settings-row>
+<x-settings-row :label="__('legacy/functions.text_management_system')">{{ $migratedHelp }}</x-settings-row>
 <x-settings-row :label="__('legacy/userdetails.row_staff_duties')"><textarea cols="60" rows="6" name="staffduties">{{ $user['stafffor'] }}</textarea></x-settings-row>
 <x-settings-row :label="__('legacy/userdetails.row_support_language')"><input type="text" name="supportlang" value="{{ $user['supportlang'] }}" /></x-settings-row>
 <x-settings-row :label="__('legacy/userdetails.row_support')"><x-user.radio-yesno name="support" :yes="\App\Support\LegacyYesNo::isYes($user['support'] ?? null)" :no="\App\Support\LegacyYesNo::isNo($user['support'] ?? null)" :yesLabel="__('legacy/userdetails.radio_yes')" :noLabel="__('legacy/userdetails.radio_no')" /></x-settings-row>
@@ -166,21 +162,12 @@
 <td class="rowfollow">{{ __('legacy/userdetails.text_not_warned') ?? '' }}</td></tr>
 @endif
 </table></td></tr>
-<x-settings-row :label="__('legacy/userdetails.row_enabled')">{{ $migratedHelp }}</x-settings-row>
 <x-settings-row :label="__('legacy/userdetails.row_forum_post_possible')"><x-user.radio-yesno name="forumpost" :yes="\App\Support\LegacyYesNo::isYes($user['forumpost'] ?? null)" :no="\App\Support\LegacyYesNo::isNo($user['forumpost'] ?? null)" :yesLabel="__('legacy/userdetails.radio_yes')" :noLabel="__('legacy/userdetails.radio_no')" /></x-settings-row>
 <x-settings-row :label="__('legacy/userdetails.row_upload_possible')"><x-user.radio-yesno name="uploadpos" :yes="\App\Support\LegacyYesNo::isYes($user['uploadpos'] ?? null)" :no="\App\Support\LegacyYesNo::isNo($user['uploadpos'] ?? null)" :yesLabel="__('legacy/userdetails.radio_yes')" :noLabel="__('legacy/userdetails.radio_no')" /></x-settings-row>
 <x-settings-row :label="__('legacy/userdetails.row_download_possible')"><x-user.radio-yesno name="downloadpos" :yes="\App\Support\LegacyYesNo::isYes($user['downloadpos'] ?? null)" :no="\App\Support\LegacyYesNo::isNo($user['downloadpos'] ?? null)" :yesLabel="__('legacy/userdetails.radio_yes')" :noLabel="__('legacy/userdetails.radio_no')" /></x-settings-row>
 @if ($canManageConfidential)
 <x-settings-row :label="__('legacy/userdetails.row_change_username')"><input type="text" size="25" name="username" value="{{ $user['username'] }}" /></x-settings-row>
 <x-settings-row :label="__('legacy/userdetails.row_change_email')"><input type="text" size="80" name="email" value="{{ $user['email'] }}" /></x-settings-row>
-@endif
-<x-settings-row :label="__('legacy/userdetails.row_change_password')"><input disabled type="password" name="chpassword" size="50" />{{ $migratedHelp }}</x-settings-row>
-<x-settings-row :label="__('legacy/userdetails.row_repeat_password')"><input disabled type="password" name="passagain" size="50" />{{ $migratedHelp }}</x-settings-row>
-@if ($canManageConfidential)
-<x-settings-row :label="__('legacy/userdetails.row_amount_uploaded')"><input disabled type="text" size="60" name="uploaded" value="{{ $user['uploaded'] }}" /><input type="hidden" name="ori_uploaded" value="{{ $user['uploaded'] }}" />{{ $migratedHelp }}</x-settings-row>
-<x-settings-row :label="__('legacy/userdetails.row_amount_downloaded')"><input disabled type="text" size="60" name="downloaded" value="{{ $user['downloaded'] }}" /><input type="hidden" name="ori_downloaded" value="{{ $user['downloaded'] }}" />{{ $migratedHelp }}</x-settings-row>
-<x-settings-row :label="__('legacy/userdetails.row_seeding_karma')"><input disabled type="text" size="60" name="bonus" value="{{ number_format((float) $user['seedbonus'], 1) }}" /><input type="hidden" name="ori_bonus" value="{{ number_format((float) $user['seedbonus'], 1) }}" />{{ $migratedHelp }}</x-settings-row>
-<x-settings-row :label="__('legacy/userdetails.row_invites')"><input disabled type="text" size="60" name="invites" value="{{ $user['invites'] }}" />{{ $migratedHelp }}</x-settings-row>
 @endif
 <x-settings-row :label="__('legacy/userdetails.row_passkey')"><input name="resetkey" value="yes" type="checkbox" />{{ __('legacy/userdetails.checkbox_reset_passkey') ?? '' }}</x-settings-row>
 <tr><td class="toolbox nx-center" colspan="2"><input type="submit" class="btn" value="{{ __('legacy/userdetails.submit_okay') ?? '' }}" /></td></tr>

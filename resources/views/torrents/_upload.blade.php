@@ -1,6 +1,5 @@
 	<form id="compose" enctype="multipart/form-data" action="/takeupload" method="post" name="upload">
 			@csrf
-			<p class="nx-center">{{ __('legacy/upload.text_red_star_required') }}<span class="nx-color-red">*</span>{{ __('legacy/upload.text_red_star_required_end') }}</p>
 			<div class="nx-fgrid">
 					<div class="nx-ffull nx-colhead nx-center">
 						{{ __('legacy/upload.text_tracker_url') ?? '' }}: &nbsp;&nbsp;&nbsp;&nbsp;<b>{{ $trackerUrl }}</b>
@@ -11,6 +10,7 @@
 							<br /><br /><b>ATTENTION</b>: Max. Torrent Size not set. Please contact the administrator about this problem!
 						@endif
 					</div>
+					<div class="nx-ffull nx-center">{{ __('legacy/upload.text_red_star_required') }}<span class="nx-color-red">*</span>{{ __('legacy/upload.text_red_star_required_end') }}</div>
 				@if (count($uploadErrorList) > 0)
 					<div class="nx-ffull">
 						<x-alert type="error" :title="__('legacy/upload.error_summary')">

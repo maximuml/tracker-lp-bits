@@ -79,8 +79,6 @@ class StaffModerationController extends LegacyController
         $userInfo = User::query()->findOrFail($userId);
 
         $class = $userInfo->class;
-        $vipAdded = $userInfo->vip_added;
-        $vipUntil = $userInfo->vip_until;
 
         $warned = (string) (request()->post('warned') ?? '');
         $warnLength = (int) (request()->post('warnlength') ?? 0);
@@ -88,7 +86,6 @@ class StaffModerationController extends LegacyController
         $title = (string) (request()->post('title') ?? '');
         $avatar = (string) (request()->post('avatar') ?? '');
         $signature = (string) (request()->post('signature') ?? '');
-        $enabled = request()->post('enabled') === 'yes';
         $uploadpos = request()->post('uploadpos') === 'yes';
         $downloadpos = request()->post('downloadpos') === 'yes';
         $privacy = (string) (request()->post('privacy') ?? 'normal');
@@ -117,8 +114,6 @@ class StaffModerationController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Permission denied. For security reason, we logged this action');
         }
 
-        $curEnabled = $arr['enabled'];
-        $curParked = $arr['parked'];
         $curUploadpos = $arr['uploadpos'];
         $curDownloadpos = $arr['downloadpos'];
         $curForumpost = $arr['forumpost'];
@@ -146,10 +141,6 @@ class StaffModerationController extends LegacyController
             $locale = Locale::userLocale($userId);
             $email = (string) (request()->post('email') ?? '');
             $username = (string) (request()->post('username') ?? '');
-            $downloaded = (float) (request()->post('downloaded') ?? 0);
-            $uploaded = (float) (request()->post('uploaded') ?? 0);
-            $bonus = (float) (request()->post('bonus') ?? 0);
-            $invites = (int) (request()->post('invites') ?? 0);
 
             if ($arr['email'] !== $email) {
                 $updateset['email'] = $email;

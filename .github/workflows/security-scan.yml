@@ -59,12 +59,14 @@ jobs:
 
       - name: Upload Trivy full scan results to GitHub Security
         uses: github/codeql-action/upload-sarif@1c5b675653bb5c22dbe9b12b556ec555138e09fd # v4
+        continue-on-error: true
         if: always()
         with:
           sarif_file: trivy-php-full.sarif
 
       - name: Upload OpenResty scan results
         uses: github/codeql-action/upload-sarif@1c5b675653bb5c22dbe9b12b556ec555138e09fd # v4
+        continue-on-error: true
         if: always()
         with:
           sarif_file: trivy-openresty-full.sarif
@@ -94,12 +96,14 @@ jobs:
 
       - name: Upload blocking results to GitHub Security
         uses: github/codeql-action/upload-sarif@1c5b675653bb5c22dbe9b12b556ec555138e09fd # v4
+        continue-on-error: true
         if: always()
         with:
           sarif_file: semgrep-blocking-results.sarif
 
       - name: Upload informational results to GitHub Security
         uses: github/codeql-action/upload-sarif@1c5b675653bb5c22dbe9b12b556ec555138e09fd # v4
+        continue-on-error: true
         if: always()
         with:
           sarif_file: semgrep-info-results.sarif

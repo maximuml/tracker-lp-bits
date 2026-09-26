@@ -16,7 +16,7 @@
         @if ($showCustom)
             <div class="nx-text">{{ \App\Support\Format::formatComment($custom) }}</div>
         @endif
-        @if ($showPaypal || $showAlipay)
+        @if ($showPaypal)
             <div class="nx-row">
                 @if ($showPaypal)
                     <div class="nx-text nx-grow">
@@ -47,19 +47,6 @@
                             <input type="hidden" name="cancel_return" value="{{ $baseUrl }}/donate.php">
                             <p class="nx-center">
                                 <input type="image" src="pic/paypalbutton.gif" name="I1" alt="Make payments with PayPal">
-                                <br /><br />
-                            </p>
-                        </form>
-                    </div>
-                @endif
-                @if ($showAlipay)
-                    <div class="nx-text nx-grow">
-                        <b>{{ __('legacy/donate.text_donate_with_alipay') }}</b><br /><br />
-                        <form action="https://www.alipay.com/trade/fast_pay.htm" method="get">
-                            {{ __('legacy/donate.text_donate_alipay_note_one') }} <br />{{ __('legacy/donate.text_donate_alipay_note_one_two') }} <br />{{ __('legacy/donate.text_donate_alipay_note_one_three') }}<b>{{ $alipay }}</b>{{ __('legacy/donate.text_donate_alipay_note_two') }} <br />{{ __('legacy/donate.text_donate_alipay_note_two_two') }}
-                            <br /><br /><br /><br /><br />
-                            <p class="nx-center">
-                                <input type="image" src="pic/alipaybutton.gif" name="I2" alt="Make payments with Alipay" />
                                 <br /><br />
                             </p>
                         </form>

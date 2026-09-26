@@ -4,9 +4,26 @@
 
 @section('content')
 
-    <h1>{{ __('legacy/bitbucketupload.std_success') }}</h1>
-    <p>{{ __('legacy/bitbucketupload.std_use_following_url') }}<br><b><a href="{{ $url }}">{{ $url }}</a></b></p>
+    @if ($results !== [])
+        <h1>{{ __('legacy/bitbucketupload.std_success') }}</h1>
+        @foreach ($results as $result)
+            <p>{{ __('legacy/bitbucketupload.std_use_following_url') }}<br><b><a href="{{ $result['url'] }}">{{ $result['url'] }}</a></b></p>
+            <p><img src="{{ $result['url'] }}"></p>
+            <p>{{ __('legacy/bitbucketupload.std_image') }} {{ (! ($result['width'] == $result['newwidth'] && $result['height'] == $result['newheight'])) ? __('legacy/bitbucketupload.std_rescaled_from') . $result['height'] . ' x ' . $result['width'] . __('legacy/bitbucketupload.std_to') . $result['newheight'] . ' x ' . $result['newwidth'] : __('legacy/bitbucketupload.std_need_not_rescaling') }}</p>
+        @endforeach
+        <p>{{ __('legacy/bitbucketupload.std_bbcode_for_description') }}<br>
+            <textarea rows="{{ min(10, count($results) + 1) }}" cols="60" readonly>@foreach ($results as $result)[img]{{ $result['url'] }}[/img]
+@endforeach</textarea>
+        </p>
+        <p>{{ __('legacy/bitbucketupload.std_profile_updated') }}</p>
+    @endif
+    @if ($errors !== [])
+        <h1>{{ __('legacy/bitbucketupload.std_failed_files') }}</h1>
+        <ul>
+            @foreach ($errors as $error)
+                <li><b>{{ $error['filename'] }}</b>: {{ \App\Support\Html\SafeHtml::fromUntrustedHtml($error['message']) }}</li>
+            @endforeach
+        </ul>
+    @endif
     <p><a href="/bitbucket-upload.php">{{ __('legacy/bitbucketupload.std_upload_another_file') }}</a>.</p>
-    <p><img src="{{ $url }}"></p>
-    <p>{{ __('legacy/bitbucketupload.std_image') }} {{ (! ($width == $newwidth && $height == $newheight)) ? __('legacy/bitbucketupload.std_rescaled_from') . $height . ' x ' . $width . __('legacy/bitbucketupload.std_to') . $newheight . ' x ' . $newwidth : __('legacy/bitbucketupload.std_need_not_rescaling') }} <br />{{ __('legacy/bitbucketupload.std_profile_updated') }}</p>
 @endsection

@@ -12,6 +12,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
@@ -67,5 +68,36 @@ final class BitbucketUploadControllerTest extends TestCase
 
         $this->assertInstanceOf(View::class, $response);
         $this->assertSame('bitbucket.upload', $response->name());
+    }
+
+    public function test_store_uploads_multiple_files_and_collects_errors(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['parked' => false]);
+        $this->actingAs($user, 'nexus-web');
+
+        app(Globals::class)->set('enablebitbucket_main', 'yes');
+
+        $ok1 = UploadedFile::fake()->image('multi_a_'.uniqid().'.png', 100, 100);
+        $ok2 = UploadedFile::fake()->image('multi_b_'.uniqid().'.jpg', 100, 100);
+        $bad = UploadedFile::fake()->create('multi_bad_'.uniqid().'.txt', 10, 'text/plain');
+
+        $controller = app(BitbucketUploadController::class);
+        $request = Request::create('/bitbucket-upload', 'POST', [], [], ['file' => [$ok1, $ok2, $bad]]);
+        app()->instance('request', $request);
+
+        $response = $controller->store($request);
+
+        $this->assertInstanceOf(View::class, $response);
+        $data = $response->getData();
+        $this->assertCount(2, $data['results']);
+        $this->assertCount(1, $data['errors']);
+        $this->assertSame($bad->getClientOriginalName(), $data['errors'][0]['filename']);
+
+        foreach ($data['results'] as $result) {
+            $path = public_path('bitbucket/'.$result['filename']);
+            $this->assertFileExists($path);
+            @unlink($path);
+        }
     }
 }

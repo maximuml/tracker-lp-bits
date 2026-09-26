@@ -91,7 +91,7 @@ final class BitbucketServiceTest extends TestCase
     {
         $bitbucket = (string) app(Globals::class)->get('bitbucket', 'bitbucket');
 
-        return Path::resolve("{$bitbucket}/{$filename}", \ROOT_PATH);
+        return Path::resolve("{$bitbucket}/{$filename}", public_path());
     }
 
     // --- getBitbucketName ---

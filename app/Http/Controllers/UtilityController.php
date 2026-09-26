@@ -33,6 +33,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -150,22 +151,36 @@ class UtilityController extends LegacyController
 
         if ($Attach->enable_attachment()) {
             $uploaded = $request->file('file');
-            $file = null;
-            if ($uploaded !== null) {
-                $file = [
-                    'tmp_name' => $uploaded->getPathname(),
-                    'size' => $uploaded->getSize(),
-                    'type' => $uploaded->getMimeType(),
-                    'name' => $uploaded->getClientOriginalName(),
-                ];
+            if ($uploaded instanceof UploadedFile) {
+                $uploaded = [$uploaded];
             }
+            $uploaded = is_array($uploaded) ? $uploaded : [];
 
             $altsize = (string) $request->input('altsize', '');
             $callbackFunc = (string) $request->input('callback_func', '');
-            $result = AttachmentMutationService::processUpload($currentUser, $Attach, $altsize, $callbackFunc, $file);
-            $warning = (string) ($result['warning'] ?? '');
-            $script = (string) ($result['script'] ?? '');
-            $countLeft = isset($result['count_left']) ? (int) $result['count_left'] : null;
+
+            $warnings = [];
+            foreach ($uploaded as $item) {
+                if (! $item instanceof UploadedFile) {
+                    continue;
+                }
+                $file = [
+                    'tmp_name' => $item->getPathname(),
+                    'size' => $item->getSize(),
+                    'type' => $item->getMimeType(),
+                    'name' => $item->getClientOriginalName(),
+                ];
+                $result = AttachmentMutationService::processUpload($currentUser, $Attach, $altsize, $callbackFunc, $file);
+                if (($result['warning'] ?? '') !== '') {
+                    $warnings[] = (string) $result['warning'];
+                }
+                $script .= (string) ($result['script'] ?? '');
+                $countLeft = isset($result['count_left']) ? (int) $result['count_left'] : $countLeft;
+            }
+            if ($uploaded === []) {
+                $warnings[] = (string) __('legacy/attachment.text_nothing_received');
+            }
+            $warning = implode(' ', $warnings);
         }
 
         return $this->renderAttachment($request, $currentUser, $Attach, $warning, $script, $countLeft);

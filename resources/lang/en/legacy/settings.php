@@ -451,7 +451,7 @@ return [
     'row_bitcoin_address' => 'Bitcoin Address',
     'row_ethereum_address' => 'Ethereum Address',
     'row_usdt_address' => 'USDT Address',
-    'text_crypto_address_note' => "The wallet address you use to receive donations. Leave it blank to hide this coin on the donate page.",
+    'text_crypto_address_note' => 'The wallet address you use to receive donations. Leave it blank to hide this coin on the donate page.',
     'row_site_email' => 'Site Email',
     'text_site_email_note' => 'Website email address',
     'row_report_email' => 'Report Email',

@@ -60,14 +60,14 @@ ENV_FILE="${ROOT_PATH}/.env"
 VENDOR_AUTOLOAD_FILE="${ROOT_PATH}/vendor/autoload.php"
 
 # Ensure writable directories exist and are writable by PHP-FPM (www-data)
-mkdir -p ${ROOT_PATH}/attachments ${ROOT_PATH}/torrents ${ROOT_PATH}/storage/framework/views ${ROOT_PATH}/storage/logs ${ROOT_PATH}/storage/app ${ROOT_PATH}/bootstrap/cache
+mkdir -p ${ROOT_PATH}/attachments ${ROOT_PATH}/torrents ${ROOT_PATH}/public/bitbucket ${ROOT_PATH}/storage/framework/views ${ROOT_PATH}/storage/logs ${ROOT_PATH}/storage/app ${ROOT_PATH}/bootstrap/cache
 # PHP error_log destination (read by the /nexusphp PHP Error Log page)
 touch ${ROOT_PATH}/storage/logs/php_errors.log
 # Only chown when running as root (queue/scheduler run as www-data)
 if [ "$(id -u)" = "0" ]; then
-  chown -R www-data:www-data ${ROOT_PATH}/attachments ${ROOT_PATH}/torrents ${ROOT_PATH}/storage ${ROOT_PATH}/bootstrap/cache
+  chown -R www-data:www-data ${ROOT_PATH}/attachments ${ROOT_PATH}/torrents ${ROOT_PATH}/public/bitbucket ${ROOT_PATH}/storage ${ROOT_PATH}/bootstrap/cache
 fi
-chmod -R 775 ${ROOT_PATH}/storage ${ROOT_PATH}/bootstrap/cache ${ROOT_PATH}/attachments ${ROOT_PATH}/torrents
+chmod -R 775 ${ROOT_PATH}/storage ${ROOT_PATH}/bootstrap/cache ${ROOT_PATH}/attachments ${ROOT_PATH}/torrents ${ROOT_PATH}/public/bitbucket
 
 if [ "$SERVICE_NAME" = "php" ]; then
     if [ ! -f "$ENV_FILE" ] || [ ! -f "$VENDOR_AUTOLOAD_FILE" ]; then

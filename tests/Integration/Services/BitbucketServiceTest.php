@@ -172,6 +172,9 @@ final class BitbucketServiceTest extends TestCase
     {
         $filename = 'duplicate_test_'.uniqid().'.png';
         $targetPath = $this->bitbucketPath($filename);
+        if (! is_dir(dirname($targetPath))) {
+            mkdir(dirname($targetPath), 0775, true);
+        }
         file_put_contents($targetPath, 'existing');
         $this->createdFiles[] = $targetPath;
 

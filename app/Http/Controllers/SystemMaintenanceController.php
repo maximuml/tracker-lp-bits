@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Repositories\MysqlStatsRepository;
 use App\Services\CleanupService;
+use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Email;
 use App\Support\Globals;
@@ -62,12 +63,21 @@ class SystemMaintenanceController extends LegacyController
                 );
             }
 
+            $smtpType = SiteConfig::current()->smtp->type('');
+            if ($smtpType === '' || $smtpType === 'none') {
+                return $this->legacyAbortResponse(
+                    (string) (__('legacy/functions.std_error')),
+                    (string) (__('legacy/functions.text_unable_to_send_mail')).' (SMTP disabled)',
+                    false,
+                );
+            }
+
             $globals = $this->globals;
             $siteName = (string) ($globals->get('SITENAME', '') ?? '');
             $siteEmail = (string) ($globals->get('SITEEMAIL', '') ?? '');
             $title = $siteName.(__('legacy/mailtest.text_smtp_testing_mail'));
             $body = (string) (__('legacy/mailtest.mail_test_mail_content'));
-            $sendResult = Mail::sentLegacy($email, $siteName, $siteEmail, $title, $body, 'mailtest', false, false, '', 'UTF-8');
+            $sendResult = Mail::queueLegacy($email, $siteName, $siteEmail, $title, $body, 'mailtest', false, false, '', 'UTF-8');
 
             if ($sendResult === true) {
                 return $this->legacyAbortResponse(

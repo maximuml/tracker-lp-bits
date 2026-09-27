@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
+use App\Support\Settings;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -90,6 +91,8 @@ final class SystemMaintenanceControllerTest extends TestCase
     public function test_mailtest_sendmail_reports_smtp_disabled(): void
     {
         Queue::fake();
+        Settings::saveBatch('smtp', ['smtptype' => 'none']);
+        Settings::resetCache();
         $this->loginAsSysop();
 
         $controller = app(SystemMaintenanceController::class);
@@ -104,6 +107,27 @@ final class SystemMaintenanceControllerTest extends TestCase
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('Unable to send mail', (string) $response->getContent());
         Queue::assertNotPushed(SendLegacyMail::class);
+    }
+
+    public function test_mailtest_sendmail_queues_job_when_smtp_enabled(): void
+    {
+        Queue::fake();
+        Settings::saveBatch('smtp', ['smtptype' => 'external']);
+        Settings::resetCache();
+        $this->loginAsSysop();
+
+        $controller = app(SystemMaintenanceController::class);
+        $request = Request::create('/mailtest', 'POST', [
+            'action' => 'sendmail',
+            'email' => 'admin@example.com',
+        ]);
+        app()->instance('request', $request);
+
+        $response = $controller->mailtest($request);
+
+        $this->assertInstanceOf(Response::class, $response);
+        $this->assertStringContainsString('Success', (string) $response->getContent());
+        Queue::assertPushed(SendLegacyMail::class);
     }
 
     private function loginAsSysop(): void

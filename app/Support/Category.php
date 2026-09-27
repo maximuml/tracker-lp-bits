@@ -152,16 +152,6 @@ final class Category
         return $ret;
     }
 
-    /**
-     * Build the category image tag for a category id.
-     *
-     * Mirrors `return_category_image()`.
-     */
-    public static function imageTagWithContext(int|string $categoryId, string $link = ''): string
-    {
-        return self::imageTag($categoryId, $link);
-    }
-
     public static function imageTag(int|string $categoryId, string $link = ''): string
     {
         $catImg = self::iconImg($categoryId);

@@ -61,15 +61,6 @@ final class TorrentAccess
      *
      * Mirrors `get_hr_img()`.
      */
-    /**
-     * @param  array<int|string, mixed>  $torrent
-     */
-    public static function hrImage(array $torrent, int|string $searchBoxId): string
-    {
-        return self::requiresHrIcon($torrent, $searchBoxId)
-            ? '<img class="hitandrun" src="pic/trans.gif" alt="H&R" title="H&R" />'
-            : '';
-    }
 
     /**
      * Whether the H&R marker applies to this torrent — typed counterpart

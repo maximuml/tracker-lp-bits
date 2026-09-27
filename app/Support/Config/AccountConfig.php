@@ -127,14 +127,6 @@ final class AccountConfig extends Config
         return $value !== null ? (int) $value : null;
     }
 
-    public function inviteByClass(int|string $class): ?int
-    {
-        $key = "{$class}_invite";
-        $value = $this->data[$key] ?? null;
-
-        return $value !== null ? (int) $value : null;
-    }
-
     /**
      * @return array{string, int} [$metricKey, $default]
      */

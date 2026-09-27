@@ -7,9 +7,7 @@ namespace App\Support;
 use App\Enums\TorrentPromotion;
 use App\Enums\UserClass as UserClassEnum;
 use App\Models\Torrent;
-use App\Models\User;
 use App\Repositories\TorrentModerationRepository;
-use App\Services\TorrentStatsService;
 use App\Support\Config\SiteConfig;
 
 /**
@@ -29,56 +27,6 @@ final class TorrentOps
     public static function deleteTorrents($id, bool $notify = false): void
     {
         app(TorrentModerationRepository::class)->deleteTorrents($id, $notify);
-    }
-
-    /**
-     * Compute the "torrent to user" value from a snatched row.
-     *
-     * Mirrors `get_torrent_2_user_value()`.
-     *
-     * @param  array<string, mixed>  $userSnatched
-     */
-    public static function userValue(array $userSnatched): float
-    {
-        $torrent2UserValue = 1.0;
-
-        $torrentArr = app(TorrentStatsService::class)->findForUserValue((int) ($userSnatched['torrentid'] ?? 0));
-
-        if ($torrentArr) {
-            if ($torrentArr['owner'] == $userSnatched['userid']) {
-                $torrent2UserValue *= 0.7;
-                $torrent2UserValue += ($userSnatched['uploaded'] / $torrentArr['size']) - 1 > 0
-                    ? 0.2 - exp(-(($userSnatched['uploaded'] / $torrentArr['size']) - 1))
-                    : ($userSnatched['uploaded'] / $torrentArr['size']) - 1;
-                $torrent2UserValue += min(0.1, (($userSnatched['seedtime'] / 37 * 60 * 60) * 0.1));
-            } else {
-                if ($userSnatched['finished'] == 1) {
-                    $torrent2UserValue *= 0.5;
-                    $torrent2UserValue += ($userSnatched['uploaded'] / $torrentArr['size']) - 1 > 0
-                        ? 0.4 - exp(-(($userSnatched['uploaded'] / $torrentArr['size']) - 1))
-                        : ($userSnatched['uploaded'] / $torrentArr['size']) - 1;
-                    $torrent2UserValue += min(0.1, (($userSnatched['seedtime'] / 22 * 60 * 60) * 0.1));
-                } else {
-                    $torrent2UserValue *= 0.2;
-                    $torrent2UserValue += min(0.05, (($userSnatched['leechtime'] / 24 * 60 * 60) * 0.1));
-                }
-            }
-        } else {
-            if ($userSnatched['finished'] == 0 && $userSnatched['uploaded'] > 0 && $userSnatched['downloaded'] == 0) {
-                $torrent2UserValue *= 0.55;
-                $torrent2UserValue += min(0.05, (($userSnatched['leechtime'] / 31 * 60 * 60) * 0.1));
-                $torrent2UserValue += min(0.1, (($userSnatched['seedtime'] / 31 * 60 * 60) * 0.1));
-            } elseif ($userSnatched['downloaded'] > 0) {
-                $torrent2UserValue *= 0.38;
-                $torrent2UserValue *= min(0.22, 0.1 * $userSnatched['uploaded'] / $userSnatched['downloaded']);
-                $torrent2UserValue += min(0.05, (($userSnatched['leechtime'] / 22 * 60 * 60) * 0.1));
-                $torrent2UserValue += min(0.12, (($userSnatched['seedtime'] / 22 * 60 * 60) * 0.1));
-            } else {
-                $torrent2UserValue *= 0.0;
-            }
-        }
-
-        return (float) $torrent2UserValue;
     }
 
     /**

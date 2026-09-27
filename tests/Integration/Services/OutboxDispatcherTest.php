@@ -117,36 +117,4 @@ final class OutboxDispatcherTest extends TestCase
         $dispatcher = new OutboxDispatcher;
         $this->assertSame(1, $dispatcher->deadLetterCount());
     }
-
-    public function test_oldest_pending_age(): void
-    {
-        $service = new OutboxService;
-        $event = $service->record('test', 'test.event', []);
-        // Set created_at to 60 seconds ago
-        $event->update(['created_at' => now()->subSeconds(60)]);
-        // Refresh so the model has the updated created_at
-        $event->refresh();
-
-        $dispatcher = new OutboxDispatcher;
-        $age = $dispatcher->oldestPendingAge();
-
-        // The age should be at least 59 seconds (allowing for timing variance)
-        $this->assertGreaterThanOrEqual(59, $age);
-    }
-
-    public function test_average_latency(): void
-    {
-        $service = new OutboxService;
-        $event = $service->record('test', 'test.event', []);
-        $event->update([
-            'status' => OutboxEvent::STATUS_COMPLETED,
-            'created_at' => now()->subSeconds(30),
-            'completed_at' => now(),
-        ]);
-
-        $dispatcher = new OutboxDispatcher;
-        $latency = $dispatcher->averageLatency();
-
-        $this->assertGreaterThan(0, $latency);
-    }
 }

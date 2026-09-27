@@ -208,14 +208,6 @@ final class Format
     }
 
     /**
-     * Legacy alias for {@see size()}. Backs the legacy `mksize()` helper.
-     */
-    public static function mksize(int|float $bytes): string
-    {
-        return self::size($bytes);
-    }
-
-    /**
      * Format an elapsed timestamp. Backs the legacy `get_elapsed_time()` helper.
      */
     public static function getElapsedTime(int|string $ts, bool $shortunit = false): string
@@ -234,14 +226,6 @@ final class Format
             'min_short' => __('legacy/functions.text_short_min'),
             'plural_suffix' => __('legacy/functions.text_s'),
         ], $shortunit);
-    }
-
-    /**
-     * Return the color code for a ratio. Backs the legacy `get_ratio_color()` helper.
-     */
-    public static function getRatioColor(int|float $ratio): string
-    {
-        return Ratio::color((float) $ratio);
     }
 
     /**

@@ -103,20 +103,6 @@ final class TorrentConfig extends Config
         return $this->float('uploaderdouble', $default);
     }
 
-    public function stickyFirstLevelBackgroundColor(?string $default = null): ?string
-    {
-        $value = $this->data['sticky_first_level_background_color'] ?? $default;
-
-        return $value !== null ? (string) $value : null;
-    }
-
-    public function stickySecondLevelBackgroundColor(?string $default = null): ?string
-    {
-        $value = $this->data['sticky_second_level_background_color'] ?? $default;
-
-        return $value !== null ? (string) $value : null;
-    }
-
     public function downloadSupportPasskey(bool $default = false): bool
     {
         return $this->bool('download_support_passkey', $default);

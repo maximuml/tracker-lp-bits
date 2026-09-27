@@ -263,21 +263,6 @@ final class Strings
     }
 
     /**
-     * Convert a fully-qualified class name into a Filament alias.
-     *
-     * Mirrors `get_filament_class_alias()`: replaces directory separators
-     * with dots, then kebab-cases each segment.
-     */
-    public static function filamentAlias(string $class): string
-    {
-        return Str::of($class)
-            ->replace(['/', '\\'], '.')
-            ->explode('.')
-            ->map([Str::class, 'kebab'])
-            ->implode('.');
-    }
-
-    /**
      * Pad a binary info-hash to 20 bytes.
      *
      * Mirrors `hash_pad()`: reads the value from a stream resource if

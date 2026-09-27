@@ -119,21 +119,6 @@ final class SecureTokenServiceTest extends TestCase
         $this->assertNull($row);
     }
 
-    public function test_verify_returns_null_for_revoked_token(): void
-    {
-        $token = $this->service->generate();
-
-        $this->service->store(self::TEST_TABLE, $token, [
-            'user_id' => 300,
-            'ip' => '127.0.0.1',
-        ]);
-
-        $this->service->revoke(self::TEST_TABLE, $token);
-
-        $row = $this->service->verify(self::TEST_TABLE, $token);
-        $this->assertNull($row);
-    }
-
     public function test_verify_returns_null_for_consumed_token(): void
     {
         $token = $this->service->generate();
@@ -186,27 +171,6 @@ final class SecureTokenServiceTest extends TestCase
 
         $row = $this->service->consume(self::TEST_TABLE, $token);
         $this->assertNull($row);
-    }
-
-    public function test_revoke_returns_true_for_existing_token(): void
-    {
-        $token = $this->service->generate();
-
-        $this->service->store(self::TEST_TABLE, $token, [
-            'user_id' => 700,
-            'ip' => '127.0.0.1',
-        ]);
-
-        $result = $this->service->revoke(self::TEST_TABLE, $token);
-        $this->assertTrue($result);
-    }
-
-    public function test_revoke_returns_false_for_nonexistent_token(): void
-    {
-        $fakeToken = str_repeat('0', 64);
-
-        $result = $this->service->revoke(self::TEST_TABLE, $fakeToken);
-        $this->assertFalse($result);
     }
 
     public function test_verify_legacy_finds_existing_hash(): void

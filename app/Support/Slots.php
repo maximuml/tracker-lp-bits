@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
-use App\Enums\UserClass as UserClassEnum;
 use App\Models\User;
-use App\Support\Config\SiteConfig;
 
 /**
  * Stateless helper for the legacy download-slot ("max slots") tier.
@@ -100,24 +98,5 @@ final class Slots
         }
 
         return "<span class='color_slots'>{$slotsLabel}</span>{$unlimitedLabel}";
-    }
-
-    /**
-     * Locale-aware wrapper for {@see display()} that reads the current
-     * user and relevant globals from the support context.
-     */
-    public static function displayWithContext(): string
-    {
-        $user = app(CurrentUser::class)->get() ?? [];
-
-        return self::display(
-            (float) ($user['uploaded'] ?? 0),
-            (float) ($user['downloaded'] ?? 0),
-            SiteConfig::current()->main->maxDlSystem() ? 'yes' : 'no',
-            (int) ($user['class'] ?? 0),
-            (int) UserClassEnum::VIP->value,
-            (string) (__('legacy/functions.text_slots')),
-            (string) (__('legacy/functions.text_unlimited'))
-        );
     }
 }

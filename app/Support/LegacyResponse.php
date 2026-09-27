@@ -35,20 +35,6 @@ final class LegacyResponse
      * in Laravel context it throws an HttpResponseException carrying the
      * rendered frame; in legacy context it `echo`s and `die`s.
      */
-    /**
-     * Print a legacy SQL error page and stop execution.
-     *
-     * Backs the `sqlerr()` helper.
-     */
-    public static function sqlError(string $file, string $line): void
-    {
-        throw new HttpResponseException(new Response(view('partials.sql-error', [
-            'error' => LegacyDb::error(),
-            'file' => $file,
-            'line' => $line,
-        ])->render(), 500));
-    }
-
     public static function abort(
         string $heading,
         string $text,
@@ -229,23 +215,6 @@ final class LegacyResponse
         }
 
         return false;
-    }
-
-    /**
-     * Render a legacy "bark" page — stdhead, a heading, a paragraph,
-     * stdfoot, then exit.
-     *
-     * Mirrors `genbark($x, $y)`.
-     */
-    public static function bark(string $title, string $message): void
-    {
-        $renderer = app(PageRenderer::class);
-
-        $html = (string) $renderer->headerHtml($title)
-            .view('partials.bark', ['title' => $title, 'message' => $message])->render()
-            .(string) $renderer->footerHtml();
-
-        throw new HttpResponseException(new Response($html));
     }
 
     /**

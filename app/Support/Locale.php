@@ -68,16 +68,6 @@ final class Locale
     }
 
     /**
-     * Return the `site_lang_folder` for the given user, or `'en'`.
-     *
-     * Mirrors `get_user_lang()`.
-     */
-    public static function userFolder(int|string $userId): string
-    {
-        return app(LanguageRepository::class)->getUserFolder((int) $userId);
-    }
-
-    /**
      * Return the `site_lang_folder` for the given language id, or
      * `$default` when the id is unknown.
      *

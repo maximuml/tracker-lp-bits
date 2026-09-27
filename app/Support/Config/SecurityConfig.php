@@ -48,21 +48,6 @@ final class SecurityConfig extends Config
         return $this->bool('iv', $default);
     }
 
-    public function guestVisitType(): ?string
-    {
-        $value = $this->data['guest_visit_type'] ?? null;
-
-        return $value !== null ? (string) $value : null;
-    }
-
-    public function guestVisitValue(string $type): ?string
-    {
-        $key = "guest_visit_value_{$type}";
-        $value = $this->data[$key] ?? null;
-
-        return $value !== null ? (string) $value : null;
-    }
-
     public function loginType(): ?string
     {
         $value = $this->data['login_type'] ?? null;

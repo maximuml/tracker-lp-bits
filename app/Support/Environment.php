@@ -16,11 +16,6 @@ final class Environment
         return (! defined('RUNNING_IN_OCTANE') || ! RUNNING_IN_OCTANE) && PHP_SAPI === 'cli';
     }
 
-    public static function isWindows(): bool
-    {
-        return (! defined('RUNNING_IN_OCTANE') || ! RUNNING_IN_OCTANE) && strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
-    }
-
     public static function isFpm(): bool
     {
         return php_sapi_name() === 'fpm-fcgi';

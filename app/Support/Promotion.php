@@ -331,64 +331,6 @@ final class Promotion
     }
 
     /**
-     * Context-aware wrapper for {@see append()}.
-     * Mirrors the legacy `get_torrent_promotion_append()` helper.
-     */
-    public static function appendWithContext(
-        int $promotion,
-        string $forceMode,
-        bool $showTimeLeft,
-        ?string $added,
-        int $promotionTimeType,
-        ?string $promotionUntil,
-        bool $ignoreGlobal,
-    ): string {
-        $user = app(CurrentUser::class)->get() ?? [];
-        $expires = self::expireTorrentGlobals();
-
-        return self::append(
-            $promotion,
-            $forceMode,
-            $showTimeLeft,
-            $added,
-            $promotionTimeType,
-            $promotionUntil,
-            $ignoreGlobal,
-            UserAppendPromotion::tryFrom((int) ($user['appendpromotion'] ?? 2))?->stringValue() ?? 'icon',
-            $expires,
-        );
-    }
-
-    /**
-     * Context-aware wrapper for {@see appendSub()}.
-     * Mirrors the legacy `get_torrent_promotion_append_sub()` helper.
-     */
-    public static function appendSubWithContext(
-        int $promotion,
-        string $forceMode,
-        bool $showTimeLeft,
-        ?string $added,
-        int $promotionTimeType,
-        ?string $promotionUntil,
-        bool $ignoreGlobal,
-    ): string {
-        $user = app(CurrentUser::class)->get() ?? [];
-        $expires = self::expireTorrentGlobals();
-
-        return self::appendSub(
-            $promotion,
-            $forceMode,
-            $showTimeLeft,
-            $added,
-            $promotionTimeType,
-            $promotionUntil,
-            $ignoreGlobal,
-            UserAppendPromotion::tryFrom((int) ($user['appendpromotion'] ?? 2))?->stringValue() ?? 'icon',
-            $expires,
-        );
-    }
-
-    /**
      * Collect the promotion-expiry globals used by append/appendSub.
      *
      * @return array<string, int>

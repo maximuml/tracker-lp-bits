@@ -384,6 +384,9 @@ a.nxm-logo:link, a.nxm-logo:visited {
 }
 
 @media (max-width: 720px) {
+    .nxm-header__brand {
+        flex-wrap: wrap;
+    }
     .nxm-burger {
         display: inline-flex;
         align-items: center;

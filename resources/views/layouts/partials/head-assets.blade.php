@@ -13,6 +13,7 @@
 @endif
 <meta name="generator" content="{{ PROJECTNAME }}" />
 <title>{{ $chrome->head->title }}</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg" />
 <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
 <link rel="search" type="application/opensearchdescription+xml" title="{{ $chrome->siteName }} Torrents" href="opensearch.php" />
 <link rel="alternate" type="application/rss+xml" title="Latest Torrents" href="torrentrss.php" />

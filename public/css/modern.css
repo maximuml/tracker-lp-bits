@@ -235,11 +235,20 @@ body {
 }
 
 a.nxm-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
     font-size: 1.35rem;
     font-weight: 700;
     color: var(--nxm-header-text);
     text-decoration: none;
     letter-spacing: 0.02em;
+}
+a.nxm-logo .nxm-logo-mark {
+    width: 1.5em;
+    height: 1.5em;
+    flex: none;
+    color: inherit;
 }
 a.nxm-logo:link, a.nxm-logo:visited {
     color: var(--nxm-header-text);

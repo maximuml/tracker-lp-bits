@@ -4,7 +4,7 @@
 <header class="nxm-header" role="banner">
     <div class="nxm-header__brand">
         @if($chrome->logoMain === '')
-            <a class="nxm-logo" href="index.php">{{ $chrome->siteName }}</a>
+            <a class="nxm-logo" href="index.php"><x-brand-mark class="nxm-logo-mark" />{{ $chrome->siteName }}</a>
             @if($chrome->slogan !== '')<span class="nxm-slogan">{{ $chrome->slogan }}</span>@endif
         @else
             <a class="nxm-logo" href="index.php"><img src="{{ $chrome->logoMain }}" alt="{{ $chrome->siteName }}" /></a>

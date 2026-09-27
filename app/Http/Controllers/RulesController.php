@@ -7,11 +7,11 @@ namespace App\Http\Controllers;
 use App\Models\Setting;
 use App\Repositories\InfoRepository;
 use App\Support\Locale;
+use App\Support\RedisGuard;
 use App\Support\Url;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 class RulesController extends LegacyController
@@ -25,7 +25,7 @@ class RulesController extends LegacyController
         $langFolder = Locale::currentLangDir('en');
         $cacheKey = "{$langFolder}_rules";
 
-        $rules = Cache::remember($cacheKey, 900, function () {
+        $rules = RedisGuard::remember($cacheKey, 900, function () {
             $langId = $this->infoRepository->resolveRuleLangId(Locale::guestIdWithContext());
 
             return $this->infoRepository->rules($langId);

@@ -9,6 +9,7 @@ use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\User;
 use App\Support\Avatar;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Format;
@@ -25,6 +26,7 @@ final class CommentTableFactory
     public function __construct(
         private readonly CurrentUser $currentUser,
         private readonly UserRepositoryInterface $userRepository,
+        private readonly ?LegacyRedisCache $legacyRedisCache = null,
     ) {}
 
     /**
@@ -44,6 +46,10 @@ final class CommentTableFactory
         $canManage = Permission::can(PermissionEnum::COM_MANAGE);
         $dt = date('Y-m-d H:i:s', TIMENOW - 900);
 
+        $renderedFmt = $this->legacyRedisCache !== null && $rows !== []
+            ? $this->legacyRedisCache->get_values(array_map(static fn ($row) => 'fmt_comment_'.md5((string) $row['text']), $rows))
+            : [];
+
         $viewRows = [];
         foreach ($rows as $row) {
             $userRow = $userInfoArr->get($row['user'], User::defaultUser())->toArray();
@@ -58,7 +64,7 @@ final class CommentTableFactory
                 addedTime: SafeHtml::fromTrustedHtml((string) Time::format((string) $row['added'])),
                 showViewOriginal: ! empty($row['editedby']) && $canManage,
                 avatar: SafeHtml::fromTrustedHtml(UserDisplay::avatarImageWithContext($avatar)),
-                text: SafeHtml::fromTrustedHtml(Format::formatComment((string) $row['text'])),
+                text: $this->renderComment((string) $row['text'], $renderedFmt),
                 editedBy: ! empty($row['editedby']) ? UserDisplay::username((int) $row['editedby']) : null,
                 editedAt: ! empty($row['editedby']) ? SafeHtml::fromTrustedHtml((string) Time::format((string) $row['editdate'], true, false)) : null,
                 online: ($userRow['last_access'] ?? '') > $dt,
@@ -76,6 +82,23 @@ final class CommentTableFactory
             self::plainTitle('legacy/functions.title_report_this_comment'),
             self::plainTitle('legacy/functions.title_add_reply'),
         );
+    }
+
+    /**
+     * @param  array<string, mixed>  $renderedFmt
+     */
+    private function renderComment(string $text, array &$renderedFmt): SafeHtml
+    {
+        $key = 'fmt_comment_'.md5($text);
+        $hit = $renderedFmt[$key] ?? false;
+        if (is_string($hit)) {
+            return SafeHtml::fromTrustedHtml($hit);
+        }
+        $html = Format::formatComment($text);
+        $this->legacyRedisCache?->cache_value($key, (string) $html, 86400);
+        $renderedFmt[$key] = (string) $html;
+
+        return $html;
     }
 
     /**

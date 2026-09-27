@@ -153,6 +153,26 @@ final class TorrentListViewFactory
             UserDisplay::preload(array_map(fn ($l) => (int) ($l['user'] ?? 0), $lastcoms));
         }
 
+        $renderedTt = $lastcoms === []
+            ? []
+            : $cache->get_values(array_map(
+                static fn ($l) => 'fmt_tt_'.md5(self::tooltipText((string) ($l['text'] ?? ''))),
+                array_values($lastcoms)
+            ));
+        $renderTt = function (string $text) use (&$renderedTt, $cache): string {
+            $truncated = self::tooltipText($text);
+            $key = 'fmt_tt_'.md5($truncated);
+            $hit = $renderedTt[$key] ?? false;
+            if (is_string($hit)) {
+                return $hit;
+            }
+            $html = (string) Format::formatComment($truncated, true, false, false, true, 600, false, false);
+            $cache->cache_value($key, $html, 86400);
+            $renderedTt[$key] = $html;
+
+            return $html;
+        };
+
         $outRows = [];
         $lastcomTooltip = [];
         $counter = 0;
@@ -250,7 +270,7 @@ final class TorrentListViewFactory
                         'content' => SafeHtml::fromTrustedHtml(
                             ($commentIsNew ? "<b>(<span class='new'>".__('legacy/functions.text_new_uppercase').'</span>)</b> ' : '')
                             .__('legacy/functions.text_last_commented_by').UserDisplay::username($lastcom['user']).$lastcomtime.'<br />'
-                            .Format::formatComment(mb_substr($lastcom['text'], 0, 100, 'UTF-8').(mb_strlen($lastcom['text'], 'UTF-8') > 100 ? ' ......' : ''), true, false, false, true, 600, false, false)
+                            .$renderTt((string) $lastcom['text'])
                         ),
                     ];
                 }
@@ -382,5 +402,10 @@ final class TorrentListViewFactory
         $columns[] = ['key' => 'uploader', 'label' => (string) __('legacy/functions.col_uploader'), 'iconClass' => '', 'iconTitle' => '', 'sortUrl' => $sortUrl(9)];
 
         return $columns;
+    }
+
+    private static function tooltipText(string $body): string
+    {
+        return mb_substr($body, 0, 100, 'UTF-8').(mb_strlen($body, 'UTF-8') > 100 ? ' ......' : '');
     }
 }

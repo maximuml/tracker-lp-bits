@@ -19,6 +19,7 @@ use App\Support\Globals;
 use App\Support\Locale;
 use App\Support\Log;
 use App\Support\Permissions;
+use App\Support\RedisGuard;
 use App\Support\Strings;
 use App\Support\TorrentBookmark;
 use App\Support\Url;
@@ -70,7 +71,7 @@ class TorrentRssController extends LegacyController
         }
 
         $cacheKey = 'nexus_rss:'.$passkey.':'.hash('xxh128', http_build_query($filteredQuery));
-        $cacheData = Cache::get($cacheKey);
+        $cacheData = RedisGuard::attempt(static fn () => Cache::get($cacheKey));
         if ($cacheData && config('app.env') !== 'local') {
             Log::writeWithContext('rss get from cache');
 
@@ -94,7 +95,7 @@ class TorrentRssController extends LegacyController
 
         $dllink = false;
         $inclbookmarked = 0;
-        $rssUser = (array) Cache::remember('user_passkey_'.$passkey.'_rss', 3600, function () use ($passkey) {
+        $rssUser = (array) RedisGuard::remember('user_passkey_'.$passkey.'_rss', 3600, function () use ($passkey) {
             $row = DB::table('users')->where('passkey', $passkey)->first(['id', 'enabled', 'parked', 'passkey']);
 
             return $row ? (array) $row : [];
@@ -195,7 +196,7 @@ class TorrentRssController extends LegacyController
             }
             $normalSql = $normalQuery->toSql();
             $normalCacheKey = sprintf('nexus_rss:normal:%s', hash('xxh128', $normalSql.':'.$showrows));
-            $normalRows = Cache::remember($normalCacheKey, 300, function () use ($normalQuery, $showrows) {
+            $normalRows = RedisGuard::remember($normalCacheKey, 300, function () use ($normalQuery, $showrows) {
                 return $normalQuery->orderBy('torrents.id', 'desc')->limit($showrows)->get()->map(fn ($row) => (array) $row)->all();
             });
         }
@@ -207,7 +208,7 @@ class TorrentRssController extends LegacyController
             $prependQuery->whereIn('torrents.id', $prependIds);
             $placeholders = implode(',', array_fill(0, count($prependIds), '?'));
             $prependCacheKey = sprintf('nexus_rss:prepend:%s', hash('xxh128', $prependQuery->toSql().':'.$prependIdStr));
-            $prependRows = Cache::remember($prependCacheKey, 300, function () use ($prependQuery, $placeholders, $prependIds) {
+            $prependRows = RedisGuard::remember($prependCacheKey, 300, function () use ($prependQuery, $placeholders, $prependIds) {
                 return $prependQuery->orderByRaw("FIELD(torrents.id, {$placeholders})", $prependIds)->get()->map(fn ($row) => (array) $row)->all();
             });
         }
@@ -299,7 +300,7 @@ class TorrentRssController extends LegacyController
             ])->render();
 
         Log::writeWithContext('rss cache generated');
-        Cache::put($cacheKey, $xml, 300);
+        RedisGuard::attempt(static fn () => Cache::put($cacheKey, $xml, 300));
 
         return response($xml, 200, ['Content-Type' => 'text/xml; charset=utf-8']);
     }

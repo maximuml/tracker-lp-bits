@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Utils;
 
 use App\Support\Html;
+use App\Support\RedisGuard;
 use App\Support\UserDisplay;
 use Illuminate\Support\Facades\Redis;
 
@@ -19,8 +20,10 @@ final class MsgAlert
 
     private function __construct()
     {
-        $redis = Redis::connection()->client();
-        $result = $redis->lRange($this->getListKey(), 0, 10);
+        $result = RedisGuard::attempt(
+            fn () => Redis::connection()->client()->lRange($this->getListKey(), 0, 10),
+            []
+        );
         if (! empty($result)) {
             $nowTimestamp = time();
             $valid = [];
@@ -29,7 +32,7 @@ final class MsgAlert
                 if (is_array($arr) && $arr['deadline'] > $nowTimestamp) {
                     $valid[$arr['name']] = $arr;
                 } else {
-                    $redis->lRem($this->getListKey(), $item, 0);
+                    RedisGuard::attempt(fn () => Redis::connection()->client()->lRem($this->getListKey(), $item, 0));
                 }
             }
             self::$alerts = $valid;
@@ -58,7 +61,7 @@ final class MsgAlert
         if (! isset(self::$alerts[$name])) {
             $params = compact('name', 'deadline', 'text', 'url', 'color');
             self::$alerts[$name] = $params;
-            Redis::connection()->client()->rPush($this->getListKey(), json_encode($params));
+            RedisGuard::attempt(fn () => Redis::connection()->client()->rPush($this->getListKey(), json_encode($params)));
         }
     }
 
@@ -104,7 +107,7 @@ final class MsgAlert
         foreach (self::$alerts as $item) {
             if ($item['name'] == $name) {
                 unset(self::$alerts[$name]);
-                Redis::connection()->client()->lRem($this->getListKey(), json_encode($item));
+                RedisGuard::attempt(fn () => Redis::connection()->client()->lRem($this->getListKey(), json_encode($item)));
             }
         }
     }

@@ -29,6 +29,7 @@ use App\Support\Log;
 use App\Support\Logger;
 use App\Support\Mail;
 use App\Support\Permissions;
+use App\Support\RedisGuard;
 use App\Support\SetlistLookup;
 use App\Support\Url;
 use App\Support\UserDisplay;
@@ -464,7 +465,7 @@ class SystemBulkController extends LegacyController
             if (! $dryRun && ! empty($userIds)) {
                 $idStr = implode(',', $userIds);
                 $idRedisKey = sprintf('temporary_invite:%s', microtime(true));
-                Cache::put($idRedisKey, $idStr);
+                RedisGuard::attempt(static fn () => Cache::put($idRedisKey, $idStr), false);
                 $command = sprintf('invite:tmp %s %s %s', $idRedisKey, $duration, $amount);
                 $output = Environment::run($command, 'string', true, true);
                 $outputStr = is_array($output) ? implode("\n", $output) : (string) $output;

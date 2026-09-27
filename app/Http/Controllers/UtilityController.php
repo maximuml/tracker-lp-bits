@@ -25,6 +25,7 @@ use App\Support\Html\SafeHtml;
 use App\Support\LegacyAuth;
 use App\Support\LegacyHeaderBag;
 use App\Support\Logger;
+use App\Support\RedisGuard;
 use App\Support\Style;
 use App\Support\Url;
 use App\Support\View as LegacyView;
@@ -34,7 +35,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -463,7 +463,7 @@ class UtilityController extends LegacyController
 
     public function opensearch(Request $request): Response
     {
-        $xml = Cache::remember('opensearch_description', 86400, function () {
+        $xml = RedisGuard::remember('opensearch_description', 86400, function () {
             return $this->buildOpensearchXml();
         });
 

@@ -200,7 +200,14 @@ final class OfferPageService
 
         $description = '';
         if (! empty($num['descr'])) {
-            $description = Format::formatComment((string) $num['descr']);
+            $descrKey = 'fmt_offer_'.md5((string) $num['descr']);
+            $cachedDescr = $this->cache->get_value($descrKey);
+            if (is_string($cachedDescr)) {
+                $description = SafeHtml::fromTrustedHtml($cachedDescr);
+            } else {
+                $description = Format::formatComment((string) $num['descr']);
+                $this->cache->cache_value($descrKey, (string) $description, 86400);
+            }
         }
 
         // Comments section
@@ -422,6 +429,26 @@ final class OfferPageService
             }
             UserDisplay::preload($lastcomUserIds);
 
+            $renderedTt = $lastcoms === []
+                ? []
+                : $this->cache->get_values(array_map(
+                    static fn ($l) => 'fmt_tt_'.md5(self::tooltipText((string) ($l['text'] ?? ''))),
+                    array_values($lastcoms)
+                ));
+            $renderTt = function (string $text) use (&$renderedTt): string {
+                $truncated = self::tooltipText($text);
+                $key = 'fmt_tt_'.md5($truncated);
+                $hit = $renderedTt[$key] ?? false;
+                if (is_string($hit)) {
+                    return $hit;
+                }
+                $html = (string) Format::formatComment($truncated, true, false, false, true, 600, false, false);
+                $this->cache->cache_value($key, $html, 86400);
+                $renderedTt[$key] = $html;
+
+                return $html;
+            };
+
             $i = 0;
             $rows = [];
             $tooltips = [];
@@ -458,7 +485,7 @@ final class OfferPageService
                                         'hasNew' => $hasnewcom,
                                         'username' => UserDisplay::username((int) ($lastcom['user'] ?? 0)),
                                         'time' => SafeHtml::fromTrustedHtml($lastcomtime),
-                                        'comment' => Format::formatComment(mb_substr((string) ($lastcom['text'] ?? ''), 0, 100, 'UTF-8').(mb_strlen((string) ($lastcom['text'] ?? ''), 'UTF-8') > 100 ? ' ......' : ''), true, false, false, true, 600, false, false),
+                                        'comment' => $renderTt((string) ($lastcom['text'] ?? '')),
                                     ])->render()
                                 ),
                             );
@@ -587,5 +614,10 @@ final class OfferPageService
             'pagerBottom' => $pagerBottom,
             'rows' => $rows,
         ];
+    }
+
+    private static function tooltipText(string $body): string
+    {
+        return mb_substr($body, 0, 100, 'UTF-8').(mb_strlen($body, 'UTF-8') > 100 ? ' ......' : '');
     }
 }

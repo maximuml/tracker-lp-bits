@@ -9,10 +9,10 @@ use App\Enums\Permission\PermissionEnum;
 use App\Repositories\ToptenRepository;
 use App\Support\CurrentUser;
 use App\Support\Locale;
+use App\Support\RedisGuard;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Cache;
 
 class ToptenController extends Controller
 {
@@ -41,7 +41,7 @@ class ToptenController extends Controller
         $langFolder = Locale::currentLangDir('en');
         $cacheKey = "topten_data_{$type}_{$limit}_{$subtype}_{$langFolder}";
 
-        $page = Cache::remember($cacheKey, 3600, function () use ($type, $limit, $subtype) {
+        $page = RedisGuard::remember($cacheKey, 3600, function () use ($type, $limit, $subtype) {
             $page = $this->toptenRepository->page($type, $limit, $subtype);
             $page['generatedAt'] = date('Y-m-d H:i:s');
 

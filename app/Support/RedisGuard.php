@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -97,7 +98,10 @@ final class RedisGuard
 
         try {
             $result = $operation();
-        } catch (\RedisException|\RedisClusterException $e) {
+        } catch (\RedisException|\RedisClusterException|\ErrorException $e) {
+            if (! self::isConnectivityFailure($e)) {
+                throw $e;
+            }
             self::markDown();
             Log::warning('Redis unreachable; using fallback', ['error' => $e->getMessage()]);
 
@@ -109,6 +113,29 @@ final class RedisGuard
         }
 
         return $result;
+    }
+
+    /**
+     * Cache::remember() with a fail-open fallback: when Redis is down the
+     * producer runs uncached instead of the request stalling or 500ing.
+     *
+     * @template T
+     *
+     * @param  callable(): T  $producer
+     * @return T
+     */
+    public static function remember(string $key, \DateTimeInterface|\DateInterval|int $ttl, callable $producer): mixed
+    {
+        static $miss = null;
+        $miss ??= new \stdClass;
+
+        $closure = static fn (): mixed => $producer();
+        $result = self::attempt(
+            static fn () => Cache::remember($key, $ttl, $closure),
+            $miss
+        );
+
+        return $result === $miss ? $producer() : $result;
     }
 
     public static function markDown(): void
@@ -127,6 +154,27 @@ final class RedisGuard
         if (is_file(self::flagPath())) {
             @unlink(self::flagPath());
         }
+    }
+
+    /**
+     * phpredis emits PHP warnings on connect failures (php_network_getaddresses,
+     * refused connections); Laravel's error handler promotes those to
+     * ErrorException wrapping the RedisException as the previous throwable.
+     */
+    public static function isConnectivityFailure(\Throwable $e): bool
+    {
+        if ($e instanceof \RedisException || $e instanceof \RedisClusterException) {
+            return true;
+        }
+        if (! $e instanceof \ErrorException) {
+            return false;
+        }
+        $prev = $e->getPrevious();
+        if ($prev instanceof \RedisException || $prev instanceof \RedisClusterException) {
+            return true;
+        }
+
+        return str_starts_with($e->getMessage(), 'Redis::');
     }
 
     private static function flagPath(): string

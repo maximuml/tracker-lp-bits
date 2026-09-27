@@ -392,19 +392,33 @@ final class OfferPageService
 
             $lastcoms = [];
             $lastcomUserIds = [];
+            $commentedOfferIds = [];
             foreach ($offerRows as $row) {
                 $arr = (array) $row;
-                if ((int) ($arr['comments'] ?? 0) === 0) {
-                    continue;
+                if ((int) ($arr['comments'] ?? 0) !== 0) {
+                    $commentedOfferIds[] = (int) $arr['id'];
                 }
-                $offerId = (int) $arr['id'];
-                $lastcom = $this->cache->get_value('offer_'.$offerId.'_last_comment_content');
-                if (! $lastcom) {
-                    $lastcom = $this->offerCommentRepository->getLastComment($offerId);
+            }
+            $cachedLastcoms = $commentedOfferIds === []
+                ? []
+                : $this->cache->get_values(array_map(fn ($id) => 'offer_'.$id.'_last_comment_content', $commentedOfferIds));
+            $uncachedOfferIds = [];
+            foreach ($commentedOfferIds as $offerId) {
+                $lastcom = $cachedLastcoms['offer_'.$offerId.'_last_comment_content'] ?? false;
+                if ($lastcom) {
+                    $lastcoms[$offerId] = (array) $lastcom;
+                } else {
+                    $uncachedOfferIds[] = $offerId;
+                }
+            }
+            if ($uncachedOfferIds !== []) {
+                foreach ($this->offerCommentRepository->getLastComments($uncachedOfferIds) as $offerId => $lastcom) {
+                    $lastcoms[$offerId] = $lastcom;
                     $this->cache->cache_value('offer_'.$offerId.'_last_comment_content', $lastcom, 1855);
                 }
-                $lastcoms[$offerId] = (array) $lastcom;
-                $lastcomUserIds[] = (int) ($lastcoms[$offerId]['user'] ?? 0);
+            }
+            foreach ($lastcoms as $lastcom) {
+                $lastcomUserIds[] = (int) ($lastcom['user'] ?? 0);
             }
             UserDisplay::preload($lastcomUserIds);
 

@@ -136,9 +136,12 @@ final class ForumTopicViewService
 
         $postCounts = [];
         $uncachedPosterIds = [];
+        $cachedCounts = $uidArr === []
+            ? []
+            : ($this->legacyRedisCache?->get_values(array_map(fn ($id) => 'user_'.$id.'_post_count', $uidArr)) ?? []);
         foreach ($uidArr as $posterId) {
-            $cached = $this->legacyRedisCache?->get_value('user_'.$posterId.'_post_count');
-            if ($cached !== false && $cached !== null) {
+            $cached = $cachedCounts['user_'.$posterId.'_post_count'] ?? false;
+            if ($cached !== false) {
                 $postCounts[(int) $posterId] = (int) $cached;
             } else {
                 $uncachedPosterIds[] = (int) $posterId;

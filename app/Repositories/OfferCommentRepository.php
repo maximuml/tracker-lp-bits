@@ -27,6 +27,33 @@ final class OfferCommentRepository extends BaseRepository
         return $row ? $row->toArray() : null;
     }
 
+    /**
+     * Latest comment per offer, keyed by offer id.
+     *
+     * @param  array<int, int>  $offerIds
+     * @return array<int, array<string, mixed>>
+     */
+    public function getLastComments(array $offerIds): array
+    {
+        $offerIds = array_values(array_unique(array_filter(array_map('intval', $offerIds))));
+        if ($offerIds === []) {
+            return [];
+        }
+
+        $rows = Comment::query()
+            ->whereIn('id', function ($q) use ($offerIds) {
+                $q->selectRaw('MAX(id)')->from('comments')->whereIn('offer', $offerIds)->groupBy('offer');
+            })
+            ->get(['id', 'offer', 'user', 'added', 'text']);
+
+        $map = [];
+        foreach ($rows as $row) {
+            $map[(int) $row->offer] = $row->toArray();
+        }
+
+        return $map;
+    }
+
     public function countComments(int $offerId): int
     {
         return (int) Comment::query()->where('offer', $offerId)->count();

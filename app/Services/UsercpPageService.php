@@ -251,10 +251,13 @@ final class UsercpPageService
         $topicRows = $this->usercpLookupRepository->getReadTopics($userId);
         $postCounts = [];
         $uncachedTopicIds = [];
-        foreach ($topicRows as $topicArr) {
-            $topicId = (int) $topicArr['id'];
-            $cached = $cache?->get_value('topic_'.$topicId.'_post_count');
-            if ($cached !== false && $cached !== null) {
+        $readTopicIds = array_map(fn ($topicArr) => (int) $topicArr['id'], $topicRows);
+        $cachedCounts = $readTopicIds === []
+            ? []
+            : ($cache?->get_values(array_map(fn ($id) => 'topic_'.$id.'_post_count', $readTopicIds)) ?? []);
+        foreach ($readTopicIds as $topicId) {
+            $cached = $cachedCounts['topic_'.$topicId.'_post_count'] ?? false;
+            if ($cached !== false) {
                 $postCounts[$topicId] = (int) $cached;
             } else {
                 $uncachedTopicIds[] = $topicId;
@@ -266,6 +269,15 @@ final class UsercpPageService
                 $cache?->cache_value('topic_'.$topicId.'_post_count', $postCounts[$topicId] ?? 0, 3600);
             }
         }
+        $lastPostIds = [];
+        foreach ($topicRows as $topicArr) {
+            if (! empty($topicArr['lastpost'])) {
+                $lastPostIds[] = (int) $topicArr['lastpost'];
+            }
+        }
+        $lastPostRows = $lastPostIds === []
+            ? []
+            : ($cache?->get_values(array_map(fn ($id) => 'post_'.$id.'_content', array_values(array_unique($lastPostIds)))) ?? []);
         $items = [];
         foreach ($topicRows as $topicArr) {
             $topicId = (int) $topicArr['id'];
@@ -273,7 +285,10 @@ final class UsercpPageService
 
             $posts = $postCounts[$topicId] ?? 0;
 
-            $arr = Forum::postRowWithContext((int) $topicArr['lastpost']);
+            $arr = $lastPostRows['post_'.((int) $topicArr['lastpost']).'_content'] ?? false;
+            if (! is_array($arr)) {
+                $arr = Forum::postRowWithContext((int) $topicArr['lastpost']) ?? [];
+            }
             $userid = (int) ($arr['userid'] ?? 0);
 
             $items[] = new ReadTopicItem(

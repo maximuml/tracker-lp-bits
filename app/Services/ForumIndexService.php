@@ -69,6 +69,37 @@ final class ForumIndexService
         $readable = static fn (array $f): bool => UserDisplay::currentClass() >= (int) ($f['minclassread'] ?? 0);
         $currentClass = UserDisplay::currentClass();
 
+        $visibleForums = [];
+        foreach ($forums as $f) {
+            if ($readable($f)) {
+                $visibleForums[] = $f;
+            }
+        }
+
+        $prefetchKeys = [];
+        foreach ($visibleForums as $f) {
+            $fid = (int) ($f['id'] ?? 0);
+            $prefetchKeys[] = 'forum_'.$fid.'_last_replied_topic_content';
+            $prefetchKeys[] = 'forum_'.$fid.'_post_'.$todayDate.'_count';
+        }
+        $prefetched = $prefetchKeys === [] ? [] : $Cache->get_values($prefetchKeys);
+        $postIdKeys = [];
+        foreach ($visibleForums as $f) {
+            $arr = $prefetched['forum_'.((int) ($f['id'] ?? 0)).'_last_replied_topic_content'] ?? false;
+            if (is_array($arr) && ! empty($arr['lastpost'])) {
+                $postIdKeys[] = 'post_'.((int) $arr['lastpost']).'_content';
+            }
+        }
+        $postRows = $postIdKeys === [] ? [] : $Cache->get_values(array_values(array_unique($postIdKeys)));
+
+        $posterIds = [];
+        foreach ($postRows as $row) {
+            if (is_array($row)) {
+                $posterIds[] = (int) ($row['userid'] ?? 0);
+            }
+        }
+        UserDisplay::preload($posterIds);
+
         $sections = [];
         foreach ($overforums as $a) {
             if ($currentClass < (int) ($a['minclassview'] ?? 0)) {
@@ -76,18 +107,18 @@ final class ForumIndexService
             }
             $forid = (int) $a['id'];
             $rows = [];
-            foreach ($forums as $f) {
-                if ((int) ($f['forid'] ?? 0) === $forid && $readable($f)) {
-                    $rows[] = $this->forumRow($f, $curUser, $todayDate);
+            foreach ($visibleForums as $f) {
+                if ((int) ($f['forid'] ?? 0) === $forid) {
+                    $rows[] = $this->forumRow($f, $curUser, $todayDate, $prefetched, $postRows);
                 }
             }
             $sections[] = new OverforumGroup((string) ($a['name'] ?? ''), $rows);
         }
 
         $orphans = [];
-        foreach ($forums as $f) {
-            if (! in_array((int) ($f['forid'] ?? 0), $overforumIds, true) && $readable($f)) {
-                $orphans[] = $this->forumRow($f, $curUser, $todayDate);
+        foreach ($visibleForums as $f) {
+            if (! in_array((int) ($f['forid'] ?? 0), $overforumIds, true)) {
+                $orphans[] = $this->forumRow($f, $curUser, $todayDate, $prefetched, $postRows);
             }
         }
         if ($orphans !== []) {
@@ -107,25 +138,32 @@ final class ForumIndexService
      *
      * @param  array<string, mixed>  $forums_arr
      * @param  array<string, mixed>  $curUser
+     * @param  array<string, mixed>  $prefetched  mget'ed forum_* cache rows
+     * @param  array<string, mixed>  $postRows  mget'ed post_*_content rows
      */
-    private function forumRow(array $forums_arr, array $curUser, string $todayDate): ForumRow
+    private function forumRow(array $forums_arr, array $curUser, string $todayDate, array $prefetched, array $postRows): ForumRow
     {
         $Cache = $this->cache;
         $forumid = (int) $forums_arr['id'];
 
         $forummoderators = Forum::moderatorsWithContext($forumid, false);
 
-        if (! $arr = $Cache->get_value('forum_'.$forumid.'_last_replied_topic_content')) {
+        $repliedKey = 'forum_'.$forumid.'_last_replied_topic_content';
+        $arr = $prefetched[$repliedKey] ?? false;
+        if (! $arr) {
             $lastTopic = $this->topicRepository->getLastTopicByForum($forumid);
             $arr = $lastTopic ? $lastTopic->toArray() : false;
-            $Cache->cache_value('forum_'.$forumid.'_last_replied_topic_content', $arr, 900);
+            $Cache->cache_value($repliedKey, $arr, 900);
         }
 
         $lastPost = null;
         $hasUnread = false;
         if ($arr) {
             $lastpostid = (int) $arr['lastpost'];
-            $post_arr = Forum::postRowWithContext($lastpostid) ?? [];
+            $post_arr = $postRows['post_'.$lastpostid.'_content'] ?? false;
+            if (! is_array($post_arr)) {
+                $post_arr = Forum::postRowWithContext($lastpostid) ?? [];
+            }
             $lasttopicid = (int) $arr['id'];
             $fullSubject = (string) ($arr['subject'] ?? '');
             $displaySubject = $fullSubject;
@@ -143,10 +181,11 @@ final class ForumIndexService
             $hasUnread = $this->getLastReadPostId($lasttopicid, $curUser) < $lastpostid;
         }
 
-        $posttodaycount = $Cache->get_value('forum_'.$forumid.'_post_'.$todayDate.'_count');
-        if ($posttodaycount == '') {
+        $todayKey = 'forum_'.$forumid.'_post_'.$todayDate.'_count';
+        $posttodaycount = $prefetched[$todayKey] ?? false;
+        if (! is_numeric($posttodaycount)) {
             $posttodaycount = $this->postRepository->getForumTodayPostCount($forumid, date('Y-m-d'));
-            $Cache->cache_value('forum_'.$forumid.'_post_'.$todayDate.'_count', $posttodaycount, 1800);
+            $Cache->cache_value($todayKey, $posttodaycount, 1800);
         }
 
         return new ForumRow(

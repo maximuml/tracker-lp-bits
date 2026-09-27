@@ -67,32 +67,6 @@ class RequireSeedTorrentRepository extends BaseRepository
         Logger::writeWithContext((string) ("{$logPrefix}, success inserted: ".count($data)), (string) 'info', (bool) false);
     }
 
-    public function autoRemoveFromListCronjob(): void
-    {
-        $idArr = RequireSeedTorrent::query()->pluck('torrent_id')->toArray();
-        if (empty($idArr)) {
-            Logger::writeWithContext((string) 'no data to remove', (string) 'info', (bool) false);
-
-            return;
-        }
-        $seederMax = Setting::getRequireSeedSectionSeederLte();
-        $seederMin = Setting::getRequireSeedSectionSeederGte();
-        $torrents = Torrent::query()->whereIn('id', $idArr)
-            ->where('seeders', '<', $seederMin)
-            ->get(['id']);
-        if (! empty($torrents)) {
-            $this->doRemove($torrents);
-            Logger::writeWithContext((string) sprintf('remove %s seeders < %s', count($torrents), $seederMin), (string) 'info', (bool) false);
-        }
-        $torrents = Torrent::query()->whereIn('id', $idArr)
-            ->where('seeders', '>', $seederMax)
-            ->get(['id']);
-        if (! empty($torrents)) {
-            $this->doRemove($torrents);
-            Logger::writeWithContext((string) sprintf('remove %s seeders > %s', count($torrents), $seederMax), (string) 'info', (bool) false);
-        }
-    }
-
     /** @param  Collection<int, mixed>  $torrents */
     public function doRemove(Collection $torrents): void
     {
@@ -178,6 +152,4 @@ class RequireSeedTorrentRepository extends BaseRepository
         $redis->hset($torrentUserCacheKey, $userId, $nowStr);
         Logger::writeWithContext((string) "success insert user: {$userId}, torrent: {$torrentId}", (string) 'info', (bool) false);
     }
-
-    public function autoSettlementCronjob(): void {}
 }

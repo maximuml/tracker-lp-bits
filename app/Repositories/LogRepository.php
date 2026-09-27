@@ -119,16 +119,6 @@ class LogRepository
         return DB::table('chronicle')->where('id', $id)->delete();
     }
 
-    /**
-     * @return ?array<int|string, mixed>
-     */
-    public function getGenericById(string $table, int $id): ?array
-    {
-        $row = DB::table($table)->where('id', $id)->first();
-
-        return $row === null ? null : (array) $row;
-    }
-
     /** @param  array<int|string, mixed>  $filters */
     public function countNews(array $filters): int
     {

@@ -15,8 +15,8 @@ use Tests\TestCase;
 /**
  * Unit tests for ModtaskRepository.
  *
- * Covers confirmUser(), getUserArray(), addFund(), updateUser(), and
- * addWarning() public methods.
+ * Covers confirmUser(), getUserArray(), addFund(), and updateUser()
+ * public methods.
  */
 #[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class ModtaskRepositoryTest extends TestCase
@@ -106,38 +106,5 @@ final class ModtaskRepositoryTest extends TestCase
         $count = $this->repository->updateUser(999999, ['enabled' => 0]);
 
         $this->assertSame(0, $count);
-    }
-
-    public function test_add_warning_increments_timeswarned(): void
-    {
-        /** @var User $user */
-        $user = User::factory()->create();
-        DB::table('users')->where('id', $user->id)->update(['timeswarned' => 0]);
-
-        $this->repository->addWarning($user->id, []);
-
-        $record = DB::table('users')->where('id', $user->id)->first();
-
-        $this->assertNotNull($record);
-        $this->assertSame(1, (int) $record->timeswarned);
-    }
-
-    public function test_add_warning_increments_timeswarned_with_extra_data(): void
-    {
-        /** @var User $user */
-        $user = User::factory()->create();
-        DB::table('users')->where('id', $user->id)->update(['timeswarned' => 2]);
-
-        $this->repository->addWarning($user->id, [
-            'warnedby' => 42,
-            'warneduntil' => '2025-12-31 23:59:59',
-        ]);
-
-        $record = DB::table('users')->where('id', $user->id)->first();
-
-        $this->assertNotNull($record);
-        $this->assertSame(3, (int) $record->timeswarned);
-        $this->assertSame(42, (int) $record->warnedby);
-        $this->assertSame('2025-12-31 23:59:59', $record->warneduntil);
     }
 }

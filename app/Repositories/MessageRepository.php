@@ -211,11 +211,6 @@ class MessageRepository extends BaseRepository
         return $result;
     }
 
-    public function getLastPmId(int $userId): int
-    {
-        return (int) (Message::query()->where('receiver', $userId)->max('id') ?? 0);
-    }
-
     /**
      * @return list<array<string, mixed>>
      */

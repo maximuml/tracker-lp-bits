@@ -18,7 +18,7 @@ use Tests\TestCase;
  *
  * Covers getList(), store(), update(), getDetail(), delete(),
  * createBasicQuery(), getOrderByFieldIdString(), syncTorrentTags(),
- * listAll(), buildSelect(), renderCheckbox(), and renderSpan().
+ * listAll(), renderCheckbox(), and renderSpan().
  *
  * Static caches ($allTags, $orderByFieldIdString) are reset via reflection
  * in setUp() to avoid cross-test contamination.
@@ -218,28 +218,6 @@ final class TagRepositoryTest extends TestCase
         $this->repository->syncTorrentTags($torrentId, [$tag1->id, $tag1->id]);
 
         $this->assertSame(1, DB::table('torrent_tags')->where('torrent_id', $torrentId)->count());
-    }
-
-    public function test_build_select_returns_html_with_options(): void
-    {
-        $tag = $this->createTag(['name' => 'Option Tag']);
-
-        $html = $this->repository->buildSelect(0, 'tag_id', $tag->id);
-
-        $this->assertStringContainsString('<select name="tag_id">', $html);
-        $this->assertStringContainsString('Option Tag', $html);
-        $this->assertStringContainsString('selected', $html);
-        $this->assertStringContainsString('</select>', $html);
-    }
-
-    public function test_build_select_marks_selected_value(): void
-    {
-        $tag = $this->createTag(['name' => 'Selected Tag']);
-        $this->createTag(['name' => 'Other Tag']);
-
-        $html = $this->repository->buildSelect(0, 'tag_id', $tag->id);
-
-        $this->assertStringContainsString('value="'.$tag->id.'" selected', $html);
     }
 
     public function test_render_checkbox_returns_html_with_labels(): void

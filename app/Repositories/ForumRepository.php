@@ -32,18 +32,10 @@ class ForumRepository extends BaseRepository implements ForumRepositoryInterface
         $this->clearForumCache();
     }
 
-    /** @param  array<string, mixed>  $data */
-    public function createForum(array $data): int
+    public function clearForumCache(): void
     {
-        $id = (int) DB::table('forums')->insertGetId($data);
-        $this->clearForumCache();
-
-        return $id;
-    }
-
-    public function getMaxForumSort(): int
-    {
-        return (int) DB::table('forums')->count();
+        Cache::forgetWithLocales('forums_list');
+        Cache::forgetWithLocales('forum_moderator_array');
     }
 
     /** @return  array<string, mixed>|null */
@@ -52,23 +44,6 @@ class ForumRepository extends BaseRepository implements ForumRepositoryInterface
         $row = (array) DB::table('forums')->where('id', $id)->first();
 
         return empty($row) ? null : $row;
-    }
-
-    /** @return  array<int, array<string, mixed>> */
-    public function getForumsWithOverforum(): array
-    {
-        return DB::table('forums')
-            ->leftJoin('overforums', 'forums.forid', '=', 'overforums.id')
-            ->orderBy('forums.sort')
-            ->get(['forums.*', 'overforums.name AS of_name'])
-            ->map(fn ($r) => (array) $r)
-            ->all();
-    }
-
-    public function clearForumCache(): void
-    {
-        Cache::forgetWithLocales('forums_list');
-        Cache::forgetWithLocales('forum_moderator_array');
     }
 
     public function getActiveForumUserCount(): int

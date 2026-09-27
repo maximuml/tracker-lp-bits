@@ -5,28 +5,11 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Enums\OfferAllowed;
-use App\Models\Category;
-use App\Models\Torrent;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class TorrentUploadRepository
 {
-    public function getCategoryMode(int $catId): ?string
-    {
-        $mode = Category::query()->where('id', $catId)->value('mode');
-
-        return $mode === null ? null : (string) $mode;
-    }
-
-    public function allowedOfferCount(int $userId): int
-    {
-        return DB::table('offers')
-            ->where('allowed', OfferAllowed::ALLOWED->value)
-            ->where('userid', $userId)
-            ->count();
-    }
-
     public function isAllowedOffer(int $offerId, int $userId): bool
     {
         return DB::table('offers')
@@ -34,32 +17,6 @@ class TorrentUploadRepository
             ->where('allowed', OfferAllowed::ALLOWED->value)
             ->where('userid', $userId)
             ->exists();
-    }
-
-    public function rollbackTorrent(int $torrentId): void
-    {
-        Torrent::query()->where('id', $torrentId)->delete();
-    }
-
-    /**
-     * @param  array<int|string, mixed>  $fileList
-     */
-    public function syncFiles(int $torrentId, array $fileList): void
-    {
-        DB::table('files')->where('torrent', $torrentId)->delete();
-
-        $inserts = [];
-        foreach ($fileList as $file) {
-            $inserts[] = [
-                'torrent' => $torrentId,
-                'filename' => $file['path'],
-                'size' => $file['size'],
-            ];
-        }
-
-        if (! empty($inserts)) {
-            DB::table('files')->insert($inserts);
-        }
     }
 
     /**

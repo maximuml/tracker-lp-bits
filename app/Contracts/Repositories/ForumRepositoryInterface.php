@@ -20,20 +20,8 @@ interface ForumRepositoryInterface
      */
     public function updateForum(int $id, array $data);
 
-    /**
-     * @param  array<string, mixed>  $data
-     */
-    public function createForum(array $data): int;
-
-    public function getMaxForumSort(): int;
-
     /** @return array<string, mixed>|null */
     public function getForumRow(int $id): ?array;
-
-    /**
-     * @return array<int, array<string, mixed>>
-     */
-    public function getForumsWithOverforum(): array;
 
     /**
      * @return void

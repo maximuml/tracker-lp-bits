@@ -21,7 +21,7 @@ use Tests\TestCase;
 /**
  * Unit tests for TorrentRepository.
  *
- * Covers getShareRatio(), getPaidIcon(), getBookmarkTorrentIds(),
+ * Covers getShareRatio(), getBookmarkTorrentIds(),
  * findForUserValue(), getLastComment(), getSnatchInfo().
  */
 #[TestCategory(TestCategory::SERVICE_INTEGRATION)]
@@ -88,37 +88,6 @@ final class TorrentRepositoryTest extends TestCase
         $ratio = $this->statsService->getShareRatio($peer);
 
         $this->assertSame(0.333, $ratio);
-    }
-
-    public function test_get_paid_icon_returns_empty_string_when_price_zero(): void
-    {
-        $result = $this->repository->getPaidIcon(['price' => 0]);
-
-        $this->assertSame('', $result);
-    }
-
-    public function test_get_paid_icon_returns_empty_string_when_price_missing(): void
-    {
-        $result = $this->repository->getPaidIcon([]);
-
-        $this->assertSame('', $result);
-    }
-
-    public function test_get_paid_icon_returns_html_when_price_positive(): void
-    {
-        $result = $this->repository->getPaidIcon(['price' => 100]);
-
-        $this->assertStringContainsString('<svg', $result);
-        $this->assertStringContainsString('width="16"', $result);
-        $this->assertStringContainsString('height="16"', $result);
-    }
-
-    public function test_get_paid_icon_uses_custom_size(): void
-    {
-        $result = $this->repository->getPaidIcon(['price' => 100], 32);
-
-        $this->assertStringContainsString('width="32"', $result);
-        $this->assertStringContainsString('height="32"', $result);
     }
 
     public function test_get_bookmark_torrent_ids_returns_zero_array_when_no_bookmarks(): void

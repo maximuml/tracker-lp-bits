@@ -11,22 +11,15 @@ use App\Enums\TorrentOperationAction;
 use App\Enums\TorrentPosState;
 use App\Enums\TorrentPromotion;
 use App\Events\TorrentDeleted;
-use App\Events\TorrentUpdated;
-use App\Exceptions\NexusException;
 use App\Models\Category;
-use App\Models\SearchBox;
-use App\Models\SiteLog;
 use App\Models\Torrent;
 use App\Models\TorrentOperationLog;
 use App\Models\TorrentTag;
 use App\Support\Config\SiteConfig;
-use App\Support\Locale;
 use App\Support\Logger;
 use App\Support\Path;
-use App\Support\Permissions;
 use App\Support\UserDisplay;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
@@ -39,7 +32,6 @@ use Illuminate\Support\Facades\DB;
 class TorrentModerationRepository extends BaseRepository
 {
     public function __construct(
-        private readonly SearchBoxRepository $searchBoxRepository,
         private readonly TorrentDownloadRepository $downloadRepository,
         private readonly MeiliSearchRepository $meiliSearchRepository,
         private readonly TorrentApprovalRepository $approvalRepository = new TorrentApprovalRepository,
@@ -182,85 +174,6 @@ class TorrentModerationRepository extends BaseRepository
         $idArr = Arr::wrap($id);
 
         return Torrent::query()->whereIn('id', $idArr)->update($update);
-    }
-
-    /**
-     * @param  \Illuminate\Support\Collection<int, mixed>|Collection<int, mixed>  $torrents
-     * @param  array<int|string, mixed>  $specificSubCategoryAndTags
-     */
-    public function changeCategory(\Illuminate\Support\Collection|Collection $torrents, int $sectionId, array $specificSubCategoryAndTags): void
-    {
-        Permissions::assertHasPermission(Permission::canManageTorrent());
-        $torrentIdArr = $torrents->pluck('id')->toArray();
-        if (empty($torrentIdArr)) {
-            Logger::writeWithContext((string) 'torrents is empty', (string) 'warn', (bool) false);
-
-            return;
-        }
-        $torrentIdStr = implode(',', $torrentIdArr);
-        Logger::writeWithContext((string) "torrentIdStr: {$torrentIdStr}, sectionId: {$sectionId}", (string) 'info', (bool) false);
-        $searchBoxRep = $this->searchBoxRepository;
-        $sections = $searchBoxRep->listSections(SearchBox::listAllSectionId(), true)->keyBy('id');
-        if (! $sections->has($sectionId)) {
-            throw new NexusException(Locale::trans('upload.invalid_section', [], null));
-        }
-        $section = $sections->get($sectionId);
-        if (! $section instanceof SearchBox) {
-            throw new NexusException(Locale::trans('upload.invalid_section', [], null));
-        }
-        $validCategoryIdArr = $section->categories->pluck('id')->toArray();
-        if (! empty($specificSubCategoryAndTags['category']) && ! in_array($specificSubCategoryAndTags['category'], $validCategoryIdArr)) {
-            throw new NexusException(Locale::trans('upload.invalid_category', [], null));
-        }
-        $categoryId = (int) ($specificSubCategoryAndTags['category'] ?? 0);
-        $category = Category::query()->find($categoryId);
-        if (! $category instanceof Category) {
-            $category = null;
-        }
-        $baseUpdateQuery = Torrent::query()->whereIn('id', $torrentIdArr);
-        $updateCategoryQuery = $baseUpdateQuery->clone();
-        if (! empty($validCategoryIdArr)) {
-            $updateCategoryQuery->whereNotIn('category', $validCategoryIdArr);
-        }
-        $updateCategoryResult = $updateCategoryQuery->update(['category' => 0]);
-        Logger::writeWithContext((string) sprintf('update category = 0 when category not in: %s, result: %s', implode(', ', $validCategoryIdArr), $updateCategoryResult), (string) 'info', (bool) false);
-
-        foreach (SearchBox::$taxonomies as $name => $info) {
-            $relationName = "taxonomy_{$name}";
-            $relation = $section->{$relationName};
-            if (empty($specificSubCategoryAndTags[$name])) {
-                continue;
-            }
-            // 有指定，看是否有效
-            if (! $relation) {
-                Logger::writeWithContext((string) "searchBox: {$section->id} no relation of {$name}", (string) 'info', (bool) false);
-                throw new NexusException(Locale::trans('upload.not_supported_sub_category_field', ['field' => $name], null));
-            }
-            $validIdArr = $relation->pluck('id')->toArray();
-            $taxonomyId = (int) $specificSubCategoryAndTags[$name];
-            if (! in_array($taxonomyId, $validIdArr)) {
-                Logger::writeWithContext((string) ("taxonomy {$name}, specific: {$taxonomyId} not in validIdArr: ".implode(', ', $validIdArr)), (string) 'info', (bool) false);
-                throw new NexusException(Locale::trans('upload.not_supported_sub_category_field', ['field' => $name], null));
-            }
-
-        }
-        $operatorId = UserDisplay::currentId();
-        $siteLogArr = [];
-        foreach ($torrents as $torrent) {
-            $siteLogArr[] = [
-                'added' => now(),
-                'txt' => sprintf('torrent: %s category was set to: %s(%s)', $torrent->id, $category ? $category->name : 'unknown', $category ? $category->id : 0),
-                'uid' => $operatorId,
-            ];
-        }
-        DB::transaction(function () use ($torrentIdArr, $categoryId, $siteLogArr) {
-            SiteLog::query()->insert($siteLogArr);
-            Torrent::query()->whereIn('id', $torrentIdArr)->update(['category' => $categoryId]);
-        });
-        foreach ($torrents as $torrent) {
-            event(new TorrentUpdated($torrent));
-        }
-        Logger::writeWithContext((string) ("success change to section {$sectionId}, torrent count:".$torrents->count()), (string) 'info', (bool) false);
     }
 
     /**

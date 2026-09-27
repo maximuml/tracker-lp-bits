@@ -19,7 +19,7 @@ use Tests\TestCase;
  * Unit tests for AgentAllowRepository.
  *
  * Covers getList(), store(), update(), getDetail(), delete(),
- * getPatternMatches(), and checkClientSimple().
+ * and getPatternMatches().
  */
 #[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class AgentAllowRepositoryTest extends TestCase
@@ -226,75 +226,6 @@ final class AgentAllowRepositoryTest extends TestCase
         $matches = $this->repository->getPatternMatches('/^qBittorrent\/(\d+)\.(\d+)\.(\d+)/', 'qBittorrent/4.5.0.1', 2);
 
         $this->assertSame(['4', '5'], $matches);
-    }
-
-    public function test_check_client_simple_throws_when_no_allows(): void
-    {
-        $this->expectException(ClientNotAllowedException::class);
-
-        $this->repository->checkClientSimple('-QB4500', 'qBittorrent/4.5.0');
-    }
-
-    public function test_check_client_simple_passes_when_pattern_matches(): void
-    {
-        $this->insertAgentAllow([
-            'family' => 'qBittorrent',
-            'start_name' => 'v4.5',
-            'peer_id_pattern' => '/^-QB/',
-            'peer_id_start' => '-QB4500',
-            'agent_pattern' => '/qBittorrent\/4/',
-            'agent_start' => 'qBittorrent/4.5.0',
-            'exception' => 0,
-            'allowhttps' => 1,
-        ]);
-
-        $result = $this->repository->checkClientSimple('-QB4500', 'qBittorrent/4.5.0');
-
-        $this->assertInstanceOf(AgentAllow::class, $result);
-        $this->assertSame('qBittorrent', $result->family);
-    }
-
-    public function test_check_client_simple_throws_when_no_pattern_matches(): void
-    {
-        $this->insertAgentAllow([
-            'family' => 'qBittorrent',
-            'start_name' => 'v4.5',
-            'peer_id_pattern' => '/^-QB/',
-            'peer_id_start' => '-QB4500',
-            'agent_pattern' => '/qBittorrent\/4/',
-            'agent_start' => 'qBittorrent/4.5.0',
-            'exception' => 0,
-            'allowhttps' => 1,
-        ]);
-
-        $this->expectException(ClientNotAllowedException::class);
-
-        $this->repository->checkClientSimple('-XX1234', 'UnknownClient/1.0');
-    }
-
-    public function test_check_client_simple_throws_when_denied_by_exception(): void
-    {
-        $id = $this->insertAgentAllow([
-            'family' => 'qBittorrent',
-            'start_name' => 'v4.5',
-            'peer_id_pattern' => '/^-QB/',
-            'peer_id_start' => '-QB4500',
-            'agent_pattern' => '/qBittorrent\/4/',
-            'agent_start' => 'qBittorrent/4.5.0',
-            'exception' => 1,
-            'allowhttps' => 1,
-        ]);
-        DB::table('agent_allowed_exception')->insert([
-            'family_id' => $id,
-            'name' => 'BannedPeer',
-            'peer_id' => '-QB4500',
-            'agent' => 'qBittorrent/4.5.0',
-            'comment' => 'banned version',
-        ]);
-
-        $this->expectException(ClientNotAllowedException::class);
-
-        $this->repository->checkClientSimple('-QB4500', 'qBittorrent/4.5.0');
     }
 
     /**

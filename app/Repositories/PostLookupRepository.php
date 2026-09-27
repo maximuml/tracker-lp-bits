@@ -111,24 +111,6 @@ class PostLookupRepository extends BaseRepository
         return Post::query()->with('user')->where('id', $id)->first();
     }
 
-    public function getFirstPostId(int $topicid): int
-    {
-        return (int) Post::query()->where('topicid', $topicid)->min('id');
-    }
-
-    /**
-     * @return array{topicid: int, userid: int}|null
-     */
-    public function getPostTopicAndUser(int $postid): ?array
-    {
-        $post = Post::query()->where('id', $postid)->first(['topicid', 'userid']);
-
-        return $post ? [
-            'topicid' => (int) $post->topicid,
-            'userid' => (int) $post->userid,
-        ] : null;
-    }
-
     public function getPreviousPostId(int $topicid, int $postid): ?int
     {
         return Post::query()

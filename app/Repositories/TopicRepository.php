@@ -68,13 +68,6 @@ class TopicRepository extends BaseRepository
         return Topic::query()->where('id', $topicid)->value('forumid');
     }
 
-    public function isTopicLocked(int $topicid): ?bool
-    {
-        $topic = Topic::query()->where('id', $topicid)->first(['locked']);
-
-        return $topic?->locked;
-    }
-
     public function getTopic(int $id): ?Topic
     {
         return Topic::query()->where('id', $id)->first();

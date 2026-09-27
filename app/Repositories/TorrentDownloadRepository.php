@@ -159,23 +159,6 @@ class TorrentDownloadRepository extends BaseRepository implements TorrentDownloa
     }
 
     /**
-     * @param  mixed  $id
-     * @param  mixed  $uid
-     * @param  mixed  $initializeIfNotExists
-     *
-     * @deprecated
-     *
-     * @throws NexusException
-     */
-    public function getTrackerReportAuthKey($id, $uid, $initializeIfNotExists = false): string
-    {
-        $key = $this->getTrackerReportAuthKeySecret($id, $uid, $initializeIfNotExists);
-        $hash = (new Hashids($key))->encode(date('Ymd'));
-
-        return sprintf('%s|%s|%s', $id, $uid, $hash);
-    }
-
-    /**
      * @param  mixed  $authKey
      * @return array<int|string, mixed>
      *

@@ -28,13 +28,6 @@ interface TorrentDownloadRepositoryInterface
     public function decryptDownHash($downHash, $user);
 
     /**
-     * @param  mixed  $id
-     * @param  mixed  $uid
-     * @param  mixed  $initializeIfNotExists
-     */
-    public function getTrackerReportAuthKey($id, $uid, $initializeIfNotExists = false): string;
-
-    /**
      * @param  mixed  $authKey
      * @return array<int|string, mixed>
      */

@@ -15,8 +15,8 @@ use Tests\TestCase;
 /**
  * Unit tests for ForumRepository.
  *
- * Covers createForum(), updateForum(), deleteForum(), getForumRow(),
- * getMaxForumSort(), getTopicIdByPost(), isModeratorOfTopic().
+ * Covers updateForum(), deleteForum(), getForumRow(),
+ * getTopicIdByPost(), isModeratorOfTopic().
  */
 #[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class ForumRepositoryTest extends TestCase
@@ -34,22 +34,9 @@ final class ForumRepositoryTest extends TestCase
         $this->topicRepository = app(TopicRepository::class);
     }
 
-    public function test_create_forum_returns_id(): void
-    {
-        $id = $this->repository->createForum([
-            'name' => 'Test Forum',
-            'description' => 'Test description',
-            'sort' => 1,
-            'forid' => 0,
-        ]);
-
-        $this->assertGreaterThan(0, $id);
-        $this->assertDatabaseHas('forums', ['id' => $id, 'name' => 'Test Forum']);
-    }
-
     public function test_update_forum_modifies_record(): void
     {
-        $id = $this->repository->createForum([
+        $id = DB::table('forums')->insertGetId([
             'name' => 'Original Name',
             'description' => 'Original desc',
             'sort' => 1,
@@ -63,7 +50,7 @@ final class ForumRepositoryTest extends TestCase
 
     public function test_get_forum_row_returns_array(): void
     {
-        $id = $this->repository->createForum([
+        $id = DB::table('forums')->insertGetId([
             'name' => 'Get Row Test',
             'description' => 'desc',
             'sort' => 1,
@@ -83,25 +70,9 @@ final class ForumRepositoryTest extends TestCase
         $this->assertNull($row);
     }
 
-    public function test_get_max_forum_sort_returns_count(): void
-    {
-        $initial = $this->repository->getMaxForumSort();
-
-        $this->repository->createForum([
-            'name' => 'Sort Test',
-            'description' => '',
-            'sort' => 1,
-            'forid' => 0,
-        ]);
-
-        $after = $this->repository->getMaxForumSort();
-
-        $this->assertSame($initial + 1, $after);
-    }
-
     public function test_delete_forum_removes_forum_and_topics(): void
     {
-        $id = $this->repository->createForum([
+        $id = DB::table('forums')->insertGetId([
             'name' => 'Delete Test',
             'description' => '',
             'sort' => 1,
@@ -116,7 +87,7 @@ final class ForumRepositoryTest extends TestCase
     public function test_get_topic_id_by_post_returns_topic_id(): void
     {
         $user = User::factory()->create();
-        $forumId = $this->repository->createForum([
+        $forumId = DB::table('forums')->insertGetId([
             'name' => 'Topic Test',
             'description' => '',
             'sort' => 1,

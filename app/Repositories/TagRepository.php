@@ -10,7 +10,6 @@ use App\Models\Tag;
 use App\Models\Torrent;
 use App\Models\TorrentTag;
 use App\Support\Json;
-use App\Support\Locale;
 use App\Support\Logger;
 use App\Support\TorrentTags;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
@@ -263,27 +262,5 @@ class TagRepository extends BaseRepository implements TagRepositoryInterface
         }
 
         return self::$allTags;
-    }
-
-    /**
-     * @param  mixed  $name
-     * @param  mixed  $value
-     */
-    public function buildSelect(int $searchBoxId, $name, $value): string
-    {
-        $options = [];
-        foreach ($this->listAll($searchBoxId) as $item) {
-            $options[] = [
-                'value' => $item->id,
-                'label' => (string) $item->name,
-                'selected' => $item->id == $value,
-            ];
-        }
-
-        return view('tags._select', [
-            'name' => $name,
-            'placeholder' => Locale::trans('nexus.select_one_please', [], null),
-            'options' => $options,
-        ])->render();
     }
 }

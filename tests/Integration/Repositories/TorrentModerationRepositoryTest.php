@@ -12,7 +12,6 @@ use App\Enums\UserClass;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\MeiliSearchRepository;
-use App\Repositories\SearchBoxRepository;
 use App\Repositories\TorrentDownloadRepository;
 use App\Repositories\TorrentModerationRepository;
 use App\Support\Permissions;
@@ -54,13 +53,12 @@ final class TorrentModerationRepositoryTest extends TestCase
         DB::table('tags')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
-        $searchBoxMock = Mockery::mock(SearchBoxRepository::class);
         $downloadMock = Mockery::mock(TorrentDownloadRepository::class);
         $meiliMock = Mockery::mock(MeiliSearchRepository::class);
         $meiliMock->shouldReceive('deleteDocuments')->andReturnNull();
 
         /** @phpstan-ignore-next-line */
-        $this->repository = new TorrentModerationRepository($searchBoxMock, $downloadMock, $meiliMock);
+        $this->repository = new TorrentModerationRepository($downloadMock, $meiliMock);
     }
 
     protected function tearDown(): void

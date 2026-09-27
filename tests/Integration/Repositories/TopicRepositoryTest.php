@@ -19,7 +19,7 @@ use Tests\TestCase;
  * Covers topicExists(), getTopic(), getTopicWithUser(), createTopic(),
  * updateTopicSubject(), getTopicsByForum(),
  * getUnreadTopics(), getTopicById(), getLastTopicByForum(),
- * getTopicForumId(), isTopicLocked(), incrementTopicViews(),
+ * getTopicForumId(), incrementTopicViews(),
  * getTopicSubject(), getTopicIdByPost(), isModeratorOfTopic(),
  * getTotalTopicsCount(), getTopicForumAndUser().
  *
@@ -116,15 +116,6 @@ final class TopicRepositoryTest extends TestCase
         $result = $this->repository->getTopicForumId($topic->id);
 
         $this->assertSame($forum->id, $result);
-    }
-
-    public function test_is_topic_locked_returns_locked_flag(): void
-    {
-        $topic = Topic::factory()->create(['locked' => true]);
-
-        $result = $this->repository->isTopicLocked($topic->id);
-
-        $this->assertTrue($result);
     }
 
     public function test_increment_topic_views_increments_views(): void

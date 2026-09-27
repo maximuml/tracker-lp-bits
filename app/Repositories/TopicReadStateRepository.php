@@ -30,31 +30,6 @@ class TopicReadStateRepository extends BaseRepository
         return $ret;
     }
 
-    public function getReadPost(int $userId, int $topicId): ?\stdClass
-    {
-        return DB::table('readposts')
-            ->where('userid', $userId)
-            ->where('topicid', $topicId)
-            ->first();
-    }
-
-    public function insertReadPost(int $userId, int $topicId, int $postId): bool
-    {
-        return (bool) DB::table('readposts')->insert([
-            'userid' => $userId,
-            'topicid' => $topicId,
-            'lastpostread' => $postId,
-        ]);
-    }
-
-    public function updateReadPost(int $userId, int $topicId, int $postId): bool
-    {
-        return (bool) DB::table('readposts')
-            ->where('userid', $userId)
-            ->where('topicid', $topicId)
-            ->update(['lastpostread' => $postId]);
-    }
-
     public function markPostRead(int $userId, int $topicId, int $postId, int $lastCatchup): bool
     {
         $readPost = DB::table('readposts')

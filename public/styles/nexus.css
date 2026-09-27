@@ -662,3 +662,23 @@ table.nx-torrents td.rowfollow img{vertical-align:middle}
 /* Legacy `nowrap` attribute migrated to a class — define it globally
    (Classic theme had it; modern chrome did not). */
 .nowrap{white-space:nowrap}
+
+/* Classes the shared views emit that only Classic/theme.css used to
+   define — functional port so modern chrome (and non-Classic packs)
+   render them too. Classic still wins where it defines the same
+   selectors (it loads after this file). */
+ul.menu{margin:0;padding:0;list-style:none}
+ul.menu li{display:inline;margin:0}
+ul.menu li a{display:inline-block;padding:3px 8px;border:1px solid var(--nxm-border,#778);border-bottom:none;text-decoration:none;background:var(--nxm-surface-alt,#cfe0df);color:var(--nxm-text,#000)}
+ul.menu li.selected a{font-weight:bold;background:var(--nxm-surface,#fff);position:relative;top:1px;border-bottom-color:var(--nxm-surface,#fff)}
+.dropmenu{position:absolute;z-index:50;background:var(--nxm-surface,#fff);color:var(--nxm-text,#000);border:1px solid var(--nxm-border,#a6c9d7);padding:6px;text-align:left}
+.dropmenu ul{list-style:none;margin:0;padding:0;white-space:nowrap}
+.attach img{border:0;width:16px;height:16px}
+.attach .size{color:var(--nxm-muted,gray)}
+.codetop{font-weight:bold;padding:3px;border:1px solid var(--nxm-border,#000);border-bottom:none;background:var(--nxm-warning-bg,#f1b000);color:var(--nxm-text,#000)}
+.codemain{border:1px solid var(--nxm-border,#000);padding:3px;margin:0 auto;background:var(--nxm-surface,#fff);color:var(--nxm-text,#000)}
+.sublink{font-weight:normal;font-style:italic}
+a.index{font-weight:bold}
+img.border{border:1px solid var(--nxm-border,#000)}
+.color_slots{color:#1900d1}
+table.torrents .colhead,table.torrents td.rowfollow{text-align:center}

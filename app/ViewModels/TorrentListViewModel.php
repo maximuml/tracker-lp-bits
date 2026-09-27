@@ -25,7 +25,6 @@ final class TorrentListViewModel
         public readonly array $columns,
         public readonly array $rows,
         public readonly bool $showComments,
-        public readonly bool $canManage,
         public readonly bool $showPromotionNote,
         public readonly array $lastCommentTooltips,
     ) {}

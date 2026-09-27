@@ -66,9 +66,6 @@
             <i>{{ __('legacy/functions.text_orphaned') }}</i>
         @endif
     </td>
-    @if ($row->staffDeleteUrl !== null)
-    <td class="rowfollow nxm-td-staff"><a href="{{ $row->staffDeleteUrl }}"><img class="staff_delete" src="pic/trans.gif" alt="D" title="{{ __('legacy/functions.text_delete') }}" /></a></td>
-    @endif
 </tr>
 @endforeach
 </tbody>

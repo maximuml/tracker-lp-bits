@@ -4,10 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
-use App\Support\Cache\LegacyRedisCache;
-use App\Support\Config\SiteConfig;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 /**
  * Per-request value object that holds all legacy runtime state.
@@ -23,13 +20,6 @@ final class NexusContext
     /** @var array<string, mixed>|null */
     public ?array $user = null;
 
-    public ?LegacyRedisCache $cache = null;
-
-    public string $bonusTweak = '';
-
-    /** @var array<string, mixed> */
-    public array $siteConfig = [];
-
     /** @var array<string, mixed> */
     public array $server = [];
 
@@ -38,15 +28,6 @@ final class NexusContext
 
     /** @var array<string, mixed> */
     public array $get = [];
-
-    /** @var array<string, mixed> */
-    public array $post = [];
-
-    /** @var array<string, mixed> */
-    public array $request = [];
-
-    /** @var array<string, mixed> */
-    public array $files = [];
 
     /** @var array<string, mixed> */
     public array $userUpdateSet = [];
@@ -70,54 +51,14 @@ final class NexusContext
         '__composer_autoload_files',
     ];
 
-    public static function fromRequest(Request $request): self
-    {
-        $context = new self;
-        $context->setFromRequest($request);
-
-        return $context;
-    }
-
     public function setFromRequest(Request $request): void
     {
         $this->laravelRequest = $request;
         $this->server = $request->server->all();
         $this->cookie = $request->cookies->all();
         $this->get = $request->query->all();
-        $this->post = $request->request->all();
-        $this->request = $request->input();
-        $this->files = $this->normalizeFiles($request->files->all());
 
         $this->ensureUserUpdateSetReference();
-    }
-
-    /**
-     * Convert Symfony UploadedFile objects into the legacy array format so
-     * legacy partials can keep using $file['tmp_name'], $file['size'], etc.
-     *
-     * @param  array<string, mixed>  $files
-     * @return array<string, mixed>
-     */
-    private function normalizeFiles(array $files): array
-    {
-        $normalized = [];
-        foreach ($files as $key => $value) {
-            if (is_array($value)) {
-                $normalized[$key] = $this->normalizeFiles($value);
-            } elseif ($value instanceof UploadedFile) {
-                $normalized[$key] = [
-                    'name' => $value->getClientOriginalName(),
-                    'type' => $value->getClientMimeType(),
-                    'tmp_name' => $value->getPathname(),
-                    'error' => $value->getError(),
-                    'size' => $value->getSize(),
-                ];
-            } else {
-                $normalized[$key] = $value;
-            }
-        }
-
-        return $normalized;
     }
 
     /** @param array<string, mixed>|null $user */
@@ -139,67 +80,9 @@ final class NexusContext
         return $this->userUpdateSet;
     }
 
-    /** @param array<string, mixed> $data */
-    public function setUserUpdateSet(array $data): void
-    {
-        $this->globals['USERUPDATESET'] = $data;
-        $this->userUpdateSet = &$this->globals['USERUPDATESET'];
-    }
-
     public function addUserUpdate(string $key, mixed $value): void
     {
         $this->userUpdateSet[$key] = $value;
-    }
-
-    public function setCache(?LegacyRedisCache $cache): void
-    {
-        $this->cache = $cache;
-        $this->globals['Cache'] = $cache;
-    }
-
-    public function getCache(): ?LegacyRedisCache
-    {
-        return $this->cache;
-    }
-
-    public function setBonusTweak(string $value): void
-    {
-        $this->bonusTweak = $value;
-        $this->globals['bonus_tweak'] = $value;
-    }
-
-    public function getBonusTweak(): string
-    {
-        return $this->bonusTweak;
-    }
-
-    /** @param array<string, mixed> $config */
-    public function setSiteConfig(array $config): void
-    {
-        $this->siteConfig = $config;
-        foreach ($config as $key => $value) {
-            $this->globals[$key] = $value;
-        }
-    }
-
-    /** @return array<string, mixed> */
-    public function getSiteConfig(): array
-    {
-        if (! empty($this->siteConfig)) {
-            return $this->siteConfig;
-        }
-
-        $siteConfig = SiteConfig::current();
-
-        return $this->siteConfig = [
-            'SITENAME' => $siteConfig->basic->siteName(),
-            'SITEEMAIL' => $siteConfig->main->siteEmail(),
-            'smtptype' => $siteConfig->smtp->type(),
-            'smtp' => $siteConfig->smtp->smtp(),
-            'smtp_host' => $siteConfig->smtp->host(),
-            'smtp_port' => $siteConfig->smtp->port(),
-            'smtp_from' => $siteConfig->smtp->from(),
-        ];
     }
 
     public function setGlobal(string $key, mixed $value): void
@@ -228,11 +111,6 @@ final class NexusContext
         return $context;
     }
 
-    public function setServerValue(string $key, mixed $value): void
-    {
-        $this->server[$key] = $value;
-    }
-
     public function getServerValue(string $key, mixed $default = null): mixed
     {
         if (array_key_exists($key, $this->server)) {
@@ -247,12 +125,6 @@ final class NexusContext
         }
 
         return $default;
-    }
-
-    /** @param array<string, mixed> $cookie */
-    public function setCookie(array $cookie): void
-    {
-        $this->cookie = $cookie;
     }
 
     public function getCookieValue(string $key, ?string $default = null): ?string
@@ -272,26 +144,6 @@ final class NexusContext
         return is_string($value) || $value === null ? $value : (string) $value;
     }
 
-    /** @return array<string, mixed> */
-    public function allCookie(): array
-    {
-        if (! empty($this->cookie)) {
-            return $this->cookie;
-        }
-
-        if ($this->laravelRequest !== null) {
-            return $this->laravelRequest->cookies->all();
-        }
-
-        return [];
-    }
-
-    /** @param array<string, mixed> $get */
-    public function setGet(array $get): void
-    {
-        $this->get = $get;
-    }
-
     public function getQuery(string $key, mixed $default = null): mixed
     {
         if (array_key_exists($key, $this->get)) {
@@ -303,143 +155,6 @@ final class NexusContext
         }
 
         return $default;
-    }
-
-    public function removeQuery(string $key): void
-    {
-        unset($this->get[$key]);
-    }
-
-    /** @return array<string, mixed> */
-    public function allQuery(): array
-    {
-        if (! empty($this->get)) {
-            return $this->get;
-        }
-
-        if ($this->laravelRequest !== null) {
-            return $this->laravelRequest->query->all();
-        }
-
-        return [];
-    }
-
-    /** @param array<string, mixed> $post */
-    public function setPost(array $post): void
-    {
-        $this->post = $post;
-    }
-
-    public function getPost(string $key, mixed $default = null): mixed
-    {
-        if (array_key_exists($key, $this->post)) {
-            return $this->post[$key];
-        }
-
-        if ($this->laravelRequest !== null) {
-            return $this->laravelRequest->request->all()[$key] ?? $default;
-        }
-
-        return $default;
-    }
-
-    public function removePost(string $key): void
-    {
-        unset($this->post[$key]);
-    }
-
-    /** @return array<string, mixed> */
-    public function allPost(): array
-    {
-        if (! empty($this->post)) {
-            return $this->post;
-        }
-
-        if ($this->laravelRequest !== null) {
-            return $this->laravelRequest->request->all();
-        }
-
-        return [];
-    }
-
-    /** @param array<string, mixed> $request */
-    public function setRequest(array $request): void
-    {
-        $this->request = $request;
-    }
-
-    public function getRequestInput(string $key, mixed $default = null): mixed
-    {
-        if (array_key_exists($key, $this->request)) {
-            return $this->request[$key];
-        }
-
-        if ($this->laravelRequest !== null) {
-            return $this->laravelRequest->input($key, $default);
-        }
-
-        return $default;
-    }
-
-    public function removeRequestInput(string $key): void
-    {
-        unset($this->request[$key]);
-    }
-
-    /** @return array<string, mixed> */
-    public function allRequest(): array
-    {
-        if (! empty($this->request)) {
-            return $this->request;
-        }
-
-        if ($this->laravelRequest !== null) {
-            return $this->laravelRequest->input();
-        }
-
-        return [];
-    }
-
-    /** @param array<string, mixed> $files */
-    public function setFiles(array $files): void
-    {
-        $this->files = $this->normalizeFiles($files);
-    }
-
-    public function getFile(string $key, mixed $default = null): mixed
-    {
-        return $this->files[$key] ?? $default;
-    }
-
-    /** @return array<string, mixed> */
-    public function allFiles(): array
-    {
-        return $this->files;
-    }
-
-    public function setLaravelRequest(?Request $request): void
-    {
-        $this->laravelRequest = $request;
-    }
-
-    public function getLaravelRequest(): ?Request
-    {
-        if ($this->laravelRequest !== null) {
-            return $this->laravelRequest;
-        }
-
-        if (function_exists('app')) {
-            $app = app();
-            if ($app->bound('request')) {
-                /** @var mixed $request */
-                $request = $app->make('request');
-                if ($request instanceof Request) {
-                    return $request;
-                }
-            }
-        }
-
-        return null;
     }
 
     private function ensureUserUpdateSetReference(): void

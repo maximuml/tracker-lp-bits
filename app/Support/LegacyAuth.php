@@ -25,44 +25,6 @@ use Illuminate\Http\Response;
 final class LegacyAuth
 {
     /**
-     * Legacy pre-login IP ban check.
-     */
-    public static function failedLoginsCheck(string $type, LegacyAuthContext $context): void
-    {
-        $maxAttempts = $context->maxLoginAttempts;
-        $ip = $context->ip;
-
-        $total = app(AuthRepositoryInterface::class)->getLoginAttemptsSum($ip);
-
-        if ($total >= $maxAttempts) {
-            app(AuthRepositoryInterface::class)->banLoginAttempts($ip);
-
-            LegacyResponse::abort(
-                $type.(__('legacy/functions.std_locked')).$maxAttempts.(__('legacy/functions.std_attempts_reached')),
-                (string) (__('legacy/functions.std_your_ip_banned')),
-                true,
-                true,
-            );
-        }
-    }
-
-    /**
-     * Record a failed login attempt and abort with the login-specific message.
-     */
-    public static function failedLogins(string $type, bool $recover, bool $head, LegacyAuthContext $context): void
-    {
-        self::recordFailedLogin($type, $recover, $head, 'std_failed', $context);
-    }
-
-    /**
-     * Record a failed login/recover attempt and abort with the recover message.
-     */
-    public static function loginFailedLogins(string $type, bool $recover, bool $head, LegacyAuthContext $context): void
-    {
-        self::recordFailedLogin($type, $recover, $head, 'std_recover_failed', $context);
-    }
-
-    /**
      * Legacy captcha verification.
      */
     public static function checkCode(
@@ -243,31 +205,6 @@ final class LegacyAuth
         }
 
         return true;
-    }
-
-    /**
-     * Remaining login attempts for the current IP.
-     *
-     * Mirrors the legacy `remaining()` helper: counts the `attempts`
-     * column in `loginattempts`, subtracts from `$maxAttempts`, and
-     * returns a small red/green HTML fragment.
-     */
-    public static function remainingAttemptsFromContext(string $type = 'login'): string
-    {
-        $context = LegacyAuthContext::fromSupportContext();
-
-        return self::remainingAttempts($type, $context->maxLoginAttempts, $context->ip);
-    }
-
-    public static function remainingAttempts(string $type, int $maxAttempts, string $ip): string
-    {
-        $total = app(AuthRepositoryInterface::class)->getLoginAttemptsSum($ip);
-
-        $remaining = $maxAttempts - $total;
-
-        return $remaining <= 2
-            ? '<span class="nx-color-red nx-size-2">['.$remaining.']</span>'
-            : '<span class="nx-color-green nx-size-2">['.$remaining.']</span>';
     }
 
     /**

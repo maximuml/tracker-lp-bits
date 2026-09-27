@@ -53,14 +53,4 @@ class ModtaskRepository
     {
         return User::query()->where('id', $userId)->update($data);
     }
-
-    /**
-     * @param  array<string, mixed>  $extra
-     */
-    public function addWarning(int $userId, array $extra): void
-    {
-        DB::table('users')
-            ->where('id', $userId)
-            ->increment('timeswarned', 1, $extra);
-    }
 }

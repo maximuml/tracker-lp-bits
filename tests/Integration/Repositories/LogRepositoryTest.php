@@ -207,21 +207,6 @@ final class LogRepositoryTest extends TestCase
         $this->assertSame(0, $this->repository->deleteChronicle(99999));
     }
 
-    public function test_get_generic_by_id_returns_null_when_not_found(): void
-    {
-        $this->assertNull($this->repository->getGenericById('chronicle', 99999));
-    }
-
-    public function test_get_generic_by_id_returns_array_when_found(): void
-    {
-        $id = $this->insertChronicle(1, 'generic test');
-
-        $result = $this->repository->getGenericById('chronicle', $id);
-
-        $this->assertNotNull($result);
-        $this->assertSame($id, (int) $result['id']);
-    }
-
     public function test_count_news_returns_zero_when_empty(): void
     {
         $this->assertSame(0, $this->repository->countNews([]));

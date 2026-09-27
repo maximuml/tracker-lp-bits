@@ -72,10 +72,4 @@ interface TagRepositoryInterface
 
     /** @return Collection<int, Tag> */
     public function listAll(int $searchBoxId = 0): Collection;
-
-    /**
-     * @param  mixed  $name
-     * @param  mixed  $value
-     */
-    public function buildSelect(int $searchBoxId, $name, $value): string;
 }

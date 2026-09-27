@@ -18,8 +18,7 @@ use Tests\TestCase;
  *
  * Covers postExists(), getPost(), getPostWithUser(), getPreviousPostId(),
  * getPostForQuote(), getPostForEdit(), getPostWithTopic(), getPostEditInfo(),
- * getPostArrayById(), findPostArrayById(), getFirstPostId(),
- * getPostTopicAndUser().
+ * getPostArrayById(), findPostArrayById().
  */
 #[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class PostLookupRepositoryTest extends TestCase
@@ -86,17 +85,6 @@ final class PostLookupRepositoryTest extends TestCase
         $post2 = Post::factory()->create(['topicid' => $topic->id]);
 
         $result = $this->repository->getPreviousPostId($topic->id, $post2->id);
-
-        $this->assertSame($post1->id, $result);
-    }
-
-    public function test_get_first_post_id_returns_earliest_post(): void
-    {
-        $topic = Topic::factory()->create();
-        $post1 = Post::factory()->create(['topicid' => $topic->id]);
-        Post::factory()->create(['topicid' => $topic->id]);
-
-        $result = $this->repository->getFirstPostId($topic->id);
 
         $this->assertSame($post1->id, $result);
     }
@@ -177,17 +165,5 @@ final class PostLookupRepositoryTest extends TestCase
         $result = $this->repository->findPostArrayById(999999);
 
         $this->assertNull($result);
-    }
-
-    public function test_get_post_topic_and_user_returns_array(): void
-    {
-        $user = User::factory()->create();
-        $topic = Topic::factory()->create();
-        $post = Post::factory()->create(['topicid' => $topic->id, 'userid' => $user->id]);
-
-        $result = $this->repository->getPostTopicAndUser($post->id);
-
-        $this->assertSame($topic->id, $result['topicid']);
-        $this->assertSame($user->id, $result['userid']);
     }
 }

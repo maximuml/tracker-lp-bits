@@ -51,10 +51,5 @@ interface ExamRepositoryInterface
      */
     public function listMatchExam(int $uid);
 
-    /**
-     * @return Collection<int, Exam>
-     */
-    public function listMatchTask(int $uid);
-
     public function isExamMatchUser(Exam $exam, User|int $user): bool;
 }

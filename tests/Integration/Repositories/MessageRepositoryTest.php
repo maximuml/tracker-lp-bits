@@ -24,7 +24,7 @@ use Tests\TestCase;
  * getMessageForUser(), getMessageForForward(), markAsRead(), moveMessages(),
  * deleteSingleMessage(), deleteMultipleMessages(), getNextMailboxNumber(),
  * addMailboxes(), updateMailbox(), deleteMailbox(), getUsername(),
- * getList(), store(), update(), getDetail(), delete(), getLastPmId(),
+ * getList(), store(), update(), getDetail(), delete(),
  * getUnreadPmNotifications(), and countStaffMessage().
  */
 #[TestCategory(TestCategory::SERVICE_INTEGRATION)]
@@ -446,19 +446,6 @@ final class MessageRepositoryTest extends TestCase
 
         $this->assertTrue((bool) $result);
         $this->assertSame(0, DB::table('messages')->where('id', $id)->count());
-    }
-
-    public function test_get_last_pm_id_returns_zero_when_no_messages(): void
-    {
-        $this->assertSame(0, $this->repository->getLastPmId($this->userId));
-    }
-
-    public function test_get_last_pm_id_returns_max_id(): void
-    {
-        $id1 = $this->insertMessage(['receiver' => $this->userId]);
-        $id2 = $this->insertMessage(['receiver' => $this->userId]);
-
-        $this->assertSame($id2, $this->repository->getLastPmId($this->userId));
     }
 
     public function test_get_unread_pm_notifications_returns_empty_when_none(): void

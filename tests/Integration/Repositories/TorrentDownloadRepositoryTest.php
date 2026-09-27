@@ -9,6 +9,7 @@ use App\Models\Torrent;
 use App\Models\TorrentSecret;
 use App\Models\User;
 use App\Repositories\TorrentDownloadRepository;
+use Hashids\Hashids;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -20,7 +21,7 @@ use Tests\TestCase;
  * Unit tests for TorrentDownloadRepository.
  *
  * Covers getDownloadUrl(), encryptDownHash(), decryptDownHash(),
- * getTrackerReportAuthKey(), checkTrackerReportAuthKey(),
+ * checkTrackerReportAuthKey(),
  * resetTrackerReportAuthKeySecret(), pieces-hash cache methods,
  * and touch/reset cache stamp.
  */
@@ -125,29 +126,16 @@ final class TorrentDownloadRepositoryTest extends TestCase
         $this->repository->encryptDownHash(1, ['id' => 1, 'passkey' => '']);
     }
 
-    public function test_get_tracker_report_auth_key_returns_formatted_string(): void
-    {
-        /** @var User $user */
-        $user = User::factory()->create();
-
-        $authKey = $this->repository->getTrackerReportAuthKey(10, $user->id, true);
-
-        $parts = explode('|', $authKey);
-        $this->assertCount(3, $parts);
-        $this->assertSame('10', $parts[0]);
-        $this->assertSame((string) $user->id, $parts[1]);
-    }
-
     public function test_check_tracker_report_auth_key_decodes_successfully(): void
     {
         /** @var User $user */
         $user = User::factory()->create();
 
         // Pre-create the secret so the cache doesn't store a stale false
-        $this->repository->resetTrackerReportAuthKeySecret($user->id, 0);
+        $secret = $this->repository->resetTrackerReportAuthKeySecret($user->id, 20);
         Cache::flush();
 
-        $authKey = $this->repository->getTrackerReportAuthKey(20, $user->id, true);
+        $authKey = sprintf('20|%s|%s', $user->id, (new Hashids($secret))->encode(date('Ymd')));
         $decoded = $this->repository->checkTrackerReportAuthKey($authKey);
 
         $this->assertNotEmpty($decoded);
@@ -158,16 +146,6 @@ final class TorrentDownloadRepositoryTest extends TestCase
         $this->expectException(NexusException::class);
 
         $this->repository->checkTrackerReportAuthKey('invalid');
-    }
-
-    public function test_get_tracker_report_auth_key_throws_when_no_secret_and_no_init(): void
-    {
-        /** @var User $user */
-        $user = User::factory()->create();
-
-        $this->expectException(NexusException::class);
-
-        $this->repository->getTrackerReportAuthKey(999, $user->id, false);
     }
 
     public function test_reset_tracker_report_auth_key_secret_with_zero_torrent_id(): void

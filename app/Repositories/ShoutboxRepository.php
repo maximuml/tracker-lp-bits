@@ -272,11 +272,6 @@ final class ShoutboxRepository extends BaseRepository
         }
     }
 
-    public function getLastShoutId(): int
-    {
-        return (int) (DB::table('shoutbox')->max('id') ?? 0);
-    }
-
     /**
      * @return array<string, mixed>|null
      */

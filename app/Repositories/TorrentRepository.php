@@ -299,24 +299,6 @@ class TorrentRepository extends BaseRepository implements TorrentRepositoryInter
     }
 
     /**
-     * @param  array<int|string, mixed>  $torrentInfo
-     * @param  mixed  $size
-     * @param  mixed  $verticalAlign
-     * @return mixed
-     */
-    public function getPaidIcon(array $torrentInfo, $size = 16, $verticalAlign = 'sub')
-    {
-        if (! isset($torrentInfo['price']) || $torrentInfo['price'] <= 0) {
-            return '';
-        }
-
-        return view('torrents._paid_icon', [
-            'title' => Locale::trans('torrent.paid_torrent', [], null),
-            'size' => $size,
-        ])->render();
-    }
-
-    /**
      * @param  mixed  $name
      * @param  mixed  $value
      * @param  mixed  $noteText

@@ -18,8 +18,7 @@ use Tests\TestCase;
  * Unit tests for RequireSeedTorrentRepository.
  *
  * Covers doRemove(), shouldRecordUser(), recordUser(),
- * autoAddToListCronjob() (disabled path), autoRemoveFromListCronjob(),
- * and autoSettlementCronjob().
+ * autoAddToListCronjob() (disabled path).
  *
  * Note: Setting::get() uses a function-level static cache that cannot be
  * reset across tests. The require_seed_section.enabled setting is not
@@ -68,26 +67,11 @@ final class RequireSeedTorrentRepositoryTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_auto_settlement_cronjob_completes_without_error(): void
-    {
-        // autoSettlementCronjob() is currently a no-op.
-        $this->repository->autoSettlementCronjob();
-
-        $this->expectNotToPerformAssertions();
-    }
-
     public function test_auto_add_to_list_cronjob_returns_early_when_disabled(): void
     {
         // require_seed_section.enabled is not set by default, so the
         // cronjob should return early without inserting anything.
         $this->repository->autoAddToListCronjob();
-
-        $this->assertSame(0, RequireSeedTorrent::query()->count());
-    }
-
-    public function test_auto_remove_from_list_cronjob_returns_early_when_no_data(): void
-    {
-        $this->repository->autoRemoveFromListCronjob();
 
         $this->assertSame(0, RequireSeedTorrent::query()->count());
     }

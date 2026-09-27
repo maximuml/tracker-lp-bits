@@ -6,11 +6,9 @@ namespace App\Repositories;
 
 use App\Contracts\Repositories\TagRepositoryInterface;
 use App\Models\SearchBox;
-use App\Support\Input;
 use App\Support\Locale;
 use Filament\Forms;
 use Filament\Schemas\Components\Fieldset;
-use Filament\Schemas\Components\Section;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -208,15 +206,6 @@ class SearchBoxSchemaBuilder
                 ->options($items->pluck('name', 'id')->toArray())
                 ->label($searchBox->getTaxonomyLabel($torrentField));
         }
-    }
-
-    public function buildSearchBoxFormSchema(SearchBox $searchBox, string $namePrefix): Section
-    {
-        $lang = Locale::folderFromCookie(Input::cookieValue('c_lang_folder', ''), (bool) false);
-        $heading = $searchBox->section_name[$lang] ?? Locale::trans('searchbox.sections.browse', [], null);
-
-        return Section::make($heading)
-            ->schema($this->buildCategoryTaxonomyTagSchema($searchBox, false, $namePrefix));
     }
 
     /**

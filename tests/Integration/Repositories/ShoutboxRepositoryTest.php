@@ -17,7 +17,7 @@ use Tests\TestCase;
  * Unit tests for ShoutboxRepository.
  *
  * Covers history(), prefetchReactions(), getReactionCounts(), getMyReactions(),
- * getMentions(), getLastShoutId(), findUserByUsername(), torrentExists(),
+ * getMentions(), findUserByUsername(), torrentExists(),
  * and applyTypeFilter().
  */
 #[TestCategory(TestCategory::SERVICE_INTEGRATION)]
@@ -290,19 +290,6 @@ final class ShoutboxRepositoryTest extends TestCase
         $result = $this->repository->getMentions($user->id, $shoutId);
 
         $this->assertSame([], $result);
-    }
-
-    public function test_get_last_shout_id_returns_max_id(): void
-    {
-        $id1 = $this->insertShout(1, 'a', 100);
-        $id2 = $this->insertShout(2, 'b', 200);
-
-        $this->assertSame($id2, $this->repository->getLastShoutId());
-    }
-
-    public function test_get_last_shout_id_returns_zero_when_empty(): void
-    {
-        $this->assertSame(0, $this->repository->getLastShoutId());
     }
 
     public function test_find_user_by_username_returns_user_when_found(): void

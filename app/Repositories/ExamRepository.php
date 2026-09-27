@@ -176,16 +176,6 @@ class ExamRepository extends BaseRepository implements ExamRepositoryInterface
     }
 
     /**
-     * @return Collection<int, Exam>
-     */
-    public function listMatchTask(int $uid)
-    {
-        $exams = $this->listValid(null, null, ExamType::TASK->value);
-
-        return $this->filterForUser($exams, $uid);
-    }
-
-    /**
      * @param  Collection<int, Exam>  $exams
      * @return Collection<int, Exam>
      */

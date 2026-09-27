@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Tests\Integration\Repositories;
 
 use App\Repositories\ForumModRepository;
-use App\Repositories\ForumRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Tests\Attributes\TestCategory;
@@ -23,19 +22,16 @@ final class ForumModRepositoryTest extends TestCase
 
     private ForumModRepository $repository;
 
-    private ForumRepository $forumRepository;
-
     protected function setUp(): void
     {
         parent::setUp();
         $this->repository = app(ForumModRepository::class);
-        $this->forumRepository = app(ForumRepository::class);
     }
 
     /** @param  array<string, mixed>  $overrides */
     private function makeForum(array $overrides = []): int
     {
-        return $this->forumRepository->createForum(array_merge([
+        return (int) DB::table('forums')->insertGetId(array_merge([
             'name' => 'Mod Test',
             'description' => '',
             'sort' => 1,

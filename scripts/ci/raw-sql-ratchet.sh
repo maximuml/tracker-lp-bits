@@ -6,10 +6,10 @@ set -euo pipefail
 BASELINE_COUNT=$(php -r 'echo count(json_decode(file_get_contents("raw-queries.json"), true)["queries"] ?? []);')
 CURRENT=$(grep -rn 'DB::\(select\|statement\|unprepared\)\s*(' app/ --include="*.php" \
     | grep -v 'Support/Install' \
-    | wc -l)
+    | wc -l || true)
 CURRENT_SUBQUERY=$(grep -rn 'DB::table\s*(\s*DB::raw' app/ --include="*.php" \
     | grep -v 'Support/Install' \
-    | wc -l)
+    | wc -l || true)
 TOTAL=$((CURRENT + CURRENT_SUBQUERY))
 echo "Baseline: $BASELINE_COUNT"
 echo "Current raw queries: $CURRENT"

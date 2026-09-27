@@ -183,3 +183,18 @@ get client with url: http://meilisearch:7700, master key:
 14. **mybonus exchange via curl may 419 but still commit** — a stale `_token`
     produces 419 after the mutation runs. Prefer the in-browser exchange path
     for clean verification.
+15. **Announce peer flow.** `peers.torrent` is the torrent-id column (not
+    `torrent_id`). Recipe: GET
+    `http://localhost/announce?passkey=..&info_hash=<raw-byte-%XX-encoded>&peer_id=-TR4000-<12>&port=51413&event=started`
+    with `User-Agent: Transmission/4.0.0` registers a peer; `event=stopped`
+    removes the row (allow a beat before asserting).
+16. **usercp Security password fields are class-based** (`.password`/
+    `.passagain`, no name attributes) and submit via a `type=button` JS
+    handler — fill by class, click the form's button, expect the two-step
+    confirm flow.
+17. **Staff modcomments live in `user_modify_logs`** (user_id/content), not
+    `users.modcomment`.
+18. **`docker exec nexusphp-mysql mysql` default DB may be `nexusphp_testing`**
+    — always qualify `nexusphp.<table>` or pass the db name explicitly.
+19. **Bitbucket upload form is at `/bitbucket-upload.php`** (not
+    bitbucket.php).

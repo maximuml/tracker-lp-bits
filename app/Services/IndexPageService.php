@@ -17,6 +17,7 @@ use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Globals;
 use App\Support\Html\SafeHtml;
+use App\Support\Locale;
 use App\Support\Ratio;
 use App\Support\Shoutbox;
 use App\Support\UserClass;
@@ -219,7 +220,7 @@ JS;
             return ['show' => false];
         }
 
-        $cacheKey = 'index_latest_torrents_grid_v3';
+        $cacheKey = Locale::currentLangDir('en').'_index_latest_torrents_grid_v3';
         $cacheTtl = 120;
         $html = $cache->get_value($cacheKey);
 

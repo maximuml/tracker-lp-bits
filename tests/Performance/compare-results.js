@@ -33,6 +33,17 @@ const path = require('path');
 const REGRESSION_RATIO = 1.50;
 const REGRESSION_ABS_MS = 100;
 
+// Runner noise floor: page_health_live_duration does no app work, so its
+// p95 delta vs baseline measures the per-run constant added by the shared
+// runner (observed: a uniform +140-170ms on every scenario, health checks
+// included). Subtract it from every other scenario's delta so a globally
+// slow runner cannot fail a clean run. Capped so a pathological control
+// value cannot mask real regressions — the absolute per-scenario budgets
+// in the k6 thresholds remain the hard gate for that.
+const CONTROL_FILE = 'baseline.json';
+const CONTROL_SCENARIO = 'page_health_live_duration';
+const NOISE_FLOOR_CAP_MS = 200;
+
 const [, , baselineDir, currentDir] = process.argv;
 if (!baselineDir || !currentDir) {
   console.error('usage: compare-results.js <baselineDir> <currentDir>');
@@ -86,6 +97,26 @@ for (const dir of baselineDirs) {
 
 console.log(`Baseline runs aggregated: ${baselineDirs.length}`);
 
+// Measure the shared-runner noise floor from the control scenario before
+// comparing. The same job runs all files on one runner, so a single global
+// shift applies to announce.json too.
+let noiseShift = 0;
+const controlBase = samples.get(CONTROL_FILE)?.get(CONTROL_SCENARIO);
+const controlCurrentPath = path.join(currentDir, CONTROL_FILE);
+if (controlBase && controlBase.length > 0 && fs.existsSync(controlCurrentPath)) {
+  try {
+    const curControl = JSON.parse(fs.readFileSync(controlCurrentPath, 'utf8'))?.scenarios?.[CONTROL_SCENARIO]?.p95_ms;
+    if (typeof curControl === 'number' && curControl > 0) {
+      noiseShift = Math.min(Math.max(0, curControl - median(controlBase)), NOISE_FLOOR_CAP_MS);
+    }
+  } catch {
+    // No usable control sample — noiseShift stays 0.
+  }
+}
+if (noiseShift > 0) {
+  console.log(`Runner noise floor: +${noiseShift.toFixed(0)}ms (control ${CONTROL_SCENARIO}); subtracting from scenario deltas`);
+}
+
 let regressions = 0;
 let compared = 0;
 let skipped = 0;
@@ -109,6 +140,13 @@ for (const file of fs.readdirSync(currentDir).filter((f) => f.endsWith('.json'))
   }
 
   for (const [scenario, cur] of Object.entries(current.scenarios ?? {})) {
+    // The control scenario defines the noise floor — its own delta is runner
+    // noise by definition, and its absolute budget is enforced by k6.
+    if (scenario === CONTROL_SCENARIO) {
+      console.log(`SKIP ${file}:${scenario}: noise-floor control`);
+      skipped++;
+      continue;
+    }
     const values = fileSamples.get(scenario);
     if (!values || values.length === 0) {
       console.log(`SKIP ${file}:${scenario}: no baseline p95`);
@@ -117,14 +155,15 @@ for (const file of fs.readdirSync(currentDir).filter((f) => f.endsWith('.json'))
     }
 
     const baseP95 = median(values);
-    const ratio = cur.p95_ms / baseP95;
+    const adjusted = cur.p95_ms - noiseShift;
+    const ratio = adjusted / baseP95;
     const pct = ((ratio - 1) * 100).toFixed(1);
     compared++;
 
-    const delta = cur.p95_ms - baseP95;
+    const delta = adjusted - baseP95;
     if (ratio > REGRESSION_RATIO && delta > REGRESSION_ABS_MS) {
       console.log(
-        `REGRESSION ${file}:${scenario}: p95 median(${values.length}) ${baseP95.toFixed(0)}ms -> ${cur.p95_ms}ms (+${pct}%, +${delta.toFixed(0)}ms)`
+        `REGRESSION ${file}:${scenario}: p95 median(${values.length}) ${baseP95.toFixed(0)}ms -> ${cur.p95_ms}ms (+${pct}%, +${delta.toFixed(0)}ms adjusted)`
       );
       regressions++;
     } else {

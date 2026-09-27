@@ -146,18 +146,6 @@ final class SecureTokenService
     }
 
     /**
-     * Revoke a token by its digest.
-     */
-    public function revoke(string $table, string $token): bool
-    {
-        $digest = $this->digest($token);
-
-        return DB::table($table)
-            ->where('token_digest', $digest)
-            ->update(['revoked' => 1]) > 0;
-    }
-
-    /**
      * Store a new token digest in the given table.
      *
      * @param  string  $table  Database table name.

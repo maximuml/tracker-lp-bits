@@ -34,21 +34,6 @@ final class LegacyBootstrap
         self::bootUser($request);
     }
 
-    public static function bootConsole(string $rootpath = ''): void
-    {
-        self::resetAndCapture(null);
-
-        ini_set('error_reporting', E_ALL);
-        ini_set('display_errors', 0);
-
-        self::bootNexus();
-        self::bootCache($rootpath);
-        self::bootDatabase();
-        self::bootTimezone();
-        self::bootSettings();
-        self::bootLanguage($rootpath);
-    }
-
     private static function resetAndCapture(?Request $request): void
     {
         SupportContext::reset();

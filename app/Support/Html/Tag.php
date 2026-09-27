@@ -221,27 +221,6 @@ final class Tag
     }
 
     /**
-     * Grid-mode counterpart of {@see settingsRowSmall()}. Same escaping
-     * quirk preserved: `$escape` runs htmlspecialchars on `$follow` but
-     * does NOT do the \n → <br /> substitution.
-     */
-    public static function settingsFrowSmall(
-        string $head,
-        string $follow,
-        bool $escape = true,
-        string $relation = '',
-    ): string {
-        $cell = $escape ? htmlspecialchars($follow) : $follow;
-
-        $open = $relation !== ''
-            ? '<div class="nx-grouprow '.$relation.'" relation = "'.$relation.'">'
-            : '';
-        $close = $relation !== '' ? '</div>' : '';
-
-        return $open.'<div class="nx-fhead nx-nowrap">'.$head.'</div><div class="nx-fcell">'.$cell.'</div>'.$close;
-    }
-
-    /**
      * Emit a settings row, returning it when `$return` is true or
      * echoing it otherwise. Backs the legacy `tr()` helper.
      */
@@ -273,46 +252,6 @@ final class Tag
         bool $return = false,
     ): ?string {
         $html = self::settingsFrow($head, $follow, $escape, $relation);
-        if ($return) {
-            return $html;
-        }
-        echo $html;
-
-        return null;
-    }
-
-    /**
-     * Emit a narrow-label grid-mode settings row
-     * ({@see settingsFrowSmall()}), returning it when `$return` is true
-     * or echoing it otherwise.
-     */
-    public static function emitSettingsFrowSmall(
-        string $head,
-        string $follow,
-        bool $escape = true,
-        string $relation = '',
-        bool $return = false,
-    ): ?string {
-        $html = self::settingsFrowSmall($head, $follow, $escape, $relation);
-        if ($return) {
-            return $html;
-        }
-        echo $html;
-
-        return null;
-    }
-
-    /**
-     * Emit a narrow-label settings row. Backs the legacy `tr_small()` helper.
-     */
-    public static function emitSettingsRowSmall(
-        string $head,
-        string $follow,
-        bool $escape = true,
-        string $relation = '',
-        bool $return = false,
-    ): ?string {
-        $html = self::settingsRowSmall($head, $follow, $escape, $relation);
         if ($return) {
             return $html;
         }

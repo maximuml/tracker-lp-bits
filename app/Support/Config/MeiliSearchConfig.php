@@ -15,9 +15,4 @@ final class MeiliSearchConfig extends Config
     {
         return $this->bool('search_description', $default);
     }
-
-    public function defaultSearchMode(string $default = 'and'): string
-    {
-        return $this->string('default_search_mode', $default);
-    }
 }

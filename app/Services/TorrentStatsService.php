@@ -159,36 +159,6 @@ class TorrentStatsService
     }
 
     /**
-     * @param  mixed  $snatch
-     * @return mixed
-     */
-    public function getSnatchUploadSpeed($snatch)
-    {
-        if ($snatch->seedtime <= 0) {
-            $speed = Format::size(0);
-        } else {
-            $speed = Format::size($snatch->uploaded / ($snatch->seedtime + $snatch->leechtime));
-        }
-
-        return "$speed/s";
-    }
-
-    /**
-     * @param  mixed  $snatch
-     * @return mixed
-     */
-    public function getSnatchDownloadSpeed($snatch)
-    {
-        if ($snatch->leechtime <= 0) {
-            $speed = Format::size(0);
-        } else {
-            $speed = Format::size($snatch->downloaded / $snatch->leechtime);
-        }
-
-        return "$speed/s";
-    }
-
-    /**
      * Get the latest comment for a torrent, or null if none exists.
      *
      * @return array<string, mixed>|null

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Contracts\Repositories\AuthRepositoryInterface;
-use App\Contracts\Repositories\TorrentDownloadRepositoryInterface;
 use App\Models\User;
 use App\Support\Config\SiteConfig;
 use Dotenv\Dotenv;
@@ -333,28 +332,6 @@ final class AuthCookie
         }
 
         return $key;
-    }
-
-    /**
-     * Resolve a tracker-report authkey to the user's passkey.
-     *
-     * Mirrors `get_passkey_by_authkey()`. The result is cached for 24h.
-     */
-    public static function passkeyByAuthkey(string $authkey): string
-    {
-        return Cache::remember("authkey2passkey:$authkey", 3600 * 24, function () use ($authkey) {
-            $arr = explode('|', $authkey);
-            if (count($arr) !== 3) {
-                throw new \InvalidArgumentException("Invalid authkey: $authkey, format error");
-            }
-            $uid = $arr[1];
-            $decrypted = app(TorrentDownloadRepositoryInterface::class)->checkTrackerReportAuthKey($authkey);
-            if (empty($decrypted)) {
-                throw new \InvalidArgumentException("Invalid authkey: $authkey");
-            }
-
-            return app(AuthRepositoryInterface::class)->getPasskeyByUserId((int) $uid) ?? '';
-        });
     }
 
     /**

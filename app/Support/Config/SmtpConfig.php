@@ -57,9 +57,4 @@ final class SmtpConfig extends Config
 
         return $value !== null ? (string) $value : null;
     }
-
-    public function smtpName(string $default = ''): string
-    {
-        return $this->string('smtpname', $default);
-    }
 }

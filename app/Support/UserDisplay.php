@@ -91,25 +91,6 @@ final class UserDisplay
     }
 
     /**
-     * Return the current user's passkey, or '' when not available.
-     *
-     * Mirrors `get_user_passkey()`.
-     */
-    public static function currentPasskey(): string
-    {
-        $user = app(CurrentUser::class)->get();
-        if (app(LegacyRuntime::class)->isLegacy()) {
-            return $user['passkey'] ?? '';
-        }
-
-        if (! auth()->check()) {
-            return '';
-        }
-
-        return (string) (auth()->user()->passkey ?? '');
-    }
-
-    /**
      * Return the current user's raw username, or '' when not available.
      *
      * Mirrors `get_pure_username()`.
@@ -292,11 +273,6 @@ final class UserDisplay
         return (string) ($row['username'] ?? '');
     }
 
-    /**
-     * Build the avatar `<img>` tag.
-     *
-     * Mirrors `return_avatar_image()`.
-     */
     public static function avatarImage(string $url, string $langFolder): string
     {
         return '<img src="'.$url.'" alt="avatar" width="150px" data-avatar-check="'.$langFolder.'" />';

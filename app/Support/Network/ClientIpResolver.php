@@ -21,12 +21,4 @@ class ClientIpResolver
     {
         return Network::clientIp(true);
     }
-
-    /**
-     * Resolve the full IP chain (comma-separated, includes proxies).
-     */
-    public function resolveChain(): string
-    {
-        return Network::clientIp(false);
-    }
 }

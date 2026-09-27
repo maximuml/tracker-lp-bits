@@ -26,17 +26,4 @@ final class User
     {
         return Validators::isUserClass($class);
     }
-
-    public static function currentUserCheck(): void
-    {
-        LegacyAuth::currentUserCheck(LegacyAuthContext::fromSupportContext());
-    }
-
-    /**
-     * @param  array<array-key, mixed>|int|string  $torrent
-     */
-    public static function canAccessTorrent(array|int|string $torrent, int|string $uid): bool
-    {
-        return TorrentAccess::canAccess($torrent, $uid);
-    }
 }

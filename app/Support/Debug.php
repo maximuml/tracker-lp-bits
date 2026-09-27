@@ -22,17 +22,4 @@ final class Debug
             throw new HttpResponseException(new Response(''));
         }
     }
-
-    /**
-     * @param  mixed  $vars
-     */
-    public static function dumpAndExit(...$vars): void
-    {
-        $html = '<pre>';
-        foreach ($vars as $var) {
-            $html .= print_r($var, true);
-        }
-        $html .= '</pre>';
-        throw new HttpResponseException(new Response($html));
-    }
 }

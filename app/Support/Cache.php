@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Contracts\Repositories\SearchBoxRepositoryInterface;
-use App\Contracts\Repositories\TorrentDownloadRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Events\UserUpdated;
 use App\Models\Setting;
@@ -115,55 +114,6 @@ final class Cache
      * or `fwrite` returned `false`. The legacy source ignores both
      * return values and trusts the open/write/close sequence.
      */
-    /**
-     * Legacy page-cache check. Returns true when the caller should
-     * generate and buffer the page; returns false and exits when a
-     * fresh cached file was served.
-     *
-     * Backs the legacy `cache_check()` helper.
-     */
-    public static function pageCheck(string $file = 'cachefile', bool $endpage = true, int $cachetime = 600): bool
-    {
-        $rootpath = app(Globals::class)->get('rootpath', defined('ROOT_PATH') ? constant('ROOT_PATH') : '');
-        $cacheDir = app(Globals::class)->get('cache', '');
-        $langDir = Locale::currentLangDir();
-
-        $cachefile = self::path($rootpath, $cacheDir, $langDir, $file);
-        if (self::isFresh($cachefile, $cachetime)) {
-            include $cachefile;
-            if ($endpage) {
-                $cacheMtime = filemtime($cachefile);
-                $cacheMtime = $cacheMtime === false ? null : $cacheMtime;
-                echo '<p class="nx-center"><span class="small">'.(__('legacy/functions.text_page_last_updated')).date('Y-m-d H:i:s', $cacheMtime).'</span></p>';
-                echo "</td></tr></table>\n";
-                Html::stdfoot();
-                exit;
-            }
-
-            return false;
-        }
-        ob_start();
-
-        return true;
-    }
-
-    /**
-     * Write the current output buffer into the legacy page-cache file.
-     *
-     * Backs the legacy `cache_save()` helper.
-     */
-    public static function pageSave(string $file = 'cachefile'): void
-    {
-        $rootpath = app(Globals::class)->get('rootpath', defined('ROOT_PATH') ? constant('ROOT_PATH') : '');
-        $cacheDir = app(Globals::class)->get('cache', '');
-        $langDir = Locale::currentLangDir();
-
-        $cachefile = self::path($rootpath, $cacheDir, $langDir, $file);
-        $contents = ob_get_contents();
-        self::writeBuffer($cachefile, (string) $contents);
-        ob_end_flush();
-    }
-
     public static function writeBuffer(string $cachefile, string $contents): int|false
     {
         $fp = @fopen($cachefile, 'w');
@@ -174,26 +124,6 @@ final class Cache
         fclose($fp);
 
         return $written;
-    }
-
-    /**
-     * Touch the cache timestamp on a torrent row.
-     *
-     * Mirrors the legacy `set_cachetimestamp($id, $field)` helper.
-     */
-    public static function touchTorrent(int|string $torrentId, string $field = 'cache_stamp'): void
-    {
-        app(TorrentDownloadRepositoryInterface::class)->touchCacheStamp($torrentId, $field);
-    }
-
-    /**
-     * Reset the cache timestamp on a torrent row to zero.
-     *
-     * Mirrors the legacy `reset_cachetimestamp($id, $field)` helper.
-     */
-    public static function resetTorrent(int|string $torrentId, string $field = 'cache_stamp'): void
-    {
-        app(TorrentDownloadRepositoryInterface::class)->resetCacheStamp($torrentId, $field);
     }
 
     public static function clearUser(int|string $uid, string $passkey = ''): void

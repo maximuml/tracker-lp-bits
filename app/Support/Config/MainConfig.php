@@ -146,11 +146,6 @@ final class MainConfig extends Config
         return $this->bool('showoffer', $default);
     }
 
-    public function siteLanguageEnabled(bool $default = true): bool
-    {
-        return $this->bool('site_language_enabled', $default);
-    }
-
     public function torrentNamePrefix(string $default = ''): string
     {
         return $this->string('torrentnameprefix', $default);
@@ -266,12 +261,5 @@ final class MainConfig extends Config
     public function icpLicense(string $default = ''): string
     {
         return $this->string('icplicense', $default);
-    }
-
-    public function torrentsPerPageNullable(?string $default = null): ?string
-    {
-        $value = $this->data['torrentsperpage'] ?? $default;
-
-        return $value !== null ? (string) $value : null;
     }
 }

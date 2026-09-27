@@ -7,7 +7,6 @@ namespace App\Support;
 use App\Repositories\AttachmentRepository;
 use App\Support\Config\SiteConfig;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Str;
 
 /**
  * Attachment HTML emitter extracted from `include/functions.php`.
@@ -141,48 +140,6 @@ final class Attachment
                 'downloads' => Locale::trans('attachment.downloads'),
             ]
         );
-    }
-
-    /**
-     * Extract the storage key from an attachment URL.
-     *
-     * Mirrors `attachmentKey()`.
-     */
-    public static function keyFromUrl(string $url): string
-    {
-        if (! filter_var($url, FILTER_VALIDATE_URL)) {
-            throw new \InvalidArgumentException("URL: '$url' invalid.");
-        }
-
-        $parsed = parse_url($url);
-        if (! is_array($parsed)) {
-            throw new \RuntimeException("URL: '$url' could not be parsed.");
-        }
-        $driver = config('admin.upload.disk');
-
-        return match ($driver) {
-            'qiniu' => trim($parsed['path'] ?? '', '/'),
-            'cloudinary' => (function () use ($parsed) {
-                $parts = explode('/', $parsed['path'] ?? '');
-                $key = (string) end($parts);
-                if (Str::contains($key, '.')) {
-                    $key = (string) strstr($key, '.', true);
-                }
-
-                return $key;
-            })(),
-            default => throw new \RuntimeException('Unsupported cloud drive driver'),
-        };
-    }
-
-    /**
-     * Build the public URL for an attachment location.
-     *
-     * Mirrors `attachmentUrl()`.
-     */
-    public static function publicUrl(string $location): string
-    {
-        return sprintf('%s/attachments/%s', Url::schemeAndHost(), trim($location, '/'));
     }
 
     /**

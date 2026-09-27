@@ -36,7 +36,6 @@ use App\Repositories\TorrentRepository;
 use App\Repositories\UserModerationRepository;
 use App\Repositories\UserRepository;
 use App\Support\Cache\LegacyRedisCache;
-use App\Support\Cache\TaggedCacheService;
 use App\Support\CurrentUser;
 use App\Support\DestructiveEnvironmentGuard;
 use App\Support\Env;
@@ -83,7 +82,6 @@ class AppServiceProvider extends ServiceProvider
 
             return $cache;
         });
-        $this->app->singleton(TaggedCacheService::class);
         $this->app->singleton(CurrentUser::class);
         $this->app->singleton(Globals::class);
         $this->app->singleton(UserUpdateBatch::class);

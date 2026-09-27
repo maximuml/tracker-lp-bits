@@ -643,14 +643,6 @@ class BdInfoExtra
     }
 
     /**
-     * 获取宽高比
-     */
-    public function getAspectRatio(): string
-    {
-        return $this->bdInfoArr['video']['aspect_ratio'] ?? '';
-    }
-
-    /**
      * 获取Extras信息
      */
     public function getExtras(): string

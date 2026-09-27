@@ -38,31 +38,6 @@ final class Shoutbox
     }
 
     /**
-     * Validate a shoutbox CSRF token. Accepts the current and the previous
-     * hourly window so users on a stale page still work during a rollover.
-     */
-    public static function validateCsrfToken(int $userId, string $token): bool
-    {
-        $secret = self::getAppKey();
-        if ($secret === '') {
-            return false;
-        }
-        $parts = explode(':', $token, 2);
-        if (count($parts) !== 2 || ! ctype_digit($parts[0])) {
-            return false;
-        }
-        $window = $parts[0];
-        $expected = $window.':'.hash_hmac('sha256', 'shoutbox:'.$userId.':'.$window, $secret);
-        if (hash_equals($expected, $token)) {
-            return true;
-        }
-        $previousWindow = (string) ($window - 1);
-        $previousExpected = $previousWindow.':'.hash_hmac('sha256', 'shoutbox:'.$userId.':'.$previousWindow, $secret);
-
-        return hash_equals($previousExpected, $token);
-    }
-
-    /**
      * Read the Laravel app key, falling back to the APP_KEY environment
      * variable. Legacy/FPM bootstrap may not have loaded `config()` yet.
      */

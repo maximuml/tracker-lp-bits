@@ -32,22 +32,6 @@ final class Captcha
     }
 
     /**
-     * Issue an image captcha code.
-     *
-     * Mirrors `image_code()`.
-     */
-    public static function imageCode(): mixed
-    {
-        $driver = self::manager()->driver('image');
-
-        if (! method_exists($driver, 'issue')) {
-            throw new \RuntimeException('Image captcha driver is unavailable.');
-        }
-
-        return $driver->issue();
-    }
-
-    /**
      * Row template for captcha markup: legacy `<tr>` for table hosts or
      * `nx-fhead`/`nx-fcell` divs for `.nx-fgrid` hosts (the `.nx-auth`
      * forms re-skin the same pair via CSS, ADR 0020).
@@ -126,15 +110,5 @@ final class Captcha
         bool $head = true,
     ): bool {
         return LegacyAuth::checkCode($imagehash, $imagestring, $where, $maxattemptlog, $head, LegacyAuthContext::fromSupportContext());
-    }
-
-    /**
-     * Render the active captcha markup when enabled. Backs the legacy `show_image_code()` helper.
-     */
-    public static function showImageCode(string $layout = 'tr'): void
-    {
-        $iv = SiteConfig::current()->security->captchaRequired() ? 'yes' : 'no';
-
-        self::render($iv, (string) request()->query('secret', ''), $layout);
     }
 }

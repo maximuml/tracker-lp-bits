@@ -55,20 +55,6 @@ final class Database
     }
 
     /**
-     * Build a SQL fragment that converts a unix timestamp to a datetime.
-     *
-     * Mirrors `NexusDB::fromUnixTimestampField()`.
-     */
-    public static function fromUnixTimestampField(int $timestamp): string
-    {
-        return match (self::driverName()) {
-            'mysql' => sprintf('FROM_UNIXTIME(%d)', $timestamp),
-            'pgsql' => sprintf('to_timestamp(%d)', $timestamp),
-            default => throw new \RuntimeException('Not supported database.'),
-        };
-    }
-
-    /**
      * Build the upsert suffix for a raw INSERT statement.
      *
      * Mirrors `NexusDB::upsertField()`.

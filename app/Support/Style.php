@@ -101,20 +101,6 @@ final class Style
 
     /**
      * Convenience wrapper that reads the current user / default stylesheet
-     * from the support context and returns a stylesheet row.
-     *
-     * @return array<string, mixed>|null
-     */
-    public static function cssRowWithContext(): ?array
-    {
-        $user = app(CurrentUser::class)->get() ?? [];
-        $defaultId = self::defaultStylesheetId();
-
-        return self::cssRow(app(LegacyRedisCache::class), $user ? $user['stylesheet'] : $defaultId, $defaultId);
-    }
-
-    /**
-     * Convenience wrapper that reads the current user / default stylesheet
      * from the support context and returns the stylesheet URI.
      */
     public static function cssUriWithContext(string $file = ''): string
@@ -135,17 +121,6 @@ final class Style
         $defaultId = self::defaultStylesheetId();
 
         return SafeHtml::fromTrustedHtml(self::addiCode(app(LegacyRedisCache::class), $user ? $user['stylesheet'] : $defaultId, $defaultId));
-    }
-
-    /**
-     * Convenience wrapper that reads the current user's stylesheet from
-     * the support context and returns the highlight CSS.
-     */
-    public static function highlightColorWithContext(): string
-    {
-        $user = app(CurrentUser::class)->get() ?? [];
-
-        return self::highlightColor($user ? (int) $user['stylesheet'] : null);
     }
 
     /**

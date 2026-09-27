@@ -59,9 +59,6 @@ class CustomField
         ],
     ];
 
-    /** @var array<int|string, array<int|string, mixed>> */
-    private array $preparedTorrentCustomFieldValues = [];
-
     public function getTypeHuman(int $type): string
     {
         $map = [
@@ -305,19 +302,6 @@ class CustomField
         }
 
         return $result;
-    }
-
-    /** @return array<int|string, mixed>|array<int|string, array<int|string, mixed>>|string */
-    public function getPreparedTorrent(int|string|null $torrentId = null, ?string $fieldName = null): array|string
-    {
-        if ($torrentId === null) {
-            return $this->preparedTorrentCustomFieldValues;
-        }
-        if ($fieldName === null) {
-            return $this->preparedTorrentCustomFieldValues[$torrentId] ?? [];
-        }
-
-        return $this->preparedTorrentCustomFieldValues[$torrentId][$fieldName] ?? '';
     }
 
     /** @param  array<int|string, mixed>  $data */

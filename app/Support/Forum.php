@@ -71,23 +71,6 @@ final class Forum
     }
 
     /**
-     * Persist the moderator list for a forum.
-     *
-     * Mirrors `set_forum_moderators()`.
-     */
-    public static function setModerators(string $name, int|string $forumId, int $limit = 3): void
-    {
-        $name = rtrim(trim($name), ',');
-        $users = explode(',', $name);
-        $userIds = [];
-        foreach ($users as $user) {
-            $userIds[] = UserDisplay::userIdFromName(trim($user));
-        }
-
-        app(ForumModRepository::class)->replaceModerators((int) $forumId, $userIds, $limit);
-    }
-
-    /**
      * Check whether the current user is a moderator for the given
      * post / topic / forum.
      *

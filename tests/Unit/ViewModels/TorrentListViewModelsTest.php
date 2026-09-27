@@ -72,8 +72,6 @@ final class TorrentListViewModelsTest extends TestCase
             uploaderAnonymous: false,
             uploaderShowOwner: false,
             uploaderName: SafeHtml::fromTrustedHtml('<b>sysop</b>'),
-            staffDeleteUrl: 'fastdelete.php?id=42',
-            staffEditUrl: 'edit.php?id=42',
         );
 
         $this->assertSame(42, $row->id);
@@ -91,8 +89,6 @@ final class TorrentListViewModelsTest extends TestCase
         $this->assertTrue($row->bookmarked);
         $this->assertSame('5h', $row->waitText);
         $this->assertSame('nx-wait-10', $row->waitClass);
-        $this->assertSame('fastdelete.php?id=42', $row->staffDeleteUrl);
-        $this->assertSame('edit.php?id=42', $row->staffEditUrl);
         $this->assertSame('4.00', $row->size['value']);
         $this->assertSame('GB', $row->size['unit']);
     }
@@ -109,7 +105,6 @@ final class TorrentListViewModelsTest extends TestCase
             columns: [['key' => 'name', 'label' => 'Name', 'iconClass' => '', 'iconTitle' => '', 'sortUrl' => '?sort=1&type=asc']],
             rows: [],
             showComments: true,
-            canManage: false,
             showPromotionNote: true,
             lastCommentTooltips: [['id' => 'lastcom_0', 'content' => SafeHtml::fromTrustedHtml('<b>x</b>')]],
         );
@@ -117,7 +112,6 @@ final class TorrentListViewModelsTest extends TestCase
         $this->assertCount(1, $vm->columns);
         $this->assertSame([], $vm->rows);
         $this->assertTrue($vm->showComments);
-        $this->assertFalse($vm->canManage);
         $this->assertTrue($vm->showPromotionNote);
     }
 

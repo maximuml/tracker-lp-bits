@@ -46,8 +46,8 @@
         @endif
     </td>
     @endif
-    <td class="rowfollow nowrap nxm-td-added"><x-time :value="$row->added" :ago="false" :two-line="true" /></td>
-    <td class="rowfollow nxm-td-size">{{ $row->size['value'] }}<br /> {{ $row->size['unit'] }}</td>
+    <td class="rowfollow nowrap nxm-td-added"><time datetime="{{ str_replace(' ', 'T', (string) $row->added) }}">{{ $row->added }}</time></td>
+    <td class="rowfollow nowrap nxm-td-size">{{ $row->size['value'] }} {{ $row->size['unit'] }}</td>
     <td class="rowfollow nxm-td-seeders nx-center" data-label="{{ 'S' }}">
         @if ($row->seedersUrl)
             <b><a href="{{ $row->seedersUrl }}">@if ($row->seedersClass)<span class="{{ $row->seedersClass }}">{{ number_format($row->seeders) }}</span>@else{{ number_format($row->seeders) }}@endif</a></b>
@@ -66,9 +66,6 @@
             <i>{{ __('legacy/functions.text_orphaned') }}</i>
         @endif
     </td>
-    @if ($row->staffEditUrl !== null)
-    <td class="rowfollow nxm-td-staff">@if ($row->staffDeleteUrl !== null)<a href="{{ $row->staffDeleteUrl }}"><img class="staff_delete" src="pic/trans.gif" alt="D" title="{{ __('legacy/functions.text_delete') }}" /></a><br />@endif<a href="{{ $row->staffEditUrl }}"><img class="staff_edit" src="pic/trans.gif" alt="E" title="{{ __('legacy/functions.text_edit') }}" /></a></td>
-    @endif
 </tr>
 @endforeach
 </tbody>

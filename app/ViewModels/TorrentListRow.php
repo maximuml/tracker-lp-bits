@@ -64,7 +64,5 @@ final class TorrentListRow
         public readonly bool $uploaderAnonymous,
         public readonly bool $uploaderShowOwner,
         public readonly ?SafeHtml $uploaderName,
-        public readonly ?string $staffDeleteUrl,
-        public readonly ?string $staffEditUrl,
     ) {}
 }

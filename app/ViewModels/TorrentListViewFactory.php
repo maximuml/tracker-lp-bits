@@ -17,7 +17,6 @@ use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
-use App\Support\Input;
 use App\Support\Locale;
 use App\Support\Palette;
 use App\Support\Promotion;
@@ -105,12 +104,11 @@ final class TorrentListViewFactory
         }
 
         $showComments = (bool) ($user['showcomnum'] ?? false);
-        $canManage = Permission::canManageTorrent();
         // Columns are only rendered alongside rows; skip the header build
         // (and its lang lookups) for empty listings.
         $columns = $rows === []
             ? []
-            : $this->columns($wait > 0, $showComments, $canManage, (string) ($user['timetype'] ?? ''));
+            : $this->columns($wait > 0, $showComments, (string) ($user['timetype'] ?? ''));
 
         $caticonrow = Category::iconRowWithContext($user['caticon']);
         $hasSecondIcon = is_array($caticonrow) && (bool) ($caticonrow['secondicon'] ?? false);
@@ -121,8 +119,6 @@ final class TorrentListViewFactory
         $timeAlive = ($user['timetype'] ?? null) == UserTimeType::TIMEALIVE->value;
         $promotionNote = ($user['appendpromotion'] ?? null) == UserAppendPromotion::HIGHLIGHT->value;
         $canViewAnonymous = Permission::canViewAnonymous();
-        $canDelete = Permission::canDeleteTorrent();
-        $returnTo = rawurlencode(Input::serverValue('REQUEST_URI', ''));
 
         $bookmarkIds = ($user['bmicon'] ?? false)
             ? TorrentBookmark::bookmarkArray($cache, $user['id'])
@@ -256,9 +252,6 @@ final class TorrentListViewFactory
                 ? UserDisplay::username($row['owner'])
                 : null;
 
-            $staffDeleteUrl = ($canManage && $canDelete) ? 'fastdelete.php?id='.$id : null;
-            $staffEditUrl = $canManage ? 'edit.php?returnto='.$returnTo.'&id='.$id : null;
-
             $outRows[] = new TorrentListRow(
                 id: $id,
                 rowClass: $rowClass,
@@ -300,8 +293,6 @@ final class TorrentListViewFactory
                 uploaderAnonymous: $uploaderAnonymous,
                 uploaderShowOwner: $uploaderShowOwner,
                 uploaderName: $uploaderName,
-                staffDeleteUrl: $staffDeleteUrl,
-                staffEditUrl: $staffEditUrl,
             );
             $counter++;
         }
@@ -312,7 +303,6 @@ final class TorrentListViewFactory
             columns: $columns,
             rows: $outRows,
             showComments: $showComments,
-            canManage: $canManage,
             showPromotionNote: $promotionNote,
             lastCommentTooltips: ($enableTooltip && (empty($user) || ($user['showlastcom'] ?? false)))
                 ? $lastcomTooltip
@@ -326,7 +316,7 @@ final class TorrentListViewFactory
      *
      * @return list<array{key: string, label: string, iconClass: string, iconTitle: string, sortUrl: ?string}>
      */
-    private function columns(bool $showWait, bool $showComments, bool $canManage, string $timetype): array
+    private function columns(bool $showWait, bool $showComments, string $timetype): array
     {
         $queryParams = [];
         foreach (request()->query() as $getName => $getValue) {
@@ -365,9 +355,6 @@ final class TorrentListViewFactory
         $columns[] = ['key' => 'leechers', 'label' => '', 'iconClass' => 'leechers', 'iconTitle' => (string) __('legacy/functions.title_number_of_leechers'), 'sortUrl' => $sortUrl(8)];
         $columns[] = ['key' => 'snatched', 'label' => '', 'iconClass' => 'snatched', 'iconTitle' => (string) __('legacy/functions.title_number_of_snatched'), 'sortUrl' => $sortUrl(6)];
         $columns[] = ['key' => 'uploader', 'label' => (string) __('legacy/functions.col_uploader'), 'iconClass' => '', 'iconTitle' => '', 'sortUrl' => $sortUrl(9)];
-        if ($canManage) {
-            $columns[] = ['key' => 'action', 'label' => (string) __('legacy/functions.col_action'), 'iconClass' => '', 'iconTitle' => '', 'sortUrl' => null];
-        }
 
         return $columns;
     }

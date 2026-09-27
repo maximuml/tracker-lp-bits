@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Http\Controllers;
 
+use App\Enums\UserClass;
 use App\Http\Controllers\StaffMessageController;
+use App\Jobs\BulkUserMessageJob;
 use App\Models\User;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
@@ -13,6 +15,7 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\View\View;
 use Mockery;
 use Tests\Attributes\TestCategory;
@@ -178,6 +181,110 @@ final class StaffMessageControllerTest extends TestCase
         // which renders a View for an authed user.
         $this->assertInstanceOf(View::class, $response);
         $this->assertSame('takecontact.index', $response->name());
+    }
+
+    public function test_take_staffmess_denies_non_admin(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['class' => UserClass::MODERATOR->value]);
+        $this->actingAs($user);
+
+        $controller = app(StaffMessageController::class);
+        $request = Request::create('/takestaffmess', 'POST', ['msg' => 'hi', 'classes' => [1]]);
+        app()->instance('request', $request);
+
+        $response = $controller->takeStaffmess($request);
+
+        $this->assertInstanceOf(Response::class, $response);
+        $this->assertStringContainsString('Permission denied', (string) $response->getContent());
+    }
+
+    public function test_take_staffmess_rejects_get_request(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->admin()->create();
+        $this->actingAs($user);
+
+        $controller = app(StaffMessageController::class);
+        $request = Request::create('/takestaffmess', 'GET');
+        app()->instance('request', $request);
+
+        $response = $controller->takeStaffmess($request);
+
+        $this->assertInstanceOf(Response::class, $response);
+        $this->assertStringContainsString('Permission denied', (string) $response->getContent());
+    }
+
+    public function test_take_staffmess_rejects_blank_message(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->admin()->create();
+        $this->actingAs($user);
+
+        $controller = app(StaffMessageController::class);
+        $request = Request::create('/takestaffmess', 'POST', ['msg' => '', 'classes' => [1]]);
+        app()->instance('request', $request);
+
+        $response = $controller->takeStaffmess($request);
+
+        $this->assertInstanceOf(Response::class, $response);
+        $this->assertStringContainsString('blank', (string) $response->getContent());
+    }
+
+    public function test_take_staffmess_rejects_empty_classes(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->admin()->create();
+        $this->actingAs($user);
+
+        $controller = app(StaffMessageController::class);
+        $request = Request::create('/takestaffmess', 'POST', ['msg' => 'hello', 'classes' => []]);
+        app()->instance('request', $request);
+
+        $response = $controller->takeStaffmess($request);
+
+        $this->assertInstanceOf(Response::class, $response);
+        $this->assertStringContainsString('No valid filter', (string) $response->getContent());
+    }
+
+    public function test_take_staffmess_rejects_invalid_class(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->admin()->create();
+        $this->actingAs($user);
+
+        $controller = app(StaffMessageController::class);
+        $request = Request::create('/takestaffmess', 'POST', ['msg' => 'hello', 'classes' => [-5]]);
+        app()->instance('request', $request);
+
+        $response = $controller->takeStaffmess($request);
+
+        $this->assertInstanceOf(Response::class, $response);
+        $this->assertStringContainsString('Invalid Class', (string) $response->getContent());
+    }
+
+    public function test_take_staffmess_dispatches_bulk_message_job(): void
+    {
+        Queue::fake();
+
+        /** @var User $user */
+        $user = User::factory()->admin()->create();
+        $this->actingAs($user);
+
+        $controller = app(StaffMessageController::class);
+        $request = Request::create('/takestaffmess', 'POST', [
+            'msg' => 'Scheduled downtime tonight',
+            'subject' => 'Maintenance',
+            'classes' => [UserClass::USER->value],
+            'sender' => 'system',
+        ]);
+        app()->instance('request', $request);
+
+        $response = $controller->takeStaffmess($request);
+
+        $this->assertInstanceOf(RedirectResponse::class, $response);
+        $this->assertStringContainsString('staffmess.php?sent=1', $response->getTargetUrl());
+        Queue::assertPushed(BulkUserMessageJob::class, 1);
     }
 
     /**

@@ -654,3 +654,11 @@ img[data-zoomable]{cursor:zoom-in}
 .nxz-zoomed{position:relative;z-index:9991;cursor:zoom-out;transform-origin:0 0}
 .nxz-clone{position:fixed;top:0;left:0;z-index:9991;cursor:zoom-out;transform-origin:0 0}
 .nxz-source-hidden{visibility:hidden}
+
+/* Compact torrents listing: single-line cells (added/size) + thinner rows. */
+table.nx-torrents td.rowfollow{padding-top:.15rem;padding-bottom:.15rem}
+table.nx-torrents td.rowfollow img{vertical-align:middle}
+
+/* Legacy `nowrap` attribute migrated to a class — define it globally
+   (Classic theme had it; modern chrome did not). */
+.nowrap{white-space:nowrap}

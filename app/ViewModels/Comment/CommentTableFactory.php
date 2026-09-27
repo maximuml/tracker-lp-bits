@@ -39,6 +39,7 @@ final class CommentTableFactory
         $uidArr = array_values(array_filter(array_map('intval', array_column($rows, 'user'))));
         $neededColumns = ['id', 'class', 'enabled', 'privacy', 'avatar', 'signature', 'uploaded', 'downloaded', 'last_access', 'username', 'donor', 'leechwarn', 'warned', 'title'];
         $userInfoArr = $this->userRepository->getByIds($uidArr, $neededColumns);
+        UserDisplay::preload(array_merge($uidArr, array_filter(array_map('intval', array_column($rows, 'editedby')))));
 
         $canManage = Permission::can(PermissionEnum::COM_MANAGE);
         $dt = date('Y-m-d H:i:s', TIMENOW - 900);

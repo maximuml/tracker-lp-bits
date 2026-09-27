@@ -120,6 +120,8 @@ class TorrentAjaxController extends LegacyController
     private function decorateSnatchRows(iterable $snatchedRows, int $currentUserId): array
     {
         $perSecond = (string) (__('legacy/viewsnatches.text_per_second'));
+        $snatchedRows = collect($snatchedRows);
+        UserDisplay::preload($snatchedRows->pluck('userid')->map(fn ($id) => (int) $id)->all());
         $rows = [];
         foreach ($snatchedRows as $snatchRow) {
             $arr = (array) $snatchRow;

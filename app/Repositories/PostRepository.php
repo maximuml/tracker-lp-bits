@@ -71,6 +71,26 @@ class PostRepository extends BaseRepository implements PostRepositoryInterface
     }
 
     /**
+     * @param  array<int, int>  $topicIds
+     * @return array<int, int> map of topic id to post count
+     */
+    public function countTopicPostsBatch(array $topicIds): array
+    {
+        $topicIds = array_values(array_unique(array_filter(array_map('intval', $topicIds))));
+        if ($topicIds === []) {
+            return [];
+        }
+
+        return Post::query()
+            ->whereIn('topicid', $topicIds)
+            ->selectRaw('topicid, COUNT(*) as cnt')
+            ->groupBy('topicid')
+            ->pluck('cnt', 'topicid')
+            ->map(fn ($cnt) => (int) $cnt)
+            ->all();
+    }
+
+    /**
      * @return array<int>
      */
     public function getTopicPostIds(int $topicid, ?int $authorId = null): array
@@ -99,6 +119,26 @@ class PostRepository extends BaseRepository implements PostRepositoryInterface
     public function countUserPosts(int $userId): int
     {
         return (int) Post::query()->where('userid', $userId)->count();
+    }
+
+    /**
+     * @param  array<int, int>  $userIds
+     * @return array<int, int> map of user id to post count
+     */
+    public function countUserPostsBatch(array $userIds): array
+    {
+        $userIds = array_values(array_unique(array_filter(array_map('intval', $userIds))));
+        if ($userIds === []) {
+            return [];
+        }
+
+        return Post::query()
+            ->whereIn('userid', $userIds)
+            ->selectRaw('userid, COUNT(*) as cnt')
+            ->groupBy('userid')
+            ->pluck('cnt', 'userid')
+            ->map(fn ($cnt) => (int) $cnt)
+            ->all();
     }
 
     public function updateUserLastPost(int $userId, string $date): bool

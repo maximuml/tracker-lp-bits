@@ -215,14 +215,32 @@ JS;
             ]);
 
         $hasUpUserIds = [];
+        foreach ($uploaders as $uploader) {
+            $hasUpUserIds[] = (int) ((array) $uploader)['userid'];
+        }
+        $nonUploaderQuery = User::query()
+            ->where('class', '>=', $uploaderClass)
+            ->when(! empty($hasUpUserIds), function ($q) use ($hasUpUserIds) {
+                $q->whereNotIn('id', $hasUpUserIds);
+            })
+            ->orderBy('username')
+            ->get(['id AS userid', 'username']);
+
+        $allUserIds = array_merge($hasUpUserIds, $nonUploaderQuery->pluck('userid')->map(fn ($id) => (int) $id)->all());
+        UserDisplay::preload($allUserIds);
+        $lastTorrents = $allUserIds === []
+            ? collect()
+            : DB::table('torrents')
+                ->whereIn('id', function ($q) use ($allUserIds) {
+                    $q->selectRaw('MAX(id)')->from('torrents')->whereIn('owner', $allUserIds)->groupBy('owner');
+                })
+                ->get(['id', 'name', 'added', 'owner'])
+                ->keyBy('owner');
+
         $rows = [];
         foreach ($uploaders as $uploader) {
             $row = (array) $uploader;
-            $lastTorrent = DB::table('torrents')
-                ->where('owner', (int) $row['userid'])
-                ->orderByDesc('id')
-                ->first(['id', 'name', 'added']);
-            $last = $lastTorrent ? (array) $lastTorrent : [];
+            $last = (array) ($lastTorrents->get((int) $row['userid']) ?? []);
             $rows[] = [
                 'userid' => (int) $row['userid'],
                 'username' => $row['username'],
@@ -232,24 +250,11 @@ JS;
                 'last_id' => (int) ($last['id'] ?? 0),
                 'last_name' => $last['name'] ?? '',
             ];
-            $hasUpUserIds[] = (int) $row['userid'];
         }
-
-        $nonUploaderQuery = User::query()
-            ->where('class', '>=', $uploaderClass)
-            ->when(! empty($hasUpUserIds), function ($q) use ($hasUpUserIds) {
-                $q->whereNotIn('id', $hasUpUserIds);
-            })
-            ->orderBy('username')
-            ->get(['id AS userid', 'username']);
 
         foreach ($nonUploaderQuery as $nonUploader) {
             $row = (array) $nonUploader->getAttributes();
-            $lastTorrent = DB::table('torrents')
-                ->where('owner', (int) $row['userid'])
-                ->orderByDesc('id')
-                ->first(['id', 'name', 'added']);
-            $last = $lastTorrent ? (array) $lastTorrent : [];
+            $last = (array) ($lastTorrents->get((int) $row['userid']) ?? []);
             $rows[] = [
                 'userid' => (int) $row['userid'],
                 'username' => $row['username'],

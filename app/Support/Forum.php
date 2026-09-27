@@ -62,6 +62,7 @@ final class Forum
         }
 
         $userIds = $moderatorsArray[$forumId] ?? [];
+        UserDisplay::preload($userIds);
         $names = [];
         foreach ($userIds as $userId) {
             $names[] = $plainText ? UserDisplay::plainUsername($userId) : UserDisplay::username($userId);

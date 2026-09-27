@@ -171,6 +171,33 @@ class TorrentStatsService
     }
 
     /**
+     * Latest comment per torrent, keyed by torrent id.
+     *
+     * @param  array<int, int>  $torrentIds
+     * @return array<int, array<string, mixed>>
+     */
+    public function getLastComments(array $torrentIds): array
+    {
+        $torrentIds = array_values(array_unique(array_filter(array_map('intval', $torrentIds))));
+        if ($torrentIds === []) {
+            return [];
+        }
+
+        $rows = DB::table('comments')
+            ->whereIn('id', function ($q) use ($torrentIds) {
+                $q->selectRaw('MAX(id)')->from('comments')->whereIn('torrent', $torrentIds)->groupBy('torrent');
+            })
+            ->get();
+
+        $map = [];
+        foreach ($rows as $lastcom) {
+            $map[(int) $lastcom->torrent] = array_merge((array) $lastcom, array_values((array) $lastcom));
+        }
+
+        return $map;
+    }
+
+    /**
      * Get torrent tag records keyed by torrent id.
      *
      * @param  array<int, int>  $torrentIds

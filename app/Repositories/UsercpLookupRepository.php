@@ -36,6 +36,26 @@ final class UsercpLookupRepository extends BaseRepository
     }
 
     /**
+     * @param  array<int, int>  $topicIds
+     * @return array<int, int> map of topic id to post count
+     */
+    public function getTopicPostCounts(array $topicIds): array
+    {
+        $topicIds = array_values(array_unique(array_filter(array_map('intval', $topicIds))));
+        if ($topicIds === []) {
+            return [];
+        }
+
+        return Post::query()
+            ->whereIn('topicid', $topicIds)
+            ->selectRaw('topicid, COUNT(*) as cnt')
+            ->groupBy('topicid')
+            ->pluck('cnt', 'topicid')
+            ->map(fn ($cnt) => (int) $cnt)
+            ->all();
+    }
+
+    /**
      * @return array<int, array<string, mixed>>
      */
     public function getReadTopics(int $userId, int $limit = 5): array

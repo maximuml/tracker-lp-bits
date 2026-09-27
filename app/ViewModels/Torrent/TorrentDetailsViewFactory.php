@@ -344,6 +344,11 @@ JS, \json_encode($approvalTitle)), 'footer', false);
             );
         }
 
+        $giverIds = [];
+        foreach ($magicInfo['givers'] as $giver) {
+            $giverIds[] = (int) ($giver->userid ?? 0);
+        }
+        UserDisplay::preload($giverIds);
         $givers = [];
         foreach ($magicInfo['givers'] as $giver) {
             $givers[] = UserDisplay::username((int) ($giver->userid ?? 0), false, true, true, false, false, true);
@@ -380,6 +385,11 @@ JS, \json_encode($approvalTitle)), 'footer', false);
         $hasThanked = (bool) $thanksInfo['has_thanked'];
         $currentUserHtml = UserDisplay::username((int) ($currentUser['id'] ?? 0), false, true, true, false, false, true);
 
+        $thanksUserIds = [];
+        foreach ($thanksInfo['thanks'] as $t) {
+            $thanksUserIds[] = (int) ($t->userid ?? 0);
+        }
+        UserDisplay::preload($thanksUserIds);
         $thanksBy = [];
         foreach ($thanksInfo['thanks'] as $t) {
             if ((int) $t->userid !== (int) $currentUser['id']) {

@@ -128,6 +128,9 @@
     <x-settings-text layout="grid" :label="__('legacy/settings.row_max_users')" name="maxusers" :value="$config['maxusers'] ?? 2500" :note="__('legacy/settings.text_max_users')" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_site_accountant_userid')" name="ACCOUNTANTID" :value="$config['ACCOUNTANTID'] ?? ''" :note="__('legacy/settings.text_site_accountant_userid_note')" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_paypal_account')" name="PAYPALACCOUNT" :value="$config['PAYPALACCOUNT'] ?? ''" :note="__('legacy/settings.text_paypal_account_note')" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_bitcoin_address')" name="BITCOINADDRESS" :value="$config['BITCOINADDRESS'] ?? ''" :note="__('legacy/settings.text_crypto_address_note')" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_ethereum_address')" name="ETHEREUMADDRESS" :value="$config['ETHEREUMADDRESS'] ?? ''" :note="__('legacy/settings.text_crypto_address_note')" />
+    <x-settings-text layout="grid" :label="__('legacy/settings.row_usdt_address')" name="USDTADDRESS" :value="$config['USDTADDRESS'] ?? ''" :note="__('legacy/settings.text_crypto_address_note')" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_site_email')" name="SITEEMAIL" :value="$config['SITEEMAIL'] ?? ''" :note="__('legacy/settings.text_site_email_note')" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_report_email')" name="reportemail" :value="$config['reportemail'] ?? ''" :note="__('legacy/settings.text_report_email_note')" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_site_slogan')" name="SLOGAN" :value="$config['SLOGAN'] ?? ''" :note="__('legacy/settings.text_site_slogan_note')" />

@@ -14,6 +14,10 @@ use App\Support\Html\SafeHtml;
 use App\Support\Pagination;
 use App\Support\Settings;
 use App\Support\Url;
+use chillerlan\QRCode\Common\EccLevel;
+use chillerlan\QRCode\Output\QROutputInterface;
+use chillerlan\QRCode\QRCode;
+use chillerlan\QRCode\QROptions;
 use Illuminate\Support\Facades\DB;
 
 final class InfoRepository
@@ -132,16 +136,44 @@ final class InfoRepository
 
         $accountantId = (int) Settings::get('main.ACCOUNTANTID', 1);
 
+        $crypto = [];
+        foreach (['BITCOINADDRESS' => 'BTC', 'ETHEREUMADDRESS' => 'ETH', 'USDTADDRESS' => 'USDT (BEP20)'] as $key => $coin) {
+            $address = trim((string) Settings::get('main.'.$key, ''));
+            if ($address !== '') {
+                $crypto[] = [
+                    'coin' => $coin,
+                    'address' => $address,
+                    'qr' => self::cryptoQr($key, $address),
+                ];
+            }
+        }
+
         return [
             'enabled' => $enabled,
             'custom' => $custom,
             'paypal' => $paypal,
             'showPaypal' => $showPaypal,
+            'crypto' => $crypto,
             'showCustom' => $custom !== '',
-            'showAny' => $showPaypal || $custom !== '',
+            'showAny' => $showPaypal || $custom !== '' || $crypto !== [],
             'accountantId' => $accountantId,
             'baseUrl' => Url::schemeAndHost(false),
         ];
+    }
+
+    private static function cryptoQr(string $key, string $address): string
+    {
+        $payload = match ($key) {
+            'BITCOINADDRESS' => 'bitcoin:'.$address,
+            'ETHEREUMADDRESS' => 'ethereum:'.$address,
+            default => $address,
+        };
+
+        return (new QRCode(new QROptions([
+            'outputType' => QROutputInterface::MARKUP_SVG,
+            'outputBase64' => true,
+            'eccLevel' => EccLevel::M,
+        ])))->render($payload);
     }
 
     /**

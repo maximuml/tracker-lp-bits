@@ -69,6 +69,9 @@ final class SettingsSeed
         $globals->set('SITEEMAIL', $MAIN['SITEEMAIL']);
         $globals->set('ACCOUNTANTID', (int) $MAIN['ACCOUNTANTID']);
         $globals->set('PAYPALACCOUNT', $MAIN['PAYPALACCOUNT']);
+        $globals->set('BITCOINADDRESS', $MAIN['BITCOINADDRESS']);
+        $globals->set('ETHEREUMADDRESS', $MAIN['ETHEREUMADDRESS']);
+        $globals->set('USDTADDRESS', $MAIN['USDTADDRESS']);
         $globals->set('SLOGAN', $MAIN['SLOGAN']);
         $globals->set('icplicense_main', $MAIN['icplicense']);
         $globals->set('autoclean_interval_one', $MAIN['autoclean_interval_one']);

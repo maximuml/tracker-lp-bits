@@ -91,18 +91,31 @@ final class ForumListingService
         $tooltips = [];
         $counter = 0;
 
+        $postCounts = [];
+        $uncachedTopicIds = [];
+        foreach ($topicRows as $topic) {
+            $topicid = (int) $topic->id;
+            $cached = $this->legacyRedisCache?->get_value('topic_'.$topicid.'_post_count');
+            if ($cached !== false && $cached !== null) {
+                $postCounts[$topicid] = (int) $cached;
+            } else {
+                $uncachedTopicIds[] = $topicid;
+            }
+        }
+        if ($uncachedTopicIds !== []) {
+            $postCounts += $this->postRepository->countTopicPostsBatch($uncachedTopicIds);
+            foreach ($uncachedTopicIds as $topicid) {
+                $this->legacyRedisCache?->cache_value('topic_'.$topicid.'_post_count', $postCounts[$topicid] ?? 0, 3600);
+            }
+        }
+
         foreach ($topicRows as $topic) {
             $topicarr = $topic->toArray();
             $topicid = (int) $topicarr['id'];
             $locked = (bool) $topicarr['locked'];
             $hlcolor = (int) $topicarr['hlcolor'];
 
-            $posts = $this->legacyRedisCache?->get_value('topic_'.$topicid.'_post_count');
-            if (! $posts) {
-                $posts = $this->postRepository->countTopicPosts((int) $topicid);
-                $this->legacyRedisCache?->cache_value('topic_'.$topicid.'_post_count', $posts, 3600);
-            }
-            $posts = (int) $posts;
+            $posts = $postCounts[$topicid] ?? 0;
 
             $tpages = (int) floor($posts / max(1, $postsperpage));
             if ($tpages * $postsperpage != $posts) {

@@ -124,6 +124,30 @@ final class TorrentListViewFactory
             ? TorrentBookmark::bookmarkArray($cache, $user['id'])
             : [];
 
+        $lastcoms = [];
+        if ($showComments && $showLastCom) {
+            $uncachedTorrentIds = [];
+            foreach ($rows as $row) {
+                $id = (int) $row['id'];
+                if (! $row['comments']) {
+                    continue;
+                }
+                $cached = $cache->get_value('torrent_'.$id.'_last_comment_content');
+                if ($cached) {
+                    $lastcoms[$id] = $cached;
+                } else {
+                    $uncachedTorrentIds[] = $id;
+                }
+            }
+            if ($uncachedTorrentIds !== []) {
+                $lastcoms += $this->statsService->getLastComments($uncachedTorrentIds);
+                foreach ($uncachedTorrentIds as $id) {
+                    $cache->cache_value('torrent_'.$id.'_last_comment_content', $lastcoms[$id] ?? null, 1855);
+                }
+            }
+            UserDisplay::preload(array_map(fn ($l) => (int) ($l['user'] ?? 0), $lastcoms));
+        }
+
         $outRows = [];
         $lastcomTooltip = [];
         $counter = 0;
@@ -209,11 +233,7 @@ final class TorrentListViewFactory
             $commentIsNew = false;
             $tooltipId = null;
             if ($showComments && $row['comments'] && $showLastCom) {
-                $lastcom = $cache->get_value('torrent_'.$id.'_last_comment_content');
-                if (! $lastcom) {
-                    $lastcom = $this->statsService->getLastComment($id);
-                    $cache->cache_value('torrent_'.$id.'_last_comment_content', $lastcom, 1855);
-                }
+                $lastcom = $lastcoms[$id] ?? null;
                 if ($lastcom) {
                     $commentIsNew = $lastcom['user'] != $user['id'] && strtotime($lastcom['added']) >= $lastBrowse;
                     $lastcomtime = $timeAlive

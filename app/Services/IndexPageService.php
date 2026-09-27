@@ -196,6 +196,7 @@ JS;
         }
 
         $posts = $this->indexRepository->getLatestForumPosts(5, (int) UserDisplay::currentClass());
+        UserDisplay::preload(collect($posts)->map(fn ($p) => (int) ($p['userpost'] ?? 0))->all());
 
         return [
             'show' => count($posts) > 0,
@@ -227,6 +228,7 @@ JS;
         if ($html === false || $html === null || $html === '') {
             $torrents = $this->indexRepository->getLatestTorrents(9);
             if ($torrents->isNotEmpty()) {
+                UserDisplay::preload($torrents->map(fn ($t) => (int) $t->owner)->all());
                 $items = [];
                 foreach ($torrents as $torrent) {
                     $detailsUrl = 'details.php?id='.(int) $torrent->id.'&hit=1';

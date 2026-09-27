@@ -170,6 +170,7 @@ class MessagePageService
         $messageResult = $this->messageRepository->getMailboxMessages($userId, $mailbox, $keyword, $place, $unreadBool, (int) $offset, (int) $perpage);
         $messages = $messageResult['messages'];
 
+        UserDisplay::preload($messages->map(fn ($message) => (int) ($mailbox !== self::PM_SENT_BOX ? $message->sender : $message->receiver))->all());
         // Build message rows
         $rows = [];
         foreach ($messages as $message) {

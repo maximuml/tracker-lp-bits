@@ -209,6 +209,7 @@ class InviteController extends LegacyController
             $pendingCount = $this->inviteRepository->countPendingInvitees($currentUserId);
         }
 
+        UserDisplay::preload(array_values(array_map(fn ($r) => (int) ($r['id'] ?? 0), $inviteRows)));
         foreach ($inviteRows as &$row) {
             $row['usernameHtml'] = UserDisplay::username((int) $row['id']);
             if ((float) $row['downloaded'] > 0) {

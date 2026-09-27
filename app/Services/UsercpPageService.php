@@ -249,24 +249,29 @@ final class UsercpPageService
     private function buildReadTopics(int $userId, ?LegacyRedisCache $cache): array
     {
         $topicRows = $this->usercpLookupRepository->getReadTopics($userId);
+        $postCounts = [];
+        $uncachedTopicIds = [];
+        foreach ($topicRows as $topicArr) {
+            $topicId = (int) $topicArr['id'];
+            $cached = $cache?->get_value('topic_'.$topicId.'_post_count');
+            if ($cached !== false && $cached !== null) {
+                $postCounts[$topicId] = (int) $cached;
+            } else {
+                $uncachedTopicIds[] = $topicId;
+            }
+        }
+        if ($uncachedTopicIds !== []) {
+            $postCounts += $this->usercpLookupRepository->getTopicPostCounts($uncachedTopicIds);
+            foreach ($uncachedTopicIds as $topicId) {
+                $cache?->cache_value('topic_'.$topicId.'_post_count', $postCounts[$topicId] ?? 0, 3600);
+            }
+        }
         $items = [];
         foreach ($topicRows as $topicArr) {
             $topicId = (int) $topicArr['id'];
             $topicViews = (int) $topicArr['views'];
 
-            $posts = 0;
-            if ($cache !== null) {
-                $cached = $cache->get_value('topic_'.$topicId.'_post_count');
-                if ($cached !== false) {
-                    $posts = (int) $cached;
-                }
-            }
-            if ($posts === 0) {
-                $posts = $this->usercpLookupRepository->getTopicPostCount($topicId);
-                if ($cache !== null) {
-                    $cache->cache_value('topic_'.$topicId.'_post_count', $posts, 3600);
-                }
-            }
+            $posts = $postCounts[$topicId] ?? 0;
 
             $arr = Forum::postRowWithContext((int) $topicArr['lastpost']);
             $userid = (int) ($arr['userid'] ?? 0);

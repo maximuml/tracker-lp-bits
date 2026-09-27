@@ -451,7 +451,7 @@ final class ForumListingServiceTest extends TestCase
                 $this->fakeTopic(['id' => 7, 'subject' => 'Pinned <i>topic</i>', 'sticky' => 1, 'hlcolor' => 9, 'views' => 1234]),
             ]),
         ]);
-        $this->postRepo->shouldReceive('countTopicPosts')->andReturn(3);
+        $this->postRepo->shouldReceive('countTopicPostsBatch')->with([7])->andReturn([7 => 3]);
 
         $vm = $this->service->buildViewForum(
             ['id' => 1, 'username' => 'test', 'class' => 10, 'forumpost' => 'yes'],
@@ -490,7 +490,7 @@ final class ForumListingServiceTest extends TestCase
             'count' => 1,
             'rows' => new Collection([$this->fakeTopic(['id' => 7])]),
         ]);
-        $this->postRepo->shouldReceive('countTopicPosts')->andReturn(95); // 10 pages at 10/page
+        $this->postRepo->shouldReceive('countTopicPostsBatch')->with([7])->andReturn([7 => 95]); // 10 pages at 10/page
 
         $vm = $this->service->buildViewForum(
             ['id' => 1, 'username' => 'test', 'class' => 10, 'forumpost' => 'yes'],

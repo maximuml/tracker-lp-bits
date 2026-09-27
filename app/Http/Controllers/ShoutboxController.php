@@ -88,11 +88,7 @@ class ShoutboxController extends LegacyController
         $reactionData = Shoutbox::prefetchReactions($shoutIds, $currentUserId);
 
         $userIds = array_filter(array_unique($rows->pluck('userid')->map(fn ($id) => (int) $id)->all()));
-        foreach ($userIds as $userId) {
-            if ($userId > 0) {
-                UserDisplay::row($userId);
-            }
-        }
+        UserDisplay::preload(array_values($userIds));
 
         $isStaff = $actor->can(PermissionEnum::SB_MANAGE);
         $items = $this->decorateShoutRows($rows, $currentUser, $currentUserId, $isStaff, $reactionData);
@@ -231,6 +227,7 @@ class ShoutboxController extends LegacyController
         $shoutIds = array_map(fn ($r) => (int) ($r['id'] ?? 0), $rows);
         $userIds = array_filter(array_unique(array_map(fn ($r) => (int) ($r['userid'] ?? 0), $rows)));
 
+        UserDisplay::preload(array_values($userIds));
         $userDisplayMap = [];
         foreach ($userIds as $uid) {
             if ($uid > 0) {

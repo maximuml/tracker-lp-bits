@@ -390,6 +390,24 @@ final class OfferPageService
             $canAgainst = Permission::can(PermissionEnum::AGAINST_OFFER);
             $showlastcom = (bool) ($curUser['showlastcom'] ?? true);
 
+            $lastcoms = [];
+            $lastcomUserIds = [];
+            foreach ($offerRows as $row) {
+                $arr = (array) $row;
+                if ((int) ($arr['comments'] ?? 0) === 0) {
+                    continue;
+                }
+                $offerId = (int) $arr['id'];
+                $lastcom = $this->cache->get_value('offer_'.$offerId.'_last_comment_content');
+                if (! $lastcom) {
+                    $lastcom = $this->offerCommentRepository->getLastComment($offerId);
+                    $this->cache->cache_value('offer_'.$offerId.'_last_comment_content', $lastcom, 1855);
+                }
+                $lastcoms[$offerId] = (array) $lastcom;
+                $lastcomUserIds[] = (int) ($lastcoms[$offerId]['user'] ?? 0);
+            }
+            UserDisplay::preload($lastcomUserIds);
+
             $i = 0;
             $rows = [];
             $tooltips = [];
@@ -406,12 +424,7 @@ final class OfferPageService
                         tooltipId: null,
                     );
                 } else {
-                    $lastcom = $this->cache->get_value('offer_'.$offerId.'_last_comment_content');
-                    if (! $lastcom) {
-                        $lastcom = $this->offerCommentRepository->getLastComment($offerId);
-                        $this->cache->cache_value('offer_'.$offerId.'_last_comment_content', $lastcom, 1855);
-                    }
-                    $lastcom = (array) $lastcom;
+                    $lastcom = $lastcoms[$offerId] ?? [];
                     $timestamp = strtotime((string) ($lastcom['added'] ?? 'now'));
                     $hasnewcom = (($lastcom['user'] ?? 0) !== $userId && $timestamp >= $last_offer);
                     $title = null;
@@ -541,6 +554,7 @@ final class OfferPageService
         [$pagerTop, $pagerBottom, , $offset, $perpage] = Pagination::pager($perpage, $count, $self.'?id='.$offerId.'&offer_vote=1&');
         $voteRows = $this->offerVoteRepository->getVoteRows($offerId, (int) $offset, (int) $perpage);
 
+        UserDisplay::preload($voteRows->map(fn ($r) => (int) (((array) $r)['userid'] ?? 0))->all());
         $rows = [];
         foreach ($voteRows as $arr) {
             $arrArr = (array) $arr;

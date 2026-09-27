@@ -132,6 +132,24 @@ final class ForumTopicViewService
 
         $neededColumns = ['id', 'class', 'enabled', 'privacy', 'avatar', 'signature', 'uploaded', 'downloaded', 'last_access', 'username', 'donor', 'leechwarn', 'warned', 'title'];
         $userInfoArr = $this->forumRepository->getUsersByIds($uidArr, $neededColumns);
+        UserDisplay::preload(array_merge($uidArr, array_filter(array_map(fn ($p) => (int) ($p['editedby'] ?? 0), $allPosts))));
+
+        $postCounts = [];
+        $uncachedPosterIds = [];
+        foreach ($uidArr as $posterId) {
+            $cached = $this->legacyRedisCache?->get_value('user_'.$posterId.'_post_count');
+            if ($cached !== false && $cached !== null) {
+                $postCounts[(int) $posterId] = (int) $cached;
+            } else {
+                $uncachedPosterIds[] = (int) $posterId;
+            }
+        }
+        if ($uncachedPosterIds !== []) {
+            $postCounts += $this->postRepository->countUserPostsBatch($uncachedPosterIds);
+            foreach ($uncachedPosterIds as $posterId) {
+                $this->legacyRedisCache?->cache_value('user_'.$posterId.'_post_count', $postCounts[$posterId] ?? 0, 3600);
+            }
+        }
         $lpr = $this->index->getLastReadPostId($topicid, $curUser);
 
         $posts = [];
@@ -144,10 +162,7 @@ final class ForumTopicViewService
             $userInfo = $userInfoArr->get($posterid) ?: User::defaultUser();
             $arr2 = $userInfo->toArray();
 
-            if (! $forumposts = $this->legacyRedisCache?->get_value('user_'.$posterid.'_post_count')) {
-                $forumposts = $this->postRepository->countUserPosts($posterid);
-                $this->legacyRedisCache?->cache_value('user_'.$posterid.'_post_count', $forumposts, 3600);
-            }
+            $forumposts = $postCounts[$posterid] ?? 0;
 
             $signature = LegacyYesNo::isYes($curUser['signatures'] ?? null) ? (string) ($arr2['signature'] ?? '') : '';
             $avatar = LegacyYesNo::isYes($curUser['avatars'] ?? null) ? (string) ($arr2['avatar'] ?? '') : '';

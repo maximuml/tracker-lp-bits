@@ -84,16 +84,21 @@ class StaffPageController extends LegacyController
         $supportRows = $supportRows->map(fn ($r) => $buildUserRow((array) $r->getAttributes(), 'supportlang', 'supportfor'))->all();
         $pickerRows = $pickerRows->map(fn ($r) => $buildUserRow((array) $r->getAttributes(), 'pickfor'))->all();
 
+        $modUserIds = $forumMods->map(fn ($m) => (int) ((array) $m)['userid'])->all();
+        $modForums = $modUserIds === []
+            ? collect()
+            : DB::table('forums as f')
+                ->leftJoin('forummods as fm', 'f.id', '=', 'fm.forumid')
+                ->whereIn('fm.userid', $modUserIds)
+                ->get(['fm.userid', 'f.id', 'f.name'])
+                ->groupBy('userid');
+
         $forumModRows = [];
         foreach ($forumMods as $modRow) {
             $arr = (array) $modRow;
             $userId = (int) $arr['userid'];
             $forums = [];
-            $forumRows = DB::table('forums as f')
-                ->leftJoin('forummods as fm', 'f.id', '=', 'fm.forumid')
-                ->where('fm.userid', $userId)
-                ->get(['f.id', 'f.name']);
-            foreach ($forumRows as $forumRow) {
+            foreach ($modForums->get($userId, collect()) as $forumRow) {
                 $forums[] = ['id' => (int) $forumRow->id, 'name' => (string) $forumRow->name];
             }
             $base = $buildUserRow($arr);

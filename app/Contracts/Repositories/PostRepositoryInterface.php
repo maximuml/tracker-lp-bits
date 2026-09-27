@@ -33,6 +33,18 @@ interface PostRepositoryInterface
 
     public function countUserPosts(int $userId): int;
 
+    /**
+     * @param  array<int, int>  $userIds
+     * @return array<int, int> map of user id to post count
+     */
+    public function countUserPostsBatch(array $userIds): array;
+
+    /**
+     * @param  array<int, int>  $topicIds
+     * @return array<int, int> map of topic id to post count
+     */
+    public function countTopicPostsBatch(array $topicIds): array;
+
     public function updateUserLastPost(int $userId, string $date): bool;
 
     public function deletePost(int $postid, int $topicid, int $forumid): bool;

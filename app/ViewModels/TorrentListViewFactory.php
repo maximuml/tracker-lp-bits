@@ -126,13 +126,18 @@ final class TorrentListViewFactory
 
         $lastcoms = [];
         if ($showComments && $showLastCom) {
-            $uncachedTorrentIds = [];
+            $commentedTorrentIds = [];
             foreach ($rows as $row) {
-                $id = (int) $row['id'];
-                if (! $row['comments']) {
-                    continue;
+                if ($row['comments']) {
+                    $commentedTorrentIds[] = (int) $row['id'];
                 }
-                $cached = $cache->get_value('torrent_'.$id.'_last_comment_content');
+            }
+            $cachedLastcoms = $commentedTorrentIds === []
+                ? []
+                : $cache->get_values(array_map(fn ($id) => 'torrent_'.$id.'_last_comment_content', $commentedTorrentIds));
+            $uncachedTorrentIds = [];
+            foreach ($commentedTorrentIds as $id) {
+                $cached = $cachedLastcoms['torrent_'.$id.'_last_comment_content'] ?? false;
                 if ($cached) {
                     $lastcoms[$id] = $cached;
                 } else {

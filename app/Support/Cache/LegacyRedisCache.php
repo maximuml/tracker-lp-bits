@@ -185,6 +185,43 @@ class LegacyRedisCache
         return $Return;
     }
 
+    /**
+     * Batch wrapper for mget — one Redis round-trip instead of one per key.
+     *
+     * @param  array<int, string>  $Keys
+     * @return array<string, mixed> key => unserialized value (false on miss)
+     */
+    public function get_values(array $Keys): array
+    {
+        $result = array_fill_keys($Keys, false);
+        if ($Keys === [] || ! $this->getIsEnabled()) {
+            return $result;
+        }
+        if ($this->getClearCache()) {
+            foreach ($Keys as $Key) {
+                $this->delete_value($Key);
+            }
+
+            return $result;
+        }
+        if ($this->redis === null) {
+            return $result;
+        }
+        $redis = $this->redis;
+        $keys = array_values($Keys);
+        $rows = RedisGuard::attempt(fn () => $redis->mget($keys), false);
+        if (! is_array($rows)) {
+            $rows = array_fill(0, count($keys), false);
+        }
+        foreach ($keys as $i => $Key) {
+            $result[$Key] = $this->unserialize($rows[$i] ?? false);
+            $this->keyHits['read'][$Key] = ! isset($this->keyHits['read'][$Key]) ? 1 : $this->keyHits['read'][$Key] + 1;
+        }
+        $this->cacheReadTimes += count($keys);
+
+        return $result;
+    }
+
     // Wrapper for Memcache::delete. For a reason, see above.
     public function delete_value(string $Key, bool $AllLang = false): int
     {

@@ -93,10 +93,13 @@ final class ForumListingService
 
         $postCounts = [];
         $uncachedTopicIds = [];
-        foreach ($topicRows as $topic) {
-            $topicid = (int) $topic->id;
-            $cached = $this->legacyRedisCache?->get_value('topic_'.$topicid.'_post_count');
-            if ($cached !== false && $cached !== null) {
+        $topicIds = $topicRows->map(fn ($topic) => (int) $topic->id)->all();
+        $cachedCounts = $topicIds === []
+            ? []
+            : ($this->legacyRedisCache?->get_values(array_map(fn ($id) => 'topic_'.$id.'_post_count', $topicIds)) ?? []);
+        foreach ($topicIds as $topicid) {
+            $cached = $cachedCounts['topic_'.$topicid.'_post_count'] ?? false;
+            if ($cached !== false) {
                 $postCounts[$topicid] = (int) $cached;
             } else {
                 $uncachedTopicIds[] = $topicid;
@@ -108,6 +111,27 @@ final class ForumListingService
                 $this->legacyRedisCache?->cache_value('topic_'.$topicid.'_post_count', $postCounts[$topicid] ?? 0, 3600);
             }
         }
+
+        $postIds = [];
+        foreach ($topicRows as $topic) {
+            $topicarr = $topic->toArray();
+            foreach (['lastpost', 'firstpost'] as $col) {
+                if (! empty($topicarr[$col])) {
+                    $postIds[] = (int) $topicarr[$col];
+                }
+            }
+        }
+        $postRows = $postIds === []
+            ? []
+            : ($this->legacyRedisCache?->get_values(array_map(fn ($id) => 'post_'.$id.'_content', array_values(array_unique($postIds)))) ?? []);
+        $resolvePost = static function (int $postId) use ($postRows): array {
+            $row = $postRows['post_'.$postId.'_content'] ?? false;
+            if (! is_array($row)) {
+                $row = Forum::postRowWithContext($postId) ?? [];
+            }
+
+            return $row;
+        };
 
         foreach ($topicRows as $topic) {
             $topicarr = $topic->toArray();
@@ -140,7 +164,7 @@ final class ForumListingService
                 }
             }
 
-            $arr = Forum::postRowWithContext((int) $topicarr['lastpost']);
+            $arr = $resolvePost((int) $topicarr['lastpost']);
             $lppostid = (int) ($arr['id'] ?? 0);
             $lpuserid = (int) ($arr['userid'] ?? 0);
             $lpadded = (string) ($arr['added'] ?? '');
@@ -159,7 +183,7 @@ final class ForumListingService
                 ];
             }
 
-            $arr = Forum::postRowWithContext((int) $topicarr['firstpost']);
+            $arr = $resolvePost((int) $topicarr['firstpost']);
             $firstAdded = (string) ($arr['added'] ?? '');
             $lastpostread = $this->index->getLastReadPostId($topicid, $curUser);
 

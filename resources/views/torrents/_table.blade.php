@@ -46,7 +46,7 @@
         @endif
     </td>
     @endif
-    <td class="rowfollow nowrap nxm-td-added"><x-time :value="$row->added" :ago="false" /></td>
+    <td class="rowfollow nowrap nxm-td-added"><time datetime="{{ str_replace(' ', 'T', (string) $row->added) }}">{{ $row->added }}</time></td>
     <td class="rowfollow nowrap nxm-td-size">{{ $row->size['value'] }} {{ $row->size['unit'] }}</td>
     <td class="rowfollow nxm-td-seeders nx-center" data-label="{{ 'S' }}">
         @if ($row->seedersUrl)

@@ -656,7 +656,7 @@ img[data-zoomable]{cursor:zoom-in}
 .nxz-source-hidden{visibility:hidden}
 
 /* Compact torrents listing: single-line cells (added/size) + thinner rows. */
-table.nx-torrents td.rowfollow{padding-top:.15rem;padding-bottom:.15rem}
+table.nx-torrents td.rowfollow{padding-top:.08rem;padding-bottom:.08rem;line-height:1.25}
 table.nx-torrents td.rowfollow img{vertical-align:middle}
 
 /* Legacy `nowrap` attribute migrated to a class — define it globally

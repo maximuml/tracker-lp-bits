@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Support;
 
-use App\Support\Cache\LegacyRedisCache;
 use Illuminate\Http\Request;
 
 /**
@@ -62,52 +61,9 @@ final class SupportContext
         return self::context()->userUpdateSet;
     }
 
-    /** @param array<string, mixed> $data */
-    public static function setUserUpdateSet(array $data): void
-    {
-        self::context()->setUserUpdateSet($data);
-    }
-
     public static function addUserUpdate(string $key, mixed $value): void
     {
         self::context()->addUserUpdate($key, $value);
-    }
-
-    public static function setCache(?LegacyRedisCache $cache): void
-    {
-        self::context()->setCache($cache);
-    }
-
-    public static function getCache(): ?LegacyRedisCache
-    {
-        return self::context()->getCache();
-    }
-
-    public static function setBonusTweak(string $value): void
-    {
-        self::context()->setBonusTweak($value);
-    }
-
-    public static function getBonusTweak(): string
-    {
-        return self::context()->getBonusTweak();
-    }
-
-    /** @param array<string, mixed> $config */
-    public static function setSiteConfig(array $config): void
-    {
-        self::context()->setSiteConfig($config);
-    }
-
-    /** @return array<string, mixed> */
-    public static function getSiteConfig(): array
-    {
-        return self::context()->getSiteConfig();
-    }
-
-    public static function setGlobal(string $key, mixed $value): void
-    {
-        self::context()->setGlobal($key, $value);
     }
 
     public static function getGlobal(string $key, mixed $default = null): mixed
@@ -115,26 +71,9 @@ final class SupportContext
         return self::context()->getGlobal($key, $default);
     }
 
-    /** @return array<string, mixed> */
-    public static function getGlobalsForView(): array
-    {
-        return self::context()->getGlobalsForView();
-    }
-
-    public static function setServerValue(string $key, mixed $value): void
-    {
-        self::context()->setServerValue($key, $value);
-    }
-
     public static function getServerValue(string $key, mixed $default = null): mixed
     {
         return self::context()->getServerValue($key, $default);
-    }
-
-    /** @param array<string, mixed> $cookie */
-    public static function setCookie(array $cookie): void
-    {
-        self::context()->setCookie($cookie);
     }
 
     public static function getCookieValue(string $key, ?string $default = null): ?string
@@ -142,102 +81,8 @@ final class SupportContext
         return self::context()->getCookieValue($key, $default);
     }
 
-    /** @return array<string, mixed> */
-    public static function allCookie(): array
-    {
-        return self::context()->allCookie();
-    }
-
-    /** @param array<string, mixed> $get */
-    public static function setGet(array $get): void
-    {
-        self::context()->setGet($get);
-    }
-
     public static function getQuery(string $key, mixed $default = null): mixed
     {
         return self::context()->getQuery($key, $default);
-    }
-
-    public static function removeQuery(string $key): void
-    {
-        self::context()->removeQuery($key);
-    }
-
-    /** @return array<string, mixed> */
-    public static function allQuery(): array
-    {
-        return self::context()->allQuery();
-    }
-
-    /** @param array<string, mixed> $post */
-    public static function setPost(array $post): void
-    {
-        self::context()->setPost($post);
-    }
-
-    public static function getPost(string $key, mixed $default = null): mixed
-    {
-        return self::context()->getPost($key, $default);
-    }
-
-    public static function removePost(string $key): void
-    {
-        self::context()->removePost($key);
-    }
-
-    /** @return array<string, mixed> */
-    public static function allPost(): array
-    {
-        return self::context()->allPost();
-    }
-
-    /** @param array<string, mixed> $request */
-    public static function setRequest(array $request): void
-    {
-        self::context()->setRequest($request);
-    }
-
-    public static function getRequestInput(string $key, mixed $default = null): mixed
-    {
-        return self::context()->getRequestInput($key, $default);
-    }
-
-    public static function removeRequestInput(string $key): void
-    {
-        self::context()->removeRequestInput($key);
-    }
-
-    /** @return array<string, mixed> */
-    public static function allRequest(): array
-    {
-        return self::context()->allRequest();
-    }
-
-    /** @param array<string, mixed> $files */
-    public static function setFiles(array $files): void
-    {
-        self::context()->setFiles($files);
-    }
-
-    public static function getFile(string $key, mixed $default = null): mixed
-    {
-        return self::context()->getFile($key, $default);
-    }
-
-    /** @return array<string, mixed> */
-    public static function allFiles(): array
-    {
-        return self::context()->allFiles();
-    }
-
-    public static function setLaravelRequest(?Request $request): void
-    {
-        self::context()->setLaravelRequest($request);
-    }
-
-    public static function getLaravelRequest(): ?Request
-    {
-        return self::context()->getLaravelRequest();
     }
 }

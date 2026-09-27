@@ -54,11 +54,6 @@ class AttachmentService
         $this->countsofar = app(AttachmentRepository::class)->countRecentForUser($this->userid);
     }
 
-    public function get_count_so_far(): int
-    {
-        return $this->countsofar;
-    }
-
     public function get_count_limit_class(int $class): int
     {
         $limits = [
@@ -119,11 +114,6 @@ class AttachmentService
         $class = $this->class;
         $sizelimit = $this->get_size_limit_class($class);
         $this->sizelimit = $sizelimit;
-    }
-
-    public function get_size_limit_kb(): int
-    {
-        return $this->sizelimit;
     }
 
     public function get_size_limit_byte(): int

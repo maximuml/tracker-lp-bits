@@ -18,6 +18,7 @@ use App\Support\AuthCookie;
 use App\Support\Config\SiteConfig;
 use App\Support\Logger;
 use App\Support\Network;
+use App\Support\RedisGuard;
 use App\Support\Token;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Http\RedirectResponse;
@@ -261,7 +262,7 @@ class AuthenticateController extends Controller
         try {
             $username = $request->username;
             $challenge = Token::randomHex((int) 20);
-            Cache::put(Token::challengeKey($username), $challenge, 300);
+            RedisGuard::attempt(static fn () => Cache::put(Token::challengeKey($username), $challenge, 300), false);
             $user = User::query()->where('username', $username)->first(['secret', 'passhash_algo']);
 
             return $this->success([

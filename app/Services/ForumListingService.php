@@ -133,6 +133,29 @@ final class ForumListingService
             return $row;
         };
 
+        $ttKeys = [];
+        foreach ($postRows as $postRow) {
+            if (is_array($postRow)) {
+                $ttKeys[] = 'fmt_tt_'.md5(self::tooltipText((string) ($postRow['body'] ?? '')));
+            }
+        }
+        $renderedTt = $ttKeys === []
+            ? []
+            : ($this->legacyRedisCache?->get_values(array_values(array_unique($ttKeys))) ?? []);
+        $renderTt = function (string $body) use (&$renderedTt): string {
+            $truncated = self::tooltipText($body);
+            $key = 'fmt_tt_'.md5($truncated);
+            $hit = $renderedTt[$key] ?? false;
+            if (is_string($hit)) {
+                return $hit;
+            }
+            $html = (string) Format::formatComment($truncated, true, false, false, true, 600, false, false);
+            $this->legacyRedisCache?->cache_value($key, $html, 86400);
+            $renderedTt[$key] = $html;
+
+            return $html;
+        };
+
         foreach ($topicRows as $topic) {
             $topicarr = $topic->toArray();
             $topicid = (int) $topicarr['id'];
@@ -175,7 +198,7 @@ final class ForumListingService
                 } else {
                     $lastposttime = __('legacy/forums.text_blank').Time::format($lpadded, true, false, true);
                 }
-                $lptext = Format::formatComment(mb_substr((string) ($arr['body'] ?? ''), 0, 100, 'UTF-8').(mb_strlen((string) ($arr['body'] ?? ''), 'UTF-8') > 100 ? ' ......' : ''), true, false, false, true, 600, false, false);
+                $lptext = $renderTt((string) ($arr['body'] ?? ''));
                 $tooltipId = 'lastpost_'.$counter;
                 $tooltips[] = [
                     'id' => $tooltipId,
@@ -337,5 +360,10 @@ final class ForumListingService
             pages: $pages,
             imageUrl: Forum::picFolderWithContext().'/search_button.gif',
         );
+    }
+
+    private static function tooltipText(string $body): string
+    {
+        return mb_substr($body, 0, 100, 'UTF-8').(mb_strlen($body, 'UTF-8') > 100 ? ' ......' : '');
     }
 }

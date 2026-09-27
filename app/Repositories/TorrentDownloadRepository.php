@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Support\Config\SiteConfig;
 use App\Support\Env;
 use App\Support\Logger;
+use App\Support\RedisGuard;
 use App\Support\Url;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
@@ -242,7 +243,10 @@ class TorrentDownloadRepository extends BaseRepository implements TorrentDownloa
     {
         $value = $this->buildPiecesHashCacheValue($torrentId, $piecesHash);
 
-        return Redis::connection()->client()->hSet(self::PIECES_HASH_CACHE_KEY, $piecesHash, $value);
+        return RedisGuard::attempt(
+            static fn () => Redis::connection()->client()->hSet(self::PIECES_HASH_CACHE_KEY, $piecesHash, $value),
+            false
+        );
     }
 
     private function buildPiecesHashCacheValue(int $torrentId, string $piecesHash): bool|string
@@ -252,7 +256,10 @@ class TorrentDownloadRepository extends BaseRepository implements TorrentDownloa
 
     public function delPiecesHashCache(string $piecesHash): bool|int|\Redis
     {
-        return Redis::connection()->client()->hDel(self::PIECES_HASH_CACHE_KEY, $piecesHash);
+        return RedisGuard::attempt(
+            static fn () => Redis::connection()->client()->hDel(self::PIECES_HASH_CACHE_KEY, $piecesHash),
+            false
+        );
     }
 
     /**
@@ -268,11 +275,14 @@ class TorrentDownloadRepository extends BaseRepository implements TorrentDownloa
         if (count($piecesHash) > $maxCount) {
             throw new \InvalidArgumentException("too many pieces hash, must less then $maxCount");
         }
-        $pipe = Redis::connection()->client()->multi(\Redis::PIPELINE);
-        foreach ($piecesHash as $hash) {
-            $pipe->hGet(self::PIECES_HASH_CACHE_KEY, $hash);
-        }
-        $results = $pipe->exec();
+        $results = RedisGuard::attempt(static function () use ($piecesHash) {
+            $pipe = Redis::connection()->client()->multi(\Redis::PIPELINE);
+            foreach ($piecesHash as $hash) {
+                $pipe->hGet(self::PIECES_HASH_CACHE_KEY, $hash);
+            }
+
+            return $pipe->exec();
+        }, []);
         $logPrefix = sprintf('piecesHashCount: %s, resultCount: %s', count($piecesHash), count($results));
         $out = [];
         foreach ($results as $item) {

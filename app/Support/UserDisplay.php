@@ -35,7 +35,7 @@ final class UserDisplay
     public static function resetState(): void
     {
         foreach (array_keys(self::$rowCache) as $id) {
-            Cache::forget("user_{$id}_content");
+            RedisGuard::attempt(static fn () => Cache::forget("user_{$id}_content"), false);
         }
         self::$rowCache = [];
         self::$usernameCache = [];
@@ -122,7 +122,7 @@ final class UserDisplay
             return self::$rowCache[$id];
         }
 
-        $row = Cache::remember("user_{$id}_content", 3600, function () use ($id) {
+        $row = RedisGuard::remember("user_{$id}_content", 3600, function () use ($id) {
             $user = app(UserRepositoryInterface::class)->findForDisplay($id);
 
             if (! $user) {

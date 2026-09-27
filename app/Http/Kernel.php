@@ -20,6 +20,7 @@ use App\Http\Middleware\PasskeyV2Enabled;
 use App\Http\Middleware\PreventRequestsDuringMaintenance;
 use App\Http\Middleware\RecordHttpMetrics;
 use App\Http\Middleware\RedirectIfAuthenticated;
+use App\Http\Middleware\RedisDegradedMode;
 use App\Http\Middleware\RejectGetMutations;
 use App\Http\Middleware\RequirePasswordChange;
 use App\Http\Middleware\ResponseTimeHeader;
@@ -83,6 +84,7 @@ class Kernel extends HttpKernel
         'web' => [
             EncryptCookies::class,
             AddQueuedCookiesToResponse::class,
+            RedisDegradedMode::class,
             StartSession::class,
             // \Illuminate\Session\Middleware\AuthenticateSession::class,
             ShareErrorsFromSession::class,
@@ -91,11 +93,13 @@ class Kernel extends HttpKernel
         ],
 
         'api' => [
+            RedisDegradedMode::class,
             'throttle:api',
             SubstituteBindings::class,
             CheckSiteStatus::class,
         ],
         'filament' => [
+            RedisDegradedMode::class,
             StartSession::class,
             //            \Filament\Http\Middleware\Authenticate::class,
             Filament::class,

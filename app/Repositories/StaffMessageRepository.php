@@ -9,6 +9,7 @@ use App\Enums\Permission\PermissionEnum;
 use App\Models\StaffMessage;
 use App\Support\Cache;
 use App\Support\Permissions;
+use App\Support\RedisGuard;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Redis;
 
@@ -66,12 +67,14 @@ class StaffMessageRepository extends BaseRepository
             Cache::forgetWithLocales(self::STAFF_MESSAGE_NEW_CACHE_KEY);
             Cache::forgetWithLocales(self::STAFF_MESSAGE_TOTAL_CACHE_KEY);
         } else {
-            $redis = Redis::connection()->client();
-            match ($type) {
-                'total' => $redis->hSet(self::STAFF_MESSAGE_TOTAL_CACHE_KEY, $uid, $value),
-                'new' => $redis->hSet(self::STAFF_MESSAGE_NEW_CACHE_KEY, $uid, $value),
-                default => throw new \InvalidArgumentException("Invalid type: $type")
-            };
+            RedisGuard::attempt(static function () use ($uid, $type, $value) {
+                $redis = Redis::connection()->client();
+                match ($type) {
+                    'total' => $redis->hSet(self::STAFF_MESSAGE_TOTAL_CACHE_KEY, $uid, $value),
+                    'new' => $redis->hSet(self::STAFF_MESSAGE_NEW_CACHE_KEY, $uid, $value),
+                    default => throw new \InvalidArgumentException("Invalid type: $type")
+                };
+            });
         }
     }
 
@@ -82,12 +85,17 @@ class StaffMessageRepository extends BaseRepository
      */
     public function getStaffMessageCountCache($uid = 0, $type = '')
     {
-        $redis = Redis::connection()->client();
+        return RedisGuard::attempt(
+            static function () use ($uid, $type) {
+                $redis = Redis::connection()->client();
 
-        return match ($type) {
-            'total' => $redis->hGet(self::STAFF_MESSAGE_TOTAL_CACHE_KEY, (string) $uid),
-            'new' => $redis->hGet(self::STAFF_MESSAGE_NEW_CACHE_KEY, (string) $uid),
-            default => throw new \InvalidArgumentException("Invalid type: $type")
-        };
+                return match ($type) {
+                    'total' => $redis->hGet(self::STAFF_MESSAGE_TOTAL_CACHE_KEY, (string) $uid),
+                    'new' => $redis->hGet(self::STAFF_MESSAGE_NEW_CACHE_KEY, (string) $uid),
+                    default => throw new \InvalidArgumentException("Invalid type: $type")
+                };
+            },
+            false
+        );
     }
 }

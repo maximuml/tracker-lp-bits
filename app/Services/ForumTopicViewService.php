@@ -155,6 +155,31 @@ final class ForumTopicViewService
         }
         $lpr = $this->index->getLastReadPostId($topicid, $curUser);
 
+        $renderedFmt = [];
+        if ($this->legacyRedisCache !== null && $allPosts !== []) {
+            $fmtKeys = array_map(static fn ($p) => 'fmt_post_'.md5((string) $p['body']), $allPosts);
+            if (LegacyYesNo::isYes($curUser['signatures'] ?? null)) {
+                foreach ($allPosts as $p) {
+                    $sig = (string) (optional($userInfoArr->get((int) $p['userid']))->signature ?? '');
+                    if ($sig !== '') {
+                        $fmtKeys[] = 'fmt_sig_'.md5($sig);
+                    }
+                }
+            }
+            $renderedFmt = $this->legacyRedisCache->get_values(array_values(array_unique($fmtKeys)));
+        }
+        $renderFmt = function (string $key, callable $render) use (&$renderedFmt): SafeHtml {
+            $hit = $renderedFmt[$key] ?? false;
+            if (is_string($hit)) {
+                return SafeHtml::fromTrustedHtml($hit);
+            }
+            $html = $render();
+            $this->legacyRedisCache?->cache_value($key, (string) $html, 86400);
+            $renderedFmt[$key] = (string) $html;
+
+            return $html;
+        };
+
         $posts = [];
         $pn = 0;
         foreach ($allPosts as $arr) {
@@ -181,7 +206,7 @@ final class ForumTopicViewService
 
             $canViewProtected = $pn + $offset <= 1 || Forum::canViewPost($userId, $arr);
             $bodyContent = $canViewProtected
-                ? Format::formatComment((string) $arr['body'])
+                ? $renderFmt('fmt_post_'.md5((string) $arr['body']), static fn () => Format::formatComment((string) $arr['body']))
                 : Format::formatComment((string) (__('legacy/forums.text_post_protected')));
             if ($highlight !== '') {
                 $bodyContent = SafeHtml::fromTrustedHtml(Format::highlight(htmlspecialchars($highlight), (string) $bodyContent));
@@ -219,7 +244,7 @@ final class ForumTopicViewService
                 ratio: SafeHtml::fromTrustedHtml((string) Ratio::forUserId((int) $arr2['id'])),
                 body: $bodyContent,
                 signature: $signature !== ''
-                    ? SafeHtml::fromTrustedHtml((string) Format::formatComment($signature, false, false, false, true, 500, true, false, 1, 200))
+                    ? $renderFmt('fmt_sig_'.md5($signature), static fn () => Format::formatComment($signature, false, false, false, true, 500, true, false, 1, 200))
                     : null,
                 editedBy: $editedBy,
                 editedAtRaw: $editedAtRaw,

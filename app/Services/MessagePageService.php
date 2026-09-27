@@ -315,7 +315,7 @@ class MessagePageService
             }
         }
 
-        $body = Format::formatComment((string) $message['msg'], true);
+        $body = $this->renderMessageBody((string) $message['msg'], true);
         $added = (string) $message['added'];
 
         $showUnread = $isSender && (bool) ($message['unread'] ?? false);
@@ -389,7 +389,7 @@ class MessagePageService
             $origName2 = $this->messageRepository->getUsername($orig) ?? '';
         }
 
-        $body = '-------- Original Message from '.htmlspecialchars($origName2).' --------<br />'.Format::formatComment((string) $message['msg']);
+        $body = '-------- Original Message from '.htmlspecialchars($origName2).' --------<br />'.$this->renderMessageBody((string) $message['msg']);
 
         return [
             'pmId' => $pmId,
@@ -398,5 +398,18 @@ class MessagePageService
             'origName' => SafeHtml::fromTrustedHtml($origName),
             'body' => SafeHtml::fromTrustedHtml($body),
         ];
+    }
+
+    private function renderMessageBody(string $text, bool $stripHtml = false): SafeHtml
+    {
+        $key = 'fmt_pm_'.md5($text).($stripHtml ? '_s' : '');
+        $cached = $this->legacyRedisCache?->get_value($key);
+        if (is_string($cached)) {
+            return SafeHtml::fromTrustedHtml($cached);
+        }
+        $html = Format::formatComment($text, $stripHtml);
+        $this->legacyRedisCache?->cache_value($key, (string) $html, 86400);
+
+        return $html;
     }
 }

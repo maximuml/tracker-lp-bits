@@ -10,12 +10,12 @@ use App\Support\Globals;
 use App\Support\Html;
 use App\Support\Html\SafeHtml;
 use App\Support\Locale;
+use App\Support\RedisGuard;
 use App\Support\Url;
 use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 class FaqController extends LegacyController
@@ -35,7 +35,7 @@ class FaqController extends LegacyController
         $langFolder = (string) $this->globals->get('CURLANGDIR', 'en');
         $cacheKey = "{$langFolder}_faq";
 
-        $categories = Cache::remember($cacheKey, 900, function () {
+        $categories = RedisGuard::remember($cacheKey, 900, function () {
             $langId = $this->infoRepository->resolveRuleLangId(Locale::guestIdWithContext());
             $categories = $this->infoRepository->faqCategories($langId);
             foreach ($categories as &$category) {

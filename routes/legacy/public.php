@@ -40,9 +40,9 @@ Route::get('/ok', [UtilityController::class, 'ok'])->name('ok.legacy');
 
 Route::get('/complains', [SupportController::class, 'complains'])->name('complains.legacy');
 Route::post('/complains', [SupportController::class, 'complains']);
-Route::get('/shoutbox', [ShoutboxController::class, 'shoutbox'])->middleware('throttle:shoutbox')->name('shoutbox.legacy');
+Route::get('/shoutbox', [ShoutboxController::class, 'shoutbox'])->middleware(['auth.nexus:nexus-web', 'throttle:shoutbox'])->name('shoutbox.legacy');
 
 Route::get('/bookmark', [TorrentBookmarkController::class, 'bookmark'])->name('bookmark.legacy');
 Route::post('/bookmark', [TorrentBookmarkController::class, 'bookmarkToggle'])->middleware(['auth.nexus:nexus-web', 'reject.get.mutations']);
 Route::get('/viewfilelist', [TorrentAjaxController::class, 'viewFileList'])->name('viewfilelist.legacy');
-Route::get('/viewpeerlist', [TorrentAjaxController::class, 'viewPeerList'])->name('viewpeerlist.legacy');
+Route::get('/viewpeerlist', [TorrentAjaxController::class, 'viewPeerList'])->middleware('auth.nexus:nexus-web')->name('viewpeerlist.legacy');

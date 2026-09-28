@@ -342,6 +342,11 @@ class StaffModerationController extends LegacyController
             ]);
         }
 
+        $modcomment = trim((string) (request()->post('modcomment') ?? ''));
+        if ($modcomment !== '') {
+            $userModifyLogs[] = date('Y-m-d').' - '.$modcomment.' (by '.$currentUser['username'].')';
+        }
+
         $this->modtaskRepository->updateUser($userId, $updateset);
 
         if (! empty($userModifyLogs)) {

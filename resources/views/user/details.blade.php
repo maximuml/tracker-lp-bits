@@ -124,7 +124,7 @@
 <x-settings-row :label="__('legacy/userdetails.row_movie_picker')"><x-user.radio-yesno name="moviepicker" :yes="\App\Support\LegacyYesNo::isYes($user['picker'] ?? null)" :no="! \App\Support\LegacyYesNo::isYes($user['picker'] ?? null)" :yesLabel="__('legacy/userdetails.radio_yes')" :noLabel="__('legacy/userdetails.radio_no')" /></x-settings-row>
 <x-settings-row :label="__('legacy/userdetails.row_pick_for')"><textarea cols="60" rows="6" name="pickfor">{{ $user['pickfor'] }}</textarea></x-settings-row>
 @if ($canManageConfidential)
-<x-settings-row :label="__('legacy/userdetails.row_comment')"><textarea cols="60" rows="6" name="modcomment">{{ $modcomment }}</textarea></x-settings-row>
+<x-settings-row :label="__('legacy/userdetails.row_comment')"><textarea cols="60" rows="6" name="modcomment" placeholder="{{ $modcomment }}"></textarea></x-settings-row>
 <x-settings-row :label="__('legacy/userdetails.row_seeding_karma')"><textarea cols="60" rows="6" name="bonuscomment" readonly="readonly">{{ $bonuscomment }}</textarea></x-settings-row>
 @endif
 <tr><td class="rowhead">{{ __('legacy/userdetails.row_warning_system') }}<br /><br />{{ __('legacy/userdetails.row_warning_system_note') }}</td><td class="rowfollow"><table data-nx="data" class="main"><caption class="nx-sr-only">{{ __('legacy/userdetails.row_warning_system') }}</caption><tr><td class="rowfollow">@if ($warned)<input name="warned" value="yes" type="radio" checked="checked" />{{ __('legacy/userdetails.radio_yes') ?? '' }}<input name="warned" value="no" type="radio" />{{ __('legacy/userdetails.radio_no') ?? '' }}@else{{ __('legacy/userdetails.text_not_warned') ?? '' }}@endif</td>

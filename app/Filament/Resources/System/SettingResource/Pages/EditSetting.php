@@ -180,6 +180,7 @@ class EditSetting extends Page implements HasForms
                 TextInput::make('backup.retention_count')->numeric()->label(__('label.setting.backup.retention_count'))->helperText(new HtmlString(__('label.setting.backup.retention_count_help', ['default_count' => ToolRepository::BACKUP_RETENTION_COUNT_DEFAULT]))),
                 Radio::make('backup.via_ftp')->options(self::$yesOrNo)->inline(true)->label(__('label.setting.backup.via_ftp'))->helperText(new HtmlString(__('label.setting.backup.via_ftp_help'))),
                 Radio::make('backup.via_sftp')->options(self::$yesOrNo)->inline(true)->label(__('label.setting.backup.via_sftp'))->helperText(new HtmlString(__('label.setting.backup.via_sftp_help'))),
+                Radio::make('backup.via_gdrive')->options(self::$yesOrNo)->inline(true)->label(__('label.setting.backup.via_gdrive'))->helperText(new HtmlString(__('label.setting.backup.via_gdrive_help'))),
             ])->columns(2);
 
         $id = 'meilisearch';

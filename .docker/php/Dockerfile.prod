@@ -32,7 +32,8 @@ RUN docker-php-ext-install -j$(nproc) \
     sockets \
     gmp \
     zip \
-    intl
+    intl \
+    ftp
 
 RUN pecl channel-update pecl.php.net \
     && pecl install redis-6.3.0 \

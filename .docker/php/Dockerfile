@@ -25,7 +25,8 @@ RUN docker-php-ext-install -j$(nproc) \
     sockets \
     gmp \
     zip \
-    intl
+    intl \
+    ftp
 
 # 检查 pecl.php.net 可用性
 RUN curl -Is https://pecl.php.net | head -n 1 | grep "200" \

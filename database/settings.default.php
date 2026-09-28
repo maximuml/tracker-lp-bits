@@ -373,6 +373,7 @@ return [
         'minute' => '0',
         'via_ftp' => 'no',
         'via_sftp' => 'no',
+        'via_gdrive' => 'no',
     ],
     'hr' => [
         'mode' => HitAndRunMode::DISABLED->value,

@@ -127,9 +127,6 @@ final class LegacyViewSurfaceTest extends TestCase
         'components/frame.blade.php',
         'components/topten/frame.blade.php',
         'components/std-message.blade.php',
-        'partials/std-message.blade.php',
-        'partials/sql-error.blade.php',
-        'partials/int-error.blade.php',
     ];
 
     public function test_raw_output_count_does_not_exceed_baseline(): void

@@ -23,7 +23,7 @@ class BackupCronjob extends Command
      *
      * @var string
      */
-    protected $description = 'Backup all data cronjob, and upload to Google drive. options: --force';
+    protected $description = 'Backup all data cronjob, and upload to configured remotes (FTP/SFTP/Google Drive). options: --force';
 
     /**
      * Create a new command instance.

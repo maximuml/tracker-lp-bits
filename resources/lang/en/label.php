@@ -69,6 +69,8 @@ return [
             'via_ftp_help' => 'Whether to save via FTP. If so, add the configuration information to the .env file, refer to <a href="https://laravel.com/docs/master/filesystem#ftp-driver-configuration">Laravel doc</a>',
             'via_sftp' => 'Backup via SFTP',
             'via_sftp_help' => 'Whether to save via FTP. If so, add the configuration information to the .env file, refer to <a href="https://laravel.com/docs/master/filesystem#sftp-driver-configuration">Laravel doc</a>',
+            'via_gdrive' => 'Backup via Google Drive',
+            'via_gdrive_help' => 'Whether to upload backups to Google Drive. If so, set GDRIVE_CREDENTIALS (service-account JSON path) and optionally GDRIVE_FOLDER_ID in the .env file.',
             'export_path' => 'Export to directory',
             'export_path_help' => 'Not set to use the system temporary directory::default_path. you can use third-party specialized tools to transfer offsite saves.',
             'retention_count' => 'Retention count',

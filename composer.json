@@ -47,6 +47,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/scout": "^11.5",
         "lbuchs/webauthn": "^2.2",
+        "league/flysystem-ftp": "^3.25",
         "league/flysystem-sftp-v3": "^3.0",
         "meilisearch/meilisearch-php": "^1.0",
         "rhilip/bencode": "^2.5.0",

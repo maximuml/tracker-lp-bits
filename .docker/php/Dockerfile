@@ -13,9 +13,12 @@ RUN apk add --no-cache \
     libwebp-dev \
     gmp-dev \
     oniguruma-dev \
+    openssl-dev \
     linux-headers
 
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp
+
+RUN docker-php-ext-configure ftp --with-ftp-ssl
 
 RUN docker-php-ext-install -j$(nproc) \
     bcmath \
@@ -25,7 +28,8 @@ RUN docker-php-ext-install -j$(nproc) \
     sockets \
     gmp \
     zip \
-    intl
+    intl \
+    ftp
 
 # 检查 pecl.php.net 可用性
 RUN curl -Is https://pecl.php.net | head -n 1 | grep "200" \

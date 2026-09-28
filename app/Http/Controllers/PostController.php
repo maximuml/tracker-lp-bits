@@ -151,7 +151,9 @@ class PostController extends Controller
             throw ValidationException::withMessages(['post' => ['Permission denied.']]);
         }
 
-        $this->postRepository->deletePost((int) $post->id, (int) $topic->id, (int) $topic->forumid);
+        if (! $this->postRepository->deletePost((int) $post->id, (int) $topic->id, (int) $topic->forumid)) {
+            abort(404);
+        }
 
         return $this->success(['success' => true], 'Post deleted');
     }

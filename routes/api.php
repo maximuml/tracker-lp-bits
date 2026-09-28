@@ -145,10 +145,13 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::post('topics/{topic}/posts', [PostController::class, 'store'])
             ->middleware(Permissions::abilityLabel(RoutePermissionEnum::TOPIC_LIST));
         Route::get('topics/{topic}/posts/{post}', [PostController::class, 'show'])
+            ->scopeBindings()
             ->middleware(Permissions::abilityLabel(RoutePermissionEnum::TOPIC_LIST));
         Route::match(['put', 'patch'], 'topics/{topic}/posts/{post}', [PostController::class, 'update'])
+            ->scopeBindings()
             ->middleware(Permissions::abilityLabel(RoutePermissionEnum::TOPIC_LIST));
         Route::delete('topics/{topic}/posts/{post}', [PostController::class, 'destroy'])
+            ->scopeBindings()
             ->middleware(Permissions::abilityLabel(RoutePermissionEnum::TOPIC_LIST));
 
         Route::get('shoutbox', [ShoutboxController::class, 'index'])

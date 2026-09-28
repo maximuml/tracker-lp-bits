@@ -148,7 +148,11 @@ class PostRepository extends BaseRepository implements PostRepositoryInterface
 
     public function deletePost(int $postid, int $topicid, int $forumid): bool
     {
-        Post::query()->where('id', $postid)->delete();
+        $deleted = Post::query()->where('id', $postid)->where('topicid', $topicid)->delete();
+        if ($deleted === 0) {
+            return false;
+        }
+
         Forum::query()->where('id', $forumid)->update(['postcount' => DB::raw('GREATEST(CAST(postcount AS SIGNED) - 1, 0)')]);
 
         return true;

@@ -555,6 +555,7 @@ button.nx-btn-link {
    in every theme (no theme colors), so these are theme-safe. */
 .nx-text{padding:10pt}
 .nx-embedded{padding:0}
+.nx-pagebox{width:1200px;max-width:100%;margin-left:auto;margin-right:auto}
 .nx-box{border:1px solid rgba(127,127,127,.35);padding:10pt}
 .nx-box--tight{padding:5px}
 .nx-box--737{width:737px;max-width:100%}

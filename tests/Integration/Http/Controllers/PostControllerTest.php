@@ -177,6 +177,7 @@ final class PostControllerTest extends TestCase
         $user = User::factory()->create(['class' => 10]);
         $forum = Forum::factory()->create();
         $topic = Topic::factory()->create(['forumid' => $forum->id, 'subject' => 'Test Topic']);
+        Post::factory()->create(['topicid' => $topic->id, 'body' => 'First post']);
         $post = Post::factory()->create(['topicid' => $topic->id, 'userid' => $user->id, 'body' => 'To delete']);
 
         $this->actingAs($user);
@@ -184,6 +185,7 @@ final class PostControllerTest extends TestCase
         /** @var TopicRepository&Mockery\MockInterface $topicRepo */
         $topicRepo = Mockery::mock(TopicRepository::class);
         $topicRepo->shouldReceive('isModeratorOfTopic')->once()->andReturn(true);
+        $topicRepo->shouldReceive('updateTopicLastPost')->once()->andReturn(true);
         app()->instance(TopicRepository::class, $topicRepo);
 
         /** @var PostRepository&Mockery\MockInterface $postRepo */

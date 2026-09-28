@@ -21,6 +21,7 @@ use App\Repositories\TopicRepository;
 use App\Support\CurrentUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class PostController extends Controller
@@ -75,11 +76,15 @@ class PostController extends Controller
         $dto = StorePostDto::fromRequest($request);
 
         $date = now()->toDateTimeString();
-        $postId = $this->postRepository->createPost((int) $topic->id, (int) $user->id, $dto->body, $date);
+        $postId = DB::transaction(function () use ($topic, $forum, $user, $dto, $date): int {
+            $postId = $this->postRepository->createPost((int) $topic->id, (int) $user->id, $dto->body, $date);
 
-        $this->topicRepository->setTopicLastPost((int) $topic->id, $postId);
-        $this->forumRepository->incrementForumPostCount((int) $forum->id);
-        $this->postRepository->updateUserLastPost((int) $user->id, $date);
+            $this->topicRepository->setTopicLastPost((int) $topic->id, $postId);
+            $this->forumRepository->incrementForumPostCount((int) $forum->id);
+            $this->postRepository->updateUserLastPost((int) $user->id, $date);
+
+            return $postId;
+        });
 
         $post = Post::query()->findOrFail($postId);
         $post->load('user');
@@ -123,12 +128,14 @@ class PostController extends Controller
         $dto = UpdatePostDto::fromRequest($request);
 
         $date = now()->toDateTimeString();
-        $this->postRepository->updatePostBody((int) $post->id, $dto->body, $date, (int) $user->id);
+        DB::transaction(function () use ($post, $topic, $dto, $date, $user): void {
+            $this->postRepository->updatePostBody((int) $post->id, $dto->body, $date, (int) $user->id);
 
-        $postInfo = $this->postLookupRepository->getPostEditInfo((int) $post->id);
-        if ($dto->subject !== null && $dto->subject !== '' && ! empty($postInfo['is_first_post'])) {
-            $topic->update(['subject' => $dto->subject]);
-        }
+            $postInfo = $this->postLookupRepository->getPostEditInfo((int) $post->id);
+            if ($dto->subject !== null && $dto->subject !== '' && ! empty($postInfo['is_first_post'])) {
+                $topic->update(['subject' => $dto->subject]);
+            }
+        });
 
         $post->refresh()->load('user');
 
@@ -151,7 +158,19 @@ class PostController extends Controller
             throw ValidationException::withMessages(['post' => ['Permission denied.']]);
         }
 
-        if (! $this->postRepository->deletePost((int) $post->id, (int) $topic->id, (int) $topic->forumid)) {
+        if ($this->postLookupRepository->getPreviousPostId((int) $topic->id, (int) $post->id) === null) {
+            throw ValidationException::withMessages(['post' => ['Cannot delete the first post of a topic.']]);
+        }
+
+        $deleted = DB::transaction(function () use ($topic, $post): bool {
+            if (! $this->postRepository->deletePost((int) $post->id, (int) $topic->id, (int) $topic->forumid)) {
+                return false;
+            }
+            $this->topicRepository->updateTopicLastPost((int) $topic->id);
+
+            return true;
+        });
+        if (! $deleted) {
             abort(404);
         }
 

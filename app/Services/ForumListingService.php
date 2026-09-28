@@ -327,16 +327,15 @@ final class ForumListingService
         $pages = 0;
 
         if ($searched) {
-            $searchResult = $this->postRepository->searchForumPosts($keywordsEsc, (int) UserDisplay::currentClass(), 0, 0);
-            $hits = (int) $searchResult['hits'];
+            $hits = $this->postRepository->countForumSearchPosts($keywords, (int) UserDisplay::currentClass());
         }
 
         if ($hits > 0) {
             [, , , $offset, $perpage, $page] = Pagination::pager($topicsperpage, $hits, 'forums.php?action=search&keywords='.rawurlencode($keywords).'&');
-            $searchResult = $this->postRepository->searchForumPosts($keywordsEsc, (int) UserDisplay::currentClass(), (int) $offset, (int) $perpage);
+            $rows = $this->postRepository->searchForumPosts($keywords, (int) UserDisplay::currentClass(), (int) $offset, (int) $perpage);
             $pages = (int) max(1, (int) ceil($hits / max(1, (int) $perpage)));
 
-            foreach ($searchResult['rows'] as $post) {
+            foreach ($rows as $post) {
                 $post = (array) $post;
                 $results[] = new SearchResultRow(
                     postId: (int) $post['id'],

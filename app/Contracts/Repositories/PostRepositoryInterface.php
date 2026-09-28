@@ -49,10 +49,12 @@ interface PostRepositoryInterface
 
     public function deletePost(int $postid, int $topicid, int $forumid): bool;
 
+    public function countForumSearchPosts(string $keywords, int $minClass): int;
+
     /**
-     * @return array{hits: int, rows: \Illuminate\Support\Collection<int, \stdClass>}
+     * @return \Illuminate\Support\Collection<int, \stdClass>
      */
-    public function searchForumPosts(string $keywords, int $minClass, int $offset, int $perPage): array;
+    public function searchForumPosts(string $keywords, int $minClass, int $offset, int $perPage): \Illuminate\Support\Collection;
 
     public function getForumTodayPostCount(int $forumid, string $todayDate): int;
 }

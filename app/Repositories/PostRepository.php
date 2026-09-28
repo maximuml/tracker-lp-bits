@@ -9,6 +9,7 @@ use App\Models\Forum;
 use App\Models\Post;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -158,13 +159,36 @@ class PostRepository extends BaseRepository implements PostRepositoryInterface
         return true;
     }
 
+    public function countForumSearchPosts(string $keywords, int $minClass): int
+    {
+        return (int) $this->forumSearchQuery($keywords, $minClass)->count('posts.id');
+    }
+
     /**
-     * @return array{hits: int, rows: Collection<int, \stdClass>}
+     * @return Collection<int, \stdClass>
      */
-    public function searchForumPosts(string $keywords, int $minClass, int $offset, int $perPage): array
+    public function searchForumPosts(string $keywords, int $minClass, int $offset, int $perPage): Collection
+    {
+        if ($perPage <= 0) {
+            return new Collection;
+        }
+
+        return $this->forumSearchQuery($keywords, $minClass)
+            ->select('posts.id', 'posts.topicid', 'posts.userid', 'posts.added', 'topics.subject', 'topics.hlcolor', 'forums.id AS forumid', 'forums.name AS forumname')
+            ->orderByDesc('posts.id')
+            ->offset($offset)
+            ->limit($perPage)
+            ->get();
+    }
+
+    /**
+     * @return Builder
+     */
+    private function forumSearchQuery(string $keywords, int $minClass)
     {
         $term = '%'.$keywords.'%';
-        $query = DB::table('posts')
+
+        return DB::table('posts')
             ->leftJoin('topics', 'posts.topicid', '=', 'topics.id')
             ->leftJoin('forums', 'topics.forumid', '=', 'forums.id')
             ->where('forums.minclassread', '<=', $minClass)
@@ -173,16 +197,6 @@ class PostRepository extends BaseRepository implements PostRepositoryInterface
                     $sub->where('topics.subject', 'like', $term)->whereColumn('posts.id', 'topics.firstpost');
                 })->orWhere('posts.body', 'like', $term);
             });
-
-        $hits = (int) $query->count('posts.id');
-        $rows = $query
-            ->select('posts.id', 'posts.topicid', 'posts.userid', 'posts.added', 'topics.subject', 'topics.hlcolor', 'forums.id AS forumid', 'forums.name AS forumname')
-            ->orderByDesc('posts.id')
-            ->offset($offset)
-            ->limit($perPage)
-            ->get();
-
-        return ['hits' => $hits, 'rows' => $rows];
     }
 
     public function getForumTodayPostCount(int $forumid, string $todayDate): int

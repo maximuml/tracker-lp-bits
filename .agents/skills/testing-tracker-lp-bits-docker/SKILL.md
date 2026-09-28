@@ -212,6 +212,13 @@ get client with url: http://meilisearch:7700, master key:
 23. **Announce `peer_id` must be exactly 20 bytes** (`-TR4000-` + 12 chars);
     "already downloading the same torrent" means a stale peer row — use
     another user/torrent.
+23. **Filament admin (/nexusphp):** log in via the APP `/login` first —
+    `/nexusphp/login` renders but its session does not issue `c_secure_pass`,
+    so the cookie guard still treats you as guest and bounces to `/login`.
+    Resource URLs are nav-group namespaced: `nexusphp/user/users`,
+    `nexusphp/system/settings` (singleton edit page — no `/1/edit` path),
+    `nexusphp/torrent/torrents`, `nexusphp/section/*`, `nexusphp/security/*`.
+    Full list: `php artisan route:list | grep nexusphp`.
 24. **Shoutbox reactions:** rows expose `+` add button `[data-shout-picker=ID]`
     → opens `#shout-reaction-picker-ID` (options carry `data-close-picker`).
     Click posts `ajax.php?action=shoutboxReact` (id+reaction); applied badge

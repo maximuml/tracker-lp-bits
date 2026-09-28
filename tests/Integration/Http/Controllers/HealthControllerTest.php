@@ -57,7 +57,10 @@ final class HealthControllerTest extends TestCase
 
     public function test_ready_returns_degraded_when_redis_fails(): void
     {
-        Redis::shouldReceive('connection->ping')->andThrow(new \RuntimeException('Connection refused'));
+        // Closed port → connection refused inside the bounded probe.
+        config(['database.redis.default.url' => null]);
+        config(['database.redis.default.host' => '127.0.0.1']);
+        config(['database.redis.default.port' => 1]);
 
         $controller = app(HealthController::class);
 
@@ -67,6 +70,9 @@ final class HealthControllerTest extends TestCase
         $body = json_decode((string) $response->getContent(), true);
         $this->assertSame('degraded', $body['status']);
         $this->assertSame('fail', $body['checks']['redis']);
+        // Redis-backed checks are short-circuited, not re-probed.
+        $this->assertSame('degraded', $body['checks']['horizon']);
+        $this->assertSame('degraded', $body['checks']['scheduler']);
     }
 
     public function test_ready_includes_meilisearch_check(): void
@@ -116,8 +122,10 @@ final class HealthControllerTest extends TestCase
 
     public function test_ready_does_not_leak_exception_messages(): void
     {
-        Redis::shouldReceive('connection->ping')->andThrow(new \RuntimeException('secret connection string detail'));
-        Redis::shouldReceive('connection->get')->andThrow(new \RuntimeException('secret connection string detail'));
+        config(['database.redis.default.url' => null]);
+        config(['database.redis.default.host' => '127.0.0.1']);
+        config(['database.redis.default.port' => 1]);
+        config(['database.redis.default.password' => 'secret connection string detail']);
 
         $controller = app(HealthController::class);
 

@@ -180,7 +180,7 @@ final class UsercpPageService
         $ipLocation = '';
         if ($enableLocationTweak) {
             [$locPub, $locMod] = Network::ipLocationWithContext((string) ($curUser['ip'] ?? ''));
-            $ipLocation = Strings::hidden(e((string) ($curUser['ip'] ?? ''))." <span title='".e($locMod)."'>[".e($locPub).']</span>');
+            $ipLocation = Strings::hidden(e((string) ($curUser['ip'] ?? ''))." <span title='".e($locMod, false)."'>[".e($locPub).']</span>');
         } else {
             $ipLocation = Strings::hidden(e((string) ($curUser['ip'] ?? '')));
         }

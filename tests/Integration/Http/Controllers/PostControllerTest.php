@@ -188,7 +188,7 @@ final class PostControllerTest extends TestCase
 
         /** @var PostRepository&Mockery\MockInterface $postRepo */
         $postRepo = Mockery::mock(PostRepository::class);
-        $postRepo->shouldReceive('deletePost')->once();
+        $postRepo->shouldReceive('deletePost')->once()->andReturn(true);
         app()->instance(PostRepository::class, $postRepo);
 
         $controller = app(PostController::class);

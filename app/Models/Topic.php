@@ -19,6 +19,7 @@ namespace App\Models;
 
 use App\Models\Traits\NexusActivityLogTrait;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Topic extends NexusModel
 {
@@ -55,5 +56,11 @@ class Topic extends NexusModel
     public function lastPost(): BelongsTo
     {
         return $this->belongsTo(Post::class, 'lastpost');
+    }
+
+    /** @return HasMany<Post, $this> */
+    public function posts(): HasMany
+    {
+        return $this->hasMany(Post::class, 'topicid');
     }
 }

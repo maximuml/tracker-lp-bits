@@ -543,7 +543,7 @@ jobs:
           echo "0 blocking findings — all clear." >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload blocking results to GitHub Security
-        uses: github/codeql-action/upload-sarif@1c5b675653bb5c22dbe9b12b556ec555138e09fd # v4
+        uses: github/codeql-action/upload-sarif@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4
         continue-on-error: true
         if: always()
         with:
@@ -568,7 +568,7 @@ jobs:
         run: bash scripts/ci/semgrep-informational.sh
 
       - name: Upload informational results to GitHub Security
-        uses: github/codeql-action/upload-sarif@1c5b675653bb5c22dbe9b12b556ec555138e09fd # v4
+        uses: github/codeql-action/upload-sarif@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4
         continue-on-error: true
         if: always()
         with:
@@ -645,7 +645,7 @@ jobs:
         run: bash scripts/ci/trivy-check-results.sh
 
       - name: Upload Trivy PHP scan results to GitHub Security
-        uses: github/codeql-action/upload-sarif@1c5b675653bb5c22dbe9b12b556ec555138e09fd # v4
+        uses: github/codeql-action/upload-sarif@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4
         continue-on-error: true
         if: always()
         with:
@@ -653,7 +653,7 @@ jobs:
           category: trivy-php
 
       - name: Upload Trivy OpenResty scan results to GitHub Security
-        uses: github/codeql-action/upload-sarif@1c5b675653bb5c22dbe9b12b556ec555138e09fd # v4
+        uses: github/codeql-action/upload-sarif@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4
         continue-on-error: true
         if: always()
         with:

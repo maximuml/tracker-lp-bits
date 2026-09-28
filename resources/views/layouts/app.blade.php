@@ -14,11 +14,11 @@
 @yield('content')
 </div>
 @elseif ($shell === 'boxed')
-<table class="main nx-mx-auto" width="{{ CONTENT_WIDTH }}" cellspacing="0" cellpadding="0"><tr><td class="embedded" >
+<div class="nx-pagebox nx-main">
 
 @yield('content')
 
-</td></tr></table>
+</div>
 @else
 @yield('content')
 @endif

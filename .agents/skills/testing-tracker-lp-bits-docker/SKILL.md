@@ -198,3 +198,17 @@ get client with url: http://meilisearch:7700, master key:
     — always qualify `nexusphp.<table>` or pass the db name explicitly.
 19. **Bitbucket upload form is at `/bitbucket-upload.php`** (not
     bitbucket.php).
+20. **Index sections are settings-gated** — `main.show_top_uploader`,
+    `main.showlastxforumposts`, `main.showpolls`, etc. Toggle
+    `settings.value` + `php artisan cache:clear` to verify hidden sections,
+    then restore.
+21. **Top-uploader tabs** — `.tr-top-uploader-tab [data-table]` cells toggle
+    `.top-uploader` tables via `nx-hidden`; admin clear-shoutbox is
+    `#clear-shout-box` → `layer.confirm` → `ajax.php action=clearShoutBox`
+    (needs `SHOUT_CSRF` global).
+22. **Signup password fields are class-based** (`.wantpassword`/`.passagain`)
+    hashed into hidden inputs by JS — fill classes, not
+    `input[name=wantpassword]`.
+23. **Announce `peer_id` must be exactly 20 bytes** (`-TR4000-` + 12 chars);
+    "already downloading the same torrent" means a stale peer row — use
+    another user/torrent.

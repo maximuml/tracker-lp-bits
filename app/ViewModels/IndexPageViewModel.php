@@ -4,6 +4,17 @@ declare(strict_types=1);
 
 namespace App\ViewModels;
 
+use App\ViewModels\Index\IndexBrowserNoteSection;
+use App\ViewModels\Index\IndexDisclaimerSection;
+use App\ViewModels\Index\IndexForumPostsSection;
+use App\ViewModels\Index\IndexLatestTorrentsSection;
+use App\ViewModels\Index\IndexNewsSection;
+use App\ViewModels\Index\IndexPollsSection;
+use App\ViewModels\Index\IndexShoutboxSection;
+use App\ViewModels\Index\IndexStatsSection;
+use App\ViewModels\Index\IndexTopUploadersSection;
+use App\ViewModels\Index\IndexTrackerLoadSection;
+
 /**
  * ViewModel for the index page.
  *
@@ -13,16 +24,6 @@ final class IndexPageViewModel extends ViewModel
 {
     /**
      * @param  array<string, mixed>  $curUser
-     * @param  array<string, mixed>  $news
-     * @param  array<string, mixed>  $shoutbox
-     * @param  array<string, mixed>  $forumPosts
-     * @param  array<string, mixed>  $latestTorrents
-     * @param  array<string, mixed>  $topUploaders
-     * @param  array<string, mixed>  $polls
-     * @param  array<string, mixed>  $stats
-     * @param  array<string, mixed>  $trackerLoad
-     * @param  array<string, mixed>  $disclaimer
-     * @param  array<string, mixed>  $browserNote
      */
     public function __construct(
         public readonly array $curUser,
@@ -30,17 +31,17 @@ final class IndexPageViewModel extends ViewModel
         public readonly bool $canPollManage,
         public readonly bool $canSbManage,
         public readonly bool $canLog,
-        public readonly array $news,
-        public readonly array $shoutbox,
+        public readonly IndexNewsSection $news,
+        public readonly IndexShoutboxSection $shoutbox,
         public readonly string $extraModules,
-        public readonly array $forumPosts,
-        public readonly array $latestTorrents,
-        public readonly array $topUploaders,
-        public readonly array $polls,
-        public readonly array $stats,
-        public readonly array $trackerLoad,
-        public readonly array $disclaimer,
-        public readonly array $browserNote,
+        public readonly IndexForumPostsSection $forumPosts,
+        public readonly IndexLatestTorrentsSection $latestTorrents,
+        public readonly IndexTopUploadersSection $topUploaders,
+        public readonly IndexPollsSection $polls,
+        public readonly IndexStatsSection $stats,
+        public readonly IndexTrackerLoadSection $trackerLoad,
+        public readonly IndexDisclaimerSection $disclaimer,
+        public readonly IndexBrowserNoteSection $browserNote,
     ) {}
 
     /**

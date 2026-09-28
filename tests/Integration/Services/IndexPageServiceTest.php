@@ -12,6 +12,19 @@ use App\Services\IndexPageService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
+use App\ViewModels\Index\IndexBrowserNoteSection;
+use App\ViewModels\Index\IndexClassStatRow;
+use App\ViewModels\Index\IndexDisclaimerSection;
+use App\ViewModels\Index\IndexForumPostsSection;
+use App\ViewModels\Index\IndexLatestTorrentsSection;
+use App\ViewModels\Index\IndexNewsItem;
+use App\ViewModels\Index\IndexNewsSection;
+use App\ViewModels\Index\IndexPollsSection;
+use App\ViewModels\Index\IndexShoutboxSection;
+use App\ViewModels\Index\IndexStatsSection;
+use App\ViewModels\Index\IndexTopUploadersSection;
+use App\ViewModels\Index\IndexTrackerLoadSection;
+use App\ViewModels\IndexPageViewModel;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
@@ -152,9 +165,8 @@ final class IndexPageServiceTest extends TestCase
 
     /**
      * @param  array<string, mixed>  $globalsOverrides
-     * @return array<string, mixed>
      */
-    private function buildWithAllSectionsDisabled(array $globalsOverrides = []): array
+    private function buildWithAllSectionsDisabled(array $globalsOverrides = []): IndexPageViewModel
     {
         $this->mockIndexRepo();
         $this->setCurrentUser();
@@ -169,7 +181,7 @@ final class IndexPageServiceTest extends TestCase
             'maxnewsnum_main' => 0,
         ], $globalsOverrides));
 
-        return $this->service->build()->toArray();
+        return $this->service->build();
     }
 
     // ─── Instantiation ────────────────────────────────────────────────
@@ -191,22 +203,16 @@ final class IndexPageServiceTest extends TestCase
     public function test_build_returns_expected_top_level_keys(): void
     {
         $result = $this->buildWithAllSectionsDisabled();
-        $this->assertArrayHasKey('curUser', $result);
-        $this->assertArrayHasKey('canNewsManage', $result);
-        $this->assertArrayHasKey('canPollManage', $result);
-        $this->assertArrayHasKey('canSbManage', $result);
-        $this->assertArrayHasKey('canLog', $result);
-        $this->assertArrayHasKey('news', $result);
-        $this->assertArrayHasKey('shoutbox', $result);
-        $this->assertArrayHasKey('forumPosts', $result);
-        $this->assertArrayHasKey('latestTorrents', $result);
-        $this->assertArrayHasKey('topUploaders', $result);
-        $this->assertArrayHasKey('polls', $result);
-        $this->assertArrayHasKey('stats', $result);
-        $this->assertArrayHasKey('trackerLoad', $result);
-        $this->assertArrayHasKey('disclaimer', $result);
-        $this->assertArrayHasKey('browserNote', $result);
-        $this->assertArrayHasKey('extraModules', $result);
+        $this->assertInstanceOf(IndexNewsSection::class, $result->news);
+        $this->assertInstanceOf(IndexShoutboxSection::class, $result->shoutbox);
+        $this->assertInstanceOf(IndexForumPostsSection::class, $result->forumPosts);
+        $this->assertInstanceOf(IndexLatestTorrentsSection::class, $result->latestTorrents);
+        $this->assertInstanceOf(IndexTopUploadersSection::class, $result->topUploaders);
+        $this->assertInstanceOf(IndexPollsSection::class, $result->polls);
+        $this->assertInstanceOf(IndexStatsSection::class, $result->stats);
+        $this->assertInstanceOf(IndexTrackerLoadSection::class, $result->trackerLoad);
+        $this->assertInstanceOf(IndexDisclaimerSection::class, $result->disclaimer);
+        $this->assertInstanceOf(IndexBrowserNoteSection::class, $result->browserNote);
     }
 
     public function test_build_returns_cur_user_array(): void
@@ -223,10 +229,10 @@ final class IndexPageServiceTest extends TestCase
             'showtrackerload' => 'no',
         ]);
 
-        $result = $this->service->build()->toArray();
+        $result = $this->service->build();
 
-        $this->assertSame(99, (int) $result['curUser']['id']);
-        $this->assertSame('myuser', $result['curUser']['username']);
+        $this->assertSame(99, (int) $result->curUser['id']);
+        $this->assertSame('myuser', $result->curUser['username']);
     }
 
     // ─── Section visibility toggles ───────────────────────────────────
@@ -235,7 +241,7 @@ final class IndexPageServiceTest extends TestCase
     {
         $result = $this->buildWithAllSectionsDisabled();
 
-        $this->assertFalse($result['shoutbox']['show']);
+        $this->assertFalse($result->shoutbox->show);
     }
 
     public function test_shoutbox_shown_when_showshoutbox_main_is_yes(): void
@@ -244,16 +250,16 @@ final class IndexPageServiceTest extends TestCase
             'showshoutbox_main' => 'yes',
         ]);
 
-        $this->assertTrue($result['shoutbox']['show']);
-        $this->assertArrayHasKey('title', $result['shoutbox']);
-        $this->assertArrayHasKey('toolbar', $result['shoutbox']);
+        $this->assertTrue($result->shoutbox->show);
+        $this->assertNotEmpty($result->shoutbox->title);
+        $this->assertNotNull($result->shoutbox->toolbar);
     }
 
     public function test_forum_posts_hidden_when_setting_is_no(): void
     {
         $result = $this->buildWithAllSectionsDisabled();
 
-        $this->assertFalse($result['forumPosts']['show']);
+        $this->assertFalse($result->forumPosts->show);
     }
 
     public function test_forum_posts_hidden_when_no_current_user(): void
@@ -270,17 +276,17 @@ final class IndexPageServiceTest extends TestCase
             'showtrackerload' => 'no',
         ]);
 
-        $result = $this->service->build()->toArray();
+        $result = $this->service->build();
 
         // Empty curUser means forum posts should not show
-        $this->assertFalse($result['forumPosts']['show']);
+        $this->assertFalse($result->forumPosts->show);
     }
 
     public function test_latest_torrents_hidden_when_setting_is_no(): void
     {
         $result = $this->buildWithAllSectionsDisabled();
 
-        $this->assertFalse($result['latestTorrents']['show']);
+        $this->assertFalse($result->latestTorrents->show);
     }
 
     public function test_latest_torrents_shown_when_setting_is_yes(): void
@@ -289,7 +295,7 @@ final class IndexPageServiceTest extends TestCase
             'showlastxtorrents_main' => 'yes',
         ]);
 
-        $this->assertTrue($result['latestTorrents']['show']);
+        $this->assertTrue($result->latestTorrents->show);
     }
 
     public function test_latest_torrents_title_does_not_mismatch_card_count(): void
@@ -316,7 +322,7 @@ final class IndexPageServiceTest extends TestCase
             'showlastxtorrents_main' => 'yes',
         ]);
 
-        $html = (string) $result['latestTorrents']['html'];
+        $html = (string) $result->latestTorrents->html;
         $this->assertStringContainsString('Latest Torrents', $html);
         $this->assertStringNotContainsString('Last 5', $html);
         $this->assertSame(1, substr_count($html, 'class="lt-card"'));
@@ -327,14 +333,14 @@ final class IndexPageServiceTest extends TestCase
     {
         $result = $this->buildWithAllSectionsDisabled();
 
-        $this->assertFalse($result['polls']['show']);
+        $this->assertFalse($result->polls->show);
     }
 
     public function test_stats_hidden_when_setting_is_no(): void
     {
         $result = $this->buildWithAllSectionsDisabled();
 
-        $this->assertFalse($result['stats']['show']);
+        $this->assertFalse($result->stats->show);
     }
 
     public function test_stats_shown_when_setting_is_yes(): void
@@ -343,17 +349,17 @@ final class IndexPageServiceTest extends TestCase
             'showstats_main' => 'yes',
         ]);
 
-        $this->assertTrue($result['stats']['show']);
-        $this->assertArrayHasKey('userStats', $result['stats']);
-        $this->assertArrayHasKey('torrentStats', $result['stats']);
-        $this->assertArrayHasKey('classStats', $result['stats']);
+        $this->assertTrue($result->stats->show);
+        $this->assertIsArray($result->stats->userStats);
+        $this->assertIsArray($result->stats->torrentStats);
+        $this->assertContainsOnlyInstancesOf(IndexClassStatRow::class, $result->stats->classStats);
     }
 
     public function test_tracker_load_hidden_when_setting_is_no(): void
     {
         $result = $this->buildWithAllSectionsDisabled();
 
-        $this->assertFalse($result['trackerLoad']['show']);
+        $this->assertFalse($result->trackerLoad->show);
     }
 
     public function test_tracker_load_shown_when_setting_is_yes(): void
@@ -362,8 +368,8 @@ final class IndexPageServiceTest extends TestCase
             'showtrackerload' => 'yes',
         ]);
 
-        $this->assertTrue($result['trackerLoad']['show']);
-        $this->assertArrayHasKey('load', $result['trackerLoad']);
+        $this->assertTrue($result->trackerLoad->show);
+
     }
 
     // ─── Always-on sections ───────────────────────────────────────────
@@ -372,33 +378,32 @@ final class IndexPageServiceTest extends TestCase
     {
         $result = $this->buildWithAllSectionsDisabled();
 
-        $this->assertTrue($result['disclaimer']['show']);
-        $this->assertArrayHasKey('title', $result['disclaimer']);
-        $this->assertArrayHasKey('content', $result['disclaimer']);
+        $this->assertTrue($result->disclaimer->show);
+        $this->assertNotEmpty($result->disclaimer->title);
+        $this->assertNotEmpty($result->disclaimer->content);
     }
 
     public function test_browser_note_always_shown(): void
     {
         $result = $this->buildWithAllSectionsDisabled();
 
-        $this->assertTrue($result['browserNote']['show']);
-        $this->assertArrayHasKey('note', $result['browserNote']);
+        $this->assertTrue($result->browserNote->show);
+        $this->assertNotNull($result->browserNote->note);
     }
 
     public function test_news_always_shown(): void
     {
         $result = $this->buildWithAllSectionsDisabled();
 
-        $this->assertTrue($result['news']['show']);
-        $this->assertArrayHasKey('items', $result['news']);
-        $this->assertArrayHasKey('canManage', $result['news']);
+        $this->assertTrue($result->news->show);
+        $this->assertContainsOnlyInstancesOf(IndexNewsItem::class, $result->news->items);
     }
 
     public function test_top_uploaders_hidden_when_setting_disabled(): void
     {
         $result = $this->buildWithAllSectionsDisabled();
 
-        $this->assertFalse($result['topUploaders']['show']);
+        $this->assertFalse($result->topUploaders->show);
     }
 
     // ─── Permission flags ─────────────────────────────────────────────
@@ -407,9 +412,9 @@ final class IndexPageServiceTest extends TestCase
     {
         $result = $this->buildWithAllSectionsDisabled();
 
-        $this->assertFalse($result['canNewsManage']);
-        $this->assertFalse($result['canPollManage']);
-        $this->assertFalse($result['canSbManage']);
-        $this->assertFalse($result['canLog']);
+        $this->assertFalse($result->canNewsManage);
+        $this->assertFalse($result->canPollManage);
+        $this->assertFalse($result->canSbManage);
+        $this->assertFalse($result->canLog);
     }
 }

@@ -1,21 +1,21 @@
-@if($news['show'])
-<h2>{{ $news['title'] }}
-    @if($news['canManage'])
-        - <span class="small">[<a class="altlink" href="news.php"><b>{{ $news['manageLink'] }}</b></a>]</span>
+@if($news->show)
+<h2>{{ $news->title }}
+    @if($news->canManage)
+        - <span class="small">[<a class="altlink" href="news.php"><b>{{ $news->manageLink }}</b></a>]</span>
     @endif
 </h2>
-@if(count($news['items']) > 0)
+@if(count($news->items) > 0)
 <div class="nx-text"><div>
-@foreach($news['items'] as $newsItem)
+@foreach($news->items as $newsItem)
     @if($loop->first)
-        <a href="#" data-klappe="a{{ $newsItem['id'] }}"><img class="minus" src="pic/trans.gif" id="pica{{ $newsItem['id'] }}" alt="Show/Hide" title="{{ $news['showHideTitle'] }}" />&nbsp;{{ date('Y.m.d', strtotime($newsItem['added'])) }} - <b>{{ $newsItem['title'] }}</b></a>
-        <div id="ka{{ $newsItem['id'] }}"> {{ \App\Support\Format::formatComment($newsItem['body'], 0) }} </div>
+        <a href="#" data-klappe="a{{ $newsItem->id }}"><img class="minus" src="pic/trans.gif" id="pica{{ $newsItem->id }}" alt="Show/Hide" title="{{ $news->showHideTitle }}" />&nbsp;{{ date('Y.m.d', strtotime($newsItem->added)) }} - <b>{{ $newsItem->title }}</b></a>
+        <div id="ka{{ $newsItem->id }}"> {{ \App\Support\Format::formatComment($newsItem->body, 0) }} </div>
     @else
-        <a href="#" data-klappe="a{{ $newsItem['id'] }}"><br /><img class="plus" src="pic/trans.gif" id="pica{{ $newsItem['id'] }}" alt="Show/Hide" title="{{ $news['showHideTitle'] }}" />&nbsp;{{ date('Y.m.d', strtotime($newsItem['added'])) }} - <b>{{ $newsItem['title'] }}</b></a>
-        <div id="ka{{ $newsItem['id'] }}" class="nx-hidden"> {{ \App\Support\Format::formatComment($newsItem['body'], 0) }} </div>
+        <a href="#" data-klappe="a{{ $newsItem->id }}"><br /><img class="plus" src="pic/trans.gif" id="pica{{ $newsItem->id }}" alt="Show/Hide" title="{{ $news->showHideTitle }}" />&nbsp;{{ date('Y.m.d', strtotime($newsItem->added)) }} - <b>{{ $newsItem->title }}</b></a>
+        <div id="ka{{ $newsItem->id }}" class="nx-hidden"> {{ \App\Support\Format::formatComment($newsItem->body, 0) }} </div>
     @endif
-    &nbsp; [<a class="faqlink" href="news.php?action=edit&amp;newsid={{ $newsItem['id'] }}"><b>{{ $news['editLabel'] }}</b></a>]
-    <form method="post" action="/news" class="nx-inline">@csrf<input type="hidden" name="action" value="delete" /><input type="hidden" name="newsid" value="{{ $newsItem['id'] }}" /><input type="hidden" name="sure" value="1" /><button type="submit" class="faqlink"><b>{{ $news['deleteLabel'] }}</b></button></form>
+    &nbsp; [<a class="faqlink" href="news.php?action=edit&amp;newsid={{ $newsItem->id }}"><b>{{ $news->editLabel }}</b></a>]
+    <form method="post" action="/news" class="nx-inline">@csrf<input type="hidden" name="action" value="delete" /><input type="hidden" name="newsid" value="{{ $newsItem->id }}" /><input type="hidden" name="sure" value="1" /><button type="submit" class="faqlink"><b>{{ $news->deleteLabel }}</b></button></form>
 @endforeach
 </div></div>
 @endif

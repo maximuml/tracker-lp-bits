@@ -631,7 +631,7 @@ textarea.bbcode{width:100%;box-sizing:border-box}
 .bbcode-btn-b{font-weight:bold}
 .bbcode-btn-i{font-style:italic}
 .bbcode-btn-u{text-decoration:underline}
-.bbcode-attach{width:100%;height:24px;display:block}
+.bbcode-attach{width:100%;height:58px;display:block}
 .bbcode-body{display:flex;gap:10px;align-items:flex-start}
 .bbcode-body .bbcode{flex:1 1 auto}
 .bbcode-smilies-wrap{text-align:center}

@@ -8,6 +8,8 @@ use App\Filament\Widgets\AccountInfo;
 use App\Filament\Widgets\LatestTorrents;
 use App\Filament\Widgets\LatestUsers;
 use App\Filament\Widgets\SystemInfo;
+use App\Filament\Widgets\TorrentTrend;
+use App\Filament\Widgets\UserTrend;
 use Filament\Support\Enums\Width;
 
 class Dashboard extends \Filament\Pages\Dashboard
@@ -20,6 +22,8 @@ class Dashboard extends \Filament\Pages\Dashboard
             AccountInfo::class,
             LatestUsers::class,
             LatestTorrents::class,
+            UserTrend::class,
+            TorrentTrend::class,
             SystemInfo::class,
         ];
     }

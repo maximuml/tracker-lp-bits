@@ -20,6 +20,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Js;
 use Illuminate\View\View;
 
 class BonusShopController extends LegacyController
@@ -87,7 +88,7 @@ class BonusShopController extends LegacyController
                 'id' => $row->id,
                 'image_large' => $row->image_large,
                 'name' => $row->name,
-                'description' => SafeHtml::fromTrustedHtml((string) ($row->description ?? '')),
+                'description' => SafeHtml::fromUntrustedHtml((string) ($row->description ?? '')),
                 'sale_begin_time' => $row->sale_begin_time ?? Locale::trans('nexus.no_limit', [], null),
                 'sale_end_time' => $row->sale_end_time ?? Locale::trans('nexus.no_limit', [], null),
                 'durationText' => $row->durationText,
@@ -95,20 +96,20 @@ class BonusShopController extends LegacyController
                 'gift_fee_factor' => ($row->gift_fee_factor ?? 0) * 100,
                 'price' => $row->price,
                 'inventory' => $row->inventory ?? Locale::trans('label.infinite', [], null),
-                'buy_action' => SafeHtml::fromTrustedHtml(sprintf('<input type="button" class="%s" data-id="%s" value="%s"%s>', $buyClass, $row->id, htmlspecialchars($buyBtnText), $buyDisabled)),
-                'gift_action' => SafeHtml::fromTrustedHtml(sprintf('<input type="number" class="uid" %s placeholder="UID"><input type="button" class="%s" data-id="%s" value="%s"%s><span class="nowrap">%s: %s</span>', $giftDisabled, $giftClass, $row->id, htmlspecialchars($giftBtnText), $giftDisabled, Locale::trans('medal.fields.gift_fee', [], null), (($row->gift_fee_factor ?? 0) * 100).'%')),
+                'buy_action' => SafeHtml::fromTrustedHtml(sprintf('<input type="button" class="%s" data-id="%s" value="%s"%s>', $buyClass, $row->id, e($buyBtnText), $buyDisabled)),
+                'gift_action' => SafeHtml::fromTrustedHtml(sprintf('<input type="number" class="uid" %s placeholder="UID"><input type="button" class="%s" data-id="%s" value="%s"%s><span class="nowrap">%s: %s</span>', $giftDisabled, $giftClass, $row->id, e($giftBtnText), $giftDisabled, Locale::trans('medal.fields.gift_fee', [], null), (($row->gift_fee_factor ?? 0) * 100).'%')),
             ];
         }
 
         $title = Locale::trans('medal.label', [], null);
-        $confirmBuyMsg = Locale::trans('medal.confirm_to_buy', [], null);
-        $confirmGiftMsg = Locale::trans('medal.confirm_to_gift', [], null);
+        $confirmBuyJs = Js::from(Locale::trans('medal.confirm_to_buy', [], null));
+        $confirmGiftJs = Js::from(Locale::trans('medal.confirm_to_gift', [], null));
 
         $js = <<<JS
 document.querySelectorAll('.buy').forEach(function (btn) {
     btn.addEventListener('click', function () {
         var medalId = this.getAttribute('data-id')
-        layer.confirm("{$confirmBuyMsg}", function (index) {
+        layer.confirm({$confirmBuyJs}, function (index) {
             var params = {
                 action: "buyMedal",
                 params: {medal_id: medalId}
@@ -133,7 +134,7 @@ document.querySelectorAll('.gift').forEach(function (btn) {
             layer.alert('Require UID')
             return
         }
-        layer.confirm("{$confirmGiftMsg}" + uid + " ?", function (index) {
+        layer.confirm({$confirmGiftJs} + uid + " ?", function (index) {
             var params = {
                 action: "giftMedal",
                 params: {medal_id: medalId, uid: uid}
@@ -218,7 +219,7 @@ JS;
                 'rewardFormatted' => number_format((float) $row->success_reward_bonus),
                 'deductFormatted' => number_format((float) $row->fail_deduct_bonus),
                 'claimedCount' => ($row->on_going_users_count ?? 0).'/'.($row->max_user_count ?: $infiniteText),
-                'description' => SafeHtml::fromTrustedHtml((string) ($row->description ?? '')),
+                'description' => SafeHtml::fromUntrustedHtml((string) ($row->description ?? '')),
                 'claimActionHtml' => SafeHtml::fromTrustedHtml(sprintf(
                     '<input type="button" class="%s" data-id="%s" value="%s"%s>',
                     $isClaimed ? '' : 'claim',
@@ -230,14 +231,13 @@ JS;
         }
 
         $title = Locale::trans('exam.type_task', [], null);
-        $confirmBuyMsg = Locale::trans('exam.confirm_to_claim', [], null);
-        $confirmGiftMsg = Locale::trans('medal.confirm_to_gift', [], null);
+        $confirmBuyJs = Js::from(Locale::trans('exam.confirm_to_claim', [], null));
 
         $js = <<<JS
 document.querySelectorAll('.claim').forEach(function (btn) {
     btn.addEventListener('click', function () {
         var id = this.getAttribute('data-id')
-        layer.confirm("{$confirmBuyMsg}", function (index) {
+        layer.confirm({$confirmBuyJs}, function (index) {
             layer.close(index)
             var params = {
                 action: "claimTask",

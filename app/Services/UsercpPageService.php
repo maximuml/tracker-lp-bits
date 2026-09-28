@@ -180,9 +180,9 @@ final class UsercpPageService
         $ipLocation = '';
         if ($enableLocationTweak) {
             [$locPub, $locMod] = Network::ipLocationWithContext((string) ($curUser['ip'] ?? ''));
-            $ipLocation = Strings::hidden((string) ($curUser['ip'] ?? '')." <span title='".$locMod."'>[".$locPub.']</span>');
+            $ipLocation = Strings::hidden(e((string) ($curUser['ip'] ?? ''))." <span title='".e($locMod)."'>[".e($locPub).']</span>');
         } else {
-            $ipLocation = Strings::hidden((string) ($curUser['ip'] ?? ''));
+            $ipLocation = Strings::hidden(e((string) ($curUser['ip'] ?? '')));
         }
 
         // Passkey login form data (if passkey login enabled and deadline in
@@ -221,7 +221,7 @@ final class UsercpPageService
             ipLocation: SafeHtml::fromTrustedHtml($ipLocation),
             showAvatar: ! empty($curUser['avatar']),
             avatarUrl: (string) ($curUser['avatar'] ?? ''),
-            passkey: Strings::hidden((string) ($curUser['passkey'] ?? '')),
+            passkey: Strings::hidden(e((string) ($curUser['passkey'] ?? ''))),
             passkeyLogin: $passkeyLogin,
             invites: (int) ($curUser['invites'] ?? 0),
             seedbonus: (string) ($curUser['seedbonus'] ?? '0'),

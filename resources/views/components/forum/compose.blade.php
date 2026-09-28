@@ -3,6 +3,7 @@
      #previewouter/#editorouter and the data-preview-toggle buttons
      handled by bbcode-editor.js/common.js. --}}
 @props(['vm'])
+@php($errors ??= new \Illuminate\Support\ViewErrorBag)
 <form id="compose" method="post" name="compose" action="?action=post">
     @if ($vm->postid !== null)
     <input type="hidden" name="postid" value="{{ $vm->postid }}" />
@@ -15,11 +16,11 @@
     <x-frame :caption="$vm->frameCaption()" :center="true">
         <div class="nx-fgrid nx-fgrid--flat">
             @if ($vm->hasSubject)
-            <div class="nx-fhead">{{ __('legacy/functions.row_subject') }}</div>
-            <div class="nx-fcell"><input type="text" name="subject" maxlength="{{ $vm->maxSubjectLength }}" value="{{ $vm->subject }}" /></div>
+            <div class="nx-fhead"><label for="subject">{{ __('legacy/functions.row_subject') }}</label></div>
+            <div class="nx-fcell"><input type="text" id="subject" name="subject" maxlength="{{ $vm->maxSubjectLength }}" value="{{ $vm->subject }}"@if (isset($errors) && $errors->has('subject')) aria-invalid="true" aria-describedby="compose-subject-error"@endif />@error('subject')<p class="nx-field__error" id="compose-subject-error">{{ $message }}</p>@enderror</div>
             @endif
-            <div class="nx-fhead">{{ __('legacy/functions.row_body') }}</div>
-            <div class="nx-fcell"><span class="nx-hidden" id="previewouter"></span><div id="editorouter"><x-bbcode-editor form="compose" text="body" :content="$vm->body" /></div></div>
+            <div class="nx-fhead"><label for="body">{{ __('legacy/functions.row_body') }}</label></div>
+            <div class="nx-fcell"><span class="nx-hidden" id="previewouter"></span><div id="editorouter"><x-bbcode-editor form="compose" text="body" :content="$vm->body" :invalid="isset($errors) && $errors->has('body')" :described-by="isset($errors) && $errors->has('body') ? 'compose-body-error' : ''" />@error('body')<p class="nx-field__error" id="compose-body-error">{{ $message }}</p>@enderror</div></div>
             <div class="nx-ffull nx-center"><input id="qr" type="submit" class="btn" value="{{ __('legacy/functions.submit_submit') }}" />
                 <input type="button" class="btn2" name="previewbutton" id="previewbutton" value="{{ __('legacy/functions.submit_preview') }}" data-preview-toggle="preview" />
                 <input type="button" class="btn2 nx-hidden" name="unpreviewbutton" id="unpreviewbutton" value="{{ __('legacy/functions.submit_edit') }}" data-preview-toggle="unpreview" /></div>

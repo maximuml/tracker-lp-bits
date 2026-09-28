@@ -212,3 +212,23 @@ get client with url: http://meilisearch:7700, master key:
 23. **Announce `peer_id` must be exactly 20 bytes** (`-TR4000-` + 12 chars);
     "already downloading the same torrent" means a stale peer row — use
     another user/torrent.
+24. **Shoutbox reactions:** rows expose `+` add button `[data-shout-picker=ID]`
+    → opens `#shout-reaction-picker-ID` (options carry `data-close-picker`).
+    Click posts `ajax.php?action=shoutboxReact` (id+reaction); applied badge
+    is `.shout-reaction[data-shout-react=ID][data-emoji=X]` WITHOUT
+    `data-close-picker` — include that exclusion when asserting "no badge"
+    or you will match hidden picker options. Toggle deletes the
+    `shoutbox_reactions` row; DOM badge may lag ~1s until poll refresh.
+    History page = `/shoutbox_history.php`, filters `user/from/to/search`.
+25. **Stale compiled blades → blanket 500s after a git checkout.** If the
+    stack stays up across a `git checkout`/`merge` that adds or changes
+    blades, authed pages can 500 with `touch(): Utime failed: Operation not
+    permitted at BladeCompiler.php:215` (compiled views owned by another
+    uid). Fix: `docker compose … exec -T php php artisan view:clear`.
+26. **Theme runs:** `users.stylesheet` = row id in `stylesheets`
+    (4=Classic, 5=Unshatter, …); guest default = `settings`
+    `main.defstylesheet`. `users.theme` (light/dark/auto) picks the
+    variant inside the stylesheet — check both. Verify theme actually
+    applied via `<link href="styles/<Name>/theme.css">`, then eyeball
+    contrast (computed body bg/fg luminance) + `scrollWidth` overflow.
+    Restore both DB values and `cache:clear` afterwards.

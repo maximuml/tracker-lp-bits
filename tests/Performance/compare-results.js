@@ -33,6 +33,19 @@ const path = require('path');
 const REGRESSION_RATIO = 1.50;
 const REGRESSION_ABS_MS = 100;
 
+// announce.json gets a wider gate: those scenarios run the real announce
+// write path under multi-VU load, so shared-runner CPU contention scales
+// their p95 *multiplicatively* — observed on unrelated/doc-only PRs at
+// ×1.6–2.9 (+167–526ms) while every page metric improved. The additive
+// noiseShift above cannot absorb that. Values sit just past the observed
+// noise: a true announce regression the gate can still see is the
+// order-of-magnitude kind (which k6's own absolute budgets also bound at
+// p95<1000). Sub-×3 announce drift is honestly undetectable on shared
+// runners — trend-watching, not a blocking gate.
+const FILE_THRESHOLDS = {
+  'announce.json': { ratio: 3.5, absMs: 600 },
+};
+
 // Runner noise floor: page_health_live_duration does no app work, so its
 // p95 delta vs baseline measures the per-run constant added by the shared
 // runner (observed: a uniform +140-170ms on every scenario, health checks
@@ -154,6 +167,7 @@ for (const file of fs.readdirSync(currentDir).filter((f) => f.endsWith('.json'))
       continue;
     }
 
+    const limits = FILE_THRESHOLDS[file] ?? { ratio: REGRESSION_RATIO, absMs: REGRESSION_ABS_MS };
     const baseP95 = median(values);
     const adjusted = cur.p95_ms - noiseShift;
     const ratio = adjusted / baseP95;
@@ -161,7 +175,7 @@ for (const file of fs.readdirSync(currentDir).filter((f) => f.endsWith('.json'))
     compared++;
 
     const delta = adjusted - baseP95;
-    if (ratio > REGRESSION_RATIO && delta > REGRESSION_ABS_MS) {
+    if (ratio > limits.ratio && delta > limits.absMs) {
       console.log(
         `REGRESSION ${file}:${scenario}: p95 median(${values.length}) ${baseP95.toFixed(0)}ms -> ${cur.p95_ms}ms (+${pct}%, +${delta.toFixed(0)}ms adjusted)`
       );
@@ -177,6 +191,6 @@ for (const file of fs.readdirSync(currentDir).filter((f) => f.endsWith('.json'))
 console.log(`\nCompared ${compared} scenario(s): ${regressions} regression(s), ${skipped} skipped.`);
 
 if (regressions > 0) {
-  console.error(`FAIL: ${regressions} scenario(s) regressed (>${((REGRESSION_RATIO - 1) * 100).toFixed(0)}% AND >${REGRESSION_ABS_MS}ms).`);
+  console.error(`FAIL: ${regressions} scenario(s) regressed (>${((REGRESSION_RATIO - 1) * 100).toFixed(0)}% AND >${REGRESSION_ABS_MS}ms; per-file overrides may apply).`);
   process.exit(1);
 }

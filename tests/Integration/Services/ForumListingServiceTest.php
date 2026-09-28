@@ -329,7 +329,8 @@ final class ForumListingServiceTest extends TestCase
         $this->setUser();
         $this->setRequest(['keywords' => 'notfound']);
 
-        $this->postRepo->shouldReceive('searchForumPosts')->once()->andReturn(['hits' => 0, 'rows' => new Collection]);
+        $this->postRepo->shouldReceive('countForumSearchPosts')->once()->andReturn(0);
+        $this->postRepo->shouldNotReceive('searchForumPosts');
 
         $vm = $this->service->buildSearch(20);
 
@@ -346,16 +347,14 @@ final class ForumListingServiceTest extends TestCase
         $this->setUser();
         $this->setRequest(['keywords' => 'test']);
 
-        $this->postRepo->shouldReceive('searchForumPosts')->andReturn([
-            'hits' => 25,
-            'rows' => new Collection([
-                (object) [
-                    'id' => 50, 'topicid' => 7, 'subject' => 'A test topic',
-                    'hlcolor' => 0, 'forumid' => 3, 'forumname' => 'Forum Three',
-                    'added' => '2026-09-01 12:00:00', 'userid' => 1,
-                ],
-            ]),
-        ]);
+        $this->postRepo->shouldReceive('countForumSearchPosts')->once()->andReturn(25);
+        $this->postRepo->shouldReceive('searchForumPosts')->once()->andReturn(new Collection([
+            (object) [
+                'id' => 50, 'topicid' => 7, 'subject' => 'A test topic',
+                'hlcolor' => 0, 'forumid' => 3, 'forumname' => 'Forum Three',
+                'added' => '2026-09-01 12:00:00', 'userid' => 1,
+            ],
+        ]));
 
         $vm = $this->service->buildSearch(20);
 

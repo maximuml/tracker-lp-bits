@@ -1048,3 +1048,28 @@ by final repository classes or static methods — see W2-01/W2-02).
   method); nonce markers for replay protection must outlive signature
   validity — TTL is `ts + window - now + grace`, and a failing nonce
   store rejects the login (fail closed).
+### ADR 0032: Posts API permission matrix — TOPIC_LIST ability, domain checks in the controller (Accepted, plan step 4)
+
+- **Context:** `topics/{topic}/posts*` routes all sit under the `TOPIC_LIST`
+  Sanctum ability. The plan's suggested alternative — `TOPIC_MANAGE` for
+  reply/edit/delete — was rejected: it would deny ordinary members
+  replying to topics (a legitimate domain-scoped right granted by
+  `forum.minclasswrite`), which is a semantic change, not a permission
+  narrowing. Authorization has two distinct layers: Sanctum ability
+  (401/403) and domain checks inside `PostController` (422 via
+  ValidationException).
+- **Decision:** All five posts routes keep `TOPIC_LIST`. Domain matrix,
+  enforced in `PostController` (`canRead` / `canWrite` / `canEdit` /
+  `canModerate`):
+  read — `class >= forum.minclassread`; reply —
+  `class >= forum.minclasswrite` and (topic unlocked or forum moderator);
+  edit own — `post.userid = user` and `class >= forum.minclasswrite`;
+  delete own — same, plus the topic's first post cannot be deleted;
+  moderate — `forummods` row or `POST_MANAGE` permission bypasses the
+  owner check (not the `minclasswrite` floor for non-staff).
+  `scopeBindings` pins `{post}` to `{topic}` (step 1).
+- **Consequences:** `PostPermissionMatrixTest` pins all four scenarios
+  with positive and negative cases; `AuthorizationMatrixTest` covers the
+  ability layer. Any future narrowing (e.g. a dedicated `TOPIC_REPLY`
+  ability) must split reply from moderate, not promote reply to
+  `TOPIC_MANAGE`.

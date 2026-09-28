@@ -121,6 +121,13 @@ class AuthorizationMatrixTest extends TestCase
             'topics.update' => ['/api/v1/topics/1',      'PUT',    RoutePermissionEnum::TOPIC_MANAGE->value],
             'topics.destroy' => ['/api/v1/topics/1',     'DELETE', RoutePermissionEnum::TOPIC_MANAGE->value],
 
+            // Posts (nested under topic; domain matrix pinned in PostPermissionMatrixTest)
+            'posts.index' => ['/api/v1/topics/1/posts',     'GET',    RoutePermissionEnum::TOPIC_LIST->value],
+            'posts.store' => ['/api/v1/topics/1/posts',     'POST',   RoutePermissionEnum::TOPIC_LIST->value],
+            'posts.show' => ['/api/v1/topics/1/posts/1',   'GET',    RoutePermissionEnum::TOPIC_LIST->value],
+            'posts.update' => ['/api/v1/topics/1/posts/1',   'PUT',    RoutePermissionEnum::TOPIC_LIST->value],
+            'posts.destroy' => ['/api/v1/topics/1/posts/1',   'DELETE', RoutePermissionEnum::TOPIC_LIST->value],
+
             // Agent allow/deny
             'agent-allows.index' => ['/api/v1/agent-allows',    'GET',    RoutePermissionEnum::AGENT_ALLOW_LIST->value],
             'agent-allows.show' => ['/api/v1/agent-allows/1',  'GET',    RoutePermissionEnum::AGENT_ALLOW_LIST->value],

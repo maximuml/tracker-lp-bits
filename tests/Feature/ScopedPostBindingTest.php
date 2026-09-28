@@ -114,14 +114,15 @@ final class ScopedPostBindingTest extends TestCase
 
     public function test_destroy_matching_pair_still_works(): void
     {
-        $forum = Forum::factory()->create(['minclassread' => 1, 'minclasswrite' => 1, 'postcount' => 1]);
+        $forum = Forum::factory()->create(['minclassread' => 1, 'minclasswrite' => 1, 'postcount' => 2]);
         $topic = Topic::factory()->create(['forumid' => $forum->id]);
+        Post::factory()->create(['topicid' => $topic->id, 'userid' => $this->user->id]);
         $post = Post::factory()->create(['topicid' => $topic->id, 'userid' => $this->user->id]);
 
         $this->deleteJson("/api/v1/topics/{$topic->id}/posts/{$post->id}")
             ->assertOk();
 
         $this->assertNull($post->fresh());
-        $this->assertSame(0, (int) $forum->fresh()->postcount);
+        $this->assertSame(1, (int) $forum->fresh()->postcount);
     }
 }

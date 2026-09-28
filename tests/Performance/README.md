@@ -51,3 +51,31 @@ fail fast until the flag expires.
 `many_peers_one_torrent` is the known flake source: tiny iteration counts
 on shared runners make its p95 jump around (lock contention on the peer
 row); the comparator's 1.5×/100ms gate exists for exactly this.
+
+## Forum search benchmark (2026-09-28, local dev stack)
+
+Modernization plan step 5 — the SQL-vs-FULLTEXT-vs-MeiliSearch decision is
+measured, not guessed. Dataset: 100 000 synthetic `posts` across 5 000
+`topics` seeded via a recursive-CTE insert; forum search query shape is
+`posts ⋈ topics ⋈ forums` with the `forums.minclassread` gate and the
+post-#996 predicate (`topics.subject LIKE ? AND posts.id = topics.firstpost`
+OR `posts.body LIKE ?`).
+
+| query | keyword | p50 |
+|---|---|---|
+| `LIKE %kw%` count | Linkin / lossless / Meteora / padding / concert | 239–289 ms |
+| `MATCH … AGAINST` (nat.) count | same five keywords | 164–223 ms |
+| `LIKE %kw%` page select (LIMIT 25) | Linkin / padding | 250–274 ms |
+
+Temporary `FULLTEXT` indexes on `posts(body)` / `topics(subject)` used for
+the measurement, then dropped with the bench rows — not migrated.
+
+**Decision: keep SQL `LIKE`.** FULLTEXT is ~30–40% faster but still a
+full-result scan at this volume — not an order-of-magnitude win, and it
+changes match semantics (word boundaries, `innodb_ft_min_token_size`,
+stopwords — substring searches like `R&B` or partial nicks would silently
+stop matching). MeiliSearch adds infra + a `Searchable` model/index wiring
+for a query that stays under ~300 ms at 100k posts. Revisit when posts are
+an order of magnitude larger or if ranked/fuzzy search UX is actually
+wanted. The remaining cost is the `COUNT(*)` covering the whole result set;
+`perPage=0` already short-circuits to count-only (PR #996).

@@ -199,9 +199,12 @@ final class CriticalFlowConcurrencyTest extends TestCase
         $this->assertSame(1, $event->attempts);
         $this->assertTrue($event->available_at > now(), 'Backoff should delay availability.');
 
-        // Backoff for attempt 1: 5 * 2^0 = 5 seconds
-        $backoff = (int) now()->diffInSeconds($event->available_at);
+        // Backoff for attempt 1: 5 * 2^0 = 5 seconds. Measure between the two
+        // timestamps written by the same UPDATE — comparing against a fresh
+        // now() here makes the assert sensitive to second-boundary timing.
+        $backoff = (int) $event->updated_at->diffInSeconds($event->available_at);
         $this->assertGreaterThanOrEqual(4, $backoff, 'First retry backoff should be ~5s.');
+        $this->assertLessThanOrEqual(6, $backoff, 'First retry backoff should be ~5s.');
     }
 
     public function test_outbox_dead_letters_after_max_attempts(): void

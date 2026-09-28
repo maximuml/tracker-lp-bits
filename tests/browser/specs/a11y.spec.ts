@@ -150,3 +150,55 @@ test.describe('expanded search panel', () => {
     await expect(bell).toHaveAttribute('aria-expanded', 'false');
   });
 });
+
+test.describe('compose form', () => {
+  test.use({ storageState: AUTH_STATE });
+
+  test('PM compose: labels, named toolbar selects, keyboard preview+submit', async ({
+    page,
+  }) => {
+    await page.goto('/sendmessage?receiver=1', { waitUntil: 'networkidle' });
+
+    // Explicit label association for subject + body (a11y fix targets).
+    await expect(page.locator('label[for="subject"]')).toBeVisible();
+    await expect(page.locator('input#subject')).toBeVisible();
+    await expect(page.locator('label[for="body"]')).toBeVisible();
+    await expect(page.locator('textarea#body')).toBeVisible();
+
+    // Toolbar selects expose accessible names.
+    for (const name of ['color', 'font', 'size']) {
+      await expect(
+        page.locator(`select[name="${name}"]`),
+      ).toHaveAttribute('aria-label', /.+/);
+    }
+
+    // Keyboard path: subject -> (toolbar controls) -> body -> preview -> edit
+    // -> submit button.
+    await page.locator('input#subject').focus();
+    await page.keyboard.type('a11y spec subject');
+    let bodyFocused = false;
+    for (let i = 0; i < 15 && !bodyFocused; i++) {
+      await page.keyboard.press('Tab');
+      bodyFocused = await page.evaluate(
+        () => document.activeElement?.id === 'body',
+      );
+    }
+    expect(bodyFocused, 'Tab from subject should reach body').toBe(true);
+    await page.keyboard.type('a11y spec body');
+
+    await page.locator('#previewbutton').focus();
+    await page.keyboard.press('Enter');
+    await expect(page.locator('#previewouter')).toBeVisible();
+    await expect(page.locator('#unpreviewbutton')).toBeVisible();
+
+    await page.locator('#unpreviewbutton').focus();
+    await page.keyboard.press('Enter');
+    await expect(page.locator('#editorouter')).toBeVisible();
+
+    // The submit control is reachable and enabled from the keyboard.
+    const submit = page.locator('#qr');
+    await expect(submit).toBeEnabled();
+    await submit.focus();
+    await expect(submit).toBeFocused();
+  });
+});

@@ -234,15 +234,13 @@ class IndexRepository
             $this->cacheKey('poll_results', [(string) $pollId]),
             300,
             function () use ($pollId) {
-                $selections = PollAnswer::where('pollid', $pollId)
+                $counts = PollAnswer::where('pollid', $pollId)
                     ->where('selection', '<=', Poll::MAX_OPTION_INDEX)
-                    ->pluck('selection')
-                    ->toArray();
-
-                $counts = [];
-                foreach ($selections as $selection) {
-                    $counts[$selection] = ($counts[$selection] ?? 0) + 1;
-                }
+                    ->selectRaw('selection, count(*) as cnt')
+                    ->groupBy('selection')
+                    ->pluck('cnt', 'selection')
+                    ->map(fn ($cnt) => (int) $cnt)
+                    ->all();
 
                 $poll = Poll::find($pollId);
                 $items = [];

@@ -78,22 +78,27 @@ final class HealthController extends Controller
         }
 
         // Redis (critical)
-        try {
-            Redis::connection()->ping();
-            $checks['redis'] = 'ok';
-        } catch (\Throwable $e) {
-            $checks['redis'] = 'fail';
+        $checks['redis'] = $this->redisPing() ? 'ok' : 'fail';
+        if ($checks['redis'] === 'fail') {
             $healthy = false;
         }
 
         // MeiliSearch (non-critical — search falls back to SQL)
         $checks['meilisearch'] = $this->checkMeiliSearch($warnings);
 
-        // Horizon (non-critical for web requests, but critical for async jobs)
-        $checks['horizon'] = $this->checkHorizon($warnings);
+        // Horizon + scheduler heartbeat are Redis-backed: when Redis is
+        // already down, re-probing pays the full connect stall per check.
+        if ($checks['redis'] === 'fail') {
+            $warnings[] = 'Horizon and scheduler checks skipped: Redis unreachable';
+            $checks['horizon'] = 'degraded';
+            $checks['scheduler'] = 'degraded';
+        } else {
+            // Horizon (non-critical for web requests, but critical for async jobs)
+            $checks['horizon'] = $this->checkHorizon($warnings);
 
-        // Scheduler heartbeat (non-critical for web, but indicates cron is running)
-        $checks['scheduler'] = $this->checkSchedulerHeartbeat($warnings);
+            // Scheduler heartbeat (non-critical for web, but indicates cron is running)
+            $checks['scheduler'] = $this->checkSchedulerHeartbeat($warnings);
+        }
 
         $response = [
             'status' => $healthy ? 'ok' : 'degraded',
@@ -104,6 +109,51 @@ final class HealthController extends Controller
         }
 
         return response()->json($response, $healthy ? 200 : 503);
+    }
+
+    /**
+     * Bounded Redis ping: a dedicated client with a short connect+read
+     * timeout. The default connection has no socket timeout, so a
+     * blackholed Redis (network partition, dead container IP — no RST)
+     * stalls the probe for ~60s instead of failing the check fast.
+     */
+    private function redisPing(float $timeoutSeconds = 2.0): bool
+    {
+        try {
+            /** @var array{url?: ?string, host?: string, password?: ?string, port?: int, database?: int} $config */
+            $config = config('database.redis.default') ?? [];
+            $host = (string) ($config['host'] ?? '127.0.0.1');
+            $port = (int) ($config['port'] ?? 6379);
+            $password = $config['password'] ?? null;
+            $db = (int) ($config['database'] ?? 0);
+
+            $url = $config['url'] ?? null;
+            if (is_string($url) && $url !== '') {
+                $parts = parse_url($url);
+                if (is_array($parts)) {
+                    $host = (string) ($parts['host'] ?? $host);
+                    $port = (int) ($parts['port'] ?? $port);
+                    $password = $parts['pass'] ?? $password;
+                    $db = isset($parts['path']) ? (int) trim($parts['path'], '/') : $db;
+                }
+            }
+
+            $client = new \Redis;
+            if (! $client->connect($host, $port, $timeoutSeconds)) {
+                return false;
+            }
+            $client->setOption(\Redis::OPT_READ_TIMEOUT, $timeoutSeconds);
+            if (is_string($password) && $password !== '') {
+                $client->auth($password);
+            }
+            if ($db !== 0) {
+                $client->select($db);
+            }
+
+            return (bool) $client->ping();
+        } catch (\Throwable) {
+            return false;
+        }
     }
 
     /**
@@ -243,7 +293,7 @@ final class HealthController extends Controller
             'laravel' => App::version(),
             'environment' => App::environment(),
             'db_ping_ms' => $this->measureMs(static fn () => DB::connection()->getPdo()),
-            'redis_ping_ms' => $this->measureMs(static fn () => Redis::connection()->ping()),
+            'redis_ping_ms' => $this->measureMs(fn () => $this->redisPing() || throw new \RuntimeException('redis ping failed')),
             'meilisearch_ms' => $this->measureMs(fn () => $this->probeMeiliSearch()),
             'scheduler_heartbeat_age' => $this->schedulerHeartbeatAge(),
             'horizon_masters' => $this->horizonMasterCount(),

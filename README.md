@@ -93,21 +93,47 @@ material changes — the site upgrades HTTP→HTTPS without a restart. Use
 
 ## Local Development
 
+There is no Node/Vite build step — Blade + legacy assets are served as-is.
+The dev stack is Docker Compose (PHP, MySQL, Redis, MeiliSearch, openresty):
+
 ```bash
-composer install
-npm install
-npm run dev
-php artisan key:generate
-php artisan migrate --seed
-php artisan serve
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
+docker compose -f docker-compose.yml -f docker-compose.dev.yml exec php composer install
+docker compose -f docker-compose.yml -f docker-compose.dev.yml exec php php artisan migrate:fresh --seed --force
+docker compose -f docker-compose.yml -f docker-compose.dev.yml exec php php artisan meilisearch:import
+# site on http://127.0.0.1
+```
+
+Create an admin account:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml exec php \
+  php artisan user:reset_id_auto_increment \
+  --auto_increment=10001 --admin=sysop --password=<password> --email=<email>
 ```
 
 ## Testing
 
+PHP suites run inside the php container; `make test` uses the
+`docker-compose.test.yml` overlay (isolated `nexusphp_testing` DB and
+`test_` Redis prefix) so tests never touch dev data:
+
 ```bash
-vendor/bin/phpunit
-vendor/bin/phpstan analyse
-composer audit
+make test              # all suites
+make test-unit         # unit only, no DB needed
+make test-feature      # legacy-context feature tests
+make test-lint         # Pint + PHPStan level 8
+make test-performance  # EXPLAIN/query-plan regression tests
+docker compose exec -T php composer audit
+```
+
+Browser (Playwright/axe) specs live in `tests/browser/` and run against a
+prepared dev stack — see `tests/browser/README.md`:
+
+```bash
+cd tests/browser
+npm install && npx playwright install chromium   # one-time prerequisites
+npx playwright test                              # BROWSER_BASE_URL etc. in playwright.config.ts
 ```
 
 CI runs Pint, PHPStan level 8, Unit tests (PHP 8.4/8.5 × MySQL 8.0/9.0 matrix),

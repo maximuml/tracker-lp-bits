@@ -1293,6 +1293,50 @@ document.addEventListener('error', function (e) {
     });
 })();
 
+/* ===== nx-menus.js ===== */
+/**
+ * Header <details> dropdowns (nav overflow + user menu): clicking
+ * outside or pressing Escape closes an open menu, and opening one
+ * closes the others.
+ */
+(function () {
+    var menus = document.querySelectorAll('details.nxm-more, details.nxm-usermenu');
+    if (!menus.length) {
+        return;
+    }
+
+    function closeAll(except) {
+        for (var i = 0; i < menus.length; i++) {
+            if (menus[i] !== except && menus[i].hasAttribute('open')) {
+                menus[i].removeAttribute('open');
+            }
+        }
+    }
+
+    for (var i = 0; i < menus.length; i++) {
+        menus[i].addEventListener('toggle', function () {
+            if (this.hasAttribute('open')) {
+                closeAll(this);
+            }
+        });
+    }
+
+    document.addEventListener('click', function (e) {
+        var target = e.target;
+        for (var i = 0; i < menus.length; i++) {
+            if (menus[i].hasAttribute('open') && !menus[i].contains(target)) {
+                menus[i].removeAttribute('open');
+            }
+        }
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            closeAll(null);
+        }
+    });
+})();
+
 /* ===== nexus.js ===== */
 /**
  * Image preview + lazy-load (native JS, no jQuery).

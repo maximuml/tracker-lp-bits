@@ -502,6 +502,7 @@ a.nxm-logo:link, a.nxm-logo:visited {
 .nxm-usermenu__item {
     display: block;
     width: 100%;
+    box-sizing: border-box;
     padding: 0.45rem 0.6rem;
     color: var(--nxm-text);
     text-decoration: none;
@@ -657,7 +658,10 @@ a.nxm-stat:hover { border-color: var(--nxm-nav-active); text-decoration: none; }
         padding: 0.5rem 0;
     }
     .nxm-search { display: flex; width: 100%; }
-    .nxm-search input[type="text"] { flex: 1; width: auto; }
+    .nxm-search input[type="text"] { flex: 1 1 0%; width: 0; min-width: 0; }
+    .nxm-search select { max-width: 6rem; }
+    .nxm-search input[type="submit"] { max-width: 8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .nxm-userbar__icons { flex-wrap: wrap; }
     .nxm-usermenu { position: static; }
     .nxm-usermenu__panel {
         position: static;
@@ -675,6 +679,8 @@ a.nxm-stat:hover { border-color: var(--nxm-nav-active); text-decoration: none; }
         display: flex;
         align-items: center;
         color: var(--nxm-userbar-text);
+        white-space: normal;
+        min-width: 0;
     }
     .nxm-usermenu__hello { color: var(--nxm-userbar-dim); }
     .nxm-search input[type="text"],

@@ -81,6 +81,8 @@ html[data-theme="light"]:root {
     --nxm-border: #d9d7cc;
     --nxm-accent: #c79500;
     --nxm-accent-hover: #a87e00;
+    --nxm-accent-text: #7f6100;
+    --nxm-accent-text-hover: #6f5600;
     --nxm-on-accent: #111114;
     --nxm-success: #1a7f37;
     --nxm-danger: #c9232e;
@@ -168,6 +170,8 @@ html[data-theme="light"]:root {
         --nxm-border: #d9d7cc;
         --nxm-accent: #c79500;
         --nxm-accent-hover: #a87e00;
+        --nxm-accent-text: #7f6100;
+        --nxm-accent-text-hover: #6f5600;
         --nxm-on-accent: #111114;
         --nxm-success: #1a7f37;
         --nxm-danger: #c9232e;
@@ -259,7 +263,7 @@ html[data-theme]:root .nxm-alert.nxm-alert--blue a:hover {
 /* Legacy "alt link" colour — blue on Classic, accent-yellow here. */
 html[data-theme]:root a.altlink_blue:link,
 html[data-theme]:root a.altlink_blue:visited {
-    color: var(--nxm-accent);
+    color: var(--nxm-accent-text, var(--nxm-accent));
 }
 
 html[data-theme]:root a.altlink_blue:hover {

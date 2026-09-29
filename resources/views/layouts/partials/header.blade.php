@@ -64,6 +64,8 @@
                             <a href="#" id="nx-notif-bell" class="nx-notif-bell" role="button" aria-label="{{ __('legacy/notifications.title_bell') }}" aria-haspopup="true" aria-expanded="false" title="{{ __('legacy/notifications.title_bell') }}"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1a4.5 4.5 0 0 0-4.5 4.5v2.4c0 .4-.12.78-.34 1.11L2 10.5c-.4.64.05 1.5.83 1.5h10.34c.78 0 1.23-.86.83-1.5l-1.16-1.49a2.1 2.1 0 0 1-.34-1.11V5.5A4.5 4.5 0 0 0 8 1Zm0 13.5a2 2 0 0 0 1.86-1.25H6.14A2 2 0 0 0 8 14.5Z"/></svg><span id="nx-notif-badge" class="nx-notif-badge nx-hidden">0</span></a>
                             <div id="nx-notif-panel" class="nx-notif-panel nx-hidden" role="region" aria-label="{{ __('legacy/notifications.title_bell') }}"></div>
                         </span>
+                        <button type="button" class="nxm-iconbtn nxm-theme-toggle" data-persist-url="/web/usercp/theme" title="{{ 'Theme' }}: {{ ucfirst($chrome->head->theme) }}">{{ 'Theme' }}: {{ ucfirst($chrome->head->theme) }}</button>
+                        <form method="post" action="logout.php" class="nx-inline">@csrf<button type="submit" class="nxm-iconbtn" title="{{ __('legacy/functions.text_logout') }}" aria-label="{{ __('legacy/functions.text_logout') }}"><svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M6 1v3h1V2h6v12H7v-2H6v3h8V1H6z"/><path d="M3.3 5.3.6 8l2.7 2.7.7-.7L2.4 8.4h7.6V7.6H2.4L4 6l-.7-.7z"/></svg></button></form>
                     </div>
                     <details class="nxm-usermenu">
                         <summary class="nxm-usermenu__toggle">
@@ -90,7 +92,6 @@
                                 @if($chrome->userBar->managementHref !== '')<a href="{{ $chrome->userBar->managementHref }}" target="_blank" rel="noopener">{{ __('legacy/functions.text_management_system') }}</a>@endif
                             </div>
                             <div class="nxm-usermenu__footer">
-                                <button type="button" class="nxm-usermenu__item nxm-theme-toggle" data-persist-url="/web/usercp/theme" title="{{ 'Theme' }}: {{ ucfirst($chrome->head->theme) }}">{{ 'Theme' }}: {{ ucfirst($chrome->head->theme) }}</button>
                                 <form method="post" action="logout.php" class="nxm-usermenu__form">@csrf<button type="submit" class="nxm-usermenu__item nxm-usermenu__item--danger">{{ __('legacy/functions.text_logout') }}</button></form>
                             </div>
                         </div>

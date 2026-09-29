@@ -275,6 +275,7 @@ a.nxm-logo:link, a.nxm-logo:visited {
     align-items: stretch;
     flex: 1;
     min-width: 0;
+    flex-wrap: wrap;
     gap: 0.5rem;
 }
 
@@ -311,18 +312,18 @@ a.nxm-logo:link, a.nxm-logo:visited {
 .nxm-nav__list > li > a:focus-visible,
 .nxm-more > summary:hover,
 .nxm-more > summary:focus-visible {
-    color: var(--nxm-nav-active);
+    color: var(--nxm-userbar-link);
     outline: none;
 }
 
 .nxm-nav__list > li > a.nxm-nav__link--active,
 .nxm-nav__list > li > a[aria-current="page"] {
-    color: var(--nxm-nav-active);
-    box-shadow: inset 0 -2px 0 var(--nxm-nav-active);
+    color: var(--nxm-userbar-link);
+    box-shadow: inset 0 -2px 0 var(--nxm-userbar-link);
 }
 
 .nxm-more > summary.nxm-nav__link--active {
-    color: var(--nxm-nav-active);
+    color: var(--nxm-userbar-link);
 }
 
 .nxm-more { display: flex; }
@@ -371,8 +372,9 @@ a.nxm-logo:link, a.nxm-logo:visited {
 
 .nxm-nav__sub a.nxm-nav__link--active,
 .nxm-nav__sub a[aria-current="page"] {
-    color: var(--nxm-nav-active);
+    color: var(--nxm-text);
     font-weight: 600;
+    box-shadow: inset 3px 0 0 var(--nxm-nav-active);
 }
 
 /* ---------- User bar ---------- */
@@ -385,8 +387,8 @@ a.nxm-logo:link, a.nxm-logo:visited {
     color: var(--nxm-userbar-text);
 }
 
-.nxm-userbar a { color: var(--nxm-userbar-link); text-decoration: none; }
-.nxm-userbar a:hover { text-decoration: underline; }
+.nxm-userbar__icons a { color: var(--nxm-userbar-link); text-decoration: none; }
+.nxm-userbar__icons a:hover { text-decoration: underline; }
 
 .nxm-userbar__row {
     display: flex;
@@ -410,6 +412,27 @@ a.nxm-logo:link, a.nxm-logo:visited {
 .nxm-userbar__icons img {
     vertical-align: middle;
     margin-right: 0.15rem;
+}
+
+.nxm-iconbtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.2rem 0.45rem;
+    background: transparent;
+    border: none;
+    border-radius: var(--nxm-radius);
+    color: var(--nxm-userbar-dim);
+    font: inherit;
+    font-size: 0.8rem;
+    line-height: 1.2;
+    cursor: pointer;
+}
+.nxm-iconbtn:hover,
+.nxm-iconbtn:focus-visible {
+    color: var(--nxm-userbar-text);
+    background: rgba(255, 255, 255, 0.1);
+    outline: none;
 }
 
 .nxm-usermenu { position: relative; }
@@ -656,7 +679,8 @@ a.nxm-stat:hover { border-color: var(--nxm-nav-active); text-decoration: none; }
     .nxm-usermenu__hello { color: var(--nxm-userbar-dim); }
     .nxm-search input[type="text"],
     .nxm-search select,
-    .nxm-search input[type="submit"] {
+    .nxm-search input[type="submit"],
+    .nxm-iconbtn {
         min-height: 44px;
     }
 }
@@ -911,6 +935,7 @@ td.embedded, .nx-embedded { background-color: var(--nxm-surface); color: var(--n
 .nx-attach-controls input[type=file] { max-width: 100%; }
 .nx-attach-info { font-size: .85em; line-height: 1.2; }
 .colhead, .nx-colhead { color: var(--nxm-on-accent); background-color: var(--nxm-accent); }
+:is(.colhead, .nx-colhead) :is(a:link, a:visited) { color: var(--nxm-on-accent); }
 td.rowhead, td.rowhead_left, td.rowhead_center { color: var(--nxm-text-dim); }
 td.rowfollow, td.colfollow, td.text, td.comment { color: var(--nxm-text); }
 td.navigation { color: var(--nxm-text-dim); }
@@ -976,7 +1001,7 @@ html[data-theme="dark"] a.altlink_green:link, html[data-theme="dark"] a.altlink_
 .striking, .new { color: var(--nxm-danger); }
 .hot { color: var(--nxm-warning); }
 .classic { color: var(--nxm-success); }
-.recommended { color: var(--nxm-accent); }
+.recommended { color: var(--nxm-accent-text, var(--nxm-accent)); }
 
 /* Latest-torrents cards (nexus.css) follow the active scheme too. */
 .lt-grid .lt-seed { color: var(--nxm-success); }
@@ -1042,8 +1067,8 @@ table[data-nx="data"] th {
 }
 table[data-nx="data"] tr:last-child td { border-bottom: none; }
 
-a { color: var(--nxm-accent); }
-a:hover { color: var(--nxm-accent-hover); }
+a { color: var(--nxm-accent-text, var(--nxm-accent)); }
+a:hover { color: var(--nxm-accent-text-hover, var(--nxm-accent-hover)); }
 
 .btn,
 input[type="submit"],
@@ -1174,7 +1199,7 @@ div.niceTitle {
 }
 .nx-auth h1 { margin: 0.25rem 0 0.75rem; font-size: 1.3rem; text-align: center; }
 .nx-auth p { margin: 0.5rem 0; }
-.nx-auth a { color: var(--nxm-accent); }
+.nx-auth a { color: var(--nxm-accent-text, var(--nxm-accent)); }
 .nx-auth__lang { text-align: right; margin-bottom: 0.75rem; font-size: 0.85rem; }
 .nx-auth__lang select { width: auto; min-width: 8rem; }
 .nx-auth__error,

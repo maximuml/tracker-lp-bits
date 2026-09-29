@@ -561,14 +561,41 @@ a.nxm-logo:link, a.nxm-logo:visited {
     color: var(--nxm-userbar-text);
 }
 
-.nxm-chips .nxm-userbar__stats {
+.nxm-chips__row {
     display: flex;
+    align-items: center;
     gap: 0.4rem;
     max-width: var(--nxm-content-width);
     margin: 0 auto;
     padding: 0.45rem 1rem;
+}
+
+.nxm-chips .nxm-userbar__stats {
+    display: flex;
+    gap: 0.4rem;
+    flex: 1;
+    min-width: 0;
     overflow-x: auto;
     scrollbar-width: thin;
+}
+
+.nxm-chips .nxm-usermenu { flex: 0 0 auto; }
+
+.nxm-chips .nxm-usermenu > summary {
+    padding: 0.12rem 0.55rem 0.12rem 0.18rem;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 999px;
+}
+
+.nxm-chips .nxm-avatar {
+    width: 20px;
+    height: 20px;
+    font-size: 0.62rem;
+}
+
+.nxm-chips .nxm-usermenu__panel {
+    left: 0;
+    right: auto;
 }
 
 .nxm-chips .nxm-stat {
@@ -662,27 +689,31 @@ a.nxm-stat:hover { border-color: var(--nxm-nav-active); text-decoration: none; }
     .nxm-search select { max-width: 6rem; }
     .nxm-search input[type="submit"] { max-width: 8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .nxm-userbar__icons { flex-wrap: wrap; }
-    .nxm-usermenu { position: static; }
-    .nxm-usermenu__panel {
-        position: static;
-        box-shadow: none;
-        border: none;
-        border-top: 1px solid var(--nxm-border);
-        border-radius: 0;
-        padding: 0.3rem 0;
-        background: transparent;
-        color: var(--nxm-userbar-text);
+    .nxm-chips .nxm-usermenu { position: relative; }
+    .nxm-chips .nxm-usermenu__panel {
+        position: absolute;
+        left: 0;
+        right: auto;
+        top: calc(100% + 6px);
+        min-width: 200px;
+        padding: 0.3rem;
+        background: var(--nxm-surface);
+        border: 1px solid var(--nxm-border);
+        border-radius: var(--nxm-radius);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        color: var(--nxm-text);
+        z-index: 9500;
     }
-    .nxm-usermenu__links a,
-    .nxm-usermenu__item {
+    .nxm-chips .nxm-usermenu__links a,
+    .nxm-chips .nxm-usermenu__item {
         min-height: 44px;
         display: flex;
         align-items: center;
-        color: var(--nxm-userbar-text);
+        color: var(--nxm-text);
         white-space: normal;
         min-width: 0;
     }
-    .nxm-usermenu__hello { color: var(--nxm-userbar-dim); }
+    .nxm-chips .nxm-usermenu__hello { color: var(--nxm-text-dim); }
     .nxm-search input[type="text"],
     .nxm-search select,
     .nxm-search input[type="submit"],

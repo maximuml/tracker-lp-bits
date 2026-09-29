@@ -29,7 +29,7 @@ final readonly class PersonalSettingsDto
         public ?string $notifs,
     ) {}
 
-    public static function fromRequest(Request $request): self
+    public static function fromRequest(Request $request, ?string $currentAvatar = null): self
     {
         $parked = $request->input('parked') === 'yes';
         $acceptpmsRaw = $request->input('acceptpms', 'yes');
@@ -50,7 +50,7 @@ final readonly class PersonalSettingsDto
         $trackerUrlId = (int) $request->input('tracker_url_id', 0);
         $trackerUrlId = Validators::isId($trackerUrlId) ? $trackerUrlId : null;
 
-        $avatar = self::sanitizeAvatar($request);
+        $avatar = self::sanitizeAvatar($request, $currentAvatar);
         $info = htmlspecialchars(trim((string) $request->input('info', '')));
 
         $notifs = self::buildNotifs($request);
@@ -70,11 +70,22 @@ final readonly class PersonalSettingsDto
         );
     }
 
-    private static function sanitizeAvatar(Request $request): ?string
+    private static function sanitizeAvatar(Request $request, ?string $currentAvatar): ?string
     {
-        $avatar = (string) $request->input('avatar', '');
+        $avatar = trim((string) $request->input('avatar', ''));
+
         if ($avatar === '') {
-            $avatar = (string) $request->input('savatar', '');
+            // The savatar select echoes the stored avatar as its first
+            // option, so a value equal to the current avatar is not a
+            // real pick. Only a different value counts as a selection
+            // (the "Nothing" option or a bitbucket URL).
+            $savatar = trim((string) $request->input('savatar', ''));
+            if ($savatar !== '' && $savatar !== $currentAvatar) {
+                $avatar = $savatar;
+            } else {
+                // Explicit empty field clears the stored avatar.
+                return $request->has('avatar') ? '' : null;
+            }
         }
 
         if (
@@ -86,6 +97,8 @@ final readonly class PersonalSettingsDto
             return htmlspecialchars(trim($avatar));
         }
 
+        // Non-empty but invalid — keep the current avatar rather than
+        // persisting an unsafe or broken URL.
         return null;
     }
 

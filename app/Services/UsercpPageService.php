@@ -4,8 +4,15 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Enums\UserAcceptPms;
+use App\Enums\UserAppendPromotion;
+use App\Enums\UserClickTopic;
+use App\Enums\UserFontsize;
+use App\Enums\UserGender;
 use App\Enums\UserPrivacy;
 use App\Enums\UserTheme;
+use App\Enums\UserTimeType;
+use App\Enums\UserTooltip;
 use App\Models\Setting;
 use App\Models\TrackerUrl;
 use App\Models\User;
@@ -318,7 +325,7 @@ final class UsercpPageService
             avatars: LegacyYesNo::isYes($curUser['avatars'] ?? null),
             signatures: LegacyYesNo::isYes($curUser['signatures'] ?? null),
             showLastPost: LegacyYesNo::isYes($curUser['showlastpost'] ?? null),
-            clicktopic: (string) ($curUser['clicktopic'] ?? ''),
+            clicktopic: UserClickTopic::tryFrom((int) ($curUser['clicktopic'] ?? 0))?->stringValue() ?? 'firstpage',
             signature: (string) ($curUser['signature'] ?? ''),
         );
     }
@@ -358,12 +365,12 @@ final class UsercpPageService
         return new UsercpPersonalSection(
             formId: 'form'.Strings::randomCode(6),
             parked: LegacyYesNo::isYes($curUser['parked'] ?? null),
-            acceptpms: (string) ($curUser['acceptpms'] ?? ''),
+            acceptpms: UserAcceptPms::tryFrom((int) ($curUser['acceptpms'] ?? 0))?->stringValue() ?? 'yes',
             deletepms: LegacyYesNo::isYes($curUser['deletepms'] ?? null),
             savepms: LegacyYesNo::isYes($curUser['savepms'] ?? null),
             commentpm: LegacyYesNo::isYes($curUser['commentpm'] ?? null),
             notifCheckboxes: $notifCheckboxes,
-            gender: (string) ($curUser['gender'] ?? ''),
+            gender: UserGender::tryFrom((int) ($curUser['gender'] ?? 2))?->stringValue() ?? 'N/A',
             trackerUrlId: (string) ($curUser['tracker_url_id'] ?? ''),
             trackerUrlOptions: $trackerUrlOptions,
             country: (string) ($curUser['country'] ?? ''),
@@ -642,7 +649,7 @@ JS;
             currentStylesheet: (int) ($curUser['stylesheet'] ?? 0),
             themeOptions: $themeOptions,
             currentTheme: $currentTheme,
-            fontsize: (string) ($curUser['fontsize'] ?? ''),
+            fontsize: UserFontsize::tryFrom((int) ($curUser['fontsize'] ?? 1))?->stringValue() ?? 'medium',
             langOptions: $siteLanguages,
             currentLangId: $currentLangId,
             pmnum: (int) ($curUser['pmnum'] ?? 0),
@@ -651,12 +658,12 @@ JS;
             sbrefresh: (int) ($curUser['sbrefresh'] ?? 0),
             showdescription: LegacyYesNo::isYes($curUser['showdescription'] ?? null),
             showcomment: LegacyYesNo::isYes($curUser['showcomment'] ?? null),
-            timetype: (string) ($curUser['timetype'] ?? ''),
+            timetype: UserTimeType::tryFrom((int) ($curUser['timetype'] ?? 1))?->stringValue() ?? 'timealive',
             torrentsperpage: (int) ($curUser['torrentsperpage'] ?? 0),
-            tooltip: (string) ($curUser['tooltip'] ?? ''),
+            tooltip: UserTooltip::tryFrom((int) ($curUser['tooltip'] ?? 2))?->stringValue() ?? 'off',
             appendsticky: LegacyYesNo::isYes($curUser['appendsticky'] ?? null),
             appendnew: LegacyYesNo::isYes($curUser['appendnew'] ?? null),
-            appendpromotion: (string) ($curUser['appendpromotion'] ?? ''),
+            appendpromotion: UserAppendPromotion::tryFrom((int) ($curUser['appendpromotion'] ?? 2))?->stringValue() ?? 'icon',
             appendpicked: LegacyYesNo::isYes($curUser['appendpicked'] ?? null),
             dlicon: LegacyYesNo::isYes($curUser['dlicon'] ?? null),
             bmicon: LegacyYesNo::isYes($curUser['bmicon'] ?? null),

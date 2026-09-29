@@ -152,7 +152,13 @@ final readonly class TrackerSettingsDto
                 continue;
             }
             foreach (self::NOTIF_PREFIXES as $prefix) {
-                if (str_starts_with($key, $prefix) && $inputs[$key] === 'yes') {
+                // Presence means checked — the category grid emits value="0"
+                // checkboxes (legacy isset() semantics). Require prefix+digits
+                // so unrelated fields (e.g. 'status') can't inject a key.
+                if (
+                    str_starts_with($key, $prefix)
+                    && ctype_digit(substr($key, strlen($prefix)))
+                ) {
                     $preferences[$key] = true;
                     break;
                 }

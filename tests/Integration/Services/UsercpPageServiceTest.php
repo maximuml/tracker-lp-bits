@@ -247,6 +247,48 @@ final class UsercpPageServiceTest extends TestCase
         $this->assertFalse($result['forum']->showTooltipSetting);
     }
 
+    // ─── int-backed enum fields must map to the strings the forms post ─
+
+    public function test_personal_section_maps_int_enums_to_form_strings(): void
+    {
+        $this->setupCommon();
+        $this->setCurrentUser(['acceptpms' => 1, 'gender' => 1]);
+
+        $result = $this->service->build('personal', '')->toArray();
+
+        $this->assertSame('friends', $result['personal']->acceptpms);
+        $this->assertSame('Female', $result['personal']->gender);
+    }
+
+    public function test_tracker_section_maps_int_enums_to_form_strings(): void
+    {
+        $this->setupCommon();
+        DB::table('searchbox')->insert(['id' => 1, 'name' => 'test']);
+        $this->setCurrentUser([
+            'timetype' => 0,
+            'appendpromotion' => 1,
+            'fontsize' => 2,
+            'tooltip' => 2,
+        ]);
+
+        $result = $this->service->build('tracker', '')->toArray();
+
+        $this->assertSame('timeadded', $result['tracker']->timetype);
+        $this->assertSame('word', $result['tracker']->appendpromotion);
+        $this->assertSame('large', $result['tracker']->fontsize);
+        $this->assertSame('off', $result['tracker']->tooltip);
+    }
+
+    public function test_forum_section_maps_clicktopic_to_form_string(): void
+    {
+        $this->setupCommon();
+        $this->setCurrentUser(['clicktopic' => 1]);
+
+        $result = $this->service->build('forum', '')->toArray();
+
+        $this->assertSame('lastpage', $result['forum']->clicktopic);
+    }
+
     // ─── build() home section (default) ───────────────────────────────
 
     public function test_build_default_action_returns_home_section(): void

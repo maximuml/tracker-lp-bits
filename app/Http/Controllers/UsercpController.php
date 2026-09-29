@@ -45,7 +45,9 @@ class UsercpController extends LegacyController
     public function settings(Request $request): array
     {
         if ($request->isMethod('POST')) {
-            return $this->success($this->repository->updatePersonal(PersonalSettingsDto::fromRequest($request)));
+            return $this->success($this->repository->updatePersonal(
+                PersonalSettingsDto::fromRequest($request, Auth::user()?->avatar),
+            ));
         }
 
         return $this->success($this->repository->settings());
@@ -153,7 +155,7 @@ class UsercpController extends LegacyController
             if (! $this->policy->updatePersonal($user, $user)) {
                 return redirect('/usercp.php?action=personal');
             }
-            $this->repository->updatePersonal(PersonalSettingsDto::fromRequest($request));
+            $this->repository->updatePersonal(PersonalSettingsDto::fromRequest($request, $user->avatar));
 
             return redirect('/usercp.php?action=personal&type=saved');
         }

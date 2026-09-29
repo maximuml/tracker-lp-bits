@@ -79,7 +79,7 @@ Use when verifying PRs that migrate `usercp.php`, auth pages, bitbucket/attachme
 - **Radio re-render (FIXED)**: tinyint enum columns are mapped via `Enum::tryFrom(int)?->stringValue()` so radios render checked (acceptpms, gender, timetype, appendpromotion, clicktopic, fontsize, tooltip). Saving with no radio checked still writes the `fromStringSafe('')` default — a real form always posts the checked radio.
 - **Category notification checkboxes (FIXED)**: `collectNotifPreferences` uses legacy presence semantics (prefix+digits key shape), so checked boxes collect and `updateTracker` rebuilds `users.notifs` correctly.
 - **ttlastpost (FIXED)**: absent checkbox → explicit `showlastpost=0` write; unchecked now disables again.
-- avatar input accepts ONLY absolute `https?://…(jpg|gif|png|jpeg)` — invalid non-empty values are rejected and keep the current avatar; an explicit empty field clears it. `savatar` select is the fallback source.
+- avatar input accepts ONLY absolute `https?://…(jpg|gif|png|jpeg)` (verified): invalid non-empty → keep current; empty field + `savatar` echo → clears (`savatar` value equal to stored avatar is treated as the echo, not a pick); empty field + different `savatar` → the pick applies (gallery URL or "Nothing" → `pic/default_avatar.png`). Text field non-empty always wins over `savatar`.
 - `notifs[option]` checkboxes (topic_reply/hr_reached) write `[option]` keys into `users.notifs`; `pmnotif`/`emailnotif` may be class-gated (absent for lpfan05).
 - Checkboxes posting `value=yes` work (`in:yes`/`=== 'yes'`); valueless ones post `'on'` → only `has()`-based fields (deletepms/savepms) work with them.
 - Sysop usercp behaves identically to seeded users (same defects, not class-gated).

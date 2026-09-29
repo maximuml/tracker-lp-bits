@@ -1132,6 +1132,26 @@ input[type="reset"] {
     border: 1px solid var(--nxm-border);
 }
 
+/* Unified form controls under --nxm-* tokens (all legacy pages). */
+input[type="text"], input[type="password"], input[type="search"],
+input[type="number"], input[type="email"], input[type="url"],
+input[type="date"], input[type="datetime-local"], input[type="time"],
+input[type="file"], textarea, select {
+    background: var(--nxm-surface-alt);
+    color: var(--nxm-text);
+    border: 1px solid var(--nxm-border);
+    border-radius: var(--nxm-radius);
+    padding: 0.3rem 0.5rem;
+    font: inherit;
+}
+input[type="file"] { border-style: dashed; background: transparent; }
+:is(input, textarea, select):focus-visible {
+    outline: 2px solid var(--nxm-accent);
+    outline-offset: 1px;
+    border-color: var(--nxm-accent);
+}
+textarea { resize: vertical; }
+
 /* ---------- Footer ---------- */
 
 .nxm-footer {

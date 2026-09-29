@@ -108,8 +108,8 @@ class ModerationController extends LegacyController
                 return $this->legacyAbortResponse(__('legacy/report.std_error'), __('legacy/report.std_invalid_user_id'));
             }
             $arr = $userRow->toArray();
-            if ((int) $arr['class'] >= $staffmemClass) {
-                $msg = (__('legacy/report.std_cannot_report')).UserClass::name((int) $arr['class'], false, true, true);
+            if ((int) ($arr['class'] ?? 0) >= $staffmemClass) {
+                $msg = (__('legacy/report.std_cannot_report')).UserClass::name((int) ($arr['class'] ?? 0), false, true, true);
 
                 return $this->legacyAbortResponse(__('legacy/report.std_sorry'), $msg);
             }
@@ -171,11 +171,11 @@ class ModerationController extends LegacyController
                 return $this->legacyAbortResponse(__('legacy/report.std_error'), __('legacy/report.std_invalid_comment_id'));
             }
             $arr = $comment->toArray();
-            if ($arr['torrent']) {
+            if ($arr['torrent'] ?? null) {
                 $name = Torrent::query()->where('id', $arr['torrent'])->value('name');
                 $url = 'details.php?id='.$arr['torrent'].'#'.$commentid;
                 $of = __('legacy/report.text_of_torrent');
-            } elseif ($arr['offer']) {
+            } elseif ($arr['offer'] ?? null) {
                 $name = Offer::query()->where('id', $arr['offer'])->value('name');
                 $url = 'offers.php?id='.$arr['offer'].'&off_details=1#'.$commentid;
                 $of = __('legacy/report.text_of_offer');
@@ -189,7 +189,7 @@ class ModerationController extends LegacyController
                 'of' => (string) $of,
                 'url' => $url,
                 'name' => (string) $name,
-                'userHtml' => UserDisplay::username($arr['user']),
+                'userHtml' => UserDisplay::username((int) ($arr['user'] ?? 0)),
                 'mid' => (string) __('legacy/report.text_to_staff'),
                 'extraNote' => null,
                 'field' => 'takecommentid',
@@ -207,8 +207,8 @@ class ModerationController extends LegacyController
             $form = view('moderation._confirm', [
                 'pre' => (string) __('legacy/report.text_are_you_sure_offer'),
                 'kind' => 'offer',
-                'id' => $arr['id'],
-                'name' => (string) $arr['name'],
+                'id' => $arr['id'] ?? 0,
+                'name' => (string) ($arr['name'] ?? ''),
                 'mid' => (string) __('legacy/report.text_to_staff'),
                 'extraNote' => null,
                 'field' => 'takereportofferid',
@@ -264,8 +264,8 @@ class ModerationController extends LegacyController
                         $arr = $torrent->toArray();
                         $reporting = view('moderation._reporting_cell', [
                             'kind' => 'torrent',
-                            'id' => $arr['id'],
-                            'name' => (string) $arr['name'],
+                            'id' => $arr['id'] ?? 0,
+                            'name' => (string) ($arr['name'] ?? ''),
                         ])->render();
                     }
                     break;
@@ -290,8 +290,8 @@ class ModerationController extends LegacyController
                         $arr = $offer->toArray();
                         $reporting = view('moderation._reporting_cell', [
                             'kind' => 'offer',
-                            'id' => $arr['id'],
-                            'name' => (string) $arr['name'],
+                            'id' => $arr['id'] ?? 0,
+                            'name' => (string) ($arr['name'] ?? ''),
                         ])->render();
                     }
                     break;
@@ -317,11 +317,11 @@ class ModerationController extends LegacyController
                         $reporting = (string) (__('legacy/reports.text_comment_does_not_exist'));
                     } else {
                         $arr = $comment->toArray();
-                        if ($arr['torrent']) {
+                        if ($arr['torrent'] ?? null) {
                             $name = Torrent::query()->where('id', $arr['torrent'])->value('name');
                             $url = 'details.php?id='.$arr['torrent'].'#cid'.$row['reportid'];
                             $of = __('legacy/reports.text_of_torrent');
-                        } elseif ($arr['offer']) {
+                        } elseif ($arr['offer'] ?? null) {
                             $name = Offer::query()->where('id', $arr['offer'])->value('name');
                             $url = 'offers.php?id='.$arr['offer'].'&off_details=1#cid'.$row['reportid'];
                             $of = __('legacy/reports.text_of_offer');
@@ -336,7 +336,7 @@ class ModerationController extends LegacyController
                             'of' => (string) $of,
                             'url' => $url,
                             'name' => (string) $name,
-                            'userHtml' => UserDisplay::username($arr['user']),
+                            'userHtml' => UserDisplay::username((int) ($arr['user'] ?? 0)),
                         ])->render();
                     }
                     break;

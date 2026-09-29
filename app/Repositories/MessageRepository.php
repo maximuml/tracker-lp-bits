@@ -121,13 +121,13 @@ class MessageRepository extends BaseRepository
         }
 
         $messageArr = $message->toArray();
-        if ($messageArr['receiver'] == $userId && $messageArr['saved'] == 0) {
+        if (($messageArr['receiver'] ?? 0) == $userId && ($messageArr['saved'] ?? 0) == 0) {
             $message->delete();
-        } elseif ($messageArr['sender'] == $userId && $messageArr['location'] == 0) { // PM_DELETED
+        } elseif (($messageArr['sender'] ?? 0) == $userId && ($messageArr['location'] ?? 0) == 0) { // PM_DELETED
             $message->delete();
-        } elseif ($messageArr['receiver'] == $userId && $messageArr['saved'] == 1) {
+        } elseif (($messageArr['receiver'] ?? 0) == $userId && ($messageArr['saved'] ?? 0) == 1) {
             $message->update(['location' => 0]);
-        } elseif ($messageArr['sender'] == $userId && $messageArr['location'] != 0) { // not PM_DELETED
+        } elseif (($messageArr['sender'] ?? 0) == $userId && ($messageArr['location'] ?? 0) != 0) { // not PM_DELETED
             $message->update(['saved' => false]);
         } else {
             return null;

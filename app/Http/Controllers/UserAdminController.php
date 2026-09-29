@@ -183,8 +183,8 @@ class UserAdminController extends LegacyController
             }
             $arr = $user->toArray();
 
-            if (UserDisplay::currentClass() <= (int) $arr['class']) {
-                $log = "Password Reset For {$username} by {$currentUsername} denied: operator class => ".UserDisplay::currentClass()." is not greater than target user => {$arr['class']}";
+            if (UserDisplay::currentClass() <= (int) ($arr['class'] ?? 0)) {
+                $log = "Password Reset For {$username} by {$currentUsername} denied: operator class => ".UserDisplay::currentClass().' is not greater than target user => '.($arr['class'] ?? 0);
                 Log::writeWithContext($log);
                 Logger::writeWithContext($log, 'alert', false);
 
@@ -193,7 +193,7 @@ class UserAdminController extends LegacyController
 
             $userRep = $this->userRepository;
             try {
-                $userRep->resetPassword((int) $arr['id'], $newpassword, $newpasswordagain);
+                $userRep->resetPassword((int) ($arr['id'] ?? 0), $newpassword, $newpasswordagain);
             } catch (\Exception $e) {
                 return $this->legacyAbortResponse('Error', $e->getMessage());
             }

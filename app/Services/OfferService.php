@@ -183,7 +183,7 @@ final class OfferService
         $curuser = $this->curUser();
         $userId = (int) ($curuser['id'] ?? 0);
 
-        if ($userId !== (int) $num['userid'] && ! Permission::can(PermissionEnum::OFFER_MANAGE)) {
+        if ($userId !== (int) ($num['userid'] ?? 0) && ! Permission::can(PermissionEnum::OFFER_MANAGE)) {
             $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_cannot_delete_others_offer'));
         }
 
@@ -201,21 +201,21 @@ final class OfferService
         $this->offerVoteRepository->deleteOfferVotes($offerId);
         $this->offerCommentRepository->deleteOfferComments($offerId);
 
-        if ($userId !== (int) $num['userid']) {
-            $locale = Locale::userLocale((int) $num['userid']);
+        if ($userId !== (int) ($num['userid'] ?? 0)) {
+            $locale = Locale::userLocale((int) ($num['userid'] ?? 0));
             $subject = Locale::trans('offer.msg_offer_deleted', [], $locale);
-            $msg = Locale::trans('offer.msg_your_offer', [], $locale).$num['name'].Locale::trans('offer.msg_was_deleted_by', [], $locale)."[url=userdetails.php?id={$userId}]".($curuser['username'] ?? '').'[/url]'.Locale::trans('offer.msg_blank', [], $locale).($reason !== '' ? Locale::trans('offer.msg_reason_is', [], $locale).$reason : '');
+            $msg = Locale::trans('offer.msg_your_offer', [], $locale).($num['name'] ?? '').Locale::trans('offer.msg_was_deleted_by', [], $locale)."[url=userdetails.php?id={$userId}]".($curuser['username'] ?? '').'[/url]'.Locale::trans('offer.msg_blank', [], $locale).($reason !== '' ? Locale::trans('offer.msg_reason_is', [], $locale).$reason : '');
 
             Message::add([
                 'sender' => null,
-                'receiver' => (int) $num['userid'],
+                'receiver' => (int) ($num['userid'] ?? 0),
                 'msg' => $msg,
                 'subject' => $subject,
                 'added' => now(),
             ]);
         }
 
-        Log::writeWithContext("Offer: {$offerId} ({$num['name']}) was deleted by ".($curuser['username'] ?? '').($reason !== '' ? " ({$reason})" : ''), 'normal');
+        Log::writeWithContext('Offer: '.$offerId.' ('.($num['name'] ?? '').') was deleted by '.($curuser['username'] ?? '').($reason !== '' ? " ({$reason})" : ''), 'normal');
 
         return redirect('/offers.php');
     }

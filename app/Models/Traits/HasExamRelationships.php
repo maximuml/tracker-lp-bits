@@ -19,7 +19,7 @@ trait HasExamRelationships
         return $this->belongsToMany(User::class, 'exam_users', 'exam_id', 'uid');
     }
 
-    /** @return mixed */
+    /** @return BelongsToMany<User, $this> */
     public function onGoingUsers()
     {
         return $this->users()->wherePivot('status', ExamUserStatus::NORMAL->value);

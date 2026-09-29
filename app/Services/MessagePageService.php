@@ -175,27 +175,27 @@ class MessagePageService
         $rows = [];
         foreach ($messages as $message) {
             $row = $message->toArray();
-            if ((int) $row['sender'] !== 0) {
+            if ((int) ($row['sender'] ?? 0) !== 0) {
                 if ($mailbox !== self::PM_SENT_BOX) {
-                    $username = UserDisplay::username((int) $row['sender']);
+                    $username = UserDisplay::username((int) ($row['sender'] ?? 0));
                 } else {
-                    $username = UserDisplay::username((int) $row['receiver']);
+                    $username = UserDisplay::username((int) ($row['receiver'] ?? 0));
                 }
             } else {
                 $username = (string) (__('legacy/messages.text_system'));
             }
 
-            $subject = (string) $row['subject'];
+            $subject = (string) ($row['subject'] ?? '');
             if (strlen($subject) <= 0) {
                 $subject = (string) (__('legacy/messages.text_no_subject'));
             }
 
             $rows[] = [
-                'id' => (int) $row['id'],
+                'id' => (int) ($row['id'] ?? 0),
                 'subject' => $subject,
                 'username' => SafeHtml::fromTrustedHtml($username),
-                'added' => SafeHtml::fromTrustedHtml((string) Time::format((string) $row['added'], true, false)),
-                'unread' => (bool) $row['unread'],
+                'added' => SafeHtml::fromTrustedHtml((string) Time::format((string) ($row['added'] ?? ''), true, false)),
+                'unread' => (bool) ($row['unread'] ?? false),
             ];
         }
 
@@ -299,28 +299,28 @@ class MessagePageService
 
         $message = $messageModel->toArray();
 
-        $isSender = (int) $message['sender'] === $userId;
+        $isSender = (int) ($message['sender'] ?? 0) === $userId;
         $replyHref = null;
 
         if ($isSender) {
-            $sender = UserDisplay::username((int) $message['receiver']);
+            $sender = UserDisplay::username((int) ($message['receiver'] ?? 0));
             $from = __('legacy/messages.text_to');
         } else {
             $from = __('legacy/messages.text_from');
-            if ((int) $message['sender'] === 0) {
+            if ((int) ($message['sender'] ?? 0) === 0) {
                 $sender = (string) (__('legacy/messages.text_system'));
             } else {
-                $sender = UserDisplay::username((int) $message['sender']);
-                $replyHref = 'sendmessage.php?receiver='.(int) $message['sender'].'&replyto='.$pmId;
+                $sender = UserDisplay::username((int) ($message['sender'] ?? 0));
+                $replyHref = 'sendmessage.php?receiver='.(int) ($message['sender'] ?? 0).'&replyto='.$pmId;
             }
         }
 
-        $body = $this->renderMessageBody((string) $message['msg'], true);
-        $added = (string) $message['added'];
+        $body = $this->renderMessageBody((string) ($message['msg'] ?? ''), true);
+        $added = (string) ($message['added'] ?? '');
 
         $showUnread = $isSender && (bool) ($message['unread'] ?? false);
 
-        $subject = (string) $message['subject'];
+        $subject = (string) ($message['subject'] ?? '');
         if (strlen($subject) <= 0) {
             $subject = (string) (__('legacy/messages.text_no_subject'));
         }
@@ -332,7 +332,7 @@ class MessagePageService
         }
 
         // Mailbox for menu highlight
-        $mailbox = $isSender ? self::PM_SENT_BOX : (int) $message['location'];
+        $mailbox = $isSender ? self::PM_SENT_BOX : (int) ($message['location'] ?? self::PM_INBOX);
 
         // Move-to boxes
         $pmBoxes = $this->mailboxRepository->getUserMailboxes($userId);
@@ -376,9 +376,9 @@ class MessagePageService
 
         $message = $messageModel->toArray();
 
-        $subject = 'Fwd: '.htmlspecialchars((string) $message['subject']);
-        $from = (int) $message['receiver'];
-        $orig = (int) $message['sender'];
+        $subject = 'Fwd: '.htmlspecialchars((string) ($message['subject'] ?? ''));
+        $from = (int) ($message['receiver'] ?? 0);
+        $orig = (int) ($message['sender'] ?? 0);
 
         $fromName = UserDisplay::username($from);
         if ($orig === 0) {
@@ -389,7 +389,7 @@ class MessagePageService
             $origName2 = $this->messageRepository->getUsername($orig) ?? '';
         }
 
-        $body = '-------- Original Message from '.htmlspecialchars($origName2).' --------<br />'.$this->renderMessageBody((string) $message['msg']);
+        $body = '-------- Original Message from '.htmlspecialchars($origName2).' --------<br />'.$this->renderMessageBody((string) ($message['msg'] ?? ''));
 
         return [
             'pmId' => $pmId,

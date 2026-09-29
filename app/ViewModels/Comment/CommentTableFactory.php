@@ -54,7 +54,7 @@ final class CommentTableFactory
         foreach ($rows as $row) {
             $userRow = $userInfoArr->get($row['user'], User::defaultUser())->toArray();
 
-            $avatar = ($curUser['avatars'] ?? false) ? \htmlspecialchars(trim((string) $userRow['avatar'])) : '';
+            $avatar = ($curUser['avatars'] ?? false) ? \htmlspecialchars(trim((string) ($userRow['avatar'] ?? ''))) : '';
             $avatar = Avatar::forUser((int) $row['user'], $avatar);
 
             $viewRows[] = new CommentRow(
@@ -68,7 +68,7 @@ final class CommentTableFactory
                 editedBy: ! empty($row['editedby']) ? UserDisplay::username((int) $row['editedby']) : null,
                 editedAt: ! empty($row['editedby']) ? SafeHtml::fromTrustedHtml((string) Time::format((string) $row['editdate'], true, false)) : null,
                 online: ($userRow['last_access'] ?? '') > $dt,
-                pmTitle: self::plainTitle('legacy/functions.title_send_message_to').(string) $userRow['username'],
+                pmTitle: self::plainTitle('legacy/functions.title_send_message_to').(string) ($userRow['username'] ?? ''),
                 canDelete: $canManage,
                 canEdit: (int) $row['user'] === (int) ($curUser['id'] ?? 0) || UserDisplay::currentClass() >= $commanageClass,
             );

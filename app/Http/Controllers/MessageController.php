@@ -101,8 +101,8 @@ class MessageController extends LegacyController
             if ((int) ($msga['receiver'] ?? 0) !== (int) ($currentUser['id'] ?? 0)) {
                 return $this->legacyAbortResponse(__('legacy/sendmessage.std_error'), __('legacy/sendmessage.std_permission_denied'));
             }
-            $body .= $msga['msg']."\n\n-------- [url=userdetails.php?id=".$currentUser['id'].']'.$currentUser['username'].'[/url][i] Wrote at '.date('Y-m-d H:i:s').":[/i] --------\n";
-            $subject = (string) $msga['subject'];
+            $body .= ($msga['msg'] ?? '')."\n\n-------- [url=userdetails.php?id=".$currentUser['id'].']'.$currentUser['username'].'[/url][i] Wrote at '.date('Y-m-d H:i:s').":[/i] --------\n";
+            $subject = (string) ($msga['subject'] ?? '');
             if (preg_match('/^Re:\\s/', $subject)) {
                 $subject = preg_replace('/^Re:\\s(.*)$/', 'Re(2): \\1', $subject) ?? $subject;
             } elseif (preg_match('/^Re\\([0-9]*\\):\\s/', $subject)) {

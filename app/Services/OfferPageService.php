@@ -172,7 +172,7 @@ final class OfferPageService
         }
         $num = $offer->toArray();
 
-        $timeFormat = Time::format((string) $num['added'], true, false);
+        $timeFormat = Time::format((string) ($num['added'] ?? ''), true, false);
         $offertime = ($curUser['timetype'] ?? 1) !== UserTimeType::TIMEALIVE->value
             ? (string) (__('legacy/offers.text_at')).$timeFormat
             : (string) (__('legacy/offers.text_blank')).$timeFormat;

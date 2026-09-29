@@ -165,12 +165,12 @@ class WebAuthService
         $user->makeVisible(['passhash', 'secret', 'auth_key']);
         $row = $user->toArray();
 
-        if ($row['status'] === UserStatus::PENDING->value) {
+        if (($row['status'] ?? null) === UserStatus::PENDING->value) {
             $this->recordFailedAttempt($ip);
             throw new AuthenticationException('Account unconfirmed.');
         }
 
-        if (! $row['enabled'] && (int) SiteConfig::current()->bonus->selfEnable() <= 0) {
+        if (! ($row['enabled'] ?? false) && (int) SiteConfig::current()->bonus->selfEnable() <= 0) {
             $this->recordFailedAttempt($ip);
             throw new AuthenticationException('Account disabled.');
         }
@@ -198,15 +198,15 @@ class WebAuthService
         }
 
         if (! empty($update)) {
-            User::query()->where('id', $row['id'])->update($update);
+            User::query()->where('id', $row['id'] ?? 0)->update($update);
         }
 
         $duration = ! empty($data['logout']) && $data['logout'] === 'yes' ? 900 : 0;
-        AuthCookie::setLoginCookie((int) $row['id'], null, $duration);
+        AuthCookie::setLoginCookie((int) ($row['id'] ?? 0), null, $duration);
 
-        $this->userRepository->saveLoginLog((int) $row['id'], $ip, 'Web', true);
+        $this->userRepository->saveLoginLog((int) ($row['id'] ?? 0), $ip, 'Web', true);
 
-        Cache::clearUser((int) $row['id'], '');
+        Cache::clearUser((int) ($row['id'] ?? 0), '');
 
         return $user;
     }

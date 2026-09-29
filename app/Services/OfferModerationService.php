@@ -77,7 +77,7 @@ final class OfferModerationService
 
         $arr = $offer->toArray();
         $arr['username'] = $offer->user->username ?? '';
-        $locale = Locale::userLocale((int) $arr['userid']);
+        $locale = Locale::userLocale((int) ($arr['userid'] ?? 0));
         $offeruptimeout = (int) ($this->globals->get('offeruptimeout_main') ?? 0);
 
         if ($offeruptimeout) {
@@ -89,20 +89,20 @@ final class OfferModerationService
 
         $curuser = $this->curUser();
         $url = Url::absolute($this->baseUrl())."/offers.php?id={$offid}&off_details=1";
-        $msg = ($curuser['username'] ?? '').Locale::trans('offer.msg_has_allowed', [], $locale)."[b][url={$url}]".$arr['name'].'[/url][/b]. '.Locale::trans('offer.msg_find_offer_option', [], $locale).$timeoutnote;
+        $msg = ($curuser['username'] ?? '').Locale::trans('offer.msg_has_allowed', [], $locale)."[b][url={$url}]".($arr['name'] ?? '').'[/url][/b]. '.Locale::trans('offer.msg_find_offer_option', [], $locale).$timeoutnote;
         $subject = Locale::trans('offer.msg_your_offer_allowed', [], $locale);
         $allowedtime = date('Y-m-d H:i:s');
 
         Message::add([
             'sender' => null,
-            'receiver' => (int) $arr['userid'],
+            'receiver' => (int) ($arr['userid'] ?? 0),
             'msg' => $msg,
             'subject' => $subject,
             'added' => $allowedtime,
         ]);
 
         $this->offerRepository->allowOffer($offid, $allowedtime);
-        Log::writeWithContext(($curuser['username'] ?? '')." allowed offer {$arr['name']}", 'normal');
+        Log::writeWithContext(($curuser['username'] ?? '').' allowed offer '.($arr['name'] ?? ''), 'normal');
 
         return redirect("/offers.php?id={$offid}&off_details=1");
     }
@@ -132,7 +132,7 @@ final class OfferModerationService
 
         $arr = $offer->toArray();
         $arr['username'] = $offer->user->username ?? '';
-        $locale = Locale::userLocale((int) $arr['userid']);
+        $locale = Locale::userLocale((int) ($arr['userid'] ?? 0));
         $offeruptimeout = (int) ($this->globals->get('offeruptimeout_main') ?? 0);
         $minoffervotes = (int) ($this->globals->get('minoffervotes') ?? 0);
         $curuser = $this->curUser();
@@ -156,11 +156,11 @@ final class OfferModerationService
                 $timeoutnote = '';
             }
 
-            $msg = Locale::trans('offer.msg_offer_voted_on', [], $locale)."[b][url={$url}]".$arr['name'].'[/url][/b].'.Locale::trans('offer.msg_find_offer_option', [], $locale).$timeoutnote;
+            $msg = Locale::trans('offer.msg_offer_voted_on', [], $locale)."[b][url={$url}]".($arr['name'] ?? '').'[/url][/b].'.Locale::trans('offer.msg_find_offer_option', [], $locale).$timeoutnote;
             $subject = Locale::trans('offer.msg_your_offer_allowed', [], $locale);
             $this->offerRepository->allowOffer($offid, $finishvotetime);
         } elseif (($no - $yes) >= $minoffervotes) {
-            $msg = Locale::trans('offer.msg_offer_voted_off', [], $locale)."[b][url={$url}]".$arr['name'].'[/url][/b].'.Locale::trans('offer.msg_offer_deleted', [], $locale);
+            $msg = Locale::trans('offer.msg_offer_voted_off', [], $locale)."[b][url={$url}]".($arr['name'] ?? '').'[/url][/b].'.Locale::trans('offer.msg_offer_deleted', [], $locale);
             $subject = Locale::trans('offer.msg_offer_deleted', [], $locale);
             $this->offerRepository->denyOffer($offid);
         } else {
@@ -170,13 +170,13 @@ final class OfferModerationService
         Message::add([
             'sender' => null,
             'subject' => $subject,
-            'receiver' => (int) $arr['userid'],
+            'receiver' => (int) ($arr['userid'] ?? 0),
             'added' => $finishvotetime,
             'msg' => $msg,
         ]);
 
         $curuser = $this->curUser();
-        Log::writeWithContext(($curuser['username'] ?? '')." closed poll {$arr['name']}", 'normal');
+        Log::writeWithContext(($curuser['username'] ?? '').' closed poll '.($arr['name'] ?? ''), 'normal');
 
         return redirect("/offers.php?id={$offid}&off_details=1");
     }

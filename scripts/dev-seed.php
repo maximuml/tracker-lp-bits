@@ -13,10 +13,10 @@ $root = dirname(__DIR__);
 
 require $root.'/vendor/autoload.php';
 $app = require $root.'/bootstrap/app.php';
-$app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+$app->make(Kernel::class)->bootstrap();
 
 if (! app()->environment('local', 'development', 'testing')) {
-    fwrite(STDERR, "dev-seed is for local dev stacks only (APP_ENV=".app()->environment().")\n");
+    fwrite(STDERR, 'dev-seed is for local dev stacks only (APP_ENV='.app()->environment().")\n");
     exit(1);
 }
 
@@ -25,6 +25,7 @@ use App\Enums\TorrentType;
 use App\Enums\TorrentVisible;
 use App\Models\Torrent;
 use App\Models\User;
+use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Rhilip\Bencode\Bencode;

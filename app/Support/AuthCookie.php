@@ -10,6 +10,7 @@ use App\Support\Config\SiteConfig;
 use Dotenv\Dotenv;
 use Illuminate\Encryption\Encrypter;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -243,6 +244,40 @@ final class AuthCookie
         }
 
         app(AuthRepositoryInterface::class)->updateLogin($userId, $update);
+    }
+
+    /**
+     * Queue the login cookie on the current response via Laravel's cookie jar.
+     *
+     * Livewire responses do not carry raw `setcookie()` headers, so callers on
+     * that path (e.g. the Filament login page) must queue the cookie instead.
+     * Unlike setLoginCookie() this does not touch users.last_login — the guard's
+     * login() already did that through setLoginCookie().
+     */
+    public static function queueLoginCookie(int $userId, int $durationSeconds = 0): void
+    {
+        if ($durationSeconds <= 0) {
+            $durationSeconds = (int) SiteConfig::current()->system->cookieValidDays(365) * 86400;
+        }
+
+        $expires = self::computeExpires($durationSeconds);
+        $authVersion = app(AuthRepositoryInterface::class)->getAuthVersion($userId);
+        if ($authVersion === null || $authVersion < 1) {
+            return;
+        }
+        $token = self::buildToken($userId, null, $expires, $authVersion);
+
+        Cookie::queue(Cookie::make(
+            self::COOKIE_NAME,
+            $token,
+            (int) max(1, (int) (($expires - time()) / 60)),
+            '/',
+            null,
+            Url::isSecure(),
+            true,
+            false,
+            'Lax',
+        ));
     }
 
     /**

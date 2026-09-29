@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Providers\Filament;
 
 use App\Enums\UserClass as UserClassEnum;
+use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Dashboard;
 use App\Http\Middleware\Filament;
 use App\Support\Input;
@@ -48,7 +49,7 @@ class AppPanelProvider extends PanelProvider
             ->sidebarCollapsibleOnDesktop(true)
             ->authGuard('nexus-web')
             ->path('nexusphp')
-            ->login()
+            ->login(Login::class)
             ->colors([
                 'primary' => Color::Amber,
             ])
